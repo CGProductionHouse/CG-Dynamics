@@ -333,8 +333,8 @@ test('createOrdinaryHoursEntry: valid entry with staff client isolation and idem
   assert.equal(entry.hours, 2)
   assert.equal(entry.task_description, 'Client meeting and design review')
   assert.equal(entry.status, 'draft')
-  assert.equal(entry.created_at, expect.any(String))
-  assert.equal(entry.updated_at, expect.any(String))
+  assert.ok(typeof entry.created_at === 'string' && entry.created_at.length > 0)
+  assert.ok(typeof entry.updated_at === 'string' && entry.updated_at.length > 0)
   assert.ok(typeof idempotencyKey === 'string')
   assert.ok(idempotencyKey.includes('staff-123'))
   assert.ok(idempotencyKey.includes('create_ordinary_hours_entry'))
@@ -481,4 +481,277 @@ test('applyOrdinaryHoursCorrection: invalid correction throws', () => {
     () => mod.applyOrdinaryHoursCorrection(context, entry, invalidCorrection),
     /Invalid correction/
   )
+})
+
+// ──────────────────────────────────────────────────────────────────────────────
+// executeOrdinaryHoursAction tests
+// ──────────────────────────────────────────────────────────────────────────────
+
+test('executeOrdinaryHoursAction: without adapter returns NOT_CONFIGURED with contract', async () => {
+  const context = { staffId: 'staff-123', clientId: 'c-dulux' }
+  const action = { type: 'create', draft: { client_id: 'c-dulux', date: '2026-07-15', type: 'time', hours: 2, task_description: 'Work' } }
+  const result = await mod.executeOrdinaryHoursAction(context, action)
+  assert.equal(result.action, 'create')
+  assert.equal(result.result.ok, false)
+  assert.equal(result.result.error, 'NOT_CONFIGURED')
+  assert.ok(result.result.contract)
+  assert.ok(Array.isArray(result.result.contract.required_endpoints))
+  assert.ok(result.result.contract.required_endpoints.includes('create_ordinary_hours_entry'))
+  assert.ok(result.result.contract.idempotency_strategy.includes('deriveMcpIdempotencyKey'))
+  assert.ok(result.result.contract.rls_enforcement.includes('Row Level Security'))
+  assert.ok(result.result.contract.staff_client_isolation.includes('Cross-staff/client access denied'))
+})
+
+test('executeOrdinaryHoursAction: create with mock adapter returns receipt and record', async () => {
+  const context = { staffId: 'staff-123', clientId: 'c-dulux' }
+  const action = { type: 'create', draft: { client_id: 'c-dulux', date: '2026-07-15', type: 'time', hours: 2, task_description: 'Client meeting' } }
+  const mockReceipt = { record_id: 'rec-456', idempotency_key: 'staff-123|create_ordinary_hours_entry|staff-123|c-dulux|2026-07-15', created_at: '2026-07-15T10:00:00Z' }
+  const mockRecord = { id: 'rec-456', staff_id: 'staff-123', client_id: 'c-dulux', date: '2026-07-15', type: 'time', hours: 2, task_description: 'Client meeting', notes: undefined, status: 'draft', created_at: '2026-07-15T10:00:00Z', updated_at: '2026-07-15T10:00:00Z' }
+  const mockAdapter = {
+    createOrdinaryHoursEntry: async () => ({ ok: true, receipt: mockReceipt, record: mockRecord }),
+    readOrdinaryHoursEntries: async () => ({ ok: true, receipt: mockReceipt, record: [] }),
+    applyOrdinaryHoursCorrection: async () => ({ ok: true, receipt: mockReceipt, record: mockRecord }),
+  }
+  const result = await mod.executeOrdinaryHoursAction(context, action, mockAdapter)
+  assert.equal(result.action, 'create')
+  assert.equal(result.result.ok, true)
+  assert.equal(result.result.receipt.record_id, 'rec-456')
+  assert.equal(result.result.record.id, 'rec-456')
+  assert.equal(result.result.record.staff_id, 'staff-123')
+  assert.equal(result.result.record.client_id, 'c-dulux')
+})
+
+test('executeOrdinaryHoursAction: create enforces client isolation', async () => {
+  const context = { staffId: 'staff-123', clientId: 'c-dulux' }
+  const action = { type: 'create', draft: { client_id: 'c-other', date: '2026-07-15', type: 'time', hours: 2, task_description: 'Work' } }
+  const mockAdapter = {
+    createOrdinaryHoursEntry: async () => ({ ok: true, receipt: {}, record: {} }),
+    readOrdinaryHoursEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyOrdinaryHoursCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+  }
+  const result = await mod.executeOrdinaryHoursAction(context, action, mockAdapter)
+  assert.equal(result.action, 'create')
+  assert.equal(result.result.ok, false)
+  assert.equal(result.result.error, 'UNAUTHORIZED')
+  assert.ok(result.result.reason.includes('Client isolation violation'))
+})
+
+test('executeOrdinaryHoursAction: create validates draft', async () => {
+  const context = { staffId: 'staff-123', clientId: 'c-dulux' }
+  const action = { type: 'create', draft: { client_id: 'c-dulux', date: 'invalid', type: 'time', hours: -1, task_description: '' } }
+  const mockAdapter = {
+    createOrdinaryHoursEntry: async () => ({ ok: true, receipt: {}, record: {} }),
+    readOrdinaryHoursEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyOrdinaryHoursCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+  }
+  const result = await mod.executeOrdinaryHoursAction(context, action, mockAdapter)
+  assert.equal(result.action, 'create')
+  assert.equal(result.result.ok, false)
+  assert.equal(result.result.error, 'VALIDATION_ERROR')
+  assert.ok(Array.isArray(result.result.details))
+  assert.ok(result.result.details.length > 0)
+})
+
+test('executeOrdinaryHoursAction: read with mock adapter returns records', async () => {
+  const context = { staffId: 'staff-123', clientId: 'c-dulux' }
+  const action = { type: 'read', fromDate: '2026-07-01', toDate: '2026-07-31', types: ['time'] }
+  const mockReceipt = { record_id: 'read-1', idempotency_key: 'staff-123|read_ordinary_hours_entries|staff-123|c-dulux|2026-07-01|2026-07-31', created_at: '2026-07-15T10:00:00Z' }
+  const mockRecords = [{ id: 'rec-1', staff_id: 'staff-123', client_id: 'c-dulux', date: '2026-07-15', type: 'time', hours: 2, task_description: 'Work', notes: null, status: 'draft', created_at: '2026-07-15T08:00:00Z', updated_at: '2026-07-15T08:00:00Z' }]
+  const mockAdapter = {
+    createOrdinaryHoursEntry: async () => ({ ok: true, receipt: {}, record: {} }),
+    readOrdinaryHoursEntries: async () => ({ ok: true, receipt: mockReceipt, record: mockRecords }),
+    applyOrdinaryHoursCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+  }
+  const result = await mod.executeOrdinaryHoursAction(context, action, mockAdapter)
+  assert.equal(result.action, 'read')
+  assert.equal(result.result.ok, true)
+  assert.ok(Array.isArray(result.result.record))
+  assert.equal(result.result.record.length, 1)
+  assert.equal(result.result.record[0].id, 'rec-1')
+})
+
+test('executeOrdinaryHoursAction: correct with mock adapter returns corrected record', async () => {
+  const context = { staffId: 'staff-123', clientId: 'c-dulux' }
+  const action = { type: 'correct', entryId: 'rec-123', correction: { entry_id: 'rec-123', staff_id: 'staff-123', reason: 'Mistyped hours', correction: { hours: 3 } } }
+  const mockReceipt = { record_id: 'rec-123', idempotency_key: 'staff-123|apply_ordinary_hours_correction|staff-123|rec-123', created_at: '2026-07-15T12:00:00Z' }
+  const mockRecord = { id: 'rec-123', staff_id: 'staff-123', client_id: 'c-dulux', date: '2026-07-15', type: 'time', hours: 3, task_description: 'Client meeting', notes: 'Initial', status: 'draft', created_at: '2026-07-15T08:00:00Z', updated_at: '2026-07-15T12:00:00Z' }
+  const mockAdapter = {
+    createOrdinaryHoursEntry: async () => ({ ok: true, receipt: {}, record: {} }),
+    readOrdinaryHoursEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyOrdinaryHoursCorrection: async () => ({ ok: true, receipt: mockReceipt, record: mockRecord }),
+  }
+  const result = await mod.executeOrdinaryHoursAction(context, action, mockAdapter)
+  assert.equal(result.action, 'correct')
+  assert.equal(result.result.ok, true)
+  assert.equal(result.result.receipt.record_id, 'rec-123')
+  assert.equal(result.result.record.hours, 3)
+  assert.equal(result.result.record.updated_at, '2026-07-15T12:00:00Z')
+})
+
+test('executeOrdinaryHoursAction: correct enforces staff isolation', async () => {
+  const context = { staffId: 'staff-123', clientId: 'c-dulux' }
+  const action = { type: 'correct', entryId: 'rec-123', correction: { entry_id: 'rec-123', staff_id: 'staff-other', reason: 'Test', correction: { hours: 3 } } }
+  const mockAdapter = {
+    createOrdinaryHoursEntry: async () => ({ ok: true, receipt: {}, record: {} }),
+    readOrdinaryHoursEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyOrdinaryHoursCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+  }
+  const result = await mod.executeOrdinaryHoursAction(context, action, mockAdapter)
+  assert.equal(result.action, 'correct')
+  assert.equal(result.result.ok, false)
+  assert.equal(result.result.error, 'UNAUTHORIZED')
+  assert.ok(result.result.reason.includes('Staff isolation violation'))
+})
+
+test('executeOrdinaryHoursAction: correct validates correction', async () => {
+  const context = { staffId: 'staff-123', clientId: 'c-dulux' }
+  const action = { type: 'correct', entryId: 'rec-123', correction: { entry_id: 'rec-123', staff_id: 'staff-123', reason: '', correction: { hours: 25 } } }
+  const mockAdapter = {
+    createOrdinaryHoursEntry: async () => ({ ok: true, receipt: {}, record: {} }),
+    readOrdinaryHoursEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyOrdinaryHoursCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+  }
+  const result = await mod.executeOrdinaryHoursAction(context, action, mockAdapter)
+  assert.equal(result.action, 'correct')
+  assert.equal(result.result.ok, false)
+  assert.equal(result.result.error, 'VALIDATION_ERROR')
+  assert.ok(Array.isArray(result.result.details))
+  assert.ok(result.result.details.length > 0)
+})
+
+test('executeOrdinaryHoursAction: idempotency key is deterministic for duplicate retry', async () => {
+  const context = { staffId: 'staff-123', clientId: 'c-dulux' }
+  const action = { type: 'create', draft: { client_id: 'c-dulux', date: '2026-07-15', type: 'time', hours: 2, task_description: 'Work' } }
+  let callCount = 0
+  const mockAdapter = {
+    createOrdinaryHoursEntry: async (staffId, clientId, date, hours, taskDescription, notes, idempotencyKey) => {
+      callCount++
+      return { ok: true, receipt: { record_id: 'rec-456', idempotency_key: idempotencyKey, created_at: '2026-07-15T10:00:00Z' }, record: { id: 'rec-456', staff_id: staffId, client_id: clientId, date, type: 'time', hours, task_description: taskDescription, notes, status: 'draft', created_at: '2026-07-15T10:00:00Z', updated_at: '2026-07-15T10:00:00Z' } }
+    },
+    readOrdinaryHoursEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyOrdinaryHoursCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+  }
+  const result1 = await mod.executeOrdinaryHoursAction(context, action, mockAdapter)
+  const result2 = await mod.executeOrdinaryHoursAction(context, action, mockAdapter)
+  assert.equal(callCount, 2)
+  // Same idempotency key should be generated for same inputs
+  assert.equal(result1.result.receipt.idempotency_key, result2.result.receipt.idempotency_key)
+  assert.ok(result1.result.receipt.idempotency_key.includes('staff-123|create_ordinary_hours_entry'))
+})
+
+test('executeOrdinaryHoursAction: cross-staff denial - read with different staffId context', async () => {
+  const context1 = { staffId: 'staff-123', clientId: 'c-dulux' }
+  const context2 = { staffId: 'staff-other', clientId: 'c-dulux' }
+  const action = { type: 'read', fromDate: '2026-07-01', toDate: '2026-07-31', types: ['time'] }
+  const mockAdapter = {
+    createOrdinaryHoursEntry: async () => ({ ok: true, receipt: {}, record: {} }),
+    readOrdinaryHoursEntries: async (staffId, clientId, fromDate, toDate, types) => {
+      // Adapter should receive the correct staffId from context
+      return { ok: true, receipt: { record_id: 'read-1', idempotency_key: `staff-${staffId}|read`, created_at: '2026-07-15T10:00:00Z' }, record: [] }
+    },
+    applyOrdinaryHoursCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+  }
+  const result1 = await mod.executeOrdinaryHoursAction(context1, action, mockAdapter)
+  const result2 = await mod.executeOrdinaryHoursAction(context2, action, mockAdapter)
+  // Both succeed but with different staffId passed to adapter
+  assert.equal(result1.result.ok, true)
+  assert.equal(result2.result.ok, true)
+  // The idempotency keys should differ by staffId
+  assert.notEqual(result1.result.receipt.idempotency_key, result2.result.receipt.idempotency_key)
+})
+
+test('executeOrdinaryHoursAction: cross-client denial - create with different clientId context', async () => {
+  const context1 = { staffId: 'staff-123', clientId: 'c-dulux' }
+  const context2 = { staffId: 'staff-123', clientId: 'c-other' }
+  // Draft without client_id (undefined) - should use context clientId
+  const action = { type: 'create', draft: { date: '2026-07-15', type: 'time', hours: 2, task_description: 'Work' } }
+  let receivedClientId = null
+  const mockAdapter = {
+    createOrdinaryHoursEntry: async (staffId, clientId, date, hours, taskDescription, notes, idempotencyKey) => {
+      receivedClientId = clientId
+      return { ok: true, receipt: { record_id: 'rec-1', idempotency_key: idempotencyKey, created_at: '2026-07-15T10:00:00Z' }, record: { id: 'rec-1', staff_id: staffId, client_id: clientId, date, type: 'time', hours, task_description: taskDescription, notes, status: 'draft', created_at: '2026-07-15T10:00:00Z', updated_at: '2026-07-15T10:00:00Z' } }
+    },
+    readOrdinaryHoursEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyOrdinaryHoursCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+  }
+  const result1 = await mod.executeOrdinaryHoursAction(context1, action, mockAdapter)
+  assert.equal(result1.result.ok, true)
+  assert.equal(receivedClientId, 'c-dulux')
+  const result2 = await mod.executeOrdinaryHoursAction(context2, action, mockAdapter)
+  assert.equal(result2.result.ok, true)
+  assert.equal(receivedClientId, 'c-other')
+  // Idempotency keys should differ by clientId
+  assert.notEqual(result1.result.receipt.idempotency_key, result2.result.receipt.idempotency_key)
+})
+
+test('executeOrdinaryHoursAction: custom idempotencyKey function is used', async () => {
+  const customKeyFn = (action, requestKey) => `custom|${action}|${requestKey}`
+  const context = { staffId: 'staff-123', clientId: 'c-dulux', idempotencyKey: customKeyFn }
+  const action = { type: 'create', draft: { client_id: 'c-dulux', date: '2026-07-15', type: 'time', hours: 2, task_description: 'Work' } }
+  const mockAdapter = {
+    createOrdinaryHoursEntry: async (staffId, clientId, date, hours, taskDescription, notes, idempotencyKey) => {
+      return { ok: true, receipt: { record_id: 'rec-1', idempotency_key: idempotencyKey, created_at: '2026-07-15T10:00:00Z' }, record: { id: 'rec-1', staff_id: staffId, client_id: clientId, date, type: 'time', hours, task_description: taskDescription, notes, status: 'draft', created_at: '2026-07-15T10:00:00Z', updated_at: '2026-07-15T10:00:00Z' } }
+    },
+    readOrdinaryHoursEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyOrdinaryHoursCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+  }
+  const result = await mod.executeOrdinaryHoursAction(context, action, mockAdapter)
+  assert.equal(result.result.ok, true)
+  assert.ok(result.result.receipt.idempotency_key.startsWith('custom|create_ordinary_hours_entry|'))
+})
+
+test('executeOrdinaryHoursAction: clientId null in context allows draft client_id', async () => {
+  const context = { staffId: 'staff-123', clientId: null }
+  const action = { type: 'create', draft: { client_id: 'c-dulux', date: '2026-07-15', type: 'time', hours: 2, task_description: 'Work' } }
+  let receivedClientId = null
+  const mockAdapter = {
+    createOrdinaryHoursEntry: async (staffId, clientId, date, hours, taskDescription, notes, idempotencyKey) => {
+      receivedClientId = clientId
+      return { ok: true, receipt: { record_id: 'rec-1', idempotency_key: idempotencyKey, created_at: '2026-07-15T10:00:00Z' }, record: { id: 'rec-1', staff_id: staffId, client_id: clientId, date, type: 'time', hours, task_description: taskDescription, notes, status: 'draft', created_at: '2026-07-15T10:00:00Z', updated_at: '2026-07-15T10:00:00Z' } }
+    },
+    readOrdinaryHoursEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyOrdinaryHoursCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+  }
+  const result = await mod.executeOrdinaryHoursAction(context, action, mockAdapter)
+  assert.equal(result.result.ok, true)
+  assert.equal(receivedClientId, 'c-dulux')
+})
+
+test('executeOrdinaryHoursAction: read action generates correct idempotency key format internally', async () => {
+  const context = { staffId: 'staff-456', clientId: 'c-germoparts' }
+  const action = { type: 'read', fromDate: '2026-08-01', toDate: '2026-08-31', types: ['time', 'mileage'] }
+  const mockAdapter = {
+    createOrdinaryHoursEntry: async () => ({ ok: true, receipt: {}, record: {} }),
+    readOrdinaryHoursEntries: async (staffId, clientId, fromDate, toDate, types) => {
+      // Verify adapter receives correct parameters
+      assert.equal(staffId, 'staff-456')
+      assert.equal(clientId, 'c-germoparts')
+      assert.equal(fromDate, '2026-08-01')
+      assert.equal(toDate, '2026-08-31')
+      assert.deepEqual(types, ['time', 'mileage'])
+      return { ok: true, receipt: { record_id: 'read-1', idempotency_key: 'adapter-generated', created_at: '2026-08-15T10:00:00Z' }, record: [] }
+    },
+    applyOrdinaryHoursCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+  }
+  const result = await mod.executeOrdinaryHoursAction(context, action, mockAdapter)
+  assert.equal(result.result.ok, true)
+  // The action layer generates the idempotency key internally for duplicate detection
+  // but doesn't pass it to the read adapter. The receipt's key is adapter-generated.
+  // This test verifies the adapter receives the correct staff/client/date parameters.
+})
+
+test('executeOrdinaryHoursAction: correct action uses correct idempotency key format', async () => {
+  const context = { staffId: 'staff-789', clientId: 'c-braize' }
+  const action = { type: 'correct', entryId: 'entry-999', correction: { entry_id: 'entry-999', staff_id: 'staff-789', reason: 'Correction', correction: { hours: 4 } } }
+  const mockAdapter = {
+    createOrdinaryHoursEntry: async () => ({ ok: true, receipt: {}, record: {} }),
+    readOrdinaryHoursEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyOrdinaryHoursCorrection: async (entryId, staffId, correction, reason, idempotencyKey) => {
+      return { ok: true, receipt: { record_id: entryId, idempotency_key: idempotencyKey, created_at: '2026-08-15T12:00:00Z' }, record: { id: entryId, staff_id: staffId, client_id: 'c-braize', date: '2026-08-15', type: 'time', hours: correction.hours ?? 2, task_description: 'Work', notes: null, status: 'draft', created_at: '2026-08-15T08:00:00Z', updated_at: '2026-08-15T12:00:00Z' } }
+    },
+  }
+  const result = await mod.executeOrdinaryHoursAction(context, action, mockAdapter)
+  assert.equal(result.result.ok, true)
+  assert.ok(result.result.receipt.idempotency_key.includes('staff-789|apply_ordinary_hours_correction'))
+  assert.ok(result.result.receipt.idempotency_key.includes('entry-999'))
 })

@@ -84,6 +84,100 @@ export interface VehicleReimbursementSnapshot {
   computed_at: string
 }
 
+// ──────────────────────────────────────────────────────────────────────────────
+// Canonical CG Hours persistence adapter boundary
+// ──────────────────────────────────────────────────────────────────────────────
+// The canonical CG Hours backend (separate system) must implement this adapter.
+// If the adapter is not provided, the action layer returns NOT_CONFIGURED with the
+// exact contract required. No shadow ledger, no local fallback persistence.
+export interface CgHoursTimeEntryRecord {
+  id: string
+  staff_id: string
+  client_id: string | null
+  date: string // YYYY-MM-DD
+  type: 'time'
+  hours: number
+  task_description: string
+  notes?: string | null
+  status: 'draft' | 'submitted' | 'approved' | 'rejected'
+  created_at: string
+  updated_at: string
+}
+
+export interface CgHoursPersistenceReceipt {
+  record_id: string
+  idempotency_key: string
+  created_at: string
+}
+
+export type CgHoursPersistenceResult<T> =
+  | { ok: true; receipt: CgHoursPersistenceReceipt; record: T }
+  | { ok: false; error: 'NOT_CONFIGURED'; contract: CgHoursPersistenceContract }
+  | { ok: false; error: 'UNAUTHORIZED'; reason: string }
+  | { ok: false; error: 'VALIDATION_ERROR'; details: string[] }
+  | { ok: false; error: 'CONFLICT'; reason: string; existing_id?: string }
+  | { ok: false; error: 'UPSTREAM_ERROR'; reason: string }
+
+export interface CgHoursPersistenceContract {
+  // The canonical CG Hours backend must expose these RPCs/endpoints:
+  // 1. create_ordinary_hours_entry(p_staff_id, p_client_id, p_date, p_hours, p_task_description, p_notes, p_idempotency_key)
+  //    -> returns { record_id, created_at }
+  // 2. read_ordinary_hours_entries(p_staff_id, p_from_date, p_to_date, p_types?, p_client_id?)
+  //    -> returns CgHoursTimeEntryRecord[]
+  // 3. apply_ordinary_hours_correction(p_entry_id, p_staff_id, p_correction, p_reason, p_idempotency_key)
+  //    -> returns { record_id, updated_at }
+  // 4. All endpoints enforce RLS: staff can only access their own entries; client context is pinned.
+  // Idempotency: p_idempotency_key must be a deterministic key derived from (staff_id, action, request_key)
+  //              using the existing deriveMcpIdempotencyKey. Duplicate calls return the existing receipt.
+  required_endpoints: string[]
+  idempotency_strategy: string
+  rls_enforcement: string
+  staff_client_isolation: string
+}
+
+export interface CgHoursPersistenceAdapter {
+  createOrdinaryHoursEntry(
+    staffId: string,
+    clientId: string | null,
+    date: string,
+    hours: number,
+    taskDescription: string,
+    notes: string | undefined,
+    idempotencyKey: string
+  ): Promise<CgHoursPersistenceResult<CgHoursTimeEntryRecord>>
+
+  readOrdinaryHoursEntries(
+    staffId: string,
+    clientId: string | null,
+    fromDate: string,
+    toDate: string,
+    types?: CgHoursEntryType[]
+  ): Promise<CgHoursPersistenceResult<CgHoursTimeEntryRecord[]>>
+
+  applyOrdinaryHoursCorrection(
+    entryId: string,
+    staffId: string,
+    correction: {
+      hours?: number
+      task_description?: string
+      notes?: string
+    },
+    reason: string,
+    idempotencyKey: string
+  ): Promise<CgHoursPersistenceResult<CgHoursTimeEntryRecord>>
+}
+
+export const CG_HOURS_PERSISTENCE_CONTRACT: CgHoursPersistenceContract = {
+  required_endpoints: [
+    'create_ordinary_hours_entry',
+    'read_ordinary_hours_entries',
+    'apply_ordinary_hours_correction',
+  ],
+  idempotency_strategy: 'deriveMcpIdempotencyKey(staff_id, action, request_key) -> uuid; duplicate key returns existing receipt',
+  rls_enforcement: 'Row Level Security on canonical CG Hours tables: staff_id = current_staff_id; client_id pinned by effective client context',
+  staff_client_isolation: 'Staff can only create/read/correct their own entries. Client-scoped context restricts to that client_id. Cross-staff/client access denied.',
+}
+
 export interface CgHoursRecentEntriesQuery {
   staff_id: string
   from_date: string // YYYY-MM-DD
@@ -282,11 +376,11 @@ export function readOrdinaryHoursEntries(
   toDate: string,
   types?: CgHoursEntryType[]
 ): CgHoursRecentEntriesQuery {
-  const { staffId, clientId } = context
+  const { staffId } = context
   return {
     staff_id: staffId,
-    from_date: from_date,
-    to_date: to_date,
+    from_date: fromDate,
+    to_date: toDate,
     types,
   }
 }
@@ -307,4 +401,111 @@ export function applyOrdinaryHoursCorrection(
   }
 
   return applyCorrectionToTimeEntry(entry, correction, nowIso)
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Authenticated canonical CG Hours action — wired to the existing CG Dynamics
+// OAuth/MCP/project/staff context and the canonical CG Hours backend.
+// ──────────────────────────────────────────────────────────────────────────────
+
+export type OrdinaryHoursAction =
+  | { type: 'create'; draft: CgHoursTimeEntryDraft }
+  | { type: 'read'; fromDate: string; toDate: string; types?: CgHoursEntryType[] }
+  | { type: 'correct'; entryId: string; correction: CgHoursCorrectionDraft }
+
+export interface ExecuteOrdinaryHoursActionResult {
+  action: OrdinaryHoursAction['type']
+  result: CgHoursPersistenceResult<CgHoursTimeEntryRecord | CgHoursTimeEntryRecord[]>
+}
+
+/**
+ * Execute one ordinary-hours action from the authenticated effective staff/client
+ * context through the canonical CG Hours persistence adapter.
+ *
+ * If no adapter is provided (i.e., the canonical CG Hours backend is not configured
+ * in this repo), returns a typed NOT_CONFIGURED result with the exact adapter
+ * contract required. No shadow ledger, no local fallback persistence.
+ *
+ * Staff/client isolation, idempotency, and duplicate-retry safety are enforced
+ * by the adapter contract; this function only validates context and delegates.
+ */
+export async function executeOrdinaryHoursAction(
+  context: CgHoursOrdinaryHoursActionContext,
+  action: OrdinaryHoursAction,
+  adapter?: CgHoursPersistenceAdapter
+): Promise<ExecuteOrdinaryHoursActionResult> {
+  const { staffId, clientId, idempotencyKey: keyFn } = context
+
+  if (!adapter) {
+    return {
+      action: action.type,
+      result: {
+        ok: false,
+        error: 'NOT_CONFIGURED',
+        contract: CG_HOURS_PERSISTENCE_CONTRACT,
+      },
+    }
+  }
+
+  const makeIdempotencyKey = (actionName: string, requestKey: string): string =>
+    keyFn ? keyFn(actionName, requestKey) : generateIdempotencyKey(staffId, actionName, requestKey)
+
+  switch (action.type) {
+    case 'create': {
+      const { draft } = action
+      if (draft.client_id !== undefined && clientId !== null && draft.client_id !== clientId) {
+        return {
+          action: 'create',
+          result: { ok: false, error: 'UNAUTHORIZED', reason: `Client isolation violation: draft.client_id=${draft.client_id} differs from context.clientId=${clientId}` },
+        }
+      }
+      const effectiveClientId = clientId !== null ? clientId : draft.client_id
+      const errors = validateCgHoursTimeEntryDraft({ ...draft, client_id: effectiveClientId })
+      if (errors.length > 0) {
+        return { action: 'create', result: { ok: false, error: 'VALIDATION_ERROR', details: errors } }
+      }
+      const idempotencyKey = makeIdempotencyKey('create_ordinary_hours_entry', `${staffId}|${effectiveClientId}|${draft.date}`)
+      const result = await adapter.createOrdinaryHoursEntry(
+        staffId,
+        effectiveClientId,
+        draft.date,
+        draft.hours,
+        draft.task_description,
+        draft.notes,
+        idempotencyKey
+      )
+      return { action: 'create', result }
+    }
+
+    case 'read': {
+      const { fromDate, toDate, types } = action
+      // Idempotency key generated for potential future use / logging but not passed to read adapter
+      makeIdempotencyKey('read_ordinary_hours_entries', `${staffId}|${clientId ?? 'none'}|${fromDate}|${toDate}`)
+      const result = await adapter.readOrdinaryHoursEntries(staffId, clientId, fromDate, toDate, types)
+      return { action: 'read', result }
+    }
+
+    case 'correct': {
+      const { entryId, correction } = action
+      if (correction.staff_id !== staffId) {
+        return {
+          action: 'correct',
+          result: { ok: false, error: 'UNAUTHORIZED', reason: `Staff isolation violation: correction.staff_id=${correction.staff_id} differs from context.staffId=${staffId}` },
+        }
+      }
+      const errors = validateCorrectionDraft(correction)
+      if (errors.length > 0) {
+        return { action: 'correct', result: { ok: false, error: 'VALIDATION_ERROR', details: errors } }
+      }
+      const idempotencyKey = makeIdempotencyKey('apply_ordinary_hours_correction', `${staffId}|${entryId}`)
+      const result = await adapter.applyOrdinaryHoursCorrection(
+        entryId,
+        staffId,
+        { hours: correction.correction.hours, task_description: correction.correction.task_description, notes: correction.correction.notes },
+        correction.reason,
+        idempotencyKey
+      )
+      return { action: 'correct', result }
+    }
+  }
 }
