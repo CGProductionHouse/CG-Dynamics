@@ -1,7 +1,5 @@
-import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
+import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { useAuth } from '../../contexts/AuthContext'
-import { isAdminRole, isManagerRole } from '../../lib/roles'
 import { PageContainer, PageHeader } from '../../components/layout/PageShell'
 import { EmptyState, LoadingState } from '../../components/ui/States'
 import { ActionButton } from '../../components/ui/Buttons'
@@ -243,7 +241,7 @@ function CampaignComposer({ onClose }: { onClose: () => void }) {
   })
 
   const handleSave = () => {
-    onClose(draft)
+    onClose()
     setIsOpen(false)
   }
 
@@ -350,7 +348,7 @@ function CampaignComposer({ onClose }: { onClose: () => void }) {
   )
 }
 
-function CampaignsSection({ isAdmin: _isAdmin, isManager: _isManager, setSearchParams }: { isAdmin: boolean; isManager: boolean; setSearchParams: ReturnType<typeof useSearchParams>[1] }) {
+function CampaignsSection({ setSearchParams }: { setSearchParams: ReturnType<typeof useSearchParams>[1] }) {
   const { campaigns, loading, error, migrationNeeded, reload } = useCampaigns()
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<CampaignStatus | 'all'>('all')
@@ -402,7 +400,7 @@ function CampaignsSection({ isAdmin: _isAdmin, isManager: _isManager, setSearchP
   )
 }
 
-function AudiencesSection({ isAdmin: _isAdmin, setSearchParams }: { isAdmin: boolean; setSearchParams: ReturnType<typeof useSearchParams>[1] }) {
+function AudiencesSection({ setSearchParams }: { setSearchParams: ReturnType<typeof useSearchParams>[1] }) {
   const { audiences, loading, error, migrationNeeded, reload } = useAudiences()
   const [search, setSearch] = useState('')
 
@@ -443,7 +441,7 @@ function AudiencesSection({ isAdmin: _isAdmin, setSearchParams }: { isAdmin: boo
   )
 }
 
-function TemplatesSection({ isAdmin: _isAdmin, setSearchParams }: { isAdmin: boolean; setSearchParams: ReturnType<typeof useSearchParams>[1] }) {
+function TemplatesSection({ setSearchParams }: { setSearchParams: ReturnType<typeof useSearchParams>[1] }) {
   const { templates, loading, error, migrationNeeded, reload } = useTemplates()
   const [search, setSearch] = useState('')
 
@@ -485,28 +483,7 @@ function TemplatesSection({ isAdmin: _isAdmin, setSearchParams }: { isAdmin: boo
 }
 
 export default function EmailMarketingPage() {
-  const { profile } = useAuth()
-  const isAdmin = isAdminRole(profile?.role)
-  const isManager = isManagerRole(profile?.role)
   const [searchParams, setSearchParams] = useSearchParams()
-
-  const requested = searchParams.get('section') as Section | null
-  const section: Section = tabs.some(t => t.key === requested) ? (requested as Section) : 'campaigns'
-  const mode = searchParams.get('mode') as 'create' | null
-
-  const [draft, setDraft] = useState<CampaignDraft | null>(mode === 'create' ? {
-    id: 'tmp',
-    name: '',
-    client_id: null,
-    subject: '',
-    preheader: '',
-    body: '',
-    template_id: null,
-    send_at: null,
-    isMobilePreview: false,
-  } : null)
-
-  const composerRef = useRef<HTMLDivElement>(null)
 
   const tabs = useMemo(() => {
     const list: Array<{ key: Section; label: string }> = [
@@ -517,8 +494,12 @@ export default function EmailMarketingPage() {
     return list
   }, [])
 
-  const handleCreateCampaign = () => {
-    setSearchParams(prev => { const next = new URLSearchParams(prev); next.set('section', 'campaigns'); next.set('mode', 'create'); return next })
+  const requested = searchParams.get('section') as Section | null
+  const section: Section = tabs.some(t => t.key === requested) ? (requested as Section) : 'campaigns'
+  const mode = searchParams.get('mode') as 'create' | null
+
+  const handleCloseComposer = () => {
+    setSearchParams(prev => { const next = new URLSearchParams(prev); next.delete('section'); next.delete('mode'); return next })
   }
 
   return (
@@ -543,7 +524,7 @@ export default function EmailMarketingPage() {
           <ActionButton
             size="sm"
             variant="secondary"
-            onClick={() => setSearchParams(prev => { const next = new URLSearchParams(prev); next.delete('section'); next.delete('mode'); return next })}
+            onClick={handleCloseComposer}
             style={{ marginLeft: '8px' }}
           >
             Cancel
@@ -551,10 +532,10 @@ export default function EmailMarketingPage() {
         )}
       </div>
 
-      {section === 'campaigns' && <CampaignsSection isAdmin={isAdmin} isManager={isManager} setSearchParams={setSearchParams} />}
-      {section === 'audiences' && <AudiencesSection isAdmin={isAdmin} setSearchParams={setSearchParams} />}
-      {section === 'templates' && <TemplatesSection isAdmin={isAdmin} setSearchParams={setSearchParams} />}
-      {mode === 'create' && <CampaignComposer onClose={draft => setSearchParams(prev => { const next = new URLSearchParams(prev); next.delete('section'); next.delete('mode'); return next })} />}
+      {section === 'campaigns' && <CampaignsSection setSearchParams={setSearchParams} />}
+      {section === 'audiences' && <AudiencesSection setSearchParams={setSearchParams} />}
+      {section === 'templates' && <TemplatesSection setSearchParams={setSearchParams} />}
+      {mode === 'create' && <CampaignComposer onClose={handleCloseComposer} />}
 
     </PageContainer>
   )
