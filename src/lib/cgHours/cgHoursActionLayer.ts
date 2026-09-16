@@ -239,3 +239,72 @@ export function generateIdempotencyKey(staffId: string, action: string, key: str
   // In production this would be hashed to UUID via the existing deriveMcpIdempotencyKey
   return `${staffId}|${action}|${key}`
 }
+
+export interface CgHoursOrdinaryHoursActionContext {
+  staffId: string
+  clientId: string | null
+  idempotencyKey?: (action: string, requestKey: string) => string
+}
+
+export function createOrdinaryHoursEntry(
+  context: CgHoursOrdinaryHoursActionContext,
+  draft: CgHoursTimeEntryDraft,
+  nowIso = new Date().toISOString()
+): { entry: CgHoursTimeEntry; idempotencyKey: string } {
+  const { staffId, clientId, idempotencyKey: keyFn } = context
+
+  if (draft.client_id !== undefined && clientId !== null && draft.client_id !== clientId) {
+    throw new Error(`Client isolation violation: draft.client_id=${draft.client_id} differs from context.clientId=${clientId}`)
+  }
+
+  const effectiveClientId = clientId !== null ? clientId : draft.client_id
+
+  const draftWithClient = {
+    ...draft,
+    client_id: effectiveClientId,
+  }
+
+  const errors = validateCgHoursTimeEntryDraft(draftWithClient)
+  if (errors.length > 0) {
+    throw new Error(`Invalid time entry draft: ${errors.join('; ')}`)
+  }
+
+  const entry = createTimeEntryFromDraft(draftWithClient, staffId, nowIso)
+
+  const key = keyFn ? keyFn('create_ordinary_hours_entry', `${staffId}|${effectiveClientId}|${draft.date}`) : generateIdempotencyKey(staffId, 'create_ordinary_hours_entry', `${staffId}|${effectiveClientId}|${draft.date}`)
+
+  return { entry, idempotencyKey: key }
+}
+
+export function readOrdinaryHoursEntries(
+  context: CgHoursOrdinaryHoursActionContext,
+  fromDate: string,
+  toDate: string,
+  types?: CgHoursEntryType[]
+): CgHoursRecentEntriesQuery {
+  const { staffId, clientId } = context
+  return {
+    staff_id: staffId,
+    from_date: from_date,
+    to_date: to_date,
+    types,
+  }
+}
+
+export function applyOrdinaryHoursCorrection(
+  context: CgHoursOrdinaryHoursActionContext,
+  entry: CgHoursTimeEntry,
+  correction: CgHoursCorrectionDraft,
+  nowIso = new Date().toISOString()
+): CgHoursCorrectionResult<CgHoursTimeEntry> {
+  if (entry.staff_id !== context.staffId) {
+    throw new Error(`Staff isolation violation: correcting staff ${entry.staff_id} differs from context staff ${context.staffId}`)
+  }
+
+  const errors = validateCorrectionDraft(correction)
+  if (errors.length > 0) {
+    throw new Error(`Invalid correction: ${errors.join('; ')}`)
+  }
+
+  return applyCorrectionToTimeEntry(entry, correction, nowIso)
+}

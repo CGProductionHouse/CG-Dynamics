@@ -312,3 +312,173 @@ test('generateIdempotencyKey: creates deterministic key', () => {
   const key = mod.generateIdempotencyKey('staff-123', 'create_time_entry', 'unique-request-1')
   assert.equal(key, 'staff-123|create_time_entry|unique-request-1')
 })
+
+test('createOrdinaryHoursEntry: valid entry with staff client isolation and idempotency key', () => {
+  const context = {
+    staffId: 'staff-123',
+    clientId: 'c-dulux',
+  }
+  const draft = {
+    client_id: 'c-dulux',
+    date: '2026-07-15',
+    type: 'time',
+    hours: 2,
+    task_description: 'Client meeting and design review',
+  }
+  const { entry, idempotencyKey } = mod.createOrdinaryHoursEntry(context, draft)
+  assert.equal(entry.staff_id, 'staff-123')
+  assert.equal(entry.client_id, 'c-dulux')
+  assert.equal(entry.date, '2026-07-15')
+  assert.equal(entry.type, 'time')
+  assert.equal(entry.hours, 2)
+  assert.equal(entry.task_description, 'Client meeting and design review')
+  assert.equal(entry.status, 'draft')
+  assert.equal(entry.created_at, expect.any(String))
+  assert.equal(entry.updated_at, expect.any(String))
+  assert.ok(typeof idempotencyKey === 'string')
+  assert.ok(idempotencyKey.includes('staff-123'))
+  assert.ok(idempotencyKey.includes('create_ordinary_hours_entry'))
+})
+
+test('createOrdinaryHoursEntry: client isolation violation throws', () => {
+  const context = {
+    staffId: 'staff-123',
+    clientId: 'c-dulux',
+  }
+  const draft = {
+    client_id: 'c-other',
+    date: '2026-07-15',
+    type: 'time',
+    hours: 2,
+    task_description: 'Work',
+  }
+  assert.throws(
+    () => mod.createOrdinaryHoursEntry(context, draft),
+    /Client isolation violation/
+  )
+})
+
+test('createOrdinaryHoursEntry: idempotency key is deterministic', () => {
+  const context = {
+    staffId: 'staff-456',
+    clientId: 'c-dulux',
+    idempotencyKey: (action, requestKey) => mod.generateIdempotencyKey('staff-456', action, requestKey),
+  }
+  const draft = {
+    client_id: 'c-dulux',
+    date: '2026-07-15',
+    type: 'time',
+    hours: 3,
+    task_description: 'Design review',
+  }
+  const { entry: entry1, idempotencyKey: key1 } = mod.createOrdinaryHoursEntry(context, draft)
+  const { entry: entry2, idempotencyKey: key2 } = mod.createOrdinaryHoursEntry(context, draft)
+  assert.equal(key1, key2)
+  assert.equal(entry1.staff_id, entry2.staff_id)
+  assert.equal(entry1.client_id, entry2.client_id)
+  assert.equal(entry1.date, entry2.date)
+})
+
+test('readOrdinaryHoursEntries: reads entries filtered by staff and client', () => {
+  const context = {
+    staffId: 'staff-123',
+    clientId: 'c-germoparts',
+  }
+  const query = mod.readOrdinaryHoursEntries(context, '2026-07-01', '2026-07-31', ['time'])
+  assert.equal(query.staff_id, 'staff-123')
+  assert.equal(query.from_date, '2026-07-01')
+  assert.equal(query.to_date, '2026-07-31')
+  assert.ok(Array.isArray(query.types) && query.types.includes('time'))
+})
+
+test('applyOrdinaryHoursCorrection: corrects time entry with staff audit trail', () => {
+  const context = {
+    staffId: 'staff-123',
+    clientId: 'c-dulux',
+  }
+  const entry = {
+    id: 'entry-123',
+    staff_id: 'staff-123',
+    client_id: 'c-dulux',
+    date: '2026-07-15',
+    type: 'time',
+    hours: 2,
+    task_description: 'Client meeting',
+    notes: 'Initial',
+    status: 'draft',
+    created_at: '2026-07-15T08:00:00Z',
+    updated_at: '2026-07-15T08:00:00Z',
+  }
+  const correction = {
+    entry_id: 'entry-123',
+    staff_id: 'staff-123',
+    reason: 'Actually worked 3 hours',
+    correction: { hours: 3 },
+  }
+  const result = mod.applyOrdinaryHoursCorrection(context, entry, correction, '2026-07-15T12:00:00Z')
+  assert.equal(result.corrected.hours, 3)
+  assert.equal(result.corrected.task_description, 'Client meeting')
+  assert.equal(result.corrected.updated_at, '2026-07-15T12:00:00Z')
+  assert.equal(result.audit.corrected_by, 'staff-123')
+  assert.equal(result.audit.corrected_at, '2026-07-15T12:00:00Z')
+  assert.equal(result.audit.reason, 'Actually worked 3 hours')
+  assert.equal(result.original.hours, 2)
+})
+
+test('applyOrdinaryHoursCorrection: staff isolation violation throws', () => {
+  const context = {
+    staffId: 'staff-123',
+    clientId: 'c-dulux',
+  }
+  const entry = {
+    id: 'entry-123',
+    staff_id: 'staff-other',
+    client_id: 'c-dulux',
+    date: '2026-07-15',
+    type: 'time',
+    hours: 2,
+    task_description: 'Client meeting',
+    status: 'draft',
+    created_at: '2026-07-15T08:00:00Z',
+    updated_at: '2026-07-15T08:00:00Z',
+  }
+  const correction = {
+    entry_id: 'entry-123',
+    staff_id: 'staff-123',
+    reason: 'Test',
+    correction: { hours: 3 },
+  }
+  assert.throws(
+    () => mod.applyOrdinaryHoursCorrection(context, entry, correction),
+    /Staff isolation violation/
+  )
+})
+
+test('applyOrdinaryHoursCorrection: invalid correction throws', () => {
+  const context = {
+    staffId: 'staff-123',
+    clientId: 'c-dulux',
+  }
+  const entry = {
+    id: 'entry-123',
+    staff_id: 'staff-123',
+    client_id: 'c-dulux',
+    date: '2026-07-15',
+    type: 'time',
+    hours: 2,
+    task_description: 'Client meeting',
+    status: 'draft',
+    created_at: '2026-07-15T08:00:00Z',
+    updated_at: '2026-07-15T08:00:00Z',
+  }
+  const invalidCorrection = {
+    entry_id: 'entry-123',
+    staff_id: 'staff-123',
+    reason: '',
+    correction: { hours: 25 },
+  }
+  assert.throws(
+    () => mod.applyOrdinaryHoursCorrection(context, entry, invalidCorrection),
+    /Invalid correction/
+  )
+})
