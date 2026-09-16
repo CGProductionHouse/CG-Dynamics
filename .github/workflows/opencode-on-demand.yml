@@ -30,6 +30,11 @@ jobs:
           fetch-depth: 1
           persist-credentials: true
 
+      - name: Configure git author
+        run: |
+          git config --local user.name "opencode-agent[bot]"
+          git config --local user.email "219766164+opencode-agent[bot]@users.noreply.github.com"
+
       - name: Run OpenCode — Go quality lane
         id: go
         timeout-minutes: 35
@@ -66,6 +71,11 @@ jobs:
           fetch-depth: 1
           persist-credentials: true
 
+      - name: Configure git author
+        run: |
+          git config --local user.name "opencode-agent[bot]"
+          git config --local user.email "219766164+opencode-agent[bot]@users.noreply.github.com"
+
       - name: Run OpenCode — Zen direct lane
         timeout-minutes: 45
         uses: anomalyco/opencode/github@latest
@@ -87,6 +97,11 @@ jobs:
         with:
           fetch-depth: 1
           persist-credentials: true
+
+      - name: Configure git author
+        run: |
+          git config --local user.name "opencode-agent[bot]"
+          git config --local user.email "219766164+opencode-agent[bot]@users.noreply.github.com"
 
       - name: Run OpenCode — NVIDIA direct lane
         timeout-minutes: 45
@@ -117,6 +132,11 @@ jobs:
         with:
           fetch-depth: 1
           persist-credentials: true
+
+      - name: Configure git author
+        run: |
+          git config --local user.name "opencode-agent[bot]"
+          git config --local user.email "219766164+opencode-agent[bot]@users.noreply.github.com"
 
       - name: Run OpenCode — Go quality lane
         id: go
