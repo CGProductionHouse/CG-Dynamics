@@ -295,15 +295,15 @@ export type AuthorityVerificationResult =
 /**
  * Verifies that the operating context is authorised to act on the requested target.
  *
- * This is the server-verifiable authority/delegation seam (#377 checkpoint). It distinguishes
+ * This is the server-verifiable authority/delegation seam. It distinguishes
  * the *requested* target (from tool input) from the *verified* operating context (resolved
  * from the per-call Project context against canonical records).
  *
  * Rules:
- * - Staff context: can only act on their own staff_profile_id. Admin/manager roles get
- *   explicit delegation to act on any staff target (company-wide audit scope).
- * - Client context: can only act on their pinned client_id. No delegation — client Projects
- *   are strictly single-client.
+ * - Staff context: can only act on their own staff_profile_id. No delegation via role
+ *   inference — the effective subject's role cannot grant scope. Fail closed for any
+ *   target that is not the caller's own staff_profile_id.
+ * - Client context: can only act on their pinned client_id. No delegation.
  * - Company_admin context: explicit admin delegation to act on any staff or client target.
  * - Exact UUID alone never grants scope — the context must authorise the target.
  *
@@ -324,24 +324,21 @@ export function verifyTargetAuthority(
   }
   const targetId = requestedTargetId.trim()
 
-  // Staff context — own profile only, unless admin/manager (explicit delegation)
+  // Staff context — own profile only. No delegation via role inference.
+  // The effective subject's role cannot grant scope; authority must come from
+  // an independently verified connection principal or server-side delegation policy.
   if (contextKind === 'staff') {
     if (targetKind === 'staff_profile') {
       if (contextStaffProfileId && targetId === contextStaffProfileId.trim()) {
         return { ok: true, authorised: true, reason: 'own_context' }
       }
-      // Admin/manager explicit delegation for company-wide scope
-      if (contextRole === 'admin' || contextRole === 'manager') {
-        return { ok: true, authorised: true, reason: 'explicit_admin_delegation' }
-      }
+      // No role-inference delegation — fail closed for cross-subject targets
       return { ok: true, authorised: false, reason: 'forged_target' }
     }
     if (targetKind === 'client') {
-      // Staff context acting on a client target — only allowed if explicitly delegated
-      // (e.g., via client workspace actions which are gated separately)
-      if (contextRole === 'admin' || contextRole === 'manager') {
-        return { ok: true, authorised: true, reason: 'explicit_admin_delegation' }
-      }
+      // Staff context acting on a client target — only allowed via explicit server-side
+      // delegation policy (not via role inference from the effective subject). Fail closed
+      // when no such policy is provable.
       return { ok: true, authorised: false, reason: 'cross_context' }
     }
   }

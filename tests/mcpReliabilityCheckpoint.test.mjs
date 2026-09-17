@@ -170,13 +170,31 @@ test('verifyTargetAuthority: staff context — own staff_profile_id authorised (
   assert.match(PROJECT_CONTEXT, /reason: 'own_context'/)
 })
 
-test('verifyTargetAuthority: staff context — admin/manager explicit delegation for any staff target', () => {
-  assert.match(PROJECT_CONTEXT, /contextRole === 'admin' \|\| contextRole === 'manager'/)
-  assert.match(PROJECT_CONTEXT, /reason: 'explicit_admin_delegation'/)
+test('verifyTargetAuthority: staff context — admin/manager role cannot grant explicit delegation', () => {
+  // Admin/manager role from effective subject cannot grant scope; authority must come from
+  // independently verified connection principal or server-side delegation policy.
+  // Staff context with admin/manager role still only has own_context for own profile.
+  assert.match(PROJECT_CONTEXT, /contextKind === 'staff'/)
+  assert.match(PROJECT_CONTEXT, /targetKind === 'staff_profile'/)
+  assert.match(PROJECT_CONTEXT, /reason: 'forged_target'/)
 })
 
-test('verifyTargetAuthority: staff context — forged staff target refused (forged_target)', () => {
+test('verifyTargetAuthority: staff context — forged/changed admin target self-authorisation denied (forged_target)', () => {
+  // When a staff context targets a staff_profile_id that is not their own, it is refused
+  // even if the effective subject has admin/manager role. Role inference cannot grant
+  // delegation; authority must come from independently verified connection principal.
+  assert.match(PROJECT_CONTEXT, /contextKind === 'staff'/)
+  assert.match(PROJECT_CONTEXT, /targetKind === 'staff_profile'/)
   assert.match(PROJECT_CONTEXT, /reason: 'forged_target'/)
+})
+
+test('verifyTargetAuthority: staff context — changed client target refused (cross_context)', () => {
+  // Staff context acting on a client target is refused when no explicit server-side
+  // delegation policy exists. Authority must come from an independently verified
+  // connection principal or delegation policy, not from the effective subject's role.
+  assert.match(PROJECT_CONTEXT, /contextKind === 'staff'/)
+  assert.match(PROJECT_CONTEXT, /targetKind === 'client'/)
+  assert.match(PROJECT_CONTEXT, /reason: 'cross_context'/)
 })
 
 test('verifyTargetAuthority: staff context — client target requires admin delegation (cross_context)', () => {
