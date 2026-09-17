@@ -32,6 +32,9 @@ import {
 
 const INPUT_CLASS = 'w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2.5 text-sm text-white outline-none focus:border-brand-accent/60 disabled:cursor-not-allowed disabled:opacity-60'
 
+import { TrackingSetupHealthPanel } from '../../components/admin/TrackingSetupHealth'
+import { loadTrackingSetupHealth, type TrackingSetupHealth } from '../../lib/trackingSetupHealth'
+
 function currentMonth(): string {
   const date = new Date()
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
@@ -78,11 +81,23 @@ export default function GoogleAdsIntegrationPage() {
   const [syncAccountIds, setSyncAccountIds] = useState<Set<string>>(new Set())
   const [syncResult, setSyncResult] = useState<{ data: GoogleAdsSyncResult; month: string } | null>(null)
   const [targetClientId, setTargetClientId] = useState('')
+  const [setupHealth, setSetupHealth] = useState<TrackingSetupHealth | null>(null)
   const [targetMonth, setTargetMonth] = useState(currentMonth())
   const [targetAmount, setTargetAmount] = useState('')
   const [targetCurrency, setTargetCurrency] = useState('ZAR')
   const [targetApprovalNote, setTargetApprovalNote] = useState('')
   const [targetApprovedAt, setTargetApprovedAt] = useState(new Date().toISOString().slice(0, 16))
+
+  // #335 read-only setup health for the selected client. Performs no provider call.
+  useEffect(() => {
+    let active = true
+    if (targetClientId) {
+      loadTrackingSetupHealth(targetClientId)
+        .then(result => { if (active) setSetupHealth(result) })
+        .catch(() => { if (active) setSetupHealth(null) })
+    }
+    return () => { active = false }
+  }, [targetClientId])
 
   async function load(silent = false) {
     try {
@@ -253,6 +268,8 @@ export default function GoogleAdsIntegrationPage() {
             </div>
           ) : <p className="mt-4 text-sm text-brand-primary">No dated monthly targets are stored yet.</p>}
         </PremiumCard>
+
+        <TrackingSetupHealthPanel health={targetClientId ? setupHealth : null} />
 
         <PremiumCard>
           <PremiumCardHeader eyebrow="Sync" title="Sync selected accounts once" subtitle="One request syncs the selected month plus the prior 13 days needed for two equal seven-day trend windows." />

@@ -47,6 +47,13 @@ import {
 } from '../../lib/overviewModel'
 import type { ReportContentExclusion, ReportFactHealth } from '../../lib/db/reportingTruth'
 import type { GoogleAdsDashboardData, GoogleAdsDashboardState } from '../../lib/googleAdsDashboard'
+import { WebsiteAfterTheClick } from '../../components/client/WebsiteAfterTheClick'
+import {
+  buildWebsiteAfterClickProjection,
+  type Ga4WebsitePayload,
+  type WebsiteAfterClickProjection,
+} from '../../lib/websiteAfterClick'
+import type { CtaDefinition } from '../../lib/ga4Contract'
 
 type TabKey = 'overview' | Platform | 'google_ads'
 
@@ -91,6 +98,8 @@ export function ClientReportView({
   contentExclusions = [],
   onSetContentExcluded,
   curationBusyId = null,
+  ga4Website = null,
+  ctaDefinitions = [],
 }: {
   report: RenderableReport
   client?: Client | null
@@ -100,6 +109,10 @@ export function ClientReportView({
   googleAds: GoogleAdsDashboardData | null
   googleAdsState: GoogleAdsDashboardState
   googleAdsError: string | null
+  /** #335 GA4 website behaviour for the same exact client/campaign/period. */
+  ga4Website?: Ga4WebsitePayload | null
+  /** CG CTA taxonomy configured for this exact client. */
+  ctaDefinitions?: CtaDefinition[]
   showEmptyStrategy?: boolean
   /** Staff-only: renders the data-health panel. Never enable on client routes. */
   showAdminDiagnostics?: boolean
@@ -152,6 +165,16 @@ export function ClientReportView({
   const hasMeta = availablePlatforms.length > 0 || facts.some(fact => fact.platform === 'facebook' || fact.platform === 'instagram')
   const hasGoogleAds = googleAds !== null || googleAdsState !== 'disconnected'
   const hasGoogleAdsSource = googleAdsState === 'data' || googleAdsState === 'no-activity'
+  // #335: computed ONCE here so every surface that renders this view - the client report and Admin
+  // Preview, which renders this same component - shows the identical canonical projection.
+  const websiteAfterClick = useMemo(
+    () => buildWebsiteAfterClickProjection({
+      adsDashboard: googleAds,
+      ga4: ga4Website,
+      ctaDefinitions,
+    }),
+    [googleAds, ga4Website, ctaDefinitions],
+  )
   const tabs: { key: TabKey; label: string }[] = [
     { key: 'overview', label: 'Overview' },
     ...reportPlatforms.map(platform => ({ key: platform as TabKey, label: PLATFORM_LABELS[platform] })),
@@ -204,6 +227,7 @@ export function ClientReportView({
           googleAds={googleAds}
           googleAdsState={googleAdsState}
           googleAdsError={googleAdsError}
+          websiteAfterClick={websiteAfterClick}
           verifiedSections={verifiedSections}
           normalizedFactsActive={normalizedFactsActive}
           dataHealth={dataHealth}
@@ -217,6 +241,7 @@ export function ClientReportView({
           googleAds={googleAds}
           state={googleAdsState}
           error={googleAdsError}
+          websiteAfterClick={websiteAfterClick}
         />
       ) : (
         <PlatformTab
@@ -358,6 +383,7 @@ function OverviewTab({
   googleAds,
   googleAdsState,
   googleAdsError,
+  websiteAfterClick,
   verifiedSections,
   normalizedFactsActive,
   dataHealth,
@@ -375,6 +401,7 @@ function OverviewTab({
   googleAds: GoogleAdsDashboardData | null
   googleAdsState: GoogleAdsDashboardState
   googleAdsError: string | null
+  websiteAfterClick: WebsiteAfterClickProjection
   verifiedSections: VerifiedSection[]
   normalizedFactsActive: boolean
   dataHealth: ReportFactHealth[]
@@ -461,6 +488,7 @@ function OverviewTab({
           googleAds={googleAds}
           state={googleAdsState}
           error={googleAdsError}
+          websiteAfterClick={websiteAfterClick}
         />
       )}
 
@@ -1239,10 +1267,12 @@ function GoogleAdsOverview({
   googleAds,
   state,
   error,
+  websiteAfterClick,
 }: {
   googleAds: GoogleAdsDashboardData | null
   state: GoogleAdsDashboardState
   error: string | null
+  websiteAfterClick: WebsiteAfterClickProjection
 }) {
   return (
     <section className="mb-14 rounded-[2rem] border border-[#f59e0b]/20 bg-[linear-gradient(135deg,rgba(245,158,11,0.10),rgba(255,255,255,0.025))] p-6 sm:p-8">
@@ -1255,6 +1285,10 @@ function GoogleAdsOverview({
       ) : (
         <GoogleAdsEmptyState state={state} hasError={state === 'error' && Boolean(error)} compact />
       )}
+      {/* #335: the same canonical projection the Google Ads tab renders. */}
+      <div className="mt-8">
+        <WebsiteAfterTheClick projection={websiteAfterClick} compact />
+      </div>
     </section>
   )
 }
@@ -1263,14 +1297,21 @@ function GoogleAdsTab({
   googleAds,
   state,
   error,
+  websiteAfterClick,
 }: {
   googleAds: GoogleAdsDashboardData | null
   state: GoogleAdsDashboardState
   error: string | null
+  websiteAfterClick: WebsiteAfterClickProjection
 }) {
   if (!googleAds) return <GoogleAdsEmptyState state={state} hasError={state === 'error' && Boolean(error)} />
 
-  return <GoogleAdsResults dashboard={googleAds} />
+  return (
+    <div className="space-y-8">
+      <GoogleAdsResults dashboard={googleAds} />
+      <WebsiteAfterTheClick projection={websiteAfterClick} />
+    </div>
+  )
 }
 
 function GoogleAdsEmptyState({
