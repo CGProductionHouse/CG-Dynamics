@@ -47,8 +47,13 @@ import {
 } from '../../lib/overviewModel'
 import type { ReportContentExclusion, ReportFactHealth } from '../../lib/db/reportingTruth'
 import type { GoogleAdsDashboardData, GoogleAdsDashboardState } from '../../lib/googleAdsDashboard'
+import {
+  PerformanceProviderIcon,
+  type PerformanceProviderIconKey,
+} from '../../components/client/PerformanceProviderIcon'
 
-export type ReportTabKey = 'overview' | Platform | 'campaigns' | 'google_ads'
+export type ReportTabKey = 'overview' | 'facebook' | 'instagram' | 'google' | 'tiktok' | 'linkedin' | 'web' | 'email'
+export type GoogleSurface = 'ads' | 'business'
 
 const LOGO_FRAME = 'border border-white/10 bg-[#06110f] shadow-[0_18px_35px_-24px_rgba(45,212,191,0.7)]'
 
@@ -93,6 +98,8 @@ export function ClientReportView({
   curationBusyId = null,
   initialTab = 'overview',
   onTabChange,
+  initialGoogleSurface = 'ads',
+  onGoogleSurfaceChange,
 }: {
   report: RenderableReport
   client?: Client | null
@@ -120,9 +127,13 @@ export function ClientReportView({
   curationBusyId?: string | null
   initialTab?: ReportTabKey
   onTabChange?: (tab: ReportTabKey) => void
+  initialGoogleSurface?: GoogleSurface
+  onGoogleSurfaceChange?: (surface: GoogleSurface) => void
 }) {
   const [localTab, setLocalTab] = useState<ReportTabKey>('overview')
   const tab = onTabChange ? initialTab : localTab
+  const [localGoogleSurface, setLocalGoogleSurface] = useState<GoogleSurface>('ads')
+  const googleSurface = onGoogleSurfaceChange ? initialGoogleSurface : localGoogleSurface
 
   // Verified, availability-aware Overview sections built ONLY from normalized
   // facts. Per-platform (no cross-platform unique summing); the comparability
@@ -154,19 +165,28 @@ export function ClientReportView({
       .map(fact => fact.platform)
       .filter((platform): platform is Platform => platform === 'facebook' || platform === 'instagram'),
   ]))
-  const hasMeta = availablePlatforms.length > 0 || facts.some(fact => fact.platform === 'facebook' || fact.platform === 'instagram')
+  const hasMeta = availablePlatforms.some(view => view.platform === 'facebook' || view.platform === 'instagram')
+    || facts.some(fact => fact.platform === 'facebook' || fact.platform === 'instagram')
   const hasGoogleAds = googleAds !== null || googleAdsState !== 'disconnected'
   const hasGoogleAdsSource = googleAdsState === 'data' || googleAdsState === 'no-activity'
-  const tabs: { key: ReportTabKey; label: string }[] = [
-    { key: 'overview', label: 'Overview' },
-    ...reportPlatforms.map(platform => ({ key: platform as ReportTabKey, label: PLATFORM_LABELS[platform] })),
-    { key: 'campaigns', label: 'Campaigns' },
-    ...(hasGoogleAds ? [{ key: 'google_ads' as const, label: 'Google Ads' }] : []),
+  const tabs: { key: ReportTabKey; label: string; icon: PerformanceProviderIconKey }[] = [
+    { key: 'overview', label: 'Overview', icon: 'overview' },
+    { key: 'facebook', label: 'Facebook', icon: 'facebook' },
+    { key: 'instagram', label: 'Instagram', icon: 'instagram' },
+    { key: 'google', label: 'Google', icon: 'google' },
+    { key: 'tiktok', label: 'TikTok', icon: 'tiktok' },
+    { key: 'linkedin', label: 'LinkedIn', icon: 'linkedin' },
+    { key: 'web', label: 'Website Performance', icon: 'web' },
+    { key: 'email', label: 'Email Marketing', icon: 'email' },
   ]
   const activeTab = tabs.some(item => item.key === tab) ? tab : 'overview'
   const selectTab = (nextTab: ReportTabKey) => {
     if (onTabChange) onTabChange(nextTab)
     else setLocalTab(nextTab)
+  }
+  const selectGoogleSurface = (surface: GoogleSurface) => {
+    if (onGoogleSurfaceChange) onGoogleSurfaceChange(surface)
+    else setLocalGoogleSurface(surface)
   }
 
   const month = monthDisplayLabel(getReportMonthFromPeriod(report))
@@ -223,23 +243,39 @@ export function ClientReportView({
           onSetContentExcluded={onSetContentExcluded}
           curationBusyId={curationBusyId}
         />
-      ) : activeTab === 'campaigns' ? (
-        <CampaignsTab
+      ) : activeTab === 'google' ? (
+        <GooglePerformanceTab
           report={report}
           month={month}
           googleAds={googleAds}
           state={googleAdsState}
           error={googleAdsError}
           hasGoogleAds={hasGoogleAds}
-          onOpenGoogleAds={() => selectTab('google_ads')}
+          surface={googleSurface}
+          onSurfaceChange={selectGoogleSurface}
         />
-      ) : activeTab === 'google_ads' ? (
-        <GoogleAdsTab
-          googleAds={googleAds}
-          state={googleAdsState}
-          error={googleAdsError}
+      ) : activeTab === 'web' ? (
+        <ProviderAvailabilityPanel
+          eyebrow="Digital experience"
+          title="Website Performance"
+          status="Not connected"
+          description="Website reporting is available for CG-built websites connected to Dynamics. No verified website source is connected for this published month."
         />
-      ) : (
+      ) : activeTab === 'email' ? (
+        <ProviderAvailabilityPanel
+          eyebrow="Owned audience"
+          title="Email Marketing"
+          status="Coming soon"
+          description="Email Marketing performance will appear here when the client reporting lane is available and connected."
+        />
+      ) : activeTab === 'linkedin' ? (
+        <ProviderAvailabilityPanel
+          eyebrow="Professional audience"
+          title="LinkedIn"
+          status="Coming soon"
+          description="LinkedIn performance is not yet available in the client portal. No figures are inferred or shown as zero."
+        />
+      ) : reportPlatforms.includes(activeTab as Platform) ? (
         <PlatformTab
           view={master.platforms.find(item => item.platform === activeTab)!}
           previousView={null}
@@ -249,6 +285,15 @@ export function ClientReportView({
           facts={facts.filter(fact => fact.platform === activeTab)}
           previousFacts={previousFacts.filter(fact => fact.platform === activeTab)}
           normalizedFactsActive={normalizedFactsActive}
+        />
+      ) : (
+        <ProviderAvailabilityPanel
+          eyebrow="Platform performance"
+          title={activeTab === 'facebook' ? 'Facebook' : activeTab === 'instagram' ? 'Instagram' : 'TikTok'}
+          status={activeTab === 'tiktok' ? 'Coming soon' : 'Not connected'}
+          description={activeTab === 'tiktok'
+            ? 'TikTok performance is not yet available in the client portal. No figures are inferred or shown as zero.'
+            : `No verified ${activeTab === 'facebook' ? 'Facebook' : 'Instagram'} reporting source is connected for this published month.`}
         />
       )}
 
@@ -342,12 +387,12 @@ function ReportTabs({
   active,
   onChange,
 }: {
-  tabs: { key: ReportTabKey; label: string }[]
+  tabs: { key: ReportTabKey; label: string; icon: PerformanceProviderIconKey }[]
   active: ReportTabKey
   onChange: (tab: ReportTabKey) => void
 }) {
   return (
-    <div role="tablist" aria-label="Performance report sections" className="mb-10 flex w-fit flex-wrap gap-1 rounded-full border border-white/10 bg-white/[0.04] p-1">
+    <div role="tablist" aria-label="Performance services" className="mx-auto mb-10 flex w-fit max-w-full flex-wrap justify-center gap-1.5 rounded-[1.5rem] border border-white/10 bg-black/20 p-1.5 shadow-[0_24px_60px_-42px_rgba(0,0,0,0.95)] backdrop-blur">
       {tabs.map(item => {
         const isActive = active === item.key
         return (
@@ -356,14 +401,19 @@ function ReportTabs({
             type="button"
             role="tab"
             aria-selected={isActive}
+            aria-label={item.label}
+            title={item.label}
             onClick={() => onChange(item.key)}
-            className={`rounded-full px-5 py-2 text-sm font-bold transition ${
+            className={`group relative flex h-11 w-11 items-center justify-center rounded-2xl border transition sm:h-12 sm:w-12 ${
               isActive
-                ? 'bg-white text-[#06110f] shadow-lg'
-                : 'text-slate-400 hover:bg-white/[0.06] hover:text-white'
+                ? 'border-[#2dd4bf]/55 bg-[linear-gradient(145deg,rgba(45,212,191,0.22),rgba(255,255,255,0.12))] text-white shadow-[0_14px_30px_-16px_rgba(45,212,191,0.9)]'
+                : 'border-transparent text-slate-400 hover:border-white/10 hover:bg-white/[0.06] hover:text-white'
             }`}
           >
-            {item.label}
+            <PerformanceProviderIcon provider={item.icon} />
+            <span className="pointer-events-none absolute left-1/2 top-[calc(100%+0.45rem)] z-20 hidden -translate-x-1/2 whitespace-nowrap rounded-lg border border-white/10 bg-[#07110f] px-2.5 py-1.5 text-[0.68rem] font-bold text-white shadow-xl group-hover:block group-focus-visible:block">
+              {item.label}
+            </span>
           </button>
         )
       })}
@@ -1282,14 +1332,41 @@ function GoogleAdsOverview({
   )
 }
 
-function CampaignsTab({
+function ProviderAvailabilityPanel({
+  eyebrow,
+  title,
+  status,
+  description,
+}: {
+  eyebrow: string
+  title: string
+  status: 'Not connected' | 'Coming soon'
+  description: string
+}) {
+  return (
+    <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#071311]/95 p-7 shadow-[0_35px_90px_-45px_rgba(0,0,0,0.95)] sm:p-10">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_10%_0%,rgba(45,212,191,0.16),transparent_38%),radial-gradient(circle_at_92%_8%,rgba(249,115,22,0.10),transparent_34%)]" />
+      <div className="relative max-w-3xl">
+        <p className="text-xs font-black uppercase tracking-[0.24em] text-[#2dd4bf]">{eyebrow}</p>
+        <h2 className="mt-3 text-3xl font-black tracking-[-0.04em] text-white sm:text-5xl">{title}</h2>
+        <span className="mt-6 inline-flex rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-xs font-black uppercase tracking-[0.16em] text-slate-300">
+          {status}
+        </span>
+        <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300">{description}</p>
+      </div>
+    </section>
+  )
+}
+
+function GooglePerformanceTab({
   report,
   month,
   googleAds,
   state,
   error,
   hasGoogleAds,
-  onOpenGoogleAds,
+  surface,
+  onSurfaceChange,
 }: {
   report: RenderableReport
   month: string
@@ -1297,7 +1374,8 @@ function CampaignsTab({
   state: GoogleAdsDashboardState
   error: string | null
   hasGoogleAds: boolean
-  onOpenGoogleAds: () => void
+  surface: GoogleSurface
+  onSurfaceChange: (surface: GoogleSurface) => void
 }) {
   const strategy = readStrategyData(report.strategy_data)
   const campaignRecommendation = strategy.actionPlan.campaign_recommendation
@@ -1313,10 +1391,10 @@ function CampaignsTab({
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_0%,rgba(45,212,191,0.18),transparent_38%),radial-gradient(circle_at_92%_8%,rgba(249,115,22,0.14),transparent_34%)]" />
         <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-end">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.24em] text-[#2dd4bf]">Campaign performance</p>
-            <h2 className="mt-3 max-w-3xl text-3xl font-black tracking-[-0.04em] text-white sm:text-5xl">Paid media, in context.</h2>
+            <p className="text-xs font-black uppercase tracking-[0.24em] text-[#2dd4bf]">Search &amp; local presence</p>
+            <h2 className="mt-3 max-w-3xl text-3xl font-black tracking-[-0.04em] text-white sm:text-5xl">Google Performance</h2>
             <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300">
-              Verified campaign results and the reviewed direction CG is using to improve the next move.
+              Verified Google results and the reviewed direction CG is using to improve the next move.
             </p>
           </div>
           <div className="rounded-2xl border border-white/10 bg-black/20 p-5">
@@ -1324,22 +1402,42 @@ function CampaignsTab({
             <p className="mt-2 text-xl font-black text-white">{month}</p>
           </div>
         </div>
+        <div role="tablist" aria-label="Google performance services" className="relative mt-7 flex w-fit rounded-full border border-white/10 bg-black/25 p-1">
+          {(['ads', 'business'] as const).map(item => {
+            const selected = surface === item
+            const label = item === 'ads' ? 'Ads' : 'Business'
+            return (
+              <button
+                key={item}
+                type="button"
+                role="tab"
+                aria-selected={selected}
+                onClick={() => onSurfaceChange(item)}
+                className={`rounded-full px-5 py-2 text-sm font-bold transition ${selected ? 'bg-white text-[#07110f]' : 'text-slate-400 hover:text-white'}`}
+              >
+                {label}
+              </button>
+            )
+          })}
+        </div>
       </section>
 
+      {surface === 'business' ? (
+        <ProviderAvailabilityPanel
+          eyebrow="Google local presence"
+          title="Google Business Profile"
+          status="Coming soon"
+          description="Google Business Profile performance is not yet available in the client portal. No local-search figures are inferred or shown as zero."
+        />
+      ) : (
+        <>
       {hasGoogleAds ? (
         <section className="rounded-[2rem] border border-[#f59e0b]/20 bg-[linear-gradient(135deg,rgba(245,158,11,0.10),rgba(255,255,255,0.025))] p-6 sm:p-8">
-          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="mb-6">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.22em] text-[#f59e0b]">Configured source</p>
               <h3 className="mt-2 text-2xl font-black tracking-[-0.03em] text-white">Google Ads</h3>
             </div>
-            <button
-              type="button"
-              onClick={onOpenGoogleAds}
-              className="w-fit rounded-full border border-white/15 bg-white/[0.06] px-4 py-2 text-sm font-bold text-white transition hover:border-[#f59e0b]/40 hover:bg-[#f59e0b]/10"
-            >
-              Open full Google Ads detail
-            </button>
           </div>
           {googleAds ? (
             <GoogleAdsResults dashboard={googleAds} compact />
@@ -1408,22 +1506,10 @@ function CampaignsTab({
           Tell CG whether the campaign leads were valuable and relevant to your business. That real-world feedback helps refine targeting, messaging and campaign direction.
         </p>
       </aside>
+        </>
+      )}
     </div>
   )
-}
-
-function GoogleAdsTab({
-  googleAds,
-  state,
-  error,
-}: {
-  googleAds: GoogleAdsDashboardData | null
-  state: GoogleAdsDashboardState
-  error: string | null
-}) {
-  if (!googleAds) return <GoogleAdsEmptyState state={state} hasError={state === 'error' && Boolean(error)} />
-
-  return <GoogleAdsResults dashboard={googleAds} />
 }
 
 function GoogleAdsEmptyState({

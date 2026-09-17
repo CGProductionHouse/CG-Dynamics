@@ -95,7 +95,7 @@ test('portal pages use the signed-in client and only published monthly reports',
   assert.match(HOME_SOURCE, /profile\.client_id/)
   assert.match(HOME_SOURCE, /listClientPublishedReports\(\)/)
   assert.match(PERFORMANCE_SOURCE, /listClientPublishedReports\(\)/)
-  assert.match(CAMPAIGNS_SOURCE, /Navigate to="\/client\/performance\?tab=campaigns" replace/)
+  assert.match(CAMPAIGNS_SOURCE, /Navigate to="\/client\/performance\?tab=google" replace/)
   assert.doesNotMatch(CAMPAIGNS_SOURCE, /listClientPublishedReports|loadGoogleAdsDashboard/)
   assert.match(REPORTS_SOURCE, /supabase\.rpc\('client_published_reports'\)/)
   assert.doesNotMatch(REPORTS_SOURCE, /listPublishedReportsForClient/)

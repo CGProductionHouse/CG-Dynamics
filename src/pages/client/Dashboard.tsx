@@ -13,7 +13,12 @@ import {
   type ReportManualMetric,
 } from '../../lib/db/manualMetrics'
 import { getReportMonthFromPeriod, monthDisplayLabel, previousReportMonth, selectMonthlyReports } from '../../lib/reportPeriod'
-import { ClientReportView, EmptyReportState, type ReportTabKey } from './ClientReportView'
+import {
+  ClientReportView,
+  EmptyReportState,
+  type GoogleSurface,
+  type ReportTabKey,
+} from './ClientReportView'
 import { ClientMonthAhead } from '../../components/client/ClientMonthAhead'
 import { ClientPortalShell } from '../../components/client/ClientPortalShell'
 import {
@@ -60,11 +65,21 @@ export default function Dashboard() {
 
   const months = useMemo(() => selectMonthlyReports(reports), [reports])
   const requestedTab = parseReportTab(searchParams.get('tab'))
+  const requestedGoogleSurface = parseGoogleSurface(searchParams.get('surface'))
 
   const handleTabChange = (tab: ReportTabKey) => {
     const next = new URLSearchParams(searchParams)
     if (tab === 'overview') next.delete('tab')
     else next.set('tab', tab)
+    if (tab !== 'google') next.delete('surface')
+    setSearchParams(next, { replace: true })
+  }
+
+  const handleGoogleSurfaceChange = (surface: GoogleSurface) => {
+    const next = new URLSearchParams(searchParams)
+    next.set('tab', 'google')
+    if (surface === 'ads') next.delete('surface')
+    else next.set('surface', surface)
     setSearchParams(next, { replace: true })
   }
 
@@ -266,6 +281,8 @@ export default function Dashboard() {
           normalizedFactsAttempted={normalizedFactsAttempted}
           initialTab={requestedTab}
           onTabChange={handleTabChange}
+          initialGoogleSurface={requestedGoogleSurface}
+          onGoogleSurfaceChange={handleGoogleSurfaceChange}
         />
       ) : (
         <EmptyReportState
@@ -282,6 +299,11 @@ export default function Dashboard() {
 }
 
 function parseReportTab(value: string | null): ReportTabKey {
-  if (value === 'facebook' || value === 'instagram' || value === 'campaigns' || value === 'google_ads') return value
+  if (value === 'campaigns' || value === 'google_ads') return 'google'
+  if (value === 'facebook' || value === 'instagram' || value === 'google' || value === 'tiktok' || value === 'linkedin' || value === 'web' || value === 'email') return value
   return 'overview'
+}
+
+function parseGoogleSurface(value: string | null): GoogleSurface {
+  return value === 'business' ? 'business' : 'ads'
 }

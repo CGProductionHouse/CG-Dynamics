@@ -11,6 +11,7 @@ import { createServer } from 'vite'
 
 const read = p => readFileSync(new URL(p, import.meta.url), 'utf8')
 const CAMPAIGNS = read('../src/pages/client/ClientCampaignsPage.tsx')
+const PROVIDER_ICONS = read('../src/components/client/PerformanceProviderIcon.tsx')
 const CALENDAR = read('../src/pages/client/ClientContentCalendarPage.tsx')
 const REPORT_VIEW = read('../src/pages/client/ClientReportView.tsx')
 const HOME = read('../src/pages/client/ClientPortalHome.tsx')
@@ -45,7 +46,7 @@ test('client pages load only via the signed-in profile.client_id, never a URL pa
     assert.doesNotMatch(src, /useParams[\s\S]{0,80}client_?[iI]d/, `${name} must not read client id from the URL`)
     assert.doesNotMatch(src, /searchParams\.get\(['"]client/i, `${name} must not read client id from the query`)
   }
-  assert.match(CAMPAIGNS, /Navigate to="\/client\/performance\?tab=campaigns" replace/)
+  assert.match(CAMPAIGNS, /Navigate to="\/client\/performance\?tab=google" replace/)
   assert.doesNotMatch(CAMPAIGNS, /client_?[iI]d|listClientPublishedReports|loadGoogleAdsDashboard/)
 })
 
@@ -97,7 +98,7 @@ test('only genuinely available Facebook/Instagram become active organic platform
   assert.deepEqual(cp.activeOrganicPlatforms(facts), ['Facebook'])
 })
 
-test('campaigns tab never presents unsupported or planned ad platforms', () => {
+test('provider workspace never presents unsupported platforms as active data sources', () => {
   assert.doesNotMatch(REPORT_VIEW, /Meta Ads|TikTok Ads|Planned integration/)
   assert.match(REPORT_VIEW, /No verified campaign source is configured/)
   assert.match(REPORT_VIEW, /Missing data is never presented as zero/)
@@ -149,7 +150,7 @@ test('performance dashboard has loading, error and empty states', () => {
   assert.match(PERFORMANCE, /account is pending setup/i)
 })
 
-test('campaigns tab inherits report loading and covers every configured-source state honestly', () => {
+test('Google Ads panel inherits report loading and covers every configured-source state honestly', () => {
   assert.match(PERFORMANCE, /Loading report/)
   assert.match(REPORT_VIEW, /Google Ads is not connected/)
   assert.match(REPORT_VIEW, /No paid campaigns are linked/)
@@ -185,7 +186,7 @@ test('calendar uses client-safe status labels, never internal codes', () => {
   assert.doesNotMatch(CALENDAR, /internal_notes|assigned_to|helper_names|priority/)
 })
 
-test('campaigns tab uses the canonical client-safe Google Ads results component', () => {
+test('Google Ads panel uses the canonical client-safe results component', () => {
   assert.match(REPORT_VIEW, /GoogleAdsResults/)
   assert.match(GOOGLE_ADS_RESULTS, /formatMoney/)
   assert.match(GOOGLE_ADS_RESULTS, /Unavailable/)
@@ -278,15 +279,31 @@ test('report view uses verified, per-platform availability-aware Overview when n
   assert.match(REPORT_VIEW, /VerifiedFactsUnavailable/)
 })
 
-test('report view platform tabs are generated from per-platform facts and master report data', () => {
+test('report view keeps every provider destination visible and gates data by report truth', () => {
   assert.match(REPORT_VIEW, /reportPlatforms/)
-  assert.match(REPORT_VIEW, /PLATFORM_LABELS\[platform\]/)
+  for (const key of ['overview', 'facebook', 'instagram', 'google', 'tiktok', 'linkedin', 'web', 'email']) {
+    assert.match(REPORT_VIEW, new RegExp(`key: '${key}'.*icon: '${key}'`))
+  }
+  assert.match(REPORT_VIEW, /reportPlatforms\.includes/)
 })
 
-test('Google Ads tab is gated on hasGoogleAds being true (not shown for disconnected only)', () => {
+test('Google is grouped with Ads and Business while provider data remains gated', () => {
   assert.match(REPORT_VIEW, /hasGoogleAdsSource/)
   assert.match(REPORT_VIEW, /hasGoogleAds/)
-  assert.match(REPORT_VIEW, /google_ads/)
+  assert.match(REPORT_VIEW, /Google performance services/)
+  assert.match(REPORT_VIEW, /\['ads', 'business'\]/)
+  assert.match(REPORT_VIEW, /Google Business Profile/)
+})
+
+test('icon-led provider navigation uses official brand glyphs and accessible names', () => {
+  assert.match(REPORT_VIEW, /PerformanceProviderIcon/)
+  assert.match(REPORT_VIEW, /aria-label=\{item\.label\}/)
+  assert.match(REPORT_VIEW, /title=\{item\.label\}/)
+  for (const provider of ['facebook', 'instagram', 'google', 'tiktok', 'linkedin']) {
+    assert.match(PROVIDER_ICONS, new RegExp(`provider === '${provider}'`))
+  }
+  assert.match(PROVIDER_ICONS, /Official multicolour Google G/)
+  assert.doesNotMatch(PROVIDER_ICONS, />\s*[FIGTL]\s*<\//)
 })
 
 test('report view includes a methodology and disclaimer section', () => {
@@ -294,7 +311,7 @@ test('report view includes a methodology and disclaimer section', () => {
   assert.match(REPORT_VIEW, /methodology|disclaimer/)
 })
 
-test('Performance campaigns use provider-native Google Ads semantics without generic MoM', () => {
+test('Performance Google uses provider-native Ads semantics without generic MoM', () => {
   assert.match(REPORT_VIEW, /GoogleAdsResults/)
   assert.match(GOOGLE_ADS_RESULTS, /average daily/)
   assert.doesNotMatch(GOOGLE_ADS_RESULTS, /Configured conversion value/)
@@ -317,16 +334,16 @@ test('performance dashboard separates load states for report list and report det
   assert.match(PERFORMANCE, /Select a month/)
 })
 
-// ── 18. Performance Campaigns tab completeness ────────────────────────────────
-test('campaigns tab shows CG review and optimisation direction from published report strategy', () => {
-  assert.match(REPORT_VIEW, /CampaignsTab/)
+// ── 18. Performance Google panel completeness ─────────────────────────────────
+test('Google Ads shows CG review and optimisation direction from published report strategy', () => {
+  assert.match(REPORT_VIEW, /GooglePerformanceTab/)
   assert.match(REPORT_VIEW, /readStrategyData/)
   assert.match(REPORT_VIEW, /strategyGoingForward/)
   assert.match(REPORT_VIEW, /campaign_recommendation/)
   assert.match(REPORT_VIEW, /CG review.*optimisation direction/i)
 })
 
-test('campaigns tab shows campaign objective, lifecycle status and per-campaign metrics', () => {
+test('Google Ads shows campaign objective, lifecycle status and per-campaign metrics', () => {
   assert.match(REPORT_VIEW, /GoogleAdsResults/)
   assert.match(GOOGLE_ADS_RESULTS, /campaign\.(type|status|name)/)
   assert.match(GOOGLE_ADS_RESULTS, /campaign\.impressions/)
@@ -334,7 +351,7 @@ test('campaigns tab shows campaign objective, lifecycle status and per-campaign 
   assert.match(GOOGLE_ADS_RESULTS, /campaign\.ctr/)
 })
 
-test('campaigns tab shares the complete Google Ads state machine and gates disconnected sources', () => {
+test('Google Ads shares the complete state machine and gates disconnected sources', () => {
   assert.match(REPORT_VIEW, /disconnected/)
   assert.match(REPORT_VIEW, /unmapped/)
   assert.match(REPORT_VIEW, /not-synced/)
