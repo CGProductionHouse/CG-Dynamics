@@ -1870,7 +1870,7 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
 
   const innerClass = mobileFullscreen
     ? 'flex min-h-0 w-full flex-1 flex-col px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pl-[max(0.5rem,env(safe-area-inset-left))] pr-[max(0.5rem,env(safe-area-inset-right))]'
-    : 'pointer-events-auto mx-auto w-full max-w-2xl md:mx-0 md:w-[26rem]'
+    : (!isMobile ? 'pointer-events-auto mx-auto w-full max-w-2xl md:mx-0 md:w-[26rem]' : 'mx-auto w-full max-w-2xl md:mx-0 md:w-[26rem]')
 
   // When a capture / debrief / proposal surface is open it IS the task, so in
   // full-screen it takes the flexible space and the chat log collapses instead.
@@ -2305,113 +2305,124 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
 
         {/* Composer bar — the fixed footer of the full-screen column, so it is
             always the element sitting directly above the keyboard. */}
-        <form onSubmit={handleSubmit} className={`relative flex items-end gap-1.5 rounded-2xl border border-white/12 bg-[#0c0f0e]/98 px-2 py-1.5 shadow-[0_18px_50px_-18px_rgba(0,0,0,0.9)] backdrop-blur-xl ${mobileFullscreen ? 'shrink-0' : ''}`}>
-          {plusOpen && (
-            <div className="absolute bottom-full left-0 mb-2 w-52 overflow-hidden rounded-xl border border-white/12 bg-[#121614] p-1 shadow-2xl">
-              <button type="button" onClick={newChat} className="block min-h-11 w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">New chat</button>
-              <button type="button" onClick={() => { setShowJobs(true); setOpen(true); setPlusOpen(false); void loadJobs() }} className="block min-h-11 w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">Background jobs</button>
-              <button type="button" onClick={startDailyCapture} className="block min-h-11 w-full rounded-lg px-3 py-2 text-left text-sm font-black text-brand-teal hover:bg-white/[0.05]">Record my day</button>
-              <button type="button" onClick={startNewDebrief} className="block min-h-11 w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">Meeting debrief</button>
-              <button type="button" onClick={() => { attachRef.current?.click() }} className="block min-h-11 w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">Attach file</button>
-              <Link to="/admin/assistant" onClick={() => { setPlusOpen(false); setOpen(false) }} className="block min-h-11 w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">Open full assistant</Link>
-            </div>
-          )}
-          <input ref={attachRef} type="file" className="hidden" onChange={event => onAttach(event.target.files)} />
-
+        {!mobileFullscreen && !open && isMobile ? (
           <button
             type="button"
-            onClick={() => setPlusOpen(value => !value)}
-            aria-label="Add action"
-            aria-expanded={plusOpen}
-            disabled={listening}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/12 bg-white/[0.04] text-lg font-bold text-brand-primary transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-teal disabled:cursor-not-allowed disabled:opacity-40"
+            onClick={() => setOpen(true)}
+            className="mx-auto flex h-10 w-10 items-center justify-center rounded-full border border-white/12 bg-white/[0.04] text-lg font-bold text-brand-primary transition-colors hover:text-white"
+            aria-label="Open CG Assistant"
           >
             +
           </button>
+        ) : (
+          <form onSubmit={handleSubmit} className={`relative flex items-end gap-1.5 rounded-2xl border border-white/12 bg-[#0c0f0e]/98 px-2 py-1.5 shadow-[0_18px_50px_-18px_rgba(0,0,0,0.9)] backdrop-blur-xl ${mobileFullscreen ? 'shrink-0' : ''}`}>
+            {plusOpen && (
+              <div className="absolute bottom-full left-0 mb-2 w-52 overflow-hidden rounded-xl border border-white/12 bg-[#121614] p-1 shadow-2xl">
+                <button type="button" onClick={newChat} className="block min-h-11 w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">New chat</button>
+                <button type="button" onClick={() => { setShowJobs(true); setOpen(true); setPlusOpen(false); void loadJobs() }} className="block min-h-11 w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">Background jobs</button>
+                <button type="button" onClick={startDailyCapture} className="block min-h-11 w-full rounded-lg px-3 py-2 text-left text-sm font-black text-brand-teal hover:bg-white/[0.05]">Record my day</button>
+                <button type="button" onClick={startNewDebrief} className="block min-h-11 w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">Meeting debrief</button>
+                <button type="button" onClick={() => { attachRef.current?.click() }} className="block min-h-11 w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">Attach file</button>
+                <Link to="/admin/assistant" onClick={() => { setPlusOpen(false); setOpen(false) }} className="block min-h-11 w-full rounded-lg px-3 py-2 text-left text-sm text-brand-primary hover:bg-white/[0.05] hover:text-white">Open full assistant</Link>
+              </div>
+            )}
+            <input ref={attachRef} type="file" className="hidden" onChange={event => onAttach(event.target.files)} />
 
-          <textarea
-            ref={inputRef}
-            value={input}
-            onChange={event => { setInput(event.target.value); setMoreOpen(false) }}
-            onFocus={() => setOpen(true)}
-            onKeyDown={event => {
-              if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault()
-                if (!listening) void send(input)
-              }
-            }}
-            rows={2}
-            placeholder="Ask CG Assistant"
-            aria-label="Ask CG Assistant"
-            className="min-h-[4.5rem] min-w-0 flex-1 resize-none overflow-y-hidden bg-transparent px-1 py-2.5 text-sm leading-5 text-white placeholder:text-brand-primary/45 focus:outline-none md:min-h-11"
-          />
+            <button
+              type="button"
+              onClick={() => setPlusOpen(value => !value)}
+              aria-label="Add action"
+              aria-expanded={plusOpen}
+              disabled={listening}
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/12 bg-white/[0.04] text-lg font-bold text-brand-primary transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-teal disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              +
+            </button>
 
-          {speechSupported && (
-            <div className="hidden shrink-0 items-center gap-1 md:flex">
-              <button
-                type="button"
-                onClick={() => setMicLang(l => (l === 'en-ZA' ? 'af-ZA' : 'en-ZA'))}
-                disabled={listening || sending}
-                className="min-h-11 min-w-11 rounded-md px-1 text-[10px] font-black uppercase tracking-wide text-brand-primary/60 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-teal disabled:cursor-not-allowed disabled:opacity-40"
-                title="Dictation language"
-                aria-label={`Dictation language: ${micLang === 'en-ZA' ? 'English' : 'Afrikaans'}`}
-              >
-                {micLang === 'en-ZA' ? 'EN' : 'AF'}
-              </button>
-              <button
-                type="button"
-                onClick={toggleMic}
-                disabled={sending}
-                aria-label={listening ? 'Stop voice input' : 'Start voice input'}
-                aria-pressed={listening}
-                className={`flex h-11 w-11 items-center justify-center rounded-full border text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-teal disabled:cursor-not-allowed disabled:opacity-40 ${
-                  listening ? 'animate-pulse border-red-400/40 bg-red-400/15 text-red-200' : 'border-white/12 bg-white/[0.04] text-brand-primary hover:text-white'
-                }`}
-              >
-                ●
-              </button>
+            <textarea
+              ref={inputRef}
+              value={input}
+              onChange={event => { setInput(event.target.value); setMoreOpen(false) }}
+              onFocus={() => setOpen(true)}
+              onKeyDown={event => {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                  event.preventDefault()
+                  if (!listening) void send(input)
+                }
+              }}
+              rows={2}
+              placeholder="Ask CG Assistant"
+              aria-label="Ask CG Assistant"
+              className="min-h-[4.5rem] min-w-0 flex-1 resize-none overflow-y-hidden bg-transparent px-1 py-2.5 text-sm leading-5 text-white placeholder:text-brand-primary/45 focus:outline-none md:min-h-11"
+            />
+
+            {speechSupported && (
+              <div className="hidden shrink-0 items-center gap-1 md:flex">
+                <button
+                  type="button"
+                  onClick={() => setMicLang(l => (l === 'en-ZA' ? 'af-ZA' : 'en-ZA'))}
+                  disabled={listening || sending}
+                  className="min-h-11 min-w-11 rounded-md px-1 text-[10px] font-black uppercase tracking-wide text-brand-primary/60 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-teal disabled:cursor-not-allowed disabled:opacity-40"
+                  title="Dictation language"
+                  aria-label={`Dictation language: ${micLang === 'en-ZA' ? 'English' : 'Afrikaans'}`}
+                >
+                  {micLang === 'en-ZA' ? 'EN' : 'AF'}
+                </button>
+                <button
+                  type="button"
+                  onClick={toggleMic}
+                  disabled={sending}
+                  aria-label={listening ? 'Stop voice input' : 'Start voice input'}
+                  aria-pressed={listening}
+                  className={`flex h-11 w-11 items-center justify-center rounded-full border text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-teal disabled:cursor-not-allowed disabled:opacity-40 ${
+                    listening ? 'animate-pulse border-red-400/40 bg-red-400/15 text-red-200' : 'border-white/12 bg-white/[0.04] text-brand-primary hover:text-white'
+                  }`}
+                >
+                  ●
+                </button>
+              </div>
+            )}
+
+            {/* Mobile: exactly one primary control — mic while empty/listening, send otherwise */}
+            <div className="flex shrink-0 items-center md:hidden">
+              {mobileSendPrimary ? (
+                <button
+                  type="submit"
+                  disabled={sending || listening || !input.trim()}
+                  aria-label="Send message"
+                  className={`flex h-11 w-11 items-center justify-center rounded-full text-base font-black text-black transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-teal disabled:opacity-35 ${
+                    sending ? 'bg-brand-teal/70' : 'bg-brand-teal hover:bg-brand-teal/90'
+                  }`}
+                >
+                  {sending ? '…' : '↑'}
+                </button>
+              ) : mobileMicPrimary ? (
+                <button
+                  type="button"
+                  onClick={toggleMic}
+                  aria-label={listening ? 'Stop voice input' : 'Start voice input'}
+                  aria-pressed={listening}
+                  className={`flex h-11 w-11 items-center justify-center rounded-full text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-teal ${
+                    listening
+                      ? 'animate-pulse border border-red-400/40 bg-red-400/15 text-red-200'
+                      : 'border border-transparent bg-brand-teal text-black font-black hover:bg-brand-teal/90'
+                  }`}
+                >
+                  ●
+                </button>
+              ) : null}
             </div>
-          )}
 
-          {/* Mobile: exactly one primary control — mic while empty/listening, send otherwise */}
-          <div className="flex shrink-0 items-center md:hidden">
-            {mobileSendPrimary ? (
-              <button
-                type="submit"
-                disabled={sending || listening || !input.trim()}
-                aria-label="Send message"
-                className={`flex h-11 w-11 items-center justify-center rounded-full text-base font-black text-black transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-teal disabled:opacity-35 ${
-                  sending ? 'bg-brand-teal/70' : 'bg-brand-teal hover:bg-brand-teal/90'
-                }`}
-              >
-                {sending ? '…' : '↑'}
-              </button>
-            ) : mobileMicPrimary ? (
-              <button
-                type="button"
-                onClick={toggleMic}
-                aria-label={listening ? 'Stop voice input' : 'Start voice input'}
-                aria-pressed={listening}
-                className={`flex h-11 w-11 items-center justify-center rounded-full text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-teal ${
-                  listening
-                    ? 'animate-pulse border border-red-400/40 bg-red-400/15 text-red-200'
-                    : 'border border-transparent bg-brand-teal text-black font-black hover:bg-brand-teal/90'
-                }`}
-              >
-                ●
-              </button>
-            ) : null}
-          </div>
-
-          <button
-            type="submit"
-            disabled={sending || listening || !input.trim()}
-            aria-label="Send message"
-            className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-teal text-base font-black text-black transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-teal disabled:opacity-35 md:flex"
-          >
-            {sending ? '…' : '↑'}
-          </button>
-        </form>
+            <button
+              type="submit"
+              disabled={sending || listening || !input.trim()}
+              aria-label="Send message"
+              className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-teal text-base font-black text-black transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-teal disabled:opacity-35 md:flex"
+            >
+              {sending ? '…' : '↑'}
+            </button>
+          </form>
+        )}
       </div>
     </div>
   )

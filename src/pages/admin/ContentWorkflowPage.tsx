@@ -51,6 +51,7 @@ import ContentOverview from './ContentOverview'
 import FullContentGuidePage from './FullContentGuidePage'
 import { type ContentTab, resolveContentTab } from './contentTabTypes'
 import { ContentRunVoiceDebrief } from '../../components/content/ContentRunVoiceDebrief'
+import { useIsMobileViewport } from '../../lib/mobileViewport'
 
 function runStatusTone(status: ContentRunStatus): 'teal' | 'amber' | 'neutral' {
   if (status === 'completed' || status === 'ready') return 'teal'
@@ -163,8 +164,10 @@ function RunForm({
 
 export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defaultTab?: ContentTab }) {
   const { profile } = useAuth()
+  const isMobile = useIsMobileViewport()
+  const effectiveDefaultTab = isMobile ? ('runs' as ContentTab) : defaultTab
   const [searchParams, setSearchParams] = useSearchParams()
-  const tab = resolveContentTab(searchParams.get('tab'), defaultTab)
+  const tab = resolveContentTab(searchParams.get('tab'), effectiveDefaultTab)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [migrationNeeded, setMigrationNeeded] = useState(false)
@@ -466,7 +469,42 @@ export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defau
         </p>
       </header>
 
-      {!migrationNeeded && <div className="mt-6 flex flex-wrap gap-2" aria-label="Content sections">{tabButton('overview', 'Overview', 0)}{tabButton('runs', 'Content Runs', runs.length)}{tabButton('guidelines', 'Guidelines', documents.length)}{tabButton('pipeline', 'Video Pipeline', 0)}</div>}
+      {!migrationNeeded && (
+        <>
+          {/* Mobile: compact sticky segment control for Runs | Guidelines | Pipeline */}
+          {isMobile && (
+            <div className="mt-4 sticky top-0 z-10 flex items-center gap-1 rounded-xl border border-white/10 bg-brand-bg/95 backdrop-blur px-2 py-1.5 sm:hidden" role="tablist" aria-label="Content sections">
+              {(['runs', 'guidelines', 'pipeline'] as ContentTab[]).map(value => (
+                <button
+                  key={value}
+                  type="button"
+                  role="tab"
+                  aria-selected={tab === value}
+                  onClick={() => switchTab(value)}
+                  className={`rounded-full px-3 py-1.5 text-xs font-black transition-colors ${
+                    tab === value
+                      ? 'border-brand-teal/50 bg-brand-teal/10 text-brand-teal'
+                      : 'border-white/10 text-white/45 hover:text-white/70'
+                  }`}
+                >
+                  {value === 'runs' ? 'Runs' : value === 'guidelines' ? 'Guidelines' : 'Pipeline'}
+                  {value === 'runs' && runs.length > 0 && <span className="ml-1 opacity-60">{runs.length}</span>}
+                  {value === 'guidelines' && documents.length > 0 && <span className="ml-1 opacity-60">{documents.length}</span>}
+                </button>
+              ))}
+            </div>
+          )}
+          {/* Desktop: existing tab buttons */}
+          {!isMobile && (
+            <div className="mt-6 flex flex-wrap gap-2" aria-label="Content sections">
+              {tabButton('overview', 'Overview', 0)}
+              {tabButton('runs', 'Content Runs', runs.length)}
+              {tabButton('guidelines', 'Guidelines', documents.length)}
+              {tabButton('pipeline', 'Video Pipeline', 0)}
+            </div>
+          )}
+        </>
+      )}
 
       {migrationNeeded ? (
         <div className="mt-6 rounded-2xl border border-amber-300/25 bg-amber-300/[0.07] p-5 sm:p-6">
@@ -488,14 +526,36 @@ export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defau
         <VideoPipelineTab clients={clients} staff={staff} />
       ) : (
         <div className="mx-auto mt-6 w-full max-w-3xl space-y-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <input className={`${INPUT_CLS} min-w-0 flex-1`} placeholder="Search runs" value={runSearch} onChange={event => setRunSearch(event.target.value)} />
-            <select className={`${INPUT_CLS} w-auto`} value={runStatusFilter} onChange={event => setRunStatusFilter(event.target.value as ContentRunStatus | 'all')}>
-              <option value="all">All statuses</option>
-              {CONTENT_RUN_STATUSES.map(status => <option key={status} value={status}>{humanizeStatus(status)}</option>)}
-            </select>
-            <ActionButton size="sm" onClick={() => { setRunMode('create'); setSelectedRunId(null); setRunError(null); setSearchParams(current => { const next = new URLSearchParams(current); next.delete('runId'); return next }, { replace: true }) }}>New run</ActionButton>
-          </div>
+          {/* Mobile: Filters behind a disclosure, New run always visible */}
+          {isMobile ? (
+            <>
+              <div className="flex flex-wrap items-center gap-2">
+                <ActionButton size="sm" onClick={() => { setRunMode('create'); setSelectedRunId(null); setRunError(null); setSearchParams(current => { const next = new URLSearchParams(current); next.delete('runId'); return next }, { replace: true }) }}>New run</ActionButton>
+                <details className="flex-1">
+                  <summary className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.045] px-3 py-1.5 text-xs font-bold text-slate-300 cursor-pointer hover:border-white/20 hover:text-white">
+                    Filters
+                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-white/20" aria-hidden />
+                  </summary>
+                  <div className="mt-2 space-y-2 p-2">
+                    <input className={`${INPUT_CLS} w-full`} placeholder="Search runs" value={runSearch} onChange={event => setRunSearch(event.target.value)} />
+                    <select className={`${INPUT_CLS} w-full`} value={runStatusFilter} onChange={event => setRunStatusFilter(event.target.value as ContentRunStatus | 'all')}>
+                      <option value="all">All statuses</option>
+                      {CONTENT_RUN_STATUSES.map(status => <option key={status} value={status}>{humanizeStatus(status)}</option>)}
+                    </select>
+                  </div>
+                </details>
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-wrap items-center gap-2">
+              <input className={`${INPUT_CLS} min-w-0 flex-1`} placeholder="Search runs" value={runSearch} onChange={event => setRunSearch(event.target.value)} />
+              <select className={`${INPUT_CLS} w-auto`} value={runStatusFilter} onChange={event => setRunStatusFilter(event.target.value as ContentRunStatus | 'all')}>
+                <option value="all">All statuses</option>
+                {CONTENT_RUN_STATUSES.map(status => <option key={status} value={status}>{humanizeStatus(status)}</option>)}
+              </select>
+              <ActionButton size="sm" onClick={() => { setRunMode('create'); setSelectedRunId(null); setRunError(null); setSearchParams(current => { const next = new URLSearchParams(current); next.delete('runId'); return next }, { replace: true }) }}>New run</ActionButton>
+            </div>
+          )}
 
           {runMode === 'create' && (
             <section ref={runEditorRef} className="scroll-mt-20 rounded-2xl border border-brand-teal/30 bg-brand-teal/[0.05] p-4 sm:p-5">

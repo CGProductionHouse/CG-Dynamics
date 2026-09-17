@@ -65,11 +65,13 @@ test('desktop sidebar and mobile drawer both render the full hub list including 
   assert.match(adminNav, /label: 'Morning List Import'/)
 })
 
-test('mobile quick-nav is role-stable and never displaces Calendar or Schedule', () => {
-  assert.match(layout, /const MOBILE_QUICK_PATHS = \[/)
-  assert.match(layout, /'\/admin\/cg-hub', '\/admin\/work', '\/admin\/cg-calendar', '\/admin\/client-schedule'/)
-  assert.match(layout, /primaryItems\.filter\(item => MOBILE_QUICK_PATHS\.includes\(item\.to\)\)/)
-  assert.doesNotMatch(layout, /MOBILE_QUICK_PATHS = \[[^\]]*command-centre[^\]]*\]/)
+test('mobile quick-nav is role-stable and never displaces Content or Calendar', () => {
+  assert.match(layout, /const MOBILE_PRIMARY_PATHS = \[/)
+  assert.match(layout, /'\/admin\/cg-hub', '\/admin\/work', '\/admin\/content', '\/admin\/cg-calendar'/)
+  assert.match(layout, /primaryItems\.filter\(item => MOBILE_PRIMARY_PATHS\.includes\(item\.to\)\)/)
+  assert.doesNotMatch(layout, /MOBILE_PRIMARY_PATHS = \[[^\]]*client-schedule[^\]]*\]/)
+  assert.doesNotMatch(layout, /MOBILE_PRIMARY_PATHS = \[[^\]]*command-centre[^\]]*\]/)
+  assert.doesNotMatch(layout, /MOBILE_PRIMARY_PATHS = \[[^\]]*morning-import[^\]]*\]/)
 })
 
 test('Team Work and Morning List Import reach managers via the More drawer, not the bottom bar', () => {
