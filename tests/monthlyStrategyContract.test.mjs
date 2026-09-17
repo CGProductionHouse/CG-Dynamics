@@ -6,6 +6,7 @@ const read = path => readFileSync(new URL(path, import.meta.url), 'utf8').replac
 const migration = read('../supabase/migrations/20260917173138_canonical_monthly_client_strategy.sql')
 const runtime = read('../src/lib/monthlyStrategy.ts')
 const contract = read('../docs/canonical-monthly-client-strategy.md')
+const { buildMonthlyBaseline } = await import('../src/lib/monthlyStrategySeed.ts')
 
 function functionDefinition(signatureStart) {
   const start = migration.indexOf(signatureStart)
@@ -80,9 +81,54 @@ test('automatic baseline reuses the existing strategy engine and calendar author
   assert.match(runtime, /readStrategyData\(previousRaw\)/)
   assert.match(runtime, /generateActionPlan/)
   assert.match(runtime, /generateStrategyGoingForward/)
+  assert.match(runtime, /select\('id,title,body,decisions'\)/)
+  assert.match(runtime, /select\('id,guide_markdown'\)/)
+  assert.match(runtime, /intelligence_evidence: baseline\.evidence/)
   assert.doesNotMatch(runtime, /Heritage Day|Christmas Day|Good Friday|Family Day/)
   assert.match(runtime, /\.slice\(0, 3\)/)
   assert.match(runtime, /selected: selectedIds\.has\(event\.id\)/)
+})
+
+test('rich clients receive a materially client-specific seed from approved intelligence', () => {
+  const baseline = buildMonthlyBaseline({
+    clientName: 'Cape Lumber',
+    guideId: 'guide-cape-lumber',
+    readyGuideMarkdown: `# Guide\n\n## Client identity and positioning\n- **Business:** timber and building-material supplier serving professional project buyers.\n- Primary audience: builders, architects and professional project teams.\n\n## Content ideas and recurring formats\n- Show real timber stock, sourcing and delivery preparation.\n\n## Approved contact\n- info@example.com`,
+    contextUpdates: [{
+      id: 'update-1',
+      title: 'Procurement direction',
+      body: 'Prioritise practical sourcing content for project buyers.',
+      decisions: { format: 'Use product-led demonstrations where source material is verified.' },
+    }],
+    previousDirection: [],
+    previousDrivers: [],
+    deliverables: [{ id: 'reel-1', deliverable_type: 'reel' }],
+  })
+
+  assert.ok(baseline.clientDirection.some(value => value.includes('project buyers')))
+  assert.ok(baseline.strategyDrivers.some(value => value.includes('timber and building-material supplier')))
+  assert.ok(baseline.evidence.some(item => item.authority === 'client_guide' && item.source_id === 'guide-cape-lumber'))
+  assert.ok(baseline.evidence.some(item => item.authority === 'client_context_update' && item.source_id === 'update-1'))
+  assert.ok(baseline.strategyDrivers.every(value => !value.includes('info@example.com')))
+})
+
+test('sparse clients receive a conservative seed from recorded deliverables without invented specifics', () => {
+  const baseline = buildMonthlyBaseline({
+    clientName: 'Sparse Client',
+    contextUpdates: [],
+    previousDirection: [],
+    previousDrivers: [],
+    deliverables: [
+      { id: 'reel-1', deliverable_type: 'reel' },
+      { id: 'reel-2', deliverable_type: 'reel' },
+      { id: 'dp-1', deliverable_type: 'dp' },
+    ],
+  })
+
+  assert.deepEqual(baseline.clientDirection, [])
+  assert.match(baseline.strategyDrivers[0], /Sparse Client.*2 reels.*1 design poster/)
+  assert.match(baseline.strategyDrivers[1], /confirm client priorities before adding offer, event or campaign claims/)
+  assert.doesNotMatch(baseline.strategyDrivers.join(' '), /sale|discount|launch|audience/i)
 })
 
 test('seed context exposes considered and selected calendar evidence without creating another schedule', () => {

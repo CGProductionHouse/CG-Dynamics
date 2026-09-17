@@ -1,5 +1,6 @@
 import { getMonthEvents, type CalendarEvent, type DeliverableType as CalendarDeliverableType } from './contentCalendar'
 import { readPackageSettings, type PackageSettings } from './db/clients'
+import { buildMonthlyBaseline, type BaselineEvidence } from './monthlyStrategySeed'
 import { supabase } from './supabase'
 import {
   emptyStrategyData,
@@ -57,6 +58,7 @@ export interface MonthlyStrategySeedContext {
     selected: boolean
     rationale: string
   }>
+  intelligence_evidence: BaselineEvidence[]
   source_coverage: Record<string, 'available' | 'none' | 'unavailable'>
 }
 
@@ -86,6 +88,13 @@ interface ClientEventSeedRow {
 interface ClientContextUpdateSeedRow {
   id: string
   title: string
+  body: string | null
+  decisions: unknown
+}
+
+interface ReadyClientGuideSeedRow {
+  id: string
+  guide_markdown: string
 }
 
 function monthStart(month: string): string {
@@ -203,8 +212,8 @@ export async function prepareMonthlyStrategySeed(clientId: string, month: string
     supabase.from('company_calendar_events').select('id,title,event_type,start_at').eq('client_id', clientId).gte('start_at', `${targetMonth}T00:00:00+02:00`).lt('start_at', `${followingMonth}T00:00:00+02:00`).neq('status', 'cancelled').is('superseded_by_event_id', null),
     supabase.from('monthly_client_strategies').select('id,strategy_data').eq('client_id', clientId).lt('strategy_month', targetMonth).order('strategy_month', { ascending: false }).limit(1).maybeSingle(),
     supabase.from('reports').select('id,strategy_data,period_end').eq('client_id', clientId).eq('status', 'published').is('platform', null).lt('period_end', targetMonth).order('period_end', { ascending: false }).limit(1).maybeSingle(),
-    supabase.from('client_context_updates').select('id,title').eq('client_id', clientId).eq('review_state', 'incorporated').order('created_at', { ascending: false }).limit(5),
-    supabase.from('client_guides').select('id,runtime_readiness').eq('client_id', clientId).eq('runtime_readiness', 'ready').order('version', { ascending: false }).limit(1).maybeSingle(),
+    supabase.from('client_context_updates').select('id,title,body,decisions').eq('client_id', clientId).eq('review_state', 'incorporated').order('created_at', { ascending: false }).limit(5),
+    supabase.from('client_guides').select('id,guide_markdown').eq('client_id', clientId).eq('runtime_readiness', 'ready').order('version', { ascending: false }).limit(1).maybeSingle(),
     supabase.from('client_packages').select('id').eq('client_id', clientId).eq('status', 'active').lt('start_date', followingMonth).or(`end_date.is.null,end_date.gte.${targetMonth}`).order('start_date', { ascending: false }).limit(1).maybeSingle(),
   ])
 
@@ -219,19 +228,25 @@ export async function prepareMonthlyStrategySeed(clientId: string, month: string
   const deliverables = (deliverablesResult.data ?? []) as DeliverableSeedRow[]
   const clientEvents = (eventsResult.data ?? []) as ClientEventSeedRow[]
   const contextUpdates = updatesResult.error ? [] : (updatesResult.data ?? []) as ClientContextUpdateSeedRow[]
+  const readyGuide = guideResult.error ? null : guideResult.data as ReadyClientGuideSeedRow | null
   const previousRaw = priorStrategyResult.data?.strategy_data ?? reportResult.data?.strategy_data
   const previous = readStrategyData(previousRaw)
   const packageSettings = packageFromDeliverables(deliverables, readPackageSettings(clientResult.data.package_settings))
   const calendar = buildCalendarSelections(month, deliverables, clientEvents)
+  const baseline = buildMonthlyBaseline({
+    clientName: clientResult.data.name,
+    guideId: readyGuide?.id,
+    readyGuideMarkdown: readyGuide?.guide_markdown,
+    contextUpdates,
+    previousDirection: previous.clientDirection,
+    previousDrivers: previous.strategyDrivers,
+    deliverables,
+  })
 
   const strategyData = emptyStrategyData()
-  strategyData.clientDirection = contextUpdates.length > 0
-    ? contextUpdates.map(update => update.title)
-    : previous.clientDirection
+  strategyData.clientDirection = baseline.clientDirection
   strategyData.topContent = previous.topContent
-  strategyData.strategyDrivers = previous.strategyDrivers.length > 0
-    ? previous.strategyDrivers
-    : ['Build a consistent monthly content rhythm', 'Align content with verified client priorities']
+  strategyData.strategyDrivers = baseline.strategyDrivers
   strategyData.calendarSelections = calendar.selections
   strategyData.actionPlan = generateActionPlan({
     clientName: clientResult.data.name,
@@ -259,9 +274,10 @@ export async function prepareMonthlyStrategySeed(clientId: string, month: string
       deliverable_ids: deliverables.map(row => row.id),
       client_calendar_event_ids: clientEvents.map(row => row.id),
       approved_client_context_update_ids: contextUpdates.map(row => row.id),
-      client_guide_id: guideResult.error ? null : guideResult.data?.id ?? null,
+      client_guide_id: readyGuide?.id ?? null,
     },
     calendar_events: calendar.audit,
+    intelligence_evidence: baseline.evidence,
     source_coverage: {
       previous_monthly_strategy: priorStrategyResult.data ? 'available' : 'none',
       previous_published_report: reportResult.data ? 'available' : 'none',
