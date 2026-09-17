@@ -53,24 +53,31 @@ test('all portal routes sit behind the existing client-only guard and legacy das
 test('shared portal navigation links every client area and keeps sign out available', () => {
   for (const route of [
     '/client',
-    '/client/strategy',
+    '/client/plan',
     '/client/performance',
+    '/client/approvals',
+    '/client/brand-hub',
+  ]) {
+    assert.ok(SHELL_SOURCE.includes(`to: '${route}'`))
+  }
+  for (const legacyRoute of [
+    '/client/strategy',
     '/client/campaigns',
     '/client/content-calendar',
     '/client/content-guides',
     '/client/setup',
   ]) {
-    assert.ok(SHELL_SOURCE.includes(`to: '${route}'`))
+    assert.ok(APP_SOURCE.includes(`path="${legacyRoute}"`))
   }
   assert.match(SHELL_SOURCE, /onClick=\{\(\) => void signOut\(\)\}/)
 })
 
 test('client mobile navigation exposes every destination without horizontal-scroll discovery', () => {
-  assert.match(SHELL_SOURCE, />\s*Portal menu\s*/)
+  assert.match(SHELL_SOURCE, /activeItem\.label/)
   assert.match(SHELL_SOURCE, /id="client-mobile-navigation"/)
   assert.match(SHELL_SOURCE, /className="mt-2 grid grid-cols-2 gap-2/)
   assert.match(SHELL_SOURCE, /min-h-11/)
-  assert.match(SHELL_SOURCE, /pb-\[env\(safe-area-inset-bottom\)\]/)
+  assert.match(SHELL_SOURCE, /env\(safe-area-inset-bottom\)/)
 })
 
 test('login preserves role-valid client deep links and staff guards avoid the dashboard hop', () => {
