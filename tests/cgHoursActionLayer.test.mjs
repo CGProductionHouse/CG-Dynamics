@@ -755,3 +755,379 @@ test('executeOrdinaryHoursAction: correct action uses correct idempotency key fo
   assert.ok(result.result.receipt.idempotency_key.includes('staff-789|apply_ordinary_hours_correction'))
   assert.ok(result.result.receipt.idempotency_key.includes('entry-999'))
 })
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Vehicle entry tests
+// ──────────────────────────────────────────────────────────────────────────────
+
+test('validateCgHoursVehicleEntryDraft: valid mileage draft passes', () => {
+  const draft = {
+    client_id: 'c-germoparts',
+    date: '2026-07-15',
+    type: 'mileage',
+    distance_km: 50,
+    description: 'Client site visit',
+  }
+  const errors = mod.validateCgHoursVehicleEntryDraft(draft)
+  assert.equal(errors.length, 0)
+})
+
+test('validateCgHoursVehicleEntryDraft: valid fuel draft passes', () => {
+  const draft = {
+    client_id: null,
+    date: '2026-07-15',
+    type: 'fuel',
+    litres: 45,
+    cost_per_litre: 22.5,
+    description: 'Fuel fill',
+  }
+  const errors = mod.validateCgHoursVehicleEntryDraft(draft)
+  assert.equal(errors.length, 0)
+})
+
+test('validateCgHoursVehicleEntryDraft: valid vehicle_expense draft passes', () => {
+  const draft = {
+    client_id: 'c-braize',
+    date: '2026-07-15',
+    type: 'vehicle_expense',
+    description: 'Parking fee',
+    amount: 25,
+  }
+  const errors = mod.validateCgHoursVehicleEntryDraft(draft)
+  assert.equal(errors.length, 0)
+})
+
+test('validateCgHoursVehicleEntryDraft: mileage missing distance_km fails', () => {
+  const draft = { client_id: 'c-germoparts', date: '2026-07-15', type: 'mileage', description: 'Visit' }
+  const errors = mod.validateCgHoursVehicleEntryDraft(draft)
+  assert.ok(errors.some(e => e.includes('mileage requires non-negative distance_km')))
+})
+
+test('validateCgHoursVehicleEntryDraft: mileage negative distance_km fails', () => {
+  const draft = { client_id: 'c-germoparts', date: '2026-07-15', type: 'mileage', distance_km: -10, description: 'Visit' }
+  const errors = mod.validateCgHoursVehicleEntryDraft(draft)
+  assert.ok(errors.some(e => e.includes('mileage requires non-negative distance_km')))
+})
+
+test('validateCgHoursVehicleEntryDraft: mileage excessive distance_km fails', () => {
+  const draft = { client_id: 'c-germoparts', date: '2026-07-15', type: 'mileage', distance_km: 2500, description: 'Visit' }
+  const errors = mod.validateCgHoursVehicleEntryDraft(draft)
+  assert.ok(errors.some(e => e.includes('exceeds reasonable daily maximum')))
+})
+
+test('validateCgHoursVehicleEntryDraft: fuel missing litres fails', () => {
+  const draft = { client_id: null, date: '2026-07-15', type: 'fuel', cost_per_litre: 22.5, description: 'Fuel' }
+  const errors = mod.validateCgHoursVehicleEntryDraft(draft)
+  assert.ok(errors.some(e => e.includes('fuel requires positive litres')))
+})
+
+test('validateCgHoursVehicleEntryDraft: fuel missing cost_per_litre fails', () => {
+  const draft = { client_id: null, date: '2026-07-15', type: 'fuel', litres: 45, description: 'Fuel' }
+  const errors = mod.validateCgHoursVehicleEntryDraft(draft)
+  assert.ok(errors.some(e => e.includes('fuel requires positive cost_per_litre')))
+})
+
+test('validateCgHoursVehicleEntryDraft: fuel excessive litres fails', () => {
+  const draft = { client_id: null, date: '2026-07-15', type: 'fuel', litres: 250, cost_per_litre: 22.5, description: 'Fuel' }
+  const errors = mod.validateCgHoursVehicleEntryDraft(draft)
+  assert.ok(errors.some(e => e.includes('exceeds reasonable single-fill maximum')))
+})
+
+test('validateCgHoursVehicleEntryDraft: vehicle_expense missing description fails', () => {
+  const draft = { client_id: 'c-braize', date: '2026-07-15', type: 'vehicle_expense', amount: 50 }
+  const errors = mod.validateCgHoursVehicleEntryDraft(draft)
+  assert.ok(errors.some(e => e.includes('vehicle_expense requires description')))
+})
+
+test('validateCgHoursVehicleEntryDraft: vehicle_expense missing amount fails', () => {
+  const draft = { client_id: 'c-braize', date: '2026-07-15', type: 'vehicle_expense', description: 'Toll fee' }
+  const errors = mod.validateCgHoursVehicleEntryDraft(draft)
+  assert.ok(errors.some(e => e.includes('vehicle_expense requires positive amount')))
+})
+
+test('validateCgHoursVehicleEntryDraft: notes too long fails', () => {
+  const draft = { client_id: 'c-germoparts', date: '2026-07-15', type: 'mileage', distance_km: 50, description: 'Visit', notes: 'x'.repeat(1001) }
+  const errors = mod.validateCgHoursVehicleEntryDraft(draft)
+  assert.ok(errors.some(e => e.includes('notes exceeds maximum length')))
+})
+
+test('isVehicleDraftSubmittable: valid drafts return true', () => {
+  assert.equal(mod.isVehicleDraftSubmittable({ client_id: 'c-dulux', date: '2026-07-15', type: 'mileage', distance_km: 100, description: 'Visit' }), true)
+  assert.equal(mod.isVehicleDraftSubmittable({ client_id: null, date: '2026-07-15', type: 'fuel', litres: 40, cost_per_litre: 22.5, description: 'Fuel' }), true)
+  assert.equal(mod.isVehicleDraftSubmittable({ client_id: 'c-braize', date: '2026-07-15', type: 'vehicle_expense', description: 'Parking', amount: 50 }), true)
+})
+
+test('isVehicleDraftSubmittable: invalid drafts return false', () => {
+  assert.equal(mod.isVehicleDraftSubmittable({ type: 'mileage', distance_km: 100, description: 'Visit' }), false)
+  assert.equal(mod.isVehicleDraftSubmittable({ client_id: null, date: '2026-07-15', type: 'fuel', litres: 40 }), false)
+  assert.equal(mod.isVehicleDraftSubmittable({ client_id: 'c-braize', date: '2026-07-15', type: 'vehicle_expense', description: 'Parking' }), false)
+})
+
+test('createVehicleEntryFromDraft: mileage creates entry', () => {
+  const draft = { client_id: 'c-dulux', date: '2026-07-15', type: 'mileage', distance_km: 100, description: 'Client visit', notes: 'Met with team' }
+  const entry = mod.createVehicleEntryFromDraft(draft, 'staff-123', '2026-07-15T10:00:00Z')
+  assert.equal(entry.staff_id, 'staff-123')
+  assert.equal(entry.client_id, 'c-dulux')
+  assert.equal(entry.date, '2026-07-15')
+  assert.equal(entry.type, 'mileage')
+  assert.equal(entry.distance_km, 100)
+  assert.equal(entry.description, 'Client visit')
+  assert.equal(entry.notes, 'Met with team')
+  assert.equal(entry.status, 'draft')
+  assert.equal(entry.created_at, '2026-07-15T10:00:00Z')
+  assert.equal(entry.updated_at, '2026-07-15T10:00:00Z')
+})
+
+test('createVehicleEntryFromDraft: fuel creates entry', () => {
+  const draft = { client_id: null, date: '2026-07-15', type: 'fuel', litres: 40, cost_per_litre: 22.5, description: 'Fuel fill' }
+  const entry = mod.createVehicleEntryFromDraft(draft, 'staff-123', '2026-07-15T10:00:00Z')
+  assert.equal(entry.type, 'fuel')
+  assert.equal(entry.litres, undefined)
+  assert.equal(entry.distance_km, undefined)
+  assert.equal(entry.description, 'Fuel fill')
+})
+
+test('createVehicleEntryFromDraft: vehicle_expense creates entry', () => {
+  const draft = { client_id: 'c-braize', date: '2026-07-15', type: 'vehicle_expense', description: 'Toll', amount: 75 }
+  const entry = mod.createVehicleEntryFromDraft(draft, 'staff-123', '2026-07-15T10:00:00Z')
+  assert.equal(entry.type, 'vehicle_expense')
+  assert.equal(entry.description, 'Toll')
+  assert.equal(entry.amount, undefined)
+})
+
+test('createVehicleEntryFromDraft: throws on invalid draft', () => {
+  const draft = { type: 'mileage', distance_km: 100, description: 'Visit' }
+  assert.throws(() => mod.createVehicleEntryFromDraft(draft, 'staff-123'), /Invalid vehicle entry draft/)
+})
+
+// ──────────────────────────────────────────────────────────────────────────────
+// executeOrdinaryHoursAction vehicle tests
+// ──────────────────────────────────────────────────────────────────────────────
+
+test('executeOrdinaryHoursAction: create_vehicle without adapter returns NOT_CONFIGURED', async () => {
+  const context = { staffId: 'staff-123', clientId: 'c-dulux' }
+  const action = { type: 'create_vehicle', draft: { client_id: 'c-dulux', date: '2026-07-15', type: 'mileage', distance_km: 100, description: 'Visit' } }
+  const result = await mod.executeOrdinaryHoursAction(context, action)
+  assert.equal(result.action, 'create_vehicle')
+  assert.equal(result.result.ok, false)
+  assert.equal(result.result.error, 'NOT_CONFIGURED')
+  assert.ok(result.result.contract)
+  assert.ok(Array.isArray(result.result.contract.required_endpoints))
+  assert.ok(result.result.contract.required_endpoints.includes('create_vehicle_entry'))
+})
+
+test('executeOrdinaryHoursAction: create_vehicle with mock adapter returns receipt and record', async () => {
+  const context = { staffId: 'staff-123', clientId: 'c-dulux' }
+  const action = { type: 'create_vehicle', draft: { client_id: 'c-dulux', date: '2026-07-15', type: 'mileage', distance_km: 100, description: 'Client visit' } }
+  const mockReceipt = { record_id: 'veh-456', idempotency_key: 'staff-123|create_vehicle_entry|staff-123|c-dulux|2026-07-15|mileage', created_at: '2026-07-15T10:00:00Z' }
+  const mockRecord = { id: 'veh-456', staff_id: 'staff-123', client_id: 'c-dulux', date: '2026-07-15', type: 'mileage', distance_km: 100, description: 'Client visit', notes: undefined, litres: null, cost_per_litre: null, amount: null, status: 'draft', created_at: '2026-07-15T10:00:00Z', updated_at: '2026-07-15T10:00:00Z' }
+  const mockAdapter = {
+    createOrdinaryHoursEntry: async () => ({ ok: true, receipt: {}, record: {} }),
+    readOrdinaryHoursEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyOrdinaryHoursCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+    createVehicleEntry: async () => ({ ok: true, receipt: mockReceipt, record: mockRecord }),
+    readVehicleEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyVehicleCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+  }
+  const result = await mod.executeOrdinaryHoursAction(context, action, mockAdapter)
+  assert.equal(result.action, 'create_vehicle')
+  assert.equal(result.result.ok, true)
+  assert.equal(result.result.receipt.record_id, 'veh-456')
+  assert.equal(result.result.record.id, 'veh-456')
+  assert.equal(result.result.record.staff_id, 'staff-123')
+  assert.equal(result.result.record.client_id, 'c-dulux')
+  assert.equal(result.result.record.type, 'mileage')
+  assert.equal(result.result.record.distance_km, 100)
+})
+
+test('executeOrdinaryHoursAction: create_vehicle enforces client isolation', async () => {
+  const context = { staffId: 'staff-123', clientId: 'c-dulux' }
+  const action = { type: 'create_vehicle', draft: { client_id: 'c-other', date: '2026-07-15', type: 'mileage', distance_km: 100, description: 'Visit' } }
+  const mockAdapter = {
+    createOrdinaryHoursEntry: async () => ({ ok: true, receipt: {}, record: {} }),
+    readOrdinaryHoursEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyOrdinaryHoursCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+    createVehicleEntry: async () => ({ ok: true, receipt: {}, record: {} }),
+    readVehicleEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyVehicleCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+  }
+  const result = await mod.executeOrdinaryHoursAction(context, action, mockAdapter)
+  assert.equal(result.action, 'create_vehicle')
+  assert.equal(result.result.ok, false)
+  assert.equal(result.result.error, 'UNAUTHORIZED')
+  assert.ok(result.result.reason.includes('Client isolation violation'))
+})
+
+test('executeOrdinaryHoursAction: create_vehicle validates draft', async () => {
+  const context = { staffId: 'staff-123', clientId: 'c-dulux' }
+  const action = { type: 'create_vehicle', draft: { client_id: 'c-dulux', date: 'invalid', type: 'mileage', distance_km: -1, description: '' } }
+  const mockAdapter = {
+    createOrdinaryHoursEntry: async () => ({ ok: true, receipt: {}, record: {} }),
+    readOrdinaryHoursEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyOrdinaryHoursCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+    createVehicleEntry: async () => ({ ok: true, receipt: {}, record: {} }),
+    readVehicleEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyVehicleCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+  }
+  const result = await mod.executeOrdinaryHoursAction(context, action, mockAdapter)
+  assert.equal(result.action, 'create_vehicle')
+  assert.equal(result.result.ok, false)
+  assert.equal(result.result.error, 'VALIDATION_ERROR')
+  assert.ok(Array.isArray(result.result.details))
+  assert.ok(result.result.details.length > 0)
+})
+
+test('executeOrdinaryHoursAction: read_vehicle with mock adapter returns records', async () => {
+  const context = { staffId: 'staff-123', clientId: 'c-dulux' }
+  const action = { type: 'read_vehicle', fromDate: '2026-07-01', toDate: '2026-07-31', types: ['mileage', 'fuel'] }
+  const mockReceipt = { record_id: 'read-veh-1', idempotency_key: 'staff-123|read_vehicle_entries|staff-123|c-dulux|2026-07-01|2026-07-31', created_at: '2026-07-15T10:00:00Z' }
+  const mockRecords = [{ id: 'veh-1', staff_id: 'staff-123', client_id: 'c-dulux', date: '2026-07-15', type: 'mileage', distance_km: 100, description: 'Visit', notes: null, litres: null, cost_per_litre: null, amount: null, status: 'draft', created_at: '2026-07-15T08:00:00Z', updated_at: '2026-07-15T08:00:00Z' }]
+  const mockAdapter = {
+    createOrdinaryHoursEntry: async () => ({ ok: true, receipt: {}, record: {} }),
+    readOrdinaryHoursEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyOrdinaryHoursCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+    createVehicleEntry: async () => ({ ok: true, receipt: {}, record: {} }),
+    readVehicleEntries: async () => ({ ok: true, receipt: mockReceipt, record: mockRecords }),
+    applyVehicleCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+  }
+  const result = await mod.executeOrdinaryHoursAction(context, action, mockAdapter)
+  assert.equal(result.action, 'read_vehicle')
+  assert.equal(result.result.ok, true)
+  assert.ok(Array.isArray(result.result.record))
+  assert.equal(result.result.record.length, 1)
+  assert.equal(result.result.record[0].id, 'veh-1')
+})
+
+test('executeOrdinaryHoursAction: idempotency key is deterministic for duplicate vehicle retry', async () => {
+  const context = { staffId: 'staff-123', clientId: 'c-dulux' }
+  const action = { type: 'create_vehicle', draft: { client_id: 'c-dulux', date: '2026-07-15', type: 'mileage', distance_km: 100, description: 'Visit' } }
+  let callCount = 0
+  const mockAdapter = {
+    createOrdinaryHoursEntry: async () => ({ ok: true, receipt: {}, record: {} }),
+    readOrdinaryHoursEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyOrdinaryHoursCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+    createVehicleEntry: async (staffId, clientId, date, type, distanceKm, description, notes, litres, costPerLitre, amount, idempotencyKey) => {
+      callCount++
+      return { ok: true, receipt: { record_id: 'veh-456', idempotency_key: idempotencyKey, created_at: '2026-07-15T10:00:00Z' }, record: { id: 'veh-456', staff_id: staffId, client_id: clientId, date, type, distance_km: distanceKm, description, notes, litres, cost_per_litre: costPerLitre, amount, status: 'draft', created_at: '2026-07-15T10:00:00Z', updated_at: '2026-07-15T10:00:00Z' } }
+    },
+    readVehicleEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyVehicleCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+  }
+  const result1 = await mod.executeOrdinaryHoursAction(context, action, mockAdapter)
+  const result2 = await mod.executeOrdinaryHoursAction(context, action, mockAdapter)
+  assert.equal(callCount, 2)
+  assert.equal(result1.result.receipt.idempotency_key, result2.result.receipt.idempotency_key)
+  assert.ok(result1.result.receipt.idempotency_key.includes('staff-123|create_vehicle_entry'))
+  assert.ok(result1.result.receipt.idempotency_key.includes('mileage'))
+})
+
+test('executeOrdinaryHoursAction: cross-staff denial - vehicle create with different staffId context', async () => {
+  const context1 = { staffId: 'staff-123', clientId: 'c-dulux' }
+  const context2 = { staffId: 'staff-other', clientId: 'c-dulux' }
+  const action = { type: 'create_vehicle', draft: { date: '2026-07-15', type: 'mileage', distance_km: 100, description: 'Visit' } }
+  let receivedStaffId = null
+  const mockAdapter = {
+    createOrdinaryHoursEntry: async () => ({ ok: true, receipt: {}, record: {} }),
+    readOrdinaryHoursEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyOrdinaryHoursCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+    createVehicleEntry: async (staffId, clientId, date, type, distanceKm, description, notes, litres, costPerLitre, amount, idempotencyKey) => {
+      receivedStaffId = staffId
+      return { ok: true, receipt: { record_id: 'veh-1', idempotency_key: idempotencyKey, created_at: '2026-07-15T10:00:00Z' }, record: { id: 'veh-1', staff_id: staffId, client_id: clientId, date, type, distance_km: distanceKm, description, notes, litres, cost_per_litre: costPerLitre, amount, status: 'draft', created_at: '2026-07-15T10:00:00Z', updated_at: '2026-07-15T10:00:00Z' } }
+    },
+    readVehicleEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyVehicleCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+  }
+  const result1 = await mod.executeOrdinaryHoursAction(context1, action, mockAdapter)
+  assert.equal(result1.result.ok, true)
+  assert.equal(receivedStaffId, 'staff-123')
+  const result2 = await mod.executeOrdinaryHoursAction(context2, action, mockAdapter)
+  assert.equal(result2.result.ok, true)
+  assert.equal(receivedStaffId, 'staff-other')
+  assert.notEqual(result1.result.receipt.idempotency_key, result2.result.receipt.idempotency_key)
+})
+
+test('executeOrdinaryHoursAction: cross-client denial - vehicle create with different clientId context', async () => {
+  const context1 = { staffId: 'staff-123', clientId: 'c-dulux' }
+  const context2 = { staffId: 'staff-123', clientId: 'c-other' }
+  const action = { type: 'create_vehicle', draft: { date: '2026-07-15', type: 'mileage', distance_km: 100, description: 'Visit' } }
+  let receivedClientId = null
+  const mockAdapter = {
+    createOrdinaryHoursEntry: async () => ({ ok: true, receipt: {}, record: {} }),
+    readOrdinaryHoursEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyOrdinaryHoursCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+    createVehicleEntry: async (staffId, clientId, date, type, distanceKm, description, notes, litres, costPerLitre, amount, idempotencyKey) => {
+      receivedClientId = clientId
+      return { ok: true, receipt: { record_id: 'veh-1', idempotency_key: idempotencyKey, created_at: '2026-07-15T10:00:00Z' }, record: { id: 'veh-1', staff_id: staffId, client_id: clientId, date, type, distance_km: distanceKm, description, notes, litres, cost_per_litre: costPerLitre, amount, status: 'draft', created_at: '2026-07-15T10:00:00Z', updated_at: '2026-07-15T10:00:00Z' } }
+    },
+    readVehicleEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyVehicleCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+  }
+  const result1 = await mod.executeOrdinaryHoursAction(context1, action, mockAdapter)
+  assert.equal(result1.result.ok, true)
+  assert.equal(receivedClientId, 'c-dulux')
+  const result2 = await mod.executeOrdinaryHoursAction(context2, action, mockAdapter)
+  assert.equal(result2.result.ok, true)
+  assert.equal(receivedClientId, 'c-other')
+  assert.notEqual(result1.result.receipt.idempotency_key, result2.result.receipt.idempotency_key)
+})
+
+test('executeOrdinaryHoursAction: custom idempotencyKey function used for vehicle create', async () => {
+  const customKeyFn = (action, requestKey) => `custom|${action}|${requestKey}`
+  const context = { staffId: 'staff-123', clientId: 'c-dulux', idempotencyKey: customKeyFn }
+  const action = { type: 'create_vehicle', draft: { client_id: 'c-dulux', date: '2026-07-15', type: 'mileage', distance_km: 100, description: 'Visit' } }
+  const mockAdapter = {
+    createOrdinaryHoursEntry: async () => ({ ok: true, receipt: {}, record: {} }),
+    readOrdinaryHoursEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyOrdinaryHoursCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+    createVehicleEntry: async (staffId, clientId, date, type, distanceKm, description, notes, litres, costPerLitre, amount, idempotencyKey) => {
+      return { ok: true, receipt: { record_id: 'veh-1', idempotency_key: idempotencyKey, created_at: '2026-07-15T10:00:00Z' }, record: { id: 'veh-1', staff_id: staffId, client_id: clientId, date, type, distance_km: distanceKm, description, notes, litres, cost_per_litre: costPerLitre, amount, status: 'draft', created_at: '2026-07-15T10:00:00Z', updated_at: '2026-07-15T10:00:00Z' } }
+    },
+    readVehicleEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyVehicleCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+  }
+  const result = await mod.executeOrdinaryHoursAction(context, action, mockAdapter)
+  assert.equal(result.result.ok, true)
+  assert.ok(result.result.receipt.idempotency_key.startsWith('custom|create_vehicle_entry|'))
+})
+
+test('executeOrdinaryHoursAction: clientId null in context allows draft client_id for vehicle', async () => {
+  const context = { staffId: 'staff-123', clientId: null }
+  const action = { type: 'create_vehicle', draft: { client_id: 'c-dulux', date: '2026-07-15', type: 'mileage', distance_km: 100, description: 'Visit' } }
+  let receivedClientId = null
+  const mockAdapter = {
+    createOrdinaryHoursEntry: async () => ({ ok: true, receipt: {}, record: {} }),
+    readOrdinaryHoursEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyOrdinaryHoursCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+    createVehicleEntry: async (staffId, clientId, date, type, distanceKm, description, notes, litres, costPerLitre, amount, idempotencyKey) => {
+      receivedClientId = clientId
+      return { ok: true, receipt: { record_id: 'veh-1', idempotency_key: idempotencyKey, created_at: '2026-07-15T10:00:00Z' }, record: { id: 'veh-1', staff_id: staffId, client_id: clientId, date, type, distance_km: distanceKm, description, notes, litres, cost_per_litre: costPerLitre, amount, status: 'draft', created_at: '2026-07-15T10:00:00Z', updated_at: '2026-07-15T10:00:00Z' } }
+    },
+    readVehicleEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyVehicleCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+  }
+  const result = await mod.executeOrdinaryHoursAction(context, action, mockAdapter)
+  assert.equal(result.result.ok, true)
+  assert.equal(receivedClientId, 'c-dulux')
+})
+
+test('executeOrdinaryHoursAction: read_vehicle action passes correct params to adapter', async () => {
+  const context = { staffId: 'staff-456', clientId: 'c-germoparts' }
+  const action = { type: 'read_vehicle', fromDate: '2026-08-01', toDate: '2026-08-31', types: ['mileage', 'fuel', 'vehicle_expense'] }
+  const mockAdapter = {
+    createOrdinaryHoursEntry: async () => ({ ok: true, receipt: {}, record: {} }),
+    readOrdinaryHoursEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyOrdinaryHoursCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+    createVehicleEntry: async () => ({ ok: true, receipt: {}, record: {} }),
+    readVehicleEntries: async (staffId, clientId, fromDate, toDate, types) => {
+      assert.equal(staffId, 'staff-456')
+      assert.equal(clientId, 'c-germoparts')
+      assert.equal(fromDate, '2026-08-01')
+      assert.equal(toDate, '2026-08-31')
+      assert.deepEqual(types, ['mileage', 'fuel', 'vehicle_expense'])
+      return { ok: true, receipt: { record_id: 'read-1', idempotency_key: 'adapter-generated', created_at: '2026-08-15T10:00:00Z' }, record: [] }
+    },
+    applyVehicleCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+  }
+  const result = await mod.executeOrdinaryHoursAction(context, action, mockAdapter)
+  assert.equal(result.result.ok, true)
+})

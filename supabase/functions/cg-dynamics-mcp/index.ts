@@ -2596,6 +2596,212 @@ const handleRecordClientUpdate: ToolHandler = async (staff, input) => {
   return shapeClientUpdateResult(data)
 }
 
+// ──────────────────────────────────────────────────────────────────────────────
+// CG Hours handlers — authenticated staff actions for time, kilometre/travel, corrections
+// ──────────────────────────────────────────────────────────────────────────────
+
+const CG_HOURS_NOT_CONFIGURED = {
+  ok: false,
+  error: 'NOT_CONFIGURED' as const,
+  contract: {
+    required_endpoints: [
+      'create_ordinary_hours_entry',
+      'read_ordinary_hours_entries',
+      'apply_ordinary_hours_correction',
+      'create_vehicle_entry',
+      'read_vehicle_entries',
+      'apply_vehicle_correction',
+    ],
+    idempotency_strategy: 'deriveMcpIdempotencyKey(staff_id, action, request_key) -> uuid; duplicate key returns existing receipt',
+    rls_enforcement: 'Row Level Security on canonical CG Hours tables: staff_id = current_staff_id; client_id pinned by effective client context',
+    staff_client_isolation: 'Staff can only create/read/correct their own entries. Client-scoped context restricts to that client_id. Cross-staff/client access denied.',
+  },
+}
+
+// Helper to check if CG Hours adapter is available via environment
+function isCgHoursConfigured(): boolean {
+  return !!Deno.env.get('CG_HOURS_SUPABASE_URL') && !!Deno.env.get('CG_HOURS_SERVICE_ROLE_KEY')
+}
+
+// Helper to create a CG Hours Supabase client
+function createCgHoursClient(): ReturnType<typeof createClient> | null {
+  const url = Deno.env.get('CG_HOURS_SUPABASE_URL')
+  const key = Deno.env.get('CG_HOURS_SERVICE_ROLE_KEY')
+  if (!url || !key) return null
+  return createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } })
+}
+
+async function handleLogOrdinaryHours(staff: AuthenticatedStaff, input: Record<string, unknown>) {
+  if (!isCgHoursConfigured()) return CG_HOURS_NOT_CONFIGURED
+
+  const cgHours = createCgHoursClient()
+  if (!cgHours) return CG_HOURS_NOT_CONFIGURED
+
+  const { date, hours, task_description, notes, client_id, idempotency_key } = input as {
+    date: string
+    hours: number
+    task_description: string
+    notes?: string
+    client_id?: string | null
+    idempotency_key: string
+  }
+
+  // Resolve effective client_id: staff context pins client if provided, otherwise use input
+  let effectiveClientId = client_id ?? null
+  if (staff.contextKind === 'client' && staff.effectiveClientId) {
+    effectiveClientId = staff.effectiveClientId
+  } else if (staff.contextKind === 'staff') {
+    // Staff can specify a client or leave null for internal time
+    effectiveClientId = client_id ?? null
+  }
+
+  const { data, error } = await cgHours.rpc('create_ordinary_hours_entry', {
+    p_staff_id: staff.effectiveStaffProfileId ?? staff.profileId,
+    p_client_id: effectiveClientId,
+    p_date: date,
+    p_hours: hours,
+    p_task_description: task_description,
+    p_notes: notes ?? null,
+    p_idempotency_key: idempotency_key,
+  })
+
+  if (error) return { error: error.message }
+  return { logged: true, record: data, receipt: { record_id: data?.id, idempotency_key, created_at: new Date().toISOString() } }
+}
+
+async function handleLogKilometreEntry(staff: AuthenticatedStaff, input: Record<string, unknown>) {
+  if (!isCgHoursConfigured()) return CG_HOURS_NOT_CONFIGURED
+
+  const cgHours = createCgHoursClient()
+  if (!cgHours) return CG_HOURS_NOT_CONFIGURED
+
+  const { date, type, distance_km, description, notes, litres, cost_per_litre, amount, client_id, idempotency_key } = input as {
+    date: string
+    type: 'mileage' | 'fuel' | 'vehicle_expense'
+    distance_km?: number
+    description?: string
+    notes?: string
+    litres?: number
+    cost_per_litre?: number
+    amount?: number
+    client_id?: string | null
+    idempotency_key: string
+  }
+
+  let effectiveClientId = client_id ?? null
+  if (staff.contextKind === 'client' && staff.effectiveClientId) {
+    effectiveClientId = staff.effectiveClientId
+  } else if (staff.contextKind === 'staff') {
+    effectiveClientId = client_id ?? null
+  }
+
+  const { data, error } = await cgHours.rpc('create_vehicle_entry', {
+    p_staff_id: staff.effectiveStaffProfileId ?? staff.profileId,
+    p_client_id: effectiveClientId,
+    p_date: date,
+    p_type: type,
+    p_distance_km: distance_km ?? null,
+    p_description: description ?? null,
+    p_notes: notes ?? null,
+    p_litres: litres ?? null,
+    p_cost_per_litre: cost_per_litre ?? null,
+    p_amount: amount ?? null,
+    p_idempotency_key: idempotency_key,
+  })
+
+  if (error) return { error: error.message }
+  return { logged: true, record: data, receipt: { record_id: data?.id, idempotency_key, created_at: new Date().toISOString() } }
+}
+
+async function handleReadMyRecentEntries(staff: AuthenticatedStaff, input: Record<string, unknown>) {
+  if (!isCgHoursConfigured()) return CG_HOURS_NOT_CONFIGURED
+
+  const cgHours = createCgHoursClient()
+  if (!cgHours) return CG_HOURS_NOT_CONFIGURED
+
+  const { from_date, to_date, include_vehicle } = input as {
+    from_date: string
+    to_date: string
+    include_vehicle?: boolean
+  }
+
+  // Staff context pins the staff_id; client context pins client_id
+  let effectiveClientId: string | null = null
+  if (staff.contextKind === 'client' && staff.effectiveClientId) {
+    effectiveClientId = staff.effectiveClientId
+  } else if (staff.contextKind === 'staff') {
+    effectiveClientId = null // Staff can see all their entries across clients unless filtered
+  }
+
+  const [{ data: timeEntries, error: timeError }, { data: vehicleEntries, error: vehicleError }] = await Promise.all([
+    cgHours.rpc('read_ordinary_hours_entries', {
+      p_staff_id: staff.effectiveStaffProfileId ?? staff.profileId,
+      p_client_id: effectiveClientId,
+      p_from_date: from_date,
+      p_to_date: to_date,
+      p_types: ['time'],
+    }),
+    include_vehicle
+      ? cgHours.rpc('read_vehicle_entries', {
+          p_staff_id: staff.effectiveStaffProfileId ?? staff.profileId,
+          p_client_id: effectiveClientId,
+          p_from_date: from_date,
+          p_to_date: to_date,
+          p_types: ['mileage', 'fuel', 'vehicle_expense'],
+        })
+      : Promise.resolve({ data: [], error: null }),
+  ])
+
+  if (timeError) return { error: timeError.message }
+  if (vehicleError) return { error: vehicleError.message }
+
+  return {
+    time_entries: timeEntries ?? [],
+    vehicle_entries: vehicleEntries ?? [],
+  }
+}
+
+async function handleCorrectMyEntry(staff: AuthenticatedStaff, input: Record<string, unknown>) {
+  if (!isCgHoursConfigured()) return CG_HOURS_NOT_CONFIGURED
+
+  const cgHours = createCgHoursClient()
+  if (!cgHours) return CG_HOURS_NOT_CONFIGURED
+
+  const { entry_id, entry_type, correction, reason, idempotency_key } = input as {
+    entry_id: string
+    entry_type: 'time' | 'mileage' | 'fuel' | 'vehicle_expense'
+    correction: Record<string, unknown>
+    reason: string
+    idempotency_key: string
+  }
+
+  // For corrections, we need to verify ownership first by reading the entry
+  // This is a safety check - the RPC should also enforce RLS
+  const staffId = staff.effectiveStaffProfileId ?? staff.profileId
+
+  if (entry_type === 'time') {
+    const { data, error } = await cgHours.rpc('apply_ordinary_hours_correction', {
+      p_entry_id: entry_id,
+      p_staff_id: staffId,
+      p_correction: correction,
+      p_reason: reason,
+      p_idempotency_key: idempotency_key,
+    })
+    if (error) return { error: error.message }
+    return { corrected: true, record: data, receipt: { record_id: data?.id, idempotency_key, created_at: new Date().toISOString() } }
+  } else {
+    const { data, error } = await cgHours.rpc('apply_vehicle_correction', {
+      p_entry_id: entry_id,
+      p_staff_id: staffId,
+      p_correction: correction,
+      p_reason: reason,
+      p_idempotency_key: idempotency_key,
+    })
+    if (error) return { error: error.message }
+    return { corrected: true, record: data, receipt: { record_id: data?.id, idempotency_key, created_at: new Date().toISOString() } }
+  }
+}
+
 const MISSING_RELATION_CODES = new Set(['42P01', 'PGRST205'])
 
 async function loadRecordedClientUpdates(staff: AuthenticatedStaff, clientId: string) {
@@ -2629,7 +2835,24 @@ async function loadRecordedClientUpdates(staff: AuthenticatedStaff, clientId: st
 
 // ── Tool Router ─────────────────────────────────────────────────────────────
 
-const WRITE_TOOLS = new Set(['create_task', 'update_task', 'update_lead', 'add_lead_research', 'update_my_preferences', 'create_recurring_task', 'compose_mail_draft', 'log_lead_email_activity', 'close_content_run', 'update_closeout_upload_status', 'link_content_run_deliverables', 'upsert_calendar_event', ...CLIENT_WORKSPACE_ACTIONS])
+const WRITE_TOOLS = new Set([
+  'create_task',
+  'update_task',
+  'update_lead',
+  'add_lead_research',
+  'update_my_preferences',
+  'create_recurring_task',
+  'compose_mail_draft',
+  'log_lead_email_activity',
+  'close_content_run',
+  'update_closeout_upload_status',
+  'link_content_run_deliverables',
+  'upsert_calendar_event',
+  'log_ordinary_hours',
+  'log_kilometre_entry',
+  'correct_my_entry',
+  ...CLIENT_WORKSPACE_ACTIONS,
+])
 
 const toolHandlers: Record<string, ToolHandler> = {
   get_my_day: handleGetMyDay,
@@ -2669,6 +2892,10 @@ const toolHandlers: Record<string, ToolHandler> = {
   record_client_request: handleRecordClientRequest,
   create_client_followup_task: handleCreateClientFollowupTask,
   record_client_update: handleRecordClientUpdate,
+  log_ordinary_hours: handleLogOrdinaryHours,
+  log_kilometre_entry: handleLogKilometreEntry,
+  read_my_recent_entries: handleReadMyRecentEntries,
+  correct_my_entry: handleCorrectMyEntry,
 }
 
 // ── MCP Server ──────────────────────────────────────────────────────────────

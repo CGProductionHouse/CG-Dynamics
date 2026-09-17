@@ -469,6 +469,78 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
     annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
     dependency: '#313', canonicalContract: 'update_closeout_upload_status RPC + content_run_closeouts table',
   },
+  // ──────────────────────────────────────────────────────────────────────────────
+  // CG Hours — authenticated staff actions for time, kilometre/travel, and corrections
+  // ──────────────────────────────────────────────────────────────────────────────
+  {
+    name: 'log_ordinary_hours', title: 'Log ordinary hours',
+    description: 'Log an ordinary hours entry for the exact authenticated staff member in the current Project context. The entry is created in the canonical CG Hours backend. Requires an idempotency_key for duplicate-retry safety. Only says "logged" after the backend returns a persisted record_id and receipt.',
+    inputSchema: objectSchema({
+      date: { type: 'string', pattern: '^\\d{4}-\\d{2}-\\d{2}$', description: 'YYYY-MM-DD' },
+      hours: { type: 'number', minimum: 0.25, maximum: 24 },
+      task_description: { type: 'string', minLength: 1, maxLength: 500 },
+      notes: { type: 'string', maxLength: 1000 },
+      client_id: uuid,
+      idempotency_key: idempotencyKeySchema,
+    }, ['date', 'hours', 'task_description', 'idempotency_key']),
+    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
+    dependency: '#361', canonicalContract: 'CG Hours canonical persistence adapter (create_ordinary_hours_entry RPC on separate Supabase project)',
+  },
+  {
+    name: 'log_kilometre_entry', title: 'Log kilometre/travel entry',
+    description: 'Log a kilometre (mileage), fuel, or vehicle expense entry for the exact authenticated staff member. The raw kilometre seam stores distance_km only; no reimbursement calculation is performed here. Requires an idempotency_key for duplicate-retry safety. Only says "logged" after the backend returns a persisted record_id and receipt.',
+    inputSchema: objectSchema({
+      date: { type: 'string', pattern: '^\\d{4}-\\d{2}-\\d{2}$', description: 'YYYY-MM-DD' },
+      type: { enum: ['mileage', 'fuel', 'vehicle_expense'] },
+      distance_km: { type: 'number', minimum: 0 },
+      description: { type: 'string', maxLength: 240 },
+      notes: { type: 'string', maxLength: 1000 },
+      litres: { type: 'number', minimum: 0 },
+      cost_per_litre: { type: 'number', minimum: 0 },
+      amount: { type: 'number', minimum: 0 },
+      client_id: uuid,
+      idempotency_key: idempotencyKeySchema,
+    }, ['date', 'type', 'idempotency_key']),
+    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
+    dependency: '#361', canonicalContract: 'CG Hours canonical persistence adapter (create_vehicle_entry RPC on separate Supabase project)',
+  },
+  {
+    name: 'read_my_recent_entries', title: 'Read my recent entries',
+    description: 'Read recent ordinary-hours and/or vehicle entries for the exact authenticated staff member within a date range. Caller-only — never reads another staff member\'s entries.',
+    inputSchema: objectSchema({
+      from_date: { type: 'string', pattern: '^\\d{4}-\\d{2}-\\d{2}$', description: 'YYYY-MM-DD' },
+      to_date: { type: 'string', pattern: '^\\d{4}-\\d{2}-\\d{2}$', description: 'YYYY-MM-DD' },
+      include_vehicle: { type: 'boolean', description: 'Also include mileage/fuel/vehicle_expense entries' },
+    }, ['from_date', 'to_date']),
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+    dependency: '#361', canonicalContract: 'CG Hours canonical persistence adapter (read_ordinary_hours_entries / read_vehicle_entries RPCs)',
+  },
+  {
+    name: 'correct_my_entry', title: 'Correct my entry',
+    description: 'Apply a correction to one of the exact authenticated staff member\'s own entries. Verifies ownership and client scope. Retains before/after audit evidence. Requires an idempotency_key for duplicate-retry safety.',
+    inputSchema: objectSchema({
+      entry_id: uuid,
+      entry_type: { enum: ['time', 'mileage', 'fuel', 'vehicle_expense'] },
+      correction: {
+        type: 'object',
+        properties: {
+          hours: { type: 'number', minimum: 0.25, maximum: 24 },
+          task_description: { type: 'string', maxLength: 500 },
+          notes: { type: 'string', maxLength: 1000 },
+          distance_km: { type: 'number', minimum: 0 },
+          description: { type: 'string', maxLength: 240 },
+          litres: { type: 'number', minimum: 0 },
+          cost_per_litre: { type: 'number', minimum: 0 },
+          amount: { type: 'number', minimum: 0 },
+        },
+        additionalProperties: false,
+      },
+      reason: { type: 'string', minLength: 1, maxLength: 500 },
+      idempotency_key: idempotencyKeySchema,
+    }, ['entry_id', 'entry_type', 'correction', 'reason', 'idempotency_key']),
+    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
+    dependency: '#361', canonicalContract: 'CG Hours canonical persistence adapter (apply_ordinary_hours_correction / apply_vehicle_correction RPCs)',
+  },
 ] as const
 
 export const CG_DYNAMICS_MCP_SERVER_INSTRUCTIONS =

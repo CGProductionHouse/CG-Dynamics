@@ -133,6 +133,8 @@ export const STAFF_SUBJECT_TOOLS: readonly string[] = [
   'create_task', 'update_task', 'update_lead', 'add_lead_research', 'get_my_profile',
   'update_my_preferences', 'get_my_assistant_bootstrap', 'get_my_recurring_tasks',
   'create_recurring_task', 'compose_mail_draft', 'log_lead_email_activity',
+  // CG Hours staff-subject actions (#361)
+  'log_ordinary_hours', 'log_kilometre_entry', 'read_my_recent_entries', 'correct_my_entry',
   // Internal operational/content actions. They may run for an exact staff subject or an
   // explicit company-admin context, but never inside a client Project.
   'find_content_runs', 'link_content_run_deliverables', 'upsert_calendar_event',

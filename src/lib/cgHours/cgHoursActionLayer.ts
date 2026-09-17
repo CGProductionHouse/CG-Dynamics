@@ -172,6 +172,9 @@ export const CG_HOURS_PERSISTENCE_CONTRACT: CgHoursPersistenceContract = {
     'create_ordinary_hours_entry',
     'read_ordinary_hours_entries',
     'apply_ordinary_hours_correction',
+    'create_vehicle_entry',
+    'read_vehicle_entries',
+    'apply_vehicle_correction',
   ],
   idempotency_strategy: 'deriveMcpIdempotencyKey(staff_id, action, request_key) -> uuid; duplicate key returns existing receipt',
   rls_enforcement: 'Row Level Security on canonical CG Hours tables: staff_id = current_staff_id; client_id pinned by effective client context',
@@ -404,6 +407,190 @@ export function applyOrdinaryHoursCorrection(
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
+// Vehicle/Kilometre entry types and validation
+// ──────────────────────────────────────────────────────────────────────────────
+
+export interface CgHoursVehicleEntryDraft {
+  client_id: string | null
+  date: string // YYYY-MM-DD
+  type: 'mileage' | 'fuel' | 'vehicle_expense'
+  distance_km?: number
+  description?: string
+  notes?: string
+  litres?: number
+  cost_per_litre?: number
+  amount?: number
+}
+
+export interface CgHoursVehicleEntryRecord {
+  id: string
+  staff_id: string
+  client_id: string | null
+  date: string
+  type: 'mileage' | 'fuel' | 'vehicle_expense'
+  distance_km?: number | null
+  description?: string | null
+  notes?: string | null
+  litres?: number | null
+  cost_per_litre?: number | null
+  amount?: number | null
+  status: 'draft' | 'submitted' | 'approved' | 'rejected'
+  created_at: string
+  updated_at: string
+}
+
+export function validateCgHoursVehicleEntryDraft(draft: CgHoursVehicleEntryDraft): string[] {
+  const errors: string[] = []
+
+  if (!draft.date || !/^\d{4}-\d{2}-\d{2}$/.test(draft.date)) {
+    errors.push('date must be YYYY-MM-DD')
+  }
+
+  if (!['mileage', 'fuel', 'vehicle_expense'].includes(draft.type)) {
+    errors.push('type must be "mileage", "fuel", or "vehicle_expense"')
+    return errors
+  }
+
+  if (draft.type === 'mileage') {
+    if (typeof draft.distance_km !== 'number' || !Number.isFinite(draft.distance_km) || draft.distance_km < 0) {
+      errors.push('mileage requires non-negative distance_km')
+    }
+    if (draft.distance_km && draft.distance_km > 2000) {
+      errors.push('distance_km exceeds reasonable daily maximum (2000)')
+    }
+  }
+
+  if (draft.type === 'fuel') {
+    if (typeof draft.litres !== 'number' || !Number.isFinite(draft.litres) || draft.litres <= 0) {
+      errors.push('fuel requires positive litres')
+    }
+    if (draft.litres && draft.litres > 200) {
+      errors.push('litres exceeds reasonable single-fill maximum (200)')
+    }
+    if (typeof draft.cost_per_litre !== 'number' || !Number.isFinite(draft.cost_per_litre) || draft.cost_per_litre <= 0) {
+      errors.push('fuel requires positive cost_per_litre')
+    }
+  }
+
+  if (draft.type === 'vehicle_expense') {
+    if (!draft.description || draft.description.trim().length === 0) {
+      errors.push('vehicle_expense requires description')
+    }
+    if (typeof draft.amount !== 'number' || !Number.isFinite(draft.amount) || draft.amount <= 0) {
+      errors.push('vehicle_expense requires positive amount')
+    }
+  }
+
+  if (draft.notes && draft.notes.length > 1000) {
+    errors.push('notes exceeds maximum length (1000)')
+  }
+
+  return errors
+}
+
+export function isVehicleDraftSubmittable(draft: CgHoursVehicleEntryDraft): boolean {
+  return validateCgHoursVehicleEntryDraft(draft).length === 0
+}
+
+export function createVehicleEntryFromDraft(
+  draft: CgHoursVehicleEntryDraft,
+  staffId: string,
+  nowIso = new Date().toISOString()
+): CgHoursVehicleEntry {
+  const errors = validateCgHoursVehicleEntryDraft(draft)
+  if (errors.length > 0) {
+    throw new Error(`Invalid vehicle entry draft: ${errors.join('; ')}`)
+  }
+
+  return {
+    staff_id: staffId,
+    client_id: draft.client_id,
+    date: draft.date,
+    type: draft.type,
+    distance_km: draft.distance_km,
+    description: draft.description?.trim(),
+    notes: draft.notes?.trim(),
+    status: 'draft',
+    created_at: nowIso,
+    updated_at: nowIso,
+  }
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Extended persistence adapter for vehicle entries
+// ──────────────────────────────────────────────────────────────────────────────
+
+export interface CgHoursPersistenceAdapter {
+  createOrdinaryHoursEntry(
+    staffId: string,
+    clientId: string | null,
+    date: string,
+    hours: number,
+    taskDescription: string,
+    notes: string | undefined,
+    idempotencyKey: string
+  ): Promise<CgHoursPersistenceResult<CgHoursTimeEntryRecord>>
+
+  readOrdinaryHoursEntries(
+    staffId: string,
+    clientId: string | null,
+    fromDate: string,
+    toDate: string,
+    types?: CgHoursEntryType[]
+  ): Promise<CgHoursPersistenceResult<CgHoursTimeEntryRecord[]>>
+
+  applyOrdinaryHoursCorrection(
+    entryId: string,
+    staffId: string,
+    correction: {
+      hours?: number
+      task_description?: string
+      notes?: string
+    },
+    reason: string,
+    idempotencyKey: string
+  ): Promise<CgHoursPersistenceResult<CgHoursTimeEntryRecord>>
+
+  // Vehicle/kilometre entries
+  createVehicleEntry(
+    staffId: string,
+    clientId: string | null,
+    date: string,
+    type: 'mileage' | 'fuel' | 'vehicle_expense',
+    distanceKm: number | undefined,
+    description: string | undefined,
+    notes: string | undefined,
+    litres: number | undefined,
+    costPerLitre: number | undefined,
+    amount: number | undefined,
+    idempotencyKey: string
+  ): Promise<CgHoursPersistenceResult<CgHoursVehicleEntryRecord>>
+
+  readVehicleEntries(
+    staffId: string,
+    clientId: string | null,
+    fromDate: string,
+    toDate: string,
+    types?: ('mileage' | 'fuel' | 'vehicle_expense')[]
+  ): Promise<CgHoursPersistenceResult<CgHoursVehicleEntryRecord[]>>
+
+  applyVehicleCorrection(
+    entryId: string,
+    staffId: string,
+    correction: {
+      distance_km?: number
+      description?: string
+      notes?: string
+      litres?: number
+      cost_per_litre?: number
+      amount?: number
+    },
+    reason: string,
+    idempotencyKey: string
+  ): Promise<CgHoursPersistenceResult<CgHoursVehicleEntryRecord>>
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
 // Authenticated canonical CG Hours action — wired to the existing CG Dynamics
 // OAuth/MCP/project/staff context and the canonical CG Hours backend.
 // ──────────────────────────────────────────────────────────────────────────────
@@ -412,10 +599,12 @@ export type OrdinaryHoursAction =
   | { type: 'create'; draft: CgHoursTimeEntryDraft }
   | { type: 'read'; fromDate: string; toDate: string; types?: CgHoursEntryType[] }
   | { type: 'correct'; entryId: string; correction: CgHoursCorrectionDraft }
+  | { type: 'create_vehicle'; draft: CgHoursVehicleEntryDraft }
+  | { type: 'read_vehicle'; fromDate: string; toDate: string; types?: ('mileage' | 'fuel' | 'vehicle_expense')[] }
 
 export interface ExecuteOrdinaryHoursActionResult {
   action: OrdinaryHoursAction['type']
-  result: CgHoursPersistenceResult<CgHoursTimeEntryRecord | CgHoursTimeEntryRecord[]>
+  result: CgHoursPersistenceResult<CgHoursTimeEntryRecord | CgHoursTimeEntryRecord[] | CgHoursVehicleEntryRecord | CgHoursVehicleEntryRecord[]>
 }
 
 /**
@@ -479,7 +668,6 @@ export async function executeOrdinaryHoursAction(
 
     case 'read': {
       const { fromDate, toDate, types } = action
-      // Idempotency key generated for potential future use / logging but not passed to read adapter
       makeIdempotencyKey('read_ordinary_hours_entries', `${staffId}|${clientId ?? 'none'}|${fromDate}|${toDate}`)
       const result = await adapter.readOrdinaryHoursEntries(staffId, clientId, fromDate, toDate, types)
       return { action: 'read', result }
@@ -506,6 +694,43 @@ export async function executeOrdinaryHoursAction(
         idempotencyKey
       )
       return { action: 'correct', result }
+    }
+
+    case 'create_vehicle': {
+      const { draft } = action
+      if (draft.client_id !== undefined && clientId !== null && draft.client_id !== clientId) {
+        return {
+          action: 'create_vehicle',
+          result: { ok: false, error: 'UNAUTHORIZED', reason: `Client isolation violation: draft.client_id=${draft.client_id} differs from context.clientId=${clientId}` },
+        }
+      }
+      const effectiveClientId = clientId !== null ? clientId : draft.client_id
+      const errors = validateCgHoursVehicleEntryDraft({ ...draft, client_id: effectiveClientId })
+      if (errors.length > 0) {
+        return { action: 'create_vehicle', result: { ok: false, error: 'VALIDATION_ERROR', details: errors } }
+      }
+      const idempotencyKey = makeIdempotencyKey('create_vehicle_entry', `${staffId}|${effectiveClientId}|${draft.date}|${draft.type}`)
+      const result = await adapter.createVehicleEntry(
+        staffId,
+        effectiveClientId,
+        draft.date,
+        draft.type,
+        draft.distance_km,
+        draft.description,
+        draft.notes,
+        draft.litres,
+        draft.cost_per_litre,
+        draft.amount,
+        idempotencyKey
+      )
+      return { action: 'create_vehicle', result }
+    }
+
+    case 'read_vehicle': {
+      const { fromDate, toDate, types } = action
+      makeIdempotencyKey('read_vehicle_entries', `${staffId}|${clientId ?? 'none'}|${fromDate}|${toDate}`)
+      const result = await adapter.readVehicleEntries(staffId, clientId, fromDate, toDate, types)
+      return { action: 'read_vehicle', result }
     }
   }
 }

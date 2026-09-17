@@ -28,7 +28,12 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
-          persist-credentials: false
+          persist-credentials: true
+
+      - name: Configure git author
+        run: |
+          git config --local user.name "opencode-agent[bot]"
+          git config --local user.email "219766164+opencode-agent[bot]@users.noreply.github.com"
 
       - name: Run OpenCode — Go quality lane
         id: go
@@ -40,6 +45,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           model: opencode-go/glm-5.3
+          use_github_token: true
 
       - name: Run OpenCode — free fallback
         timeout-minutes: 15
@@ -52,6 +58,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           model: ${{ vars.OPENCODE_PRIMARY_MODEL || 'opencode/nemotron-3-ultra-free' }}
+          use_github_token: true
 
   zen_comment:
     if: github.event_name == 'issue_comment' && contains(github.event.comment.body, '/zen') && (contains(github.event.comment.body, '/oc') || contains(github.event.comment.body, '/opencode')) && github.actor == 'CGProductionHouse'
@@ -62,7 +69,12 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
-          persist-credentials: false
+          persist-credentials: true
+
+      - name: Configure git author
+        run: |
+          git config --local user.name "opencode-agent[bot]"
+          git config --local user.email "219766164+opencode-agent[bot]@users.noreply.github.com"
 
       - name: Run OpenCode — Zen direct lane
         timeout-minutes: 45
@@ -73,6 +85,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           model: ${{ vars.OPENCODE_PRIMARY_MODEL || 'opencode/nemotron-3-ultra-free' }}
+          use_github_token: true
 
   nvidia_comment:
     if: github.event_name == 'issue_comment' && contains(github.event.comment.body, '/nvidia') && (contains(github.event.comment.body, '/oc') || contains(github.event.comment.body, '/opencode')) && github.actor == 'CGProductionHouse'
@@ -83,7 +96,12 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
-          persist-credentials: false
+          persist-credentials: true
+
+      - name: Configure git author
+        run: |
+          git config --local user.name "opencode-agent[bot]"
+          git config --local user.email "219766164+opencode-agent[bot]@users.noreply.github.com"
 
       - name: Run OpenCode — NVIDIA direct lane
         timeout-minutes: 45
@@ -102,6 +120,7 @@ jobs:
           # /nvidia-gemma             -> Gemma 4 31B, coding + multimodal secondary worker
           # /nvidia-muse              -> Muse Glimmer 30B, multimodal reasoning + tool use
           model: ${{ contains(github.event.comment.body, '/nvidia-deepseek') && 'nvidia/deepseek-ai/deepseek-v4-flash-0731' || contains(github.event.comment.body, '/nvidia-poolside') && 'nvidia/poolside/laguna-xs-2.1' || contains(github.event.comment.body, '/nvidia-lightning') && 'nvidia/nvidia/nemotron-3.5-lightning-30b-a3b' || contains(github.event.comment.body, '/nvidia-ultra') && 'nvidia/nvidia/nemotron-3-ultra-550b-a55b' || contains(github.event.comment.body, '/nvidia-gemma') && 'nvidia/google/gemma-4-31b-it' || contains(github.event.comment.body, '/nvidia-muse') && 'nvidia/meta/muse-glimmer-30b' || vars.OPENCODE_NVIDIA_MODEL || 'nvidia/moonshotai/kimi-k3' }}
+          use_github_token: true
 
   manual:
     if: github.event_name == 'workflow_dispatch'
@@ -112,7 +131,12 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
-          persist-credentials: false
+          persist-credentials: true
+
+      - name: Configure git author
+        run: |
+          git config --local user.name "opencode-agent[bot]"
+          git config --local user.email "219766164+opencode-agent[bot]@users.noreply.github.com"
 
       - name: Run OpenCode — Go quality lane
         id: go
@@ -125,6 +149,7 @@ jobs:
         with:
           model: opencode-go/glm-5.3
           prompt: ${{ inputs.prompt }}
+          use_github_token: true
 
       - name: Run OpenCode — free fallback
         timeout-minutes: 15
@@ -138,3 +163,4 @@ jobs:
         with:
           model: ${{ vars.OPENCODE_PRIMARY_MODEL || 'opencode/nemotron-3-ultra-free' }}
           prompt: ${{ inputs.prompt }}
+          use_github_token: true
