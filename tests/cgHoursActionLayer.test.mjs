@@ -1270,3 +1270,196 @@ test('CG_HOURS_MAPPING_CONTRACT: documents exact mapping tables and resolution r
   assert.ok(mod.CG_HOURS_MAPPING_CONTRACT.resolution_rule.includes('NOT_CONFIGURED'))
   assert.ok(mod.CG_HOURS_MAPPING_CONTRACT.resolution_rule.includes('Never fuzzy'))
 })
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Weekly timesheet + task-template resolution contract (PR #384)
+// ──────────────────────────────────────────────────────────────────────────────
+
+const makeScheduleResolver = (overrides = {}) => ({
+  timesheet: {
+    resolveWeeklyTimesheet: () => ({
+      ok: true,
+      timesheetId: 'ts-uuid',
+      weekStartDate: '2026-07-13',
+      weekEndDate: '2026-07-19',
+    }),
+    ...overrides.timesheet,
+  },
+  taskTemplate: {
+    resolveTaskTemplate: (kind) => ({
+      ok: true,
+      template:
+        kind === 'traveling'
+          ? { id: 'tpl-travel', name: 'Traveling', tracks_km: true }
+          : { id: 'tpl-ordinary', name: 'Ordinary Hours', tracks_km: false },
+    }),
+    ...overrides.taskTemplate,
+  },
+})
+
+const makeAdapterBase = () => ({
+  createOrdinaryHoursEntry: async () => ({ ok: true, receipt: { record_id: 'r1', idempotency_key: 'k', created_at: 't' }, record: {} }),
+  readOrdinaryHoursEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+  applyOrdinaryHoursCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+  createVehicleEntry: async () => ({ ok: true, receipt: { record_id: 'v1', idempotency_key: 'k', created_at: 't' }, record: {} }),
+  readVehicleEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+  applyVehicleCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+})
+
+test('resolveCgHoursTimesheetAndTemplate: missing week fails closed as NOT_CONFIGURED', async () => {
+  const result = await mod.resolveCgHoursTimesheetAndTemplate(
+    { resolveWeeklyTimesheet: () => ({ ok: false, error: 'NOT_CONFIGURED', mapping: 'timesheet', reason: 'no weekly timesheet for staff on entry_date' }) },
+    { resolveTaskTemplate: () => ({ ok: true, template: { id: 't', name: 'Ordinary Hours', tracks_km: false } }) },
+    'staff-1',
+    '2026-07-15',
+    'ordinary'
+  )
+  assert.equal(result.ok, false)
+  assert.equal(result.error, 'NOT_CONFIGURED')
+  assert.equal(result.mapping, 'timesheet')
+})
+
+test('resolveCgHoursTimesheetAndTemplate: missing template fails closed as NOT_CONFIGURED', async () => {
+  const result = await mod.resolveCgHoursTimesheetAndTemplate(
+    { resolveWeeklyTimesheet: () => ({ ok: true, timesheetId: 'ts', weekStartDate: '2026-07-13', weekEndDate: '2026-07-19' }) },
+    { resolveTaskTemplate: () => ({ ok: false, error: 'NOT_CONFIGURED', mapping: 'task_template', reason: 'no Traveling template with tracks_km=true' }) },
+    'staff-1',
+    '2026-07-15',
+    'traveling'
+  )
+  assert.equal(result.ok, false)
+  assert.equal(result.error, 'NOT_CONFIGURED')
+  assert.equal(result.mapping, 'task_template')
+})
+
+test('resolveCgHoursTimesheetAndTemplate: resolved returns timesheet + template', async () => {
+  const result = await mod.resolveCgHoursTimesheetAndTemplate(
+    { resolveWeeklyTimesheet: () => ({ ok: true, timesheetId: 'ts-1', weekStartDate: '2026-07-13', weekEndDate: '2026-07-19' }) },
+    { resolveTaskTemplate: () => ({ ok: true, template: { id: 'tpl', name: 'Traveling', tracks_km: true } }) },
+    'staff-1',
+    '2026-07-15',
+    'traveling'
+  )
+  assert.equal(result.ok, true)
+  assert.equal(result.timesheetId, 'ts-1')
+  assert.equal(result.template.name, 'Traveling')
+  assert.equal(result.template.tracks_km, true)
+})
+
+test('executeOrdinaryHoursAction: create with missing week returns NOT_CONFIGURED before persistence (adapter never called)', async () => {
+  let adapterCalled = false
+  const adapter = {
+    ...makeAdapterBase(),
+    createOrdinaryHoursEntry: async () => { adapterCalled = true; return { ok: true, receipt: {}, record: {} } },
+  }
+  const context = {
+    staffId: 's1',
+    clientId: null,
+    scheduleResolver: makeScheduleResolver({
+      timesheet: { resolveWeeklyTimesheet: () => ({ ok: false, error: 'NOT_CONFIGURED', mapping: 'timesheet', reason: 'missing week' }) },
+    }),
+  }
+  const result = await mod.executeOrdinaryHoursAction(context, { type: 'create', draft: { date: '2026-07-15', type: 'time', hours: 2, task_description: 'Work' } }, adapter)
+  assert.equal(result.result.ok, false)
+  assert.equal(result.result.error, 'NOT_CONFIGURED')
+  assert.ok(result.result.contract.mapping_failure.startsWith('timesheet:'))
+  assert.equal(adapterCalled, false)
+})
+
+test('executeOrdinaryHoursAction: create with missing ordinary template returns NOT_CONFIGURED before persistence', async () => {
+  let adapterCalled = false
+  const adapter = {
+    ...makeAdapterBase(),
+    createOrdinaryHoursEntry: async () => { adapterCalled = true; return { ok: true, receipt: {}, record: {} } },
+  }
+  const context = {
+    staffId: 's1',
+    clientId: null,
+    scheduleResolver: makeScheduleResolver({
+      taskTemplate: { resolveTaskTemplate: () => ({ ok: false, error: 'NOT_CONFIGURED', mapping: 'task_template', reason: 'ambiguous ordinary template' }) },
+    }),
+  }
+  const result = await mod.executeOrdinaryHoursAction(context, { type: 'create', draft: { date: '2026-07-15', type: 'time', hours: 2, task_description: 'Work' } }, adapter)
+  assert.equal(result.result.error, 'NOT_CONFIGURED')
+  assert.equal(adapterCalled, false)
+})
+
+test('executeOrdinaryHoursAction: create rejects ordinary template with tracks_km=true', async () => {
+  const adapter = makeAdapterBase()
+  const context = {
+    staffId: 's1',
+    clientId: null,
+    scheduleResolver: makeScheduleResolver({
+      taskTemplate: { resolveTaskTemplate: () => ({ ok: true, template: { id: 'tpl', name: 'Something', tracks_km: true } }) },
+    }),
+  }
+  const result = await mod.executeOrdinaryHoursAction(context, { type: 'create', draft: { date: '2026-07-15', type: 'time', hours: 2, task_description: 'Work' } }, adapter)
+  assert.equal(result.result.error, 'NOT_CONFIGURED')
+  assert.ok(result.result.contract.mapping_failure.includes('tracks_km=true'))
+})
+
+test('executeOrdinaryHoursAction: create resolved yields canonical payload (entry_date + duration_minutes)', async () => {
+  const adapter = makeAdapterBase()
+  const context = { staffId: 's1', clientId: 'c1', scheduleResolver: makeScheduleResolver() }
+  const result = await mod.executeOrdinaryHoursAction(context, { type: 'create', draft: { date: '2026-07-15', type: 'time', hours: 2.5, task_description: 'Work' } }, adapter)
+  assert.equal(result.result.ok, true)
+  assert.ok(result.resolved)
+  assert.equal(result.resolved.timesheetId, 'ts-uuid')
+  assert.equal(result.resolved.taskTemplateId, 'tpl-ordinary')
+  assert.equal(result.resolved.payload.entry_date, '2026-07-15')
+  assert.equal(result.resolved.payload.duration_minutes, 150)
+  assert.equal(result.resolved.payload.timesheet_id, 'ts-uuid')
+  assert.equal(result.resolved.payload.task_template_id, 'tpl-ordinary')
+  assert.equal(result.resolved.payload.km_travelled, undefined)
+})
+
+test('executeOrdinaryHoursAction: create_vehicle requires Traveling template with tracks_km=true', async () => {
+  const adapter = makeAdapterBase()
+  const context = {
+    staffId: 's1',
+    clientId: null,
+    scheduleResolver: makeScheduleResolver({
+      taskTemplate: { resolveTaskTemplate: () => ({ ok: true, template: { id: 'tpl', name: 'Travel', tracks_km: true } }) },
+    }),
+  }
+  const result = await mod.executeOrdinaryHoursAction(context, { type: 'create_vehicle', draft: { date: '2026-07-15', type: 'mileage', distance_km: 20 } }, adapter)
+  assert.equal(result.result.error, 'NOT_CONFIGURED')
+  assert.ok(result.result.contract.mapping_failure.includes('"Traveling"'))
+})
+
+test('executeOrdinaryHoursAction: create_vehicle Traveling resolved yields unified km payload', async () => {
+  const adapter = makeAdapterBase()
+  const context = { staffId: 's1', clientId: 'c1', scheduleResolver: makeScheduleResolver() }
+  const result = await mod.executeOrdinaryHoursAction(context, { type: 'create_vehicle', draft: { date: '2026-07-15', type: 'mileage', distance_km: 20, notes: 'Germoparts in city' } }, adapter)
+  assert.equal(result.result.ok, true)
+  assert.ok(result.resolved)
+  assert.equal(result.resolved.taskTemplateId, 'tpl-travel')
+  assert.equal(result.resolved.payload.km_travelled, 20)
+  assert.equal(result.resolved.payload.entry_date, '2026-07-15')
+  assert.equal(result.resolved.payload.timesheet_id, 'ts-uuid')
+  assert.equal(result.resolved.payload.task_template_id, 'tpl-travel')
+})
+
+test('executeOrdinaryHoursAction: create_vehicle missing week fails closed before persistence', async () => {
+  let adapterCalled = false
+  const adapter = {
+    ...makeAdapterBase(),
+    createVehicleEntry: async () => { adapterCalled = true; return { ok: true, receipt: {}, record: {} } },
+  }
+  const context = {
+    staffId: 's1',
+    clientId: null,
+    scheduleResolver: makeScheduleResolver({
+      timesheet: { resolveWeeklyTimesheet: () => ({ ok: false, error: 'NOT_CONFIGURED', mapping: 'timesheet', reason: 'missing week' }) },
+    }),
+  }
+  const result = await mod.executeOrdinaryHoursAction(context, { type: 'create_vehicle', draft: { date: '2026-07-15', type: 'mileage', distance_km: 20 } }, adapter)
+  assert.equal(result.result.error, 'NOT_CONFIGURED')
+  assert.equal(adapterCalled, false)
+})
+
+test('CG_HOURS_TIMESHEET_TEMPLATE_CONTRACT: documents timesheet/template/Traveling semantics', () => {
+  assert.ok(mod.CG_HOURS_TIMESHEET_TEMPLATE_CONTRACT.timesheet_table.includes('timesheet_id'))
+  assert.ok(mod.CG_HOURS_TIMESHEET_TEMPLATE_CONTRACT.traveling_semantics.includes('tracks_km=true'))
+  assert.ok(mod.CG_HOURS_TIMESHEET_TEMPLATE_CONTRACT.resolution_rule.includes('NOT_CONFIGURED'))
+})

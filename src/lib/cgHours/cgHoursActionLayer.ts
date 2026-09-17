@@ -244,6 +244,203 @@ export async function resolveCgHoursIdentity(
   return { ok: true, cgHoursStaffId: staff.cgHoursId, cgHoursClientId: client.cgHoursId }
 }
 
+// ──────────────────────────────────────────────────────────────────────────────
+// Weekly timesheet + task-template resolution contract (PR #384 requirement)
+// ──────────────────────────────────────────────────────────────────────────────
+// Canonical CG Hours `time_entries` requires a NOT NULL `timesheet_id` (weekly
+// container, unique (staff_id, week_start_date)) and a `task_template_id`. The
+// "Traveling" template is the ONLY task template with tracks_km=true and is the
+// canonical target for kilometre entries. Unresolved, ambiguous, missing-week or
+// missing-template state must fail closed as NOT_CONFIGURED BEFORE persistence.
+//
+// Backing storage (NOT created in this PR — resolution data lives in the
+// canonical CG Hours project; apply is CA-gated):
+//   timesheets      (id, staff_id, week_start_date, week_end_date, status)
+//   task_templates  (id, name, tracks_km)  — "Traveling" has tracks_km=true
+
+export type CgHoursTimesheetResolution =
+  | { ok: true; timesheetId: string; weekStartDate: string; weekEndDate: string }
+  | {
+      ok: false
+      error: 'NOT_CONFIGURED'
+      mapping: 'timesheet'
+      /** e.g. 'no weekly timesheet for staff on entry_date', 'ambiguous: multiple timesheets match week' */
+      reason: string
+    }
+
+export interface CgHoursTimesheetResolver {
+  /**
+   * Resolve the canonical weekly timesheet (timesheets.id) for a CG Hours staff
+   * member and an entry_date (YYYY-MM-DD). Exact week lookup only (week within
+   * week_start_date..week_end_date for that staff). Missing week or ambiguous
+   * match MUST return NOT_CONFIGURED; this layer never creates weeks implicitly.
+   */
+  resolveWeeklyTimesheet(
+    cgHoursStaffId: string,
+    entryDate: string
+  ): Promise<CgHoursTimesheetResolution> | CgHoursTimesheetResolution
+}
+
+export type CgHoursTaskTemplateKind = 'ordinary' | 'traveling'
+
+export interface CgHoursTaskTemplateRef {
+  id: string
+  name: string
+  tracks_km: boolean
+}
+
+export type CgHoursTaskTemplateResolution =
+  | { ok: true; template: CgHoursTaskTemplateRef }
+  | {
+      ok: false
+      error: 'NOT_CONFIGURED'
+      mapping: 'task_template'
+      /** e.g. 'no Traveling template with tracks_km=true', 'ambiguous: multiple templates' */
+      reason: string
+    }
+
+export interface CgHoursTaskTemplateResolver {
+  /**
+   * Resolve the canonical task template for the requested action kind.
+   * - 'ordinary'  -> the default working-hours template; MUST have tracks_km=false.
+   * - 'traveling' -> the exact template named "Traveling"; MUST have tracks_km=true.
+   * Any missing, wrong-named, wrong-flags or ambiguous result MUST return
+   * NOT_CONFIGURED. Never fuzzy/name-tolerant fallback.
+   */
+  resolveTaskTemplate(
+    kind: CgHoursTaskTemplateKind
+  ): Promise<CgHoursTaskTemplateResolution> | CgHoursTaskTemplateResolution
+}
+
+export const CG_HOURS_TIMESHEET_TEMPLATE_CONTRACT = {
+  timesheet_table: 'timesheets(id, staff_id, week_start_date, week_end_date, status) — weekly container, unique (staff_id, week_start_date); time_entries.timesheet_id NOT NULL FK',
+  task_template_table: 'task_templates(id, name, tracks_km) — time_entries.task_template_id FK',
+  traveling_semantics: 'Kilometre entries resolve the exact template named "Traveling" with tracks_km=true; ordinary hours require a template with tracks_km=false.',
+  resolution_rule: 'Resolution happens before persistence. Unresolved/ambiguous/missing-week/missing-template returns CG_HOURS_NOT_CONFIGURED. This layer never creates weeks or templates implicitly.',
+} as const
+
+/**
+ * Resolve canonical weekly timesheet + task template for one action.
+ * Fails closed: any unresolved, ambiguous, missing-week or missing-template
+ * state returns NOT_CONFIGURED before persistence.
+ */
+export async function resolveCgHoursTimesheetAndTemplate(
+  timesheetResolver: CgHoursTimesheetResolver,
+  taskTemplateResolver: CgHoursTaskTemplateResolver,
+  cgHoursStaffId: string,
+  entryDate: string,
+  kind: CgHoursTaskTemplateKind
+): Promise<
+  | { ok: true; timesheetId: string; weekStartDate: string; weekEndDate: string; template: CgHoursTaskTemplateRef }
+  | { ok: false; error: 'NOT_CONFIGURED'; mapping: 'timesheet' | 'task_template'; reason: string }
+> {
+  const timesheet = await timesheetResolver.resolveWeeklyTimesheet(cgHoursStaffId, entryDate)
+  if (!timesheet.ok) {
+    return { ok: false, error: 'NOT_CONFIGURED', mapping: 'timesheet', reason: timesheet.reason }
+  }
+  const template = await taskTemplateResolver.resolveTaskTemplate(kind)
+  if (!template.ok) {
+    return { ok: false, error: 'NOT_CONFIGURED', mapping: 'task_template', reason: template.reason }
+  }
+  return {
+    ok: true,
+    timesheetId: timesheet.timesheetId,
+    weekStartDate: timesheet.weekStartDate,
+    weekEndDate: timesheet.weekEndDate,
+    template: template.template,
+  }
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Canonical CG Hours time_entries payload boundary (PR #384 requirement)
+// ──────────────────────────────────────────────────────────────────────────────
+// The audited canonical CG Hours `time_entries` row uses entry_date /
+// duration_minutes / km_* columns plus timesheet_id and task_template_id. This
+// payload is the exact boundary the final backend RPC/write-through consumes.
+// The final backend RPC is intentionally NOT implemented in this checkpoint
+// (it requires CA-gated migration/apply); this canonical payload boundary is
+// the reviewed hand-off surface for that next step.
+export interface CgHoursCanonicalTimeEntryPayload {
+  staff_id: string // canonical CG Hours profiles.id (already resolved)
+  client_id: string | null // canonical CG Hours clients.id (already resolved)
+  timesheet_id: string // resolved weekly timesheet
+  task_template_id: string // resolved task template
+  entry_date: string // YYYY-MM-DD (canonical column; NOT `date`)
+  duration_minutes: number // canonical column; NOT `hours`
+  task_description?: string
+  notes?: string
+  // Kilometre columns live on the same time_entries row (migration 036).
+  // Only present for Traveling (tracks_km=true) entries.
+  km_travelled?: number
+  km_origin?: string
+  km_destination?: string
+  km_notes?: string
+}
+
+export interface CgHoursCanonicalWriteReceipt extends CgHoursPersistenceReceipt {
+  time_entries_id: string
+  timesheet_id: string
+  task_template_id: string
+}
+
+/**
+ * Build the canonical payload boundary for an ordinary-hours action.
+ * Converts `date` -> `entry_date` and `hours` -> `duration_minutes`.
+ */
+export function toCanonicalOrdinaryHoursPayload(input: {
+  staffId: string
+  clientId: string | null
+  timesheetId: string
+  taskTemplateId: string
+  date: string
+  hours: number
+  taskDescription: string
+  notes?: string
+}): CgHoursCanonicalTimeEntryPayload {
+  return {
+    staff_id: input.staffId,
+    client_id: input.clientId,
+    timesheet_id: input.timesheetId,
+    task_template_id: input.taskTemplateId,
+    entry_date: input.date,
+    duration_minutes: Math.round(input.hours * 60),
+    task_description: input.taskDescription,
+    notes: input.notes,
+  }
+}
+
+/**
+ * Build the canonical payload boundary for a kilometre (Traveling) action.
+ * The task template MUST be the Traveling template (tracks_km=true) and the km
+ * fields are carried on the same unified time_entries row.
+ */
+export function toCanonicalTravellingKmPayload(input: {
+  staffId: string
+  clientId: string | null
+  timesheetId: string
+  taskTemplateId: string
+  date: string
+  hours?: number
+  distanceKm: number
+  origin?: string
+  destination?: string
+  notes?: string
+}): CgHoursCanonicalTimeEntryPayload {
+  return {
+    staff_id: input.staffId,
+    client_id: input.clientId,
+    timesheet_id: input.timesheetId,
+    task_template_id: input.taskTemplateId,
+    entry_date: input.date,
+    duration_minutes: input.hours !== undefined ? Math.round(input.hours * 60) : 0,
+    notes: input.notes,
+    km_travelled: input.distanceKm,
+    km_origin: input.origin,
+    km_destination: input.destination,
+    km_notes: input.notes,
+  }
+}
+
 export interface CgHoursRecentEntriesQuery {
   staff_id: string
   from_date: string // YYYY-MM-DD
@@ -412,6 +609,16 @@ export interface CgHoursOrdinaryHoursActionContext {
    * behavior; real deployments MUST supply a resolver per the mapping contract).
    */
   identityResolver?: CgHoursIdentityResolver
+  /**
+   * Optional weekly timesheet + task-template resolvers (PR #384 contract).
+   * When present, both are resolved BEFORE persistence for create/km actions;
+   * unresolved/ambiguous/missing-week/missing-template fails closed as
+   * NOT_CONFIGURED. When absent, current MCP behavior is preserved.
+   */
+  scheduleResolver?: {
+    timesheet: CgHoursTimesheetResolver
+    taskTemplate: CgHoursTaskTemplateResolver
+  }
 }
 
 export function createOrdinaryHoursEntry(
@@ -680,6 +887,16 @@ export type OrdinaryHoursAction =
 export interface ExecuteOrdinaryHoursActionResult {
   action: OrdinaryHoursAction['type']
   result: CgHoursPersistenceResult<CgHoursTimeEntryRecord | CgHoursTimeEntryRecord[] | CgHoursVehicleEntryRecord | CgHoursVehicleEntryRecord[]>
+  /**
+   * When a scheduleResolver was supplied and resolution succeeded, this carries
+   * the resolved timesheet/task-template plus the canonical time_entries payload
+   * boundary ready for the next (backend write-through) checkpoint.
+   */
+  resolved?: {
+    timesheetId: string
+    taskTemplateId: string
+    payload: CgHoursCanonicalTimeEntryPayload
+  }
 }
 
 /**
@@ -698,7 +915,7 @@ export async function executeOrdinaryHoursAction(
   action: OrdinaryHoursAction,
   adapter?: CgHoursPersistenceAdapter
 ): Promise<ExecuteOrdinaryHoursActionResult> {
-  const { staffId: staffIdRaw, clientId: clientIdRaw, idempotencyKey: keyFn, identityResolver } = context
+  const { staffId: staffIdRaw, clientId: clientIdRaw, idempotencyKey: keyFn, identityResolver, scheduleResolver } = context
 
   if (!adapter) {
     return {
@@ -753,6 +970,59 @@ export async function executeOrdinaryHoursAction(
       if (errors.length > 0) {
         return { action: 'create', result: { ok: false, error: 'VALIDATION_ERROR', details: errors } }
       }
+      // PR #384: resolve weekly timesheet + ordinary task template BEFORE
+      // persistence; missing week/template fails closed as NOT_CONFIGURED.
+      let resolved: ExecuteOrdinaryHoursActionResult['resolved']
+      if (scheduleResolver) {
+        const schedule = await resolveCgHoursTimesheetAndTemplate(
+          scheduleResolver.timesheet,
+          scheduleResolver.taskTemplate,
+          staffId,
+          draft.date,
+          'ordinary'
+        )
+        if (!schedule.ok) {
+          return {
+            action: 'create',
+            result: {
+              ok: false,
+              error: 'NOT_CONFIGURED',
+              contract: {
+                ...CG_HOURS_PERSISTENCE_CONTRACT,
+                mapping_failure: `${schedule.mapping}:${schedule.reason}`,
+              } as CgHoursPersistenceContract,
+            },
+          }
+        }
+        // Exact semantics guard: ordinary hours must not target a km template.
+        if (schedule.template.tracks_km) {
+          return {
+            action: 'create',
+            result: {
+              ok: false,
+              error: 'NOT_CONFIGURED',
+              contract: {
+                ...CG_HOURS_PERSISTENCE_CONTRACT,
+                mapping_failure: `task_template:ordinary template has tracks_km=true; expected tracks_km=false`,
+              } as CgHoursPersistenceContract,
+            },
+          }
+        }
+        resolved = {
+          timesheetId: schedule.timesheetId,
+          taskTemplateId: schedule.template.id,
+          payload: toCanonicalOrdinaryHoursPayload({
+            staffId,
+            clientId: effectiveClientId,
+            timesheetId: schedule.timesheetId,
+            taskTemplateId: schedule.template.id,
+            date: draft.date,
+            hours: draft.hours,
+            taskDescription: draft.task_description,
+            notes: draft.notes,
+          }),
+        }
+      }
       const idempotencyKey = makeIdempotencyKey('create_ordinary_hours_entry', `${staffId}|${effectiveClientId}|${draft.date}`)
       const result = await adapter.createOrdinaryHoursEntry(
         staffId,
@@ -763,7 +1033,7 @@ export async function executeOrdinaryHoursAction(
         draft.notes,
         idempotencyKey
       )
-      return { action: 'create', result }
+      return { action: 'create', result, ...(resolved ? { resolved } : {}) }
     }
 
     case 'read': {
@@ -809,6 +1079,59 @@ export async function executeOrdinaryHoursAction(
       if (errors.length > 0) {
         return { action: 'create_vehicle', result: { ok: false, error: 'VALIDATION_ERROR', details: errors } }
       }
+      // PR #384: resolve weekly timesheet + Traveling task template BEFORE
+      // persistence; missing week/template fails closed as NOT_CONFIGURED.
+      let vehicleResolved: ExecuteOrdinaryHoursActionResult['resolved']
+      if (scheduleResolver) {
+        const schedule = await resolveCgHoursTimesheetAndTemplate(
+          scheduleResolver.timesheet,
+          scheduleResolver.taskTemplate,
+          staffId,
+          draft.date,
+          'traveling'
+        )
+        if (!schedule.ok) {
+          return {
+            action: 'create_vehicle',
+            result: {
+              ok: false,
+              error: 'NOT_CONFIGURED',
+              contract: {
+                ...CG_HOURS_PERSISTENCE_CONTRACT,
+                mapping_failure: `${schedule.mapping}:${schedule.reason}`,
+              } as CgHoursPersistenceContract,
+            },
+          }
+        }
+        // Exact Traveling semantics: km entries require the template named
+        // "Traveling" with tracks_km=true.
+        if (schedule.template.name !== 'Traveling' || schedule.template.tracks_km !== true) {
+          return {
+            action: 'create_vehicle',
+            result: {
+              ok: false,
+              error: 'NOT_CONFIGURED',
+              contract: {
+                ...CG_HOURS_PERSISTENCE_CONTRACT,
+                mapping_failure: `task_template:km entries require template named "Traveling" with tracks_km=true; got name=${schedule.template.name} tracks_km=${schedule.template.tracks_km}`,
+              } as CgHoursPersistenceContract,
+            },
+          }
+        }
+        vehicleResolved = {
+          timesheetId: schedule.timesheetId,
+          taskTemplateId: schedule.template.id,
+          payload: toCanonicalTravellingKmPayload({
+            staffId,
+            clientId: effectiveClientId,
+            timesheetId: schedule.timesheetId,
+            taskTemplateId: schedule.template.id,
+            date: draft.date,
+            distanceKm: draft.distance_km ?? 0,
+            notes: draft.notes,
+          }),
+        }
+      }
       const idempotencyKey = makeIdempotencyKey('create_vehicle_entry', `${staffId}|${effectiveClientId}|${draft.date}|${draft.type}`)
       const result = await adapter.createVehicleEntry(
         staffId,
@@ -823,7 +1146,7 @@ export async function executeOrdinaryHoursAction(
         draft.amount,
         idempotencyKey
       )
-      return { action: 'create_vehicle', result }
+      return { action: 'create_vehicle', result, ...(vehicleResolved ? { resolved: vehicleResolved } : {}) }
     }
 
     case 'read_vehicle': {
