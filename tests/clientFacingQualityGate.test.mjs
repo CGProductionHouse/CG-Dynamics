@@ -227,11 +227,11 @@ test('unscheduled calendar posts appear in a separate section', () => {
 })
 
 // ── 14. Client portal home invariants ─────────────────────────────────────────
-test('home page shows report month badge and action month badge when data available', () => {
+test('home page shows the published report and working month when data is available', () => {
   assert.match(HOME, /reportMonth/)
   assert.match(HOME, /actionMonth/)
   assert.match(HOME, /monthDisplayLabel/)
-  assert.match(HOME, /Latest report:|Planning month:/i)
+  assert.match(HOME, /Latest report|Working month/i)
 })
 
 test('portal home does not sum facts or show totalViews/totalReach across platforms', () => {
@@ -500,9 +500,9 @@ test('client strategy page is read-only (no mutations)', () => {
   assert.doesNotMatch(STRATEGY_PAGE, /\binsert\b|\bdelete\b|\.update\(|\.create\(|\.from\(.*\.insert|\.from\(.*\.delete/i)
 })
 
-test('client portal home links to strategy page', () => {
-  assert.match(HOME, /\/client\/strategy/)
-  assert.match(HOME, /Strategy/)
+test('client portal home links strategy content through the staged Plan destination', () => {
+  assert.match(HOME, /\/client\/plan/)
+  assert.match(HOME, /strategy/i)
 })
 
 test('strategy page uses ClientPortalShell with client data', () => {

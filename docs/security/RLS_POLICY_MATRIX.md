@@ -85,6 +85,18 @@ false row permits either a null pair or a complete explicit-off pair.
 | visible Planner task select | SELECT | Planner activity follows board visibility; `admin_only` requires `is_admin()`. Managers/admins retain non-Planner operational audit visibility |
 | direct write | INSERT/UPDATE/DELETE | No authenticated grant or policy; assignment/status RPCs write audit rows |
 
+## monthly_client_strategies and revisions
+
+| Policy | Type | Effect |
+|--------|------|--------|
+| active staff read | SELECT | Active `admin`, `manager`, `staff`, or `team` profile only |
+| direct writes | INSERT/UPDATE/DELETE | No authenticated grant or policy; guarded RPCs only |
+| client projection | RPC | Active client receives only its own exact-month published safe snapshot |
+
+Mutation RPCs resolve the effective actor against `profiles`, require exact client/month,
+optimistic version and idempotency key, and append before/after evidence. Service-role
+assistant calls do not bypass the effective active-staff actor check.
+
 ## profiles
 
 | Policy | Type | Effect |
