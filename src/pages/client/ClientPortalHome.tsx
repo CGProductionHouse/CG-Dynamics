@@ -97,115 +97,193 @@ export default function ClientPortalHome() {
   return (
     <ClientPortalShell client={data.client}>
       {loading ? (
-        <PortalStatus message="Preparing your client portal..." />
+        <LoadingState />
       ) : error ? (
-        <PortalStatus message="Your portal could not be loaded right now. Please try again shortly." tone="error" />
+        <ErrorState />
       ) : (
         <>
-          <section className="max-w-4xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-report-accent">Client overview</p>
-            <h1 className="mt-3 text-3xl font-semibold tracking-normal text-white sm:text-5xl">
-              Welcome{data.client ? `, ${data.client.name}` : ''}
-            </h1>
-            <p className="mt-4 max-w-2xl text-base leading-7 text-report-muted">
-              Your performance, campaign activity and upcoming content in one clear place.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-2">
-              <PortalBadge
-                label={reportMonth ? `Latest report: ${monthDisplayLabel(reportMonth)}` : 'No published report yet'}
-              />
-              {actionMonth && <PortalBadge label={`Planning month: ${monthDisplayLabel(actionMonth)}`} accent />}
-            </div>
-          </section>
+          {/* ── Hero ─────────────────────────────────────────────────────── */}
+          <section className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-[linear-gradient(165deg,rgba(20,45,40,0.7),rgba(5,10,9,0.95))] px-6 py-10 sm:px-10 sm:py-14">
+            <div aria-hidden className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-report-accent/[0.07] blur-3xl" />
+            <div aria-hidden className="pointer-events-none absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-[#c37a49]/[0.05] blur-3xl" />
 
-          <section className="mt-10 grid gap-4 lg:grid-cols-3">
-            <PortalCard
-              to="/client/strategy"
-              eyebrow="Strategy & direction"
-              title="Strategy"
-              description="Reviewed forward-looking strategy, client direction, action plan and campaign recommendations."
-              detail={
-                data.report?.status === 'published'
-                  ? 'Strategy available from the latest published report.'
-                  : 'Strategy will appear when the current review is complete and published.'
-              }
-            />
-            <PortalCard
-              to="/client/performance"
-              eyebrow="Verified reporting"
-              title="Performance Dashboard"
-              description="Review published organic and profile performance with clear source and availability context."
-              detail={
-                activeOrganic.length > 0
-                  ? `Active reporting: ${activeOrganic.join(', ')}`
-                  : 'No verified organic source is available in the latest published report.'
-              }
-            />
-            <PortalCard
-              to="/client/campaigns"
-              eyebrow="Paid media"
-              title="Campaigns"
-              description="See verified paid campaign reporting and the optimisation direction behind it."
-              detail={
-                googleAdsActive
-                  ? data.googleAdsState === 'data'
-                    ? 'Google Ads reporting is active.'
-                    : 'Google Ads is connected with no activity recorded for this report month.'
-                  : 'Campaign reporting is not active for this report month.'
-              }
-            />
-            <PortalCard
-              to="/client/content-calendar"
-              eyebrow="Planning"
-              title="Content Calendar"
-              description="View upcoming scheduled deliverables. Client-visible concepts, guidelines and scripts will appear when approved and available."
-              detail={
-                data.calendarCount === null
-                  ? 'Schedule details will appear as they become available.'
-                  : `${data.calendarCount} scheduled item${data.calendarCount === 1 ? '' : 's'} currently visible for the planning month.`
-              }
-            />
-            <PortalCard
-              to="/client/content-guides"
-              eyebrow="Production"
-              title="Content Guides"
-              description="Approved concepts, scripts, shot breakdowns and direction notes for published content guides."
-              detail="Published guides for the current month are displayed once approved and released by your team."
-            />
-          </section>
+            <div className="relative">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-report-accent">
+                {data.client ? 'Client portal' : 'Welcome'}
+              </p>
+              <h1 className="mt-3 text-4xl font-bold tracking-tight text-white sm:text-6xl">
+                {data.client?.name ?? 'Your Portal'}
+              </h1>
 
-          <section className="mt-12 border-t border-white/[0.07] pt-10">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-report-accent">Current game plan</p>
-                <h2 className="mt-2 text-2xl font-semibold tracking-normal text-white">From insight to action</h2>
+              <div className="mt-5 flex flex-wrap items-center gap-3">
+                {reportMonth && (
+                  <span className="rounded-full border border-white/10 bg-white/[0.05] px-3.5 py-1.5 text-xs font-medium text-report-muted">
+                    Latest report: {monthDisplayLabel(reportMonth)}
+                  </span>
+                )}
+                {actionMonth && (
+                  <span className="rounded-full border border-report-accent/20 bg-report-accent/10 px-3.5 py-1.5 text-xs font-medium text-report-accent">
+                    Working month: {monthDisplayLabel(actionMonth)}
+                  </span>
+                )}
+                {!reportMonth && (
+                  <span className="rounded-full border border-white/10 bg-white/[0.05] px-3.5 py-1.5 text-xs font-medium text-report-muted">
+                    Reporting setup in progress
+                  </span>
+                )}
               </div>
-              {reportMonth && <p className="text-sm text-report-faint">From the {monthDisplayLabel(reportMonth)} review</p>}
+
+              <p className="mt-6 max-w-xl text-base leading-7 text-report-muted">
+                {reportMonth
+                  ? `Performance, strategy and upcoming content for ${monthDisplayLabel(reportMonth)} in one clear view.`
+                  : 'Your performance data and content plan will appear here once reporting is connected.'}
+              </p>
+            </div>
+          </section>
+
+          {/* ── Performance at a glance ──────────────────────────────────── */}
+          <section className="mt-8">
+            <div className="flex items-end justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-report-accent">Performance</p>
+                <h2 className="mt-2 text-2xl font-semibold tracking-normal text-white">At a glance</h2>
+              </div>
+              <Link
+                to="/client/performance"
+                className="hidden text-sm font-medium text-report-accent transition hover:text-white sm:inline"
+              >
+                View full report
+              </Link>
             </div>
 
-            {strategy.length > 0 ? (
-              <div className="mt-6 grid gap-4 md:grid-cols-2">
-                {strategy.map(item => (
-                  <article
-                    key={`${item.phase}-${item.label}`}
-                    className="rounded-lg border border-white/[0.08] bg-white/[0.035] p-5 shadow-[0_18px_55px_rgba(0,0,0,0.2)]"
-                  >
-                    <p className={`text-xs font-semibold uppercase tracking-[0.16em] ${
-                      item.phase === 'review' ? 'text-report-muted' : 'text-report-accent'
-                    }`}>
-                      {item.label}
-                    </p>
-                    <p className="mt-3 whitespace-pre-line text-sm leading-6 text-report-text">{item.value}</p>
-                  </article>
-                ))}
+            {activeOrganic.length > 0 || googleAdsActive ? (
+              <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {activeOrganic.length > 0 && (
+                  <MetricCard
+                    label="Active channels"
+                    value={String(activeOrganic.length)}
+                    detail={activeOrganic.join(', ')}
+                  />
+                )}
+                {googleAdsActive && (
+                  <MetricCard
+                    label="Paid media"
+                    value={data.googleAdsState === 'data' ? 'Active' : 'Connected'}
+                    detail={data.googleAdsState === 'data' ? 'Google Ads reporting live' : 'No activity this period'}
+                  />
+                )}
+                {reportMonth && (
+                  <MetricCard
+                    label="Report"
+                    value={monthDisplayLabel(reportMonth)}
+                    detail="Latest published report"
+                  />
+                )}
               </div>
             ) : (
-              <div className="mt-6 rounded-lg border border-white/[0.08] bg-white/[0.03] px-5 py-6">
+              <div className="mt-5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-5 py-6">
                 <p className="text-sm leading-6 text-report-muted">
-                  Your next strategy update will appear here once the current reporting review is complete.
+                  Performance data will appear here once your reporting sources are connected and verified.
                 </p>
               </div>
             )}
+
+            <Link
+              to="/client/performance"
+              className="mt-4 inline-flex text-sm font-medium text-report-accent transition hover:text-white sm:hidden"
+            >
+              View full report
+            </Link>
+          </section>
+
+          {/* ── Strategy + Calendar (asymmetric two-column) ──────────────── */}
+          <section className="mt-10 grid gap-5 lg:grid-cols-5">
+            {/* Strategy — wider column */}
+            <div className="lg:col-span-3">
+              <div className="flex items-end justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-report-accent">Strategy</p>
+                  <h2 className="mt-2 text-2xl font-semibold tracking-normal text-white">Current direction</h2>
+                </div>
+                <Link
+                  to="/client/plan"
+                  className="hidden text-sm font-medium text-report-accent transition hover:text-white sm:inline"
+                >
+                  View plan
+                </Link>
+              </div>
+
+              {strategy.length > 0 ? (
+                <div className="mt-5 space-y-3">
+                  {strategy.map(item => (
+                    <article
+                      key={`${item.phase}-${item.label}`}
+                      className="rounded-lg border border-white/[0.08] bg-white/[0.035] p-5"
+                    >
+                      <p className={`text-xs font-semibold uppercase tracking-[0.16em] ${
+                        item.phase === 'review' ? 'text-report-muted' : 'text-report-accent'
+                      }`}>
+                        {item.label}
+                      </p>
+                      <p className="mt-2 whitespace-pre-line text-sm leading-6 text-report-text">{item.value}</p>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <div className="mt-5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-5 py-6">
+                  <p className="text-sm leading-6 text-report-muted">
+                    Your next strategy update will appear here once the current reporting review is complete.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Calendar — narrower column */}
+            <div className="lg:col-span-2">
+              <div className="flex items-end justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-report-accent">Content</p>
+                  <h2 className="mt-2 text-2xl font-semibold tracking-normal text-white">Upcoming</h2>
+                </div>
+                <Link
+                  to="/client/plan"
+                  className="hidden text-sm font-medium text-report-accent transition hover:text-white sm:inline"
+                >
+                  View calendar
+                </Link>
+              </div>
+
+              <div className="mt-5 rounded-lg border border-white/[0.08] bg-white/[0.035] p-5">
+                {data.calendarCount !== null && data.calendarCount > 0 ? (
+                  <>
+                    <p className="text-3xl font-bold text-white">{data.calendarCount}</p>
+                    <p className="mt-1 text-sm text-report-muted">
+                      scheduled item{data.calendarCount === 1 ? '' : 's'} for the planning month
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-sm leading-6 text-report-muted">
+                    Content scheduling details will appear here as they become available.
+                  </p>
+                )}
+              </div>
+
+              <Link
+                to="/client/plan"
+                className="mt-4 inline-flex text-sm font-medium text-report-accent transition hover:text-white sm:hidden"
+              >
+                View calendar
+              </Link>
+            </div>
+          </section>
+
+          {/* ── Quick links ──────────────────────────────────────────────── */}
+          <section className="mt-10 border-t border-white/[0.07] pt-8">
+            <div className="grid gap-3 sm:grid-cols-3">
+              <QuickLink to="/client/plan" label="Plan" description="Strategy, calendar and content guidelines" />
+              <QuickLink to="/client/performance" label="Performance" description="Verified reporting and campaign data" />
+              <QuickLink to="/client/approvals" label="Approvals" description="Content review status" />
+            </div>
           </section>
         </>
       )}
@@ -213,53 +291,47 @@ export default function ClientPortalHome() {
   )
 }
 
-function PortalCard({
-  to,
-  eyebrow,
-  title,
-  description,
-  detail,
-}: {
-  to: string
-  eyebrow: string
-  title: string
-  description: string
-  detail: string
-}) {
+function MetricCard({ label, value, detail }: { label: string; value: string; detail?: string }) {
+  return (
+    <div className="rounded-lg border border-white/[0.08] bg-white/[0.035] p-4">
+      <p className="text-xs font-medium uppercase tracking-[0.14em] text-report-faint">{label}</p>
+      <p className="mt-2 text-2xl font-bold text-white">{value}</p>
+      {detail && <p className="mt-1 text-xs text-report-faint">{detail}</p>}
+    </div>
+  )
+}
+
+function QuickLink({ to, label, description }: { to: string; label: string; description: string }) {
   return (
     <Link
       to={to}
-      className="group flex min-h-64 flex-col rounded-lg border border-white/[0.09] bg-[linear-gradient(145deg,rgba(20,45,40,0.62),rgba(10,15,14,0.92))] p-6 shadow-[0_22px_70px_rgba(0,0,0,0.3)] transition hover:-translate-y-0.5 hover:border-report-accent/35"
+      className="group rounded-lg border border-white/[0.08] bg-white/[0.03] p-4 transition hover:border-report-accent/30 hover:bg-white/[0.05]"
     >
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-report-accent">{eyebrow}</p>
-      <h2 className="mt-4 text-xl font-semibold tracking-normal text-white">{title}</h2>
-      <p className="mt-3 text-sm leading-6 text-report-muted">{description}</p>
-      <p className="mt-auto border-t border-white/[0.07] pt-5 text-xs leading-5 text-report-faint">{detail}</p>
-      <span className="mt-4 text-sm font-medium text-report-accent transition group-hover:text-white">Open {title}</span>
+      <p className="text-sm font-semibold text-white">{label}</p>
+      <p className="mt-1 text-xs text-report-faint">{description}</p>
+      <span className="mt-3 inline-block text-xs font-medium text-report-accent transition group-hover:text-white">
+        Open
+      </span>
     </Link>
   )
 }
 
-function PortalBadge({ label, accent = false }: { label: string; accent?: boolean }) {
+function LoadingState() {
   return (
-    <span className={`rounded-full border px-3 py-1.5 text-xs ${
-      accent
-        ? 'border-report-accent/25 bg-report-accent/10 text-report-accent'
-        : 'border-white/10 bg-white/[0.03] text-report-muted'
-    }`}>
-      {label}
-    </span>
+    <div className="flex items-center justify-center py-24">
+      <div className="rounded-lg border border-white/[0.08] bg-white/[0.03] px-6 py-4 text-sm text-report-muted">
+        Preparing your portal...
+      </div>
+    </div>
   )
 }
 
-function PortalStatus({ message, tone = 'normal' }: { message: string; tone?: 'normal' | 'error' }) {
+function ErrorState() {
   return (
-    <div className={`rounded-lg border px-5 py-6 text-sm ${
-      tone === 'error'
-        ? 'border-[#d8a07a]/20 bg-[#d8a07a]/[0.06] text-[#d8a07a]'
-        : 'border-white/[0.08] bg-white/[0.03] text-report-muted'
-    }`}>
-      {message}
+    <div className="flex items-center justify-center py-24">
+      <div className="rounded-lg border border-[#d8a07a]/20 bg-[#d8a07a]/[0.06] px-6 py-4 text-sm text-[#d8a07a]">
+        Your portal could not be loaded right now. Please try again shortly.
+      </div>
     </div>
   )
 }

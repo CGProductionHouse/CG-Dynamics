@@ -55,12 +55,10 @@ const CommandCentrePage = lazyRoute(() => import('./pages/admin/CommandCentrePag
 const OpsHubPage = lazyRoute(() => import('./pages/admin/OpsHubPage'))
 const Dashboard = lazyRoute(() => import('./pages/client/Dashboard'))
 const ClientPortalHome = lazyRoute(() => import('./pages/client/ClientPortalHome'))
-const ClientCampaignsPage = lazyRoute(() => import('./pages/client/ClientCampaignsPage'))
-const ClientPortalCalendarPage = lazyRoute(() => import('./pages/client/ClientContentCalendarPage'))
-const ClientContentGuidesPage = lazyRoute(() => import('./pages/client/ClientContentGuidesPage'))
-const ClientStrategyPage = lazyRoute(() => import('./pages/client/ClientStrategyPage'))
+const ClientPlanPage = lazyRoute(() => import('./pages/client/ClientPlanPage'))
+const ClientBrandHubPage = lazyRoute(() => import('./pages/client/ClientBrandHubPage'))
 const WelcomeToCgPage = lazyRoute(() => import('./features/client-onboarding/WelcomeToCgPage'))
-const ClientSetupPage = lazyRoute(() => import('./features/client-onboarding/ClientSetupPage'))
+const ClientContentGuidesPage = lazyRoute(() => import('./pages/client/ClientContentGuidesPage'))
 const InternalOnboardingPage = lazyRoute(() => import('./features/client-onboarding/InternalOnboardingPage'))
 const OAuthConsentPage = lazyRoute(() => import('./pages/OAuthConsentPage'))
 
@@ -190,13 +188,16 @@ export default function App() {
           {/* Client routes */}
           <Route element={<RequireClient />}>
             <Route path="/client" element={<ClientPortalHome />} />
+            <Route path="/client/plan" element={<ClientPlanPage />} />
             <Route path="/client/performance" element={<Dashboard />} />
-            <Route path="/client/campaigns" element={<ClientCampaignsPage />} />
-            <Route path="/client/content-calendar" element={<ClientPortalCalendarPage />} />
             <Route path="/client/approvals" element={<ContentReviewsPage clientView />} />
-            <Route path="/client/content-guides" element={<ClientContentGuidesPage />} />
-            <Route path="/client/strategy" element={<ClientStrategyPage />} />
-            <Route path="/client/setup" element={<ClientSetupPage />} />
+            <Route path="/client/brand-hub" element={<ClientBrandHubPage />} />
+            {/* Safe deep links from superseded routes */}
+            <Route path="/client/strategy" element={<Navigate to="/client/plan" replace />} />
+            <Route path="/client/content-calendar" element={<Navigate to="/client/plan" replace />} />
+            <Route path="/client/content-guides" element={<Navigate to="/client/plan" replace />} />
+            <Route path="/client/campaigns" element={<Navigate to="/client/performance" replace />} />
+            <Route path="/client/setup" element={<Navigate to="/client/brand-hub" replace />} />
             <Route path="/dashboard" element={<Navigate to="/client" replace />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

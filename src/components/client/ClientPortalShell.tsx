@@ -7,13 +7,10 @@ import type { Client } from '../../lib/db/clients'
 
 const NAV_ITEMS = [
   { to: '/client', label: 'Overview', end: true },
-  { to: '/client/strategy', label: 'Strategy', end: false },
+  { to: '/client/plan', label: 'Plan', end: false },
   { to: '/client/performance', label: 'Performance', end: false },
-  { to: '/client/campaigns', label: 'Campaigns', end: false },
-  { to: '/client/content-calendar', label: 'Content calendar', end: false },
   { to: '/client/approvals', label: 'Approvals', end: false },
-  { to: '/client/content-guides', label: 'Content guides', end: false },
-  { to: '/client/setup', label: 'Setup', end: false },
+  { to: '/client/brand-hub', label: 'Brand Hub', end: false },
 ] as const
 
 export function ClientPortalShell({
