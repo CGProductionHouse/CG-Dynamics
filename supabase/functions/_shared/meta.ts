@@ -132,6 +132,9 @@ export async function metaFetch(
     } catch (e) {
       clearTimeout(timer)
       if (e instanceof MetaSyncDeadlineError) throw e
+      if (e instanceof DOMException && e.name === 'AbortError') {
+        throw new MetaSyncDeadlineError(`request attempt ${attempt + 1}`)
+      }
       lastErr = e
     }
     assertMetaSyncActive(control, `request attempt ${attempt + 1} completion`)
