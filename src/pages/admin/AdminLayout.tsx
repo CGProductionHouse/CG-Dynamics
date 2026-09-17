@@ -12,10 +12,10 @@ const GlobalAssistantComposer = lazy(() => import('../../components/assistant/Gl
 const NOTIFICATION_POLL_MS = 30_000
 const ZONE_STORAGE_KEY = 'cg-nav-zone-v1'
 
-// The mobile quick-nav stays the same for every role — Hub / Work / Calendar /
-// Schedule / More. Manager-only work entries (Team Work, Morning List Import)
-// live in the More drawer instead of displacing Calendar or Schedule.
-const MOBILE_QUICK_PATHS = ['/admin/cg-hub', '/admin/work', '/admin/cg-calendar', '/admin/client-schedule']
+// The mobile primary nav: Hub / Work / Content / Calendar / More.
+// Manager-only work entries live in the More drawer instead of displacing the primary 5.
+// Client Schedule (Schedule) is a manager+ admin surface behind More.
+const MOBILE_PRIMARY_PATHS = ['/admin/cg-hub', '/admin/work', '/admin/content', '/admin/cg-calendar']
 
 function scheduleWhenIdle(callback: () => void) {
   const idleWindow = window as Window & {
@@ -145,7 +145,7 @@ export default function AdminLayout() {
   const zoneItems = zone === 'performance' ? performanceItems : primaryItems
   const mobilePrimaryItems = zone === 'performance'
     ? zoneItems.slice(0, 4)
-    : primaryItems.filter(item => MOBILE_QUICK_PATHS.includes(item.to))
+    : primaryItems.filter(item => MOBILE_PRIMARY_PATHS.includes(item.to))
   const assistantVisible = location.pathname !== '/admin/assistant'
   const closeMobile = () => setMobileMenuOpen(false)
 
@@ -333,7 +333,7 @@ export default function AdminLayout() {
 
       <MyDayContextStoreProvider>
         <main
-          className={`min-w-0 flex-1 overflow-auto md:h-screen ${assistantVisible ? 'pb-[calc(9rem+env(safe-area-inset-bottom))] md:pb-16' : 'pb-[calc(3.5rem+env(safe-area-inset-bottom))] md:pb-0'}`}
+          className={`min-w-0 flex-1 overflow-auto md:h-screen ${assistantVisible ? 'pb-[calc(3.5rem+env(safe-area-inset-bottom))] md:pb-16' : 'pb-[calc(3.5rem+env(safe-area-inset-bottom))] md:pb-0'}`}
           aria-hidden={assistantFullscreen || undefined}
           inert={assistantFullscreen || undefined}
         >
