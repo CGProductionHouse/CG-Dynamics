@@ -130,7 +130,7 @@ test('no inline client_name string survives against monthly_deliverables', () =>
 
 test('both handlers flatten before returning', () => {
   assert.match(INDEX, /deliverables: flattenDeliverableClient\(scheduleResult\.data\)/)
-  assert.match(INDEX, /deliverables: flattenDeliverableClient\(data\), error: error\?\.message \?\? null/)
+  assert.match(INDEX, /deliverables: flattenDeliverableClient\(data\)[\s\S]*?if \(error\?\.message\) result\.error = error\.message/)
 })
 
 // ── Client Schedule semantics unchanged ─────────────────────────────────────

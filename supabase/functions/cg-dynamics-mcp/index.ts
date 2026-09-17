@@ -504,8 +504,8 @@ const handleGetMyDay: ToolHandler = async (staff) => {
   const [tasksResult, calendarResult, scheduleResult] = await Promise.all([
     staff.supabase
       .from('planner_tasks')
-      .select('id, title, assigned_to_name, due_date, status, notes, client_name, client_id')
-      .eq('assigned_to_name', staff.fullName)
+      .select('id, title, assigned_to_name, due_date, status, notes, client_name, client_id, assigned_to_user_id, assignee_user_ids')
+      .eq('assigned_to_user_id', staff.profileId)
       .is('archived_at', null)
       .is('microsoft_source_removed_at', null)
       .in('status', ACTIVE_TASK_STATES)
@@ -522,7 +522,7 @@ const handleGetMyDay: ToolHandler = async (staff) => {
     staff.supabase
       .from('monthly_deliverables')
       .select(MY_DAY_DELIVERABLE_SELECT)
-      .eq('assigned_to_name', staff.fullName)
+      .eq('assigned_to_user_id', staff.profileId)
       .eq('scheduled_date', today)
       .order('scheduled_date', { ascending: true })
       .limit(20),
@@ -543,11 +543,9 @@ const handleListMyTasks: ToolHandler = async (staff, input) => {
   let query = staff.supabase
     .from('planner_tasks')
     .select(`id, title, assigned_to_name, due_date, status, notes, client_name, client_id, created_at, updated_at, ${PLANNER_MICROSOFT_FIELDS.join(', ')}`)
-    .eq('assigned_to_name', staff.fullName)
+    .eq('assigned_to_user_id', staff.profileId)
     .is('archived_at', null)
     .is('microsoft_source_removed_at', null)
-    .order('due_date', { ascending: true })
-    .limit(50)
 
   if (input.status) query = query.eq('status', input.status)
   else query = query.in('status', ACTIVE_TASK_STATES)
@@ -555,20 +553,22 @@ const handleListMyTasks: ToolHandler = async (staff, input) => {
 
   const { data, error } = await query
   // #325: durable Microsoft identity + freshness so the Assistant can reconcile by ID.
-  return { tasks: withSourceLinkage(data, 'planner'), error: error?.message ?? null }
+  const result = { tasks: withSourceLinkage(data, 'planner') }
+  if (error?.message) result.error = error.message
+  return result
 }
 
 const handleGetTask: ToolHandler = async (staff, input) => {
   const taskId = input.task_id as string
   const { data, error } = await staff.supabase
     .from('planner_tasks')
-    .select('id, title, assigned_to_name, due_date, status, notes, client_name, client_id, created_at, updated_at')
+    .select('id, title, assigned_to_name, due_date, status, notes, client_name, client_id, created_at, updated_at, assigned_to_user_id')
     .eq('id', taskId)
     .maybeSingle()
 
   if (error) return { error: error.message }
   if (!data) return { error: 'Task not found.' }
-  if (data.assigned_to_name !== staff.fullName && staff.role === 'staff') {
+  if ((staff.role === 'staff' || staff.role === 'team') && data.assigned_to_user_id !== staff.profileId) {
     return { error: 'You can only read tasks assigned to you.' }
   }
   return data
@@ -584,7 +584,9 @@ const handleListMyCalendar: ToolHandler = async (staff, input) => {
     .limit(50)
 
   // #325: durable Outlook identity + freshness for ID-based dedupe against live Outlook.
-  return { events: withSourceLinkage(data, 'calendar'), error: error?.message ?? null }
+  const result = { events: withSourceLinkage(data, 'calendar') }
+  if (error?.message) result.error = error.message
+  return result
 }
 
 const handleListClientSchedule: ToolHandler = async (staff, input) => {
@@ -599,7 +601,10 @@ const handleListClientSchedule: ToolHandler = async (staff, input) => {
   if (input.client_id) query.eq('client_id', input.client_id)
 
   const { data, error } = await query
-  return { deliverables: flattenDeliverableClient(data), error: error?.message ?? null }
+  // #325: durable Microsoft identity + freshness so the Assistant can reconcile by ID.
+  const result = { deliverables: flattenDeliverableClient(data) }
+  if (error?.message) result.error = error.message
+  return result
 }
 
 /**
@@ -1614,7 +1619,10 @@ const handleListMyLeads: ToolHandler = async (staff, input) => {
   if (input.stage) query.eq('stage', input.stage)
 
   const { data, error } = await query
-  return { leads: data ?? [], error: error?.message ?? null }
+  // #325: avoid surfacing error: null as outer error — only include error when present
+  const result = { leads: data ?? [] }
+  if (error?.message) result.error = error.message
+  return result
 }
 
 const handleGetLead: ToolHandler = async (staff, input) => {
@@ -1972,14 +1980,16 @@ const handleGetMyAssistantBootstrap: ToolHandler = async (staff) => {
 const handleGetMyRecurringTasks: ToolHandler = async (staff) => {
   const { data, error } = await staff.supabase
     .from('planner_tasks')
-    .select('id, title, assigned_to_name, due_date, status, notes, client_name, client_id, recurrence_rule, recurrence_until, created_at, updated_at')
-    .eq('assigned_to_name', staff.fullName)
+    .select('id, title, assigned_to_name, due_date, status, notes, client_name, client_id, recurrence_rule, recurrence_until, created_at, updated_at, assigned_to_user_id')
+    .eq('assigned_to_user_id', staff.profileId)
     .not('recurrence_rule', 'is', null)
     .is('archived_at', null)
     .order('created_at', { ascending: false })
-    .limit(50)
 
-  return { templates: data ?? [], error: error?.message ?? null }
+  // #325: avoid surfacing error: null as outer error — only include error when present
+  const result = { templates: data ?? [] }
+  if (error?.message) result.error = error.message
+  return result
 }
 
 const handleCreateRecurringTask: ToolHandler = async (staff, input) => {
