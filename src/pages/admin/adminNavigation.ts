@@ -26,7 +26,7 @@ export const primaryNavItems: NavItem[] = [
   // Marketing/Knowledge is a daily destination all staff can use: they search
   // approved shared knowledge. Source administration, review and registration
   // sections are admin-scoped inside the page and by RLS.
-  { to: '/admin/marketing', label: 'Marketing', shortLabel: 'Marketing', marker: 'MK', activePaths: ['/admin/marketing', '/admin/marketing-library', '/admin/marketing-ai', '/admin/skill-card-review'] },
+  { to: '/admin/marketing', label: 'Marketing', shortLabel: 'Marketing', marker: 'MK', activePaths: ['/admin/marketing', '/admin/marketing-library', '/admin/marketing-ai', '/admin/skill-card-review', '/admin/email-marketing'] },
 ]
 
 // Client Performance zone — the client-intelligence surfaces, kept prominent and
