@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Navigate, useLocation, useSearchParams } from 'react-router-dom'
-import { ClientPortalShell } from '../../components/client/ClientPortalShell'
 import { useAuth } from '../../contexts/AuthContext'
 import { actionMonthForReport } from '../../lib/clientPortal'
-import { getClient, type Client } from '../../lib/db/clients'
 import { listClientPublishedReports } from '../../lib/db/reports'
 import { monthDisplayLabel, selectMonthlyReports } from '../../lib/reportPeriod'
 import ClientContentCalendarPage from './ClientContentCalendarPage'
@@ -32,7 +30,6 @@ function shiftMonth(month: string, amount: number) {
 export default function ClientPlanPage() {
   const { profile } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
-  const [client, setClient] = useState<Client | null>(null)
   const [fallbackMonth, setFallbackMonth] = useState(currentMonth)
 
   const requestedMonth = searchParams.get('month')
@@ -44,12 +41,8 @@ export default function ClientPlanPage() {
     let active = true
     async function loadContext() {
       if (!profile?.client_id) return
-      const [clientResult, reportsResult] = await Promise.all([
-        getClient(profile.client_id),
-        listClientPublishedReports(),
-      ])
+      const reportsResult = await listClientPublishedReports()
       if (!active) return
-      if (!clientResult.error) setClient(clientResult.data)
       if (!requestedMonth && !reportsResult.error) {
         const latest = selectMonthlyReports(reportsResult.data)[0] ?? null
         setFallbackMonth(actionMonthForReport(latest) ?? currentMonth())
@@ -74,7 +67,7 @@ export default function ClientPlanPage() {
       : <ClientStrategyPage embedded month={month} />
 
   return (
-    <ClientPortalShell client={client}>
+    <>
       <section className="relative overflow-hidden rounded-[2rem] border border-white/[0.08] bg-[radial-gradient(circle_at_12%_5%,rgba(45,212,191,0.16),transparent_34%),radial-gradient(circle_at_90%_15%,rgba(249,115,22,0.12),transparent_28%),linear-gradient(145deg,rgba(10,27,24,0.96),rgba(5,12,11,0.94))] px-5 py-7 shadow-[0_34px_100px_-55px_rgba(0,0,0,0.95)] sm:px-8 sm:py-10 lg:px-10">
         <div aria-hidden className="absolute -left-16 top-8 h-44 w-44 rounded-full bg-[#2dd4bf]/10 blur-3xl" />
         <div aria-hidden className="absolute -right-20 bottom-0 h-52 w-52 rounded-full bg-[#f97316]/10 blur-3xl" />
@@ -116,7 +109,7 @@ export default function ClientPlanPage() {
       </div>
 
       <section role="tabpanel" className="mt-7">{tabPanel}</section>
-    </ClientPortalShell>
+    </>
   )
 }
 

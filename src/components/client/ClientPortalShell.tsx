@@ -126,7 +126,7 @@ export function ClientPortalShell({
         </nav>
       </header>
 
-      <main className="relative z-[1] mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
+      <main id="client-portal-content" className="relative z-[1] mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
         {children}
       </main>
     </div>

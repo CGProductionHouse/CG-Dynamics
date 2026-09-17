@@ -6,6 +6,7 @@ import { RequireStaff } from './components/guards/RequireStaff'
 import { RequireAdmin } from './components/guards/RequireAdmin'
 import { RequireManager } from './components/guards/RequireManager'
 import { RequireClient } from './components/guards/RequireClient'
+import { ClientPortalLayout } from './components/client/ClientPortalLayout'
 import AdminLayout from './pages/admin/AdminLayout'
 import { RouteLoadBoundary } from './components/RouteLoadBoundary'
 import { lazyRoute } from './lib/lazyRoute'
@@ -189,19 +190,21 @@ export default function App() {
 
           {/* Client routes */}
           <Route element={<RequireClient />}>
-            <Route path="/client" element={<ClientPortalHome />} />
-            <Route path="/client/plan" element={<ClientPlanPage />} />
-            <Route path="/client/performance" element={<Dashboard />} />
-            <Route path="/client/approvals" element={<ContentReviewsPage clientView />} />
-            {/* Pass 1: /client/brand-hub renders existing Setup until Pass 4 refines */}
-            <Route path="/client/brand-hub" element={<ClientSetupPage />} />
-            {/* Pass 2 legacy deep links preserve query context inside the unified Plan. */}
-            <Route path="/client/strategy" element={<ClientPlanLegacyRedirect tab="strategy" />} />
-            <Route path="/client/content-calendar" element={<ClientPlanLegacyRedirect tab="calendar" />} />
-            <Route path="/client/content-guides" element={<ClientPlanLegacyRedirect tab="guidelines" />} />
-            <Route path="/client/campaigns" element={<ClientCampaignsPage />} />
-            <Route path="/client/setup" element={<ClientSetupPage />} />
-            <Route path="/dashboard" element={<Navigate to="/client" replace />} />
+            <Route element={<ClientPortalLayout />}>
+              <Route path="/client" element={<ClientPortalHome />} />
+              <Route path="/client/plan" element={<ClientPlanPage />} />
+              <Route path="/client/performance" element={<Dashboard />} />
+              <Route path="/client/approvals" element={<ContentReviewsPage clientView />} />
+              {/* Pass 1: /client/brand-hub renders existing Setup until Pass 4 refines */}
+              <Route path="/client/brand-hub" element={<ClientSetupPage />} />
+              {/* Pass 2 legacy deep links preserve query context inside the unified Plan. */}
+              <Route path="/client/strategy" element={<ClientPlanLegacyRedirect tab="strategy" />} />
+              <Route path="/client/content-calendar" element={<ClientPlanLegacyRedirect tab="calendar" />} />
+              <Route path="/client/content-guides" element={<ClientPlanLegacyRedirect tab="guidelines" />} />
+              <Route path="/client/campaigns" element={<ClientCampaignsPage />} />
+              <Route path="/client/setup" element={<ClientSetupPage />} />
+              <Route path="/dashboard" element={<Navigate to="/client" replace />} />
+            </Route>
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

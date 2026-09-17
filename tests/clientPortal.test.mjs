@@ -6,9 +6,13 @@ import { createServer } from 'vite'
 const readSource = relativePath => readFileSync(new URL(relativePath, import.meta.url), 'utf8')
 
 const APP_SOURCE = readSource('../src/App.tsx')
+const LAYOUT_SOURCE = readSource('../src/components/client/ClientPortalLayout.tsx')
 const SHELL_SOURCE = readSource('../src/components/client/ClientPortalShell.tsx')
 const HOME_SOURCE = readSource('../src/pages/client/ClientPortalHome.tsx')
 const PERFORMANCE_SOURCE = readSource('../src/pages/client/Dashboard.tsx')
+const PLAN_SOURCE = readSource('../src/pages/client/ClientPlanPage.tsx')
+const APPROVALS_SOURCE = readSource('../src/pages/admin/ContentReviewsPage.tsx')
+const BRAND_HUB_SOURCE = readSource('../src/features/client-onboarding/ClientSetupPage.tsx')
 const CAMPAIGNS_SOURCE = readSource('../src/pages/client/ClientCampaignsPage.tsx')
 const REPORT_VIEW_SOURCE = readSource('../src/pages/client/ClientReportView.tsx')
 const CALENDAR_PAGE_SOURCE = readSource('../src/pages/client/ClientContentCalendarPage.tsx')
@@ -71,6 +75,25 @@ test('shared portal navigation links every client area and keeps sign out availa
     assert.ok(APP_SOURCE.includes(`path="${legacyRoute}"`))
   }
   assert.match(SHELL_SOURCE, /onClick=\{\(\) => void signOut\(\)\}/)
+})
+
+test('one persistent client layout owns the shell while routed pages render content only', () => {
+  const clientRoutes = APP_SOURCE.slice(
+    APP_SOURCE.indexOf('{/* Client routes */}'),
+    APP_SOURCE.indexOf('<Route path="*"')
+  )
+
+  assert.match(clientRoutes, /<Route element=\{<RequireClient \/>\}>[\s\S]*<Route element=\{<ClientPortalLayout \/>\}>/)
+  assert.match(LAYOUT_SOURCE, /<ClientPortalShell client=\{client\}>[\s\S]*<Suspense fallback=\{<ClientPortalContentLoading \/>\}>[\s\S]*<Outlet \/>/)
+  assert.match(LAYOUT_SOURCE, /getClient\(profile\.client_id\)/)
+  assert.match(LAYOUT_SOURCE, /motion-reduce:animate-none/)
+
+  for (const page of [HOME_SOURCE, PLAN_SOURCE, PERFORMANCE_SOURCE, APPROVALS_SOURCE, BRAND_HUB_SOURCE]) {
+    assert.doesNotMatch(page, /<ClientPortalShell/)
+  }
+  for (const page of [HOME_SOURCE, PLAN_SOURCE, PERFORMANCE_SOURCE, APPROVALS_SOURCE, BRAND_HUB_SOURCE]) {
+    assert.doesNotMatch(page, /getClient\(/)
+  }
 })
 
 test('client mobile navigation exposes every destination without horizontal-scroll discovery', () => {
