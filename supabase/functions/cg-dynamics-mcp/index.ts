@@ -88,6 +88,7 @@ import {
   type ProjectContextKind,
 } from './projectContext.ts'
 import {
+  CG_HOURS_BACKEND_GAP,
   durableCgHoursRecordId,
   invokeCgHoursStaffLogger,
   validateCgHoursStaffLoggerConfig,
@@ -2617,6 +2618,7 @@ const CG_HOURS_NOT_CONFIGURED = {
     idempotency_strategy: 'Dynamics keeps the same idempotency_key across retries; CG Hours returns the original durable time_entries record.',
     staff_isolation: 'A short-lived single-use capability is issued only from the exact authenticated staff Project context. CG Hours maps capability.sub to its own staff identity.',
     lifecycle: 'Draft-only. This caller cannot submit, approve, reopen, run payroll, or perform admin actions.',
+    backend_gap: CG_HOURS_BACKEND_GAP,
   },
 }
 

@@ -21,6 +21,36 @@ export interface CgHoursStaffLoggerConfig {
   secret: string
 }
 
+/**
+ * Durable BACKEND_GAP handoff (Issue #361, PR #376, 2026-09-17).
+ *
+ * CGProductionHouse/CG-Hours main (`56869571d3417947a90bd06c3ba4d8cf89a4350c`) exposes NO
+ * existing create/read/correct authority for canonical `time_entries` that Dynamics may use.
+ * The only reviewed seam is unmerged CG-Hours PR #3
+ * (reviewed head `18e6122f8bce3040169c21d9cb9e4306ef07f24c`):
+ *
+ *   POST /api/staff-logger/invoke
+ *     header  x-cg-staff-capability — Dynamics-issued short-lived single-use HS256 capability
+ *     staff identity resolved server-side via `staff_logger_identity_map` (JTI spent once)
+ *     restricted, draft-only nine-tool staff-logger catalogue (no submit/approve/reopen/payroll/admin)
+ *
+ * Until that exact endpoint ships on CG-Hours main, every Dynamics handler MUST fail closed as
+ * CG_HOURS_NOT_CONFIGURED (envs must stay unset). Never claim a log/correct success without a
+ * CG Hours response carrying a durable time_entries record id (`data.entry_id`/`data.record_id`).
+ *
+ * Smallest CA-gated change to close this gap: merge CG-Hours PR #3 unchanged and configure
+ * CG_HOURS_STAFF_LOGGER_URL + CG_HOURS_STAFF_LOGGER_SECRET. No Dynamics migration, table,
+ * shadow ledger or second backend is required.
+ */
+export const CG_HOURS_BACKEND_GAP = {
+  status: 'BACKEND_GAP' as const,
+  missing_authority: 'POST /api/staff-logger/invoke (capability x-cg-staff-capability) on CG Hours main',
+  authority_source: 'CGProductionHouse/CG-Hours PR #3',
+  authority_head: '18e6122f8bce3040169c21d9cb9e4306ef07f24c',
+  cg_hours_main_checked: '56869571d3417947a90bd06c3ba4d8cf89a4350c',
+  required_to_close: 'Merge CG-Hours PR #3 unchanged, then set CG_HOURS_STAFF_LOGGER_URL and CG_HOURS_STAFF_LOGGER_SECRET.',
+} as const
+
 export type CgHoursStaffLoggerResult =
   | { ok: true; message: string; data?: Record<string, unknown> }
   | {

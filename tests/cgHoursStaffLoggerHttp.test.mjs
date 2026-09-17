@@ -107,6 +107,27 @@ test('backend refusal and missing durable identity never become claimed success'
   assert.equal(staffLogger.durableCgHoursRecordId(missingReceipt), null)
 })
 
+test('backend gap handoff names the missing CG Hours main authority and unconfigured calls fail closed without fetch', async () => {
+  const gap = staffLogger.CG_HOURS_BACKEND_GAP
+  assert.equal(gap.status, 'BACKEND_GAP')
+  assert.match(gap.missing_authority, /POST \/api\/staff-logger\/invoke/)
+  assert.match(gap.missing_authority, /x-cg-staff-capability/)
+  assert.equal(gap.authority_source, 'CGProductionHouse/CG-Hours PR #3')
+  assert.match(gap.authority_head, /^[0-9a-f]{40}$/)
+  assert.match(gap.cg_hours_main_checked, /^[0-9a-f]{40}$/)
+  assert.match(gap.required_to_close, /CG_HOURS_STAFF_LOGGER_URL/)
+
+  let fetched = 0
+  const result = await staffLogger.invokeCgHoursStaffLogger(null, STAFF_ID, 'add_my_time_entry', { idempotency_key: 'k' }, {
+    fetchImpl: async () => { fetched += 1; throw new Error('must never fetch without backend authority') },
+  })
+  assert.equal(fetched, 0)
+  assert.equal(result.ok, false)
+  assert.equal(result.error, 'CG_HOURS_NOT_CONFIGURED')
+
+  assert.match(INDEX, /backend_gap: CG_HOURS_BACKEND_GAP/)
+})
+
 test('four Dynamics tools match the closed PR #3 HTTP shapes and expose no reimbursement semantics', () => {
   const byName = name => catalog.CG_DYNAMICS_MCP_TOOLS.find(tool => tool.name === name)
   const ordinary = byName('log_ordinary_hours')
