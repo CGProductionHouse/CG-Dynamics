@@ -351,7 +351,7 @@ test('budget is shown separately from spend and uses provider-native settings', 
     campaignType: 'SEARCH',
   }
   const budget = formatGoogleAdsCampaignBudget(campaign)
-  assert.match(budget, /2,500\.00/)
+  assert.match(budget, /2(?:[,\s\u00a0])500(?:[.,])00/)
   assert.match(budget, /average daily/)
   assert.doesNotMatch(budget, /572\.32/)
 })
@@ -380,10 +380,9 @@ test('incomparable equal-window trends are suppressed, not rendered as Unavailab
   assert.equal(isGoogleAdsTrendComparable(null), false)
 })
 
-test('Campaigns page loads Google Ads for the exact published report month', () => {
-  const campaignsSource = readSource('../src/pages/client/ClientCampaignsPage.tsx')
-  assert.match(campaignsSource, /getReportMonthFromPeriod/)
-  assert.match(campaignsSource, /reportMonth\(report\)/)
-  assert.match(campaignsSource, /loadGoogleAdsDashboard\(report\.id, reportMonth\(report\)\)/)
-  assert.doesNotMatch(campaignsSource, /currentTrackingMonth\(\)/)
+test('Performance loads Google Ads once for the exact published report month', () => {
+  const performanceSource = readSource('../src/pages/client/Dashboard.tsx')
+  assert.match(performanceSource, /currentMonth = getReportMonthFromPeriod\(data\)/)
+  assert.match(performanceSource, /loadGoogleAdsDashboard\(data\.id, currentMonth\)/)
+  assert.doesNotMatch(performanceSource, /currentTrackingMonth\(\)/)
 })

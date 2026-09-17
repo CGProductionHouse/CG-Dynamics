@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { getClient, type Client } from '../../lib/db/clients'
 import {
@@ -12,7 +13,7 @@ import {
   type ReportManualMetric,
 } from '../../lib/db/manualMetrics'
 import { getReportMonthFromPeriod, monthDisplayLabel, previousReportMonth, selectMonthlyReports } from '../../lib/reportPeriod'
-import { ClientReportView, EmptyReportState } from './ClientReportView'
+import { ClientReportView, EmptyReportState, type ReportTabKey } from './ClientReportView'
 import { ClientMonthAhead } from '../../components/client/ClientMonthAhead'
 import { ClientPortalShell } from '../../components/client/ClientPortalShell'
 import {
@@ -39,6 +40,7 @@ function monthLabel(report: ClientReport) {
 
 export default function Dashboard() {
   const { profile } = useAuth()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [reports, setReports] = useState<ClientReport[]>([])
   const [client, setClient] = useState<Client | null>(null)
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null)
@@ -57,6 +59,14 @@ export default function Dashboard() {
   const reportRequestRef = useRef(0)
 
   const months = useMemo(() => selectMonthlyReports(reports), [reports])
+  const requestedTab = parseReportTab(searchParams.get('tab'))
+
+  const handleTabChange = (tab: ReportTabKey) => {
+    const next = new URLSearchParams(searchParams)
+    if (tab === 'overview') next.delete('tab')
+    else next.set('tab', tab)
+    setSearchParams(next, { replace: true })
+  }
 
   useEffect(() => {
     const requestId = ++reportsRequestRef.current
@@ -254,6 +264,8 @@ export default function Dashboard() {
           facts={facts}
           previousFacts={previousFacts}
           normalizedFactsAttempted={normalizedFactsAttempted}
+          initialTab={requestedTab}
+          onTabChange={handleTabChange}
         />
       ) : (
         <EmptyReportState
@@ -267,4 +279,9 @@ export default function Dashboard() {
       {profile.client_id && <ClientMonthAhead clientId={profile.client_id} />}
     </ClientPortalShell>
   )
+}
+
+function parseReportTab(value: string | null): ReportTabKey {
+  if (value === 'facebook' || value === 'instagram' || value === 'campaigns' || value === 'google_ads') return value
+  return 'overview'
 }

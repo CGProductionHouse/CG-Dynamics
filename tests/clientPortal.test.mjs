@@ -10,6 +10,7 @@ const SHELL_SOURCE = readSource('../src/components/client/ClientPortalShell.tsx'
 const HOME_SOURCE = readSource('../src/pages/client/ClientPortalHome.tsx')
 const PERFORMANCE_SOURCE = readSource('../src/pages/client/Dashboard.tsx')
 const CAMPAIGNS_SOURCE = readSource('../src/pages/client/ClientCampaignsPage.tsx')
+const REPORT_VIEW_SOURCE = readSource('../src/pages/client/ClientReportView.tsx')
 const CALENDAR_PAGE_SOURCE = readSource('../src/pages/client/ClientContentCalendarPage.tsx')
 const CALENDAR_LIB_SOURCE = readSource('../src/lib/clientPortalCalendar.ts')
 const REPORTS_SOURCE = readSource('../src/lib/db/reports.ts')
@@ -94,7 +95,8 @@ test('portal pages use the signed-in client and only published monthly reports',
   assert.match(HOME_SOURCE, /profile\.client_id/)
   assert.match(HOME_SOURCE, /listClientPublishedReports\(\)/)
   assert.match(PERFORMANCE_SOURCE, /listClientPublishedReports\(\)/)
-  assert.match(CAMPAIGNS_SOURCE, /listClientPublishedReports\(\)/)
+  assert.match(CAMPAIGNS_SOURCE, /Navigate to="\/client\/performance\?tab=campaigns" replace/)
+  assert.doesNotMatch(CAMPAIGNS_SOURCE, /listClientPublishedReports|loadGoogleAdsDashboard/)
   assert.match(REPORTS_SOURCE, /supabase\.rpc\('client_published_reports'\)/)
   assert.doesNotMatch(REPORTS_SOURCE, /listPublishedReportsForClient/)
 })
@@ -129,7 +131,8 @@ test('only genuinely available Facebook and Instagram facts become active platfo
 
   assert.deepEqual(activeOrganicPlatforms(facts), ['Facebook'])
   assert.doesNotMatch(HOME_SOURCE, /TikTok reporting is active|Google Business Profile reporting is active/)
-  assert.match(CAMPAIGNS_SOURCE, /This campaign source is not connected in the client portal yet/)
+  assert.doesNotMatch(REPORT_VIEW_SOURCE, /Meta Ads|TikTok Ads|Planned integration/)
+  assert.match(REPORT_VIEW_SOURCE, /No verified campaign source is configured/)
 })
 
 test('strategy preview uses published reviewed fields and has an honest empty state', () => {
