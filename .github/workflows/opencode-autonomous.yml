@@ -18,7 +18,7 @@ permissions:
 jobs:
   autonomous:
     runs-on: ubuntu-latest
-    timeout-minutes: 55
+    timeout-minutes: 40
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -26,7 +26,7 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
 
-      - name: Run OpenCode — primary
+      - name: Run OpenCode — free primary
         id: primary
         timeout-minutes: 25
         continue-on-error: true
@@ -35,7 +35,7 @@ jobs:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          model: ${{ vars.OPENCODE_PRIMARY_MODEL || 'opencode/nemotron-3-ultra-free' }}
+          model: opencode/nemotron-3-ultra-free
           prompt: |
             Operate as the autonomous CG Dynamics engineering worker.
 
@@ -47,57 +47,29 @@ jobs:
 
             Preserve the canonical architecture and security boundaries recorded in GitHub. Never invent credentials, weaken auth/RLS/client isolation, make destructive production guesses, or expose secrets. Do not merge PRs, deploy production, apply production migrations, change provider permissions/secrets, or perform external publishing from this unattended worker. Leave verified work at a clean PR/review gate for the supervisor.
 
+            FREE MODEL RULE: this unattended workflow may use free model routes only. Never use OpenCode Zen credits or OpenCode Go. If the free route cannot complete safely, stop cleanly rather than falling back to a paid or credit-backed route.
+
             If #216 is launch-ready or only true external blockers remain, make no code changes and exit quietly without posting a routine status update.
 
-      - name: Run OpenCode — Go quality fallback
-        id: go
-        timeout-minutes: 15
-        if: steps.primary.outcome == 'failure'
-        continue-on-error: true
-        uses: anomalyco/opencode/github@latest
-        env:
-          OPENCODE_API_KEY: ${{ secrets.OPENCODE_GO_API_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          model: opencode-go/glm-5.3
-          prompt: |
-            Continue the autonomous CG Dynamics engineering mission from current GitHub truth. Read current main, Issue #216 latest comments, open PR ownership, and linked launch issues first. Do not duplicate active work.
-
-            Pick the highest-priority safe unowned task, implement and verify it, and open/update a focused PR when there is a real code change. Do not post routine progress/status comments on issues or PRs; keep routine evidence in workflow logs, commits and the PR body. Preserve canonical architecture and all auth/RLS/client boundaries. Never invent credentials or make unsafe destructive guesses. This unattended worker must not merge, production-deploy, apply production migrations, change provider permissions/secrets, or publish externally. If blocked, leave a clean review gate and let the supervisor surface the blocker to CA.
-
-      - name: Run OpenCode — configured quality fallback
-        id: sol
-        timeout-minutes: 8
-        if: steps.primary.outcome == 'failure' && steps.go.outcome == 'failure' && vars.OPENCODE_FALLBACK_MODEL_1 != ''
-        continue-on-error: true
-        uses: anomalyco/opencode/github@latest
-        env:
-          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          model: ${{ vars.OPENCODE_FALLBACK_MODEL_1 }}
-          prompt: |
-            Continue the autonomous CG Dynamics engineering mission from current GitHub truth. Read current main, Issue #216 latest comments, open PR ownership, and linked launch issues first. Do not duplicate active work.
-
-            Pick the highest-priority safe unowned task, implement and verify it, and open/update a focused PR when there is a real code change. Do not post routine progress/status comments on issues or PRs; keep routine evidence in workflow logs, commits and the PR body. Preserve canonical architecture and all auth/RLS/client boundaries. Never invent credentials or make unsafe destructive guesses. This unattended worker must not merge, production-deploy, apply production migrations, change provider permissions/secrets, or publish externally. If blocked, leave a clean review gate and let the supervisor surface that blocker to CA.
-
-      - name: Run OpenCode — NVIDIA fallback
+      - name: Run OpenCode — free NVIDIA fallback
         id: nvidia
-        timeout-minutes: 5
-        if: steps.primary.outcome == 'failure' && steps.go.outcome == 'failure' && (vars.OPENCODE_FALLBACK_MODEL_1 == '' || steps.sol.outcome == 'failure') && vars.OPENCODE_NVIDIA_MODEL != ''
+        timeout-minutes: 10
+        if: steps.primary.outcome == 'failure'
         continue-on-error: true
         uses: anomalyco/opencode/github@latest
         env:
           NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          model: ${{ vars.OPENCODE_NVIDIA_MODEL }}
+          model: nvidia/nvidia/nemotron-3.5-lightning-30b-a3b
           prompt: |
             Continue the autonomous CG Dynamics engineering mission from current GitHub truth. Read current main, Issue #216 latest comments, open PR ownership, and linked launch issues first. Do not duplicate active work.
 
-            Pick the highest-priority safe unowned task, implement and verify it, and open/update a focused PR when there is a real code change. Do not post routine progress/status comments on issues or PRs; keep routine evidence in workflow logs, commits and the PR body. Preserve canonical architecture and all auth/RLS/client boundaries. Never invent credentials or make unsafe destructive guesses. This unattended worker must not merge, production-deploy, apply production migrations, change provider permissions/secrets, or publish externally. If blocked, leave a clean review gate and let the supervisor surface that blocker to CA.
+            Pick the highest-priority safe unowned task, implement and verify it, and open/update a focused PR when there is a real code change. Do not post routine progress/status comments on issues or PRs; keep routine evidence in workflow logs, commits and the PR body. Preserve canonical architecture and all auth/RLS/client boundaries. Never invent credentials or make unsafe destructive guesses. This unattended worker must not merge, production-deploy, apply production migrations, change provider permissions/secrets, or publish externally. If blocked, leave a clean review gate and let the supervisor surface the blocker to CA.
 
-      - name: Record unavailable model lanes
-        if: steps.primary.outcome == 'failure' && steps.go.outcome == 'failure' && (vars.OPENCODE_FALLBACK_MODEL_1 == '' || steps.sol.outcome == 'failure') && (vars.OPENCODE_NVIDIA_MODEL == '' || steps.nvidia.outcome == 'failure')
+            FREE MODEL RULE: use this free NVIDIA route only. Never use OpenCode Zen credits or OpenCode Go. If unavailable, stop cleanly.
+
+      - name: Record unavailable free model lanes
+        if: steps.primary.outcome == 'failure' && steps.nvidia.outcome == 'failure'
         run: |
-          echo "All configured OpenCode model lanes were unavailable or failed. The supervisor can inspect this run; no email-worthy failure is raised here."
+          echo "All approved free OpenCode/NVIDIA model lanes were unavailable or failed. Stop cleanly; no paid or credit-backed fallback is permitted."
