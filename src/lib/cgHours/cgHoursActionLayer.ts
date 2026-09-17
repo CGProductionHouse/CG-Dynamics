@@ -181,6 +181,69 @@ export const CG_HOURS_PERSISTENCE_CONTRACT: CgHoursPersistenceContract = {
   staff_client_isolation: 'Staff can only create/read/correct their own entries. Client-scoped context restricts to that client_id. Cross-staff/client access denied.',
 }
 
+// ──────────────────────────────────────────────────────────────────────────────
+// Cross-project identity resolution contract (PR #384 requirement)
+// ──────────────────────────────────────────────────────────────────────────────
+// CG Hours is a separate Supabase project with its own `profiles` and `clients`
+// tables. CG Dynamics staff/client UUIDs MUST NOT be passed through directly.
+// Typed resolution must happen before any persistence call; unresolved or
+// ambiguous mappings fail closed as NOT_CONFIGURED.
+//
+// Backing storage (NOT created in this PR — mapping apply is a CA-gated step):
+//   cg_hours_staff_mapping  (dynamics_staff_id uuid PK, hours_staff_id uuid NOT NULL)
+//   cg_hours_client_mapping (dynamics_client_id uuid PK, hours_client_id uuid NOT NULL)
+export type CgHoursMappingKind = 'staff' | 'client'
+
+export type CgHoursMappingResolution =
+  | { ok: true; cgHoursId: string }
+  | {
+      ok: false
+      error: 'NOT_CONFIGURED'
+      mapping: CgHoursMappingKind
+      /** The Dynamics-side identifier that could not be resolved. */
+      identifier: string
+      /** e.g. 'no mapping row', 'ambiguous: multiple CG Hours matches' */
+      reason: string
+    }
+
+export interface CgHoursIdentityResolver {
+  resolveStaff(dynamicsStaffId: string): Promise<CgHoursMappingResolution> | CgHoursMappingResolution
+  resolveClient(dynamicsClientId: string): Promise<CgHoursMappingResolution> | CgHoursMappingResolution
+}
+
+export const CG_HOURS_MAPPING_CONTRACT = {
+  staff_mapping_table: 'cg_hours_staff_mapping(dynamics_staff_id uuid PK -> hours_staff_id uuid NOT NULL UNIQUE)',
+  client_mapping_table: 'cg_hours_client_mapping(dynamics_client_id uuid PK -> hours_client_id uuid NOT NULL UNIQUE)',
+  resolution_rule: 'Exact UUID lookup only. Never fuzzy/name matching. Unresolved or ambiguous mapping fails closed as CG_HOURS_NOT_CONFIGURED before any persistence call.',
+} as const
+
+/**
+ * Resolve Dynamics staff/client identities into canonical CG Hours UUIDs.
+ * Fails closed: any unresolved or ambiguous mapping returns NOT_CONFIGURED
+ * before persistence. Never passes Dynamics UUIDs through to CG Hours.
+ */
+export async function resolveCgHoursIdentity(
+  resolver: CgHoursIdentityResolver,
+  dynamicsStaffId: string,
+  dynamicsClientId: string | null
+): Promise<
+  | { ok: true; cgHoursStaffId: string; cgHoursClientId: string | null }
+  | { ok: false; error: 'NOT_CONFIGURED'; mapping: CgHoursMappingKind; identifier: string; reason: string }
+> {
+  const staff = await resolver.resolveStaff(dynamicsStaffId)
+  if (!staff.ok) {
+    return { ok: false, error: 'NOT_CONFIGURED', mapping: 'staff', identifier: dynamicsStaffId, reason: staff.reason }
+  }
+  if (dynamicsClientId === null) {
+    return { ok: true, cgHoursStaffId: staff.cgHoursId, cgHoursClientId: null }
+  }
+  const client = await resolver.resolveClient(dynamicsClientId)
+  if (!client.ok) {
+    return { ok: false, error: 'NOT_CONFIGURED', mapping: 'client', identifier: dynamicsClientId, reason: client.reason }
+  }
+  return { ok: true, cgHoursStaffId: staff.cgHoursId, cgHoursClientId: client.cgHoursId }
+}
+
 export interface CgHoursRecentEntriesQuery {
   staff_id: string
   from_date: string // YYYY-MM-DD
@@ -341,6 +404,14 @@ export interface CgHoursOrdinaryHoursActionContext {
   staffId: string
   clientId: string | null
   idempotencyKey?: (action: string, requestKey: string) => string
+  /**
+   * Optional cross-project identity resolver (PR #384 contract). When present,
+   * Dynamics staff/client IDs are resolved to canonical CG Hours UUIDs before
+   * persistence; unresolved/ambiguous mappings fail closed as NOT_CONFIGURED.
+   * When absent, context IDs pass through unchanged (preserves current MCP
+   * behavior; real deployments MUST supply a resolver per the mapping contract).
+   */
+  identityResolver?: CgHoursIdentityResolver
 }
 
 export function createOrdinaryHoursEntry(
@@ -627,7 +698,7 @@ export async function executeOrdinaryHoursAction(
   action: OrdinaryHoursAction,
   adapter?: CgHoursPersistenceAdapter
 ): Promise<ExecuteOrdinaryHoursActionResult> {
-  const { staffId, clientId, idempotencyKey: keyFn } = context
+  const { staffId: staffIdRaw, clientId: clientIdRaw, idempotencyKey: keyFn, identityResolver } = context
 
   if (!adapter) {
     return {
@@ -638,6 +709,31 @@ export async function executeOrdinaryHoursAction(
         contract: CG_HOURS_PERSISTENCE_CONTRACT,
       },
     }
+  }
+
+  // Cross-project identity resolution (PR #384): when a resolver is supplied,
+  // Dynamics staff/client IDs are mapped to canonical CG Hours UUIDs before any
+  // persistence call. Unresolved/ambiguous mappings fail closed as NOT_CONFIGURED;
+  // Dynamics UUIDs are never passed through when a resolver is present.
+  let staffId = staffIdRaw
+  let clientId = clientIdRaw
+  if (identityResolver) {
+    const resolved = await resolveCgHoursIdentity(identityResolver, staffIdRaw, clientIdRaw)
+    if (!resolved.ok) {
+      return {
+        action: action.type,
+        result: {
+          ok: false,
+          error: 'NOT_CONFIGURED',
+          contract: {
+            ...CG_HOURS_PERSISTENCE_CONTRACT,
+            mapping_failure: `${resolved.mapping}:${resolved.identifier}:${resolved.reason}`,
+          } as CgHoursPersistenceContract,
+        },
+      }
+    }
+    staffId = resolved.cgHoursStaffId
+    clientId = resolved.cgHoursClientId
   }
 
   const makeIdempotencyKey = (actionName: string, requestKey: string): string =>

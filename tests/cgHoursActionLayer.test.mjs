@@ -1131,3 +1131,142 @@ test('executeOrdinaryHoursAction: read_vehicle action passes correct params to a
   const result = await mod.executeOrdinaryHoursAction(context, action, mockAdapter)
   assert.equal(result.result.ok, true)
 })
+// ──────────────────────────────────────────────────────────────────────────────
+// Cross-project identity resolution contract (PR #384)
+// ──────────────────────────────────────────────────────────────────────────────
+
+test('resolveCgHoursIdentity: unresolved staff mapping fails closed as NOT_CONFIGURED', async () => {
+  const resolver = {
+    resolveStaff: () => ({ ok: false, error: 'NOT_CONFIGURED', mapping: 'staff', identifier: 'staff-uuid-dyn', reason: 'no mapping row' }),
+    resolveClient: () => ({ ok: true, cgHoursId: 'hours-client-1' }),
+  }
+  const result = await mod.resolveCgHoursIdentity(resolver, 'staff-uuid-dyn', 'client-uuid-dyn')
+  assert.equal(result.ok, false)
+  assert.equal(result.error, 'NOT_CONFIGURED')
+  assert.equal(result.mapping, 'staff')
+  assert.equal(result.identifier, 'staff-uuid-dyn')
+})
+
+test('resolveCgHoursIdentity: unresolved client mapping fails closed as NOT_CONFIGURED', async () => {
+  const resolver = {
+    resolveStaff: () => ({ ok: true, cgHoursId: 'hours-staff-1' }),
+    resolveClient: () => ({ ok: false, error: 'NOT_CONFIGURED', mapping: 'client', identifier: 'client-uuid-dyn', reason: 'ambiguous: multiple CG Hours matches' }),
+  }
+  const result = await mod.resolveCgHoursIdentity(resolver, 'staff-uuid-dyn', 'client-uuid-dyn')
+  assert.equal(result.ok, false)
+  assert.equal(result.error, 'NOT_CONFIGURED')
+  assert.equal(result.mapping, 'client')
+  assert.equal(result.identifier, 'client-uuid-dyn')
+})
+
+test('resolveCgHoursIdentity: null client skips client resolution', async () => {
+  let clientResolved = false
+  const resolver = {
+    resolveStaff: () => ({ ok: true, cgHoursId: 'hours-staff-1' }),
+    resolveClient: () => { clientResolved = true; return { ok: true, cgHoursId: 'hours-client-1' } },
+  }
+  const result = await mod.resolveCgHoursIdentity(resolver, 'staff-uuid-dyn', null)
+  assert.equal(result.ok, true)
+  assert.equal(result.cgHoursStaffId, 'hours-staff-1')
+  assert.equal(result.cgHoursClientId, null)
+  assert.equal(clientResolved, false)
+})
+
+test('resolveCgHoursIdentity: resolved staff + client returns canonical CG Hours IDs', async () => {
+  const resolver = {
+    resolveStaff: () => ({ ok: true, cgHoursId: 'hours-staff-9' }),
+    resolveClient: () => ({ ok: true, cgHoursId: 'hours-client-9' }),
+  }
+  const result = await mod.resolveCgHoursIdentity(resolver, 'dyn-staff', 'dyn-client')
+  assert.equal(result.ok, true)
+  assert.equal(result.cgHoursStaffId, 'hours-staff-9')
+  assert.equal(result.cgHoursClientId, 'hours-client-9')
+})
+
+test('executeOrdinaryHoursAction: resolver unresolved staff fails closed before persistence', async () => {
+  let adapterCalled = false
+  const adapter = {
+    createOrdinaryHoursEntry: async () => { adapterCalled = true; return { ok: true, receipt: {}, record: {} } },
+    readOrdinaryHoursEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyOrdinaryHoursCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+    createVehicleEntry: async () => { adapterCalled = true; return { ok: true, receipt: {}, record: {} } },
+    readVehicleEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyVehicleCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+  }
+  const context = {
+    staffId: 'dyn-staff-1',
+    clientId: 'dyn-client-1',
+    identityResolver: {
+      resolveStaff: () => ({ ok: false, error: 'NOT_CONFIGURED', mapping: 'staff', identifier: 'dyn-staff-1', reason: 'no mapping row' }),
+      resolveClient: () => ({ ok: true, cgHoursId: 'hours-client-1' }),
+    },
+  }
+  const action = { type: 'create', draft: { date: '2026-07-15', type: 'time', hours: 2, task_description: 'Work' } }
+  const result = await mod.executeOrdinaryHoursAction(context, action, adapter)
+  assert.equal(result.result.ok, false)
+  assert.equal(result.result.error, 'NOT_CONFIGURED')
+  assert.equal(adapterCalled, false)
+})
+
+test('executeOrdinaryHoursAction: resolver unresolved client fails closed before persistence', async () => {
+  let adapterCalled = false
+  const adapter = {
+    createOrdinaryHoursEntry: async () => { adapterCalled = true; return { ok: true, receipt: {}, record: {} } },
+    readOrdinaryHoursEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyOrdinaryHoursCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+    createVehicleEntry: async () => { adapterCalled = true; return { ok: true, receipt: {}, record: {} } },
+    readVehicleEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyVehicleCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+  }
+  const context = {
+    staffId: 'dyn-staff-1',
+    clientId: 'dyn-client-1',
+    identityResolver: {
+      resolveStaff: () => ({ ok: true, cgHoursId: 'hours-staff-1' }),
+      resolveClient: () => ({ ok: false, error: 'NOT_CONFIGURED', mapping: 'client', identifier: 'dyn-client-1', reason: 'no mapping row' }),
+    },
+  }
+  const action = { type: 'create', draft: { date: '2026-07-15', type: 'time', hours: 2, task_description: 'Work' } }
+  const result = await mod.executeOrdinaryHoursAction(context, action, adapter)
+  assert.equal(result.result.ok, false)
+  assert.equal(result.result.error, 'NOT_CONFIGURED')
+  assert.equal(adapterCalled, false)
+})
+
+test('executeOrdinaryHoursAction: resolved identity passes canonical CG Hours IDs to adapter (Dynamics IDs never passed through)', async () => {
+  let seenStaff = null
+  let seenClient = null
+  const adapter = {
+    createOrdinaryHoursEntry: async (staffId, clientId) => {
+      seenStaff = staffId; seenClient = clientId
+      return { ok: true, receipt: { record_id: 'r-1', idempotency_key: 'k', created_at: '2026-07-15T10:00:00Z' }, record: { id: 'r-1', staff_id: staffId, client_id: clientId } }
+    },
+    readOrdinaryHoursEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyOrdinaryHoursCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+    createVehicleEntry: async () => ({ ok: true, receipt: {}, record: {} }),
+    readVehicleEntries: async () => ({ ok: true, receipt: {}, record: [] }),
+    applyVehicleCorrection: async () => ({ ok: true, receipt: {}, record: {} }),
+  }
+  const context = {
+    staffId: 'dyn-staff-1',
+    clientId: 'dyn-client-1',
+    identityResolver: {
+      resolveStaff: () => ({ ok: true, cgHoursId: 'hours-staff-uuid' }),
+      resolveClient: () => ({ ok: true, cgHoursId: 'hours-client-uuid' }),
+    },
+  }
+  const action = { type: 'create', draft: { date: '2026-07-15', type: 'time', hours: 2, task_description: 'Work' } }
+  const result = await mod.executeOrdinaryHoursAction(context, action, adapter)
+  assert.equal(result.result.ok, true)
+  assert.equal(seenStaff, 'hours-staff-uuid')
+  assert.equal(seenClient, 'hours-client-uuid')
+  assert.notEqual(seenStaff, 'dyn-staff-1')
+  assert.notEqual(seenClient, 'dyn-client-1')
+})
+
+test('CG_HOURS_MAPPING_CONTRACT: documents exact mapping tables and resolution rule', () => {
+  assert.ok(mod.CG_HOURS_MAPPING_CONTRACT.staff_mapping_table.includes('cg_hours_staff_mapping'))
+  assert.ok(mod.CG_HOURS_MAPPING_CONTRACT.client_mapping_table.includes('cg_hours_client_mapping'))
+  assert.ok(mod.CG_HOURS_MAPPING_CONTRACT.resolution_rule.includes('NOT_CONFIGURED'))
+  assert.ok(mod.CG_HOURS_MAPPING_CONTRACT.resolution_rule.includes('Never fuzzy'))
+})
