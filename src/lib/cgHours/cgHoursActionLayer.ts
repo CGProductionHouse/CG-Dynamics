@@ -398,6 +398,10 @@ export function applyOrdinaryHoursCorrection(
     throw new Error(`Staff isolation violation: correcting staff ${entry.staff_id} differs from context staff ${context.staffId}`)
   }
 
+  if (entry.client_id !== context.clientId && context.clientId !== null) {
+    throw new Error(`Client isolation violation: entry.client_id=${entry.client_id} differs from context.clientId=${context.clientId}`)
+  }
+
   const errors = validateCorrectionDraft(correction)
   if (errors.length > 0) {
     throw new Error(`Invalid correction: ${errors.join('; ')}`)
