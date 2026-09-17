@@ -183,6 +183,17 @@ test('staff-subject tools run in staff and company_admin contexts', () => {
   }
 })
 
+test('CG Hours tools require one exact staff Project and never use the company-admin connection as staff identity', () => {
+  for (const tool of ['log_ordinary_hours', 'log_kilometre_entry', 'read_my_recent_entries', 'correct_my_entry']) {
+    assert.equal(ctx.assertToolAllowedInContext(tool, 'staff').allowed, true, `${tool} runs for exact staff`)
+    for (const kind of ['client', 'company_admin']) {
+      const result = ctx.assertToolAllowedInContext(tool, kind)
+      assert.equal(result.allowed, false, `${tool} must refuse ${kind}`)
+      assert.match(result.error, /exact authenticated staff Project context/)
+    }
+  }
+})
+
 test('client-scoped tools are allowed in every context', () => {
   for (const kind of ['staff', 'client', 'company_admin']) {
     for (const tool of ctx.CLIENT_SCOPED_TOOLS) {

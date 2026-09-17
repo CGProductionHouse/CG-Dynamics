@@ -87,6 +87,12 @@ import {
   type ParsedProjectContext,
   type ProjectContextKind,
 } from './projectContext.ts'
+import {
+  durableCgHoursRecordId,
+  invokeCgHoursStaffLogger,
+  validateCgHoursStaffLoggerConfig,
+  type CgHoursStaffLoggerResult,
+} from './cgHoursStaffLogger.ts'
 
 const STAFF_ROLES = new Set(['admin', 'manager', 'staff', 'team'])
 const MCP_PROTOCOL_VERSION = '2025-03-26'
@@ -2601,204 +2607,246 @@ const handleRecordClientUpdate: ToolHandler = async (staff, input) => {
 // ──────────────────────────────────────────────────────────────────────────────
 
 const CG_HOURS_NOT_CONFIGURED = {
-  ok: false,
-  error: 'NOT_CONFIGURED' as const,
+  ok: false as const,
+  error: 'CG_HOURS_NOT_CONFIGURED' as const,
+  message: 'CG Hours staff logging is not configured, so nothing was read or changed.',
   contract: {
-    required_endpoints: [
-      'create_ordinary_hours_entry',
-      'read_ordinary_hours_entries',
-      'apply_ordinary_hours_correction',
-      'create_vehicle_entry',
-      'read_vehicle_entries',
-      'apply_vehicle_correction',
-    ],
-    idempotency_strategy: 'deriveMcpIdempotencyKey(staff_id, action, request_key) -> uuid; duplicate key returns existing receipt',
-    rls_enforcement: 'Row Level Security on canonical CG Hours tables: staff_id = current_staff_id; client_id pinned by effective client context',
-    staff_client_isolation: 'Staff can only create/read/correct their own entries. Client-scoped context restricts to that client_id. Cross-staff/client access denied.',
+    endpoint: 'POST /api/staff-logger/invoke',
+    capability_header: 'x-cg-staff-capability',
+    required_configuration: ['CG_HOURS_STAFF_LOGGER_URL', 'CG_HOURS_STAFF_LOGGER_SECRET'],
+    idempotency_strategy: 'Dynamics keeps the same idempotency_key across retries; CG Hours returns the original durable time_entries record.',
+    staff_isolation: 'A short-lived single-use capability is issued only from the exact authenticated staff Project context. CG Hours maps capability.sub to its own staff identity.',
+    lifecycle: 'Draft-only. This caller cannot submit, approve, reopen, run payroll, or perform admin actions.',
   },
 }
 
-// Helper to check if CG Hours adapter is available via environment
-function isCgHoursConfigured(): boolean {
-  return !!Deno.env.get('CG_HOURS_SUPABASE_URL') && !!Deno.env.get('CG_HOURS_SERVICE_ROLE_KEY')
+function cgHoursStaffLoggerConfig() {
+  return validateCgHoursStaffLoggerConfig(
+    Deno.env.get('CG_HOURS_STAFF_LOGGER_URL'),
+    Deno.env.get('CG_HOURS_STAFF_LOGGER_SECRET'),
+  )
 }
 
-// Helper to create a CG Hours Supabase client
-function createCgHoursClient(): ReturnType<typeof createClient> | null {
-  const url = Deno.env.get('CG_HOURS_SUPABASE_URL')
-  const key = Deno.env.get('CG_HOURS_SERVICE_ROLE_KEY')
-  if (!url || !key) return null
-  return createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } })
+function cgHoursStaffSubject(staff: AuthenticatedStaff): string | null {
+  if (staff.contextKind !== 'staff') return null
+  return staff.effectiveStaffProfileId
+}
+
+function cgHoursReceipt(result: CgHoursStaffLoggerResult, idempotencyKey: string) {
+  const recordId = durableCgHoursRecordId(result)
+  if (!recordId) {
+    return {
+      ok: false as const,
+      error: 'CG_HOURS_INVALID_RECEIPT' as const,
+      message: 'CG Hours did not return a durable time entry id, so no success is claimed.',
+    }
+  }
+  return {
+    ok: true as const,
+    receipt: {
+      provider: 'cg-hours-staff-logger',
+      record_id: recordId,
+      idempotency_key: idempotencyKey,
+      replayed: result.ok && result.data?.replayed === true,
+    },
+  }
+}
+
+async function cgHoursInvokeForStaff(
+  staff: AuthenticatedStaff,
+  tool: Parameters<typeof invokeCgHoursStaffLogger>[2],
+  input: Record<string, unknown>,
+): Promise<CgHoursStaffLoggerResult> {
+  const staffProfileId = cgHoursStaffSubject(staff)
+  if (!staffProfileId) {
+    return {
+      ok: false as const,
+      error: 'CG_HOURS_REFUSED' as const,
+      message: 'CG Hours actions require the exact authenticated staff Project context.',
+    }
+  }
+  const config = cgHoursStaffLoggerConfig()
+  if (!config) return CG_HOURS_NOT_CONFIGURED
+  return invokeCgHoursStaffLogger(config, staffProfileId, tool, input)
 }
 
 async function handleLogOrdinaryHours(staff: AuthenticatedStaff, input: Record<string, unknown>) {
-  if (!isCgHoursConfigured()) return CG_HOURS_NOT_CONFIGURED
-
-  const cgHours = createCgHoursClient()
-  if (!cgHours) return CG_HOURS_NOT_CONFIGURED
-
-  const { date, hours, task_description, notes, client_id, idempotency_key } = input as {
+  const { date, hours, task_description, notes, client_id, task_template_id, idempotency_key } = input as {
     date: string
     hours: number
     task_description: string
     notes?: string
-    client_id?: string | null
+    client_id: string
+    task_template_id?: string
     idempotency_key: string
   }
-
-  // Resolve effective client_id: staff context pins client if provided, otherwise use input
-  let effectiveClientId = client_id ?? null
-  if (staff.contextKind === 'client' && staff.effectiveClientId) {
-    effectiveClientId = staff.effectiveClientId
-  } else if (staff.contextKind === 'staff') {
-    // Staff can specify a client or leave null for internal time
-    effectiveClientId = client_id ?? null
+  const minutes = hours * 60
+  if (!Number.isInteger(minutes) || minutes < 1 || minutes > 1440) {
+    return { ok: false, error: 'INVALID_DURATION', message: 'Hours must resolve to a whole number of minutes between 1 minute and 24 hours.' }
+  }
+  const combinedNotes = notes ? `${task_description}\n${notes}` : task_description
+  if (combinedNotes.length > 500) {
+    return { ok: false, error: 'INVALID_NOTES', message: 'Task description and notes must be 500 characters or fewer in total.' }
   }
 
-  const { data, error } = await cgHours.rpc('create_ordinary_hours_entry', {
-    p_staff_id: staff.effectiveStaffProfileId ?? staff.profileId,
-    p_client_id: effectiveClientId,
-    p_date: date,
-    p_hours: hours,
-    p_task_description: task_description,
-    p_notes: notes ?? null,
-    p_idempotency_key: idempotency_key,
-  })
+  const options = await cgHoursInvokeForStaff(staff, 'list_my_logging_options', {})
+  if (!options.ok) return options
+  const clients = Array.isArray(options.data?.clients) ? options.data.clients as Array<Record<string, unknown>> : []
+  if (!clients.some(client => client.client_id === client_id)) {
+    return { ok: false, error: 'CG_HOURS_CLIENT_NOT_AVAILABLE', message: 'That exact CG Hours client is not available for this staff logger, so nothing was logged.' }
+  }
+  if (task_template_id) {
+    const tasks = Array.isArray(options.data?.tasks) ? options.data.tasks as Array<Record<string, unknown>> : []
+    if (!tasks.some(task => task.task_template_id === task_template_id)) {
+      return { ok: false, error: 'CG_HOURS_TASK_NOT_AVAILABLE', message: 'That exact CG Hours task is not available for this staff logger, so nothing was logged.' }
+    }
+  }
 
-  if (error) return { error: error.message }
-  return { logged: true, record: data, receipt: { record_id: data?.id, idempotency_key, created_at: new Date().toISOString() } }
+  const result = await cgHoursInvokeForStaff(staff, 'add_my_time_entry', {
+    date,
+    client_id,
+    ...(task_template_id ? { task_template_id } : {}),
+    minutes,
+    notes: combinedNotes,
+    idempotency_key,
+  })
+  if (!result.ok) return result
+  const durable = cgHoursReceipt(result, idempotency_key)
+  if (!durable.ok) return durable
+  return {
+    ok: true,
+    logged: true,
+    draft: true,
+    message: `${result.message} Saved as a draft in CG Hours; review and submit the week manually in CG Hours.`,
+    record: result.data,
+    receipt: durable.receipt,
+  }
 }
 
 async function handleLogKilometreEntry(staff: AuthenticatedStaff, input: Record<string, unknown>) {
-  if (!isCgHoursConfigured()) return CG_HOURS_NOT_CONFIGURED
-
-  const cgHours = createCgHoursClient()
-  if (!cgHours) return CG_HOURS_NOT_CONFIGURED
-
-  const { date, type, distance_km, description, notes, litres, cost_per_litre, amount, client_id, idempotency_key } = input as {
-    date: string
-    type: 'mileage' | 'fuel' | 'vehicle_expense'
-    distance_km?: number
-    description?: string
+  const { entry_id, distance_km, origin, destination, notes, idempotency_key } = input as {
+    entry_id: string
+    distance_km: number
+    origin?: string
+    destination?: string
     notes?: string
-    litres?: number
-    cost_per_litre?: number
-    amount?: number
-    client_id?: string | null
     idempotency_key: string
   }
-
-  let effectiveClientId = client_id ?? null
-  if (staff.contextKind === 'client' && staff.effectiveClientId) {
-    effectiveClientId = staff.effectiveClientId
-  } else if (staff.contextKind === 'staff') {
-    effectiveClientId = client_id ?? null
-  }
-
-  const { data, error } = await cgHours.rpc('create_vehicle_entry', {
-    p_staff_id: staff.effectiveStaffProfileId ?? staff.profileId,
-    p_client_id: effectiveClientId,
-    p_date: date,
-    p_type: type,
-    p_distance_km: distance_km ?? null,
-    p_description: description ?? null,
-    p_notes: notes ?? null,
-    p_litres: litres ?? null,
-    p_cost_per_litre: cost_per_litre ?? null,
-    p_amount: amount ?? null,
-    p_idempotency_key: idempotency_key,
+  const result = await cgHoursInvokeForStaff(staff, 'add_my_travel_km', {
+    entry_id,
+    km: distance_km,
+    ...(origin ? { origin } : {}),
+    ...(destination ? { destination } : {}),
+    ...(notes ? { notes } : {}),
+    idempotency_key,
   })
-
-  if (error) return { error: error.message }
-  return { logged: true, record: data, receipt: { record_id: data?.id, idempotency_key, created_at: new Date().toISOString() } }
+  if (!result.ok) return result
+  const durable = cgHoursReceipt(result, idempotency_key)
+  if (!durable.ok) return durable
+  return {
+    ok: true,
+    logged: true,
+    draft: true,
+    message: `${result.message} Saved on the draft time entry in CG Hours; review and submit the week manually in CG Hours.`,
+    record: result.data,
+    receipt: durable.receipt,
+  }
 }
 
 async function handleReadMyRecentEntries(staff: AuthenticatedStaff, input: Record<string, unknown>) {
-  if (!isCgHoursConfigured()) return CG_HOURS_NOT_CONFIGURED
-
-  const cgHours = createCgHoursClient()
-  if (!cgHours) return CG_HOURS_NOT_CONFIGURED
-
   const { from_date, to_date, include_vehicle } = input as {
     from_date: string
     to_date: string
     include_vehicle?: boolean
   }
-
-  // Staff context pins the staff_id; client context pins client_id
-  let effectiveClientId: string | null = null
-  if (staff.contextKind === 'client' && staff.effectiveClientId) {
-    effectiveClientId = staff.effectiveClientId
-  } else if (staff.contextKind === 'staff') {
-    effectiveClientId = null // Staff can see all their entries across clients unless filtered
+  if (from_date !== to_date) {
+    return {
+      ok: false,
+      error: 'CG_HOURS_SINGLE_DAY_REQUIRED',
+      message: 'The canonical CG Hours staff logger reads one day at a time. Use the same from_date and to_date.',
+    }
   }
 
-  const [{ data: timeEntries, error: timeError }, { data: vehicleEntries, error: vehicleError }] = await Promise.all([
-    cgHours.rpc('read_ordinary_hours_entries', {
-      p_staff_id: staff.effectiveStaffProfileId ?? staff.profileId,
-      p_client_id: effectiveClientId,
-      p_from_date: from_date,
-      p_to_date: to_date,
-      p_types: ['time'],
-    }),
-    include_vehicle
-      ? cgHours.rpc('read_vehicle_entries', {
-          p_staff_id: staff.effectiveStaffProfileId ?? staff.profileId,
-          p_client_id: effectiveClientId,
-          p_from_date: from_date,
-          p_to_date: to_date,
-          p_types: ['mileage', 'fuel', 'vehicle_expense'],
-        })
-      : Promise.resolve({ data: [], error: null }),
-  ])
-
-  if (timeError) return { error: timeError.message }
-  if (vehicleError) return { error: vehicleError.message }
+  const hours = await cgHoursInvokeForStaff(staff, 'get_my_hours_today', { date: from_date })
+  if (!hours.ok) return hours
+  const travel = include_vehicle
+    ? await cgHoursInvokeForStaff(staff, 'get_my_travel_today', { date: from_date })
+    : null
+  if (travel) {
+    if (!travel.ok) return travel
+  }
+  const options = await cgHoursInvokeForStaff(staff, 'list_my_logging_options', {})
+  if (!options.ok) return options
 
   return {
-    time_entries: timeEntries ?? [],
-    vehicle_entries: vehicleEntries ?? [],
+    ok: true,
+    date: from_date,
+    time_entries: Array.isArray(hours.data?.entries) ? hours.data.entries : [],
+    vehicle_entries: travel && Array.isArray(travel.data?.entries) ? travel.data.entries : [],
+    logging_options: options.data ?? { clients: [], tasks: [] },
+    summary: {
+      total_minutes: hours.data?.total_minutes ?? null,
+      total_km: travel?.data?.total_km ?? null,
+      editable: hours.data?.editable ?? null,
+    },
   }
 }
 
 async function handleCorrectMyEntry(staff: AuthenticatedStaff, input: Record<string, unknown>) {
-  if (!isCgHoursConfigured()) return CG_HOURS_NOT_CONFIGURED
-
-  const cgHours = createCgHoursClient()
-  if (!cgHours) return CG_HOURS_NOT_CONFIGURED
-
-  const { entry_id, entry_type, correction, reason, idempotency_key } = input as {
+  const { entry_id, entry_type, correction, idempotency_key } = input as {
     entry_id: string
-    entry_type: 'time' | 'mileage' | 'fuel' | 'vehicle_expense'
+    entry_type: 'time' | 'mileage'
     correction: Record<string, unknown>
-    reason: string
     idempotency_key: string
   }
-
-  // For corrections, we need to verify ownership first by reading the entry
-  // This is a safety check - the RPC should also enforce RLS
-  const staffId = staff.effectiveStaffProfileId ?? staff.profileId
-
+  if (entry_type !== 'time' && entry_type !== 'mileage') {
+    return { ok: false, error: 'INVALID_ENTRY_TYPE', message: 'Entry type must be time or mileage.' }
+  }
+  if (!correction || typeof correction !== 'object' || Array.isArray(correction)) {
+    return { ok: false, error: 'INVALID_CORRECTION', message: 'Provide one closed correction object.' }
+  }
+  let tool: 'edit_my_time_entry' | 'edit_my_travel_km'
+  let patch: Record<string, unknown>
   if (entry_type === 'time') {
-    const { data, error } = await cgHours.rpc('apply_ordinary_hours_correction', {
-      p_entry_id: entry_id,
-      p_staff_id: staffId,
-      p_correction: correction,
-      p_reason: reason,
-      p_idempotency_key: idempotency_key,
-    })
-    if (error) return { error: error.message }
-    return { corrected: true, record: data, receipt: { record_id: data?.id, idempotency_key, created_at: new Date().toISOString() } }
+    if (correction.distance_km !== undefined || correction.origin !== undefined || correction.destination !== undefined) {
+      return { ok: false, error: 'INVALID_CORRECTION', message: 'A time correction may change only hours or notes.' }
+    }
+    tool = 'edit_my_time_entry'
+    patch = { entry_id, idempotency_key }
+    if (correction.hours !== undefined) {
+      const minutes = Number(correction.hours) * 60
+      if (!Number.isInteger(minutes) || minutes < 1 || minutes > 1440) {
+        return { ok: false, error: 'INVALID_DURATION', message: 'Corrected hours must resolve to a whole number of minutes between 1 minute and 24 hours.' }
+      }
+      patch.minutes = minutes
+    }
+    if (typeof correction.notes === 'string') patch.notes = correction.notes
   } else {
-    const { data, error } = await cgHours.rpc('apply_vehicle_correction', {
-      p_entry_id: entry_id,
-      p_staff_id: staffId,
-      p_correction: correction,
-      p_reason: reason,
-      p_idempotency_key: idempotency_key,
-    })
-    if (error) return { error: error.message }
-    return { corrected: true, record: data, receipt: { record_id: data?.id, idempotency_key, created_at: new Date().toISOString() } }
+    if (correction.hours !== undefined) {
+      return { ok: false, error: 'INVALID_CORRECTION', message: 'A mileage correction may change only distance, origin, destination or notes.' }
+    }
+    tool = 'edit_my_travel_km'
+    patch = { entry_id, idempotency_key }
+    if (correction.distance_km !== undefined) patch.km = correction.distance_km
+    if (typeof correction.origin === 'string') patch.origin = correction.origin
+    if (typeof correction.destination === 'string') patch.destination = correction.destination
+    if (typeof correction.notes === 'string') patch.notes = correction.notes
+  }
+  if (Object.keys(patch).length === 2) {
+    return { ok: false, error: 'EMPTY_CORRECTION', message: 'There is nothing to change.' }
+  }
+
+  const result = await cgHoursInvokeForStaff(staff, tool, patch)
+  if (!result.ok) return result
+  const durable = cgHoursReceipt(result, idempotency_key)
+  if (!durable.ok) return durable
+  return {
+    ok: true,
+    corrected: true,
+    draft: true,
+    message: `${result.message} The entry remains a draft in CG Hours; review and submit the week manually there.`,
+    record: result.data,
+    receipt: durable.receipt,
   }
 }
 
@@ -2852,6 +2900,15 @@ const WRITE_TOOLS = new Set([
   'log_kilometre_entry',
   'correct_my_entry',
   ...CLIENT_WORKSPACE_ACTIONS,
+])
+
+// These backends own the durable idempotency receipt. An identical MCP retry must reach them so
+// they can return the original record id; the generic Dynamics log stores status/audit only.
+const CANONICAL_RECEIPT_REPLAY_TOOLS = new Set([
+  ...CLIENT_WORKSPACE_ACTIONS,
+  'log_ordinary_hours',
+  'log_kilometre_entry',
+  'correct_my_entry',
 ])
 
 const toolHandlers: Record<string, ToolHandler> = {
@@ -2996,7 +3053,7 @@ async function handleToolsCall(
     const existing = await checkIdempotency(staff.supabase, staff.profileId, toolName, canonicalIdempotencyKey, inputHash)
     if (existing.duplicate) {
       const conflict = (existing.result as { status?: string } | undefined)?.status === 'conflict'
-      if (CLIENT_WORKSPACE_ACTIONS.includes(toolName) && !conflict) {
+      if (CANONICAL_RECEIPT_REPLAY_TOOLS.has(toolName) && !conflict) {
         replayThroughCanonicalKey = true
       } else {
         return jsonRpcResponse(id, { content: [{ type: 'text', text: JSON.stringify({ ...(existing.result as object), _context: audit }) }], isError: CLIENT_WORKSPACE_ACTIONS.includes(toolName) && conflict })

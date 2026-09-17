@@ -141,6 +141,14 @@ export const STAFF_SUBJECT_TOOLS: readonly string[] = [
 ]
 
 /**
+ * The CG Hours capability subject must come from an exact staff Project. Unlike broader internal
+ * staff tools, the shared admin connection cannot stand in for a person in company_admin context.
+ */
+export const EXACT_STAFF_PROJECT_TOOLS: readonly string[] = [
+  'log_ordinary_hours', 'log_kilometre_entry', 'read_my_recent_entries', 'correct_my_entry',
+]
+
+/**
  * Tools that read/act on exact-client data. Allowed in every context, but in a client
  * Project they are hard-pinned to that Project's canonical client.
  */
@@ -186,6 +194,12 @@ export type ToolPolicyResult = { allowed: true } | { allowed: false; error: stri
 
 /** Is this tool permitted under the resolved context kind? */
 export function assertToolAllowedInContext(toolName: string, contextKind: ProjectContextKind): ToolPolicyResult {
+  if (EXACT_STAFF_PROJECT_TOOLS.includes(toolName) && contextKind !== 'staff') {
+    return {
+      allowed: false,
+      error: `${toolName} requires the exact authenticated staff Project context (context_kind="staff"). The shared company-admin connection cannot act as a CG Hours staff identity.`,
+    }
+  }
   if (COMPANY_ADMIN_TOOLS.includes(toolName) && contextKind !== 'company_admin') {
     return {
       allowed: false,
