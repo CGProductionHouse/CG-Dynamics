@@ -588,15 +588,33 @@ const handleGetMyDay: ToolHandler = async (staff) => {
 
   const tasksError = tasksResult.error?.message
   const assignmentsError = assignmentsResult.error?.message
+
+  // #325: truthful Microsoft freshness / source-state — Dynamics mirror is stale when no
+  // reconciliation run has been recorded; Microsoft completion must remain authoritative.
+  const nowIso = now.toISOString()
+  const syncHealth = summarizeSyncHealth(null, nowIso)
+
+  // Attach durable Microsoft source classification (classification, source_key, microsoft, freshness)
+  const ownedTasksWithSource = withSourceLinkage(ownedTasks, 'planner')
+
   return {
     today,
     timezone: CG_TIMEZONE,
     staff_name: staff.fullName,
-    tasks: ownedTasks,
+    tasks: ownedTasksWithSource,
     calendar_events: calendarResult.data ?? [],
     deliverables: flattenDeliverableClient(scheduleResult.data),
-    partial: tasksError !== undefined || assignmentsError !== undefined,
-    errors: [tasksError, assignmentsError, calendarResult.error?.message, scheduleResult.error?.message].filter(Boolean),
+    partial:
+      tasksError !== undefined ||
+      assignmentsError !== undefined ||
+      syncHealth.degraded,
+    errors: [
+      tasksError,
+      assignmentsError,
+      calendarResult.error?.message,
+      scheduleResult.error?.message,
+    ].filter(Boolean),
+    microsoft_source_state: syncHealth.state,
   }
 }
 
@@ -645,7 +663,18 @@ const handleListMyTasks: ToolHandler = async (staff, input) => {
 
   // #325: durable Microsoft identity + freshness so the Assistant can reconcile by ID.
   const listError = assignmentsResult.error?.message ?? null
-  return { tasks: withSourceLinkage(ownedTasks, 'planner'), error: listError, partial: listError !== null }
+
+  // #325: truthful Microsoft freshness / source-state — Dynamics mirror is stale when no
+  // reconciliation run has been recorded; Microsoft completion must remain authoritative.
+  const nowIso = new Date().toISOString()
+  const syncHealth = summarizeSyncHealth(null, nowIso)
+
+  return {
+    tasks: withSourceLinkage(ownedTasks, 'planner'),
+    error: listError,
+    partial: listError !== null || syncHealth.degraded,
+    microsoft_source_state: syncHealth.state,
+  }
 }
 
 const handleGetTask: ToolHandler = async (staff, input) => {
