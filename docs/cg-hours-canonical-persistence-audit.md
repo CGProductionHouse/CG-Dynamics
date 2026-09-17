@@ -1,12 +1,18 @@
 # CG Hours Canonical Persistence Audit
 
-Date: 2026-09-16 (v1) | Updated: 2026-09-17 (v2 — PR #376 code review)
+Date: 2026-09-16 (v1) | Updated: 2026-09-17 (v2) | Updated: 2026-09-17 (v3 — continuation verification)
 Author: CA manual agent
 Refs: Issue #361, PR #376, PR #383, PR #384
 
 ## Executive Summary
 
-CG Hours is a **separate Supabase project** (`CGProductionHouse/CG-Hours`, project ref `qcafdqwhwqaxjhdcugcs`). PR #376 now defines 4 MCP tools + handlers that call 6 RPCs on CG Hours — but **none of those 6 RPCs exist in CG Hours**. The verdict is **CONTRACT_GAP**.
+CG Hours is a **separate Supabase project** (`CGProductionHouse/CG-Hours`, project ref `qcafdqwhwqaxjhdcugcs`). PR #376 defines 4 MCP tools + handlers that call 6 RPCs on CG Hours — but **none of those 6 RPCs exist in CG Hours**. CG Hours has **zero Edge Functions** and **zero RPCs for time_entries CRUD**. All time_entries access is via direct table queries through RLS. The verdict is **CONTRACT_GAP**.
+
+### v3 continuation verified PR #376 head `ed9e59c`
+- No newer worker pushed after `ed9e59c` on PR #376
+- No schema changes in CG Hours since last audit (post-043 migrations are payroll/SARS only)
+- PR #376 delta from `b589c43`: only a 4-line client-isolation guard in `applyOrdinaryHoursCorrection`
+- All 6 RPCs confirmed non-existent via complete CG Hours function inventory
 
 PR #376 has advanced from pure action layer (v1) to MCP-wired handlers with typed NOT_CONFIGURED fallback. The architecture is directionally correct but has critical schema mismatches and missing backend RPCs that prevent any real persistence.
 
@@ -67,6 +73,36 @@ ChatGPT → Bearer token → cg-dynamics-mcp (Deno Edge Function)
 2. **`handleLogKilometreEntry`**: Calls `create_vehicle_entry` RPC with `p_staff_id`, `p_client_id`, `p_date`, `p_type` (mileage/fuel/vehicle_expense), `p_distance_km`, `p_description`, `p_notes`, `p_litres`, `p_cost_per_litre`, `p_amount`, `p_idempotency_key`
 3. **`handleReadMyRecentEntries`**: Calls `read_ordinary_hours_entries` + optionally `read_vehicle_entries` RPCs
 4. **`handleCorrectMyEntry`**: Calls `apply_ordinary_hours_correction` or `apply_vehicle_correction` RPCs
+
+### Runtime path verification (v3 continuation — stage-by-stage)
+
+| Stage | Status | Evidence |
+|---|---|---|
+| ChatGPT → MCP tool | ✅ IMPLEMENTED | `log_ordinary_hours`, `log_kilometre_entry`, `read_my_recent_entries`, `correct_my_entry` in toolCatalog.ts |
+| Authenticated CG Dynamics MCP principal | ✅ IMPLEMENTED | `authenticateStaff()` → `ConnectionPrincipal` → `AuthenticatedStaff` |
+| Effective staff context | ✅ IMPLEMENTED | `staff.effectiveStaffProfileId ?? staff.profileId` |
+| Exact client context | ✅ IMPLEMENTED | `staff.effectiveClientId` from client Project, or `input.client_id` from staff Project |
+| CG Hours MCP tool | ✅ IMPLEMENTED | 4 tools in toolCatalog.ts, routed in index.ts |
+| Persistence adapter | ✅ IMPLEMENTED (interface only) | `CgHoursPersistenceAdapter` interface defined; 6 method signatures |
+| CG Hours project client | ⚠️ CONFIG_REQUIRED | `isCgHoursConfigured()` checks `CG_HOURS_SUPABASE_URL` + `CG_HOURS_SERVICE_ROLE_KEY` env vars; `createCgHoursClient()` creates Supabase client pointing to CG Hours project ref `qcafdqwhwqaxjhdcugcs` |
+| RPC call | ❌ MISSING | 6 RPCs called by handlers do NOT exist in CG Hours: `create_ordinary_hours_entry`, `create_vehicle_entry`, `read_ordinary_hours_entries`, `read_vehicle_entries`, `apply_ordinary_hours_correction`, `apply_vehicle_correction` |
+| Staff mapping | ❌ MISSING | CG Dynamics `profiles.id` passed directly as `p_staff_id` to CG Hours; no mapping table, no verification that UUID exists in CG Hours `profiles` |
+| Client mapping | ❌ MISSING | CG Dynamics `effectiveClientId` passed directly as `p_client_id` to CG Hours; no mapping table, no verification that UUID exists in CG Hours `clients` |
+| Weekly timesheet resolution | ❌ MISSING | `time_entries.timesheet_id` is NOT NULL FK; PR #376 does not resolve or create timesheets; RPCs don't exist to handle this |
+| Task template resolution | ❌ MISSING | `time_entries.task_template_id` is nullable FK; PR #376 does not resolve task templates; "Traveling" template with `tracks_km=true` never resolved |
+| Canonical time_entries write | ❌ MISSING | No write occurs; RPCs don't exist; schema mismatches (see section C) |
+| Durable record ID | ❌ MISSING | `data?.id` from non-existent RPC will be null/undefined |
+| Durable receipt / retry result | ❌ MISSING | Receipt uses client-side `new Date().toISOString()` not server timestamp; depends on non-existent RPC response |
+
+### Correction handler note (v3 delta)
+
+PR #376 head `ed9e59c` added a 4-line client-isolation guard to `applyOrdinaryHoursCorrection`:
+```typescript
+if (entry.client_id !== context.clientId && context.clientId !== null) {
+  throw new Error('Client isolation violation')
+}
+```
+This is a correct application-layer guard but does not affect the underlying contract gap — the RPCs it would call still don't exist.
 
 ## C. PR #376 vs real CG Hours schema — critical mismatches
 
