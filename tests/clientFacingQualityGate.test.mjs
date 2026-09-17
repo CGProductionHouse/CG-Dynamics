@@ -157,16 +157,16 @@ test('campaigns page has loading, error, empty and disconnected states', () => {
   assert.match(CAMPAIGNS, /no campaign activity/i)
 })
 
-test('calendar page has loading, error and empty states', () => {
+test('calendar page has loading, error and an intentional empty-month state', () => {
   assert.match(CALENDAR, /loading.*calendar|content calendar/i)
   assert.match(CALENDAR, /could not be loaded/i)
-  assert.match(CALENDAR, /No.*schedule items.*available/i)
+  assert.match(CALENDAR, /The month is ready for your plan/i)
 })
 
 // ── 10. Mobile rendering ──────────────────────────────────────────────────────
 test('calendar page renders a mobile agenda view and a desktop grid', () => {
-  assert.match(CALENDAR, /hidden lg:block/) // desktop grid
-  assert.match(CALENDAR, /lg:hidden/)       // mobile agenda
+  assert.match(CALENDAR, /hidden sm:block/) // generous tablet/desktop grid
+  assert.match(CALENDAR, /sm:hidden/)       // phone calendar + agenda
   assert.match(CALENDAR, /Agenda/)
   assert.match(CALENDAR, /MonthGrid/)
 })
@@ -358,8 +358,8 @@ test('calendar page shows deliverable type labels and client-safe status labels'
 test('calendar page has desktop MonthGrid and mobile Agenda views', () => {
   assert.match(CALENDAR, /MonthGrid/)
   assert.match(CALENDAR, /Agenda/)
-  assert.match(CALENDAR, /hidden lg:block/)
-  assert.match(CALENDAR, /lg:hidden/)
+  assert.match(CALENDAR, /hidden sm:block/)
+  assert.match(CALENDAR, /sm:hidden/)
 })
 
 test('calendar page shows summary cards for item counts', () => {
@@ -382,10 +382,10 @@ test('calendar page uses SECURITY-DEFINER RPC keyed to profile.client_id, never 
   assert.doesNotMatch(CALENDAR, /assigned_to|internal_notes|helper_names|priority/)
 })
 
-test('calendar page has loading, error and empty states', () => {
+test('calendar page has loading, error and an intentional empty-month state', () => {
   assert.match(CALENDAR, /loading.*calendar/i)
   assert.match(CALENDAR, /could not be loaded/i)
-  assert.match(CALENDAR, /No.*schedule items.*available/i)
+  assert.match(CALENDAR, /The month is ready for your plan/i)
 })
 
 test('calendar page shows type breakdown below summary cards', () => {

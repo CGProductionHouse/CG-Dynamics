@@ -118,19 +118,16 @@ export default function ClientContentCalendarPage({ embedded = false, month: con
           tone="error"
           message="Content calendar could not be loaded right now."
         />
-      ) : calendar && (calendar.posts.length > 0 || calendar.events.length > 0) ? (
-        <>
-          <CalendarSummary calendar={calendar} scheduledCount={scheduledPosts.length} />
-          <div className="mt-6 hidden lg:block">
-            <MonthGrid month={month} posts={scheduledPosts} events={calendar.events} />
-          </div>
-          <div className="mt-6 lg:hidden">
-            <Agenda month={month} posts={scheduledPosts} events={calendar.events} />
-          </div>
-          {unscheduledPosts.length > 0 && <Unscheduled posts={unscheduledPosts} />}
-        </>
+      ) : calendar ? (
+        <CalendarSurface
+          key={month}
+          month={month}
+          calendar={calendar}
+          scheduledPosts={scheduledPosts}
+          unscheduledPosts={unscheduledPosts}
+        />
       ) : (
-        <CalendarMessage message={`No client-facing schedule items are available for ${monthDisplayLabel(month)} yet.`} />
+        <CalendarMessage message="Your content calendar is not available right now." />
       )}
 
       <p className="mt-8 max-w-3xl text-xs leading-5 text-report-faint">
@@ -139,6 +136,41 @@ export default function ClientContentCalendarPage({ embedded = false, month: con
     </>
   )
   return embedded ? content : <ClientPortalShell client={client}>{content}</ClientPortalShell>
+}
+
+function CalendarSurface({
+  month,
+  calendar,
+  scheduledPosts,
+  unscheduledPosts,
+}: {
+  month: string
+  calendar: ClientMonthAhead
+  scheduledPosts: ClientCalendarPost[]
+  unscheduledPosts: ClientCalendarPost[]
+}) {
+  const hasVisibleItems = calendar.posts.length > 0 || calendar.events.length > 0
+
+  return (
+    <>
+      {hasVisibleItems ? (
+        <CalendarSummary calendar={calendar} scheduledCount={scheduledPosts.length} />
+      ) : (
+        <div className="mt-8 flex flex-col gap-2 rounded-2xl border border-white/[0.08] bg-white/[0.035] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm font-semibold text-white">The month is ready for your plan.</p>
+          <p className="text-xs leading-5 text-report-muted">Posts, shoots, content runs and client events will appear on their dates as they are scheduled.</p>
+        </div>
+      )}
+
+      <div className="mt-6 hidden sm:block">
+        <MonthGrid month={month} posts={scheduledPosts} events={calendar.events} />
+      </div>
+      <div className="mt-6 sm:hidden">
+        <Agenda month={month} posts={scheduledPosts} events={calendar.events} />
+      </div>
+      {unscheduledPosts.length > 0 && <Unscheduled posts={unscheduledPosts} />}
+    </>
+  )
 }
 
 function CalendarSummary({ calendar, scheduledCount }: { calendar: ClientMonthAhead; scheduledCount: number }) {
@@ -182,7 +214,7 @@ function MonthGrid({
   const today = todayIso()
 
   return (
-    <section className="overflow-hidden rounded-3xl border border-white/[0.08] bg-black/20 shadow-[0_28px_80px_-50px_rgba(0,0,0,0.95)]">
+    <section aria-label={`${monthDisplayLabel(month)} content calendar`} className="overflow-hidden rounded-3xl border border-white/[0.08] bg-black/20 shadow-[0_28px_80px_-50px_rgba(0,0,0,0.95)]">
       <div className="grid grid-cols-7 border-b border-white/[0.08] bg-white/[0.025]">
         {CALENDAR_HEADERS.map(day => (
           <div key={day} className="px-3 py-3 text-center text-xs font-semibold uppercase tracking-[0.14em] text-report-faint">
@@ -198,7 +230,7 @@ function MonthGrid({
           return (
             <div
               key={cell.iso}
-              className={`min-h-36 border-b border-r border-white/[0.06] p-2 ${
+              className={`min-h-36 border-b border-r border-white/[0.06] p-2.5 ${
                 cell.outside ? 'bg-black/20 opacity-45' : isToday ? 'bg-white/[0.04]' : 'bg-white/[0.012]'
               }`}
             >
@@ -228,8 +260,10 @@ function Agenda({
   const cells = monthGridCells(month)
   const today = todayIso()
 
-  // Default to today when it is in the visible month, otherwise the first cell.
-  const day = selectedDay ?? (cells.some(cell => cell.iso === today) ? today : (cells[0]?.iso ?? null))
+  // Default to today when it is in the visible month, otherwise the first day
+  // of the selected month (not an adjacent-month padding cell).
+  const firstMonthDay = cells.find(cell => !cell.outside)?.iso ?? null
+  const day = selectedDay ?? (cells.some(cell => cell.iso === today && !cell.outside) ? today : firstMonthDay)
   const dayPosts = posts.filter(post => post.date === day)
   const dayEvents = events.filter(event => localDateKey(event.startAt) === day)
 

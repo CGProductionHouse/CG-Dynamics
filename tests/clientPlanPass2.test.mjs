@@ -47,3 +47,12 @@ test('Plan month controls and tabs expose accessible button state', () => {
   assert.match(PLAN_SOURCE, /aria-pressed=\{tab === item\.key\}/)
   assert.match(PLAN_SOURCE, /min-h-11/)
 })
+
+test('an empty client month still renders its real calendar canvas', () => {
+  assert.match(CALENDAR_SOURCE, /calendar \? \(/)
+  assert.match(CALENDAR_SOURCE, /<CalendarSurface/)
+  assert.match(CALENDAR_SOURCE, /<MonthGrid month=\{month\} posts=\{scheduledPosts\} events=\{calendar\.events\}/)
+  assert.match(CALENDAR_SOURCE, /<Agenda month=\{month\} posts=\{scheduledPosts\} events=\{calendar\.events\}/)
+  assert.doesNotMatch(CALENDAR_SOURCE, /calendar && \(calendar\.posts\.length > 0/)
+  assert.match(CALENDAR_SOURCE, /Posts, shoots, content runs and client events will appear/)
+})
