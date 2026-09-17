@@ -1,89 +1,301 @@
 # CG Hours Canonical Persistence Audit
 
-Date: 2026-09-16 (updated 2026-09-17)
+Date: 2026-09-16 (v1) | Updated: 2026-09-17 (v2 — PR #376 code review)
 Author: CA manual agent
 Refs: Issue #361, PR #376, PR #383, PR #384
 
 ## Executive Summary
 
-CG Hours is a **separate Supabase project** (`CGProductionHouse/CG-Hours`). There is no write-through from CG Dynamics to CG Hours today. PR #376 head `b589c43` defines a pure action layer + MCP tool handlers with env-gated adapter calls, but **zero cross-project identity mapping, zero timesheet resolution, zero task template resolution, and schema mismatches against canonical CG Hours `time_entries`**. The verdict is **NOT_CONFIGURED**.
+CG Hours is a **separate Supabase project** (`CGProductionHouse/CG-Hours`, project ref `qcafdqwhwqaxjhdcugcs`). PR #376 now defines 4 MCP tools + handlers that call 6 RPCs on CG Hours — but **none of those 6 RPCs exist in CG Hours**. The verdict is **CONTRACT_GAP**.
+
+PR #376 has advanced from pure action layer (v1) to MCP-wired handlers with typed NOT_CONFIGURED fallback. The architecture is directionally correct but has critical schema mismatches and missing backend RPCs that prevent any real persistence.
 
 ## A. Canonical CG Hours persistence (exact locations)
 
-### Database: CG Hours' own Supabase project
+### Database: CG Hours' own Supabase project (qcafdqwhwqaxjhdcugcs)
 
 | Table | Key columns | Purpose |
 |---|---|---|
-| `time_entries` | `id`, `staff_id`, `client_id`, `timesheet_id`, `entry_date`, `duration_minutes`, `km_travelled`, `km_origin`, `km_destination`, `km_notes`, `km_compensation_method`, `km_review_status` | Canonical time + km entries |
-| `travel_requests` | `id`, `staff_id`, `time_entry_id`, `client_id`, `km_travelled`, `origin`, `destination`, `suggested_amount`, `admin_amount`, `review_status` | Staff travel calculator (separate from time_entries) |
-| `timesheets` | `id`, `staff_id`, `week_start_date`, `week_end_date`, `status` | Weekly container for time_entries |
-| `task_templates` | `id`, `name`, `tracks_km` | "Traveling" template has `tracks_km=true` |
-| `clients` | `id`, `name`, `status` | Client registry (CG Hours' own, NOT CG Dynamics') |
-| `profiles` | `id`, `full_name`, `email`, `role` | Staff registry (CG Hours' own Supabase Auth) |
-| `app_settings` | `setting_key`, `setting_value` | `travel_km_rate` (4.50 ZAR/km), fuel defaults |
+| `time_entries` | `id`, `timesheet_id` (NOT NULL FK), `staff_id`, `client_id`, `project_id`, `task_template_id`, `entry_date`, `duration_minutes` (>0), `notes`, `description`, `is_billable`, `km_travelled`, `km_origin`, `km_destination`, `km_notes`, `km_compensation_method`, `km_review_status`, `km_reviewed_by`, `km_reviewed_at` | Canonical time + km entries |
+| `travel_requests` | `id`, `staff_id`, `time_entry_id` (nullable FK), `client_id`, `entry_date`, `km_travelled`, `origin`, `destination`, `notes`, `fuel_price`, `consumption_value`, `consumption_unit`, `suggested_amount`, `admin_*` overrides, `review_status`, `compensation_method`, `client_billable` | Staff travel calculator with admin override |
+| `timesheets` | `id`, `staff_id`, `week_start_date`, `week_end_date`, `status` | Weekly container; `unique(staff_id, week_start_date)` |
+| `task_templates` | `id`, `name`, `tracks_km` | "Traveling" has `tracks_km=true` |
+| `clients` | `id`, `name`, `status` | Client registry (CG Hours' own) |
+| `profiles` | `id` (FK → auth.users), `full_name`, `email`, `role` | Staff registry (CG Hours' own Supabase Auth) |
 
-### Record ID returned
-- `time_entries.id` (uuid) on insert
-- `travel_requests.id` (uuid) on insert
+### Key schema constraints (verified from migrations 001, 002, 036, 037):
 
-### Staff identity field
-- `time_entries.staff_id` → `profiles.id` (CG Hours' own auth)
-- `travel_requests.staff_id` → `profiles.id`
+- `time_entries.timesheet_id` is **NOT NULL** — every time entry MUST belong to a timesheet
+- `time_entries.duration_minutes` has `CHECK (duration_minutes > 0)`
+- `timesheets` has `unique (staff_id, week_start_date)` — one timesheet per staff per week
+- `time_entries` RLS INSERT requires: `staff_id = auth.uid()` AND the referenced timesheet must belong to the same staff and be in `('draft', 'rejected')` status
+- `km_review_status` defaults to `'draft'` with CHECK constraint
+- `km_compensation_method` CHECK: `'direct_fuel'` or `'payroll_reimbursement'`
 
-### Client identity field
-- `time_entries.client_id` → `clients.id` (CG Hours' own clients)
-- `travel_requests.client_id` → `clients.id`
+### RPCs that exist in CG Hours (complete list from all 43+ migrations):
 
-### Correction/update path
-- `time_entries`: owner/admin ALL RLS policy (full CRUD)
-- `travel_requests`: staff own draft/submitted; owner/admin manages all
-- `km_review_status`: draft → submitted → approved/rejected
-- `km_reviewed_by` + `km_reviewed_at` audit fields
+**None related to time_entries, vehicle entries, or corrections.** CG Hours time entry management is done via direct table access with RLS. The only RPCs are for payroll, finance, leave, part-time work, and payslip artifacts.
 
-### Idempotency
-- **None.** No idempotency key on `time_entries` or `travel_requests`.
-- `timesheets` has `unique (staff_id, week_start_date)` but that's a weekly container constraint.
+### RPCs that PR #376 calls (NONE EXIST):
 
-### Migration files
-- `supabase/migrations/001_initial_schema.sql` — base tables
-- `supabase/migrations/036_travel_km_tracking.sql` — KM columns on time_entries
-- `supabase/migrations/037_travel_requests.sql` — travel_requests table
+| RPC called by PR #376 | Exists in CG Hours? | Notes |
+|---|---|---|
+| `create_ordinary_hours_entry` | **NO** | No such function in any migration |
+| `create_vehicle_entry` | **NO** | No such function; no separate vehicle entry table |
+| `read_ordinary_hours_entries` | **NO** | No such function |
+| `read_vehicle_entries` | **NO** | No such function |
+| `apply_ordinary_hours_correction` | **NO** | No such function |
+| `apply_vehicle_correction` | **NO** | No such function |
 
-## B. Exact authenticated ChatGPT/MCP call path
-
-### What EXISTS (CG Dynamics side):
+## B. Exact authenticated ChatGPT/MCP call path (as implemented in PR #376)
 
 ```
 ChatGPT → Bearer token → cg-dynamics-mcp (Deno Edge Function)
 → authenticateStaff() → ConnectionPrincipal { userId, profileId, role }
 → parseProjectContext() → { contextKind: "staff", staffProfileId: "<uuid>" }
 → resolveOperatingContext() → AuthenticatedStaff { effectiveStaffProfileId }
-→ tool handler → CG Dynamics RPCs/tables via service-role
+→ tool router → handleLogOrdinaryHours / handleLogKilometreEntry / etc.
+→ isCgHoursConfigured() check (CG_HOURS_SUPABASE_URL + CG_HOURS_SERVICE_ROLE_KEY)
+→ createCgHoursClient() → Supabase client pointing to CG Hours project
+→ cgHours.rpc('create_ordinary_hours_entry', { p_staff_id, p_client_id, ... })
+→ ❌ RPC DOES NOT EXIST → error returned
 ```
 
-### What is MISSING (the gap to CG Hours):
+### Handler details (from PR #376 `index.ts`):
 
-1. **No CG Hours credential in CG Dynamics** — CG Dynamics Edge Functions have no `CG_HOURS_SUPABASE_URL` or `CG_HOURS_SERVICE_ROLE_KEY` (env-gated in PR #376 but not configured)
-2. **No cross-project identity mapping** — CG Dynamics `profiles.id` and CG Hours `profiles.id` are in separate Supabase projects. Same auth UUID IF shared Supabase Auth, but UNVERIFIED.
-3. **No CG Hours write API** — CG Hours has no Edge Functions, no MCP, no REST write endpoint. Only `api/payslips/` exists.
-4. **No timesheet resolution** — `time_entries` requires `timesheet_id`. No logic to find/create current week's timesheet.
-5. **No client UUID mapping** — "Germoparts" in CG Dynamics has a different UUID than "Germoparts" in CG Hours.
-6. **No task template resolution** — ordinary hours need `task_template_id`; km entries need the "Traveling" template.
+1. **`handleLogOrdinaryHours`**: Calls `create_ordinary_hours_entry` RPC with `p_staff_id`, `p_client_id`, `p_date`, `p_hours`, `p_task_description`, `p_notes`, `p_idempotency_key`
+2. **`handleLogKilometreEntry`**: Calls `create_vehicle_entry` RPC with `p_staff_id`, `p_client_id`, `p_date`, `p_type` (mileage/fuel/vehicle_expense), `p_distance_km`, `p_description`, `p_notes`, `p_litres`, `p_cost_per_litre`, `p_amount`, `p_idempotency_key`
+3. **`handleReadMyRecentEntries`**: Calls `read_ordinary_hours_entries` + optionally `read_vehicle_entries` RPCs
+4. **`handleCorrectMyEntry`**: Calls `apply_ordinary_hours_correction` or `apply_vehicle_correction` RPCs
 
-### Required new adapter (the missing seam):
+## C. PR #376 vs real CG Hours schema — critical mismatches
 
+### C1. Vehicle/km/fuel/vehicle_expense ARE NOT canonical CG Hours concepts
+
+PR #376 models three vehicle entry types: `mileage`, `fuel`, `vehicle_expense`. These do NOT exist in CG Hours.
+
+**What CG Hours actually has for km/travel:**
+
+1. **`time_entries` KM columns** (migration 036): km_travelled, km_origin, km_destination, km_notes, km_compensation_method, km_review_status, km_reviewed_by, km_reviewed_at — these are COLUMNS ON TIME_ENTRIES, not separate records
+2. **`travel_requests`** (migration 037): A separate staff travel calculator with admin overrides — not a time entry
+
+**What PR #376 assumes:** Separate vehicle entry records with types `mileage` | `fuel` | `vehicle_expense` stored in a separate table or via a separate RPC.
+
+**Verdict:** The `fuel` and `vehicle_expense` types are **invented**. They have no canonical CG Hours backing. The `mileage` type roughly maps to km columns on `time_entries`, but the data model is fundamentally different.
+
+### C2. Timesheet_id is REQUIRED but not provided
+
+CG Hours `time_entries.timesheet_id` is NOT NULL. PR #376 handlers do not provide or resolve a `timesheet_id`. Every CG Hours time entry must belong to a weekly timesheet with `unique(staff_id, week_start_date)`.
+
+The handler would need to:
+1. Calculate the ISO week start date for the entry date
+2. Query `timesheets` for existing: `SELECT id FROM timesheets WHERE staff_id = X AND week_start_date = Y`
+3. If not found, create: `INSERT INTO timesheets (staff_id, week_start_date, week_end_date) VALUES (X, Y, Y+6)`
+4. Use the resulting `timesheet_id` in the time_entries INSERT
+
+### C3. Duration is in minutes, not hours
+
+CG Hours uses `duration_minutes` (integer, >0). PR #376 passes `p_hours` (number). The RPC would need to multiply by 60.
+
+### C4. No task_template_id resolution
+
+CG Hours `time_entries.task_template_id` is a nullable FK. PR #376 handlers don't resolve task templates. For km entries, the "Traveling" template (with `tracks_km=true`) should be used.
+
+### C5. Client UUID mismatch
+
+CG Hours has its own `clients` table. "Germoparts" in CG Dynamics has a different UUID than "Germoparts" in CG Hours. PR #376 passes `p_client_id` from the CG Dynamics context, which will not match any CG Hours client.
+
+### C6. Staff UUID may not match
+
+CG Hours has its own `profiles` table under its own Supabase Auth project (ref `qcafdqwhwqaxjhdcugcs`). CG Dynamics uses a different Supabase project. The `p_staff_id` from CG Dynamics may not exist in CG Hours' `profiles` table.
+
+## D. Cross-project staff identity
+
+**Status: UNVERIFIED — likely MAPPING_REQUIRED**
+
+CG Hours Supabase project ref: `qcafdqwhwqaxjhdcugcs`
+CG Dynamics uses a different Supabase project (env-based, not committed to repo).
+
+These are separate Supabase projects with separate auth. Even if both use Supabase Auth, the `profiles.id` values are independent. A staff member who exists in both systems may have:
+- Same auth UUID IF they signed up through the same Supabase Auth instance (unlikely — separate projects)
+- Different UUIDs IF each project has its own auth
+
+**Minimum mapping contract needed:**
+```sql
+CREATE TABLE cg_hours_staff_mapping (
+  dynamics_profile_id uuid PRIMARY KEY REFERENCES profiles(id),
+  hours_profile_id uuid NOT NULL,
+  hours_staff_email text, -- for verification
+  verified_at timestamptz,
+  created_at timestamptz DEFAULT now()
+);
 ```
-CG Dynamics MCP tool handler
-→ CgHoursWriteAdapter (new)
-  → resolve CgHours staff_id (mapping or shared auth)
-  → resolve CgHours client_id (mapping table or name lookup)
-  → find/create current timesheet
-  → resolve task_template_id
-  → INSERT into CG Hours time_entries via service-role
-  → return record ID
+
+## E. Client mapping
+
+**Status: MAPPING_REQUIRED**
+
+CG Hours has its own `clients` table. No cross-system identifier exists.
+
+**Minimum mapping contract needed:**
+```sql
+CREATE TABLE cg_hours_client_mapping (
+  dynamics_client_id uuid PRIMARY KEY REFERENCES clients(id),
+  hours_client_id uuid NOT NULL,
+  hours_client_name text, -- for verification
+  verified_at timestamptz,
+  created_at timestamptz DEFAULT now()
+);
 ```
 
-## C. PR #376 Head `b589c43` Independent Verification Against 10 Audit Points
+## F. Timesheet resolution
+
+**Status: NOT IMPLEMENTED in PR #376**
+
+CG Hours expects:
+- `timesheets` table with `unique(staff_id, week_start_date)`
+- Week boundary: Monday–Sunday (standard ISO week)
+- `time_entries.timesheet_id` NOT NULL FK
+- RLS INSERT on `time_entries` requires the referenced timesheet to exist and be in `('draft', 'rejected')` status for that staff member
+- Race condition: two concurrent requests for the same week could both try to create the timesheet. The `unique` constraint prevents duplicates, but the second INSERT would fail. Need `ON CONFLICT` handling.
+
+**Required RPC logic (must exist in CG Hours):**
+```sql
+-- Inside create_ordinary_hours_entry RPC:
+v_week_start := date_trunc('week', p_date::date)::date;
+SELECT id INTO v_timesheet_id
+FROM timesheets
+WHERE staff_id = p_staff_id AND week_start_date = v_week_start;
+
+IF v_timesheet_id IS NULL THEN
+  INSERT INTO timesheets (staff_id, week_start_date, week_end_date)
+  VALUES (p_staff_id, v_week_start, v_week_start + 6)
+  ON CONFLICT (staff_id, week_start_date) DO UPDATE SET updated_at = now()
+  RETURNING id INTO v_timesheet_id;
+END IF;
+```
+
+## G. Task template resolution
+
+**Status: NOT IMPLEMENTED in PR #376**
+
+For ordinary hours: `task_template_id` can be NULL or resolved from task description.
+For km entries: the "Traveling" template (with `tracks_km=true`) should be used.
+
+The CG Hours MCP handlers don't resolve task templates at all.
+
+## H. Cross-project idempotency
+
+**Status: GAP — crash boundary not safe**
+
+PR #376 uses MCP-level idempotency (`mcp_check_idempotency` / `mcp_record_idempotency`). The crash scenario:
+
+1. MCP handler calls `cgHours.rpc('create_ordinary_hours_entry', {...})`
+2. CG Hours insert succeeds → time_entry row created
+3. Network response is lost (timeout, connection reset)
+4. MCP idempotency record is NOT committed (the response never arrived)
+5. Request retries → MCP idempotency check finds no prior record
+6. CG Hours insert runs again → SECOND duplicate entry created
+
+**This is NOT fully idempotent.** The MCP idempotency layer operates in CG Dynamics; the actual persistence happens in CG Hours. A crash between steps 2 and 4 creates duplicates.
+
+**Minimum safe contract:**
+- The CG Hours RPC itself must enforce idempotency (check `p_idempotency_key` before insert)
+- OR: CG Hours must have a unique constraint that prevents duplicates (e.g., `unique(staff_id, client_id, entry_date, task_template_id, idempotency_key)`)
+- The MCP idempotency layer is a useful front door but cannot be the sole dedup mechanism
+
+## I. Corrections
+
+**Status: INCORRECTLY MODELED**
+
+PR #376 calls `apply_ordinary_hours_correction` and `apply_vehicle_correction` RPCs that don't exist.
+
+CG Hours correction model:
+- Time entries: update the row directly (owner/admin RLS)
+- KM entries: update `km_travelled`, `km_origin`, `km_destination`, `km_notes` columns on `time_entries`
+- KM review workflow: `km_review_status` (draft → submitted → approved/rejected), `km_reviewed_by`, `km_reviewed_at`
+- No built-in before/after audit trail in the schema (the `audit_log` table exists but isn't automatically triggered for time_entries)
+
+PR #376's `CgHoursCorrectionResult` with `original` + `corrected` + `audit` is a client-side pattern, not a CG Hours native feature.
+
+## J. Receipt truth
+
+**Status: UNRELIABLE**
+
+PR #376 handlers return:
+```typescript
+return { logged: true, record: data, receipt: { record_id: data?.id, idempotency_key, created_at: new Date().toISOString() } }
+```
+
+Issues:
+- `created_at` is client-side `new Date().toISOString()`, not the CG Hours server timestamp
+- `data?.id` depends on the RPC returning the inserted row — but the RPCs don't exist
+- If the RPC returns null/error, `data?.id` is undefined but the handler returns `{ error: error.message }` (correct)
+
+A trustworthy receipt must include:
+- Actual CG Hours `time_entries.id` from the INSERT
+- Server-side `created_at` from CG Hours
+- The idempotency key used
+
+## K. First controlled live test checklist
+
+### CODE REQUIRED (must be built before any live test):
+
+1. **6 RPCs in CG Hours** — `create_ordinary_hours_entry`, `create_vehicle_entry` (or equivalent), `read_ordinary_hours_entries`, `read_vehicle_entries`, `apply_ordinary_hours_correction`, `apply_vehicle_correction`
+   - These must handle timesheet resolution internally
+   - These must enforce RLS via `auth.uid()` or service-role with `p_staff_id` validation
+   - The km entry RPC must write to `time_entries` KM columns, not a separate table
+
+2. **Staff identity mapping** — `cg_hours_staff_mapping` table or verified shared auth UUID
+3. **Client mapping** — `cg_hours_client_mapping` table
+4. **Task template resolution** — resolve "Traveling" template ID for km entries
+
+### CONFIG REQUIRED (environment variables):
+
+| Variable | Where | Purpose |
+|---|---|---|
+| `CG_HOURS_SUPABASE_URL` | CG Dynamics Edge Function env | CG Hours Supabase project URL |
+| `CG_HOURS_SERVICE_ROLE_KEY` | CG Dynamics Edge Function env | CG Hours service role key |
+
+### CA APPROVAL REQUIRED:
+
+- First production write (one controlled staff entry)
+- Staff/client mapping approval
+- CG Hours RPC deployment approval
+
+### First test sequence:
+
+1. Authenticated test staff → exact approved client → small ordinary time entry (30 min)
+2. Verify directly in CG Hours UI/database
+3. Retry same request → prove same receipt / no duplicate
+4. Correct the entry → verify audit state
+5. Read it back through ChatGPT
+6. Log 20 km for same client → verify km columns on time_entries
+7. Verify km_review_status is 'draft'
+
+## L. PR #383 acceptance matrix cross-check
+
+PR #383 defines 13 acceptance tests using a **test-only fixture backend** (`createContractFixtureBackend`). These tests verify the contract/harness logic, NOT real CG Hours persistence.
+
+| PR #383 test | What it proves | What it doesn't prove |
+|---|---|---|
+| 1. Franku trip creates record | Harness logic works | That CG Hours gets the write |
+| 2. Retry returns original ID | Fixture idempotency works | That CG Hours idempotency works |
+| 3. Sydney ≠ Franku | Fixture staff isolation | That CG Hours RLS enforces this |
+| 4. Cross-staff denial | Fixture scope check | That CG Hours prevents cross-staff |
+| 5. Wrong client denial | Fixture client scope | That CG Hours FK enforcement works |
+| 6. Ordinary hours persists | Harness time entry logic | Real CG Hours time_entries write |
+| 7. Correction audit | Fixture audit trail | Real CG Hours correction semantics |
+| 8. Read-only own entries | Fixture read isolation | Real CG Hours RLS read isolation |
+| 9. Backend unavailable | Fixture NOT_CONFIGURED | Real CG Hours error handling |
+| 10. error:null success | Fixture success check | Real CG Hours response format |
+| 11. Invalid km values | Fixture validation | Real CG Hours constraints |
+| 12. Receipt required | Fixture receipt check | Real CG Hours receipt format |
+| 13. Odometer validation | Fixture validation | N/A (CG Hours has no odometer) |
+
+**PR #383 is a valuable contract specification but is fixture-only.** Real persistence proof requires the 6 RPCs to exist in CG Hours and the handlers to call them successfully.
+
+## M. PR #376 Head `b589c43` Independent Verification Against 10 Audit Points
 
 ### 1. Does the code really map CG Dynamics staff/client IDs to CG Hours IDs, or does it only pass Dynamics IDs through?
 
@@ -166,9 +378,9 @@ CG Dynamics MCP tool handler
 
 ### 8. Re-run/extend the PR #384 contract tests so they catch false-positive adapters that compile but cannot satisfy the real CG Hours schema.
 
-**FINDING: PR #384 CONTRACT TESTS PASS (23/23) — THEY CATCH THE GAPS**
+**FINDING: PR #384 CONTRACT TESTS PASS (51/51) — THEY CATCH THE GAPS**
 
-All 23 contract tests in `tests/cgHoursCanonicalPersistenceAudit.test.mjs` pass. They verify:
+All 51 contract tests pass (23 in `cgHoursCanonicalPersistenceAudit.test.mjs` + 28 in `cgHoursCrossProjectContract.test.mjs`). They verify:
 - `time_entries` requires `timesheet_id` (test: "requires timesheet_id — no time entry exists without a weekly timesheet")
 - `duration_minutes` > 0 constraint (test: "duration_minutes must be > 0")
 - `km_review_status` 4 values, `km_compensation_method` 2 values
@@ -179,6 +391,10 @@ All 23 contract tests in `tests/cgHoursCanonicalPersistenceAudit.test.mjs` pass.
 - MCP tool catalog: no CG Hours tools exist yet, 4 new tools needed, must be staff-subject
 - Adapter boundary: must resolve staff_id, client_id, find/create timesheet, return record ID, support idempotency
 - Voice use case: all required fields documented
+- RPC existence contract: 6 RPCs that must exist
+- Schema mismatch: duration_minutes, timesheet_id NOT NULL, KM columns on time_entries
+- Idempotency crash boundary: MCP-level idempotency is NOT sufficient
+- Receipt truth: mock fixture IDs do not count as persistence proof
 
 **These tests would FAIL for any adapter that compiles but doesn't supply `timesheet_id`, `task_template_id`, uses wrong column names (`date` vs `entry_date`, `hours` vs `duration_minutes`), or doesn't map to the unified `time_entries` table with KM columns.**
 
@@ -212,7 +428,7 @@ All 23 contract tests in `tests/cgHoursCanonicalPersistenceAudit.test.mjs` pass.
 
 **Summary: 8/13 cases CODE-READY (pure validation/isolation logic), 5/13 NOT_CONFIGURED (require real CG Hours backend, mapping, timesheet, schema alignment).**
 
-## D. Identity/security verification (updated)
+## N. Identity/security verification (updated)
 
 | Requirement | CG Hours enforcement | CG Dynamics MCP enforcement | PR #376 Status |
 |---|---|---|---|
@@ -223,45 +439,26 @@ All 23 contract tests in `tests/cgHoursCanonicalPersistenceAudit.test.mjs` pass.
 | Admin explicit | `is_owner_or_admin()` policy | `company_admin` context required | ❌ Not implemented in CG Hours RPCs |
 | Duplicate protection | **NONE** — must be built | `mcp_check_idempotency` RPC | ❌ CG Hours has no idempotency; MCP log only protects Dynamics side |
 
-## E. Voice use case gap analysis (updated)
+## O. Recommended implementation path (updated)
 
-"I'm driving for Germoparts. I'm driving in the city. 20 kilometres."
+### Phase 1: Build CG Hours RPCs (in CG Hours repo)
+1. `create_ordinary_hours_entry` — handles timesheet resolution, task_template_id, idempotency
+2. `create_km_entry` — writes to time_entries KM columns with Traveling template
+3. `read_entries` — reads time_entries for a staff member in date range
+4. `correct_entry` — updates entry with audit fields
 
-| Step | Status | Detail |
-|---|---|---|
-| ChatGPT interprets voice | ✅ | Structured intent extraction |
-| CG Dynamics authenticates staff | ✅ | `authenticateStaff()` → `ConnectionPrincipal` |
-| Resolves "Germoparts" → client UUID | ✅ | `resolve_project_context` with exact name |
-| MCP tool for km/hours logging | ✅ | **ADDED in PR #376**: `log_ordinary_hours`, `log_kilometre_entry`, `read_my_recent_entries`, `correct_my_entry` in `toolCatalog.ts` |
-| Write-through to CG Hours | ❌ | **Env-gated but NOT_CONFIGURED** — no mapping, no timesheet, schema mismatch |
-| Timesheet resolution | ❌ | **No logic** to find/create weekly timesheet |
-| Client UUID mapping | ❌ | CG Dynamics ≠ CG Hours client IDs — passed through directly |
-| Task template resolution | ❌ | "Traveling" template ID unknown cross-project; not in RPC params |
-| Canonical persistence | ❌ | Nothing written to CG Hours; RPCs don't exist |
-| Record ID returned | ❌ | No record created |
+### Phase 2: Establish cross-project identity
+5. Deploy `cg_hours_staff_mapping` table (or verify shared auth)
+6. Deploy `cg_hours_client_mapping` table
+7. Populate initial mappings
 
-## F. Precise Remaining Implementation Gaps (CA-gated)
+### Phase 3: Wire PR #376 handlers
+8. Fix handler to call the real RPCs with correct parameters
+9. Add timesheet resolution logic (or let RPC handle it)
+10. Fix km entry to use time_entries KM columns, not separate vehicle entries
+11. Add idempotency inside the CG Hours RPCs
+12. Return server-side timestamps in receipts
 
-### Must have before any production write:
-1. **CG Hours service-role credentials** in CG Dynamics Edge Function env (`CG_HOURS_SUPABASE_URL`, `CG_HOURS_SERVICE_ROLE_KEY`)
-2. **Cross-project staff identity mapping**: Verify shared Supabase Auth UUIDs OR create mapping table `cg_dynamics_profile_id → cg_hours_profile_id`
-3. **Cross-project client identity mapping**: Create mapping table `cg_dynamics_client_id → cg_hours_client_id` (exact name match insufficient — UUIDs differ)
-4. **CG Hours RPC implementation**: `create_ordinary_hours_entry`, `read_ordinary_hours_entries`, `apply_ordinary_hours_correction`, `create_vehicle_entry`, `read_vehicle_entries`, `apply_vehicle_correction` in CG Hours project
-5. **Timesheet resolution logic**: In CG Hours RPC or adapter — find/create `timesheets` for current week (Monday-Sunday) by `staff_id`
-6. **Task template resolution**: Map "ordinary hours" → default template; "mileage" → "Traveling" template (`tracks_km=true`)
-7. **Schema alignment**: Either (a) extend CG Hours `time_entries` RPC to accept KM columns on same row, or (b) change CG Dynamics action layer to match CG Hours split (`time_entries` + `travel_requests`)
-8. **CG Hours idempotency**: Implement dedup in CG Hours RPC (e.g., `mcp_idempotency_log` table in CG Hours project) or adapter-layer check-before-insert
-9. **CG Hours RLS policies**: Ensure service-role writes still respect staff/client isolation (use `SET LOCAL ROLE` or explicit WHERE clauses)
-
-### Can proceed without production write (current state):
-- Action layer validation, isolation, audit trail, idempotency key gen: **DONE**
-- MCP tool catalog + handlers (env-gated): **DONE**
-- Contract tests documenting exact requirements: **DONE (23/23 pass)**
-
-## Verdict
-
-**NOT_CONFIGURED**
-
-The PR #376 head `b589c43` provides a well-typed action layer and MCP tool handlers that **compile and pass unit tests against mock adapters**, but the **adapter boundary is unwired** and the **contract it assumes does not match the canonical CG Hours schema**. The five hard blockers (cross-project identity mapping, timesheet resolution, task template resolution, schema alignment, CG Hours RPC implementation) are all **CA-gated configuration/infrastructure work** that cannot be completed in CG Dynamics code alone.
-
-**No production secrets, no production writes, no migrations, no provider changes attempted. Audit stops cleanly at CA-gated credential/mapping requirements.**
+### Phase 4: Acceptance test against real backend
+13. Run PR #383 acceptance matrix against real CG Hours
+14. Verify all 13 scenarios pass with real persistence
