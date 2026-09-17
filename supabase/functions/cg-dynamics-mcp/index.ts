@@ -547,9 +547,8 @@ const handleGetMyDay: ToolHandler = async (staff) => {
       .is('archived_at', null)
       .is('microsoft_source_removed_at', null)
       .in('status', ACTIVE_TASK_STATES)
-      .lte('due_date', tomorrow)
-      .order('due_date', { ascending: true })
-      .limit(20),
+      .or(`due_date.null,due_date.lte.${tomorrow}`)
+      .order('due_date', { ascending: true }),
     staff.supabase.rpc('list_planner_board_assignments', { p_board_id: null }),
     staff.supabase
       .from('company_calendar_events')
@@ -587,6 +586,8 @@ const handleGetMyDay: ToolHandler = async (staff) => {
     ),
   )
 
+  const tasksError = tasksResult.error?.message
+  const assignmentsError = assignmentsResult.error?.message
   return {
     today,
     timezone: CG_TIMEZONE,
@@ -594,7 +595,8 @@ const handleGetMyDay: ToolHandler = async (staff) => {
     tasks: ownedTasks,
     calendar_events: calendarResult.data ?? [],
     deliverables: flattenDeliverableClient(scheduleResult.data),
-    errors: [tasksResult.error?.message, assignmentsResult.error?.message, calendarResult.error?.message, scheduleResult.error?.message].filter(Boolean),
+    partial: tasksError !== undefined || assignmentsError !== undefined,
+    errors: [tasksError, assignmentsError, calendarResult.error?.message, scheduleResult.error?.message].filter(Boolean),
   }
 }
 
@@ -609,8 +611,7 @@ const handleListMyTasks: ToolHandler = async (staff, input) => {
       .select(`id, title, assigned_to_name, assigned_to_user_id, due_date, status, notes, client_name, client_id, created_at, updated_at, assignment_review_state, ${PLANNER_MICROSOFT_FIELDS.join(', ')}`)
       .is('archived_at', null)
       .is('microsoft_source_removed_at', null)
-      .order('due_date', { ascending: true })
-      .limit(50),
+      .order('due_date', { ascending: true }),
     staff.supabase.rpc('list_planner_board_assignments', { p_board_id: null }),
   ])
 
@@ -643,7 +644,8 @@ const handleListMyTasks: ToolHandler = async (staff, input) => {
   )
 
   // #325: durable Microsoft identity + freshness so the Assistant can reconcile by ID.
-  return { tasks: withSourceLinkage(ownedTasks, 'planner'), error: assignmentsResult.error?.message ?? null }
+  const listError = assignmentsResult.error?.message ?? null
+  return { tasks: withSourceLinkage(ownedTasks, 'planner'), error: listError, partial: listError !== null }
 }
 
 const handleGetTask: ToolHandler = async (staff, input) => {
