@@ -44,8 +44,7 @@ export default function ClientPlanPage() {
       const reportsResult = await listClientPublishedReports()
       if (!active) return
       if (!requestedMonth && !reportsResult.error) {
-        const latest = selectMonthlyReports(reportsResult.data)[0] ?? null
-        setFallbackMonth(actionMonthForReport(latest) ?? currentMonth())
+        setFallbackMonth(currentMonth())
       }
     }
     void loadContext()

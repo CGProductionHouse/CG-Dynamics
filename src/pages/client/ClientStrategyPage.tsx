@@ -3,7 +3,7 @@ import { ClientPortalShell } from '../../components/client/ClientPortalShell'
 import { useAuth } from '../../contexts/AuthContext'
 import { getClient, type Client } from '../../lib/db/clients'
 import { listClientPublishedReports, type ClientReport } from '../../lib/db/reports'
-import { monthDisplayLabel, selectMonthlyReports } from '../../lib/reportPeriod'
+import { monthDisplayLabel, selectMonthlyReports, getReportMonthFromPeriod } from '../../lib/reportPeriod'
 import { actionMonthForReport, buildClientStrategyPreview } from '../../lib/clientPortal'
 import { readStrategyData, ACTION_PLAN_LABELS, type StrategyData } from '../../lib/strategyEngine'
 
@@ -29,9 +29,9 @@ export default function ClientStrategyPage({ embedded = false, month }: { embedd
         if (clientResult.error || reportsResult.error) throw new Error('Data unavailable')
         setClient(clientResult.data)
         const monthlyReports = selectMonthlyReports(reportsResult.data)
-        const found = month
-          ? monthlyReports.find(candidate => actionMonthForReport(candidate) === month) ?? null
-          : monthlyReports[0] ?? null
+const found = month
+        ? monthlyReports.find(candidate => getReportMonthFromPeriod(candidate) === month) ?? null
+        : monthlyReports[0] ?? null
         setReport(found)
       } catch {
         if (active) setError(true)
@@ -45,7 +45,7 @@ export default function ClientStrategyPage({ embedded = false, month }: { embedd
 
   const strategy = useMemo(() => report ? readStrategyData(report.strategy_data) : null, [report])
   const preview = useMemo(() => buildClientStrategyPreview(report), [report])
-  const strategyMonth = month ?? actionMonthForReport(report)
+  const strategyMonth = month
 
   const actionPlanEntries = useMemo(() => {
     if (!strategy) return []
