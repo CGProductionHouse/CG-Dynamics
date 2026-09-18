@@ -1,21 +1,24 @@
 import { useSearchParams } from 'react-router-dom'
 import UsersAdmin from './UsersAdmin'
 import InvitesAdmin from './InvitesAdmin'
+import ClientAccessAdmin from './ClientAccessAdmin'
 import { PageContainer } from '../../components/layout/PageShell'
 
 // Consolidated Users workspace: user accounts and invites in one place. Each tab
 // renders the existing standalone page component. Both are admin-only (this hub
 // is mounted under RequireAdmin).
 
-type UsersTab = 'users' | 'invites'
+type UsersTab = 'users' | 'invites' | 'client-access'
 
 export default function UsersHub() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const tab: UsersTab = searchParams.get('tab') === 'invites' ? 'invites' : 'users'
+  const requestedTab = searchParams.get('tab')
+  const tab: UsersTab = requestedTab === 'invites' || requestedTab === 'client-access' ? requestedTab : 'users'
 
   const tabs: { key: UsersTab; label: string }[] = [
     { key: 'users', label: 'Users' },
     { key: 'invites', label: 'Invites' },
+    { key: 'client-access', label: 'Client Access' },
   ]
 
   return (
@@ -24,7 +27,7 @@ export default function UsersHub() {
         <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-accent">Administration</p>
           <h1 className="mt-2 text-3xl font-black text-white">Users</h1>
         <p className="mt-1 text-sm text-brand-primary/65">Manage workforce access, client users and invitations.</p>
-        <div className="mt-5 grid grid-cols-2 gap-2 rounded-xl border border-white/10 bg-black/20 p-1">
+        <div className="mt-5 grid grid-cols-3 gap-2 rounded-xl border border-white/10 bg-black/20 p-1">
           {tabs.map(item => (
             <button
               key={item.key}
@@ -44,6 +47,7 @@ export default function UsersHub() {
 
       {tab === 'users' && <UsersAdmin embedded />}
       {tab === 'invites' && <InvitesAdmin embedded />}
+      {tab === 'client-access' && <ClientAccessAdmin />}
     </PageContainer>
   )
 }
