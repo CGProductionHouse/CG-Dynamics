@@ -398,6 +398,9 @@ This section is an orientation snapshot only. Refetch GitHub + tracker before ac
 
 - Owner: CA manual coding agent 1.
 - Scope: bounded read-only Client Portal Library / Brand Hub foundation.
+- Owning implementation: draft PR #410 on `codex/issue-396-client-portal-library`; early checkpoint `3a1cfbb`.
+- Checkpoint status: exact-client service-only mappings, published-asset projection, server-mediated open/download and responsive Brand Hub shell are implemented; focused tests, scoped lint, production build and mobile/desktop visual QA are green.
+- The migration remains unapplied and the feature remains unavailable until an exact library mapping is both verified and explicitly enabled.
 - Reuse the exact `A_ClientPortal_<ClientSlug>` boundary.
 - Use durable OneDrive item IDs; never fuzzy filename identity.
 - Do not expose raw drive IDs/internal paths/sibling folders.
