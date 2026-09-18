@@ -403,6 +403,28 @@ This section is an orientation snapshot only. Refetch GitHub + tracker before ac
 - Do not configure production provider secrets/tokens, change DNS/domains, enable Website Operations, run migrations/backfills, start #405 lead/email work or duplicate #335/#336 GA4/Ads work.
 - Return durable checkpoints on both existing PRs with exact heads, tests/builds and remaining protected activation dependencies.
 
+**#405 Website Growth M2A canonical lead transaction**
+
+- Owner: CA manual coding agent 2.
+- Dynamics backend only; Agent 01 continues separate M1 reporting work.
+- Read Issue #405 latest comments plus Website Editor #27 and PR #28 engineering authority before coding.
+- Own the canonical enquiry vs contact identity, versioned form schema/stable field contract, tenant-scoped submission key and one PostgreSQL transaction that commits enquiry + approved-recipient delivery jobs + one canonical reporting event.
+- Exact Website/client/environment/recipient identity must resolve server-side; browser input is never authority.
+- Identical replay returns the same receipt; changed payload with the same key conflicts; no cross-client dedupe by email and no partial acknowledged state.
+- Prove RLS/isolation/idempotency/concurrency/crash-recovery semantics.
+- A migration/schema implementation may be authored and tested but must not be applied to production.
+- Do not touch Website Editor adapter files owned by Agent 01, live transactional provider/email send, provider secrets/config, production recipient setup, #374 or #335/#336.
+
+### Release-verification wait
+
+**#395 / PR #398 Client Plan + canonical monthly strategy**
+
+- No active coding owner.
+- Reconciled head `688409d6f09fb66c3a16f7039f311d96a3258ec4` is mergeable and locally green: 115/115 focused tests, production build, scoped ESLint 0 errors and diff check.
+- Remaining gate is only a fresh Vercel preview after the daily deployment quota resets. Current UNSTABLE is quota rejection, not an engineering/test failure.
+- After quota reset: rerun preview for the exact head; if green, routine coordinator merge + production verification.
+- No migration, production strategy seed/publish or provider/config action.
+
 ### Protected activation gates
 
 **#396 Client Portal Library**
@@ -480,13 +502,10 @@ No currently queued lane should be dispatched into #396, #404/#7 or #413 while t
 
 **#395 / PR #398**
 
-- implementation complete and reconciled onto `main` at `c3a85dd4dc86645ee34e3a80fc08e345bb486d4a`;
-- current-month default, URL-owned sticky month and legacy deep-link context remain intact;
-- canonical #391 monthly strategy activation remains the only strategy authority;
-- exact client/month isolation and published-only client projection remain enforced;
-- staff seed/review/amend/approve/explicit-publish workspace remains separate from the client view;
-- the final head and verification evidence are recorded on Issue #395 / PR #398;
-- no migration, production seed/publish action or provider/config change was performed;
+- implementation complete;
+- current-month/sticky month;
+- canonical monthly strategy activation;
+- staff seed/review/approve/publish workspace;
 - refetch PR state before deciding merge.
 
 ### Parked future
