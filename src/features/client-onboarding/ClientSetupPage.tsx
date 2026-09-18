@@ -1,27 +1,38 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { loadPortalSetup } from './api'
+import { loadClientPortalLibrary } from '../client-portal-library/api'
+import { ClientPortalLibrary } from '../client-portal-library/ClientPortalLibrary'
+import type { ClientPortalLibraryState } from '../client-portal-library/types'
 import { SetupSummary } from './SetupSummary'
 import { OnboardingProgress } from './OnboardingProgress'
 import { BrandAssetLibrary } from './BrandAssetLibrary'
 import { OnboardingTimeline } from './OnboardingTimeline'
 import type { ClientOnboardingState } from './types'
-import { ClientPortalEmptyState, ClientPortalErrorState, ClientPortalLoadingState } from '../../components/client/ClientPortalStates'
+import { ClientPortalErrorState, ClientPortalLoadingState } from '../../components/client/ClientPortalStates'
 
 export default function ClientSetupPage() {
   const { profile } = useAuth()
   const [state, setState] = useState<ClientOnboardingState | null>(null)
+  const [library, setLibrary] = useState<ClientPortalLibraryState | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     let active = true
     async function load() {
-      if (!profile?.client_id) return
-      const setupResult = await loadPortalSetup()
+      if (!profile?.client_id) {
+        setLoading(false)
+        return
+      }
+      const [libraryResult, setupResult] = await Promise.all([
+        loadClientPortalLibrary(),
+        loadPortalSetup(),
+      ])
       if (!active) return
       setState(setupResult.data)
-      setError(setupResult.error)
+      setLibrary(libraryResult.data)
+      setError(libraryResult.error)
       setLoading(false)
     }
     void load()
@@ -29,14 +40,13 @@ export default function ClientSetupPage() {
   }, [profile?.client_id])
 
   if (loading) return <ClientPortalLoadingState />
-  if (error || !state) {
+  if (error || !library) {
     return <ClientPortalErrorState title="Brand Hub is not available yet" message="Your CG team will make this space available once your client-safe library is ready." />
   }
-  return <ClientSetupContent state={state} />
+  return <ClientBrandHub library={library} state={state} />
 }
 
-export function ClientSetupContent({ state, audience = 'client' }: { state: ClientOnboardingState; audience?: 'client' | 'staff' }) {
-  if (audience === 'client') return <ClientBrandHub state={state} />
+export function ClientSetupContent({ state, audience = 'staff' }: { state: ClientOnboardingState; audience?: 'client' | 'staff' }) {
   return (
     <div className="space-y-5">
       <OnboardingProgress state={state} />
@@ -47,9 +57,7 @@ export function ClientSetupContent({ state, audience = 'client' }: { state: Clie
   )
 }
 
-function ClientBrandHub({ state }: { state: ClientOnboardingState }) {
-  const receivedAssets = state.uploads.filter(upload => upload.uploadStatus === 'received')
-
+function ClientBrandHub({ library, state }: { library: ClientPortalLibraryState; state: ClientOnboardingState | null }) {
   return (
     <div className="space-y-7">
       <section className="relative overflow-hidden rounded-[2rem] border border-white/[0.08] bg-[radial-gradient(circle_at_12%_5%,rgba(45,212,191,0.18),transparent_34%),radial-gradient(circle_at_92%_18%,rgba(249,115,22,0.12),transparent_28%),linear-gradient(145deg,rgba(10,27,24,0.96),rgba(5,12,11,0.94))] px-6 py-9 shadow-[0_34px_100px_-55px_rgba(0,0,0,0.95)] sm:px-9 sm:py-11">
@@ -62,17 +70,9 @@ function ClientBrandHub({ state }: { state: ClientOnboardingState }) {
         </div>
       </section>
 
-      {receivedAssets.length > 0 ? (
-        <BrandAssetLibrary state={state} audience="client" />
-      ) : (
-        <ClientPortalEmptyState
-          eyebrow="Client-safe library"
-          title="Your approved files will live here"
-          message="CG is preparing the client-safe Brand Identity and final-content library. Only files approved for client access will appear here; working files and raw production assets remain private."
-        />
-      )}
+      <ClientPortalLibrary library={library} />
 
-      <div className="grid gap-5 lg:grid-cols-5">
+      {state && <div className="grid gap-5 lg:grid-cols-5">
         <section className="rounded-[2rem] border border-white/[0.08] bg-white/[0.035] p-6 sm:p-8 lg:col-span-3">
           <p className="text-xs font-black uppercase tracking-[0.22em] text-[#2dd4bf]">Brand foundation</p>
           <h2 className="mt-3 text-2xl font-black tracking-[-0.035em] text-white">What CG has on file</h2>
@@ -86,7 +86,7 @@ function ClientBrandHub({ state }: { state: ClientOnboardingState }) {
             <OnboardingTimeline state={state} />
           </div>
         </section>
-      </div>
+      </div>}
     </div>
   )
 }

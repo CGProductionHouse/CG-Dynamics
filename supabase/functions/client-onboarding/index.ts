@@ -32,6 +32,7 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-onboarding-token',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Expose-Headers': 'x-client-filename, content-disposition',
   'Referrer-Policy': 'no-referrer',
   'Cache-Control': 'no-store',
 }
@@ -100,15 +101,130 @@ function validateUploadFile(category: UploadCategory, file: { name: string; type
   return null
 }
 
-function streamResponse(data: ArrayBuffer, mimeType: string, filename: string) {
+function streamResponse(data: ArrayBuffer, mimeType: string, filename: string, disposition: 'attachment' | 'inline' = 'attachment') {
+  const safeFilename = filename.replace(/[^\x20-\x7e]|[\r\n"]/g, '_')
   return new Response(data, {
     headers: {
       ...corsHeaders,
       'Content-Type': mimeType,
-      'Content-Disposition': `attachment; filename="${filename.replace(/"/g, '\\"')}"`,
+      'Content-Disposition': `${disposition}; filename="${safeFilename}"`,
+      'X-Client-Filename': encodeURIComponent(filename),
       'Cache-Control': 'no-store',
     },
   })
+}
+
+const PORTAL_CATEGORY_LABELS = {
+  brand_identity: 'Brand Identity',
+  graphic_design: 'Graphic Design',
+  video: 'Video',
+  photography: 'Photography',
+} as const
+
+type PortalCategory = keyof typeof PORTAL_CATEGORY_LABELS
+
+function isCanonicalPortalRoot(name: unknown): name is string {
+  return typeof name === 'string' && /^A_ClientPortal_[A-Za-z0-9][A-Za-z0-9_-]{0,95}$/.test(name)
+}
+
+function isSafeInlineMimeType(mimeType: string) {
+  return /^(image\/(?:avif|gif|jpeg|png|webp)|application\/pdf|video\/mp4)$/i.test(mimeType)
+}
+
+async function safePortalLibrary(service: SupabaseClient, clientId: string) {
+  const { data: client, error: clientError } = await service
+    .from('clients')
+    .select('name, logo_url')
+    .eq('id', clientId)
+    .maybeSingle()
+  if (clientError || !client) return null
+
+  const { data: library, error: libraryError } = await service
+    .from('client_portal_libraries')
+    .select('id, client_id, drive_id, root_folder_name, enabled, last_verified_at')
+    .eq('client_id', clientId)
+    .maybeSingle()
+  if (libraryError) return null
+  if (!library || !library.enabled || !library.last_verified_at || library.client_id !== clientId || !isCanonicalPortalRoot(library.root_folder_name)) {
+    return {
+      clientName: client.name,
+      clientLogoUrl: client.logo_url,
+      available: false,
+      categories: [],
+      assets: [],
+    }
+  }
+
+  const [categoriesResult, assetsResult] = await Promise.all([
+    service
+      .from('client_portal_library_categories')
+      .select('id, library_id, client_id, category, drive_id, folder_item_id, folder_name, last_verified_at')
+      .eq('library_id', library.id)
+      .eq('client_id', clientId),
+    service
+      .from('client_portal_assets')
+      .select('id, library_id, category_id, client_id, drive_id, parent_folder_item_id, display_name, mime_type, size_bytes, deliverable_id, published_at')
+      .eq('library_id', library.id)
+      .eq('client_id', clientId)
+      .eq('active', true)
+      .lte('published_at', new Date().toISOString())
+      .order('published_at', { ascending: false }),
+  ])
+  if (categoriesResult.error || assetsResult.error) return null
+
+  const categoryRows = (categoriesResult.data ?? []).filter(row => {
+    const category = row.category as PortalCategory
+    return row.library_id === library.id
+      && row.client_id === clientId
+      && row.drive_id === library.drive_id
+      && Boolean(row.last_verified_at)
+      && PORTAL_CATEGORY_LABELS[category] === row.folder_name
+  })
+  const categoryById = new Map(categoryRows.map(row => [row.id, row]))
+  const deliverableIds = [...new Set((assetsResult.data ?? [])
+    .map(row => row.deliverable_id as string | null)
+    .filter((id): id is string => Boolean(id)))]
+  const deliverables = deliverableIds.length > 0
+    ? await service
+      .from('monthly_deliverables')
+      .select('id, client_id, title, scheduled_date')
+      .eq('client_id', clientId)
+      .in('id', deliverableIds)
+    : { data: [], error: null }
+  if (deliverables.error) return null
+  const deliverableById = new Map((deliverables.data ?? []).map(row => [row.id, row]))
+
+  const assets = []
+  for (const row of assetsResult.data ?? []) {
+    const category = categoryById.get(row.category_id)
+    if (!category
+      || row.library_id !== library.id
+      || row.client_id !== clientId
+      || row.drive_id !== library.drive_id
+      || row.parent_folder_item_id !== category.folder_item_id) continue
+    const deliverable = row.deliverable_id ? deliverableById.get(row.deliverable_id) : null
+    if (row.deliverable_id && !deliverable) continue
+    assets.push({
+      id: row.id,
+      category: category.category,
+      displayName: row.display_name,
+      mimeType: row.mime_type,
+      sizeBytes: row.size_bytes == null ? null : Number(row.size_bytes),
+      publishedAt: row.published_at,
+      deliverableTitle: deliverable?.title ?? null,
+      planMonth: typeof deliverable?.scheduled_date === 'string' ? deliverable.scheduled_date.slice(0, 7) : null,
+    })
+  }
+
+  return {
+    clientName: client.name,
+    clientLogoUrl: client.logo_url,
+    available: true,
+    categories: categoryRows
+      .map(row => row.category as PortalCategory)
+      .sort((a, b) => Object.keys(PORTAL_CATEGORY_LABELS).indexOf(a) - Object.keys(PORTAL_CATEGORY_LABELS).indexOf(b)),
+    assets,
+  }
 }
 
 async function getTokenSession(service: SupabaseClient, request: Request): Promise<SessionRow | null> {
@@ -517,6 +633,73 @@ Deno.serve(async request => {
 
   const authorized = await getAuthorizedUser(service, request)
   if (!authorized) return json({ ok: false, error: 'Authentication required.' }, 401)
+
+  if (action === 'portal_library_load') {
+    if (authorized.profile.role !== 'client' || !authorized.profile.client_id) {
+      return json({ ok: false, error: 'Client access required.' }, 403)
+    }
+    const library = await safePortalLibrary(service, authorized.profile.client_id)
+    if (!library) return json({ ok: false, error: 'Client-safe library is unavailable.' }, 503)
+    return json({ ok: true, data: library })
+  }
+
+  if (action === 'portal_library_file') {
+    if (authorized.profile.role !== 'client' || !authorized.profile.client_id) {
+      return json({ ok: false, error: 'Client access required.' }, 403)
+    }
+    const assetId = cleanString(body.assetId, 50)
+    const disposition = body.disposition === 'open' ? 'inline' : body.disposition === 'download' ? 'attachment' : null
+    if (!assetId || !disposition) return json({ ok: false, error: 'Invalid file request.' }, 400)
+
+    const { data: asset, error: assetError } = await service
+      .from('client_portal_assets')
+      .select('id, library_id, category_id, client_id, drive_id, parent_folder_item_id, item_id, file_name, mime_type, active, published_at')
+      .eq('id', assetId)
+      .eq('client_id', authorized.profile.client_id)
+      .eq('active', true)
+      .maybeSingle()
+    if (assetError || !asset?.published_at) return json({ ok: false, error: 'File not found.' }, 404)
+
+    const [{ data: library }, { data: category }] = await Promise.all([
+      service
+        .from('client_portal_libraries')
+        .select('id, client_id, drive_id, root_folder_name, enabled, last_verified_at')
+        .eq('id', asset.library_id)
+        .eq('client_id', authorized.profile.client_id)
+        .maybeSingle(),
+      service
+        .from('client_portal_library_categories')
+        .select('id, library_id, client_id, drive_id, folder_item_id, category, folder_name, last_verified_at')
+        .eq('id', asset.category_id)
+        .eq('library_id', asset.library_id)
+        .eq('client_id', authorized.profile.client_id)
+        .maybeSingle(),
+    ])
+    const categoryName = category?.category as PortalCategory | undefined
+    const exactBoundary = library?.enabled
+      && Boolean(library.last_verified_at)
+      && library.client_id === authorized.profile.client_id
+      && library.drive_id === asset.drive_id
+      && isCanonicalPortalRoot(library.root_folder_name)
+      && category?.client_id === authorized.profile.client_id
+      && category.library_id === library.id
+      && category.drive_id === asset.drive_id
+      && category.folder_item_id === asset.parent_folder_item_id
+      && Boolean(category.last_verified_at)
+      && categoryName != null
+      && PORTAL_CATEGORY_LABELS[categoryName] === category.folder_name
+    if (!exactBoundary) return json({ ok: false, error: 'File boundary could not be verified.' }, 409)
+    if (!isUploadAdapterConfigured()) return json({ ok: false, error: 'File access is not configured yet.' }, 503)
+
+    const result = await downloadFile(asset.drive_id, asset.item_id)
+    if (!result) return json({ ok: false, error: 'Could not retrieve the file.' }, 503)
+    const mimeType = asset.mime_type ?? result.mimeType
+    if (disposition === 'inline' && !isSafeInlineMimeType(mimeType)) {
+      return json({ ok: false, error: 'Preview is not available for this file type.' }, 400)
+    }
+    const buffer = await new Response(result.stream).arrayBuffer()
+    return streamResponse(buffer, mimeType, asset.file_name, disposition)
+  }
 
   if (action === 'portal_load') {
     if (authorized.profile.role !== 'client' || !authorized.profile.client_id) return json({ ok: false, error: 'Client access required.' }, 403)
