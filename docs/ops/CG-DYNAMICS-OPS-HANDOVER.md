@@ -403,14 +403,27 @@ This section is an orientation snapshot only. Refetch GitHub + tracker before ac
 - Do not configure production provider secrets/tokens, change DNS/domains, enable Website Operations, run migrations/backfills, start #405 lead/email work or duplicate #335/#336 GA4/Ads work.
 - Return durable checkpoints on both existing PRs with exact heads, tests/builds and remaining protected activation dependencies.
 
-**#395 / PR #398 Client Plan + canonical monthly strategy**
+**#405 Website Growth M2A canonical lead transaction**
 
 - Owner: CA manual coding agent 2.
-- Continue existing PR #398 only; current checkpoint head before reconcile is `457882e2f6d16ba6ea0e88a907ae0ced9743acfc`.
-- Reconcile against current main without regressing actual-current-month URL ownership, canonical #391 monthly strategy reads, exact-client/month isolation or explicit staff review/approve/publish lifecycle.
-- No second strategy/calendar/report authority.
-- No migration, production strategy seed/publish action or provider/config change.
-- Re-run focused #395/isolation tests, scoped lint, production build, diff check and preview; return final merge-ready head.
+- Dynamics backend only; Agent 01 continues separate M1 reporting work.
+- Read Issue #405 latest comments plus Website Editor #27 and PR #28 engineering authority before coding.
+- Own the canonical enquiry vs contact identity, versioned form schema/stable field contract, tenant-scoped submission key and one PostgreSQL transaction that commits enquiry + approved-recipient delivery jobs + one canonical reporting event.
+- Exact Website/client/environment/recipient identity must resolve server-side; browser input is never authority.
+- Identical replay returns the same receipt; changed payload with the same key conflicts; no cross-client dedupe by email and no partial acknowledged state.
+- Prove RLS/isolation/idempotency/concurrency/crash-recovery semantics.
+- A migration/schema implementation may be authored and tested but must not be applied to production.
+- Do not touch Website Editor adapter files owned by Agent 01, live transactional provider/email send, provider secrets/config, production recipient setup, #374 or #335/#336.
+
+### Release-verification wait
+
+**#395 / PR #398 Client Plan + canonical monthly strategy**
+
+- No active coding owner.
+- Reconciled head `688409d6f09fb66c3a16f7039f311d96a3258ec4` is mergeable and locally green: 115/115 focused tests, production build, scoped ESLint 0 errors and diff check.
+- Remaining gate is only a fresh Vercel preview after the daily deployment quota resets. Current UNSTABLE is quota rejection, not an engineering/test failure.
+- After quota reset: rerun preview for the exact head; if green, routine coordinator merge + production verification.
+- No migration, production strategy seed/publish or provider/config action.
 
 ### Protected activation gates
 
