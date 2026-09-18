@@ -4,6 +4,8 @@
 
 Use GitHub as the persistent control plane so OpenCode can keep CG Dynamics moving without CA manually relaying `continue` prompts.
 
+Before autonomous dispatch, read `docs/ops/CG-DYNAMICS-OPS-HANDOVER.md`, Issue #381 and the Google Sheet `CG AI Model and Agent Control Centre`. GitHub is code truth; the Control Centre is ownership/capacity/dispatch truth. Manual CA ownership always wins.
+
 ## Workflows
 
 - `.github/workflows/opencode-autonomous.yml`
@@ -63,7 +65,7 @@ Install/authorize the official OpenCode GitHub app for this repository if it is 
 
 ## Operating rules
 
-- GitHub is source of truth.
+- GitHub is code/product source of truth; the Google Control Centre is worker/capacity/dispatch truth. Reconcile both before dispatch.
 - Do not duplicate an active Claude/Codex/Crestodian/OpenCode-owned PR or mission.
 - Prefer finishing existing launch work over starting new architecture.
 - Safe unattended output stops at a verified PR/review gate.
