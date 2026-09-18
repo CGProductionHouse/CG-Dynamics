@@ -168,8 +168,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function signIn(identifier: string, password: string) {
     const value = identifier.trim()
-    let signedInUser: User | null = null
-    let authError: AuthContextError | null = null
+    let signedInUser: User | null
+    let authError: AuthContextError | null
 
     if (value.includes('@')) {
       const { data, error } = await supabase.auth.signInWithPassword({ email: value, password })
