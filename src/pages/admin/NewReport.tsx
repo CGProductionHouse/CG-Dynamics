@@ -391,6 +391,7 @@ export default function NewReport() {
     const fromReport = savedReportId
       ? reportPosts
           .filter(post => {
+            if (post.raw?.source === 'meta_sync' || post.raw?.meta_sync) return true
             if (!post.publish_time) return true
             const time = new Date(post.publish_time).getTime()
             if (Number.isNaN(time)) return true

@@ -85,13 +85,16 @@ test('shared account facts stop resumably between probes and cap every retry to 
   assert.match(sharedMeta, /for \(const spec of specs\) \{[\s\S]*assertMetaSyncActive[\s\S]*probeMetric\([\s\S]*control\)/)
   assert.match(sharedMeta, /for \(let attempt = 0; attempt <= backoff\.length; attempt\+\+\) \{[\s\S]*assertMetaSyncActive/)
   assert.match(sharedMeta, /Math\.min\(requestedTimeoutMs, control\.deadline - Date\.now\(\)\)/)
-  assert.match(sharedMeta, /if \(e instanceof MetaSyncDeadlineError\) throw e/)
+  assert.match(sharedMeta, /e instanceof MetaSyncDeadlineError \|\| e instanceof MetaProviderTimeoutError/)
 })
 
-test('worker passes its safe deadline and requeues the distinct connector deadline', () => {
+test('worker refunds connector budget yields but consumes bounded provider timeout attempts', () => {
   assert.match(worker, /deadline: invocationDeadline - PAGE_FETCH_RESERVE_MS/g)
   assert.match(worker, /e instanceof MetaSyncDeadlineError[\s\S]*throw new RetryableIncompleteError\(e\.message, true\)/)
-  assert.match(worker, /e instanceof RetryableIncompleteError && \(item\.attempts < 3 \|\| isMetaRateLimitError\(message\)\)[\s\S]*itemStatus = 'queued'/)
+  assert.match(worker, /const MAX_PROVIDER_ATTEMPTS = 3/)
+  assert.match(worker, /if \(e instanceof MetaProviderTimeoutError\) throw e/)
+  assert.match(worker, /e instanceof RetryableIncompleteError && \(item\.attempts < MAX_PROVIDER_ATTEMPTS \|\| isMetaRateLimitError\(message\)\)[\s\S]*itemStatus = 'queued'/)
+  assert.match(worker, /refundAttempt = e instanceof RetryableIncompleteError \? e\.refundAttempt : e instanceof MetaSyncDeadlineError/)
 })
 
 test('worker resumes from safe per-platform cursors and clears them on page completion', () => {

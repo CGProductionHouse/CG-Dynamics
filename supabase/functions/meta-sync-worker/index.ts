@@ -3,7 +3,10 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import {
   META_CONNECTOR_VERSION,
   MetaFactRetryableError,
+  MetaProviderTimeoutError,
   MetaSyncDeadlineError,
+  isWithinMetaProviderPeriod,
+  metaProviderPeriod,
   metaPostBounds,
   metaFetch,
   readMetaError,
@@ -26,6 +29,7 @@ const META_COLLECTION_PAGE_CAP = 25
 const MAX_WORK_MS = 40_000
 const PAGE_FETCH_RESERVE_MS = 8_000
 const MIN_PAGE_REQUEST_BUDGET_MS = 4_000
+const MAX_PROVIDER_ATTEMPTS = 3
 
 class RetryableIncompleteError extends Error {
   constructor(message: string, readonly refundAttempt = false) {
@@ -90,7 +94,7 @@ const TERMINAL_META_STATES = new Set<MetaSyncState>(['complete', 'failed', 'not_
 
 function assertWorkBudget(deadline: number, context: string): void {
   if (Date.now() >= deadline - PAGE_FETCH_RESERVE_MS) {
-    throw new RetryableIncompleteError(`${context} paused to preserve the worker lease budget.`)
+    throw new RetryableIncompleteError(`${context} paused to preserve the worker lease budget.`, true)
   }
 }
 
@@ -119,12 +123,7 @@ async function fetchMetaCollection(
   while (pagesFetched < META_COLLECTION_PAGE_CAP) {
     const remainingMs = deadline - Date.now()
     if (remainingMs < MIN_PAGE_REQUEST_BUDGET_MS + PAGE_FETCH_RESERVE_MS) {
-      return {
-        pagesFetched,
-        complete: false,
-        error: `${context} paused before page ${pagesFetched + 1} to preserve the worker lease budget.`,
-        retryable: true,
-      }
+      throw new MetaSyncDeadlineError(`${context} page ${pagesFetched + 1} pre-request budget check`)
     }
     // metaFetch can make three bounded attempts. Keep each attempt short enough
     // that retries plus backoff cannot consume the rest of this invocation.
@@ -542,6 +541,7 @@ Deno.serve(async (req) => {
 
       const { periodStart, periodEnd } = monthBounds(item.month)
       const postBounds = metaPostBounds(periodStart, periodEnd)
+      const providerPeriod = metaProviderPeriod(periodStart, periodEnd)
       let postsSynced = Number(item.posts_synced ?? 0)
       let reportsCreated = Number(item.reports_created ?? 0)
       let reportsReused = Number(item.reports_reused ?? 0)
@@ -693,6 +693,7 @@ Deno.serve(async (req) => {
                     const metaPostId = String(raw.id ?? '')
                     if (!metaPostId) continue
                     const publishTime = raw.created_time ? new Date(raw.created_time as string).toISOString() : null
+                    if (!publishTime || !isWithinMetaProviderPeriod(publishTime, periodStart, periodEnd)) continue
                     const caption = (raw.message as string | null) ?? null
                     const permalink = (raw.permalink_url as string | null) ?? null
                     const reactions = (raw.reactions as { summary?: { total_count?: number } })?.summary?.total_count ?? 0
@@ -732,7 +733,9 @@ Deno.serve(async (req) => {
               }
             } catch (e) {
               const message = redact(`Facebook sync error: ${String(e)}`, [accessToken, ...pageTokenMap.values()])
-              if (e instanceof RetryableIncompleteError && (item.attempts < 3 || isMetaRateLimitError(message))) throw e
+              if (e instanceof MetaProviderTimeoutError) throw e
+              if (e instanceof MetaSyncDeadlineError) throw e
+              if (e instanceof RetryableIncompleteError && (item.attempts < MAX_PROVIDER_ATTEMPTS || isMetaRateLimitError(message))) throw e
               if (isMetaRateLimitError(message)) throw new RetryableIncompleteError(message)
               providerPaging.facebook = { pagesFetched: 0, complete: false, pageCap: META_COLLECTION_PAGE_CAP }
               warnings.push(message)
@@ -762,8 +765,8 @@ Deno.serve(async (req) => {
               async rawMedia => {
                 const pageResult = classifyInstagramMediaPage(
                   rawMedia,
-                  new Date(Number(postBounds.since) * 1000).toISOString(),
-                  new Date(Number(postBounds.until) * 1000).toISOString(),
+                  providerPeriod.start,
+                  providerPeriod.endExclusive,
                   instagramOldestTimestamp,
                   instagramBoundaryEnabled,
                   instagramOrderingMalformed,
@@ -827,7 +830,9 @@ Deno.serve(async (req) => {
             }
           } catch (e) {
             const message = redact(`Instagram sync error: ${String(e)}`, [accessToken, ...pageTokenMap.values()])
-            if (e instanceof RetryableIncompleteError && (item.attempts < 3 || isMetaRateLimitError(message))) throw e
+            if (e instanceof MetaProviderTimeoutError) throw e
+            if (e instanceof MetaSyncDeadlineError) throw e
+            if (e instanceof RetryableIncompleteError && (item.attempts < MAX_PROVIDER_ATTEMPTS || isMetaRateLimitError(message))) throw e
             if (isMetaRateLimitError(message)) throw new RetryableIncompleteError(message)
             providerPaging.instagram = { pagesFetched: 0, complete: false, pageCap: META_COLLECTION_PAGE_CAP }
             warnings.push(message)
@@ -866,8 +871,9 @@ Deno.serve(async (req) => {
               if (e instanceof MetaSyncDeadlineError) {
                 throw new RetryableIncompleteError(e.message, true)
               }
-              if (e instanceof MetaFactRetryableError) throw new RetryableIncompleteError(e.message, true)
-              if (e instanceof RetryableIncompleteError && (item.attempts < 3 || isMetaRateLimitError(String(e)))) throw e
+              if (e instanceof MetaProviderTimeoutError) throw e
+              if (e instanceof MetaFactRetryableError) throw new RetryableIncompleteError(e.message, e.rateLimited)
+              if (e instanceof RetryableIncompleteError && (item.attempts < MAX_PROVIDER_ATTEMPTS || isMetaRateLimitError(String(e)))) throw e
               const factsError = redact(`Facebook account facts error: ${String(e)}`, allTokens)
               warnings.push(factsError)
               itemStatus = 'failed'
@@ -899,8 +905,9 @@ Deno.serve(async (req) => {
             if (e instanceof MetaSyncDeadlineError) {
               throw new RetryableIncompleteError(e.message, true)
             }
-            if (e instanceof MetaFactRetryableError) throw new RetryableIncompleteError(e.message, true)
-            if (e instanceof RetryableIncompleteError && (item.attempts < 3 || isMetaRateLimitError(String(e)))) throw e
+            if (e instanceof MetaProviderTimeoutError) throw e
+            if (e instanceof MetaFactRetryableError) throw new RetryableIncompleteError(e.message, e.rateLimited)
+            if (e instanceof RetryableIncompleteError && (item.attempts < MAX_PROVIDER_ATTEMPTS || isMetaRateLimitError(String(e)))) throw e
             const factsError = redact(`Instagram account facts error: ${String(e)}`, allTokens)
             warnings.push(factsError)
             itemStatus = 'failed'
@@ -938,7 +945,7 @@ Deno.serve(async (req) => {
 
       } catch (e) {
         const message = redact(String(e), [accessToken, ...pageTokenMap.values()])
-        if ((e instanceof RetryableIncompleteError || e instanceof MetaFactRetryableError || e instanceof MetaSyncDeadlineError) && (item.attempts < 3 || isMetaRateLimitError(message))) {
+        if ((e instanceof RetryableIncompleteError || e instanceof MetaFactRetryableError || e instanceof MetaSyncDeadlineError || e instanceof MetaProviderTimeoutError) && (item.attempts < MAX_PROVIDER_ATTEMPTS || isMetaRateLimitError(message))) {
           itemStatus = 'queued'
           itemError = message
           refundAttempt = e instanceof RetryableIncompleteError ? e.refundAttempt : e instanceof MetaSyncDeadlineError
@@ -946,7 +953,9 @@ Deno.serve(async (req) => {
         } else {
           itemStatus = 'failed'
           itemError = e instanceof RetryableIncompleteError
-            ? `${message} Incomplete pagination exhausted 3 bounded attempts.`
+            ? `${message} Incomplete pagination exhausted ${MAX_PROVIDER_ATTEMPTS} bounded attempts.`
+            : e instanceof MetaProviderTimeoutError
+              ? `${message} Provider request timeout exhausted ${MAX_PROVIDER_ATTEMPTS} bounded attempts.`
             : message
         }
       }
