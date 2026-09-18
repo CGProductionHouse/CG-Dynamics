@@ -18,7 +18,7 @@ export default function Login() {
   const { signIn } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const [email, setEmail] = useState('')
+  const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -29,7 +29,7 @@ export default function Login() {
     setError(null)
     setUnconfirmed(false)
     setLoading(true)
-    const { error, role, pendingInviteSetup } = await signIn(email, password)
+    const { error, role, pendingInviteSetup } = await signIn(identifier, password)
     setLoading(false)
     if (error) {
       if (isNotConfirmed(error as { message?: string; code?: string })) {
@@ -70,18 +70,20 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} noValidate className="space-y-5">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-brand-accent mb-1.5">
-              Email
+            <label htmlFor="identifier" className="block text-sm font-medium text-brand-accent mb-1.5">
+              Username or email
             </label>
             <input
-              id="email"
-              type="email"
-              autoComplete="email"
+              id="identifier"
+              type="text"
+              autoComplete="username"
+              autoCapitalize="none"
+              spellCheck={false}
               required
-              value={email}
-              onChange={e => setEmail(e.target.value)}
+              value={identifier}
+              onChange={e => setIdentifier(e.target.value)}
               className="w-full bg-brand-bg border border-brand-muted rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-accent focus:border-transparent transition"
-              placeholder="you@example.com"
+              placeholder="Company username or email"
             />
           </div>
 
@@ -120,7 +122,7 @@ export default function Login() {
         </form>
 
         <p className="mt-6 text-center text-sm text-brand-primary">
-          Have an invitation?{' '}
+          Client usernames are supplied by CG Production House. Have an invitation?{' '}
           <Link to="/signup" className="text-brand-accent hover:brightness-110 font-medium transition">
             Complete setup
           </Link>
