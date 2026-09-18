@@ -18,10 +18,38 @@ export interface ClientPortalLibraryAsset {
   planMonth: string | null
 }
 
+export interface ClientPortalLibraryMonthSummary {
+  month: number
+  fileCount: number
+}
+
+export interface ClientPortalLibraryYearSummary {
+  year: number
+  fileCount: number
+  months: ClientPortalLibraryMonthSummary[]
+}
+
+export interface ClientPortalLibraryCategorySummary {
+  category: ClientPortalLibraryCategory
+  fileCount: number
+  years: ClientPortalLibraryYearSummary[]
+}
+
 export interface ClientPortalLibraryState {
   clientName: string
   clientLogoUrl: string | null
   available: boolean
-  categories: ClientPortalLibraryCategory[]
+  categories: ClientPortalLibraryCategorySummary[]
+}
+
+export interface ClientPortalLibraryFilesPage {
   assets: ClientPortalLibraryAsset[]
+  nextOffset: number | null
+}
+
+export type ClientPortalAssetPurpose = 'inline' | 'download' | 'stream' | 'thumbnail'
+
+export interface ClientPortalAssetAccess {
+  url: string
+  expiresAt: string
 }
