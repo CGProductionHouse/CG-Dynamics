@@ -1,5 +1,22 @@
 import { createClient, type SupabaseClient, type User } from 'https://esm.sh/@supabase/supabase-js@2'
-import { createUploadSession, downloadFile, isUploadAdapterConfigured, verifyDriveItem } from './onedrive-adapter.ts'
+import {
+  createUploadSession,
+  downloadFile,
+  isUploadAdapterConfigured,
+  streamDriveItem,
+  streamDriveThumbnail,
+  verifyDriveItem,
+} from './onedrive-adapter.ts'
+import {
+  createPortalMediaResponse,
+  isPortalAccessPurpose,
+  isValidPartialContent,
+  normalizeRangeHeader,
+  PORTAL_STREAM_TTL_SECONDS,
+  signPortalAccess,
+  verifyPortalAccess,
+  type PortalAccessPurpose,
+} from './portal-library-stream.ts'
 
 const PLATFORMS = new Set(['facebook', 'instagram', 'meta_business', 'linkedin', 'tiktok', 'website', 'google', 'outlook'])
 const CHOICES = new Set(['connect_now', 'do_later', 'not_needed'])
@@ -30,8 +47,9 @@ const BLOCKED_EXTENSIONS = new Set([
 ])
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-onboarding-token',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-onboarding-token, range',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Expose-Headers': 'x-client-filename, content-disposition, accept-ranges, content-length, content-range, etag',
   'Referrer-Policy': 'no-referrer',
   'Cache-Control': 'no-store',
 }
@@ -100,15 +118,268 @@ function validateUploadFile(category: UploadCategory, file: { name: string; type
   return null
 }
 
-function streamResponse(data: ArrayBuffer, mimeType: string, filename: string) {
+function streamResponse(data: ArrayBuffer, mimeType: string, filename: string, disposition: 'attachment' | 'inline' = 'attachment') {
+  const safeFilename = filename.replace(/[^\x20-\x7e]|[\r\n"]/g, '_')
   return new Response(data, {
     headers: {
       ...corsHeaders,
       'Content-Type': mimeType,
-      'Content-Disposition': `attachment; filename="${filename.replace(/"/g, '\\"')}"`,
+      'Content-Disposition': `${disposition}; filename="${safeFilename}"`,
+      'X-Client-Filename': encodeURIComponent(filename),
       'Cache-Control': 'no-store',
     },
   })
+}
+
+const PORTAL_CATEGORY_LABELS = {
+  brand_identity: 'Brand Identity',
+  graphic_design: 'Graphic Design',
+  video: 'Video',
+  photography: 'Photography',
+} as const
+
+type PortalCategory = keyof typeof PORTAL_CATEGORY_LABELS
+
+function isCanonicalPortalRoot(name: unknown): name is string {
+  return typeof name === 'string' && /^A_ClientPortal_[A-Za-z0-9][A-Za-z0-9_-]{0,95}$/.test(name)
+}
+
+function isSafeInlineMimeType(mimeType: string) {
+  return /^(image\/(?:avif|gif|jpeg|png|webp)|application\/pdf|video\/mp4)$/i.test(mimeType)
+}
+
+async function safePortalLibrary(service: SupabaseClient, clientId: string) {
+  const { data: client, error: clientError } = await service
+    .from('clients')
+    .select('name, logo_url')
+    .eq('id', clientId)
+    .maybeSingle()
+  if (clientError || !client) return null
+
+  const { data: library, error: libraryError } = await service
+    .from('client_portal_libraries')
+    .select('id, client_id, drive_id, root_folder_name, enabled, last_verified_at')
+    .eq('client_id', clientId)
+    .maybeSingle()
+  if (libraryError) return null
+  if (!library || !library.enabled || !library.last_verified_at || library.client_id !== clientId || !isCanonicalPortalRoot(library.root_folder_name)) {
+    return {
+      clientName: client.name,
+      clientLogoUrl: client.logo_url,
+      available: false,
+      categories: [],
+    }
+  }
+
+  const [categoriesResult, summaryResult] = await Promise.all([
+    service
+      .from('client_portal_library_categories')
+      .select('id, library_id, client_id, category, drive_id, folder_item_id, folder_name, last_verified_at')
+      .eq('library_id', library.id)
+      .eq('client_id', clientId),
+    service.rpc('get_client_portal_library_summary', {
+      p_library_id: library.id,
+      p_client_id: clientId,
+    }),
+  ])
+  if (categoriesResult.error || summaryResult.error) return null
+
+  const categoryRows = (categoriesResult.data ?? []).filter(row => {
+    const category = row.category as PortalCategory
+    return row.library_id === library.id
+      && row.client_id === clientId
+      && row.drive_id === library.drive_id
+      && Boolean(row.last_verified_at)
+      && PORTAL_CATEGORY_LABELS[category] === row.folder_name
+  })
+  const summaryByCategory = new Map<string, Array<{ year: number | null; month: number | null; fileCount: number }>>()
+  for (const row of summaryResult.data ?? []) {
+    const category = categoryRows.find(candidate => candidate.id === row.category_id)
+    if (!category) continue
+    const year = row.library_year == null ? null : Number(row.library_year)
+    const month = row.library_month == null ? null : Number(row.library_month)
+    const validPeriod = category.category === 'brand_identity'
+      ? year == null && month == null
+      : Number.isInteger(year) && year! >= 2000 && year! <= 2100 && Number.isInteger(month) && month! >= 1 && month! <= 12
+    if (!validPeriod) continue
+    const entries = summaryByCategory.get(category.id) ?? []
+    entries.push({ year, month, fileCount: Number(row.file_count) })
+    summaryByCategory.set(category.id, entries)
+  }
+
+  const categories = categoryRows
+    .map(row => {
+      const entries = summaryByCategory.get(row.id) ?? []
+      const years = row.category === 'brand_identity' ? [] : [...new Set(entries.map(entry => entry.year as number))]
+        .sort((a, b) => b - a)
+        .map(year => ({
+          year,
+          fileCount: entries.filter(entry => entry.year === year).reduce((sum, entry) => sum + entry.fileCount, 0),
+          months: entries
+            .filter(entry => entry.year === year)
+            .sort((a, b) => (b.month ?? 0) - (a.month ?? 0))
+            .map(entry => ({ month: entry.month as number, fileCount: entry.fileCount })),
+        }))
+      return {
+        category: row.category as PortalCategory,
+        fileCount: entries.reduce((sum, entry) => sum + entry.fileCount, 0),
+        years,
+      }
+    })
+    .sort((a, b) => Object.keys(PORTAL_CATEGORY_LABELS).indexOf(a.category) - Object.keys(PORTAL_CATEGORY_LABELS).indexOf(b.category))
+
+  return {
+    clientName: client.name,
+    clientLogoUrl: client.logo_url,
+    available: true,
+    categories,
+  }
+}
+
+type AuthorizedPortalAsset = {
+  id: string
+  library_id: string
+  category_id: string
+  client_id: string
+  drive_id: string
+  parent_folder_item_id: string
+  item_id: string
+  display_name: string
+  file_name: string
+  mime_type: string | null
+  size_bytes: number | null
+  library_year: number | null
+  library_month: number | null
+  published_at: string
+  category: PortalCategory
+}
+
+async function authorizePortalAsset(service: SupabaseClient, assetId: string): Promise<AuthorizedPortalAsset | null> {
+  const { data: asset, error: assetError } = await service
+    .from('client_portal_assets')
+    .select('id, library_id, category_id, client_id, drive_id, parent_folder_item_id, item_id, display_name, file_name, mime_type, size_bytes, library_year, library_month, active, published_at')
+    .eq('id', assetId)
+    .eq('active', true)
+    .lte('published_at', new Date().toISOString())
+    .maybeSingle()
+  if (assetError || !asset?.published_at) return null
+
+  const [{ data: library }, { data: category }] = await Promise.all([
+    service
+      .from('client_portal_libraries')
+      .select('id, client_id, drive_id, root_folder_name, enabled, last_verified_at')
+      .eq('id', asset.library_id)
+      .eq('client_id', asset.client_id)
+      .maybeSingle(),
+    service
+      .from('client_portal_library_categories')
+      .select('id, library_id, client_id, drive_id, folder_item_id, category, folder_name, last_verified_at')
+      .eq('id', asset.category_id)
+      .eq('library_id', asset.library_id)
+      .eq('client_id', asset.client_id)
+      .maybeSingle(),
+  ])
+  const categoryName = category?.category as PortalCategory | undefined
+  const validPeriod = categoryName === 'brand_identity'
+    ? asset.library_year == null && asset.library_month == null
+    : Number.isInteger(asset.library_year) && Number.isInteger(asset.library_month)
+  const exactBoundary = library?.enabled
+    && Boolean(library.last_verified_at)
+    && library.client_id === asset.client_id
+    && library.drive_id === asset.drive_id
+    && isCanonicalPortalRoot(library.root_folder_name)
+    && category?.client_id === asset.client_id
+    && category.library_id === library.id
+    && category.drive_id === asset.drive_id
+    && category.folder_item_id === asset.parent_folder_item_id
+    && Boolean(category.last_verified_at)
+    && categoryName != null
+    && PORTAL_CATEGORY_LABELS[categoryName] === category.folder_name
+    && validPeriod
+  if (!exactBoundary) return null
+  return { ...asset, category: categoryName } as AuthorizedPortalAsset
+}
+
+function portalStreamSecret(serviceRoleKey: string) {
+  const dedicated = Deno.env.get('CLIENT_PORTAL_STREAM_SECRET')?.trim()
+  return dedicated && dedicated.length >= 32
+    ? dedicated
+    : `cg-client-portal-stream-v1:${serviceRoleKey}`
+}
+
+async function portalAccessUrl(request: Request, assetId: string, purpose: PortalAccessPurpose, serviceRoleKey: string) {
+  const secret = portalStreamSecret(serviceRoleKey)
+  const expiresAt = Math.floor(Date.now() / 1000) + PORTAL_STREAM_TTL_SECONDS
+  const signature = await signPortalAccess(secret, assetId, purpose, expiresAt)
+  const url = new URL(request.url)
+  url.search = new URLSearchParams({ asset: assetId, purpose, expires: String(expiresAt), signature }).toString()
+  return { url: url.toString(), expiresAt: new Date(expiresAt * 1000).toISOString() }
+}
+
+async function handlePortalStreamRequest(service: SupabaseClient, request: Request, serviceRoleKey: string) {
+  const url = new URL(request.url)
+  const assetId = cleanString(url.searchParams.get('asset'), 50)
+  const purposeValue = url.searchParams.get('purpose')
+  const expiresAt = Number(url.searchParams.get('expires'))
+  const signature = cleanString(url.searchParams.get('signature'), 64)
+  const secret = portalStreamSecret(serviceRoleKey)
+  if (!assetId || !isPortalAccessPurpose(purposeValue)) return json({ ok: false, error: 'File access is unavailable.' }, 404)
+  if (!await verifyPortalAccess(secret, assetId, purposeValue, expiresAt, signature)) {
+    return json({ ok: false, error: 'This file access link has expired.' }, 403)
+  }
+
+  const asset = await authorizePortalAsset(service, assetId)
+  if (!asset) return json({ ok: false, error: 'File not found.' }, 404)
+  if (purposeValue === 'stream' && !/^video\/mp4$/i.test(asset.mime_type ?? '')) {
+    return json({ ok: false, error: 'Streaming is not available for this file.' }, 400)
+  }
+  if (purposeValue === 'inline' && !isSafeInlineMimeType(asset.mime_type ?? '')) {
+    return json({ ok: false, error: 'Preview is not available for this file.' }, 400)
+  }
+  if (purposeValue === 'thumbnail' && !/^(image\/|video\/)/i.test(asset.mime_type ?? '')) {
+    return json({ ok: false, error: 'Thumbnail is not available for this file.' }, 400)
+  }
+  if (!isUploadAdapterConfigured()) return json({ ok: false, error: 'File access is not configured yet.' }, 503)
+
+  const sizeBytes = asset.size_bytes == null ? 0 : Number(asset.size_bytes)
+  if (purposeValue === 'stream' && sizeBytes <= 0) {
+    return json({ ok: false, error: 'Streaming is unavailable for this file.' }, 409)
+  }
+  const requestedRange = purposeValue === 'thumbnail'
+    ? undefined
+    : purposeValue === 'stream'
+      ? request.headers.get('range') ?? 'bytes=0-'
+      : request.headers.get('range')
+  const range = normalizeRangeHeader(requestedRange, sizeBytes)
+  if (range === null) {
+    return new Response(null, {
+      status: 416,
+      headers: { ...corsHeaders, 'Accept-Ranges': 'bytes', 'Content-Range': `bytes */${Math.max(0, sizeBytes)}` },
+    })
+  }
+
+  const result = purposeValue === 'thumbnail'
+    ? await streamDriveThumbnail(asset.drive_id, asset.item_id)
+    : await streamDriveItem(asset.drive_id, asset.item_id, range)
+  if (!result) return json({ ok: false, error: 'Could not retrieve the file.' }, 503)
+  if (range && !isValidPartialContent(range, result.status, result.contentRange)) {
+    await result.stream.cancel()
+    return json({ ok: false, error: 'Range streaming is unavailable.' }, 502)
+  }
+
+  const safeFilename = asset.file_name.replace(/[^\x20-\x7e]|[\r\n"]/g, '_')
+  const responseHeaders: Record<string, string> = {
+    ...corsHeaders,
+    'Content-Type': purposeValue === 'thumbnail' ? result.contentType ?? 'image/jpeg' : asset.mime_type ?? result.contentType ?? 'application/octet-stream',
+    'Content-Disposition': `${purposeValue === 'download' ? 'attachment' : 'inline'}; filename="${safeFilename}"`,
+    'X-Client-Filename': encodeURIComponent(asset.file_name),
+    'Accept-Ranges': 'bytes',
+    'Cache-Control': 'private, no-store',
+  }
+  if (result.contentLength) responseHeaders['Content-Length'] = result.contentLength
+  if (result.contentRange) responseHeaders['Content-Range'] = result.contentRange
+  if (result.etag) responseHeaders.ETag = result.etag
+  return createPortalMediaResponse(result.stream, result.status, responseHeaders)
 }
 
 async function getTokenSession(service: SupabaseClient, request: Request): Promise<SessionRow | null> {
@@ -262,11 +533,12 @@ async function refreshedSession(service: SupabaseClient, id: string) {
 
 Deno.serve(async request => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
-  if (request.method !== 'POST') return json({ ok: false, error: 'Not found.' }, 404)
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   if (!supabaseUrl || !serviceRoleKey) return json({ ok: false, error: 'Service unavailable.' }, 503)
   const service = createClient(supabaseUrl, serviceRoleKey, { auth: { autoRefreshToken: false, persistSession: false } })
+  if (request.method === 'GET') return await handlePortalStreamRequest(service, request, serviceRoleKey)
+  if (request.method !== 'POST') return json({ ok: false, error: 'Not found.' }, 404)
 
   let body: Record<string, unknown>
   try { body = await request.json() } catch { return json({ ok: false, error: 'Invalid request.' }, 400) }
@@ -517,6 +789,111 @@ Deno.serve(async request => {
 
   const authorized = await getAuthorizedUser(service, request)
   if (!authorized) return json({ ok: false, error: 'Authentication required.' }, 401)
+
+  if (action === 'portal_library_load') {
+    if (authorized.profile.role !== 'client' || !authorized.profile.client_id) {
+      return json({ ok: false, error: 'Client access required.' }, 403)
+    }
+    const library = await safePortalLibrary(service, authorized.profile.client_id)
+    if (!library) return json({ ok: false, error: 'Client-safe library is unavailable.' }, 503)
+    return json({ ok: true, data: library })
+  }
+
+  if (action === 'portal_library_month') {
+    if (authorized.profile.role !== 'client' || !authorized.profile.client_id) {
+      return json({ ok: false, error: 'Client access required.' }, 403)
+    }
+    const categoryName = cleanString(body.category, 30) as PortalCategory
+    const year = Number(body.year)
+    const month = Number(body.month)
+    const offset = Number(body.offset ?? 0)
+    if (!Object.hasOwn(PORTAL_CATEGORY_LABELS, categoryName) || !Number.isSafeInteger(offset) || offset < 0 || offset > 10_000) {
+      return json({ ok: false, error: 'Invalid library request.' }, 400)
+    }
+    const flat = categoryName === 'brand_identity'
+    if (!flat && (!Number.isInteger(year) || year < 2000 || year > 2100 || !Number.isInteger(month) || month < 1 || month > 12)) {
+      return json({ ok: false, error: 'Select a valid year and month.' }, 400)
+    }
+
+    const { data: library } = await service
+      .from('client_portal_libraries')
+      .select('id, client_id, drive_id, root_folder_name, enabled, last_verified_at')
+      .eq('client_id', authorized.profile.client_id)
+      .maybeSingle()
+    if (!library?.enabled || !library.last_verified_at || !isCanonicalPortalRoot(library.root_folder_name)) {
+      return json({ ok: false, error: 'Client-safe library is unavailable.' }, 404)
+    }
+    const { data: category } = await service
+      .from('client_portal_library_categories')
+      .select('id, library_id, client_id, drive_id, folder_item_id, category, folder_name, last_verified_at')
+      .eq('library_id', library.id)
+      .eq('client_id', authorized.profile.client_id)
+      .eq('category', categoryName)
+      .maybeSingle()
+    if (!category?.last_verified_at
+      || category.drive_id !== library.drive_id
+      || category.folder_name !== PORTAL_CATEGORY_LABELS[categoryName]) {
+      return json({ ok: false, error: 'Library category is unavailable.' }, 404)
+    }
+
+    let assetsQuery = service
+      .from('client_portal_assets')
+      .select('id, category_id, client_id, drive_id, parent_folder_item_id, display_name, mime_type, size_bytes, deliverable_id, published_at, library_year, library_month')
+      .eq('library_id', library.id)
+      .eq('category_id', category.id)
+      .eq('client_id', authorized.profile.client_id)
+      .eq('drive_id', library.drive_id)
+      .eq('parent_folder_item_id', category.folder_item_id)
+      .eq('active', true)
+      .lte('published_at', new Date().toISOString())
+      .order('published_at', { ascending: false })
+      .order('id', { ascending: true })
+      .range(offset, offset + 24)
+    assetsQuery = flat
+      ? assetsQuery.is('library_year', null).is('library_month', null)
+      : assetsQuery.eq('library_year', year).eq('library_month', month)
+    const assetsResult = await assetsQuery
+    if (assetsResult.error) return json({ ok: false, error: 'Library files are unavailable.' }, 503)
+    const pageRows = assetsResult.data ?? []
+    const visibleRows = pageRows.slice(0, 24)
+    const deliverableIds = [...new Set(visibleRows.map(row => row.deliverable_id as string | null).filter((id): id is string => Boolean(id)))]
+    const deliverables = deliverableIds.length > 0
+      ? await service.from('monthly_deliverables').select('id, client_id, title, scheduled_date').eq('client_id', authorized.profile.client_id).in('id', deliverableIds)
+      : { data: [], error: null }
+    if (deliverables.error) return json({ ok: false, error: 'Library files are unavailable.' }, 503)
+    const deliverableById = new Map((deliverables.data ?? []).map(row => [row.id, row]))
+    const assets = visibleRows.flatMap(row => {
+      const deliverable = row.deliverable_id ? deliverableById.get(row.deliverable_id) : null
+      if (row.deliverable_id && !deliverable) return []
+      return [{
+        id: row.id,
+        category: categoryName,
+        displayName: row.display_name,
+        mimeType: row.mime_type,
+        sizeBytes: row.size_bytes == null ? null : Number(row.size_bytes),
+        publishedAt: row.published_at,
+        deliverableTitle: deliverable?.title ?? null,
+        planMonth: typeof deliverable?.scheduled_date === 'string' ? deliverable.scheduled_date.slice(0, 7) : null,
+      }]
+    })
+    return json({ ok: true, data: { assets, nextOffset: pageRows.length > 24 ? offset + 24 : null } })
+  }
+
+  if (action === 'portal_library_access') {
+    if (authorized.profile.role !== 'client' || !authorized.profile.client_id) {
+      return json({ ok: false, error: 'Client access required.' }, 403)
+    }
+    const assetId = cleanString(body.assetId, 50)
+    const purpose = body.purpose
+    if (!assetId || !isPortalAccessPurpose(purpose)) return json({ ok: false, error: 'Invalid file request.' }, 400)
+    const asset = await authorizePortalAsset(service, assetId)
+    if (!asset || asset.client_id !== authorized.profile.client_id) return json({ ok: false, error: 'File not found.' }, 404)
+    if (purpose === 'stream' && !/^video\/mp4$/i.test(asset.mime_type ?? '')) return json({ ok: false, error: 'Streaming is not available for this file.' }, 400)
+    if (purpose === 'inline' && !isSafeInlineMimeType(asset.mime_type ?? '')) return json({ ok: false, error: 'Preview is not available for this file.' }, 400)
+    if (purpose === 'thumbnail' && !/^(image\/|video\/)/i.test(asset.mime_type ?? '')) return json({ ok: false, error: 'Thumbnail is not available for this file.' }, 400)
+    const access = await portalAccessUrl(request, asset.id, purpose, serviceRoleKey)
+    return json({ ok: true, data: access })
+  }
 
   if (action === 'portal_load') {
     if (authorized.profile.role !== 'client' || !authorized.profile.client_id) return json({ ok: false, error: 'Client access required.' }, 403)

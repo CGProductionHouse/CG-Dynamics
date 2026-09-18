@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ClientLogo } from '../../components/ClientLogo'
 import { useClientPortal } from '../../components/client/ClientPortalContext'
+import { ClientPortalErrorState, ClientPortalLoadingState } from '../../components/client/ClientPortalStates'
 import { useAuth } from '../../contexts/AuthContext'
 import { activeOrganicPlatforms, actionMonthForReport, buildClientStrategyPreview } from '../../lib/clientPortal'
 import { fetchClientMonthAhead } from '../../lib/clientPortalCalendar'
@@ -101,9 +102,9 @@ export default function ClientPortalHome() {
   return (
     <>
       {loading ? (
-        <LoadingState />
+        <ClientPortalLoadingState />
       ) : error ? (
-        <ErrorState />
+        <ClientPortalErrorState title="Your overview could not be loaded" />
       ) : (
         <>
           <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#071311] shadow-[0_35px_90px_-45px_rgba(0,0,0,0.95)]">
@@ -367,24 +368,4 @@ function googleAdsStatusLabel(state: GoogleAdsDashboardState): { value: string; 
   if (state === 'no-activity') return { value: 'No activity', detail: 'Connected, with no activity this period' }
   if (state === 'error') return { value: 'Unavailable', detail: 'Reporting could not be verified' }
   return { value: 'Not connected', detail: 'No verified campaign source for this period' }
-}
-
-function LoadingState() {
-  return (
-    <div className="flex items-center justify-center py-24">
-      <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04] px-6 py-4 text-sm text-slate-400 shadow-2xl">
-        Preparing your portal...
-      </div>
-    </div>
-  )
-}
-
-function ErrorState() {
-  return (
-    <div className="flex items-center justify-center py-24">
-      <div className="rounded-2xl border border-[#f97316]/20 bg-[#f97316]/[0.06] px-6 py-4 text-sm text-[#f6a15f] shadow-2xl">
-        Your portal could not be loaded right now. Please try again shortly.
-      </div>
-    </div>
-  )
 }
