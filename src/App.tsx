@@ -6,6 +6,7 @@ import { RequireStaff } from './components/guards/RequireStaff'
 import { RequireAdmin } from './components/guards/RequireAdmin'
 import { RequireManager } from './components/guards/RequireManager'
 import { RequireClient } from './components/guards/RequireClient'
+import { ClientPortalLayout } from './components/client/ClientPortalLayout'
 import AdminLayout from './pages/admin/AdminLayout'
 import { RouteLoadBoundary } from './components/RouteLoadBoundary'
 import { lazyRoute } from './lib/lazyRoute'
@@ -57,9 +58,9 @@ const Dashboard = lazyRoute(() => import('./pages/client/Dashboard'))
 const ClientPortalHome = lazyRoute(() => import('./pages/client/ClientPortalHome'))
 const WelcomeToCgPage = lazyRoute(() => import('./features/client-onboarding/WelcomeToCgPage'))
 const ClientContentGuidesPage = lazyRoute(() => import('./pages/client/ClientContentGuidesPage'))
-const ClientStrategyPage = lazyRoute(() => import('./pages/client/ClientStrategyPage'))
+const ClientPlanPage = lazyRoute(() => import('./pages/client/ClientPlanPage'))
+const ClientPlanLegacyRedirect = lazyRoute(() => import('./pages/client/ClientPlanPage').then(module => ({ default: module.ClientPlanLegacyRedirect })))
 const ClientCampaignsPage = lazyRoute(() => import('./pages/client/ClientCampaignsPage'))
-const ClientPortalCalendarPage = lazyRoute(() => import('./pages/client/ClientContentCalendarPage'))
 const ClientSetupPage = lazyRoute(() => import('./features/client-onboarding/ClientSetupPage'))
 const InternalOnboardingPage = lazyRoute(() => import('./features/client-onboarding/InternalOnboardingPage'))
 const OAuthConsentPage = lazyRoute(() => import('./pages/OAuthConsentPage'))
@@ -189,20 +190,21 @@ export default function App() {
 
           {/* Client routes */}
           <Route element={<RequireClient />}>
-            <Route path="/client" element={<ClientPortalHome />} />
-            {/* Pass 1: /client/plan renders existing Strategy until Pass 2 consolidates */}
-            <Route path="/client/plan" element={<ClientStrategyPage />} />
-            <Route path="/client/performance" element={<Dashboard />} />
-            <Route path="/client/approvals" element={<ContentReviewsPage clientView />} />
-            {/* Pass 1: /client/brand-hub renders existing Setup until Pass 4 refines */}
-            <Route path="/client/brand-hub" element={<ClientSetupPage />} />
-            {/* Preserved functional routes — remain usable until their owning pass lands */}
-            <Route path="/client/strategy" element={<ClientStrategyPage />} />
-            <Route path="/client/content-calendar" element={<ClientPortalCalendarPage />} />
-            <Route path="/client/content-guides" element={<ClientContentGuidesPage />} />
-            <Route path="/client/campaigns" element={<ClientCampaignsPage />} />
-            <Route path="/client/setup" element={<ClientSetupPage />} />
-            <Route path="/dashboard" element={<Navigate to="/client" replace />} />
+            <Route element={<ClientPortalLayout />}>
+              <Route path="/client" element={<ClientPortalHome />} />
+              <Route path="/client/plan" element={<ClientPlanPage />} />
+              <Route path="/client/performance" element={<Dashboard />} />
+              <Route path="/client/approvals" element={<ContentReviewsPage clientView />} />
+              {/* Pass 1: /client/brand-hub renders existing Setup until Pass 4 refines */}
+              <Route path="/client/brand-hub" element={<ClientSetupPage />} />
+              {/* Pass 2 legacy deep links preserve query context inside the unified Plan. */}
+              <Route path="/client/strategy" element={<ClientPlanLegacyRedirect tab="strategy" />} />
+              <Route path="/client/content-calendar" element={<ClientPlanLegacyRedirect tab="calendar" />} />
+              <Route path="/client/content-guides" element={<ClientPlanLegacyRedirect tab="guidelines" />} />
+              <Route path="/client/campaigns" element={<ClientCampaignsPage />} />
+              <Route path="/client/setup" element={<ClientSetupPage />} />
+              <Route path="/dashboard" element={<Navigate to="/client" replace />} />
+            </Route>
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

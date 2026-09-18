@@ -107,13 +107,14 @@ test('client loaders use only safe report projections while staff helpers keep b
   assert.doesNotMatch(dashboard, /loadReportContentExclusions/)
 })
 
-test('client dashboard discards stale profile, client, and report requests and fails closed', () => {
+test('client dashboard discards stale profile and report requests and fails closed', () => {
   assert.match(dashboard, /const reportsRequestRef = useRef\(0\)/)
   assert.match(dashboard, /const reportRequestRef = useRef\(0\)/)
   assert.match(dashboard, /requestedProfileId = profile\?\.id \?\? null/)
   assert.match(dashboard, /requestedClientId = profile\?\.client_id \?\? null/)
   assert.match(dashboard, /requestedReportId = selectedReportId/)
   assert.match(dashboard, /if \(!requestIsCurrent\(\)\) return/)
-  assert.match(dashboard, /if \(error \|\| clientRes\.error \|\| !clientRes\.data\)/)
+  assert.match(dashboard, /const reportsRes = await listClientPublishedReports\(\)/)
+  assert.match(dashboard, /if \(error\) \{[\s\S]*setError\(error\.message\)/)
   assert.match(dashboard, /setReport\(null\)[\s\S]*Verified reporting data could not be loaded safely/)
 })

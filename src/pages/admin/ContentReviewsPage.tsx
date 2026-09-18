@@ -1,30 +1,23 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
-import { ClientPortalShell } from '../../components/client/ClientPortalShell'
 import { ContentReviewCard } from '../../components/content/ContentReviewCard'
 import { listContentReviews, type ContentReview } from '../../lib/contentReviews'
 import { supabase } from '../../lib/supabase'
-import { getClient, type Client } from '../../lib/db/clients'
 
 export default function ContentReviewsPage({ clientView = false }: { clientView?: boolean }) {
   const { profile } = useAuth()
   const [reviews, setReviews] = useState<ContentReview[]>([])
-  const [client, setClient] = useState<Client | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [revision, setRevision] = useState(0)
   useEffect(() => {
     let active = true
     const load = async () => {
-      const [result, clientResult] = await Promise.all([
-        clientView ? supabase.rpc('client_content_review_queue') : listContentReviews(),
-        clientView && profile?.client_id ? getClient(profile.client_id) : Promise.resolve(null),
-      ])
+      const result = await (clientView ? supabase.rpc('client_content_review_queue') : listContentReviews())
       if (!active) return
       setReviews((result.data ?? []) as ContentReview[])
       setError(result.error?.message ?? null)
-      setClient(clientResult?.data ?? null)
       setLoading(false)
     }
     void load()
@@ -38,5 +31,5 @@ export default function ContentReviewsPage({ clientView = false }: { clientView?
       <ContentReviewCard staffView={!clientView} review={review} canDecide={clientView ? review.state === 'client_review' : ['admin', 'manager'].includes(profile?.role ?? '') && review.state === 'internal_review'} onChanged={() => setRevision(value => value + 1)} />
     </div>)}</div>}
   </div>
-  return clientView ? <ClientPortalShell client={client}>{body}</ClientPortalShell> : body
+  return body
 }
