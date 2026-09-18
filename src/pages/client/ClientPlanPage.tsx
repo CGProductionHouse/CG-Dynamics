@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Navigate, useLocation, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
-import { actionMonthForReport } from '../../lib/clientPortal'
 import { listClientPublishedReports } from '../../lib/db/reports'
-import { monthDisplayLabel, selectMonthlyReports } from '../../lib/reportPeriod'
+import { monthDisplayLabel } from '../../lib/reportPeriod'
 import ClientContentCalendarPage from './ClientContentCalendarPage'
 import ClientContentGuidesPage from './ClientContentGuidesPage'
 import ClientStrategyPage from './ClientStrategyPage'
@@ -30,10 +29,9 @@ function shiftMonth(month: string, amount: number) {
 export default function ClientPlanPage() {
   const { profile } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
-  const [fallbackMonth, setFallbackMonth] = useState(currentMonth)
-
   const requestedMonth = searchParams.get('month')
-  const month = requestedMonth && MONTH_PATTERN.test(requestedMonth) ? requestedMonth : fallbackMonth
+
+  const month = requestedMonth && MONTH_PATTERN.test(requestedMonth) ? requestedMonth : currentMonth()
   const requestedTab = searchParams.get('tab')
   const tab: PlanTab = PLAN_TABS.some(item => item.key === requestedTab) ? requestedTab as PlanTab : 'strategy'
 
@@ -43,14 +41,13 @@ export default function ClientPlanPage() {
       if (!profile?.client_id) return
       const reportsResult = await listClientPublishedReports()
       if (!active) return
-      if (!requestedMonth && !reportsResult.error) {
-        const latest = selectMonthlyReports(reportsResult.data)[0] ?? null
-        setFallbackMonth(actionMonthForReport(latest) ?? currentMonth())
-      }
+      // Month is intentionally not overridden from report data;
+      // the URL-selected or current-month value is preserved.
+      if (!active) return
     }
     void loadContext()
     return () => { active = false }
-  }, [profile?.client_id, requestedMonth])
+  }, [profile?.client_id])
 
   function updatePlan(next: { tab?: PlanTab; month?: string }) {
     setSearchParams(current => {

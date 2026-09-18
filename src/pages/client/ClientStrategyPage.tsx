@@ -43,7 +43,7 @@ export default function ClientStrategyPage({ embedded = false, month }: { embedd
     return () => { active = false }
   }, [month, profile?.client_id])
 
-  const strategy = useMemo(() => report ? readStrategyData(report.strategy_data) : null, [report])
+const strategy = useMemo(() => report ? readStrategyData(report.strategy_data) : null, [report])
   const preview = useMemo(() => buildClientStrategyPreview(report), [report])
   const strategyMonth = month ?? actionMonthForReport(report)
 
@@ -64,7 +64,7 @@ export default function ClientStrategyPage({ embedded = false, month }: { embedd
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-report-accent">
           {strategyMonth ? monthDisplayLabel(strategyMonth) : 'Strategy'}
         </p>
-        <h2 className="mt-3 text-3xl font-black tracking-[-0.035em] text-white sm:text-5xl">Strategy &amp; direction</h2>
+        <h2 className="mt-3 text-3xl font-black tracking-[-0.035em] text-white sm:text-5xl">Strategy & direction</h2>
         <p className="mt-4 max-w-2xl text-base leading-7 text-report-muted">
           The reviewed strategy connecting past performance, current direction and the action plan ahead.
         </p>
@@ -78,7 +78,19 @@ export default function ClientStrategyPage({ embedded = false, month }: { embedd
         <div className="mt-8 rounded-3xl border border-[#d8a07a]/20 bg-[#d8a07a]/[0.06] px-6 py-8 shadow-[0_24px_70px_-48px_rgba(0,0,0,0.95)]">
           <p className="text-sm leading-6 text-[#d8a07a]">Your strategy could not be loaded right now. Please try again shortly.</p>
         </div>
-      ) : !report || preview.length === 0 ? (
+      ) : !report ? (
+        <div className="relative mt-8 overflow-hidden rounded-3xl border border-white/[0.08] bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.1),transparent_40%),rgba(255,255,255,0.035)] px-6 py-8 shadow-[0_24px_70px_-48px_rgba(0,0,0,0.95)]">
+          <p className="text-sm leading-6 text-report-muted">
+            Your next strategy update will appear here once the current reporting review is complete.
+          </p>
+        </div>
+      ) : !report.strategy_data ? (
+        <div className="relative mt-8 overflow-hidden rounded-3xl border border-white/[0.08] bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.1),transparent_40%),rgba(255,255,255,0.035)] px-6 py-8 shadow-[0_24px_70px_-48px_rgba(0,0,0,0.95)]">
+          <p className="text-sm leading-6 text-report-muted">
+            Strategy under review. Not published yet.
+          </p>
+        </div>
+      ) : preview.length === 0 ? (
         <div className="relative mt-8 overflow-hidden rounded-3xl border border-white/[0.08] bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.1),transparent_40%),rgba(255,255,255,0.035)] px-6 py-8 shadow-[0_24px_70px_-48px_rgba(0,0,0,0.95)]">
           <p className="text-sm leading-6 text-report-muted">
             Your next strategy update will appear here once the current reporting review is complete.
