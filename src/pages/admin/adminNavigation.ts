@@ -67,6 +67,7 @@ export function isSharedNavZonePath(pathname: string): boolean {
 // and legacy deep links continue to resolve. Ordinary staff see none of these.
 export const adminNavItems: NavItem[] = [
   { to: '/admin/integrations', label: 'Integrations', shortLabel: 'Integrations', marker: 'IN', access: 'manager', activePaths: ['/admin/integrations', '/admin/microsoft-import', '/admin/planner-import', '/admin/import', '/admin/import-csv', '/admin/imports', '/admin/manual-metrics'] },
+  { to: '/admin/email-marketing', label: 'Email Marketing', shortLabel: 'Email', marker: 'EM', access: 'manager', activePaths: ['/admin/email-marketing'] },
   { to: '/admin/users', label: 'Users', shortLabel: 'Users', marker: 'U', access: 'admin', activePaths: ['/admin/users', '/admin/team', '/admin/invites'] },
   { to: '/admin/system', label: 'System', shortLabel: 'System', marker: 'SY', access: 'admin', activePaths: ['/admin/system', '/admin/import-health', '/admin/ai-health'] },
 ]
