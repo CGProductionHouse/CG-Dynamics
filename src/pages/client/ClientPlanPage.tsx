@@ -30,25 +30,26 @@ function shiftMonth(month: string, amount: number) {
 export default function ClientPlanPage() {
   const { profile } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
-  const [fallbackMonth, setFallbackMonth] = useState(currentMonth)
-
   const requestedMonth = searchParams.get('month')
-  const month = requestedMonth && MONTH_PATTERN.test(requestedMonth) ? requestedMonth : fallbackMonth
+  const month = requestedMonth && MONTH_PATTERN.test(requestedMonth) ? requestedMonth : currentMonth()
   const requestedTab = searchParams.get('tab')
   const tab: PlanTab = PLAN_TABS.some(item => item.key === requestedTab) ? requestedTab as PlanTab : 'strategy'
 
   useEffect(() => {
     let active = true
-    async function loadContext() {
+    async function canonicalizeMonth() {
       if (!profile?.client_id) return
-      const reportsResult = await listClientPublishedReports()
-      if (!active) return
-      if (!requestedMonth && !reportsResult.error) {
-        const latest = selectMonthlyReports(reportsResult.data)[0] ?? null
-        setFallbackMonth(actionMonthForReport(latest) ?? currentMonth())
+      if (requestedMonth) return
+      const now = new Date()
+      const canonical = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+      if (canonical !== requestedMonth) {
+        setSearchParams(current => {
+          current.set('month', canonical)
+          return current
+        })
       }
     }
-    void loadContext()
+    void canonicalizeMonth()
     return () => { active = false }
   }, [profile?.client_id, requestedMonth])
 

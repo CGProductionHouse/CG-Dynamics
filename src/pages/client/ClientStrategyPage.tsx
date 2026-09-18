@@ -4,8 +4,9 @@ import { useAuth } from '../../contexts/AuthContext'
 import { getClient, type Client } from '../../lib/db/clients'
 import { listClientPublishedReports, type ClientReport } from '../../lib/db/reports'
 import { monthDisplayLabel, selectMonthlyReports } from '../../lib/reportPeriod'
-import { actionMonthForReport, buildClientStrategyPreview } from '../../lib/clientPortal'
+import { actionMonthForReport } from '../../lib/clientPortal'
 import { readStrategyData, ACTION_PLAN_LABELS, type StrategyData } from '../../lib/strategyEngine'
+import { getClientPublishedMonthlyStrategy } from '../../lib/monthlyStrategy'
 
 export default function ClientStrategyPage({ embedded = false, month }: { embedded?: boolean; month?: string }) {
   const { profile } = useAuth()
@@ -13,6 +14,9 @@ export default function ClientStrategyPage({ embedded = false, month }: { embedd
   const [report, setReport] = useState<ClientReport | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
+  const [strategy, setStrategy] = useState<StrategyData | null>(null)
+  const [strategyStatus, setStrategyStatus] = useState<'published' | 'draft' | 'under-review'>('published')
+  const [strategyMonthDisplay, setStrategyMonthDisplay] = useState<string>('')
 
   useEffect(() => {
     let active = true
@@ -33,6 +37,22 @@ export default function ClientStrategyPage({ embedded = false, month }: { embedd
           ? monthlyReports.find(candidate => actionMonthForReport(candidate) === month) ?? null
           : monthlyReports[0] ?? null
         setReport(found)
+
+        // Load canonical published monthly strategy from #391 projection
+        const publishedResult = await getClientPublishedMonthlyStrategy(month ?? (found ? actionMonthForReport(found) : null))
+        if (!active) return
+        if (publishedResult.error) throw new Error(publishedResult.error.message)
+
+        const published = publishedResult.data
+        if (published && published.strategy_data) {
+          setStrategy(readStrategyData(published.strategy_data))
+          setStrategyStatus('published')
+          setStrategyMonthDisplay(monthDisplayLabel(published.strategy_month))
+        } else {
+          setStrategy(null)
+          setStrategyStatus('under-review')
+          setStrategyMonthDisplay(monthDisplayLabel(month ?? currentMonth()))
+        }
       } catch {
         if (active) setError(true)
       } finally {
@@ -43,9 +63,25 @@ export default function ClientStrategyPage({ embedded = false, month }: { embedd
     return () => { active = false }
   }, [month, profile?.client_id])
 
-  const strategy = useMemo(() => report ? readStrategyData(report.strategy_data) : null, [report])
-  const preview = useMemo(() => buildClientStrategyPreview(report), [report])
-  const strategyMonth = month ?? actionMonthForReport(report)
+  const preview = useMemo(() => {
+    if (!strategy) return []
+    // Build preview from canonical StrategyData (not legacy report.strategy_data)
+    const candidates: Array<{ label: string; value: string; phase: string } | null> = [
+      strategy.strategyGoingForward
+        ? { label: 'Strategy going forward', value: strategy.strategyGoingForward, phase: 'action' }
+        : null,
+      strategy.topContent?.whatThisTellsUs
+        ? { label: 'What it means', value: strategy.topContent.whatThisTellsUs, phase: 'review' }
+        : null,
+      strategy.clientDirection.length > 0
+        ? { label: 'Client direction', value: strategy.clientDirection.map(d => `• ${d}`).join('\n'), phase: 'action' }
+        : null,
+      strategy.calendarSelections && strategy.calendarSelections.length > 0
+        ? { label: 'Calendar events', value: strategy.calendarSelections.map(s => s.title).join(', '), phase: 'review' }
+        : null,
+    ]
+    return candidates.filter(Boolean) as Array<{ label: string; value: string; phase: string }>
+  }, [strategy])
 
   const actionPlanEntries = useMemo(() => {
     if (!strategy) return []
@@ -62,7 +98,7 @@ export default function ClientStrategyPage({ embedded = false, month }: { embedd
     <>
       <section className="max-w-5xl">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-report-accent">
-          {strategyMonth ? monthDisplayLabel(strategyMonth) : 'Strategy'}
+          {strategyMonthDisplay ? monthDisplayLabel(strategyMonthDisplay) : 'Strategy'}
         </p>
         <h2 className="mt-3 text-3xl font-black tracking-[-0.035em] text-white sm:text-5xl">Strategy &amp; direction</h2>
         <p className="mt-4 max-w-2xl text-base leading-7 text-report-muted">
@@ -78,10 +114,10 @@ export default function ClientStrategyPage({ embedded = false, month }: { embedd
         <div className="mt-8 rounded-3xl border border-[#d8a07a]/20 bg-[#d8a07a]/[0.06] px-6 py-8 shadow-[0_24px_70px_-48px_rgba(0,0,0,0.95)]">
           <p className="text-sm leading-6 text-[#d8a07a]">Your strategy could not be loaded right now. Please try again shortly.</p>
         </div>
-      ) : !report || preview.length === 0 ? (
+      ) : strategyStatus === 'under-review' ? (
         <div className="relative mt-8 overflow-hidden rounded-3xl border border-white/[0.08] bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.1),transparent_40%),rgba(255,255,255,0.035)] px-6 py-8 shadow-[0_24px_70px_-48px_rgba(0,0,0,0.95)]">
           <p className="text-sm leading-6 text-report-muted">
-            Your next strategy update will appear here once the current reporting review is complete.
+            Strategy under review for this month.
           </p>
         </div>
       ) : (
