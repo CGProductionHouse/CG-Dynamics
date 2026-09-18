@@ -435,9 +435,20 @@ Rules:
 - initial controlled backfill: JFJ Electrical, Neshora Oxygen, VCS Cleaning Solutions;
 - production migration/data backfill remains CA-gated.
 
+### Additional active autonomous validation lane
+
+**#413 AuthContext lint cleanup**
+
+- Owner: CA's additional OpenCode free agent.
+- Scope: `src/contexts/AuthContext.tsx` only, plus focused tests if needed.
+- Purpose: prove the free OpenCode route is healthy on a tiny isolated useful task.
+- Remove the two known pre-existing `no-useless-assignment` findings without changing auth behaviour.
+- One branch/PR; lint + focused auth/client tests + production build + diff check.
+- No migrations, Edge Functions, auth schema/RLS, production config or overlap with #396/#404.
+
 ### Queued / ready to dispatch
 
-No currently queued lane should be dispatched into #396 or #404/#7 while the manual owners above remain active. Re-read the Control Centre for any other safe unowned work.
+No currently queued lane should be dispatched into #396, #404/#7 or #413 while those owners remain active. Re-read the Control Centre for any other safe unowned work.
 
 ### Recently completed production rollout
 
