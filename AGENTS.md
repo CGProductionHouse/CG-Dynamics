@@ -20,6 +20,19 @@ Before planning or editing code, read:
 
 The ops handover is the first-stop authority for recovering current CG Dynamics coordination state in a fresh chat. The master AI/tools file is cross-project authority for shared capability/process. The autonomous orchestration file is the current authority for how coding workers are woken, supervised, handed off and prevented from duplicating one another. The CA coding-prompt contract is mandatory whenever ChatGPT or another coordinator prepares a prompt CA will manually send to a coding agent. Project-specific continuity files remain authority for CG Dynamics product decisions. The 2026-08-13 handoff is current. Older handoffs are historical only. Page contracts override generic product ideas.
 
+## Continuity write-back obligation
+
+Any coordinator or coding supervisor that materially changes CG Dynamics operating state must maintain `docs/ops/CG-DYNAMICS-OPS-HANDOVER.md` as part of the same handoff.
+
+Do not treat the handover as read-only documentation. When ownership, lane status, production state, protected gates, model routing, or durable operating rules materially change:
+
+1. update the owning issue/PR;
+2. update #381 when cross-lane state changed;
+3. update the Google Control Centre;
+4. update the ops handover if its current snapshot/rules changed.
+
+Before a chat/session is handed off or becomes context-heavy, reconcile the handover against current GitHub + #381 + tracker so the next chat can continue without CA repeating history.
+
 ## Product direction
 
 CG Dynamics is CG Production House's internal operating system. Three product areas:
