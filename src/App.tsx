@@ -27,6 +27,7 @@ const ImportHub = lazyRoute(() => import('./pages/admin/ImportHub'))
 const UsersHub = lazyRoute(() => import('./pages/admin/UsersHub'))
 const NewReport = lazyRoute(() => import('./pages/admin/NewReport'))
 const ReportsManagement = lazyRoute(() => import('./pages/admin/ReportsManagement'))
+const MonthlyStrategyPage = lazyRoute(() => import('./pages/admin/MonthlyStrategyPage'))
 const ManualMetricsAdmin = lazyRoute(() => import('./pages/admin/ManualMetricsAdmin'))
 const ContentReviewsPage = lazyRoute(() => import('./pages/admin/ContentReviewsPage'))
 const ContentOperationsPage = lazyRoute(() => import('./pages/admin/ContentOperationsPage'))
@@ -161,6 +162,7 @@ export default function App() {
                 <Route path="/admin/import-csv" element={<ImportMetaCsv />} />
                 <Route path="/admin/reports/new" element={<NewReport />} />
                 <Route path="/admin/reports/:reportId/edit" element={<NewReport />} />
+                <Route path="/admin/monthly-strategy" element={<MonthlyStrategyPage />} />
                 <Route path="/admin/planner-import" element={<PlannerImportPage />} />
                 {/* Marketing AI is a manager-usable workspace: managers and
                     admins may run specialists against approved knowledge. Source
