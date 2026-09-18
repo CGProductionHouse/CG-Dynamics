@@ -7,6 +7,7 @@ import BrandMark from '../../components/BrandMark'
 import { ClientLogo } from '../../components/ClientLogo'
 import { readStrategyData } from '../../lib/strategyEngine'
 import { getReportMonthFromPeriod, monthDisplayLabel, normalizeReportToCalendarMonth, previousReportMonth } from '../../lib/reportPeriod'
+import { isWithinMetaProviderPeriod } from '../../../supabase/functions/_shared/metaPeriod'
 import type { MasterReportData, MetricMovement, Platform, PlatformView, ReportStatsPost } from '../../lib/reportStats'
 import {
   PLATFORM_LABELS,
@@ -62,14 +63,16 @@ type RenderableReport = ReportWithPosts | ClientReportWithPosts
 function postsForReportMonth(report: RenderableReport): ReportStatsPost[] {
   const { start, end } = normalizeReportToCalendarMonth(report)
   const startTime = new Date(`${start}T00:00:00Z`).getTime()
-  const endTime = new Date(`${end}T23:59:59Z`).getTime()
+  const endTime = new Date(`${end}T23:59:59.999Z`).getTime()
 
   return report.posts
     .filter(post => {
       if (!post.publish_time) return true
+      if (post.platform === 'facebook' || post.platform === 'instagram') {
+        return isWithinMetaProviderPeriod(post.publish_time, start, end)
+      }
       const time = new Date(post.publish_time).getTime()
-      if (Number.isNaN(time)) return true
-      return time >= startTime && time <= endTime
+      return Number.isNaN(time) || (time >= startTime && time <= endTime)
     })
     .map(reportPostToStatsPost)
 }

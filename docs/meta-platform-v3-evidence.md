@@ -174,3 +174,29 @@ controlled read/reporting rollout is:
 Rollback boundary: revert Edge Functions to their prior deployment and stop new
 enqueues. The migrations are additive and historical metric facts are not
 rewritten; do not drop new audit/checkpoint objects or destructively roll back facts.
+
+## #386 / bounded #236 M1 correctness checkpoint — 18 September 2026
+
+Branch `fix/386-abort-error-classification` was reconciled onto current main for
+supervisor review. This checkpoint does not start the fleet-refresh phase.
+
+- A pre-request invocation-budget yield remains resumable and refunds the queue
+  attempt because no provider request was dispatched.
+- An `AbortError` or `TimeoutError` raised after a Meta request starts is now a
+  distinct provider-timeout cause. It resumes while attempts remain, consumes
+  each bounded attempt, and becomes terminal after the third attempt.
+- Existing page/fact checkpoints remain the resume authority. Rate-limit
+  cooldown/refund behavior is unchanged, while permission failures remain
+  terminal and preserve already collected facts/posts.
+- Post ingestion and client reporting now share one America/Los_Angeles,
+  half-open provider-period contract. For August 2026, a post at
+  `2026-09-01T06:59:59.999Z` is included and one at `07:00:00.000Z` is excluded.
+- The established provider-native fact contract remains intact: missing or
+  unavailable values do not become zero, and Facebook/Instagram metric identity
+  is not collapsed into generic totals.
+
+Verification: 147 Meta/client-isolation tests passed; the focused correctness
+set passed 62/62; scoped ESLint reported zero errors (one existing React Hook
+dependency warning); the production build and `git diff --check` passed. No
+production SQL/data mutation, function deployment, secret/permission change,
+provider call, concurrency change, or fleet refresh was performed.

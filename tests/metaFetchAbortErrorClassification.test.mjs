@@ -8,16 +8,15 @@ import { createServer } from 'vite'
 // "AbortError: The signal has been aborted".
 
 let server
-let metaFetch, MetaSyncDeadlineError
+let metaFetch, MetaProviderTimeoutError, MetaSyncDeadlineError
 
 before(async () => {
   server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
-  ;({ metaFetch, MetaSyncDeadlineError } = await server.ssrLoadModule('/supabase/functions/_shared/meta.ts'))
+  ;({ metaFetch, MetaProviderTimeoutError, MetaSyncDeadlineError } = await server.ssrLoadModule('/supabase/functions/_shared/meta.ts'))
 })
 after(async () => { await server.close() })
 
-test('metaFetch converts AbortError to MetaSyncDeadlineError for retry', async () => {
-  // Simulate a fetch that aborts due to timeout (the bounded-fetch timeout path)
+test('metaFetch classifies exact production AbortError as a provider timeout', async () => {
   const originalFetch = globalThis.fetch
   let callCount = 0
   globalThis.fetch = async () => {
@@ -30,43 +29,37 @@ test('metaFetch converts AbortError to MetaSyncDeadlineError for retry', async (
     await metaFetch('https://graph.facebook.com/v25.0/test', 100)
     assert.fail('Expected metaFetch to throw MetaSyncDeadlineError')
   } catch (e) {
-    assert.ok(e instanceof MetaSyncDeadlineError, `Expected MetaSyncDeadlineError, got ${e?.constructor?.name}: ${e?.message}`)
-    assert.match(e.message, /request attempt \d+/)
-    // Should have attempted once (no backoff for non-GET or after abort)
+    assert.ok(e instanceof MetaProviderTimeoutError, `Expected MetaProviderTimeoutError, got ${e?.constructor?.name}: ${e?.message}`)
+    assert.match(e.message, /provider request timed out.*request attempt 1/i)
     assert.equal(callCount, 1)
   } finally {
     globalThis.fetch = originalFetch
   }
 })
 
-test('metaFetch converts AbortError on GET to MetaSyncDeadlineError immediately', async () => {
+test('metaFetch classifies TimeoutError as a provider timeout', async () => {
   const originalFetch = globalThis.fetch
   let callCount = 0
   globalThis.fetch = async () => {
     callCount++
-    const abortError = new DOMException('The signal has been aborted', 'AbortError')
-    throw abortError
+    throw new DOMException('The operation timed out', 'TimeoutError')
   }
 
   try {
-    // GET request - AbortError should be converted immediately, not retried internally
     await metaFetch('https://graph.facebook.com/v25.0/test', { method: 'GET' }, 100)
-    assert.fail('Expected metaFetch to throw MetaSyncDeadlineError')
+    assert.fail('Expected metaFetch to throw MetaProviderTimeoutError')
   } catch (e) {
-    assert.ok(e instanceof MetaSyncDeadlineError, `Expected MetaSyncDeadlineError, got ${e?.constructor?.name}: ${e?.message}`)
-    // Should have attempted once (AbortError converts immediately)
+    assert.ok(e instanceof MetaProviderTimeoutError, `Expected MetaProviderTimeoutError, got ${e?.constructor?.name}: ${e?.message}`)
     assert.equal(callCount, 1)
   } finally {
     globalThis.fetch = originalFetch
   }
 })
 
-test('metaFetch preserves MetaSyncDeadlineError from deadline check', async () => {
+test('pre-request invocation deadline yields without dispatching a provider request', async () => {
   const originalFetch = globalThis.fetch
-  globalThis.fetch = async () => {
-    await new Promise(r => setTimeout(r, 50))
-    return new Response(JSON.stringify({ data: [] }), { status: 200 })
-  }
+  let callCount = 0
+  globalThis.fetch = async () => { callCount++; return Response.json({ data: [] }) }
 
   const control = { deadline: Date.now() - 1000 } // already past deadline
 
@@ -75,6 +68,7 @@ test('metaFetch preserves MetaSyncDeadlineError from deadline check', async () =
     assert.fail('Expected metaFetch to throw MetaSyncDeadlineError')
   } catch (e) {
     assert.ok(e instanceof MetaSyncDeadlineError, `Expected MetaSyncDeadlineError, got ${e?.constructor?.name}: ${e?.message}`)
+    assert.equal(callCount, 0)
   } finally {
     globalThis.fetch = originalFetch
   }
