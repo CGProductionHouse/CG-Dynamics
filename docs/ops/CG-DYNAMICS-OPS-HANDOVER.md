@@ -410,13 +410,14 @@ This section is an orientation snapshot only. Refetch GitHub + tracker before ac
 **#404 + CG-Hours #7 Client Registry Bridge**
 
 - Owner: CA manual coding agent 2 across both repos.
-- Owning PRs: Dynamics #411 at `57cd3a8a2cb6d8e8b71503e3e74174d59aa8eff7`; CG-Hours #8 at `d5b7f3fad0aa4c43806246940478da08f1ef6fcb`.
-- Dynamics preview is green; CG-Hours PR #8 currently has a failing Vercel status and is not merge-ready.
-- Continue the same PRs to fix the Hours preview and make the bridge safely OFF/inert before migrations/secrets/config are activated.
+- Owning PRs: Dynamics #411 and CG-Hours #8; use their live GitHub heads as authority.
+- The CG-Hours Vercel failure was the Hobby-plan rejection of a five-minute cron. PR #8 now uses a daily Hobby-compatible schedule and keeps the entire bridge OFF/inert unless the explicit activation flag is exactly `true`.
+- Continue the same PRs; do not create replacement PRs.
 - Disabled production must not query a missing outbox table, show registry UI, or emit recurring cron configuration failures.
 - Existing CG Hours client creation must remain unchanged until the activation gate.
 - No overlap with Dynamics #361/#376 or CG-Hours PR #3 Staff Logger.
 - Production migrations, secret/config activation, function deployment and initial JFJ Electrical / Neshora Oxygen / VCS Cleaning Solutions backfill remain protected apply gates.
+- Exact ordered activation and kill-switch procedure: `docs/ops/CG-HOURS-CLIENT-REGISTRY-BRIDGE-ACTIVATION.md`.
 
 Goal:
 
