@@ -1,5 +1,123 @@
 # CG Dynamics Ops Handover
 
+## CURRENT OVERRIDE — 18 September 2026, 16:35 SAST
+
+This section supersedes conflicting current-state snapshots later in this file. Preserve the stable operating rules below, but refetch #381 and live GitHub before acting.
+
+### Website Growth / owned-system doctrine
+
+CA's standing business objective is to own as much of the CG website/client operating system as practical and avoid recreating Wix-style recurring per-client subscription economics.
+
+Approved recurring foundations:
+- shared Vercel Pro team, base subscription only;
+- existing Supabase Pro organisation;
+- unavoidable normal domain/email costs.
+
+Verified Vercel state on 18 Sep 2026:
+- team `cg-dynamics-projects` / `team_SK5vvWv1AIXFkPNV8JFYL205` is Pro;
+- current invoice target is the single $20 Pro base subscription;
+- metered infrastructure shown so far is covered by included Pro usage credit;
+- automatic private-repository committer paid Developer seats are OFF/manual approval;
+- no routine Vercel top-up, premium add-on or additional recurring SaaS is authorised.
+
+Default architecture rule:
+- build/reuse CG-owned capability inside Dynamics, Website Editor, current Postgres/Supabase, GitHub and client-site code;
+- prefer already-paid capability and suitable open source;
+- any new recurring service requires a proven production gap, build-vs-buy/ops comparison and CA's explicit approval;
+- target marginal software cost per client trending downward as the fleet grows.
+
+Do not promise that taxes, explicitly purchased domains/add-ons/seats or unbounded overage can never bill. Prevent those by configuration and approval gates rather than by assumption.
+
+### Website Growth authority and order
+
+Primary umbrella: `CGProductionHouse/cg-website-editor#27`.
+Engineering authority: Website Editor PR #28 plus its Website Growth docs.
+Website Builder master continuation: Website Editor Issue #22, CURRENT OVERRIDE section.
+
+Core sequence:
+1. exact identity/contracts;
+2. genuine reporting;
+3. durable enquiry + client mail;
+4. performance/content freshness;
+5. organic discovery;
+6. quality feedback;
+7. repeatability/recovery/fleet.
+
+Do not duplicate reporting, lead, CRM, queue or website-registry authorities.
+
+### M1 Website Performance — current production state
+
+Completed under CA's explicit approval:
+- Website Editor PR #18 merged/deployed.
+- Dynamics PR #356 merged/deployed.
+- exact Red Oak production mapping verified:
+  - Website ID `7`
+  - Dynamics client `cdb11a82-339e-4b46-9b09-bde1a23efeaf`
+  - repo `CGProductionHouse/redoak-website`
+  - Vercel project `prj_KrJjrXLqyO3Y3kHTh1qSwYBvFbe6`
+  - team `team_SK5vvWv1AIXFkPNV8JFYL205`
+  - canonical host `www.redoakgroup.co.za`
+- production migration `website_report_snapshots` applied; Supabase records version `20260918130449`.
+- Edge Function `website-performance-report` ACTIVE v1 with JWT verification enabled.
+- Red Oak reporting PR #3 reconciled and merged at `489c1202fb2cd1d1311713172c01c2a4c249f8bc`.
+- production deployment `dpl_BhuNPtULJNDb7ig8iWtPi5yFLSxr` READY.
+- canonical Red Oak host returned HTTP 200 from that deployment.
+- immediate runtime scan was clean.
+- truthful production analytics start is **2026-09-18**. Never backdate from preview evidence.
+
+Current blocker:
+- Codex verified the locally authenticated Vercel CLI credential can manage the projects;
+- Vercel Web Analytics rejects that credential with HTTP 403 `invalidToken`;
+- therefore it cannot be used as `WEBSITE_REPORTING_VERCEL_TOKEN`;
+- Codex stopped correctly and changed **no production configuration**.
+
+Next M1 gate:
+1. obtain a supported Vercel Web Analytics/API token through Vercel's supported token flow;
+2. configure the exact server-only Website Editor reporting env + Dynamics Edge Function secrets;
+3. do not expose secret values in GitHub/chat;
+4. redeploy Website Editor if the environment change requires it;
+5. prove provider access;
+6. use a truthful closed production period only;
+7. staff preview -> save -> review -> publish -> exact-client portal isolation using the same snapshot/revision.
+
+M1 is not production-accepted until that proof closes. Do not invent historic traffic or weaken the adapter to work around the token blocker.
+
+### M2 contract still locked
+
+Issue #405 owns canonical enquiries/email/quality. Website Editor #19 owns first-party contact actions.
+
+Rules:
+- contact action != enquiry;
+- a contact may create multiple legitimate enquiries;
+- browser never chooses client, recipient, environment, role or synthetic authority;
+- versioned stable form keys;
+- one Dynamics-owned PostgreSQL transaction commits enquiry + approved notification jobs + one canonical reporting event;
+- durable outbox/retry/reconciliation;
+- provider delivery status is not proof of inbox/read;
+- no blind provider failover;
+- exact tenant/RLS/idempotency/concurrency/crash-recovery proof;
+- client email is mandatory, portal optional, client owns sales follow-up.
+
+### Coding-agent workflow reminder
+
+GitHub must contain the real brief before CA receives a coding prompt.
+
+Use:
+```text
+CA MANUAL AGENT
+
+Read AGENTS.md and current GitHub truth first.
+Continue <existing issue/PR/phase>.
+
+Next mission: <one scoped objective>.
+Do not touch <held lane if relevant>.
+
+Verify, commit and push only if green.
+Return: completed / verification / commit / blockers.
+```
+
+Do not paste project history into prompts when GitHub already contains it. One owner per issue/file set. Continue existing branches/PRs. Routine green code-only release flow may continue; production migrations, secrets/credentials, provider permission changes, purchases/spend, DNS, destructive actions, external sends and Commerce/payment/stock remain protected gates unless CA explicitly approves that exact action.
+
 Last updated: 18 September 2026 SAST  
 Status: CURRENT operating handover for ChatGPT coordinators, supervisors and coding agents  
 Repository: `CGProductionHouse/CG-Dynamics`
