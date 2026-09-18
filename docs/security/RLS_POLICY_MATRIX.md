@@ -185,3 +185,20 @@ legacy-name fallback.
 
 Operations Hub files are private, manager-only access through signed URLs.
 Client report PDFs use signed URLs with TTL expiry.
+
+## Website enquiry transaction foundation
+
+`website_enquiry_endpoints`, `website_form_schemas`,
+`website_enquiry_recipient_configurations`, `website_enquiry_recipient_routes`,
+`website_enquiry_contacts`, `website_enquiries`,
+`website_enquiry_delivery_jobs`, and `website_enquiry_events` have RLS enabled
+with no browser policies. `PUBLIC`, `anon`, and `authenticated` receive no table
+privileges.
+
+The service-role-only `submit_website_enquiry` function is SECURITY INVOKER. It
+accepts an opaque endpoint key, schema identity, endpoint-scoped submission key,
+answers, and bounded attribution only. Exact client, website, environment,
+recipient routes, workflow state, and reporting classification are resolved from
+reviewed database configuration within the transaction. Direct browser access is
+deny-by-default; future staff/client projections require separate explicit policy
+and are outside M2A.
