@@ -265,7 +265,6 @@ async function handleProvision(body: Record<string, unknown>, admin: AdminClient
     client_id: clientId,
     client_name: eligibility.client.name,
     username,
-    starter_password: password,
     status: existing ? 'updated' : 'created',
   })
 }
@@ -287,7 +286,7 @@ async function handleReset(body: Record<string, unknown>, admin: AdminClient) {
   await admin.from('client_portal_access').update({ enabled: true, updated_at: new Date().toISOString() }).eq('client_id', clientId)
   await admin.from('profiles').update({ is_active: true }).eq('id', access.auth_user_id)
 
-  return jsonResponse({ ok: true, username: access.username, starter_password: password })
+  return jsonResponse({ ok: true, username: access.username })
 }
 
 async function handleEnabled(body: Record<string, unknown>, admin: AdminClient, enabled: boolean) {
