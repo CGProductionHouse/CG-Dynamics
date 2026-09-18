@@ -7,6 +7,7 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 import webpush from 'npm:web-push@3.6.7'
 import { dispatchMetaWorker } from '../_shared/metaWorkerDispatch.ts'
+import { currentMetaMonth, previousMetaMonth } from '../_shared/metaPeriod.ts'
 
 const MAX_RUNTIME_MS = 25_000
 const MAX_JOBS_PER_RUN = 25
@@ -16,10 +17,10 @@ const MAX_JOBS_PER_RUN = 25
 // the second or third cron tick.
 const META_SYNC_STALE_SECONDS = 120
 // Fleet freshness: enqueue proactive sync for assets whose checkpoint is due.
-// Runs every background-worker invocation (every minute via cron). The check is
-// cheap; if no assets are due it returns immediately. Bounded to 2 batches per
-// invocation to avoid starving the job queue.
-const META_FLEET_FRESHNESS_MAX_BATCHES = 2
+  // Runs every background-worker invocation (every minute via cron). The check is
+  // cheap; if no assets are due it returns immediately. Bounded to 2 batches per
+  // invocation to avoid starving the job queue.
+  const META_FLEET_FRESHNESS_MAX_BATCHES = 2
 
 interface JobRow {
   id: string
@@ -207,82 +208,163 @@ interface FleetFreshnessBatch {
   assetCount: number
 }
 
-async function enqueueFleetMetaFreshness(
-  supabase: ReturnType<typeof createClient>,
-  url: string,
-): Promise<Array<FleetFreshnessBatch | { detail: string }>> {
-  const out: Array<FleetFreshnessBatch | { detail: string }> = []
-  const workerSecret = (Deno.env.get('META_SYNC_WORKER_SECRET') ?? '').trim()
-  if (!workerSecret) {
-    return [{ detail: 'META_SYNC_WORKER_SECRET not configured' }]
+interface CheckpointRow {
+    asset_id: string
+    platform: string
+    next_due_at: string | null
+    last_sync_kind: string | null
+    last_status: string | null
+    last_health_state: string | null
+    last_successful_month: string | null
   }
 
-  // 1. Find asset/platform checkpoints that are due for sync.
-  // Join with meta_client_assets to get client info and verify the asset is still active.
-  // Only consider platforms that are actually linked (facebook_page_id or instagram_account_id not null).
-  const { data: dueCheckpoints, error: checkpointError } = await supabase
-    .from('meta_asset_sync_checkpoints')
+  async function enqueueFleetMetaFreshness(
+    supabase: ReturnType<typeof createClient>,
+    url: string,
+  ): Promise<Array<FleetFreshnessBatch | { detail: string }>> {
+    const out: Array<FleetFreshnessBatch | { detail: string }> = []
+    const workerSecret = (Deno.env.get('META_SYNC_WORKER_SECRET') ?? '').trim()
+    if (!workerSecret) {
+      return [{ detail: 'META_SYNC_WORKER_SECRET not configured' }]
+    }
+
+    // 1. Build the complete inventory of expected active Meta targets from
+  // meta_client_assets. This is the source of truth for what SHOULD be synced.
+  // LEFT JOIN with meta_asset_sync_checkpoints to find due/missing work.
+  // Missing checkpoint row = bootstrap due (never synced).
+  // Existing checkpoint with next_due_at <= now() = refresh due.
+  const { data: expectedTargets, error: targetError } = await supabase
+    .from('meta_client_assets')
     .select(`
-      asset_id,
+      id,
       client_id,
-      platform,
-      next_due_at,
-      last_sync_kind,
-      last_status,
-      last_health_state,
-      meta_client_assets!inner (
-        id,
-        client_id,
-        facebook_page_id,
-        instagram_account_id,
-        is_active
+      facebook_page_id,
+      instagram_account_id,
+      is_active,
+      meta_asset_sync_checkpoints!left (
+        asset_id,
+        platform,
+        next_due_at,
+        last_sync_kind,
+        last_status,
+        last_health_state,
+        last_successful_month
       )
     `)
-    .lte('next_due_at', new Date().toISOString())
-    .order('next_due_at', { ascending: true })
-    .limit(50)
+    .eq('is_active', true)
+    .limit(100)
 
-  if (checkpointError || !dueCheckpoints || dueCheckpoints.length === 0) {
+  if (targetError || !expectedTargets || expectedTargets.length === 0) {
     return out
   }
 
-  // Filter to only assets where the platform is actually linked
-  const linkedDue = (dueCheckpoints as Array<{
-    asset_id: string
-    client_id: string
-    platform: string
-    next_due_at: string
-    last_sync_kind: string
-    last_status: string
-    last_health_state: string
-    meta_client_assets: {
-      id: string
-      client_id: string
-      facebook_page_id: string | null
-      instagram_account_id: string | null
-      is_active: boolean
+  // 2. Flatten to per-platform targets and determine due state.
+  // Each asset can have facebook and/or instagram platform.
+  const now = new Date().toISOString()
+  const currentMonth = currentMetaMonth()
+  const prevCompletedMonth = previousMetaMonth(1)
+
+  type PlatformTarget = {
+    assetId: string
+    clientId: string
+    platform: 'facebook' | 'instagram'
+    hasCheckpoint: boolean
+    nextDueAt: string | null
+    lastSyncKind: string | null
+    lastStatus: string | null
+    lastHealthState: string | null
+    lastSuccessfulMonth: string | null
+    isDue: boolean
+    isBootstrap: boolean
+  }
+
+  const allPlatformTargets: PlatformTarget[] = []
+
+  for (const asset of expectedTargets) {
+    if (!asset.is_active) continue
+
+    // Facebook platform
+    if (asset.facebook_page_id) {
+      const checkpoint = asset.meta_asset_sync_checkpoints?.find(
+        (c: CheckpointRow) => c.platform === 'facebook'
+      )
+      const nextDueAt = checkpoint?.next_due_at ?? null
+      const isBootstrap = !checkpoint
+      const isDue = isBootstrap || (nextDueAt && nextDueAt <= now)
+      if (isDue) {
+        allPlatformTargets.push({
+          assetId: asset.id,
+          clientId: asset.client_id,
+          platform: 'facebook',
+          hasCheckpoint: !!checkpoint,
+          nextDueAt,
+          lastSyncKind: checkpoint?.last_sync_kind ?? null,
+          lastStatus: checkpoint?.last_status ?? null,
+          lastHealthState: checkpoint?.last_health_state ?? null,
+          lastSuccessfulMonth: checkpoint?.last_successful_month ?? null,
+          isDue: true,
+          isBootstrap,
+        })
+      }
     }
-  }>).filter(cp => {
-    const asset = cp.meta_client_assets
-    if (!asset.is_active) return false
-    if (cp.platform === 'facebook' && !asset.facebook_page_id) return false
-    if (cp.platform === 'instagram' && !asset.instagram_account_id) return false
-    return true
-  })
 
-  if (linkedDue.length === 0) {
+    // Instagram platform
+    if (asset.instagram_account_id) {
+      const checkpoint = asset.meta_asset_sync_checkpoints?.find(
+        (c: CheckpointRow) => c.platform === 'instagram'
+      )
+      const nextDueAt = checkpoint?.next_due_at ?? null
+      const isBootstrap = !checkpoint
+      const isDue = isBootstrap || (nextDueAt && nextDueAt <= now)
+      if (isDue) {
+        allPlatformTargets.push({
+          assetId: asset.id,
+          clientId: asset.client_id,
+          platform: 'instagram',
+          hasCheckpoint: !!checkpoint,
+          nextDueAt,
+          lastSyncKind: checkpoint?.last_sync_kind ?? null,
+          lastStatus: checkpoint?.last_status ?? null,
+          lastHealthState: checkpoint?.last_health_state ?? null,
+          lastSuccessfulMonth: checkpoint?.last_successful_month ?? null,
+          isDue: true,
+          isBootstrap,
+        })
+      }
+    }
+  }
+
+  if (allPlatformTargets.length === 0) {
     return out
   }
 
-  // 2. Group by client to create efficient multi-asset batches.
-  // Each batch will sync the current period (incremental) for due assets.
-  // For completed-month reconciliation, we also sync the previous completed month
-  // if the last successful month is older than that (catches late Meta revisions).
-  const byClient = new Map<string, Array<typeof linkedDue[0]>>()
-  for (const cp of linkedDue) {
-    const arr = byClient.get(cp.client_id) ?? []
-    arr.push(cp)
-    byClient.set(cp.client_id, arr)
+  // 3. Cross-batch active-work dedupe: find asset+platform+month combinations
+  // that already have queued/running work across ANY batch.
+  // This prevents the every-minute cron from creating duplicate work while
+  // a prior batch is still being processed.
+  const activeWorkKeys = new Set<string>()
+  const { data: activeItems } = await supabase
+    .from('meta_sync_batch_items')
+    .select('asset_id, month')
+    .in('status', ['queued', 'running'])
+    .or(`cooldown_until.is.null,cooldown_until.lte.${now}`)
+
+  if (activeItems) {
+    for (const item of activeItems) {
+      if (item.asset_id) {
+        // We need platform - fetch from checkpoints or assets table
+        // For dedupe we only need to know if ANY platform for this asset+month is active
+        activeWorkKeys.add(`${item.asset_id}:${item.month}`)
+      }
+    }
+  }
+
+  // 4. Group by client to create efficient multi-asset batches.
+  const byClient = new Map<string, PlatformTarget[]>()
+  for (const target of allPlatformTargets) {
+    const arr = byClient.get(target.clientId) ?? []
+    arr.push(target)
+    byClient.set(target.clientId, arr)
   }
 
   const clientIds = Array.from(byClient.keys())
@@ -292,36 +374,40 @@ async function enqueueFleetMetaFreshness(
     .in('id', clientIds)
   const clientNameMap = new Map<string, string>((clientRows ?? []).map(c => [c.id, c.name]))
 
-  // 3. Determine months to sync for each client.
-  // - Always sync the current period (incremental) for due assets.
-  // - Also sync the previous completed month if last_successful_month is older
-  //   (reconciliation for late Meta revisions).
-  const currentMonth = currentMonthStr()
-  const prevCompletedMonth = previousMonthStr(1)
-
+  // 5. For each client, build months and filter out active work.
   let batchesCreated = 0
-  for (const [clientId, checkpoints] of byClient.entries()) {
+  for (const [clientId, targets] of byClient.entries()) {
     if (batchesCreated >= META_FLEET_FRESHNESS_MAX_BATCHES) break
 
     const clientName = clientNameMap.get(clientId) ?? 'Unknown'
-    const assets = checkpoints.map(cp => ({
-      assetId: cp.asset_id,
-      clientId,
-      clientName,
-      platform: cp.platform,
-    }))
 
-    // Determine months: current period (incremental) + previous completed month if needed
-    const months: string[] = [currentMonth]
-    const needsReconciliation = checkpoints.some(cp => {
-      if (!cp.last_successful_month) return true
-      return cp.last_successful_month < prevCompletedMonth
+    // Determine months needed for this client's targets.
+    // - Current Meta month (incremental) for all due targets.
+    // - Previous completed Meta month (historical) if any target needs reconciliation.
+    const needsReconciliation = targets.some(t => {
+      if (!t.lastSuccessfulMonth) return true // bootstrap = no history, needs full current + prev
+      return t.lastSuccessfulMonth < prevCompletedMonth
     })
+
+    const months: string[] = [currentMonth]
     if (needsReconciliation) months.push(prevCompletedMonth)
 
-    // 4. Create the batch directly (bypassing meta-sync-enqueue HTTP to avoid auth overhead).
-    // This mirrors the logic in meta-sync-enqueue but runs with service role.
-    const uniqueAssets = [...new Map(assets.map(a => [a.assetId, a])).values()]
+    // Filter targets: exclude asset+month combos that already have active work
+    const filteredTargets = targets.filter(t => {
+      for (const month of months) {
+        if (activeWorkKeys.has(`${t.assetId}:${month}`)) {
+          return false // skip - work already queued/running
+        }
+      }
+      return true
+    })
+
+    if (filteredTargets.length === 0) {
+      continue // all work for this client is already active
+    }
+
+    // 6. Create the batch with filtered targets and months.
+    const uniqueAssets = [...new Map(filteredTargets.map(t => [t.assetId, t])).values()]
     const totalItems = months.length * uniqueAssets.length
 
     const { data: batch, error: batchError } = await supabase
@@ -360,12 +446,12 @@ async function enqueueFleetMetaFreshness(
 
     for (const month of months) {
       const kind = month === currentMonth ? 'incremental' : 'historical'
-      for (const asset of uniqueAssets) {
+      for (const target of uniqueAssets) {
         itemRows.push({
           batch_id: batchId,
-          client_id: asset.clientId,
-          client_name: asset.clientName,
-          asset_id: asset.assetId,
+          client_id: target.clientId,
+          client_name: clientName,
+          asset_id: target.assetId,
           sync_kind: kind,
           month,
           status: 'queued',
@@ -382,7 +468,7 @@ async function enqueueFleetMetaFreshness(
       continue
     }
 
-    // 5. Trigger the worker for this batch (fire-and-forget with short timeout).
+    // 7. Trigger the worker for this batch (fire-and-forget with short timeout).
     const workerUrl = Deno.env.get('META_SYNC_WORKER_URL') ?? `${url}/functions/v1/meta-sync-worker`
     try {
       await Promise.race([
@@ -405,17 +491,6 @@ async function enqueueFleetMetaFreshness(
   }
 
   return out
-}
-
-function currentMonthStr(): string {
-  const now = new Date()
-  return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`
-}
-
-function previousMonthStr(offset = 1): string {
-  const now = new Date()
-  const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - offset, 1))
-  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`
 }
 
 // Runs one job to its real completion and returns a TRUTHFUL result summary that

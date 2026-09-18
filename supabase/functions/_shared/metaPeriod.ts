@@ -63,6 +63,43 @@ export function isWithinMetaProviderPeriod(timestamp: string, periodStart: strin
   return Number.isFinite(time) && time >= Date.parse(period.start) && time < Date.parse(period.endExclusive)
 }
 
+// Returns the current Meta calendar month (YYYY-MM) in America/Los_Angeles.
+// This is the canonical month for Meta provider-period membership and
+// incremental/reconciliation scheduling. Must NOT use UTC month arithmetic.
+export function currentMetaMonth(): string {
+  const now = new Date()
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: META_INSIGHTS_TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+  })
+  const parts = formatter.formatToParts(now)
+  const year = parts.find(p => p.type === 'year')?.value ?? ''
+  const month = parts.find(p => p.type === 'month')?.value ?? ''
+  return `${year}-${month}`
+}
+
+// Returns the previous completed Meta calendar month (YYYY-MM) in America/Los_Angeles.
+// Uses the canonical Meta provider calendar, not UTC.
+export function previousMetaMonth(offset = 1): string {
+  const now = new Date()
+  // Get current month in Meta timezone, then subtract offset months
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: META_INSIGHTS_TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+  })
+  const parts = formatter.formatToParts(now)
+  let year = Number(parts.find(p => p.type === 'year')?.value ?? '0')
+  let month = Number(parts.find(p => p.type === 'month')?.value ?? '0')
+  month -= offset
+  while (month <= 0) {
+    month += 12
+    year -= 1
+  }
+  return `${year}-${String(month).padStart(2, '0')}`
+}
+
 // Each requested Pacific calendar day must have exactly one ending bucket.
 // Calendar arithmetic preserves 23/25-hour days across daylight-saving changes.
 export function expectedMetaDailyEnds(since: string, until: string): number[] {

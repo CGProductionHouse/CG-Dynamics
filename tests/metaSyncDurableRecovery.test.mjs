@@ -143,13 +143,12 @@ test('"Restoring sync progress..." is replaced once restoration produces real da
 // ── No duplicate batches or reports ─────────────────────────────────────────
 test('recovery resumes the existing batch and never creates another', () => {
   // The reaper only ever POSTs an existing batchId; it has no insert path.
+  // Isolate ONLY the reapStalledMetaSyncBatches function, not the new enqueue function.
   const start = background.indexOf('async function reapStalledMetaSyncBatches')
-  // Find the end of this specific function (first 'return out' after start that's
-  // followed by a closing brace and then either a blank line or next function).
-  // We look for the pattern: return out\n}\n\n (end of function).
-  const afterStart = background.slice(start)
-  const funcEnd = afterStart.match(/\n}\s*\n\s*(?:async function|interface|const|$)/)?.[0]?.length ?? 0
-  const reaper = funcEnd > 0 ? afterStart.slice(0, funcEnd) : afterStart.slice(0, afterStart.indexOf('return out') + 10)
+  const funcStart = background.indexOf('async function ', start + 1)
+  const reaper = funcStart > start
+    ? background.slice(start, funcStart)
+    : background.slice(start, background.indexOf('return out', start) + 20)
   assert.match(reaper, /dispatchMetaWorker/)
   assert.match(reaper, /\{ batchId: row\.batch_id \}/)
   assert.doesNotMatch(reaper, /\.insert\(/, 'the reaper must never create a batch')
