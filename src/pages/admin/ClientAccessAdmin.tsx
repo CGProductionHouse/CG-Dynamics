@@ -5,7 +5,7 @@ import {
   resetClientPortalAccess,
   setClientPortalAccessEnabled,
   type ClientPortalAccessRow,
-  type ClientPortalCredentials,
+  type ClientPortalAccessReceipt,
 } from '../../lib/clientPortalAccess'
 
 function message(error: unknown, fallback: string) {
@@ -18,7 +18,7 @@ export default function ClientAccessAdmin() {
   const [loading, setLoading] = useState(true)
   const [busyId, setBusyId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [credentials, setCredentials] = useState<(ClientPortalCredentials & { client_name: string }) | null>(null)
+  const [lastAction, setLastAction] = useState<(ClientPortalAccessReceipt & { client_name: string }) | null>(null)
   const [query, setQuery] = useState('')
 
   async function load() {
@@ -55,11 +55,11 @@ export default function ClientAccessAdmin() {
   async function provision(row: ClientPortalAccessRow) {
     setBusyId(row.client_id)
     setError(null)
-    setCredentials(null)
+    setLastAction(null)
     try {
       const result = await provisionClientPortalAccess(row.client_id, usernames[row.client_id] ?? row.proposed_username)
       if (result.error || !result.data) throw result.error ?? new Error('Could not provision client access.')
-      setCredentials({ ...result.data, client_name: row.client_name })
+      setLastAction({ ...result.data, client_name: row.client_name })
       await load()
     } catch (error) {
       setError(message(error, 'Could not provision client access.'))
@@ -71,11 +71,11 @@ export default function ClientAccessAdmin() {
   async function reset(row: ClientPortalAccessRow) {
     setBusyId(row.client_id)
     setError(null)
-    setCredentials(null)
+    setLastAction(null)
     try {
       const result = await resetClientPortalAccess(row.client_id)
       if (result.error || !result.data) throw result.error ?? new Error('Could not reset client access.')
-      setCredentials({ ...result.data, client_name: row.client_name })
+      setLastAction({ ...result.data, client_name: row.client_name })
       await load()
     } catch (error) {
       setError(message(error, 'Could not reset client access.'))
@@ -99,8 +99,110 @@ export default function ClientAccessAdmin() {
   }
 
   async function copyCredentials() {
-    if (!credentials) return
-    const text = `CG Dynamics\nUsername: ${credentials.username}\nPassword: ${credentials.starter_password}\nLogin: https://www.cgdynamics.co.za/login`
+    if (!lastAction) return
+    // CA-approved Phase 1 convention. Keep the password out of rendered DOM and API responses.
+    const password = `${lastAction.username}_cgimport { useEffect, useMemo, useState } from 'react'
+import {
+  listClientPortalAccess,
+  provisionClientPortalAccess,
+  resetClientPortalAccess,
+  setClientPortalAccessEnabled,
+  type ClientPortalAccessRow,
+  type ClientPortalAccessReceipt,
+} from '../../lib/clientPortalAccess'
+
+function message(error: unknown, fallback: string) {
+  return error instanceof Error && error.message ? error.message : fallback
+}
+
+export default function ClientAccessAdmin() {
+  const [rows, setRows] = useState<ClientPortalAccessRow[]>([])
+  const [usernames, setUsernames] = useState<Record<string, string>>({})
+  const [loading, setLoading] = useState(true)
+  const [busyId, setBusyId] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [lastAction, setLastAction] = useState<(ClientPortalAccessReceipt & { client_name: string }) | null>(null)
+  const [query, setQuery] = useState('')
+
+  async function load() {
+    setLoading(true)
+    setError(null)
+    const result = await listClientPortalAccess()
+    if (result.error) {
+      setError(result.error.message)
+      setLoading(false)
+      return
+    }
+    setRows(result.data)
+    setUsernames(Object.fromEntries(result.data.map(row => [
+      row.client_id,
+      row.username ?? row.proposed_username,
+    ])))
+    setLoading(false)
+  }
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => { void load() }, 0)
+    return () => window.clearTimeout(timer)
+  }, [])
+
+  const filtered = useMemo(() => {
+    const needle = query.trim().toLowerCase()
+    if (!needle) return rows
+    return rows.filter(row =>
+      row.client_name.toLowerCase().includes(needle) ||
+      (row.username ?? row.proposed_username).toLowerCase().includes(needle)
+    )
+  }, [query, rows])
+
+  async function provision(row: ClientPortalAccessRow) {
+    setBusyId(row.client_id)
+    setError(null)
+    setLastAction(null)
+    try {
+      const result = await provisionClientPortalAccess(row.client_id, usernames[row.client_id] ?? row.proposed_username)
+      if (result.error || !result.data) throw result.error ?? new Error('Could not provision client access.')
+      setLastAction({ ...result.data, client_name: row.client_name })
+      await load()
+    } catch (error) {
+      setError(message(error, 'Could not provision client access.'))
+    } finally {
+      setBusyId(null)
+    }
+  }
+
+  async function reset(row: ClientPortalAccessRow) {
+    setBusyId(row.client_id)
+    setError(null)
+    setLastAction(null)
+    try {
+      const result = await resetClientPortalAccess(row.client_id)
+      if (result.error || !result.data) throw result.error ?? new Error('Could not reset client access.')
+      setLastAction({ ...result.data, client_name: row.client_name })
+      await load()
+    } catch (error) {
+      setError(message(error, 'Could not reset client access.'))
+    } finally {
+      setBusyId(null)
+    }
+  }
+
+  async function toggle(row: ClientPortalAccessRow) {
+    setBusyId(row.client_id)
+    setError(null)
+    try {
+      const result = await setClientPortalAccessEnabled(row.client_id, !row.enabled)
+      if (result.error) throw result.error
+      await load()
+    } catch (error) {
+      setError(message(error, 'Could not change client access.'))
+    } finally {
+      setBusyId(null)
+    }
+  }
+
+
+    const text = `CG Dynamics\nUsername: ${lastAction.username}\nPassword: ${password}\nLogin: https://www.cgdynamics.co.za/login`
     await navigator.clipboard.writeText(text)
   }
 
@@ -121,14 +223,13 @@ export default function ClientAccessAdmin() {
         />
       </div>
 
-      {credentials && (
+      {lastAction && (
         <div className="mb-5 rounded-xl border border-brand-accent/30 bg-brand-accent/10 p-4">
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-accent">Starter login ready</p>
-          <p className="mt-2 text-sm font-semibold text-white">{credentials.client_name}</p>
-          <div className="mt-2 grid gap-1 text-sm text-brand-primary">
-            <span>Username: <strong className="text-white">{credentials.username}</strong></span>
-            <span>Password: <strong className="text-white">{credentials.starter_password}</strong></span>
-          </div>
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-accent">Client access ready</p>
+          <p className="mt-2 text-sm font-semibold text-white">{lastAction.client_name}</p>
+          <p className="mt-2 text-sm text-brand-primary">
+            Username: <strong className="text-white">{lastAction.username}</strong>
+          </p>
           <button
             type="button"
             onClick={() => void copyCredentials()}
@@ -136,7 +237,9 @@ export default function ClientAccessAdmin() {
           >
             Copy login details
           </button>
-          <p className="mt-2 text-xs text-brand-primary/70">This password is shown from the current admin action only and is not stored in this page.</p>
+          <p className="mt-2 text-xs text-brand-primary/70">
+            Starter password is not rendered or returned by the provisioning action. It is generated only when an admin deliberately copies login details.
+          </p>
         </div>
       )}
 
