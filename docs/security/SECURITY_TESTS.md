@@ -55,9 +55,9 @@ node --test tests/adminInvitePolicy.test.mjs
 node --test tests/websiteEnquiryTransaction.test.mjs
 ```
 
-The PostgreSQL acceptance suite runs against a disposable Supabase Postgres image
-in `.github/workflows/website-enquiry-transaction.yml`; it does not connect to or
-mutate production.
+The PostgreSQL acceptance suite runs against a dedicated disposable database in
+`.github/workflows/website-enquiry-transaction.yml`; it does not connect to or mutate
+production.
 
 ## Coverage gaps
 

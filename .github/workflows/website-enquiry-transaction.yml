@@ -32,5 +32,10 @@ jobs:
 
       - name: Run disposable Supabase PostgreSQL acceptance
         env:
-          CG_LOCAL_PG_NAME: cg-lead-acceptance-${{ github.run_id }}
-        run: scripts/local-db-acceptance.sh tests/sql/405_website_enquiry_transaction_acceptance.sql
+          PGHOST: 127.0.0.1
+          PGUSER: postgres
+          PGPASSWORD: postgres
+        run: |
+          sudo systemctl start postgresql.service
+          sudo -u postgres psql -c "alter role postgres password 'postgres'"
+          scripts/website-enquiry-transaction-acceptance.sh

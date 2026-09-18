@@ -1,6 +1,6 @@
 -- Issue #405 M2A actual PostgreSQL acceptance.
--- Run only against the disposable Supabase container:
---   scripts/local-db-acceptance.sh tests/sql/405_website_enquiry_transaction_acceptance.sql
+-- Run only against the disposable database created by:
+--   scripts/website-enquiry-transaction-acceptance.sh
 
 create extension if not exists dblink with schema extensions;
 
@@ -239,7 +239,7 @@ reset role;
 -- Six independent database sessions race on the same exact tenant submission key.
 select extensions.dblink_connect(
   connection_name,
-  'host=127.0.0.1 dbname=postgres user=supabase_admin password=postgres'
+  'host=127.0.0.1 dbname=cg_website_enquiry_acceptance user=supabase_admin password=postgres'
 )
 from unnest(array['lead_c1','lead_c2','lead_c3','lead_c4','lead_c5','lead_c6']) connection_name;
 
