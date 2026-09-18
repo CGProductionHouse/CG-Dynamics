@@ -397,10 +397,10 @@ This section is an orientation snapshot only. Refetch GitHub + tracker before ac
 **#396 Client Portal Library**
 
 - Owner: CA manual coding agent 1.
-- Owning PR: #410, current reviewed head `5c63c94d387e5b16d0ca953ae1e3adfdab1b06bd`.
-- Foundation is green, but latest accepted media UX requires a follow-up before merge.
-- Current whole-file browser Blob/objectURL path is not accepted for large production video.
-- Continue the same PR to provide Dynamics-native range/streaming access, lazy/bounded previews and opaque asset identity.
+- Owning PR: #410 on `codex/issue-396-client-portal-library`; foundation checkpoint `5c63c94d387e5b16d0ca953ae1e3adfdab1b06bd`.
+- Accepted media follow-up implemented: bounded HTTP Range/206 streaming, opaque short-lived Dynamics access grants, lazy Category -> Year -> Month -> Files metadata, on-demand month pages/thumbnails and Dynamics-native video playback.
+- Exact-client/library/drive/category and published-date checks remain mandatory on every access; OneDrive/Graph origins and durable provider IDs remain hidden from the client.
+- Focused isolation/streaming tests, scoped lint, production build and interactive mobile/desktop QA are green; final head is recorded on PR #410.
 - Reuse the exact `A_ClientPortal_<ClientSlug>` boundary.
 - Use durable OneDrive item IDs; never fuzzy filename identity.
 - Do not expose raw drive IDs/internal paths/sibling folders.

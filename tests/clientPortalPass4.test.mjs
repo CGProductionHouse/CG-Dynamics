@@ -38,10 +38,10 @@ test('client approvals stay on the canonical review queue and real decision acti
   assert.doesNotMatch(approvals, /monthly_deliverables.*(?:insert|update|upsert)/s)
 })
 
-test('Brand Hub only renders the existing client-safe onboarding projection', () => {
+test('Brand Hub uses the dedicated client-safe library projection and keeps onboarding context optional', () => {
+  assert.match(brandHub, /loadClientPortalLibrary\(\)/)
   assert.match(brandHub, /loadPortalSetup\(\)/)
-  assert.match(brandHub, /BrandAssetLibrary state=\{state\} audience="client"/)
-  assert.match(brandHub, /uploadStatus === 'received'/)
-  assert.match(brandHub, /working files and raw production assets remain private/i)
+  assert.match(brandHub, /<ClientPortalLibrary library=\{library\} \/>/)
+  assert.doesNotMatch(brandHub.slice(brandHub.indexOf('function ClientBrandHub')), /BrandAssetLibrary/)
   assert.doesNotMatch(brandHub, /drive_item_id|drive_path|sharepoint|onedrive/i)
 })
