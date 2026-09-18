@@ -325,7 +325,7 @@ export default function ClientPerformancePage() {
           </section>
 
           {canManageOnboarding && <OnboardingStatusCard clients={clients} />}
-          <WebsitePerformancePanel clients={clients} />
+          <WebsitePerformancePanel clients={clients} canSave={canManageOnboarding} />
 
           <section className="mt-6">
             <PremiumCard padding="lg" className="bg-white/[0.035]">

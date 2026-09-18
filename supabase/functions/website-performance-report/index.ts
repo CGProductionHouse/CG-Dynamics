@@ -25,10 +25,11 @@ Deno.serve(async (request) => {
   if (roleError) return json({ error: 'Authorization unavailable' }, 503)
   if (!['admin', 'manager', 'staff', 'team'].includes(profile?.role ?? '')) return json({ error: 'Forbidden' }, 403)
 
-  let input: { clientId?: unknown; from?: unknown; to?: unknown }
+  let input: { clientId?: unknown; from?: unknown; to?: unknown; action?: unknown }
   try { input = await request.json() } catch { return json({ error: 'Malformed request' }, 400) }
   if (typeof input.clientId !== 'string' || !uuid.test(input.clientId) ||
-    typeof input.from !== 'string' || typeof input.to !== 'string' || !day.test(input.from) || !day.test(input.to)) {
+    typeof input.from !== 'string' || typeof input.to !== 'string' || !day.test(input.from) || !day.test(input.to) ||
+    !['preview', 'save_draft'].includes(String(input.action ?? 'preview'))) {
     return json({ error: 'Invalid report request' }, 400)
   }
   const start = Date.parse(`${input.from}T00:00:00Z`)
@@ -44,7 +45,7 @@ Deno.serve(async (request) => {
   let mappings: Record<string, number>
   try { mappings = JSON.parse(Deno.env.get('WEBSITE_REPORTING_CLIENT_MAP') ?? '{}') } catch { return json({ error: 'Reporting mapping invalid' }, 503) }
   const websiteId = mappings[input.clientId]
-  if (!Number.isSafeInteger(websiteId) || websiteId < 1) return json({ error: 'Website not mapped' }, 404)
+  if (!Number.isSafeInteger(websiteId) || websiteId < 1) return json({ clientId: input.clientId, state: 'not_connected', report: null })
   // Fail closed if one Builder website is accidentally assigned to multiple clients.
   if (Object.values(mappings).filter((id) => id === websiteId).length !== 1) return json({ error: 'Reporting mapping ambiguous' }, 503)
   try {
@@ -52,12 +53,37 @@ Deno.serve(async (request) => {
     if (endpoint.protocol !== 'https:') return json({ error: 'Reporting endpoint invalid' }, 503)
     endpoint.searchParams.set('from', input.from)
     endpoint.searchParams.set('to', input.to)
+    endpoint.searchParams.set('clientId', input.clientId)
     const upstream = await fetch(endpoint, { headers: { Authorization: `Bearer ${builderToken}` } })
-    if (!upstream.ok) return json({ error: 'Website report unavailable' }, 503)
+    if (upstream.status === 409) return json({ clientId: input.clientId, state: 'not_connected', report: null })
+    if ([401, 403].includes(upstream.status)) return json({ clientId: input.clientId, state: 'permission_required', report: null })
+    if (!upstream.ok) return json({ clientId: input.clientId, state: 'unavailable', report: null })
     const report = await upstream.json()
-    if (report?.version !== 1 || report.websiteId !== websiteId || report.period?.from !== input.from || report.period?.to !== input.to) {
+    if (report?.version !== 1 || report.websiteId !== websiteId || report.identity?.dynamicsClientId !== input.clientId ||
+      report.period?.from !== input.from || report.period?.to !== input.to) {
       return json({ error: 'Website report contract mismatch' }, 503)
     }
-    return json({ clientId: input.clientId, report })
+    const action = String(input.action ?? 'preview')
+    if (action === 'save_draft') {
+      if (!['admin', 'manager'].includes(profile?.role ?? '')) return json({ error: 'Manager access required' }, 403)
+      if (report.identity?.environment !== 'production' || !['available', 'partial'].includes(report.dataQuality?.state) || !report.dataQuality?.sourceReadAt) {
+        return json({ error: 'Only available production reporting can be saved for review' }, 409)
+      }
+      const { data: saved, error: saveError } = await supabase.rpc('save_website_report_snapshot', {
+        p_client_id: input.clientId,
+        p_period_start: input.from,
+        p_period_end: input.to,
+        p_snapshot: report,
+        p_actor_id: user.id,
+      })
+      if (saveError || !Array.isArray(saved) || !saved[0]) return json({ error: 'Website snapshot could not be saved' }, 503)
+      return json({
+        clientId: input.clientId,
+        state: report.dataQuality.state,
+        report,
+        saved: { reportId: saved[0].report_id, snapshotId: saved[0].snapshot_id, revision: saved[0].revision },
+      })
+    }
+    return json({ clientId: input.clientId, state: report.dataQuality.state, report })
   } catch { return json({ error: 'Website report unavailable' }, 503) }
 })

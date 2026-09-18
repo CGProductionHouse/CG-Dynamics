@@ -1,6 +1,6 @@
 # Website Performance Reporting Goal
 
-Status: V1 Performance panel and server-side Builder bridge implemented on `codex/website-reporting-v1`; no live mapping, Edge deployment or client publication yet. Red Oak's active client ID was verified read-only on 2026-09-12 as `cdb11a82-339e-4b46-9b09-bde1a23efeaf`; the Builder Website ID remains unverified, so do not configure `WEBSITE_REPORTING_CLIENT_MAP` yet.
+Status: PR #356 is reconciled with current `main`. The exact-client Builder bridge, truthful source states, immutable monthly snapshot revisions, staff draft-save action and approved/published client projection are implemented. No live mapping, migration, Edge deployment or client publication was performed. Red Oak's active client ID was verified read-only on 2026-09-12 as `cdb11a82-339e-4b46-9b09-bde1a23efeaf`; the Builder Website ID remains unverified, so do not configure `WEBSITE_REPORTING_CLIENT_MAP` yet.
 Primary zone: CG Dynamics -> Performance
 Upstream system: CG Website Builder / Website System
 
@@ -152,6 +152,14 @@ The final schema must be typed/versioned and tenant-safe.
 - Aggregate reporting by default.
 - No unnecessary PII or enquiry message content in analytics/reporting storage.
 - Role-gate internal notes/recommendations where required.
+
+## Implemented M0/M1 publication path
+
+The Builder request includes both the verified Website ID and expected Dynamics client UUID. A mismatch fails closed. The normalized state is `not_connected`, `not_tracked`, `collecting`, `partial`, `available`, `permission_required` or `provider_error`; unknown data stays null.
+
+An active manager/admin may save only an exact production `available` or `partial` response. The service-only save RPC serializes writes per client/month, creates or reuses the existing master draft report, and appends an immutable snapshot revision. It refuses to change a published report. Publication is blocked unless the attached snapshot belongs to the report's exact client and is publishable. The existing `client_published_reports()` RPC returns only a sanitized website snapshot for the signed-in report client. Draft and live Builder data are never exposed directly to the client portal.
+
+The migration in PR #356 is a protected artifact only. Applying it, deploying the Edge Function and configuring mappings/tokens remain explicit production activation steps.
 
 ## Delivery order
 

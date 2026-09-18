@@ -397,11 +397,12 @@ This section is an orientation snapshot only. Refetch GitHub + tracker before ac
 **Website Growth #27 M0/M1**
 
 - Owner: CA manual coding agent 1.
-- Continue existing Website Editor PR #18 at `d7c429aabbbcc77739ee7a60c127fb6d11dec26d` and Dynamics PR #356 at `b56595b9993cf512bf16a72617bd62bc8fc75fac`.
+- Continue existing Website Editor PR #18 and Dynamics PR #356 only. Both were rebased onto their current `main` branches on 2026-09-18; their live PR heads are GitHub authority.
 - No replacement reporting branches.
 - Scope: current-main reconciliation, exact website/client identity chain, truthful reporting states and the missing Builder -> Dynamics -> published client reporting path required by #27 M0/M1.
 - Do not configure production provider secrets/tokens, change DNS/domains, enable Website Operations, run migrations/backfills, start #405 lead/email work or duplicate #335/#336 GA4/Ads work.
 - Return durable checkpoints on both existing PRs with exact heads, tests/builds and remaining protected activation dependencies.
+- Implemented checkpoint: exact website/client/environment identity, explicit Builder availability states, Dynamics immutable snapshot revisions, staff-only draft save, publishability guard and sanitized exact-client projection through the existing monthly report RPC. Nothing was activated in production.
 
 **#405 Website Growth M2A canonical lead transaction**
 
