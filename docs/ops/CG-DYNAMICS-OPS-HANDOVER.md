@@ -397,10 +397,10 @@ This section is an orientation snapshot only. Refetch GitHub + tracker before ac
 **#396 Client Portal Library**
 
 - Owner: CA manual coding agent 1.
-- Scope: bounded read-only Client Portal Library / Brand Hub foundation.
-- Owning implementation: draft PR #410 on `codex/issue-396-client-portal-library`; early checkpoint `3a1cfbb`.
-- Checkpoint status: exact-client service-only mappings, published-asset projection, server-mediated open/download and responsive Brand Hub shell are implemented; focused tests, scoped lint, production build and mobile/desktop visual QA are green.
-- The migration remains unapplied and the feature remains unavailable until an exact library mapping is both verified and explicitly enabled.
+- Owning PR: #410, current reviewed head `5c63c94d387e5b16d0ca953ae1e3adfdab1b06bd`.
+- Foundation is green, but latest accepted media UX requires a follow-up before merge.
+- Current whole-file browser Blob/objectURL path is not accepted for large production video.
+- Continue the same PR to provide Dynamics-native range/streaming access, lazy/bounded previews and opaque asset identity.
 - Reuse the exact `A_ClientPortal_<ClientSlug>` boundary.
 - Use durable OneDrive item IDs; never fuzzy filename identity.
 - Do not expose raw drive IDs/internal paths/sibling folders.
@@ -410,9 +410,13 @@ This section is an orientation snapshot only. Refetch GitHub + tracker before ac
 **#404 + CG-Hours #7 Client Registry Bridge**
 
 - Owner: CA manual coding agent 2 across both repos.
-- Scope: implementation + tests + one owning PR per repo only.
+- Owning PRs: Dynamics #411 at `57cd3a8a2cb6d8e8b71503e3e74174d59aa8eff7`; CG-Hours #8 at `d5b7f3fad0aa4c43806246940478da08f1ef6fcb`.
+- Dynamics preview is green; CG-Hours PR #8 currently has a failing Vercel status and is not merge-ready.
+- Continue the same PRs to fix the Hours preview and make the bridge safely OFF/inert before migrations/secrets/config are activated.
+- Disabled production must not query a missing outbox table, show registry UI, or emit recurring cron configuration failures.
+- Existing CG Hours client creation must remain unchanged until the activation gate.
 - No overlap with Dynamics #361/#376 or CG-Hours PR #3 Staff Logger.
-- Production migration and initial JFJ Electrical / Neshora Oxygen / VCS Cleaning Solutions backfill remain protected apply gates.
+- Production migrations, secret/config activation, function deployment and initial JFJ Electrical / Neshora Oxygen / VCS Cleaning Solutions backfill remain protected apply gates.
 
 Goal:
 
