@@ -402,26 +402,27 @@ This section is an orientation snapshot only. Refetch GitHub + tracker before ac
 
 ### Active manual coding
 
-**Website Growth #27 M0/M1**
+**Website Editor #19 first-party contact actions**
 
 - Owner: CA manual coding agent 1.
-- Continue existing Website Editor PR #18 at `d7c429aabbbcc77739ee7a60c127fb6d11dec26d` and Dynamics PR #356 at `b56595b9993cf512bf16a72617bd62bc8fc75fac`.
-- No replacement reporting branches.
-- Scope: current-main reconciliation, exact website/client identity chain, truthful reporting states and the missing Builder -> Dynamics -> published client reporting path required by #27 M0/M1.
-- Do not configure production provider secrets/tokens, change DNS/domains, enable Website Operations, run migrations/backfills, start #405 lead/email work or duplicate #335/#336 GA4/Ads work.
-- Return durable checkpoints on both existing PRs with exact heads, tests/builds and remaining protected activation dependencies.
+- Current Website Editor `main` includes merged reporting PR #18.
+- Own only privacy-minimised first-party contact actions: WhatsApp, phone, email, directions, booking and other explicitly allowlisted CTA interactions.
+- Confirmed enquiry count remains canonical Dynamics #405 truth; never count browser form clicks/submits as accepted enquiries.
+- Exact Website identity only; no fuzzy IDs, no browser-held Builder/reporting secret, no arbitrary referrer query data or lead PII.
+- Add strict validation/rate limiting, half-open date-range reads, preview/synthetic exclusion and normalized V1 report integration.
+- No real client-site configuration, production schema apply, Commerce/Yoco or #405 overlap.
 
 **#405 Website Growth M2A canonical lead transaction**
 
 - Owner: CA manual coding agent 2.
-- Dynamics backend only; Agent 01 continues separate M1 reporting work.
+- Dynamics backend only.
 - Read Issue #405 latest comments plus Website Editor #27 and PR #28 engineering authority before coding.
 - Own the canonical enquiry vs contact identity, versioned form schema/stable field contract, tenant-scoped submission key and one PostgreSQL transaction that commits enquiry + approved-recipient delivery jobs + one canonical reporting event.
 - Exact Website/client/environment/recipient identity must resolve server-side; browser input is never authority.
 - Identical replay returns the same receipt; changed payload with the same key conflicts; no cross-client dedupe by email and no partial acknowledged state.
 - Prove RLS/isolation/idempotency/concurrency/crash-recovery semantics.
 - A migration/schema implementation may be authored and tested but must not be applied to production.
-- Do not touch Website Editor adapter files owned by Agent 01, live transactional provider/email send, provider secrets/config, production recipient setup, #374 or #335/#336.
+- Do not touch Website Editor #19 files, live transactional provider/email send, provider secrets/config, production recipient setup, #374 or #335/#336.
 
 ### Recently completed production release
 
@@ -449,6 +450,16 @@ This section is an orientation snapshot only. Refetch GitHub + tracker before ac
 - Reuse the exact `A_ClientPortal_<ClientSlug>` boundary and durable OneDrive item IDs; never fuzzy filename identity.
 - Still NOT executed: production migration, exact production library mapping, library enablement, real OneDrive share/permission, file move/copy/rename, folder discovery or first-client activation.
 - Do not dispatch further implementation here unless activation exposes a reproducible defect.
+
+**Website Growth #27 M1 reporting activation**
+
+- No active coding owner.
+- Website Editor PR #18 merged at `59f720998fdec117172ea01bc2f2b2e486e5c5f2`; production deployment `dpl_GcRQV3yZxZd1tN2E8ffTaYrKkzZb` READY.
+- Dynamics PR #356 merged at `23b436f23c2b19db334063045557a80a82999d63`; production deployment `dpl_DTQjJE25FWqMv1JbsMrYhzLvpwZm` READY.
+- Immediate runtime-error scans are clean in both projects.
+- Code is production-deployed but reporting remains intentionally unconfigured/fail-closed.
+- Still NOT executed: exact production Website ID + canonical host verification, Dynamics website-snapshot migration apply, `website-performance-report` Edge Function deployment, one-to-one mapping/tokens, real staff preview-save-review-publish acceptance and exact-client portal proof.
+- Do not call M1 production-accepted until those protected gates pass.
 
 **#404 + CG-Hours #7 Client Registry Bridge**
 
@@ -480,20 +491,19 @@ Rules:
 - initial controlled backfill: JFJ Electrical, Neshora Oxygen, VCS Cleaning Solutions;
 - production migration/data backfill remains CA-gated.
 
-### Additional active autonomous validation lane
+### Additional active autonomous lane
 
-**#413 AuthContext lint cleanup**
+**Website Editor PR #28 engineering-authority reconcile**
 
-- Owner: CA's additional OpenCode free agent.
-- Scope: `src/contexts/AuthContext.tsx` only, plus focused tests if needed.
-- Purpose: prove the free OpenCode route is healthy on a tiny isolated useful task.
-- Remove the two known pre-existing `no-useless-assignment` findings without changing auth behaviour.
-- One branch/PR; lint + focused auth/client tests + production build + diff check.
-- No migrations, Edge Functions, auth schema/RLS, production config or overlap with #396/#404.
+- Owner: CA's validated OpenCode free agent.
+- Existing PR #28 only; docs-only current-main reconcile.
+- Preserve the four accepted Website Growth engineering authority documents.
+- Update stale Hobby/daily-quota wording to current verified Vercel Pro truth while preserving the no-unapproved-recurring-SaaS cost doctrine.
+- No application code, schema, runtime config, provider setup, DNS or production behaviour changes.
 
 ### Queued / ready to dispatch
 
-No currently queued lane should be dispatched into #396, #404/#7 or #413 while those owners remain active. Re-read the Control Centre for any other safe unowned work.
+Do not dispatch overlapping work into Website Editor #19, Dynamics #405 M2A or Website Editor PR #28 while those owners remain active. Re-read the Control Centre for any other safe unowned work.
 
 ### Recently completed production rollout
 
@@ -509,16 +519,6 @@ No currently queued lane should be dispatched into #396, #404/#7 or #413 while t
 - exact-client isolation remained intact;
 - no credentials were exposed or collected;
 - no further code/migration/deploy was required for the final batch.
-
-### Complete but not automatically equivalent to merged/live
-
-**#395 / PR #398**
-
-- implementation complete;
-- current-month/sticky month;
-- canonical monthly strategy activation;
-- staff seed/review/approve/publish workspace;
-- refetch PR state before deciding merge.
 
 ### Parked future
 
