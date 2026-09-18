@@ -7,6 +7,7 @@ const readSource = relativePath => readFileSync(new URL(relativePath, import.met
 
 const APP_SOURCE = readSource('../src/App.tsx')
 const LAYOUT_SOURCE = readSource('../src/components/client/ClientPortalLayout.tsx')
+const PORTAL_STATES_SOURCE = readSource('../src/components/client/ClientPortalStates.tsx')
 const SHELL_SOURCE = readSource('../src/components/client/ClientPortalShell.tsx')
 const HOME_SOURCE = readSource('../src/pages/client/ClientPortalHome.tsx')
 const PERFORMANCE_SOURCE = readSource('../src/pages/client/Dashboard.tsx')
@@ -86,7 +87,7 @@ test('one persistent client layout owns the shell while routed pages render cont
   assert.match(clientRoutes, /<Route element=\{<RequireClient \/>\}>[\s\S]*<Route element=\{<ClientPortalLayout \/>\}>/)
   assert.match(LAYOUT_SOURCE, /<ClientPortalShell client=\{client\}>[\s\S]*<Suspense fallback=\{<ClientPortalContentLoading \/>\}>[\s\S]*<Outlet \/>/)
   assert.match(LAYOUT_SOURCE, /getClient\(profile\.client_id\)/)
-  assert.match(LAYOUT_SOURCE, /motion-reduce:animate-none/)
+  assert.match(PORTAL_STATES_SOURCE, /motion-reduce:animate-none/)
 
   for (const page of [HOME_SOURCE, PLAN_SOURCE, PERFORMANCE_SOURCE, APPROVALS_SOURCE, BRAND_HUB_SOURCE]) {
     assert.doesNotMatch(page, /<ClientPortalShell/)

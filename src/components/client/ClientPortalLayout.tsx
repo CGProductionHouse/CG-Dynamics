@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { getClient, type Client } from '../../lib/db/clients'
 import { ClientPortalContext } from './ClientPortalContext'
 import { ClientPortalShell } from './ClientPortalShell'
+import { ClientPortalErrorState, ClientPortalLoadingState } from './ClientPortalStates'
 
 export function ClientPortalLayout() {
   const { profile } = useAuth()
@@ -42,6 +43,26 @@ export function ClientPortalLayout() {
 
   const portalContext = useMemo(() => ({ client }), [client])
 
+  useEffect(() => {
+    if (loading || error) return
+    const preload = () => {
+      void Promise.allSettled([
+        import('../../pages/client/ClientPortalHome'),
+        import('../../pages/client/ClientPlanPage'),
+        import('../../pages/client/Dashboard'),
+        import('../../pages/admin/ContentReviewsPage'),
+        import('../../features/client-onboarding/ClientSetupPage'),
+      ])
+    }
+    const idleWindow = window as Window & { requestIdleCallback?: (callback: () => void) => number }
+    if (idleWindow.requestIdleCallback) {
+      const handle = idleWindow.requestIdleCallback(preload)
+      return () => window.cancelIdleCallback?.(handle)
+    }
+    const timer = window.setTimeout(preload, 250)
+    return () => window.clearTimeout(timer)
+  }, [error, loading])
+
   return (
     <ClientPortalContext.Provider value={portalContext}>
       <ClientPortalShell client={client}>
@@ -60,23 +81,9 @@ export function ClientPortalLayout() {
 }
 
 export function ClientPortalContentLoading() {
-  return (
-    <div role="status" aria-live="polite" aria-label="Loading your workspace" className="animate-pulse space-y-5 motion-reduce:animate-none">
-      <span className="sr-only">Loading your workspace…</span>
-      <div className="h-48 rounded-[2rem] border border-white/[0.08] bg-white/[0.035] sm:h-64" />
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="h-32 rounded-3xl border border-white/[0.08] bg-white/[0.025]" />
-        <div className="h-32 rounded-3xl border border-white/[0.08] bg-white/[0.025]" />
-        <div className="h-32 rounded-3xl border border-white/[0.08] bg-white/[0.025] sm:col-span-2 lg:col-span-1" />
-      </div>
-    </div>
-  )
+  return <ClientPortalLoadingState />
 }
 
 function ClientPortalContextError() {
-  return (
-    <div role="alert" className="rounded-3xl border border-[#f97316]/20 bg-[#f97316]/[0.06] px-6 py-8 text-sm text-[#f6a15f] shadow-2xl">
-      Your client workspace could not be loaded safely. Please try again shortly.
-    </div>
-  )
+  return <ClientPortalErrorState title="Your client workspace could not be loaded" />
 }

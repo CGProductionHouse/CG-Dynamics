@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useClientPortal } from '../../components/client/ClientPortalContext'
+import { ClientPortalErrorState, ClientPortalLoadingState } from '../../components/client/ClientPortalStates'
 import { useAuth } from '../../contexts/AuthContext'
 import {
   getClientPublishedReportWithPosts,
@@ -208,11 +209,11 @@ export default function Dashboard() {
   }
 
   if (loading) {
-    return <p role="status" className="text-sm text-report-muted">Loading your reports…</p>
+    return <ClientPortalLoadingState variant="report" />
   }
 
   if (error) {
-    return <p className="rounded-2xl bg-report-surface px-4 py-3 text-sm text-[#d8a07a]">{error}</p>
+    return <ClientPortalErrorState title="Performance is temporarily unavailable" message="Your published reporting could not be loaded safely. Please try again shortly." />
   }
 
   if (months.length === 0) {
@@ -249,7 +250,7 @@ export default function Dashboard() {
       )}
 
       {reportLoading ? (
-        <p className="text-sm text-report-muted">Loading report…</p>
+        <ClientPortalLoadingState variant="report" />
       ) : report ? (
         <ClientReportView
           report={report}

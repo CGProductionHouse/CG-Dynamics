@@ -28,6 +28,7 @@ const FULL_GUIDE_PAGE = read('../src/pages/admin/FullContentGuidePage.tsx')
 const GUIDE_EDITOR = read('../src/pages/admin/ContentGuidelineDocumentEditor.tsx')
 const STRATEGY_PAGE = read('../src/pages/client/ClientStrategyPage.tsx')
 const PORTAL_LIB = read('../src/lib/clientPortal.ts')
+const PORTAL_STATES = read('../src/components/client/ClientPortalStates.tsx')
 
 let server, ov, cp, ga
 before(async () => {
@@ -137,21 +138,21 @@ test('the client report exposes reporting methodology + honest source language',
 // ══════════════════════════════════════════════════════════════════════════════
 
 test('home page has loading, error and empty states', () => {
-  assert.match(HOME, /loading.*portal|preparing/i)
-  assert.match(HOME, /could not be loaded|unavailable/i)
+  assert.match(HOME, /ClientPortalLoadingState/)
+  assert.match(HOME, /ClientPortalErrorState/)
   assert.match(HOME, /no published report/i)
   assert.match(HOME, /Your next strategy update will appear here/i)
 })
 
 test('performance dashboard has loading, error and empty states', () => {
-  assert.match(PERFORMANCE, /loading.*report/i)
-  assert.match(PERFORMANCE, /could not load/i)
+  assert.match(PERFORMANCE, /ClientPortalLoadingState/)
+  assert.match(PERFORMANCE, /ClientPortalErrorState/)
   assert.match(PERFORMANCE, /No published report yet/i)
   assert.match(PERFORMANCE, /account is pending setup/i)
 })
 
 test('Google Ads panel inherits report loading and covers every configured-source state honestly', () => {
-  assert.match(PERFORMANCE, /Loading report/)
+  assert.match(PERFORMANCE, /ClientPortalLoadingState variant="report"/)
   assert.match(REPORT_VIEW, /Google Ads is not connected/)
   assert.match(REPORT_VIEW, /No paid campaigns are linked/)
   assert.match(REPORT_VIEW, /not synced for this month/)
@@ -160,8 +161,8 @@ test('Google Ads panel inherits report loading and covers every configured-sourc
 })
 
 test('calendar page has loading, error and an intentional empty-month state', () => {
-  assert.match(CALENDAR, /loading.*calendar|content calendar/i)
-  assert.match(CALENDAR, /could not be loaded/i)
+  assert.match(CALENDAR, /ClientPortalLoadingState variant="calendar"/)
+  assert.match(CALENDAR, /ClientPortalErrorState/)
   assert.match(CALENDAR, /The month is ready for your plan/i)
 })
 
@@ -401,8 +402,8 @@ test('calendar page uses SECURITY-DEFINER RPC keyed to profile.client_id, never 
 })
 
 test('calendar page has loading, error and an intentional empty-month state', () => {
-  assert.match(CALENDAR, /loading.*calendar/i)
-  assert.match(CALENDAR, /could not be loaded/i)
+  assert.match(CALENDAR, /ClientPortalLoadingState variant="calendar"/)
+  assert.match(CALENDAR, /ClientPortalErrorState/)
   assert.match(CALENDAR, /The month is ready for your plan/i)
 })
 
@@ -473,9 +474,17 @@ test('client content guidelines page fetches the client-safe document RPC', () =
 })
 
 test('client content guidelines page has loading, empty and error states', () => {
-  assert.match(GUIDES_PAGE, /Loading published Content Guidelines/)
+  assert.match(GUIDES_PAGE, /ClientPortalLoadingState/)
+  assert.match(GUIDES_PAGE, /ClientPortalErrorState/)
   assert.match(GUIDES_PAGE, /No published Content Guidelines/)
   assert.match(GUIDES_PAGE, /error/)
+})
+
+test('shared portal states prevent loader flash and respect reduced-motion preferences', () => {
+  assert.match(PORTAL_STATES, /delayMs = 180/)
+  assert.match(PORTAL_STATES, /motion-reduce:animate-none/)
+  assert.match(PORTAL_STATES, /aria-busy="true"/)
+  assert.match(PORTAL_STATES, /role="alert"/)
 })
 test('client content guides page is read-only', () => {
   assert.doesNotMatch(GUIDES_PAGE, /create|delete|update|insert|edit|form.*submit/i)
