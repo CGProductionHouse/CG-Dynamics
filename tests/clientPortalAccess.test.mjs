@@ -47,11 +47,14 @@ test('provisioning uses Auth Admin and links the created profile to one exact cl
   assert.doesNotMatch(EDGE, /insert\s+into\s+auth\.users/i)
 })
 
-test('phase-one starter credential is generated only in the server access service', () => {
+test('phase-one starter credential is never returned or rendered after provisioning', () => {
   assert.match(EDGE, /username.*_cg\$/s)
   assert.doesNotMatch(MIGRATION, /starter_password|password_hash|plaintext_password/i)
-  assert.doesNotMatch(API, /_cg\$/)
-  assert.doesNotMatch(ADMIN, /_cg\$/)
+  assert.doesNotMatch(EDGE, /starter_password\s*:/)
+  assert.doesNotMatch(API, /starter_password/)
+  assert.doesNotMatch(ADMIN, /starter_password/)
+  assert.doesNotMatch(ADMIN, /Password:\s*<strong/)
+  assert.match(ADMIN, /generated only when an admin deliberately copies login details/)
 })
 
 test('existing staff email login remains while username login uses the server resolver', () => {
@@ -76,7 +79,7 @@ test('client access management stays inside the admin Users workspace', () => {
 
 test('admin access API never persists generated credentials client-side', () => {
   assert.match(API, /supabase\.functions\.invoke<AccessResponse>\('client-portal-access'/)
-  assert.match(ADMIN, /ClientPortalCredentials/)
+  assert.match(ADMIN, /ClientPortalAccessReceipt/)
   assert.doesNotMatch(API, /localStorage|sessionStorage/)
   assert.doesNotMatch(ADMIN, /localStorage|sessionStorage/)
 })
