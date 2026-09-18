@@ -20,6 +20,7 @@ create table if not exists public.client_portal_libraries (
   last_verified_at timestamptz,
   check (not enabled or last_verified_at is not null),
   unique (id, client_id),
+  unique (id, client_id, drive_id),
   unique (drive_id, root_folder_item_id)
 );
 
@@ -42,8 +43,8 @@ create table if not exists public.client_portal_library_categories (
   mapped_by uuid not null references public.profiles(id) on delete restrict,
   mapped_at timestamptz not null default now(),
   last_verified_at timestamptz,
-  foreign key (library_id, client_id)
-    references public.client_portal_libraries(id, client_id) on delete cascade,
+  foreign key (library_id, client_id, drive_id)
+    references public.client_portal_libraries(id, client_id, drive_id) on delete cascade,
   unique (library_id, category),
   unique (id, library_id, client_id, drive_id, folder_item_id),
   unique (drive_id, folder_item_id)

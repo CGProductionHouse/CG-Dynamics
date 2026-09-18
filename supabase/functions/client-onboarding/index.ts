@@ -657,6 +657,7 @@ Deno.serve(async request => {
       .eq('id', assetId)
       .eq('client_id', authorized.profile.client_id)
       .eq('active', true)
+      .lte('published_at', new Date().toISOString())
       .maybeSingle()
     if (assetError || !asset?.published_at) return json({ ok: false, error: 'File not found.' }, 404)
 

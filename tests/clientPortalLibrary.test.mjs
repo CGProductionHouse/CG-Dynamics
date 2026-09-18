@@ -20,7 +20,7 @@ test('portal library schema is additive, service-role only, and exact-client lin
   }
   assert.match(migration, /root_folder_name ~ '\^A_ClientPortal_/)
   assert.match(migration, /check \(not enabled or last_verified_at is not null\)/)
-  assert.match(migration, /foreign key \(library_id, client_id\)/)
+  assert.match(migration, /foreign key \(library_id, client_id, drive_id\)/)
   assert.match(migration, /foreign key \(category_id, library_id, client_id, drive_id, parent_folder_item_id\)/)
   assert.match(migration, /deliverable\.client_id = new\.client_id/)
   assert.doesNotMatch(migration, /drop table|truncate|delete from/i)
@@ -72,6 +72,8 @@ test('file open and download are server mediated and re-check the exact boundary
   assert.doesNotMatch(api, /driveId|itemId|webUrl|onedrive/i)
   assert.match(edge, /action === 'portal_library_file'/)
   assert.match(edge, /\.eq\('client_id', authorized\.profile\.client_id\)/)
+  const fileRoute = edge.slice(edge.indexOf("action === 'portal_library_file'"), edge.indexOf("action === 'portal_load'"))
+  assert.match(fileRoute, /\.lte\('published_at', new Date\(\)\.toISOString\(\)\)/)
   assert.match(edge, /category\.folder_item_id === asset\.parent_folder_item_id/)
   assert.match(edge, /downloadFile\(asset\.drive_id, asset\.item_id\)/)
   assert.match(edge, /isSafeInlineMimeType\(mimeType\)/)
