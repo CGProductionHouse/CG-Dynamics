@@ -8,6 +8,11 @@ insert into public.clients (id, name, active) values
   ('40500000-0000-4000-8000-000000000001', 'Enquiry Client A', true),
   ('40500000-0000-4000-8000-000000000002', 'Enquiry Client B', true);
 
+insert into auth.users (id) values
+  ('40510000-0000-4000-8000-000000000001'),
+  ('40510000-0000-4000-8000-000000000002'),
+  ('40510000-0000-4000-8000-000000000003');
+
 insert into public.profiles (id, full_name, role, client_id, is_active) values
   ('40510000-0000-4000-8000-000000000001', 'Enquiry Manager', 'manager', null, true),
   ('40510000-0000-4000-8000-000000000002', 'Client A User', 'client', '40500000-0000-4000-8000-000000000001', true),

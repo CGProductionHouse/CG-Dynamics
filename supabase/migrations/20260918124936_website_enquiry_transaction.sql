@@ -501,10 +501,10 @@ begin
     if v_type = 'select' and not ((v_definition -> 'options') ? v_text) then
       raise exception 'Select field value is unsupported.' using errcode = '22023';
     end if;
-    v_normalized_answers := v_normalized_answers || jsonb_build_object(
-      v_key,
-      case when v_type = 'email' then lower(v_text) else v_text end
-    );
+    if v_type = 'email' then
+      v_text := lower(v_text);
+    end if;
+    v_normalized_answers := v_normalized_answers || jsonb_build_object(v_key, v_text);
   end loop;
 
   if exists (
@@ -525,8 +525,12 @@ begin
       raise exception 'Attribution values must be text.' using errcode = '22023';
     end if;
     v_text := btrim(v_value #>> '{}');
-    if char_length(v_text) > case when v_key = 'referrer' then 2048 else 500 end
-       or v_text ~ '[\r\n]' then
+    if v_key = 'referrer' then
+      v_max_length := 2048;
+    else
+      v_max_length := 500;
+    end if;
+    if char_length(v_text) > v_max_length or v_text ~ '[\r\n]' then
       raise exception 'Attribution value is invalid.' using errcode = '22023';
     end if;
     v_normalized_attribution := v_normalized_attribution || jsonb_build_object(v_key, v_text);
