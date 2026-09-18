@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { ClientPortalShell } from '../../components/client/ClientPortalShell'
+import { ClientPortalErrorState, ClientPortalLoadingState } from '../../components/client/ClientPortalStates'
 import { useAuth } from '../../contexts/AuthContext'
 import {
   fetchClientMonthAhead,
@@ -112,12 +113,9 @@ export default function ClientContentCalendarPage({ embedded = false, month: con
       </section>
 
       {loading ? (
-        <CalendarMessage message="Loading your content calendar..." />
+        <ClientPortalLoadingState variant="calendar" />
       ) : calendar?.loadFailed ? (
-        <CalendarMessage
-          tone="error"
-          message="Content calendar could not be loaded right now."
-        />
+        <ClientPortalErrorState title="Content calendar could not be loaded" />
       ) : calendar ? (
         <CalendarSurface
           key={month}
@@ -375,13 +373,9 @@ function SummaryCard({ label, value }: { label: string; value: string }) {
   )
 }
 
-function CalendarMessage({ message, tone = 'normal' }: { message: string; tone?: 'normal' | 'error' }) {
+function CalendarMessage({ message }: { message: string }) {
   return (
-    <div className={`mt-8 rounded-3xl border px-6 py-8 text-sm shadow-[0_24px_70px_-48px_rgba(0,0,0,0.95)] ${
-      tone === 'error'
-        ? 'border-[#d8a07a]/20 bg-[#d8a07a]/[0.06] text-[#d8a07a]'
-        : 'border-white/[0.08] bg-white/[0.03] text-report-muted'
-    }`}>
+    <div className="mt-8 rounded-3xl border border-white/[0.08] bg-white/[0.03] px-6 py-8 text-sm text-report-muted shadow-[0_24px_70px_-48px_rgba(0,0,0,0.95)]">
       {message}
     </div>
   )

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { ClientPortalShell } from '../../components/client/ClientPortalShell'
+import { ClientPortalErrorState, ClientPortalLoadingState } from '../../components/client/ClientPortalStates'
 import { useAuth } from '../../contexts/AuthContext'
 import { fetchPublishedGuides, type PublishedContentGuideline } from '../../lib/clientContentGuides'
 import { getClient, type Client } from '../../lib/db/clients'
@@ -71,9 +72,9 @@ export default function ClientContentGuidesPage({ preview = false, embedded = fa
       </section>
 
       {loading ? (
-        <Message>Loading published Content Guidelines...</Message>
+        <ClientPortalLoadingState />
       ) : error ? (
-        <Message error>{error}</Message>
+        <ClientPortalErrorState title="Content Guidelines could not be loaded" message="Your published guidance is temporarily unavailable. Please try again shortly." />
       ) : guidelines.length === 0 ? (
         <Message>No published Content Guidelines are available for {monthDisplayLabel(currentMonth)}.</Message>
       ) : (
@@ -129,7 +130,7 @@ export default function ClientContentGuidesPage({ preview = false, embedded = fa
   )
   if (preview) return canPreview
     ? <div className="min-w-0 p-4 sm:p-6"><p className="mb-4 text-sm text-report-muted">Client preview · Published content only</p>{content}</div>
-    : <Message error>Only managers and admins can preview client guides.</Message>
+    : <ClientPortalErrorState title="Preview unavailable" message="Only managers and admins can preview client guides." />
   return embedded ? content : <ClientPortalShell client={client}>{content}</ClientPortalShell>
 }
 
