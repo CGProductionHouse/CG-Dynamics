@@ -18,6 +18,49 @@ Continue CG Dynamics ops from current GitHub truth.
 
 That is enough only if the agent follows the bootstrap below.
 
+## Continuous continuity maintenance — mandatory
+
+This handover is a **living operational file**, not a one-time checkpoint.
+
+Every future ChatGPT coordinator/new chat that materially changes CG Dynamics state must keep this file current as part of the same operating cycle.
+
+Material changes include:
+
+- a manual or autonomous owner starts/stops;
+- a queued lane becomes active;
+- a PR is created, materially advances, merges or is abandoned;
+- production deployment state changes;
+- a protected gate is crossed or newly introduced;
+- a product/data authority changes;
+- model/provider routing changes materially;
+- a major rollout completes;
+- a new integration lane becomes part of normal operations;
+- the current lane snapshot becomes materially misleading.
+
+Required write-back sequence after a material change:
+
+1. update the owning issue/PR;
+2. update Issue #381 if cross-lane state changed;
+3. update the Google Control Centre / Dispatch Queue;
+4. update this handover when its operating rules or current lane snapshot changed;
+5. only then consider the handoff complete.
+
+Do **not** wait for CA to remind the coordinator to update continuity.
+
+Before a long chat ends, context becomes crowded, a new chat is likely, or CA says to continue in another chat:
+
+1. refetch #381 + the Control Centre + current GitHub;
+2. reconcile active/queued/completed ownership;
+3. update this handover with any material drift;
+4. leave a durable GitHub handoff;
+5. ensure the next chat can continue from the one-line prompt without reconstructing history from conversation memory.
+
+The hourly Supervisor must also check for **handover drift**. If the handover's operating rules or current-lane snapshot are materially stale, it should update them as routine docs-only ops when safe, or leave an explicit #381 handover-update requirement. It should not rewrite the file every hour when nothing material changed.
+
+Keep this file concise and operational. Do not turn it into a chat transcript or append every minor event. Preserve stable rules; refresh the current-state sections.
+
+Never put passwords, secrets, tokens, private credentials or generated credential lists in this handover.
+
 ## 1. Fresh-chat bootstrap, mandatory before acting
 
 Do these in order:
@@ -351,15 +394,7 @@ This section is an orientation snapshot only. Refetch GitHub + tracker before ac
 
 ### Active
 
-**#402 Client profile rollout**
-
-- Owner: CA manual coding/ops agent.
-- Foundation #399 / PR #401 is production-live.
-- Hotfix PR #406 is production-live.
-- Red Oak and AV Event Life are provisioned and verified.
-- 35 rollout clients remained at the last durable checkpoint.
-- Automated QA must not click `Copy login details`.
-- Braize existing user must be preserved.
+No client-profile rollout worker is active. #402 is complete and that manual capacity is released.
 
 ### Queued / ready to dispatch
 
@@ -388,6 +423,21 @@ Rules:
 - Dynamics becomes canonical identity/name authority after mapping;
 - initial controlled backfill: JFJ Electrical, Neshora Oxygen, VCS Cleaning Solutions;
 - production migration/data backfill remains CA-gated.
+
+### Recently completed production rollout
+
+**#402 Client profile rollout**
+
+- issue closed complete;
+- 37 active portal mappings;
+- final continuation created 35 accounts;
+- 0 skipped;
+- 0 failed;
+- 0 remaining;
+- 12 pre-existing users/accounts preserved, including Red Oak, AV Event Life, Braize and staff/admin accounts;
+- exact-client isolation remained intact;
+- no credentials were exposed or collected;
+- no further code/migration/deploy was required for the final batch.
 
 ### Complete but not automatically equivalent to merged/live
 
@@ -551,6 +601,7 @@ When state changes:
 - update owning issue/PR;
 - update #381 when cross-lane state changed;
 - update Dispatch Queue;
+- update this handover whenever its durable rules or current-state snapshot changed;
 - include PR/SHA/run/deployment evidence;
 - release/retain capacity honestly.
 
@@ -574,3 +625,5 @@ repo -> AGENTS.md -> this handover -> #381 -> Control Centre
 ```
 
 That is the CG Dynamics operating system.
+
+A future chat is not finished with a material CG Dynamics handoff until the durable control plane **and this handover** are current.
