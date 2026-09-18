@@ -724,6 +724,12 @@ export function GuidedStrategyView({
         </ViewCard>
       )}
 
+      {data.strategyDrivers.length > 0 && (
+        <ViewCard title="Strategic drivers" variant={variant}>
+          <ChipRow items={data.strategyDrivers} variant={variant} />
+        </ViewCard>
+      )}
+
       {!hideTopContent && (data.topContent.whyItWorked.length > 0 || data.topContent.whatThisTellsUs.trim() || data.topContent.coverImageUrl) && (
         <ViewCard title="Top content insight" variant={variant}>
           {data.topContent.coverImageUrl && (

@@ -403,15 +403,6 @@ This section is an orientation snapshot only. Refetch GitHub + tracker before ac
 - Do not configure production provider secrets/tokens, change DNS/domains, enable Website Operations, run migrations/backfills, start #405 lead/email work or duplicate #335/#336 GA4/Ads work.
 - Return durable checkpoints on both existing PRs with exact heads, tests/builds and remaining protected activation dependencies.
 
-**#395 / PR #398 Client Plan + canonical monthly strategy**
-
-- Owner: CA manual coding agent 2.
-- Continue existing PR #398 only; current checkpoint head before reconcile is `457882e2f6d16ba6ea0e88a907ae0ced9743acfc`.
-- Reconcile against current main without regressing actual-current-month URL ownership, canonical #391 monthly strategy reads, exact-client/month isolation or explicit staff review/approve/publish lifecycle.
-- No second strategy/calendar/report authority.
-- No migration, production strategy seed/publish action or provider/config change.
-- Re-run focused #395/isolation tests, scoped lint, production build, diff check and preview; return final merge-ready head.
-
 ### Protected activation gates
 
 **#396 Client Portal Library**
@@ -489,10 +480,13 @@ No currently queued lane should be dispatched into #396, #404/#7 or #413 while t
 
 **#395 / PR #398**
 
-- implementation complete;
-- current-month/sticky month;
-- canonical monthly strategy activation;
-- staff seed/review/approve/publish workspace;
+- implementation complete and reconciled onto `main` at `c3a85dd4dc86645ee34e3a80fc08e345bb486d4a`;
+- current-month default, URL-owned sticky month and legacy deep-link context remain intact;
+- canonical #391 monthly strategy activation remains the only strategy authority;
+- exact client/month isolation and published-only client projection remain enforced;
+- staff seed/review/amend/approve/explicit-publish workspace remains separate from the client view;
+- the final head and verification evidence are recorded on Issue #395 / PR #398;
+- no migration, production seed/publish action or provider/config change was performed;
 - refetch PR state before deciding merge.
 
 ### Parked future

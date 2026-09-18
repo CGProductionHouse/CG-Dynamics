@@ -79,7 +79,7 @@ export default function ClientStrategyPage({ embedded = false, month }: { embedd
         <div className="relative mt-8 overflow-hidden rounded-3xl border border-white/[0.08] bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.1),transparent_40%),rgba(255,255,255,0.035)] px-6 py-8 shadow-[0_24px_70px_-48px_rgba(0,0,0,0.95)]">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-report-accent">Strategy under review</p>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-report-muted">
-            Your {monthDisplayLabel(strategyMonth)} direction is being prepared and will appear here once it has been reviewed and published.
+            Your {monthDisplayLabel(strategyMonth)} strategy update will appear here once it has been reviewed and published.
           </p>
         </div>
       ) : (

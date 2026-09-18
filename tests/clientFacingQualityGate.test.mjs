@@ -27,6 +27,7 @@ const GUIDE_SQL = read('../supabase/migrations/20260725172531_content_guideline_
 const FULL_GUIDE_PAGE = read('../src/pages/admin/FullContentGuidePage.tsx')
 const GUIDE_EDITOR = read('../src/pages/admin/ContentGuidelineDocumentEditor.tsx')
 const STRATEGY_PAGE = read('../src/pages/client/ClientStrategyPage.tsx')
+const GUIDED_STRATEGY = read('../src/components/strategy/GuidedStrategy.tsx')
 const PORTAL_LIB = read('../src/lib/clientPortal.ts')
 const PORTAL_STATES = read('../src/components/client/ClientPortalStates.tsx')
 
@@ -514,13 +515,15 @@ test('client strategy page has loading, empty and error states', () => {
 })
 
 test('client strategy page shows action plan when data available', () => {
-  assert.match(STRATEGY_PAGE, /Action plan/)
-  assert.match(STRATEGY_PAGE, /ACTION_PLAN_LABELS/)
+  assert.match(STRATEGY_PAGE, /GuidedStrategyView/)
+  assert.match(GUIDED_STRATEGY, /Action plan/)
+  assert.match(GUIDED_STRATEGY, /ACTION_PLAN_LABELS/)
 })
 
 test('client strategy page shows strategic drivers', () => {
-  assert.match(STRATEGY_PAGE, /Strategic drivers/)
-  assert.match(STRATEGY_PAGE, /strategyDrivers/)
+  assert.match(STRATEGY_PAGE, /GuidedStrategyView/)
+  assert.match(GUIDED_STRATEGY, /Strategic drivers/)
+  assert.match(GUIDED_STRATEGY, /data\.strategyDrivers/)
 })
 
 test('client strategy page is read-only (no mutations)', () => {
