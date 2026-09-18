@@ -30,15 +30,28 @@ test('legacy Strategy, Calendar and Content Guidelines links preserve query cont
   assert.match(CALENDAR_SOURCE, /\/client\/plan\?tab=guidelines&month=/)
 })
 
-test('Plan reuses existing client-safe published reads and does not depend on the unapplied strategy migration', () => {
-  assert.match(PLAN_SOURCE, /listClientPublishedReports\(\)/)
-  assert.match(STRATEGY_SOURCE, /listClientPublishedReports\(\)/)
-  assert.match(STRATEGY_SOURCE, /actionMonthForReport\(candidate\) === month/)
+test('Plan uses the canonical exact-month published strategy projection', () => {
+  assert.doesNotMatch(PLAN_SOURCE, /listClientPublishedReports\(\)/)
+  assert.match(STRATEGY_SOURCE, /getClientPublishedMonthlyStrategy\(strategyMonth\)/)
+  assert.match(STRATEGY_SOURCE, /GuidedStrategyView data=\{strategy\}/)
+  assert.match(STRATEGY_SOURCE, /Strategy under review/)
+  assert.doesNotMatch(STRATEGY_SOURCE, /listClientPublishedReports|actionMonthForReport|buildClientStrategyPreview/)
   assert.match(CALENDAR_SOURCE, /fetchClientMonthAhead\(profile\.client_id, month\)/)
   assert.match(GUIDELINES_SOURCE, /fetchPublishedGuides\(clientId, currentMonth\)/)
-  for (const source of [PLAN_SOURCE, STRATEGY_SOURCE, CALENDAR_SOURCE, GUIDELINES_SOURCE]) {
-    assert.doesNotMatch(source, /client_monthly_strategy|monthly_client_strategies/)
-  }
+  assert.doesNotMatch(STRATEGY_SOURCE, /monthly_client_strategies/)
+})
+
+test('Plan canonicalizes a missing or invalid month immediately without report-driven fallback', () => {
+  assert.match(PLAN_SOURCE, /const month = requestedMonth && MONTH_PATTERN\.test\(requestedMonth\) \? requestedMonth : currentMonth\(\)/)
+  assert.match(PLAN_SOURCE, /canonical\.set\('month', month\)/)
+  assert.match(PLAN_SOURCE, /\{ replace: true \}/)
+  assert.doesNotMatch(PLAN_SOURCE, /fallbackMonth|actionMonthForReport|listClientPublishedReports|selectMonthlyReports/)
+})
+
+test('Plan preserves the exact month when switching tabs and changing months', () => {
+  assert.match(PLAN_SOURCE, /updated\.set\('tab', next\.tab \?\? tab\)/)
+  assert.match(PLAN_SOURCE, /updated\.set\('month', next\.month \?\? month\)/)
+  assert.match(PLAN_SOURCE, /onClick=\{\(\) => updatePlan\(\{ tab: item\.key \}\)\}/)
 })
 
 test('Plan month controls and tabs expose accessible button state', () => {

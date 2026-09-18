@@ -1,9 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Navigate, useLocation, useSearchParams } from 'react-router-dom'
-import { useAuth } from '../../contexts/AuthContext'
-import { actionMonthForReport } from '../../lib/clientPortal'
-import { listClientPublishedReports } from '../../lib/db/reports'
-import { monthDisplayLabel, selectMonthlyReports } from '../../lib/reportPeriod'
+import { monthDisplayLabel } from '../../lib/reportPeriod'
 import ClientContentCalendarPage from './ClientContentCalendarPage'
 import ClientContentGuidesPage from './ClientContentGuidesPage'
 import ClientStrategyPage from './ClientStrategyPage'
@@ -28,35 +25,28 @@ function shiftMonth(month: string, amount: number) {
 }
 
 export default function ClientPlanPage() {
-  const { profile } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
-  const [fallbackMonth, setFallbackMonth] = useState(currentMonth)
 
   const requestedMonth = searchParams.get('month')
-  const month = requestedMonth && MONTH_PATTERN.test(requestedMonth) ? requestedMonth : fallbackMonth
+  const month = requestedMonth && MONTH_PATTERN.test(requestedMonth) ? requestedMonth : currentMonth()
   const requestedTab = searchParams.get('tab')
   const tab: PlanTab = PLAN_TABS.some(item => item.key === requestedTab) ? requestedTab as PlanTab : 'strategy'
 
   useEffect(() => {
-    let active = true
-    async function loadContext() {
-      if (!profile?.client_id) return
-      const reportsResult = await listClientPublishedReports()
-      if (!active) return
-      if (!requestedMonth && !reportsResult.error) {
-        const latest = selectMonthlyReports(reportsResult.data)[0] ?? null
-        setFallbackMonth(actionMonthForReport(latest) ?? currentMonth())
-      }
-    }
-    void loadContext()
-    return () => { active = false }
-  }, [profile?.client_id, requestedMonth])
+    if (requestedMonth === month) return
+    setSearchParams(current => {
+      const canonical = new URLSearchParams(current)
+      canonical.set('month', month)
+      return canonical
+    }, { replace: true })
+  }, [month, requestedMonth, setSearchParams])
 
   function updatePlan(next: { tab?: PlanTab; month?: string }) {
     setSearchParams(current => {
-      current.set('tab', next.tab ?? tab)
-      current.set('month', next.month ?? month)
-      return current
+      const updated = new URLSearchParams(current)
+      updated.set('tab', next.tab ?? tab)
+      updated.set('month', next.month ?? month)
+      return updated
     })
   }
 
