@@ -84,18 +84,22 @@ music/claim risk — and says plainly that rejecting a trend is a valid outcome.
 When no web-grounded provider is configured the step is skipped and the sources block says
 `Live external research: NOT PERFORMED — no web-grounded AI provider is configured.`
 
-## OneDrive: one month folder per run
+## OneDrive: canonical run + per-video production naming
 
-`supabase/functions/content-run-onedrive-folder` links a run to its exact production folder.
+`supabase/functions/content-run-onedrive-folder` links a Content Run to its exact production month folder.
 
-- Canonical path: `Clients / <Client> / Videos / <YYYY> / <YYYY_MM_MON>` (e.g. `2026_09_SEP`).
+- Run/month path: `Clients / <Client> / Videos / <YYYY> / <YYYY_MM_MON>` (e.g. `2026_09_SEP`).
   The month comes from the guideline's coverage month, falling back to the shoot date.
-- **No per-video folders.**
+- CA's canonical production naming below that month folder is
+  `<YYYY_MM_CLIENT_VIDEO_XX>`, giving the full structure
+  `Clients/<Client>/Videos/<YYYY>/<YYYY_MM_MON>/<YYYY_MM_CLIENT_VIDEO_XX>`.
+- The configured client short code and zero-padded sequence are canonical data. Never derive or guess them from display names.
+- `src/lib/onedriveCanonical.ts` is the helper authority for year/month/video folder naming.
+- The run-level month-folder mapping does not cancel or replace the canonical per-video naming standard.
 - Identity is the durable Graph `driveId` + `itemId`. Names are matched only while an admin is
   linking, and the admin sees and confirms the result.
 - The client folder is chosen by an admin from the real children of `Clients` — never guessed.
-- A missing canonical year/month folder is created **only** on an explicit confirmed action, and
-  create-only (Graph `conflictBehavior: fail`). Nothing renames, moves or deletes.
+- Missing canonical folders are created only through an explicit confirmed action. Nothing renames, moves or deletes automatically.
 - Reads are staff-visible; every mapping write is admin-only, matching the existing
   `upsert_client_onedrive_mapping` / `upsert_content_run_onedrive_folder` RPCs.
 - The run card checks on demand, so opening a run never calls OneDrive.
@@ -109,13 +113,13 @@ When no web-grounded provider is configured the step is skipped and the sources 
 - Rename, move or delete anything in OneDrive.
 - Present another client's material, or invent client facts.
 
-## Open question for CA (not changed here)
+## Naming authority confirmed by CA
 
-The Video Pipeline and guideline cards still show a per-video **canonical name**
-(`YYYY_MM_CLIENT_VIDEO_XX`) with a "copy folder name" button, from the earlier per-video folder
-convention. This flow creates no per-video folders, so that label now implies a structure the
-product no longer builds. It is left untouched because `canonical_name` is also used by the Video
-Pipeline's footage-link checks — removing or relabelling it is a separate, deliberate change.
+CA reconfirmed on 18 Sep 2026 that the per-video canonical production naming is intentional and must be preserved:
+
+`Clients/<Client>/Videos/<YYYY>/<YYYY_MM_MON>/<YYYY_MM_CLIENT_VIDEO_XX>`
+
+Any Staff Assistant, OneDrive action or future folder-creation flow must use the configured client short code and canonical helper. If required naming context is missing, stop and surface the gap rather than inventing a folder.
 
 ## Gates
 
