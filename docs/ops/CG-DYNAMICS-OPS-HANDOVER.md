@@ -394,18 +394,22 @@ This section is an orientation snapshot only. Refetch GitHub + tracker before ac
 
 ### Active
 
-No client-profile rollout worker is active. #402 is complete and that manual capacity is released.
-
-### Queued / ready to dispatch
-
 **#396 Client Portal Library**
 
-- OneDrive client-safe library/backend.
+- Owner: CA manual coding agent 1.
+- Scope: bounded read-only Client Portal Library / Brand Hub foundation.
 - Reuse the exact `A_ClientPortal_<ClientSlug>` boundary.
-- No invented naming conventions.
-- First real OneDrive sharing permission remains a protected gate.
+- Use durable OneDrive item IDs; never fuzzy filename identity.
+- Do not expose raw drive IDs/internal paths/sibling folders.
+- No real OneDrive sharing/permission mutation, production file move/copy or new naming convention in this checkpoint.
+- First real client share remains a protected gate.
 
 **#404 + CG-Hours #7 Client Registry Bridge**
+
+- Owner: CA manual coding agent 2 across both repos.
+- Scope: implementation + tests + one owning PR per repo only.
+- No overlap with Dynamics #361/#376 or CG-Hours PR #3 Staff Logger.
+- Production migration and initial JFJ Electrical / Neshora Oxygen / VCS Cleaning Solutions backfill remain protected apply gates.
 
 Goal:
 
@@ -423,6 +427,10 @@ Rules:
 - Dynamics becomes canonical identity/name authority after mapping;
 - initial controlled backfill: JFJ Electrical, Neshora Oxygen, VCS Cleaning Solutions;
 - production migration/data backfill remains CA-gated.
+
+### Queued / ready to dispatch
+
+No currently queued lane should be dispatched into #396 or #404/#7 while the manual owners above remain active. Re-read the Control Centre for any other safe unowned work.
 
 ### Recently completed production rollout
 
