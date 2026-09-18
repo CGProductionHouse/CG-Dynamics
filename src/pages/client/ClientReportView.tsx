@@ -255,12 +255,7 @@ export function ClientReportView({
           onSurfaceChange={selectGoogleSurface}
         />
       ) : activeTab === 'web' ? (
-        <ProviderAvailabilityPanel
-          eyebrow="Digital experience"
-          title="Website Performance"
-          status="Not connected"
-          description="Website reporting is available for CG-built websites connected to Dynamics. No verified website source is connected for this published month."
-        />
+        <PublishedWebsitePerformance report={report.website_report ?? null} />
       ) : activeTab === 'email' ? (
         <ProviderAvailabilityPanel
           eyebrow="Owned audience"
@@ -309,6 +304,70 @@ export function ClientReportView({
       <MethodologyDisclaimer />
     </div>
   )
+}
+
+function PublishedWebsitePerformance({ report }: { report: RenderableReport['website_report'] }) {
+  if (!report) {
+    return <ProviderAvailabilityPanel
+      eyebrow="Digital experience"
+      title="Website Performance"
+      status="Not connected"
+      description="No approved website snapshot was published with this monthly report. No figures are inferred or shown as zero."
+    />
+  }
+
+  const stale = report.dataQuality.sourceReadAt
+    ? new Date(report.dataQuality.sourceReadAt).getTime() < new Date(`${report.period.to}T00:00:00Z`).getTime()
+    : true
+  const state = stale ? 'stale' : report.dataQuality.state
+  const stateLabel = state === 'available' ? 'Available' : state === 'partial' ? 'Partial period' : 'Stale snapshot'
+
+  return (
+    <section aria-label="Published website performance">
+      <SectionHeading eyebrow="Digital experience" title="Website Performance" />
+      <div className="mb-6 rounded-2xl border border-white/10 bg-white/[0.045] p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm font-bold text-white">{report.identity.canonicalHost}</p>
+          <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-semibold text-slate-300">{stateLabel}</span>
+        </div>
+        <p className="mt-2 text-xs text-slate-400">
+          Coverage: {formatDate(report.period.from)} to {formatDate(report.period.to)} · {report.period.timezone}
+        </p>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <WebsiteMetric title="Visitors" value={report.traffic.visitors} />
+        <WebsiteMetric title="Page views" value={report.traffic.pageviews} />
+        <WebsiteMetric title="Actions" value={report.conversions.total} />
+        <WebsiteMetric
+          title="Enquiries"
+          value={report.conversions.byType.find(item => item.type === 'enquiry_submit')?.count ?? (report.conversions.total === null ? null : 0)}
+        />
+      </div>
+      <div className="mt-8 grid gap-6 lg:grid-cols-2">
+        <WebsiteBreakdown title="Top pages" rows={report.traffic.topPages.map(item => [item.label, item.pageviews])} />
+        <WebsiteBreakdown title="Traffic sources" rows={report.traffic.sources.map(item => [item.label, item.visitors])} />
+      </div>
+      {report.dataQuality.gaps.length > 0 && (
+        <p className="mt-7 text-sm leading-relaxed text-slate-400">Measurement notes: {report.dataQuality.gaps.join(' ')}</p>
+      )}
+    </section>
+  )
+}
+
+function WebsiteMetric({ title, value }: { title: string; value: number | null }) {
+  return <div className="rounded-2xl border border-white/10 bg-white/[0.045] p-5">
+    <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">{title}</p>
+    <p className="mt-3 text-3xl font-black text-white">{value === null ? 'Unavailable' : formatNumber(value)}</p>
+  </div>
+}
+
+function WebsiteBreakdown({ title, rows }: { title: string; rows: [string, number][] }) {
+  return <div>
+    <h3 className="text-sm font-bold text-white">{title}</h3>
+    {rows.length ? <ul className="mt-3 space-y-2 text-sm text-slate-300">
+      {rows.slice(0, 8).map(([name, value]) => <li key={name} className="flex justify-between gap-4"><span className="truncate">{name}</span><span className="font-semibold text-white">{formatNumber(value)}</span></li>)}
+    </ul> : <p className="mt-3 text-sm text-slate-500">No tracked data for this period.</p>}
+  </div>
 }
 
 function ReportHero({
