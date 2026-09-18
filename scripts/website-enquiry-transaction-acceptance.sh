@@ -30,12 +30,14 @@ begin
     create role authenticated nologin;
   end if;
   if not exists (select 1 from pg_roles where rolname = 'service_role') then
-    create role service_role nologin;
+    create role service_role nologin bypassrls;
   end if;
   if not exists (select 1 from pg_roles where rolname = 'supabase_admin') then
     create role supabase_admin login superuser password 'postgres';
   end if;
 end $$;
+
+alter role service_role bypassrls;
 
 create table auth.users (id uuid primary key);
 
