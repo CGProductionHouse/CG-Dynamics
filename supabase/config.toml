@@ -1,0 +1,4 @@
+[functions.ensure-client-from-cg-hours]
+# Server-to-server authentication is enforced inside the function with the
+# dedicated CG_HOURS_BRIDGE_SECRET. The caller never receives a Dynamics JWT.
+verify_jwt = false
