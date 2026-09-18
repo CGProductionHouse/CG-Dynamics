@@ -344,7 +344,7 @@ test('record mutations are idempotency-keyed', () => {
     assert.ok(t.inputSchema.required.includes('idempotency_key'), `${name} requires idempotency_key`)
     assert.equal(t.annotations.idempotentHint, true)
   }
-  assert.match(INDEX, /'link_content_run_deliverables', 'upsert_calendar_event'/, 'enforced in WRITE_TOOLS')
+  assert.match(INDEX, /const WRITE_TOOLS[\s\S]*?'link_content_run_deliverables'[\s\S]*?'upsert_calendar_event'/, 'enforced in WRITE_TOOLS')
 })
 
 test('the caller token is forwarded for delegation but never returned', () => {

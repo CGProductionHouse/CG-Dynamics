@@ -469,8 +469,73 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
     annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
     dependency: '#313', canonicalContract: 'update_closeout_upload_status RPC + content_run_closeouts table',
   },
+  // ──────────────────────────────────────────────────────────────────────────────
+  // CG Hours — authenticated staff actions for time, kilometre/travel, and corrections
+  // ──────────────────────────────────────────────────────────────────────────────
+  {
+    name: 'log_ordinary_hours', title: 'Log ordinary hours',
+    description: 'Save an ordinary-hours entry as a draft for the exact authenticated staff member through the restricted CG Hours staff logger. Use a canonical CG Hours client_id (and optional task_template_id) returned by read_my_recent_entries.logging_options. Requires an idempotency_key for duplicate-retry safety. Only says saved after CG Hours returns a durable time_entries id; staff must review and submit the week manually in CG Hours.',
+    inputSchema: objectSchema({
+      date: { type: 'string', pattern: '^\\d{4}-\\d{2}-\\d{2}$', description: 'YYYY-MM-DD' },
+      hours: { type: 'number', minimum: 0.25, maximum: 24 },
+      task_description: { type: 'string', minLength: 1, maxLength: 240 },
+      notes: { type: 'string', maxLength: 240 },
+      client_id: uuid,
+      task_template_id: uuid,
+      idempotency_key: idempotencyKeySchema,
+    }, ['date', 'hours', 'task_description', 'client_id', 'idempotency_key']),
+    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
+    dependency: '#361', canonicalContract: 'CG-Hours PR #3 POST /api/staff-logger/invoke → add_my_time_entry with a short-lived staff capability; draft-only canonical time_entries persistence',
+  },
+  {
+    name: 'log_kilometre_entry', title: 'Log kilometre/travel entry',
+    description: 'Attach explicitly confirmed travel kilometres to one existing draft CG Hours time entry owned by the exact authenticated staff member. Log the hours first and use its entry_id. This never creates fuel, vehicle-expense, reimbursement, submit, approval or payroll records. Only says saved after CG Hours returns the durable time_entries id.',
+    inputSchema: objectSchema({
+      entry_id: uuid,
+      distance_km: { type: 'number', minimum: 0.1, maximum: 2000 },
+      origin: { type: 'string', maxLength: 120 },
+      destination: { type: 'string', maxLength: 120 },
+      notes: { type: 'string', maxLength: 500 },
+      idempotency_key: idempotencyKeySchema,
+    }, ['entry_id', 'distance_km', 'idempotency_key']),
+    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
+    dependency: '#361', canonicalContract: 'CG-Hours PR #3 POST /api/staff-logger/invoke → add_my_travel_km on canonical time_entries km columns; no reimbursement path',
+  },
+  {
+    name: 'read_my_recent_entries', title: 'Read my recent entries',
+    description: 'Read one day of ordinary-hours and optional travel entries for the exact authenticated staff member, plus canonical active CG Hours client/task logging options. The backend contract is day-scoped, so from_date and to_date must be the same date.',
+    inputSchema: objectSchema({
+      from_date: { type: 'string', pattern: '^\\d{4}-\\d{2}-\\d{2}$', description: 'YYYY-MM-DD' },
+      to_date: { type: 'string', pattern: '^\\d{4}-\\d{2}-\\d{2}$', description: 'YYYY-MM-DD' },
+      include_vehicle: { type: 'boolean', description: 'Also include travel kilometres attached to the day\'s canonical time entries.' },
+    }, ['from_date', 'to_date']),
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+    dependency: '#361', canonicalContract: 'CG-Hours PR #3 POST /api/staff-logger/invoke → get_my_hours_today / get_my_travel_today / list_my_logging_options',
+  },
+  {
+    name: 'correct_my_entry', title: 'Correct my entry',
+    description: 'Correct hours/notes or travel kilometres on one draft entry owned by the exact authenticated staff member. CG Hours enforces ownership, draft-week lifecycle, kilometre approval state, audit and idempotency. This cannot submit, approve or reopen a week.',
+    inputSchema: objectSchema({
+      entry_id: uuid,
+      entry_type: { enum: ['time', 'mileage'] },
+      correction: {
+        type: 'object',
+        properties: {
+          hours: { type: 'number', minimum: 0.25, maximum: 24 },
+          notes: { type: 'string', maxLength: 500 },
+          distance_km: { type: 'number', minimum: 0.1, maximum: 2000 },
+          origin: { type: 'string', maxLength: 120 },
+          destination: { type: 'string', maxLength: 120 },
+        },
+        additionalProperties: false,
+      },
+      idempotency_key: idempotencyKeySchema,
+    }, ['entry_id', 'entry_type', 'correction', 'idempotency_key']),
+    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
+    dependency: '#361', canonicalContract: 'CG-Hours PR #3 POST /api/staff-logger/invoke → edit_my_time_entry / edit_my_travel_km with canonical ownership and draft-only enforcement',
+  },
 ] as const
 
 export const CG_DYNAMICS_MCP_SERVER_INSTRUCTIONS =
-  'This connector is shared by the whole CG Production House ChatGPT account. The OAuth connection is the company admin account and is NOT the staff identity. In a fresh Project chat call resolve_project_context once, then pass that exact context object on every later tool call: a staff Project acts as that exact staff member, a client Project is pinned to that exact client, and broader company-admin work must be requested explicitly. Never reuse another Project\'s context, never infer identity from chat history or the connected account, and never fuzzy-match a staff or client name. Read before write when a target is ambiguous. Use only canonical Dynamics actions and RLS. In a client Project the only writes are record_client_request, create_client_followup_task and record_client_update: they are pinned to that exact client, an assignee is the target of the work and never the caller, and say created, assigned or recorded only after the tool returns the record id. Never expose SQL, raw tables, service keys, cross-client fallbacks, or destructive actions.'
+  'This connector is shared by the whole CG Production House ChatGPT account. The OAuth connection is the company admin account and is NOT the staff identity. In a fresh Project chat call resolve_project_context once, then pass that exact context object on every later tool call: a staff Project acts as that exact staff member, a client Project is pinned to that exact client, and broader company-admin work must be requested explicitly. Never reuse another Project\'s context, never infer identity from chat history or the connected account, and never fuzzy-match a staff or client name. Read before write when a target is ambiguous. Use only canonical Dynamics actions and RLS. In a client Project the only writes are record_client_request, create_client_followup_task and record_client_update: they are pinned to that exact client, an assignee is the target of the work and never the caller, and say created, assigned or recorded only after the tool returns the record id. CG Hours actions require an exact staff Project and are draft-only: never submit, approve, reopen, run payroll or claim success without the durable CG Hours time-entry id. Never expose SQL, raw tables, service keys, cross-client fallbacks, or destructive actions.'
 

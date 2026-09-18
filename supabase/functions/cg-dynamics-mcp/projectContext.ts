@@ -133,9 +133,19 @@ export const STAFF_SUBJECT_TOOLS: readonly string[] = [
   'create_task', 'update_task', 'update_lead', 'add_lead_research', 'get_my_profile',
   'update_my_preferences', 'get_my_assistant_bootstrap', 'get_my_recurring_tasks',
   'create_recurring_task', 'compose_mail_draft', 'log_lead_email_activity',
+  // CG Hours staff-subject actions (#361)
+  'log_ordinary_hours', 'log_kilometre_entry', 'read_my_recent_entries', 'correct_my_entry',
   // Internal operational/content actions. They may run for an exact staff subject or an
   // explicit company-admin context, but never inside a client Project.
   'find_content_runs', 'link_content_run_deliverables', 'upsert_calendar_event',
+]
+
+/**
+ * The CG Hours capability subject must come from an exact staff Project. Unlike broader internal
+ * staff tools, the shared admin connection cannot stand in for a person in company_admin context.
+ */
+export const EXACT_STAFF_PROJECT_TOOLS: readonly string[] = [
+  'log_ordinary_hours', 'log_kilometre_entry', 'read_my_recent_entries', 'correct_my_entry',
 ]
 
 /**
@@ -184,6 +194,12 @@ export type ToolPolicyResult = { allowed: true } | { allowed: false; error: stri
 
 /** Is this tool permitted under the resolved context kind? */
 export function assertToolAllowedInContext(toolName: string, contextKind: ProjectContextKind): ToolPolicyResult {
+  if (EXACT_STAFF_PROJECT_TOOLS.includes(toolName) && contextKind !== 'staff') {
+    return {
+      allowed: false,
+      error: `${toolName} requires the exact authenticated staff Project context (context_kind="staff"). The shared company-admin connection cannot act as a CG Hours staff identity.`,
+    }
+  }
   if (COMPANY_ADMIN_TOOLS.includes(toolName) && contextKind !== 'company_admin') {
     return {
       allowed: false,

@@ -147,6 +147,7 @@ test('generic create_task still fails in a client Project, and the staff-subject
     'create_task', 'update_task', 'update_lead', 'add_lead_research', 'get_my_profile',
     'update_my_preferences', 'get_my_assistant_bootstrap', 'get_my_recurring_tasks',
     'create_recurring_task', 'compose_mail_draft', 'log_lead_email_activity',
+    'log_ordinary_hours', 'log_kilometre_entry', 'read_my_recent_entries', 'correct_my_entry',
     'find_content_runs', 'link_content_run_deliverables', 'upsert_calendar_event',
   ])
 })
@@ -175,7 +176,7 @@ test('assigning Sydney never gives the client Project Sydney\'s staff permission
   assert.match(SQL, /p_actor_profile_id uuid/)
   assert.match(SQL, /Only a manager can assign Planner tasks/)
   assert.match(SQL, /set_planner_task_assignees_internal\(\s*v_task\.id, array\[v_assignee\.id\], v_actor\.id/)
-  const workspace = INDEX.slice(INDEX.indexOf('function clientWorkspaceScope('), INDEX.indexOf('const toolHandlers'))
+  const workspace = INDEX.slice(INDEX.indexOf('function clientWorkspaceScope('), INDEX.indexOf('const CG_HOURS_NOT_CONFIGURED'))
   assert.doesNotMatch(workspace, /effectiveStaffProfileId/, 'client-workspace writes never read a staff subject')
 })
 
@@ -261,7 +262,7 @@ test('a retry returns the original record instead of creating another', () => {
 
   // The router lets an identical repeat reach the canonical per-client key instead of answering
   // with a bare status; a reused key with different input is still refused.
-  assert.match(INDEX, /CLIENT_WORKSPACE_ACTIONS\.includes\(toolName\) && !conflict/)
+  assert.match(INDEX, /CANONICAL_RECEIPT_REPLAY_TOOLS\.has\(toolName\) && !conflict/)
   assert.match(INDEX, /replayThroughCanonicalKey = true/)
   assert.match(INDEX, /isWrite && canonicalIdempotencyKey && !replayThroughCanonicalKey/)
   // The database serialises each (client, key) and returns the existing row before inserting.

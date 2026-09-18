@@ -52,6 +52,7 @@ test('read tools cover exact staff, task, calendar, schedule, lead, client conte
     'list_client_schedule', 'get_client_context', 'list_assignable_staff', 'list_my_leads', 'get_lead',
     'get_my_profile', 'get_my_assistant_bootstrap', 'get_my_recurring_tasks',
     'get_content_run_plan', 'get_content_run_closeout', 'verify_content_run_upload',
+    'read_my_recent_entries',
   ])
 })
 
@@ -96,17 +97,17 @@ test('server instruction states the shared-connection contract and forbids unsaf
   assert.doesNotMatch(instructions, /Project name.*identity/i)
 })
 
-test('catalog contains exactly 38 tools: 21 read + 17 write', () => {
+test('catalog contains exactly 42 tools: 22 read + 20 write', () => {
   const tools = catalog.CG_DYNAMICS_MCP_TOOLS
-  assert.equal(tools.length, 38)
+  assert.equal(tools.length, 42)
   const reads = tools.filter(t => t.annotations.readOnlyHint)
   const writes = tools.filter(t => !t.annotations.readOnlyHint)
-  assert.equal(reads.length, 21)
-  assert.equal(writes.length, 17)
+  assert.equal(reads.length, 22)
+  assert.equal(writes.length, 20)
 })
 
 test('every tool maps to a declared dependency and no tool references an unknown upstream', () => {
-  const validDeps = new Set(['main', '#241/#294', '#305', '#307', '#313', '#341'])
+  const validDeps = new Set(['main', '#241/#294', '#305', '#307', '#313', '#341', '#361'])
   for (const tool of catalog.CG_DYNAMICS_MCP_TOOLS) {
     assert.ok(validDeps.has(tool.dependency), `${tool.name} has unknown dependency: ${tool.dependency}`)
   }
