@@ -396,28 +396,27 @@ This section is an orientation snapshot only. Refetch GitHub + tracker before ac
 
 **#396 Client Portal Library**
 
-- Owner: CA manual coding agent 1.
-- Owning PR: #410 on `codex/issue-396-client-portal-library`; foundation checkpoint `5c63c94d387e5b16d0ca953ae1e3adfdab1b06bd`.
-- Accepted media follow-up implemented: bounded HTTP Range/206 streaming, opaque short-lived Dynamics access grants, lazy Category -> Year -> Month -> Files metadata, on-demand month pages/thumbnails and Dynamics-native video playback.
-- Exact-client/library/drive/category and published-date checks remain mandatory on every access; OneDrive/Graph origins and durable provider IDs remain hidden from the client.
-- Focused isolation/streaming tests, scoped lint, production build and interactive mobile/desktop QA are green; final head is recorded on PR #410.
-- Reuse the exact `A_ClientPortal_<ClientSlug>` boundary.
-- Use durable OneDrive item IDs; never fuzzy filename identity.
-- Do not expose raw drive IDs/internal paths/sibling folders.
-- No real OneDrive sharing/permission mutation, production file move/copy or new naming convention in this checkpoint.
-- First real client share remains a protected gate.
+- No active coding owner. Manual agent 1 capacity is released.
+- PR #410 merged at `2ec39b4719f7a1fbd77a8ef780f16f4ba6c6bfa8`; production deployment `dpl_6ouWTaweBLu5YVAxSN1ydn4qwoGv` READY.
+- Production code includes metadata-first Category -> Year -> Month -> Files browsing, lazy/on-demand month data, viewport-lazy thumbnails, opaque short-lived Dynamics access grants, bounded HTTP Range/206 streaming and Dynamics-native MP4 playback.
+- Exact-client/library/drive/category/date checks remain mandatory on every access; OneDrive/Graph origins and durable provider IDs remain hidden from clients.
+- #396 remains open only for protected production activation/mapping.
+- Reuse the exact `A_ClientPortal_<ClientSlug>` boundary and durable OneDrive item IDs; never fuzzy filename identity.
+- Still NOT executed: production migration, exact production library mapping, library enablement, real OneDrive share/permission, file move/copy/rename, folder discovery or first-client activation.
+- Do not dispatch further implementation here unless activation exposes a reproducible defect.
 
 **#404 + CG-Hours #7 Client Registry Bridge**
 
-- Owner: CA manual coding agent 2 across both repos.
-- Owning PRs: Dynamics #411 and CG-Hours #8; use their live GitHub heads as authority.
-- The CG-Hours Vercel failure was the Hobby-plan rejection of a five-minute cron. PR #8 now uses a daily Hobby-compatible schedule and keeps the entire bridge OFF/inert unless the explicit activation flag is exactly `true`.
-- Continue the same PRs; do not create replacement PRs.
-- Disabled production must not query a missing outbox table, show registry UI, or emit recurring cron configuration failures.
-- Existing CG Hours client creation must remain unchanged until the activation gate.
-- No overlap with Dynamics #361/#376 or CG-Hours PR #3 Staff Logger.
-- Production migrations, secret/config activation, function deployment and initial JFJ Electrical / Neshora Oxygen / VCS Cleaning Solutions backfill remain protected apply gates.
+- No active coding owner. Manual agent 2 capacity is released.
+- Dynamics PR #411 merged at `a2c0cacf4b06775eff9c47dfea919ab9106386a2`; production deployment `dpl_8h5ZbCV2tUoYhMEUQ9teP4M1Adqw` READY.
+- CG-Hours PR #8 merged at `58553f5170d68a8fbfae0ac3ae6e725ca91923a9`.
+- CG-Hours hotfix PR #9 merged at `84a1dbcf30aa6f45aff1345008ed6028dde16cdc`; production deployment `dpl_HYVzaxLXr7xHvfy7LtmpGkxZEd7S` READY.
+- Immediate runtime-error scans are clean in both projects.
+- Bridge code is on production main but remains intentionally OFF/inert. Disabled production does not query the missing outbox table, show registry UI, or run bridge work.
+- #404 and CG-Hours #7 remain open only as protected activation/runbook authorities.
 - Exact ordered activation and kill-switch procedure: `docs/ops/CG-HOURS-CLIENT-REGISTRY-BRIDGE-ACTIVATION.md`.
+- Still NOT executed: Dynamics migration, bridge function deployment/secret, CG-Hours migration, Hours server config/enable flag, production sync or JFJ Electrical / Neshora Oxygen / VCS Cleaning Solutions backfill.
+- Do not dispatch further implementation here unless activation exposes a reproducible defect.
 
 Goal:
 
