@@ -52,12 +52,14 @@ test('one PostgreSQL function atomically creates enquiry, approved jobs and one 
 
 test('tenant-scoped idempotency returns the same receipt and conflicts on changed content', () => {
   assert.match(migration, /on conflict \(endpoint_id, submission_key\) do nothing/i)
+  assert.match(migration, /pg_advisory_xact_lock/i)
   assert.match(migration, /v_existing\.canonical_payload <> v_canonical_payload/i)
   assert.match(migration, /Submission key was already used with different content/i)
   assert.match(migration, /'receipt_id', v_existing\.receipt_id/i)
   assert.match(acceptance, /all concurrent callers received the same receipt/i)
   assert.match(acceptance, /concurrent requests create one enquiry/i)
   assert.match(acceptance, /concurrent requests create one event/i)
+  assert.match(acceptance, /serialized replay does not leave orphan contacts without email identity/i)
 })
 
 test('browser roles have no base-table or transaction authority', () => {
@@ -72,6 +74,7 @@ test('browser roles have no base-table or transaction authority', () => {
     'website_enquiry_events',
   ]) {
     assert.match(migration, new RegExp(`alter table public\\.${table} enable row level security`, 'i'))
+    assert.match(migration, new RegExp(`alter table public\\.${table} force row level security`, 'i'))
     assert.match(migration, new RegExp(`revoke all on table public\\.${table} from public, anon, authenticated`, 'i'))
   }
   assert.match(migration, /security invoker/i)

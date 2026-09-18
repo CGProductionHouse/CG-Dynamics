@@ -68,6 +68,16 @@ insert into public.website_form_schemas (
       {"key":"message","type":"textarea","required":true,"max_length":2000}
     ]'::jsonb,
     'name', 'email', null, '40510000-0000-4000-8000-000000000001', now()
+  ),
+  (
+    '40530000-0000-4000-8000-000000000004', '40520000-0000-4000-8000-000000000001',
+    'phone_form', 1, 'active',
+    '[
+      {"key":"name","type":"text","required":true,"max_length":120},
+      {"key":"phone","type":"tel","required":true,"max_length":80},
+      {"key":"message","type":"textarea","required":true,"max_length":2000}
+    ]'::jsonb,
+    'name', null, 'phone', '40510000-0000-4000-8000-000000000001', now()
   );
 
 insert into public.website_enquiry_recipient_configurations (
@@ -247,9 +257,9 @@ select extensions.dblink_send_query(
   connection_name,
   $query$
     select public.submit_website_enquiry(
-      '40521000-0000-4000-8000-000000000001', 'contact_form', 1,
+      '40521000-0000-4000-8000-000000000001', 'phone_form', 1,
       'concurrent-submit-0001',
-      '{"name":"Concurrent Person","email":"concurrent@example.test","service":"design","message":"One concurrent request."}',
+      '{"name":"Concurrent Person","phone":"012 555 0199","message":"One concurrent request."}',
       '{"landing_path":"/contact"}'
     )
   $query$
@@ -280,6 +290,9 @@ begin
           join public.website_enquiries enquiry on enquiry.id = job.enquiry_id
           where enquiry.submission_key = 'concurrent-submit-0001') = 2,
     'concurrent requests create one approved-recipient job set';
+  assert (select count(*) from public.website_enquiry_contacts
+          where display_name = 'Concurrent Person' and normalized_email is null) = 1,
+    'serialized replay does not leave orphan contacts without email identity';
 end $$;
 
 select extensions.dblink_disconnect(connection_name)

@@ -438,7 +438,8 @@ begin
 
   select endpoint.* into v_endpoint
   from public.website_enquiry_endpoints endpoint
-  where endpoint.intake_key = p_intake_key;
+  where endpoint.intake_key = p_intake_key
+  for share;
   if not found then
     raise exception 'Website intake is unavailable.' using errcode = '22023';
   end if;
@@ -447,7 +448,8 @@ begin
   from public.website_form_schemas schema_row
   where schema_row.endpoint_id = v_endpoint.id
     and schema_row.schema_key = p_schema_key
-    and schema_row.version = p_schema_version;
+    and schema_row.version = p_schema_version
+  for share;
   if not found then
     raise exception 'Form schema is unsupported.' using errcode = '22023';
   end if;
@@ -543,6 +545,13 @@ begin
     'attribution', v_normalized_attribution
   );
   v_fingerprint := md5(v_canonical_payload::text);
+
+  -- Serialize this exact endpoint/key before any contact or outbox side effect.
+  -- Hash collisions can only add harmless serialization; exact payload equality
+  -- below remains the replay/conflict authority.
+  perform pg_catalog.pg_advisory_xact_lock(
+    pg_catalog.hashtextextended(v_endpoint.id::text || ':' || p_submission_key, 0)
+  );
 
   select enquiry.* into v_existing
   from public.website_enquiries enquiry
@@ -683,6 +692,15 @@ alter table public.website_enquiry_contacts enable row level security;
 alter table public.website_enquiries enable row level security;
 alter table public.website_enquiry_delivery_jobs enable row level security;
 alter table public.website_enquiry_events enable row level security;
+
+alter table public.website_enquiry_endpoints force row level security;
+alter table public.website_form_schemas force row level security;
+alter table public.website_enquiry_recipient_configurations force row level security;
+alter table public.website_enquiry_recipient_routes force row level security;
+alter table public.website_enquiry_contacts force row level security;
+alter table public.website_enquiries force row level security;
+alter table public.website_enquiry_delivery_jobs force row level security;
+alter table public.website_enquiry_events force row level security;
 
 revoke all on table public.website_enquiry_endpoints from public, anon, authenticated;
 revoke all on table public.website_form_schemas from public, anon, authenticated;
