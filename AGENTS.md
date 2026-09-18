@@ -6,18 +6,19 @@ Shared operating instructions for Codex, Claude Code, OpenCode and any other cod
 
 Before planning or editing code, read:
 
-1. `docs/ai-workforce/MASTER-AI-TOOLS-AND-WORKFLOW.md` — cross-project AI tools, agent allocation, new-chat grounding, OpenCode state and reusable website workflow.
-2. `docs/ai-workforce/AUTONOMOUS-CODING-ORCHESTRATION.md` — canonical wake/supervise workflow, GitHub-as-control-plane rules, agent lanes, model fallback and CA-removal-from-dispatch strategy.
-3. `docs/ai-workforce/CA-CODING-PROMPT-CONTRACT.md` — mandatory short-prompt contract for any coding-agent prompt CA manually copies/runs.
-4. `CONTINUE-HERE.md`
-5. `docs/vision/PROJECT-CONTINUITY-HANDOFF-2026-08-13.md`
-6. `docs/cg-dynamics-page-vision-and-milestones.md`
-7. `docs/current-product-game-plan.md`
-8. `docs/vision/CURRENT-MILESTONE.md`
-9. `docs/ai-workforce/AI-TOOLING-MODEL-ROUTING.md` when changing detailed provider/model configuration
-10. the latest relevant open PRs/issues on GitHub
+1. `docs/ops/CG-DYNAMICS-OPS-HANDOVER.md` — canonical fresh-chat operational handover: Supervisor #381, Google Control Centre, ownership/capacity rules, model routing, protected gates and current ops snapshot.
+2. `docs/ai-workforce/MASTER-AI-TOOLS-AND-WORKFLOW.md` — cross-project AI tools, agent allocation, new-chat grounding, OpenCode state and reusable website workflow.
+3. `docs/ai-workforce/AUTONOMOUS-CODING-ORCHESTRATION.md` — canonical wake/supervise workflow, GitHub-as-control-plane rules, agent lanes, model fallback and CA-removal-from-dispatch strategy.
+4. `docs/ai-workforce/CA-CODING-PROMPT-CONTRACT.md` — mandatory short-prompt contract for any coding-agent prompt CA manually copies/runs.
+5. `CONTINUE-HERE.md`
+6. `docs/vision/PROJECT-CONTINUITY-HANDOFF-2026-08-13.md`
+7. `docs/cg-dynamics-page-vision-and-milestones.md`
+8. `docs/current-product-game-plan.md`
+9. `docs/vision/CURRENT-MILESTONE.md`
+10. `docs/ai-workforce/AI-TOOLING-MODEL-ROUTING.md` when changing detailed provider/model configuration
+11. the latest relevant open PRs/issues on GitHub
 
-The master AI/tools file is cross-project authority for shared capability/process. The autonomous orchestration file is the current authority for how coding workers are woken, supervised, handed off and prevented from duplicating one another. The CA coding-prompt contract is mandatory whenever ChatGPT or another coordinator prepares a prompt CA will manually send to a coding agent. Project-specific continuity files remain authority for CG Dynamics product decisions. The 2026-08-13 handoff is current. Older handoffs are historical only. Page contracts override generic product ideas.
+The ops handover is the first-stop authority for recovering current CG Dynamics coordination state in a fresh chat. The master AI/tools file is cross-project authority for shared capability/process. The autonomous orchestration file is the current authority for how coding workers are woken, supervised, handed off and prevented from duplicating one another. The CA coding-prompt contract is mandatory whenever ChatGPT or another coordinator prepares a prompt CA will manually send to a coding agent. Project-specific continuity files remain authority for CG Dynamics product decisions. The 2026-08-13 handoff is current. Older handoffs are historical only. Page contracts override generic product ideas.
 
 ## Product direction
 
