@@ -10,9 +10,8 @@ export interface ClientPortalAccessRow {
   existing_client_users: number
 }
 
-export interface ClientPortalCredentials {
+export interface ClientPortalAccessReceipt {
   username: string
-  starter_password: string
 }
 
 interface AccessResponse {
@@ -20,7 +19,6 @@ interface AccessResponse {
   error?: string
   clients?: ClientPortalAccessRow[]
   username?: string
-  starter_password?: string
   session?: {
     access_token: string
     refresh_token: string
@@ -65,8 +63,8 @@ export async function listClientPortalAccess() {
 export async function provisionClientPortalAccess(clientId: string, username: string) {
   const result = await invoke({ action: 'provision', client_id: clientId, username })
   return {
-    data: result.data?.username && result.data?.starter_password
-      ? { username: result.data.username, starter_password: result.data.starter_password } satisfies ClientPortalCredentials
+    data: result.data?.username
+      ? { username: result.data.username } satisfies ClientPortalAccessReceipt
       : null,
     error: result.error,
   }
@@ -75,8 +73,8 @@ export async function provisionClientPortalAccess(clientId: string, username: st
 export async function resetClientPortalAccess(clientId: string) {
   const result = await invoke({ action: 'reset', client_id: clientId })
   return {
-    data: result.data?.username && result.data?.starter_password
-      ? { username: result.data.username, starter_password: result.data.starter_password } satisfies ClientPortalCredentials
+    data: result.data?.username
+      ? { username: result.data.username } satisfies ClientPortalAccessReceipt
       : null,
     error: result.error,
   }
