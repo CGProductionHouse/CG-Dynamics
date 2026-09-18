@@ -274,6 +274,14 @@ Still stop for protected gates unless CA separately and explicitly approved that
 
 Important distinction: a migration file in Git is not permission to apply it.
 
+## Vercel infrastructure truth
+
+As of 18 September 2026, Vercel team `cg-dynamics-projects` is on **Pro**.
+
+The prior Hobby commercial-plan concern and the >100 daily deployment preview quota blocker are no longer current blockers.
+
+Do not auto-upgrade or change spend/config further without a separate need. Provider credentials, DNS, migrations and other protected gates remain independent from the Vercel plan.
+
 ## 9. Current product authorities that must not drift
 
 ### Client Schedule
@@ -415,15 +423,19 @@ This section is an orientation snapshot only. Refetch GitHub + tracker before ac
 - A migration/schema implementation may be authored and tested but must not be applied to production.
 - Do not touch Website Editor adapter files owned by Agent 01, live transactional provider/email send, provider secrets/config, production recipient setup, #374 or #335/#336.
 
-### Release-verification wait
+### Recently completed production release
 
 **#395 / PR #398 Client Plan + canonical monthly strategy**
 
 - No active coding owner.
-- Reconciled head `688409d6f09fb66c3a16f7039f311d96a3258ec4` is mergeable and locally green: 115/115 focused tests, production build, scoped ESLint 0 errors and diff check.
-- Remaining gate is only a fresh Vercel preview after the daily deployment quota resets. Current UNSTABLE is quota rejection, not an engineering/test failure.
-- After quota reset: rerun preview for the exact head; if green, routine coordinator merge + production verification.
-- No migration, production strategy seed/publish or provider/config action.
+- Vercel Pro removed the previous daily deployment quota blocker.
+- Final reconciled preview head `7e14bd267c7dee5933135f52b9c4220098944e86` passed on deployment `dpl_LaWzKorAm9JGdHme5NA5TRnpbxHT`.
+- PR #398 merged at `7d9c88b2b37ec7a9fb7c3c5024642ed74aecfaf1`.
+- Production deployment `dpl_43ZZewHxKiP1hbqLHJtYecguCQKM` is READY on CG Dynamics production aliases.
+- Immediate runtime error scan was clean.
+- Current-month Plan state + canonical #391 monthly strategy review/approve/publish workflow is production live.
+- #395 is closed complete.
+- No migration, production strategy seed/publish or provider/config action occurred during release.
 
 ### Protected activation gates
 
