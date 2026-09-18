@@ -115,3 +115,36 @@
 - **Existing control**: RLS restricts what the browser can read. Supabase
   dashboard access requires project owner permissions.
 - **Remaining risk**: Low. RLS is the boundary.
+
+## Forged website enquiry ownership or routing
+
+- **Entry point**: Public website form payload
+- **Affected asset**: Client enquiry, approved recipients, canonical reporting
+- **Existing control**: The browser supplies only an opaque endpoint key. Exact
+  client, Website Editor site, environment, canonical host, approved recipient
+  configuration, internal state, and synthetic classification are resolved in the
+  service-role-only transaction. All base tables deny browser access.
+- **Remaining risk**: Low after the trusted intake service validates the public
+  request controls defined by Website Editor PR #28.
+- **Tests**: `405_website_enquiry_transaction_acceptance.sql`
+
+## Duplicate or conflicting website submissions
+
+- **Entry point**: Retry, concurrent request, or reused idempotency key
+- **Affected asset**: Enquiry counts, delivery jobs, canonical lead event
+- **Existing control**: A unique endpoint-scoped submission key serializes creation.
+  Identical canonical payloads return the same receipt; a changed payload conflicts.
+  Enquiry, outbox jobs, and event commit in one PostgreSQL transaction, so an injected
+  failure cannot leave acknowledged partial state.
+- **Remaining risk**: Low. Delivery execution and retry policy belong to M2B.
+- **Tests**: `405_website_enquiry_transaction_acceptance.sql`
+
+## Cross-client contact merging
+
+- **Entry point**: The same email address submits forms for multiple clients
+- **Affected asset**: Contact identity and tenant isolation
+- **Existing control**: Contact uniqueness is `(client_id, normalized_email)` and
+  every enquiry repeats and validates the exact client/endpoint relationship. No
+  global email deduplication exists.
+- **Remaining risk**: Low. Any future CRM merge must retain the same client boundary.
+- **Tests**: `405_website_enquiry_transaction_acceptance.sql`

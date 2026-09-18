@@ -75,3 +75,25 @@ Every exposed table has RLS enabled. Policies follow least-privilege:
 - VAPID private keys exist only as Supabase Edge Function secrets. Push endpoints and encryption key material are never returned to another user or included in logs.
 - Delivery joins the notification recipient to that recipient's active device subscription. Manager status does not grant access to another user's personal reminders.
 - Push failures do not remove in-app notifications. HTTP 404/410 endpoints are deactivated safely.
+
+## Website enquiry intake transaction
+
+- A reviewed `website_enquiry_endpoints` row binds one opaque intake key to the exact
+  CG Websites identity, environment, canonical host, and Dynamics client. The browser
+  cannot submit a trusted client, site, environment, recipient, workflow state, or
+  synthetic/reporting classification.
+- Activated form schemas are immutable, versioned, and validate stable field keys.
+  Display labels may change between versions without changing the stored answer keys.
+- `submit_website_enquiry` is a service-role-only, SECURITY INVOKER transaction. It
+  resolves all trusted identity and the current approved recipient configuration on
+  the server, then creates the client-scoped contact, distinct enquiry, pending outbox
+  jobs, and one canonical `generate_lead` event before returning a receipt.
+- Idempotency is scoped to the resolved endpoint. An identical replay returns the
+  existing receipt; reuse of the same submission key with different canonical answers
+  or attribution raises a conflict. Email identity is never deduplicated across clients.
+- Approved recipient configurations and routes are immutable. M2A records delivery
+  intent only; it does not send email, select a provider, or expose recipient addresses
+  to the public browser.
+- Preview and staging classification is derived from the reviewed endpoint environment,
+  so non-production submissions are marked synthetic in the reporting event without
+  trusting browser input.
