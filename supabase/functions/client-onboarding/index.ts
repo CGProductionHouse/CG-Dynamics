@@ -3,6 +3,8 @@ import {
   createUploadSession,
   downloadFile,
   isUploadAdapterConfigured,
+  listChildren,
+  resolveClientsFolder,
   streamDriveItem,
   streamDriveThumbnail,
   verifyDriveItem,
@@ -17,6 +19,7 @@ import {
   verifyPortalAccess,
   type PortalAccessPurpose,
 } from './portal-library-stream.ts'
+import { visiblePortalMonths } from '../_shared/portal-visibility.ts'
 
 const PLATFORMS = new Set(['facebook', 'instagram', 'meta_business', 'linkedin', 'tiktok', 'website', 'google', 'outlook'])
 const CHOICES = new Set(['connect_now', 'do_later', 'not_needed'])
@@ -135,7 +138,6 @@ const PORTAL_CATEGORY_LABELS = {
   brand_identity: 'Brand Identity',
   graphic_design: 'Graphic Design',
   video: 'Video',
-  photography: 'Photography',
 } as const
 
 type PortalCategory = keyof typeof PORTAL_CATEGORY_LABELS
@@ -193,6 +195,7 @@ async function safePortalLibrary(service: SupabaseClient, clientId: string) {
       && PORTAL_CATEGORY_LABELS[category] === row.folder_name
   })
   const summaryByCategory = new Map<string, Array<{ year: number | null; month: number | null; fileCount: number }>>()
+  const visible = visiblePortalMonths()
   for (const row of summaryResult.data ?? []) {
     const category = categoryRows.find(candidate => candidate.id === row.category_id)
     if (!category) continue
@@ -202,6 +205,10 @@ async function safePortalLibrary(service: SupabaseClient, clientId: string) {
       ? year == null && month == null
       : Number.isInteger(year) && year! >= 2000 && year! <= 2100 && Number.isInteger(month) && month! >= 1 && month! <= 12
     if (!validPeriod) continue
+    if (category.category !== 'brand_identity' && year != null && month != null) {
+      const isVisible = visible.some(v => v.year === year && v.month === month)
+      if (!isVisible) continue
+    }
     const entries = summaryByCategory.get(category.id) ?? []
     entries.push({ year, month, fileCount: Number(row.file_count) })
     summaryByCategory.set(category.id, entries)
@@ -814,6 +821,11 @@ Deno.serve(async request => {
     if (!flat && (!Number.isInteger(year) || year < 2000 || year > 2100 || !Number.isInteger(month) || month < 1 || month > 12)) {
       return json({ ok: false, error: 'Select a valid year and month.' }, 400)
     }
+    if (!flat) {
+      const visible = visiblePortalMonths()
+      const isVisible = visible.some(v => v.year === year && v.month === month)
+      if (!isVisible) return json({ ok: false, error: 'This month is not currently visible.' }, 404)
+    }
 
     const { data: library } = await service
       .from('client_portal_libraries')
@@ -1061,6 +1073,89 @@ Deno.serve(async request => {
     const responseState = await safeState(service, current, true)
     if (!responseState) return json({ ok: false, error: 'Onboarding status is unavailable.' }, 503)
     return json({ ok: true, data: responseState })
+  }
+
+  if (action === 'staff_resolve_portal_root') {
+    if (authorized.profile.role !== 'admin') return json({ ok: false, error: 'Admin access required.' }, 403)
+    const clientId = cleanString(body.clientId, 50)
+    if (!clientId) return json({ ok: false, error: 'Select a client.' }, 400)
+
+    const { data: client, error: clientError } = await service
+      .from('clients')
+      .select('id, name')
+      .eq('id', clientId)
+      .eq('active', true)
+      .maybeSingle()
+    if (clientError || !client) return json({ ok: false, error: 'Active client not found.' }, 404)
+
+    const clientsFolder = await resolveClientsFolder()
+    if (!clientsFolder) return json({ ok: false, error: 'OneDrive is not connected.' }, 503)
+
+    const children = await listChildren(clientsFolder.driveId, clientsFolder.itemId)
+    if (!children) return json({ ok: false, error: 'Could not list OneDrive folders.' }, 503)
+
+    const slug = client.name.replace(/[^A-Za-z0-9]/g, '')
+    const expectedRootName = `A_ClientPortal_${slug}`
+    const portalRoot = children.find(c => c.isFolder && c.name === expectedRootName)
+    if (!portalRoot) return json({ ok: false, error: `Portal folder not found: ${expectedRootName}` }, 404)
+
+    const categoryChildren = await listChildren(clientsFolder.driveId, portalRoot.id)
+    if (!categoryChildren) return json({ ok: false, error: 'Could not list portal categories.' }, 503)
+
+    const { data: library, error: libraryError } = await service
+      .from('client_portal_libraries')
+      .upsert({
+        client_id: clientId,
+        drive_id: clientsFolder.driveId,
+        root_folder_item_id: portalRoot.id,
+        root_folder_name: portalRoot.name,
+        enabled: true,
+        mapped_by: authorized.user.id,
+        last_verified_at: new Date().toISOString(),
+      }, { onConflict: 'client_id' })
+      .select('id')
+      .maybeSingle()
+    if (libraryError || !library) return json({ ok: false, error: 'Could not save portal mapping.' }, 503)
+
+    const categories = [
+      { key: 'brand_identity', expectedName: 'Brand Identity' },
+      { key: 'graphic_design', expectedName: 'Graphic Design' },
+      { key: 'video', expectedName: 'Video' },
+    ] as const
+
+    const categoryResults: Array<{ category: string; found: boolean; folderItemId?: string }> = []
+    for (const cat of categories) {
+      const folder = categoryChildren.find(c => c.isFolder && c.name === cat.expectedName)
+      if (!folder) {
+        categoryResults.push({ category: cat.key, found: false })
+        continue
+      }
+      const { error: catError } = await service
+        .from('client_portal_library_categories')
+        .upsert({
+          library_id: library.id,
+          client_id: clientId,
+          category: cat.key,
+          drive_id: clientsFolder.driveId,
+          folder_item_id: folder.id,
+          folder_name: folder.name,
+          mapped_by: authorized.user.id,
+          last_verified_at: new Date().toISOString(),
+        }, { onConflict: 'library_id,category' })
+      if (catError) return json({ ok: false, error: `Could not save category mapping: ${cat.key}` }, 503)
+      categoryResults.push({ category: cat.key, found: true, folderItemId: folder.id })
+    }
+
+    return json({
+      ok: true,
+      data: {
+        clientId,
+        libraryId: library.id,
+        portalRootName: portalRoot.name,
+        portalRootItemId: portalRoot.id,
+        categories: categoryResults,
+      },
+    })
   }
 
   // ── Download actions (server-mediated proxy) ──────────────────────────
