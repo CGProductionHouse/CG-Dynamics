@@ -14,7 +14,6 @@ const CATEGORY_LABELS: Record<ClientPortalLibraryCategory, string> = {
   brand_identity: 'Brand Identity',
   graphic_design: 'Graphic Design',
   video: 'Video',
-  photography: 'Photography',
 }
 
 export function ClientPortalLibrary({ library }: { library: ClientPortalLibraryState }) {

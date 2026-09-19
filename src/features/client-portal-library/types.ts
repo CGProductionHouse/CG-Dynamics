@@ -2,7 +2,6 @@ export const CLIENT_PORTAL_LIBRARY_CATEGORIES = [
   'brand_identity',
   'graphic_design',
   'video',
-  'photography',
 ] as const
 
 export type ClientPortalLibraryCategory = typeof CLIENT_PORTAL_LIBRARY_CATEGORIES[number]
