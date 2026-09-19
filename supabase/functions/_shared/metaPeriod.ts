@@ -100,6 +100,51 @@ export function previousMetaMonth(offset = 1): string {
   return `${year}-${String(month).padStart(2, '0')}`
 }
 
+// Returns the latest completed Meta reporting date (YYYY-MM-DD) for incremental
+// month-to-date work. This is yesterday in America/Los_Angeles: Meta's daily
+// insight buckets have a ~24h reporting lag, so today's bucket is not yet
+// available when the scheduler runs. Using yesterday avoids requesting future
+// daily buckets that cannot exist, which would cause
+// incomplete_or_out_of_range_daily_coverage rejections.
+//
+// This is intentionally NOT a completed month. Month-to-date facts are presented
+// as partial and must never be treated as a fully completed period.
+export function incrementalMonthEnd(): string {
+  const now = new Date()
+  const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: META_INSIGHTS_TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  })
+  const parts = Object.fromEntries(
+    formatter.formatToParts(yesterday)
+      .filter(part => part.type !== 'literal')
+      .map(part => [part.type, Number(part.value)]),
+  )
+  return `${parts.year}-${String(parts.month).padStart(2, '0')}-${String(parts.day).padStart(2, '0')}`
+}
+
+// Returns the provider window bounds for current-month incremental work.
+// periodStart is the first day of the month; periodEnd is yesterday (latest
+// completed Meta reporting date). This prevents the worker from expecting
+// future daily buckets while still covering all available month-to-date data.
+// The canonical period_month remains the full current month — these bounds
+// control only the insight/probe window, not the monthly identity.
+export function incrementalMonthBounds(month: string): { periodStart: string; periodEnd: string } {
+  const end = incrementalMonthEnd()
+  const monthPrefix = month.slice(0, 7)
+  // If the incremental end falls outside the requested month, clamp to the
+  // month boundary. This can happen on the 1st of a new month before the
+  // previous month is marked completed.
+  const endClamped = end.startsWith(monthPrefix) ? end : `${month}-01`
+  return {
+    periodStart: `${month}-01`,
+    periodEnd: endClamped,
+  }
+}
+
 // Each requested Pacific calendar day must have exactly one ending bucket.
 // Calendar arithmetic preserves 23/25-hour days across daylight-saving changes.
 export function expectedMetaDailyEnds(since: string, until: string): number[] {

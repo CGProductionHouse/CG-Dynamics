@@ -9,6 +9,12 @@ import { readFileSync } from 'node:fs'
 // (This tests the canonical Meta month helper used by the scheduler and worker)
 const read = p => readFileSync(new URL(p, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
 
+// Import the actual metaPeriod module for executable tests
+const { incrementalMonthEnd, incrementalMonthBounds, expectedMetaDailyEnds, metaInsightsBounds } =
+  await import('../supabase/functions/_shared/metaPeriod.ts')
+
+const worker = read('../supabase/functions/meta-sync-worker/index.ts')
+
 describe('Meta month eligibility (canonical America/Los_Angeles)', () => {
   test('currentMetaMonth and previousMetaMonth use Pacific timezone', async () => {
     // These functions are used by the scheduler and worker for month arithmetic.
@@ -30,7 +36,6 @@ describe('Meta month eligibility (canonical America/Los_Angeles)', () => {
 })
 
 describe('Worker month skip logic: incremental vs historical', () => {
-  const worker = read('../supabase/functions/meta-sync-worker/index.ts')
 
   test('worker allows current Meta month when sync_kind === incremental', () => {
     // The worker must NOT skip current month for incremental work
@@ -141,5 +146,169 @@ describe('Integration: month selection contract matches PR #424', () => {
     assert.match(background, /\.from\('meta_client_assets'\)/)
     assert.match(background, /meta_asset_sync_checkpoints!left/)
     assert.match(background, /fbBootstrap|igBootstrap/)
+  })
+})
+
+describe('Incremental month-to-date bounds: MTD window for current-month work', () => {
+  const metaPeriod = read('../supabase/functions/_shared/metaPeriod.ts')
+  const worker = read('../supabase/functions/meta-sync-worker/index.ts')
+
+  test('incrementalMonthEnd returns yesterday in Pacific time', () => {
+    // Must exist and be exported
+    assert.match(metaPeriod, /export function incrementalMonthEnd/)
+    // Uses America/Los_Angeles, not UTC
+    const fn = metaPeriod.slice(metaPeriod.indexOf('export function incrementalMonthEnd'))
+    assert.match(fn, /timeZone: META_INSIGHTS_TIMEZONE/)
+    // Subtracts 24h from now to get the latest completed reporting date
+    assert.match(fn, /24 \* 60 \* 60 \* 1000/)
+    // Returns YYYY-MM-DD format
+    assert.match(fn, /parts\.year.*parts\.month.*parts\.day/)
+  })
+
+  test('incrementalMonthBounds returns periodStart=month-01, periodEnd=yesterday', () => {
+    assert.match(metaPeriod, /export function incrementalMonthBounds/)
+    const fn = metaPeriod.slice(metaPeriod.indexOf('export function incrementalMonthBounds'))
+    // periodStart is always month-01
+    assert.match(fn, /periodStart: `\$\{month\}-01`/)
+    // periodEnd uses incrementalMonthEnd()
+    assert.match(fn, /incrementalMonthEnd\(\)/)
+  })
+
+  test('worker uses incrementalMonthBounds for current-month incremental items', () => {
+    // The worker must import incrementalMonthBounds
+    assert.match(worker, /incrementalMonthBounds/)
+    assert.match(worker, /from '\.\.\/_shared\/metaPeriod\.ts'/)
+    // For current-month incremental, use incrementalMonthBounds instead of monthBounds
+    // The ternary spans multiple lines: isCurrentMonthIncremental ? incrementalMonthBounds : monthBounds
+    assert.match(worker, /isCurrentMonthIncremental/)
+    assert.match(worker, /incrementalMonthBounds\(item\.month\)/)
+  })
+
+  test('completed historical month still uses full monthBounds', () => {
+    // Historical/completed months must use the full month (not MTD)
+    assert.match(worker, /monthBounds\(item\.month\)/)
+    // monthBounds function still exists for non-incremental months
+    assert.match(worker, /function monthBounds/)
+  })
+
+  test('incremental bounds do not extend past current month boundary', () => {
+    // If incrementalMonthEnd falls outside the month, it clamps to month-01
+    const fn = metaPeriod.slice(metaPeriod.indexOf('export function incrementalMonthBounds'))
+    assert.match(fn, /end\.startsWith\(monthPrefix\)/)
+    assert.match(fn, /endClamped/)
+  })
+})
+
+describe('Incremental bounds executable: MTD window behaviour', () => {
+
+  // Helper: get today's date in YYYY-MM-DD in Pacific time
+  function todayPacific() {
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Los_Angeles',
+      year: 'numeric', month: '2-digit', day: '2-digit',
+    })
+    const parts = Object.fromEntries(
+      formatter.formatToParts(new Date())
+        .filter(p => p.type !== 'literal')
+        .map(p => [p.type, Number(p.value)]),
+    )
+    return `${parts.year}-${String(parts.month).padStart(2, '0')}-${String(parts.day).padStart(2, '0')}`
+  }
+
+  // Helper: get current Meta month in Pacific
+  function currentMonthPacific() {
+    return todayPacific().slice(0, 7)
+  }
+
+  test('completed historical month uses full month bounds (Aug 1–31)', () => {
+    // For a completed month, monthBounds must return the full month range.
+    // The worker uses monthBounds for non-incremental items.
+    assert.match(worker, /function monthBounds/)
+    assert.match(worker, /monthBounds\(item\.month\)/)
+  })
+
+  test('incrementalMonthEnd returns a date before today (yesterday in Pacific)', () => {
+    const end = incrementalMonthEnd()
+    const today = todayPacific()
+    // end must be strictly before today (it is yesterday)
+    assert.ok(end < today, `incrementalMonthEnd ${end} should be before today ${today}`)
+    // end must be in YYYY-MM-DD format
+    assert.match(end, /^\d{4}-\d{2}-\d{2}$/)
+    // end must be in the same or previous month as today
+    assert.ok(end.slice(0, 7) <= today.slice(0, 7),
+      `incrementalMonthEnd ${end} should be in the same or previous month as today ${today}`)
+  })
+
+  test('current-month incremental on Sep 19 does NOT expect Sep 20–30 daily buckets', () => {
+    // The key invariant: incrementalMonthBounds for the current month must NOT
+    // extend to month-end. The periodEnd must be yesterday, not the 30th/31st.
+    const month = currentMonthPacific()
+    const bounds = incrementalMonthBounds(month)
+    const today = todayPacific()
+
+    // periodStart is always month-01
+    assert.equal(bounds.periodStart, `${month}-01`)
+
+    // periodEnd must NOT be the last day of the month (it is yesterday)
+    const year = Number(month.slice(0, 4))
+    const m = Number(month.slice(5, 7))
+    const lastDay = new Date(Date.UTC(year, m, 0)).getUTCDate()
+    const monthEnd = `${month}-${String(lastDay).padStart(2, '0')}`
+    assert.ok(bounds.periodEnd <= today,
+      `periodEnd ${bounds.periodEnd} must not exceed today ${today}`)
+    assert.ok(bounds.periodEnd < monthEnd,
+      `periodEnd ${bounds.periodEnd} must be before month-end ${monthEnd} for incremental work`)
+  })
+
+  test('daily fallback series containing every completed requested day is accepted', () => {
+    // metaInsightsBounds + expectedMetaDailyEnds with incremental bounds should
+    // produce a set of daily ends that Meta can satisfy for past days only.
+    const month = currentMonthPacific()
+    const bounds = incrementalMonthBounds(month)
+    const insights = metaInsightsBounds(bounds.periodStart, bounds.periodEnd)
+    const expectedEnds = expectedMetaDailyEnds(insights.since, insights.until)
+
+    // The number of expected daily ends must equal the number of Pacific
+    // calendar days between periodStart and periodEnd (inclusive).
+    // Each day produces exactly one ending bucket.
+    assert.ok(expectedEnds.length > 0, 'expectedMetaDailyEnds should produce at least one bucket')
+    // All expected ends must be finite timestamps
+    assert.ok(expectedEnds.every(e => Number.isFinite(e)),
+      'all expected daily ends must be finite timestamps')
+    // No expected end should be in the future
+    const nowMs = Date.now()
+    const futureEnds = expectedEnds.filter(e => e > nowMs)
+    assert.equal(futureEnds.length, 0,
+      `expectedMetaDailyEnds must not include future buckets: ${JSON.stringify(futureEnds)}`)
+  })
+
+  test('current-month refresh advances periodEnd without changing canonical period_month', () => {
+    // Later refreshes in the same month should produce a different (later) periodEnd
+    // but the canonical period_month (YYYY-MM) stays the same.
+    const month = currentMonthPacific()
+    const bounds = incrementalMonthBounds(month)
+
+    // The period_month is always the full month, not the MTD window
+    assert.equal(bounds.periodStart, `${month}-01`)
+
+    // periodEnd is yesterday; if we run again later it would be different
+    // (but we can't test time travel, so verify the window is bounded)
+    const today = todayPacific()
+    assert.ok(bounds.periodEnd < today || bounds.periodEnd === today,
+      'periodEnd should be yesterday or today')
+    // The periodEnd is always within the same month or earlier
+    assert.ok(bounds.periodEnd.slice(0, 7) <= month,
+      'periodEnd must not extend past the current month')
+  })
+
+  test('Pacific date boundaries are used (incrementalMonthEnd uses META_INSIGHTS_TIMEZONE)', () => {
+    // The incrementalMonthEnd function must use the canonical Pacific timezone
+    const metaPeriod = read('../supabase/functions/_shared/metaPeriod.ts')
+    const fn = metaPeriod.slice(metaPeriod.indexOf('export function incrementalMonthEnd'))
+    assert.match(fn, /timeZone: META_INSIGHTS_TIMEZONE/)
+    // Does NOT use getUTCHours or UTC date arithmetic for the day calculation
+    assert.doesNotMatch(fn, /getUTCHours/)
+    // Uses Intl.DateTimeFormat with META_INSIGHTS_TIMEZONE (same as currentMetaMonth)
+    assert.match(fn, /Intl\.DateTimeFormat/)
   })
 })

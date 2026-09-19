@@ -20,7 +20,7 @@ import { normalizeMetaWorkerLanes } from '../_shared/metaWorkerLanes.ts'
 import { dispatchMetaWorker } from '../_shared/metaWorkerDispatch.ts'
 import { metaRateLimitScope } from '../_shared/metaRateLimit.ts'
 import { fetchMappedPageToken } from '../_shared/metaAssetIdentity.ts'
-import { currentMetaMonth } from '../_shared/metaPeriod.ts'
+import { currentMetaMonth, incrementalMonthBounds } from '../_shared/metaPeriod.ts'
 
 // Scheduled/background syncing shares the SAME truth contract as manual syncing:
 // configurable Graph version, shared connector engine (syncAccountFacts) writing
@@ -539,7 +539,9 @@ Deno.serve(async (req) => {
         continue
       }
 
-      const { periodStart, periodEnd } = monthBounds(item.month)
+      const { periodStart, periodEnd } = isCurrentMonthIncremental
+        ? incrementalMonthBounds(item.month)
+        : monthBounds(item.month)
       const postBounds = metaPostBounds(periodStart, periodEnd)
       const providerPeriod = metaProviderPeriod(periodStart, periodEnd)
       let postsSynced = Number(item.posts_synced ?? 0)
