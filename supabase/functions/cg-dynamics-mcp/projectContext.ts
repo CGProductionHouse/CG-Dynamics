@@ -280,3 +280,132 @@ export function buildAuditEnvelope(
     effective_client_id: context.clientId,
   }
 }
+
+// ── Authority/Delegation Seam ────────────────────────────────────────────────
+
+/** Target kinds that can be verified against an operating context. */
+export type AuthorityTargetKind = 'staff_profile' | 'client'
+
+/** Result of authority verification. */
+export type AuthorityVerificationResult =
+  | { ok: true; authorised: true; reason: 'own_context' | 'explicit_admin_delegation' }
+  | { ok: true; authorised: false; reason: 'forged_target' | 'cross_context' | 'no_delegation' }
+  | { ok: false; error: string }
+
+/**
+ * Verifies that the operating context is authorised to act on the requested target.
+ *
+ * This is the server-verifiable authority/delegation seam. It distinguishes
+ * the *requested* target (from tool input) from the *verified* operating context (resolved
+ * from the per-call Project context against canonical records).
+ *
+ * Rules:
+ * - Staff context: can only act on their own staff_profile_id. No delegation via role
+ *   inference — the effective subject's role cannot grant scope. Fail closed for any
+ *   target that is not the caller's own staff_profile_id.
+ * - Client context: can only act on their pinned client_id. No delegation.
+ * - Company_admin context: explicit admin delegation to act on any staff or client target.
+ * - Exact UUID alone never grants scope — the context must authorise the target.
+ *
+ * This function is pure and import-free for unit testing.
+ */
+export function verifyTargetAuthority(
+  contextKind: ProjectContextKind,
+  contextRole: string,
+  contextStaffProfileId: string | null,
+  contextClientId: string | null,
+  targetKind: AuthorityTargetKind,
+  requestedTargetId: string | null | undefined,
+): AuthorityVerificationResult {
+  // No target requested — not an authority violation (caller decides if required)
+  if (!requestedTargetId) return { ok: true, authorised: true, reason: 'own_context' }
+  if (!isUuid(requestedTargetId)) {
+    return { ok: false, error: `Invalid ${targetKind} id: must be a canonical uuid.` }
+  }
+  const targetId = requestedTargetId.trim()
+
+  // Staff context — own profile only. No delegation via role inference.
+  // The effective subject's role cannot grant scope; authority must come from
+  // an independently verified connection principal or server-side delegation policy.
+  if (contextKind === 'staff') {
+    if (targetKind === 'staff_profile') {
+      if (contextStaffProfileId && targetId === contextStaffProfileId.trim()) {
+        return { ok: true, authorised: true, reason: 'own_context' }
+      }
+      // No role-inference delegation — fail closed for cross-subject targets
+      return { ok: true, authorised: false, reason: 'forged_target' }
+    }
+    if (targetKind === 'client') {
+      // Staff context acting on a client target — only allowed via explicit server-side
+      // delegation policy (not via role inference from the effective subject). Fail closed
+      // when no such policy is provable.
+      return { ok: true, authorised: false, reason: 'cross_context' }
+    }
+  }
+
+  // Client context — strictly pinned to one client, no delegation
+  if (contextKind === 'client') {
+    if (targetKind === 'client') {
+      if (contextClientId && targetId === contextClientId.trim()) {
+        return { ok: true, authorised: true, reason: 'own_context' }
+      }
+      return { ok: true, authorised: false, reason: 'forged_target' }
+    }
+    if (targetKind === 'staff_profile') {
+      // Client context cannot act on staff targets (no staff subject)
+      return { ok: true, authorised: false, reason: 'cross_context' }
+    }
+  }
+
+  // Company_admin context — explicit admin delegation for any target
+  if (contextKind === 'company_admin') {
+    // Admin role already verified during context resolution
+    return { ok: true, authorised: true, reason: 'explicit_admin_delegation' }
+  }
+
+  return { ok: false, error: 'Unknown context kind for authority verification.' }
+}
+
+/**
+ * Convenience wrapper for verifying a staff profile target from tool input.
+ * Returns the verified target id if authorised, or an error result.
+ */
+export function verifyStaffTarget(
+  contextKind: ProjectContextKind,
+  contextRole: string,
+  contextStaffProfileId: string | null,
+  input: Record<string, unknown>,
+  inputKey: 'staff_profile_id' | 'assignee_profile_id' = 'staff_profile_id',
+): AuthorityVerificationResult {
+  const requested = input[inputKey]
+  return verifyTargetAuthority(
+    contextKind,
+    contextRole,
+    contextStaffProfileId,
+    null,
+    'staff_profile',
+    typeof requested === 'string' ? requested : undefined,
+  )
+}
+
+/**
+ * Convenience wrapper for verifying a client target from tool input.
+ * Returns the verified target id if authorised, or an error result.
+ */
+export function verifyClientTarget(
+  contextKind: ProjectContextKind,
+  contextRole: string,
+  contextClientId: string | null,
+  input: Record<string, unknown>,
+  inputKey: 'client_id' = 'client_id',
+): AuthorityVerificationResult {
+  const requested = input[inputKey]
+  return verifyTargetAuthority(
+    contextKind,
+    contextRole,
+    null,
+    contextClientId,
+    'client',
+    typeof requested === 'string' ? requested : undefined,
+  )
+}

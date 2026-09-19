@@ -86,6 +86,8 @@ import {
   type ContextAuditEnvelope,
   type ParsedProjectContext,
   type ProjectContextKind,
+  verifyStaffTarget,
+  verifyClientTarget,
 } from './projectContext.ts'
 
 const STAFF_ROLES = new Set(['admin', 'manager', 'staff', 'team'])
@@ -181,20 +183,36 @@ interface ConnectionPrincipal {
 }
 
 // Handed to every tool handler. `profileId` / `fullName` / `role` are the EFFECTIVE Project
-// subject (Franco in Franco's Project), never the shared OAuth principal, so existing
-// handlers act for the right person unchanged. `connection` is kept alongside for audit.
-interface AuthenticatedStaff {
-  supabase: ReturnType<typeof createClient>
-  profileId: string
-  fullName: string | null
-  role: string
-  isActive: boolean
-  contextKind: ProjectContextKind
-  effectiveStaffProfileId: string | null
-  effectiveClientId: string | null
-  effectiveClientName: string | null
-  connection: ConnectionPrincipal
-}
+  // subject (Franco in Franco's Project), never the shared OAuth principal, so existing
+  // handlers act for the right person unchanged. `connection` is kept alongside for audit.
+  interface AuthenticatedStaff {
+    supabase: ReturnType<typeof createClient>
+    profileId: string
+    fullName: string | null
+    role: string
+    isActive: boolean
+    contextKind: ProjectContextKind
+    effectiveStaffProfileId: string | null
+    effectiveClientId: string | null
+    effectiveClientName: string | null
+    connection: ConnectionPrincipal
+  }
+
+  /**
+   * Typed result discrimination for MCP tool results.
+   * A genuine error has a non-null string error property.
+   * Success results may have error: null or no error property.
+   * This avoids the defect where `error: null` was flagged as an outer error.
+   */
+  function isMcpErrorResult(result: unknown): result is { error: string } {
+    return (
+      result !== null &&
+      typeof result === 'object' &&
+      'error' in result &&
+      typeof (result as Record<string, unknown>).error === 'string' &&
+      (result as Record<string, unknown>).error.length > 0
+    )
+  }
 
 interface AuthChallenge {
   error: McpAuthChallengeError
@@ -494,24 +512,44 @@ const ACTIVE_TASK_STATES = [
   'ready_internal_review', 'approved', 'scheduled',
 ]
 
+/**
+ * Canonical ownership check — mirrors src/lib/workforceMyDay.ts userMatches().
+ * Uses canonical profile IDs (assigned_to_user_id, assignee_user_ids) and honours
+ * assignment_review_state. Unresolved/conflicted ownership is NOT verified ownership.
+ * Role-agnostic: both 'staff' and 'team' (and any workforce role) with matching
+ * profileId pass the check. Admin/manager bypass is handled separately by callers.
+ */
+function userMatchesTask(
+  assignedToUserId: string | null | undefined,
+  assigneeUserIds: string[] | undefined,
+  staffProfileId: string,
+  assignmentReviewState?: string | null,
+): boolean {
+  if (assignmentReviewState && assignmentReviewState !== 'ok') return false
+  if (assigneeUserIds?.length) return assigneeUserIds.includes(staffProfileId)
+  return Boolean(assignedToUserId && assignedToUserId === staffProfileId)
+}
+
 const handleGetMyDay: ToolHandler = async (staff) => {
   // CG operates in Africa/Johannesburg (UTC+2). Deriving the day from UTC returned the
   // PREVIOUS date between 00:00-02:00 SAST (#325/#327 defect: 00:37 SAST on 10 Sep -> 9 Sep).
   const now = new Date()
   const today = cgDate(now)
   const tomorrow = cgDatePlusDays(1, now)
+  const staffProfileId = staff.profileId
 
-  const [tasksResult, calendarResult, scheduleResult] = await Promise.all([
+  // Canonical planner read: use the canonical view and fetch assignee_user_ids via the
+  // same RPC the app uses (listPlannerBoardAssignments -> list_planner_board_assignments).
+  const [tasksResult, assignmentsResult, calendarResult, scheduleResult] = await Promise.all([
     staff.supabase
-      .from('planner_tasks')
-      .select('id, title, assigned_to_name, due_date, status, notes, client_name, client_id')
-      .eq('assigned_to_name', staff.fullName)
+      .from('planner_tasks_canonical')
+      .select('id, title, assigned_to_name, assigned_to_user_id, due_date, status, notes, client_name, client_id, assignment_review_state')
       .is('archived_at', null)
       .is('microsoft_source_removed_at', null)
       .in('status', ACTIVE_TASK_STATES)
-      .lte('due_date', tomorrow)
-      .order('due_date', { ascending: true })
-      .limit(20),
+      .or(`due_date.null,due_date.lte.${tomorrow}`)
+      .order('due_date', { ascending: true }),
+    staff.supabase.rpc('list_planner_board_assignments', { p_board_id: null }),
     staff.supabase
       .from('company_calendar_events')
       .select('id, title, event_type, start_at, end_at, client_name, status, assigned_to_name')
@@ -528,47 +566,153 @@ const handleGetMyDay: ToolHandler = async (staff) => {
       .limit(20),
   ])
 
+  // Build assignee_user_ids map from assignments RPC (canonical multi-assignee authority)
+  const assigneeIdsByTask = new Map<string, string[]>()
+  if (!assignmentsResult.error) {
+    for (const assignment of assignmentsResult.data ?? []) {
+      const current = assigneeIdsByTask.get(assignment.task_id) ?? []
+      current.push(assignment.profile_id)
+      assigneeIdsByTask.set(assignment.task_id, current)
+    }
+  }
+
+  // Filter tasks using canonical ownership logic (profileId-based, honours review state, multi-assignee)
+  const ownedTasks = (tasksResult.data ?? []).filter((task: Record<string, unknown>) =>
+    userMatchesTask(
+      task.assigned_to_user_id as string | null,
+      assigneeIdsByTask.get(task.id as string),
+      staffProfileId,
+      task.assignment_review_state as string | null,
+    ),
+  )
+
+  const tasksError = tasksResult.error?.message
+  const assignmentsError = assignmentsResult.error?.message
+
+  // #325: truthful Microsoft freshness / source-state — Dynamics mirror is stale when no
+  // reconciliation run has been recorded; Microsoft completion must remain authoritative.
+  const nowIso = now.toISOString()
+  const syncHealth = summarizeSyncHealth(null, nowIso)
+
+  // Attach durable Microsoft source classification (classification, source_key, microsoft, freshness)
+  const ownedTasksWithSource = withSourceLinkage(ownedTasks, 'planner')
+
   return {
     today,
     timezone: CG_TIMEZONE,
     staff_name: staff.fullName,
-    tasks: tasksResult.data ?? [],
+    tasks: ownedTasksWithSource,
     calendar_events: calendarResult.data ?? [],
     deliverables: flattenDeliverableClient(scheduleResult.data),
-    errors: [tasksResult.error?.message, calendarResult.error?.message, scheduleResult.error?.message].filter(Boolean),
+    partial:
+      tasksError !== undefined ||
+      assignmentsError !== undefined ||
+      syncHealth.degraded,
+    errors: [
+      tasksError,
+      assignmentsError,
+      calendarResult.error?.message,
+      scheduleResult.error?.message,
+    ].filter(Boolean),
+    microsoft_source_state: syncHealth.state,
   }
 }
 
 const handleListMyTasks: ToolHandler = async (staff, input) => {
-  let query = staff.supabase
-    .from('planner_tasks')
-    .select(`id, title, assigned_to_name, due_date, status, notes, client_name, client_id, created_at, updated_at, ${PLANNER_MICROSOFT_FIELDS.join(', ')}`)
-    .eq('assigned_to_name', staff.fullName)
-    .is('archived_at', null)
-    .is('microsoft_source_removed_at', null)
-    .order('due_date', { ascending: true })
-    .limit(50)
+  const staffProfileId = staff.profileId
 
-  if (input.status) query = query.eq('status', input.status)
-  else query = query.in('status', ACTIVE_TASK_STATES)
-  if (input.due_before) query = query.lte('due_date', input.due_before)
+  // Canonical planner read: use the canonical view and fetch assignee_user_ids via the
+  // same RPC the app uses (listPlannerBoardAssignments -> list_planner_board_assignments).
+  const [tasksResult, assignmentsResult] = await Promise.all([
+    staff.supabase
+      .from('planner_tasks_canonical')
+      .select(`id, title, assigned_to_name, assigned_to_user_id, due_date, status, notes, client_name, client_id, created_at, updated_at, assignment_review_state, ${PLANNER_MICROSOFT_FIELDS.join(', ')}`)
+      .is('archived_at', null)
+      .is('microsoft_source_removed_at', null)
+      .order('due_date', { ascending: true }),
+    staff.supabase.rpc('list_planner_board_assignments', { p_board_id: null }),
+  ])
 
-  const { data, error } = await query
+  if (tasksResult.error) return { tasks: [], error: tasksResult.error.message }
+
+  // Build assignee_user_ids map from assignments RPC (canonical multi-assignee authority)
+  const assigneeIdsByTask = new Map<string, string[]>()
+  if (!assignmentsResult.error) {
+    for (const assignment of assignmentsResult.data ?? []) {
+      const current = assigneeIdsByTask.get(assignment.task_id) ?? []
+      current.push(assignment.profile_id)
+      assigneeIdsByTask.set(assignment.task_id, current)
+    }
+  }
+
+  let data = tasksResult.data ?? []
+
+  if (input.status) data = data.filter((t: Record<string, unknown>) => t.status === input.status)
+  else data = data.filter((t: Record<string, unknown>) => ACTIVE_TASK_STATES.includes(t.status as string))
+  if (input.due_before) data = data.filter((t: Record<string, unknown>) => (t.due_date as string | null) && t.due_date <= input.due_before)
+
+  // Filter using canonical ownership logic (profileId-based, honours review state, multi-assignee)
+  const ownedTasks = data.filter((task: Record<string, unknown>) =>
+    userMatchesTask(
+      task.assigned_to_user_id as string | null,
+      assigneeIdsByTask.get(task.id as string),
+      staffProfileId,
+      task.assignment_review_state as string | null,
+    ),
+  )
+
   // #325: durable Microsoft identity + freshness so the Assistant can reconcile by ID.
-  return { tasks: withSourceLinkage(data, 'planner'), error: error?.message ?? null }
+  const listError = assignmentsResult.error?.message ?? null
+
+  // #325: truthful Microsoft freshness / source-state — Dynamics mirror is stale when no
+  // reconciliation run has been recorded; Microsoft completion must remain authoritative.
+  const nowIso = new Date().toISOString()
+  const syncHealth = summarizeSyncHealth(null, nowIso)
+
+  return {
+    tasks: withSourceLinkage(ownedTasks, 'planner'),
+    error: listError,
+    partial: listError !== null || syncHealth.degraded,
+    microsoft_source_state: syncHealth.state,
+  }
 }
 
 const handleGetTask: ToolHandler = async (staff, input) => {
   const taskId = input.task_id as string
-  const { data, error } = await staff.supabase
-    .from('planner_tasks')
-    .select('id, title, assigned_to_name, due_date, status, notes, client_name, client_id, created_at, updated_at')
-    .eq('id', taskId)
-    .maybeSingle()
+  const [taskResult, assignmentsResult] = await Promise.all([
+    staff.supabase
+      .from('planner_tasks_canonical')
+      .select('id, title, assigned_to_name, assigned_to_user_id, due_date, status, notes, client_name, client_id, created_at, updated_at, assignment_review_state')
+      .eq('id', taskId)
+      .maybeSingle(),
+    staff.supabase.rpc('list_planner_board_assignments', { p_board_id: null }),
+  ])
 
-  if (error) return { error: error.message }
-  if (!data) return { error: 'Task not found.' }
-  if (data.assigned_to_name !== staff.fullName && staff.role === 'staff') {
+  if (taskResult.error) return { error: taskResult.error.message }
+  if (!taskResult.data) return { error: 'Task not found.' }
+
+  // Build assignee_user_ids map from assignments RPC (canonical multi-assignee authority)
+  const assigneeIdsByTask = new Map<string, string[]>()
+  if (!assignmentsResult.error) {
+    for (const assignment of assignmentsResult.data ?? []) {
+      const current = assigneeIdsByTask.get(assignment.task_id) ?? []
+      current.push(assignment.profile_id)
+      assigneeIdsByTask.set(assignment.task_id, current)
+    }
+  }
+
+  const data = taskResult.data
+
+  // Canonical ownership check: use profileId and review state, not name matching.
+  // Both 'staff' and 'team' roles have personal task access.
+  const isOwnTask = userMatchesTask(
+    data.assigned_to_user_id as string | null,
+    assigneeIdsByTask.get(data.id as string),
+    staff.profileId,
+    data.assignment_review_state as string | null,
+  )
+  const canReadOthers = staff.role === 'admin' || staff.role === 'manager'
+  if (!isOwnTask && !canReadOthers) {
     return { error: 'You can only read tasks assigned to you.' }
   }
   return data
@@ -2706,8 +2850,8 @@ async function handleToolsCall(
   // The context-bootstrap tool runs before any operating context exists.
   if (toolName === CONTEXT_BOOTSTRAP_TOOL) {
     const result = await handleResolveProjectContext(supabase, connection, rawToolInput)
-    const isError = result && typeof result === 'object' && 'error' in result
-    return jsonRpcResponse(id, { content: [{ type: 'text', text: JSON.stringify(result) }], isError: !!isError })
+    const isError = isMcpErrorResult(result)
+    return jsonRpcResponse(id, { content: [{ type: 'text', text: JSON.stringify(result) }], isError })
   }
 
   const handler = toolHandlers[toolName]
@@ -2740,6 +2884,24 @@ async function handleToolsCall(
     return jsonRpcError(id, -32602, scoped.error)
   }
   const toolInput = scoped.input
+
+  // Authority/delegation seam (#377 checkpoint): verify requested targets against
+  // the verified operating context. Exact UUID alone never grants scope.
+  const authStaff = verifyStaffTarget(staff.contextKind, staff.role, staff.effectiveStaffProfileId, toolInput)
+  if (authStaff.ok && !authStaff.authorised) {
+    return jsonRpcError(id, -32602, `Staff target not authorised: ${authStaff.reason}. This Project acts for staff profile ${staff.effectiveStaffProfileId ?? 'none'}.`)
+  }
+  if (!authStaff.ok) {
+    return jsonRpcError(id, -32602, authStaff.error)
+  }
+
+  const authClient = verifyClientTarget(staff.contextKind, staff.role, staff.effectiveClientId, toolInput)
+  if (authClient.ok && !authClient.authorised) {
+    return jsonRpcError(id, -32602, `Client target not authorised: ${authClient.reason}. This Project is scoped to client ${staff.effectiveClientId ?? 'none'}.`)
+  }
+  if (!authClient.ok) {
+    return jsonRpcError(id, -32602, authClient.error)
+  }
 
   const audit = buildAuditEnvelope(connection, parsed.context)
 
@@ -2782,18 +2944,18 @@ async function handleToolsCall(
 
     if (isWrite && canonicalIdempotencyKey && !replayThroughCanonicalKey) {
       const inputHash = computeInputHash(toolInput as Record<string, unknown>)
-      const hasError = result && typeof result === 'object' && 'error' in result
+      const hasError = isMcpErrorResult(result)
       await recordIdempotency(staff.supabase, staff.profileId, toolName, canonicalIdempotencyKey, inputHash, hasError ? 'error' : 'success', audit)
     }
 
-    const isError = result && typeof result === 'object' && 'error' in result
+    const isError = isMcpErrorResult(result)
     // Dual-principal audit on every call: communal connection principal + effective context.
     const payload = result && typeof result === 'object' && !Array.isArray(result)
       ? { ...(result as Record<string, unknown>), _context: audit }
       : { result, _context: audit }
     return jsonRpcResponse(id, {
       content: [{ type: 'text', text: JSON.stringify(payload) }],
-      isError: !!isError,
+      isError,
     })
   } catch (err) {
     if (isWrite && canonicalIdempotencyKey) {
