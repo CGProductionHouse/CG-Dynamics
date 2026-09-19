@@ -166,9 +166,14 @@ interface GlobalAssistantComposerProps {
    * out of the accessibility tree.
    */
   onMobileFullscreenChange?: (fullscreen: boolean) => void
+  /**
+   * Reports whether the assistant composer is open (mobile fullscreen or desktop docked).
+   * Allows the shell to adjust layout padding when the composer opens/closes.
+   */
+  onOpenChange?: (open: boolean) => void
 }
 
-export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssistantComposerProps = {}) {
+export function GlobalAssistantComposer({ onMobileFullscreenChange, onOpenChange }: GlobalAssistantComposerProps = {}) {
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const { profile } = useAuth()
@@ -612,6 +617,11 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
     const el = scrollRef.current
     if (el) el.scrollTop = el.scrollHeight
   }, [mobileFullscreen, viewport.keyboardOpen, viewport.height])
+
+  // Notify shell when open state changes so it can adjust layout padding.
+  useEffect(() => {
+    onOpenChange?.(open)
+  }, [open, onOpenChange])
 
   // Grow to a comfortable multi-line surface on iPhone, then scroll internally
   // only after the bounded height is reached. The visual viewport keeps this

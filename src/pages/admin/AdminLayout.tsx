@@ -6,6 +6,7 @@ import BrandMark from '../../components/BrandMark'
 import { roleLabel } from '../../lib/roles'
 import { primaryNavItems, performanceNavItems, adminNavItems, canShowNavItem, isNavItemActive, isSharedNavZonePath, resolveNavZone, type NavItem, type NavZone } from './adminNavigation'
 import { dismissAssistantNotification, listMyNotifications, markAllNotificationsRead, markNotificationRead, refreshAssistantDayNotifications, safeNotificationLink, snoozeAssistantNotification, unreadNotificationCount, type AppNotification } from '../../lib/notifications'
+import { useIsMobileViewport } from '../../lib/mobileViewport'
 
 const GlobalAssistantComposer = lazy(() => import('../../components/assistant/GlobalAssistantComposer').then(module => ({ default: module.GlobalAssistantComposer })))
 
@@ -123,7 +124,9 @@ export default function AdminLayout() {
   // stands down and the page behind leaves the accessibility tree, so the
   // assistant is a single focused surface rather than another floating layer.
   const [assistantFullscreen, setAssistantFullscreen] = useState(false)
+  const [assistantOpen, setAssistantOpen] = useState(false)
   const [backgroundReady, setBackgroundReady] = useState(false)
+  const isMobile = useIsMobileViewport()
   const [selectedZone, setSelectedZone] = useState<NavZone>(() => {
     const routeZone = resolveNavZone(location.pathname)
     if (!isSharedNavZonePath(location.pathname)) return routeZone
@@ -148,6 +151,12 @@ export default function AdminLayout() {
     : primaryItems.filter(item => MOBILE_PRIMARY_PATHS.includes(item.to))
   const assistantVisible = location.pathname !== '/admin/assistant'
   const closeMobile = () => setMobileMenuOpen(false)
+  // Mobile padding: when assistant is open (fullscreen), content is hidden so no padding needed.
+  // When assistant is closed, only bottom navigation needs space (~4.5rem).
+  // Desktop padding unchanged.
+  const mainPadding = assistantVisible
+    ? `md:pb-16 ${isMobile ? (assistantOpen ? 'pb-0' : 'pb-[calc(4.5rem+env(safe-area-inset-bottom))]') : 'pb-[calc(3.5rem+env(safe-area-inset-bottom))]'}`
+    : `md:pb-0 ${isMobile ? (assistantOpen ? 'pb-0' : 'pb-[calc(4.5rem+env(safe-area-inset-bottom))]') : 'pb-[calc(3.5rem+env(safe-area-inset-bottom))]'}`
 
   useEffect(() => {
     window.localStorage.setItem(ZONE_STORAGE_KEY, zone)
@@ -333,7 +342,7 @@ export default function AdminLayout() {
 
       <MyDayContextStoreProvider>
         <main
-          className={`min-w-0 flex-1 overflow-auto md:h-screen ${assistantVisible ? 'pb-[calc(3.5rem+env(safe-area-inset-bottom))] md:pb-16' : 'pb-[calc(3.5rem+env(safe-area-inset-bottom))] md:pb-0'}`}
+          className={`min-w-0 flex-1 overflow-auto md:h-screen ${mainPadding}`}
           aria-hidden={assistantFullscreen || undefined}
           inert={assistantFullscreen || undefined}
         >
@@ -420,7 +429,7 @@ export default function AdminLayout() {
           </section>
         )}
 
-        {backgroundReady && <Suspense fallback={null}><GlobalAssistantComposer onMobileFullscreenChange={setAssistantFullscreen} /></Suspense>}
+        {backgroundReady && <Suspense fallback={null}><GlobalAssistantComposer onMobileFullscreenChange={setAssistantFullscreen} onOpenChange={setAssistantOpen} /></Suspense>}
       </MyDayContextStoreProvider>
     </div>
   )

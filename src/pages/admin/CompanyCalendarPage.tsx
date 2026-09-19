@@ -1,7 +1,8 @@
 import { useEffect, useEffectEvent, useMemo, useRef, useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import { ActionButton } from '../../components/ui/Buttons'
+import { ActionButton, IconButton } from '../../components/ui/Buttons'
 import { EmptyState } from '../../components/ui/States'
+import { Pill } from '../../components/ui/Badges'
 import { ClientPicker } from '../../components/ClientPicker'
 import { useAuth } from '../../contexts/AuthContext'
 import {
@@ -28,7 +29,7 @@ import {
 import { materializeRecurringTasks } from '../../lib/recurrence'
 import { addBusinessDays, businessDateKey, businessDayBoundaryIso, businessMonthKey, formatBusinessDate, formatBusinessTime } from '../../lib/businessTime'
 import { isManagerRole } from '../../lib/roles'
-import { useVisualViewportBottomInset } from '../../lib/mobileViewport'
+import { useVisualViewportBottomInset, useIsMobileViewport } from '../../lib/mobileViewport'
 import { reconcileCalendarLogicalItems } from '../../lib/calendarIdentity'
 
 type EventFilter = 'all' | 'cancelled' | CompanyEventType
@@ -163,6 +164,7 @@ function nextMonthStart(key: string) {
 
 export default function CompanyCalendarPage() {
   const { profile } = useAuth()
+  const isMobile = useIsMobileViewport()
   const [events, setEvents] = useState<CompanyCalendarEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [tableMissing, setTableMissing] = useState(false)
@@ -387,58 +389,118 @@ export default function CompanyCalendarPage() {
   ]
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="mt-1 text-3xl font-black tracking-tight text-white sm:text-4xl">CG Calendar</h1>
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl">CG Calendar</h1>
+        <div className="flex items-center gap-2">
+          {canManage && (
+            <IconButton
+              ariaLabel="Add event"
+              variant="primary"
+              size="sm"
+              onClick={() => handleCreateEvent()}
+              className={isMobile ? 'h-9 w-9' : undefined}
+            >
+              +
+            </IconButton>
+          )}
         </div>
-        {canManage && <ActionButton variant="primary" onClick={() => handleCreateEvent()}>
-          + Add Event
-        </ActionButton>}
       </div>
 
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        <button type="button" onClick={() => setSelectedMonth(shiftMonth(selectedMonth, -1))} className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-bold text-brand-primary hover:text-white">Prev</button>
-        <button type="button" onClick={() => setSelectedMonth(monthKey(new Date()))} className="rounded-md border border-brand-teal/25 bg-brand-teal/[0.07] px-3 py-2 text-xs font-bold text-[#2dd4bf] hover:text-white">Today</button>
-        <input type="month" value={selectedMonth} onChange={event => setSelectedMonth(event.target.value)} className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-bold text-white outline-none focus:border-brand-accent/50" />
-        <button type="button" onClick={() => setSelectedMonth(shiftMonth(selectedMonth, 1))} className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-bold text-brand-primary hover:text-white">Next</button>
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <IconButton
+          ariaLabel="Previous month"
+          variant="ghost"
+          size="sm"
+          onClick={() => setSelectedMonth(shiftMonth(selectedMonth, -1))}
+        >
+          ‹
+        </IconButton>
+        <button
+          type="button"
+          onClick={() => setSelectedMonth(monthKey(new Date()))}
+          className="rounded-md border border-brand-teal/25 bg-brand-teal/[0.07] px-3 py-1.5 text-xs font-bold text-[#2dd4bf] hover:text-white"
+        >
+          Today
+        </button>
+        <input
+          type="month"
+          value={selectedMonth}
+          onChange={event => setSelectedMonth(event.target.value)}
+          className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-1.5 text-sm font-bold text-white outline-none focus:border-brand-accent/50"
+        />
+        <IconButton
+          ariaLabel="Next month"
+          variant="ghost"
+          size="sm"
+          onClick={() => setSelectedMonth(shiftMonth(selectedMonth, 1))}
+        >
+          ›
+        </IconButton>
         <div className="ml-auto flex rounded-lg border border-white/[0.08] bg-white/[0.03] p-1">
           {(['calendar', 'agenda'] as const).map(option => (
-            <button key={option} type="button" onClick={() => setViewMode(option)} className={`rounded-md px-3 py-1.5 text-xs font-bold capitalize transition-colors ${viewMode === option ? 'bg-brand-accent text-black' : 'text-brand-primary/60 hover:text-brand-primary'}`}>{option}</button>
+            <button
+              key={option}
+              type="button"
+              onClick={() => setViewMode(option)}
+              className={`rounded-md px-2.5 py-1 text-xs font-bold capitalize transition-colors ${
+                viewMode === option ? 'bg-brand-accent text-black' : 'text-brand-primary/60 hover:text-brand-primary'
+              }`}
+            >
+              {option}
+            </button>
           ))}
         </div>
       </div>
 
-      {/* Events are the default calendar. Planner tasks are an optional operational overlay. */}
-      <div className="mb-4 flex flex-wrap items-center gap-4 rounded-lg border border-white/[0.08] bg-white/[0.025] px-3 py-2">
-        <span className="text-[10px] font-black uppercase tracking-[0.18em] text-brand-primary/45">Layers</span>
-        <label className="flex cursor-pointer items-center gap-2 text-xs font-bold text-sky-200">
-          <input type="checkbox" checked={layers.events} onChange={event => setLayers(prev => ({ ...prev, events: event.target.checked }))} className="h-3.5 w-3.5 accent-teal-400" />
-          Events ({monthEvents.length})
-        </label>
-        <label className="flex cursor-pointer items-center gap-2 text-xs font-bold text-amber-200">
-          <input type="checkbox" checked={layers.tasks} onChange={event => setLayers(prev => ({ ...prev, tasks: event.target.checked }))} className="h-3.5 w-3.5 accent-amber-400" />
-          Planner tasks ({monthTasks.length})
-        </label>
-      </div>
+      <details className="mb-3 group" aria-label="Calendar filters and layers">
+        <summary className="flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.025] px-3 py-2 text-xs font-bold text-brand-primary/60 hover:text-white cursor-pointer list-none">
+          <span className="flex items-center gap-1.5">
+            <span className="text-[10px] font-black uppercase tracking-[0.18em]">Filters</span>
+            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-white/20" aria-hidden />
+          </span>
+        </summary>
+        <div className="mt-2 rounded-lg border border-white/10 bg-[#111111] p-3 space-y-3">
+          <div>
+            <span className="text-[10px] font-black uppercase tracking-[0.18em] text-brand-primary/45">Layers</span>
+            <div className="mt-1.5 flex flex-wrap items-center gap-3">
+              <label className="flex cursor-pointer items-center gap-1.5 text-xs font-bold text-sky-200">
+                <input type="checkbox" checked={layers.events} onChange={event => setLayers(prev => ({ ...prev, events: event.target.checked }))} className="h-3.5 w-3.5 accent-teal-400" />
+                Events ({monthEvents.length})
+              </label>
+              <label className="flex cursor-pointer items-center gap-1.5 text-xs font-bold text-amber-200">
+                <input type="checkbox" checked={layers.tasks} onChange={event => setLayers(prev => ({ ...prev, tasks: event.target.checked }))} className="h-3.5 w-3.5 accent-amber-400" />
+                Planner tasks ({monthTasks.length})
+              </label>
+            </div>
+          </div>
+          <div>
+            <span className="text-[10px] font-black uppercase tracking-[0.18em] text-brand-primary/45">Event type</span>
+            <select
+              value={filter}
+              onChange={event => setFilter(event.target.value as EventFilter)}
+              className="mt-1.5 w-full rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-sm font-bold text-white outline-none focus:border-brand-teal/50"
+            >
+              {filterTabs.map(tab => <option key={tab.value} value={tab.value}>{tab.label} ({tab.count})</option>)}
+            </select>
+          </div>
+        </div>
+      </details>
 
       {supersessionMigrationNeeded && (
-        <div className="mb-4 rounded-xl border border-amber-300/20 bg-amber-300/[0.06] px-4 py-3 text-xs text-amber-100">
+        <div className="mb-3 rounded-lg border border-amber-300/20 bg-amber-300/[0.06] px-3 py-2 text-xs text-amber-100">
           Calendar events are available, but duplicate resolution is not available yet.
         </div>
       )}
 
       {canManage && reviewCandidates.length > 0 && (
-        <div className="mb-4 rounded-xl border border-amber-300/20 bg-amber-300/[0.06] px-4 py-3 flex items-center justify-between gap-3" role="status" aria-label="Calendar duplicate review">
-          <div className="min-w-0">
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-amber-200">
-              {reviewCandidates.length} possible duplicate{reviewCandidates.length !== 1 ? 's' : ''}
-            </p>
-            <p className="mt-0.5 text-xs leading-4 text-amber-100/60">
-              Native and Outlook records share a title and start time.
-            </p>
-          </div>
-          <button type="button" onClick={() => setShowReviewPanel(true)} className="shrink-0 rounded-lg border border-amber-300/30 bg-amber-300/10 px-3 py-1.5 text-xs font-bold text-amber-200 hover:bg-amber-300/20">
+        <div className="mb-3 flex items-center justify-between gap-2 rounded-lg border border-amber-300/30 bg-amber-300/10 px-3 py-2" role="status" aria-label="Calendar duplicate review">
+          <Pill tone="amber">{reviewCandidates.length} duplicate{reviewCandidates.length !== 1 ? 's' : ''} to review</Pill>
+          <button
+            type="button"
+            onClick={() => setShowReviewPanel(true)}
+            className="shrink-0 rounded-md border border-amber-300/30 bg-amber-300/10 px-2.5 py-1 text-xs font-bold text-amber-200 hover:bg-amber-300/20"
+          >
             Review
           </button>
         </div>
@@ -498,7 +560,7 @@ export default function CompanyCalendarPage() {
         </>
       )}
 
-      {(tableMissing || error || layerErrors.tasks || layerErrors.recurrence || recurrenceMigrationNeeded || (allMonthEvents.length + monthTasks.length === 0)) && (
+      {(tableMissing || error || layerErrors.tasks || layerErrors.recurrence || recurrenceMigrationNeeded) && (
         <CalendarDiagnostics
           month={selectedMonth}
           eventCount={allMonthEvents.length}
@@ -510,17 +572,6 @@ export default function CompanyCalendarPage() {
           recurrenceMigrationNeeded={recurrenceMigrationNeeded}
         />
       )}
-
-      <label className="mb-6 block max-w-xs space-y-1.5">
-        <span className="text-[10px] font-black uppercase tracking-[0.18em] text-brand-primary/45">Event type</span>
-        <select
-          value={filter}
-          onChange={event => setFilter(event.target.value as EventFilter)}
-          className="w-full rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-sm font-bold text-white outline-none focus:border-brand-teal/50"
-        >
-          {filterTabs.map(tab => <option key={tab.value} value={tab.value}>{tab.label} ({tab.count})</option>)}
-        </select>
-      </label>
 
       {viewMode === 'calendar' ? (
         <CgCalendarGrid
