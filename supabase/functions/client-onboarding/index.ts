@@ -19,7 +19,7 @@ import {
   verifyPortalAccess,
   type PortalAccessPurpose,
 } from './portal-library-stream.ts'
-import { visiblePortalMonths } from '../_shared/portal-visibility.ts'
+import { visiblePortalMonths, resolvePortalMapping, portalRootFolderName } from '../_shared/portal-visibility.ts'
 
 const PLATFORMS = new Set(['facebook', 'instagram', 'meta_business', 'linkedin', 'tiktok', 'website', 'google', 'outlook'])
 const CHOICES = new Set(['connect_now', 'do_later', 'not_needed'])
@@ -1091,31 +1091,18 @@ Deno.serve(async request => {
     const clientsFolder = await resolveClientsFolder()
     if (!clientsFolder) return json({ ok: false, error: 'OneDrive is not connected.' }, 503)
 
-    const children = await listChildren(clientsFolder.driveId, clientsFolder.itemId)
-    if (!children) return json({ ok: false, error: 'Could not list OneDrive folders.' }, 503)
+    const rootChildren = await listChildren(clientsFolder.driveId, clientsFolder.itemId)
+    if (!rootChildren) return json({ ok: false, error: 'Could not list OneDrive folders.' }, 503)
 
-    const slug = client.name.replace(/[^A-Za-z0-9]/g, '')
-    const expectedRootName = `A_ClientPortal_${slug}`
-    const portalRoot = children.find(c => c.isFolder && c.name === expectedRootName)
+    const expectedRootName = portalRootFolderName(client.name)
+    const portalRoot = rootChildren.find(c => c.isFolder && c.name === expectedRootName)
     if (!portalRoot) return json({ ok: false, error: `Portal folder not found: ${expectedRootName}` }, 404)
 
     const categoryChildren = await listChildren(clientsFolder.driveId, portalRoot.id)
     if (!categoryChildren) return json({ ok: false, error: 'Could not list portal categories.' }, 503)
 
-    const requiredCategories = [
-      { key: 'brand_identity', expectedName: 'Brand Identity' },
-      { key: 'graphic_design', expectedName: 'Graphic Design' },
-      { key: 'video', expectedName: 'Video' },
-    ] as const
-
-    const resolvedCategories: Array<{ key: string; expectedName: string; folderId: string; folderName: string }> = []
-    for (const cat of requiredCategories) {
-      const folder = categoryChildren.find(c => c.isFolder && c.name === cat.expectedName)
-      if (!folder) {
-        return json({ ok: false, error: `Required portal category not found: ${cat.expectedName}` }, 404)
-      }
-      resolvedCategories.push({ key: cat.key, expectedName: cat.expectedName, folderId: folder.id, folderName: folder.name })
-    }
+    const fullMapping = resolvePortalMapping(client.name, rootChildren, categoryChildren)
+    if ('error' in fullMapping) return json({ ok: false, error: fullMapping.error }, fullMapping.httpStatus as 404)
 
     const { data: existingLibrary } = await service
       .from('client_portal_libraries')
@@ -1128,8 +1115,8 @@ Deno.serve(async request => {
       .upsert({
         client_id: clientId,
         drive_id: clientsFolder.driveId,
-        root_folder_item_id: portalRoot.id,
-        root_folder_name: portalRoot.name,
+        root_folder_item_id: fullMapping.rootItemId,
+        root_folder_name: fullMapping.rootFolderName,
         enabled: false,
         mapped_by: authorized.user.id,
       }, { onConflict: 'client_id' })
@@ -1137,21 +1124,22 @@ Deno.serve(async request => {
       .maybeSingle()
     if (libraryError || !library) return json({ ok: false, error: 'Could not save portal mapping.' }, 503)
 
-    for (const cat of resolvedCategories) {
-      const { error: catError } = await service
-        .from('client_portal_library_categories')
-        .upsert({
-          library_id: library.id,
-          client_id: clientId,
-          category: cat.key,
-          drive_id: clientsFolder.driveId,
-          folder_item_id: cat.folderId,
-          folder_name: cat.folderName,
-          mapped_by: authorized.user.id,
-          last_verified_at: new Date().toISOString(),
-        }, { onConflict: 'library_id,category' })
-      if (catError) return json({ ok: false, error: `Could not save category mapping: ${cat.key}` }, 503)
-    }
+    const now = new Date().toISOString()
+    const categoryRows = fullMapping.categories.map(cat => ({
+      library_id: library.id,
+      client_id: clientId,
+      category: cat.key,
+      drive_id: clientsFolder.driveId,
+      folder_item_id: cat.folderId,
+      folder_name: cat.folderName,
+      mapped_by: authorized.user.id,
+      last_verified_at: now,
+    }))
+
+    const { error: catBulkError } = await service
+      .from('client_portal_library_categories')
+      .upsert(categoryRows, { onConflict: 'library_id,category' })
+    if (catBulkError) return json({ ok: false, error: 'Could not save category mappings.' }, 503)
 
     const created = !existingLibrary
 
@@ -1160,11 +1148,11 @@ Deno.serve(async request => {
       data: {
         clientId,
         libraryId: library.id,
-        portalRootName: portalRoot.name,
-        portalRootItemId: portalRoot.id,
+        portalRootName: fullMapping.rootFolderName,
+        portalRootItemId: fullMapping.rootItemId,
         enabled: false,
         created,
-        categories: resolvedCategories.map(c => ({ category: c.key, folderItemId: c.folderId })),
+        categories: fullMapping.categories.map(c => ({ category: c.key, folderItemId: c.folderId })),
       },
     })
   }

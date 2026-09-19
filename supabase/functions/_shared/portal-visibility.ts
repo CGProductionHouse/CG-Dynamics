@@ -1,9 +1,12 @@
-// Shared month-visibility rule for Brand Hub (#396).
+// Shared pure helpers for Brand Hub (#396).
 //
-// The next calendar month is visible and active on the 1st of the prior month.
+// visiblePortalMonths: next calendar month visible on the 1st of the prior month.
 // CG business timezone: Africa/Johannesburg (SAST, UTC+2, no DST).
 //
-// Pure function — no network, no Deno, no React.
+// portalClientSlug: canonical underscore-normalised portal root slug.
+// resolvePortalMapping: pure/fakeable portal root + category resolution.
+//
+// Pure functions — no network, no Deno, no React.
 
 /** CG business timezone for portal visibility. */
 export const PORTAL_VISIBILITY_TIMEZONE = 'Africa/Johannesburg' as const
@@ -28,4 +31,89 @@ export function visiblePortalMonths(now = new Date()): Array<{ year: number; mon
   const nextYear = month === 12 ? year + 1 : year
   months.push({ year: nextYear, month: nextMonth })
   return months
+}
+
+// ── Canonical portal slug ─────────────────────────────────────────────────────
+
+/**
+ * Canonical underscore-normalised portal client slug.
+ *
+ * Replaces runs of non-alphanumeric characters with a single underscore,
+ * trims leading/trailing underscores, preserves case.
+ *
+ * Examples (from approved physical OneDrive names):
+ *   Red Oak              -> Red_Oak
+ *   AV Event Life        -> AV_Event_Life
+ *   C&L Innovations      -> C_L_Innovations
+ *   RC-Polypipe          -> RC_Polypipe
+ *   Bloem Marble & Granite -> Bloem_Marble_Granite
+ *   Dulux Paint & Paper Bloemfontein -> Dulux_Paint_Paper_Bloemfontein
+ */
+export function portalClientSlug(clientName: string): string {
+  return clientName
+    .replace(/[^A-Za-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+}
+
+/** Expected portal root folder name for a given client name. */
+export function portalRootFolderName(clientName: string): string {
+  return `A_ClientPortal_${portalClientSlug(clientName)}`
+}
+
+// ── Pure portal mapping resolver ──────────────────────────────────────────────
+
+export interface DriveChild {
+  id: string
+  name: string
+  isFolder: boolean
+}
+
+export interface PortalMappingPlan {
+  rootItemId: string
+  rootFolderName: string
+  categories: Array<{
+    key: string
+    expectedName: string
+    folderId: string
+    folderName: string
+  }>
+}
+
+export interface PortalMappingError {
+  error: string
+  httpStatus: number
+}
+
+export const PORTAL_REQUIRED_CATEGORIES = [
+  { key: 'brand_identity', expectedName: 'Brand Identity' },
+  { key: 'graphic_design', expectedName: 'Graphic Design' },
+  { key: 'video', expectedName: 'Video' },
+] as const
+
+/**
+ * Pure portal root + category resolution.
+ *
+ * Finds the exact A_ClientPortal_<slug> root among rootChildren,
+ * then validates all three required categories among categoryChildren.
+ * Uses exact string equality only — no fuzzy matching, no case folding.
+ *
+ * Returns either a complete mapping plan or an error. No partial state.
+ */
+export function resolvePortalMapping(
+  clientName: string,
+  rootChildren: readonly DriveChild[],
+  categoryChildren: readonly DriveChild[],
+): PortalMappingPlan | PortalMappingError {
+  const expectedRootName = portalRootFolderName(clientName)
+  const root = rootChildren.find(c => c.isFolder && c.name === expectedRootName)
+  if (!root) return { error: `Portal folder not found: ${expectedRootName}`, httpStatus: 404 }
+
+  const categories: PortalMappingPlan['categories'] = []
+  for (const cat of PORTAL_REQUIRED_CATEGORIES) {
+    const folder = categoryChildren.find(c => c.isFolder && c.name === cat.expectedName)
+    if (!folder) return { error: `Required portal category not found: ${cat.expectedName}`, httpStatus: 404 }
+    categories.push({ key: cat.key, expectedName: cat.expectedName, folderId: folder.id, folderName: folder.name })
+  }
+
+  return { rootItemId: root.id, rootFolderName: root.name, categories }
 }

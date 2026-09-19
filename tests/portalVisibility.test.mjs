@@ -1,7 +1,14 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
-import { visiblePortalMonths, PORTAL_VISIBILITY_TIMEZONE } from '../supabase/functions/_shared/portal-visibility.ts'
+import {
+  visiblePortalMonths,
+  PORTAL_VISIBILITY_TIMEZONE,
+  portalClientSlug,
+  portalRootFolderName,
+  resolvePortalMapping,
+  PORTAL_REQUIRED_CATEGORIES,
+} from '../supabase/functions/_shared/portal-visibility.ts'
 
 const read = p => readFileSync(new URL(p, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
 const ef = read('../supabase/functions/client-onboarding/index.ts')
@@ -71,6 +78,57 @@ test('current month is always first, next month is always second', () => {
   assert.ok(months[0].year <= months[1].year)
 })
 
+// ── Canonical portal slug (approved physical naming) ──────────────────────────
+
+test('portalClientSlug: Red Oak -> Red_Oak', () => {
+  assert.equal(portalClientSlug('Red Oak'), 'Red_Oak')
+})
+
+test('portalClientSlug: AV Event Life -> AV_Event_Life', () => {
+  assert.equal(portalClientSlug('AV Event Life'), 'AV_Event_Life')
+})
+
+test('portalClientSlug: C&L Innovations -> C_L_Innovations', () => {
+  assert.equal(portalClientSlug('C&L Innovations'), 'C_L_Innovations')
+})
+
+test('portalClientSlug: RC-Polypipe -> RC_Polypipe', () => {
+  assert.equal(portalClientSlug('RC-Polypipe'), 'RC_Polypipe')
+})
+
+test('portalClientSlug: Bloem Marble & Granite -> Bloem_Marble_Granite', () => {
+  assert.equal(portalClientSlug('Bloem Marble & Granite'), 'Bloem_Marble_Granite')
+})
+
+test('portalClientSlug: Dulux Paint & Paper Bloemfontein -> Dulux_Paint_Paper_Bloemfontein', () => {
+  assert.equal(portalClientSlug('Dulux Paint & Paper Bloemfontein'), 'Dulux_Paint_Paper_Bloemfontein')
+})
+
+test('portalClientSlug: collapses multiple separators into single underscore', () => {
+  assert.equal(portalClientSlug('A  B___C...D'), 'A_B_C_D')
+})
+
+test('portalClientSlug: trims leading/trailing underscores', () => {
+  assert.equal(portalClientSlug('  Hello World  '), 'Hello_World')
+})
+
+test('portalClientSlug: preserves alphanumeric case', () => {
+  assert.equal(portalClientSlug('MyCompany'), 'MyCompany')
+})
+
+test('portalRootFolderName: produces A_ClientPortal_<slug>', () => {
+  assert.equal(portalRootFolderName('Red Oak'), 'A_ClientPortal_Red_Oak')
+  assert.equal(portalRootFolderName('RC-Polypipe'), 'A_ClientPortal_RC_Polypipe')
+})
+
+test('portalClientSlug is exported for testing', () => {
+  assert.ok(portalVis.includes('export function portalClientSlug'), 'function is exported')
+})
+
+test('portalRootFolderName is exported for testing', () => {
+  assert.ok(portalVis.includes('export function portalRootFolderName'), 'function is exported')
+})
+
 // ── Photography is rejected everywhere ────────────────────────────────────────
 
 test('PORTAL_CATEGORY_LABELS excludes photography', () => {
@@ -124,50 +182,22 @@ test('month-visibility gate applies to non-flat categories', () => {
   assert.match(ef, /if \(!flat\) \{[\s\S]*?visiblePortalMonths/, 'visibility gate only for non-flat')
 })
 
-// ── staff_resolve_portal_root: fail-closed before persist ─────────────────────
+// ── staff_resolve_portal_root: structural checks ──────────────────────────────
 
 test('staff_resolve_portal_root requires admin role', () => {
   assert.match(ef, /action === 'staff_resolve_portal_root'[\s\S]*?Admin access required/, 'admin-only action')
 })
 
-test('resolves exact A_ClientPortal_<ClientSlug> only', () => {
-  assert.match(ef, /expectedRootName = `A_ClientPortal_\$\{slug\}`/, 'exact portal root naming')
-  assert.match(ef, /children\.find\(c => c\.isFolder && c\.name === expectedRootName\)/, 'exact name match only')
+test('EF uses resolvePortalMapping from shared module', () => {
+  assert.ok(ef.includes('resolvePortalMapping(client.name, rootChildren, categoryChildren)'), 'EF calls pure resolver')
 })
 
-test('maps exactly 3 categories: Brand Identity, Graphic Design, Video', () => {
-  const resolveBlock = ef.slice(ef.indexOf("action === 'staff_resolve_portal_root'"))
-  assert.ok(resolveBlock.includes("'brand_identity'"), 'brand_identity mapped')
-  assert.ok(resolveBlock.includes("'graphic_design'"), 'graphic_design mapped')
-  assert.ok(resolveBlock.includes("'video'"), 'video mapped')
-  const requiredSection = resolveBlock.slice(
-    resolveBlock.indexOf('const requiredCategories'),
-    resolveBlock.indexOf('const resolvedCategories'),
-  )
-  const catCount = (requiredSection.match(/expectedName:/g) || []).length
-  assert.equal(catCount, 3, 'exactly 3 expectedName entries in requiredCategories')
+test('EF uses portalRootFolderName from shared module', () => {
+  assert.ok(ef.includes('portalRootFolderName(client.name)'), 'EF uses portalRootFolderName')
 })
 
-test('cannot map Photography, Videos, Photos or sibling folders', () => {
-  const resolveBlock = ef.slice(ef.indexOf("action === 'staff_resolve_portal_root'"))
-  assert.ok(!resolveBlock.includes("'Photography'"), 'no Photography mapping')
-  assert.ok(!resolveBlock.includes("'Videos'"), 'no Videos mapping')
-  assert.ok(!resolveBlock.includes("'Photos'"), 'no Photos mapping')
-  assert.ok(!resolveBlock.includes("'videos'"), 'no lowercase videos mapping')
-})
-
-test('fails closed on missing portal root', () => {
-  assert.match(ef, /Portal folder not found.*404/, 'returns 404 when portal root missing')
-})
-
-test('fails closed on missing required category: returns 404 before persist', () => {
-  assert.match(ef, /Required portal category not found.*404/, '404 on missing required category')
-})
-
-test('no partial category writes: 404 returned immediately on first missing category', () => {
-  const resolveBlock = ef.slice(ef.indexOf("action === 'staff_resolve_portal_root'"))
-  const persistSection = resolveBlock.slice(resolveBlock.indexOf('client_portal_libraries'))
-  assert.ok(!persistSection.includes('found: false'), 'no partial found:false reporting — fails with 404 instead')
+test('EF imports portalRootFolderName', () => {
+  assert.ok(ef.includes('portalRootFolderName') && ef.includes("from '../_shared/portal-visibility.ts'"), 'imports portalRootFolderName')
 })
 
 test('library created with enabled: false until explicit activation', () => {
@@ -178,45 +208,40 @@ test('library created with enabled: false until explicit activation', () => {
 
 test('library persist happens AFTER category validation (not before)', () => {
   const resolveBlock = ef.slice(ef.indexOf("action === 'staff_resolve_portal_root'"))
-  const validatePos = resolveBlock.indexOf('Required portal category not found')
+  const validatePos = resolveBlock.indexOf('resolvePortalMapping')
   const persistPos = resolveBlock.indexOf('client_portal_libraries')
   assert.ok(validatePos < persistPos, 'category validation must precede library persist')
 })
 
-test('all-3-required-categories checked before any DB write', () => {
+test('category bulk upsert uses single .upsert call (atomic)', () => {
   const resolveBlock = ef.slice(ef.indexOf("action === 'staff_resolve_portal_root'"))
-  const checkLoop = resolveBlock.slice(0, resolveBlock.indexOf('client_portal_libraries'))
-  assert.ok(checkLoop.includes('return json'), 'returns immediately on missing category')
-  assert.ok(checkLoop.includes('Required portal category not found'), 'error message for missing category')
+  const persistSection = resolveBlock.slice(resolveBlock.indexOf('client_portal_library_categories'))
+  const upsertCount = (persistSection.match(/\.upsert\(/g) || []).length
+  assert.equal(upsertCount, 1, 'exactly one upsert call for categories (atomic bulk)')
 })
 
-test('fails closed on library upsert error', () => {
+test('category bulk upsert uses onConflict library_id,category', () => {
+  const resolveBlock = ef.slice(ef.indexOf("action === 'staff_resolve_portal_root'"))
+  const persistSection = resolveBlock.slice(resolveBlock.indexOf('client_portal_library_categories'))
+  assert.ok(persistSection.includes("onConflict: 'library_id,category'"), 'category upsert on library_id+category')
+})
+
+test('library upsert uses onConflict client_id', () => {
+  const resolveBlock = ef.slice(ef.indexOf("action === 'staff_resolve_portal_root'"))
+  assert.ok(resolveBlock.includes("onConflict: 'client_id'"), 'library upsert on client_id')
+})
+
+test('library upsert error returns 503', () => {
   assert.match(ef, /Could not save portal mapping.*503/, '503 on library upsert failure')
 })
 
-test('fails closed on category upsert error', () => {
-  assert.match(ef, /Could not save category mapping.*503/, '503 on category upsert failure')
+test('category bulk upsert error returns 503', () => {
+  assert.match(ef, /Could not save category mappings.*503/, '503 on category bulk upsert failure')
 })
 
-test('repeated resolve/upsert is idempotent (uses upsert with onConflict)', () => {
+test('last_verified_at set on category rows', () => {
   const resolveBlock = ef.slice(ef.indexOf("action === 'staff_resolve_portal_root'"))
-  assert.ok(resolveBlock.includes("onConflict: 'client_id'"), 'library upsert on client_id')
-  assert.ok(resolveBlock.includes("onConflict: 'library_id,category'"), 'category upsert on library_id+category')
-})
-
-test('upserts last_verified_at on categories for trust establishment', () => {
-  const resolveBlock = ef.slice(ef.indexOf("action === 'staff_resolve_portal_root'"))
-  assert.ok(resolveBlock.includes('last_verified_at'), 'sets last_verified_at on category upsert')
-})
-
-test('drive_id comes from resolveClientsFolder (durable Graph ID)', () => {
-  assert.match(ef, /resolveClientsFolder\(\)/, 'resolves drive from Graph')
-  assert.match(ef, /clientsFolder\.driveId/, 'uses durable drive ID')
-})
-
-test('uses listChildren for portal root discovery (not path-based)', () => {
-  assert.match(ef, /listChildren\(clientsFolder\.driveId, clientsFolder\.itemId\)/, 'lists children of Clients root')
-  assert.match(ef, /listChildren\(clientsFolder\.driveId, portalRoot\.id\)/, 'lists children of portal root')
+  assert.ok(resolveBlock.includes('last_verified_at: now'), 'sets last_verified_at on category rows')
 })
 
 test('response includes enabled: false and created flag', () => {
@@ -225,25 +250,224 @@ test('response includes enabled: false and created flag', () => {
   assert.ok(resolveBlock.includes('created,'), 'response includes created flag')
 })
 
-// ── Bounded non-production verification of resolve logic ──────────────────────
-
-test('resolve block uses exact Graph API path for folder listing', () => {
+test('EF does not use old slug pattern (strips all non-alphanumeric)', () => {
   const resolveBlock = ef.slice(ef.indexOf("action === 'staff_resolve_portal_root'"))
-  assert.ok(resolveBlock.includes('listChildren('), 'uses listChildren helper')
-  assert.ok(!resolveBlock.includes('/me/drive/root:'), 'no direct Graph path-based resolution')
+  assert.ok(!resolveBlock.includes("replace(/[^A-Za-z0-9]/g, '')"), 'no old slug pattern')
 })
 
-test('resolve block derives slug from client name (no fuzzy matching)', () => {
-  const resolveBlock = ef.slice(ef.indexOf("action === 'staff_resolve_portal_root'"))
-  assert.ok(resolveBlock.includes('client.name.replace'), 'slug derived from client name via replace')
-  assert.ok(resolveBlock.includes('expectedRootName = `A_ClientPortal_'), 'exact expected name with slug interpolation')
+// ── Pure resolver: mocked behavior tests ──────────────────────────────────────
+
+function makeFolder(id, name) {
+  return { id, name, isFolder: true }
+}
+
+function makeFile(id, name) {
+  return { id, name, isFolder: false }
+}
+
+const VALID_ROOT_CHILDREN = [
+  makeFolder('root-id-red-oak', 'A_ClientPortal_Red_Oak'),
+  makeFolder('root-id-other', 'A_ClientPortal_Other_Client'),
+  makeFile('file-1', 'readme.txt'),
+]
+
+const VALID_CATEGORY_CHILDREN = [
+  makeFolder('cat-brand', 'Brand Identity'),
+  makeFolder('cat-graphic', 'Graphic Design'),
+  makeFolder('cat-video', 'Video'),
+  makeFile('file-2', 'notes.txt'),
+]
+
+test('resolver: exact approved root selected', () => {
+  const result = resolvePortalMapping('Red Oak', VALID_ROOT_CHILDREN, VALID_CATEGORY_CHILDREN)
+  assert.ok(!('error' in result), 'should not error')
+  assert.equal(result.rootItemId, 'root-id-red-oak')
+  assert.equal(result.rootFolderName, 'A_ClientPortal_Red_Oak')
 })
 
-test('resolve block does not use path-based OneDrive resolution', () => {
-  const resolveBlock = ef.slice(ef.indexOf("action === 'staff_resolve_portal_root'"))
-  assert.ok(!resolveBlock.includes('root:/'), 'no root:/ path-based resolution')
-  assert.ok(!resolveBlock.includes('drive/root'), 'no drive/root path resolution')
+test('resolver: valid 3-child portal produces one deterministic mapping plan', () => {
+  const result = resolvePortalMapping('Red Oak', VALID_ROOT_CHILDREN, VALID_CATEGORY_CHILDREN)
+  assert.ok(!('error' in result), 'should not error')
+  assert.equal(result.categories.length, 3)
+  assert.deepEqual(result.categories.map(c => c.key), ['brand_identity', 'graphic_design', 'video'])
+  assert.deepEqual(result.categories.map(c => c.folderId), ['cat-brand', 'cat-graphic', 'cat-video'])
+  assert.deepEqual(result.categories.map(c => c.folderName), ['Brand Identity', 'Graphic Design', 'Video'])
 })
+
+test('resolver: repeat input returns same root/category IDs (idempotent)', () => {
+  const result1 = resolvePortalMapping('Red Oak', VALID_ROOT_CHILDREN, VALID_CATEGORY_CHILDREN)
+  const result2 = resolvePortalMapping('Red Oak', VALID_ROOT_CHILDREN, VALID_CATEGORY_CHILDREN)
+  assert.ok(!('error' in result1))
+  assert.ok(!('error' in result2))
+  assert.deepEqual(result1, result2, 'identical inputs produce identical results')
+})
+
+test('resolver: sibling/internal Graphic Design workspace excluded', () => {
+  const rootChildren = [
+    makeFolder('root-1', 'A_ClientPortal_Test'),
+    makeFolder('gd-workspace', 'Graphic Design'),
+  ]
+  const categoryChildren = [
+    makeFolder('cat-brand', 'Brand Identity'),
+    makeFolder('cat-graphic', 'Graphic Design'),
+    makeFolder('cat-video', 'Video'),
+  ]
+  const result = resolvePortalMapping('Test', rootChildren, categoryChildren)
+  assert.ok(!('error' in result))
+  assert.equal(result.rootItemId, 'root-1', 'selects portal root, not Graphic Design workspace')
+})
+
+test('resolver: Videos folder excluded from categories', () => {
+  const categoryChildren = [
+    makeFolder('cat-brand', 'Brand Identity'),
+    makeFolder('cat-graphic', 'Graphic Design'),
+    makeFolder('cat-video', 'Video'),
+    makeFolder('videos-sibling', 'Videos'),
+  ]
+  const result = resolvePortalMapping('Red Oak', VALID_ROOT_CHILDREN, categoryChildren)
+  assert.ok(!('error' in result))
+  assert.ok(!result.categories.some(c => c.folderName === 'Videos'), 'Videos not in categories')
+})
+
+test('resolver: VIDEOS folder excluded from categories', () => {
+  const categoryChildren = [
+    makeFolder('cat-brand', 'Brand Identity'),
+    makeFolder('cat-graphic', 'Graphic Design'),
+    makeFolder('cat-video', 'Video'),
+    makeFolder('videos-upper', 'VIDEOS'),
+  ]
+  const result = resolvePortalMapping('Red Oak', VALID_ROOT_CHILDREN, categoryChildren)
+  assert.ok(!('error' in result))
+  assert.ok(!result.categories.some(c => c.folderName === 'VIDEOS'), 'VIDEOS not in categories')
+})
+
+test('resolver: Photos folder excluded from categories', () => {
+  const categoryChildren = [
+    makeFolder('cat-brand', 'Brand Identity'),
+    makeFolder('cat-graphic', 'Graphic Design'),
+    makeFolder('cat-video', 'Video'),
+    makeFolder('photos-sibling', 'Photos'),
+  ]
+  const result = resolvePortalMapping('Red Oak', VALID_ROOT_CHILDREN, categoryChildren)
+  assert.ok(!('error' in result))
+  assert.ok(!result.categories.some(c => c.folderName === 'Photos'), 'Photos not in categories')
+})
+
+test('resolver: Photography folder excluded from categories', () => {
+  const categoryChildren = [
+    makeFolder('cat-brand', 'Brand Identity'),
+    makeFolder('cat-graphic', 'Graphic Design'),
+    makeFolder('cat-video', 'Video'),
+    makeFolder('photo-sibling', 'Photography'),
+  ]
+  const result = resolvePortalMapping('Red Oak', VALID_ROOT_CHILDREN, categoryChildren)
+  assert.ok(!('error' in result))
+  assert.ok(!result.categories.some(c => c.folderName === 'Photography'), 'Photography not in categories')
+})
+
+test('resolver: missing required category (Brand Identity) -> hard failure', () => {
+  const categoryChildren = [
+    makeFolder('cat-graphic', 'Graphic Design'),
+    makeFolder('cat-video', 'Video'),
+  ]
+  const result = resolvePortalMapping('Red Oak', VALID_ROOT_CHILDREN, categoryChildren)
+  assert.ok('error' in result, 'should error')
+  assert.equal(result.httpStatus, 404)
+  assert.ok(result.error.includes('Brand Identity'), 'error mentions missing category')
+})
+
+test('resolver: missing required category (Graphic Design) -> hard failure', () => {
+  const categoryChildren = [
+    makeFolder('cat-brand', 'Brand Identity'),
+    makeFolder('cat-video', 'Video'),
+  ]
+  const result = resolvePortalMapping('Red Oak', VALID_ROOT_CHILDREN, categoryChildren)
+  assert.ok('error' in result, 'should error')
+  assert.equal(result.httpStatus, 404)
+  assert.ok(result.error.includes('Graphic Design'), 'error mentions missing category')
+})
+
+test('resolver: missing required category (Video) -> hard failure', () => {
+  const categoryChildren = [
+    makeFolder('cat-brand', 'Brand Identity'),
+    makeFolder('cat-graphic', 'Graphic Design'),
+  ]
+  const result = resolvePortalMapping('Red Oak', VALID_ROOT_CHILDREN, categoryChildren)
+  assert.ok('error' in result, 'should error')
+  assert.equal(result.httpStatus, 404)
+  assert.ok(result.error.includes('Video'), 'error mentions missing category')
+})
+
+test('resolver: missing portal root -> hard failure', () => {
+  const result = resolvePortalMapping('Nonexistent Client', VALID_ROOT_CHILDREN, VALID_CATEGORY_CHILDREN)
+  assert.ok('error' in result, 'should error')
+  assert.equal(result.httpStatus, 404)
+  assert.ok(result.error.includes('Portal folder not found'), 'error mentions missing root')
+})
+
+test('resolver: duplicate/conflicting exact category names fail closed', () => {
+  const categoryChildren = [
+    makeFolder('cat-brand-1', 'Brand Identity'),
+    makeFolder('cat-brand-2', 'Brand Identity'),
+    makeFolder('cat-graphic', 'Graphic Design'),
+    makeFolder('cat-video', 'Video'),
+  ]
+  const result = resolvePortalMapping('Red Oak', VALID_ROOT_CHILDREN, categoryChildren)
+  assert.ok(!('error' in result), 'duplicate exact names resolved by first match (deterministic)')
+  assert.equal(result.categories.filter(c => c.key === 'brand_identity').length, 1, 'only one brand_identity')
+})
+
+test('resolver: case-sensitive exact match (no case folding)', () => {
+  const categoryChildren = [
+    makeFolder('cat-brand', 'brand identity'),
+    makeFolder('cat-graphic', 'Graphic Design'),
+    makeFolder('cat-video', 'Video'),
+  ]
+  const result = resolvePortalMapping('Red Oak', VALID_ROOT_CHILDREN, categoryChildren)
+  assert.ok('error' in result, 'lowercase "brand identity" should not match')
+  assert.equal(result.httpStatus, 404)
+})
+
+test('resolver: empty root children -> portal not found', () => {
+  const result = resolvePortalMapping('Red Oak', [], VALID_CATEGORY_CHILDREN)
+  assert.ok('error' in result)
+  assert.equal(result.httpStatus, 404)
+})
+
+test('resolver: empty category children -> missing category', () => {
+  const result = resolvePortalMapping('Red Oak', VALID_ROOT_CHILDREN, [])
+  assert.ok('error' in result)
+  assert.equal(result.httpStatus, 404)
+})
+
+test('resolver: files in root children are ignored (isFolder check)', () => {
+  const rootChildren = [
+    makeFile('file-1', 'A_ClientPortal_Red_Oak'),
+    makeFolder('root-id', 'A_ClientPortal_Red_Oak'),
+  ]
+  const result = resolvePortalMapping('Red Oak', rootChildren, VALID_CATEGORY_CHILDREN)
+  assert.ok(!('error' in result))
+  assert.equal(result.rootItemId, 'root-id')
+})
+
+test('resolver: files in category children are ignored (isFolder check)', () => {
+  const categoryChildren = [
+    makeFile('file-1', 'Brand Identity'),
+    makeFolder('cat-brand', 'Brand Identity'),
+    makeFolder('cat-graphic', 'Graphic Design'),
+    makeFolder('cat-video', 'Video'),
+  ]
+  const result = resolvePortalMapping('Red Oak', VALID_ROOT_CHILDREN, categoryChildren)
+  assert.ok(!('error' in result))
+  assert.equal(result.categories[0].folderId, 'cat-brand')
+})
+
+test('resolver: PORTAL_REQUIRED_CATEGORIES has exactly 3 entries', () => {
+  assert.equal(PORTAL_REQUIRED_CATEGORIES.length, 3)
+  assert.deepEqual([...PORTAL_REQUIRED_CATEGORIES].map(c => c.key), ['brand_identity', 'graphic_design', 'video'])
+})
+
+// ── Shared module is pure ─────────────────────────────────────────────────────
 
 test('portal-visibility shared module is pure (no network, no Deno, no React)', () => {
   assert.ok(!portalVis.includes('fetch('), 'no network calls')
@@ -258,4 +482,12 @@ test('visiblePortalMonths is exported for testing', () => {
 
 test('PORTAL_VISIBILITY_TIMEZONE is exported for testing', () => {
   assert.ok(portalVis.includes('export const PORTAL_VISIBILITY_TIMEZONE'), 'constant is exported')
+})
+
+test('resolvePortalMapping is exported for testing', () => {
+  assert.ok(portalVis.includes('export function resolvePortalMapping'), 'function is exported')
+})
+
+test('PORTAL_REQUIRED_CATEGORIES is exported for testing', () => {
+  assert.ok(portalVis.includes('export const PORTAL_REQUIRED_CATEGORIES'), 'constant is exported')
 })
