@@ -405,7 +405,7 @@ test('resolver: missing portal root -> hard failure', () => {
   assert.ok(result.error.includes('Portal folder not found'), 'error mentions missing root')
 })
 
-test('resolver: duplicate/conflicting exact category names fail closed', () => {
+test('resolver: duplicate exact category names fail closed (409 conflict)', () => {
   const categoryChildren = [
     makeFolder('cat-brand-1', 'Brand Identity'),
     makeFolder('cat-brand-2', 'Brand Identity'),
@@ -413,8 +413,46 @@ test('resolver: duplicate/conflicting exact category names fail closed', () => {
     makeFolder('cat-video', 'Video'),
   ]
   const result = resolvePortalMapping('Red Oak', VALID_ROOT_CHILDREN, categoryChildren)
-  assert.ok(!('error' in result), 'duplicate exact names resolved by first match (deterministic)')
-  assert.equal(result.categories.filter(c => c.key === 'brand_identity').length, 1, 'only one brand_identity')
+  assert.ok('error' in result, 'should error on duplicate category')
+  assert.equal(result.httpStatus, 409)
+  assert.ok(result.error.includes('Brand Identity'), 'error mentions duplicate category')
+})
+
+test('resolver: duplicate Graphic Design -> hard failure (409)', () => {
+  const categoryChildren = [
+    makeFolder('cat-brand', 'Brand Identity'),
+    makeFolder('cat-gd-1', 'Graphic Design'),
+    makeFolder('cat-gd-2', 'Graphic Design'),
+    makeFolder('cat-video', 'Video'),
+  ]
+  const result = resolvePortalMapping('Red Oak', VALID_ROOT_CHILDREN, categoryChildren)
+  assert.ok('error' in result, 'should error on duplicate Graphic Design')
+  assert.equal(result.httpStatus, 409)
+  assert.ok(result.error.includes('Graphic Design'), 'error mentions duplicate Graphic Design')
+})
+
+test('resolver: duplicate Video -> hard failure (409)', () => {
+  const categoryChildren = [
+    makeFolder('cat-brand', 'Brand Identity'),
+    makeFolder('cat-graphic', 'Graphic Design'),
+    makeFolder('cat-video-1', 'Video'),
+    makeFolder('cat-video-2', 'Video'),
+  ]
+  const result = resolvePortalMapping('Red Oak', VALID_ROOT_CHILDREN, categoryChildren)
+  assert.ok('error' in result, 'should error on duplicate Video')
+  assert.equal(result.httpStatus, 409)
+  assert.ok(result.error.includes('Video'), 'error mentions duplicate Video')
+})
+
+test('resolver: duplicate portal root -> hard failure (409)', () => {
+  const rootChildren = [
+    makeFolder('root-1', 'A_ClientPortal_Red_Oak'),
+    makeFolder('root-2', 'A_ClientPortal_Red_Oak'),
+  ]
+  const result = resolvePortalMapping('Red Oak', rootChildren, VALID_CATEGORY_CHILDREN)
+  assert.ok('error' in result, 'should error on duplicate portal root')
+  assert.equal(result.httpStatus, 409)
+  assert.ok(result.error.includes('Duplicate portal root'), 'error mentions duplicate root')
 })
 
 test('resolver: case-sensitive exact match (no case folding)', () => {

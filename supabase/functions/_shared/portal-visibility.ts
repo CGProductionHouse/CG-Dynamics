@@ -97,6 +97,8 @@ export const PORTAL_REQUIRED_CATEGORIES = [
  * then validates all three required categories among categoryChildren.
  * Uses exact string equality only — no fuzzy matching, no case folding.
  *
+ * Requires exactly one match for root and each category.
+ * Zero matches → not-found; more than one → conflict (fail closed).
  * Returns either a complete mapping plan or an error. No partial state.
  */
 export function resolvePortalMapping(
@@ -105,14 +107,17 @@ export function resolvePortalMapping(
   categoryChildren: readonly DriveChild[],
 ): PortalMappingPlan | PortalMappingError {
   const expectedRootName = portalRootFolderName(clientName)
-  const root = rootChildren.find(c => c.isFolder && c.name === expectedRootName)
-  if (!root) return { error: `Portal folder not found: ${expectedRootName}`, httpStatus: 404 }
+  const rootMatches = rootChildren.filter(c => c.isFolder && c.name === expectedRootName)
+  if (rootMatches.length === 0) return { error: `Portal folder not found: ${expectedRootName}`, httpStatus: 404 }
+  if (rootMatches.length > 1) return { error: `Duplicate portal root folders: ${expectedRootName} (${rootMatches.length} found)`, httpStatus: 409 }
+  const root = rootMatches[0]
 
   const categories: PortalMappingPlan['categories'] = []
   for (const cat of PORTAL_REQUIRED_CATEGORIES) {
-    const folder = categoryChildren.find(c => c.isFolder && c.name === cat.expectedName)
-    if (!folder) return { error: `Required portal category not found: ${cat.expectedName}`, httpStatus: 404 }
-    categories.push({ key: cat.key, expectedName: cat.expectedName, folderId: folder.id, folderName: folder.name })
+    const matches = categoryChildren.filter(c => c.isFolder && c.name === cat.expectedName)
+    if (matches.length === 0) return { error: `Required portal category not found: ${cat.expectedName}`, httpStatus: 404 }
+    if (matches.length > 1) return { error: `Duplicate portal category: ${cat.expectedName} (${matches.length} found)`, httpStatus: 409 }
+    categories.push({ key: cat.key, expectedName: cat.expectedName, folderId: matches[0].id, folderName: matches[0].name })
   }
 
   return { rootItemId: root.id, rootFolderName: root.name, categories }
