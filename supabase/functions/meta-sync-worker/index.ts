@@ -539,8 +539,15 @@ Deno.serve(async (req) => {
         continue
       }
 
-      const { periodStart, periodEnd } = isCurrentMonthIncremental
-        ? incrementalMonthBounds(item.month)
+      const incrementalBounds = isCurrentMonthIncremental ? incrementalMonthBounds(item.month) : null
+      if (isCurrentMonthIncremental && !incrementalBounds) {
+        await settleItem('skipped', 0, 0, [], 'No completed reporting day yet in the current month.')
+        processed.push({ itemId: item.id, clientName: item.client_name, month: item.month, status: 'skipped', postsSynced: 0 })
+        continue
+      }
+
+      const { periodStart, periodEnd } = isCurrentMonthIncremental && incrementalBounds
+        ? incrementalBounds
         : monthBounds(item.month)
       const postBounds = metaPostBounds(periodStart, periodEnd)
       const providerPeriod = metaProviderPeriod(periodStart, periodEnd)

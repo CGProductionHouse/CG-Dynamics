@@ -126,23 +126,38 @@ export function incrementalMonthEnd(): string {
   return `${parts.year}-${String(parts.month).padStart(2, '0')}-${String(parts.day).padStart(2, '0')}`
 }
 
-// Returns the provider window bounds for current-month incremental work.
-// periodStart is the first day of the month; periodEnd is yesterday (latest
-// completed Meta reporting date). This prevents the worker from expecting
-// future daily buckets while still covering all available month-to-date data.
+// Returns the provider window bounds for current-month incremental work, or
+// null when no completed reporting day exists yet in the current month.
+//
+// On the 1st of a month, incrementalMonthEnd() returns the last day of the
+// previous month. Clamping that to month-01 would fabricate a completed
+// reporting bucket for a day that has not finished yet. Instead, returning
+// null signals that current-month incremental work is not yet eligible.
+//
+// On the 2nd+, periodStart = month-01, periodEnd = yesterday (latest completed
+// Meta reporting date). This prevents the worker from expecting future daily
+// buckets while still covering all available month-to-date data.
+//
 // The canonical period_month remains the full current month — these bounds
 // control only the insight/probe window, not the monthly identity.
-export function incrementalMonthBounds(month: string): { periodStart: string; periodEnd: string } {
+export function incrementalMonthBounds(month: string): { periodStart: string; periodEnd: string } | null {
   const end = incrementalMonthEnd()
   const monthPrefix = month.slice(0, 7)
-  // If the incremental end falls outside the requested month, clamp to the
-  // month boundary. This can happen on the 1st of a new month before the
-  // previous month is marked completed.
-  const endClamped = end.startsWith(monthPrefix) ? end : `${month}-01`
+  // If yesterday is in a previous month, no current-month reporting day
+  // has completed yet. Do not fabricate month-01.
+  if (!end.startsWith(monthPrefix)) return null
   return {
     periodStart: `${month}-01`,
-    periodEnd: endClamped,
+    periodEnd: end,
   }
+}
+
+// Returns true when the current Meta month has at least one completed
+// reporting day for incremental month-to-date work. Equivalent to
+// incrementalMonthBounds(currentMetaMonth()) !== null but avoids
+// recomputing the bounds.
+export function currentMonthHasIncrementalWindow(): boolean {
+  return incrementalMonthBounds(currentMetaMonth()) !== null
 }
 
 // Each requested Pacific calendar day must have exactly one ending bucket.

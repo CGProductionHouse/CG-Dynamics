@@ -7,7 +7,7 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 import webpush from 'npm:web-push@3.6.7'
 import { dispatchMetaWorker } from '../_shared/metaWorkerDispatch.ts'
-import { currentMetaMonth, previousMetaMonth } from '../_shared/metaPeriod.ts'
+import { currentMetaMonth, previousMetaMonth, currentMonthHasIncrementalWindow } from '../_shared/metaPeriod.ts'
 
 const MAX_RUNTIME_MS = 25_000
 const MAX_JOBS_PER_RUN = 25
@@ -388,8 +388,15 @@ interface CheckpointRow {
     // - Previous completed Meta month (historical) if any target needs reconciliation.
     const needsReconciliation = plans.some(p => p.needsReconciliation)
 
-    const months: string[] = [currentMonth]
+    // On day 1 of a new month, no completed reporting day exists yet for the
+    // current month. Skip current-month incremental to avoid creating items
+    // that the worker would immediately skip (and prevent churn).
+    const canDoCurrentIncremental = currentMonthHasIncrementalWindow()
+
+    const months: string[] = []
+    if (canDoCurrentIncremental) months.push(currentMonth)
     if (needsReconciliation) months.push(prevCompletedMonth)
+    if (months.length === 0) continue
 
     // Build logical work items per asset per month, then apply dedupe.
     // Each item = { plan, month, syncKind }
