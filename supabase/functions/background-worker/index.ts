@@ -374,7 +374,8 @@ interface CheckpointRow {
     .in('id', clientIds)
   const clientNameMap = new Map<string, string>((clientRows ?? []).map(c => [c.id, c.name]))
 
-  // 5. For each client, build months and filter out active work.
+  // 5. For each client, build logical work items (asset + month + sync_kind)
+  // and apply dedupe per asset+month.
   let batchesCreated = 0
   for (const [clientId, targets] of byClient.entries()) {
     if (batchesCreated >= META_FLEET_FRESHNESS_MAX_BATCHES) break
@@ -392,23 +393,29 @@ interface CheckpointRow {
     const months: string[] = [currentMonth]
     if (needsReconciliation) months.push(prevCompletedMonth)
 
-    // Filter targets: exclude asset+month combos that already have active work
-    const filteredTargets = targets.filter(t => {
-      for (const month of months) {
-        if (activeWorkKeys.has(`${t.assetId}:${month}`)) {
-          return false // skip - work already queued/running
-        }
-      }
-      return true
-    })
+    // Build logical work items per target per month, then apply dedupe.
+    // Each item = { target, month, sync_kind }
+    type WorkItem = { target: PlatformTarget; month: string; syncKind: string }
+    const neededWork: WorkItem[] = []
 
-    if (filteredTargets.length === 0) {
+    for (const target of targets) {
+      for (const month of months) {
+        // Skip if this asset+month already has active work
+        if (activeWorkKeys.has(`${target.assetId}:${month}`)) {
+          continue
+        }
+        const syncKind = month === currentMonth ? 'incremental' : 'historical'
+        neededWork.push({ target, month, syncKind })
+      }
+    }
+
+    if (neededWork.length === 0) {
       continue // all work for this client is already active
     }
 
-    // 6. Create the batch with filtered targets and months.
-    const uniqueAssets = [...new Map(filteredTargets.map(t => [t.assetId, t])).values()]
-    const totalItems = months.length * uniqueAssets.length
+    // 6. Create the batch with only the needed logical work items.
+    const uniqueAssets = [...new Map(neededWork.map(w => [w.target.assetId, w.target])).values()]
+    const totalItems = neededWork.length
 
     const { data: batch, error: batchError } = await supabase
       .from('meta_sync_batches')
@@ -420,7 +427,7 @@ interface CheckpointRow {
         total_items: totalItems,
         completed_items: 0,
         failed_items: 0,
-        summary: { months, clientCount: uniqueAssets.length, via: 'fleet_freshness' },
+        summary: { months, clientCount: uniqueAssets.length, via: 'fleet_freshness', itemsEnqueued: totalItems },
       })
       .select('id')
       .single()
@@ -432,8 +439,7 @@ interface CheckpointRow {
 
     const batchId = batch.id
 
-    // Create batch items with sync_kind = 'incremental' for current period,
-    // 'historical' for reconciliation month.
+    // Create batch items from the filtered work list.
     const itemRows: Array<{
       batch_id: string
       client_id: string
@@ -444,19 +450,16 @@ interface CheckpointRow {
       status: string
     }> = []
 
-    for (const month of months) {
-      const kind = month === currentMonth ? 'incremental' : 'historical'
-      for (const target of uniqueAssets) {
-        itemRows.push({
-          batch_id: batchId,
-          client_id: target.clientId,
-          client_name: clientName,
-          asset_id: target.assetId,
-          sync_kind: kind,
-          month,
-          status: 'queued',
-        })
-      }
+    for (const work of neededWork) {
+      itemRows.push({
+        batch_id: batchId,
+        client_id: work.target.clientId,
+        client_name: clientName,
+        asset_id: work.target.assetId,
+        sync_kind: work.syncKind,
+        month: work.month,
+        status: 'queued',
+      })
     }
 
     const { error: itemsError } = await supabase
@@ -487,7 +490,7 @@ interface CheckpointRow {
     }
 
     batchesCreated++
-    out.push({ batchId, clientCount: uniqueAssets.length, months, assetCount: uniqueAssets.length })
+    out.push({ batchId, clientCount: uniqueAssets.length, months, assetCount: uniqueAssets.length, itemsEnqueued: totalItems })
   }
 
   return out
