@@ -20,6 +20,7 @@ import { normalizeMetaWorkerLanes } from '../_shared/metaWorkerLanes.ts'
 import { dispatchMetaWorker } from '../_shared/metaWorkerDispatch.ts'
 import { metaRateLimitScope } from '../_shared/metaRateLimit.ts'
 import { fetchMappedPageToken } from '../_shared/metaAssetIdentity.ts'
+import { currentMetaMonth, incrementalMonthBounds } from '../_shared/metaPeriod.ts'
 
 // Scheduled/background syncing shares the SAME truth contract as manual syncing:
 // configurable Graph version, shared connector engine (syncAccountFacts) writing
@@ -55,11 +56,6 @@ function monthLabel(month: string): string {
   const m = Number(month.slice(5, 7))
   const y = Number(month.slice(0, 4))
   return new Date(Date.UTC(y, m - 1, 1)).toLocaleString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' })
-}
-
-function currentMonthStr(): string {
-  const now = new Date()
-  return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`
 }
 
 async function parseMetaError(
@@ -532,14 +528,27 @@ Deno.serve(async (req) => {
         settledIds.add(item.id)
       }
 
-      // ── Skip current/future months ──
-      if (item.month >= currentMonthStr()) {
+      // ── Skip future months; allow current month only for incremental work ──
+      // Canonical Meta month uses America/Los_Angeles (META_INSIGHTS_TIMEZONE).
+      const currentMetaMonthStr = currentMetaMonth()
+      const isFutureMonth = item.month > currentMetaMonthStr
+      const isCurrentMonthIncremental = item.month === currentMetaMonthStr && item.sync_kind === 'incremental'
+      if (isFutureMonth || (item.month === currentMetaMonthStr && !isCurrentMonthIncremental)) {
         await settleItem('skipped', 0, 0, [], 'Month is not yet completed.')
         processed.push({ itemId: item.id, clientName: item.client_name, month: item.month, status: 'skipped', postsSynced: 0 })
         continue
       }
 
-      const { periodStart, periodEnd } = monthBounds(item.month)
+      const incrementalBounds = isCurrentMonthIncremental ? incrementalMonthBounds(item.month) : null
+      if (isCurrentMonthIncremental && !incrementalBounds) {
+        await settleItem('skipped', 0, 0, [], 'No completed reporting day yet in the current month.')
+        processed.push({ itemId: item.id, clientName: item.client_name, month: item.month, status: 'skipped', postsSynced: 0 })
+        continue
+      }
+
+      const { periodStart, periodEnd } = isCurrentMonthIncremental && incrementalBounds
+        ? incrementalBounds
+        : monthBounds(item.month)
       const postBounds = metaPostBounds(periodStart, periodEnd)
       const providerPeriod = metaProviderPeriod(periodStart, periodEnd)
       let postsSynced = Number(item.posts_synced ?? 0)

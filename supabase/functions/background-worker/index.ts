@@ -7,6 +7,7 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 import webpush from 'npm:web-push@3.6.7'
 import { dispatchMetaWorker } from '../_shared/metaWorkerDispatch.ts'
+import { currentMetaMonth, previousMetaMonth, currentMonthHasIncrementalWindow } from '../_shared/metaPeriod.ts'
 
 const MAX_RUNTIME_MS = 25_000
 const MAX_JOBS_PER_RUN = 25
@@ -15,6 +16,11 @@ const MAX_JOBS_PER_RUN = 25
 // so a healthy batch is never double-driven, while a dead one is picked up on
 // the second or third cron tick.
 const META_SYNC_STALE_SECONDS = 120
+// Fleet freshness: enqueue proactive sync for assets whose checkpoint is due.
+  // Runs every background-worker invocation (every minute via cron). The check is
+  // cheap; if no assets are due it returns immediately. Bounded to 2 batches per
+  // invocation to avoid starving the job queue.
+  const META_FLEET_FRESHNESS_MAX_BATCHES = 2
 
 interface JobRow {
   id: string
@@ -99,7 +105,16 @@ Deno.serve(async () => {
   const reaped = await reapStalledMetaSyncBatches(supabase, url)
   const laneRecoveries = await recoverMetaSyncLanes(supabase, url)
 
-  return new Response(JSON.stringify({ ok: true, worker, processed, reaped, laneRecoveries }), { headers: { 'Content-Type': 'application/json' } })
+  // ── Fleet freshness enqueue ──────────────────────────────────────────────
+  // Proactively create sync batches for assets whose per-platform checkpoint
+  // next_due_at has passed. This implements automatic background freshness so
+  // routine operation does not depend on a person pressing Sync.
+  // Bounded to META_FLEET_FRESHNESS_MAX_BATCHES per invocation to avoid
+  // starving the job queue. The checkpoints table already tracks freshness
+  // state (Access/Coverage/Completeness/Freshness) independently.
+  const fleetFreshness = await enqueueFleetMetaFreshness(supabase, url)
+
+  return new Response(JSON.stringify({ ok: true, worker, processed, reaped, laneRecoveries, fleetFreshness }), { headers: { 'Content-Type': 'application/json' } })
 })
 
 interface LaneRecoveryRow {
@@ -181,6 +196,307 @@ async function reapStalledMetaSyncBatches(
     }
 
     out.push({ batchId: row.batch_id, queued: row.queued_items, staleRunning: row.stale_running_items, invoked, detail })
+  }
+
+  return out
+}
+
+interface FleetFreshnessBatch {
+  batchId: string
+  clientCount: number
+  months: string[]
+  assetCount: number
+}
+
+interface CheckpointRow {
+    asset_id: string
+    platform: string
+    next_due_at: string | null
+    last_sync_kind: string | null
+    last_status: string | null
+    last_health_state: string | null
+    last_successful_month: string | null
+  }
+
+  async function enqueueFleetMetaFreshness(
+    supabase: ReturnType<typeof createClient>,
+    url: string,
+  ): Promise<Array<FleetFreshnessBatch | { detail: string }>> {
+    const out: Array<FleetFreshnessBatch | { detail: string }> = []
+    const workerSecret = (Deno.env.get('META_SYNC_WORKER_SECRET') ?? '').trim()
+    if (!workerSecret) {
+      return [{ detail: 'META_SYNC_WORKER_SECRET not configured' }]
+    }
+
+    // 1. Build the complete inventory of expected active Meta targets from
+  // meta_client_assets. This is the source of truth for what SHOULD be synced.
+  // LEFT JOIN with meta_asset_sync_checkpoints to find due/missing work.
+  // Missing checkpoint row = bootstrap due (never synced).
+  // Existing checkpoint with next_due_at <= now() = refresh due.
+  const { data: expectedTargets, error: targetError } = await supabase
+    .from('meta_client_assets')
+    .select(`
+      id,
+      client_id,
+      facebook_page_id,
+      instagram_account_id,
+      is_active,
+      meta_asset_sync_checkpoints!left (
+        asset_id,
+        platform,
+        next_due_at,
+        last_sync_kind,
+        last_status,
+        last_health_state,
+        last_successful_month
+      )
+    `)
+    .eq('is_active', true)
+    .limit(100)
+
+  if (targetError || !expectedTargets || expectedTargets.length === 0) {
+    return out
+  }
+
+  // 2. Collapse per-platform due observations into per-asset scheduling plans.
+  // Canonical queue semantics: one batch item per asset+month, owning both FB/IG stages.
+  const now = new Date().toISOString()
+  const currentMonth = currentMetaMonth()
+  const prevCompletedMonth = previousMetaMonth(1)
+
+  type AssetPlan = {
+    assetId: string
+    clientId: string
+    hasFacebook: boolean
+    hasInstagram: boolean
+    lastSuccessfulMonth: string | null // earliest successful month across platforms
+    needsReconciliation: boolean
+  }
+
+  const assetPlans = new Map<string, AssetPlan>()
+
+  for (const asset of expectedTargets) {
+    if (!asset.is_active) continue
+
+    let fbDue = false
+    let igDue = false
+    let fbCheckpoint: CheckpointRow | null = null
+    let igCheckpoint: CheckpointRow | null = null
+    let fbBootstrap = false
+    let igBootstrap = false
+
+    // Facebook platform
+    if (asset.facebook_page_id) {
+      fbCheckpoint = asset.meta_asset_sync_checkpoints?.find(
+        (c: CheckpointRow) => c.platform === 'facebook'
+      ) ?? null
+      fbBootstrap = !fbCheckpoint
+      fbDue = fbBootstrap || (fbCheckpoint?.next_due_at && fbCheckpoint.next_due_at <= now)
+    }
+
+    // Instagram platform
+    if (asset.instagram_account_id) {
+      igCheckpoint = asset.meta_asset_sync_checkpoints?.find(
+        (c: CheckpointRow) => c.platform === 'instagram'
+      ) ?? null
+      igBootstrap = !igCheckpoint
+      igDue = igBootstrap || (igCheckpoint?.next_due_at && igCheckpoint.next_due_at <= now)
+    }
+
+    if (!fbDue && !igDue) continue
+
+    // Determine reconciliation: required if ANY due platform needs it
+    const fbReconcile = fbDue && (fbBootstrap || (fbCheckpoint?.last_successful_month ?? '') < prevCompletedMonth)
+    const igReconcile = igDue && (igBootstrap || (igCheckpoint?.last_successful_month ?? '') < prevCompletedMonth)
+    const needsReconciliation = fbReconcile || igReconcile
+
+    // Earliest successful month across due platforms (null if any bootstrap)
+    let earliestSuccess: string | null = null
+    if (fbDue) {
+      if (fbBootstrap) earliestSuccess = null
+      else if (fbCheckpoint?.last_successful_month) {
+        earliestSuccess = fbCheckpoint.last_successful_month
+      }
+    }
+    if (igDue) {
+      if (igBootstrap) earliestSuccess = null
+      else if (igCheckpoint?.last_successful_month) {
+        if (!earliestSuccess || igCheckpoint.last_successful_month < earliestSuccess) {
+          earliestSuccess = igCheckpoint.last_successful_month
+        }
+      }
+    }
+
+    assetPlans.set(asset.id, {
+      assetId: asset.id,
+      clientId: asset.client_id,
+      hasFacebook: fbDue,
+      hasInstagram: igDue,
+      lastSuccessfulMonth: earliestSuccess,
+      needsReconciliation,
+    })
+  }
+
+  if (assetPlans.size === 0) {
+    return out
+  }
+
+  // 3. Cross-batch active-work dedupe: find asset+month combinations that
+  // already have queued/running work across ANY batch.
+  // Include items regardless of cooldown — cooldown is healthy waiting, not finished work.
+  // The worker controls retry timing; the scheduler must treat all queued/running
+  // asset+month as active logical work to prevent duplicate enqueue.
+  const activeWorkKeys = new Set<string>()
+  const { data: activeItems } = await supabase
+    .from('meta_sync_batch_items')
+    .select('asset_id, month')
+    .in('status', ['queued', 'running'])
+
+  if (activeItems) {
+    for (const item of activeItems) {
+      if (item.asset_id) {
+        activeWorkKeys.add(`${item.asset_id}:${item.month}`)
+      }
+    }
+  }
+
+  // 4. Group by client using collapsed asset plans.
+  const byClient = new Map<string, AssetPlan[]>()
+  for (const plan of assetPlans.values()) {
+    const arr = byClient.get(plan.clientId) ?? []
+    arr.push(plan)
+    byClient.set(plan.clientId, arr)
+  }
+
+  const clientIds = Array.from(byClient.keys())
+  const { data: clientRows } = await supabase
+    .from('clients')
+    .select('id, name')
+    .in('id', clientIds)
+  const clientNameMap = new Map<string, string>((clientRows ?? []).map(c => [c.id, c.name]))
+
+  // 5. For each client, build logical work items (asset + month + sync_kind)
+  // and apply dedupe per asset+month.
+  let batchesCreated = 0
+  for (const [clientId, plans] of byClient.entries()) {
+    if (batchesCreated >= META_FLEET_FRESHNESS_MAX_BATCHES) break
+
+    const clientName = clientNameMap.get(clientId) ?? 'Unknown'
+
+    // Determine months needed for this client's targets.
+    // - Current Meta month (incremental) for all due targets.
+    // - Previous completed Meta month (historical) if any target needs reconciliation.
+    const needsReconciliation = plans.some(p => p.needsReconciliation)
+
+    // On day 1 of a new month, no completed reporting day exists yet for the
+    // current month. Skip current-month incremental to avoid creating items
+    // that the worker would immediately skip (and prevent churn).
+    const canDoCurrentIncremental = currentMonthHasIncrementalWindow()
+
+    const months: string[] = []
+    if (canDoCurrentIncremental) months.push(currentMonth)
+    if (needsReconciliation) months.push(prevCompletedMonth)
+    if (months.length === 0) continue
+
+    // Build logical work items per asset per month, then apply dedupe.
+    // Each item = { plan, month, syncKind }
+    // Canonical queue: one item per asset+month.
+    type WorkItem = { plan: AssetPlan; month: string; syncKind: string }
+    const neededWork: WorkItem[] = []
+
+    for (const plan of plans) {
+      for (const month of months) {
+        // Skip if this asset+month already has active work (regardless of platform)
+        if (activeWorkKeys.has(`${plan.assetId}:${month}`)) {
+          continue
+        }
+        const syncKind = month === currentMonth ? 'incremental' : 'historical'
+        neededWork.push({ plan, month, syncKind })
+      }
+    }
+
+    if (neededWork.length === 0) {
+      continue // all work for this client is already active
+    }
+
+    // 6. Create the batch with only the needed logical work items.
+    const uniqueAssets = [...new Map(neededWork.map(w => [w.plan.assetId, w.plan])).values()]
+    const totalItems = neededWork.length
+
+    const { data: batch, error: batchError } = await supabase
+      .from('meta_sync_batches')
+      .insert({
+        mode: 'all',
+        requested_by: null, // system-initiated
+        status: 'queued',
+        sync_range_months: months.length,
+        total_items: totalItems,
+        completed_items: 0,
+        failed_items: 0,
+        summary: { months, clientCount: uniqueAssets.length, via: 'fleet_freshness', itemsEnqueued: totalItems },
+      })
+      .select('id')
+      .single()
+
+    if (batchError || !batch) {
+      out.push({ detail: `Failed to create batch for ${clientName}: ${batchError?.message ?? 'no id'}` })
+      continue
+    }
+
+    const batchId = batch.id
+
+    // Create batch items from the filtered work list.
+    const itemRows: Array<{
+      batch_id: string
+      client_id: string
+      client_name: string
+      asset_id: string
+      sync_kind: string
+      month: string
+      status: string
+    }> = []
+
+    for (const work of neededWork) {
+      itemRows.push({
+        batch_id: batchId,
+        client_id: work.plan.clientId,
+        client_name: clientName,
+        asset_id: work.plan.assetId,
+        sync_kind: work.syncKind,
+        month: work.month,
+        status: 'queued',
+      })
+    }
+
+    const { error: itemsError } = await supabase
+      .from('meta_sync_batch_items')
+      .insert(itemRows)
+
+    if (itemsError) {
+      out.push({ detail: `Failed to create batch items for ${clientName}: ${itemsError.message}` })
+      continue
+    }
+
+    // 7. Trigger the worker for this batch (fire-and-forget with short timeout).
+    const workerUrl = Deno.env.get('META_SYNC_WORKER_URL') ?? `${url}/functions/v1/meta-sync-worker`
+    try {
+      await Promise.race([
+        fetch(workerUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-worker-secret': workerSecret,
+          },
+          body: JSON.stringify({ batchId, maxItems: 1, startLanes: true }),
+        }),
+        new Promise(resolve => setTimeout(resolve, 3_000)),
+      ])
+    } catch {
+      // Worker may not be deployed yet — batch stays queued; reaper will pick it up.
+    }
+
+    batchesCreated++
+    out.push({ batchId, clientCount: uniqueAssets.length, months, assetCount: uniqueAssets.length, itemsEnqueued: totalItems })
   }
 
   return out
