@@ -128,17 +128,18 @@ describe('Integration: month selection contract matches PR #424', () => {
   })
 
   test('reconciliation conditional on selected last_successful_month', () => {
-    // Reconciliation triggered when lastSuccessfulMonth < prevCompletedMonth
-    // Bootstrap (no history) also triggers reconciliation
+    // Reconciliation is computed per-asset from per-platform checkpoints
+    // and then checked at the client level: plans.some(p => p.needsReconciliation)
     assert.match(background, /needsReconciliation/)
-    assert.match(background, /!t\.lastSuccessfulMonth/)
-    assert.match(background, /t\.lastSuccessfulMonth < prevCompletedMonth/)
+    assert.match(background, /needsReconciliation = fbReconcile \|\| igReconcile/)
+    assert.match(background, /plans\.some\(p => p\.needsReconciliation\)/)
   })
 
   test('bootstrap targets (no checkpoint row) are discovered and enqueued', () => {
     // Scheduler starts from meta_client_assets with LEFT JOIN
+    // Missing checkpoint = bootstrap due (no history) -> fbBootstrap/igBootstrap = true
     assert.match(background, /\.from\('meta_client_assets'\)/)
     assert.match(background, /meta_asset_sync_checkpoints!left/)
-    assert.match(background, /isBootstrap/)
+    assert.match(background, /fbBootstrap|igBootstrap/)
   })
 })

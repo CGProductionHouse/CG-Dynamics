@@ -258,113 +258,114 @@ interface CheckpointRow {
     return out
   }
 
-  // 2. Flatten to per-platform targets and determine due state.
-  // Each asset can have facebook and/or instagram platform.
+  // 2. Collapse per-platform due observations into per-asset scheduling plans.
+  // Canonical queue semantics: one batch item per asset+month, owning both FB/IG stages.
   const now = new Date().toISOString()
   const currentMonth = currentMetaMonth()
   const prevCompletedMonth = previousMetaMonth(1)
 
-  type PlatformTarget = {
+  type AssetPlan = {
     assetId: string
     clientId: string
-    platform: 'facebook' | 'instagram'
-    hasCheckpoint: boolean
-    nextDueAt: string | null
-    lastSyncKind: string | null
-    lastStatus: string | null
-    lastHealthState: string | null
-    lastSuccessfulMonth: string | null
-    isDue: boolean
-    isBootstrap: boolean
+    hasFacebook: boolean
+    hasInstagram: boolean
+    lastSuccessfulMonth: string | null // earliest successful month across platforms
+    needsReconciliation: boolean
   }
 
-  const allPlatformTargets: PlatformTarget[] = []
+  const assetPlans = new Map<string, AssetPlan>()
 
   for (const asset of expectedTargets) {
     if (!asset.is_active) continue
 
+    let fbDue = false
+    let igDue = false
+    let fbCheckpoint: CheckpointRow | null = null
+    let igCheckpoint: CheckpointRow | null = null
+    let fbBootstrap = false
+    let igBootstrap = false
+
     // Facebook platform
     if (asset.facebook_page_id) {
-      const checkpoint = asset.meta_asset_sync_checkpoints?.find(
+      fbCheckpoint = asset.meta_asset_sync_checkpoints?.find(
         (c: CheckpointRow) => c.platform === 'facebook'
-      )
-      const nextDueAt = checkpoint?.next_due_at ?? null
-      const isBootstrap = !checkpoint
-      const isDue = isBootstrap || (nextDueAt && nextDueAt <= now)
-      if (isDue) {
-        allPlatformTargets.push({
-          assetId: asset.id,
-          clientId: asset.client_id,
-          platform: 'facebook',
-          hasCheckpoint: !!checkpoint,
-          nextDueAt,
-          lastSyncKind: checkpoint?.last_sync_kind ?? null,
-          lastStatus: checkpoint?.last_status ?? null,
-          lastHealthState: checkpoint?.last_health_state ?? null,
-          lastSuccessfulMonth: checkpoint?.last_successful_month ?? null,
-          isDue: true,
-          isBootstrap,
-        })
-      }
+      ) ?? null
+      fbBootstrap = !fbCheckpoint
+      fbDue = fbBootstrap || (fbCheckpoint?.next_due_at && fbCheckpoint.next_due_at <= now)
     }
 
     // Instagram platform
     if (asset.instagram_account_id) {
-      const checkpoint = asset.meta_asset_sync_checkpoints?.find(
+      igCheckpoint = asset.meta_asset_sync_checkpoints?.find(
         (c: CheckpointRow) => c.platform === 'instagram'
-      )
-      const nextDueAt = checkpoint?.next_due_at ?? null
-      const isBootstrap = !checkpoint
-      const isDue = isBootstrap || (nextDueAt && nextDueAt <= now)
-      if (isDue) {
-        allPlatformTargets.push({
-          assetId: asset.id,
-          clientId: asset.client_id,
-          platform: 'instagram',
-          hasCheckpoint: !!checkpoint,
-          nextDueAt,
-          lastSyncKind: checkpoint?.last_sync_kind ?? null,
-          lastStatus: checkpoint?.last_status ?? null,
-          lastHealthState: checkpoint?.last_health_state ?? null,
-          lastSuccessfulMonth: checkpoint?.last_successful_month ?? null,
-          isDue: true,
-          isBootstrap,
-        })
+      ) ?? null
+      igBootstrap = !igCheckpoint
+      igDue = igBootstrap || (igCheckpoint?.next_due_at && igCheckpoint.next_due_at <= now)
+    }
+
+    if (!fbDue && !igDue) continue
+
+    // Determine reconciliation: required if ANY due platform needs it
+    const fbReconcile = fbDue && (fbBootstrap || (fbCheckpoint?.last_successful_month ?? '') < prevCompletedMonth)
+    const igReconcile = igDue && (igBootstrap || (igCheckpoint?.last_successful_month ?? '') < prevCompletedMonth)
+    const needsReconciliation = fbReconcile || igReconcile
+
+    // Earliest successful month across due platforms (null if any bootstrap)
+    let earliestSuccess: string | null = null
+    if (fbDue) {
+      if (fbBootstrap) earliestSuccess = null
+      else if (fbCheckpoint?.last_successful_month) {
+        earliestSuccess = fbCheckpoint.last_successful_month
       }
     }
+    if (igDue) {
+      if (igBootstrap) earliestSuccess = null
+      else if (igCheckpoint?.last_successful_month) {
+        if (!earliestSuccess || igCheckpoint.last_successful_month < earliestSuccess) {
+          earliestSuccess = igCheckpoint.last_successful_month
+        }
+      }
+    }
+
+    assetPlans.set(asset.id, {
+      assetId: asset.id,
+      clientId: asset.client_id,
+      hasFacebook: fbDue,
+      hasInstagram: igDue,
+      lastSuccessfulMonth: earliestSuccess,
+      needsReconciliation,
+    })
   }
 
-  if (allPlatformTargets.length === 0) {
+  if (assetPlans.size === 0) {
     return out
   }
 
-  // 3. Cross-batch active-work dedupe: find asset+platform+month combinations
-  // that already have queued/running work across ANY batch.
-  // This prevents the every-minute cron from creating duplicate work while
-  // a prior batch is still being processed.
+  // 3. Cross-batch active-work dedupe: find asset+month combinations that
+  // already have queued/running work across ANY batch.
+  // Include items regardless of cooldown — cooldown is healthy waiting, not finished work.
+  // The worker controls retry timing; the scheduler must treat all queued/running
+  // asset+month as active logical work to prevent duplicate enqueue.
   const activeWorkKeys = new Set<string>()
   const { data: activeItems } = await supabase
     .from('meta_sync_batch_items')
     .select('asset_id, month')
     .in('status', ['queued', 'running'])
-    .or(`cooldown_until.is.null,cooldown_until.lte.${now}`)
 
   if (activeItems) {
     for (const item of activeItems) {
       if (item.asset_id) {
-        // We need platform - fetch from checkpoints or assets table
-        // For dedupe we only need to know if ANY platform for this asset+month is active
         activeWorkKeys.add(`${item.asset_id}:${item.month}`)
       }
     }
   }
 
-  // 4. Group by client to create efficient multi-asset batches.
-  const byClient = new Map<string, PlatformTarget[]>()
-  for (const target of allPlatformTargets) {
-    const arr = byClient.get(target.clientId) ?? []
-    arr.push(target)
-    byClient.set(target.clientId, arr)
+  // 4. Group by client using collapsed asset plans.
+  const byClient = new Map<string, AssetPlan[]>()
+  for (const plan of assetPlans.values()) {
+    const arr = byClient.get(plan.clientId) ?? []
+    arr.push(plan)
+    byClient.set(plan.clientId, arr)
   }
 
   const clientIds = Array.from(byClient.keys())
@@ -377,7 +378,7 @@ interface CheckpointRow {
   // 5. For each client, build logical work items (asset + month + sync_kind)
   // and apply dedupe per asset+month.
   let batchesCreated = 0
-  for (const [clientId, targets] of byClient.entries()) {
+  for (const [clientId, plans] of byClient.entries()) {
     if (batchesCreated >= META_FLEET_FRESHNESS_MAX_BATCHES) break
 
     const clientName = clientNameMap.get(clientId) ?? 'Unknown'
@@ -385,27 +386,25 @@ interface CheckpointRow {
     // Determine months needed for this client's targets.
     // - Current Meta month (incremental) for all due targets.
     // - Previous completed Meta month (historical) if any target needs reconciliation.
-    const needsReconciliation = targets.some(t => {
-      if (!t.lastSuccessfulMonth) return true // bootstrap = no history, needs full current + prev
-      return t.lastSuccessfulMonth < prevCompletedMonth
-    })
+    const needsReconciliation = plans.some(p => p.needsReconciliation)
 
     const months: string[] = [currentMonth]
     if (needsReconciliation) months.push(prevCompletedMonth)
 
-    // Build logical work items per target per month, then apply dedupe.
-    // Each item = { target, month, sync_kind }
-    type WorkItem = { target: PlatformTarget; month: string; syncKind: string }
+    // Build logical work items per asset per month, then apply dedupe.
+    // Each item = { plan, month, syncKind }
+    // Canonical queue: one item per asset+month.
+    type WorkItem = { plan: AssetPlan; month: string; syncKind: string }
     const neededWork: WorkItem[] = []
 
-    for (const target of targets) {
+    for (const plan of plans) {
       for (const month of months) {
-        // Skip if this asset+month already has active work
-        if (activeWorkKeys.has(`${target.assetId}:${month}`)) {
+        // Skip if this asset+month already has active work (regardless of platform)
+        if (activeWorkKeys.has(`${plan.assetId}:${month}`)) {
           continue
         }
         const syncKind = month === currentMonth ? 'incremental' : 'historical'
-        neededWork.push({ target, month, syncKind })
+        neededWork.push({ plan, month, syncKind })
       }
     }
 
@@ -414,7 +413,7 @@ interface CheckpointRow {
     }
 
     // 6. Create the batch with only the needed logical work items.
-    const uniqueAssets = [...new Map(neededWork.map(w => [w.target.assetId, w.target])).values()]
+    const uniqueAssets = [...new Map(neededWork.map(w => [w.plan.assetId, w.plan])).values()]
     const totalItems = neededWork.length
 
     const { data: batch, error: batchError } = await supabase
@@ -453,9 +452,9 @@ interface CheckpointRow {
     for (const work of neededWork) {
       itemRows.push({
         batch_id: batchId,
-        client_id: work.target.clientId,
+        client_id: work.plan.clientId,
         client_name: clientName,
-        asset_id: work.target.assetId,
+        asset_id: work.plan.assetId,
         sync_kind: work.syncKind,
         month: work.month,
         status: 'queued',

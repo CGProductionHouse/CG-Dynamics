@@ -16,11 +16,12 @@ test('fleet freshness bootstraps assets with no checkpoint row', () => {
   // checkpoint row are discovered and treated as due (bootstrap).
   assert.match(background, /\.from\('meta_client_assets'\)/)
   assert.match(background, /meta_asset_sync_checkpoints!left/)
-  assert.match(background, /isBootstrap/)
-  assert.match(background, /!checkpoint/)
-  // Bootstrap targets must be marked isDue = true
-  assert.match(background, /isBootstrap/)
-  assert.match(background, /isDue/)
+  // Bootstrap targets must have fbBootstrap or igBootstrap = true
+  assert.match(background, /fbBootstrap/)
+  assert.match(background, /igBootstrap/)
+  // Due = bootstrap OR nextDueAt <= now
+  assert.match(background, /fbDue/)
+  assert.match(background, /igDue/)
 })
 
 // 2. last_successful_month is selected and typed
@@ -30,9 +31,10 @@ test('fleet freshness selects and uses last_successful_month', () => {
   // The reconciliation decision must read the selected field explicitly.
   assert.match(background, /lastSuccessfulMonth/)
   assert.match(background, /needsReconciliation/)
-  // Bootstrap (no history) and stale history both trigger reconciliation.
-  assert.match(background, /!t\.lastSuccessfulMonth/)
-  assert.match(background, /t\.lastSuccessfulMonth < prevCompletedMonth/)
+  // Per-asset reconciliation is computed from per-platform results.
+  assert.match(background, /needsReconciliation = fbReconcile \|\| igReconcile/)
+  // Client-level check uses plans.some().
+  assert.match(background, /plans\.some\(p => p\.needsReconciliation\)/)
 })
 
 // 3. Month selection uses America/Los_Angeles (canonical Meta period contract)
@@ -58,13 +60,12 @@ test('fleet freshness deduplicates active asset+month work across batches', () =
   // meta_sync_batch_items for the same asset+month combination.
   assert.match(background, /activeWorkKeys/)
   assert.match(background, /meta_sync_batch_items/)
-  assert.match(background, /status.*queued.*running/)
+  assert.match(background, /\.in\('status', \['queued', 'running'\]\)/)
   assert.match(background, /activeWorkKeys\.has\(/)
-  // Filtered targets must exclude asset+month combos with active work.
-  assert.match(background, /filteredTargets/)
+  // Skip logic prevents duplicate enqueue.
   assert.match(background, /continue.*all work for this client is already active/)
-  // Dedupe key includes asset_id + month (platform is implicit per asset row).
-  assert.match(background, /asset_id.*month/)
+  // Dedupe key is asset_id + month.
+  assert.match(background, /\$\{plan\.assetId\}:\$\{month\}/)
 })
 
 // 5. Integration: complete flow produces correct batch structure
