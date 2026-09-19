@@ -1,6 +1,6 @@
 # CG Dynamics Ops Handover
 
-## CURRENT OVERRIDE — 18 September 2026, 16:35 SAST
+## CURRENT OVERRIDE — 19 September 2026, 14:20 SAST
 
 This section supersedes conflicting current-state snapshots later in this file. Preserve the stable operating rules below, but refetch #381 and live GitHub before acting.
 
@@ -118,7 +118,7 @@ Return: completed / verification / commit / blockers.
 
 Do not paste project history into prompts when GitHub already contains it. One owner per issue/file set. Continue existing branches/PRs. Routine green code-only release flow may continue; production migrations, secrets/credentials, provider permission changes, purchases/spend, DNS, destructive actions, external sends and Commerce/payment/stock remain protected gates unless CA explicitly approves that exact action.
 
-Last updated: 18 September 2026 SAST  
+Last updated: 19 September 2026 SAST  
 Status: CURRENT operating handover for ChatGPT coordinators, supervisors and coding agents  
 Repository: `CGProductionHouse/CG-Dynamics`
 
@@ -558,16 +558,44 @@ This section is an orientation snapshot only. Refetch GitHub + tracker before ac
 
 ### Protected activation gates
 
-**#396 Client Portal Library**
+**#396 Client Portal Library / PR #430 Brand Hub dynamics-mapping**
 
 - No active coding owner. Manual agent 1 capacity is released.
-- PR #410 merged at `2ec39b4719f7a1fbd77a8ef780f16f4ba6c6bfa8`; production deployment `dpl_6ouWTaweBLu5YVAxSN1ydn4qwoGv` READY.
-- Production code includes metadata-first Category -> Year -> Month -> Files browsing, lazy/on-demand month data, viewport-lazy thumbnails, opaque short-lived Dynamics access grants, bounded HTTP Range/206 streaming and Dynamics-native MP4 playback.
-- Exact-client/library/drive/category/date checks remain mandatory on every access; OneDrive/Graph origins and durable provider IDs remain hidden from clients.
+- PR #430 merged at `050f1d3df39c59e2ba4b0b485c3d70859d781b31`; production activation gated.
+- Brand Hub code complete; dynamics-mapping integration merged into main.
+- Production activation remains gated; exact production library mapping, library enablement, real OneDrive share/permission, file move/copy/rename, folder discovery or first-client activation not yet executed.
 - #396 remains open only for protected production activation/mapping.
-- Reuse the exact `A_ClientPortal_<ClientSlug>` boundary and durable OneDrive item IDs; never fuzzy filename identity.
-- Still NOT executed: production migration, exact production library mapping, library enablement, real OneDrive share/permission, file move/copy/rename, folder discovery or first-client activation.
 - Do not dispatch further implementation here unless activation exposes a reproducible defect.
+
+**#425 Meta M2**
+
+- Merged; production activation gated.
+- Meta M2 integration code complete on main.
+- Production activation remains gated; exact mapping and deployment not yet executed.
+- Do not dispatch further implementation here unless activation exposes a reproducible defect.
+
+**#426 Marketing Intelligence research foundations**
+
+- Merged; first-pack Library bridge active.
+- Marketing Intelligence research foundation code merged into main.
+- First-pack Library bridge is now active, enabling initial client-safe library bridging.
+- Bridge remains read-only; no further implementation or data write-back until activation gate is reviewed.
+
+**#433 implementation reality audit**
+
+- Complete; audit of implementation realities finished.
+- Full implementation audit conducted against current main and Control Centre state.
+- No discrepancies found between documented handover and live GitHub truth.
+- Audit results confirmed current main SHA: `050f1d3df39c59e2ba4b0b485c3d70859d781b31`.
+- All durable rules and single-owner constraints verified intact.
+
+**#435 Google Ads Assistant read-only intelligence**
+
+- Active; read-only intelligence operational.
+- Google Ads Assistant is active in read-only mode; no external sends or publishing.
+- Intelligence data surfaces read-only metrics and insights through the Google Ads integration layer.
+- No write-back to Google Ads accounts; strictly intelligence/surface-level only.
+- Protected gate: any write/ send/ external action requires separate CA approval.
 
 **Website Growth #27 M1 reporting activation**
 
@@ -639,6 +667,12 @@ Do not dispatch overlapping work into Website Editor #19, Dynamics #405 M2A or W
 - no further code/migration/deploy was required for the final batch.
 
 ### Parked future
+
+**#377/#380 and #374/#375**
+
+- Parked/stalled; no active implementation.
+- #377/#380 and #374/#375 are parked/stalled pending CA resolution.
+- No coding owner; capacity released awaiting direction.
 
 **#400 Client Billing Hub**
 
