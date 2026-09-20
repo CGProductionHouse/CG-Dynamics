@@ -12,8 +12,8 @@ import evidenceJson from '../../../docs/marketing-library/audience-lifecycle/com
 //  • Coverage state is preserved exactly — interface_shell_only, indexed_excerpt_only,
 //    selected_sections, full_page_text, page_text_price_unavailable are never
 //    coerced to full_read or upgraded.
-//  • Source type is deterministically classified from publisher + title keywords;
-//    fail closed on unknown publisher/identity.
+//  • Source type is classified by explicit evidence-ID lookup; unknown IDs fail
+//    closed even when publisher is known.
 //  • All entries remain needs_review / metadata_reference only.
 //  • Finding/limitation are preserved as review context, never as active doctrine.
 //  • Repeat execution is idempotent via classifyRegistrations dedupe.
@@ -44,44 +44,43 @@ const SUPPORTED_COVERAGE_STATES = new Set([
   'page_text_price_unavailable',
 ])
 
-/** Official documentation publishers — platform docs, API docs, policy announcements. */
-const OFFICIAL_PUBLISHERS = new Set(['Meta', 'TikTok', 'Google', 'Foreplay', 'Motion'])
-
-/** Vendor/estimation publishers — estimation tools, pricing pages, third-party products. */
-const VENDOR_PUBLISHERS = new Set(['Brandsearch', 'WinningHunter', 'Kalodata'])
-
-/** Case report title keywords — distinguishable from platform docs. */
-const CASE_REPORT_KEYWORDS = /case report|case study|friends.*brgrs|botanist|scroll stop/i
-
-/** Pricing-page title keywords — distinguishable from product docs. */
-const PRICING_KEYWORDS = /pricing|price|plan comparison|cost|spending.*intelligence|data-accuracy/i
-
-function isCaseReport(s: CompetitiveCreativeSource): boolean {
-  return CASE_REPORT_KEYWORDS.test(s.title)
-}
-
-function isPricingPage(s: CompetitiveCreativeSource): boolean {
-  return PRICING_KEYWORDS.test(s.title)
-}
-
 /**
- * Deterministic source-type classification.
+ * Explicit evidence-ID → source-type classification.
  *
- * Official provider documentation → official_documentation
- * Provider case reports → professional_source (not platform docs)
- * Vendor estimation/pricing → professional_source
- * Unknown publisher → fail closed (null)
+ * Each ID is classified once against its actual evidence nature:
+ *  • official_documentation: platform docs, API references, policy announcements
+ *  • professional_source: interface probes, case reports, vendor estimation/pricing
+ *
+ * Unknown IDs fail closed (null) even if the publisher appears in the ledger.
+ * This prevents fuzzy publisher matching from promoting non-documentation evidence.
  */
+const SOURCE_TYPE_BY_ID: Record<string, SourceType> = {
+  M0: 'professional_source',   // Meta Ad Library interface-only probe — not documentation
+  M1: 'official_documentation', // Meta DSA transparency announcement
+  M2: 'official_documentation', // Meta Ad Library API indexed reference
+  T1: 'official_documentation', // TikTok About Top Ads
+  T2: 'official_documentation', // TikTok Top Ads Dashboard guide
+  T3: 'official_documentation', // TikTok Commercial Content API overview
+  T4: 'official_documentation', // TikTok Commercial Content API countries
+  T5: 'official_documentation', // TikTok non-paid commercial content query
+  G1: 'official_documentation', // Google Ads transparency help
+  B1: 'professional_source',    // Brandsearch estimation methods
+  B2: 'professional_source',    // Brandsearch product claims
+  B3: 'professional_source',    // Brandsearch pricing review
+  W1: 'professional_source',    // WinningHunter data-accuracy help
+  W2: 'professional_source',    // WinningHunter product/pricing
+  K1: 'professional_source',    // Kalodata FAQ/data limitations
+  K2: 'professional_source',    // Kalodata pricing interface probe
+  F1: 'official_documentation', // Foreplay API product documentation
+  F2: 'professional_source',    // Foreplay pricing page
+  O1: 'official_documentation', // Motion MCP documentation
+  O2: 'professional_source',    // Motion pricing/scope review
+  C1: 'professional_source',    // TikTok Friends & Brgrs case report
+  C2: 'professional_source',    // TikTok The Botanist case report
+}
+
 function classifySourceType(s: CompetitiveCreativeSource): SourceType | null {
-  if (OFFICIAL_PUBLISHERS.has(s.publisher)) {
-    if (isCaseReport(s)) return 'professional_source'
-    if (isPricingPage(s)) return 'professional_source'
-    return 'official_documentation'
-  }
-  if (VENDOR_PUBLISHERS.has(s.publisher)) {
-    return 'professional_source'
-  }
-  return null
+  return SOURCE_TYPE_BY_ID[s.id] ?? null
 }
 
 function deriveFamily(sourceType: SourceType): 'official_documentation' | 'professional_source' {
@@ -99,7 +98,7 @@ function isEligible(s: CompetitiveCreativeSource): boolean {
 
 function exclusionReason(s: CompetitiveCreativeSource): string {
   if (!SUPPORTED_COVERAGE_STATES.has(s.coverage)) return `unsupported_coverage:${s.coverage}`
-  if (!classifySourceType(s)) return `unknown_publisher:${s.publisher}`
+  if (!classifySourceType(s)) return `unknown_source_id:${s.id}`
   if (!s.id || !s.url) return 'missing_identifier'
   if (!s.title?.trim()) return 'missing_title'
   if (!s.publisher?.trim()) return 'missing_publisher'
@@ -121,7 +120,7 @@ export function bridgeCompetitiveCreativeSources(
     .sort((a, b) => a.id.localeCompare(b.id))
     .map(s => {
       const sourceType = classifySourceType(s)
-      if (!sourceType) throw new Error(`Unexpected: eligible source ${s.id} has unclassifiable publisher ${s.publisher}`)
+      if (!sourceType) throw new Error(`Unexpected: eligible source ${s.id} has no explicit classification`)
       return {
         sourceIdentifier: s.url,
         kind: 'cited_source' as const,

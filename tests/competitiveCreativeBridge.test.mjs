@@ -78,6 +78,14 @@ test('B3 page_text_price_unavailable is not coerced to full_page_text', () => {
 
 // 5. known official/provider/vendor/case sources classify deterministically
 
+test('M0 interface-only probe classifies as professional_source, not official_documentation', () => {
+  const candidates = bridgeCompetitiveCreativeSources()
+  const m0 = candidates.find(c => c.citedIn[0]?.includes('#M0'))
+  assert.ok(m0, 'M0 is mapped')
+  assert.equal(m0.sourceType, 'professional_source', 'M0 is interface-only, not official docs')
+  assert.notEqual(m0.sourceType, 'official_documentation')
+})
+
 test('Meta official docs classify as official_documentation', () => {
   const candidates = bridgeCompetitiveCreativeSources()
   const m1 = candidates.find(c => c.citedIn[0]?.includes('#M1'))
@@ -163,6 +171,14 @@ test('unknown publisher fails closed', () => {
   ]
   const candidates = bridgeCompetitiveCreativeSources(synthetic)
   assert.equal(candidates.length, 0, 'unknown publisher excluded')
+})
+
+test('unknown ID from known publisher fails closed', () => {
+  const synthetic = [
+    { id: 'M99', title: 'Some Meta page', publisher: 'Meta', url: 'https://meta.example.com/m99', coverage: 'full_page_text', pageDate: null, finding: 'f', limitation: 'l', status: 'needs_review', accessedAt: '2026-09-19', reviewDue: '2026-10-19', rights: 'r' },
+  ]
+  const candidates = bridgeCompetitiveCreativeSources(synthetic)
+  assert.equal(candidates.length, 0, 'known publisher but unknown ID excluded')
 })
 
 // 7. incomplete metadata fails closed
@@ -310,8 +326,8 @@ test('eligibility summary is correct by coverage', () => {
 
 test('source-type classification summary is correct', () => {
   const summary = summariseCompetitiveCreativeEligibility()
-  assert.equal(summary.bySourceType.official_documentation, 11, '11 official_documentation')
-  assert.equal(summary.bySourceType.professional_source, 11, '11 professional_source')
+  assert.equal(summary.bySourceType.official_documentation, 10, '10 official_documentation')
+  assert.equal(summary.bySourceType.professional_source, 12, '12 professional_source')
 })
 
 test('deterministic sort by id', () => {
