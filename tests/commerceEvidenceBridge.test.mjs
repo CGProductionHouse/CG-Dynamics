@@ -163,8 +163,12 @@ test('S01 finding preserved as review context', () => {
   const candidates = bridgeCommerceEvidenceSources()
   const s01 = candidates.find(c => c.citedIn[0]?.includes('#S01'))
   assert.ok(s01, 'S01 mapped')
-  assert.ok(s01.reviewContext?.finding, 'S01 has finding')
-  assert.ok(s01.reviewContext.finding.includes('single option'), 'finding contains expected text')
+  assert.ok(s01.reviewContext, 'S01 has reviewContext')
+  assert.equal(
+    s01.reviewContext.finding,
+    'Laboratory studies describe increased search with a single option and context-dependent increases in selection when alternatives are present.',
+    'finding preserved verbatim',
+  )
 })
 
 test('S01 limitation preserved as review context', () => {
@@ -172,7 +176,11 @@ test('S01 limitation preserved as review context', () => {
   const s01 = candidates.find(c => c.citedIn[0]?.includes('#S01'))
   assert.ok(s01, 'S01 mapped')
   assert.ok(s01.reviewContext?.limitations, 'S01 has limitations')
-  assert.ok(s01.reviewContext.limitations.includes('Full article not reviewed'), 'limitation contains expected text')
+  assert.equal(
+    s01.reviewContext.limitations,
+    'No Coke/Pepsi field verification, current retail forecast or universal lift. Full article not reviewed.',
+    'limitations preserved verbatim',
+  )
 })
 
 test('reviewContext is optional and not doctrine', () => {
