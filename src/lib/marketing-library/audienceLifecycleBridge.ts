@@ -5,13 +5,17 @@ import sourcesJson from '../../../docs/marketing-library/audience-lifecycle/sour
 
 // ── Audience Lifecycle source bridge (#426) ───────────────────────────────────
 //
-// Maps eligible official FULL-READ sources from the audience-lifecycle
+// Maps eligible FULL-READ official sources from the audience-lifecycle
 // source ledger into RegistrationCandidate format for the Marketing Library
 // source-registration pipeline.
 //
 // Rules:
-//  • FULL-READ official sources only — blocked, rate-limited, login-gated,
-//    partial/abstract sources are excluded;
+//  • Eligibility requires BOTH full_read access AND a supported
+//    first-party/provider-owned source class:
+//    - official_documentation (Google, TikTok official docs)
+//    - professional_source where publisher is explicitly Meta-owned first-party
+//  • Unknown/unsupported sourceType is excluded (fail closed).
+//  • blocked_login, rate_limited, login-gated sources are excluded.
 //  • all mapped entries remain needs_review / reference-only;
 //  • no auto-activation, no trust upgrade;
 //  • repeat execution is idempotent (dedupe by sourceIdentifier via
@@ -39,17 +43,36 @@ interface AudienceLifecycleSource {
 /** Eligible sourceAccess values for this checkpoint. */
 const ELIGIBLE_ACCESS = new Set(['full_read'])
 
+/** Supported first-party/provider-owned source types for this pack. */
+const SUPPORTED_SOURCE_TYPES = new Set(['official_documentation', 'professional_source'])
+
+/** Explicitly trusted Meta-owned first-party publishers (for professional_source). */
+const META_OWNED_PUBLISHERS = new Set(['Meta'])
+
 /** Map sourceType string from sources.json to the canonical SourceType union. */
-function mapSourceType(raw: string): SourceType {
+function mapSourceType(raw: string): SourceType | null {
   if (raw === 'official_documentation') return 'official_documentation'
   if (raw === 'professional_source') return 'professional_source'
-  return 'other'
+  return null
 }
 
 /** Derive CitedSourceFamily from sourceType. */
 function deriveFamily(sourceType: SourceType): 'official_documentation' | 'professional_source' {
   if (sourceType === 'professional_source') return 'professional_source'
   return 'official_documentation'
+}
+
+/** Build source attribution matching the actual stored sourceType. */
+function buildAttribution(publisher: string, sourceType: SourceType): string {
+  if (sourceType === 'professional_source') return `${publisher} first-party publication.`
+  return `${publisher} official documentation.`
+}
+
+function isEligible(s: AudienceLifecycleSource): boolean {
+  if (!ELIGIBLE_ACCESS.has(s.sourceAccess)) return false
+  if (!SUPPORTED_SOURCE_TYPES.has(s.sourceType)) return false
+  if (s.sourceType === 'professional_source' && !META_OWNED_PUBLISHERS.has(s.publisher)) return false
+  return true
 }
 
 /**
@@ -63,10 +86,11 @@ export function bridgeAudienceLifecycleSources(
   sources: AudienceLifecycleSource[] = (sourcesJson as unknown as { sources: AudienceLifecycleSource[] }).sources,
 ): RegistrationCandidate[] {
   return sources
-    .filter(s => ELIGIBLE_ACCESS.has(s.sourceAccess))
+    .filter(isEligible)
     .sort((a, b) => a.key.localeCompare(b.key))
     .map(s => {
       const sourceType = mapSourceType(s.sourceType)
+      if (!sourceType) throw new Error(`Unexpected: eligible source ${s.key} has unsupported type ${s.sourceType}`)
       return {
         sourceIdentifier: s.sourceIdentifier,
         kind: 'cited_source' as const,
@@ -74,7 +98,7 @@ export function bridgeAudienceLifecycleSources(
         title: s.title,
         author: s.publisher,
         canonicalUrl: s.canonicalUrl,
-        sourceAttribution: `${s.publisher} official documentation.`,
+        sourceAttribution: buildAttribution(s.publisher, sourceType),
         rightsNote: s.rights,
         sourceType,
         trustTier: 'needs_review' as SourceTrustTier,
@@ -86,7 +110,7 @@ export function bridgeAudienceLifecycleSources(
 
 /**
  * Summarise source eligibility from the full source list.
- * Returns counts by access reason for reporting.
+ * Returns counts by exclusion reason for reporting.
  */
 export function summariseEligibility(
   sources: AudienceLifecycleSource[] = (sourcesJson as unknown as { sources: AudienceLifecycleSource[] }).sources,
@@ -95,11 +119,16 @@ export function summariseEligibility(
   let eligible = 0
   let excluded = 0
   for (const s of sources) {
-    if (ELIGIBLE_ACCESS.has(s.sourceAccess)) {
+    if (isEligible(s)) {
       eligible++
     } else {
       excluded++
-      byReason[s.sourceAccess] = (byReason[s.sourceAccess] ?? 0) + 1
+      const reason = !ELIGIBLE_ACCESS.has(s.sourceAccess)
+        ? s.sourceAccess
+        : !SUPPORTED_SOURCE_TYPES.has(s.sourceType)
+          ? `unsupported_type:${s.sourceType}`
+          : `unsupported_publisher:${s.publisher}`
+      byReason[reason] = (byReason[reason] ?? 0) + 1
     }
   }
   return { eligible, excluded, byReason }
