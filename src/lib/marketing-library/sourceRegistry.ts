@@ -45,6 +45,12 @@ export interface RegistrationCandidate {
   citedIn: string[]
   /** Original access/coverage level from the source ledger (additive, v0.2+). Preserved exactly; never upgraded. */
   accessCoverage?: string
+  /** Review-only context from the source ledger. Not doctrine, not principle, not active Skill Card content. */
+  reviewContext?: {
+    finding?: string
+    limitations?: string
+    jurisdiction?: string
+  }
 }
 
 const citedCandidates: RegistrationCandidate[] = CITED_SOURCES.map(source => ({

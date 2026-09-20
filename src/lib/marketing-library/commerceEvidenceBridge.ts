@@ -62,6 +62,7 @@ function isEligible(s: CommerceEvidenceSource): boolean {
   if (!SUPPORTED_ACCESS_LEVELS.has(s.accessLevel)) return false
   if (!SUPPORTED_SOURCE_TYPES.has(s.sourceType)) return false
   if (!s.sourceIdentifier || !s.canonicalUrl) return false
+  if (!s.title?.trim() || !s.publisher?.trim() || !s.rights?.trim()) return false
   return true
 }
 
@@ -94,6 +95,11 @@ export function bridgeCommerceEvidenceSources(
         ingestionEligibility: 'metadata_reference' as const,
         citedIn: [`docs/marketing-library/audience-lifecycle/commerce-psychology/evidence.json#${s.id}`],
         accessCoverage: s.accessLevel,
+        reviewContext: {
+          finding: s.finding || undefined,
+          limitations: s.limitations || undefined,
+          jurisdiction: s.jurisdiction || undefined,
+        },
       }
     })
 }

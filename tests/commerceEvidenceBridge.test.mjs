@@ -55,6 +55,30 @@ test('unknown sourceType fails closed', () => {
   assert.equal(candidates.length, 0, 'unsourced_blog sourceType excluded')
 })
 
+test('incomplete metadata fails closed: missing title excluded', () => {
+  const synthetic = [
+    { id: 'X3', title: '', publisher: 'P', publicationDate: null, sourceIdentifier: 'https://x3.com', canonicalUrl: 'https://x3.com', accessedAt: '2026-09-19', accessLevel: 'full_page', sourceType: 'research_paper', finding: 'f', limitations: 'l', reviewStatus: 'needs_review', fullTextReviewed: false, fullTextCopied: false, rights: 'r', jurisdiction: 'j' },
+  ]
+  const candidates = bridgeCommerceEvidenceSources(synthetic)
+  assert.equal(candidates.length, 0, 'empty title excluded')
+})
+
+test('incomplete metadata fails closed: missing publisher excluded', () => {
+  const synthetic = [
+    { id: 'X4', title: 'T', publisher: '', publicationDate: null, sourceIdentifier: 'https://x4.com', canonicalUrl: 'https://x4.com', accessedAt: '2026-09-19', accessLevel: 'full_page', sourceType: 'research_paper', finding: 'f', limitations: 'l', reviewStatus: 'needs_review', fullTextReviewed: false, fullTextCopied: false, rights: 'r', jurisdiction: 'j' },
+  ]
+  const candidates = bridgeCommerceEvidenceSources(synthetic)
+  assert.equal(candidates.length, 0, 'empty publisher excluded')
+})
+
+test('incomplete metadata fails closed: missing rights excluded', () => {
+  const synthetic = [
+    { id: 'X5', title: 'T', publisher: 'P', publicationDate: null, sourceIdentifier: 'https://x5.com', canonicalUrl: 'https://x5.com', accessedAt: '2026-09-19', accessLevel: 'full_page', sourceType: 'research_paper', finding: 'f', limitations: 'l', reviewStatus: 'needs_review', fullTextReviewed: false, fullTextCopied: false, rights: '', jurisdiction: 'j' },
+  ]
+  const candidates = bridgeCommerceEvidenceSources(synthetic)
+  assert.equal(candidates.length, 0, 'empty rights excluded')
+})
+
 test('stable-source duplicate is not re-added', () => {
   const candidates = bridgeCommerceEvidenceSources()
   const existing = candidates.map(c => ({ source_identifier: c.sourceIdentifier }))
@@ -117,11 +141,48 @@ test('research_paper and official_documentation both eligible', () => {
   assert.ok(official.length >= 6, 'at least 6 official_documentation')
 })
 
-test('jurisdiction preserved as review context', () => {
+// ── Review context preservation tests (#441) ──────────────────────────────────
+
+test('S10 jurisdiction = United States preserved verbatim', () => {
   const candidates = bridgeCommerceEvidenceSources()
   const s10 = candidates.find(c => c.citedIn[0]?.includes('#S10'))
   assert.ok(s10, 'S10 mapped')
-  assert.equal(s10.author, 'US Federal Trade Commission')
+  assert.ok(s10.reviewContext, 'S10 has reviewContext')
+  assert.equal(s10.reviewContext.jurisdiction, 'United States', 'jurisdiction preserved exactly')
+})
+
+test('S11 jurisdiction = South Africa preserved verbatim', () => {
+  const candidates = bridgeCommerceEvidenceSources()
+  const s11 = candidates.find(c => c.citedIn[0]?.includes('#S11'))
+  assert.ok(s11, 'S11 mapped')
+  assert.ok(s11.reviewContext, 'S11 has reviewContext')
+  assert.equal(s11.reviewContext.jurisdiction, 'South Africa', 'jurisdiction preserved exactly')
+})
+
+test('S01 finding preserved as review context', () => {
+  const candidates = bridgeCommerceEvidenceSources()
+  const s01 = candidates.find(c => c.citedIn[0]?.includes('#S01'))
+  assert.ok(s01, 'S01 mapped')
+  assert.ok(s01.reviewContext?.finding, 'S01 has finding')
+  assert.ok(s01.reviewContext.finding.includes('single option'), 'finding contains expected text')
+})
+
+test('S01 limitation preserved as review context', () => {
+  const candidates = bridgeCommerceEvidenceSources()
+  const s01 = candidates.find(c => c.citedIn[0]?.includes('#S01'))
+  assert.ok(s01, 'S01 mapped')
+  assert.ok(s01.reviewContext?.limitations, 'S01 has limitations')
+  assert.ok(s01.reviewContext.limitations.includes('Full article not reviewed'), 'limitation contains expected text')
+})
+
+test('reviewContext is optional and not doctrine', () => {
+  const candidates = bridgeCommerceEvidenceSources()
+  for (const c of candidates) {
+    if (c.reviewContext) {
+      assert.ok(!('principle' in c.reviewContext), `no principle in reviewContext: ${c.sourceIdentifier}`)
+      assert.ok(!('status' in c.reviewContext), `no status in reviewContext: ${c.sourceIdentifier}`)
+    }
+  }
 })
 
 test('deterministic sort by id', () => {
