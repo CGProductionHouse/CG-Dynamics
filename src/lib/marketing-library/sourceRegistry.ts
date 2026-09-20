@@ -43,6 +43,8 @@ export interface RegistrationCandidate {
   ingestionEligibility: 'metadata_reference'
   /** Pack file paths this source is cited in (container provenance). */
   citedIn: string[]
+  /** Original access/coverage level from the source ledger (additive, v0.2+). Preserved exactly; never upgraded. */
+  accessCoverage?: string
 }
 
 const citedCandidates: RegistrationCandidate[] = CITED_SOURCES.map(source => ({
