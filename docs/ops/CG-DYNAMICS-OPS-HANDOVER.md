@@ -1,5 +1,19 @@
 # CG Dynamics Ops Handover
 
+## CURRENT OVERRIDE — 20 September 2026, morning SAST
+
+This section supersedes older lane snapshots below. Refetch live GitHub + #381 before consequential action.
+
+### Marketing Intelligence / manual coding state
+
+- `main` includes merged PR #439 at `cdef879b9252dd0808da742debb8e4ba4cba644b`: first-pack audience-lifecycle Marketing Library bridge complete, 9 eligible / 3 excluded, fail-closed source eligibility, all entries still `needs_review` + metadata-reference-only. No Library activation or production mutation occurred.
+- PR #438 / Issue #437 is code-accepted at `b346e8390c4d0c26fb664e1f6078fa119edce9ff`; merge is gated only on authenticated desktop/mobile staff-session UI acceptance. CA MANUAL 01 was released from #437 and now owns #435.
+- Issue #435 / branch `feat/435-google-ads-assistant-readonly` is owned by CA MANUAL 01 for the bounded exact-client/date-range READ-ONLY Google Ads Assistant audit checkpoint. No provider/campaign/schema/data/deploy writes are authorised.
+- CA MANUAL 02 is released after #439 merge and may take the next non-overlapping research-to-product lane.
+- #426 remains the research/integration umbrella. Later v0.2-v0.8 research must reuse the existing Marketing Library registration/review authority; no second Library or direct activation path.
+- Private Mission Control / R1m strategy remains outside CG Dynamics product knowledge.
+
+
 ## CURRENT OVERRIDE — 18 September 2026, 16:35 SAST
 
 This section supersedes conflicting current-state snapshots later in this file. Preserve the stable operating rules below, but refetch #381 and live GitHub before acting.
