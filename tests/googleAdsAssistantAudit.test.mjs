@@ -75,3 +75,49 @@ test('identical read is deterministic; missing audit surfaces and mutation bound
   assert.match(handler, /data_state: 'unavailable'/)
   assert.doesNotMatch(handler, /searchStream|refreshGoogleAccessToken|\.insert\(|\.update\(|\.delete\(|\.rpc\(/)
 })
+
+// The supervisor's #440 blocker: a shared account must never be read account-wide.
+const otherAccount = (overrides = {}) => ({ ...account('dedicated'), id: 'account-b', customer_id: '7770001111', ...overrides })
+
+test('a shared-account read is planned from the exact campaign IDs of this client only', () => {
+  const reads = audit.planGoogleAdsMetricReads(A, {
+    accounts: [account()],
+    dedicatedLinks: [],
+    campaignLinks: [link(A, 'campaign-a'), link(A, 'campaign-c'), link(B, 'campaign-b')],
+  })
+  assert.deepEqual(reads, [{ google_ads_account_id: 'account-a', customer_id: '4951506884', campaign_ids: ['campaign-a', 'campaign-c'] }])
+  for (const read of reads) assert.ok(!read.campaign_ids.includes('campaign-b'), 'another campaign owner cannot enter the read scope')
+})
+
+test('a shared account with no campaign of this client is never read', () => {
+  assert.deepEqual(audit.planGoogleAdsMetricReads(A, { accounts: [account()], dedicatedLinks: [], campaignLinks: [link(B)] }), [])
+  const wrongCustomer = { ...link(A), customer_id: '9999999999' }
+  assert.deepEqual(audit.planGoogleAdsMetricReads(A, { accounts: [account()], dedicatedLinks: [], campaignLinks: [wrongCustomer] }), [])
+})
+
+test('a dedicated account is read whole only while uniquely linked to this client', () => {
+  const accounts = [account('dedicated')]
+  assert.deepEqual(audit.planGoogleAdsMetricReads(A, { accounts, dedicatedLinks: [link(A)], campaignLinks: [] }),
+    [{ google_ads_account_id: 'account-a', customer_id: '4951506884', campaign_ids: null }])
+  assert.deepEqual(audit.planGoogleAdsMetricReads(A, { accounts, dedicatedLinks: [link(A), link(B)], campaignLinks: [] }), [])
+  assert.deepEqual(audit.planGoogleAdsMetricReads(A, { accounts, dedicatedLinks: [link(B)], campaignLinks: [] }), [])
+  assert.deepEqual(audit.planGoogleAdsMetricReads(A, { accounts: [{ ...account('dedicated'), is_active: false }], dedicatedLinks: [link(A)], campaignLinks: [] }), [])
+})
+
+test('planned reads match exactly the accounts the projection is willing to report', () => {
+  const rowSet = { accounts: [account(), otherAccount()], dedicatedLinks: [{ ...link(A), google_ads_account_id: 'account-b' }], campaignLinks: [link(A), link(B, 'campaign-b')] }
+  const planned = audit.planGoogleAdsMetricReads(A, rowSet).map(read => read.google_ads_account_id).sort()
+  const reported = audit.buildGoogleAdsAudit(input, { ...rowSet, metrics: [], syncRuns: [] }).accounts.map(entry => entry.account.id).sort()
+  assert.deepEqual(planned, reported)
+})
+
+test('the handler scopes each metric read per account instead of by account list', () => {
+  const serverSource = readFileSync('supabase/functions/cg-dynamics-mcp/index.ts', 'utf8')
+  const handler = serverSource.slice(serverSource.indexOf('const handleGetGoogleAdsAudit:'), serverSource.indexOf('const MISSING_RELATION_CODES'))
+  const metricRead = handler.slice(handler.indexOf('const reads = planGoogleAdsMetricReads'), handler.lastIndexOf('return buildGoogleAdsAudit'))
+  assert.match(metricRead, /\.eq\('google_ads_account_id', read\.google_ads_account_id\)\.eq\('customer_id', read\.customer_id\)/)
+  assert.match(metricRead, /if \(read\.campaign_ids\) query = query\.in\('campaign_id', read\.campaign_ids\)/)
+  // no account-wide metric read, and each account gets its own row budget
+  assert.doesNotMatch(metricRead, /\.in\('google_ads_account_id'/)
+  assert.match(metricRead, /for \(const read of reads\)[\s\S]*?for \(let offset = 0; offset < 10000/)
+})

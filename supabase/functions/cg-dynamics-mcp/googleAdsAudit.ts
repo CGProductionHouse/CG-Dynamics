@@ -21,6 +21,38 @@ export function validateGoogleAdsAuditInput(input: Record<string, unknown>): str
   return validateGoogleAdsDateRange(input.start_date, input.end_date, '9999-12-31')
 }
 
+/** A metric read that is already narrowed to this exact client before it reaches the database. */
+export interface GoogleAdsMetricRead { google_ads_account_id: string; customer_id: string; campaign_ids: string[] | null }
+
+/**
+ * Plans one metric read per eligible account, using the same eligibility rules as the
+ * projection. A shared account is read by its exact active campaign IDs for this client;
+ * a dedicated account is read only once it is proven uniquely linked to this client.
+ * Accounts that qualify for neither are never read at all.
+ */
+export function planGoogleAdsMetricReads(clientId: string, rows: {
+  accounts: AuditAccount[]; dedicatedLinks: AuditLink[]; campaignLinks: AuditLink[]
+}): GoogleAdsMetricRead[] {
+  const reads: GoogleAdsMetricRead[] = []
+  for (const account of [...rows.accounts].sort((a, b) => a.id.localeCompare(b.id))) {
+    if (!account.is_active) continue
+    if (account.account_mode === 'dedicated') {
+      const mine = rows.dedicatedLinks.some(link => link.is_active && link.client_id === clientId && link.google_ads_account_id === account.id)
+      const shared = rows.dedicatedLinks.some(link => link.is_active && link.client_id !== clientId && link.google_ads_account_id === account.id)
+      if (mine && !shared) reads.push({ google_ads_account_id: account.id, customer_id: account.customer_id, campaign_ids: null })
+      continue
+    }
+    if (account.account_mode !== 'shared') continue
+    const campaignIds = [...new Set(rows.campaignLinks
+      .filter(link => link.is_active && link.client_id === clientId && link.google_ads_account_id === account.id
+        && link.customer_id === account.customer_id)
+      .map(link => link.campaign_id)
+      .filter((id): id is string => typeof id === 'string' && id.length > 0))].sort()
+    if (campaignIds.length) reads.push({ google_ads_account_id: account.id, customer_id: account.customer_id, campaign_ids: campaignIds })
+  }
+  return reads
+}
+
 /** Pure, fail-closed projection over canonical stored rows. No provider or database calls. */
 export function buildGoogleAdsAudit(input: GoogleAdsAuditInput, rows: {
   accounts: AuditAccount[]; dedicatedLinks: AuditLink[]; campaignLinks: AuditLink[]; metrics: AuditMetric[]; syncRuns: AuditSync[]; truncated?: boolean

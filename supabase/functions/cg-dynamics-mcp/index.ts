@@ -28,7 +28,7 @@ import {
   type McpAuthChallengeError,
 } from './oauthDiscovery.ts'
 import { cgDate, cgDatePlusDays, CG_TIMEZONE } from './cgTime.ts'
-import { buildGoogleAdsAudit, validateGoogleAdsAuditInput, type AuditAccount, type AuditLink, type AuditMetric, type AuditSync } from './googleAdsAudit.ts'
+import { buildGoogleAdsAudit, planGoogleAdsMetricReads, validateGoogleAdsAuditInput, type AuditAccount, type AuditLink, type AuditMetric, type AuditSync } from './googleAdsAudit.ts'
 import {
   classifyOneDriveReadiness,
   gradeSyncRun,
@@ -2627,17 +2627,29 @@ const handleGetGoogleAdsAudit: ToolHandler = async (staff, input) => {
       .in('google_ads_account_id', accountIds).eq('status', 'succeeded').order('finished_at', { ascending: false }).limit(1000),
   ])
   if (accountResult.error || allDedicatedResult.error || syncResult.error) return unavailable('Canonical Google Ads account or sync history unavailable.')
+  // Isolation happens before the read: each account is queried on its own exact
+  // customer_id, and a shared account only by this client's exact campaign IDs, so no
+  // other client's rows enter this process or consume this client's row budget.
+  const reads = planGoogleAdsMetricReads(clientId, {
+    accounts: (accountResult.data ?? []) as AuditAccount[],
+    dedicatedLinks: (allDedicatedResult.data ?? []) as AuditLink[],
+    campaignLinks: campaigns,
+  })
   const metrics: AuditMetric[] = []
   let truncated = (syncResult.data ?? []).length === 1000
-  for (let offset = 0; offset < 10000; offset += 1000) {
-    const page = await staff.supabase.from('google_ads_campaign_daily_metrics')
-      .select('google_ads_account_id, client_id, customer_id, campaign_id, campaign_name, campaign_status, campaign_type, metric_date, impressions, clicks, interactions, cost_micros, conversions, conversion_value, native_settings')
-      .in('google_ads_account_id', accountIds).gte('metric_date', startDate).lte('metric_date', endDate)
-      .order('google_ads_account_id').order('campaign_id').order('metric_date').range(offset, offset + 999)
-    if (page.error) return unavailable('Canonical Google Ads period metrics unavailable.')
-    metrics.push(...((page.data ?? []) as AuditMetric[]))
-    if ((page.data ?? []).length < 1000) break
-    if (offset === 9000) truncated = true
+  for (const read of reads) {
+    for (let offset = 0; offset < 10000; offset += 1000) {
+      let query = staff.supabase.from('google_ads_campaign_daily_metrics')
+        .select('google_ads_account_id, client_id, customer_id, campaign_id, campaign_name, campaign_status, campaign_type, metric_date, impressions, clicks, interactions, cost_micros, conversions, conversion_value, native_settings')
+        .eq('google_ads_account_id', read.google_ads_account_id).eq('customer_id', read.customer_id)
+      if (read.campaign_ids) query = query.in('campaign_id', read.campaign_ids)
+      const page = await query.gte('metric_date', startDate).lte('metric_date', endDate)
+        .order('campaign_id').order('metric_date').range(offset, offset + 999)
+      if (page.error) return unavailable('Canonical Google Ads period metrics unavailable.')
+      metrics.push(...((page.data ?? []) as AuditMetric[]))
+      if ((page.data ?? []).length < 1000) break
+      if (offset === 9000) truncated = true
+    }
   }
   return buildGoogleAdsAudit({ client_id: clientId, start_date: startDate, end_date: endDate }, {
     accounts: (accountResult.data ?? []) as AuditAccount[],
