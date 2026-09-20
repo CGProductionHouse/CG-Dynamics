@@ -1,5 +1,6 @@
 import type { RegistrationCandidate } from './sourceRegistry'
-import { REGISTRATION_MANIFEST } from './sourceRegistry'
+import { REGISTRATION_MANIFEST, classifyRegistrations } from './sourceRegistry'
+import type { MarketingLibrarySource } from './skillCardsData'
 import { bridgeAudienceLifecycleSources } from './audienceLifecycleBridge'
 import { bridgeCommerceEvidenceSources } from './commerceEvidenceBridge'
 import { bridgeCompetitiveCreativeSources } from './competitiveCreativeBridge'
@@ -43,6 +44,8 @@ export interface PreviewSummary {
   totalResearchPreviewOnly: number
   totalDuplicate: number
   totalConflict: number
+  totalAlreadyRegistered: number
+  totalPreviewReady: number
   byOrigin: Record<SourceOrigin, number>
 }
 
@@ -57,9 +60,9 @@ function conflictFields(a: RegistrationCandidate, b: RegistrationCandidate): str
   const conflicts: string[] = []
 
   if (a.sourceType !== b.sourceType) conflicts.push('sourceType')
-  if (a.canonicalUrl !== b.canonicalUrl) conflicts.push('canonicalUrl')
+  if (a.canonicalUrl != null && b.canonicalUrl != null && a.canonicalUrl !== b.canonicalUrl) conflicts.push('canonicalUrl')
   if (a.title !== b.title) conflicts.push('title')
-  if (a.author !== b.author) conflicts.push('author')
+  if (a.author != null && b.author != null && a.author !== b.author) conflicts.push('author')
   if (a.rightsNote != null && b.rightsNote != null && a.rightsNote !== b.rightsNote) conflicts.push('rightsNote')
   if (a.accessCoverage != null && b.accessCoverage != null && a.accessCoverage !== b.accessCoverage) {
     conflicts.push('accessCoverage')
@@ -115,12 +118,17 @@ function mergeCandidates(base: RegistrationCandidate, overlay: RegistrationCandi
 /**
  * Build the unified derived preview from seed manifest + research bridges.
  * Pure function — no side effects, no writes.
+ *
+ * When liveSources is provided, computes already-registered and preview-ready
+ * counts using the existing classifyRegistrations() against the non-conflict
+ * unified candidates. Conflicts are excluded from preview-ready.
  */
 export function buildUnifiedPreview(
   seedManifest: RegistrationCandidate[] = REGISTRATION_MANIFEST,
   audienceLifecycle: RegistrationCandidate[] = bridgeAudienceLifecycleSources(),
   commerceEvidence: RegistrationCandidate[] = bridgeCommerceEvidenceSources(),
   competitiveCreative: RegistrationCandidate[] = bridgeCompetitiveCreativeSources(),
+  liveSources: Array<Pick<MarketingLibrarySource, 'source_identifier'>> = [],
 ): UnifiedPreview {
   // Tag each candidate with its origin
   const tagged: Array<{ candidate: RegistrationCandidate; origin: SourceOrigin }> = [
@@ -194,11 +202,19 @@ export function buildUnifiedPreview(
   // Sort deterministically by sourceIdentifier
   entries.sort((a, b) => a.candidate.sourceIdentifier.localeCompare(b.candidate.sourceIdentifier))
 
+  // Compute registration state using existing classifier
+  const nonConflictCandidates = entries
+    .filter(e => !e.conflict)
+    .map(e => e.candidate)
+  const registration = classifyRegistrations(nonConflictCandidates, liveSources)
+
   const summary: PreviewSummary = {
     totalSeed: seedManifest.length,
     totalResearchPreviewOnly: entries.filter(e => !e.origins.includes('seed')).length,
     totalDuplicate: entries.filter(e => e.duplicateCount > 1 && !e.conflict).length,
     totalConflict: entries.filter(e => e.conflict).length,
+    totalAlreadyRegistered: registration.counts.registered,
+    totalPreviewReady: registration.counts.unregistered,
     byOrigin,
   }
 

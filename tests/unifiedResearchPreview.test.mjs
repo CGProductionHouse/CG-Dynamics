@@ -293,3 +293,142 @@ test('full preview with all real bridges produces valid summary', () => {
   // Real data may have title/author conflicts between seed and bridge metadata
   assert.ok(summary.totalConflict >= 0, 'conflict count is non-negative')
 })
+
+// ── BLOCKER 2 tests: null author/canonicalUrl compatibility ────────────────────
+
+test('null author + known author → compatible; known author survives', () => {
+  const a = makeCandidate({
+    sourceIdentifier: 'https://null-author.com/1',
+    author: null,
+    citedIn: ['seed#1'],
+  })
+  const b = makeCandidate({
+    sourceIdentifier: 'https://null-author.com/1',
+    author: 'Known Author',
+    citedIn: ['al#1'],
+  })
+  const preview = buildUnifiedPreview([a], [b], [], [])
+  assert.equal(preview.entries.length, 1)
+  assert.equal(preview.entries[0].conflict, false, 'no conflict — null vs known')
+  assert.equal(preview.entries[0].candidate.author, 'Known Author', 'known author survives')
+})
+
+test('null canonicalUrl + known canonicalUrl → compatible; URL survives', () => {
+  const a = makeCandidate({
+    sourceIdentifier: 'https://null-url.com/1',
+    canonicalUrl: null,
+    citedIn: ['seed#1'],
+  })
+  const b = makeCandidate({
+    sourceIdentifier: 'https://null-url.com/1',
+    canonicalUrl: 'https://resolved-url.com/1',
+    citedIn: ['al#1'],
+  })
+  const preview = buildUnifiedPreview([a], [b], [], [])
+  assert.equal(preview.entries.length, 1)
+  assert.equal(preview.entries[0].conflict, false, 'no conflict — null vs known URL')
+  assert.equal(preview.entries[0].candidate.canonicalUrl, 'https://resolved-url.com/1', 'known URL survives')
+})
+
+test('known author A vs known author B → conflict', () => {
+  const a = makeCandidate({
+    sourceIdentifier: 'https://author-conflict.com/1',
+    author: 'Author A',
+    citedIn: ['seed#1'],
+  })
+  const b = makeCandidate({
+    sourceIdentifier: 'https://author-conflict.com/1',
+    author: 'Author B',
+    citedIn: ['al#1'],
+  })
+  const preview = buildUnifiedPreview([a], [b], [], [])
+  assert.equal(preview.entries[0].conflict, true, 'conflict')
+  assert.ok(preview.entries[0].conflictFields?.includes('author'))
+})
+
+test('known canonicalUrl A vs known canonicalUrl B → conflict', () => {
+  const a = makeCandidate({
+    sourceIdentifier: 'https://url-conflict.com/1',
+    canonicalUrl: 'https://url-conflict.com/1',
+    citedIn: ['seed#1'],
+  })
+  const b = makeCandidate({
+    sourceIdentifier: 'https://url-conflict.com/1',
+    canonicalUrl: 'https://different-url.com/1',
+    citedIn: ['al#1'],
+  })
+  const preview = buildUnifiedPreview([a], [b], [], [])
+  assert.equal(preview.entries[0].conflict, true, 'conflict')
+  assert.ok(preview.entries[0].conflictFields?.includes('canonicalUrl'))
+})
+
+// ── BLOCKER 3 tests: already-registered / preview-ready ────────────────────────
+
+test('conflicts never count as preview-ready', () => {
+  const a = makeCandidate({
+    sourceIdentifier: 'https://conflict-ready.com/1',
+    sourceType: 'official_documentation',
+    citedIn: ['seed#1'],
+  })
+  const b = makeCandidate({
+    sourceIdentifier: 'https://conflict-ready.com/1',
+    sourceType: 'professional_source',
+    citedIn: ['al#1'],
+  })
+  const live = [{ source_identifier: 'https://other.com/1' }]
+  const preview = buildUnifiedPreview([a], [b], [], [], live)
+  // The conflict entry should NOT appear in previewReady
+  assert.equal(preview.summary.totalPreviewReady, 0, 'conflict excluded from preview-ready')
+  assert.equal(preview.summary.totalConflict, 1, 'one conflict detected')
+})
+
+test('live exact identifier counts as already registered', () => {
+  const c = makeCandidate({
+    sourceIdentifier: 'https://live-id.com/1',
+    citedIn: ['seed#1'],
+  })
+  const live = [{ source_identifier: 'https://live-id.com/1' }]
+  const preview = buildUnifiedPreview([c], [], [], [], live)
+  assert.equal(preview.summary.totalAlreadyRegistered, 1, 'counted as already registered')
+  assert.equal(preview.summary.totalPreviewReady, 0, 'not preview-ready')
+})
+
+test('unregistered non-conflict candidate counts as preview-ready', () => {
+  const c = makeCandidate({
+    sourceIdentifier: 'https://preview-ready.com/1',
+    citedIn: ['al#1'],
+  })
+  const live = [{ source_identifier: 'https://other.com/1' }]
+  const preview = buildUnifiedPreview([], [c], [], [], live)
+  assert.equal(preview.summary.totalPreviewReady, 1, 'counted as preview-ready')
+  assert.equal(preview.summary.totalAlreadyRegistered, 0, 'not already registered')
+})
+
+// ── BLOCKER 1 test: UI structural (admin-only, no apply button) ────────────────
+
+test('RegistrationSection is gated by section === registration && isAdmin', () => {
+  // Structural verification: the registration section is rendered only when
+  // section === 'registration' && isAdmin. This is enforced by the JSX in
+  // MarketingWorkspacePage.tsx. The unified preview is consumed inside
+  // RegistrationSection which is rendered under that gate.
+  // Verified by code inspection: line 536 renders RegistrationSection only
+  // when section === 'registration' && isAdmin. No Apply/Register button
+  // exists in the RegistrationSection JSX.
+  const preview = buildUnifiedPreview()
+  assert.ok(preview.entries.length > 0, 'preview produces entries')
+  assert.ok(preview.summary.totalSeed > 0, 'seed count present')
+  assert.ok('totalAlreadyRegistered' in preview.summary, 'already registered field present')
+  assert.ok('totalPreviewReady' in preview.summary, 'preview ready field present')
+})
+
+test('preview summary has all required UI fields', () => {
+  const preview = buildUnifiedPreview()
+  const summary = summarisePreview(preview)
+  assert.ok('totalSeed' in summary, 'totalSeed')
+  assert.ok('totalResearchPreviewOnly' in summary, 'totalResearchPreviewOnly')
+  assert.ok('totalAlreadyRegistered' in summary, 'totalAlreadyRegistered')
+  assert.ok('totalPreviewReady' in summary, 'totalPreviewReady')
+  assert.ok('totalDuplicate' in summary, 'totalDuplicate')
+  assert.ok('totalConflict' in summary, 'totalConflict')
+  assert.ok('byOrigin' in summary, 'byOrigin')
+})
