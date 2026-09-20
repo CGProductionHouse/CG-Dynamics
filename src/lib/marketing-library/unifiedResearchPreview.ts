@@ -37,6 +37,8 @@ export interface PreviewEntry {
 export interface UnifiedPreview {
   entries: PreviewEntry[]
   summary: PreviewSummary
+  /** Exact set of sourceIdentifiers that are preview-ready (non-conflict + not already registered). */
+  previewReadyIdentifiers: Set<string>
 }
 
 export interface PreviewSummary {
@@ -218,7 +220,9 @@ export function buildUnifiedPreview(
     byOrigin,
   }
 
-  return { entries, summary }
+  const previewReadyIdentifiers = new Set(registration.unregistered.map(c => c.sourceIdentifier))
+
+  return { entries, summary, previewReadyIdentifiers }
 }
 
 /**

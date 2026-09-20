@@ -471,3 +471,79 @@ test('real default bridges include all three research sources', () => {
   assert.ok(ceEntries.length > 0, 'commerce_evidence entries present in unified preview')
   assert.ok(ccEntries.length > 0, 'competitive_creative entries present in unified preview')
 })
+
+// ── previewReadyIdentifiers consistency tests ──────────────────────────────────
+
+test('exact live registered research-only candidate is NOT in previewReadyIdentifiers', () => {
+  const c = makeCandidate({
+    sourceIdentifier: 'https://live-registered.com/1',
+    citedIn: ['al#1'],
+  })
+  const live = [{ source_identifier: 'https://live-registered.com/1' }]
+  const preview = buildUnifiedPreview([], [c], [], [], live)
+  assert.equal(preview.previewReadyIdentifiers.has('https://live-registered.com/1'), false, 'registered id excluded')
+  assert.equal(preview.summary.totalPreviewReady, 0, 'count matches')
+})
+
+test('unregistered research-only candidate IS in previewReadyIdentifiers', () => {
+  const c = makeCandidate({
+    sourceIdentifier: 'https://unregistered.com/1',
+    citedIn: ['al#1'],
+  })
+  const live = [{ source_identifier: 'https://other.com/1' }]
+  const preview = buildUnifiedPreview([], [c], [], [], live)
+  assert.equal(preview.previewReadyIdentifiers.has('https://unregistered.com/1'), true, 'unregistered id included')
+  assert.equal(preview.summary.totalPreviewReady, 1, 'count matches')
+})
+
+test('unregistered seed-backed candidate is preview-ready but still seed-backed', () => {
+  const c = makeCandidate({
+    sourceIdentifier: 'https://seed-unreg.com/1',
+    citedIn: ['seed#1'],
+  })
+  const live = [{ source_identifier: 'https://other.com/1' }]
+  const preview = buildUnifiedPreview([c], [], [], [], live)
+  assert.equal(preview.previewReadyIdentifiers.has('https://seed-unreg.com/1'), true, 'seed-backed unreg is preview-ready')
+  const entry = preview.entries.find(e => e.candidate.sourceIdentifier === 'https://seed-unreg.com/1')
+  assert.ok(entry.origins.includes('seed'), 'still marked seed-backed')
+})
+
+test('previewReadyIdentifiers length matches totalPreviewReady', () => {
+  const preview = buildUnifiedPreview()
+  assert.equal(
+    preview.previewReadyIdentifiers.size,
+    preview.summary.totalPreviewReady,
+    'set size === totalPreviewReady',
+  )
+})
+
+test('previewReadyIdentifiers excludes conflicts', () => {
+  const a = makeCandidate({
+    sourceIdentifier: 'https://conflict-reg.com/1',
+    sourceType: 'official_documentation',
+    citedIn: ['seed#1'],
+  })
+  const b = makeCandidate({
+    sourceIdentifier: 'https://conflict-reg.com/1',
+    sourceType: 'professional_source',
+    citedIn: ['al#1'],
+  })
+  const preview = buildUnifiedPreview([a], [b], [], [])
+  assert.equal(preview.previewReadyIdentifiers.has('https://conflict-reg.com/1'), false, 'conflict excluded')
+})
+
+test('page source reads previewReadyIdentifiers for list filtering', async () => {
+  const fs = await import('node:fs/promises')
+  const pageSource = await fs.readFile(
+    new URL('../src/pages/admin/MarketingWorkspacePage.tsx', import.meta.url),
+    'utf8',
+  )
+  assert.ok(
+    pageSource.includes('preview.previewReadyIdentifiers'),
+    'page uses previewReadyIdentifiers for list filtering',
+  )
+  assert.ok(
+    !pageSource.includes('!e.origins.includes(\'seed\') || (e.origins.includes(\'seed\') && e.origins.length > 1)'),
+    'page does not use origin-based filter for preview-ready list',
+  )
+})
