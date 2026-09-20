@@ -132,6 +132,13 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
     dependency: 'main', canonicalContract: 'meta/google-ads/tiktok connection-status functions (#325)',
   },
   {
+    name: 'get_google_ads_audit', title: 'Read exact-client Google Ads audit',
+    description: 'Company-admin only. Read canonical stored Google Ads V2 account mapping, sync freshness, campaign daily facts and timestamped observed settings for one exact Dynamics client UUID and explicit account-local date range. No live provider request or mutation. Missing audit surfaces are explicit.',
+    inputSchema: objectSchema({ client_id: uuid, start_date: date, end_date: date }, ['client_id', 'start_date', 'end_date']),
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+    dependency: 'main', canonicalContract: 'google_ads_accounts + exact dedicated/shared links + google_ads_campaign_daily_metrics + google_ads_sync_runs (#237/#435)',
+  },
+  {
     name: 'run_provider_sync', title: 'Run routine provider sync',
     description: 'Company-admin only. Targeted routine sync for ONE already-authorised, already-mapped provider account via its existing sync function. Refuses to run when the provider is not already connected. Never authorises an account, changes mappings or permissions, or publishes.',
     inputSchema: objectSchema({

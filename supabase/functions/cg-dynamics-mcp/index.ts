@@ -28,6 +28,7 @@ import {
   type McpAuthChallengeError,
 } from './oauthDiscovery.ts'
 import { cgDate, cgDatePlusDays, CG_TIMEZONE } from './cgTime.ts'
+import { buildGoogleAdsAudit, planGoogleAdsMetricReads, validateGoogleAdsAuditInput, type AuditAccount, type AuditLink, type AuditMetric, type AuditSync } from './googleAdsAudit.ts'
 import {
   classifyOneDriveReadiness,
   gradeSyncRun,
@@ -2596,6 +2597,67 @@ const handleRecordClientUpdate: ToolHandler = async (staff, input) => {
   return shapeClientUpdateResult(data)
 }
 
+// #435: Stored Google Ads V2 facts only. The communal service-role connection is
+// restricted here to an explicit manager/admin Project and exact client UUID.
+const handleGetGoogleAdsAudit: ToolHandler = async (staff, input) => {
+  const unavailable = (reason: string) => ({ data_state: 'unavailable', error: reason })
+  const validation = validateGoogleAdsAuditInput(input)
+  if (validation) return { error: validation }
+  const clientId = input.client_id as string
+  const startDate = input.start_date as string
+  const endDate = input.end_date as string
+  const clientResult = await staff.supabase.from('clients').select('id, active').eq('id', clientId).maybeSingle()
+  if (clientResult.error) return unavailable('Exact client lookup unavailable.')
+  if (!clientResult.data?.active) return { error: 'No active client matches that exact client_id.' }
+  const [dedicatedResult, campaignResult] = await Promise.all([
+    staff.supabase.from('google_ads_account_links').select('google_ads_account_id, client_id, is_active').eq('client_id', clientId).eq('is_active', true),
+    staff.supabase.from('google_ads_campaign_links').select('google_ads_account_id, customer_id, campaign_id, campaign_name, client_id, is_active').eq('client_id', clientId).eq('is_active', true),
+  ])
+  if (dedicatedResult.error || campaignResult.error) return unavailable('Google Ads mapping lookup unavailable.')
+  const dedicated = (dedicatedResult.data ?? []) as AuditLink[]
+  const campaigns = (campaignResult.data ?? []) as AuditLink[]
+  const accountIds = [...new Set([...dedicated, ...campaigns].map(link => link.google_ads_account_id))]
+  const empty = { accounts: [] as AuditAccount[], dedicatedLinks: dedicated, campaignLinks: campaigns,
+    metrics: [] as AuditMetric[], syncRuns: [] as AuditSync[] }
+  if (!accountIds.length) return buildGoogleAdsAudit({ client_id: clientId, start_date: startDate, end_date: endDate }, empty)
+  const [accountResult, allDedicatedResult, syncResult] = await Promise.all([
+    staff.supabase.from('google_ads_accounts').select('id, customer_id, account_name, account_mode, currency_code, time_zone, is_active').in('id', accountIds),
+    staff.supabase.from('google_ads_account_links').select('google_ads_account_id, client_id, is_active').in('google_ads_account_id', accountIds).eq('is_active', true),
+    staff.supabase.from('google_ads_sync_runs').select('google_ads_account_id, status, period_start, period_end, finished_at, rows_upserted, unmapped_campaigns')
+      .in('google_ads_account_id', accountIds).eq('status', 'succeeded').order('finished_at', { ascending: false }).limit(1000),
+  ])
+  if (accountResult.error || allDedicatedResult.error || syncResult.error) return unavailable('Canonical Google Ads account or sync history unavailable.')
+  // Isolation happens before the read: each account is queried on its own exact
+  // customer_id, and a shared account only by this client's exact campaign IDs, so no
+  // other client's rows enter this process or consume this client's row budget.
+  const reads = planGoogleAdsMetricReads(clientId, {
+    accounts: (accountResult.data ?? []) as AuditAccount[],
+    dedicatedLinks: (allDedicatedResult.data ?? []) as AuditLink[],
+    campaignLinks: campaigns,
+  })
+  const metrics: AuditMetric[] = []
+  let truncated = (syncResult.data ?? []).length === 1000
+  for (const read of reads) {
+    for (let offset = 0; offset < 10000; offset += 1000) {
+      let query = staff.supabase.from('google_ads_campaign_daily_metrics')
+        .select('google_ads_account_id, client_id, customer_id, campaign_id, campaign_name, campaign_status, campaign_type, metric_date, impressions, clicks, interactions, cost_micros, conversions, conversion_value, native_settings')
+        .eq('google_ads_account_id', read.google_ads_account_id).eq('customer_id', read.customer_id)
+      if (read.campaign_ids) query = query.in('campaign_id', read.campaign_ids)
+      const page = await query.gte('metric_date', startDate).lte('metric_date', endDate)
+        .order('campaign_id').order('metric_date').range(offset, offset + 999)
+      if (page.error) return unavailable('Canonical Google Ads period metrics unavailable.')
+      metrics.push(...((page.data ?? []) as AuditMetric[]))
+      if ((page.data ?? []).length < 1000) break
+      if (offset === 9000) truncated = true
+    }
+  }
+  return buildGoogleAdsAudit({ client_id: clientId, start_date: startDate, end_date: endDate }, {
+    accounts: (accountResult.data ?? []) as AuditAccount[],
+    dedicatedLinks: (allDedicatedResult.data ?? []) as AuditLink[], campaignLinks: campaigns,
+    metrics, syncRuns: (syncResult.data ?? []) as AuditSync[], truncated,
+  })
+}
+
 const MISSING_RELATION_CODES = new Set(['42P01', 'PGRST205'])
 
 async function loadRecordedClientUpdates(staff: AuthenticatedStaff, clientId: string) {
@@ -2653,6 +2715,7 @@ const toolHandlers: Record<string, ToolHandler> = {
   get_microsoft_sync_status: handleGetMicrosoftSyncStatus,
   run_microsoft_sync: handleRunMicrosoftSync,
   get_provider_health: handleGetProviderHealth,
+  get_google_ads_audit: handleGetGoogleAdsAudit,
   run_provider_sync: handleRunProviderSync,
   find_content_runs: handleFindContentRuns,
   link_content_run_deliverables: handleLinkContentRunDeliverables,
