@@ -268,7 +268,7 @@ const REGISTRATION_FAMILY_LABELS: Record<string, string> = {
 function RegistrationSection() {
   const { sources, loading, error, migrationNeeded } = useSources()
   const classification = useMemo(() => classifyRegistrations(REGISTRATION_MANIFEST, sources), [sources])
-  const preview = useMemo(() => buildUnifiedPreview(REGISTRATION_MANIFEST, [], [], [], sources), [sources])
+  const preview = useMemo(() => buildUnifiedPreview(REGISTRATION_MANIFEST, undefined, undefined, undefined, sources), [sources])
   const [showContainers, setShowContainers] = useState(false)
   const unregistered = useMemo(
     () => classification.unregistered.filter(c => showContainers || c.kind === 'cited_source'),
@@ -327,13 +327,36 @@ function RegistrationSection() {
             {preview.summary.totalConflict > 0 && (
               <div className="space-y-1.5">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-red-300/70">Conflicts (excluded from preview-ready)</p>
-                {preview.entries.filter(e => e.conflict).map(e => (
+                {preview.entries.filter(e => e.conflict).slice(0, 15).map(e => (
                   <div key={e.candidate.sourceIdentifier} className="rounded-lg border border-red-300/15 bg-red-300/[0.04] px-3 py-2">
                     <p className="truncate text-xs font-bold text-red-200">{e.candidate.title}</p>
                     <p className="truncate font-mono text-[10px] text-red-200/50">{e.candidate.sourceIdentifier}</p>
+                    <div className="mt-0.5 flex flex-wrap gap-1">
+                      {e.origins.map(o => <span key={o} className="rounded-full border border-red-300/20 bg-red-300/10 px-1.5 text-[9px] text-red-200/60">{o.replace(/_/g, ' ')}</span>)}
+                      {e.candidate.accessCoverage && <span className="text-[10px] text-red-200/50">access: {e.candidate.accessCoverage}</span>}
+                    </div>
                     <p className="mt-0.5 text-[10px] text-red-200/60">Conflicting fields: {e.conflictFields?.join(', ')}</p>
                   </div>
                 ))}
+                {preview.summary.totalConflict > 15 && <p className="text-[10px] text-white/30">…and {preview.summary.totalConflict - 15} more conflicts</p>}
+              </div>
+            )}
+
+            {/* Preview-ready list (bounded) */}
+            {preview.summary.totalPreviewReady > 0 && (
+              <div className="space-y-1.5">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-amber-200/70">Preview-ready (not in phase-28a, not registered, not activated)</p>
+                {preview.entries.filter(e => !e.conflict && !e.origins.includes('seed') || (e.origins.includes('seed') && e.origins.length > 1)).filter(e => !e.conflict).slice(0, 15).map(e => (
+                  <div key={e.candidate.sourceIdentifier} className="rounded-lg border border-amber-200/10 bg-amber-200/[0.03] px-3 py-2">
+                    <p className="truncate text-xs font-bold text-amber-100">{e.candidate.title}</p>
+                    <p className="truncate font-mono text-[10px] text-amber-100/40">{e.candidate.sourceIdentifier}</p>
+                    <div className="mt-0.5 flex flex-wrap gap-1">
+                      {e.origins.map(o => <span key={o} className="rounded-full border border-amber-200/15 bg-amber-200/5 px-1.5 text-[9px] text-amber-200/50">{o.replace(/_/g, ' ')}</span>)}
+                      {e.candidate.accessCoverage && <span className="text-[10px] text-amber-200/40">access: {e.candidate.accessCoverage}</span>}
+                    </div>
+                  </div>
+                ))}
+                {preview.summary.totalPreviewReady > 15 && <p className="text-[10px] text-white/30">…and {preview.summary.totalPreviewReady - 15} more preview-ready sources</p>}
               </div>
             )}
           </div>

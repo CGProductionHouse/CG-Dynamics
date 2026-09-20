@@ -432,3 +432,42 @@ test('preview summary has all required UI fields', () => {
   assert.ok('totalConflict' in summary, 'totalConflict')
   assert.ok('byOrigin' in summary, 'byOrigin')
 })
+
+// ── Structural source inspection tests ─────────────────────────────────────────
+
+test('Registration UI does not pass empty arrays for research bridges', async () => {
+  const fs = await import('node:fs/promises')
+  const pageSource = await fs.readFile(
+    new URL('../src/pages/admin/MarketingWorkspacePage.tsx', import.meta.url),
+    'utf8',
+  )
+  // The page should NOT call buildUnifiedPreview with explicit empty arrays
+  // for the three research bridge parameters
+  const badPattern = 'buildUnifiedPreview(REGISTRATION_MANIFEST, [], [], [],'
+  assert.ok(!pageSource.includes(badPattern), 'page must not pass empty arrays for research bridges')
+})
+
+test('preview with real default bridges produces researchPreviewOnly > 0', () => {
+  const preview = buildUnifiedPreview()
+  assert.ok(
+    preview.summary.totalResearchPreviewOnly > 0,
+    `expected researchPreviewOnly > 0, got ${preview.summary.totalResearchPreviewOnly}`,
+  )
+})
+
+test('real default bridges include all three research sources', () => {
+  const al = bridgeAudienceLifecycleSources()
+  const ce = bridgeCommerceEvidenceSources()
+  const cc = bridgeCompetitiveCreativeSources()
+  assert.ok(al.length > 0, 'audience-lifecycle bridge has sources')
+  assert.ok(ce.length > 0, 'commerce-evidence bridge has sources')
+  assert.ok(cc.length > 0, 'competitive-creative bridge has sources')
+
+  const preview = buildUnifiedPreview()
+  const alEntries = preview.entries.filter(e => e.origins.includes('audience_lifecycle'))
+  const ceEntries = preview.entries.filter(e => e.origins.includes('commerce_evidence'))
+  const ccEntries = preview.entries.filter(e => e.origins.includes('competitive_creative'))
+  assert.ok(alEntries.length > 0, 'audience_lifecycle entries present in unified preview')
+  assert.ok(ceEntries.length > 0, 'commerce_evidence entries present in unified preview')
+  assert.ok(ccEntries.length > 0, 'competitive_creative entries present in unified preview')
+})
