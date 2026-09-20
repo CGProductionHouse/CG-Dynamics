@@ -32,6 +32,7 @@ import {
   type SourceFilters,
 } from '../../lib/marketing-library/knowledgeFilters'
 import { REGISTRATION_MANIFEST, classifyRegistrations } from '../../lib/marketing-library/sourceRegistry'
+import { buildUnifiedPreview } from '../../lib/marketing-library/unifiedResearchPreview'
 import type { IndustryTag, KnowledgeLayer, SkillCardStatus, SourceType } from '../../types/skillCards'
 import {
   listClientGuides,
@@ -267,6 +268,7 @@ const REGISTRATION_FAMILY_LABELS: Record<string, string> = {
 function RegistrationSection() {
   const { sources, loading, error, migrationNeeded } = useSources()
   const classification = useMemo(() => classifyRegistrations(REGISTRATION_MANIFEST, sources), [sources])
+  const preview = useMemo(() => buildUnifiedPreview(REGISTRATION_MANIFEST, undefined, undefined, undefined, sources), [sources])
   const [showContainers, setShowContainers] = useState(false)
   const unregistered = useMemo(
     () => classification.unregistered.filter(c => showContainers || c.kind === 'cited_source'),
@@ -295,6 +297,72 @@ function RegistrationSection() {
               </div>
             ))}
           </div>
+
+          {/* ── Unified research-source preview ──────────────────────────── */}
+          <div className="rounded-2xl border border-teal-400/15 bg-teal-400/[0.04] p-4 space-y-3">
+            <p className="text-sm font-bold text-teal-200">Research-source registration preview</p>
+            <p className="text-[11px] text-white/45">Derived from seed manifest + audience lifecycle, commerce evidence and competitive-creative bridges. Research-preview-only items are <span className="font-bold text-amber-100">NOT in the phase-28a seed</span> and are <span className="font-bold text-amber-100">NOT registered or activated</span>.</p>
+            <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
+              {([
+                ['Seed-backed', preview.summary.totalSeed, 'text-white/70'],
+                ['Research-only', preview.summary.totalResearchPreviewOnly, 'text-teal-300'],
+                ['Already registered', preview.summary.totalAlreadyRegistered, 'text-green-300'],
+                ['Preview-ready', preview.summary.totalPreviewReady, 'text-amber-200'],
+                ['Duplicates', preview.summary.totalDuplicate, 'text-white/50'],
+                ['Conflicts', preview.summary.totalConflict, 'text-red-300'],
+              ] as const).map(([label, n, cls]) => (
+                <div key={label} className="rounded-xl border border-white/10 bg-black/20 p-3">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-white/40">{label}</p>
+                  <p className={`mt-0.5 text-xl font-black ${cls}`}>{n}</p>
+                </div>
+              ))}
+            </div>
+            {/* Origin badges */}
+            <div className="flex flex-wrap gap-1.5 text-[10px]">
+              {Object.entries(preview.summary.byOrigin).filter(([, n]) => n > 0).map(([origin, n]) => (
+                <span key={origin} className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-white/50">{origin.replace(/_/g, ' ')}: {n}</span>
+              ))}
+            </div>
+            {/* Conflict details */}
+            {preview.summary.totalConflict > 0 && (
+              <div className="space-y-1.5">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-red-300/70">Conflicts (excluded from preview-ready)</p>
+                {preview.entries.filter(e => e.conflict).slice(0, 15).map(e => (
+                  <div key={e.candidate.sourceIdentifier} className="rounded-lg border border-red-300/15 bg-red-300/[0.04] px-3 py-2">
+                    <p className="truncate text-xs font-bold text-red-200">{e.candidate.title}</p>
+                    <p className="truncate font-mono text-[10px] text-red-200/50">{e.candidate.sourceIdentifier}</p>
+                    <div className="mt-0.5 flex flex-wrap gap-1">
+                      {e.origins.map(o => <span key={o} className="rounded-full border border-red-300/20 bg-red-300/10 px-1.5 text-[9px] text-red-200/60">{o.replace(/_/g, ' ')}</span>)}
+                      {e.candidate.accessCoverage && <span className="text-[10px] text-red-200/50">access: {e.candidate.accessCoverage}</span>}
+                    </div>
+                    <p className="mt-0.5 text-[10px] text-red-200/60">Conflicting fields: {e.conflictFields?.join(', ')}</p>
+                  </div>
+                ))}
+                {preview.summary.totalConflict > 15 && <p className="text-[10px] text-white/30">…and {preview.summary.totalConflict - 15} more conflicts</p>}
+              </div>
+            )}
+
+            {/* Preview-ready list (bounded) */}
+            {preview.summary.totalPreviewReady > 0 && (
+              <div className="space-y-1.5">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-amber-200/70">Preview-ready (non-conflict, not already registered)</p>
+                {preview.entries.filter(e => preview.previewReadyIdentifiers.has(e.candidate.sourceIdentifier)).slice(0, 15).map(e => (
+                  <div key={e.candidate.sourceIdentifier} className="rounded-lg border border-amber-200/10 bg-amber-200/[0.03] px-3 py-2">
+                    <p className="truncate text-xs font-bold text-amber-100">{e.candidate.title}</p>
+                    <p className="truncate font-mono text-[10px] text-amber-100/40">{e.candidate.sourceIdentifier}</p>
+                    <div className="mt-0.5 flex flex-wrap gap-1">
+                      {e.origins.map(o => <span key={o} className="rounded-full border border-amber-200/15 bg-amber-200/5 px-1.5 text-[9px] text-amber-200/50">{o.replace(/_/g, ' ')}</span>)}
+                      {e.candidate.accessCoverage && <span className="text-[10px] text-amber-200/40">access: {e.candidate.accessCoverage}</span>}
+                      {!e.origins.includes('seed') && <span className="text-[10px] text-amber-200/40">not in phase-28a</span>}
+                      {e.origins.includes('seed') && <span className="text-[10px] text-amber-200/40">seed-backed</span>}
+                    </div>
+                  </div>
+                ))}
+                {preview.summary.totalPreviewReady > 15 && <p className="text-[10px] text-white/30">…and {preview.summary.totalPreviewReady - 15} more preview-ready sources</p>}
+              </div>
+            )}
+          </div>
+
           <label className="flex items-center gap-1.5 text-xs text-white/60"><input type="checkbox" className="h-3.5 w-3.5 accent-teal-400" checked={showContainers} onChange={e => setShowContainers(e.target.checked)} />Include pack container references</label>
           <ul className="grid gap-2 lg:grid-cols-2">
             {unregistered.map(c => (
