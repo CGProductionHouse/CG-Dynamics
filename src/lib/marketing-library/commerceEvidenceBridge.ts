@@ -100,6 +100,9 @@ export function bridgeCommerceEvidenceSources(
           limitations: s.limitations || undefined,
           jurisdiction: s.jurisdiction || undefined,
         },
+        pageDate: s.publicationDate || undefined,
+        accessedAt: s.accessedAt || undefined,
+        sourceStatus: s.reviewStatus || undefined,
       }
     })
 }

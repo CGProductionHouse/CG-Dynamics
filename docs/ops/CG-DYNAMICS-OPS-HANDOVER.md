@@ -1,5 +1,134 @@
 # CG Dynamics Ops Handover
 
+## SUPERVISOR CONTINUATION — 21 September 2026, 11:55 SAST
+
+**This section supersedes the 11:36 P0 lane-state snapshot below. Refetch live GitHub before consequential action.**
+
+### Live P0 state
+
+- Live `main` before this handover write: `95952cc5f9a0b74dda056b81306efe1405cc0f2b`.
+- **CA MANUAL 02 — #450 / PR #455** remains on `feat/450-content-production-autopilot`, head `9ebe22c28bd3ae88df8e0928517057437bf4a6f0`. Vercel is green and GitHub reports the PR mergeable, but supervisor code review found functional/truth blockers. State is now **CORRECTION PASS REQUIRED**; do not merge this SHA.
+- **CA MANUAL 01 — #451 / PR #454** remains on `feat/451-daily-dynamics-freshness`, head `10d6a986e2dc5f9da5e6268b0cc198b15f6abc2d`. State remains **CORRECTION PASS REQUIRED** and Vercel remains red.
+- **#452** audit support is complete/closed.
+- **#453** audit support is now complete/closed. It independently confirmed all five #454 blockers and additionally found that a crashed Microsoft apply left at `status='applying'` has no automatic resume path.
+- #442 remains paused. No protected production gate has been crossed.
+
+### #450 / PR #455 — seven supervisor blockers
+
+1. The exact Microsoft-owned Outlook/CG Calendar event -> Content Run auto-ensure path is still not executable. The background pass begins from existing `content_runs`; the Econofoods missing-run failure class is not actually exercised end-to-end.
+2. The normal background cycle does not execute draft AI generation; generation exists only as an explicit MCP action. Add the safe latent automatic path/feature gate while keeping activation CA-gated.
+3. Per-video OneDrive folder auto-ensure is not executable. Mapping schema/readiness planning exists, but no create-only Graph/OneDrive create+durable-map path calls the new mapping authority.
+4. The autopilot pass does not automatically link exact, unambiguous same-client future `monthly_deliverables`; it only reports unallocated videos. The Client Schedule rows themselves remain read-only.
+5. Browser Content Operations queries `content_guide_video_onedrive_folders` directly even though the migration revokes authenticated access and exposes its helper only to service role. Add a least-privilege staff-safe projection/RPC so real mappings do not appear unreadable.
+6. Browser final-output truth never reads `client_portal_assets`, so a real final output can be shown as not published.
+7. `NO_FUTURE_CONTENT_RUN` truth is incomplete: browser discovery only includes clients already present in upcoming runs, while the background pass globally limits to 25 runs and can misclassify unprocessed/preparation-failed clients as having no future run.
+
+Also: PR #455 is behind current main and must be reconciled after fixes. Strengthen the Econofoods acceptance fixture so it executes Microsoft event -> run -> guideline, rather than starting from a pre-supplied run. Fresh focused/full verification and a fresh green Vercel are required on the corrected SHA.
+
+### #451 / PR #454 — correction requirements remain
+
+The existing five blockers remain authoritative:
+1. fix the TypeScript/Vercel build failure;
+2. do not broaden global `public.is_admin()` to service role; scope automatic Microsoft authority narrowly with the required explicit grant;
+3. add bounded automatic failed-source retry/cooldown/exhaustion and truthful degraded/failed terminal state;
+4. remove the 100-asset Meta inventory truncation and prove >100;
+5. expose durable Meta failed/retrying/recovery truth rather than hard-coded `retrying: false`.
+
+Add the #453 audit finding to the same correction pass: a crashed automatic apply left in `applying` must have a safe resume/recovery path. Reconcile the shared `background-worker/index.ts` only after #455's corrected code is accepted/merged, unless the supervisor explicitly coordinates an earlier rebase.
+
+### Exact next supervisor sequence
+
+1. **CA MANUAL 02** fixes all seven #455 blockers on the existing branch/PR, reconciles current main, reruns required verification and stops on a new pushed SHA with fresh Vercel evidence.
+2. Supervisor refetches/reviews that exact #455 SHA. Merge routine code only if clean; do not cross migration/deploy/scheduler/OneDrive/provider/data gates.
+3. Reconcile **CA MANUAL 01** / #454 against the accepted #455 shared background-worker state and current main; fix the five existing blockers plus the crashed-`applying` resume gap; require fresh green Vercel.
+4. Supervisor reviews the exact new #454 SHA.
+5. Only after both code lanes are accepted, present CA the protected production activation sequence. First live acceptance must prove Econofoods readiness + exact Microsoft reconciliation + truthful Meta fleet freshness, not merely successful deployment.
+
+Full technical reviews are durable on PR #455, Issue #450, Issue #451/#453 and supervisor Issue #381. CA should receive only the short manual-agent continuation prompts.
+
+
+## NEW CHAT BOOTSTRAP — 21 September 2026, 11:36 SAST
+
+**This is the canonical starting point for the next CG Dynamics supervisor chat. Refetch live GitHub before consequential action.**
+
+### P0 today
+
+CA's P0 is:
+1. **#450 Content Production Autopilot** — guidelines already prepared for upcoming runs/months, staff primarily review/change through ChatGPT/Dynamics, exact per-video OneDrive working/final mappings, raw-upload truth and edit readiness.
+2. **#451 Daily Dynamics Freshness** — Microsoft/Teams/Planner/Outlook + Meta fresh automatically before staff work, with truthful PASS/PARTIAL/STALE/FAILED/UNAVAILABLE and bounded recovery.
+
+### Manual ownership
+
+**CA MANUAL 02 — #450 / PR #455**
+- branch: `feat/450-content-production-autopilot`
+- head at checkpoint: `9ebe22c28bd3ae88df8e0928517057437bf4a6f0`
+- state: **IMPLEMENTATION COMPLETE / AWAITING SUPERVISOR CODE REVIEW**
+- open/mergeable at checkpoint.
+- Review the actual PR diff before accepting the agent report.
+- Reported scope: auto-ensure run/guideline, rolling drafts, eight audited MCP guideline actions, configured short-code-only folder naming, per-video production + portal identity, raw/edit-readiness derivation, Content Operations readiness, background `content_autopilot` job, Econofoods fixture.
+- Autonomous audit #452 is complete and should be read during review. It identified the Microsoft-owned event ensure gap, existing-authority reuse, #454 background-worker overlap, #438 Content Guideline UI overlap, and protected OneDrive/calendar identity gates.
+- Protected activation after code acceptance remains CA-only: migration `20260921090000_content_production_autopilot.sql`, `cg-dynamics-mcp` deploy + connector refresh, `background-worker` deploy/job enablement, automatic AI-generation decision, OneDrive production rollout/tokens/writes, Econofoods exact short-code + mapping live acceptance.
+
+**CA MANUAL 01 — #451 / PR #454**
+- branch: `feat/451-daily-dynamics-freshness`
+- head at checkpoint: `10d6a986e2dc5f9da5e6268b0cc198b15f6abc2d`
+- state: **SUPERVISOR REVIEW / CORRECTION PASS REQUIRED**
+- same branch/PR only.
+- Latest supervisor review on #451/PR #454 is authoritative.
+- Five blockers:
+  1. Vercel preview RED: deployment `dpl_HQN9J7rKupJ3P2zGrPnx4srZY1de`, `lint_or_type_error`, `npm run build` exit 2.
+  2. Migration `20260921120000_daily_dynamics_service_reconciliation.sql` must NOT redefine global `public.is_admin()` for service role; scope service authority only to Microsoft automatic apply + explicit required EXECUTE grant.
+  3. System Microsoft job can loop forever after a failed required source; add bounded auto retry/cooldown/exhaustion and truthful degraded/failed terminal state.
+  4. Meta fleet discovery is hard-capped at 100 assets; fully page inventory and test >100.
+  5. Meta retry/failure truth is incomplete: `retrying: false` is hard-coded and failed count is omitted; derive from durable batch/checkpoint state.
+- After fixes: reconcile current main, rerun suites/build/lint/diff and require fresh green Vercel.
+- Authenticated desktop/mobile UI acceptance remains outstanding.
+- No migration/deploy/secret/cron/live reconciliation/provider change is authorised yet.
+
+### Autonomous support
+
+- **#452** audit support for #450: COMPLETE. Read its concrete audit comment; no code/branch/production action.
+- **#453** audit support for #451: first Poolside route failed by request-limit; rerouted to `/oc /nvidia`. Action run `35583400106` was IN_PROGRESS at 11:36 SAST. Audit-only; must not modify code.
+- Scheduled OpenCode free-primary route has demonstrated provider health, but recent scheduled runs often produced no product SHA. Do not equate workflow success with product progress.
+
+### Completed / paused
+
+- #448 / PR #449 research-source governance: COMPLETE / MERGED at `d9143930933a8647f7d1bddca84a61ca1b59331e`.
+- #442 baseline reconciliation: PAUSED; preserve `fix/442-main-suite-baseline`.
+- #437 / PR #438 Creative Intelligence: code accepted previously, but authenticated UI acceptance + current-main reconciliation remain. It overlaps the Content Guideline surface, so coordinate carefully with #450.
+- #435 Google Ads code merged; production activation remains separately protected.
+- Client Portal / Brand Hub production migration/mapping/enablement remains separately protected.
+
+### Locked authorities
+
+- `monthly_deliverables` is canonical Client Schedule truth.
+- one canonical Content Guideline per real Content Run.
+- a real Content Run may cover several future months.
+- never fabricate a run when no future real run exists.
+- use configured client short code only; never infer from display name.
+- canonical production path:
+  `Clients/<Client>/Videos/<YYYY>/<YYYY_MM_MON>/<YYYY_MM_<SHORT_CODE>_VIDEO_<XX>>`
+- client portal boundary:
+  `Clients/<Client>/A_ClientPortal_<ClientSlug>/Brand Identity|Graphic Design|Video`
+- raw internal production storage is never client-visible.
+- live Microsoft remains freshness authority for Microsoft-backed work during coexistence.
+- no second Content system, Client Schedule, sync authority, Marketing Library or file tracker.
+
+### Exact next supervisor sequence
+
+1. Refetch `main`, PR #455, PR #454, #453.
+2. **Review PR #455 first**; it is CA's highest operational priority.
+3. If #455 is clean, merge routine code only; do not cross its protected production gates.
+4. Reconcile #454's shared `background-worker/index.ts` carefully after #455 merge, or require Manual 01 to rebase during its correction pass.
+5. Review the next #454 SHA only after all five blockers are fixed, branch is current and Vercel is green.
+6. Incorporate #453 autonomous audit findings when they land.
+7. Then present CA the exact protected activation sequence needed to make the P0 genuinely live today.
+8. First controlled live acceptance must prove Econofoods content readiness + Microsoft exact reconciliation + Meta freshness truth, not merely deployment success.
+
+### Communication
+
+Full coding specs/reviews go into GitHub first. CA receives only tiny prompts naming **CA MANUAL AGENT 01** or **CA MANUAL AGENT 02**. Never accept an agent's prose report without refetching GitHub/diff/checks.
+
 
 ## CURRENT OVERRIDE — 21 September 2026, P0 TODAY
 
@@ -11,7 +140,7 @@ CA has explicitly reprioritised today around getting the content-production oper
 
 - **CA MANUAL 02 owns Issue #450 / `feat/450-content-production-autopilot`.** This is the highest-priority content lane: exact Outlook/CG Calendar -> Content Run identity, automatic canonical draft Content Guideline creation, review-ready multi-month AI content, same-client schedule linkage, canonical internal per-video production folders, Client Portal Video final-output mapping, raw-upload verification, edit-readiness state, and narrow audited Assistant/MCP actions so staff can review/change through ChatGPT instead of backend fallbacks.
 - **CA MANUAL 01 owns Issue #451 / `feat/451-daily-dynamics-freshness`.** This lane makes Microsoft/Teams/Planner/Outlook and Meta fresh automatically in the normal operating cycle, with durable success/failure evidence, bounded recovery, exact-ID reconciliation and no fake-zero/stale-as-current behavior.
-- **Issue #448 / PR #449 is PAUSED, not rejected.** Preserve its current branch/head for later. Manual 02 capacity is released from it until #450 clears.
+- **Issue #448 / PR #449 is COMPLETE / MERGED** at `d9143930933a8647f7d1bddca84a61ca1b59331e`. Research-source freshness/governance is now on `main`; no protected gate was crossed. Manual 02 remains fully assigned to #450.
 - **Issue #442 is PAUSED.** Preserve `fix/442-main-suite-baseline` for later. Manual 01 capacity is released from it until #451 clears.
 - Shared MCP ownership while both P0 lanes run: #450 owns `supabase/functions/cg-dynamics-mcp/index.ts`, `toolCatalog.ts` and content Assistant skill/action files. #451 must not edit those concurrently; any tiny MCP follow-up is deferred for supervisor reconciliation after #450 lands.
 - Existing authorities remain locked: `monthly_deliverables` is Client Schedule truth; one canonical Content Guideline per real Content Run; Content Runs may cover multiple future months; canonical OneDrive naming uses configured client short code only; raw internal production storage is never exposed to clients; live Microsoft remains freshness authority for Microsoft-backed work during coexistence.

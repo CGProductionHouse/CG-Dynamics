@@ -104,6 +104,10 @@ export function bridgeAudienceLifecycleSources(
         trustTier: 'needs_review' as SourceTrustTier,
         ingestionEligibility: 'metadata_reference' as const,
         citedIn: [`docs/marketing-library/audience-lifecycle/sources.json#${s.key}`],
+        pageDate: s.pageDate || undefined,
+        accessedAt: s.accessedAt || undefined,
+        reviewDue: s.reviewDue || undefined,
+        sourceStatus: s.status || undefined,
       }
     })
 }

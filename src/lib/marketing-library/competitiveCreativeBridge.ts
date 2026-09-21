@@ -139,6 +139,10 @@ export function bridgeCompetitiveCreativeSources(
           finding: s.finding || undefined,
           limitations: s.limitation || undefined,
         },
+        pageDate: s.pageDate || undefined,
+        accessedAt: s.accessedAt || undefined,
+        reviewDue: s.reviewDue || undefined,
+        sourceStatus: s.status || undefined,
       }
     })
 }

@@ -32,7 +32,7 @@ import {
   type SourceFilters,
 } from '../../lib/marketing-library/knowledgeFilters'
 import { REGISTRATION_MANIFEST, classifyRegistrations } from '../../lib/marketing-library/sourceRegistry'
-import { buildUnifiedPreview } from '../../lib/marketing-library/unifiedResearchPreview'
+import { buildUnifiedPreview, type PreviewEntry } from '../../lib/marketing-library/unifiedResearchPreview'
 import type { IndustryTag, KnowledgeLayer, SkillCardStatus, SourceType } from '../../types/skillCards'
 import {
   listClientGuides,
@@ -268,8 +268,10 @@ const REGISTRATION_FAMILY_LABELS: Record<string, string> = {
 function RegistrationSection() {
   const { sources, loading, error, migrationNeeded } = useSources()
   const classification = useMemo(() => classifyRegistrations(REGISTRATION_MANIFEST, sources), [sources])
-  const preview = useMemo(() => buildUnifiedPreview(REGISTRATION_MANIFEST, undefined, undefined, undefined, sources), [sources])
+  const today = useMemo(() => new Date().toISOString().slice(0, 10), [])
+  const preview = useMemo(() => buildUnifiedPreview(REGISTRATION_MANIFEST, undefined, undefined, undefined, sources, today), [sources, today])
   const [showContainers, setShowContainers] = useState(false)
+  const [governanceFilter, setGovernanceFilter] = useState<string | null>(null)
   const unregistered = useMemo(
     () => classification.unregistered.filter(c => showContainers || c.kind === 'cited_source'),
     [classification, showContainers],
@@ -361,6 +363,121 @@ function RegistrationSection() {
                 {preview.summary.totalPreviewReady > 15 && <p className="text-[10px] text-white/30">…and {preview.summary.totalPreviewReady - 15} more preview-ready sources</p>}
               </div>
             )}
+          </div>
+
+          {/* ── Research source governance console ──────────────────────────── */}
+          <div className="rounded-2xl border border-purple-400/15 bg-purple-400/[0.04] p-4 space-y-3">
+            <p className="text-sm font-bold text-purple-200">Research source governance</p>
+            <p className="text-[11px] text-white/45">Read-only governance layer. Source freshness is derived from ledger metadata. No auto-activation, no write path.</p>
+
+            {/* Freshness counts */}
+            <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-5">
+              {([
+                ['Overdue', preview.summary.totalOverdue, 'text-red-300', 'overdue'],
+                ['Due today', preview.summary.totalDueToday, 'text-amber-300', 'due_today'],
+                ['Due soon', preview.summary.totalDueSoon, 'text-yellow-200', 'due_soon'],
+                ['Current', preview.summary.totalCurrent, 'text-green-300', 'current'],
+                ['Unscheduled', preview.summary.totalUnscheduled, 'text-white/50', 'unscheduled'],
+              ] as const).map(([label, n, cls, filter]) => (
+                <button
+                  key={label}
+                  onClick={() => setGovernanceFilter(governanceFilter === filter ? null : filter)}
+                  className={`rounded-xl border p-3 text-left transition-colors ${
+                    governanceFilter === filter
+                      ? 'border-purple-400/40 bg-purple-400/10'
+                      : 'border-white/10 bg-black/20 hover:bg-white/5'
+                  }`}
+                >
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-white/40">{label}</p>
+                  <p className={`mt-0.5 text-xl font-black ${cls}`}>{n}</p>
+                </button>
+              ))}
+            </div>
+
+            {/* Queue filter badges */}
+            <div className="flex flex-wrap gap-1.5 text-[10px]">
+              {([
+                ['Conflicts', preview.governanceQueues.conflicts.length, 'text-red-300', 'conflicts'],
+                ['Registered', preview.governanceQueues.alreadyRegistered.length, 'text-green-300', 'registered'],
+                ['Preview-ready', preview.governanceQueues.previewReady.length, 'text-amber-200', 'preview_ready'],
+              ] as const).map(([label, n, cls, filter]) => (
+                <button
+                  key={label}
+                  onClick={() => setGovernanceFilter(governanceFilter === filter ? null : filter)}
+                  className={`rounded-full border px-2 py-0.5 transition-colors ${
+                    governanceFilter === filter
+                      ? 'border-purple-400/40 bg-purple-400/10 text-purple-200'
+                      : `border-white/10 bg-white/5 ${cls}`
+                  }`}
+                >
+                  {label}: {n}
+                </button>
+              ))}
+              {governanceFilter && (
+                <button onClick={() => setGovernanceFilter(null)} className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-white/40 hover:text-white/60">
+                  clear filter
+                </button>
+              )}
+            </div>
+
+            {/* Governance source rows (bounded) */}
+            {governanceFilter && (() => {
+              const queueMap: Record<string, string[]> = {
+                overdue: preview.governanceQueues.overdue,
+                due_today: preview.governanceQueues.dueToday,
+                due_soon: preview.governanceQueues.dueSoon,
+                current: preview.governanceQueues.current,
+                unscheduled: preview.governanceQueues.unscheduled,
+                conflicts: preview.governanceQueues.conflicts,
+                registered: preview.governanceQueues.alreadyRegistered,
+                preview_ready: preview.governanceQueues.previewReady,
+              }
+              const ids = queueMap[governanceFilter] ?? []
+              const filteredEntries = ids
+                .map(id => preview.entries.find(e => e.candidate.sourceIdentifier === id))
+                .filter((e): e is PreviewEntry => e != null)
+                .slice(0, 20)
+              return (
+                <div className="space-y-1.5">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-purple-200/70">
+                    {governanceFilter.replace(/_/g, ' ')} — {ids.length} source{ids.length !== 1 ? 's' : ''}
+                  </p>
+                  {filteredEntries.map(e => (
+                    <div key={e.candidate.sourceIdentifier} className="rounded-lg border border-purple-300/10 bg-purple-300/[0.03] px-3 py-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="truncate text-xs font-bold text-purple-100">{e.candidate.title}</p>
+                        <div className="flex shrink-0 gap-1">
+                          {e.conflict && <span className="rounded border border-red-300/20 bg-red-300/10 px-1 text-[9px] text-red-300/70">conflict</span>}
+                          {e.origins.includes('seed') && <span className="rounded border border-white/10 bg-white/5 px-1 text-[9px] text-white/40">seed</span>}
+                        </div>
+                      </div>
+                      <p className="truncate font-mono text-[10px] text-purple-100/40">{e.candidate.sourceIdentifier}</p>
+                      <div className="mt-0.5 flex flex-wrap gap-1">
+                        {e.origins.map(o => <span key={o} className="rounded-full border border-purple-200/10 bg-purple-200/5 px-1.5 text-[9px] text-purple-200/50">{o.replace(/_/g, ' ')}</span>)}
+                        {e.candidate.accessCoverage && <span className="text-[10px] text-purple-200/40">access: {e.candidate.accessCoverage}</span>}
+                        {e.candidate.sourceType && <span className="text-[10px] text-purple-200/40">type: {e.candidate.sourceType}</span>}
+                        {e.candidate.reviewDue && <span className="text-[10px] text-purple-200/40">review: {e.candidate.reviewDue}</span>}
+                        {e.candidate.pageDate && <span className="text-[10px] text-purple-200/40">published: {e.candidate.pageDate}</span>}
+                      </div>
+                      {/* Conflict variants */}
+                      {e.conflict && e.conflictVariants && e.conflictVariants.length > 0 && (
+                        <div className="mt-1.5 space-y-1">
+                          {e.conflictVariants.map((v, i) => (
+                            <div key={i} className="rounded border border-red-300/10 bg-red-300/[0.03] px-2 py-1">
+                              <p className="text-[9px] font-bold text-red-200/60">variant: {v.origin.replace(/_/g, ' ')}</p>
+                              <p className="truncate text-[10px] text-red-200/50">title: {v.candidate.title}</p>
+                              {v.candidate.author && <p className="truncate text-[10px] text-red-200/40">author: {v.candidate.author}</p>}
+                              {v.candidate.accessCoverage && <p className="text-[10px] text-red-200/40">access: {v.candidate.accessCoverage}</p>}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  {ids.length > 20 && <p className="text-[10px] text-white/30">…and {ids.length - 20} more</p>}
+                </div>
+              )
+            })()}
           </div>
 
           <label className="flex items-center gap-1.5 text-xs text-white/60"><input type="checkbox" className="h-3.5 w-3.5 accent-teal-400" checked={showContainers} onChange={e => setShowContainers(e.target.checked)} />Include pack container references</label>
