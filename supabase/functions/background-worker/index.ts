@@ -9,6 +9,7 @@ import webpush from 'npm:web-push@3.6.7'
 import { dispatchMetaWorker } from '../_shared/metaWorkerDispatch.ts'
 import { currentMetaMonth, previousMetaMonth, currentMonthHasIncrementalWindow } from '../_shared/metaPeriod.ts'
 import { fetchAllRows } from '../_shared/paginatedRows.ts'
+import { recordContentAutopilotPass, runContentAutopilotPass } from '../_shared/contentAutopilotPass.ts'
 
 const MAX_RUNTIME_MS = 25_000
 const MAX_JOBS_PER_RUN = 25
@@ -565,6 +566,24 @@ async function runJob(
       if (error) throw new Error(error.message)
       await updateJobProgress(supabase, job.id, worker, 90)
       return { ok: true, ...(data as Record<string, unknown>) }
+    }
+    case 'content_autopilot': {
+      // #450: prepare content for upcoming real Content Runs on the normal operating
+      // cycle. Idempotent and read-mostly: the only content write is the canonical
+      // guideline a run must already have. It never creates a run, writes the Client
+      // Schedule, overwrites human content, publishes, or touches a file.
+      await updateJobProgress(supabase, job.id, worker, 40)
+      const today = typeof payload.today === 'string' ? payload.today : new Date().toISOString().slice(0, 10)
+      try {
+        const result = await runContentAutopilotPass(supabase as unknown as Parameters<typeof runContentAutopilotPass>[0], { today })
+        await updateJobProgress(supabase, job.id, worker, 90)
+        await recordContentAutopilotPass(supabase as unknown as Parameters<typeof recordContentAutopilotPass>[0], result, null)
+        return result
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err)
+        await recordContentAutopilotPass(supabase as unknown as Parameters<typeof recordContentAutopilotPass>[0], null, message)
+        throw err
+      }
     }
     default:
       throw new Error(`Unsupported background job type: ${job.job_type}`)
