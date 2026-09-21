@@ -1,6 +1,7 @@
 import type { RegistrationCandidate } from './sourceRegistry'
 import { REGISTRATION_MANIFEST, classifyRegistrations } from './sourceRegistry'
 import type { MarketingLibrarySource } from './skillCardsData'
+import { classifyFreshness } from './sourceFreshness'
 import { bridgeAudienceLifecycleSources } from './audienceLifecycleBridge'
 import { bridgeCommerceEvidenceSources } from './commerceEvidenceBridge'
 import { bridgeCompetitiveCreativeSources } from './competitiveCreativeBridge'
@@ -21,6 +22,13 @@ import { bridgeCompetitiveCreativeSources } from './competitiveCreativeBridge'
 
 export type SourceOrigin = 'seed' | 'audience_lifecycle' | 'commerce_evidence' | 'competitive_creative'
 
+export interface ConflictVariant {
+  /** Origin that contributed this variant. */
+  origin: SourceOrigin
+  /** Exact candidate metadata from this origin. */
+  candidate: RegistrationCandidate
+}
+
 export interface PreviewEntry {
   /** Merged RegistrationCandidate — richest compatible metadata wins for optional fields. */
   candidate: RegistrationCandidate
@@ -30,8 +38,21 @@ export interface PreviewEntry {
   conflict: boolean
   /** Conflict fields if conflict=true. */
   conflictFields?: string[]
+  /** Exact source variants that caused the conflict. Preserved for human review. */
+  conflictVariants?: ConflictVariant[]
   /** How many times this sourceIdentifier appeared across all inputs. */
   duplicateCount: number
+}
+
+export interface GovernanceQueues {
+  conflicts: string[]
+  overdue: string[]
+  dueToday: string[]
+  dueSoon: string[]
+  current: string[]
+  unscheduled: string[]
+  alreadyRegistered: string[]
+  previewReady: string[]
 }
 
 export interface UnifiedPreview {
@@ -39,6 +60,8 @@ export interface UnifiedPreview {
   summary: PreviewSummary
   /** Exact set of sourceIdentifiers that are preview-ready (non-conflict + not already registered). */
   previewReadyIdentifiers: Set<string>
+  /** Derived governance queues — every list length matches the corresponding summary count. */
+  governanceQueues: GovernanceQueues
 }
 
 export interface PreviewSummary {
@@ -49,6 +72,12 @@ export interface PreviewSummary {
   totalAlreadyRegistered: number
   totalPreviewReady: number
   byOrigin: Record<SourceOrigin, number>
+  // ── Governance counts ─────────────────────────────────────────────────────
+  totalOverdue: number
+  totalDueToday: number
+  totalDueSoon: number
+  totalCurrent: number
+  totalUnscheduled: number
 }
 
 // ── Conflict detection ────────────────────────────────────────────────────────
@@ -112,6 +141,10 @@ function mergeCandidates(base: RegistrationCandidate, overlay: RegistrationCandi
     citedIn: [...new Set([...base.citedIn, ...overlay.citedIn])],
     accessCoverage: base.accessCoverage ?? overlay.accessCoverage,
     reviewContext: mergedReviewContext,
+    pageDate: base.pageDate ?? overlay.pageDate,
+    accessedAt: base.accessedAt ?? overlay.accessedAt,
+    reviewDue: base.reviewDue ?? overlay.reviewDue,
+    sourceStatus: base.sourceStatus ?? overlay.sourceStatus,
   }
 }
 
@@ -124,6 +157,9 @@ function mergeCandidates(base: RegistrationCandidate, overlay: RegistrationCandi
  * When liveSources is provided, computes already-registered and preview-ready
  * counts using the existing classifyRegistrations() against the non-conflict
  * unified candidates. Conflicts are excluded from preview-ready.
+ *
+ * @param today - Injected date string (YYYY-MM-DD) for freshness classification.
+ *                No timezone drift. If omitted, freshness queues are empty.
  */
 export function buildUnifiedPreview(
   seedManifest: RegistrationCandidate[] = REGISTRATION_MANIFEST,
@@ -131,6 +167,7 @@ export function buildUnifiedPreview(
   commerceEvidence: RegistrationCandidate[] = bridgeCommerceEvidenceSources(),
   competitiveCreative: RegistrationCandidate[] = bridgeCompetitiveCreativeSources(),
   liveSources: Array<Pick<MarketingLibrarySource, 'source_identifier'>> = [],
+  today?: string,
 ): UnifiedPreview {
   // Tag each candidate with its origin
   const tagged: Array<{ candidate: RegistrationCandidate; origin: SourceOrigin }> = [
@@ -177,6 +214,7 @@ export function buildUnifiedPreview(
     // Multiple items with same sourceIdentifier — check for conflicts
     let merged = items[0].candidate
     let allConflicts: string[] = []
+    const variants: ConflictVariant[] = items.map(i => ({ origin: i.origin, candidate: i.candidate }))
 
     for (let i = 1; i < items.length; i++) {
       const cf = conflictFields(merged, items[i].candidate)
@@ -195,6 +233,7 @@ export function buildUnifiedPreview(
       origins,
       conflict: uniqueConflicts.length > 0,
       conflictFields: uniqueConflicts.length > 0 ? uniqueConflicts : undefined,
+      conflictVariants: uniqueConflicts.length > 0 ? variants : undefined,
       duplicateCount,
     })
 
@@ -210,6 +249,43 @@ export function buildUnifiedPreview(
     .map(e => e.candidate)
   const registration = classifyRegistrations(nonConflictCandidates, liveSources)
 
+  // ── Governance queues ─────────────────────────────────────────────────────
+  const conflictIds = entries.filter(e => e.conflict).map(e => e.candidate.sourceIdentifier)
+  const registeredIds = new Set(registration.registered.map(c => c.sourceIdentifier))
+  const previewReadyIdentifiers = new Set(registration.unregistered.map(c => c.sourceIdentifier))
+
+  const overdue: string[] = []
+  const dueToday: string[] = []
+  const dueSoon: string[] = []
+  const current: string[] = []
+  const unscheduled: string[] = []
+
+  if (today) {
+    for (const e of entries) {
+      if (e.conflict) continue
+      const freshness = classifyFreshness(e.candidate, today)
+      switch (freshness.state) {
+        case 'overdue': overdue.push(e.candidate.sourceIdentifier); break
+        case 'due_today': dueToday.push(e.candidate.sourceIdentifier); break
+        case 'due_soon': dueSoon.push(e.candidate.sourceIdentifier); break
+        case 'current': current.push(e.candidate.sourceIdentifier); break
+        case 'unscheduled': unscheduled.push(e.candidate.sourceIdentifier); break
+        case 'needs_reverify': overdue.push(e.candidate.sourceIdentifier); break
+      }
+    }
+  }
+
+  const governanceQueues: GovernanceQueues = {
+    conflicts: conflictIds,
+    overdue,
+    dueToday,
+    dueSoon,
+    current,
+    unscheduled,
+    alreadyRegistered: [...registeredIds],
+    previewReady: [...previewReadyIdentifiers],
+  }
+
   const summary: PreviewSummary = {
     totalSeed: seedManifest.length,
     totalResearchPreviewOnly: entries.filter(e => !e.origins.includes('seed')).length,
@@ -218,11 +294,14 @@ export function buildUnifiedPreview(
     totalAlreadyRegistered: registration.counts.registered,
     totalPreviewReady: registration.counts.unregistered,
     byOrigin,
+    totalOverdue: overdue.length,
+    totalDueToday: dueToday.length,
+    totalDueSoon: dueSoon.length,
+    totalCurrent: current.length,
+    totalUnscheduled: unscheduled.length,
   }
 
-  const previewReadyIdentifiers = new Set(registration.unregistered.map(c => c.sourceIdentifier))
-
-  return { entries, summary, previewReadyIdentifiers }
+  return { entries, summary, previewReadyIdentifiers, governanceQueues }
 }
 
 /**
