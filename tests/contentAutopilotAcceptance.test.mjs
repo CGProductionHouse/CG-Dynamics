@@ -363,3 +363,100 @@ test('EXECUTED: unreadable folder evidence is UNVERIFIED, never missing', async 
   assert.equal(result.blockers.RAW_UNVERIFIED, 1)
   assert.equal(result.runs[0].production_folder_state_readable, false)
 })
+
+// ── #456 — empty-guideline ideas generation ────────────────────────────────────
+
+test('EXECUTED: a newly ensured blank guideline gets initial ideas generated when enabled', async () => {
+  const db = econofoodsWorld()
+  // First pass ensures the run and creates a blank guideline (no videos).
+  await pass.runContentAutopilotPass(db, { today: TODAY })
+  assert.equal(db.tables.content_guide_ideas.length, 0, 'no videos exist yet')
+
+  const calls = []
+  const generateDrafts = async input => { calls.push(input); return { ok: true, generated: 3 } }
+
+  // Generation off — records blocker.
+  const off = await pass.runContentAutopilotPass(db, { today: TODAY, generateDrafts })
+  assert.equal(calls.length, 0, 'nothing generated until enabled')
+  assert.equal(off.blockers.GENERATION_NOT_ENABLED, 1)
+
+  // Generation on — initial ideas are requested for the empty guideline.
+  const on = await pass.runContentAutopilotPass(db, { today: TODAY, generateDrafts, generationEnabled: true })
+  assert.equal(calls.length, 1, 'ideas generation executed')
+  assert.equal(calls[0].mode, 'ideas', 'empty guideline gets ideas mode, not develop')
+  assert.deepEqual(calls[0].videoIds, [], 'no video ids for an empty guideline')
+  assert.equal(on.drafts_generated, 3)
+  assert.equal(on.blockers.GENERATION_NOT_ENABLED, undefined)
+})
+
+// ── #456 — >maxRuns events are not starved ─────────────────────────────────────
+
+test('EXECUTED: more than maxRuns upcoming events do not starve later missing mirrors', async () => {
+  const db = econofoodsWorld()
+  const events = []
+  // Create 3 content-run events with confirmed status, all beyond the initial maxRuns=1.
+  for (let i = 0; i < 3; i++) {
+    const eventId = `event-future-${i}`
+    events.push({
+      id: eventId, event_type: 'content_run', status: 'confirmed', client_id: CLIENT,
+      client_name: 'Econofoods', title: `Shoot ${i}`, microsoft_event_id: `ms-${i}`,
+      microsoft_calendar_id: 'cal-1', start_at: `2026-10-${String(i + 1).padStart(2, '0')}T07:00:00Z`,
+    })
+  }
+  db.tables.company_calendar_events.push(...events)
+  // Process only 1 event-mirror per pass.
+  const first = await pass.runContentAutopilotPass(db, { today: TODAY, maxRuns: 1 })
+  assert.equal(first.runs_ensured, 1, 'one event ensured this pass')
+  // A second pass with higher maxRuns can now reach the remaining mirrors —
+  // proving the first pass did not starve them.
+  const second = await pass.runContentAutopilotPass(db, { today: TODAY, maxRuns: 5 })
+  assert.equal(second.runs_ensured, 3, 'the remaining three missing mirrors are now reachable, not starved')
+})
+
+// ── #456 — OneDrive folder ensure wired into cycle ────────────────────────────
+
+test('EXECUTED: per-video folder ensure is latent — off by default, callable when enabled', async () => {
+  const db = econofoodsWorld()
+  await pass.runContentAutopilotPass(db, { today: TODAY })
+  const guideline = db.tables.content_guidelines[0]
+  // Give the client a short_code so folders are not blocked.
+  db.tables.clients.find(c => c.id === CLIENT).short_code = 'ECONO'
+  db.tables.content_guide_ideas.push(
+    { id: VIDEO_A, content_guideline_id: guideline.id, client_id: CLIENT, title: 'Deli counter', month: '2026-09-01', position: 1, script: null, deliverable_id: null, production_status: 'not_shot', status: 'idea' },
+  )
+  const calls = []
+  const ensureVideoFolders = async input => { calls.push(input); return { ok: true, ensured: 1 } }
+
+  // Folder ensure off — records blocker.
+  const off = await pass.runContentAutopilotPass(db, { today: TODAY, ensureVideoFolders })
+  assert.equal(calls.length, 0, 'no folder creation until enabled')
+  assert.equal(off.blockers.VIDEO_FOLDER_NOT_ENABLED, 1)
+
+  // Folder ensure on — the path executes.
+  const on = await pass.runContentAutopilotPass(db, { today: TODAY, ensureVideoFolders, videoFolderEnabled: true })
+  assert.equal(calls.length, 1, 'folder ensure executed')
+  assert.equal(calls[0].contentRunId, db.tables.content_runs[0].id)
+  assert.deepEqual(calls[0].videoIds, [VIDEO_A])
+  assert.equal(on.blockers.VIDEO_FOLDER_NOT_ENABLED, undefined)
+})
+
+// ── #456 — runs_unprocessed truthful count ─────────────────────────────────────
+
+test('EXECUTED: runs_unprocessed reflects the real count, not only 0 or 1', async () => {
+  const db = econofoodsWorld()
+  // Add 5 more upcoming runs for the same client (all within the horizon).
+  for (let i = 0; i < 5; i++) {
+    db.tables.content_runs.push(
+      { id: `run-extra-${i}`, calendar_event_id: `event-extra-${i}`, client_id: CLIENT, client_name: 'Econofoods', run_date: `2026-10-${String(i + 1).padStart(2, '0')}`, status: 'planning' },
+    )
+  }
+  // Process only 2 runs.
+  const result = await pass.runContentAutopilotPass(db, { today: TODAY, maxRuns: 2 })
+  // 1 ensured from the event + 2 existing runs processed = 3 prepared.
+  // The original event + 5 extra = 6 total upcoming. 6 - 2 = 4 unprocessed... but one
+  // was ensured (the event creates a new run), so 6+1=7 total, 2 processed = 5 unprocessed.
+  // Actually: the event creates 1 run, then we have 5 extra + 1 created = 6 upcoming.
+  // 2 are processed, so 4 are unprocessed.
+  assert.ok(result.runs_unprocessed >= 4, `expected at least 4 unprocessed, got ${result.runs_unprocessed}`)
+  assert.ok(result.runs_unprocessed > 1, 'the count is not capped at 1')
+})

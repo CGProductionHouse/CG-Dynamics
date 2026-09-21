@@ -8,7 +8,7 @@ import { createClient } from 'jsr:@supabase/supabase-js@2'
 import webpush from 'npm:web-push@3.6.7'
 import { dispatchMetaWorker } from '../_shared/metaWorkerDispatch.ts'
 import { currentMetaMonth, previousMetaMonth, currentMonthHasIncrementalWindow } from '../_shared/metaPeriod.ts'
-import { GENERATION_FLAG, recordContentAutopilotPass, runContentAutopilotPass } from '../_shared/contentAutopilotPass.ts'
+import { GENERATION_FLAG, VIDEO_FOLDER_FLAG, recordContentAutopilotPass, runContentAutopilotPass } from '../_shared/contentAutopilotPass.ts'
 
 const MAX_RUNTIME_MS = 25_000
 const MAX_JOBS_PER_RUN = 25
@@ -550,10 +550,13 @@ async function runJob(
       // Latent executable generation path. It stays off until CA sets the project
       // secret; switching it on is a protected production action, not a code change.
       const generationEnabled = (Deno.env.get(GENERATION_FLAG) ?? '').toLowerCase() === 'true'
+      // Latent executable OneDrive folder path. Same pattern: off unless CA enables it.
+      const videoFolderEnabled = (Deno.env.get(VIDEO_FOLDER_FLAG) ?? '').toLowerCase() === 'true'
       try {
         const result = await runContentAutopilotPass(supabase as unknown as Parameters<typeof runContentAutopilotPass>[0], {
           today,
           generationEnabled,
+          videoFolderEnabled,
           generateDrafts: async input => {
             // Reuses the EXISTING AI Content Director. Draft only: the function itself
             // refuses a non-draft guideline and never overwrites a human-written field.
@@ -574,6 +577,29 @@ async function runJob(
             if (!res.ok) return { ok: false, error: `suggest-content-videos returned ${res.status}` }
             const body = await res.json().catch(() => null) as { videos?: unknown[]; ideas?: unknown[] } | null
             return { ok: true, generated: (body?.videos ?? body?.ideas ?? []).length }
+          },
+          ensureVideoFolders: async input => {
+            // Reuses the EXISTING ensure_video_folders Edge Function action. Create-only;
+            // existing folders are mapped by durable id, never duplicated. Behind the
+            // protected OneDrive-write gate.
+            const res = await fetch(`${url}/functions/v1/content-run-onedrive-folder`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''}`,
+              },
+              body: JSON.stringify({
+                action: 'ensure_video_folders',
+                contentRunId: input.contentRunId,
+                videoIds: input.videoIds,
+                confirmCreate: true,
+              }),
+            })
+            if (!res.ok) return { ok: false, error: `content-run-onedrive-folder returned ${res.status}` }
+            const body = await res.json().catch(() => null) as { status?: string; results?: unknown[]; error?: string } | null
+            if (body?.error) return { ok: false, error: body.error }
+            const created = (body?.results ?? []).filter((r: Record<string, unknown>) => r.state === 'created' || r.state === 'mapped_existing')
+            return { ok: true, ensured: created.length }
           },
         })
         await updateJobProgress(supabase, job.id, worker, 90)

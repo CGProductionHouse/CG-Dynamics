@@ -38,6 +38,13 @@ export const LOOKAHEAD_DAYS = 90
  */
 export const GENERATION_FLAG = 'CONTENT_AUTOPILOT_GENERATION'
 
+/**
+ * Automatic per-video OneDrive folder creation is latent: the executable path exists,
+ * but it runs only when CA switches this on. Activation is a protected production
+ * action that enables writes to OneDrive.
+ */
+export const VIDEO_FOLDER_FLAG = 'CONTENT_AUTOPILOT_VIDEO_FOLDERS'
+
 // The narrow slice of the Supabase client this pass uses. Typed structurally so the
 // module stays honest without importing the SDK types.
 type QueryBuilder = {
@@ -71,12 +78,25 @@ export type DraftGenerator = (input: {
   videoIds: string[]
 }) => Promise<{ ok: boolean; generated?: number; error?: string }>
 
+/**
+ * Injected so the OneDrive folder ensure path is executable and testable without
+ * a live Graph API. The real implementation calls the existing ensure_video_folders
+ * Edge Function action. Behind a protected production gate; OFF by default.
+ */
+export type VideoFolderEnsurer = (input: {
+  contentRunId: string
+  videoIds: string[]
+}) => Promise<{ ok: boolean; ensured?: number; error?: string }>
+
 export interface AutopilotPassOptions {
   today: string
   maxRuns?: number
   /** Latent executable path. Off unless CA has switched generation on. */
   generationEnabled?: boolean
   generateDrafts?: DraftGenerator
+  /** Latent executable OneDrive folder path. Off unless CA has switched it on. */
+  videoFolderEnabled?: boolean
+  ensureVideoFolders?: VideoFolderEnsurer
   /** Automatic same-client slot linking. On by default; the link itself is DB-guarded. */
   linkDeliverables?: boolean
 }
@@ -129,7 +149,19 @@ export async function runContentAutopilotPass(
   // Identity is the durable calendar event row. An ordinary meeting, a cancelled
   // event or an event with no exact client is never turned into a run — the RPC
   // refuses those, and a refusal is recorded as a blocker rather than worked around.
+  //
+  // Already-mirrored events are excluded BEFORE the bounded work limit so a later
+  // missing mirror is never starved by earlier completed mirrors filling the slice.
   let runsEnsured = 0
+  const existingRuns = await supabase
+    .from('content_runs')
+    .select('calendar_event_id')
+    .not('calendar_event_id', 'is', null)
+  const mirroredEventIds = new Set(
+    ((existingRuns.data ?? []) as Array<Record<string, unknown>>)
+      .map(row => row.calendar_event_id as string)
+      .filter(Boolean),
+  )
   const eventsResult = await supabase
     .from('company_calendar_events')
     .select('id, client_id, event_type, status, start_at')
@@ -139,12 +171,12 @@ export async function runContentAutopilotPass(
     .neq('status', 'cancelled')
     .gte('start_at', `${today}T00:00:00Z`)
     .lte('start_at', `${horizon}T23:59:59Z`)
-    .limit(maxRuns)
   if (eventsResult.error) {
     note('CALENDAR_EVENTS_UNREADABLE')
   } else {
     const events = (eventsResult.data ?? []) as Array<Record<string, unknown>>
-    for (const event of events) {
+    const missing = events.filter(event => !mirroredEventIds.has(event.id as string))
+    for (const event of missing.slice(0, maxRuns)) {
       const ensured = await supabase.rpc('ensure_content_run_for_calendar_event', { p_calendar_event_id: event.id })
       if (ensured.error) {
         note('RUN_MIRROR_REFUSED')
@@ -156,6 +188,7 @@ export async function runContentAutopilotPass(
   }
 
   // ── 2. Upcoming runs ──────────────────────────────────────────────────────
+  // Full scan so the unprocessed count is truthful, then slice for bounded work.
   const { data: runRows, error: runError } = await supabase
     .from('content_runs')
     .select('id, client_id, client_name, run_date, status')
@@ -164,12 +197,11 @@ export async function runContentAutopilotPass(
     .not('client_id', 'is', null)
     .neq('status', 'cancelled')
     .order('run_date', { ascending: true })
-    .limit(maxRuns + 1)
   if (runError) throw new Error(`Upcoming content runs could not be read: ${runError.message}`)
 
   const allUpcoming = (runRows ?? []) as Array<Record<string, unknown>>
   const runs = allUpcoming.slice(0, maxRuns)
-  const unprocessed = allUpcoming.slice(maxRuns)
+  const unprocessedCount = Math.max(0, allUpcoming.length - maxRuns)
   const clientIds = [...new Set(allUpcoming.map(run => run.client_id as string))]
 
   const { data: clientRows } = clientIds.length
@@ -283,20 +315,42 @@ export async function runContentAutopilotPass(
 
     // 2d. Draft preparation. The executable path is here; it runs only once CA has
     // switched generation on. A guideline that is not a draft is never regenerated.
+    // An empty guideline (no videos yet) gets initial ideas; a guideline with videos
+    // needing scripts gets develop-mode generation. Both paths are gated on the same
+    // project secret.
     const needsScript = videos.filter(video => !String(video.script ?? '').trim())
-    if (guideline.status === 'draft' && needsScript.length && options.generateDrafts) {
-      if (!options.generationEnabled) {
-        note('GENERATION_NOT_ENABLED')
-      } else {
-        const generated = await options.generateDrafts({
-          clientId,
-          contentRunId: run.id as string,
-          guidelineId: guideline.id as string,
-          mode: videos.length ? 'develop' : 'ideas',
-          videoIds: needsScript.map(video => video.id as string),
-        })
-        if (!generated.ok) note('GENERATION_BLOCKED')
-        else draftsGenerated += generated.generated ?? 0
+    if (guideline.status === 'draft' && options.generateDrafts) {
+      if (!videos.length) {
+        // Empty guideline — generate initial ideas so the first draft concepts are
+        // prebuilt instead of waiting for a human to open the editor.
+        if (!options.generationEnabled) {
+          note('GENERATION_NOT_ENABLED')
+        } else {
+          const generated = await options.generateDrafts({
+            clientId,
+            contentRunId: run.id as string,
+            guidelineId: guideline.id as string,
+            mode: 'ideas',
+            videoIds: [],
+          })
+          if (!generated.ok) note('GENERATION_BLOCKED')
+          else draftsGenerated += generated.generated ?? 0
+        }
+      } else if (needsScript.length) {
+        // Existing videos needing scripts — develop mode.
+        if (!options.generationEnabled) {
+          note('GENERATION_NOT_ENABLED')
+        } else {
+          const generated = await options.generateDrafts({
+            clientId,
+            contentRunId: run.id as string,
+            guidelineId: guideline.id as string,
+            mode: 'develop',
+            videoIds: needsScript.map(video => video.id as string),
+          })
+          if (!generated.ok) note('GENERATION_BLOCKED')
+          else draftsGenerated += generated.generated ?? 0
+        }
       }
     }
 
@@ -343,6 +397,28 @@ export async function runContentAutopilotPass(
     readyToEdit += runReady
     if (!videos.length) note('GUIDELINE_EMPTY')
     if (guideline.status !== 'draft') note('GUIDELINE_APPROVED')
+
+    // 2f. Per-video OneDrive folder auto-ensure. Latent: the executable path exists
+    // but only runs when CA has switched the OneDrive-write gate on. Production writes
+    // are OFF by default. The ensurer re-proves client isolation and create-only
+    // authority; it never bypasses admin gates or invents folders.
+    const videosNeedingFolders = videos
+      .filter(video => {
+        const mapped = folderByVideo.get(video.id as string) ?? null
+        return mapped === null && client.shortCode
+      })
+      .map(video => video.id as string)
+    if (videosNeedingFolders.length && options.ensureVideoFolders) {
+      if (!options.videoFolderEnabled) {
+        note('VIDEO_FOLDER_NOT_ENABLED')
+      } else {
+        const ensured = await options.ensureVideoFolders({
+          contentRunId: run.id as string,
+          videoIds: videosNeedingFolders,
+        })
+        if (!ensured.ok) note('VIDEO_FOLDER_ENSURE_FAILED')
+      }
+    }
 
     summaries.push({
       content_run_id: run.id,
@@ -393,14 +469,14 @@ export async function runContentAutopilotPass(
     note('NO_FUTURE_CONTENT_RUN')
   }
   if (preparationFailed.size) blockers.PREPARATION_FAILED = preparationFailed.size
-  if (unprocessed.length) note('RUNS_UNPROCESSED_THIS_PASS')
+  if (unprocessedCount) note('RUNS_UNPROCESSED_THIS_PASS')
 
   return {
     ok: true,
     clients_considered: (activeClients ?? []).length,
     runs_ensured: runsEnsured,
     runs_prepared: summaries.length,
-    runs_unprocessed: unprocessed.length,
+    runs_unprocessed: unprocessedCount,
     guidelines_created: guidelinesCreated,
     videos_planned: videosPlanned,
     videos_linked: videosLinked,
