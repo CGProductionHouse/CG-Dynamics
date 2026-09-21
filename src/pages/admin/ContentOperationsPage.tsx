@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import ContentRunReadinessPanel from '../../components/content/ContentRunReadinessPanel'
 import { applyOpsFilters, fetchContentOps, opsFilterOptions, OPS_BUCKET_LABELS, OPS_BUCKET_ORDER, type OpsFilters, type OpsItem, type OpsSummary } from '../../lib/contentOps'
 
 // #220 — Cross-client content operations dashboard. Read-only monitoring so
@@ -86,6 +87,9 @@ export default function ContentOperationsPage() {
       {loading ? <p className="text-white/60">Loading…</p>
         : error ? <p role="alert" className="text-red-300">{error}</p>
         : !summary ? null : <>
+          {/* #450 — the prepared plan for upcoming runs, before the per-item buckets. */}
+          <ContentRunReadinessPanel today={today()} />
+
           {/* Risk strip */}
           <div className="grid gap-3 sm:grid-cols-3">
             {riskCards.map(([label, list]) => (

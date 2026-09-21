@@ -101,8 +101,10 @@ export interface PreparationPlan {
   ideasWanted: number
   /** Saved videos with no script yet — the `develop` step's exact targets, in saved order. */
   developVideoIds: string[]
-  /** Videos whose month has no real deliverable link: truthfully unallocated, not an error. */
+  /** Videos with no real Client Schedule slot: truthfully unallocated, not an error. */
   unallocatedVideoIds: string[]
+  /** Unallocated videos whose target month DOES have a real slot — safe to propose linking. */
+  linkableVideoIds: string[]
   blocked: GenerationBlockedReason | null
   coverage: CoverageWindow | null
 }
@@ -131,7 +133,7 @@ export function planGuidelinePreparation(input: {
   minimumMonths?: number
 }): PreparationPlan {
   const idle = (blocked: GenerationBlockedReason, coverage: CoverageWindow | null = null): PreparationPlan => ({
-    requestIdeas: false, ideasWanted: 0, developVideoIds: [], unallocatedVideoIds: [], blocked, coverage,
+    requestIdeas: false, ideasWanted: 0, developVideoIds: [], unallocatedVideoIds: [], linkableVideoIds: [], blocked, coverage,
   })
   if (input.guidelineStatus !== 'draft') return idle('GUIDELINE_APPROVED')
   if (!input.runDate) return idle('NO_COVERAGE_WINDOW')
@@ -146,8 +148,9 @@ export function planGuidelinePreparation(input: {
     requestIdeas: ordered.length < target,
     ideasWanted: Math.max(0, target - ordered.length),
     developVideoIds: ordered.filter(video => !hasRealScript(video)).map(video => video.id),
-    unallocatedVideoIds: ordered
-      .filter(video => !video.deliverable_id && (!video.month || !deliverableMonths.has(monthOf(video.month))))
+    unallocatedVideoIds: ordered.filter(video => !video.deliverable_id).map(video => video.id),
+    linkableVideoIds: ordered
+      .filter(video => !video.deliverable_id && video.month && deliverableMonths.has(monthOf(video.month)))
       .map(video => video.id),
     blocked: null,
     coverage,

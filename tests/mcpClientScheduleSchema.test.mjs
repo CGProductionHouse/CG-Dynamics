@@ -100,7 +100,7 @@ test('flatten tolerates an array-shaped embed and empty input', () => {
 
 test('every monthly_deliverables select is a verified shared constant or verified column list', () => {
   const selects = [...INDEX.matchAll(/\.from\('monthly_deliverables'\)\s*\n\s*\.select\(([^)]*)\)/g)].map(m => m[1].trim())
-  assert.equal(selects.length, 3, 'expected three monthly_deliverables selects')
+  assert.equal(selects.length, 4, 'expected four monthly_deliverables selects')
 
   const constants = selects.filter(x => !x.startsWith("'"))
   assert.deepEqual(constants.sort(), ['CLIENT_SCHEDULE_SELECT', 'MY_DAY_DELIVERABLE_SELECT'],
@@ -108,10 +108,14 @@ test('every monthly_deliverables select is a verified shared constant or verifie
 
   // #325 Assistant-owned linkage reads same-client deliverables to resolve links. It is a
   // READ with an inline column list, so validate every column really exists.
+  // The second inline read is the #450 same-client link check, which proves provenance
+  // before a guideline video may point at a slot. Both are reads; neither writes.
   const inline = selects.filter(x => x.startsWith("'"))
-  assert.equal(inline.length, 1, 'exactly one inline deliverable read (linkage candidate lookup)')
-  for (const part of inline[0].replace(/'/g, '').split(',').map(x => x.trim()).filter(Boolean)) {
-    assert.ok(REAL_COLUMNS.has(part), `linkage read selects nonexistent column "${part}"`)
+  assert.equal(inline.length, 2, 'two inline deliverable reads (run linkage + #450 video link check)')
+  for (const select of inline) {
+    for (const part of select.replace(/'/g, '').split(',').map(x => x.trim()).filter(Boolean)) {
+      assert.ok(REAL_COLUMNS.has(part), `inline deliverable read selects nonexistent column "${part}"`)
+    }
   }
 })
 
