@@ -1531,8 +1531,9 @@ const handleGetClientContext: ToolHandler = async (staff, input) => {
       const policy = policyResult.data
       const contactSlotKey = (contact: Record<string, unknown>) => {
         const type = String(contact.contact_type)
-        const identity = String(contact.person_name || contact.display_label || '').trim().toLowerCase()
-        return `${type}::${identity}`
+        const person = String(contact.person_name || '').trim().toLowerCase()
+        const label = String(contact.display_label || '').trim().toLowerCase()
+        return `${type}::${person}::${label}`
       }
       const valuesBySlot = new Map<string, Set<string>>()
       for (const contact of eligible) {
