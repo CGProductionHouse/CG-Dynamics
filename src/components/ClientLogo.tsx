@@ -30,8 +30,7 @@ export function ClientLogo({
   // Restart the candidate walk whenever the client (and therefore its
   // candidate list) changes.
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIndex(() => 0)
+    setIndex(0)
   }, [candidates])
 
   const src = index < candidates.length ? candidates[index] : null

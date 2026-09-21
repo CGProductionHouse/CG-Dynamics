@@ -17,7 +17,6 @@ import { useAuth } from '../../contexts/AuthContext'
 import { listStaffOnboarding } from '../../features/client-onboarding/api'
 import type { StaffOnboardingSummary } from '../../features/client-onboarding/types'
 import { isManagerRole } from '../../lib/roles'
-import { WebsitePerformancePanel } from '../../components/admin/WebsitePerformancePanel'
 
 type ReportState = 'published' | 'ready-to-publish' | 'needs-strategy' | 'internal-draft' | 'needs-repair'
 
@@ -325,7 +324,6 @@ export default function ClientPerformancePage() {
           </section>
 
           {canManageOnboarding && <OnboardingStatusCard clients={clients} />}
-          <WebsitePerformancePanel clients={clients} canSave={canManageOnboarding} />
 
           <section className="mt-6">
             <PremiumCard padding="lg" className="bg-white/[0.035]">

@@ -2,7 +2,7 @@ import { listTasks, taskStatusDisplayLabel, type CommandCentreTask } from './com
 import {
   getEffectiveScheduleDate,
   isMonthKey,
-  listMonthlyDeliverablesByMonth,
+  listMonthlyDeliverablesByYear,
   normalizeScheduleStatus,
   type MonthlyDeliverable,
 } from './planner'
@@ -423,6 +423,7 @@ export async function getMyDayContext(
   const errors: string[] = []
 
   const currentMonth = businessMonthKey(baseDate)
+  const currentYear = Number(currentMonth.slice(0, 4))
 
   let tasks: CommandCentreTask[]
   let clientNameById: Map<string, string>
@@ -435,28 +436,19 @@ export async function getMyDayContext(
     rawDeliverables = prefetched.deliverables
     rawEvents = prefetched.events
   } else {
-    const nextMonthDate = new Date(baseDate)
-    nextMonthDate.setMonth(nextMonthDate.getMonth() + 1)
-    const nextMonth = businessMonthKey(nextMonthDate)
-
-    const [tasksResult, clientsResult, currentMonthDeliverablesResult, nextMonthDeliverablesResult] = await Promise.all([
+    const [tasksResult, clientsResult, deliverablesResult] = await Promise.all([
       listTasks({ activeOnly: true }),
       listActiveClients(),
-      listMonthlyDeliverablesByMonth(currentMonth),
-      listMonthlyDeliverablesByMonth(nextMonth),
+      listMonthlyDeliverablesByYear(currentYear),
     ])
 
     if (tasksResult.error) errors.push(tasksResult.error.message)
     if (clientsResult.error) errors.push(clientsResult.error.message)
-    if (currentMonthDeliverablesResult.error) errors.push(currentMonthDeliverablesResult.error.message)
-    if (nextMonthDeliverablesResult.error) errors.push(nextMonthDeliverablesResult.error.message)
+    if (deliverablesResult.error) errors.push(deliverablesResult.error.message)
 
     tasks = (tasksResult.data ?? []) as CommandCentreTask[]
     clientNameById = new Map((clientsResult.data ?? []).map(c => [c.id, c.name]))
-    rawDeliverables = [
-      ...(currentMonthDeliverablesResult.data ?? []),
-      ...(nextMonthDeliverablesResult.data ?? []),
-    ] as MonthlyDeliverable[]
+    rawDeliverables = (deliverablesResult.data ?? []) as MonthlyDeliverable[]
 
     const eventsResult = await listCompanyEvents(businessDayBoundaryIso(today), businessDayBoundaryIso(today, 8))
     if (eventsResult.error) errors.push(eventsResult.error.message)

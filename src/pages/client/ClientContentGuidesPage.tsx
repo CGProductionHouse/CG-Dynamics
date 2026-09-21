@@ -1,14 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { ClientPortalShell } from '../../components/client/ClientPortalShell'
-import { ClientPortalErrorState, ClientPortalLoadingState } from '../../components/client/ClientPortalStates'
 import { useAuth } from '../../contexts/AuthContext'
 import { fetchPublishedGuides, type PublishedContentGuideline } from '../../lib/clientContentGuides'
 import { getClient, type Client } from '../../lib/db/clients'
-import { guidelineVideoName } from '../../lib/contentGuidelineNaming'
 import { monthDisplayLabel } from '../../lib/reportPeriod'
 
-export default function ClientContentGuidesPage({ preview = false, embedded = false, month }: { preview?: boolean; embedded?: boolean; month?: string }) {
+export default function ClientContentGuidesPage() {
   const { profile } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const [client, setClient] = useState<Client | null>(null)
@@ -19,20 +17,18 @@ export default function ClientContentGuidesPage({ preview = false, embedded = fa
   const now = new Date()
   const fallbackMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
   const requestedMonth = searchParams.get('month')
-  const currentMonth = month ?? (requestedMonth && /^\d{4}-\d{2}$/.test(requestedMonth) ? requestedMonth : fallbackMonth)
+  const currentMonth = requestedMonth && /^\d{4}-\d{2}$/.test(requestedMonth) ? requestedMonth : fallbackMonth
   const selectedGuideKey = searchParams.get('guide')
-  const canPreview = preview && (profile?.role === 'admin' || profile?.role === 'manager')
-  const clientId = canPreview ? searchParams.get('client') : profile?.client_id
 
   useEffect(() => {
     let active = true
     async function load() {
-      if (!clientId) { setLoading(false); return }
+      if (!profile?.client_id) { setLoading(false); return }
       setLoading(true)
       setError(null)
       const [clientResult, guidelineResult] = await Promise.all([
-        getClient(clientId),
-        fetchPublishedGuides(clientId, currentMonth),
+        getClient(profile.client_id),
+        fetchPublishedGuides(profile.client_id, currentMonth),
       ])
       if (!active) return
       if (clientResult.error) { setError('Could not load client data.'); setLoading(false); return }
@@ -43,38 +39,38 @@ export default function ClientContentGuidesPage({ preview = false, embedded = fa
     }
     void load()
     return () => { active = false }
-  }, [clientId, currentMonth])
+  }, [profile?.client_id, currentMonth])
 
-  const content = (
-    <>
+  return (
+    <ClientPortalShell client={client}>
       <section className="max-w-5xl">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-report-accent">Content production</p>
-        <h2 className="mt-3 text-3xl font-black tracking-[-0.035em] text-white sm:text-5xl">Content guidelines</h2>
+        <h1 className="mt-3 text-3xl font-semibold tracking-normal text-white sm:text-5xl">Content Guidelines</h1>
         <p className="mt-4 max-w-2xl text-base leading-7 text-report-muted">
           Published filming documents for {monthDisplayLabel(currentMonth)}, with every video name and complete script in order.
         </p>
-        {!embedded && <div className="mt-5 flex items-center gap-2">
+        <div className="mt-5 flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setSearchParams(current => { current.set('month', shiftMonth(currentMonth, -1)); return current })}
+            onClick={() => setSearchParams({ month: shiftMonth(currentMonth, -1) })}
             className="rounded-full border border-white/10 px-4 py-2 text-sm text-report-muted transition hover:border-report-accent/35 hover:text-white"
           >
             Previous
           </button>
           <button
             type="button"
-            onClick={() => setSearchParams(current => { current.set('month', shiftMonth(currentMonth, 1)); return current })}
+            onClick={() => setSearchParams({ month: shiftMonth(currentMonth, 1) })}
             className="rounded-full border border-white/10 px-4 py-2 text-sm text-report-muted transition hover:border-report-accent/35 hover:text-white"
           >
             Next
           </button>
-        </div>}
+        </div>
       </section>
 
       {loading ? (
-        <ClientPortalLoadingState />
+        <Message>Loading published Content Guidelines...</Message>
       ) : error ? (
-        <ClientPortalErrorState title="Content Guidelines could not be loaded" message="Your published guidance is temporarily unavailable. Please try again shortly." />
+        <Message error>{error}</Message>
       ) : guidelines.length === 0 ? (
         <Message>No published Content Guidelines are available for {monthDisplayLabel(currentMonth)}.</Message>
       ) : (
@@ -88,7 +84,7 @@ export default function ClientContentGuidesPage({ preview = false, embedded = fa
                   window.requestAnimationFrame(() => element.scrollIntoView({ behavior: 'smooth', block: 'start' }))
                 }
               }}
-              className={`scroll-mt-6 overflow-hidden rounded-3xl border bg-white/[0.04] shadow-[0_28px_80px_-50px_rgba(0,0,0,0.95)] ${
+              className={`scroll-mt-6 overflow-hidden rounded-lg border bg-white/[0.035] shadow-[0_18px_55px_rgba(0,0,0,0.2)] ${
                 selectedGuideKey === guideline.row_key
                   ? 'border-report-accent/45 ring-1 ring-report-accent/20'
                   : 'border-white/[0.08]'
@@ -105,8 +101,9 @@ export default function ClientContentGuidesPage({ preview = false, embedded = fa
               <ol className="divide-y divide-white/[0.08]">
                 {guideline.videos.map((video, index) => (
                   <li key={`${guideline.row_key}-${video.position}`} className="p-5 sm:p-7">
-                    <h3 className="text-xl font-semibold text-white">{guidelineVideoName(video.position ?? index + 1, video.title)}</h3>
-                    <div className="mt-5 rounded-2xl border border-white/[0.08] bg-black/15 p-4 sm:p-5">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-report-accent">Video {index + 1}</p>
+                    <h3 className="mt-2 text-xl font-semibold text-white">{video.title}</h3>
+                    <div className="mt-5 rounded-lg border border-white/[0.08] bg-black/15 p-4 sm:p-5">
                       <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-report-faint">Complete script</p>
                       <p className="mt-2 whitespace-pre-wrap text-sm leading-7 text-report-text">{video.script}</p>
                     </div>
@@ -126,12 +123,8 @@ export default function ClientContentGuidesPage({ preview = false, embedded = fa
           ))}
         </div>
       )}
-    </>
+    </ClientPortalShell>
   )
-  if (preview) return canPreview
-    ? <div className="min-w-0 p-4 sm:p-6"><p className="mb-4 text-sm text-report-muted">Client preview · Published content only</p>{content}</div>
-    : <ClientPortalErrorState title="Preview unavailable" message="Only managers and admins can preview client guides." />
-  return embedded ? content : <ClientPortalShell client={client}>{content}</ClientPortalShell>
 }
 
 function shiftMonth(month: string, amount: number): string {
@@ -141,7 +134,7 @@ function shiftMonth(month: string, amount: number): string {
 
 function Message({ children, error = false }: { children: React.ReactNode; error?: boolean }) {
   return (
-    <div className={`mt-8 rounded-3xl border px-6 py-8 shadow-[0_24px_70px_-48px_rgba(0,0,0,0.95)] ${error ? 'border-[#d8a07a]/20 bg-[#d8a07a]/[0.06] text-[#d8a07a]' : 'border-white/[0.08] bg-white/[0.04] text-report-muted'}`}>
+    <div className={`mt-8 rounded-lg border px-5 py-6 ${error ? 'border-[#d8a07a]/20 bg-[#d8a07a]/[0.06] text-[#d8a07a]' : 'border-white/[0.08] bg-white/[0.03] text-report-muted'}`}>
       <p className="text-sm leading-6">{children}</p>
     </div>
   )

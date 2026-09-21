@@ -1,7 +1,6 @@
 import { supabase } from '../supabase'
 import type { ImportedMetaPost } from './importedMetaPosts'
 import type { StrategyData } from '../strategyEngine'
-import type { WebsiteReport } from '../websitePerformance'
 
 export type ReportStatus = 'draft' | 'published'
 
@@ -27,8 +26,6 @@ export interface Report {
   // Guided strategy engine structured data (added by phase-3j). Optional so the
   // app keeps working before the migration is applied.
   strategy_data?: StrategyData | null
-  website_report_snapshot_id?: string | null
-  website_report?: WebsiteReport | null
   published_at: string | null
   created_by: string | null
   created_at: string
@@ -72,7 +69,6 @@ export type ClientReport = Pick<Report,
   | 'content_direction_next_month'
   | 'boost_recommendation'
   | 'strategy_data'
-  | 'website_report'
   | 'published_at'
 >
 
@@ -211,17 +207,9 @@ export async function getReportWithPosts(reportId: string) {
     return { data: null, error: postsResult.error }
   }
 
-  let websiteReport: WebsiteReport | null = null
-  const rawReport = reportResult.data as Report
-  if (rawReport.website_report_snapshot_id) {
-    const snapshotResult = await supabase.rpc('report_website_snapshot', { p_report_id: reportId })
-    if (!snapshotResult.error && snapshotResult.data) websiteReport = snapshotResult.data as WebsiteReport
-  }
-
   return {
     data: {
-      ...rawReport,
-      website_report: websiteReport,
+      ...(reportResult.data as Report),
       posts: (postsResult.data ?? []) as ReportPost[],
     },
     error: null,

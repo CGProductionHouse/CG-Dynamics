@@ -12,8 +12,7 @@ const CLIENT_DASHBOARD_SOURCE = readSource('../src/pages/client/Dashboard.tsx')
 const REPORT_VIEW_SOURCE = readSource('../src/pages/client/ClientReportView.tsx')
 const GOOGLE_ADS_PAGE_SOURCE = readSource('../src/pages/admin/GoogleAdsIntegrationPage.tsx')
 const INTEGRATIONS_SOURCE = readSource('../src/pages/admin/IntegrationsPage.tsx')
-const LEGACY_SQL_SOURCE = readSource('../supabase/phase-20c-google-ads-client-dashboard.sql')
-const V2_SQL_SOURCE = readSource('../supabase/migrations/20260908181448_google_ads_v2_native_settings.sql')
+const SQL_SOURCE = readSource('../supabase/phase-20c-google-ads-client-dashboard.sql')
 const USER_FACING_SOURCES = [
   PREVIEW_SOURCE,
   CLIENT_DASHBOARD_SOURCE,
@@ -25,17 +24,14 @@ const USER_FACING_SOURCES = [
 let server
 let loadGoogleAdsDashboard
 let googleAdsCampaignPeriodLabel
-let parseGoogleAdsDashboardData
-let isGoogleAdsTrendComparable
-let formatGoogleAdsCampaignBudget
 let formatGoogleAdsCustomerId
 let supabase
 let originalRpc
 
 before(async () => {
   server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
-  ;({ loadGoogleAdsDashboard, googleAdsCampaignPeriodLabel, parseGoogleAdsDashboardData, isGoogleAdsTrendComparable } = await server.ssrLoadModule('/src/lib/googleAdsDashboard.ts'))
-  ;({ formatGoogleAdsCampaignBudget, formatGoogleAdsCustomerId } = await server.ssrLoadModule('/src/lib/googleAds.ts'))
+  ;({ loadGoogleAdsDashboard, googleAdsCampaignPeriodLabel } = await server.ssrLoadModule('/src/lib/googleAdsDashboard.ts'))
+  ;({ formatGoogleAdsCustomerId } = await server.ssrLoadModule('/src/lib/googleAds.ts'))
   ;({ supabase } = await server.ssrLoadModule('/src/lib/supabase.ts'))
   originalRpc = supabase.rpc
 })
@@ -52,8 +48,8 @@ function mockDashboardRpc({ metrics = [], status = [{ connected: true, has_mappi
   supabase.rpc = async (name, args) => {
     calls.push({ name, args })
     if (name === errorFor) return { data: null, error: { message: 'RPC failed' } }
-    if (name === 'get_google_ads_dashboard_campaign_metrics_v2') return { data: metrics, error: null }
-    if (name === 'get_google_ads_dashboard_status_v2') return { data: status, error: null }
+    if (name === 'get_google_ads_dashboard_campaign_metrics') return { data: metrics, error: null }
+    if (name === 'get_google_ads_dashboard_status') return { data: status, error: null }
     throw new Error(`Unexpected RPC: ${name}`)
   }
   return calls
@@ -66,11 +62,11 @@ test('dashboard loader calls the report-bound RPCs with exact calendar-month arg
   assert.equal(result.state, 'no-activity')
   assert.deepEqual(calls, [
     {
-      name: 'get_google_ads_dashboard_campaign_metrics_v2',
+      name: 'get_google_ads_dashboard_campaign_metrics',
       args: { p_report_id: 'report-123', p_period_start: '2026-02-01', p_period_end: '2026-02-28' },
     },
     {
-      name: 'get_google_ads_dashboard_status_v2',
+      name: 'get_google_ads_dashboard_status',
       args: { p_report_id: 'report-123', p_period_start: '2026-02-01', p_period_end: '2026-02-28' },
     },
   ])
@@ -79,12 +75,7 @@ test('dashboard loader calls the report-bound RPCs with exact calendar-month arg
 test('dashboard loader consumes the SQL RPC row contract and keeps weighted Google Ads totals', async () => {
   mockDashboardRpc({
     metrics: [
-      {
-        campaign_name: 'Brand Search', campaign_status: 'ENABLED', campaign_type: 'SEARCH',
-        cost: 20, impressions: 150, clicks: 15, interactions: 20, conversions: 3,
-        value: 75, currency: 'ZAR', time_zone: 'Africa/Johannesburg',
-        first_activity: '2026-06-01', last_activity: '2026-06-10', data_through_date: '2026-06-10',
-      },
+      { campaign_name: 'Brand Search', campaign_status: 'ENABLED', campaign_type: 'SEARCH', cost: 20, impressions: 150, clicks: 15, conversions: 3, value: 75, currency: 'ZAR' },
     ],
   })
 
@@ -95,12 +86,9 @@ test('dashboard loader consumes the SQL RPC row contract and keeps weighted Goog
   assert.equal(result.data.spendMicros, 20_000_000)
   assert.equal(result.data.impressions, 150)
   assert.equal(result.data.clicks, 15)
-  assert.equal(result.data.interactions, 20)
   assert.equal(result.data.ctr, 10)
   assert.equal(result.data.averageCpcMicros, 20_000_000 / 15)
   assert.equal(result.data.conversions, 3)
-  assert.equal(result.data.conversionRate, 15)
-  assert.equal(result.data.costPerConversionMicros, 20_000_000 / 3)
   assert.equal(result.data.conversionValue, 75)
   assert.equal(result.data.currencyCode, 'ZAR')
   assert.equal(result.data.campaignCount, 1)
@@ -125,7 +113,7 @@ test('dashboard loader returns distinct, client-safe setup, empty, and failure s
     assert.deepEqual(result, { data: null, state: expectedState, error: null })
   }
 
-  mockDashboardRpc({ errorFor: 'get_google_ads_dashboard_campaign_metrics_v2' })
+  mockDashboardRpc({ errorFor: 'get_google_ads_dashboard_campaign_metrics' })
   assert.deepEqual(
     await loadGoogleAdsDashboard('report-safe', '2026-05'),
     { data: null, state: 'error', error: 'Google Ads data could not be loaded.' },
@@ -143,11 +131,12 @@ test('unnamed provider accounts receive a neutral customer-specific label', () =
   assert.doesNotMatch(GOOGLE_ADS_LIB_SOURCE, /Action Sport/i)
 })
 
-test('admin preview and client dashboard load only the selected Google Ads period', () => {
+test('admin preview and client dashboard automatically load current and previous Google Ads months', () => {
   for (const source of [PREVIEW_SOURCE, CLIENT_DASHBOARD_SOURCE]) {
     assert.match(source, /loadGoogleAdsDashboard\(data\.id, currentMonth\)/)
-    assert.doesNotMatch(source, /loadGoogleAdsDashboard\(data\.id, previousMonth\)/)
-    assert.doesNotMatch(source, /previousGoogleAds/)
+    assert.match(source, /previousMonth\s*\?\s*loadGoogleAdsDashboard\(data\.id, previousMonth\)/s)
+    assert.match(source, /Promise\.all\(\[[\s\S]*googleAdsResult[\s\S]*previousGoogleAdsResult/)
+    assert.match(source, /previousGoogleAds=\{previousGoogleAds\}/)
   }
 })
 
@@ -164,7 +153,7 @@ test('client route uses only its published report list and passes Google Ads to 
 test('admin Client View passes Google Ads while diagnostics remain role-gated', () => {
   assert.match(PREVIEW_SOURCE, />\s*Client View\s*</)
   assert.match(PREVIEW_SOURCE, /googleAds=\{googleAds\}/)
-  assert.doesNotMatch(PREVIEW_SOURCE, /previousGoogleAds/)
+  assert.match(PREVIEW_SOURCE, /previousGoogleAds=\{previousGoogleAds\}/)
   assert.match(PREVIEW_SOURCE, /showAdminDiagnostics=\{isStaff\}/)
   assert.match(REPORT_VIEW_SOURCE, /\{showAdminDiagnostics && <AdminDataHealth/)
 })
@@ -176,50 +165,44 @@ test('dashboard and integration surfaces have no manual report loader or diagnos
 })
 
 test('report-bound SQL permits staff preview but requires a published same-client report for clients', () => {
-  for (const functionName of ['get_google_ads_dashboard_campaign_metrics_v2', 'get_google_ads_dashboard_status_v2']) {
-    const start = V2_SQL_SOURCE.indexOf(`create or replace function public.${functionName}(`)
-    const body = V2_SQL_SOURCE.slice(start, V2_SQL_SOURCE.indexOf('\n$$;', start) + 4)
-    assert.ok(start >= 0, `missing ${functionName}`)
+  const functions = SQL_SOURCE.split(/create or replace function public\./).slice(1)
+  assert.equal(functions.length, 2)
+  for (const body of functions) {
     assert.match(body, /from public\.reports r[\s\S]*where r\.id = p_report_id/)
     assert.match(body, /coalesce\(public\.is_staff\(\), false\)[\s\S]*or \([\s\S]*r\.status = 'published'/)
     assert.match(body, /from public\.profiles p[\s\S]*p\.id = auth\.uid\(\)[\s\S]*p\.client_id = r\.client_id[\s\S]*p\.role = 'client'/)
     assert.match(body, /if report_client_id is null then[\s\S]*raise exception 'Report access denied'/)
-    assert.match(body, /p_period_start <> pg_catalog\.date_trunc\('month', p_period_start\)::date/)
-    assert.match(body, /Google Ads period must be one complete calendar month/)
+    assert.match(body, /p_period_start = report_month_start and p_period_end = report_month_end/)
+    assert.match(body, /p_period_start = previous_month_start and p_period_end = previous_month_end/)
+    assert.match(body, /Google Ads period must be the report month or previous month/)
   }
 })
 
 test('client metrics RPC aggregates campaigns server-side without provider IDs or daily rows', () => {
-  const signature = V2_SQL_SOURCE.match(/get_google_ads_dashboard_campaign_metrics_v2\([\s\S]*?\)\s*returns table \(([\s\S]*?)\)\s*language plpgsql/)?.[1] ?? ''
+  const signature = SQL_SOURCE.match(/get_google_ads_dashboard_campaign_metrics\([\s\S]*?\)\s*returns table \(([\s\S]*?)\)\s*language plpgsql/)?.[1] ?? ''
   assert.doesNotMatch(signature, /campaign_id|metric_date|customer_id|account_id/)
-  assert.match(V2_SQL_SOURCE, /group by r\.google_ads_account_id, r\.campaign_id, r\.campaign_name,/)
-  assert.match(V2_SQL_SOURCE, /sum\(r\.impressions\)/)
-  assert.match(V2_SQL_SOURCE, /sum\(r\.cost_micros\)/)
-  assert.match(V2_SQL_SOURCE, /current_7d jsonb,[\s\S]*previous_7d jsonb/)
+  assert.match(SQL_SOURCE, /group by r\.google_ads_account_id, r\.campaign_id, r\.campaign_name, r\.currency_code/)
+  assert.match(SQL_SOURCE, /sum\(r\.impressions\)/)
+  assert.match(SQL_SOURCE, /sum\(r\.cost_micros\)/)
 })
 
 test('SQL excludes cross-client and unmapped metrics for dedicated and shared accounts', () => {
-  assert.match(V2_SQL_SOURCE, /al\.google_ads_account_id = a\.id[\s\S]*al\.client_id = report_client_id[\s\S]*al\.is_active/)
-  assert.match(V2_SQL_SOURCE, /cl\.google_ads_account_id = a\.id[\s\S]*cl\.customer_id = m\.customer_id[\s\S]*cl\.campaign_id = m\.campaign_id[\s\S]*cl\.client_id = report_client_id[\s\S]*cl\.is_active/)
-  assert.doesNotMatch(V2_SQL_SOURCE, /from public\.google_ads_campaign_daily_metrics m[\s\S]*\bleft join public\.google_ads_campaign_links/)
+  assert.match(SQL_SOURCE, /al\.google_ads_account_id = a\.id[\s\S]*al\.client_id = report_client_id[\s\S]*al\.is_active/)
+  assert.match(SQL_SOURCE, /cl\.google_ads_account_id = a\.id[\s\S]*cl\.customer_id = m\.customer_id[\s\S]*cl\.campaign_id = m\.campaign_id[\s\S]*cl\.client_id = report_client_id[\s\S]*cl\.is_active/)
+  assert.doesNotMatch(SQL_SOURCE, /from public\.google_ads_campaign_daily_metrics m[\s\S]*\bleft join public\.google_ads_campaign_links/)
 })
 
 test('loader RPC names exactly match both SQL function declarations', () => {
-  const loaderNames = [...DASHBOARD_LIB_SOURCE.matchAll(/supabase\.rpc\('(get_google_ads_dashboard_[^']+)'/g)].map(match => match[1])
-  const v2SqlNames = [...V2_SQL_SOURCE.matchAll(/create or replace function public\.(get_google_ads_dashboard_[a-z_0-9]+)\(/g)].map(match => match[1])
-  const legacySqlNames = [...LEGACY_SQL_SOURCE.matchAll(/create or replace function public\.(get_google_ads_dashboard_[a-z_]+)\(/g)].map(match => match[1])
-  assert.deepEqual(new Set(loaderNames), new Set([...v2SqlNames, ...legacySqlNames]))
+  const loaderNames = [...DASHBOARD_LIB_SOURCE.matchAll(/supabase\.rpc\('([^']+)'/g)].map(match => match[1]).sort()
+  const sqlNames = [...SQL_SOURCE.matchAll(/create or replace function public\.(get_google_ads_dashboard_[a-z_]+)\(/g)].map(match => match[1]).sort()
+  assert.deepEqual(loaderNames, sqlNames)
 })
 
-test('Google Ads uses canonical equal-window trends without entering Meta totals', () => {
-  const resultsSource = readSource('../src/components/client/GoogleAdsResults.tsx')
-  assert.match(REPORT_VIEW_SOURCE, /<GoogleAdsResults dashboard=\{googleAds\}/)
-  assert.match(resultsSource, /dashboard\.sevenDayTrend/)
-  assert.match(resultsSource, /Latest 7 days vs previous 7 days/)
-  assert.match(resultsSource, /Both windows contain seven calendar days/)
-  assert.doesNotMatch(resultsSource, /label="MoM"|<ChannelGrowthPill/)
-  assert.match(resultsSource, /No unequal-period MoM inference is used/)
-  assert.doesNotMatch(REPORT_VIEW_SOURCE, /previousGoogleAds/)
+test('Google Ads comparisons render month-over-month without entering Meta totals', () => {
+  assert.match(REPORT_VIEW_SOURCE, /function googleAdsMetrics\([\s\S]*previous: GoogleAdsDashboardData \| null/)
+  assert.match(REPORT_VIEW_SOURCE, /googleAdsMetrics\(googleAds, previousGoogleAds\)/)
+  assert.match(REPORT_VIEW_SOURCE, /compareNullable\(metric\.current, metric\.previous\)/)
+  assert.match(REPORT_VIEW_SOURCE, /<ChannelGrowthPill label="MoM" movement=\{movement\}/)
   assert.match(REPORT_VIEW_SOURCE, /<CombinedHero master=\{master\} performance=\{performance\} \/>/)
   assert.doesNotMatch(REPORT_VIEW_SOURCE, /<CombinedHero[^>]*googleAds/)
   assert.match(REPORT_VIEW_SOURCE, /Paid campaign performance is shown separately from organic social results\./)
@@ -274,115 +257,4 @@ test('integrations index preserves Meta status while exposing Google Ads sync ma
   assert.match(INTEGRATIONS_SOURCE, /Manage Google Ads/)
   assert.match(INTEGRATIONS_SOURCE, /Set up Google Ads/)
   assert.match(INTEGRATIONS_SOURCE, /Google Ads data sync/)
-})
-
-test('Cape Lumber August 2026 dashboard matches provider-native totals and period', () => {
-  const row = {
-    campaign_id: '23937664317',
-    campaign_name: 'Cape Lumber Brand Search',
-    campaign_status: 'ENABLED',
-    campaign_type: 'SEARCH',
-    impressions: 5490,
-    clicks: 151,
-    interactions: 151,
-    cost: 572.32,
-    conversions: 37,
-    value: 37,
-    currency: 'ZAR',
-    time_zone: 'Africa/Johannesburg',
-    first_activity: '2026-08-25',
-    last_activity: '2026-08-31',
-    data_through_date: '2026-08-31',
-  }
-  const data = parseGoogleAdsDashboardData('2026-08', [row])
-  assert.ok(data, 'dashboard parsed')
-  assert.equal(data.month, '2026-08')
-  assert.equal(data.periodStart, '2026-08-01')
-  assert.equal(data.periodEnd, '2026-08-31')
-  assert.equal(data.timeZone, 'Africa/Johannesburg')
-  assert.equal(data.currencyCode, 'ZAR')
-  assert.equal(data.spendMicros, 572_320_000)
-  assert.equal(data.impressions, 5490)
-  assert.equal(data.clicks, 151)
-  assert.equal(data.conversions, 37)
-  assert.equal(data.conversionValue, 37)
-  assert.equal(data.campaignCount, 1)
-  assert.equal(data.campaigns[0].campaignId, '23937664317')
-  assert.equal(data.campaigns[0].currencyCode, 'ZAR')
-  assert.equal(data.campaigns[0].timeZone, 'Africa/Johannesburg')
-  assert.ok(Math.abs(data.ctr - (151 / 5490) * 100) < 1e-6)
-  assert.ok(Math.abs(data.averageCpcMicros - 572_320_000 / 151) < 1)
-  assert.ok(Math.abs(data.conversionRate - (37 / 151) * 100) < 1e-6)
-  assert.ok(Math.abs(data.costPerConversionMicros - 572_320_000 / 37) < 1)
-  assert.equal(data.sevenDayTrend, null)
-})
-
-test('budget is shown separately from spend and uses provider-native settings', () => {
-  const campaign = {
-    campaignId: '23937664317',
-    name: 'Cape Lumber Brand Search',
-    currencyCode: 'ZAR',
-    timeZone: 'Africa/Johannesburg',
-    status: 'ENABLED',
-    type: 'SEARCH',
-    spendMicros: 572_320_000,
-    impressions: 5490,
-    clicks: 151,
-    interactions: 151,
-    ctr: 2.75,
-    averageCpcMicros: 3_790_000,
-    conversions: 37,
-    conversionRate: 24.5,
-    costPerConversionMicros: 15_470_000,
-    conversionValue: 37,
-    nativeSettings: {
-      apiVersion: 'v25',
-      observedAt: '2026-08-31T12:00:00Z',
-      primaryStatus: 'SERVING',
-      budgetAmountMicros: 2_500_000_000,
-      budgetPeriod: 'DAILY',
-      budgetShared: false,
-      budgetStatus: 'ENABLED',
-    },
-    firstActivity: '2026-08-25',
-    lastActivity: '2026-08-31',
-    campaignName: 'Cape Lumber Brand Search',
-    campaignStatus: 'ENABLED',
-    campaignType: 'SEARCH',
-  }
-  const budget = formatGoogleAdsCampaignBudget(campaign)
-  assert.match(budget, /2(?:[,\s\u00a0])500(?:[.,])00/)
-  assert.match(budget, /average daily/)
-  assert.doesNotMatch(budget, /572\.32/)
-})
-
-test('conversion value is hidden from client-facing reporting until verified', () => {
-  const resultsSource = readSource('../src/components/client/GoogleAdsResults.tsx')
-  assert.doesNotMatch(resultsSource, /Configured conversion value/)
-  assert.doesNotMatch(resultsSource, /formatNumber\([^)]*conversionValue/)
-  assert.doesNotMatch(resultsSource, /Unitless until conversion-action value configuration is verified/)
-  assert.match(resultsSource, /Conversion value is not shown as revenue or account currency until that configuration is verified/)
-})
-
-test('incomparable equal-window trends are suppressed, not rendered as Unavailable', () => {
-  const comparable = {
-    current: { startDate: '2026-09-08', endDate: '2026-09-14', spendMicros: 100_000_000, impressions: 100, clicks: 20, conversions: 5 },
-    previous: { startDate: '2026-09-01', endDate: '2026-09-07', spendMicros: 80_000_000, impressions: 90, clicks: 10, conversions: 4 },
-  }
-  assert.equal(isGoogleAdsTrendComparable(comparable), true)
-  assert.equal(
-    isGoogleAdsTrendComparable({
-      ...comparable,
-      previous: { ...comparable.previous, spendMicros: 0, clicks: 0 },
-    }),
-    false,
-  )
-  assert.equal(isGoogleAdsTrendComparable(null), false)
-})
-
-test('Performance loads Google Ads once for the exact published report month', () => {
-  const performanceSource = readSource('../src/pages/client/Dashboard.tsx')
-  assert.match(performanceSource, /currentMonth = getReportMonthFromPeriod\(data\)/)
-  assert.match(performanceSource, /loadGoogleAdsDashboard\(data\.id, currentMonth\)/)
-  assert.doesNotMatch(performanceSource, /currentTrackingMonth\(\)/)
 })

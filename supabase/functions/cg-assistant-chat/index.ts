@@ -1,6 +1,5 @@
-import { describeGoogleAdsStatus, type GoogleAdsSavedStatus } from './googleAdsStatus.ts'
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
-import { createClient } from 'npm:@supabase/supabase-js@2.106.2'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import {
   getProviderDiagnostics,
   routeAiChat,
@@ -64,7 +63,6 @@ interface LocalWorkContext {
 }
 
 const TOOL_REGISTRY: AssistantToolStatus[] = [
-  { key: 'google-ads', name: 'Google Ads', status: 'protected', description: 'Read saved reporting integration status for managers; reporting lives in Performance. No campaign writes.' },
   {
     key: 'my-day',
     name: 'My Day',
@@ -75,7 +73,7 @@ const TOOL_REGISTRY: AssistantToolStatus[] = [
     key: 'tasks',
     name: 'Tasks',
     status: 'available',
-    description: 'Create, assign, reschedule, complete, block, add notes to and query Planner tasks.',
+    description: 'Create, assign, complete, block and query Planner tasks.',
   },
   {
     key: 'clients',
@@ -87,7 +85,7 @@ const TOOL_REGISTRY: AssistantToolStatus[] = [
     key: 'calendar',
     name: 'CG Calendar',
     status: 'available',
-    description: 'Query, create and cancel internal company calendar events.',
+    description: 'Query and create internal company calendar events.',
   },
   {
     key: 'client-schedule',
@@ -121,16 +119,6 @@ const TOOL_REGISTRY: AssistantToolStatus[] = [
   },
 ]
 
-async function getGoogleAdsSavedStatus(sb: ReturnType<typeof createClient>): Promise<GoogleAdsSavedStatus | null> {
-  try {
-    const [accounts, runs] = await Promise.all([
-      sb.from('google_ads_accounts').select('id', { head: true, count: 'exact' }).eq('is_active', true),
-      sb.from('google_ads_sync_runs').select('finished_at').eq('status', 'succeeded').order('finished_at', { ascending: false }).limit(1).maybeSingle(),
-    ])
-    if (accounts.error || runs.error) return null
-    return { accountCount: accounts.count, lastSyncedAt: runs.data?.finished_at ?? null }
-  } catch { return null }
-}
 interface MetaIntegrationState {
   connected: boolean
   status: string
@@ -1676,14 +1664,13 @@ function buildSystemPrompt(
     '',
     '## What you can do right now',
     '- Understand what is happening across the app (tasks, calendar, clients, schedule, marketing).',
-    '- Create, assign, reschedule, complete, block, add notes to and query Planner tasks.',
+    '- Create, assign, complete, block and query Planner tasks.',
     '- Look up, open and summarise active clients.',
-    '- Query, create and cancel CG Calendar events.',
+    '- Query and create CG Calendar events.',
     '- Answer what content is due, scheduled or posted for any client this week or month.',
     '- Launch Marketing AI specialists for strategy, copy, brand review and content planning.',
     '- Navigate directly to any page, client, task or event.',
     '- Answer real integration status from live diagnostics.',
-    '- Google Ads reporting exists in Performance. Saved account/sync status is available to managers; never infer a live provider connection or campaign write capability.',
     '',
     '## Daily brief',
     'When asked what to do today, sort priorities, or what is overdue, use the supplied My Day context to give a prioritised human answer. Identify the top few priorities and why. Offer a follow-up action.',
@@ -2184,8 +2171,7 @@ Deno.serve(async (req) => {
   ])
 
   if (isCapabilitiesQuestion(message)) {
-    const googleAds = ['admin', 'manager'].includes(role) ? describeGoogleAdsStatus(await getGoogleAdsSavedStatus(sb)) : 'Google Ads reporting and connection checks are managed in Performance by a manager.'
-    const answer = buildCapabilitiesResponse(role, metaState, microsoftState, marketingAiState).replace('Just ask in plain language.', googleAds)
+    const answer = buildCapabilitiesResponse(role, metaState, microsoftState, marketingAiState)
 
     await auditAssistantRequest(sb, {
       userId: user.id,
@@ -2204,12 +2190,6 @@ Deno.serve(async (req) => {
     })
   }
 
-  if (/\bgoogle\s*ads\b/i.test(message) && /\b(status|connect(?:ed|ion)?|integrat(?:ed|ion)|sync|available|access)\b/i.test(message)) {
-    const googleAds = ['admin', 'manager'].includes(role) ? describeGoogleAdsStatus(await getGoogleAdsSavedStatus(sb)) : 'Google Ads reporting and connection checks are managed in Performance by a manager.'
-    const answer = googleAds + ' I cannot change campaigns or budgets from chat.'
-    await auditAssistantRequest(sb, { userId: user.id, role, message, responseStatus: 'google_ads_saved_status', restricted: false, promptCategory: 'integration_status', model: 'local:google_ads_status' })
-    return jsonResponse({ ok: true, answer, tools: TOOL_REGISTRY })
-  }
   if (isTaskLookupRequest(message)) {
     const answer = localWorkContext ? buildLocalWorkResponse(localWorkContext) : buildTaskModulePendingResponse()
 

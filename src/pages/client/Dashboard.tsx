@@ -1,8 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import { useClientPortal } from '../../components/client/ClientPortalContext'
-import { ClientPortalErrorState, ClientPortalLoadingState } from '../../components/client/ClientPortalStates'
 import { useAuth } from '../../contexts/AuthContext'
+import { getClient, type Client } from '../../lib/db/clients'
 import {
   getClientPublishedReportWithPosts,
   listClientPublishedReports,
@@ -14,13 +12,9 @@ import {
   type ReportManualMetric,
 } from '../../lib/db/manualMetrics'
 import { getReportMonthFromPeriod, monthDisplayLabel, previousReportMonth, selectMonthlyReports } from '../../lib/reportPeriod'
-import {
-  ClientReportView,
-  EmptyReportState,
-  type GoogleSurface,
-  type ReportTabKey,
-} from './ClientReportView'
+import { ClientReportView, EmptyReportState } from './ClientReportView'
 import { ClientMonthAhead } from '../../components/client/ClientMonthAhead'
+import { ClientPortalShell } from '../../components/client/ClientPortalShell'
 import {
   loadGoogleAdsDashboard,
   type GoogleAdsDashboardData,
@@ -45,13 +39,13 @@ function monthLabel(report: ClientReport) {
 
 export default function Dashboard() {
   const { profile } = useAuth()
-  const { client } = useClientPortal()
-  const [searchParams, setSearchParams] = useSearchParams()
   const [reports, setReports] = useState<ClientReport[]>([])
+  const [client, setClient] = useState<Client | null>(null)
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null)
   const [report, setReport] = useState<ClientReportWithPosts | null>(null)
   const [manualMetrics, setManualMetrics] = useState<ReportManualMetric[]>([])
   const [googleAds, setGoogleAds] = useState<GoogleAdsDashboardData | null>(null)
+  const [previousGoogleAds, setPreviousGoogleAds] = useState<GoogleAdsDashboardData | null>(null)
   const [googleAdsState, setGoogleAdsState] = useState<GoogleAdsDashboardState>('no-activity')
   const [googleAdsError, setGoogleAdsError] = useState<string | null>(null)
   const [facts, setFacts] = useState<PlatformFact[]>([])
@@ -64,24 +58,6 @@ export default function Dashboard() {
   const reportRequestRef = useRef(0)
 
   const months = useMemo(() => selectMonthlyReports(reports), [reports])
-  const requestedTab = parseReportTab(searchParams.get('tab'))
-  const requestedGoogleSurface = parseGoogleSurface(searchParams.get('surface'))
-
-  const handleTabChange = (tab: ReportTabKey) => {
-    const next = new URLSearchParams(searchParams)
-    if (tab === 'overview') next.delete('tab')
-    else next.set('tab', tab)
-    if (tab !== 'google') next.delete('surface')
-    setSearchParams(next, { replace: true })
-  }
-
-  const handleGoogleSurfaceChange = (surface: GoogleSurface) => {
-    const next = new URLSearchParams(searchParams)
-    next.set('tab', 'google')
-    if (surface === 'ads') next.delete('surface')
-    else next.set('surface', surface)
-    setSearchParams(next, { replace: true })
-  }
 
   useEffect(() => {
     const requestId = ++reportsRequestRef.current
@@ -94,6 +70,7 @@ export default function Dashboard() {
     async function loadReports() {
       setReports([])
       setSelectedReportId(null)
+      setClient(null)
       setReport(null)
       setManualMetrics([])
       setFacts([])
@@ -107,14 +84,18 @@ export default function Dashboard() {
       setLoading(true)
       setError(null)
       try {
-        const reportsRes = await listClientPublishedReports()
+        const [reportsRes, clientRes] = await Promise.all([
+          listClientPublishedReports(),
+          getClient(requestedClientId),
+        ])
         if (!requestIsCurrent()) return
         const { data, error } = reportsRes
-        if (error) {
-          setError(error.message)
+        if (error || clientRes.error || !clientRes.data) {
+          setError(error?.message ?? clientRes.error?.message ?? 'Your client profile could not be loaded safely.')
         } else {
           setReports(data)
           setSelectedReportId(selectMonthlyReports(data)[0]?.id ?? null)
+          setClient(clientRes.data)
         }
       } catch (error) {
         if (requestIsCurrent()) setError(errorMessage(error, 'Could not load your reports.'))
@@ -138,6 +119,8 @@ export default function Dashboard() {
       && selectedReportId === requestedReportId
 
     if (!requestedReportId || !requestedClientId || !requestedProfileId) {
+      setReport(null)
+      setReportLoading(false)
       return () => { reportRequestRef.current += 1 }
     }
     const reportId = requestedReportId
@@ -146,6 +129,7 @@ export default function Dashboard() {
       setReport(null)
       setManualMetrics([])
       setGoogleAds(null)
+      setPreviousGoogleAds(null)
       setGoogleAdsState('no-activity')
       setGoogleAdsError(null)
       setFacts([])
@@ -164,9 +148,12 @@ export default function Dashboard() {
         if (data) {
           const currentMonth = getReportMonthFromPeriod(data)
           const previousMonth = previousReportMonth(currentMonth)
-          const [metricsResult, googleAdsResult, factsResult] = await Promise.all([
+          const [metricsResult, googleAdsResult, previousGoogleAdsResult, factsResult] = await Promise.all([
             listClientReportManualMetrics(data.id),
             loadGoogleAdsDashboard(data.id, currentMonth),
+            previousMonth
+              ? loadGoogleAdsDashboard(data.id, previousMonth)
+              : Promise.resolve({ data: null, state: 'no-activity' as const, error: null }),
             loadReportPlatformFacts(data.id, currentMonth, previousMonth),
           ])
           if (!requestIsCurrent()) return
@@ -180,8 +167,9 @@ export default function Dashboard() {
           }
           setManualMetrics(metricsResult.data)
           setGoogleAds(googleAdsResult.data)
+          setPreviousGoogleAds(previousGoogleAdsResult.data)
           setGoogleAdsState(googleAdsResult.state)
-          setGoogleAdsError(googleAdsResult.error)
+          setGoogleAdsError(googleAdsResult.error ?? previousGoogleAdsResult.error)
           setFacts(factsResult.facts)
           setPreviousFacts(factsResult.previousFacts)
           setNormalizedFactsAttempted(factsResult.normalizedAttempted)
@@ -201,32 +189,44 @@ export default function Dashboard() {
 
   if (!profile?.client_id) {
     return (
-      <EmptyReportState
-        title="Your account is pending setup"
-        message="Your client access has not been linked yet. Contact your account manager to get access."
-      />
+      <ClientPortalShell client={client}>
+        <EmptyReportState
+          title="Your account is pending setup"
+          message="Your client access has not been linked yet. Contact your account manager to get access."
+        />
+      </ClientPortalShell>
     )
   }
 
   if (loading) {
-    return <ClientPortalLoadingState variant="report" />
+    return (
+      <ClientPortalShell client={client}>
+        <p className="text-sm text-report-muted">Loading your reports…</p>
+      </ClientPortalShell>
+    )
   }
 
   if (error) {
-    return <ClientPortalErrorState title="Performance is temporarily unavailable" message="Your published reporting could not be loaded safely. Please try again shortly." />
+    return (
+      <ClientPortalShell client={client}>
+        <p className="rounded-2xl bg-report-surface px-4 py-3 text-sm text-[#d8a07a]">{error}</p>
+      </ClientPortalShell>
+    )
   }
 
   if (months.length === 0) {
     return (
-      <EmptyReportState
-        title="No published report yet"
-        message="Your monthly reports will appear here as soon as they are published by CG Production House."
-      />
+      <ClientPortalShell client={client}>
+        <EmptyReportState
+          title="No published report yet"
+          message="Your monthly reports will appear here as soon as they are published by CG Production House."
+        />
+      </ClientPortalShell>
     )
   }
 
   return (
-    <>
+    <ClientPortalShell client={client}>
       {months.length > 1 && (
         <div className="mb-8">
           <p className="mb-3 text-[0.7rem] uppercase tracking-[0.22em] text-report-faint">Choose a month</p>
@@ -250,22 +250,19 @@ export default function Dashboard() {
       )}
 
       {reportLoading ? (
-        <ClientPortalLoadingState variant="report" />
+        <p className="text-sm text-report-muted">Loading report…</p>
       ) : report ? (
         <ClientReportView
           report={report}
           client={client}
           manualMetrics={manualMetrics}
           googleAds={googleAds}
+          previousGoogleAds={previousGoogleAds}
           googleAdsState={googleAdsState}
           googleAdsError={googleAdsError}
           facts={facts}
           previousFacts={previousFacts}
           normalizedFactsAttempted={normalizedFactsAttempted}
-          initialTab={requestedTab}
-          onTabChange={handleTabChange}
-          initialGoogleSurface={requestedGoogleSurface}
-          onGoogleSurfaceChange={handleGoogleSurfaceChange}
         />
       ) : (
         <EmptyReportState
@@ -277,16 +274,6 @@ export default function Dashboard() {
       {/* Forward-looking: this month's CG plan (client-safe; renders nothing
           until the client has visible schedule data). */}
       {profile.client_id && <ClientMonthAhead clientId={profile.client_id} />}
-    </>
+    </ClientPortalShell>
   )
-}
-
-function parseReportTab(value: string | null): ReportTabKey {
-  if (value === 'campaigns' || value === 'google_ads') return 'google'
-  if (value === 'facebook' || value === 'instagram' || value === 'google' || value === 'tiktok' || value === 'linkedin' || value === 'web' || value === 'email') return value
-  return 'overview'
-}
-
-function parseGoogleSurface(value: string | null): GoogleSurface {
-  return value === 'business' ? 'business' : 'ads'
 }

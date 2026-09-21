@@ -126,7 +126,7 @@ test('client calendar exposes only an opaque key for published same-client guide
 
 test('client event opens the matching month and highlights only the returned guide key', () => {
   assert.match(CLIENT_CALENDAR, /Open filming guideline/)
-  assert.match(CLIENT_CALENDAR, /\/client\/plan\?tab=guidelines&month=/)
+  assert.match(CLIENT_CALENDAR, /\/client\/content-guides\?month=/)
   assert.match(CLIENT_CALENDAR, /guide=\$\{encodeURIComponent\(event\.guidelineKey\)\}/)
   assert.match(CLIENT_GUIDES, /const selectedGuideKey = searchParams\.get\('guide'\)/)
   assert.match(CLIENT_GUIDES, /selectedGuideKey === guideline\.row_key/)

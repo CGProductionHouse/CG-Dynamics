@@ -146,5 +146,3 @@ scripts/generated/
 .yarn/install-state.gz
 .pnp.*
 .vercel
-.worktrees/
-artifacts/

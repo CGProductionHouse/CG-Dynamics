@@ -75,28 +75,18 @@ not invent or create OneDrive folders. The Edge Function:
 
 ### Environment variables
 
-> **Corrected 2026-09-09 (#225): the OneDrive is a PERSONAL Microsoft account — delegated OAuth,
-> not app-only.** See `docs/onboarding/ONEDRIVE-PRODUCTION-MAPPING-225.md`.
+The dedicated upload app requires:
 
-The dedicated OneDrive app (delegated) requires:
-
-- `ONEDRIVE_MS_CLIENT_ID`
-- `ONEDRIVE_MS_CLIENT_SECRET`
-- `ONEDRIVE_MS_REDIRECT_URI`
-- `ONEDRIVE_MS_AUTHORITY` (default `https://login.microsoftonline.com/consumers`)
-- `ONEDRIVE_TOKEN_ENC_KEY` (base64 32-byte AES-256-GCM key for the encrypted token store)
-- `ONEDRIVE_OAUTH_SETUP_TOKEN` (gates the one-time consent starter)
+- `ONBOARDING_MS_TENANT_ID`
+- `ONBOARDING_MS_CLIENT_ID`
+- `ONBOARDING_MS_CLIENT_SECRET`
 
 These MUST be a separate app from `MICROSOFT_TENANT_ID` / `MICROSOFT_CLIENT_ID`
-used by `microsoft-transition-sync`. The delegated app needs only:
+used by `microsoft-transition-sync`. The upload app needs only:
 
-- delegated scopes `Files.ReadWrite offline_access openid profile` — the user's own
-  OneDrive only, **not** tenant-wide, **not** `Files.ReadWrite.All`;
-- a one-time interactive consent by the personal `info@` account that mints a refresh
-  token (stored encrypted, rotated on use); app-only/client-credentials is not supported.
-
-(The former app-only `ONBOARDING_MS_TENANT_ID/CLIENT_ID/CLIENT_SECRET` +
-`Files.ReadWrite.All` model does not work for a personal Microsoft account and is retired.)
+- `Files.ReadWrite.All` (application), which is tenant-wide and constrained at
+  runtime to the exact mapped client/category destinations;
+- no user delegation; client credentials flow only.
 
 ### Server-mediated download
 
@@ -125,131 +115,6 @@ website, mailbox, or other passwords to onboarding tables, browser storage,
 analytics, logs, errors, notifications, or ordinary API responses. A future
 credential handoff must use an independently reviewed encrypted secret system
 with one-way submission semantics and tightly audited access.
-
-## Product decisions captured from the manual onboarding bridge — 17 Sep 2026
-
-CG is using a polished universal onboarding PDF as a temporary operational bridge
-while the in-app onboarding remains deferred in the launch order. The PDF is not
-a second product and should not be copied 1:1 into the app. It clarified the
-client-facing information architecture, access rules and relationship language
-that the app should inherit when onboarding resumes.
-
-### Welcome / relationship framing
-
-- Lead with **Welcome to CG**, not a sterile setup form.
-- Explain that the client can send the material they already have and CG will
-  help identify gaps and organise the rest.
-- Ask for practical business details, brand assets and service information before
-  access setup.
-- CG researches and verifies public social links; clients should not be asked to
-  manually type every public profile URL unless genuinely needed.
-- A permanent CG Production House profile is available at
-  `https://www.cgproductionhouse.com/company-profile`. The onboarding experience
-  may link to it for clients who want to understand more of CG's capabilities,
-  rather than duplicating a long brochure inside Dynamics.
-
-### Platform access rules
-
-Meta / Facebook is an **either/or** route, never both:
-
-1. **Preferred when a Meta Business Portfolio already exists:** add CG Production
-   House as a partner using Business ID `3217480521719798`, then assign the
-   relevant Page and agreed assets/permissions.
-2. **Simple fallback when the client is not properly set up in Meta:** give
-   **Christie-Ann Groenewald** full Facebook Page access. Once that access is
-   active the client stops there and CG organises the remaining Meta structure.
-
-Other platform rules:
-
-- **Instagram:** CG requires direct account login access for day-to-day management
-  even when the account is connected to Meta. Collect username/login email as
-  ordinary onboarding data, but the password must use the separate secure
-  credential handoff and must never be stored by onboarding until an approved
-  vault exists. Two-factor approval may be required once.
-- **TikTok:** same direct-login rule and same secure credential boundary as
-  Instagram unless CG explicitly agrees another access method with the client.
-- **Google:** use `info@cgproductionhouse.com` for the relevant services. Current
-  operating roles are Business Profile = **Manager**, Google Analytics =
-  **Editor**, Search Console = **Full user**, Google Ads = **Standard**.
-- **LinkedIn:** Company Pages do not use a separate Page password. An existing
-  Super admin should add **Christie-Ann Groenewald** as **Super admin** for
-  onboarding/optimisation. LinkedIn Ads / Campaign Manager access is separate
-  and should be requested only when relevant.
-- **Website:** if CG is taking over an existing site, request the highest practical
-  administrator/collaborator access plus domain/DNS, hosting, Analytics/Search
-  Console and integration access where applicable. Do not tell a client to cancel
-  the old provider or hosting before continuity/access is verified. If CG is
-  rebuilding the site, the client should understand that CG handles the new
-  technical foundation and launch once required domain ownership/access is in place.
-- **Email / Outlook:** for CG-hosted IMAP mailboxes, Outlook Classic remains the
-  supported setup path. Current universal settings are IMAP port **993 + SSL/TLS**,
-  SMTP port **465 + SSL/TLS**, with SPA unticked. Mailbox-specific email, server
-  name and password are supplied separately and must not be embedded in the
-  universal onboarding experience.
-
-Platform access remains optional to the core completion contract because not
-every client uses every platform or buys every service. The client should always
-be able to skip non-relevant platforms.
-
-### Website / AI education direction
-
-The manual onboarding work confirmed that website education is a valuable part of
-Welcome to CG, especially for clients deciding whether CG should merely take over
-an old site or rebuild it properly. Keep this concise in-app, but the product may
-explain that a CG rebuild treats the website as a connected technical foundation,
-not only a visual redesign.
-
-Relevant capability language includes:
-
-- modern responsive structure and conversion-focused user journeys;
-- on-page SEO foundations;
-- Answer Engine Optimisation (AEO) foundations for AI-powered search;
-- Generative Engine Optimisation (GEO) foundations for generative discovery;
-- search engine and AI crawler accessibility;
-- structured data/schema where applicable;
-- page titles, descriptions, metadata and content hierarchy;
-- XML sitemap and robots.txt configuration;
-- Google indexing and Search Console setup/connection;
-- analytics and conversion measurement;
-- clear service, location and business-entity signals;
-- launch QA across desktop/tablet/mobile, browsers, links, forms, media and
-  crawler/indexing checks.
-
-Use the client question **“Can AI find your business — and can it understand what
-you do?”** as a useful educational framing. Do not promise rankings or AI citations.
-The goal is a technically clean, machine-readable source of truth designed for how
-modern discovery works.
-
-### Connected digital system
-
-Onboarding should help clients understand that CG does not treat website, Google,
-social, captions, hashtags, ads and analytics as isolated tasks. They reinforce a
-shared set of business/brand signals and should be planned as one connected digital
-system so the brand is easier to find, understand and measure.
-
-### How CG works with the client each month
-
-The manual guide also clarified the service process that removes uncertainty after
-onboarding. This belongs in the Welcome/Setup education layer, not as another legal
-terms document:
-
-1. **Monthly direction:** the client can supply a theme, promotion, event, product
-   or priority for the month.
-2. **Research + game plan:** if there is no requested theme, CG researches the
-   industry, audience, season and market and builds the monthly plan.
-3. **Content guideline before every shoot:** CG sends the intended capture/ideas
-   before the shoot so the client knows what is planned and what may be needed.
-4. **Production:** CG shoots/designs/edits, writes captions and hashtags and
-   prepares each piece for the relevant platforms.
-5. **WhatsApp approval:** finished content/copy is sent to the client WhatsApp
-   group for approval before posting.
-6. **Changes are welcome:** the client can request changes in the group; CG makes
-   them and sends the updated version back for approval.
-7. **Publish + improve:** only approved content is scheduled/published, and
-   performance learning feeds the next cycle where reporting is in scope.
-
-Client reassurance to preserve: **nothing goes live without client approval**.
-The intended experience is “no uncertainty, no surprises”.
 
 ## Deferred integrations
 

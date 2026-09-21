@@ -105,17 +105,10 @@ export default function MarketingAiDepartmentPage() {
     if (!res.error) setArtifacts((res.data ?? []) as MarketingArtifact[])
   }, [clientId])
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    refreshArtifacts()
-  }, [refreshArtifacts])
+  useEffect(() => { void refreshArtifacts() }, [refreshArtifacts])
 
   useEffect(() => {
-    if (!clientId) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setCampaigns(() => [])
-      return
-    }
+    if (!clientId) { setCampaigns([]); return }
     listCampaignOptions(clientId).then(res => {
       if (!res.error) setCampaigns((res.data ?? []) as Array<{ campaign_id: string; campaign_name: string | null }>)
     }).catch(() => {})
@@ -131,17 +124,8 @@ export default function MarketingAiDepartmentPage() {
   }, [])
 
   useEffect(() => {
-    if (selectedId) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      loadArtifactDetail(selectedId)
-    } else {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setVersions(() => [])
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setHistory(() => [])
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setApprovals(() => [])
-    }
+    if (selectedId) void loadArtifactDetail(selectedId)
+    else { setVersions([]); setHistory([]); setApprovals([]) }
     setCompareId('')
   }, [selectedId, loadArtifactDetail])
 

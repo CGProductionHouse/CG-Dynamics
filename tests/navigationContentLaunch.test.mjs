@@ -58,8 +58,8 @@ test('/admin/content route renders ContentWorkflowPage with overview defaultTab'
   assert.match(app, /path="\/admin\/content" element=\{<ContentWorkflowPage defaultTab="overview" \/>\}/)
 })
 
-test('legacy content-workflow route maps to guidelines tab', () => {
-  assert.match(app, /path="\/admin\/content-workflow" element=\{<ContentWorkflowPage defaultTab="guidelines" \/>\}/)
+test('legacy content-workflow route maps to library tab', () => {
+  assert.match(app, /path="\/admin\/content-workflow" element=\{<ContentWorkflowPage defaultTab="library" \/>\}/)
 })
 
 test('legacy full-content-guide route maps to guidelines tab', () => {
@@ -123,12 +123,11 @@ test('contentTabTypes exports ContentTab type and resolveContentTab function', (
   assert.ok(contentTab.includes("'runs'"), 'runs tab')
   assert.ok(contentTab.includes("'guidelines'"), 'guidelines tab')
   assert.ok(contentTab.includes("'pipeline'"), 'pipeline tab')
-  // The legacy 'library' tab was removed (#219 consolidation); old guides/library
-  // labels now resolve to the guidelines tab (asserted below).
+  assert.ok(contentTab.includes("'library'"), 'library tab')
 })
 
-test('resolveContentTab maps old guides/library labels to guidelines', () => {
-  assert.match(contentTab, /if \(value === 'guides' \|\| value === 'library'\) return 'guidelines'/)
+test('resolveContentTab maps old guides label to library', () => {
+  assert.match(contentTab, /if \(value === 'guides'\) return 'library'/)
 })
 
 // ── Content Workflow Page ───────────────────────────────────────────────────
@@ -209,71 +208,4 @@ test('ContentOverview has five filter controls and section structure', () => {
   assert.ok(contentOverview.includes('attentionItems'), 'attention queue')
   assert.ok(contentOverview.includes('RunCard'), 'run cards')
   assert.ok(contentOverview.includes('GuidelineCard'), 'guideline cards')
-})
-
-// Content Workflow Page mobile viewport
-
-test('ContentWorkflowPage imports useIsMobileViewport for mobile detection', () => {
-  assert.match(contentWorkflow, /useIsMobileViewport/)
-  assert.match(contentWorkflow, /mobileViewport/)
-})
-
-test('ContentWorkflowPage defaults to runs tab on mobile viewport', () => {
-  assert.match(contentWorkflow, /const isMobile = useIsMobileViewport\(\)/)
-  assert.match(contentWorkflow, /const effectiveDefaultTab = isMobile \? \('runs' as ContentTab\) : defaultTab/)
-  assert.match(contentWorkflow, /const tab = resolveContentTab\(searchParams\.get\('tab'\), effectiveDefaultTab\)/)
-})
-
-test('ContentWorkflowPage renders compact sticky Runs|Guidelines|Pipeline segment control at 390px', () => {
-  // Mobile-only segment control (sm:hidden)
-  assert.match(contentWorkflow, /isMobile \&\& \(/)
-  assert.match(contentWorkflow, /sm:hidden/)
-  assert.match(contentWorkflow, /sticky top-0 z-10/)
-  assert.match(contentWorkflow, /role="tablist"/)
-  assert.match(contentWorkflow, /Runs/)
-  assert.match(contentWorkflow, /Guidelines/)
-  assert.match(contentWorkflow, /Pipeline/)
-  assert.match(contentWorkflow, /aria-selected={tab === value}/)
-})
-
-test('ContentWorkflowPage moves filter controls behind Filters disclosure on mobile', () => {
-  // Mobile: filters inside <details> with "Filters" summary
-  assert.match(contentWorkflow, /isMobile \? \(/)
-  assert.match(contentWorkflow, /<details/)
-  assert.match(contentWorkflow, /Filters/)
-  assert.match(contentWorkflow, /runSearch/)
-  assert.match(contentWorkflow, /runStatusFilter/)
-  // Desktop: filters stay inline
-  assert.match(contentWorkflow, /placeholder="Search runs"/)
-  assert.match(contentWorkflow, /All statuses/)
-  assert.match(contentWorkflow, /min-w-0 flex-1/)
-})
-
-// ClientContentCalendarPage error handling
-
-const clientContentCalendar = read('../src/pages/admin/ClientContentCalendarPage.tsx')
-
-test('ClientContentCalendarPage declares error state and sets it on read failure', () => {
-  assert.match(clientContentCalendar, /const \[error, setError\] = useState<string \| null>\(null\)/)
-  assert.match(clientContentCalendar, /setError\(null\)/)
-  assert.match(clientContentCalendar, /clientResult\.error\)/)
-  assert.match(clientContentCalendar, /setError\(clientResult\.error\.message \?\? 'Failed to load clients'\)/)
-  assert.match(clientContentCalendar, /scheduleResult\.error\)/)
-  assert.match(clientContentCalendar, /setError\(scheduleResult\.error\.message \?\? 'Failed to load schedule'\)/)
-})
-
-test('ClientContentCalendarPage renders truthful error banner (not empty state) on read failure', () => {
-  assert.match(clientContentCalendar, /error \? \(/)
-  assert.match(clientContentCalendar, /title="Could not load content calendar"/)
-  assert.match(clientContentCalendar, /message={error}/)
-  assert.match(clientContentCalendar, /Try again/)
-})
-
-test('ClientContentCalendarPage keeps client picker accessible in initial/no-data/error states', () => {
-  // Client picker rendered when !clientId (initial state)
-  assert.match(clientContentCalendar, /!clientId \? \(/)
-  assert.match(clientContentCalendar, /ClientPicker/)
-  // Client picker rendered in staff controls when clientId exists
-  assert.match(clientContentCalendar, /presenting \? null : \(/)
-  assert.match(clientContentCalendar, /ClientPicker/)
 })

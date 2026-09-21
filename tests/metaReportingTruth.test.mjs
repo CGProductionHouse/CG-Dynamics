@@ -7,11 +7,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 
 const read = (rel) => readFileSync(new URL(rel, import.meta.url), 'utf8')
 const SHARED_META = read('../supabase/functions/_shared/meta.ts')
-const META_PERIOD = read('../supabase/functions/_shared/metaPeriod.ts')
 const META_POST_MERGE = read('../supabase/functions/_shared/metaPostMerge.ts')
-const META_FENCING = read('../supabase/migrations/20260908120000_meta_sync_fencing_and_idempotency.sql')
-const META_TOKEN_LIFECYCLE = read('../supabase/migrations/20260908130000_meta_token_lifecycle_diagnostics.sql')
-const META_TOKEN_DIAGNOSTICS = read('../supabase/functions/_shared/metaTokenDiagnostics.ts')
 const META_SYNC = read('../supabase/functions/meta-sync/index.ts')
 const META_WORKER = read('../supabase/functions/meta-sync-worker/index.ts')
 const REPORT_STATS = read('../src/lib/reportStats.ts')
@@ -28,13 +24,6 @@ const META_OAUTH_START = read('../supabase/functions/meta-oauth-start/index.ts')
 const META_OAUTH_CALLBACK = read('../supabase/functions/meta-oauth-callback/index.ts')
 const META_CONNECTION_STATUS = read('../supabase/functions/meta-connection-status/index.ts')
 const META_LIST_ASSETS = read('../supabase/functions/meta-list-assets/index.ts')
-const META_MANAGER_FUNCTIONS = [
-  '../supabase/functions/meta-oauth-start/index.ts',
-  '../supabase/functions/meta-list-assets/index.ts',
-  '../supabase/functions/meta-link-assets/index.ts',
-  '../supabase/functions/meta-sync/index.ts',
-  '../supabase/functions/meta-sync-enqueue/index.ts',
-].map(read)
 
 let server
 let ov
@@ -106,9 +95,7 @@ test('comparison is suppressed for incomplete periods or paid-scope changes', ()
 
 test('a complete fact without a numeric value is never rendered as zero', () => {
   const sections = ov.buildOverviewSections([fact({ value: null })], [])
-  assert.equal(sections.length, 1)
-  assert.equal(sections[0].lines[0].hasValue, false)
-  assert.equal(sections[0].lines[0].value, null)
+  assert.equal(sections.length, 0)
 })
 
 // ── No cross-platform unique-audience summing ───────────────────────────────
@@ -137,19 +124,16 @@ test('Instagram-only views are never presented as a combined all-channel total',
   const sections = ov.buildOverviewSections(current, [])
   const visibility = sections.find(s => s.key === 'brand_visibility')
   assert.ok(visibility, 'brand visibility section exists')
-  // Both platform results are explicit. Facebook remains unavailable, while
-  // Instagram is labelled natively and never becomes a combined "Views" total.
+  // Only the Instagram line is shown (FB unavailable is omitted, not zeroed) and
+  // it is explicitly labelled Instagram — never a bare combined "Views".
   const viewLines = visibility.lines.filter(l => l.metricKey === 'brand_views')
-  assert.equal(viewLines.length, 2)
-  assert.equal(viewLines[0].platform, 'facebook')
-  assert.equal(viewLines[0].value, null)
-  assert.equal(viewLines[0].hasValue, false)
-  assert.equal(viewLines[1].platform, 'instagram')
-  assert.match(viewLines[1].label, /instagram/i)
-  assert.equal(viewLines[1].value, 1750)
+  assert.equal(viewLines.length, 1)
+  assert.equal(viewLines[0].platform, 'instagram')
+  assert.match(viewLines[0].label, /instagram/i)
+  assert.equal(viewLines[0].value, 1750)
 })
 
-test('valid_zero renders as 0 while unavailable renders an explicit empty fact', () => {
+test('valid_zero renders as 0 with a value; unavailable renders no line', () => {
   const current = [
     { platform: 'facebook', metricKey: 'content_interactions', value: 0, availability: 'valid_zero', comparableGroup: 'fb_interactions_v1', aggregation: 'sum' },
     { platform: 'instagram', metricKey: 'content_interactions', value: null, availability: 'unavailable', comparableGroup: 'ig_interactions_v1', aggregation: 'sum' },
@@ -157,14 +141,11 @@ test('valid_zero renders as 0 while unavailable renders an explicit empty fact',
   const sections = ov.buildOverviewSections(current, [])
   const response = sections.find(s => s.key === 'audience_response')
   const lines = response.lines.filter(l => l.metricKey === 'content_interactions')
-  assert.equal(lines.length, 2)
+  assert.equal(lines.length, 1)
   assert.equal(lines[0].platform, 'facebook')
   assert.equal(lines[0].isValidZero, true)
   assert.equal(lines[0].value, 0)
   assert.equal(lines[0].hasValue, true)
-  assert.equal(lines[1].platform, 'instagram')
-  assert.equal(lines[1].value, null)
-  assert.equal(lines[1].hasValue, false)
 })
 
 test('provider-specific metrics use labels that do not imply Business Suite parity', () => {
@@ -230,8 +211,7 @@ test('scheduled worker uses the shared connector, not a competing one', () => {
   assert.match(META_WORKER, /syncAccountFacts/)
   // Shares the network layer (no private retry loop competing with the shared one).
   assert.match(META_WORKER, /\bmetaFetch\b/)
-  assert.match(META_WORKER, /runType: item\.sync_kind === 'incremental' \? 'scheduled'/)
-  assert.match(META_WORKER, /item\.sync_kind === 'targeted_backfill' \? 'historical_resync' : 'manual'/)
+  assert.match(META_WORKER, /runType: 'scheduled'/)
 })
 
 test('manual and scheduled sync share conservative post reconciliation', () => {
@@ -239,15 +219,15 @@ test('manual and scheduled sync share conservative post reconciliation', () => {
     assert.match(source, /upsertMetaReportPost/)
     assert.match(source, /metaPostBounds\(periodStart, periodEnd\)/)
   }
-  assert.match(META_POST_MERGE, /meta_sync_upsert_report_post/)
-  assert.match(META_FENCING, /create or replace function public\.meta_sync_upsert_report_post/)
-  assert.match(META_FENCING, /meta_normalize_permalink/)
-  assert.match(META_FENCING, /v_imported_count = 1/)
-  assert.match(META_FENCING, /abs\(extract\(epoch from \(p\.publish_time - \(p_payload ->> 'publish_time'\)::timestamptz\)\)\) <= 64800/)
-  assert.match(META_FENCING, /Conflicting imported and provider posts require reviewed reconciliation/)
-  assert.doesNotMatch(META_FENCING, /delete from public\.posts\s+where id = v_duplicate/)
-  // A unique imported row is reused in place, so existing highlights and
-  // exclusions keep the same post id. Conflicting identities fail for review.
+  assert.match(META_POST_MERGE, /permalinkMatches\.length === 1/)
+  assert.match(META_POST_MERGE, /captionMatches\.length === 1/)
+  assert.match(META_POST_MERGE, /closePublishTime/)
+  assert.match(META_POST_MERGE, /meta_sync: payload\.raw/)
+  assert.match(META_POST_MERGE, /findUnmappedLiveDuplicate/)
+  assert.match(META_POST_MERGE, /removeLegacyDuplicate/)
+  assert.match(META_POST_MERGE, /report_content_exclusions/)
+  assert.match(META_POST_MERGE, /best_poster_post_id/)
+  assert.match(META_POST_MERGE, /best_video_post_id/)
   assert.doesNotMatch(META_SYNC, /views:\s*post\.viewsValue\s*\?\?\s*0/)
   assert.doesNotMatch(META_SYNC, /reach:\s*post\.reachValue\s*\?\?\s*0/)
 })
@@ -339,14 +319,6 @@ test('rendered current followers are a snapshot with no percentage', () => {
   assert.doesNotMatch(html, /vs last month/)
 })
 
-test('rendered unavailable fact is explicit and never becomes zero', () => {
-  const unavailable = fact({ platform: 'facebook', metricKey: 'unique_viewers', value: null, availability: 'unavailable', aggregation: 'unique', sourceMetric: 'page_total_media_view_unique', comparableGroup: 'fb_media_viewers_v2' })
-  const html = renderReport({ facts: [unavailable], previousFacts: [] })
-  assert.match(html, /Facebook viewers/)
-  assert.match(html, /Unavailable from the connected Meta source/)
-  assert.doesNotMatch(html, />0</)
-})
-
 test('rendered exclusions promote the next eligible post and expose admin controls only to staff callback', () => {
   const posts = [
     { id: 'post-1', report_id: 'report-1', meta_post_id: 'ig-1', platform: 'instagram', publish_time: '2026-06-10T00:00:00Z', meta_post_type: 'Photo', caption: 'First performer', permalink: null, views: 500, reach: 100, reactions: 20, comments: 0, shares: 0, total_clicks: 0, raw: { source: 'meta_sync', views: 500, reach: 100, engagements: 20 }, created_at: '2026-06-10T00:00:00Z' },
@@ -375,16 +347,6 @@ test('client-safe exclusion flags use stable evidence identity after report-mont
   assert.doesNotMatch(html, /Excluded in month/)
 })
 
-test('client report uses the Meta Pacific half-open period at the UTC month boundary', () => {
-  const posts = [
-    { id: 'pacific-month-end', platform: 'facebook', publish_time: '2026-09-01T06:59:59.999Z', post_type: 'Photo', caption: 'Pacific month end', permalink: null, impressions: 300, reach: 100, engagements: 20, excluded: false },
-    { id: 'next-pacific-month', platform: 'facebook', publish_time: '2026-09-01T07:00:00.000Z', post_type: 'Photo', caption: 'Next Pacific month', permalink: null, impressions: 900, reach: 300, engagements: 30, excluded: false },
-  ]
-  const html = renderReport({ report: { ...baseReport, period_start: '2026-08-01', period_end: '2026-08-31', posts } })
-  assert.match(html, /Pacific month end/)
-  assert.doesNotMatch(html, /Next Pacific month/)
-})
-
 test('legacy fallback renders no ungated prior-month percentage', () => {
   const manual = [{ platform: 'instagram', views: 100, reach: 50, engagements: 5, profile_visits: 2, followers: 10, source_type: 'manual', general_notes: null }]
   const previous = [{ ...manual[0], views: 50, reach: 25 }]
@@ -405,21 +367,6 @@ test('staff health renders only when explicitly enabled', () => {
   }]
   assert.doesNotMatch(renderReport({ facts: [fact({ value: 120 })], dataHealth: health }), /connector health/)
   assert.match(renderReport({ facts: [fact({ value: 120 })], dataHealth: health, showAdminDiagnostics: true }), /connector health/)
-})
-
-test('staff health names the exact platform run state instead of conflating partial, errors and staleness', () => {
-  const health = [{
-    period_month: '2026-06', platform: 'facebook', attempted: true, successful: false,
-    latest_run_status: 'partial', latest_health_state: 'verified_partial', latest_attempted_at: '2026-07-01T12:00:00Z',
-    last_successful_at: null, api_version: 'v25.0', connector_version: 'meta-connector-v3',
-    metric_key: 'brand_views', fact_value: 120, fact_availability: 'complete', source_metric: 'page_media_view',
-    aggregation: 'sum', comparable_group: 'fb_media_views_v2', includes_paid: 'both', fact_verified_at: '2026-07-01T12:00:00Z',
-    permission_blocked: false, partial_error_or_stale: true, comparison_eligible: true,
-    safe_reference: 'safe-reference', ready_for_client_reporting: true,
-  }]
-  const html = renderReport({ facts: [fact({ value: 120 })], dataHealth: health, showAdminDiagnostics: true })
-  assert.match(html, /Platform run: partial · verified partial/)
-  assert.doesNotMatch(html, /Partial, error or stale/)
 })
 
 test('real admin and client loaders use report-bound current and previous facts', () => {
@@ -454,9 +401,9 @@ test('Graph v25 contract uses media views, Pacific report bounds, and current fo
   assert.match(SHARED_META, /sourceMetric: 'page_total_media_view_unique'/)
   assert.match(SHARED_META, /sourceMetric: 'page_daily_follows'/)
   assert.match(SHARED_META, /sourceMetric: 'follows_and_unfollows'/)
-  assert.match(META_PERIOD, /META_INSIGHTS_TIMEZONE = 'America\/Los_Angeles'/)
-  assert.match(META_PERIOD, /metaInsightsBounds[\s\S]*zonedStartEpoch\(periodEnd, META_INSIGHTS_TIMEZONE\)/)
-  assert.match(META_PERIOD, /metaPostBounds[\s\S]*addUtcDays\(periodEnd, 1\)/)
+  assert.match(SHARED_META, /META_INSIGHTS_TIMEZONE = 'America\/Los_Angeles'/)
+  assert.match(SHARED_META, /metaInsightsBounds[\s\S]*zonedStartEpoch\(periodEnd, META_INSIGHTS_TIMEZONE\)/)
+  assert.match(SHARED_META, /metaPostBounds[\s\S]*addUtcDays\(periodEnd, 1\)/)
   assert.match(SHARED_META, /spec\.aggregation !== 'unique'/)
   assert.doesNotMatch(SHARED_META, /sourceMetric: 'page_impressions'/)
   assert.doesNotMatch(SHARED_META, /sourceMetric: 'page_impressions_unique'/)
@@ -491,26 +438,6 @@ test('Meta connection health uses live permissions, schema and verified insight 
   assert.match(META_INTEGRATION_PAGE, /OAuth permissions/)
   assert.match(META_INTEGRATION_PAGE, /Last verified insight/)
   assert.doesNotMatch(META_INTEGRATION_PAGE, /Confirm phase-4b SQL is applied/)
-})
-
-test('Meta token lifecycle is validated server-side without exposing credentials', () => {
-  assert.match(META_TOKEN_DIAGNOSTICS, /\/debug_token\?input_token=/)
-  assert.match(META_TOKEN_DIAGNOSTICS, /Authorization: `Bearer \$\{appToken\}`/)
-  assert.match(META_TOKEN_DIAGNOSTICS, /data_access_expires_at/)
-  assert.match(META_TOKEN_LIFECYCLE, /validation_state in \('valid', 'invalid', 'unverified'\)/)
-  assert.match(META_CONNECTION_STATUS, /validationAge >= 24 \* 60 \* 60 \* 1000/)
-  assert.match(META_CONNECTION_STATUS, /tokenExpired/)
-  assert.match(META_CONNECTION_STATUS, /dataAccessExpired/)
-  assert.match(META_CONNECTION_STATUS, /assetHealth/)
-  assert.doesNotMatch(META_INTEGRATION_PAGE, /encrypted_access_token/)
-  assert.match(META_INTEGRATION_PAGE, /Token validity/)
-  assert.match(META_INTEGRATION_PAGE, /Token\/data access expiry/)
-  assert.match(META_INTEGRATION_PAGE, /no durable checkpoint recorded/)
-  assert.match(META_INTEGRATION_PAGE, /refresh diagnostics unavailable/)
-  for (const source of META_MANAGER_FUNCTIONS) {
-    assert.match(source, /\['admin', 'manager'\]/)
-    assert.doesNotMatch(source, /\['admin', 'team'\]/)
-  }
 })
 
 test('rendered report includes methodology and curation controls without CG-generated wording', () => {

@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { ClientPortalShell } from '../../components/client/ClientPortalShell'
-import { ClientPortalErrorState, ClientPortalLoadingState } from '../../components/client/ClientPortalStates'
 import { useAuth } from '../../contexts/AuthContext'
 import {
   fetchClientMonthAhead,
@@ -37,11 +36,11 @@ function localDateKey(value: string): string {
   return `${year}-${month}-${day}`
 }
 
-export default function ClientContentCalendarPage({ embedded = false, month: controlledMonth }: { embedded?: boolean; month?: string }) {
+export default function ClientContentCalendarPage() {
   const { profile } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const requestedMonth = searchParams.get('month')
-  const month = controlledMonth ?? (requestedMonth && MONTH_PATTERN.test(requestedMonth) ? requestedMonth : currentMonth())
+  const month = requestedMonth && MONTH_PATTERN.test(requestedMonth) ? requestedMonth : currentMonth()
   const [client, setClient] = useState<Client | null>(null)
   const [calendar, setCalendar] = useState<ClientMonthAhead | null>(null)
   const [loading, setLoading] = useState(true)
@@ -77,24 +76,23 @@ export default function ClientContentCalendarPage({ embedded = false, month: con
   }, [month, profile?.client_id])
 
   function changeMonth(next: string) {
-    if (controlledMonth) return
     setSearchParams({ month: next })
   }
 
   const scheduledPosts = calendar?.posts.filter(post => post.date) ?? []
   const unscheduledPosts = calendar?.posts.filter(post => !post.date) ?? []
 
-  const content = (
-    <>
+  return (
+    <ClientPortalShell client={client}>
       <section className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-report-accent">Content planning</p>
-          <h2 className="mt-3 text-3xl font-black tracking-[-0.035em] text-white sm:text-5xl">Content calendar</h2>
+          <h1 className="mt-3 text-3xl font-semibold tracking-normal text-white sm:text-5xl">Content Calendar</h1>
           <p className="mt-4 text-base leading-7 text-report-muted">
             Upcoming deliverables and client-facing schedule details for {monthDisplayLabel(month)}.
           </p>
         </div>
-        {!embedded && <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => changeMonth(shiftMonth(month, -1))}
@@ -109,65 +107,35 @@ export default function ClientContentCalendarPage({ embedded = false, month: con
           >
             Next
           </button>
-        </div>}
+        </div>
       </section>
 
       {loading ? (
-        <ClientPortalLoadingState variant="calendar" />
+        <CalendarMessage message="Loading your content calendar..." />
       ) : calendar?.loadFailed ? (
-        <ClientPortalErrorState title="Content calendar could not be loaded" />
-      ) : calendar ? (
-        <CalendarSurface
-          key={month}
-          month={month}
-          calendar={calendar}
-          scheduledPosts={scheduledPosts}
-          unscheduledPosts={unscheduledPosts}
+        <CalendarMessage
+          tone="error"
+          message="Content calendar could not be loaded right now."
         />
+      ) : calendar && (calendar.posts.length > 0 || calendar.events.length > 0) ? (
+        <>
+          <CalendarSummary calendar={calendar} scheduledCount={scheduledPosts.length} />
+          <div className="mt-6 hidden lg:block">
+            <MonthGrid month={month} posts={scheduledPosts} events={calendar.events} />
+          </div>
+          <div className="mt-6 lg:hidden">
+            <Agenda month={month} posts={scheduledPosts} events={calendar.events} />
+          </div>
+          {unscheduledPosts.length > 0 && <Unscheduled posts={unscheduledPosts} />}
+        </>
       ) : (
-        <CalendarMessage message="Your content calendar is not available right now." />
+        <CalendarMessage message={`No client-facing schedule items are available for ${monthDisplayLabel(month)} yet.`} />
       )}
 
       <p className="mt-8 max-w-3xl text-xs leading-5 text-report-faint">
         Schedule details reflect the client-visible plan currently available in CG Dynamics and may be refined as production progresses.
       </p>
-    </>
-  )
-  return embedded ? content : <ClientPortalShell client={client}>{content}</ClientPortalShell>
-}
-
-function CalendarSurface({
-  month,
-  calendar,
-  scheduledPosts,
-  unscheduledPosts,
-}: {
-  month: string
-  calendar: ClientMonthAhead
-  scheduledPosts: ClientCalendarPost[]
-  unscheduledPosts: ClientCalendarPost[]
-}) {
-  const hasVisibleItems = calendar.posts.length > 0 || calendar.events.length > 0
-
-  return (
-    <>
-      {hasVisibleItems ? (
-        <CalendarSummary calendar={calendar} scheduledCount={scheduledPosts.length} />
-      ) : (
-        <div className="mt-8 flex flex-col gap-2 rounded-2xl border border-white/[0.08] bg-white/[0.035] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm font-semibold text-white">The month is ready for your plan.</p>
-          <p className="text-xs leading-5 text-report-muted">Posts, shoots, content runs and client events will appear on their dates as they are scheduled.</p>
-        </div>
-      )}
-
-      <div className="mt-6 hidden sm:block">
-        <MonthGrid month={month} posts={scheduledPosts} events={calendar.events} />
-      </div>
-      <div className="mt-6 sm:hidden">
-        <Agenda month={month} posts={scheduledPosts} events={calendar.events} />
-      </div>
-      {unscheduledPosts.length > 0 && <Unscheduled posts={unscheduledPosts} />}
-    </>
+    </ClientPortalShell>
   )
 }
 
@@ -212,7 +180,7 @@ function MonthGrid({
   const today = todayIso()
 
   return (
-    <section aria-label={`${monthDisplayLabel(month)} content calendar`} className="overflow-hidden rounded-3xl border border-white/[0.08] bg-black/20 shadow-[0_28px_80px_-50px_rgba(0,0,0,0.95)]">
+    <section className="overflow-hidden rounded-lg border border-white/[0.08] bg-black/20">
       <div className="grid grid-cols-7 border-b border-white/[0.08] bg-white/[0.025]">
         {CALENDAR_HEADERS.map(day => (
           <div key={day} className="px-3 py-3 text-center text-xs font-semibold uppercase tracking-[0.14em] text-report-faint">
@@ -228,7 +196,7 @@ function MonthGrid({
           return (
             <div
               key={cell.iso}
-              className={`min-h-36 border-b border-r border-white/[0.06] p-2.5 ${
+              className={`min-h-36 border-b border-r border-white/[0.06] p-2 ${
                 cell.outside ? 'bg-black/20 opacity-45' : isToday ? 'bg-white/[0.04]' : 'bg-white/[0.012]'
               }`}
             >
@@ -254,14 +222,12 @@ function Agenda({
   posts: ClientCalendarPost[]
   events: ClientCalendarEvent[]
 }) {
-  const [selectedDay, setSelectedDay] = useState<string | null>(null)
+const [selectedDay, setSelectedDay] = useState<string | null>(null)
   const cells = monthGridCells(month)
   const today = todayIso()
 
-  // Default to today when it is in the visible month, otherwise the first day
-  // of the selected month (not an adjacent-month padding cell).
-  const firstMonthDay = cells.find(cell => !cell.outside)?.iso ?? null
-  const day = selectedDay ?? (cells.some(cell => cell.iso === today && !cell.outside) ? today : firstMonthDay)
+  // Default to today when it is in the visible month, otherwise the first cell.
+  const day = selectedDay ?? (cells.some(cell => cell.iso === today) ? today : (cells[0]?.iso ?? null))
   const dayPosts = posts.filter(post => post.date === day)
   const dayEvents = events.filter(event => localDateKey(event.startAt) === day)
 
@@ -354,7 +320,7 @@ function EventChip({ event }: { event: ClientCalendarEvent }) {
   return event.guidelineKey ? (
     <Link
       className={className}
-      to={`/client/plan?tab=guidelines&month=${localDateKey(event.startAt).slice(0, 7)}&guide=${encodeURIComponent(event.guidelineKey)}`}
+      to={`/client/content-guides?month=${localDateKey(event.startAt).slice(0, 7)}&guide=${encodeURIComponent(event.guidelineKey)}`}
       aria-label={`Open Content Guideline for ${event.title}`}
     >
       {content}
@@ -366,16 +332,20 @@ function EventChip({ event }: { event: ClientCalendarEvent }) {
 
 function SummaryCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-white/[0.08] bg-[linear-gradient(145deg,rgba(255,255,255,0.05),rgba(45,212,191,0.025))] p-5 shadow-[0_18px_55px_-42px_rgba(0,0,0,0.95)]">
+    <div className="rounded-lg border border-white/[0.08] bg-white/[0.03] p-4">
       <p className="text-xs text-report-faint">{label}</p>
-      <p className="mt-2 text-3xl font-black tracking-[-0.04em] text-white">{value}</p>
+      <p className="mt-1 text-2xl font-semibold text-white">{value}</p>
     </div>
   )
 }
 
-function CalendarMessage({ message }: { message: string }) {
+function CalendarMessage({ message, tone = 'normal' }: { message: string; tone?: 'normal' | 'error' }) {
   return (
-    <div className="mt-8 rounded-3xl border border-white/[0.08] bg-white/[0.03] px-6 py-8 text-sm text-report-muted shadow-[0_24px_70px_-48px_rgba(0,0,0,0.95)]">
+    <div className={`mt-8 rounded-lg border px-5 py-6 text-sm ${
+      tone === 'error'
+        ? 'border-[#d8a07a]/20 bg-[#d8a07a]/[0.06] text-[#d8a07a]'
+        : 'border-white/[0.08] bg-white/[0.03] text-report-muted'
+    }`}>
       {message}
     </div>
   )

@@ -270,8 +270,8 @@ Deno.serve(async request => {
   let eventId: string
   let clientId: string
   let requestId: string
-  let providerName: string
-  let providerRouteId: string
+  let providerName = ''
+  let providerRouteId = ''
   let durationSeconds = 0
   let audio: File | null = null
   let jsonBody: Record<string, unknown> = {}

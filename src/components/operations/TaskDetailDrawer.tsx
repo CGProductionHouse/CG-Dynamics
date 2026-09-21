@@ -89,14 +89,10 @@ export function TaskDetailDrawer({ task, onClose, onSaved, clients, staffProfile
   const taskId = task?.id ?? null
   useEffect(() => {
     if (task) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setDraft(() => taskToDraft(task))
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setError(() => null)
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setShowCloseConfirm(() => false)
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setShowMobile(() => true)
+      setDraft(taskToDraft(task))
+      setError(null)
+      setShowCloseConfirm(false)
+      setShowMobile(true)
     }
   }, [taskId])
 

@@ -4,7 +4,6 @@ import { Pill } from '../../components/ui/Badges'
 import type { ClientOption } from '../../lib/commandCentre'
 import { listMonthlyDeliverablesByMonth, type MonthlyDeliverable } from '../../lib/planner'
 import type { ContentGuideIdea, ContentGuideInput, StaffProfileOption } from '../../lib/contentWorkflow'
-import { guidelineVideoName } from '../../lib/contentGuidelineNaming'
 import {
   VIDEO_STATUS_LABELS,
   buildCanonicalName,
@@ -44,13 +43,12 @@ export function CopyFolderButton({ name, size = 'sm' }: { name: string; size?: '
 }
 
 // A brief section that preserves line breaks and hides itself when empty.
-export function Section({ label, value, size = 'sm' }: { label: string; value: string | null; size?: 'sm' | 'md' }) {
+export function Section({ label, value }: { label: string; value: string | null }) {
   if (!value) return null
-  const textClass = size === 'md' ? 'text-base leading-relaxed' : 'text-sm leading-relaxed'
   return (
     <div>
       <p className={LABEL_CLS}>{label}</p>
-      <p className={`mt-1 whitespace-pre-wrap ${textClass} text-white/80`}>{value}</p>
+      <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-white/80">{value}</p>
     </div>
   )
 }
@@ -325,7 +323,7 @@ export function GuidelineBrief({
             {onEdit && <ActionButton size="sm" variant="secondary" onClick={onEdit}>Edit guideline</ActionButton>}
           </div>
         </div>
-        <h2 className="mt-3 break-words text-xl font-black text-white">{guidelineVideoName(idea.position ?? idea.video_number ?? 0, idea.title)}</h2>
+        <h2 className="mt-3 break-words text-xl font-black text-white">{idea.title}</h2>
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <Pill>{clientName(clients, idea.client_id)}</Pill>
           {idea.month && <Pill>{idea.month.slice(0, 7)}</Pill>}
@@ -393,7 +391,7 @@ export function GuidelineCard({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="break-all font-mono text-[11px] text-white/50">{idea.canonical_name ?? '(no canonical name)'}</p>
-          <p className="mt-0.5 break-words text-sm font-black text-white">{guidelineVideoName(idea.position ?? idea.video_number ?? 0, idea.title)}</p>
+          <p className="mt-0.5 break-words text-sm font-black text-white">{idea.title}</p>
           <p className="mt-1 text-xs text-white/45">{clientName(clients, idea.client_id)}{deliverableLabel ? ` · ${deliverableLabel}` : ''}</p>
         </div>
         <button type="button" onClick={() => setExpanded(prev => !prev)} className="shrink-0 rounded-lg border border-white/10 px-2 py-1 text-[11px] font-bold text-white/60 hover:text-white" aria-expanded={expanded}>
@@ -462,7 +460,7 @@ export function ShootMode({
   const idea = guidelines[Math.min(index, Math.max(0, total - 1))] ?? null
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-[#0b0b0b]" style={{ paddingTop: 'env(safe-area-inset-top, 0px)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+    <div className="fixed inset-0 z-50 flex flex-col bg-[#0b0b0b]">
       <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
         <div className="min-w-0">
           <p className="truncate text-sm font-black text-white">{runName}</p>
@@ -479,24 +477,21 @@ export function ShootMode({
                 <p className="break-all font-mono text-xs text-white/60">{idea.canonical_name ?? '—'}</p>
                 {idea.canonical_name && <CopyFolderButton name={idea.canonical_name} />}
               </div>
-              <h2 className="mt-2 break-words text-2xl font-black text-white">{guidelineVideoName(idea.position ?? idea.video_number ?? 0, idea.title)}</h2>
+              <h2 className="mt-2 break-words text-2xl font-black text-white">{idea.title}</h2>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 <Pill>{clientName(clients, idea.client_id)}</Pill>
                 <Pill tone={videoStatusTone(idea.production_status)}>{VIDEO_STATUS_LABELS[idea.production_status]}</Pill>
               </div>
             </div>
 
-            <Section label="People, products & props" value={idea.requirements} size="md" />
-            <Section label="Script / dialogue" value={idea.script} size="md" />
-            <Section label="Shot-by-shot breakdown" value={idea.shot_breakdown} size="md" />
-            <Section label="Hook / opening" value={idea.hook} size="md" />
-            <Section label="Visual / filming notes" value={idea.visual_notes} size="md" />
+            <Section label="People, products & props" value={idea.requirements} />
+            <Section label="Script / dialogue" value={idea.script} />
+            <Section label="Shot-by-shot breakdown" value={idea.shot_breakdown} />
+            <Section label="Hook / opening" value={idea.hook} />
+            <Section label="Visual / filming notes" value={idea.visual_notes} />
 
             {idea.production_status === 'not_shot' && (
               <ActionButton className="w-full" loading={marking} disabled={marking} onClick={() => onMarkShot(idea)}>Mark video shot</ActionButton>
-            )}
-            {idea.production_status === 'shot' && (
-              <div className="rounded-lg border border-emerald-300/25 bg-emerald-300/[0.07] px-4 py-3 text-center text-sm font-bold text-emerald-200">Video marked shot</div>
             )}
             {error && <p className="rounded-lg border border-red-400/25 bg-red-400/10 px-3 py-2 text-sm text-red-200">{error}</p>}
           </div>
@@ -507,19 +502,7 @@ export function ShootMode({
 
       <div className="flex items-center justify-between gap-3 border-t border-white/10 px-4 py-3">
         <ActionButton size="sm" variant="secondary" disabled={index <= 0} onClick={() => setIndex(prev => Math.max(0, prev - 1))}>← Previous</ActionButton>
-        <select
-          className="min-h-11 min-w-0 flex-1 rounded-lg border border-white/10 bg-transparent px-2 py-1 text-xs font-bold text-white/70"
-          value={Math.min(index, Math.max(0, total - 1))}
-          disabled={total === 0}
-          onChange={event => setIndex(Number(event.target.value))}
-          aria-label="Jump to video"
-        >
-          {guidelines.map((g, i) => (
-            <option key={g.id} value={i} className="bg-[#1a1a1a] text-white">
-              {i + 1}. {g.title}
-            </option>
-          ))}
-        </select>
+        <span className="text-xs font-bold text-white/50">{total === 0 ? '0 / 0' : `${Math.min(index + 1, total)} / ${total}`}</span>
         <ActionButton size="sm" variant="secondary" disabled={index >= total - 1} onClick={() => setIndex(prev => Math.min(total - 1, prev + 1))}>Next →</ActionButton>
       </div>
     </div>

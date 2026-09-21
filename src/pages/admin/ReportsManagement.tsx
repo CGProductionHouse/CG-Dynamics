@@ -105,7 +105,6 @@ export default function ReportsManagement() {
   const [searchParams] = useSearchParams()
   const { profile } = useAuth()
   const isAdmin = profile?.role === 'admin'
-  const canManageMonthlyStrategy = profile?.role === 'admin' || profile?.role === 'manager'
   const [clients, setClients] = useState<Client[]>([])
   const [reports, setReports] = useState<Report[]>([])
   const [loading, setLoading] = useState(true)
@@ -194,8 +193,7 @@ export default function ReportsManagement() {
   }
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    load()
+    void load()
   }, [])
 
   const statusCounts = useMemo(() => {
@@ -355,17 +353,8 @@ export default function ReportsManagement() {
         <div>
           <h1 className="text-2xl font-semibold text-white sm:text-3xl">Reports</h1>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {canManageMonthlyStrategy && (
-            <ActionButton
-              variant="secondary"
-              onClick={() => navigate(`/admin/monthly-strategy${clientFilter !== 'all' ? `?client=${clientFilter}` : ''}`)}
-            >
-              Monthly strategies
-            </ActionButton>
-          )}
-          {isAdmin && (
-            <>
+        {isAdmin && (
+          <div className="flex flex-wrap gap-2">
             <ActionButton
               variant="outline"
               onClick={() => navigate('/admin/integrations/meta')}
@@ -378,9 +367,8 @@ export default function ReportsManagement() {
             >
               New report
             </ActionButton>
-            </>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {error && (

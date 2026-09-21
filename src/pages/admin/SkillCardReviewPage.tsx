@@ -103,10 +103,7 @@ export default function SkillCardReviewPage() {
     setLoading(false)
   }, [])
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    load()
-  }, [load])
+  useEffect(() => { void load() }, [load])
 
   const summary = useMemo(() => summariseReadiness(rows), [rows])
   const filtered = useMemo(() => applyQueueFilters(rows, filters), [rows, filters])
@@ -126,14 +123,7 @@ export default function SkillCardReviewPage() {
     [filtered],
   )
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setNote(() => '')
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setEdits(() => ({}))
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setRouting(() => null)
-  }, [openId])
+  useEffect(() => { setNote(''); setEdits({}); setRouting(null) }, [openId])
 
   async function saveRouting() {
     if (!open || !routing || busy) return

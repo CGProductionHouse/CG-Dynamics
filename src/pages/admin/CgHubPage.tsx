@@ -2,7 +2,6 @@ import { useState, useEffect, useEffectEvent, useMemo } from 'react'
 import type { ReactNode, FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
-import { useMyDayShareActions } from '../../contexts/MyDayContextStore'
 import {
   listTasks,
   createTask,
@@ -95,7 +94,6 @@ function deliverableDate(d: MonthlyDeliverable) {
 
 export default function CgHubPage() {
   const { profile } = useAuth()
-  const myDayShare = useMyDayShareActions()
 
   const today = useMemo(() => todayStr(), [])
   const currentMonth = useMemo(() => businessMonthKey(), [])
@@ -118,9 +116,6 @@ export default function CgHubPage() {
   async function loadAll() {
     setLoadingData(true)
     setLoadErrors([])
-    // Tell the assistant composer this user's day is on its way, so it waits for
-    // it instead of running the same queries in parallel.
-    myDayShare.beginLoad(profile?.id ?? null)
     try {
       const [tasksRes, clientsRes, delRes, companyRes] = await Promise.all([
         listTasks({ activeOnly: true }),
@@ -149,9 +144,6 @@ export default function CgHubPage() {
       })
       setMyDayContext(myDay)
       setLoadingData(false)
-      // Same tick as the two updates above (React batches them); kept after
-      // setLoadingData so the core-work-first render order stays explicit.
-      myDayShare.publish(profile?.id ?? null, myDay)
       // Best-effort: Content Runs/videos are optional (phase-19d/19e). Never block
       // the Hub — but surface their errors instead of dropping them silently.
       const [runsRes, videosRes] = await Promise.all([listRuns(), listPipelineVideos()])
@@ -167,7 +159,6 @@ export default function CgHubPage() {
       setDeliverables([])
       setCompanyEvents([])
       setMyDayContext(null)
-      myDayShare.fail(profile?.id ?? null)
     } finally {
       setLoadingData(false)
     }

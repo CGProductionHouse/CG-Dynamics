@@ -26,18 +26,11 @@ export interface AiChatMessage {
   content: string
 }
 
-export interface AiGroundingSource {
-  title: string
-  uri: string
-}
-
 export interface AiRouterResult {
   content: string
   provider: AiProviderName
   model: string
   usageRequestId?: string
-  /** Web sources that grounded the answer. Present only for webSearch requests. */
-  groundingSources?: AiGroundingSource[]
 }
 
 export interface AiRouterOptions {
@@ -53,11 +46,6 @@ export interface AiRouterOptions {
   routeId?: string
   forceProbe?: boolean
   validateContent?: (content: string) => boolean | Promise<boolean>
-  /**
-   * Ground the answer in live Google Search results. Off by default. Only Gemini routes can
-   * serve it; when no Gemini route has a key the request fails like any unavailable provider.
-   */
-  webSearch?: boolean
   replayKind?: AiReplayKind
   buildReplayPayload?: (result: { content: string; provider: AiProviderName; model: string }) => Record<string, unknown>
 }
@@ -89,7 +77,6 @@ interface ProviderCallResult {
   inputTokens: number | null
   outputTokens: number | null
   httpStatus: number
-  groundingSources?: AiGroundingSource[]
 }
 
 class ProviderError extends Error {
@@ -231,21 +218,6 @@ function systemText(messages: AiChatMessage[]): string {
   return messages.filter(message => message.role === 'system').map(message => message.content).join('\n')
 }
 
-function geminiGroundingSources(data: unknown): AiGroundingSource[] {
-  const chunks = (data as {
-    candidates?: Array<{ groundingMetadata?: { groundingChunks?: Array<{ web?: { uri?: unknown; title?: unknown } }> } }>
-  })?.candidates?.[0]?.groundingMetadata?.groundingChunks ?? []
-  const seen = new Set<string>()
-  const sources: AiGroundingSource[] = []
-  for (const chunk of chunks) {
-    const uri = typeof chunk.web?.uri === 'string' ? chunk.web.uri : ''
-    if (!uri || seen.has(uri)) continue
-    seen.add(uri)
-    sources.push({ uri: uri.slice(0, 1000), title: typeof chunk.web?.title === 'string' ? chunk.web.title.slice(0, 300) : uri.slice(0, 300) })
-  }
-  return sources.slice(0, 20)
-}
-
 function parseGemini(data: unknown, requestedModel: string): Omit<ProviderCallResult, 'httpStatus'> {
   const body = data as {
     modelVersion?: unknown
@@ -288,7 +260,7 @@ async function callOpenAiCompatible(
   return { ...parseOpenAiCompatible(data), httpStatus: response.status }
 }
 
-async function callGemini(config: ProviderConfig, messages: AiChatMessage[], maxOutputTokens: number, webSearch = false): Promise<ProviderCallResult> {
+async function callGemini(config: ProviderConfig, messages: AiChatMessage[], maxOutputTokens: number): Promise<ProviderCallResult> {
   if (!config.apiKey) throw new ProviderError('PROVIDER_SECRET_MISSING', 'provider_error')
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(config.model)}:generateContent?key=${encodeURIComponent(config.apiKey)}`
   const response = await fetchWithTimeout(url, {
@@ -298,26 +270,21 @@ async function callGemini(config: ProviderConfig, messages: AiChatMessage[], max
       systemInstruction: { parts: [{ text: systemText(messages) }] },
       contents: geminiContents(messages),
       generationConfig: { temperature: 0.2, maxOutputTokens },
-      ...(webSearch ? { tools: [{ google_search: {} }] } : {}),
     }),
   })
   if (!response.ok) throw new ProviderError(safeHttpCode(response.status), 'http_error', response.status)
   let data: unknown
   try { data = await response.json() } catch { throw new ProviderError('PROVIDER_INVALID_RESPONSE', 'invalid_response', response.status) }
-  return {
-    ...parseGemini(data, config.model),
-    httpStatus: response.status,
-    ...(webSearch ? { groundingSources: geminiGroundingSources(data) } : {}),
-  }
+  return { ...parseGemini(data, config.model), httpStatus: response.status }
 }
 
-async function callProvider(config: ProviderConfig, messages: AiChatMessage[], maxOutputTokens: number, webSearch = false): Promise<ProviderCallResult> {
+async function callProvider(config: ProviderConfig, messages: AiChatMessage[], maxOutputTokens: number): Promise<ProviderCallResult> {
   if (config.name === 'openrouter') return callOpenAiCompatible(config, messages, 'https://openrouter.ai/api/v1/chat/completions', {
     'HTTP-Referer': 'https://cg-dynamics.vercel.app', 'X-Title': 'CG Dynamics',
   }, maxOutputTokens)
   if (config.name === 'groq') return callOpenAiCompatible(config, messages, 'https://api.groq.com/openai/v1/chat/completions', {}, maxOutputTokens)
   if (config.name === 'openai') return callOpenAiCompatible(config, messages, 'https://api.openai.com/v1/chat/completions', {}, maxOutputTokens)
-  return callGemini(config, messages, maxOutputTokens, webSearch)
+  return callGemini(config, messages, maxOutputTokens)
 }
 
 async function observeProviderHealth(
@@ -372,8 +339,6 @@ export async function routeAiChat(
   const routes = selectRoutes(await loadAiProviderRoutes(options.usageClient, 'text'), options.complexity)
     .filter(route => !options.provider || route.provider === options.provider)
     .filter(route => !options.routeId || route.id === options.routeId)
-    // Web-grounded requests can only be served by Gemini (Google Search grounding).
-    .filter(route => !options.webSearch || route.provider === 'gemini')
   const reservation = await reserveAiUsage(options.usageClient, {
     idempotencyKey: options.idempotencyKey,
     fingerprint: options.fingerprint,
@@ -424,7 +389,7 @@ export async function routeAiChat(
       unrecordedProviderAttempts += 1
       let result: ProviderCallResult
       try {
-        result = await callProvider(config, messages, maxOutputTokens, options.webSearch === true)
+        result = await callProvider(config, messages, maxOutputTokens)
       } catch (error) {
         const providerError = error instanceof ProviderError ? error : new ProviderError('PROVIDER_ERROR', 'provider_error')
         const latencyMs = Date.now() - callStarted
@@ -472,12 +437,7 @@ export async function routeAiChat(
       })
       unrecordedProviderAttempts -= 1
       await observeProviderHealth(options.usageClient, route, reservation.request_id, 'success', null, result.httpStatus, latencyMs)
-      const routed = {
-        content: result.content,
-        provider: config.name,
-        model: result.actualModel ?? config.model,
-        ...(result.groundingSources ? { groundingSources: result.groundingSources } : {}),
-      }
+      const routed = { content: result.content, provider: config.name, model: result.actualModel ?? config.model }
       const replayPayload = options.buildReplayPayload?.(routed) ?? routed
       await finalizeAiUsageWithReplay(options.usageClient, {
         requestId: reservation.request_id,

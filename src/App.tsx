@@ -1,4 +1,4 @@
-import { Suspense } from 'react'
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { useAuth } from './contexts/AuthContext'
@@ -6,65 +6,54 @@ import { RequireStaff } from './components/guards/RequireStaff'
 import { RequireAdmin } from './components/guards/RequireAdmin'
 import { RequireManager } from './components/guards/RequireManager'
 import { RequireClient } from './components/guards/RequireClient'
-import { ClientPortalLayout } from './components/client/ClientPortalLayout'
 import AdminLayout from './pages/admin/AdminLayout'
-import { RouteLoadBoundary } from './components/RouteLoadBoundary'
-import { lazyRoute } from './lib/lazyRoute'
 
-const LandingPage = lazyRoute(() => import('./pages/LandingPage'))
-const Login = lazyRoute(() => import('./pages/Login'))
-const Signup = lazyRoute(() => import('./pages/Signup'))
-const ForgotPassword = lazyRoute(() => import('./pages/ForgotPassword'))
-const ResetPassword = lazyRoute(() => import('./pages/ResetPassword'))
-const PrivacyPolicyPage = lazyRoute(() => import('./pages/LegalPage').then(module => ({ default: module.PrivacyPolicyPage })))
-const TermsOfServicePage = lazyRoute(() => import('./pages/LegalPage').then(module => ({ default: module.TermsOfServicePage })))
-const ClientPerformancePage = lazyRoute(() => import('./pages/admin/ClientPerformancePage'))
-const CgHubPage = lazyRoute(() => import('./pages/admin/CgHubPage'))
-const ClientsList = lazyRoute(() => import('./pages/admin/ClientsList'))
-const ImportMetaCsv = lazyRoute(() => import('./pages/admin/ImportMetaCsv'))
-const ImportsManagement = lazyRoute(() => import('./pages/admin/ImportsManagement'))
-const ImportHub = lazyRoute(() => import('./pages/admin/ImportHub'))
-const UsersHub = lazyRoute(() => import('./pages/admin/UsersHub'))
-const NewReport = lazyRoute(() => import('./pages/admin/NewReport'))
-const ReportsManagement = lazyRoute(() => import('./pages/admin/ReportsManagement'))
-const MonthlyStrategyPage = lazyRoute(() => import('./pages/admin/MonthlyStrategyPage'))
-const ManualMetricsAdmin = lazyRoute(() => import('./pages/admin/ManualMetricsAdmin'))
-const ContentReviewsPage = lazyRoute(() => import('./pages/admin/ContentReviewsPage'))
-const ContentOperationsPage = lazyRoute(() => import('./pages/admin/ContentOperationsPage'))
-const PublishedPreview = lazyRoute(() => import('./pages/admin/PublishedPreview'))
-const IntegrationsPage = lazyRoute(() => import('./pages/admin/IntegrationsPage'))
-const MetaIntegrationPage = lazyRoute(() => import('./pages/admin/MetaIntegrationPage'))
-const GoogleAdsIntegrationPage = lazyRoute(() => import('./pages/admin/GoogleAdsIntegrationPage'))
-const TikTokIntegrationPage = lazyRoute(() => import('./pages/admin/TikTokIntegrationPage'))
-const AssistantPage = lazyRoute(() => import('./pages/admin/AssistantPage'))
-const MyAssistantPage = lazyRoute(() => import('./pages/admin/MyAssistantPage'))
-const PackageMasterPage = lazyRoute(() => import('./pages/admin/PackageMasterPage'))
-const ClientSchedulePage = lazyRoute(() => import('./pages/admin/ClientSchedulePage'))
-const ClientContentCalendarPage = lazyRoute(() => import('./pages/admin/ClientContentCalendarPage'))
-const PlannerImportPage = lazyRoute(() => import('./pages/admin/PlannerImportPage'))
-const ImportHealthPage = lazyRoute(() => import('./pages/admin/ImportHealthPage'))
-const AiUsageHealthPage = lazyRoute(() => import('./pages/admin/AiUsageHealthPage'))
-const CompanyCalendarPage = lazyRoute(() => import('./pages/admin/CompanyCalendarPage'))
-const MicrosoftImportPage = lazyRoute(() => import('./pages/admin/MicrosoftImportPage'))
-const MarketingLibraryPage = lazyRoute(() => import('./pages/admin/MarketingLibraryPage'))
-const MarketingAiDepartmentPage = lazyRoute(() => import('./pages/admin/MarketingAiDepartmentPage'))
-const MarketingWorkspacePage = lazyRoute(() => import('./pages/admin/MarketingWorkspacePage'))
-const SystemHubPage = lazyRoute(() => import('./pages/admin/SystemHubPage'))
-const SkillCardReviewPage = lazyRoute(() => import('./pages/admin/SkillCardReviewPage'))
-const ContentWorkflowPage = lazyRoute(() => import('./pages/admin/ContentWorkflowPage'))
-const MyWorkPage = lazyRoute(() => import('./pages/admin/MyWorkPage'))
-const CommandCentrePage = lazyRoute(() => import('./pages/admin/CommandCentrePage'))
-const OpsHubPage = lazyRoute(() => import('./pages/admin/OpsHubPage'))
-const Dashboard = lazyRoute(() => import('./pages/client/Dashboard'))
-const ClientPortalHome = lazyRoute(() => import('./pages/client/ClientPortalHome'))
-const WelcomeToCgPage = lazyRoute(() => import('./features/client-onboarding/WelcomeToCgPage'))
-const ClientContentGuidesPage = lazyRoute(() => import('./pages/client/ClientContentGuidesPage'))
-const ClientPlanPage = lazyRoute(() => import('./pages/client/ClientPlanPage'))
-const ClientPlanLegacyRedirect = lazyRoute(() => import('./pages/client/ClientPlanPage').then(module => ({ default: module.ClientPlanLegacyRedirect })))
-const ClientCampaignsPage = lazyRoute(() => import('./pages/client/ClientCampaignsPage'))
-const ClientSetupPage = lazyRoute(() => import('./features/client-onboarding/ClientSetupPage'))
-const InternalOnboardingPage = lazyRoute(() => import('./features/client-onboarding/InternalOnboardingPage'))
-const OAuthConsentPage = lazyRoute(() => import('./pages/OAuthConsentPage'))
+const LandingPage = lazy(() => import('./pages/LandingPage'))
+const Login = lazy(() => import('./pages/Login'))
+const Signup = lazy(() => import('./pages/Signup'))
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
+const ResetPassword = lazy(() => import('./pages/ResetPassword'))
+const ClientPerformancePage = lazy(() => import('./pages/admin/ClientPerformancePage'))
+const CgHubPage = lazy(() => import('./pages/admin/CgHubPage'))
+const ClientsList = lazy(() => import('./pages/admin/ClientsList'))
+const ImportMetaCsv = lazy(() => import('./pages/admin/ImportMetaCsv'))
+const ImportsManagement = lazy(() => import('./pages/admin/ImportsManagement'))
+const ImportHub = lazy(() => import('./pages/admin/ImportHub'))
+const UsersHub = lazy(() => import('./pages/admin/UsersHub'))
+const NewReport = lazy(() => import('./pages/admin/NewReport'))
+const ReportsManagement = lazy(() => import('./pages/admin/ReportsManagement'))
+const ManualMetricsAdmin = lazy(() => import('./pages/admin/ManualMetricsAdmin'))
+const PublishedPreview = lazy(() => import('./pages/admin/PublishedPreview'))
+const IntegrationsPage = lazy(() => import('./pages/admin/IntegrationsPage'))
+const MetaIntegrationPage = lazy(() => import('./pages/admin/MetaIntegrationPage'))
+const GoogleAdsIntegrationPage = lazy(() => import('./pages/admin/GoogleAdsIntegrationPage'))
+const AssistantPage = lazy(() => import('./pages/admin/AssistantPage'))
+const PackageMasterPage = lazy(() => import('./pages/admin/PackageMasterPage'))
+const ClientSchedulePage = lazy(() => import('./pages/admin/ClientSchedulePage'))
+const ClientContentCalendarPage = lazy(() => import('./pages/admin/ClientContentCalendarPage'))
+const PlannerImportPage = lazy(() => import('./pages/admin/PlannerImportPage'))
+const ImportHealthPage = lazy(() => import('./pages/admin/ImportHealthPage'))
+const AiUsageHealthPage = lazy(() => import('./pages/admin/AiUsageHealthPage'))
+const CompanyCalendarPage = lazy(() => import('./pages/admin/CompanyCalendarPage'))
+const MicrosoftImportPage = lazy(() => import('./pages/admin/MicrosoftImportPage'))
+const MarketingLibraryPage = lazy(() => import('./pages/admin/MarketingLibraryPage'))
+const MarketingAiDepartmentPage = lazy(() => import('./pages/admin/MarketingAiDepartmentPage'))
+const MarketingWorkspacePage = lazy(() => import('./pages/admin/MarketingWorkspacePage'))
+const SystemHubPage = lazy(() => import('./pages/admin/SystemHubPage'))
+const SkillCardReviewPage = lazy(() => import('./pages/admin/SkillCardReviewPage'))
+const ContentWorkflowPage = lazy(() => import('./pages/admin/ContentWorkflowPage'))
+const MyWorkPage = lazy(() => import('./pages/admin/MyWorkPage'))
+const CommandCentrePage = lazy(() => import('./pages/admin/CommandCentrePage'))
+const OpsHubPage = lazy(() => import('./pages/admin/OpsHubPage'))
+const Dashboard = lazy(() => import('./pages/client/Dashboard'))
+const ClientPortalHome = lazy(() => import('./pages/client/ClientPortalHome'))
+const ClientCampaignsPage = lazy(() => import('./pages/client/ClientCampaignsPage'))
+const ClientPortalCalendarPage = lazy(() => import('./pages/client/ClientContentCalendarPage'))
+const ClientContentGuidesPage = lazy(() => import('./pages/client/ClientContentGuidesPage'))
+const ClientStrategyPage = lazy(() => import('./pages/client/ClientStrategyPage'))
+const WelcomeToCgPage = lazy(() => import('./features/client-onboarding/WelcomeToCgPage'))
+const ClientSetupPage = lazy(() => import('./features/client-onboarding/ClientSetupPage'))
+const InternalOnboardingPage = lazy(() => import('./features/client-onboarding/InternalOnboardingPage'))
 
 function HomeRedirect() {
   const { user, profile, profileError, loading, isPasswordRecovery } = useAuth()
@@ -92,22 +81,15 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <RouteLoadBoundary>
-          <Suspense fallback={<div className="min-h-screen bg-brand-bg" aria-label="Opening CG Dynamics" />}>
-            <Routes>
+        <Suspense fallback={<div className="min-h-screen bg-brand-bg" aria-label="Opening CG Dynamics" />}>
+          <Routes>
           <Route path="/" element={<HomeRedirect />} />
           <Route path="/landing" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-          <Route path="/terms-of-service" element={<TermsOfServicePage />} />
           <Route path="/welcome" element={<WelcomeToCgPage />} />
-          {/* Supabase OAuth 2.1 consent surface for the CG Dynamics ChatGPT connector.
-              Public auth route: no staff/client guard, but inside AuthProvider so it can
-              resolve the session and route to /login (preserving the request) when needed. */}
-          <Route path="/oauth/consent" element={<OAuthConsentPage />} />
 
           {/* Staff routes */}
           <Route element={<RequireStaff />}>
@@ -124,10 +106,8 @@ export default function App() {
               <Route path="/admin/planner" element={<Navigate to="/admin/work?tab=board" replace />} />
               <Route path="/admin/package-master" element={<PackageMasterPage />} />
               <Route path="/admin/client-schedule" element={<ClientSchedulePage />} />
-              <Route path="/admin/content-reviews" element={<ContentReviewsPage />} />
-              <Route path="/admin/content-ops" element={<ContentOperationsPage />} />
               <Route path="/admin/content" element={<ContentWorkflowPage defaultTab="overview" />} />
-              <Route path="/admin/content-workflow" element={<ContentWorkflowPage defaultTab="guidelines" />} />
+              <Route path="/admin/content-workflow" element={<ContentWorkflowPage defaultTab="library" />} />
               <Route path="/admin/full-content-guide" element={<ContentWorkflowPage defaultTab="guidelines" />} />
               <Route path="/admin/client-calendar" element={<ClientContentCalendarPage />} />
               <Route path="/admin/monthly-planner" element={<Navigate to="/admin/client-schedule?view=calendar" replace />} />
@@ -135,10 +115,8 @@ export default function App() {
               <Route path="/admin/clients" element={<ClientsList />} />
               <Route path="/admin/reports" element={<ReportsManagement />} />
               <Route path="/admin/assistant" element={<AssistantPage />} />
-              <Route path="/admin/my-assistant" element={<MyAssistantPage />} />
               <Route path="/admin/client-dashboard" element={<PublishedPreview />} />
               <Route path="/admin/published" element={<PublishedPreview />} />
-              <Route path="/admin/content-guide-preview" element={<ClientContentGuidesPage preview />} />
               <Route path="/admin/cg-calendar" element={<CompanyCalendarPage />} />
               <Route path="/admin/company-calendar" element={<Navigate to="/admin/cg-calendar" replace />} />
               {/* Marketing/Knowledge workspace — staff may search approved shared
@@ -158,11 +136,9 @@ export default function App() {
                 <Route path="/admin/integrations" element={<IntegrationsPage />} />
                 <Route path="/admin/integrations/meta" element={<MetaIntegrationPage />} />
                 <Route path="/admin/integrations/google-ads" element={<GoogleAdsIntegrationPage />} />
-                <Route path="/admin/integrations/tiktok" element={<TikTokIntegrationPage />} />
                 <Route path="/admin/import-csv" element={<ImportMetaCsv />} />
                 <Route path="/admin/reports/new" element={<NewReport />} />
                 <Route path="/admin/reports/:reportId/edit" element={<NewReport />} />
-                <Route path="/admin/monthly-strategy" element={<MonthlyStrategyPage />} />
                 <Route path="/admin/planner-import" element={<PlannerImportPage />} />
                 {/* Marketing AI is a manager-usable workspace: managers and
                     admins may run specialists against approved knowledge. Source
@@ -192,26 +168,18 @@ export default function App() {
 
           {/* Client routes */}
           <Route element={<RequireClient />}>
-            <Route element={<ClientPortalLayout />}>
-              <Route path="/client" element={<ClientPortalHome />} />
-              <Route path="/client/plan" element={<ClientPlanPage />} />
-              <Route path="/client/performance" element={<Dashboard />} />
-              <Route path="/client/approvals" element={<ContentReviewsPage clientView />} />
-              {/* Pass 1: /client/brand-hub renders existing Setup until Pass 4 refines */}
-              <Route path="/client/brand-hub" element={<ClientSetupPage />} />
-              {/* Pass 2 legacy deep links preserve query context inside the unified Plan. */}
-              <Route path="/client/strategy" element={<ClientPlanLegacyRedirect tab="strategy" />} />
-              <Route path="/client/content-calendar" element={<ClientPlanLegacyRedirect tab="calendar" />} />
-              <Route path="/client/content-guides" element={<ClientPlanLegacyRedirect tab="guidelines" />} />
-              <Route path="/client/campaigns" element={<ClientCampaignsPage />} />
-              <Route path="/client/setup" element={<ClientSetupPage />} />
-              <Route path="/dashboard" element={<Navigate to="/client" replace />} />
-            </Route>
+            <Route path="/client" element={<ClientPortalHome />} />
+            <Route path="/client/performance" element={<Dashboard />} />
+            <Route path="/client/campaigns" element={<ClientCampaignsPage />} />
+            <Route path="/client/content-calendar" element={<ClientPortalCalendarPage />} />
+            <Route path="/client/content-guides" element={<ClientContentGuidesPage />} />
+            <Route path="/client/strategy" element={<ClientStrategyPage />} />
+            <Route path="/client/setup" element={<ClientSetupPage />} />
+            <Route path="/dashboard" element={<Navigate to="/client" replace />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </Suspense>
-        </RouteLoadBoundary>
+          </Routes>
+        </Suspense>
       </AuthProvider>
     </BrowserRouter>
   )

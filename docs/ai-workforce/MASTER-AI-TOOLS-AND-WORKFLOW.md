@@ -9,8 +9,6 @@ This is the cross-project authority for AI tools, coding agents, shared capabili
 
 Project-specific product/design/business decisions still belong in each project's own `AGENTS.md`, continuity/decision docs, issues, PRs and codebase.
 
-For **CG Dynamics operations specifically**, fresh coordinators must also read `docs/ops/CG-DYNAMICS-OPS-HANDOVER.md`. That file defines the live Supervisor #381 + Google Control Centre operating system, current ownership/capacity reconciliation, protected gates and minimum fresh-chat recovery path.
-
 ## 1. Mandatory grounding rule
 
 Every new ChatGPT project/chat, Claude Code session, OpenCode session, Codex task, Antigravity session, Cline task, Roo Code task or other coding/research agent should ground itself in this order before proposing work:

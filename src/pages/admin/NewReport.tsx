@@ -273,8 +273,7 @@ export default function NewReport() {
   // match the report month and show what else is available.
   useEffect(() => {
     if (!clientId) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setManualMetrics(() => [])
+      setManualMetrics([])
       return
     }
     let active = true
@@ -391,7 +390,6 @@ export default function NewReport() {
     const fromReport = savedReportId
       ? reportPosts
           .filter(post => {
-            if (post.raw?.source === 'meta_sync' || post.raw?.meta_sync) return true
             if (!post.publish_time) return true
             const time = new Date(post.publish_time).getTime()
             if (Number.isNaN(time)) return true

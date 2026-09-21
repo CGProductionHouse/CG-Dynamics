@@ -189,21 +189,6 @@ knowledge, changes client records or spends advertising budget.
 | UPDATE | ✓ | ✗ |
 | DELETE | ✓ | ✗ |
 
-### monthly_client_strategies, monthly_client_strategy_revisions
-
-| Operation | Admin | Manager | Staff/Team | Client |
-|-----------|-------|---------|------------|--------|
-| Read canonical working strategy/revisions | ✓ | ✓ | ✓ | ✗ |
-| Seed/amend with exact client + month | ✓ | ✓ | ✓ | ✗ |
-| Approve/publish through guarded RPC | ✓ | ✓ | ✓ | ✗ |
-| Direct table writes | ✗ | ✗ | ✗ | ✗ |
-| Read exact own published safe projection | staff view | staff view | staff view | ✓ |
-
-Monthly strategy writes require an active effective staff actor, exact client UUID,
-first-of-month target, optimistic version and idempotency key. The client RPC returns
-only the caller's linked client's published safe snapshot; internal notes, seed context,
-actors, revision evidence and unpublished drafts are excluded.
-
 ## Package classification fields
 
 `package_action`, `quote_needed`, `admin_package_note`, `deliverable_id` on

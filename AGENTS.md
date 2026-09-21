@@ -6,32 +6,16 @@ Shared operating instructions for Codex, Claude Code, OpenCode and any other cod
 
 Before planning or editing code, read:
 
-1. `docs/ops/CG-DYNAMICS-OPS-HANDOVER.md` — canonical fresh-chat operational handover: Supervisor #381, Google Control Centre, ownership/capacity rules, model routing, protected gates and current ops snapshot.
-2. `docs/ai-workforce/MASTER-AI-TOOLS-AND-WORKFLOW.md` — cross-project AI tools, agent allocation, new-chat grounding, OpenCode state and reusable website workflow.
-3. `docs/ai-workforce/AUTONOMOUS-CODING-ORCHESTRATION.md` — canonical wake/supervise workflow, GitHub-as-control-plane rules, agent lanes, model fallback and CA-removal-from-dispatch strategy.
-4. `docs/ai-workforce/CA-CODING-PROMPT-CONTRACT.md` — mandatory short-prompt contract for any coding-agent prompt CA manually copies/runs.
-5. `CONTINUE-HERE.md`
-6. `docs/vision/PROJECT-CONTINUITY-HANDOFF-2026-08-13.md`
-7. `docs/cg-dynamics-page-vision-and-milestones.md`
-8. `docs/current-product-game-plan.md`
-9. `docs/vision/CURRENT-MILESTONE.md`
-10. `docs/ai-workforce/AI-TOOLING-MODEL-ROUTING.md` when changing detailed provider/model configuration
-11. the latest relevant open PRs/issues on GitHub
+1. `docs/ai-workforce/MASTER-AI-TOOLS-AND-WORKFLOW.md` — cross-project AI tools, agent allocation, new-chat grounding, OpenCode state and reusable website workflow.
+2. `CONTINUE-HERE.md`
+3. `docs/vision/PROJECT-CONTINUITY-HANDOFF-2026-08-13.md`
+4. `docs/cg-dynamics-page-vision-and-milestones.md`
+5. `docs/current-product-game-plan.md`
+6. `docs/vision/CURRENT-MILESTONE.md`
+7. `docs/ai-workforce/AI-TOOLING-MODEL-ROUTING.md` when changing detailed provider/model configuration
+8. the latest relevant open PRs/issues on GitHub
 
-The ops handover is the first-stop authority for recovering current CG Dynamics coordination state in a fresh chat. The master AI/tools file is cross-project authority for shared capability/process. The autonomous orchestration file is the current authority for how coding workers are woken, supervised, handed off and prevented from duplicating one another. The CA coding-prompt contract is mandatory whenever ChatGPT or another coordinator prepares a prompt CA will manually send to a coding agent. Project-specific continuity files remain authority for CG Dynamics product decisions. The 2026-08-13 handoff is current. Older handoffs are historical only. Page contracts override generic product ideas.
-
-## Continuity write-back obligation
-
-Any coordinator or coding supervisor that materially changes CG Dynamics operating state must maintain `docs/ops/CG-DYNAMICS-OPS-HANDOVER.md` as part of the same handoff.
-
-Do not treat the handover as read-only documentation. When ownership, lane status, production state, protected gates, model routing, or durable operating rules materially change:
-
-1. update the owning issue/PR;
-2. update #381 when cross-lane state changed;
-3. update the Google Control Centre;
-4. update the ops handover if its current snapshot/rules changed.
-
-Before a chat/session is handed off or becomes context-heavy, reconcile the handover against current GitHub + #381 + tracker so the next chat can continue without CA repeating history.
+The master AI/tools file is cross-project authority for shared capability/process. Project-specific continuity files remain authority for CG Dynamics product decisions. The 2026-08-13 handoff is current. Older handoffs are historical only. Page contracts override generic product ideas.
 
 ## Product direction
 
@@ -92,20 +76,17 @@ Do NOT:
 
 ## Agent allocation
 
-CA's preferred workflow is defined cross-project in `docs/ai-workforce/MASTER-AI-TOOLS-AND-WORKFLOW.md`; autonomous dispatch/supervision is defined in `docs/ai-workforce/AUTONOMOUS-CODING-ORCHESTRATION.md`; prompts CA manually sends must follow `docs/ai-workforce/CA-CODING-PROMPT-CONTRACT.md`.
+CA's preferred workflow is defined cross-project in `docs/ai-workforce/MASTER-AI-TOOLS-AND-WORKFLOW.md`.
 
 In short:
 
 - Claude Code handles large architecture/substantial implementation; do not micromanage it file-by-file.
-- OpenCode handles bounded isolated fixes and now also has GitHub-scheduled/on-demand autonomous worker lanes; it is provider/model-routed, not permanently tied to one model.
-- ChatGPT coordinates product direction, GitHub continuity, worker dispatch/supervision, prompts and review.
-- Codex is used for focused coding/review when useful and available; use thread wake/automation where available rather than relying on CA to type `continue`.
-- Crestodian remains an orchestration/watchdog lane and must not duplicate already-owned broad missions.
+- OpenCode handles bounded isolated fixes and is provider/model-routed, not permanently tied to one DeepSeek model.
+- ChatGPT coordinates product direction, GitHub continuity, prompts and review.
+- Codex is used for focused coding/review when useful and available.
 - Cline/Roo Code are fallback execution paths, not separate product brains.
 - Do not launch overlapping broad missions.
 - Review actual GitHub output before merge advice.
-- Prefer GitHub-first handoffs so a new chat/agent can continue without private conversational history.
-- If repository authority already contains the context, do not repeat it in a CA manual prompt. Normal CA manual prompts should be tiny and point the agent to GitHub authority.
 
 External coding-agent/model routing is **not** the same thing as CG Dynamics runtime AI. Never redesign product AI because a desktop coding model is capped, retired or unavailable.
 
@@ -115,16 +96,7 @@ External coding-agent/model routing is **not** the same thing as CG Dynamics run
 - A migration file on `main` does not prove production application.
 - Never expose/commit privileged secrets.
 - Never guess a `client_id` UUID.
-- Microsoft/Outlook is read-only upstream **except** for the narrow #325 coexistence
-  exception: the exact operational task/meeting a staff member explicitly asked the Staff
-  Assistant to create/update/reschedule/complete/cancel, plus its exact linked counterpart,
-  matched by durable IDs. Nothing else. Do not build a broad write-back engine.
-- During coexistence (#325) CG Dynamics is **not** a fallback-only source. Every normal
-  Staff Assistant daily update cross-references BOTH live Microsoft and CG Dynamics.
-  Teams/Planner and Outlook are the freshness authority for Microsoft-backed records;
-  Dynamics-only work is legitimate and must still appear. The canonical runtime policy is
-  returned by `get_my_assistant_bootstrap` (see `supabase/functions/cg-dynamics-mcp/coexistencePolicy.ts`)
-  and overrides stale ChatGPT Project Instruction wording.
+- Microsoft/Outlook remains read-only upstream unless explicitly redesigned later.
 
 Pending production migration order:
 
@@ -153,13 +125,11 @@ Do not apply either without approval. Do not replay obsolete client-portal phase
 ## AI tooling / provider continuity
 
 - Cross-project master authority: `docs/ai-workforce/MASTER-AI-TOOLS-AND-WORKFLOW.md`.
-- Autonomous dispatch/supervision authority: `docs/ai-workforce/AUTONOMOUS-CODING-ORCHESTRATION.md`.
-- CA manual prompt authority: `docs/ai-workforce/CA-CODING-PROMPT-CONTRACT.md`.
 - Detailed provider/model appendix: `docs/ai-workforce/AI-TOOLING-MODEL-ROUTING.md`.
 - Do not use a global OpenCode provider allowlist that accidentally hides connected providers without first verifying the intended effect.
 - Keep CA's proven working models available; distinguish a dead provider endpoint from a similarly named working Zen model.
 - Never commit OpenRouter, Google, OpenAI, Anthropic or OpenCode auth secrets.
-- If the external agent/provider/model stack materially changes, update the master/orchestration files in the same work.
+- If the external agent/provider/model stack materially changes, update the master file in the same work.
 
 ## Client research
 

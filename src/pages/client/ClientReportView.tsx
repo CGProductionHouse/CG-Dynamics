@@ -7,7 +7,6 @@ import BrandMark from '../../components/BrandMark'
 import { ClientLogo } from '../../components/ClientLogo'
 import { readStrategyData } from '../../lib/strategyEngine'
 import { getReportMonthFromPeriod, monthDisplayLabel, normalizeReportToCalendarMonth, previousReportMonth } from '../../lib/reportPeriod'
-import { isWithinMetaProviderPeriod } from '../../../supabase/functions/_shared/metaPeriod'
 import type { MasterReportData, MetricMovement, Platform, PlatformView, ReportStatsPost } from '../../lib/reportStats'
 import {
   PLATFORM_LABELS,
@@ -38,8 +37,9 @@ import {
   type TopContent,
 } from '../../lib/reportPerformance'
 import {
-  GoogleAdsResults,
-} from '../../components/client/GoogleAdsResults'
+  formatGoogleAdsCurrencyValue,
+  formatGoogleAdsMoney,
+} from '../../lib/googleAds'
 import {
   buildOverviewSections,
   type OverviewSection as VerifiedSection,
@@ -47,14 +47,13 @@ import {
   type PlatformFact,
 } from '../../lib/overviewModel'
 import type { ReportContentExclusion, ReportFactHealth } from '../../lib/db/reportingTruth'
-import type { GoogleAdsDashboardData, GoogleAdsDashboardState } from '../../lib/googleAdsDashboard'
 import {
-  PerformanceProviderIcon,
-  type PerformanceProviderIconKey,
-} from '../../components/client/PerformanceProviderIcon'
+  googleAdsCampaignPeriodLabel,
+  type GoogleAdsDashboardData,
+  type GoogleAdsDashboardState,
+} from '../../lib/googleAdsDashboard'
 
-export type ReportTabKey = 'overview' | 'facebook' | 'instagram' | 'google' | 'tiktok' | 'linkedin' | 'web' | 'email'
-export type GoogleSurface = 'ads' | 'business'
+type TabKey = 'overview' | Platform | 'google_ads'
 
 const LOGO_FRAME = 'border border-white/10 bg-[#06110f] shadow-[0_18px_35px_-24px_rgba(45,212,191,0.7)]'
 
@@ -63,16 +62,14 @@ type RenderableReport = ReportWithPosts | ClientReportWithPosts
 function postsForReportMonth(report: RenderableReport): ReportStatsPost[] {
   const { start, end } = normalizeReportToCalendarMonth(report)
   const startTime = new Date(`${start}T00:00:00Z`).getTime()
-  const endTime = new Date(`${end}T23:59:59.999Z`).getTime()
+  const endTime = new Date(`${end}T23:59:59Z`).getTime()
 
   return report.posts
     .filter(post => {
       if (!post.publish_time) return true
-      if (post.platform === 'facebook' || post.platform === 'instagram') {
-        return isWithinMetaProviderPeriod(post.publish_time, start, end)
-      }
       const time = new Date(post.publish_time).getTime()
-      return Number.isNaN(time) || (time >= startTime && time <= endTime)
+      if (Number.isNaN(time)) return true
+      return time >= startTime && time <= endTime
     })
     .map(reportPostToStatsPost)
 }
@@ -88,6 +85,7 @@ export function ClientReportView({
   client = null,
   manualMetrics = [],
   googleAds,
+  previousGoogleAds,
   googleAdsState,
   googleAdsError,
   showEmptyStrategy = false,
@@ -99,10 +97,6 @@ export function ClientReportView({
   contentExclusions = [],
   onSetContentExcluded,
   curationBusyId = null,
-  initialTab = 'overview',
-  onTabChange,
-  initialGoogleSurface = 'ads',
-  onGoogleSurfaceChange,
 }: {
   report: RenderableReport
   client?: Client | null
@@ -110,6 +104,7 @@ export function ClientReportView({
   previousReport?: RenderableReport | null
   previousManualMetrics?: ReportManualMetric[]
   googleAds: GoogleAdsDashboardData | null
+  previousGoogleAds: GoogleAdsDashboardData | null
   googleAdsState: GoogleAdsDashboardState
   googleAdsError: string | null
   showEmptyStrategy?: boolean
@@ -128,15 +123,8 @@ export function ClientReportView({
   /** Staff-only explicit curation action. Omitted on client routes. */
   onSetContentExcluded?: (post: ReportStatsPost, excluded: boolean) => void | Promise<void>
   curationBusyId?: string | null
-  initialTab?: ReportTabKey
-  onTabChange?: (tab: ReportTabKey) => void
-  initialGoogleSurface?: GoogleSurface
-  onGoogleSurfaceChange?: (surface: GoogleSurface) => void
 }) {
-  const [localTab, setLocalTab] = useState<ReportTabKey>('overview')
-  const tab = onTabChange ? initialTab : localTab
-  const [localGoogleSurface, setLocalGoogleSurface] = useState<GoogleSurface>('ads')
-  const googleSurface = onGoogleSurfaceChange ? initialGoogleSurface : localGoogleSurface
+  const [tab, setTab] = useState<TabKey>('overview')
 
   // Verified, availability-aware Overview sections built ONLY from normalized
   // facts. Per-platform (no cross-platform unique summing); the comparability
@@ -155,7 +143,7 @@ export function ClientReportView({
       }
     })
     return new Set(keys)
-  }, [contentExclusions, report.posts])
+  }, [contentExclusions, report.posts, statsPosts])
   const master = useMemo(
     () => buildMasterReport(statsPosts, manualMetrics, excludedContentKeys),
     [excludedContentKeys, manualMetrics, statsPosts],
@@ -168,29 +156,14 @@ export function ClientReportView({
       .map(fact => fact.platform)
       .filter((platform): platform is Platform => platform === 'facebook' || platform === 'instagram'),
   ]))
-  const hasMeta = availablePlatforms.some(view => view.platform === 'facebook' || view.platform === 'instagram')
-    || facts.some(fact => fact.platform === 'facebook' || fact.platform === 'instagram')
+  const hasMeta = availablePlatforms.length > 0 || facts.some(fact => fact.platform === 'facebook' || fact.platform === 'instagram')
   const hasGoogleAds = googleAds !== null || googleAdsState !== 'disconnected'
   const hasGoogleAdsSource = googleAdsState === 'data' || googleAdsState === 'no-activity'
-  const tabs: { key: ReportTabKey; label: string; icon: PerformanceProviderIconKey }[] = [
-    { key: 'overview', label: 'Overview', icon: 'overview' },
-    { key: 'facebook', label: 'Facebook', icon: 'facebook' },
-    { key: 'instagram', label: 'Instagram', icon: 'instagram' },
-    { key: 'google', label: 'Google', icon: 'google' },
-    { key: 'tiktok', label: 'TikTok', icon: 'tiktok' },
-    { key: 'linkedin', label: 'LinkedIn', icon: 'linkedin' },
-    { key: 'web', label: 'Website Performance', icon: 'web' },
-    { key: 'email', label: 'Email Marketing', icon: 'email' },
+  const tabs: { key: TabKey; label: string }[] = [
+    { key: 'overview', label: 'Overview' },
+    ...reportPlatforms.map(platform => ({ key: platform as TabKey, label: PLATFORM_LABELS[platform] })),
+    ...(hasGoogleAds ? [{ key: 'google_ads' as const, label: 'Google Ads' }] : []),
   ]
-  const activeTab = tabs.some(item => item.key === tab) ? tab : 'overview'
-  const selectTab = (nextTab: ReportTabKey) => {
-    if (onTabChange) onTabChange(nextTab)
-    else setLocalTab(nextTab)
-  }
-  const selectGoogleSurface = (surface: GoogleSurface) => {
-    if (onGoogleSurfaceChange) onGoogleSurfaceChange(surface)
-    else setLocalGoogleSurface(surface)
-  }
 
   const month = monthDisplayLabel(getReportMonthFromPeriod(report))
   const previousMonthLabel = useMemo(() => {
@@ -224,10 +197,10 @@ export function ClientReportView({
       </p>
 
       {tabs.length > 1 && (
-        <ReportTabs tabs={tabs} active={activeTab} onChange={selectTab} />
+        <ReportTabs tabs={tabs} active={tab} onChange={setTab} />
       )}
 
-      {activeTab === 'overview' ? (
+      {tab === 'overview' ? (
         <OverviewTab
           report={report}
           master={master}
@@ -236,6 +209,7 @@ export function ClientReportView({
           nextSteps={performance.nextSteps}
           showAdminDiagnostics={showAdminDiagnostics}
           googleAds={googleAds}
+          previousGoogleAds={previousGoogleAds}
           googleAdsState={googleAdsState}
           googleAdsError={googleAdsError}
           verifiedSections={verifiedSections}
@@ -246,52 +220,23 @@ export function ClientReportView({
           onSetContentExcluded={onSetContentExcluded}
           curationBusyId={curationBusyId}
         />
-      ) : activeTab === 'google' ? (
-        <GooglePerformanceTab
-          report={report}
-          month={month}
+      ) : tab === 'google_ads' ? (
+        <GoogleAdsTab
           googleAds={googleAds}
+          previousGoogleAds={previousGoogleAds}
           state={googleAdsState}
           error={googleAdsError}
-          hasGoogleAds={hasGoogleAds}
-          surface={googleSurface}
-          onSurfaceChange={selectGoogleSurface}
         />
-      ) : activeTab === 'web' ? (
-        <PublishedWebsitePerformance report={report.website_report ?? null} />
-      ) : activeTab === 'email' ? (
-        <ProviderAvailabilityPanel
-          eyebrow="Owned audience"
-          title="Email Marketing"
-          status="Coming soon"
-          description="Email Marketing performance will appear here when the client reporting lane is available and connected."
-        />
-      ) : activeTab === 'linkedin' ? (
-        <ProviderAvailabilityPanel
-          eyebrow="Professional audience"
-          title="LinkedIn"
-          status="Coming soon"
-          description="LinkedIn performance is not yet available in the client portal. No figures are inferred or shown as zero."
-        />
-      ) : reportPlatforms.includes(activeTab as Platform) ? (
+      ) : (
         <PlatformTab
-          view={master.platforms.find(item => item.platform === activeTab)!}
+          view={master.platforms.find(item => item.platform === tab)!}
           previousView={null}
           previousManual={null}
           previousMonthLabel={previousMonthLabel}
           monthLabel={month}
-          facts={facts.filter(fact => fact.platform === activeTab)}
-          previousFacts={previousFacts.filter(fact => fact.platform === activeTab)}
+          facts={facts.filter(fact => fact.platform === tab)}
+          previousFacts={previousFacts.filter(fact => fact.platform === tab)}
           normalizedFactsActive={normalizedFactsActive}
-        />
-      ) : (
-        <ProviderAvailabilityPanel
-          eyebrow="Platform performance"
-          title={activeTab === 'facebook' ? 'Facebook' : activeTab === 'instagram' ? 'Instagram' : 'TikTok'}
-          status={activeTab === 'tiktok' ? 'Coming soon' : 'Not connected'}
-          description={activeTab === 'tiktok'
-            ? 'TikTok performance is not yet available in the client portal. No figures are inferred or shown as zero.'
-            : `No verified ${activeTab === 'facebook' ? 'Facebook' : 'Instagram'} reporting source is connected for this published month.`}
         />
       )}
 
@@ -307,70 +252,6 @@ export function ClientReportView({
       <MethodologyDisclaimer />
     </div>
   )
-}
-
-function PublishedWebsitePerformance({ report }: { report: RenderableReport['website_report'] }) {
-  if (!report) {
-    return <ProviderAvailabilityPanel
-      eyebrow="Digital experience"
-      title="Website Performance"
-      status="Not connected"
-      description="No approved website snapshot was published with this monthly report. No figures are inferred or shown as zero."
-    />
-  }
-
-  const stale = report.dataQuality.sourceReadAt
-    ? new Date(report.dataQuality.sourceReadAt).getTime() < new Date(`${report.period.to}T00:00:00Z`).getTime()
-    : true
-  const state = stale ? 'stale' : report.dataQuality.state
-  const stateLabel = state === 'available' ? 'Available' : state === 'partial' ? 'Partial period' : 'Stale snapshot'
-
-  return (
-    <section aria-label="Published website performance">
-      <SectionHeading eyebrow="Digital experience" title="Website Performance" />
-      <div className="mb-6 rounded-2xl border border-white/10 bg-white/[0.045] p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm font-bold text-white">{report.identity.canonicalHost}</p>
-          <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-semibold text-slate-300">{stateLabel}</span>
-        </div>
-        <p className="mt-2 text-xs text-slate-400">
-          Coverage: {formatDate(report.period.from)} to {formatDate(report.period.to)} · {report.period.timezone}
-        </p>
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <WebsiteMetric title="Visitors" value={report.traffic.visitors} />
-        <WebsiteMetric title="Page views" value={report.traffic.pageviews} />
-        <WebsiteMetric title="Actions" value={report.conversions.total} />
-        <WebsiteMetric
-          title="Enquiries"
-          value={report.conversions.byType.find(item => item.type === 'enquiry_submit')?.count ?? (report.conversions.total === null ? null : 0)}
-        />
-      </div>
-      <div className="mt-8 grid gap-6 lg:grid-cols-2">
-        <WebsiteBreakdown title="Top pages" rows={report.traffic.topPages.map(item => [item.label, item.pageviews])} />
-        <WebsiteBreakdown title="Traffic sources" rows={report.traffic.sources.map(item => [item.label, item.visitors])} />
-      </div>
-      {report.dataQuality.gaps.length > 0 && (
-        <p className="mt-7 text-sm leading-relaxed text-slate-400">Measurement notes: {report.dataQuality.gaps.join(' ')}</p>
-      )}
-    </section>
-  )
-}
-
-function WebsiteMetric({ title, value }: { title: string; value: number | null }) {
-  return <div className="rounded-2xl border border-white/10 bg-white/[0.045] p-5">
-    <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">{title}</p>
-    <p className="mt-3 text-3xl font-black text-white">{value === null ? 'Unavailable' : formatNumber(value)}</p>
-  </div>
-}
-
-function WebsiteBreakdown({ title, rows }: { title: string; rows: [string, number][] }) {
-  return <div>
-    <h3 className="text-sm font-bold text-white">{title}</h3>
-    {rows.length ? <ul className="mt-3 space-y-2 text-sm text-slate-300">
-      {rows.slice(0, 8).map(([name, value]) => <li key={name} className="flex justify-between gap-4"><span className="truncate">{name}</span><span className="font-semibold text-white">{formatNumber(value)}</span></li>)}
-    </ul> : <p className="mt-3 text-sm text-slate-500">No tracked data for this period.</p>}
-  </div>
 }
 
 function ReportHero({
@@ -449,33 +330,26 @@ function ReportTabs({
   active,
   onChange,
 }: {
-  tabs: { key: ReportTabKey; label: string; icon: PerformanceProviderIconKey }[]
-  active: ReportTabKey
-  onChange: (tab: ReportTabKey) => void
+  tabs: { key: TabKey; label: string }[]
+  active: TabKey
+  onChange: (tab: TabKey) => void
 }) {
   return (
-    <div role="tablist" aria-label="Performance services" className="mx-auto mb-10 flex w-fit max-w-full flex-wrap justify-center gap-1.5 rounded-[1.5rem] border border-white/10 bg-black/20 p-1.5 shadow-[0_24px_60px_-42px_rgba(0,0,0,0.95)] backdrop-blur">
+    <div className="mb-10 flex w-fit flex-wrap gap-1 rounded-full border border-white/10 bg-white/[0.04] p-1">
       {tabs.map(item => {
         const isActive = active === item.key
         return (
           <button
             key={item.key}
             type="button"
-            role="tab"
-            aria-selected={isActive}
-            aria-label={item.label}
-            title={item.label}
             onClick={() => onChange(item.key)}
-            className={`group relative flex h-11 w-11 items-center justify-center rounded-2xl border transition sm:h-12 sm:w-12 ${
+            className={`rounded-full px-5 py-2 text-sm font-bold transition ${
               isActive
-                ? 'border-[#2dd4bf]/55 bg-[linear-gradient(145deg,rgba(45,212,191,0.22),rgba(255,255,255,0.12))] text-white shadow-[0_14px_30px_-16px_rgba(45,212,191,0.9)]'
-                : 'border-transparent text-slate-400 hover:border-white/10 hover:bg-white/[0.06] hover:text-white'
+                ? 'bg-white text-[#06110f] shadow-lg'
+                : 'text-slate-400 hover:bg-white/[0.06] hover:text-white'
             }`}
           >
-            <PerformanceProviderIcon provider={item.icon} />
-            <span className="pointer-events-none absolute left-1/2 top-[calc(100%+0.45rem)] z-20 hidden -translate-x-1/2 whitespace-nowrap rounded-lg border border-white/10 bg-[#07110f] px-2.5 py-1.5 text-[0.68rem] font-bold text-white shadow-xl group-hover:block group-focus-visible:block">
-              {item.label}
-            </span>
+            {item.label}
           </button>
         )
       })}
@@ -491,6 +365,7 @@ function OverviewTab({
   nextSteps,
   showAdminDiagnostics,
   googleAds,
+  previousGoogleAds,
   googleAdsState,
   googleAdsError,
   verifiedSections,
@@ -508,6 +383,7 @@ function OverviewTab({
   nextSteps: NextStep[]
   showAdminDiagnostics: boolean
   googleAds: GoogleAdsDashboardData | null
+  previousGoogleAds: GoogleAdsDashboardData | null
   googleAdsState: GoogleAdsDashboardState
   googleAdsError: string | null
   verifiedSections: VerifiedSection[]
@@ -520,7 +396,7 @@ function OverviewTab({
 }) {
   const strategy = readStrategyData(report.strategy_data)
   const platformsWithData = master.platforms.filter(view => view.source !== 'none')
-  const hasGoogleAdsSection = googleAds !== null || googleAdsState !== 'disconnected'
+  const hasGoogleAdsSection = googleAds !== null || String(googleAdsState) !== 'idle'
   const hasVerified = verifiedSections.length > 0
   const hasData = normalizedFactsActive || platformsWithData.length > 0 || performance.metrics.length > 0 || hasGoogleAdsSection
 
@@ -594,6 +470,7 @@ function OverviewTab({
       {hasGoogleAdsSection && (
         <GoogleAdsOverview
           googleAds={googleAds}
+          previousGoogleAds={previousGoogleAds}
           state={googleAdsState}
           error={googleAdsError}
         />
@@ -644,15 +521,13 @@ function VerifiedFactsUnavailable() {
 
 // ── Verified Overview (facts-driven, per-platform, comparability-gated) ───────
 function VerifiedOverview({ sections }: { sections: VerifiedSection[]; monthLabel: string }) {
-  const lines = sections.flatMap(section => section.lines)
-  const platforms = [...new Set(lines.map(line => line.platform))]
   return (
     <div className="mb-14 space-y-10">
-      {platforms.map(platform => (
-        <section key={platform}>
-          <SectionHeading eyebrow="Meta insights" title={platform === 'facebook' ? 'Facebook' : 'Instagram'} />
+      {sections.map(section => (
+        <section key={section.key}>
+          <SectionHeading eyebrow="Verified performance" title={section.title} />
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {lines.filter(line => line.platform === platform).map(line => (
+            {section.lines.map(line => (
               <VerifiedMetricCard key={`${line.platform}:${line.metricKey}`} line={line} />
             ))}
           </div>
@@ -669,13 +544,6 @@ function VerifiedOverview({ sections }: { sections: VerifiedSection[]; monthLabe
 
 function VerifiedMetricCard({ line }: { line: VerifiedLine }) {
   const showMovement = line.comparable && typeof line.changePercent === 'number'
-  const unavailableMessage = line.availability === 'unavailable'
-    ? 'Unavailable from the connected Meta source'
-    : line.availability === 'permission_blocked'
-      ? 'Unavailable with the current Meta permissions'
-      : line.availability === 'error' || line.availability === 'stale'
-        ? 'Not currently verified from Meta'
-        : null
   const up = (line.changePercent ?? 0) > 0
   const down = (line.changePercent ?? 0) < 0
   return (
@@ -691,9 +559,7 @@ function VerifiedMetricCard({ line }: { line: VerifiedLine }) {
         {line.availability === 'partial' && !line.reconstructed && (
           <span className="rounded-full bg-amber-400/10 px-2 py-0.5 text-amber-200">Partial platform coverage</span>
         )}
-        {unavailableMessage ? (
-          <span className="text-slate-500">{unavailableMessage}</span>
-        ) : line.isSnapshot ? (
+        {line.isSnapshot ? (
           <span className="text-slate-500">Current followers snapshot at the latest sync</span>
         ) : showMovement ? (
           <span className={up ? 'text-emerald-300' : down ? 'text-amber-300' : 'text-slate-400'}>
@@ -768,15 +634,7 @@ function ConnectorDataHealth({ rows }: { rows: ReportFactHealth[] }) {
                 <td className="py-1 pr-3">{PLATFORM_LABELS[r.platform as Platform] ?? r.platform}</td>
                 <td className="py-1 pr-3">{r.period_month}</td>
                 <td className="py-1 pr-3">{r.metric_key ?? 'Connector run'}{r.source_metric ? <span className="block text-slate-500">{r.source_metric}</span> : null}</td>
-                <td className="py-1 pr-3">
-                  {r.fact_availability ?? r.latest_health_state ?? r.latest_run_status ?? 'Not attempted'}
-                  {r.permission_blocked ? <span className="block text-amber-300">Permission blocked</span> : null}
-                  {r.partial_error_or_stale ? (
-                    <span className="block text-amber-300">
-                      Platform run: {formatHealthState(r.latest_run_status, r.latest_health_state)}
-                    </span>
-                  ) : null}
-                </td>
+                <td className="py-1 pr-3">{r.fact_availability ?? r.latest_health_state ?? r.latest_run_status ?? 'Not attempted'}{r.permission_blocked ? <span className="block text-amber-300">Permission blocked</span> : null}{r.partial_error_or_stale ? <span className="block text-amber-300">Partial, error or stale</span> : null}</td>
                 <td className="py-1 pr-3">{formatHealthTimestamp(r.latest_attempted_at)}</td>
                 <td className="py-1 pr-3">{formatHealthTimestamp(r.last_successful_at)}</td>
                 <td className="py-1 pr-3">{r.api_version ?? '—'}</td>
@@ -797,14 +655,6 @@ function formatHealthTimestamp(value: string | null): string {
   if (!value) return '—'
   const date = new Date(value)
   return Number.isNaN(date.getTime()) ? '—' : date.toLocaleString()
-}
-
-function formatHealthState(runStatus: string | null, healthState: string | null): string {
-  const humanize = (value: string) => value.replaceAll('_', ' ')
-  if (runStatus && healthState && runStatus !== healthState) {
-    return `${humanize(runStatus)} · ${humanize(healthState)}`
-  }
-  return humanize(runStatus ?? healthState ?? 'needs review')
 }
 
 // A. The "all your channels together" moment. Headlines ONLY metrics that are
@@ -1370,12 +1220,64 @@ function PlatformRow({ label, value }: { label: string; value: string }) {
   )
 }
 
+type GoogleAdsMetric = {
+  key: string
+  label: string
+  current: number | null
+  previous: number | null
+  display: string
+}
+
+function googleAdsMetrics(
+  current: GoogleAdsDashboardData,
+  previous: GoogleAdsDashboardData | null,
+): GoogleAdsMetric[] {
+  const comparableCurrency =
+    previous !== null &&
+    !current.hasMixedCurrencies &&
+    !previous.hasMixedCurrencies &&
+    current.currencyCode !== null &&
+    current.currencyCode === previous.currencyCode
+  const numberWithDecimals = (value: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(value)
+
+  return [
+    {
+      key: 'spend',
+      label: 'Spend',
+      current: current.spendMicros,
+      previous: comparableCurrency ? previous.spendMicros : null,
+      display: formatGoogleAdsMoney(current.spendMicros, current.currencyCode),
+    },
+    { key: 'impressions', label: 'Impressions', current: current.impressions, previous: previous?.impressions ?? null, display: formatNumber(current.impressions) },
+    { key: 'clicks', label: 'Clicks', current: current.clicks, previous: previous?.clicks ?? null, display: formatNumber(current.clicks) },
+    { key: 'ctr', label: 'CTR', current: current.ctr, previous: previous?.ctr ?? null, display: current.ctr === null ? '-' : `${current.ctr.toFixed(2)}%` },
+    {
+      key: 'average_cpc',
+      label: 'Avg CPC',
+      current: current.averageCpcMicros,
+      previous: comparableCurrency ? previous.averageCpcMicros : null,
+      display: formatGoogleAdsMoney(current.averageCpcMicros, current.currencyCode),
+    },
+    { key: 'conversions', label: 'Conversions', current: current.conversions, previous: previous?.conversions ?? null, display: numberWithDecimals(current.conversions) },
+    {
+      key: 'conversion_value',
+      label: 'Conversion value',
+      current: current.conversionValue,
+      previous: comparableCurrency ? previous.conversionValue : null,
+      display: formatGoogleAdsCurrencyValue(current.conversionValue, current.currencyCode),
+    },
+    { key: 'campaign_count', label: 'Campaign count', current: current.campaignCount, previous: previous?.campaignCount ?? null, display: formatNumber(current.campaignCount) },
+  ]
+}
+
 function GoogleAdsOverview({
   googleAds,
+  previousGoogleAds,
   state,
   error,
 }: {
   googleAds: GoogleAdsDashboardData | null
+  previousGoogleAds: GoogleAdsDashboardData | null
   state: GoogleAdsDashboardState
   error: string | null
 }) {
@@ -1386,7 +1288,11 @@ function GoogleAdsOverview({
         Paid campaign performance is shown separately from organic social results.
       </p>
       {googleAds ? (
-        <GoogleAdsResults dashboard={googleAds} compact />
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {googleAdsMetrics(googleAds, previousGoogleAds).slice(0, 4).map(metric => (
+            <GoogleAdsMetricCard key={metric.key} metric={metric} />
+          ))}
+        </div>
       ) : (
         <GoogleAdsEmptyState state={state} hasError={state === 'error' && Boolean(error)} compact />
       )}
@@ -1394,183 +1300,96 @@ function GoogleAdsOverview({
   )
 }
 
-function ProviderAvailabilityPanel({
-  eyebrow,
-  title,
-  status,
-  description,
+function GoogleAdsTab({
+  googleAds,
+  previousGoogleAds,
+  state,
+  error,
 }: {
-  eyebrow: string
-  title: string
-  status: 'Not connected' | 'Coming soon'
-  description: string
+  googleAds: GoogleAdsDashboardData | null
+  previousGoogleAds: GoogleAdsDashboardData | null
+  state: GoogleAdsDashboardState
+  error: string | null
 }) {
+  if (!googleAds) return <GoogleAdsEmptyState state={state} hasError={state === 'error' && Boolean(error)} />
+
   return (
-    <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#071311]/95 p-7 shadow-[0_35px_90px_-45px_rgba(0,0,0,0.95)] sm:p-10">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_10%_0%,rgba(45,212,191,0.16),transparent_38%),radial-gradient(circle_at_92%_8%,rgba(249,115,22,0.10),transparent_34%)]" />
-      <div className="relative max-w-3xl">
-        <p className="text-xs font-black uppercase tracking-[0.24em] text-[#2dd4bf]">{eyebrow}</p>
-        <h2 className="mt-3 text-3xl font-black tracking-[-0.04em] text-white sm:text-5xl">{title}</h2>
-        <span className="mt-6 inline-flex rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-xs font-black uppercase tracking-[0.16em] text-slate-300">
-          {status}
-        </span>
-        <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300">{description}</p>
-      </div>
-    </section>
+    <>
+      <SectionHeading eyebrow="Paid media" title="Google Ads performance" />
+      <p className="-mt-2 mb-7 max-w-2xl text-base leading-relaxed text-slate-300">
+        A focused view of campaign investment, traffic, and conversion outcomes for the month.
+      </p>
+
+      <section className="mb-14 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {googleAdsMetrics(googleAds, previousGoogleAds).map(metric => (
+          <GoogleAdsMetricCard key={metric.key} metric={metric} />
+        ))}
+      </section>
+
+      <section className="mb-12">
+        <SectionHeading eyebrow="Campaign performance" title="Campaign results" />
+        <p className="-mt-2 mb-5 text-sm leading-relaxed text-slate-400">Activity labels reflect the report month. A campaign&apos;s current Google Ads status may have changed after month end.</p>
+        {googleAds.campaigns.length > 0 ? (
+          <div className="overflow-hidden rounded-[2rem] border border-white/[0.08] bg-[#071311] shadow-[0_30px_80px_-48px_rgba(0,0,0,0.95)]">
+            <div className="overflow-x-auto">
+              <table className="min-w-[1040px] w-full text-left text-sm">
+                <thead className="border-b border-white/10 bg-white/[0.04] text-[0.65rem] font-black uppercase tracking-[0.16em] text-slate-500">
+                  <tr>
+                    <th className="px-5 py-4">Campaign</th>
+                    <th className="px-4 py-4">Report period</th>
+                    <th className="px-4 py-4 text-right">Spend</th>
+                    <th className="px-4 py-4 text-right">Impressions</th>
+                    <th className="px-4 py-4 text-right">Clicks</th>
+                    <th className="px-4 py-4 text-right">CTR</th>
+                    <th className="px-4 py-4 text-right">Conversions</th>
+                    <th className="px-5 py-4 text-right">Value</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/[0.07]">
+                  {googleAds.campaigns.map((campaign, index) => (
+                    <tr key={`${campaign.name}-${index}`} className="transition hover:bg-white/[0.025]">
+                      <td className="max-w-xs px-5 py-4 font-bold text-white">{campaign.name}</td>
+                      <td className="px-4 py-4">
+                        <span className="rounded-full border border-emerald-300/15 bg-emerald-300/[0.06] px-2.5 py-1 text-xs font-bold text-emerald-100">
+                          {googleAdsCampaignPeriodLabel(campaign, googleAds.month)}
+                        </span>
+                        {campaign.status && <p className="mt-2 text-[11px] text-slate-500">Current status: {formatCampaignStatus(campaign.status)}</p>}
+                      </td>
+                      <td className="px-4 py-4 text-right font-semibold text-slate-200">{formatGoogleAdsMoney(campaign.spendMicros, campaign.currencyCode)}</td>
+                      <td className="px-4 py-4 text-right text-slate-300">{formatNumber(campaign.impressions)}</td>
+                      <td className="px-4 py-4 text-right text-slate-300">{formatNumber(campaign.clicks)}</td>
+                      <td className="px-4 py-4 text-right text-slate-300">{campaign.ctr === null ? '-' : `${campaign.ctr.toFixed(2)}%`}</td>
+                      <td className="px-4 py-4 text-right text-slate-300">{new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(campaign.conversions)}</td>
+                      <td className="px-5 py-4 text-right font-semibold text-slate-200">{formatGoogleAdsCurrencyValue(campaign.conversionValue, campaign.currencyCode)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : (
+          <GoogleAdsEmptyState state="no-activity" hasError={false} compact />
+        )}
+      </section>
+    </>
   )
 }
 
-function GooglePerformanceTab({
-  report,
-  month,
-  googleAds,
-  state,
-  error,
-  hasGoogleAds,
-  surface,
-  onSurfaceChange,
-}: {
-  report: RenderableReport
-  month: string
-  googleAds: GoogleAdsDashboardData | null
-  state: GoogleAdsDashboardState
-  error: string | null
-  hasGoogleAds: boolean
-  surface: GoogleSurface
-  onSurfaceChange: (surface: GoogleSurface) => void
-}) {
-  const strategy = readStrategyData(report.strategy_data)
-  const campaignRecommendation = strategy.actionPlan.campaign_recommendation
-  const hasDirection = Boolean(
-    strategy.strategyGoingForward
-      || strategy.clientDirection.length > 0
-      || campaignRecommendation.enabled,
-  )
+function GoogleAdsMetricCard({ metric }: { metric: GoogleAdsMetric }) {
+  const movement = compareNullable(metric.current, metric.previous)
+  const hasMovement = movement.direction !== 'missing' && movement.difference !== null && !movement.notAvailable
 
   return (
-    <div className="space-y-8">
-      <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#071311]/95 p-6 shadow-[0_35px_90px_-45px_rgba(0,0,0,0.95)] sm:p-9">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_0%,rgba(45,212,191,0.18),transparent_38%),radial-gradient(circle_at_92%_8%,rgba(249,115,22,0.14),transparent_34%)]" />
-        <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-end">
-          <div>
-            <p className="text-xs font-black uppercase tracking-[0.24em] text-[#2dd4bf]">Search &amp; local presence</p>
-            <h2 className="mt-3 max-w-3xl text-3xl font-black tracking-[-0.04em] text-white sm:text-5xl">Google Performance</h2>
-            <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300">
-              Verified Google results and the reviewed direction CG is using to improve the next move.
-            </p>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-black/20 p-5">
-            <p className="text-[0.65rem] font-black uppercase tracking-[0.2em] text-slate-500">Published reporting month</p>
-            <p className="mt-2 text-xl font-black text-white">{month}</p>
-          </div>
-        </div>
-        <div role="tablist" aria-label="Google performance services" className="relative mt-7 flex w-fit rounded-full border border-white/10 bg-black/25 p-1">
-          {(['ads', 'business'] as const).map(item => {
-            const selected = surface === item
-            const label = item === 'ads' ? 'Ads' : 'Business'
-            return (
-              <button
-                key={item}
-                type="button"
-                role="tab"
-                aria-selected={selected}
-                onClick={() => onSurfaceChange(item)}
-                className={`rounded-full px-5 py-2 text-sm font-bold transition ${selected ? 'bg-white text-[#07110f]' : 'text-slate-400 hover:text-white'}`}
-              >
-                {label}
-              </button>
-            )
-          })}
-        </div>
-      </section>
-
-      {surface === 'business' ? (
-        <ProviderAvailabilityPanel
-          eyebrow="Google local presence"
-          title="Google Business Profile"
-          status="Coming soon"
-          description="Google Business Profile performance is not yet available in the client portal. No local-search figures are inferred or shown as zero."
-        />
+    <article className="rounded-3xl border border-white/[0.08] bg-[#0b1715]/90 p-5 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.95)] sm:p-6">
+      <div className="mb-5 h-1 w-12 rounded-full bg-gradient-to-r from-[#f59e0b] to-[#f97316]" />
+      <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">{metric.label}</p>
+      <p className="mt-3 text-3xl font-black leading-none tracking-[-0.04em] text-white">{metric.display}</p>
+      {hasMovement ? (
+        <div className="mt-3"><ChannelGrowthPill label="MoM" movement={movement} /></div>
       ) : (
-        <>
-      {hasGoogleAds ? (
-        <section className="rounded-[2rem] border border-[#f59e0b]/20 bg-[linear-gradient(135deg,rgba(245,158,11,0.10),rgba(255,255,255,0.025))] p-6 sm:p-8">
-          <div className="mb-6">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.22em] text-[#f59e0b]">Configured source</p>
-              <h3 className="mt-2 text-2xl font-black tracking-[-0.03em] text-white">Google Ads</h3>
-            </div>
-          </div>
-          {googleAds ? (
-            <GoogleAdsResults dashboard={googleAds} compact />
-          ) : (
-            <GoogleAdsEmptyState state={state} hasError={state === 'error' && Boolean(error)} compact />
-          )}
-        </section>
-      ) : (
-        <section className="rounded-[2rem] border border-white/[0.08] bg-white/[0.035] p-7 sm:p-9">
-          <p className="text-xs font-black uppercase tracking-[0.22em] text-slate-500">Campaign sources</p>
-          <h3 className="mt-3 text-2xl font-black tracking-[-0.03em] text-white">No verified campaign source is configured</h3>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
-            Paid campaign figures are intentionally withheld for this published month. Missing data is never presented as zero.
-          </p>
-        </section>
+        <p className="mt-3 text-xs font-medium text-slate-500">This month</p>
       )}
-
-      {hasDirection && (
-        <section>
-          <SectionHeading eyebrow="CG review & optimisation direction" title="Strategy for paid media" />
-          <div className="grid gap-4 lg:grid-cols-2">
-            {strategy.strategyGoingForward && (
-              <article className="rounded-[1.75rem] border border-[#2dd4bf]/20 bg-[linear-gradient(145deg,rgba(45,212,191,0.10),rgba(255,255,255,0.025))] p-6 sm:p-7">
-                <p className="text-[0.68rem] font-black uppercase tracking-[0.2em] text-[#2dd4bf]">Going forward</p>
-                <p className="mt-4 whitespace-pre-line text-sm leading-7 text-slate-200">{strategy.strategyGoingForward}</p>
-              </article>
-            )}
-            {strategy.clientDirection.length > 0 && (
-              <article className="rounded-[1.75rem] border border-white/[0.08] bg-white/[0.035] p-6 sm:p-7">
-                <p className="text-[0.68rem] font-black uppercase tracking-[0.2em] text-slate-500">Campaign direction</p>
-                <ul className="mt-4 space-y-3">
-                  {strategy.clientDirection.map((direction, index) => (
-                    <li key={index} className="flex items-start gap-3 text-sm leading-6 text-slate-300">
-                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#2dd4bf]" />
-                      {direction}
-                    </li>
-                  ))}
-                </ul>
-              </article>
-            )}
-            {campaignRecommendation.enabled && (
-              <article className="rounded-[1.75rem] border border-[#f97316]/20 bg-[linear-gradient(145deg,rgba(249,115,22,0.10),rgba(255,255,255,0.025))] p-6 sm:p-7 lg:col-span-2">
-                <p className="text-[0.68rem] font-black uppercase tracking-[0.2em] text-[#fb923c]">Next campaign recommendation</p>
-                {campaignRecommendation.items.length > 0 && (
-                  <ul className="mt-4 grid gap-3 sm:grid-cols-2">
-                    {campaignRecommendation.items.map((item, index) => (
-                      <li key={index} className="flex items-start gap-3 text-sm leading-6 text-slate-300">
-                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#fb923c]" />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                {campaignRecommendation.notes && (
-                  <p className="mt-4 whitespace-pre-line text-sm leading-7 text-slate-200">{campaignRecommendation.notes}</p>
-                )}
-              </article>
-            )}
-          </div>
-        </section>
-      )}
-
-      <aside className="rounded-[1.75rem] border border-[#2dd4bf]/15 bg-[#2dd4bf]/[0.045] p-6 sm:p-7">
-        <p className="text-xs font-black uppercase tracking-[0.2em] text-[#2dd4bf]">Campaign feedback</p>
-        <p className="mt-3 max-w-4xl text-sm leading-7 text-slate-300">
-          Tell CG whether the campaign leads were valuable and relevant to your business. That real-world feedback helps refine targeting, messaging and campaign direction.
-        </p>
-      </aside>
-        </>
-      )}
-    </div>
+    </article>
   )
 }
 
@@ -1617,6 +1436,11 @@ function GoogleAdsEmptyState({
       <p className="mt-2 text-sm leading-relaxed text-slate-400">{selected.message}</p>
     </div>
   )
+}
+
+function formatCampaignStatus(status: string | null): string {
+  if (!status) return 'Status unavailable'
+  return status.toLowerCase().replace(/_/g, ' ').replace(/^./, character => character.toUpperCase())
 }
 
 function StrategyBlocks({

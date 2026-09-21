@@ -32,21 +32,7 @@ import {
   type SourceFilters,
 } from '../../lib/marketing-library/knowledgeFilters'
 import { REGISTRATION_MANIFEST, classifyRegistrations } from '../../lib/marketing-library/sourceRegistry'
-import { buildUnifiedPreview } from '../../lib/marketing-library/unifiedResearchPreview'
 import type { IndustryTag, KnowledgeLayer, SkillCardStatus, SourceType } from '../../types/skillCards'
-import {
-  listClientGuides,
-  downloadClientGuide,
-  copyProjectInstructions,
-  type ClientGuide,
-} from '../../lib/clientGuides'
-import {
-  listClientProjectMappings,
-  openChatgptProject,
-  type ClientProjectMapping,
-} from '../../lib/clientProjectMapping'
-import { listAllClientContacts, type ClientContact } from '../../lib/clientContacts'
-import { listClients, type Client } from '../../lib/db/clients'
 
 // ── Marketing / Knowledge workspace (#183/#184) ──────────────────────────────
 //
@@ -60,7 +46,7 @@ import { listClients, type Client } from '../../lib/db/clients'
 const INPUT_CLS = 'w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none focus:border-brand-teal/50'
 const today = () => new Date().toISOString().slice(0, 10)
 
-type Section = 'library' | 'sources' | 'review' | 'registration' | 'ai' | 'client-guides'
+type Section = 'library' | 'sources' | 'review' | 'registration' | 'ai'
 
 function trustTone(tier: SourceTrustTier): 'teal' | 'amber' | 'neutral' {
   if (tier === 'tier_1_primary' || tier === 'tier_2_trusted_professional') return 'teal'
@@ -268,7 +254,6 @@ const REGISTRATION_FAMILY_LABELS: Record<string, string> = {
 function RegistrationSection() {
   const { sources, loading, error, migrationNeeded } = useSources()
   const classification = useMemo(() => classifyRegistrations(REGISTRATION_MANIFEST, sources), [sources])
-  const preview = useMemo(() => buildUnifiedPreview(REGISTRATION_MANIFEST, undefined, undefined, undefined, sources), [sources])
   const [showContainers, setShowContainers] = useState(false)
   const unregistered = useMemo(
     () => classification.unregistered.filter(c => showContainers || c.kind === 'cited_source'),
@@ -297,72 +282,6 @@ function RegistrationSection() {
               </div>
             ))}
           </div>
-
-          {/* ── Unified research-source preview ──────────────────────────── */}
-          <div className="rounded-2xl border border-teal-400/15 bg-teal-400/[0.04] p-4 space-y-3">
-            <p className="text-sm font-bold text-teal-200">Research-source registration preview</p>
-            <p className="text-[11px] text-white/45">Derived from seed manifest + audience lifecycle, commerce evidence and competitive-creative bridges. Research-preview-only items are <span className="font-bold text-amber-100">NOT in the phase-28a seed</span> and are <span className="font-bold text-amber-100">NOT registered or activated</span>.</p>
-            <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
-              {([
-                ['Seed-backed', preview.summary.totalSeed, 'text-white/70'],
-                ['Research-only', preview.summary.totalResearchPreviewOnly, 'text-teal-300'],
-                ['Already registered', preview.summary.totalAlreadyRegistered, 'text-green-300'],
-                ['Preview-ready', preview.summary.totalPreviewReady, 'text-amber-200'],
-                ['Duplicates', preview.summary.totalDuplicate, 'text-white/50'],
-                ['Conflicts', preview.summary.totalConflict, 'text-red-300'],
-              ] as const).map(([label, n, cls]) => (
-                <div key={label} className="rounded-xl border border-white/10 bg-black/20 p-3">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-white/40">{label}</p>
-                  <p className={`mt-0.5 text-xl font-black ${cls}`}>{n}</p>
-                </div>
-              ))}
-            </div>
-            {/* Origin badges */}
-            <div className="flex flex-wrap gap-1.5 text-[10px]">
-              {Object.entries(preview.summary.byOrigin).filter(([, n]) => n > 0).map(([origin, n]) => (
-                <span key={origin} className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-white/50">{origin.replace(/_/g, ' ')}: {n}</span>
-              ))}
-            </div>
-            {/* Conflict details */}
-            {preview.summary.totalConflict > 0 && (
-              <div className="space-y-1.5">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-red-300/70">Conflicts (excluded from preview-ready)</p>
-                {preview.entries.filter(e => e.conflict).slice(0, 15).map(e => (
-                  <div key={e.candidate.sourceIdentifier} className="rounded-lg border border-red-300/15 bg-red-300/[0.04] px-3 py-2">
-                    <p className="truncate text-xs font-bold text-red-200">{e.candidate.title}</p>
-                    <p className="truncate font-mono text-[10px] text-red-200/50">{e.candidate.sourceIdentifier}</p>
-                    <div className="mt-0.5 flex flex-wrap gap-1">
-                      {e.origins.map(o => <span key={o} className="rounded-full border border-red-300/20 bg-red-300/10 px-1.5 text-[9px] text-red-200/60">{o.replace(/_/g, ' ')}</span>)}
-                      {e.candidate.accessCoverage && <span className="text-[10px] text-red-200/50">access: {e.candidate.accessCoverage}</span>}
-                    </div>
-                    <p className="mt-0.5 text-[10px] text-red-200/60">Conflicting fields: {e.conflictFields?.join(', ')}</p>
-                  </div>
-                ))}
-                {preview.summary.totalConflict > 15 && <p className="text-[10px] text-white/30">…and {preview.summary.totalConflict - 15} more conflicts</p>}
-              </div>
-            )}
-
-            {/* Preview-ready list (bounded) */}
-            {preview.summary.totalPreviewReady > 0 && (
-              <div className="space-y-1.5">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-amber-200/70">Preview-ready (non-conflict, not already registered)</p>
-                {preview.entries.filter(e => preview.previewReadyIdentifiers.has(e.candidate.sourceIdentifier)).slice(0, 15).map(e => (
-                  <div key={e.candidate.sourceIdentifier} className="rounded-lg border border-amber-200/10 bg-amber-200/[0.03] px-3 py-2">
-                    <p className="truncate text-xs font-bold text-amber-100">{e.candidate.title}</p>
-                    <p className="truncate font-mono text-[10px] text-amber-100/40">{e.candidate.sourceIdentifier}</p>
-                    <div className="mt-0.5 flex flex-wrap gap-1">
-                      {e.origins.map(o => <span key={o} className="rounded-full border border-amber-200/15 bg-amber-200/5 px-1.5 text-[9px] text-amber-200/50">{o.replace(/_/g, ' ')}</span>)}
-                      {e.candidate.accessCoverage && <span className="text-[10px] text-amber-200/40">access: {e.candidate.accessCoverage}</span>}
-                      {!e.origins.includes('seed') && <span className="text-[10px] text-amber-200/40">not in phase-28a</span>}
-                      {e.origins.includes('seed') && <span className="text-[10px] text-amber-200/40">seed-backed</span>}
-                    </div>
-                  </div>
-                ))}
-                {preview.summary.totalPreviewReady > 15 && <p className="text-[10px] text-white/30">…and {preview.summary.totalPreviewReady - 15} more preview-ready sources</p>}
-              </div>
-            )}
-          </div>
-
           <label className="flex items-center gap-1.5 text-xs text-white/60"><input type="checkbox" className="h-3.5 w-3.5 accent-teal-400" checked={showContainers} onChange={e => setShowContainers(e.target.checked)} />Include pack container references</label>
           <ul className="grid gap-2 lg:grid-cols-2">
             {unregistered.map(c => (
@@ -387,168 +306,6 @@ function RegistrationSection() {
   )
 }
 
-// ── Client Guides (derived/exportable documents + ChatGPT Project bridge) ──
-
-function ClientGuidesSection() {
-  const [guides, setGuides] = useState<ClientGuide[]>([])
-  const [mappings, setMappings] = useState<ClientProjectMapping[]>([])
-  const [contacts, setContacts] = useState<ClientContact[]>([])
-  const [clients, setClients] = useState<Client[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [copiedId, setCopiedId] = useState<string | null>(null)
-
-  useEffect(() => {
-    let cancelled = false
-    async function load() {
-      setLoading(true)
-      const [guideResult, clientResult, mappingResult, contactResult] = await Promise.all([
-        listClientGuides(),
-        listClients('active'),
-        listClientProjectMappings(),
-        listAllClientContacts(),
-      ])
-      if (cancelled) return
-      setGuides(guideResult.data)
-      setClients(clientResult.data ?? [])
-      setMappings(mappingResult.data ?? [])
-      setContacts(contactResult.data ?? [])
-      setError(guideResult.error?.message ?? clientResult.error?.message ?? mappingResult.error?.message ?? contactResult.error?.message ?? null)
-      setLoading(false)
-    }
-    void load()
-    return () => { cancelled = true }
-  }, [])
-
-  function clientName(clientId: string): string {
-    return clients.find(c => c.id === clientId)?.name ?? clientId
-  }
-
-  function getMapping(clientId: string): ClientProjectMapping | undefined {
-    return mappings.find(m => m.client_id === clientId)
-  }
-
-  function contactState(clientId: string) {
-    const clientContacts = contacts.filter(contact => contact.client_id === clientId)
-    return {
-      approved: clientContacts.filter(contact =>
-        contact.lifecycle_state === 'active' &&
-        contact.visibility === 'public_marketing' &&
-        contact.approved_for_caption &&
-        contact.freshness_state === 'current_verified',
-      ).length,
-      blocked: clientContacts.filter(contact =>
-        contact.lifecycle_state === 'active' &&
-        (contact.visibility === 'unverified_hold' || ['possible_change', 'stale_unverified'].includes(contact.freshness_state)),
-      ).length,
-    }
-  }
-
-  async function handleCopy(guide: ClientGuide) {
-    const ok = await copyProjectInstructions(guide.project_instructions)
-    if (ok) {
-      setCopiedId(guide.id)
-      setTimeout(() => setCopiedId(null), 2000)
-    }
-  }
-
-  function syncStateLabel(state: string): string {
-    switch (state) {
-      case 'connected': return 'Connected'
-      case 'stale': return 'Needs refresh'
-      case 'disconnected': return 'Disconnected'
-      default: return 'Not set up'
-    }
-  }
-
-  function syncStateTone(state: string): 'teal' | 'amber' | 'neutral' {
-    if (state === 'connected') return 'teal'
-    if (state === 'stale' || state === 'disconnected') return 'amber'
-    return 'neutral'
-  }
-
-  return (
-    <div className="space-y-4">
-      <p className="text-xs text-white/50">
-        Client intelligence bridge — maps each client to a ChatGPT Project for direct retrieval.
-        The <span className="font-bold text-white/70">CG Dynamics record is the source of truth</span>;
-        ChatGPT Projects retrieve current intelligence at task time. Derived Client Guides are export-only artifacts.
-      </p>
-
-      {loading ? <LoadingState message="Loading client intelligence…" />
-        : error ? <EmptyState title="Could not load client intelligence" message={error} />
-        : guides.length === 0 ? (
-        <EmptyState
-          title="No client guides yet"
-          message="Client guides are generated from the canonical intelligence packs after the client intelligence integration migration is applied."
-        />
-      ) : (
-        <ul className="space-y-3">
-          {guides.map(guide => {
-            const mapping = getMapping(guide.client_id)
-            const contactStatus = contactState(guide.client_id)
-            return (
-              <li key={guide.id} className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-5">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <h3 className="text-sm font-black text-white">{clientName(guide.client_id)}</h3>
-                    <p className="mt-0.5 text-xs text-white/45">
-                      Version {guide.version} · Generated {new Date(guide.generated_at).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })}
-                      {guide.source_pack_path && <> · Source: {guide.source_pack_path.split('/').pop()}</>}
-                    </p>
-                    {mapping && (
-                      <div className="mt-1 flex items-center gap-2">
-                        <Pill tone={syncStateTone(mapping.sync_state)}>{syncStateLabel(mapping.sync_state)}</Pill>
-                        {mapping.project_name && (
-                          <span className="text-[11px] text-white/40">{mapping.project_name}</span>
-                        )}
-                        {mapping.last_context_retrieved_at && (
-                          <span className="text-[11px] text-white/30">
-                            Last retrieved {new Date(mapping.last_context_retrieved_at).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short' })}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                    <p className="mt-1 text-[11px] text-white/40">
-                      Caption contacts: {contactStatus.approved} approved
-                      {contactStatus.blocked > 0 ? ` · ${contactStatus.blocked} on hold` : ''}
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {mapping?.chatgpt_project_url && (
-                      <ActionButton size="sm" variant="primary" onClick={() => openChatgptProject(mapping)}>
-                        Open ChatGPT Project
-                      </ActionButton>
-                    )}
-                    <ActionButton size="sm" variant="secondary" onClick={() => downloadClientGuide(guide, clientName(guide.client_id))}>
-                      Download .md
-                    </ActionButton>
-                    <ActionButton size="sm" variant={copiedId === guide.id ? 'primary' : 'secondary'} onClick={() => void handleCopy(guide)}>
-                      {copiedId === guide.id ? 'Copied!' : 'Copy Project Instructions'}
-                    </ActionButton>
-                  </div>
-                </div>
-                {guide.project_instructions && (
-                  <details className="mt-3 group">
-                    <summary className="cursor-pointer text-xs font-bold text-white/50 hover:text-white/70">Preview Project Instructions</summary>
-                    <pre className="mt-2 max-h-48 overflow-auto rounded-lg bg-black/40 p-3 text-[11px] leading-relaxed text-white/70 whitespace-pre-wrap">{guide.project_instructions}</pre>
-                  </details>
-                )}
-              </li>
-            )
-          })}
-        </ul>
-      )}
-
-      <p className="text-[11px] text-white/35">
-        CG Dynamics is the permanent source of truth. ChatGPT Projects retrieve current intelligence at task time.
-        Derived Client Guides are export-only artifacts, not runtime dependencies.
-        No static .md upload is required — the bridge is live retrieval, not file replacement.
-      </p>
-    </div>
-  )
-}
-
 function AiSection() {
   return (
     <div className="space-y-3">
@@ -567,7 +324,7 @@ export default function MarketingWorkspacePage() {
   const [searchParams, setSearchParams] = useSearchParams()
 
   const tabs = useMemo(() => {
-    const list: Array<{ key: Section; label: string }> = [{ key: 'library', label: 'Library' }, { key: 'client-guides', label: 'Client Guides' }]
+    const list: Array<{ key: Section; label: string }> = [{ key: 'library', label: 'Library' }]
     if (isManager) list.push({ key: 'ai', label: 'AI' })
     if (isAdmin) list.push({ key: 'review', label: 'Review' }, { key: 'sources', label: 'Sources' }, { key: 'registration', label: 'Registration' })
     return list
@@ -597,7 +354,6 @@ export default function MarketingWorkspacePage() {
       </div>
 
       {section === 'library' && <LibrarySection isAdmin={isAdmin} />}
-      {section === 'client-guides' && <ClientGuidesSection />}
       {section === 'ai' && isManager && <AiSection />}
       {section === 'review' && isAdmin && <ReviewSection />}
       {section === 'sources' && isAdmin && <SourcesSection />}

@@ -235,7 +235,6 @@ async function loadContext(
   const assignedTaskIds = new Set((assignmentRows ?? []).map(row => row.task_id))
   const tasks = ((taskRows ?? []) as Array<TaskContext & { board_id: string; assigned_to_name: string | null }>)
     .filter(task => role === 'admin' || role === 'manager' || assignedTaskIds.has(task.id) || task.assigned_to_name?.trim().toLowerCase() === fullName.trim().toLowerCase())
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     .map(({ board_id: _boardId, ...task }) => task)
   return {
     staff: (staffRows ?? []).filter(row => row.full_name).map(row => ({ id: row.id, name: row.full_name })),
@@ -338,11 +337,11 @@ Deno.serve(async request => {
   }
 
   const contentType = request.headers.get('content-type') ?? ''
-  let action: string
+  let action = ''
   let transcript = ''
-  let requestId: string
+  let requestId = ''
   let clientId = ''
-  let page: string
+  let page = ''
   let durationSeconds = 0
   let audio: File | null = null
   let jsonBody: Record<string, unknown> = {}

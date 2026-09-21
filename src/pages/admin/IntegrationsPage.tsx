@@ -5,7 +5,6 @@ import { PremiumCard } from '../../components/ui/PremiumCard'
 import { ActionButton } from '../../components/ui/Buttons'
 import { StatusBadge, Pill } from '../../components/ui/Badges'
 import { getGoogleAdsWorkspace } from '../../lib/googleAds'
-import { getTiktokConnectionStatus } from '../../lib/tiktok'
 import { useAuth } from '../../contexts/AuthContext'
 import { isAdminRole, isManagerRole } from '../../lib/roles'
 import { getMicrosoftConnectionStatus } from '../../lib/microsoftImportData'
@@ -22,7 +21,6 @@ export default function IntegrationsPage() {
   const [linkedClients, setLinkedClients] = useState<number | null>(null)
   const [googleState, setGoogleState] = useState<MetaState>('loading')
   const [googleLinkedClients, setGoogleLinkedClients] = useState<number | null>(null)
-  const [tiktokState, setTiktokState] = useState<MetaState>('loading')
   const [microsoftState, setMicrosoftState] = useState<MetaState>('loading')
   const [microsoftSourceCount, setMicrosoftSourceCount] = useState(0)
 
@@ -48,16 +46,6 @@ export default function IntegrationsPage() {
       .then(({ data }) => {
         if (!active || !data) return
         setLinkedClients(new Set(data.map(r => r.client_id as string)).size)
-      })
-
-    // TikTok connection status
-    getTiktokConnectionStatus()
-      .then(data => {
-        if (!active) return
-        setTiktokState(data?.connected ? 'connected' : 'disconnected')
-      })
-      .catch(() => {
-        if (active) setTiktokState('disconnected')
       })
 
     if (canManageGoogleAds) {
@@ -101,12 +89,6 @@ export default function IntegrationsPage() {
       : 'Facebook and Instagram are connected. Link clients to start syncing monthly reports.'
     : 'Connect Facebook Pages and Instagram accounts to create monthly report drafts automatically.'
   const metaButtonLabel = metaConnected ? 'Manage Meta' : 'Set up Meta'
-  const tiktokConnected = tiktokState === 'connected'
-  const tiktokStatus = tiktokState === 'loading' ? 'Checking...' : tiktokConnected ? 'Connected' : 'Not connected'
-  const tiktokDescription = tiktokConnected
-    ? 'TikTok is connected. Sync organic analytics or publish content.'
-    : 'Connect TikTok for organic analytics sync and content publishing.'
-  const tiktokButtonLabel = tiktokConnected ? 'Manage TikTok' : 'Set up TikTok'
   const googleConnected = googleState === 'connected'
   const googleStatus = !canManageGoogleAds ? 'Manager access' : googleState === 'loading' ? 'Checking…' : googleConnected ? 'Connected' : 'Not connected'
   const googleDescription = !canManageGoogleAds
@@ -162,30 +144,31 @@ export default function IntegrationsPage() {
           </div>
         </PremiumCard>
 
-        {/* TikTok — live status */}
-        <PremiumCard padding="md" className="relative">
-          <div className="absolute inset-x-0 top-0 h-0.5 rounded-t-2xl bg-gradient-to-r from-pink-500 to-red-500" />
+        {/* TikTok — planned */}
+        <PremiumCard padding="md">
           <div className="flex flex-col">
             <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-pink-500/20 text-sm font-bold text-pink-300">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-muted text-sm font-bold text-brand-primary">
                 T
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
                   <h2 className="text-base font-semibold text-white">TikTok</h2>
-                  <StatusBadge
-                    label={tiktokStatus}
-                    variant={tiktokConnected ? 'published' : tiktokState === 'loading' ? 'default' : 'internal-draft'}
-                    size="sm"
-                  />
+                  <Pill tone="neutral">Planned</Pill>
                 </div>
-                <p className="mt-1.5 text-sm leading-relaxed text-brand-primary">{tiktokDescription}</p>
+                <p className="mt-1.5 text-sm leading-relaxed text-brand-primary">
+                  TikTok reporting sync will be added later.
+                </p>
               </div>
             </div>
             <div className="mt-auto pt-5">
-              <ActionButton variant="outline" onClick={() => navigate('/admin/integrations/tiktok')} fullWidth>
-                {tiktokButtonLabel}
-              </ActionButton>
+              <button
+                type="button"
+                disabled
+                className="w-full cursor-not-allowed rounded-lg border border-brand-muted bg-brand-muted/20 px-4 py-2.5 text-sm font-semibold text-brand-primary"
+              >
+                Coming later
+              </button>
             </div>
           </div>
         </PremiumCard>

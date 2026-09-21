@@ -143,8 +143,7 @@ export default function ManualMetricsAdmin() {
   }
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    load()
+    void load()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

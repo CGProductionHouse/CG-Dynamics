@@ -6,7 +6,6 @@ import PasswordField from '../components/PasswordField'
 import BrandMark from '../components/BrandMark'
 import { AuthMessage } from '../components/AuthShell'
 import { friendlyAuthError } from '../lib/authErrors'
-import { isSafeOAuthReturnPath } from '../lib/oauthConsent'
 
 function isNotConfirmed(error: { message?: string; code?: string } | null) {
   if (!error) return false
@@ -18,7 +17,7 @@ export default function Login() {
   const { signIn } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const [identifier, setIdentifier] = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -29,7 +28,7 @@ export default function Login() {
     setError(null)
     setUnconfirmed(false)
     setLoading(true)
-    const { error, role, pendingInviteSetup } = await signIn(identifier, password)
+    const { error, role, pendingInviteSetup } = await signIn(email, password)
     setLoading(false)
     if (error) {
       if (isNotConfirmed(error as { message?: string; code?: string })) {
@@ -43,16 +42,11 @@ export default function Login() {
     } else {
       const requestedPath = (location.state as { from?: string } | null)?.from
       const clientRequestedPath = requestedPath && /^\/client(?:[/?#]|$)/.test(requestedPath) ? requestedPath : null
-      // Honour a safe OAuth-consent return so a user sent to login mid-authorization
-      // lands back on the exact consent request (any role may approve their own).
-      const oauthReturnPath = isSafeOAuthReturnPath(requestedPath) ? requestedPath! : null
-      const destination = oauthReturnPath
-        ? oauthReturnPath
-        : pendingInviteSetup
-          ? '/signup'
-          : role === 'client'
-            ? clientRequestedPath ?? '/client'
-            : requestedPath?.startsWith('/admin/') ? requestedPath : '/admin/cg-hub'
+      const destination = pendingInviteSetup
+        ? '/signup'
+        : role === 'client'
+          ? clientRequestedPath ?? '/client'
+          : requestedPath?.startsWith('/admin/') ? requestedPath : '/admin/cg-hub'
       navigate(destination, { replace: true })
     }
   }
@@ -70,20 +64,18 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} noValidate className="space-y-5">
           <div>
-            <label htmlFor="identifier" className="block text-sm font-medium text-brand-accent mb-1.5">
-              Username or email
+            <label htmlFor="email" className="block text-sm font-medium text-brand-accent mb-1.5">
+              Email
             </label>
             <input
-              id="identifier"
-              type="text"
-              autoComplete="username"
-              autoCapitalize="none"
-              spellCheck={false}
+              id="email"
+              type="email"
+              autoComplete="email"
               required
-              value={identifier}
-              onChange={e => setIdentifier(e.target.value)}
+              value={email}
+              onChange={e => setEmail(e.target.value)}
               className="w-full bg-brand-bg border border-brand-muted rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-accent focus:border-transparent transition"
-              placeholder="Company username or email"
+              placeholder="you@example.com"
             />
           </div>
 
@@ -122,15 +114,11 @@ export default function Login() {
         </form>
 
         <p className="mt-6 text-center text-sm text-brand-primary">
-          Client usernames are supplied by CG Production House. Have an invitation?{' '}
+          Have an invitation?{' '}
           <Link to="/signup" className="text-brand-accent hover:brightness-110 font-medium transition">
             Complete setup
           </Link>
         </p>
-        <nav aria-label="Legal" className="mt-5 flex justify-center gap-4 text-xs text-brand-primary">
-          <Link to="/privacy-policy" className="hover:text-brand-accent transition">Privacy Policy</Link>
-          <Link to="/terms-of-service" className="hover:text-brand-accent transition">Terms of Service</Link>
-        </nav>
       </div>
     </div>
   )

@@ -6,16 +6,10 @@ import { createServer } from 'vite'
 const readSource = relativePath => readFileSync(new URL(relativePath, import.meta.url), 'utf8')
 
 const APP_SOURCE = readSource('../src/App.tsx')
-const LAYOUT_SOURCE = readSource('../src/components/client/ClientPortalLayout.tsx')
-const PORTAL_STATES_SOURCE = readSource('../src/components/client/ClientPortalStates.tsx')
 const SHELL_SOURCE = readSource('../src/components/client/ClientPortalShell.tsx')
 const HOME_SOURCE = readSource('../src/pages/client/ClientPortalHome.tsx')
 const PERFORMANCE_SOURCE = readSource('../src/pages/client/Dashboard.tsx')
-const PLAN_SOURCE = readSource('../src/pages/client/ClientPlanPage.tsx')
-const APPROVALS_SOURCE = readSource('../src/pages/admin/ContentReviewsPage.tsx')
-const BRAND_HUB_SOURCE = readSource('../src/features/client-onboarding/ClientSetupPage.tsx')
 const CAMPAIGNS_SOURCE = readSource('../src/pages/client/ClientCampaignsPage.tsx')
-const REPORT_VIEW_SOURCE = readSource('../src/pages/client/ClientReportView.tsx')
 const CALENDAR_PAGE_SOURCE = readSource('../src/pages/client/ClientContentCalendarPage.tsx')
 const CALENDAR_LIB_SOURCE = readSource('../src/lib/clientPortalCalendar.ts')
 const REPORTS_SOURCE = readSource('../src/lib/db/reports.ts')
@@ -59,50 +53,24 @@ test('all portal routes sit behind the existing client-only guard and legacy das
 test('shared portal navigation links every client area and keeps sign out available', () => {
   for (const route of [
     '/client',
-    '/client/plan',
-    '/client/performance',
-    '/client/approvals',
-    '/client/brand-hub',
-  ]) {
-    assert.ok(SHELL_SOURCE.includes(`to: '${route}'`))
-  }
-  for (const legacyRoute of [
     '/client/strategy',
+    '/client/performance',
     '/client/campaigns',
     '/client/content-calendar',
     '/client/content-guides',
     '/client/setup',
   ]) {
-    assert.ok(APP_SOURCE.includes(`path="${legacyRoute}"`))
+    assert.ok(SHELL_SOURCE.includes(`to: '${route}'`))
   }
   assert.match(SHELL_SOURCE, /onClick=\{\(\) => void signOut\(\)\}/)
 })
 
-test('one persistent client layout owns the shell while routed pages render content only', () => {
-  const clientRoutes = APP_SOURCE.slice(
-    APP_SOURCE.indexOf('{/* Client routes */}'),
-    APP_SOURCE.indexOf('<Route path="*"')
-  )
-
-  assert.match(clientRoutes, /<Route element=\{<RequireClient \/>\}>[\s\S]*<Route element=\{<ClientPortalLayout \/>\}>/)
-  assert.match(LAYOUT_SOURCE, /<ClientPortalShell client=\{client\}>[\s\S]*<Suspense fallback=\{<ClientPortalContentLoading \/>\}>[\s\S]*<Outlet \/>/)
-  assert.match(LAYOUT_SOURCE, /getClient\(profile\.client_id\)/)
-  assert.match(PORTAL_STATES_SOURCE, /motion-reduce:animate-none/)
-
-  for (const page of [HOME_SOURCE, PLAN_SOURCE, PERFORMANCE_SOURCE, APPROVALS_SOURCE, BRAND_HUB_SOURCE]) {
-    assert.doesNotMatch(page, /<ClientPortalShell/)
-  }
-  for (const page of [HOME_SOURCE, PLAN_SOURCE, PERFORMANCE_SOURCE, APPROVALS_SOURCE, BRAND_HUB_SOURCE]) {
-    assert.doesNotMatch(page, /getClient\(/)
-  }
-})
-
 test('client mobile navigation exposes every destination without horizontal-scroll discovery', () => {
-  assert.match(SHELL_SOURCE, /activeItem\.label/)
+  assert.match(SHELL_SOURCE, />\s*Portal menu\s*/)
   assert.match(SHELL_SOURCE, /id="client-mobile-navigation"/)
   assert.match(SHELL_SOURCE, /className="mt-2 grid grid-cols-2 gap-2/)
   assert.match(SHELL_SOURCE, /min-h-11/)
-  assert.match(SHELL_SOURCE, /env\(safe-area-inset-bottom\)/)
+  assert.match(SHELL_SOURCE, /pb-\[env\(safe-area-inset-bottom\)\]/)
 })
 
 test('login preserves role-valid client deep links and staff guards avoid the dashboard hop', () => {
@@ -119,8 +87,7 @@ test('portal pages use the signed-in client and only published monthly reports',
   assert.match(HOME_SOURCE, /profile\.client_id/)
   assert.match(HOME_SOURCE, /listClientPublishedReports\(\)/)
   assert.match(PERFORMANCE_SOURCE, /listClientPublishedReports\(\)/)
-  assert.match(CAMPAIGNS_SOURCE, /Navigate to="\/client\/performance\?tab=google" replace/)
-  assert.doesNotMatch(CAMPAIGNS_SOURCE, /listClientPublishedReports|loadGoogleAdsDashboard/)
+  assert.match(CAMPAIGNS_SOURCE, /listClientPublishedReports\(\)/)
   assert.match(REPORTS_SOURCE, /supabase\.rpc\('client_published_reports'\)/)
   assert.doesNotMatch(REPORTS_SOURCE, /listPublishedReportsForClient/)
 })
@@ -155,8 +122,7 @@ test('only genuinely available Facebook and Instagram facts become active platfo
 
   assert.deepEqual(activeOrganicPlatforms(facts), ['Facebook'])
   assert.doesNotMatch(HOME_SOURCE, /TikTok reporting is active|Google Business Profile reporting is active/)
-  assert.doesNotMatch(REPORT_VIEW_SOURCE, /Meta Ads|TikTok Ads|Planned integration/)
-  assert.match(REPORT_VIEW_SOURCE, /No verified campaign source is configured/)
+  assert.match(CAMPAIGNS_SOURCE, /This campaign source is not connected in the client portal yet/)
 })
 
 test('strategy preview uses published reviewed fields and has an honest empty state', () => {
