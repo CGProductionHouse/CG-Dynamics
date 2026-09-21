@@ -86,6 +86,17 @@ Never: create a run, rewrite `monthly_deliverables`, overwrite a human field, pu
 or delete a file, or expose raw media to a client. A client with no upcoming run reports
 `NO_FUTURE_CONTENT_RUN` — it never gets an invented shoot date.
 
+**Supervisor correction pass (PR #455).** Seven behaviours moved from report-only to
+executable: the exact Microsoft `(calendar, event)` -> Content Run ensure
+(`ensure_content_run_for_calendar_event`, durable event identity only); a latent
+feature-gated AI generation path on the cycle; create-only per-video folder
+ensure/map (`ensure_video_folders`); unambiguous same-client slot linking
+(`link_content_guide_video_deliverable`); a staff-safe folder projection
+(`content_run_video_folder_states`, no Graph ids) so the browser can read folder truth;
+real published-portal-asset truth in the readiness view; and a `NO_FUTURE_CONTENT_RUN`
+decision made from a full upcoming-run scan, with `runs_unprocessed` and
+`clients_preparation_failed` kept distinct from genuinely having no future run.
+
 **What the background pass deliberately does not do yet.** It ensures the guideline and computes
 what should be generated, but it does not itself call the AI Content Director. Generation stays
 explicitly triggered — by staff in the editor, or by the Assistant's
@@ -107,6 +118,7 @@ client the first time it ran.
 | Capability | Gate |
 |---|---|
 | Per-video folder mapping, autopilot state | Apply `20260921090000_content_production_autopilot.sql` (CA approval) |
+| Run ensure, staff folder projection, safe slot linking | Apply `20260921140000_content_autopilot_corrections.sql` (CA approval) |
 | Per-video folder creation in OneDrive | #225 rollout: app registration, secrets, `onedrive-oauth-*` deploy, one-time consent — production currently stores 0 tokens |
 | Assistant content actions live | Deploy `cg-dynamics-mcp` (CA approval), then refresh the ChatGPT connector action list |
 | Prepared draft generation live | Deploy `suggest-content-videos`; a web-grounded provider key for real research |

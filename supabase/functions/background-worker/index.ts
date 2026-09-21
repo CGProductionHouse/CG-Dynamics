@@ -8,7 +8,7 @@ import { createClient } from 'jsr:@supabase/supabase-js@2'
 import webpush from 'npm:web-push@3.6.7'
 import { dispatchMetaWorker } from '../_shared/metaWorkerDispatch.ts'
 import { currentMetaMonth, previousMetaMonth, currentMonthHasIncrementalWindow } from '../_shared/metaPeriod.ts'
-import { recordContentAutopilotPass, runContentAutopilotPass } from '../_shared/contentAutopilotPass.ts'
+import { GENERATION_FLAG, recordContentAutopilotPass, runContentAutopilotPass } from '../_shared/contentAutopilotPass.ts'
 
 const MAX_RUNTIME_MS = 25_000
 const MAX_JOBS_PER_RUN = 25
@@ -547,8 +547,35 @@ async function runJob(
       // Schedule, overwrites human content, publishes, or touches a file.
       await updateJobProgress(supabase, job.id, worker, 40)
       const today = typeof payload.today === 'string' ? payload.today : new Date().toISOString().slice(0, 10)
+      // Latent executable generation path. It stays off until CA sets the project
+      // secret; switching it on is a protected production action, not a code change.
+      const generationEnabled = (Deno.env.get(GENERATION_FLAG) ?? '').toLowerCase() === 'true'
       try {
-        const result = await runContentAutopilotPass(supabase as unknown as Parameters<typeof runContentAutopilotPass>[0], { today })
+        const result = await runContentAutopilotPass(supabase as unknown as Parameters<typeof runContentAutopilotPass>[0], {
+          today,
+          generationEnabled,
+          generateDrafts: async input => {
+            // Reuses the EXISTING AI Content Director. Draft only: the function itself
+            // refuses a non-draft guideline and never overwrites a human-written field.
+            const res = await fetch(`${url}/functions/v1/suggest-content-videos`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''}`,
+              },
+              body: JSON.stringify({
+                mode: input.mode,
+                clientId: input.clientId,
+                guidelineId: input.guidelineId,
+                contentRunId: input.contentRunId,
+                videoIds: input.videoIds,
+              }),
+            })
+            if (!res.ok) return { ok: false, error: `suggest-content-videos returned ${res.status}` }
+            const body = await res.json().catch(() => null) as { videos?: unknown[]; ideas?: unknown[] } | null
+            return { ok: true, generated: (body?.videos ?? body?.ideas ?? []).length }
+          },
+        })
         await updateJobProgress(supabase, job.id, worker, 90)
         await recordContentAutopilotPass(supabase as unknown as Parameters<typeof recordContentAutopilotPass>[0], result, null)
         return result
