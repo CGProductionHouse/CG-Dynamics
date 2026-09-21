@@ -256,12 +256,16 @@ Deno.serve(async (req) => {
     health_state: checkpoint.last_health_state,
     finished_at: checkpoint.last_status === 'failed' ? checkpoint.last_attempted_at : (checkpoint.last_successful_at ?? checkpoint.last_attempted_at),
     created_at: checkpoint.last_attempted_at,
+    last_successful_at: checkpoint.last_successful_at,
     high_watermark_at: checkpoint.high_watermark_at,
     next_due_at: checkpoint.next_due_at,
     last_error_code: checkpoint.last_error_code,
   } : null
   const assetHealth = schemaReady ? (activeAssets ?? []).map(asset => ({
+    assetId: asset.id,
     clientId: asset.client_id,
+    facebookMapped: Boolean(asset.facebook_page_id),
+    instagramMapped: Boolean(asset.instagram_account_id),
     facebook: asset.facebook_page_id ? asRun(checkpointByAsset.get(`${asset.id}:facebook`)) : null,
     instagram: asset.instagram_account_id ? asRun(checkpointByAsset.get(`${asset.id}:instagram`)) : null,
   })) : null

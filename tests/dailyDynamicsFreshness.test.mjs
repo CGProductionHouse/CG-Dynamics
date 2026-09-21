@@ -1,0 +1,84 @@
+import assert from 'node:assert/strict'
+import test, { after, before } from 'node:test'
+import { createServer } from 'vite'
+import { readFileSync } from 'node:fs'
+
+let server
+let microsoftFreshnessEvidence
+let metaFleetFreshnessEvidence
+
+before(async () => {
+  server = await createServer({ server: { middlewareMode: true }, appType: 'custom', logLevel: 'silent' })
+  ;({ microsoftFreshnessEvidence, metaFleetFreshnessEvidence } = await server.ssrLoadModule('/src/lib/dailyDynamicsFreshness.ts'))
+})
+after(async () => { await server?.close() })
+
+const now = '2026-09-21T08:00:00.000Z'
+
+test('Microsoft PASS requires a recent full applied reconciliation', () => {
+  assert.equal(microsoftFreshnessEvidence({ now, connected: true, lastJobStartedAt: now, lastJobCompletedAt: now, lastSuccessfulReconciliationAt: '2026-09-21T07:00:00.000Z', requiredSources: [{ name: 'Outlook', complete: true, error: null }], applyStatus: 'completed' }).verdict, 'PASS')
+})
+
+test('Microsoft source failure is PARTIAL and never inferred fresh from a completed cron', () => {
+  const evidence = microsoftFreshnessEvidence({ now, connected: true, lastJobStartedAt: now, lastJobCompletedAt: now, lastSuccessfulReconciliationAt: '2026-09-21T07:00:00.000Z', requiredSources: [{ name: 'MASTER CLIENT TO DO', complete: false, error: 'throttled' }], applyStatus: 'completed' })
+  assert.equal(evidence.verdict, 'PARTIAL')
+  assert.deepEqual(evidence.incomplete, ['MASTER CLIENT TO DO'])
+})
+
+test('Microsoft stale, failed and unavailable remain distinct', () => {
+  const base = { now, lastJobStartedAt: null, lastJobCompletedAt: null, lastSuccessfulReconciliationAt: null, requiredSources: [] }
+  assert.equal(microsoftFreshnessEvidence({ ...base, connected: true, applyStatus: null }).verdict, 'STALE')
+  assert.equal(microsoftFreshnessEvidence({ ...base, connected: true, applyStatus: 'failed' }).verdict, 'FAILED')
+  assert.equal(microsoftFreshnessEvidence({ ...base, connected: false, applyStatus: null }).verdict, 'UNAVAILABLE')
+})
+
+test('Meta fleet truth is derived dynamically per exact asset and platform', () => {
+  const evidence = metaFleetFreshnessEvidence([
+    { clientId: 'client-a', assetId: 'asset-a', platform: 'facebook', mapped: true, lastAttemptedAt: now, lastSuccessfulAt: now, lastSuccessfulMonth: '2026-09', highWatermarkAt: '2026-09-20', nextDueAt: '2026-09-22T00:00:00Z', status: 'complete', healthState: 'verified', errorCode: null, retrying: false },
+    { clientId: 'client-b', assetId: 'asset-b', platform: 'instagram', mapped: true, lastAttemptedAt: null, lastSuccessfulAt: null, lastSuccessfulMonth: null, highWatermarkAt: null, nextDueAt: null, status: null, healthState: null, errorCode: null, retrying: false },
+  ], now)
+  assert.equal(evidence.mappedClients, 2)
+  assert.equal(evidence.mappedAssets, 2)
+  assert.equal(evidence.verdict, 'STALE')
+  assert.equal(evidence.platforms[1].reason, 'Mapped platform has never completed its bootstrap checkpoint.')
+})
+
+test('Meta failed attempt preserves last verified state as PARTIAL instead of zero or success', () => {
+  const evidence = metaFleetFreshnessEvidence([
+    { clientId: 'client-a', assetId: 'asset-a', platform: 'facebook', mapped: true, lastAttemptedAt: now, lastSuccessfulAt: '2026-09-20T08:00:00Z', lastSuccessfulMonth: '2026-09', highWatermarkAt: '2026-09-19', nextDueAt: now, status: 'failed', healthState: 'verified', errorCode: 'rate_limited', retrying: true },
+  ], now)
+  assert.equal(evidence.verdict, 'PARTIAL')
+  assert.equal(evidence.recoveryInProgress, true)
+  assert.equal(evidence.platforms[0].lastSuccessfulAt, '2026-09-20T08:00:00Z')
+})
+
+test('scheduled cycle advances Microsoft before Meta fleet freshness', () => {
+  const worker = readFileSync(new URL('../supabase/functions/background-worker/index.ts', import.meta.url), 'utf8')
+  assert.ok(worker.indexOf('advanceMicrosoftFreshness(url)') < worker.indexOf('enqueueFleetMetaFreshness(supabase, url)'))
+  assert.match(worker, /DAILY_FRESHNESS_WORKER_SECRET/)
+  assert.match(worker, /action: 'system_cycle'/)
+})
+
+test('automatic Microsoft mirror excludes Client Schedule and uses exact established reconciliation', () => {
+  const automatic = readFileSync(new URL('../supabase/functions/microsoft-transition-sync/automatic-reconciliation.ts', import.meta.url), 'utf8')
+  assert.match(automatic, /buildMicrosoftReconciliation/)
+  assert.match(automatic, /item\.destination === 'planner' \|\| item\.destination === 'cg_calendar'/)
+  assert.doesNotMatch(automatic, /from\('monthly_deliverables'\)/)
+  assert.match(automatic, /buildMicrosoftApplyRpcArgs/)
+  assert.match(automatic, /microsoftStableItemKey/)
+})
+
+test('system reconciliation is fail-closed behind exact worker secret and identity', () => {
+  const edge = readFileSync(new URL('../supabase/functions/microsoft-transition-sync/index.ts', import.meta.url), 'utf8')
+  assert.match(edge, /expectedSystemSecret\.length >= 32/)
+  assert.match(edge, /MICROSOFT_SYNC_SYSTEM_USER_ID/)
+  assert.match(edge, /eq\('created_by', user\.id\)/)
+  assert.match(edge, /Date\.now\(\) - lastSuccess < 3 \* 60 \* 60 \* 1000/)
+})
+
+test('service reconciliation activation remains an explicit protected migration', () => {
+  const sql = readFileSync(new URL('../supabase/migrations/20260921120000_daily_dynamics_service_reconciliation.sql', import.meta.url), 'utf8')
+  assert.match(sql, /DO NOT APPLY IN PRODUCTION WITHOUT CA APPROVAL/)
+  assert.match(sql, /auth\.role\(\) = 'service_role'/)
+  assert.doesNotMatch(sql, /monthly_deliverables/)
+})

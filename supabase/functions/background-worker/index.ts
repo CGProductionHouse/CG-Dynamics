@@ -88,6 +88,14 @@ Deno.serve(async () => {
     }
   }
 
+  // ── Daily operating freshness cycle ──────────────────────────────────────
+  // Microsoft is intentionally admitted before Meta. Each invocation advances
+  // one durable Microsoft source unit; the existing per-minute worker therefore
+  // drains large paginated jobs without a long request. The Microsoft function
+  // deduplicates against its exact system identity and enforces a three-hour
+  // freshness window before starting another reconciliation.
+  const microsoftFreshness = await advanceMicrosoftFreshness(url)
+
   // ── Meta sync batch reaper ────────────────────────────────────────────────
   // The durable safety net for production blocker #161.
   //
@@ -114,8 +122,25 @@ Deno.serve(async () => {
   // state (Access/Coverage/Completeness/Freshness) independently.
   const fleetFreshness = await enqueueFleetMetaFreshness(supabase, url)
 
-  return new Response(JSON.stringify({ ok: true, worker, processed, reaped, laneRecoveries, fleetFreshness }), { headers: { 'Content-Type': 'application/json' } })
+  return new Response(JSON.stringify({ ok: true, worker, processed, microsoftFreshness, reaped, laneRecoveries, fleetFreshness }), { headers: { 'Content-Type': 'application/json' } })
 })
+
+async function advanceMicrosoftFreshness(url: string): Promise<Record<string, unknown>> {
+  const secret = (Deno.env.get('DAILY_FRESHNESS_WORKER_SECRET') ?? '').trim()
+  if (secret.length < 32) return { ok: false, state: 'unavailable', blocker: 'DAILY_FRESHNESS_WORKER_SECRET is not configured.' }
+  try {
+    const response = await fetch(`${url}/functions/v1/microsoft-transition-sync`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-daily-freshness-secret': secret },
+      body: JSON.stringify({ action: 'system_cycle' }),
+      signal: AbortSignal.timeout(20_000),
+    })
+    const body = await response.json().catch(() => ({})) as Record<string, unknown>
+    return { ok: response.ok && body.ok === true, httpStatus: response.status, ...body }
+  } catch {
+    return { ok: false, state: 'failed', blocker: 'Microsoft freshness worker could not be reached; the last verified mirror remains in use.' }
+  }
+}
 
 interface LaneRecoveryRow {
   batch_id: string
