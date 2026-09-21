@@ -33,7 +33,7 @@ export function microsoftFreshnessEvidence(input: MicrosoftFreshnessInput): Fres
     return { verdict: 'FAILED', lastAttemptedAt: input.lastJobStartedAt, lastSuccessfulAt: input.lastSuccessfulReconciliationAt, staleAfterMinutes, incomplete, blocker: input.blocker ?? 'The latest Microsoft reconciliation failed.', recoveryInProgress: Boolean(input.recoveryInProgress) }
   }
   if (incomplete.length > 0 || input.applyStatus === 'partial' || input.applyStatus === 'applying') {
-    return { verdict: 'PARTIAL', lastAttemptedAt: input.lastJobStartedAt, lastSuccessfulAt: input.lastSuccessfulReconciliationAt, staleAfterMinutes, incomplete, blocker: input.blocker, recoveryInProgress: Boolean(input.recoveryInProgress || input.applyStatus === 'applying') }
+    return { verdict: 'PARTIAL', lastAttemptedAt: input.lastJobStartedAt, lastSuccessfulAt: input.lastSuccessfulReconciliationAt, staleAfterMinutes, incomplete, blocker: input.blocker ?? null, recoveryInProgress: Boolean(input.recoveryInProgress || input.applyStatus === 'applying') }
   }
   const success = input.lastSuccessfulReconciliationAt ? Date.parse(input.lastSuccessfulReconciliationAt) : Number.NaN
   const now = Date.parse(input.now)
@@ -66,6 +66,7 @@ export interface MetaFleetFreshness {
   platforms: Array<MetaCheckpointInput & { verdict: FreshnessVerdict; reason: string | null }>
   stale: number
   partial: number
+  failed: number
   unavailable: number
   recoveryInProgress: boolean
 }
@@ -100,6 +101,7 @@ export function metaFleetFreshnessEvidence(checkpoints: MetaCheckpointInput[], n
     platforms,
     stale,
     partial,
+    failed,
     unavailable,
     recoveryInProgress: platforms.some(item => item.retrying),
   }

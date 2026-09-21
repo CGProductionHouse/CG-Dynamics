@@ -8,6 +8,7 @@ import { createClient } from 'jsr:@supabase/supabase-js@2'
 import webpush from 'npm:web-push@3.6.7'
 import { dispatchMetaWorker } from '../_shared/metaWorkerDispatch.ts'
 import { currentMetaMonth, previousMetaMonth, currentMonthHasIncrementalWindow } from '../_shared/metaPeriod.ts'
+import { fetchAllRows } from '../_shared/paginatedRows.ts'
 
 const MAX_RUNTIME_MS = 25_000
 const MAX_JOBS_PER_RUN = 25
@@ -258,7 +259,7 @@ interface CheckpointRow {
   // LEFT JOIN with meta_asset_sync_checkpoints to find due/missing work.
   // Missing checkpoint row = bootstrap due (never synced).
   // Existing checkpoint with next_due_at <= now() = refresh due.
-  const { data: expectedTargets, error: targetError } = await supabase
+  const { data: expectedTargets, error: targetError } = await fetchAllRows((from, to) => supabase
     .from('meta_client_assets')
     .select(`
       id,
@@ -277,7 +278,7 @@ interface CheckpointRow {
       )
     `)
     .eq('is_active', true)
-    .limit(100)
+    .range(from, to))
 
   if (targetError || !expectedTargets || expectedTargets.length === 0) {
     return out
@@ -372,10 +373,11 @@ interface CheckpointRow {
   // The worker controls retry timing; the scheduler must treat all queued/running
   // asset+month as active logical work to prevent duplicate enqueue.
   const activeWorkKeys = new Set<string>()
-  const { data: activeItems } = await supabase
+  const { data: activeItems } = await fetchAllRows((from, to) => supabase
     .from('meta_sync_batch_items')
     .select('asset_id, month')
     .in('status', ['queued', 'running'])
+    .range(from, to))
 
   if (activeItems) {
     for (const item of activeItems) {
@@ -617,10 +619,11 @@ async function runMetaSyncBatch(
 
   if (!batchId) {
     // Linked, active clients only — the same population the sync engine serves.
-    const { data: assets, error: assetsError } = await supabase
+    const { data: assets, error: assetsError } = await fetchAllRows((from, to) => supabase
       .from('meta_client_assets')
       .select('client_id')
       .eq('is_active', true)
+      .range(from, to))
     if (assetsError) throw new Error(`Could not load linked Meta clients: ${assetsError.message}`)
     const clientIds = [...new Set((assets ?? []).map(a => a.client_id))]
     if (clientIds.length === 0) throw new Error('No clients are linked to Meta yet — nothing to sync.')

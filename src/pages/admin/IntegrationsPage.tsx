@@ -54,7 +54,7 @@ export default function IntegrationsPage() {
               status: (run?.status as string | null) ?? null,
               healthState: (run?.health_state as string | null) ?? null,
               errorCode: (run?.last_error_code as string | null) ?? null,
-              retrying: false,
+              retrying: Boolean(run?.retrying),
             })
           }
           return rows
@@ -193,7 +193,8 @@ export default function IntegrationsPage() {
                 {metaFreshness && <div className="mt-3 rounded-lg border border-white/10 bg-black/20 p-3 text-xs text-white/65">
                   <div className="flex items-center justify-between gap-2"><span>Fleet freshness</span><StatusBadge label={metaFreshness.verdict} variant={freshnessTone(metaFreshness.verdict)} size="sm" /></div>
                   <p className="mt-2">{metaFreshness.mappedClients} clients · {metaFreshness.mappedAssets} assets · {metaFreshness.platforms.length} mapped platforms</p>
-                  {(metaFreshness.stale > 0 || metaFreshness.partial > 0 || metaFreshness.unavailable > 0) && <p className="mt-1 text-amber-200">{metaFreshness.stale} stale · {metaFreshness.partial} partial · {metaFreshness.unavailable} unavailable</p>}
+                  {(metaFreshness.stale > 0 || metaFreshness.partial > 0 || metaFreshness.failed > 0 || metaFreshness.unavailable > 0) && <p className="mt-1 text-amber-200">{metaFreshness.failed} failed · {metaFreshness.stale} stale · {metaFreshness.partial} partial · {metaFreshness.unavailable} unavailable</p>}
+                  {metaFreshness.recoveryInProgress && <p className="mt-1 text-sky-200">Recovery in progress</p>}
                 </div>}
               </div>
             </div>

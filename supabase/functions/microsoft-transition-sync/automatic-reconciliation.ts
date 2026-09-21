@@ -22,7 +22,7 @@ export interface AutomaticReconciliationResult {
 /** Applies only already-approved Planner and Outlook mirror domains.
  * Client Schedule is excluded categorically, and every update uses an exact
  * durable Microsoft identity plus the established optimistic-lock contract. */
-export async function applyAutomaticMicrosoftMirrors(db: Db, snapshot: MicrosoftSnapshot, previewJobId: string): Promise<AutomaticReconciliationResult> {
+export async function applyAutomaticMicrosoftMirrors(db: Db, snapshot: MicrosoftSnapshot, previewJobId: string, systemUserId: string): Promise<AutomaticReconciliationResult> {
   const [clients, aliases, boards, buckets, planner, calendar] = await Promise.all([
     db.from('clients').select('id,name,active').eq('active', true),
     db.from('client_aliases').select('client_id,alias'),
@@ -69,7 +69,7 @@ export async function applyAutomaticMicrosoftMirrors(db: Db, snapshot: Microsoft
   let applied = 0; let skipped = 0; let failed = 0; let firstError: string | null = null
   for (const item of items) {
     const args = buildMicrosoftApplyRpcArgs(item, snapshot, run.id, microsoftStableItemKey(item), true)
-    const result = await db.rpc('apply_microsoft_sync_item', args as unknown as Record<string, unknown>)
+    const result = await db.rpc('apply_microsoft_sync_item_automatic', { ...args, p_system_user_id: systemUserId } as unknown as Record<string, unknown>)
     if (result.error) { failed += 1; firstError ??= result.error.message }
     else if (args.p_should_apply) applied += 1
     else skipped += 1

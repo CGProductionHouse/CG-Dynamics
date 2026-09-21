@@ -24,6 +24,7 @@ import {
   type SourceManifest,
   type SourceUnitResult,
   PAGINATION_BATCH_SIZE,
+  planAutomaticSourceRecovery,
 } from './job-machine.ts'
 import { applyAutomaticMicrosoftMirrors } from './automatic-reconciliation.ts'
 
@@ -316,7 +317,7 @@ Deno.serve(async request => {
   let action = body.action ?? ''
   if (systemRequest) {
     const { data: latestSystemJob } = await sb.from('microsoft_sync_jobs')
-      .select('id,status,created_at,exported_at').eq('created_by', user.id)
+      .select('id,status,created_at,exported_at,automatic_retry_count,automatic_retry_after').eq('created_by', user.id)
       .order('created_at', { ascending: false }).limit(1).maybeSingle()
     const { data: appliedRun } = latestSystemJob?.id ? await sb.from('microsoft_sync_runs')
       .select('id,status,finished_at').eq('preview_job_id', latestSystemJob.id)
@@ -324,6 +325,19 @@ Deno.serve(async request => {
     const lastSuccess = appliedRun?.status === 'completed' && appliedRun.finished_at ? Date.parse(appliedRun.finished_at) : 0
     const recentTerminal = appliedRun?.finished_at ? Date.now() - Date.parse(appliedRun.finished_at) < 3 * 60 * 60 * 1000 : false
     if (latestSystemJob?.status === 'running') {
+      const { data: recoverySources } = await sb.from('microsoft_sync_job_sources')
+        .select('required,stage').eq('job_id', latestSystemJob.id)
+      const failedRequired = (recoverySources ?? []).filter(source => source.required && source.stage === 'failed').length
+      const recovery = planAutomaticSourceRecovery({ failedRequired, retryCount: Number(latestSystemJob.automatic_retry_count ?? 0), retryAfter: latestSystemJob.automatic_retry_after ?? null, now: new Date().toISOString() })
+      if (recovery.kind === 'wait') return jsonResponse({ ok: false, phase: 'retry_wait', jobId: latestSystemJob.id, retryAfter: recovery.retryAfter })
+      if (recovery.kind === 'exhausted') {
+        await sb.from('microsoft_sync_jobs').update({ status: 'failed', automatic_failure: 'Automatic source retry budget exhausted.', updated_at: new Date().toISOString() }).eq('id', latestSystemJob.id)
+        return jsonResponse({ ok: false, phase: 'degraded', jobId: latestSystemJob.id, blocker: 'Automatic Microsoft source recovery was exhausted; manual review is required.' })
+      }
+      if (recovery.kind === 'retry') {
+        await sb.from('microsoft_sync_job_sources').update({ ...retrySourceReset(), updated_at: new Date().toISOString() }).eq('job_id', latestSystemJob.id).eq('stage', 'failed')
+        await sb.from('microsoft_sync_jobs').update({ automatic_retry_count: recovery.nextRetryCount, automatic_retry_after: recovery.retryAfter, automatic_failure: null, updated_at: new Date().toISOString() }).eq('id', latestSystemJob.id)
+      }
       action = 'job_process'; body.jobId = latestSystemJob.id
     } else if (latestSystemJob?.status === 'complete' && !appliedRun) {
       const auto = await automaticallyApplyJob(sb, latestSystemJob.id)
@@ -505,7 +519,7 @@ async function automaticallyApplyJob(sb: ReturnType<typeof createClient>, jobId:
   const exportedAt = (job.exported_at as string | null) ?? new Date().toISOString()
   const snapshot = assembleSnapshot(jobRows, (job.assignee_map as Record<string, unknown>) ?? {}, exportedAt)
   if (!job.exported_at) await sb.from('microsoft_sync_jobs').update({ exported_at: exportedAt, status: 'complete', updated_at: exportedAt }).eq('id', jobId)
-  return applyAutomaticMicrosoftMirrors(sb, snapshot, jobId)
+  return applyAutomaticMicrosoftMirrors(sb, snapshot, jobId, Deno.env.get('MICROSOFT_SYNC_SYSTEM_USER_ID') ?? '')
 }
 
 async function mergeAssignees(

@@ -231,6 +231,18 @@ export function retrySourceReset() {
   }
 }
 
+export const MAX_AUTOMATIC_SOURCE_RETRIES = 3
+export const AUTOMATIC_RETRY_COOLDOWN_MS = 5 * 60 * 1000
+
+export function planAutomaticSourceRecovery(input: { failedRequired: number; retryCount: number; retryAfter: string | null; now: string }) {
+  if (input.failedRequired === 0) return { kind: 'none' as const, nextRetryCount: input.retryCount, retryAfter: null }
+  if (input.retryCount >= MAX_AUTOMATIC_SOURCE_RETRIES) return { kind: 'exhausted' as const, nextRetryCount: input.retryCount, retryAfter: null }
+  const nowMs = Date.parse(input.now)
+  const retryAfterMs = input.retryAfter ? Date.parse(input.retryAfter) : Number.NaN
+  if (Number.isFinite(retryAfterMs) && retryAfterMs > nowMs) return { kind: 'wait' as const, nextRetryCount: input.retryCount, retryAfter: input.retryAfter }
+  return { kind: 'retry' as const, nextRetryCount: input.retryCount + 1, retryAfter: new Date(nowMs + AUTOMATIC_RETRY_COOLDOWN_MS).toISOString() }
+}
+
 export interface JobSourceRow {
   position: number
   source_type: string
