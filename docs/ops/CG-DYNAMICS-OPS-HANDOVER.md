@@ -1,5 +1,34 @@
 # CG Dynamics Ops Handover
 
+
+## CURRENT OVERRIDE — 21 September 2026, P0 TODAY
+
+This section supersedes the older manual-lane snapshot below. Refetch live GitHub + #381 + Control Centre before consequential action.
+
+### CA P0 priority: Content Production Autopilot + daily freshness
+
+CA has explicitly reprioritised today around getting the content-production operating chain dependable and automatically fresh.
+
+- **CA MANUAL 02 owns Issue #450 / `feat/450-content-production-autopilot`.** This is the highest-priority content lane: exact Outlook/CG Calendar -> Content Run identity, automatic canonical draft Content Guideline creation, review-ready multi-month AI content, same-client schedule linkage, canonical internal per-video production folders, Client Portal Video final-output mapping, raw-upload verification, edit-readiness state, and narrow audited Assistant/MCP actions so staff can review/change through ChatGPT instead of backend fallbacks.
+- **CA MANUAL 01 owns Issue #451 / `feat/451-daily-dynamics-freshness`.** This lane makes Microsoft/Teams/Planner/Outlook and Meta fresh automatically in the normal operating cycle, with durable success/failure evidence, bounded recovery, exact-ID reconciliation and no fake-zero/stale-as-current behavior.
+- **Issue #448 / PR #449 is PAUSED, not rejected.** Preserve its current branch/head for later. Manual 02 capacity is released from it until #450 clears.
+- **Issue #442 is PAUSED.** Preserve `fix/442-main-suite-baseline` for later. Manual 01 capacity is released from it until #451 clears.
+- Shared MCP ownership while both P0 lanes run: #450 owns `supabase/functions/cg-dynamics-mcp/index.ts`, `toolCatalog.ts` and content Assistant skill/action files. #451 must not edit those concurrently; any tiny MCP follow-up is deferred for supervisor reconciliation after #450 lands.
+- Existing authorities remain locked: `monthly_deliverables` is Client Schedule truth; one canonical Content Guideline per real Content Run; Content Runs may cover multiple future months; canonical OneDrive naming uses configured client short code only; raw internal production storage is never exposed to clients; live Microsoft remains freshness authority for Microsoft-backed work during coexistence.
+- #325 + #327 remain umbrella authorities. #450 and #451 are execution lanes, not replacements.
+- Routine green code-only merges may proceed under supervisor review. Production migrations/data reconciliation, Edge Function deploys, scheduler/cron activation, secrets/permissions, provider configuration, OneDrive write rollout and other protected production actions still require CA approval at the exact gate.
+
+### Today acceptance target
+
+Before calling this P0 closed:
+1. upcoming real Content Runs already have review-ready draft guidelines rather than blank/manual setup;
+2. staff can review/change guideline content through governed ChatGPT/Dynamics actions;
+3. each video resolves a canonical internal production folder plus client-safe final-output destination when mappings are complete;
+4. raw-upload state truthfully drives edit readiness;
+5. Microsoft/Teams/Outlook and Meta freshness run automatically and expose PASS/PARTIAL/STALE/FAILED rather than relying on a human Sync click;
+6. Econofoods 23 Sep failure class is covered by deterministic acceptance and then used as the first controlled live acceptance case after code review;
+7. no Client Schedule rewrite, cross-client guessing, fake run, fake zero, or destructive OneDrive cleanup is introduced.
+
 ## CURRENT OVERRIDE — 20 September 2026, morning SAST
 
 This section supersedes older lane snapshots below. Refetch live GitHub + #381 before consequential action.
