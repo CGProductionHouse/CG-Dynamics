@@ -2664,6 +2664,37 @@ const handleGetGoogleAdsAudit: ToolHandler = async (staff, input) => {
 }
 
 
+const MISSING_RELATION_CODES = new Set(['42P01', 'PGRST205'])
+
+async function loadRecordedClientUpdates(staff: AuthenticatedStaff, clientId: string) {
+  const { data, error } = await staff.supabase
+    .from('client_context_updates')
+    .select('id, update_kind, title, body, decisions, unresolved, linked_task_ids, meeting_debrief_id, source_kind, source_meeting_title, source_meeting_date, review_state, created_at')
+    .eq('client_id', clientId)
+    .neq('review_state', 'rejected')
+    .order('created_at', { ascending: false })
+    .limit(20)
+  if (error) {
+    const status = MISSING_RELATION_CODES.has(String(error.code ?? '')) ? 'not_installed' : 'unavailable'
+    return {
+      status,
+      error: error.message,
+      view: {
+        status,
+        note: status === 'not_installed'
+          ? 'Recorded client updates are not installed in this environment yet (#341 migration pending). Report this rather than implying there are none.'
+          : 'Recorded client updates could not be read. Report them as unknown, not as none.',
+        updates: [],
+      },
+    }
+  }
+  return {
+    status: 'available',
+    error: null,
+    view: { status: 'available', note: RECORDED_CLIENT_UPDATES_NOTE, updates: summarizeClientUpdates(data ?? []) },
+  }
+}
+
 // ── #450 Content preparation actions ────────────────────────────────────────
 //
 // Every action is addressed by an exact run or video id, re-checked against the
@@ -3031,37 +3062,6 @@ const handleGenerateContentGuidelineDrafts: ToolHandler = async (staff, input) =
     mode,
     result: result.data,
     note: 'Draft only. Review each draft before it is saved; a field a human wrote is never overwritten.',
-  }
-}
-
-const MISSING_RELATION_CODES = new Set(['42P01', 'PGRST205'])
-
-async function loadRecordedClientUpdates(staff: AuthenticatedStaff, clientId: string) {
-  const { data, error } = await staff.supabase
-    .from('client_context_updates')
-    .select('id, update_kind, title, body, decisions, unresolved, linked_task_ids, meeting_debrief_id, source_kind, source_meeting_title, source_meeting_date, review_state, created_at')
-    .eq('client_id', clientId)
-    .neq('review_state', 'rejected')
-    .order('created_at', { ascending: false })
-    .limit(20)
-  if (error) {
-    const status = MISSING_RELATION_CODES.has(String(error.code ?? '')) ? 'not_installed' : 'unavailable'
-    return {
-      status,
-      error: error.message,
-      view: {
-        status,
-        note: status === 'not_installed'
-          ? 'Recorded client updates are not installed in this environment yet (#341 migration pending). Report this rather than implying there are none.'
-          : 'Recorded client updates could not be read. Report them as unknown, not as none.',
-        updates: [],
-      },
-    }
-  }
-  return {
-    status: 'available',
-    error: null,
-    view: { status: 'available', note: RECORDED_CLIENT_UPDATES_NOTE, updates: summarizeClientUpdates(data ?? []) },
   }
 }
 

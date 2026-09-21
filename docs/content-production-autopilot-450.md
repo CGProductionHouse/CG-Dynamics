@@ -86,6 +86,13 @@ Never: create a run, rewrite `monthly_deliverables`, overwrite a human field, pu
 or delete a file, or expose raw media to a client. A client with no upcoming run reports
 `NO_FUTURE_CONTENT_RUN` — it never gets an invented shoot date.
 
+**What the background pass deliberately does not do yet.** It ensures the guideline and computes
+what should be generated, but it does not itself call the AI Content Director. Generation stays
+explicitly triggered — by staff in the editor, or by the Assistant's
+`generate_content_guideline_drafts` — until CA approves automatic AI writes on the cycle. That is a
+separate gate below, not an oversight: the pass would otherwise write AI drafts across every active
+client the first time it ran.
+
 ## What must never happen here
 
 - writing `monthly_deliverables` from this flow;
@@ -104,4 +111,5 @@ or delete a file, or expose raw media to a client. A client with no upcoming run
 | Assistant content actions live | Deploy `cg-dynamics-mcp` (CA approval), then refresh the ChatGPT connector action list |
 | Prepared draft generation live | Deploy `suggest-content-videos`; a web-grounded provider key for real research |
 | Autopilot running on the cycle | Deploy `background-worker` and enqueue `content_autopilot` on the existing cycle |
+| Automatic AI draft generation on the cycle | CA decision: today the pass prepares and reports; it never calls the AI Content Director by itself |
 | Econofoods live acceptance | Configure the Econofoods `short_code`, map its client folder and the 23 Sep run month folder — all CA/admin actions |

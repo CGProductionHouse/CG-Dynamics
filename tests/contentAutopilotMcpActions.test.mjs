@@ -130,7 +130,7 @@ test('the Edge copy of the readiness rules does not drift from the app', () => {
 
 test('the handlers cannot write the Client Schedule or publish a guideline', () => {
   const start = serverSource.indexOf('// ── #450 Content preparation actions')
-  const handlers = serverSource.slice(start, serverSource.indexOf('const MISSING_RELATION_CODES', start))
+  const handlers = serverSource.slice(start, serverSource.indexOf('// ── Tool Router', start))
   assert.ok(start > 0, 'the #450 handler block exists')
   // The only monthly_deliverables touch is a read to verify same-client provenance.
   const deliverableCalls = handlers.match(/from\('monthly_deliverables'\)[\s\S]{0,120}/g) ?? []
@@ -147,7 +147,7 @@ test('the handlers cannot write the Client Schedule or publish a guideline', () 
 
 test('generation blocks instead of inventing content', () => {
   const start = serverSource.indexOf('const handleGenerateContentGuidelineDrafts')
-  const handler = serverSource.slice(start, serverSource.indexOf('const MISSING_RELATION_CODES', start))
+  const handler = serverSource.slice(start, serverSource.indexOf('// ── Tool Router', start))
   assert.match(handler, /GENERATION_BLOCKED/)
   assert.match(handler, /GUIDELINE_APPROVED/, 'an approved guideline is never regenerated')
   assert.match(handler, /suggest-content-videos/, 'it reuses the existing Content Director')
