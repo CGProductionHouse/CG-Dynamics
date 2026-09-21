@@ -128,7 +128,7 @@ export function resolveCaptionContacts(input: {
   // same logical contact slot. Multiple people may legitimately share a contact type
   // (for example a consultant email block), so person/label identity is part of the key.
   const contactSlotKey = (contact: CaptionContactCandidate) =>
-    `${contact.contact_type}::${(contact.person_name?.trim() || contact.display_label.trim()).toLowerCase()}`
+    `${contact.contact_type}::${contact.person_name?.trim().toLowerCase() ?? ''}::${contact.display_label.trim().toLowerCase()}`
   const valuesBySlot = new Map<string, Set<string>>()
   for (const contact of contacts) {
     const slot = contactSlotKey(contact)
