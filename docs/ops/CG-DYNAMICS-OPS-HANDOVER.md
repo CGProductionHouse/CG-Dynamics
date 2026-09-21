@@ -1,6 +1,89 @@
 # CG Dynamics Ops Handover
 
 
+## NEW CHAT BOOTSTRAP — 21 September 2026, 11:36 SAST
+
+**This is the canonical starting point for the next CG Dynamics supervisor chat. Refetch live GitHub before consequential action.**
+
+### P0 today
+
+CA's P0 is:
+1. **#450 Content Production Autopilot** — guidelines already prepared for upcoming runs/months, staff primarily review/change through ChatGPT/Dynamics, exact per-video OneDrive working/final mappings, raw-upload truth and edit readiness.
+2. **#451 Daily Dynamics Freshness** — Microsoft/Teams/Planner/Outlook + Meta fresh automatically before staff work, with truthful PASS/PARTIAL/STALE/FAILED/UNAVAILABLE and bounded recovery.
+
+### Manual ownership
+
+**CA MANUAL 02 — #450 / PR #455**
+- branch: `feat/450-content-production-autopilot`
+- head at checkpoint: `9ebe22c28bd3ae88df8e0928517057437bf4a6f0`
+- state: **IMPLEMENTATION COMPLETE / AWAITING SUPERVISOR CODE REVIEW**
+- open/mergeable at checkpoint.
+- Review the actual PR diff before accepting the agent report.
+- Reported scope: auto-ensure run/guideline, rolling drafts, eight audited MCP guideline actions, configured short-code-only folder naming, per-video production + portal identity, raw/edit-readiness derivation, Content Operations readiness, background `content_autopilot` job, Econofoods fixture.
+- Autonomous audit #452 is complete and should be read during review. It identified the Microsoft-owned event ensure gap, existing-authority reuse, #454 background-worker overlap, #438 Content Guideline UI overlap, and protected OneDrive/calendar identity gates.
+- Protected activation after code acceptance remains CA-only: migration `20260921090000_content_production_autopilot.sql`, `cg-dynamics-mcp` deploy + connector refresh, `background-worker` deploy/job enablement, automatic AI-generation decision, OneDrive production rollout/tokens/writes, Econofoods exact short-code + mapping live acceptance.
+
+**CA MANUAL 01 — #451 / PR #454**
+- branch: `feat/451-daily-dynamics-freshness`
+- head at checkpoint: `10d6a986e2dc5f9da5e6268b0cc198b15f6abc2d`
+- state: **SUPERVISOR REVIEW / CORRECTION PASS REQUIRED**
+- same branch/PR only.
+- Latest supervisor review on #451/PR #454 is authoritative.
+- Five blockers:
+  1. Vercel preview RED: deployment `dpl_HQN9J7rKupJ3P2zGrPnx4srZY1de`, `lint_or_type_error`, `npm run build` exit 2.
+  2. Migration `20260921120000_daily_dynamics_service_reconciliation.sql` must NOT redefine global `public.is_admin()` for service role; scope service authority only to Microsoft automatic apply + explicit required EXECUTE grant.
+  3. System Microsoft job can loop forever after a failed required source; add bounded auto retry/cooldown/exhaustion and truthful degraded/failed terminal state.
+  4. Meta fleet discovery is hard-capped at 100 assets; fully page inventory and test >100.
+  5. Meta retry/failure truth is incomplete: `retrying: false` is hard-coded and failed count is omitted; derive from durable batch/checkpoint state.
+- After fixes: reconcile current main, rerun suites/build/lint/diff and require fresh green Vercel.
+- Authenticated desktop/mobile UI acceptance remains outstanding.
+- No migration/deploy/secret/cron/live reconciliation/provider change is authorised yet.
+
+### Autonomous support
+
+- **#452** audit support for #450: COMPLETE. Read its concrete audit comment; no code/branch/production action.
+- **#453** audit support for #451: first Poolside route failed by request-limit; rerouted to `/oc /nvidia`. Action run `35583400106` was IN_PROGRESS at 11:36 SAST. Audit-only; must not modify code.
+- Scheduled OpenCode free-primary route has demonstrated provider health, but recent scheduled runs often produced no product SHA. Do not equate workflow success with product progress.
+
+### Completed / paused
+
+- #448 / PR #449 research-source governance: COMPLETE / MERGED at `d9143930933a8647f7d1bddca84a61ca1b59331e`.
+- #442 baseline reconciliation: PAUSED; preserve `fix/442-main-suite-baseline`.
+- #437 / PR #438 Creative Intelligence: code accepted previously, but authenticated UI acceptance + current-main reconciliation remain. It overlaps the Content Guideline surface, so coordinate carefully with #450.
+- #435 Google Ads code merged; production activation remains separately protected.
+- Client Portal / Brand Hub production migration/mapping/enablement remains separately protected.
+
+### Locked authorities
+
+- `monthly_deliverables` is canonical Client Schedule truth.
+- one canonical Content Guideline per real Content Run.
+- a real Content Run may cover several future months.
+- never fabricate a run when no future real run exists.
+- use configured client short code only; never infer from display name.
+- canonical production path:
+  `Clients/<Client>/Videos/<YYYY>/<YYYY_MM_MON>/<YYYY_MM_<SHORT_CODE>_VIDEO_<XX>>`
+- client portal boundary:
+  `Clients/<Client>/A_ClientPortal_<ClientSlug>/Brand Identity|Graphic Design|Video`
+- raw internal production storage is never client-visible.
+- live Microsoft remains freshness authority for Microsoft-backed work during coexistence.
+- no second Content system, Client Schedule, sync authority, Marketing Library or file tracker.
+
+### Exact next supervisor sequence
+
+1. Refetch `main`, PR #455, PR #454, #453.
+2. **Review PR #455 first**; it is CA's highest operational priority.
+3. If #455 is clean, merge routine code only; do not cross its protected production gates.
+4. Reconcile #454's shared `background-worker/index.ts` carefully after #455 merge, or require Manual 01 to rebase during its correction pass.
+5. Review the next #454 SHA only after all five blockers are fixed, branch is current and Vercel is green.
+6. Incorporate #453 autonomous audit findings when they land.
+7. Then present CA the exact protected activation sequence needed to make the P0 genuinely live today.
+8. First controlled live acceptance must prove Econofoods content readiness + Microsoft exact reconciliation + Meta freshness truth, not merely deployment success.
+
+### Communication
+
+Full coding specs/reviews go into GitHub first. CA receives only tiny prompts naming **CA MANUAL AGENT 01** or **CA MANUAL AGENT 02**. Never accept an agent's prose report without refetching GitHub/diff/checks.
+
+
 ## CURRENT OVERRIDE — 21 September 2026, P0 TODAY
 
 This section supersedes the older manual-lane snapshot below. Refetch live GitHub + #381 + Control Centre before consequential action.
