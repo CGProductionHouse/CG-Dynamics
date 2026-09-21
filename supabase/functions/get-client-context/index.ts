@@ -372,7 +372,7 @@ async function loadContactContext(
   // Ambiguity guard: fail closed only when two approved values compete for the same
   // logical contact slot. Distinct people may legitimately share a contact type.
   const contactSlotKey = (contact: { contact_type: string; person_name: string | null; display_label: string }) =>
-    `${contact.contact_type}::${(contact.person_name?.trim() || contact.display_label.trim()).toLowerCase()}`
+    `${contact.contact_type}::${contact.person_name?.trim().toLowerCase() ?? ''}::${contact.display_label.trim().toLowerCase()}`
   const valuesBySlot = new Map<string, Set<string>>()
   for (const contact of approved) {
     const slot = contactSlotKey(contact)
