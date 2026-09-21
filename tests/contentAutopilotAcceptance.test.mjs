@@ -460,3 +460,37 @@ test('EXECUTED: runs_unprocessed reflects the real count, not only 0 or 1', asyn
   assert.ok(result.runs_unprocessed >= 4, `expected at least 4 unprocessed, got ${result.runs_unprocessed}`)
   assert.ok(result.runs_unprocessed > 1, 'the count is not capped at 1')
 })
+
+test('EXECUTED: the pass reports what the folder gate really did, not what it skipped', async () => {
+  const db = econofoodsWorld()
+  await pass.runContentAutopilotPass(db, { today: TODAY })
+  db.tables.clients.find(client => client.id === CLIENT).short_code = 'ECONO'
+  const guideline = db.tables.content_guidelines[0]
+  db.tables.content_guide_ideas.push(
+    { id: VIDEO_A, content_guideline_id: guideline.id, client_id: CLIENT, title: 'Deli counter', month: '2026-09-01', position: 1, script: 'Written.', deliverable_id: null, production_status: 'shot', status: 'idea' },
+    { id: VIDEO_B, content_guideline_id: guideline.id, client_id: CLIENT, title: 'Weekend braai', month: '2026-09-01', position: 2, script: 'Written.', deliverable_id: null, production_status: 'shot', status: 'idea' },
+  )
+
+  // Gate off: nothing is created, and both folders are reported as still outstanding.
+  const off = await pass.runContentAutopilotPass(db, { today: TODAY, ensureVideoFolders: async () => ({ ok: true, ensured: 2 }) })
+  assert.equal(off.video_folders_ensured, 0)
+  assert.equal(off.video_folders_pending, 2)
+  assert.equal(off.blockers.VIDEO_FOLDER_NOT_ENABLED, 1)
+
+  // Gate on, but OneDrive could only create one of the two.
+  const partial = await pass.runContentAutopilotPass(db, {
+    today: TODAY, videoFolderEnabled: true,
+    ensureVideoFolders: async () => ({ ok: true, ensured: 1 }),
+  })
+  assert.equal(partial.video_folders_ensured, 1)
+  assert.equal(partial.video_folders_pending, 1, 'the unfinished folder is never counted as done')
+
+  // A failed ensure is never reported as progress.
+  const failed = await pass.runContentAutopilotPass(db, {
+    today: TODAY, videoFolderEnabled: true,
+    ensureVideoFolders: async () => ({ ok: false, error: 'OneDrive unavailable' }),
+  })
+  assert.equal(failed.video_folders_ensured, 0)
+  assert.equal(failed.video_folders_pending, 2)
+  assert.equal(failed.blockers.VIDEO_FOLDER_ENSURE_FAILED, 1)
+})

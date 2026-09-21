@@ -111,6 +111,8 @@ export interface AutopilotPassResult extends Record<string, unknown> {
   videos_planned: number
   videos_linked: number
   drafts_generated: number
+  video_folders_ensured: number
+  video_folders_pending: number
   generation_enabled: boolean
   ready_to_edit: number
   clients_without_future_run: string[]
@@ -222,6 +224,8 @@ export async function runContentAutopilotPass(
   let videosPlanned = 0
   let videosLinked = 0
   let draftsGenerated = 0
+  let videoFoldersEnsured = 0
+  let videoFoldersPending = 0
   let readyToEdit = 0
 
   for (const run of runs) {
@@ -408,15 +412,25 @@ export async function runContentAutopilotPass(
         return mapped === null && client.shortCode
       })
       .map(video => video.id as string)
-    if (videosNeedingFolders.length && options.ensureVideoFolders) {
-      if (!options.videoFolderEnabled) {
-        note('VIDEO_FOLDER_NOT_ENABLED')
+    if (videosNeedingFolders.length) {
+      if (!options.ensureVideoFolders || !options.videoFolderEnabled) {
+        // Nothing was created: say how many folders are still outstanding rather than
+        // letting a disabled gate look like completed work.
+        videoFoldersPending += videosNeedingFolders.length
+        if (options.ensureVideoFolders) note('VIDEO_FOLDER_NOT_ENABLED')
       } else {
         const ensured = await options.ensureVideoFolders({
           contentRunId: run.id as string,
           videoIds: videosNeedingFolders,
         })
-        if (!ensured.ok) note('VIDEO_FOLDER_ENSURE_FAILED')
+        if (!ensured.ok) {
+          note('VIDEO_FOLDER_ENSURE_FAILED')
+          videoFoldersPending += videosNeedingFolders.length
+        } else {
+          const made = ensured.ensured ?? 0
+          videoFoldersEnsured += made
+          videoFoldersPending += Math.max(0, videosNeedingFolders.length - made)
+        }
       }
     }
 
@@ -481,6 +495,8 @@ export async function runContentAutopilotPass(
     videos_planned: videosPlanned,
     videos_linked: videosLinked,
     drafts_generated: draftsGenerated,
+    video_folders_ensured: videoFoldersEnsured,
+    video_folders_pending: videoFoldersPending,
     generation_enabled: options.generationEnabled === true,
     ready_to_edit: readyToEdit,
     clients_without_future_run: withoutFutureRun,
