@@ -1,6 +1,9 @@
 -- #471 Phase 1 only. Prepared code; do not apply without CA approval.
 -- Standalone Instagram Login is a separate credential route for professional
 -- accounts that cannot use the canonical Facebook Page-linked Meta flow.
+-- PRODUCTION DEPLOYMENT/CONSENT IS BLOCKED until the existing Meta
+-- token-at-rest encryption requirement is resolved or this table is replaced
+-- by a reviewed encrypted store. Phase 1 code also fails closed on activation.
 
 create table if not exists public.meta_instagram_connections (
   id uuid primary key default gen_random_uuid(),
@@ -9,7 +12,7 @@ create table if not exists public.meta_instagram_connections (
   app_scoped_user_id text not null,
   instagram_account_id text not null unique,
   instagram_username text not null,
-  account_type text not null check (account_type in ('Business', 'Media_Creator')),
+  account_type text not null check (account_type in ('business', 'creator')),
   scopes text[] not null default '{}',
   status text not null default 'pending_review'
     check (status in ('pending_review', 'connected', 'needs_reauth', 'revoked', 'rejected')),
@@ -31,7 +34,7 @@ create table if not exists public.meta_instagram_connection_tokens (
 );
 
 comment on table public.meta_instagram_connection_tokens is
-  'SERVER-ONLY Instagram user tokens. RLS has no browser policies; only narrowly guarded service-role functions may access rows.';
+  'PHASE 1 ONLY: raw server-only Instagram tokens. Production deployment and consent remain blocked until reviewed token-at-rest encryption is in use.';
 
 create table if not exists public.meta_instagram_oauth_states (
   id uuid primary key default gen_random_uuid(),
@@ -89,7 +92,7 @@ create or replace function public.complete_instagram_login_connection(
 ) returns uuid
 language plpgsql
 security definer
-set search_path = public, auth, pg_temp
+set search_path = ''
 as $$
 declare
   v_connection_id uuid;
@@ -97,7 +100,7 @@ begin
   if auth.role() is distinct from 'service_role' then
     raise exception 'Service role required';
   end if;
-  if p_account_type not in ('Business', 'Media_Creator') then
+  if p_account_type not in ('business', 'creator') then
     raise exception 'Professional Instagram account required';
   end if;
   if p_instagram_account_id !~ '^\d+$' or p_app_scoped_user_id !~ '^\d+$' then
@@ -116,7 +119,7 @@ begin
   ) then
     raise exception 'Active admin or manager connecting user required';
   end if;
-  if coalesce(btrim(p_access_token), '') = '' then
+  if pg_catalog.coalesce(pg_catalog.btrim(p_access_token), '') = '' then
     raise exception 'Instagram access token required';
   end if;
   if p_instagram_username !~ '^[A-Za-z0-9._]{1,30}$' then
@@ -145,7 +148,7 @@ begin
     instagram_username, account_type, scopes, status, last_connected_at
   ) values (
     p_client_id, p_connected_by, p_app_scoped_user_id, p_instagram_account_id,
-    p_instagram_username, p_account_type, p_scopes, 'pending_review', now()
+    p_instagram_username, p_account_type, p_scopes, 'pending_review', pg_catalog.now()
   )
   on conflict (client_id) do update set
     connected_by = excluded.connected_by,
@@ -156,7 +159,7 @@ begin
     scopes = excluded.scopes,
     status = 'pending_review',
     confirmed_asset_id = null,
-    last_connected_at = now()
+    last_connected_at = pg_catalog.now()
   returning id into v_connection_id;
 
   insert into public.meta_instagram_connection_tokens (connection_id, access_token, token_expires_at)
@@ -164,7 +167,7 @@ begin
   on conflict (connection_id) do update set
     access_token = excluded.access_token,
     token_expires_at = excluded.token_expires_at,
-    updated_at = now();
+    updated_at = pg_catalog.now();
 
   return v_connection_id;
 end;

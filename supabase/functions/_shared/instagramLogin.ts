@@ -7,6 +7,13 @@ export const INSTAGRAM_LOGIN_AUTHORIZE_URL = 'https://www.instagram.com/oauth/au
 export const INSTAGRAM_LOGIN_TOKEN_URL = 'https://api.instagram.com/oauth/access_token'
 export const INSTAGRAM_GRAPH_HOST = 'https://graph.instagram.com'
 
+// Phase 1 cannot be activated while tokens would be stored as raw values.
+// A later reviewed change must replace this gate only when token-at-rest
+// encryption (or another reviewed encrypted store) is actually in use.
+export const INSTAGRAM_STANDALONE_LIVE_ACTIVATION_ENABLED: boolean = false
+export const INSTAGRAM_STANDALONE_ACTIVATION_BLOCKER =
+  'Standalone Instagram Login requires reviewed token-at-rest encryption before production deployment or consent.'
+
 export interface InstagramShortLivedToken {
   accessToken: string
   appScopedUserId: string
@@ -17,7 +24,7 @@ export interface InstagramProfessionalIdentity {
   appScopedUserId: string
   instagramAccountId: string
   username: string
-  accountType: 'Business' | 'Media_Creator'
+  accountType: 'business' | 'creator'
 }
 
 function requiredString(value: unknown, label: string): string {
@@ -75,14 +82,17 @@ export function parseInstagramShortLivedToken(body: unknown): InstagramShortLive
 }
 
 export function parseInstagramProfessionalIdentity(body: unknown): InstagramProfessionalIdentity {
-  const candidate = body as {
-    data?: Array<{ id?: unknown; user_id?: unknown; username?: unknown; account_type?: unknown }>
+  if (!body || typeof body !== 'object' || Array.isArray(body) || 'data' in body) {
+    throw new Error('Instagram identity response must be one profile object.')
   }
-  const records = candidate?.data ?? []
-  if (records.length !== 1) throw new Error('Instagram identity response did not contain exactly one account.')
-  const record = records[0]
-  const accountType = requiredString(record.account_type, 'account type')
-  if (accountType !== 'Business' && accountType !== 'Media_Creator') {
+  const record = body as { id?: unknown; user_id?: unknown; username?: unknown; account_type?: unknown }
+  const providerAccountType = requiredString(record.account_type, 'account type')
+  const accountType = providerAccountType === 'BUSINESS'
+    ? 'business'
+    : providerAccountType === 'MEDIA_CREATOR'
+      ? 'creator'
+      : null
+  if (!accountType) {
     throw new Error('Instagram Login requires a Business or Creator professional account.')
   }
 

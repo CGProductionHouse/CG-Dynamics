@@ -2,6 +2,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeaders } from '../_shared/cors.ts'
 import {
   INSTAGRAM_LOGIN_TOKEN_URL,
+  INSTAGRAM_STANDALONE_LIVE_ACTIVATION_ENABLED,
   missingInstagramLoginScopes,
   parseInstagramProfessionalIdentity,
   parseInstagramShortLivedToken,
@@ -26,6 +27,7 @@ async function boundedFetch(url: string, init?: RequestInit): Promise<Response> 
 
 Deno.serve(async req => {
   const appUrl = Deno.env.get('APP_PUBLIC_URL') || 'https://cg-dynamics.vercel.app'
+  if (!INSTAGRAM_STANDALONE_LIVE_ACTIVATION_ENABLED) return redirect(appUrl, 'activation_blocked')
   const requestUrl = new URL(req.url)
   if (requestUrl.searchParams.get('error')) return redirect(appUrl, 'denied')
 

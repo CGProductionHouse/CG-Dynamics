@@ -15,6 +15,10 @@
 - The migration, functions, provider app setup, secrets, consent, token/mapping
   writes and canonical worker token selection remain unapplied/unconfigured.
   Agent 01's background worker, activation and Microsoft files are untouched.
+- Standalone Instagram live activation is explicitly disabled in code. The
+  Phase-1 table would store a raw server-only token, so production deployment
+  and provider consent remain blocked until reviewed token-at-rest encryption
+  or another reviewed encrypted token store is actually implemented.
 - Existing Facebook/Page-linked Meta remains the first route. Standalone Login is
   only for an exact professional account proven unable/unsuitable to use that
   route. Activation requires a separate CA gate and shared Meta worker review.

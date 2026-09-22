@@ -3,6 +3,8 @@ import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 import {
   INSTAGRAM_LOGIN_SCOPES,
+  INSTAGRAM_STANDALONE_ACTIVATION_BLOCKER,
+  INSTAGRAM_STANDALONE_LIVE_ACTIVATION_ENABLED,
   buildInstagramAuthorizationUrl,
   missingInstagramLoginScopes,
   parseInstagramProfessionalIdentity,
@@ -40,22 +42,43 @@ test('short-lived token response requires one numeric app-scoped identity', () =
   assert.throws(() => parseInstagramShortLivedToken({ data: [] }), /one account/)
 })
 
-test('identity accepts only one verified professional Business or Creator account', () => {
-  assert.deepEqual(parseInstagramProfessionalIdentity({ data: [{
-    id: '102030', user_id: '998877', username: 'official.client', account_type: 'Business',
-  }] }), {
+test('identity parses the provider single-object Business fixture and preserves both IDs', () => {
+  assert.deepEqual(parseInstagramProfessionalIdentity({
+    id: '102030', user_id: '998877', username: 'official.client', account_type: 'BUSINESS',
+  }), {
     appScopedUserId: '102030',
     instagramAccountId: '998877',
     username: 'official.client',
-    accountType: 'Business',
+    accountType: 'business',
   })
+})
+
+test('identity parses the provider single-object Creator fixture', () => {
+  assert.deepEqual(parseInstagramProfessionalIdentity({
+    id: '203040', user_id: '887766', username: 'creator.client', account_type: 'MEDIA_CREATOR',
+  }), {
+    appScopedUserId: '203040',
+    instagramAccountId: '887766',
+    username: 'creator.client',
+    accountType: 'creator',
+  })
+})
+
+test('identity rejects malformed, personal, legacy-case and collection response shapes', () => {
+  assert.throws(() => parseInstagramProfessionalIdentity(null), /one profile object/)
+  assert.throws(() => parseInstagramProfessionalIdentity([]), /one profile object/)
   assert.throws(() => parseInstagramProfessionalIdentity({ data: [{
-    id: '102030', user_id: '998877', username: 'personal.user', account_type: 'Personal',
-  }] }), /Business or Creator/)
-  assert.throws(() => parseInstagramProfessionalIdentity({ data: [
-    { id: '1', user_id: '2', username: 'one', account_type: 'Business' },
-    { id: '3', user_id: '4', username: 'two', account_type: 'Business' },
-  ] }), /exactly one account/)
+    id: '1', user_id: '2', username: 'one', account_type: 'BUSINESS',
+  }] }), /one profile object/)
+  assert.throws(() => parseInstagramProfessionalIdentity({
+    id: '1', user_id: '2', username: 'mixed', account_type: 'BUSINESS', data: [],
+  }), /one profile object/)
+  assert.throws(() => parseInstagramProfessionalIdentity({
+    id: '1', user_id: '2', username: 'personal.user', account_type: 'PERSONAL',
+  }), /Business or Creator/)
+  assert.throws(() => parseInstagramProfessionalIdentity({
+    id: '1', user_id: '2', username: 'legacy.case', account_type: 'Business',
+  }), /Business or Creator/)
 })
 
 test('missing reporting permission remains an explicit blocker', () => {
@@ -79,6 +102,15 @@ test('OAuth intent is exact-client and refuses an existing canonical Instagram m
   assert.match(start, /\['admin', 'manager'\]/)
 })
 
+test('standalone Instagram production activation fails closed until encrypted token storage exists', () => {
+  assert.equal(INSTAGRAM_STANDALONE_LIVE_ACTIVATION_ENABLED, false)
+  assert.match(INSTAGRAM_STANDALONE_ACTIVATION_BLOCKER, /token-at-rest encryption/)
+  assert.match(start, /INSTAGRAM_STANDALONE_LIVE_ACTIVATION_ENABLED/)
+  assert.match(callback, /INSTAGRAM_STANDALONE_LIVE_ACTIVATION_ENABLED/)
+  assert.match(migration, /PRODUCTION DEPLOYMENT\/CONSENT IS BLOCKED/)
+  assert.match(migration, /Production deployment and consent remain blocked until reviewed token-at-rest encryption/)
+})
+
 test('callback verifies token identity and stops at pending review', () => {
   assert.match(callback, /identity\.appScopedUserId !== shortToken\.appScopedUserId/)
   assert.match(callback, /complete_instagram_login_connection/)
@@ -88,6 +120,8 @@ test('callback verifies token identity and stops at pending review', () => {
 
 test('server-only persistence is atomic, exact-client and cannot become a second reporting store', () => {
   assert.match(migration, /auth\.role\(\) is distinct from 'service_role'/)
+  assert.match(migration, /set search_path = ''/)
+  assert.doesNotMatch(migration, /set search_path = public/)
   assert.match(migration, /Active admin or manager connecting user required/)
   assert.match(migration, /Instagram account is already assigned to another client/)
   assert.match(migration, /Client already has a canonical Instagram mapping/)

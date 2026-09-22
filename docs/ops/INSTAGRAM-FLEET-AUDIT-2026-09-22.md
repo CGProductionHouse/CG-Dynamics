@@ -77,6 +77,7 @@ The prepared fallback:
 6. persists metadata and its server-only token atomically as `pending_review`;
 7. prevents one Instagram account identity from being assigned to two clients;
 8. deliberately does **not** write `meta_client_assets`, run sync, create reports/facts/checkpoints, or publish anything.
+9. fails closed before OAuth consent and callback exchange because production use remains blocked until reviewed token-at-rest encryption—or another reviewed encrypted token store—is actually implemented.
 
 The existing `meta_client_assets` row remains the only canonical reporting mapping. A later CA-approved activation must explicitly review the pending identity, bind it to that existing authority, and teach the existing Meta connector to select the standalone token for Instagram only. That activation belongs with the shared Meta worker owner; it is intentionally not implemented in #471 Phase 1.
 
@@ -85,9 +86,10 @@ The existing `meta_client_assets` row remains the only canonical reporting mappi
 1. Resolve the 11 unresolved/unsafe identity cases directly with clients, including the Bohemia name difference, HMHI legal identity, exact Supa Quick stores, PSG national-versus-branch scope and Tobich location scope.
 2. For each exact account, use the existing Meta asset discovery first. Record whether Meta returns it as the mapped Page's Instagram business account.
 3. For a proven professional account that is absent from the Page route, decide whether CA wants standalone Instagram Login and obtain the account owner's consent at action time.
-4. Before deployment, create/configure the Instagram product in the Meta App Dashboard, exact redirect URI, Instagram App ID/secret, explicit Graph version, required access level/app review and token lifecycle. None of this was performed here.
-5. Review/apply the prepared migration and deploy the two Edge Functions only through a separately approved production gate.
-6. Have the shared Meta worker owner implement/review the narrow canonical mapping/token-selection activation and token refresh before any pending connection can report.
+4. Do **not** deploy or begin provider consent while the explicit code gate is closed. First resolve the existing Meta token-at-rest encryption requirement or implement a reviewed encrypted token store; the Phase-1 raw server-only token table is not approved for live use.
+5. Only after that security gate is resolved, create/configure the Instagram product in the Meta App Dashboard, exact redirect URI, Instagram App ID/secret, explicit Graph version, required access level/app review and token lifecycle. None of this was performed here.
+6. Review/apply the prepared migration and deploy the two Edge Functions only through a separately approved production gate.
+7. Have the shared Meta worker owner implement/review the narrow canonical mapping/token-selection activation and token refresh before any pending connection can report.
 
 ## Evidence notes
 
