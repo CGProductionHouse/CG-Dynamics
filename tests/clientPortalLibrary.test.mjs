@@ -5,6 +5,7 @@ import { test } from 'node:test'
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
 
 const migration = read('../supabase/migrations/20260918113000_client_portal_library_foundation.sql')
+const categoryMigration = read('../supabase/migrations/20260919100000_client_portal_remove_photography.sql')
 const edge = read('../supabase/functions/client-onboarding/index.ts')
 const adapter = read('../supabase/functions/client-onboarding/onedrive-adapter.ts')
 const page = read('../src/features/client-onboarding/ClientSetupPage.tsx')
@@ -35,11 +36,15 @@ test('only the locked category names can be mapped', () => {
     ['brand_identity', 'Brand Identity'],
     ['graphic_design', 'Graphic Design'],
     ['video', 'Video'],
-    ['photography', 'Photography'],
   ]) {
     assert.match(migration, new RegExp(`category = '${key}' and folder_name = '${label}'`))
     assert.ok(types.includes(`'${key}'`))
     assert.ok(library.includes(`${key}: '${label}'`))
+  }
+  assert.match(categoryMigration, /check \(category in \('brand_identity', 'graphic_design', 'video'\)\)/)
+  assert.doesNotMatch(categoryMigration, /or \(category = 'photography'/)
+  for (const source of [types, library]) {
+    assert.doesNotMatch(source, /photography/i)
   }
 })
 
