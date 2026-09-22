@@ -50,6 +50,53 @@ test('Meta fleet truth is derived dynamically per exact asset and platform', () 
   assert.equal(evidence.platforms[1].reason, 'Mapped platform has never completed its bootstrap checkpoint.')
 })
 
+test('empty Meta checkpoint evidence is UNAVAILABLE and never PASS', () => {
+  const evidence = metaFleetFreshnessEvidence([], now)
+  assert.equal(evidence.verdict, 'UNAVAILABLE')
+  assert.equal(evidence.platforms.length, 0)
+})
+
+test('mapped Meta inventory preserves counts when checkpoint evidence is unavailable', () => {
+  const inventory = [
+    { clientId: 'client-a', assetId: 'asset-a', facebookMapped: true, instagramMapped: true },
+    { clientId: 'client-b', assetId: 'asset-b', facebookMapped: true, instagramMapped: false },
+  ]
+  const evidence = metaFleetFreshnessEvidence([], now, inventory, false)
+  assert.equal(evidence.verdict, 'UNAVAILABLE')
+  assert.equal(evidence.mappedClients, 2)
+  assert.equal(evidence.mappedAssets, 2)
+  assert.equal(evidence.platforms.length, 3)
+  assert.equal(evidence.unavailable, 3)
+})
+
+test('mapped Meta inventory without checkpoint rows is STALE when evidence is readable', () => {
+  const evidence = metaFleetFreshnessEvidence([], now, [
+    { clientId: 'client-a', assetId: 'asset-a', facebookMapped: true, instagramMapped: false },
+  ], true)
+  assert.equal(evidence.verdict, 'STALE')
+  assert.equal(evidence.stale, 1)
+  assert.equal(evidence.platforms[0].reason, 'Mapped platform has never completed its bootstrap checkpoint.')
+})
+
+test('Meta mixed fresh, stale and failed checkpoint verdicts remain unchanged', () => {
+  const evidence = metaFleetFreshnessEvidence([
+    { clientId: 'client-a', assetId: 'asset-a', platform: 'facebook', mapped: true, lastAttemptedAt: now, lastSuccessfulAt: now, lastSuccessfulMonth: '2026-09', highWatermarkAt: now, nextDueAt: '2026-09-22T09:00:00Z', status: 'complete', healthState: 'verified', errorCode: null, retrying: false },
+    { clientId: 'client-a', assetId: 'asset-a', platform: 'instagram', mapped: true, lastAttemptedAt: null, lastSuccessfulAt: null, lastSuccessfulMonth: null, highWatermarkAt: null, nextDueAt: null, status: null, healthState: null, errorCode: null, retrying: false },
+    { clientId: 'client-b', assetId: 'asset-b', platform: 'facebook', mapped: true, lastAttemptedAt: now, lastSuccessfulAt: null, lastSuccessfulMonth: null, highWatermarkAt: null, nextDueAt: null, status: 'failed', healthState: null, errorCode: 'permission', retrying: false },
+  ], now)
+  assert.equal(evidence.verdict, 'FAILED')
+  assert.equal(evidence.stale, 1)
+  assert.equal(evidence.failed, 1)
+  assert.equal(evidence.platforms[0].verdict, 'PASS')
+})
+
+test('Integrations renders inventory truth and cannot PASS absent checkpoint evidence', () => {
+  const integrations = readFileSync(new URL('../src/pages/admin/IntegrationsPage.tsx', import.meta.url), 'utf8')
+  assert.match(integrations, /metaFleetFreshnessEvidence\(metaCheckpoints,[\s\S]*metaInventory, metaCheckpointEvidenceAvailable\)/)
+  assert.match(integrations, /Checkpoint freshness is unavailable and has not been verified\./)
+  assert.match(integrations, /facebook_page_id, instagram_account_id/)
+})
+
 test('Meta failed attempt preserves last verified state as PARTIAL instead of zero or success', () => {
   const evidence = metaFleetFreshnessEvidence([
     { clientId: 'client-a', assetId: 'asset-a', platform: 'facebook', mapped: true, lastAttemptedAt: now, lastSuccessfulAt: '2026-09-20T08:00:00Z', lastSuccessfulMonth: '2026-09', highWatermarkAt: '2026-09-19', nextDueAt: now, status: 'failed', healthState: 'verified', errorCode: 'rate_limited', retrying: true },

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { PremiumCard } from '../../components/ui/PremiumCard'
@@ -10,7 +10,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { isAdminRole, isManagerRole } from '../../lib/roles'
 import { getMicrosoftConnectionStatus } from '../../lib/microsoftImportData'
 import { PageContainer, PageHeader } from '../../components/layout/PageShell'
-import { metaFleetFreshnessEvidence, microsoftFreshnessEvidence, type FreshnessVerdict, type MetaCheckpointInput } from '../../lib/dailyDynamicsFreshness'
+import { metaFleetFreshnessEvidence, microsoftFreshnessEvidence, type FreshnessVerdict, type MetaCheckpointInput, type MetaInventoryInput } from '../../lib/dailyDynamicsFreshness'
 
 type MetaState = 'loading' | 'connected' | 'disconnected'
 
@@ -27,7 +27,9 @@ export default function IntegrationsPage() {
   const [microsoftState, setMicrosoftState] = useState<MetaState>('loading')
   const [microsoftSourceCount, setMicrosoftSourceCount] = useState(0)
   const [microsoftFreshness, setMicrosoftFreshness] = useState<ReturnType<typeof microsoftFreshnessEvidence> | null>(null)
-  const [metaFreshness, setMetaFreshness] = useState<ReturnType<typeof metaFleetFreshnessEvidence> | null>(null)
+  const [metaCheckpoints, setMetaCheckpoints] = useState<MetaCheckpointInput[] | null>(null)
+  const [metaCheckpointEvidenceAvailable, setMetaCheckpointEvidenceAvailable] = useState(false)
+  const [metaInventory, setMetaInventory] = useState<MetaInventoryInput[] | null>(null)
 
   useEffect(() => {
     let active = true
@@ -59,7 +61,8 @@ export default function IntegrationsPage() {
           }
           return rows
         })
-        setMetaFreshness(data?.connected ? metaFleetFreshnessEvidence(checkpoints, new Date().toISOString()) : null)
+        setMetaCheckpoints(checkpoints)
+        setMetaCheckpointEvidenceAvailable(Array.isArray(data?.assetHealth))
       })
       .catch(() => {
         if (active) setMetaState('disconnected')
@@ -68,11 +71,17 @@ export default function IntegrationsPage() {
     // Linked client/asset count (best-effort; staff can read via RLS).
     supabase
       .from('meta_client_assets')
-      .select('client_id')
+      .select('id, client_id, facebook_page_id, instagram_account_id')
       .eq('is_active', true)
       .then(({ data }) => {
         if (!active || !data) return
         setLinkedClients(new Set(data.map(r => r.client_id as string)).size)
+        setMetaInventory(data.map(row => ({
+          clientId: String(row.client_id),
+          assetId: String(row.id),
+          facebookMapped: Boolean(row.facebook_page_id),
+          instagramMapped: Boolean(row.instagram_account_id),
+        })))
       })
 
     // TikTok connection status
@@ -128,6 +137,10 @@ export default function IntegrationsPage() {
       active = false
     }
   }, [canManageGoogleAds, canManageMicrosoft])
+
+  const metaFreshness = useMemo(() => metaState === 'connected' && metaCheckpoints && metaInventory
+    ? metaFleetFreshnessEvidence(metaCheckpoints, new Date().toISOString(), metaInventory, metaCheckpointEvidenceAvailable)
+    : null, [metaCheckpointEvidenceAvailable, metaCheckpoints, metaInventory, metaState])
 
   const metaConnected = metaState === 'connected'
   const metaStatus =
@@ -193,6 +206,7 @@ export default function IntegrationsPage() {
                 {metaFreshness && <div className="mt-3 rounded-lg border border-white/10 bg-black/20 p-3 text-xs text-white/65">
                   <div className="flex items-center justify-between gap-2"><span>Fleet freshness</span><StatusBadge label={metaFreshness.verdict} variant={freshnessTone(metaFreshness.verdict)} size="sm" /></div>
                   <p className="mt-2">{metaFreshness.mappedClients} clients · {metaFreshness.mappedAssets} assets · {metaFreshness.platforms.length} mapped platforms</p>
+                  {metaFreshness.verdict === 'UNAVAILABLE' && <p className="mt-1 text-amber-200">Checkpoint freshness is unavailable and has not been verified.</p>}
                   {(metaFreshness.stale > 0 || metaFreshness.partial > 0 || metaFreshness.failed > 0 || metaFreshness.unavailable > 0) && <p className="mt-1 text-amber-200">{metaFreshness.failed} failed · {metaFreshness.stale} stale · {metaFreshness.partial} partial · {metaFreshness.unavailable} unavailable</p>}
                   {metaFreshness.recoveryInProgress && <p className="mt-1 text-sky-200">Recovery in progress</p>}
                 </div>}
