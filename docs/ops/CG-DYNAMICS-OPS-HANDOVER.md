@@ -46,10 +46,17 @@
   Autopilot jobs. The code-only follow-up migration
   `20260922142000_extend_background_jobs_allowed_type_for_autopilots.sql` preserves those existing
   types, restores canonical system-owned `web_push_delivery`, and adds exactly
-  `monthly_strategy_autopilot` and `content_autopilot`; applying it remains a separate protected CA
-  gate after review/merge. The authenticated enqueue RPC remains restricted to its existing types.
-  No function, cron, RLS, grant, secret or flag change belongs to that migration follow-up. All three
-  Content Autopilot flags remain off.
+  `monthly_strategy_autopilot` and `content_autopilot`. After PR #475 merged at main
+  `8bacfd39478d082a4d7ae2371788d0dbf66beb9c`, CA separately approved and Agent 01 applied only that
+  migration. Production verification shows the exact five-value `NOT VALID` constraint and the
+  recorded `20260922142000` migration receipt. The authenticated enqueue RPC remains restricted to
+  `meta_sync` and `report_prep`; cron, RLS, grants, functions, secrets and flags were unchanged.
+- The unchanged minute worker admitted exactly one Johannesburg-day strategy job,
+  `3a8e1aa5-70aa-4ebb-9971-429ac7a8b36b`, and completed it on its first attempt. It prepared 112
+  version-1 drafts for 56 active clients across September and October 2026, reported 71 truthful
+  `PACKAGE_UNVERIFIED` blockers and zero failures. No existing strategy was encountered or
+  overwritten. The next scheduler tick reused the same succeeded daily job. All three Content
+  Autopilot flags remain false and production still has zero `content_autopilot` jobs.
 
 ## PRODUCTION ACTIVATION TRUTH — 22 September 2026
 
@@ -87,10 +94,8 @@ protected runbook are in `docs/ops/P0-PRODUCTION-ACTIVATION-2026-09-22.md`.
 - Microsoft job `40569507-7f78-4e1b-afe0-79b7b06edb4b` is complete with all six required sources
   complete, zero pending detail units, automatic retry count one and no automatic failure. No
   `microsoft_sync_runs` apply row exists; the last verified mirror remained authoritative throughout.
-- Remaining gates: review/merge the exact-five-type #463 queue migration; separately approve applying
-  only that migration; verify one terminal, idempotent same-day strategy job; complete Red Oak
-  exact-Page access/re-consent and stable Meta evidence; only then enable Content Autopilot alone.
-  AI and OneDrive remain off.
+- Remaining gates: complete Red Oak exact-Page access/re-consent and stable Meta evidence; only then
+  separately consider enabling Content Autopilot alone. AI generation and OneDrive remain off.
   No Microsoft write occurred.
 
 ## SUPERVISOR CONTINUATION — 21 September 2026, 11:55 SAST
