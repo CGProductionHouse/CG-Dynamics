@@ -100,4 +100,3 @@ export function parseInstagramProfessionalIdentity(body: unknown): InstagramProf
 export function missingInstagramLoginScopes(grantedScopes: readonly string[]): string[] {
   return INSTAGRAM_LOGIN_SCOPES.filter(scope => !grantedScopes.includes(scope))
 }
-

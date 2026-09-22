@@ -119,4 +119,3 @@ Deno.serve(async req => {
     return redirect(appUrl, 'error')
   }
 })
-

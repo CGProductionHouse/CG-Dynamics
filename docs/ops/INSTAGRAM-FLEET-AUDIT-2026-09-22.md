@@ -1,7 +1,9 @@
 # Instagram fleet audit — Issue #471
 
-**Audit date:** 22 September 2026  
-**Scope:** the 17 active clients named in Issue #471 with no current `meta_client_assets.instagram_account_id` mapping.  
+**Audit date:** 22 September 2026
+
+**Scope:** the 17 active clients named in Issue #471 with no current `meta_client_assets.instagram_account_id` mapping.
+
 **Phase:** evidence + isolated code foundation only. No provider consent, production token, mapping, migration, configuration or reporting write was performed.
 
 ## Decision rule
@@ -90,4 +92,3 @@ The existing `meta_client_assets` row remains the only canonical reporting mappi
 ## Evidence notes
 
 First-party websites inspected on 22 Sep 2026 include Emmanuel Funeral Services, Novus Steel, Piek Group `.co.za`, Red Oak, We Ar Fuels, Central Canvas, Ehrlich Park Butchery, First Technology, Tobich Optics, PSG Bloemfontein and Supa Quick directories. Existing reviewed client intelligence was checked first for Bohemia, Bouwer & Coetzee, Central Canvas, Daisy & Co, Ehrlich Park Butchery, Emmanuel, First Technology and Piek Group. Search results and directories were used only to find or reject candidates, never as automatic mapping authority.
-
