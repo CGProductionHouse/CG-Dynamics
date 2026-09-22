@@ -15,6 +15,7 @@ import {
   syncAccountFacts,
 } from '../_shared/meta.ts'
 import { upsertMetaReportPost } from '../_shared/metaPostMerge.ts'
+import { buildMetaPostEngagementEvidence, observedMetaPostComponent } from '../_shared/metaPostEngagement.ts'
 import { classifyInstagramMediaPage } from '../_shared/metaInstagramPaging.ts'
 import { normalizeMetaWorkerLanes } from '../_shared/metaWorkerLanes.ts'
 import { dispatchMetaWorker } from '../_shared/metaWorkerDispatch.ts'
@@ -713,9 +714,14 @@ Deno.serve(async (req) => {
                     if (!publishTime || !isWithinMetaProviderPeriod(publishTime, periodStart, periodEnd)) continue
                     const caption = (raw.message as string | null) ?? null
                     const permalink = (raw.permalink_url as string | null) ?? null
-                    const reactions = (raw.reactions as { summary?: { total_count?: number } })?.summary?.total_count ?? 0
-                    const comments = (raw.comments as { summary?: { total_count?: number } })?.summary?.total_count ?? 0
-                    const shares = (raw.shares as { count?: number })?.count ?? 0
+                    const engagementEvidence = buildMetaPostEngagementEvidence('facebook', {
+                      reactions: (raw.reactions as { summary?: { total_count?: unknown } })?.summary?.total_count,
+                      comments: (raw.comments as { summary?: { total_count?: unknown } })?.summary?.total_count,
+                      shares: (raw.shares as { count?: unknown })?.count,
+                    }, now)
+                    const reactions = observedMetaPostComponent(engagementEvidence, 'reactions')
+                    const comments = observedMetaPostComponent(engagementEvidence, 'comments')
+                    const shares = observedMetaPostComponent(engagementEvidence, 'shares')
                     const fullPicture = raw.full_picture as string | null ?? null
                     await upsertMetaReportPost(sb, {
                       clientId: item.client_id,
@@ -727,8 +733,8 @@ Deno.serve(async (req) => {
                         reactions, comments, shares,
                         raw: {
                           source: 'meta_sync', platform: 'facebook', synced_at: now,
-                          views: null, reach: null, engagements: { reactions, comments, shares },
-                          metric_availability: { views: false, reach: false, content_interactions: true, source: 'direct_fields' },
+                          views: null, reach: null, engagement_evidence: engagementEvidence,
+                          metric_availability: { views: false, reach: false, content_interactions: engagementEvidence.completeness === 'complete', source: 'direct_fields' },
                           meta_payload: raw, ...(fullPicture ? { full_picture: fullPicture } : {}),
                         },
                       },
@@ -797,8 +803,12 @@ Deno.serve(async (req) => {
                   if (!metaPostId) continue
                   const timestamp = raw.timestamp ? new Date(raw.timestamp as string).toISOString() : null
                   if (!timestamp) throw new Error('Instagram media timestamp was missing after page validation.')
-                  const likes = (raw.like_count as number) ?? 0
-                  const igComments = (raw.comments_count as number) ?? 0
+                  const engagementEvidence = buildMetaPostEngagementEvidence('instagram', {
+                    likes: raw.like_count,
+                    comments: raw.comments_count,
+                  }, now)
+                  const likes = observedMetaPostComponent(engagementEvidence, 'likes')
+                  const igComments = observedMetaPostComponent(engagementEvidence, 'comments')
                   const mediaType = (raw.media_type as string) ?? ''
                   const mediaProductType = raw.media_product_type as string | undefined
                   let postType = mediaType
@@ -815,12 +825,12 @@ Deno.serve(async (req) => {
                       report_id: reportId, platform: 'instagram', meta_post_id: metaPostId,
                       publish_time: timestamp, caption: (raw.caption as string | null) ?? null,
                       permalink: (raw.permalink as string | null) ?? null, views: null, reach: null,
-                      reactions: likes, comments: igComments, shares: 0,
+                      reactions: likes, comments: igComments, shares: null,
                       raw: {
                         source: 'meta_sync', platform: 'instagram', synced_at: now,
                         content_type: postType, views: null, reach: null,
-                        engagements: { likes, comments: igComments },
-                        metric_availability: { views: false, reach: false, content_interactions: true, source: 'media_fields' },
+                        engagement_evidence: engagementEvidence,
+                        metric_availability: { views: false, reach: false, content_interactions: engagementEvidence.completeness === 'complete', source: 'direct_fields' },
                         meta_payload: raw,
                         ...(raw.thumbnail_url ? { thumbnail_url: raw.thumbnail_url as string } : {}),
                         ...(raw.media_url ? { media_url: raw.media_url as string } : {}),

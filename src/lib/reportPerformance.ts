@@ -46,7 +46,7 @@ export function contentToneFor(post: ReportStatsPost): {
 
   const strongViews = typeof views === 'number' && views >= STRONG_VIEWS_THRESHOLD
   const strongReach = typeof reach === 'number' && reach >= STRONG_REACH_THRESHOLD
-  const strongInteractions = interactions >= WEAK_CONTENT_THRESHOLD
+  const strongInteractions = typeof interactions === 'number' && interactions >= WEAK_CONTENT_THRESHOLD
 
   if (strongViews || strongReach || strongInteractions) {
     const rankingMetricLabel = strongViews ? 'views' : strongReach ? 'reach' : 'content interactions'
@@ -57,13 +57,15 @@ export function contentToneFor(post: ReportStatsPost): {
     }
   }
 
-  const hasSignal = interactions > 0 || typeof views === 'number' || typeof reach === 'number'
+  const hasSignal = typeof interactions === 'number' || typeof views === 'number' || typeof reach === 'number'
   if (hasSignal) {
     return {
       tone: 'learning',
       rankingMetricLabel:
         typeof views === 'number' ? 'views' : typeof reach === 'number' ? 'reach' : 'content interactions',
-      reason: `Top content interactions (${interactions}) are below ${WEAK_CONTENT_THRESHOLD} with no stronger views/reach signal - framed as content learning, not a win.`,
+      reason: typeof interactions === 'number'
+        ? `Top content interactions (${interactions}) are below ${WEAK_CONTENT_THRESHOLD} with no stronger views/reach signal - framed as content learning, not a win.`
+        : 'Interaction evidence is incomplete; available visibility is framed as content learning.',
     }
   }
 
@@ -110,7 +112,7 @@ export interface TopContent {
   tone: ContentTone
   platformLabel: string | null
   // The single headline number we are comfortable showing for this tone.
-  interactions: number
+  interactions: number | null
   // Which metric earned this post the top slot ("views" / "reach" / ...).
   rankingMetricLabel: string | null
   // Admin-only: why this tone was chosen.
@@ -203,7 +205,7 @@ export function buildReportPerformance(input: BuildInput): ReportPerformance {
       // Only treat it as a real comparison if at least one previous figure exists.
       (previousMaster?.totalReach != null ||
         previousMaster?.totalViews != null ||
-        (previousMaster?.totalEngagements ?? 0) > 0 ||
+        typeof previousMaster?.totalEngagements === 'number' ||
         totalManualFollowers(previousManual) !== null ||
         totalManualProfileVisits(previousManual) !== null ||
         totalPosts(previousMaster ?? emptyMaster()) > 0),
@@ -225,7 +227,7 @@ export function buildReportPerformance(input: BuildInput): ReportPerformance {
     buildMetric(
       'content_interactions',
       'Content interactions',
-      master.totalEngagements > 0 ? master.totalEngagements : null,
+      typeof master.totalEngagements === 'number' ? master.totalEngagements : null,
       hasComparison ? previousMaster?.totalEngagements ?? null : null,
       prevLabel,
     ),
@@ -266,10 +268,11 @@ export function buildReportPerformance(input: BuildInput): ReportPerformance {
   let weakestArea: string | null = declined[0]?.label ?? null
   const reachVal = master.totalReach ?? 0
   const engVal = master.totalEngagements
-  if (!weakestArea && reachVal >= 500 && engVal > 0 && engVal / reachVal < 0.01) {
+  if (!weakestArea && reachVal >= 500 && typeof engVal === 'number' && engVal > 0 && engVal / reachVal < 0.01) {
     weakestArea = 'Engagement quality'
   }
-  if (!weakestArea && (best?.engagements ?? 0) < WEAK_CONTENT_THRESHOLD && curPosts > 0) {
+  if (!weakestArea && typeof best?.engagements === 'number'
+    && best.engagements < WEAK_CONTENT_THRESHOLD && curPosts > 0) {
     weakestArea = 'Audience response'
   }
 
@@ -299,7 +302,7 @@ function emptyMaster(): MasterReportData {
     platforms: [],
     totalReach: null,
     totalViews: null,
-    totalEngagements: 0,
+    totalEngagements: null,
     bestPlatform: null,
     bestPostOverall: null,
   }
@@ -318,7 +321,7 @@ function computeLevel(
   const score = ups - downs
   const interactions = master.totalEngagements
 
-  if (score >= 2 && interactions >= 50) return 'strong'
+  if (score >= 2 && typeof interactions === 'number' && interactions >= 50) return 'strong'
   if (score >= 1) return 'improving'
   if (score <= -2 || (downs > ups && downs >= 2)) return 'needs_attention'
   if (downs > ups) return 'needs_attention'
@@ -391,7 +394,7 @@ function buildNextSteps(input: {
 
   const reach = master.totalReach
   const interactions = master.totalEngagements
-  const bestEng = best?.engagements ?? 0
+  const bestEng = best?.engagements
   const dir = (key: string) => metrics.find(m => m.key === key)?.direction
 
   const reachUp = dir('reach') === 'up' || dir('views') === 'up'
@@ -406,14 +409,14 @@ function buildNextSteps(input: {
       why: 'Visibility improved while response quality is the next focus - more people saw the content without taking action.',
       action: 'Test stronger opening hooks, question-led captions and product comparison posts.',
     })
-  } else if (typeof reach === 'number' && reach >= 500 && interactions > 0 && interactions / reach < 0.02) {
+  } else if (typeof reach === 'number' && reach >= 500 && typeof interactions === 'number' && interactions > 0 && interactions / reach < 0.02) {
     steps.push({
       priority: 1,
       title: 'Convert reach into engagement',
       why: 'Visibility is building while response quality is the next focus - the content is being seen but action is still building.',
       action: 'Use stronger opening hooks, question-led captions and product comparison posts.',
     })
-  } else if (bestEng > 0 && bestEng < WEAK_CONTENT_THRESHOLD) {
+  } else if (typeof bestEng === 'number' && bestEng > 0 && bestEng < WEAK_CONTENT_THRESHOLD) {
     steps.push({
       priority: 1,
       title: 'Sharpen content hooks',
@@ -460,7 +463,7 @@ function buildNextSteps(input: {
   }
 
   // 5. Strong top post exists - use it as a format signal.
-  if (best && bestEng >= WEAK_CONTENT_THRESHOLD) {
+  if (best && typeof bestEng === 'number' && bestEng >= WEAK_CONTENT_THRESHOLD) {
     steps.push({
       priority: 5,
       title: 'Build on what worked',
@@ -609,9 +612,9 @@ function buildPlatformRecommendations(input: {
     )
   }
 
-  const weakContent = topContent ? topContent.tone !== 'top' : false
+  const weakContent = topContent?.tone === 'learning'
   const reach = view.reach ?? 0
-  const thinEngagement = reach >= 500 && view.engagements > 0 && view.engagements / reach < 0.02
+  const thinEngagement = reach >= 500 && typeof view.engagements === 'number' && view.engagements > 0 && view.engagements / reach < 0.02
   if (weakContent || thinEngagement) {
     recs.push('Test question-led captions, product comparison posts, and carousel-style storytelling to lift engagement.')
   }
@@ -658,8 +661,8 @@ export function buildPlatformPerformance(input: {
     buildMetric(
       'content_interactions',
       'Content interactions',
-      view.engagements > 0 ? view.engagements : null,
-      prev && prev.engagements > 0 ? prev.engagements : null,
+      typeof view.engagements === 'number' ? view.engagements : null,
+      prev && typeof prev.engagements === 'number' ? prev.engagements : null,
       previousMonthLabel,
     ),
     profileVisitsAvailable

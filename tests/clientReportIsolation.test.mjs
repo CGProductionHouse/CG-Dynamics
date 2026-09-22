@@ -3,7 +3,10 @@ import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 
 const read = relativePath => readFileSync(new URL(relativePath, import.meta.url), 'utf8')
-const migration = read('../supabase/migrations/20260801190000_client_report_safe_projection.sql')
+const migration = [
+  read('../supabase/migrations/20260801190000_client_report_safe_projection.sql'),
+  read('../supabase/migrations/20260922154243_meta_post_engagement_truth.sql'),
+].join('\n')
 const reports = read('../src/lib/db/reports.ts')
 const manualMetrics = read('../src/lib/db/manualMetrics.ts')
 const dashboard = read('../src/pages/client/Dashboard.tsx')
@@ -12,7 +15,9 @@ const strategyPage = read('../src/pages/client/ClientStrategyPage.tsx')
 const campaignsPage = read('../src/pages/client/ClientCampaignsPage.tsx')
 
 function functionDefinition(name) {
-  const start = migration.indexOf(`create or replace function public.${name}`)
+  const replaceStart = migration.lastIndexOf(`create or replace function public.${name}`)
+  const createStart = migration.lastIndexOf(`create function public.${name}`)
+  const start = Math.max(replaceStart, createStart)
   assert.notEqual(start, -1, `${name} must exist`)
   const next = migration.indexOf('\ncreate or replace function public.', start + 1)
   return migration.slice(start, next === -1 ? migration.length : next)
@@ -71,6 +76,8 @@ test('post projection derives display metrics without exposing raw or provider I
   assert.doesNotMatch(definition.slice(0, definition.indexOf('as $$')), /\b(raw|meta_post_id|post_id|report_id|created_at)\b/)
   assert.doesNotMatch(definition, /select\s+p\.id\b/i)
   assert.doesNotMatch(definition, /select\s+p\.meta_post_id\b/i)
+  assert.match(definition, /imported_meta_post_id/)
+  assert.match(definition, /else 'unavailable' end/)
 })
 
 test('manual projection is report-bound and omits every unapproved note field', () => {

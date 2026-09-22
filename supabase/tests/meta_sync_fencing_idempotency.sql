@@ -9,6 +9,23 @@ begin
 end
 $$;
 
+create or replace function pg_temp.fb_evidence(p_reactions integer, p_comments integer, p_shares integer, p_observed_at timestamptz default now())
+returns jsonb language sql as $$
+  select jsonb_build_object(
+    'definition_id', 'facebook_direct_reactions_comments_shares_v1',
+    'definition_label', 'Facebook direct reactions + comments + shares',
+    'source', 'meta_graph_api_direct_fields', 'observed_at', p_observed_at,
+    'required_components', jsonb_build_array('reactions', 'comments', 'shares'),
+    'components', jsonb_build_object(
+      'reactions', jsonb_build_object('state', 'observed', 'value', p_reactions),
+      'comments', jsonb_build_object('state', 'observed', 'value', p_comments),
+      'shares', jsonb_build_object('state', 'observed', 'value', p_shares)),
+    'complete_total', p_reactions + p_comments + p_shares,
+    'known_subtotal', p_reactions + p_comments + p_shares,
+    'coverage', jsonb_build_object('observed', 3, 'required', 3),
+    'completeness', 'complete');
+$$;
+
 insert into public.clients (id, name)
 values ('10000000-0000-0000-0000-000000000001', 'Meta fencing fixture');
 insert into public.meta_sync_batches
@@ -100,7 +117,7 @@ begin
       'meta_post_id', 'meta-object-1', 'publish_time', '2026-07-10T10:00:00Z',
       'caption', 'Atomic fixture', 'permalink', 'https://facebook.example/meta-object-1',
       'views', null, 'reach', null, 'reactions', 2, 'comments', 1, 'shares', 0,
-      'raw', jsonb_build_object('source', 'meta_sync')));
+      'raw', jsonb_build_object('source', 'meta_sync', 'engagement_evidence', pg_temp.fb_evidence(2, 1, 0))));
   perform public.meta_sync_upsert_report_post(
     v_b.id, v_b.lease_generation, null, 'meta-object-1', 'Photo',
     jsonb_build_object(
@@ -108,7 +125,33 @@ begin
       'meta_post_id', 'meta-object-1', 'publish_time', '2026-07-10T10:00:00Z',
       'caption', 'Atomic fixture updated', 'permalink', 'https://facebook.example/meta-object-1',
       'views', null, 'reach', null, 'reactions', 3, 'comments', 1, 'shares', 0,
-      'raw', jsonb_build_object('source', 'meta_sync')));
+      'raw', jsonb_build_object('source', 'meta_sync', 'engagement_evidence', pg_temp.fb_evidence(3, 1, 0))));
+
+  perform public.meta_sync_upsert_report_post(
+    v_b.id, v_b.lease_generation, null, 'meta-object-1', 'Photo',
+    jsonb_build_object(
+      'report_id', v_report.report_id, 'platform', 'facebook',
+      'meta_post_id', 'meta-object-1', 'publish_time', '2026-07-10T10:00:00Z',
+      'caption', 'Incomplete refresh', 'permalink', 'https://facebook.example/meta-object-1',
+      'views', null, 'reach', null, 'reactions', 9, 'comments', null, 'shares', null,
+      'raw', jsonb_build_object('source', 'meta_sync', 'engagement_evidence', jsonb_build_object(
+        'definition_id', 'facebook_direct_reactions_comments_shares_v1',
+        'definition_label', 'Facebook direct reactions + comments + shares',
+        'source', 'meta_graph_api_direct_fields', 'observed_at', '2026-07-12T10:00:00Z',
+        'required_components', jsonb_build_array('reactions', 'comments', 'shares'),
+        'components', jsonb_build_object(
+          'reactions', jsonb_build_object('state', 'observed', 'value', 9),
+          'comments', jsonb_build_object('state', 'missing', 'value', null),
+          'shares', jsonb_build_object('state', 'invalid', 'value', null)),
+        'complete_total', null, 'known_subtotal', 9,
+        'coverage', jsonb_build_object('observed', 1, 'required', 3),
+        'completeness', 'invalid'))));
+  perform pg_temp.assert_true(
+    (select reactions = 3 and comments = 1 and shares = 0
+      and raw #>> '{engagement_evidence,completeness}' = 'complete'
+      and raw #>> '{engagement_refresh_attempt,completeness}' = 'invalid'
+     from public.posts where id = v_post.post_id),
+    'incomplete refresh preserves the last complete observation and records the failed attempt');
 
   perform pg_temp.assert_true(
     (select count(*) = 1 from public.reports where id = v_report.report_id),

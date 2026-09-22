@@ -46,10 +46,10 @@ export interface ReportPost {
   permalink: string | null
   views: number
   reach: number
-  reactions: number
-  comments: number
-  shares: number
-  total_clicks: number
+  reactions: number | null
+  comments: number | null
+  shares: number | null
+  total_clicks: number | null
   raw: Record<string, unknown>
   created_at: string
 }
@@ -85,7 +85,14 @@ export interface ClientReportPost {
   permalink: string | null
   impressions: number | null
   reach: number | null
-  engagements: number
+  engagements: number | null
+  engagement_known_subtotal: number | null
+  engagement_definition_id: string | null
+  engagement_definition_label: string | null
+  engagement_source: string | null
+  engagement_observed_at: string | null
+  engagement_coverage: { observed: number; required: number } | null
+  engagement_completeness: 'complete' | 'partial' | 'unavailable' | 'invalid'
   excluded: boolean
 }
 
@@ -167,6 +174,7 @@ export async function saveReport(input: ReportInput) {
       raw: {
         ...post.raw,
         imported_meta_post_id: post.id,
+        import_source: post.source,
         views: post.impressions,
         impressions: post.impressions,
         engagements: post.engagements,
