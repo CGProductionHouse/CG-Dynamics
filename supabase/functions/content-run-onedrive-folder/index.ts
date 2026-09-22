@@ -77,15 +77,20 @@ Deno.serve(async (req) => {
   const sb = createClient(supabaseUrl, serviceRoleKey, { auth: { autoRefreshToken: false, persistSession: false } })
 
   const token = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '')
-  const WORKER_TOKEN = Deno.env.get('WORKER_INTERNAL_TOKEN') ?? ''
+  const WORKER_TOKEN = (Deno.env.get('WORKER_INTERNAL_TOKEN') ?? '').trim()
   const internalWorkerToken = req.headers.get('X-Internal-Worker-Token') ?? ''
-  const isInternalWorker = WORKER_TOKEN.length > 0 && internalWorkerToken === WORKER_TOKEN
+  const isInternalWorker = WORKER_TOKEN.length >= 32 && internalWorkerToken === WORKER_TOKEN
 
   let userId: string
   let canManage: boolean
   const systemProfileId = Deno.env.get('WORKER_SYSTEM_PROFILE_ID') ?? ''
   if (isInternalWorker) {
-    userId = systemProfileId || '00000000-0000-0000-0000-000000000001'
+    if (!UUID_RE.test(systemProfileId)) return jsonResponse({ error: 'Worker system profile is not configured.' }, 503)
+    const { data: profile } = await sb.from('profiles').select('role, is_active').eq('id', systemProfileId).maybeSingle()
+    if (!profile || profile.is_active !== true || profile.role !== 'admin') {
+      return jsonResponse({ error: 'Worker system profile is not an active admin.' }, 503)
+    }
+    userId = systemProfileId
     canManage = true
   } else {
     if (!token) return jsonResponse({ error: 'Authentication required.' }, 401)
@@ -105,10 +110,10 @@ Deno.serve(async (req) => {
   if (!ACTIONS.includes(action)) return jsonResponse({ error: `action must be one of: ${ACTIONS.join(', ')}` }, 400)
   if (!body.contentRunId || !UUID_RE.test(body.contentRunId)) return jsonResponse({ error: 'contentRunId must be a valid UUID.' }, 400)
 
-  // Internal worker authority is limited to reading status and ensuring video folders.
+  // Internal worker authority is limited to the one automatic action it needs.
   // All mapping actions (map_client_folder, link_month_folder, create_month_folder) are human-only.
-  if (isInternalWorker && !['status', 'ensure_video_folders'].includes(action)) {
-    return jsonResponse({ error: 'Internal worker may only read status or ensure video folders.' }, 403)
+  if (isInternalWorker && action !== 'ensure_video_folders') {
+    return jsonResponse({ error: 'Internal worker may only ensure video folders.' }, 403)
   }
 
   // ── The run, its client and its content month ────────────────────────────────────────
@@ -242,6 +247,7 @@ Deno.serve(async (req) => {
     const monthChildren = foldersOnly(children)
 
     const results: Array<Record<string, unknown>> = []
+    let failed = false
     for (const [index, video] of videos.entries()) {
       if (alreadyMapped.has(video.id)) {
         results.push({ videoId: video.id, state: 'already_mapped' })
@@ -252,6 +258,19 @@ Deno.serve(async (req) => {
       const name = buildVideoFolderName(
         Number(videoMonth.slice(0, 4)), Number(videoMonth.slice(5, 7)), client.short_code, position,
       )
+      if (isInternalWorker) {
+        const preflight = await sb.rpc('assert_content_autopilot_video_folder_write', {
+          p_content_guide_idea_id: video.id,
+          p_content_run_id: run.id,
+          p_client_id: run.client_id,
+          p_actor_profile_id: systemProfileId,
+        })
+        if (preflight.error || preflight.data !== true) {
+          failed = true
+          results.push({ videoId: video.id, state: 'authority_failed', error: preflight.error?.message ?? 'Worker mapping authority refused.' })
+          continue
+        }
+      }
       // An existing folder with this exact canonical name is mapped, not duplicated.
       let folder = findChildByExactName(monthChildren, name, { caseInsensitive: true })
       let origin: 'canonical' | 'legacy_mapped' = folder ? 'legacy_mapped' : 'canonical'
@@ -261,11 +280,12 @@ Deno.serve(async (req) => {
           continue
         }
         const made = await ensureCanonicalChildFolder(runFolder.drive_id, runFolder.month_folder_item_id, name)
-        if (!made) { results.push({ videoId: video.id, state: 'create_failed', expectedName: name }); continue }
+        if (!made) { failed = true; results.push({ videoId: video.id, state: 'create_failed', expectedName: name }); continue }
         folder = { id: made.ref.itemId, name: made.ref.name, isFolder: true, webUrl: made.ref.webUrl }
         origin = 'canonical'
       }
-      const { error: mapError } = await sb.rpc('upsert_content_guide_video_folder', {
+      const mappingRpc = isInternalWorker ? 'upsert_content_autopilot_video_folder' : 'upsert_content_guide_video_folder'
+      const { error: mapError } = await sb.rpc(mappingRpc, {
         p_content_guide_idea_id: video.id,
         p_content_run_id: run.id,
         p_client_id: run.client_id,
@@ -273,17 +293,22 @@ Deno.serve(async (req) => {
         p_folder_item_id: folder.id,
         p_folder_name: folder.name,
         p_mapping_origin: origin,
-        p_actor_id: userId,
-        ...(isInternalWorker && systemProfileId ? { p_actor_profile_id: systemProfileId } : {}),
+        ...(isInternalWorker ? { p_actor_profile_id: systemProfileId } : { p_actor_id: userId }),
       })
-      if (mapError) { results.push({ videoId: video.id, state: 'map_failed', error: mapError.message }); continue }
+      if (mapError) {
+        failed = true
+        results.push({ videoId: video.id, state: 'map_failed_recoverable', error: mapError.message })
+        continue
+      }
       results.push({ videoId: video.id, state: origin === 'canonical' ? 'created' : 'mapped_existing', folderName: folder.name })
     }
     return jsonResponse({
-      status: 'ensured',
+      status: failed ? 'failed' : 'ensured',
       results,
-      note: 'Create-only: existing folders were left exactly as they are, and an existing canonical folder was mapped by its durable id.',
-    })
+      note: failed
+        ? 'No success was acknowledged. A newly created exact-name folder is recoverable on retry and will be mapped, never duplicated.'
+        : 'Create-only: existing folders were left exactly as they are, and an existing canonical folder was mapped by its durable id.',
+    }, failed ? 502 : 200)
   }
 
   // link_month_folder | create_month_folder

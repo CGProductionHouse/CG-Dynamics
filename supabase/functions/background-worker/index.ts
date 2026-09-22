@@ -561,8 +561,9 @@ async function runJob(
           generateDrafts: async input => {
             // Reuses the EXISTING AI Content Director via narrow internal worker auth.
             // The Edge Function persists draft ideas when called with the internal token.
-            const workerToken = Deno.env.get('WORKER_INTERNAL_TOKEN')
-            if (!workerToken) return { ok: false, error: 'WORKER_INTERNAL_TOKEN not set' }
+            const workerToken = (Deno.env.get('WORKER_INTERNAL_TOKEN') ?? '').trim()
+            const systemProfileId = (Deno.env.get('WORKER_SYSTEM_PROFILE_ID') ?? '').trim()
+            if (workerToken.length < 32 || !systemProfileId) return { ok: false, error: 'Autopilot worker identity is not configured' }
             const res = await fetch(`${url}/functions/v1/suggest-content-videos`, {
               method: 'POST',
               headers: {
@@ -581,15 +582,17 @@ async function runJob(
             })
             if (!res.ok) return { ok: false, error: `suggest-content-videos returned ${res.status}` }
             const body = await res.json().catch(() => null) as { videos?: unknown[]; ideas?: unknown[]; developments?: unknown[]; persisted?: number } | null
-            const generated = body?.persisted ?? (body?.videos ?? body?.ideas ?? body?.developments ?? []).length
-            return { ok: true, generated }
+            const persisted = body?.persisted
+            if (typeof persisted !== 'number' || persisted <= 0) return { ok: false, error: 'Generated content was not durably persisted' }
+            return { ok: true, generated: persisted }
           },
           ensureVideoFolders: async input => {
             // Reuses the EXISTING ensure_video_folders Edge Function action via narrow
             // internal worker auth. Create-only; existing folders are mapped by durable
             // id, never duplicated. Behind the protected OneDrive-write gate.
-            const workerToken = Deno.env.get('WORKER_INTERNAL_TOKEN')
-            if (!workerToken) return { ok: false, error: 'WORKER_INTERNAL_TOKEN not set' }
+            const workerToken = (Deno.env.get('WORKER_INTERNAL_TOKEN') ?? '').trim()
+            const systemProfileId = (Deno.env.get('WORKER_SYSTEM_PROFILE_ID') ?? '').trim()
+            if (workerToken.length < 32 || !systemProfileId) return { ok: false, error: 'Autopilot worker identity is not configured' }
             const res = await fetch(`${url}/functions/v1/content-run-onedrive-folder`, {
               method: 'POST',
               headers: {

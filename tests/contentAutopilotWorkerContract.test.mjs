@@ -13,6 +13,7 @@
 import assert from 'node:assert/strict'
 import { after, before, test } from 'node:test'
 import { createServer } from 'vite'
+import { readFileSync } from 'node:fs'
 import { FakeSupabase } from './helpers/fakeSupabase.mjs'
 
 let server, pass
@@ -56,6 +57,64 @@ test('fetchAll pages through >1000 rows without silent truncation', async () => 
   // The count query returned all rows, not just the first 1000.
   const countResult = await fake.from('company_calendar_events').select('id', { count: 'exact', head: true })
   assert.equal(countResult.count, 1200, `count should be 1200, got ${countResult.count}`)
+})
+
+test('a late unmirrored event advances after >1000 mirrored identities', async () => {
+  const events = Array.from({ length: 1101 }, (_, i) => ({
+    id: `event-${String(i).padStart(4, '0')}`,
+    client_id: CLIENT,
+    event_type: 'content_run',
+    status: 'confirmed',
+    start_at: '2026-10-15T10:00:00Z',
+    microsoft_event_id: `ms-${i}`,
+  }))
+  const mirrored = events.slice(0, 1100).map((event, i) => ({
+    id: `old-run-${i}`,
+    calendar_event_id: event.id,
+    client_id: CLIENT,
+    run_date: '2025-01-01',
+    status: 'complete',
+  }))
+  const fake = new FakeSupabase({
+    company_calendar_events: events,
+    content_runs: mirrored,
+    clients: [{ id: CLIENT, name: 'Test Client', short_code: 'TST', active: true }],
+  })
+
+  const result = await pass.runContentAutopilotPass(fake, { today: '2026-10-01', maxRuns: 1 })
+  const ensureCalls = fake.rpcCalls.filter(call => call.fn === 'ensure_content_run_for_calendar_event')
+  assert.equal(result.runs_ensured, 1)
+  assert.equal(ensureCalls.length, 1)
+  assert.equal(ensureCalls[0].args.p_calendar_event_id, 'event-1100')
+})
+
+test('NO_FUTURE scans every active client and future run beyond one page', async () => {
+  const clients = Array.from({ length: 1101 }, (_, i) => ({
+    id: `client-${String(i).padStart(4, '0')}`,
+    name: `Client ${i}`,
+    short_code: 'TST',
+    active: true,
+  }))
+  const lateClient = clients[1100]
+  const fake = new FakeSupabase({
+    content_runs: [{ id: RUN, client_id: lateClient.id, run_date: '2026-10-15', status: 'ready' }],
+    content_guidelines: [{ id: GUIDELINE, content_run_id: RUN, client_id: lateClient.id, status: 'draft' }],
+    content_guide_ideas: [],
+    clients,
+  })
+  const result = await pass.runContentAutopilotPass(fake, { today: '2026-10-01', maxRuns: 1 })
+  assert.equal(result.clients_considered, 1101)
+  assert.ok(!result.clients_without_future_run.includes(lateClient.id))
+  assert.equal(result.clients_without_future_run.length, 1100)
+})
+
+test('a paginated truth-query failure aborts instead of becoming empty truth', async () => {
+  const fake = new FakeSupabase({ content_runs: [], clients: [] })
+  fake.makeUnreadable('company_calendar_events')
+  await assert.rejects(
+    pass.runContentAutopilotPass(fake, { today: '2026-10-01' }),
+    /Paginated truth query failed: company_calendar_events is not readable/,
+  )
 })
 
 test('count query returns accurate total even when data exceeds page size', async () => {
@@ -134,35 +193,27 @@ test('pass re-reads folder mappings after ensure so summary reflects current sta
   assert.equal(result.blockers.VIDEO_FOLDER_NOT_CREATED, undefined, 'VIDEO_FOLDER_NOT_CREATED should not be recorded after folder re-read')
 })
 
-test('X-Internal-Worker-Token auth path is structurally correct', () => {
-  const WORKER_TOKEN = 'test-worker-secret-123'
+test('actual worker and SQL contracts fail closed and preserve human RPC authority', () => {
+  const worker = readFileSync('supabase/functions/background-worker/index.ts', 'utf8')
+  const ai = readFileSync('supabase/functions/suggest-content-videos/index.ts', 'utf8')
+  const folders = readFileSync('supabase/functions/content-run-onedrive-folder/index.ts', 'utf8')
+  const sql = readFileSync('supabase/migrations/20260922120000_system_worker_profile.sql', 'utf8')
 
-  const headerToken = 'test-worker-secret-123'
-  const isInternalWorker = WORKER_TOKEN.length > 0 && headerToken === WORKER_TOKEN
-  assert.equal(isInternalWorker, true, 'Valid token should authenticate as internal worker')
-
-  const badToken = 'wrong-token'
-  const isInvalidWorker = WORKER_TOKEN.length > 0 && badToken === WORKER_TOKEN
-  assert.equal(isInvalidWorker, false, 'Invalid token should not authenticate')
-
-  const emptyWorkerToken = ''
-  const isNoTokenWorker = emptyWorkerToken.length > 0 && headerToken === emptyWorkerToken
-  assert.equal(isNoTokenWorker, false, 'Empty token env should not authenticate')
-
-  const systemProfileId = '00000000-0000-0000-0000-000000000001'
-  const userId = isInternalWorker ? systemProfileId : 'user-id'
-  assert.equal(userId, systemProfileId, 'Internal worker should get system profile ID')
-
-  const canManage = isInternalWorker ? true : false
-  assert.equal(canManage, true, 'Internal worker should have admin authority')
-
-  // Internal worker is restricted to ensure_video_folders and status only
-  const allowedActions = ['status', 'ensure_video_folders']
-  assert.ok(allowedActions.includes('ensure_video_folders'), 'ensure_video_folders is allowed for worker')
-  assert.ok(allowedActions.includes('status'), 'status is allowed for worker')
-  assert.ok(!allowedActions.includes('map_client_folder'), 'map_client_folder is NOT allowed for worker')
-  assert.ok(!allowedActions.includes('link_month_folder'), 'link_month_folder is NOT allowed for worker')
-  assert.ok(!allowedActions.includes('create_month_folder'), 'create_month_folder is NOT allowed for worker')
+  assert.doesNotMatch(worker, /Authorization:\s*`Bearer \$\{Deno\.env\.get\('SUPABASE_SERVICE_ROLE_KEY'/)
+  assert.match(worker, /workerToken\.length < 32 \|\| !systemProfileId/)
+  assert.match(ai, /WORKER_TOKEN\.length >= 32/)
+  assert.match(ai, /Worker system profile is unavailable/)
+  assert.match(folders, /action !== 'ensure_video_folders'/)
+  assert.match(folders, /assert_content_autopilot_video_folder_write/)
+  assert.match(folders, /status: failed \? 'failed' : 'ensured'/)
+  assert.match(folders, /failed \? 502 : 200/)
+  assert.match(folders, /map_failed_recoverable/)
+  assert.doesNotMatch(sql, /insert into public\.profiles/i)
+  assert.doesNotMatch(sql, /drop function if exists public\.get_or_create_content_guideline\(uuid\)/i)
+  assert.match(sql, /get_or_create_content_guideline_as_actor/)
+  assert.match(sql, /join auth\.users u on u\.id=p\.id/)
+  assert.match(sql, /persist_content_autopilot_ideas/)
+  assert.match(sql, /persist_content_autopilot_developments/)
 })
 
 test('persist flag causes ideas to be written to content_guide_ideas', async () => {

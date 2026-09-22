@@ -54,6 +54,7 @@ import {
 // the expanded set also covers future migrations that may add 'manager','staff','owner'.
 const STAFF_ROLES = ['owner', 'admin', 'manager', 'staff', 'team'] as const
 type StaffRole = typeof STAFF_ROLES[number]
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 const MAX_COVERAGE_MONTHS = 12
 const MAX_SUGGESTIONS = 20
@@ -238,15 +239,19 @@ Deno.serve(async (req) => {
   //      Narrow server-to-server authority; bypasses user auth but still enforces the
   //      same business rules (draft-only, no overwrite of human content).
 
-  const WORKER_TOKEN = Deno.env.get('WORKER_INTERNAL_TOKEN') ?? ''
+  const WORKER_TOKEN = (Deno.env.get('WORKER_INTERNAL_TOKEN') ?? '').trim()
   const internalWorkerToken = req.headers.get('X-Internal-Worker-Token') ?? ''
-  const isInternalWorker = WORKER_TOKEN.length > 0 && internalWorkerToken === WORKER_TOKEN
+  const isInternalWorker = WORKER_TOKEN.length >= 32 && internalWorkerToken === WORKER_TOKEN
 
   let userId: string
   const systemProfileId = Deno.env.get('WORKER_SYSTEM_PROFILE_ID') ?? ''
   if (isInternalWorker) {
-    // Narrow internal authority: the worker acts as a system actor, not a staff user.
-    userId = systemProfileId || '00000000-0000-0000-0000-000000000001'
+    if (!UUID_RE.test(systemProfileId)) return jsonResponse({ error: 'Worker system profile is not configured.' }, 503)
+    const { data: profile } = await sb.from('profiles').select('role, is_active').eq('id', systemProfileId).maybeSingle()
+    if (!profile || profile.is_active !== true || !isStaffRole(profile.role)) {
+      return jsonResponse({ error: 'Worker system profile is unavailable.' }, 503)
+    }
+    userId = systemProfileId
   } else {
     const token = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '')
     if (!token) {
@@ -944,25 +949,15 @@ async function handleIdeasMode(context: DirectorContext): Promise<Response> {
   // a content_guide_ideas row with status 'draft' in the saved order.
   let persisted = 0
   if (context.persist && context.guidelineId) {
-    for (let i = 0; i < ideas.length; i++) {
-      const idea = ideas[i]
-      const { error: insertError } = await context.sb
-        .from('content_guide_ideas')
-        .insert({
-          content_guideline_id: context.guidelineId,
-          client_id: context.client.id,
-          title: idea.title,
-          objective: idea.objective ?? null,
-          hook: idea.hook ?? null,
-          notes: idea.angle ?? null,
-          month: idea.targetMonth ? `${idea.targetMonth}-01` : null,
-          deliverable_id: idea.deliverableId ?? null,
-          position: i + 1,
-          status: 'draft',
-          created_by: context.userId,
-        })
-      if (!insertError) persisted++
-    }
+    const saved = await context.sb.rpc('persist_content_autopilot_ideas', {
+      p_guideline_id: context.guidelineId,
+      p_client_id: context.client.id,
+      p_actor_profile_id: context.userId,
+      p_ideas: ideas,
+    })
+    if (saved.error) return jsonResponse({ error: `Generated ideas were not persisted: ${saved.error.message}` }, 500)
+    persisted = Number(saved.data ?? 0)
+    if (persisted !== ideas.length) return jsonResponse({ error: 'Generated ideas were not fully persisted.' }, 409)
     console.info(`[content-director] mode=ideas persisted=${persisted}/${ideas.length} guideline=${context.guidelineId}`)
   }
 
@@ -1058,26 +1053,16 @@ async function handleDevelopMode(context: DirectorContext, requestedVideoIds: st
   // Only fills EMPTY AI-owned fields; never overwrites human-edited content.
   let persisted = 0
   if (context.persist) {
-    for (const dev of developments) {
-      // Re-read current row to verify emptiness — no stale overwrites.
-      const { data: current } = await context.sb
-        .from('content_guide_ideas')
-        .select('script, shot_breakdown, requirements, cta')
-        .eq('id', dev.videoId)
-        .maybeSingle()
-      if (!current) continue
-      const update: Record<string, unknown> = {}
-      if (!String(current.script ?? '').trim() && dev.script) update.script = dev.script
-      if (!String(current.shot_breakdown ?? '').trim() && dev.shotBreakdown) update.shot_breakdown = dev.shotBreakdown
-      if (!String(current.requirements ?? '').trim() && dev.requirements) update.requirements = dev.requirements
-      if (!String(current.cta ?? '').trim() && dev.cta) update.cta = dev.cta
-      if (Object.keys(update).length > 0) {
-        const { error: updError } = await context.sb
-          .from('content_guide_ideas')
-          .update(update)
-          .eq('id', dev.videoId)
-        if (!updError) persisted++
-      }
+    const saved = await context.sb.rpc('persist_content_autopilot_developments', {
+      p_guideline_id: context.guidelineId,
+      p_client_id: context.client.id,
+      p_actor_profile_id: context.userId,
+      p_developments: developments,
+    })
+    if (saved.error) return jsonResponse({ error: `Generated developments were not persisted: ${saved.error.message}` }, 500)
+    persisted = Number(saved.data ?? 0)
+    if (persisted === 0 && developments.length > 0) {
+      return jsonResponse({ error: 'Generated developments did not change canonical content.' }, 409)
     }
     console.info(`[content-director] mode=develop persisted=${persisted}/${developments.length}`)
   }

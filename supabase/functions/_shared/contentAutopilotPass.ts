@@ -145,19 +145,19 @@ function monthOf(date: string): string {
 async function fetchAll(
   query: QueryBuilder,
   PAGE_SIZE = 500,
-  maxPages = 20,
+  maxPages = 200,
 ): Promise<Array<Record<string, unknown>>> {
   const all: Array<Record<string, unknown>> = []
   for (let page = 0; page < maxPages; page++) {
     const from = page * PAGE_SIZE
     const to = from + PAGE_SIZE - 1
     const result = await query.range(from, to)
-    if (result.error) break
+    if (result.error) throw new Error(`Paginated truth query failed: ${result.error.message}`)
     const rows = (result.data ?? []) as Array<Record<string, unknown>>
     all.push(...rows)
-    if (rows.length < PAGE_SIZE) break
+    if (rows.length < PAGE_SIZE) return all
   }
-  return all
+  throw new Error(`Paginated truth query exceeded the explicit ${PAGE_SIZE * maxPages}-row safety cap`)
 }
 
 /**
@@ -190,7 +190,7 @@ export async function runContentAutopilotPass(
       .not('calendar_event_id', 'is', null),
   )
   const mirroredEventIds = new Set(
-    ((existingRuns.data ?? []) as Array<Record<string, unknown>>)
+    existingRuns
       .map(row => row.calendar_event_id as string)
       .filter(Boolean),
   )
@@ -218,13 +218,16 @@ export async function runContentAutopilotPass(
   // ── 2. Upcoming runs ──────────────────────────────────────────────────────
   // Count ALL upcoming runs first (for truthful unprocessed count), then fetch a
   // bounded page for actual work. The count query uses head:true for efficiency.
-  const { count: totalUpcoming } = await supabase
+  const { count: totalUpcoming, error: upcomingCountError } = await supabase
     .from('content_runs')
     .select('id', { count: 'exact', head: true })
     .gte('run_date', today)
     .lte('run_date', horizon)
     .not('client_id', 'is', null)
     .neq('status', 'cancelled')
+  if (upcomingCountError || totalUpcoming == null) {
+    throw new Error(`Upcoming-run count failed: ${upcomingCountError?.message ?? 'exact count unavailable'}`)
+  }
 
   const allUpcoming = await fetchAll(
     supabase.from('content_runs')
@@ -274,10 +277,12 @@ export async function runContentAutopilotPass(
       .maybeSingle()
     let guideline = existing.data as Record<string, unknown> | null
     if (!guideline && !existing.error) {
-      const created = await supabase.rpc('get_or_create_content_guideline', {
-        p_content_run_id: run.id,
-        ...(options.systemProfileId ? { p_actor_profile_id: options.systemProfileId } : {}),
-      })
+      const created = options.systemProfileId
+        ? await supabase.rpc('get_or_create_content_guideline_as_actor', {
+          p_run_id: run.id,
+          p_actor_profile_id: options.systemProfileId,
+        })
+        : await supabase.rpc('get_or_create_content_guideline', { p_run_id: run.id })
       if (created.error) {
         note('GUIDELINE_UNAVAILABLE')
         preparationFailed.add(clientId)
@@ -556,8 +561,6 @@ export async function runContentAutopilotPass(
   const activeClients = await fetchAll(
     supabase.from('clients').select('id').eq('active', true),
   )
-  if (!activeClients.length) note('CLIENT_LIST_UNREADABLE')
-
   const clientsWithUpcomingRun = new Set<string>()
   const scanned = await fetchAll(
     supabase.from('content_runs')

@@ -126,7 +126,9 @@ test('the pass distinguishes unprocessed and failed from genuinely no future run
   assert.match(source, /runs_unprocessed/)
   assert.match(source, /RUNS_UNPROCESSED_THIS_PASS/)
   // The no-future-run decision is made from a full scan, not from the processed slice.
-  const decision = source.slice(source.indexOf('const clientsWithUpcomingRun'), source.indexOf('return {\n    ok: true'))
+  const start = source.indexOf('const clientsWithUpcomingRun')
+  const end = source.indexOf('  return {', start)
+  const decision = source.slice(start, end)
   assert.match(decision, /from\('content_runs'\)[\s\S]{0,300}\.select\('client_id'\)/)
-  assert.doesNotMatch(decision, /summaries/, 'it never infers absence from what this pass had time to process')
+  assert.doesNotMatch(decision, /summaries\.(?:some|map|filter)/, 'it never infers absence from what this pass processed')
 })

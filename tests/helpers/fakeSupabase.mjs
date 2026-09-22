@@ -157,7 +157,15 @@ export class FakeSupabase {
     return { data: [{ content_run_id: run.id, created: true, client_id: event.client_id }], error: null }
   }
 
-  rpc_get_or_create_content_guideline({ p_content_run_id, p_actor_profile_id }) {
+  rpc_get_or_create_content_guideline({ p_run_id, p_content_run_id }) {
+    return this.createGuideline(p_run_id ?? p_content_run_id)
+  }
+
+  rpc_get_or_create_content_guideline_as_actor({ p_run_id }) {
+    return this.createGuideline(p_run_id)
+  }
+
+  createGuideline(p_content_run_id) {
     const guidelines = this.tables.content_guidelines ?? (this.tables.content_guidelines = [])
     const existing = guidelines.find(row => row.content_run_id === p_content_run_id)
     if (existing) return { data: [existing], error: null }
