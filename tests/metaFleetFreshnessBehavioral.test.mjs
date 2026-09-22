@@ -17,6 +17,11 @@ const {
 
 const worker = read('../supabase/functions/meta-sync-worker/index.ts')
 
+test('Meta worker uses the repository-standard deployable Supabase dependency', () => {
+  assert.match(worker, /from 'jsr:@supabase\/supabase-js@2'/)
+  assert.doesNotMatch(worker, /esm\.sh\/@supabase\/supabase-js/)
+})
+
 describe('Meta month eligibility (canonical America/Los_Angeles)', () => {
   test('currentMetaMonth and previousMetaMonth use Pacific timezone', async () => {
     // These functions are used by the scheduler and worker for month arithmetic.

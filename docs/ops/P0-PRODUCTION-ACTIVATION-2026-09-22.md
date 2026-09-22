@@ -16,7 +16,13 @@ Authority: live inspection and the CA-approved activation against GitHub `main`
   `meta-connection-status` v24 and `cg-dynamics-mcp` v15. Deployed `background-worker` v14 last.
 - Meta fleet recovery is live and truthful. At 10:02 UTC it had 39 checkpoint rows for 57 mapped
   platforms, 37 carrying successful evidence, zero PASS, and no active batch. Missing evidence was
-  not converted into zero or PASS.
+  not converted into zero or PASS. The first live fleet cycle later proved that the deployed
+  `meta-sync-worker` predates #451 current-month `sync_kind='incremental'` support: current-month
+  items are skipped and then selected again, while Red Oak's prior-month read truthfully fails for
+  missing `pages_read_engagement`. At 10:48 UTC production had 45 checkpoints for 57 mapped
+  platforms (42 successful, three failed). Deploying current `meta-sync-worker` is therefore an
+  additional protected dependency gate; do not mistake the five-function deploy for a complete
+  Meta runtime rollout.
 - Microsoft did not start a new job. The selected real admin actor also owns the stale 18 September
   preview, so the first implementation repeatedly tried to adopt that historical preview instead
   of starting today's job. The correction on `codex/451-activation-runtime-hardening` makes stale
@@ -105,7 +111,9 @@ Every numbered production mutation below requires CA approval at that gate.
 4. Deploy `microsoft-transition-sync` with gateway JWT verification enabled. Deploy
    `suggest-content-videos` and `content-run-onedrive-folder` with JWT verification enabled. Deploy
    `meta-connection-status` and `cg-dynamics-mcp` using their existing self-authenticated gateway
-   settings. Refresh the ChatGPT connector action list after the MCP deploy.
+   settings. Deploy `meta-sync-worker` with its existing self-authenticated worker-secret contract;
+   #451's scheduler and current-month incremental semantics depend on that accepted source. Refresh
+   the ChatGPT connector action list after the MCP deploy.
 5. Keep `CONTENT_AUTOPILOT_ENABLED=false`, `CONTENT_AUTOPILOT_GENERATION=false` and
    `CONTENT_AUTOPILOT_VIDEO_FOLDERS=false`. Deploy `background-worker` last. This immediately admits
    the Microsoft system cycle and Meta fleet recovery on the already-live minute cron, so treat this
