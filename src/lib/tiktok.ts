@@ -30,19 +30,32 @@ export interface TiktokConnectionStatus {
   missingScopes: string[]
   schemaReady: boolean
   connection?: TiktokConnection
+  health?: {
+    access: 'connected' | 'reconnect_required' | 'permission_required' | 'provider_error' | 'unavailable'
+    coverage: 'complete' | 'partial' | 'unavailable'
+    completeness: 'complete' | 'partial' | 'unavailable'
+    freshness: 'fresh' | 'stale' | 'never'
+    clientState: 'available' | 'partial' | 'unavailable'
+    staffDiagnostic: string
+    clientMessage: string
+    lastAttemptedAt: string | null
+    lastSuccessfulAt: string | null
+    ageHours: number | null
+    staleAfterHours: number
+  }
 }
 
 export interface TiktokSyncResult {
   ok: boolean
   health: 'verified' | 'partial' | 'sync_error'
   periodMonth: string
-  videosSynced: number
+  videosSynced: number | null
   paginationComplete: boolean
   metrics: {
-    views: number
-    likes: number
-    comments: number
-    shares: number
+    views: number | null
+    likes: number | null
+    comments: number | null
+    shares: number | null
     followers: number | null
   }
   errors?: string[]
@@ -182,7 +195,7 @@ export async function syncTiktokAnalytics(clientId: string, periodMonth?: string
     method: 'POST',
     body: { clientId, periodMonth },
   })
-  if (error) return { ok: false, health: 'sync_error', periodMonth: periodMonth ?? '', videosSynced: 0, paginationComplete: false, metrics: { views: 0, likes: 0, comments: 0, shares: 0, followers: null }, error: error.message }
+  if (error) return { ok: false, health: 'sync_error', periodMonth: periodMonth ?? '', videosSynced: null, paginationComplete: false, metrics: { views: null, likes: null, comments: null, shares: null, followers: null }, error: error.message }
   return data
 }
 

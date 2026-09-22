@@ -21,9 +21,18 @@ import {
   monthlyStrategyAutopilotOperatingDate,
   monthlyStrategyReadyForContent,
 } from '../_shared/monthlyStrategyAutopilotSchedule.ts'
+import {
+  currentTiktokMonth,
+  TIKTOK_ANALYTICS_REFRESH_JOB_TYPE,
+  TIKTOK_FRESH_AFTER_HOURS,
+  TIKTOK_READ_SCOPES,
+  tiktokOperatingDate,
+  tiktokRefreshIdempotencyKey,
+} from '../_shared/tiktokFreshness.ts'
 
 const MAX_RUNTIME_MS = 25_000
 const MAX_JOBS_PER_RUN = 25
+const TIKTOK_FRESHNESS_MAX_ENQUEUES = 2
 // A live worker heartbeats every item (a few seconds apart) and each invocation
 // runs ~35s. 120s is comfortably longer than one invocation plus its hand-off,
 // so a healthy batch is never double-driven, while a dead one is picked up on
@@ -64,6 +73,7 @@ Deno.serve(async () => {
   // no second scheduler exists and concurrent minute ticks remain idempotent.
   const monthlyStrategyAutopilotSchedule = await ensureDailyMonthlyStrategyAutopilotJob(supabase)
   const contentAutopilotSchedule = await ensureDailyContentAutopilotJob(supabase, monthlyStrategyAutopilotSchedule)
+  const tiktokFreshnessSchedule = await ensureTiktokFreshnessJobs(supabase)
 
   while (Date.now() < deadline && processed.length < MAX_JOBS_PER_RUN) {
     const { data: job, error } = await supabase.rpc('claim_next_background_job', { p_worker: worker })
@@ -141,8 +151,115 @@ Deno.serve(async () => {
   // state (Access/Coverage/Completeness/Freshness) independently.
   const fleetFreshness = await enqueueFleetMetaFreshness(supabase, url)
 
-  return new Response(JSON.stringify({ ok: true, worker, processed, monthlyStrategyAutopilotSchedule, contentAutopilotSchedule, microsoftFreshness, reaped, laneRecoveries, fleetFreshness }), { headers: { 'Content-Type': 'application/json' } })
+  return new Response(JSON.stringify({ ok: true, worker, processed, monthlyStrategyAutopilotSchedule, contentAutopilotSchedule, tiktokFreshnessSchedule, microsoftFreshness, reaped, laneRecoveries, fleetFreshness }), { headers: { 'Content-Type': 'application/json' } })
 })
+
+async function ensureTiktokFreshnessJobs(
+  supabase: ReturnType<typeof createClient>,
+): Promise<Record<string, unknown>> {
+  const operatingDate = tiktokOperatingDate()
+  const periodMonth = currentTiktokMonth()
+  const freshCutoff = new Date(Date.now() - TIKTOK_FRESH_AFTER_HOURS * 3_600_000).toISOString()
+
+  const [clientsResult, connectionsResult, tokensResult, successesResult, jobsResult] = await Promise.all([
+    fetchAllRows((from, to) => supabase.from('clients').select('id').eq('active', true).range(from, to)),
+    fetchAllRows((from, to) => supabase.from('tiktok_connections')
+      .select('id,client_id,tiktok_open_id,scopes,status')
+      .eq('status', 'connected')
+      .not('client_id', 'is', null)
+      .not('tiktok_open_id', 'is', null)
+      .range(from, to)),
+    fetchAllRows((from, to) => supabase.from('tiktok_connection_tokens').select('connection_id').range(from, to)),
+    fetchAllRows((from, to) => supabase.from('platform_sync_runs')
+      .select('client_id,connection_id,finished_at')
+      .eq('platform', 'tiktok')
+      .eq('status', 'success')
+      .eq('health_state', 'verified')
+      .gte('finished_at', freshCutoff)
+      .range(from, to)),
+    fetchAllRows((from, to) => supabase.from('background_jobs')
+      .select('idempotency_key')
+      .eq('job_type', TIKTOK_ANALYTICS_REFRESH_JOB_TYPE)
+      .like('idempotency_key', `%:${operatingDate}`)
+      .range(from, to)),
+  ])
+
+  const failedRead = [clientsResult, connectionsResult, tokensResult, successesResult, jobsResult]
+    .find(result => result.error)
+  if (failedRead?.error) {
+    return { state: 'unavailable', blocker: failedRead.error.message, operatingDate, periodMonth }
+  }
+
+  const activeClients = new Set(clientsResult.data.map(row => String(row.id)))
+  const tokenConnections = new Set(tokensResult.data.map(row => String(row.connection_id)))
+  const freshConnections = new Set(successesResult.data
+    .filter(row => row.connection_id && activeClients.has(String(row.client_id)))
+    .map(row => String(row.connection_id)))
+  const existingKeys = new Set(jobsResult.data.map(row => String(row.idempotency_key)))
+
+  let eligible = 0
+  let fresh = 0
+  let enqueued = 0
+  let missingToken = 0
+  let missingScopes = 0
+
+  for (const connection of connectionsResult.data) {
+    const clientId = typeof connection.client_id === 'string' ? connection.client_id : ''
+    const connectionId = typeof connection.id === 'string' ? connection.id : ''
+    const openId = typeof connection.tiktok_open_id === 'string' ? connection.tiktok_open_id : ''
+    if (!clientId || !connectionId || !openId || !activeClients.has(clientId)) continue
+
+    const scopes = Array.isArray(connection.scopes)
+      ? connection.scopes.filter((scope): scope is string => typeof scope === 'string')
+      : []
+    if (!TIKTOK_READ_SCOPES.every(scope => scopes.includes(scope))) {
+      missingScopes++
+      continue
+    }
+    if (!tokenConnections.has(connectionId)) {
+      missingToken++
+      continue
+    }
+    eligible++
+    if (freshConnections.has(connectionId)) {
+      fresh++
+      continue
+    }
+
+    const idempotencyKey = tiktokRefreshIdempotencyKey(connectionId, operatingDate)
+    if (existingKeys.has(idempotencyKey)) continue
+    if (enqueued >= TIKTOK_FRESHNESS_MAX_ENQUEUES) continue
+
+    const { error } = await supabase.from('background_jobs').upsert({
+      job_type: TIKTOK_ANALYTICS_REFRESH_JOB_TYPE,
+      payload: {
+        clientId,
+        connectionId,
+        tiktokOpenId: openId,
+        periodMonth,
+        schedule: 'daily_operating_cycle',
+      },
+      idempotency_key: idempotencyKey,
+      max_attempts: 3,
+    }, { onConflict: 'idempotency_key', ignoreDuplicates: true })
+    if (error) return { state: 'unavailable', blocker: error.message, operatingDate, periodMonth, eligible, fresh, enqueued }
+
+    existingKeys.add(idempotencyKey)
+    enqueued++
+  }
+
+  return {
+    state: 'ready',
+    operatingDate,
+    periodMonth,
+    eligible,
+    fresh,
+    enqueued,
+    skippedMissingToken: missingToken,
+    skippedMissingScopes: missingScopes,
+    maxEnqueuesPerPass: TIKTOK_FRESHNESS_MAX_ENQUEUES,
+  }
+}
 
 async function ensureDailyMonthlyStrategyAutopilotJob(
   supabase: ReturnType<typeof createClient>,
@@ -679,6 +796,43 @@ async function runJob(
       if (!response.ok || body?.ok !== true) {
         const detail = typeof body?.error === 'string' ? body.error : `HTTP ${response.status}`
         throw new Error(`Monthly strategy autopilot did not complete: ${detail}`)
+      }
+      await updateJobProgress(supabase, job.id, worker, 90)
+      return body
+    }
+    case TIKTOK_ANALYTICS_REFRESH_JOB_TYPE: {
+      await updateJobProgress(supabase, job.id, worker, 40)
+      const workerToken = (Deno.env.get('WORKER_INTERNAL_TOKEN') ?? '').trim()
+      if (workerToken.length < 32) throw new Error('TikTok refresh worker authentication is not configured')
+      const clientId = typeof payload.clientId === 'string' ? payload.clientId : ''
+      const connectionId = typeof payload.connectionId === 'string' ? payload.connectionId : ''
+      const tiktokOpenId = typeof payload.tiktokOpenId === 'string' ? payload.tiktokOpenId : ''
+      const periodMonth = typeof payload.periodMonth === 'string' ? payload.periodMonth : ''
+      if (!clientId || !connectionId || !tiktokOpenId || !/^\d{4}-(0[1-9]|1[0-2])$/.test(periodMonth)) {
+        throw new Error('TikTok refresh job is missing its exact client/account identity')
+      }
+
+      const response = await fetch(`${url}/functions/v1/tiktok-sync`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${serviceKey}`,
+          'X-Internal-Worker-Token': workerToken,
+        },
+        body: JSON.stringify({
+          clientId,
+          periodMonth,
+          expectedConnectionId: connectionId,
+          expectedTiktokOpenId: tiktokOpenId,
+        }),
+      })
+      const body = await response.json().catch(() => null) as Record<string, unknown> | null
+      if (!response.ok || body?.ok !== true || body?.health !== 'verified') {
+        const detail = typeof body?.error === 'string' ? body.error : `HTTP ${response.status}`
+        const providerErrors = Array.isArray(body?.errors)
+          ? body.errors.filter(error => typeof error === 'string').join('; ')
+          : ''
+        throw new Error(`TikTok analytics refresh did not complete: ${providerErrors || detail}`)
       }
       await updateJobProgress(supabase, job.id, worker, 90)
       return body
