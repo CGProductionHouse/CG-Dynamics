@@ -24,7 +24,9 @@ Authority: live inspection and the CA-approved activation against GitHub `main`
   terminal failure from spawning jobs every minute. After that correction deployed, the first
   direct cycle failed before job creation because its `-31`/`+370` range totalled 401 days against
   the existing 370-day guard. `codex/451-activation-range-fix` replaces it with a tested 369-day
-  window. No Microsoft write occurred.
+  window. Its exact-main deploy then exposed a persistent server-bundler timeout on the function's
+  legacy `esm.sh` Supabase client import; `codex/451-edge-dependency-resolution` moves that one import
+  to the repository's established JSR source. No Microsoft write occurred.
 - The existing cron cadence is correct, but its `net.http_post` command omits
   `timeout_milliseconds`, leaving pg_net's five-second default. New worker calls exceed that while
   durable downstream Meta work continues. Updating only that timeout is a new protected cron
