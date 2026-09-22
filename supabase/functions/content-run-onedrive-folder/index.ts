@@ -83,8 +83,9 @@ Deno.serve(async (req) => {
 
   let userId: string
   let canManage: boolean
+  const systemProfileId = Deno.env.get('WORKER_SYSTEM_PROFILE_ID') ?? ''
   if (isInternalWorker) {
-    userId = '00000000-0000-0000-0000-000000000000'
+    userId = systemProfileId || '00000000-0000-0000-0000-000000000001'
     canManage = true
   } else {
     if (!token) return jsonResponse({ error: 'Authentication required.' }, 401)
@@ -103,6 +104,12 @@ Deno.serve(async (req) => {
   const action = body.action as Action
   if (!ACTIONS.includes(action)) return jsonResponse({ error: `action must be one of: ${ACTIONS.join(', ')}` }, 400)
   if (!body.contentRunId || !UUID_RE.test(body.contentRunId)) return jsonResponse({ error: 'contentRunId must be a valid UUID.' }, 400)
+
+  // Internal worker authority is limited to reading status and ensuring video folders.
+  // All mapping actions (map_client_folder, link_month_folder, create_month_folder) are human-only.
+  if (isInternalWorker && !['status', 'ensure_video_folders'].includes(action)) {
+    return jsonResponse({ error: 'Internal worker may only read status or ensure video folders.' }, 403)
+  }
 
   // ── The run, its client and its content month ────────────────────────────────────────
   const { data: run } = await sb.from('content_runs').select('id, client_id, run_date').eq('id', body.contentRunId).maybeSingle()
@@ -189,6 +196,7 @@ Deno.serve(async (req) => {
       p_web_url: selected.webUrl,
       p_folder_name: selected.name,
       p_actor_id: userId,
+      ...(isInternalWorker && systemProfileId ? { p_actor_profile_id: systemProfileId } : {}),
     })
     if (mapError) return jsonResponse({ error: mapError.message }, 400)
     return jsonResponse({ status: 'mapped', folderName: selected.name })
@@ -266,6 +274,7 @@ Deno.serve(async (req) => {
         p_folder_name: folder.name,
         p_mapping_origin: origin,
         p_actor_id: userId,
+        ...(isInternalWorker && systemProfileId ? { p_actor_profile_id: systemProfileId } : {}),
       })
       if (mapError) { results.push({ videoId: video.id, state: 'map_failed', error: mapError.message }); continue }
       results.push({ videoId: video.id, state: origin === 'canonical' ? 'created' : 'mapped_existing', folderName: folder.name })
@@ -314,7 +323,8 @@ Deno.serve(async (req) => {
     p_month_folder_item_id: monthFolder.id,
     p_web_url: monthFolder.webUrl,
     p_folder_name: monthFolder.name,
-    p_actor_id: user.id,
+    p_actor_id: userId,
+    ...(isInternalWorker && systemProfileId ? { p_actor_profile_id: systemProfileId } : {}),
   })
   if (linkError) return jsonResponse({ error: linkError.message }, 400)
   return jsonResponse({

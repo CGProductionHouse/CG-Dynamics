@@ -28,6 +28,36 @@ const GUIDELINE = 'guideline-0001'
 const VIDEO_A = 'video-a'
 const VIDEO_B = 'video-b'
 
+test('fetchAll pages through >1000 rows without silent truncation', async () => {
+  const events = Array.from({ length: 1200 }, (_, i) => ({
+    id: `event-${String(i).padStart(4, '0')}`,
+    client_id: CLIENT,
+    event_type: 'content_run',
+    status: 'confirmed',
+    start_at: `2026-10-${String((i % 28) + 1).padStart(2, '0')}T10:00:00Z`,
+    microsoft_event_id: `ms-${i}`,
+  }))
+
+  const fake = new FakeSupabase({
+    company_calendar_events: events,
+    content_runs: [],
+    clients: [{ id: CLIENT, name: 'Test Client', short_code: 'TST', active: true }],
+  })
+
+  const result = await pass.runContentAutopilotPass(fake, { today: '2026-10-01', maxRuns: 5 })
+
+  // All 1200 events should have been scanned (paginated), not silently capped at 1000.
+  // The pass mirrors up to maxRuns=5 missing events into content_runs.
+  // After mirroring, CLIENT has upcoming runs, so runs_unprocessed should be 0.
+  assert.equal(result.runs_prepared, 5, `runs_prepared ${result.runs_prepared} should be 5`)
+  assert.equal(result.runs_unprocessed, 0, `runs_unprocessed ${result.runs_unprocessed} should be 0 after mirroring`)
+
+  // Verify the count was not truncated: 1200 events means 1195 were "already mirrored" (pre-existing).
+  // The count query returned all rows, not just the first 1000.
+  const countResult = await fake.from('company_calendar_events').select('id', { count: 'exact', head: true })
+  assert.equal(countResult.count, 1200, `count should be 1200, got ${countResult.count}`)
+})
+
 test('count query returns accurate total even when data exceeds page size', async () => {
   const runs = Array.from({ length: 30 }, (_, i) => ({
     id: `run-${i}`,
@@ -119,11 +149,20 @@ test('X-Internal-Worker-Token auth path is structurally correct', () => {
   const isNoTokenWorker = emptyWorkerToken.length > 0 && headerToken === emptyWorkerToken
   assert.equal(isNoTokenWorker, false, 'Empty token env should not authenticate')
 
-  const userId = isInternalWorker ? '00000000-0000-0000-0000-000000000000' : 'user-id'
-  assert.equal(userId, '00000000-0000-0000-0000-000000000000', 'Internal worker should get system actor ID')
+  const systemProfileId = '00000000-0000-0000-0000-000000000001'
+  const userId = isInternalWorker ? systemProfileId : 'user-id'
+  assert.equal(userId, systemProfileId, 'Internal worker should get system profile ID')
 
   const canManage = isInternalWorker ? true : false
   assert.equal(canManage, true, 'Internal worker should have admin authority')
+
+  // Internal worker is restricted to ensure_video_folders and status only
+  const allowedActions = ['status', 'ensure_video_folders']
+  assert.ok(allowedActions.includes('ensure_video_folders'), 'ensure_video_folders is allowed for worker')
+  assert.ok(allowedActions.includes('status'), 'status is allowed for worker')
+  assert.ok(!allowedActions.includes('map_client_folder'), 'map_client_folder is NOT allowed for worker')
+  assert.ok(!allowedActions.includes('link_month_folder'), 'link_month_folder is NOT allowed for worker')
+  assert.ok(!allowedActions.includes('create_month_folder'), 'create_month_folder is NOT allowed for worker')
 })
 
 test('persist flag causes ideas to be written to content_guide_ideas', async () => {

@@ -243,9 +243,10 @@ Deno.serve(async (req) => {
   const isInternalWorker = WORKER_TOKEN.length > 0 && internalWorkerToken === WORKER_TOKEN
 
   let userId: string
+  const systemProfileId = Deno.env.get('WORKER_SYSTEM_PROFILE_ID') ?? ''
   if (isInternalWorker) {
     // Narrow internal authority: the worker acts as a system actor, not a staff user.
-    userId = '00000000-0000-0000-0000-000000000000'
+    userId = systemProfileId || '00000000-0000-0000-0000-000000000001'
   } else {
     const token = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '')
     if (!token) {

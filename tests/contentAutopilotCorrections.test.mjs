@@ -67,7 +67,7 @@ test('the mapping write stays admin-gated with exact run/client provenance', () 
   assert.match(fn, /guideline\.client_id = p_client_id/)
   const onedriveAction = ONEDRIVE.slice(ONEDRIVE.indexOf("if (action === 'ensure_video_folders')"))
   assert.ok(ONEDRIVE.includes('if (!canManage) return jsonResponse'), 'mapping writes stay behind the admin gate')
-  assert.match(onedriveAction, /p_actor_id: user\.id/)
+  assert.match(onedriveAction, /p_actor_id: userId/)
 })
 
 // ── 4. Safe same-client linking ─────────────────────────────────────────────

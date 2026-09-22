@@ -26,10 +26,16 @@ class Query {
     this.columns = null
     this.sort = null
     this.max = null
+    this.rangeFrom = null
+    this.rangeTo = null
     this.pendingUpdate = null
   }
 
-  select(columns) { this.columns = columns; return this }
+  select(columns, options) {
+    this.columns = columns
+    if (options?.count === 'exact' && options?.head) this.isCountHead = true
+    return this
+  }
   eq(column, value) { this.filters.push({ column, op: 'eq', value }); return this }
   neq(column, value) { this.filters.push({ column, op: 'neq', value }); return this }
   gte(column, value) { this.filters.push({ column, op: 'gte', value }); return this }
@@ -49,6 +55,7 @@ class Query {
 
   order(column, options = { ascending: true }) { this.sort = { column, ascending: options.ascending !== false }; return this }
   limit(count) { this.max = count; return this }
+  range(from, to) { this.rangeFrom = from; this.rangeTo = to; return this }
 
   update(patch) { this.pendingUpdate = patch; return this }
 
@@ -71,7 +78,11 @@ class Query {
         return (left < right ? -1 : left > right ? 1 : 0) * (ascending ? 1 : -1)
       })
     }
-    if (this.max != null) rows = rows.slice(0, this.max)
+    if (this.rangeFrom != null && this.rangeTo != null) {
+      rows = rows.slice(this.rangeFrom, this.rangeTo + 1)
+    } else if (this.max != null) {
+      rows = rows.slice(0, this.max)
+    }
     return rows
   }
 
@@ -80,11 +91,12 @@ class Query {
       this.db.recordWrite(this.table, 'update')
       const rows = this.rows() ?? []
       for (const row of rows) Object.assign(row, this.pendingUpdate)
-      return { data: rows.map(row => ({ ...row })), error: null }
+      return { data: rows.map(row => ({ ...row })), count: rows.length, error: null }
     }
     const rows = this.rows()
-    if (rows === null) return { data: null, error: { message: `${this.table} is not readable`, code: '42P01' } }
-    return { data: rows.map(row => ({ ...row })), error: null }
+    if (rows === null) return { data: null, count: null, error: { message: `${this.table} is not readable`, code: '42P01' } }
+    if (this.isCountHead) return { data: null, count: rows.length, error: null }
+    return { data: rows.map(row => ({ ...row })), count: rows.length, error: null }
   }
 
   async maybeSingle() {
@@ -145,15 +157,15 @@ export class FakeSupabase {
     return { data: [{ content_run_id: run.id, created: true, client_id: event.client_id }], error: null }
   }
 
-  rpc_get_or_create_content_guideline({ p_run_id }) {
+  rpc_get_or_create_content_guideline({ p_content_run_id, p_actor_profile_id }) {
     const guidelines = this.tables.content_guidelines ?? (this.tables.content_guidelines = [])
-    const existing = guidelines.find(row => row.content_run_id === p_run_id)
+    const existing = guidelines.find(row => row.content_run_id === p_content_run_id)
     if (existing) return { data: [existing], error: null }
-    const run = (this.tables.content_runs ?? []).find(row => row.id === p_run_id)
+    const run = (this.tables.content_runs ?? []).find(row => row.id === p_content_run_id)
     if (!run) return { data: null, error: { message: 'Content run not found.' } }
     const guideline = {
       id: this.id('guideline'),
-      content_run_id: p_run_id,
+      content_run_id: p_content_run_id,
       client_id: run.client_id,
       title: `${run.client_name ?? 'Client'} content guideline`,
       status: 'draft',

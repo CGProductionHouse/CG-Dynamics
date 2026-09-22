@@ -33,13 +33,6 @@ export const MAX_RUNS_PER_PASS = 25
 export const LOOKAHEAD_DAYS = 90
 
 /**
- * Explicit page size for all Supabase queries. Default Supabase limit is 1000;
- * queries that could exceed this must paginate. This constant documents the
- * contract and is used consistently across all scans.
- */
-const QUERY_PAGE_SIZE = 1000
-
-/**
  * Automatic draft generation is latent: the executable path exists, but it runs only
  * when CA switches this on. Activation is a protected production action.
  */
@@ -67,6 +60,7 @@ type QueryBuilder = {
   not: (column: string, operator: string, value: unknown) => QueryBuilder
   order: (column: string, options: { ascending: boolean }) => QueryBuilder
   limit: (count: number) => QueryBuilder
+  range: (from: number, to: number) => QueryBuilder
   maybeSingle: () => Promise<{ data: Record<string, unknown> | null; error: { message: string } | null }>
   then: Promise<{ data: unknown; count: number | null; error: { message: string } | null }>['then']
 }
@@ -108,6 +102,8 @@ export interface AutopilotPassOptions {
   ensureVideoFolders?: VideoFolderEnsurer
   /** Automatic same-client slot linking. On by default; the link itself is DB-guarded. */
   linkDeliverables?: boolean
+  /** System worker profile ID for service-role RPC actor bypass. */
+  systemProfileId?: string
 }
 
 export interface AutopilotPassResult extends Record<string, unknown> {
@@ -141,6 +137,30 @@ function monthOf(date: string): string {
 }
 
 /**
+ * Page through all matching rows using range-based iteration.
+ * Replaces the unsafe `.limit(N)` pattern that silently truncates at 1000 rows.
+ * Each page fetches PAGE_SIZE rows; the loop stops when a page returns fewer
+ * rows than requested, or when maxPages is reached.
+ */
+async function fetchAll(
+  query: QueryBuilder,
+  PAGE_SIZE = 500,
+  maxPages = 20,
+): Promise<Array<Record<string, unknown>>> {
+  const all: Array<Record<string, unknown>> = []
+  for (let page = 0; page < maxPages; page++) {
+    const from = page * PAGE_SIZE
+    const to = from + PAGE_SIZE - 1
+    const result = await query.range(from, to)
+    if (result.error) break
+    const rows = (result.data ?? []) as Array<Record<string, unknown>>
+    all.push(...rows)
+    if (rows.length < PAGE_SIZE) break
+  }
+  return all
+}
+
+/**
  * One idempotent pass. Every content write is find-or-create against an exact id:
  * the run mirroring an exact Microsoft event, the one guideline that run must have,
  * and an unambiguous same-client slot link.
@@ -164,40 +184,35 @@ export async function runContentAutopilotPass(
   // Already-mirrored events are excluded BEFORE the bounded work limit so a later
   // missing mirror is never starved by earlier completed mirrors filling the slice.
   let runsEnsured = 0
-  const existingRuns = await supabase
-    .from('content_runs')
-    .select('calendar_event_id')
-    .not('calendar_event_id', 'is', null)
-    .limit(QUERY_PAGE_SIZE)
+  const existingRuns = await fetchAll(
+    supabase.from('content_runs')
+      .select('calendar_event_id')
+      .not('calendar_event_id', 'is', null),
+  )
   const mirroredEventIds = new Set(
     ((existingRuns.data ?? []) as Array<Record<string, unknown>>)
       .map(row => row.calendar_event_id as string)
       .filter(Boolean),
   )
-  const eventsResult = await supabase
-    .from('company_calendar_events')
-    .select('id, client_id, event_type, status, start_at')
-    .eq('event_type', 'content_run')
-    .not('microsoft_event_id', 'is', null)
-    .not('client_id', 'is', null)
-    .neq('status', 'cancelled')
-    .gte('start_at', `${today}T00:00:00Z`)
-    .lte('start_at', `${horizon}T23:59:59Z`)
-    .limit(QUERY_PAGE_SIZE)
-  if (eventsResult.error) {
-    note('CALENDAR_EVENTS_UNREADABLE')
-  } else {
-    const events = (eventsResult.data ?? []) as Array<Record<string, unknown>>
-    const missing = events.filter(event => !mirroredEventIds.has(event.id as string))
-    for (const event of missing.slice(0, maxRuns)) {
-      const ensured = await supabase.rpc('ensure_content_run_for_calendar_event', { p_calendar_event_id: event.id })
-      if (ensured.error) {
-        note('RUN_MIRROR_REFUSED')
-        continue
-      }
-      const row = (Array.isArray(ensured.data) ? ensured.data[0] : ensured.data) as Record<string, unknown> | null
-      if (row?.created === true) runsEnsured += 1
+  const events = await fetchAll(
+    supabase.from('company_calendar_events')
+      .select('id, client_id, event_type, status, start_at')
+      .eq('event_type', 'content_run')
+      .not('microsoft_event_id', 'is', null)
+      .not('client_id', 'is', null)
+      .neq('status', 'cancelled')
+      .gte('start_at', `${today}T00:00:00Z`)
+      .lte('start_at', `${horizon}T23:59:59Z`),
+  )
+  const missing = events.filter(event => !mirroredEventIds.has(event.id as string))
+  for (const event of missing.slice(0, maxRuns)) {
+    const ensured = await supabase.rpc('ensure_content_run_for_calendar_event', { p_calendar_event_id: event.id })
+    if (ensured.error) {
+      note('RUN_MIRROR_REFUSED')
+      continue
     }
+    const row = (Array.isArray(ensured.data) ? ensured.data[0] : ensured.data) as Record<string, unknown> | null
+    if (row?.created === true) runsEnsured += 1
   }
 
   // ── 2. Upcoming runs ──────────────────────────────────────────────────────
@@ -211,18 +226,15 @@ export async function runContentAutopilotPass(
     .not('client_id', 'is', null)
     .neq('status', 'cancelled')
 
-  const { data: runRows, error: runError } = await supabase
-    .from('content_runs')
-    .select('id, client_id, client_name, run_date, status')
-    .gte('run_date', today)
-    .lte('run_date', horizon)
-    .not('client_id', 'is', null)
-    .neq('status', 'cancelled')
-    .order('run_date', { ascending: true })
-    .limit(QUERY_PAGE_SIZE)
-  if (runError) throw new Error(`Upcoming content runs could not be read: ${runError.message}`)
-
-  const allUpcoming = (runRows ?? []) as Array<Record<string, unknown>>
+  const allUpcoming = await fetchAll(
+    supabase.from('content_runs')
+      .select('id, client_id, client_name, run_date, status')
+      .gte('run_date', today)
+      .lte('run_date', horizon)
+      .not('client_id', 'is', null)
+      .neq('status', 'cancelled')
+      .order('run_date', { ascending: true }),
+  )
   const runs = allUpcoming.slice(0, maxRuns)
   const unprocessedCount = Math.max(0, (totalUpcoming ?? allUpcoming.length) - maxRuns)
   const clientIds = [...new Set(allUpcoming.map(run => run.client_id as string))]
@@ -262,7 +274,10 @@ export async function runContentAutopilotPass(
       .maybeSingle()
     let guideline = existing.data as Record<string, unknown> | null
     if (!guideline && !existing.error) {
-      const created = await supabase.rpc('get_or_create_content_guideline', { p_run_id: run.id })
+      const created = await supabase.rpc('get_or_create_content_guideline', {
+        p_content_run_id: run.id,
+        ...(options.systemProfileId ? { p_actor_profile_id: options.systemProfileId } : {}),
+      })
       if (created.error) {
         note('GUIDELINE_UNAVAILABLE')
         preparationFailed.add(clientId)
@@ -538,30 +553,26 @@ export async function runContentAutopilotPass(
   // This is decided from the FULL upcoming-run set, not from what this pass had time
   // to process. A client whose run fell outside this pass, or whose preparation
   // failed, is reported as such — never as "no future content run".
-  const { data: activeClients, error: activeError } = await supabase
-    .from('clients').select('id').eq('active', true).limit(QUERY_PAGE_SIZE)
-  if (activeError) note('CLIENT_LIST_UNREADABLE')
+  const activeClients = await fetchAll(
+    supabase.from('clients').select('id').eq('active', true),
+  )
+  if (!activeClients.length) note('CLIENT_LIST_UNREADABLE')
 
   const clientsWithUpcomingRun = new Set<string>()
-  const scanned = await supabase
-    .from('content_runs')
-    .select('client_id')
-    .gte('run_date', today)
-    .lte('run_date', horizon)
-    .not('client_id', 'is', null)
-    .neq('status', 'cancelled')
-    .limit(QUERY_PAGE_SIZE)
-  if (scanned.error) {
-    note('UPCOMING_RUN_SCAN_UNREADABLE')
-    for (const run of allUpcoming) clientsWithUpcomingRun.add(run.client_id as string)
-  } else {
-    for (const row of (scanned.data ?? []) as Array<Record<string, unknown>>) {
-      clientsWithUpcomingRun.add(row.client_id as string)
-    }
+  const scanned = await fetchAll(
+    supabase.from('content_runs')
+      .select('client_id')
+      .gte('run_date', today)
+      .lte('run_date', horizon)
+      .not('client_id', 'is', null)
+      .neq('status', 'cancelled'),
+  )
+  for (const row of scanned) {
+    clientsWithUpcomingRun.add(row.client_id as string)
   }
 
   const withoutFutureRun: string[] = []
-  for (const row of (activeClients ?? []) as Array<Record<string, unknown>>) {
+  for (const row of activeClients) {
     const id = row.id as string
     if (clientsWithUpcomingRun.has(id)) continue
     withoutFutureRun.push(id)
@@ -572,7 +583,7 @@ export async function runContentAutopilotPass(
 
   return {
     ok: true,
-    clients_considered: (activeClients ?? []).length,
+    clients_considered: activeClients.length,
     runs_ensured: runsEnsured,
     runs_prepared: summaries.length,
     runs_unprocessed: unprocessedCount,

@@ -557,15 +557,17 @@ async function runJob(
           today,
           generationEnabled,
           videoFolderEnabled,
+          systemProfileId: Deno.env.get('WORKER_SYSTEM_PROFILE_ID') ?? '',
           generateDrafts: async input => {
             // Reuses the EXISTING AI Content Director via narrow internal worker auth.
             // The Edge Function persists draft ideas when called with the internal token.
-            const workerToken = Deno.env.get('WORKER_INTERNAL_TOKEN') ?? ''
+            const workerToken = Deno.env.get('WORKER_INTERNAL_TOKEN')
+            if (!workerToken) return { ok: false, error: 'WORKER_INTERNAL_TOKEN not set' }
             const res = await fetch(`${url}/functions/v1/suggest-content-videos`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                ...(workerToken ? { 'X-Internal-Worker-Token': workerToken } : { Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''}` }),
+                'X-Internal-Worker-Token': workerToken,
               },
               body: JSON.stringify({
                 requestId: `autopilot:${input.contentRunId}:${input.mode}:${Date.now()}`,
@@ -586,12 +588,13 @@ async function runJob(
             // Reuses the EXISTING ensure_video_folders Edge Function action via narrow
             // internal worker auth. Create-only; existing folders are mapped by durable
             // id, never duplicated. Behind the protected OneDrive-write gate.
-            const workerToken = Deno.env.get('WORKER_INTERNAL_TOKEN') ?? ''
+            const workerToken = Deno.env.get('WORKER_INTERNAL_TOKEN')
+            if (!workerToken) return { ok: false, error: 'WORKER_INTERNAL_TOKEN not set' }
             const res = await fetch(`${url}/functions/v1/content-run-onedrive-folder`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                ...(workerToken ? { 'X-Internal-Worker-Token': workerToken } : { Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''}` }),
+                'X-Internal-Worker-Token': workerToken,
               },
               body: JSON.stringify({
                 action: 'ensure_video_folders',
