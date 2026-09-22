@@ -1,7 +1,7 @@
 import type { SourceType } from '../../types/skillCards'
 import type { MarketingLibrarySource, SourceTrustTier } from './skillCardsData'
 import type { CitedSourceFamily } from './citedSourceExtraction'
-import { CITED_SOURCES, CONTAINER_REFERENCES, PACK_FILES } from './citedSources.generated'
+import { CITED_SOURCES, CONTAINER_REFERENCES, PACK_FILES } from './citedSources.generated.ts'
 
 // ── #184 Repository source registration (pure) ───────────────────────────────
 //

@@ -1,10 +1,10 @@
-import type { RegistrationCandidate } from './sourceRegistry'
-import { REGISTRATION_MANIFEST, classifyRegistrations } from './sourceRegistry'
+import type { RegistrationCandidate } from './sourceRegistry.ts'
+import { REGISTRATION_MANIFEST, classifyRegistrations } from './sourceRegistry.ts'
 import type { MarketingLibrarySource } from './skillCardsData'
-import { classifyFreshness } from './sourceFreshness'
-import { bridgeAudienceLifecycleSources } from './audienceLifecycleBridge'
-import { bridgeCommerceEvidenceSources } from './commerceEvidenceBridge'
-import { bridgeCompetitiveCreativeSources } from './competitiveCreativeBridge'
+import { classifyFreshness } from './sourceFreshness.ts'
+import { bridgeAudienceLifecycleSources } from './audienceLifecycleBridge.ts'
+import { bridgeCommerceEvidenceSources } from './commerceEvidenceBridge.ts'
+import { bridgeCompetitiveCreativeSources } from './competitiveCreativeBridge.ts'
 
 // ── Unified research-source registration preview (#446) ───────────────────────
 //
