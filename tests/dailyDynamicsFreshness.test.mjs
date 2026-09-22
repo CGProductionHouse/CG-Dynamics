@@ -195,9 +195,10 @@ test('Meta checkpoint and retry reads chunk large exact-asset populations withou
 
 test('scheduled cycle advances Microsoft before Meta fleet freshness', () => {
   const worker = readFileSync(new URL('../supabase/functions/background-worker/index.ts', import.meta.url), 'utf8')
-  assert.ok(worker.indexOf('advanceMicrosoftFreshness(url)') < worker.indexOf('enqueueFleetMetaFreshness(supabase, url)'))
+  assert.ok(worker.indexOf('advanceMicrosoftFreshness(url, serviceKey)') < worker.indexOf('enqueueFleetMetaFreshness(supabase, url)'))
   assert.match(worker, /DAILY_FRESHNESS_WORKER_SECRET/)
   assert.match(worker, /action: 'system_cycle'/)
+  assert.match(worker, /Authorization: `Bearer \$\{serviceKey\}`/)
 })
 
 test('automatic Microsoft mirror excludes Client Schedule and uses exact established reconciliation', () => {

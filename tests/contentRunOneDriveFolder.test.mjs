@@ -54,13 +54,13 @@ test('the linked folder is re-read by durable id and only named while an admin l
 })
 
 test('status is readable by staff; every mapping change is admin-only through the existing RPCs', () => {
-  assert.match(code, /const canManage = profile\.role === 'admin'/)
+  assert.match(code, /canManage = profile\.role === 'admin'/)
   assert.match(code, /if \(!canManage\) return jsonResponse\(\{ error: 'Only an admin can link OneDrive production folders\.' \}, 403\)/)
   const statusBranch = code.indexOf("if (action === 'status')")
   const adminGate = code.indexOf('if (!canManage)')
   assert.ok(statusBranch > -1 && adminGate > statusBranch, 'status is answered before the admin gate')
-  assert.match(code, /rpc\('upsert_client_onedrive_mapping'[\s\S]*p_actor_id: user\.id/)
-  assert.match(code, /rpc\('upsert_content_run_onedrive_folder'[\s\S]*p_actor_id: user\.id/)
+  assert.match(code, /rpc\('upsert_client_onedrive_mapping'[\s\S]*p_actor_id: userId/)
+  assert.match(code, /rpc\('upsert_content_run_onedrive_folder'[\s\S]*p_actor_id: userId/)
   assert.match(code, /rpc\('get_content_run_onedrive_folder'/)
 })
 
