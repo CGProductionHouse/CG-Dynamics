@@ -76,6 +76,8 @@ test('post projection derives display metrics without exposing raw or provider I
   assert.doesNotMatch(definition.slice(0, definition.indexOf('as $$')), /\b(raw|meta_post_id|post_id|report_id|created_at)\b/)
   assert.doesNotMatch(definition, /select\s+p\.id\b/i)
   assert.doesNotMatch(definition, /select\s+p\.meta_post_id\b/i)
+  assert.match(definition, /imported_meta_post_id/)
+  assert.match(definition, /else 'unavailable' end/)
 })
 
 test('manual projection is report-bound and omits every unapproved note field', () => {

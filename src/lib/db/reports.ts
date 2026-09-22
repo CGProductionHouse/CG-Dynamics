@@ -174,6 +174,7 @@ export async function saveReport(input: ReportInput) {
       raw: {
         ...post.raw,
         imported_meta_post_id: post.id,
+        import_source: post.source,
         views: post.impressions,
         impressions: post.impressions,
         engagements: post.engagements,

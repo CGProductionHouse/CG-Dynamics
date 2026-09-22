@@ -62,7 +62,11 @@ export function sumOrNull(values: Array<number | null | undefined>): number | nu
 
 export function importedToStatsPost(post: ImportedMetaPost): ReportStatsPost {
   const engagement = projectMetaPostEngagement(
-    { engagements: post.engagements, source: 'legacy_import' },
+    {
+      engagements: post.engagements,
+      imported_meta_post_id: post.id,
+      import_source: post.source,
+    },
     post.platform,
     null,
   )
@@ -232,7 +236,9 @@ export function calculateReportStats(posts: ReportStatsPost[], evidencePosts: Re
   return {
     totalReach: sumOrNull(posts.map(post => post.reach)),
     totalImpressions: sumOrNull(posts.map(post => post.impressions)),
-    totalEngagements: engagementDefinitionId === null ? null : complete.reduce((sum, post) => sum + (post.engagements ?? 0), 0),
+    totalEngagements: engagementDefinitionId === null
+      ? null
+      : complete.reduce((sum, post) => sum + (post.engagements as number), 0),
     knownEngagementSubtotal: subtotalTimes.size === 1 ? sumOrNull(posts.map(post => post.engagementKnownSubtotal)) : null,
     engagementDefinitionId,
     engagementDefinitionLabel,

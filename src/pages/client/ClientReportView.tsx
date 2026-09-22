@@ -1305,7 +1305,9 @@ function ChannelCard({ view, previousView }: { view: PlatformView; previousView:
   ].filter(g => g.m.direction !== 'missing' && g.m.difference !== null && !g.m.notAvailable)
 
   const best = view.bestPost
-  const learningLabel = (best?.engagements ?? 0) >= WEAK_CONTENT_THRESHOLD ? 'Top content' : 'Content learning'
+  const learningLabel = typeof best?.engagements !== 'number'
+    ? 'Content highlight'
+    : best.engagements >= WEAK_CONTENT_THRESHOLD ? 'Top content' : 'Content learning'
 
   return (
     <article className="group rounded-3xl border border-white/[0.08] bg-white/[0.045] p-6 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.95)] transition hover:border-[#2dd4bf]/25 hover:bg-white/[0.06]">

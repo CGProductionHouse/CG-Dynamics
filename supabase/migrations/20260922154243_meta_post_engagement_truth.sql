@@ -269,42 +269,53 @@ begin
     case
       when p.raw #>> '{engagement_evidence,completeness}' = 'complete'
         then (p.raw #>> '{engagement_evidence,complete_total}')::bigint
-      when jsonb_typeof(p.raw -> 'engagements') = 'number' then
-        case when (p.raw ->> 'engagements')::numeric = trunc((p.raw ->> 'engagements')::numeric)
-          and (p.raw ->> 'engagements')::numeric between 0 and 2147483647
-          then (p.raw ->> 'engagements')::bigint end
+      when nullif(p.raw ->> 'imported_meta_post_id', '') is not null then
+        case when jsonb_typeof(p.raw -> 'engagements') = 'number' then
+          case when (p.raw ->> 'engagements')::numeric = trunc((p.raw ->> 'engagements')::numeric)
+            and (p.raw ->> 'engagements')::numeric between 0 and 2147483647
+            then (p.raw ->> 'engagements')::bigint end end
       else null end,
     case
       when jsonb_typeof(p.raw #> '{engagement_evidence,known_subtotal}') = 'number'
         then (p.raw #>> '{engagement_evidence,known_subtotal}')::bigint
-      when jsonb_typeof(p.raw -> 'engagements') = 'number' then
-        case when (p.raw ->> 'engagements')::numeric = trunc((p.raw ->> 'engagements')::numeric)
-          and (p.raw ->> 'engagements')::numeric between 0 and 2147483647
-          then (p.raw ->> 'engagements')::bigint end
+      when nullif(p.raw ->> 'imported_meta_post_id', '') is not null then
+        case when jsonb_typeof(p.raw -> 'engagements') = 'number' then
+          case when (p.raw ->> 'engagements')::numeric = trunc((p.raw ->> 'engagements')::numeric)
+            and (p.raw ->> 'engagements')::numeric between 0 and 2147483647
+            then (p.raw ->> 'engagements')::bigint end end
       else null end,
     case when p.raw ? 'engagement_evidence' then p.raw #>> '{engagement_evidence,definition_id}'
-      when jsonb_typeof(p.raw -> 'engagements') = 'number' then
-        case when (p.raw ->> 'engagements')::numeric = trunc((p.raw ->> 'engagements')::numeric)
-          and (p.raw ->> 'engagements')::numeric between 0 and 2147483647
-          then p.platform || '_legacy_import_engagements_v1' end end,
+      when nullif(p.raw ->> 'imported_meta_post_id', '') is not null then
+        case when jsonb_typeof(p.raw -> 'engagements') = 'number' then
+          case when (p.raw ->> 'engagements')::numeric = trunc((p.raw ->> 'engagements')::numeric)
+            and (p.raw ->> 'engagements')::numeric between 0 and 2147483647
+            then p.platform || '_legacy_import_engagements_v1' end end end,
     case when p.raw ? 'engagement_evidence' then p.raw #>> '{engagement_evidence,definition_label}'
-      when jsonb_typeof(p.raw -> 'engagements') = 'number' then
-        case when (p.raw ->> 'engagements')::numeric = trunc((p.raw ->> 'engagements')::numeric)
-          and (p.raw ->> 'engagements')::numeric between 0 and 2147483647
-          then initcap(p.platform) || ' legacy imported engagements' end end,
-    coalesce(p.raw #>> '{engagement_evidence,source}', p.raw ->> 'source', 'legacy_import'),
+      when nullif(p.raw ->> 'imported_meta_post_id', '') is not null then
+        case when jsonb_typeof(p.raw -> 'engagements') = 'number' then
+          case when (p.raw ->> 'engagements')::numeric = trunc((p.raw ->> 'engagements')::numeric)
+            and (p.raw ->> 'engagements')::numeric between 0 and 2147483647
+            then initcap(p.platform) || ' legacy imported engagements' end end end,
+    case when p.raw ? 'engagement_evidence' then p.raw #>> '{engagement_evidence,source}'
+      when nullif(p.raw ->> 'imported_meta_post_id', '') is not null
+        then coalesce(nullif(p.raw ->> 'import_source', ''), 'meta_business_suite')
+      else p.raw ->> 'source' end,
     case when p.raw ? 'engagement_evidence' then (p.raw #>> '{engagement_evidence,observed_at}')::timestamptz
       when p.raw ? 'synced_at' then (p.raw ->> 'synced_at')::timestamptz else p.created_at end,
     case when p.raw ? 'engagement_evidence' then p.raw #> '{engagement_evidence,coverage}'
-      when jsonb_typeof(p.raw -> 'engagements') = 'number' then
-        case when (p.raw ->> 'engagements')::numeric = trunc((p.raw ->> 'engagements')::numeric)
-          and (p.raw ->> 'engagements')::numeric between 0 and 2147483647
-          then '{"observed":1,"required":1}'::jsonb end end,
+      when nullif(p.raw ->> 'imported_meta_post_id', '') is not null then
+        case when jsonb_typeof(p.raw -> 'engagements') = 'number' then
+          case when (p.raw ->> 'engagements')::numeric = trunc((p.raw ->> 'engagements')::numeric)
+            and (p.raw ->> 'engagements')::numeric between 0 and 2147483647
+            then '{"observed":1,"required":1}'::jsonb end end end,
     case when p.raw ? 'engagement_evidence' then p.raw #>> '{engagement_evidence,completeness}'
-      when jsonb_typeof(p.raw -> 'engagements') = 'number' then
-        case when (p.raw ->> 'engagements')::numeric = trunc((p.raw ->> 'engagements')::numeric)
-          and (p.raw ->> 'engagements')::numeric between 0 and 2147483647 then 'complete' else 'invalid' end
-      when p.raw ? 'engagements' then 'invalid' else 'unavailable' end,
+      when nullif(p.raw ->> 'imported_meta_post_id', '') is not null then
+        case when jsonb_typeof(p.raw -> 'engagements') = 'number' then
+          case when (p.raw ->> 'engagements')::numeric = trunc((p.raw ->> 'engagements')::numeric)
+            and (p.raw ->> 'engagements')::numeric between 0 and 2147483647
+            then 'complete' else 'invalid' end
+          when p.raw ? 'engagements' then 'invalid' else 'unavailable' end
+      else 'unavailable' end,
     exists (select 1 from public.report_content_exclusions e where e.report_id = p_report_id
       and e.post_id = p.id and e.client_id = v_client_id and e.excluded)
   from public.posts p where p.report_id = p_report_id

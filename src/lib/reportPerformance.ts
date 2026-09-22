@@ -57,7 +57,7 @@ export function contentToneFor(post: ReportStatsPost): {
     }
   }
 
-  const hasSignal = (typeof interactions === 'number' && interactions > 0) || typeof views === 'number' || typeof reach === 'number'
+  const hasSignal = typeof interactions === 'number' || typeof views === 'number' || typeof reach === 'number'
   if (hasSignal) {
     return {
       tone: 'learning',
@@ -205,7 +205,7 @@ export function buildReportPerformance(input: BuildInput): ReportPerformance {
       // Only treat it as a real comparison if at least one previous figure exists.
       (previousMaster?.totalReach != null ||
         previousMaster?.totalViews != null ||
-        (previousMaster?.totalEngagements ?? 0) > 0 ||
+        typeof previousMaster?.totalEngagements === 'number' ||
         totalManualFollowers(previousManual) !== null ||
         totalManualProfileVisits(previousManual) !== null ||
         totalPosts(previousMaster ?? emptyMaster()) > 0),
@@ -271,7 +271,8 @@ export function buildReportPerformance(input: BuildInput): ReportPerformance {
   if (!weakestArea && reachVal >= 500 && typeof engVal === 'number' && engVal > 0 && engVal / reachVal < 0.01) {
     weakestArea = 'Engagement quality'
   }
-  if (!weakestArea && (best?.engagements ?? 0) < WEAK_CONTENT_THRESHOLD && curPosts > 0) {
+  if (!weakestArea && typeof best?.engagements === 'number'
+    && best.engagements < WEAK_CONTENT_THRESHOLD && curPosts > 0) {
     weakestArea = 'Audience response'
   }
 
@@ -393,7 +394,7 @@ function buildNextSteps(input: {
 
   const reach = master.totalReach
   const interactions = master.totalEngagements
-  const bestEng = best?.engagements ?? 0
+  const bestEng = best?.engagements
   const dir = (key: string) => metrics.find(m => m.key === key)?.direction
 
   const reachUp = dir('reach') === 'up' || dir('views') === 'up'
@@ -415,7 +416,7 @@ function buildNextSteps(input: {
       why: 'Visibility is building while response quality is the next focus - the content is being seen but action is still building.',
       action: 'Use stronger opening hooks, question-led captions and product comparison posts.',
     })
-  } else if (bestEng > 0 && bestEng < WEAK_CONTENT_THRESHOLD) {
+  } else if (typeof bestEng === 'number' && bestEng > 0 && bestEng < WEAK_CONTENT_THRESHOLD) {
     steps.push({
       priority: 1,
       title: 'Sharpen content hooks',
@@ -462,7 +463,7 @@ function buildNextSteps(input: {
   }
 
   // 5. Strong top post exists - use it as a format signal.
-  if (best && bestEng >= WEAK_CONTENT_THRESHOLD) {
+  if (best && typeof bestEng === 'number' && bestEng >= WEAK_CONTENT_THRESHOLD) {
     steps.push({
       priority: 5,
       title: 'Build on what worked',
@@ -611,7 +612,7 @@ function buildPlatformRecommendations(input: {
     )
   }
 
-  const weakContent = topContent ? topContent.tone !== 'top' : false
+  const weakContent = topContent?.tone === 'learning'
   const reach = view.reach ?? 0
   const thinEngagement = reach >= 500 && typeof view.engagements === 'number' && view.engagements > 0 && view.engagements / reach < 0.02
   if (weakContent || thinEngagement) {

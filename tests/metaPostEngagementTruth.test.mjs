@@ -12,10 +12,12 @@ const reports = read('../src/lib/db/reports.ts')
 let server
 let engagement
 let reportStats
+let reportPerformance
 before(async () => {
   server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
   engagement = await server.ssrLoadModule('/supabase/functions/_shared/metaPostEngagement.ts')
   reportStats = await server.ssrLoadModule('/src/lib/reportStats.ts')
+  reportPerformance = await server.ssrLoadModule('/src/lib/reportPerformance.ts')
 })
 after(async () => { if (server) await server.close() })
 
@@ -68,13 +70,49 @@ test('repeat ingestion is deterministic and an incomplete refresh preserves prio
 })
 
 test('legacy imports retain explicit zero and source identity without inferring column totals', () => {
-  const legacy = engagement.projectMetaPostEngagement({ engagements: 0, source: 'csv_import' }, 'facebook', at)
-  assert.equal(legacy.completeTotal, 0)
-  assert.equal(legacy.definitionId, 'facebook_legacy_import_engagements_v1')
-  assert.equal(legacy.source, 'csv_import')
-  assert.equal(legacy.observedAt, at)
+  const legacy = reportStats.reportPostToStatsPost({
+    id: 'saved-import', report_id: 'report-id', meta_post_id: 'imported-meta-id',
+    platform: 'facebook', publish_time: null, meta_post_type: 'Photo', caption: null,
+    permalink: null, views: 0, reach: 0, reactions: 0, comments: 0, shares: 0,
+    total_clicks: 0,
+    raw: {
+      engagements: 0, imported_meta_post_id: 'imported-row-id',
+      import_source: 'meta_business_suite',
+    },
+    created_at: at,
+  })
+  assert.equal(legacy.engagements, 0)
+  assert.equal(legacy.engagementDefinitionId, 'facebook_legacy_import_engagements_v1')
+  assert.equal(legacy.engagementSource, 'meta_business_suite')
+  assert.equal(legacy.engagementObservedAt, at)
   const missing = engagement.projectMetaPostEngagement({}, 'facebook', at)
   assert.equal(missing.completeTotal, null)
+  const unprovenSource = engagement.projectMetaPostEngagement({
+    engagements: 12, source: 'csv_import',
+  }, 'facebook', at)
+  assert.equal(unprovenSource.completeTotal, null)
+  assert.equal(unprovenSource.definitionId, null)
+})
+
+test('historical automated numeric engagements fail closed for zero and positive values', () => {
+  for (const value of [0, 27]) {
+    const projected = reportStats.reportPostToStatsPost({
+      id: `automated-${value}`, report_id: 'report-id', meta_post_id: `meta-${value}`,
+      platform: 'facebook', publish_time: null, meta_post_type: 'Photo', caption: null,
+      permalink: null, views: null, reach: null, reactions: value, comments: 0,
+      shares: 0, total_clicks: 0,
+      raw: { engagements: value, source: 'meta_sync', synced_at: at },
+      created_at: '2026-09-21T12:00:00.000Z',
+    })
+    assert.equal(projected.engagements, null)
+    assert.equal(projected.engagementDefinitionId, null)
+    assert.equal(projected.engagementCompleteness, 'unavailable')
+    assert.equal(projected.engagementSource, 'meta_sync')
+    assert.equal(projected.engagementObservedAt, at)
+    const ranked = reportStats.rankPostsByStrength([projected])
+    assert.equal(ranked.metric, null)
+    assert.deepEqual(ranked.posts, [])
+  }
 })
 
 const post = (id, platform, total, definition) => ({
@@ -114,10 +152,65 @@ test('aggregate totals require one definition and one observation time', () => {
   assert.equal(sameAge.engagementDefinitionId, definition)
 })
 
+test('missing engagement does not create a weak signal while observed zero remains evidence', () => {
+  const performanceFor = engagements => {
+    const best = post(
+      engagements === null ? 'missing' : 'zero',
+      'instagram',
+      engagements,
+      engagements === null ? null : 'instagram_direct_likes_comments_v1',
+    )
+    return reportPerformance.buildReportPerformance({
+      master: {
+        platforms: [{
+          platform: 'instagram', label: 'Instagram', source: 'posts', reach: null, views: null,
+          engagements, engagementKnownSubtotal: engagements,
+          engagementDefinitionId: best.engagementDefinitionId,
+          engagementDefinitionLabel: best.engagementDefinitionLabel,
+          engagementObservedAt: best.engagementObservedAt,
+          postCount: 1, bestPost: best, topPosts: [best], manual: null,
+        }],
+        totalReach: null, totalViews: null, totalEngagements: null,
+        bestPlatform: null, bestPostOverall: best,
+      },
+      previousMaster: null, currentManual: [], previousManual: [],
+      monthLabel: 'September 2026', previousMonthLabel: null,
+    })
+  }
+
+  const missing = performanceFor(null)
+  assert.equal(missing.weakestArea, null)
+  assert.equal(missing.topContent.tone, 'baseline')
+  const zero = performanceFor(0)
+  assert.equal(zero.weakestArea, 'Audience response')
+  assert.equal(zero.topContent.interactions, 0)
+  assert.equal(zero.topContent.tone, 'learning')
+
+  const platformFor = result => reportPerformance.buildPlatformPerformance({
+    view: result.topContent
+      ? {
+          platform: 'instagram', label: 'Instagram', source: 'posts', reach: null, views: null,
+          engagements: result.topContent.interactions,
+          engagementKnownSubtotal: result.topContent.interactions,
+          engagementDefinitionId: result.topContent.post.engagementDefinitionId,
+          engagementDefinitionLabel: result.topContent.post.engagementDefinitionLabel,
+          engagementObservedAt: result.topContent.post.engagementObservedAt,
+          postCount: 1, bestPost: result.topContent.post, topPosts: [result.topContent.post], manual: null,
+        }
+      : null,
+    previousView: null, previousManual: null,
+    monthLabel: 'September 2026', previousMonthLabel: null,
+  })
+  assert.doesNotMatch(platformFor(missing).recommendations.join(' '), /question-led captions/i)
+  assert.match(platformFor(zero).recommendations.join(' '), /question-led captions/i)
+})
+
 test('SQL boundary preserves good evidence and exposes only published exact-client rows', () => {
   assert.match(migration, /v_existing_complete and not v_complete/)
   assert.match(migration, /engagement_refresh_attempt/)
   assert.match(migration, /v_component_value > 2147483647/)
+  assert.match(migration, /imported_meta_post_id/)
+  assert.match(migration, /else 'unavailable' end/)
   assert.match(migration, /r\.status = 'published'/)
   assert.match(migration, /v_client_id is distinct from public\.my_client_id\(\)/)
   assert.match(migration, /profile\.is_active and profile\.role = 'client'/)
@@ -133,4 +226,5 @@ test('both Meta ingestion paths use canonical evidence and never default direct 
     assert.doesNotMatch(source, /comments_count as number\) \?\? 0/)
   }
   assert.match(reports, /engagement_known_subtotal: number \| null/)
+  assert.match(reports, /imported_meta_post_id: post\.id,[\s\S]*import_source: post\.source/)
 })

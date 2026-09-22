@@ -146,14 +146,17 @@ export function projectMetaPostEngagement(
     }
   }
 
+  const hasExplicitImportIdentity = typeof raw.imported_meta_post_id === 'string'
+    && raw.imported_meta_post_id.trim().length > 0
   const legacy = classifyMetaPostCount(raw.engagements)
-  if (legacy.state === 'observed' && (platform === 'facebook' || platform === 'instagram')) {
+  if (hasExplicitImportIdentity && legacy.state === 'observed'
+    && (platform === 'facebook' || platform === 'instagram')) {
     return {
       completeTotal: legacy.value,
       knownSubtotal: legacy.value,
       definitionId: `${platform}_legacy_import_engagements_v1`,
       definitionLabel: `${platform === 'facebook' ? 'Facebook' : 'Instagram'} legacy imported engagements`,
-      source: typeof raw.source === 'string' ? raw.source : 'legacy_import',
+      source: typeof raw.import_source === 'string' ? raw.import_source : 'meta_business_suite',
       observedAt: validTimestamp(raw.synced_at) ? raw.synced_at : legacyObservedAt,
       coverage: { observed: 1, required: 1 },
       completeness: 'complete',
@@ -168,6 +171,6 @@ export function projectMetaPostEngagement(
     source: typeof raw.source === 'string' ? raw.source : null,
     observedAt: validTimestamp(raw.synced_at) ? raw.synced_at : legacyObservedAt,
     coverage: null,
-    completeness: legacy.state === 'invalid' ? 'invalid' : 'unavailable',
+    completeness: hasExplicitImportIdentity && legacy.state === 'invalid' ? 'invalid' : 'unavailable',
   }
 }
