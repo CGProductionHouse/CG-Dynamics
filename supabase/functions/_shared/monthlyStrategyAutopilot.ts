@@ -126,12 +126,22 @@ function addUnique(target: string[], value: string, limit: number) {
   if (value.length >= 12 && !target.some(item => item.toLowerCase() === value.toLowerCase()) && target.length < limit) target.push(value)
 }
 
-async function prepareDraft(sb: StrategyAutopilotClient, client: Record<string, unknown>, strategyMonth: string) {
+/** PostgreSQL date semantics: a card remains current through its expiry date. */
+export function strategyKnowledgeCardIsCurrent(card: { review_expires_at?: unknown }, operatingDate: string): boolean {
+  const expiresOn = clean(card.review_expires_at, 10)
+  return !expiresOn || expiresOn >= operatingDate
+}
+
+export function approvedIndustryProfile(row: Record<string, unknown> | null): Record<string, unknown> | null {
+  return row && (row.review_state === 'reviewed' || row.review_state === 'active') ? row : null
+}
+
+async function prepareDraft(sb: StrategyAutopilotClient, client: Record<string, unknown>, strategyMonth: string, operatingDate: string) {
   const clientId = String(client.id)
   const next = new Date(`${strategyMonth}T00:00:00Z`)
   next.setUTCMonth(next.getUTCMonth() + 1)
   const nextMonth = next.toISOString().slice(0, 10)
-  const [deliverables, events, prior, report, updates, guide, packageRow, industry, cards] = await Promise.all([
+  const [deliverables, events, prior, report, updates, guide, packageRow, industry, sharedCards, clientCards] = await Promise.all([
     sb.from('monthly_deliverables').select('id,deliverable_type,title').eq('client_id', clientId).eq('month', strategyMonth).is('archived_at', null),
     sb.from('company_calendar_events').select('id,title,event_type,start_at').eq('client_id', clientId).gte('start_at', `${strategyMonth}T00:00:00+02:00`).lt('start_at', `${nextMonth}T00:00:00+02:00`).neq('status', 'cancelled').is('superseded_by_event_id', null),
     sb.from('monthly_client_strategies').select('id,strategy_data').eq('client_id', clientId).lt('strategy_month', strategyMonth).order('strategy_month', { ascending: false }).limit(1).maybeSingle(),
@@ -140,23 +150,28 @@ async function prepareDraft(sb: StrategyAutopilotClient, client: Record<string, 
     sb.from('client_guides').select('id,guide_markdown').eq('client_id', clientId).eq('runtime_readiness', 'ready').order('version', { ascending: false }).limit(1).maybeSingle(),
     sb.from('client_packages').select('id').eq('client_id', clientId).eq('status', 'active').lt('start_date', nextMonth).or(`end_date.is.null,end_date.gte.${strategyMonth}`).order('start_date', { ascending: false }).limit(1).maybeSingle(),
     sb.from('client_industry_profiles').select('primary_industry,secondary_industry,review_state').eq('client_id', clientId).maybeSingle(),
-    sb.from('skill_cards').select('id,title,principle,summary,knowledge_layer,category,subcategory,active_client_id,review_expires_at').eq('status', 'active').in('knowledge_layer', ['universal_principle', 'south_african_market', 'industry_specific', 'active_client_specific']).limit(30),
+    sb.from('skill_cards').select('id,title,principle,summary,knowledge_layer,category,subcategory,active_client_id,review_expires_at').eq('status', 'active').is('active_client_id', null).in('knowledge_layer', ['universal_principle', 'south_african_market', 'industry_specific']).or(`review_expires_at.is.null,review_expires_at.gte.${operatingDate}`).limit(30),
+    sb.from('skill_cards').select('id,title,principle,summary,knowledge_layer,category,subcategory,active_client_id,review_expires_at').eq('status', 'active').eq('active_client_id', clientId).or(`review_expires_at.is.null,review_expires_at.gte.${operatingDate}`).limit(30),
   ])
-  for (const result of [deliverables, events, prior, report, updates, guide, packageRow, industry, cards]) {
+  for (const result of [deliverables, events, prior, report, updates, guide, packageRow, industry, sharedCards, clientCards]) {
     if (result.error) throw new Error(result.error.message)
   }
 
   const ds = (deliverables.data ?? []) as Array<Record<string, unknown>>
   const evs = (events.data ?? []) as Array<Record<string, unknown>>
   const updateRows = (updates.data ?? []) as Array<Record<string, unknown>>
-  const industryRow = industry.data as Record<string, unknown> | null
+  const industryRow = approvedIndustryProfile(industry.data as Record<string, unknown> | null)
   const primaryIndustry = clean(industryRow?.primary_industry, 100).toLowerCase()
-  const cardRows = ((cards.data ?? []) as Array<Record<string, unknown>>).filter(card => {
+  const cardRows = [
+    ...((clientCards.data ?? []) as Array<Record<string, unknown>>),
+    ...((sharedCards.data ?? []) as Array<Record<string, unknown>>),
+  ].filter(card => {
+    if (!strategyKnowledgeCardIsCurrent(card, operatingDate)) return false
     if (card.active_client_id) return card.active_client_id === clientId
     if (card.knowledge_layer !== 'industry_specific') return true
     const labels = `${clean(card.category, 100)} ${clean(card.subcategory, 100)}`.toLowerCase()
     return Boolean(primaryIndustry) && labels.includes(primaryIndustry)
-  })
+  }).slice(0, 30)
   const draft = emptyDraft()
   const evidence: Evidence[] = []
   const blockers: string[] = []
@@ -174,7 +189,7 @@ async function prepareDraft(sb: StrategyAutopilotClient, client: Record<string, 
   draft.clientDirection = baseline.clientDirection
   draft.strategyDrivers = baseline.strategyDrivers
   evidence.push(...baseline.evidence)
-  if (industryRow?.review_state === 'approved' && industryRow.primary_industry) {
+  if (industryRow?.primary_industry) {
     const value = `Apply relevant ${clean(industryRow.primary_industry, 80)} category context without adding unverified client claims.`
     addUnique(draft.strategyDrivers, value, 6)
   }
@@ -284,7 +299,7 @@ export async function runMonthlyStrategyAutopilot(
       const existing = await sb.from('monthly_client_strategies').select('id,workflow_status,version').eq('client_id', client.id).eq('strategy_month', strategyMonth).maybeSingle()
       if (existing.error) throw new Error(existing.error.message)
       if (existing.data) { existingUntouched += 1; continue }
-      const prepared = await prepareDraft(sb, client, strategyMonth)
+      const prepared = await prepareDraft(sb, client, strategyMonth, options.today)
       for (const blocker of prepared.blockers) note(blocker)
       const enhanced = options.enhanceDraft ? await options.enhanceDraft({ clientId: String(client.id), clientName: String(client.name), strategyMonth, draft: prepared.draft, groundedEvidence: prepared.evidence }) : null
       const idempotency = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`monthly-strategy-autopilot:${client.id}:${strategyMonth}`))

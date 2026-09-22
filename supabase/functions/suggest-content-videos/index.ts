@@ -30,6 +30,7 @@ import {
   type AiChatMessage,
 } from '../cg-assistant-chat/ai-router.ts'
 import { fetchAiUsageReplay, type AiUsageClient } from '../_shared/aiUsage.ts'
+import { monthlyStrategyAlignmentLines, type MonthlyStrategyAlignmentRow } from '../_shared/monthlyStrategyAlignment.ts'
 import {
   buildDevelopPrompt,
   buildIdeasPrompt,
@@ -343,7 +344,7 @@ Deno.serve(async (req) => {
   // for the same client and covered month. This is read-only and bounded. A
   // missing strategy is not replaced with another store or inferred context.
   const strategyMonths = coverageMonths.map(month => `${month}-01`)
-  const { data: monthlyStrategies } = strategyMonths.length > 0
+  const { data: monthlyStrategies, error: monthlyStrategyError } = strategyMonths.length > 0
     ? await sb
       .from('monthly_client_strategies')
       .select('strategy_month,strategy_data,workflow_status')
@@ -457,12 +458,7 @@ Deno.serve(async (req) => {
     `${totalDeliverableSlots} schedule deliverable slots (video/reel) in coverage window`,
     `${existingVideos.length} existing videos in current guideline`,
     `${historicalConcepts?.length ?? 0} historical approved/completed concepts for this client`,
-    ...((monthlyStrategies ?? []) as Array<{ strategy_month: string; strategy_data: Record<string, unknown>; workflow_status: string }>).map(strategy => {
-      const data = strategy.strategy_data ?? {}
-      const direction = Array.isArray(data.clientDirection) ? data.clientDirection.filter(value => typeof value === 'string').slice(0, 3) : []
-      const drivers = Array.isArray(data.strategyDrivers) ? data.strategyDrivers.filter(value => typeof value === 'string').slice(0, 3) : []
-      return `Canonical monthly strategy (${strategy.strategy_month}, ${strategy.workflow_status}): direction=${direction.join(' | ') || 'none recorded'}; drivers=${drivers.join(' | ') || 'none recorded'}; forward=${typeof data.strategyGoingForward === 'string' ? data.strategyGoingForward.slice(0, 600) : 'none recorded'}`
-    }),
+    ...monthlyStrategyAlignmentLines(monthlyStrategies as MonthlyStrategyAlignmentRow[] | null, monthlyStrategyError),
   ]
 
   const marketingLibraryKnowledge = (skillCards ?? []).map(
