@@ -1,7 +1,7 @@
 # #450/#451 production activation ledger — 22 September 2026
 
 Authority: live inspection and the CA-approved activation against GitHub `main`
-`03b5d49f6777469badb0b23a9e08c28f702af751` on 22 September 2026.
+`dd9215d4d8b8fbe04d91f013aba67fc39e4cae1d` on 22 September 2026.
 
 ## Activation execution status
 
@@ -11,18 +11,20 @@ Authority: live inspection and the CA-approved activation against GitHub `main`
   `CONTENT_AUTOPILOT_VIDEO_FOLDERS` false. Production has zero Content Autopilot jobs.
 - Applied and verified the explicitly approved prerequisite `20260918113000`, then the approved
   four migrations in order. `20260919100000_client_portal_remove_photography.sql` was not applied.
-- Deployed `microsoft-transition-sync` v27 and the other dependency functions with the intended JWT
-  modes: `suggest-content-videos` v12, `content-run-onedrive-folder` v3,
-  `meta-connection-status` v24 and `cg-dynamics-mcp` v15. Deployed `background-worker` v14 last.
+- Deployed the accepted dependency functions with their intended JWT modes. Current relevant
+  versions include `microsoft-transition-sync` v31 (`verify_jwt=true`), `meta-sync-worker` v31 and
+  `background-worker` v15 (both `verify_jwt=false`).
 - Meta fleet recovery is live and truthful. At 10:02 UTC it had 39 checkpoint rows for 57 mapped
   platforms, 37 carrying successful evidence, zero PASS, and no active batch. Missing evidence was
   not converted into zero or PASS. The first live fleet cycle later proved that the deployed
   `meta-sync-worker` predates #451 current-month `sync_kind='incremental'` support: current-month
   items are skipped and then selected again, while Red Oak's prior-month read truthfully fails for
   missing `pages_read_engagement`. At 10:48 UTC production had 45 checkpoints for 57 mapped
-  platforms (42 successful, three failed). Deploying current `meta-sync-worker` is therefore an
-  additional protected dependency gate; do not mistake the five-function deploy for a complete
-  Meta runtime rollout.
+  platforms (42 successful, three failed). Current `meta-sync-worker` v31 was subsequently deployed
+  under explicit CA approval. It correctly completed current-month incremental and historical work;
+  checkpoints reached 51 of 57 by 11:18 UTC. Red Oak remains permission-blocked because the stored
+  user token claims `pages_read_engagement` but cannot obtain Page access for exact Page
+  `117937152934535` (`RedOak LHP`).
 - Microsoft did not start a new job. The selected real admin actor also owns the stale 18 September
   preview, so the first implementation repeatedly tried to adopt that historical preview instead
   of starting today's job. The correction on `codex/451-activation-runtime-hardening` makes stale
@@ -36,64 +38,36 @@ Authority: live inspection and the CA-approved activation against GitHub `main`
   then proved that a 300-detail unit can exceed the background worker's 20-second hand-off budget;
   `codex/451-detail-budget` narrows each durable unit to one normal four-request Graph wave (80 task
   details). No Microsoft write occurred.
-- The existing cron cadence is correct, but its `net.http_post` command omits
-  `timeout_milliseconds`, leaving pg_net's five-second default. New worker calls exceed that while
-  durable downstream Meta work continues. Updating only that timeout is a new protected cron
-  mutation and must be approved before final reconciliation acceptance.
+- Under explicit CA approval, the existing `cg-background-worker` job was changed only from pg_net's
+  default timeout to `timeout_milliseconds=30000`. Job ID 1, `* * * * *` cadence, PostgreSQL
+  scheduler identity and background-worker endpoint are unchanged. Subsequent minute responses are
+  HTTP 200 with `timed_out=false`, `contentAutopilotSchedule.state=disabled` and Microsoft success.
 
-## Already live
+## Current live state
 
-- Vercel production serves `f8e1ae8`; authenticated desktop/mobile acceptance passed.
-- Existing `cg-background-worker` pg_cron job is active every minute. Its last 60 runs in the
-  inspected hour all succeeded at the SQL/HTTP-dispatch layer.
-- Production has 37 exact Meta client/asset rows: 37 Facebook + 20 Instagram platforms. It has
-  only two checkpoints, both last successful on 17 September; 55 mapped platforms have no
-  checkpoint. The UI therefore correctly reports STALE rather than PASS.
-- Microsoft provider credentials/source manifest exist. The registry has one active plan and
-  transition status is active. The last durable fetch job completed on 18 September with six source
-  rows (five complete, one failed); the last fully applied reconciliation is older, from 19 August,
-  with all six sources complete. Production Microsoft truth is therefore stale/partial, not fresh.
+- Vercel production is green on `dd9215d4d8b8fbe04d91f013aba67fc39e4cae1d`.
+- Existing `cg-background-worker` pg_cron job is active every minute with a 30-second HTTP timeout.
+- Production has 37 exact Meta client/asset rows: 37 Facebook + 20 Instagram platforms. At 11:18
+  UTC it had 51 checkpoints: 49 successful and two failed. Missing evidence remains non-PASS.
+- Microsoft job `40569507-7f78-4e1b-afe0-79b7b06edb4b` is in bounded source retry 1 of 3. Five
+  required sources remain complete; the retried legacy plan has 5,374 records and cleanly re-entered
+  durable detail processing. No apply run exists and the last verified mirror remains authoritative.
 - Base durable jobs, Meta checkpointing, Microsoft durable import, OneDrive token/mapping tables,
   and the existing Content Guideline data model are present.
 - Econofoods has one upcoming run, one guideline and three guideline ideas. It has no configured
   short code, client OneDrive mapping or run-folder mapping.
 
-## Not live
+## Remaining not live / blocked
 
-The following committed migrations are absent from production, and their defining tables/RPCs are
-also absent:
-
-1. `20260921090000_content_production_autopilot.sql`
-2. `20260921120000_daily_dynamics_service_reconciliation.sql`
-3. `20260921140000_content_autopilot_corrections.sql`
-4. `20260922120000_system_worker_profile.sql`
-
-Do not use a blanket `supabase db push`: production migration history contains older remote/local
-drift. Apply only these reviewed files, in timestamp order, and verify each history row and required
-object before continuing.
-
-The deployed functions are all behind current main: `background-worker` v12,
-`microsoft-transition-sync` v25, `meta-connection-status` v22, `cg-dynamics-mcp` v13,
-`suggest-content-videos` v10 and `content-run-onedrive-folder` v1. Downloaded production source
-differs materially from main for every one of them. `onedrive-oauth-start` and
-`onedrive-oauth-callback` are not deployed.
-
-Existing provider secrets are present for Microsoft and Meta. These new runtime values are absent:
-
-- `DAILY_FRESHNESS_WORKER_SECRET`
-- `MICROSOFT_SYNC_SYSTEM_USER_ID`
-- `WORKER_INTERNAL_TOKEN`
-- `WORKER_SYSTEM_PROFILE_ID`
-- `CONTENT_AUTOPILOT_ENABLED`
-- the optional, separately gated `CONTENT_AUTOPILOT_GENERATION` and
-  `CONTENT_AUTOPILOT_VIDEO_FOLDERS` flags
-- all delegated OneDrive `ONEDRIVE_MS_*`, `ONEDRIVE_TOKEN_ENC_KEY` and
-  `ONEDRIVE_OAUTH_SETUP_TOKEN` values
-
-Two active, auth-backed admin profiles exist as candidates, but no identity was selected. Production
-has zero configured client short codes, zero client OneDrive mappings, zero run-folder mappings and
-zero delegated OneDrive token rows. Selection of a real system actor and all provider/mapping writes
-remain CA gates.
+- Content Autopilot remains disabled; production has zero `content_autopilot` jobs. AI generation
+  and OneDrive folder creation remain disabled.
+- Red Oak complete Meta evidence requires the connecting Facebook user to have Page access to exact
+  Page `117937152934535`, then use Dynamics **Integrations → Meta → Reconnect Meta**, select
+  `RedOak LHP` in the Facebook asset chooser and approve the already-requested
+  `pages_read_engagement` permission. No broad app-scope expansion is indicated: the stored token
+  already lists the required scope, while the exact Page-token read returns Graph code 10.
+- The Client Portal Photography policy migration `20260919100000` remains intentionally unapplied.
+- OneDrive OAuth functions/secrets and client/run mappings remain absent and separately gated.
 
 ## Exact protected activation sequence
 
