@@ -59,6 +59,13 @@ export interface MetaCheckpointInput {
   retrying: boolean
 }
 
+export interface MetaInventoryInput {
+  clientId: string
+  assetId: string
+  facebookMapped: boolean
+  instagramMapped: boolean
+}
+
 export interface MetaFleetFreshness {
   verdict: FreshnessVerdict
   mappedClients: number
@@ -71,13 +78,39 @@ export interface MetaFleetFreshness {
   recoveryInProgress: boolean
 }
 
-export function metaFleetFreshnessEvidence(checkpoints: MetaCheckpointInput[], now: string): MetaFleetFreshness {
+export function metaFleetFreshnessEvidence(
+  checkpoints: MetaCheckpointInput[],
+  now: string,
+  inventory: MetaInventoryInput[] = [],
+  checkpointEvidenceAvailable = true,
+): MetaFleetFreshness {
   const nowMs = Date.parse(now)
-  const platforms = checkpoints.map(checkpoint => {
+  const checkpointByPlatform = new Map(checkpoints.map(checkpoint => [`${checkpoint.assetId}:${checkpoint.platform}`, checkpoint]))
+  const mappedInventory = inventory.flatMap(asset => (['facebook', 'instagram'] as const)
+    .filter(platform => asset[`${platform}Mapped`])
+    .map(platform => ({ clientId: asset.clientId, assetId: asset.assetId, platform })))
+  const effectiveCheckpoints: MetaCheckpointInput[] = mappedInventory.length > 0
+    ? mappedInventory.map(mapped => checkpointByPlatform.get(`${mapped.assetId}:${mapped.platform}`) ?? {
+        ...mapped,
+        mapped: true,
+        lastAttemptedAt: null,
+        lastSuccessfulAt: null,
+        lastSuccessfulMonth: null,
+        highWatermarkAt: null,
+        nextDueAt: null,
+        status: null,
+        healthState: null,
+        errorCode: null,
+        retrying: false,
+      })
+    : checkpoints
+  const platforms = effectiveCheckpoints.map(checkpoint => {
     let verdict: FreshnessVerdict = 'PASS'
     let reason: string | null = null
     if (!checkpoint.mapped) {
       verdict = 'UNAVAILABLE'; reason = 'Platform is not mapped for this asset.'
+    } else if (!checkpointEvidenceAvailable) {
+      verdict = 'UNAVAILABLE'; reason = 'Checkpoint freshness evidence is unavailable and has not been verified.'
     } else if (!checkpoint.lastAttemptedAt) {
       verdict = 'STALE'; reason = 'Mapped platform has never completed its bootstrap checkpoint.'
     } else if (checkpoint.status === 'failed') {
@@ -93,11 +126,13 @@ export function metaFleetFreshnessEvidence(checkpoints: MetaCheckpointInput[], n
   const failed = platforms.filter(item => item.verdict === 'FAILED').length
   const partial = platforms.filter(item => item.verdict === 'PARTIAL').length
   const stale = platforms.filter(item => item.verdict === 'STALE').length
-  const verdict: FreshnessVerdict = failed > 0 ? 'FAILED' : partial > 0 ? 'PARTIAL' : stale > 0 ? 'STALE' : unavailable > 0 ? 'UNAVAILABLE' : 'PASS'
+  const verdict: FreshnessVerdict = platforms.length === 0
+    ? 'UNAVAILABLE'
+    : failed > 0 ? 'FAILED' : partial > 0 ? 'PARTIAL' : stale > 0 ? 'STALE' : unavailable > 0 ? 'UNAVAILABLE' : 'PASS'
   return {
     verdict,
-    mappedClients: new Set(checkpoints.filter(item => item.mapped).map(item => item.clientId)).size,
-    mappedAssets: new Set(checkpoints.filter(item => item.mapped).map(item => item.assetId)).size,
+    mappedClients: new Set(effectiveCheckpoints.filter(item => item.mapped).map(item => item.clientId)).size,
+    mappedAssets: new Set(effectiveCheckpoints.filter(item => item.mapped).map(item => item.assetId)).size,
     platforms,
     stale,
     partial,
