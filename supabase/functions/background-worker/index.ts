@@ -10,6 +10,11 @@ import { dispatchMetaWorker } from '../_shared/metaWorkerDispatch.ts'
 import { currentMetaMonth, previousMetaMonth, currentMonthHasIncrementalWindow } from '../_shared/metaPeriod.ts'
 import { fetchAllRows } from '../_shared/paginatedRows.ts'
 import { GENERATION_FLAG, VIDEO_FOLDER_FLAG, recordContentAutopilotPass, runContentAutopilotPass } from '../_shared/contentAutopilotPass.ts'
+import {
+  CONTENT_AUTOPILOT_ENABLED_FLAG,
+  contentAutopilotIdempotencyKey,
+  contentAutopilotOperatingDate,
+} from '../_shared/contentAutopilotSchedule.ts'
 
 const MAX_RUNTIME_MS = 25_000
 const MAX_JOBS_PER_RUN = 25
@@ -47,6 +52,11 @@ Deno.serve(async () => {
   const worker = `edge-${crypto.randomUUID().slice(0, 8)}`
   const processed: Array<{ id: string; job_type: string; ok: boolean }> = []
   const deadline = Date.now() + MAX_RUNTIME_MS
+
+  // #450 uses the existing worker/queue rather than a second cron. Activation is
+  // explicit and fail-closed; once enabled, the daily idempotency key guarantees
+  // that concurrent minute ticks can enqueue at most one Johannesburg-day pass.
+  const contentAutopilotSchedule = await ensureDailyContentAutopilotJob(supabase)
 
   while (Date.now() < deadline && processed.length < MAX_JOBS_PER_RUN) {
     const { data: job, error } = await supabase.rpc('claim_next_background_job', { p_worker: worker })
@@ -96,7 +106,7 @@ Deno.serve(async () => {
   // drains large paginated jobs without a long request. The Microsoft function
   // deduplicates against its exact system identity and enforces a three-hour
   // freshness window before starting another reconciliation.
-  const microsoftFreshness = await advanceMicrosoftFreshness(url)
+  const microsoftFreshness = await advanceMicrosoftFreshness(url, serviceKey)
 
   // ── Meta sync batch reaper ────────────────────────────────────────────────
   // The durable safety net for production blocker #161.
@@ -124,16 +134,43 @@ Deno.serve(async () => {
   // state (Access/Coverage/Completeness/Freshness) independently.
   const fleetFreshness = await enqueueFleetMetaFreshness(supabase, url)
 
-  return new Response(JSON.stringify({ ok: true, worker, processed, microsoftFreshness, reaped, laneRecoveries, fleetFreshness }), { headers: { 'Content-Type': 'application/json' } })
+  return new Response(JSON.stringify({ ok: true, worker, processed, contentAutopilotSchedule, microsoftFreshness, reaped, laneRecoveries, fleetFreshness }), { headers: { 'Content-Type': 'application/json' } })
 })
 
-async function advanceMicrosoftFreshness(url: string): Promise<Record<string, unknown>> {
+async function ensureDailyContentAutopilotJob(
+  supabase: ReturnType<typeof createClient>,
+): Promise<Record<string, unknown>> {
+  const enabled = (Deno.env.get(CONTENT_AUTOPILOT_ENABLED_FLAG) ?? '').trim().toLowerCase() === 'true'
+  if (!enabled) return { state: 'disabled' }
+
+  const today = contentAutopilotOperatingDate()
+  const idempotencyKey = contentAutopilotIdempotencyKey(today)
+  const { data, error } = await supabase
+    .from('background_jobs')
+    .upsert({
+      job_type: 'content_autopilot',
+      payload: { today, schedule: 'daily_operating_cycle' },
+      idempotency_key: idempotencyKey,
+      max_attempts: 3,
+    }, { onConflict: 'idempotency_key', ignoreDuplicates: true })
+    .select('id')
+    .maybeSingle()
+
+  if (error) return { state: 'unavailable', blocker: error.message }
+  return { state: data?.id ? 'enqueued' : 'already_enqueued', operatingDate: today, idempotencyKey }
+}
+
+async function advanceMicrosoftFreshness(url: string, serviceKey: string): Promise<Record<string, unknown>> {
   const secret = (Deno.env.get('DAILY_FRESHNESS_WORKER_SECRET') ?? '').trim()
   if (secret.length < 32) return { ok: false, state: 'unavailable', blocker: 'DAILY_FRESHNESS_WORKER_SECRET is not configured.' }
   try {
     const response = await fetch(`${url}/functions/v1/microsoft-transition-sync`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-daily-freshness-secret': secret },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${serviceKey}`,
+        'x-daily-freshness-secret': secret,
+      },
       body: JSON.stringify({ action: 'system_cycle' }),
       signal: AbortSignal.timeout(20_000),
     })

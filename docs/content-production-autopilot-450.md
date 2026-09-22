@@ -97,12 +97,11 @@ real published-portal-asset truth in the readiness view; and a `NO_FUTURE_CONTEN
 decision made from a full upcoming-run scan, with `runs_unprocessed` and
 `clients_preparation_failed` kept distinct from genuinely having no future run.
 
-**What the background pass deliberately does not do yet.** It ensures the guideline and computes
-what should be generated, but it does not itself call the AI Content Director. Generation stays
-explicitly triggered — by staff in the editor, or by the Assistant's
-`generate_content_guideline_drafts` — until CA approves automatic AI writes on the cycle. That is a
-separate gate below, not an oversight: the pass would otherwise write AI drafts across every active
-client the first time it ran.
+**Protected runtime gates.** The existing per-minute worker can enqueue one idempotent pass per
+Johannesburg operating day only when `CONTENT_AUTOPILOT_ENABLED=true`. Draft generation and
+per-video OneDrive creation remain independent gates (`CONTENT_AUTOPILOT_GENERATION=true` and
+`CONTENT_AUTOPILOT_VIDEO_FOLDERS=true`). All three default off. This lets CA activate the bounded
+readiness pass without silently enabling AI or file writes.
 
 ## What must never happen here
 
@@ -122,6 +121,6 @@ client the first time it ran.
 | Per-video folder creation in OneDrive | #225 rollout: app registration, secrets, `onedrive-oauth-*` deploy, one-time consent — production currently stores 0 tokens |
 | Assistant content actions live | Deploy `cg-dynamics-mcp` (CA approval), then refresh the ChatGPT connector action list |
 | Prepared draft generation live | Deploy `suggest-content-videos`; a web-grounded provider key for real research |
-| Autopilot running on the cycle | Deploy `background-worker` and enqueue `content_autopilot` on the existing cycle |
-| Automatic AI draft generation on the cycle | CA decision: today the pass prepares and reports; it never calls the AI Content Director by itself |
+| Autopilot running on the cycle | Deploy `background-worker`, then explicitly set `CONTENT_AUTOPILOT_ENABLED=true`; the existing cycle enqueues one idempotent job per Johannesburg day |
+| Automatic AI draft generation on the cycle | Separate CA decision: `CONTENT_AUTOPILOT_GENERATION` defaults off; when explicitly enabled the worker calls the existing Content Director through its narrow internal authority |
 | Econofoods live acceptance | Configure the Econofoods `short_code`, map its client folder and the 23 Sep run month folder — all CA/admin actions |

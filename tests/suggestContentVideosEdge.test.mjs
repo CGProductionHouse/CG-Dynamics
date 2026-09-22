@@ -241,7 +241,7 @@ test('canonical routing context classifies and meters content video generation',
   assert.match(INDEX, /usageClient:\s*sb as unknown as AiUsageClient/)
   assert.match(INDEX, /feature:\s*['"]content_video_suggestions['"]/)
   assert.match(INDEX, /action:\s*['"]generate['"]/)
-  assert.match(INDEX, /actorId:\s*user\.id/)
+  assert.match(INDEX, /actorId:\s*userId/)
   assert.match(INDEX, /idempotencyKey:\s*requestId/)
   assert.match(INDEX, /complexity:\s*['"]complex['"]/)
   assert.match(INDEX, /maxOutputTokens:\s*SUGGESTION_MAX_OUTPUT_TOKENS/)
@@ -251,7 +251,7 @@ test('canonical routing context classifies and meters content video generation',
 test('fingerprint is SHA-256 of canonical non-secret semantic inputs, not prompt contents', () => {
   assert.match(INDEX, /crypto\.subtle\.digest\(['"]SHA-256['"]/)
   const fingerprintSection = INDEX.slice(INDEX.indexOf('const fingerprint ='), INDEX.indexOf('aiResult = await routeAiChat'))
-  for (const input of ['actorId: user.id', 'clientId', 'coverageStart', 'coverageEnd', 'guidelineId']) {
+  for (const input of ['actorId: userId', 'clientId', 'coverageStart', 'coverageEnd', 'guidelineId']) {
     assert.match(fingerprintSection, new RegExp(input.replace('.', '\\.')))
   }
   assert.doesNotMatch(fingerprintSection, /messages|systemPrompt|userMessage|rawContent|script/)

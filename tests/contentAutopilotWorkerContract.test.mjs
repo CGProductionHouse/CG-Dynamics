@@ -16,10 +16,11 @@ import { createServer } from 'vite'
 import { readFileSync } from 'node:fs'
 import { FakeSupabase } from './helpers/fakeSupabase.mjs'
 
-let server, pass
+let server, pass, schedule
 before(async () => {
   server = await createServer({ root: process.cwd(), logLevel: 'error', server: { middlewareMode: true }, appType: 'custom' })
   pass = await server.ssrLoadModule('/supabase/functions/_shared/contentAutopilotPass.ts')
+  schedule = await server.ssrLoadModule('/supabase/functions/_shared/contentAutopilotSchedule.ts')
 })
 after(async () => { await server?.close() })
 
@@ -214,6 +215,16 @@ test('actual worker and SQL contracts fail closed and preserve human RPC authori
   assert.match(sql, /join auth\.users u on u\.id=p\.id/)
   assert.match(sql, /persist_content_autopilot_ideas/)
   assert.match(sql, /persist_content_autopilot_developments/)
+})
+
+test('daily autopilot scheduling is explicit, Johannesburg-dated and idempotent', () => {
+  const worker = readFileSync('supabase/functions/background-worker/index.ts', 'utf8')
+  assert.match(worker, /CONTENT_AUTOPILOT_ENABLED_FLAG/)
+  assert.match(worker, /ignoreDuplicates: true/)
+  assert.match(worker, /onConflict: 'idempotency_key'/)
+  assert.equal(schedule.contentAutopilotOperatingDate(new Date('2026-09-21T22:30:00.000Z')), '2026-09-22')
+  assert.equal(schedule.contentAutopilotIdempotencyKey('2026-09-22'), 'content-autopilot:2026-09-22')
+  assert.throws(() => schedule.contentAutopilotIdempotencyKey('22-09-2026'), /Invalid content autopilot operating date/)
 })
 
 test('persist flag causes ideas to be written to content_guide_ideas', async () => {

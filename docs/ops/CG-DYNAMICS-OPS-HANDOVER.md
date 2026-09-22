@@ -1,5 +1,31 @@
 # CG Dynamics Ops Handover
 
+## PRODUCTION ACTIVATION TRUTH — 22 September 2026
+
+This section supersedes the pre-merge #450/#451 lane snapshots below. Exact evidence and the ordered
+protected runbook are in `docs/ops/P0-PRODUCTION-ACTIVATION-2026-09-22.md`.
+
+- GitHub/Vercel code truth: `main` `f8e1ae83871a0590dc6d35510a1f691c4ec8489a`; #450 code merged
+  through PR #456, #451 through PR #454, and Meta empty-evidence truth fixed through PR #461.
+  Authenticated desktop/mobile acceptance passed. Issue #451 is closed; #450 remains open for
+  protected activation.
+- Production is **not activated** for the merged runtime. None of the four #450/#451 migrations
+  (`20260921090000`, `20260921120000`, `20260921140000`, `20260922120000`) is applied. The six
+  affected deployed Edge Functions are older than main.
+- The existing per-minute `cg-background-worker` cron is live and dispatching successfully; do not
+  create a second scheduler. Current production worker code does not contain merged Microsoft/Meta
+  freshness or Content Autopilot behavior.
+- Live Meta truth: 37 linked clients/assets, 57 mapped platforms, two stale checkpoints and 55
+  missing checkpoints. Live Microsoft truth: provider configuration exists, transition is active,
+  but no automatic system identity/secret is configured; the 18 September fetch has five of six
+  sources complete, while the last fully applied six-source reconciliation is 19 August.
+- Content/OneDrive truth: Econofoods already has the upcoming run, guideline and three ideas, but no
+  short code or durable folder mappings. Across production there are zero configured short codes,
+  zero OneDrive mappings and zero delegated OAuth tokens.
+- Remaining steps are the explicit CA-protected sequence in the activation ledger. Never blanket
+  push migrations, deploy the worker as a passive change, or enable AI/OneDrive flags together with
+  the first Microsoft/Meta reconciliation.
+
 ## SUPERVISOR CONTINUATION — 21 September 2026, 11:55 SAST
 
 **This section supersedes the 11:36 P0 lane-state snapshot below. Refetch live GitHub before consequential action.**

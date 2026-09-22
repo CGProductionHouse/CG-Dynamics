@@ -107,10 +107,12 @@ Manifest shape:
 }
 ```
 
-Deploy only after reviewing and applying Phase 17a:
+Deploy only after reviewing and applying the Microsoft transition migrations. Keep
+gateway JWT verification enabled: staff calls carry their user JWT and the internal
+freshness cycle carries the injected service-role JWT plus its dedicated worker secret.
 
 ```bash
-npx supabase functions deploy microsoft-transition-sync --project-ref ehtjfntukiwbgptqgbzy --no-verify-jwt
+npx supabase functions deploy microsoft-transition-sync --project-ref ehtjfntukiwbgptqgbzy
 ```
 
 The function verifies the caller JWT and requires the `admin` role. The Entra
