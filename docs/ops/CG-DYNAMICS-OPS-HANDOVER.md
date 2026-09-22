@@ -38,16 +38,23 @@
   strategy job into the existing worker before daily Content Autopilot. Content is
   withheld until the same-day strategy job succeeds. No second scheduler, schema,
   Microsoft/Meta behavior or production configuration is added.
-- Merge does not authorise production activation. The isolated Edge Function must
-  be deployed before the updated background worker under a separate protected gate.
-  All three Content Autopilot flags remain off.
+- The separate deployment gate was completed from main
+  `6d58eb5eb9be879e8cbc5722d1f12f1cedbe412f`:
+  `monthly-strategy-autopilot` v1 is active with gateway JWT verification and
+  `background-worker` v16 is active on the unchanged minute cron. Live readback found the production
+  queue constraint still admits only `meta_sync` and `report_prep`, leaving zero strategy/content
+  Autopilot jobs. The code-only follow-up migration
+  `20260922142000_extend_background_jobs_allowed_type_for_autopilots.sql` adds exactly
+  `monthly_strategy_autopilot` and `content_autopilot`; applying it remains a separate protected CA
+  gate after review/merge. No function, cron, RLS, RPC, secret or flag change belongs to that
+  migration follow-up. All three Content Autopilot flags remain off.
 
 ## PRODUCTION ACTIVATION TRUTH — 22 September 2026
 
 This section supersedes the pre-merge #450/#451 lane snapshots below. Exact evidence and the ordered
 protected runbook are in `docs/ops/P0-PRODUCTION-ACTIVATION-2026-09-22.md`.
 
-- GitHub code truth is `main` `250d83a1290cd96648f47f969cff29d15ee0d0b9`.
+- GitHub code truth is `main` `6d58eb5eb9be879e8cbc5722d1f12f1cedbe412f`.
   Activation corrections for stale-preview takeover, automatic date range, Edge dependency
   resolution and bounded Microsoft detail units are merged and production-green.
 - Production now has the explicitly approved Client Portal foundation plus the four #450/#451
@@ -78,10 +85,10 @@ protected runbook are in `docs/ops/P0-PRODUCTION-ACTIVATION-2026-09-22.md`.
 - Microsoft job `40569507-7f78-4e1b-afe0-79b7b06edb4b` is complete with all six required sources
   complete, zero pending detail units, automatic retry count one and no automatic failure. No
   `microsoft_sync_runs` apply row exists; the last verified mirror remained authoritative throughout.
-- Remaining gates: accept the #463 worker integration; separately approve deployment of
-  `monthly-strategy-autopilot` followed by `background-worker` with all Content Autopilot flags off;
-  verify one terminal, idempotent same-day strategy job; complete Red Oak exact-Page access/re-consent
-  and stable Meta evidence; only then enable Content Autopilot alone. AI and OneDrive remain off.
+- Remaining gates: review/merge the exact-four-type #463 queue migration; separately approve applying
+  only that migration; verify one terminal, idempotent same-day strategy job; complete Red Oak
+  exact-Page access/re-consent and stable Meta evidence; only then enable Content Autopilot alone.
+  AI and OneDrive remain off.
   No Microsoft write occurred.
 
 ## SUPERVISOR CONTINUATION — 21 September 2026, 11:55 SAST
