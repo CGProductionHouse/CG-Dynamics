@@ -21,7 +21,7 @@
 This section supersedes the pre-merge #450/#451 lane snapshots below. Exact evidence and the ordered
 protected runbook are in `docs/ops/P0-PRODUCTION-ACTIVATION-2026-09-22.md`.
 
-- GitHub/Vercel code truth is `main` `0d170e5be2e87dd7c9d602fe0ea2a7860762283a`.
+- GitHub/Vercel code truth is `main` `dd9215d4d8b8fbe04d91f013aba67fc39e4cae1d`.
   Activation corrections for stale-preview takeover, automatic date range, Edge dependency
   resolution and bounded Microsoft detail units are merged and production-green.
 - Production now has the explicitly approved Client Portal foundation plus the four #450/#451
@@ -31,17 +31,15 @@ protected runbook are in `docs/ops/P0-PRODUCTION-ACTIVATION-2026-09-22.md`.
 - Both system identities are the auth-backed `CG Production House Admin` profile. Independent
   `DAILY_FRESHNESS_WORKER_SECRET` and `WORKER_INTERNAL_TOKEN` values are configured. All three
   Content Autopilot flags remain false and no `content_autopilot` job has been created.
-- The originally listed five dependency functions are deployed from accepted main with their intended gateway modes;
-  `background-worker` was deployed last. The existing cron has since exposed its implicit pg_net
-  five-second timeout: live calls time out at the scheduler while longer worker work continues.
-  Do not create a second scheduler. Changing the existing cron command/timeout remains a protected
-  mutation requiring CA approval.
-- Live Meta truth at 10:48 UTC: 37 linked assets, 57 mapped platforms and 45 checkpoint rows (42
-  successful, three failed). Missing evidence remains missing and zero PASS is preserved. The
-  deployed `meta-sync-worker` is older than #451 and skips current-month incremental items, causing
-  the same assets to be rescheduled; current accepted `meta-sync-worker` is a newly proven protected
-  deployment dependency. Red Oak also has a truthful provider permission failure for
-  `pages_read_engagement` on its historical read.
+- Current `meta-sync-worker` v31 is deployed with its worker-secret contract and `verify_jwt=false`.
+  The existing `cg-background-worker` cron was changed only to a 30-second pg_net timeout; job ID,
+  minute cadence, PostgreSQL identity and endpoint are unchanged. Subsequent responses are HTTP 200
+  without timeout. Do not create a second scheduler.
+- Live Meta truth at 11:18 UTC: 37 linked assets, 57 mapped platforms and 51 checkpoint rows (49
+  successful, two failed). Missing evidence remains missing and zero PASS is preserved. Current
+  month incremental work now completes. Red Oak exact Page `117937152934535` remains blocked by
+  Graph code 10 even though the user token lists `pages_read_engagement`; the narrow remaining action
+  is exact-Page access/re-consent, not a broad provider-scope change.
 - Live Microsoft truth: provider configuration and transition are active, but the production cycle
   first selected the 18 September staff preview because the chosen actor is also the historical
   admin actor. That takeover defect is merged and deployed. Its first direct cycle then failed
@@ -51,10 +49,11 @@ protected runbook are in `docs/ops/P0-PRODUCTION-ACTIVATION-2026-09-22.md`.
 - Content/OneDrive truth: Econofoods already has the upcoming run, guideline and three ideas, but no
   short code or durable folder mappings. Across production there are zero configured short codes,
   zero OneDrive mappings and zero delegated OAuth tokens.
-- Remaining gates: accept/deploy current `meta-sync-worker`; approve and update the existing cron's
-  pg_net timeout (not its cadence); observe a bounded Microsoft terminal result and stable Meta
-  checkpoints; resolve the Red Oak provider-permission gate if complete fleet evidence is required;
-  only then enable Content Autopilot alone. AI and OneDrive remain off.
+- Microsoft job `40569507-7f78-4e1b-afe0-79b7b06edb4b` is in bounded source retry 1 of 3 with five
+  required sources still complete, no apply run and the last verified mirror authoritative.
+- Remaining gates: CA completes Red Oak exact-Page access/re-consent; observe stable Meta checkpoints
+  and the Microsoft bounded terminal result; only then enable Content Autopilot alone. AI and
+  OneDrive remain off. No Microsoft write occurred.
 
 ## SUPERVISOR CONTINUATION — 21 September 2026, 11:55 SAST
 
