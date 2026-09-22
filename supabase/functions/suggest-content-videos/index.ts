@@ -30,6 +30,7 @@ import {
   type AiChatMessage,
 } from '../cg-assistant-chat/ai-router.ts'
 import { fetchAiUsageReplay, type AiUsageClient } from '../_shared/aiUsage.ts'
+import { monthlyStrategyAlignmentLines, type MonthlyStrategyAlignmentRow } from '../_shared/monthlyStrategyAlignment.ts'
 import {
   buildDevelopPrompt,
   buildIdeasPrompt,
@@ -339,6 +340,19 @@ Deno.serve(async (req) => {
     .eq('client_id', clientId)
     .maybeSingle()
 
+  // #463: the one canonical #391 monthly strategy may guide draft content ideas
+  // for the same client and covered month. This is read-only and bounded. A
+  // missing strategy is not replaced with another store or inferred context.
+  const strategyMonths = coverageMonths.map(month => `${month}-01`)
+  const { data: monthlyStrategies, error: monthlyStrategyError } = strategyMonths.length > 0
+    ? await sb
+      .from('monthly_client_strategies')
+      .select('strategy_month,strategy_data,workflow_status')
+      .eq('client_id', clientId)
+      .in('strategy_month', strategyMonths)
+      .limit(MAX_COVERAGE_MONTHS)
+    : { data: [], error: null }
+
   // ── Validate guidelineId belongs to this client ──────────────────────────
   if (guidelineId) {
     const { data: guideline } = await sb
@@ -444,6 +458,7 @@ Deno.serve(async (req) => {
     `${totalDeliverableSlots} schedule deliverable slots (video/reel) in coverage window`,
     `${existingVideos.length} existing videos in current guideline`,
     `${historicalConcepts?.length ?? 0} historical approved/completed concepts for this client`,
+    ...monthlyStrategyAlignmentLines(monthlyStrategies as MonthlyStrategyAlignmentRow[] | null, monthlyStrategyError),
   ]
 
   const marketingLibraryKnowledge = (skillCards ?? []).map(
