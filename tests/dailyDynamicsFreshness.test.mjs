@@ -8,14 +8,16 @@ let microsoftFreshnessEvidence
 let metaFleetFreshnessEvidence
 let planAutomaticSourceRecovery
 let planAutomaticApplyRecovery
+let planAutomaticSystemCycle
 let automaticApplyLeaseDeadline
+let requiredSourcesComplete
 let fetchAllRows
 let fetchAllRowsByIdChunks
 
 before(async () => {
   server = await createServer({ server: { middlewareMode: true }, appType: 'custom', logLevel: 'silent' })
   ;({ microsoftFreshnessEvidence, metaFleetFreshnessEvidence } = await server.ssrLoadModule('/src/lib/dailyDynamicsFreshness.ts'))
-  ;({ planAutomaticSourceRecovery, planAutomaticApplyRecovery, automaticApplyLeaseDeadline } = await server.ssrLoadModule('/supabase/functions/microsoft-transition-sync/job-machine.ts'))
+  ;({ planAutomaticSourceRecovery, planAutomaticApplyRecovery, planAutomaticSystemCycle, automaticApplyLeaseDeadline, requiredSourcesComplete } = await server.ssrLoadModule('/supabase/functions/microsoft-transition-sync/job-machine.ts'))
   ;({ fetchAllRows, fetchAllRowsByIdChunks } = await server.ssrLoadModule('/supabase/functions/_shared/paginatedRows.ts'))
 })
 after(async () => { await server?.close() })
@@ -155,6 +157,39 @@ test('last verified Microsoft mirror remains authoritative while applying recove
   assert.equal(evidence.recoveryInProgress, true)
 })
 
+test('stale completed staff preview is never adopted as the automatic system job', () => {
+  assert.equal(planAutomaticSystemCycle({
+    jobStatus: 'complete', jobUpdatedAt: '2026-09-18T08:34:22Z', requiredIncomplete: 1,
+    runStatus: null, runFinishedAt: null, now,
+  }).kind, 'start')
+})
+
+test('fresh complete automatic job applies only with full required-source evidence', () => {
+  assert.equal(planAutomaticSystemCycle({
+    jobStatus: 'complete', jobUpdatedAt: '2026-09-21T07:59:00Z', requiredIncomplete: 0,
+    runStatus: null, runFinishedAt: null, now,
+  }).kind, 'apply')
+  assert.equal(planAutomaticSystemCycle({
+    jobStatus: 'complete', jobUpdatedAt: '2026-09-21T07:59:00Z', requiredIncomplete: 1,
+    runStatus: null, runFinishedAt: null, now,
+  }).kind, 'degraded_incomplete')
+})
+
+test('recent terminal automatic failure does not spawn a new job every minute', () => {
+  assert.equal(planAutomaticSystemCycle({
+    jobStatus: 'failed', jobUpdatedAt: '2026-09-21T07:59:00Z', requiredIncomplete: 1,
+    runStatus: null, runFinishedAt: null, now,
+  }).kind, 'degraded')
+  assert.equal(planAutomaticSystemCycle({
+    jobStatus: 'failed', jobUpdatedAt: '2026-09-21T04:00:00Z', requiredIncomplete: 1,
+    runStatus: null, runFinishedAt: null, now,
+  }).kind, 'start')
+})
+
+test('required Microsoft source must be terminal and explicitly complete', () => {
+  assert.equal(requiredSourcesComplete([{ position: 0, source_type: 'planner_plan', source_id: 'plan', source_name: 'Plan', required: true, stage: 'complete', complete: false, safe_error: 'legacy cap', record_count: 5000, range_start: null, range_end: null }]), false)
+})
+
 test('automatic apply recovery reuses the same run and serializes exact item keys', () => {
   const edge = readFileSync(new URL('../supabase/functions/microsoft-transition-sync/index.ts', import.meta.url), 'utf8')
   const automatic = readFileSync(new URL('../supabase/functions/microsoft-transition-sync/automatic-reconciliation.ts', import.meta.url), 'utf8')
@@ -215,7 +250,8 @@ test('system reconciliation is fail-closed behind exact worker secret and identi
   assert.match(edge, /expectedSystemSecret\.length >= 32/)
   assert.match(edge, /MICROSOFT_SYNC_SYSTEM_USER_ID/)
   assert.match(edge, /eq\('created_by', user\.id\)/)
-  assert.match(edge, /Date\.now\(\) - lastSuccess < 3 \* 60 \* 60 \* 1000/)
+  assert.match(edge, /planAutomaticSystemCycle/)
+  assert.match(edge, /requiredIncomplete/)
 })
 
 test('service reconciliation activation remains an explicit protected migration', () => {

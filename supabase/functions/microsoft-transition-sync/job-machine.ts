@@ -213,6 +213,9 @@ export function planSourceUpdate(result: SourceUnitResult, attempts: number): So
   if (result.detailIds.length > 0) {
     return { ...base, stage: 'fetching_details', complete: false, safe_error: null, pending_detail_ids: result.detailIds }
   }
+  if (!result.complete) {
+    return { ...base, stage: 'failed', complete: false, safe_error: 'Microsoft source returned incomplete evidence. Retry the failed source.' }
+  }
   return { ...base, stage: 'complete', complete: result.complete, safe_error: null }
 }
 
@@ -245,6 +248,7 @@ export function planAutomaticSourceRecovery(input: { failedRequired: number; ret
 
 export const AUTOMATIC_APPLY_STALE_MS = 10 * 60 * 1000
 export const MAX_AUTOMATIC_APPLY_RECOVERIES = 3
+export const AUTOMATIC_SYSTEM_CYCLE_FRESH_MS = 3 * 60 * 60 * 1000
 
 export function automaticApplyLeaseDeadline(now: string) {
   return new Date(Date.parse(now) + AUTOMATIC_APPLY_STALE_MS).toISOString()
@@ -262,6 +266,39 @@ export function planAutomaticApplyRecovery(input: { status: string; startedAt: s
   if (input.recoveryCount >= MAX_AUTOMATIC_APPLY_RECOVERIES) return { kind: 'exhausted' as const }
   if (Number.isFinite(startedMs) && nowMs - startedMs < AUTOMATIC_APPLY_STALE_MS) return { kind: 'fresh' as const }
   return { kind: 'recover' as const }
+}
+
+export function planAutomaticSystemCycle(input: {
+  jobStatus: string | null
+  jobUpdatedAt: string | null
+  requiredIncomplete: number
+  runStatus: string | null
+  runFinishedAt: string | null
+  now: string
+}) {
+  if (!input.jobStatus) return { kind: 'start' as const }
+  if (input.jobStatus === 'running') return { kind: 'process' as const }
+
+  const nowMs = Date.parse(input.now)
+  const jobUpdatedMs = input.jobUpdatedAt ? Date.parse(input.jobUpdatedAt) : Number.NaN
+  const runFinishedMs = input.runFinishedAt ? Date.parse(input.runFinishedAt) : Number.NaN
+  const jobIsRecent = Number.isFinite(jobUpdatedMs) && nowMs - jobUpdatedMs < AUTOMATIC_SYSTEM_CYCLE_FRESH_MS
+  const runIsRecent = Number.isFinite(runFinishedMs) && nowMs - runFinishedMs < AUTOMATIC_SYSTEM_CYCLE_FRESH_MS
+
+  if (input.jobStatus === 'complete' && input.runStatus === 'applying') return { kind: 'apply' as const }
+  if (input.jobStatus === 'complete' && input.runStatus === null) {
+    // The system identity can also be a real staff admin with historical previews.
+    // Never adopt or apply an old staff preview merely because it has the same actor.
+    if (!jobIsRecent) return { kind: 'start' as const }
+    if (input.requiredIncomplete > 0) return { kind: 'degraded_incomplete' as const }
+    return { kind: 'apply' as const }
+  }
+  if (input.runStatus === 'completed' && runIsRecent) return { kind: 'fresh' as const }
+  if (input.runStatus !== null && runIsRecent) return { kind: 'degraded' as const }
+  // A bounded source/apply failure remains terminal for the freshness window.
+  // This prevents a failed automatic run from spawning a new job every minute.
+  if (input.jobStatus === 'failed' && jobIsRecent) return { kind: 'degraded' as const }
+  return { kind: 'start' as const }
 }
 
 export interface JobSourceRow {
@@ -305,7 +342,7 @@ export function jobProgress(sources: JobSourceRow[]): JobProgress {
   return {
     total: sources.length,
     complete, failed, fetching, queued, detailsRemaining,
-    allRequiredComplete: sources.length > 0 && sources.every((s) => !s.required || s.stage === 'complete'),
+    allRequiredComplete: sources.length > 0 && sources.every((s) => !s.required || (s.stage === 'complete' && s.complete)),
     anyFailed: failed > 0,
     finished: sources.every((s) => s.stage === 'complete' || s.stage === 'failed'),
   }
@@ -314,7 +351,7 @@ export function jobProgress(sources: JobSourceRow[]): JobProgress {
 // The reconciliation preview may only be assembled/applied when every required
 // source has completed (completeness safeguard — never a partial preview).
 export function requiredSourcesComplete(sources: JobSourceRow[]): boolean {
-  return sources.length > 0 && sources.every((s) => !s.required || s.stage === 'complete')
+  return sources.length > 0 && sources.every((s) => !s.required || (s.stage === 'complete' && s.complete))
 }
 
 // Pick the next unit of work: continue an in-progress detail fetch first (so a

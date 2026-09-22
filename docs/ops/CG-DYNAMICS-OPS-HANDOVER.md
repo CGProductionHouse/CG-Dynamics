@@ -5,26 +5,36 @@
 This section supersedes the pre-merge #450/#451 lane snapshots below. Exact evidence and the ordered
 protected runbook are in `docs/ops/P0-PRODUCTION-ACTIVATION-2026-09-22.md`.
 
-- GitHub/Vercel code truth: `main` `f8e1ae83871a0590dc6d35510a1f691c4ec8489a`; #450 code merged
-  through PR #456, #451 through PR #454, and Meta empty-evidence truth fixed through PR #461.
-  Authenticated desktop/mobile acceptance passed. Issue #451 is closed; #450 remains open for
-  protected activation.
-- Production is **not activated** for the merged runtime. None of the four #450/#451 migrations
-  (`20260921090000`, `20260921120000`, `20260921140000`, `20260922120000`) is applied. The six
-  affected deployed Edge Functions are older than main.
-- The existing per-minute `cg-background-worker` cron is live and dispatching successfully; do not
-  create a second scheduler. Current production worker code does not contain merged Microsoft/Meta
-  freshness or Content Autopilot behavior.
-- Live Meta truth: 37 linked clients/assets, 57 mapped platforms, two stale checkpoints and 55
-  missing checkpoints. Live Microsoft truth: provider configuration exists, transition is active,
-  but no automatic system identity/secret is configured; the 18 September fetch has five of six
-  sources complete, while the last fully applied six-source reconciliation is 19 August.
+- GitHub/Vercel code truth entering activation: `main`
+  `03b5d49f6777469badb0b23a9e08c28f702af751`. The activation exposed a Microsoft takeover defect;
+  the bounded correction is on `codex/451-activation-runtime-hardening` and must be accepted before
+  Microsoft freshness continues.
+- Production now has the explicitly approved Client Portal foundation plus the four #450/#451
+  migrations (`20260918113000`, `20260921090000`, `20260921120000`, `20260921140000`,
+  `20260922120000`) applied and object/grant verified. The separate Photography policy migration
+  `20260919100000` remains unapplied as instructed.
+- Both system identities are the auth-backed `CG Production House Admin` profile. Independent
+  `DAILY_FRESHNESS_WORKER_SECRET` and `WORKER_INTERNAL_TOKEN` values are configured. All three
+  Content Autopilot flags remain false and no `content_autopilot` job has been created.
+- The five dependency functions are deployed from accepted main with their intended gateway modes;
+  `background-worker` was deployed last. The existing cron has since exposed its implicit pg_net
+  five-second timeout: live calls time out at the scheduler while longer worker work continues.
+  Do not create a second scheduler. Changing the existing cron command/timeout remains a protected
+  mutation requiring CA approval.
+- Live Meta truth at 10:02 UTC: 37 linked assets, 57 mapped platforms, 39 checkpoint rows, 37 with
+  successful evidence, zero PASS, and no active fleet batches. Missing evidence remains missing;
+  the automatic fleet pass is progressing truthfully.
+- Live Microsoft truth: provider configuration and transition are active, but the production cycle
+  is repeatedly selecting the 18 September completed staff preview because the chosen system actor
+  is also the historical admin actor. It has not created a new system job and no Microsoft write
+  occurred. The correction refuses stale preview adoption, requires explicit source completeness,
+  and holds recent terminal failure for the three-hour freshness window.
 - Content/OneDrive truth: Econofoods already has the upcoming run, guideline and three ideas, but no
   short code or durable folder mappings. Across production there are zero configured short codes,
   zero OneDrive mappings and zero delegated OAuth tokens.
-- Remaining steps are the explicit CA-protected sequence in the activation ledger. Never blanket
-  push migrations, deploy the worker as a passive change, or enable AI/OneDrive flags together with
-  the first Microsoft/Meta reconciliation.
+- Remaining gates: accept/deploy the Microsoft correction; approve and update the existing cron's
+  pg_net timeout (not its cadence); observe a bounded Microsoft terminal result and the remaining
+  Meta checkpoints; only then enable Content Autopilot alone. AI and OneDrive remain off.
 
 ## SUPERVISOR CONTINUATION — 21 September 2026, 11:55 SAST
 
