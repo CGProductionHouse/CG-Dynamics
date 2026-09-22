@@ -88,6 +88,7 @@ test('callback verifies token identity and stops at pending review', () => {
 
 test('server-only persistence is atomic, exact-client and cannot become a second reporting store', () => {
   assert.match(migration, /auth\.role\(\) is distinct from 'service_role'/)
+  assert.match(migration, /Active admin or manager connecting user required/)
   assert.match(migration, /Instagram account is already assigned to another client/)
   assert.match(migration, /Client already has a canonical Instagram mapping/)
   assert.match(migration, /instagram_business_basic', 'instagram_business_manage_insights/)

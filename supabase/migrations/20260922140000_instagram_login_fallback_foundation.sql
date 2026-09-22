@@ -106,8 +106,15 @@ begin
   if not exists (select 1 from public.clients where id = p_client_id and active = true) then
     raise exception 'Active client required';
   end if;
-  if not exists (select 1 from auth.users where id = p_connected_by) then
-    raise exception 'Authenticated connecting user required';
+  if not exists (
+    select 1
+    from auth.users auth_user
+    join public.profiles profile on profile.id = auth_user.id
+    where auth_user.id = p_connected_by
+      and profile.is_active = true
+      and profile.role in ('admin', 'manager')
+  ) then
+    raise exception 'Active admin or manager connecting user required';
   end if;
   if coalesce(btrim(p_access_token), '') = '' then
     raise exception 'Instagram access token required';
