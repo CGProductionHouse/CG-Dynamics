@@ -13,6 +13,10 @@ alter table public.microsoft_sync_runs
   add column if not exists automatic_recovery_count integer not null default 0 check (automatic_recovery_count between 0 and 3),
   add column if not exists automatic_recovery_after timestamptz;
 
+create unique index if not exists microsoft_sync_runs_one_automatic_per_preview_idx
+  on public.microsoft_sync_runs (preview_job_id)
+  where preview_job_id is not null and trigger_type = 'agent';
+
 create or replace function public.claim_microsoft_automatic_apply_recovery(p_run_id uuid)
 returns boolean language plpgsql security definer set search_path = public, pg_temp as $$
 declare affected integer;

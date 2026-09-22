@@ -251,8 +251,11 @@ export function planAutomaticApplyRecovery(input: { status: string; startedAt: s
   const nowMs = Date.parse(input.now)
   const startedMs = Date.parse(input.startedAt)
   const recoveryAfterMs = input.recoveryAfter ? Date.parse(input.recoveryAfter) : Number.NaN
-  if (input.recoveryCount >= MAX_AUTOMATIC_APPLY_RECOVERIES) return { kind: 'exhausted' as const }
+  // A claimed recovery owns its full lease, including the final allowed try.
+  // Exhaustion is evaluated only after that lease expires so a concurrent
+  // system_cycle cannot mark the run failed while its recovery is still active.
   if (Number.isFinite(recoveryAfterMs) && recoveryAfterMs > nowMs) return { kind: 'fresh' as const }
+  if (input.recoveryCount >= MAX_AUTOMATIC_APPLY_RECOVERIES) return { kind: 'exhausted' as const }
   if (Number.isFinite(startedMs) && nowMs - startedMs < AUTOMATIC_APPLY_STALE_MS) return { kind: 'fresh' as const }
   return { kind: 'recover' as const }
 }

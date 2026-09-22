@@ -9,12 +9,13 @@ let metaFleetFreshnessEvidence
 let planAutomaticSourceRecovery
 let planAutomaticApplyRecovery
 let fetchAllRows
+let fetchAllRowsByIdChunks
 
 before(async () => {
   server = await createServer({ server: { middlewareMode: true }, appType: 'custom', logLevel: 'silent' })
   ;({ microsoftFreshnessEvidence, metaFleetFreshnessEvidence } = await server.ssrLoadModule('/src/lib/dailyDynamicsFreshness.ts'))
   ;({ planAutomaticSourceRecovery, planAutomaticApplyRecovery } = await server.ssrLoadModule('/supabase/functions/microsoft-transition-sync/job-machine.ts'))
-  ;({ fetchAllRows } = await server.ssrLoadModule('/supabase/functions/_shared/paginatedRows.ts'))
+  ;({ fetchAllRows, fetchAllRowsByIdChunks } = await server.ssrLoadModule('/supabase/functions/_shared/paginatedRows.ts'))
 })
 after(async () => { await server?.close() })
 
@@ -84,8 +85,25 @@ test('stale crashed applying run is recovered with a bounded lease', () => {
 })
 
 test('applying recovery exhausts instead of remaining applying forever', () => {
+  assert.equal(planAutomaticApplyRecovery({ status: 'applying', startedAt: '2026-09-21T07:00:00Z', recoveryCount: 3, recoveryAfter: '2026-09-21T08:05:00Z', now }).kind, 'fresh')
   assert.equal(planAutomaticApplyRecovery({ status: 'applying', startedAt: '2026-09-21T07:00:00Z', recoveryCount: 3, recoveryAfter: null, now }).kind, 'exhausted')
   assert.equal(planAutomaticApplyRecovery({ status: 'completed', startedAt: '2026-09-21T07:00:00Z', recoveryCount: 0, recoveryAfter: null, now }).kind, 'terminal')
+})
+
+test('last verified Microsoft mirror remains authoritative while applying recovery is unresolved', () => {
+  const evidence = microsoftFreshnessEvidence({
+    now,
+    connected: true,
+    lastJobStartedAt: now,
+    lastJobCompletedAt: now,
+    lastSuccessfulReconciliationAt: '2026-09-21T06:30:00.000Z',
+    requiredSources: [{ name: 'Outlook', complete: true, error: null }],
+    applyStatus: 'applying',
+    recoveryInProgress: true,
+  })
+  assert.equal(evidence.verdict, 'PARTIAL')
+  assert.equal(evidence.lastSuccessfulAt, '2026-09-21T06:30:00.000Z')
+  assert.equal(evidence.recoveryInProgress, true)
 })
 
 test('automatic apply recovery reuses the same run and serializes exact item keys', () => {
@@ -97,13 +115,28 @@ test('automatic apply recovery reuses the same run and serializes exact item key
   assert.match(automatic, /existingRunId[\s\S]*id: existingRunId/)
   assert.match(automatic, /microsoftStableItemKey\(item\)/)
   assert.match(sql, /pg_advisory_xact_lock\(hashtextextended\(p_run_id::text \|\| ':' \|\| p_item_key, 451\)\)/)
-  assert.match(sql, /unique \(run_id, item_key\)|claim_microsoft_automatic_apply_recovery/)
+  assert.match(sql, /unique index if not exists microsoft_sync_runs_one_automatic_per_preview_idx[\s\S]*preview_job_id[\s\S]*trigger_type = 'agent'/)
+  const base = readFileSync(new URL('../supabase/phase-17a-microsoft-transition-sync.sql', import.meta.url), 'utf8')
+  assert.match(base, /unique \(run_id, item_key\)/)
 })
 
 test('fleet pagination returns more than 100 active assets without truncation', async () => {
   const rows = Array.from({ length: 205 }, (_, id) => ({ id }))
   const result = await fetchAllRows(async (from, to) => ({ data: rows.slice(from, to + 1), error: null }), 100)
   assert.equal(result.data.length, 205)
+})
+
+test('Meta checkpoint and retry reads chunk large exact-asset populations without truncation', async () => {
+  const ids = Array.from({ length: 1205 }, (_, id) => `asset-${id}`)
+  const seen = []
+  const result = await fetchAllRowsByIdChunks(ids, async (chunk, from, to) => {
+    seen.push(chunk)
+    return { data: chunk.slice(from, to + 1).map(id => ({ id })), error: null }
+  }, 200, 1000)
+  assert.equal(result.data.length, 1205)
+  assert.equal(seen.length, 7)
+  assert.ok(seen.every(chunk => chunk.length <= 200))
+  assert.deepEqual(result.data.map(row => row.id), ids)
 })
 
 test('scheduled cycle advances Microsoft before Meta fleet freshness', () => {

@@ -2,7 +2,7 @@ import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { inspectMetaAccessToken } from '../_shared/metaTokenDiagnostics.ts'
 import { resolveMetaGraphConfig } from '../_shared/meta.ts'
-import { fetchAllRows } from '../_shared/paginatedRows.ts'
+import { fetchAllRows, fetchAllRowsByIdChunks } from '../_shared/paginatedRows.ts'
 
 const REQUIRED_SCOPES = [
   'pages_show_list',
@@ -243,14 +243,15 @@ Deno.serve(async (req) => {
     .range(from, to))
   const assetIds = (activeAssets ?? []).map(asset => asset.id).filter(Boolean)
   const { data: checkpoints } = schemaReady && assetIds.length > 0
-    ? await sb.from('meta_asset_sync_checkpoints')
+    ? await fetchAllRowsByIdChunks(assetIds, (ids, from, to) => sb.from('meta_asset_sync_checkpoints')
       .select('asset_id, client_id, platform, last_sync_kind, last_status, last_health_state, last_attempted_at, last_successful_at, last_successful_month, high_watermark_at, next_due_at, api_version, connector_version, last_error_code')
-      .in('asset_id', assetIds)
+      .in('asset_id', ids)
+      .range(from, to))
     : { data: [] }
   const { data: recoveryItems } = assetIds.length > 0
-    ? await fetchAllRows((from, to) => sb.from('meta_sync_batch_items')
+    ? await fetchAllRowsByIdChunks(assetIds, (ids, from, to) => sb.from('meta_sync_batch_items')
       .select('asset_id, status, facebook_sync_state, instagram_sync_state, error, cooldown_until, updated_at')
-      .in('asset_id', assetIds)
+      .in('asset_id', ids)
       .in('status', ['queued', 'running', 'failed'])
       .order('updated_at', { ascending: false })
       .range(from, to))
