@@ -133,6 +133,14 @@ async function fetchMetaCollection(
       return { pagesFetched, complete: false, error, retryable: isMetaRateLimitError(error) }
     }
     const page = await res.json()
+    if (!page || typeof page !== 'object' || !Array.isArray(page.data)) {
+      return {
+        pagesFetched,
+        complete: false,
+        error: `${context} returned a malformed collection data envelope.`,
+        retryable: false,
+      }
+    }
     const nextUrl = typeof page.paging?.next === 'string' ? page.paging.next : null
     if (nextUrl) {
       try {
@@ -147,7 +155,7 @@ async function fetchMetaCollection(
     if (nextUrl && !candidateCursor) {
       return { pagesFetched, complete: false, error: `${context} returned an unsafe or missing paging cursor.`, retryable: false }
     }
-    const processedPage = await processPage((page.data as Array<Record<string, unknown>> | undefined) ?? [])
+    const processedPage = await processPage(page.data)
     const pagePostsSynced = typeof processedPage === 'number' ? processedPage : processedPage.postsSynced
     const stopAfterPage = typeof processedPage === 'number' ? false : processedPage.stopAfterPage === true
     await checkpoint(stopAfterPage ? null : candidateCursor, !nextUrl || stopAfterPage, pagePostsSynced)

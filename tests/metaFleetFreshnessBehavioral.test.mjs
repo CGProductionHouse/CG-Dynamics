@@ -166,8 +166,9 @@ describe('Incremental month-to-date bounds: MTD window for current-month work', 
     // Uses America/Los_Angeles, not UTC
     const fn = metaPeriod.slice(metaPeriod.indexOf('export function incrementalMonthEnd'))
     assert.match(fn, /timeZone: META_INSIGHTS_TIMEZONE/)
-    // Subtracts 24h from now to get the latest completed reporting date
-    assert.match(fn, /24 \* 60 \* 60 \* 1000/)
+    // Subtracts a Pacific calendar day, not 24 elapsed hours across DST.
+    assert.match(fn, /addUtcDays\(today, -1\)/)
+    assert.doesNotMatch(fn, /24 \* 60 \* 60 \* 1000/)
     // Returns YYYY-MM-DD format
     assert.match(fn, /parts\.year.*parts\.month.*parts\.day/)
   })

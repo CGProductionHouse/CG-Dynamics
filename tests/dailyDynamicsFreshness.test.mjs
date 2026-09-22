@@ -118,6 +118,36 @@ test('Meta terminal failure without prior success is FAILED and counted', () => 
   assert.equal(evidence.failed, 1)
 })
 
+test('Meta invalid freshness timestamps fail closed instead of producing PASS', () => {
+  const base = {
+    clientId: 'client-a', assetId: 'asset-a', platform: 'facebook', mapped: true,
+    lastAttemptedAt: now, lastSuccessfulAt: now, lastSuccessfulMonth: '2026-09',
+    highWatermarkAt: now, nextDueAt: '2026-09-22T09:00:00Z', status: 'complete',
+    healthState: 'verified', errorCode: null, retrying: false,
+  }
+  for (const field of ['lastAttemptedAt', 'lastSuccessfulAt', 'highWatermarkAt', 'nextDueAt']) {
+    const evidence = metaFleetFreshnessEvidence([{ ...base, [field]: 'not-a-timestamp' }], now)
+    assert.equal(evidence.verdict, 'UNAVAILABLE', `${field} must fail closed`)
+    assert.equal(evidence.platforms[0].reason, 'Freshness evidence contains an invalid timestamp and cannot be verified.')
+  }
+
+  assert.equal(metaFleetFreshnessEvidence([base], 'not-a-timestamp').verdict, 'UNAVAILABLE')
+})
+
+test('Meta mapping and unavailable-evidence precedence is preserved for invalid timestamps', () => {
+  const invalid = {
+    clientId: 'client-a', assetId: 'asset-a', platform: 'facebook', mapped: false,
+    lastAttemptedAt: 'not-a-timestamp', lastSuccessfulAt: null, lastSuccessfulMonth: null,
+    highWatermarkAt: null, nextDueAt: null, status: null, healthState: null,
+    errorCode: null, retrying: false,
+  }
+  const unmapped = metaFleetFreshnessEvidence([invalid], now)
+  assert.equal(unmapped.platforms[0].reason, 'Platform is not mapped for this asset.')
+
+  const unavailable = metaFleetFreshnessEvidence([{ ...invalid, mapped: true }], now, [], false)
+  assert.equal(unavailable.platforms[0].reason, 'Checkpoint freshness evidence is unavailable and has not been verified.')
+})
+
 test('automatic Microsoft retry is bounded, persisted and cooldown-aware', () => {
   const retry = planAutomaticSourceRecovery({ failedRequired: 1, retryCount: 0, retryAfter: null, now })
   assert.equal(retry.kind, 'retry')

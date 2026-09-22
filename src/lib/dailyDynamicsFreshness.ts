@@ -111,6 +111,13 @@ export function metaFleetFreshnessEvidence(
       verdict = 'UNAVAILABLE'; reason = 'Platform is not mapped for this asset.'
     } else if (!checkpointEvidenceAvailable) {
       verdict = 'UNAVAILABLE'; reason = 'Checkpoint freshness evidence is unavailable and has not been verified.'
+    } else if (!Number.isFinite(nowMs) || [
+      checkpoint.lastAttemptedAt,
+      checkpoint.lastSuccessfulAt,
+      checkpoint.highWatermarkAt,
+      checkpoint.nextDueAt,
+    ].some(value => value != null && !Number.isFinite(Date.parse(value)))) {
+      verdict = 'UNAVAILABLE'; reason = 'Freshness evidence contains an invalid timestamp and cannot be verified.'
     } else if (!checkpoint.lastAttemptedAt) {
       verdict = 'STALE'; reason = 'Mapped platform has never completed its bootstrap checkpoint.'
     } else if (checkpoint.status === 'failed') {
