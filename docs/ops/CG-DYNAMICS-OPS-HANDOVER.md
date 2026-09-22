@@ -21,10 +21,9 @@
 This section supersedes the pre-merge #450/#451 lane snapshots below. Exact evidence and the ordered
 protected runbook are in `docs/ops/P0-PRODUCTION-ACTIVATION-2026-09-22.md`.
 
-- GitHub/Vercel code truth entering activation: `main`
-  `03b5d49f6777469badb0b23a9e08c28f702af751`. The activation exposed a Microsoft takeover defect;
-  the bounded correction is on `codex/451-activation-runtime-hardening` and must be accepted before
-  Microsoft freshness continues.
+- GitHub/Vercel code truth is `main` `0d170e5be2e87dd7c9d602fe0ea2a7860762283a`.
+  Activation corrections for stale-preview takeover, automatic date range, Edge dependency
+  resolution and bounded Microsoft detail units are merged and production-green.
 - Production now has the explicitly approved Client Portal foundation plus the four #450/#451
   migrations (`20260918113000`, `20260921090000`, `20260921120000`, `20260921140000`,
   `20260922120000`) applied and object/grant verified. The separate Photography policy migration
@@ -32,14 +31,17 @@ protected runbook are in `docs/ops/P0-PRODUCTION-ACTIVATION-2026-09-22.md`.
 - Both system identities are the auth-backed `CG Production House Admin` profile. Independent
   `DAILY_FRESHNESS_WORKER_SECRET` and `WORKER_INTERNAL_TOKEN` values are configured. All three
   Content Autopilot flags remain false and no `content_autopilot` job has been created.
-- The five dependency functions are deployed from accepted main with their intended gateway modes;
+- The originally listed five dependency functions are deployed from accepted main with their intended gateway modes;
   `background-worker` was deployed last. The existing cron has since exposed its implicit pg_net
   five-second timeout: live calls time out at the scheduler while longer worker work continues.
   Do not create a second scheduler. Changing the existing cron command/timeout remains a protected
   mutation requiring CA approval.
-- Live Meta truth at 10:02 UTC: 37 linked assets, 57 mapped platforms, 39 checkpoint rows, 37 with
-  successful evidence, zero PASS, and no active fleet batches. Missing evidence remains missing;
-  the automatic fleet pass is progressing truthfully.
+- Live Meta truth at 10:48 UTC: 37 linked assets, 57 mapped platforms and 45 checkpoint rows (42
+  successful, three failed). Missing evidence remains missing and zero PASS is preserved. The
+  deployed `meta-sync-worker` is older than #451 and skips current-month incremental items, causing
+  the same assets to be rescheduled; current accepted `meta-sync-worker` is a newly proven protected
+  deployment dependency. Red Oak also has a truthful provider permission failure for
+  `pages_read_engagement` on its historical read.
 - Live Microsoft truth: provider configuration and transition are active, but the production cycle
   first selected the 18 September staff preview because the chosen actor is also the historical
   admin actor. That takeover defect is merged and deployed. Its first direct cycle then failed
@@ -49,9 +51,10 @@ protected runbook are in `docs/ops/P0-PRODUCTION-ACTIVATION-2026-09-22.md`.
 - Content/OneDrive truth: Econofoods already has the upcoming run, guideline and three ideas, but no
   short code or durable folder mappings. Across production there are zero configured short codes,
   zero OneDrive mappings and zero delegated OAuth tokens.
-- Remaining gates: accept/deploy the Microsoft correction; approve and update the existing cron's
-  pg_net timeout (not its cadence); observe a bounded Microsoft terminal result and the remaining
-  Meta checkpoints; only then enable Content Autopilot alone. AI and OneDrive remain off.
+- Remaining gates: accept/deploy current `meta-sync-worker`; approve and update the existing cron's
+  pg_net timeout (not its cadence); observe a bounded Microsoft terminal result and stable Meta
+  checkpoints; resolve the Red Oak provider-permission gate if complete fleet evidence is required;
+  only then enable Content Autopilot alone. AI and OneDrive remain off.
 
 ## SUPERVISOR CONTINUATION — 21 September 2026, 11:55 SAST
 
