@@ -256,6 +256,8 @@ test('automatic Microsoft mirror excludes Client Schedule and uses exact establi
 
 test('system reconciliation is fail-closed behind exact worker secret and identity', () => {
   const edge = readFileSync(new URL('../supabase/functions/microsoft-transition-sync/index.ts', import.meta.url), 'utf8')
+  assert.match(edge, /from 'jsr:@supabase\/supabase-js@2'/)
+  assert.doesNotMatch(edge, /esm\.sh\/@supabase\/supabase-js/)
   assert.match(edge, /expectedSystemSecret\.length >= 32/)
   assert.match(edge, /MICROSOFT_SYNC_SYSTEM_USER_ID/)
   assert.match(edge, /eq\('created_by', user\.id\)/)

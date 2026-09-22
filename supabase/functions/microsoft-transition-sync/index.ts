@@ -1,5 +1,5 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient } from 'jsr:@supabase/supabase-js@2'
 import { runBoundedWorkers } from './bounded-workers.ts'
 import { shouldFetchPlannerTaskDetails } from './planner-details.ts'
 import {
