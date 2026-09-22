@@ -1,7 +1,8 @@
 # #450/#451 production activation ledger — 22 September 2026
 
-Authority: live inspection and the CA-approved activation against GitHub `main`
-`dd9215d4d8b8fbe04d91f013aba67fc39e4cae1d` on 22 September 2026.
+Authority: live inspection and the CA-approved activation originally executed against
+`dd9215d4d8b8fbe04d91f013aba67fc39e4cae1d`, reconciled with GitHub `main`
+`250d83a1290cd96648f47f969cff29d15ee0d0b9` on 22 September 2026.
 
 ## Activation execution status
 
@@ -49,9 +50,10 @@ Authority: live inspection and the CA-approved activation against GitHub `main`
 - Existing `cg-background-worker` pg_cron job is active every minute with a 30-second HTTP timeout.
 - Production has 37 exact Meta client/asset rows: 37 Facebook + 20 Instagram platforms. At 11:18
   UTC it had 51 checkpoints: 49 successful and two failed. Missing evidence remains non-PASS.
-- Microsoft job `40569507-7f78-4e1b-afe0-79b7b06edb4b` is in bounded source retry 1 of 3. Five
-  required sources remain complete; the retried legacy plan has 5,374 records and cleanly re-entered
-  durable detail processing. No apply run exists and the last verified mirror remains authoritative.
+- Microsoft job `40569507-7f78-4e1b-afe0-79b7b06edb4b` is complete: all six required sources are
+  complete, zero detail units remain pending, automatic retry count is one and no automatic failure
+  was recorded. No `microsoft_sync_runs` apply row exists, so no apply occurred and the last verified
+  mirror remained authoritative throughout. No Microsoft write occurred.
 - Base durable jobs, Meta checkpointing, Microsoft durable import, OneDrive token/mapping tables,
   and the existing Content Guideline data model are present.
 - Econofoods has one upcoming run, one guideline and three guideline ideas. It has no configured
@@ -61,6 +63,10 @@ Authority: live inspection and the CA-approved activation against GitHub `main`
 
 - Content Autopilot remains disabled; production has zero `content_autopilot` jobs. AI generation
   and OneDrive folder creation remain disabled.
+- Monthly Strategy Autopilot is accepted on `main`, but the live `background-worker` does not yet
+  invoke it. The code-only follow-up adds one Johannesburg-day durable strategy job before Content
+  Autopilot and withholds the content job until the strategy job succeeds. Production deployment of
+  `monthly-strategy-autopilot` and the updated worker remains protected.
 - Red Oak complete Meta evidence requires the connecting Facebook user to have Page access to exact
   Page `117937152934535`, then use Dynamics **Integrations → Meta → Reconnect Meta**, select
   `RedOak LHP` in the Facebook asset chooser and approve the already-requested
@@ -72,6 +78,28 @@ Authority: live inspection and the CA-approved activation against GitHub `main`
 ## Exact protected activation sequence
 
 Every numbered production mutation below requires CA approval at that gate.
+
+The foundation/four migrations, identities/secrets, #451 functions, Meta worker and 30-second cron
+timeout described above are already complete and must not be replayed. From the current state, the
+remaining ordered sequence is:
+
+1. Accept and merge the isolated #463 shared-worker integration after verification.
+2. With separate CA approval, deploy `monthly-strategy-autopilot` first with gateway JWT verification
+   enabled, then deploy the accepted `background-worker`. The worker call must satisfy both gateway
+   authentication and the independent `WORKER_INTERNAL_TOKEN` contract. Do not create or alter cron;
+   retain the existing minute job, identity, endpoint, headers and 30-second timeout. Keep all three
+   Content Autopilot flags false.
+3. Observe one terminal `monthly_strategy_autopilot` durable job for the Johannesburg operating
+   date. Verify current/next-month canonical draft receipts, exact client/month idempotency, truthful
+   blockers and zero overwrite of existing staff-amended/approved/published strategies. Repeat worker
+   invocation must reuse the same daily key.
+4. Complete the narrow Red Oak exact-Page access/re-consent gate and verify stable Meta fleet evidence.
+5. Only after strategy and Meta evidence pass, separately approve
+   `CONTENT_AUTOPILOT_ENABLED=true`. Keep AI generation and OneDrive folder flags false; verify the
+   content job was admitted only after the same-day strategy job succeeded.
+
+The original executed activation runbook is retained below as historical evidence of the earlier
+protected sequence.
 
 1. Merge the launch-definition fix that adds a gateway-authenticated Microsoft internal call and a
    gated, once-per-Johannesburg-day Content Autopilot enqueue. Rebuild and deploy only from that exact

@@ -28,13 +28,22 @@ context for the exact client and requested coverage months. It remains the same
 Content Guideline system and does not overwrite saved guideline videos or create
 a circular generation path.
 
-## Deferred activation handoff
+## Shared-worker integration
 
 `monthly-strategy-autopilot` is an internal-token-only Edge Function prepared for
-the existing daily operating cycle. Agent 01 owns the shared worker and production
-activation lane. After this PR is accepted, that lane may add one call before the
-existing Content Autopilot step. That later action requires the already-defined
-`WORKER_INTERNAL_TOKEN` and auth-backed `WORKER_SYSTEM_PROFILE_ID`.
+the existing daily operating cycle. The shared worker now enqueues one durable job
+per Johannesburg operating date with the idempotency key
+`monthly-strategy-autopilot:YYYY-MM-DD`. The existing queue's three-attempt recovery
+contract remains the bounded retry authority.
 
-This PR does **not** modify `background-worker`, cron/scheduler configuration,
-Microsoft/Meta sync, secrets, production data, or deployed functions.
+The strategy job is scheduled before daily Content Autopilot. Content Autopilot is
+withheld until that exact daily strategy job has succeeded, so concurrent minute
+ticks cannot let content preparation overtake strategy preparation. The three
+Content Autopilot feature flags remain unchanged and off in production.
+
+This integration reuses the existing cron, service-role gateway authentication,
+`WORKER_INTERNAL_TOKEN` and auth-backed `WORKER_SYSTEM_PROFILE_ID`. The function
+keeps gateway JWT verification enabled and also validates the independent internal
+token. It adds no scheduler, schema, migration or strategy store. Deploying
+`monthly-strategy-autopilot` and the updated `background-worker` remains a separate
+protected production gate.

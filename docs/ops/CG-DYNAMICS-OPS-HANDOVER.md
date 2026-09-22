@@ -33,18 +33,21 @@
 - Supervisor correction review verified Johannesburg-date Marketing Library expiry,
   reviewed/active-only industry routing, exact-client card scoping before limits,
   and truthful withheld alignment when the canonical strategy read fails.
-- Agent 01 retains the shared worker/sync/launch lane. #463 did not modify the
-  background worker, scheduler, Microsoft/Meta sync, production configuration or
-  live data. Final worker ordering remains a small documented handoff after review.
+- Agent 01 retains the shared worker/sync/launch lane. The isolated follow-up from
+  `main` `250d83a1290cd96648f47f969cff29d15ee0d0b9` wires one durable Johannesburg-day
+  strategy job into the existing worker before daily Content Autopilot. Content is
+  withheld until the same-day strategy job succeeds. No second scheduler, schema,
+  Microsoft/Meta behavior or production configuration is added.
 - Merge does not authorise production activation. The isolated Edge Function must
-  not be deployed or wired into the live cycle without the normal protected gate.
+  be deployed before the updated background worker under a separate protected gate.
+  All three Content Autopilot flags remain off.
 
 ## PRODUCTION ACTIVATION TRUTH — 22 September 2026
 
 This section supersedes the pre-merge #450/#451 lane snapshots below. Exact evidence and the ordered
 protected runbook are in `docs/ops/P0-PRODUCTION-ACTIVATION-2026-09-22.md`.
 
-- GitHub/Vercel code truth is `main` `dd9215d4d8b8fbe04d91f013aba67fc39e4cae1d`.
+- GitHub code truth is `main` `250d83a1290cd96648f47f969cff29d15ee0d0b9`.
   Activation corrections for stale-preview takeover, automatic date range, Edge dependency
   resolution and bounded Microsoft detail units are merged and production-green.
 - Production now has the explicitly approved Client Portal foundation plus the four #450/#451
@@ -72,11 +75,14 @@ protected runbook are in `docs/ops/P0-PRODUCTION-ACTIVATION-2026-09-22.md`.
 - Content/OneDrive truth: Econofoods already has the upcoming run, guideline and three ideas, but no
   short code or durable folder mappings. Across production there are zero configured short codes,
   zero OneDrive mappings and zero delegated OAuth tokens.
-- Microsoft job `40569507-7f78-4e1b-afe0-79b7b06edb4b` is in bounded source retry 1 of 3 with five
-  required sources still complete, no apply run and the last verified mirror authoritative.
-- Remaining gates: CA completes Red Oak exact-Page access/re-consent; observe stable Meta checkpoints
-  and the Microsoft bounded terminal result; only then enable Content Autopilot alone. AI and
-  OneDrive remain off. No Microsoft write occurred.
+- Microsoft job `40569507-7f78-4e1b-afe0-79b7b06edb4b` is complete with all six required sources
+  complete, zero pending detail units, automatic retry count one and no automatic failure. No
+  `microsoft_sync_runs` apply row exists; the last verified mirror remained authoritative throughout.
+- Remaining gates: accept the #463 worker integration; separately approve deployment of
+  `monthly-strategy-autopilot` followed by `background-worker` with all Content Autopilot flags off;
+  verify one terminal, idempotent same-day strategy job; complete Red Oak exact-Page access/re-consent
+  and stable Meta evidence; only then enable Content Autopilot alone. AI and OneDrive remain off.
+  No Microsoft write occurred.
 
 ## SUPERVISOR CONTINUATION — 21 September 2026, 11:55 SAST
 

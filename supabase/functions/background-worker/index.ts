@@ -15,6 +15,12 @@ import {
   contentAutopilotIdempotencyKey,
   contentAutopilotOperatingDate,
 } from '../_shared/contentAutopilotSchedule.ts'
+import {
+  MONTHLY_STRATEGY_AUTOPILOT_JOB_TYPE,
+  monthlyStrategyAutopilotIdempotencyKey,
+  monthlyStrategyAutopilotOperatingDate,
+  monthlyStrategyReadyForContent,
+} from '../_shared/monthlyStrategyAutopilotSchedule.ts'
 
 const MAX_RUNTIME_MS = 25_000
 const MAX_JOBS_PER_RUN = 25
@@ -53,10 +59,11 @@ Deno.serve(async () => {
   const processed: Array<{ id: string; job_type: string; ok: boolean }> = []
   const deadline = Date.now() + MAX_RUNTIME_MS
 
-  // #450 uses the existing worker/queue rather than a second cron. Activation is
-  // explicit and fail-closed; once enabled, the daily idempotency key guarantees
-  // that concurrent minute ticks can enqueue at most one Johannesburg-day pass.
-  const contentAutopilotSchedule = await ensureDailyContentAutopilotJob(supabase)
+  // #463 prepares the canonical monthly strategy before #450 can enqueue its
+  // daily pass. Both use this existing worker/queue and Johannesburg-day keys;
+  // no second scheduler exists and concurrent minute ticks remain idempotent.
+  const monthlyStrategyAutopilotSchedule = await ensureDailyMonthlyStrategyAutopilotJob(supabase)
+  const contentAutopilotSchedule = await ensureDailyContentAutopilotJob(supabase, monthlyStrategyAutopilotSchedule)
 
   while (Date.now() < deadline && processed.length < MAX_JOBS_PER_RUN) {
     const { data: job, error } = await supabase.rpc('claim_next_background_job', { p_worker: worker })
@@ -67,7 +74,7 @@ Deno.serve(async () => {
     // missing id as "nothing to do".
     if (!job || !job.id) break
     try {
-      const result = await runJob(supabase, job as JobRow, url, worker)
+      const result = await runJob(supabase, job as JobRow, url, serviceKey, worker)
       if (result.waiting === true) {
         const { error: deferError } = await supabase.rpc('defer_background_job', {
           p_id: job.id,
@@ -134,14 +141,62 @@ Deno.serve(async () => {
   // state (Access/Coverage/Completeness/Freshness) independently.
   const fleetFreshness = await enqueueFleetMetaFreshness(supabase, url)
 
-  return new Response(JSON.stringify({ ok: true, worker, processed, contentAutopilotSchedule, microsoftFreshness, reaped, laneRecoveries, fleetFreshness }), { headers: { 'Content-Type': 'application/json' } })
+  return new Response(JSON.stringify({ ok: true, worker, processed, monthlyStrategyAutopilotSchedule, contentAutopilotSchedule, microsoftFreshness, reaped, laneRecoveries, fleetFreshness }), { headers: { 'Content-Type': 'application/json' } })
 })
+
+async function ensureDailyMonthlyStrategyAutopilotJob(
+  supabase: ReturnType<typeof createClient>,
+): Promise<Record<string, unknown>> {
+  const today = monthlyStrategyAutopilotOperatingDate()
+  const idempotencyKey = monthlyStrategyAutopilotIdempotencyKey(today)
+  const { error: enqueueError } = await supabase
+    .from('background_jobs')
+    .upsert({
+      job_type: MONTHLY_STRATEGY_AUTOPILOT_JOB_TYPE,
+      payload: { today, schedule: 'daily_operating_cycle' },
+      idempotency_key: idempotencyKey,
+      max_attempts: 3,
+    }, { onConflict: 'idempotency_key', ignoreDuplicates: true })
+
+  if (enqueueError) return { state: 'unavailable', blocker: enqueueError.message, operatingDate: today, idempotencyKey }
+
+  const { data: job, error: readError } = await supabase
+    .from('background_jobs')
+    .select('id,status,attempts,max_attempts,error')
+    .eq('idempotency_key', idempotencyKey)
+    .maybeSingle()
+
+  if (readError || !job) {
+    return { state: 'unavailable', blocker: readError?.message ?? 'Daily monthly strategy job was not readable.', operatingDate: today, idempotencyKey }
+  }
+
+  return {
+    state: job.status === 'succeeded' ? 'complete' : job.status,
+    jobStatus: job.status,
+    jobId: job.id,
+    attempts: job.attempts,
+    maxAttempts: job.max_attempts,
+    blocker: job.error ?? null,
+    operatingDate: today,
+    idempotencyKey,
+  }
+}
 
 async function ensureDailyContentAutopilotJob(
   supabase: ReturnType<typeof createClient>,
+  monthlyStrategySchedule: Record<string, unknown>,
 ): Promise<Record<string, unknown>> {
   const enabled = (Deno.env.get(CONTENT_AUTOPILOT_ENABLED_FLAG) ?? '').trim().toLowerCase() === 'true'
   if (!enabled) return { state: 'disabled' }
+
+  if (!monthlyStrategyReadyForContent(monthlyStrategySchedule.jobStatus)) {
+    return {
+      state: 'waiting_for_monthly_strategy',
+      prerequisiteState: monthlyStrategySchedule.state ?? 'unavailable',
+      prerequisiteJobId: monthlyStrategySchedule.jobId ?? null,
+      blocker: monthlyStrategySchedule.blocker ?? null,
+    }
+  }
 
   const today = contentAutopilotOperatingDate()
   const idempotencyKey = contentAutopilotIdempotencyKey(today)
@@ -573,6 +628,7 @@ async function runJob(
   supabase: ReturnType<typeof createClient>,
   job: JobRow,
   url: string,
+  serviceKey: string,
   worker: string,
 ): Promise<JobResult> {
   await updateJobProgress(supabase, job.id, worker, 10)
@@ -603,6 +659,29 @@ async function runJob(
       if (error) throw new Error(error.message)
       await updateJobProgress(supabase, job.id, worker, 90)
       return { ok: true, ...(data as Record<string, unknown>) }
+    }
+    case MONTHLY_STRATEGY_AUTOPILOT_JOB_TYPE: {
+      // #463 delegates to the accepted internal Edge boundary. That function
+      // owns Johannesburg-month selection and the canonical #391 seed RPC;
+      // it never updates an existing staff-amended/approved/published strategy.
+      await updateJobProgress(supabase, job.id, worker, 40)
+      const workerToken = (Deno.env.get('WORKER_INTERNAL_TOKEN') ?? '').trim()
+      if (workerToken.length < 32) throw new Error('Monthly strategy worker authentication is not configured')
+      const response = await fetch(`${url}/functions/v1/monthly-strategy-autopilot`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${serviceKey}`,
+          'X-Internal-Worker-Token': workerToken,
+        },
+      })
+      const body = await response.json().catch(() => null) as Record<string, unknown> | null
+      if (!response.ok || body?.ok !== true) {
+        const detail = typeof body?.error === 'string' ? body.error : `HTTP ${response.status}`
+        throw new Error(`Monthly strategy autopilot did not complete: ${detail}`)
+      }
+      await updateJobProgress(supabase, job.id, worker, 90)
+      return body
     }
     case 'content_autopilot': {
       // #450: prepare content for upcoming real Content Runs on the normal operating
