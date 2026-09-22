@@ -1529,14 +1529,20 @@ const handleGetClientContext: ToolHandler = async (staff, input) => {
         contact.lifecycle_state === 'active' &&
         (contact.blocks_caption === true || ['possible_change', 'stale_unverified'].includes(String(contact.freshness_state))))
       const policy = policyResult.data
-      const valuesByType = new Map<string, Set<string>>()
-      for (const contact of eligible) {
+      const contactSlotKey = (contact: Record<string, unknown>) => {
         const type = String(contact.contact_type)
-        const values = valuesByType.get(type) ?? new Set<string>()
-        values.add(String(contact.value))
-        valuesByType.set(type, values)
+        const person = String(contact.person_name || '').trim().toLowerCase()
+        const label = String(contact.display_label || '').trim().toLowerCase()
+        return `${type}::${person}::${label}`
       }
-      const ambiguous = [...valuesByType.values()].some(values => values.size > 1)
+      const valuesBySlot = new Map<string, Set<string>>()
+      for (const contact of eligible) {
+        const slot = contactSlotKey(contact)
+        const values = valuesBySlot.get(slot) ?? new Set<string>()
+        values.add(String(contact.value))
+        valuesBySlot.set(slot, values)
+      }
+      const ambiguous = [...valuesBySlot.values()].some(values => values.size > 1)
       const blocked = !policy || policy.review_state !== 'current_verified' || ambiguous || held.some((contact: Record<string, unknown>) => contact.blocks_caption === true) || (policy.requirement === 'mandatory' && eligible.length === 0)
       contactFooter = {
         status: blocked ? 'not_ready' : 'ready',

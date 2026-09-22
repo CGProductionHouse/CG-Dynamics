@@ -427,6 +427,37 @@ test('caption contact resolver includes exact current approved public contact', 
   assert.equal(result.can_generate_footer, true)
 })
 
+test('caption contact resolver allows multiple same-type contacts for different people', () => {
+  const second = {
+    ...currentPublicContact,
+    id: 'red-oak-public-2',
+    person_name: 'Second Person',
+    value: 'PUBLIC-VALUE-2',
+    footer_order: 20,
+  }
+  const result = contactPolicy.resolveCaptionContacts({
+    clientId: 'red-oak', contacts: [currentPublicContact, second], policies: [optionalCaptionPolicy],
+  })
+  assert.deepEqual(result.contacts.map(contact => contact.value), ['PUBLIC-VALUE', 'PUBLIC-VALUE-2'])
+  assert.equal(result.can_generate_footer, true)
+  assert.equal(result.unresolved.length, 0)
+})
+
+test('caption contact resolver still blocks conflicting values for the same logical contact', () => {
+  const conflict = {
+    ...currentPublicContact,
+    id: 'red-oak-public-conflict',
+    value: 'PUBLIC-VALUE-CHANGED',
+    footer_order: 20,
+  }
+  const result = contactPolicy.resolveCaptionContacts({
+    clientId: 'red-oak', contacts: [currentPublicContact, conflict], policies: [optionalCaptionPolicy],
+  })
+  assert.equal(result.contacts.length, 0)
+  assert.equal(result.can_generate_footer, false)
+  assert.equal(result.unresolved.length, 2)
+})
+
 test('caption contact resolver excludes internal, stale, superseded and other-client contacts', () => {
   const contacts = [
     currentPublicContact,

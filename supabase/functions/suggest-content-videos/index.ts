@@ -54,6 +54,7 @@ import {
 // the expanded set also covers future migrations that may add 'manager','staff','owner'.
 const STAFF_ROLES = ['owner', 'admin', 'manager', 'staff', 'team'] as const
 type StaffRole = typeof STAFF_ROLES[number]
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 const MAX_COVERAGE_MONTHS = 12
 const MAX_SUGGESTIONS = 20
@@ -231,28 +232,49 @@ Deno.serve(async (req) => {
 
   // ── Auth and caller authorisation ──────────────────────────────────────────
   // Uses service-role client (bypasses RLS), so we manually enforce access.
+  //
+  // Two auth paths:
+  //   1. Staff session: Bearer token → auth.getUser → profile → role check.
+  //   2. Internal worker: X-Internal-Worker-Token header matching WORKER_INTERNAL_TOKEN.
+  //      Narrow server-to-server authority; bypasses user auth but still enforces the
+  //      same business rules (draft-only, no overwrite of human content).
 
-  const token = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '')
-  if (!token) {
-    return jsonResponse({ error: 'Authentication required.' }, 401)
+  const WORKER_TOKEN = (Deno.env.get('WORKER_INTERNAL_TOKEN') ?? '').trim()
+  const internalWorkerToken = req.headers.get('X-Internal-Worker-Token') ?? ''
+  const isInternalWorker = WORKER_TOKEN.length >= 32 && internalWorkerToken === WORKER_TOKEN
+
+  let userId: string
+  const systemProfileId = Deno.env.get('WORKER_SYSTEM_PROFILE_ID') ?? ''
+  if (isInternalWorker) {
+    if (!UUID_RE.test(systemProfileId)) return jsonResponse({ error: 'Worker system profile is not configured.' }, 503)
+    const { data: profile } = await sb.from('profiles').select('role, is_active').eq('id', systemProfileId).maybeSingle()
+    if (!profile || profile.is_active !== true || !isStaffRole(profile.role)) {
+      return jsonResponse({ error: 'Worker system profile is unavailable.' }, 503)
+    }
+    userId = systemProfileId
+  } else {
+    const token = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '')
+    if (!token) {
+      return jsonResponse({ error: 'Authentication required.' }, 401)
+    }
+
+    const { data: { user }, error: authError } = await sb.auth.getUser(token)
+    if (authError || !user) {
+      return jsonResponse({ error: 'Authentication required.' }, 401)
+    }
+    userId = user.id
+
+    const { data: profile } = await sb
+      .from('profiles')
+      .select('role, is_active')
+      .eq('id', user.id)
+      .maybeSingle()
+
+    // Fail closed: no profile, inactive profile, or non-staff role → deny.
+    if (!profile || profile.is_active !== true || !isStaffRole(profile.role)) {
+      return jsonResponse({ error: 'Staff access required.' }, 403)
+    }
   }
-
-  const { data: { user }, error: authError } = await sb.auth.getUser(token)
-  if (authError || !user) {
-    return jsonResponse({ error: 'Authentication required.' }, 401)
-  }
-
-  const { data: profile } = await sb
-    .from('profiles')
-    .select('role, is_active')
-    .eq('id', user.id)
-    .maybeSingle()
-
-  // Fail closed: no profile, inactive profile, or non-staff role → deny.
-  if (!profile || profile.is_active !== true || !isStaffRole(profile.role)) {
-    return jsonResponse({ error: 'Staff access required.' }, 403)
-  }
-
 
   // Client-access policy: all staff roles (admin, manager, staff, team, owner)
   // may access any active client. This matches the RLS policy
@@ -270,6 +292,7 @@ Deno.serve(async (req) => {
 
   const { requestId, clientId, coverageStart, coverageEnd, guidelineId } = body
   const mode: DirectorMode = isDirectorMode(body.mode) ? body.mode : 'suggest'
+  // Worker calls always include requestId/coverageStart/coverageEnd; staff calls too.
   if (!requestId || !clientId || !coverageStart || !coverageEnd) {
     return jsonResponse({ error: 'requestId, clientId, coverageStart and coverageEnd are required.' }, 400)
   }
@@ -448,7 +471,7 @@ Deno.serve(async (req) => {
       : []
     const directorContext: DirectorContext = {
       sb,
-      userId: user.id,
+      userId,
       requestId,
       client: { id: client.id, name: client.name, tier: client.tier },
       guidelineId: guidelineId ?? null,
@@ -467,6 +490,7 @@ Deno.serve(async (req) => {
       canonicalInternal,
       existingTitles: existingVideos.map(video => video.title),
       historicalTitles: (historicalConcepts ?? []).slice(0, 20).map(concept => concept.title as string),
+      persist: isInternalWorker,
     }
     return mode === 'ideas'
       ? await handleIdeasMode(directorContext)
@@ -594,7 +618,7 @@ Deno.serve(async (req) => {
 
   let aiResult: Awaited<ReturnType<typeof routeAiChat>>
   const fingerprint = await sha256(JSON.stringify({
-    actorId: user.id,
+    actorId: userId,
     clientId,
     coverageStart,
     coverageEnd,
@@ -624,7 +648,7 @@ Deno.serve(async (req) => {
       usageClient: sb as unknown as AiUsageClient,
       feature: 'content_video_suggestions',
       action: 'generate',
-      actorId: user.id,
+      actorId: userId,
       idempotencyKey: requestId,
       fingerprint,
       complexity: 'complex',
@@ -643,7 +667,7 @@ Deno.serve(async (req) => {
         error.requestId,
         fingerprint,
         'suggestion_response',
-        user.id,
+        userId,
       )
       if (replay && Array.isArray(replay.suggestions) && replay.suggestions.length > 0 &&
         replay.suggestions.every(isValidSuggestion) && replay.context && replay.sources) {
@@ -713,7 +737,7 @@ Deno.serve(async (req) => {
   // Safe operational log (no prompts, scripts, credentials or secrets)
   const elapsed = Date.now() - startTime
   console.info(
-    `[suggest-content-videos] user=${user.id} client=${clientId} ` +
+    `[suggest-content-videos] user=${userId} client=${clientId} ` +
     `months=${coverageMonths.length} slots=${totalDeliverableSlots} ` +
     `existing=${existingVideos.length} suggestions=${suggestions.length} ` +
     `provider=${providerName} model=${providerModel} elapsed=${elapsed}ms`,
@@ -745,6 +769,8 @@ interface DirectorContext {
   canonicalInternal: string[]
   existingTitles: string[]
   historicalTitles: string[]
+  /** When true, persist generated drafts into content_guide_ideas (worker path). */
+  persist: boolean
 }
 
 type ReadyGuide = { markdown: string } | { notReady: { reason: string } }
@@ -917,7 +943,25 @@ async function handleIdeasMode(context: DirectorContext): Promise<Response> {
     `months=${context.coverageMonths.length} slots=${context.slots.length} ideas=${ideas.length} ` +
     `research=${research.sources.length} provider=${routed.provider}`,
   )
-  return jsonResponse({ mode: 'ideas', ideas, context: baseContext, sources })
+
+  // ── Persist draft ideas when called by the internal worker ────────────────
+  // Idempotent: only insert into a guideline the worker owns. Each idea becomes
+  // a content_guide_ideas row with status 'draft' in the saved order.
+  let persisted = 0
+  if (context.persist && context.guidelineId) {
+    const saved = await context.sb.rpc('persist_content_autopilot_ideas', {
+      p_guideline_id: context.guidelineId,
+      p_client_id: context.client.id,
+      p_actor_profile_id: context.userId,
+      p_ideas: ideas,
+    })
+    if (saved.error) return jsonResponse({ error: `Generated ideas were not persisted: ${saved.error.message}` }, 500)
+    persisted = Number(saved.data ?? 0)
+    if (persisted !== ideas.length) return jsonResponse({ error: 'Generated ideas were not fully persisted.' }, 409)
+    console.info(`[content-director] mode=ideas persisted=${persisted}/${ideas.length} guideline=${context.guidelineId}`)
+  }
+
+  return jsonResponse({ mode: 'ideas', ideas, context: baseContext, sources, persisted })
 }
 
 async function handleDevelopMode(context: DirectorContext, requestedVideoIds: string[]): Promise<Response> {
@@ -1004,10 +1048,30 @@ async function handleDevelopMode(context: DirectorContext, requestedVideoIds: st
     `[content-director] mode=develop user=${context.userId} client=${context.client.id} ` +
     `requested=${targets.length} developed=${developments.length} provider=${routed.provider}`,
   )
+
+  // ── Persist developments into saved videos when called by the internal worker ─
+  // Only fills EMPTY AI-owned fields; never overwrites human-edited content.
+  let persisted = 0
+  if (context.persist) {
+    const saved = await context.sb.rpc('persist_content_autopilot_developments', {
+      p_guideline_id: context.guidelineId,
+      p_client_id: context.client.id,
+      p_actor_profile_id: context.userId,
+      p_developments: developments,
+    })
+    if (saved.error) return jsonResponse({ error: `Generated developments were not persisted: ${saved.error.message}` }, 500)
+    persisted = Number(saved.data ?? 0)
+    if (persisted === 0 && developments.length > 0) {
+      return jsonResponse({ error: 'Generated developments did not change canonical content.' }, 409)
+    }
+    console.info(`[content-director] mode=develop persisted=${persisted}/${developments.length}`)
+  }
+
   return jsonResponse({
     mode: 'develop',
     developments,
     context: { ...baseContext, developedCount: developments.length },
     sources,
+    persisted,
   })
 }
