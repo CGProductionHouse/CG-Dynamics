@@ -7,12 +7,11 @@ export const INSTAGRAM_LOGIN_AUTHORIZE_URL = 'https://www.instagram.com/oauth/au
 export const INSTAGRAM_LOGIN_TOKEN_URL = 'https://api.instagram.com/oauth/access_token'
 export const INSTAGRAM_GRAPH_HOST = 'https://graph.instagram.com'
 
-// Phase 1 cannot be activated while tokens would be stored as raw values.
-// A later reviewed change must replace this gate only when token-at-rest
-// encryption (or another reviewed encrypted store) is actually in use.
+// Code-level encryption is prepared, but activation remains a separate protected
+// gate covering migration approval, secret configuration, deployment and consent.
 export const INSTAGRAM_STANDALONE_LIVE_ACTIVATION_ENABLED: boolean = false
 export const INSTAGRAM_STANDALONE_ACTIVATION_BLOCKER =
-  'Standalone Instagram Login requires reviewed token-at-rest encryption before production deployment or consent.'
+  'Standalone Instagram Login remains disabled until token-at-rest encryption migrations, secret configuration and deployment are explicitly approved.'
 
 export interface InstagramShortLivedToken {
   accessToken: string

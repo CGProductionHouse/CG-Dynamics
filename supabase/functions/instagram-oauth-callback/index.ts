@@ -8,6 +8,7 @@ import {
   parseInstagramShortLivedToken,
   resolveInstagramGraphConfig,
 } from '../_shared/instagramLogin.ts'
+import { encryptInstagramAccessToken } from '../_shared/instagramTokenEncryption.ts'
 
 function redirect(appUrl: string, status: string): Response {
   return new Response(null, {
@@ -40,7 +41,9 @@ Deno.serve(async req => {
   const appId = Deno.env.get('INSTAGRAM_APP_ID')
   const appSecret = Deno.env.get('INSTAGRAM_APP_SECRET')
   const redirectUri = Deno.env.get('INSTAGRAM_REDIRECT_URI')
-  if (!supabaseUrl || !serviceRoleKey || !appId || !appSecret || !redirectUri) {
+  const encryptionKeyBase64 = Deno.env.get('INSTAGRAM_TOKEN_ENCRYPTION_KEY_B64')
+  const encryptionKeyVersion = Deno.env.get('INSTAGRAM_TOKEN_ENCRYPTION_KEY_VERSION')
+  if (!supabaseUrl || !serviceRoleKey || !appId || !appSecret || !redirectUri || !encryptionKeyBase64 || !encryptionKeyVersion) {
     console.error('Instagram Login callback is missing server configuration.')
     return redirect(appUrl, 'config_error')
   }
@@ -100,6 +103,15 @@ Deno.serve(async req => {
     const expiresIn = typeof longBody.expires_in === 'number' && Number.isFinite(longBody.expires_in)
       ? longBody.expires_in
       : null
+    const encryptedToken = await encryptInstagramAccessToken({
+      accessToken: longBody.access_token,
+      keyBase64: encryptionKeyBase64,
+      context: {
+        clientId: oauthState.client_id,
+        instagramAccountId: identity.instagramAccountId,
+        keyVersion: encryptionKeyVersion,
+      },
+    })
     const { error: saveError } = await sb.rpc('complete_instagram_login_connection', {
       p_client_id: oauthState.client_id,
       p_connected_by: oauthState.user_id,
@@ -108,7 +120,10 @@ Deno.serve(async req => {
       p_instagram_username: identity.username,
       p_account_type: identity.accountType,
       p_scopes: shortToken.permissions,
-      p_access_token: longBody.access_token,
+      p_token_ciphertext_base64: encryptedToken.ciphertextBase64,
+      p_token_iv_base64: encryptedToken.ivBase64,
+      p_encryption_version: encryptedToken.encryptionVersion,
+      p_key_version: encryptedToken.keyVersion,
       p_token_expires_at: expiresIn ? new Date(Date.now() + expiresIn * 1000).toISOString() : null,
     })
     if (saveError) throw new Error(`Instagram connection persistence failed (${saveError.code ?? 'unknown'}).`)

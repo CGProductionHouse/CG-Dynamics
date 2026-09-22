@@ -74,10 +74,23 @@ The prepared fallback:
 3. binds a hashed, one-time OAuth state to that exact client and staff actor;
 4. requests only the two reporting permissions above;
 5. verifies one exact Business/Creator `/me` identity and cross-checks its app-scoped user ID against the token response;
-6. persists metadata and its server-only token atomically as `pending_review`;
+6. encrypts the provider token in the Edge runtime and persists metadata plus ciphertext atomically as `pending_review`;
 7. prevents one Instagram account identity from being assigned to two clients;
 8. deliberately does **not** write `meta_client_assets`, run sync, create reports/facts/checkpoints, or publish anything.
-9. fails closed before OAuth consent and callback exchange because production use remains blocked until reviewed token-at-rest encryption—or another reviewed encrypted token store—is actually implemented.
+9. remains disabled before OAuth consent and callback exchange until the separate migration, secret, deployment and consent gates are explicitly approved.
+
+### #476 encrypted token-storage correction
+
+The later `20260922144059_standalone_instagram_token_encryption.sql` migration corrects the unapplied Phase-1 schema without rewriting its history:
+
+- it aborts if any plaintext standalone token row exists;
+- it removes the plaintext `access_token` column and raw-token RPC signature;
+- the replacement RPC accepts only canonical-base64 AES-256-GCM ciphertext, a fresh 96-bit IV, encryption-contract version, key version and expiry;
+- encryption happens before the RPC call using a strictly decoded 32-byte server-side key;
+- deterministic authenticated data binds the ciphertext to the contract version, key version, exact Dynamics client UUID and exact Instagram account ID;
+- the decrypt helper exists only for future reviewed integration and is not wired into `meta-sync-worker` or reporting.
+
+The encryption secret contract is `INSTAGRAM_TOKEN_ENCRYPTION_KEY_B64` containing canonical RFC 4648 base64 for exactly 32 random bytes, plus non-secret `INSTAGRAM_TOKEN_ENCRYPTION_KEY_VERSION` in the form `v1`, `v2`, and so on. Neither value is created or configured by this code-only lane.
 
 The existing `meta_client_assets` row remains the only canonical reporting mapping. A later CA-approved activation must explicitly review the pending identity, bind it to that existing authority, and teach the existing Meta connector to select the standalone token for Instagram only. That activation belongs with the shared Meta worker owner; it is intentionally not implemented in #471 Phase 1.
 
@@ -86,10 +99,12 @@ The existing `meta_client_assets` row remains the only canonical reporting mappi
 1. Resolve the 11 unresolved/unsafe identity cases directly with clients, including the Bohemia name difference, HMHI legal identity, exact Supa Quick stores, PSG national-versus-branch scope and Tobich location scope.
 2. For each exact account, use the existing Meta asset discovery first. Record whether Meta returns it as the mapped Page's Instagram business account.
 3. For a proven professional account that is absent from the Page route, decide whether CA wants standalone Instagram Login and obtain the account owner's consent at action time.
-4. Do **not** deploy or begin provider consent while the explicit code gate is closed. First resolve the existing Meta token-at-rest encryption requirement or implement a reviewed encrypted token store; the Phase-1 raw server-only token table is not approved for live use.
-5. Only after that security gate is resolved, create/configure the Instagram product in the Meta App Dashboard, exact redirect URI, Instagram App ID/secret, explicit Graph version, required access level/app review and token lifecycle. None of this was performed here.
-6. Review/apply the prepared migration and deploy the two Edge Functions only through a separately approved production gate.
-7. Have the shared Meta worker owner implement/review the narrow canonical mapping/token-selection activation and token refresh before any pending connection can report.
+4. Obtain supervisor review and merge of the code-only encryption correction.
+5. Obtain explicit CA approval to apply the foundation and correction migrations together, in order; neither is applied by this lane.
+6. Obtain explicit CA approval to create/configure the encryption secret and its non-secret key version. Never print or commit the key.
+7. Under separate approval, configure the Instagram product and deploy start/callback with reviewed settings while the activation constant remains false until the controlled gate.
+8. Run one controlled exact-client provider-consent test only after the prior gates are accepted.
+9. Require a separate review before any decrypt helper, standalone token, mapping, worker or reporting integration is activated.
 
 ## Evidence notes
 
