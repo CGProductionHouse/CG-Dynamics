@@ -21,7 +21,10 @@ Authority: live inspection and the CA-approved activation against GitHub `main`
   preview, so the first implementation repeatedly tried to adopt that historical preview instead
   of starting today's job. The correction on `codex/451-activation-runtime-hardening` makes stale
   previews ineligible, requires both terminal stage and explicit completeness, and prevents recent
-  terminal failure from spawning jobs every minute. No Microsoft write occurred.
+  terminal failure from spawning jobs every minute. After that correction deployed, the first
+  direct cycle failed before job creation because its `-31`/`+370` range totalled 401 days against
+  the existing 370-day guard. `codex/451-activation-range-fix` replaces it with a tested 369-day
+  window. No Microsoft write occurred.
 - The existing cron cadence is correct, but its `net.http_post` command omits
   `timeout_milliseconds`, leaving pg_net's five-second default. New worker calls exceed that while
   durable downstream Meta work continues. Updating only that timeout is a new protected cron

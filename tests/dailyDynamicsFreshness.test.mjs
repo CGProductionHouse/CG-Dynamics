@@ -11,13 +11,14 @@ let planAutomaticApplyRecovery
 let planAutomaticSystemCycle
 let automaticApplyLeaseDeadline
 let requiredSourcesComplete
+let automaticSystemRange
 let fetchAllRows
 let fetchAllRowsByIdChunks
 
 before(async () => {
   server = await createServer({ server: { middlewareMode: true }, appType: 'custom', logLevel: 'silent' })
   ;({ microsoftFreshnessEvidence, metaFleetFreshnessEvidence } = await server.ssrLoadModule('/src/lib/dailyDynamicsFreshness.ts'))
-  ;({ planAutomaticSourceRecovery, planAutomaticApplyRecovery, planAutomaticSystemCycle, automaticApplyLeaseDeadline, requiredSourcesComplete } = await server.ssrLoadModule('/supabase/functions/microsoft-transition-sync/job-machine.ts'))
+  ;({ planAutomaticSourceRecovery, planAutomaticApplyRecovery, planAutomaticSystemCycle, automaticApplyLeaseDeadline, requiredSourcesComplete, automaticSystemRange } = await server.ssrLoadModule('/supabase/functions/microsoft-transition-sync/job-machine.ts'))
   ;({ fetchAllRows, fetchAllRowsByIdChunks } = await server.ssrLoadModule('/supabase/functions/_shared/paginatedRows.ts'))
 })
 after(async () => { await server?.close() })
@@ -188,6 +189,14 @@ test('recent terminal automatic failure does not spawn a new job every minute', 
 
 test('required Microsoft source must be terminal and explicitly complete', () => {
   assert.equal(requiredSourcesComplete([{ position: 0, source_type: 'planner_plan', source_id: 'plan', source_name: 'Plan', required: true, stage: 'complete', complete: false, safe_error: 'legacy cap', record_count: 5000, range_start: null, range_end: null }]), false)
+})
+
+test('automatic Microsoft range remains inside the existing 370-day guard', () => {
+  const range = automaticSystemRange(now)
+  const days = (Date.parse(range.rangeEnd) - Date.parse(range.rangeStart)) / 86_400_000
+  assert.equal(days, 369)
+  assert.equal(range.rangeStart, '2026-08-21T08:00:00.000Z')
+  assert.equal(range.rangeEnd, '2027-08-25T08:00:00.000Z')
 })
 
 test('automatic apply recovery reuses the same run and serializes exact item keys', () => {

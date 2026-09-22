@@ -41,10 +41,11 @@ protected runbook are in `docs/ops/P0-PRODUCTION-ACTIVATION-2026-09-22.md`.
   successful evidence, zero PASS, and no active fleet batches. Missing evidence remains missing;
   the automatic fleet pass is progressing truthfully.
 - Live Microsoft truth: provider configuration and transition are active, but the production cycle
-  is repeatedly selecting the 18 September completed staff preview because the chosen system actor
-  is also the historical admin actor. It has not created a new system job and no Microsoft write
-  occurred. The correction refuses stale preview adoption, requires explicit source completeness,
-  and holds recent terminal failure for the three-hour freshness window.
+  first selected the 18 September staff preview because the chosen actor is also the historical
+  admin actor. That takeover defect is merged and deployed. Its first direct cycle then failed
+  before job creation because the automatic `-31`/`+370` range totalled 401 days against the
+  existing 370-day guard. `codex/451-activation-range-fix` makes the range a tested 369 days. No
+  Microsoft write occurred.
 - Content/OneDrive truth: Econofoods already has the upcoming run, guideline and three ideas, but no
   short code or durable folder mappings. Across production there are zero configured short codes,
   zero OneDrive mappings and zero delegated OAuth tokens.

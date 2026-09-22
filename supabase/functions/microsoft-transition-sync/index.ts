@@ -27,6 +27,7 @@ import {
   planAutomaticSourceRecovery,
   planAutomaticApplyRecovery,
   planAutomaticSystemCycle,
+  automaticSystemRange,
 } from './job-machine.ts'
 import { applyAutomaticMicrosoftMirrors } from './automatic-reconciliation.ts'
 
@@ -361,10 +362,8 @@ Deno.serve(async request => {
       return jsonResponse({ ok: false, phase: 'degraded', jobId: latestSystemJob?.id ?? null, status: appliedRun?.status ?? latestSystemJob?.status ?? null, blocker: 'The latest automatic Microsoft reconciliation needs review; last verified state remains in use.' })
     } else {
       action = 'job_start'
-      const today = new Date()
-      const rangeStart = new Date(today); rangeStart.setUTCDate(rangeStart.getUTCDate() - 31)
-      const rangeEnd = new Date(today); rangeEnd.setUTCDate(rangeEnd.getUTCDate() + 370)
-      body.rangeStart = rangeStart.toISOString(); body.rangeEnd = rangeEnd.toISOString()
+      const range = automaticSystemRange(new Date().toISOString())
+      body.rangeStart = range.rangeStart; body.rangeEnd = range.rangeEnd
     }
   }
   const JOB_ACTIONS = new Set(['job_start', 'job_process', 'job_status', 'job_result', 'job_retry', 'job_latest'])
