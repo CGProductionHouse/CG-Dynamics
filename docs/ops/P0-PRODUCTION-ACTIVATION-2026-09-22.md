@@ -2,7 +2,7 @@
 
 Authority: live inspection and the CA-approved activation originally executed against
 `dd9215d4d8b8fbe04d91f013aba67fc39e4cae1d`, reconciled with GitHub `main`
-`250d83a1290cd96648f47f969cff29d15ee0d0b9` on 22 September 2026.
+`6d58eb5eb9be879e8cbc5722d1f12f1cedbe412f` on 22 September 2026.
 
 ## Activation execution status
 
@@ -13,8 +13,9 @@ Authority: live inspection and the CA-approved activation originally executed ag
 - Applied and verified the explicitly approved prerequisite `20260918113000`, then the approved
   four migrations in order. `20260919100000_client_portal_remove_photography.sql` was not applied.
 - Deployed the accepted dependency functions with their intended JWT modes. Current relevant
-  versions include `microsoft-transition-sync` v31 (`verify_jwt=true`), `meta-sync-worker` v31 and
-  `background-worker` v15 (both `verify_jwt=false`).
+  versions include `microsoft-transition-sync` v31 (`verify_jwt=true`), `meta-sync-worker` v31
+  (`verify_jwt=false`), `monthly-strategy-autopilot` v1 (`verify_jwt=true`) and
+  `background-worker` v16 (`verify_jwt=false`).
 - Meta fleet recovery is live and truthful. At 10:02 UTC it had 39 checkpoint rows for 57 mapped
   platforms, 37 carrying successful evidence, zero PASS, and no active batch. Missing evidence was
   not converted into zero or PASS. The first live fleet cycle later proved that the deployed
@@ -43,6 +44,14 @@ Authority: live inspection and the CA-approved activation originally executed ag
   default timeout to `timeout_milliseconds=30000`. Job ID 1, `* * * * *` cadence, PostgreSQL
   scheduler identity and background-worker endpoint are unchanged. Subsequent minute responses are
   HTTP 200 with `timed_out=false`, `contentAutopilotSchedule.state=disabled` and Microsoft success.
+- Under a later explicit CA gate, `monthly-strategy-autopilot` v1 was deployed with gateway JWT
+  verification and `background-worker` v16 was deployed without changing the existing cron. Live
+  readback then proved the production `background_jobs_allowed_type` constraint still permits only
+  `meta_sync` and `report_prep`, so the strategy job is truthfully rejected before admission. The
+  isolated follow-up migration `20260922142000_extend_background_jobs_allowed_type_for_autopilots.sql`
+  preserves those two values, restores the existing canonical system-owned `web_push_delivery`, and
+  adds only `monthly_strategy_autopilot` and `content_autopilot`. That migration is code-only and
+  must not be applied before separate CA approval.
 
 ## Current live state
 
@@ -63,10 +72,11 @@ Authority: live inspection and the CA-approved activation originally executed ag
 
 - Content Autopilot remains disabled; production has zero `content_autopilot` jobs. AI generation
   and OneDrive folder creation remain disabled.
-- Monthly Strategy Autopilot is accepted on `main`, but the live `background-worker` does not yet
-  invoke it. The code-only follow-up adds one Johannesburg-day durable strategy job before Content
-  Autopilot and withholds the content job until the strategy job succeeds. Production deployment of
-  `monthly-strategy-autopilot` and the updated worker remains protected.
+- Monthly Strategy Autopilot and the updated worker are deployed, but production cannot admit their
+  durable jobs until the exact five-type queue constraint migration above is reviewed, merged and
+  separately approved for production application. Production still has zero
+  `monthly_strategy_autopilot` and zero `content_autopilot` rows; all Content Autopilot flags remain
+  false.
 - Red Oak complete Meta evidence requires the connecting Facebook user to have Page access to exact
   Page `117937152934535`, then use Dynamics **Integrations → Meta → Reconnect Meta**, select
   `RedOak LHP` in the Facebook asset chooser and approve the already-requested
@@ -83,18 +93,17 @@ The foundation/four migrations, identities/secrets, #451 functions, Meta worker 
 timeout described above are already complete and must not be replayed. From the current state, the
 remaining ordered sequence is:
 
-1. Accept and merge the isolated #463 shared-worker integration after verification.
-2. With separate CA approval, deploy `monthly-strategy-autopilot` first with gateway JWT verification
-   enabled, then deploy the accepted `background-worker`. The worker call must satisfy both gateway
-   authentication and the independent `WORKER_INTERNAL_TOKEN` contract. Do not create or alter cron;
-   retain the existing minute job, identity, endpoint, headers and 30-second timeout. Keep all three
-   Content Autopilot flags false.
-3. Observe one terminal `monthly_strategy_autopilot` durable job for the Johannesburg operating
+1. Accept and merge the isolated exact-five-type constraint migration. With separate CA approval,
+   apply only `20260922142000_extend_background_jobs_allowed_type_for_autopilots.sql`, then verify
+   the check permits exactly `meta_sync`, `report_prep`, `web_push_delivery`,
+   `monthly_strategy_autopilot` and `content_autopilot`. Do not alter RLS, RPCs, cron, functions,
+   secrets or flags.
+2. Observe one terminal `monthly_strategy_autopilot` durable job for the Johannesburg operating
    date. Verify current/next-month canonical draft receipts, exact client/month idempotency, truthful
    blockers and zero overwrite of existing staff-amended/approved/published strategies. Repeat worker
    invocation must reuse the same daily key.
-4. Complete the narrow Red Oak exact-Page access/re-consent gate and verify stable Meta fleet evidence.
-5. Only after strategy and Meta evidence pass, separately approve
+3. Complete the narrow Red Oak exact-Page access/re-consent gate and verify stable Meta fleet evidence.
+4. Only after strategy and Meta evidence pass, separately approve
    `CONTENT_AUTOPILOT_ENABLED=true`. Keep AI generation and OneDrive folder flags false; verify the
    content job was admitted only after the same-day strategy job succeeded.
 
