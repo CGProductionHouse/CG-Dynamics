@@ -61,9 +61,10 @@ test('Google stays grouped with URL-backed Ads and Business surfaces', () => {
   assert.match(performance, /next\.set\('surface', surface\)/)
 })
 
-test('unavailable provider panels remain visible and never fabricate zero metrics', () => {
+test('provider panels remain visible and never fabricate unavailable metrics', () => {
   assert.match(reportView, /title="Website Performance"/)
-  assert.match(reportView, /Available for CG-built websites connected to Dynamics|available for CG-built websites connected to Dynamics/)
+  assert.match(reportView, /<PublishedWebsitePerformance report=\{report\.website_report \?\? null\} \/>/)
+  assert.match(reportView, /No approved website snapshot was published with this monthly report\. No figures are inferred or shown as zero\./)
   assert.match(reportView, /title="Email Marketing"/)
   assert.match(reportView, /title="LinkedIn"/)
   assert.match(reportView, /status="Coming soon"/)
