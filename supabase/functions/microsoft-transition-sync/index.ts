@@ -25,6 +25,7 @@ import {
   type SourceUnitResult,
   PAGINATION_BATCH_SIZE,
   planAutomaticSourceRecovery,
+  planAutomaticApplyRecovery,
 } from './job-machine.ts'
 import { applyAutomaticMicrosoftMirrors } from './automatic-reconciliation.ts'
 
@@ -339,7 +340,7 @@ Deno.serve(async request => {
         await sb.from('microsoft_sync_jobs').update({ automatic_retry_count: recovery.nextRetryCount, automatic_retry_after: recovery.retryAfter, automatic_failure: null, updated_at: new Date().toISOString() }).eq('id', latestSystemJob.id)
       }
       action = 'job_process'; body.jobId = latestSystemJob.id
-    } else if (latestSystemJob?.status === 'complete' && !appliedRun) {
+    } else if (latestSystemJob?.status === 'complete' && (!appliedRun || appliedRun.status === 'applying')) {
       const auto = await automaticallyApplyJob(sb, latestSystemJob.id)
       return jsonResponse({ ok: auto.status === 'completed', phase: 'apply', jobId: latestSystemJob.id, automatic: auto }, auto.status === 'failed' ? 500 : 200)
     } else if (lastSuccess && Date.now() - lastSuccess < 3 * 60 * 60 * 1000) {
@@ -506,8 +507,20 @@ Deno.serve(async request => {
 })
 
 async function automaticallyApplyJob(sb: ReturnType<typeof createClient>, jobId: string) {
-  const { data: existing } = await sb.from('microsoft_sync_runs').select('id,status,summary,safe_error').eq('preview_job_id', jobId).order('created_at', { ascending: false }).limit(1).maybeSingle()
-  if (existing) return { status: existing.status, runId: existing.id, ...(existing.summary ?? {}), error: existing.safe_error ?? null }
+  const { data: existing } = await sb.from('microsoft_sync_runs').select('id,status,summary,safe_error,started_at,automatic_recovery_count,automatic_recovery_after').eq('preview_job_id', jobId).order('created_at', { ascending: false }).limit(1).maybeSingle()
+  let recoveryRunId: string | undefined
+  if (existing) {
+    const recovery = planAutomaticApplyRecovery({ status: existing.status, startedAt: existing.started_at, recoveryCount: Number(existing.automatic_recovery_count ?? 0), recoveryAfter: existing.automatic_recovery_after ?? null, now: new Date().toISOString() })
+    if (recovery.kind === 'terminal' || recovery.kind === 'fresh') return { status: existing.status, runId: existing.id, ...(existing.summary ?? {}), error: existing.safe_error ?? null }
+    if (recovery.kind === 'exhausted') {
+      const error = 'Automatic Microsoft apply recovery was exhausted; the last verified mirror remains in use.'
+      await sb.from('microsoft_sync_runs').update({ status: 'failed', safe_error: error, finished_at: new Date().toISOString() }).eq('id', existing.id).eq('status', 'applying')
+      return { status: 'failed' as const, runId: existing.id, ...(existing.summary ?? {}), error }
+    }
+    const { data: claimed } = await sb.rpc('claim_microsoft_automatic_apply_recovery', { p_run_id: existing.id })
+    if (!claimed) return { status: 'applying' as const, runId: existing.id, ...(existing.summary ?? {}), error: null }
+    recoveryRunId = existing.id
+  }
   const [{ data: job }, { data: rows }] = await Promise.all([
     sb.from('microsoft_sync_jobs').select('assignee_map,exported_at').eq('id', jobId).single(),
     sb.from('microsoft_sync_job_sources').select('position,source_type,source_id,source_name,required,stage,record_count,complete,safe_error,records,range_start,range_end,pagination_cursor').eq('job_id', jobId),
@@ -519,7 +532,7 @@ async function automaticallyApplyJob(sb: ReturnType<typeof createClient>, jobId:
   const exportedAt = (job.exported_at as string | null) ?? new Date().toISOString()
   const snapshot = assembleSnapshot(jobRows, (job.assignee_map as Record<string, unknown>) ?? {}, exportedAt)
   if (!job.exported_at) await sb.from('microsoft_sync_jobs').update({ exported_at: exportedAt, status: 'complete', updated_at: exportedAt }).eq('id', jobId)
-  return applyAutomaticMicrosoftMirrors(sb, snapshot, jobId, Deno.env.get('MICROSOFT_SYNC_SYSTEM_USER_ID') ?? '')
+  return applyAutomaticMicrosoftMirrors(sb, snapshot, jobId, Deno.env.get('MICROSOFT_SYNC_SYSTEM_USER_ID') ?? '', recoveryRunId)
 }
 
 async function mergeAssignees(

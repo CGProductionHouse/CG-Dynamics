@@ -243,6 +243,20 @@ export function planAutomaticSourceRecovery(input: { failedRequired: number; ret
   return { kind: 'retry' as const, nextRetryCount: input.retryCount + 1, retryAfter: new Date(nowMs + AUTOMATIC_RETRY_COOLDOWN_MS).toISOString() }
 }
 
+export const AUTOMATIC_APPLY_STALE_MS = 10 * 60 * 1000
+export const MAX_AUTOMATIC_APPLY_RECOVERIES = 3
+
+export function planAutomaticApplyRecovery(input: { status: string; startedAt: string; recoveryCount: number; recoveryAfter: string | null; now: string }) {
+  if (input.status !== 'applying') return { kind: 'terminal' as const }
+  const nowMs = Date.parse(input.now)
+  const startedMs = Date.parse(input.startedAt)
+  const recoveryAfterMs = input.recoveryAfter ? Date.parse(input.recoveryAfter) : Number.NaN
+  if (input.recoveryCount >= MAX_AUTOMATIC_APPLY_RECOVERIES) return { kind: 'exhausted' as const }
+  if (Number.isFinite(recoveryAfterMs) && recoveryAfterMs > nowMs) return { kind: 'fresh' as const }
+  if (Number.isFinite(startedMs) && nowMs - startedMs < AUTOMATIC_APPLY_STALE_MS) return { kind: 'fresh' as const }
+  return { kind: 'recover' as const }
+}
+
 export interface JobSourceRow {
   position: number
   source_type: string

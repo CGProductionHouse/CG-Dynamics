@@ -22,7 +22,7 @@ export interface AutomaticReconciliationResult {
 /** Applies only already-approved Planner and Outlook mirror domains.
  * Client Schedule is excluded categorically, and every update uses an exact
  * durable Microsoft identity plus the established optimistic-lock contract. */
-export async function applyAutomaticMicrosoftMirrors(db: Db, snapshot: MicrosoftSnapshot, previewJobId: string, systemUserId: string): Promise<AutomaticReconciliationResult> {
+export async function applyAutomaticMicrosoftMirrors(db: Db, snapshot: MicrosoftSnapshot, previewJobId: string, systemUserId: string, existingRunId?: string): Promise<AutomaticReconciliationResult> {
   const [clients, aliases, boards, buckets, planner, calendar] = await Promise.all([
     db.from('clients').select('id,name,active').eq('active', true),
     db.from('client_aliases').select('client_id,alias'),
@@ -60,11 +60,14 @@ export async function applyAutomaticMicrosoftMirrors(db: Db, snapshot: Microsoft
   const clientScheduleExcluded = preview.filter(item => item.destination === 'client_schedule').length
   const items = preview.filter(item => item.destination === 'planner' || item.destination === 'cg_calendar')
   const conflicts = items.filter(item => item.reconciliationAction === 'conflict').length
-  const { data: run, error: runError } = await db.from('microsoft_sync_runs').insert({
-    trigger_type: 'agent', status: 'applying', snapshot_exported_at: snapshot.exportedAt,
-    source_completeness: snapshot.sources, preview_job_id: previewJobId,
-    summary: { automatic: true, reviewed: items.length, clientScheduleExcluded, conflicts }, reviewed_items: [],
-  }).select('id').single()
+  const runResult = existingRunId
+    ? { data: { id: existingRunId }, error: null }
+    : await db.from('microsoft_sync_runs').insert({
+      trigger_type: 'agent', status: 'applying', snapshot_exported_at: snapshot.exportedAt,
+      source_completeness: snapshot.sources, preview_job_id: previewJobId,
+      summary: { automatic: true, reviewed: items.length, clientScheduleExcluded, conflicts }, reviewed_items: [],
+    }).select('id').single()
+  const { data: run, error: runError } = runResult
   if (runError || !run) return { status: 'failed', runId: null, applied: 0, skipped: 0, failed: 1, conflicts, clientScheduleExcluded, error: runError?.message ?? 'Could not create automatic reconciliation run.' }
   let applied = 0; let skipped = 0; let failed = 0; let firstError: string | null = null
   for (const item of items) {

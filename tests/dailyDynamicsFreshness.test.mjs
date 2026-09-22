@@ -7,12 +7,13 @@ let server
 let microsoftFreshnessEvidence
 let metaFleetFreshnessEvidence
 let planAutomaticSourceRecovery
+let planAutomaticApplyRecovery
 let fetchAllRows
 
 before(async () => {
   server = await createServer({ server: { middlewareMode: true }, appType: 'custom', logLevel: 'silent' })
   ;({ microsoftFreshnessEvidence, metaFleetFreshnessEvidence } = await server.ssrLoadModule('/src/lib/dailyDynamicsFreshness.ts'))
-  ;({ planAutomaticSourceRecovery } = await server.ssrLoadModule('/supabase/functions/microsoft-transition-sync/job-machine.ts'))
+  ;({ planAutomaticSourceRecovery, planAutomaticApplyRecovery } = await server.ssrLoadModule('/supabase/functions/microsoft-transition-sync/job-machine.ts'))
   ;({ fetchAllRows } = await server.ssrLoadModule('/supabase/functions/_shared/paginatedRows.ts'))
 })
 after(async () => { await server?.close() })
@@ -71,6 +72,32 @@ test('automatic Microsoft retry is bounded, persisted and cooldown-aware', () =>
   assert.equal(retry.nextRetryCount, 1)
   assert.equal(planAutomaticSourceRecovery({ failedRequired: 1, retryCount: 1, retryAfter: retry.retryAfter, now }).kind, 'wait')
   assert.equal(planAutomaticSourceRecovery({ failedRequired: 1, retryCount: 3, retryAfter: null, now }).kind, 'exhausted')
+})
+
+test('fresh applying Microsoft run is not double-driven', () => {
+  assert.equal(planAutomaticApplyRecovery({ status: 'applying', startedAt: '2026-09-21T07:55:00Z', recoveryCount: 0, recoveryAfter: null, now }).kind, 'fresh')
+})
+
+test('stale crashed applying run is recovered with a bounded lease', () => {
+  assert.equal(planAutomaticApplyRecovery({ status: 'applying', startedAt: '2026-09-21T07:00:00Z', recoveryCount: 0, recoveryAfter: null, now }).kind, 'recover')
+  assert.equal(planAutomaticApplyRecovery({ status: 'applying', startedAt: '2026-09-21T07:00:00Z', recoveryCount: 1, recoveryAfter: '2026-09-21T08:05:00Z', now }).kind, 'fresh')
+})
+
+test('applying recovery exhausts instead of remaining applying forever', () => {
+  assert.equal(planAutomaticApplyRecovery({ status: 'applying', startedAt: '2026-09-21T07:00:00Z', recoveryCount: 3, recoveryAfter: null, now }).kind, 'exhausted')
+  assert.equal(planAutomaticApplyRecovery({ status: 'completed', startedAt: '2026-09-21T07:00:00Z', recoveryCount: 0, recoveryAfter: null, now }).kind, 'terminal')
+})
+
+test('automatic apply recovery reuses the same run and serializes exact item keys', () => {
+  const edge = readFileSync(new URL('../supabase/functions/microsoft-transition-sync/index.ts', import.meta.url), 'utf8')
+  const automatic = readFileSync(new URL('../supabase/functions/microsoft-transition-sync/automatic-reconciliation.ts', import.meta.url), 'utf8')
+  const sql = readFileSync(new URL('../supabase/migrations/20260921120000_daily_dynamics_service_reconciliation.sql', import.meta.url), 'utf8')
+  assert.match(edge, /claim_microsoft_automatic_apply_recovery/)
+  assert.match(edge, /applyAutomaticMicrosoftMirrors\(sb, snapshot, jobId,[\s\S]*recoveryRunId\)/)
+  assert.match(automatic, /existingRunId[\s\S]*id: existingRunId/)
+  assert.match(automatic, /microsoftStableItemKey\(item\)/)
+  assert.match(sql, /pg_advisory_xact_lock\(hashtextextended\(p_run_id::text \|\| ':' \|\| p_item_key, 451\)\)/)
+  assert.match(sql, /unique \(run_id, item_key\)|claim_microsoft_automatic_apply_recovery/)
 })
 
 test('fleet pagination returns more than 100 active assets without truncation', async () => {
