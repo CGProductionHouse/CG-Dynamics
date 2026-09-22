@@ -558,35 +558,40 @@ async function runJob(
           generationEnabled,
           videoFolderEnabled,
           generateDrafts: async input => {
-            // Reuses the EXISTING AI Content Director. Draft only: the function itself
-            // refuses a non-draft guideline and never overwrites a human-written field.
+            // Reuses the EXISTING AI Content Director via narrow internal worker auth.
+            // The Edge Function persists draft ideas when called with the internal token.
+            const workerToken = Deno.env.get('WORKER_INTERNAL_TOKEN') ?? ''
             const res = await fetch(`${url}/functions/v1/suggest-content-videos`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''}`,
+                ...(workerToken ? { 'X-Internal-Worker-Token': workerToken } : { Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''}` }),
               },
               body: JSON.stringify({
+                requestId: `autopilot:${input.contentRunId}:${input.mode}:${Date.now()}`,
                 mode: input.mode,
                 clientId: input.clientId,
                 guidelineId: input.guidelineId,
-                contentRunId: input.contentRunId,
+                coverageStart: input.coverageStart,
+                coverageEnd: input.coverageEnd,
                 videoIds: input.videoIds,
               }),
             })
             if (!res.ok) return { ok: false, error: `suggest-content-videos returned ${res.status}` }
-            const body = await res.json().catch(() => null) as { videos?: unknown[]; ideas?: unknown[] } | null
-            return { ok: true, generated: (body?.videos ?? body?.ideas ?? []).length }
+            const body = await res.json().catch(() => null) as { videos?: unknown[]; ideas?: unknown[]; developments?: unknown[]; persisted?: number } | null
+            const generated = body?.persisted ?? (body?.videos ?? body?.ideas ?? body?.developments ?? []).length
+            return { ok: true, generated }
           },
           ensureVideoFolders: async input => {
-            // Reuses the EXISTING ensure_video_folders Edge Function action. Create-only;
-            // existing folders are mapped by durable id, never duplicated. Behind the
-            // protected OneDrive-write gate.
+            // Reuses the EXISTING ensure_video_folders Edge Function action via narrow
+            // internal worker auth. Create-only; existing folders are mapped by durable
+            // id, never duplicated. Behind the protected OneDrive-write gate.
+            const workerToken = Deno.env.get('WORKER_INTERNAL_TOKEN') ?? ''
             const res = await fetch(`${url}/functions/v1/content-run-onedrive-folder`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''}`,
+                ...(workerToken ? { 'X-Internal-Worker-Token': workerToken } : { Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''}` }),
               },
               body: JSON.stringify({
                 action: 'ensure_video_folders',

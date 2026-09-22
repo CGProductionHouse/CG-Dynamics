@@ -77,14 +77,26 @@ Deno.serve(async (req) => {
   const sb = createClient(supabaseUrl, serviceRoleKey, { auth: { autoRefreshToken: false, persistSession: false } })
 
   const token = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '')
-  if (!token) return jsonResponse({ error: 'Authentication required.' }, 401)
-  const { data: { user }, error: authError } = await sb.auth.getUser(token)
-  if (authError || !user) return jsonResponse({ error: 'Authentication required.' }, 401)
-  const { data: profile } = await sb.from('profiles').select('role, is_active').eq('id', user.id).maybeSingle()
-  if (!profile || profile.is_active !== true || !STAFF_ROLES.includes(profile.role)) {
-    return jsonResponse({ error: 'Staff access required.' }, 403)
+  const WORKER_TOKEN = Deno.env.get('WORKER_INTERNAL_TOKEN') ?? ''
+  const internalWorkerToken = req.headers.get('X-Internal-Worker-Token') ?? ''
+  const isInternalWorker = WORKER_TOKEN.length > 0 && internalWorkerToken === WORKER_TOKEN
+
+  let userId: string
+  let canManage: boolean
+  if (isInternalWorker) {
+    userId = '00000000-0000-0000-0000-000000000000'
+    canManage = true
+  } else {
+    if (!token) return jsonResponse({ error: 'Authentication required.' }, 401)
+    const { data: { user }, error: authError } = await sb.auth.getUser(token)
+    if (authError || !user) return jsonResponse({ error: 'Authentication required.' }, 401)
+    userId = user.id
+    const { data: profile } = await sb.from('profiles').select('role, is_active').eq('id', user.id).maybeSingle()
+    if (!profile || profile.is_active !== true || !STAFF_ROLES.includes(profile.role)) {
+      return jsonResponse({ error: 'Staff access required.' }, 403)
+    }
+    canManage = profile.role === 'admin'
   }
-  const canManage = profile.role === 'admin'
 
   let body: { action?: string; contentRunId?: string; clientFolderItemId?: string; confirmCreate?: boolean }
   try { body = await req.json() } catch { return jsonResponse({ error: 'Invalid request body.' }, 400) }
@@ -176,7 +188,7 @@ Deno.serve(async (req) => {
       p_videos_folder_item_id: videos.id,
       p_web_url: selected.webUrl,
       p_folder_name: selected.name,
-      p_actor_id: user.id,
+      p_actor_id: userId,
     })
     if (mapError) return jsonResponse({ error: mapError.message }, 400)
     return jsonResponse({ status: 'mapped', folderName: selected.name })
@@ -253,7 +265,7 @@ Deno.serve(async (req) => {
         p_folder_item_id: folder.id,
         p_folder_name: folder.name,
         p_mapping_origin: origin,
-        p_actor_id: user.id,
+        p_actor_id: userId,
       })
       if (mapError) { results.push({ videoId: video.id, state: 'map_failed', error: mapError.message }); continue }
       results.push({ videoId: video.id, state: origin === 'canonical' ? 'created' : 'mapped_existing', folderName: folder.name })

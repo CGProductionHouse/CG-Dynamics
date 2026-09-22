@@ -231,28 +231,44 @@ Deno.serve(async (req) => {
 
   // ── Auth and caller authorisation ──────────────────────────────────────────
   // Uses service-role client (bypasses RLS), so we manually enforce access.
+  //
+  // Two auth paths:
+  //   1. Staff session: Bearer token → auth.getUser → profile → role check.
+  //   2. Internal worker: X-Internal-Worker-Token header matching WORKER_INTERNAL_TOKEN.
+  //      Narrow server-to-server authority; bypasses user auth but still enforces the
+  //      same business rules (draft-only, no overwrite of human content).
 
-  const token = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '')
-  if (!token) {
-    return jsonResponse({ error: 'Authentication required.' }, 401)
+  const WORKER_TOKEN = Deno.env.get('WORKER_INTERNAL_TOKEN') ?? ''
+  const internalWorkerToken = req.headers.get('X-Internal-Worker-Token') ?? ''
+  const isInternalWorker = WORKER_TOKEN.length > 0 && internalWorkerToken === WORKER_TOKEN
+
+  let userId: string
+  if (isInternalWorker) {
+    // Narrow internal authority: the worker acts as a system actor, not a staff user.
+    userId = '00000000-0000-0000-0000-000000000000'
+  } else {
+    const token = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '')
+    if (!token) {
+      return jsonResponse({ error: 'Authentication required.' }, 401)
+    }
+
+    const { data: { user }, error: authError } = await sb.auth.getUser(token)
+    if (authError || !user) {
+      return jsonResponse({ error: 'Authentication required.' }, 401)
+    }
+    userId = user.id
+
+    const { data: profile } = await sb
+      .from('profiles')
+      .select('role, is_active')
+      .eq('id', user.id)
+      .maybeSingle()
+
+    // Fail closed: no profile, inactive profile, or non-staff role → deny.
+    if (!profile || profile.is_active !== true || !isStaffRole(profile.role)) {
+      return jsonResponse({ error: 'Staff access required.' }, 403)
+    }
   }
-
-  const { data: { user }, error: authError } = await sb.auth.getUser(token)
-  if (authError || !user) {
-    return jsonResponse({ error: 'Authentication required.' }, 401)
-  }
-
-  const { data: profile } = await sb
-    .from('profiles')
-    .select('role, is_active')
-    .eq('id', user.id)
-    .maybeSingle()
-
-  // Fail closed: no profile, inactive profile, or non-staff role → deny.
-  if (!profile || profile.is_active !== true || !isStaffRole(profile.role)) {
-    return jsonResponse({ error: 'Staff access required.' }, 403)
-  }
-
 
   // Client-access policy: all staff roles (admin, manager, staff, team, owner)
   // may access any active client. This matches the RLS policy
@@ -270,6 +286,7 @@ Deno.serve(async (req) => {
 
   const { requestId, clientId, coverageStart, coverageEnd, guidelineId } = body
   const mode: DirectorMode = isDirectorMode(body.mode) ? body.mode : 'suggest'
+  // Worker calls always include requestId/coverageStart/coverageEnd; staff calls too.
   if (!requestId || !clientId || !coverageStart || !coverageEnd) {
     return jsonResponse({ error: 'requestId, clientId, coverageStart and coverageEnd are required.' }, 400)
   }
@@ -448,7 +465,7 @@ Deno.serve(async (req) => {
       : []
     const directorContext: DirectorContext = {
       sb,
-      userId: user.id,
+      userId,
       requestId,
       client: { id: client.id, name: client.name, tier: client.tier },
       guidelineId: guidelineId ?? null,
@@ -467,6 +484,7 @@ Deno.serve(async (req) => {
       canonicalInternal,
       existingTitles: existingVideos.map(video => video.title),
       historicalTitles: (historicalConcepts ?? []).slice(0, 20).map(concept => concept.title as string),
+      persist: isInternalWorker,
     }
     return mode === 'ideas'
       ? await handleIdeasMode(directorContext)
@@ -594,7 +612,7 @@ Deno.serve(async (req) => {
 
   let aiResult: Awaited<ReturnType<typeof routeAiChat>>
   const fingerprint = await sha256(JSON.stringify({
-    actorId: user.id,
+    actorId: userId,
     clientId,
     coverageStart,
     coverageEnd,
@@ -624,7 +642,7 @@ Deno.serve(async (req) => {
       usageClient: sb as unknown as AiUsageClient,
       feature: 'content_video_suggestions',
       action: 'generate',
-      actorId: user.id,
+      actorId: userId,
       idempotencyKey: requestId,
       fingerprint,
       complexity: 'complex',
@@ -643,7 +661,7 @@ Deno.serve(async (req) => {
         error.requestId,
         fingerprint,
         'suggestion_response',
-        user.id,
+        userId,
       )
       if (replay && Array.isArray(replay.suggestions) && replay.suggestions.length > 0 &&
         replay.suggestions.every(isValidSuggestion) && replay.context && replay.sources) {
@@ -713,7 +731,7 @@ Deno.serve(async (req) => {
   // Safe operational log (no prompts, scripts, credentials or secrets)
   const elapsed = Date.now() - startTime
   console.info(
-    `[suggest-content-videos] user=${user.id} client=${clientId} ` +
+    `[suggest-content-videos] user=${userId} client=${clientId} ` +
     `months=${coverageMonths.length} slots=${totalDeliverableSlots} ` +
     `existing=${existingVideos.length} suggestions=${suggestions.length} ` +
     `provider=${providerName} model=${providerModel} elapsed=${elapsed}ms`,
@@ -745,6 +763,8 @@ interface DirectorContext {
   canonicalInternal: string[]
   existingTitles: string[]
   historicalTitles: string[]
+  /** When true, persist generated drafts into content_guide_ideas (worker path). */
+  persist: boolean
 }
 
 type ReadyGuide = { markdown: string } | { notReady: { reason: string } }
@@ -917,7 +937,35 @@ async function handleIdeasMode(context: DirectorContext): Promise<Response> {
     `months=${context.coverageMonths.length} slots=${context.slots.length} ideas=${ideas.length} ` +
     `research=${research.sources.length} provider=${routed.provider}`,
   )
-  return jsonResponse({ mode: 'ideas', ideas, context: baseContext, sources })
+
+  // ── Persist draft ideas when called by the internal worker ────────────────
+  // Idempotent: only insert into a guideline the worker owns. Each idea becomes
+  // a content_guide_ideas row with status 'draft' in the saved order.
+  let persisted = 0
+  if (context.persist && context.guidelineId) {
+    for (let i = 0; i < ideas.length; i++) {
+      const idea = ideas[i]
+      const { error: insertError } = await context.sb
+        .from('content_guide_ideas')
+        .insert({
+          content_guideline_id: context.guidelineId,
+          client_id: context.client.id,
+          title: idea.title,
+          objective: idea.objective ?? null,
+          hook: idea.hook ?? null,
+          notes: idea.angle ?? null,
+          month: idea.targetMonth ? `${idea.targetMonth}-01` : null,
+          deliverable_id: idea.deliverableId ?? null,
+          position: i + 1,
+          status: 'draft',
+          created_by: context.userId,
+        })
+      if (!insertError) persisted++
+    }
+    console.info(`[content-director] mode=ideas persisted=${persisted}/${ideas.length} guideline=${context.guidelineId}`)
+  }
+
+  return jsonResponse({ mode: 'ideas', ideas, context: baseContext, sources, persisted })
 }
 
 async function handleDevelopMode(context: DirectorContext, requestedVideoIds: string[]): Promise<Response> {
@@ -1004,10 +1052,40 @@ async function handleDevelopMode(context: DirectorContext, requestedVideoIds: st
     `[content-director] mode=develop user=${context.userId} client=${context.client.id} ` +
     `requested=${targets.length} developed=${developments.length} provider=${routed.provider}`,
   )
+
+  // ── Persist developments into saved videos when called by the internal worker ─
+  // Only fills EMPTY AI-owned fields; never overwrites human-edited content.
+  let persisted = 0
+  if (context.persist) {
+    for (const dev of developments) {
+      // Re-read current row to verify emptiness — no stale overwrites.
+      const { data: current } = await context.sb
+        .from('content_guide_ideas')
+        .select('script, shot_breakdown, requirements, cta')
+        .eq('id', dev.videoId)
+        .maybeSingle()
+      if (!current) continue
+      const update: Record<string, unknown> = {}
+      if (!String(current.script ?? '').trim() && dev.script) update.script = dev.script
+      if (!String(current.shot_breakdown ?? '').trim() && dev.shotBreakdown) update.shot_breakdown = dev.shotBreakdown
+      if (!String(current.requirements ?? '').trim() && dev.requirements) update.requirements = dev.requirements
+      if (!String(current.cta ?? '').trim() && dev.cta) update.cta = dev.cta
+      if (Object.keys(update).length > 0) {
+        const { error: updError } = await context.sb
+          .from('content_guide_ideas')
+          .update(update)
+          .eq('id', dev.videoId)
+        if (!updError) persisted++
+      }
+    }
+    console.info(`[content-director] mode=develop persisted=${persisted}/${developments.length}`)
+  }
+
   return jsonResponse({
     mode: 'develop',
     developments,
     context: { ...baseContext, developedCount: developments.length },
     sources,
+    persisted,
   })
 }

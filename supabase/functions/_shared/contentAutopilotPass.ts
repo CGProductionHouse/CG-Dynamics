@@ -33,6 +33,13 @@ export const MAX_RUNS_PER_PASS = 25
 export const LOOKAHEAD_DAYS = 90
 
 /**
+ * Explicit page size for all Supabase queries. Default Supabase limit is 1000;
+ * queries that could exceed this must paginate. This constant documents the
+ * contract and is used consistently across all scans.
+ */
+const QUERY_PAGE_SIZE = 1000
+
+/**
  * Automatic draft generation is latent: the executable path exists, but it runs only
  * when CA switches this on. Activation is a protected production action.
  */
@@ -48,7 +55,7 @@ export const VIDEO_FOLDER_FLAG = 'CONTENT_AUTOPILOT_VIDEO_FOLDERS'
 // The narrow slice of the Supabase client this pass uses. Typed structurally so the
 // module stays honest without importing the SDK types.
 type QueryBuilder = {
-  select: (columns: string) => QueryBuilder
+  select: (columns: string, options?: { count?: 'exact'; head?: boolean }) => QueryBuilder
   insert: (row: Record<string, unknown>) => Promise<{ error: { message: string } | null }>
   update: (row: Record<string, unknown>) => QueryBuilder
   eq: (column: string, value: unknown) => QueryBuilder
@@ -61,7 +68,7 @@ type QueryBuilder = {
   order: (column: string, options: { ascending: boolean }) => QueryBuilder
   limit: (count: number) => QueryBuilder
   maybeSingle: () => Promise<{ data: Record<string, unknown> | null; error: { message: string } | null }>
-  then: Promise<{ data: unknown; error: { message: string } | null }>['then']
+  then: Promise<{ data: unknown; count: number | null; error: { message: string } | null }>['then']
 }
 
 type Supabase = {
@@ -74,6 +81,8 @@ export type DraftGenerator = (input: {
   clientId: string
   contentRunId: string
   guidelineId: string
+  coverageStart: string
+  coverageEnd: string
   mode: 'ideas' | 'develop'
   videoIds: string[]
 }) => Promise<{ ok: boolean; generated?: number; error?: string }>
@@ -159,6 +168,7 @@ export async function runContentAutopilotPass(
     .from('content_runs')
     .select('calendar_event_id')
     .not('calendar_event_id', 'is', null)
+    .limit(QUERY_PAGE_SIZE)
   const mirroredEventIds = new Set(
     ((existingRuns.data ?? []) as Array<Record<string, unknown>>)
       .map(row => row.calendar_event_id as string)
@@ -173,6 +183,7 @@ export async function runContentAutopilotPass(
     .neq('status', 'cancelled')
     .gte('start_at', `${today}T00:00:00Z`)
     .lte('start_at', `${horizon}T23:59:59Z`)
+    .limit(QUERY_PAGE_SIZE)
   if (eventsResult.error) {
     note('CALENDAR_EVENTS_UNREADABLE')
   } else {
@@ -190,7 +201,16 @@ export async function runContentAutopilotPass(
   }
 
   // ── 2. Upcoming runs ──────────────────────────────────────────────────────
-  // Full scan so the unprocessed count is truthful, then slice for bounded work.
+  // Count ALL upcoming runs first (for truthful unprocessed count), then fetch a
+  // bounded page for actual work. The count query uses head:true for efficiency.
+  const { count: totalUpcoming } = await supabase
+    .from('content_runs')
+    .select('id', { count: 'exact', head: true })
+    .gte('run_date', today)
+    .lte('run_date', horizon)
+    .not('client_id', 'is', null)
+    .neq('status', 'cancelled')
+
   const { data: runRows, error: runError } = await supabase
     .from('content_runs')
     .select('id, client_id, client_name, run_date, status')
@@ -199,11 +219,12 @@ export async function runContentAutopilotPass(
     .not('client_id', 'is', null)
     .neq('status', 'cancelled')
     .order('run_date', { ascending: true })
+    .limit(QUERY_PAGE_SIZE)
   if (runError) throw new Error(`Upcoming content runs could not be read: ${runError.message}`)
 
   const allUpcoming = (runRows ?? []) as Array<Record<string, unknown>>
   const runs = allUpcoming.slice(0, maxRuns)
-  const unprocessedCount = Math.max(0, allUpcoming.length - maxRuns)
+  const unprocessedCount = Math.max(0, (totalUpcoming ?? allUpcoming.length) - maxRuns)
   const clientIds = [...new Set(allUpcoming.map(run => run.client_id as string))]
 
   const { data: clientRows } = clientIds.length
@@ -323,6 +344,7 @@ export async function runContentAutopilotPass(
     // needing scripts gets develop-mode generation. Both paths are gated on the same
     // project secret.
     const needsScript = videos.filter(video => !String(video.script ?? '').trim())
+    let generationRan = false
     if (guideline.status === 'draft' && options.generateDrafts) {
       if (!videos.length) {
         // Empty guideline — generate initial ideas so the first draft concepts are
@@ -334,11 +356,13 @@ export async function runContentAutopilotPass(
             clientId,
             contentRunId: run.id as string,
             guidelineId: guideline.id as string,
+            coverageStart: (guideline.coverage_start as string) ?? today,
+            coverageEnd: (guideline.coverage_end as string) ?? horizon,
             mode: 'ideas',
             videoIds: [],
           })
           if (!generated.ok) note('GENERATION_BLOCKED')
-          else draftsGenerated += generated.generated ?? 0
+          else { draftsGenerated += generated.generated ?? 0; generationRan = true }
         }
       } else if (needsScript.length) {
         // Existing videos needing scripts — develop mode.
@@ -349,12 +373,29 @@ export async function runContentAutopilotPass(
             clientId,
             contentRunId: run.id as string,
             guidelineId: guideline.id as string,
+            coverageStart: (guideline.coverage_start as string) ?? today,
+            coverageEnd: (guideline.coverage_end as string) ?? horizon,
             mode: 'develop',
             videoIds: needsScript.map(video => video.id as string),
           })
           if (!generated.ok) note('GENERATION_BLOCKED')
-          else draftsGenerated += generated.generated ?? 0
+          else { draftsGenerated += generated.generated ?? 0; generationRan = true }
         }
+      }
+    }
+
+    // Re-read videos after generation so the evidence/folder pass uses current state.
+    let currentVideos = videos
+    if (generationRan) {
+      const refreshed = await supabase
+        .from('content_guide_ideas')
+        .select('id, title, month, position, script, deliverable_id, production_status, status')
+        .eq('content_guideline_id', guideline.id)
+        .eq('client_id', clientId)
+        .neq('status', 'archived')
+        .order('position', { ascending: true })
+      if (!refreshed.error && refreshed.data) {
+        currentVideos = (refreshed.data ?? []) as Array<Record<string, unknown>>
       }
     }
 
@@ -374,7 +415,7 @@ export async function runContentAutopilotPass(
 
     let runReady = 0
     let unallocated = 0
-    for (const video of videos) {
+    for (const video of currentVideos) {
       const mapped = folderByVideo.get(video.id as string) ?? null
       const folderState: 'mapped' | 'ready_to_create' | 'blocked' = mapped !== null
         ? 'mapped'
@@ -392,7 +433,8 @@ export async function runContentAutopilotPass(
       })
       if (readiness.readiness === 'READY_TO_EDIT') runReady += 1
       if (folderBlocked) note(folderBlocked)
-      if (folderState === 'ready_to_create') note('VIDEO_FOLDER_NOT_CREATED')
+      // VIDEO_FOLDER_NOT_CREATED is deferred until after the folder ensure step (2f)
+      // so folders created during this pass are not reported as missing.
       if (raw === 'UNVERIFIED') note('RAW_UNVERIFIED')
       if (!video.deliverable_id) unallocated += 1
     }
@@ -406,12 +448,13 @@ export async function runContentAutopilotPass(
     // but only runs when CA has switched the OneDrive-write gate on. Production writes
     // are OFF by default. The ensurer re-proves client isolation and create-only
     // authority; it never bypasses admin gates or invents folders.
-    const videosNeedingFolders = videos
+    const videosNeedingFolders = currentVideos
       .filter(video => {
         const mapped = folderByVideo.get(video.id as string) ?? null
         return mapped === null && client.shortCode
       })
       .map(video => video.id as string)
+    let folderRan = false
     if (videosNeedingFolders.length) {
       if (!options.ensureVideoFolders || !options.videoFolderEnabled) {
         // Nothing was created: say how many folders are still outstanding rather than
@@ -430,8 +473,49 @@ export async function runContentAutopilotPass(
           const made = ensured.ensured ?? 0
           videoFoldersEnsured += made
           videoFoldersPending += Math.max(0, videosNeedingFolders.length - made)
+          folderRan = true
         }
       }
+    }
+
+    // Re-read folder mappings after ensure so the summary reflects current state.
+    if (folderRan) {
+      const refreshedFolders = await supabase
+        .from('content_guide_video_onedrive_folders')
+        .select('content_guide_idea_id, upload_status').eq('content_run_id', run.id)
+      if (!refreshedFolders.error && refreshedFolders.data) {
+        folderByVideo.clear()
+        for (const row of (refreshedFolders.data ?? []) as Array<Record<string, unknown>>) {
+          folderByVideo.set(row.content_guide_idea_id as string, row.upload_status as string)
+        }
+        // Recalculate ready count with fresh folder state.
+        runReady = 0
+        for (const video of currentVideos) {
+          const mapped = folderByVideo.get(video.id as string) ?? null
+          const folderState: 'mapped' | 'ready_to_create' | 'blocked' = mapped !== null
+            ? 'mapped'
+            : !client.shortCode ? 'blocked' : 'ready_to_create'
+          const folderBlocked = folderState === 'blocked' ? 'BLOCKED_MISSING_SHORT_CODE' as const : null
+          const raw = deriveRawEvidence({
+            folderState,
+            providerReadable: foldersReadable,
+            closeoutUploadStatus: closeoutStatus as 'verified' | 'missing' | 'partial' | 'unverified' | null,
+            videoUploadStatus: mapped as 'verified' | 'missing' | 'partial' | null,
+          })
+          const readiness = deriveEditReadiness({
+            folderState, folderBlocked, raw,
+            productionStatus: String(video.production_status ?? 'not_shot'),
+          })
+          if (readiness.readiness === 'READY_TO_EDIT') runReady += 1
+        }
+      }
+    }
+
+    // Deferred blocker: VIDEO_FOLDER_NOT_CREATED is noted AFTER the folder ensure
+    // step so folders created during this pass are not reported as missing.
+    for (const video of currentVideos) {
+      const mapped = folderByVideo.get(video.id as string) ?? null
+      if (mapped === null && client.shortCode) note('VIDEO_FOLDER_NOT_CREATED')
     }
 
     summaries.push({
@@ -441,9 +525,9 @@ export async function runContentAutopilotPass(
       run_date: run.run_date,
       guideline_id: guideline.id,
       guideline_status: guideline.status,
-      videos: videos.length,
+      videos: currentVideos.length,
       unallocated,
-      needs_script: needsScript.length,
+      needs_script: currentVideos.filter(v => !String(v.script ?? '').trim()).length,
       ready_to_edit: runReady,
       production_folder_state_readable: foldersReadable,
     })
@@ -455,7 +539,7 @@ export async function runContentAutopilotPass(
   // to process. A client whose run fell outside this pass, or whose preparation
   // failed, is reported as such — never as "no future content run".
   const { data: activeClients, error: activeError } = await supabase
-    .from('clients').select('id').eq('active', true)
+    .from('clients').select('id').eq('active', true).limit(QUERY_PAGE_SIZE)
   if (activeError) note('CLIENT_LIST_UNREADABLE')
 
   const clientsWithUpcomingRun = new Set<string>()
@@ -466,6 +550,7 @@ export async function runContentAutopilotPass(
     .lte('run_date', horizon)
     .not('client_id', 'is', null)
     .neq('status', 'cancelled')
+    .limit(QUERY_PAGE_SIZE)
   if (scanned.error) {
     note('UPCOMING_RUN_SCAN_UNREADABLE')
     for (const run of allUpcoming) clientsWithUpcomingRun.add(run.client_id as string)
