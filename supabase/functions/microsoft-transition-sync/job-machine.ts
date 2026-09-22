@@ -231,6 +231,39 @@ export function retrySourceReset() {
   }
 }
 
+export const MAX_AUTOMATIC_SOURCE_RETRIES = 3
+export const AUTOMATIC_RETRY_COOLDOWN_MS = 5 * 60 * 1000
+
+export function planAutomaticSourceRecovery(input: { failedRequired: number; retryCount: number; retryAfter: string | null; now: string }) {
+  if (input.failedRequired === 0) return { kind: 'none' as const, nextRetryCount: input.retryCount, retryAfter: null }
+  if (input.retryCount >= MAX_AUTOMATIC_SOURCE_RETRIES) return { kind: 'exhausted' as const, nextRetryCount: input.retryCount, retryAfter: null }
+  const nowMs = Date.parse(input.now)
+  const retryAfterMs = input.retryAfter ? Date.parse(input.retryAfter) : Number.NaN
+  if (Number.isFinite(retryAfterMs) && retryAfterMs > nowMs) return { kind: 'wait' as const, nextRetryCount: input.retryCount, retryAfter: input.retryAfter }
+  return { kind: 'retry' as const, nextRetryCount: input.retryCount + 1, retryAfter: new Date(nowMs + AUTOMATIC_RETRY_COOLDOWN_MS).toISOString() }
+}
+
+export const AUTOMATIC_APPLY_STALE_MS = 10 * 60 * 1000
+export const MAX_AUTOMATIC_APPLY_RECOVERIES = 3
+
+export function automaticApplyLeaseDeadline(now: string) {
+  return new Date(Date.parse(now) + AUTOMATIC_APPLY_STALE_MS).toISOString()
+}
+
+export function planAutomaticApplyRecovery(input: { status: string; startedAt: string; recoveryCount: number; recoveryAfter: string | null; now: string }) {
+  if (input.status !== 'applying') return { kind: 'terminal' as const }
+  const nowMs = Date.parse(input.now)
+  const startedMs = Date.parse(input.startedAt)
+  const recoveryAfterMs = input.recoveryAfter ? Date.parse(input.recoveryAfter) : Number.NaN
+  // A claimed recovery owns its full lease, including the final allowed try.
+  // Exhaustion is evaluated only after that lease expires so a concurrent
+  // system_cycle cannot mark the run failed while its recovery is still active.
+  if (Number.isFinite(recoveryAfterMs) && recoveryAfterMs > nowMs) return { kind: 'fresh' as const }
+  if (input.recoveryCount >= MAX_AUTOMATIC_APPLY_RECOVERIES) return { kind: 'exhausted' as const }
+  if (Number.isFinite(startedMs) && nowMs - startedMs < AUTOMATIC_APPLY_STALE_MS) return { kind: 'fresh' as const }
+  return { kind: 'recover' as const }
+}
+
 export interface JobSourceRow {
   position: number
   source_type: string

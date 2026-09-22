@@ -24,7 +24,10 @@ import {
   type SourceManifest,
   type SourceUnitResult,
   PAGINATION_BATCH_SIZE,
+  planAutomaticSourceRecovery,
+  planAutomaticApplyRecovery,
 } from './job-machine.ts'
+import { applyAutomaticMicrosoftMirrors } from './automatic-reconciliation.ts'
 
 interface GraphBatchItem { id: string; status: number; headers?: Record<string, string>; body?: { description?: unknown } }
 
@@ -227,14 +230,20 @@ Deno.serve(async request => {
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   if (!supabaseUrl || !serviceRoleKey) return jsonResponse({ ok: false, error: 'Server configuration error.' }, 500)
   const sb = createClient(supabaseUrl, serviceRoleKey)
-  const token = (request.headers.get('Authorization') ?? '').replace('Bearer ', '')
-  const { data: { user }, error: authError } = await sb.auth.getUser(token)
-  if (authError || !user) return jsonResponse({ ok: false, error: 'Authentication required.' }, 401)
-  const { data: profile } = await sb.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') return jsonResponse({ ok: false, error: 'Admin access required.' }, 403)
-
   let body: { action?: string; rangeStart?: string; rangeEnd?: string; jobId?: string }
   try { body = await request.json() } catch { return jsonResponse({ ok: false, error: 'Invalid request body.' }, 400) }
+  const suppliedSystemSecret = request.headers.get('x-daily-freshness-secret') ?? ''
+  const expectedSystemSecret = Deno.env.get('DAILY_FRESHNESS_WORKER_SECRET') ?? ''
+  const systemRequest = body.action === 'system_cycle' && expectedSystemSecret.length >= 32 && suppliedSystemSecret === expectedSystemSecret
+  const token = (request.headers.get('Authorization') ?? '').replace('Bearer ', '')
+  const { data: authData, error: authError } = systemRequest ? { data: { user: null }, error: null } : await sb.auth.getUser(token)
+  const systemUserId = Deno.env.get('MICROSOFT_SYNC_SYSTEM_USER_ID') ?? ''
+  const user = systemRequest ? (/^[0-9a-f-]{36}$/i.test(systemUserId) ? { id: systemUserId } : null) : authData.user
+  if (!user || (!systemRequest && authError)) return jsonResponse({ ok: false, error: systemRequest ? 'Microsoft system sync identity is not configured.' : 'Authentication required.' }, systemRequest ? 503 : 401)
+  if (!systemRequest) {
+    const { data: profile } = await sb.from('profiles').select('role').eq('id', user.id).single()
+    if (profile?.role !== 'admin') return jsonResponse({ ok: false, error: 'Admin access required.' }, 403)
+  }
 
   const tenantId = Deno.env.get('MICROSOFT_TENANT_ID')
   const clientId = Deno.env.get('MICROSOFT_CLIENT_ID')
@@ -262,16 +271,90 @@ Deno.serve(async request => {
   const transitionStatus = setting?.transition_status ?? 'paused'
 
   if (body.action === 'status') {
+    const [{ data: latestJobs }, { data: latestRuns }, { data: successfulRuns }] = await Promise.all([
+      sb.from('microsoft_sync_jobs')
+        .select('id, status, created_at, updated_at, exported_at')
+        .order('created_at', { ascending: false }).limit(1),
+      sb.from('microsoft_sync_runs')
+        .select('id, status, created_at, finished_at, source_completeness, summary, safe_error')
+        .order('created_at', { ascending: false }).limit(1),
+      sb.from('microsoft_sync_runs')
+        .select('finished_at').eq('status', 'completed')
+        .order('finished_at', { ascending: false, nullsFirst: false }).limit(1),
+    ])
+    const latestJob = latestJobs?.[0] ?? null
+    const latestRun = latestRuns?.[0] ?? null
+    let sourceCoverage: Array<{ name: string; complete: boolean; error: string | null; records: number }> = []
+    if (latestJob?.id) {
+      const { data: sourceRows } = await sb.from('microsoft_sync_job_sources')
+        .select('source_name, complete, safe_error, record_count')
+        .eq('job_id', latestJob.id).order('position')
+      sourceCoverage = (sourceRows ?? []).map(row => ({
+        name: String(row.source_name), complete: Boolean(row.complete),
+        error: (row.safe_error as string | null) ?? null, records: Number(row.record_count ?? 0),
+      }))
+    }
     return jsonResponse({
       ok: true,
       connected: !settingError && configured && transitionStatus === 'active',
       transitionStatus,
       message: settingError ? 'Microsoft transition lifecycle status is unavailable.' : !configured ? 'Microsoft transition connection is not configured.' : transitionStatus !== 'active' ? `Microsoft transition sync is ${transitionStatus}.` : 'Microsoft transition connection is available.',
       sources: manifest ? publicSources(manifest) : [],
+      freshness: {
+        lastJobId: latestJob?.id ?? null,
+        lastJobStartedAt: latestJob?.created_at ?? null,
+        lastJobCompletedAt: latestJob?.exported_at ?? (latestJob?.status === 'complete' ? latestJob?.updated_at : null),
+        lastSuccessfulReconciliationAt: successfulRuns?.[0]?.finished_at ?? null,
+        latestApplyStatus: latestRun?.status ?? null,
+        latestApplySummary: latestRun?.summary ?? null,
+        latestApplyError: latestRun?.safe_error ?? null,
+        sourceCoverage,
+        recoveryInProgress: latestJob?.status === 'running' || latestRun?.status === 'applying',
+        staleAfterMinutes: 180,
+      },
     })
   }
 
-  const action = body.action ?? ''
+  let action = body.action ?? ''
+  if (systemRequest) {
+    const { data: latestSystemJob } = await sb.from('microsoft_sync_jobs')
+      .select('id,status,created_at,exported_at,automatic_retry_count,automatic_retry_after').eq('created_by', user.id)
+      .order('created_at', { ascending: false }).limit(1).maybeSingle()
+    const { data: appliedRun } = latestSystemJob?.id ? await sb.from('microsoft_sync_runs')
+      .select('id,status,finished_at').eq('preview_job_id', latestSystemJob.id)
+      .order('created_at', { ascending: false }).limit(1).maybeSingle() : { data: null }
+    const lastSuccess = appliedRun?.status === 'completed' && appliedRun.finished_at ? Date.parse(appliedRun.finished_at) : 0
+    const recentTerminal = appliedRun?.finished_at ? Date.now() - Date.parse(appliedRun.finished_at) < 3 * 60 * 60 * 1000 : false
+    if (latestSystemJob?.status === 'running') {
+      const { data: recoverySources } = await sb.from('microsoft_sync_job_sources')
+        .select('required,stage').eq('job_id', latestSystemJob.id)
+      const failedRequired = (recoverySources ?? []).filter(source => source.required && source.stage === 'failed').length
+      const recovery = planAutomaticSourceRecovery({ failedRequired, retryCount: Number(latestSystemJob.automatic_retry_count ?? 0), retryAfter: latestSystemJob.automatic_retry_after ?? null, now: new Date().toISOString() })
+      if (recovery.kind === 'wait') return jsonResponse({ ok: false, phase: 'retry_wait', jobId: latestSystemJob.id, retryAfter: recovery.retryAfter })
+      if (recovery.kind === 'exhausted') {
+        await sb.from('microsoft_sync_jobs').update({ status: 'failed', automatic_failure: 'Automatic source retry budget exhausted.', updated_at: new Date().toISOString() }).eq('id', latestSystemJob.id)
+        return jsonResponse({ ok: false, phase: 'degraded', jobId: latestSystemJob.id, blocker: 'Automatic Microsoft source recovery was exhausted; manual review is required.' })
+      }
+      if (recovery.kind === 'retry') {
+        await sb.from('microsoft_sync_job_sources').update({ ...retrySourceReset(), updated_at: new Date().toISOString() }).eq('job_id', latestSystemJob.id).eq('stage', 'failed')
+        await sb.from('microsoft_sync_jobs').update({ automatic_retry_count: recovery.nextRetryCount, automatic_retry_after: recovery.retryAfter, automatic_failure: null, updated_at: new Date().toISOString() }).eq('id', latestSystemJob.id)
+      }
+      action = 'job_process'; body.jobId = latestSystemJob.id
+    } else if (latestSystemJob?.status === 'complete' && (!appliedRun || appliedRun.status === 'applying')) {
+      const auto = await automaticallyApplyJob(sb, latestSystemJob.id)
+      return jsonResponse({ ok: auto.status === 'completed', phase: 'apply', jobId: latestSystemJob.id, automatic: auto }, auto.status === 'failed' ? 500 : 200)
+    } else if (lastSuccess && Date.now() - lastSuccess < 3 * 60 * 60 * 1000) {
+      return jsonResponse({ ok: true, phase: 'fresh', jobId: latestSystemJob?.id ?? null, lastSuccessfulAt: appliedRun?.finished_at })
+    } else if (appliedRun && recentTerminal) {
+      return jsonResponse({ ok: false, phase: 'degraded', jobId: latestSystemJob?.id ?? null, status: appliedRun.status, blocker: 'The latest automatic Microsoft reconciliation needs review; last verified state remains in use.' })
+    } else {
+      action = 'job_start'
+      const today = new Date()
+      const rangeStart = new Date(today); rangeStart.setUTCDate(rangeStart.getUTCDate() - 31)
+      const rangeEnd = new Date(today); rangeEnd.setUTCDate(rangeEnd.getUTCDate() + 370)
+      body.rangeStart = rangeStart.toISOString(); body.rangeEnd = rangeEnd.toISOString()
+    }
+  }
   const JOB_ACTIONS = new Set(['job_start', 'job_process', 'job_status', 'job_result', 'job_retry', 'job_latest'])
   if (!JOB_ACTIONS.has(action)) {
     if (action === 'fetch') return jsonResponse({ ok: false, error: 'The one-shot fetch is retired. Use a durable preview job (job_start / job_process / job_result).' }, 410)
@@ -309,7 +392,7 @@ Deno.serve(async request => {
     const { error: seedError } = await sb.from('microsoft_sync_job_sources').insert(seeds.map(s => ({ job_id: job.id, position: s.position, source_type: s.source_type, source_id: s.source_id, source_name: s.source_name, required: s.required, range_start: s.range_start, range_end: s.range_end })))
     if (seedError) return jsonResponse({ ok: false, error: 'Could not enumerate preview sources.' }, 500)
     const { data: rows } = await sb.from('microsoft_sync_job_sources').select(SOURCE_FIELDS).eq('job_id', job.id)
-    return jsonResponse({ ok: true, jobId: job.id, status: 'running', sources: statusList(rows ?? []), progress: jobProgress(asJobRows(rows ?? [])) })
+    return jsonResponse({ ok: true, phase: systemRequest ? 'started' : undefined, jobId: job.id, status: 'running', sources: statusList(rows ?? []), progress: jobProgress(asJobRows(rows ?? [])) })
   }
 
   if (action === 'job_latest') {
@@ -357,6 +440,10 @@ Deno.serve(async request => {
   if (!pick) {
     const done = requiredSourcesComplete(jobRows)
     await sb.from('microsoft_sync_jobs').update({ status: done ? 'complete' : (jobProgress(jobRows).anyFailed ? 'running' : 'complete'), updated_at: new Date().toISOString() }).eq('id', jobId)
+    if (systemRequest && done) {
+      const automatic = await automaticallyApplyJob(sb, jobId)
+      return jsonResponse({ ok: automatic.status !== 'failed', phase: 'apply', jobId, finished: true, sources: statusList(rows ?? []), progress: jobProgress(jobRows), automatic }, automatic.status === 'failed' ? 500 : 200)
+    }
     return jsonResponse({ ok: true, jobId, finished: true, sources: statusList(rows ?? []), progress: jobProgress(jobRows) })
   }
   const dbRow = rowIndex.get(`${pick.source_type}:${pick.source_id}`) as Record<string, unknown>
@@ -412,8 +499,43 @@ Deno.serve(async request => {
   if (progress.finished) {
     await sb.from('microsoft_sync_jobs').update({ status: requiredSourcesComplete(afterRows) ? 'complete' : 'running', updated_at: now() }).eq('id', jobId)
   }
+  if (systemRequest && progress.finished && requiredSourcesComplete(afterRows)) {
+    const automatic = await automaticallyApplyJob(sb, jobId)
+    return jsonResponse({ ok: automatic.status !== 'failed', phase: 'apply', jobId, finished: true, sources: statusList(after ?? []), progress, automatic }, automatic.status === 'failed' ? 500 : 200)
+  }
   return jsonResponse({ ok: true, jobId, finished: progress.finished, sources: statusList(after ?? []), progress })
 })
+
+async function automaticallyApplyJob(sb: ReturnType<typeof createClient>, jobId: string) {
+  const { data: existing } = await sb.from('microsoft_sync_runs').select('id,status,summary,safe_error,started_at,automatic_recovery_count,automatic_recovery_after').eq('preview_job_id', jobId).order('created_at', { ascending: false }).limit(1).maybeSingle()
+  let recoveryRunId: string | undefined
+  let recoveryGeneration = 0
+  if (existing) {
+    const recovery = planAutomaticApplyRecovery({ status: existing.status, startedAt: existing.started_at, recoveryCount: Number(existing.automatic_recovery_count ?? 0), recoveryAfter: existing.automatic_recovery_after ?? null, now: new Date().toISOString() })
+    if (recovery.kind === 'terminal' || recovery.kind === 'fresh') return { status: existing.status, runId: existing.id, ...(existing.summary ?? {}), error: existing.safe_error ?? null }
+    if (recovery.kind === 'exhausted') {
+      const error = 'Automatic Microsoft apply recovery was exhausted; the last verified mirror remains in use.'
+      await sb.from('microsoft_sync_runs').update({ status: 'failed', safe_error: error, finished_at: new Date().toISOString() }).eq('id', existing.id).eq('status', 'applying')
+      return { status: 'failed' as const, runId: existing.id, ...(existing.summary ?? {}), error }
+    }
+    const { data: claimed } = await sb.rpc('claim_microsoft_automatic_apply_recovery', { p_run_id: existing.id })
+    if (!claimed) return { status: 'applying' as const, runId: existing.id, ...(existing.summary ?? {}), error: null }
+    recoveryRunId = existing.id
+    recoveryGeneration = Number(existing.automatic_recovery_count ?? 0) + 1
+  }
+  const [{ data: job }, { data: rows }] = await Promise.all([
+    sb.from('microsoft_sync_jobs').select('assignee_map,exported_at').eq('id', jobId).single(),
+    sb.from('microsoft_sync_job_sources').select('position,source_type,source_id,source_name,required,stage,record_count,complete,safe_error,records,range_start,range_end,pagination_cursor').eq('job_id', jobId),
+  ])
+  const jobRows = (rows ?? []).map((row: Record<string, unknown>) => ({
+    position: Number(row.position), source_type: String(row.source_type), source_id: String(row.source_id), source_name: String(row.source_name), required: Boolean(row.required), stage: row.stage as JobSourceRow['stage'], record_count: Number(row.record_count), complete: Boolean(row.complete), safe_error: row.safe_error as string | null, pending_detail_ids: [], range_start: row.range_start as string | null, range_end: row.range_end as string | null, pagination_cursor: row.pagination_cursor as string | null, records: Array.isArray(row.records) ? row.records as Array<Record<string, unknown>> : [],
+  }))
+  if (!job || !requiredSourcesComplete(jobRows)) return { status: 'failed' as const, runId: null, applied: 0, skipped: 0, failed: 1, conflicts: 0, clientScheduleExcluded: 0, error: 'Required Microsoft sources are incomplete.' }
+  const exportedAt = (job.exported_at as string | null) ?? new Date().toISOString()
+  const snapshot = assembleSnapshot(jobRows, (job.assignee_map as Record<string, unknown>) ?? {}, exportedAt)
+  if (!job.exported_at) await sb.from('microsoft_sync_jobs').update({ exported_at: exportedAt, status: 'complete', updated_at: exportedAt }).eq('id', jobId)
+  return applyAutomaticMicrosoftMirrors(sb, snapshot, jobId, Deno.env.get('MICROSOFT_SYNC_SYSTEM_USER_ID') ?? '', recoveryRunId, recoveryGeneration)
+}
 
 async function mergeAssignees(
   sb: ReturnType<typeof createClient>,

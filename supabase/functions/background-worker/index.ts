@@ -8,6 +8,7 @@ import { createClient } from 'jsr:@supabase/supabase-js@2'
 import webpush from 'npm:web-push@3.6.7'
 import { dispatchMetaWorker } from '../_shared/metaWorkerDispatch.ts'
 import { currentMetaMonth, previousMetaMonth, currentMonthHasIncrementalWindow } from '../_shared/metaPeriod.ts'
+import { fetchAllRows } from '../_shared/paginatedRows.ts'
 import { GENERATION_FLAG, VIDEO_FOLDER_FLAG, recordContentAutopilotPass, runContentAutopilotPass } from '../_shared/contentAutopilotPass.ts'
 
 const MAX_RUNTIME_MS = 25_000
@@ -89,6 +90,14 @@ Deno.serve(async () => {
     }
   }
 
+  // ── Daily operating freshness cycle ──────────────────────────────────────
+  // Microsoft is intentionally admitted before Meta. Each invocation advances
+  // one durable Microsoft source unit; the existing per-minute worker therefore
+  // drains large paginated jobs without a long request. The Microsoft function
+  // deduplicates against its exact system identity and enforces a three-hour
+  // freshness window before starting another reconciliation.
+  const microsoftFreshness = await advanceMicrosoftFreshness(url)
+
   // ── Meta sync batch reaper ────────────────────────────────────────────────
   // The durable safety net for production blocker #161.
   //
@@ -115,8 +124,25 @@ Deno.serve(async () => {
   // state (Access/Coverage/Completeness/Freshness) independently.
   const fleetFreshness = await enqueueFleetMetaFreshness(supabase, url)
 
-  return new Response(JSON.stringify({ ok: true, worker, processed, reaped, laneRecoveries, fleetFreshness }), { headers: { 'Content-Type': 'application/json' } })
+  return new Response(JSON.stringify({ ok: true, worker, processed, microsoftFreshness, reaped, laneRecoveries, fleetFreshness }), { headers: { 'Content-Type': 'application/json' } })
 })
+
+async function advanceMicrosoftFreshness(url: string): Promise<Record<string, unknown>> {
+  const secret = (Deno.env.get('DAILY_FRESHNESS_WORKER_SECRET') ?? '').trim()
+  if (secret.length < 32) return { ok: false, state: 'unavailable', blocker: 'DAILY_FRESHNESS_WORKER_SECRET is not configured.' }
+  try {
+    const response = await fetch(`${url}/functions/v1/microsoft-transition-sync`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-daily-freshness-secret': secret },
+      body: JSON.stringify({ action: 'system_cycle' }),
+      signal: AbortSignal.timeout(20_000),
+    })
+    const body = await response.json().catch(() => ({})) as Record<string, unknown>
+    return { ok: response.ok && body.ok === true, httpStatus: response.status, ...body }
+  } catch {
+    return { ok: false, state: 'failed', blocker: 'Microsoft freshness worker could not be reached; the last verified mirror remains in use.' }
+  }
+}
 
 interface LaneRecoveryRow {
   batch_id: string
@@ -234,7 +260,7 @@ interface CheckpointRow {
   // LEFT JOIN with meta_asset_sync_checkpoints to find due/missing work.
   // Missing checkpoint row = bootstrap due (never synced).
   // Existing checkpoint with next_due_at <= now() = refresh due.
-  const { data: expectedTargets, error: targetError } = await supabase
+  const { data: expectedTargets, error: targetError } = await fetchAllRows((from, to) => supabase
     .from('meta_client_assets')
     .select(`
       id,
@@ -253,7 +279,7 @@ interface CheckpointRow {
       )
     `)
     .eq('is_active', true)
-    .limit(100)
+    .range(from, to))
 
   if (targetError || !expectedTargets || expectedTargets.length === 0) {
     return out
@@ -348,10 +374,11 @@ interface CheckpointRow {
   // The worker controls retry timing; the scheduler must treat all queued/running
   // asset+month as active logical work to prevent duplicate enqueue.
   const activeWorkKeys = new Set<string>()
-  const { data: activeItems } = await supabase
+  const { data: activeItems } = await fetchAllRows((from, to) => supabase
     .from('meta_sync_batch_items')
     .select('asset_id, month')
     .in('status', ['queued', 'running'])
+    .range(from, to))
 
   if (activeItems) {
     for (const item of activeItems) {
@@ -675,10 +702,11 @@ async function runMetaSyncBatch(
 
   if (!batchId) {
     // Linked, active clients only — the same population the sync engine serves.
-    const { data: assets, error: assetsError } = await supabase
+    const { data: assets, error: assetsError } = await fetchAllRows((from, to) => supabase
       .from('meta_client_assets')
       .select('client_id')
       .eq('is_active', true)
+      .range(from, to))
     if (assetsError) throw new Error(`Could not load linked Meta clients: ${assetsError.message}`)
     const clientIds = [...new Set((assets ?? []).map(a => a.client_id))]
     if (clientIds.length === 0) throw new Error('No clients are linked to Meta yet — nothing to sync.')
