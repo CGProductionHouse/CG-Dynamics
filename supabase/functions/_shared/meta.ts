@@ -102,6 +102,70 @@ export class MetaProviderTimeoutError extends Error {
   }
 }
 
+const NON_RETRYABLE_PROVIDER_ERROR =
+  /\b(?:permission|oauth|access token|invalid token|configuration|schema|contract|malformed)\b|\bHTTP\s+(?:400|401|403)\b/i
+
+/**
+ * Runtime/provider layers do not always preserve DOMException identity. Deno
+ * can surface the same fetch abort as a DOMException, an Error whose message
+ * starts with "AbortError:", or a request-timeout string. Keep this matcher
+ * deliberately narrow: permanent auth, permission, configuration and contract
+ * failures must never enter the automatic retry path just because their text
+ * also mentions a request.
+ */
+export function isTransientMetaRequestAbort(error: unknown): boolean {
+  const name = error && typeof error === 'object' && 'name' in error
+    ? String((error as { name?: unknown }).name ?? '')
+    : ''
+  const code = error && typeof error === 'object' && 'code' in error
+    ? String((error as { code?: unknown }).code ?? '')
+    : ''
+  const message = error instanceof Error
+    ? error.message
+    : typeof error === 'string'
+      ? error
+      : ''
+  if (message && NON_RETRYABLE_PROVIDER_ERROR.test(message)) return false
+  if (name === 'AbortError' || name === 'TimeoutError') return true
+  if (['ABORT_ERR', 'UND_ERR_ABORTED', 'ETIMEDOUT', 'UND_ERR_CONNECT_TIMEOUT', 'UND_ERR_HEADERS_TIMEOUT', 'UND_ERR_BODY_TIMEOUT'].includes(code)) return true
+  if (!message) return false
+
+  return [
+    /\baborterror:\s*the signal has been aborted\b/i,
+    /\bthe signal has been aborted\b/i,
+    /\b(?:fetch|request) (?:was )?aborted\b/i,
+    /\bthe operation (?:was |has been )?aborted\b/i,
+    /\b(?:fetch|request) (?:timeout|timed out)\b/i,
+    /\bthe operation timed out\b/i,
+  ].some(pattern => pattern.test(message))
+}
+
+export interface MetaRequestAbortRetryPlan {
+  status: 'queued' | 'failed'
+  error: string
+  refundAttempt: false
+}
+
+/** Pure bounded disposition used by the worker and its executable tests. */
+export function planMetaRequestAbortRetry(
+  error: unknown,
+  attempts: number,
+  maxAttempts: number,
+): MetaRequestAbortRetryPlan | null {
+  if (!isTransientMetaRequestAbort(error)) return null
+  const normalized = error instanceof MetaProviderTimeoutError
+    ? error
+    : new MetaProviderTimeoutError('worker provider request')
+  const message = String(normalized)
+  return attempts < maxAttempts
+    ? { status: 'queued', error: message, refundAttempt: false }
+    : {
+        status: 'failed',
+        error: `${message} Provider request timeout exhausted ${maxAttempts} bounded attempts.`,
+        refundAttempt: false,
+      }
+}
+
 export class MetaFactRetryableError extends Error {
   readonly rateLimited: boolean
 
@@ -156,7 +220,7 @@ export async function metaFetch(
     } catch (e) {
       clearTimeout(timer)
       if (e instanceof MetaSyncDeadlineError) throw e
-      if (e instanceof Error && (e.name === 'AbortError' || e.name === 'TimeoutError')) {
+      if (isTransientMetaRequestAbort(e)) {
         throw new MetaProviderTimeoutError(`request attempt ${attempt + 1}`)
       }
       lastErr = e
