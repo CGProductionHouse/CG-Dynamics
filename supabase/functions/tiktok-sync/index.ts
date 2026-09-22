@@ -8,6 +8,7 @@ import {
   resolveTiktokConnectionForClient,
   type TiktokVideo,
 } from '../_shared/tiktok.ts'
+import { completeMetricSum } from '../_shared/tiktokFreshness.ts'
 
 // ── TikTok Analytics Sync ──────────────────────────────────────────────────
 // Fetches user profile + video list from TikTok Display API and upserts
@@ -33,6 +34,8 @@ import {
 interface SyncBody {
   clientId: string
   periodMonth?: string
+  expectedConnectionId?: string
+  expectedTiktokOpenId?: string
 }
 
 function getPreviousMonth(): string {
@@ -84,16 +87,21 @@ Deno.serve(async (req) => {
 
   const sb = createClient(supabaseUrl, serviceRoleKey)
 
-  const token = authHeader.replace('Bearer ', '')
-  const { data: { user }, error: authError } = await sb.auth.getUser(token)
-  if (authError || !user) {
-    return jsonResponse({ ok: false, error: 'Authentication required.' }, 401)
-  }
+  const configuredWorkerToken = (Deno.env.get('WORKER_INTERNAL_TOKEN') ?? '').trim()
+  const suppliedWorkerToken = req.headers.get('X-Internal-Worker-Token') ?? ''
+  const isInternalWorker = configuredWorkerToken.length >= 32 && suppliedWorkerToken === configuredWorkerToken
+  if (!isInternalWorker) {
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user }, error: authError } = await sb.auth.getUser(token)
+    if (authError || !user) {
+      return jsonResponse({ ok: false, error: 'Authentication required.' }, 401)
+    }
 
-  // Use canonical admin|manager role check
-  const { data: profile } = await sb.from('profiles').select('role').eq('id', user.id).single()
-  if (!profile || !['admin', 'manager'].includes(profile.role)) {
-    return jsonResponse({ ok: false, error: 'Admin or manager access required.' }, 403)
+    // Use canonical admin|manager role check
+    const { data: profile } = await sb.from('profiles').select('role').eq('id', user.id).single()
+    if (!profile || !['admin', 'manager'].includes(profile.role)) {
+      return jsonResponse({ ok: false, error: 'Admin or manager access required.' }, 403)
+    }
   }
 
   let body: SyncBody
@@ -108,12 +116,32 @@ Deno.serve(async (req) => {
   }
 
   const periodMonth = body.periodMonth ?? getPreviousMonth()
+  if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(periodMonth)) {
+    return jsonResponse({ ok: false, error: 'periodMonth must be YYYY-MM.' }, 400)
+  }
   const { periodStart, periodEnd } = getMonthDateBounds(periodMonth)
 
   // EXPLICIT client-account resolution — never use "first connected"
   const { connectionId, error: connError } = await resolveTiktokConnectionForClient(sb, body.clientId)
   if (!connectionId) {
     return jsonResponse({ ok: false, error: connError ?? 'No active TikTok connection for this client.' }, 400)
+  }
+
+  const { data: exactConnection, error: exactConnectionError } = await sb
+    .from('tiktok_connections')
+    .select('id,tiktok_open_id')
+    .eq('id', connectionId)
+    .eq('client_id', body.clientId)
+    .eq('status', 'connected')
+    .maybeSingle()
+  if (exactConnectionError || !exactConnection) {
+    return jsonResponse({ ok: false, error: 'The exact TikTok client/account mapping could not be verified.' }, 409)
+  }
+  if (body.expectedConnectionId && body.expectedConnectionId !== exactConnection.id) {
+    return jsonResponse({ ok: false, error: 'TikTok connection mapping changed before the refresh started.' }, 409)
+  }
+  if (body.expectedTiktokOpenId && body.expectedTiktokOpenId !== exactConnection.tiktok_open_id) {
+    return jsonResponse({ ok: false, error: 'TikTok account identity changed before the refresh started.' }, 409)
   }
 
   // Get token (refresh if needed)
@@ -156,7 +184,7 @@ Deno.serve(async (req) => {
       client_id: body.clientId,
       connection_id: connectionId,
       platform: 'tiktok',
-      run_type: 'manual',
+      run_type: isInternalWorker ? 'scheduled' : 'manual',
       period_month: periodMonth,
       period_start: periodStart,
       period_end: periodEnd,
@@ -168,6 +196,7 @@ Deno.serve(async (req) => {
       status: 'running',
       health_state: 'sync_error',
       started_at: new Date().toISOString(),
+      summary: { trigger: isInternalWorker ? 'background_worker' : 'staff' },
     })
     .select('id')
     .single()
@@ -220,15 +249,15 @@ Deno.serve(async (req) => {
   const periodVideos = allVideos.filter(v => isVideoInPeriod(v, periodMonth))
 
   // Compute metrics — preserve null for missing values, never coerce to zero
-  const totals = periodVideos.reduce(
-    (acc, v) => ({
-      views: acc.views + (v.view_count ?? 0),
-      likes: acc.likes + (v.like_count ?? 0),
-      comments: acc.comments + (v.comment_count ?? 0),
-      shares: acc.shares + (v.share_count ?? 0),
-    }),
-    { views: 0, likes: 0, comments: 0, shares: 0 },
-  )
+  // A valid zero requires a complete provider listing and an explicit numeric
+  // value for every included video. A truncated list or one missing field makes
+  // that aggregate unavailable; it must not silently become zero or a lower sum.
+  const totals = {
+    views: paginationComplete ? completeMetricSum(periodVideos, video => video.view_count) : null,
+    likes: paginationComplete ? completeMetricSum(periodVideos, video => video.like_count) : null,
+    comments: paginationComplete ? completeMetricSum(periodVideos, video => video.comment_count) : null,
+    shares: paginationComplete ? completeMetricSum(periodVideos, video => video.share_count) : null,
+  }
 
   // Truthful labeling:
   // - Video metrics are "cumulative as-of snapshot for videos published in period"
@@ -251,12 +280,18 @@ Deno.serve(async (req) => {
     { metricKey: 'video_count', sourceMetric: 'video_count', value: profileData?.video_count ?? null, aggregation: 'snapshot', comparableGroup: 'tiktok_profile' },
   ]
 
+  const missingMetricKeys = facts.filter(fact => fact.value === null).map(fact => fact.metricKey)
+  if (missingMetricKeys.length > 0) {
+    syncHealth = syncHealth === 'sync_error' ? 'sync_error' : 'partial'
+    syncErrors.push(`Provider did not return complete values for: ${missingMetricKeys.join(', ')}.`)
+  }
+
   let upsertFailures = 0
   for (const fact of facts) {
-    // Cumulative video metrics are 'partial' snapshots; profile metrics that
-    // are null become 'unavailable'; non-null profile snapshots are 'partial'
-    // because they are point-in-time, not period-truth.
-    const availability = fact.value !== null ? 'partial' : 'unavailable'
+    // A failed/partial provider read must not replace the last verified fact
+    // with an unavailable row. Absence remains explicit through run health;
+    // only values actually returned by TikTok enter the canonical fact store.
+    if (fact.value === null) continue
 
     const { error } = await sb.rpc('upsert_platform_metric_fact_preserving_verified', {
       p_client_id: body.clientId,
@@ -268,7 +303,7 @@ Deno.serve(async (req) => {
       p_metric_key: fact.metricKey,
       p_source_metric: fact.sourceMetric,
       p_value: fact.value,
-      p_availability: availability,
+      p_availability: 'partial',
       p_includes_paid: 'unknown',
       p_aggregation: fact.aggregation,
       p_comparable_group: fact.comparableGroup,
@@ -338,6 +373,7 @@ Deno.serve(async (req) => {
       finished_at: new Date().toISOString(),
       summary: {
         periodMonth,
+        trigger: isInternalWorker ? 'background_worker' : 'staff',
         videosFound: allVideos.length,
         videosInPeriod: periodVideos.length,
         paginationComplete,
@@ -350,8 +386,8 @@ Deno.serve(async (req) => {
     .eq('id', syncRunId)
 
   if (syncRunUpdateError) {
-    syncErrors.push(`Sync checkpoint finalization failed: ${syncRunUpdateError.message}`)
-    syncHealth = 'partial'
+    console.error('TikTok sync checkpoint finalization failed:', syncRunUpdateError.message)
+    return jsonResponse({ ok: false, error: 'TikTok refresh could not finalize its durable checkpoint.' }, 500)
   }
 
   return jsonResponse({

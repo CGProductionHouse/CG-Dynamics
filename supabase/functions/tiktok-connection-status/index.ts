@@ -1,13 +1,9 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { resolveTiktokConnectionForClient } from '../_shared/tiktok.ts'
+import { classifyTiktokHealth, TIKTOK_READ_SCOPES, type TiktokRunEvidence } from '../_shared/tiktokFreshness.ts'
 
-const READ_SCOPES = [
-  'user.info.basic',
-  'user.info.profile',
-  'user.info.stats',
-  'video.list',
-]
+const READ_SCOPES = [...TIKTOK_READ_SCOPES]
 
 const REQUIRED_SCOPES = Deno.env.get('TIKTOK_PUBLISHING_ENABLED') === 'true'
   ? [...READ_SCOPES, 'video.publish']
@@ -81,6 +77,17 @@ Deno.serve(async (req) => {
 
   const { connectionId, error: connError } = await resolveTiktokConnectionForClient(sb, body.clientId)
   if (!connectionId) {
+    if (connError === 'Could not look up TikTok connection.') {
+      return jsonResponse({
+        ok: false,
+        connected: false,
+        status: 'unavailable',
+        error: connError,
+        message: 'TikTok connection status could not be verified.',
+        missingScopes: [],
+        schemaReady,
+      }, 503)
+    }
     return jsonResponse({
       ok: true,
       connected: false,
@@ -91,11 +98,23 @@ Deno.serve(async (req) => {
   }
 
   // Read the specific connection for this client
-  const { data: latest } = await sb
+  const { data: latest, error: latestError } = await sb
     .from('tiktok_connections')
     .select('id, client_id, tiktok_open_id, display_name, avatar_url, status, scopes, last_error, last_connected_at')
     .eq('id', connectionId)
     .single()
+
+  if (latestError) {
+    return jsonResponse({
+      ok: false,
+      connected: false,
+      status: 'unavailable',
+      error: latestError.message,
+      message: 'TikTok connection status could not be verified.',
+      missingScopes: [],
+      schemaReady,
+    }, 503)
+  }
 
   if (!latest) {
     return jsonResponse({
@@ -130,43 +149,102 @@ Deno.serve(async (req) => {
     })
   }
 
-  if (missingScopes.length > 0) {
+  const runFields = 'status,health_state,period_month,started_at,finished_at,summary'
+  const [{ data: attemptedRows, error: attemptedError }, { data: successfulRows, error: successfulError }] = await Promise.all([
+    sb.from('platform_sync_runs')
+      .select(runFields)
+      .eq('client_id', body.clientId)
+      .eq('connection_id', latest.id)
+      .eq('platform', 'tiktok')
+      .order('started_at', { ascending: false })
+      .limit(1),
+    sb.from('platform_sync_runs')
+      .select(runFields)
+      .eq('client_id', body.clientId)
+      .eq('connection_id', latest.id)
+      .eq('platform', 'tiktok')
+      .in('status', ['success', 'partial'])
+      .in('health_state', ['verified', 'verified_partial'])
+      .order('finished_at', { ascending: false })
+      .limit(1),
+  ])
+
+  if (attemptedError || successfulError) {
     return jsonResponse({
-      ok: true,
-      connected: false,
-      status: 'needs_reauth',
-      message: `TikTok needs to be reconnected with: ${missingScopes.join(', ')}.`,
+      ok: false,
+      connected: true,
+      status: 'health_unavailable',
+      error: attemptedError?.message ?? successfulError?.message,
+      message: 'TikTok is connected, but analytics freshness could not be verified.',
       missingScopes,
       schemaReady,
-    })
+    }, 503)
   }
 
   // Verify token row exists
-  const { data: tokenRows } = await sb
+  const { data: tokenRows, error: tokenError } = await sb
     .from('tiktok_connection_tokens')
-    .select('id, token_expires_at')
+    .select('id, token_expires_at, refresh_token')
     .eq('connection_id', latest.id)
     .limit(1)
 
+  if (tokenError) {
+    return jsonResponse({
+      ok: false,
+      connected: true,
+      status: 'unavailable',
+      error: tokenError.message,
+      message: 'TikTok token status could not be verified.',
+      missingScopes,
+      schemaReady,
+    }, 503)
+  }
+
   if (!tokenRows || tokenRows.length === 0) {
+    const health = classifyTiktokHealth({
+      connectionStatus: latest.status,
+      missingScopes,
+      tokenPresent: false,
+      tokenExpired: false,
+      tokenRefreshable: false,
+      latestAttempt: (attemptedRows?.[0] as TiktokRunEvidence | undefined) ?? null,
+      latestSuccessful: (successfulRows?.[0] as TiktokRunEvidence | undefined) ?? null,
+    })
     return jsonResponse({
       ok: true,
       connected: false,
       status: 'needs_reauth',
       message: 'TikTok needs to be reconnected.',
+      missingScopes,
+      schemaReady,
+      health,
     })
   }
 
   const tokenExpiry = tokenRows[0]?.token_expires_at as string | null
   const tokenExpired = tokenExpiry ? new Date(tokenExpiry) < new Date() : false
+  const tokenRefreshable = typeof tokenRows[0]?.refresh_token === 'string' && tokenRows[0].refresh_token.length > 0
+
+  const health = classifyTiktokHealth({
+    connectionStatus: latest.status,
+    missingScopes,
+    tokenPresent: true,
+    tokenExpired,
+    tokenRefreshable,
+    latestAttempt: (attemptedRows?.[0] as TiktokRunEvidence | undefined) ?? null,
+    latestSuccessful: (successfulRows?.[0] as TiktokRunEvidence | undefined) ?? null,
+  })
 
   return jsonResponse({
     ok: true,
-    connected: true,
-    status: tokenExpired ? 'needs_refresh' : 'connected',
-    message: tokenExpired ? 'TikTok token needs refresh.' : 'TikTok is connected.',
-    missingScopes: [],
+    connected: missingScopes.length === 0,
+    status: missingScopes.length > 0 ? 'needs_reauth' : tokenExpired ? 'needs_refresh' : 'connected',
+    message: missingScopes.length > 0
+      ? `TikTok needs to be reconnected with: ${missingScopes.join(', ')}.`
+      : tokenExpired ? 'TikTok token refresh will be attempted automatically.' : 'TikTok is connected.',
+    missingScopes,
     schemaReady,
+    health,
     connection: {
       id: latest.id,
       clientId: latest.client_id,
