@@ -1,5 +1,28 @@
 # CG Dynamics Ops Handover
 
+## ISSUE #471 CODE LANE — 22 September 2026
+
+- Manual Agent 02 owns Issue #471 on `codex/issue-471-instagram-login-fallback`.
+- The 17-client missing-Instagram audit is recorded in
+  `docs/ops/INSTAGRAM-FLEET-AUDIT-2026-09-22.md`. Six exact first-party/current
+  handles are verified, but all 17 remain access/ownership/linkage unknown until
+  Meta or the client proves professional type and exact access. No handle was
+  guessed and absence was not converted into “no Instagram account”.
+- Phase-1 code adds an isolated Instagram Login foundation only: exact-client
+  one-time OAuth intent, Business/Creator identity verification, server-only
+  atomic token persistence and `pending_review`. It deliberately does not write
+  `meta_client_assets`, run sync, create reporting facts/checkpoints or publish.
+- The migration, functions, provider app setup, secrets, consent, token/mapping
+  writes and canonical worker token selection remain unapplied/unconfigured.
+  Agent 01's background worker, activation and Microsoft files are untouched.
+- Standalone Instagram live activation is explicitly disabled in code. The
+  Phase-1 table would store a raw server-only token, so production deployment
+  and provider consent remain blocked until reviewed token-at-rest encryption
+  or another reviewed encrypted token store is actually implemented.
+- Existing Facebook/Page-linked Meta remains the first route. Standalone Login is
+  only for an exact professional account proven unable/unsuitable to use that
+  route. Activation requires a separate CA gate and shared Meta worker review.
+
 ## ISSUE #463 CODE LANE — 22 September 2026
 
 - Monthly Strategy Autopilot is accepted and merged through PR #464 at main
