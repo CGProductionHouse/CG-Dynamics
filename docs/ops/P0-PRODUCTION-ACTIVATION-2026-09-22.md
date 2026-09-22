@@ -26,7 +26,10 @@ Authority: live inspection and the CA-approved activation against GitHub `main`
   the existing 370-day guard. `codex/451-activation-range-fix` replaces it with a tested 369-day
   window. Its exact-main deploy then exposed a persistent server-bundler timeout on the function's
   legacy `esm.sh` Supabase client import; `codex/451-edge-dependency-resolution` moves that one import
-  to the repository's established JSR source. No Microsoft write occurred.
+  to the repository's established JSR source. The resulting live 5,371-record legacy Planner source
+  then proved that a 300-detail unit can exceed the background worker's 20-second hand-off budget;
+  `codex/451-detail-budget` narrows each durable unit to one normal four-request Graph wave (80 task
+  details). No Microsoft write occurred.
 - The existing cron cadence is correct, but its `net.http_post` command omits
   `timeout_milliseconds`, leaving pg_net's five-second default. New worker calls exceed that while
   durable downstream Meta work continues. Updating only that timeout is a new protected cron

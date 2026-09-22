@@ -41,6 +41,7 @@ test('every configured source is enumerated (Outlook + all plans), plans require
 })
 
 test('detail batching splits a large pending list into bounded batches', () => {
+  assert.equal(jm.DETAIL_BATCH_SIZE, 80, 'one unit must fit one four-request Graph detail wave')
   const pending = Array.from({ length: 4306 }, (_, i) => `t${i}`)
   const { batch, rest } = jm.nextDetailBatch(pending)
   assert.equal(batch.length, jm.DETAIL_BATCH_SIZE)

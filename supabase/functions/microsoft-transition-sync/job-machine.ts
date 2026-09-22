@@ -50,7 +50,11 @@ export function enumerateJobSources(
   return seeds
 }
 
-export const DETAIL_BATCH_SIZE = 300
+// One unit is at most four Graph batch requests (20 task details per request),
+// matching GRAPH_DETAIL_CONCURRENCY. Keeping it to one normal request wave lets
+// the caller finish inside background-worker's 20-second hand-off budget while
+// retaining durable progress between invocations.
+export const DETAIL_BATCH_SIZE = 80
 export const PAGINATION_BATCH_SIZE = 1000
 
 // Split the pending detail-id list into the next bounded batch + the remainder.
