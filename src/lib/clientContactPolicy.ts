@@ -124,23 +124,27 @@ export function resolveCaptionContacts(input: {
       contact.freshness_state === 'stale_unverified'),
   )
 
-  // Ambiguity guard: within one exact scope, two different approved values of the same
-  // contact_type is an unresolved conflict. Fail closed rather than guess which is current.
-  const valuesByType = new Map<string, Set<string>>()
+  // Ambiguity guard: fail closed only when two approved values compete for the
+  // same logical contact slot. Multiple people may legitimately share a contact type
+  // (for example a consultant email block), so person/label identity is part of the key.
+  const contactSlotKey = (contact: CaptionContactCandidate) =>
+    `${contact.contact_type}::${contact.person_name?.trim().toLowerCase() ?? ''}::${contact.display_label.trim().toLowerCase()}`
+  const valuesBySlot = new Map<string, Set<string>>()
   for (const contact of contacts) {
-    const set = valuesByType.get(contact.contact_type) ?? new Set<string>()
+    const slot = contactSlotKey(contact)
+    const set = valuesBySlot.get(slot) ?? new Set<string>()
     set.add(contact.value)
-    valuesByType.set(contact.contact_type, set)
+    valuesBySlot.set(slot, set)
   }
-  const conflictingTypes = [...valuesByType.entries()].filter(([, values]) => values.size > 1).map(([type]) => type)
-  const ambiguousConflict = conflictingTypes.length > 0
+  const conflictingSlots = [...valuesBySlot.entries()].filter(([, values]) => values.size > 1).map(([slot]) => slot)
+  const ambiguousConflict = conflictingSlots.length > 0
   const conflictUnresolved = ambiguousConflict
     ? contacts
-        .filter(contact => conflictingTypes.includes(contact.contact_type))
+        .filter(contact => conflictingSlots.includes(contactSlotKey(contact)))
         .map(contact => ({
           id: contact.id,
           display_label: contact.display_label,
-          reason: `Multiple approved ${contact.contact_type} contacts conflict for this exact scope.`,
+          reason: `Multiple approved ${contact.contact_type} values conflict for ${contact.person_name ?? contact.display_label} in this exact scope.`,
         }))
     : []
 
