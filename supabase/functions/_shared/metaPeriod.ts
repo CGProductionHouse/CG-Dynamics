@@ -111,7 +111,6 @@ export function previousMetaMonth(offset = 1): string {
 // as partial and must never be treated as a fully completed period.
 export function incrementalMonthEnd(): string {
   const now = new Date()
-  const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000)
   const formatter = new Intl.DateTimeFormat('en-CA', {
     timeZone: META_INSIGHTS_TIMEZONE,
     year: 'numeric',
@@ -119,11 +118,12 @@ export function incrementalMonthEnd(): string {
     day: '2-digit',
   })
   const parts = Object.fromEntries(
-    formatter.formatToParts(yesterday)
+    formatter.formatToParts(now)
       .filter(part => part.type !== 'literal')
       .map(part => [part.type, Number(part.value)]),
   )
-  return `${parts.year}-${String(parts.month).padStart(2, '0')}-${String(parts.day).padStart(2, '0')}`
+  const today = `${parts.year}-${String(parts.month).padStart(2, '0')}-${String(parts.day).padStart(2, '0')}`
+  return addUtcDays(today, -1)
 }
 
 // Returns the provider window bounds for current-month incremental work, or
