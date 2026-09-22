@@ -8,13 +8,14 @@ let microsoftFreshnessEvidence
 let metaFleetFreshnessEvidence
 let planAutomaticSourceRecovery
 let planAutomaticApplyRecovery
+let automaticApplyLeaseDeadline
 let fetchAllRows
 let fetchAllRowsByIdChunks
 
 before(async () => {
   server = await createServer({ server: { middlewareMode: true }, appType: 'custom', logLevel: 'silent' })
   ;({ microsoftFreshnessEvidence, metaFleetFreshnessEvidence } = await server.ssrLoadModule('/src/lib/dailyDynamicsFreshness.ts'))
-  ;({ planAutomaticSourceRecovery, planAutomaticApplyRecovery } = await server.ssrLoadModule('/supabase/functions/microsoft-transition-sync/job-machine.ts'))
+  ;({ planAutomaticSourceRecovery, planAutomaticApplyRecovery, automaticApplyLeaseDeadline } = await server.ssrLoadModule('/supabase/functions/microsoft-transition-sync/job-machine.ts'))
   ;({ fetchAllRows, fetchAllRowsByIdChunks } = await server.ssrLoadModule('/supabase/functions/_shared/paginatedRows.ts'))
 })
 after(async () => { await server?.close() })
@@ -82,6 +83,7 @@ test('fresh applying Microsoft run is not double-driven', () => {
 test('stale crashed applying run is recovered with a bounded lease', () => {
   assert.equal(planAutomaticApplyRecovery({ status: 'applying', startedAt: '2026-09-21T07:00:00Z', recoveryCount: 0, recoveryAfter: null, now }).kind, 'recover')
   assert.equal(planAutomaticApplyRecovery({ status: 'applying', startedAt: '2026-09-21T07:00:00Z', recoveryCount: 1, recoveryAfter: '2026-09-21T08:05:00Z', now }).kind, 'fresh')
+  assert.equal(automaticApplyLeaseDeadline(now), '2026-09-21T08:10:00.000Z')
 })
 
 test('applying recovery exhausts instead of remaining applying forever', () => {
@@ -111,9 +113,14 @@ test('automatic apply recovery reuses the same run and serializes exact item key
   const automatic = readFileSync(new URL('../supabase/functions/microsoft-transition-sync/automatic-reconciliation.ts', import.meta.url), 'utf8')
   const sql = readFileSync(new URL('../supabase/migrations/20260921120000_daily_dynamics_service_reconciliation.sql', import.meta.url), 'utf8')
   assert.match(edge, /claim_microsoft_automatic_apply_recovery/)
-  assert.match(edge, /applyAutomaticMicrosoftMirrors\(sb, snapshot, jobId,[\s\S]*recoveryRunId\)/)
+  assert.match(edge, /applyAutomaticMicrosoftMirrors\(sb, snapshot, jobId,[\s\S]*recoveryRunId, recoveryGeneration\)/)
   assert.match(automatic, /existingRunId[\s\S]*id: existingRunId/)
   assert.match(automatic, /microsoftStableItemKey\(item\)/)
+  assert.match(automatic, /eq\('automatic_recovery_count', recoveryGeneration\)/)
+  assert.match(automatic, /automatic_recovery_after: automaticApplyLeaseDeadline/)
+  assert.match(automatic, /finalized\.error \|\| !finalized\.data/)
+  assert.match(automatic, /runError\?\.code === '23505'[\s\S]*eq\('preview_job_id', previewJobId\)[\s\S]*status: 'applying'/)
+  assert.match(edge, /recoveryGeneration = Number\(existing\.automatic_recovery_count \?\? 0\) \+ 1/)
   assert.match(sql, /pg_advisory_xact_lock\(hashtextextended\(p_run_id::text \|\| ':' \|\| p_item_key, 451\)\)/)
   assert.match(sql, /unique index if not exists microsoft_sync_runs_one_automatic_per_preview_idx[\s\S]*preview_job_id[\s\S]*trigger_type = 'agent'/)
   const base = readFileSync(new URL('../supabase/phase-17a-microsoft-transition-sync.sql', import.meta.url), 'utf8')

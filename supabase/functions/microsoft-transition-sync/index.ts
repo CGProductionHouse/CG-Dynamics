@@ -509,6 +509,7 @@ Deno.serve(async request => {
 async function automaticallyApplyJob(sb: ReturnType<typeof createClient>, jobId: string) {
   const { data: existing } = await sb.from('microsoft_sync_runs').select('id,status,summary,safe_error,started_at,automatic_recovery_count,automatic_recovery_after').eq('preview_job_id', jobId).order('created_at', { ascending: false }).limit(1).maybeSingle()
   let recoveryRunId: string | undefined
+  let recoveryGeneration = 0
   if (existing) {
     const recovery = planAutomaticApplyRecovery({ status: existing.status, startedAt: existing.started_at, recoveryCount: Number(existing.automatic_recovery_count ?? 0), recoveryAfter: existing.automatic_recovery_after ?? null, now: new Date().toISOString() })
     if (recovery.kind === 'terminal' || recovery.kind === 'fresh') return { status: existing.status, runId: existing.id, ...(existing.summary ?? {}), error: existing.safe_error ?? null }
@@ -520,6 +521,7 @@ async function automaticallyApplyJob(sb: ReturnType<typeof createClient>, jobId:
     const { data: claimed } = await sb.rpc('claim_microsoft_automatic_apply_recovery', { p_run_id: existing.id })
     if (!claimed) return { status: 'applying' as const, runId: existing.id, ...(existing.summary ?? {}), error: null }
     recoveryRunId = existing.id
+    recoveryGeneration = Number(existing.automatic_recovery_count ?? 0) + 1
   }
   const [{ data: job }, { data: rows }] = await Promise.all([
     sb.from('microsoft_sync_jobs').select('assignee_map,exported_at').eq('id', jobId).single(),
@@ -532,7 +534,7 @@ async function automaticallyApplyJob(sb: ReturnType<typeof createClient>, jobId:
   const exportedAt = (job.exported_at as string | null) ?? new Date().toISOString()
   const snapshot = assembleSnapshot(jobRows, (job.assignee_map as Record<string, unknown>) ?? {}, exportedAt)
   if (!job.exported_at) await sb.from('microsoft_sync_jobs').update({ exported_at: exportedAt, status: 'complete', updated_at: exportedAt }).eq('id', jobId)
-  return applyAutomaticMicrosoftMirrors(sb, snapshot, jobId, Deno.env.get('MICROSOFT_SYNC_SYSTEM_USER_ID') ?? '', recoveryRunId)
+  return applyAutomaticMicrosoftMirrors(sb, snapshot, jobId, Deno.env.get('MICROSOFT_SYNC_SYSTEM_USER_ID') ?? '', recoveryRunId, recoveryGeneration)
 }
 
 async function mergeAssignees(

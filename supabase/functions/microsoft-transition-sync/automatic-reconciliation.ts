@@ -5,11 +5,12 @@ import { microsoftStableItemKey } from '../../../src/lib/microsoftRecovery.ts'
 import type { MicrosoftExistingTarget } from '../../../src/lib/microsoftImport.ts'
 import type { MicrosoftPreviewMappingContext } from '../../../src/lib/microsoftImportPreview.ts'
 import type { MicrosoftSnapshot } from '../../../src/lib/microsoftSnapshot.ts'
+import { automaticApplyLeaseDeadline } from './job-machine.ts'
 
-type Db = { from: (table: string) => any; rpc: (name: string, args?: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }> }
+type Db = { from: (table: string) => any; rpc: (name: string, args?: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string; code?: string } | null }> }
 
 export interface AutomaticReconciliationResult {
-  status: 'completed' | 'partial' | 'failed'
+  status: 'applying' | 'completed' | 'partial' | 'failed'
   runId: string | null
   applied: number
   skipped: number
@@ -22,7 +23,7 @@ export interface AutomaticReconciliationResult {
 /** Applies only already-approved Planner and Outlook mirror domains.
  * Client Schedule is excluded categorically, and every update uses an exact
  * durable Microsoft identity plus the established optimistic-lock contract. */
-export async function applyAutomaticMicrosoftMirrors(db: Db, snapshot: MicrosoftSnapshot, previewJobId: string, systemUserId: string, existingRunId?: string): Promise<AutomaticReconciliationResult> {
+export async function applyAutomaticMicrosoftMirrors(db: Db, snapshot: MicrosoftSnapshot, previewJobId: string, systemUserId: string, existingRunId?: string, recoveryGeneration = 0): Promise<AutomaticReconciliationResult> {
   const [clients, aliases, boards, buckets, planner, calendar] = await Promise.all([
     db.from('clients').select('id,name,active').eq('active', true),
     db.from('client_aliases').select('client_id,alias'),
@@ -65,12 +66,27 @@ export async function applyAutomaticMicrosoftMirrors(db: Db, snapshot: Microsoft
     : await db.from('microsoft_sync_runs').insert({
       trigger_type: 'agent', status: 'applying', snapshot_exported_at: snapshot.exportedAt,
       source_completeness: snapshot.sources, preview_job_id: previewJobId,
+      automatic_recovery_count: 0, automatic_recovery_after: automaticApplyLeaseDeadline(new Date().toISOString()),
       summary: { automatic: true, reviewed: items.length, clientScheduleExcluded, conflicts }, reviewed_items: [],
     }).select('id').single()
   const { data: run, error: runError } = runResult
+  if (!existingRunId && runError?.code === '23505') {
+    const collision = await db.from('microsoft_sync_runs')
+      .select('id').eq('preview_job_id', previewJobId).eq('trigger_type', 'agent').maybeSingle()
+    if (collision.data) {
+      return { status: 'applying', runId: collision.data.id, applied: 0, skipped: 0, failed: 0, conflicts, clientScheduleExcluded, error: null }
+    }
+  }
   if (runError || !run) return { status: 'failed', runId: null, applied: 0, skipped: 0, failed: 1, conflicts, clientScheduleExcluded, error: runError?.message ?? 'Could not create automatic reconciliation run.' }
   let applied = 0; let skipped = 0; let failed = 0; let firstError: string | null = null
   for (const item of items) {
+    const lease = await db.from('microsoft_sync_runs')
+      .update({ automatic_recovery_after: automaticApplyLeaseDeadline(new Date().toISOString()) })
+      .eq('id', run.id).eq('status', 'applying').eq('automatic_recovery_count', recoveryGeneration)
+      .select('id').maybeSingle()
+    if (lease.error || !lease.data) {
+      return { status: 'applying', runId: run.id, applied, skipped, failed, conflicts, clientScheduleExcluded, error: null }
+    }
     const args = buildMicrosoftApplyRpcArgs(item, snapshot, run.id, microsoftStableItemKey(item), true)
     const result = await db.rpc('apply_microsoft_sync_item_automatic', { ...args, p_system_user_id: systemUserId } as unknown as Record<string, unknown>)
     if (result.error) { failed += 1; firstError ??= result.error.message }
@@ -78,6 +94,12 @@ export async function applyAutomaticMicrosoftMirrors(db: Db, snapshot: Microsoft
     else skipped += 1
   }
   const status = failed > 0 ? microsoftRunFinalStatus(applied, failed, 0) : conflicts > 0 ? 'partial' as const : 'completed' as const
-  await db.from('microsoft_sync_runs').update({ status, finished_at: new Date().toISOString(), applied_at: new Date().toISOString(), safe_error: firstError, summary: { automatic: true, applied, skipped, failed, conflicts, clientScheduleExcluded } }).eq('id', run.id)
+  const finalized = await db.from('microsoft_sync_runs')
+    .update({ status, finished_at: new Date().toISOString(), applied_at: new Date().toISOString(), automatic_recovery_after: null, safe_error: firstError, summary: { automatic: true, applied, skipped, failed, conflicts, clientScheduleExcluded } })
+    .eq('id', run.id).eq('status', 'applying').eq('automatic_recovery_count', recoveryGeneration)
+    .select('id').maybeSingle()
+  if (finalized.error || !finalized.data) {
+    return { status: 'applying', runId: run.id, applied, skipped, failed, conflicts, clientScheduleExcluded, error: null }
+  }
   return { status, runId: run.id, applied, skipped, failed, conflicts, clientScheduleExcluded, error: firstError }
 }

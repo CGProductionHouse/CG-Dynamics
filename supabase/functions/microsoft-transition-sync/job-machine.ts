@@ -246,6 +246,10 @@ export function planAutomaticSourceRecovery(input: { failedRequired: number; ret
 export const AUTOMATIC_APPLY_STALE_MS = 10 * 60 * 1000
 export const MAX_AUTOMATIC_APPLY_RECOVERIES = 3
 
+export function automaticApplyLeaseDeadline(now: string) {
+  return new Date(Date.parse(now) + AUTOMATIC_APPLY_STALE_MS).toISOString()
+}
+
 export function planAutomaticApplyRecovery(input: { status: string; startedAt: string; recoveryCount: number; recoveryAfter: string | null; now: string }) {
   if (input.status !== 'applying') return { kind: 'terminal' as const }
   const nowMs = Date.parse(input.now)
