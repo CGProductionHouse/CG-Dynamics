@@ -8,7 +8,7 @@ import { createClient } from 'jsr:@supabase/supabase-js@2'
 import webpush from 'npm:web-push@3.6.7'
 import { dispatchMetaWorker } from '../_shared/metaWorkerDispatch.ts'
 import { currentMetaMonth, previousMetaMonth, currentMonthHasIncrementalWindow } from '../_shared/metaPeriod.ts'
-import { recordContentAutopilotPass, runContentAutopilotPass } from '../_shared/contentAutopilotPass.ts'
+import { GENERATION_FLAG, VIDEO_FOLDER_FLAG, recordContentAutopilotPass, runContentAutopilotPass } from '../_shared/contentAutopilotPass.ts'
 
 const MAX_RUNTIME_MS = 25_000
 const MAX_JOBS_PER_RUN = 25
@@ -547,8 +547,72 @@ async function runJob(
       // Schedule, overwrites human content, publishes, or touches a file.
       await updateJobProgress(supabase, job.id, worker, 40)
       const today = typeof payload.today === 'string' ? payload.today : new Date().toISOString().slice(0, 10)
+      // Latent executable generation path. It stays off until CA sets the project
+      // secret; switching it on is a protected production action, not a code change.
+      const generationEnabled = (Deno.env.get(GENERATION_FLAG) ?? '').toLowerCase() === 'true'
+      // Latent executable OneDrive folder path. Same pattern: off unless CA enables it.
+      const videoFolderEnabled = (Deno.env.get(VIDEO_FOLDER_FLAG) ?? '').toLowerCase() === 'true'
       try {
-        const result = await runContentAutopilotPass(supabase as unknown as Parameters<typeof runContentAutopilotPass>[0], { today })
+        const result = await runContentAutopilotPass(supabase as unknown as Parameters<typeof runContentAutopilotPass>[0], {
+          today,
+          generationEnabled,
+          videoFolderEnabled,
+          systemProfileId: Deno.env.get('WORKER_SYSTEM_PROFILE_ID') ?? '',
+          generateDrafts: async input => {
+            // Reuses the EXISTING AI Content Director via narrow internal worker auth.
+            // The Edge Function persists draft ideas when called with the internal token.
+            const workerToken = (Deno.env.get('WORKER_INTERNAL_TOKEN') ?? '').trim()
+            const systemProfileId = (Deno.env.get('WORKER_SYSTEM_PROFILE_ID') ?? '').trim()
+            if (workerToken.length < 32 || !systemProfileId) return { ok: false, error: 'Autopilot worker identity is not configured' }
+            const res = await fetch(`${url}/functions/v1/suggest-content-videos`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Internal-Worker-Token': workerToken,
+              },
+              body: JSON.stringify({
+                requestId: `autopilot:${input.contentRunId}:${input.mode}:${Date.now()}`,
+                mode: input.mode,
+                clientId: input.clientId,
+                guidelineId: input.guidelineId,
+                coverageStart: input.coverageStart,
+                coverageEnd: input.coverageEnd,
+                videoIds: input.videoIds,
+              }),
+            })
+            if (!res.ok) return { ok: false, error: `suggest-content-videos returned ${res.status}` }
+            const body = await res.json().catch(() => null) as { videos?: unknown[]; ideas?: unknown[]; developments?: unknown[]; persisted?: number } | null
+            const persisted = body?.persisted
+            if (typeof persisted !== 'number' || persisted <= 0) return { ok: false, error: 'Generated content was not durably persisted' }
+            return { ok: true, generated: persisted }
+          },
+          ensureVideoFolders: async input => {
+            // Reuses the EXISTING ensure_video_folders Edge Function action via narrow
+            // internal worker auth. Create-only; existing folders are mapped by durable
+            // id, never duplicated. Behind the protected OneDrive-write gate.
+            const workerToken = (Deno.env.get('WORKER_INTERNAL_TOKEN') ?? '').trim()
+            const systemProfileId = (Deno.env.get('WORKER_SYSTEM_PROFILE_ID') ?? '').trim()
+            if (workerToken.length < 32 || !systemProfileId) return { ok: false, error: 'Autopilot worker identity is not configured' }
+            const res = await fetch(`${url}/functions/v1/content-run-onedrive-folder`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Internal-Worker-Token': workerToken,
+              },
+              body: JSON.stringify({
+                action: 'ensure_video_folders',
+                contentRunId: input.contentRunId,
+                videoIds: input.videoIds,
+                confirmCreate: true,
+              }),
+            })
+            if (!res.ok) return { ok: false, error: `content-run-onedrive-folder returned ${res.status}` }
+            const body = await res.json().catch(() => null) as { status?: string; results?: unknown[]; error?: string } | null
+            if (body?.error) return { ok: false, error: body.error }
+            const created = (body?.results ?? []).filter((r: Record<string, unknown>) => r.state === 'created' || r.state === 'mapped_existing')
+            return { ok: true, ensured: created.length }
+          },
+        })
         await updateJobProgress(supabase, job.id, worker, 90)
         await recordContentAutopilotPass(supabase as unknown as Parameters<typeof recordContentAutopilotPass>[0], result, null)
         return result

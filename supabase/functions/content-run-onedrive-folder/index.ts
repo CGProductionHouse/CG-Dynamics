@@ -1,7 +1,9 @@
 // Content Run → exact OneDrive production month folder (#224 on the #225 model).
 //
-// Canonical structure (CA lock, #224): My files / Clients / <Client> / Videos / <YYYY> / <YYYY_MM_MON>
-// A run links to its ONE month folder by durable Graph drive/item ids. There are no per-video folders.
+// Canonical structure (CA lock, #224/#450):
+//   My files / Clients / <Client> / Videos / <YYYY> / <YYYY_MM_MON> / <YYYY_MM_<SHORT_CODE>_VIDEO_<XX>>
+// A run links to its ONE month folder, and each saved guideline video to its ONE production
+// folder, by durable Graph drive/item ids. docs/onedrive-naming-authority.md is the authority.
 //
 // Rules:
 //   * Runtime identity is the stored durable id. Folder names are matched ONLY while an admin is
@@ -12,14 +14,16 @@
 //   * OneDrive tables are service-role only; the existing upsert RPCs require an active admin actor.
 //
 // POST /content-run-onedrive-folder
-// { action: 'status' | 'list_client_folders' | 'map_client_folder' | 'link_month_folder' | 'create_month_folder',
-//   contentRunId: uuid, clientFolderItemId?: string, confirmCreate?: boolean }
+// { action: 'status' | 'list_client_folders' | 'map_client_folder' | 'link_month_folder'
+//         | 'create_month_folder' | 'ensure_video_folders',
+//   contentRunId: uuid, clientFolderItemId?: string, confirmCreate?: boolean, videoIds?: uuid[] }
 
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import {
   assertSameClient,
   buildMonthFolderName,
+  buildVideoFolderName,
   buildYearFolderName,
   findChildByExactName,
   resolveChildByDurableId,
@@ -35,7 +39,7 @@ import {
 } from '../client-onboarding/onedrive-adapter.ts'
 
 const STAFF_ROLES = ['owner', 'admin', 'manager', 'staff', 'team']
-const ACTIONS = ['status', 'list_client_folders', 'map_client_folder', 'link_month_folder', 'create_month_folder'] as const
+const ACTIONS = ['status', 'list_client_folders', 'map_client_folder', 'link_month_folder', 'create_month_folder', 'ensure_video_folders'] as const
 type Action = typeof ACTIONS[number]
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const VIDEOS_FOLDER_NAME = 'Videos'
@@ -73,14 +77,32 @@ Deno.serve(async (req) => {
   const sb = createClient(supabaseUrl, serviceRoleKey, { auth: { autoRefreshToken: false, persistSession: false } })
 
   const token = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '')
-  if (!token) return jsonResponse({ error: 'Authentication required.' }, 401)
-  const { data: { user }, error: authError } = await sb.auth.getUser(token)
-  if (authError || !user) return jsonResponse({ error: 'Authentication required.' }, 401)
-  const { data: profile } = await sb.from('profiles').select('role, is_active').eq('id', user.id).maybeSingle()
-  if (!profile || profile.is_active !== true || !STAFF_ROLES.includes(profile.role)) {
-    return jsonResponse({ error: 'Staff access required.' }, 403)
+  const WORKER_TOKEN = (Deno.env.get('WORKER_INTERNAL_TOKEN') ?? '').trim()
+  const internalWorkerToken = req.headers.get('X-Internal-Worker-Token') ?? ''
+  const isInternalWorker = WORKER_TOKEN.length >= 32 && internalWorkerToken === WORKER_TOKEN
+
+  let userId: string
+  let canManage: boolean
+  const systemProfileId = Deno.env.get('WORKER_SYSTEM_PROFILE_ID') ?? ''
+  if (isInternalWorker) {
+    if (!UUID_RE.test(systemProfileId)) return jsonResponse({ error: 'Worker system profile is not configured.' }, 503)
+    const { data: profile } = await sb.from('profiles').select('role, is_active').eq('id', systemProfileId).maybeSingle()
+    if (!profile || profile.is_active !== true || profile.role !== 'admin') {
+      return jsonResponse({ error: 'Worker system profile is not an active admin.' }, 503)
+    }
+    userId = systemProfileId
+    canManage = true
+  } else {
+    if (!token) return jsonResponse({ error: 'Authentication required.' }, 401)
+    const { data: { user }, error: authError } = await sb.auth.getUser(token)
+    if (authError || !user) return jsonResponse({ error: 'Authentication required.' }, 401)
+    userId = user.id
+    const { data: profile } = await sb.from('profiles').select('role, is_active').eq('id', user.id).maybeSingle()
+    if (!profile || profile.is_active !== true || !STAFF_ROLES.includes(profile.role)) {
+      return jsonResponse({ error: 'Staff access required.' }, 403)
+    }
+    canManage = profile.role === 'admin'
   }
-  const canManage = profile.role === 'admin'
 
   let body: { action?: string; contentRunId?: string; clientFolderItemId?: string; confirmCreate?: boolean }
   try { body = await req.json() } catch { return jsonResponse({ error: 'Invalid request body.' }, 400) }
@@ -88,11 +110,17 @@ Deno.serve(async (req) => {
   if (!ACTIONS.includes(action)) return jsonResponse({ error: `action must be one of: ${ACTIONS.join(', ')}` }, 400)
   if (!body.contentRunId || !UUID_RE.test(body.contentRunId)) return jsonResponse({ error: 'contentRunId must be a valid UUID.' }, 400)
 
+  // Internal worker authority is limited to the one automatic action it needs.
+  // All mapping actions (map_client_folder, link_month_folder, create_month_folder) are human-only.
+  if (isInternalWorker && action !== 'ensure_video_folders') {
+    return jsonResponse({ error: 'Internal worker may only ensure video folders.' }, 403)
+  }
+
   // ── The run, its client and its content month ────────────────────────────────────────
   const { data: run } = await sb.from('content_runs').select('id, client_id, run_date').eq('id', body.contentRunId).maybeSingle()
   if (!run) return jsonResponse({ error: 'Content Run not found.' }, 404)
   if (!run.client_id) return jsonResponse({ error: 'Assign a client to this Content Run first.' }, 409)
-  const { data: client } = await sb.from('clients').select('id, name, active').eq('id', run.client_id).maybeSingle()
+  const { data: client } = await sb.from('clients').select('id, name, active, short_code').eq('id', run.client_id).maybeSingle()
   if (!client || client.active !== true) return jsonResponse({ error: 'The Content Run client is not an active client.' }, 409)
 
   // The month folder follows the guideline's content month; the shoot date is the fallback.
@@ -172,10 +200,115 @@ Deno.serve(async (req) => {
       p_videos_folder_item_id: videos.id,
       p_web_url: selected.webUrl,
       p_folder_name: selected.name,
-      p_actor_id: user.id,
+      p_actor_id: userId,
+      ...(isInternalWorker && systemProfileId ? { p_actor_profile_id: systemProfileId } : {}),
     })
     if (mapError) return jsonResponse({ error: mapError.message }, 400)
     return jsonResponse({ status: 'mapped', folderName: selected.name })
+  }
+
+  // ── #450: the run's per-video production folders ───────────────────────────────────────
+  //
+  // One create-only folder per saved guideline video, named from the CONFIGURED client short
+  // code — never from the client or folder display name. An existing exact-name folder is
+  // mapped by its durable id instead of creating a near-match twin. Nothing is renamed,
+  // moved or deleted, and a video already mapped is left untouched.
+  if (action === 'ensure_video_folders') {
+    if (!runFolder) return jsonResponse({ error: 'Link this run\'s month folder first.' }, 409)
+    try { assertSameClient(runFolder.client_id, run.client_id) } catch { return jsonResponse({ error: 'Client isolation check failed.' }, 409) }
+    if (!client.short_code) {
+      return jsonResponse({ error: 'This client has no configured short code, so canonical video folders cannot be named.', blocked: 'BLOCKED_MISSING_SHORT_CODE' }, 409)
+    }
+    if (!monthDate) return jsonResponse({ error: 'Set the guideline coverage month or the run date first.' }, 409)
+
+    const { data: guidelineRow } = await sb.from('content_guidelines').select('id').eq('content_run_id', run.id).maybeSingle()
+    if (!guidelineRow) return jsonResponse({ error: 'This run has no Content Guideline yet.' }, 409)
+    const { data: videoRows, error: videoError } = await sb
+      .from('content_guide_ideas')
+      .select('id, title, position, month, client_id')
+      .eq('content_guideline_id', guidelineRow.id)
+      .eq('client_id', run.client_id)
+      .neq('status', 'archived')
+      .order('position', { ascending: true })
+    if (videoError) return jsonResponse({ error: videoError.message }, 400)
+
+    const requested = Array.isArray(body.videoIds) && body.videoIds.length
+      ? new Set(body.videoIds.map(String))
+      : null
+    const videos = ((videoRows ?? []) as Array<{ id: string; title: string | null; position: number | null; month: string | null }>)
+      .filter(video => !requested || requested.has(video.id))
+    if (!videos.length) return jsonResponse({ error: 'No saved guideline video matched.' }, 422)
+
+    const { data: mappedRows } = await sb.rpc('get_content_run_video_folders', { p_content_run_id: run.id })
+    const alreadyMapped = new Set(((mappedRows ?? []) as Array<{ content_guide_idea_id: string }>).map(row => row.content_guide_idea_id))
+
+    const children = await listChildren(runFolder.drive_id, runFolder.month_folder_item_id)
+    if (children == null) return jsonResponse({ error: 'The run month folder could not be listed.' }, 502)
+    const monthChildren = foldersOnly(children)
+
+    const results: Array<Record<string, unknown>> = []
+    let failed = false
+    for (const [index, video] of videos.entries()) {
+      if (alreadyMapped.has(video.id)) {
+        results.push({ videoId: video.id, state: 'already_mapped' })
+        continue
+      }
+      const position = video.position && video.position > 0 ? video.position : index + 1
+      const videoMonth = video.month ?? monthDate
+      const name = buildVideoFolderName(
+        Number(videoMonth.slice(0, 4)), Number(videoMonth.slice(5, 7)), client.short_code, position,
+      )
+      if (isInternalWorker) {
+        const preflight = await sb.rpc('assert_content_autopilot_video_folder_write', {
+          p_content_guide_idea_id: video.id,
+          p_content_run_id: run.id,
+          p_client_id: run.client_id,
+          p_actor_profile_id: systemProfileId,
+        })
+        if (preflight.error || preflight.data !== true) {
+          failed = true
+          results.push({ videoId: video.id, state: 'authority_failed', error: preflight.error?.message ?? 'Worker mapping authority refused.' })
+          continue
+        }
+      }
+      // An existing folder with this exact canonical name is mapped, not duplicated.
+      let folder = findChildByExactName(monthChildren, name, { caseInsensitive: true })
+      let origin: 'canonical' | 'legacy_mapped' = folder ? 'legacy_mapped' : 'canonical'
+      if (!folder) {
+        if (body.confirmCreate !== true) {
+          results.push({ videoId: video.id, state: 'create_required', expectedName: name })
+          continue
+        }
+        const made = await ensureCanonicalChildFolder(runFolder.drive_id, runFolder.month_folder_item_id, name)
+        if (!made) { failed = true; results.push({ videoId: video.id, state: 'create_failed', expectedName: name }); continue }
+        folder = { id: made.ref.itemId, name: made.ref.name, isFolder: true, webUrl: made.ref.webUrl }
+        origin = 'canonical'
+      }
+      const mappingRpc = isInternalWorker ? 'upsert_content_autopilot_video_folder' : 'upsert_content_guide_video_folder'
+      const { error: mapError } = await sb.rpc(mappingRpc, {
+        p_content_guide_idea_id: video.id,
+        p_content_run_id: run.id,
+        p_client_id: run.client_id,
+        p_drive_id: runFolder.drive_id,
+        p_folder_item_id: folder.id,
+        p_folder_name: folder.name,
+        p_mapping_origin: origin,
+        ...(isInternalWorker ? { p_actor_profile_id: systemProfileId } : { p_actor_id: userId }),
+      })
+      if (mapError) {
+        failed = true
+        results.push({ videoId: video.id, state: 'map_failed_recoverable', error: mapError.message })
+        continue
+      }
+      results.push({ videoId: video.id, state: origin === 'canonical' ? 'created' : 'mapped_existing', folderName: folder.name })
+    }
+    return jsonResponse({
+      status: failed ? 'failed' : 'ensured',
+      results,
+      note: failed
+        ? 'No success was acknowledged. A newly created exact-name folder is recoverable on retry and will be mapped, never duplicated.'
+        : 'Create-only: existing folders were left exactly as they are, and an existing canonical folder was mapped by its durable id.',
+    }, failed ? 502 : 200)
   }
 
   // link_month_folder | create_month_folder
@@ -215,7 +348,8 @@ Deno.serve(async (req) => {
     p_month_folder_item_id: monthFolder.id,
     p_web_url: monthFolder.webUrl,
     p_folder_name: monthFolder.name,
-    p_actor_id: user.id,
+    p_actor_id: userId,
+    ...(isInternalWorker && systemProfileId ? { p_actor_profile_id: systemProfileId } : {}),
   })
   if (linkError) return jsonResponse({ error: linkError.message }, 400)
   return jsonResponse({
