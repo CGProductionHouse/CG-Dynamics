@@ -1,5 +1,23 @@
 # CG Dynamics Ops Handover
 
+## ISSUE #476 CODE LANE — 22 September 2026
+
+- Manual Agent 02 owns the isolated standalone Instagram token-at-rest
+  encryption foundation from current `main`; Agent 01 retains #463/#475 and
+  the shared queue/launch lane.
+- The code-only correction adds Edge-runtime AES-256-GCM with a strictly
+  decoded 32-byte server key, fresh 96-bit IV, versioned key/contract metadata
+  and AAD bound to exact client + Instagram account identity.
+- Correction migration `20260922144059_standalone_instagram_token_encryption.sql`
+  aborts if plaintext rows exist, removes the plaintext column/raw-token RPC,
+  and retains service-role-only atomic `pending_review` persistence.
+- Standalone activation remains false. Foundation/correction migration apply,
+  encryption-secret configuration, function deployment, provider consent,
+  client mapping and worker/reporting integration are separate protected gates.
+- No background-worker, Microsoft, Meta sync worker, legacy Facebook token,
+  cron, Content Autopilot flag, OneDrive, production secret/config/data or live
+  provider state is owned by #476.
+
 ## ISSUE #471 CODE LANE — 22 September 2026
 
 - Manual Agent 02 owns Issue #471 on `codex/issue-471-instagram-login-fallback`.
