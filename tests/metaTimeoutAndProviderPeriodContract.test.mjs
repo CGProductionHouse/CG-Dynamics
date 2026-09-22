@@ -20,10 +20,28 @@ after(async () => { await server.close() })
 
 test('provider request timeouts retry with a consumed attempt and stop at the cap', () => {
   assert.match(worker, /const MAX_PROVIDER_ATTEMPTS = 3/)
-  assert.match(worker, /if \(e instanceof MetaProviderTimeoutError\) throw e/)
-  assert.match(worker, /e instanceof MetaProviderTimeoutError[\s\S]*Provider request timeout exhausted \$\{MAX_PROVIDER_ATTEMPTS\} bounded attempts/)
+  assert.match(worker, /if \(e instanceof MetaProviderTimeoutError \|\| isTransientMetaRequestAbort\(e\)\) throw e/)
+  assert.match(worker, /planMetaRequestAbortRetry\(e, item\.attempts, MAX_PROVIDER_ATTEMPTS\)/)
   assert.match(worker, /refundAttempt = e instanceof RetryableIncompleteError \? e\.refundAttempt : e instanceof MetaSyncDeadlineError/)
   assert.doesNotMatch(worker, /refundAttempt =[^\n]*MetaProviderTimeoutError/)
+})
+
+test('raw abort signatures requeue before platform terminalization and still exhaust at the bounded cap', () => {
+  assert.match(worker, /isTransientMetaRequestAbort/)
+  assert.match(worker, /MetaProviderTimeoutError \|\| isTransientMetaRequestAbort\(e\)\) throw e/g)
+  assert.match(worker, /planMetaRequestAbortRetry\(e, item\.attempts, MAX_PROVIDER_ATTEMPTS\)/)
+  assert.match(worker, /itemStatus = requestAbortPlan\.status/)
+  assert.match(worker, /budgetDeferred = requestAbortPlan\.status === 'queued'/)
+  assert.match(worker, /refundAttempt = requestAbortPlan\.refundAttempt/)
+})
+
+test('abort requeue leaves saved cursors and completed platform state to existing checkpoint authority', () => {
+  assert.match(worker, /let facebookCursor = \(item\.facebook_next_cursor/)
+  assert.match(worker, /let instagramCursor = \(item\.instagram_next_cursor/)
+  assert.match(worker, /const TERMINAL_META_STATES = new Set<MetaSyncState>\(\['complete', 'failed', 'not_applicable'\]\)/)
+  assert.match(worker, /facebookState === 'pending'/)
+  assert.match(worker, /instagramState === 'pending'/)
+  assert.doesNotMatch(worker, /requestAbortPlan[\s\S]{0,300}savePlatformState/)
 })
 
 test('pre-request budget yield refunds while transient provider errors consume attempts', () => {

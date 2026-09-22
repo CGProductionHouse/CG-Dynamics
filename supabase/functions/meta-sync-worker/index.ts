@@ -9,6 +9,8 @@ import {
   metaProviderPeriod,
   metaPostBounds,
   metaFetch,
+  isTransientMetaRequestAbort,
+  planMetaRequestAbortRetry,
   readMetaError,
   redact,
   resolveMetaGraphConfig,
@@ -756,7 +758,7 @@ Deno.serve(async (req) => {
               }
             } catch (e) {
               const message = redact(`Facebook sync error: ${String(e)}`, [accessToken, ...pageTokenMap.values()])
-              if (e instanceof MetaProviderTimeoutError) throw e
+              if (e instanceof MetaProviderTimeoutError || isTransientMetaRequestAbort(e)) throw e
               if (e instanceof MetaSyncDeadlineError) throw e
               if (e instanceof RetryableIncompleteError && (item.attempts < MAX_PROVIDER_ATTEMPTS || isMetaRateLimitError(message))) throw e
               if (isMetaRateLimitError(message)) throw new RetryableIncompleteError(message)
@@ -857,7 +859,7 @@ Deno.serve(async (req) => {
             }
           } catch (e) {
             const message = redact(`Instagram sync error: ${String(e)}`, [accessToken, ...pageTokenMap.values()])
-            if (e instanceof MetaProviderTimeoutError) throw e
+            if (e instanceof MetaProviderTimeoutError || isTransientMetaRequestAbort(e)) throw e
             if (e instanceof MetaSyncDeadlineError) throw e
             if (e instanceof RetryableIncompleteError && (item.attempts < MAX_PROVIDER_ATTEMPTS || isMetaRateLimitError(message))) throw e
             if (isMetaRateLimitError(message)) throw new RetryableIncompleteError(message)
@@ -898,7 +900,7 @@ Deno.serve(async (req) => {
               if (e instanceof MetaSyncDeadlineError) {
                 throw new RetryableIncompleteError(e.message, true)
               }
-              if (e instanceof MetaProviderTimeoutError) throw e
+              if (e instanceof MetaProviderTimeoutError || isTransientMetaRequestAbort(e)) throw e
               if (e instanceof MetaFactRetryableError) throw new RetryableIncompleteError(e.message, e.rateLimited)
               if (e instanceof RetryableIncompleteError && (item.attempts < MAX_PROVIDER_ATTEMPTS || isMetaRateLimitError(String(e)))) throw e
               const factsError = redact(`Facebook account facts error: ${String(e)}`, allTokens)
@@ -932,7 +934,7 @@ Deno.serve(async (req) => {
             if (e instanceof MetaSyncDeadlineError) {
               throw new RetryableIncompleteError(e.message, true)
             }
-            if (e instanceof MetaProviderTimeoutError) throw e
+            if (e instanceof MetaProviderTimeoutError || isTransientMetaRequestAbort(e)) throw e
             if (e instanceof MetaFactRetryableError) throw new RetryableIncompleteError(e.message, e.rateLimited)
             if (e instanceof RetryableIncompleteError && (item.attempts < MAX_PROVIDER_ATTEMPTS || isMetaRateLimitError(String(e)))) throw e
             const factsError = redact(`Instagram account facts error: ${String(e)}`, allTokens)
@@ -971,8 +973,14 @@ Deno.serve(async (req) => {
         if (runError) throw new Error(`Could not record fenced Meta sync run: ${runError.message}`)
 
       } catch (e) {
-        const message = redact(String(e), [accessToken, ...pageTokenMap.values()])
-        if ((e instanceof RetryableIncompleteError || e instanceof MetaFactRetryableError || e instanceof MetaSyncDeadlineError || e instanceof MetaProviderTimeoutError) && (item.attempts < MAX_PROVIDER_ATTEMPTS || isMetaRateLimitError(message))) {
+        const requestAbortPlan = planMetaRequestAbortRetry(e, item.attempts, MAX_PROVIDER_ATTEMPTS)
+        const message = redact(requestAbortPlan?.error ?? String(e), [accessToken, ...pageTokenMap.values()])
+        if (requestAbortPlan) {
+          itemStatus = requestAbortPlan.status
+          itemError = message
+          refundAttempt = requestAbortPlan.refundAttempt
+          budgetDeferred = requestAbortPlan.status === 'queued'
+        } else if ((e instanceof RetryableIncompleteError || e instanceof MetaFactRetryableError || e instanceof MetaSyncDeadlineError) && (item.attempts < MAX_PROVIDER_ATTEMPTS || isMetaRateLimitError(message))) {
           itemStatus = 'queued'
           itemError = message
           refundAttempt = e instanceof RetryableIncompleteError ? e.refundAttempt : e instanceof MetaSyncDeadlineError
@@ -981,8 +989,6 @@ Deno.serve(async (req) => {
           itemStatus = 'failed'
           itemError = e instanceof RetryableIncompleteError
             ? `${message} Incomplete pagination exhausted ${MAX_PROVIDER_ATTEMPTS} bounded attempts.`
-            : e instanceof MetaProviderTimeoutError
-              ? `${message} Provider request timeout exhausted ${MAX_PROVIDER_ATTEMPTS} bounded attempts.`
             : message
         }
       }
