@@ -3,7 +3,10 @@ import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 
 const read = relativePath => readFileSync(new URL(relativePath, import.meta.url), 'utf8')
-const migration = read('../supabase/migrations/20260801190000_client_report_safe_projection.sql')
+const migration = [
+  read('../supabase/migrations/20260801190000_client_report_safe_projection.sql'),
+  read('../supabase/migrations/20260922154243_meta_post_engagement_truth.sql'),
+].join('\n')
 const reports = read('../src/lib/db/reports.ts')
 const manualMetrics = read('../src/lib/db/manualMetrics.ts')
 const dashboard = read('../src/pages/client/Dashboard.tsx')
@@ -12,7 +15,9 @@ const strategyPage = read('../src/pages/client/ClientStrategyPage.tsx')
 const campaignsPage = read('../src/pages/client/ClientCampaignsPage.tsx')
 
 function functionDefinition(name) {
-  const start = migration.indexOf(`create or replace function public.${name}`)
+  const replaceStart = migration.lastIndexOf(`create or replace function public.${name}`)
+  const createStart = migration.lastIndexOf(`create function public.${name}`)
+  const start = Math.max(replaceStart, createStart)
   assert.notEqual(start, -1, `${name} must exist`)
   const next = migration.indexOf('\ncreate or replace function public.', start + 1)
   return migration.slice(start, next === -1 ? migration.length : next)

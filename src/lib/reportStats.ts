@@ -1,6 +1,7 @@
 import type { ImportedMetaPost } from './db/importedMetaPosts'
 import type { ClientReportPost, ReportPost } from './db/reports'
 import type { ReportManualMetric } from './db/manualMetrics'
+import { projectMetaPostEngagement } from '../../supabase/functions/_shared/metaPostEngagement.ts'
 
 export type Platform = 'facebook' | 'instagram' | 'tiktok'
 
@@ -20,10 +21,17 @@ export interface ReportStatsPost {
   // reach / impressions are null when the source genuinely did not return the
   // metric (e.g. Meta did not provide insights). They are only 0 when a source
   // explicitly reported 0. Engagements come from likes/comments/etc. which are
-  // generally available, so they stay numeric.
+  // null unless every component in the labelled definition was observed.
   reach: number | null
   impressions: number | null
-  engagements: number
+  engagements: number | null
+  engagementKnownSubtotal: number | null
+  engagementDefinitionId: string | null
+  engagementDefinitionLabel: string | null
+  engagementSource: string | null
+  engagementObservedAt: string | null
+  engagementCoverage: { observed: number; required: number } | null
+  engagementCompleteness: 'complete' | 'partial' | 'unavailable' | 'invalid'
   post_type: string | null
   platform: Platform | null
   imageUrl: string | null
@@ -33,7 +41,11 @@ export interface ReportStatsPost {
 export interface ReportStats {
   totalReach: number | null
   totalImpressions: number | null
-  totalEngagements: number
+  totalEngagements: number | null
+  knownEngagementSubtotal: number | null
+  engagementDefinitionId: string | null
+  engagementDefinitionLabel: string | null
+  engagementObservedAt: string | null
   postCount: number
   bestPost: ReportStatsPost | null
   topPosts: ReportStatsPost[]
@@ -49,6 +61,11 @@ export function sumOrNull(values: Array<number | null | undefined>): number | nu
 }
 
 export function importedToStatsPost(post: ImportedMetaPost): ReportStatsPost {
+  const engagement = projectMetaPostEngagement(
+    { engagements: post.engagements, source: 'legacy_import' },
+    post.platform,
+    null,
+  )
   return {
     id: post.id,
     caption: post.caption,
@@ -56,7 +73,14 @@ export function importedToStatsPost(post: ImportedMetaPost): ReportStatsPost {
     publish_time: post.publish_time,
     reach: post.reach,
     impressions: post.impressions,
-    engagements: post.engagements,
+    engagements: engagement.completeTotal,
+    engagementKnownSubtotal: engagement.knownSubtotal,
+    engagementDefinitionId: engagement.definitionId,
+    engagementDefinitionLabel: engagement.definitionLabel,
+    engagementSource: engagement.source,
+    engagementObservedAt: engagement.observedAt,
+    engagementCoverage: engagement.coverage,
+    engagementCompleteness: engagement.completeness,
     post_type: post.post_type,
     platform: post.platform,
     imageUrl: null,
@@ -74,6 +98,13 @@ export function reportPostToStatsPost(post: ReportPost | ClientReportPost): Repo
       reach: post.reach,
       impressions: post.impressions,
       engagements: post.engagements,
+      engagementKnownSubtotal: post.engagement_known_subtotal,
+      engagementDefinitionId: post.engagement_definition_id,
+      engagementDefinitionLabel: post.engagement_definition_label,
+      engagementSource: post.engagement_source,
+      engagementObservedAt: post.engagement_observed_at,
+      engagementCoverage: post.engagement_coverage,
+      engagementCompleteness: post.engagement_completeness,
       post_type: post.post_type,
       platform: post.platform,
       imageUrl: null,
@@ -114,10 +145,7 @@ export function reportPostToStatsPost(post: ReportPost | ClientReportPost): Repo
     reach = post.reach
   }
 
-  const engagements =
-    typeof raw.engagements === 'number'
-      ? raw.engagements
-      : post.reactions + post.comments + post.shares + post.total_clicks
+  const engagement = projectMetaPostEngagement(raw, post.platform, post.created_at)
 
   return {
     id: post.id,
@@ -126,7 +154,14 @@ export function reportPostToStatsPost(post: ReportPost | ClientReportPost): Repo
     publish_time: post.publish_time,
     reach,
     impressions,
-    engagements,
+    engagements: engagement.completeTotal,
+    engagementKnownSubtotal: engagement.knownSubtotal,
+    engagementDefinitionId: engagement.definitionId,
+    engagementDefinitionLabel: engagement.definitionLabel,
+    engagementSource: engagement.source,
+    engagementObservedAt: engagement.observedAt,
+    engagementCoverage: engagement.coverage,
+    engagementCompleteness: engagement.completeness,
     post_type: raw.content_type ?? post.meta_post_type,
     platform: post.platform,
     imageUrl: raw.full_picture ?? raw.thumbnail_url ?? raw.media_url ?? null,
@@ -148,20 +183,32 @@ export function rankPostsByStrength(posts: ReportStatsPost[]): {
 
   const anyViews = posts.some(post => typeof post.impressions === 'number')
   const anyReach = posts.some(post => typeof post.reach === 'number')
-  const metric: RankingMetric = anyViews ? 'views' : anyReach ? 'reach' : 'interactions'
+  const completePosts = posts
+    .filter(post => typeof post.engagements === 'number' && post.engagementDefinitionId)
+  const completeDefinitions = new Set(completePosts.map(post => post.engagementDefinitionId))
+  const comparableInteractions = completeDefinitions.size === 1 && completePosts.length > 0
+  const metric: RankingMetric | null = anyViews ? 'views' : anyReach ? 'reach' : comparableInteractions ? 'interactions' : null
+
+  if (!metric) return { posts: [], metric: null }
+  const rankingPool = metric === 'interactions' ? completePosts : posts
 
   const valueFor = (post: ReportStatsPost) =>
     metric === 'views'
       ? post.impressions ?? -1
       : metric === 'reach'
         ? post.reach ?? -1
-        : post.engagements
+        : post.engagements ?? -1
 
-  const ranked = [...posts].sort((a, b) => {
+  const ranked = [...rankingPool].sort((a, b) => {
     const diff = valueFor(b) - valueFor(a)
     if (diff !== 0) return diff
-    // Tie-break on interactions so equally-ranked posts settle deterministically.
-    return b.engagements - a.engagements
+    // Interactions only break ties when both rows share one complete definition.
+    if (a.engagementDefinitionId === b.engagementDefinitionId
+      && typeof a.engagements === 'number' && typeof b.engagements === 'number') {
+      const engagementDiff = b.engagements - a.engagements
+      if (engagementDiff !== 0) return engagementDiff
+    }
+    return a.id.localeCompare(b.id)
   })
 
   return { posts: ranked, metric }
@@ -169,11 +216,27 @@ export function rankPostsByStrength(posts: ReportStatsPost[]): {
 
 export function calculateReportStats(posts: ReportStatsPost[], evidencePosts: ReportStatsPost[] = posts): ReportStats {
   const { posts: ranked } = rankPostsByStrength(evidencePosts)
+  const complete = posts.filter(post => typeof post.engagements === 'number' && post.engagementDefinitionId)
+  const definitions = new Set(complete.map(post => post.engagementDefinitionId))
+  const observationTimes = new Set(posts.map(post => post.engagementObservedAt).filter(Boolean))
+  const engagementDefinitionId = definitions.size === 1 && complete.length === posts.length && observationTimes.size === 1
+    ? complete[0]?.engagementDefinitionId ?? null
+    : null
+  const engagementDefinitionLabel = engagementDefinitionId ? complete[0]?.engagementDefinitionLabel ?? null : null
+  const engagementObservedAt = engagementDefinitionId ? complete[0]?.engagementObservedAt ?? null : null
+  const subtotalTimes = new Set(posts
+    .filter(post => post.engagementKnownSubtotal !== null)
+    .map(post => post.engagementObservedAt)
+    .filter(Boolean))
 
   return {
     totalReach: sumOrNull(posts.map(post => post.reach)),
     totalImpressions: sumOrNull(posts.map(post => post.impressions)),
-    totalEngagements: posts.reduce((sum, post) => sum + post.engagements, 0),
+    totalEngagements: engagementDefinitionId === null ? null : complete.reduce((sum, post) => sum + (post.engagements ?? 0), 0),
+    knownEngagementSubtotal: subtotalTimes.size === 1 ? sumOrNull(posts.map(post => post.engagementKnownSubtotal)) : null,
+    engagementDefinitionId,
+    engagementDefinitionLabel,
+    engagementObservedAt,
     postCount: posts.length,
     bestPost: ranked[0] ?? null,
     topPosts: ranked.slice(0, 3),
@@ -209,7 +272,7 @@ export function bestPlatform(breakdowns: PlatformBreakdown[]): PlatformBreakdown
     const ar = a.stats.totalReach ?? -1
     const br = b.stats.totalReach ?? -1
     if (br !== ar) return br - ar
-    return b.stats.totalEngagements - a.stats.totalEngagements
+    return a.platform.localeCompare(b.platform)
   })[0]
 }
 
@@ -224,7 +287,11 @@ export interface PlatformView {
   // null when the metric was not available from this platform's source.
   reach: number | null
   views: number | null
-  engagements: number
+  engagements: number | null
+  engagementKnownSubtotal: number | null
+  engagementDefinitionId: string | null
+  engagementDefinitionLabel: string | null
+  engagementObservedAt: string | null
   // Populated when source === 'posts'
   postCount: number
   bestPost: ReportStatsPost | null
@@ -237,7 +304,7 @@ export interface MasterReportData {
   platforms: PlatformView[]
   totalReach: number | null
   totalViews: number | null
-  totalEngagements: number
+  totalEngagements: number | null
   bestPlatform: PlatformView | null
   bestPostOverall: ReportStatsPost | null
 }
@@ -306,6 +373,10 @@ export function buildMasterReport(
         reach: reachAvailable ? manual!.reach : stats.totalReach,
         views: viewsAvailable ? manual!.views : stats.totalImpressions,
         engagements: engagementsAvailable ? manual!.engagements : stats.totalEngagements,
+        engagementKnownSubtotal: engagementsAvailable ? manual!.engagements : stats.knownEngagementSubtotal,
+        engagementDefinitionId: engagementsAvailable ? `${platform}_account_content_interactions` : stats.engagementDefinitionId,
+        engagementDefinitionLabel: engagementsAvailable ? `${PLATFORM_LABELS[platform]} account content interactions` : stats.engagementDefinitionLabel,
+        engagementObservedAt: engagementsAvailable ? null : stats.engagementObservedAt,
         postCount: stats.postCount,
         bestPost: stats.bestPost,
         topPosts: stats.topPosts,
@@ -323,7 +394,11 @@ export function buildMasterReport(
         source: 'manual',
         reach: reachAvailable ? manual.reach : null,
         views: viewsAvailable ? manual.views : null,
-        engagements: engagementsAvailable ? manual.engagements : 0,
+        engagements: engagementsAvailable ? manual.engagements : null,
+        engagementKnownSubtotal: engagementsAvailable ? manual.engagements : null,
+        engagementDefinitionId: engagementsAvailable ? `${platform}_account_content_interactions` : null,
+        engagementDefinitionLabel: engagementsAvailable ? `${PLATFORM_LABELS[platform]} account content interactions` : null,
+        engagementObservedAt: null,
         postCount: 0,
         bestPost: null,
         topPosts: [],
@@ -337,7 +412,11 @@ export function buildMasterReport(
       source: 'none',
       reach: null,
       views: null,
-      engagements: 0,
+      engagements: null,
+      engagementKnownSubtotal: null,
+      engagementDefinitionId: null,
+      engagementDefinitionLabel: null,
+      engagementObservedAt: null,
       postCount: 0,
       bestPost: null,
       topPosts: [],
@@ -351,7 +430,7 @@ export function buildMasterReport(
     const ar = a.reach ?? -1
     const br = b.reach ?? -1
     if (br !== ar) return br - ar
-    return b.engagements - a.engagements
+    return a.platform.localeCompare(b.platform)
   })[0] ?? null
 
   // Views and reach are UNIQUE-audience style metrics with different per-platform
@@ -366,7 +445,9 @@ export function buildMasterReport(
     platforms,
     totalReach: null,
     totalViews: null,
-    totalEngagements: withData.reduce((sum, view) => sum + view.engagements, 0),
+    // Facebook and Instagram expose different engagement definitions. Never
+    // promote them into an unlabeled cross-platform total.
+    totalEngagements: null,
     bestPlatform,
     bestPostOverall: posts.length > 0
       ? calculateReportStats(posts, posts.filter(post => !excludedContentKeys.has(contentEvidenceKey(post)))).bestPost
@@ -445,7 +526,7 @@ export function buildPerformanceMovement(
     // Views/reach are null when neither source reported them → "not available".
     views: compareNullable(current.totalViews, previous?.totalViews),
     reach: compareNullable(current.totalReach, previous?.totalReach),
-    engagements: compareMetric(current.totalEngagements, previous?.totalEngagements),
+    engagements: compareNullable(current.totalEngagements, previous?.totalEngagements),
     // Profile visits and followers are only available from manual summaries.
     // Show "not available" rather than 0 when no manual data exists.
     profileVisits: currentProfileVisits === null ? unavailableMetric() : compareMetric(currentProfileVisits, previousProfileVisits),

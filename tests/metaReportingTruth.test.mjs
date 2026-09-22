@@ -292,9 +292,18 @@ test('legacy automated Meta zeros cannot become verified client metrics', () => 
 })
 
 test('content exclusions change highlights but preserve aggregate totals', () => {
+  const engagementEvidence = {
+    engagementKnownSubtotal: 0,
+    engagementDefinitionId: 'instagram_direct_likes_comments_v1',
+    engagementDefinitionLabel: 'Instagram direct likes + comments',
+    engagementSource: 'meta_graph_api_direct_fields',
+    engagementObservedAt: '2026-07-01T00:00:00Z',
+    engagementCoverage: { observed: 2, required: 2 },
+    engagementCompleteness: 'complete',
+  }
   const posts = [
-    { id: 'p1', caption: 'First', permalink: null, publish_time: '2026-06-10T00:00:00Z', reach: 100, impressions: 500, engagements: 20, post_type: 'photo', platform: 'instagram', imageUrl: null, metaObjectId: 'ig-1' },
-    { id: 'p2', caption: 'Second', permalink: null, publish_time: '2026-06-11T00:00:00Z', reach: 80, impressions: 300, engagements: 10, post_type: 'photo', platform: 'instagram', imageUrl: null, metaObjectId: 'ig-2' },
+    { ...engagementEvidence, engagementKnownSubtotal: 20, id: 'p1', caption: 'First', permalink: null, publish_time: '2026-06-10T00:00:00Z', reach: 100, impressions: 500, engagements: 20, post_type: 'photo', platform: 'instagram', imageUrl: null, metaObjectId: 'ig-1' },
+    { ...engagementEvidence, engagementKnownSubtotal: 10, id: 'p2', caption: 'Second', permalink: null, publish_time: '2026-06-11T00:00:00Z', reach: 80, impressions: 300, engagements: 10, post_type: 'photo', platform: 'instagram', imageUrl: null, metaObjectId: 'ig-2' },
   ]
   const report = reportStats.buildMasterReport(posts, [], new Set(['instagram:ig-1']))
   assert.equal(report.platforms.find(view => view.platform === 'instagram').engagements, 30)

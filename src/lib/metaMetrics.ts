@@ -133,7 +133,7 @@ export function buildMetaPlatformMetrics(view: PlatformView): MetaMetricValue[] 
   if (view.platform === 'facebook') {
     if (view.views !== null) items.push({ key: 'views', label: METRIC_DEFINITIONS.views.label, value: view.views })
     if (view.reach !== null) items.push({ key: 'reach', label: METRIC_DEFINITIONS.reach.label, value: view.reach })
-    if (metaMetricAvailable(view.manual, 'engagements') && view.engagements > 0) items.push({ key: 'content_interactions', label: METRIC_DEFINITIONS.content_interactions.label, value: view.engagements })
+    if (typeof view.engagements === 'number') items.push({ key: 'content_interactions', label: view.engagementDefinitionLabel ?? METRIC_DEFINITIONS.content_interactions.label, value: view.engagements })
     if (metaMetricAvailable(view.manual, 'profile_visits')) items.push({ key: 'profile_visits', label: METRIC_DEFINITIONS.profile_visits.label, value: view.manual!.profile_visits })
     if (metaMetricAvailable(view.manual, 'followers')) items.push({ key: 'current_followers', label: METRIC_DEFINITIONS.current_followers.label, value: view.manual!.followers })
     if (view.postCount > 0) items.push({ key: 'posts', label: METRIC_DEFINITIONS.posts.label, value: view.postCount })
@@ -143,7 +143,7 @@ export function buildMetaPlatformMetrics(view: PlatformView): MetaMetricValue[] 
   if (view.platform === 'instagram') {
     if (view.views !== null) items.push({ key: 'views', label: METRIC_DEFINITIONS.views.label, value: view.views })
     if (view.reach !== null) items.push({ key: 'reach', label: METRIC_DEFINITIONS.reach.label, value: view.reach })
-    if (metaMetricAvailable(view.manual, 'engagements') && view.engagements > 0) items.push({ key: 'content_interactions', label: METRIC_DEFINITIONS.content_interactions.label, value: view.engagements })
+    if (typeof view.engagements === 'number') items.push({ key: 'content_interactions', label: view.engagementDefinitionLabel ?? METRIC_DEFINITIONS.content_interactions.label, value: view.engagements })
     if (metaMetricAvailable(view.manual, 'profile_visits')) items.push({ key: 'profile_visits', label: METRIC_DEFINITIONS.profile_visits.label, value: view.manual!.profile_visits })
     if (metaMetricAvailable(view.manual, 'followers')) items.push({ key: 'current_followers', label: METRIC_DEFINITIONS.current_followers.label, value: view.manual!.followers })
     if (view.postCount > 0) items.push({ key: 'posts', label: METRIC_DEFINITIONS.posts.label, value: view.postCount })
@@ -153,7 +153,7 @@ export function buildMetaPlatformMetrics(view: PlatformView): MetaMetricValue[] 
   // TikTok / other
   if (view.views !== null) items.push({ key: 'views', label: METRIC_DEFINITIONS.views.label, value: view.views })
   if (view.reach !== null) items.push({ key: 'reach', label: METRIC_DEFINITIONS.reach.label, value: view.reach })
-  if (view.engagements > 0) items.push({ key: 'content_interactions', label: METRIC_DEFINITIONS.content_interactions.label, value: view.engagements })
+  if (typeof view.engagements === 'number') items.push({ key: 'content_interactions', label: view.engagementDefinitionLabel ?? 'Defined interactions', value: view.engagements })
   if (view.postCount > 0) items.push({ key: 'posts', label: METRIC_DEFINITIONS.posts.label, value: view.postCount })
   return items
 }
@@ -162,7 +162,7 @@ export function buildMetaContentMetrics(post: ReportStatsPost): MetaMetricValue[
   const items: MetaMetricValue[] = []
   if (post.impressions !== null) items.push({ key: 'views', label: METRIC_DEFINITIONS.views.label, value: post.impressions })
   if (post.reach !== null) items.push({ key: 'reach', label: METRIC_DEFINITIONS.reach.label, value: post.reach })
-  if (post.engagements > 0) items.push({ key: 'content_interactions', label: METRIC_DEFINITIONS.content_interactions.label, value: post.engagements })
+  if (typeof post.engagements === 'number') items.push({ key: 'content_interactions', label: post.engagementDefinitionLabel ?? 'Defined interactions', value: post.engagements })
   return items
 }
 

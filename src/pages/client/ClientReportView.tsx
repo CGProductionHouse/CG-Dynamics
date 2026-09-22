@@ -807,10 +807,9 @@ function formatHealthState(runStatus: string | null, healthState: string | null)
   return humanize(runStatus ?? healthState ?? 'needs review')
 }
 
-// A. The "all your channels together" moment. Headlines ONLY metrics that are
-// safe to sum across platforms (views, content interactions). Reach audiences
-// overlap between platforms, so when reach is the only signal we headline the
-// strongest single platform instead of a misleading combined total.
+// A. The "all your channels together" moment. Cross-platform post engagement
+// definitions and unique-audience visibility are not summed. When no genuinely
+// comparable combined metric exists, headline one explicitly-labelled platform.
 function CombinedHero({ master, performance }: { master: MasterReportData; performance: ReportPerformance }) {
   const withData = master.platforms.filter(view => view.source !== 'none')
   if (withData.length === 0) return null
@@ -820,7 +819,7 @@ function CombinedHero({ master, performance }: { master: MasterReportData; perfo
   if (typeof master.totalViews === 'number' && master.totalViews > 0) {
     value = master.totalViews
     line = `times your content was seen across your channels in ${performance.monthLabel}`
-  } else if (master.totalEngagements > 0) {
+  } else if (typeof master.totalEngagements === 'number' && master.totalEngagements > 0) {
     value = master.totalEngagements
     line = `interactions with your content across your channels in ${performance.monthLabel}`
   } else {
@@ -841,7 +840,7 @@ function CombinedHero({ master, performance }: { master: MasterReportData; perfo
           ? `${formatCompact(view.views)} views`
           : typeof view.reach === 'number' && view.reach > 0
             ? `${formatCompact(view.reach)} reach`
-            : view.engagements > 0
+            : typeof view.engagements === 'number'
               ? `${formatCompact(view.engagements)} interactions`
               : null
       return metric ? { label: view.label, metric } : null
@@ -1139,14 +1138,14 @@ function ContentSection({
       ? { value: bestPost.impressions, label: 'views' }
       : rankingMetric === 'reach' && typeof bestPost?.reach === 'number'
         ? { value: bestPost.reach, label: 'reach' }
-        : (topContent?.interactions ?? 0) > 0
-          ? { value: topContent!.interactions, label: 'content interactions' }
+        : typeof topContent?.interactions === 'number'
+          ? { value: topContent.interactions, label: bestPost?.engagementDefinitionLabel ?? 'defined interactions' }
           : null
 
   const allMetrics: { label: string; value: string }[] = []
   if (typeof bestPost?.impressions === 'number') allMetrics.push({ label: 'views', value: formatNumber(bestPost.impressions) })
   if (typeof bestPost?.reach === 'number') allMetrics.push({ label: 'reach', value: formatNumber(bestPost.reach) })
-  if (bestPost && bestPost.engagements > 0) allMetrics.push({ label: 'content interactions', value: formatNumber(bestPost.engagements) })
+  if (bestPost && typeof bestPost.engagements === 'number') allMetrics.push({ label: bestPost.engagementDefinitionLabel ?? 'defined interactions', value: formatNumber(bestPost.engagements) })
   const metricRow = allMetrics.map(m => `${m.value} ${m.label}`).join(' · ')
 
   const cgInsight = strategyMatchesBest ? tc.whatThisTellsUs.trim() : ''
@@ -2030,7 +2029,13 @@ function PlatformPostCard({ post, index }: { post: ReportStatsPost; index: numbe
   const parts: string[] = []
   if (typeof post.impressions === 'number') parts.push(`${formatNumber(post.impressions)} views`)
   if (typeof post.reach === 'number') parts.push(`${formatNumber(post.reach)} reach`)
-  parts.push(`${formatNumber(post.engagements)} content interactions`)
+  if (typeof post.engagements === 'number') {
+    parts.push(`${formatNumber(post.engagements)} ${post.engagementDefinitionLabel?.toLowerCase() ?? 'defined interactions'}`)
+  } else if (post.engagementKnownSubtotal !== null) {
+    parts.push(`${formatNumber(post.engagementKnownSubtotal)} known subtotal (${post.engagementCoverage?.observed ?? 0}/${post.engagementCoverage?.required ?? 0} fields)`)
+  } else {
+    parts.push('Interaction data unavailable')
+  }
 
   return (
     <article className="rounded-3xl border border-white/[0.08] bg-white/[0.045] p-5 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.95)]">
