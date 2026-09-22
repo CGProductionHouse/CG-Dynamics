@@ -40,6 +40,7 @@ test('durable strategy job invokes only the accepted internal endpoint contract'
 
   assert.match(worker, /case MONTHLY_STRATEGY_AUTOPILOT_JOB_TYPE:/)
   assert.match(worker, /functions\/v1\/monthly-strategy-autopilot/)
+  assert.match(worker, /Authorization: `Bearer \$\{serviceKey\}`/)
   assert.match(worker, /'X-Internal-Worker-Token': workerToken/)
   assert.match(worker, /body\?\.ok !== true/)
   assert.match(handler, /jsr:@supabase\/supabase-js@2/)

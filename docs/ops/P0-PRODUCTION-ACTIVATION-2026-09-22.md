@@ -84,9 +84,11 @@ timeout described above are already complete and must not be replayed. From the 
 remaining ordered sequence is:
 
 1. Accept and merge the isolated #463 shared-worker integration after verification.
-2. With separate CA approval, deploy `monthly-strategy-autopilot` first, then deploy the accepted
-   `background-worker`. Do not create or alter cron; retain the existing minute job, identity,
-   endpoint, headers and 30-second timeout. Keep all three Content Autopilot flags false.
+2. With separate CA approval, deploy `monthly-strategy-autopilot` first with gateway JWT verification
+   enabled, then deploy the accepted `background-worker`. The worker call must satisfy both gateway
+   authentication and the independent `WORKER_INTERNAL_TOKEN` contract. Do not create or alter cron;
+   retain the existing minute job, identity, endpoint, headers and 30-second timeout. Keep all three
+   Content Autopilot flags false.
 3. Observe one terminal `monthly_strategy_autopilot` durable job for the Johannesburg operating
    date. Verify current/next-month canonical draft receipts, exact client/month idempotency, truthful
    blockers and zero overwrite of existing staff-amended/approved/published strategies. Repeat worker

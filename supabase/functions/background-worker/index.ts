@@ -74,7 +74,7 @@ Deno.serve(async () => {
     // missing id as "nothing to do".
     if (!job || !job.id) break
     try {
-      const result = await runJob(supabase, job as JobRow, url, worker)
+      const result = await runJob(supabase, job as JobRow, url, serviceKey, worker)
       if (result.waiting === true) {
         const { error: deferError } = await supabase.rpc('defer_background_job', {
           p_id: job.id,
@@ -628,6 +628,7 @@ async function runJob(
   supabase: ReturnType<typeof createClient>,
   job: JobRow,
   url: string,
+  serviceKey: string,
   worker: string,
 ): Promise<JobResult> {
   await updateJobProgress(supabase, job.id, worker, 10)
@@ -670,6 +671,7 @@ async function runJob(
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${serviceKey}`,
           'X-Internal-Worker-Token': workerToken,
         },
       })

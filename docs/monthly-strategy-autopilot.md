@@ -41,7 +41,9 @@ withheld until that exact daily strategy job has succeeded, so concurrent minute
 ticks cannot let content preparation overtake strategy preparation. The three
 Content Autopilot feature flags remain unchanged and off in production.
 
-This integration reuses the existing cron, `WORKER_INTERNAL_TOKEN` and auth-backed
-`WORKER_SYSTEM_PROFILE_ID`. It adds no scheduler, schema, migration or strategy
-store. Deploying `monthly-strategy-autopilot` and the updated `background-worker`
-remains a separate protected production gate.
+This integration reuses the existing cron, service-role gateway authentication,
+`WORKER_INTERNAL_TOKEN` and auth-backed `WORKER_SYSTEM_PROFILE_ID`. The function
+keeps gateway JWT verification enabled and also validates the independent internal
+token. It adds no scheduler, schema, migration or strategy store. Deploying
+`monthly-strategy-autopilot` and the updated `background-worker` remains a separate
+protected production gate.
