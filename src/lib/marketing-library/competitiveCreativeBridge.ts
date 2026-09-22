@@ -1,7 +1,7 @@
 import type { SourceType } from '../../types/skillCards'
 import type { SourceTrustTier } from './skillCardsData'
 import type { RegistrationCandidate } from './sourceRegistry'
-import evidenceJson from '../../../docs/marketing-library/audience-lifecycle/competitive-creative/evidence.json'
+import evidenceJson from '../../../docs/marketing-library/audience-lifecycle/competitive-creative/evidence.json' with { type: 'json' }
 
 // ── Competitive-creative evidence source bridge (#444) ────────────────────────
 //

@@ -1,7 +1,7 @@
 import type { SourceType } from '../../types/skillCards'
 import type { SourceTrustTier } from './skillCardsData'
 import type { RegistrationCandidate } from './sourceRegistry'
-import sourcesJson from '../../../docs/marketing-library/audience-lifecycle/sources.json'
+import sourcesJson from '../../../docs/marketing-library/audience-lifecycle/sources.json' with { type: 'json' }
 
 // ── Audience Lifecycle source bridge (#426) ───────────────────────────────────
 //
