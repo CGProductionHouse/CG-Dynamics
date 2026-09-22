@@ -49,8 +49,9 @@ Authority: live inspection and the CA-approved activation originally executed ag
   readback then proved the production `background_jobs_allowed_type` constraint still permits only
   `meta_sync` and `report_prep`, so the strategy job is truthfully rejected before admission. The
   isolated follow-up migration `20260922142000_extend_background_jobs_allowed_type_for_autopilots.sql`
-  preserves those two values and adds only `monthly_strategy_autopilot` and `content_autopilot`.
-  That migration is code-only and must not be applied before separate CA approval.
+  preserves those two values, restores the existing canonical system-owned `web_push_delivery`, and
+  adds only `monthly_strategy_autopilot` and `content_autopilot`. That migration is code-only and
+  must not be applied before separate CA approval.
 
 ## Current live state
 
@@ -72,7 +73,7 @@ Authority: live inspection and the CA-approved activation originally executed ag
 - Content Autopilot remains disabled; production has zero `content_autopilot` jobs. AI generation
   and OneDrive folder creation remain disabled.
 - Monthly Strategy Autopilot and the updated worker are deployed, but production cannot admit their
-  durable jobs until the exact four-type queue constraint migration above is reviewed, merged and
+  durable jobs until the exact five-type queue constraint migration above is reviewed, merged and
   separately approved for production application. Production still has zero
   `monthly_strategy_autopilot` and zero `content_autopilot` rows; all Content Autopilot flags remain
   false.
@@ -92,10 +93,11 @@ The foundation/four migrations, identities/secrets, #451 functions, Meta worker 
 timeout described above are already complete and must not be replayed. From the current state, the
 remaining ordered sequence is:
 
-1. Accept and merge the isolated exact-four-type constraint migration. With separate CA approval,
+1. Accept and merge the isolated exact-five-type constraint migration. With separate CA approval,
    apply only `20260922142000_extend_background_jobs_allowed_type_for_autopilots.sql`, then verify
-   the check permits exactly `meta_sync`, `report_prep`, `monthly_strategy_autopilot` and
-   `content_autopilot`. Do not alter RLS, RPCs, cron, functions, secrets or flags.
+   the check permits exactly `meta_sync`, `report_prep`, `web_push_delivery`,
+   `monthly_strategy_autopilot` and `content_autopilot`. Do not alter RLS, RPCs, cron, functions,
+   secrets or flags.
 2. Observe one terminal `monthly_strategy_autopilot` durable job for the Johannesburg operating
    date. Verify current/next-month canonical draft receipts, exact client/month idempotency, truthful
    blockers and zero overwrite of existing staff-amended/approved/published strategies. Repeat worker

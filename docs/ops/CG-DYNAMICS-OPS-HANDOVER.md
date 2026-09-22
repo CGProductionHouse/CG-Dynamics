@@ -44,10 +44,12 @@
   `background-worker` v16 is active on the unchanged minute cron. Live readback found the production
   queue constraint still admits only `meta_sync` and `report_prep`, leaving zero strategy/content
   Autopilot jobs. The code-only follow-up migration
-  `20260922142000_extend_background_jobs_allowed_type_for_autopilots.sql` adds exactly
+  `20260922142000_extend_background_jobs_allowed_type_for_autopilots.sql` preserves those existing
+  types, restores canonical system-owned `web_push_delivery`, and adds exactly
   `monthly_strategy_autopilot` and `content_autopilot`; applying it remains a separate protected CA
-  gate after review/merge. No function, cron, RLS, RPC, secret or flag change belongs to that
-  migration follow-up. All three Content Autopilot flags remain off.
+  gate after review/merge. The authenticated enqueue RPC remains restricted to its existing types.
+  No function, cron, RLS, grant, secret or flag change belongs to that migration follow-up. All three
+  Content Autopilot flags remain off.
 
 ## PRODUCTION ACTIVATION TRUTH — 22 September 2026
 
@@ -85,7 +87,7 @@ protected runbook are in `docs/ops/P0-PRODUCTION-ACTIVATION-2026-09-22.md`.
 - Microsoft job `40569507-7f78-4e1b-afe0-79b7b06edb4b` is complete with all six required sources
   complete, zero pending detail units, automatic retry count one and no automatic failure. No
   `microsoft_sync_runs` apply row exists; the last verified mirror remained authoritative throughout.
-- Remaining gates: review/merge the exact-four-type #463 queue migration; separately approve applying
+- Remaining gates: review/merge the exact-five-type #463 queue migration; separately approve applying
   only that migration; verify one terminal, idempotent same-day strategy job; complete Red Oak
   exact-Page access/re-consent and stable Meta evidence; only then enable Content Autopilot alone.
   AI and OneDrive remain off.

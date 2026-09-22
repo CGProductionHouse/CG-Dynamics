@@ -1,7 +1,8 @@
--- Issue #463: admit only the two system-owned Autopilot job types while
--- preserving the existing durable queue allowlist. Keep the constraint NOT
--- VALID to match its current production semantics: existing rows are not
--- rescanned, while every new or updated row is checked immediately.
+-- Issue #463: preserve the two existing durable queue types, restore the
+-- canonical system-owned Web Push type, and admit only the two system-owned
+-- Autopilot types. Keep the constraint NOT VALID to match its current
+-- production semantics: existing rows are not rescanned, while every new or
+-- updated row is checked immediately.
 begin;
 
 alter table public.background_jobs
@@ -13,6 +14,7 @@ alter table public.background_jobs
     job_type in (
       'meta_sync',
       'report_prep',
+      'web_push_delivery',
       'monthly_strategy_autopilot',
       'content_autopilot'
     )
