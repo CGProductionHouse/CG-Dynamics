@@ -2,15 +2,18 @@
 
 ## ISSUE #463 CODE LANE — 22 September 2026
 
-- Monthly Strategy Autopilot is being implemented on the isolated
-  `codex/issue-463-monthly-strategy-autopilot` branch from `main` `03b5d49f`.
-- Scope is code-only: current/next-month canonical #391 draft preparation plus
-  read-only #450 Content Guideline alignment. Existing strategies are never
+- Monthly Strategy Autopilot is accepted and merged through PR #464 at main
+  `b93f3086a3e46c272c294f7037c4679b3d907e94`.
+- The merged scope is code-only: current/next-month canonical #391 draft preparation
+  plus read-only #450 Content Guideline alignment. Existing strategies are never
   overwritten and client visibility remains publish-only.
-- Agent 01 retains the shared worker/sync/launch lane. #463 does not modify the
+- Supervisor correction review verified Johannesburg-date Marketing Library expiry,
+  reviewed/active-only industry routing, exact-client card scoping before limits,
+  and truthful withheld alignment when the canonical strategy read fails.
+- Agent 01 retains the shared worker/sync/launch lane. #463 did not modify the
   background worker, scheduler, Microsoft/Meta sync, production configuration or
   live data. Final worker ordering remains a small documented handoff after review.
-- No production activation is implied by merge. The isolated Edge Function must
+- Merge does not authorise production activation. The isolated Edge Function must
   not be deployed or wired into the live cycle without the normal protected gate.
 
 ## PRODUCTION ACTIVATION TRUTH — 22 September 2026
