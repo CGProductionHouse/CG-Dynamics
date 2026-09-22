@@ -50,8 +50,10 @@ Authority: live inspection and the CA-approved activation originally executed ag
   `meta_sync` and `report_prep`, so the strategy job is truthfully rejected before admission. The
   isolated follow-up migration `20260922142000_extend_background_jobs_allowed_type_for_autopilots.sql`
   preserves those two values, restores the existing canonical system-owned `web_push_delivery`, and
-  adds only `monthly_strategy_autopilot` and `content_autopilot`. That migration is code-only and
-  must not be applied before separate CA approval.
+  adds only `monthly_strategy_autopilot` and `content_autopilot`. PR #475 merged at main
+  `8bacfd39478d082a4d7ae2371788d0dbf66beb9c`; CA then separately approved applying only that
+  migration. Production now records the migration and exposes the exact five-value `NOT VALID`
+  constraint. No other migration was applied.
 
 ## Current live state
 
@@ -72,11 +74,12 @@ Authority: live inspection and the CA-approved activation originally executed ag
 
 - Content Autopilot remains disabled; production has zero `content_autopilot` jobs. AI generation
   and OneDrive folder creation remain disabled.
-- Monthly Strategy Autopilot and the updated worker are deployed, but production cannot admit their
-  durable jobs until the exact five-type queue constraint migration above is reviewed, merged and
-  separately approved for production application. Production still has zero
-  `monthly_strategy_autopilot` and zero `content_autopilot` rows; all Content Autopilot flags remain
-  false.
+- Monthly Strategy Autopilot is live. The unchanged minute scheduler admitted one exact daily job,
+  `3a8e1aa5-70aa-4ebb-9971-429ac7a8b36b`, which succeeded on its first attempt and was reused by the
+  next tick. It prepared 112 version-1 drafts for 56 active clients across `2026-09-01` and
+  `2026-10-01`, with zero failures and 71 truthful `PACKAGE_UNVERIFIED` blockers. No existing
+  strategy was encountered or overwritten. Production still has zero `content_autopilot` jobs and
+  all three Content Autopilot flags remain false.
 - Red Oak complete Meta evidence requires the connecting Facebook user to have Page access to exact
   Page `117937152934535`, then use Dynamics **Integrations → Meta → Reconnect Meta**, select
   `RedOak LHP` in the Facebook asset chooser and approve the already-requested
@@ -93,17 +96,8 @@ The foundation/four migrations, identities/secrets, #451 functions, Meta worker 
 timeout described above are already complete and must not be replayed. From the current state, the
 remaining ordered sequence is:
 
-1. Accept and merge the isolated exact-five-type constraint migration. With separate CA approval,
-   apply only `20260922142000_extend_background_jobs_allowed_type_for_autopilots.sql`, then verify
-   the check permits exactly `meta_sync`, `report_prep`, `web_push_delivery`,
-   `monthly_strategy_autopilot` and `content_autopilot`. Do not alter RLS, RPCs, cron, functions,
-   secrets or flags.
-2. Observe one terminal `monthly_strategy_autopilot` durable job for the Johannesburg operating
-   date. Verify current/next-month canonical draft receipts, exact client/month idempotency, truthful
-   blockers and zero overwrite of existing staff-amended/approved/published strategies. Repeat worker
-   invocation must reuse the same daily key.
-3. Complete the narrow Red Oak exact-Page access/re-consent gate and verify stable Meta fleet evidence.
-4. Only after strategy and Meta evidence pass, separately approve
+1. Complete the narrow Red Oak exact-Page access/re-consent gate and verify stable Meta fleet evidence.
+2. Only after strategy and Meta evidence pass, separately approve
    `CONTENT_AUTOPILOT_ENABLED=true`. Keep AI generation and OneDrive folder flags false; verify the
    content job was admitted only after the same-day strategy job succeeded.
 
