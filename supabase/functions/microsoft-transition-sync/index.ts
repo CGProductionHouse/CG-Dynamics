@@ -26,6 +26,7 @@ import {
   PAGINATION_BATCH_SIZE,
   planAutomaticSourceRecovery,
   planAutomaticApplyRecovery,
+  planAutomaticSystemCycle,
 } from './job-machine.ts'
 import { applyAutomaticMicrosoftMirrors } from './automatic-reconciliation.ts'
 
@@ -318,16 +319,23 @@ Deno.serve(async request => {
   let action = body.action ?? ''
   if (systemRequest) {
     const { data: latestSystemJob } = await sb.from('microsoft_sync_jobs')
-      .select('id,status,created_at,exported_at,automatic_retry_count,automatic_retry_after').eq('created_by', user.id)
+      .select('id,status,created_at,updated_at,exported_at,automatic_retry_count,automatic_retry_after').eq('created_by', user.id)
       .order('created_at', { ascending: false }).limit(1).maybeSingle()
     const { data: appliedRun } = latestSystemJob?.id ? await sb.from('microsoft_sync_runs')
       .select('id,status,finished_at').eq('preview_job_id', latestSystemJob.id)
       .order('created_at', { ascending: false }).limit(1).maybeSingle() : { data: null }
-    const lastSuccess = appliedRun?.status === 'completed' && appliedRun.finished_at ? Date.parse(appliedRun.finished_at) : 0
-    const recentTerminal = appliedRun?.finished_at ? Date.now() - Date.parse(appliedRun.finished_at) < 3 * 60 * 60 * 1000 : false
-    if (latestSystemJob?.status === 'running') {
-      const { data: recoverySources } = await sb.from('microsoft_sync_job_sources')
-        .select('required,stage').eq('job_id', latestSystemJob.id)
+    const { data: recoverySources } = latestSystemJob?.id ? await sb.from('microsoft_sync_job_sources')
+      .select('required,stage,complete').eq('job_id', latestSystemJob.id) : { data: [] }
+    const requiredIncomplete = (recoverySources ?? []).filter(source => source.required && (source.stage !== 'complete' || !source.complete)).length
+    const cycle = planAutomaticSystemCycle({
+      jobStatus: latestSystemJob?.status ?? null,
+      jobUpdatedAt: latestSystemJob?.updated_at ?? latestSystemJob?.exported_at ?? latestSystemJob?.created_at ?? null,
+      requiredIncomplete,
+      runStatus: appliedRun?.status ?? null,
+      runFinishedAt: appliedRun?.finished_at ?? null,
+      now: new Date().toISOString(),
+    })
+    if (cycle.kind === 'process' && latestSystemJob) {
       const failedRequired = (recoverySources ?? []).filter(source => source.required && source.stage === 'failed').length
       const recovery = planAutomaticSourceRecovery({ failedRequired, retryCount: Number(latestSystemJob.automatic_retry_count ?? 0), retryAfter: latestSystemJob.automatic_retry_after ?? null, now: new Date().toISOString() })
       if (recovery.kind === 'wait') return jsonResponse({ ok: false, phase: 'retry_wait', jobId: latestSystemJob.id, retryAfter: recovery.retryAfter })
@@ -340,13 +348,17 @@ Deno.serve(async request => {
         await sb.from('microsoft_sync_jobs').update({ automatic_retry_count: recovery.nextRetryCount, automatic_retry_after: recovery.retryAfter, automatic_failure: null, updated_at: new Date().toISOString() }).eq('id', latestSystemJob.id)
       }
       action = 'job_process'; body.jobId = latestSystemJob.id
-    } else if (latestSystemJob?.status === 'complete' && (!appliedRun || appliedRun.status === 'applying')) {
+    } else if (cycle.kind === 'apply' && latestSystemJob) {
       const auto = await automaticallyApplyJob(sb, latestSystemJob.id)
       return jsonResponse({ ok: auto.status === 'completed', phase: 'apply', jobId: latestSystemJob.id, automatic: auto }, auto.status === 'failed' ? 500 : 200)
-    } else if (lastSuccess && Date.now() - lastSuccess < 3 * 60 * 60 * 1000) {
+    } else if (cycle.kind === 'fresh') {
       return jsonResponse({ ok: true, phase: 'fresh', jobId: latestSystemJob?.id ?? null, lastSuccessfulAt: appliedRun?.finished_at })
-    } else if (appliedRun && recentTerminal) {
-      return jsonResponse({ ok: false, phase: 'degraded', jobId: latestSystemJob?.id ?? null, status: appliedRun.status, blocker: 'The latest automatic Microsoft reconciliation needs review; last verified state remains in use.' })
+    } else if (cycle.kind === 'degraded_incomplete' && latestSystemJob) {
+      const blocker = 'Automatic Microsoft reconciliation completed without full required-source evidence; last verified state remains in use.'
+      await sb.from('microsoft_sync_jobs').update({ status: 'failed', automatic_failure: blocker, updated_at: new Date().toISOString() }).eq('id', latestSystemJob.id).eq('status', 'complete')
+      return jsonResponse({ ok: false, phase: 'degraded', jobId: latestSystemJob.id, status: 'failed', blocker })
+    } else if (cycle.kind === 'degraded') {
+      return jsonResponse({ ok: false, phase: 'degraded', jobId: latestSystemJob?.id ?? null, status: appliedRun?.status ?? latestSystemJob?.status ?? null, blocker: 'The latest automatic Microsoft reconciliation needs review; last verified state remains in use.' })
     } else {
       action = 'job_start'
       const today = new Date()
@@ -484,7 +496,15 @@ Deno.serve(async request => {
       if (rest.length === 0) {
         const assignees = await resolveAssignees(records.flatMap(r => (r.assigneeMicrosoftIds as string[]) ?? []), graphToken)
         await mergeAssignees(sb, jobId, job.assignee_map as Record<string, unknown>, assignees)
-        await sb.from('microsoft_sync_job_sources').update({ stage: 'complete', complete: complete && (full?.safe_error ?? null) === null, records, pending_detail_ids: [], updated_at: now() }).eq('id', dbId)
+        const detailComplete = complete && (full?.safe_error ?? null) === null
+        await sb.from('microsoft_sync_job_sources').update({
+          stage: detailComplete ? 'complete' : 'failed',
+          complete: detailComplete,
+          safe_error: detailComplete ? null : 'Some Planner task details could not be fetched. Retry the failed source.',
+          records,
+          pending_detail_ids: [],
+          updated_at: now(),
+        }).eq('id', dbId)
       } else {
         await sb.from('microsoft_sync_job_sources').update({ records, pending_detail_ids: rest, safe_error: complete ? (full?.safe_error ?? null) : 'Some Planner task details could not be fetched.', updated_at: now() }).eq('id', dbId)
       }

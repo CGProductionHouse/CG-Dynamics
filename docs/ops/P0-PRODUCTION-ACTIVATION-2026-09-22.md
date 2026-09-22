@@ -1,8 +1,31 @@
 # #450/#451 production activation ledger — 22 September 2026
 
-Authority: live read-only inspection of the linked Supabase production project and GitHub `main`
-`f8e1ae83871a0590dc6d35510a1f691c4ec8489a`. No migration, deploy, secret, cron, provider,
-mapping, OneDrive or reconciliation write was performed during this audit.
+Authority: live inspection and the CA-approved activation against GitHub `main`
+`03b5d49f6777469badb0b23a9e08c28f702af751` on 22 September 2026.
+
+## Activation execution status
+
+- Configured both system profile variables to the auth-backed `CG Production House Admin` profile
+  and configured two independent high-entropy worker secrets. Secret values are not recorded here.
+- Kept `CONTENT_AUTOPILOT_ENABLED`, `CONTENT_AUTOPILOT_GENERATION` and
+  `CONTENT_AUTOPILOT_VIDEO_FOLDERS` false. Production has zero Content Autopilot jobs.
+- Applied and verified the explicitly approved prerequisite `20260918113000`, then the approved
+  four migrations in order. `20260919100000_client_portal_remove_photography.sql` was not applied.
+- Deployed `microsoft-transition-sync` v27 and the other dependency functions with the intended JWT
+  modes: `suggest-content-videos` v12, `content-run-onedrive-folder` v3,
+  `meta-connection-status` v24 and `cg-dynamics-mcp` v15. Deployed `background-worker` v14 last.
+- Meta fleet recovery is live and truthful. At 10:02 UTC it had 39 checkpoint rows for 57 mapped
+  platforms, 37 carrying successful evidence, zero PASS, and no active batch. Missing evidence was
+  not converted into zero or PASS.
+- Microsoft did not start a new job. The selected real admin actor also owns the stale 18 September
+  preview, so the first implementation repeatedly tried to adopt that historical preview instead
+  of starting today's job. The correction on `codex/451-activation-runtime-hardening` makes stale
+  previews ineligible, requires both terminal stage and explicit completeness, and prevents recent
+  terminal failure from spawning jobs every minute. No Microsoft write occurred.
+- The existing cron cadence is correct, but its `net.http_post` command omits
+  `timeout_milliseconds`, leaving pg_net's five-second default. New worker calls exceed that while
+  durable downstream Meta work continues. Updating only that timeout is a new protected cron
+  mutation and must be approved before final reconciliation acceptance.
 
 ## Already live
 
