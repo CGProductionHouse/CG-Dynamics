@@ -250,6 +250,16 @@ export const AUTOMATIC_APPLY_STALE_MS = 10 * 60 * 1000
 export const MAX_AUTOMATIC_APPLY_RECOVERIES = 3
 export const AUTOMATIC_SYSTEM_CYCLE_FRESH_MS = 3 * 60 * 60 * 1000
 
+export function automaticSystemRange(now: string) {
+  const rangeStart = new Date(now)
+  const rangeEnd = new Date(now)
+  rangeStart.setUTCDate(rangeStart.getUTCDate() - 31)
+  // 31 historical days + 338 forward days = 369 days, safely inside the
+  // existing 370-day Outlook range guard without silently changing that guard.
+  rangeEnd.setUTCDate(rangeEnd.getUTCDate() + 338)
+  return { rangeStart: rangeStart.toISOString(), rangeEnd: rangeEnd.toISOString() }
+}
+
 export function automaticApplyLeaseDeadline(now: string) {
   return new Date(Date.parse(now) + AUTOMATIC_APPLY_STALE_MS).toISOString()
 }
