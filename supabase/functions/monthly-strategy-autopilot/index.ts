@@ -2,7 +2,7 @@
 // Prepared for a later, small shared-worker handoff; this function does not
 // create a scheduler and is not deployed by this PR.
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient } from 'jsr:@supabase/supabase-js@2'
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import {
   runMonthlyStrategyAutopilot,
