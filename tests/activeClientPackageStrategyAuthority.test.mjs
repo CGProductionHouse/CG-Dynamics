@@ -83,14 +83,19 @@ test('gold-standard quality rejects generic filler and out-of-package work but p
   assert.ok(issues.some(issue => issue.includes('Reels exceeds')))
 })
 
-test('database approval gate requires confirmed package, exact-client provenance and all ten specific fields', () => {
+test('database approval gate requires current package receipt, exact-client evidence and all ten specific fields', () => {
   assert.match(migration, /PACKAGE_UNVERIFIED/)
   assert.match(migration, /new\.seed_context ->> 'client_id' is distinct from new\.client_id::text/)
+  assert.match(migration, /package_verification_confirmed_at/)
+  assert.match(migration, /package_verification_actor_id/)
+  assert.match(migration, /package_source_references/)
+  assert.match(migration, /Strategy provenance does not match the current confirmed package receipt/)
+  assert.match(migration, /Exact-client intelligence or previous-work evidence is required before strategy approval/)
   for (const field of strategy.GOLD_STANDARD_FIELDS) assert.match(migration, new RegExp(`'${field.key}'`))
   assert.match(migration, /Generic strategy filler is not approvable/)
   assert.match(migration, /Reels plan exceeds the confirmed package/)
   assert.match(migration, /Campaign plan exceeds the confirmed package/)
-  assert.match(migration, /before update of workflow_status on public\.monthly_client_strategies/)
+  assert.match(migration, /before insert or update of workflow_status, strategy_data, seed_context, client_id/)
 })
 
 test('manual and automatic preparation consume confirmed package truth rather than schedule inference', () => {
@@ -110,4 +115,13 @@ test('strategy provenance retains exact package, prior-content and governed Skil
   assert.match(automaticStrategy, /confidence_level/)
   assert.match(automaticStrategy, /evidence_label/)
   assert.match(automaticStrategy, /source_id/)
+})
+
+
+test('approved and published strategy edits cannot bypass the authority gate', () => {
+  assert.match(migration, /tg_op = 'UPDATE'/)
+  assert.match(migration, /new\.strategy_data is not distinct from old\.strategy_data/)
+  assert.match(migration, /new\.seed_context is not distinct from old\.seed_context/)
+  assert.match(migration, /new\.client_id is not distinct from old\.client_id/)
+  assert.match(migration, /before insert or update of workflow_status, strategy_data, seed_context, client_id/)
 })
