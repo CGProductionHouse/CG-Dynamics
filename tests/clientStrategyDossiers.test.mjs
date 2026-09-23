@@ -7,10 +7,10 @@ execFileSync(process.execPath, ['scripts/build-client-strategy-dossiers.mjs'], {
 const index = JSON.parse(readFileSync('artifacts/client-strategy-dossiers/issue-513/index.json', 'utf8'))
 
 test('creates exactly one isolated dossier for every active client', () => {
-  assert.equal(index.active_client_count, 56)
-  assert.equal(index.dossier_complete_count, 56)
-  assert.equal(new Set(index.clients.map(row => row.id)).size, 56)
-  assert.equal(new Set(index.clients.map(row => row.file)).size, 56)
+  assert.equal(index.active_client_count, 57)
+  assert.equal(index.dossier_complete_count, 57)
+  assert.equal(new Set(index.clients.map(row => row.id)).size, 57)
+  assert.equal(new Set(index.clients.map(row => row.file)).size, 57)
 })
 
 test('dossiers preserve exact identity, evidence provenance, and honest gaps', () => {
@@ -52,6 +52,14 @@ test('all 52 production-ready guides enrich only their exact-client dossiers', (
   })
   assert.equal(runtimeGuides.length, 52)
   assert.equal(index.strategy_ready_count, 55)
-  assert.equal(index.strategy_blocked_count, 1)
-  assert.deepEqual(index.clients.filter(client => client.strategy_status === 'blocked').map(client => client.name), ['Kundedienste'])
+  assert.equal(index.strategy_blocked_count, 2)
+  assert.deepEqual(index.clients.filter(client => client.strategy_status === 'blocked').map(client => client.name), ['Kundedienste', 'Neshora Oxygen'])
+})
+
+test('Neshora is package-grounded without inventing missing strategy evidence', () => {
+  const neshora = readFileSync('artifacts/client-strategy-dossiers/issue-513/neshora-oxygen.md', 'utf8')
+  assert.match(neshora, /1 professional videos\/month; 4 photo posts\/month; 4 design posters\/month/)
+  assert.match(neshora, /NO_EVIDENCE_BACKED_RECOMMENDATION/)
+  assert.match(neshora, /No reviewed exact-client business or industry intelligence exists yet/)
+  assert.doesNotMatch(neshora, /artifact:issue-501-recovery-pass-1-snapshot\.json#3c20fae1/)
 })

@@ -2,10 +2,10 @@
 
 Generated from the immutable #501 recovery snapshot and the confirmed #504 package authority. One isolated dossier exists for every active client. A blocked dossier is intentionally not padded with generic strategy filler.
 
-- Active clients: 56
-- Dossiers complete: 56
+- Active clients: 57
+- Dossiers complete: 57
 - Ready for gold-strategy drafting from repository evidence: 55
-- Strategy-gate blocked pending production-guide retrieval or missing exact evidence: 1
+- Strategy-gate blocked pending production-guide retrieval or missing exact evidence: 2
 
 | Client | Reports | Posts | Status | Blockers |
 |---|---:|---:|---|---|
@@ -65,3 +65,4 @@ Generated from the immutable #501 recovery snapshot and the confirmed #504 packa
 | [Wiseman Group](./wiseman-group.md) | 3 | 74 | ready | — |
 | [WiseRide](./wiseride.md) | 0 | 0 | ready | — |
 | [Zooz Lifestyle WFF](./zooz-lifestyle-wff.md) | 3 | 37 | ready | — |
+| [Neshora Oxygen](./neshora-oxygen.md) | 0 | 0 | blocked | NO_EVIDENCE_BACKED_RECOMMENDATION |

@@ -179,7 +179,9 @@ Do not fabricate missing reports/posts/metrics.
 PR #514 is merged:
 `6cfffa1a117663d9c9efd3b9bdc99054591b9a25`
 
-It created 56/56 exact-client strategy dossiers.
+It created the original 56/56 exact-client strategy dossiers. The current
+57-client generator now also creates an isolated Neshora Oxygen dossier without
+changing the frozen reviewed fleet plan.
 
 Current canonical strategy rows:
 - 56 September drafts.
@@ -215,6 +217,16 @@ The v2 dry-run is regenerated from current production:
 - production writes: 0.
 
 The old `94e42112...` plan is rejected and must not be applied.
+
+Neshora Oxygen was added after the frozen 56-client source cutoff. Its separate
+zero-write readiness dry-run preserves reviewed plan hash
+`4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b`
+and records both September and October as blocked. The package is exact
+(1 professional video, 4 photo posts and 4 design posters), but production has
+no Neshora guide, industry profile, report, content guideline or canonical
+monthly-strategy row. Do not invent a strategy from package quantities alone.
+The safe next action is reviewed exact-client intelligence followed by draft
+creation through the existing #391/#463 monthly strategy contract.
 
 PR #523 passed supervisor review and merged the frozen v2 artifact at
 `45b794ff655d0bee7b71d5c3ae0dd4c187d23755`.

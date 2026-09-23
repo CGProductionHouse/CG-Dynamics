@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "issue": 513,
+  "captured_at": "2026-09-23T21:00:00+02:00",
+  "database_project_id": "ehtjfntukiwbgptqgbzy",
+  "write_count": 0,
+  "client": {
+    "id": "3c20fae1-8e91-41d5-98eb-1c331600e6e3",
+    "name": "Neshora Oxygen",
+    "active": true,
+    "package_settings": {
+      "professional_videos_per_month": 1,
+      "photo_posts_per_month": 4,
+      "design_posters_per_month": 4,
+      "reels_per_month": null,
+      "animated_posters_per_month": null,
+      "campaign_management_included": null,
+      "monthly_campaign_budget": null,
+      "shoot_days_per_month": null,
+      "website_updates_per_month": null,
+      "other_agreed_deliverables": null,
+      "package_notes": null,
+      "package_exclusions": null,
+      "verification": {
+        "status": "confirmed",
+        "version": 2,
+        "confirmed_at": "2026-09-23T19:03:12.585396+00:00",
+        "source_references": [
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5801092086"
+        ]
+      }
+    }
+  },
+  "evidence_counts": {
+    "client_guides": 0,
+    "industry_profiles": 0,
+    "reports": 0,
+    "monthly_strategies": 0,
+    "content_guidelines": 0
+  }
+}

@@ -68,6 +68,7 @@ We Ar Fuels|2b953772-e791-4dff-a278-d4dd3521f02e|WE-AR-FUELS-CG-DYNAMICS-CLIENT-
 Wiseman Group|899c9988-8207-4e45-a8fc-a7446dfcf96b|WISEMAN-GROUP-CG-DYNAMICS-CLIENT-GUIDE.md|1,4,4,?,?||Prepared from Teams Planner Excel dry-run
 WiseRide|504113ee-fba9-4993-807e-a86066615212|WISERIDE-CLIENT-INTELLIGENCE-2026-09.md|?,2,2,?,?|Video capacity shared with Wiseman Group and may feature Midas/WiseRide.|No fixed WiseRide video quantity.
 Zooz Lifestyle WFF|0c01d90f-ba5e-4251-a597-bf3c83f990fa||?,?,?,?,?||
+Neshora Oxygen|3c20fae1-8e91-41d5-98eb-1c331600e6e3||1,4,4,?,?||All other package fields remain unknown; do not infer them from cadence or provider access.
 `.trim()
 
 const SPECIAL_RESEARCH = {
@@ -90,6 +91,13 @@ const SPECIAL_RESEARCH = {
     observed: '2026-09-23',
     facts: ['CA confirmed Kundedienste was once-off work, not a recurring social-management client.'],
     constraints: ['Exact business identity and current service objective are not verified.', 'No recurring content quantity or channel entitlement may be inferred.'],
+    recommendations: [],
+  },
+  'Neshora Oxygen': {
+    source: 'https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5801092086',
+    observed: '2026-09-23',
+    facts: ['CA confirmed the recurring monthly package as one professional video, four design posters and four photo posts.'],
+    constraints: ['All other package and service fields remain unknown and must not be inferred.', 'No reviewed exact-client business or industry intelligence exists yet.'],
     recommendations: [],
   },
 }
@@ -176,8 +184,14 @@ function packageLines(pkg) {
 const snapshot = JSON.parse(readFileSync(REPORT_SNAPSHOT, 'utf8'))
 const rows = parseRows()
 const snapshotClients = new Map(snapshot.rows.map(row => [row.client.id, row.client.name]))
-if (rows.length !== 56 || snapshotClients.size !== 56) throw new Error(`Expected 56 exact active clients; authority=${rows.length}, snapshot=${snapshotClients.size}`)
-for (const row of rows) if (snapshotClients.get(row.id) !== row.name) throw new Error(`Identity mismatch for ${row.name}`)
+if (rows.length !== 57 || snapshotClients.size !== 56) throw new Error(`Expected 57 current active clients and the frozen 56-client report snapshot; authority=${rows.length}, snapshot=${snapshotClients.size}`)
+for (const [id, name] of snapshotClients) {
+  if (!rows.some(row => row.id === id && row.name === name)) throw new Error(`Identity mismatch for frozen client ${name}`)
+}
+const postSnapshotClients = rows.filter(row => !snapshotClients.has(row.id))
+if (postSnapshotClients.length !== 1 || postSnapshotClients[0].name !== 'Neshora Oxygen') {
+  throw new Error('Only exact post-snapshot client Neshora Oxygen may be absent from the frozen report snapshot.')
+}
 
 mkdirSync(OUTPUT_DIR, { recursive: true })
 const index = []
@@ -199,7 +213,7 @@ for (const row of rows) {
   if (!guide && !row.guide && !special) blockers.push('NO_REVIEWED_EXACT_CLIENT_RESEARCH')
   if (extracted.facts.length === 0 && !row.guide) blockers.push('NO_VERIFIED_BUSINESS_FACTS')
   if (extracted.recommendations.length === 0 && !row.guide) blockers.push('NO_EVIDENCE_BACKED_RECOMMENDATION')
-  const sources = [runtimeGuide ? `production-client-guide:${basename(guidePath)}` : guidePath ? `docs/ai-workforce/client-intelligence/${basename(guidePath)}` : null, !guidePath && row.guide ? `production-client-guide:${row.guide}` : null, special?.source, PACKAGE_AUTHORITY, `artifact:${basename(REPORT_SNAPSHOT)}#${row.id}`].filter(Boolean)
+  const sources = [runtimeGuide ? `production-client-guide:${basename(guidePath)}` : guidePath ? `docs/ai-workforce/client-intelligence/${basename(guidePath)}` : null, !guidePath && row.guide ? `production-client-guide:${row.guide}` : null, special?.source, PACKAGE_AUTHORITY, snapshotClients.has(row.id) ? `artifact:${basename(REPORT_SNAPSHOT)}#${row.id}` : null].filter(Boolean)
   const hash = createHash('sha256').update(JSON.stringify({ row, sources, extracted, report_ids: safe.map(item => item.report?.id), post_ids: posts.map(post => post.id) })).digest('hex')
   const bullet = values => values.length ? values.map(value => `- ${value}`).join('\n') : '- No exact evidence available; do not fill this gap with generic copy.'
   const dossier = `# ${row.name} — strategy grounding dossier

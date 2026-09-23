@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "issue": 513,
+  "mode": "dry_run",
+  "write_count": 0,
+  "preserves_reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+  "source_snapshot_hash": "fabddaa726472063fd9f571eb9439abbc8e70888f03901a4a896751417b545b5",
+  "counts": {
+    "blocked": 2,
+    "ready": 0
+  },
+  "rows": [
+    {
+      "client_id": "3c20fae1-8e91-41d5-98eb-1c331600e6e3",
+      "client_name": "Neshora Oxygen",
+      "strategy_month": "2026-09-01",
+      "disposition": "blocked",
+      "reason": "MISSING_CANONICAL_STRATEGY_DRAFT_AND_REVIEWED_CLIENT_INTELLIGENCE",
+      "source_evidence_hash": "58359d6b25209a38c5f05c92f7207e8e6585ce3e747fe70f81d1fa0ff718809d",
+      "package": {
+        "professional_videos_per_month": 1,
+        "photo_posts_per_month": 4,
+        "design_posters_per_month": 4
+      },
+      "unavailable_evidence": [
+        "client_guides",
+        "industry_profiles",
+        "reports",
+        "monthly_strategies",
+        "content_guidelines"
+      ],
+      "safe_next_action": "Create the canonical draft through the existing monthly strategy contract only after reviewed exact-client intelligence is available; do not derive strategy from package quantities alone."
+    },
+    {
+      "client_id": "3c20fae1-8e91-41d5-98eb-1c331600e6e3",
+      "client_name": "Neshora Oxygen",
+      "strategy_month": "2026-10-01",
+      "disposition": "blocked",
+      "reason": "MISSING_CANONICAL_STRATEGY_DRAFT_AND_REVIEWED_CLIENT_INTELLIGENCE",
+      "source_evidence_hash": "58359d6b25209a38c5f05c92f7207e8e6585ce3e747fe70f81d1fa0ff718809d",
+      "package": {
+        "professional_videos_per_month": 1,
+        "photo_posts_per_month": 4,
+        "design_posters_per_month": 4
+      },
+      "unavailable_evidence": [
+        "client_guides",
+        "industry_profiles",
+        "reports",
+        "monthly_strategies",
+        "content_guidelines"
+      ],
+      "safe_next_action": "Create the canonical draft through the existing monthly strategy contract only after reviewed exact-client intelligence is available; do not derive strategy from package quantities alone."
+    }
+  ],
+  "plan_hash": "55349857354e5a610fb3d580b96f9ef9fdfb28b2d0f48e5276c65d20242f9107"
+}
