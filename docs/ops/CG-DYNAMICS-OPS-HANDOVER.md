@@ -2,7 +2,7 @@
 
 Status: CURRENT authority for a fresh supervisor chat.
 
-Updated: 23 September 2026 after #515 provider-eligibility production activation.
+Updated: 23 September 2026 after package confirmation, #514 strategy dossiers and #515 social-provider eligibility.
 
 ## 1. Recovery order
 
