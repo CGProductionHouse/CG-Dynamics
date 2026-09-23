@@ -12,7 +12,7 @@ const page = read('../src/components/integrations/InstagramConnectionQueue.tsx')
 const integration = read('../src/pages/admin/MetaIntegrationPage.tsx')
 const start = read('../supabase/functions/instagram-oauth-start/index.ts')
 const confirm = read('../supabase/functions/instagram-connection-confirm/index.ts')
-const migration = read('../supabase/migrations/20260923110000_instagram_connection_review_binding.sql')
+const migration = read('../supabase/migrations/20260923120000_instagram_connection_review_binding.sql')
 
 test('fleet evidence contains the exact 17 reviewed active-client cases without guessed handles', () => {
   assert.equal(INSTAGRAM_FLEET_EVIDENCE.length, 17)
