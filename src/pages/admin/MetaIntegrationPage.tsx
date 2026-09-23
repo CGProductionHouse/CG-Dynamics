@@ -11,6 +11,7 @@ import {
   summariseMetaTerminalResult,
   type MetaFailureGroup,
 } from '../../lib/metaSyncFailures'
+import { metaAssetRunLabel, type MetaAssetRunPresentation } from '../../lib/metaAssetRunPresentation'
 
 const STEP_LABELS = ['Connect Meta', 'Link assets', 'Sync data', 'Review draft']
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined
@@ -107,13 +108,7 @@ interface ConnectionInfo {
   } | null
 }
 
-interface MetaAssetRun {
-  run_type: string
-  period_month: string | null
-  status: string
-  health_state: string
-  finished_at: string | null
-  created_at: string
+interface MetaAssetRun extends MetaAssetRunPresentation {
   high_watermark_at?: string | null
   next_due_at?: string | null
   last_error_code?: string | null
@@ -260,17 +255,6 @@ function tokenExpiryLabel(info: ConnectionInfo | null): string {
   if (values.length === 0) return 'No expiry reported by Meta'
   const earliest = values.sort()[0]
   return formatDateTime(earliest)
-}
-
-function assetRunLabel(platform: 'Facebook' | 'Instagram', run: MetaAssetRun | null): string {
-  if (!run) return `${platform}: no durable checkpoint recorded`
-  const timestamp = run.finished_at ?? run.created_at
-  const ageMs = Date.now() - new Date(timestamp).getTime()
-  const failure = run.status === 'failed' || ['sync_error', 'permission_blocked', 'reconnection_required'].includes(run.health_state)
-  const freshness = failure ? 'needs attention' : ageMs > 48 * 60 * 60 * 1000 ? 'stale' : 'current'
-  const kind = run.run_type === 'scheduled' ? 'incremental' : run.run_type.replaceAll('_', ' ')
-  const health = run.health_state.replaceAll('_', ' ')
-  return `${platform}: ${formatDateTime(timestamp)} · ${kind} · ${health} · ${freshness}${run.period_month ? ` · ${run.period_month}` : ''}`
 }
 
 function applyAliases(value: string): string {
@@ -2520,8 +2504,8 @@ export default function MetaIntegrationPage() {
                     <p className="text-brand-primary">{asset.facebook_page_name || 'No Facebook Page linked'}</p>
                     <p className="text-brand-primary">{asset.instagram_username ? `@${asset.instagram_username}` : asset.instagram_not_applicable ? 'Instagram not applicable' : 'No Instagram account linked'}</p>
                     <p className="text-brand-primary">{asset.ad_account_name || 'No ad account linked'}</p>
-                    {asset.facebook_page_id && <p className="mt-2 text-xs text-brand-primary/65">{healthAvailable ? assetRunLabel('Facebook', health?.facebook ?? null) : 'Facebook: refresh diagnostics unavailable'}</p>}
-                    {asset.instagram_account_id && <p className="text-xs text-brand-primary/65">{healthAvailable ? assetRunLabel('Instagram', health?.instagram ?? null) : 'Instagram: refresh diagnostics unavailable'}</p>}
+                    {asset.facebook_page_id && <p className="mt-2 text-xs text-brand-primary/65">{healthAvailable ? metaAssetRunLabel('Facebook', health?.facebook ?? null) : 'Facebook: refresh diagnostics unavailable'}</p>}
+                    {asset.instagram_account_id && <p className="text-xs text-brand-primary/65">{healthAvailable ? metaAssetRunLabel('Instagram', health?.instagram ?? null) : 'Instagram: refresh diagnostics unavailable'}</p>}
                   </div>
                   <ActionButton variant="danger" size="sm" onClick={() => handleDeactivate(asset)}>
                     Deactivate
