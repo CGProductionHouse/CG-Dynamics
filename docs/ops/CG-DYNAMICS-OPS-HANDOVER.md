@@ -405,6 +405,27 @@ Older portal/auth foundation:
 
 Do not assume all 57 need client portal access merely because they are active.
 
+Read-only production reconciliation captured on 23 Sep 2026:
+- 57 active clients = 47 recurring-social eligible / 10 excluded;
+- 37 enabled canonical mappings, all backed by one exact active client profile;
+- 0 duplicate mappings, 0 mapped clients without an active exact profile and
+  0 inactive-profile conflicts;
+- 119 currently published reports across 40 clients;
+- preserve all 37 existing mappings, including four excluded-scope clients;
+- Braize and CG Production House each have an exact active client profile but
+  no portal mapping: link those existing profiles, never create duplicates;
+- seven clients have published client-facing reports but neither mapping nor
+  client profile: All Around PVC, Bat Hill Royale, Case Bloemfontein, HMHI,
+  The Staffordshire, Vrystaat Kunstefees and Zooz Lifestyle WFF;
+- the smallest protected launch batch is therefore nine clients: two existing
+  profiles to link plus seven new accesses through the existing #399 flow;
+- the remaining 11 unmapped clients have no published client-facing report and
+  currently require no portal. This includes Neshora Oxygen; social eligibility
+  alone is not portal-need authority.
+
+No user, mapping, credential or production data was created or changed during
+this reconciliation. Starter credentials are not included in its artifacts.
+
 ## 10. Production authorities
 
 ### Package
