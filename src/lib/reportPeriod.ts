@@ -180,6 +180,27 @@ export function isCompletedMonth(month: string): boolean {
   return isMonthComplete(month)
 }
 
+export function isPublishedMonthToDateReport(
+  report: { period_start: string; period_end: string; status?: string }
+): boolean {
+  if (report.status !== 'published') return false
+  const month = report.period_start.slice(0, 7)
+  const bounds = calendarMonthBounds(month)
+  return report.period_start === bounds.start
+    && report.period_end >= bounds.start
+    && report.period_end < bounds.end
+}
+
+export function reportPeriodDisclosure(
+  report: { period_start: string; period_end: string; status?: string }
+): string | null {
+  if (!isPublishedMonthToDateReport(report)) return null
+  const asOf = new Intl.DateTimeFormat('en-ZA', {
+    day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
+  }).format(new Date(`${report.period_end}T00:00:00Z`))
+  return `Month to date · as of latest verified evidence on ${asOf}`
+}
+
 // The calendar month a report belongs to. Derived from period_start so that a
 // partial range like 21 May - 10 June resolves to May (the intended month).
 export function getReportMonthFromPeriod(report: { period_start: string }): string {
@@ -242,7 +263,7 @@ export function selectMonthlyReports<
   const byMonth = new Map<string, T>()
   for (const report of reports) {
     const month = getReportMonthFromPeriod(report)
-    if (!isCompletedMonth(month)) continue
+    if (!isCompletedMonth(month) && !isPublishedMonthToDateReport(report)) continue
     const existing = byMonth.get(month)
     if (!existing) {
       byMonth.set(month, report)

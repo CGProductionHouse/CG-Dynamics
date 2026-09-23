@@ -49,6 +49,14 @@ test('published report projection has an explicit safe allowlist', () => {
   }
 })
 
+test('truth backfill writes the reflection field exposed by the client projection', () => {
+  const reconciliation = read('../scripts/reconcile-client-report-truth.mjs')
+  const projection = functionDefinition('client_published_reports()')
+  assert.match(reconciliation, /previous_month_reflection: row\.previous_month_reflection/)
+  assert.doesNotMatch(reconciliation, /strategy_reflection: row\./)
+  assert.match(projection, /r\.previous_month_reflection/)
+})
+
 test('client projections require active client profiles and strip nested strategy IDs', () => {
   for (const name of [
     'client_published_reports()',
