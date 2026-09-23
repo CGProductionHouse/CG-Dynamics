@@ -6,7 +6,7 @@ import type { ReportManualMetric } from '../../lib/db/manualMetrics'
 import BrandMark from '../../components/BrandMark'
 import { ClientLogo } from '../../components/ClientLogo'
 import { readStrategyData } from '../../lib/strategyEngine'
-import { getReportMonthFromPeriod, monthDisplayLabel, normalizeReportToCalendarMonth, previousReportMonth } from '../../lib/reportPeriod'
+import { getReportMonthFromPeriod, monthDisplayLabel, normalizeReportToCalendarMonth, previousReportMonth, reportPeriodDisclosure } from '../../lib/reportPeriod'
 import { isWithinMetaProviderPeriod } from '../../../supabase/functions/_shared/metaPeriod'
 import type { MasterReportData, MetricMovement, Platform, PlatformView, ReportStatsPost } from '../../lib/reportStats'
 import {
@@ -193,6 +193,7 @@ export function ClientReportView({
   }
 
   const month = monthDisplayLabel(getReportMonthFromPeriod(report))
+  const periodDisclosure = reportPeriodDisclosure(report)
   const previousMonthLabel = useMemo(() => {
     const prev = previousReportMonth(getReportMonthFromPeriod(report))
     return prev ? monthDisplayLabel(prev) : null
@@ -222,6 +223,12 @@ export function ClientReportView({
       <p className="mb-6 text-center text-xs text-slate-500">
         Reporting period: {report.period_start ? formatDate(report.period_start) : '-'} to {report.period_end ? formatDate(report.period_end) : '-'}
       </p>
+
+      {periodDisclosure && (
+        <p className="mb-6 rounded-xl border border-amber-300/20 bg-amber-300/[0.06] px-4 py-3 text-center text-sm font-semibold text-amber-100">
+          {periodDisclosure}. This is not a completed monthly report.
+        </p>
+      )}
 
       {tabs.length > 1 && (
         <ReportTabs tabs={tabs} active={activeTab} onChange={selectTab} />
