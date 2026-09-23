@@ -24,6 +24,7 @@ import { dispatchMetaWorker } from '../_shared/metaWorkerDispatch.ts'
 import { metaRateLimitScope } from '../_shared/metaRateLimit.ts'
 import { fetchMappedPageToken } from '../_shared/metaAssetIdentity.ts'
 import { currentMetaMonth, incrementalMonthBounds } from '../_shared/metaPeriod.ts'
+import { InstagramReportingCredential, resolveInstagramReportingCredential } from '../_shared/instagramReportingCredential.ts'
 
 // Scheduled/background syncing shares the SAME truth contract as manual syncing:
 // configurable Graph version, shared connector engine (syncAccountFacts) writing
@@ -389,23 +390,15 @@ Deno.serve(async (req) => {
     .order('last_connected_at', { ascending: false })
     .limit(1)
 
-  if (!connections || connections.length === 0) {
-    await releaseActiveLane()
-    return jsonResponse({ ok: false, error: 'Meta is not connected.' }, 400)
-  }
+  const metaConnectionId = connections?.[0]?.id ?? null
 
   const { data: tokenRows } = await sb
     .from('meta_connection_tokens')
     .select('encrypted_access_token')
-    .eq('connection_id', connections[0].id)
+    .eq('connection_id', metaConnectionId ?? '')
     .limit(1)
 
-  if (!tokenRows || tokenRows.length === 0 || !tokenRows[0].encrypted_access_token) {
-    await releaseActiveLane()
-    return jsonResponse({ ok: false, error: 'Meta connection token is missing.' }, 400)
-  }
-
-  const accessToken = tokenRows[0].encrypted_access_token
+  const accessToken: string | null = tokenRows?.[0]?.encrypted_access_token ?? null
   const { baseUrl, version: graphVersion } = graphConfig
 
   const pageTokenMap = new Map<string, string>()
@@ -593,7 +586,7 @@ Deno.serve(async (req) => {
         // ── Get linked assets for this client ──
         let linkedAssetQuery = sb
           .from('meta_client_assets')
-          .select('id, facebook_page_id, facebook_page_name, instagram_account_id, instagram_username, instagram_not_applicable')
+          .select('id, facebook_page_id, facebook_page_name, instagram_account_id, instagram_username, instagram_not_applicable, instagram_connection_id')
           .eq('client_id', item.client_id)
           .eq('is_active', true)
         linkedAssetQuery = item.asset_id ? linkedAssetQuery.eq('id', item.asset_id) : linkedAssetQuery
@@ -609,6 +602,7 @@ Deno.serve(async (req) => {
         const asset = linkedAssets?.[0]
         const facebookPageId = asset?.facebook_page_id ?? null
         const instagramAccountId = (asset?.instagram_not_applicable === true) ? null : (asset?.instagram_account_id ?? null)
+        let instagramCredential: InstagramReportingCredential | null = null
 
         const now = new Date().toISOString()
         let facebookState = (item.facebook_sync_state ?? 'pending') as MetaSyncState
@@ -621,7 +615,7 @@ Deno.serve(async (req) => {
         // a page below the window cannot prove that later pages contain no matches.
         const instagramBoundaryEnabled = false
 
-        if (facebookPageId && (!TERMINAL_META_STATES.has(facebookState) || !TERMINAL_META_STATES.has(instagramState))) {
+        if (facebookPageId && accessToken && (!TERMINAL_META_STATES.has(facebookState) || !TERMINAL_META_STATES.has(instagramState))) {
           // Include both identities in the cache key so a different mapping is
           // revalidated even if it references a Page already seen this invocation.
           const identity = `${facebookPageId}:${instagramAccountId ?? ''}`
@@ -774,18 +768,29 @@ Deno.serve(async (req) => {
         if (!instagramAccountId && !TERMINAL_META_STATES.has(instagramState)) {
           await savePlatformState('instagram', 'not_applicable', null)
         } else if (instagramAccountId && reportId && instagramState === 'pending') {
-          const pageToken = facebookPageId ? (pageTokenMap.get(facebookPageId) ?? accessToken) : accessToken
           try {
+            instagramCredential = await resolveInstagramReportingCredential({
+              asset: { id: asset.id, clientId: item.client_id, instagramAccountId, instagramConnectionId: asset.instagram_connection_id ?? null, facebookPageId },
+              metaConnectionId, metaBaseUrl: baseUrl, metaApiVersion: graphVersion, metaUserToken: accessToken,
+              pageToken: facebookPageId ? (pageTokenMap.get(facebookPageId) ?? null) : null,
+              loadStandalone: async connectionId => {
+                const { data: connection } = await sb.from('meta_instagram_connections').select('id, client_id, instagram_account_id, status, confirmed_asset_id').eq('id', connectionId).maybeSingle()
+                const { data: token } = await sb.from('meta_instagram_connection_tokens').select('ciphertext_base64, iv_base64, encryption_version, key_version, token_expires_at').eq('connection_id', connectionId).maybeSingle()
+                return { connection, token }
+              },
+              encryptionKeyBase64: Deno.env.get('INSTAGRAM_TOKEN_ENCRYPTION_KEY_B64'), supportedKeyVersion: Deno.env.get('INSTAGRAM_TOKEN_ENCRYPTION_KEY_VERSION'),
+              instagramGraphVersion: Deno.env.get('INSTAGRAM_GRAPH_VERSION'),
+            })
             const params = new URLSearchParams({
-              access_token: pageToken,
+              access_token: instagramCredential.token,
               fields: 'id,caption,media_type,media_product_type,timestamp,permalink,thumbnail_url,media_url,like_count,comments_count',
               limit: '100',
             })
             const igCollection = await fetchMetaCollection(
-              `${baseUrl}/${instagramAccountId}/media?${params.toString()}`,
+              `${instagramCredential.baseUrl}/${instagramAccountId}/media?${params.toString()}`,
               instagramCursor,
               'Instagram media fetch',
-              [accessToken, ...pageTokenMap.values()],
+              [accessToken, ...pageTokenMap.values(), instagramCredential.token],
               invocationDeadline,
               async rawMedia => {
                 const pageResult = classifyInstagramMediaPage(
@@ -858,7 +863,7 @@ Deno.serve(async (req) => {
               await savePlatformState('instagram', 'failed', null)
             }
           } catch (e) {
-            const message = redact(`Instagram sync error: ${String(e)}`, [accessToken, ...pageTokenMap.values()])
+            const message = redact(`Instagram sync error: ${String(e)}`, [accessToken, ...pageTokenMap.values(), instagramCredential?.token])
             if (e instanceof MetaProviderTimeoutError || isTransientMetaRequestAbort(e)) throw e
             if (e instanceof MetaSyncDeadlineError) throw e
             if (e instanceof RetryableIncompleteError && (item.attempts < MAX_PROVIDER_ATTEMPTS || isMetaRateLimitError(message))) throw e
@@ -873,7 +878,7 @@ Deno.serve(async (req) => {
 
         // Account facts are separately resumable after post pagination. Check
         // budget before each sequential stage so the lease has time to requeue.
-        const allTokens = [accessToken, ...pageTokenMap.values()]
+        const allTokens = [accessToken, ...pageTokenMap.values(), instagramCredential?.token]
         if (facebookState === 'facts_pending' && facebookPageId) {
           const fbPageToken = pageTokenMap.get(facebookPageId)
           if (!fbPageToken) {
@@ -885,7 +890,7 @@ Deno.serve(async (req) => {
             try {
               assertWorkBudget(invocationDeadline, 'Facebook account facts')
               const factsResult = await syncAccountFacts(sb, {
-                clientId: item.client_id, assetId: asset?.id ?? null, connectionId: connections[0].id,
+                clientId: item.client_id, assetId: asset?.id ?? null, connectionId: metaConnectionId,
                 platform: 'facebook', objectId: facebookPageId, token: fbPageToken,
                 baseUrl, apiVersion: graphVersion, periodMonth: item.month, periodStart, periodEnd,
                 tokens: allTokens, tokenClass: 'page', runType: item.sync_kind === 'incremental' ? 'scheduled' : item.sync_kind === 'targeted_backfill' ? 'historical_resync' : 'manual',
@@ -914,14 +919,25 @@ Deno.serve(async (req) => {
           }
         }
         if (instagramState === 'facts_pending' && instagramAccountId) {
-          const igToken = facebookPageId ? (pageTokenMap.get(facebookPageId) ?? accessToken) : accessToken
           try {
+            instagramCredential ??= await resolveInstagramReportingCredential({
+              asset: { id: asset.id, clientId: item.client_id, instagramAccountId, instagramConnectionId: asset.instagram_connection_id ?? null, facebookPageId },
+              metaConnectionId, metaBaseUrl: baseUrl, metaApiVersion: graphVersion, metaUserToken: accessToken,
+              pageToken: facebookPageId ? (pageTokenMap.get(facebookPageId) ?? null) : null,
+              loadStandalone: async connectionId => {
+                const { data: connection } = await sb.from('meta_instagram_connections').select('id, client_id, instagram_account_id, status, confirmed_asset_id').eq('id', connectionId).maybeSingle()
+                const { data: token } = await sb.from('meta_instagram_connection_tokens').select('ciphertext_base64, iv_base64, encryption_version, key_version, token_expires_at').eq('connection_id', connectionId).maybeSingle()
+                return { connection, token }
+              },
+              encryptionKeyBase64: Deno.env.get('INSTAGRAM_TOKEN_ENCRYPTION_KEY_B64'), supportedKeyVersion: Deno.env.get('INSTAGRAM_TOKEN_ENCRYPTION_KEY_VERSION'),
+              instagramGraphVersion: Deno.env.get('INSTAGRAM_GRAPH_VERSION'),
+            })
             assertWorkBudget(invocationDeadline, 'Instagram account facts')
             const factsResult = await syncAccountFacts(sb, {
-              clientId: item.client_id, assetId: asset?.id ?? null, connectionId: connections[0].id,
-              platform: 'instagram', objectId: instagramAccountId, token: igToken,
-              baseUrl, apiVersion: graphVersion, periodMonth: item.month, periodStart, periodEnd,
-              tokens: allTokens, tokenClass: facebookPageId && pageTokenMap.get(facebookPageId) ? 'page' : 'user',
+              clientId: item.client_id, assetId: asset?.id ?? null, connectionId: instagramCredential.connectionId,
+              platform: 'instagram', objectId: instagramAccountId, token: instagramCredential.token,
+              baseUrl: instagramCredential.baseUrl, apiVersion: instagramCredential.apiVersion, periodMonth: item.month, periodStart, periodEnd,
+              tokens: [...allTokens, instagramCredential.token], tokenClass: instagramCredential.tokenClass,
               runType: item.sync_kind === 'incremental' ? 'scheduled' : item.sync_kind === 'targeted_backfill' ? 'historical_resync' : 'manual',
               deadline: invocationDeadline - PAGE_FETCH_RESERVE_MS,
               checkpoint: { itemId: item.id, leaseGeneration },
@@ -966,7 +982,7 @@ Deno.serve(async (req) => {
         const { error: runError } = await sb.rpc('meta_sync_record_run', {
           p_item_id: item.id,
           p_lease_generation: leaseGeneration,
-          p_connection_id: connections[0].id,
+          p_connection_id: instagramCredential?.connectionId ?? metaConnectionId,
           p_status: itemStatus === 'failed' || itemStatus === 'skipped' ? 'failed' : 'success',
           p_summary: { postsSynced, warnings, reportsCreated, reportsReused, providerPaging, worker: META_CONNECTOR_VERSION },
         })

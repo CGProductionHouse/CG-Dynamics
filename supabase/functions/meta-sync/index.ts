@@ -12,6 +12,7 @@ import {
 } from '../_shared/meta.ts'
 import { upsertMetaReportPost } from '../_shared/metaPostMerge.ts'
 import { buildMetaPostEngagementEvidence, observedMetaPostComponent } from '../_shared/metaPostEngagement.ts'
+import { resolveInstagramReportingCredential } from '../_shared/instagramReportingCredential.ts'
 
 type ErrorPhase = 'auth' | 'env' | 'request_parse' | 'connection' | 'assets' | 'sync' | 'unknown'
 
@@ -23,6 +24,7 @@ interface SyncClient {
   facebookPageName: string | null
   instagramAccountId: string | null
   instagramUsername: string | null
+  instagramConnectionId: string | null
   adAccountId: string | null
 }
 
@@ -399,22 +401,16 @@ async function handleRequest(req: Request): Promise<Response> {
     .order('last_connected_at', { ascending: false })
     .limit(1)
 
-  if (!connections || connections.length === 0) {
-    return failureResponse('connection', 'Meta is not connected.', 400, tokensForRedaction, { steps })
-  }
-  steps.push('connection loaded')
+  const metaConnectionId = connections?.[0]?.id ?? null
+  if (metaConnectionId) steps.push('connection loaded')
 
   const { data: tokenRows } = await sb
     .from('meta_connection_tokens')
     .select('encrypted_access_token')
-    .eq('connection_id', connections[0].id)
+    .eq('connection_id', metaConnectionId ?? '')
     .limit(1)
 
-  if (!tokenRows || tokenRows.length === 0 || !tokenRows[0].encrypted_access_token) {
-    return failureResponse('connection', 'Meta connection token is missing. Reconnect Meta.', 400, tokensForRedaction, { steps })
-  }
-
-  const accessToken = tokenRows[0].encrypted_access_token
+  const accessToken: string | null = tokenRows?.[0]?.encrypted_access_token ?? null
   const { baseUrl, version: graphVersion } = graphConfig
 
   steps.push('meta token loaded')
@@ -423,20 +419,20 @@ async function handleRequest(req: Request): Promise<Response> {
   // Falls back to the user token per endpoint if a page token is unavailable.
   let pageTokenMap = new Map<string, string>()
   try {
-    pageTokenMap = await fetchPageTokens(baseUrl, accessToken)
+    if (accessToken) pageTokenMap = await fetchPageTokens(baseUrl, accessToken)
   } catch {
     // Non-fatal — endpoints will fall back to the user token.
   }
   steps.push(`page tokens loaded (${pageTokenMap.size})`)
   // Used to scrub any token from warnings/errors before they are stored/returned.
-  const knownTokens: string[] = [accessToken, ...pageTokenMap.values()]
+  const knownTokens: string[] = [accessToken, ...pageTokenMap.values()].filter((value): value is string => Boolean(value))
   tokensForRedaction.push(...knownTokens)
 
   // ── Load linked clients ──────────────────────────────────
   phase = 'assets'
   let linkedAssetsQuery = sb
     .from('meta_client_assets')
-    .select('id, client_id, facebook_page_id, facebook_page_name, instagram_account_id, instagram_username, ad_account_id')
+    .select('id, client_id, facebook_page_id, facebook_page_name, instagram_account_id, instagram_username, ad_account_id, instagram_connection_id')
     .eq('is_active', true)
 
   if (body.clientId) {
@@ -500,6 +496,7 @@ async function handleRequest(req: Request): Promise<Response> {
     facebookPageName: a.facebook_page_name,
     instagramAccountId: a.instagram_account_id,
     instagramUsername: a.instagram_username,
+    instagramConnectionId: a.instagram_connection_id ?? null,
     adAccountId: a.ad_account_id,
   }))
   // A client can only be synced if it has at least one linked page/IG id.
@@ -549,9 +546,25 @@ async function handleRequest(req: Request): Promise<Response> {
     const pageToken = client.facebookPageId
       ? (pageTokenMap.get(client.facebookPageId) ?? accessToken)
       : accessToken
-    const igToken = pageToken
-
     try {
+      const instagramCredential = client.instagramAccountId
+        ? await resolveInstagramReportingCredential({
+            asset: { id: client.assetId, clientId: client.clientId, instagramAccountId: client.instagramAccountId, instagramConnectionId: client.instagramConnectionId, facebookPageId: client.facebookPageId },
+            metaConnectionId, metaBaseUrl: baseUrl, metaApiVersion: graphVersion, metaUserToken: accessToken,
+            pageToken: client.facebookPageId ? (pageTokenMap.get(client.facebookPageId) ?? null) : null,
+            loadStandalone: async connectionId => {
+              const { data: connection } = await sb.from('meta_instagram_connections').select('id, client_id, instagram_account_id, status, confirmed_asset_id').eq('id', connectionId).maybeSingle()
+              const { data: token } = await sb.from('meta_instagram_connection_tokens').select('ciphertext_base64, iv_base64, encryption_version, key_version, token_expires_at').eq('connection_id', connectionId).maybeSingle()
+              return { connection, token }
+            },
+            encryptionKeyBase64: Deno.env.get('INSTAGRAM_TOKEN_ENCRYPTION_KEY_B64'), supportedKeyVersion: Deno.env.get('INSTAGRAM_TOKEN_ENCRYPTION_KEY_VERSION'),
+            instagramGraphVersion: Deno.env.get('INSTAGRAM_GRAPH_VERSION'),
+          })
+        : null
+      if (instagramCredential) {
+        knownTokens.push(instagramCredential.token)
+        tokensForRedaction.push(instagramCredential.token)
+      }
       // ── Atomically acquire the monthly master report ───────
       const { data: reportRows, error: reportError } = await sb.rpc('meta_sync_get_or_create_report', {
         p_item_id: null,
@@ -592,7 +605,7 @@ async function handleRequest(req: Request): Promise<Response> {
       }> = []
       const postBounds = metaPostBounds(periodStart, periodEnd)
 
-      if (client.facebookPageId) {
+      if (client.facebookPageId && pageToken) {
         try {
           const fbParams = new URLSearchParams({
             access_token: pageToken,
@@ -666,13 +679,14 @@ async function handleRequest(req: Request): Promise<Response> {
 
       if (client.instagramAccountId) {
         try {
+          if (!instagramCredential) throw new Error('Instagram reporting credential is unavailable.')
           const igParams = new URLSearchParams({
-            access_token: igToken,
+            access_token: instagramCredential.token,
             fields: 'id,caption,media_type,media_product_type,timestamp,permalink,thumbnail_url,media_url,like_count,comments_count',
             limit: '100',
           })
 
-          const igRes = await metaFetch(`${baseUrl}/${client.instagramAccountId}/media?${igParams.toString()}`)
+          const igRes = await metaFetch(`${instagramCredential.baseUrl}/${client.instagramAccountId}/media?${igParams.toString()}`)
           if (igRes.ok) {
             const igData = await igRes.json()
             const rawMedia: Array<Record<string, unknown>> = igData.data ?? []
@@ -728,17 +742,17 @@ async function handleRequest(req: Request): Promise<Response> {
                 break
               }
               let { values, error } = await fetchInsights(
-                baseUrl,
+                instagramCredential.baseUrl,
                 post.metaPostId,
                 igInsightMetricsForType(),
-                igToken,
+                instagramCredential.token,
                 {},
                 knownTokens,
               )
               // One unsupported metric can fail the whole batch — retry once with
               // a minimal, broadly-supported set so views/reach still come through.
               if (error && Object.keys(values).length === 0) {
-                const retry = await fetchInsights(baseUrl, post.metaPostId, ['reach', 'views'], igToken, {}, knownTokens)
+                const retry = await fetchInsights(instagramCredential.baseUrl, post.metaPostId, ['reach', 'views'], instagramCredential.token, {}, knownTokens)
                 if (Object.keys(retry.values).length > 0) {
                   values = retry.values
                   error = retry.error
@@ -873,10 +887,10 @@ async function handleRequest(req: Request): Promise<Response> {
         }
       }
 
-      if (client.facebookPageId && Date.now() < insightDeadline) {
+      if (client.facebookPageId && pageToken && Date.now() < insightDeadline) {
         try {
           const fb = await syncAccountFacts(sb, {
-            clientId: client.clientId, assetId: client.assetId, connectionId: connections[0].id,
+            clientId: client.clientId, assetId: client.assetId, connectionId: metaConnectionId,
             platform: 'facebook', objectId: client.facebookPageId, token: pageToken,
             baseUrl, apiVersion: graphVersion,
             periodMonth: month, periodStart, periodEnd,
@@ -893,13 +907,14 @@ async function handleRequest(req: Request): Promise<Response> {
 
       if (client.instagramAccountId && Date.now() < insightDeadline) {
         try {
+          if (!instagramCredential) throw new Error('Instagram reporting credential is unavailable.')
           const ig = await syncAccountFacts(sb, {
-            clientId: client.clientId, assetId: client.assetId, connectionId: connections[0].id,
-            platform: 'instagram', objectId: client.instagramAccountId, token: igToken,
-            baseUrl, apiVersion: graphVersion,
+            clientId: client.clientId, assetId: client.assetId, connectionId: instagramCredential.connectionId,
+            platform: 'instagram', objectId: client.instagramAccountId, token: instagramCredential.token,
+            baseUrl: instagramCredential.baseUrl, apiVersion: instagramCredential.apiVersion,
             periodMonth: month, periodStart, periodEnd,
             tokens: knownTokens,
-            tokenClass: client.facebookPageId && pageTokenMap.get(client.facebookPageId) ? 'page' : 'user',
+            tokenClass: instagramCredential.tokenClass,
             runType: historicalMonth ? 'historical_resync' : 'manual',
           })
           applyFacts('instagram', ig.facts)
@@ -940,7 +955,7 @@ async function handleRequest(req: Request): Promise<Response> {
       const { error: runError } = await sb.from('meta_sync_runs').insert({
         client_id: client.clientId,
         asset_id: client.assetId,
-        connection_id: connections[0].id,
+        connection_id: metaConnectionId,
         sync_type: 'previous_completed_month',
         period_start: periodStart,
         period_end: periodEnd,
