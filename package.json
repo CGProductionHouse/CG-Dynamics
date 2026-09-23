@@ -17,7 +17,9 @@
     "test:meta-reporting": "node --test tests/metaReportingTruth.test.mjs",
     "reports:truth:dry-run": "node scripts/reconcile-client-report-truth.mjs",
     "preview": "vite preview",
-    "test:video-pipeline": "node --test tests/videoPipeline.test.mjs"
+    "test:video-pipeline": "node --test tests/videoPipeline.test.mjs",
+    "strategies:reviewed:preflight": "node scripts/apply-reviewed-client-strategies.mjs --preflight-only",
+    "strategies:reviewed:apply": "node scripts/apply-reviewed-client-strategies.mjs --apply"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.106.2",
