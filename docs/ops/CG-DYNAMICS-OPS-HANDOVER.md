@@ -197,9 +197,23 @@ The v2 dry-run is regenerated from current production:
   workflow/version/timestamp/staff-amendment/approval/publication preconditions;
 - production writes: 0.
 
-The old `94e42112...` plan is rejected and must not be applied. Next #513 gate is
-supervisor review of the new v2 frozen artifact. Do not apply the new migration
-or mutate, approve or publish any strategy yet.
+The old `94e42112...` plan is rejected and must not be applied.
+
+PR #523 passed supervisor review and merged the frozen v2 artifact at
+`45b794ff655d0bee7b71d5c3ae0dd4c187d23755`.
+
+PR #524 then added the resumable reviewed-plan apply runner and merged at
+`d67edb4b5c3108f6960fb14196f592d79c9148bf`. The runner hard-pins the reviewed
+plan hash, preflights exact live row/version/timestamp/strategy-hash and
+seed-context-hash state, applies only through the guarded atomic RPC, uses
+deterministic idempotency keys, verifies 92 durable amendment receipts and proves
+the 20 non-applicable rows remain unchanged. It contains no approve/publish path.
+
+Production remains unchanged: migration
+`20260923193000_monthly_strategy_context_amend.sql` is still unapplied and no
+#513 strategy mutation has occurred. The next live sequence is migration apply,
+same-hash preflight and exact 92-row draft amendment; approval/publication remains
+a later separate gate.
 
 Kundedienste must not receive a fabricated recurring-social strategy.
 
