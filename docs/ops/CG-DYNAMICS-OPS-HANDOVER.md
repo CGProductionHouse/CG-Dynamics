@@ -98,11 +98,11 @@ the Control Centre before consequential action.
   `20260922153348_extend_background_jobs_for_tiktok_freshness.sql` is unapplied,
   and the background/TikTok functions have not been deployed from that change.
 - Standalone Instagram #471 / PR #473 and security correction #476 / PR #477
-  are merged and closed. Migrations
-  `20260922140000_instagram_login_fallback_foundation.sql` and
-  `20260922144059_standalone_instagram_token_encryption.sql` are unapplied;
-  encryption secret, functions, provider consent, exact-client review/mapping
-  and worker/reporting integration remain protected and inactive.
+  are merged and closed. Issue #491 is the isolated active-client connection
+  queue/review continuation. Production has the foundation and encrypted-token
+  migrations applied and verified plaintext-free, but the provider app secrets,
+  activation flag, functions, consent, exact-client mapping and standalone-token
+  worker selection remain protected and inactive.
 - Meta D02 migration `20260922154243_meta_post_engagement_truth.sql` is
   unapplied, and the related updated Meta persistence/projection functions are
   undeployed. This migration is now also a dependency for deploying the
@@ -142,12 +142,31 @@ by this documentation snapshot.
 - Correction migration `20260922144059_standalone_instagram_token_encryption.sql`
   aborts if plaintext rows exist, removes the plaintext column/raw-token RPC,
   and retains service-role-only atomic `pending_review` persistence.
-- Standalone activation remains false. Foundation/correction migration apply,
-  encryption-secret configuration, function deployment, provider consent,
-  client mapping and worker/reporting integration are separate protected gates.
+- Production now has the foundation/correction migrations applied and verified
+  plaintext-free. Encryption-secret/app configuration, function deployment,
+  provider consent, client mapping and worker/reporting integration remain
+  separate protected gates.
 - No background-worker, Microsoft, Meta sync worker, legacy Facebook token,
   cron, Content Autopilot flag, OneDrive, production secret/config/data or live
   provider state is owned by #476.
+
+## ISSUE #491 CODE LANE — 23 September 2026
+
+- Agent 02 owns the isolated active-client Instagram connection queue from main
+  `16c0056746eff964fedbbe36bfa8f6dc02e9d56f`.
+- The code checkpoint replaces the compile-time activation constant with an
+  exact server flag that fails closed, keeps Page-linked Meta first, exposes the
+  reviewed 17-client matrix in the staff Integrations UI and preserves OAuth
+  completion as encrypted `pending_review`.
+- A new explicit admin/manager confirmation action rechecks exact client,
+  provider account ID, username, professional type, scopes and encrypted-token
+  presence in one transaction before binding the identity to the existing
+  `meta_client_assets` authority. It does not create a reporting/facts store.
+- Migration `20260923110000_instagram_connection_review_binding.sql`, the three
+  Instagram Edge Functions, provider secrets, activation flag and any consent
+  or mappings remain unapplied/undeployed. The shared Meta worker is unchanged;
+  standalone credential selection remains a protected shared-worker gate before
+  autonomous standalone reporting can be enabled.
 
 ## ISSUE #471 CODE LANE — 22 September 2026
 
@@ -162,13 +181,13 @@ by this documentation snapshot.
   one-time OAuth intent, Business/Creator identity verification, server-only
   atomic token persistence and `pending_review`. It deliberately does not write
   `meta_client_assets`, run sync, create reporting facts/checkpoints or publish.
-- The migration, functions, provider app setup, secrets, consent, token/mapping
-  writes and canonical worker token selection remain unapplied/unconfigured.
+- The two foundation migrations are now production-applied; functions, provider
+  app setup, secrets, consent, token/mapping writes and canonical worker token
+  selection remain undeployed/unconfigured.
   The shared background worker, activation and Microsoft files are untouched.
-- Standalone Instagram live activation is explicitly disabled in code. The
-  merged #476 correction makes the prepared persistence contract
-  ciphertext-only, but both migrations, the encryption key and the functions
-  remain unapplied/undeployed; provider consent therefore remains blocked.
+- The merged #476 correction makes the production persistence contract
+  ciphertext-only. Provider configuration, the encryption key and functions
+  remain undeployed; provider consent therefore remains blocked.
 - Existing Facebook/Page-linked Meta remains the first route. Standalone Login is
   only for an exact professional account proven unable/unsuitable to use that
   route. Activation requires a separate CA gate and shared Meta worker review.
