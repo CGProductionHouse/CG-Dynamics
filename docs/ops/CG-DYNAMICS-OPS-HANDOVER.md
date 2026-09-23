@@ -187,7 +187,7 @@ Current production connection layer includes:
 - `tiktok-connection-queue` v3.
 - publishing remains disabled/out of scope.
 
-At last read, only CG Production House had a TikTok connection; it was stale pending the #508 recovery path.
+CG Production House TikTok is now canonically recovered and fresh: exact account `CGPRODUCTIONHOUSE`, persistent read-only scopes, September sync 4 videos, queue 1 connected / 0 reconnect / 55 not connected. Remaining 55 active clients require exact owner-controlled identity discovery and client-by-client provider login before OAuth; do not reuse the CGPH session across clients.
 
 ### Active-client package authority
 
