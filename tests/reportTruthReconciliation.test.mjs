@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
-import { buildFactualReflection, buildReconciliationPlan, isGenericStrategyCopy, reconcileClientMonth, verifiedEvidenceTimestamp } from '../scripts/lib/report-truth-reconciliation.mjs'
+import { buildFactualReflection, buildReconciliationPlan, buildReviewedSnapshot, isGenericStrategyCopy, reconcileClientMonth, summarizeReviewedSnapshot, verifiedEvidenceTimestamp, verifyReviewedSnapshot } from '../scripts/lib/report-truth-reconciliation.mjs'
 
 const client = { id: 'client-1', name: 'Exact Client', active: true }
 const report = { id: 'report-1', client_id: client.id, platform: null, period_start: '2026-09-01', status: 'draft', strategy_next_month: null, content_direction_next_month: null }
@@ -76,19 +76,63 @@ test('plan covers every active client for all three required months', () => {
 
 test('plan hash is stable across generated time and publication satisfaction for safe resume', () => {
   const first = buildReconciliationPlan({ clients: [client], reports: [report], posts: [post] })
-  const published = { ...report, status: 'published', previous_month_reflection: first.rows.find(row => row.month === '2026-09').previous_month_reflection }
+  const desired = first.rows.find(row => row.month === '2026-09')
+  const published = {
+    ...report,
+    status: 'published',
+    period_start: desired.period_start,
+    period_end: desired.period_end,
+    report_title: desired.report_title,
+    previous_month_reflection: desired.previous_month_reflection,
+  }
   const resumed = buildReconciliationPlan({ clients: [client], reports: [published], posts: [post] })
   assert.equal(resumed.plan_hash, first.plan_hash)
   assert.equal(resumed.already_satisfied, 1)
   assert.equal(resumed.mutation_targets, 0)
 })
 
-test('apply is pinned to the reviewed plan and conditional current row state', () => {
-  assert.match(applyScript, /--expected-plan-hash/)
-  assert.match(applyScript, /plan\.plan_hash !== expectedPlanHash/)
+test('immutable snapshot freezes exact source evidence and derived client payload', () => {
+  const snapshot = buildReviewedSnapshot({
+    clients: [client], reports: [report], posts: [post], strategies: [],
+    snapshotCutoff: '2026-09-17T00:00:00.000Z',
+  })
+  assert.equal(snapshot.snapshot_cutoff, '2026-09-17T00:00:00.000Z')
+  assert.match(snapshot.snapshot_hash, /^[a-f0-9]{64}$/)
+  assert.equal(snapshot.rows.length, 3)
+  const september = snapshot.rows.find(row => row.month === '2026-09')
+  assert.deepEqual(september.client, client)
+  assert.equal(september.report.id, report.id)
+  assert.match(september.report.source_version, /^[a-f0-9]{64}$/)
+  assert.deepEqual(september.included_posts[0].verified_evidence, { kind: 'meta_sync_synced_at', value: '2026-09-16T10:00:00.000Z' })
+  assert.equal(september.derived.period_end, '2026-09-16')
+  assert.match(september.derived.report_title, /Month-to-Date/)
+  assert.match(september.derived.previous_month_reflection, /Published-content record/)
+  assert.equal(verifyReviewedSnapshot(snapshot, snapshot.snapshot_hash), snapshot.snapshot_hash)
+  assert.deepEqual(summarizeReviewedSnapshot(snapshot).withheld_reasons, { MISSING_CANONICAL_REPORT: 2 })
+})
+
+test('snapshot integrity rejects tampering and excludes evidence beyond its cutoff', () => {
+  const afterCutoff = { ...post, raw: { source: 'meta_sync', synced_at: '2026-09-18T00:00:00Z' } }
+  const snapshot = buildReviewedSnapshot({
+    clients: [client], reports: [report], posts: [afterCutoff], strategies: [],
+    snapshotCutoff: '2026-09-17T00:00:00.000Z',
+  })
+  assert.equal(snapshot.rows.find(row => row.month === '2026-09').reason, 'NO_IN_MONTH_POST_EVIDENCE')
+  const tampered = structuredClone(snapshot)
+  tampered.rows[0].client.name = 'Changed after review'
+  assert.throws(() => verifyReviewedSnapshot(tampered, snapshot.snapshot_hash), /Snapshot integrity mismatch/)
+})
+
+test('apply requires a reviewed immutable snapshot and conditional current row state', () => {
+  assert.match(applyScript, /Live-plan apply is disabled/)
+  assert.match(applyScript, /--apply-snapshot/)
+  assert.match(applyScript, /--expected-snapshot-hash/)
+  assert.match(applyScript, /verifyReviewedSnapshot\(snapshot, expectedSnapshotHash\)/)
   assert.match(applyScript, /No writes were attempted/)
-  assert.match(applyScript, /filter\(item => item\.state === 'mutation_target'\)/)
-  assert.match(applyScript, /\.eq\('status', row\.expected\.status\)/)
+  assert.match(applyScript, /duplicate or replaced canonical report/)
+  assert.match(applyScript, /report source-version drift/)
+  assert.match(applyScript, /\.eq\('status', row\.report\.status\)/)
   assert.match(applyScript, /updated_at/)
   assert.match(applyScript, /concurrent report change detected/)
+  assert.match(applyScript, /snapshot_cutoff: snapshot\.snapshot_cutoff/)
 })
