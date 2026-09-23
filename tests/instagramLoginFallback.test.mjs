@@ -4,8 +4,8 @@ import { test } from 'node:test'
 import {
   INSTAGRAM_LOGIN_SCOPES,
   INSTAGRAM_STANDALONE_ACTIVATION_BLOCKER,
-  INSTAGRAM_STANDALONE_LIVE_ACTIVATION_ENABLED,
   buildInstagramAuthorizationUrl,
+  isInstagramStandaloneActivationEnabled,
   missingInstagramLoginScopes,
   parseInstagramProfessionalIdentity,
   parseInstagramShortLivedToken,
@@ -102,11 +102,16 @@ test('OAuth intent is exact-client and refuses an existing canonical Instagram m
   assert.match(start, /\['admin', 'manager'\]/)
 })
 
-test('standalone Instagram production activation fails closed until encrypted token storage exists', () => {
-  assert.equal(INSTAGRAM_STANDALONE_LIVE_ACTIVATION_ENABLED, false)
-  assert.match(INSTAGRAM_STANDALONE_ACTIVATION_BLOCKER, /token-at-rest encryption/)
-  assert.match(start, /INSTAGRAM_STANDALONE_LIVE_ACTIVATION_ENABLED/)
-  assert.match(callback, /INSTAGRAM_STANDALONE_LIVE_ACTIVATION_ENABLED/)
+test('standalone Instagram activation is a strict fail-closed server configuration gate', () => {
+  assert.equal(isInstagramStandaloneActivationEnabled(undefined), false)
+  assert.equal(isInstagramStandaloneActivationEnabled(''), false)
+  assert.equal(isInstagramStandaloneActivationEnabled('TRUE'), false)
+  assert.equal(isInstagramStandaloneActivationEnabled('1'), false)
+  assert.equal(isInstagramStandaloneActivationEnabled('true '), false)
+  assert.equal(isInstagramStandaloneActivationEnabled('true'), true)
+  assert.match(INSTAGRAM_STANDALONE_ACTIVATION_BLOCKER, /not enabled/)
+  assert.match(start, /Deno\.env\.get\('INSTAGRAM_STANDALONE_LIVE_ACTIVATION_ENABLED'\)/)
+  assert.match(callback, /Deno\.env\.get\('INSTAGRAM_STANDALONE_LIVE_ACTIVATION_ENABLED'\)/)
   assert.match(migration, /PRODUCTION DEPLOYMENT\/CONSENT IS BLOCKED/)
   assert.match(migration, /Production deployment and consent remain blocked until reviewed token-at-rest encryption/)
 })

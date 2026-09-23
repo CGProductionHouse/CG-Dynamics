@@ -171,7 +171,7 @@ test('final schema and RPC expose only versioned ciphertext fields behind servic
   assert.doesNotMatch(correction, /meta_client_assets\s*\([^)]*insert/i)
 })
 
-test('activation stays disabled and decrypt remains unwired from live Meta workers', () => {
-  assert.match(login, /INSTAGRAM_STANDALONE_LIVE_ACTIVATION_ENABLED: boolean = false/)
+test('activation remains fail-closed and decrypt remains unwired from live Meta workers', () => {
+  assert.match(login, /return rawValue === 'true'/)
   assert.doesNotMatch(worker, /instagramTokenEncryption|decryptInstagramAccessToken/)
 })

@@ -7,11 +7,14 @@ export const INSTAGRAM_LOGIN_AUTHORIZE_URL = 'https://www.instagram.com/oauth/au
 export const INSTAGRAM_LOGIN_TOKEN_URL = 'https://api.instagram.com/oauth/access_token'
 export const INSTAGRAM_GRAPH_HOST = 'https://graph.instagram.com'
 
-// Code-level encryption is prepared, but activation remains a separate protected
-// gate covering migration approval, secret configuration, deployment and consent.
-export const INSTAGRAM_STANDALONE_LIVE_ACTIVATION_ENABLED: boolean = false
 export const INSTAGRAM_STANDALONE_ACTIVATION_BLOCKER =
-  'Standalone Instagram Login remains disabled until token-at-rest encryption migrations, secret configuration and deployment are explicitly approved.'
+  'Standalone Instagram Login is not enabled in this environment.'
+
+// Fail closed. This is intentionally stricter than a truthy check so an absent,
+// misspelled or surprising value can never activate provider consent.
+export function isInstagramStandaloneActivationEnabled(rawValue: string | undefined): boolean {
+  return rawValue === 'true'
+}
 
 export interface InstagramShortLivedToken {
   accessToken: string

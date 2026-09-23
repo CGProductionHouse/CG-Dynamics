@@ -100,11 +100,30 @@ The existing `meta_client_assets` row remains the only canonical reporting mappi
 2. For each exact account, use the existing Meta asset discovery first. Record whether Meta returns it as the mapped Page's Instagram business account.
 3. For a proven professional account that is absent from the Page route, decide whether CA wants standalone Instagram Login and obtain the account owner's consent at action time.
 4. Obtain supervisor review and merge of the code-only encryption correction.
-5. Obtain explicit CA approval to apply the foundation and correction migrations together, in order; neither is applied by this lane.
+5. The foundation and correction migrations were later applied and verified plaintext-free; do not replay them.
 6. Obtain explicit CA approval to create/configure the encryption secret and its non-secret key version. Never print or commit the key.
-7. Under separate approval, configure the Instagram product and deploy start/callback with reviewed settings while the activation constant remains false until the controlled gate.
+7. Under separate approval, configure the Instagram product and deploy the reviewed functions while the exact server activation flag stays absent/false until the controlled gate.
 8. Run one controlled exact-client provider-consent test only after the prior gates are accepted.
 9. Require a separate review before any decrypt helper, standalone token, mapping, worker or reporting integration is activated.
+
+## Issue #491 active-client connection checkpoint — 23 Sep 2026
+
+The follow-up code lane turns this reviewed evidence into a staff connection
+queue without changing the evidence itself. Only currently active Dynamics
+clients without a canonical Instagram mapping or an explicit not-applicable
+decision are shown. The six verified handles are displayed as review evidence;
+the other eleven remain explicitly unverified and are never guessed.
+
+The provider-native flow remains Page-linked first. Standalone OAuth is enabled
+only by the exact server value `INSTAGRAM_STANDALONE_LIVE_ACTIVATION_ENABLED=true`.
+OAuth completion remains encrypted and `pending_review`; an authenticated active
+admin/manager must confirm the exact client, provider account ID and username
+before the transaction can bind it to `meta_client_assets`.
+
+This checkpoint does not apply its additive review-binding migration, configure
+provider secrets, deploy functions, run consent, write mappings or teach the
+shared Meta worker to select/decrypt standalone credentials. Those remain
+separate protected gates, so no autonomous standalone reporting is claimed yet.
 
 ## Evidence notes
 

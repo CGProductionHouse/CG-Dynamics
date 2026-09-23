@@ -3,7 +3,7 @@ import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import {
   buildInstagramAuthorizationUrl,
   INSTAGRAM_STANDALONE_ACTIVATION_BLOCKER,
-  INSTAGRAM_STANDALONE_LIVE_ACTIVATION_ENABLED,
+  isInstagramStandaloneActivationEnabled,
 } from '../_shared/instagramLogin.ts'
 
 function base64Url(bytes: Uint8Array): string {
@@ -18,7 +18,7 @@ async function sha256Hex(value: string): Promise<string> {
 Deno.serve(async req => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders })
   if (req.method !== 'POST') return jsonResponse({ ok: false, error: 'Method not allowed.' }, 405)
-  if (!INSTAGRAM_STANDALONE_LIVE_ACTIVATION_ENABLED) {
+  if (!isInstagramStandaloneActivationEnabled(Deno.env.get('INSTAGRAM_STANDALONE_LIVE_ACTIVATION_ENABLED'))) {
     return jsonResponse({ ok: false, error: INSTAGRAM_STANDALONE_ACTIVATION_BLOCKER }, 503)
   }
 

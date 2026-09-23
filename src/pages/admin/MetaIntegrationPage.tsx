@@ -12,6 +12,7 @@ import {
   type MetaFailureGroup,
 } from '../../lib/metaSyncFailures'
 import { metaAssetRunLabel, type MetaAssetRunPresentation } from '../../lib/metaAssetRunPresentation'
+import { InstagramConnectionQueue } from '../../components/integrations/InstagramConnectionQueue'
 
 const STEP_LABELS = ['Connect Meta', 'Link assets', 'Sync data', 'Review draft']
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined
@@ -1028,6 +1029,7 @@ export default function MetaIntegrationPage() {
   // OAuth result from URL query params.
   useEffect(() => {
     const meta = searchParams.get('meta')
+    const instagram = searchParams.get('instagram')
     if (meta === 'connected') {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- reflect the provider callback encoded in the URL
       setConnectMsg('Meta connected. Next step: link assets to clients.')
@@ -1039,6 +1041,18 @@ export default function MetaIntegrationPage() {
     } else if (meta === 'permissions_missing') {
       setConnectMsg('Meta connected, but one or more reporting permissions were not granted. Reconnect Meta and approve all requested permissions.')
       checkConnection()
+      window.history.replaceState(null, '', window.location.pathname)
+    } else if (instagram === 'review_required') {
+      setConnectMsg('Instagram connected securely. Review the exact account below before creating its canonical client mapping.')
+      window.history.replaceState(null, '', window.location.pathname)
+    } else if (instagram === 'activation_blocked') {
+      setConnectMsg('Standalone Instagram Login is not enabled in this environment.')
+      window.history.replaceState(null, '', window.location.pathname)
+    } else if (instagram === 'denied') {
+      setConnectMsg('Instagram consent was cancelled. No account was connected.')
+      window.history.replaceState(null, '', window.location.pathname)
+    } else if (instagram) {
+      setConnectMsg('Instagram Login did not complete. No canonical mapping was changed.')
       window.history.replaceState(null, '', window.location.pathname)
     }
   }, [searchParams, checkConnection])
@@ -1746,6 +1760,15 @@ export default function MetaIntegrationPage() {
           Connection, permissions and schema readiness are checked server-side. Meta tokens never reach the browser. Token storage remains server-only but is not yet encrypted at rest, so encryption hardening is still required before broader production rollout.
         </p>
       </PremiumCard>
+
+      <InstagramConnectionQueue
+        clients={clients}
+        linkedAssets={linkedAssets}
+        providerPages={pages}
+        providerAssetsLoaded={assetsLoaded}
+        onLoadProviderAssets={() => { void loadAssets() }}
+        onCanonicalMappingChanged={loadLinkedAssets}
+      />
 
       {/* Readiness drilldown */}
       {filteredClientsForDrilldown && (
@@ -2504,8 +2527,8 @@ export default function MetaIntegrationPage() {
                     <p className="text-brand-primary">{asset.facebook_page_name || 'No Facebook Page linked'}</p>
                     <p className="text-brand-primary">{asset.instagram_username ? `@${asset.instagram_username}` : asset.instagram_not_applicable ? 'Instagram not applicable' : 'No Instagram account linked'}</p>
                     <p className="text-brand-primary">{asset.ad_account_name || 'No ad account linked'}</p>
-                    {asset.facebook_page_id && <p className="mt-2 text-xs text-brand-primary/65">{healthAvailable ? metaAssetRunLabel('Facebook', health?.facebook ?? null) : 'Facebook: refresh diagnostics unavailable'}</p>}
-                    {asset.instagram_account_id && <p className="text-xs text-brand-primary/65">{healthAvailable ? metaAssetRunLabel('Instagram', health?.instagram ?? null) : 'Instagram: refresh diagnostics unavailable'}</p>}
+                    {asset.facebook_page_id && <p className="mt-2 text-xs text-brand-primary/65">{healthAvailable ? metaAssetRunLabel('Facebook', health?.facebook ?? null) : 'Facebook: refresh diagnostics unavailable; no durable checkpoint recorded'}</p>}
+                    {asset.instagram_account_id && <p className="text-xs text-brand-primary/65">{healthAvailable ? metaAssetRunLabel('Instagram', health?.instagram ?? null) : 'Instagram: refresh diagnostics unavailable; no durable checkpoint recorded'}</p>}
                   </div>
                   <ActionButton variant="danger" size="sm" onClick={() => handleDeactivate(asset)}>
                     Deactivate
