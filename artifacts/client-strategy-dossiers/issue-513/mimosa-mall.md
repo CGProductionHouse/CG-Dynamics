@@ -4,12 +4,17 @@ Client ID: `e276f019-a580-44c5-a7ab-e43840c33a64`
 
 Issue: #513
 
-Evidence hash: `db4b0f026b4f95f33323ffc638b76fde5413b1db7d00fcc6f85f00efc155948d`
-Status: **dossier complete; strategy gate blocked**
+Evidence hash: `1d7cdac3b1186009be99c378bea9d7f41c9abb6652f30585ef66f29dbd2dd2a1`
+Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- No exact evidence available; do not fill this gap with generic copy.
+- individual Mimosa Mall tenants and their national brands;
+- Pareto or any centre-management/company entity;
+- agencies, suppliers and media partners;
+- event sponsors and campaign partners;
+- neighbouring or collaborating shopping centres;
+- historical event brands such as a Mimosa Mall marathon/family-run identity.
 
 ## Confirmed package
 
@@ -27,22 +32,37 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Client and CG constraints
 
-- No exact evidence available; do not fill this gap with generic copy.
+- explicit current client or CG Production House correction / client-supplied current information;
+- current official Mimosa Mall website and current centre-maintained structured pages;
+- current official Mimosa Mall social channels / social content exposed through the official site;
+- current authoritative centre, owner or verified business listings where relevant;
+- current tenant/partner first-party sources for facts about that tenant/partner only;
+- historical Project files, old posts, campaign concepts and older CG work;
 
 ## Research observations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- warm, supportive community and school content;
+- emotional but concrete community-impact storytelling;
+- concise holiday/occasion messages;
+- factual operational notices;
+- direct tenant opening announcements;
+- event/competition information with exact participation details;
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Correct facts are only the starting point.
+- Future Mimosa Mall marketing should feel like someone understands the centre, the actual tenant/event, Bloemfontein and the supplied asset.
+- the real local occasion or reason to visit;
+- a recognisable shopper/family/community moment;
+- one useful detail that helps the audience act;
+- a small human observation or playful angle when appropriate;
 
 ## Strategy gate blockers
 
-- `PRODUCTION_GUIDE_RETRIEVAL_REQUIRED`
+- None at dossier level. Package-bounded strategy still requires field-by-field quality review.
 
 ## Sources
 
-- production-client-guide:MIMOSA-MALL-CLIENT-MARKETING-INTELLIGENCE-2026-09.md
+- production-client-guide:mimosa-mall.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#e276f019-a580-44c5-a7ab-e43840c33a64

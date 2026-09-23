@@ -4,17 +4,17 @@ Client ID: `2aed8a31-bd53-4ad1-a3dc-432865adfb3d`
 
 Issue: #513
 
-Evidence hash: `c2ceb1117ef36cd7de3259e6eadbcb64adbc1adce5ed448d9f36bea96332a1aa`
+Evidence hash: `711a2e530c67732991cc27a0ad97f597bc3942996d53ac041d84c25fd86ccbd1`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- product or product category;
-- repetitive “you can trust us” wording;
-- robotic or influencer-style hype.
-- Keep captions natural, specific and concise.
-- A short one-liner is often enough when the artwork already carries the detail.
-- Captions must add something to the artwork instead of repeating it word-for-word.
+- short, readable copy often performs the job better than long polished wording;
+- captions should add to artwork, not duplicate it;
+- colour content should explain the effect in the room;
+- expertise is stronger proof than generic popularity;
+- premium/refined wording must be supported by something real;
+- voting, awards, app CTAs, promotions and special campaign treatments are temporary, not permanent feed rules;
 
 ## Confirmed package
 
@@ -45,7 +45,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Keep captions natural, specific and concise.
+- A short one-liner is often enough when the artwork already carries the detail.
+- Captions must add something to the artwork instead of repeating it word-for-word.
+- Add one useful detail, context point or practical CTA.
+- Do not mix Afrikaans and English unless specifically requested.
+- If Afrikaans is requested, use natural everyday spoken Afrikaans.
 
 ## Strategy gate blockers
 
@@ -53,6 +58,6 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Sources
 
-- docs/ai-workforce/client-intelligence/DULUX-PAINT-PAPER-BLOEMFONTEIN-CG-DYNAMICS-CLIENT-GUIDE.md
+- production-client-guide:dulux-paint-and-paper-bloemfontein.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#2aed8a31-bd53-4ad1-a3dc-432865adfb3d

@@ -1,0 +1,10 @@
+{
+  "client_id": "b6052710-417d-4b3b-8348-0f126bfea671",
+  "client_name": "Germoparts",
+  "guide_id": "247d841d-9028-4eae-b121-0cf7ce43407b",
+  "version": 1,
+  "runtime_readiness": "ready",
+  "source_pack_path": "docs/ai-workforce/client-intelligence/GERMOPARTS-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md",
+  "source_revision": "e808404571ba985201f8e639bd1c50434d5ba25e",
+  "source_observed_at": "2026-09-07 22:00:00+00"
+}

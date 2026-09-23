@@ -4,17 +4,17 @@ Client ID: `ed7aa1ae-de21-4151-a8f9-54796b234c1f`
 
 Issue: #513
 
-Evidence hash: `f70477e8c3cf8d8b48b6675a6155e39ddb1f2cbed334fab5f00b811ccf1346dd`
+Evidence hash: `3da13393bc5d6c961027dda92d7e65aeea0e1eecf3bdd9795d68ca6a5e09402a`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- which brands and branches belong in the Piek content ecosystem;
-- how each brand should sound;
-- what wording and visual approaches the client repeatedly accepts or rejects;
-- what details must be included in captions;
-- which branches have different partners/services;
-- what historical context matters;
+- explicit current client/CG Production House correction;
+- current CGProductionHouse/PiekGroup-Website main structured data;
+- current CGProductionHouse/gettogether-website main data for Get Together;
+- current Piek Dynamics intelligence / this Guide;
+- authoritative public sources where extra verification is needed;
+- old Project PDFs, old public-site snapshots and historical captions.
 
 ## Confirmed package
 
@@ -32,12 +32,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Client and CG constraints
 
-- unverified locations or services;
-- mixing branch details that belong to different station brands.
-- branch phone/email if used operationally;
-- station manager/staff names;
-- exact store/restaurant partner mix;
-- Woolworths/Steers/KAUAI/Wimpy/Get Together/Col'Cacchio presence;
+- PIEK GROUP OF COMPANIESBUSINESSINFO.pdf — KEEP as original evidence;
+- SASOLBUSINESSINFO.pdf — KEEP as original evidence;
+- ENGENBUSINESSINFO.pdf — REPLACE as everyday grounding;
+- GETTOGETHERBUSINESSINFO.pdf — REPLACE as everyday grounding.
+- correct current branch name?
+- partner/service valid for that branch?
 
 ## Research observations
 
@@ -45,7 +45,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Correct facts are only the starting point.
+- A Piek caption/content idea should feel like a real person understood the asset, branch, audience and occasion.
+- start from the actual image/video/poster;
+- notice what the artwork already says;
+- add to it instead of repeating it;
+- add a point of view, observation, useful detail, personality, local relevance, feeling or reason to act;
 
 ## Strategy gate blockers
 
@@ -53,6 +58,6 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Sources
 
-- docs/ai-workforce/client-intelligence/PIEK-GROUP-CLIENT-OPERATIONAL-INTELLIGENCE-2026-09.md
+- production-client-guide:piek-group.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#ed7aa1ae-de21-4151-a8f9-54796b234c1f

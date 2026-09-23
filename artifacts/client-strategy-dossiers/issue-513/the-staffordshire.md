@@ -4,12 +4,17 @@ Client ID: `dfa47255-875d-43cf-8a22-cfe1a6247fb7`
 
 Issue: #513
 
-Evidence hash: `4a95a99e7262713e25a6986225aed0f03597484c8acddcbc9ed2e6c256680f4d`
-Status: **dossier complete; strategy gate blocked**
+Evidence hash: `2e3fbaadda6c6f808f7b479c67f2e95ba45c7aa9682d24b5dfff6e731d7fd979`
+Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Issue 241 and current PR 247 only for exact-client runtime/ownership boundaries;
+- Issue 248 human creative standard;
+- Issue 256 / TBS Brokers as the immediately preceding out-of-sequence Project migration pattern;
+- current freshness/provenance protocol and client-research progress references on main;
+- current main Staffordshire/Staffy alias and historical matching references;
+- current first-party Staffy website and accessible social destinations;
 
 ## Confirmed package
 
@@ -27,22 +32,37 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Client and CG constraints
 
-- No exact evidence available; do not fill this gap with generic copy.
+- The Staffy is a Bloemfontein pub & restaurant;
+- food/drink hospitality is core;
+- table bookings are supported;
+- events/tickets are a live business function;
+- private functions are currently promoted;
+- current site supports daily-specials and menu discovery;
 
 ## Research observations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- rugby and late-match viewing;
+- live music and ticketed events;
+- Heritage Day / braai-style local occasions;
+- private functions and hosted celebrations;
+- community response and audience participation;
+- energetic event announcements;
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Captions must add a second layer beyond the artwork/video.
+- a human reaction to the announcement;
+- what changed because the audience asked;
+- a direct booking/ticket prompt;
+- one useful event logistics detail that is current and supplied;
+- a quick crowd-facing joke tied to the content;
 
 ## Strategy gate blockers
 
-- `PRODUCTION_GUIDE_RETRIEVAL_REQUIRED`
+- None at dossier level. Package-bounded strategy still requires field-by-field quality review.
 
 ## Sources
 
-- production-client-guide:THE-STAFFORDSHIRE-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md
+- production-client-guide:the-staffordshire.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#dfa47255-875d-43cf-8a22-cfe1a6247fb7

@@ -1,0 +1,10 @@
+{
+  "client_id": "504113ee-fba9-4993-807e-a86066615212",
+  "client_name": "WiseRide",
+  "guide_id": "653c6c4e-c8a7-4413-bb4c-19d83fdc50a0",
+  "version": 1,
+  "runtime_readiness": "ready",
+  "source_pack_path": "docs/ai-workforce/client-intelligence/WISERIDE-CLIENT-INTELLIGENCE-2026-09.md",
+  "source_revision": "16204a8d3d16bf44a59085321d1483821e99fab9",
+  "source_observed_at": "2026-09-07 22:00:00+00"
+}

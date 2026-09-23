@@ -4,17 +4,17 @@ Client ID: `c8d34a97-8400-4f52-8b0d-843491fe3d3b`
 
 Issue: #513
 
-Evidence hash: `9854a44202a16e14a34e7ade7c91d3ea945858c1c8b21d57950e567e9ad55212`
+Evidence hash: `3b3bad2c49e076e1dcd9e12a630aec2d9568fb4abfe62046bfd130475dfff8d3`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- a real Bloemfontein office and team;
-- First Technology Group scale and national specialist access;
-- hardware, cloud, cyber security, networking, modern workplace, managed services and professional services under one ecosystem;
-- local relationship/account management rather than remote-only support;
-- the ability to serve SMEs through to larger institutions and enterprises.
-- Current public name: First Technology Central.
+- First Technology Bloemfontein
+- First Tech, when used casually by the local team
+- 87 General Hertzog Street, Dan Pienaar, Bloemfontein, 9301
+- Main office phone: 051 430 4455
+- Official location email: info@firsttechfs.co.za
+- Canonical group website: https://www.firsttech.co.za/
 
 ## Confirmed package
 
@@ -32,25 +32,30 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Client and CG constraints
 
-- exact current Central team and public-facing roles;
-- whether the Dan Pienaar Mall / Preller retail presence is fully closed or remains a separate point;
-- correct function of tech@firsttechfs.co.za, sales@firsttechfs.co.za and info@firsttechfs.co.za;
-- current local support hours and after-hours SLA availability;
-- current local managed-service packages;
-- assessment offerings and whether any are free/paid;
+- explicit current client/CG Production House correction or client-supplied current information;
+- current official First Technology / First Technology Central owned sources;
+- current local First Technology Central social content;
+- current verified business/listing evidence;
+- current official FirstShop evidence where the task is specifically about FirstShop;
+- older CG intelligence and historical posts.
 
 ## Research observations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- B2B technical/service copy is predominantly English.
+- Current posts are usually short and direct, with functional contact lines.
+- Cyber, M365, backup/network and stationery are active current content territories.
+- Local content sometimes uses a clear sales/footer block, but this should not override CG's explicit rule to add contacts only where operationally useful.
+- Recent posts contain generic phrases such as stay ahead, work smarter, future-proof and broad solution language. These are current historical evidence, not the creative-quality target under 248.
+- Five hashtags in recent posts supports the max-five standard, but the exact five must remain dynamic.
 
 ## Evidence-backed recommendations
 
-- Is there a Bloemfontein team?
-- What can they solve locally?
-- Do they support SMEs as well as enterprise?
-- Can they assess my current environment?
-- Can they supply and support hardware?
-- What happens after I submit an enquiry?
+- Correct facts are only the starting point.
+- First Technology Central copy must feel like the local team understands real business technology problems and can explain them without corporate fog.
+- professional, clear and confident;
+- calm, useful and technically literate;
+- business-first rather than product-spec-first;
+- human and locally accountable;
 
 ## Strategy gate blockers
 
@@ -58,6 +63,6 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Sources
 
-- docs/ai-workforce/client-intelligence/FIRST-TECHNOLOGY-CENTRAL-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md
+- production-client-guide:first-technology-central.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#c8d34a97-8400-4f52-8b0d-843491fe3d3b

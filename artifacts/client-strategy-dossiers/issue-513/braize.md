@@ -4,17 +4,17 @@ Client ID: `6b67a2df-e2ab-418b-bcee-03aef5963d37`
 
 Issue: #513
 
-Evidence hash: `f6dddc97aacca08d941cb81325923f6a860238f532a215c97996e485552f85d1`
+Evidence hash: `20d091548dbfeea4e50ee3b376f05d3b7824f8786e5a80236ea8b581e2ba65a2`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- website linked publicly: www.braize.co.za;
-- current public promise: "People make the party. We bring the right ones.";
-- current service description: professional waitresses, bartenders and promo girls for events that stand out;
-- current feed direction: event footage, branded team imagery, event posters, staff features and premium black/orange identity.
-- cocktail bartenders where skills are verified;
-- hostess and guest-facing support.
+- Issue 248 Human creative standard;
+- Issue 241 current comments and draft PR 247 for ownership/runtime boundary;
+- current client migration workflow on the 241 branch, with later 241 comments treated as authoritative where they supersede the older static-guide wording;
+- active canonical row: Braize;
+- exact active client ID: 6b67a2df-e2ab-418b-bcee-03aef5963d37;
+- separate inactive row: Braize Promotions;
 
 ## Confirmed package
 
@@ -32,12 +32,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Client and CG constraints
 
-- written terms with clients and staff;
-- minimum wage and working-time compliance where applicable;
-- overtime and public-holiday rules;
-- alcohol-service age and conduct;
-- harassment and discrimination;
-- injury and incident reporting;
+- whether Braize still wants the public Braize girls terminology beyond specific social contexts;
+- current public contact/footer set;
+- current operational service area / national coverage;
+- exact currently bookable role list;
+- current recruitment/application pathway;
+- current training/vetting/supervision/replacement model;
 
 ## Research observations
 
@@ -45,12 +45,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- one accountable staffing partner;
-- access to people who fit the tone of the event.
-- one reliable staffing contact;
-- staff who arrive early and correctly dressed;
-- no need to chase individual workers.
-- Promotional and activation staff
+- Braize output should be recognisably different from generic event-agency copy.
+- human, energetic, specific and commercially useful;
+- one focused thought is stronger than a three-item stack;
+- captions add a new angle to the creative instead of paraphrasing it;
+- real service pressure, serving/pouring, crowd flow, event context or team performance can provide the hook when visible/verified;
+- B2B booking content should address the event problem or job being done;
 
 ## Strategy gate blockers
 
@@ -58,6 +58,6 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Sources
 
-- docs/ai-workforce/client-intelligence/BRAIZE-EVENT-STAFFING-CLIENT-MARKETING-INTELLIGENCE-2026-08.md
+- production-client-guide:braize.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#6b67a2df-e2ab-418b-bcee-03aef5963d37

@@ -5,8 +5,8 @@
   "package_authority": "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
   "active_client_count": 56,
   "dossier_complete_count": 56,
-  "strategy_ready_count": 27,
-  "strategy_blocked_count": 29,
+  "strategy_ready_count": 55,
+  "strategy_blocked_count": 1,
   "clients": [
     {
       "name": "Agri-Secure",
@@ -24,11 +24,9 @@
       "id": "fd16ebae-a50b-4920-afe0-94c2631f8f06",
       "file": "all-around-pvc.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
-      "blockers": [
-        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
-      ],
-      "evidence_hash": "3acccc76492a40dcee44714f46dee39b953b4797f57a8f56a9d7be2df1e20007",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "1d9f4961c59379e578ec42cc0b272bb2ad1436f663ae3b7eb754c759fc176e85",
       "reports": 1,
       "posts": 12
     },
@@ -39,7 +37,7 @@
       "dossier_status": "complete",
       "strategy_status": "ready",
       "blockers": [],
-      "evidence_hash": "777cec32de18d407f1a74853f4a1affa72f3d88d43239245e9c0865b55716abd",
+      "evidence_hash": "12727114357a401ba459a2ee2103cbca3decf3b1a150a8a5f74ae668bdfc0d0f",
       "reports": 3,
       "posts": 22
     },
@@ -50,7 +48,7 @@
       "dossier_status": "complete",
       "strategy_status": "ready",
       "blockers": [],
-      "evidence_hash": "171d3c7cbd098ccb67a6c07d92328e887d30fecdfaa49f8aefc4420e32a1298e",
+      "evidence_hash": "30089c19a30d2d349fdeaa8b0dcca1c117b523d34087a43e129f7a5cd8bdbae0",
       "reports": 2,
       "posts": 41
     },
@@ -61,7 +59,7 @@
       "dossier_status": "complete",
       "strategy_status": "ready",
       "blockers": [],
-      "evidence_hash": "e31b1f9bde891674c669895aa5d980fde01440978456fec9400c115286e95b3e",
+      "evidence_hash": "d7b6a3817c35fad44b6bfa48efb7dead797e7c8f5033c3f7a47548b64eb05420",
       "reports": 0,
       "posts": 0
     },
@@ -72,7 +70,7 @@
       "dossier_status": "complete",
       "strategy_status": "ready",
       "blockers": [],
-      "evidence_hash": "37126eb02f540168a28c2129e9d6c23e389685a427017fcb4c44ff21253eebd0",
+      "evidence_hash": "c93e572bf8aefc57694d5537403ee8211e41045ba92caae683af3d02b707a80f",
       "reports": 3,
       "posts": 277
     },
@@ -83,7 +81,7 @@
       "dossier_status": "complete",
       "strategy_status": "ready",
       "blockers": [],
-      "evidence_hash": "47e4161bebf9cd49f19218246a2979d10a4e539c975cf8579b9c695dfc0155d6",
+      "evidence_hash": "bf8aaf8a3e3a8000221c8f44fb88a837c6b0711e85a3480e0aae07b4b49e0901",
       "reports": 0,
       "posts": 0
     },
@@ -94,7 +92,7 @@
       "dossier_status": "complete",
       "strategy_status": "ready",
       "blockers": [],
-      "evidence_hash": "5b27529a0b9c8a47938a5e329eb09144fcc874d5de7dcebd5748eed08edeb40f",
+      "evidence_hash": "41cc7210826e5628b98817c834a2cfaf97410269148270b550c0c4f69140f754",
       "reports": 3,
       "posts": 4
     },
@@ -103,11 +101,9 @@
       "id": "8e448cf9-1534-4ba1-89a4-93e4c8b83d2f",
       "file": "bouwer-and-coetzee-attorneys.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
-      "blockers": [
-        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
-      ],
-      "evidence_hash": "1250fe124f48bbca37d932488558596cf07c588f77e4c22c91c83d11391a3a4b",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "0aea81a9ed9472a6db91b8bac2c080ffa1221b9ee7631a71156cf2757936526f",
       "reports": 3,
       "posts": 21
     },
@@ -118,7 +114,7 @@
       "dossier_status": "complete",
       "strategy_status": "ready",
       "blockers": [],
-      "evidence_hash": "f6dddc97aacca08d941cb81325923f6a860238f532a215c97996e485552f85d1",
+      "evidence_hash": "20d091548dbfeea4e50ee3b376f05d3b7824f8786e5a80236ea8b581e2ba65a2",
       "reports": 3,
       "posts": 22
     },
@@ -129,7 +125,7 @@
       "dossier_status": "complete",
       "strategy_status": "ready",
       "blockers": [],
-      "evidence_hash": "b844586c8e6a1a24f20b98f935445741a55346266fd09db233602f3877614a40",
+      "evidence_hash": "5515590298c19da8d0e8be3f2d5a1c0e20be28d6f77f8f54facc0fea4254215a",
       "reports": 3,
       "posts": 22
     },
@@ -140,7 +136,7 @@
       "dossier_status": "complete",
       "strategy_status": "ready",
       "blockers": [],
-      "evidence_hash": "3ab510517bfb77ed1d52814d0c1a2f4c92fa0ba4b98d96b8a30685d2eef92896",
+      "evidence_hash": "b461c8d79eed1af7a5cdfa8d01e33301c95b0d77d7a30ab77ff13004b28f6b66",
       "reports": 3,
       "posts": 115
     },
@@ -151,7 +147,7 @@
       "dossier_status": "complete",
       "strategy_status": "ready",
       "blockers": [],
-      "evidence_hash": "785748cab4b85635e4f99ffc1b5fc38da2294cc3395d3951073a37476964b58e",
+      "evidence_hash": "96c628106a79a355663347dac680726c2323dd09e005dad60ab90ca8fea2788c",
       "reports": 3,
       "posts": 87
     },
@@ -162,7 +158,7 @@
       "dossier_status": "complete",
       "strategy_status": "ready",
       "blockers": [],
-      "evidence_hash": "073d6f8e43d5907bdf712917c8aeebe12d552eecec7e1b46ed3d8c94ccb56fa1",
+      "evidence_hash": "55c3e462e15b6c1cb25b42e0d9b2c8ad709d924bf06f8b18a5c0d6e69ab3dd04",
       "reports": 3,
       "posts": 21
     },
@@ -173,7 +169,7 @@
       "dossier_status": "complete",
       "strategy_status": "ready",
       "blockers": [],
-      "evidence_hash": "d632b14f1309a66e6b19d9e38ef1510d42211aca6cee1c5937d130126b915815",
+      "evidence_hash": "07edb8cbd5e73eaed9d9397537e277987f96939d52235ce81c3a719e7c86f9e3",
       "reports": 3,
       "posts": 40
     },
@@ -184,7 +180,7 @@
       "dossier_status": "complete",
       "strategy_status": "ready",
       "blockers": [],
-      "evidence_hash": "3126c1c02f9633b89c9d5c5cbe369596fe5dfab2b8360b07255bc18b2e8d5657",
+      "evidence_hash": "75e94c1f51bffa01cb5fe0a04d37234989e634dcfe1c40222c54706d37724ebb",
       "reports": 3,
       "posts": 14
     },
@@ -195,7 +191,7 @@
       "dossier_status": "complete",
       "strategy_status": "ready",
       "blockers": [],
-      "evidence_hash": "0315333e586d2c3d1e7d57df38b8c522893566e8d094ebb072f534b18aa6a7a6",
+      "evidence_hash": "9a1d0a6ea9ece9167038fe05c1d0d466e4e2d82945b20b3f1a6c921748948a86",
       "reports": 3,
       "posts": 40
     },
@@ -206,7 +202,7 @@
       "dossier_status": "complete",
       "strategy_status": "ready",
       "blockers": [],
-      "evidence_hash": "c2ceb1117ef36cd7de3259e6eadbcb64adbc1adce5ed448d9f36bea96332a1aa",
+      "evidence_hash": "711a2e530c67732991cc27a0ad97f597bc3942996d53ac041d84c25fd86ccbd1",
       "reports": 3,
       "posts": 52
     },
@@ -217,7 +213,7 @@
       "dossier_status": "complete",
       "strategy_status": "ready",
       "blockers": [],
-      "evidence_hash": "9d83f729d6c4d70f002449672ca615be748f8e8d72b64941f173cfb320542c8e",
+      "evidence_hash": "465d5b51ccbe1e85e6ebce15d7f16cf760cfc942a725a9467edcafeb77ea7d35",
       "reports": 0,
       "posts": 0
     },
@@ -228,7 +224,7 @@
       "dossier_status": "complete",
       "strategy_status": "ready",
       "blockers": [],
-      "evidence_hash": "e2213f0aa1c9717d967b92ed1b4719cb595a182f70be930e88e70688655189d4",
+      "evidence_hash": "7f4c62b374b3e66664374aaf9ebfa1b99195c43834cb0ffc600b1f041306100f",
       "reports": 3,
       "posts": 6
     },
@@ -239,7 +235,7 @@
       "dossier_status": "complete",
       "strategy_status": "ready",
       "blockers": [],
-      "evidence_hash": "3e9b8f83dce8fe102898457030a63f48d71f0c4288857e8367f4407a9b0e4ba6",
+      "evidence_hash": "c8f78bbde5eda6bf760a50e1d8dfbb4043eeb9cd8823f8bae5d7a716a79489d6",
       "reports": 3,
       "posts": 59
     },
@@ -250,7 +246,7 @@
       "dossier_status": "complete",
       "strategy_status": "ready",
       "blockers": [],
-      "evidence_hash": "2c5d8c8606e2c938f1f9ebfbb844026fa85ee4db6e8ea49e8d93b9088b5e2a6f",
+      "evidence_hash": "a19694e83a099b28ded683b2d8b8b7c9b3e114927a42e3f44a61df873695ce47",
       "reports": 0,
       "posts": 0
     },
@@ -261,7 +257,7 @@
       "dossier_status": "complete",
       "strategy_status": "ready",
       "blockers": [],
-      "evidence_hash": "9854a44202a16e14a34e7ade7c91d3ea945858c1c8b21d57950e567e9ad55212",
+      "evidence_hash": "3b3bad2c49e076e1dcd9e12a630aec2d9568fb4abfe62046bfd130475dfff8d3",
       "reports": 3,
       "posts": 22
     },
@@ -270,11 +266,9 @@
       "id": "4424ed69-7270-4d30-a1ea-0b77d76912df",
       "file": "forklift-trucks.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
-      "blockers": [
-        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
-      ],
-      "evidence_hash": "6266b1d2dfb4346b2205eb57b183196e7f954f802cecbda47883988c95ef7311",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "937383a9dedeb76cef370fa0926cc8d4e7d4d75b9f76c5a91b89e10c9d1c0b8b",
       "reports": 0,
       "posts": 0
     },
@@ -285,7 +279,7 @@
       "dossier_status": "complete",
       "strategy_status": "ready",
       "blockers": [],
-      "evidence_hash": "c8a74a4c5f3020c85f03445614c4dc88b5cfde28efde703abe9155cd781b8b8a",
+      "evidence_hash": "38d23e1d90fd4085bd07da245c917fb19c55c2f66e9f90464cbdcd1937e48338",
       "reports": 3,
       "posts": 85
     },
@@ -296,7 +290,7 @@
       "dossier_status": "complete",
       "strategy_status": "ready",
       "blockers": [],
-      "evidence_hash": "7259755f92089113165ec77b16b442b6f46b9e2b6435351244b55b47054b87ad",
+      "evidence_hash": "3ea0036a3123e387e74ae289413d6ac588056076dcd06f1d0fe07de89a1ebf9b",
       "reports": 0,
       "posts": 0
     },
@@ -307,7 +301,7 @@
       "dossier_status": "complete",
       "strategy_status": "ready",
       "blockers": [],
-      "evidence_hash": "88294002f1be41fa5a1cb78df0f4774345b60f52e8cb37338462c048600da750",
+      "evidence_hash": "5a7e52bf885c15630f302bfc3496286f49ddbd8a74379ad07c12df4615d49308",
       "reports": 3,
       "posts": 11
     },
@@ -316,11 +310,9 @@
       "id": "816c7f59-d56c-46a3-ba15-f76971d83769",
       "file": "human-auto.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
-      "blockers": [
-        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
-      ],
-      "evidence_hash": "f1fe0ad08bca35555872b74d7857d5d2029349a1079d1e66452667e8de0a31a8",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "1292ab9c32b1a28cf0152bd6ed5878ae2dbccf2b789f8a8a1216666dd68140b8",
       "reports": 0,
       "posts": 0
     },
@@ -329,11 +321,9 @@
       "id": "2e643855-e2ad-481f-a6c6-3d934b9f4a50",
       "file": "ipopeng-office-supplies.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
-      "blockers": [
-        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
-      ],
-      "evidence_hash": "159199bc6544b6720e84cfc1931f1cb57eb2e790f19a2f7c4172d7deb2cb6559",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "a253476c195ecc3bedde28bec36a6bcd0633a93bc036a4807ab8a51fedf0e85d",
       "reports": 0,
       "posts": 0
     },
@@ -342,11 +332,9 @@
       "id": "a5eab798-3e00-44cc-947e-463386fdac39",
       "file": "jenkor.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
-      "blockers": [
-        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
-      ],
-      "evidence_hash": "213756fa1093aaacefd1ab725bbb832b3c2734022fba75e48a843d9dbf61b8e6",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "d11aecd5d44e8d92d4fce4f56af1a90596034479181594729a66e43420ae6111",
       "reports": 0,
       "posts": 0
     },
@@ -368,11 +356,9 @@
       "id": "2a5ea019-64f5-4f8e-8a61-61a28940aa6e",
       "file": "local-deli.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
-      "blockers": [
-        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
-      ],
-      "evidence_hash": "4dea2c2e0e9977398a147ddf256ceb5467994c4d8f1d3aa3dfe7d5db3377e2ba",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "f3da5b435a6485e55afc1f672b73c3b5d6038341da6e33830a6cb647e2fa5038",
       "reports": 1,
       "posts": 8
     },
@@ -381,11 +367,9 @@
       "id": "21300630-6755-4591-9a49-e22abbaf7e3d",
       "file": "loraclox.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
-      "blockers": [
-        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
-      ],
-      "evidence_hash": "c2b5b0adc25241afca8ad93c8925575745fddb6e6861a2b21875ec7b3da5b495",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "3cdc0ddb125609ecfbdde592438b5b2b3ab6708c1ab9db387ea6960de1fc2706",
       "reports": 3,
       "posts": 31
     },
@@ -394,11 +378,9 @@
       "id": "7b47afb0-fa55-4916-85f6-09c57e5905b9",
       "file": "madison-wear.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
-      "blockers": [
-        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
-      ],
-      "evidence_hash": "9057f0916947a0b3ec8741f94654f97abe792db0e6abd9a0a5b7af4480baffde",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "6c5e403d70b51aad6e208253a3aa3f586d7dbfc69da0b854a44efdc971931e68",
       "reports": 3,
       "posts": 91
     },
@@ -407,11 +389,9 @@
       "id": "e276f019-a580-44c5-a7ab-e43840c33a64",
       "file": "mimosa-mall.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
-      "blockers": [
-        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
-      ],
-      "evidence_hash": "db4b0f026b4f95f33323ffc638b76fde5413b1db7d00fcc6f85f00efc155948d",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "1d7cdac3b1186009be99c378bea9d7f41c9abb6652f30585ef66f29dbd2dd2a1",
       "reports": 0,
       "posts": 0
     },
@@ -420,11 +400,9 @@
       "id": "94fe2568-3cf1-47dc-801e-d8d5396a0965",
       "file": "ncna.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
-      "blockers": [
-        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
-      ],
-      "evidence_hash": "0a661e8b16d43dffbbe6e3dca25f1c764cc734a67dde89bc48ca6ce655962c5a",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "556ed75250af217304ff1421f7719818e114a3db52930e489cfb185182c55418",
       "reports": 0,
       "posts": 0
     },
@@ -433,11 +411,9 @@
       "id": "4236a60a-990f-484f-8d19-13d2f92fbe3b",
       "file": "novus-steel.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
-      "blockers": [
-        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
-      ],
-      "evidence_hash": "2bc51ec64f4fd0d2e88900959f0e9cc18fa602e1c8ccdb6d28bd3ad365ab787c",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "669241319340b853b3f6892bb20fa3ff6c8fe18e03bb78ddaedc8092565a2231",
       "reports": 3,
       "posts": 17
     },
@@ -446,11 +422,9 @@
       "id": "a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b",
       "file": "peyper-bonds.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
-      "blockers": [
-        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
-      ],
-      "evidence_hash": "79f19ac60f79147bc80e891a948897143fd663402a16ec92b4d538704adab247",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "f6c46109eacc4da32165828caca2e5da2df6c3cc35ed1d6e869f5bbe1c39e11c",
       "reports": 3,
       "posts": 37
     },
@@ -461,7 +435,7 @@
       "dossier_status": "complete",
       "strategy_status": "ready",
       "blockers": [],
-      "evidence_hash": "f70477e8c3cf8d8b48b6675a6155e39ddb1f2cbed334fab5f00b811ccf1346dd",
+      "evidence_hash": "3da13393bc5d6c961027dda92d7e65aeea0e1eecf3bdd9795d68ca6a5e09402a",
       "reports": 3,
       "posts": 49
     },
@@ -470,11 +444,9 @@
       "id": "29a28efd-c998-45e2-a57c-4a751e779e66",
       "file": "psg-bloemfontein.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
-      "blockers": [
-        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
-      ],
-      "evidence_hash": "d55dac7ccfdcfd071b8a0d20c6a4c4779f8f6f6b2e58c96a03239d5ba530e960",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "26186f0a745d4630d0b2ffdfc44803ea50ddc737ed37bbb67da5f0fca3d775be",
       "reports": 3,
       "posts": 15
     },
@@ -483,11 +455,9 @@
       "id": "4f6106de-c437-404e-8cef-fbe848de0665",
       "file": "rc-polypipe.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
-      "blockers": [
-        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
-      ],
-      "evidence_hash": "238b27a3706ec178d435d0275583368c199b90d68b7a109ddc5720bbf1b82ed6",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "912552d62eb24f57ca3a84327029701108d51a9cc3fbda1d40cad6fba8908c66",
       "reports": 3,
       "posts": 39
     },
@@ -496,11 +466,9 @@
       "id": "cdb11a82-339e-4b46-9b09-bde1a23efeaf",
       "file": "red-oak.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
-      "blockers": [
-        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
-      ],
-      "evidence_hash": "4fe46b38da41d1561241a7b8e6e6d3a123a879198f3fa3345297be9b57b1f21a",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "a40b6e4ff4d83d374b404c3415e0c7364d5e500ec65cd1734a07f4a18f070630",
       "reports": 1,
       "posts": 40
     },
@@ -520,11 +488,9 @@
       "id": "917d6f7c-1c2a-4c20-82f0-daa41b9062f5",
       "file": "securiforce.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
-      "blockers": [
-        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
-      ],
-      "evidence_hash": "eb0444807c74508dd5ab83f81f3964020a061f44544fe7ebdc63817fcd6cd934",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "79e1a9c97f4ebd0b626b4ae38fcf643304ed900e323fa254485f7990fc963f29",
       "reports": 3,
       "posts": 107
     },
@@ -533,11 +499,9 @@
       "id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
       "file": "supa-quick-bfn.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
-      "blockers": [
-        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
-      ],
-      "evidence_hash": "f150f575bae93689059cccc448287762f216656b8827f8efdf521a8c5545bfb4",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "818f9351f18d897129972d9df2925b9a4398837dcff1e6f399d277994e7683b4",
       "reports": 3,
       "posts": 13
     },
@@ -546,11 +510,9 @@
       "id": "e2870110-930c-4e63-b2fe-c858030f7258",
       "file": "supa-quick-centurion.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
-      "blockers": [
-        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
-      ],
-      "evidence_hash": "bbc9cd301206b45aa92b899586c6b253c04b57ce0b046dc065d90d1f82cddd90",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "6ed6bb55fa527da96f2fbea3d5a2a1f31a9690e9d39de6f0f4b7f1730a61a328",
       "reports": 3,
       "posts": 13
     },
@@ -559,11 +521,9 @@
       "id": "a36ba938-e9dc-4ecf-bb67-4853608b1c01",
       "file": "tbs-brokers.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
-      "blockers": [
-        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
-      ],
-      "evidence_hash": "951f82e9143becf20f4c934ff0f186ab41c2482e0a1b03b8628885ca2f841353",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "e79f9a89dec73a5f6eb63ebccc873c3c3e15897109c72a1e65b6c2efb079c01d",
       "reports": 3,
       "posts": 49
     },
@@ -572,11 +532,9 @@
       "id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
       "file": "the-staffordshire.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
-      "blockers": [
-        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
-      ],
-      "evidence_hash": "4a95a99e7262713e25a6986225aed0f03597484c8acddcbc9ed2e6c256680f4d",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "2e3fbaadda6c6f808f7b479c67f2e95ba45c7aa9682d24b5dfff6e731d7fd979",
       "reports": 3,
       "posts": 47
     },
@@ -585,11 +543,9 @@
       "id": "204f4f22-14c7-42ed-a956-da57af102706",
       "file": "tobich-optics.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
-      "blockers": [
-        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
-      ],
-      "evidence_hash": "5c0959cfb7063a90045563b1f74633b2e8b00131b42a0644568eb16cc66854a5",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "e60f6861d718e6c6b21547b642b152fb1c3f6244fc8ab89d21c946b97dc08c38",
       "reports": 3,
       "posts": 29
     },
@@ -598,11 +554,9 @@
       "id": "e2ad6d57-5b06-46e1-b75b-b67f017d57f1",
       "file": "toyota-bloemfontein.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
-      "blockers": [
-        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
-      ],
-      "evidence_hash": "dd53d60fadc74ff9625bc200d61e4e53876af935703c22b5d4d9e922502d509e",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "8792b532b64145cf11843375e38691bd2616bd608aa6d9cf6b1d11ec489fe089",
       "reports": 0,
       "posts": 0
     },
@@ -611,11 +565,9 @@
       "id": "1f0406bb-d643-4b83-bc3e-b1ebe87eeb89",
       "file": "vrystaat-kunstefees.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
-      "blockers": [
-        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
-      ],
-      "evidence_hash": "ea4471f70cd03258ea04a9f502d3c8552701d56c42a3d13308912cb1f22a03ad",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "23b6ff96d69c1d63ccc27c60a85a89e02d18e885e622962f0b23642279c44652",
       "reports": 2,
       "posts": 31
     },
@@ -624,11 +576,9 @@
       "id": "e1cb958e-3f68-4a77-b5ea-b471ea62bdef",
       "file": "watch-addict.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
-      "blockers": [
-        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
-      ],
-      "evidence_hash": "f5a033285f6be283438d04da442730c8e3030436c8c436acd7cf9f733698358b",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "a1e5024789059f818999f8a5c1f5448966f369917076c6ad9750c7de62ca7f04",
       "reports": 3,
       "posts": 17
     },
@@ -637,11 +587,9 @@
       "id": "2b953772-e791-4dff-a278-d4dd3521f02e",
       "file": "we-ar-fuels.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
-      "blockers": [
-        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
-      ],
-      "evidence_hash": "ce57e30c554717232e5d9078dc451319d89f6ecb1e95a559e047fd21d8bad28e",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "d5e1d141cf76e514e4bca11f2d2983b0e958184f5f364aff251225fe28aceff3",
       "reports": 3,
       "posts": 20
     },
@@ -650,11 +598,9 @@
       "id": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
       "file": "wiseman-group.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
-      "blockers": [
-        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
-      ],
-      "evidence_hash": "5b7ff565c2720501fb4da588cd7e32e4aec8223d87a7a555bc00a896d04e3c30",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "128fe4bd9d587d79543aaba65f52b2cda2459af48524cd541f75161f595e1a5c",
       "reports": 3,
       "posts": 74
     },
@@ -663,11 +609,9 @@
       "id": "504113ee-fba9-4993-807e-a86066615212",
       "file": "wiseride.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
-      "blockers": [
-        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
-      ],
-      "evidence_hash": "73509346918e4f4bc45fa4e71fb762d59e7b04bbfd6833623dc548ea6fcc8614",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "57282c684638f517feea5a01ed53fbda8a1de1216a8e7d810e86bbeb4e6436ff",
       "reports": 0,
       "posts": 0
     },

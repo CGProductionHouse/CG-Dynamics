@@ -4,12 +4,17 @@ Client ID: `4236a60a-990f-484f-8d19-13d2f92fbe3b`
 
 Issue: #513
 
-Evidence hash: `2bc51ec64f4fd0d2e88900959f0e9cc18fa602e1c8ccdb6d28bd3ad365ab787c`
-Status: **dossier complete; strategy gate blocked**
+Evidence hash: `669241319340b853b3f6892bb20fa3ff6c8fe18e03bb78ddaedc8092565a2231`
+Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- No exact evidence available; do not fill this gap with generic copy.
+- structural/custom fabrication;
+- crane hire for steel erection, heavy lifting and on-site installation support;
+- industrial/custom steel structures;
+- in-house drafting for fabrication/cutting detail;
+- warehouses and sports-facility structures;
+- Email: info@novussteel.co.za
 
 ## Confirmed package
 
@@ -27,7 +32,12 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Client and CG constraints
 
-- No exact evidence available; do not fill this gap with generic copy.
+- steel grades/specifications;
+- dimensions/thicknesses/standards;
+- fabrication or processing capability beyond what is verified;
+- welding/engineering certifications;
+- supplier/manufacturer/partner relationships;
+- service area beyond verified national/project wording;
 
 ## Research observations
 
@@ -35,14 +45,19 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Start with the supplied image/video/poster.
+- What service/application is actually shown?
+- What has the artwork already said?
+- What useful second layer can the caption add?
+- A good Novus Steel caption adds one or more of:
+- why a capability matters on the job;
 
 ## Strategy gate blockers
 
-- `PRODUCTION_GUIDE_RETRIEVAL_REQUIRED`
+- None at dossier level. Package-bounded strategy still requires field-by-field quality review.
 
 ## Sources
 
-- production-client-guide:NOVUS-STEEL-CG-DYNAMICS-CLIENT-GUIDE.md
+- production-client-guide:novus-steel.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#4236a60a-990f-484f-8d19-13d2f92fbe3b

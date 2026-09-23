@@ -182,21 +182,17 @@ Gold-strategy rule:
 - no cross-client evidence;
 - no out-of-package work.
 
-PR #520 exists but its current frozen dry-run used an older service partition:
-- 46 social
-- 5 non-social
-- 5 held
+PR #520 is reconciled to current main and regenerated from the final production receipts:
+- source cutoff: `2026-09-23T17:08:08.859Z`;
+- plan hash: `94e42112c8f8ed79cef7383302c9ff85ff9d813e6aa3f4a016c3c4be165f3665`;
+- 46 social clients / 92 strategy rows ready;
+- 10 non-social or not-currently-social clients / 20 rows non-applicable;
+- 0 held and 0 otherwise blocked;
+- all 112 source strategy rows remained draft and staff-unamended at cutoff;
+- production writes: 0.
 
-That partition is now stale.
-
-**Do not apply PR #520's current plan.**
-
-Now that Agent 01 refreshed the eight #516 service receipts:
-1. rebase/reconcile #520 to current main;
-2. use the latest production guides/dossiers;
-3. regenerate the deterministic Sep/Oct dry-run using final 46 social / 10 non-social / 0 held truth;
-4. return ready / non-applicable / blocked with exact reasons;
-5. no strategy writes until supervisor reviews the regenerated plan.
+Next #513 gate: supervisor review of the frozen PR #520 plan. Do not mutate,
+approve or publish any strategy until a separate exact-plan authorization.
 
 Kundedienste must not receive a fabricated recurring-social strategy.
 

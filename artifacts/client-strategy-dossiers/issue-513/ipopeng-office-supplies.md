@@ -4,12 +4,17 @@ Client ID: `2e643855-e2ad-481f-a6c6-3d934b9f4a50`
 
 Issue: #513
 
-Evidence hash: `159199bc6544b6720e84cfc1931f1cb57eb2e790f19a2f7c4172d7deb2cb6559`
-Status: **dossier complete; strategy gate blocked**
+Evidence hash: `a253476c195ecc3bedde28bec36a6bcd0633a93bc036a4807ab8a51fedf0e85d`
+Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- No exact evidence available; do not fill this gap with generic copy.
+- client ID: 2e643855-e2ad-481f-a6c6-3d934b9f4a50;
+- no exact-client row in clientindustryprofiles;
+- no exact-client Skill Cards (activeclientid count 0);
+- no 2026 monthlydeliverables rows for this exact client ID through September 2026.
+- canonical website: https://ipopengfs.co.za/;
+- public name: Ipopeng Office Supplies;
 
 ## Confirmed package
 
@@ -27,7 +32,12 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Client and CG constraints
 
-- No exact evidence available; do not fill this gap with generic copy.
+- explicit current client/CG Production House information for the exact task;
+- current official Ipopeng website and official first-party channels;
+- current client-provided documents/assets;
+- current verified business listings where first-party evidence is unavailable;
+- historical government/public records as historical evidence only;
+- older CG Project chats, captions and stored memory.
 
 ## Research observations
 
@@ -35,14 +45,19 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- two fun, out-of-the-box short ideas;
+- scripts and scenes workable with one person;
+- then a distinct idea around wholesale / supplying schools.
+- concepts should be practical to shoot with limited cast and simple real-world staging;
+- more ideas should change the creative mechanism, not merely rewrite the same concept;
+- fun is welcome, but the product/order/use-case must remain commercially useful;
 
 ## Strategy gate blockers
 
-- `PRODUCTION_GUIDE_RETRIEVAL_REQUIRED`
+- None at dossier level. Package-bounded strategy still requires field-by-field quality review.
 
 ## Sources
 
-- production-client-guide:IPOPENG-OFFICE-SUPPLIES-CLIENT-INTELLIGENCE-2026-09.md
+- production-client-guide:ipopeng-office-supplies.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#2e643855-e2ad-481f-a6c6-3d934b9f4a50

@@ -4,17 +4,16 @@ Client ID: `217a547c-7b22-45cc-bf88-9d45a8e93dfe`
 
 Issue: #513
 
-Evidence hash: `2c5d8c8606e2c938f1f9ebfbb844026fa85ee4db6e8ea49e8d93b9088b5e2a6f`
+Evidence hash: `a19694e83a099b28ded683b2d8b8b7c9b3e114927a42e3f44a61df873695ce47`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- 7 Frans Kleinhans Road, Bloemfontein / Groenvlei area.
-- conference and function facilities;
-- space to work on driver / irons;
-- easy access without committing to a full round;
-- coaching or practice support if available.
-- club availability if offered;
+- real golf situations, reactions and friendly rivalry;
+- specific hooks based on the actual post/video;
+- a playful tone when the golf/social moment earns it;
+- natural Afrikaans only when requested or genuinely appropriate;
+- an emoji when it fits, not as a template.
 
 ## Confirmed package
 
@@ -32,12 +31,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Client and CG constraints
 
-- Dun & Bradstreet currently lists EMOYA DRIVING RANGE (PTY) LTD in Bloemfontein.
-- Older Emoya Estate corporate material lists Mulligan's Driving Range & Put-Put as an Emoya Estate activity.
-- Current local business-directory evidence still lists Mulligans Golf Drvng Rng at Emoya Estate, next to the Spookhuis, with phone 076 616 1195.
-- Historical Emoya material also uses the contact number and positions the driving range and putt-putt as a teambuilding/activity option.
-- Historical golf-professional evidence confirms a driving range operated at Emoya Estate from 2016 to mid-2018.
-- whether putt-putt remains active;
+- current contact route and whether it is phone/WhatsApp/both;
+- bucket/session/monthly-package prices and terms;
+- food/bar/alcohol availability;
+- event/group package inclusions, capacity and pricing;
+- current website/booking link/Google Business Profile;
+- partner/sponsor relationships;
 
 ## Research observations
 
@@ -45,12 +44,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- Can a rugby player hit 250m?;
-- First time holding a driver;
-- R100 says you can't hit this target only where legally/operationally appropriate and current prize rules are formalised;
-- Bloem golfer vs Bloem non-golfer;
-- Can groups / corporates book?
-- condition of range / balls / mats / grass;
+- The artwork/video already carries its own message.
+- A caption should add a second layer: a real reason to visit, a golf/social observation, a current service/offer detail, a challenge angle, an event use-case or a direct CTA.
+- no repeating the poster text word-for-word;
+- no generic motivational golf copy;
+- no invented facilities, offers or claims;
+- maximum 5 dynamic hashtags chosen for the exact post/platform/search intent.
 
 ## Strategy gate blockers
 
@@ -58,6 +57,6 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Sources
 
-- docs/ai-workforce/client-intelligence/EMOYA-DRIVING-RANGE-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md
+- production-client-guide:emoya-estate-driving-range.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#217a547c-7b22-45cc-bf88-9d45a8e93dfe

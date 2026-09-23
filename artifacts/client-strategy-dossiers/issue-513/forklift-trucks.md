@@ -4,12 +4,17 @@ Client ID: `4424ed69-7270-4d30-a1ea-0b77d76912df`
 
 Issue: #513
 
-Evidence hash: `6266b1d2dfb4346b2205eb57b183196e7f954f802cecbda47883988c95ef7311`
-Status: **dossier complete; strategy gate blocked**
+Evidence hash: `937383a9dedeb76cef370fa0926cc8d4e7d4d75b9f76c5a91b89e10c9d1c0b8b`
+Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- No exact evidence available; do not fill this gap with generic copy.
+- new Toyota material-handling equipment;
+- long-term rental/contract arrangements;
+- routine/scheduled maintenance;
+- breakdown support, including current public 24/7 breakdown support wording;
+- service work on forklift makes beyond Toyota.
+- email: admin@toyotaforkliftofs.co.za;
 
 ## Confirmed package
 
@@ -27,7 +32,12 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Client and CG constraints
 
-- No exact evidence available; do not fill this gap with generic copy.
+- hours and after-hours numbers;
+- Toyota representation scope;
+- stock and used-equipment availability;
+- workshop/field-service capability;
+- brands/dealer/distributor rights;
+- specifications or capacities;
 
 ## Research observations
 
@@ -35,14 +45,19 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Read the artwork/video first.
+- Do not paraphrase the headline, poster copy or spoken dialogue underneath it.
+- who the machine/service is relevant to;
+- an uptime or maintenance implication;
+- a direct enquiry or quote prompt.
+- practical rather than inspirational;
 
 ## Strategy gate blockers
 
-- `PRODUCTION_GUIDE_RETRIEVAL_REQUIRED`
+- None at dossier level. Package-bounded strategy still requires field-by-field quality review.
 
 ## Sources
 
-- production-client-guide:FORKLIFT-TRUCKS-CG-DYNAMICS-CLIENT-GUIDE.md
+- production-client-guide:forklift-trucks.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#4424ed69-7270-4d30-a1ea-0b77d76912df

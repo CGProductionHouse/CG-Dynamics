@@ -4,12 +4,17 @@ Client ID: `fd16ebae-a50b-4920-afe0-94c2631f8f06`
 
 Issue: #513
 
-Evidence hash: `3acccc76492a40dcee44714f46dee39b953b4797f57a8f56a9d7be2df1e20007`
-Status: **dossier complete; strategy gate blocked**
+Evidence hash: `1d9f4961c59379e578ec42cc0b272bb2ad1436f663ae3b7eb754c759fc176e85`
+Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Issue 249 and current ownership comment
+- Issue 241 and draft PR 247 for architecture/ownership boundary only
+- Current migration workflow document on PR 247 branch where it is not yet present on main
+- clients: exact active row All Around PVC
+- client ID: fd16ebae-a50b-4920-afe0-94c2631f8f06
+- exact-client clientindustryprofiles: none
 
 ## Confirmed package
 
@@ -35,14 +40,19 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- sound direct, practical and human;
+- default to English unless the task says otherwise;
+- explain one real surface/product/customer decision at a time;
+- add information/personality beyond poster/video wording;
+- use concise, varied sentence structures;
+- use technical detail only as far as evidence supports it;
 
 ## Strategy gate blockers
 
-- `PRODUCTION_GUIDE_RETRIEVAL_REQUIRED`
+- None at dossier level. Package-bounded strategy still requires field-by-field quality review.
 
 ## Sources
 
-- production-client-guide:ALL-AROUND-PVC-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md
+- production-client-guide:all-around-pvc.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#fd16ebae-a50b-4920-afe0-94c2631f8f06

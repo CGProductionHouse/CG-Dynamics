@@ -4,17 +4,17 @@ Client ID: `079df21e-783a-4648-b3fa-0acae6e68867`
 
 Issue: #513
 
-Evidence hash: `785748cab4b85635e4f99ffc1b5fc38da2294cc3395d3951073a37476964b58e`
+Evidence hash: `96c628106a79a355663347dac680726c2323dd09e005dad60ab90ca8fea2788c`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- workshop and field-service bookings;
-- Case Ladybrand was established on 1 July 2015 as a Case IH and CASE Construction dealership.
-- The business acquired the Case Bloemfontein dealership on 1 July 2018.
-- Both branches operate under one team.
-- The dealership supplies agriculture, construction, parts, technical support and Husqvarna outdoor power equipment.
-- Case IH agricultural machinery
+- Issue 248 human creative standard;
+- Issue 241 and PR 247 only for exact-client retrieval/shared-ownership architecture;
+- local Case Bloemfontein facts;
+- shared Bloemfontein/Ladybrand business context;
+- national/global Case IH / CASE / Husqvarna material;
+- mutable product/stock/finance examples.
 
 ## Confirmed package
 
@@ -36,21 +36,16 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Research observations
 
-- https://www.n1tractors.co.za/
-- https://www.executivetractorhub.co.za/
-- https://www.bestbiersa.co.za/
-- https://mcmco.co.za/bloemfontein/
-- https://bhbwbothaville.co.za/
-- https://www.masseyferguson.com/enza/dealer-list.html
+- No exact evidence available; do not fill this gap with generic copy.
 
 ## Evidence-backed recommendations
 
-- Case IH tractors in Bloemfontein and Ladybrand;
-- harvesters and harvest support;
-- planting and seeding equipment;
-- used tractors and farm equipment;
-- used construction equipment;
-- pre-season inspection booking;
+- make event captions more fun and personal;
+- write as people who were actually there rather than a formal event report;
+- mention that the event was fun/successful without sounding corporate;
+- express real excitement about returning next year where appropriate;
+- use natural Afrikaans/farmer conversation for boer praat content rather than stiff translated copy.
+- Durable lesson: local agricultural event content should feel social, human and present.
 
 ## Strategy gate blockers
 
@@ -58,6 +53,6 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Sources
 
-- docs/ai-workforce/client-intelligence/CASE-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md
+- production-client-guide:case-bloemfontein.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#079df21e-783a-4648-b3fa-0acae6e68867

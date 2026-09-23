@@ -4,12 +4,17 @@ Client ID: `917d6f7c-1c2a-4c20-82f0-daa41b9062f5`
 
 Issue: #513
 
-Evidence hash: `eb0444807c74508dd5ab83f81f3964020a061f44544fe7ebdc63817fcd6cd934`
-Status: **dossier complete; strategy gate blocked**
+Evidence hash: `79e1a9c97f4ebd0b626b4ae38fcf643304ed900e323fa254485f7990fc963f29`
+Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Residential and commercial guarding/security guards.
+- Industrial and retail guarding.
+- Alarm and CCTV/off-site Monitoring.
+- National Keypoint Security as a website-listed capability.
+- 24/7 Control Room/monitoring operation;
+- technical services on weekday hours with 24-hour standby.
 
 ## Confirmed package
 
@@ -27,7 +32,12 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Client and CG constraints
 
-- No exact evidence available; do not fill this gap with generic copy.
+- “fastest” or guaranteed response;
+- crime-prevention guarantees;
+- current packages, prices, discounts or free-period offers.
+- use Securiforce as the canonical new client name; use SecuriForce;
+- include location references in normal captions;
+- repeat the artwork in the caption;
 
 ## Research observations
 
@@ -35,14 +45,19 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Default to clear English unless Afrikaans is requested.
+- When writing Afrikaans, use natural everyday spoken Afrikaans.
+- Keep sentences active and easy to read.
+- Captions must add to the artwork rather than repeat it.
+- Short captions are often better when the poster already carries the detail.
+- One useful service fact, proof point or CTA is stronger than several generic claims.
 
 ## Strategy gate blockers
 
-- `PRODUCTION_GUIDE_RETRIEVAL_REQUIRED`
+- None at dossier level. Package-bounded strategy still requires field-by-field quality review.
 
 ## Sources
 
-- production-client-guide:SECURIFORCE-CG-DYNAMICS-CLIENT-GUIDE.md
+- production-client-guide:securiforce.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#917d6f7c-1c2a-4c20-82f0-daa41b9062f5

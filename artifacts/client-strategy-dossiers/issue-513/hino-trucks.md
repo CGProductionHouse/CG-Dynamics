@@ -4,17 +4,17 @@ Client ID: `1007e58b-3fea-4515-88b7-ddaa85763de6`
 
 Issue: #513
 
-Evidence hash: `7259755f92089113165ec77b16b442b6f46b9e2b6435351244b55b47054b87ad`
+Evidence hash: `3ea0036a3123e387e74ae289413d6ac588056076dcd06f1d0fe07de89a1ebf9b`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- will the truck fit the actual job;
-- what payload/body/application is required;
-- what will fuel, servicing and maintenance cost;
-- can parts be supplied quickly;
-- can the dealer support the truck after sale;
-- can finance and replacement cycles be planned;
+- Use Hino Bloemfontein as the normal local customer-facing identity.
+- The current CFAO page title includes Hino Bloemfontein (Oranje). Treat Oranje as source/locator history, not the default creative name.
+- Keep Hino Trucks separate from Toyota Bloemfontein.
+- Hino South Africa/global material is manufacturer context, not proof of local Hino Bloemfontein stock, services or offers.
+- rooted in real dealership, sales, workshop, parts or truck situations;
+- short and visually driven, normally around 30–40 seconds when the brief calls for a fun reel;
 
 ## Confirmed package
 
@@ -32,27 +32,20 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Client and CG constraints
 
-- slow walk-around with no buyer problem;
-- salesperson listing specs to camera for 60 seconds;
-- cinematic truck footage with no commercial message;
-- copied passenger-car handover style.
-- current official social handles;
-- local WhatsApp number if any;
+- No exact evidence available; do not fill this gap with generic copy.
 
 ## Research observations
 
-- Motus Commercial Bloemfontein — Isuzu and UD Trucks on one premises;
-- other regional/national truck brands competing across specific weight/application segments, including FUSO, MAN, FAW and additional commercial-vehicle dealers depending on current representation.
-- resale evidence only when verified;
+- No exact evidence available; do not fill this gap with generic copy.
 
 ## Evidence-backed recommendations
 
-- customer operator case study;
-- body-builder transformation;
-- new-stock/used-stock fast walkaround;
-- costly mistake educational series without fearmongering.
-- pre-season fleet/service checks.
-- local co-op/agribusiness partnerships;
+- Captions add to the artwork/video; they do not repeat it.
+- Start from the actual content.
+- Focus on one useful idea and why it matters to the operator.
+- Use a practical CTA when it helps.
+- Default footer, unless a live brief supplies a different verified route:
+- https://www.cfaomobility.co.za/find-a-dealer/hino-bloemfontein-oranje
 
 ## Strategy gate blockers
 
@@ -60,6 +53,6 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Sources
 
-- docs/ai-workforce/client-intelligence/HINO-ORANJE-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md
+- production-client-guide:hino-trucks.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#1007e58b-3fea-4515-88b7-ddaa85763de6

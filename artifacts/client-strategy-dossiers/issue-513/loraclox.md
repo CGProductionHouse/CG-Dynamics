@@ -4,12 +4,17 @@ Client ID: `21300630-6755-4591-9a49-e22abbaf7e3d`
 
 Issue: #513
 
-Evidence hash: `c2b5b0adc25241afca8ad93c8925575745fddb6e6861a2b21875ec7b3da5b495`
-Status: **dossier complete; strategy gate blocked**
+Evidence hash: `3cdc0ddb125609ecfbdde592438b5b2b3ab6708c1ab9db387ea6960de1fc2706`
+Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Work only on Loraclox and exact client ID 21300630-6755-4591-9a49-e22abbaf7e3d.
+- Treat Loraclox as a technology-led electronic-security/CCTV systems business.
+- Current evidence strongly supports CCTV/security-system work.
+- Access control is supported at a general level, but detailed current capability must be rechecked when the claim matters.
+- Accessible Loraclox Project history shows biometric access systems used as a client-specific service/post topic. Treat this as historical evidence only, not proof of current biometric hardware, integrations, specifications or availability.
+- The older Project Source also lists electric fencing, EVAC systems, time-management systems and intruder alarm systems. These remain freshness-gated until current exact-client evidence reconfirms them.
 
 ## Confirmed package
 
@@ -27,7 +32,12 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Client and CG constraints
 
-- No exact evidence available; do not fill this gap with generic copy.
+- fire-alarm/fire-detection certification;
+- facial-recognition capability;
+- biometric attendance/payroll integrations;
+- guaranteed emergency response;
+- specific standards/certifications;
+- specific hardware brands or integrations.
 
 ## Research observations
 
@@ -35,14 +45,19 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Captions add to the artwork/video.
+- For straightforward Loraclox social posts, the accessible Project history supports a default rhythm of one sentence, straight to the point, followed by the appropriate verified contact/footer details when required and up to 5 dynamic hashtags.
+- explain the practical customer problem a verified system/service addresses;
+- add one useful CCTV, installation, maintenance or access-control consideration;
+- make technical work understandable without inventing specifications;
+- show process/workmanship when the creative supports it;
 
 ## Strategy gate blockers
 
-- `PRODUCTION_GUIDE_RETRIEVAL_REQUIRED`
+- None at dossier level. Package-bounded strategy still requires field-by-field quality review.
 
 ## Sources
 
-- production-client-guide:LORACLOX-CG-DYNAMICS-CLIENT-GUIDE.md
+- production-client-guide:loraclox.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#21300630-6755-4591-9a49-e22abbaf7e3d

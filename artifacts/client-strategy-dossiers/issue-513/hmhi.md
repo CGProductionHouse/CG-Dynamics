@@ -4,17 +4,17 @@ Client ID: `572555e0-d4d0-404a-8d67-beeeeed6a1f2`
 
 Issue: #513
 
-Evidence hash: `88294002f1be41fa5a1cb78df0f4774345b60f52e8cb37338462c048600da750`
+Evidence hash: `5a7e52bf885c15630f302bfc3496286f49ddbd8a74379ad07c12df4615d49308`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- current public-facing brand name;
-- whether HMH Attorneys, Howard Maimela Heyns Inc, Heyns Attorneys Inc or another name is now canonical;
-- current phone and WhatsApp numbers;
-- current attorney/director/team list;
-- current branch/correspondent footprint.
-- civil law / civil litigation;
+- Publicly use Hill, McHardy & Herbst or Hill, McHardy & Herbst Inc.
+- HMHI is supported as Project/internal shorthand through the @hmhi.co.za domain, but it is not the strongest current public brand name.
+- The current Dynamics row says HMH Attorneys. Treat that as an ambiguous legacy/internal label, not public naming authority.
+- Never merge this client with the separate HMH Attorneys / Howard Maimela Heyns practice in Lydenburg/Mashishing.
+- professional and knowledgeable;
+- confident without arrogance;
 
 ## Confirmed package
 
@@ -32,12 +32,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Client and CG constraints
 
-- South African Gazette and LSSA-linked legal documents identify HOWARD MAIMELA HEYNS INC / HMH Attorneys and use @hmhattorneys.co.za email addresses.
-- Older government notices list HOWARD MAIMELA HEYNS INC, Leo Forum, 72 Kantoor Street, Lydenburg, 1120, telephone 013 235 1625.
-- A 2024 Government Gazette matter identifies HEYNS ATTORNEYS INC. at 61 Viljoen Street, Lydenburg, 1120, while still using amanda@hmhattorneys.co.za.
-- A current business listing still describes Howard Maimela Heyns Inc at Leo Forum, 72 Kantoor Street and categorises the firm around civil law, labour law and legal representation.
-- Historical tender records identify Howard Maimela Heyns T/A HMH Attorneys Inc..
-- gavels, scales and law-book stock imagery;
+- success rates or guaranteed outcomes;
+- entitlement to a specific result;
+- attorney/conveyancer/notary/specialist status;
+- qualifications or admissions;
+- court rights or jurisdiction;
+- case facts or client outcomes;
 
 ## Research observations
 
@@ -45,12 +45,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- Exact current firm name and Lydenburg location.
-- 4–6 confirmed priority practice areas.
-- Named attorneys and credentials.
-- What happens after you contact us?
-- selected proof / experience without breaching confidentiality;
-- clear consultation/contact routes.
+- Captions add to the artwork/video.
+- add a second angle or useful detail;
+- explain why the topic matters in everyday terms;
+- keep serious legal topics calm and human;
+- avoid repeating the firm name too often;
+- avoid restating the poster headline;
 
 ## Strategy gate blockers
 
@@ -58,6 +58,6 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Sources
 
-- docs/ai-workforce/client-intelligence/HMH-ATTORNEYS-LYDENBURG-CLIENT-MARKETING-INTELLIGENCE-2026-08.md
+- production-client-guide:hmhi.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#572555e0-d4d0-404a-8d67-beeeeed6a1f2

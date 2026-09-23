@@ -4,7 +4,7 @@ Client ID: `42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa`
 
 Issue: #513
 
-Evidence hash: `3ab510517bfb77ed1d52814d0c1a2f4c92fa0ba4b98d96b8a30685d2eef92896`
+Evidence hash: `b461c8d79eed1af7a5cdfa8d01e33301c95b0d77d7a30ab77ff13004b28f6b66`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
@@ -45,7 +45,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Cape Lumber captions should add value beyond the artwork.
+- Do not repeat the text already on the post.
+- Add a useful product detail, buyer reason, sourcing point, delivery context, specification note, quote prompt or availability context.
+- Keep straightforward captions reasonably short.
+- Make the copy commercial and practical rather than inspirational.
+- send the material/timber list;
 
 ## Strategy gate blockers
 
@@ -53,6 +58,6 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Sources
 
-- docs/ai-workforce/client-intelligence/CAPE-LUMBER-CG-DYNAMICS-CLIENT-GUIDE.md
+- production-client-guide:cape-lumber.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa

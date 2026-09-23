@@ -4,12 +4,17 @@ Client ID: `816c7f59-d56c-46a3-ba15-f76971d83769`
 
 Issue: #513
 
-Evidence hash: `f1fe0ad08bca35555872b74d7857d5d2029349a1079d1e66452667e8de0a31a8`
-Status: **dossier complete; strategy gate blocked**
+Evidence hash: `1292ab9c32b1a28cf0152bd6ed5878ae2dbccf2b789f8a8a1216666dd68140b8`
+Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Human Auto Ford - current Ford dealership group with Bloemfontein, Welkom and Kimberley locations;
+- Human Auto MG Bloemfontein - current MG dealership identity in Bloemfontein;
+- Human Auto Foton - current Foton dealer relationship evidenced for Bloemfontein and Welkom;
+- Human Select - durable Human Auto pre-owned identity supported by CG/client history and recent public context, but its current standalone branch/contact truth must still be refreshed before use.
+- Sales: Mon-Fri 07:30-17:15, Sat 08:00-12:00;
+- Service & Parts: Mon-Fri 07:30-17:00.
 
 ## Confirmed package
 
@@ -27,7 +32,12 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Client and CG constraints
 
-- No exact evidence available; do not fill this gap with generic copy.
+- model/derivative availability;
+- technical specs from appearance alone;
+- price, discount, deposit, interest rate or instalment;
+- warranty or service-plan terms;
+- local service or parts availability;
+- current awards/promotions/events;
 
 ## Research observations
 
@@ -35,14 +45,19 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Read the artwork/video first.
+- If it already contains the model, price, finance figure, headline, promotion, event date, branch or feature list, do not paraphrase those lines underneath it.
+- one verified feature translated into buyer value;
+- a test-drive or viewing reason;
+- service/ownership relevance;
+- a buyer question worth considering.
 
 ## Strategy gate blockers
 
-- `PRODUCTION_GUIDE_RETRIEVAL_REQUIRED`
+- None at dossier level. Package-bounded strategy still requires field-by-field quality review.
 
 ## Sources
 
-- production-client-guide:HUMAN-AUTO-CG-DYNAMICS-CLIENT-GUIDE.md
+- production-client-guide:human-auto.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#816c7f59-d56c-46a3-ba15-f76971d83769

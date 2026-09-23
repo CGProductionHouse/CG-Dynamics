@@ -1,0 +1,10 @@
+{
+  "client_id": "2a5ea019-64f5-4f8e-8a61-61a28940aa6e",
+  "client_name": "Local Deli",
+  "guide_id": "49611dd3-c345-43b4-8114-950c6926d786",
+  "version": 1,
+  "runtime_readiness": "ready",
+  "source_pack_path": "docs/ai-workforce/client-intelligence/LOCAL-DELI-CG-DYNAMICS-CLIENT-GUIDE.md",
+  "source_revision": "ed343124e48925e2d66dd78958fd87989c14f611",
+  "source_observed_at": "2026-09-07 22:00:00+00"
+}

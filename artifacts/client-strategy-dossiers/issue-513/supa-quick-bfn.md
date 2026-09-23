@@ -4,12 +4,13 @@ Client ID: `a60b4d07-0a30-4f1c-8d48-7bd9ea649c97`
 
 Issue: #513
 
-Evidence hash: `f150f575bae93689059cccc448287762f216656b8827f8efdf521a8c5545bfb4`
-Status: **dossier complete; strategy gate blocked**
+Evidence hash: `818f9351f18d897129972d9df2925b9a4398837dcff1e6f399d277994e7683b4`
+Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- No exact evidence available; do not fill this gap with generic copy.
+- mag wheels/wheel products when the exact product is evidenced;
+- minor services at Bloemfontein CBD when current.
 
 ## Confirmed package
 
@@ -27,7 +28,12 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Client and CG constraints
 
-- No exact evidence available; do not fill this gap with generic copy.
+- tyre stock, size, load/speed rating or compatibility;
+- current promotion/competition participation;
+- warranty/guarantee entitlement;
+- national fleet or other national programme participation;
+- minor-service availability outside CBD;
+- any branch-local claim not supported by current evidence.
 
 ## Research observations
 
@@ -35,14 +41,19 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Read the artwork/video before writing.
+- Do not restate the poster headline or copy Reel dialogue.
+- If the artwork already names the service, add why a motorist would care, one useful detail or a practical next step.
+- Keep service captions punchy unless extra explanation is genuinely useful.
+- Vary openings and CTAs; do not recycle an exact line CG has already rejected/used.
+- When several assets are supplied, account for every one and keep outputs aligned to the correct asset.
 
 ## Strategy gate blockers
 
-- `PRODUCTION_GUIDE_RETRIEVAL_REQUIRED`
+- None at dossier level. Package-bounded strategy still requires field-by-field quality review.
 
 ## Sources
 
-- production-client-guide:SUPA-QUICK-BFN-CG-DYNAMICS-CLIENT-GUIDE.md
+- production-client-guide:supa-quick-bfn.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#a60b4d07-0a30-4f1c-8d48-7bd9ea649c97

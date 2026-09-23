@@ -4,17 +4,17 @@ Client ID: `5dfdf4bd-9d94-4cc6-9dee-0e480a2234cb`
 
 Issue: #513
 
-Evidence hash: `5b27529a0b9c8a47938a5e329eb09144fcc874d5de7dcebd5748eed08edeb40f`
+Evidence hash: `41cc7210826e5628b98817c834a2cfaf97410269148270b550c0c4f69140f754`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- create immediate local awareness of a timely offer, product or convenience benefit;
-- give nearby customers a simple reason to visit the shop now.
-- commuters and passing traffic;
-- workers and students needing quick convenience purchases;
-- regular customers responding to familiar products, price and availability;
-- people looking for snacks, drinks, household basics or other confirmed quick-shop items.
+- current main at c72431efc30687ecd950bb4d6b277b6dda06c11c;
+- Issue 241 current comments/ownership state and PR 247 for shared architecture only;
+- Issue 249 completion/handoff correction as the current isolated client-migration precedent;
+- exact clients row: Bohemia Quick Stop;
+- client ID: 5dfdf4bd-9d94-4cc6-9dee-0e480a2234cb;
+- existing exact-client clientindustryprofiles: one skeletal row, clientname = 'Bohemia', confidence/review state needsresearch, no populated business/service evidence;
 
 ## Confirmed package
 
@@ -32,20 +32,20 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Client and CG constraints
 
-- Confirm every price, date and product before publishing.
-- Do not invent product availability.
-- Do not overload posters with multiple unrelated offers.
-- Do not recommend paid campaigns, websites or large strategy work unless the client scope changes.
-- Keep CG effort proportional to the actual two-poster monthly package.
+- No exact evidence available; do not fill this gap with generic copy.
 
 ## Research observations
 
-- convenient opening hours, where confirmed.
+- No exact evidence available; do not fill this gap with generic copy.
 
 ## Evidence-backed recommendations
 
-- Poster 1: direct product or special poster designed to drive visits and sales.
-- Poster 2: timely convenience, occasion or brand-recognition poster.
+- These match the strongest user corrections and 248.
+- Current instructions say copy should feel like real Bloem workshop staff.
+- Decision: REFRAME, not literalise.
+- Bohemia is verified as a petrol station/fuel forecourt and deli, not a workshop.
+- Preserve the intended local-human voice as real forecourt/shop staff.
+- Never create workshop services from that wording.
 
 ## Strategy gate blockers
 
@@ -53,6 +53,6 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Sources
 
-- docs/ai-workforce/client-intelligence/BOHEMIA-QUICK-SHOP-LIGHT-MARKETING-GUIDE-2026-08.md
+- production-client-guide:bohemia-quick-stop.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#5dfdf4bd-9d94-4cc6-9dee-0e480a2234cb

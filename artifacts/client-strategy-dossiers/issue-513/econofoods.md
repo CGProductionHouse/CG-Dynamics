@@ -4,17 +4,17 @@ Client ID: `61acf81b-1011-404e-9fae-2e209be65fca`
 
 Issue: #513
 
-Evidence hash: `9d83f729d6c4d70f002449672ca615be748f8e8d72b64941f173cfb320542c8e`
+Evidence hash: `465d5b51ccbe1e85e6ebce15d7f16cf760cfc942a725a9467edcafeb77ea7d35`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- What commercial job must this video do?
-- What product, price, craving, convenience or customer truth gives the joke a reason to exist?
-- What is the fastest entertaining hook that fits Econofoods rather than generic supermarket content?
-- What should the viewer remember or do after watching?
-- Official website: https://econofoods.co.za/
-- Head-office/contact address published by Econofoods: 10 Loop Street, Hilton, Bloemfontein.
+- Issue 241 plus current draft PR 247 for architecture/ownership boundaries only;
+- exact active row: Econofoods;
+- exact ID: 61acf81b-1011-404e-9fae-2e209be65fca;
+- industry/business/audience/product fields: null;
+- review state: needsresearch;
+- preserve it as stale/low-information system evidence;
 
 ## Confirmed package
 
@@ -32,25 +32,25 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Client and CG constraints
 
-- No exact evidence available; do not fill this gap with generic copy.
+- old prices, pack sizes, promotions and campaign dates;
+- store-opening locations from old projects;
+- old product/flavour availability;
+- old delivery/stock assumptions;
+- historical public discussion as anything stronger than directional customer-language evidence.
+- whether Econofoods later expands CG beyond the currently verified video-first relationship;
 
 ## Research observations
 
-- major supermarket chains such as Checkers, Pick n Pay and Spar;
-- Food Lover's Market on specials and food value;
-- independent butcheries on meat quality and trust;
-- discount/value retailers and specialist frozen-food stores;
-- local wholesalers and cash-and-carry operators;
-- Best Before-style discount shopping for budget-driven customers, though the product model differs.
+- No exact evidence available; do not fill this gap with generic copy.
 
 ## Evidence-backed recommendations
 
-- restaurant operator testimonial where genuine;
-- what a takeaway needs for Friday night;
-- product consistency and pack format.
-- Get the actual commercial priority from the client before ideation: product, promotion, store, event or brand objective.
-- Generate concepts across at least three different mechanisms, not three versions of the same joke.
-- Select one hero idea, one value idea, one recurring cheeky franchise and one product-discovery/food-beauty idea.
+- video-first relationship model — now independently verified from 2026 Dynamics schedule data;
+- cheeky, quick, commercially clear brand direction;
+- humour as delivery, not strategy;
+- product-essential comedy test;
+- craving/value/discovery/store-traffic/basket/B2B/brand-affection commercial jobs;
+- strong first-two-second hook rule;
 
 ## Strategy gate blockers
 
@@ -58,6 +58,6 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Sources
 
-- docs/ai-workforce/client-intelligence/ECONOFOODS-SOUTH-AFRICA-VIDEO-COMMERCIAL-PLAYBOOK-2026-08.md
+- production-client-guide:econofoods.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#61acf81b-1011-404e-9fae-2e209be65fca

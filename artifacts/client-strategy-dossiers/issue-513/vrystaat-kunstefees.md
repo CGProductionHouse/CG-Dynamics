@@ -4,12 +4,14 @@ Client ID: `1f0406bb-d643-4b83-bc3e-b1ebe87eeb89`
 
 Issue: #513
 
-Evidence hash: `ea4471f70cd03258ea04a9f502d3c8552701d56c42a3d13308912cb1f22a03ad`
-Status: **dossier complete; strategy gate blocked**
+Evidence hash: `23b6ff96d69c1d63ccc27c60a85a89e02d18e885e622962f0b23642279c44652`
+Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- No exact evidence available; do not fill this gap with generic copy.
+- specific to the real programme, artist, application or festival moment;
+- warm or reflective when the content calls for it;
+- natural in Afrikaans or English;
 
 ## Confirmed package
 
@@ -27,7 +29,9 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Client and CG constraints
 
-- No exact evidence available; do not fill this gap with generic copy.
+- application deadlines and fees;
+- age/language/accessibility details;
+- current programme structure.
 
 ## Research observations
 
@@ -35,14 +39,19 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Use the caption to add a reason to care, a human observation, useful application detail, artist/programme context, a real deadline/action, or a second layer of story.
+- For applications, distinguish the exact route: Main Festival, Vrynge, Vlieks, Literature Festival, Book Submission, Art Market/Kunsmark or another verified programme.
+- Never invent eligibility, fees, dates or selection outcomes.
+- For highlights/reels, talk about the actual moment rather than describing the montage generically.
+- Afrikaans should sound natural and spoken, not formal or stiff.
+- English should be clear and arts-aware.
 
 ## Strategy gate blockers
 
-- `PRODUCTION_GUIDE_RETRIEVAL_REQUIRED`
+- None at dossier level. Package-bounded strategy still requires field-by-field quality review.
 
 ## Sources
 
-- production-client-guide:VRYSTAAT-KUNSTEFEES-CG-DYNAMICS-CLIENT-GUIDE.md
+- production-client-guide:vrystaat-kunstefees.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#1f0406bb-d643-4b83-bc3e-b1ebe87eeb89

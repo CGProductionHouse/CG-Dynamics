@@ -4,12 +4,17 @@ Client ID: `2b953772-e791-4dff-a278-d4dd3521f02e`
 
 Issue: #513
 
-Evidence hash: `ce57e30c554717232e5d9078dc451319d89f6ecb1e95a559e047fd21d8bad28e`
-Status: **dossier complete; strategy gate blocked**
+Evidence hash: `d5e1d141cf76e514e4bca11f2d2983b0e958184f5f364aff251225fe28aceff3`
+Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- No exact evidence available; do not fill this gap with generic copy.
+- No influencer language, forced humour, slang or hype.
+- Use natural English or Afrikaans as the brief fits.
+- Keep captions concise unless useful detail genuinely adds value.
+- Add to the artwork/video; do not repeat it.
+- Prefer one clear idea over stacked generic lists.
+- Use the actual delivery, farm/business need, team, vehicle, customer context or service fact as the hook.
 
 ## Confirmed package
 
@@ -27,7 +32,12 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Client and CG constraints
 
-- No exact evidence available; do not fill this gap with generic copy.
+- exact diesel grade/specification;
+- petrol/unleaded availability;
+- supplier/petroleum-company relationships;
+- turnaround/emergency-delivery capability;
+- compliance/licensing/accreditation claims;
+- tank/equipment/fleet-account services;
 
 ## Research observations
 
@@ -35,14 +45,19 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Normal public We Ar Fuels captions should use the current approved regional footer from the governed exact-client contact source:
+- Sentraal Vrystaat — Ryno Serfontein.
+- Wes Vrystaat — Paul de Koker, then Werner Serfontein.
+- The exact current phone/email values live in the client-approved/private evidence layer and should be retrieved at generation time.
+- Do not use Thianie’s older contact route.
+- It is superseded/unverified for caption use.
 
 ## Strategy gate blockers
 
-- `PRODUCTION_GUIDE_RETRIEVAL_REQUIRED`
+- None at dossier level. Package-bounded strategy still requires field-by-field quality review.
 
 ## Sources
 
-- production-client-guide:WE-AR-FUELS-CG-DYNAMICS-CLIENT-GUIDE.md
+- production-client-guide:we-ar-fuels.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#2b953772-e791-4dff-a278-d4dd3521f02e

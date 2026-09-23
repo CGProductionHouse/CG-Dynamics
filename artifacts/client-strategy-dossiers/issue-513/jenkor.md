@@ -4,12 +4,17 @@ Client ID: `a5eab798-3e00-44cc-947e-463386fdac39`
 
 Issue: #513
 
-Evidence hash: `213756fa1093aaacefd1ab725bbb832b3c2734022fba75e48a843d9dbf61b8e6`
-Status: **dossier complete; strategy gate blocked**
+Evidence hash: `d11aecd5d44e8d92d4fce4f56af1a90596034479181594729a66e43420ae6111`
+Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- No exact evidence available; do not fill this gap with generic copy.
+- 21 Lekkerwater Road, Sunnydale, Fish Hoek
+- 21 Lekkerwater Rd, Capri, Cape Town, 7975
+- explicit current client / CG Production House correction;
+- current official Jenkor website;
+- exact current authoritative social/listing/supplier evidence where relevant;
+- current Jenkor Dynamics intelligence / this Guide;
 
 ## Confirmed package
 
@@ -27,7 +32,12 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Client and CG constraints
 
-- No exact evidence available; do not fill this gap with generic copy.
+- units per square metre/pallet;
+- supplier/brand relationship;
+- compliance/certification/performance.
+- supplied creative and existing artwork text;
+- relevant verified product/service fact;
+- any unresolved fact affecting this exact task.
 
 ## Research observations
 
@@ -35,14 +45,19 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- start from the actual asset;
+- read what is already on the artwork/video;
+- add to it instead of repeating it;
+- give the customer one useful second layer: buying reason, use case, process detail, order/service benefit, local relevance or practical context;
+- vary openings, rhythm and CTA;
+- make the line specific enough that it would not fit ten unrelated building suppliers;
 
 ## Strategy gate blockers
 
-- `PRODUCTION_GUIDE_RETRIEVAL_REQUIRED`
+- None at dossier level. Package-bounded strategy still requires field-by-field quality review.
 
 ## Sources
 
-- production-client-guide:JENKOR-CG-DYNAMICS-CLIENT-GUIDE.md
+- production-client-guide:jenkor.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#a5eab798-3e00-44cc-947e-463386fdac39

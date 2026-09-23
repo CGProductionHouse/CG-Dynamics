@@ -1,0 +1,10 @@
+{
+  "client_id": "1007e58b-3fea-4515-88b7-ddaa85763de6",
+  "client_name": "Hino Trucks",
+  "guide_id": "b80d3ca3-9bd7-43bc-822c-53a94be1ab68",
+  "version": 1,
+  "runtime_readiness": "ready",
+  "source_pack_path": "docs/ai-workforce/client-intelligence/HINO-TRUCKS-CG-DYNAMICS-CLIENT-GUIDE.md",
+  "source_revision": "57411cca291031ce8dc40f23d7227016a915dc3b",
+  "source_observed_at": "2026-09-07 22:00:00+00"
+}
