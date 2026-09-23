@@ -68,7 +68,7 @@ Major completed launch-critical merges:
 
 ### CURRENT closure lanes
 
-1. #513 Sep/Oct gold-strategy dry-run regeneration against the final #516 receipts.
+1. #513 supervisor review of the regenerated v2 Sep/Oct gold-strategy dry-run; no apply yet.
 2. #505 eligible-client TikTok/Instagram rollout + native TikTok Business Center/scheduler setup.
 3. #518 website period-contract production migration + read-only acceptance.
 4. #519 current portal-access reconciliation.
@@ -182,17 +182,24 @@ Gold-strategy rule:
 - no cross-client evidence;
 - no out-of-package work.
 
-PR #520 is reconciled to current main and regenerated from the final production receipts:
-- source cutoff: `2026-09-23T17:08:08.859Z`;
-- plan hash: `94e42112c8f8ed79cef7383302c9ff85ff9d813e6aa3f4a016c3c4be165f3665`;
+PR #522 merged the approval-capable v2 plan contract and guarded atomic
+strategy-plus-seed-context RPC in code. Its migration remains unapplied.
+
+The v2 dry-run is regenerated from current production:
+- source cutoff: `2026-09-23T17:46:08.174Z`;
+- plan hash: `4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b`;
 - 46 social clients / 92 strategy rows ready;
 - 10 non-social or not-currently-social clients / 20 rows non-applicable;
 - 0 held and 0 otherwise blocked;
 - all 112 source strategy rows remained draft and staff-unamended at cutoff;
+- all 92 ready rows contain the full ten-field `goldStandard` brief, current
+  package-verification provenance, strategy and seed-context hashes, and exact
+  workflow/version/timestamp/staff-amendment/approval/publication preconditions;
 - production writes: 0.
 
-Next #513 gate: supervisor review of the frozen PR #520 plan. Do not mutate,
-approve or publish any strategy until a separate exact-plan authorization.
+The old `94e42112...` plan is rejected and must not be applied. Next #513 gate is
+supervisor review of the new v2 frozen artifact. Do not apply the new migration
+or mutate, approve or publish any strategy yet.
 
 Kundedienste must not receive a fabricated recurring-social strategy.
 
@@ -392,7 +399,7 @@ On a fresh CG Dynamics chat:
 4. act directly on safe work.
 
 Priority order:
-1. Agent 03 / #513: regenerate #520 strategy dry-run against final 46 / 10 / 0 service truth.
+1. Agent 03 / #513: supervisor review of the regenerated v2 46 / 10 / 0 strategy dry-run.
 2. Agent 02 / #505: continue exact eligible TikTok/Instagram sweep + TikTok Business Center scheduler setup.
 3. #518: production migration only after CA approval, then Red Oak read-only preview.
 4. #519: current portal-access reconciliation.
