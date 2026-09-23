@@ -90,18 +90,24 @@ Canonical package authority:
 - #504 comment `5796786851` = production execution receipt.
 - #511 comment `5796787633` = completion record.
 
-Final current recurring-service partition across the 56 active clients:
-
 Historical 56-client package authority completed under #516:
 - **46 recurring-social eligible**
 - **10 non-social / not-currently-social**
 - **0 held**
 
-Current live fleet after adding Neshora Oxygen on 23 Sep 2026:
+Current live fleet after Neshora Oxygen package confirmation on 23 Sep 2026:
 - **57 active clients**
-- **46 recurring-social eligible**
+- **57 / 57 package verification confirmed**
+- **47 recurring-social eligible**
 - **10 non-social / not-currently-social**
-- **1 unresolved / held — Neshora Oxygen**
+- **0 held**
+
+Neshora Oxygen current confirmed monthly package:
+- **1 professional video**
+- **4 design posters**
+- **4 photo posts**
+
+All other Neshora package fields remain unknown/null unless separately confirmed.
 
 Explicit non-social / not-currently-social clients include:
 - Econofoods — supplied-video service only, no social management.
@@ -142,10 +148,12 @@ Exact refreshed clients:
 - Vrystaat Kunstefees;
 - Zooz Lifestyle WFF.
 
-The original #516 eight-client resolution is complete, but #516 is reopened only
-because Neshora Oxygen is a newly active client. Until its real package/service
-scope is confirmed, provider rollout must use the current 46 / 10 / 1 partition
-and hold Neshora from TikTok/Instagram OAuth and approval-capable social strategy.
+The original #516 eight-client resolution remains complete. Neshora Oxygen was
+then resolved separately from direct CA package confirmation through
+`confirm_client_package_settings`. #516 is closed again. Provider rollout now
+uses the current **47 / 10 / 0** partition. Neshora is eligible for provider
+OAuth, but it still requires an exact-client strategy dossier/drafts before any
+approval-capable strategy work.
 
 ## 5. Reports / client visibility
 
@@ -230,9 +238,10 @@ Kundedienste must not receive a fabricated recurring-social strategy.
 
 Only **recurring-social eligible** clients may enter provider rollout.
 
-Current live provider authority is **46 eligible / 10 excluded / 1 unresolved**.
-Do not connect the 10 non-social / not-currently-social clients or unresolved
-Neshora Oxygen until #516 confirms its actual recurring-service scope.
+Current live provider authority is **47 eligible / 10 excluded / 0 unresolved**.
+Do not connect the 10 non-social / not-currently-social clients. Neshora Oxygen
+is now eligible after package confirmation, subject to the same exact-account
+identity and provider-session isolation rules as every other client.
 
 ### TikTok
 
