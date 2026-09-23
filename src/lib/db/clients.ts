@@ -1,6 +1,7 @@
 import { supabase } from '../supabase'
 import {
   EMPTY_PACKAGE_SETTINGS,
+  buildPackageFieldStates,
   readPackageAuthority,
   readPackageSettings,
   type PackageSettings,
@@ -101,7 +102,10 @@ export async function confirmClientPackage(input: {
   const { data, error } = await withRequestTimeout(
     supabase.rpc('confirm_client_package_settings', {
       p_client_id: input.clientId,
-      p_package_settings: input.settings,
+      p_package_settings: {
+        ...input.settings,
+        field_states: buildPackageFieldStates(input.settings),
+      },
       p_evidence_note: input.evidenceNote,
       p_inference_note: input.inferenceNote ?? '',
       p_source_references: input.sourceReferences ?? [],
