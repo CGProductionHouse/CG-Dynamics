@@ -83,9 +83,16 @@ the Control Centre before consequential action.
 
 - #388 / PR #485 is merged at
   `26fa18f8d4c6155a03fead0ce339f9bcc398c631`, but production still runs the
-  pre-#485 `meta-sync-worker`. The AbortError/request-timeout resumability fix
-  therefore awaits a separately approved Edge Function deployment and bounded
-  production acceptance.
+  pre-#485 `meta-sync-worker`. Do NOT deploy the current-main worker by itself:
+  current main also contains #472 D02 engagement-evidence ingestion, while the
+  production `meta_sync_upsert_report_post` and client post projection are still
+  the pre-D02 contracts that coerce missing engagement components to zero. The
+  safe current-main activation unit is therefore the D02 migration
+  `20260922154243_meta_post_engagement_truth.sql` first, then the updated
+  `meta-sync-worker` and `meta-sync` functions with their shared dependencies,
+  followed by bounded D02 + AbortError production acceptance. A #388-only
+  deployment would require a separately reviewed backport onto the deployed
+  pre-D02 worker baseline rather than deploying current main.
 - TikTok #238 / PR #483 is merged at
   `93b09a89a71e9371b8ba53d704edc486b993aa85`. Migration
   `20260922153348_extend_background_jobs_for_tiktok_freshness.sql` is unapplied,
@@ -98,12 +105,17 @@ the Control Centre before consequential action.
   and worker/reporting integration remain protected and inactive.
 - Meta D02 migration `20260922154243_meta_post_engagement_truth.sql` is
   unapplied, and the related updated Meta persistence/projection functions are
-  undeployed. Do not bulk rewrite legacy/import history.
+  undeployed. This migration is now also a dependency for deploying the
+  current-main #485 worker safely, because that worker emits the D02 evidence
+  contract. Do not bulk rewrite legacy/import history.
 
 ### Exact remaining launch gates
 
-1. Separate CA approval to deploy the merged #388 Meta worker change, followed
-   by bounded production acceptance of AbortError/request-timeout resumability.
+1. Separate CA approval for the coordinated current-main Meta activation:
+   apply `20260922154243_meta_post_engagement_truth.sql`, then deploy the updated
+   `meta-sync-worker` and `meta-sync` functions with shared dependencies, then
+   run bounded D02 + AbortError/request-timeout production acceptance. Do not
+   deploy the current-main worker alone while the old D02 SQL contract is live.
 2. Red Oak exact-Page access/re-consent and stable fleet evidence.
 3. Only after those gates, a separate decision on enabling Content Autopilot
    alone. Keep AI generation and OneDrive flags off unless separately approved.
