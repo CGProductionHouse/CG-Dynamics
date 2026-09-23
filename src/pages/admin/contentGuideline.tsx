@@ -5,6 +5,9 @@ import type { ClientOption } from '../../lib/commandCentre'
 import { listMonthlyDeliverablesByMonth, type MonthlyDeliverable } from '../../lib/planner'
 import type { ContentGuideIdea, ContentGuideInput, StaffProfileOption } from '../../lib/contentWorkflow'
 import { guidelineVideoName } from '../../lib/contentGuidelineNaming'
+import { getMonthlyStrategy, type MonthlyClientStrategy } from '../../lib/monthlyStrategy'
+import { listActiveSharedSkillCards, type SkillCardRecord } from '../../lib/marketing-library/skillCardsData'
+import { buildCreativeBriefIntelligence } from '../../lib/creativeBriefIntelligence'
 import {
   VIDEO_STATUS_LABELS,
   buildCanonicalName,
@@ -136,6 +139,10 @@ export function GuidelineForm({
 }) {
   const [form, setForm] = useState<GuidelineFormState>(toFormState(initial))
   const [deliverables, setDeliverables] = useState<MonthlyDeliverable[]>([])
+  const [strategy, setStrategy] = useState<MonthlyClientStrategy | null>(null)
+  const [cards, setCards] = useState<SkillCardRecord[]>([])
+  const [intelligenceLoading, setIntelligenceLoading] = useState(false)
+  const [intelligenceError, setIntelligenceError] = useState<string | null>(null)
   const set = <K extends keyof GuidelineFormState>(key: K, value: GuidelineFormState[K]) => setForm(prev => ({ ...prev, [key]: value }))
 
   useEffect(() => {
@@ -157,8 +164,34 @@ export function GuidelineForm({
     }
   }, [form.client_id, form.month])
 
+  useEffect(() => {
+    let active = true
+    const timer = window.setTimeout(() => {
+      setStrategy(null)
+      setCards([])
+      setIntelligenceError(null)
+      if (!form.client_id || !form.month) { setIntelligenceLoading(false); return }
+      setIntelligenceLoading(true)
+      void Promise.all([getMonthlyStrategy(form.client_id, form.month), listActiveSharedSkillCards()])
+        .then(([monthly, library]) => {
+          if (!active) return
+          setStrategy(monthly.error ? null : monthly.data)
+          setCards(library.error || library.migrationNeeded ? [] : library.data)
+          if (monthly.error || library.error) setIntelligenceError('Some Creative Intelligence sources could not be loaded.')
+        })
+        .catch(() => { if (active) setIntelligenceError('Creative Intelligence sources could not be loaded.') })
+        .finally(() => { if (active) setIntelligenceLoading(false) })
+    }, 0)
+    return () => { active = false; window.clearTimeout(timer) }
+  }, [form.client_id, form.month])
+
   const resolvedClientName = form.client_id ? (clients.find(client => client.id === form.client_id)?.name ?? null) : null
   const linkedDeliverable = form.deliverable_id ? deliverables.find(d => d.id === form.deliverable_id) : undefined
+  const intelligence = buildCreativeBriefIntelligence({
+    clientId: form.client_id, month: form.month, deliverableId: form.deliverable_id,
+    deliverable: linkedDeliverable ?? null, strategy, cards,
+    draft: form, today: new Date().toISOString().slice(0, 10),
+  })
   const deliverableNumber = linkedDeliverable ? videoNumberFromInstance(linkedDeliverable.instance_number) : null
   const deliverableLinked = Boolean(form.deliverable_id)
 
@@ -241,6 +274,41 @@ export function GuidelineForm({
           {deliverables.map(deliverable => <option key={deliverable.id} value={deliverable.id}>{contentGuidelineDeliverableLabel(deliverable)}</option>)}
         </select>
       </label>
+
+      <section className="rounded-xl border border-brand-teal/20 bg-brand-teal/[0.05] p-3" aria-label="Creative Intelligence">
+        <h3 className="text-sm font-bold text-white">Creative Intelligence</h3>
+        <p className="mt-1 text-xs text-white/50">Read-only planning context. Nothing is applied to the guideline automatically.</p>
+        {intelligenceLoading && <p className="mt-2 text-sm text-white/60">Loading approved knowledge and monthly strategy…</p>}
+        {intelligenceError && <p className="mt-2 text-sm text-amber-200">{intelligenceError}</p>}
+        {!intelligenceLoading && <><p className="mt-3 text-xs font-bold uppercase tracking-wide text-brand-teal">Source / strategy-backed guidance</p><div className="mt-2 grid gap-3 sm:grid-cols-2">
+          {([
+            ['Strategy alignment', intelligence.strategyAlignment], ['Strategy creative job / angle', intelligence.creativeJob],
+            ['Approved-card guidance', intelligence.sourceBackedGuidance],
+          ] as const).map(([label, values]) => <div key={label}><p className={LABEL_CLS}>{label}</p>
+            {values.length ? <ul className="mt-1 list-disc space-y-1 pl-4 text-sm text-white/75">{values.map((value, index) => <li key={`${index}-${value}`}>{value}</li>)}</ul>
+              : <p className="mt-1 text-sm text-white/40">Not established</p>}</div>)}
+        </div>
+        <p className="mt-3 text-xs font-bold uppercase tracking-wide text-white/60">Current staff draft — not a recommendation</p>
+        <div className="mt-2 grid gap-2 text-sm text-white/70 sm:grid-cols-2">
+          {([['Objective', intelligence.currentDraft.objective], ['Hook', intelligence.currentDraft.hook], ['CTA', intelligence.currentDraft.cta],
+            ['Shot breakdown', intelligence.currentDraft.shot_breakdown], ['Requirements', intelligence.currentDraft.requirements]] as const)
+            .map(([label, value]) => <p key={label}><span className="text-white/45">{label}: </span>{value.trim() || 'Not drafted'}</p>)}
+        </div>
+        <p className="mt-3 text-xs font-bold uppercase tracking-wide text-amber-200">Unknown / needs confirmation</p>
+        <div className="mt-2 grid gap-3 sm:grid-cols-2">
+          {([['Audience / intent', intelligence.audienceIntent], ['Proof to capture', intelligence.proofToCapture], ['Other confirmations', intelligence.needsConfirmation]] as const)
+            .map(([label, values]) => <div key={label}><p className={LABEL_CLS}>{label}</p><ul className="mt-1 list-disc space-y-1 pl-4 text-sm text-white/75">
+              {(values.length ? values : ['Not established by approved evidence.']).map((value, index) => <li key={`${index}-${value}`}>{value}</li>)}
+            </ul></div>)}
+        </div></>}
+        {!intelligenceLoading && intelligence.warnings.length > 0 && <div className="mt-3 rounded-lg border border-amber-400/20 p-2 text-sm text-amber-100"><p className="font-semibold">Warnings / overclaims</p>{intelligence.warnings.map((warning, index) => <p key={index}>{warning}</p>)}</div>}
+        {!intelligenceLoading && intelligence.ready && <p className="mt-3 text-xs text-white/50">Linked deliverable ID: {intelligence.provenance.deliverableId} · Monthly strategy: {intelligence.provenance.strategy
+          ? `${intelligence.provenance.strategy.id} · version ${intelligence.provenance.strategy.version} · ${intelligence.provenance.strategy.status}`
+          : 'Unavailable for this client/month'}</p>}
+        {!intelligenceLoading && intelligence.sources.length > 0 && <details className="mt-3 text-xs text-white/60"><summary className="cursor-pointer">Approved source rationale ({intelligence.sources.length})</summary>
+          <ul className="mt-2 space-y-2">{intelligence.sources.map(source => <li key={source.id}><strong>{source.title}</strong> · {source.evidence_label} · {source.confidence_level} · ID {source.id}<br />{source.source_reference || 'Source reference unavailable'}{source.safe_claim && <> · Safe claim: {source.safe_claim}</>}</li>)}</ul>
+        </details>}
+      </section>
 
       <label className="block space-y-1.5"><span className={LABEL_CLS}>Concept title *</span><input className={INPUT_CLS} value={form.title} onChange={event => set('title', event.target.value)} /></label>
       <div className="grid gap-4 sm:grid-cols-2">
