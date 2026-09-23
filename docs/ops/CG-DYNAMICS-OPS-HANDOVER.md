@@ -44,7 +44,10 @@ Recent launch-critical merges:
 
 ### CA MANUAL AGENT 01 — Issues #504 / #511
 
-Mission: active-client package confirmation campaign, with #511 now blocking the first truthful receipt.
+Mission: active-client package confirmation campaign.
+
+#511 code is now merged through PR #512 at `b894f1acc0d7ceed119ae93343da096a737ddd2f`.
+The production migration/RPC activation is still unapplied and remains a protected gate.
 
 Production package authority is live.
 
@@ -55,16 +58,19 @@ Latest verified queue:
 - 0 conflicts.
 - 19 unknown-heavy.
 
-AV Event Life is the first CA-confirmed package truth:
-- CA explicitly confirmed 4 design posters + 4 photo posts + social media management/caption generation.
-- all other package fields remain unknown, not zero.
+CA has now reviewed the complete 56-active-client package list in one batch.
 
-Important blocker discovered before write:
-- the live #494 confirmation RPC currently requires explicit values for every numeric field and an explicit campaign boolean;
-- using it now would silently turn unknowns into false zeros;
-- no AV package write has occurred;
-- Issue #511 owns the bounded authority correction so confirmed receipts can preserve unknown/null fields while strategy capacity checks fail closed.
-- after #511 code review and separately approved migration/RPC activation, AV Event Life should be the first confirmed receipt using the exact CA-approved truth.
+Durable batch authority:
+- Issue #504 comment `5796095876`.
+- every unmentioned client/package is approved unchanged from the reviewed Teams-derived list;
+- CA corrections in that comment override Teams/template evidence;
+- AV Event Life = 4 design posters + 4 photo posts + social media management/caption generation;
+- unknowns remain unknown/null, never zero;
+- First Technology Central, Kundedienste and Local Deli are removed from recurring social-management scope;
+- Rusoord Farmstay is website-only;
+- Red Oak, TBS Brokers, The Staffordshire and WiseRide contain flexible/on-request/shared scope that must be stored as notes/other agreed deliverables rather than fake fixed quantities.
+
+No package confirmation receipts have been written from this batch yet because the #511 migration/RPC replacement is not production-applied.
 
 Agent 01 has already prepared the next ten direct-evidence-ready clients on #504:
 Bloem Action Sports; Bloem Marble & Granite; Bohemia Quick Stop; Bouwer & Coetzee Attorneys; C&L Innovations; Cape Lumber; Central Canvas; Daisy & Co; Delta Gas; Dulux Paint & Paper Bloemfontein.
@@ -85,12 +91,13 @@ Production:
 - failed provider refresh can now mark the exact connection `needs_reauth` / `reconnect_required`.
 - transport/config failures remain retryable.
 
-Resume #505 with CG Production House first:
-1. retry the stored refresh once through the canonical production flow;
-2. if provider rejects it, verify queue becomes reconnect_required;
-3. use existing TikTok OAuth reconnect;
-4. verify exact account identity and freshness;
-5. continue other ACTIVE clients. No TikTok publishing.
+#505 has now verified CG Production House transitions correctly to `reconnect_required`.
+The canonical exact-client TikTok OAuth reconnect is available.
+
+Current protected blocker:
+- CA must explicitly authorize the persistent read-only TikTok OAuth reconnect/consent for the exact CG Production House account.
+
+After that consent, verify exact account identity/freshness and continue other ACTIVE clients. No TikTok publishing.
 
 Instagram campaign state:
 - 56 active clients reviewed.
