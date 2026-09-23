@@ -8,6 +8,13 @@ the Control Centre before consequential action.
 
 ### GitHub and ownership truth
 
+- Issue #494 is owned by CA MANUAL AGENT 01 from main
+  `16c0056746eff964fedbbe36bfa8f6dc02e9d56f`. Its isolated implementation adds
+  active-client-only package confirmation and fail-closed gold-standard monthly
+  strategy authority. The migration remains unapplied; no client package is
+  bulk-confirmed. #491/#238 provider work and #492 report publication remain
+  separate owned lanes.
+
 - Current runtime-code baseline: `e77d0ce29a5439b99ceaf39694e31a908265c820`, including
   #388 / PR #485 and website-reporting CORS PR #486 after #472 D02 / PR #484.
   Later `main` commits may be docs-only handover updates; always refetch GitHub

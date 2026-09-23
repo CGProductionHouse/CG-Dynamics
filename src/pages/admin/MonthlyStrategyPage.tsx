@@ -6,7 +6,7 @@ import { StatusBadge } from '../../components/ui/Badges'
 import { ActionButton } from '../../components/ui/Buttons'
 import { useAuth } from '../../contexts/AuthContext'
 import { getMonthEvents } from '../../lib/contentCalendar'
-import { getClient, readPackageSettings, type Client } from '../../lib/db/clients'
+import { getClient, readPackageAuthority, type Client } from '../../lib/db/clients'
 import {
   DEFAULT_OPTIONS,
   listStrategyOptions,
@@ -22,7 +22,13 @@ import {
   type MonthlyStrategyStatus,
 } from '../../lib/monthlyStrategy'
 import { monthDisplayLabel } from '../../lib/reportPeriod'
-import { emptyStrategyData, readStrategyData, type StrategyData } from '../../lib/strategyEngine'
+import {
+  GOLD_STANDARD_FIELDS,
+  assessGoldStandardStrategy,
+  emptyStrategyData,
+  readStrategyData,
+  type StrategyData,
+} from '../../lib/strategyEngine'
 
 const MONTH_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/
 
@@ -142,12 +148,13 @@ export default function MonthlyStrategyPage() {
     }
   }
 
+  const packageAuthority = useMemo(() => readPackageAuthority(client?.package_settings), [client])
   const context = useMemo<StrategyContext>(() => ({
     clientName: client?.name ?? 'Client',
-    packageSettings: readPackageSettings(client?.package_settings),
+    packageSettings: packageAuthority.settings,
     calendarEvents: getMonthEvents(month),
     topPost: null,
-  }), [client, month])
+  }), [client, month, packageAuthority.settings])
 
   const dirty = useMemo(() => strategy !== null && (
     JSON.stringify(draftData) !== JSON.stringify(readStrategyData(strategy.strategy_data))
@@ -155,6 +162,16 @@ export default function MonthlyStrategyPage() {
   ), [draftData, internalNotes, strategy])
 
   const coverage = strategy ? Object.entries(strategy.seed_context.source_coverage) : []
+  const exactEvidenceAvailable = Boolean(
+    strategy && (
+      (Array.isArray(strategy.seed_context.intelligence_evidence) && strategy.seed_context.intelligence_evidence.length > 0)
+      || strategy.seed_context.sources.previous_report_id
+      || strategy.seed_context.sources.previous_monthly_strategy_id
+    ),
+  )
+  const qualityIssues = strategy
+    ? assessGoldStandardStrategy(draftData, packageAuthority.settings, exactEvidenceAvailable)
+    : []
   const isAdmin = profile?.role === 'admin'
 
   return (
@@ -233,6 +250,19 @@ export default function MonthlyStrategyPage() {
                     </span>
                   ))}
                 </div>
+                <details className="mt-4 rounded-xl border border-white/[0.08] bg-black/10 p-3 text-xs text-brand-primary">
+                  <summary className="cursor-pointer font-bold text-white">Exact provenance</summary>
+                  <div className="mt-3 space-y-2 leading-5">
+                    <p>Client: {strategy.seed_context.client_id} · Month: {strategy.seed_context.strategy_month}</p>
+                    <p>Package confirmed: {strategy.seed_context.sources.package_verification_confirmed_at ?? 'not recorded in this seed'} · actor {strategy.seed_context.sources.package_verification_actor_id ?? 'unavailable'}</p>
+                    <p>Package sources: {strategy.seed_context.sources.package_source_references?.join(', ') || 'none recorded'}</p>
+                    <p>Client guide: {strategy.seed_context.sources.client_guide_id ?? 'none'} · Previous report: {strategy.seed_context.sources.previous_report_id ?? 'none'} · Previous strategy: {strategy.seed_context.sources.previous_monthly_strategy_id ?? 'none'}</p>
+                    <p>Deliverables: {strategy.seed_context.sources.deliverable_ids.join(', ') || 'none'} · Prior posts: {strategy.seed_context.sources.previous_post_ids?.join(', ') || 'none'}</p>
+                    {(strategy.seed_context.sources.marketing_library_cards ?? []).map(card => (
+                      <p key={card.id}>Skill Card {card.id} · {card.title} · {card.evidence_label} · {card.confidence_level} · source {card.source_id ?? 'unavailable'}</p>
+                    ))}
+                  </div>
+                </details>
               </div>
               <div className="text-xs leading-5 text-brand-primary/70 lg:text-right">
                 <p>Version {strategy.version}</p>
@@ -251,6 +281,37 @@ export default function MonthlyStrategyPage() {
               isAdmin={isAdmin}
               onReloadOptions={() => void reloadOptions()}
             />
+
+            <section className="mt-6 border-t border-white/[0.08] pt-6">
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-teal">Gold-standard exact-client authority</p>
+              <p className="mt-2 text-sm leading-6 text-brand-primary">
+                Complete every field from this client’s confirmed package, evidence and actual prior work. Generic filler is rejected at approval.
+              </p>
+              <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                {GOLD_STANDARD_FIELDS.map(field => (
+                  <label key={field.key} className="block">
+                    <span className="mb-1.5 block text-xs font-bold text-brand-primary">{field.label}</span>
+                    <textarea
+                      value={draftData.goldStandard[field.key]}
+                      onChange={event => setDraftData(current => ({
+                        ...current,
+                        goldStandard: { ...current.goldStandard, [field.key]: event.target.value },
+                      }))}
+                      rows={4}
+                      className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white placeholder:text-brand-primary/40 focus:outline-none focus:ring-2 focus:ring-brand-accent"
+                    />
+                  </label>
+                ))}
+              </div>
+              <div className={`mt-4 rounded-xl border px-4 py-3 text-sm ${qualityIssues.length === 0 ? 'border-brand-teal/20 bg-brand-teal/10 text-brand-teal' : 'border-amber-300/20 bg-amber-300/10 text-amber-100'}`}>
+                {qualityIssues.length === 0 ? 'Package and exact-client strategy quality gates are complete.' : (
+                  <>
+                    <p className="font-bold">Approval is blocked until:</p>
+                    <ul className="mt-2 list-disc space-y-1 pl-5">{qualityIssues.map(issue => <li key={issue}>{issue}</li>)}</ul>
+                  </>
+                )}
+              </div>
+            </section>
 
             <label className="mt-6 block border-t border-white/[0.08] pt-6">
               <span className="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-brand-primary">Internal review notes</span>
@@ -281,7 +342,7 @@ export default function MonthlyStrategyPage() {
                 <ActionButton
                   variant="outline"
                   loading={busy === 'approve'}
-                  disabled={dirty}
+                  disabled={dirty || qualityIssues.length > 0}
                   onClick={() => void runAction('approve', () => transitionMonthlyStrategy({ clientId, month, expectedVersion: strategy.version, targetStatus: 'approved', actorProfileId: profile?.id, idempotencyKey: crypto.randomUUID() }), 'Strategy approved. It is not client-visible until published.')}
                 >
                   Approve strategy
@@ -290,6 +351,7 @@ export default function MonthlyStrategyPage() {
               {strategy.workflow_status === 'approved' && (
                 <ActionButton
                   loading={busy === 'publish'}
+                  disabled={qualityIssues.length > 0}
                   onClick={() => {
                     if (!window.confirm(`Publish ${client?.name ?? 'this client'}’s ${monthDisplayLabel(month)} strategy to the client portal?`)) return
                     void runAction('publish', () => transitionMonthlyStrategy({ clientId, month, expectedVersion: strategy.version, targetStatus: 'published', actorProfileId: profile?.id, idempotencyKey: crypto.randomUUID() }), 'Strategy published to the exact client-month portal view.')

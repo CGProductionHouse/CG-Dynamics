@@ -1,5 +1,6 @@
 import { getMonthEvents, type CalendarEvent, type DeliverableType as CalendarDeliverableType } from './contentCalendar'
-import { readPackageSettings, type PackageSettings } from './db/clients'
+import { cardTargetsAgent } from '../features/ai-workforce/agents/agentRegistry'
+import { readPackageAuthority } from './db/clients'
 import { buildMonthlyBaseline, type BaselineEvidence } from './monthlyStrategySeed'
 import { supabase } from './supabase'
 import {
@@ -49,6 +50,12 @@ export interface MonthlyStrategySeedContext {
     client_calendar_event_ids: string[]
     approved_client_context_update_ids: string[]
     client_guide_id: string | null
+    package_verification_confirmed_at?: string | null
+    package_verification_actor_id?: string | null
+    package_source_references?: string[]
+    marketing_library_skill_card_ids?: string[]
+    marketing_library_cards?: Array<{ id: string; title: string; confidence_level: string; evidence_label: string; source_id: string | null }>
+    previous_post_ids?: string[]
   }
   calendar_events: Array<{
     authority: 'content_calendar' | 'company_calendar'
@@ -183,21 +190,6 @@ function buildCalendarSelections(
   }
 }
 
-function packageFromDeliverables(rows: DeliverableSeedRow[], fallback: PackageSettings): PackageSettings {
-  const count = (type: string) => rows.filter(row => row.deliverable_type === type).length
-  return {
-    professional_videos_per_month: count('video'),
-    reels_per_month: count('reel'),
-    photo_posts_per_month: count('photo'),
-    design_posters_per_month: count('dp'),
-    animated_posters_per_month: fallback.animated_posters_per_month,
-    campaign_management_included: fallback.campaign_management_included,
-    monthly_campaign_budget: fallback.monthly_campaign_budget,
-    shoot_days_per_month: fallback.shoot_days_per_month,
-    package_notes: fallback.package_notes,
-  }
-}
-
 export async function prepareMonthlyStrategySeed(clientId: string, month: string): Promise<{
   strategyData: StrategyData
   seedContext: MonthlyStrategySeedContext
@@ -206,15 +198,18 @@ export async function prepareMonthlyStrategySeed(clientId: string, month: string
   const targetMonth = monthStart(month)
   const followingMonth = nextMonthStart(month)
 
-  const [clientResult, deliverablesResult, eventsResult, priorStrategyResult, reportResult, updatesResult, guideResult, packageResult] = await Promise.all([
+  const operatingDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'Africa/Johannesburg' }).format(new Date())
+  const [clientResult, deliverablesResult, eventsResult, priorStrategyResult, reportResult, updatesResult, guideResult, packageResult, sharedCardsResult, clientCardsResult] = await Promise.all([
     supabase.from('clients').select('id,name,active,package_settings').eq('id', clientId).maybeSingle(),
     supabase.from('monthly_deliverables').select('id,deliverable_type').eq('client_id', clientId).eq('month', targetMonth).is('archived_at', null),
     supabase.from('company_calendar_events').select('id,title,event_type,start_at').eq('client_id', clientId).gte('start_at', `${targetMonth}T00:00:00+02:00`).lt('start_at', `${followingMonth}T00:00:00+02:00`).neq('status', 'cancelled').is('superseded_by_event_id', null),
     supabase.from('monthly_client_strategies').select('id,strategy_data').eq('client_id', clientId).lt('strategy_month', targetMonth).order('strategy_month', { ascending: false }).limit(1).maybeSingle(),
-    supabase.from('reports').select('id,strategy_data,period_end').eq('client_id', clientId).eq('status', 'published').is('platform', null).lt('period_end', targetMonth).order('period_end', { ascending: false }).limit(1).maybeSingle(),
+    supabase.from('reports').select('id,strategy_data,performance_comments,period_end').eq('client_id', clientId).eq('status', 'published').is('platform', null).lt('period_end', targetMonth).order('period_end', { ascending: false }).limit(1).maybeSingle(),
     supabase.from('client_context_updates').select('id,title,body,decisions').eq('client_id', clientId).eq('review_state', 'incorporated').order('created_at', { ascending: false }).limit(5),
     supabase.from('client_guides').select('id,guide_markdown').eq('client_id', clientId).eq('runtime_readiness', 'ready').order('version', { ascending: false }).limit(1).maybeSingle(),
     supabase.from('client_packages').select('id').eq('client_id', clientId).eq('status', 'active').lt('start_date', followingMonth).or(`end_date.is.null,end_date.gte.${targetMonth}`).order('start_date', { ascending: false }).limit(1).maybeSingle(),
+    supabase.from('skill_cards').select('id,title,principle,summary,relevant_agents,confidence_level,evidence_label,source_id,review_expires_at').eq('status', 'active').is('active_client_id', null).in('knowledge_layer', ['universal_principle', 'south_african_market']).or(`review_expires_at.is.null,review_expires_at.gte.${operatingDate}`).limit(30),
+    supabase.from('skill_cards').select('id,title,principle,summary,relevant_agents,confidence_level,evidence_label,source_id,review_expires_at').eq('status', 'active').eq('active_client_id', clientId).or(`review_expires_at.is.null,review_expires_at.gte.${operatingDate}`).limit(30),
   ])
 
   if (clientResult.error || !clientResult.data?.active || clientResult.data.id !== clientId) {
@@ -224,6 +219,9 @@ export async function prepareMonthlyStrategySeed(clientId: string, month: string
   if (eventsResult.error) throw new Error(eventsResult.error.message)
   if (priorStrategyResult.error) throw new Error(priorStrategyResult.error.message)
   if (reportResult.error) throw new Error(reportResult.error.message)
+  if (packageResult.error) throw new Error(packageResult.error.message)
+  if (sharedCardsResult.error) throw new Error(sharedCardsResult.error.message)
+  if (clientCardsResult.error) throw new Error(clientCardsResult.error.message)
 
   const deliverables = (deliverablesResult.data ?? []) as DeliverableSeedRow[]
   const clientEvents = (eventsResult.data ?? []) as ClientEventSeedRow[]
@@ -231,7 +229,22 @@ export async function prepareMonthlyStrategySeed(clientId: string, month: string
   const readyGuide = guideResult.error ? null : guideResult.data as ReadyClientGuideSeedRow | null
   const previousRaw = priorStrategyResult.data?.strategy_data ?? reportResult.data?.strategy_data
   const previous = readStrategyData(previousRaw)
-  const packageSettings = packageFromDeliverables(deliverables, readPackageSettings(clientResult.data.package_settings))
+  const postResult = reportResult.data?.id
+    ? await supabase.from('posts').select('id,caption,platform,reach,views,raw').eq('report_id', reportResult.data.id).order('reach', { ascending: false }).limit(5)
+    : { data: [], error: null }
+  if (postResult.error) throw new Error(postResult.error.message)
+  const previousPosts = (postResult.data ?? []) as Array<{ id: string; caption: string | null; platform: string | null; reach: number | null; views: number | null }>
+  const packageAuthority = readPackageAuthority(clientResult.data.package_settings)
+  if (!packageAuthority.settings || !packageAuthority.verification) {
+    throw new Error('PACKAGE_UNVERIFIED: confirm this active client’s exact package before preparing strategy.')
+  }
+  const hasExactClientEvidence = Boolean(
+    priorStrategyResult.data || reportResult.data || readyGuide || contextUpdates.length > 0,
+  )
+  if (!hasExactClientEvidence) {
+    throw new Error('CLIENT_EVIDENCE_UNVERIFIED: approved client intelligence or previous exact-client work is required.')
+  }
+  const packageSettings = packageAuthority.settings
   const calendar = buildCalendarSelections(month, deliverables, clientEvents)
   const baseline = buildMonthlyBaseline({
     clientName: clientResult.data.name,
@@ -242,10 +255,40 @@ export async function prepareMonthlyStrategySeed(clientId: string, month: string
     previousDrivers: previous.strategyDrivers,
     deliverables,
   })
+  const marketingCards = [
+    ...((clientCardsResult.data ?? []) as Array<Record<string, unknown>>),
+    ...((sharedCardsResult.data ?? []) as Array<Record<string, unknown>>),
+  ].filter(card => {
+    const agents = Array.isArray(card.relevant_agents) ? card.relevant_agents.filter((value): value is string => typeof value === 'string') : []
+    return cardTargetsAgent(agents, 'marketing_strategist') || cardTargetsAgent(agents, 'content_planner')
+  }).sort((left, right) => String(left.id).localeCompare(String(right.id))).slice(0, 5)
+  for (const card of marketingCards) {
+    const principle = typeof card.principle === 'string' ? card.principle.trim() : ''
+    if (!principle || baseline.strategyDrivers.some(value => value.toLocaleLowerCase() === principle.toLocaleLowerCase())) continue
+    baseline.strategyDrivers.push(principle)
+    baseline.evidence.push({ authority: 'marketing_library_skill_card', source_id: String(card.id), field: 'strategyDrivers', excerpt: principle.slice(0, 180) })
+  }
 
   const strategyData = emptyStrategyData()
   strategyData.clientDirection = baseline.clientDirection
   strategyData.topContent = previous.topContent
+  const topPost = previousPosts[0]
+  if (topPost) {
+    const observedMetric = typeof topPost.reach === 'number'
+      ? { label: 'Reach', value: topPost.reach }
+      : typeof topPost.views === 'number' ? { label: 'Views', value: topPost.views } : null
+    strategyData.topContent.autoCaption = topPost.caption
+    strategyData.topContent.autoPlatform = (topPost.platform ?? null) as StrategyData['topContent']['autoPlatform']
+    strategyData.topContent.autoMetricLabel = observedMetric?.label ?? null
+    strategyData.topContent.autoMetricValue = observedMetric?.value ?? null
+    baseline.evidence.push({
+      authority: 'published_report_post', source_id: topPost.id, field: 'topContent',
+      excerpt: topPost.caption?.slice(0, 180) || 'Previous published report post with observed performance.',
+    })
+  }
+  if (!strategyData.topContent.whatThisTellsUs && typeof reportResult.data?.performance_comments === 'string') {
+    strategyData.topContent.whatThisTellsUs = reportResult.data.performance_comments
+  }
   strategyData.strategyDrivers = baseline.strategyDrivers
   strategyData.calendarSelections = calendar.selections
   strategyData.actionPlan = generateActionPlan({
@@ -261,6 +304,28 @@ export async function prepareMonthlyStrategySeed(clientId: string, month: string
     packageSettings,
   })
   strategyData.clientActionsRequired = ['Confirm any priority offers, events or deadlines for this month.']
+  const packageMix = [
+    `${packageSettings.professional_videos_per_month} professional videos`,
+    `${packageSettings.reels_per_month} reels`,
+    `${packageSettings.photo_posts_per_month} photo posts`,
+    `${packageSettings.design_posters_per_month} design posters`,
+    `${packageSettings.animated_posters_per_month} animated posters`,
+    `${packageSettings.website_updates_per_month} website updates`,
+  ].join(', ')
+  strategyData.goldStandard.objective = baseline.clientDirection[0]
+    ? `${clientResult.data.name}: ${baseline.clientDirection[0]}`
+    : ''
+  strategyData.goldStandard.formatsAndRationale = `Work within ${clientResult.data.name}’s confirmed monthly package of ${packageMix}; staff must tie each selected format to an evidenced objective before approval.`
+  strategyData.goldStandard.testAndChange = previous.topContent.whatThisTellsUs
+    ? `Use the previous exact-client finding “${previous.topContent.whatThisTellsUs}” to define one controlled change for ${clientResult.data.name}.`
+    : ''
+  strategyData.goldStandard.nextMonthGamePlan = `Plan and sequence only the confirmed ${packageMix}. ${packageSettings.package_exclusions ? `Excluded: ${packageSettings.package_exclusions}` : 'No additional scope may be inferred.'}`
+  baseline.evidence.push({
+    authority: 'confirmed_client_package',
+    source_id: clientId,
+    field: 'actionPlan',
+    excerpt: `${packageMix}. Confirmed ${packageAuthority.verification.confirmed_at}.`,
+  })
 
   const seedContext: MonthlyStrategySeedContext = {
     version: 1,
@@ -275,6 +340,18 @@ export async function prepareMonthlyStrategySeed(clientId: string, month: string
       client_calendar_event_ids: clientEvents.map(row => row.id),
       approved_client_context_update_ids: contextUpdates.map(row => row.id),
       client_guide_id: readyGuide?.id ?? null,
+      package_verification_confirmed_at: packageAuthority.verification.confirmed_at,
+      package_verification_actor_id: packageAuthority.verification.confirmed_by_profile_id,
+      package_source_references: packageAuthority.verification.source_references,
+      marketing_library_skill_card_ids: marketingCards.map(card => String(card.id)),
+      marketing_library_cards: marketingCards.map(card => ({
+        id: String(card.id),
+        title: String(card.title ?? ''),
+        confidence_level: String(card.confidence_level ?? ''),
+        evidence_label: String(card.evidence_label ?? ''),
+        source_id: card.source_id ? String(card.source_id) : null,
+      })),
+      previous_post_ids: previousPosts.map(post => post.id),
     },
     calendar_events: calendar.audit,
     intelligence_evidence: baseline.evidence,
@@ -285,7 +362,8 @@ export async function prepareMonthlyStrategySeed(clientId: string, month: string
       company_calendar: clientEvents.length > 0 ? 'available' : 'none',
       approved_client_context: updatesResult.error ? 'unavailable' : contextUpdates.length > 0 ? 'available' : 'none',
       client_guide: guideResult.error ? 'unavailable' : guideResult.data ? 'available' : 'none',
-      client_package: packageResult.error ? 'unavailable' : packageResult.data ? 'available' : 'none',
+      client_package: packageAuthority.settings ? 'available' : 'none',
+      marketing_library: marketingCards.length > 0 ? 'available' : 'none',
     },
   }
 

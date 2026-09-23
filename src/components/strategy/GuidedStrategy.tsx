@@ -25,7 +25,7 @@ import {
 
 export interface StrategyContext {
   clientName: string
-  packageSettings: PackageSettings
+  packageSettings: PackageSettings | null
   calendarEvents: CalendarEvent[]
   topPost: { caption: string | null; platform: Platform | null; metricLabel: string; metricValue: number; postType: string | null; imageUrl: string | null } | null
 }
@@ -67,6 +67,7 @@ export function GuidedStrategyEditor({
   const selectedCalendar = data.calendarSelections
 
   function handleGenerateStrategy() {
+    if (!context.packageSettings) return
     const text = generateStrategyGoingForward({
       clientName: context.clientName,
       data,
@@ -77,6 +78,7 @@ export function GuidedStrategyEditor({
   }
 
   function handleGenerateActionPlan() {
+    if (!context.packageSettings) return
     const plan = generateActionPlan({
       clientName: context.clientName,
       data,
@@ -202,7 +204,7 @@ export function GuidedStrategyEditor({
         title="Strategy going forward"
         subtitle="Pick the drivers, generate an editable draft, then refine."
         action={
-          <button type="button" onClick={handleGenerateStrategy} className={GENERATE_BTN}>
+          <button type="button" onClick={handleGenerateStrategy} disabled={!context.packageSettings} className={GENERATE_BTN}>
             Generate draft
           </button>
         }
@@ -230,7 +232,7 @@ export function GuidedStrategyEditor({
         title="Action plan"
         subtitle="Auto-generated from the package, then fully editable."
         action={
-          <button type="button" onClick={handleGenerateActionPlan} className={GENERATE_BTN}>
+          <button type="button" onClick={handleGenerateActionPlan} disabled={!context.packageSettings} className={GENERATE_BTN}>
             Generate from package
           </button>
         }

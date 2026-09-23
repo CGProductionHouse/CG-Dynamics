@@ -112,7 +112,7 @@ test('rich clients receive a materially client-specific seed from approved intel
   assert.ok(baseline.strategyDrivers.every(value => !value.includes('info@example.com')))
 })
 
-test('sparse clients receive a conservative seed from recorded deliverables without invented specifics', () => {
+test('sparse clients receive no generic strategy fallback from recorded deliverables alone', () => {
   const baseline = buildMonthlyBaseline({
     clientName: 'Sparse Client',
     contextUpdates: [],
@@ -126,9 +126,8 @@ test('sparse clients receive a conservative seed from recorded deliverables with
   })
 
   assert.deepEqual(baseline.clientDirection, [])
-  assert.match(baseline.strategyDrivers[0], /Sparse Client.*2 reels.*1 design poster/)
-  assert.match(baseline.strategyDrivers[1], /confirm client priorities before adding offer, event or campaign claims/)
-  assert.doesNotMatch(baseline.strategyDrivers.join(' '), /sale|discount|launch|audience/i)
+  assert.deepEqual(baseline.strategyDrivers, [])
+  assert.deepEqual(baseline.evidence, [])
 })
 
 test('seed context exposes considered and selected calendar evidence without creating another schedule', () => {

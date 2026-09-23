@@ -11,17 +11,18 @@ import {
   listClients,
   createClient,
   updateClient,
-  updateClientPackage,
+  confirmClientPackage,
   archiveClient,
   restoreClient,
   deleteClient,
   clientHasData,
   readPackageSettings,
-  EMPTY_PACKAGE_SETTINGS,
+  readPackageAuthority,
   type Client,
   type PackageSettings,
 } from '../../lib/db/clients'
 import { ClientLogo } from '../../components/ClientLogo'
+import { PACKAGE_NUMBER_FIELDS } from '../../lib/packageAuthority'
 
 function errorMessage(_error: unknown, fallback: string) {
   return fallback
@@ -71,6 +72,11 @@ export default function ClientsList() {
     if (viewFilter === 'archived') return clients.filter(c => !c.active)
     return clients
   }, [clients, viewFilter])
+  const packageQueue = useMemo(() => {
+    const activeClients = clients.filter(client => client.active)
+    const confirmed = activeClients.filter(client => readPackageAuthority(client.package_settings).status === 'confirmed').length
+    return { total: activeClients.length, confirmed, unverified: activeClients.length - confirmed }
+  }, [clients])
 
   function openBulk() {
     setBulkOpen(true)
@@ -145,6 +151,7 @@ export default function ClientsList() {
       active: boolean
       logo_url: string | null
       package: PackageSettings
+      packageConfirmation?: { evidenceNote: string; inferenceNote: string; sourceReferences: string[] }
     }
   ): Promise<string | null> {
     try {
@@ -175,16 +182,26 @@ export default function ClientsList() {
         }
       }
 
-      // Package settings remain a separate best-effort save from the client record.
-      if (savedId) {
-        const pkgResult = await updateClientPackage(savedId, input.package)
+      // Package scope becomes authority only through the explicit audited RPC.
+      if (savedId && input.packageConfirmation) {
+        const pkgResult = await confirmClientPackage({
+          clientId: savedId,
+          settings: input.package,
+          evidenceNote: input.packageConfirmation.evidenceNote,
+          inferenceNote: input.packageConfirmation.inferenceNote,
+          sourceReferences: input.packageConfirmation.sourceReferences,
+        })
         if (pkgResult.migrationNeeded) {
           setPackageNotice('Client saved, but monthly package settings are not available yet.')
         } else if (pkgResult.error) {
           setPackageNotice('Client saved, but monthly package settings could not be stored.')
         } else {
           setPackageNotice(null)
-          if (pkgResult.data) setClients(current => upsertClient(current, pkgResult.data!))
+          if (pkgResult.data) {
+            setClients(current => current.map(client => client.id === savedId
+              ? { ...client, package_settings: pkgResult.data!.package_settings }
+              : client))
+          }
         }
       }
 
@@ -204,6 +221,9 @@ export default function ClientsList() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
           <h1 className="font-display text-4xl font-black uppercase tracking-wide text-white">Clients</h1>
+          <p className="mt-2 text-xs text-brand-primary">
+            Active package queue · {packageQueue.confirmed} confirmed · {packageQueue.unverified} unverified · {packageQueue.total} active
+          </p>
         </div>
         {isAdmin && (
           <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
@@ -439,7 +459,8 @@ function ClientActionLink({ to, label, teal = false }: { to: string; label: stri
 
 // Compact package chip row derived from client.package_settings
 function PackageChips({ client }: { client: Client }) {
-  const pkg = client.package_settings ? readPackageSettings(client.package_settings) : null
+  const authority = readPackageAuthority(client.package_settings)
+  const pkg = authority.settings
   const chips = pkg
     ? [
         { label: 'DP', value: pkg.design_posters_per_month },
@@ -450,7 +471,11 @@ function PackageChips({ client }: { client: Client }) {
     : []
 
   if (chips.length === 0) {
-    return <span className="text-[11px] text-white/25">Package not set</span>
+    return (
+      <span className={`text-[11px] ${authority.status === 'confirmed' ? 'text-brand-teal' : 'text-amber-300'}`}>
+        {authority.status === 'confirmed' ? 'Confirmed package · no core content quantities' : 'Package unverified'}
+      </span>
+    )
   }
   return (
     <div className="flex flex-wrap gap-1">
@@ -462,6 +487,9 @@ function PackageChips({ client }: { client: Client }) {
           {chip.label} {chip.value}
         </span>
       ))}
+      <span className="rounded border border-brand-teal/20 bg-brand-teal/[0.06] px-2 py-0.5 text-[11px] font-bold text-brand-teal">
+        Confirmed
+      </span>
     </div>
   )
 }
@@ -513,7 +541,7 @@ function PackageNumber({
   onChange,
 }: {
   label: string
-  value: number
+  value: string
   onChange: (value: string) => void
 }) {
   return (
@@ -522,6 +550,7 @@ function PackageNumber({
       <input
         type="number"
         min={0}
+        step={1}
         value={value}
         onChange={e => onChange(e.target.value)}
         className="w-full bg-brand-bg border border-brand-muted rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-accent"
@@ -538,22 +567,42 @@ function ClientModal({
   onClose,
 }: {
   client?: Client
-  onSave: (input: { name: string; tier: 'standard' | 'premium'; active: boolean; logo_url: string | null; package: PackageSettings }) => Promise<string | null>
+  onSave: (input: {
+    name: string
+    tier: 'standard' | 'premium'
+    active: boolean
+    logo_url: string | null
+    package: PackageSettings
+    packageConfirmation?: { evidenceNote: string; inferenceNote: string; sourceReferences: string[] }
+  }) => Promise<string | null>
   onClose: () => void
 }) {
   const [name, setName] = useState(client?.name ?? '')
   const [tier, setTier] = useState<'standard' | 'premium'>(client?.tier ?? 'standard')
   const [logoUrl, setLogoUrl] = useState(client?.logo_url ?? '')
   const [active, setActive] = useState(client?.active ?? true)
-  const [pkg, setPkg] = useState<PackageSettings>(() =>
-    client?.package_settings ? readPackageSettings(client.package_settings) : { ...EMPTY_PACKAGE_SETTINGS }
+  const initialAuthority = readPackageAuthority(client?.package_settings)
+  const initialPackage = readPackageSettings(client?.package_settings)
+  const [pkg, setPkg] = useState<PackageSettings>(initialPackage)
+  const [numberValues, setNumberValues] = useState<Record<string, string>>(() => Object.fromEntries(
+    Object.entries(initialPackage)
+      .filter(([, value]) => typeof value === 'number')
+      .map(([key, value]) => [key, initialAuthority.explicitValues[key as keyof PackageSettings] === undefined ? '' : String(value)]),
+  ))
+  const [campaignValue, setCampaignValue] = useState(
+    initialAuthority.explicitValues.campaign_management_included === undefined
+      ? ''
+      : String(initialPackage.campaign_management_included),
   )
+  const [confirmPackage, setConfirmPackage] = useState(false)
+  const [evidenceNote, setEvidenceNote] = useState(initialAuthority.verification?.evidence_note ?? '')
+  const [inferenceNote, setInferenceNote] = useState(initialAuthority.verification?.inference_note ?? '')
+  const [sourceReferences, setSourceReferences] = useState(initialAuthority.verification?.source_references.join('\n') ?? '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   function setPkgNum(key: keyof PackageSettings, value: string) {
-    const n = Math.max(0, Math.round(Number(value)))
-    setPkg(current => ({ ...current, [key]: Number.isFinite(n) ? n : 0 }))
+    setNumberValues(current => ({ ...current, [key]: value }))
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -569,7 +618,39 @@ function ClientModal({
     setError(null)
     let saved = false
     try {
-      const err = await onSave({ name: trimmedName, tier, active, logo_url: logoUrl.trim() || null, package: pkg })
+      const parsedSourceReferences = sourceReferences.split('\n').map(value => value.trim()).filter(Boolean)
+      if (confirmPackage) {
+        const invalidNumber = PACKAGE_NUMBER_FIELDS.find(key => !/^\d+$/.test(numberValues[key] ?? ''))
+        if (invalidNumber || campaignValue === '') {
+          setError('Every package field needs an explicit value. Use 0 only when zero is confirmed.')
+          return
+        }
+        if (evidenceNote.trim().length < 12) {
+          setError('Add a specific evidence note before confirming this package.')
+          return
+        }
+        if (parsedSourceReferences.length === 0) {
+          setError('Add at least one exact source reference before confirming this package.')
+          return
+        }
+      }
+      const confirmedPackage = {
+        ...pkg,
+        ...Object.fromEntries(PACKAGE_NUMBER_FIELDS.map(key => [key, Number(numberValues[key])])),
+        campaign_management_included: campaignValue === 'true',
+      } as PackageSettings
+      const err = await onSave({
+        name: trimmedName,
+        tier,
+        active,
+        logo_url: logoUrl.trim() || null,
+        package: confirmedPackage,
+        packageConfirmation: confirmPackage ? {
+          evidenceNote: evidenceNote.trim(),
+          inferenceNote: inferenceNote.trim(),
+          sourceReferences: parsedSourceReferences,
+        } : undefined,
+      })
       if (err) {
         setError(err)
         return
@@ -652,35 +733,29 @@ function ClientModal({
 
           <fieldset className="rounded-lg border border-brand-muted bg-brand-bg/40 p-3.5">
             <legend className="px-1.5 text-sm font-semibold text-brand-accent">Package</legend>
-            <div className="grid grid-cols-2 gap-3">
-              <PackageNumber label="Video" value={pkg.professional_videos_per_month} onChange={v => setPkgNum('professional_videos_per_month', v)} />
-              <PackageNumber label="Reel" value={pkg.reels_per_month} onChange={v => setPkgNum('reels_per_month', v)} />
-              <PackageNumber label="F" value={pkg.photo_posts_per_month} onChange={v => setPkgNum('photo_posts_per_month', v)} />
-              <PackageNumber label="DP" value={pkg.design_posters_per_month} onChange={v => setPkgNum('design_posters_per_month', v)} />
-              <PackageNumber label="Animated posters" value={pkg.animated_posters_per_month} onChange={v => setPkgNum('animated_posters_per_month', v)} />
-              <PackageNumber label="Shoot days" value={pkg.shoot_days_per_month} onChange={v => setPkgNum('shoot_days_per_month', v)} />
+            <div className={`mb-3 rounded-lg border px-3 py-2 text-xs ${initialAuthority.status === 'confirmed' ? 'border-brand-teal/20 bg-brand-teal/10 text-brand-teal' : 'border-amber-300/20 bg-amber-300/10 text-amber-200'}`}>
+              {initialAuthority.status === 'confirmed'
+                ? `Confirmed ${new Date(initialAuthority.verification!.confirmed_at).toLocaleString('en-ZA')}. Editing does not change authority until explicitly reconfirmed.`
+                : 'Unverified. Existing blanks and zero placeholders are not authoritative package scope.'}
             </div>
-            <label className="mt-3 flex items-center gap-2.5 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={pkg.campaign_management_included}
-                onChange={e => setPkg(current => ({ ...current, campaign_management_included: e.target.checked }))}
-                className="h-4 w-4 rounded accent-brand-accent"
-              />
-              <span className="text-sm text-white">Campaign management included</span>
+            <div className="grid grid-cols-2 gap-3">
+              <PackageNumber label="Video" value={numberValues.professional_videos_per_month} onChange={v => setPkgNum('professional_videos_per_month', v)} />
+              <PackageNumber label="Reel" value={numberValues.reels_per_month} onChange={v => setPkgNum('reels_per_month', v)} />
+              <PackageNumber label="F" value={numberValues.photo_posts_per_month} onChange={v => setPkgNum('photo_posts_per_month', v)} />
+              <PackageNumber label="DP" value={numberValues.design_posters_per_month} onChange={v => setPkgNum('design_posters_per_month', v)} />
+              <PackageNumber label="Animated posters" value={numberValues.animated_posters_per_month} onChange={v => setPkgNum('animated_posters_per_month', v)} />
+              <PackageNumber label="Shoot days" value={numberValues.shoot_days_per_month} onChange={v => setPkgNum('shoot_days_per_month', v)} />
+              <PackageNumber label="Website updates" value={numberValues.website_updates_per_month} onChange={v => setPkgNum('website_updates_per_month', v)} />
+              <PackageNumber label="Campaign budget (R)" value={numberValues.monthly_campaign_budget} onChange={v => setPkgNum('monthly_campaign_budget', v)} />
+            </div>
+            <label className="mt-3 block">
+              <span className="block text-xs font-medium text-brand-primary mb-1">Campaign management included</span>
+              <select value={campaignValue} onChange={event => setCampaignValue(event.target.value)} className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white">
+                <option value="">Not confirmed</option>
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+              </select>
             </label>
-            {pkg.campaign_management_included && (
-              <div className="mt-3">
-                <label className="block text-xs font-medium text-brand-primary mb-1">Monthly campaign budget (R)</label>
-                <input
-                  type="number"
-                  min={0}
-                  value={pkg.monthly_campaign_budget}
-                  onChange={e => setPkgNum('monthly_campaign_budget', e.target.value)}
-                  className="w-full bg-brand-bg border border-brand-muted rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-accent"
-                />
-              </div>
-            )}
             <div className="mt-3">
               <label className="block text-xs font-medium text-brand-primary mb-1">Package notes</label>
               <textarea
@@ -691,6 +766,33 @@ function ClientModal({
                 className="w-full bg-brand-bg border border-brand-muted rounded-lg px-3 py-2 text-sm text-white placeholder-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-accent"
               />
             </div>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <label className="block text-xs font-medium text-brand-primary">Other agreed deliverables
+                <textarea value={pkg.other_agreed_deliverables} onChange={e => setPkg(current => ({ ...current, other_agreed_deliverables: e.target.value }))} rows={2} className="mt-1 w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white" />
+              </label>
+              <label className="block text-xs font-medium text-brand-primary">Specific exclusions
+                <textarea value={pkg.package_exclusions} onChange={e => setPkg(current => ({ ...current, package_exclusions: e.target.value }))} rows={2} className="mt-1 w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white" />
+              </label>
+            </div>
+            {client && (
+              <div className="mt-4 space-y-3 border-t border-white/10 pt-4">
+                <label className="flex items-start gap-2.5 text-sm text-white">
+                  <input type="checkbox" checked={confirmPackage} onChange={event => setConfirmPackage(event.target.checked)} className="mt-0.5 h-4 w-4 accent-brand-accent" />
+                  Confirm this exact current package as authoritative
+                </label>
+                {confirmPackage && <>
+                  <label className="block text-xs font-medium text-brand-primary">Evidence reviewed (required)
+                    <textarea value={evidenceNote} onChange={event => setEvidenceNote(event.target.value)} rows={2} placeholder="Contract, client confirmation, current schedule or other exact-client evidence." className="mt-1 w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white" />
+                  </label>
+                  <label className="block text-xs font-medium text-brand-primary">Inference or uncertainty retained (optional)
+                    <textarea value={inferenceNote} onChange={event => setInferenceNote(event.target.value)} rows={2} placeholder="Record anything inferred or still needing follow-up; do not hide it." className="mt-1 w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white" />
+                  </label>
+                  <label className="block text-xs font-medium text-brand-primary">Source references (required; one per line)
+                    <textarea value={sourceReferences} onChange={event => setSourceReferences(event.target.value)} rows={2} placeholder="Dynamics record, Teams/contract reference, client confirmation date…" className="mt-1 w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white" />
+                  </label>
+                </>}
+              </div>
+            )}
           </fieldset>
 
           {error && (

@@ -35,7 +35,7 @@ test('save, approve and publish remain separate reviewed actions', () => {
   assert.match(page, /targetStatus: 'approved'/)
   assert.match(page, /window\.confirm/)
   assert.match(page, /targetStatus: 'published'/)
-  assert.match(page, /disabled=\{dirty\}/)
+  assert.match(page, /disabled=\{dirty \|\| qualityIssues\.length > 0\}/)
   assert.match(page, /It is not client-visible until published/)
 })
 
