@@ -159,8 +159,14 @@ declare
   v_field text;
   v_value text;
 begin
-  if new.workflow_status not in ('approved', 'published')
-     or new.workflow_status is not distinct from old.workflow_status then
+  if new.workflow_status not in ('approved', 'published') then
+    return new;
+  end if;
+  if tg_op = 'UPDATE'
+     and new.workflow_status is not distinct from old.workflow_status
+     and new.strategy_data is not distinct from old.strategy_data
+     and new.seed_context is not distinct from old.seed_context
+     and new.client_id is not distinct from old.client_id then
     return new;
   end if;
 
@@ -173,6 +179,23 @@ begin
   end if;
   if new.seed_context ->> 'client_id' is distinct from new.client_id::text then
     raise exception 'Strategy provenance does not belong to the exact client';
+  end if;
+  if nullif(new.seed_context #>> '{sources,package_verification_confirmed_at}', '') is null
+     or (new.seed_context #>> '{sources,package_verification_confirmed_at}')::timestamptz
+        is distinct from (v_package #>> '{verification,confirmed_at}')::timestamptz
+     or new.seed_context #>> '{sources,package_verification_actor_id}'
+        is distinct from v_package #>> '{verification,confirmed_by_profile_id}'
+     or new.seed_context #> '{sources,package_source_references}'
+        is distinct from v_package #> '{verification,source_references}' then
+    raise exception 'Strategy provenance does not match the current confirmed package receipt';
+  end if;
+  if not (
+    (jsonb_typeof(new.seed_context -> 'intelligence_evidence') = 'array'
+      and jsonb_array_length(new.seed_context -> 'intelligence_evidence') > 0)
+    or nullif(new.seed_context #>> '{sources,previous_report_id}', '') is not null
+    or nullif(new.seed_context #>> '{sources,previous_monthly_strategy_id}', '') is not null
+  ) then
+    raise exception 'Exact-client intelligence or previous-work evidence is required before strategy approval';
   end if;
 
   v_brief := new.strategy_data -> 'goldStandard';
@@ -225,7 +248,8 @@ $$;
 
 drop trigger if exists enforce_gold_standard_monthly_strategy on public.monthly_client_strategies;
 create trigger enforce_gold_standard_monthly_strategy
-before update of workflow_status on public.monthly_client_strategies
+before insert or update of workflow_status, strategy_data, seed_context, client_id
+on public.monthly_client_strategies
 for each row execute function public.enforce_gold_standard_monthly_strategy();
 
 revoke all on function public.enforce_gold_standard_monthly_strategy() from public, anon, authenticated;
