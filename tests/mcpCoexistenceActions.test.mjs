@@ -306,7 +306,7 @@ test('the six new tools are exposed, contexted and correctly classified', () => 
 })
 
 test('company-wide actions require an explicit company_admin context', () => {
-  for (const name of ['run_microsoft_sync', 'get_provider_health', 'run_provider_sync']) {
+  for (const name of ['run_microsoft_sync', 'get_provider_health', 'get_google_ads_audit', 'run_provider_sync']) {
     assert.ok(ctx.COMPANY_ADMIN_TOOLS.includes(name), `${name} is admin-gated`)
     assert.equal(ctx.assertToolAllowedInContext(name, 'staff').allowed, false)
     assert.equal(ctx.assertToolAllowedInContext(name, 'client').allowed, false)

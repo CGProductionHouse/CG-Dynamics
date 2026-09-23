@@ -111,10 +111,11 @@ For package-driven video/content work:
 - The Content Run must link to one canonical Content Guideline in Dynamics.
 - Individual planned videos/content items in the guideline should link to their originating deliverable where applicable.
 - The Content Run must link to the exact authorised OneDrive folder for the client/month/run.
-- One real shoot folder may contain footage for several videos from the same Content Run; do not create unnecessary per-video subfolders if that is not the real workflow.
+- OneDrive production naming is strict: `Clients/<Client>/Videos/<YYYY>/<YYYY_MM_MON>/<YYYY_MM_CLIENT_VIDEO_XX>`. The configured client short code and zero-padded sequence must come from canonical Dynamics context/helpers, never staff memory or title guessing.
 - The operational task/calendar item should be able to navigate to the associated client, monthly deliverable, Content Run, Content Guideline and exact OneDrive evidence without duplicating those records.
 - OneDrive IDs/URLs remain internal and must never leak to client-facing surfaces.
 - Upload verification uses durable mapping, never folder-name guessing at runtime.
+- If the exact client short code, month or sequence is unavailable, the Staff Assistant must stop and ask/flag the missing canonical value rather than create a near-match folder.
 - Package changes affect future work only and must not destroy completed historical runs/guidelines.
 
 ### Calendar/task transition rule

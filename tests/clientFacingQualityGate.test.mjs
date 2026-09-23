@@ -11,6 +11,7 @@ import { createServer } from 'vite'
 
 const read = p => readFileSync(new URL(p, import.meta.url), 'utf8')
 const CAMPAIGNS = read('../src/pages/client/ClientCampaignsPage.tsx')
+const PROVIDER_ICONS = read('../src/components/client/PerformanceProviderIcon.tsx')
 const CALENDAR = read('../src/pages/client/ClientContentCalendarPage.tsx')
 const REPORT_VIEW = read('../src/pages/client/ClientReportView.tsx')
 const HOME = read('../src/pages/client/ClientPortalHome.tsx')
@@ -18,7 +19,6 @@ const PERFORMANCE = read('../src/pages/client/Dashboard.tsx')
 const REPORTS_DB = read('../src/lib/db/reports.ts')
 const REPORT_PROJECTION_SQL = read('../supabase/migrations/20260801190000_client_report_safe_projection.sql')
 const CALENDAR_LIB = read('../src/lib/clientPortalCalendar.ts')
-const CAMPAIGNS_DB_LOADER = read('../src/lib/googleAdsDashboard.ts')
 const GOOGLE_ADS_RESULTS = read('../src/components/client/GoogleAdsResults.tsx')
 const CALENDAR_RPC = read('../supabase/phase-11a-client-portal-read-access.sql')
 const GUIDES_PAGE = read('../src/pages/client/ClientContentGuidesPage.tsx')
@@ -27,7 +27,9 @@ const GUIDE_SQL = read('../supabase/migrations/20260725172531_content_guideline_
 const FULL_GUIDE_PAGE = read('../src/pages/admin/FullContentGuidePage.tsx')
 const GUIDE_EDITOR = read('../src/pages/admin/ContentGuidelineDocumentEditor.tsx')
 const STRATEGY_PAGE = read('../src/pages/client/ClientStrategyPage.tsx')
+const GUIDED_STRATEGY = read('../src/components/strategy/GuidedStrategy.tsx')
 const PORTAL_LIB = read('../src/lib/clientPortal.ts')
+const PORTAL_STATES = read('../src/components/client/ClientPortalStates.tsx')
 
 let server, ov, cp, ga
 before(async () => {
@@ -40,12 +42,14 @@ after(async () => { await server?.close() })
 
 // ── 1. Client isolation ──────────────────────────────────────────────────────
 test('client pages load only via the signed-in profile.client_id, never a URL param', () => {
-  for (const [name, src] of [['home', HOME], ['performance', PERFORMANCE], ['campaigns', CAMPAIGNS], ['calendar', CALENDAR]]) {
+  for (const [name, src] of [['home', HOME], ['performance', PERFORMANCE], ['calendar', CALENDAR]]) {
     assert.match(src, /profile\??\.client_id/, `${name} uses profile.client_id`)
     // No client id sourced from route/query params (that would allow cross-client access).
     assert.doesNotMatch(src, /useParams[\s\S]{0,80}client_?[iI]d/, `${name} must not read client id from the URL`)
     assert.doesNotMatch(src, /searchParams\.get\(['"]client/i, `${name} must not read client id from the query`)
   }
+  assert.match(CAMPAIGNS, /Navigate to="\/client\/performance\?tab=google" replace/)
+  assert.doesNotMatch(CAMPAIGNS, /client_?[iI]d|listClientPublishedReports|loadGoogleAdsDashboard/)
 })
 
 test('client report queries use active-role, published own-client projections', () => {
@@ -96,10 +100,10 @@ test('only genuinely available Facebook/Instagram become active organic platform
   assert.deepEqual(cp.activeOrganicPlatforms(facts), ['Facebook'])
 })
 
-test('campaigns page shows unsupported ad platforms as not connected, never fake-active', () => {
-  assert.match(CAMPAIGNS, /not connected in the client portal yet/i)
-  assert.match(CAMPAIGNS, /Meta Ads/)
-  assert.match(CAMPAIGNS, /TikTok Ads/)
+test('provider workspace never presents unsupported platforms as active data sources', () => {
+  assert.doesNotMatch(REPORT_VIEW, /Meta Ads|TikTok Ads|Planned integration/)
+  assert.match(REPORT_VIEW, /No verified campaign source is configured/)
+  assert.match(REPORT_VIEW, /Missing data is never presented as zero/)
   // No confirmed-revenue framing; the canonical formatter fails closed.
   assert.match(GOOGLE_ADS_RESULTS, /if \(micros === null \|\| !currency\) return 'Unavailable'/)
 })
@@ -113,7 +117,8 @@ test('client content calendar exposes no staff notes/assignments and uses safe R
 
 // ── 6. No fake submission workflows ──────────────────────────────────────────
 test('client campaign feedback is informational only — no fake DB submission', () => {
-  assert.doesNotMatch(CAMPAIGNS, /\.from\([^)]*\)\.(insert|update|upsert)\(/)
+  assert.match(REPORT_VIEW, /Campaign feedback/)
+  assert.doesNotMatch(REPORT_VIEW, /\.from\([^)]*\)\.(insert|update|upsert)\(/)
 })
 
 // ── 7. Forward-looking month rules ───────────────────────────────────────────
@@ -134,39 +139,38 @@ test('the client report exposes reporting methodology + honest source language',
 // ══════════════════════════════════════════════════════════════════════════════
 
 test('home page has loading, error and empty states', () => {
-  assert.match(HOME, /loading.*portal|preparing/i)
-  assert.match(HOME, /could not be loaded|unavailable/i)
+  assert.match(HOME, /ClientPortalLoadingState/)
+  assert.match(HOME, /ClientPortalErrorState/)
   assert.match(HOME, /no published report/i)
   assert.match(HOME, /Your next strategy update will appear here/i)
 })
 
 test('performance dashboard has loading, error and empty states', () => {
-  assert.match(PERFORMANCE, /loading.*report/i)
-  assert.match(PERFORMANCE, /could not load/i)
+  assert.match(PERFORMANCE, /ClientPortalLoadingState/)
+  assert.match(PERFORMANCE, /ClientPortalErrorState/)
   assert.match(PERFORMANCE, /No published report yet/i)
   assert.match(PERFORMANCE, /account is pending setup/i)
 })
 
-test('campaigns page has loading, error, empty and disconnected states', () => {
-  assert.match(CAMPAIGNS, /loading.*campaign/i)
-  assert.match(CAMPAIGNS, /could not be loaded/i)
-  assert.match(CAMPAIGNS, /No published campaign/i)
-  assert.match(CAMPAIGNS, /not connected/i)
-  assert.match(CAMPAIGNS, /not been linked/i)
-  assert.match(CAMPAIGNS, /verified campaign data is not available/i)
-  assert.match(CAMPAIGNS, /no campaign activity/i)
+test('Google Ads panel inherits report loading and covers every configured-source state honestly', () => {
+  assert.match(PERFORMANCE, /ClientPortalLoadingState variant="report"/)
+  assert.match(REPORT_VIEW, /Google Ads is not connected/)
+  assert.match(REPORT_VIEW, /No paid campaigns are linked/)
+  assert.match(REPORT_VIEW, /not synced for this month/)
+  assert.match(REPORT_VIEW, /No Google Ads activity this month/)
+  assert.match(REPORT_VIEW, /performance is unavailable/)
 })
 
-test('calendar page has loading, error and empty states', () => {
-  assert.match(CALENDAR, /loading.*calendar|content calendar/i)
-  assert.match(CALENDAR, /could not be loaded/i)
-  assert.match(CALENDAR, /No.*schedule items.*available/i)
+test('calendar page has loading, error and an intentional empty-month state', () => {
+  assert.match(CALENDAR, /ClientPortalLoadingState variant="calendar"/)
+  assert.match(CALENDAR, /ClientPortalErrorState/)
+  assert.match(CALENDAR, /The month is ready for your plan/i)
 })
 
 // ── 10. Mobile rendering ──────────────────────────────────────────────────────
 test('calendar page renders a mobile agenda view and a desktop grid', () => {
-  assert.match(CALENDAR, /hidden lg:block/) // desktop grid
-  assert.match(CALENDAR, /lg:hidden/)       // mobile agenda
+  assert.match(CALENDAR, /hidden sm:block/) // generous tablet/desktop grid
+  assert.match(CALENDAR, /sm:hidden/)       // phone calendar + agenda
   assert.match(CALENDAR, /Agenda/)
   assert.match(CALENDAR, /MonthGrid/)
 })
@@ -184,12 +188,12 @@ test('calendar uses client-safe status labels, never internal codes', () => {
   assert.doesNotMatch(CALENDAR, /internal_notes|assigned_to|helper_names|priority/)
 })
 
-test('campaigns page uses the canonical client-safe Google Ads results component', () => {
-  assert.match(CAMPAIGNS, /GoogleAdsResults/)
+test('Google Ads panel uses the canonical client-safe results component', () => {
+  assert.match(REPORT_VIEW, /GoogleAdsResults/)
   assert.match(GOOGLE_ADS_RESULTS, /formatMoney/)
   assert.match(GOOGLE_ADS_RESULTS, /Unavailable/)
-  assert.match(CAMPAIGNS, /getReportMonthFromPeriod/)
-  assert.match(CAMPAIGNS, /reportMonth\(report\)/)
+  assert.match(PERFORMANCE, /currentMonth = getReportMonthFromPeriod\(data\)/)
+  assert.match(PERFORMANCE, /loadGoogleAdsDashboard\(data\.id, currentMonth\)/)
   assert.match(GOOGLE_ADS_RESULTS, /Last successful sync/)
 })
 
@@ -277,15 +281,31 @@ test('report view uses verified, per-platform availability-aware Overview when n
   assert.match(REPORT_VIEW, /VerifiedFactsUnavailable/)
 })
 
-test('report view platform tabs are generated from per-platform facts and master report data', () => {
+test('report view keeps every provider destination visible and gates data by report truth', () => {
   assert.match(REPORT_VIEW, /reportPlatforms/)
-  assert.match(REPORT_VIEW, /PLATFORM_LABELS\[platform\]/)
+  for (const key of ['overview', 'facebook', 'instagram', 'google', 'tiktok', 'linkedin', 'web', 'email']) {
+    assert.match(REPORT_VIEW, new RegExp(`key: '${key}'.*icon: '${key}'`))
+  }
+  assert.match(REPORT_VIEW, /reportPlatforms\.includes/)
 })
 
-test('Google Ads tab is gated on hasGoogleAds being true (not shown for disconnected only)', () => {
+test('Google is grouped with Ads and Business while provider data remains gated', () => {
   assert.match(REPORT_VIEW, /hasGoogleAdsSource/)
   assert.match(REPORT_VIEW, /hasGoogleAds/)
-  assert.match(REPORT_VIEW, /google_ads/)
+  assert.match(REPORT_VIEW, /Google performance services/)
+  assert.match(REPORT_VIEW, /\['ads', 'business'\]/)
+  assert.match(REPORT_VIEW, /Google Business Profile/)
+})
+
+test('icon-led provider navigation uses official brand glyphs and accessible names', () => {
+  assert.match(REPORT_VIEW, /PerformanceProviderIcon/)
+  assert.match(REPORT_VIEW, /aria-label=\{item\.label\}/)
+  assert.match(REPORT_VIEW, /title=\{item\.label\}/)
+  for (const provider of ['facebook', 'instagram', 'google', 'tiktok', 'linkedin']) {
+    assert.match(PROVIDER_ICONS, new RegExp(`provider === '${provider}'`))
+  }
+  assert.match(PROVIDER_ICONS, /Official multicolour Google G/)
+  assert.doesNotMatch(PROVIDER_ICONS, />\s*[FIGTL]\s*<\//)
 })
 
 test('report view includes a methodology and disclaimer section', () => {
@@ -293,9 +313,8 @@ test('report view includes a methodology and disclaimer section', () => {
   assert.match(REPORT_VIEW, /methodology|disclaimer/)
 })
 
-test('report and campaigns use provider-native Google Ads semantics without generic MoM', () => {
+test('Performance Google uses provider-native Ads semantics without generic MoM', () => {
   assert.match(REPORT_VIEW, /GoogleAdsResults/)
-  assert.match(CAMPAIGNS, /GoogleAdsResults/)
   assert.match(GOOGLE_ADS_RESULTS, /average daily/)
   assert.doesNotMatch(GOOGLE_ADS_RESULTS, /Configured conversion value/)
   assert.match(GOOGLE_ADS_RESULTS, /No automatic month-on-month judgement is shown/)
@@ -317,28 +336,29 @@ test('performance dashboard separates load states for report list and report det
   assert.match(PERFORMANCE, /Select a month/)
 })
 
-// ── 18. Campaigns page completeness ───────────────────────────────────────────
-test('campaigns page shows CG review and optimisation direction from report strategy data', () => {
-  assert.match(CAMPAIGNS, /CampaignStrategyDirection/)
-  assert.match(CAMPAIGNS, /readStrategyData/)
-  assert.match(CAMPAIGNS, /strategyGoingForward/)
-  assert.match(CAMPAIGNS, /campaign_recommendation/)
-  assert.match(CAMPAIGNS, /CG review.*optimisation direction/i)
+// ── 18. Performance Google panel completeness ─────────────────────────────────
+test('Google Ads shows CG review and optimisation direction from published report strategy', () => {
+  assert.match(REPORT_VIEW, /GooglePerformanceTab/)
+  assert.match(REPORT_VIEW, /readStrategyData/)
+  assert.match(REPORT_VIEW, /strategyGoingForward/)
+  assert.match(REPORT_VIEW, /campaign_recommendation/)
+  assert.match(REPORT_VIEW, /CG review.*optimisation direction/i)
 })
 
-test('campaigns page shows campaign objective, lifecycle status and per-campaign metrics', () => {
-  assert.match(CAMPAIGNS, /GoogleAdsResults/)
+test('Google Ads shows campaign objective, lifecycle status and per-campaign metrics', () => {
+  assert.match(REPORT_VIEW, /GoogleAdsResults/)
   assert.match(GOOGLE_ADS_RESULTS, /campaign\.(type|status|name)/)
   assert.match(GOOGLE_ADS_RESULTS, /campaign\.impressions/)
   assert.match(GOOGLE_ADS_RESULTS, /campaign\.clicks/)
   assert.match(GOOGLE_ADS_RESULTS, /campaign\.ctr/)
 })
 
-test('campaigns page handles all Google Ads dashboard states with honest messaging', () => {
-  assert.match(CAMPAIGNS, /disconnected/)
-  assert.match(CAMPAIGNS, /unmapped/)
-  assert.match(CAMPAIGNS, /not-synced/)
-  assert.match(CAMPAIGNS, /no-activity/)
+test('Google Ads shares the complete state machine and gates disconnected sources', () => {
+  assert.match(REPORT_VIEW, /disconnected/)
+  assert.match(REPORT_VIEW, /unmapped/)
+  assert.match(REPORT_VIEW, /not-synced/)
+  assert.match(REPORT_VIEW, /no-activity/)
+  assert.match(REPORT_VIEW, /googleAds !== null \|\| googleAdsState !== 'disconnected'/)
 })
 
 // ── 19. Content Calendar completeness ─────────────────────────────────────────
@@ -358,8 +378,8 @@ test('calendar page shows deliverable type labels and client-safe status labels'
 test('calendar page has desktop MonthGrid and mobile Agenda views', () => {
   assert.match(CALENDAR, /MonthGrid/)
   assert.match(CALENDAR, /Agenda/)
-  assert.match(CALENDAR, /hidden lg:block/)
-  assert.match(CALENDAR, /lg:hidden/)
+  assert.match(CALENDAR, /hidden sm:block/)
+  assert.match(CALENDAR, /sm:hidden/)
 })
 
 test('calendar page shows summary cards for item counts', () => {
@@ -382,10 +402,10 @@ test('calendar page uses SECURITY-DEFINER RPC keyed to profile.client_id, never 
   assert.doesNotMatch(CALENDAR, /assigned_to|internal_notes|helper_names|priority/)
 })
 
-test('calendar page has loading, error and empty states', () => {
-  assert.match(CALENDAR, /loading.*calendar/i)
-  assert.match(CALENDAR, /could not be loaded/i)
-  assert.match(CALENDAR, /No.*schedule items.*available/i)
+test('calendar page has loading, error and an intentional empty-month state', () => {
+  assert.match(CALENDAR, /ClientPortalLoadingState variant="calendar"/)
+  assert.match(CALENDAR, /ClientPortalErrorState/)
+  assert.match(CALENDAR, /The month is ready for your plan/i)
 })
 
 test('calendar page shows type breakdown below summary cards', () => {
@@ -455,9 +475,17 @@ test('client content guidelines page fetches the client-safe document RPC', () =
 })
 
 test('client content guidelines page has loading, empty and error states', () => {
-  assert.match(GUIDES_PAGE, /Loading published Content Guidelines/)
+  assert.match(GUIDES_PAGE, /ClientPortalLoadingState/)
+  assert.match(GUIDES_PAGE, /ClientPortalErrorState/)
   assert.match(GUIDES_PAGE, /No published Content Guidelines/)
   assert.match(GUIDES_PAGE, /error/)
+})
+
+test('shared portal states prevent loader flash and respect reduced-motion preferences', () => {
+  assert.match(PORTAL_STATES, /delayMs = 180/)
+  assert.match(PORTAL_STATES, /motion-reduce:animate-none/)
+  assert.match(PORTAL_STATES, /aria-busy="true"/)
+  assert.match(PORTAL_STATES, /role="alert"/)
 })
 test('client content guides page is read-only', () => {
   assert.doesNotMatch(GUIDES_PAGE, /create|delete|update|insert|edit|form.*submit/i)
@@ -487,13 +515,15 @@ test('client strategy page has loading, empty and error states', () => {
 })
 
 test('client strategy page shows action plan when data available', () => {
-  assert.match(STRATEGY_PAGE, /Action plan/)
-  assert.match(STRATEGY_PAGE, /ACTION_PLAN_LABELS/)
+  assert.match(STRATEGY_PAGE, /GuidedStrategyView/)
+  assert.match(GUIDED_STRATEGY, /Action plan/)
+  assert.match(GUIDED_STRATEGY, /ACTION_PLAN_LABELS/)
 })
 
 test('client strategy page shows strategic drivers', () => {
-  assert.match(STRATEGY_PAGE, /Strategic drivers/)
-  assert.match(STRATEGY_PAGE, /strategyDrivers/)
+  assert.match(STRATEGY_PAGE, /GuidedStrategyView/)
+  assert.match(GUIDED_STRATEGY, /Strategic drivers/)
+  assert.match(GUIDED_STRATEGY, /data\.strategyDrivers/)
 })
 
 test('client strategy page is read-only (no mutations)', () => {

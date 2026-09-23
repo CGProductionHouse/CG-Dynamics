@@ -41,6 +41,7 @@ test('every configured source is enumerated (Outlook + all plans), plans require
 })
 
 test('detail batching splits a large pending list into bounded batches', () => {
+  assert.equal(jm.DETAIL_BATCH_SIZE, 80, 'one unit must fit one four-request Graph detail wave')
   const pending = Array.from({ length: 4306 }, (_, i) => `t${i}`)
   const { batch, rest } = jm.nextDetailBatch(pending)
   assert.equal(batch.length, jm.DETAIL_BATCH_SIZE)
@@ -88,18 +89,18 @@ test('progress + completeness gate: apply blocked until every required source co
   assert.equal(p.detailsRemaining, 2)
   assert.equal(jm.requiredSourcesComplete(partial), false)
 
-  const failed = [row({ position: 0, stage: 'complete' }), row({ position: 1, stage: 'failed' })]
+  const failed = [row({ position: 0, stage: 'complete', complete: true }), row({ position: 1, stage: 'failed' })]
   assert.equal(jm.jobProgress(failed).finished, true)
   assert.equal(jm.jobProgress(failed).anyFailed, true)
   assert.equal(jm.requiredSourcesComplete(failed), false)
 
-  const done = [row({ position: 0, stage: 'complete' }), row({ position: 1, stage: 'complete' })]
+  const done = [row({ position: 0, stage: 'complete', complete: true }), row({ position: 1, stage: 'complete', complete: true })]
   assert.equal(jm.requiredSourcesComplete(done), true)
   assert.equal(jm.jobProgress(done).allRequiredComplete, true)
 })
 
 test('a non-required source that failed does not block completeness', () => {
-  const rows = [row({ position: 0, stage: 'complete', required: true }), row({ position: 1, stage: 'failed', required: false })]
+  const rows = [row({ position: 0, stage: 'complete', complete: true, required: true }), row({ position: 1, stage: 'failed', required: false })]
   assert.equal(jm.requiredSourcesComplete(rows), true)
 })
 
@@ -346,6 +347,13 @@ test('a failing page fails the source instead of pinning the job in fetching_tas
   assert.equal(jm.requiredSourcesComplete([source]), false, 'a failed required source still blocks apply')
 })
 
+test('incomplete terminal evidence becomes a retryable failure, never a complete source', () => {
+  const update = jm.planSourceUpdate({ records: [{ sourceTaskId: 'task-1' }], detailIds: [], complete: false, safeError: null, nextCursor: null }, 1)
+  assert.equal(update.stage, 'failed')
+  assert.equal(update.complete, false)
+  assert.match(update.safe_error, /incomplete evidence/i)
+})
+
 test('job_retry re-queues a failed source and a fresh run completes', async () => {
   const failing = await runPlanner(fakeGraph([900, 900, 900, 900], { failAt: 2 }))
   const reset = { ...failing.source, ...jm.retrySourceReset() }
@@ -414,5 +422,5 @@ test('index.ts is wired to the tested functions and keeps status polls light', (
   assert.doesNotMatch(sourceFields[1], /\brecords\b/, 'status polls must not load every source payload')
   assert.match(code, /\.select\('records'\)\.eq\('id', dbId\)/, 'job_process loads only the source it fetches')
   assert.doesNotMatch(code, /nextCursor: next\b/, 'a failed page URL must never be handed back as a resume cursor')
-  assert.match(code, /if \(rest\.length === 0\)[\s\S]{0,400}stage: 'complete'/, 'detail work completes the source only once drained')
+  assert.match(code, /if \(rest\.length === 0\)[\s\S]{0,800}stage: detailComplete \? 'complete' : 'failed'/, 'detail work completes the source only once drained and fails closed on incomplete detail evidence')
 })

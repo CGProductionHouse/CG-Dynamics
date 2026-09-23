@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ClientLogo } from '../../components/ClientLogo'
-import { ClientPortalShell } from '../../components/client/ClientPortalShell'
+import { useClientPortal } from '../../components/client/ClientPortalContext'
+import { ClientPortalErrorState, ClientPortalLoadingState } from '../../components/client/ClientPortalStates'
 import { useAuth } from '../../contexts/AuthContext'
 import { activeOrganicPlatforms, actionMonthForReport, buildClientStrategyPreview } from '../../lib/clientPortal'
 import { fetchClientMonthAhead } from '../../lib/clientPortalCalendar'
-import { getClient, type Client } from '../../lib/db/clients'
 import { listClientPublishedReports, type ClientReport } from '../../lib/db/reports'
 import { loadReportPlatformFacts } from '../../lib/db/reportingTruth'
 import { loadGoogleAdsDashboard, type GoogleAdsDashboardState } from '../../lib/googleAdsDashboard'
@@ -13,7 +13,6 @@ import type { PlatformFact } from '../../lib/overviewModel'
 import { getReportMonthFromPeriod, monthDisplayLabel, selectMonthlyReports } from '../../lib/reportPeriod'
 
 type PortalData = {
-  client: Client | null
   report: ClientReport | null
   facts: PlatformFact[]
   googleAdsState: GoogleAdsDashboardState
@@ -21,7 +20,6 @@ type PortalData = {
 }
 
 const EMPTY_DATA: PortalData = {
-  client: null,
   report: null,
   facts: [],
   googleAdsState: 'no-activity',
@@ -30,6 +28,7 @@ const EMPTY_DATA: PortalData = {
 
 export default function ClientPortalHome() {
   const { profile } = useAuth()
+  const { client } = useClientPortal()
   const [data, setData] = useState<PortalData>(EMPTY_DATA)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -46,12 +45,9 @@ export default function ClientPortalHome() {
       setLoading(true)
       setError(false)
       try {
-        const [clientResult, reportsResult] = await Promise.all([
-          getClient(profile.client_id),
-          listClientPublishedReports(),
-        ])
+        const reportsResult = await listClientPublishedReports()
         if (!active) return
-        if (clientResult.error || reportsResult.error) throw new Error('Portal data unavailable')
+        if (reportsResult.error) throw new Error('Portal data unavailable')
 
         const report = selectMonthlyReports(reportsResult.data)[0] ?? null
         const reportMonth = report ? getReportMonthFromPeriod(report) : null
@@ -70,7 +66,6 @@ export default function ClientPortalHome() {
         if (!active) return
 
         setData({
-          client: clientResult.data,
           report,
           facts: factsResult.error ? [] : factsResult.facts,
           googleAdsState: googleAdsResult.state,
@@ -105,11 +100,11 @@ export default function ClientPortalHome() {
       : `${data.calendarCount} item${data.calendarCount === 1 ? '' : 's'} scheduled`
 
   return (
-    <ClientPortalShell client={data.client}>
+    <>
       {loading ? (
-        <LoadingState />
+        <ClientPortalLoadingState />
       ) : error ? (
-        <ErrorState />
+        <ClientPortalErrorState title="Your overview could not be loaded" />
       ) : (
         <>
           <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#071311] shadow-[0_35px_90px_-45px_rgba(0,0,0,0.95)]">
@@ -120,9 +115,9 @@ export default function ClientPortalHome() {
             <div className="relative grid gap-8 p-6 sm:p-9 lg:grid-cols-[1.2fr_0.8fr] lg:items-end lg:p-12">
               <div className="min-w-0">
                 <div className="flex items-center gap-4 sm:gap-5">
-                  {data.client && (
+                  {client && (
                     <ClientLogo
-                      client={data.client}
+                      client={client}
                       boxClassName="h-16 w-16 rounded-2xl sm:h-20 sm:w-20"
                       padding="p-2.5"
                       frameClassName="border border-white/10 bg-white/[0.07] shadow-2xl"
@@ -138,7 +133,7 @@ export default function ClientPortalHome() {
                 </div>
 
                 <h1 className="mt-8 max-w-4xl text-5xl font-black leading-[0.92] tracking-[-0.055em] text-white sm:text-7xl lg:text-[5.5rem]">
-                  {data.client?.name ?? 'Your portal'}
+                  {client?.name ?? 'Your portal'}
                 </h1>
                 <p className="mt-6 max-w-2xl text-base leading-relaxed text-slate-300 sm:text-lg">
                   {reportMonth
@@ -325,7 +320,7 @@ export default function ClientPortalHome() {
           </section>
         </>
       )}
-    </ClientPortalShell>
+    </>
   )
 }
 
@@ -373,24 +368,4 @@ function googleAdsStatusLabel(state: GoogleAdsDashboardState): { value: string; 
   if (state === 'no-activity') return { value: 'No activity', detail: 'Connected, with no activity this period' }
   if (state === 'error') return { value: 'Unavailable', detail: 'Reporting could not be verified' }
   return { value: 'Not connected', detail: 'No verified campaign source for this period' }
-}
-
-function LoadingState() {
-  return (
-    <div className="flex items-center justify-center py-24">
-      <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04] px-6 py-4 text-sm text-slate-400 shadow-2xl">
-        Preparing your portal...
-      </div>
-    </div>
-  )
-}
-
-function ErrorState() {
-  return (
-    <div className="flex items-center justify-center py-24">
-      <div className="rounded-2xl border border-[#f97316]/20 bg-[#f97316]/[0.06] px-6 py-4 text-sm text-[#f6a15f] shadow-2xl">
-        Your portal could not be loaded right now. Please try again shortly.
-      </div>
-    </div>
-  )
 }

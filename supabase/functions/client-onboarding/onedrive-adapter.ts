@@ -476,3 +476,93 @@ export async function downloadFile(
     return null
   }
 }
+
+export interface DriveContentStream {
+  stream: ReadableStream<Uint8Array>
+  status: 200 | 206
+  contentType: string | null
+  contentLength: string | null
+  contentRange: string | null
+  acceptRanges: string | null
+  etag: string | null
+}
+
+async function openDriveContent(
+  driveId: string,
+  itemId: string,
+  options: { range?: string; thumbnail?: boolean } = {},
+): Promise<DriveContentStream | null> {
+  const accessToken = await getValidAccessToken()
+  if (!accessToken) return null
+  const suffix = options.thumbnail ? '/thumbnails/0/medium/content' : '/content'
+  const graphUrl = `${GRAPH_ROOT}/drives/${encodeURIComponent(driveId)}/items/${encodeURIComponent(itemId)}${suffix}`
+  try {
+    // Resolve Graph's short-lived provider URL server-side. It is never returned to the client.
+    const graphController = new AbortController()
+    const graphTimeout = setTimeout(() => graphController.abort(), 30_000)
+    let graphResponse: Response
+    try {
+      graphResponse = await fetch(graphUrl, {
+        headers: options.range
+          ? { Authorization: `Bearer ${accessToken}`, Range: options.range }
+          : { Authorization: `Bearer ${accessToken}` },
+        redirect: 'manual',
+        signal: graphController.signal,
+      })
+    } finally {
+      clearTimeout(graphTimeout)
+    }
+    let contentResponse = graphResponse
+    if ([301, 302, 303, 307, 308].includes(graphResponse.status)) {
+      const location = graphResponse.headers.get('location')
+      if (!location || new URL(location).protocol !== 'https:') return null
+      const contentController = new AbortController()
+      const contentTimeout = setTimeout(() => contentController.abort(), 30_000)
+      try {
+        contentResponse = await fetch(location, {
+          headers: options.range ? { Range: options.range } : undefined,
+          redirect: 'follow',
+          signal: contentController.signal,
+        })
+      } finally {
+        // The timeout protects time-to-first-byte only. Once headers arrive, the
+        // response body is allowed to stream for as long as the client needs it.
+        clearTimeout(contentTimeout)
+      }
+    }
+    if (!contentResponse.ok || !contentResponse.body) return null
+    if (options.range && contentResponse.status !== 206) {
+      await contentResponse.body.cancel()
+      return null
+    }
+    if (contentResponse.status !== 200 && contentResponse.status !== 206) return null
+    return {
+      stream: contentResponse.body,
+      status: contentResponse.status,
+      contentType: contentResponse.headers.get('content-type'),
+      contentLength: contentResponse.headers.get('content-length'),
+      contentRange: contentResponse.headers.get('content-range'),
+      acceptRanges: contentResponse.headers.get('accept-ranges'),
+      etag: contentResponse.headers.get('etag'),
+    }
+  } catch {
+    return null
+  }
+}
+
+/** Stream an exact durable item. A requested range must remain partial upstream. */
+export async function streamDriveItem(
+  driveId: string,
+  itemId: string,
+  range?: string,
+): Promise<DriveContentStream | null> {
+  return await openDriveContent(driveId, itemId, { range })
+}
+
+/** Stream a bounded Graph-generated thumbnail; the provider URL stays server-side. */
+export async function streamDriveThumbnail(
+  driveId: string,
+  itemId: string,
+): Promise<DriveContentStream | null> {
+  return await openDriveContent(driveId, itemId, { thumbnail: true })
+}

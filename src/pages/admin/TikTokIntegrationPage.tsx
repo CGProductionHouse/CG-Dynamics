@@ -145,7 +145,8 @@ export default function TikTokIntegrationPage() {
         return `Sync failed. ${(result.errors ?? []).join('; ') || result.error || ''}`
       }
       const healthNote = result.health === 'partial' ? ' (partial — see notes)' : ''
-      return `TikTok sync completed${healthNote}. ${result.videosSynced} video${result.videosSynced === 1 ? '' : 's'} synced for ${result.periodMonth}.`
+      const videoCount = result.videosSynced === null ? 'an unavailable number of' : result.videosSynced
+      return `TikTok sync completed${healthNote}. ${videoCount} video${result.videosSynced === 1 ? '' : 's'} synced for ${result.periodMonth}.`
     })
   }
 
@@ -212,6 +213,22 @@ export default function TikTokIntegrationPage() {
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {status?.health && (
+            <div className="mt-4 rounded-lg border border-white/8 bg-black/20 p-4">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <HealthDimension label="Access" value={status.health.access} />
+                <HealthDimension label="Coverage" value={status.health.coverage} />
+                <HealthDimension label="Completeness" value={status.health.completeness} />
+                <HealthDimension label="Freshness" value={status.health.freshness} />
+              </div>
+              <p className="mt-3 text-xs text-brand-primary">{status.health.staffDiagnostic}</p>
+              <p className="mt-1 text-xs text-white/50">
+                Last verified refresh: {formatDateTime(status.health.lastSuccessfulAt)}
+                {status.health.ageHours !== null && <> · {status.health.ageHours}h ago</>}
+              </p>
             </div>
           )}
 
@@ -359,11 +376,23 @@ export default function TikTokIntegrationPage() {
   )
 }
 
-function MetricCard({ label, value }: { label: string; value: number }) {
+function MetricCard({ label, value }: { label: string; value: number | null }) {
   return (
     <div className="rounded-lg border border-white/8 bg-black/20 px-3 py-2.5">
       <p className="text-xs text-brand-primary">{label}</p>
-      <p className="mt-0.5 text-lg font-semibold text-white">{value.toLocaleString()}</p>
+      <p className="mt-0.5 text-lg font-semibold text-white">{value === null ? 'Unavailable' : value.toLocaleString()}</p>
+    </div>
+  )
+}
+
+function HealthDimension({ label, value }: { label: string; value: string }) {
+  const healthy = value === 'connected' || value === 'complete' || value === 'fresh'
+  return (
+    <div>
+      <p className="text-[11px] font-semibold uppercase tracking-wide text-white/45">{label}</p>
+      <p className={healthy ? 'mt-1 text-sm font-semibold text-brand-teal' : 'mt-1 text-sm font-semibold text-amber-300'}>
+        {value.replaceAll('_', ' ')}
+      </p>
     </div>
   )
 }

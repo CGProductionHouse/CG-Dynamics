@@ -7,14 +7,42 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 import webpush from 'npm:web-push@3.6.7'
 import { dispatchMetaWorker } from '../_shared/metaWorkerDispatch.ts'
+import { currentMetaMonth, previousMetaMonth, currentMonthHasIncrementalWindow } from '../_shared/metaPeriod.ts'
+import { fetchAllRows } from '../_shared/paginatedRows.ts'
+import { GENERATION_FLAG, VIDEO_FOLDER_FLAG, recordContentAutopilotPass, runContentAutopilotPass } from '../_shared/contentAutopilotPass.ts'
+import {
+  CONTENT_AUTOPILOT_ENABLED_FLAG,
+  contentAutopilotIdempotencyKey,
+  contentAutopilotOperatingDate,
+} from '../_shared/contentAutopilotSchedule.ts'
+import {
+  MONTHLY_STRATEGY_AUTOPILOT_JOB_TYPE,
+  monthlyStrategyAutopilotIdempotencyKey,
+  monthlyStrategyAutopilotOperatingDate,
+  monthlyStrategyReadyForContent,
+} from '../_shared/monthlyStrategyAutopilotSchedule.ts'
+import {
+  currentTiktokMonth,
+  TIKTOK_ANALYTICS_REFRESH_JOB_TYPE,
+  TIKTOK_FRESH_AFTER_HOURS,
+  TIKTOK_READ_SCOPES,
+  tiktokOperatingDate,
+  tiktokRefreshIdempotencyKey,
+} from '../_shared/tiktokFreshness.ts'
 
 const MAX_RUNTIME_MS = 25_000
 const MAX_JOBS_PER_RUN = 25
+const TIKTOK_FRESHNESS_MAX_ENQUEUES = 2
 // A live worker heartbeats every item (a few seconds apart) and each invocation
 // runs ~35s. 120s is comfortably longer than one invocation plus its hand-off,
 // so a healthy batch is never double-driven, while a dead one is picked up on
 // the second or third cron tick.
 const META_SYNC_STALE_SECONDS = 120
+// Fleet freshness: enqueue proactive sync for assets whose checkpoint is due.
+  // Runs every background-worker invocation (every minute via cron). The check is
+  // cheap; if no assets are due it returns immediately. Bounded to 2 batches per
+  // invocation to avoid starving the job queue.
+  const META_FLEET_FRESHNESS_MAX_BATCHES = 2
 
 interface JobRow {
   id: string
@@ -40,6 +68,13 @@ Deno.serve(async () => {
   const processed: Array<{ id: string; job_type: string; ok: boolean }> = []
   const deadline = Date.now() + MAX_RUNTIME_MS
 
+  // #463 prepares the canonical monthly strategy before #450 can enqueue its
+  // daily pass. Both use this existing worker/queue and Johannesburg-day keys;
+  // no second scheduler exists and concurrent minute ticks remain idempotent.
+  const monthlyStrategyAutopilotSchedule = await ensureDailyMonthlyStrategyAutopilotJob(supabase)
+  const contentAutopilotSchedule = await ensureDailyContentAutopilotJob(supabase, monthlyStrategyAutopilotSchedule)
+  const tiktokFreshnessSchedule = await ensureTiktokFreshnessJobs(supabase)
+
   while (Date.now() < deadline && processed.length < MAX_JOBS_PER_RUN) {
     const { data: job, error } = await supabase.rpc('claim_next_background_job', { p_worker: worker })
     if (error) {
@@ -49,7 +84,7 @@ Deno.serve(async () => {
     // missing id as "nothing to do".
     if (!job || !job.id) break
     try {
-      const result = await runJob(supabase, job as JobRow, url, worker)
+      const result = await runJob(supabase, job as JobRow, url, serviceKey, worker)
       if (result.waiting === true) {
         const { error: deferError } = await supabase.rpc('defer_background_job', {
           p_id: job.id,
@@ -82,6 +117,14 @@ Deno.serve(async () => {
     }
   }
 
+  // ── Daily operating freshness cycle ──────────────────────────────────────
+  // Microsoft is intentionally admitted before Meta. Each invocation advances
+  // one durable Microsoft source unit; the existing per-minute worker therefore
+  // drains large paginated jobs without a long request. The Microsoft function
+  // deduplicates against its exact system identity and enforces a three-hour
+  // freshness window before starting another reconciliation.
+  const microsoftFreshness = await advanceMicrosoftFreshness(url, serviceKey)
+
   // ── Meta sync batch reaper ────────────────────────────────────────────────
   // The durable safety net for production blocker #161.
   //
@@ -99,8 +142,216 @@ Deno.serve(async () => {
   const reaped = await reapStalledMetaSyncBatches(supabase, url)
   const laneRecoveries = await recoverMetaSyncLanes(supabase, url)
 
-  return new Response(JSON.stringify({ ok: true, worker, processed, reaped, laneRecoveries }), { headers: { 'Content-Type': 'application/json' } })
+  // ── Fleet freshness enqueue ──────────────────────────────────────────────
+  // Proactively create sync batches for assets whose per-platform checkpoint
+  // next_due_at has passed. This implements automatic background freshness so
+  // routine operation does not depend on a person pressing Sync.
+  // Bounded to META_FLEET_FRESHNESS_MAX_BATCHES per invocation to avoid
+  // starving the job queue. The checkpoints table already tracks freshness
+  // state (Access/Coverage/Completeness/Freshness) independently.
+  const fleetFreshness = await enqueueFleetMetaFreshness(supabase, url)
+
+  return new Response(JSON.stringify({ ok: true, worker, processed, monthlyStrategyAutopilotSchedule, contentAutopilotSchedule, tiktokFreshnessSchedule, microsoftFreshness, reaped, laneRecoveries, fleetFreshness }), { headers: { 'Content-Type': 'application/json' } })
 })
+
+async function ensureTiktokFreshnessJobs(
+  supabase: ReturnType<typeof createClient>,
+): Promise<Record<string, unknown>> {
+  const operatingDate = tiktokOperatingDate()
+  const periodMonth = currentTiktokMonth()
+  const freshCutoff = new Date(Date.now() - TIKTOK_FRESH_AFTER_HOURS * 3_600_000).toISOString()
+
+  const [clientsResult, connectionsResult, tokensResult, successesResult, jobsResult] = await Promise.all([
+    fetchAllRows((from, to) => supabase.from('clients').select('id').eq('active', true).range(from, to)),
+    fetchAllRows((from, to) => supabase.from('tiktok_connections')
+      .select('id,client_id,tiktok_open_id,scopes,status')
+      .eq('status', 'connected')
+      .not('client_id', 'is', null)
+      .not('tiktok_open_id', 'is', null)
+      .range(from, to)),
+    fetchAllRows((from, to) => supabase.from('tiktok_connection_tokens').select('connection_id').range(from, to)),
+    fetchAllRows((from, to) => supabase.from('platform_sync_runs')
+      .select('client_id,connection_id,finished_at')
+      .eq('platform', 'tiktok')
+      .eq('status', 'success')
+      .eq('health_state', 'verified')
+      .gte('finished_at', freshCutoff)
+      .range(from, to)),
+    fetchAllRows((from, to) => supabase.from('background_jobs')
+      .select('idempotency_key')
+      .eq('job_type', TIKTOK_ANALYTICS_REFRESH_JOB_TYPE)
+      .like('idempotency_key', `%:${operatingDate}`)
+      .range(from, to)),
+  ])
+
+  const failedRead = [clientsResult, connectionsResult, tokensResult, successesResult, jobsResult]
+    .find(result => result.error)
+  if (failedRead?.error) {
+    return { state: 'unavailable', blocker: failedRead.error.message, operatingDate, periodMonth }
+  }
+
+  const activeClients = new Set(clientsResult.data.map(row => String(row.id)))
+  const tokenConnections = new Set(tokensResult.data.map(row => String(row.connection_id)))
+  const freshConnections = new Set(successesResult.data
+    .filter(row => row.connection_id && activeClients.has(String(row.client_id)))
+    .map(row => String(row.connection_id)))
+  const existingKeys = new Set(jobsResult.data.map(row => String(row.idempotency_key)))
+
+  let eligible = 0
+  let fresh = 0
+  let enqueued = 0
+  let missingToken = 0
+  let missingScopes = 0
+
+  for (const connection of connectionsResult.data) {
+    const clientId = typeof connection.client_id === 'string' ? connection.client_id : ''
+    const connectionId = typeof connection.id === 'string' ? connection.id : ''
+    const openId = typeof connection.tiktok_open_id === 'string' ? connection.tiktok_open_id : ''
+    if (!clientId || !connectionId || !openId || !activeClients.has(clientId)) continue
+
+    const scopes = Array.isArray(connection.scopes)
+      ? connection.scopes.filter((scope): scope is string => typeof scope === 'string')
+      : []
+    if (!TIKTOK_READ_SCOPES.every(scope => scopes.includes(scope))) {
+      missingScopes++
+      continue
+    }
+    if (!tokenConnections.has(connectionId)) {
+      missingToken++
+      continue
+    }
+    eligible++
+    if (freshConnections.has(connectionId)) {
+      fresh++
+      continue
+    }
+
+    const idempotencyKey = tiktokRefreshIdempotencyKey(connectionId, operatingDate)
+    if (existingKeys.has(idempotencyKey)) continue
+    if (enqueued >= TIKTOK_FRESHNESS_MAX_ENQUEUES) continue
+
+    const { error } = await supabase.from('background_jobs').upsert({
+      job_type: TIKTOK_ANALYTICS_REFRESH_JOB_TYPE,
+      payload: {
+        clientId,
+        connectionId,
+        tiktokOpenId: openId,
+        periodMonth,
+        schedule: 'daily_operating_cycle',
+      },
+      idempotency_key: idempotencyKey,
+      max_attempts: 3,
+    }, { onConflict: 'idempotency_key', ignoreDuplicates: true })
+    if (error) return { state: 'unavailable', blocker: error.message, operatingDate, periodMonth, eligible, fresh, enqueued }
+
+    existingKeys.add(idempotencyKey)
+    enqueued++
+  }
+
+  return {
+    state: 'ready',
+    operatingDate,
+    periodMonth,
+    eligible,
+    fresh,
+    enqueued,
+    skippedMissingToken: missingToken,
+    skippedMissingScopes: missingScopes,
+    maxEnqueuesPerPass: TIKTOK_FRESHNESS_MAX_ENQUEUES,
+  }
+}
+
+async function ensureDailyMonthlyStrategyAutopilotJob(
+  supabase: ReturnType<typeof createClient>,
+): Promise<Record<string, unknown>> {
+  const today = monthlyStrategyAutopilotOperatingDate()
+  const idempotencyKey = monthlyStrategyAutopilotIdempotencyKey(today)
+  const { error: enqueueError } = await supabase
+    .from('background_jobs')
+    .upsert({
+      job_type: MONTHLY_STRATEGY_AUTOPILOT_JOB_TYPE,
+      payload: { today, schedule: 'daily_operating_cycle' },
+      idempotency_key: idempotencyKey,
+      max_attempts: 3,
+    }, { onConflict: 'idempotency_key', ignoreDuplicates: true })
+
+  if (enqueueError) return { state: 'unavailable', blocker: enqueueError.message, operatingDate: today, idempotencyKey }
+
+  const { data: job, error: readError } = await supabase
+    .from('background_jobs')
+    .select('id,status,attempts,max_attempts,error')
+    .eq('idempotency_key', idempotencyKey)
+    .maybeSingle()
+
+  if (readError || !job) {
+    return { state: 'unavailable', blocker: readError?.message ?? 'Daily monthly strategy job was not readable.', operatingDate: today, idempotencyKey }
+  }
+
+  return {
+    state: job.status === 'succeeded' ? 'complete' : job.status,
+    jobStatus: job.status,
+    jobId: job.id,
+    attempts: job.attempts,
+    maxAttempts: job.max_attempts,
+    blocker: job.error ?? null,
+    operatingDate: today,
+    idempotencyKey,
+  }
+}
+
+async function ensureDailyContentAutopilotJob(
+  supabase: ReturnType<typeof createClient>,
+  monthlyStrategySchedule: Record<string, unknown>,
+): Promise<Record<string, unknown>> {
+  const enabled = (Deno.env.get(CONTENT_AUTOPILOT_ENABLED_FLAG) ?? '').trim().toLowerCase() === 'true'
+  if (!enabled) return { state: 'disabled' }
+
+  if (!monthlyStrategyReadyForContent(monthlyStrategySchedule.jobStatus)) {
+    return {
+      state: 'waiting_for_monthly_strategy',
+      prerequisiteState: monthlyStrategySchedule.state ?? 'unavailable',
+      prerequisiteJobId: monthlyStrategySchedule.jobId ?? null,
+      blocker: monthlyStrategySchedule.blocker ?? null,
+    }
+  }
+
+  const today = contentAutopilotOperatingDate()
+  const idempotencyKey = contentAutopilotIdempotencyKey(today)
+  const { data, error } = await supabase
+    .from('background_jobs')
+    .upsert({
+      job_type: 'content_autopilot',
+      payload: { today, schedule: 'daily_operating_cycle' },
+      idempotency_key: idempotencyKey,
+      max_attempts: 3,
+    }, { onConflict: 'idempotency_key', ignoreDuplicates: true })
+    .select('id')
+    .maybeSingle()
+
+  if (error) return { state: 'unavailable', blocker: error.message }
+  return { state: data?.id ? 'enqueued' : 'already_enqueued', operatingDate: today, idempotencyKey }
+}
+
+async function advanceMicrosoftFreshness(url: string, serviceKey: string): Promise<Record<string, unknown>> {
+  const secret = (Deno.env.get('DAILY_FRESHNESS_WORKER_SECRET') ?? '').trim()
+  if (secret.length < 32) return { ok: false, state: 'unavailable', blocker: 'DAILY_FRESHNESS_WORKER_SECRET is not configured.' }
+  try {
+    const response = await fetch(`${url}/functions/v1/microsoft-transition-sync`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${serviceKey}`,
+        'x-daily-freshness-secret': secret,
+      },
+      body: JSON.stringify({ action: 'system_cycle' }),
+      signal: AbortSignal.timeout(20_000),
+    })
+    const body = await response.json().catch(() => ({})) as Record<string, unknown>
+    return { ok: response.ok && body.ok === true, httpStatus: response.status, ...body }
+  } catch {
+    return { ok: false, state: 'failed', blocker: 'Microsoft freshness worker could not be reached; the last verified mirror remains in use.' }
+  }
+}
 
 interface LaneRecoveryRow {
   batch_id: string
@@ -186,12 +437,315 @@ async function reapStalledMetaSyncBatches(
   return out
 }
 
+interface FleetFreshnessBatch {
+  batchId: string
+  clientCount: number
+  months: string[]
+  assetCount: number
+}
+
+interface CheckpointRow {
+    asset_id: string
+    platform: string
+    next_due_at: string | null
+    last_sync_kind: string | null
+    last_status: string | null
+    last_health_state: string | null
+    last_successful_month: string | null
+  }
+
+  async function enqueueFleetMetaFreshness(
+    supabase: ReturnType<typeof createClient>,
+    url: string,
+  ): Promise<Array<FleetFreshnessBatch | { detail: string }>> {
+    const out: Array<FleetFreshnessBatch | { detail: string }> = []
+    const workerSecret = (Deno.env.get('META_SYNC_WORKER_SECRET') ?? '').trim()
+    if (!workerSecret) {
+      return [{ detail: 'META_SYNC_WORKER_SECRET not configured' }]
+    }
+
+    // 1. Build the complete inventory of expected active Meta targets from
+  // meta_client_assets. This is the source of truth for what SHOULD be synced.
+  // LEFT JOIN with meta_asset_sync_checkpoints to find due/missing work.
+  // Missing checkpoint row = bootstrap due (never synced).
+  // Existing checkpoint with next_due_at <= now() = refresh due.
+  const { data: expectedTargets, error: targetError } = await fetchAllRows((from, to) => supabase
+    .from('meta_client_assets')
+    .select(`
+      id,
+      client_id,
+      facebook_page_id,
+      instagram_account_id,
+      is_active,
+      meta_asset_sync_checkpoints!left (
+        asset_id,
+        platform,
+        next_due_at,
+        last_sync_kind,
+        last_status,
+        last_health_state,
+        last_successful_month
+      )
+    `)
+    .eq('is_active', true)
+    .range(from, to))
+
+  if (targetError || !expectedTargets || expectedTargets.length === 0) {
+    return out
+  }
+
+  // 2. Collapse per-platform due observations into per-asset scheduling plans.
+  // Canonical queue semantics: one batch item per asset+month, owning both FB/IG stages.
+  const now = new Date().toISOString()
+  const currentMonth = currentMetaMonth()
+  const prevCompletedMonth = previousMetaMonth(1)
+
+  type AssetPlan = {
+    assetId: string
+    clientId: string
+    hasFacebook: boolean
+    hasInstagram: boolean
+    lastSuccessfulMonth: string | null // earliest successful month across platforms
+    needsReconciliation: boolean
+  }
+
+  const assetPlans = new Map<string, AssetPlan>()
+
+  for (const asset of expectedTargets) {
+    if (!asset.is_active) continue
+
+    let fbDue = false
+    let igDue = false
+    let fbCheckpoint: CheckpointRow | null = null
+    let igCheckpoint: CheckpointRow | null = null
+    let fbBootstrap = false
+    let igBootstrap = false
+
+    // Facebook platform
+    if (asset.facebook_page_id) {
+      fbCheckpoint = asset.meta_asset_sync_checkpoints?.find(
+        (c: CheckpointRow) => c.platform === 'facebook'
+      ) ?? null
+      fbBootstrap = !fbCheckpoint
+      fbDue = fbBootstrap || (fbCheckpoint?.next_due_at && fbCheckpoint.next_due_at <= now)
+    }
+
+    // Instagram platform
+    if (asset.instagram_account_id) {
+      igCheckpoint = asset.meta_asset_sync_checkpoints?.find(
+        (c: CheckpointRow) => c.platform === 'instagram'
+      ) ?? null
+      igBootstrap = !igCheckpoint
+      igDue = igBootstrap || (igCheckpoint?.next_due_at && igCheckpoint.next_due_at <= now)
+    }
+
+    if (!fbDue && !igDue) continue
+
+    // Determine reconciliation: required if ANY due platform needs it
+    const fbReconcile = fbDue && (fbBootstrap || (fbCheckpoint?.last_successful_month ?? '') < prevCompletedMonth)
+    const igReconcile = igDue && (igBootstrap || (igCheckpoint?.last_successful_month ?? '') < prevCompletedMonth)
+    const needsReconciliation = fbReconcile || igReconcile
+
+    // Earliest successful month across due platforms (null if any bootstrap)
+    let earliestSuccess: string | null = null
+    if (fbDue) {
+      if (fbBootstrap) earliestSuccess = null
+      else if (fbCheckpoint?.last_successful_month) {
+        earliestSuccess = fbCheckpoint.last_successful_month
+      }
+    }
+    if (igDue) {
+      if (igBootstrap) earliestSuccess = null
+      else if (igCheckpoint?.last_successful_month) {
+        if (!earliestSuccess || igCheckpoint.last_successful_month < earliestSuccess) {
+          earliestSuccess = igCheckpoint.last_successful_month
+        }
+      }
+    }
+
+    assetPlans.set(asset.id, {
+      assetId: asset.id,
+      clientId: asset.client_id,
+      hasFacebook: fbDue,
+      hasInstagram: igDue,
+      lastSuccessfulMonth: earliestSuccess,
+      needsReconciliation,
+    })
+  }
+
+  if (assetPlans.size === 0) {
+    return out
+  }
+
+  // 3. Cross-batch active-work dedupe: find asset+month combinations that
+  // already have queued/running work across ANY batch.
+  // Include items regardless of cooldown — cooldown is healthy waiting, not finished work.
+  // The worker controls retry timing; the scheduler must treat all queued/running
+  // asset+month as active logical work to prevent duplicate enqueue.
+  const activeWorkKeys = new Set<string>()
+  const { data: activeItems } = await fetchAllRows((from, to) => supabase
+    .from('meta_sync_batch_items')
+    .select('asset_id, month')
+    .in('status', ['queued', 'running'])
+    .range(from, to))
+
+  if (activeItems) {
+    for (const item of activeItems) {
+      if (item.asset_id) {
+        activeWorkKeys.add(`${item.asset_id}:${item.month}`)
+      }
+    }
+  }
+
+  // 4. Group by client using collapsed asset plans.
+  const byClient = new Map<string, AssetPlan[]>()
+  for (const plan of assetPlans.values()) {
+    const arr = byClient.get(plan.clientId) ?? []
+    arr.push(plan)
+    byClient.set(plan.clientId, arr)
+  }
+
+  const clientIds = Array.from(byClient.keys())
+  const { data: clientRows } = await supabase
+    .from('clients')
+    .select('id, name')
+    .in('id', clientIds)
+  const clientNameMap = new Map<string, string>((clientRows ?? []).map(c => [c.id, c.name]))
+
+  // 5. For each client, build logical work items (asset + month + sync_kind)
+  // and apply dedupe per asset+month.
+  let batchesCreated = 0
+  for (const [clientId, plans] of byClient.entries()) {
+    if (batchesCreated >= META_FLEET_FRESHNESS_MAX_BATCHES) break
+
+    const clientName = clientNameMap.get(clientId) ?? 'Unknown'
+
+    // Determine months needed for this client's targets.
+    // - Current Meta month (incremental) for all due targets.
+    // - Previous completed Meta month (historical) if any target needs reconciliation.
+    const needsReconciliation = plans.some(p => p.needsReconciliation)
+
+    // On day 1 of a new month, no completed reporting day exists yet for the
+    // current month. Skip current-month incremental to avoid creating items
+    // that the worker would immediately skip (and prevent churn).
+    const canDoCurrentIncremental = currentMonthHasIncrementalWindow()
+
+    const months: string[] = []
+    if (canDoCurrentIncremental) months.push(currentMonth)
+    if (needsReconciliation) months.push(prevCompletedMonth)
+    if (months.length === 0) continue
+
+    // Build logical work items per asset per month, then apply dedupe.
+    // Each item = { plan, month, syncKind }
+    // Canonical queue: one item per asset+month.
+    type WorkItem = { plan: AssetPlan; month: string; syncKind: string }
+    const neededWork: WorkItem[] = []
+
+    for (const plan of plans) {
+      for (const month of months) {
+        // Skip if this asset+month already has active work (regardless of platform)
+        if (activeWorkKeys.has(`${plan.assetId}:${month}`)) {
+          continue
+        }
+        const syncKind = month === currentMonth ? 'incremental' : 'historical'
+        neededWork.push({ plan, month, syncKind })
+      }
+    }
+
+    if (neededWork.length === 0) {
+      continue // all work for this client is already active
+    }
+
+    // 6. Create the batch with only the needed logical work items.
+    const uniqueAssets = [...new Map(neededWork.map(w => [w.plan.assetId, w.plan])).values()]
+    const totalItems = neededWork.length
+
+    const { data: batch, error: batchError } = await supabase
+      .from('meta_sync_batches')
+      .insert({
+        mode: 'all',
+        requested_by: null, // system-initiated
+        status: 'queued',
+        sync_range_months: months.length,
+        total_items: totalItems,
+        completed_items: 0,
+        failed_items: 0,
+        summary: { months, clientCount: uniqueAssets.length, via: 'fleet_freshness', itemsEnqueued: totalItems },
+      })
+      .select('id')
+      .single()
+
+    if (batchError || !batch) {
+      out.push({ detail: `Failed to create batch for ${clientName}: ${batchError?.message ?? 'no id'}` })
+      continue
+    }
+
+    const batchId = batch.id
+
+    // Create batch items from the filtered work list.
+    const itemRows: Array<{
+      batch_id: string
+      client_id: string
+      client_name: string
+      asset_id: string
+      sync_kind: string
+      month: string
+      status: string
+    }> = []
+
+    for (const work of neededWork) {
+      itemRows.push({
+        batch_id: batchId,
+        client_id: work.plan.clientId,
+        client_name: clientName,
+        asset_id: work.plan.assetId,
+        sync_kind: work.syncKind,
+        month: work.month,
+        status: 'queued',
+      })
+    }
+
+    const { error: itemsError } = await supabase
+      .from('meta_sync_batch_items')
+      .insert(itemRows)
+
+    if (itemsError) {
+      out.push({ detail: `Failed to create batch items for ${clientName}: ${itemsError.message}` })
+      continue
+    }
+
+    // 7. Trigger the worker for this batch (fire-and-forget with short timeout).
+    const workerUrl = Deno.env.get('META_SYNC_WORKER_URL') ?? `${url}/functions/v1/meta-sync-worker`
+    try {
+      await Promise.race([
+        fetch(workerUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-worker-secret': workerSecret,
+          },
+          body: JSON.stringify({ batchId, maxItems: 1, startLanes: true }),
+        }),
+        new Promise(resolve => setTimeout(resolve, 3_000)),
+      ])
+    } catch {
+      // Worker may not be deployed yet — batch stays queued; reaper will pick it up.
+    }
+
+    batchesCreated++
+    out.push({ batchId, clientCount: uniqueAssets.length, months, assetCount: uniqueAssets.length, itemsEnqueued: totalItems })
+  }
+
+  return out
+}
+
 // Runs one job to its real completion and returns a TRUTHFUL result summary that
 // is stored on the job row. Throwing marks the job failed (with retry/backoff).
 async function runJob(
   supabase: ReturnType<typeof createClient>,
   job: JobRow,
   url: string,
+  serviceKey: string,
   worker: string,
 ): Promise<JobResult> {
   await updateJobProgress(supabase, job.id, worker, 10)
@@ -222,6 +776,148 @@ async function runJob(
       if (error) throw new Error(error.message)
       await updateJobProgress(supabase, job.id, worker, 90)
       return { ok: true, ...(data as Record<string, unknown>) }
+    }
+    case MONTHLY_STRATEGY_AUTOPILOT_JOB_TYPE: {
+      // #463 delegates to the accepted internal Edge boundary. That function
+      // owns Johannesburg-month selection and the canonical #391 seed RPC;
+      // it never updates an existing staff-amended/approved/published strategy.
+      await updateJobProgress(supabase, job.id, worker, 40)
+      const workerToken = (Deno.env.get('WORKER_INTERNAL_TOKEN') ?? '').trim()
+      if (workerToken.length < 32) throw new Error('Monthly strategy worker authentication is not configured')
+      const response = await fetch(`${url}/functions/v1/monthly-strategy-autopilot`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${serviceKey}`,
+          'X-Internal-Worker-Token': workerToken,
+        },
+      })
+      const body = await response.json().catch(() => null) as Record<string, unknown> | null
+      if (!response.ok || body?.ok !== true) {
+        const detail = typeof body?.error === 'string' ? body.error : `HTTP ${response.status}`
+        throw new Error(`Monthly strategy autopilot did not complete: ${detail}`)
+      }
+      await updateJobProgress(supabase, job.id, worker, 90)
+      return body
+    }
+    case TIKTOK_ANALYTICS_REFRESH_JOB_TYPE: {
+      await updateJobProgress(supabase, job.id, worker, 40)
+      const workerToken = (Deno.env.get('WORKER_INTERNAL_TOKEN') ?? '').trim()
+      if (workerToken.length < 32) throw new Error('TikTok refresh worker authentication is not configured')
+      const clientId = typeof payload.clientId === 'string' ? payload.clientId : ''
+      const connectionId = typeof payload.connectionId === 'string' ? payload.connectionId : ''
+      const tiktokOpenId = typeof payload.tiktokOpenId === 'string' ? payload.tiktokOpenId : ''
+      const periodMonth = typeof payload.periodMonth === 'string' ? payload.periodMonth : ''
+      if (!clientId || !connectionId || !tiktokOpenId || !/^\d{4}-(0[1-9]|1[0-2])$/.test(periodMonth)) {
+        throw new Error('TikTok refresh job is missing its exact client/account identity')
+      }
+
+      const response = await fetch(`${url}/functions/v1/tiktok-sync`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${serviceKey}`,
+          'X-Internal-Worker-Token': workerToken,
+        },
+        body: JSON.stringify({
+          clientId,
+          periodMonth,
+          expectedConnectionId: connectionId,
+          expectedTiktokOpenId: tiktokOpenId,
+        }),
+      })
+      const body = await response.json().catch(() => null) as Record<string, unknown> | null
+      if (!response.ok || body?.ok !== true || body?.health !== 'verified') {
+        const detail = typeof body?.error === 'string' ? body.error : `HTTP ${response.status}`
+        const providerErrors = Array.isArray(body?.errors)
+          ? body.errors.filter(error => typeof error === 'string').join('; ')
+          : ''
+        throw new Error(`TikTok analytics refresh did not complete: ${providerErrors || detail}`)
+      }
+      await updateJobProgress(supabase, job.id, worker, 90)
+      return body
+    }
+    case 'content_autopilot': {
+      // #450: prepare content for upcoming real Content Runs on the normal operating
+      // cycle. Idempotent and read-mostly: the only content write is the canonical
+      // guideline a run must already have. It never creates a run, writes the Client
+      // Schedule, overwrites human content, publishes, or touches a file.
+      await updateJobProgress(supabase, job.id, worker, 40)
+      const today = typeof payload.today === 'string' ? payload.today : new Date().toISOString().slice(0, 10)
+      // Latent executable generation path. It stays off until CA sets the project
+      // secret; switching it on is a protected production action, not a code change.
+      const generationEnabled = (Deno.env.get(GENERATION_FLAG) ?? '').toLowerCase() === 'true'
+      // Latent executable OneDrive folder path. Same pattern: off unless CA enables it.
+      const videoFolderEnabled = (Deno.env.get(VIDEO_FOLDER_FLAG) ?? '').toLowerCase() === 'true'
+      try {
+        const result = await runContentAutopilotPass(supabase as unknown as Parameters<typeof runContentAutopilotPass>[0], {
+          today,
+          generationEnabled,
+          videoFolderEnabled,
+          systemProfileId: Deno.env.get('WORKER_SYSTEM_PROFILE_ID') ?? '',
+          generateDrafts: async input => {
+            // Reuses the EXISTING AI Content Director via narrow internal worker auth.
+            // The Edge Function persists draft ideas when called with the internal token.
+            const workerToken = (Deno.env.get('WORKER_INTERNAL_TOKEN') ?? '').trim()
+            const systemProfileId = (Deno.env.get('WORKER_SYSTEM_PROFILE_ID') ?? '').trim()
+            if (workerToken.length < 32 || !systemProfileId) return { ok: false, error: 'Autopilot worker identity is not configured' }
+            const res = await fetch(`${url}/functions/v1/suggest-content-videos`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Internal-Worker-Token': workerToken,
+              },
+              body: JSON.stringify({
+                requestId: `autopilot:${input.contentRunId}:${input.mode}:${Date.now()}`,
+                mode: input.mode,
+                clientId: input.clientId,
+                guidelineId: input.guidelineId,
+                coverageStart: input.coverageStart,
+                coverageEnd: input.coverageEnd,
+                videoIds: input.videoIds,
+              }),
+            })
+            if (!res.ok) return { ok: false, error: `suggest-content-videos returned ${res.status}` }
+            const body = await res.json().catch(() => null) as { videos?: unknown[]; ideas?: unknown[]; developments?: unknown[]; persisted?: number } | null
+            const persisted = body?.persisted
+            if (typeof persisted !== 'number' || persisted <= 0) return { ok: false, error: 'Generated content was not durably persisted' }
+            return { ok: true, generated: persisted }
+          },
+          ensureVideoFolders: async input => {
+            // Reuses the EXISTING ensure_video_folders Edge Function action via narrow
+            // internal worker auth. Create-only; existing folders are mapped by durable
+            // id, never duplicated. Behind the protected OneDrive-write gate.
+            const workerToken = (Deno.env.get('WORKER_INTERNAL_TOKEN') ?? '').trim()
+            const systemProfileId = (Deno.env.get('WORKER_SYSTEM_PROFILE_ID') ?? '').trim()
+            if (workerToken.length < 32 || !systemProfileId) return { ok: false, error: 'Autopilot worker identity is not configured' }
+            const res = await fetch(`${url}/functions/v1/content-run-onedrive-folder`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Internal-Worker-Token': workerToken,
+              },
+              body: JSON.stringify({
+                action: 'ensure_video_folders',
+                contentRunId: input.contentRunId,
+                videoIds: input.videoIds,
+                confirmCreate: true,
+              }),
+            })
+            if (!res.ok) return { ok: false, error: `content-run-onedrive-folder returned ${res.status}` }
+            const body = await res.json().catch(() => null) as { status?: string; results?: unknown[]; error?: string } | null
+            if (body?.error) return { ok: false, error: body.error }
+            const created = (body?.results ?? []).filter((r: Record<string, unknown>) => r.state === 'created' || r.state === 'mapped_existing')
+            return { ok: true, ensured: created.length }
+          },
+        })
+        await updateJobProgress(supabase, job.id, worker, 90)
+        await recordContentAutopilotPass(supabase as unknown as Parameters<typeof recordContentAutopilotPass>[0], result, null)
+        return result
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err)
+        await recordContentAutopilotPass(supabase as unknown as Parameters<typeof recordContentAutopilotPass>[0], null, message)
+        throw err
+      }
     }
     default:
       throw new Error(`Unsupported background job type: ${job.job_type}`)
@@ -276,10 +972,11 @@ async function runMetaSyncBatch(
 
   if (!batchId) {
     // Linked, active clients only — the same population the sync engine serves.
-    const { data: assets, error: assetsError } = await supabase
+    const { data: assets, error: assetsError } = await fetchAllRows((from, to) => supabase
       .from('meta_client_assets')
       .select('client_id')
       .eq('is_active', true)
+      .range(from, to))
     if (assetsError) throw new Error(`Could not load linked Meta clients: ${assetsError.message}`)
     const clientIds = [...new Set((assets ?? []).map(a => a.client_id))]
     if (clientIds.length === 0) throw new Error('No clients are linked to Meta yet — nothing to sync.')

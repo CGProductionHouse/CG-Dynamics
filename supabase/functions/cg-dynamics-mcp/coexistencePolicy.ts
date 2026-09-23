@@ -11,7 +11,7 @@
 // is preserved exactly and is NOT broadened.
 
 /** Bump when the policy text/rules change. Returned to the Assistant on every bootstrap. */
-export const STAFF_ASSISTANT_POLICY_VERSION = '2026.09.10-coexistence-2'
+export const STAFF_ASSISTANT_POLICY_VERSION = '2026.09.18-coexistence-naming-3'
 
 /** CA decision effective date for this policy (#325). */
 export const STAFF_ASSISTANT_POLICY_EFFECTIVE_AT = '2026-09-10T00:00:00Z'
@@ -96,7 +96,8 @@ const CLIENT_SCHEDULE_PROTECTION = [
 const CONTENT_LINKAGE_RULE = [
   'Canonical chain: Client -> active Package -> package deliverable/template -> monthly_deliverable -> linked operational task/meeting where applicable -> Content Run -> canonical Content Guideline -> guideline items -> exact OneDrive month/run folder -> upload evidence -> closeout/approval/publish state.',
   'Traverse by IDs, never by title guessing. Each Content Run links to exactly one canonical Content Guideline.',
-  'One real run folder may contain several videos. Do not invent per-video subfolders.',
+  'OneDrive production naming is strict: Clients/<Client>/Videos/<YYYY>/<YYYY_MM_MON>/<YYYY_MM_CLIENT_VIDEO_XX>. Resolve the configured client short code and canonical month/sequence through CG Dynamics; never guess, free-type or create a near-match folder name.',
+  'If the exact client short code, month or video sequence cannot be resolved from canonical Dynamics context, STOP and request/flag the missing canonical value rather than improvising. Runtime folder identity is durable Graph item ID after mapping.',
   'Raw OneDrive IDs and URLs are INTERNAL ONLY and must never reach a client-facing surface.',
   'Package changes affect future work only and preserve completed history.',
 ]

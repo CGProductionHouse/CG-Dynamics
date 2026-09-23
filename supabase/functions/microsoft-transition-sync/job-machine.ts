@@ -50,7 +50,11 @@ export function enumerateJobSources(
   return seeds
 }
 
-export const DETAIL_BATCH_SIZE = 300
+// One unit is at most four Graph batch requests (20 task details per request),
+// matching GRAPH_DETAIL_CONCURRENCY. Keeping it to one normal request wave lets
+// the caller finish inside background-worker's 20-second hand-off budget while
+// retaining durable progress between invocations.
+export const DETAIL_BATCH_SIZE = 80
 export const PAGINATION_BATCH_SIZE = 1000
 
 // Split the pending detail-id list into the next bounded batch + the remainder.
@@ -213,6 +217,9 @@ export function planSourceUpdate(result: SourceUnitResult, attempts: number): So
   if (result.detailIds.length > 0) {
     return { ...base, stage: 'fetching_details', complete: false, safe_error: null, pending_detail_ids: result.detailIds }
   }
+  if (!result.complete) {
+    return { ...base, stage: 'failed', complete: false, safe_error: 'Microsoft source returned incomplete evidence. Retry the failed source.' }
+  }
   return { ...base, stage: 'complete', complete: result.complete, safe_error: null }
 }
 
@@ -229,6 +236,83 @@ export function retrySourceReset() {
     pagination_cursor: null,
     attempts: 0,
   }
+}
+
+export const MAX_AUTOMATIC_SOURCE_RETRIES = 3
+export const AUTOMATIC_RETRY_COOLDOWN_MS = 5 * 60 * 1000
+
+export function planAutomaticSourceRecovery(input: { failedRequired: number; retryCount: number; retryAfter: string | null; now: string }) {
+  if (input.failedRequired === 0) return { kind: 'none' as const, nextRetryCount: input.retryCount, retryAfter: null }
+  if (input.retryCount >= MAX_AUTOMATIC_SOURCE_RETRIES) return { kind: 'exhausted' as const, nextRetryCount: input.retryCount, retryAfter: null }
+  const nowMs = Date.parse(input.now)
+  const retryAfterMs = input.retryAfter ? Date.parse(input.retryAfter) : Number.NaN
+  if (Number.isFinite(retryAfterMs) && retryAfterMs > nowMs) return { kind: 'wait' as const, nextRetryCount: input.retryCount, retryAfter: input.retryAfter }
+  return { kind: 'retry' as const, nextRetryCount: input.retryCount + 1, retryAfter: new Date(nowMs + AUTOMATIC_RETRY_COOLDOWN_MS).toISOString() }
+}
+
+export const AUTOMATIC_APPLY_STALE_MS = 10 * 60 * 1000
+export const MAX_AUTOMATIC_APPLY_RECOVERIES = 3
+export const AUTOMATIC_SYSTEM_CYCLE_FRESH_MS = 3 * 60 * 60 * 1000
+
+export function automaticSystemRange(now: string) {
+  const rangeStart = new Date(now)
+  const rangeEnd = new Date(now)
+  rangeStart.setUTCDate(rangeStart.getUTCDate() - 31)
+  // 31 historical days + 338 forward days = 369 days, safely inside the
+  // existing 370-day Outlook range guard without silently changing that guard.
+  rangeEnd.setUTCDate(rangeEnd.getUTCDate() + 338)
+  return { rangeStart: rangeStart.toISOString(), rangeEnd: rangeEnd.toISOString() }
+}
+
+export function automaticApplyLeaseDeadline(now: string) {
+  return new Date(Date.parse(now) + AUTOMATIC_APPLY_STALE_MS).toISOString()
+}
+
+export function planAutomaticApplyRecovery(input: { status: string; startedAt: string; recoveryCount: number; recoveryAfter: string | null; now: string }) {
+  if (input.status !== 'applying') return { kind: 'terminal' as const }
+  const nowMs = Date.parse(input.now)
+  const startedMs = Date.parse(input.startedAt)
+  const recoveryAfterMs = input.recoveryAfter ? Date.parse(input.recoveryAfter) : Number.NaN
+  // A claimed recovery owns its full lease, including the final allowed try.
+  // Exhaustion is evaluated only after that lease expires so a concurrent
+  // system_cycle cannot mark the run failed while its recovery is still active.
+  if (Number.isFinite(recoveryAfterMs) && recoveryAfterMs > nowMs) return { kind: 'fresh' as const }
+  if (input.recoveryCount >= MAX_AUTOMATIC_APPLY_RECOVERIES) return { kind: 'exhausted' as const }
+  if (Number.isFinite(startedMs) && nowMs - startedMs < AUTOMATIC_APPLY_STALE_MS) return { kind: 'fresh' as const }
+  return { kind: 'recover' as const }
+}
+
+export function planAutomaticSystemCycle(input: {
+  jobStatus: string | null
+  jobUpdatedAt: string | null
+  requiredIncomplete: number
+  runStatus: string | null
+  runFinishedAt: string | null
+  now: string
+}) {
+  if (!input.jobStatus) return { kind: 'start' as const }
+  if (input.jobStatus === 'running') return { kind: 'process' as const }
+
+  const nowMs = Date.parse(input.now)
+  const jobUpdatedMs = input.jobUpdatedAt ? Date.parse(input.jobUpdatedAt) : Number.NaN
+  const runFinishedMs = input.runFinishedAt ? Date.parse(input.runFinishedAt) : Number.NaN
+  const jobIsRecent = Number.isFinite(jobUpdatedMs) && nowMs - jobUpdatedMs < AUTOMATIC_SYSTEM_CYCLE_FRESH_MS
+  const runIsRecent = Number.isFinite(runFinishedMs) && nowMs - runFinishedMs < AUTOMATIC_SYSTEM_CYCLE_FRESH_MS
+
+  if (input.jobStatus === 'complete' && input.runStatus === 'applying') return { kind: 'apply' as const }
+  if (input.jobStatus === 'complete' && input.runStatus === null) {
+    // The system identity can also be a real staff admin with historical previews.
+    // Never adopt or apply an old staff preview merely because it has the same actor.
+    if (!jobIsRecent) return { kind: 'start' as const }
+    if (input.requiredIncomplete > 0) return { kind: 'degraded_incomplete' as const }
+    return { kind: 'apply' as const }
+  }
+  if (input.runStatus === 'completed' && runIsRecent) return { kind: 'fresh' as const }
+  if (input.runStatus !== null && runIsRecent) return { kind: 'degraded' as const }
+  // A bounded source/apply failure remains terminal for the freshness window.
+  // This prevents a failed automatic run from spawning a new job every minute.
+  if (input.jobStatus === 'failed' && jobIsRecent) return { kind: 'degraded' as const }
+  return { kind: 'start' as const }
 }
 
 export interface JobSourceRow {
@@ -272,7 +356,7 @@ export function jobProgress(sources: JobSourceRow[]): JobProgress {
   return {
     total: sources.length,
     complete, failed, fetching, queued, detailsRemaining,
-    allRequiredComplete: sources.length > 0 && sources.every((s) => !s.required || s.stage === 'complete'),
+    allRequiredComplete: sources.length > 0 && sources.every((s) => !s.required || (s.stage === 'complete' && s.complete)),
     anyFailed: failed > 0,
     finished: sources.every((s) => s.stage === 'complete' || s.stage === 'failed'),
   }
@@ -281,7 +365,7 @@ export function jobProgress(sources: JobSourceRow[]): JobProgress {
 // The reconciliation preview may only be assembled/applied when every required
 // source has completed (completeness safeguard — never a partial preview).
 export function requiredSourcesComplete(sources: JobSourceRow[]): boolean {
-  return sources.length > 0 && sources.every((s) => !s.required || s.stage === 'complete')
+  return sources.length > 0 && sources.every((s) => !s.required || (s.stage === 'complete' && s.complete))
 }
 
 // Pick the next unit of work: continue an in-progress detail fetch first (so a

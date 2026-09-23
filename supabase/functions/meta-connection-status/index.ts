@@ -2,6 +2,7 @@ import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { inspectMetaAccessToken } from '../_shared/metaTokenDiagnostics.ts'
 import { resolveMetaGraphConfig } from '../_shared/meta.ts'
+import { fetchAllRows, fetchAllRowsByIdChunks } from '../_shared/paginatedRows.ts'
 
 const REQUIRED_SCOPES = [
   'pages_show_list',
@@ -235,16 +236,30 @@ Deno.serve(async (req) => {
     })
   }
 
-  const { data: activeAssets } = await sb
+  const { data: activeAssets } = await fetchAllRows((from, to) => sb
     .from('meta_client_assets')
     .select('id, client_id, facebook_page_id, instagram_account_id')
     .eq('is_active', true)
+    .range(from, to))
   const assetIds = (activeAssets ?? []).map(asset => asset.id).filter(Boolean)
   const { data: checkpoints } = schemaReady && assetIds.length > 0
-    ? await sb.from('meta_asset_sync_checkpoints')
+    ? await fetchAllRowsByIdChunks(assetIds, (ids, from, to) => sb.from('meta_asset_sync_checkpoints')
       .select('asset_id, client_id, platform, last_sync_kind, last_status, last_health_state, last_attempted_at, last_successful_at, last_successful_month, high_watermark_at, next_due_at, api_version, connector_version, last_error_code')
-      .in('asset_id', assetIds)
+      .in('asset_id', ids)
+      .range(from, to))
     : { data: [] }
+  const { data: recoveryItems } = assetIds.length > 0
+    ? await fetchAllRowsByIdChunks(assetIds, (ids, from, to) => sb.from('meta_sync_batch_items')
+      .select('asset_id, status, facebook_sync_state, instagram_sync_state, error, cooldown_until, updated_at')
+      .in('asset_id', ids)
+      .in('status', ['queued', 'running', 'failed'])
+      .order('updated_at', { ascending: false })
+      .range(from, to))
+    : { data: [] }
+  const recoveryByAsset = new Map<string, Record<string, unknown>>()
+  for (const item of recoveryItems ?? []) {
+    if (!recoveryByAsset.has(String(item.asset_id))) recoveryByAsset.set(String(item.asset_id), item)
+  }
   const checkpointByAsset = new Map<string, Record<string, unknown>>()
   for (const checkpoint of checkpoints ?? []) {
     checkpointByAsset.set(`${checkpoint.asset_id}:${checkpoint.platform}`, checkpoint)
@@ -256,15 +271,30 @@ Deno.serve(async (req) => {
     health_state: checkpoint.last_health_state,
     finished_at: checkpoint.last_status === 'failed' ? checkpoint.last_attempted_at : (checkpoint.last_successful_at ?? checkpoint.last_attempted_at),
     created_at: checkpoint.last_attempted_at,
+    last_successful_at: checkpoint.last_successful_at,
     high_watermark_at: checkpoint.high_watermark_at,
     next_due_at: checkpoint.next_due_at,
     last_error_code: checkpoint.last_error_code,
   } : null
-  const assetHealth = schemaReady ? (activeAssets ?? []).map(asset => ({
-    clientId: asset.client_id,
-    facebook: asset.facebook_page_id ? asRun(checkpointByAsset.get(`${asset.id}:facebook`)) : null,
-    instagram: asset.instagram_account_id ? asRun(checkpointByAsset.get(`${asset.id}:instagram`)) : null,
-  })) : null
+  const assetHealth = schemaReady ? (activeAssets ?? []).map(asset => {
+    const recovery = recoveryByAsset.get(String(asset.id))
+    const retrying = recovery?.status === 'queued' || recovery?.status === 'running'
+    const withRecovery = (run: ReturnType<typeof asRun>, platform: 'facebook' | 'instagram') => ({
+      ...(run ?? {}),
+      status: recovery?.status === 'failed' && recovery[`${platform}_sync_state`] === 'failed' ? 'failed' : run?.status ?? null,
+      last_error_code: recovery?.status === 'failed' && recovery[`${platform}_sync_state`] === 'failed' ? (recovery.error ?? run?.last_error_code ?? null) : run?.last_error_code ?? null,
+      retrying: retrying && !['complete', 'not_applicable'].includes(String(recovery?.[`${platform}_sync_state`] ?? '')),
+      cooldown_until: recovery?.cooldown_until ?? null,
+    })
+    return {
+      assetId: asset.id,
+      clientId: asset.client_id,
+      facebookMapped: Boolean(asset.facebook_page_id),
+      instagramMapped: Boolean(asset.instagram_account_id),
+      facebook: asset.facebook_page_id ? withRecovery(asRun(checkpointByAsset.get(`${asset.id}:facebook`)), 'facebook') : null,
+      instagram: asset.instagram_account_id ? withRecovery(asRun(checkpointByAsset.get(`${asset.id}:instagram`)), 'instagram') : null,
+    }
+  }) : null
 
   return jsonResponse({
     ok: true,

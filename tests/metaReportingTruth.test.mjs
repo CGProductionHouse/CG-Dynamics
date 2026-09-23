@@ -7,6 +7,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 
 const read = (rel) => readFileSync(new URL(rel, import.meta.url), 'utf8')
 const SHARED_META = read('../supabase/functions/_shared/meta.ts')
+const META_PERIOD = read('../supabase/functions/_shared/metaPeriod.ts')
 const META_POST_MERGE = read('../supabase/functions/_shared/metaPostMerge.ts')
 const META_FENCING = read('../supabase/migrations/20260908120000_meta_sync_fencing_and_idempotency.sql')
 const META_TOKEN_LIFECYCLE = read('../supabase/migrations/20260908130000_meta_token_lifecycle_diagnostics.sql')
@@ -23,6 +24,7 @@ const CLIENT_VIEW = read('../src/pages/client/ClientReportView.tsx')
 const CLIENT_DASHBOARD = read('../src/pages/client/Dashboard.tsx')
 const ADMIN_PREVIEW = read('../src/pages/admin/PublishedPreview.tsx')
 const META_INTEGRATION_PAGE = read('../src/pages/admin/MetaIntegrationPage.tsx')
+const META_ASSET_RUN_PRESENTATION = read('../src/lib/metaAssetRunPresentation.ts')
 const META_OAUTH_START = read('../supabase/functions/meta-oauth-start/index.ts')
 const META_OAUTH_CALLBACK = read('../supabase/functions/meta-oauth-callback/index.ts')
 const META_CONNECTION_STATUS = read('../supabase/functions/meta-connection-status/index.ts')
@@ -291,9 +293,18 @@ test('legacy automated Meta zeros cannot become verified client metrics', () => 
 })
 
 test('content exclusions change highlights but preserve aggregate totals', () => {
+  const engagementEvidence = {
+    engagementKnownSubtotal: 0,
+    engagementDefinitionId: 'instagram_direct_likes_comments_v1',
+    engagementDefinitionLabel: 'Instagram direct likes + comments',
+    engagementSource: 'meta_graph_api_direct_fields',
+    engagementObservedAt: '2026-07-01T00:00:00Z',
+    engagementCoverage: { observed: 2, required: 2 },
+    engagementCompleteness: 'complete',
+  }
   const posts = [
-    { id: 'p1', caption: 'First', permalink: null, publish_time: '2026-06-10T00:00:00Z', reach: 100, impressions: 500, engagements: 20, post_type: 'photo', platform: 'instagram', imageUrl: null, metaObjectId: 'ig-1' },
-    { id: 'p2', caption: 'Second', permalink: null, publish_time: '2026-06-11T00:00:00Z', reach: 80, impressions: 300, engagements: 10, post_type: 'photo', platform: 'instagram', imageUrl: null, metaObjectId: 'ig-2' },
+    { ...engagementEvidence, engagementKnownSubtotal: 20, id: 'p1', caption: 'First', permalink: null, publish_time: '2026-06-10T00:00:00Z', reach: 100, impressions: 500, engagements: 20, post_type: 'photo', platform: 'instagram', imageUrl: null, metaObjectId: 'ig-1' },
+    { ...engagementEvidence, engagementKnownSubtotal: 10, id: 'p2', caption: 'Second', permalink: null, publish_time: '2026-06-11T00:00:00Z', reach: 80, impressions: 300, engagements: 10, post_type: 'photo', platform: 'instagram', imageUrl: null, metaObjectId: 'ig-2' },
   ]
   const report = reportStats.buildMasterReport(posts, [], new Set(['instagram:ig-1']))
   assert.equal(report.platforms.find(view => view.platform === 'instagram').engagements, 30)
@@ -374,6 +385,16 @@ test('client-safe exclusion flags use stable evidence identity after report-mont
   assert.doesNotMatch(html, /Excluded in month/)
 })
 
+test('client report uses the Meta Pacific half-open period at the UTC month boundary', () => {
+  const posts = [
+    { id: 'pacific-month-end', platform: 'facebook', publish_time: '2026-09-01T06:59:59.999Z', post_type: 'Photo', caption: 'Pacific month end', permalink: null, impressions: 300, reach: 100, engagements: 20, excluded: false },
+    { id: 'next-pacific-month', platform: 'facebook', publish_time: '2026-09-01T07:00:00.000Z', post_type: 'Photo', caption: 'Next Pacific month', permalink: null, impressions: 900, reach: 300, engagements: 30, excluded: false },
+  ]
+  const html = renderReport({ report: { ...baseReport, period_start: '2026-08-01', period_end: '2026-08-31', posts } })
+  assert.match(html, /Pacific month end/)
+  assert.doesNotMatch(html, /Next Pacific month/)
+})
+
 test('legacy fallback renders no ungated prior-month percentage', () => {
   const manual = [{ platform: 'instagram', views: 100, reach: 50, engagements: 5, profile_visits: 2, followers: 10, source_type: 'manual', general_notes: null }]
   const previous = [{ ...manual[0], views: 50, reach: 25 }]
@@ -443,9 +464,9 @@ test('Graph v25 contract uses media views, Pacific report bounds, and current fo
   assert.match(SHARED_META, /sourceMetric: 'page_total_media_view_unique'/)
   assert.match(SHARED_META, /sourceMetric: 'page_daily_follows'/)
   assert.match(SHARED_META, /sourceMetric: 'follows_and_unfollows'/)
-  assert.match(SHARED_META, /META_INSIGHTS_TIMEZONE = 'America\/Los_Angeles'/)
-  assert.match(SHARED_META, /metaInsightsBounds[\s\S]*zonedStartEpoch\(periodEnd, META_INSIGHTS_TIMEZONE\)/)
-  assert.match(SHARED_META, /metaPostBounds[\s\S]*addUtcDays\(periodEnd, 1\)/)
+  assert.match(META_PERIOD, /META_INSIGHTS_TIMEZONE = 'America\/Los_Angeles'/)
+  assert.match(META_PERIOD, /metaInsightsBounds[\s\S]*zonedStartEpoch\(periodEnd, META_INSIGHTS_TIMEZONE\)/)
+  assert.match(META_PERIOD, /metaPostBounds[\s\S]*addUtcDays\(periodEnd, 1\)/)
   assert.match(SHARED_META, /spec\.aggregation !== 'unique'/)
   assert.doesNotMatch(SHARED_META, /sourceMetric: 'page_impressions'/)
   assert.doesNotMatch(SHARED_META, /sourceMetric: 'page_impressions_unique'/)
@@ -494,7 +515,8 @@ test('Meta token lifecycle is validated server-side without exposing credentials
   assert.doesNotMatch(META_INTEGRATION_PAGE, /encrypted_access_token/)
   assert.match(META_INTEGRATION_PAGE, /Token validity/)
   assert.match(META_INTEGRATION_PAGE, /Token\/data access expiry/)
-  assert.match(META_INTEGRATION_PAGE, /no durable checkpoint recorded/)
+  assert.match(META_INTEGRATION_PAGE, /metaAssetRunLabel/)
+  assert.match(META_ASSET_RUN_PRESENTATION, /no durable checkpoint recorded/)
   assert.match(META_INTEGRATION_PAGE, /refresh diagnostics unavailable/)
   for (const source of META_MANAGER_FUNCTIONS) {
     assert.match(source, /\['admin', 'manager'\]/)

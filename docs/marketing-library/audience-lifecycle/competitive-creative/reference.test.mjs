@@ -1,0 +1,47 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { validDate, httpsReference, assessReference, summarisePattern, toolValue, benchmarkCoverage } from './reference.mjs';
+const context = { clientId: 'fixture-client-a', today: '2026-09-19' };
+const record = () => ({ provider: 'meta', nativeAdId: 'fixture-ad-1', advertiserId: 'fixture-brand-1', familyId: 'fixture-family-1',
+  sourceUrl: 'https://example.invalid/ad/1', scope: 'shared', clientId: null, observedAt: '2026-09-19', validUntil: '2026-10-19',
+  basis: 'direct_observation', coverage: 'full_video', reviewStatus: 'active', isSample: false });
+const assess = patch => assessReference({ ...record(), ...patch }, context);
+const cost = () => ({ currency: 'ZAR', tasks: 12, nativeMinutes: 60, toolMinutes: 30, hourlyValue: 300, monthlyFee: 1000, monthlyQaCost: 200, setupCost: 600, amortisationMonths: 3 });
+test('valid reference has no execution, publication, media or winner authority', () => { const r = assess({}); assert.equal(r.canEnterReviewedPattern, true); for (const k of ['externalProfitVerified','causalConclusionAllowed','mediaCopyAllowed','publicationAllowed','executionAllowed']) assert.equal(r[k], false); });
+test('bad inputs fail', () => assert.equal(assessReference(null, null).canEnterReviewedPattern, false));
+test('leap dates and impossible dates', () => { assert.equal(validDate('2028-02-29'), true); assert.equal(validDate('2026-02-29'), false); });
+test('URL is a reference, javascript and credentials rejected', () => { assert.equal(httpsReference('javascript:alert(1)'), false); assert.equal(httpsReference('https://user:pass@example.com'), false); assert.equal(httpsReference('https://example.com'), true); });
+for (const key of ['provider','nativeAdId','advertiserId','familyId']) test(`missing ${key} blocks pattern inclusion`, () => assert.ok(assess({ [key]: '' }).issues.includes('IDENTITY_INCOMPLETE')));
+for (const reviewStatus of ['draft','needs_review','reviewed','deprecated']) test(`${reviewStatus} does not become active`, () => assert.equal(assess({ reviewStatus }).canEnterReviewedPattern, false));
+test('cross-client refused', () => assert.ok(assess({ scope: 'client', clientId: 'fixture-client-b' }).issues.includes('SCOPE_MISMATCH')));
+test('private cannot masquerade as shared', () => assert.ok(assess({ clientId: 'fixture-client-a' }).issues.includes('SCOPE_MISMATCH')));
+test('exact client works', () => assert.equal(assess({ scope: 'client', clientId: context.clientId }).canEnterReviewedPattern, true));
+for (const patch of [{ observedAt: null },{ observedAt: '2026-09-20' },{ validUntil: '2026-09-18' },{ validUntil: 'invalid' }]) test(`invalid freshness ${JSON.stringify(patch)}`, () => assert.ok(assess(patch).issues.includes('STALE_UNDATED_OR_FUTURE')));
+for (const coverage of ['blocked','shell_only','unknown']) test(`${coverage} is not inspected creative`, () => assert.ok(assess({ coverage }).issues.includes('CONTENT_NOT_INSPECTED')));
+test('still cannot imply watched video', () => assert.ok(assess({ coverage: 'still' }).notes.includes('DO_NOT_INVENT_UNSEEN_VIDEO_OR_AUDIO')));
+test('long active ad not profit', () => { const r = assess({ active: true, daysObserved: 200 }); assert.equal(r.externalProfitVerified, false); assert.ok(r.notes.includes('PRESENCE_OR_AGE_DOES_NOT_PROVE_PROFIT')); });
+test('stopped is not failed', () => assert.ok(assess({ active: false }).notes.includes('STOPPED_OR_MISSING_DOES_NOT_PROVE_FAILURE')));
+test('percentile is not rate', () => assert.ok(assess({ metricUnit: 'percentile' }).notes.includes('RELATIVE_METRIC_NOT_CONVERSION_RATE')));
+test('estimate retains uncertainty', () => assert.ok(assess({ basis: 'vendor_estimate' }).notes.includes('ESTIMATE_NOT_ACCOUNTING_OR_AD_ATTRIBUTION')));
+test('case report not experiment', () => assert.ok(assess({ basis: 'case_report' }).notes.includes('PUBLISHER_REPORT_NOT_INDEPENDENT_CAUSAL_PROOF')));
+test('own outcome needs exact private context', () => assert.ok(assess({ basis: 'cg_verified_outcome' }).issues.includes('OWN_OUTCOME_CONTEXT_REQUIRED')));
+for (const patch of [{ isSample: true },{ basis: 'synthetic' },{ basis: 'unknown' }]) test(`sample or unknown excluded ${JSON.stringify(patch)}`, () => assert.equal(assess(patch).canEnterReviewedPattern, false));
+test('same native ad across vendors counted once', () => { const s = summarisePattern([record(), { ...record(), vendor: 'another' }], context); assert.equal(s.uniqueAds, 1); assert.equal(s.duplicateRows, 1); });
+test('variants in same family are not independent advertisers', () => { const s = summarisePattern([record(), { ...record(), nativeAdId: 'fixture-ad-2' }], context); assert.equal(s.uniqueAds, 2); assert.equal(s.advertisers, 1); assert.equal(s.families, 1); assert.equal(s.canClaimWinner, false); });
+test('conflicting identity excludes entire group', () => { const s = summarisePattern([record(), { ...record(), advertiserId: 'other' }], context); assert.equal(s.uniqueAds, 0); assert.equal(s.conflicts, 1); assert.equal(s.excluded, 2); });
+test('cross-provider native IDs never guessed equivalent', () => assert.equal(summarisePattern([record(), { ...record(), provider: 'tiktok' }], context).uniqueAds, 2));
+test('string tuple identity avoids separator collisions', () => assert.equal(summarisePattern([{ ...record(), provider: 'a:b', nativeAdId: 'c' },{ ...record(), provider: 'a', nativeAdId: 'b:c' }], context).uniqueAds, 2));
+test('inactive sample excluded from counts', () => assert.equal(summarisePattern([{ ...record(), isSample: true }], context).uniqueAds, 0));
+test('capacity maths', () => { const r = toolValue(cost()); assert.equal(r.capacityValue, 1800); assert.equal(r.netPlanningValue, 400); assert.equal(r.purchaseAllowed, false); });
+for (const value of [null,'', '12', NaN, Infinity, -1]) test(`bad number ${String(value)} yields unknown, not zero`, () => assert.equal(toolValue({ ...cost(), tasks: value }).netPlanningValue, null));
+test('slower tool may have negative value', () => assert.ok(toolValue({ ...cost(), toolMinutes: 90 }).netPlanningValue < 0));
+test('zero divisor rejected', () => assert.equal(toolValue({ ...cost(), amortisationMonths: 0 }).valid, false));
+test('blank currency rejected', () => assert.equal(toolValue({ ...cost(), currency: '' }).valid, false));
+test('empty benchmark has unknown coverage', () => assert.equal(benchmarkCoverage([],[]), null));
+test('coverage is deduplicated benchmark not world', () => { const r = benchmarkCoverage(['a','a','b'], ['b','c']); assert.equal(r.nativeShareOfBenchmark, 2/3); assert.equal(r.marketCoverageKnown, false); });
+test('invalid benchmark IDs rejected', () => assert.equal(benchmarkCoverage([''],['b']), null));
+test('no mutation', () => { const r=record(), before=JSON.stringify(r); assessReference(r,context); summarisePattern([r],context); assert.equal(JSON.stringify(r),before); });
+test('source ledger preserves access and review, without duplicate URLs', () => { const p=JSON.parse(readFileSync(new URL('./evidence.json',import.meta.url))); assert.equal(p.activationAllowed,false); assert.equal(new Set(p.sources.map(s=>s.url)).size,p.sources.length); assert.ok(p.sources.every(s=>s.status==='needs_review'&&s.accessedAt==='2026-09-19'&&s.coverage)); const ids=new Set(p.sources.map(s=>s.id)); assert.ok(p.candidates.every(c=>c.status==='needs_review'&&c.sourceIds.every(id=>ids.has(id)))); });
+
+test('overflow fails closed instead of showing infinity', () => assert.equal(toolValue({ ...cost(), tasks: 1e308, hourlyValue: 1e308 }).valid, false));

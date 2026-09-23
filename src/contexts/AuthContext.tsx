@@ -6,6 +6,7 @@ import { getProfile, type Profile } from '../lib/db/profiles'
 import { acceptInvite, validatePendingInvite } from '../lib/db/invites'
 import { acceptStaffInvitation } from '../lib/db/staffInvitations'
 import { disableWebPush } from '../lib/webPush'
+import { signInWithPortalUsername } from '../lib/clientPortalAccess'
 
 type AuthContextError = AuthError | PostgrestError | Error
 
@@ -19,7 +20,7 @@ interface AuthContextType {
   // the user to /reset-password instead of /admin or /dashboard.
   isPasswordRecovery: boolean
   endPasswordRecovery: () => void
-  signIn: (email: string, password: string) => Promise<{ error: AuthContextError | null; role: string | null; pendingInviteSetup: boolean }>
+  signIn: (identifier: string, password: string) => Promise<{ error: AuthContextError | null; role: string | null; pendingInviteSetup: boolean }>
   completeInvite: (password: string, fullName?: string) => Promise<{ error: AuthContextError | null; role: string | null }>
   resetPasswordForEmail: (email: string) => Promise<{ error: AuthError | null }>
   updatePassword: (password: string) => Promise<{ error: AuthError | null }>
@@ -165,9 +166,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  async function signIn(email: string, password: string) {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error || !data.user) return { error, role: null, pendingInviteSetup: false }
+  async function signIn(identifier: string, password: string) {
+    const value = identifier.trim()
+    let signedInUser: User | null
+    let authError: AuthContextError | null
+
+    if (value.includes('@')) {
+      const { data, error } = await supabase.auth.signInWithPassword({ email: value, password })
+      signedInUser = data.user
+      authError = error
+    } else {
+      const portal = await signInWithPortalUsername(value, password)
+      if (portal.error || !portal.session) {
+        return { error: portal.error ?? new Error('Invalid username or password.'), role: null, pendingInviteSetup: false }
+      }
+      const { data, error } = await supabase.auth.setSession({
+        access_token: portal.session.access_token,
+        refresh_token: portal.session.refresh_token,
+      })
+      signedInUser = data.user
+      authError = error
+    }
+
+    if (authError || !signedInUser) {
+      return { error: authError, role: null, pendingInviteSetup: false }
+    }
 
     // A normal password sign-in ends any lingering recovery mode so the user
     // is not bounced back to /reset-password.
@@ -177,10 +200,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // waiting for the onAuthStateChange callback to fire.
     const requestId = ++authRequestRef.current
     setLoading(true)
-    setUser(data.user)
-    userIdRef.current = data.user.id
+    setUser(signedInUser)
+    userIdRef.current = signedInUser.id
     try {
-      const { profile: profileData, error: profileLoadError } = await fetchProfile(data.user.id)
+      const { profile: profileData, error: profileLoadError } = await fetchProfile(signedInUser.id)
       if (requestId === authRequestRef.current) {
         setProfile(profileData)
         setProfileError(profileLoadError?.message ?? null)
@@ -190,7 +213,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return {
         error: profileLoadError,
         role: profileData?.role ?? null,
-        pendingInviteSetup: Boolean(data.user.invited_at && profileData?.role === 'client' && !profileData.client_id),
+        pendingInviteSetup: Boolean(signedInUser.invited_at && profileData?.role === 'client' && !profileData.client_id),
       }
     } catch (error) {
       const profileLoadError = error instanceof Error

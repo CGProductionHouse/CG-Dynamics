@@ -274,23 +274,14 @@ describe('TikTok partial sync failure handling', () => {
       { view_count: 50, like_count: null, comment_count: 3, share_count: null },
     ]
 
-    const totals = videos.reduce(
-      (acc, v) => ({
-        views: acc.views + (v.view_count ?? 0),
-        likes: acc.likes + (v.like_count ?? 0),
-        comments: acc.comments + (v.comment_count ?? 0),
-        shares: acc.shares + (v.share_count ?? 0),
-      }),
-      { views: 0, likes: 0, comments: 0, shares: 0 },
-    )
+    const completeSum = field => videos.every(v => typeof v[field] === 'number')
+      ? videos.reduce((sum, v) => sum + v[field], 0)
+      : null
 
-    // Null values become 0 in the sum (correct — we can't add null)
-    // But the sum is only meaningful if all values were non-null
-    // The availability field should reflect this
-    expect(totals.views).toBe(150)
-    expect(totals.likes).toBe(5)
-    expect(totals.comments).toBe(3)
-    expect(totals.shares).toBe(2)
+    expect(completeSum('view_count')).toBe(150)
+    expect(completeSum('like_count')).toBeNull()
+    expect(completeSum('comment_count')).toBeNull()
+    expect(completeSum('share_count')).toBeNull()
   })
 
   it('sync run status reflects actual health, not always success', () => {

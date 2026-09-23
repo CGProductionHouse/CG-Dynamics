@@ -156,6 +156,12 @@ export const CLIENT_SCOPED_TOOLS: readonly string[] = [
   'list_client_schedule', 'get_client_context', 'get_content_run_plan',
   'get_content_run_closeout', 'verify_content_run_upload', 'close_content_run',
   'update_closeout_upload_status',
+  // #450 content preparation. Every one of these is addressed by an exact run or video
+  // id and is re-checked against the Project's pinned client inside the handler.
+  'ensure_content_guideline', 'list_content_guideline_videos', 'add_content_guideline_video',
+  'update_content_guideline_video', 'reorder_content_guideline_videos',
+  'link_content_guideline_video_deliverable', 'generate_content_guideline_drafts',
+  'get_content_video_readiness',
 ]
 
 /**
@@ -170,6 +176,7 @@ export const COMPANY_ADMIN_TOOLS: readonly string[] = [
   // company-wide provider/reconciliation engine), so they require the explicit admin context.
   'run_microsoft_sync',
   'get_provider_health',
+  'get_google_ads_audit',
   'run_provider_sync',
 ]
 

@@ -30,7 +30,7 @@ import {
   shortCaption,
   type MetricMovement,
 } from '../../lib/reportStats'
-import { buildMetaContentMetrics, buildMetaPlatformMetrics, metaEngagementLabel, metaPrimaryMetricLabel } from '../../lib/metaMetrics'
+import { buildMetaContentMetrics, buildMetaPlatformMetrics, metaPrimaryMetricLabel } from '../../lib/metaMetrics'
 import { buildPlatformPerformance, buildReportPerformance, type PerformanceLevel } from '../../lib/reportPerformance'
 import { PremiumCard, PremiumCardHeader, CardGrid } from '../../components/ui/PremiumCard'
 import { StatusBadge, SourceBadge, ReadinessBadge } from '../../components/ui/Badges'
@@ -391,6 +391,7 @@ export default function NewReport() {
     const fromReport = savedReportId
       ? reportPosts
           .filter(post => {
+            if (post.raw?.source === 'meta_sync' || post.raw?.meta_sync) return true
             if (!post.publish_time) return true
             const time = new Date(post.publish_time).getTime()
             if (Number.isNaN(time)) return true
@@ -454,6 +455,7 @@ export default function NewReport() {
   const topPostContext = useMemo(() => {
     const post = master.bestPostOverall
     if (!post) return null
+    if (typeof post.engagements !== 'number') return null
     return {
       caption: shortCaption(post.caption),
       platform: post.platform,
@@ -679,7 +681,7 @@ export default function NewReport() {
             <p className="text-2xl font-semibold text-white mt-3 break-words sm:text-3xl">{formatNumber(master.totalReach)}</p>
           </PremiumCard>
         )}
-        {master.totalEngagements > 0 && (
+        {typeof master.totalEngagements === 'number' && (
           <PremiumCard padding="sm">
             <p className="text-xs uppercase tracking-[0.12em] text-brand-primary">Content interactions</p>
             <p className="text-2xl font-semibold text-white mt-3 break-words sm:text-3xl">{formatNumber(master.totalEngagements)}</p>
@@ -1051,7 +1053,11 @@ export default function NewReport() {
                       {post.post_type ? displayContentType(post.post_type) ?? post.post_type : 'Content type not set'}
                     </p>
                     <p className="text-xs text-brand-primary mt-2">
-                      {formatNumber(post.engagements)} {metaEngagementLabel().toLowerCase()}{post.reach !== null ? ` | ${formatNumber(post.reach)} ${metaPrimaryMetricLabel().toLowerCase()}` : ''}
+                      {typeof post.engagements === 'number'
+                        ? `${formatNumber(post.engagements)} ${post.engagementDefinitionLabel?.toLowerCase() ?? 'defined interactions'}`
+                        : post.engagementKnownSubtotal !== null
+                          ? `${formatNumber(post.engagementKnownSubtotal)} known subtotal (${post.engagementCoverage?.observed ?? 0}/${post.engagementCoverage?.required ?? 0} fields)`
+                          : 'Interaction data unavailable'}{post.reach !== null ? ` | ${formatNumber(post.reach)} ${metaPrimaryMetricLabel().toLowerCase()}` : ''}
                     </p>
                   </div>
                 ))

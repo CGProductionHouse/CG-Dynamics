@@ -1,22 +1,29 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient } from 'jsr:@supabase/supabase-js@2'
 import {
   META_CONNECTOR_VERSION,
   MetaFactRetryableError,
+  MetaProviderTimeoutError,
   MetaSyncDeadlineError,
+  isWithinMetaProviderPeriod,
+  metaProviderPeriod,
   metaPostBounds,
   metaFetch,
+  isTransientMetaRequestAbort,
+  planMetaRequestAbortRetry,
   readMetaError,
   redact,
   resolveMetaGraphConfig,
   syncAccountFacts,
 } from '../_shared/meta.ts'
 import { upsertMetaReportPost } from '../_shared/metaPostMerge.ts'
+import { buildMetaPostEngagementEvidence, observedMetaPostComponent } from '../_shared/metaPostEngagement.ts'
 import { classifyInstagramMediaPage } from '../_shared/metaInstagramPaging.ts'
 import { normalizeMetaWorkerLanes } from '../_shared/metaWorkerLanes.ts'
 import { dispatchMetaWorker } from '../_shared/metaWorkerDispatch.ts'
 import { metaRateLimitScope } from '../_shared/metaRateLimit.ts'
 import { fetchMappedPageToken } from '../_shared/metaAssetIdentity.ts'
+import { currentMetaMonth, incrementalMonthBounds } from '../_shared/metaPeriod.ts'
 
 // Scheduled/background syncing shares the SAME truth contract as manual syncing:
 // configurable Graph version, shared connector engine (syncAccountFacts) writing
@@ -26,6 +33,7 @@ const META_COLLECTION_PAGE_CAP = 25
 const MAX_WORK_MS = 40_000
 const PAGE_FETCH_RESERVE_MS = 8_000
 const MIN_PAGE_REQUEST_BUDGET_MS = 4_000
+const MAX_PROVIDER_ATTEMPTS = 3
 
 class RetryableIncompleteError extends Error {
   constructor(message: string, readonly refundAttempt = false) {
@@ -51,11 +59,6 @@ function monthLabel(month: string): string {
   const m = Number(month.slice(5, 7))
   const y = Number(month.slice(0, 4))
   return new Date(Date.UTC(y, m - 1, 1)).toLocaleString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' })
-}
-
-function currentMonthStr(): string {
-  const now = new Date()
-  return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`
 }
 
 async function parseMetaError(
@@ -90,7 +93,7 @@ const TERMINAL_META_STATES = new Set<MetaSyncState>(['complete', 'failed', 'not_
 
 function assertWorkBudget(deadline: number, context: string): void {
   if (Date.now() >= deadline - PAGE_FETCH_RESERVE_MS) {
-    throw new RetryableIncompleteError(`${context} paused to preserve the worker lease budget.`)
+    throw new RetryableIncompleteError(`${context} paused to preserve the worker lease budget.`, true)
   }
 }
 
@@ -119,12 +122,7 @@ async function fetchMetaCollection(
   while (pagesFetched < META_COLLECTION_PAGE_CAP) {
     const remainingMs = deadline - Date.now()
     if (remainingMs < MIN_PAGE_REQUEST_BUDGET_MS + PAGE_FETCH_RESERVE_MS) {
-      return {
-        pagesFetched,
-        complete: false,
-        error: `${context} paused before page ${pagesFetched + 1} to preserve the worker lease budget.`,
-        retryable: true,
-      }
+      throw new MetaSyncDeadlineError(`${context} page ${pagesFetched + 1} pre-request budget check`)
     }
     // metaFetch can make three bounded attempts. Keep each attempt short enough
     // that retries plus backoff cannot consume the rest of this invocation.
@@ -138,6 +136,14 @@ async function fetchMetaCollection(
       return { pagesFetched, complete: false, error, retryable: isMetaRateLimitError(error) }
     }
     const page = await res.json()
+    if (!page || typeof page !== 'object' || !Array.isArray(page.data)) {
+      return {
+        pagesFetched,
+        complete: false,
+        error: `${context} returned a malformed collection data envelope.`,
+        retryable: false,
+      }
+    }
     const nextUrl = typeof page.paging?.next === 'string' ? page.paging.next : null
     if (nextUrl) {
       try {
@@ -152,7 +158,7 @@ async function fetchMetaCollection(
     if (nextUrl && !candidateCursor) {
       return { pagesFetched, complete: false, error: `${context} returned an unsafe or missing paging cursor.`, retryable: false }
     }
-    const processedPage = await processPage((page.data as Array<Record<string, unknown>> | undefined) ?? [])
+    const processedPage = await processPage(page.data)
     const pagePostsSynced = typeof processedPage === 'number' ? processedPage : processedPage.postsSynced
     const stopAfterPage = typeof processedPage === 'number' ? false : processedPage.stopAfterPage === true
     await checkpoint(stopAfterPage ? null : candidateCursor, !nextUrl || stopAfterPage, pagePostsSynced)
@@ -533,15 +539,29 @@ Deno.serve(async (req) => {
         settledIds.add(item.id)
       }
 
-      // ── Skip current/future months ──
-      if (item.month >= currentMonthStr()) {
+      // ── Skip future months; allow current month only for incremental work ──
+      // Canonical Meta month uses America/Los_Angeles (META_INSIGHTS_TIMEZONE).
+      const currentMetaMonthStr = currentMetaMonth()
+      const isFutureMonth = item.month > currentMetaMonthStr
+      const isCurrentMonthIncremental = item.month === currentMetaMonthStr && item.sync_kind === 'incremental'
+      if (isFutureMonth || (item.month === currentMetaMonthStr && !isCurrentMonthIncremental)) {
         await settleItem('skipped', 0, 0, [], 'Month is not yet completed.')
         processed.push({ itemId: item.id, clientName: item.client_name, month: item.month, status: 'skipped', postsSynced: 0 })
         continue
       }
 
-      const { periodStart, periodEnd } = monthBounds(item.month)
+      const incrementalBounds = isCurrentMonthIncremental ? incrementalMonthBounds(item.month) : null
+      if (isCurrentMonthIncremental && !incrementalBounds) {
+        await settleItem('skipped', 0, 0, [], 'No completed reporting day yet in the current month.')
+        processed.push({ itemId: item.id, clientName: item.client_name, month: item.month, status: 'skipped', postsSynced: 0 })
+        continue
+      }
+
+      const { periodStart, periodEnd } = isCurrentMonthIncremental && incrementalBounds
+        ? incrementalBounds
+        : monthBounds(item.month)
       const postBounds = metaPostBounds(periodStart, periodEnd)
+      const providerPeriod = metaProviderPeriod(periodStart, periodEnd)
       let postsSynced = Number(item.posts_synced ?? 0)
       let reportsCreated = Number(item.reports_created ?? 0)
       let reportsReused = Number(item.reports_reused ?? 0)
@@ -693,11 +713,17 @@ Deno.serve(async (req) => {
                     const metaPostId = String(raw.id ?? '')
                     if (!metaPostId) continue
                     const publishTime = raw.created_time ? new Date(raw.created_time as string).toISOString() : null
+                    if (!publishTime || !isWithinMetaProviderPeriod(publishTime, periodStart, periodEnd)) continue
                     const caption = (raw.message as string | null) ?? null
                     const permalink = (raw.permalink_url as string | null) ?? null
-                    const reactions = (raw.reactions as { summary?: { total_count?: number } })?.summary?.total_count ?? 0
-                    const comments = (raw.comments as { summary?: { total_count?: number } })?.summary?.total_count ?? 0
-                    const shares = (raw.shares as { count?: number })?.count ?? 0
+                    const engagementEvidence = buildMetaPostEngagementEvidence('facebook', {
+                      reactions: (raw.reactions as { summary?: { total_count?: unknown } })?.summary?.total_count,
+                      comments: (raw.comments as { summary?: { total_count?: unknown } })?.summary?.total_count,
+                      shares: (raw.shares as { count?: unknown })?.count,
+                    }, now)
+                    const reactions = observedMetaPostComponent(engagementEvidence, 'reactions')
+                    const comments = observedMetaPostComponent(engagementEvidence, 'comments')
+                    const shares = observedMetaPostComponent(engagementEvidence, 'shares')
                     const fullPicture = raw.full_picture as string | null ?? null
                     await upsertMetaReportPost(sb, {
                       clientId: item.client_id,
@@ -709,8 +735,8 @@ Deno.serve(async (req) => {
                         reactions, comments, shares,
                         raw: {
                           source: 'meta_sync', platform: 'facebook', synced_at: now,
-                          views: null, reach: null, engagements: { reactions, comments, shares },
-                          metric_availability: { views: false, reach: false, content_interactions: true, source: 'direct_fields' },
+                          views: null, reach: null, engagement_evidence: engagementEvidence,
+                          metric_availability: { views: false, reach: false, content_interactions: engagementEvidence.completeness === 'complete', source: 'direct_fields' },
                           meta_payload: raw, ...(fullPicture ? { full_picture: fullPicture } : {}),
                         },
                       },
@@ -732,7 +758,9 @@ Deno.serve(async (req) => {
               }
             } catch (e) {
               const message = redact(`Facebook sync error: ${String(e)}`, [accessToken, ...pageTokenMap.values()])
-              if (e instanceof RetryableIncompleteError && (item.attempts < 3 || isMetaRateLimitError(message))) throw e
+              if (e instanceof MetaProviderTimeoutError || isTransientMetaRequestAbort(e)) throw e
+              if (e instanceof MetaSyncDeadlineError) throw e
+              if (e instanceof RetryableIncompleteError && (item.attempts < MAX_PROVIDER_ATTEMPTS || isMetaRateLimitError(message))) throw e
               if (isMetaRateLimitError(message)) throw new RetryableIncompleteError(message)
               providerPaging.facebook = { pagesFetched: 0, complete: false, pageCap: META_COLLECTION_PAGE_CAP }
               warnings.push(message)
@@ -762,8 +790,8 @@ Deno.serve(async (req) => {
               async rawMedia => {
                 const pageResult = classifyInstagramMediaPage(
                   rawMedia,
-                  new Date(Number(postBounds.since) * 1000).toISOString(),
-                  new Date(Number(postBounds.until) * 1000).toISOString(),
+                  providerPeriod.start,
+                  providerPeriod.endExclusive,
                   instagramOldestTimestamp,
                   instagramBoundaryEnabled,
                   instagramOrderingMalformed,
@@ -777,8 +805,12 @@ Deno.serve(async (req) => {
                   if (!metaPostId) continue
                   const timestamp = raw.timestamp ? new Date(raw.timestamp as string).toISOString() : null
                   if (!timestamp) throw new Error('Instagram media timestamp was missing after page validation.')
-                  const likes = (raw.like_count as number) ?? 0
-                  const igComments = (raw.comments_count as number) ?? 0
+                  const engagementEvidence = buildMetaPostEngagementEvidence('instagram', {
+                    likes: raw.like_count,
+                    comments: raw.comments_count,
+                  }, now)
+                  const likes = observedMetaPostComponent(engagementEvidence, 'likes')
+                  const igComments = observedMetaPostComponent(engagementEvidence, 'comments')
                   const mediaType = (raw.media_type as string) ?? ''
                   const mediaProductType = raw.media_product_type as string | undefined
                   let postType = mediaType
@@ -795,12 +827,12 @@ Deno.serve(async (req) => {
                       report_id: reportId, platform: 'instagram', meta_post_id: metaPostId,
                       publish_time: timestamp, caption: (raw.caption as string | null) ?? null,
                       permalink: (raw.permalink as string | null) ?? null, views: null, reach: null,
-                      reactions: likes, comments: igComments, shares: 0,
+                      reactions: likes, comments: igComments, shares: null,
                       raw: {
                         source: 'meta_sync', platform: 'instagram', synced_at: now,
                         content_type: postType, views: null, reach: null,
-                        engagements: { likes, comments: igComments },
-                        metric_availability: { views: false, reach: false, content_interactions: true, source: 'media_fields' },
+                        engagement_evidence: engagementEvidence,
+                        metric_availability: { views: false, reach: false, content_interactions: engagementEvidence.completeness === 'complete', source: 'direct_fields' },
                         meta_payload: raw,
                         ...(raw.thumbnail_url ? { thumbnail_url: raw.thumbnail_url as string } : {}),
                         ...(raw.media_url ? { media_url: raw.media_url as string } : {}),
@@ -827,7 +859,9 @@ Deno.serve(async (req) => {
             }
           } catch (e) {
             const message = redact(`Instagram sync error: ${String(e)}`, [accessToken, ...pageTokenMap.values()])
-            if (e instanceof RetryableIncompleteError && (item.attempts < 3 || isMetaRateLimitError(message))) throw e
+            if (e instanceof MetaProviderTimeoutError || isTransientMetaRequestAbort(e)) throw e
+            if (e instanceof MetaSyncDeadlineError) throw e
+            if (e instanceof RetryableIncompleteError && (item.attempts < MAX_PROVIDER_ATTEMPTS || isMetaRateLimitError(message))) throw e
             if (isMetaRateLimitError(message)) throw new RetryableIncompleteError(message)
             providerPaging.instagram = { pagesFetched: 0, complete: false, pageCap: META_COLLECTION_PAGE_CAP }
             warnings.push(message)
@@ -866,8 +900,9 @@ Deno.serve(async (req) => {
               if (e instanceof MetaSyncDeadlineError) {
                 throw new RetryableIncompleteError(e.message, true)
               }
-              if (e instanceof MetaFactRetryableError) throw new RetryableIncompleteError(e.message, true)
-              if (e instanceof RetryableIncompleteError && (item.attempts < 3 || isMetaRateLimitError(String(e)))) throw e
+              if (e instanceof MetaProviderTimeoutError || isTransientMetaRequestAbort(e)) throw e
+              if (e instanceof MetaFactRetryableError) throw new RetryableIncompleteError(e.message, e.rateLimited)
+              if (e instanceof RetryableIncompleteError && (item.attempts < MAX_PROVIDER_ATTEMPTS || isMetaRateLimitError(String(e)))) throw e
               const factsError = redact(`Facebook account facts error: ${String(e)}`, allTokens)
               warnings.push(factsError)
               itemStatus = 'failed'
@@ -899,8 +934,9 @@ Deno.serve(async (req) => {
             if (e instanceof MetaSyncDeadlineError) {
               throw new RetryableIncompleteError(e.message, true)
             }
-            if (e instanceof MetaFactRetryableError) throw new RetryableIncompleteError(e.message, true)
-            if (e instanceof RetryableIncompleteError && (item.attempts < 3 || isMetaRateLimitError(String(e)))) throw e
+            if (e instanceof MetaProviderTimeoutError || isTransientMetaRequestAbort(e)) throw e
+            if (e instanceof MetaFactRetryableError) throw new RetryableIncompleteError(e.message, e.rateLimited)
+            if (e instanceof RetryableIncompleteError && (item.attempts < MAX_PROVIDER_ATTEMPTS || isMetaRateLimitError(String(e)))) throw e
             const factsError = redact(`Instagram account facts error: ${String(e)}`, allTokens)
             warnings.push(factsError)
             itemStatus = 'failed'
@@ -937,8 +973,14 @@ Deno.serve(async (req) => {
         if (runError) throw new Error(`Could not record fenced Meta sync run: ${runError.message}`)
 
       } catch (e) {
-        const message = redact(String(e), [accessToken, ...pageTokenMap.values()])
-        if ((e instanceof RetryableIncompleteError || e instanceof MetaFactRetryableError || e instanceof MetaSyncDeadlineError) && (item.attempts < 3 || isMetaRateLimitError(message))) {
+        const requestAbortPlan = planMetaRequestAbortRetry(e, item.attempts, MAX_PROVIDER_ATTEMPTS)
+        const message = redact(requestAbortPlan?.error ?? String(e), [accessToken, ...pageTokenMap.values()])
+        if (requestAbortPlan) {
+          itemStatus = requestAbortPlan.status
+          itemError = message
+          refundAttempt = requestAbortPlan.refundAttempt
+          budgetDeferred = requestAbortPlan.status === 'queued'
+        } else if ((e instanceof RetryableIncompleteError || e instanceof MetaFactRetryableError || e instanceof MetaSyncDeadlineError) && (item.attempts < MAX_PROVIDER_ATTEMPTS || isMetaRateLimitError(message))) {
           itemStatus = 'queued'
           itemError = message
           refundAttempt = e instanceof RetryableIncompleteError ? e.refundAttempt : e instanceof MetaSyncDeadlineError
@@ -946,7 +988,7 @@ Deno.serve(async (req) => {
         } else {
           itemStatus = 'failed'
           itemError = e instanceof RetryableIncompleteError
-            ? `${message} Incomplete pagination exhausted 3 bounded attempts.`
+            ? `${message} Incomplete pagination exhausted ${MAX_PROVIDER_ATTEMPTS} bounded attempts.`
             : message
         }
       }

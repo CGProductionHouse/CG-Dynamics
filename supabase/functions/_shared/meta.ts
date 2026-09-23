@@ -11,7 +11,21 @@
 // ============================================================================
 import { parseMetaInsight } from './metaInsightResponse.ts'
 import { readMetaUsage, type MetaUsage } from './metaUsage.ts'
+import {
+  META_INSIGHTS_TIMEZONE,
+  expectedMetaDailyEnds,
+  metaInsightsBounds,
+} from './metaPeriod.ts'
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+export {
+  META_INSIGHTS_TIMEZONE,
+  expectedMetaDailyEnds,
+  isWithinMetaProviderPeriod,
+  metaInsightsBounds,
+  metaPostBounds,
+  metaProviderPeriod,
+} from './metaPeriod.ts'
 
 // ── Graph API version resolution ─────────────────────────────────────────────
 // One controlled server-side source. The version is NEVER silently assumed.
@@ -37,7 +51,6 @@ export function resolveMetaGraphConfig(): { version: string; baseUrl: string } {
 }
 
 export const META_CONNECTOR_VERSION = 'meta-connector-v3'
-export const META_INSIGHTS_TIMEZONE = 'America/Los_Angeles'
 
 export type Availability =
   | 'complete'
@@ -76,6 +89,81 @@ export class MetaSyncDeadlineError extends Error {
     super(`Meta sync paused during ${stage} because its resumable deadline was reached.`)
     this.name = 'MetaSyncDeadlineError'
   }
+}
+
+// A request was dispatched to Meta and then timed out/aborted. Unlike an
+// invocation-budget yield, this consumes one durable item attempt.
+export class MetaProviderTimeoutError extends Error {
+  readonly resumable = true
+
+  constructor(stage: string) {
+    super(`Meta provider request timed out during ${stage}.`)
+    this.name = 'MetaProviderTimeoutError'
+  }
+}
+
+const NON_RETRYABLE_PROVIDER_ERROR =
+  /\b(?:permission|oauth|access token|invalid token|configuration|schema|contract|malformed)\b|\bHTTP\s+(?:400|401|403)\b/i
+
+/**
+ * Runtime/provider layers do not always preserve DOMException identity. Deno
+ * can surface the same fetch abort as a DOMException, an Error whose message
+ * starts with "AbortError:", or a request-timeout string. Keep this matcher
+ * deliberately narrow: permanent auth, permission, configuration and contract
+ * failures must never enter the automatic retry path just because their text
+ * also mentions a request.
+ */
+export function isTransientMetaRequestAbort(error: unknown): boolean {
+  const name = error && typeof error === 'object' && 'name' in error
+    ? String((error as { name?: unknown }).name ?? '')
+    : ''
+  const code = error && typeof error === 'object' && 'code' in error
+    ? String((error as { code?: unknown }).code ?? '')
+    : ''
+  const message = error instanceof Error
+    ? error.message
+    : typeof error === 'string'
+      ? error
+      : ''
+  if (message && NON_RETRYABLE_PROVIDER_ERROR.test(message)) return false
+  if (name === 'AbortError' || name === 'TimeoutError') return true
+  if (['ABORT_ERR', 'UND_ERR_ABORTED', 'ETIMEDOUT', 'UND_ERR_CONNECT_TIMEOUT', 'UND_ERR_HEADERS_TIMEOUT', 'UND_ERR_BODY_TIMEOUT'].includes(code)) return true
+  if (!message) return false
+
+  return [
+    /\baborterror:\s*the signal has been aborted\b/i,
+    /\bthe signal has been aborted\b/i,
+    /\b(?:fetch|request) (?:was )?aborted\b/i,
+    /\bthe operation (?:was |has been )?aborted\b/i,
+    /\b(?:fetch|request) (?:timeout|timed out)\b/i,
+    /\bthe operation timed out\b/i,
+  ].some(pattern => pattern.test(message))
+}
+
+export interface MetaRequestAbortRetryPlan {
+  status: 'queued' | 'failed'
+  error: string
+  refundAttempt: false
+}
+
+/** Pure bounded disposition used by the worker and its executable tests. */
+export function planMetaRequestAbortRetry(
+  error: unknown,
+  attempts: number,
+  maxAttempts: number,
+): MetaRequestAbortRetryPlan | null {
+  if (!isTransientMetaRequestAbort(error)) return null
+  const normalized = error instanceof MetaProviderTimeoutError
+    ? error
+    : new MetaProviderTimeoutError('worker provider request')
+  const message = String(normalized)
+  return attempts < maxAttempts
+    ? { status: 'queued', error: message, refundAttempt: false }
+    : {
+        status: 'failed',
+        error: `${message} Provider request timeout exhausted ${maxAttempts} bounded attempts.`,
+        refundAttempt: false,
+      }
 }
 
 export class MetaFactRetryableError extends Error {
@@ -132,6 +220,9 @@ export async function metaFetch(
     } catch (e) {
       clearTimeout(timer)
       if (e instanceof MetaSyncDeadlineError) throw e
+      if (isTransientMetaRequestAbort(e)) {
+        throw new MetaProviderTimeoutError(`request attempt ${attempt + 1}`)
+      }
       lastErr = e
     }
     assertMetaSyncActive(control, `request attempt ${attempt + 1} completion`)
@@ -269,66 +360,6 @@ export const IG_ACCOUNT_METRICS: MetricSpec[] = [
   { metricKey: 'current_followers', sourceMetric: 'followers_count', mode: 'ig_field', includesPaid: 'organic', aggregation: 'snapshot', comparableGroup: 'ig_followers_snapshot_v1' },
 ]
 
-function addUtcDays(date: string, days: number): string {
-  const parsed = new Date(`${date}T12:00:00Z`)
-  parsed.setUTCDate(parsed.getUTCDate() + days)
-  return parsed.toISOString().slice(0, 10)
-}
-
-function zonedStartEpoch(date: string, timeZone: string): number {
-  const [year, month, day] = date.split('-').map(Number)
-  const utcGuess = Date.UTC(year, month - 1, day)
-  const formatter = new Intl.DateTimeFormat('en-US', {
-    timeZone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hourCycle: 'h23',
-  })
-  const parts = Object.fromEntries(
-    formatter.formatToParts(new Date(utcGuess))
-      .filter(part => part.type !== 'literal')
-      .map(part => [part.type, Number(part.value)]),
-  )
-  const representedAsUtc = Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute, parts.second)
-  return Math.floor((utcGuess - (representedAsUtc - utcGuess)) / 1000)
-}
-
-export function metaInsightsBounds(periodStart: string, periodEnd: string): { since: string; until: string } {
-  return {
-    since: String(zonedStartEpoch(periodStart, META_INSIGHTS_TIMEZONE)),
-    // Page/Instagram Insights treats `until` as an inclusive report date and
-    // returns the daily bucket ending on the following midnight. Adding another
-    // day here silently includes the first day of the next month.
-    until: String(zonedStartEpoch(periodEnd, META_INSIGHTS_TIMEZONE)),
-  }
-}
-
-export function metaPostBounds(periodStart: string, periodEnd: string): { since: string; until: string } {
-  return {
-    since: String(zonedStartEpoch(periodStart, META_INSIGHTS_TIMEZONE)),
-    // Post edges and local timestamp filtering use an exclusive upper bound.
-    until: String(zonedStartEpoch(addUtcDays(periodEnd, 1), META_INSIGHTS_TIMEZONE)),
-  }
-}
-
-// Each requested Pacific calendar day must have exactly one ending bucket.
-// Calendar arithmetic preserves 23/25-hour days across daylight-saving changes.
-export function expectedMetaDailyEnds(since: string, until: string): number[] {
-  const formatter = new Intl.DateTimeFormat('en-CA', { timeZone: META_INSIGHTS_TIMEZONE, year: 'numeric', month: '2-digit', day: '2-digit' })
-  let day = formatter.format(new Date(Number(since) * 1000))
-  const last = formatter.format(new Date(Number(until) * 1000))
-  const ends: number[] = []
-  while (day <= last && ends.length < 367) {
-    day = addUtcDays(day, 1)
-    ends.push(zonedStartEpoch(day, META_INSIGHTS_TIMEZONE) * 1000)
-  }
-  return ends
-}
-
 export interface MetricProbe {
   usage?: MetaUsage
   metricKey: string
@@ -388,7 +419,7 @@ export async function probeMetric(
         : (typeof fallbackValue === 'number' && spec.fallbackField ? spec.fallbackField : spec.sourceMetric)
       return { ...base, usage: readMetaUsage(res.headers), sourceMetric, value: v, availability: classifyValue(v), responseShape: 'field', metricType: 'field', rawSnapshot: tokenSafeSnapshot(body, tokens) }
     } catch (e) {
-      if (e instanceof MetaSyncDeadlineError) throw e
+      if (e instanceof MetaSyncDeadlineError || e instanceof MetaProviderTimeoutError) throw e
       return { ...base, value: null, availability: 'error', responseShape: 'error', metricType: 'field', error: { code: null, subcode: null, message: redact(String(e), tokens), type: null, trace: null } }
     }
   }
@@ -435,7 +466,7 @@ export async function probeMetric(
       lastShape = parsed.responseShape
       lastReason = parsed.reason
     } catch (e) {
-      if (e instanceof MetaSyncDeadlineError) throw e
+      if (e instanceof MetaSyncDeadlineError || e instanceof MetaProviderTimeoutError) throw e
       lastErr = { code: null, subcode: null, message: redact(String(e), tokens), type: null, trace: null }
     }
   }
@@ -639,7 +670,6 @@ export async function syncAccountFacts(
       syncRunId,
       probe,
       source_metric: sourceMetric,
-      availability: probe.availability,
       includes_paid: spec.includesPaid,
       comparable_group: spec.comparableGroup,
       source_timezone: META_INSIGHTS_TIMEZONE,
@@ -683,7 +713,7 @@ export async function syncAccountFacts(
     }
   } catch (error) {
     const safeError = redact(error instanceof Error ? error.message : String(error), args.tokens)
-    if (args.checkpoint && (error instanceof MetaSyncDeadlineError || error instanceof MetaFactRetryableError)) throw error
+    if (args.checkpoint && (error instanceof MetaSyncDeadlineError || error instanceof MetaProviderTimeoutError || error instanceof MetaFactRetryableError)) throw error
     const failureSummary = {
       facts,
       connector: META_CONNECTOR_VERSION,

@@ -29,6 +29,12 @@ import {
 } from './oauthDiscovery.ts'
 import { cgDate, cgDatePlusDays, CG_TIMEZONE } from './cgTime.ts'
 import {
+  deriveEditReadiness as deriveVideoEditReadiness,
+  deriveRawEvidence as deriveVideoRawEvidence, shapeVideoForAssistant,
+  validateDeliverableLink, validateNewVideo, validateReorder, validateVideoPatch,
+} from './contentGuidelineActions.ts'
+import { buildGoogleAdsAudit, planGoogleAdsMetricReads, validateGoogleAdsAuditInput, type AuditAccount, type AuditLink, type AuditMetric, type AuditSync } from './googleAdsAudit.ts'
+import {
   classifyOneDriveReadiness,
   gradeSyncRun,
   planGuidelineVideoLinks,
@@ -88,10 +94,10 @@ import {
   type ProjectContextKind,
 } from './projectContext.ts'
 import {
-  CG_HOURS_BACKEND_GAP,
   durableCgHoursRecordId,
   invokeCgHoursStaffLogger,
   validateCgHoursStaffLoggerConfig,
+  CG_HOURS_BACKEND_AUTHORITY,
   type CgHoursStaffLoggerResult,
 } from './cgHoursStaffLogger.ts'
 
@@ -1530,14 +1536,20 @@ const handleGetClientContext: ToolHandler = async (staff, input) => {
         contact.lifecycle_state === 'active' &&
         (contact.blocks_caption === true || ['possible_change', 'stale_unverified'].includes(String(contact.freshness_state))))
       const policy = policyResult.data
-      const valuesByType = new Map<string, Set<string>>()
-      for (const contact of eligible) {
+      const contactSlotKey = (contact: Record<string, unknown>) => {
         const type = String(contact.contact_type)
-        const values = valuesByType.get(type) ?? new Set<string>()
-        values.add(String(contact.value))
-        valuesByType.set(type, values)
+        const person = String(contact.person_name || '').trim().toLowerCase()
+        const label = String(contact.display_label || '').trim().toLowerCase()
+        return `${type}::${person}::${label}`
       }
-      const ambiguous = [...valuesByType.values()].some(values => values.size > 1)
+      const valuesBySlot = new Map<string, Set<string>>()
+      for (const contact of eligible) {
+        const slot = contactSlotKey(contact)
+        const values = valuesBySlot.get(slot) ?? new Set<string>()
+        values.add(String(contact.value))
+        valuesBySlot.set(slot, values)
+      }
+      const ambiguous = [...valuesBySlot.values()].some(values => values.size > 1)
       const blocked = !policy || policy.review_state !== 'current_verified' || ambiguous || held.some((contact: Record<string, unknown>) => contact.blocks_caption === true) || (policy.requirement === 'mandatory' && eligible.length === 0)
       contactFooter = {
         status: blocked ? 'not_ready' : 'ready',
@@ -2616,9 +2628,9 @@ const CG_HOURS_NOT_CONFIGURED = {
     capability_header: 'x-cg-staff-capability',
     required_configuration: ['CG_HOURS_STAFF_LOGGER_URL', 'CG_HOURS_STAFF_LOGGER_SECRET'],
     idempotency_strategy: 'Dynamics keeps the same idempotency_key across retries; CG Hours returns the original durable time_entries record.',
-    staff_isolation: 'A short-lived single-use capability is issued only from the exact authenticated staff Project context. CG Hours maps capability.sub to its own staff identity.',
+    staff_isolation: 'A short-lived single-use capability is issued only from the exact authenticated staff Project context. CG Hours maps capability.sub to its own staff identity via staff_logger_identity_map.',
     lifecycle: 'Draft-only. This caller cannot submit, approve, reopen, run payroll, or perform admin actions.',
-    backend_gap: CG_HOURS_BACKEND_GAP,
+    backend: CG_HOURS_BACKEND_AUTHORITY,
   },
 }
 
@@ -2852,6 +2864,67 @@ async function handleCorrectMyEntry(staff: AuthenticatedStaff, input: Record<str
   }
 }
 
+// #435: Stored Google Ads V2 facts only. The communal service-role connection is
+// restricted here to an explicit manager/admin Project and exact client UUID.
+const handleGetGoogleAdsAudit: ToolHandler = async (staff, input) => {
+  const unavailable = (reason: string) => ({ data_state: 'unavailable', error: reason })
+  const validation = validateGoogleAdsAuditInput(input)
+  if (validation) return { error: validation }
+  const clientId = input.client_id as string
+  const startDate = input.start_date as string
+  const endDate = input.end_date as string
+  const clientResult = await staff.supabase.from('clients').select('id, active').eq('id', clientId).maybeSingle()
+  if (clientResult.error) return unavailable('Exact client lookup unavailable.')
+  if (!clientResult.data?.active) return { error: 'No active client matches that exact client_id.' }
+  const [dedicatedResult, campaignResult] = await Promise.all([
+    staff.supabase.from('google_ads_account_links').select('google_ads_account_id, client_id, is_active').eq('client_id', clientId).eq('is_active', true),
+    staff.supabase.from('google_ads_campaign_links').select('google_ads_account_id, customer_id, campaign_id, campaign_name, client_id, is_active').eq('client_id', clientId).eq('is_active', true),
+  ])
+  if (dedicatedResult.error || campaignResult.error) return unavailable('Google Ads mapping lookup unavailable.')
+  const dedicated = (dedicatedResult.data ?? []) as AuditLink[]
+  const campaigns = (campaignResult.data ?? []) as AuditLink[]
+  const accountIds = [...new Set([...dedicated, ...campaigns].map(link => link.google_ads_account_id))]
+  const empty = { accounts: [] as AuditAccount[], dedicatedLinks: dedicated, campaignLinks: campaigns,
+    metrics: [] as AuditMetric[], syncRuns: [] as AuditSync[] }
+  if (!accountIds.length) return buildGoogleAdsAudit({ client_id: clientId, start_date: startDate, end_date: endDate }, empty)
+  const [accountResult, allDedicatedResult, syncResult] = await Promise.all([
+    staff.supabase.from('google_ads_accounts').select('id, customer_id, account_name, account_mode, currency_code, time_zone, is_active').in('id', accountIds),
+    staff.supabase.from('google_ads_account_links').select('google_ads_account_id, client_id, is_active').in('google_ads_account_id', accountIds).eq('is_active', true),
+    staff.supabase.from('google_ads_sync_runs').select('google_ads_account_id, status, period_start, period_end, finished_at, rows_upserted, unmapped_campaigns')
+      .in('google_ads_account_id', accountIds).eq('status', 'succeeded').order('finished_at', { ascending: false }).limit(1000),
+  ])
+  if (accountResult.error || allDedicatedResult.error || syncResult.error) return unavailable('Canonical Google Ads account or sync history unavailable.')
+  // Isolation happens before the read: each account is queried on its own exact
+  // customer_id, and a shared account only by this client's exact campaign IDs, so no
+  // other client's rows enter this process or consume this client's row budget.
+  const reads = planGoogleAdsMetricReads(clientId, {
+    accounts: (accountResult.data ?? []) as AuditAccount[],
+    dedicatedLinks: (allDedicatedResult.data ?? []) as AuditLink[],
+    campaignLinks: campaigns,
+  })
+  const metrics: AuditMetric[] = []
+  let truncated = (syncResult.data ?? []).length === 1000
+  for (const read of reads) {
+    for (let offset = 0; offset < 10000; offset += 1000) {
+      let query = staff.supabase.from('google_ads_campaign_daily_metrics')
+        .select('google_ads_account_id, client_id, customer_id, campaign_id, campaign_name, campaign_status, campaign_type, metric_date, impressions, clicks, interactions, cost_micros, conversions, conversion_value, native_settings')
+        .eq('google_ads_account_id', read.google_ads_account_id).eq('customer_id', read.customer_id)
+      if (read.campaign_ids) query = query.in('campaign_id', read.campaign_ids)
+      const page = await query.gte('metric_date', startDate).lte('metric_date', endDate)
+        .order('campaign_id').order('metric_date').range(offset, offset + 999)
+      if (page.error) return unavailable('Canonical Google Ads period metrics unavailable.')
+      metrics.push(...((page.data ?? []) as AuditMetric[]))
+      if ((page.data ?? []).length < 1000) break
+      if (offset === 9000) truncated = true
+    }
+  }
+  return buildGoogleAdsAudit({ client_id: clientId, start_date: startDate, end_date: endDate }, {
+    accounts: (accountResult.data ?? []) as AuditAccount[],
+    dedicatedLinks: (allDedicatedResult.data ?? []) as AuditLink[], campaignLinks: campaigns,
+    metrics, syncRuns: (syncResult.data ?? []) as AuditSync[], truncated,
+  })
+}
+
 const MISSING_RELATION_CODES = new Set(['42P01', 'PGRST205'])
 
 async function loadRecordedClientUpdates(staff: AuthenticatedStaff, clientId: string) {
@@ -2883,6 +2956,376 @@ async function loadRecordedClientUpdates(staff: AuthenticatedStaff, clientId: st
   }
 }
 
+// ── #450 Content preparation actions ────────────────────────────────────────
+//
+// Every action is addressed by an exact run or video id, re-checked against the
+// Project's pinned client, and audited through the shared write path. Nothing here
+// writes monthly_deliverables, publishes a guideline, or returns a Graph id or URL.
+
+interface ContentRunScope {
+  runId: string
+  clientId: string
+  clientName: string | null
+  runDate: string | null
+  shortCode: string | null
+}
+
+async function resolveContentRunScope(
+  staff: AuthenticatedStaff,
+  runId: string,
+): Promise<ContentRunScope | { error: string }> {
+  const { data: run, error } = await staff.supabase
+    .from('content_runs')
+    .select('id, client_id, client_name, run_date')
+    .eq('id', runId)
+    .maybeSingle()
+  if (error) return { error: error.message }
+  if (!run) return { error: 'Content Run not found.' }
+  if (!run.client_id) return { error: 'Content Run has no exact client assigned.' }
+  const scope = assertRecordClientMatchesContext(staff.contextKind, staff.effectiveClientId, run.client_id as string, 'content run')
+  if (!scope.allowed) return { error: scope.error }
+  const { data: client } = await staff.supabase
+    .from('clients').select('short_code').eq('id', run.client_id).maybeSingle()
+  return {
+    runId: run.id as string,
+    clientId: run.client_id as string,
+    clientName: (run.client_name as string | null) ?? null,
+    runDate: (run.run_date as string | null) ?? null,
+    shortCode: (client?.short_code as string | null) ?? null,
+  }
+}
+
+const GUIDELINE_VIDEO_SELECT =
+  'id, content_guideline_id, client_id, title, objective, hook, cta, month, script, shot_breakdown, requirements, visual_notes, notes, deliverable_id, position, status, production_status, editor_name'
+
+async function loadGuidelineVideos(staff: AuthenticatedStaff, guidelineId: string, clientId: string) {
+  const { data, error } = await staff.supabase
+    .from('content_guide_ideas')
+    .select(GUIDELINE_VIDEO_SELECT)
+    .eq('content_guideline_id', guidelineId)
+    .eq('client_id', clientId)
+    .neq('status', 'archived')
+    .order('position', { ascending: true })
+    .order('created_at', { ascending: true })
+  if (error) return { error: error.message }
+  return { videos: (data ?? []) as Array<Record<string, unknown>> }
+}
+
+/** The one canonical guideline for this run, created as a draft when it is missing. */
+async function ensureGuideline(staff: AuthenticatedStaff, scope: ContentRunScope) {
+  const existing = await staff.supabase
+    .from('content_guidelines')
+    .select('id, content_run_id, client_id, title, month, coverage_start, coverage_end, status')
+    .eq('content_run_id', scope.runId)
+    .maybeSingle()
+  if (existing.error) return { error: existing.error.message }
+  if (existing.data) return { guideline: existing.data as Record<string, unknown>, created: false }
+  const { data, error } = await staff.supabase.rpc('get_or_create_content_guideline', { p_run_id: scope.runId })
+  if (error) return { error: error.message }
+  const guideline = Array.isArray(data) ? data[0] : data
+  if (!guideline) return { error: 'The canonical Content Guideline could not be prepared for that run.' }
+  return { guideline: guideline as Record<string, unknown>, created: true }
+}
+
+/** Resolve the run's guideline and videos in one step; both actions need the pair. */
+async function loadRunGuideline(staff: AuthenticatedStaff, runId: string) {
+  const scope = await resolveContentRunScope(staff, runId)
+  if ('error' in scope) return { error: scope.error }
+  const ensured = await ensureGuideline(staff, scope)
+  if ('error' in ensured) return { error: ensured.error }
+  const loaded = await loadGuidelineVideos(staff, ensured.guideline.id as string, scope.clientId)
+  if ('error' in loaded) return { error: loaded.error }
+  return { scope, guideline: ensured.guideline, created: ensured.created, videos: loaded.videos }
+}
+
+const handleEnsureContentGuideline: ToolHandler = async (staff, input) => {
+  const loaded = await loadRunGuideline(staff, input.content_run_id as string)
+  if ('error' in loaded) return { error: loaded.error }
+  return {
+    content_run_id: loaded.scope.runId,
+    client_name: loaded.scope.clientName,
+    guideline_id: loaded.guideline.id,
+    status: loaded.guideline.status,
+    title: loaded.guideline.title,
+    coverage_start: loaded.guideline.coverage_start ?? null,
+    coverage_end: loaded.guideline.coverage_end ?? null,
+    created: loaded.created,
+    video_count: loaded.videos.length,
+    note: loaded.created
+      ? 'A canonical draft Content Guideline was prepared for this run.'
+      : 'This run already had its one canonical Content Guideline; it was returned unchanged.',
+  }
+}
+
+/** Per-video evidence for one run: folder mapping, raw upload, portal final output. */
+async function loadVideoEvidence(staff: AuthenticatedStaff, scope: ContentRunScope) {
+  const [folders, closeout, assets] = await Promise.all([
+    staff.supabase.from('content_guide_video_onedrive_folders')
+      .select('content_guide_idea_id, folder_name, upload_status')
+      .eq('content_run_id', scope.runId).eq('client_id', scope.clientId),
+    staff.supabase.from('content_run_closeouts')
+      .select('upload_status').eq('content_run_id', scope.runId).maybeSingle(),
+    staff.supabase.from('client_portal_assets')
+      .select('content_guide_idea_id, active').eq('client_id', scope.clientId),
+  ])
+  const folderByVideo = new Map<string, { folder_name: string; upload_status: string }>()
+  for (const row of (folders.data ?? []) as Array<Record<string, unknown>>) {
+    folderByVideo.set(row.content_guide_idea_id as string, {
+      folder_name: row.folder_name as string,
+      upload_status: row.upload_status as string,
+    })
+  }
+  const publishedVideos = new Set<string>()
+  for (const row of (assets.data ?? []) as Array<Record<string, unknown>>) {
+    if (row.active && typeof row.content_guide_idea_id === 'string') publishedVideos.add(row.content_guide_idea_id)
+  }
+  return {
+    folderByVideo,
+    publishedVideos,
+    // A table that is not installed yet is UNKNOWN evidence, not proof of absence.
+    foldersReadable: !folders.error,
+    portalReadable: !assets.error,
+    closeoutUploadStatus: (closeout.data?.upload_status as string | undefined) ?? null,
+  }
+}
+
+function shapeRunVideos(
+  scope: ContentRunScope,
+  videos: Array<Record<string, unknown>>,
+  evidence: Awaited<ReturnType<typeof loadVideoEvidence>>,
+) {
+  return videos.map((video, index) => {
+    const position = typeof video.position === 'number' && video.position > 0 ? video.position : index + 1
+    const mapped = evidence.folderByVideo.get(video.id as string) ?? null
+    const folderState: 'mapped' | 'ready_to_create' | 'blocked' = mapped
+      ? 'mapped'
+      : !scope.shortCode ? 'blocked' : 'ready_to_create'
+    const folderBlocked = folderState === 'blocked' ? 'BLOCKED_MISSING_SHORT_CODE' as const : null
+    const raw = deriveVideoRawEvidence({
+      folderState,
+      providerReadable: evidence.foldersReadable,
+      closeoutUploadStatus: (evidence.closeoutUploadStatus as 'verified' | 'missing' | 'partial' | 'unverified' | null) ?? null,
+      videoUploadStatus: (mapped?.upload_status as 'verified' | 'missing' | 'partial' | null) ?? null,
+    })
+    const published = evidence.publishedVideos.has(video.id as string)
+    const readiness = deriveVideoEditReadiness({
+      folderState, folderBlocked, raw,
+      productionStatus: String(video.production_status ?? 'not_shot'),
+      finalPublished: published,
+    })
+    return shapeVideoForAssistant({
+      video, position,
+      folderName: mapped?.folder_name ?? null,
+      folderState, folderBlocked, raw, readiness,
+      finalOutputState: !evidence.portalReadable ? 'unverified' : published ? 'published' : 'not_published',
+    })
+  })
+}
+
+const handleListContentGuidelineVideos: ToolHandler = async (staff, input) => {
+  const loaded = await loadRunGuideline(staff, input.content_run_id as string)
+  if ('error' in loaded) return { error: loaded.error }
+  const evidence = await loadVideoEvidence(staff, loaded.scope)
+  const videos = shapeRunVideos(loaded.scope, loaded.videos, evidence)
+  return {
+    content_run_id: loaded.scope.runId,
+    client_name: loaded.scope.clientName,
+    guideline_id: loaded.guideline.id,
+    guideline_status: loaded.guideline.status,
+    coverage_start: loaded.guideline.coverage_start ?? null,
+    coverage_end: loaded.guideline.coverage_end ?? null,
+    videos,
+    unallocated_count: videos.filter(video => !video.allocated).length,
+    note: 'Order is canonical: "Video XX" comes from the saved position, never from the title.',
+  }
+}
+
+const handleGetContentVideoReadiness: ToolHandler = async (staff, input) => {
+  const loaded = await loadRunGuideline(staff, input.content_run_id as string)
+  if ('error' in loaded) return { error: loaded.error }
+  const evidence = await loadVideoEvidence(staff, loaded.scope)
+  const videos = shapeRunVideos(loaded.scope, loaded.videos, evidence)
+  const blockers: string[] = []
+  if (!loaded.scope.shortCode) blockers.push('BLOCKED_MISSING_SHORT_CODE')
+  if (!evidence.foldersReadable) blockers.push('PRODUCTION_FOLDER_STATE_UNREADABLE')
+  return {
+    content_run_id: loaded.scope.runId,
+    client_name: loaded.scope.clientName,
+    run_date: loaded.scope.runDate,
+    videos,
+    ready_to_edit: videos.filter(video => video.edit_readiness === 'READY_TO_EDIT').length,
+    blocked: videos.filter(video => String(video.edit_readiness).startsWith('BLOCKED')).length,
+    blockers,
+    note: 'UNVERIFIED means nobody has checked that folder yet — it never means the footage is missing.',
+  }
+}
+
+const handleAddContentGuidelineVideo: ToolHandler = async (staff, input) => {
+  const loaded = await loadRunGuideline(staff, input.content_run_id as string)
+  if ('error' in loaded) return { error: loaded.error }
+  const fields = { ...input }
+  delete fields.content_run_id
+  const validated = validateNewVideo(fields)
+  if (!validated.ok) return { error: validated.error }
+  const position = loaded.videos.reduce((max, video) => Math.max(max, Number(video.position ?? 0)), 0) + 1
+  const { data, error } = await staff.supabase
+    .from('content_guide_ideas')
+    .insert({
+      ...validated.value,
+      content_guideline_id: loaded.guideline.id,
+      client_id: loaded.scope.clientId,
+      client_name: loaded.scope.clientName,
+      position,
+      video_number: position,
+      status: 'idea',
+      created_by: staff.connection.profileId,
+    })
+    .select(GUIDELINE_VIDEO_SELECT)
+    .single()
+  if (error) return { error: error.message }
+  return {
+    content_guide_idea_id: data.id,
+    name: `Video ${String(position).padStart(2, '0')} - ${data.title}`,
+    position,
+    allocated: false,
+    created: true,
+    note: 'Added as a DRAFT video. It is not published, not approved, and no Client Schedule row was created.',
+  }
+}
+
+/** Load one video and prove it belongs to this Project's client before any write. */
+async function resolveVideoScope(staff: AuthenticatedStaff, videoId: string) {
+  const { data, error } = await staff.supabase
+    .from('content_guide_ideas')
+    .select('id, client_id, content_guideline_id, title, position, status, deliverable_id')
+    .eq('id', videoId)
+    .maybeSingle()
+  if (error) return { error: error.message }
+  if (!data) return { error: 'That guideline video was not found.' }
+  if (data.status === 'archived') return { error: 'That guideline video is archived.' }
+  if (!data.client_id) return { error: 'That guideline video has no exact client.' }
+  const scope = assertRecordClientMatchesContext(staff.contextKind, staff.effectiveClientId, data.client_id as string, 'guideline video')
+  if (!scope.allowed) return { error: scope.error }
+  return { video: data as Record<string, unknown> }
+}
+
+const handleUpdateContentGuidelineVideo: ToolHandler = async (staff, input) => {
+  const resolved = await resolveVideoScope(staff, input.content_guide_idea_id as string)
+  if ('error' in resolved) return { error: resolved.error }
+  const validated = validateVideoPatch(input)
+  if (!validated.ok) return { error: validated.error }
+  const { data, error } = await staff.supabase
+    .from('content_guide_ideas')
+    .update(validated.value)
+    .eq('id', resolved.video.id)
+    .eq('client_id', resolved.video.client_id)
+    .select(GUIDELINE_VIDEO_SELECT)
+    .single()
+  if (error) return { error: error.message }
+  return {
+    content_guide_idea_id: data.id,
+    updated_fields: Object.keys(validated.value),
+    name: `Video ${String(data.position ?? 0).padStart(2, '0')} - ${data.title}`,
+    note: 'Only the supplied fields were changed; the rest of the video was left exactly as it was.',
+  }
+}
+
+const handleReorderContentGuidelineVideos: ToolHandler = async (staff, input) => {
+  const loaded = await loadRunGuideline(staff, input.content_run_id as string)
+  if ('error' in loaded) return { error: loaded.error }
+  const validated = validateReorder(input.video_ids, loaded.videos.map(video => video.id as string))
+  if (!validated.ok) return { error: validated.error }
+  const { error } = await staff.supabase.rpc('reorder_content_guideline_videos', {
+    p_guideline_id: loaded.guideline.id,
+    p_video_ids: validated.value,
+  })
+  if (error) return { error: error.message }
+  const reloaded = await loadGuidelineVideos(staff, loaded.guideline.id as string, loaded.scope.clientId)
+  if ('error' in reloaded) return { error: reloaded.error }
+  return {
+    content_run_id: loaded.scope.runId,
+    order: reloaded.videos.map((video, index) => ({
+      content_guide_idea_id: video.id,
+      name: `Video ${String(video.position ?? index + 1).padStart(2, '0')} - ${video.title}`,
+    })),
+    note: 'Order is canonical: position and video_number were rewritten as 1..n, so every surface renumbers together.',
+  }
+}
+
+const handleLinkContentGuidelineVideoDeliverable: ToolHandler = async (staff, input) => {
+  const resolved = await resolveVideoScope(staff, input.content_guide_idea_id as string)
+  if ('error' in resolved) return { error: resolved.error }
+  const unlink = input.unlink === true
+  let deliverable: { id: string; client_id: string | null; month: string | null; deliverable_type: string } | null = null
+  if (!unlink) {
+    if (typeof input.deliverable_id !== 'string') return { error: 'Supply an exact deliverable_id, or unlink=true.' }
+    const { data, error } = await staff.supabase
+      .from('monthly_deliverables')
+      .select('id, client_id, month, deliverable_type')
+      .eq('id', input.deliverable_id)
+      .maybeSingle()
+    if (error) return { error: error.message }
+    deliverable = (data as typeof deliverable) ?? null
+  }
+  const validated = validateDeliverableLink({
+    videoClientId: resolved.video.client_id as string,
+    deliverable,
+    unlink,
+  })
+  if (!validated.ok) return { error: validated.error }
+  const { error } = await staff.supabase
+    .from('content_guide_ideas')
+    .update({ deliverable_id: unlink ? null : deliverable!.id })
+    .eq('id', resolved.video.id)
+    .eq('client_id', resolved.video.client_id)
+  if (error) return { error: error.message }
+  return {
+    content_guide_idea_id: resolved.video.id,
+    allocated: !unlink,
+    deliverable_id: unlink ? null : deliverable!.id,
+    note: unlink
+      ? 'The video is now unallocated. Its Client Schedule slot was not changed or removed.'
+      : 'Linked to an existing Client Schedule slot of the same client. No Client Schedule row was created or rewritten.',
+  }
+}
+
+const handleGenerateContentGuidelineDrafts: ToolHandler = async (staff, input) => {
+  const loaded = await loadRunGuideline(staff, input.content_run_id as string)
+  if ('error' in loaded) return { error: loaded.error }
+  if (loaded.guideline.status !== 'draft') {
+    return { error: 'GENERATION_BLOCKED', reason: 'GUIDELINE_APPROVED', note: 'This guideline is no longer a draft, so automatic generation will not touch it.' }
+  }
+  const mode = input.mode === 'develop' ? 'develop' : 'ideas'
+  const targets = mode === 'develop'
+    ? (Array.isArray(input.video_ids) && input.video_ids.length
+      ? loaded.videos.filter(video => (input.video_ids as string[]).includes(video.id as string))
+      : loaded.videos.filter(video => !String(video.script ?? '').trim()))
+    : []
+  if (mode === 'develop' && !targets.length) {
+    return { content_run_id: loaded.scope.runId, mode, generated: 0, note: 'Every saved video already has a script. Nothing was regenerated.' }
+  }
+  const result = await invokeSiblingFunction(staff.connection, 'suggest-content-videos', {
+    mode,
+    clientId: loaded.scope.clientId,
+    guidelineId: loaded.guideline.id,
+    contentRunId: loaded.scope.runId,
+    videoIds: targets.map(video => video.id as string),
+  })
+  if (!result.ok) {
+    return {
+      error: 'GENERATION_BLOCKED',
+      reason: result.error ?? 'The AI Content Director could not be reached.',
+      note: 'No draft content was invented. Report this as unavailable rather than writing placeholder content.',
+    }
+  }
+  return {
+    content_run_id: loaded.scope.runId,
+    mode,
+    result: result.data,
+    note: 'Draft only. Review each draft before it is saved; a field a human wrote is never overwritten.',
+  }
+}
+
 // ── Tool Router ─────────────────────────────────────────────────────────────
 
 const WRITE_TOOLS = new Set([
@@ -2898,10 +3341,18 @@ const WRITE_TOOLS = new Set([
   'update_closeout_upload_status',
   'link_content_run_deliverables',
   'upsert_calendar_event',
+  // #361 CG Hours draft staff-logger writes.
   'log_ordinary_hours',
   'log_kilometre_entry',
   'correct_my_entry',
   ...CLIENT_WORKSPACE_ACTIONS,
+  // #450 content preparation writes. Reads in that set stay out of this list.
+  'ensure_content_guideline',
+  'add_content_guideline_video',
+  'update_content_guideline_video',
+  'reorder_content_guideline_videos',
+  'link_content_guideline_video_deliverable',
+  'generate_content_guideline_drafts',
 ])
 
 // These backends own the durable idempotency receipt. An identical MCP retry must reach them so
@@ -2935,6 +3386,7 @@ const toolHandlers: Record<string, ToolHandler> = {
   get_microsoft_sync_status: handleGetMicrosoftSyncStatus,
   run_microsoft_sync: handleRunMicrosoftSync,
   get_provider_health: handleGetProviderHealth,
+  get_google_ads_audit: handleGetGoogleAdsAudit,
   run_provider_sync: handleRunProviderSync,
   find_content_runs: handleFindContentRuns,
   link_content_run_deliverables: handleLinkContentRunDeliverables,
@@ -2943,6 +3395,14 @@ const toolHandlers: Record<string, ToolHandler> = {
   compose_mail_draft: handleComposeMailDraft,
   log_lead_email_activity: handleLogLeadEmailActivity,
   get_content_run_plan: handleGetContentRunPlan,
+  ensure_content_guideline: handleEnsureContentGuideline,
+  list_content_guideline_videos: handleListContentGuidelineVideos,
+  add_content_guideline_video: handleAddContentGuidelineVideo,
+  update_content_guideline_video: handleUpdateContentGuidelineVideo,
+  reorder_content_guideline_videos: handleReorderContentGuidelineVideos,
+  link_content_guideline_video_deliverable: handleLinkContentGuidelineVideoDeliverable,
+  generate_content_guideline_drafts: handleGenerateContentGuidelineDrafts,
+  get_content_video_readiness: handleGetContentVideoReadiness,
   get_content_run_closeout: handleGetContentRunCloseout,
   verify_content_run_upload: handleVerifyContentRunUpload,
   close_content_run: handleCloseContentRun,

@@ -449,6 +449,18 @@ export interface MicrosoftConnectionStatus {
   connected: boolean
   message: string
   sources: Array<{ id: string; name: string; type: 'outlook_calendar' | 'planner_plan' }>
+  freshness: {
+    lastJobId: string | null
+    lastJobStartedAt: string | null
+    lastJobCompletedAt: string | null
+    lastSuccessfulReconciliationAt: string | null
+    latestApplyStatus: 'completed' | 'partial' | 'failed' | 'applying' | null
+    latestApplySummary: Record<string, unknown> | null
+    latestApplyError: string | null
+    sourceCoverage: Array<{ name: string; complete: boolean; error: string | null; records: number }>
+    recoveryInProgress: boolean
+    staleAfterMinutes: number
+  } | null
 }
 
 async function microsoftFunctionError(error: unknown, fallback: string): Promise<string> {
@@ -476,7 +488,7 @@ export async function getMicrosoftConnectionStatus(): Promise<{ data: MicrosoftC
   const { data, error } = await supabase.functions.invoke('microsoft-transition-sync', { body: { action: 'status' } })
   if (error) return { data: null, error: await microsoftFunctionError(error, 'Microsoft connection status failed.') }
   if (!data?.ok) return { data: null, error: data?.error ?? 'Microsoft connection status failed.' }
-  return { data: { connected: Boolean(data.connected), message: data.message as string, sources: data.sources ?? [] }, error: null }
+  return { data: { connected: Boolean(data.connected), message: data.message as string, sources: data.sources ?? [], freshness: data.freshness ?? null }, error: null }
 }
 
 // ── Durable preview job ───────────────────────────────────────────────────────

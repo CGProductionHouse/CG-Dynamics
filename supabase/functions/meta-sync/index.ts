@@ -11,6 +11,7 @@ import {
   syncAccountFacts,
 } from '../_shared/meta.ts'
 import { upsertMetaReportPost } from '../_shared/metaPostMerge.ts'
+import { buildMetaPostEngagementEvidence, observedMetaPostComponent } from '../_shared/metaPostEngagement.ts'
 
 type ErrorPhase = 'auth' | 'env' | 'request_parse' | 'connection' | 'assets' | 'sync' | 'unknown'
 
@@ -579,9 +580,9 @@ async function handleRequest(req: Request): Promise<Response> {
         caption: string | null
         permalink: string | null
         postType: string
-        reactions: number
-        comments: number
-        shares: number
+        reactions: unknown
+        comments: unknown
+        shares: unknown
         impressions: number | null
         engagedUsers: number | null
         clicks: number | null
@@ -610,9 +611,9 @@ async function handleRequest(req: Request): Promise<Response> {
               const postId = String(raw.id ?? '')
               if (!postId) continue
 
-              const reactions = (raw.reactions as { summary?: { total_count?: number } })?.summary?.total_count ?? 0
-              const comments = (raw.comments as { summary?: { total_count?: number } })?.summary?.total_count ?? 0
-              const shares = (raw.shares as { count?: number })?.count ?? 0
+              const reactions = (raw.reactions as { summary?: { total_count?: unknown } })?.summary?.total_count
+              const comments = (raw.comments as { summary?: { total_count?: unknown } })?.summary?.total_count
+              const shares = (raw.shares as { count?: unknown })?.count
 
               fbPosts.push({
                 metaPostId: postId,
@@ -651,14 +652,13 @@ async function handleRequest(req: Request): Promise<Response> {
         caption: string | null
         permalink: string | null
         postType: string
-        reactions: number
-        comments: number
+        reactions: unknown
+        comments: unknown
         impressions: number | null
         reach: number | null
         saves: number | null
         shares: number | null
         videoViews: number | null
-        totalInteractions: number | null
         thumbnailUrl: string | null
         mediaUrl: string | null
         rawPayload: Record<string, unknown>
@@ -699,14 +699,13 @@ async function handleRequest(req: Request): Promise<Response> {
                   (raw.media_type as string) ?? '',
                   raw.media_product_type as string | undefined,
                 ),
-                reactions: (raw.like_count as number) ?? 0,
-                comments: (raw.comments_count as number) ?? 0,
+                reactions: raw.like_count,
+                comments: raw.comments_count,
                 impressions: null,
                 reach: null,
                 saves: null,
                 shares: null,
                 videoViews: null,
-                totalInteractions: null,
                 thumbnailUrl: (raw.thumbnail_url as string | null) ?? null,
                 mediaUrl: (raw.media_url as string | null) ?? null,
                 rawPayload: raw,
@@ -757,7 +756,6 @@ async function handleRequest(req: Request): Promise<Response> {
               if (typeof values.plays === 'number') post.impressions = values.plays
               if (typeof values.saved === 'number') post.saves = values.saved
               if (typeof values.shares === 'number') post.shares = values.shares
-              if (typeof values.total_interactions === 'number') post.totalInteractions = values.total_interactions
             }
             if (igInsightErr) {
               result.warnings.push(`Some Instagram media insights were unavailable: ${igInsightErr}`)
@@ -771,29 +769,36 @@ async function handleRequest(req: Request): Promise<Response> {
       }
 
       // ── Upsert posts and mappings ──────────────────────
-      // Normalize each post to availability-aware metrics:
-      //   viewsValue / reachValue are number | null (null = Meta did not return)
-      //   engagementsValue is always a number (from likes/comments/etc.)
+      // Normalize visibility separately from the platform-specific direct-field
+      // engagement evidence. Missing/invalid direct fields remain non-values.
+      const postObservationTime = new Date().toISOString()
       const allPosts = [
         ...fbPosts.map(p => ({
           ...p,
           platform: 'facebook' as const,
           viewsValue: typeof p.impressions === 'number' ? p.impressions : null,
           reachValue: typeof p.impressionsUnique === 'number' ? p.impressionsUnique : null,
-          engagementsValue: p.reactions + p.comments + p.shares + (p.clicks ?? 0),
         })),
         ...igPosts.map(p => ({
           ...p,
           platform: 'instagram' as const,
           viewsValue: typeof p.impressions === 'number' ? p.impressions : null,
           reachValue: typeof p.reach === 'number' ? p.reach : null,
-          engagementsValue: typeof p.totalInteractions === 'number'
-            ? p.totalInteractions
-            : p.reactions + p.comments + (p.saves ?? 0) + (p.shares ?? 0),
         })),
       ]
 
       for (const post of allPosts) {
+        const observedAt = postObservationTime
+        const engagementEvidence = post.platform === 'facebook'
+          ? buildMetaPostEngagementEvidence('facebook', {
+              reactions: post.reactions,
+              comments: post.comments,
+              shares: post.shares,
+            }, observedAt)
+          : buildMetaPostEngagementEvidence('instagram', {
+              likes: post.reactions,
+              comments: post.comments,
+            }, observedAt)
         const postPayload = {
           report_id: reportId,
           platform: post.platform,
@@ -804,23 +809,23 @@ async function handleRequest(req: Request): Promise<Response> {
           permalink: post.permalink,
           views: post.viewsValue,
           reach: post.reachValue,
-          reactions: post.reactions,
-          comments: post.comments,
-          shares: post.shares ?? 0,
-          total_clicks: ('clicks' in post && typeof post.clicks === 'number') ? post.clicks : 0,
+          reactions: observedMetaPostComponent(engagementEvidence, post.platform === 'facebook' ? 'reactions' : 'likes'),
+          comments: observedMetaPostComponent(engagementEvidence, 'comments'),
+          shares: post.platform === 'facebook' ? observedMetaPostComponent(engagementEvidence, 'shares') : null,
+          total_clicks: null,
           raw: {
             source: 'meta_sync',
             platform: post.platform,
             content_type: normalizeContentType(post.postType),
-            synced_at: new Date().toISOString(),
+            synced_at: observedAt,
             views: post.viewsValue,
             reach: post.reachValue,
-            engagements: post.engagementsValue,
+            engagement_evidence: engagementEvidence,
             metric_availability: {
               views: typeof post.viewsValue === 'number',
               reach: typeof post.reachValue === 'number',
-              content_interactions: true,
-              source: post.platform === 'facebook' ? 'direct_fields' : 'media_insights',
+              content_interactions: engagementEvidence.completeness === 'complete',
+              source: 'direct_fields',
             },
             meta_payload: post.rawPayload,
             ...('fullPicture' in post && post.fullPicture ? { full_picture: post.fullPicture } : {}),

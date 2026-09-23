@@ -12,10 +12,10 @@ export interface MetaPostPayload {
   permalink: string | null
   views: number | null
   reach: number | null
-  reactions: number
-  comments: number
-  shares: number
-  total_clicks?: number
+  reactions: number | null
+  comments: number | null
+  shares: number | null
+  total_clicks?: number | null
   raw: Record<string, unknown>
 }
 

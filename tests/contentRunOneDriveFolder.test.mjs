@@ -34,10 +34,15 @@ test('the expected month folder follows the canonical Clients/<Client>/Videos/YY
   assert.equal(lib.expectedRunMonthFolder('September', 'DULUX'), null)
 })
 
-test('there are no per-video folders and nothing is renamed, moved or deleted', () => {
-  assert.doesNotMatch(code, /buildVideoFolderName|_VIDEO_/)
+// #450 + docs/onedrive-naming-authority.md (CA-locked, 18 Sep 2026) supersede the earlier
+// "no per-video folders" wording: the canonical per-video production folder is part of the
+// structure. What must never change is that nothing is renamed, moved or deleted.
+test('per-video folders are canonical and create-only; nothing is renamed, moved or deleted', () => {
+  assert.match(code, /buildVideoFolderName\(/, 'the canonical builder names each video folder')
+  assert.match(code, /BLOCKED_MISSING_SHORT_CODE/, 'a missing configured short code blocks naming')
   assert.doesNotMatch(code, /method:\s*['"](PATCH|DELETE|PUT)['"]/)
   assert.doesNotMatch(code, /\/move|\/copy|rename/i)
+  assert.doesNotMatch(code, /deriveClientCode/, 'a short code is never inferred from a display name')
 })
 
 test('the linked folder is re-read by durable id and only named while an admin links it', () => {
@@ -49,13 +54,13 @@ test('the linked folder is re-read by durable id and only named while an admin l
 })
 
 test('status is readable by staff; every mapping change is admin-only through the existing RPCs', () => {
-  assert.match(code, /const canManage = profile\.role === 'admin'/)
+  assert.match(code, /canManage = profile\.role === 'admin'/)
   assert.match(code, /if \(!canManage\) return jsonResponse\(\{ error: 'Only an admin can link OneDrive production folders\.' \}, 403\)/)
   const statusBranch = code.indexOf("if (action === 'status')")
   const adminGate = code.indexOf('if (!canManage)')
   assert.ok(statusBranch > -1 && adminGate > statusBranch, 'status is answered before the admin gate')
-  assert.match(code, /rpc\('upsert_client_onedrive_mapping'[\s\S]*p_actor_id: user\.id/)
-  assert.match(code, /rpc\('upsert_content_run_onedrive_folder'[\s\S]*p_actor_id: user\.id/)
+  assert.match(code, /rpc\('upsert_client_onedrive_mapping'[\s\S]*p_actor_id: userId/)
+  assert.match(code, /rpc\('upsert_content_run_onedrive_folder'[\s\S]*p_actor_id: userId/)
   assert.match(code, /rpc\('get_content_run_onedrive_folder'/)
 })
 

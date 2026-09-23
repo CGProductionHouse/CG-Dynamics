@@ -7,6 +7,7 @@ import BrandMark from '../../components/BrandMark'
 import { ClientLogo } from '../../components/ClientLogo'
 import { readStrategyData } from '../../lib/strategyEngine'
 import { getReportMonthFromPeriod, monthDisplayLabel, normalizeReportToCalendarMonth, previousReportMonth } from '../../lib/reportPeriod'
+import { isWithinMetaProviderPeriod } from '../../../supabase/functions/_shared/metaPeriod'
 import type { MasterReportData, MetricMovement, Platform, PlatformView, ReportStatsPost } from '../../lib/reportStats'
 import {
   PLATFORM_LABELS,
@@ -47,8 +48,13 @@ import {
 } from '../../lib/overviewModel'
 import type { ReportContentExclusion, ReportFactHealth } from '../../lib/db/reportingTruth'
 import type { GoogleAdsDashboardData, GoogleAdsDashboardState } from '../../lib/googleAdsDashboard'
+import {
+  PerformanceProviderIcon,
+  type PerformanceProviderIconKey,
+} from '../../components/client/PerformanceProviderIcon'
 
-type TabKey = 'overview' | Platform | 'google_ads'
+export type ReportTabKey = 'overview' | 'facebook' | 'instagram' | 'google' | 'tiktok' | 'linkedin' | 'web' | 'email'
+export type GoogleSurface = 'ads' | 'business'
 
 const LOGO_FRAME = 'border border-white/10 bg-[#06110f] shadow-[0_18px_35px_-24px_rgba(45,212,191,0.7)]'
 
@@ -57,14 +63,16 @@ type RenderableReport = ReportWithPosts | ClientReportWithPosts
 function postsForReportMonth(report: RenderableReport): ReportStatsPost[] {
   const { start, end } = normalizeReportToCalendarMonth(report)
   const startTime = new Date(`${start}T00:00:00Z`).getTime()
-  const endTime = new Date(`${end}T23:59:59Z`).getTime()
+  const endTime = new Date(`${end}T23:59:59.999Z`).getTime()
 
   return report.posts
     .filter(post => {
       if (!post.publish_time) return true
+      if (post.platform === 'facebook' || post.platform === 'instagram') {
+        return isWithinMetaProviderPeriod(post.publish_time, start, end)
+      }
       const time = new Date(post.publish_time).getTime()
-      if (Number.isNaN(time)) return true
-      return time >= startTime && time <= endTime
+      return Number.isNaN(time) || (time >= startTime && time <= endTime)
     })
     .map(reportPostToStatsPost)
 }
@@ -91,6 +99,10 @@ export function ClientReportView({
   contentExclusions = [],
   onSetContentExcluded,
   curationBusyId = null,
+  initialTab = 'overview',
+  onTabChange,
+  initialGoogleSurface = 'ads',
+  onGoogleSurfaceChange,
 }: {
   report: RenderableReport
   client?: Client | null
@@ -116,8 +128,15 @@ export function ClientReportView({
   /** Staff-only explicit curation action. Omitted on client routes. */
   onSetContentExcluded?: (post: ReportStatsPost, excluded: boolean) => void | Promise<void>
   curationBusyId?: string | null
+  initialTab?: ReportTabKey
+  onTabChange?: (tab: ReportTabKey) => void
+  initialGoogleSurface?: GoogleSurface
+  onGoogleSurfaceChange?: (surface: GoogleSurface) => void
 }) {
-  const [tab, setTab] = useState<TabKey>('overview')
+  const [localTab, setLocalTab] = useState<ReportTabKey>('overview')
+  const tab = onTabChange ? initialTab : localTab
+  const [localGoogleSurface, setLocalGoogleSurface] = useState<GoogleSurface>('ads')
+  const googleSurface = onGoogleSurfaceChange ? initialGoogleSurface : localGoogleSurface
 
   // Verified, availability-aware Overview sections built ONLY from normalized
   // facts. Per-platform (no cross-platform unique summing); the comparability
@@ -149,14 +168,29 @@ export function ClientReportView({
       .map(fact => fact.platform)
       .filter((platform): platform is Platform => platform === 'facebook' || platform === 'instagram'),
   ]))
-  const hasMeta = availablePlatforms.length > 0 || facts.some(fact => fact.platform === 'facebook' || fact.platform === 'instagram')
+  const hasMeta = availablePlatforms.some(view => view.platform === 'facebook' || view.platform === 'instagram')
+    || facts.some(fact => fact.platform === 'facebook' || fact.platform === 'instagram')
   const hasGoogleAds = googleAds !== null || googleAdsState !== 'disconnected'
   const hasGoogleAdsSource = googleAdsState === 'data' || googleAdsState === 'no-activity'
-  const tabs: { key: TabKey; label: string }[] = [
-    { key: 'overview', label: 'Overview' },
-    ...reportPlatforms.map(platform => ({ key: platform as TabKey, label: PLATFORM_LABELS[platform] })),
-    ...(hasGoogleAds ? [{ key: 'google_ads' as const, label: 'Google Ads' }] : []),
+  const tabs: { key: ReportTabKey; label: string; icon: PerformanceProviderIconKey }[] = [
+    { key: 'overview', label: 'Overview', icon: 'overview' },
+    { key: 'facebook', label: 'Facebook', icon: 'facebook' },
+    { key: 'instagram', label: 'Instagram', icon: 'instagram' },
+    { key: 'google', label: 'Google', icon: 'google' },
+    { key: 'tiktok', label: 'TikTok', icon: 'tiktok' },
+    { key: 'linkedin', label: 'LinkedIn', icon: 'linkedin' },
+    { key: 'web', label: 'Website Performance', icon: 'web' },
+    { key: 'email', label: 'Email Marketing', icon: 'email' },
   ]
+  const activeTab = tabs.some(item => item.key === tab) ? tab : 'overview'
+  const selectTab = (nextTab: ReportTabKey) => {
+    if (onTabChange) onTabChange(nextTab)
+    else setLocalTab(nextTab)
+  }
+  const selectGoogleSurface = (surface: GoogleSurface) => {
+    if (onGoogleSurfaceChange) onGoogleSurfaceChange(surface)
+    else setLocalGoogleSurface(surface)
+  }
 
   const month = monthDisplayLabel(getReportMonthFromPeriod(report))
   const previousMonthLabel = useMemo(() => {
@@ -190,10 +224,10 @@ export function ClientReportView({
       </p>
 
       {tabs.length > 1 && (
-        <ReportTabs tabs={tabs} active={tab} onChange={setTab} />
+        <ReportTabs tabs={tabs} active={activeTab} onChange={selectTab} />
       )}
 
-      {tab === 'overview' ? (
+      {activeTab === 'overview' ? (
         <OverviewTab
           report={report}
           master={master}
@@ -212,22 +246,52 @@ export function ClientReportView({
           onSetContentExcluded={onSetContentExcluded}
           curationBusyId={curationBusyId}
         />
-      ) : tab === 'google_ads' ? (
-        <GoogleAdsTab
+      ) : activeTab === 'google' ? (
+        <GooglePerformanceTab
+          report={report}
+          month={month}
           googleAds={googleAds}
           state={googleAdsState}
           error={googleAdsError}
+          hasGoogleAds={hasGoogleAds}
+          surface={googleSurface}
+          onSurfaceChange={selectGoogleSurface}
         />
-      ) : (
+      ) : activeTab === 'web' ? (
+        <PublishedWebsitePerformance report={report.website_report ?? null} />
+      ) : activeTab === 'email' ? (
+        <ProviderAvailabilityPanel
+          eyebrow="Owned audience"
+          title="Email Marketing"
+          status="Coming soon"
+          description="Email Marketing performance will appear here when the client reporting lane is available and connected."
+        />
+      ) : activeTab === 'linkedin' ? (
+        <ProviderAvailabilityPanel
+          eyebrow="Professional audience"
+          title="LinkedIn"
+          status="Coming soon"
+          description="LinkedIn performance is not yet available in the client portal. No figures are inferred or shown as zero."
+        />
+      ) : reportPlatforms.includes(activeTab as Platform) ? (
         <PlatformTab
-          view={master.platforms.find(item => item.platform === tab)!}
+          view={master.platforms.find(item => item.platform === activeTab)!}
           previousView={null}
           previousManual={null}
           previousMonthLabel={previousMonthLabel}
           monthLabel={month}
-          facts={facts.filter(fact => fact.platform === tab)}
-          previousFacts={previousFacts.filter(fact => fact.platform === tab)}
+          facts={facts.filter(fact => fact.platform === activeTab)}
+          previousFacts={previousFacts.filter(fact => fact.platform === activeTab)}
           normalizedFactsActive={normalizedFactsActive}
+        />
+      ) : (
+        <ProviderAvailabilityPanel
+          eyebrow="Platform performance"
+          title={activeTab === 'facebook' ? 'Facebook' : activeTab === 'instagram' ? 'Instagram' : 'TikTok'}
+          status={activeTab === 'tiktok' ? 'Coming soon' : 'Not connected'}
+          description={activeTab === 'tiktok'
+            ? 'TikTok performance is not yet available in the client portal. No figures are inferred or shown as zero.'
+            : `No verified ${activeTab === 'facebook' ? 'Facebook' : 'Instagram'} reporting source is connected for this published month.`}
         />
       )}
 
@@ -243,6 +307,70 @@ export function ClientReportView({
       <MethodologyDisclaimer />
     </div>
   )
+}
+
+function PublishedWebsitePerformance({ report }: { report: RenderableReport['website_report'] }) {
+  if (!report) {
+    return <ProviderAvailabilityPanel
+      eyebrow="Digital experience"
+      title="Website Performance"
+      status="Not connected"
+      description="No approved website snapshot was published with this monthly report. No figures are inferred or shown as zero."
+    />
+  }
+
+  const stale = report.dataQuality.sourceReadAt
+    ? new Date(report.dataQuality.sourceReadAt).getTime() < new Date(`${report.period.to}T00:00:00Z`).getTime()
+    : true
+  const state = stale ? 'stale' : report.dataQuality.state
+  const stateLabel = state === 'available' ? 'Available' : state === 'partial' ? 'Partial period' : 'Stale snapshot'
+
+  return (
+    <section aria-label="Published website performance">
+      <SectionHeading eyebrow="Digital experience" title="Website Performance" />
+      <div className="mb-6 rounded-2xl border border-white/10 bg-white/[0.045] p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm font-bold text-white">{report.identity.canonicalHost}</p>
+          <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-semibold text-slate-300">{stateLabel}</span>
+        </div>
+        <p className="mt-2 text-xs text-slate-400">
+          Coverage: {formatDate(report.period.from)} to {formatDate(report.period.to)} · {report.period.timezone}
+        </p>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <WebsiteMetric title="Visitors" value={report.traffic.visitors} />
+        <WebsiteMetric title="Page views" value={report.traffic.pageviews} />
+        <WebsiteMetric title="Actions" value={report.conversions.total} />
+        <WebsiteMetric
+          title="Enquiries"
+          value={report.conversions.byType.find(item => item.type === 'enquiry_submit')?.count ?? (report.conversions.total === null ? null : 0)}
+        />
+      </div>
+      <div className="mt-8 grid gap-6 lg:grid-cols-2">
+        <WebsiteBreakdown title="Top pages" rows={report.traffic.topPages.map(item => [item.label, item.pageviews])} />
+        <WebsiteBreakdown title="Traffic sources" rows={report.traffic.sources.map(item => [item.label, item.visitors])} />
+      </div>
+      {report.dataQuality.gaps.length > 0 && (
+        <p className="mt-7 text-sm leading-relaxed text-slate-400">Measurement notes: {report.dataQuality.gaps.join(' ')}</p>
+      )}
+    </section>
+  )
+}
+
+function WebsiteMetric({ title, value }: { title: string; value: number | null }) {
+  return <div className="rounded-2xl border border-white/10 bg-white/[0.045] p-5">
+    <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">{title}</p>
+    <p className="mt-3 text-3xl font-black text-white">{value === null ? 'Unavailable' : formatNumber(value)}</p>
+  </div>
+}
+
+function WebsiteBreakdown({ title, rows }: { title: string; rows: [string, number][] }) {
+  return <div>
+    <h3 className="text-sm font-bold text-white">{title}</h3>
+    {rows.length ? <ul className="mt-3 space-y-2 text-sm text-slate-300">
+      {rows.slice(0, 8).map(([name, value]) => <li key={name} className="flex justify-between gap-4"><span className="truncate">{name}</span><span className="font-semibold text-white">{formatNumber(value)}</span></li>)}
+    </ul> : <p className="mt-3 text-sm text-slate-500">No tracked data for this period.</p>}
+  </div>
 }
 
 function ReportHero({
@@ -321,26 +449,33 @@ function ReportTabs({
   active,
   onChange,
 }: {
-  tabs: { key: TabKey; label: string }[]
-  active: TabKey
-  onChange: (tab: TabKey) => void
+  tabs: { key: ReportTabKey; label: string; icon: PerformanceProviderIconKey }[]
+  active: ReportTabKey
+  onChange: (tab: ReportTabKey) => void
 }) {
   return (
-    <div className="mb-10 flex w-fit flex-wrap gap-1 rounded-full border border-white/10 bg-white/[0.04] p-1">
+    <div role="tablist" aria-label="Performance services" className="mx-auto mb-10 flex w-fit max-w-full flex-wrap justify-center gap-1.5 rounded-[1.5rem] border border-white/10 bg-black/20 p-1.5 shadow-[0_24px_60px_-42px_rgba(0,0,0,0.95)] backdrop-blur">
       {tabs.map(item => {
         const isActive = active === item.key
         return (
           <button
             key={item.key}
             type="button"
+            role="tab"
+            aria-selected={isActive}
+            aria-label={item.label}
+            title={item.label}
             onClick={() => onChange(item.key)}
-            className={`rounded-full px-5 py-2 text-sm font-bold transition ${
+            className={`group relative flex h-11 w-11 items-center justify-center rounded-2xl border transition sm:h-12 sm:w-12 ${
               isActive
-                ? 'bg-white text-[#06110f] shadow-lg'
-                : 'text-slate-400 hover:bg-white/[0.06] hover:text-white'
+                ? 'border-[#2dd4bf]/55 bg-[linear-gradient(145deg,rgba(45,212,191,0.22),rgba(255,255,255,0.12))] text-white shadow-[0_14px_30px_-16px_rgba(45,212,191,0.9)]'
+                : 'border-transparent text-slate-400 hover:border-white/10 hover:bg-white/[0.06] hover:text-white'
             }`}
           >
-            {item.label}
+            <PerformanceProviderIcon provider={item.icon} />
+            <span className="pointer-events-none absolute left-1/2 top-[calc(100%+0.45rem)] z-20 hidden -translate-x-1/2 whitespace-nowrap rounded-lg border border-white/10 bg-[#07110f] px-2.5 py-1.5 text-[0.68rem] font-bold text-white shadow-xl group-hover:block group-focus-visible:block">
+              {item.label}
+            </span>
           </button>
         )
       })}
@@ -385,7 +520,7 @@ function OverviewTab({
 }) {
   const strategy = readStrategyData(report.strategy_data)
   const platformsWithData = master.platforms.filter(view => view.source !== 'none')
-  const hasGoogleAdsSection = googleAds !== null || String(googleAdsState) !== 'idle'
+  const hasGoogleAdsSection = googleAds !== null || googleAdsState !== 'disconnected'
   const hasVerified = verifiedSections.length > 0
   const hasData = normalizedFactsActive || platformsWithData.length > 0 || performance.metrics.length > 0 || hasGoogleAdsSection
 
@@ -672,10 +807,9 @@ function formatHealthState(runStatus: string | null, healthState: string | null)
   return humanize(runStatus ?? healthState ?? 'needs review')
 }
 
-// A. The "all your channels together" moment. Headlines ONLY metrics that are
-// safe to sum across platforms (views, content interactions). Reach audiences
-// overlap between platforms, so when reach is the only signal we headline the
-// strongest single platform instead of a misleading combined total.
+// A. The "all your channels together" moment. Cross-platform post engagement
+// definitions and unique-audience visibility are not summed. When no genuinely
+// comparable combined metric exists, headline one explicitly-labelled platform.
 function CombinedHero({ master, performance }: { master: MasterReportData; performance: ReportPerformance }) {
   const withData = master.platforms.filter(view => view.source !== 'none')
   if (withData.length === 0) return null
@@ -685,7 +819,7 @@ function CombinedHero({ master, performance }: { master: MasterReportData; perfo
   if (typeof master.totalViews === 'number' && master.totalViews > 0) {
     value = master.totalViews
     line = `times your content was seen across your channels in ${performance.monthLabel}`
-  } else if (master.totalEngagements > 0) {
+  } else if (typeof master.totalEngagements === 'number' && master.totalEngagements > 0) {
     value = master.totalEngagements
     line = `interactions with your content across your channels in ${performance.monthLabel}`
   } else {
@@ -706,7 +840,7 @@ function CombinedHero({ master, performance }: { master: MasterReportData; perfo
           ? `${formatCompact(view.views)} views`
           : typeof view.reach === 'number' && view.reach > 0
             ? `${formatCompact(view.reach)} reach`
-            : view.engagements > 0
+            : typeof view.engagements === 'number'
               ? `${formatCompact(view.engagements)} interactions`
               : null
       return metric ? { label: view.label, metric } : null
@@ -1004,14 +1138,14 @@ function ContentSection({
       ? { value: bestPost.impressions, label: 'views' }
       : rankingMetric === 'reach' && typeof bestPost?.reach === 'number'
         ? { value: bestPost.reach, label: 'reach' }
-        : (topContent?.interactions ?? 0) > 0
-          ? { value: topContent!.interactions, label: 'content interactions' }
+        : typeof topContent?.interactions === 'number'
+          ? { value: topContent.interactions, label: bestPost?.engagementDefinitionLabel ?? 'defined interactions' }
           : null
 
   const allMetrics: { label: string; value: string }[] = []
   if (typeof bestPost?.impressions === 'number') allMetrics.push({ label: 'views', value: formatNumber(bestPost.impressions) })
   if (typeof bestPost?.reach === 'number') allMetrics.push({ label: 'reach', value: formatNumber(bestPost.reach) })
-  if (bestPost && bestPost.engagements > 0) allMetrics.push({ label: 'content interactions', value: formatNumber(bestPost.engagements) })
+  if (bestPost && typeof bestPost.engagements === 'number') allMetrics.push({ label: bestPost.engagementDefinitionLabel ?? 'defined interactions', value: formatNumber(bestPost.engagements) })
   const metricRow = allMetrics.map(m => `${m.value} ${m.label}`).join(' · ')
 
   const cgInsight = strategyMatchesBest ? tc.whatThisTellsUs.trim() : ''
@@ -1171,7 +1305,9 @@ function ChannelCard({ view, previousView }: { view: PlatformView; previousView:
   ].filter(g => g.m.direction !== 'missing' && g.m.difference !== null && !g.m.notAvailable)
 
   const best = view.bestPost
-  const learningLabel = (best?.engagements ?? 0) >= WEAK_CONTENT_THRESHOLD ? 'Top content' : 'Content learning'
+  const learningLabel = typeof best?.engagements !== 'number'
+    ? 'Content highlight'
+    : best.engagements >= WEAK_CONTENT_THRESHOLD ? 'Top content' : 'Content learning'
 
   return (
     <article className="group rounded-3xl border border-white/[0.08] bg-white/[0.045] p-6 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.95)] transition hover:border-[#2dd4bf]/25 hover:bg-white/[0.06]">
@@ -1259,18 +1395,184 @@ function GoogleAdsOverview({
   )
 }
 
-function GoogleAdsTab({
+function ProviderAvailabilityPanel({
+  eyebrow,
+  title,
+  status,
+  description,
+}: {
+  eyebrow: string
+  title: string
+  status: 'Not connected' | 'Coming soon'
+  description: string
+}) {
+  return (
+    <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#071311]/95 p-7 shadow-[0_35px_90px_-45px_rgba(0,0,0,0.95)] sm:p-10">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_10%_0%,rgba(45,212,191,0.16),transparent_38%),radial-gradient(circle_at_92%_8%,rgba(249,115,22,0.10),transparent_34%)]" />
+      <div className="relative max-w-3xl">
+        <p className="text-xs font-black uppercase tracking-[0.24em] text-[#2dd4bf]">{eyebrow}</p>
+        <h2 className="mt-3 text-3xl font-black tracking-[-0.04em] text-white sm:text-5xl">{title}</h2>
+        <span className="mt-6 inline-flex rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-xs font-black uppercase tracking-[0.16em] text-slate-300">
+          {status}
+        </span>
+        <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300">{description}</p>
+      </div>
+    </section>
+  )
+}
+
+function GooglePerformanceTab({
+  report,
+  month,
   googleAds,
   state,
   error,
+  hasGoogleAds,
+  surface,
+  onSurfaceChange,
 }: {
+  report: RenderableReport
+  month: string
   googleAds: GoogleAdsDashboardData | null
   state: GoogleAdsDashboardState
   error: string | null
+  hasGoogleAds: boolean
+  surface: GoogleSurface
+  onSurfaceChange: (surface: GoogleSurface) => void
 }) {
-  if (!googleAds) return <GoogleAdsEmptyState state={state} hasError={state === 'error' && Boolean(error)} />
+  const strategy = readStrategyData(report.strategy_data)
+  const campaignRecommendation = strategy.actionPlan.campaign_recommendation
+  const hasDirection = Boolean(
+    strategy.strategyGoingForward
+      || strategy.clientDirection.length > 0
+      || campaignRecommendation.enabled,
+  )
 
-  return <GoogleAdsResults dashboard={googleAds} />
+  return (
+    <div className="space-y-8">
+      <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#071311]/95 p-6 shadow-[0_35px_90px_-45px_rgba(0,0,0,0.95)] sm:p-9">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_0%,rgba(45,212,191,0.18),transparent_38%),radial-gradient(circle_at_92%_8%,rgba(249,115,22,0.14),transparent_34%)]" />
+        <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-end">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.24em] text-[#2dd4bf]">Search &amp; local presence</p>
+            <h2 className="mt-3 max-w-3xl text-3xl font-black tracking-[-0.04em] text-white sm:text-5xl">Google Performance</h2>
+            <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300">
+              Verified Google results and the reviewed direction CG is using to improve the next move.
+            </p>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-black/20 p-5">
+            <p className="text-[0.65rem] font-black uppercase tracking-[0.2em] text-slate-500">Published reporting month</p>
+            <p className="mt-2 text-xl font-black text-white">{month}</p>
+          </div>
+        </div>
+        <div role="tablist" aria-label="Google performance services" className="relative mt-7 flex w-fit rounded-full border border-white/10 bg-black/25 p-1">
+          {(['ads', 'business'] as const).map(item => {
+            const selected = surface === item
+            const label = item === 'ads' ? 'Ads' : 'Business'
+            return (
+              <button
+                key={item}
+                type="button"
+                role="tab"
+                aria-selected={selected}
+                onClick={() => onSurfaceChange(item)}
+                className={`rounded-full px-5 py-2 text-sm font-bold transition ${selected ? 'bg-white text-[#07110f]' : 'text-slate-400 hover:text-white'}`}
+              >
+                {label}
+              </button>
+            )
+          })}
+        </div>
+      </section>
+
+      {surface === 'business' ? (
+        <ProviderAvailabilityPanel
+          eyebrow="Google local presence"
+          title="Google Business Profile"
+          status="Coming soon"
+          description="Google Business Profile performance is not yet available in the client portal. No local-search figures are inferred or shown as zero."
+        />
+      ) : (
+        <>
+      {hasGoogleAds ? (
+        <section className="rounded-[2rem] border border-[#f59e0b]/20 bg-[linear-gradient(135deg,rgba(245,158,11,0.10),rgba(255,255,255,0.025))] p-6 sm:p-8">
+          <div className="mb-6">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.22em] text-[#f59e0b]">Configured source</p>
+              <h3 className="mt-2 text-2xl font-black tracking-[-0.03em] text-white">Google Ads</h3>
+            </div>
+          </div>
+          {googleAds ? (
+            <GoogleAdsResults dashboard={googleAds} compact />
+          ) : (
+            <GoogleAdsEmptyState state={state} hasError={state === 'error' && Boolean(error)} compact />
+          )}
+        </section>
+      ) : (
+        <section className="rounded-[2rem] border border-white/[0.08] bg-white/[0.035] p-7 sm:p-9">
+          <p className="text-xs font-black uppercase tracking-[0.22em] text-slate-500">Campaign sources</p>
+          <h3 className="mt-3 text-2xl font-black tracking-[-0.03em] text-white">No verified campaign source is configured</h3>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
+            Paid campaign figures are intentionally withheld for this published month. Missing data is never presented as zero.
+          </p>
+        </section>
+      )}
+
+      {hasDirection && (
+        <section>
+          <SectionHeading eyebrow="CG review & optimisation direction" title="Strategy for paid media" />
+          <div className="grid gap-4 lg:grid-cols-2">
+            {strategy.strategyGoingForward && (
+              <article className="rounded-[1.75rem] border border-[#2dd4bf]/20 bg-[linear-gradient(145deg,rgba(45,212,191,0.10),rgba(255,255,255,0.025))] p-6 sm:p-7">
+                <p className="text-[0.68rem] font-black uppercase tracking-[0.2em] text-[#2dd4bf]">Going forward</p>
+                <p className="mt-4 whitespace-pre-line text-sm leading-7 text-slate-200">{strategy.strategyGoingForward}</p>
+              </article>
+            )}
+            {strategy.clientDirection.length > 0 && (
+              <article className="rounded-[1.75rem] border border-white/[0.08] bg-white/[0.035] p-6 sm:p-7">
+                <p className="text-[0.68rem] font-black uppercase tracking-[0.2em] text-slate-500">Campaign direction</p>
+                <ul className="mt-4 space-y-3">
+                  {strategy.clientDirection.map((direction, index) => (
+                    <li key={index} className="flex items-start gap-3 text-sm leading-6 text-slate-300">
+                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#2dd4bf]" />
+                      {direction}
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            )}
+            {campaignRecommendation.enabled && (
+              <article className="rounded-[1.75rem] border border-[#f97316]/20 bg-[linear-gradient(145deg,rgba(249,115,22,0.10),rgba(255,255,255,0.025))] p-6 sm:p-7 lg:col-span-2">
+                <p className="text-[0.68rem] font-black uppercase tracking-[0.2em] text-[#fb923c]">Next campaign recommendation</p>
+                {campaignRecommendation.items.length > 0 && (
+                  <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+                    {campaignRecommendation.items.map((item, index) => (
+                      <li key={index} className="flex items-start gap-3 text-sm leading-6 text-slate-300">
+                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#fb923c]" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {campaignRecommendation.notes && (
+                  <p className="mt-4 whitespace-pre-line text-sm leading-7 text-slate-200">{campaignRecommendation.notes}</p>
+                )}
+              </article>
+            )}
+          </div>
+        </section>
+      )}
+
+      <aside className="rounded-[1.75rem] border border-[#2dd4bf]/15 bg-[#2dd4bf]/[0.045] p-6 sm:p-7">
+        <p className="text-xs font-black uppercase tracking-[0.2em] text-[#2dd4bf]">Campaign feedback</p>
+        <p className="mt-3 max-w-4xl text-sm leading-7 text-slate-300">
+          Tell CG whether the campaign leads were valuable and relevant to your business. That real-world feedback helps refine targeting, messaging and campaign direction.
+        </p>
+      </aside>
+        </>
+      )}
+    </div>
+  )
 }
 
 function GoogleAdsEmptyState({
@@ -1729,7 +2031,13 @@ function PlatformPostCard({ post, index }: { post: ReportStatsPost; index: numbe
   const parts: string[] = []
   if (typeof post.impressions === 'number') parts.push(`${formatNumber(post.impressions)} views`)
   if (typeof post.reach === 'number') parts.push(`${formatNumber(post.reach)} reach`)
-  parts.push(`${formatNumber(post.engagements)} content interactions`)
+  if (typeof post.engagements === 'number') {
+    parts.push(`${formatNumber(post.engagements)} ${post.engagementDefinitionLabel?.toLowerCase() ?? 'defined interactions'}`)
+  } else if (post.engagementKnownSubtotal !== null) {
+    parts.push(`${formatNumber(post.engagementKnownSubtotal)} known subtotal (${post.engagementCoverage?.observed ?? 0}/${post.engagementCoverage?.required ?? 0} fields)`)
+  } else {
+    parts.push('Interaction data unavailable')
+  }
 
   return (
     <article className="rounded-3xl border border-white/[0.08] bg-white/[0.045] p-5 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.95)]">

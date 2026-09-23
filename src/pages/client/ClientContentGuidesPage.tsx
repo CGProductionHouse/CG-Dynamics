@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { ClientPortalShell } from '../../components/client/ClientPortalShell'
+import { ClientPortalErrorState, ClientPortalLoadingState } from '../../components/client/ClientPortalStates'
 import { useAuth } from '../../contexts/AuthContext'
 import { fetchPublishedGuides, type PublishedContentGuideline } from '../../lib/clientContentGuides'
 import { getClient, type Client } from '../../lib/db/clients'
 import { guidelineVideoName } from '../../lib/contentGuidelineNaming'
 import { monthDisplayLabel } from '../../lib/reportPeriod'
 
-export default function ClientContentGuidesPage({ preview = false }: { preview?: boolean }) {
+export default function ClientContentGuidesPage({ preview = false, embedded = false, month }: { preview?: boolean; embedded?: boolean; month?: string }) {
   const { profile } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const [client, setClient] = useState<Client | null>(null)
@@ -18,7 +19,7 @@ export default function ClientContentGuidesPage({ preview = false }: { preview?:
   const now = new Date()
   const fallbackMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
   const requestedMonth = searchParams.get('month')
-  const currentMonth = requestedMonth && /^\d{4}-\d{2}$/.test(requestedMonth) ? requestedMonth : fallbackMonth
+  const currentMonth = month ?? (requestedMonth && /^\d{4}-\d{2}$/.test(requestedMonth) ? requestedMonth : fallbackMonth)
   const selectedGuideKey = searchParams.get('guide')
   const canPreview = preview && (profile?.role === 'admin' || profile?.role === 'manager')
   const clientId = canPreview ? searchParams.get('client') : profile?.client_id
@@ -48,11 +49,11 @@ export default function ClientContentGuidesPage({ preview = false }: { preview?:
     <>
       <section className="max-w-5xl">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-report-accent">Content production</p>
-        <h1 className="mt-3 text-3xl font-semibold tracking-normal text-white sm:text-5xl">Content Guidelines</h1>
+        <h2 className="mt-3 text-3xl font-black tracking-[-0.035em] text-white sm:text-5xl">Content guidelines</h2>
         <p className="mt-4 max-w-2xl text-base leading-7 text-report-muted">
           Published filming documents for {monthDisplayLabel(currentMonth)}, with every video name and complete script in order.
         </p>
-        <div className="mt-5 flex items-center gap-2">
+        {!embedded && <div className="mt-5 flex items-center gap-2">
           <button
             type="button"
             onClick={() => setSearchParams(current => { current.set('month', shiftMonth(currentMonth, -1)); return current })}
@@ -67,13 +68,13 @@ export default function ClientContentGuidesPage({ preview = false }: { preview?:
           >
             Next
           </button>
-        </div>
+        </div>}
       </section>
 
       {loading ? (
-        <Message>Loading published Content Guidelines...</Message>
+        <ClientPortalLoadingState />
       ) : error ? (
-        <Message error>{error}</Message>
+        <ClientPortalErrorState title="Content Guidelines could not be loaded" message="Your published guidance is temporarily unavailable. Please try again shortly." />
       ) : guidelines.length === 0 ? (
         <Message>No published Content Guidelines are available for {monthDisplayLabel(currentMonth)}.</Message>
       ) : (
@@ -87,7 +88,7 @@ export default function ClientContentGuidesPage({ preview = false }: { preview?:
                   window.requestAnimationFrame(() => element.scrollIntoView({ behavior: 'smooth', block: 'start' }))
                 }
               }}
-              className={`scroll-mt-6 overflow-hidden rounded-lg border bg-white/[0.035] shadow-[0_18px_55px_rgba(0,0,0,0.2)] ${
+              className={`scroll-mt-6 overflow-hidden rounded-3xl border bg-white/[0.04] shadow-[0_28px_80px_-50px_rgba(0,0,0,0.95)] ${
                 selectedGuideKey === guideline.row_key
                   ? 'border-report-accent/45 ring-1 ring-report-accent/20'
                   : 'border-white/[0.08]'
@@ -105,7 +106,7 @@ export default function ClientContentGuidesPage({ preview = false }: { preview?:
                 {guideline.videos.map((video, index) => (
                   <li key={`${guideline.row_key}-${video.position}`} className="p-5 sm:p-7">
                     <h3 className="text-xl font-semibold text-white">{guidelineVideoName(video.position ?? index + 1, video.title)}</h3>
-                    <div className="mt-5 rounded-lg border border-white/[0.08] bg-black/15 p-4 sm:p-5">
+                    <div className="mt-5 rounded-2xl border border-white/[0.08] bg-black/15 p-4 sm:p-5">
                       <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-report-faint">Complete script</p>
                       <p className="mt-2 whitespace-pre-wrap text-sm leading-7 text-report-text">{video.script}</p>
                     </div>
@@ -129,8 +130,8 @@ export default function ClientContentGuidesPage({ preview = false }: { preview?:
   )
   if (preview) return canPreview
     ? <div className="min-w-0 p-4 sm:p-6"><p className="mb-4 text-sm text-report-muted">Client preview · Published content only</p>{content}</div>
-    : <Message error>Only managers and admins can preview client guides.</Message>
-  return <ClientPortalShell client={client}>{content}</ClientPortalShell>
+    : <ClientPortalErrorState title="Preview unavailable" message="Only managers and admins can preview client guides." />
+  return embedded ? content : <ClientPortalShell client={client}>{content}</ClientPortalShell>
 }
 
 function shiftMonth(month: string, amount: number): string {
@@ -140,7 +141,7 @@ function shiftMonth(month: string, amount: number): string {
 
 function Message({ children, error = false }: { children: React.ReactNode; error?: boolean }) {
   return (
-    <div className={`mt-8 rounded-lg border px-5 py-6 ${error ? 'border-[#d8a07a]/20 bg-[#d8a07a]/[0.06] text-[#d8a07a]' : 'border-white/[0.08] bg-white/[0.03] text-report-muted'}`}>
+    <div className={`mt-8 rounded-3xl border px-6 py-8 shadow-[0_24px_70px_-48px_rgba(0,0,0,0.95)] ${error ? 'border-[#d8a07a]/20 bg-[#d8a07a]/[0.06] text-[#d8a07a]' : 'border-white/[0.08] bg-white/[0.04] text-report-muted'}`}>
       <p className="text-sm leading-6">{children}</p>
     </div>
   )

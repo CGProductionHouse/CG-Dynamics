@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { PremiumCard } from '../../components/ui/PremiumCard'
@@ -10,6 +10,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { isAdminRole, isManagerRole } from '../../lib/roles'
 import { getMicrosoftConnectionStatus } from '../../lib/microsoftImportData'
 import { PageContainer, PageHeader } from '../../components/layout/PageShell'
+import { metaFleetFreshnessEvidence, microsoftFreshnessEvidence, type FreshnessVerdict, type MetaCheckpointInput, type MetaInventoryInput } from '../../lib/dailyDynamicsFreshness'
 
 type MetaState = 'loading' | 'connected' | 'disconnected'
 
@@ -25,6 +26,10 @@ export default function IntegrationsPage() {
   const [tiktokState, setTiktokState] = useState<MetaState>('loading')
   const [microsoftState, setMicrosoftState] = useState<MetaState>('loading')
   const [microsoftSourceCount, setMicrosoftSourceCount] = useState(0)
+  const [microsoftFreshness, setMicrosoftFreshness] = useState<ReturnType<typeof microsoftFreshnessEvidence> | null>(null)
+  const [metaCheckpoints, setMetaCheckpoints] = useState<MetaCheckpointInput[] | null>(null)
+  const [metaCheckpointEvidenceAvailable, setMetaCheckpointEvidenceAvailable] = useState(false)
+  const [metaInventory, setMetaInventory] = useState<MetaInventoryInput[] | null>(null)
 
   useEffect(() => {
     let active = true
@@ -35,6 +40,29 @@ export default function IntegrationsPage() {
       .then(({ data }) => {
         if (!active) return
         setMetaState(data?.ok && data?.connected ? 'connected' : 'disconnected')
+        const checkpoints: MetaCheckpointInput[] = (data?.assetHealth ?? []).flatMap((asset: Record<string, unknown>) => {
+          const rows: MetaCheckpointInput[] = []
+          for (const platform of ['facebook', 'instagram'] as const) {
+            const mapped = Boolean(asset[`${platform}Mapped`])
+            if (!mapped) continue
+            const run = asset[platform] as Record<string, unknown> | null
+            rows.push({
+              clientId: String(asset.clientId), assetId: String(asset.assetId), platform, mapped,
+              lastAttemptedAt: (run?.created_at as string | null) ?? null,
+              lastSuccessfulAt: (run?.last_successful_at as string | null) ?? (run?.status === 'success' ? (run.finished_at as string | null) ?? null : null),
+              lastSuccessfulMonth: (run?.period_month as string | null) ?? null,
+              highWatermarkAt: (run?.high_watermark_at as string | null) ?? null,
+              nextDueAt: (run?.next_due_at as string | null) ?? null,
+              status: (run?.status as string | null) ?? null,
+              healthState: (run?.health_state as string | null) ?? null,
+              errorCode: (run?.last_error_code as string | null) ?? null,
+              retrying: Boolean(run?.retrying),
+            })
+          }
+          return rows
+        })
+        setMetaCheckpoints(checkpoints)
+        setMetaCheckpointEvidenceAvailable(Array.isArray(data?.assetHealth))
       })
       .catch(() => {
         if (active) setMetaState('disconnected')
@@ -43,11 +71,17 @@ export default function IntegrationsPage() {
     // Linked client/asset count (best-effort; staff can read via RLS).
     supabase
       .from('meta_client_assets')
-      .select('client_id')
+      .select('id, client_id, facebook_page_id, instagram_account_id')
       .eq('is_active', true)
       .then(({ data }) => {
         if (!active || !data) return
         setLinkedClients(new Set(data.map(r => r.client_id as string)).size)
+        setMetaInventory(data.map(row => ({
+          clientId: String(row.client_id),
+          assetId: String(row.id),
+          facebookMapped: Boolean(row.facebook_page_id),
+          instagramMapped: Boolean(row.instagram_account_id),
+        })))
       })
 
     // TikTok connection status
@@ -81,6 +115,18 @@ export default function IntegrationsPage() {
           if (!active) return
           setMicrosoftState(result.data?.connected ? 'connected' : 'disconnected')
           setMicrosoftSourceCount(result.data?.sources.length ?? 0)
+          const freshness = result.data?.freshness
+          setMicrosoftFreshness(result.data && freshness ? microsoftFreshnessEvidence({
+            now: new Date().toISOString(), connected: result.data.connected,
+            lastJobStartedAt: freshness.lastJobStartedAt,
+            lastJobCompletedAt: freshness.lastJobCompletedAt,
+            lastSuccessfulReconciliationAt: freshness.lastSuccessfulReconciliationAt,
+            requiredSources: freshness.sourceCoverage,
+            applyStatus: freshness.latestApplyStatus,
+            recoveryInProgress: freshness.recoveryInProgress,
+            blocker: freshness.latestApplyError,
+            staleAfterMinutes: freshness.staleAfterMinutes,
+          }) : null)
         })
         .catch(() => {
           if (active) setMicrosoftState('disconnected')
@@ -91,6 +137,10 @@ export default function IntegrationsPage() {
       active = false
     }
   }, [canManageGoogleAds, canManageMicrosoft])
+
+  const metaFreshness = useMemo(() => metaState === 'connected' && metaCheckpoints && metaInventory
+    ? metaFleetFreshnessEvidence(metaCheckpoints, new Date().toISOString(), metaInventory, metaCheckpointEvidenceAvailable)
+    : null, [metaCheckpointEvidenceAvailable, metaCheckpoints, metaInventory, metaState])
 
   const metaConnected = metaState === 'connected'
   const metaStatus =
@@ -116,6 +166,7 @@ export default function IntegrationsPage() {
       ? `${googleLinkedClients} client${googleLinkedClients === 1 ? '' : 's'} linked for Google Ads data sync.`
       : 'Google Ads is connected. Link a client account to begin monthly sync.'
     : 'Connect and map Google Ads accounts for monthly data sync.'
+  const freshnessTone = (verdict: FreshnessVerdict | undefined) => verdict === 'PASS' ? 'published' : verdict ? 'internal-draft' : 'default'
 
   return (
     <PageContainer width="wide" className="pb-16">
@@ -152,6 +203,13 @@ export default function IntegrationsPage() {
                   />
                 </div>
                 <p className="mt-1.5 text-sm leading-relaxed text-brand-primary">{metaDescription}</p>
+                {metaFreshness && <div className="mt-3 rounded-lg border border-white/10 bg-black/20 p-3 text-xs text-white/65">
+                  <div className="flex items-center justify-between gap-2"><span>Fleet freshness</span><StatusBadge label={metaFreshness.verdict} variant={freshnessTone(metaFreshness.verdict)} size="sm" /></div>
+                  <p className="mt-2">{metaFreshness.mappedClients} clients · {metaFreshness.mappedAssets} assets · {metaFreshness.platforms.length} mapped platforms</p>
+                  {metaFreshness.verdict === 'UNAVAILABLE' && <p className="mt-1 text-amber-200">Checkpoint freshness is unavailable and has not been verified.</p>}
+                  {(metaFreshness.stale > 0 || metaFreshness.partial > 0 || metaFreshness.failed > 0 || metaFreshness.unavailable > 0) && <p className="mt-1 text-amber-200">{metaFreshness.failed} failed · {metaFreshness.stale} stale · {metaFreshness.partial} partial · {metaFreshness.unavailable} unavailable</p>}
+                  {metaFreshness.recoveryInProgress && <p className="mt-1 text-sky-200">Recovery in progress</p>}
+                </div>}
               </div>
             </div>
             <div className="mt-auto pt-5">
@@ -229,6 +287,13 @@ export default function IntegrationsPage() {
                   <p className="mt-1.5 text-sm leading-relaxed text-brand-primary">
                     {microsoftState === 'connected' ? `${microsoftSourceCount} Planner and Outlook source${microsoftSourceCount === 1 ? '' : 's'} available for controlled reconciliation.` : 'Connect Planner and Outlook for reviewed operations imports.'}
                   </p>
+                  {microsoftFreshness && <div className="mt-3 rounded-lg border border-white/10 bg-black/20 p-3 text-xs text-white/65">
+                    <div className="flex items-center justify-between gap-2"><span>Reconciliation freshness</span><StatusBadge label={microsoftFreshness.verdict} variant={freshnessTone(microsoftFreshness.verdict)} size="sm" /></div>
+                    <p className="mt-2">Last full success: {microsoftFreshness.lastSuccessfulAt ? new Date(microsoftFreshness.lastSuccessfulAt).toLocaleString() : 'Never'}</p>
+                    {microsoftFreshness.recoveryInProgress && <p className="mt-1 text-sky-200">Recovery in progress</p>}
+                    {microsoftFreshness.incomplete.length > 0 && <p className="mt-1 text-amber-200">Incomplete: {microsoftFreshness.incomplete.join(', ')}</p>}
+                    {microsoftFreshness.blocker && <p className="mt-1 text-amber-200">{microsoftFreshness.blocker}</p>}
+                  </div>}
                 </div>
               </div>
               <div className="mt-auto pt-5">

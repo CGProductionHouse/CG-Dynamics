@@ -1,0 +1,58 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { offerEconomics, trafficEconomics, analysisGate, recurringScenario } from './commerce_reference.mjs';
+const offer = (q = 1) => ({currency:'ZAR',priceBasis:'ex_vat_scenario',quantity:q,discountRate:[0,0,.15,.2][q],unitPrice:600,unitCost:260,packaging:[0,20,25,30][q],delivery:[0,70,80,100][q],shippingCollected:0,feeRate:.03,feeFixed:0,afterSaleAllowance:12*q});
+const scope = () => ({ clientId:'synthetic-a',month:'2026-10',metric:'contribution_per_eligible_visitor',unit:'ZAR/visitor' });
+const packet = () => ({...scope(),snapshotId:'synthetic-snapshot',snapshotRevision:'1',population:'all assigned eligible visitors',dataComplete:true,dataCurrent:true,deduplicated:true,comparable:true,outcomesMature:true,design:'randomised',assignmentLogged:true,allocationCheck:'passed',preRegistered:true,interferenceReviewed:true,guardrails:'passed',analysisReviewed:true,analysisVersion:'synthetic-review-v1',intervalMethod:'externally supplied illustrative CI',outcomeWindow:'synthetic matured observation window',lower:2,upper:4,minimumPracticalEffect:1,intervalLevel:.95});
+
+test('one, two and three quantity contribution calculations',()=>{
+ assert.equal(offerEconomics(offer()).contribution,220); assert.equal(offerEconomics(offer(2)).contribution,340.4); assert.equal(offerEconomics(offer(3)).contribution,450.8);
+});
+test('R600 two pack is 15 percent off both, not off only second item',()=>assert.equal(offerEconomics(offer(2)).chargedRevenue,1020));
+test('shipping income is not silently ignored',()=>assert.equal(offerEconomics({...offer(),shippingCollected:100}).contribution,317));
+test('after-sale allowance is deducted exactly once',()=>assert.equal(offerEconomics({...offer(),afterSaleAllowance:0}).contribution,232));
+for(const key of ['unitPrice','unitCost','packaging','delivery','shippingCollected','feeFixed','afterSaleAllowance']) test(`missing ${key} cannot become zero`,()=>{const o=offer();delete o[key];assert.throws(()=>offerEconomics(o),TypeError)});
+for(const value of [NaN,Infinity,-1,'600',null]) test(`invalid numeric input ${String(value)}`,()=>assert.throws(()=>offerEconomics({...offer(),unitPrice:value}),TypeError));
+test('fractional quantity rejected',()=>assert.throws(()=>offerEconomics({...offer(),quantity:1.2}),TypeError));
+test('out of range discount rejected',()=>assert.throws(()=>offerEconomics({...offer(),discountRate:1.1}),TypeError));
+test('loss has no profitable ROAS threshold',()=>assert.equal(offerEconomics({...offer(),unitCost:1000}).firstOrderBreakEvenRevenueRoas,null));
+test('unknown tax basis rejected',()=>assert.throws(()=>offerEconomics({...offer(),priceBasis:'unknown'}),TypeError));
+test('overflow rejected',()=>assert.throws(()=>offerEconomics({...offer(),unitPrice:Number.MAX_VALUE,quantity:3}),RangeError));
+test('higher AOV can accompany lower contribution',()=>{
+ const a=trafficEconomics([{id:'one',offer:offer(),probability:.03}],1000,5000);
+ const b=trafficEconomics([{id:'two',offer:offer(2),probability:.018}],1000,5000);
+ assert.equal(a.revenue,18000);assert.equal(b.revenue,18360);assert.equal(a.contributionAfterMedia,1600);assert.equal(b.contributionAfterMedia,1127.2);
+ assert.ok(b.averageOrderValue>a.averageOrderValue);assert.ok(b.revenueToMediaRatio>a.revenueToMediaRatio);assert.ok(b.contributionPerEligibleVisitor<a.contributionPerEligibleVisitor);
+});
+test('nonbuyers remain in the denominator',()=>assert.equal(trafficEconomics([{id:'one',offer:offer(),probability:.03}],1000,0).noPurchaseProbability,.97));
+test('zero buyers has unknown AOV, not invented zero',()=>assert.equal(trafficEconomics([{id:'one',offer:offer(),probability:0}],1000,0).averageOrderValue,null));
+test('zero media does not fabricate ROAS',()=>assert.equal(trafficEconomics([{id:'one',offer:offer(),probability:.03}],1000,0).revenueToMediaRatio,null));
+test('offer probabilities above one rejected',()=>assert.throws(()=>trafficEconomics([{id:'one',offer:offer(),probability:.7},{id:'two',offer:offer(2),probability:.6}],1000,0),TypeError));
+test('duplicate offer identities rejected',()=>assert.throws(()=>trafficEconomics([{id:'one',offer:offer(),probability:.1},{id:'one',offer:offer(2),probability:.1}],1000,0),TypeError));
+test('mixed currencies rejected',()=>assert.throws(()=>trafficEconomics([{id:'one',offer:offer(),probability:.1},{id:'two',offer:{...offer(2),currency:'USD'},probability:.1}],1000,0),TypeError));
+test('zero eligible visitors rejected',()=>assert.throws(()=>trafficEconomics([{id:'one',offer:offer(),probability:.1}],0,0),TypeError));
+test('missing trusted scope fails closed',()=>assert.equal(analysisGate(packet(),{}).status,'invalid_input'));
+for(const key of ['clientId','month','metric','unit']) test(`different ${key} blocked`,()=>assert.equal(analysisGate({...packet(),[key]:'other'},scope()).status,'scope_blocked'));
+for(const key of ['dataComplete','dataCurrent','deduplicated','comparable']) test(`${key} failure blocks creative judgement`,()=>assert.equal(analysisGate({...packet(),[key]:false},scope()).status,'data_issue'));
+test('unmatured outcomes wait',()=>assert.equal(analysisGate({...packet(),outcomesMature:false},scope()).status,'await_outcomes'));
+test('observational comparison cannot become experiment winner',()=>assert.equal(analysisGate({...packet(),design:'observational'},scope()).status,'observation_only'));
+test('allocation mismatch invalidates randomised result',()=>assert.equal(analysisGate({...packet(),allocationCheck:'failed'},scope()).status,'invalid_experiment'));
+test('no preregistration holds experiment interpretation',()=>assert.equal(analysisGate({...packet(),preRegistered:false},scope()).status,'invalid_experiment'));
+test('failed guardrail overrides apparent positive effect',()=>assert.equal(analysisGate({...packet(),guardrails:'failed'},scope()).status,'hold_guardrail'));
+test('unreviewed analysis cannot be approved by the model',()=>assert.equal(analysisGate({...packet(),analysisReviewed:false},scope()).status,'needs_analysis_review'));
+test('interval crossing practical threshold is inconclusive',()=>assert.equal(analysisGate({...packet(),lower:.2,upper:1.5},scope()).status,'inconclusive'));
+test('interval wholly below zero is negative review',()=>assert.equal(analysisGate({...packet(),lower:-2,upper:-.5},scope()).status,'review_negative'));
+test('reverse interval invalid',()=>assert.equal(analysisGate({...packet(),lower:5,upper:1},scope()).status,'invalid_input'));
+test('review-positive is never spend, publication or causality authority',()=>{const r=analysisGate(packet(),scope());assert.equal(r.status,'review_positive');assert.equal(r.executionAllowed,false);assert.equal(r.publicationAllowed,false);assert.equal(r.causalityProven,false)});
+test('two customers monthly run rate is not first year billed',()=>{const r=recurringScenario({monthlyPrice:7500,newCustomersEachMonth:2,months:12,monthlyChurn:0});assert.equal(r.annualisedExitRunRate,2160000);assert.equal(r.billedDuringPeriod,1170000);assert.equal(r.profitCalculated,false)});
+test('four customers monthly scenario is arithmetic only',()=>{const r=recurringScenario({monthlyPrice:7500,newCustomersEachMonth:4,months:12,monthlyChurn:0});assert.equal(r.billedDuringPeriod,2340000);assert.equal(r.annualisedExitRunRate,4320000);assert.equal(r.forecast,false)});
+test('churn reduces expected active base before new arrivals',()=>{const r=recurringScenario({monthlyPrice:100,newCustomersEachMonth:2,months:2,monthlyChurn:.5});assert.equal(r.expectedActiveAtEnd,3);assert.equal(r.billedDuringPeriod,500)});
+test('reference functions do not mutate caller values',()=>{const o=offer(),p=packet(),s=scope(),before=JSON.stringify([o,p,s]);offerEconomics(o);analysisGate(p,s);assert.equal(JSON.stringify([o,p,s]),before)});
+test('source pack preserves review-only scope and valid unique references',()=>{
+ const p=JSON.parse(readFileSync(new URL('./evidence.json',import.meta.url),'utf8'));
+ assert.equal(p.activationAllowed,false);assert.equal(new Set(p.sources.map(s=>s.id)).size,p.sources.length);
+ const ids=new Set(p.sources.map(s=>s.id)); assert.ok(p.sources.every(s=>s.reviewStatus==='needs_review'&&s.fullTextCopied===false));
+ assert.ok(p.candidates.every(c=>c.status==='needs_review'&&c.sourceIds.every(id=>ids.has(id))));
+ assert.ok(p.sources.filter(s=>s.accessLevel==='abstract_only').every(s=>s.fullTextReviewed===false));
+});

@@ -4,14 +4,14 @@ import type { ClientOnboardingState } from './types'
 import { PLATFORM_GUIDES } from './platformGuides'
 import { logoRequirementSatisfied, servicesRequirementSatisfied } from './validation'
 
-export function SetupSummary({ state, audience = 'client' }: { state: ClientOnboardingState; audience?: 'client' | 'staff' }) {
+export function SetupSummary({ state, audience = 'client', compact = false }: { state: ClientOnboardingState; audience?: 'client' | 'staff'; compact?: boolean }) {
   return (
     <div className="space-y-5">
-      <header>
+      {!compact && <header>
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-report-accent">Performance</p>
         <h1 className="mt-2 text-3xl font-black text-white sm:text-5xl">Setup</h1>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-report-muted">Your Welcome to CG information stays here, so you can check what was shared and what CG has verified.</p>
-      </header>
+      </header>}
       <div className="grid gap-4 sm:grid-cols-2">
         <SummaryCard title="Logo & brand files" ready={logoRequirementSatisfied(state)}>
           {state.uploads.filter(upload => upload.category === 'logo').map(upload => <p key={upload.id} className="flex items-center justify-between gap-2"><span>{upload.originalFilename}</span>{upload.uploadStatus === 'received' && <DownloadButton uploadId={upload.id} audience={audience} />}</p>)}

@@ -1,7 +1,7 @@
 import type { SourceType } from '../../types/skillCards'
 import type { MarketingLibrarySource, SourceTrustTier } from './skillCardsData'
 import type { CitedSourceFamily } from './citedSourceExtraction'
-import { CITED_SOURCES, CONTAINER_REFERENCES, PACK_FILES } from './citedSources.generated'
+import { CITED_SOURCES, CONTAINER_REFERENCES, PACK_FILES } from './citedSources.generated.ts'
 
 // ── #184 Repository source registration (pure) ───────────────────────────────
 //
@@ -43,6 +43,23 @@ export interface RegistrationCandidate {
   ingestionEligibility: 'metadata_reference'
   /** Pack file paths this source is cited in (container provenance). */
   citedIn: string[]
+  /** Original access/coverage level from the source ledger (additive, v0.2+). Preserved exactly; never upgraded. */
+  accessCoverage?: string
+  /** Review-only context from the source ledger. Not doctrine, not principle, not active Skill Card content. */
+  reviewContext?: {
+    finding?: string
+    limitations?: string
+    jurisdiction?: string
+  }
+  // ── Governance / freshness metadata (additive, v0.3+) ──────────────────────
+  /** Publication or page date from the source ledger. Exact string; never inferred from file mtime. */
+  pageDate?: string
+  /** Date the source was accessed/verified. Exact ledger value; never fabricated. */
+  accessedAt?: string
+  /** Date by which the source should be re-reviewed. Exact ledger value; missing = unscheduled. */
+  reviewDue?: string
+  /** Source status from the ledger (e.g. "active", "blocked_login", "rate_limited"). Exact value; never inferred. */
+  sourceStatus?: string
 }
 
 const citedCandidates: RegistrationCandidate[] = CITED_SOURCES.map(source => ({
