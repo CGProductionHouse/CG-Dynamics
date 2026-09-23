@@ -22,7 +22,9 @@ import {
   type PackageSettings,
 } from '../../lib/db/clients'
 import { ClientLogo } from '../../components/ClientLogo'
-import { PACKAGE_NUMBER_FIELDS } from '../../lib/packageAuthority'
+import { PACKAGE_NUMBER_FIELDS, type PackageVerificationReceipt } from '../../lib/packageAuthority'
+import { loadActiveClientPackageEvidenceMatrix, type ActiveClientPackageEvidence } from '../../lib/packageEvidence'
+import { PackageEvidenceReviewModal } from '../../components/clients/PackageEvidenceReviewModal'
 
 function errorMessage(_error: unknown, fallback: string) {
   return fallback
@@ -66,6 +68,11 @@ export default function ClientsList() {
   const [viewFilter, setViewFilter] = useState<ViewFilter>('active')
   const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null)
   const [packageNotice, setPackageNotice] = useState<string | null>(null)
+  const [packageEvidence, setPackageEvidence] = useState<ActiveClientPackageEvidence[]>([])
+  const [packageEvidenceLoading, setPackageEvidenceLoading] = useState(true)
+  const [packageEvidenceError, setPackageEvidenceError] = useState<string | null>(null)
+  const [showEvidenceMatrix, setShowEvidenceMatrix] = useState(false)
+  const [reviewClientId, setReviewClientId] = useState<string | null>(null)
 
   const displayClients = useMemo(() => {
     if (viewFilter === 'active') return clients.filter(c => c.active)
@@ -119,6 +126,38 @@ export default function ClientsList() {
   useEffect(() => {
     void load()
   }, [])
+
+  useEffect(() => {
+    if (!isAdmin || clients.length === 0) return
+    let cancelled = false
+    void loadActiveClientPackageEvidenceMatrix(clients).then(result => {
+      if (cancelled) return
+      setPackageEvidenceLoading(false)
+      if (result.error) {
+        setPackageEvidenceError('Could not load the package evidence matrix.')
+        return
+      }
+      setPackageEvidence(result.data)
+      setPackageEvidenceError(null)
+    })
+    return () => { cancelled = true }
+  }, [clients, isAdmin])
+
+  const nextUnconfirmed = packageEvidence.find(row => !row.confirmed)
+  const reviewEvidence = packageEvidence.find(row => row.clientId === reviewClientId) ?? null
+
+  function openNextUnconfirmed() {
+    if (nextUnconfirmed) setReviewClientId(nextUnconfirmed.clientId)
+  }
+
+  function handlePackageReviewed(packageSettings: PackageSettings & { verification: PackageVerificationReceipt }) {
+    if (!reviewEvidence) return
+    const completedId = reviewEvidence.clientId
+    const next = packageEvidence.find(row => !row.confirmed && row.clientId !== completedId)
+    setClients(current => current.map(client => client.id === completedId ? { ...client, package_settings: packageSettings } : client))
+    setPackageEvidence(current => current.map(row => row.clientId === completedId ? { ...row, confirmed: true } : row))
+    setReviewClientId(next?.clientId ?? null)
+  }
 
   async function load(options: { silent?: boolean } = {}): Promise<string | null> {
     if (!options.silent) {
@@ -227,6 +266,12 @@ export default function ClientsList() {
         </div>
         {isAdmin && (
           <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+            <ActionButton variant="secondary" onClick={() => setShowEvidenceMatrix(value => !value)}>
+              {showEvidenceMatrix ? 'Hide evidence matrix' : 'Evidence matrix'}
+            </ActionButton>
+            <ActionButton variant="secondary" onClick={openNextUnconfirmed} disabled={!nextUnconfirmed || packageEvidenceLoading}>
+              Review next unconfirmed
+            </ActionButton>
             <ActionButton variant="secondary" onClick={openBulk}>Bulk add clients</ActionButton>
             <ActionButton variant="primary" onClick={() => setModal({ open: true })}>Add client</ActionButton>
           </div>
@@ -244,6 +289,15 @@ export default function ClientsList() {
             ✕
           </button>
         </div>
+      )}
+
+      {isAdmin && showEvidenceMatrix && (
+        <PackageEvidenceMatrix
+          rows={packageEvidence}
+          loading={packageEvidenceLoading}
+          error={packageEvidenceError}
+          onReview={clientId => setReviewClientId(clientId)}
+        />
       )}
 
       {loading ? (
@@ -438,7 +492,61 @@ export default function ClientsList() {
           onClose={closeBulk}
         />
       )}
+
+
+      {reviewEvidence && (
+        <PackageEvidenceReviewModal
+          key={reviewEvidence.clientId}
+          evidence={reviewEvidence}
+          confirmedCount={packageEvidence.filter(row => row.confirmed).length}
+          totalCount={packageEvidence.length}
+          onConfirmed={handlePackageReviewed}
+          onClose={() => setReviewClientId(null)}
+        />
+      )}
     </div>
+  )
+}
+
+function PackageEvidenceMatrix({
+  rows,
+  loading,
+  error,
+  onReview,
+}: {
+  rows: ActiveClientPackageEvidence[]
+  loading: boolean
+  error: string | null
+  onReview: (clientId: string) => void
+}) {
+  if (loading && rows.length === 0) return <div className="mb-5 rounded-xl border border-white/10 bg-brand-surface p-4 text-sm text-brand-primary">Loading exact-client evidence…</div>
+  if (error) return <div className="mb-5 rounded-xl border border-red-400/20 bg-red-400/10 p-4 text-sm text-red-300">{error}</div>
+  return (
+    <section className="mb-6 overflow-hidden rounded-xl border border-white/10 bg-brand-surface/90">
+      <div className="border-b border-white/10 p-4">
+        <h2 className="text-sm font-bold text-white">Active-client package evidence matrix</h2>
+        <p className="mt-1 text-xs text-brand-primary">{rows.length} active clients represented. Proposed values come only from exact current package records/templates. Schedule cadence is supporting evidence only.</p>
+      </div>
+      <div className="max-h-[36rem] overflow-auto">
+        <table className="w-full min-w-[760px] text-left text-xs">
+          <thead className="sticky top-0 bg-brand-surface text-[10px] uppercase tracking-wider text-white/35">
+            <tr><th className="px-4 py-3">Client</th><th className="px-4 py-3">Status</th><th className="px-4 py-3">Direct proposals</th><th className="px-4 py-3">Unknown</th><th className="px-4 py-3">Conflicts</th><th className="px-4 py-3">Evidence</th><th className="px-4 py-3" /></tr>
+          </thead>
+          <tbody>{rows.map(row => {
+            const proposals = Object.values(row.fields).filter(field => field.state === 'proposed').length
+            return <tr key={row.clientId} className="border-t border-white/8 align-top">
+              <td className="px-4 py-3 font-semibold text-white">{row.clientName}</td>
+              <td className="px-4 py-3"><span className={row.confirmed ? 'text-brand-teal' : 'text-amber-200'}>{row.confirmed ? 'Confirmed' : 'Unconfirmed'}</span></td>
+              <td className="px-4 py-3 text-white/65">{proposals}</td>
+              <td className="px-4 py-3 text-amber-200">{row.unknownFields.length}</td>
+              <td className="max-w-xs px-4 py-3 text-red-300">{row.conflicts.length ? row.conflicts.join(' ') : '—'}</td>
+              <td className="px-4 py-3 text-white/55">{row.directSources.length} direct · {row.supportingSources.length} supporting</td>
+              <td className="px-4 py-3 text-right">{!row.confirmed && <ActionButton variant="ghost" size="sm" onClick={() => onReview(row.clientId)}>Review</ActionButton>}</td>
+            </tr>
+          })}</tbody>
+        </table>
+      </div>
+    </section>
   )
 }
 
