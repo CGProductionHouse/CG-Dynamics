@@ -5,7 +5,9 @@ import { test } from 'node:test'
 const packageAuthority = await import('../src/lib/packageAuthority.ts')
 const strategy = await import('../src/lib/strategyEngine.ts')
 const migration = readFileSync(new URL('../supabase/migrations/20260923110000_active_client_package_strategy_authority.sql', import.meta.url), 'utf8').replace(/\r\n/g, '\n')
+const unknownMigration = readFileSync(new URL('../supabase/migrations/20260923122616_preserve_unknown_package_confirmation.sql', import.meta.url), 'utf8').replace(/\r\n/g, '\n')
 const clientsPage = readFileSync(new URL('../src/pages/admin/ClientsList.tsx', import.meta.url), 'utf8').replace(/\r\n/g, '\n')
+const evidenceReview = readFileSync(new URL('../src/components/clients/PackageEvidenceReviewModal.tsx', import.meta.url), 'utf8').replace(/\r\n/g, '\n')
 const manualStrategy = readFileSync(new URL('../src/lib/monthlyStrategy.ts', import.meta.url), 'utf8').replace(/\r\n/g, '\n')
 const automaticStrategy = readFileSync(new URL('../supabase/functions/_shared/monthlyStrategyAutopilot.ts', import.meta.url), 'utf8').replace(/\r\n/g, '\n')
 
@@ -47,6 +49,67 @@ test('explicit verified zero remains a real confirmed package value', () => {
   assert.equal(result.verification?.source_references[0], 'contract-2026')
 })
 
+test('v2 confirmation preserves unknown, explicit zero and known values exactly', () => {
+  const settings = {
+    ...confirmedPackage(),
+    professional_videos_per_month: null,
+    reels_per_month: 0,
+    photo_posts_per_month: 4,
+    campaign_management_included: null,
+    other_agreed_deliverables: null,
+    package_notes: null,
+    package_exclusions: null,
+    verification: undefined,
+  }
+  const fieldStates = packageAuthority.buildPackageFieldStates(settings)
+  const raw = {
+    ...settings,
+    verification: {
+      status: 'confirmed', version: 2, confirmed_at: '2026-09-23T08:00:00Z',
+      confirmed_by_profile_id: 'admin-a', evidence_note: 'Signed package reviewed',
+      inference_note: 'Unknowns retained.', source_references: ['contract-2026'], field_states: fieldStates,
+    },
+  }
+  const result = packageAuthority.readPackageAuthority(raw)
+  assert.equal(result.status, 'confirmed')
+  assert.equal(result.settings?.professional_videos_per_month, null)
+  assert.equal(result.settings?.reels_per_month, 0)
+  assert.equal(result.settings?.photo_posts_per_month, 4)
+  assert.equal(result.settings?.campaign_management_included, null)
+  assert.equal(fieldStates.professional_videos_per_month, 'unknown')
+  assert.equal(fieldStates.reels_per_month, 'explicit_zero')
+  assert.equal(fieldStates.photo_posts_per_month, 'known')
+})
+
+test('v2 receipt fails closed when a field state relabels null or zero', () => {
+  const base = confirmedPackage({
+    professional_videos_per_month: null,
+    other_agreed_deliverables: null,
+    package_notes: null,
+    package_exclusions: null,
+  })
+  const states = packageAuthority.buildPackageFieldStates(base)
+  const receipt = {
+    status: 'confirmed', version: 2, confirmed_at: '2026-09-23T08:00:00Z',
+    confirmed_by_profile_id: 'admin-a', evidence_note: 'Signed package reviewed',
+    inference_note: '', source_references: ['contract-2026'], field_states: states,
+  }
+  assert.equal(packageAuthority.readPackageAuthority({ ...base, verification: receipt }).status, 'confirmed')
+  assert.equal(packageAuthority.readPackageAuthority({ ...base, verification: { ...receipt, field_states: { ...states, professional_videos_per_month: 'known' } } }).status, 'unverified')
+  assert.equal(packageAuthority.readPackageAuthority({ ...base, reels_per_month: 0, verification: { ...receipt, field_states: { ...states, reels_per_month: 'known' } } }).status, 'unverified')
+})
+
+test('confirmation UI and RPC preserve blank values as unknown rather than zero or false', () => {
+  assert.match(evidenceReview, /numbers\[field\] === '' \? null : Number\(numbers\[field\]\)/)
+  assert.match(evidenceReview, /campaign === '' \? null : campaign === 'true'/)
+  assert.match(clientsPage, /value === '' \? null : Number\(value\)/)
+  assert.match(clientsPage, /campaignValue === '' \? null : campaignValue === 'true'/)
+  assert.match(unknownMigration, /'version', 2/)
+  assert.match(unknownMigration, /'field_states', v_field_states/)
+  assert.match(unknownMigration, /Unknown package field % must remain null/)
+  assert.match(unknownMigration, /v_state = 'explicit_zero' and v_numeric <> 0/)
+})
+
 test('package verification is active-admin only, exact-client, guarded and auditable', () => {
   assert.match(migration, /profile\.id = auth\.uid\(\).*profile\.is_active.*profile\.role = 'admin'/s)
   assert.match(migration, /where client\.id = p_client_id for update/)
@@ -64,7 +127,7 @@ test('the review queue defaults to active clients and requires an explicit confi
   assert.match(clientsPage, /const \[viewFilter, setViewFilter\] = useState<ViewFilter>\('active'\)/)
   assert.match(clientsPage, /clients\.filter\(client => client\.active\)/)
   assert.match(clientsPage, /Confirm this exact current package as authoritative/)
-  assert.match(clientsPage, /Use 0 only when zero is confirmed/)
+  assert.match(clientsPage, /use 0 only when zero is confirmed/i)
   assert.match(clientsPage, /at least one exact source reference/)
   assert.match(clientsPage, /confirmClientPackage\(/)
   assert.match(clientsPage, /package_settings: pkgResult\.data!\.package_settings/)
@@ -81,6 +144,19 @@ test('gold-standard quality rejects generic filler and out-of-package work but p
   const issues = strategy.assessGoldStandardStrategy(data, packageSettings, true)
   assert.ok(issues.some(issue => issue.includes('generic')))
   assert.ok(issues.some(issue => issue.includes('Reels exceeds')))
+})
+
+test('strategy capacity distinguishes unknown from explicit zero and fails closed', () => {
+  const data = strategy.emptyStrategyData()
+  for (const field of strategy.GOLD_STANDARD_FIELDS) data.goldStandard[field.key] = `Client-specific evidence and concrete action for ${field.label}.`
+  data.actionPlan.reels.enabled = true
+  const unknown = packageAuthority.readPackageSettings({ reels_per_month: null })
+  const zero = packageAuthority.readPackageSettings({ reels_per_month: 0 })
+  assert.ok(strategy.assessGoldStandardStrategy(data, unknown, true).includes('Reels capacity is unknown; it cannot be approved.'))
+  assert.ok(strategy.assessGoldStandardStrategy(data, zero, true).includes('Reels exceeds the confirmed package.'))
+  assert.match(unknownMigration, /capacity is unknown; strategy cannot be approved/)
+  assert.match(unknownMigration, /plan exceeds the confirmed package/)
+  assert.doesNotMatch(unknownMigration, /coalesce\(\(v_package ->> 'reels_per_month'\)::integer, 0\)/)
 })
 
 test('database approval gate requires current package receipt, exact-client evidence and all ten specific fields', () => {

@@ -575,13 +575,21 @@ function PackageChips({ client }: { client: Client }) {
         { label: 'F', value: pkg.photo_posts_per_month },
         { label: 'Video', value: pkg.professional_videos_per_month },
         { label: 'Reel', value: pkg.reels_per_month },
-      ].filter(c => c.value > 0)
+      ].filter(c => typeof c.value === 'number' && c.value > 0)
     : []
+  const coreQuantitiesUnknown = Boolean(pkg && [
+    pkg.design_posters_per_month,
+    pkg.photo_posts_per_month,
+    pkg.professional_videos_per_month,
+    pkg.reels_per_month,
+  ].some(value => value === null))
 
   if (chips.length === 0) {
     return (
       <span className={`text-[11px] ${authority.status === 'confirmed' ? 'text-brand-teal' : 'text-amber-300'}`}>
-        {authority.status === 'confirmed' ? 'Confirmed package · no core content quantities' : 'Package unverified'}
+        {authority.status === 'confirmed'
+          ? coreQuantitiesUnknown ? 'Confirmed package · core quantities partly unknown' : 'Confirmed package · no core content quantities'
+          : 'Package unverified'}
       </span>
     )
   }
@@ -598,6 +606,7 @@ function PackageChips({ client }: { client: Client }) {
       <span className="rounded border border-brand-teal/20 bg-brand-teal/[0.06] px-2 py-0.5 text-[11px] font-bold text-brand-teal">
         Confirmed
       </span>
+      {coreQuantitiesUnknown && <span className="rounded border border-amber-300/20 bg-amber-300/[0.06] px-2 py-0.5 text-[11px] font-bold text-amber-200">Some unknown</span>}
     </div>
   )
 }
@@ -728,9 +737,12 @@ function ClientModal({
     try {
       const parsedSourceReferences = sourceReferences.split('\n').map(value => value.trim()).filter(Boolean)
       if (confirmPackage) {
-        const invalidNumber = PACKAGE_NUMBER_FIELDS.find(key => !/^\d+$/.test(numberValues[key] ?? ''))
-        if (invalidNumber || campaignValue === '') {
-          setError('Every package field needs an explicit value. Use 0 only when zero is confirmed.')
+        const invalidNumber = PACKAGE_NUMBER_FIELDS.find(key => {
+          const value = (numberValues[key] ?? '').trim()
+          return value !== '' && !/^\d+$/.test(value)
+        })
+        if (invalidNumber) {
+          setError('Package quantities must be whole numbers. Leave unknown fields blank; use 0 only when zero is confirmed.')
           return
         }
         if (evidenceNote.trim().length < 12) {
@@ -744,8 +756,14 @@ function ClientModal({
       }
       const confirmedPackage = {
         ...pkg,
-        ...Object.fromEntries(PACKAGE_NUMBER_FIELDS.map(key => [key, Number(numberValues[key])])),
-        campaign_management_included: campaignValue === 'true',
+        ...Object.fromEntries(PACKAGE_NUMBER_FIELDS.map(key => {
+          const value = (numberValues[key] ?? '').trim()
+          return [key, value === '' ? null : Number(value)]
+        })),
+        campaign_management_included: campaignValue === '' ? null : campaignValue === 'true',
+        package_notes: pkg.package_notes?.trim() || null,
+        other_agreed_deliverables: pkg.other_agreed_deliverables?.trim() || null,
+        package_exclusions: pkg.package_exclusions?.trim() || null,
       } as PackageSettings
       const err = await onSave({
         name: trimmedName,
@@ -867,7 +885,7 @@ function ClientModal({
             <div className="mt-3">
               <label className="block text-xs font-medium text-brand-primary mb-1">Package notes</label>
               <textarea
-                value={pkg.package_notes}
+                value={pkg.package_notes ?? ''}
                 onChange={e => setPkg(current => ({ ...current, package_notes: e.target.value }))}
                 rows={2}
                 placeholder="Anything specific about this client's package."
@@ -876,10 +894,10 @@ function ClientModal({
             </div>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
               <label className="block text-xs font-medium text-brand-primary">Other agreed deliverables
-                <textarea value={pkg.other_agreed_deliverables} onChange={e => setPkg(current => ({ ...current, other_agreed_deliverables: e.target.value }))} rows={2} className="mt-1 w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white" />
+                <textarea value={pkg.other_agreed_deliverables ?? ''} onChange={e => setPkg(current => ({ ...current, other_agreed_deliverables: e.target.value }))} rows={2} className="mt-1 w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white" />
               </label>
               <label className="block text-xs font-medium text-brand-primary">Specific exclusions
-                <textarea value={pkg.package_exclusions} onChange={e => setPkg(current => ({ ...current, package_exclusions: e.target.value }))} rows={2} className="mt-1 w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white" />
+                <textarea value={pkg.package_exclusions ?? ''} onChange={e => setPkg(current => ({ ...current, package_exclusions: e.target.value }))} rows={2} className="mt-1 w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white" />
               </label>
             </div>
             {client && (

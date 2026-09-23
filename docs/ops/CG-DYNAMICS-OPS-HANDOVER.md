@@ -278,7 +278,12 @@ Required:
 - backward compatibility for existing confirmed rows;
 - after review, production RPC/schema activation remains a protected gate.
 
-Agent 01 should handle #511 before any first package confirmation write.
+Agent 01 has prepared the bounded #511 correction: v2 confirmation receipts retain
+per-field `known` / `explicit_zero` / `unknown` state, unknown values remain JSON
+`null`, and enabled strategy work with unknown capacity fails closed. The additive
+`20260923122616_preserve_unknown_package_confirmation.sql` migration is not applied;
+no first package confirmation write may proceed until supervisor review and separate
+CA approval for that protected production migration/RPC activation.
 
 ## 7. Prompt discipline — HARD
 

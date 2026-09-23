@@ -304,27 +304,31 @@ export async function prepareMonthlyStrategySeed(clientId: string, month: string
     packageSettings,
   })
   strategyData.clientActionsRequired = ['Confirm any priority offers, events or deadlines for this month.']
-  const packageMix = [
-    `${packageSettings.professional_videos_per_month} professional videos`,
-    `${packageSettings.reels_per_month} reels`,
-    `${packageSettings.photo_posts_per_month} photo posts`,
-    `${packageSettings.design_posters_per_month} design posters`,
-    `${packageSettings.animated_posters_per_month} animated posters`,
-    `${packageSettings.website_updates_per_month} website updates`,
-  ].join(', ')
+  const packageMix = ([
+    [packageSettings.professional_videos_per_month, 'professional videos'],
+    [packageSettings.reels_per_month, 'reels'],
+    [packageSettings.photo_posts_per_month, 'photo posts'],
+    [packageSettings.design_posters_per_month, 'design posters'],
+    [packageSettings.animated_posters_per_month, 'animated posters'],
+    [packageSettings.website_updates_per_month, 'website updates'],
+  ] as Array<[number | null, string]>)
+    .filter((entry): entry is [number, string] => typeof entry[0] === 'number')
+    .map(([count, label]) => `${count} ${label}`)
+    .join(', ')
+  const confirmedPackageMix = packageMix || 'no quantitatively confirmed deliverables'
   strategyData.goldStandard.objective = baseline.clientDirection[0]
     ? `${clientResult.data.name}: ${baseline.clientDirection[0]}`
     : ''
-  strategyData.goldStandard.formatsAndRationale = `Work within ${clientResult.data.name}’s confirmed monthly package of ${packageMix}; staff must tie each selected format to an evidenced objective before approval.`
+  strategyData.goldStandard.formatsAndRationale = `Work within ${clientResult.data.name}’s confirmed monthly package of ${confirmedPackageMix}; staff must tie each selected format to an evidenced objective before approval.`
   strategyData.goldStandard.testAndChange = previous.topContent.whatThisTellsUs
     ? `Use the previous exact-client finding “${previous.topContent.whatThisTellsUs}” to define one controlled change for ${clientResult.data.name}.`
     : ''
-  strategyData.goldStandard.nextMonthGamePlan = `Plan and sequence only the confirmed ${packageMix}. ${packageSettings.package_exclusions ? `Excluded: ${packageSettings.package_exclusions}` : 'No additional scope may be inferred.'}`
+  strategyData.goldStandard.nextMonthGamePlan = `Plan and sequence only the confirmed ${confirmedPackageMix}. ${packageSettings.package_exclusions ? `Excluded: ${packageSettings.package_exclusions}` : 'No additional scope may be inferred.'}`
   baseline.evidence.push({
     authority: 'confirmed_client_package',
     source_id: clientId,
     field: 'actionPlan',
-    excerpt: `${packageMix}. Confirmed ${packageAuthority.verification.confirmed_at}.`,
+    excerpt: `${confirmedPackageMix}. Confirmed ${packageAuthority.verification.confirmed_at}.`,
   })
 
   const seedContext: MonthlyStrategySeedContext = {

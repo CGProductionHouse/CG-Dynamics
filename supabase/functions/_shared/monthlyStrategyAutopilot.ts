@@ -216,10 +216,15 @@ async function prepareDraft(sb: StrategyAutopilotClient, client: Record<string, 
 
   const counts = new Map<string, number>()
   if (packageAuthority.settings) {
-    counts.set('video', packageAuthority.settings.professional_videos_per_month)
-    counts.set('reel', packageAuthority.settings.reels_per_month)
-    counts.set('photo', packageAuthority.settings.photo_posts_per_month)
-    counts.set('dp', packageAuthority.settings.design_posters_per_month)
+    const observedCounts: Array<[string, number | null]> = [
+      ['video', packageAuthority.settings.professional_videos_per_month],
+      ['reel', packageAuthority.settings.reels_per_month],
+      ['photo', packageAuthority.settings.photo_posts_per_month],
+      ['dp', packageAuthority.settings.design_posters_per_month],
+    ]
+    for (const [type, count] of observedCounts) {
+      if (typeof count === 'number') counts.set(type, count)
+    }
   }
   for (const [type, count] of counts) {
     const key = ({ video: 'professional_video', reel: 'reels', photo: 'photo_content', dp: 'design_poster' } as Record<string, string>)[type]

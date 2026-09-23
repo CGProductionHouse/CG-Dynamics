@@ -63,11 +63,10 @@ export function PackageEvidenceReviewModal({
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const unresolvedNumbers = useMemo(() => PACKAGE_NUMBER_FIELDS.filter(field => !/^\d+$/.test(numbers[field])), [numbers])
+  const invalidNumbers = useMemo(() => PACKAGE_NUMBER_FIELDS.filter(field => numbers[field] !== '' && !/^\d+$/.test(numbers[field])), [numbers])
   const sourceList = sourceReferences.split('\n').map(value => value.trim()).filter(Boolean)
   const canConfirm = explicitConfirmation
-    && unresolvedNumbers.length === 0
-    && (campaign === 'true' || campaign === 'false')
+    && invalidNumbers.length === 0
     && evidenceNote.trim().length >= 12
     && sourceList.length > 0
 
@@ -77,11 +76,11 @@ export function PackageEvidenceReviewModal({
     setSaving(true)
     setError(null)
     const settings = {
-      ...Object.fromEntries(PACKAGE_NUMBER_FIELDS.map(field => [field, Number(numbers[field])])),
-      campaign_management_included: campaign === 'true',
-      other_agreed_deliverables: other.trim(),
-      package_notes: notes.trim(),
-      package_exclusions: exclusions.trim(),
+      ...Object.fromEntries(PACKAGE_NUMBER_FIELDS.map(field => [field, numbers[field] === '' ? null : Number(numbers[field])])),
+      campaign_management_included: campaign === '' ? null : campaign === 'true',
+      other_agreed_deliverables: other.trim() || null,
+      package_notes: notes.trim() || null,
+      package_exclusions: exclusions.trim() || null,
     } as PackageSettings
     const result = await confirmClientPackage({
       clientId: evidence.clientId,
@@ -174,8 +173,8 @@ export function PackageEvidenceReviewModal({
               <input type="checkbox" checked={explicitConfirmation} onChange={event => setExplicitConfirmation(event.target.checked)} className="mt-0.5 h-4 w-4 accent-brand-accent" />
               I have verified every field for this exact client. Blank evidence and posting history were not treated as contractual zero or scope.
             </label>
-            {unresolvedNumbers.length > 0 && <p className="text-xs text-amber-200">Resolve {unresolvedNumbers.length} unknown numeric field{unresolvedNumbers.length === 1 ? '' : 's'} before confirming.</p>}
-            {campaign === '' && <p className="text-xs text-amber-200">Campaign management is still unknown.</p>}
+            {invalidNumbers.length > 0 && <p className="text-xs text-red-300">Correct {invalidNumbers.length} invalid numeric field{invalidNumbers.length === 1 ? '' : 's'} before confirming.</p>}
+            <p className="text-xs text-amber-200">Blank fields will be confirmed as unknown, never as zero or No.</p>
             {error && <p className="rounded-lg border border-red-400/20 bg-red-400/10 p-3 text-sm text-red-300">{error}</p>}
             <ActionButton variant="primary" type="submit" fullWidth disabled={!canConfirm || saving} loading={saving}>Confirm exact package and open next</ActionButton>
           </aside>

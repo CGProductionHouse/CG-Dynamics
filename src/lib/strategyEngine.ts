@@ -316,7 +316,7 @@ export function assessGoldStandardStrategy(
     else if (value.length < 20) issues.push(`${field.label} needs specific client detail.`)
   }
   if (packageSettings) {
-    const checks: Array<[ActionPlanKey, number | boolean, string]> = [
+    const checks: Array<[ActionPlanKey, number | boolean | null, string]> = [
       ['professional_video', packageSettings.professional_videos_per_month, 'Professional video'],
       ['reels', packageSettings.reels_per_month, 'Reels'],
       ['photo_content', packageSettings.photo_posts_per_month, 'Photo content'],
@@ -325,7 +325,9 @@ export function assessGoldStandardStrategy(
       ['campaign_recommendation', packageSettings.campaign_management_included, 'Campaign management'],
     ]
     for (const [key, allowance, label] of checks) {
-      if (data.actionPlan[key].enabled && !allowance) issues.push(`${label} exceeds the confirmed package.`)
+      if (!data.actionPlan[key].enabled) continue
+      if (allowance === null) issues.push(`${label} capacity is unknown; it cannot be approved.`)
+      else if (!allowance) issues.push(`${label} exceeds the confirmed package.`)
     }
   }
   return issues
@@ -410,7 +412,7 @@ export function generateActionPlan(
   const dateTitles = ctx.selectedCalendar.filter(s => s.use).map(s => s.title)
   const dateLine = dateTitles.length > 0 ? `Tie content to: ${joinList(dateTitles)}.` : ''
 
-  const make = (key: ActionPlanKey, enabled: boolean, qty?: number): ActionPlanSection => {
+  const make = (key: ActionPlanKey, enabled: boolean, qty?: number | null): ActionPlanSection => {
     const items: string[] = []
     const base = ACTION_DEFAULTS[key]
     items.push(qty && qty > 0 ? `${base} (${qty} this month)` : base)
@@ -419,15 +421,15 @@ export function generateActionPlan(
   }
 
   return {
-    professional_video: make('professional_video', pkg.professional_videos_per_month > 0, pkg.professional_videos_per_month),
-    reels: make('reels', pkg.reels_per_month > 0, pkg.reels_per_month),
-    photo_content: make('photo_content', pkg.photo_posts_per_month > 0, pkg.photo_posts_per_month),
-    design_poster: make('design_poster', pkg.design_posters_per_month > 0, pkg.design_posters_per_month),
-    animated_poster: make('animated_poster', pkg.animated_posters_per_month > 0, pkg.animated_posters_per_month),
+    professional_video: make('professional_video', typeof pkg.professional_videos_per_month === 'number' && pkg.professional_videos_per_month > 0, pkg.professional_videos_per_month),
+    reels: make('reels', typeof pkg.reels_per_month === 'number' && pkg.reels_per_month > 0, pkg.reels_per_month),
+    photo_content: make('photo_content', typeof pkg.photo_posts_per_month === 'number' && pkg.photo_posts_per_month > 0, pkg.photo_posts_per_month),
+    design_poster: make('design_poster', typeof pkg.design_posters_per_month === 'number' && pkg.design_posters_per_month > 0, pkg.design_posters_per_month),
+    animated_poster: make('animated_poster', typeof pkg.animated_posters_per_month === 'number' && pkg.animated_posters_per_month > 0, pkg.animated_posters_per_month),
     campaign_recommendation: {
-      enabled: pkg.campaign_management_included,
+      enabled: pkg.campaign_management_included === true,
       items: [
-        pkg.campaign_management_included && pkg.monthly_campaign_budget > 0
+        pkg.campaign_management_included === true && typeof pkg.monthly_campaign_budget === 'number' && pkg.monthly_campaign_budget > 0
           ? `Manage the monthly campaign budget of R${pkg.monthly_campaign_budget.toLocaleString('en-ZA')}.`
           : ACTION_DEFAULTS.campaign_recommendation,
       ],
