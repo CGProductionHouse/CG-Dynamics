@@ -311,7 +311,9 @@ Exact reviewed handles already known among the 24 unmapped clients:
 - Toyota Bloemfontein — `@cfaomobilitytoyotabloemfontein`
 - We Ar Fuels — `@we_ar_fuels`
 
-Do not infer the remaining identities from search-name similarity. Bloem Action Sports, Hino Trucks, Jenkor and WiseRide are explicitly unresolved in current reviewed intelligence; other unresolved rows also remain identity-gated.
+The in-product queue evidence is reconciled to this exact production partition: 46 recurring-social eligible / 10 non-social-or-not-currently-social / 24 Instagram-unmapped. First Technology Central is non-social and is excluded from rollout evidence.
+
+Do not infer the remaining identities from search-name similarity. Bloem Action Sports, Forklift Trucks, Hino Trucks, Human Auto, Jenkor and WiseRide are explicitly unresolved in current reviewed intelligence; other unresolved rows also remain identity-gated.
 
 Real remaining standalone provider gates:
 - secure server configuration completeness, including `INSTAGRAM_APP_SECRET` and `INSTAGRAM_STANDALONE_LIVE_ACTIVATION_ENABLED=true`;

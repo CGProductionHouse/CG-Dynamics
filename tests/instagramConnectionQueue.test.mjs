@@ -15,13 +15,66 @@ const callback = read('../supabase/functions/instagram-oauth-callback/index.ts')
 const confirm = read('../supabase/functions/instagram-connection-confirm/index.ts')
 const migration = read('../supabase/migrations/20260923120000_instagram_connection_review_binding.sql')
 
-test('fleet evidence contains the exact 17 reviewed active-client cases without guessed handles', () => {
-  assert.equal(INSTAGRAM_FLEET_EVIDENCE.length, 17)
-  assert.equal(INSTAGRAM_FLEET_EVIDENCE.filter(item => item.verifiedHandle).length, 6)
-  assert.equal(INSTAGRAM_FLEET_EVIDENCE.filter(item => !item.verifiedHandle).length, 11)
+test('fleet evidence contains the exact 24 Instagram-unmapped recurring-social clients', () => {
+  const expectedClients = [
+    'Bloem Action Sports',
+    'Bohemia Quick Stop',
+    'Bouwer & Coetzee',
+    'Central Canvas',
+    'Daisy & Co',
+    'Ehrlich Park Butchery',
+    'Emmanuel Funerals',
+    'Emoya Estate Driving Range',
+    'Forklift Trucks',
+    'Hino Trucks',
+    'HMHI',
+    'Human Auto',
+    'Jenkor',
+    'Novus Steel',
+    'Piek Group',
+    'PSG Bloemfontein',
+    'Red Oak',
+    'Supa Quick BFN',
+    'Supa Quick Centurion',
+    'The Staffordshire',
+    'Tobich Optics',
+    'Toyota Bloemfontein',
+    'We Ar Fuels',
+    'WiseRide',
+  ]
+
+  assert.deepEqual(INSTAGRAM_FLEET_EVIDENCE.map(item => item.clientName), expectedClients)
+  assert.equal(INSTAGRAM_FLEET_EVIDENCE.filter(item => item.verifiedHandle).length, 8)
+  assert.equal(INSTAGRAM_FLEET_EVIDENCE.filter(item => !item.verifiedHandle).length, 16)
+  assert.equal(instagramFleetEvidenceFor('First Technology Central'), null)
+  assert.equal(instagramFleetEvidenceFor('Unreviewed Client'), null)
+})
+
+test('all eight reviewed exact handles are preserved without guessing unresolved identities', () => {
+  const expectedHandles = new Map([
+    ['Bouwer & Coetzee Attorneys', 'bouwer_coetzee_attorneys'],
+    ['Emmanuel Funerals', 'emmanuelfunerals'],
+    ['Emoya Estate Driving Range', 'emoyadrivingrange'],
+    ['Novus Steel', 'novus_steel'],
+    ['Piek Group', 'piekgroup'],
+    ['Red Oak', 'official.redoak'],
+    ['Toyota Bloemfontein', 'cfaomobilitytoyotabloemfontein'],
+    ['We Ar Fuels', 'we_ar_fuels'],
+  ])
+
+  for (const [clientName, handle] of expectedHandles) {
+    assert.equal(instagramFleetEvidenceFor(clientName)?.verifiedHandle, handle)
+  }
+
+  for (const clientName of ['Bloem Action Sports', 'Forklift Trucks', 'Hino Trucks', 'Human Auto', 'Jenkor', 'WiseRide']) {
+    const evidence = instagramFleetEvidenceFor(clientName)
+    assert.equal(evidence?.evidence, 'no_verified_account')
+    assert.equal(evidence?.verifiedHandle, null)
+    assert.match(evidence?.reviewNote ?? '', /do not (?:infer|substitute)/i)
+  }
+
   assert.equal(instagramFleetEvidenceFor('Bouwer & Coetzee Attorneys')?.verifiedHandle, 'bouwer_coetzee_attorneys')
   assert.equal(instagramFleetEvidenceFor('Bohemia Quick Shop')?.clientName, 'Bohemia Quick Stop')
-  assert.equal(instagramFleetEvidenceFor('Unreviewed Client'), null)
 })
 
 test('reviewed handle comparison is exact apart from provider-safe case normalization', () => {
