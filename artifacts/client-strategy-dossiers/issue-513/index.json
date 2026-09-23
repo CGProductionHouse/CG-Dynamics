@@ -5,16 +5,18 @@
   "package_authority": "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
   "active_client_count": 56,
   "dossier_complete_count": 56,
-  "strategy_ready_count": 27,
-  "strategy_blocked_count": 29,
+  "strategy_ready_count": 22,
+  "strategy_blocked_count": 24,
   "clients": [
     {
       "name": "Agri-Secure",
       "id": "893992a5-23cd-4ee6-b5d9-ccf7b17fe071",
       "file": "agri-secure.md",
       "dossier_status": "complete",
-      "strategy_status": "ready",
-      "blockers": [],
+      "strategy_status": "non-applicable",
+      "blockers": [
+        "NON_SOCIAL_PACKAGE"
+      ],
       "evidence_hash": "1f525b6eccb616e94660017414ff89231627b6a66678b48a58bbb49e4bd55c44",
       "reports": 0,
       "posts": 0
@@ -81,8 +83,10 @@
       "id": "2d16262d-8450-458d-ae7e-084ef9ff662d",
       "file": "bloem-vascular.md",
       "dossier_status": "complete",
-      "strategy_status": "ready",
-      "blockers": [],
+      "strategy_status": "non-applicable",
+      "blockers": [
+        "NON_SOCIAL_PACKAGE"
+      ],
       "evidence_hash": "47e4161bebf9cd49f19218246a2979d10a4e539c975cf8579b9c695dfc0155d6",
       "reports": 0,
       "posts": 0
@@ -215,8 +219,10 @@
       "id": "61acf81b-1011-404e-9fae-2e209be65fca",
       "file": "econofoods.md",
       "dossier_status": "complete",
-      "strategy_status": "ready",
-      "blockers": [],
+      "strategy_status": "non-applicable",
+      "blockers": [
+        "NON_SOCIAL_PACKAGE"
+      ],
       "evidence_hash": "9d83f729d6c4d70f002449672ca615be748f8e8d72b64941f173cfb320542c8e",
       "reports": 0,
       "posts": 0
@@ -259,8 +265,10 @@
       "id": "c8d34a97-8400-4f52-8b0d-843491fe3d3b",
       "file": "first-technology-central.md",
       "dossier_status": "complete",
-      "strategy_status": "ready",
-      "blockers": [],
+      "strategy_status": "non-applicable",
+      "blockers": [
+        "NON_SOCIAL_PACKAGE"
+      ],
       "evidence_hash": "9854a44202a16e14a34e7ade7c91d3ea945858c1c8b21d57950e567e9ad55212",
       "reports": 3,
       "posts": 22
@@ -329,9 +337,9 @@
       "id": "2e643855-e2ad-481f-a6c6-3d934b9f4a50",
       "file": "ipopeng-office-supplies.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
+      "strategy_status": "non-applicable",
       "blockers": [
-        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
+        "NON_SOCIAL_PACKAGE"
       ],
       "evidence_hash": "159199bc6544b6720e84cfc1931f1cb57eb2e790f19a2f7c4172d7deb2cb6559",
       "reports": 0,
@@ -355,9 +363,9 @@
       "id": "5e4e3335-a89c-4629-9efc-b6a194bec80c",
       "file": "kundedienste.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
+      "strategy_status": "non-applicable",
       "blockers": [
-        "NO_EVIDENCE_BACKED_RECOMMENDATION"
+        "NON_SOCIAL_PACKAGE"
       ],
       "evidence_hash": "20d89cabc6510a67578f6a3023cbb59609a0389c534ea68b3e287a7920f7723b",
       "reports": 0,
@@ -368,9 +376,9 @@
       "id": "2a5ea019-64f5-4f8e-8a61-61a28940aa6e",
       "file": "local-deli.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
+      "strategy_status": "non-applicable",
       "blockers": [
-        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
+        "NON_SOCIAL_PACKAGE"
       ],
       "evidence_hash": "4dea2c2e0e9977398a147ddf256ceb5467994c4d8f1d3aa3dfe7d5db3377e2ba",
       "reports": 1,
@@ -407,9 +415,9 @@
       "id": "e276f019-a580-44c5-a7ab-e43840c33a64",
       "file": "mimosa-mall.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
+      "strategy_status": "non-applicable",
       "blockers": [
-        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
+        "NON_SOCIAL_PACKAGE"
       ],
       "evidence_hash": "db4b0f026b4f95f33323ffc638b76fde5413b1db7d00fcc6f85f00efc155948d",
       "reports": 0,
@@ -420,9 +428,9 @@
       "id": "94fe2568-3cf1-47dc-801e-d8d5396a0965",
       "file": "ncna.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
+      "strategy_status": "non-applicable",
       "blockers": [
-        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
+        "NON_SOCIAL_PACKAGE"
       ],
       "evidence_hash": "0a661e8b16d43dffbbe6e3dca25f1c764cc734a67dde89bc48ca6ce655962c5a",
       "reports": 0,
@@ -509,8 +517,10 @@
       "id": "ac4c5e0c-c5d3-4512-8472-fe59192abeca",
       "file": "rusoord-farmstay.md",
       "dossier_status": "complete",
-      "strategy_status": "ready",
-      "blockers": [],
+      "strategy_status": "non-applicable",
+      "blockers": [
+        "NON_SOCIAL_PACKAGE"
+      ],
       "evidence_hash": "ecca4c22a74e21a7b7c7379bfb7aac4074f1a37a618fad63928f554c3220b8de",
       "reports": 0,
       "posts": 0
@@ -682,5 +692,6 @@
       "reports": 3,
       "posts": 37
     }
-  ]
+  ],
+  "strategy_non_applicable_count": 10
 }

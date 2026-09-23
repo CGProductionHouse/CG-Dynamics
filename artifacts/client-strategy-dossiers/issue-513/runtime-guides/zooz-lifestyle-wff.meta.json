@@ -1,0 +1,10 @@
+{
+  "client_id": "0c01d90f-ba5e-4251-a597-bf3c83f990fa",
+  "client_name": "Zooz Lifestyle WFF",
+  "guide_id": "110e136a-bd5c-4fd7-86b1-6fb8178218ef",
+  "version": 1,
+  "runtime_readiness": "ready",
+  "source_pack_path": "artifacts/client-strategy-dossiers/issue-513/zooz-lifestyle-wff.md",
+  "source_revision": "current",
+  "source_observed_at": "2026-09-23 12:15:42+00"
+}

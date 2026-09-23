@@ -4,18 +4,19 @@ Generated from the immutable #501 recovery snapshot and the confirmed #504 packa
 
 - Active clients: 56
 - Dossiers complete: 56
-- Ready for gold-strategy drafting from repository evidence: 27
-- Strategy-gate blocked pending production-guide retrieval or missing exact evidence: 29
+- Ready for gold-strategy drafting from repository evidence: 22
+- Strategy-gate blocked pending production-guide retrieval or missing exact evidence: 24
+- Non-applicable (non-social / not-currently-social packages): 10
 
 | Client | Reports | Posts | Status | Blockers |
 |---|---:|---:|---|---|
-| [Agri-Secure](./agri-secure.md) | 0 | 0 | ready | — |
+| [Agri-Secure](./agri-secure.md) | 0 | 0 | non-applicable | NON_SOCIAL_PACKAGE |
 | [All Around PVC](./all-around-pvc.md) | 1 | 12 | blocked | PRODUCTION_GUIDE_RETRIEVAL_REQUIRED |
 | [AV Event Life](./av-event-life.md) | 3 | 22 | ready | — |
 | [Bat Hill Royale](./bat-hill-royale.md) | 2 | 41 | ready | — |
 | [Bloem Action Sports](./bloem-action-sports.md) | 0 | 0 | ready | — |
 | [Bloem Marble & Granite](./bloem-marble-and-granite.md) | 3 | 277 | ready | — |
-| [Bloem Vascular](./bloem-vascular.md) | 0 | 0 | ready | — |
+| [Bloem Vascular](./bloem-vascular.md) | 0 | 0 | non-applicable | NON_SOCIAL_PACKAGE |
 | [Bohemia Quick Stop](./bohemia-quick-stop.md) | 3 | 4 | ready | — |
 | [Bouwer & Coetzee Attorneys](./bouwer-and-coetzee-attorneys.md) | 3 | 21 | blocked | PRODUCTION_GUIDE_RETRIEVAL_REQUIRED |
 | [Braize](./braize.md) | 3 | 22 | ready | — |
@@ -27,31 +28,31 @@ Generated from the immutable #501 recovery snapshot and the confirmed #504 packa
 | [Daisy & Co](./daisy-and-co.md) | 3 | 14 | ready | — |
 | [Delta Gas](./delta-gas.md) | 3 | 40 | ready | — |
 | [Dulux Paint & Paper Bloemfontein](./dulux-paint-and-paper-bloemfontein.md) | 3 | 52 | ready | — |
-| [Econofoods](./econofoods.md) | 0 | 0 | ready | — |
+| [Econofoods](./econofoods.md) | 0 | 0 | non-applicable | NON_SOCIAL_PACKAGE |
 | [Ehrlich Park Butchery](./ehrlich-park-butchery.md) | 3 | 6 | ready | — |
 | [Emmanuel Funerals](./emmanuel-funerals.md) | 3 | 59 | ready | — |
 | [Emoya Estate Driving Range](./emoya-estate-driving-range.md) | 0 | 0 | ready | — |
-| [First Technology Central](./first-technology-central.md) | 3 | 22 | ready | — |
+| [First Technology Central](./first-technology-central.md) | 3 | 22 | non-applicable | NON_SOCIAL_PACKAGE |
 | [Forklift Trucks](./forklift-trucks.md) | 0 | 0 | blocked | PRODUCTION_GUIDE_RETRIEVAL_REQUIRED |
 | [Germoparts](./germoparts.md) | 3 | 85 | ready | — |
 | [Hino Trucks](./hino-trucks.md) | 0 | 0 | ready | — |
 | [HMHI](./hmhi.md) | 3 | 11 | ready | — |
 | [Human Auto](./human-auto.md) | 0 | 0 | blocked | PRODUCTION_GUIDE_RETRIEVAL_REQUIRED |
-| [Ipopeng Office Supplies](./ipopeng-office-supplies.md) | 0 | 0 | blocked | PRODUCTION_GUIDE_RETRIEVAL_REQUIRED |
+| [Ipopeng Office Supplies](./ipopeng-office-supplies.md) | 0 | 0 | non-applicable | NON_SOCIAL_PACKAGE |
 | [Jenkor](./jenkor.md) | 0 | 0 | blocked | PRODUCTION_GUIDE_RETRIEVAL_REQUIRED |
-| [Kundedienste](./kundedienste.md) | 0 | 0 | blocked | NO_EVIDENCE_BACKED_RECOMMENDATION |
-| [Local Deli](./local-deli.md) | 1 | 8 | blocked | PRODUCTION_GUIDE_RETRIEVAL_REQUIRED |
+| [Kundedienste](./kundedienste.md) | 0 | 0 | non-applicable | NON_SOCIAL_PACKAGE |
+| [Local Deli](./local-deli.md) | 1 | 8 | non-applicable | NON_SOCIAL_PACKAGE |
 | [Loraclox](./loraclox.md) | 3 | 31 | blocked | PRODUCTION_GUIDE_RETRIEVAL_REQUIRED |
 | [Madison Wear](./madison-wear.md) | 3 | 91 | blocked | PRODUCTION_GUIDE_RETRIEVAL_REQUIRED |
-| [Mimosa Mall](./mimosa-mall.md) | 0 | 0 | blocked | PRODUCTION_GUIDE_RETRIEVAL_REQUIRED |
-| [NCNA](./ncna.md) | 0 | 0 | blocked | PRODUCTION_GUIDE_RETRIEVAL_REQUIRED |
+| [Mimosa Mall](./mimosa-mall.md) | 0 | 0 | non-applicable | NON_SOCIAL_PACKAGE |
+| [NCNA](./ncna.md) | 0 | 0 | non-applicable | NON_SOCIAL_PACKAGE |
 | [Novus Steel](./novus-steel.md) | 3 | 17 | blocked | PRODUCTION_GUIDE_RETRIEVAL_REQUIRED |
 | [Peyper Bonds](./peyper-bonds.md) | 3 | 37 | blocked | PRODUCTION_GUIDE_RETRIEVAL_REQUIRED |
 | [Piek Group](./piek-group.md) | 3 | 49 | ready | — |
 | [PSG Bloemfontein](./psg-bloemfontein.md) | 3 | 15 | blocked | PRODUCTION_GUIDE_RETRIEVAL_REQUIRED |
 | [RC-Polypipe](./rc-polypipe.md) | 3 | 39 | blocked | PRODUCTION_GUIDE_RETRIEVAL_REQUIRED |
 | [Red Oak](./red-oak.md) | 1 | 40 | blocked | PRODUCTION_GUIDE_RETRIEVAL_REQUIRED |
-| [Rusoord Farmstay](./rusoord-farmstay.md) | 0 | 0 | ready | — |
+| [Rusoord Farmstay](./rusoord-farmstay.md) | 0 | 0 | non-applicable | NON_SOCIAL_PACKAGE |
 | [SecuriForce](./securiforce.md) | 3 | 107 | blocked | PRODUCTION_GUIDE_RETRIEVAL_REQUIRED |
 | [Supa Quick BFN](./supa-quick-bfn.md) | 3 | 13 | blocked | PRODUCTION_GUIDE_RETRIEVAL_REQUIRED |
 | [Supa Quick Centurion](./supa-quick-centurion.md) | 3 | 13 | blocked | PRODUCTION_GUIDE_RETRIEVAL_REQUIRED |

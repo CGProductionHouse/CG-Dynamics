@@ -1,0 +1,10 @@
+{
+  "client_id": "5dfdf4bd-9d94-4cc6-9dee-0e480a2234cb",
+  "client_name": "Bohemia Quick Stop",
+  "guide_id": "9ed5b6e6-957e-4d69-8aa4-2354b3995387",
+  "version": 1,
+  "runtime_readiness": "ready",
+  "source_pack_path": "docs/ai-workforce/client-intelligence/BOHEMIA-QUICK-STOP-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md",
+  "source_revision": "01fcdad0741fba507f38b7bc35b4fb60c44f2863",
+  "source_observed_at": "2026-09-07 22:00:00+00"
+}

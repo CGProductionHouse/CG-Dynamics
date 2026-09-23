@@ -1,0 +1,10 @@
+{
+  "client_id": "917d6f7c-1c2a-4c20-82f0-daa41b9062f5",
+  "client_name": "SecuriForce",
+  "guide_id": "a5600730-27bd-4f3f-a604-a777e598ce28",
+  "version": 1,
+  "runtime_readiness": "ready",
+  "source_pack_path": "docs/ai-workforce/client-intelligence/SECURIFORCE-CG-DYNAMICS-CLIENT-GUIDE.md",
+  "source_revision": "ccd3550c7d34a09973c627c5a740a826687f50a7",
+  "source_observed_at": "2026-09-07 22:00:00+00"
+}
