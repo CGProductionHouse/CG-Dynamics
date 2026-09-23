@@ -8,12 +8,18 @@ the Control Centre before consequential action.
 
 ### GitHub and ownership truth
 
-- Issue #494 is owned by CA MANUAL AGENT 01 from main
-  `16c0056746eff964fedbbe36bfa8f6dc02e9d56f`. Its isolated implementation adds
-  active-client-only package confirmation and fail-closed gold-standard monthly
-  strategy authority. The migration remains unapplied; no client package is
-  bulk-confirmed. #491/#238 provider work and #492 report publication remain
-  separate owned lanes.
+- Issue #500 is the active follow-up to production-live #494. CA MANUAL AGENT
+  01 owns the isolated active-client evidence-matrix and next-unconfirmed review
+  UX lane. The matrix is a read-only projection over existing exact package,
+  schedule/Microsoft mirror, guide and incorporated-context evidence; the
+  existing #494 admin RPC remains the only confirmation write. No bulk
+  confirmation, blank-to-zero inference, provider/report mutation or second
+  package store is allowed.
+
+- Issue #494 / PR #497 is merged and its package-authority migration is
+  production-live. Production has 56 active clients and zero confirmed package
+  receipts at the start of #500; no package was bulk-confirmed. #491/#238
+  provider work and #501 report publication remain separate owned lanes.
 
 - Current runtime-code baseline: `e77d0ce29a5439b99ceaf39694e31a908265c820`, including
   #388 / PR #485 and website-reporting CORS PR #486 after #472 D02 / PR #484.
@@ -101,19 +107,16 @@ the Control Centre before consequential action.
   deployment would require a separately reviewed backport onto the deployed
   pre-D02 worker baseline rather than deploying current main.
 - TikTok #238 / PR #483 is merged at
-  `93b09a89a71e9371b8ba53d704edc486b993aa85`. Its daily-freshness migration
-  and functions were activated on 2026-09-23: background-worker v18,
-  tiktok-sync v7 and tiktok-connection-status v5 are live. The first automatic
-  job truthfully found the sole existing CG Production House token expired and
-  unable to refresh, so provider OAuth reconnect remains required. The current
-  #238 continuation owns only the active-client connection/reconnect queue and
-  exact-account OAuth hardening; publishing stays out of scope.
-- Standalone Instagram #471 / PR #473 and security correction #476 / PR #477
-  are merged and closed. Issue #491 is the isolated active-client connection
-  queue/review continuation. Production has the foundation and encrypted-token
-  migrations applied and verified plaintext-free, but the provider app secrets,
-  activation flag, functions, consent, exact-client mapping and standalone-token
-  worker selection remain protected and inactive.
+  `93b09a89a71e9371b8ba53d704edc486b993aa85`. Migration
+  `20260922153348_extend_background_jobs_for_tiktok_freshness.sql` is unapplied,
+  and the background/TikTok functions have not been deployed from that change.
+- Standalone Instagram #471 / PR #473, security correction #476 / PR #477 and
+  connection/review continuation #491 / PR #496 are merged. The review-binding
+  migration is production-applied, and `instagram-oauth-start`,
+  `instagram-oauth-callback` and `instagram-connection-confirm` are deployed
+  fail-closed. Provider consent and live mappings remain protected actions.
+  Issue #499 owns the still-code-only encrypted standalone credential selection
+  in the canonical Meta sync paths; do not infer deployment from its PR.
 - Meta D02 migration `20260922154243_meta_post_engagement_truth.sql` is
   unapplied, and the related updated Meta persistence/projection functions are
   undeployed. This migration is now also a dependency for deploying the
@@ -161,6 +164,16 @@ by this documentation snapshot.
   cron, Content Autopilot flag, OneDrive, production secret/config/data or live
   provider state is owned by #476.
 
+## ISSUE #499 CODE LANE — 23 September 2026
+
+- Agent 02 owns the isolated code-only route from a reviewed standalone
+  Instagram connection into the existing `meta-sync-worker` and `meta-sync`
+  reporting/freshness authority.
+- The implementation must preserve Page-linked Instagram as preferred, decrypt
+  only the exact client/account/asset-bound credential in memory, and write only
+  existing Meta post/fact/checkpoint authorities. No worker/function deployment,
+  provider consent, live mapping or production write is part of this lane.
+
 ## ISSUE #491 CODE LANE — 23 September 2026
 
 - Agent 02 owns the isolated active-client Instagram connection queue from main
@@ -173,11 +186,11 @@ by this documentation snapshot.
   provider account ID, username, professional type, scopes and encrypted-token
   presence in one transaction before binding the identity to the existing
   `meta_client_assets` authority. It does not create a reporting/facts store.
-- Migration `20260923120000_instagram_connection_review_binding.sql`, the three
-  Instagram Edge Functions, provider secrets, activation flag and any consent
-  or mappings remain unapplied/undeployed. The shared Meta worker is unchanged;
-  standalone credential selection remains a protected shared-worker gate before
-  autonomous standalone reporting can be enabled.
+- PR #496 is merged. Migration
+  `20260923120000_instagram_connection_review_binding.sql` is production-applied,
+  and the three Instagram Edge Functions are deployed fail-closed. Consent and
+  mappings remain explicit protected actions. The shared Meta worker remains
+  unchanged in production; #499 owns its code-only credential-selection update.
 
 ## ISSUE #471 CODE LANE — 22 September 2026
 
@@ -983,15 +996,15 @@ This section is an orientation snapshot only. Refetch GitHub + tracker before ac
   production acceptance remain.
 - #437 / PR #438: code accepted; authenticated desktop/mobile staff-session UI
   acceptance is the only stated merge gate.
-- #238: daily freshness is live; the active-client OAuth connection/reconnect
-  queue is the current code-review lane. Provider consent is a later CA action.
+- #238: code accepted/merged; protected TikTok migration, function deployment,
+  provider/config and production acceptance remain.
 
 ### Protected activation gates
 
 - Red Oak exact-Page access/re-consent and stable Meta evidence.
 - Content Autopilot enablement remains a separate decision after #388 and Red
   Oak evidence. AI generation and OneDrive stay off.
-- Meta D02 migration/function deployment; TikTok connection-queue deployment;
+- Meta D02 migration/function deployment; TikTok migration/function deployment;
   standalone Instagram migrations/secret/functions/consent/mapping; Brand Hub
   mapping/activation; Google Ads authenticated live audit; and #438 UI
   acceptance are all separate gates.
