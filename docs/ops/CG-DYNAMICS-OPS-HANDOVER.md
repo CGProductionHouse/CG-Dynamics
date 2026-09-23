@@ -307,9 +307,9 @@ If provider requires 2FA, QR owner approval, Business Account conversion or anot
 Page-linked Instagram remains preferred.
 
 Live production fleet truth (23 Sep 2026):
-- 46 recurring-social eligible clients;
+- 47 recurring-social eligible clients;
 - 22 currently have a canonical Instagram mapping;
-- 24 remain unmapped;
+- 25 remain unmapped;
 - 0 standalone OAuth connections;
 - 0 standalone encrypted token rows;
 - 0 pending standalone reviews.
@@ -321,7 +321,7 @@ Standalone infrastructure is already deployed:
 - Instagram OAuth start/callback/confirm Edge Functions are ACTIVE (v4);
 - standalone reviewed encrypted tokens can feed the canonical Meta sync path after exact staff confirmation.
 
-Exact reviewed handles already known among the 24 unmapped clients:
+Exact reviewed handles already known among the 25 unmapped clients:
 - Bouwer & Coetzee Attorneys — `@bouwer_coetzee_attorneys`
 - Emmanuel Funerals — `@emmanuelfunerals`
 - Emoya Estate Driving Range — `@emoyadrivingrange`
@@ -331,7 +331,7 @@ Exact reviewed handles already known among the 24 unmapped clients:
 - Toyota Bloemfontein — `@cfaomobilitytoyotabloemfontein`
 - We Ar Fuels — `@we_ar_fuels`
 
-The in-product queue evidence is reconciled to this exact production partition: 46 recurring-social eligible / 10 non-social-or-not-currently-social / 24 Instagram-unmapped. First Technology Central is non-social and is excluded from rollout evidence.
+The in-product queue evidence is reconciled to this exact production partition: 47 recurring-social eligible / 10 non-social-or-not-currently-social / 25 Instagram-unmapped. Neshora Oxygen is eligible but has no reviewed exact Instagram identity. First Technology Central is non-social and is excluded from rollout evidence.
 
 Do not infer the remaining identities from search-name similarity. Bloem Action Sports, Forklift Trucks, Hino Trucks, Human Auto, Jenkor and WiseRide are explicitly unresolved in current reviewed intelligence; other unresolved rows also remain identity-gated.
 

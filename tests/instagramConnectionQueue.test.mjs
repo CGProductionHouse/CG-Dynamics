@@ -15,7 +15,7 @@ const callback = read('../supabase/functions/instagram-oauth-callback/index.ts')
 const confirm = read('../supabase/functions/instagram-connection-confirm/index.ts')
 const migration = read('../supabase/migrations/20260923120000_instagram_connection_review_binding.sql')
 
-test('fleet evidence contains the exact 24 Instagram-unmapped recurring-social clients', () => {
+test('fleet evidence contains the exact 25 Instagram-unmapped recurring-social clients', () => {
   const expectedClients = [
     'Bloem Action Sports',
     'Bohemia Quick Stop',
@@ -30,6 +30,7 @@ test('fleet evidence contains the exact 24 Instagram-unmapped recurring-social c
     'HMHI',
     'Human Auto',
     'Jenkor',
+    'Neshora Oxygen',
     'Novus Steel',
     'Piek Group',
     'PSG Bloemfontein',
@@ -45,7 +46,13 @@ test('fleet evidence contains the exact 24 Instagram-unmapped recurring-social c
 
   assert.deepEqual(INSTAGRAM_FLEET_EVIDENCE.map(item => item.clientName), expectedClients)
   assert.equal(INSTAGRAM_FLEET_EVIDENCE.filter(item => item.verifiedHandle).length, 8)
-  assert.equal(INSTAGRAM_FLEET_EVIDENCE.filter(item => !item.verifiedHandle).length, 16)
+  assert.equal(INSTAGRAM_FLEET_EVIDENCE.filter(item => !item.verifiedHandle).length, 17)
+  assert.deepEqual(instagramFleetEvidenceFor('Neshora Oxygen'), {
+    clientName: 'Neshora Oxygen',
+    verifiedHandle: null,
+    evidence: 'no_verified_account',
+    reviewNote: 'No exact owner-controlled Instagram identity has been reviewed; do not guess a handle.',
+  })
   assert.equal(instagramFleetEvidenceFor('First Technology Central'), null)
   assert.equal(instagramFleetEvidenceFor('Unreviewed Client'), null)
 })

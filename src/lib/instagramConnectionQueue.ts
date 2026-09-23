@@ -19,6 +19,7 @@ export const INSTAGRAM_FLEET_EVIDENCE: readonly InstagramFleetEvidence[] = [
   { clientName: 'HMHI', verifiedHandle: null, evidence: 'no_verified_account', reviewNote: 'Confirm the exact client identity and official handle.' },
   { clientName: 'Human Auto', verifiedHandle: null, evidence: 'no_verified_account', reviewNote: 'Reviewed evidence does not resolve the exact dealer account; do not infer one from the client name.' },
   { clientName: 'Jenkor', verifiedHandle: null, evidence: 'no_verified_account', reviewNote: 'Reviewed evidence does not resolve an exact owner-controlled Instagram handle; do not infer one from name variants.' },
+  { clientName: 'Neshora Oxygen', verifiedHandle: null, evidence: 'no_verified_account', reviewNote: 'No exact owner-controlled Instagram identity has been reviewed; do not guess a handle.' },
   { clientName: 'Novus Steel', verifiedHandle: 'novus_steel', evidence: 'verified_official', reviewNote: 'Official handle is linked from the current first-party website.' },
   { clientName: 'Piek Group', verifiedHandle: 'piekgroup', evidence: 'verified_official', reviewNote: 'Use the reviewed Piek Group account only.' },
   { clientName: 'PSG Bloemfontein', verifiedHandle: null, evidence: 'no_verified_account', reviewNote: 'Confirm branch versus national reporting scope before binding.' },
