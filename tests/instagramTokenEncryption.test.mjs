@@ -171,7 +171,11 @@ test('final schema and RPC expose only versioned ciphertext fields behind servic
   assert.doesNotMatch(correction, /meta_client_assets\s*\([^)]*insert/i)
 })
 
-test('activation remains fail-closed and decrypt remains unwired from live Meta workers', () => {
+test('activation remains fail-closed and both canonical sync paths use the shared encrypted resolver', () => {
+  const manual = read('../supabase/functions/meta-sync/index.ts')
   assert.match(login, /return rawValue === 'true'/)
-  assert.doesNotMatch(worker, /instagramTokenEncryption|decryptInstagramAccessToken/)
+  assert.match(worker, /resolveInstagramReportingCredential/)
+  assert.match(manual, /resolveInstagramReportingCredential/)
+  assert.doesNotMatch(worker, /meta_instagram_connection_tokens[^\n]*access_token/)
+  assert.doesNotMatch(manual, /meta_instagram_connection_tokens[^\n]*access_token/)
 })

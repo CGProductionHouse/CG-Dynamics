@@ -110,12 +110,13 @@ the Control Centre before consequential action.
   `93b09a89a71e9371b8ba53d704edc486b993aa85`. Migration
   `20260922153348_extend_background_jobs_for_tiktok_freshness.sql` is unapplied,
   and the background/TikTok functions have not been deployed from that change.
-- Standalone Instagram #471 / PR #473 and security correction #476 / PR #477
-  are merged and closed. Issue #491 is the isolated active-client connection
-  queue/review continuation. Production has the foundation and encrypted-token
-  migrations applied and verified plaintext-free, but the provider app secrets,
-  activation flag, functions, consent, exact-client mapping and standalone-token
-  worker selection remain protected and inactive.
+- Standalone Instagram #471 / PR #473, security correction #476 / PR #477 and
+  connection/review continuation #491 / PR #496 are merged. The review-binding
+  migration is production-applied, and `instagram-oauth-start`,
+  `instagram-oauth-callback` and `instagram-connection-confirm` are deployed
+  fail-closed. Provider consent and live mappings remain protected actions.
+  Issue #499 owns the still-code-only encrypted standalone credential selection
+  in the canonical Meta sync paths; do not infer deployment from its PR.
 - Meta D02 migration `20260922154243_meta_post_engagement_truth.sql` is
   unapplied, and the related updated Meta persistence/projection functions are
   undeployed. This migration is now also a dependency for deploying the
@@ -163,6 +164,16 @@ by this documentation snapshot.
   cron, Content Autopilot flag, OneDrive, production secret/config/data or live
   provider state is owned by #476.
 
+## ISSUE #499 CODE LANE — 23 September 2026
+
+- Agent 02 owns the isolated code-only route from a reviewed standalone
+  Instagram connection into the existing `meta-sync-worker` and `meta-sync`
+  reporting/freshness authority.
+- The implementation must preserve Page-linked Instagram as preferred, decrypt
+  only the exact client/account/asset-bound credential in memory, and write only
+  existing Meta post/fact/checkpoint authorities. No worker/function deployment,
+  provider consent, live mapping or production write is part of this lane.
+
 ## ISSUE #491 CODE LANE — 23 September 2026
 
 - Agent 02 owns the isolated active-client Instagram connection queue from main
@@ -175,11 +186,11 @@ by this documentation snapshot.
   provider account ID, username, professional type, scopes and encrypted-token
   presence in one transaction before binding the identity to the existing
   `meta_client_assets` authority. It does not create a reporting/facts store.
-- Migration `20260923120000_instagram_connection_review_binding.sql`, the three
-  Instagram Edge Functions, provider secrets, activation flag and any consent
-  or mappings remain unapplied/undeployed. The shared Meta worker is unchanged;
-  standalone credential selection remains a protected shared-worker gate before
-  autonomous standalone reporting can be enabled.
+- PR #496 is merged. Migration
+  `20260923120000_instagram_connection_review_binding.sql` is production-applied,
+  and the three Instagram Edge Functions are deployed fail-closed. Consent and
+  mappings remain explicit protected actions. The shared Meta worker remains
+  unchanged in production; #499 owns its code-only credential-selection update.
 
 ## ISSUE #471 CODE LANE — 22 September 2026
 
