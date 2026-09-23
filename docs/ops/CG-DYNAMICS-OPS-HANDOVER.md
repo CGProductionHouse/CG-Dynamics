@@ -114,45 +114,41 @@ Production Instagram plumbing already live:
 
 ### CA MANUAL AGENT 03 — Issue #501
 
-CA has already explicitly authorized **GO SNAPSHOT**.
+The original GO SNAPSHOT publication is COMPLETE.
 
-Merged PR #506 immutable artifact:
+Approved snapshot:
+- artifact: `artifacts/report-truth/issue-501-reviewed-plan-snapshot.json`
+- cutoff: `2026-09-23T11:24:00.897Z`
+- hash: `d7448dcd7306deb752191aec9676da28ce228c731dde5c5626cd8a8813c79abe`
 
-`artifacts/report-truth/issue-501-reviewed-plan-snapshot.json`
+Production receipt:
+- applied at `2026-09-23T12:07:17.358Z`
+- 107 applied / 0 already satisfied
+- 107 reports verified live
+- 1,647 frozen post identities verified
+- July/August/September = 37 / 35 / 35
+- truth, period, September MTD, reflection, strategy and cross-client violations = 0
 
-Snapshot cutoff:
+First withheld-recovery snapshot is frozen and merged through PR #510 at `87d9a9d140ece76c4bd94fa1058e763596cd6031`.
 
-`2026-09-23T11:24:00.897Z`
+Recovery snapshot:
+- artifact: `artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json`
+- cutoff: `2026-09-23T12:15:42.531Z`
+- hash: `af696f0a33ac36fe1a7dc7b6b6c01d23929658187f1a614e6a65f69233a17f35`
+- 107 already satisfied
+- 5 new mutation targets
+- 56 remaining withheld
+- 47 `MISSING_CANONICAL_REPORT`
+- 9 `NO_IN_MONTH_POST_EVIDENCE`
 
-Approved snapshot hash:
+Five new targets:
+- All Around PVC — September
+- Bat Hill Royale — August
+- Bat Hill Royale — September
+- Vrystaat Kunstefees — August
+- Vrystaat Kunstefees — September
 
-`d7448dcd7306deb752191aec9676da28ce228c731dde5c5626cd8a8813c79abe`
-
-Frozen batch:
-- 168 active-client month targets.
-- 107 mutation targets.
-- 0 already satisfied at snapshot.
-- 61 withheld.
-- July 37 safe / 19 withheld.
-- August 35 safe / 21 withheld.
-- September MTD 35 safe / 21 withheld.
-- withheld = 57 `MISSING_CANONICAL_REPORT` + 4 `NO_IN_MONTH_POST_EVIDENCE`.
-- zero duplicate masters.
-
-CA authorization is already recorded on #501 and #381. The next action is the frozen snapshot apply, not another review or moving live dry-run.
-
-Agent 03 must:
-- verify the artifact recomputes to the approved hash;
-- run the snapshot apply with the exact expected hash;
-- honor the built-in preflight;
-- if preflight passes, publish the exact frozen 107 rows;
-- verify client-visible truth;
-- record publication receipt;
-- continue withheld recovery without fabrication.
-
-If preflight fails on client/report identity or source-version drift, stop before writes and report the exact blocker.
-
-The latest pasted Agent 03 result saying publication still needs approval is STALE and must not override GO SNAPSHOT.
+The recovery hash is NOT publication-authorized yet. PR #510 merge stored the artifact only and did not publish these five rows.
 
 ## 4. Production authorities already live
 
@@ -327,9 +323,9 @@ When CA opens a fresh chat and says continue CG Dynamics:
 - keep prompts tiny.
 
 The fresh chat should prioritize, in order:
-1. #501 GO SNAPSHOT apply/verification/recovery.
-2. #505 TikTok CGPH recovery + provider campaign; standalone Instagram provider setup.
-3. #504 exact package confirmations and strategy authority.
+1. #505 TikTok CGPH recovery + provider campaign; standalone Instagram provider setup.
+2. #511 unknown-preserving package authority, then #504 package confirmation rollout.
+3. #501 recovery snapshot review/publication only when separately authorized.
 4. current launch acceptance gaps.
 5. #493 LinkedIn and #361 CG Hours once the current client-launch milestone is stable.
 
