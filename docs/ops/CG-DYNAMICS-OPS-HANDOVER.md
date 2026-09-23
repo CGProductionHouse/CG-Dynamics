@@ -94,10 +94,9 @@ Production:
 #505 has now verified CG Production House transitions correctly to `reconnect_required`.
 The canonical exact-client TikTok OAuth reconnect is available.
 
-Current protected blocker:
-- CA must explicitly authorize the persistent read-only TikTok OAuth reconnect/consent for the exact CG Production House account.
+CA has explicitly authorized the persistent read-only TikTok OAuth reconnect for the exact CG Production House account.
 
-After that consent, verify exact account identity/freshness and continue other ACTIVE clients. No TikTok publishing.
+Next action: execute the canonical `Reconnect with TikTok` provider OAuth flow, verify exact account identity/freshness, then continue other ACTIVE clients. No TikTok publishing. Do not ask CA for this same consent again unless TikTok presents a new scope/permission change.
 
 Instagram campaign state:
 - 56 active clients reviewed.
@@ -155,7 +154,9 @@ Five new targets:
 - Vrystaat Kunstefees — August
 - Vrystaat Kunstefees — September
 
-The recovery hash is NOT publication-authorized yet. PR #510 merge stored the artifact only and did not publish these five rows.
+CA has explicitly authorized Recovery 5 for hash `af696f0a33ac36fe1a7dc7b6b6c01d23929658187f1a614e6a65f69233a17f35`.
+
+Next action: run the frozen recovery artifact through its built-in preflight and publish only the five exact authorized rows if preflight passes. Verify client-visible truth and record receipt. Any additional recovered rows require a new frozen artifact/authorization.
 
 ## 4. Production authorities already live
 
