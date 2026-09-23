@@ -8,8 +8,10 @@ the Control Centre before consequential action.
 
 ### GitHub and ownership truth
 
-- Current `main`: `26fa18f8d4c6155a03fead0ce339f9bcc398c631`, merged through
-  #388 / PR #485 after #472 D02 / PR #484.
+- Current runtime-code baseline: `e77d0ce29a5439b99ceaf39694e31a908265c820`, including
+  #388 / PR #485 and website-reporting CORS PR #486 after #472 D02 / PR #484.
+  Later `main` commits may be docs-only handover updates; always refetch GitHub
+  before consequential action.
 - #472 is complete and closed. PR #484 is merged; the component-level Meta
   engagement truth code is accepted. Migration
   `20260922154243_meta_post_engagement_truth.sql` remains unapplied and the
@@ -69,6 +71,13 @@ the Control Centre before consequential action.
   only, exact-client/date-range scoped and provider-write-free. A documented
   authenticated live audit is still required before calling the production
   acceptance complete.
+- Website reporting PR #486 is merged and the corrected
+  `website-performance-report` Edge Function is production-live as version 5
+  with `verify_jwt=true` and the standard Supabase `x-client-info` CORS header
+  allowed. Red Oak still has zero website snapshots and no published report
+  linkage. The next gate is an authenticated staff read-only Red Oak preview;
+  do not save a snapshot or publish until that preview proves exact Website 7 /
+  client identity and acceptable `available` or `partial` data quality.
 
 ### Merged but not production-activated
 
@@ -101,7 +110,9 @@ the Control Centre before consequential action.
 4. Authenticated desktop/mobile acceptance for #438.
 5. CA real production phone confirmation for #217 before closing its durable
    launch-blocker issue.
-6. Separate CA approval for every unapplied migration/function/provider gate
+6. Authenticated staff read-only Red Oak Website Performance preview after the
+   production #486 CORS correction; no snapshot save or publication before it passes.
+7. Separate CA approval for every unapplied migration/function/provider gate
    listed above. Do not infer activation from merged files.
 
 No production SQL/data mutation, provider permission/config change, deploy,
