@@ -2,7 +2,7 @@
 
 Status: CURRENT authority for a fresh supervisor chat.
 
-Updated: 23 September 2026 after package rollout completion, report recovery, CGPH TikTok recovery and #505 TikTok-source correction.
+Updated: 23 September 2026 after package rollout completion, report recovery, CGPH TikTok recovery, TikTok native-management steer and #514 strategy-dossier merge.
 
 ## 1. Recovery order
 
@@ -24,7 +24,7 @@ Do not ask CA to repeat project history. GitHub current truth and verified produ
 
 Latest verified main when this handover was refreshed:
 
-`fe2b245994159017af5c90dcfabe06bc536c1539`
+`6cfffa1a117663d9c9efd3b9bdc99054591b9a25`
 
 Always refetch current `main` before consequential action.
 
@@ -39,6 +39,7 @@ Recent launch-critical work includes:
 - #506 immutable reviewed report-publication snapshot.
 - #508 TikTok failed-refresh reconnect recovery.
 - #512 unknown-preserving V2 package confirmation.
+- #514 exact-client strategy grounding dossiers for all 56 active clients.
 
 ## 3. Active manual lanes
 
@@ -105,10 +106,10 @@ Required #505 continuation:
 4. Where the exact active client has a populated TikTok-specific record, use an isolated provider session for that client.
 5. Authenticate only on TikTok's provider-owned surface.
 6. Verify TikTok's returned exact provider identity before canonical binding.
-7. If the TikTok-specific field is blank/missing or returned identity mismatches, mark only that client unresolved and continue.
-8. Never reuse the CGPH session across clients.
-9. Never expose usernames/passwords/tokens in GitHub/chat/logs.
-10. No TikTok publishing.
+7. In the same client session, set up native TikTok management: add/request the exact account in CG's TikTok Business Center where supported and verify Web Business Suite / Scheduler availability.
+8. Do not silently convert account type; if TikTok requires Business Account conversion, mark `ACCOUNT_TYPE_ACTION_REQUIRED` for separate decision.
+9. If the TikTok-specific field is blank/missing or returned identity mismatches, mark only that client unresolved and continue.
+10. Never reuse the CGPH session across clients or expose credential values. No publishing beyond the separately approved native-management/scheduling setup.
 
 Durable correction:
 - #505 comment `5796930571`
@@ -157,21 +158,29 @@ Report truth:
 - fresh read-only discovery found no further truthful recovery batch.
 - do not fabricate around withheld evidence gaps.
 
-Agent 03 now owns **#513 Gold strategy rollout**.
+Agent 03 owns **#513 Gold strategy rollout**.
 
-Current strategy table:
-- 56 September rows, draft.
-- 56 October rows, draft.
-- all 56 active-client package receipts are now confirmed.
+PR #514 is merged at `6cfffa1a117663d9c9efd3b9bdc99054591b9a25`.
 
-#513 mission:
-1. build exact-client research/grounding dossiers for all 56 active clients;
-2. use confirmed package truth + actual report/content history + client intelligence + real business positioning + audience/brand constraints + governed Marketing Library + useful sourced local/category context;
-3. separate verified fact / constraint / research observation / recommendation;
-4. upgrade existing canonical Sep/Oct strategy rows, do not create a shadow strategy store;
-5. preserve flexible/on-request package logic;
-6. reject anything generic enough to transfer to another client by changing the name;
-7. do not approve/publish until gold-standard gate passes and client-safe output is verified.
+Current strategy truth:
+- 56/56 exact-client dossiers generated.
+- 56/56 package receipts confirmed in production.
+- existing 56 September + 56 October strategy rows remain draft and untouched.
+- 27 dossiers were locally ready from repository evidence.
+- 28 dossiers were blocked only because their latest production guide content had not yet been retrieved.
+- Kundedienste is non-recurring/once-off and must not receive filler strategy merely to force 56/56 social strategy output.
+
+Important production discovery after #514 review:
+- `public.client_guides` currently has 52 rows with `runtime_readiness='ready'` and non-empty `guide_markdown`.
+- therefore the 28 runtime-guide blockers are resolvable with exact-client read-only retrieval; they are not an external access blocker.
+
+Next #513 phase:
+1. retrieve each blocked client's latest ready production guide from `client_guides` and enrich only that exact dossier;
+2. recompute dossier hashes/readiness;
+3. use all confirmed package receipts and actual report/content history;
+4. produce a deterministic Sep/Oct strategy mutation dry-run only;
+5. return ready-for-mutation vs non-applicable vs blocked clients/reasons;
+6. do not mutate/approve/publish strategy rows yet.
 
 No provider mapping, package write or report-publication work in #513.
 
@@ -304,8 +313,8 @@ When CA starts a fresh CG Dynamics chat:
 4. continue safe actions automatically.
 
 Priority:
-1. #505 TikTok active-client re-audit from dedicated TikTok field + Instagram provider gates.
-2. #513 gold strategy dossiers and Sep/Oct final strategy.
+1. #505 active-client TikTok Dynamics + native Business Center/Scheduler one-sweep setup, plus Instagram provider gates.
+2. #513 retrieve runtime guides, finish dossiers and produce Sep/Oct mutation dry-run.
 3. #501 only when new truthful report evidence appears.
 4. current launch acceptance gaps.
 5. #493 LinkedIn and #361 CG Hours.
