@@ -2,7 +2,7 @@
 
 Status: CURRENT authority for a fresh supervisor chat.
 
-Updated: 23 September 2026 after package/service-scope completion, report publication/recovery, TikTok native-scheduler expansion, strategy dossier work, and website period-contract merge.
+Updated: 23 September 2026 after the audited #516 package/service-scope receipt refresh, report publication/recovery, TikTok native-scheduler expansion, strategy dossier work, and website period-contract merge.
 
 ## 1. Fresh-chat recovery order
 
@@ -50,6 +50,7 @@ Major completed launch-critical merges:
 ### DONE / production-proven
 
 - 56/56 active-client package receipts confirmed.
+- #516 final service-scope receipts are production-live and verified at 46 recurring-social / 10 non-social-or-not-currently-social / 0 held.
 - V2 unknown-preserving package authority live.
 - Unknown values stay null; explicit zero is distinct from unknown.
 - 112 truthful July/August/September reports are published and verified.
@@ -67,12 +68,11 @@ Major completed launch-critical merges:
 
 ### CURRENT closure lanes
 
-1. #516 final package/service-scope receipt refresh.
-2. #513 Sep/Oct gold-strategy dry-run regeneration after #516 receipt refresh.
-3. #505 eligible-client TikTok/Instagram rollout + native TikTok Business Center/scheduler setup.
-4. #518 website period-contract production migration + read-only acceptance.
-5. #519 current portal-access reconciliation.
-6. #217 optional final real-phone human signoff if CA still wants it.
+1. #513 Sep/Oct gold-strategy dry-run regeneration against the final #516 receipts.
+2. #505 eligible-client TikTok/Instagram rollout + native TikTok Business Center/scheduler setup.
+3. #518 website period-contract production migration + read-only acceptance.
+4. #519 current portal-access reconciliation.
+5. #217 optional final real-phone human signoff if CA still wants it.
 
 Do not open overlapping redesign lanes.
 
@@ -115,17 +115,28 @@ Recurring-social decisions confirmed under #516:
 
 ### Agent 01 current lane — #516
 
-Human decisions are complete.
+**COMPLETE.** The eight exact #516 receipts were refreshed in production through
+`confirm_client_package_settings` as `CG Production House Admin`.
 
-Next action is execution only:
-- refresh the eight exact #516 package/service receipts through the canonical audited confirmation flow;
-- preserve all existing fixed quantities and unknown/null values;
-- add only the approved service-scope notes;
-- no provider mapping mutation;
-- no strategy writes;
-- no invented quantities.
+Verification:
+- live #515 classification is exactly **46 eligible / 10 excluded / 0 unresolved**;
+- all pre-existing fixed quantities and unknown/null values remain unchanged;
+- only approved `other_agreed_deliverables` or `package_exclusions` service-scope notes were added;
+- #504 and #516 source references are retained on every refreshed receipt;
+- no provider mapping, OAuth state, strategy row, client active state or package quantity changed.
 
-After this refresh, production provider eligibility should exactly mirror 46 / 10 / 0.
+Exact refreshed clients:
+- Agri-Secure;
+- Bat Hill Royale;
+- Bloem Vascular;
+- Ipopeng Office Supplies;
+- Mimosa Mall;
+- NCNA;
+- Vrystaat Kunstefees;
+- Zooz Lifestyle WFF.
+
+Agent 01 has no remaining #516 production action. Provider rollout and strategy
+regeneration may now consume the canonical 46 / 10 / 0 partition.
 
 ## 5. Reports / client visibility
 
@@ -180,7 +191,7 @@ That partition is now stale.
 
 **Do not apply PR #520's current plan.**
 
-After Agent 01 refreshes the eight #516 service receipts:
+Now that Agent 01 refreshed the eight #516 service receipts:
 1. rebase/reconcile #520 to current main;
 2. use the latest production guides/dossiers;
 3. regenerate the deterministic Sep/Oct dry-run using final 46 social / 10 non-social / 0 held truth;
@@ -385,13 +396,12 @@ On a fresh CG Dynamics chat:
 4. act directly on safe work.
 
 Priority order:
-1. Agent 01 / #516: refresh the eight final package/service receipts.
-2. Agent 03 / #513: regenerate #520 strategy dry-run against final 46 / 10 / 0 service truth.
-3. Agent 02 / #505: continue exact eligible TikTok/Instagram sweep + TikTok Business Center scheduler setup.
-4. #518: production migration only after CA approval, then Red Oak read-only preview.
-5. #519: current portal-access reconciliation.
-6. #217: optional real-phone signoff if CA still wants it.
-7. Then close current client launch and proceed to #493 LinkedIn + #361 CG Hours.
+1. Agent 03 / #513: regenerate #520 strategy dry-run against final 46 / 10 / 0 service truth.
+2. Agent 02 / #505: continue exact eligible TikTok/Instagram sweep + TikTok Business Center scheduler setup.
+3. #518: production migration only after CA approval, then Red Oak read-only preview.
+4. #519: current portal-access reconciliation.
+5. #217: optional real-phone signoff if CA still wants it.
+6. Then close current client launch and proceed to #493 LinkedIn + #361 CG Hours.
 
 ## 15. Control-plane warning
 
