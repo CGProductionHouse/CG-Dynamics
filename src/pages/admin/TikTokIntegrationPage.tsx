@@ -36,7 +36,7 @@ function messageFrom(error: unknown, fallback: string): string {
 const emptyQueue: TiktokConnectionQueue = {
   ok: true,
   items: [],
-  summary: { activeClients: 0, connected: 0, reconnectRequired: 0, notConnected: 0 },
+  summary: { activeClients: 0, eligible: 0, excluded: 0, unresolved: 0, connected: 0, reconnectRequired: 0, notConnected: 0 },
 }
 
 const callbackMessages: Record<string, { tone: 'error' | 'success' | 'warning'; message: string }> = {
@@ -181,15 +181,17 @@ export default function TikTokIntegrationPage() {
         <div>
           <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-accent">TikTok fleet</p>
           <h1 className="mt-2 text-3xl font-semibold text-white">Connection queue</h1>
-          <p className="mt-2 max-w-3xl text-sm text-brand-primary">Connect each active client to its exact TikTok account through TikTok&apos;s provider-owned OAuth screen. One consent keeps daily read-only analytics fresh automatically.</p>
+          <p className="mt-2 max-w-3xl text-sm text-brand-primary">Connect each client with confirmed recurring social scope to its exact TikTok account through TikTok&apos;s provider-owned OAuth screen. One consent keeps daily read-only analytics fresh automatically.</p>
         </div>
         <div className="flex gap-2"><ActionButton variant="outline" onClick={nextClient} disabled={queue.summary.reconnectRequired + queue.summary.notConnected === 0}>Next client</ActionButton><ActionButton variant="ghost" onClick={() => navigate('/admin/integrations')}>Back</ActionButton></div>
       </div>
 
       {message && <Message tone={message.tone}>{message.message}</Message>}
 
-      <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Summary label="Active clients" value={queue.summary.activeClients} />
+      <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
+        <Summary label="Eligible" value={queue.summary.eligible} />
+        <Summary label="Excluded" value={queue.summary.excluded} />
+        <Summary label="Held" value={queue.summary.unresolved} tone="amber" />
         <Summary label="Connected" value={queue.summary.connected} tone="teal" />
         <Summary label="Reconnect" value={queue.summary.reconnectRequired} tone="amber" />
         <Summary label="Not connected" value={queue.summary.notConnected} />
@@ -197,7 +199,7 @@ export default function TikTokIntegrationPage() {
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(320px,0.8fr)_minmax(0,1.4fr)]">
         <PremiumCard className="lg:sticky lg:top-6 lg:self-start">
-          <PremiumCardHeader eyebrow="Active clients only" title="Work the queue" subtitle="Provider identity is shown only after TikTok verifies it." />
+          <PremiumCardHeader eyebrow="Confirmed social scope only" title="Work the queue" subtitle={`${queue.summary.activeClients} active clients assessed. Existing mappings are unchanged; unresolved package scope is held.`} />
           <input className={INPUT_CLASS} value={search} onChange={event => setSearch(event.target.value)} placeholder="Search client or verified account" aria-label="Search TikTok connection queue" />
           <div className="mt-4 max-h-[660px] space-y-2 overflow-y-auto pr-1">
             {filteredItems.map(item => (

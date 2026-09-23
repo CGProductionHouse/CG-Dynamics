@@ -11,6 +11,7 @@ const read = path => readFileSync(new URL(path, import.meta.url), 'utf8').replac
 const page = read('../src/components/integrations/InstagramConnectionQueue.tsx')
 const integration = read('../src/pages/admin/MetaIntegrationPage.tsx')
 const start = read('../supabase/functions/instagram-oauth-start/index.ts')
+const callback = read('../supabase/functions/instagram-oauth-callback/index.ts')
 const confirm = read('../supabase/functions/instagram-connection-confirm/index.ts')
 const migration = read('../supabase/migrations/20260923120000_instagram_connection_review_binding.sql')
 
@@ -30,8 +31,11 @@ test('reviewed handle comparison is exact apart from provider-safe case normaliz
   assert.equal(exactHandleMatches(null, 'anything'), false)
 })
 
-test('queue is active-client-only, excludes canonical mappings and prefers Page-linked assets', () => {
-  assert.match(page, /clients\.filter\(client => client\.active\)/)
+test('queue is confirmed-social-scope-only, excludes canonical mappings and prefers Page-linked assets', () => {
+  assert.match(page, /classifySocialProviderEligibility\(client\.package_settings\)/)
+  assert.match(page, /eligibility\.state === 'eligible'/)
+  assert.match(page, /explicitly excluded/)
+  assert.match(page, /held for package\/service confirmation/)
   assert.match(page, /asset\.instagram_account_id \|\| asset\.instagram_not_applicable/)
   assert.match(page, /pageLinkedAccount \? 'Page-linked available'/)
   assert.match(page, /do not start standalone OAuth/)
@@ -40,10 +44,15 @@ test('queue is active-client-only, excludes canonical mappings and prefers Page-
   assert.match(integration, /<InstagramConnectionQueue/)
 })
 
-test('OAuth start remains exact-client and active-client guarded server-side', () => {
-  assert.match(start, /\.from\('clients'\)\.select\('id, active'\)\.eq\('id', clientId\)\.single\(\)/)
+test('OAuth start, callback and confirmation remain exact-client and package-eligibility guarded server-side', () => {
+  assert.match(start, /\.from\('clients'\)\.select\('id, active, package_settings'\)\.eq\('id', clientId\)\.single\(\)/)
   assert.match(start, /if \(!client\?\.active\)/)
+  assert.match(start, /classifySocialProviderEligibility\(client\.package_settings\)/)
   assert.match(start, /already has a canonical Instagram mapping/)
+  assert.match(callback, /\.eq\('id', oauthState\.client_id\)/)
+  assert.match(callback, /classifySocialProviderEligibility\(eligibleClient\.package_settings\)/)
+  assert.match(confirm, /\.eq\('id', clientId\)/)
+  assert.match(confirm, /classifySocialProviderEligibility\(client\.package_settings\)/)
 })
 
 test('confirmation handler requires exact immutable identity fields and active staff', () => {

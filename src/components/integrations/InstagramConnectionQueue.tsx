@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { Client } from '../../lib/db/clients'
 import { exactHandleMatches, instagramFleetEvidenceFor } from '../../lib/instagramConnectionQueue'
+import { classifySocialProviderEligibility } from '../../lib/socialProviderEligibility'
 import { supabase } from '../../lib/supabase'
 import { StatusBadge } from '../ui/Badges'
 import { ActionButton } from '../ui/Buttons'
@@ -53,7 +54,9 @@ export function InstagramConnectionQueue({
 
   const loadConnections = useCallback(async () => {
     setLoading(true)
-    const activeIds = clients.filter(client => client.active).map(client => client.id)
+    const activeIds = clients
+      .filter(client => client.active && classifySocialProviderEligibility(client.package_settings).state === 'eligible')
+      .map(client => client.id)
     if (activeIds.length === 0) {
       setConnections([])
       setLoading(false)
@@ -77,8 +80,16 @@ export function InstagramConnectionQueue({
     void loadConnections()
   }, [loadConnections])
 
-  const queue = useMemo(() => clients
+  const eligibility = useMemo(() => clients
     .filter(client => client.active)
+    .map(client => ({ client, eligibility: classifySocialProviderEligibility(client.package_settings) })), [clients])
+  const eligibleCount = eligibility.filter(item => item.eligibility.state === 'eligible').length
+  const excludedCount = eligibility.filter(item => item.eligibility.state === 'excluded').length
+  const unresolvedCount = eligibility.filter(item => item.eligibility.state === 'unresolved').length
+
+  const queue = useMemo(() => eligibility
+    .filter(item => item.eligibility.state === 'eligible')
+    .map(item => item.client)
     .filter(client => !linkedAssets.some(asset => asset.client_id === client.id && (asset.instagram_account_id || asset.instagram_not_applicable)))
     .map(client => {
       const evidence = instagramFleetEvidenceFor(client.name)
@@ -93,7 +104,7 @@ export function InstagramConnectionQueue({
         pageLinkedAccount: providerPage?.instagramAccount ?? null,
         hasFacebookPage: Boolean(link?.facebook_page_id),
       }
-    }), [clients, connections, linkedAssets, providerPages])
+    }), [eligibility, connections, linkedAssets, providerPages])
 
   async function startStandalone(client: Client) {
     setBusyClientId(client.id)
@@ -142,13 +153,14 @@ export function InstagramConnectionQueue({
   return (
     <PremiumCard className="mt-6 w-full" padding="md" border>
       <PremiumCardHeader
-        eyebrow="Active clients only"
+        eyebrow="Confirmed social scope only"
         title="Instagram connection queue"
         action={<StatusBadge label={loading ? 'Checking…' : `${queue.length} need attention`} variant={queue.length === 0 ? 'published' : 'needs-strategy'} />}
       />
       <div className="max-w-3xl space-y-2 text-sm leading-relaxed text-brand-primary/75">
         <p>Use the Facebook Page-linked account whenever Meta exposes one. Standalone Instagram Login is the fallback for an exact Business or Creator account only.</p>
         <p>Passwords are entered only on Instagram's own consent screen. CG Dynamics stores an encrypted OAuth token, then waits for an exact staff review before creating the canonical mapping.</p>
+        <p>{eligibleCount} eligible · {excludedCount} explicitly excluded · {unresolvedCount} held for package/service confirmation. Existing mappings are not changed.</p>
       </div>
 
       {message && (
@@ -231,7 +243,7 @@ export function InstagramConnectionQueue({
 
       {!loading && queue.length === 0 && (
         <div className="mt-5 rounded-2xl border border-brand-teal/20 bg-brand-teal/[0.06] p-5 text-sm text-brand-teal">
-          Every active client currently has a canonical Instagram mapping or an explicit not-applicable decision.
+          Every eligible client currently has a canonical Instagram mapping or an explicit not-applicable decision.
         </div>
       )}
     </PremiumCard>

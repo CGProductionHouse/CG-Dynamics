@@ -1,6 +1,7 @@
 import { corsHeaders } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { resolveTiktokConfig, tiktokFetch, getTiktokUserInfo, redact } from '../_shared/tiktok.ts'
+import { classifySocialProviderEligibility } from '../../../src/lib/socialProviderEligibility.ts'
 
 const READ_SCOPES = [
   'user.info.basic',
@@ -93,11 +94,11 @@ Deno.serve(async (req) => {
   }
 
   const [{ data: client }, { data: profile }] = await Promise.all([
-    sb.from('clients').select('id').eq('id', clientId).eq('active', true).maybeSingle(),
+    sb.from('clients').select('id, package_settings').eq('id', clientId).eq('active', true).maybeSingle(),
     sb.from('profiles').select('role, is_active').eq('id', consumedState.user_id).maybeSingle(),
   ])
 
-  if (!client || !profile?.is_active || !['admin', 'manager'].includes(profile.role)) {
+  if (!client || classifySocialProviderEligibility(client.package_settings).state !== 'eligible' || !profile?.is_active || !['admin', 'manager'].includes(profile.role)) {
     console.error('TikTok OAuth callback eligibility no longer valid')
     return redirect(resultUrl(appUrl, 'ineligible', clientId))
   }
