@@ -11,9 +11,13 @@ const page = read('../src/pages/admin/TikTokIntegrationPage.tsx')
 const migration = read('../supabase/migrations/20260923143000_tiktok_exact_account_identity.sql')
 
 describe('TikTok active-client connection queue', () => {
-  test('server-side discovery pages every truth scan and excludes inactive clients', () => {
+  test('server-side discovery pages every truth scan and classifies active clients by confirmed package scope', () => {
     assert.match(queue, /fetchAllRows/)
-    assert.match(queue, /\.from\('clients'\)\.select\('id, name'\)\.eq\('active', true\)/)
+    assert.match(queue, /\.from\('clients'\)\.select\('id, name, package_settings'\)\.eq\('active', true\)/)
+    assert.match(queue, /classifySocialProviderEligibility\(client\.package_settings\)/)
+    assert.match(queue, /eligibility\.state === 'eligible'/)
+    assert.match(queue, /excluded:/)
+    assert.match(queue, /unresolved:/)
     assert.match(queue, /\.from\('tiktok_connections'\)/)
     assert.match(queue, /\.from\('tiktok_connection_tokens'\)/)
   })
@@ -25,7 +29,9 @@ describe('TikTok active-client connection queue', () => {
       assert.match(source, /\['admin', 'manager'\]\.includes\(profile\.role\)/)
     }
     assert.match(start, /\.eq\('active', true\)/)
+    assert.match(start, /classifySocialProviderEligibility\(client\.package_settings\)/)
     assert.match(callback, /\.eq\('id', clientId\)\.eq\('active', true\)/)
+    assert.match(callback, /classifySocialProviderEligibility\(client\.package_settings\)/)
     assert.match(callback, /consumedState\.user_id/)
   })
 

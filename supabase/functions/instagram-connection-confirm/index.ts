@@ -4,6 +4,7 @@ import {
   INSTAGRAM_STANDALONE_ACTIVATION_BLOCKER,
   isInstagramStandaloneActivationEnabled,
 } from '../_shared/instagramLogin.ts'
+import { classifySocialProviderEligibility } from '../../../src/lib/socialProviderEligibility.ts'
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const PROVIDER_ID = /^\d+$/
@@ -44,6 +45,17 @@ Deno.serve(async req => {
   const instagramUsername = typeof body.instagramUsername === 'string' ? body.instagramUsername.trim() : ''
   if (!UUID.test(connectionId) || !UUID.test(clientId) || !PROVIDER_ID.test(instagramAccountId) || !USERNAME.test(instagramUsername)) {
     return jsonResponse({ ok: false, error: 'Exact pending Instagram identity is required.' }, 400)
+  }
+
+  const { data: client } = await sb
+    .from('clients')
+    .select('id, active, package_settings')
+    .eq('id', clientId)
+    .maybeSingle()
+  if (!client?.active) return jsonResponse({ ok: false, error: 'Client is inactive or does not exist.' }, 404)
+  const eligibility = classifySocialProviderEligibility(client.package_settings)
+  if (eligibility.state !== 'eligible') {
+    return jsonResponse({ ok: false, error: eligibility.reason, eligibility: eligibility.state }, 409)
   }
 
   const { data, error } = await sb.rpc('confirm_instagram_login_connection', {

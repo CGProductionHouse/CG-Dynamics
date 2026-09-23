@@ -5,6 +5,7 @@ import {
   INSTAGRAM_STANDALONE_ACTIVATION_BLOCKER,
   isInstagramStandaloneActivationEnabled,
 } from '../_shared/instagramLogin.ts'
+import { classifySocialProviderEligibility } from '../../../src/lib/socialProviderEligibility.ts'
 
 function base64Url(bytes: Uint8Array): string {
   return btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '')
@@ -58,10 +59,14 @@ Deno.serve(async req => {
   }
 
   const [{ data: client }, { data: mappedRows }] = await Promise.all([
-    sb.from('clients').select('id, active').eq('id', clientId).single(),
+    sb.from('clients').select('id, active, package_settings').eq('id', clientId).single(),
     sb.from('meta_client_assets').select('id').eq('client_id', clientId).eq('is_active', true).not('instagram_account_id', 'is', null).limit(1),
   ])
   if (!client?.active) return jsonResponse({ ok: false, error: 'Client is inactive or does not exist.' }, 404)
+  const eligibility = classifySocialProviderEligibility(client.package_settings)
+  if (eligibility.state !== 'eligible') {
+    return jsonResponse({ ok: false, error: eligibility.reason, eligibility: eligibility.state }, 409)
+  }
   if (mappedRows?.length) {
     return jsonResponse({ ok: false, error: 'This client already has a canonical Instagram mapping.' }, 409)
   }

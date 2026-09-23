@@ -1,6 +1,7 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { resolveTiktokConfig } from '../_shared/tiktok.ts'
+import { classifySocialProviderEligibility } from '../../../src/lib/socialProviderEligibility.ts'
 
 const READ_SCOPES = [
   'user.info.basic',
@@ -82,13 +83,17 @@ Deno.serve(async (req) => {
   // Validate the client exists
   const { data: client } = await sb
     .from('clients')
-    .select('id, name, active')
+    .select('id, name, active, package_settings')
     .eq('id', body.clientId)
     .eq('active', true)
     .single()
 
   if (!client) {
     return jsonResponse({ ok: false, error: 'Only an active client can be connected to TikTok.' }, 400)
+  }
+  const eligibility = classifySocialProviderEligibility(client.package_settings)
+  if (eligibility.state !== 'eligible') {
+    return jsonResponse({ ok: false, error: eligibility.reason, eligibility: eligibility.state }, 409)
   }
 
   let config

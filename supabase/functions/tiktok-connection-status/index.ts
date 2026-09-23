@@ -1,6 +1,7 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { classifyTiktokHealth, TIKTOK_READ_SCOPES, type TiktokRunEvidence } from '../_shared/tiktokFreshness.ts'
+import { classifySocialProviderEligibility } from '../../../src/lib/socialProviderEligibility.ts'
 
 const READ_SCOPES = [...TIKTOK_READ_SCOPES]
 
@@ -76,7 +77,7 @@ Deno.serve(async (req) => {
 
   const { data: activeClient, error: clientError } = await sb
     .from('clients')
-    .select('id')
+    .select('id, package_settings')
     .eq('id', body.clientId)
     .eq('active', true)
     .maybeSingle()
@@ -86,6 +87,10 @@ Deno.serve(async (req) => {
   }
   if (!activeClient) {
     return jsonResponse({ ok: false, connected: false, status: 'ineligible', message: 'Only active clients are eligible for TikTok.', missingScopes: [], schemaReady }, 403)
+  }
+  const eligibility = classifySocialProviderEligibility(activeClient.package_settings)
+  if (eligibility.state !== 'eligible') {
+    return jsonResponse({ ok: false, connected: false, status: 'ineligible', message: eligibility.reason, eligibility: eligibility.state, missingScopes: [], schemaReady }, 403)
   }
 
   // Management must include reconnect-required rows; the sync path separately

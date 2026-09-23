@@ -2,6 +2,7 @@ import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { classifyTiktokConnectionRecovery, TIKTOK_READ_SCOPES } from '../_shared/tiktokFreshness.ts'
 import { fetchAllRows } from '../_shared/paginatedRows.ts'
+import { classifySocialProviderEligibility } from '../../../src/lib/socialProviderEligibility.ts'
 
 const REQUIRED_SCOPES = Deno.env.get('TIKTOK_PUBLISHING_ENABLED') === 'true'
   ? [...TIKTOK_READ_SCOPES, 'video.publish']
@@ -31,7 +32,7 @@ Deno.serve(async req => {
 
   try {
     const [clientResult, connectionResult, tokenResult] = await Promise.all([
-      fetchAllRows<Row>((from, to) => sb.from('clients').select('id, name').eq('active', true).order('name').range(from, to)),
+      fetchAllRows<Row>((from, to) => sb.from('clients').select('id, name, package_settings').eq('active', true).order('name').range(from, to)),
       fetchAllRows<Row>((from, to) => sb.from('tiktok_connections')
         .select('id, client_id, tiktok_open_id, display_name, avatar_url, status, scopes, last_error, last_connected_at')
         .not('client_id', 'is', null).order('last_connected_at', { ascending: false, nullsFirst: false }).range(from, to)),
@@ -40,7 +41,12 @@ Deno.serve(async req => {
     ])
     const readError = clientResult.error ?? connectionResult.error ?? tokenResult.error
     if (readError) throw new Error(readError.message)
-    const clients = clientResult.data
+    const activeClients = clientResult.data
+    const classifiedClients = activeClients.map(client => ({
+      client,
+      eligibility: classifySocialProviderEligibility(client.package_settings),
+    }))
+    const clients = classifiedClients.filter(item => item.eligibility.state === 'eligible').map(item => item.client)
     const connections = connectionResult.data
     const tokens = tokenResult.data
 
@@ -96,7 +102,10 @@ Deno.serve(async req => {
       ok: true,
       items,
       summary: {
-        activeClients: items.length,
+        activeClients: activeClients.length,
+        eligible: items.length,
+        excluded: classifiedClients.filter(item => item.eligibility.state === 'excluded').length,
+        unresolved: classifiedClients.filter(item => item.eligibility.state === 'unresolved').length,
         connected: items.filter(item => item.state === 'connected' || item.state === 'refresh_pending').length,
         reconnectRequired: items.filter(item => item.state === 'reconnect_required').length,
         notConnected: items.filter(item => item.state === 'not_connected').length,

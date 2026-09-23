@@ -9,6 +9,7 @@ import {
   resolveInstagramGraphConfig,
 } from '../_shared/instagramLogin.ts'
 import { encryptInstagramAccessToken } from '../_shared/instagramTokenEncryption.ts'
+import { classifySocialProviderEligibility } from '../../../src/lib/socialProviderEligibility.ts'
 
 function redirect(appUrl: string, status: string): Response {
   return new Response(null, {
@@ -68,6 +69,15 @@ Deno.serve(async req => {
     .select('client_id, user_id')
     .single()
   if (stateError || !oauthState) return redirect(appUrl, 'invalid_state')
+
+  const { data: eligibleClient } = await sb
+    .from('clients')
+    .select('id, active, package_settings')
+    .eq('id', oauthState.client_id)
+    .maybeSingle()
+  if (!eligibleClient?.active || classifySocialProviderEligibility(eligibleClient.package_settings).state !== 'eligible') {
+    return redirect(appUrl, 'ineligible')
+  }
 
   try {
     const shortBody = new FormData()

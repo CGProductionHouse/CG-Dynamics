@@ -60,7 +60,7 @@ export interface TiktokConnectionQueueItem {
 export interface TiktokConnectionQueue {
   ok: boolean
   items: TiktokConnectionQueueItem[]
-  summary: { activeClients: number; connected: number; reconnectRequired: number; notConnected: number }
+  summary: { activeClients: number; eligible: number; excluded: number; unresolved: number; connected: number; reconnectRequired: number; notConnected: number }
   error?: string
 }
 
@@ -211,7 +211,7 @@ export async function getTiktokConnectionStatus(clientId?: string): Promise<Tikt
 
 export async function getTiktokConnectionQueue(): Promise<TiktokConnectionQueue> {
   const { data, error } = await supabase.functions.invoke('tiktok-connection-queue', { method: 'POST', body: {} })
-  if (error) return { ok: false, items: [], summary: { activeClients: 0, connected: 0, reconnectRequired: 0, notConnected: 0 }, error: error.message }
+  if (error) return { ok: false, items: [], summary: { activeClients: 0, eligible: 0, excluded: 0, unresolved: 0, connected: 0, reconnectRequired: 0, notConnected: 0 }, error: error.message }
   return data
 }
 
