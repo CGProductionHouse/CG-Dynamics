@@ -2,7 +2,7 @@
 
 Status: CURRENT authority for a fresh supervisor chat.
 
-Updated: 23 September 2026 after PR #508 production activation.
+Updated: 23 September 2026 after package rollout completion, report recovery, CGPH TikTok recovery and #505 TikTok-source correction.
 
 ## 1. Recovery order
 
@@ -14,322 +14,277 @@ AGENTS.md
 -> Issue #381 latest comments
 -> current main
 -> active owning issues/PRs
--> live Supabase/Vercel/provider state when consequential
+-> live production/provider state when consequential
 -> act
 ```
 
-Do not ask CA to repeat project history. GitHub `main`, the newest owning issue comments and verified production state outrank stale chat summaries.
+Do not ask CA to repeat project history. GitHub current truth and verified production state outrank stale chat summaries.
 
 ## 2. Current GitHub truth
 
-Latest verified **runtime-code baseline** before docs-only handover commits:
+Latest verified main when this handover was refreshed:
 
-`66f3b1ea45d5ede618f666a46bf4c3ac2019e4cc` (#508 merged)
+`fe2b245994159017af5c90dcfabe06bc536c1539`
 
-Always refetch current `main` before consequential action because docs-only handover commits may be newer than the runtime baseline.
+Always refetch current `main` before consequential action.
 
-Recent launch-critical merges:
-
+Recent launch-critical work includes:
 - #490 Meta integration crash fix.
-- #495 truthful Jul/Aug/Sep report reconciliation tooling.
-- #497 active-client package authority + gold-standard strategy gate.
+- #495 truthful Jul/Aug/Sep report reconciliation.
+- #497 package + gold-strategy authority.
 - #502 active-client package evidence/review UX.
-- #496 active-client Instagram connection/review queue.
+- #496 Instagram connection/review queue.
 - #503 standalone Instagram credential route into canonical Meta reporting.
-- #498 active-client TikTok connection/reconnect queue.
+- #498 TikTok active-client connection queue.
 - #506 immutable reviewed report-publication snapshot.
-- #508 TikTok failed-refresh -> canonical reconnect recovery.
+- #508 TikTok failed-refresh reconnect recovery.
+- #512 unknown-preserving V2 package confirmation.
 
 ## 3. Active manual lanes
 
-### CA MANUAL AGENT 01 — Issues #504 / #511
+### CA MANUAL AGENT 01
 
-Mission: active-client package confirmation campaign.
+Package lane is COMPLETE.
 
-#511 code is now merged through PR #512 at `b894f1acc0d7ceed119ae93343da096a737ddd2f`.
-The production migration/RPC activation is still unapplied and remains a protected gate.
-
-Production package authority is live.
-
-Latest verified queue:
+Production truth:
 - 56 active clients.
-- 0 confirmed package receipts.
-- 37 direct-evidence-ready.
-- 0 conflicts.
-- 19 unknown-heavy.
+- 56 confirmed package receipts.
+- 0 unverified.
+- 0 held.
+- unknown fields remain null, never fake zero/false.
+- flexible/on-request packages were preserved as flexible text scope.
+- social-removal / website-only cases were recorded without hard-deleting clients.
 
-CA has now reviewed the complete 56-active-client package list in one batch.
+Durable package authority:
+- #504 comment `5796095876` = CA-reviewed full package batch.
+- #504 comment `5796786851` = completed production execution.
+- #511 comment `5796787633` = final completion record.
 
-Durable batch authority:
-- Issue #504 comment `5796095876`.
-- every unmentioned client/package is approved unchanged from the reviewed Teams-derived list;
-- CA corrections in that comment override Teams/template evidence;
-- AV Event Life = 4 design posters + 4 photo posts + social media management/caption generation;
-- unknowns remain unknown/null, never zero;
-- First Technology Central, Kundedienste and Local Deli are removed from recurring social-management scope;
-- Rusoord Farmstay is website-only;
-- Red Oak, TBS Brokers, The Staffordshire and WiseRide contain flexible/on-request/shared scope that must be stored as notes/other agreed deliverables rather than fake fixed quantities.
+Special package cases:
+- First Technology Central: no recurring social package; do not infer full client deletion.
+- Kundedienste: once-off, no recurring socials.
+- Local Deli: stale/no ongoing socials.
+- Rusoord Farmstay: website-only.
+- Red Oak, TBS Brokers, The Staffordshire and WiseRide retain flexible/on-request/shared scope exactly as recorded on #504.
+- Econofoods: 5 supplied videos/month; CG does not manage socials.
 
-No package confirmation receipts have been written from this batch yet because the #511 migration/RPC replacement is not production-applied.
+#511 migration is production-live:
+`20260923122616_preserve_unknown_package_confirmation.sql`
 
-Agent 01 has already prepared the next ten direct-evidence-ready clients on #504:
-Bloem Action Sports; Bloem Marble & Granite; Bohemia Quick Stop; Bouwer & Coetzee Attorneys; C&L Innovations; Cape Lumber; Central Canvas; Daisy & Co; Delta Gas; Dulux Paint & Paper Bloemfontein.
+V2 receipts distinguish known / explicit_zero / unknown.
+Strategy approval fails closed when enabled work depends on unknown capacity.
 
-Do not bulk-confirm packages. Confirmation must use the existing #494 audited RPC after CA/admin approves the exact client scope.
+Agent 01 has no remaining package cleanup task.
 
-### CA MANUAL AGENT 02 — Issues #505 / #507
+### CA MANUAL AGENT 02 — Issue #505
 
-#507 code is complete and production-live.
+Mission: ACTIVE-client social provider connection campaign.
 
-PR #508 merged at:
-`66f3b1ea45d5ede618f666a46bf4c3ac2019e4cc`
+#### TikTok current truth
 
-Production:
-- `tiktok-sync` v11 ACTIVE.
-- `tiktok-connection-queue` v3 ACTIVE.
-- existing TikTok OAuth start/callback/status and daily freshness remain live.
-- failed provider refresh can now mark the exact connection `needs_reauth` / `reconnect_required`.
-- transport/config failures remain retryable.
+CG Production House is COMPLETE:
+- exact account: `CGPRODUCTIONHOUSE`
+- persistent read-only scopes
+- September sync: 4 videos
+- access: connected
+- coverage: complete
+- completeness: complete
+- freshness: fresh
+- queue: 1 connected / 0 reconnect / 55 not connected
+- no publishing scope/action.
 
-#505 has now verified CG Production House transitions correctly to `reconnect_required`.
-The canonical exact-client TikTok OAuth reconnect is available.
+Critical CA clarification:
+- the approved local account source is explicitly structured with **CLIENT / INSTAGRAM / TIK TOK** columns;
+- some ACTIVE clients have populated TikTok-specific entries;
+- the previous Agent 02 conclusion that all 23 matching rows were merely generic was too conservative.
 
-CA has explicitly authorized the persistent read-only TikTok OAuth reconnect for the exact CG Production House account.
+Required #505 continuation:
+1. ACTIVE clients only. Dynamics `active=true` is the client-list authority.
+2. Ignore every old/inactive row in the local source even if it contains TikTok details.
+3. Re-audit the remaining active clients using the dedicated TikTok field.
+4. Where the exact active client has a populated TikTok-specific record, use an isolated provider session for that client.
+5. Authenticate only on TikTok's provider-owned surface.
+6. Verify TikTok's returned exact provider identity before canonical binding.
+7. If the TikTok-specific field is blank/missing or returned identity mismatches, mark only that client unresolved and continue.
+8. Never reuse the CGPH session across clients.
+9. Never expose usernames/passwords/tokens in GitHub/chat/logs.
+10. No TikTok publishing.
 
-Next action: execute the canonical `Reconnect with TikTok` provider OAuth flow, verify exact account identity/freshness, then continue other ACTIVE clients. No TikTok publishing. Do not ask CA for this same consent again unless TikTok presents a new scope/permission change.
+Durable correction:
+- #505 comment `5796930571`
+- #381 comment `5796933605`
 
-Instagram campaign state:
+#### Instagram current truth
+
 - 56 active clients reviewed.
 - 25 Page-linked Instagram clients.
-- 0 standalone Instagram clients connected.
-- 6 verified standalone candidates: Bouwer & Coetzee Attorneys; Emmanuel Funerals; Novus Steel; Piek Group; Red Oak; We Ar Fuels.
-- 25 additional active clients still require exact owner-controlled Instagram identity confirmation.
-- 6 of 7 standalone production config names are securely present.
-- only `INSTAGRAM_APP_SECRET` remains absent.
+- 0 standalone Instagram clients connected at last verified checkpoint.
+- 6 verified standalone candidates:
+  - Bouwer & Coetzee Attorneys
+  - Emmanuel Funerals
+  - Novus Steel
+  - Piek Group
+  - Red Oak
+  - We Ar Fuels
+- 25 additional clients still require exact account identity confirmation.
+- production OAuth callback saved in Meta.
+- 6/7 standalone config names were securely configured.
+- `INSTAGRAM_APP_SECRET` remains the only missing production secret.
 - standalone activation remains fail-closed.
-- Meta provider redirect configuration still needs saving.
-- Meta App Review / advanced access and Live mode are required before real standalone client data access.
-- provider re-auth/2FA may be required.
-- never paste or return secrets; client passwords may only be used locally on provider-owned login pages.
+- Meta App Review / advanced access + Live mode still required.
+- provider re-auth / 2FA may be required.
 
 Production Instagram plumbing already live:
 - review-binding migration applied.
 - `instagram-oauth-start`, `instagram-oauth-callback`, `instagram-connection-confirm` deployed.
-- `meta-sync-worker` v36 and `meta-sync` v49 can consume exact reviewed standalone encrypted credentials.
+- `meta-sync-worker` v36 and `meta-sync` v49 support exact reviewed standalone encrypted credentials.
 - Page-linked Instagram remains preferred.
 
-### CA MANUAL AGENT 03 — Issue #501
+Never request or paste provider secret values into chat.
 
-The original GO SNAPSHOT publication is COMPLETE.
+### CA MANUAL AGENT 03 — Issue #513
 
-Approved snapshot:
-- artifact: `artifacts/report-truth/issue-501-reviewed-plan-snapshot.json`
-- cutoff: `2026-09-23T11:24:00.897Z`
-- hash: `d7448dcd7306deb752191aec9676da28ce228c731dde5c5626cd8a8813c79abe`
+Report publication lane #501 is no longer the active mutation lane.
 
-Production receipt:
-- applied at `2026-09-23T12:07:17.358Z`
-- 107 applied / 0 already satisfied
-- 107 reports verified live
-- 1,647 frozen post identities verified
-- July/August/September = 37 / 35 / 35
-- truth, period, September MTD, reflection, strategy and cross-client violations = 0
+Report truth:
+- original GO SNAPSHOT applied successfully.
+- recovery 5 applied successfully.
+- total live verified reports from rollout: **112**.
+- July/Aug/Sep client-visible truth verified.
+- remaining withheld: **56**
+  - 47 `MISSING_CANONICAL_REPORT`
+  - 9 `NO_IN_MONTH_POST_EVIDENCE`
+- fresh read-only discovery found no further truthful recovery batch.
+- do not fabricate around withheld evidence gaps.
 
-First withheld-recovery snapshot is frozen and merged through PR #510 at `87d9a9d140ece76c4bd94fa1058e763596cd6031`.
+Agent 03 now owns **#513 Gold strategy rollout**.
 
-Recovery pass 1 is COMPLETE.
-- recovery hash: `af696f0a33ac36fe1a7dc7b6b6c01d23929658187f1a614e6a65f69233a17f35`
-- applied at `2026-09-23T14:06:16.053Z`
-- 5 newly applied / 107 prior rows already satisfied
-- 84/84 frozen posts verified
-- 5/5 reflections present
-- 3/3 September rows explicitly MTD
-- zero truth/identity/period/cross-client violations
+Current strategy table:
+- 56 September rows, draft.
+- 56 October rows, draft.
+- all 56 active-client package receipts are now confirmed.
 
-Total live verified reports from #501 rollout: 112.
+#513 mission:
+1. build exact-client research/grounding dossiers for all 56 active clients;
+2. use confirmed package truth + actual report/content history + client intelligence + real business positioning + audience/brand constraints + governed Marketing Library + useful sourced local/category context;
+3. separate verified fact / constraint / research observation / recommendation;
+4. upgrade existing canonical Sep/Oct strategy rows, do not create a shadow strategy store;
+5. preserve flexible/on-request package logic;
+6. reject anything generic enough to transfer to another client by changing the name;
+7. do not approve/publish until gold-standard gate passes and client-safe output is verified.
 
-Remaining withheld: 56.
-- 47 `MISSING_CANONICAL_REPORT`
-- 9 `NO_IN_MONTH_POST_EVIDENCE`
+No provider mapping, package write or report-publication work in #513.
 
-Fresh read-only discovery found no additional qualifying rows, so #501 is now a truthful withheld ledger rather than an active mutation lane. Agent 03 is released from report recovery until new evidence appears.
+## 4. Production authorities
 
-## 4. Production authorities already live
+### Meta / Instagram reporting
 
-### Meta / Instagram
-
-Meta engagement D02 migration is applied.
-
-Current canonical Meta reporting runtime includes:
+- D02 engagement truth migration live.
 - `meta-sync-worker` v36.
 - `meta-sync` v49.
-- missing engagement remains unavailable/partial, never fake zero.
-- component evidence/provenance is preserved.
+- missing evidence remains unavailable/partial, never fake zero.
+- exact platform failures remain isolated.
 
-Known external Meta exceptions should be rechecked before claims:
-- Red Oak Facebook exact Page access/re-consent remains an external provider recovery item.
-- AV Event Life Facebook has had provider permission/Page access issues.
-- individual provider failures must remain exact-client/platform scoped.
+Known provider exceptions should be rechecked before claims:
+- Red Oak Facebook access/re-consent remains an external Meta issue.
+- AV Event Life Facebook has had provider permission/Page-access issues.
 
-### TikTok
+### TikTok runtime
 
-Automatic freshness scheduling is live.
-
-Current production connection layer includes:
-- exact TikTok provider-account identity uniqueness.
+Live:
 - active-client-only queue.
+- exact provider-account uniqueness.
 - OAuth start/callback/status.
 - `tiktok-sync` v11.
 - `tiktok-connection-queue` v3.
-- publishing remains disabled/out of scope.
+- automatic freshness.
+- publishing disabled/out of scope.
 
-CG Production House TikTok is now canonically recovered and fresh: exact account `CGPRODUCTIONHOUSE`, persistent read-only scopes, September sync 4 videos, queue 1 connected / 0 reconnect / 55 not connected. Remaining 55 active clients require exact owner-controlled identity discovery and client-by-client provider login before OAuth; do not reuse the CGPH session across clients.
+### Package authority
 
-### Active-client package authority
+`clients.package_settings` remains canonical.
+No shadow package store.
 
-Migration `20260923110000_active_client_package_strategy_authority.sql` is production-live.
-
-The existing `clients.package_settings` remains canonical. No shadow package store.
-
-Package rules:
+Rules:
 - active clients only.
 - blank != zero.
-- explicit zero is authoritative only when directly confirmed.
-- direct package edits invalidate prior verification.
+- unknown remains null.
+- explicit zero only when directly confirmed.
+- direct edits invalidate confirmation.
 - confirmation is auditable.
-- strategy approval/publication fails closed without current confirmed package truth and exact-client evidence.
+- 56/56 active clients confirmed.
 
-### Strategy quality
+### Strategy authority
 
-`monthly_client_strategies` remains canonical strategy authority.
+`monthly_client_strategies` remains canonical.
 
-Gold-standard requirement:
+Gold-standard requirements:
 - exact confirmed package.
 - actual previous content/performance.
-- exact client intelligence/guide.
-- products/services/offers and commercial priority.
+- exact client intelligence.
+- real commercial priorities.
 - audience/location/brand constraints.
-- current/local context where relevant.
-- governed Marketing Library methods.
-- previous strategy + what actually happened.
+- useful local/seasonal/category research where sourced.
+- governed Marketing Library.
+- previous strategy + actual execution.
 - concrete content pillars/hooks/tests/actions.
-- no generic filler transferable by changing the client name.
+- no generic filler.
 - no out-of-package plan.
-
-September/October strategy rows exist, but client strategy publication must wait for exact package truth and the current approval/publish gate.
 
 ### Microsoft
 
-Microsoft collection/reconciliation remains automatic on the existing background worker.
-
-It is not a blind daily Microsoft writeback.
+Microsoft collection/reconciliation remains automated.
+It is not blind Microsoft writeback.
 
 Always distinguish:
-- source collection complete/current;
-- canonical verified mirror;
+- collected source truth;
+- verified canonical mirror;
 - actual apply/write.
 
-Never infer a Microsoft write merely because collection completed.
+If Dynamics mirror freshness is uncertain, use live Microsoft-first evidence.
 
 ### Content Autopilot
 
-Keep Content Autopilot off unless separately approved.
-
+Keep Content Autopilot OFF unless separately approved.
 Do not silently enable AI generation or OneDrive automation.
 
-## 4A. Gold strategy rollout — Issue #513
+## 5. Next milestones
 
-Agent 03 now owns #513.
+After current #505/#513 launch work:
+- #493 LinkedIn client provider connection + truthful analytics.
+- #361 / Dynamics PR #376 + CG-Hours PR #3: company ChatGPT own-hours + travel-km logging. Code exists, production activation/mappings/secrets/first controlled write remain incomplete.
+- #217 durable real-phone acceptance if still open.
+- #437 / PR #438 creative intelligence reconciliation/authenticated acceptance if still relevant.
 
-Current strategy state:
-- 56 September strategy rows, all draft.
-- 56 October strategy rows, all draft.
-
-Phase 1:
-- build an exact-client research/grounding dossier for all 56 active clients using verified client intelligence, actual report/content history, business/site positioning, audience/brand constraints, Marketing Library methods and sourced category/local context;
-- clearly separate fact, constraint, research observation and recommendation;
-- no cross-client evidence and no generic filler.
-
-Phase 2:
-- as #504 package receipts become confirmed, upgrade the existing canonical September/October strategy rows for that exact client;
-- quantify only known package capacity;
-- preserve flexible/on-request package logic;
-- do not approve/publish until exact package receipt + dossier + gold-standard gate all pass.
-
-Do not touch provider mappings, package confirmation writes or report publication in this lane.
-
-## 5. Important next milestones after current launch lanes
-
-- Issue #493: LinkedIn client provider connection + truthful analytics, after current Instagram/TikTok/report/package milestone.
-- Issue #361 / Dynamics PR #376 + CG-Hours PR #3: company ChatGPT staff logging for own daily hours + travel km. Code exists but production activation/mapping/secrets/first controlled live write remain incomplete. Franco cannot be called production-ready for this until those gates are completed.
-- #217: real-phone human confirmation remains for the durable mobile signoff.
-- #437 / PR #438: previously code-accepted creative intelligence UI still requires current-main reconciliation/authenticated staff acceptance before eventual merge if not superseded.
-
-## 6. Security / protected actions
+## 6. Security
 
 Never expose:
-- client/provider passwords;
-- OAuth access/refresh tokens;
+- provider passwords;
+- OAuth tokens;
 - app secrets;
 - encryption keys;
 - staff logger secrets.
 
-Provider passwords may be read from CA's approved local password PDF only by the local agent and only when typing into the actual provider-owned login page. Never transcribe them into GitHub/chat/terminal/logs.
+Approved local account sources may be used only by the local execution agent and only to authenticate on the actual provider-owned login surface.
 
-Protected actions requiring explicit CA authorization when not already specifically authorized:
-- production schema/data migration;
-- production reconciliation/data apply;
-- provider consent/App Review submission/permission change;
-- secrets/credentials;
-- payments/spend;
-- external publishing/sends;
-- destructive data/OneDrive actions;
-- first real CG Hours live draft write.
-
-Routine verified code merge/deploy remains delegated to the supervisor unless a protected action is bundled into it.
-
-## 6A. Package confirmation blocker — Issue #511
-
-Issue #511 is a launch-safety correction, not a redesign.
-
-Required:
-- keep `clients.package_settings` canonical;
-- known package fields may be explicit values;
-- unproven fields must remain unknown/null, never coerced to zero/false;
-- receipt must distinguish known / explicit zero / unknown;
-- UI must render unknown clearly;
-- strategy/package-capacity checks must fail closed when a needed entitlement is unknown;
-- direct edits still invalidate verification;
-- backward compatibility for existing confirmed rows;
-- after review, production RPC/schema activation remains a protected gate.
-
-Agent 01 has prepared the bounded #511 correction: v2 confirmation receipts retain
-per-field `known` / `explicit_zero` / `unknown` state, unknown values remain JSON
-`null`, and enabled strategy work with unknown capacity fails closed. The additive
-`20260923122616_preserve_unknown_package_confirmation.sql` migration is not applied;
-no first package confirmation write may proceed until supervisor review and separate
-CA approval for that protected production migration/RPC activation.
+Old/inactive client records in those sources are never authority for connection work.
 
 ## 7. Prompt discipline — HARD
 
-CA has repeatedly required tiny coding-agent prompts.
+GitHub is the brief.
 
-The repo/GitHub issue is the brief.
-
-For any CA manual agent:
-- update GitHub first;
-- prompt only points to the owning issue/PR and next action;
-- normal prompt target is 4-7 short lines;
-- hard cap is 10 nonblank lines / ~140 words;
-- if more detail is needed, put it in GitHub first;
-- do not paste architecture/history/acceptance lists already in the issue;
-- do not resend an already-sent prompt unless a redirect is genuinely needed;
-- after an agent result, supervisor acts first, then automatically gives only the tiny remaining prompt.
+For CA manual-agent prompts:
+- target 4–7 short nonblank lines;
+- hard cap 10 nonblank lines / ~140 words;
+- put all substantial detail in GitHub first;
+- do not restate architecture/history/acceptance lists already present;
+- do not resend stale prompts;
+- after an agent result, supervisor acts first and then sends only the tiny remaining prompt.
 
 Canonical contract:
 `docs/ai-workforce/CA-CODING-PROMPT-CONTRACT.md`
 
-Preferred prompt:
+Preferred format:
 
 ```text
 CA MANUAL AGENT
@@ -340,32 +295,26 @@ Do not touch <only necessary exclusion>.
 Verify and update GitHub. Return completed / verification / blocker.
 ```
 
-## 8. New-chat behavior
+## 8. Fresh-chat priority
 
-When CA opens a fresh chat and says continue CG Dynamics:
+When CA starts a fresh CG Dynamics chat:
+1. read this handover + latest #381;
+2. refetch current main;
+3. reconcile latest agent results before issuing prompts;
+4. continue safe actions automatically.
 
-- do not ask what was happening;
-- read this handover + #381;
-- refetch main and active issues;
-- reconcile any agent results;
-- continue safe work automatically;
-- send CA only material state + genuine gate;
-- keep prompts tiny.
+Priority:
+1. #505 TikTok active-client re-audit from dedicated TikTok field + Instagram provider gates.
+2. #513 gold strategy dossiers and Sep/Oct final strategy.
+3. #501 only when new truthful report evidence appears.
+4. current launch acceptance gaps.
+5. #493 LinkedIn and #361 CG Hours.
 
-The fresh chat should prioritize, in order:
-1. #504 package confirmation rollout using the CA-reviewed full batch.
-2. #505 remaining active-client provider campaign + standalone Instagram provider gates.
-3. #513 exact-client research dossiers + Sep/Oct gold strategy rollout.
-4. #501 only when new truthful report evidence appears; 112 reports are already live and 56 are genuinely withheld.
-5. #493 LinkedIn and #361 CG Hours once the current client-launch milestone is stable.
-
-## 9. Durable control-plane rule
+## 9. Durable-control rule
 
 Every material state change must update:
 - owning issue/PR;
-- #381 if cross-lane state changed;
-- this handover when the current operating state materially changes.
+- #381 when cross-lane state changes;
+- this handover when operating state materially changes.
 
-Do not leave stale statements such as “awaiting approval” after CA has already approved the exact action.
-
-Historical detail remains available in Git history and owning issue comments. This file is intentionally current-state-first rather than a growing archive.
+Do not leave stale statements like “awaiting approval” after CA already approved or completed the action.
