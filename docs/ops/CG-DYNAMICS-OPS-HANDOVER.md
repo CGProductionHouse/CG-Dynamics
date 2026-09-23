@@ -49,8 +49,8 @@ Major completed launch-critical merges:
 
 ### DONE / production-proven
 
-- 56/56 active-client package receipts confirmed.
-- #516 final service-scope receipts are production-live and verified at 46 recurring-social / 10 non-social-or-not-currently-social / 0 held.
+- 57/57 active-client package receipts confirmed.
+- Current service-scope authority is production-live and verified at 47 recurring-social / 10 non-social-or-not-currently-social / 0 held.
 - V2 unknown-preserving package authority live.
 - Unknown values stay null; explicit zero is distinct from unknown.
 - 112 truthful July/August/September reports are published and verified.
@@ -269,19 +269,36 @@ For each eligible client:
 
 Never reuse another client’s TikTok session.
 
-Known current TikTok provider state:
-- Red Oak exact account verified as `@redoak.0fficial`.
-- No stale/conflicting Red Oak DB mapping exists; earlier conflict was caused by a reused CGPH session and the guard worked correctly.
-- Red Oak OAuth then hit provider error `non_sandbox_target`.
-- Root cause: CG Dynamics TikTok app was fully configured only in Sandbox; Production had been an empty draft.
-- Production TikTok app config has now been populated with Web platform, canonical callback, Login Kit and read-only scopes only.
-- Remaining Production-review provider gates:
-  - verify `cgdynamics.co.za` ownership;
-  - provide TikTok-required end-to-end demo video;
-  - submit/complete production app review.
-- Red Oak sandbox target-user flow has been initiated and requires a fresh exact Red Oak provider login.
-- Emmanuel Funerals reached OAuth start but consent was correctly withheld because browser still carried CGPH session; it needs its own isolated provider login.
-- known provider-specific local TikTok records include Bat Hill Royale, Emmanuel Funerals and WiseRide.
+Current production TikTok fleet (23 Sep 2026):
+- **47 eligible**
+- **10 connected**
+- **0 reconnect-required**
+- **37 not connected**
+- all 10 connected rows are read-only analytics connections and eligible for automatic daily freshness.
+
+Connected exact clients:
+- CG Production House
+- Red Oak
+- Braize
+- Forklift Trucks
+- Wiseman Group
+- Dulux Paint & Paper Bloemfontein
+- Watch Addict
+- Madison Wear
+- The Staffordshire
+- Neshora Oxygen
+
+Client-assisted holds:
+- **Emmanuel Funerals**
+- **Emoya Estate Driving Range**
+- **Piek Group**
+- **We Ar Fuels**
+
+These four must not be repeatedly treated as ordinary autonomous rollout work. Resume only when the client can complete the required owner-side login, approval, 2FA or provider interaction.
+
+The remaining **33** unconnected eligible clients stay identity-gated until an exact owner-controlled TikTok identity is verified. Do not infer or guess identities.
+
+No TikTok publishing scopes, live publishing, advertising campaigns or ad spend are enabled through Dynamics.
 
 ### Native TikTok management / scheduler
 
@@ -362,7 +379,7 @@ Protected production gate still pending:
 
 ## 9. Portal coverage — #519
 
-#519 owns read-only reconciliation of current 56-client/service truth against the older completed portal rollout.
+#519 owns read-only reconciliation of current 57-client/service truth against the older completed portal rollout.
 
 Older portal/auth foundation:
 - exact-client username login/admin access proven.
@@ -370,11 +387,11 @@ Older portal/auth foundation:
 - no duplicate/cross-client/auth regressions.
 
 #519 should:
-- compare current 56-client service truth to existing mappings;
+- compare current 57-client service truth to existing mappings;
 - identify only the smallest current launch batch needing access/provisioning;
 - remain read-only until reviewed.
 
-Do not assume all 56 need client portal access merely because they are active.
+Do not assume all 57 need client portal access merely because they are active.
 
 ## 10. Production authorities
 
@@ -458,7 +475,7 @@ On a fresh CG Dynamics chat:
 
 Priority order:
 1. Agent 03 / #513: supervisor review of the regenerated v2 46 / 10 / 0 strategy dry-run.
-2. Agent 02 / #505: continue exact eligible TikTok/Instagram sweep + TikTok Business Center scheduler setup.
+2. #505: TikTok normal sweep is paused at 10 connected; four named clients require client help and the other 33 remain identity-gated. Standalone Instagram is prepared but still blocked on Meta App Review/Live mode/secure app secret before OAuth rollout.
 3. #518: production migration only after CA approval, then Red Oak read-only preview.
 4. #519: current portal-access reconciliation.
 5. #217: optional real-phone signoff if CA still wants it.
