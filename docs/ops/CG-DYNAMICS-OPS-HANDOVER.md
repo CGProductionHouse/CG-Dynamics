@@ -42,9 +42,9 @@ Recent launch-critical merges:
 
 ## 3. Active manual lanes
 
-### CA MANUAL AGENT 01 — Issue #504
+### CA MANUAL AGENT 01 — Issues #504 / #511
 
-Mission: active-client package confirmation campaign.
+Mission: active-client package confirmation campaign, with #511 now blocking the first truthful receipt.
 
 Production package authority is live.
 
@@ -55,13 +55,16 @@ Latest verified queue:
 - 0 conflicts.
 - 19 unknown-heavy.
 
-AV Event Life is currently the first CA confirmation gate.
+AV Event Life is the first CA-confirmed package truth:
+- CA explicitly confirmed 4 design posters + 4 photo posts + social media management/caption generation.
+- all other package fields remain unknown, not zero.
 
-Exact evidence:
-- Dynamics current package/templates prove 4 design posters + 4 professional/photo posts per month.
-- commercial invoice evidence proves 8 combined Advertising Posters / Professional Photos + Social Media management / caption generation at the established monthly price.
-- videos, reels, animated posters, paid campaign management/budget, shoot days, website work and other extras remain unproven.
-- do not infer unproven fields as zero.
+Important blocker discovered before write:
+- the live #494 confirmation RPC currently requires explicit values for every numeric field and an explicit campaign boolean;
+- using it now would silently turn unknowns into false zeros;
+- no AV package write has occurred;
+- Issue #511 owns the bounded authority correction so confirmed receipts can preserve unknown/null fields while strategy capacity checks fail closed.
+- after #511 code review and separately approved migration/RPC activation, AV Event Life should be the first confirmed receipt using the exact CA-approved truth.
 
 Agent 01 has already prepared the next ten direct-evidence-ready clients on #504:
 Bloem Action Sports; Bloem Marble & Granite; Bohemia Quick Stop; Bouwer & Coetzee Attorneys; C&L Innovations; Cape Lumber; Central Canvas; Daisy & Co; Delta Gas; Dulux Paint & Paper Bloemfontein.
@@ -263,6 +266,23 @@ Protected actions requiring explicit CA authorization when not already specifica
 - first real CG Hours live draft write.
 
 Routine verified code merge/deploy remains delegated to the supervisor unless a protected action is bundled into it.
+
+## 6A. Package confirmation blocker — Issue #511
+
+Issue #511 is a launch-safety correction, not a redesign.
+
+Required:
+- keep `clients.package_settings` canonical;
+- known package fields may be explicit values;
+- unproven fields must remain unknown/null, never coerced to zero/false;
+- receipt must distinguish known / explicit zero / unknown;
+- UI must render unknown clearly;
+- strategy/package-capacity checks must fail closed when a needed entitlement is unknown;
+- direct edits still invalidate verification;
+- backward compatibility for existing confirmed rows;
+- after review, production RPC/schema activation remains a protected gate.
+
+Agent 01 should handle #511 before any first package confirmation write.
 
 ## 7. Prompt discipline — HARD
 
