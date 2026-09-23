@@ -1,6 +1,5 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { resolveTiktokConnectionForClient } from '../_shared/tiktok.ts'
 import { classifyTiktokHealth, TIKTOK_READ_SCOPES, type TiktokRunEvidence } from '../_shared/tiktokFreshness.ts'
 
 const READ_SCOPES = [...TIKTOK_READ_SCOPES]
@@ -42,11 +41,11 @@ Deno.serve(async (req) => {
   // Use canonical admin|manager role check for integration management
   const { data: profile } = await sb
     .from('profiles')
-    .select('role')
+    .select('role, is_active')
     .eq('id', user.id)
     .single()
 
-  if (!profile || !['admin', 'manager'].includes(profile.role)) {
+  if (!profile?.is_active || !['admin', 'manager'].includes(profile.role)) {
     return jsonResponse({ ok: false, error: 'Admin or manager access required.' }, 403)
   }
 
@@ -75,34 +74,28 @@ Deno.serve(async (req) => {
     })
   }
 
-  const { connectionId, error: connError } = await resolveTiktokConnectionForClient(sb, body.clientId)
-  if (!connectionId) {
-    if (connError === 'Could not look up TikTok connection.') {
-      return jsonResponse({
-        ok: false,
-        connected: false,
-        status: 'unavailable',
-        error: connError,
-        message: 'TikTok connection status could not be verified.',
-        missingScopes: [],
-        schemaReady,
-      }, 503)
-    }
-    return jsonResponse({
-      ok: true,
-      connected: false,
-      status: 'not_connected',
-      message: connError ?? 'TikTok is not connected yet.',
-      schemaReady,
-    })
+  const { data: activeClient, error: clientError } = await sb
+    .from('clients')
+    .select('id')
+    .eq('id', body.clientId)
+    .eq('active', true)
+    .maybeSingle()
+
+  if (clientError) {
+    return jsonResponse({ ok: false, connected: false, status: 'unavailable', message: 'Client eligibility could not be verified.', missingScopes: [], schemaReady }, 503)
+  }
+  if (!activeClient) {
+    return jsonResponse({ ok: false, connected: false, status: 'ineligible', message: 'Only active clients are eligible for TikTok.', missingScopes: [], schemaReady }, 403)
   }
 
-  // Read the specific connection for this client
-  const { data: latest, error: latestError } = await sb
+  // Management must include reconnect-required rows; the sync path separately
+  // continues to require status=connected for provider reads.
+  const { data: rows, error: latestError } = await sb
     .from('tiktok_connections')
     .select('id, client_id, tiktok_open_id, display_name, avatar_url, status, scopes, last_error, last_connected_at')
-    .eq('id', connectionId)
-    .single()
+    .eq('client_id', body.clientId)
+    .order('last_connected_at', { ascending: false, nullsFirst: false })
+    .limit(1)
 
   if (latestError) {
     return jsonResponse({
@@ -116,7 +109,7 @@ Deno.serve(async (req) => {
     }, 503)
   }
 
-  if (!latest) {
+  if (!rows?.length) {
     return jsonResponse({
       ok: true,
       connected: false,
@@ -125,6 +118,8 @@ Deno.serve(async (req) => {
       schemaReady,
     })
   }
+
+  const latest = rows[0]
 
   const grantedScopes = Array.isArray(latest.scopes)
     ? latest.scopes.filter((scope): scope is string => typeof scope === 'string')

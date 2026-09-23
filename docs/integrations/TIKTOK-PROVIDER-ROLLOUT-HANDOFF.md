@@ -144,3 +144,26 @@ CG Dynamics Vercel preview check passed at `03d19133`. The separate `dev-bridge`
 Stop at the **PR merge/release decision gate**. PR #239 remains unmerged. The production frontend release must include the TikTok and legal routes; the current OAuth return host otherwise falls back to the hub as documented above.
 
 TikTok production app review, domain verification, review demonstration, production credentials, and agency publishing are separate subsequent gates. Keep publishing functions undeployed and `TIKTOK_PUBLISHING_ENABLED` unset. Do not restart the completed read-only rollout to investigate those future lanes.
+
+## 2026-09-23 automatic freshness and connection-queue continuation
+
+The #238 / PR #483 daily freshness path is now live on the existing scheduler:
+background-worker v18, tiktok-sync v7 and tiktok-connection-status v5. The
+daily job is admitted only for active clients with exact connected account
+mappings. Its first run preserved prior verified facts and truthfully reported
+that the sole existing CG Production House access token had expired and could
+not be refreshed; OAuth reconnect is required.
+
+The follow-on #238 code lane adds a single server-side active-client connection
+queue and hardens the provider OAuth boundary. OAuth start and callback both
+revalidate active client plus active admin/manager authority. TikTok's returned
+`open_id` is verified and cannot be reused across client mappings. The browser
+receives only client-safe display identity, never raw provider IDs or tokens.
+Reconnect-required mappings remain visible instead of collapsing into an
+incorrect disconnected/healthy state. No password collection exists.
+
+The additive `20260923143000_tiktok_exact_account_identity.sql` migration is
+code-only and unapplied. It first fails closed if cross-client duplicates exist,
+then enforces one CG client per TikTok provider account identity. Queue/function
+deployment, migration application and each provider consent remain protected CA
+gates. TikTok publishing remains disabled and outside this lane.

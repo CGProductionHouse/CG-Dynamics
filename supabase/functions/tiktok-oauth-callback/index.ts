@@ -20,6 +20,13 @@ function redirect(to: string): Response {
   })
 }
 
+function resultUrl(appUrl: string, result: string, clientId?: string | null): string {
+  const url = new URL('/admin/integrations/tiktok', appUrl)
+  url.searchParams.set('tiktok', result)
+  if (clientId) url.searchParams.set('client', clientId)
+  return url.toString()
+}
+
 async function sha256Hex(value: string): Promise<string> {
   const data = new TextEncoder().encode(value)
   const digest = await crypto.subtle.digest('SHA-256', data)
@@ -43,7 +50,7 @@ Deno.serve(async (req) => {
 
   if (!supabaseUrl || !serviceRoleKey) {
     console.error('TikTok OAuth missing Supabase server config')
-    return redirect(`${appUrl}/admin/integrations/tiktok?tiktok=error`)
+    return redirect(resultUrl(appUrl, 'error'))
   }
 
   const sb = createClient(supabaseUrl, serviceRoleKey)
@@ -85,13 +92,23 @@ Deno.serve(async (req) => {
     return redirect(`${appUrl}/admin/integrations/tiktok?tiktok=error`)
   }
 
+  const [{ data: client }, { data: profile }] = await Promise.all([
+    sb.from('clients').select('id').eq('id', clientId).eq('active', true).maybeSingle(),
+    sb.from('profiles').select('role, is_active').eq('id', consumedState.user_id).maybeSingle(),
+  ])
+
+  if (!client || !profile?.is_active || !['admin', 'manager'].includes(profile.role)) {
+    console.error('TikTok OAuth callback eligibility no longer valid')
+    return redirect(resultUrl(appUrl, 'ineligible', clientId))
+  }
+
   // Exchange authorization code for tokens
   let config
   try {
     config = resolveTiktokConfig()
   } catch (error) {
     console.error(error instanceof Error ? error.message : 'Internal TikTok configuration error.')
-    return redirect(`${appUrl}/admin/integrations/tiktok?tiktok=config_error`)
+    return redirect(resultUrl(appUrl, 'config_error', clientId))
   }
 
   const tokenParams = new URLSearchParams({
@@ -112,12 +129,12 @@ Deno.serve(async (req) => {
     })
   } catch (err) {
     console.error('TikTok token exchange network error:', redact(err instanceof Error ? err.message : String(err), [config.clientSecret, code]))
-    return redirect(`${appUrl}/admin/integrations/tiktok?tiktok=error`)
+    return redirect(resultUrl(appUrl, 'error', clientId))
   }
 
   if (!tokenResponse.ok) {
     console.error('TikTok token exchange error:', tokenResponse.status)
-    return redirect(`${appUrl}/admin/integrations/tiktok?tiktok=error`)
+    return redirect(resultUrl(appUrl, 'error', clientId))
   }
 
   // CORRECT PARSE: TikTok returns token fields at TOP LEVEL, not nested under data
@@ -133,7 +150,7 @@ Deno.serve(async (req) => {
 
   if (tokenData.error?.code && tokenData.error.code !== 'ok') {
     console.error('TikTok token exchange returned error:', tokenData.error.message)
-    return redirect(`${appUrl}/admin/integrations/tiktok?tiktok=error`)
+    return redirect(resultUrl(appUrl, 'error', clientId))
   }
 
   const accessToken = tokenData.access_token
@@ -145,7 +162,7 @@ Deno.serve(async (req) => {
 
   if (!accessToken) {
     console.error('TikTok token exchange missing access_token')
-    return redirect(`${appUrl}/admin/integrations/tiktok?tiktok=error`)
+    return redirect(resultUrl(appUrl, 'error', clientId))
   }
 
   // Check missing scopes
@@ -157,13 +174,40 @@ Deno.serve(async (req) => {
 
   // Fetch user info for display
   const { user: tiktokUser } = await getTiktokUserInfo(accessToken)
+  const verifiedOpenId = openId ?? tiktokUser?.open_id
+
+  if (!verifiedOpenId || (openId && tiktokUser?.open_id && openId !== tiktokUser.open_id)) {
+    console.error('TikTok OAuth identity could not be verified')
+    return redirect(resultUrl(appUrl, 'identity_error', clientId))
+  }
+
+  const { data: conflictingAccount, error: conflictLookupError } = await sb
+    .from('tiktok_connections')
+    .select('id, client_id')
+    .eq('tiktok_open_id', verifiedOpenId)
+    .neq('client_id', clientId)
+    .limit(1)
+    .maybeSingle()
+
+  if (conflictLookupError || conflictingAccount) {
+    console.error(conflictLookupError
+      ? 'TikTok exact-account conflict lookup failed'
+      : 'TikTok account is already mapped to another client')
+    return redirect(resultUrl(appUrl, 'account_conflict', clientId))
+  }
 
   // Upsert connection — explicitly bound to this clientId
-  const { data: existing } = await sb
+  const { data: existing, error: existingError } = await sb
     .from('tiktok_connections')
     .select('id')
     .eq('client_id', clientId)
+    .order('last_connected_at', { ascending: false, nullsFirst: false })
     .limit(1)
+
+  if (existingError) {
+    console.error('TikTok exact-client connection lookup failed')
+    return redirect(resultUrl(appUrl, 'error', clientId))
+  }
 
   let connectionId: string | null = null
 
@@ -172,7 +216,7 @@ Deno.serve(async (req) => {
       .from('tiktok_connections')
       .update({
         connected_by: consumedState.user_id,
-        tiktok_open_id: openId ?? tiktokUser?.open_id,
+        tiktok_open_id: verifiedOpenId,
         display_name: tiktokUser?.display_name,
         avatar_url: tiktokUser?.avatar_url,
         profile_deep_link: tiktokUser?.profile_deep_link,
@@ -190,7 +234,7 @@ Deno.serve(async (req) => {
       .insert({
         connected_by: consumedState.user_id,
         client_id: clientId,
-        tiktok_open_id: openId ?? tiktokUser?.open_id,
+        tiktok_open_id: verifiedOpenId,
         display_name: tiktokUser?.display_name,
         avatar_url: tiktokUser?.avatar_url,
         profile_deep_link: tiktokUser?.profile_deep_link,
@@ -204,14 +248,14 @@ Deno.serve(async (req) => {
 
     if (insertError) {
       console.error('Failed to insert tiktok_connections:', insertError.code ?? 'unknown')
-      return redirect(`${appUrl}/admin/integrations/tiktok?tiktok=error`)
+      return redirect(resultUrl(appUrl, 'error', clientId))
     }
     connectionId = inserted.id
   }
 
   if (!connectionId) {
     console.error('Could not determine TikTok connection ID')
-    return redirect(`${appUrl}/admin/integrations/tiktok?tiktok=error`)
+    return redirect(resultUrl(appUrl, 'error', clientId))
   }
 
   // Store tokens server-only
@@ -228,8 +272,12 @@ Deno.serve(async (req) => {
 
   if (tokenError) {
     console.error('Failed to store TikTok token:', tokenError.code ?? 'unknown')
-    return redirect(`${appUrl}/admin/integrations/tiktok?tiktok=error`)
+    await sb.from('tiktok_connections').update({
+      status: 'needs_reauth',
+      last_error: 'TikTok OAuth token storage did not complete. Reconnect is required.',
+    }).eq('id', connectionId)
+    return redirect(resultUrl(appUrl, 'error', clientId))
   }
 
-  return redirect(`${appUrl}/admin/integrations/tiktok?tiktok=${missingScopes.length > 0 ? 'permissions_missing' : 'connected'}`)
+  return redirect(resultUrl(appUrl, missingScopes.length > 0 ? 'permissions_missing' : 'connected', clientId))
 })
