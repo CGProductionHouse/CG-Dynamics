@@ -159,7 +159,7 @@ Deno.serve(async (req) => {
       .single()
 
     if (tokenRows?.refresh_token) {
-      let refreshed: Awaited<ReturnType<typeof refreshTiktokToken>> = null
+      let refreshed: Awaited<ReturnType<typeof refreshTiktokToken>>
       try {
         refreshed = await refreshTiktokToken(sb, connectionId, tokenRows.refresh_token)
       } catch {
