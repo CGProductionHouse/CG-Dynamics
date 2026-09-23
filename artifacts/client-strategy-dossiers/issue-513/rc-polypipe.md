@@ -4,12 +4,17 @@ Client ID: `4f6106de-c437-404e-8cef-fbe848de0665`
 
 Issue: #513
 
-Evidence hash: `238b27a3706ec178d435d0275583368c199b90d68b7a109ddc5720bbf1b82ed6`
-Status: **dossier complete; strategy gate blocked**
+Evidence hash: `5183d45b1a2cf266f00ecfc5b00847653fa79d369fbc8dba0ca7507568c6e394`
+Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- No exact evidence available; do not fill this gap with generic copy.
+- official RC Polypipe website: https://rcpolypipe.com/;
+- official quote page: https://rcpolypipe.com/get-a-quote.
+- field-irrigation / level-or-slight-downgrade application;
+- published waterhead, pump, trenching, venting and connection guidance;
+- minimum order weight and published roll-length relationships;
+- current call and WhatsApp numbers;
 
 ## Confirmed package
 
@@ -27,7 +32,11 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Client and CG constraints
 
-- No exact evidence available; do not fill this gap with generic copy.
+- 241 shared runtime/schema/workflow files;
+- 210 shared research/ledger/progress files;
+- Issue 248 shared creative-standard files;
+- unrelated client intelligence;
+- CG Hours, billing, UUID/package/time history;
 
 ## Research observations
 
@@ -39,10 +48,10 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Strategy gate blockers
 
-- `PRODUCTION_GUIDE_RETRIEVAL_REQUIRED`
+- None at dossier level. Package-bounded strategy still requires field-by-field quality review.
 
 ## Sources
 
-- production-client-guide:RC-POLYPIPE-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md
+- production-client-guide:rc-polypipe.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#4f6106de-c437-404e-8cef-fbe848de0665

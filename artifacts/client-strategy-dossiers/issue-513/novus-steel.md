@@ -4,12 +4,17 @@ Client ID: `4236a60a-990f-484f-8d19-13d2f92fbe3b`
 
 Issue: #513
 
-Evidence hash: `2bc51ec64f4fd0d2e88900959f0e9cc18fa602e1c8ccdb6d28bd3ad365ab787c`
-Status: **dossier complete; strategy gate blocked**
+Evidence hash: `9172b5c25a00f5d222796747b0ab5a05468a0764aa7b532b1c1fa551be1aa5b9`
+Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Email: info@novussteel.co.za
+- Website: https://www.novussteel.co.za/
+- Base: Bloemfontein, South Africa
+- Service reach: nationwide / projects across South Africa
+- specific to the actual job/application;
+- technically aware without showing off;
 
 ## Confirmed package
 
@@ -27,7 +32,12 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Client and CG constraints
 
-- No exact evidence available; do not fill this gap with generic copy.
+- steel grades/specifications;
+- dimensions/thicknesses/standards;
+- fabrication or processing capability beyond what is verified;
+- welding/engineering certifications;
+- supplier/manufacturer/partner relationships;
+- service area beyond verified national/project wording;
 
 ## Research observations
 
@@ -39,10 +49,10 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Strategy gate blockers
 
-- `PRODUCTION_GUIDE_RETRIEVAL_REQUIRED`
+- None at dossier level. Package-bounded strategy still requires field-by-field quality review.
 
 ## Sources
 
-- production-client-guide:NOVUS-STEEL-CG-DYNAMICS-CLIENT-GUIDE.md
+- production-client-guide:novus-steel.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#4236a60a-990f-484f-8d19-13d2f92fbe3b

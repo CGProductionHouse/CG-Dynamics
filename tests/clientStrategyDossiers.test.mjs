@@ -40,3 +40,18 @@ test('once-off and website-only clients stay outside recurring social strategy',
   assert.match(readFileSync('artifacts/client-strategy-dossiers/issue-513/kundedienste.md', 'utf8'), /once-off/i)
   assert.match(readFileSync('artifacts/client-strategy-dossiers/issue-513/rusoord-farmstay.md', 'utf8'), /website-only|website service/i)
 })
+
+test('retrieved runtime-ready guides enrich only their 28 exact-client dossiers', () => {
+  const runtimeGuides = index.clients.filter(client => {
+    try {
+      readFileSync(`artifacts/client-strategy-dossiers/issue-513/runtime-guides/${client.file}`, 'utf8')
+      return true
+    } catch {
+      return false
+    }
+  })
+  assert.equal(runtimeGuides.length, 28)
+  assert.equal(index.strategy_ready_count, 55)
+  assert.equal(index.strategy_blocked_count, 1)
+  assert.deepEqual(index.clients.filter(client => client.strategy_status === 'blocked').map(client => client.name), ['Kundedienste'])
+})

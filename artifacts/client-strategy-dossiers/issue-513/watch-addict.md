@@ -4,12 +4,17 @@ Client ID: `e1cb958e-3f68-4a77-b5ea-b471ea62bdef`
 
 Issue: #513
 
-Evidence hash: `f5a033285f6be283438d04da442730c8e3030436c8c436acd7cf9f733698358b`
-Status: **dossier complete; strategy gate blocked**
+Evidence hash: `3ed3712e5249e88d1b25651bdf18f08767ed7301a9ad64458f6ac8f18520af7d`
+Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- No exact evidence available; do not fill this gap with generic copy.
+- ecommerce product pages with live sale/stock states.
+- identify the exact supplied product/model;
+- use the exact current product page or authoritative supplied source where available;
+- recheck stock, price and sale state at task time;
+- never infer specs from a similar watch or image;
+- do not claim authorised dealer, official reseller, exclusive distributor or manufacturer warranty without direct current proof.
 
 ## Confirmed package
 
@@ -39,10 +44,10 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Strategy gate blockers
 
-- `PRODUCTION_GUIDE_RETRIEVAL_REQUIRED`
+- None at dossier level. Package-bounded strategy still requires field-by-field quality review.
 
 ## Sources
 
-- production-client-guide:WATCH-ADDICT-CG-DYNAMICS-CLIENT-GUIDE.md
+- production-client-guide:watch-addict.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#e1cb958e-3f68-4a77-b5ea-b471ea62bdef

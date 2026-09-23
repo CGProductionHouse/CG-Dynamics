@@ -1,0 +1,10 @@
+{
+  "client_id": "fd16ebae-a50b-4920-afe0-94c2631f8f06",
+  "client_name": "All Around PVC",
+  "guide_id": "110e136a-bd5c-4fd7-86b1-6fb8178218ef",
+  "version": 1,
+  "runtime_readiness": "ready",
+  "source_pack_path": "docs/ai-workforce/client-intelligence/ALL-AROUND-PVC-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md",
+  "source_revision": "383ae2cb1c4342593dab678b55cee90e54e5e5e2",
+  "source_observed_at": "2026-09-07 22:00:00+00"
+}

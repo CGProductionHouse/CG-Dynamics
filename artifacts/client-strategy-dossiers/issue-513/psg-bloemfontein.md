@@ -4,12 +4,17 @@ Client ID: `29a28efd-c998-45e2-a57c-4a751e779e66`
 
 Issue: #513
 
-Evidence hash: `d55dac7ccfdcfd071b8a0d20c6a4c4779f8f6f6b2e58c96a03239d5ba530e960`
-Status: **dossier complete; strategy gate blocked**
+Evidence hash: `d7ed3e0f84ab307bee5c46ff4c4440825eadfb366beb8d1e7da9590401c3cbff`
+Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Issue 241/current draft PR 247 for runtime/ownership boundaries only;
+- Issue 248 human creative standard;
+- current migration workflow on the 241 branch where it is not yet present on main;
+- current open parallel-lane ownership state.
+- clients: exact active row PSG Bloemfontein;
+- exact client ID: 29a28efd-c998-45e2-a57c-4a751e779e66;
 
 ## Confirmed package
 
@@ -27,7 +32,11 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Client and CG constraints
 
-- No exact evidence available; do not fill this gap with generic copy.
+- underwriting/product eligibility;
+- FSP/licensing/representative status;
+- provider/insurer relationships;
+- awards/rankings/accreditations;
+- product/service availability.
 
 ## Research observations
 
@@ -39,10 +48,10 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Strategy gate blockers
 
-- `PRODUCTION_GUIDE_RETRIEVAL_REQUIRED`
+- None at dossier level. Package-bounded strategy still requires field-by-field quality review.
 
 ## Sources
 
-- production-client-guide:PSG-BLOEMFONTEIN-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md
+- production-client-guide:psg-bloemfontein.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#29a28efd-c998-45e2-a57c-4a751e779e66

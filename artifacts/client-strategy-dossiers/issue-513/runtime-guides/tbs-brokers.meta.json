@@ -1,0 +1,10 @@
+{
+  "client_id": "a36ba938-e9dc-4ecf-bb67-4853608b1c01",
+  "client_name": "TBS Brokers",
+  "guide_id": "c6f04664-a1ec-4182-ab3f-172442629523",
+  "version": 1,
+  "runtime_readiness": "ready",
+  "source_pack_path": "docs/ai-workforce/client-intelligence/TBS-BROKERS-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md",
+  "source_revision": "21c872945c4607b856caefccd53580c09d86e694",
+  "source_observed_at": "2026-09-07 22:00:00+00"
+}

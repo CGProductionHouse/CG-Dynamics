@@ -4,12 +4,17 @@ Client ID: `a36ba938-e9dc-4ecf-bb67-4853608b1c01`
 
 Issue: #513
 
-Evidence hash: `951f82e9143becf20f4c934ff0f186ab41c2482e0a1b03b8628885ca2f841353`
-Status: **dossier complete; strategy gate blocked**
+Evidence hash: `61083d365f1100bc7be3fb6fa429c30a6d1491772a7aaa196248d563603153b5`
+Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Issue 241 and its current draft PR 247 only for runtime/ownership boundaries;
+- Issue 248 human creative standard;
+- current Project migration workflow on the 241 branch, read-only;
+- the current sibling migration pattern from Issue 255 / PSG Bloemfontein;
+- current open PR ownership and parallel-lane isolation state.
+- clients: exact active row TBS Brokers;
 
 ## Confirmed package
 
@@ -27,7 +32,12 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Client and CG constraints
 
-- No exact evidence available; do not fill this gap with generic copy.
+- premiums, prices, fees or rates;
+- investment returns, performance or forecasts;
+- suitability or personalised recommendations;
+- underwriting acceptance or eligibility;
+- claim approval, payout or response outcomes;
+- adviser authority beyond current exact evidence;
 
 ## Research observations
 
@@ -39,10 +49,10 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Strategy gate blockers
 
-- `PRODUCTION_GUIDE_RETRIEVAL_REQUIRED`
+- None at dossier level. Package-bounded strategy still requires field-by-field quality review.
 
 ## Sources
 
-- production-client-guide:TBS-BROKERS-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md
+- production-client-guide:tbs-brokers.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#a36ba938-e9dc-4ecf-bb67-4853608b1c01

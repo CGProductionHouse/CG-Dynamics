@@ -1,10 +1,11 @@
 import { createHash } from 'node:crypto'
-import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { basename, join, resolve } from 'node:path'
 
 const ROOT = resolve(import.meta.dirname, '..')
 const INTELLIGENCE_DIR = join(ROOT, 'docs/ai-workforce/client-intelligence')
 const OUTPUT_DIR = join(ROOT, 'artifacts/client-strategy-dossiers/issue-513')
+const RUNTIME_GUIDE_DIR = join(OUTPUT_DIR, 'runtime-guides')
 const REPORT_SNAPSHOT = join(ROOT, 'artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json')
 const PACKAGE_AUTHORITY = 'https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876'
 
@@ -110,6 +111,8 @@ function clean(text) {
 }
 
 function findLocalResearch(row) {
+  const runtime = join(RUNTIME_GUIDE_DIR, `${slug(row.name)}.md`)
+  if (existsSync(runtime)) return runtime
   if (row.guide) {
     const exact = join(INTELLIGENCE_DIR, row.guide)
     if (existsSync(exact)) return exact
@@ -133,21 +136,23 @@ function findLocalResearch(row) {
   return candidates.length === 1 ? join(INTELLIGENCE_DIR, candidates[0]) : null
 }
 
-function extractEvidence(markdown) {
+function extractEvidence(markdown, runtimeGuide = false) {
   const sections = { facts: [], constraints: [], observations: [], recommendations: [] }
-  let bucket = 'facts'
+  let bucket = runtimeGuide ? null : 'facts'
   for (const raw of markdown.split(/\r?\n/)) {
     const heading = raw.match(/^#{1,4}\s+(.+)/)?.[1]?.toLowerCase()
     if (heading) {
       if (/avoid|constraint|guardrail|must not|risk|compliance|freshness|unknown|confirm/.test(heading)) bucket = 'constraints'
       else if (/recommend|strategy|opportunit|content pillar|campaign|next step|plan/.test(heading)) bucket = 'recommendations'
       else if (/performance|observation|competitor|pattern|signal|what happened/.test(heading)) bucket = 'observations'
-      else bucket = 'facts'
+      else if (!runtimeGuide || /business|brand|audience|product|service|offer|voice|identity|history|evidence|website|social|client truth|current/.test(heading)) bucket = 'facts'
+      else bucket = null
       continue
     }
-    if (!/^\s*(?:[-*]|\d+\.)\s+/.test(raw)) continue
+    if (!bucket || !/^\s*(?:[-*]|\d+\.)\s+/.test(raw)) continue
     const value = clean(raw.replace(/^\s*(?:[-*]|\d+\.)\s+/, ''))
-    if (value.length < 28 || value.length > 320 || /^(file|commit|issue|branch|status|source):/i.test(value)) continue
+    if (value.length < 28 || value.length > 320 || /^(file|commit|issue|branch|status|source|date|scope):/i.test(value)) continue
+    if (runtimeGuide && (/\.(?:md|tsx?|mjs|json)\b|github\.com\/CGProductionHouse\/CG-Dynamics\/(?:issues|pull)\//i.test(value))) continue
     if (!sections[bucket].includes(value) && sections[bucket].length < 6) sections[bucket].push(value)
   }
   return sections
@@ -169,7 +174,6 @@ const snapshotClients = new Map(snapshot.rows.map(row => [row.client.id, row.cli
 if (rows.length !== 56 || snapshotClients.size !== 56) throw new Error(`Expected 56 exact active clients; authority=${rows.length}, snapshot=${snapshotClients.size}`)
 for (const row of rows) if (snapshotClients.get(row.id) !== row.name) throw new Error(`Identity mismatch for ${row.name}`)
 
-if (existsSync(OUTPUT_DIR)) rmSync(OUTPUT_DIR, { recursive: true })
 mkdirSync(OUTPUT_DIR, { recursive: true })
 const index = []
 for (const row of rows) {
@@ -179,7 +183,8 @@ for (const row of rows) {
   const special = SPECIAL_RESEARCH[row.name]
   const guidePath = findLocalResearch(row)
   const guide = guidePath ? readFileSync(guidePath, 'utf8') : ''
-  const extracted = guide ? extractEvidence(guide) : { facts: [], constraints: [], observations: [], recommendations: [] }
+  const runtimeGuide = guidePath?.startsWith(RUNTIME_GUIDE_DIR)
+  const extracted = guide ? extractEvidence(guide, runtimeGuide) : { facts: [], constraints: [], observations: [], recommendations: [] }
   for (const key of ['facts', 'constraints', 'recommendations']) {
     for (const value of special?.[key] ?? []) if (!extracted[key].includes(value)) extracted[key].push(value)
   }
@@ -189,7 +194,7 @@ for (const row of rows) {
   if (!guide && !row.guide && !special) blockers.push('NO_REVIEWED_EXACT_CLIENT_RESEARCH')
   if (extracted.facts.length === 0 && !row.guide) blockers.push('NO_VERIFIED_BUSINESS_FACTS')
   if (extracted.recommendations.length === 0 && !row.guide) blockers.push('NO_EVIDENCE_BACKED_RECOMMENDATION')
-  const sources = [guidePath ? `docs/ai-workforce/client-intelligence/${basename(guidePath)}` : null, !guidePath && row.guide ? `production-client-guide:${row.guide}` : null, special?.source, PACKAGE_AUTHORITY, `artifact:${basename(REPORT_SNAPSHOT)}#${row.id}`].filter(Boolean)
+  const sources = [runtimeGuide ? `production-client-guide:${basename(guidePath)}` : guidePath ? `docs/ai-workforce/client-intelligence/${basename(guidePath)}` : null, !guidePath && row.guide ? `production-client-guide:${row.guide}` : null, special?.source, PACKAGE_AUTHORITY, `artifact:${basename(REPORT_SNAPSHOT)}#${row.id}`].filter(Boolean)
   const hash = createHash('sha256').update(JSON.stringify({ row, sources, extracted, report_ids: safe.map(item => item.report?.id), post_ids: posts.map(post => post.id) })).digest('hex')
   const bullet = values => values.length ? values.map(value => `- ${value}`).join('\n') : '- No exact evidence available; do not fill this gap with generic copy.'
   const dossier = `# ${row.name} — strategy grounding dossier

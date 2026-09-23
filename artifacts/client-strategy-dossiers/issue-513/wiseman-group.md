@@ -4,12 +4,17 @@ Client ID: `899c9988-8207-4e45-a8fc-a7446dfcf96b`
 
 Issue: #513
 
-Evidence hash: `5b7ff565c2720501fb4da588cd7e32e4aec8223d87a7a555bc00a896d04e3c30`
-Status: **dossier complete; strategy gate blocked**
+Evidence hash: `4636fdfb9888195ccd9a6e39b611b760e41a6533b6d851b1741852223eb9f61c`
+Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- No exact evidence available; do not fill this gap with generic copy.
+- excellence across every division;
+- quality service you can trust;
+- where quality meets service;
+- drive with confidence as generic filler.
+- HQ: Wiseman Midas Building, 80 Nelson Mandela Avenue, Bloemfontein, 9301;
+- group email: info@wisemangroup.co.za;
 
 ## Confirmed package
 
@@ -27,7 +32,12 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Client and CG constraints
 
-- No exact evidence available; do not fill this gap with generic copy.
+- group phone/email/address/domain;
+- current business/division roster;
+- legal/ownership/trading wording;
+- locations/geographic coverage;
+- current events/sponsorships/community work;
+- third-party/franchise/partner claims;
 
 ## Research observations
 
@@ -39,10 +49,10 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Strategy gate blockers
 
-- `PRODUCTION_GUIDE_RETRIEVAL_REQUIRED`
+- None at dossier level. Package-bounded strategy still requires field-by-field quality review.
 
 ## Sources
 
-- production-client-guide:WISEMAN-GROUP-CG-DYNAMICS-CLIENT-GUIDE.md
+- production-client-guide:wiseman-group.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#899c9988-8207-4e45-a8fc-a7446dfcf96b

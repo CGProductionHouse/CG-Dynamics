@@ -4,12 +4,17 @@ Client ID: `504113ee-fba9-4993-807e-a86066615212`
 
 Issue: #513
 
-Evidence hash: `73509346918e4f4bc45fa4e71fb762d59e7b04bbfd6833623dc548ea6fcc8614`
-Status: **dossier complete; strategy gate blocked**
+Evidence hash: `70cba0090d46d9497fab7b1ecaf1176adf0d5b5c5c79e8d866f2613381527740`
+Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- No exact evidence available; do not fill this gap with generic copy.
+- client ID: 504113ee-fba9-4993-807e-a86066615212;
+- casing variants of the same exact brand.
+- vehicle repairs/service work at a practical automotive level;
+- Auto Armor protection as part of the newer branch offer.
+- canonical URL for linking: https://wisemangroup.co.za/
+- 80 Nelson Mandela Street, Bloemfontein;
 
 ## Confirmed package
 
@@ -27,7 +32,12 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Client and CG constraints
 
-- No exact evidence available; do not fill this gap with generic copy.
+- explicit current client/CG Production House correction or exact current brief;
+- current client-supplied WiseRide source material;
+- current official WiseRide/Wiseman-owned web or social evidence for the exact branch/topic;
+- recent exact WiseRide CG Project work that clearly reflects current client usage;
+- current Auto Armor first-party product evidence for Auto Armor product facts only;
+- current verified business/partner listings;
 
 ## Research observations
 
@@ -39,10 +49,10 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Strategy gate blockers
 
-- `PRODUCTION_GUIDE_RETRIEVAL_REQUIRED`
+- None at dossier level. Package-bounded strategy still requires field-by-field quality review.
 
 ## Sources
 
-- production-client-guide:WISERIDE-CLIENT-INTELLIGENCE-2026-09.md
+- production-client-guide:wiseride.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#504113ee-fba9-4993-807e-a86066615212

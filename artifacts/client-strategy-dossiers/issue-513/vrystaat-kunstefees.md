@@ -4,12 +4,14 @@ Client ID: `1f0406bb-d643-4b83-bc3e-b1ebe87eeb89`
 
 Issue: #513
 
-Evidence hash: `ea4471f70cd03258ea04a9f502d3c8552701d56c42a3d13308912cb1f22a03ad`
-Status: **dossier complete; strategy gate blocked**
+Evidence hash: `d8ac2450291ce5fce52e19f4b5ea1192d8ac0bd8f5efeeac4f8c13e53f57a634`
+Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- No exact evidence available; do not fill this gap with generic copy.
+- specific to the real programme, artist, application or festival moment;
+- warm or reflective when the content calls for it;
+- natural in Afrikaans or English;
 
 ## Confirmed package
 
@@ -27,7 +29,9 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Client and CG constraints
 
-- No exact evidence available; do not fill this gap with generic copy.
+- application deadlines and fees;
+- age/language/accessibility details;
+- current programme structure.
 
 ## Research observations
 
@@ -35,14 +39,19 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Main Festival applications: current deadline 27 November 2026.
+- Vrynge applications: current deadline 27 November 2026.
+- Vlieks submissions: current deadline 28 November 2026.
+- Literature Festival Programme Proposals: current deadline 29 January 2027.
+- Literature Festival Book Submissions: current deadline 15 February 2027.
+- Literature Festival page currently states 6–10 July 2027 at the UFS Bloemfontein campus.
 
 ## Strategy gate blockers
 
-- `PRODUCTION_GUIDE_RETRIEVAL_REQUIRED`
+- None at dossier level. Package-bounded strategy still requires field-by-field quality review.
 
 ## Sources
 
-- production-client-guide:VRYSTAAT-KUNSTEFEES-CG-DYNAMICS-CLIENT-GUIDE.md
+- production-client-guide:vrystaat-kunstefees.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#1f0406bb-d643-4b83-bc3e-b1ebe87eeb89

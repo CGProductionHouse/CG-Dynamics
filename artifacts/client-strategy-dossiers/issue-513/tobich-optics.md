@@ -4,12 +4,17 @@ Client ID: `204f4f22-14c7-42ed-a956-da57af102706`
 
 Issue: #513
 
-Evidence hash: `5c0959cfb7063a90045563b1f74633b2e8b00131b42a0644568eb16cc66854a5`
-Status: **dossier complete; strategy gate blocked**
+Evidence hash: `6abfd9a734dd8602e5e55d5ba8bb868de9e748cde4351afc16350d4bc7c85b40`
+Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- No exact evidence available; do not fill this gap with generic copy.
+- identify the actual supplied brand/product/creative;
+- describe only what is genuinely visible or verified;
+- do not invent model names/SKUs;
+- do not infer frame material or lens technology from appearance;
+- do not claim UV protection, polarisation, impact resistance, coating, prescription compatibility or other performance unless exact evidence supports it;
+- do not claim authorised/exclusive dealer/distributor status without current proof;
 
 ## Confirmed package
 
@@ -39,10 +44,10 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Strategy gate blockers
 
-- `PRODUCTION_GUIDE_RETRIEVAL_REQUIRED`
+- None at dossier level. Package-bounded strategy still requires field-by-field quality review.
 
 ## Sources
 
-- production-client-guide:TOBICH-OPTICS-CG-DYNAMICS-CLIENT-GUIDE.md
+- production-client-guide:tobich-optics.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#204f4f22-14c7-42ed-a956-da57af102706

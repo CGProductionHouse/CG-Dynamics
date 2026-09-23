@@ -4,12 +4,17 @@ Client ID: `e2870110-930c-4e63-b2fe-c858030f7258`
 
 Issue: #513
 
-Evidence hash: `bbc9cd301206b45aa92b899586c6b253c04b57ce0b046dc065d90d1f82cddd90`
-Status: **dossier complete; strategy gate blocked**
+Evidence hash: `6c63496724a267aa00e9b48690f1f2dfae024dfa9d01789ae186a38cda6b90ca`
+Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Canonical CG name: Supa Quick Centurion.
+- Public exact-branch label: Supa Quick Tyre Experts Centurion Lifestyle.
+- Store manager shown by the official branch page: Jurgens Wessels.
+- Regular hours shown by the official branch page: Mon–Fri 08:00–17:00; Sat 08:00–13:00; Sun Closed.
+- Tyres / tyre fitment are safe durable branch categories.
+- Wheel fitment is an established Centurion marketing/service theme in supplied Project creative.
 
 ## Confirmed package
 
@@ -27,7 +32,8 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Client and CG constraints
 
-- No exact evidence available; do not fill this gap with generic copy.
+- contact email/address form when a task needs something beyond the approved footer;
+- exact branch service categories;
 
 ## Research observations
 
@@ -39,10 +45,10 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Strategy gate blockers
 
-- `PRODUCTION_GUIDE_RETRIEVAL_REQUIRED`
+- None at dossier level. Package-bounded strategy still requires field-by-field quality review.
 
 ## Sources
 
-- production-client-guide:SUPA-QUICK-CENTURION-CG-DYNAMICS-CLIENT-GUIDE.md
+- production-client-guide:supa-quick-centurion.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#e2870110-930c-4e63-b2fe-c858030f7258

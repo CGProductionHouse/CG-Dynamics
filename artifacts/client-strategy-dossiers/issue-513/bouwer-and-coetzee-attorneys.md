@@ -4,12 +4,17 @@ Client ID: `8e448cf9-1534-4ba1-89a4-93e4c8b83d2f`
 
 Issue: #513
 
-Evidence hash: `1250fe124f48bbca37d932488558596cf07c588f77e4c22c91c83d11391a3a4b`
-Status: **dossier complete; strategy gate blocked**
+Evidence hash: `1884fc72259038c58360ad33f22d5c390257e41c20ba8f0ff8ab96f4561306d9`
+Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- No exact evidence available; do not fill this gap with generic copy.
+- lead attorney: Luané Bouwer-Coetzee;
+- public professional description: Attorney, Conveyancer and Notary;
+- address: 8 Louw Wepener, Dan Pienaar, Bloemfontein;
+- email: luane@bouwercoetzee.co.za;
+- Instagram previously verified: bouwercoetzeeattorneys.
+- conveyancing and property transfers;
 
 ## Confirmed package
 
@@ -27,7 +32,11 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Client and CG constraints
 
-- No exact evidence available; do not fill this gap with generic copy.
+- protecting your rights when it says nothing specific;
+- legal solutions tailored to you;
+- excellence, integrity, results;
+- unsupported best, leading, specialist or outcome claims;
+- slogans that could belong to ten unrelated firms.
 
 ## Research observations
 
@@ -39,10 +48,10 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Strategy gate blockers
 
-- `PRODUCTION_GUIDE_RETRIEVAL_REQUIRED`
+- None at dossier level. Package-bounded strategy still requires field-by-field quality review.
 
 ## Sources
 
-- production-client-guide:BOUWER-COETZEE-ATTORNEYS-CG-DYNAMICS-CLIENT-GUIDE.md
+- production-client-guide:bouwer-and-coetzee-attorneys.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#8e448cf9-1534-4ba1-89a4-93e4c8b83d2f

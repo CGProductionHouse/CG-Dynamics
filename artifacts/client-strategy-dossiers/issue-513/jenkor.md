@@ -4,12 +4,17 @@ Client ID: `a5eab798-3e00-44cc-947e-463386fdac39`
 
 Issue: #513
 
-Evidence hash: `213756fa1093aaacefd1ab725bbb832b3c2734022fba75e48a843d9dbf61b8e6`
-Status: **dossier complete; strategy gate blocked**
+Evidence hash: `e8ff47ca0b0d904684548ce2f490199669a0e95efcf3cd458cde78b38764a452`
+Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- No exact evidence available; do not fill this gap with generic copy.
+- 21 Lekkerwater Road, Sunnydale, Fish Hoek
+- 21 Lekkerwater Rd, Capri, Cape Town, 7975
+- practical and product-aware;
+- authentic rather than polished into corporate sameness.
+- sarcasm/cheekiness as a default brand voice;
+- generic quality you can trust, your trusted partner, experience the difference, where quality meets..., built to last or build with confidence filler when no specific point earns it.
 
 ## Confirmed package
 
@@ -27,7 +32,9 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Client and CG constraints
 
-- No exact evidence available; do not fill this gap with generic copy.
+- units per square metre/pallet;
+- supplier/brand relationship;
+- compliance/certification/performance.
 
 ## Research observations
 
@@ -39,10 +46,10 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Strategy gate blockers
 
-- `PRODUCTION_GUIDE_RETRIEVAL_REQUIRED`
+- None at dossier level. Package-bounded strategy still requires field-by-field quality review.
 
 ## Sources
 
-- production-client-guide:JENKOR-CG-DYNAMICS-CLIENT-GUIDE.md
+- production-client-guide:jenkor.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#a5eab798-3e00-44cc-947e-463386fdac39

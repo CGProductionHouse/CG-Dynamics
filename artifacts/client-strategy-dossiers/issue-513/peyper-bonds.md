@@ -4,12 +4,17 @@ Client ID: `a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b`
 
 Issue: #513
 
-Evidence hash: `79f19ac60f79147bc80e891a948897143fd663402a16ec92b4d538704adab247`
-Status: **dossier complete; strategy gate blocked**
+Evidence hash: `857510cde0555b1a3bba04c1f5d918a58993f4ba716719ac5a0d02555b4d7ed4`
+Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Peyper Bonds — bond origination/property finance;
+- Peyper Attorneys — separate legal practice;
+- Peyper Capital — separate bridging-finance company;
+- Peyper Developments — separate property-development company;
+- Peyper Forensics — separate forensic-services company.
+- Category: Bond Originator / Property Finance Specialists.
 
 ## Confirmed package
 
@@ -27,7 +32,12 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Client and CG constraints
 
-- No exact evidence available; do not fill this gap with generic copy.
+- making property dreams a reality;
+- routine with confidence language;
+- guaranteed stress-free process;
+- vague expert advice without useful information;
+- generic legal/attorney language.
+- guaranteed rate or lowest/best rate;
 
 ## Research observations
 
@@ -39,10 +49,10 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Strategy gate blockers
 
-- `PRODUCTION_GUIDE_RETRIEVAL_REQUIRED`
+- None at dossier level. Package-bounded strategy still requires field-by-field quality review.
 
 ## Sources
 
-- production-client-guide:PEYPER-BONDS-CG-DYNAMICS-CLIENT-GUIDE.md
+- production-client-guide:peyper-bonds.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b

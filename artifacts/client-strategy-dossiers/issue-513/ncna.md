@@ -4,12 +4,17 @@ Client ID: `94fe2568-3cf1-47dc-801e-d8d5396a0965`
 
 Issue: #513
 
-Evidence hash: `0a661e8b16d43dffbbe6e3dca25f1c764cc734a67dde89bc48ca6ce655962c5a`
-Status: **dossier complete; strategy gate blocked**
+Evidence hash: `a0efbae832249d0094617d828ee793439b9723c0e55dc73df764d0895b541bf9`
+Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- No exact evidence available; do not fill this gap with generic copy.
+- short, purposeful sentences;
+- real practical training/student context;
+- specific learning or career relevance;
+- Northern Cape bush/veld context when it is actually part of the creative;
+- natural South African English spelling;
+- natural everyday Afrikaans when the brief or speaker supports it;
 
 ## Confirmed package
 
@@ -27,7 +32,12 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Client and CG constraints
 
-- No exact evidence available; do not fill this gap with generic copy.
+- course availability, duration and modules;
+- accreditation/qualification/provider wording;
+- application requirements and age/nationality rules;
+- fees, deposits and payment terms;
+- external lodges/game farms/placement partners;
+- precise physical location/GPS;
 
 ## Research observations
 
@@ -39,10 +49,10 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Strategy gate blockers
 
-- `PRODUCTION_GUIDE_RETRIEVAL_REQUIRED`
+- None at dossier level. Package-bounded strategy still requires field-by-field quality review.
 
 ## Sources
 
-- production-client-guide:NCNA-CG-DYNAMICS-CLIENT-GUIDE.md
+- production-client-guide:ncna.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#94fe2568-3cf1-47dc-801e-d8d5396a0965

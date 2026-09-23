@@ -4,12 +4,17 @@ Client ID: `fd16ebae-a50b-4920-afe0-94c2631f8f06`
 
 Issue: #513
 
-Evidence hash: `3acccc76492a40dcee44714f46dee39b953b4797f57a8f56a9d7be2df1e20007`
-Status: **dossier complete; strategy gate blocked**
+Evidence hash: `b7697d821321899e5c176d7124ebecbf39f199918bdf3cabab40ebf8140d4c9b`
+Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Issue 249 and current ownership comment
+- Issue 241 and draft PR 247 for architecture/ownership boundary only
+- Current migration workflow document on PR 247 branch where it is not yet present on main
+- clients: exact active row All Around PVC
+- client ID: fd16ebae-a50b-4920-afe0-94c2631f8f06
+- exact-client clientindustryprofiles: none
 
 ## Confirmed package
 
@@ -39,10 +44,10 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Strategy gate blockers
 
-- `PRODUCTION_GUIDE_RETRIEVAL_REQUIRED`
+- None at dossier level. Package-bounded strategy still requires field-by-field quality review.
 
 ## Sources
 
-- production-client-guide:ALL-AROUND-PVC-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md
+- production-client-guide:all-around-pvc.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#fd16ebae-a50b-4920-afe0-94c2631f8f06

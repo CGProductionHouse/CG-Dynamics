@@ -1,0 +1,10 @@
+{
+  "client_id": "4424ed69-7270-4d30-a1ea-0b77d76912df",
+  "client_name": "Forklift Trucks",
+  "guide_id": "aaa3824a-42bc-4f07-a261-a0ea3838fb35",
+  "version": 1,
+  "runtime_readiness": "ready",
+  "source_pack_path": "docs/ai-workforce/client-intelligence/FORKLIFT-TRUCKS-CG-DYNAMICS-CLIENT-GUIDE.md",
+  "source_revision": "e9335fe2a4163e326b905aa644f6206ace819f5a",
+  "source_observed_at": "2026-09-07 22:00:00+00"
+}

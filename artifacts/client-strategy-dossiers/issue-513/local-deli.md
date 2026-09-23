@@ -4,8 +4,8 @@ Client ID: `2a5ea019-64f5-4f8e-8a61-61a28940aa6e`
 
 Issue: #513
 
-Evidence hash: `4dea2c2e0e9977398a147ddf256ceb5467994c4d8f1d3aa3dfe7d5db3377e2ba`
-Status: **dossier complete; strategy gate blocked**
+Evidence hash: `f720af6f6263e0167262cb6b312c4bd045dfa9f9042b04495a6f4603afcfc073`
+Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
@@ -39,10 +39,10 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Strategy gate blockers
 
-- `PRODUCTION_GUIDE_RETRIEVAL_REQUIRED`
+- None at dossier level. Package-bounded strategy still requires field-by-field quality review.
 
 ## Sources
 
-- production-client-guide:LOCAL-DELI-CG-DYNAMICS-CLIENT-GUIDE.md
+- production-client-guide:local-deli.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#2a5ea019-64f5-4f8e-8a61-61a28940aa6e

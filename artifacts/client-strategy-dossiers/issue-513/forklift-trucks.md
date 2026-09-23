@@ -4,12 +4,17 @@ Client ID: `4424ed69-7270-4d30-a1ea-0b77d76912df`
 
 Issue: #513
 
-Evidence hash: `6266b1d2dfb4346b2205eb57b183196e7f954f802cecbda47883988c95ef7311`
-Status: **dossier complete; strategy gate blocked**
+Evidence hash: `ec170fab0d88fbedf2f615c1d74a9cf6e63e9dd3dcac8f545eea489c54c1443d`
+Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- No exact evidence available; do not fill this gap with generic copy.
+- email: admin@toyotaforkliftofs.co.za;
+- after-hours breakdown numbers: 083 395 3903 / 079 217 0015.
+- canonical CG client: Forklift Trucks;
+- public trading identity: Forklift Truck OFS;
+- aliases/history may include FTOFS and Toyota Forklift OFS.
+- authorised Toyota material handling dealer;
 
 ## Confirmed package
 
@@ -27,7 +32,12 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Client and CG constraints
 
-- No exact evidence available; do not fill this gap with generic copy.
+- hours and after-hours numbers;
+- Toyota representation scope;
+- stock and used-equipment availability;
+- workshop/field-service capability;
+- brands/dealer/distributor rights;
+- specifications or capacities;
 
 ## Research observations
 
@@ -39,10 +49,10 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Strategy gate blockers
 
-- `PRODUCTION_GUIDE_RETRIEVAL_REQUIRED`
+- None at dossier level. Package-bounded strategy still requires field-by-field quality review.
 
 ## Sources
 
-- production-client-guide:FORKLIFT-TRUCKS-CG-DYNAMICS-CLIENT-GUIDE.md
+- production-client-guide:forklift-trucks.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#4424ed69-7270-4d30-a1ea-0b77d76912df
