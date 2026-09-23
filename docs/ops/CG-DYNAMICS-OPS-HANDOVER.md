@@ -286,16 +286,38 @@ If provider requires 2FA, QR owner approval, Business Account conversion or anot
 
 Page-linked Instagram remains preferred.
 
-Standalone plumbing/reporting is live:
-- Instagram OAuth start/callback/confirm deployed.
-- standalone reviewed encrypted token can feed canonical Meta sync.
-- Meta sync worker/manual sync remain canonical reporting paths.
+Live production fleet truth (23 Sep 2026):
+- 46 recurring-social eligible clients;
+- 22 currently have a canonical Instagram mapping;
+- 24 remain unmapped;
+- 0 standalone OAuth connections;
+- 0 standalone encrypted token rows;
+- 0 pending standalone reviews.
 
-Current standalone provider gates:
-- `INSTAGRAM_APP_SECRET` secure production secret transfer still required.
-- Meta App Review / advanced access required.
-- Meta Live mode required.
-- provider re-auth/2FA may be required.
+Standalone infrastructure is already deployed:
+- fallback foundation migration is ledgered in production;
+- encrypted-token correction migration is ledgered in production;
+- review-binding migration is ledgered in production;
+- Instagram OAuth start/callback/confirm Edge Functions are ACTIVE (v4);
+- standalone reviewed encrypted tokens can feed the canonical Meta sync path after exact staff confirmation.
+
+Exact reviewed handles already known among the 24 unmapped clients:
+- Bouwer & Coetzee Attorneys — `@bouwer_coetzee_attorneys`
+- Emmanuel Funerals — `@emmanuelfunerals`
+- Emoya Estate Driving Range — `@emoyadrivingrange`
+- Novus Steel — `@novus_steel`
+- Piek Group — `@piekgroup`
+- Red Oak — `@official.redoak`
+- Toyota Bloemfontein — `@cfaomobilitytoyotabloemfontein`
+- We Ar Fuels — `@we_ar_fuels`
+
+Do not infer the remaining identities from search-name similarity. Bloem Action Sports, Hino Trucks, Jenkor and WiseRide are explicitly unresolved in current reviewed intelligence; other unresolved rows also remain identity-gated.
+
+Real remaining standalone provider gates:
+- secure server configuration completeness, including `INSTAGRAM_APP_SECRET` and `INSTAGRAM_STANDALONE_LIVE_ACTIVATION_ENABLED=true`;
+- Meta Advanced Access/App Review for `instagram_business_basic` and `instagram_business_manage_insights`;
+- Meta app Live mode;
+- exact account-owner consent/re-auth/2FA where required.
 
 Do not expose provider secret values.
 
