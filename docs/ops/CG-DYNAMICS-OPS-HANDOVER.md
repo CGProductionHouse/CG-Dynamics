@@ -1,10 +1,118 @@
 # CG Dynamics Ops Handover
 
+## CURRENT OPERATIONS SNAPSHOT — 23 September 2026, 09:44 SAST
+
+This is the current orientation snapshot and supersedes older dated lane
+snapshots retained below as historical evidence. Refetch GitHub, Issue #381 and
+the Control Centre before consequential action.
+
+### GitHub and ownership truth
+
+- Current `main`: `26fa18f8d4c6155a03fead0ce339f9bcc398c631`, merged through
+  #388 / PR #485 after #472 D02 / PR #484.
+- #472 is complete and closed. PR #484 is merged; the component-level Meta
+  engagement truth code is accepted. Migration
+  `20260922154243_meta_post_engagement_truth.sql` remains unapplied and the
+  post-#472 Meta functions remain undeployed.
+- #388 is code-complete and closed. PR #485 merged at
+  `26fa18f8d4c6155a03fead0ce339f9bcc398c631`; the verified
+  `AbortError: The signal has been aborted` and narrow request-timeout
+  equivalents now use the existing bounded retry/checkpoint path in GitHub.
+  Production `meta-sync-worker` is still the pre-#485 deployed package, so the
+  resumability fix is not production-live yet.
+- #390 remains blocked until the #388 worker change is separately deployed and
+  production-accepted. Do not graduate worker lanes before that gate.
+- #217's four named stale Hub rows were traced read-only on 22 September. They
+  are legacy `teams_import` rows already archived on 7 September and absent
+  from `planner_tasks_canonical`; authenticated Hub/Work checks at 375, 390 and
+  430px reproduced no overflow. No code PR was warranted. #217 remains open
+  only for CA's explicit real production phone confirmation, because the
+  durable issue requires that human-device sign-off rather than responsive
+  browser emulation alone.
+- #437 / PR #438 is code-accepted and Vercel-green at
+  `5d7ced5f59d48321853130ee5f90b70eb253e9b8`. Merge remains held only for the
+  explicitly required authenticated desktop/mobile staff-session acceptance.
+- #377 / PR #380 and #374 / PR #375 remain parked/stalled at their existing
+  heads. Do not count green historical previews as current product progress or
+  dispatch duplicate writers.
+- The Control Centre row that still marks #472 D02 active is stale. GitHub is
+  ownership truth until the tracker is corrected.
+
+### Merged code versus production-live behavior
+
+- #450 / PR #455 and #451 / PR #454 are merged. Their approved migrations,
+  system identities, independent worker secrets and required Edge functions
+  were activated through the recorded protected rollout. The existing minute
+  scheduler remains the only scheduler; its cadence and identity are unchanged.
+- Microsoft job `40569507-7f78-4e1b-afe0-79b7b06edb4b` completed all six
+  required sources with zero pending details, automatic retry count one and no
+  automatic failure. No apply row exists and no Microsoft write occurred; the
+  last verified mirror remained authoritative.
+- Meta fleet checkpoint/freshness recovery is live through the #451 worker.
+  Missing evidence remains non-PASS. Red Oak exact Page `117937152934535`
+  remains blocked by exact-Page access/re-consent, not by a broad scope change.
+- Monthly Strategy Autopilot is live and idempotent on the existing worker
+  cycle. Its first daily job succeeded for 56 clients / 112 drafts with zero
+  failures. All three Content Autopilot flags remain false and production has
+  zero Content Autopilot jobs.
+- #425 Meta M2 and #396 / PR #430 Brand Hub code are merged. Meta's later #451
+  fleet worker deployment is live; Brand Hub production mapping/activation is
+  still protected and incomplete.
+- #426's first-pack Marketing Library bridge is merged and available for the
+  canonical registration/review workflow. It does not activate sources or
+  cards: eligible rows remain `needs_review` and metadata-reference-only.
+- #433's implementation-reality audit checkpoint is complete. Later research
+  branches remain `needs_review` / `activation_allowed:false` and must reuse the
+  existing Marketing Library, strategy and reporting authorities.
+- #435's read-only `get_google_ads_audit` action is merged, and the currently
+  deployed `cg-dynamics-mcp` contains that action. It remains company-admin
+  only, exact-client/date-range scoped and provider-write-free. A documented
+  authenticated live audit is still required before calling the production
+  acceptance complete.
+
+### Merged but not production-activated
+
+- #388 / PR #485 is merged at
+  `26fa18f8d4c6155a03fead0ce339f9bcc398c631`, but production still runs the
+  pre-#485 `meta-sync-worker`. The AbortError/request-timeout resumability fix
+  therefore awaits a separately approved Edge Function deployment and bounded
+  production acceptance.
+- TikTok #238 / PR #483 is merged at
+  `93b09a89a71e9371b8ba53d704edc486b993aa85`. Migration
+  `20260922153348_extend_background_jobs_for_tiktok_freshness.sql` is unapplied,
+  and the background/TikTok functions have not been deployed from that change.
+- Standalone Instagram #471 / PR #473 and security correction #476 / PR #477
+  are merged and closed. Migrations
+  `20260922140000_instagram_login_fallback_foundation.sql` and
+  `20260922144059_standalone_instagram_token_encryption.sql` are unapplied;
+  encryption secret, functions, provider consent, exact-client review/mapping
+  and worker/reporting integration remain protected and inactive.
+- Meta D02 migration `20260922154243_meta_post_engagement_truth.sql` is
+  unapplied, and the related updated Meta persistence/projection functions are
+  undeployed. Do not bulk rewrite legacy/import history.
+
+### Exact remaining launch gates
+
+1. Separate CA approval to deploy the merged #388 Meta worker change, followed
+   by bounded production acceptance of AbortError/request-timeout resumability.
+2. Red Oak exact-Page access/re-consent and stable fleet evidence.
+3. Only after those gates, a separate decision on enabling Content Autopilot
+   alone. Keep AI generation and OneDrive flags off unless separately approved.
+4. Authenticated desktop/mobile acceptance for #438.
+5. CA real production phone confirmation for #217 before closing its durable
+   launch-blocker issue.
+6. Separate CA approval for every unapplied migration/function/provider gate
+   listed above. Do not infer activation from merged files.
+
+No production SQL/data mutation, provider permission/config change, deploy,
+Microsoft write, OneDrive action or Content Autopilot enablement is authorised
+by this documentation snapshot.
+
 ## ISSUE #476 CODE LANE — 22 September 2026
 
-- Manual Agent 02 owns the isolated standalone Instagram token-at-rest
-  encryption foundation from current `main`; Agent 01 retains #463/#475 and
-  the shared queue/launch lane.
+- Issue #476 is closed and its isolated standalone Instagram token-at-rest
+  encryption foundation is merged through PR #477 at
+  `a92928abb109258766f10892824c1665b722d08c`.
 - The code-only correction adds Edge-runtime AES-256-GCM with a strictly
   decoded 32-byte server key, fresh 96-bit IV, versioned key/contract metadata
   and AAD bound to exact client + Instagram account identity.
@@ -20,7 +128,8 @@
 
 ## ISSUE #471 CODE LANE — 22 September 2026
 
-- Manual Agent 02 owns Issue #471 on `codex/issue-471-instagram-login-fallback`.
+- Issue #471 is closed and its Instagram Login fallback foundation is merged
+  through PR #473 at `250d83a1290cd96648f47f969cff29d15ee0d0b9`.
 - The 17-client missing-Instagram audit is recorded in
   `docs/ops/INSTAGRAM-FLEET-AUDIT-2026-09-22.md`. Six exact first-party/current
   handles are verified, but all 17 remain access/ownership/linkage unknown until
@@ -32,11 +141,11 @@
   `meta_client_assets`, run sync, create reporting facts/checkpoints or publish.
 - The migration, functions, provider app setup, secrets, consent, token/mapping
   writes and canonical worker token selection remain unapplied/unconfigured.
-  Agent 01's background worker, activation and Microsoft files are untouched.
+  The shared background worker, activation and Microsoft files are untouched.
 - Standalone Instagram live activation is explicitly disabled in code. The
-  Phase-1 table would store a raw server-only token, so production deployment
-  and provider consent remain blocked until reviewed token-at-rest encryption
-  or another reviewed encrypted token store is actually implemented.
+  merged #476 correction makes the prepared persistence contract
+  ciphertext-only, but both migrations, the encryption key and the functions
+  remain unapplied/undeployed; provider consent therefore remains blocked.
 - Existing Facebook/Page-linked Meta remains the first route. Standalone Login is
   only for an exact professional account proven unable/unsuitable to use that
   route. Activation requires a separate CA gate and shared Meta worker review.
@@ -51,8 +160,8 @@
 - Supervisor correction review verified Johannesburg-date Marketing Library expiry,
   reviewed/active-only industry routing, exact-client card scoping before limits,
   and truthful withheld alignment when the canonical strategy read fails.
-- Agent 01 retains the shared worker/sync/launch lane. The isolated follow-up from
-  `main` `250d83a1290cd96648f47f969cff29d15ee0d0b9` wires one durable Johannesburg-day
+- The merged isolated follow-up from `main`
+  `250d83a1290cd96648f47f969cff29d15ee0d0b9` wires one durable Johannesburg-day
   strategy job into the existing worker before daily Content Autopilot. Content is
   withheld until the same-day strategy job succeeds. No second scheduler, schema,
   Microsoft/Meta behavior or production configuration is added.
@@ -81,7 +190,8 @@
 This section supersedes the pre-merge #450/#451 lane snapshots below. Exact evidence and the ordered
 protected runbook are in `docs/ops/P0-PRODUCTION-ACTIVATION-2026-09-22.md`.
 
-- GitHub code truth is `main` `6d58eb5eb9be879e8cbc5722d1f12f1cedbe412f`.
+- The activation baseline was `main` `6d58eb5eb9be879e8cbc5722d1f12f1cedbe412f`;
+  the current GitHub main is recorded in the latest snapshot at the top of this file.
   Activation corrections for stale-preview takeover, automatic date range, Edge dependency
   resolution and bounded Microsoft detail units are merged and production-green.
 - Production now has the explicitly approved Client Portal foundation plus the four #450/#451
@@ -783,24 +893,24 @@ Do not trust stale Project Instructions over live `get_my_assistant_bootstrap`.
 
 ## 10. Microsoft freshness rule
 
-Issue #327 owns Morning Ops health/reconciliation.
+Issue #327 remains the Morning Ops health/reconciliation authority, with #451
+owning the automatic daily freshness implementation.
 
-As of 18 September 2026:
+Current verified production evidence:
 
-- company_admin context/bootstrap is healthy;
-- CG Dynamics connector session failure was proven transient;
-- Microsoft reconciliation remains stale/degraded;
-- a reconciliation preview fetched 6,765 records but `2025 CLIENTS SCHEDULE` hit the 5,000-record safety cap;
-- the latest successfully applied reconciliation remains 19 August 2026.
+- job `40569507-7f78-4e1b-afe0-79b7b06edb4b` is complete;
+- all six required sources are complete;
+- zero detail units remain pending;
+- automatic recovery count is one, with no automatic failure;
+- no `microsoft_sync_runs` apply row exists;
+- no Microsoft write occurred.
 
-Until a successful reconciliation is applied:
-
-- Microsoft/Planner/Outlook live data is freshness authority for Microsoft-backed work;
-- Dynamics mirrors must be treated as stale;
-- Dynamics-native work remains valid and must still be read;
-- Staff Assistants should flag `SYNC STALE / SYNC FAILED` where relevant.
-
-Do not hide the stale state.
+The completed collection cycle proves current source completeness, but it did
+not apply a new mirror. The last verified mirror therefore remained
+authoritative throughout. Staff Assistant coexistence still cross-references
+live Microsoft plus Dynamics-native work; it must expose truthful stale,
+failed, unavailable or pending states whenever the stored evidence says so.
+Never infer an apply merely from a completed collection job.
 
 ## 11. Current lane snapshot
 
@@ -808,137 +918,50 @@ This section is an orientation snapshot only. Refetch GitHub + tracker before ac
 
 ### Active manual coding
 
-**Website Editor #19 first-party contact actions**
+- #436 is this docs-only handover refresh lane. It owns only this file and must
+  not change runtime, schema, provider or production state.
+- #217 has no active code writer because its exact rows are already archived
+  and current responsive acceptance passed. It remains open only for CA's real
+  production phone confirmation.
 
-- Owner: CA manual coding agent 1.
-- Current Website Editor `main` includes merged reporting PR #18.
-- Own only privacy-minimised first-party contact actions: WhatsApp, phone, email, directions, booking and other explicitly allowlisted CTA interactions.
-- Confirmed enquiry count remains canonical Dynamics #405 truth; never count browser form clicks/submits as accepted enquiries.
-- Exact Website identity only; no fuzzy IDs, no browser-held Builder/reporting secret, no arbitrary referrer query data or lead PII.
-- Add strict validation/rate limiting, half-open date-range reads, preview/synthetic exclusion and normalized V1 report integration.
-- No real client-site configuration, production schema apply, Commerce/Yoco or #405 overlap.
+### Awaiting supervisor or acceptance
 
-**#405 Website Growth M2A canonical lead transaction**
-
-- Owner: CA manual coding agent 2.
-- Dynamics backend only.
-- Read Issue #405 latest comments plus Website Editor #27 and PR #28 engineering authority before coding.
-- Own the canonical enquiry vs contact identity, versioned form schema/stable field contract, tenant-scoped submission key and one PostgreSQL transaction that commits enquiry + approved-recipient delivery jobs + one canonical reporting event.
-- Exact Website/client/environment/recipient identity must resolve server-side; browser input is never authority.
-- Identical replay returns the same receipt; changed payload with the same key conflicts; no cross-client dedupe by email and no partial acknowledged state.
-- Prove RLS/isolation/idempotency/concurrency/crash-recovery semantics.
-- A migration/schema implementation may be authored and tested but must not be applied to production.
-- Do not touch Website Editor #19 files, live transactional provider/email send, provider secrets/config, production recipient setup, #374 or #335/#336.
-
-### Recently completed production release
-
-**#395 / PR #398 Client Plan + canonical monthly strategy**
-
-- No active coding owner.
-- Vercel Pro removed the previous daily deployment quota blocker.
-- Final reconciled preview head `7e14bd267c7dee5933135f52b9c4220098944e86` passed on deployment `dpl_LaWzKorAm9JGdHme5NA5TRnpbxHT`.
-- PR #398 merged at `7d9c88b2b37ec7a9fb7c3c5024642ed74aecfaf1`.
-- Production deployment `dpl_43ZZewHxKiP1hbqLHJtYecguCQKM` is READY on CG Dynamics production aliases.
-- Immediate runtime error scan was clean.
-- Current-month Plan state + canonical #391 monthly strategy review/approve/publish workflow is production live.
-- #395 is closed complete.
-- No migration, production strategy seed/publish or provider/config action occurred during release.
+- #388 / PR #485: code is merged; protected Meta worker deployment and bounded
+  production acceptance remain.
+- #437 / PR #438: code accepted; authenticated desktop/mobile staff-session UI
+  acceptance is the only stated merge gate.
+- #238: code accepted/merged; protected TikTok migration, function deployment,
+  provider/config and production acceptance remain.
 
 ### Protected activation gates
 
-**#396 Client Portal Library**
-
-- No active coding owner. Manual agent 1 capacity is released.
-- PR #410 merged at `2ec39b4719f7a1fbd77a8ef780f16f4ba6c6bfa8`; production deployment `dpl_6ouWTaweBLu5YVAxSN1ydn4qwoGv` READY.
-- Production code includes metadata-first Category -> Year -> Month -> Files browsing, lazy/on-demand month data, viewport-lazy thumbnails, opaque short-lived Dynamics access grants, bounded HTTP Range/206 streaming and Dynamics-native MP4 playback.
-- Exact-client/library/drive/category/date checks remain mandatory on every access; OneDrive/Graph origins and durable provider IDs remain hidden from clients.
-- #396 remains open only for protected production activation/mapping.
-- Reuse the exact `A_ClientPortal_<ClientSlug>` boundary and durable OneDrive item IDs; never fuzzy filename identity.
-- Still NOT executed: production migration, exact production library mapping, library enablement, real OneDrive share/permission, file move/copy/rename, folder discovery or first-client activation.
-- Do not dispatch further implementation here unless activation exposes a reproducible defect.
-
-**Website Growth #27 M1 reporting activation**
-
-- No active coding owner.
-- Website Editor PR #18 merged at `59f720998fdec117172ea01bc2f2b2e486e5c5f2`; production deployment `dpl_GcRQV3yZxZd1tN2E8ffTaYrKkzZb` READY.
-- Dynamics PR #356 merged at `23b436f23c2b19db334063045557a80a82999d63`; production deployment `dpl_DTQjJE25FWqMv1JbsMrYhzLvpwZm` READY.
-- Immediate runtime-error scans are clean in both projects.
-- Code is production-deployed but reporting remains intentionally unconfigured/fail-closed.
-- Still NOT executed: exact production Website ID + canonical host verification, Dynamics website-snapshot migration apply, `website-performance-report` Edge Function deployment, one-to-one mapping/tokens, real staff preview-save-review-publish acceptance and exact-client portal proof.
-- Do not call M1 production-accepted until those protected gates pass.
-
-**#404 + CG-Hours #7 Client Registry Bridge**
-
-- No active coding owner. Manual agent 2 capacity is released.
-- Dynamics PR #411 merged at `a2c0cacf4b06775eff9c47dfea919ab9106386a2`; production deployment `dpl_8h5ZbCV2tUoYhMEUQ9teP4M1Adqw` READY.
-- CG-Hours PR #8 merged at `58553f5170d68a8fbfae0ac3ae6e725ca91923a9`.
-- CG-Hours hotfix PR #9 merged at `84a1dbcf30aa6f45aff1345008ed6028dde16cdc`; production deployment `dpl_HYVzaxLXr7xHvfy7LtmpGkxZEd7S` READY.
-- Immediate runtime-error scans are clean in both projects.
-- Bridge code is on production main but remains intentionally OFF/inert. Disabled production does not query the missing outbox table, show registry UI, or run bridge work.
-- #404 and CG-Hours #7 remain open only as protected activation/runbook authorities.
-- Exact ordered activation and kill-switch procedure: `docs/ops/CG-HOURS-CLIENT-REGISTRY-BRIDGE-ACTIVATION.md`.
-- Still NOT executed: Dynamics migration, bridge function deployment/secret, CG-Hours migration, Hours server config/enable flag, production sync or JFJ Electrical / Neshora Oxygen / VCS Cleaning Solutions backfill.
-- Do not dispatch further implementation here unless activation exposes a reproducible defect.
-
-Goal:
-
-```text
-CG Hours client create
--> durable outbox/retry
--> authenticated Dynamics ensure-client action
--> exact UUID mapping
-```
-
-Rules:
-
-- no fuzzy name matching;
-- no guessed Dynamics short_code;
-- Dynamics becomes canonical identity/name authority after mapping;
-- initial controlled backfill: JFJ Electrical, Neshora Oxygen, VCS Cleaning Solutions;
-- production migration/data backfill remains CA-gated.
-
-### Additional active autonomous lane
-
-**Website Editor PR #28 engineering-authority reconcile**
-
-- Owner: CA's validated OpenCode free agent.
-- Existing PR #28 only; docs-only current-main reconcile.
-- Preserve the four accepted Website Growth engineering authority documents.
-- Update stale Hobby/daily-quota wording to current verified Vercel Pro truth while preserving the no-unapproved-recurring-SaaS cost doctrine.
-- No application code, schema, runtime config, provider setup, DNS or production behaviour changes.
-
-### Queued / ready to dispatch
-
-Do not dispatch overlapping work into Website Editor #19, Dynamics #405 M2A or Website Editor PR #28 while those owners remain active. Re-read the Control Centre for any other safe unowned work.
+- Red Oak exact-Page access/re-consent and stable Meta evidence.
+- Content Autopilot enablement remains a separate decision after #388 and Red
+  Oak evidence. AI generation and OneDrive stay off.
+- Meta D02 migration/function deployment; TikTok migration/function deployment;
+  standalone Instagram migrations/secret/functions/consent/mapping; Brand Hub
+  mapping/activation; Google Ads authenticated live audit; and #438 UI
+  acceptance are all separate gates.
+- Website reporting, Client Portal Library, CG Hours registry/logger and
+  OneDrive activation gates described in their owning runbooks remain
+  protected. Do not infer production state from merged code.
 
 ### Recently completed production rollout
 
-**#402 Client profile rollout**
-
-- issue closed complete;
-- 37 active portal mappings;
-- final continuation created 35 accounts;
-- 0 skipped;
-- 0 failed;
-- 0 remaining;
-- 12 pre-existing users/accounts preserved, including Red Oak, AV Event Life, Braize and staff/admin accounts;
-- exact-client isolation remained intact;
-- no credentials were exposed or collected;
-- no further code/migration/deploy was required for the final batch.
+- #451 Microsoft/Meta daily freshness activation is live on the single existing
+  scheduler, with the completed Microsoft collection and truthful Meta fleet
+  evidence recorded above.
+- #463 Monthly Strategy Autopilot is live and idempotent. Content Autopilot
+  remains disabled.
+- #472 D01/D03/D04 and D02 code are merged; production D02 activation remains
+  protected.
 
 ### Parked future
 
-**#400 Client Billing Hub**
-
-Future:
-
-- Xero account/invoice projection;
-- payment method;
-- debit order;
-- stronger user-specific client auth;
-- audited admin support access.
-
-Do not let #400 block current client portal rollout.
+- #377 / PR #380 and #374 / PR #375 are parked/stalled; do not duplicate them.
+- #390 waits on #388 merge/deploy/acceptance.
+- #400 Client Billing Hub remains future work and must not block current launch
+  activation.
 
 ## 12. Client access rollout rules
 
