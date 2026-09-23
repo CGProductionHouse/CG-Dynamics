@@ -237,22 +237,20 @@ Current dossier/strategy truth:
 - 56/56 exact-client dossiers exist.
 - 56/56 package receipts confirmed.
 - 56 September + 56 October canonical strategy rows remain draft and untouched.
-- 28 dossiers are blocked only on retrieval/review of runtime production guides.
-- production `client_guides` contains ready guide content, so those blockers are retrievable read-only.
+- all 52 production-ready guide bodies have been retrieved read-only and linked only to their exact-client dossiers in PR #520.
+- the deterministic PR #520 dry-run is 46 clients / 92 rows ready, 5 clients / 10 rows non-applicable, 5 clients / 10 rows held and 0 otherwise blocked.
+- frozen source cutoff: `2026-09-23T16:07:42.661Z`; plan hash: `d2cb7314045c16c812f133bbf10e45fb63de91d5e492d2628fbdca0829d46f27`.
 - Kundedienste is explicitly non-social/once-off and no recurring social strategy should be fabricated for it.
 
 Strategy scope must now follow #515 service truth:
 - 46 eligible social clients -> eligible for monthly social strategy once dossier/gates pass.
 - 5 non-social clients -> no fabricated recurring social strategy.
-- 8 held clients -> wait for #516 service decision.
+- 5 held clients -> wait for #516 service decision.
 
 Next #513 phase:
-1. retrieve each blocked client's latest ready production guide read-only;
-2. enrich only that exact client's dossier;
-3. recompute dossier hash/readiness;
-4. produce a deterministic Sep/Oct **strategy mutation dry-run only** for eligible clients;
-5. return ready / non-applicable / held / blocked with exact reasons;
-6. do not mutate, approve or publish strategies yet.
+1. supervisor-review PR #520 and its frozen deterministic plan;
+2. resolve the five #516-held clients only from explicit CA service-scope decisions;
+3. do not mutate, approve or publish strategies until a separate exact plan is approved.
 
 No provider mapping, package write or report publication in #513.
 
