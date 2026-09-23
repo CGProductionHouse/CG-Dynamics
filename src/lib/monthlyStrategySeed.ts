@@ -6,9 +6,9 @@ export interface ApprovedContextUpdate {
 }
 
 export interface BaselineEvidence {
-  authority: 'client_guide' | 'client_context_update' | 'monthly_deliverables'
+  authority: 'client_guide' | 'client_context_update' | 'monthly_deliverables' | 'marketing_library_skill_card' | 'confirmed_client_package' | 'published_report_post'
   source_id: string
-  field: 'clientDirection' | 'strategyDrivers'
+  field: 'clientDirection' | 'strategyDrivers' | 'actionPlan' | 'topContent'
   excerpt: string
 }
 
@@ -99,24 +99,6 @@ function decisionStrings(value: unknown): string[] {
   return []
 }
 
-function deliverableDriver(clientName: string, deliverables: MonthlyBaselineInput['deliverables']): string {
-  const labels: Record<string, [string, string]> = {
-    video: ['professional video', 'professional videos'],
-    reel: ['reel', 'reels'],
-    photo: ['photo post', 'photo posts'],
-    dp: ['design poster', 'design posters'],
-  }
-  const counts = new Map<string, number>()
-  for (const row of deliverables) counts.set(row.deliverable_type, (counts.get(row.deliverable_type) ?? 0) + 1)
-  const parts = [...counts.entries()]
-    .filter(([type]) => labels[type])
-    .map(([type, count]) => `${count} ${labels[type][count === 1 ? 0 : 1]}`)
-
-  return parts.length > 0
-    ? `deliver ${clientName}'s recorded monthly mix of ${parts.join(', ')}`
-    : `prepare a conservative ${clientName} draft while priority details are confirmed`
-}
-
 export function buildMonthlyBaseline(input: MonthlyBaselineInput): {
   clientDirection: string[]
   strategyDrivers: string[]
@@ -158,19 +140,6 @@ export function buildMonthlyBaseline(input: MonthlyBaselineInput): {
       if (strategyDrivers.includes(generatedDriver)) {
         evidence.push({ authority: 'client_guide', source_id: input.guideId, field: 'strategyDrivers', excerpt: signal })
       }
-    }
-  }
-
-  if (strategyDrivers.length === 0) {
-    const fallback = deliverableDriver(input.clientName, input.deliverables)
-    strategyDrivers.push(fallback, 'confirm client priorities before adding offer, event or campaign claims')
-    if (input.deliverables.length > 0) {
-      evidence.push({
-        authority: 'monthly_deliverables',
-        source_id: input.deliverables.map(row => row.id).join(','),
-        field: 'strategyDrivers',
-        excerpt: fallback,
-      })
     }
   }
 

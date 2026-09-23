@@ -1,6 +1,6 @@
 # Canonical monthly client strategy contract
 
-Issue: #391
+Issues: #391, #494
 
 Migration: `20260917173138_canonical_monthly_client_strategy.sql`
 
@@ -16,19 +16,23 @@ The strategy content remains the existing `StrategyData` version 1 shape from `s
 
 ## Automatic baseline
 
-`prepareMonthlyStrategySeed()` assembles a conservative draft from existing sources:
+`prepareMonthlyStrategySeed()` assembles a conservative draft from existing sources only after the exact active client's package has an explicit #494 confirmation receipt:
 
-- exact active client and package configuration;
+- exact active client and confirmed package configuration (blank or legacy zero-placeholder JSON is rejected, not defaulted);
 - the target month's `monthly_deliverables`;
 - the previous canonical monthly strategy, or previous published report strategy when no canonical predecessor exists;
 - incorporated exact-client context updates, including their reviewed body/decision content;
 - bounded strategy-safe snippets from the exact client's runtime-ready guide (contact, freshness, unresolved-fact and guardrail sections are excluded);
 - exact-client company calendar events;
 - deterministic South African calendar moments from `src/lib/contentCalendar.ts`.
+- active, unexpired Marketing Library cards routed to the marketing strategist or content planner;
+- actual posts from the previous published report, where available.
 
 Calendar moments are all recorded as considered. At most three deterministic moments are selected when their suggested formats overlap the target month's real deliverables. Exact client events are selected; shoots/content runs are context only. Repeated seed calls never replace an existing client-month row.
 
-The baseline prefers incorporated context, prior verified strategy evidence and approved guide signals. Every guide/update snippet actually used is recorded in `seed_context.intelligence_evidence`. When those richer authorities are absent, the draft names only the client and the deliverable mix already recorded for that month, plus an explicit instruction to confirm priorities before adding offers, events or campaign claims. It does not invent audience, promotion or product facts, and remains an unpublished staff-editable draft.
+The baseline prefers incorporated context, prior verified strategy evidence and approved guide signals. Every package, guide, context, Marketing Library and prior-content input actually used is recorded in `seed_context`. Missing package or exact-client evidence fails closed; there is no generic deliverable-only fallback. It does not invent audience, promotion, product facts or package scope, and remains an unpublished staff-editable draft.
+
+Approval additionally requires the ten-part `goldStandard` exact-client brief. A database trigger rejects unverified packages, cross-client provenance, incomplete detail and obvious generic-only filler. See `docs/active-client-package-strategy-authority.md`.
 
 ## Lifecycle and audit
 

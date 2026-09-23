@@ -97,6 +97,8 @@ Mutation RPCs resolve the effective actor against `profiles`, require exact clie
 optimistic version and idempotency key, and append before/after evidence. Service-role
 assistant calls do not bypass the effective active-staff actor check.
 
+Approval/publication also runs the #494 package/provenance/gold-standard trigger.
+
 ## profiles
 
 | Policy | Type | Effect |
@@ -114,6 +116,10 @@ assistant calls do not bypass the effective active-staff actor check.
 | admin insert | INSERT | `is_admin()` |
 | admin update | UPDATE | `is_admin()` |
 | admin delete | DELETE | `is_admin()` |
+
+`confirm_client_package_settings` requires an active admin and active exact
+client, validates explicit package values and writes an append-only activity
+receipt. A trigger removes verification from direct package changes.
 
 ## reports
 

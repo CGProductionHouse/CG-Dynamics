@@ -180,6 +180,13 @@ knowledge, changes client records or spends advertising budget.
 | UPDATE | ✓ | ✗ | ✗ | ✗ |
 | DELETE | ✓ | ✗ | ✗ | ✗ |
 
+Package confirmation is narrower than ordinary client editing: only an active
+admin may call `confirm_client_package_settings`, and only for an exact active
+client UUID. The RPC validates all fields, writes the server-authored
+verification envelope and appends a Planner activity receipt. Any direct
+package JSON change strips prior verification and therefore cannot remain
+strategy authority accidentally.
+
 ### reports, posts
 
 | Operation | Staff | Client |
@@ -203,6 +210,10 @@ Monthly strategy writes require an active effective staff actor, exact client UU
 first-of-month target, optimistic version and idempotency key. The client RPC returns
 only the caller's linked client's published safe snapshot; internal notes, seed context,
 actors, revision evidence and unpublished drafts are excluded.
+
+Draft-to-approved and approved-to-published transitions additionally require a
+currently confirmed exact-client package, matching seed provenance and the
+complete non-generic #494 gold-standard brief.
 
 ## Package classification fields
 

@@ -76,6 +76,37 @@ export interface StrategyData {
   actionPlan: Record<ActionPlanKey, ActionPlanSection>
   clientActionsRequired: string[]
   calendarSelections: CalendarSelection[]
+  goldStandard: GoldStandardStrategy
+}
+
+export interface GoldStandardStrategy {
+  objective: string
+  audienceAndIntent: string
+  coreMessage: string
+  formatsAndRationale: string
+  testAndChange: string
+  pillarsAndHooks: string
+  mustAvoid: string
+  channelIntegration: string
+  successSignals: string
+  nextMonthGamePlan: string
+}
+
+export const GOLD_STANDARD_FIELDS: Array<{ key: keyof GoldStandardStrategy; label: string }> = [
+  { key: 'objective', label: 'Exact monthly objective' },
+  { key: 'audienceAndIntent', label: 'Audience and intent' },
+  { key: 'coreMessage', label: 'Core message' },
+  { key: 'formatsAndRationale', label: 'Formats, topics and rationale' },
+  { key: 'testAndChange', label: 'What changes or gets tested' },
+  { key: 'pillarsAndHooks', label: 'Content pillars and hooks' },
+  { key: 'mustAvoid', label: 'What this client must avoid' },
+  { key: 'channelIntegration', label: 'Paid, organic, site and lead integration' },
+  { key: 'successSignals', label: 'Success signals to watch' },
+  { key: 'nextMonthGamePlan', label: 'Package-bounded next-month game plan' },
+]
+
+export function emptyGoldStandardStrategy(): GoldStandardStrategy {
+  return Object.fromEntries(GOLD_STANDARD_FIELDS.map(field => [field.key, ''])) as unknown as GoldStandardStrategy
 }
 
 function emptySection(): ActionPlanSection {
@@ -110,6 +141,7 @@ export function emptyStrategyData(): StrategyData {
     },
     clientActionsRequired: [],
     calendarSelections: [],
+    goldStandard: emptyGoldStandardStrategy(),
   }
 }
 
@@ -139,6 +171,10 @@ export function readStrategyData(raw: unknown): StrategyData {
 
   const topContent = source.topContent && typeof source.topContent === 'object'
     ? source.topContent as Partial<TopContentInsight>
+    : {}
+
+  const goldSource = source.goldStandard && typeof source.goldStandard === 'object'
+    ? source.goldStandard as Partial<GoldStandardStrategy>
     : {}
 
   return {
@@ -171,6 +207,10 @@ export function readStrategyData(raw: unknown): StrategyData {
             note: typeof s.note === 'string' ? s.note : '',
           }))
       : [],
+    goldStandard: Object.fromEntries(GOLD_STANDARD_FIELDS.map(field => [
+      field.key,
+      typeof goldSource[field.key] === 'string' ? goldSource[field.key] : '',
+    ])) as unknown as GoldStandardStrategy,
   }
 }
 
@@ -184,6 +224,7 @@ export function hasStrategyContent(data: StrategyData): boolean {
     data.topContent.whyItWorked.length > 0 ||
     data.topContent.whatThisTellsUs.trim() !== '' ||
     (Object.values(data.actionPlan) as ActionPlanSection[]).some(s => s.enabled && (s.items.length > 0 || s.notes.trim() !== ''))
+    || GOLD_STANDARD_FIELDS.some(field => data.goldStandard[field.key].trim() !== '')
   )
 }
 
@@ -246,6 +287,48 @@ export function strategyRequiredComplete(data: StrategyData): boolean {
   return strategyChecklist(data)
     .filter(item => !item.optional)
     .every(item => item.done)
+}
+
+const GENERIC_ONLY = new Set([
+  'increase engagement',
+  'build awareness',
+  'build brand awareness',
+  'post consistently',
+  'grow social media',
+  'create engaging content',
+])
+
+function normaliseStatement(value: string): string {
+  return value.toLocaleLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim()
+}
+
+export function assessGoldStandardStrategy(
+  data: StrategyData,
+  packageSettings: PackageSettings | null,
+  exactEvidenceAvailable: boolean,
+): string[] {
+  const issues: string[] = []
+  if (!packageSettings) issues.push('Confirm the exact client package before approval.')
+  if (!exactEvidenceAvailable) issues.push('Add exact-client intelligence or previous performance evidence.')
+  for (const field of GOLD_STANDARD_FIELDS) {
+    const value = data.goldStandard[field.key].trim()
+    if (GENERIC_ONLY.has(normaliseStatement(value))) issues.push(`${field.label} is generic and must be tied to exact evidence and action.`)
+    else if (value.length < 20) issues.push(`${field.label} needs specific client detail.`)
+  }
+  if (packageSettings) {
+    const checks: Array<[ActionPlanKey, number | boolean, string]> = [
+      ['professional_video', packageSettings.professional_videos_per_month, 'Professional video'],
+      ['reels', packageSettings.reels_per_month, 'Reels'],
+      ['photo_content', packageSettings.photo_posts_per_month, 'Photo content'],
+      ['design_poster', packageSettings.design_posters_per_month, 'Design posters'],
+      ['animated_poster', packageSettings.animated_posters_per_month, 'Animated posters'],
+      ['campaign_recommendation', packageSettings.campaign_management_included, 'Campaign management'],
+    ]
+    for (const [key, allowance, label] of checks) {
+      if (data.actionPlan[key].enabled && !allowance) issues.push(`${label} exceeds the confirmed package.`)
+    }
+  }
+  return issues
 }
 
 // ─── draft generators ────────────────────────────────────────────────────────

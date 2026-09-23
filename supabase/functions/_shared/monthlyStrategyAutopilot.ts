@@ -7,7 +7,9 @@
 
 import { getMonthEvents } from '../../../src/lib/contentCalendar.ts'
 import { buildMonthlyBaseline } from '../../../src/lib/monthlyStrategySeed.ts'
+import { readPackageAuthority } from '../../../src/lib/packageAuthority.ts'
 import { readStrategyData } from '../../../src/lib/strategyEngine.ts'
+import { cardTargetsAgent } from '../../../src/features/ai-workforce/agents/agentRegistry.ts'
 
 export const STRATEGY_AUTOPILOT_PAGE_SIZE = 500
 export const STRATEGY_AUTOPILOT_MAX_CLIENTS = 5_000
@@ -55,6 +57,11 @@ type DraftData = {
   actionPlan: Record<string, { enabled: boolean; items: string[]; notes: string }>
   clientActionsRequired: string[]
   calendarSelections: Array<{ eventId: string; title: string; date: string | null; use: boolean; note: string }>
+  goldStandard: {
+    objective: string; audienceAndIntent: string; coreMessage: string; formatsAndRationale: string
+    testAndChange: string; pillarsAndHooks: string; mustAvoid: string; channelIntegration: string
+    successSignals: string; nextMonthGamePlan: string
+  }
 }
 
 export type StrategyDraftEnhancer = (input: {
@@ -73,6 +80,7 @@ export interface StrategyAutopilotResult {
   drafts_created: number
   existing_untouched: number
   failed: number
+  blocked: number
   blockers: Record<string, number>
   receipts: Array<Record<string, unknown>>
 }
@@ -115,6 +123,7 @@ function emptyDraft(): DraftData {
     strategyDrivers: [], strategyGoingForward: '',
     actionPlan: { professional_video: section(), reels: section(), photo_content: section(), design_poster: section(), animated_poster: section(), campaign_recommendation: section() },
     clientActionsRequired: [], calendarSelections: [],
+    goldStandard: { objective: '', audienceAndIntent: '', coreMessage: '', formatsAndRationale: '', testAndChange: '', pillarsAndHooks: '', mustAvoid: '', channelIntegration: '', successSignals: '', nextMonthGamePlan: '' },
   }
 }
 
@@ -150,8 +159,8 @@ async function prepareDraft(sb: StrategyAutopilotClient, client: Record<string, 
     sb.from('client_guides').select('id,guide_markdown').eq('client_id', clientId).eq('runtime_readiness', 'ready').order('version', { ascending: false }).limit(1).maybeSingle(),
     sb.from('client_packages').select('id').eq('client_id', clientId).eq('status', 'active').lt('start_date', nextMonth).or(`end_date.is.null,end_date.gte.${strategyMonth}`).order('start_date', { ascending: false }).limit(1).maybeSingle(),
     sb.from('client_industry_profiles').select('primary_industry,secondary_industry,review_state').eq('client_id', clientId).maybeSingle(),
-    sb.from('skill_cards').select('id,title,principle,summary,knowledge_layer,category,subcategory,active_client_id,review_expires_at').eq('status', 'active').is('active_client_id', null).in('knowledge_layer', ['universal_principle', 'south_african_market', 'industry_specific']).or(`review_expires_at.is.null,review_expires_at.gte.${operatingDate}`).limit(30),
-    sb.from('skill_cards').select('id,title,principle,summary,knowledge_layer,category,subcategory,active_client_id,review_expires_at').eq('status', 'active').eq('active_client_id', clientId).or(`review_expires_at.is.null,review_expires_at.gte.${operatingDate}`).limit(30),
+    sb.from('skill_cards').select('id,title,principle,summary,knowledge_layer,category,subcategory,active_client_id,review_expires_at,relevant_agents,confidence_level,evidence_label,source_id').eq('status', 'active').is('active_client_id', null).in('knowledge_layer', ['universal_principle', 'south_african_market', 'industry_specific']).or(`review_expires_at.is.null,review_expires_at.gte.${operatingDate}`).limit(30),
+    sb.from('skill_cards').select('id,title,principle,summary,knowledge_layer,category,subcategory,active_client_id,review_expires_at,relevant_agents,confidence_level,evidence_label,source_id').eq('status', 'active').eq('active_client_id', clientId).or(`review_expires_at.is.null,review_expires_at.gte.${operatingDate}`).limit(30),
   ])
   for (const result of [deliverables, events, prior, report, updates, guide, packageRow, industry, sharedCards, clientCards]) {
     if (result.error) throw new Error(result.error.message)
@@ -167,14 +176,17 @@ async function prepareDraft(sb: StrategyAutopilotClient, client: Record<string, 
     ...((sharedCards.data ?? []) as Array<Record<string, unknown>>),
   ].filter(card => {
     if (!strategyKnowledgeCardIsCurrent(card, operatingDate)) return false
+    const agents = Array.isArray(card.relevant_agents) ? card.relevant_agents.filter((value): value is string => typeof value === 'string') : []
+    if (!cardTargetsAgent(agents, 'marketing_strategist') && !cardTargetsAgent(agents, 'content_planner')) return false
     if (card.active_client_id) return card.active_client_id === clientId
     if (card.knowledge_layer !== 'industry_specific') return true
     const labels = `${clean(card.category, 100)} ${clean(card.subcategory, 100)}`.toLowerCase()
     return Boolean(primaryIndustry) && labels.includes(primaryIndustry)
-  }).slice(0, 30)
+  }).sort((left, right) => String(left.id).localeCompare(String(right.id))).slice(0, 30)
   const draft = emptyDraft()
   const evidence: Evidence[] = []
   const blockers: string[] = []
+  const packageAuthority = readPackageAuthority(client.package_settings)
   const guideRow = guide.data as Record<string, unknown> | null
   const previousData = readStrategyData((prior.data as Record<string, unknown> | null)?.strategy_data ?? (report.data as Record<string, unknown> | null)?.strategy_data)
   const baseline = buildMonthlyBaseline({
@@ -189,6 +201,8 @@ async function prepareDraft(sb: StrategyAutopilotClient, client: Record<string, 
   draft.clientDirection = baseline.clientDirection
   draft.strategyDrivers = baseline.strategyDrivers
   evidence.push(...baseline.evidence)
+  if (!packageAuthority.settings || !packageAuthority.verification) blockers.push('PACKAGE_UNVERIFIED')
+  if (!prior.data && !report.data && updateRows.length === 0 && !guideRow) blockers.push('CLIENT_EVIDENCE_UNVERIFIED')
   if (industryRow?.primary_industry) {
     const value = `Apply relevant ${clean(industryRow.primary_industry, 80)} category context without adding unverified client claims.`
     addUnique(draft.strategyDrivers, value, 6)
@@ -201,15 +215,22 @@ async function prepareDraft(sb: StrategyAutopilotClient, client: Record<string, 
   }
 
   const counts = new Map<string, number>()
-  for (const row of ds) counts.set(String(row.deliverable_type), (counts.get(String(row.deliverable_type)) ?? 0) + 1)
-  if (!packageRow.data || ds.length === 0) blockers.push('PACKAGE_UNVERIFIED')
+  if (packageAuthority.settings) {
+    counts.set('video', packageAuthority.settings.professional_videos_per_month)
+    counts.set('reel', packageAuthority.settings.reels_per_month)
+    counts.set('photo', packageAuthority.settings.photo_posts_per_month)
+    counts.set('dp', packageAuthority.settings.design_posters_per_month)
+  }
   for (const [type, count] of counts) {
     const key = ({ video: 'professional_video', reel: 'reels', photo: 'photo_content', dp: 'design_poster' } as Record<string, string>)[type]
     if (!key || !draft.actionPlan[key]) continue
-    draft.actionPlan[key] = { enabled: true, items: [`Prepare ${count} ${deliverableLabel(type)}${count === 1 ? '' : 's'} from the confirmed monthly schedule.`], notes: 'Scope comes from Client Schedule; staff should confirm the creative treatment.' }
+    draft.actionPlan[key] = { enabled: count > 0, items: count > 0 ? [`Prepare ${count} ${deliverableLabel(type)}${count === 1 ? '' : 's'} from the confirmed package.`] : [], notes: 'Scope comes from the explicitly confirmed client package; Client Schedule remains execution evidence.' }
   }
   const mix = [...counts].map(([type, count]) => `${count} ${deliverableLabel(type)}${count === 1 ? '' : 's'}`).join(', ')
   if (mix) addUnique(draft.strategyDrivers, `Deliver the confirmed monthly mix: ${mix}.`, 6)
+  if (packageAuthority.verification) {
+    evidence.push({ authority: 'confirmed_client_package', source_id: clientId, field: 'actionPlan', excerpt: `Confirmed ${packageAuthority.verification.confirmed_at}: ${mix}.` })
+  }
 
   for (const event of evs) {
     const selected = event.event_type === 'client_event'
@@ -253,6 +274,10 @@ async function prepareDraft(sb: StrategyAutopilotClient, client: Record<string, 
     mix ? `Execute the confirmed ${mix} package without extending scope.` : 'Keep production scope provisional until the package and deliverables are confirmed.',
     evs.length ? 'Use only the recorded client events selected above; staff must verify any promotional detail.' : '',
   ].filter(Boolean).join(' ')
+  draft.goldStandard.objective = draft.clientDirection[0] ? `${String(client.name)}: ${draft.clientDirection[0]}` : ''
+  draft.goldStandard.formatsAndRationale = mix ? `Work within ${String(client.name)}’s confirmed package of ${mix}; each format still needs an evidence-backed role.` : ''
+  draft.goldStandard.testAndChange = draft.topContent.whatThisTellsUs ? `Use the previous exact-client finding “${draft.topContent.whatThisTellsUs}” to define one controlled change.` : ''
+  draft.goldStandard.nextMonthGamePlan = mix ? `Sequence only the confirmed ${mix}; do not add channels or deliverables outside package.` : ''
   if (blockers.length) draft.clientActionsRequired.push('Confirm the monthly package and Client Schedule scope before approval.')
 
   return {
@@ -266,12 +291,19 @@ async function prepareDraft(sb: StrategyAutopilotClient, client: Record<string, 
         deliverable_ids: ds.map(row => row.id), client_calendar_event_ids: evs.map(row => row.id),
         approved_client_context_update_ids: updateRows.map(row => row.id), client_guide_id: guideRow?.id ?? null,
         marketing_library_skill_card_ids: cardRows.slice(0, 3).map(row => row.id),
+        marketing_library_cards: cardRows.slice(0, 3).map(row => ({
+          id: row.id, title: row.title, confidence_level: row.confidence_level,
+          evidence_label: row.evidence_label, source_id: row.source_id ?? null,
+        })),
+        package_verification_confirmed_at: packageAuthority.verification?.confirmed_at ?? null,
+        package_verification_actor_id: packageAuthority.verification?.confirmed_by_profile_id ?? null,
+        package_source_references: packageAuthority.verification?.source_references ?? [],
       },
       intelligence_evidence: evidence,
       blockers,
       source_coverage: {
         previous_monthly_strategy: prior.data ? 'available' : 'none', previous_published_report: report.data ? 'available' : 'none',
-        monthly_deliverables: ds.length ? 'available' : 'none', client_package: packageRow.data ? 'available' : 'none',
+        monthly_deliverables: ds.length ? 'available' : 'none', client_package: packageAuthority.settings ? 'available' : 'none',
         company_calendar: evs.length ? 'available' : 'none', approved_client_context: updateRows.length ? 'available' : 'none',
         client_guide: guide.data ? 'available' : 'none', marketing_library: cardRows.length ? 'available' : 'none',
       },
@@ -285,13 +317,14 @@ export async function runMonthlyStrategyAutopilot(
   options: { today: string; systemProfileId: string; enhanceDraft?: StrategyDraftEnhancer },
 ): Promise<StrategyAutopilotResult> {
   if (!options.systemProfileId) throw new Error('Configured system profile is required.')
-  const clients = await fetchAll(sb.from('clients').select('id,name,active').eq('active', true).order('id', { ascending: true }))
+  const clients = await fetchAll(sb.from('clients').select('id,name,active,package_settings').eq('active', true).order('id', { ascending: true }))
   const months = strategyAutopilotMonths(options.today)
   const blockers: Record<string, number> = {}
   const receipts: Array<Record<string, unknown>> = []
   let draftsCreated = 0
   let existingUntouched = 0
   let failed = 0
+  let blocked = 0
   const note = (code: string) => { blockers[code] = (blockers[code] ?? 0) + 1 }
 
   for (const client of clients) for (const strategyMonth of months) {
@@ -301,6 +334,7 @@ export async function runMonthlyStrategyAutopilot(
       if (existing.data) { existingUntouched += 1; continue }
       const prepared = await prepareDraft(sb, client, strategyMonth, options.today)
       for (const blocker of prepared.blockers) note(blocker)
+      if (prepared.blockers.length > 0) { blocked += 1; continue }
       const enhanced = options.enhanceDraft ? await options.enhanceDraft({ clientId: String(client.id), clientName: String(client.name), strategyMonth, draft: prepared.draft, groundedEvidence: prepared.evidence }) : null
       const idempotency = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`monthly-strategy-autopilot:${client.id}:${strategyMonth}`))
       const hex = Array.from(new Uint8Array(idempotency), byte => byte.toString(16).padStart(2, '0')).join('')
@@ -320,5 +354,5 @@ export async function runMonthlyStrategyAutopilot(
       note('STRATEGY_PREPARATION_FAILED')
     }
   }
-  return { ok: failed === 0, operating_date: options.today, target_months: months, active_clients: clients.length, drafts_created: draftsCreated, existing_untouched: existingUntouched, failed, blockers, receipts }
+  return { ok: failed === 0, operating_date: options.today, target_months: months, active_clients: clients.length, drafts_created: draftsCreated, existing_untouched: existingUntouched, blocked, failed, blockers, receipts }
 }

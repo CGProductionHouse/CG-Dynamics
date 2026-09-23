@@ -45,11 +45,19 @@ class FakeSupabase {
 }
 
 function fixture(existing = []) {
+  const packageSettings = {
+    professional_videos_per_month: 1, reels_per_month: 2, photo_posts_per_month: 1,
+    design_posters_per_month: 2, animated_posters_per_month: 0,
+    campaign_management_included: false, monthly_campaign_budget: 0,
+    shoot_days_per_month: 1, website_updates_per_month: 0,
+    other_agreed_deliverables: '', package_notes: 'Confirmed package', package_exclusions: '',
+    verification: { status: 'confirmed', version: 1, confirmed_at: '2026-09-20T08:00:00Z', confirmed_by_profile_id: 'admin-a', evidence_note: 'Client contract checked', inference_note: '', source_references: ['contract-2026'] },
+  }
   return new FakeSupabase({
-    clients: [{ id: 'client-a', name: 'Client A', active: true }],
+    clients: [{ id: 'client-a', name: 'Client A', active: true, package_settings: packageSettings }],
     monthly_client_strategies: existing,
     monthly_deliverables: [{ id: 'd-1', client_id: 'client-a', month: '2026-09-01', archived_at: null, deliverable_type: 'reel', title: 'Reel' }],
-    company_calendar_events: [], reports: [], client_context_updates: [], client_guides: [],
+    company_calendar_events: [], reports: [], client_context_updates: [], client_guides: [{ id: 'guide-a', client_id: 'client-a', runtime_readiness: 'ready', version: 1, guide_markdown: '## Client identity and positioning\n- Specialist local supplier for exact project buyers.' }],
     client_packages: [{ id: 'package-a', client_id: 'client-a', status: 'active', start_date: '2026-01-01', end_date: null }],
     client_industry_profiles: [], skill_cards: [],
   })
@@ -73,7 +81,7 @@ test('only reviewed or active industry profiles can route industry knowledge', (
   assert.equal(autopilot.approvedIndustryProfile({ review_state: 'active', primary_industry: 'Agriculture' })?.primary_industry, 'Agriculture')
 })
 
-test('creates current and next draft through #391 and records truthful package gaps', async () => {
+test('creates current and next draft through #391 from one confirmed package', async () => {
   const fake = fixture()
   const result = await autopilot.runMonthlyStrategyAutopilot(fake, { today: '2026-09-22', systemProfileId: 'system-profile' })
   assert.equal(result.drafts_created, 2)
@@ -81,7 +89,31 @@ test('creates current and next draft through #391 and records truthful package g
   assert.equal(fake.calls.length, 2)
   assert.ok(fake.calls.every(call => call.p_strategy_data.version === 1))
   assert.ok(fake.calls.every(call => call.p_seed_context.origin === 'monthly_strategy_autopilot'))
-  assert.equal(result.blockers.PACKAGE_UNVERIFIED, 1, 'next month has no confirmed deliverables')
+  assert.equal(result.blockers.PACKAGE_UNVERIFIED, undefined)
+  assert.equal(result.blocked, 0)
+  assert.ok(fake.calls.every(call => call.p_seed_context.sources.package_verification_confirmed_at === '2026-09-20T08:00:00Z'))
+  assert.match(fake.calls[0].p_strategy_data.actionPlan.reels.items[0], /2 reels from the confirmed package/)
+  assert.doesNotMatch(fake.calls[0].p_strategy_data.actionPlan.reels.items[0], /1 reel/)
+})
+
+test('only active clients enter the strategy preparation queue', async () => {
+  const fake = fixture()
+  fake.tables.clients.push({ id: 'inactive-client', name: 'Old Client', active: false, package_settings: fake.tables.clients[0].package_settings })
+  const result = await autopilot.runMonthlyStrategyAutopilot(fake, { today: '2026-09-22', systemProfileId: 'system-profile' })
+  assert.equal(result.active_clients, 1)
+  assert.ok(fake.calls.every(call => call.p_client_id === 'client-a'))
+})
+
+test('empty and legacy zero-placeholder packages fail closed without creating generic drafts', async () => {
+  for (const raw of [{}, { professional_videos_per_month: 0, reels_per_month: 0 }]) {
+    const fake = fixture()
+    fake.tables.clients[0].package_settings = raw
+    const result = await autopilot.runMonthlyStrategyAutopilot(fake, { today: '2026-09-22', systemProfileId: 'system-profile' })
+    assert.equal(result.drafts_created, 0)
+    assert.equal(result.blocked, 2)
+    assert.equal(result.blockers.PACKAGE_UNVERIFIED, 2)
+    assert.equal(fake.calls.length, 0)
+  }
 })
 
 test('an existing or staff-amended client/month strategy is never sent to the seed RPC', async () => {
@@ -97,10 +129,11 @@ test('knowledge retrieval excludes expired, unreviewed-industry and other-client
   const fake = fixture()
   fake.tables.client_industry_profiles = [{ client_id: 'client-a', review_state: 'draft', primary_industry: 'Agriculture' }]
   fake.tables.skill_cards = [
-    { id: 'other-client', status: 'active', active_client_id: 'client-b', knowledge_layer: 'active_client_specific', principle: 'Private other-client truth', review_expires_at: null },
-    { id: 'expired', status: 'active', active_client_id: null, knowledge_layer: 'universal_principle', principle: 'Expired truth', review_expires_at: '2026-09-21' },
-    { id: 'today', status: 'active', active_client_id: null, knowledge_layer: 'universal_principle', principle: 'Current through today', review_expires_at: '2026-09-22' },
-    { id: 'industry-draft', status: 'active', active_client_id: null, knowledge_layer: 'industry_specific', category: 'Agriculture', principle: 'Industry truth', review_expires_at: null },
+    { id: 'other-client', status: 'active', active_client_id: 'client-b', knowledge_layer: 'active_client_specific', relevant_agents: ['marketing_strategist'], principle: 'Private other-client truth', review_expires_at: null },
+    { id: 'expired', status: 'active', active_client_id: null, knowledge_layer: 'universal_principle', relevant_agents: ['marketing_strategist'], principle: 'Expired truth', review_expires_at: '2026-09-21' },
+    { id: 'today', status: 'active', active_client_id: null, knowledge_layer: 'universal_principle', relevant_agents: ['marketing_strategist_agent'], principle: 'Current through today', review_expires_at: '2026-09-22' },
+    { id: 'unrelated', status: 'active', active_client_id: null, knowledge_layer: 'universal_principle', relevant_agents: ['paid_ads_agent'], principle: 'Unrelated active truth', review_expires_at: null },
+    { id: 'industry-draft', status: 'active', active_client_id: null, knowledge_layer: 'industry_specific', relevant_agents: ['content_planner'], category: 'Agriculture', principle: 'Industry truth', review_expires_at: null },
   ]
   await autopilot.runMonthlyStrategyAutopilot(fake, { today: '2026-09-22', systemProfileId: 'system-profile' })
   const sourceIds = fake.calls[0].p_seed_context.sources.marketing_library_skill_card_ids
