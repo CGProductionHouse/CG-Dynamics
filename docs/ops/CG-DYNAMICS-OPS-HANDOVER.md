@@ -162,7 +162,7 @@ by this documentation snapshot.
   provider account ID, username, professional type, scopes and encrypted-token
   presence in one transaction before binding the identity to the existing
   `meta_client_assets` authority. It does not create a reporting/facts store.
-- Migration `20260923110000_instagram_connection_review_binding.sql`, the three
+- Migration `20260923120000_instagram_connection_review_binding.sql`, the three
   Instagram Edge Functions, provider secrets, activation flag and any consent
   or mappings remain unapplied/undeployed. The shared Meta worker is unchanged;
   standalone credential selection remains a protected shared-worker gate before
