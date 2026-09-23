@@ -8,6 +8,7 @@ const migration = readFileSync(new URL('../supabase/migrations/20260918140000_we
 const clientReport = readFileSync(new URL('../src/pages/client/ClientReportView.tsx', import.meta.url), 'utf8')
 
 test('website reporting is a server-only, exact-client bridge', () => {
+  assert.match(edge, /Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info'/)
   assert.match(edge, /supabase\.auth\.getUser\(bearer\)/)
   assert.match(edge, /\.from\('profiles'\).*\.select\('role'\)/)
   assert.match(edge, /\.from\('clients'\).*\.eq\('id', input\.clientId\)/)
