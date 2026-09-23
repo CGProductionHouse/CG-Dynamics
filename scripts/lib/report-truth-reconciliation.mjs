@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto'
+
 const TARGET_MONTHS = ['2026-07', '2026-08', '2026-09']
 const GENERIC_STRATEGY_PATTERNS = [
   /increase engagement/i,
@@ -27,15 +29,36 @@ function formatType(value) {
   return normalized || 'unspecified'
 }
 
-function evidenceTimestamp(post) {
+function sha256(value) {
+  return createHash('sha256').update(value).digest('hex')
+}
+
+function stableValue(value) {
+  if (Array.isArray(value)) return value.map(stableValue)
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.keys(value).sort().map(key => [key, stableValue(value[key])]))
+  }
+  return value
+}
+
+function stableJson(value) {
+  return JSON.stringify(stableValue(value))
+}
+
+export function verifiedEvidenceTimestamp(post) {
   const raw = post.raw && typeof post.raw === 'object' ? post.raw : {}
   const engagement = raw.engagement_evidence && typeof raw.engagement_evidence === 'object'
     ? raw.engagement_evidence
     : {}
-  return [engagement.observed_at, raw.engagement_observed_at, raw.provider_observed_at, post.created_at, post.publish_time]
-    .map(value => value ? new Date(value) : null)
-    .filter(value => value && !Number.isNaN(value.getTime()))
-    .sort((left, right) => right.getTime() - left.getTime())[0] ?? null
+  const candidates = [engagement.observed_at, raw.engagement_observed_at, raw.provider_observed_at]
+  if (raw.source === 'meta_sync') candidates.push(raw.synced_at)
+  if (raw.evidence_verified === true) candidates.push(raw.verified_at, raw.import_observed_at)
+  for (const value of candidates) {
+    if (!value) continue
+    const parsed = new Date(value)
+    if (!Number.isNaN(parsed.getTime())) return parsed
+  }
+  return null
 }
 
 export function isGenericStrategyCopy(value) {
@@ -90,7 +113,7 @@ export function reconcileClientMonth({ client, month, reports, posts, strategy }
   }
 
   const bounds = monthBounds(month)
-  const latestEvidence = reportPosts.map(evidenceTimestamp).filter(Boolean).sort((a, b) => b.getTime() - a.getTime())[0]
+  const latestEvidence = reportPosts.map(verifiedEvidenceTimestamp).filter(Boolean).sort((a, b) => b.getTime() - a.getTime())[0]
   const asOf = isoDate(latestEvidence)
   if (month === '2026-09' && !asOf) {
     return { state: 'withheld', reason: 'MISSING_SEPTEMBER_AS_OF_EVIDENCE', client_id: client.id, client_name: client.name, month, report_id: report.id }
@@ -102,13 +125,40 @@ export function reconcileClientMonth({ client, month, reports, posts, strategy }
     ? `${client.name} ${titleMonth} Month-to-Date Report (as of ${asOf})`
     : `${client.name} ${titleMonth} Report`
   const periodEnd = month === '2026-09' ? asOf : bounds.end
-  const reflection = buildFactualReflection(reportPosts)
-  const fingerprint = `${report.id}:${month}:${reportPosts.map(post => post.id).sort().join(',')}:${periodEnd}`
+  const factualReflection = buildFactualReflection(reportPosts)
+  const reflection = report.previous_month_reflection?.trim() || factualReflection
+  const sourceFingerprint = sha256(stableJson({
+    report: {
+      id: report.id,
+      client_id: report.client_id,
+      platform: report.platform,
+      strategy_next_month: report.strategy_next_month ?? null,
+      content_direction_next_month: report.content_direction_next_month ?? null,
+      previous_month_reflection: reflection,
+    },
+    posts: reportPosts.map(post => ({
+      id: post.id,
+      meta_post_id: post.meta_post_id,
+      platform: post.platform,
+      publish_time: post.publish_time,
+      meta_post_type: post.meta_post_type,
+      verified_evidence_at: verifiedEvidenceTimestamp(post)?.toISOString() ?? null,
+    })).sort((left, right) => left.id.localeCompare(right.id)),
+    strategy: strategy ? { workflow_status: strategy.workflow_status } : null,
+  }))
+  const alreadySatisfied = report.status === 'published'
 
   return {
-    state: 'safe_to_publish', client_id: client.id, client_name: client.name, month,
+    state: alreadySatisfied ? 'already_satisfied' : 'mutation_target', client_id: client.id, client_name: client.name, month,
     report_id: report.id, post_count: reportPosts.length, period_start: bounds.start,
-    period_end: periodEnd, report_title: title, strategy_reflection: reflection, fingerprint,
+    period_end: periodEnd, report_title: title, previous_month_reflection: reflection,
+    source_fingerprint: sourceFingerprint,
+    plan_token: sha256(stableJson({ report_id: report.id, client_id: client.id, month, period_start: bounds.start, period_end: periodEnd, report_title: title, previous_month_reflection: reflection, source_fingerprint: sourceFingerprint })),
+    expected: {
+      status: report.status,
+      updated_at: report.updated_at ?? null,
+      previous_month_reflection: report.previous_month_reflection ?? null,
+    },
   }
 }
 
@@ -123,16 +173,23 @@ export function buildReconciliationPlan({ clients, reports, posts, strategies = 
   }
   const byMonth = Object.fromEntries(TARGET_MONTHS.map(month => {
     const rows = results.filter(row => row.month === month)
-    return [month, { target: rows.length, safe_to_publish: rows.filter(row => row.state === 'safe_to_publish').length, withheld: rows.filter(row => row.state === 'withheld').length }]
+    const alreadySatisfied = rows.filter(row => row.state === 'already_satisfied').length
+    const mutationTargets = rows.filter(row => row.state === 'mutation_target').length
+    return [month, { target: rows.length, safe_to_publish: alreadySatisfied + mutationTargets, already_satisfied: alreadySatisfied, mutation_targets: mutationTargets, withheld: rows.filter(row => row.state === 'withheld').length }]
   }))
   const reasons = results.filter(row => row.state === 'withheld').reduce((counts, row) => {
     counts[row.reason] = (counts[row.reason] ?? 0) + 1
     return counts
   }, {})
+  const publishableRows = results.filter(row => row.state === 'already_satisfied' || row.state === 'mutation_target')
+  const planHash = sha256(publishableRows.map(row => row.plan_token).sort().join('\n'))
   return {
     generated_at: new Date().toISOString(), target_months: TARGET_MONTHS,
     active_client_count: activeClients.length, target_client_months: activeClients.length * TARGET_MONTHS.length,
-    safe_to_publish: results.filter(row => row.state === 'safe_to_publish').length,
+    plan_hash: planHash,
+    safe_to_publish: publishableRows.length,
+    already_satisfied: results.filter(row => row.state === 'already_satisfied').length,
+    mutation_targets: results.filter(row => row.state === 'mutation_target').length,
     withheld: results.filter(row => row.state === 'withheld').length,
     by_month: byMonth, withheld_reasons: reasons, rows: results,
   }
