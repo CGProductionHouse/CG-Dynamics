@@ -33,6 +33,67 @@ function section(markdown, title) {
     .filter(line => !/No exact evidence available|None at dossier level|Missing history is unavailable/i.test(line))
 }
 
+function usableEvidence(values) {
+  const seen = new Set()
+  return values.map(value => String(value ?? '').replace(/\s+/g, ' ').replace(/[.;]+$/, '').trim())
+    .filter(value => value.length >= 8)
+    .filter(value => !/(^exact client id:|^client id:|^tier:|https?:\/\/|^[0-9a-f]{8}-[0-9a-f-]{27,}$)/i.test(value))
+    .filter(value => {
+      const key = value.toLowerCase()
+      if (seen.has(key)) return false
+      seen.add(key)
+      return true
+    })
+}
+
+function packageSummary(settings) {
+  const mapping = [
+    ['professional_videos_per_month', 'professional videos'],
+    ['reels_per_month', 'reels'],
+    ['photo_posts_per_month', 'photo posts'],
+    ['design_posters_per_month', 'design posters'],
+    ['animated_posters_per_month', 'animated posters'],
+  ]
+  const known = []
+  const unknown = []
+  for (const [field, label] of mapping) {
+    const value = settings[field]
+    if (Number.isInteger(value)) known.push(`${value} ${label}`)
+    else unknown.push(label)
+  }
+  const other = typeof settings.other_agreed_deliverables === 'string' ? settings.other_agreed_deliverables.trim() : ''
+  if (other) known.push(`other agreed scope: ${other}`)
+  const knownText = known.length > 0 ? known.join(', ') : 'no fixed monthly quantities are confirmed'
+  const unknownText = unknown.length > 0 ? `; unknown capacities remain disabled for ${unknown.join(', ')}` : ''
+  return `Confirmed package scope: ${knownText}${unknownText}`
+}
+
+function buildGoldStandard({ live, drivers, recommendations, constraints }) {
+  const evidence = usableEvidence(drivers)
+  const direction = recommendations.filter(Boolean).slice(0, 2).join(' ') || evidence[0] || `${live.name} exact-client evidence`
+  const primary = evidence[0] || direction
+  const secondary = evidence[1] || direction
+  const tertiary = evidence[2] || secondary
+  const fourth = evidence[3] || tertiary
+  const guardrails = usableEvidence(constraints).slice(0, 3)
+  const guardrailText = guardrails.length > 0 ? guardrails.join('; ') : 'unverified offers, dates, prices, quantities, access claims or unsupported business facts'
+  const scope = packageSummary(live.package_settings)
+  const month = live.strategy_month.slice(0, 7)
+
+  return {
+    objective: `${live.name} ${month}: use the verified client evidence "${primary}" to drive the practical direction "${direction}" while staying inside confirmed scope.`,
+    audienceAndIntent: `For ${live.name}, use "${secondary}" together with "${primary}" as the strongest available evidence of customer/context intent; shape calls to action around that evidence without inventing demographics or demand signals.`,
+    coreMessage: `${live.name}'s core message should connect "${primary}" with "${secondary}" and keep "${direction}" as the concrete content direction rather than falling back to generic brand claims.`,
+    formatsAndRationale: `${scope}. Use only enabled formats to express "${primary}" and "${direction}"; unknown package capacities remain disabled rather than being inferred from posting history.`,
+    testAndChange: `For ${live.name}, test one controlled variation around "${tertiary}" while keeping "${primary}" stable, then use only real exact-client report/post evidence to decide whether the direction should change.`,
+    pillarsAndHooks: `Build ${live.name}'s hooks from these exact dossier points: "${primary}"; "${secondary}"; "${tertiary}"; "${fourth}". Do not introduce unrelated generic pillars.`,
+    mustAvoid: `For ${live.name}, avoid ${guardrailText}. Also avoid invented package quantities, offers, dates, prices, audience claims or services outside confirmed scope.`,
+    channelIntegration: `Carry "${primary}" consistently across only the social channels and formats CG is authorised to manage for ${live.name}; adapt execution to ${scope} and do not assume additional provider access.`,
+    successSignals: `Judge ${live.name}'s ${month} work against real available exact-client signals tied to "${direction}"—reach, views, interactions or CTA response only where those metrics actually exist; do not invent targets.`,
+    nextMonthGamePlan: `For ${live.name}, sequence "${primary}" first, "${secondary}" second and "${tertiary}" as the controlled follow-up, carrying forward only exact-client learnings while staying within ${scope}.`,
+  }
+}
+
 function packageActionPlan(settings, recommendations, facts) {
   const sourceItems = [...recommendations, ...facts].slice(0, 4)
   const mapping = {
@@ -49,7 +110,7 @@ function packageActionPlan(settings, recommendations, facts) {
     plan[key] = {
       enabled,
       items: enabled ? sourceItems.slice(0, Math.min(quantity, sourceItems.length)) : [],
-      notes: enabled ? `Confirmed #504 capacity: ${quantity} per month; concepts remain subject to staff review.` : '',
+      notes: enabled ? `Confirmed package capacity: ${quantity} per month; concepts remain subject to staff review.` : '',
     }
   }
   plan.campaign_recommendation = { enabled: false, items: [], notes: 'No campaign budget or campaign-management entitlement is inferred.' }
@@ -75,7 +136,11 @@ for (const live of source.rows) {
       version: live.version,
       updated_at: live.updated_at,
       staff_amended_at: live.staff_amended_at,
+      approved_at: live.approved_at,
+      published_at: live.published_at,
       current_strategy_hash: sha(live.strategy_data),
+      current_seed_context_hash: sha(live.seed_context),
+      current_internal_notes: live.internal_notes ?? null,
     },
   }
   if (NON_APPLICABLE.has(live.name)) {
@@ -95,6 +160,19 @@ for (const live of source.rows) {
     continue
   }
 
+  const verification = live.package_settings?.verification
+  if (
+    verification?.status !== 'confirmed'
+    || ![1, 2].includes(Number(verification?.version))
+    || !verification?.confirmed_at
+    || !verification?.confirmed_by_profile_id
+    || !Array.isArray(verification?.source_references)
+    || verification.source_references.length === 0
+  ) {
+    rows.push({ ...base, disposition: 'blocked', reason: 'PACKAGE_PROVENANCE_INCOMPLETE' })
+    continue
+  }
+
   const markdown = readFileSync(join(DIR, dossier.file), 'utf8')
   const facts = section(markdown, 'Verified facts')
   const constraints = section(markdown, 'Client and CG constraints')
@@ -106,23 +184,31 @@ for (const live of source.rows) {
     rows.push({ ...base, disposition: 'blocked', reason: 'INSUFFICIENT_EXACT_STRATEGY_EVIDENCE' })
     continue
   }
+
   const guideMetaPath = join(DIR, 'runtime-guides', `${dossier.file.replace(/\.md$/, '')}.meta.json`)
   let guideId = live.seed_context?.sources?.client_guide_id ?? null
   try { guideId = JSON.parse(readFileSync(guideMetaPath, 'utf8')).guide_id } catch {}
+
+  const actionPlan = packageActionPlan(live.package_settings, recommendations, meaningfulFacts)
   const proposed = {
     ...live.strategy_data,
     strategyDrivers: drivers,
     strategyGoingForward: recommendations.slice(0, 2).join(' '),
     clientActionsRequired: constraints.filter(value => /confirm|verify|approval|current|must|do not|unknown/i.test(value)).slice(0, 6),
-    actionPlan: packageActionPlan(live.package_settings, recommendations, meaningfulFacts),
+    actionPlan,
+    goldStandard: buildGoldStandard({ live, drivers, recommendations, constraints }),
   }
   const proposedSeed = {
     ...live.seed_context,
-    origin: 'issue_513_reviewed_dossier_dry_run',
+    origin: 'issue_513_reviewed_dossier_plan',
     blockers: [],
     sources: {
       ...(live.seed_context?.sources ?? {}),
       client_guide_id: guideId,
+      package_verification_confirmed_at: verification.confirmed_at,
+      package_verification_actor_id: verification.confirmed_by_profile_id,
+      package_source_references: verification.source_references,
+      package_verification_version: verification.version,
       issue_513_evidence_hash: dossier.evidence_hash,
       issue_515_service_scope: 'eligible',
     },
@@ -132,12 +218,14 @@ for (const live of source.rows) {
       client_package: 'confirmed',
     },
   }
+
   rows.push({
     ...base,
     disposition: 'ready',
     reason: 'EXACT_EVIDENCE_AND_CONFIRMED_SOCIAL_SCOPE',
     proposed_strategy_data: proposed,
     proposed_seed_context: proposedSeed,
+    proposed_internal_notes: live.internal_notes ?? null,
     proposed_strategy_hash: sha(proposed),
     proposed_seed_context_hash: sha(proposedSeed),
   })
@@ -153,7 +241,7 @@ const counts = rows.reduce((acc, row) => {
 }, { ready: 0, non_applicable: 0, held: 0, blocked: 0, by_month: {}, blocked_reasons: {} })
 
 const planCore = {
-  schema_version: 1,
+  schema_version: 2,
   issue: 513,
   mode: 'dry_run',
   write_count: 0,
