@@ -137,26 +137,22 @@ Production receipt:
 
 First withheld-recovery snapshot is frozen and merged through PR #510 at `87d9a9d140ece76c4bd94fa1058e763596cd6031`.
 
-Recovery snapshot:
-- artifact: `artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json`
-- cutoff: `2026-09-23T12:15:42.531Z`
-- hash: `af696f0a33ac36fe1a7dc7b6b6c01d23929658187f1a614e6a65f69233a17f35`
-- 107 already satisfied
-- 5 new mutation targets
-- 56 remaining withheld
+Recovery pass 1 is COMPLETE.
+- recovery hash: `af696f0a33ac36fe1a7dc7b6b6c01d23929658187f1a614e6a65f69233a17f35`
+- applied at `2026-09-23T14:06:16.053Z`
+- 5 newly applied / 107 prior rows already satisfied
+- 84/84 frozen posts verified
+- 5/5 reflections present
+- 3/3 September rows explicitly MTD
+- zero truth/identity/period/cross-client violations
+
+Total live verified reports from #501 rollout: 112.
+
+Remaining withheld: 56.
 - 47 `MISSING_CANONICAL_REPORT`
 - 9 `NO_IN_MONTH_POST_EVIDENCE`
 
-Five new targets:
-- All Around PVC — September
-- Bat Hill Royale — August
-- Bat Hill Royale — September
-- Vrystaat Kunstefees — August
-- Vrystaat Kunstefees — September
-
-CA has explicitly authorized Recovery 5 for hash `af696f0a33ac36fe1a7dc7b6b6c01d23929658187f1a614e6a65f69233a17f35`.
-
-Next action: run the frozen recovery artifact through its built-in preflight and publish only the five exact authorized rows if preflight passes. Verify client-visible truth and record receipt. Any additional recovered rows require a new frozen artifact/authorization.
+Fresh read-only discovery found no additional qualifying rows, so #501 is now a truthful withheld ledger rather than an active mutation lane. Agent 03 is released from report recovery until new evidence appears.
 
 ## 4. Production authorities already live
 
@@ -240,6 +236,27 @@ Never infer a Microsoft write merely because collection completed.
 Keep Content Autopilot off unless separately approved.
 
 Do not silently enable AI generation or OneDrive automation.
+
+## 4A. Gold strategy rollout — Issue #513
+
+Agent 03 now owns #513.
+
+Current strategy state:
+- 56 September strategy rows, all draft.
+- 56 October strategy rows, all draft.
+
+Phase 1:
+- build an exact-client research/grounding dossier for all 56 active clients using verified client intelligence, actual report/content history, business/site positioning, audience/brand constraints, Marketing Library methods and sourced category/local context;
+- clearly separate fact, constraint, research observation and recommendation;
+- no cross-client evidence and no generic filler.
+
+Phase 2:
+- as #504 package receipts become confirmed, upgrade the existing canonical September/October strategy rows for that exact client;
+- quantify only known package capacity;
+- preserve flexible/on-request package logic;
+- do not approve/publish until exact package receipt + dossier + gold-standard gate all pass.
+
+Do not touch provider mappings, package confirmation writes or report publication in this lane.
 
 ## 5. Important next milestones after current launch lanes
 
@@ -336,10 +353,10 @@ When CA opens a fresh chat and says continue CG Dynamics:
 - keep prompts tiny.
 
 The fresh chat should prioritize, in order:
-1. #505 TikTok CGPH recovery + provider campaign; standalone Instagram provider setup.
-2. #511 unknown-preserving package authority, then #504 package confirmation rollout.
-3. #501 recovery snapshot review/publication only when separately authorized.
-4. current launch acceptance gaps.
+1. #504 package confirmation rollout using the CA-reviewed full batch.
+2. #505 remaining active-client provider campaign + standalone Instagram provider gates.
+3. #513 exact-client research dossiers + Sep/Oct gold strategy rollout.
+4. #501 only when new truthful report evidence appears; 112 reports are already live and 56 are genuinely withheld.
 5. #493 LinkedIn and #361 CG Hours once the current client-launch milestone is stable.
 
 ## 9. Durable control-plane rule
