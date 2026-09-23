@@ -1,6 +1,6 @@
 # CG Dynamics Ops Handover
 
-## CURRENT OPERATIONS SNAPSHOT — 22 September 2026, 19:35 SAST
+## CURRENT OPERATIONS SNAPSHOT — 23 September 2026, 09:44 SAST
 
 This is the current orientation snapshot and supersedes older dated lane
 snapshots retained below as historical evidence. Refetch GitHub, Issue #381 and
@@ -8,24 +8,27 @@ the Control Centre before consequential action.
 
 ### GitHub and ownership truth
 
-- Current `main`: `3103435f70434c768d7287937b7badc28594fb77`, merged through
-  #472 D02 / PR #484.
+- Current `main`: `26fa18f8d4c6155a03fead0ce339f9bcc398c631`, merged through
+  #388 / PR #485 after #472 D02 / PR #484.
 - #472 is complete and closed. PR #484 is merged; the component-level Meta
   engagement truth code is accepted. Migration
   `20260922154243_meta_post_engagement_truth.sql` remains unapplied and the
   post-#472 Meta functions remain undeployed.
-- #388 is the only active Meta worker code lane. PR #485 is open, mergeable and
-  Vercel-green at `95ab4796fa63da16b98be85645dd4d7e3d672bad`. It makes the
-  verified `AbortError: The signal has been aborted` and narrow request-timeout
-  equivalents use the existing bounded retry/checkpoint path. It is not merged
-  or deployed.
-- #390 remains blocked until #388 is merged, deployed and production-accepted.
-  Do not graduate worker lanes before that gate.
+- #388 is code-complete and closed. PR #485 merged at
+  `26fa18f8d4c6155a03fead0ce339f9bcc398c631`; the verified
+  `AbortError: The signal has been aborted` and narrow request-timeout
+  equivalents now use the existing bounded retry/checkpoint path in GitHub.
+  Production `meta-sync-worker` is still the pre-#485 deployed package, so the
+  resumability fix is not production-live yet.
+- #390 remains blocked until the #388 worker change is separately deployed and
+  production-accepted. Do not graduate worker lanes before that gate.
 - #217's four named stale Hub rows were traced read-only on 22 September. They
   are legacy `teams_import` rows already archived on 7 September and absent
   from `planner_tasks_canonical`; authenticated Hub/Work checks at 375, 390 and
-  430px reproduced no overflow. No code PR was warranted. #217 remains open for
-  supervisor closure or any final real-device human sign-off.
+  430px reproduced no overflow. No code PR was warranted. #217 remains open
+  only for CA's explicit real production phone confirmation, because the
+  durable issue requires that human-device sign-off rather than responsive
+  browser emulation alone.
 - #437 / PR #438 is code-accepted and Vercel-green at
   `5d7ced5f59d48321853130ee5f90b70eb253e9b8`. Merge remains held only for the
   explicitly required authenticated desktop/mobile staff-session acceptance.
@@ -69,6 +72,11 @@ the Control Centre before consequential action.
 
 ### Merged but not production-activated
 
+- #388 / PR #485 is merged at
+  `26fa18f8d4c6155a03fead0ce339f9bcc398c631`, but production still runs the
+  pre-#485 `meta-sync-worker`. The AbortError/request-timeout resumability fix
+  therefore awaits a separately approved Edge Function deployment and bounded
+  production acceptance.
 - TikTok #238 / PR #483 is merged at
   `93b09a89a71e9371b8ba53d704edc486b993aa85`. Migration
   `20260922153348_extend_background_jobs_for_tiktok_freshness.sql` is unapplied,
@@ -85,13 +93,15 @@ the Control Centre before consequential action.
 
 ### Exact remaining launch gates
 
-1. Supervisor review/merge decision for #388 / PR #485, followed by separately
-   approved Meta worker deployment and bounded production acceptance.
+1. Separate CA approval to deploy the merged #388 Meta worker change, followed
+   by bounded production acceptance of AbortError/request-timeout resumability.
 2. Red Oak exact-Page access/re-consent and stable fleet evidence.
 3. Only after those gates, a separate decision on enabling Content Autopilot
    alone. Keep AI generation and OneDrive flags off unless separately approved.
 4. Authenticated desktop/mobile acceptance for #438.
-5. Separate CA approval for every unapplied migration/function/provider gate
+5. CA real production phone confirmation for #217 before closing its durable
+   launch-blocker issue.
+6. Separate CA approval for every unapplied migration/function/provider gate
    listed above. Do not infer activation from merged files.
 
 No production SQL/data mutation, provider permission/config change, deploy,
@@ -908,18 +918,16 @@ This section is an orientation snapshot only. Refetch GitHub + tracker before ac
 
 ### Active manual coding
 
-- #388 / PR #485 is the active Meta AbortError resumability lane. Same PR only;
-  no #390 concurrency work may overlap it.
 - #436 is this docs-only handover refresh lane. It owns only this file and must
   not change runtime, schema, provider or production state.
 - #217 has no active code writer because its exact rows are already archived
-  and current responsive acceptance passed. Supervisor may close or request a
-  final human phone sign-off from the durable issue evidence.
+  and current responsive acceptance passed. It remains open only for CA's real
+  production phone confirmation.
 
 ### Awaiting supervisor or acceptance
 
-- #388 / PR #485: supervisor review, merge decision and later protected deploy /
-  production acceptance.
+- #388 / PR #485: code is merged; protected Meta worker deployment and bounded
+  production acceptance remain.
 - #437 / PR #438: code accepted; authenticated desktop/mobile staff-session UI
   acceptance is the only stated merge gate.
 - #238: code accepted/merged; protected TikTok migration, function deployment,
