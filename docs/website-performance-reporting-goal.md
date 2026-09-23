@@ -1,6 +1,6 @@
 # Website Performance Reporting Goal
 
-Status: PR #356 is reconciled with current `main`. The exact-client Builder bridge, truthful source states, immutable monthly snapshot revisions, staff draft-save action and approved/published client projection are implemented. No live mapping, migration, Edge deployment or client publication was performed. Red Oak's active client ID was verified read-only on 2026-09-12 as `cdb11a82-339e-4b46-9b09-bde1a23efeaf`; the Builder Website ID remains unverified, so do not configure `WEBSITE_REPORTING_CLIENT_MAP` yet.
+Status: Website M1 is production-live for the bounded Red Oak pilot. The exact-client Builder bridge, truthful source states, immutable monthly snapshot revisions, staff draft-save action and published client projection are implemented. Migration `20260923160000_website_snapshot_period_contract` is applied. Red Oak client `cdb11a82-339e-4b46-9b09-bde1a23efeaf` is mapped to exact production Website 7; one September revision exists and its linked report is published. Do not create a second acceptance snapshot or republish merely to repeat proof.
 Primary zone: CG Dynamics -> Performance
 Upstream system: CG Website Builder / Website System
 
@@ -181,9 +181,20 @@ Do not build CG Dynamics charts first and then discover that the upstream data m
 
 The feature is done when CA/Amonique can open a client in CG Dynamics, choose a month and produce/share a website-performance report without manually opening Vercel/analytics dashboards or counting form submissions, and the report can truthfully explain traffic source and conversions to the extent the underlying evidence allows.
 
-## Red Oak pilot gate (2026-09-12)
+## Red Oak pilot acceptance (updated 2026-09-23)
 
-Vercel Web Analytics was enabled on the existing Red Oak project at the included Hobby tier. The protected PR #3 preview recorded 1 real test visitor and 2 page views (`/`, `/menu`); the preview aggregate API returned the same numbers. This proves site-to-Vercel page-view ingest, not Builder-to-Dynamics delivery. Hobby custom-event API returned HTTP 402 and the Vercel dashboard says custom events require Pro. No paid plan was selected. Builder PR #18 now supports a preview-only project mapping, but the exact Builder Website ID, server-side secrets, and Edge deployment remain unconfigured. Until an authenticated Builder record lookup and a supported CTA collection path exist, the Dynamics Performance panel must not claim live Red Oak conversions or an end-to-end pass.
+The exact production path is now proven through Website 7. Revision 1 covers
+`[2026-09-01,2026-10-01)`, remains truthfully `partial` from 18 September and
+contains the provider-backed aggregate traffic and one tracked CTA action
+available at capture time. The snapshot is linked to the inclusive September
+Dynamics report without rewriting report periods.
+
+Read-only structural isolation proof confirms that authenticated users cannot
+SELECT the raw snapshot table, the published-report projection filters by
+`my_client_id()` and published status, and the client-safe website projection
+removes the internal Dynamics client identity. The remaining optional proof is
+an authenticated UI check as the exact Red Oak client plus a second client;
+that check must not save another snapshot or republish the report.
 
 Canonical upstream roadmap:
 

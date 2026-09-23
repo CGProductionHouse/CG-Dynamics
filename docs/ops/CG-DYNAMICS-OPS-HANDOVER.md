@@ -2,7 +2,7 @@
 
 Status: CURRENT authority for a fresh supervisor chat.
 
-Updated: 23 September 2026 after the audited #516 package/service-scope receipt refresh, report publication/recovery, TikTok native-scheduler expansion, strategy dossier work, and website period-contract merge.
+Updated: 23 September 2026 after the #513 Neshora readiness checkpoint, #519 portal reconciliation, and read-only Website M1 production-state reconciliation.
 
 ## 1. Fresh-chat recovery order
 
@@ -44,6 +44,8 @@ Major completed launch-critical merges:
 - #514 exact-client strategy dossier foundation.
 - #515 provider eligibility from confirmed service scope.
 - #517 website period-contract correction.
+- #534 Neshora strategy readiness dry-run.
+- #535 57-client portal access reconciliation.
 
 ## 3. Launch scoreboard
 
@@ -53,7 +55,7 @@ Major completed launch-critical merges:
 - Current service-scope authority is production-live and verified at 47 recurring-social / 10 non-social-or-not-currently-social / 0 held.
 - V2 unknown-preserving package authority live.
 - Unknown values stay null; explicit zero is distinct from unknown.
-- 112 truthful July/August/September reports are published and verified.
+- 119 truthful reports are currently published across 40 active clients.
 - Remaining 56 report rows are genuine evidence gaps, not silent failures:
   - 47 `MISSING_CANONICAL_REPORT`
   - 9 `NO_IN_MONTH_POST_EVIDENCE`
@@ -61,18 +63,23 @@ Major completed launch-critical merges:
 - Meta reporting truth runtime live.
 - TikTok analytics/reconnect runtime live.
 - CG Production House TikTok exact account connected and fresh.
-- 56/56 exact-client strategy dossiers exist from merged PR #514.
+- 57/57 exact-client strategy dossiers exist; Neshora remains strategy-blocked
+  rather than receiving invented business intelligence.
 - Microsoft collection/reconciliation remains automated.
 - Hub/Work responsive acceptance already passed.
-- Red Oak website-performance read-only preview previously passed before the new period-contract migration gate.
+- Red Oak Website M1 period migration, one immutable snapshot and September
+  publication are production-live; structural exact-client/safe-projection proof passed read-only.
 
 ### CURRENT closure lanes
 
-1. #513 supervisor review of the regenerated v2 Sep/Oct gold-strategy dry-run; no apply yet.
-2. #505 eligible-client TikTok/Instagram rollout + native TikTok Business Center/scheduler setup.
-3. #518 website period-contract production migration + read-only acceptance.
-4. #519 current portal-access reconciliation.
-5. #217 optional final real-phone human signoff if CA still wants it.
+1. #513: Neshora needs reviewed exact-client intelligence and canonical monthly
+   draft creation; the frozen 46-client/92-row plan remains unapplied.
+2. #505: four TikTok client-help holds, 33 exact-identity gates and protected
+   standalone Instagram provider gates remain.
+3. Website M1: optional final authenticated Red Oak-client / other-client UI
+   isolation check; do not create another snapshot or republish.
+4. #519: protected nine-client access batch remains unapplied.
+5. #217: optional final real-phone human signoff if CA still wants it.
 
 Do not open overlapping redesign lanes.
 
@@ -383,11 +390,21 @@ Fix:
 - existing report dates are not rewritten.
 - wrong-period/published-row guards remain fail-closed.
 
-Protected production gate still pending:
-- apply ONLY `20260923160000_website_snapshot_period_contract.sql`;
-- then repeat authenticated Red Oak read-only preview;
-- do not save a snapshot;
-- do not publish a website report until preview passes again.
+Current production truth (read-only reconciliation after #518 closure):
+- migration `20260923160000_website_snapshot_period_contract` is applied once;
+- Red Oak Website 7 has one immutable revision-1 September snapshot;
+- snapshot identity is exact client `cdb11a82-339e-4b46-9b09-bde1a23efeaf`,
+  production host `www.redoakgroup.co.za`, period `[2026-09-01,2026-10-01)`;
+- source state remains truthfully partial with coverage from 18 Sep;
+- the linked September report is published and the other report periods were
+  not rewritten;
+- the safe projection strips the Dynamics client UUID, authenticated users have
+  no direct snapshot-table SELECT, and `client_published_reports()` keeps both
+  published-only and `my_client_id()` filters.
+
+Do not repeat the snapshot save or republish. The only remaining optional
+acceptance is a read-only authenticated UI check with the exact Red Oak client
+and a different client to prove the portal result end to end.
 
 ## 9. Portal coverage — #519
 
@@ -507,10 +524,11 @@ On a fresh CG Dynamics chat:
 4. act directly on safe work.
 
 Priority order:
-1. Agent 03 / #513: supervisor review of the regenerated v2 46 / 10 / 0 strategy dry-run.
+1. #513: retain the frozen reviewed 46 / 10 / 0 plan; source reviewed Neshora
+   intelligence and create its canonical drafts before a separate reviewed plan.
 2. #505: TikTok normal sweep is paused at 10 connected; four named clients require client help and the other 33 remain identity-gated. Standalone Instagram is prepared but still blocked on Meta App Review/Live mode/secure app secret before OAuth rollout.
-3. #518: production migration only after CA approval, then Red Oak read-only preview.
-4. #519: current portal-access reconciliation.
+3. Website M1: no repeat write; only optional authenticated cross-client UI proof remains.
+4. #519: review the exact nine-client protected access batch; no provisioning occurred.
 5. #217: optional real-phone signoff if CA still wants it.
 6. Then close current client launch and proceed to #493 LinkedIn + #361 CG Hours.
 
