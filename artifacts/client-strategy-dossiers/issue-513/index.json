@@ -3,10 +3,10 @@
   "issue": 513,
   "generated_from_snapshot_cutoff": "2026-09-23T12:15:42.531Z",
   "package_authority": "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
-  "active_client_count": 56,
-  "dossier_complete_count": 56,
+  "active_client_count": 57,
+  "dossier_complete_count": 57,
   "strategy_ready_count": 55,
-  "strategy_blocked_count": 1,
+  "strategy_blocked_count": 2,
   "clients": [
     {
       "name": "Agri-Secure",
@@ -625,6 +625,19 @@
       "evidence_hash": "32a5bf63bdd8392ab2421e36cea8b62c43c219cdae667a8a48d9efc700254984",
       "reports": 3,
       "posts": 37
+    },
+    {
+      "name": "Neshora Oxygen",
+      "id": "3c20fae1-8e91-41d5-98eb-1c331600e6e3",
+      "file": "neshora-oxygen.md",
+      "dossier_status": "complete",
+      "strategy_status": "blocked",
+      "blockers": [
+        "NO_EVIDENCE_BACKED_RECOMMENDATION"
+      ],
+      "evidence_hash": "58359d6b25209a38c5f05c92f7207e8e6585ce3e747fe70f81d1fa0ff718809d",
+      "reports": 0,
+      "posts": 0
     }
   ]
 }
