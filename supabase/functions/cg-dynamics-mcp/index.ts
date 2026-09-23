@@ -93,6 +93,13 @@ import {
   type ParsedProjectContext,
   type ProjectContextKind,
 } from './projectContext.ts'
+import {
+  durableCgHoursRecordId,
+  invokeCgHoursStaffLogger,
+  validateCgHoursStaffLoggerConfig,
+  CG_HOURS_BACKEND_AUTHORITY,
+  type CgHoursStaffLoggerResult,
+} from './cgHoursStaffLogger.ts'
 
 const STAFF_ROLES = new Set(['admin', 'manager', 'staff', 'team'])
 const MCP_PROTOCOL_VERSION = '2025-03-26'
@@ -2608,6 +2615,255 @@ const handleRecordClientUpdate: ToolHandler = async (staff, input) => {
   return shapeClientUpdateResult(data)
 }
 
+// ──────────────────────────────────────────────────────────────────────────────
+// CG Hours handlers — authenticated staff actions for time, kilometre/travel, corrections
+// ──────────────────────────────────────────────────────────────────────────────
+
+const CG_HOURS_NOT_CONFIGURED = {
+  ok: false as const,
+  error: 'CG_HOURS_NOT_CONFIGURED' as const,
+  message: 'CG Hours staff logging is not configured, so nothing was read or changed.',
+  contract: {
+    endpoint: 'POST /api/staff-logger/invoke',
+    capability_header: 'x-cg-staff-capability',
+    required_configuration: ['CG_HOURS_STAFF_LOGGER_URL', 'CG_HOURS_STAFF_LOGGER_SECRET'],
+    idempotency_strategy: 'Dynamics keeps the same idempotency_key across retries; CG Hours returns the original durable time_entries record.',
+    staff_isolation: 'A short-lived single-use capability is issued only from the exact authenticated staff Project context. CG Hours maps capability.sub to its own staff identity via staff_logger_identity_map.',
+    lifecycle: 'Draft-only. This caller cannot submit, approve, reopen, run payroll, or perform admin actions.',
+    backend: CG_HOURS_BACKEND_AUTHORITY,
+  },
+}
+
+function cgHoursStaffLoggerConfig() {
+  return validateCgHoursStaffLoggerConfig(
+    Deno.env.get('CG_HOURS_STAFF_LOGGER_URL'),
+    Deno.env.get('CG_HOURS_STAFF_LOGGER_SECRET'),
+  )
+}
+
+function cgHoursStaffSubject(staff: AuthenticatedStaff): string | null {
+  if (staff.contextKind !== 'staff') return null
+  return staff.effectiveStaffProfileId
+}
+
+function cgHoursReceipt(result: CgHoursStaffLoggerResult, idempotencyKey: string) {
+  const recordId = durableCgHoursRecordId(result)
+  if (!recordId) {
+    return {
+      ok: false as const,
+      error: 'CG_HOURS_INVALID_RECEIPT' as const,
+      message: 'CG Hours did not return a durable time entry id, so no success is claimed.',
+    }
+  }
+  return {
+    ok: true as const,
+    receipt: {
+      provider: 'cg-hours-staff-logger',
+      record_id: recordId,
+      idempotency_key: idempotencyKey,
+      replayed: result.ok && result.data?.replayed === true,
+    },
+  }
+}
+
+async function cgHoursInvokeForStaff(
+  staff: AuthenticatedStaff,
+  tool: Parameters<typeof invokeCgHoursStaffLogger>[2],
+  input: Record<string, unknown>,
+): Promise<CgHoursStaffLoggerResult> {
+  const staffProfileId = cgHoursStaffSubject(staff)
+  if (!staffProfileId) {
+    return {
+      ok: false as const,
+      error: 'CG_HOURS_REFUSED' as const,
+      message: 'CG Hours actions require the exact authenticated staff Project context.',
+    }
+  }
+  const config = cgHoursStaffLoggerConfig()
+  if (!config) return CG_HOURS_NOT_CONFIGURED
+  return invokeCgHoursStaffLogger(config, staffProfileId, tool, input)
+}
+
+async function handleLogOrdinaryHours(staff: AuthenticatedStaff, input: Record<string, unknown>) {
+  const { date, hours, task_description, notes, client_id, task_template_id, idempotency_key } = input as {
+    date: string
+    hours: number
+    task_description: string
+    notes?: string
+    client_id: string
+    task_template_id?: string
+    idempotency_key: string
+  }
+  const minutes = hours * 60
+  if (!Number.isInteger(minutes) || minutes < 1 || minutes > 1440) {
+    return { ok: false, error: 'INVALID_DURATION', message: 'Hours must resolve to a whole number of minutes between 1 minute and 24 hours.' }
+  }
+  const combinedNotes = notes ? `${task_description}\n${notes}` : task_description
+  if (combinedNotes.length > 500) {
+    return { ok: false, error: 'INVALID_NOTES', message: 'Task description and notes must be 500 characters or fewer in total.' }
+  }
+
+  const options = await cgHoursInvokeForStaff(staff, 'list_my_logging_options', {})
+  if (!options.ok) return options
+  const clients = Array.isArray(options.data?.clients) ? options.data.clients as Array<Record<string, unknown>> : []
+  if (!clients.some(client => client.client_id === client_id)) {
+    return { ok: false, error: 'CG_HOURS_CLIENT_NOT_AVAILABLE', message: 'That exact CG Hours client is not available for this staff logger, so nothing was logged.' }
+  }
+  if (task_template_id) {
+    const tasks = Array.isArray(options.data?.tasks) ? options.data.tasks as Array<Record<string, unknown>> : []
+    if (!tasks.some(task => task.task_template_id === task_template_id)) {
+      return { ok: false, error: 'CG_HOURS_TASK_NOT_AVAILABLE', message: 'That exact CG Hours task is not available for this staff logger, so nothing was logged.' }
+    }
+  }
+
+  const result = await cgHoursInvokeForStaff(staff, 'add_my_time_entry', {
+    date,
+    client_id,
+    ...(task_template_id ? { task_template_id } : {}),
+    minutes,
+    notes: combinedNotes,
+    idempotency_key,
+  })
+  if (!result.ok) return result
+  const durable = cgHoursReceipt(result, idempotency_key)
+  if (!durable.ok) return durable
+  return {
+    ok: true,
+    logged: true,
+    draft: true,
+    message: `${result.message} Saved as a draft in CG Hours; review and submit the week manually in CG Hours.`,
+    record: result.data,
+    receipt: durable.receipt,
+  }
+}
+
+async function handleLogKilometreEntry(staff: AuthenticatedStaff, input: Record<string, unknown>) {
+  const { entry_id, distance_km, origin, destination, notes, idempotency_key } = input as {
+    entry_id: string
+    distance_km: number
+    origin?: string
+    destination?: string
+    notes?: string
+    idempotency_key: string
+  }
+  const result = await cgHoursInvokeForStaff(staff, 'add_my_travel_km', {
+    entry_id,
+    km: distance_km,
+    ...(origin ? { origin } : {}),
+    ...(destination ? { destination } : {}),
+    ...(notes ? { notes } : {}),
+    idempotency_key,
+  })
+  if (!result.ok) return result
+  const durable = cgHoursReceipt(result, idempotency_key)
+  if (!durable.ok) return durable
+  return {
+    ok: true,
+    logged: true,
+    draft: true,
+    message: `${result.message} Saved on the draft time entry in CG Hours; review and submit the week manually in CG Hours.`,
+    record: result.data,
+    receipt: durable.receipt,
+  }
+}
+
+async function handleReadMyRecentEntries(staff: AuthenticatedStaff, input: Record<string, unknown>) {
+  const { from_date, to_date, include_vehicle } = input as {
+    from_date: string
+    to_date: string
+    include_vehicle?: boolean
+  }
+  if (from_date !== to_date) {
+    return {
+      ok: false,
+      error: 'CG_HOURS_SINGLE_DAY_REQUIRED',
+      message: 'The canonical CG Hours staff logger reads one day at a time. Use the same from_date and to_date.',
+    }
+  }
+
+  const hours = await cgHoursInvokeForStaff(staff, 'get_my_hours_today', { date: from_date })
+  if (!hours.ok) return hours
+  const travel = include_vehicle
+    ? await cgHoursInvokeForStaff(staff, 'get_my_travel_today', { date: from_date })
+    : null
+  if (travel) {
+    if (!travel.ok) return travel
+  }
+  const options = await cgHoursInvokeForStaff(staff, 'list_my_logging_options', {})
+  if (!options.ok) return options
+
+  return {
+    ok: true,
+    date: from_date,
+    time_entries: Array.isArray(hours.data?.entries) ? hours.data.entries : [],
+    vehicle_entries: travel && Array.isArray(travel.data?.entries) ? travel.data.entries : [],
+    logging_options: options.data ?? { clients: [], tasks: [] },
+    summary: {
+      total_minutes: hours.data?.total_minutes ?? null,
+      total_km: travel?.data?.total_km ?? null,
+      editable: hours.data?.editable ?? null,
+    },
+  }
+}
+
+async function handleCorrectMyEntry(staff: AuthenticatedStaff, input: Record<string, unknown>) {
+  const { entry_id, entry_type, correction, idempotency_key } = input as {
+    entry_id: string
+    entry_type: 'time' | 'mileage'
+    correction: Record<string, unknown>
+    idempotency_key: string
+  }
+  if (entry_type !== 'time' && entry_type !== 'mileage') {
+    return { ok: false, error: 'INVALID_ENTRY_TYPE', message: 'Entry type must be time or mileage.' }
+  }
+  if (!correction || typeof correction !== 'object' || Array.isArray(correction)) {
+    return { ok: false, error: 'INVALID_CORRECTION', message: 'Provide one closed correction object.' }
+  }
+  let tool: 'edit_my_time_entry' | 'edit_my_travel_km'
+  let patch: Record<string, unknown>
+  if (entry_type === 'time') {
+    if (correction.distance_km !== undefined || correction.origin !== undefined || correction.destination !== undefined) {
+      return { ok: false, error: 'INVALID_CORRECTION', message: 'A time correction may change only hours or notes.' }
+    }
+    tool = 'edit_my_time_entry'
+    patch = { entry_id, idempotency_key }
+    if (correction.hours !== undefined) {
+      const minutes = Number(correction.hours) * 60
+      if (!Number.isInteger(minutes) || minutes < 1 || minutes > 1440) {
+        return { ok: false, error: 'INVALID_DURATION', message: 'Corrected hours must resolve to a whole number of minutes between 1 minute and 24 hours.' }
+      }
+      patch.minutes = minutes
+    }
+    if (typeof correction.notes === 'string') patch.notes = correction.notes
+  } else {
+    if (correction.hours !== undefined) {
+      return { ok: false, error: 'INVALID_CORRECTION', message: 'A mileage correction may change only distance, origin, destination or notes.' }
+    }
+    tool = 'edit_my_travel_km'
+    patch = { entry_id, idempotency_key }
+    if (correction.distance_km !== undefined) patch.km = correction.distance_km
+    if (typeof correction.origin === 'string') patch.origin = correction.origin
+    if (typeof correction.destination === 'string') patch.destination = correction.destination
+    if (typeof correction.notes === 'string') patch.notes = correction.notes
+  }
+  if (Object.keys(patch).length === 2) {
+    return { ok: false, error: 'EMPTY_CORRECTION', message: 'There is nothing to change.' }
+  }
+
+  const result = await cgHoursInvokeForStaff(staff, tool, patch)
+  if (!result.ok) return result
+  const durable = cgHoursReceipt(result, idempotency_key)
+  if (!durable.ok) return durable
+  return {
+    ok: true,
+    corrected: true,
+    draft: true,
+    message: `${result.message} The entry remains a draft in CG Hours; review and submit the week manually there.`,
+    record: result.data,
+    receipt: durable.receipt,
+  }
+}
+
 // #435: Stored Google Ads V2 facts only. The communal service-role connection is
 // restricted here to an explicit manager/admin Project and exact client UUID.
 const handleGetGoogleAdsAudit: ToolHandler = async (staff, input) => {
@@ -2668,7 +2924,6 @@ const handleGetGoogleAdsAudit: ToolHandler = async (staff, input) => {
     metrics, syncRuns: (syncResult.data ?? []) as AuditSync[], truncated,
   })
 }
-
 
 const MISSING_RELATION_CODES = new Set(['42P01', 'PGRST205'])
 
@@ -3073,11 +3328,41 @@ const handleGenerateContentGuidelineDrafts: ToolHandler = async (staff, input) =
 
 // ── Tool Router ─────────────────────────────────────────────────────────────
 
-const WRITE_TOOLS = new Set(['create_task', 'update_task', 'update_lead', 'add_lead_research', 'update_my_preferences', 'create_recurring_task', 'compose_mail_draft', 'log_lead_email_activity', 'close_content_run', 'update_closeout_upload_status', 'link_content_run_deliverables', 'upsert_calendar_event', ...CLIENT_WORKSPACE_ACTIONS,
+const WRITE_TOOLS = new Set([
+  'create_task',
+  'update_task',
+  'update_lead',
+  'add_lead_research',
+  'update_my_preferences',
+  'create_recurring_task',
+  'compose_mail_draft',
+  'log_lead_email_activity',
+  'close_content_run',
+  'update_closeout_upload_status',
+  'link_content_run_deliverables',
+  'upsert_calendar_event',
+  // #361 CG Hours draft staff-logger writes.
+  'log_ordinary_hours',
+  'log_kilometre_entry',
+  'correct_my_entry',
+  ...CLIENT_WORKSPACE_ACTIONS,
   // #450 content preparation writes. Reads in that set stay out of this list.
-  'ensure_content_guideline', 'add_content_guideline_video', 'update_content_guideline_video',
-  'reorder_content_guideline_videos', 'link_content_guideline_video_deliverable',
-  'generate_content_guideline_drafts'])
+  'ensure_content_guideline',
+  'add_content_guideline_video',
+  'update_content_guideline_video',
+  'reorder_content_guideline_videos',
+  'link_content_guideline_video_deliverable',
+  'generate_content_guideline_drafts',
+])
+
+// These backends own the durable idempotency receipt. An identical MCP retry must reach them so
+// they can return the original record id; the generic Dynamics log stores status/audit only.
+const CANONICAL_RECEIPT_REPLAY_TOOLS = new Set([
+  ...CLIENT_WORKSPACE_ACTIONS,
+  'log_ordinary_hours',
+  'log_kilometre_entry',
+  'correct_my_entry',
+])
 
 const toolHandlers: Record<string, ToolHandler> = {
   get_my_day: handleGetMyDay,
@@ -3126,6 +3411,10 @@ const toolHandlers: Record<string, ToolHandler> = {
   record_client_request: handleRecordClientRequest,
   create_client_followup_task: handleCreateClientFollowupTask,
   record_client_update: handleRecordClientUpdate,
+  log_ordinary_hours: handleLogOrdinaryHours,
+  log_kilometre_entry: handleLogKilometreEntry,
+  read_my_recent_entries: handleReadMyRecentEntries,
+  correct_my_entry: handleCorrectMyEntry,
 }
 
 // ── MCP Server ──────────────────────────────────────────────────────────────
@@ -3226,7 +3515,7 @@ async function handleToolsCall(
     const existing = await checkIdempotency(staff.supabase, staff.profileId, toolName, canonicalIdempotencyKey, inputHash)
     if (existing.duplicate) {
       const conflict = (existing.result as { status?: string } | undefined)?.status === 'conflict'
-      if (CLIENT_WORKSPACE_ACTIONS.includes(toolName) && !conflict) {
+      if (CANONICAL_RECEIPT_REPLAY_TOOLS.has(toolName) && !conflict) {
         replayThroughCanonicalKey = true
       } else {
         return jsonRpcResponse(id, { content: [{ type: 'text', text: JSON.stringify({ ...(existing.result as object), _context: audit }) }], isError: CLIENT_WORKSPACE_ACTIONS.includes(toolName) && conflict })
