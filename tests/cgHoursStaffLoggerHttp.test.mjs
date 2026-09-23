@@ -107,28 +107,30 @@ test('backend refusal and missing durable identity never become claimed success'
   assert.equal(staffLogger.durableCgHoursRecordId(missingReceipt), null)
 })
 
-test('backend gap handoff names the missing CG Hours main authority and unconfigured calls fail closed without fetch', async () => {
-  const gap = staffLogger.CG_HOURS_BACKEND_GAP
-  assert.equal(gap.status, 'BACKEND_GAP')
-  assert.match(gap.missing_authority, /POST \/api\/staff-logger\/invoke/)
-  assert.match(gap.missing_authority, /x-cg-staff-capability/)
-  assert.equal(gap.authority_source, 'CGProductionHouse/CG-Hours PR #3')
-  assert.match(gap.authority_head, /^[0-9a-f]{40}$/)
-  assert.match(gap.cg_hours_main_checked, /^[0-9a-f]{40}$/)
-  assert.match(gap.required_to_close, /CG_HOURS_STAFF_LOGGER_URL/)
+test('backend authority names the merged CG Hours main endpoint and unconfigured calls fail closed without fetch', async () => {
+  const authority = staffLogger.CG_HOURS_BACKEND_AUTHORITY
+  assert.equal(authority.status, 'CONFIG_REQUIRED')
+  assert.equal(authority.repository, 'CGProductionHouse/CG-Hours')
+  assert.equal(authority.main_sha, 'b301e13967862e348da96b1483303739b66f273d')
+  assert.equal(authority.endpoint, 'https://cg-hours.vercel.app/api/staff-logger/invoke')
+  assert.equal(authority.capability_header, 'x-cg-staff-capability')
+  assert.ok(authority.required_configuration.includes('CG_HOURS_STAFF_LOGGER_URL'))
+  assert.ok(authority.required_configuration.includes('CG_HOURS_STAFF_LOGGER_SECRET'))
+  assert.doesNotMatch(JSON.stringify(authority), /BACKEND_GAP/)
 
   let fetched = 0
   const result = await staffLogger.invokeCgHoursStaffLogger(null, STAFF_ID, 'add_my_time_entry', { idempotency_key: 'k' }, {
-    fetchImpl: async () => { fetched += 1; throw new Error('must never fetch without backend authority') },
+    fetchImpl: async () => { fetched += 1; throw new Error('must never fetch without runtime configuration') },
   })
   assert.equal(fetched, 0)
   assert.equal(result.ok, false)
   assert.equal(result.error, 'CG_HOURS_NOT_CONFIGURED')
 
-  assert.match(INDEX, /backend_gap: CG_HOURS_BACKEND_GAP/)
+  assert.match(INDEX, /backend: CG_HOURS_BACKEND_AUTHORITY/)
+  assert.doesNotMatch(INDEX, /BACKEND_GAP/)
 })
 
-test('four Dynamics tools match the closed PR #3 HTTP shapes and expose no reimbursement semantics', () => {
+test('four Dynamics tools match the closed staff-logger HTTP shapes and expose no reimbursement semantics', () => {
   const byName = name => catalog.CG_DYNAMICS_MCP_TOOLS.find(tool => tool.name === name)
   const ordinary = byName('log_ordinary_hours')
   assert.deepEqual(ordinary.inputSchema.required, ['date', 'hours', 'task_description', 'client_id', 'idempotency_key', 'context'])
