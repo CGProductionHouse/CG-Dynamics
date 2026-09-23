@@ -1,0 +1,826 @@
+{
+  "schema_version": 1,
+  "issue": 519,
+  "captured_at": "2026-09-23T19:48:00Z",
+  "database_project_id": "ehtjfntukiwbgptqgbzy",
+  "mode": "read_only_reconciliation",
+  "write_count": 0,
+  "credential_fields_included": false,
+  "decision_rule": {
+    "preserve": "Preserve every enabled exact-client mapping and active profile, irrespective of current social-service scope.",
+    "provision_link_existing_profile": "Use the existing approved #399 flow to link the exact active profile; never create a duplicate user.",
+    "provision_new_under_approved_flow": "Published client-facing reports establish portal content need; provision only through the existing approved #399 flow after the protected production gate.",
+    "no_client_portal_needed": "No existing access and no published client-facing report; social eligibility alone does not establish portal need."
+  },
+  "counts": {
+    "active_clients": 57,
+    "eligible": 47,
+    "excluded": 10,
+    "preserve": 37,
+    "provision_link_existing_profile": 2,
+    "provision_new_under_approved_flow": 7,
+    "no_client_portal_needed": 11,
+    "published_reports": 119
+  },
+  "rows": [
+    {
+      "client_id": "893992a5-23cd-4ee6-b5d9-ccf7b17fe071",
+      "client_name": "Agri-Secure",
+      "service_scope": "excluded",
+      "portal": {
+        "mapping_count": 0,
+        "enabled_mapping_count": 0,
+        "active_client_profile_count": 0,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 0,
+      "action": "no_client_portal_needed",
+      "reason": "NO_CLIENT_FACING_PUBLISHED_REPORT_AND_NO_EXISTING_ACCESS"
+    },
+    {
+      "client_id": "fd16ebae-a50b-4920-afe0-94c2631f8f06",
+      "client_name": "All Around PVC",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 0,
+        "enabled_mapping_count": 0,
+        "active_client_profile_count": 0,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 1,
+      "action": "provision_new_under_approved_flow",
+      "reason": "PUBLISHED_CLIENT_FACING_REPORT_EXISTS_WITHOUT_PORTAL_ACCESS"
+    },
+    {
+      "client_id": "3b85973f-bcad-49eb-b8f1-c27f7c7f1aba",
+      "client_name": "AV Event Life",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 3,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "32bd9db3-5339-4404-825b-5a615cadec6a",
+      "client_name": "Bat Hill Royale",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 0,
+        "enabled_mapping_count": 0,
+        "active_client_profile_count": 0,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 2,
+      "action": "provision_new_under_approved_flow",
+      "reason": "PUBLISHED_CLIENT_FACING_REPORT_EXISTS_WITHOUT_PORTAL_ACCESS"
+    },
+    {
+      "client_id": "b28af30a-3d44-490a-8290-1e56dac7b127",
+      "client_name": "Bloem Action Sports",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 0,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "89e0ad6d-e08c-4a75-8b8e-abea71af581c",
+      "client_name": "Bloem Marble & Granite",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 3,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "2d16262d-8450-458d-ae7e-084ef9ff662d",
+      "client_name": "Bloem Vascular",
+      "service_scope": "excluded",
+      "portal": {
+        "mapping_count": 0,
+        "enabled_mapping_count": 0,
+        "active_client_profile_count": 0,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 0,
+      "action": "no_client_portal_needed",
+      "reason": "NO_CLIENT_FACING_PUBLISHED_REPORT_AND_NO_EXISTING_ACCESS"
+    },
+    {
+      "client_id": "5dfdf4bd-9d94-4cc6-9dee-0e480a2234cb",
+      "client_name": "Bohemia Quick Stop",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 3,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "8e448cf9-1534-4ba1-89a4-93e4c8b83d2f",
+      "client_name": "Bouwer & Coetzee Attorneys",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 3,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "6b67a2df-e2ab-418b-bcee-03aef5963d37",
+      "client_name": "Braize",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 0,
+        "enabled_mapping_count": 0,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 4,
+      "action": "provision_link_existing_profile",
+      "reason": "PUBLISHED_CLIENT_FACING_REPORT_EXISTS_AND_EXACT_ACTIVE_PROFILE_MUST_BE_PRESERVED"
+    },
+    {
+      "client_id": "afb62c53-d6d3-4ef8-9393-def88ed899d8",
+      "client_name": "C&L Innovations",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 3,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa",
+      "client_name": "Cape Lumber",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 5,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "079df21e-783a-4648-b3fa-0acae6e68867",
+      "client_name": "Case Bloemfontein",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 0,
+        "enabled_mapping_count": 0,
+        "active_client_profile_count": 0,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 3,
+      "action": "provision_new_under_approved_flow",
+      "reason": "PUBLISHED_CLIENT_FACING_REPORT_EXISTS_WITHOUT_PORTAL_ACCESS"
+    },
+    {
+      "client_id": "6b313cac-283e-48c4-9df6-ba43af2f7353",
+      "client_name": "Central Canvas",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 3,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "c27d2185-08e4-4c49-be48-2572564ceecf",
+      "client_name": "CG Production House",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 0,
+        "enabled_mapping_count": 0,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 5,
+      "action": "provision_link_existing_profile",
+      "reason": "PUBLISHED_CLIENT_FACING_REPORT_EXISTS_AND_EXACT_ACTIVE_PROFILE_MUST_BE_PRESERVED"
+    },
+    {
+      "client_id": "3404f726-a693-4b2d-8c13-c9d3dfd17bbc",
+      "client_name": "Daisy & Co",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 3,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "06b20bb1-ed4a-4aa1-9f48-8c6cb0531aba",
+      "client_name": "Delta Gas",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 3,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "2aed8a31-bd53-4ad1-a3dc-432865adfb3d",
+      "client_name": "Dulux Paint & Paper Bloemfontein",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 3,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "61acf81b-1011-404e-9fae-2e209be65fca",
+      "client_name": "Econofoods",
+      "service_scope": "excluded",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 0,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "ec643c75-51f5-4839-829f-3f5b7f48829a",
+      "client_name": "Ehrlich Park Butchery",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 3,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "d53d8e62-9e6a-4bb9-be3f-554f40942d45",
+      "client_name": "Emmanuel Funerals",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 3,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "217a547c-7b22-45cc-bf88-9d45a8e93dfe",
+      "client_name": "Emoya Estate Driving Range",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 0,
+        "enabled_mapping_count": 0,
+        "active_client_profile_count": 0,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 0,
+      "action": "no_client_portal_needed",
+      "reason": "NO_CLIENT_FACING_PUBLISHED_REPORT_AND_NO_EXISTING_ACCESS"
+    },
+    {
+      "client_id": "c8d34a97-8400-4f52-8b0d-843491fe3d3b",
+      "client_name": "First Technology Central",
+      "service_scope": "excluded",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 3,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "4424ed69-7270-4d30-a1ea-0b77d76912df",
+      "client_name": "Forklift Trucks",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 0,
+        "enabled_mapping_count": 0,
+        "active_client_profile_count": 0,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 0,
+      "action": "no_client_portal_needed",
+      "reason": "NO_CLIENT_FACING_PUBLISHED_REPORT_AND_NO_EXISTING_ACCESS"
+    },
+    {
+      "client_id": "b6052710-417d-4b3b-8348-0f126bfea671",
+      "client_name": "Germoparts",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 3,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "1007e58b-3fea-4515-88b7-ddaa85763de6",
+      "client_name": "Hino Trucks",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 0,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "572555e0-d4d0-404a-8d67-beeeeed6a1f2",
+      "client_name": "HMHI",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 0,
+        "enabled_mapping_count": 0,
+        "active_client_profile_count": 0,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 3,
+      "action": "provision_new_under_approved_flow",
+      "reason": "PUBLISHED_CLIENT_FACING_REPORT_EXISTS_WITHOUT_PORTAL_ACCESS"
+    },
+    {
+      "client_id": "816c7f59-d56c-46a3-ba15-f76971d83769",
+      "client_name": "Human Auto",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 0,
+        "enabled_mapping_count": 0,
+        "active_client_profile_count": 0,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 0,
+      "action": "no_client_portal_needed",
+      "reason": "NO_CLIENT_FACING_PUBLISHED_REPORT_AND_NO_EXISTING_ACCESS"
+    },
+    {
+      "client_id": "2e643855-e2ad-481f-a6c6-3d934b9f4a50",
+      "client_name": "Ipopeng Office Supplies",
+      "service_scope": "excluded",
+      "portal": {
+        "mapping_count": 0,
+        "enabled_mapping_count": 0,
+        "active_client_profile_count": 0,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 0,
+      "action": "no_client_portal_needed",
+      "reason": "NO_CLIENT_FACING_PUBLISHED_REPORT_AND_NO_EXISTING_ACCESS"
+    },
+    {
+      "client_id": "a5eab798-3e00-44cc-947e-463386fdac39",
+      "client_name": "Jenkor",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 0,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "5e4e3335-a89c-4629-9efc-b6a194bec80c",
+      "client_name": "Kundedienste",
+      "service_scope": "excluded",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 0,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "2a5ea019-64f5-4f8e-8a61-61a28940aa6e",
+      "client_name": "Local Deli",
+      "service_scope": "excluded",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 1,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "21300630-6755-4591-9a49-e22abbaf7e3d",
+      "client_name": "Loraclox",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 3,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "7b47afb0-fa55-4916-85f6-09c57e5905b9",
+      "client_name": "Madison Wear",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 3,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "e276f019-a580-44c5-a7ab-e43840c33a64",
+      "client_name": "Mimosa Mall",
+      "service_scope": "excluded",
+      "portal": {
+        "mapping_count": 0,
+        "enabled_mapping_count": 0,
+        "active_client_profile_count": 0,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 0,
+      "action": "no_client_portal_needed",
+      "reason": "NO_CLIENT_FACING_PUBLISHED_REPORT_AND_NO_EXISTING_ACCESS"
+    },
+    {
+      "client_id": "94fe2568-3cf1-47dc-801e-d8d5396a0965",
+      "client_name": "NCNA",
+      "service_scope": "excluded",
+      "portal": {
+        "mapping_count": 0,
+        "enabled_mapping_count": 0,
+        "active_client_profile_count": 0,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 0,
+      "action": "no_client_portal_needed",
+      "reason": "NO_CLIENT_FACING_PUBLISHED_REPORT_AND_NO_EXISTING_ACCESS"
+    },
+    {
+      "client_id": "4236a60a-990f-484f-8d19-13d2f92fbe3b",
+      "client_name": "Novus Steel",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 3,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b",
+      "client_name": "Peyper Bonds",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 3,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
+      "client_name": "Piek Group",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 3,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "29a28efd-c998-45e2-a57c-4a751e779e66",
+      "client_name": "PSG Bloemfontein",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 3,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "4f6106de-c437-404e-8cef-fbe848de0665",
+      "client_name": "RC-Polypipe",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 3,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "cdb11a82-339e-4b46-9b09-bde1a23efeaf",
+      "client_name": "Red Oak",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 2,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "ac4c5e0c-c5d3-4512-8472-fe59192abeca",
+      "client_name": "Rusoord Farmstay",
+      "service_scope": "excluded",
+      "portal": {
+        "mapping_count": 0,
+        "enabled_mapping_count": 0,
+        "active_client_profile_count": 0,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 0,
+      "action": "no_client_portal_needed",
+      "reason": "NO_CLIENT_FACING_PUBLISHED_REPORT_AND_NO_EXISTING_ACCESS"
+    },
+    {
+      "client_id": "917d6f7c-1c2a-4c20-82f0-daa41b9062f5",
+      "client_name": "SecuriForce",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 4,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+      "client_name": "Supa Quick BFN",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 3,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "e2870110-930c-4e63-b2fe-c858030f7258",
+      "client_name": "Supa Quick Centurion",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 3,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "a36ba938-e9dc-4ecf-bb67-4853608b1c01",
+      "client_name": "TBS Brokers",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 3,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+      "client_name": "The Staffordshire",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 0,
+        "enabled_mapping_count": 0,
+        "active_client_profile_count": 0,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 3,
+      "action": "provision_new_under_approved_flow",
+      "reason": "PUBLISHED_CLIENT_FACING_REPORT_EXISTS_WITHOUT_PORTAL_ACCESS"
+    },
+    {
+      "client_id": "204f4f22-14c7-42ed-a956-da57af102706",
+      "client_name": "Tobich Optics",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 3,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "e2ad6d57-5b06-46e1-b75b-b67f017d57f1",
+      "client_name": "Toyota Bloemfontein",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 0,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "1f0406bb-d643-4b83-bc3e-b1ebe87eeb89",
+      "client_name": "Vrystaat Kunstefees",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 0,
+        "enabled_mapping_count": 0,
+        "active_client_profile_count": 0,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 2,
+      "action": "provision_new_under_approved_flow",
+      "reason": "PUBLISHED_CLIENT_FACING_REPORT_EXISTS_WITHOUT_PORTAL_ACCESS"
+    },
+    {
+      "client_id": "e1cb958e-3f68-4a77-b5ea-b471ea62bdef",
+      "client_name": "Watch Addict",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 3,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "2b953772-e791-4dff-a278-d4dd3521f02e",
+      "client_name": "We Ar Fuels",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 3,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
+      "client_name": "Wiseman Group",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 1,
+        "enabled_mapping_count": 1,
+        "active_client_profile_count": 1,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 3,
+      "action": "preserve",
+      "reason": "EXISTING_ENABLED_EXACT_CLIENT_MAPPING_AND_ACTIVE_PROFILE"
+    },
+    {
+      "client_id": "504113ee-fba9-4993-807e-a86066615212",
+      "client_name": "WiseRide",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 0,
+        "enabled_mapping_count": 0,
+        "active_client_profile_count": 0,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 0,
+      "action": "no_client_portal_needed",
+      "reason": "NO_CLIENT_FACING_PUBLISHED_REPORT_AND_NO_EXISTING_ACCESS"
+    },
+    {
+      "client_id": "0c01d90f-ba5e-4251-a597-bf3c83f990fa",
+      "client_name": "Zooz Lifestyle WFF",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 0,
+        "enabled_mapping_count": 0,
+        "active_client_profile_count": 0,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 3,
+      "action": "provision_new_under_approved_flow",
+      "reason": "PUBLISHED_CLIENT_FACING_REPORT_EXISTS_WITHOUT_PORTAL_ACCESS"
+    },
+    {
+      "client_id": "3c20fae1-8e91-41d5-98eb-1c331600e6e3",
+      "client_name": "Neshora Oxygen",
+      "service_scope": "eligible",
+      "portal": {
+        "mapping_count": 0,
+        "enabled_mapping_count": 0,
+        "active_client_profile_count": 0,
+        "inactive_client_profile_count": 0
+      },
+      "published_report_count": 0,
+      "action": "no_client_portal_needed",
+      "reason": "NO_CLIENT_FACING_PUBLISHED_REPORT_AND_NO_EXISTING_ACCESS"
+    }
+  ],
+  "reconciliation_hash": "14070a90e8de82cb3c0877824617924820e41f447e63cb20573dcbd48a82818e"
+}
