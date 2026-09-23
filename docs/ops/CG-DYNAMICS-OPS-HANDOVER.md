@@ -92,9 +92,16 @@ Canonical package authority:
 
 Final current recurring-service partition across the 56 active clients:
 
+Historical 56-client package authority completed under #516:
 - **46 recurring-social eligible**
 - **10 non-social / not-currently-social**
 - **0 held**
+
+Current live fleet after adding Neshora Oxygen on 23 Sep 2026:
+- **57 active clients**
+- **46 recurring-social eligible**
+- **10 non-social / not-currently-social**
+- **1 unresolved / held — Neshora Oxygen**
 
 Explicit non-social / not-currently-social clients include:
 - Econofoods — supplied-video service only, no social management.
@@ -135,8 +142,10 @@ Exact refreshed clients:
 - Vrystaat Kunstefees;
 - Zooz Lifestyle WFF.
 
-Agent 01 has no remaining #516 production action. Provider rollout and strategy
-regeneration may now consume the canonical 46 / 10 / 0 partition.
+The original #516 eight-client resolution is complete, but #516 is reopened only
+because Neshora Oxygen is a newly active client. Until its real package/service
+scope is confirmed, provider rollout must use the current 46 / 10 / 1 partition
+and hold Neshora from TikTok/Instagram OAuth and approval-capable social strategy.
 
 ## 5. Reports / client visibility
 
@@ -221,7 +230,9 @@ Kundedienste must not receive a fabricated recurring-social strategy.
 
 Only **recurring-social eligible** clients may enter provider rollout.
 
-Do not connect the 10 non-social / not-currently-social clients.
+Current live provider authority is **46 eligible / 10 excluded / 1 unresolved**.
+Do not connect the 10 non-social / not-currently-social clients or unresolved
+Neshora Oxygen until #516 confirms its actual recurring-service scope.
 
 ### TikTok
 
