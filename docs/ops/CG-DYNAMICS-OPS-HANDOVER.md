@@ -1,12 +1,33 @@
 # CG Dynamics Ops Handover
 
-## CURRENT OPERATIONS SNAPSHOT — 23 September 2026, 09:44 SAST
+## CURRENT OPERATIONS SNAPSHOT — 23 September 2026, 13:24 SAST
 
 This is the current orientation snapshot and supersedes older dated lane
 snapshots retained below as historical evidence. Refetch GitHub, Issue #381 and
 the Control Centre before consequential action.
 
 ### GitHub and ownership truth
+
+- Current `main` is `435bc0b295d09776d26a188cb22554cf0d3a340f` after
+  #500 / PR #502 merged. The three current manual reservations remain Agent 01
+  on #504 package confirmation acceptance, Agent 02 on #499 / PR #503 then the
+  existing TikTok PR #498, and Agent 03 on #501 report publication/recovery.
+- #501 has stopped both attempted moving-live-hash publication gates with zero
+  writes because Meta evidence timestamps legitimately refreshed between review
+  and authorization. The lane now uses an immutable reviewed-plan snapshot:
+  `artifacts/report-truth/issue-501-reviewed-plan-snapshot.json`, cutoff
+  `2026-09-23T11:24:00.897Z`, hash
+  `d7448dcd7306deb752191aec9676da28ce228c731dde5c5626cd8a8813c79abe`.
+  It freezes 107 evidence-backed publication targets and 61 withheld rows. No
+  report is authorized for publication until CA approves this exact frozen
+  snapshot hash after PR review.
+- #491 / PR #496 is merged and its migration plus three Instagram connection
+  functions are production-live fail-closed. #499 / PR #503 is the separately
+  owned reviewed standalone-token worker-selection continuation; do not overlap
+  it from #501.
+- #500 / PR #502 is merged. Business completion continues in #504 through
+  authenticated matrix acceptance and individual exact-package confirmation;
+  zero bulk confirmation or blank-to-zero inference remains allowed.
 
 - Issue #500 is the active follow-up to production-live #494. CA MANUAL AGENT
   01 owns the isolated active-client evidence-matrix and next-unconfirmed review
