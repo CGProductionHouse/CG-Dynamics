@@ -1,6 +1,6 @@
 # CG Dynamics Ops Handover
 
-## CURRENT OPERATIONS SNAPSHOT — 23 September 2026, 13:24 SAST
+## CURRENT OPERATIONS SNAPSHOT — 23 September 2026, 14:16 SAST
 
 This is the current orientation snapshot and supersedes older dated lane
 snapshots retained below as historical evidence. Refetch GitHub, Issue #381 and
@@ -8,19 +8,23 @@ the Control Centre before consequential action.
 
 ### GitHub and ownership truth
 
-- Current `main` is `435bc0b295d09776d26a188cb22554cf0d3a340f` after
-  #500 / PR #502 merged. The three current manual reservations remain Agent 01
+- Current `main` is `66f3b1ea45d5ede618f666a46bf4c3ac2019e4cc` after
+  #507 / PR #508 merged. The three current manual reservations remain Agent 01
   on #504 package confirmation acceptance, Agent 02 on #499 / PR #503 then the
   existing TikTok PR #498, and Agent 03 on #501 report publication/recovery.
-- #501 has stopped both attempted moving-live-hash publication gates with zero
-  writes because Meta evidence timestamps legitimately refreshed between review
-  and authorization. The lane now uses an immutable reviewed-plan snapshot:
+- #501 replaced its moving-live-hash publication gate with an immutable
+  reviewed-plan snapshot:
   `artifacts/report-truth/issue-501-reviewed-plan-snapshot.json`, cutoff
   `2026-09-23T11:24:00.897Z`, hash
   `d7448dcd7306deb752191aec9676da28ce228c731dde5c5626cd8a8813c79abe`.
-  It freezes 107 evidence-backed publication targets and 61 withheld rows. No
-  report is authorized for publication until CA approves this exact frozen
-  snapshot hash after PR review.
+  CA approved it and all 107 evidence-backed reports were published at
+  `2026-09-23T12:07:17.358Z`; post-apply identity, period, September MTD,
+  reflection, strategy and client-isolation verification found zero violations.
+  The first withheld-recovery pass found five new exact post-backed reports and
+  froze them separately at cutoff `2026-09-23T12:15:42.531Z`, hash
+  `af696f0a33ac36fe1a7dc7b6b6c01d23929658187f1a614e6a65f69233a17f35`.
+  That recovery snapshot is not publication-authorized yet; 56 rows remain
+  withheld (47 missing canonical report, 9 without in-month post evidence).
 - #491 / PR #496 is merged and its migration plus three Instagram connection
   functions are production-live fail-closed. #499 / PR #503 is the separately
   owned reviewed standalone-token worker-selection continuation; do not overlap
