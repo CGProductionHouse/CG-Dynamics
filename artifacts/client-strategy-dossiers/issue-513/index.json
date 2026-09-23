@@ -1,0 +1,686 @@
+{
+  "schema_version": 1,
+  "issue": 513,
+  "generated_from_snapshot_cutoff": "2026-09-23T12:15:42.531Z",
+  "package_authority": "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
+  "active_client_count": 56,
+  "dossier_complete_count": 56,
+  "strategy_ready_count": 27,
+  "strategy_blocked_count": 29,
+  "clients": [
+    {
+      "name": "Agri-Secure",
+      "id": "893992a5-23cd-4ee6-b5d9-ccf7b17fe071",
+      "file": "agri-secure.md",
+      "dossier_status": "complete",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "1f525b6eccb616e94660017414ff89231627b6a66678b48a58bbb49e4bd55c44",
+      "reports": 0,
+      "posts": 0
+    },
+    {
+      "name": "All Around PVC",
+      "id": "fd16ebae-a50b-4920-afe0-94c2631f8f06",
+      "file": "all-around-pvc.md",
+      "dossier_status": "complete",
+      "strategy_status": "blocked",
+      "blockers": [
+        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
+      ],
+      "evidence_hash": "3acccc76492a40dcee44714f46dee39b953b4797f57a8f56a9d7be2df1e20007",
+      "reports": 1,
+      "posts": 12
+    },
+    {
+      "name": "AV Event Life",
+      "id": "3b85973f-bcad-49eb-b8f1-c27f7c7f1aba",
+      "file": "av-event-life.md",
+      "dossier_status": "complete",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "777cec32de18d407f1a74853f4a1affa72f3d88d43239245e9c0865b55716abd",
+      "reports": 3,
+      "posts": 22
+    },
+    {
+      "name": "Bat Hill Royale",
+      "id": "32bd9db3-5339-4404-825b-5a615cadec6a",
+      "file": "bat-hill-royale.md",
+      "dossier_status": "complete",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "171d3c7cbd098ccb67a6c07d92328e887d30fecdfaa49f8aefc4420e32a1298e",
+      "reports": 2,
+      "posts": 41
+    },
+    {
+      "name": "Bloem Action Sports",
+      "id": "b28af30a-3d44-490a-8290-1e56dac7b127",
+      "file": "bloem-action-sports.md",
+      "dossier_status": "complete",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "e31b1f9bde891674c669895aa5d980fde01440978456fec9400c115286e95b3e",
+      "reports": 0,
+      "posts": 0
+    },
+    {
+      "name": "Bloem Marble & Granite",
+      "id": "89e0ad6d-e08c-4a75-8b8e-abea71af581c",
+      "file": "bloem-marble-and-granite.md",
+      "dossier_status": "complete",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "37126eb02f540168a28c2129e9d6c23e389685a427017fcb4c44ff21253eebd0",
+      "reports": 3,
+      "posts": 277
+    },
+    {
+      "name": "Bloem Vascular",
+      "id": "2d16262d-8450-458d-ae7e-084ef9ff662d",
+      "file": "bloem-vascular.md",
+      "dossier_status": "complete",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "47e4161bebf9cd49f19218246a2979d10a4e539c975cf8579b9c695dfc0155d6",
+      "reports": 0,
+      "posts": 0
+    },
+    {
+      "name": "Bohemia Quick Stop",
+      "id": "5dfdf4bd-9d94-4cc6-9dee-0e480a2234cb",
+      "file": "bohemia-quick-stop.md",
+      "dossier_status": "complete",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "5b27529a0b9c8a47938a5e329eb09144fcc874d5de7dcebd5748eed08edeb40f",
+      "reports": 3,
+      "posts": 4
+    },
+    {
+      "name": "Bouwer & Coetzee Attorneys",
+      "id": "8e448cf9-1534-4ba1-89a4-93e4c8b83d2f",
+      "file": "bouwer-and-coetzee-attorneys.md",
+      "dossier_status": "complete",
+      "strategy_status": "blocked",
+      "blockers": [
+        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
+      ],
+      "evidence_hash": "1250fe124f48bbca37d932488558596cf07c588f77e4c22c91c83d11391a3a4b",
+      "reports": 3,
+      "posts": 21
+    },
+    {
+      "name": "Braize",
+      "id": "6b67a2df-e2ab-418b-bcee-03aef5963d37",
+      "file": "braize.md",
+      "dossier_status": "complete",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "f6dddc97aacca08d941cb81325923f6a860238f532a215c97996e485552f85d1",
+      "reports": 3,
+      "posts": 22
+    },
+    {
+      "name": "C&L Innovations",
+      "id": "afb62c53-d6d3-4ef8-9393-def88ed899d8",
+      "file": "candl-innovations.md",
+      "dossier_status": "complete",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "b844586c8e6a1a24f20b98f935445741a55346266fd09db233602f3877614a40",
+      "reports": 3,
+      "posts": 22
+    },
+    {
+      "name": "Cape Lumber",
+      "id": "42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa",
+      "file": "cape-lumber.md",
+      "dossier_status": "complete",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "3ab510517bfb77ed1d52814d0c1a2f4c92fa0ba4b98d96b8a30685d2eef92896",
+      "reports": 3,
+      "posts": 115
+    },
+    {
+      "name": "Case Bloemfontein",
+      "id": "079df21e-783a-4648-b3fa-0acae6e68867",
+      "file": "case-bloemfontein.md",
+      "dossier_status": "complete",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "785748cab4b85635e4f99ffc1b5fc38da2294cc3395d3951073a37476964b58e",
+      "reports": 3,
+      "posts": 87
+    },
+    {
+      "name": "Central Canvas",
+      "id": "6b313cac-283e-48c4-9df6-ba43af2f7353",
+      "file": "central-canvas.md",
+      "dossier_status": "complete",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "073d6f8e43d5907bdf712917c8aeebe12d552eecec7e1b46ed3d8c94ccb56fa1",
+      "reports": 3,
+      "posts": 21
+    },
+    {
+      "name": "CG Production House",
+      "id": "c27d2185-08e4-4c49-be48-2572564ceecf",
+      "file": "cg-production-house.md",
+      "dossier_status": "complete",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "d632b14f1309a66e6b19d9e38ef1510d42211aca6cee1c5937d130126b915815",
+      "reports": 3,
+      "posts": 40
+    },
+    {
+      "name": "Daisy & Co",
+      "id": "3404f726-a693-4b2d-8c13-c9d3dfd17bbc",
+      "file": "daisy-and-co.md",
+      "dossier_status": "complete",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "3126c1c02f9633b89c9d5c5cbe369596fe5dfab2b8360b07255bc18b2e8d5657",
+      "reports": 3,
+      "posts": 14
+    },
+    {
+      "name": "Delta Gas",
+      "id": "06b20bb1-ed4a-4aa1-9f48-8c6cb0531aba",
+      "file": "delta-gas.md",
+      "dossier_status": "complete",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "0315333e586d2c3d1e7d57df38b8c522893566e8d094ebb072f534b18aa6a7a6",
+      "reports": 3,
+      "posts": 40
+    },
+    {
+      "name": "Dulux Paint & Paper Bloemfontein",
+      "id": "2aed8a31-bd53-4ad1-a3dc-432865adfb3d",
+      "file": "dulux-paint-and-paper-bloemfontein.md",
+      "dossier_status": "complete",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "c2ceb1117ef36cd7de3259e6eadbcb64adbc1adce5ed448d9f36bea96332a1aa",
+      "reports": 3,
+      "posts": 52
+    },
+    {
+      "name": "Econofoods",
+      "id": "61acf81b-1011-404e-9fae-2e209be65fca",
+      "file": "econofoods.md",
+      "dossier_status": "complete",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "9d83f729d6c4d70f002449672ca615be748f8e8d72b64941f173cfb320542c8e",
+      "reports": 0,
+      "posts": 0
+    },
+    {
+      "name": "Ehrlich Park Butchery",
+      "id": "ec643c75-51f5-4839-829f-3f5b7f48829a",
+      "file": "ehrlich-park-butchery.md",
+      "dossier_status": "complete",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "e2213f0aa1c9717d967b92ed1b4719cb595a182f70be930e88e70688655189d4",
+      "reports": 3,
+      "posts": 6
+    },
+    {
+      "name": "Emmanuel Funerals",
+      "id": "d53d8e62-9e6a-4bb9-be3f-554f40942d45",
+      "file": "emmanuel-funerals.md",
+      "dossier_status": "complete",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "3e9b8f83dce8fe102898457030a63f48d71f0c4288857e8367f4407a9b0e4ba6",
+      "reports": 3,
+      "posts": 59
+    },
+    {
+      "name": "Emoya Estate Driving Range",
+      "id": "217a547c-7b22-45cc-bf88-9d45a8e93dfe",
+      "file": "emoya-estate-driving-range.md",
+      "dossier_status": "complete",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "2c5d8c8606e2c938f1f9ebfbb844026fa85ee4db6e8ea49e8d93b9088b5e2a6f",
+      "reports": 0,
+      "posts": 0
+    },
+    {
+      "name": "First Technology Central",
+      "id": "c8d34a97-8400-4f52-8b0d-843491fe3d3b",
+      "file": "first-technology-central.md",
+      "dossier_status": "complete",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "9854a44202a16e14a34e7ade7c91d3ea945858c1c8b21d57950e567e9ad55212",
+      "reports": 3,
+      "posts": 22
+    },
+    {
+      "name": "Forklift Trucks",
+      "id": "4424ed69-7270-4d30-a1ea-0b77d76912df",
+      "file": "forklift-trucks.md",
+      "dossier_status": "complete",
+      "strategy_status": "blocked",
+      "blockers": [
+        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
+      ],
+      "evidence_hash": "6266b1d2dfb4346b2205eb57b183196e7f954f802cecbda47883988c95ef7311",
+      "reports": 0,
+      "posts": 0
+    },
+    {
+      "name": "Germoparts",
+      "id": "b6052710-417d-4b3b-8348-0f126bfea671",
+      "file": "germoparts.md",
+      "dossier_status": "complete",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "c8a74a4c5f3020c85f03445614c4dc88b5cfde28efde703abe9155cd781b8b8a",
+      "reports": 3,
+      "posts": 85
+    },
+    {
+      "name": "Hino Trucks",
+      "id": "1007e58b-3fea-4515-88b7-ddaa85763de6",
+      "file": "hino-trucks.md",
+      "dossier_status": "complete",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "7259755f92089113165ec77b16b442b6f46b9e2b6435351244b55b47054b87ad",
+      "reports": 0,
+      "posts": 0
+    },
+    {
+      "name": "HMHI",
+      "id": "572555e0-d4d0-404a-8d67-beeeeed6a1f2",
+      "file": "hmhi.md",
+      "dossier_status": "complete",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "88294002f1be41fa5a1cb78df0f4774345b60f52e8cb37338462c048600da750",
+      "reports": 3,
+      "posts": 11
+    },
+    {
+      "name": "Human Auto",
+      "id": "816c7f59-d56c-46a3-ba15-f76971d83769",
+      "file": "human-auto.md",
+      "dossier_status": "complete",
+      "strategy_status": "blocked",
+      "blockers": [
+        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
+      ],
+      "evidence_hash": "f1fe0ad08bca35555872b74d7857d5d2029349a1079d1e66452667e8de0a31a8",
+      "reports": 0,
+      "posts": 0
+    },
+    {
+      "name": "Ipopeng Office Supplies",
+      "id": "2e643855-e2ad-481f-a6c6-3d934b9f4a50",
+      "file": "ipopeng-office-supplies.md",
+      "dossier_status": "complete",
+      "strategy_status": "blocked",
+      "blockers": [
+        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
+      ],
+      "evidence_hash": "159199bc6544b6720e84cfc1931f1cb57eb2e790f19a2f7c4172d7deb2cb6559",
+      "reports": 0,
+      "posts": 0
+    },
+    {
+      "name": "Jenkor",
+      "id": "a5eab798-3e00-44cc-947e-463386fdac39",
+      "file": "jenkor.md",
+      "dossier_status": "complete",
+      "strategy_status": "blocked",
+      "blockers": [
+        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
+      ],
+      "evidence_hash": "213756fa1093aaacefd1ab725bbb832b3c2734022fba75e48a843d9dbf61b8e6",
+      "reports": 0,
+      "posts": 0
+    },
+    {
+      "name": "Kundedienste",
+      "id": "5e4e3335-a89c-4629-9efc-b6a194bec80c",
+      "file": "kundedienste.md",
+      "dossier_status": "complete",
+      "strategy_status": "blocked",
+      "blockers": [
+        "NO_EVIDENCE_BACKED_RECOMMENDATION"
+      ],
+      "evidence_hash": "20d89cabc6510a67578f6a3023cbb59609a0389c534ea68b3e287a7920f7723b",
+      "reports": 0,
+      "posts": 0
+    },
+    {
+      "name": "Local Deli",
+      "id": "2a5ea019-64f5-4f8e-8a61-61a28940aa6e",
+      "file": "local-deli.md",
+      "dossier_status": "complete",
+      "strategy_status": "blocked",
+      "blockers": [
+        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
+      ],
+      "evidence_hash": "4dea2c2e0e9977398a147ddf256ceb5467994c4d8f1d3aa3dfe7d5db3377e2ba",
+      "reports": 1,
+      "posts": 8
+    },
+    {
+      "name": "Loraclox",
+      "id": "21300630-6755-4591-9a49-e22abbaf7e3d",
+      "file": "loraclox.md",
+      "dossier_status": "complete",
+      "strategy_status": "blocked",
+      "blockers": [
+        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
+      ],
+      "evidence_hash": "c2b5b0adc25241afca8ad93c8925575745fddb6e6861a2b21875ec7b3da5b495",
+      "reports": 3,
+      "posts": 31
+    },
+    {
+      "name": "Madison Wear",
+      "id": "7b47afb0-fa55-4916-85f6-09c57e5905b9",
+      "file": "madison-wear.md",
+      "dossier_status": "complete",
+      "strategy_status": "blocked",
+      "blockers": [
+        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
+      ],
+      "evidence_hash": "9057f0916947a0b3ec8741f94654f97abe792db0e6abd9a0a5b7af4480baffde",
+      "reports": 3,
+      "posts": 91
+    },
+    {
+      "name": "Mimosa Mall",
+      "id": "e276f019-a580-44c5-a7ab-e43840c33a64",
+      "file": "mimosa-mall.md",
+      "dossier_status": "complete",
+      "strategy_status": "blocked",
+      "blockers": [
+        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
+      ],
+      "evidence_hash": "db4b0f026b4f95f33323ffc638b76fde5413b1db7d00fcc6f85f00efc155948d",
+      "reports": 0,
+      "posts": 0
+    },
+    {
+      "name": "NCNA",
+      "id": "94fe2568-3cf1-47dc-801e-d8d5396a0965",
+      "file": "ncna.md",
+      "dossier_status": "complete",
+      "strategy_status": "blocked",
+      "blockers": [
+        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
+      ],
+      "evidence_hash": "0a661e8b16d43dffbbe6e3dca25f1c764cc734a67dde89bc48ca6ce655962c5a",
+      "reports": 0,
+      "posts": 0
+    },
+    {
+      "name": "Novus Steel",
+      "id": "4236a60a-990f-484f-8d19-13d2f92fbe3b",
+      "file": "novus-steel.md",
+      "dossier_status": "complete",
+      "strategy_status": "blocked",
+      "blockers": [
+        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
+      ],
+      "evidence_hash": "2bc51ec64f4fd0d2e88900959f0e9cc18fa602e1c8ccdb6d28bd3ad365ab787c",
+      "reports": 3,
+      "posts": 17
+    },
+    {
+      "name": "Peyper Bonds",
+      "id": "a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b",
+      "file": "peyper-bonds.md",
+      "dossier_status": "complete",
+      "strategy_status": "blocked",
+      "blockers": [
+        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
+      ],
+      "evidence_hash": "79f19ac60f79147bc80e891a948897143fd663402a16ec92b4d538704adab247",
+      "reports": 3,
+      "posts": 37
+    },
+    {
+      "name": "Piek Group",
+      "id": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
+      "file": "piek-group.md",
+      "dossier_status": "complete",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "f70477e8c3cf8d8b48b6675a6155e39ddb1f2cbed334fab5f00b811ccf1346dd",
+      "reports": 3,
+      "posts": 49
+    },
+    {
+      "name": "PSG Bloemfontein",
+      "id": "29a28efd-c998-45e2-a57c-4a751e779e66",
+      "file": "psg-bloemfontein.md",
+      "dossier_status": "complete",
+      "strategy_status": "blocked",
+      "blockers": [
+        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
+      ],
+      "evidence_hash": "d55dac7ccfdcfd071b8a0d20c6a4c4779f8f6f6b2e58c96a03239d5ba530e960",
+      "reports": 3,
+      "posts": 15
+    },
+    {
+      "name": "RC-Polypipe",
+      "id": "4f6106de-c437-404e-8cef-fbe848de0665",
+      "file": "rc-polypipe.md",
+      "dossier_status": "complete",
+      "strategy_status": "blocked",
+      "blockers": [
+        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
+      ],
+      "evidence_hash": "238b27a3706ec178d435d0275583368c199b90d68b7a109ddc5720bbf1b82ed6",
+      "reports": 3,
+      "posts": 39
+    },
+    {
+      "name": "Red Oak",
+      "id": "cdb11a82-339e-4b46-9b09-bde1a23efeaf",
+      "file": "red-oak.md",
+      "dossier_status": "complete",
+      "strategy_status": "blocked",
+      "blockers": [
+        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
+      ],
+      "evidence_hash": "4fe46b38da41d1561241a7b8e6e6d3a123a879198f3fa3345297be9b57b1f21a",
+      "reports": 1,
+      "posts": 40
+    },
+    {
+      "name": "Rusoord Farmstay",
+      "id": "ac4c5e0c-c5d3-4512-8472-fe59192abeca",
+      "file": "rusoord-farmstay.md",
+      "dossier_status": "complete",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "ecca4c22a74e21a7b7c7379bfb7aac4074f1a37a618fad63928f554c3220b8de",
+      "reports": 0,
+      "posts": 0
+    },
+    {
+      "name": "SecuriForce",
+      "id": "917d6f7c-1c2a-4c20-82f0-daa41b9062f5",
+      "file": "securiforce.md",
+      "dossier_status": "complete",
+      "strategy_status": "blocked",
+      "blockers": [
+        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
+      ],
+      "evidence_hash": "eb0444807c74508dd5ab83f81f3964020a061f44544fe7ebdc63817fcd6cd934",
+      "reports": 3,
+      "posts": 107
+    },
+    {
+      "name": "Supa Quick BFN",
+      "id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+      "file": "supa-quick-bfn.md",
+      "dossier_status": "complete",
+      "strategy_status": "blocked",
+      "blockers": [
+        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
+      ],
+      "evidence_hash": "f150f575bae93689059cccc448287762f216656b8827f8efdf521a8c5545bfb4",
+      "reports": 3,
+      "posts": 13
+    },
+    {
+      "name": "Supa Quick Centurion",
+      "id": "e2870110-930c-4e63-b2fe-c858030f7258",
+      "file": "supa-quick-centurion.md",
+      "dossier_status": "complete",
+      "strategy_status": "blocked",
+      "blockers": [
+        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
+      ],
+      "evidence_hash": "bbc9cd301206b45aa92b899586c6b253c04b57ce0b046dc065d90d1f82cddd90",
+      "reports": 3,
+      "posts": 13
+    },
+    {
+      "name": "TBS Brokers",
+      "id": "a36ba938-e9dc-4ecf-bb67-4853608b1c01",
+      "file": "tbs-brokers.md",
+      "dossier_status": "complete",
+      "strategy_status": "blocked",
+      "blockers": [
+        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
+      ],
+      "evidence_hash": "951f82e9143becf20f4c934ff0f186ab41c2482e0a1b03b8628885ca2f841353",
+      "reports": 3,
+      "posts": 49
+    },
+    {
+      "name": "The Staffordshire",
+      "id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+      "file": "the-staffordshire.md",
+      "dossier_status": "complete",
+      "strategy_status": "blocked",
+      "blockers": [
+        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
+      ],
+      "evidence_hash": "4a95a99e7262713e25a6986225aed0f03597484c8acddcbc9ed2e6c256680f4d",
+      "reports": 3,
+      "posts": 47
+    },
+    {
+      "name": "Tobich Optics",
+      "id": "204f4f22-14c7-42ed-a956-da57af102706",
+      "file": "tobich-optics.md",
+      "dossier_status": "complete",
+      "strategy_status": "blocked",
+      "blockers": [
+        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
+      ],
+      "evidence_hash": "5c0959cfb7063a90045563b1f74633b2e8b00131b42a0644568eb16cc66854a5",
+      "reports": 3,
+      "posts": 29
+    },
+    {
+      "name": "Toyota Bloemfontein",
+      "id": "e2ad6d57-5b06-46e1-b75b-b67f017d57f1",
+      "file": "toyota-bloemfontein.md",
+      "dossier_status": "complete",
+      "strategy_status": "blocked",
+      "blockers": [
+        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
+      ],
+      "evidence_hash": "dd53d60fadc74ff9625bc200d61e4e53876af935703c22b5d4d9e922502d509e",
+      "reports": 0,
+      "posts": 0
+    },
+    {
+      "name": "Vrystaat Kunstefees",
+      "id": "1f0406bb-d643-4b83-bc3e-b1ebe87eeb89",
+      "file": "vrystaat-kunstefees.md",
+      "dossier_status": "complete",
+      "strategy_status": "blocked",
+      "blockers": [
+        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
+      ],
+      "evidence_hash": "ea4471f70cd03258ea04a9f502d3c8552701d56c42a3d13308912cb1f22a03ad",
+      "reports": 2,
+      "posts": 31
+    },
+    {
+      "name": "Watch Addict",
+      "id": "e1cb958e-3f68-4a77-b5ea-b471ea62bdef",
+      "file": "watch-addict.md",
+      "dossier_status": "complete",
+      "strategy_status": "blocked",
+      "blockers": [
+        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
+      ],
+      "evidence_hash": "f5a033285f6be283438d04da442730c8e3030436c8c436acd7cf9f733698358b",
+      "reports": 3,
+      "posts": 17
+    },
+    {
+      "name": "We Ar Fuels",
+      "id": "2b953772-e791-4dff-a278-d4dd3521f02e",
+      "file": "we-ar-fuels.md",
+      "dossier_status": "complete",
+      "strategy_status": "blocked",
+      "blockers": [
+        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
+      ],
+      "evidence_hash": "ce57e30c554717232e5d9078dc451319d89f6ecb1e95a559e047fd21d8bad28e",
+      "reports": 3,
+      "posts": 20
+    },
+    {
+      "name": "Wiseman Group",
+      "id": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
+      "file": "wiseman-group.md",
+      "dossier_status": "complete",
+      "strategy_status": "blocked",
+      "blockers": [
+        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
+      ],
+      "evidence_hash": "5b7ff565c2720501fb4da588cd7e32e4aec8223d87a7a555bc00a896d04e3c30",
+      "reports": 3,
+      "posts": 74
+    },
+    {
+      "name": "WiseRide",
+      "id": "504113ee-fba9-4993-807e-a86066615212",
+      "file": "wiseride.md",
+      "dossier_status": "complete",
+      "strategy_status": "blocked",
+      "blockers": [
+        "PRODUCTION_GUIDE_RETRIEVAL_REQUIRED"
+      ],
+      "evidence_hash": "73509346918e4f4bc45fa4e71fb762d59e7b04bbfd6833623dc548ea6fcc8614",
+      "reports": 0,
+      "posts": 0
+    },
+    {
+      "name": "Zooz Lifestyle WFF",
+      "id": "0c01d90f-ba5e-4251-a597-bf3c83f990fa",
+      "file": "zooz-lifestyle-wff.md",
+      "dossier_status": "complete",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "32a5bf63bdd8392ab2421e36cea8b62c43c219cdae667a8a48d9efc700254984",
+      "reports": 3,
+      "posts": 37
+    }
+  ]
+}
