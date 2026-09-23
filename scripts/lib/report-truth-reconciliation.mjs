@@ -147,6 +147,10 @@ export function reconcileClientMonth({ client, month, reports, posts, strategy }
     strategy: strategy ? { workflow_status: strategy.workflow_status } : null,
   }))
   const alreadySatisfied = report.status === 'published'
+    && report.period_start === bounds.start
+    && report.period_end === periodEnd
+    && report.report_title === title
+    && (report.previous_month_reflection?.trim() || '') === reflection
 
   return {
     state: alreadySatisfied ? 'already_satisfied' : 'mutation_target', client_id: client.id, client_name: client.name, month,
