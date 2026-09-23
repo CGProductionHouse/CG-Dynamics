@@ -159,11 +159,36 @@ Deno.serve(async (req) => {
       .single()
 
     if (tokenRows?.refresh_token) {
-      const refreshed = await refreshTiktokToken(sb, connectionId, tokenRows.refresh_token)
+      let refreshed: Awaited<ReturnType<typeof refreshTiktokToken>> = null
+      try {
+        refreshed = await refreshTiktokToken(sb, connectionId, tokenRows.refresh_token)
+      } catch {
+        // A transport/configuration interruption is retryable and is not evidence
+        // that provider consent is invalid. Leave this exact connection eligible
+        // for the existing bounded worker retry instead of forcing OAuth.
+        return jsonResponse({ ok: false, error: 'TikTok token refresh could not reach the provider.' }, 503)
+      }
       if (refreshed) {
         tokenData = { accessToken: refreshed.accessToken, expiresAt: new Date(Date.now() + refreshed.expiresIn * 1000).toISOString() }
       } else {
-        // Token refresh failed — cannot proceed
+        // A provider response that rejects the stored refresh recovery is durable
+        // evidence that this exact client/account needs human OAuth consent. Store
+        // only a safe diagnostic; never persist provider response bodies or tokens.
+        const { data: markedConnection, error: markError } = await sb
+          .from('tiktok_connections')
+          .update({
+            status: 'needs_reauth',
+            last_error: 'Stored TikTok refresh recovery failed. Reconnect this exact account through TikTok OAuth.',
+          })
+          .eq('id', connectionId)
+          .eq('client_id', body.clientId)
+          .eq('status', 'connected')
+          .select('id')
+          .maybeSingle()
+
+        if (markError || !markedConnection) {
+          return jsonResponse({ ok: false, error: 'TikTok refresh failure could not be recorded safely.' }, 500)
+        }
         return jsonResponse({ ok: false, error: 'TikTok token refresh failed. Please reconnect.' }, 401)
       }
     }

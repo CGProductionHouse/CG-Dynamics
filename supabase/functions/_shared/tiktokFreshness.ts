@@ -8,6 +8,27 @@ export const TIKTOK_READ_SCOPES = [
 ] as const
 
 export type TiktokAccessState = 'connected' | 'reconnect_required' | 'permission_required' | 'provider_error' | 'unavailable'
+export type TiktokConnectionRecoveryState = 'connected' | 'refresh_pending' | 'reconnect_required'
+
+export function classifyTiktokConnectionRecovery(input: {
+  connectionStatus: string
+  missingScopes: string[]
+  tokenPresent: boolean
+  tokenExpired: boolean
+  tokenRefreshable: boolean
+}): TiktokConnectionRecoveryState {
+  const terminalStatuses = ['needs_reauth', 'revoked', 'error', 'not_connected']
+  if (
+    terminalStatuses.includes(input.connectionStatus)
+    || input.missingScopes.length > 0
+    || !input.tokenPresent
+    || (input.tokenExpired && !input.tokenRefreshable)
+  ) {
+    return 'reconnect_required'
+  }
+
+  return input.tokenExpired ? 'refresh_pending' : 'connected'
+}
 export type TiktokEvidenceState = 'complete' | 'partial' | 'unavailable'
 export type TiktokFreshnessState = 'fresh' | 'stale' | 'never'
 
