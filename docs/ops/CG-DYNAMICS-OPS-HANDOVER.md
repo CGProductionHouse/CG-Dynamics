@@ -8,12 +8,18 @@ the Control Centre before consequential action.
 
 ### GitHub and ownership truth
 
-- Issue #494 is owned by CA MANUAL AGENT 01 from main
-  `16c0056746eff964fedbbe36bfa8f6dc02e9d56f`. Its isolated implementation adds
-  active-client-only package confirmation and fail-closed gold-standard monthly
-  strategy authority. The migration remains unapplied; no client package is
-  bulk-confirmed. #491/#238 provider work and #492 report publication remain
-  separate owned lanes.
+- Issue #500 is the active follow-up to production-live #494. CA MANUAL AGENT
+  01 owns the isolated active-client evidence-matrix and next-unconfirmed review
+  UX lane. The matrix is a read-only projection over existing exact package,
+  schedule/Microsoft mirror, guide and incorporated-context evidence; the
+  existing #494 admin RPC remains the only confirmation write. No bulk
+  confirmation, blank-to-zero inference, provider/report mutation or second
+  package store is allowed.
+
+- Issue #494 / PR #497 is merged and its package-authority migration is
+  production-live. Production has 56 active clients and zero confirmed package
+  receipts at the start of #500; no package was bulk-confirmed. #491/#238
+  provider work and #501 report publication remain separate owned lanes.
 
 - Current runtime-code baseline: `e77d0ce29a5439b99ceaf39694e31a908265c820`, including
   #388 / PR #485 and website-reporting CORS PR #486 after #472 D02 / PR #484.
