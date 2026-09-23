@@ -22,9 +22,11 @@ Do not ask CA to repeat project history. GitHub `main`, the newest owning issue 
 
 ## 2. Current GitHub truth
 
-Current `main`:
+Latest verified **runtime-code baseline** before docs-only handover commits:
 
-`66f3b1ea45d5ede618f666a46bf4c3ac2019e4cc`
+`66f3b1ea45d5ede618f666a46bf4c3ac2019e4cc` (#508 merged)
+
+Always refetch current `main` before consequential action because docs-only handover commits may be newer than the runtime baseline.
 
 Recent launch-critical merges:
 
