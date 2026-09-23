@@ -10,20 +10,20 @@
   },
   "counts": {
     "ready": 92,
-    "non_applicable": 10,
-    "held": 10,
+    "non_applicable": 20,
+    "held": 0,
     "blocked": 0,
     "by_month": {
       "2026-09": {
         "ready": 46,
-        "non_applicable": 5,
-        "held": 5,
+        "non_applicable": 10,
+        "held": 0,
         "blocked": 0
       },
       "2026-10": {
         "ready": 46,
-        "non_applicable": 5,
-        "held": 5,
+        "non_applicable": 10,
+        "held": 0,
         "blocked": 0
       }
     },
@@ -43,8 +43,8 @@
         "staff_amended_at": null,
         "current_strategy_hash": "e5c4cf2d172f6739e348a4f60db5814e163a08b92cf6e7b744de00b750d765dd"
       },
-      "disposition": "held",
-      "reason": "ISSUE_516_SERVICE_SCOPE_HELD"
+      "disposition": "non_applicable",
+      "reason": "CONFIRMED_NO_RECURRING_SOCIAL_SERVICE_SCOPE"
     },
     {
       "client_id": "893992a5-23cd-4ee6-b5d9-ccf7b17fe071",
@@ -59,8 +59,8 @@
         "staff_amended_at": null,
         "current_strategy_hash": "13524a6e78afcda13efb8e58a847af4265d2bbbf6e75372cd4ecbaa471ba7d09"
       },
-      "disposition": "held",
-      "reason": "ISSUE_516_SERVICE_SCOPE_HELD"
+      "disposition": "non_applicable",
+      "reason": "CONFIRMED_NO_RECURRING_SOCIAL_SERVICE_SCOPE"
     },
     {
       "client_id": "fd16ebae-a50b-4920-afe0-94c2631f8f06",
@@ -1936,8 +1936,8 @@
         "staff_amended_at": null,
         "current_strategy_hash": "7b17adf6cb9d89984de0d49dea40daccbaa3c40258e579f36202f7090bfa9fe0"
       },
-      "disposition": "held",
-      "reason": "ISSUE_516_SERVICE_SCOPE_HELD"
+      "disposition": "non_applicable",
+      "reason": "CONFIRMED_NO_RECURRING_SOCIAL_SERVICE_SCOPE"
     },
     {
       "client_id": "2d16262d-8450-458d-ae7e-084ef9ff662d",
@@ -1952,8 +1952,8 @@
         "staff_amended_at": null,
         "current_strategy_hash": "865d1e8b90df2e9b6f94819bbd74cf7d7e2c1339570aa7e5c309e37fd37b12f1"
       },
-      "disposition": "held",
-      "reason": "ISSUE_516_SERVICE_SCOPE_HELD"
+      "disposition": "non_applicable",
+      "reason": "CONFIRMED_NO_RECURRING_SOCIAL_SERVICE_SCOPE"
     },
     {
       "client_id": "5dfdf4bd-9d94-4cc6-9dee-0e480a2234cb",
@@ -9306,8 +9306,8 @@
         "staff_amended_at": null,
         "current_strategy_hash": "c4903146f950b46138d70f50300c33add282b907cac286f3537a6a49f508de1e"
       },
-      "disposition": "held",
-      "reason": "ISSUE_516_SERVICE_SCOPE_HELD"
+      "disposition": "non_applicable",
+      "reason": "CONFIRMED_NO_RECURRING_SOCIAL_SERVICE_SCOPE"
     },
     {
       "client_id": "2e643855-e2ad-481f-a6c6-3d934b9f4a50",
@@ -9322,8 +9322,8 @@
         "staff_amended_at": null,
         "current_strategy_hash": "46f6591c3e523cf588270315cc22226f4da70847f21527bc27f629405612330f"
       },
-      "disposition": "held",
-      "reason": "ISSUE_516_SERVICE_SCOPE_HELD"
+      "disposition": "non_applicable",
+      "reason": "CONFIRMED_NO_RECURRING_SOCIAL_SERVICE_SCOPE"
     },
     {
       "client_id": "a5eab798-3e00-44cc-947e-463386fdac39",
@@ -10519,8 +10519,8 @@
         "staff_amended_at": null,
         "current_strategy_hash": "39e9aaf4d1aef2de6aa8053b838b6d396412701c638b4e69dd91ccbe65a057ab"
       },
-      "disposition": "held",
-      "reason": "ISSUE_516_SERVICE_SCOPE_HELD"
+      "disposition": "non_applicable",
+      "reason": "CONFIRMED_NO_RECURRING_SOCIAL_SERVICE_SCOPE"
     },
     {
       "client_id": "e276f019-a580-44c5-a7ab-e43840c33a64",
@@ -10535,8 +10535,8 @@
         "staff_amended_at": null,
         "current_strategy_hash": "613765ac7aa2220b06a310ad81ec350aca608b37664baf47aa0445b71a9a211c"
       },
-      "disposition": "held",
-      "reason": "ISSUE_516_SERVICE_SCOPE_HELD"
+      "disposition": "non_applicable",
+      "reason": "CONFIRMED_NO_RECURRING_SOCIAL_SERVICE_SCOPE"
     },
     {
       "client_id": "94fe2568-3cf1-47dc-801e-d8d5396a0965",
@@ -10551,8 +10551,8 @@
         "staff_amended_at": null,
         "current_strategy_hash": "a7cbff1078a7631f8dc634d41ccc8fc766b7063c22c1a9c6bb436aa15d75cbd5"
       },
-      "disposition": "held",
-      "reason": "ISSUE_516_SERVICE_SCOPE_HELD"
+      "disposition": "non_applicable",
+      "reason": "CONFIRMED_NO_RECURRING_SOCIAL_SERVICE_SCOPE"
     },
     {
       "client_id": "94fe2568-3cf1-47dc-801e-d8d5396a0965",
@@ -10567,8 +10567,8 @@
         "staff_amended_at": null,
         "current_strategy_hash": "1e58e96170fa178306ecb6522c7c8eab06976267bcd702a63cc7d2b79b9874b8"
       },
-      "disposition": "held",
-      "reason": "ISSUE_516_SERVICE_SCOPE_HELD"
+      "disposition": "non_applicable",
+      "reason": "CONFIRMED_NO_RECURRING_SOCIAL_SERVICE_SCOPE"
     },
     {
       "client_id": "4236a60a-990f-484f-8d19-13d2f92fbe3b",
@@ -17471,5 +17471,5 @@
       "proposed_seed_context_hash": "7841c6c9c58a4e34c06a8b0f0897d7c2c5f33f09d72e88b49975a3a50f9c8619"
     }
   ],
-  "plan_hash": "d2cb7314045c16c812f133bbf10e45fb63de91d5e492d2628fbdca0829d46f27"
+  "plan_hash": "26286e987c72ce44d65b9a99b829ff65fb2a59a6de11101ce0b90a052875f091"
 }

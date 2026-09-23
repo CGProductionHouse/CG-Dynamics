@@ -8,11 +8,10 @@ const SOURCE = join(DIR, 'strategy-source-snapshot.json')
 const INDEX = join(DIR, 'index.json')
 const OUTPUT = join(DIR, 'sep-oct-strategy-mutation-dry-run.json')
 
-const HELD = new Set([
-  'Agri-Secure', 'Bloem Vascular', 'Ipopeng Office Supplies', 'Mimosa Mall', 'NCNA',
-])
+const HELD = new Set([])
 const NON_APPLICABLE = new Set([
   'Econofoods', 'First Technology Central', 'Kundedienste', 'Local Deli', 'Rusoord Farmstay',
+  'Agri-Secure', 'Bloem Vascular', 'Ipopeng Office Supplies', 'Mimosa Mall', 'NCNA',
 ])
 
 function canonical(value) {
