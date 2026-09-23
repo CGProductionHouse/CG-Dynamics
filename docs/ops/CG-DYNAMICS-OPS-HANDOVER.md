@@ -53,7 +53,7 @@ Launch-critical completed work includes:
 - Prior portal rollout completed 37 canonical mappings with no duplicate/cross-client/auth regressions.
 - Meta engagement/reporting truth stack is production-live.
 - TikTok analytics/reconnect runtime is production-live; CG Production House exact account is connected and fresh.
-- Provider eligibility now follows confirmed service scope server-side: 46 social-eligible / 5 explicitly non-social / 5 held.
+- Provider eligibility now follows confirmed service scope server-side: 46 recurring-social eligible / 10 non-social-or-not-currently-social / 0 held.
 - 56/56 exact-client strategy dossiers exist; PR #514 is merged.
 - 52 non-empty production-ready client guides exist for read-only dossier enrichment.
 - Microsoft collection/reconciliation remains automated.
@@ -116,9 +116,9 @@ Durable package authority:
 PR #515 is merged and provider eligibility guards are production-live.
 
 Exact live provider/service classification:
-- **46 eligible social clients**
-- **5 explicitly non-social/excluded**
-- **5 unresolved/held**
+- **46 recurring-social eligible clients**
+- **10 non-social / not-currently-social**
+- **0 unresolved/held**
 
 Excluded 5:
 - Econofoods
@@ -132,23 +132,19 @@ Resolved SOCIAL from #516:
 - Vrystaat Kunstefees
 - Zooz Lifestyle WFF
 
-Held 5 for CA decision:
-- Agri-Secure
-- Bloem Vascular
-- Ipopeng Office Supplies
-- Mimosa Mall
-- NCNA
+Final CA decisions for #516:
+- Bat Hill Royale = recurring social.
+- Vrystaat Kunstefees = recurring social.
+- Zooz Lifestyle WFF = recurring social.
+- Agri-Secure = not currently recurring social ("not yet").
+- Bloem Vascular = once-off only; non-social recurring scope.
+- Ipopeng Office Supplies = not currently recurring social ("not yet").
+- Mimosa Mall = project/creative/event work only; no social account access.
+- NCNA = once-off only; non-social recurring scope.
 
-Issue #516 now holds only the remaining 5 CA decisions.
-#516 read-only reconciliation is complete:
-- Bat Hill Royale = recurring social
-- Vrystaat Kunstefees = recurring social
-- Zooz Lifestyle WFF = recurring social
-- Agri-Secure / Bloem Vascular / Ipopeng Office Supplies / Mimosa Mall / NCNA still require one CA batch decision.
+Final partition: 46 recurring-social / 10 non-social-or-not-currently-social / 0 held.
 
-Do not mutate provider mappings in #516.
-Do not infer posting history as contractual scope.
-Once CA decides the remaining five, update service notes/eligibility through the approved canonical path.
+Next #516 action is execution, not another decision: refresh these eight exact canonical package/service receipts through the audited confirmation flow without inventing fixed quantities. No provider mapping mutation in #516.
 
 ### CA MANUAL AGENT 02 — Issue #505
 
@@ -173,9 +169,9 @@ Current deployed TikTok provider functions:
 - `tiktok-sync` v11
 - automatic freshness remains live.
 
-Only the 46 eligible social clients may enter provider rollout.
-Do not touch the 5 excluded clients.
-Do not connect the remaining 5 held clients until CA resolves them.
+Only the 46 recurring-social eligible clients may enter provider rollout.
+Do not connect the 10 non-social / not-currently-social clients.
+There are no remaining service-scope holds.
 
 CA clarified that the approved local account source is structured by **CLIENT / INSTAGRAM / TIK TOK**. Old/inactive rows are never authority.
 
@@ -235,16 +231,17 @@ PR #514 is merged at:
 
 Current dossier/strategy truth:
 - 56/56 exact-client dossiers exist.
+- PR #520 dry-run was generated before the final #516 CA decisions and is stale for apply; regenerate after canonical service-scope receipt refresh.
 - 56/56 package receipts confirmed.
 - 56 September + 56 October canonical strategy rows remain draft and untouched.
 - 28 dossiers are blocked only on retrieval/review of runtime production guides.
 - production `client_guides` contains ready guide content, so those blockers are retrievable read-only.
 - Kundedienste is explicitly non-social/once-off and no recurring social strategy should be fabricated for it.
 
-Strategy scope must now follow #515 service truth:
-- 46 eligible social clients -> eligible for monthly social strategy once dossier/gates pass.
-- 5 non-social clients -> no fabricated recurring social strategy.
-- 8 held clients -> wait for #516 service decision.
+Strategy scope must now follow final #516 service truth:
+- 46 recurring-social clients -> eligible for monthly social strategy once dossier/gates pass.
+- 10 non-social / not-currently-social clients -> no fabricated recurring social strategy.
+- 0 held clients.
 
 Next #513 phase:
 1. retrieve each blocked client's latest ready production guide read-only;
@@ -276,10 +273,11 @@ Rules:
 
 Confirmed package/service scope is canonical rollout authority.
 
-Live:
-- 46 eligible.
-- 5 excluded.
-- 8 held.
+Live final scope decision:
+- 46 recurring-social eligible.
+- 10 non-social / not-currently-social.
+- 0 held.
+Canonical package/service receipts for the eight #516 clients still need to be refreshed through the audited confirmation path so production eligibility mirrors this final decision.
 
 OAuth start/callback/status/confirmation re-check eligibility server-side.
 Active client status alone is no longer enough.
@@ -374,8 +372,8 @@ On a fresh CG Dynamics chat:
 4. continue safe actions automatically.
 
 Priority:
-1. CA batch-decision on the 5 remaining #516 service scopes.
-2. #513 retrieve production runtime guides and finish the Sep/Oct gold-strategy dry-run in Dynamics; Google Drive is not a parallel strategy authority.
+1. Refresh the eight #516 canonical package/service receipts to the final 46/10/0 scope.
+2. #513 regenerate the Sep/Oct gold-strategy dry-run from current production; PR #520's earlier service partition is stale and must not be applied.
 3. #505 eligible-client TikTok/Instagram connection + native TikTok Business Center scheduler sweep.
 4. #518 website snapshot-period fix and #519 current portal-access coverage reconciliation.
 5. #217 real-phone sign-off if CA still wants that final human gate.
