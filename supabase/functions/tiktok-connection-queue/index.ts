@@ -1,6 +1,6 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { TIKTOK_READ_SCOPES } from '../_shared/tiktokFreshness.ts'
+import { classifyTiktokConnectionRecovery, TIKTOK_READ_SCOPES } from '../_shared/tiktokFreshness.ts'
 import { fetchAllRows } from '../_shared/paginatedRows.ts'
 
 const REQUIRED_SCOPES = Deno.env.get('TIKTOK_PUBLISHING_ENABLED') === 'true'
@@ -66,9 +66,14 @@ Deno.serve(async req => {
       const tokenExpired = expiresAt ? new Date(expiresAt).getTime() <= Date.now() : false
       const refreshable = typeof tokenRow?.refresh_token === 'string' && tokenRow.refresh_token.length > 0
       const providerStatus = String(connection.status ?? 'error')
-      const needsReconnect = ['needs_reauth', 'revoked', 'error', 'not_connected'].includes(providerStatus)
-        || !tokenRow || missingScopes.length > 0 || (tokenExpired && !refreshable)
-      const state = needsReconnect ? 'reconnect_required' : tokenExpired ? 'refresh_pending' : 'connected'
+      const state = classifyTiktokConnectionRecovery({
+        connectionStatus: providerStatus,
+        missingScopes,
+        tokenPresent: Boolean(tokenRow),
+        tokenExpired,
+        tokenRefreshable: refreshable,
+      })
+      const needsReconnect = state === 'reconnect_required'
 
       return {
         clientId,
