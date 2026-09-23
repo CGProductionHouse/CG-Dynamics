@@ -41,6 +41,22 @@ test('a stronger reviewed client-visible reflection is preserved', () => {
   assert.equal(result.previous_month_reflection, 'Reviewed exact-client reflection.')
 })
 
+test('published status alone is not treated as already satisfied when client-visible truth is incomplete', () => {
+  const publishedButIncomplete = {
+    ...report,
+    status: 'published',
+    period_end: '2026-09-16',
+    report_title: 'Exact Client September 2026 Month-to-Date Report (as of 2026-09-16)',
+    previous_month_reflection: null,
+  }
+  const result = reconcileClientMonth({ client, month: '2026-09', reports: [publishedButIncomplete], posts: [post], strategy: null })
+  assert.equal(result.state, 'mutation_target')
+  assert.match(result.previous_month_reflection, /Published-content record:/)
+
+  const fullySatisfied = { ...publishedButIncomplete, previous_month_reflection: result.previous_month_reflection }
+  assert.equal(reconcileClientMonth({ client, month: '2026-09', reports: [fullySatisfied], posts: [post], strategy: null }).state, 'already_satisfied')
+})
+
 test('factual reflection is deterministic and contains no performance claim', () => {
   const reflection = buildFactualReflection([post, { ...post, id: 'post-2', platform: 'instagram', meta_post_type: 'VIDEO' }])
   assert.equal(reflection, 'Published-content record: 2 posts (1 facebook, 1 instagram). Recorded formats: 1 photo, 1 video. This factual summary does not infer campaign intent, performance causes or unavailable metrics.')
