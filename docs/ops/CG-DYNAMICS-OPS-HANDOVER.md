@@ -53,7 +53,7 @@ Launch-critical completed work includes:
 - Prior portal rollout completed 37 canonical mappings with no duplicate/cross-client/auth regressions.
 - Meta engagement/reporting truth stack is production-live.
 - TikTok analytics/reconnect runtime is production-live; CG Production House exact account is connected and fresh.
-- Provider eligibility now follows confirmed service scope server-side: 43 social-eligible / 5 explicitly non-social / 8 held.
+- Provider eligibility now follows confirmed service scope server-side: 46 social-eligible / 5 explicitly non-social / 5 held.
 - 56/56 exact-client strategy dossiers exist; PR #514 is merged.
 - 52 non-empty production-ready client guides exist for read-only dossier enrichment.
 - Microsoft collection/reconciliation remains automated.
@@ -116,9 +116,9 @@ Durable package authority:
 PR #515 is merged and provider eligibility guards are production-live.
 
 Exact live provider/service classification:
-- **43 eligible social clients**
+- **46 eligible social clients**
 - **5 explicitly non-social/excluded**
-- **8 unresolved/held**
+- **5 unresolved/held**
 
 Excluded 5:
 - Econofoods
@@ -127,25 +127,28 @@ Excluded 5:
 - Local Deli
 - Rusoord Farmstay
 
-Held 8:
-- Agri-Secure
+Resolved SOCIAL from #516:
 - Bat Hill Royale
+- Vrystaat Kunstefees
+- Zooz Lifestyle WFF
+
+Held 5 for CA decision:
+- Agri-Secure
 - Bloem Vascular
 - Ipopeng Office Supplies
 - Mimosa Mall
 - NCNA
-- Vrystaat Kunstefees
-- Zooz Lifestyle WFF
 
-Issue #516 owns the held 8.
-Agent 01 must use exact current evidence and return all eight together as:
-- recurring social confirmed;
-- explicitly non-social;
-- still needs CA business decision.
+Issue #516 now holds only the remaining 5 CA decisions.
+#516 read-only reconciliation is complete:
+- Bat Hill Royale = recurring social
+- Vrystaat Kunstefees = recurring social
+- Zooz Lifestyle WFF = recurring social
+- Agri-Secure / Bloem Vascular / Ipopeng Office Supplies / Mimosa Mall / NCNA still require one CA batch decision.
 
 Do not mutate provider mappings in #516.
 Do not infer posting history as contractual scope.
-If package/service note changes are needed, prepare them for one CA review first.
+Once CA decides the remaining five, update service notes/eligibility through the approved canonical path.
 
 ### CA MANUAL AGENT 02 — Issue #505
 
@@ -170,9 +173,9 @@ Current deployed TikTok provider functions:
 - `tiktok-sync` v11
 - automatic freshness remains live.
 
-Only the 43 eligible social clients may enter provider rollout.
+Only the 46 eligible social clients may enter provider rollout.
 Do not touch the 5 excluded clients.
-Do not connect the 8 held clients until #516 resolves them.
+Do not connect the remaining 5 held clients until CA resolves them.
 
 CA clarified that the approved local account source is structured by **CLIENT / INSTAGRAM / TIK TOK**. Old/inactive rows are never authority.
 
@@ -239,7 +242,7 @@ Current dossier/strategy truth:
 - Kundedienste is explicitly non-social/once-off and no recurring social strategy should be fabricated for it.
 
 Strategy scope must now follow #515 service truth:
-- 43 eligible social clients -> eligible for monthly social strategy once dossier/gates pass.
+- 46 eligible social clients -> eligible for monthly social strategy once dossier/gates pass.
 - 5 non-social clients -> no fabricated recurring social strategy.
 - 8 held clients -> wait for #516 service decision.
 
@@ -274,7 +277,7 @@ Rules:
 Confirmed package/service scope is canonical rollout authority.
 
 Live:
-- 43 eligible.
+- 46 eligible.
 - 5 excluded.
 - 8 held.
 
@@ -371,8 +374,8 @@ On a fresh CG Dynamics chat:
 4. continue safe actions automatically.
 
 Priority:
-1. #516 resolve the 8 held service scopes.
-2. #513 retrieve runtime guides and finish the Sep/Oct gold-strategy dry-run.
+1. CA batch-decision on the 5 remaining #516 service scopes.
+2. #513 retrieve production runtime guides and finish the Sep/Oct gold-strategy dry-run in Dynamics; Google Drive is not a parallel strategy authority.
 3. #505 eligible-client TikTok/Instagram connection + native TikTok Business Center scheduler sweep.
 4. #518 website snapshot-period fix and #519 current portal-access coverage reconciliation.
 5. #217 real-phone sign-off if CA still wants that final human gate.
