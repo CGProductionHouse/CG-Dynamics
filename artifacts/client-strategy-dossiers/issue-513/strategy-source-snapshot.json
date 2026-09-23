@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "issue": 513,
-  "generated_at": "2026-09-23T16:07:42.661Z",
+  "generated_at": "2026-09-23T17:08:08.859Z",
   "database_project_id": "ehtjfntukiwbgptqgbzy",
   "write_count": 0,
   "rows": [
@@ -12,11 +12,11 @@
         "verification": {
           "status": "confirmed",
           "version": 2,
-          "confirmed_at": "2026-09-23T14:16:26.848877+00:00",
+          "confirmed_at": "2026-09-23T16:29:05.793301+00:00",
           "field_states": {
             "package_notes": "unknown",
             "reels_per_month": "unknown",
-            "package_exclusions": "unknown",
+            "package_exclusions": "known",
             "shoot_days_per_month": "unknown",
             "photo_posts_per_month": "unknown",
             "monthly_campaign_budget": "unknown",
@@ -27,16 +27,17 @@
             "campaign_management_included": "unknown",
             "professional_videos_per_month": "unknown"
           },
-          "evidence_note": "CA approved the complete 56-active-client package batch on Issue #504; exact-client evidence and named overrides were reviewed.",
+          "evidence_note": "CA approved the final exact-client recurring-social service scope on Issue #516; existing package quantities and unknowns were preserved.",
           "inference_note": "Initially unknown: professional_videos_per_month, reels_per_month, photo_posts_per_month, design_posters_per_month, animated_posters_per_month, campaign_management_included, monthly_campaign_budget, shoot_days_per_month, website_updates_per_month, other_agreed_deliverables, package_notes, package_exclusions. Recent production cadence was treated as supporting evidence only, not contractual scope.",
           "source_references": [
-            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5798269510"
           ],
           "confirmed_by_profile_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee"
         },
         "package_notes": null,
         "reels_per_month": null,
-        "package_exclusions": null,
+        "package_exclusions": "No recurring social-media management package is currently active; service is not yet active and remains excluded until CA activates it later.",
         "shoot_days_per_month": null,
         "photo_posts_per_month": null,
         "monthly_campaign_budget": null,
@@ -209,11 +210,11 @@
         "verification": {
           "status": "confirmed",
           "version": 2,
-          "confirmed_at": "2026-09-23T14:16:26.848877+00:00",
+          "confirmed_at": "2026-09-23T16:29:05.793301+00:00",
           "field_states": {
             "package_notes": "unknown",
             "reels_per_month": "unknown",
-            "package_exclusions": "unknown",
+            "package_exclusions": "known",
             "shoot_days_per_month": "unknown",
             "photo_posts_per_month": "unknown",
             "monthly_campaign_budget": "unknown",
@@ -224,16 +225,17 @@
             "campaign_management_included": "unknown",
             "professional_videos_per_month": "unknown"
           },
-          "evidence_note": "CA approved the complete 56-active-client package batch on Issue #504; exact-client evidence and named overrides were reviewed.",
+          "evidence_note": "CA approved the final exact-client recurring-social service scope on Issue #516; existing package quantities and unknowns were preserved.",
           "inference_note": "Initially unknown: professional_videos_per_month, reels_per_month, photo_posts_per_month, design_posters_per_month, animated_posters_per_month, campaign_management_included, monthly_campaign_budget, shoot_days_per_month, website_updates_per_month, other_agreed_deliverables, package_notes, package_exclusions. Recent production cadence was treated as supporting evidence only, not contractual scope.",
           "source_references": [
-            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5798269510"
           ],
           "confirmed_by_profile_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee"
         },
         "package_notes": null,
         "reels_per_month": null,
-        "package_exclusions": null,
+        "package_exclusions": "No recurring social-media management package is currently active; service is not yet active and remains excluded until CA activates it later.",
         "shoot_days_per_month": null,
         "photo_posts_per_month": null,
         "monthly_campaign_budget": null,
@@ -1223,7 +1225,7 @@
         "verification": {
           "status": "confirmed",
           "version": 2,
-          "confirmed_at": "2026-09-23T14:20:13.553059+00:00",
+          "confirmed_at": "2026-09-23T16:31:21.404844+00:00",
           "field_states": {
             "package_notes": "unknown",
             "reels_per_month": "unknown",
@@ -1232,16 +1234,17 @@
             "photo_posts_per_month": "unknown",
             "monthly_campaign_budget": "unknown",
             "design_posters_per_month": "unknown",
-            "other_agreed_deliverables": "unknown",
+            "other_agreed_deliverables": "known",
             "website_updates_per_month": "unknown",
             "animated_posters_per_month": "unknown",
             "campaign_management_included": "unknown",
             "professional_videos_per_month": "unknown"
           },
-          "evidence_note": "CA approved the complete 56-active-client package batch on Issue #504; exact-client evidence and named overrides were reviewed.",
+          "evidence_note": "CA approved the final exact-client recurring-social service scope on Issue #516; existing package quantities and unknowns were preserved.",
           "inference_note": "Initially unknown: professional_videos_per_month, reels_per_month, photo_posts_per_month, design_posters_per_month, animated_posters_per_month, campaign_management_included, monthly_campaign_budget, shoot_days_per_month, website_updates_per_month, other_agreed_deliverables, package_notes, package_exclusions. Recent production cadence was treated as supporting evidence only, not contractual scope.",
           "source_references": [
-            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5798269510"
           ],
           "confirmed_by_profile_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee"
         },
@@ -1252,7 +1255,7 @@
         "photo_posts_per_month": null,
         "monthly_campaign_budget": null,
         "design_posters_per_month": null,
-        "other_agreed_deliverables": null,
+        "other_agreed_deliverables": "Recurring social-media management and content are included. Fixed monthly deliverable quantities remain unknown and must not be inferred from posting history.",
         "website_updates_per_month": null,
         "animated_posters_per_month": null,
         "campaign_management_included": null,
@@ -1445,7 +1448,7 @@
         "verification": {
           "status": "confirmed",
           "version": 2,
-          "confirmed_at": "2026-09-23T14:20:13.553059+00:00",
+          "confirmed_at": "2026-09-23T16:31:21.404844+00:00",
           "field_states": {
             "package_notes": "unknown",
             "reels_per_month": "unknown",
@@ -1454,16 +1457,17 @@
             "photo_posts_per_month": "unknown",
             "monthly_campaign_budget": "unknown",
             "design_posters_per_month": "unknown",
-            "other_agreed_deliverables": "unknown",
+            "other_agreed_deliverables": "known",
             "website_updates_per_month": "unknown",
             "animated_posters_per_month": "unknown",
             "campaign_management_included": "unknown",
             "professional_videos_per_month": "unknown"
           },
-          "evidence_note": "CA approved the complete 56-active-client package batch on Issue #504; exact-client evidence and named overrides were reviewed.",
+          "evidence_note": "CA approved the final exact-client recurring-social service scope on Issue #516; existing package quantities and unknowns were preserved.",
           "inference_note": "Initially unknown: professional_videos_per_month, reels_per_month, photo_posts_per_month, design_posters_per_month, animated_posters_per_month, campaign_management_included, monthly_campaign_budget, shoot_days_per_month, website_updates_per_month, other_agreed_deliverables, package_notes, package_exclusions. Recent production cadence was treated as supporting evidence only, not contractual scope.",
           "source_references": [
-            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5798269510"
           ],
           "confirmed_by_profile_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee"
         },
@@ -1474,7 +1478,7 @@
         "photo_posts_per_month": null,
         "monthly_campaign_budget": null,
         "design_posters_per_month": null,
-        "other_agreed_deliverables": null,
+        "other_agreed_deliverables": "Recurring social-media management and content are included. Fixed monthly deliverable quantities remain unknown and must not be inferred from posting history.",
         "website_updates_per_month": null,
         "animated_posters_per_month": null,
         "campaign_management_included": null,
@@ -2567,11 +2571,11 @@
         "verification": {
           "status": "confirmed",
           "version": 2,
-          "confirmed_at": "2026-09-23T14:20:35.484902+00:00",
+          "confirmed_at": "2026-09-23T16:29:05.793301+00:00",
           "field_states": {
             "package_notes": "unknown",
             "reels_per_month": "unknown",
-            "package_exclusions": "unknown",
+            "package_exclusions": "known",
             "shoot_days_per_month": "unknown",
             "photo_posts_per_month": "unknown",
             "monthly_campaign_budget": "unknown",
@@ -2582,16 +2586,17 @@
             "campaign_management_included": "unknown",
             "professional_videos_per_month": "unknown"
           },
-          "evidence_note": "CA approved the complete 56-active-client package batch on Issue #504; exact-client evidence and named overrides were reviewed.",
+          "evidence_note": "CA approved the final exact-client recurring-social service scope on Issue #516; existing package quantities and unknowns were preserved.",
           "inference_note": "Initially unknown: professional_videos_per_month, reels_per_month, photo_posts_per_month, design_posters_per_month, animated_posters_per_month, campaign_management_included, monthly_campaign_budget, shoot_days_per_month, website_updates_per_month, other_agreed_deliverables, package_notes, package_exclusions. Recent production cadence was treated as supporting evidence only, not contractual scope.",
           "source_references": [
-            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5798269510"
           ],
           "confirmed_by_profile_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee"
         },
         "package_notes": null,
         "reels_per_month": null,
-        "package_exclusions": null,
+        "package_exclusions": "No recurring social-media management package; once-off work only.",
         "shoot_days_per_month": null,
         "photo_posts_per_month": null,
         "monthly_campaign_budget": null,
@@ -2764,11 +2769,11 @@
         "verification": {
           "status": "confirmed",
           "version": 2,
-          "confirmed_at": "2026-09-23T14:20:35.484902+00:00",
+          "confirmed_at": "2026-09-23T16:29:05.793301+00:00",
           "field_states": {
             "package_notes": "unknown",
             "reels_per_month": "unknown",
-            "package_exclusions": "unknown",
+            "package_exclusions": "known",
             "shoot_days_per_month": "unknown",
             "photo_posts_per_month": "unknown",
             "monthly_campaign_budget": "unknown",
@@ -2779,16 +2784,17 @@
             "campaign_management_included": "unknown",
             "professional_videos_per_month": "unknown"
           },
-          "evidence_note": "CA approved the complete 56-active-client package batch on Issue #504; exact-client evidence and named overrides were reviewed.",
+          "evidence_note": "CA approved the final exact-client recurring-social service scope on Issue #516; existing package quantities and unknowns were preserved.",
           "inference_note": "Initially unknown: professional_videos_per_month, reels_per_month, photo_posts_per_month, design_posters_per_month, animated_posters_per_month, campaign_management_included, monthly_campaign_budget, shoot_days_per_month, website_updates_per_month, other_agreed_deliverables, package_notes, package_exclusions. Recent production cadence was treated as supporting evidence only, not contractual scope.",
           "source_references": [
-            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5798269510"
           ],
           "confirmed_by_profile_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee"
         },
         "package_notes": null,
         "reels_per_month": null,
-        "package_exclusions": null,
+        "package_exclusions": "No recurring social-media management package; once-off work only.",
         "shoot_days_per_month": null,
         "photo_posts_per_month": null,
         "monthly_campaign_budget": null,
@@ -12341,11 +12347,11 @@
         "verification": {
           "status": "confirmed",
           "version": 2,
-          "confirmed_at": "2026-09-23T14:24:09.599287+00:00",
+          "confirmed_at": "2026-09-23T16:29:05.793301+00:00",
           "field_states": {
             "package_notes": "unknown",
             "reels_per_month": "unknown",
-            "package_exclusions": "unknown",
+            "package_exclusions": "known",
             "shoot_days_per_month": "unknown",
             "photo_posts_per_month": "unknown",
             "monthly_campaign_budget": "unknown",
@@ -12356,16 +12362,17 @@
             "campaign_management_included": "unknown",
             "professional_videos_per_month": "unknown"
           },
-          "evidence_note": "CA approved the complete 56-active-client package batch on Issue #504; exact-client evidence and named overrides were reviewed.",
+          "evidence_note": "CA approved the final exact-client recurring-social service scope on Issue #516; existing package quantities and unknowns were preserved.",
           "inference_note": "Initially unknown: professional_videos_per_month, reels_per_month, photo_posts_per_month, design_posters_per_month, animated_posters_per_month, campaign_management_included, monthly_campaign_budget, shoot_days_per_month, website_updates_per_month, other_agreed_deliverables, package_notes, package_exclusions. Recent production cadence was treated as supporting evidence only, not contractual scope.",
           "source_references": [
-            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5798269510"
           ],
           "confirmed_by_profile_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee"
         },
         "package_notes": null,
         "reels_per_month": null,
-        "package_exclusions": null,
+        "package_exclusions": "No recurring social-media management package is currently active; service is not yet active and remains excluded until CA activates it later.",
         "shoot_days_per_month": null,
         "photo_posts_per_month": null,
         "monthly_campaign_budget": null,
@@ -12563,11 +12570,11 @@
         "verification": {
           "status": "confirmed",
           "version": 2,
-          "confirmed_at": "2026-09-23T14:24:09.599287+00:00",
+          "confirmed_at": "2026-09-23T16:29:05.793301+00:00",
           "field_states": {
             "package_notes": "unknown",
             "reels_per_month": "unknown",
-            "package_exclusions": "unknown",
+            "package_exclusions": "known",
             "shoot_days_per_month": "unknown",
             "photo_posts_per_month": "unknown",
             "monthly_campaign_budget": "unknown",
@@ -12578,16 +12585,17 @@
             "campaign_management_included": "unknown",
             "professional_videos_per_month": "unknown"
           },
-          "evidence_note": "CA approved the complete 56-active-client package batch on Issue #504; exact-client evidence and named overrides were reviewed.",
+          "evidence_note": "CA approved the final exact-client recurring-social service scope on Issue #516; existing package quantities and unknowns were preserved.",
           "inference_note": "Initially unknown: professional_videos_per_month, reels_per_month, photo_posts_per_month, design_posters_per_month, animated_posters_per_month, campaign_management_included, monthly_campaign_budget, shoot_days_per_month, website_updates_per_month, other_agreed_deliverables, package_notes, package_exclusions. Recent production cadence was treated as supporting evidence only, not contractual scope.",
           "source_references": [
-            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5798269510"
           ],
           "confirmed_by_profile_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee"
         },
         "package_notes": null,
         "reels_per_month": null,
-        "package_exclusions": null,
+        "package_exclusions": "No recurring social-media management package is currently active; service is not yet active and remains excluded until CA activates it later.",
         "shoot_days_per_month": null,
         "photo_posts_per_month": null,
         "monthly_campaign_budget": null,
@@ -14912,11 +14920,11 @@
         "verification": {
           "status": "confirmed",
           "version": 2,
-          "confirmed_at": "2026-09-23T14:24:52.727679+00:00",
+          "confirmed_at": "2026-09-23T16:29:05.793301+00:00",
           "field_states": {
             "package_notes": "unknown",
             "reels_per_month": "unknown",
-            "package_exclusions": "unknown",
+            "package_exclusions": "known",
             "shoot_days_per_month": "unknown",
             "photo_posts_per_month": "unknown",
             "monthly_campaign_budget": "unknown",
@@ -14927,16 +14935,17 @@
             "campaign_management_included": "unknown",
             "professional_videos_per_month": "unknown"
           },
-          "evidence_note": "CA approved the complete 56-active-client package batch on Issue #504; exact-client evidence and named overrides were reviewed.",
+          "evidence_note": "CA approved the final exact-client recurring-social service scope on Issue #516; existing package quantities and unknowns were preserved.",
           "inference_note": "Initially unknown: professional_videos_per_month, reels_per_month, photo_posts_per_month, design_posters_per_month, animated_posters_per_month, campaign_management_included, monthly_campaign_budget, shoot_days_per_month, website_updates_per_month, other_agreed_deliverables, package_notes, package_exclusions. Recent production cadence was treated as supporting evidence only, not contractual scope.",
           "source_references": [
-            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5798269510"
           ],
           "confirmed_by_profile_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee"
         },
         "package_notes": null,
         "reels_per_month": null,
-        "package_exclusions": null,
+        "package_exclusions": "No recurring social-media management package; project, creative and event work only, with no social account access.",
         "shoot_days_per_month": null,
         "photo_posts_per_month": null,
         "monthly_campaign_budget": null,
@@ -15134,11 +15143,11 @@
         "verification": {
           "status": "confirmed",
           "version": 2,
-          "confirmed_at": "2026-09-23T14:24:52.727679+00:00",
+          "confirmed_at": "2026-09-23T16:29:05.793301+00:00",
           "field_states": {
             "package_notes": "unknown",
             "reels_per_month": "unknown",
-            "package_exclusions": "unknown",
+            "package_exclusions": "known",
             "shoot_days_per_month": "unknown",
             "photo_posts_per_month": "unknown",
             "monthly_campaign_budget": "unknown",
@@ -15149,16 +15158,17 @@
             "campaign_management_included": "unknown",
             "professional_videos_per_month": "unknown"
           },
-          "evidence_note": "CA approved the complete 56-active-client package batch on Issue #504; exact-client evidence and named overrides were reviewed.",
+          "evidence_note": "CA approved the final exact-client recurring-social service scope on Issue #516; existing package quantities and unknowns were preserved.",
           "inference_note": "Initially unknown: professional_videos_per_month, reels_per_month, photo_posts_per_month, design_posters_per_month, animated_posters_per_month, campaign_management_included, monthly_campaign_budget, shoot_days_per_month, website_updates_per_month, other_agreed_deliverables, package_notes, package_exclusions. Recent production cadence was treated as supporting evidence only, not contractual scope.",
           "source_references": [
-            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5798269510"
           ],
           "confirmed_by_profile_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee"
         },
         "package_notes": null,
         "reels_per_month": null,
-        "package_exclusions": null,
+        "package_exclusions": "No recurring social-media management package; project, creative and event work only, with no social account access.",
         "shoot_days_per_month": null,
         "photo_posts_per_month": null,
         "monthly_campaign_budget": null,
@@ -15343,11 +15353,11 @@
         "verification": {
           "status": "confirmed",
           "version": 2,
-          "confirmed_at": "2026-09-23T14:25:09.86169+00:00",
+          "confirmed_at": "2026-09-23T16:29:05.793301+00:00",
           "field_states": {
             "package_notes": "unknown",
             "reels_per_month": "unknown",
-            "package_exclusions": "unknown",
+            "package_exclusions": "known",
             "shoot_days_per_month": "unknown",
             "photo_posts_per_month": "unknown",
             "monthly_campaign_budget": "unknown",
@@ -15358,16 +15368,17 @@
             "campaign_management_included": "unknown",
             "professional_videos_per_month": "unknown"
           },
-          "evidence_note": "CA approved the complete 56-active-client package batch on Issue #504; exact-client evidence and named overrides were reviewed.",
+          "evidence_note": "CA approved the final exact-client recurring-social service scope on Issue #516; existing package quantities and unknowns were preserved.",
           "inference_note": "Initially unknown: professional_videos_per_month, reels_per_month, photo_posts_per_month, design_posters_per_month, animated_posters_per_month, campaign_management_included, monthly_campaign_budget, shoot_days_per_month, website_updates_per_month, other_agreed_deliverables, package_notes, package_exclusions. Recent production cadence was treated as supporting evidence only, not contractual scope.",
           "source_references": [
-            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5798269510"
           ],
           "confirmed_by_profile_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee"
         },
         "package_notes": null,
         "reels_per_month": null,
-        "package_exclusions": null,
+        "package_exclusions": "No recurring social-media management package; once-off work only.",
         "shoot_days_per_month": null,
         "photo_posts_per_month": null,
         "monthly_campaign_budget": null,
@@ -15540,11 +15551,11 @@
         "verification": {
           "status": "confirmed",
           "version": 2,
-          "confirmed_at": "2026-09-23T14:25:09.86169+00:00",
+          "confirmed_at": "2026-09-23T16:29:05.793301+00:00",
           "field_states": {
             "package_notes": "unknown",
             "reels_per_month": "unknown",
-            "package_exclusions": "unknown",
+            "package_exclusions": "known",
             "shoot_days_per_month": "unknown",
             "photo_posts_per_month": "unknown",
             "monthly_campaign_budget": "unknown",
@@ -15555,16 +15566,17 @@
             "campaign_management_included": "unknown",
             "professional_videos_per_month": "unknown"
           },
-          "evidence_note": "CA approved the complete 56-active-client package batch on Issue #504; exact-client evidence and named overrides were reviewed.",
+          "evidence_note": "CA approved the final exact-client recurring-social service scope on Issue #516; existing package quantities and unknowns were preserved.",
           "inference_note": "Initially unknown: professional_videos_per_month, reels_per_month, photo_posts_per_month, design_posters_per_month, animated_posters_per_month, campaign_management_included, monthly_campaign_budget, shoot_days_per_month, website_updates_per_month, other_agreed_deliverables, package_notes, package_exclusions. Recent production cadence was treated as supporting evidence only, not contractual scope.",
           "source_references": [
-            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5798269510"
           ],
           "confirmed_by_profile_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee"
         },
         "package_notes": null,
         "reels_per_month": null,
-        "package_exclusions": null,
+        "package_exclusions": "No recurring social-media management package; once-off work only.",
         "shoot_days_per_month": null,
         "photo_posts_per_month": null,
         "monthly_campaign_budget": null,
@@ -21724,7 +21736,7 @@
         "verification": {
           "status": "confirmed",
           "version": 2,
-          "confirmed_at": "2026-09-23T14:27:28.986483+00:00",
+          "confirmed_at": "2026-09-23T16:31:21.404844+00:00",
           "field_states": {
             "package_notes": "unknown",
             "reels_per_month": "unknown",
@@ -21733,16 +21745,17 @@
             "photo_posts_per_month": "unknown",
             "monthly_campaign_budget": "unknown",
             "design_posters_per_month": "unknown",
-            "other_agreed_deliverables": "unknown",
+            "other_agreed_deliverables": "known",
             "website_updates_per_month": "unknown",
             "animated_posters_per_month": "unknown",
             "campaign_management_included": "unknown",
             "professional_videos_per_month": "unknown"
           },
-          "evidence_note": "CA approved the complete 56-active-client package batch on Issue #504; exact-client evidence and named overrides were reviewed.",
+          "evidence_note": "CA approved the final exact-client recurring-social service scope on Issue #516; existing package quantities and unknowns were preserved.",
           "inference_note": "Initially unknown: professional_videos_per_month, reels_per_month, photo_posts_per_month, design_posters_per_month, animated_posters_per_month, campaign_management_included, monthly_campaign_budget, shoot_days_per_month, website_updates_per_month, other_agreed_deliverables, package_notes, package_exclusions. Recent production cadence was treated as supporting evidence only, not contractual scope.",
           "source_references": [
-            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5798269510"
           ],
           "confirmed_by_profile_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee"
         },
@@ -21753,7 +21766,7 @@
         "photo_posts_per_month": null,
         "monthly_campaign_budget": null,
         "design_posters_per_month": null,
-        "other_agreed_deliverables": null,
+        "other_agreed_deliverables": "Recurring social-media management and content are included for Vrystaat Kunstefees. Fixed monthly deliverable quantities remain unknown and event/programme details remain freshness-sensitive.",
         "website_updates_per_month": null,
         "animated_posters_per_month": null,
         "campaign_management_included": null,
@@ -21921,7 +21934,7 @@
         "verification": {
           "status": "confirmed",
           "version": 2,
-          "confirmed_at": "2026-09-23T14:27:28.986483+00:00",
+          "confirmed_at": "2026-09-23T16:31:21.404844+00:00",
           "field_states": {
             "package_notes": "unknown",
             "reels_per_month": "unknown",
@@ -21930,16 +21943,17 @@
             "photo_posts_per_month": "unknown",
             "monthly_campaign_budget": "unknown",
             "design_posters_per_month": "unknown",
-            "other_agreed_deliverables": "unknown",
+            "other_agreed_deliverables": "known",
             "website_updates_per_month": "unknown",
             "animated_posters_per_month": "unknown",
             "campaign_management_included": "unknown",
             "professional_videos_per_month": "unknown"
           },
-          "evidence_note": "CA approved the complete 56-active-client package batch on Issue #504; exact-client evidence and named overrides were reviewed.",
+          "evidence_note": "CA approved the final exact-client recurring-social service scope on Issue #516; existing package quantities and unknowns were preserved.",
           "inference_note": "Initially unknown: professional_videos_per_month, reels_per_month, photo_posts_per_month, design_posters_per_month, animated_posters_per_month, campaign_management_included, monthly_campaign_budget, shoot_days_per_month, website_updates_per_month, other_agreed_deliverables, package_notes, package_exclusions. Recent production cadence was treated as supporting evidence only, not contractual scope.",
           "source_references": [
-            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5798269510"
           ],
           "confirmed_by_profile_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee"
         },
@@ -21950,7 +21964,7 @@
         "photo_posts_per_month": null,
         "monthly_campaign_budget": null,
         "design_posters_per_month": null,
-        "other_agreed_deliverables": null,
+        "other_agreed_deliverables": "Recurring social-media management and content are included for Vrystaat Kunstefees. Fixed monthly deliverable quantities remain unknown and event/programme details remain freshness-sensitive.",
         "website_updates_per_month": null,
         "animated_posters_per_month": null,
         "campaign_management_included": null,
@@ -23859,7 +23873,7 @@
         "verification": {
           "status": "confirmed",
           "version": 2,
-          "confirmed_at": "2026-09-23T14:28:07.185488+00:00",
+          "confirmed_at": "2026-09-23T16:31:21.404844+00:00",
           "field_states": {
             "package_notes": "unknown",
             "reels_per_month": "unknown",
@@ -23868,16 +23882,17 @@
             "photo_posts_per_month": "unknown",
             "monthly_campaign_budget": "unknown",
             "design_posters_per_month": "unknown",
-            "other_agreed_deliverables": "unknown",
+            "other_agreed_deliverables": "known",
             "website_updates_per_month": "unknown",
             "animated_posters_per_month": "unknown",
             "campaign_management_included": "unknown",
             "professional_videos_per_month": "unknown"
           },
-          "evidence_note": "CA approved the complete 56-active-client package batch on Issue #504; exact-client evidence and named overrides were reviewed.",
+          "evidence_note": "CA approved the final exact-client recurring-social service scope on Issue #516; existing package quantities and unknowns were preserved.",
           "inference_note": "Initially unknown: professional_videos_per_month, reels_per_month, photo_posts_per_month, design_posters_per_month, animated_posters_per_month, campaign_management_included, monthly_campaign_budget, shoot_days_per_month, website_updates_per_month, other_agreed_deliverables, package_notes, package_exclusions. Recent production cadence was treated as supporting evidence only, not contractual scope.",
           "source_references": [
-            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5798269510"
           ],
           "confirmed_by_profile_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee"
         },
@@ -23888,7 +23903,7 @@
         "photo_posts_per_month": null,
         "monthly_campaign_budget": null,
         "design_posters_per_month": null,
-        "other_agreed_deliverables": null,
+        "other_agreed_deliverables": "Recurring social-media management and content are included across ZooZ Lifestyle and WFF content. Fixed monthly deliverable quantities remain unknown; ZooZ product/programme and WFF event/athlete content must remain clearly distinguished.",
         "website_updates_per_month": null,
         "animated_posters_per_month": null,
         "campaign_management_included": null,
@@ -24056,7 +24071,7 @@
         "verification": {
           "status": "confirmed",
           "version": 2,
-          "confirmed_at": "2026-09-23T14:28:07.185488+00:00",
+          "confirmed_at": "2026-09-23T16:31:21.404844+00:00",
           "field_states": {
             "package_notes": "unknown",
             "reels_per_month": "unknown",
@@ -24065,16 +24080,17 @@
             "photo_posts_per_month": "unknown",
             "monthly_campaign_budget": "unknown",
             "design_posters_per_month": "unknown",
-            "other_agreed_deliverables": "unknown",
+            "other_agreed_deliverables": "known",
             "website_updates_per_month": "unknown",
             "animated_posters_per_month": "unknown",
             "campaign_management_included": "unknown",
             "professional_videos_per_month": "unknown"
           },
-          "evidence_note": "CA approved the complete 56-active-client package batch on Issue #504; exact-client evidence and named overrides were reviewed.",
+          "evidence_note": "CA approved the final exact-client recurring-social service scope on Issue #516; existing package quantities and unknowns were preserved.",
           "inference_note": "Initially unknown: professional_videos_per_month, reels_per_month, photo_posts_per_month, design_posters_per_month, animated_posters_per_month, campaign_management_included, monthly_campaign_budget, shoot_days_per_month, website_updates_per_month, other_agreed_deliverables, package_notes, package_exclusions. Recent production cadence was treated as supporting evidence only, not contractual scope.",
           "source_references": [
-            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5798269510"
           ],
           "confirmed_by_profile_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee"
         },
@@ -24085,7 +24101,7 @@
         "photo_posts_per_month": null,
         "monthly_campaign_budget": null,
         "design_posters_per_month": null,
-        "other_agreed_deliverables": null,
+        "other_agreed_deliverables": "Recurring social-media management and content are included across ZooZ Lifestyle and WFF content. Fixed monthly deliverable quantities remain unknown; ZooZ product/programme and WFF event/athlete content must remain clearly distinguished.",
         "website_updates_per_month": null,
         "animated_posters_per_month": null,
         "campaign_management_included": null,

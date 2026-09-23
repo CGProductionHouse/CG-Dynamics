@@ -3,7 +3,7 @@
   "issue": 513,
   "mode": "dry_run",
   "write_count": 0,
-  "source_snapshot_generated_at": "2026-09-23T16:07:42.661Z",
+  "source_snapshot_generated_at": "2026-09-23T17:08:08.859Z",
   "service_scope_authority": {
     "eligible": "https://github.com/CGProductionHouse/CG-Dynamics/issues/515",
     "held": "https://github.com/CGProductionHouse/CG-Dynamics/issues/516"
@@ -17471,5 +17471,5 @@
       "proposed_seed_context_hash": "7841c6c9c58a4e34c06a8b0f0897d7c2c5f33f09d72e88b49975a3a50f9c8619"
     }
   ],
-  "plan_hash": "26286e987c72ce44d65b9a99b829ff65fb2a59a6de11101ce0b90a052875f091"
+  "plan_hash": "94e42112c8f8ed79cef7383302c9ff85ff9d813e6aa3f4a016c3c4be165f3665"
 }
