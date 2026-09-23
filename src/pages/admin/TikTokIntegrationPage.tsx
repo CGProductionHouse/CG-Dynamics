@@ -1,15 +1,17 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ActionButton } from '../../components/ui/Buttons'
 import { PremiumCard, PremiumCardHeader } from '../../components/ui/PremiumCard'
 import { StatusBadge, Pill } from '../../components/ui/Badges'
 import { LoadingState } from '../../components/ui/States'
-import { listClients, type Client } from '../../lib/db/clients'
 import {
-  startTiktokOAuth,
+  getTiktokConnectionQueue,
   getTiktokConnectionStatus,
+  startTiktokOAuth,
   syncTiktokAnalytics,
   TIKTOK_METRICS,
+  type TiktokConnectionQueue,
+  type TiktokConnectionQueueItem,
   type TiktokConnectionStatus,
   type TiktokSyncResult,
 } from '../../lib/tiktok'
@@ -21,400 +23,224 @@ function currentMonth(): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
 }
 
-function messageFrom(error: unknown, fallback: string): string {
-  return error instanceof Error && error.message ? error.message : fallback
-}
-
-function formatDateTime(value: string | null): string {
+function formatDateTime(value: string | null | undefined): string {
   if (!value) return 'Never'
   const date = new Date(value)
   return Number.isNaN(date.getTime()) ? 'Unavailable' : date.toLocaleString()
 }
 
+function messageFrom(error: unknown, fallback: string): string {
+  return error instanceof Error && error.message ? error.message : fallback
+}
+
+const emptyQueue: TiktokConnectionQueue = {
+  ok: true,
+  items: [],
+  summary: { activeClients: 0, connected: 0, reconnectRequired: 0, notConnected: 0 },
+}
+
+const callbackMessages: Record<string, { tone: 'error' | 'success' | 'warning'; message: string }> = {
+  connected: { tone: 'success', message: 'TikTok connected and verified for the selected client.' },
+  permissions_missing: { tone: 'warning', message: 'TikTok connected, but required read permissions were not granted. Reconnect and grant every requested permission.' },
+  account_conflict: { tone: 'error', message: 'That TikTok account is already mapped to another CG client. The mapping was not changed.' },
+  identity_error: { tone: 'error', message: 'TikTok returned an identity that could not be verified. The mapping was not changed.' },
+  ineligible: { tone: 'error', message: 'The client or staff account is no longer eligible for this connection.' },
+  config_error: { tone: 'error', message: 'TikTok is not configured. Ask an admin to check the approved provider configuration.' },
+  error: { tone: 'error', message: 'TikTok connection failed without changing the selected client mapping. Please try again.' },
+}
+
 export default function TikTokIntegrationPage() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
-  const oauthResult = searchParams.get('tiktok')
-  const [clients, setClients] = useState<Client[]>([])
-  const [status, setStatus] = useState<TiktokConnectionStatus | null>(null)
+  const callbackResult = searchParams.get('tiktok')
+  const callbackClientId = searchParams.get('client') ?? ''
+  const [queue, setQueue] = useState<TiktokConnectionQueue>(emptyQueue)
+  const [selectedClientId, setSelectedClientId] = useState(callbackClientId)
+  const [statusState, setStatusState] = useState<{ clientId: string; value: TiktokConnectionStatus } | null>(null)
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(() => {
-    if (oauthResult === 'permissions_missing') return 'Some TikTok permissions were not granted. Reconnect to grant all required scopes.'
-    if (oauthResult === 'error') return 'TikTok connection failed. Please try again.'
-    if (oauthResult === 'config_error') return 'TikTok is not configured. Ask an admin to set Edge Function secrets.'
-    return null
-  })
-  const [notice, setNotice] = useState<string | null>(() => oauthResult === 'connected' ? 'TikTok connected successfully.' : null)
+  const [message, setMessage] = useState(callbackResult ? callbackMessages[callbackResult] ?? callbackMessages.error : null)
   const [syncMonth, setSyncMonth] = useState(currentMonth())
-  const [syncClientId, setSyncClientId] = useState('')
   const [syncResult, setSyncResult] = useState<TiktokSyncResult | null>(null)
+  const [search, setSearch] = useState('')
 
-  // Handle OAuth callback params — reload status for the selected client
-  useEffect(() => {
-    const tiktokParam = searchParams.get('tiktok')
-    if (tiktokParam) {
-      const nextParams = new URLSearchParams(searchParams)
-      nextParams.delete('tiktok')
-      setSearchParams(nextParams, { replace: true })
-      // Reload connection status after OAuth completes
-      if (syncClientId) {
-        getTiktokConnectionStatus(syncClientId).then(setStatus)
-      }
-    }
-  }, [searchParams, setSearchParams, syncClientId])
-
-  async function load(silent = false) {
+  async function loadQueue(silent = false) {
     try {
-      const [clientResult, connectionStatus] = await Promise.all([
-        listClients('all'),
-        getTiktokConnectionStatus(syncClientId || undefined),
-      ])
-      if (clientResult.error) throw new Error(clientResult.error.message)
-      setClients(clientResult.data.filter(c => c.active))
-      setStatus(connectionStatus)
-    } catch (loadError) {
-      setError(messageFrom(loadError, 'Could not load TikTok integration.'))
+      const result = await getTiktokConnectionQueue()
+      if (!result.ok) throw new Error(result.error ?? 'Could not load the TikTok connection queue.')
+      setQueue(result)
+      setSelectedClientId(current => {
+        if (current && result.items.some(item => item.clientId === current)) return current
+        return result.items.find(item => item.state === 'reconnect_required')?.clientId
+          ?? result.items.find(item => item.state === 'not_connected')?.clientId
+          ?? result.items[0]?.clientId
+          ?? ''
+      })
+    } catch (error) {
+      setMessage({ tone: 'error', message: messageFrom(error, 'Could not load the TikTok connection queue.') })
     } finally {
       if (!silent) setLoading(false)
     }
   }
 
-  // Load clients on mount; connection status loads per-client below
   useEffect(() => {
-    let active = true
-    ;(async () => {
-      try {
-        const clientResult = await listClients('all')
-        if (clientResult.error) throw new Error(clientResult.error.message)
-        if (active) setClients(clientResult.data.filter(c => c.active))
-      } catch (loadError) {
-        if (active) setError(messageFrom(loadError, 'Could not load TikTok integration.'))
-      } finally {
-        if (active) setLoading(false)
+    let current = true
+    getTiktokConnectionQueue().then(result => {
+      if (!current) return
+      if (!result.ok) {
+        setMessage({ tone: 'error', message: result.error ?? 'Could not load the TikTok connection queue.' })
+        setLoading(false)
+        return
       }
-    })()
-    return () => { active = false }
+      setQueue(result)
+      setSelectedClientId(selected => selected && result.items.some(item => item.clientId === selected)
+        ? selected
+        : result.items.find(item => item.state === 'reconnect_required')?.clientId
+          ?? result.items.find(item => item.state === 'not_connected')?.clientId
+          ?? result.items[0]?.clientId
+          ?? '')
+      setLoading(false)
+    })
+    return () => { current = false }
   }, [])
 
-  // Load connection status whenever the selected client changes
   useEffect(() => {
-    if (!syncClientId) return
-    let active = true
-    getTiktokConnectionStatus(syncClientId).then(s => { if (active) setStatus(s) })
-    return () => { active = false }
-  }, [syncClientId])
+    if (!callbackResult) return
+    const next = new URLSearchParams(searchParams)
+    next.delete('tiktok')
+    next.delete('client')
+    setSearchParams(next, { replace: true })
+  }, [callbackResult, searchParams, setSearchParams])
+
+  useEffect(() => {
+    if (!selectedClientId) return
+    let current = true
+    getTiktokConnectionStatus(selectedClientId).then(result => {
+      if (current) setStatusState({ clientId: selectedClientId, value: result })
+    })
+    return () => { current = false }
+  }, [selectedClientId, queue])
+
+  const selected = queue.items.find(item => item.clientId === selectedClientId) ?? null
+  const status = statusState?.clientId === selectedClientId ? statusState.value : null
+  const filteredItems = useMemo(() => {
+    const term = search.trim().toLocaleLowerCase()
+    return term ? queue.items.filter(item => item.clientName.toLocaleLowerCase().includes(term) || item.account?.displayName?.toLocaleLowerCase().includes(term)) : queue.items
+  }, [queue.items, search])
 
   async function runAction(key: string, task: () => Promise<string | void>) {
     setBusy(key)
-    setError(null)
-    setNotice(null)
+    setMessage(null)
     try {
-      const message = await task()
-      if (message) setNotice(message)
-    } catch (actionError) {
-      setError(messageFrom(actionError, 'TikTok request failed.'))
+      const result = await task()
+      if (result) setMessage({ tone: 'success', message: result })
+    } catch (error) {
+      setMessage({ tone: 'error', message: messageFrom(error, 'TikTok request failed.') })
     } finally {
       setBusy(null)
     }
   }
 
-  async function handleConnect() {
-    if (!syncClientId) {
-      setError('Select a client first — TikTok connections are bound to a specific client.')
-      return
-    }
-    await runAction('connect', async () => {
-      const result = await startTiktokOAuth(syncClientId)
-      if (!result.ok) throw new Error(result.error ?? 'Could not start TikTok OAuth.')
-      if (result.url) window.location.href = result.url
-      return undefined
+  async function connect(item: TiktokConnectionQueueItem) {
+    setSelectedClientId(item.clientId)
+    await runAction(`connect:${item.clientId}`, async () => {
+      const result = await startTiktokOAuth(item.clientId)
+      if (!result.ok || !result.url) throw new Error(result.error ?? 'Could not start TikTok OAuth.')
+      window.location.assign(result.url)
     })
+  }
+
+  function nextClient() {
+    const unresolved = queue.items.filter(item => item.state === 'reconnect_required' || item.state === 'not_connected')
+    const currentIndex = unresolved.findIndex(item => item.clientId === selectedClientId)
+    const next = unresolved[currentIndex >= 0 ? (currentIndex + 1) % unresolved.length : 0]
+    if (next) setSelectedClientId(next.clientId)
   }
 
   function runSync() {
-    if (!syncClientId) {
-      setError('Select a client before syncing.')
-      return
-    }
+    if (!selectedClientId) return
     void runAction('sync', async () => {
-      const result = await syncTiktokAnalytics(syncClientId, syncMonth)
+      const result = await syncTiktokAnalytics(selectedClientId, syncMonth)
       setSyncResult(result)
-      await load(true)
-      if (!result.ok) {
-        return `Sync failed. ${(result.errors ?? []).join('; ') || result.error || ''}`
-      }
-      const healthNote = result.health === 'partial' ? ' (partial — see notes)' : ''
-      const videoCount = result.videosSynced === null ? 'an unavailable number of' : result.videosSynced
-      return `TikTok sync completed${healthNote}. ${videoCount} video${result.videosSynced === 1 ? '' : 's'} synced for ${result.periodMonth}.`
+      await loadQueue(true)
+      if (!result.ok) throw new Error((result.errors ?? []).join('; ') || result.error || 'TikTok sync failed.')
+      const count = result.videosSynced === null ? 'an unavailable number of' : result.videosSynced
+      return `TikTok sync completed${result.health === 'partial' ? ' with partial data' : ''}: ${count} video${result.videosSynced === 1 ? '' : 's'} for ${result.periodMonth}.`
     })
   }
 
-  if (loading) return <LoadingState message="Loading TikTok integration..." className="min-h-[55vh]" />
+  if (loading) return <LoadingState message="Loading active-client TikTok queue..." className="min-h-[55vh]" />
 
-  const connected = status?.connected ?? false
-  const statusLabel = !status ? 'Checking...' : connected ? 'Connected' : 'Not connected'
-  const statusVariant = connected ? 'published' : 'internal-draft'
+  const reconnect = selected?.state === 'reconnect_required'
+  const connectable = selected?.state === 'not_connected' || reconnect
+  const connected = selected?.state === 'connected' || selected?.state === 'refresh_pending'
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
+    <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-accent">Integrations</p>
-          <h1 className="mt-2 text-2xl font-semibold text-white">TikTok connection</h1>
-          <p className="mt-1 max-w-3xl text-sm text-brand-primary">
-            Connect an exact TikTok account for read-only organic analytics through TikTok&apos;s official Login Kit and Display API.
-          </p>
+          <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-accent">TikTok fleet</p>
+          <h1 className="mt-2 text-3xl font-semibold text-white">Connection queue</h1>
+          <p className="mt-2 max-w-3xl text-sm text-brand-primary">Connect each active client to its exact TikTok account through TikTok&apos;s provider-owned OAuth screen. One consent keeps daily read-only analytics fresh automatically.</p>
         </div>
-        <ActionButton variant="ghost" onClick={() => navigate('/admin/integrations')}>Back to integrations</ActionButton>
+        <div className="flex gap-2"><ActionButton variant="outline" onClick={nextClient} disabled={queue.summary.reconnectRequired + queue.summary.notConnected === 0}>Next client</ActionButton><ActionButton variant="ghost" onClick={() => navigate('/admin/integrations')}>Back</ActionButton></div>
       </div>
 
-      {error && <Message tone="error">{error}</Message>}
-      {notice && <Message tone="success">{notice}</Message>}
+      {message && <Message tone={message.tone}>{message.message}</Message>}
 
-      <div className="mt-6 space-y-6">
-        {/* Connection card */}
-        <PremiumCard>
-          <PremiumCardHeader
-            eyebrow="Connection"
-            title="TikTok account"
-            subtitle={connected && status?.connection
-              ? `Connected as ${status.connection.displayName ?? 'TikTok user'}. Token ${status.connection.tokenExpired ? 'needs refresh' : 'valid'}.`
-              : 'Connect a TikTok account to enable read-only analytics sync.'}
-            action={
-              <div className="flex items-center gap-3">
-                <StatusBadge label={statusLabel} variant={statusVariant} size="sm" />
-                {connected
-                  ? <ActionButton variant="outline" loading={busy === 'refresh'} onClick={() => void runAction('refresh', async () => { await load(true); return 'Refreshed.' })}>Refresh</ActionButton>
-                  : <ActionButton loading={busy === 'connect'} onClick={handleConnect}>Connect TikTok</ActionButton>
-                }
-              </div>
-            }
-          />
+      <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Summary label="Active clients" value={queue.summary.activeClients} />
+        <Summary label="Connected" value={queue.summary.connected} tone="teal" />
+        <Summary label="Reconnect" value={queue.summary.reconnectRequired} tone="amber" />
+        <Summary label="Not connected" value={queue.summary.notConnected} />
+      </div>
 
-          {connected && status?.connection && (
-            <div className="mt-4 rounded-lg border border-white/8 bg-black/20 p-4">
-              <div className="flex items-center gap-4">
-                {status.connection.avatarUrl && (
-                  <img src={status.connection.avatarUrl} alt="" className="h-12 w-12 rounded-full" />
-                )}
-                <div>
-                  <p className="font-semibold text-white">{status.connection.displayName ?? 'TikTok user'}</p>
-                  <p className="text-xs text-brand-primary">
-                    Last connected: {formatDateTime(status.connection.lastConnectedAt)}
-                    {status.connection.tokenExpiresAt && <> · Token expires: {formatDateTime(status.connection.tokenExpiresAt)}</>}
-                  </p>
-                </div>
-              </div>
-              {status.connection.grantedScopes.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {status.connection.grantedScopes.map(scope => (
-                    <Pill key={scope} tone="neutral">{scope}</Pill>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {status?.health && (
-            <div className="mt-4 rounded-lg border border-white/8 bg-black/20 p-4">
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                <HealthDimension label="Access" value={status.health.access} />
-                <HealthDimension label="Coverage" value={status.health.coverage} />
-                <HealthDimension label="Completeness" value={status.health.completeness} />
-                <HealthDimension label="Freshness" value={status.health.freshness} />
-              </div>
-              <p className="mt-3 text-xs text-brand-primary">{status.health.staffDiagnostic}</p>
-              <p className="mt-1 text-xs text-white/50">
-                Last verified refresh: {formatDateTime(status.health.lastSuccessfulAt)}
-                {status.health.ageHours !== null && <> · {status.health.ageHours}h ago</>}
-              </p>
-            </div>
-          )}
-
-          {!connected && (
-            <div className="mt-4 space-y-3">
-              <div className="rounded-lg border border-white/8 bg-black/20 p-4">
-                <h3 className="text-sm font-semibold text-white">Prerequisites</h3>
-                <ul className="mt-2 space-y-1.5 text-sm text-brand-primary">
-                  <li>Register an app on TikTok for Developers and authorize the exact account as a sandbox target user.</li>
-                  <li>Enable Login Kit and configure a redirect URI for your Supabase Edge Function callback.</li>
-                  <li>Read-only rollout requests user.info.basic, user.info.profile, user.info.stats, and video.list.</li>
-                </ul>
-              </div>
-              <div className="rounded-lg border border-amber-400/20 bg-amber-400/5 p-4 text-sm text-amber-200">
-                Publishing is unavailable in this rollout. CG Dynamics does not request video.publish or send content to TikTok.
-              </div>
-            </div>
-          )}
-        </PremiumCard>
-
-        {/* Analytics sync */}
-        <PremiumCard>
-          <PremiumCardHeader
-            eyebrow="Analytics"
-            title="Sync TikTok metrics"
-            subtitle="Fetch cumulative video metrics and profile snapshots from TikTok's Display API. Video metrics are snapshots at sync time — not period totals."
-          />
-          <div className="grid gap-4 md:grid-cols-[220px_1fr_auto] md:items-end">
-            <Field label="Month">
-              <input
-                className={INPUT_CLASS}
-                type="month"
-                max={currentMonth()}
-                value={syncMonth}
-                onChange={event => setSyncMonth(event.target.value)}
-              />
-            </Field>
-            <Field label="Client">
-              <select
-                className={INPUT_CLASS}
-                value={syncClientId}
-                onChange={event => {
-                  setStatus(null)
-                  setSyncClientId(event.target.value)
-                }}
-              >
-                <option value="">Select a client</option>
-                {clients.map(client => (
-                  <option key={client.id} value={client.id}>{client.name}</option>
-                ))}
-              </select>
-            </Field>
-            <ActionButton
-              loading={busy === 'sync'}
-              disabled={!connected || !syncClientId}
-              onClick={runSync}
-            >
-              Run sync
-            </ActionButton>
-          </div>
-
-          {syncResult && syncResult.ok && (
-            <div className="mt-5 rounded-lg border border-white/8 bg-black/20 p-4" aria-live="polite">
-              <h4 className="text-sm font-semibold text-white">Sync results — {syncResult.periodMonth}</h4>
-              {syncResult.health === 'partial' && (
-                <p className="mt-1 text-xs text-amber-300">
-                  Partial sync — some data may be incomplete. {syncResult.paginationComplete ? '' : 'Video list was truncated.'}
-                </p>
-              )}
-              <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-                <MetricCard label="Videos" value={syncResult.videosSynced} />
-                <MetricCard label="Views (cumulative)" value={syncResult.metrics.views} />
-                <MetricCard label="Likes (cumulative)" value={syncResult.metrics.likes} />
-                <MetricCard label="Comments (cumulative)" value={syncResult.metrics.comments} />
-                <MetricCard label="Shares (cumulative)" value={syncResult.metrics.shares} />
-              </div>
-              {syncResult.metrics.followers !== null && (
-                <p className="mt-3 text-xs text-brand-primary">
-                  Followers at sync time: {syncResult.metrics.followers.toLocaleString()} (current snapshot, not period-specific)
-                </p>
-              )}
-              <p className="mt-2 text-xs text-brand-primary">
-                Note: Video metrics are cumulative snapshots at sync time, not period totals. Re-syncing later will produce different numbers as videos accumulate engagement.
-              </p>
-            </div>
-          )}
-        </PremiumCard>
-
-        {/* Metric reference */}
-        <PremiumCard>
-          <PremiumCardHeader
-            eyebrow="Reference"
-            title="TikTok-native metrics"
-            subtitle="All metrics use TikTok's exact metric definitions and naming. No invented or relabeled metrics."
-          />
-          <div className="overflow-x-auto rounded-lg border border-white/8">
-            <table className="min-w-[700px] w-full divide-y divide-white/8 text-left text-sm">
-              <thead className="bg-black/30 text-xs uppercase tracking-wide text-brand-primary">
-                <tr>
-                  <th className="px-4 py-3">Metric</th>
-                  <th className="px-4 py-3">Source field</th>
-                  <th className="px-4 py-3">Aggregation</th>
-                  <th className="px-4 py-3">Cross-platform</th>
-                  <th className="px-4 py-3">Meaning</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/8">
-                {TIKTOK_METRICS.map(metric => (
-                  <tr key={metric.key}>
-                    <td className="px-4 py-3 font-medium text-white">{metric.label}</td>
-                    <td className="px-4 py-3 font-mono text-xs text-brand-primary">{metric.sourceMetric}</td>
-                    <td className="px-4 py-3"><Pill tone="neutral">{metric.aggregation}</Pill></td>
-                    <td className="px-4 py-3">{metric.crossPlatformAdditive ? 'Yes' : 'No'}</td>
-                    <td className="px-4 py-3 text-xs text-brand-primary">{metric.meaning}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(320px,0.8fr)_minmax(0,1.4fr)]">
+        <PremiumCard className="lg:sticky lg:top-6 lg:self-start">
+          <PremiumCardHeader eyebrow="Active clients only" title="Work the queue" subtitle="Provider identity is shown only after TikTok verifies it." />
+          <input className={INPUT_CLASS} value={search} onChange={event => setSearch(event.target.value)} placeholder="Search client or verified account" aria-label="Search TikTok connection queue" />
+          <div className="mt-4 max-h-[660px] space-y-2 overflow-y-auto pr-1">
+            {filteredItems.map(item => (
+              <button key={item.clientId} type="button" onClick={() => setSelectedClientId(item.clientId)} className={`w-full rounded-xl border p-3 text-left transition ${item.clientId === selectedClientId ? 'border-brand-accent/50 bg-brand-accent/10' : 'border-white/8 bg-black/20 hover:border-white/20'}`}>
+                <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="truncate text-sm font-semibold text-white">{item.clientName}</p><p className="mt-1 truncate text-xs text-white/45">{item.account?.displayName ?? 'No provider account verified'}</p></div><QueueState state={item.state} /></div>
+              </button>
+            ))}
           </div>
         </PremiumCard>
 
-        {/* Publishing rollout boundary */}
-        <PremiumCard>
-          <PremiumCardHeader
-            eyebrow="Publishing"
-            title="Not enabled"
-            subtitle="This connection is limited to read-only account and video analytics."
-          />
-          <div className="space-y-3 text-sm text-brand-primary">
-            <p>
-              The current TikTok for Developers sandbox does not include Content Posting API and CG Dynamics does not request video.publish or video.upload.
-            </p>
-            <div className="rounded-lg border border-white/8 bg-black/20 p-4">
-              <h4 className="text-xs font-semibold uppercase tracking-wide text-white">Future publishing gate</h4>
-              <ul className="mt-2 space-y-1 text-xs text-brand-primary">
-                <li>Agency publishing requires a separately approved provider route that fits CG&apos;s managed-client use case.</li>
-                <li>Media delivery must use a CG-controlled hostname or URL prefix accepted by that provider.</li>
-                <li>Provider writes remain disabled until provider review and CA approval are complete.</li>
-              </ul>
-            </div>
-          </div>
-        </PremiumCard>
+        <div className="space-y-6">
+          <PremiumCard>
+            <PremiumCardHeader eyebrow="Exact client + exact account" title={selected?.clientName ?? 'Select an active client'} subtitle={selected?.diagnostic ?? 'Choose a client from the connection queue.'} action={selected && connectable ? <ActionButton loading={busy === `connect:${selected.clientId}`} onClick={() => void connect(selected)}>{reconnect ? 'Reconnect with TikTok' : 'Connect with TikTok'}</ActionButton> : undefined} />
+            {selected && (
+              <div className="mt-4 rounded-xl border border-white/8 bg-black/20 p-4">
+                <div className="flex items-center gap-4">{selected.account?.avatarUrl ? <img src={selected.account.avatarUrl} alt="" className="h-12 w-12 rounded-full" /> : <div className="grid h-12 w-12 place-items-center rounded-full border border-white/10 bg-white/5 text-sm font-bold text-white/50">TT</div>}<div className="min-w-0"><p className="truncate font-semibold text-white">{selected.account?.displayName ?? 'Account awaiting provider verification'}</p><p className="mt-1 text-xs text-brand-primary">Last connected: {formatDateTime(selected.account?.lastConnectedAt)}</p></div></div>
+                <div className="mt-4 border-t border-white/8 pt-4 text-xs text-brand-primary">CG Dynamics never asks for or stores a TikTok password. Authentication and consent happen on TikTok; Dynamics stores the resulting server-side OAuth token for automatic read-only freshness.</div>
+              </div>
+            )}
+            {status?.health && <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><HealthDimension label="Access" value={status.health.access} /><HealthDimension label="Coverage" value={status.health.coverage} /><HealthDimension label="Completeness" value={status.health.completeness} /><HealthDimension label="Freshness" value={status.health.freshness} /></div>}
+            {selected?.state === 'refresh_pending' && <Message tone="warning">The access token is expired, but a refresh token is present. The existing daily worker will attempt recovery; reconnect only if that recovery fails.</Message>}
+          </PremiumCard>
+
+          <PremiumCard>
+            <PremiumCardHeader eyebrow="Automatic freshness" title="Read-only analytics" subtitle="Daily refresh is the normal path. Manual sync is available for a deliberate staff retry and preserves TikTok-native metric semantics." />
+            <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end"><Field label="Month"><input className={INPUT_CLASS} type="month" max={currentMonth()} value={syncMonth} onChange={event => setSyncMonth(event.target.value)} /></Field><ActionButton loading={busy === 'sync'} disabled={!connected || !selectedClientId} onClick={runSync}>Run manual sync</ActionButton></div>
+            {syncResult?.ok && <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5"><Metric label="Videos" value={syncResult.videosSynced} /><Metric label="Views" value={syncResult.metrics.views} /><Metric label="Likes" value={syncResult.metrics.likes} /><Metric label="Comments" value={syncResult.metrics.comments} /><Metric label="Shares" value={syncResult.metrics.shares} /></div>}
+          </PremiumCard>
+
+          <PremiumCard>
+            <PremiumCardHeader eyebrow="Reporting contract" title="TikTok-native metrics" subtitle="Missing provider data stays unavailable and is never converted to a false zero." />
+            <div className="overflow-x-auto rounded-lg border border-white/8"><table className="min-w-[680px] w-full divide-y divide-white/8 text-left text-sm"><thead className="bg-black/30 text-xs uppercase tracking-wide text-brand-primary"><tr><th className="px-4 py-3">Metric</th><th className="px-4 py-3">Provider field</th><th className="px-4 py-3">Type</th><th className="px-4 py-3">Meaning</th></tr></thead><tbody className="divide-y divide-white/8">{TIKTOK_METRICS.map(metric => <tr key={metric.key}><td className="px-4 py-3 font-medium text-white">{metric.label}</td><td className="px-4 py-3 font-mono text-xs text-brand-primary">{metric.sourceMetric}</td><td className="px-4 py-3"><Pill tone="neutral">{metric.aggregation}</Pill></td><td className="px-4 py-3 text-xs text-brand-primary">{metric.meaning}</td></tr>)}</tbody></table></div>
+            <div className="mt-4 rounded-lg border border-amber-400/20 bg-amber-400/5 p-4 text-sm text-amber-200">Publishing is unavailable in this rollout. CG Dynamics does not request video.publish or video.upload.</div>
+          </PremiumCard>
+        </div>
       </div>
     </div>
   )
 }
 
-function MetricCard({ label, value }: { label: string; value: number | null }) {
-  return (
-    <div className="rounded-lg border border-white/8 bg-black/20 px-3 py-2.5">
-      <p className="text-xs text-brand-primary">{label}</p>
-      <p className="mt-0.5 text-lg font-semibold text-white">{value === null ? 'Unavailable' : value.toLocaleString()}</p>
-    </div>
-  )
-}
-
-function HealthDimension({ label, value }: { label: string; value: string }) {
-  const healthy = value === 'connected' || value === 'complete' || value === 'fresh'
-  return (
-    <div>
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-white/45">{label}</p>
-      <p className={healthy ? 'mt-1 text-sm font-semibold text-brand-teal' : 'mt-1 text-sm font-semibold text-amber-300'}>
-        {value.replaceAll('_', ' ')}
-      </p>
-    </div>
-  )
-}
-
-function Field({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <label className="block">
-      <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-brand-primary">{label}</span>
-      {children}
-    </label>
-  )
-}
-
-function Message({ tone, children }: { tone: 'error' | 'success' | 'warning'; children: ReactNode }) {
-  const styles = tone === 'error'
-    ? 'border-red-400/25 bg-red-400/10 text-red-300'
-    : tone === 'success'
-    ? 'border-brand-teal/25 bg-brand-teal/10 text-brand-teal'
-    : 'border-amber-400/25 bg-amber-400/10 text-amber-300'
-  return (
-    <div role={tone === 'error' ? 'alert' : 'status'} className={`mt-4 rounded-lg border px-4 py-3 text-sm ${styles}`}>
-      {children}
-    </div>
-  )
-}
+function Summary({ label, value, tone = 'neutral' }: { label: string; value: number; tone?: 'neutral' | 'teal' | 'amber' }) { const color = tone === 'teal' ? 'text-brand-teal' : tone === 'amber' ? 'text-amber-300' : 'text-white'; return <div className="rounded-xl border border-white/8 bg-black/20 p-4"><p className="text-xs uppercase tracking-wide text-white/45">{label}</p><p className={`mt-2 text-2xl font-semibold ${color}`}>{value}</p></div> }
+function QueueState({ state }: { state: TiktokConnectionQueueItem['state'] }) { const map = { connected: ['Connected', 'published'], refresh_pending: ['Refresh pending', 'internal-draft'], reconnect_required: ['Reconnect', 'internal-draft'], not_connected: ['Not connected', 'internal-draft'] } as const; return <StatusBadge label={map[state][0]} variant={map[state][1]} size="sm" /> }
+function HealthDimension({ label, value }: { label: string; value: string }) { const healthy = value === 'connected' || value === 'complete' || value === 'fresh'; return <div className="rounded-lg border border-white/8 bg-black/20 p-3"><p className="text-[11px] font-semibold uppercase tracking-wide text-white/45">{label}</p><p className={healthy ? 'mt-1 text-sm font-semibold text-brand-teal' : 'mt-1 text-sm font-semibold text-amber-300'}>{value.replaceAll('_', ' ')}</p></div> }
+function Field({ label, children }: { label: string; children: ReactNode }) { return <label className="block"><span className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-brand-primary">{label}</span>{children}</label> }
+function Metric({ label, value }: { label: string; value: number | null }) { return <div className="rounded-lg border border-white/8 bg-black/20 px-3 py-2.5"><p className="text-xs text-brand-primary">{label}</p><p className="mt-0.5 text-lg font-semibold text-white">{value === null ? 'Unavailable' : value.toLocaleString()}</p></div> }
+function Message({ tone, children }: { tone: 'error' | 'success' | 'warning'; children: ReactNode }) { const styles = tone === 'error' ? 'border-red-400/25 bg-red-400/10 text-red-300' : tone === 'success' ? 'border-brand-teal/25 bg-brand-teal/10 text-brand-teal' : 'border-amber-400/25 bg-amber-400/10 text-amber-300'; return <div role={tone === 'error' ? 'alert' : 'status'} className={`mt-4 rounded-lg border px-4 py-3 text-sm ${styles}`}>{children}</div> }

@@ -101,9 +101,13 @@ the Control Centre before consequential action.
   deployment would require a separately reviewed backport onto the deployed
   pre-D02 worker baseline rather than deploying current main.
 - TikTok #238 / PR #483 is merged at
-  `93b09a89a71e9371b8ba53d704edc486b993aa85`. Migration
-  `20260922153348_extend_background_jobs_for_tiktok_freshness.sql` is unapplied,
-  and the background/TikTok functions have not been deployed from that change.
+  `93b09a89a71e9371b8ba53d704edc486b993aa85`. Its daily-freshness migration
+  and functions were activated on 2026-09-23: background-worker v18,
+  tiktok-sync v7 and tiktok-connection-status v5 are live. The first automatic
+  job truthfully found the sole existing CG Production House token expired and
+  unable to refresh, so provider OAuth reconnect remains required. The current
+  #238 continuation owns only the active-client connection/reconnect queue and
+  exact-account OAuth hardening; publishing stays out of scope.
 - Standalone Instagram #471 / PR #473 and security correction #476 / PR #477
   are merged and closed. Issue #491 is the isolated active-client connection
   queue/review continuation. Production has the foundation and encrypted-token
@@ -979,15 +983,15 @@ This section is an orientation snapshot only. Refetch GitHub + tracker before ac
   production acceptance remain.
 - #437 / PR #438: code accepted; authenticated desktop/mobile staff-session UI
   acceptance is the only stated merge gate.
-- #238: code accepted/merged; protected TikTok migration, function deployment,
-  provider/config and production acceptance remain.
+- #238: daily freshness is live; the active-client OAuth connection/reconnect
+  queue is the current code-review lane. Provider consent is a later CA action.
 
 ### Protected activation gates
 
 - Red Oak exact-Page access/re-consent and stable Meta evidence.
 - Content Autopilot enablement remains a separate decision after #388 and Red
   Oak evidence. AI generation and OneDrive stay off.
-- Meta D02 migration/function deployment; TikTok migration/function deployment;
+- Meta D02 migration/function deployment; TikTok connection-queue deployment;
   standalone Instagram migrations/secret/functions/consent/mapping; Brand Hub
   mapping/activation; Google Ads authenticated live audit; and #438 UI
   acceptance are all separate gates.

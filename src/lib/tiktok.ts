@@ -45,6 +45,25 @@ export interface TiktokConnectionStatus {
   }
 }
 
+export type TiktokQueueState = 'connected' | 'refresh_pending' | 'reconnect_required' | 'not_connected'
+
+export interface TiktokConnectionQueueItem {
+  clientId: string
+  clientName: string
+  state: TiktokQueueState
+  account: { displayName: string | null; avatarUrl: string | null; lastConnectedAt: string | null } | null
+  missingScopes?: string[]
+  tokenExpiresAt?: string | null
+  diagnostic: string
+}
+
+export interface TiktokConnectionQueue {
+  ok: boolean
+  items: TiktokConnectionQueueItem[]
+  summary: { activeClients: number; connected: number; reconnectRequired: number; notConnected: number }
+  error?: string
+}
+
 export interface TiktokSyncResult {
   ok: boolean
   health: 'verified' | 'partial' | 'sync_error'
@@ -187,6 +206,12 @@ export async function getTiktokConnectionStatus(clientId?: string): Promise<Tikt
     body: clientId ? { clientId } : {},
   })
   if (error) return { ok: false, connected: false, status: 'error', message: error.message, missingScopes: [], schemaReady: false }
+  return data
+}
+
+export async function getTiktokConnectionQueue(): Promise<TiktokConnectionQueue> {
+  const { data, error } = await supabase.functions.invoke('tiktok-connection-queue', { method: 'POST', body: {} })
+  if (error) return { ok: false, items: [], summary: { activeClients: 0, connected: 0, reconnectRequired: 0, notConnected: 0 }, error: error.message }
   return data
 }
 

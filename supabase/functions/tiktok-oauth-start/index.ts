@@ -59,11 +59,11 @@ Deno.serve(async (req) => {
 
   const { data: profile } = await sb
     .from('profiles')
-    .select('role')
+    .select('role, is_active')
     .eq('id', user.id)
     .single()
 
-  if (!profile || !['admin', 'manager'].includes(profile.role)) {
+  if (!profile?.is_active || !['admin', 'manager'].includes(profile.role)) {
     return jsonResponse({ ok: false, error: 'Admin or manager access required.' }, 403)
   }
 
@@ -82,12 +82,13 @@ Deno.serve(async (req) => {
   // Validate the client exists
   const { data: client } = await sb
     .from('clients')
-    .select('id, name')
+    .select('id, name, active')
     .eq('id', body.clientId)
+    .eq('active', true)
     .single()
 
   if (!client) {
-    return jsonResponse({ ok: false, error: 'Client not found.' }, 400)
+    return jsonResponse({ ok: false, error: 'Only an active client can be connected to TikTok.' }, 400)
   }
 
   let config
