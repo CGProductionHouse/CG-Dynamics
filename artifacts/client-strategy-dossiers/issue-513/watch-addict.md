@@ -4,7 +4,7 @@ Client ID: `e1cb958e-3f68-4a77-b5ea-b471ea62bdef`
 
 Issue: #513
 
-Evidence hash: `3ed3712e5249e88d1b25651bdf18f08767ed7301a9ad64458f6ac8f18520af7d`
+Evidence hash: `a1e5024789059f818999f8a5c1f5448966f369917076c6ad9750c7de62ca7f04`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
@@ -40,7 +40,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- The caption must add to the artwork/video instead of repeating it.
+- What exact watch/brand/model is shown?
+- What words are already on the artwork?
+- Is the useful second layer about design, function, wear context, personality, occasion, ordering or a verified product detail?
+- Is the post a product, promotion, launch, service/enquiry or lifestyle story?
+- Good Watch Addict copy can be short and sharp.
 
 ## Strategy gate blockers
 

@@ -4,17 +4,17 @@ Client ID: `4424ed69-7270-4d30-a1ea-0b77d76912df`
 
 Issue: #513
 
-Evidence hash: `ec170fab0d88fbedf2f615c1d74a9cf6e63e9dd3dcac8f545eea489c54c1443d`
+Evidence hash: `937383a9dedeb76cef370fa0926cc8d4e7d4d75b9f76c5a91b89e10c9d1c0b8b`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
+- new Toyota material-handling equipment;
+- long-term rental/contract arrangements;
+- routine/scheduled maintenance;
+- breakdown support, including current public 24/7 breakdown support wording;
+- service work on forklift makes beyond Toyota.
 - email: admin@toyotaforkliftofs.co.za;
-- after-hours breakdown numbers: 083 395 3903 / 079 217 0015.
-- canonical CG client: Forklift Trucks;
-- public trading identity: Forklift Truck OFS;
-- aliases/history may include FTOFS and Toyota Forklift OFS.
-- authorised Toyota material handling dealer;
 
 ## Confirmed package
 
@@ -45,7 +45,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Read the artwork/video first.
+- Do not paraphrase the headline, poster copy or spoken dialogue underneath it.
+- who the machine/service is relevant to;
+- an uptime or maintenance implication;
+- a direct enquiry or quote prompt.
+- practical rather than inspirational;
 
 ## Strategy gate blockers
 

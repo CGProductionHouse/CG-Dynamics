@@ -4,7 +4,7 @@ Client ID: `94fe2568-3cf1-47dc-801e-d8d5396a0965`
 
 Issue: #513
 
-Evidence hash: `a0efbae832249d0094617d828ee793439b9723c0e55dc73df764d0895b541bf9`
+Evidence hash: `556ed75250af217304ff1421f7719818e114a3db52930e489cfb185182c55418`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
@@ -45,7 +45,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- The artwork/video already carries its own message.
+- Add one useful second layer such as:
+- what the student is learning;
+- why the practical task matters in real work;
+- current application/course context;
+- real teamwork/student-life context;
 
 ## Strategy gate blockers
 

@@ -4,7 +4,7 @@ Client ID: `899c9988-8207-4e45-a8fc-a7446dfcf96b`
 
 Issue: #513
 
-Evidence hash: `4636fdfb9888195ccd9a6e39b611b760e41a6533b6d851b1741852223eb9f61c`
+Evidence hash: `128fe4bd9d587d79543aaba65f52b2cda2459af48524cd541f75161f595e1a5c`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
@@ -45,7 +45,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Captions must add to the artwork/video, not repeat it.
+- Good Wiseman Group captions add one useful layer such as:
+- what the real team/business activity means;
+- why a group-level service/event moment matters;
+- a human observation from the actual photo/video;
+- verified context connecting more than one group business.
 
 ## Strategy gate blockers
 

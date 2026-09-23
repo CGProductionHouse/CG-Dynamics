@@ -4,7 +4,7 @@ Client ID: `e2ad6d57-5b06-46e1-b75b-b67f017d57f1`
 
 Issue: #513
 
-Evidence hash: `55888205c380225805a27f1a1ff876d159e9e70bab420e7108c92018e073100e`
+Evidence hash: `8792b532b64145cf11843375e38691bd2616bd608aa6d9cf6b1d11ec489fe089`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
@@ -14,7 +14,7 @@ Status: **dossier complete; ready for gold-strategy drafting**
 - Oranje Toyota Bloemfontein / Oranje Toyota are historical aliases only. Never rename the CG client to them.
 - Do not use OranjeToyota as the normal local identity hashtag.
 - Never merge local dealer facts with Toyota South Africa or another Toyota/CFAO dealer.
-- specific videos need specific captions;
+- new-vehicle sales/new stock route;
 
 ## Confirmed package
 
@@ -45,7 +45,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Captions add to the artwork/video.
+- Do not reuse exact video dialogue.
+- Base the copy on what is actually in the image/video.
+- Keep straightforward captions short and punchy.
+- Mention Bloemfontein in nearly every caption.
+- Use the full current location when a customer-facing footer is appropriate.
 
 ## Strategy gate blockers
 

@@ -4,17 +4,17 @@ Client ID: `4236a60a-990f-484f-8d19-13d2f92fbe3b`
 
 Issue: #513
 
-Evidence hash: `9172b5c25a00f5d222796747b0ab5a05468a0764aa7b532b1c1fa551be1aa5b9`
+Evidence hash: `669241319340b853b3f6892bb20fa3ff6c8fe18e03bb78ddaedc8092565a2231`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
+- structural/custom fabrication;
+- crane hire for steel erection, heavy lifting and on-site installation support;
+- industrial/custom steel structures;
+- in-house drafting for fabrication/cutting detail;
+- warehouses and sports-facility structures;
 - Email: info@novussteel.co.za
-- Website: https://www.novussteel.co.za/
-- Base: Bloemfontein, South Africa
-- Service reach: nationwide / projects across South Africa
-- specific to the actual job/application;
-- technically aware without showing off;
 
 ## Confirmed package
 
@@ -45,7 +45,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Start with the supplied image/video/poster.
+- What service/application is actually shown?
+- What has the artwork already said?
+- What useful second layer can the caption add?
+- A good Novus Steel caption adds one or more of:
+- why a capability matters on the job;
 
 ## Strategy gate blockers
 

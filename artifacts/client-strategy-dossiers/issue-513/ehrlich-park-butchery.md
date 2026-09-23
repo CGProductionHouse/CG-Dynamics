@@ -4,17 +4,17 @@ Client ID: `ec643c75-51f5-4839-829f-3f5b7f48829a`
 
 Issue: #513
 
-Evidence hash: `e2213f0aa1c9717d967b92ed1b4719cb595a182f70be930e88e70688655189d4`
+Evidence hash: `7f4c62b374b3e66664374aaf9ebfa1b99195c43834cb0ffc600b1f041306100f`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- Official website: https://www.ehpbutchery.co.za/
-- Owner presented on the official website as Thomas; independent BSN listing names Thomas Gianni.
-- Official store contact: 051 434 2001.
-- Official owner/mobile number displayed on the website: 081 718 6988.
-- Official email: admin@ehpbutchery.co.za.
-- Official address: 55 De Waal Road, Bloemfontein.
+- like real people serving regular customers.
+- premium cuts for every occasion;
+- empty fresh, quality, value claims with no specific second layer.
+- farm/supplier/origin claims;
+- collection/preorder mechanics
+- one real reason to buy/use the supplied product now;
 
 ## Confirmed package
 
@@ -32,12 +32,7 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Client and CG constraints
 
-- call products organic, grass-fed, free-range, hormone-free, halaal or ethically sourced without current proof;
-- claim best butcher in Bloemfontein without current substantiation;
-- copy Bester's geelvet positioning;
-- use fake farm-to-table claims;
-- use outdated prices or pack details;
-- make food-safety claims beyond approved factual guidance;
+- No exact evidence available; do not fill this gap with generic copy.
 
 ## Research observations
 
@@ -45,7 +40,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Read the poster/image/video first.
+- Do not restate its headline, product list, price or spoken wording.
+- what the staff is doing for the customer;
+- a customer/community angle supported by evidence.
+- For daily product/special captions, default to short-to-medium, tight, benefit-led copy.
+- Do not turn the caption into a second poster.
 
 ## Strategy gate blockers
 
@@ -53,6 +53,6 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Sources
 
-- docs/ai-workforce/client-intelligence/EHRLICH-PARK-BUTCHERY-CLIENT-MARKETING-INTELLIGENCE-2026-08.md
+- production-client-guide:ehrlich-park-butchery.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#ec643c75-51f5-4839-829f-3f5b7f48829a

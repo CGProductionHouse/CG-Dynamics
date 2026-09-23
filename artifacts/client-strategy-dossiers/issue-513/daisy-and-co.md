@@ -4,17 +4,17 @@ Client ID: `3404f726-a693-4b2d-8c13-c9d3dfd17bbc`
 
 Issue: #513
 
-Evidence hash: `3126c1c02f9633b89c9d5c5cbe369596fe5dfab2b8360b07255bc18b2e8d5657`
+Evidence hash: `75e94c1f51bffa01cb5fe0a04d37234989e634dcfe1c40222c54706d37724ebb`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- the current Preller Square tenant listing;
-- current location and trading-hour evidence from map and retail-directory sources;
-- current public evidence that Tal Florals supplies Daisy & Co as a Bloemfontein stockist;
-- current public review and category evidence;
-- the store's historic local positioning around freshly baked treats and gifts for the home;
-- current Preller Square context and neighbouring retail traffic;
+- Canonical client: Daisy & Co.
+- Keep Daisy & Co isolated from unrelated same-name businesses.
+- Bloemfontein is useful location context, not a second client identity.
+- Do not use Crazy Daisy as current branding without direct confirmation.
+- specific to the actual product, occasion or visual;
+- playful when the post earns it;
 
 ## Confirmed package
 
@@ -32,30 +32,20 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Client and CG constraints
 
-- a customer can buy a quick treat;
-- purchase something for the home;
-- solve an occasion at the last minute.
-- what gifts are currently available;
-- what price range the shop serves;
-- whether flowers can be reserved;
+- No exact evidence available; do not fill this gap with generic copy.
 
 ## Research observations
 
-- independent Bloemfontein gift stores;
-- bookstores with gift ranges;
-- large retailers such as Woolworths, Checkers, Dis-Chem, The Crazy Store and other Preller Square tenants;
-- online personalised-gift businesses;
-- local makers selling directly on social media.
-- aggressive seasonal promotions.
+- No exact evidence available; do not fill this gap with generic copy.
 
 ## Evidence-backed recommendations
 
-- limited-quantity weekend items.
-- Need a birthday gift under R300?;
-- Visiting someone in hospital?;
-- A quick thank-you that does not feel rushed.
-- Tal Florals and other confirmed local suppliers;
-- three gifts for a new homeowner;
+- Captions add to the artwork/video; they do not repeat it.
+- Start from what the audience can already see/read.
+- Add a customer situation, product detail, personality, reason to care, useful context or action.
+- Keep ordinary social captions short when the artwork already carries the detail.
+- Use longer copy only when the story needs it.
+- Vary openings, rhythm and CTA.
 
 ## Strategy gate blockers
 
@@ -63,6 +53,6 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Sources
 
-- docs/ai-workforce/client-intelligence/DAISY-CO-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md
+- production-client-guide:daisy-and-co.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#3404f726-a693-4b2d-8c13-c9d3dfd17bbc

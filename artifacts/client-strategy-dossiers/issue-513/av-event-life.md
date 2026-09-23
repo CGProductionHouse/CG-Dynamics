@@ -4,17 +4,17 @@ Client ID: `3b85973f-bcad-49eb-b8f1-c27f7c7f1aba`
 
 Issue: #513
 
-Evidence hash: `777cec32de18d407f1a74853f4a1affa72f3d88d43239245e9c0865b55716abd`
+Evidence hash: `12727114357a401ba459a2ee2103cbca3decf3b1a150a8a5f74ae668bdfc0d0f`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- 22 Veen Crescent, Universitas, Bloemfontein
-- visual displays, including projectors, screens and LED televisions;
-- classic and LED mobile dance floors;
-- multi-camera event recording and video production;
-- on-site technical staffing and support.
-- venue-specific sound, display and lighting solutions.
+- 22 Veen Crescent, Universitas, Bloemfontein, 9321
+- event-aware energy when the content supports it;
+- technical terms only when they help the buyer understand the job;
+- real setup/process/crew moments;
+- commercial clarity when a post needs bookings or enquiries.
+- generic luxury-event language;
 
 ## Confirmed package
 
@@ -32,30 +32,25 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Client and CG constraints
 
-- exact founding date and whether “since 2017” is correct;
-- why the website also refers to 13 years of expertise;
-- owned versus subcontracted equipment;
-- power and generator capability;
-- safety and rigging competence;
-- staff and technician structure;
+- unforgettable experience without proof;
+- experience the extraordinary;
+- bringing your event to life as a generic hook;
+- world-class, best, number one, leader, flawless or similar unsupported superiority claims.
+- owned-versus-rented/subcontracted status;
+- speaker/microphone/console/projector/screen/lighting/stage specifications;
 
 ## Research observations
 
-- over 15 years in sound and video services;
-- weddings and corporate functions;
-- transparent 2026 corporate packages;
-- returning corporate-client discount.
-- low-friction package comparison;
-- strong wedding-DJ search positioning;
+- No exact evidence available; do not fill this gap with generic copy.
 
 ## Evidence-backed recommendations
 
-- festivals and live entertainment;
-- school and university productions;
-- weddings and premium private events;
-- government and institutional events;
-- livestreamed and hybrid events;
-- venue, church, restaurant and conference-facility installations.
+- Read the supplied image, poster or video first.
+- Do not rewrite the headline or dialogue underneath it.
+- Instead add one useful second layer such as:
+- a visible production detail;
+- the difference between an empty room and the final event;
+- what guests see versus what crew prepared;
 
 ## Strategy gate blockers
 
@@ -63,6 +58,6 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Sources
 
-- docs/ai-workforce/client-intelligence/AV-EVENT-LIFE-CLIENT-MARKETING-INTELLIGENCE-2026-08.md
+- production-client-guide:av-event-life.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#3b85973f-bcad-49eb-b8f1-c27f7c7f1aba

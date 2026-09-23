@@ -4,17 +4,17 @@ Client ID: `c27d2185-08e4-4c49-be48-2572564ceecf`
 
 Issue: #513
 
-Evidence hash: `d632b14f1309a66e6b19d9e38ef1510d42211aca6cee1c5937d130126b915815`
+Evidence hash: `07edb8cbd5e73eaed9d9397537e277987f96939d52235ce81c3a719e7c86f9e3`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- convert enquiries into profitable retainers and projects;
-- demonstrate measurable value;
-- support video, photography, paid media, websites, SEO, design and campaign strategy as a connected system;
-- use CG Dynamics as the operating and intelligence layer behind delivery;
-- make the company easier to trust than a freelancer and more human, flexible and commercially useful than a large agency.
-- Trading name: CG Production House.
+- Retrieve and write only against exact client id c27d2185-08e4-4c49-be48-2572564ceecf.
+- Never merge, alias, cross-retrieve or cross-write CG Production House with CG Dynamics, CG Arcc, CG Design Solutions, or any similarly named entity.
+- The supplied client source identifies CG Production House as the trading/company name and CG Design Solutions (Pty) Ltd as the legal entity. Preserve that supported legal/trading relationship only; it is not permission to combine client knowledge or runtime identities.
+- Do not use unrelated agency/client history as a fallback when exact CG Production House evidence is missing.
+- Official website contact page — https://www.cgproductionhouse.com/contact — crawled 2026-08/09; rechecked 2026-09-08.
+- Official website services page — https://www.cgproductionhouse.com/services — rechecked 2026-09-08.
 
 ## Confirmed package
 
@@ -32,26 +32,25 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Client and CG constraints
 
-- Do not claim sales results without linked sales evidence.
-- Do not publish confidential client data.
-- Do not let generic AI copy replace human insight or client-specific language.
-- Do not overpromise full-service capability beyond current team capacity.
-- Do not sell low-margin deliverables without understanding revision and production cost.
-- Do not use fake scarcity or unsupported superiority claims.
+- Preserve real CG logos, typography/brand marks, people, faces, products, client work, camera/equipment identity and composition unless a requested edit explicitly requires a change.
+- For “professional edit” requests, improve exposure, balance, cleanup, crop/straightening and polish without unnecessarily altering identity-bearing details.
+- Do not replace a real camera/product with a lookalike or hallucinated model.
+- Do not change a face while adjusting the surrounding scene.
+- Do not invent client results, awards, events, deliverables or portfolio examples in generated marketing visuals.
+- If the user says “change nothing else”, treat that as a hard edit boundary.
 
 ## Research observations
 
-- sales/revenue where connected;
-- factors outside CG's control.
+- No exact evidence available; do not fill this gap with generic copy.
 
 ## Evidence-backed recommendations
 
-- offer and audience research;
-- landing page or WhatsApp flow;
-- the result or client response;
-- why posting is not a strategy;
-- why followers are not sales;
-- why bad follow-up destroys ad performance;
+- Only public business contacts are stored here.
+- No private-looking named/direct staff contact was found in reviewed CG Production House evidence.
+- | Contact type | Exact value | Label / role | Approved for caption | Visibility | Freshness | State | Platform / use |
+- | --- | --- | --- | --- | --- | --- | --- | --- |
+- | Website | cgproductionhouse.com | Website / enquiry | yes | publicmarketing | currentverified 2026-09-08 | active | Service/sales/lead-gen footer; website CTA |
+- | Email | info@cgproductionhouse.com | General business enquiry | yes | publicmarketing | currentverified 2026-09-08 | active | Service/sales/lead-gen footer |
 
 ## Strategy gate blockers
 
@@ -59,6 +58,6 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Sources
 
-- docs/ai-workforce/client-intelligence/CG-PRODUCTION-HOUSE-GROWTH-MARKETING-INTELLIGENCE-2026-08.md
+- production-client-guide:cg-production-house.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#c27d2185-08e4-4c49-be48-2572564ceecf

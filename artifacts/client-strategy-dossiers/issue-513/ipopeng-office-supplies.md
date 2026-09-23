@@ -4,7 +4,7 @@ Client ID: `2e643855-e2ad-481f-a6c6-3d934b9f4a50`
 
 Issue: #513
 
-Evidence hash: `616c4b554a9a9d54340f217dcb59251599cce783eba735f52c206c1250b3985c`
+Evidence hash: `a253476c195ecc3bedde28bec36a6bcd0633a93bc036a4807ab8a51fedf0e85d`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
@@ -45,7 +45,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- two fun, out-of-the-box short ideas;
+- scripts and scenes workable with one person;
+- then a distinct idea around wholesale / supplying schools.
+- concepts should be practical to shoot with limited cast and simple real-world staging;
+- more ideas should change the creative mechanism, not merely rewrite the same concept;
+- fun is welcome, but the product/order/use-case must remain commercially useful;
 
 ## Strategy gate blockers
 

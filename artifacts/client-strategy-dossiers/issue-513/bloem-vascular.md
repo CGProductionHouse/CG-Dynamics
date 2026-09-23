@@ -4,17 +4,17 @@ Client ID: `2d16262d-8450-458d-ae7e-084ef9ff662d`
 
 Issue: #513
 
-Evidence hash: `47e4161bebf9cd49f19218246a2979d10a4e539c975cf8579b9c695dfc0155d6`
+Evidence hash: `bf8aaf8a3e3a8000221c8f44fb88a837c6b0711e85a3480e0aae07b4b49e0901`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- Practice name: BloemVascular.
-- Lead surgeon: Prof AF Malan.
-- Second surgeon: Dr RS Letsoara.
-- Core scope: arterial, venous and lymphatic disease.
-- Treatment model: open vascular surgery and minimally invasive endovascular techniques.
-- Life Rosepark Hospital, Suite 202, 2nd floor, 57 Gustav Crescent, Fichardt Park, Bloemfontein.
+- https://bloemvascular.co.za/
+- professionally credible without sounding self-congratulatory.
+- fear-based healthcare marketing;
+- casual treatment of diagnosis or risk;
+- generic hospital/corporate filler;
+- lifestyle/wellness-influencer language;
 
 ## Confirmed package
 
@@ -32,28 +32,25 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Client and CG constraints
 
-- leading practice, unless objectively defined and approved;
+- leading without approved objective proof;
 - state-of-the-art as empty filler;
-- world-class without evidence;
-- fear-heavy symptom messaging;
-- patient testimonials or endorsements without specific HPCSA/legal review;
-- before-and-after imagery without explicit approval and consent;
+- unsupported first, only, most advanced or ranking claims.
+- internal referral workflow and required documents;
+- consultation/procedure fees;
+- scheme-specific medical-aid benefits;
 
 ## Research observations
 
-- general medical directories;
-- social-media influencers discussing circulation or diabetic-foot remedies;
-- patients relying on pharmacies, home remedies or compression products without specialist assessment;
-- international health websites outranking local information.
+- No exact evidence available; do not fill this gap with generic copy.
 
 ## Evidence-backed recommendations
 
-- Conditions and treatments hub.
-- Peripheral arterial disease.
-- Carotid disease and stroke prevention.
-- Diabetic foot and limb preservation.
-- Chronic venous insufficiency and ulcers.
-- Hospital and room locations.
+- Current Project instructions require the full contact block in every caption.
+- Life Rosepark Hospital: receptionrp@bloemvascular.co.za
+- Mediclinic Bloemfontein: receptionmc@bloemvascular.co.za
+- Suite 202, 2nd floor, 57 Gustav Crescent, Fichardt Park, Bloemfontein
+- Suite C116, Mediclinic 3rd Ave, C/o Zastron Street & 3rd Ave, Westdene, Bloemfontein
+- The official website also currently lists:
 
 ## Strategy gate blockers
 
@@ -61,6 +58,6 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Sources
 
-- docs/ai-workforce/client-intelligence/BLOEM-VASCULAR-CLIENT-MARKETING-INTELLIGENCE-2026-08.md
+- production-client-guide:bloem-vascular.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#2d16262d-8450-458d-ae7e-084ef9ff662d

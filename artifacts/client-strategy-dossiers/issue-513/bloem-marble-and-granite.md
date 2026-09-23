@@ -4,17 +4,17 @@ Client ID: `89e0ad6d-e08c-4a75-8b8e-abea71af581c`
 
 Issue: #513
 
-Evidence hash: `37126eb02f540168a28c2129e9d6c23e389685a427017fcb4c44ff21253eebd0`
+Evidence hash: `c93e572bf8aefc57694d5537403ee8211e41045ba92caae683af3d02b707a80f`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- strong architect, designer, builder and kitchen-company relationships;
-- faster, clearer quotation journeys;
-- modern showroom and digital buying tools;
-- separate sales systems for kitchens, commercial work, outdoor surfaces and memorials;
-- honest after-sales and care guidance.
-- address: 8 Tannery Road, Hamilton, Bloemfontein;
+- website: https://bloemmg.co.za/;
+- address: 8 Tannery Road, Hamilton, Bloemfontein, Free State, South Africa, 9301;
+- trading since 2007 according to the official website.
+- trustworthy and knowledgeable;
+- specific to the actual material/project;
+- confident without unsupported superiority claims.
 
 ## Confirmed package
 
@@ -32,12 +32,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Client and CG constraints
 
-- whether measuring, templating, delivery and installation are all included;
-- exact brands currently stocked and which are order-only;
-- slab and sample availability;
-- lead times by product category;
-- thicknesses and edge profiles offered;
-- cut-out, sink, hob, drainage-groove and backsplash capabilities;
+- delivery/collection/install geography;
+- current slabs, colours, samples and stock;
+- exact supplier/dealer relationships;
+- repairs/polishing/resealing;
+- manufacturing/fabrication equipment;
+- commercial/project capacity;
 
 ## Research observations
 
@@ -45,12 +45,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- whether templating, transport, installation, cut-outs, edge profiles, backsplashes and joins are included;
-- lead capture before detailed result;
-- immediate WhatsApp handover;
-- Repair the quote and website conversion journey.
-- Turn fabrication and installation into visible brand proof.
-- Build separate funnels for kitchens, trade, commercial, outdoor and memorials.
+- Core rule: do not repeat the wording already on the artwork/poster.
+- A caption should add a useful second layer, for example:
+- why the material/use case matters;
+- a practical customer decision;
+- a process or craftsmanship detail visible in the creative;
+- the service behind the finished result;
 
 ## Strategy gate blockers
 
@@ -58,6 +58,6 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Sources
 
-- docs/ai-workforce/client-intelligence/BLOEM-MARBLE-GRANITE-CLIENT-MARKETING-INTELLIGENCE-2026-08.md
+- production-client-guide:bloem-marble-and-granite.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#89e0ad6d-e08c-4a75-8b8e-abea71af581c

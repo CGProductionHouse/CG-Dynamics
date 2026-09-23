@@ -4,7 +4,7 @@ Client ID: `1f0406bb-d643-4b83-bc3e-b1ebe87eeb89`
 
 Issue: #513
 
-Evidence hash: `d8ac2450291ce5fce52e19f4b5ea1192d8ac0bd8f5efeeac4f8c13e53f57a634`
+Evidence hash: `23b6ff96d69c1d63ccc27c60a85a89e02d18e885e622962f0b23642279c44652`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
@@ -39,12 +39,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- Main Festival applications: current deadline 27 November 2026.
-- Vrynge applications: current deadline 27 November 2026.
-- Vlieks submissions: current deadline 28 November 2026.
-- Literature Festival Programme Proposals: current deadline 29 January 2027.
-- Literature Festival Book Submissions: current deadline 15 February 2027.
-- Literature Festival page currently states 6–10 July 2027 at the UFS Bloemfontein campus.
+- Use the caption to add a reason to care, a human observation, useful application detail, artist/programme context, a real deadline/action, or a second layer of story.
+- For applications, distinguish the exact route: Main Festival, Vrynge, Vlieks, Literature Festival, Book Submission, Art Market/Kunsmark or another verified programme.
+- Never invent eligibility, fees, dates or selection outcomes.
+- For highlights/reels, talk about the actual moment rather than describing the montage generically.
+- Afrikaans should sound natural and spoken, not formal or stiff.
+- English should be clear and arts-aware.
 
 ## Strategy gate blockers
 

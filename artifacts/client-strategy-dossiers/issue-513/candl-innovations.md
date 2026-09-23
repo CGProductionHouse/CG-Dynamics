@@ -4,17 +4,17 @@ Client ID: `afb62c53-d6d3-4ef8-9393-def88ed899d8`
 
 Issue: #513
 
-Evidence hash: `b844586c8e6a1a24f20b98f935445741a55346266fd09db233602f3877614a40`
+Evidence hash: `5515590298c19da8d0e8be3f2d5a1c0e20be28d6f77f8f54facc0fea4254215a`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- Is this a real finished C&L product?
-- How many people does it seat?
-- What does it cost or roughly cost?
-- Is it available now or custom made?
-- What finish protects the wood?
-- What warranty or workmanship support exists?
+- bespoke/handcrafted furniture language from the client-supplied source;
+- real table/furniture products and workshop/carpentry content;
+- historical live-edge/natural-wood direction;
+- product examples in the client source including dining sets, bedroom furniture, display units, shelving, coffee tables and statement décor;
+- modern/rustic aesthetic direction;
+- direct contact names/numbers below.
 
 ## Confirmed package
 
@@ -32,7 +32,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Client and CG constraints
 
-- No exact evidence available; do not fill this gap with generic copy.
+- solid wood vs veneer/engineered material;
+- resistance to heat/water/scratches;
+- commercial-grade suitability;
+- sustainability/local sourcing;
+- in-house steel/base fabrication.
+- how the shape sits in the room;
 
 ## Research observations
 
@@ -40,12 +45,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- C&L Ready Collection — a limited range of repeatable coffee tables, consoles, benches and compact dining tables with visible prices.
-- C&L Bespoke — custom live-edge dining, boardroom, hospitality and statement furniture quoted by size, slab, base and finish.
-- exact price for ready-made stock;
-- from price for repeatable products;
-- size-based guide for common dining tables;
-- clear statement that slab, thickness, species, base and finish affect final cost;
+- Start from the exact item, room, material detail or process shown.
+- A good C&L line should make the reader notice something real about the furniture or understand why it matters in a home/project.
+- If the sentence could sit under ten unrelated furniture brands unchanged, rewrite it.
+- Avoid default AI/interiors filler such as:
+- “where style meets comfort”;
+- “crafted for every lifestyle”;
 
 ## Strategy gate blockers
 
@@ -53,6 +58,6 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Sources
 
-- docs/ai-workforce/client-intelligence/C-L-INNOVATIONS-FURNITURE-SALES-RECOVERY-2026-08.md
+- production-client-guide:candl-innovations.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#afb62c53-d6d3-4ef8-9393-def88ed899d8

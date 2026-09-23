@@ -4,17 +4,16 @@ Client ID: `32bd9db3-5339-4404-825b-5a615cadec6a`
 
 Issue: #513
 
-Evidence hash: `171d3c7cbd098ccb67a6c07d92328e887d30fecdfaa49f8aefc4420e32a1298e`
+Evidence hash: `30089c19a30d2d349fdeaa8b0dcca1c117b523d34087a43e129f7a5cd8bdbae0`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- five TrackMan simulator bays;
-- indoor driving range with shot data and analytics;
-- short-game area with putting, chipping, rough and sand practice;
-- South Africa-first indoor sand-bunker claim on the website, which must be internally verified before reuse;
-- professional and in-house coaching;
-- driver, iron, wedge, putter, fairway-wood, hybrid and full-bag fitting;
+- specific to the actual post/video;
+- calm confidence around TrackMan/performance/fitting;
+- warm and social around people, leagues and events;
+- direct to the reader when useful;
+- natural Afrikaans or English/Afrikaans only when it genuinely fits.
 
 ## Confirmed package
 
@@ -32,26 +31,25 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Client and CG constraints
 
-- tour-level results for everyone;
-- unlimited access where fair-use or booking restrictions apply;
-- “South Africa's first” unless documented;
-- exact savings or prizes without current confirmation.
+- contacts/WhatsApp/booking routes;
+- address/hours/holiday hours;
+- prices/promotions/memberships;
+- event dates, artists and competitions;
+- event package, catering/menu/bar rules;
+- fitting brands/products/stock;
 
 ## Research observations
 
-- one TrackMan number explained simply;
-- why two drives with the same distance can have different outcomes;
-- dispersion before and after coaching;
-- “what this number means on the course”;
-- member progress over 30 or 90 days.
+- No exact evidence available; do not fill this gap with generic copy.
 
 ## Evidence-backed recommendations
 
-- friendly and knowledgeable staff;
-- premium but comfortable experience.
-- What was easier or better than expected?
-- Would you recommend it for practice, social play or an event?
-- What result or moment stood out?
+- The artwork/video already carries its own message.
+- A caption should add a useful second layer: a real golfer benefit, human/local observation, current service detail, event/community angle or reason to act.
+- humour only when rooted in a real golf/staff/venue situation;
+- one or two emojis at most when relevant;
+- natural Afrikaans/mixed phrasing only when the brief/context supports it.
+- Do not store or guess literal contact values in Project Instructions.
 
 ## Strategy gate blockers
 
@@ -59,6 +57,6 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Sources
 
-- docs/ai-workforce/client-intelligence/BAT-HILL-ROYALE-CLIENT-MARKETING-INTELLIGENCE-2026-08.md
+- production-client-guide:bat-hill-royale.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#32bd9db3-5339-4404-825b-5a615cadec6a

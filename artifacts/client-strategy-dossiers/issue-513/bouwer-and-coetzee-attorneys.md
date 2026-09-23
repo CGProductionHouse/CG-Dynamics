@@ -4,7 +4,7 @@ Client ID: `8e448cf9-1534-4ba1-89a4-93e4c8b83d2f`
 
 Issue: #513
 
-Evidence hash: `1884fc72259038c58360ad33f22d5c390257e41c20ba8f0ff8ab96f4561306d9`
+Evidence hash: `0aea81a9ed9472a6db91b8bac2c080ffa1221b9ee7631a71156cf2757936526f`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
@@ -44,7 +44,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Start with what is actually in the creative and what it already says.
+- Add one useful layer: a human observation, practical implication, process detail, relevant next step or reason to contact the firm.
+- one concise supporting point;
+- CTA/contact only when useful;
+- disclaimer where advice-style content could be mistaken for individual advice;
+- maximum 5 dynamic hashtags by default.
 
 ## Strategy gate blockers
 

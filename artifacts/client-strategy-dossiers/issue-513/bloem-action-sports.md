@@ -4,7 +4,7 @@ Client ID: `b28af30a-3d44-490a-8290-1e56dac7b127`
 
 Issue: #513
 
-Evidence hash: `e31b1f9bde891674c669895aa5d980fde01440978456fec9400c115286e95b3e`
+Evidence hash: `d7b6a3817c35fad44b6bfa48efb7dead797e7c8f5033c3f7a47548b64eb05420`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
@@ -45,7 +45,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Captions should add to the artwork, not repeat it.
+- current date or booking information where needed;
+- a sport-specific observation;
+- a relevant event detail that is not already carrying the poster.
+- Do not restate the poster line-for-line.
+- For time-sensitive, finals, tournament or event-day posts, also include:
 
 ## Strategy gate blockers
 
@@ -53,6 +58,6 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Sources
 
-- docs/ai-workforce/client-intelligence/BLOEM-ACTION-SPORTS-CG-DYNAMICS-CLIENT-GUIDE.md
+- production-client-guide:bloem-action-sports.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#b28af30a-3d44-490a-8290-1e56dac7b127

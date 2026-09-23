@@ -4,7 +4,7 @@ Client ID: `29a28efd-c998-45e2-a57c-4a751e779e66`
 
 Issue: #513
 
-Evidence hash: `d7ed3e0f84ab307bee5c46ff4c4440825eadfb366beb8d1e7da9590401c3cbff`
+Evidence hash: `26186f0a745d4630d0b2ffdfc44803ea50ddc737ed37bbb67da5f0fca3d775be`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
@@ -44,7 +44,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- human, professional, reassuring voice;
+- local Bloemfontein relevance;
+- empathetic/supportive rather than pushy;
+- calm/confident and simple rather than legalistic;
+- occasional natural Afrikaans/Afrikaans-English where it genuinely suits the audience;
+- short, structured, natural posts;
 
 ## Strategy gate blockers
 

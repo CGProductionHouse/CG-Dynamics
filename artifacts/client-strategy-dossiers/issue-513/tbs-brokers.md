@@ -4,7 +4,7 @@ Client ID: `a36ba938-e9dc-4ecf-bb67-4853608b1c01`
 
 Issue: #513
 
-Evidence hash: `61083d365f1100bc7be3fb6fa429c30a6d1491772a7aaa196248d563603153b5`
+Evidence hash: `e79f9a89dec73a5f6eb63ebccc873c3c3e15897109c72a1e65b6c2efb079c01d`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
@@ -45,7 +45,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- voice should be confident, clean and local;
+- content should sound like real people in the business rather than generic corporate copy;
+- never use influencer-style language, forced humour, unnatural trends, slang or hype;
+- do not make TBS cheeky merely to attract attention;
+- practical financial-planning, insurance, client-service and team/service content are core categories;
+- natural English and Afrikaans may be mixed where it genuinely fits the audience;
 
 ## Strategy gate blockers
 

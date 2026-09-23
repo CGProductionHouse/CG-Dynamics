@@ -4,17 +4,17 @@ Client ID: `06b20bb1-ed4a-4aa1-9f48-8c6cb0531aba`
 
 Issue: #513
 
-Evidence hash: `0315333e586d2c3d1e7d57df38b8c522893566e8d094ebb072f534b18aa6a7a6`
+Evidence hash: `9a1d0a6ea9ece9167038fe05c1d0d466e4e2d82945b20b3f1a6c921748948a86`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- current public business listings for Delta Gas Bloemfontein;
-- current customer-review evidence;
-- current local competitor websites and positioning;
-- current South African LPG safety and compliance guidance;
-- current evidence that the business trades from 36 General Dan Pienaar Drive, Dan Pienaar, Bloemfontein;
-- public evidence of delivery, same-day delivery, in-store shopping and gas-related consumables.
+- Delta Gas is the ORYX agent for Bloemfontein and surrounding areas.
+- 36 General Dan Pienaar Dr, Dan Pienaar, Bloemfontein, 9301
+- Owners named by the client: Gysie Pienaar, Marius van Vuuren and Gys Botes.
+- Broad offer: LPG gas and gas appliances.
+- what the cylinder/product actually shows;
+- what is currently available;
 
 ## Confirmed package
 
@@ -32,29 +32,25 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Client and CG constraints
 
-- exact current opening hours;
-- exact delivery area and delivery fee structure;
-- whether delivery is available after hours or only during trading hours;
-- cylinder sizes stocked and accepted;
-- whether Delta refills, exchanges, or offers both depending on cylinder ownership/brand;
-- whether appliances, regulators, hoses, fittings, heaters, stoves, braais or geysers are currently sold;
+- transport/storage requirements.
+- educational cylinder/product content;
+- supply/market updates when current;
+- seasonal/use-case content when genuinely relevant;
+- current business supply/order context;
+- delivery/service area/fees/cut-offs;
 
 ## Research observations
 
-- Gas Market Bloemfontein official website, accessed 2026-08-06.
-- Gasco Bloemfontein official website, accessed 2026-08-06.
-- The Gasman Bloemfontein official website, accessed 2026-08-06.
-- Afrox Free State branch listing, accessed 2026-08-06.
-- Mzaca Gas and Paraffin official website, accessed 2026-08-06.
+- No exact evidence available; do not fill this gap with generic copy.
 
 ## Evidence-backed recommendations
 
-- consistently praised fast service;
-- friendly staff and personal assistance;
-- competitive pricing reputation;
-- gas-related accessories and advice;
-- business-account experience.
-- fastest delivery in Bloemfontein;
+- Keep the opening/body concise and useful.
+- Captions must add to the artwork/video, not repeat it.
+- Add one useful second layer: a customer problem, a practical use case, a verified detail, a reason to contact Delta, or a careful safety clarification.
+- Use simple direct English by default.
+- Switch to Afrikaans or language mixing only when the brief asks for it or the supplied creative clearly supports it.
+- Keep warmth professional rather than overexcited.
 
 ## Strategy gate blockers
 
@@ -62,6 +58,6 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Sources
 
-- docs/ai-workforce/client-intelligence/DELTA-GAS-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md
+- production-client-guide:delta-gas.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#06b20bb1-ed4a-4aa1-9f48-8c6cb0531aba

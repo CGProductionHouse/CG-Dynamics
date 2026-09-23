@@ -143,17 +143,22 @@ function extractEvidence(markdown, runtimeGuide = false) {
     const heading = raw.match(/^#{1,4}\s+(.+)/)?.[1]?.toLowerCase()
     if (heading) {
       if (/avoid|constraint|guardrail|must not|risk|compliance|freshness|unknown|confirm/.test(heading)) bucket = 'constraints'
-      else if (/recommend|strategy|opportunit|content pillar|campaign|next step|plan/.test(heading)) bucket = 'recommendations'
+      else if (/recommend|strategy|opportunit|content pillar|content that suits|campaign|next step|plan|caption|poster|reels?|video|seo|working rule|creative|project instructions/.test(heading)) bucket = 'recommendations'
       else if (/performance|observation|competitor|pattern|signal|what happened/.test(heading)) bucket = 'observations'
-      else if (!runtimeGuide || /business|brand|audience|product|service|offer|voice|identity|history|evidence|website|social|client truth|current/.test(heading)) bucket = 'facts'
-      else bucket = null
+      else if (!runtimeGuide || /business|brand|audience|product|service|offer|voice|identity|history|evidence|website|social|client truth|current|what .* is/.test(heading)) bucket = 'facts'
+      else if (!bucket) bucket = null
       continue
     }
-    if (!bucket || !/^\s*(?:[-*]|\d+\.)\s+/.test(raw)) continue
-    const value = clean(raw.replace(/^\s*(?:[-*]|\d+\.)\s+/, ''))
-    if (value.length < 28 || value.length > 320 || /^(file|commit|issue|branch|status|source|date|scope):/i.test(value)) continue
-    if (runtimeGuide && (/\.(?:md|tsx?|mjs|json)\b|github\.com\/CGProductionHouse\/CG-Dynamics\/(?:issues|pull)\//i.test(value))) continue
-    if (!sections[bucket].includes(value) && sections[bucket].length < 6) sections[bucket].push(value)
+    if (!bucket) continue
+    const isListItem = /^\s*(?:[-*]|\d+\.)\s+/.test(raw)
+    if (!isListItem && !(runtimeGuide && bucket === 'recommendations' && raw.trim().length >= 40)) continue
+    const cleaned = clean(isListItem ? raw.replace(/^\s*(?:[-*]|\d+\.)\s+/, '') : raw)
+    const values = isListItem ? [cleaned] : cleaned.split(/(?<=[.!?])\s+/)
+    for (const value of values) {
+      if (value.length < 28 || value.length > 320 || /^(file|commit|issue|branch|status|source|date|scope):/i.test(value)) continue
+      if (runtimeGuide && (/\.(?:md|tsx?|mjs|json)\b|github\.com\/CGProductionHouse\/CG-Dynamics\/(?:issues|pull)\//i.test(value))) continue
+      if (!sections[bucket].includes(value) && sections[bucket].length < 6) sections[bucket].push(value)
+    }
   }
   return sections
 }

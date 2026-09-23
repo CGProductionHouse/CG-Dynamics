@@ -4,17 +4,17 @@ Client ID: `b6052710-417d-4b3b-8348-0f126bfea671`
 
 Issue: #513
 
-Evidence hash: `c8a74a4c5f3020c85f03445614c4dc88b5cfde28efde703abe9155cd781b8b8a`
+Evidence hash: `38d23e1d90fd4085bd07da245c917fb19c55c2f66e9f90464cbdcd1937e48338`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- Range — Germoparts can source or supply much more than filters and brake pads.
-- Accuracy — the right part for the right vehicle matters more than a cheap wrong part.
-- Speed — workshops lose money when a vehicle waits for parts.
-- Technical confidence — customers need someone who understands compatibility, symptoms, part categories and replacement options without making them feel stupid.
-- Official website: https://germoparts.co.za/
-- Germoparts states that it was founded in 2005 by father-and-son duo Hein and Neville Joerdens.
+- Issue 241 and current comments only for the locked exact-client retrieval/shared-ownership architecture;
+- current PR 247 state for 241, confirming shared runtime remains owned outside this client branch;
+- Issue 248 human creative standard;
+- the current parallel-migration isolation pattern demonstrated by newer client migration branches;
+- reusable automotive-aftermarket research only as strategy context, never as Germoparts factual authority.
+- canonical client: Germoparts;
 
 ## Confirmed package
 
@@ -32,30 +32,20 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Client and CG constraints
 
-- current Bloemfontein branch manager and public staff contacts;
-- actual delivery radius and delivery rules;
-- all supported vehicle makes and applications;
-- all replacement-part brands stocked/sourced;
-- whether Germoparts uses OE, OEM, OE-equivalent, aftermarket, premium aftermarket or another approved quality framework;
-- return policy, especially electronic parts;
+- No exact evidence available; do not fill this gap with generic copy.
 
 ## Research observations
 
-- compare enquiry quality by channel;
-- identify highest-converting categories;
-- identify lost-sales reasons;
-- expand best-performing search groups;
-- create first workshop case study;
-- launch specialist component video series;
+- No exact evidence available; do not fill this gap with generic copy.
 
 ## Evidence-backed recommendations
 
-- registration number where useful;
-- keep Germoparts top of mind with workshops and owners;
-- retarget visitors/enquirers;
-- show range people did not know existed;
-- humanise the branch and staff;
-- promote commercial/seasonal categories.
+- Recurring Germoparts work has used exact product detail such as:
+- campaign prices and validity windows.
+- exact supplied part/application detail matters;
+- the caption should add a buyer/use-case angle rather than repeat the artwork's description, application, part number and price;
+- temporary part numbers, prices and promotions must stay attached to the exact brief and not become permanent client memory.
+- Observed user preference across Germoparts work:
 
 ## Strategy gate blockers
 
@@ -63,6 +53,6 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Sources
 
-- docs/ai-workforce/client-intelligence/GERMOPARTS-BLOEMFONTEIN-MAJOR-CLIENT-MARKETING-INTELLIGENCE-2026-08.md
+- production-client-guide:germoparts.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#b6052710-417d-4b3b-8348-0f126bfea671

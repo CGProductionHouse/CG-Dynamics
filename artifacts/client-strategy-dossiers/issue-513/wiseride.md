@@ -4,17 +4,17 @@ Client ID: `504113ee-fba9-4993-807e-a86066615212`
 
 Issue: #513
 
-Evidence hash: `70cba0090d46d9497fab7b1ecaf1176adf0d5b5c5c79e8d866f2613381527740`
+Evidence hash: `57282c684638f517feea5a01ed53fbda8a1de1216a8e7d810e86bbeb4e6436ff`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
 - client ID: 504113ee-fba9-4993-807e-a86066615212;
 - casing variants of the same exact brand.
-- vehicle repairs/service work at a practical automotive level;
-- Auto Armor protection as part of the newer branch offer.
-- canonical URL for linking: https://wisemangroup.co.za/
-- 80 Nelson Mandela Street, Bloemfontein;
+- another Wiseman-owned automotive business.
+- WiseRide is presented as an Auto Armor-authorised application centre;
+- it offers vehicle-protection services in Bloemfontein;
+- the public location label is Nelson Mandela Dr.
 
 ## Confirmed package
 
@@ -45,7 +45,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Correct facts are only the floor.
+- WiseRide content must sound like a knowledgeable local person explaining vehicle protection or maintenance without sales theatre.
+- Preserve the current Project instruction standard:
+- direct without sounding pushy.
+- Natural English/Afrikaans mixing is allowed when it genuinely fits the creative or audience.
+- Do not force bilingual copy for effect.
 
 ## Strategy gate blockers
 

@@ -9,8 +9,7 @@ const INDEX = join(DIR, 'index.json')
 const OUTPUT = join(DIR, 'sep-oct-strategy-mutation-dry-run.json')
 
 const HELD = new Set([
-  'Agri-Secure', 'Bat Hill Royale', 'Bloem Vascular', 'Ipopeng Office Supplies',
-  'Mimosa Mall', 'NCNA', 'Vrystaat Kunstefees', 'Zooz Lifestyle WFF',
+  'Agri-Secure', 'Bloem Vascular', 'Ipopeng Office Supplies', 'Mimosa Mall', 'NCNA',
 ])
 const NON_APPLICABLE = new Set([
   'Econofoods', 'First Technology Central', 'Kundedienste', 'Local Deli', 'Rusoord Farmstay',
@@ -85,7 +84,7 @@ for (const live of source.rows) {
     continue
   }
   if (HELD.has(live.name)) {
-    rows.push({ ...base, disposition: 'blocked', reason: 'ISSUE_516_SERVICE_SCOPE_HELD' })
+    rows.push({ ...base, disposition: 'held', reason: 'ISSUE_516_SERVICE_SCOPE_HELD' })
     continue
   }
   if (dossier.strategy_status !== 'ready') {
@@ -148,11 +147,11 @@ for (const live of source.rows) {
 const counts = rows.reduce((acc, row) => {
   acc[row.disposition] = (acc[row.disposition] ?? 0) + 1
   const month = row.strategy_month.slice(0, 7)
-  acc.by_month[month] ??= { ready: 0, non_applicable: 0, blocked: 0 }
+  acc.by_month[month] ??= { ready: 0, non_applicable: 0, held: 0, blocked: 0 }
   acc.by_month[month][row.disposition] += 1
   if (row.disposition === 'blocked') acc.blocked_reasons[row.reason] = (acc.blocked_reasons[row.reason] ?? 0) + 1
   return acc
-}, { ready: 0, non_applicable: 0, blocked: 0, by_month: {}, blocked_reasons: {} })
+}, { ready: 0, non_applicable: 0, held: 0, blocked: 0, by_month: {}, blocked_reasons: {} })
 
 const planCore = {
   schema_version: 1,

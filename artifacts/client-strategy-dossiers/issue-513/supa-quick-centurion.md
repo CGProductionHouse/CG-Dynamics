@@ -4,7 +4,7 @@ Client ID: `e2870110-930c-4e63-b2fe-c858030f7258`
 
 Issue: #513
 
-Evidence hash: `6c63496724a267aa00e9b48690f1f2dfae024dfa9d01789ae186a38cda6b90ca`
+Evidence hash: `6ed6bb55fa527da96f2fbea3d5a2a1f31a9690e9d39de6f0f4b7f1730a61a328`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
@@ -41,7 +41,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Correct facts are the floor, not the finished marketing.
+- Supa Quick Centurion copy should feel useful to a real motorist and specific to the actual post.
+- the real tyre/fitment problem visible or supplied in the brief;
+- a real branch-local next step;
+- a specific service/process detail;
+- what the driver should know before asking for a quote or fitment;
 
 ## Strategy gate blockers
 

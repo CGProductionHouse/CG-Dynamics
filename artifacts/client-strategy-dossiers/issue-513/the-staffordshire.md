@@ -4,7 +4,7 @@ Client ID: `dfa47255-875d-43cf-8a22-cfe1a6247fb7`
 
 Issue: #513
 
-Evidence hash: `65f989a75a4c5f8457e6744f415ad46ca6833368dc87363cb28666baf8d0c50c`
+Evidence hash: `2e3fbaadda6c6f808f7b479c67f2e95ba45c7aa9682d24b5dfff6e731d7fd979`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
@@ -50,7 +50,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Captions must add a second layer beyond the artwork/video.
+- a human reaction to the announcement;
+- what changed because the audience asked;
+- a direct booking/ticket prompt;
+- one useful event logistics detail that is current and supplied;
+- a quick crowd-facing joke tied to the content;
 
 ## Strategy gate blockers
 

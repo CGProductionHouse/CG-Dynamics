@@ -4,17 +4,17 @@ Client ID: `6b313cac-283e-48c4-9df6-ba43af2f7353`
 
 Issue: #513
 
-Evidence hash: `073d6f8e43d5907bdf712917c8aeebe12d552eecec7e1b46ed3d8c94ccb56fa1`
+Evidence hash: `55c3e462e15b6c1cb25b42e0d9b2c8ad709d924bf06f8b18a5c0d6e69ab3dd04`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- canvas and PVC fabrication related to transport, agriculture, industry and outdoor use.
-- Website: https://centralcanvas.co.za;
-- Address: 1A Quagga Street, Quaggafontein, Bloemfontein, 9301;
-- Sales contact: Berend — 060 979 6589 — sales@centralcanvas.co.za;
-- Sales contact shown on the current contact page: Megan — 082 523 0039 — verkope@centralcanvas.co.za;
-- Admin: admin@centralcanvas.co.za;
+- Current main and branch truth.
+- Issue 248 human creative standard.
+- Issue 241 latest architecture comments and draft PR 247 for ownership/retrieval boundary only.
+- Direct Project source business name: Central Canvas (Pty) Ltd.
+- Exact current Dynamics client ID from Issue 274: 6b313cac-283e-48c4-9df6-ba43af2f7353.
+- Bloemfontein / Free State context.
 
 ## Confirmed package
 
@@ -40,12 +40,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- Bloemfontein-based since 2006;
-- specialist tarpaulin and cargo-net experience;
-- repair and replacement capability;
-- transport, agricultural and industrial application knowledge.
-- best quality at the best price.
-- Cargo nets and load restraint
+- captions should not repeat what is already on the post;
+- user repeatedly rejected generic phrasing and asked for wording that feels human and product-specific;
+- short title + supporting subtitle is a useful poster structure;
+- Truck Tarps & Repairs is an acceptable direct service heading when it matches the visual;
+- delivery/dispatch images should talk about delivery/dispatch rather than forcing a vague product metaphor;
+- avoid routine use of finish / finished;
 
 ## Strategy gate blockers
 
@@ -53,6 +53,6 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Sources
 
-- docs/ai-workforce/client-intelligence/CENTRAL-CANVAS-CLIENT-MARKETING-INTELLIGENCE-2026-08.md
+- production-client-guide:central-canvas.md
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
 - artifact:issue-501-recovery-pass-1-snapshot.json#6b313cac-283e-48c4-9df6-ba43af2f7353

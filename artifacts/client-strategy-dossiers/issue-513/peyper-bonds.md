@@ -4,7 +4,7 @@ Client ID: `a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b`
 
 Issue: #513
 
-Evidence hash: `857510cde0555b1a3bba04c1f5d918a58993f4ba716719ac5a0d02555b4d7ed4`
+Evidence hash: `f6c46109eacc4da32165828caca2e5da2df6c3cc35ed1d6e869f5bbe1c39e11c`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
@@ -45,7 +45,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Caption = new value, not a rewrite of the artwork/video.
+- A good Peyper Bonds caption usually does one of these:
+- answers the next question a buyer would ask;
+- explains one step in normal language;
+- adds a practical preparation tip;
+- shows what the team does behind the scenes;
 
 ## Strategy gate blockers
 

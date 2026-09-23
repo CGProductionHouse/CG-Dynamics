@@ -4,7 +4,7 @@ Client ID: `7b47afb0-fa55-4916-85f6-09c57e5905b9`
 
 Issue: #513
 
-Evidence hash: `b6b9e3f5deba7aa14b1844b0e2b6884406a3f43e7bd07cc66de6e73690287d01`
+Evidence hash: `6c5e403d70b51aad6e208253a3aa3f586d7dbfc69da0b854a44efdc971931e68`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
@@ -32,8 +32,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Client and CG constraints
 
-- current kids-range availability;
-- heritage/anniversary wording;
+- current verified arrivals/promotions;
+- personalised shopping/service proof;
+- branch announcements with freshly verified details.
+- preserve the exact garment/product unless replacement is requested;
+- preserve visible colour, silhouette, cut, texture, stitching and design details;
+- preserve logos/brand marks and placement;
 
 ## Research observations
 
@@ -41,7 +45,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- A caption must add to the artwork/video, not repeat it.
+- inspect the actual creative and its existing text;
+- identify the exact product/brand only when supported;
+- add one useful shopper angle: styling, occasion, visible detail, fit context, pairing, service or buying reason;
+- keep the wording concise and natural;
+- do not narrate a reel frame-by-frame;
 
 ## Strategy gate blockers
 

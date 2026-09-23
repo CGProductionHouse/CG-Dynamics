@@ -4,7 +4,7 @@ Client ID: `2a5ea019-64f5-4f8e-8a61-61a28940aa6e`
 
 Issue: #513
 
-Evidence hash: `f720af6f6263e0167262cb6b312c4bd045dfa9f9042b04495a6f4603afcfc073`
+Evidence hash: `f3da5b435a6485e55afc1f672b73c3b5d6038341da6e33830a6cb647e2fa5038`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
@@ -35,7 +35,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Keep Local Deli human, local, down-to-earth and commercially clear.
+- Start from the actual product, image or video and add a useful second layer rather than repeating artwork copy.
+- Good caption angles include a real meal or braai use-case, a practical product detail shown in the creative, a genuine prep/service moment, or a current verified reason to act.
+- Avoid generic filler such as your local favourite, taste the difference, something for everyone, quality you can taste, premium cuts for every occasion and interchangeable fresh quality claims.
+- Routine captions should usually be short-to-medium and direct.
+- No permanent Local Deli-only language, emoji or sentence-count rule was proven.
 
 ## Strategy gate blockers
 

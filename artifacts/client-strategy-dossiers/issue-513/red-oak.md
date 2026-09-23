@@ -4,7 +4,7 @@ Client ID: `cdb11a82-339e-4b46-9b09-bde1a23efeaf`
 
 Issue: #513
 
-Evidence hash: `6ec8d5d821da6b380dd50bf5aed1d9e924872f017065e776db2bbadcbf1337ce`
+Evidence hash: `a40b6e4ff4d83d374b404c3415e0c7364d5e500ec65cd1734a07f4a18f070630`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
@@ -36,6 +36,8 @@ Status: **dossier complete; ready for gold-strategy drafting**
 - current official social handles;
 - facility/accessibility/parking claims;
 - permanent sponsor or alcohol-partner relationships;
+- captions for supplied food-special posters;
+- weekend/client-highlight captions;
 
 ## Research observations
 
@@ -43,8 +45,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- app participation may technically happen online, but if the mechanic requires a Red Oak table / in-venue registration, the caption must make that physical attendance requirement clear;
-- never word a CTA so it sounds as if a person can enter remotely when they cannot.
+- For a normal Red Oak caption request:
+- return 4 genuinely different caption options by default;
+- put the relevant hashtags under every option;
+- use no more than 5 hashtags per option;
+- if CA explicitly asks for one/final/quick caption, return one;
+- options must differ in idea or angle, not only swap a few adjectives;
 
 ## Strategy gate blockers
 

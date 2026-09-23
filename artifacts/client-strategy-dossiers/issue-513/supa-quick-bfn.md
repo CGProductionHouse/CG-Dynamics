@@ -4,7 +4,7 @@ Client ID: `a60b4d07-0a30-4f1c-8d48-7bd9ea649c97`
 
 Issue: #513
 
-Evidence hash: `8c321e872c4df44c71a88154f957bd4f0680e8c58ca3aec435c05a4bb6fa184e`
+Evidence hash: `818f9351f18d897129972d9df2925b9a4398837dcff1e6f399d277994e7683b4`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
@@ -41,7 +41,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Read the artwork/video before writing.
+- Do not restate the poster headline or copy Reel dialogue.
+- If the artwork already names the service, add why a motorist would care, one useful detail or a practical next step.
+- Keep service captions punchy unless extra explanation is genuinely useful.
+- Vary openings and CTAs; do not recycle an exact line CG has already rejected/used.
+- When several assets are supplied, account for every one and keep outputs aligned to the correct asset.
 
 ## Strategy gate blockers
 

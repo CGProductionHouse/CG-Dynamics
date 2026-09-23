@@ -4,7 +4,7 @@ Client ID: `4f6106de-c437-404e-8cef-fbe848de0665`
 
 Issue: #513
 
-Evidence hash: `5183d45b1a2cf266f00ecfc5b00847653fa79d369fbc8dba0ca7507568c6e394`
+Evidence hash: `912552d62eb24f57ca3a84327029701108d51a9cc3fbda1d40cad6fba8908c66`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
@@ -44,7 +44,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- You are working only on RC-Polypipe (client ID 4f6106de-c437-404e-8cef-fbe848de0665).
+- Keep marketing human, practical, specific and application-aware.
+- Captions add to artwork/video instead of repeating it; keep them concise and use 5 dynamically chosen hashtags unless the brief says otherwise.
+- For technical/how-to content, use only verified RC guidance and preserve the official qualification that field/environmental conditions may require adjustment.
+- For image edits, preserve real products, material appearance, branding, people, proportions and composition except where explicitly changed.
+- Never invent materials/specs/classes/standards, stock, technical performance, fabrication/installation capability, turnaround, delivery, supplier rights, pricing, warranties, contacts, hours or service areas.
 
 ## Strategy gate blockers
 

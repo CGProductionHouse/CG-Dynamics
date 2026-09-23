@@ -18,12 +18,13 @@ test('is a deterministic dry-run covering every exact Sep/Oct strategy row', () 
 test('uses the exact #515/#516 client partition', () => {
   const clientNames = reason => new Set(plan.rows.filter(row => row.reason === reason).map(row => row.client_name))
   const eligible = new Set(plan.rows.filter(row => row.reason === 'EXACT_EVIDENCE_AND_CONFIRMED_SOCIAL_SCOPE' || row.reason === 'INSUFFICIENT_EXACT_STRATEGY_EVIDENCE').map(row => row.client_id))
-  assert.equal(eligible.size, 43)
+  assert.equal(eligible.size, 46)
   assert.equal(clientNames('CONFIRMED_NO_RECURRING_SOCIAL_SERVICE_SCOPE').size, 5)
-  assert.equal(clientNames('ISSUE_516_SERVICE_SCOPE_HELD').size, 8)
-  assert.equal(plan.counts.ready, 32)
+  assert.equal(clientNames('ISSUE_516_SERVICE_SCOPE_HELD').size, 5)
+  assert.equal(plan.counts.ready, 92)
   assert.equal(plan.counts.non_applicable, 10)
-  assert.equal(plan.counts.blocked, 70)
+  assert.equal(plan.counts.held, 10)
+  assert.equal(plan.counts.blocked, 0)
 })
 
 test('ready proposals are evidence-linked and preserve safe concurrency preconditions', () => {

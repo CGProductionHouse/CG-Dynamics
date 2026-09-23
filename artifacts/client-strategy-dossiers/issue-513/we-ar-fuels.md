@@ -4,7 +4,7 @@ Client ID: `2b953772-e791-4dff-a278-d4dd3521f02e`
 
 Issue: #513
 
-Evidence hash: `6fa9fc13c7d9529c9caf5518919d38b3ff7e80c872297204628e985c998ee033`
+Evidence hash: `d5e1d141cf76e514e4bca11f2d2983b0e958184f5f364aff251225fe28aceff3`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
@@ -45,7 +45,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Normal public We Ar Fuels captions should use the current approved regional footer from the governed exact-client contact source:
+- Sentraal Vrystaat — Ryno Serfontein.
+- Wes Vrystaat — Paul de Koker, then Werner Serfontein.
+- The exact current phone/email values live in the client-approved/private evidence layer and should be retrieved at generation time.
+- Do not use Thianie’s older contact route.
+- It is superseded/unverified for caption use.
 
 ## Strategy gate blockers
 

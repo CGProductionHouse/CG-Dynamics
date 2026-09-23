@@ -4,7 +4,7 @@ Client ID: `e276f019-a580-44c5-a7ab-e43840c33a64`
 
 Issue: #513
 
-Evidence hash: `e18033e9d1f0584f6b584aba49ee3ac2e11a60576123c10d942c941d248addbf`
+Evidence hash: `1d7cdac3b1186009be99c378bea9d7f41c9abb6652f30585ef66f29dbd2dd2a1`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
@@ -50,12 +50,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- the event identity was designed to feel energetic, family-friendly, approachable and community-led;
-- a strong black/charcoal, pink and white event palette appeared repeatedly, with earlier brief material also referencing Mimosa corporate pink/purple;
-- recurring graphic devices included the M, a Bloemfontein map/route treatment inside the 5, a movement/pink sweep and local city imagery;
-- one campaign moodboard explicitly framed the desired feel as Real. Local. Together.;
-- campaign assets were designed across mall screens, Wi-Fi units, website/event banners, social formats, reel covers, lift/bathroom posters and sponsor posts;
-- city/running imagery and the Mimosa Mall building were recurring visual anchors.
+- Correct facts are only the starting point.
+- Future Mimosa Mall marketing should feel like someone understands the centre, the actual tenant/event, Bloemfontein and the supplied asset.
+- the real local occasion or reason to visit;
+- a recognisable shopper/family/community moment;
+- one useful detail that helps the audience act;
+- a small human observation or playful angle when appropriate;
 
 ## Strategy gate blockers
 

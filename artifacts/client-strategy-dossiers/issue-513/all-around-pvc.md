@@ -4,7 +4,7 @@ Client ID: `fd16ebae-a50b-4920-afe0-94c2631f8f06`
 
 Issue: #513
 
-Evidence hash: `b7697d821321899e5c176d7124ebecbf39f199918bdf3cabab40ebf8140d4c9b`
+Evidence hash: `1d9f4961c59379e578ec42cc0b272bb2ad1436f663ae3b7eb754c759fc176e85`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
@@ -40,7 +40,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- sound direct, practical and human;
+- default to English unless the task says otherwise;
+- explain one real surface/product/customer decision at a time;
+- add information/personality beyond poster/video wording;
+- use concise, varied sentence structures;
+- use technical detail only as far as evidence supports it;
 
 ## Strategy gate blockers
 

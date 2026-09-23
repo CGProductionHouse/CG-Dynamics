@@ -4,17 +4,17 @@ Client ID: `816c7f59-d56c-46a3-ba15-f76971d83769`
 
 Issue: #513
 
-Evidence hash: `6ca2e3fd7fb2c6ffd2cac7a377e9a7c34cd3e3b910532ff5f46e48b8fe249720`
+Evidence hash: `1292ab9c32b1a28cf0152bd6ed5878ae2dbccf2b789f8a8a1216666dd68140b8`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
 
-- Ford creative - use Human Auto Ford facts and the exact Ford branch.
-- MG creative - use Human Auto MG Bloemfontein facts; do not append Ford hashtags/footer.
-- Foton creative - use the exact Foton dealer/location facts and recheck mutable contacts/offers.
-- Human Select / used creative - use supplied current unit and current pre-owned identity evidence only.
-- Group-wide Human Auto creative - combine identities only when the content is genuinely about the group.
-- confident without corporate stiffness;
+- Human Auto Ford - current Ford dealership group with Bloemfontein, Welkom and Kimberley locations;
+- Human Auto MG Bloemfontein - current MG dealership identity in Bloemfontein;
+- Human Auto Foton - current Foton dealer relationship evidenced for Bloemfontein and Welkom;
+- Human Select - durable Human Auto pre-owned identity supported by CG/client history and recent public context, but its current standalone branch/contact truth must still be refreshed before use.
+- Sales: Mon-Fri 07:30-17:15, Sat 08:00-12:00;
+- Service & Parts: Mon-Fri 07:30-17:00.
 
 ## Confirmed package
 
@@ -45,7 +45,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Read the artwork/video first.
+- If it already contains the model, price, finance figure, headline, promotion, event date, branch or feature list, do not paraphrase those lines underneath it.
+- one verified feature translated into buyer value;
+- a test-drive or viewing reason;
+- service/ownership relevance;
+- a buyer question worth considering.
 
 ## Strategy gate blockers
 

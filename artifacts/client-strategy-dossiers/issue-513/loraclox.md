@@ -4,7 +4,7 @@ Client ID: `21300630-6755-4591-9a49-e22abbaf7e3d`
 
 Issue: #513
 
-Evidence hash: `3bffd367e673365deac47153d6e7c639b50184941593b21ac531b7cfaab11324`
+Evidence hash: `3cdc0ddb125609ecfbdde592438b5b2b3ab6708c1ab9db387ea6960de1fc2706`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
@@ -45,7 +45,12 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Evidence-backed recommendations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- Captions add to the artwork/video.
+- For straightforward Loraclox social posts, the accessible Project history supports a default rhythm of one sentence, straight to the point, followed by the appropriate verified contact/footer details when required and up to 5 dynamic hashtags.
+- explain the practical customer problem a verified system/service addresses;
+- add one useful CCTV, installation, maintenance or access-control consideration;
+- make technical work understandable without inventing specifications;
+- show process/workmanship when the creative supports it;
 
 ## Strategy gate blockers
 
