@@ -27,6 +27,19 @@ Covers:
 - Role assignment from invites
 - Client_id restriction for client invites
 
+### 405_website_enquiry_transaction_acceptance.sql
+
+Covers:
+- Server-side endpoint/client/environment and approved-recipient resolution
+- Versioned stable form-field validation
+- Identical replay receipt stability and changed-payload conflict
+- Concurrent same-key submission serialization
+- Atomic rollback when event creation fails
+- Tenant-scoped contact identity with no cross-client email deduplication
+- One enquiry, exact pending outbox jobs, and one canonical lead event
+- Preview/staging synthetic classification derived from server configuration
+- Anonymous/authenticated execute and table-read denial
+
 ## Running security tests
 
 ```bash
@@ -39,7 +52,12 @@ Individual suites:
 node --test tests/opsHubQualityGate.test.mjs
 node --test tests/clientFacingQualityGate.test.mjs
 node --test tests/adminInvitePolicy.test.mjs
+node --test tests/websiteEnquiryTransaction.test.mjs
 ```
+
+The PostgreSQL acceptance suite runs against a dedicated disposable database in
+`.github/workflows/website-enquiry-transaction.yml`; it does not connect to or mutate
+production.
 
 ## Coverage gaps
 

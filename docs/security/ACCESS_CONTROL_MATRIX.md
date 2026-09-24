@@ -232,3 +232,18 @@ through RLS or the `admin_set_package_classification` RPC.
 | Process delivery queue | service role only | service role only | service role only | no |
 
 The browser considers push active only when permission is granted, a browser subscription exists, and the same endpoint is active server-side for the signed-in user.
+
+### Website enquiry transaction tables
+
+| Operation | Public browser | Authenticated browser | Trusted intake service | Internal delivery worker |
+|-----------|----------------|-----------------------|------------------------|--------------------------|
+| Resolve endpoint/client/environment | no | no | opaque intake key only | no |
+| Submit versioned form answers | no direct table access | no direct table access | service-role RPC | no |
+| Read enquiry/contact/event rows | no | no | service role only | service role only |
+| Create pending delivery jobs | no | no | inside the submission transaction | no |
+| Claim/update delivery jobs | no | no | no | service role only (future M2B) |
+| Configure endpoints/schemas/recipients | no | no | no | reviewed server/admin workflow only |
+
+All enquiry-foundation tables have RLS enabled and no `anon` or `authenticated`
+table privileges. The submit function also has no public, anonymous, or authenticated
+execute grant. M2A intentionally adds no browser-facing recipient/configuration API.

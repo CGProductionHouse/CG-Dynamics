@@ -1,0 +1,41 @@
+name: Website enquiry transaction acceptance
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/website-enquiry-transaction.yml'
+      - 'scripts/local-db-acceptance.sh'
+      - 'supabase/schema.sql'
+      - 'supabase/phase-*.sql'
+      - 'supabase/migrations/*.sql'
+      - 'tests/sql/405_website_enquiry_transaction_acceptance.sql'
+      - 'tests/websiteEnquiryTransaction.test.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: website-enquiry-transaction-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  postgres-acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Run focused contract tests
+        run: node --test tests/websiteEnquiryTransaction.test.mjs
+
+      - name: Run disposable Supabase PostgreSQL acceptance
+        env:
+          PGHOST: 127.0.0.1
+          PGUSER: postgres
+          PGPASSWORD: postgres
+        run: |
+          sudo systemctl start postgresql.service
+          sudo -u postgres psql -c "alter role postgres password 'postgres'"
+          scripts/website-enquiry-transaction-acceptance.sh
