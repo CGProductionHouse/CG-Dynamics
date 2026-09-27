@@ -63,10 +63,8 @@ Major completed launch-critical merges:
   - 9 `NO_IN_MONTH_POST_EVIDENCE`
 - Client report publication truth / exact-client isolation accepted.
 - Meta reporting truth runtime live.
-- TikTok analytics/reconnect runtime live.
-- CG Production House TikTok exact account connected and fresh.
-- 57/57 exact-client strategy dossiers exist; Neshora remains strategy-blocked
-  rather than receiving invented business intelligence.
+- TikTok analytics/reconnect runtime live; silent-refresh contract was corrected on 27 Sep after the first 24h expiry exposed a stale provider endpoint.
+- 57/57 exact-client strategy dossiers exist; Neshora now has reviewed first-party intelligence and a zero-write Sep/Oct draft proposal.
 - Microsoft collection/reconciliation remains automated.
 - Hub/Work responsive acceptance already passed.
 - Red Oak Website M1 period migration, one immutable snapshot and September
@@ -74,10 +72,11 @@ Major completed launch-critical merges:
 
 ### CURRENT closure lanes
 
-1. #513: Neshora needs reviewed exact-client intelligence and canonical monthly
-   draft creation; the frozen 46-client/92-row plan remains unapplied.
-2. #505: four TikTok client-help holds, 33 exact-identity gates and protected
-   standalone Instagram provider gates remain.
+1. #513: Neshora reviewed intelligence is complete; canonical Sep/Oct draft
+   creation remains protected, and the frozen 46-client/92-row plan remains unapplied.
+2. #505: TikTok live truth is 0 connected / 10 needs_reauth / 37 not connected
+   until guarded silent recovery is applied; four client-help holds and 33
+   exact-identity gates remain. Standalone Instagram provider gates also remain.
 3. Website M1: optional final authenticated Red Oak-client / other-client UI
    isolation check; do not create another snapshot or republish.
 4. #519: protected nine-client access batch remains unapplied.
@@ -227,15 +226,18 @@ The v2 dry-run is regenerated from current production:
 
 The old `94e42112...` plan is rejected and must not be applied.
 
-Neshora Oxygen was added after the frozen 56-client source cutoff. Its separate
-zero-write readiness dry-run preserves reviewed plan hash
+Neshora Oxygen was added after the frozen 56-client source cutoff. PR #546
+merged reviewed first-party intelligence from the exact client OneDrive at
+`d74d3666ab8e68a5c945698439d2af90c4185789`. The evidence includes current
+brand assets and the 21 Sep 2026 client shoot with 79 photo/video assets.
+Its separate zero-write readiness dry-run preserves reviewed plan hash
 `4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b`
-and records both September and October as blocked. The package is exact
-(1 professional video, 4 photo posts and 4 design posters), but production has
-no Neshora guide, industry profile, report, content guideline or canonical
-monthly-strategy row. Do not invent a strategy from package quantities alone.
-The safe next action is reviewed exact-client intelligence followed by draft
-creation through the existing #391/#463 monthly strategy contract.
+and now marks September and October ready for canonical draft creation inside
+the exact 1 professional video / 4 photo posts / 4 design posters package.
+Medical, service, product, contact and outcome claims remain fail-closed unless
+separately confirmed. Production still has no Neshora monthly-strategy row.
+The next protected action is exact Sep/Oct draft creation through the existing
+#391/#463 monthly strategy contract; this must not silently alter the frozen fleet plan.
 
 PR #523 passed supervisor review and merged the frozen v2 artifact at
 `45b794ff655d0bee7b71d5c3ae0dd4c187d23755`.
@@ -290,14 +292,13 @@ For each eligible client:
 
 Never reuse another client’s TikTok session.
 
-Current production TikTok fleet (23 Sep 2026):
+Current production TikTok fleet (27 Sep 2026):
 - **47 eligible**
-- **10 connected**
-- **0 reconnect-required**
+- **0 connected**
+- **10 needs_reauth / guarded-recovery candidates**
 - **37 not connected**
-- all 10 connected rows are read-only analytics connections and eligible for automatic daily freshness.
 
-Connected exact clients:
+The ten previously connected exact clients are:
 - CG Production House
 - Red Oak
 - Braize
@@ -308,6 +309,15 @@ Connected exact clients:
 - Madison Wear
 - The Staffordshire
 - Neshora Oxygen
+
+All ten failed after the first access-token expiry because the shared refresh helper
+still called the obsolete `/v2/oauth/token/refresh/` route. PR #541 corrected the
+current TikTok Login Kit contract to `POST /v2/oauth/token/` with
+`grant_type=refresh_token`; live `tiktok-sync` is v13. PR #543 added exact-client,
+exact-connection, exact-open-id guarded recovery; `tiktok-recover-connection` v1
+is live and defaults to preflight. Read-only verification proves all ten still
+have token rows and non-empty stored refresh tokens. Do not force ten manual
+OAuth logins before guarded silent recovery has been tried.
 
 Client-assisted holds:
 - **Emmanuel Funerals**
@@ -439,6 +449,10 @@ Final read-only production reconciliation captured on 23 Sep 2026:
 
 No user, mapping, credential or production data was created or changed during
 this reconciliation. Starter credentials are not included in its artifacts.
+
+PR #545 merged the duplicate-safe existing-profile link path and deployed
+`client-portal-access` v9. Braize and CG Production House each have exactly one
+active client profile with a matching auth user and no portal mapping.
 
 The remaining nine-client access batch is a **separate protected production action**:
 - link the existing Braize profile;
