@@ -3,7 +3,7 @@
 //
 // Verified against current TikTok developer docs (Sep 2026):
 //   - OAuth token: POST /v2/oauth/token/ (top-level response, NOT nested data)
-//   - Refresh token: POST /v2/oauth/token/refresh/ (top-level response)
+//   - Refresh token: POST /v2/oauth/token/ (grant_type=refresh_token; top-level response)
 //   - Video create_time: int64 Unix epoch in SECONDS
 //   - Publish status: PROCESSING_UPLOAD, PROCESSING_DOWNLOAD, SENDING_TO_USER_INBOX,
 //     FAILED, PUBLISH_COMPLETE; publicaly_available_post_id[] (not video.id)
@@ -209,7 +209,7 @@ export async function getTiktokAccessToken(
  * Refresh a TikTok access token.
  *
  * Current TikTok API (Sep 2026):
- *   POST https://open.tiktokapis.com/v2/oauth/token/refresh/
+ *   POST https://open.tiktokapis.com/v2/oauth/token/
  *   Body: application/x-www-form-urlencoded (client_key, client_secret, grant_type=refresh_token, refresh_token)
  *   Response: TOP-LEVEL fields (NOT nested under data):
  *     { access_token, expires_in, open_id, refresh_expires_in, refresh_token, scope, token_type }
@@ -228,7 +228,7 @@ export async function refreshTiktokToken(
     refresh_token: refreshToken,
   })
 
-  const res = await tiktokFetch('https://open.tiktokapis.com/v2/oauth/token/refresh/', {
+  const res = await tiktokFetch('https://open.tiktokapis.com/v2/oauth/token/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: params.toString(),

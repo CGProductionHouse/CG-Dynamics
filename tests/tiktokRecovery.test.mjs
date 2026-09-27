@@ -6,6 +6,7 @@ const read = path => readFileSync(new URL(path, import.meta.url), 'utf8').replac
 const sync = read('../supabase/functions/tiktok-sync/index.ts')
 const queue = read('../supabase/functions/tiktok-connection-queue/index.ts')
 const page = read('../src/pages/admin/TikTokIntegrationPage.tsx')
+const sharedTikTok = read('../supabase/functions/_shared/tiktok.ts')
 
 const { classifyTiktokConnectionRecovery } = await import('../supabase/functions/_shared/tiktokFreshness.ts')
 
@@ -34,6 +35,13 @@ describe('TikTok failed-refresh recovery', () => {
     assert.match(sync, /Stored TikTok refresh recovery failed\. Reconnect this exact account through TikTok OAuth\./)
     assert.match(sync, /\.eq\('id', connectionId\)[\s\S]*\.eq\('client_id', body\.clientId\)[\s\S]*\.eq\('status', 'connected'\)/)
     assert.doesNotMatch(sync, /tokenRows\.refresh_token[^\n]*console/)
+  })
+
+  test('uses the current v2 token endpoint for silent refresh and persists rotated refresh tokens', () => {
+    assert.match(sharedTikTok, /tiktokFetch\('https:\/\/open\.tiktokapis\.com\/v2\/oauth\/token\/'/)
+    assert.doesNotMatch(sharedTikTok, /\/v2\/oauth\/token\/refresh\//)
+    assert.match(sharedTikTok, /grant_type: 'refresh_token'/)
+    assert.match(sharedTikTok, /refresh_token: body\.refresh_token \?\? refreshToken/)
   })
 
   test('leaves transport failures retryable and preserves canonical exact-client OAuth', () => {
