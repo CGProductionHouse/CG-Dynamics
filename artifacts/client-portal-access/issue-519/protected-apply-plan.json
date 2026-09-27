@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "issue": 519,
+  "mode": "protected_apply_plan",
+  "write_count": 0,
+  "credential_values_included": false,
+  "generated_at": "2026-09-27",
+  "preconditions": {
+    "active_clients": 57,
+    "existing_enabled_mappings": 37,
+    "username_collisions_for_batch": 0,
+    "apply_requires_explicit_authorization": true
+  },
+  "rows": [
+    {
+      "client_id": "fd16ebae-a50b-4920-afe0-94c2631f8f06",
+      "client_name": "All Around PVC",
+      "action": "provision",
+      "username": "allaroundpvc",
+      "expected_mapping_count": 0,
+      "expected_active_client_profile_count": 0,
+      "published_report_count": 1
+    },
+    {
+      "client_id": "32bd9db3-5339-4404-825b-5a615cadec6a",
+      "client_name": "Bat Hill Royale",
+      "action": "provision",
+      "username": "bathillroyale",
+      "expected_mapping_count": 0,
+      "expected_active_client_profile_count": 0,
+      "published_report_count": 2
+    },
+    {
+      "client_id": "6b67a2df-e2ab-418b-bcee-03aef5963d37",
+      "client_name": "Braize",
+      "action": "link_existing",
+      "username": "braizepromotions",
+      "expected_mapping_count": 0,
+      "expected_active_client_profile_count": 1,
+      "expected_profile_id": "5c140f94-663e-4c72-ba31-c7d0d4537bf0",
+      "expected_auth_user": true,
+      "published_report_count": 4
+    },
+    {
+      "client_id": "079df21e-783a-4648-b3fa-0acae6e68867",
+      "client_name": "Case Bloemfontein",
+      "action": "provision",
+      "username": "casebloemfontein",
+      "expected_mapping_count": 0,
+      "expected_active_client_profile_count": 0,
+      "published_report_count": 3
+    },
+    {
+      "client_id": "c27d2185-08e4-4c49-be48-2572564ceecf",
+      "client_name": "CG Production House",
+      "action": "link_existing",
+      "username": "cgproductionhouse",
+      "expected_mapping_count": 0,
+      "expected_active_client_profile_count": 1,
+      "expected_profile_id": "6cdff3c8-bbe8-48f8-9f1f-399c0e249d12",
+      "expected_auth_user": true,
+      "published_report_count": 5
+    },
+    {
+      "client_id": "572555e0-d4d0-404a-8d67-beeeeed6a1f2",
+      "client_name": "HMHI",
+      "action": "provision",
+      "username": "hmhi",
+      "expected_mapping_count": 0,
+      "expected_active_client_profile_count": 0,
+      "published_report_count": 3
+    },
+    {
+      "client_id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+      "client_name": "The Staffordshire",
+      "action": "provision",
+      "username": "thestaffordshire",
+      "expected_mapping_count": 0,
+      "expected_active_client_profile_count": 0,
+      "published_report_count": 3
+    },
+    {
+      "client_id": "1f0406bb-d643-4b83-bc3e-b1ebe87eeb89",
+      "client_name": "Vrystaat Kunstefees",
+      "action": "provision",
+      "username": "vrystaatkunstefees",
+      "expected_mapping_count": 0,
+      "expected_active_client_profile_count": 0,
+      "published_report_count": 2
+    },
+    {
+      "client_id": "0c01d90f-ba5e-4251-a597-bf3c83f990fa",
+      "client_name": "Zooz Lifestyle WFF",
+      "action": "provision",
+      "username": "zoozlifestylewff",
+      "expected_mapping_count": 0,
+      "expected_active_client_profile_count": 0,
+      "published_report_count": 3
+    }
+  ],
+  "post_apply_acceptance": {
+    "expected_new_enabled_mappings": 9,
+    "expected_total_enabled_mappings": 46,
+    "duplicate_client_mappings": 0,
+    "duplicate_usernames": 0,
+    "preserve_existing_37": true,
+    "starter_credentials_must_not_be_committed": true
+  }
+}
