@@ -2,7 +2,7 @@
 
 Status: CURRENT authority for a fresh supervisor chat.
 
-Updated: 27 September 2026 after TikTok guarded recovery, protected portal rollout, reviewed strategy draft amendments, final stale-PR cleanup, authenticated Website M1 / #217 acceptance, and production MCP v24 operational verification.
+Updated: 27 September 2026 during #564 final launch-week closure, after TikTok guarded recovery, protected portal rollout, reviewed strategy draft amendments, final stale-PR cleanup, authenticated Website M1 / #217 acceptance, and production MCP v24 operational verification.
 
 ## 1. Fresh-chat recovery order
 
@@ -110,6 +110,15 @@ Major completed launch-critical merges:
    the intentional communal company OAuth cannot prove which physical staff member is using
    a ChatGPT Project. Keep that limitation explicit; do not reopen the rejected stale #380
    delegation seam or pretend exact UUID context proves human identity.
+8. **#564 final launch-week closure**: authenticated admin desktop acceptance passed
+   across Hub, Work, Calendar, Client Schedule, Clients, Performance, Packages,
+   Reports/Preview, Integrations, Marketing, Assistant, Onboarding, Content,
+   Strategy, Users and System with no body overflow or fatal route state. The stale
+   Microsoft transition banner was corrected to reflect active automatic collection
+   and last-verified-mirror authority while retaining the separate Planner-retirement
+   decision. The browser session expired before the final post-deploy 375px and
+   client-role pass; those checks require a fresh authenticated human session and
+   must not be inferred from staff preview access.
 
 Do not open overlapping redesign lanes.
 
@@ -667,6 +676,10 @@ Priority order:
 5. Portal rollout is complete at 46 enabled exact mappings; do not reopen #519 or
    repeat the protected nine-client batch.
 6. After current launch closure, proceed to #493 LinkedIn + #361 CG Hours.
+
+#564 is the owning issue for final non-Instagram launch acceptance. Keep its
+remaining browser gates limited to fresh authenticated 375px and true client-role
+verification; do not reopen already-proven architecture or overlap #505.
 
 ## 15. Control-plane warning
 

@@ -570,9 +570,9 @@ export default function MicrosoftImportPage() {
       <section className="mt-5 rounded-2xl border border-amber-300/25 bg-amber-300/[0.07] p-5">
         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-200/80">Transition status · beta</p>
         <p className="mt-2 text-sm leading-relaxed text-amber-50/90">
-          Microsoft transition reconciliation is available for reviewed preview and apply. Final live package
-          parity verification is still pending. Do not retire Microsoft Planner until the full dated reconciliation
-          has been reviewed.
+          Automatic Microsoft collection and the last verified Dynamics mirror are active. Manual preview and
+          apply remain reviewable and auditable. Do not retire Microsoft Planner until CA completes the separate
+          transition decision.
         </p>
       </section>
 
