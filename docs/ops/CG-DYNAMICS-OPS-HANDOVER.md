@@ -262,10 +262,23 @@ PR #549 merged at `5748b1f99f02bbb911d6ee43683f376b2899cd2a` and production
 `clients.package_settings` authority. The old legacy package-readiness gate is
 absent. The function was not invoked and existing strategy rows were unchanged.
 
-Migration `20260923193000_monthly_strategy_context_amend.sql` is still unapplied.
-The next protected live sequence is exact preflight, migration apply, the frozen
-92-row reviewed fleet amendment plus the two exact Neshora row amendments.
-Approval/publication remains a later separate gate.
+Migration `20260923193000_monthly_strategy_context_amend.sql` is now applied
+and ledgered in production.
+
+Protected #513 draft amendment completed on 27 Sep 2026:
+- frozen reviewed plan hash `4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b`;
+- 92 / 92 reviewed recurring-social Sep/Oct rows amended exactly to the frozen
+  proposed strategy + provenance hashes;
+- 92 / 92 durable append-only amendment receipts verified;
+- all 20 frozen non-applicable rows remained unchanged;
+- the two exact existing Neshora rows were amended separately from reviewed
+  #546 first-party evidence, with no duplicate row creation;
+- Neshora Sep/Oct are both draft v2 with empty blockers, current package
+  provenance, the exact #546 evidence hash and all ten goldStandard fields;
+- current Sep/Oct total is 114 rows: 94 staff-amended v2 + 20 non-applicable v1;
+- 0 approved and 0 published.
+
+The next strategy gate is approval/publication and is a separate protected action.
 
 Kundedienste must not receive a fabricated recurring-social strategy.
 
