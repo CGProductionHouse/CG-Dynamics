@@ -15,7 +15,7 @@ test('silent refresh uses the current TikTok token endpoint and persists rotated
 
 test('refresh verifies exact provider identity before token persistence', () => {
   const identityCheck = shared.indexOf("if (expectedOpenId && body.open_id !== expectedOpenId)")
-  const tokenUpdate = shared.indexOf(".from('tiktok_connection_tokens')")
+  const tokenUpdate = shared.indexOf(".update({", identityCheck)
   assert.ok(identityCheck > 0)
   assert.ok(tokenUpdate > identityCheck)
   assert.match(sync, /refreshTiktokToken\(sb, connectionId, tokenRows\.refresh_token, exactConnection\.tiktok_open_id\)/)
