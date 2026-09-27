@@ -17,16 +17,22 @@ Deno.serve(async req => {
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   if (!supabaseUrl || !serviceRoleKey) return jsonResponse({ ok: false, error: 'Server configuration error.' }, 500)
 
-  const bearer = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '')
-  if (!bearer) return jsonResponse({ ok: false, error: 'Authentication required.' }, 401)
-
   const sb = createClient(supabaseUrl, serviceRoleKey)
-  const { data: { user }, error: authError } = await sb.auth.getUser(bearer)
-  if (authError || !user) return jsonResponse({ ok: false, error: 'Authentication required.' }, 401)
+  const configuredWorkerToken = (Deno.env.get('WORKER_INTERNAL_TOKEN') ?? '').trim()
+  const suppliedWorkerToken = req.headers.get('X-Internal-Worker-Token') ?? ''
+  const isInternalWorker = configuredWorkerToken.length >= 32 && suppliedWorkerToken === configuredWorkerToken
 
-  const { data: profile } = await sb.from('profiles').select('role,is_active').eq('id', user.id).single()
-  if (!profile?.is_active || !['admin', 'manager'].includes(profile.role)) {
-    return jsonResponse({ ok: false, error: 'Admin or manager access required.' }, 403)
+  if (!isInternalWorker) {
+    const bearer = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '')
+    if (!bearer) return jsonResponse({ ok: false, error: 'Authentication required.' }, 401)
+
+    const { data: { user }, error: authError } = await sb.auth.getUser(bearer)
+    if (authError || !user) return jsonResponse({ ok: false, error: 'Authentication required.' }, 401)
+
+    const { data: profile } = await sb.from('profiles').select('role,is_active').eq('id', user.id).single()
+    if (!profile?.is_active || !['admin', 'manager'].includes(profile.role)) {
+      return jsonResponse({ ok: false, error: 'Admin or manager access required.' }, 403)
+    }
   }
 
   let body: RecoveryBody
