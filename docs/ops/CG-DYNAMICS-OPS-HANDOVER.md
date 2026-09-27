@@ -2,7 +2,7 @@
 
 Status: CURRENT authority for a fresh supervisor chat.
 
-Updated: 27 September 2026 for the #567 Client Performance repair. The code repair and zero-write evidence artifacts are complete; merge/deployment acceptance and guarded website-reporting identity activation remain to be recorded on #567.
+Updated: 27 September 2026 after authenticated production acceptance of #567. PRs #570 and #571 are merged; the exact merge build is green and desktop plus 375px Client Preview acceptance passed. Guarded website-reporting identity/snapshot activation remains external to the presentation-safe UI repair.
 
 ## 1. Fresh-chat recovery order
 
@@ -26,7 +26,7 @@ If chat history conflicts with this file, current GitHub + verified production s
 
 Latest verified runtime merge baseline:
 
-`c7b6af8b76ee5359918f340bb984914b1d7d8cf3` — docs-only PR #566 after PR #565. CURRENT LAUNCH AUTHORITY: app is NOT launch-ready while #567 remains open.
+`d80c2c791f7faf3b3dd39905c3488ac4423dabaa` — #567 production-acceptance correction after PRs #570/#571. Client Performance is presentation-safe; remaining launch gates below are protected/human actions.
 
 Always refetch `main` before code or merge actions.
 
@@ -84,7 +84,7 @@ Major completed launch-critical merges:
 
 ### CURRENT closure lanes
 
-0. **#567 Client Performance launch repair — ACTIVE P0 until production acceptance**: the code repair now renders verified TikTok facts, hides unavailable client metrics while retaining staff diagnostics, labels Instagram profile-link clicks, removes non-live provider tabs and report-text strategy fallbacks, and uses canonical monthly strategy with draft-only staff preview / published-only client projection. Client-facing strategy quality now rejects repository paths, evidence jargon and the Piek generic filler fixture. A zero-write 94-row readiness artifact passes all 94 proposals but deliberately performs no strategy amendment, approval or publication. Website fleet evidence identifies nine verified CG-managed production sites; four have exact active Dynamics clients (All Around PVC, Emmanuel Funerals, Piek Group and Red Oak), while five are held because no exact active Dynamics client exists. Red Oak remains the only proven published snapshot. The client UI now names exact CG-managed sites and reports a missing approved snapshot truthfully instead of generic `Not connected`. Exact reporting identities/snapshots for the other three active clients must still be established through the existing guarded Website Operations contract after authenticated authority is available; never guess them from a name or URL.
+0. **#567 Client Performance launch repair — PRODUCTION ACCEPTED**: PRs #570/#571 now render verified TikTok facts, hide unavailable client metric cards while retaining the exact truth in staff diagnostics, label Instagram profile-link clicks, remove non-live provider tabs/report-text strategy fallbacks, and use canonical monthly strategy with draft-only staff preview / published-only client projection. The fail-closed strategy presentation gate rejects repository paths, evidence jargon, generic filler and internal UUIDs; authenticated production checks held both Piek and Red Oak's unsafe drafts. The zero-write readiness artifact covers all 94 proposed rows and deliberately performs no strategy amendment, approval or publication. Website fleet evidence identifies nine verified CG-managed sites; four have exact active Dynamics clients (All Around PVC, Emmanuel Funerals, Piek Group and Red Oak), while five have no exact active Dynamics client. Red Oak's published snapshot renders verified facts; the other exact managed sites now show their canonical host and a truthful unavailable state instead of generic `Not connected`. Exact reporting identities/snapshots for the other three active clients remain a guarded Website Operations activation; never guess them from a name or URL. Production acceptance passed on desktop and 375px with no horizontal body overflow or console/runtime errors.
 
 1. **#505 provider closure**: TikTok is healthy at 10 connected / 0 needs_reauth /
    37 not connected. Four client-help holds remain (Emmanuel Funerals, Emoya
