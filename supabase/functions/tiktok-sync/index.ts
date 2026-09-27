@@ -161,7 +161,7 @@ Deno.serve(async (req) => {
     if (tokenRows?.refresh_token) {
       let refreshed: Awaited<ReturnType<typeof refreshTiktokToken>>
       try {
-        refreshed = await refreshTiktokToken(sb, connectionId, tokenRows.refresh_token)
+        refreshed = await refreshTiktokToken(sb, connectionId, tokenRows.refresh_token, exactConnection.tiktok_open_id)
       } catch {
         // A transport/configuration interruption is retryable and is not evidence
         // that provider consent is invalid. Leave this exact connection eligible
