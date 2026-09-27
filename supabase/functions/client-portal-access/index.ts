@@ -5,7 +5,27 @@ import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 type AdminClient = ReturnType<typeof createClient>
 
 const USERNAME_PATTERN = /^[a-z0-9]{3,64}$/
-const ACTIVE_PACKAGE_STATUSES = ['active', 'current', 'live']
+const INTERNAL_PORTAL_ACTIVATION: Record<string, { action: 'provision' | 'link_existing'; username: string }> = {
+  '6b67a2df-e2ab-418b-bcee-03aef5963d37': { action: 'link_existing', username: 'braizepromotions' },
+  'c27d2185-08e4-4c49-be48-2572564ceecf': { action: 'link_existing', username: 'cgproductionhouse' },
+  'fd16ebae-a50b-4920-afe0-94c2631f8f06': { action: 'provision', username: 'allaroundpvc' },
+  '32bd9db3-5339-4404-825b-5a615cadec6a': { action: 'provision', username: 'bathillroyale' },
+  '079df21e-783a-4648-b3fa-0acae6e68867': { action: 'provision', username: 'casebloemfontein' },
+  '572555e0-d4d0-404a-8d67-beeeeed6a1f2': { action: 'provision', username: 'hmhi' },
+  'dfa47255-875d-43cf-8a22-cfe1a6247fb7': { action: 'provision', username: 'thestaffordshire' },
+  '1f0406bb-d643-4b83-bc3e-b1ebe87eeb89': { action: 'provision', username: 'vrystaatkunstefees' },
+  '0c01d90f-ba5e-4251-a597-bf3c83f990fa': { action: 'provision', username: 'zoozlifestylewff' },
+}
+
+function packageIsConfirmed(value: unknown): boolean {
+  if (!value || typeof value !== 'object') return false
+  const verification = (value as Record<string, unknown>).verification
+  return Boolean(
+    verification &&
+    typeof verification === 'object' &&
+    (verification as Record<string, unknown>).status === 'confirmed'
+  )
+}
 
 function normalizeUsername(value: unknown): string {
   return typeof value === 'string'
@@ -52,18 +72,16 @@ async function requireAdmin(request: Request, admin: AdminClient) {
 }
 
 async function eligibleClient(admin: AdminClient, clientId: string) {
-  const [{ data: client, error: clientError }, { data: packages, error: packageError }] = await Promise.all([
-    admin.from('clients').select('id, name, active').eq('id', clientId).maybeSingle(),
-    admin.from('client_packages')
-      .select('id, status, archived_at')
-      .eq('client_id', clientId)
-      .is('archived_at', null)
-      .in('status', ACTIVE_PACKAGE_STATUSES)
-      .limit(1),
-  ])
+  const { data: client, error } = await admin
+    .from('clients')
+    .select('id,name,active,package_settings')
+    .eq('id', clientId)
+    .maybeSingle()
 
-  if (clientError || packageError) return { client: null, error: 'Client eligibility could not be verified.' }
-  if (!client?.active || !packages?.length) return { client: null, error: 'Client is not eligible for portal provisioning.' }
+  if (error) return { client: null, error: 'Client eligibility could not be verified.' }
+  if (!client?.active || !packageIsConfirmed(client.package_settings)) {
+    return { client: null, error: 'Client is not eligible for portal provisioning.' }
+  }
   return { client, error: null }
 }
 
@@ -134,17 +152,15 @@ async function handleLogin(requestBody: Record<string, unknown>, admin: AdminCli
 }
 
 async function handleList(admin: AdminClient) {
-  const [clientsRes, packagesRes, mappingsRes, profilesRes] = await Promise.all([
-    admin.from('clients').select('id, name, active').eq('active', true).order('name'),
-    admin.from('client_packages').select('client_id, status, archived_at').is('archived_at', null).in('status', ACTIVE_PACKAGE_STATUSES),
+  const [clientsRes, mappingsRes, profilesRes] = await Promise.all([
+    admin.from('clients').select('id,name,active,package_settings').eq('active', true).order('name'),
     admin.from('client_portal_access').select('client_id, username, enabled, created_at, updated_at'),
     admin.from('profiles').select('client_id').eq('role', 'client').eq('is_active', true),
   ])
 
-  const error = clientsRes.error ?? packagesRes.error ?? mappingsRes.error ?? profilesRes.error
+  const error = clientsRes.error ?? mappingsRes.error ?? profilesRes.error
   if (error) return jsonResponse({ ok: false, error: 'Client access inventory could not be loaded.' }, 503)
 
-  const eligibleIds = new Set((packagesRes.data ?? []).map(row => row.client_id as string))
   const mappings = new Map((mappingsRes.data ?? []).map(row => [row.client_id as string, row]))
   const profileCounts = new Map<string, number>()
   for (const row of profilesRes.data ?? []) {
@@ -153,7 +169,7 @@ async function handleList(admin: AdminClient) {
   }
 
   const clients = (clientsRes.data ?? [])
-    .filter(client => eligibleIds.has(client.id))
+    .filter(client => packageIsConfirmed(client.package_settings))
     .map(client => {
       const mapping = mappings.get(client.id)
       return {
@@ -409,6 +425,31 @@ Deno.serve(async (request: Request) => {
 
   if (action === 'login') {
     return handleLogin(body, admin, supabaseUrl, anonKey)
+  }
+
+  const configuredWorkerToken = (Deno.env.get('WORKER_INTERNAL_TOKEN') ?? '').trim()
+  const suppliedWorkerToken = request.headers.get('X-Internal-Worker-Token') ?? ''
+  const isInternalWorker = configuredWorkerToken.length >= 32 && suppliedWorkerToken === configuredWorkerToken
+
+  if (isInternalWorker) {
+    const clientId = typeof body.client_id === 'string' ? body.client_id.trim() : ''
+    const username = normalizeUsername(body.username)
+    const approved = INTERNAL_PORTAL_ACTIVATION[clientId]
+    if (!approved || approved.action !== action || approved.username !== username) {
+      return jsonResponse({ ok: false, error: 'Internal portal activation is not approved for this exact client/action.' }, 403)
+    }
+    const systemProfileId = (Deno.env.get('WORKER_SYSTEM_PROFILE_ID') ?? '').trim()
+    const { data: systemProfile, error: systemProfileError } = await admin
+      .from('profiles')
+      .select('id,role,is_active')
+      .eq('id', systemProfileId)
+      .maybeSingle()
+    if (systemProfileError || !systemProfile?.is_active || systemProfile.role !== 'admin') {
+      return jsonResponse({ ok: false, error: 'Internal portal activation admin identity is unavailable.' }, 503)
+    }
+    if (action === 'provision') return handleProvision(body, admin, systemProfile.id)
+    if (action === 'link_existing') return handleLinkExistingProfile(body, admin, systemProfile.id)
+    return jsonResponse({ ok: false, error: 'Internal portal action is not allowed.' }, 403)
   }
 
   const authorization = await requireAdmin(request, admin)
