@@ -79,14 +79,29 @@ Major completed launch-critical merges:
 - Microsoft collection/reconciliation remains automated.
 - `cg-dynamics-mcp` v24 is production-live with `verify_jwt=false` preserved: exact-profile task ownership uses `planner_task_assignees`, nullable `error: null` is a successful result, Christie-Ann live reads passed 19/19 exact assignment checks, cross-profile `get_task` was refused, and v24 acceptance logs were all HTTP 200.
 - Hub/Work responsive acceptance already passed.
-- Red Oak Website M1 period migration, one immutable snapshot and September
-  publication are production-live; structural exact-client/safe-projection proof passed read-only.
+- Website M1 is production-live for all four exact active-client CG-managed sites:
+  Red Oak (Website 7), Piek Group (Website 1), Emmanuel Funerals (Website 6) and
+  All Around PVC (Website 8). Each has one exact September revision-1 snapshot
+  on its published report; structural exact-client/safe-projection proof passed.
 
 ### CURRENT closure lanes
 
-0. **#567 Client Performance launch repair — PRODUCTION ACCEPTED**: PRs #570/#571 now render verified TikTok facts, hide unavailable client metric cards while retaining the exact truth in staff diagnostics, label Instagram profile-link clicks, remove non-live provider tabs/report-text strategy fallbacks, and use canonical monthly strategy with draft-only staff preview / published-only client projection. The fail-closed strategy presentation gate rejects repository paths, evidence jargon, generic filler and internal UUIDs; authenticated production checks held both Piek and Red Oak's unsafe drafts. The zero-write readiness artifact covers all 94 proposed rows and deliberately performs no strategy amendment, approval or publication. Website fleet evidence identifies nine verified CG-managed sites; four have exact active Dynamics clients (All Around PVC, Emmanuel Funerals, Piek Group and Red Oak), while five have no exact active Dynamics client. Red Oak's published snapshot renders verified facts; the other exact managed sites now show their canonical host and a truthful unavailable state instead of generic `Not connected`. Exact reporting identities are already proven for the other three active clients and are now owned by P0 #573: Piek Group = Website 1, Emmanuel Funeral Services = Website 6, All Around PVC = Website 8. Remaining work is guarded reporting activation/snapshot publication, not identity discovery. Production acceptance passed on desktop and 375px with no horizontal body overflow or console/runtime errors.
+0. **#567 Client Performance launch repair — PRODUCTION ACCEPTED**: PRs #570/#571 now render verified TikTok facts, hide unavailable client metric cards while retaining the exact truth in staff diagnostics, label Instagram profile-link clicks, remove non-live provider tabs/report-text strategy fallbacks, and use canonical monthly strategy with draft-only staff preview / published-only client projection. The fail-closed strategy presentation gate rejects repository paths, evidence jargon, generic filler and internal UUIDs; authenticated production checks held both Piek and Red Oak's unsafe drafts. The zero-write readiness artifact covers all 94 proposed rows and deliberately performs no strategy amendment, approval or publication. Website fleet evidence identifies nine verified CG-managed sites; four have exact active Dynamics clients (All Around PVC, Emmanuel Funerals, Piek Group and Red Oak), while five have no exact active Dynamics client. Red Oak established the guarded snapshot reference; #573 subsequently activated the other three exact sites without changing the reporting contract. Production acceptance passed on desktop and 375px with no horizontal body overflow or console/runtime errors.
 
-0.1 **#573 Website Performance activation — ACTIVE P0**: exact identities are already proven for Piek Group (Website 1), Emmanuel Funeral Services (Website 6), and All Around PVC (Website 8). Complete guarded reporting mapping, September MTD snapshot creation/publication and client-safe production verification for each exact client/site. Continue other sites if one source endpoint is technically blocked.
+0.1 **#573 Website Performance activation — COMPLETE, UI SESSION EVIDENCE PENDING**:
+Piek Group (Website 1 / `www.piekgroup.co.za`), Emmanuel Funerals (Website 6 /
+`emmanuelfunerals.com`) and All Around PVC (Website 8 /
+`www.allaroundpvc.co.za`) now have exact canonical Website Editor identities,
+production Vercel Analytics collection and exact Dynamics mappings. Their September
+reports contain guarded revision-1 website snapshots and remain published. Each
+snapshot truthfully reports provider-observed 1 visitor / 1 pageview from collection
+start on 27 Sep, partial coverage, empty unsupported breakdowns and unavailable
+contact actions (`not_connected`, total null); no zero or cross-client fallback was
+introduced. The client-safe projection passed exact-client/published-only and internal-
+identifier stripping checks. Public desktop rendering passed without horizontal
+overflow. Authenticated Admin Client Preview desktop/375 visual capture remains
+unverified only because both available Chrome profiles redirect to Dynamics sign-in;
+no credential reset or new session was created.
 1. **#505 provider closure**: TikTok is healthy at 10 connected / 0 needs_reauth /
    37 not connected. Four client-help holds remain (Emmanuel Funerals, Emoya
    Estate Driving Range, Piek Group, We Ar Fuels); the other unconnected TikTok
@@ -100,9 +115,10 @@ Major completed launch-critical merges:
    protected gate.
 3. **Portal**: protected nine-client rollout is complete. Production has 46/46
    enabled exact mappings across 46 clients/auth users. #519, #539 and #548 are closed.
-4. **Website M1**: only optional final authenticated Red Oak-client / other-client
-   read-only UI isolation acceptance remains; do not create another snapshot or
-   republish.
+4. **Website M1**: guarded activation is complete for Websites 1, 6, 7 and 8.
+   Do not create another September snapshot or republish. The sole remaining optional
+   evidence is authenticated Admin Client Preview desktop/375 capture after CA opens
+   an active Dynamics staff session; the client-safe data contract itself is proven.
 5. **#217**: optional real-phone human signoff only.
 6. **#558 stale-PR reconciliation**: complete in PR #561. Twelve stale, future,
    superseded or unsafe PRs were closed with evidence. Only the still-missing
@@ -540,9 +556,23 @@ Current production truth (read-only reconciliation after #518 closure):
   no direct snapshot-table SELECT, and `client_published_reports()` keeps both
   published-only and `my_client_id()` filters.
 
-Do not repeat the snapshot save or republish. The only remaining optional
-acceptance is a read-only authenticated UI check with the exact Red Oak client
-and a different client to prove the portal result end to end.
+#573 extended that same guarded contract on 27 Sep without changing its schema:
+- Piek Group → Website 1 → `www.piekgroup.co.za`;
+- Emmanuel Funerals → Website 6 → `emmanuelfunerals.com`;
+- All Around PVC → Website 8 → `www.allaroundpvc.co.za`;
+- Vercel Web Analytics is enabled and the Red Oak collector pattern is deployed on
+  all three exact production sites;
+- each exact September report has one immutable revision-1 snapshot for
+  `[2026-09-01,2026-10-01)`, truthfully partial from the 27 Sep collection start;
+- each snapshot preserves provider-observed 1 visitor / 1 pageview, empty unavailable
+  breakdowns, and `not_connected`/null contact-action truth;
+- client-safe projections proved published-only exact-client selection and removed
+  Website Editor/Dynamics/Vercel internal identities.
+
+Do not repeat any September snapshot save or republish. The only remaining optional
+acceptance is authenticated Admin Client Preview desktop/375 visual evidence after an
+active Dynamics staff browser session is available; current Chrome sessions redirect
+to sign-in. This is a session-evidence gate, not a reporting-data or isolation defect.
 
 ## 9. Portal coverage — #519
 
@@ -664,11 +694,11 @@ Priority order:
 2. #556 / #513: strategy draft amendment is complete. Prepare/review the exact
    94-row approval-readiness batch only; do not approve or publish without a new
    explicit protected-action authorization.
-3. Website M1: authenticated admin-preview acceptance passed for exact Red Oak
-   September Website data and a separate Cape Lumber report. A narrow default-
-   selection defect for published current-month full-range reports was corrected;
-   no snapshot/report write occurred. A true client-role versus other-client UI
-   session still needs separate client credentials if CA requires that final proof.
+3. Website M1: all four exact active-client CG-managed sites now have guarded
+   September website snapshots. Red Oak authenticated admin-preview acceptance is
+   retained; Websites 1/6/8 passed provider, snapshot, exact-client and safe-projection
+   verification. Their final Admin Client Preview desktop/375 capture needs CA to open
+   an authenticated Dynamics staff session; current Chrome profiles redirect to login.
 4. #217: authenticated Chrome acceptance passed at the 375px narrow viewport with
    no body overflow, usable mobile navigation and none of the four stale task
    examples. Optional physical-phone human signoff remains; it is not a code gate.
