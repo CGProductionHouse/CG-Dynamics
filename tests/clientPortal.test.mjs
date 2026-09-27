@@ -134,7 +134,7 @@ test('client calendar uses only safe RPC projections and database ownership enfo
   assert.match(CLIENT_RPC_SOURCE, /revoke all on function public\.client_portal_month_ahead_posts/)
 })
 
-test('only genuinely available Facebook and Instagram facts become active platform claims', () => {
+test('only genuinely available Facebook, Instagram and TikTok facts become active platform claims', () => {
   const base = {
     metricKey: 'brand_views',
     comparableGroup: null,
@@ -153,8 +153,8 @@ test('only genuinely available Facebook and Instagram facts become active platfo
     { ...base, platform: 'tiktok', value: 500, availability: 'complete' },
   ]
 
-  assert.deepEqual(activeOrganicPlatforms(facts), ['Facebook'])
-  assert.doesNotMatch(HOME_SOURCE, /TikTok reporting is active|Google Business Profile reporting is active/)
+  assert.deepEqual(activeOrganicPlatforms(facts), ['Facebook', 'TikTok'])
+  assert.doesNotMatch(HOME_SOURCE, /Google Business Profile reporting is active/)
   assert.doesNotMatch(REPORT_VIEW_SOURCE, /Meta Ads|TikTok Ads|Planned integration/)
   assert.match(REPORT_VIEW_SOURCE, /No verified campaign source is configured/)
 })

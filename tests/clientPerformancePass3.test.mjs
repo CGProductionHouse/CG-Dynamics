@@ -68,7 +68,7 @@ test('provider panels remain visible and never fabricate unavailable metrics', (
   assert.match(reportView, /title="Email Marketing"/)
   assert.match(reportView, /title="LinkedIn"/)
   assert.match(reportView, /status="Coming soon"/)
-  assert.match(reportView, /status=\{activeTab === 'tiktok' \? 'Coming soon' : 'Not connected'\}/)
+  assert.match(reportView, /status="Not connected"/)
 })
 
 test('campaign direction comes only from the selected published report strategy', () => {

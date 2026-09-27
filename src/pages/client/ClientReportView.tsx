@@ -166,10 +166,10 @@ export function ClientReportView({
     ...availablePlatforms.map(view => view.platform),
     ...facts
       .map(fact => fact.platform)
-      .filter((platform): platform is Platform => platform === 'facebook' || platform === 'instagram'),
+      .filter((platform): platform is Platform => platform === 'facebook' || platform === 'instagram' || platform === 'tiktok'),
   ]))
   const hasMeta = availablePlatforms.some(view => view.platform === 'facebook' || view.platform === 'instagram')
-    || facts.some(fact => fact.platform === 'facebook' || fact.platform === 'instagram')
+    || facts.some(fact => fact.platform === 'facebook' || fact.platform === 'instagram' || fact.platform === 'tiktok')
   const hasGoogleAds = googleAds !== null || googleAdsState !== 'disconnected'
   const hasGoogleAdsSource = googleAdsState === 'data' || googleAdsState === 'no-activity'
   const tabs: { key: ReportTabKey; label: string; icon: PerformanceProviderIconKey }[] = [
@@ -295,9 +295,9 @@ export function ClientReportView({
         <ProviderAvailabilityPanel
           eyebrow="Platform performance"
           title={activeTab === 'facebook' ? 'Facebook' : activeTab === 'instagram' ? 'Instagram' : 'TikTok'}
-          status={activeTab === 'tiktok' ? 'Coming soon' : 'Not connected'}
+          status="Not connected"
           description={activeTab === 'tiktok'
-            ? 'TikTok performance is not yet available in the client portal. No figures are inferred or shown as zero.'
+            ? 'No verified TikTok reporting source is connected for this published month.'
             : `No verified ${activeTab === 'facebook' ? 'Facebook' : 'Instagram'} reporting source is connected for this published month.`}
         />
       )}

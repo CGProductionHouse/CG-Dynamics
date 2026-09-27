@@ -31,6 +31,7 @@ export function activeOrganicPlatforms(facts: PlatformFact[]): string[] {
   const supported = new Map([
     ['facebook', 'Facebook'],
     ['instagram', 'Instagram'],
+    ['tiktok', 'TikTok'],
   ])
 
   return [...supported.entries()]

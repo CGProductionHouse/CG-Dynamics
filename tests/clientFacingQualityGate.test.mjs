@@ -90,14 +90,14 @@ test('month-on-month movement is suppressed when the reporting definition change
 })
 
 // ── 4. Unsupported integrations never appear connected ───────────────────────
-test('only genuinely available Facebook/Instagram become active organic platforms', () => {
+test('only genuinely available Facebook/Instagram/TikTok become active organic platforms', () => {
   const base = { metricKey: 'brand_views', value: 10, availability: 'complete', comparableGroup: null, aggregation: 'sum' }
   const facts = [
     { ...base, platform: 'facebook' },
     { ...base, platform: 'instagram', value: null, availability: 'unavailable' },
     { ...base, platform: 'tiktok', value: 999 },
   ]
-  assert.deepEqual(cp.activeOrganicPlatforms(facts), ['Facebook'])
+  assert.deepEqual(cp.activeOrganicPlatforms(facts), ['Facebook', 'TikTok'])
 })
 
 test('provider workspace never presents unsupported platforms as active data sources', () => {
