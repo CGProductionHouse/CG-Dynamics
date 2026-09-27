@@ -95,9 +95,10 @@ const SPECIAL_RESEARCH = {
   },
   'Neshora Oxygen': {
     source: 'https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5801092086',
-    observed: '2026-09-23',
+    observed: '2026-09-27',
     facts: ['CA confirmed the recurring monthly package as one professional video, four design posters and four photo posts.'],
     constraints: ['All other package and service fields remain unknown and must not be inferred.', 'No reviewed exact-client business or industry intelligence exists yet.'],
+    observations: ['2026-09-27: Exhaustive public-source search for "Neshora Oxygen" in South Africa returned no verifiable business website, social media presence, CIPC registration, or trade footprint. The only "NESHORA" entity found is a Singapore company (UEN 53529902L, incorporated 13 Aug 2026) in "other personal service activities n.e.c.", which is unrelated to the CG Dynamics client. No South African oxygen/medical gas business trading as "Neshora Oxygen" could be verified via web, LinkedIn, Facebook, Instagram, or Companies and Intellectual Property Commission public records.'],
     recommendations: [],
   },
 }
@@ -204,7 +205,7 @@ for (const row of rows) {
   const guide = guidePath ? readFileSync(guidePath, 'utf8') : ''
   const runtimeGuide = guidePath?.startsWith(RUNTIME_GUIDE_DIR)
   const extracted = guide ? extractEvidence(guide, runtimeGuide) : { facts: [], constraints: [], observations: [], recommendations: [] }
-  for (const key of ['facts', 'constraints', 'recommendations']) {
+  for (const key of ['facts', 'constraints', 'observations', 'recommendations']) {
     for (const value of special?.[key] ?? []) if (!extracted[key].includes(value)) extracted[key].push(value)
   }
   const packageTruth = packageLines(row.package)

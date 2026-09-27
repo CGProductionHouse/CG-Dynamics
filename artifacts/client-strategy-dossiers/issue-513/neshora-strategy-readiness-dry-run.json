@@ -16,7 +16,7 @@
       "strategy_month": "2026-09-01",
       "disposition": "blocked",
       "reason": "MISSING_CANONICAL_STRATEGY_DRAFT_AND_REVIEWED_CLIENT_INTELLIGENCE",
-      "source_evidence_hash": "58359d6b25209a38c5f05c92f7207e8e6585ce3e747fe70f81d1fa0ff718809d",
+      "source_evidence_hash": "df8d59c4d1e69f8bd9012dabb74b27aa36eeea5e3299c75a3f25f891d562a91f",
       "package": {
         "professional_videos_per_month": 1,
         "photo_posts_per_month": 4,
@@ -37,7 +37,7 @@
       "strategy_month": "2026-10-01",
       "disposition": "blocked",
       "reason": "MISSING_CANONICAL_STRATEGY_DRAFT_AND_REVIEWED_CLIENT_INTELLIGENCE",
-      "source_evidence_hash": "58359d6b25209a38c5f05c92f7207e8e6585ce3e747fe70f81d1fa0ff718809d",
+      "source_evidence_hash": "df8d59c4d1e69f8bd9012dabb74b27aa36eeea5e3299c75a3f25f891d562a91f",
       "package": {
         "professional_videos_per_month": 1,
         "photo_posts_per_month": 4,
@@ -53,5 +53,5 @@
       "safe_next_action": "Create the canonical draft through the existing monthly strategy contract only after reviewed exact-client intelligence is available; do not derive strategy from package quantities alone."
     }
   ],
-  "plan_hash": "55349857354e5a610fb3d580b96f9ef9fdfb28b2d0f48e5276c65d20242f9107"
+  "plan_hash": "26a75bbf098d380157a8ce638e551f82f482c556e0ddea4dae24b2b6673e4cc5"
 }

@@ -4,7 +4,7 @@ Client ID: `3c20fae1-8e91-41d5-98eb-1c331600e6e3`
 
 Issue: #513
 
-Evidence hash: `58359d6b25209a38c5f05c92f7207e8e6585ce3e747fe70f81d1fa0ff718809d`
+Evidence hash: `df8d59c4d1e69f8bd9012dabb74b27aa36eeea5e3299c75a3f25f891d562a91f`
 Status: **dossier complete; strategy gate blocked**
 
 ## Verified facts
@@ -32,7 +32,7 @@ Status: **dossier complete; strategy gate blocked**
 
 ## Research observations
 
-- No exact evidence available; do not fill this gap with generic copy.
+- 2026-09-27: Exhaustive public-source search for "Neshora Oxygen" in South Africa returned no verifiable business website, social media presence, CIPC registration, or trade footprint. The only "NESHORA" entity found is a Singapore company (UEN 53529902L, incorporated 13 Aug 2026) in "other personal service activities n.e.c.", which is unrelated to the CG Dynamics client. No South African oxygen/medical gas business trading as "Neshora Oxygen" could be verified via web, LinkedIn, Facebook, Instagram, or Companies and Intellectual Property Commission public records.
 
 ## Evidence-backed recommendations
 
