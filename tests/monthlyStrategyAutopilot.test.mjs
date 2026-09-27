@@ -96,6 +96,26 @@ test('creates current and next draft through #391 from one confirmed package', a
   assert.doesNotMatch(fake.calls[0].p_strategy_data.actionPlan.reels.items[0], /1 reel/)
 })
 
+test('confirmed package_settings remains authoritative when legacy package and schedule tables are empty', async () => {
+  const fake = fixture()
+  fake.tables.client_packages = []
+  fake.tables.monthly_deliverables = []
+
+  const result = await autopilot.runMonthlyStrategyAutopilot(fake, { today: '2026-09-22', systemProfileId: 'system-profile' })
+
+  assert.equal(result.drafts_created, 2)
+  assert.equal(result.blocked, 0)
+  assert.equal(result.blockers.PACKAGE_UNVERIFIED, undefined)
+  assert.equal(fake.calls.length, 2)
+  assert.match(fake.calls[0].p_strategy_data.actionPlan.professional_video.items[0], /1 professional video from the confirmed package/)
+  assert.match(fake.calls[0].p_strategy_data.actionPlan.reels.items[0], /2 reels from the confirmed package/)
+  assert.match(fake.calls[0].p_strategy_data.actionPlan.photo_content.items[0], /1 photo post from the confirmed package/)
+  assert.match(fake.calls[0].p_strategy_data.actionPlan.design_poster.items[0], /2 design posters from the confirmed package/)
+  assert.equal(fake.calls[0].p_seed_context.sources.client_package_id, null)
+  assert.equal(fake.calls[0].p_seed_context.source_coverage.monthly_deliverables, 'none')
+  assert.equal(fake.calls[0].p_seed_context.source_coverage.client_package, 'available')
+})
+
 test('only active clients enter the strategy preparation queue', async () => {
   const fake = fixture()
   fake.tables.clients.push({ id: 'inactive-client', name: 'Old Client', active: false, package_settings: fake.tables.clients[0].package_settings })
