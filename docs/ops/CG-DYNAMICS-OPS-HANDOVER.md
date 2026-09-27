@@ -2,7 +2,7 @@
 
 Status: CURRENT authority for a fresh supervisor chat.
 
-Updated: 27 September 2026 after TikTok guarded recovery, protected portal rollout, reviewed strategy draft amendments, the 94-row approval-readiness audit, and authenticated Website M1 / #217 acceptance.
+Updated: 27 September 2026 after TikTok guarded recovery, protected portal rollout, reviewed strategy draft amendments, final stale-PR cleanup, authenticated Website M1 / #217 acceptance, and production MCP v24 operational verification.
 
 ## 1. Fresh-chat recovery order
 
@@ -26,9 +26,9 @@ If chat history conflicts with this file, current GitHub + verified production s
 
 Latest verified runtime merge baseline:
 
-`bcc91e05c3beb06e55142823f0784fa535792791` — PR #560 strategy/Website/#217 launch acceptance.
+`bf4e88cac1e9975abd6e7677f013c4822487ddef` — PR #562 production MCP task-read schema correction.
 
-Always refetch `main` before code or merge actions; this baseline may advance while the manual Codex lane is active.
+Always refetch `main` before code or merge actions.
 
 Major completed launch-critical merges:
 - #490 Meta integration crash fix.
@@ -55,6 +55,9 @@ Major completed launch-critical merges:
 - #553 protected TikTok recovery worker path.
 - #554 protected nine-client portal rollout.
 - #555 protected-production closure handover reconciliation.
+- #560 strategy/Website/#217 launch acceptance.
+- #561 final stale-PR cleanup + canonical MCP task-read reliability.
+- #562 production MCP task-view schema correction.
 
 ## 3. Launch scoreboard
 
@@ -73,6 +76,7 @@ Major completed launch-critical merges:
 - TikTok analytics/reconnect runtime live; silent-refresh contract was corrected on 27 Sep after the first 24h expiry exposed a stale provider endpoint.
 - 57/57 exact-client strategy dossiers exist; Neshora now has reviewed first-party intelligence and a zero-write Sep/Oct draft proposal.
 - Microsoft collection/reconciliation remains automated.
+- `cg-dynamics-mcp` v24 is production-live with `verify_jwt=false` preserved: exact-profile task ownership uses `planner_task_assignees`, nullable `error: null` is a successful result, Christie-Ann live reads passed 19/19 exact assignment checks, cross-profile `get_task` was refused, and v24 acceptance logs were all HTTP 200.
 - Hub/Work responsive acceptance already passed.
 - Red Oak Website M1 period migration, one immutable snapshot and September
   publication are production-live; structural exact-client/safe-projection proof passed read-only.
@@ -91,7 +95,7 @@ Major completed launch-critical merges:
    v1; 0 approved / 0 published. Approval/publication is still a separate
    protected gate.
 3. **Portal**: protected nine-client rollout is complete. Production has 46/46
-   enabled exact mappings across 46 clients/auth users. #519 and #548 are closed.
+   enabled exact mappings across 46 clients/auth users. #519, #539 and #548 are closed.
 4. **Website M1**: only optional final authenticated Red Oak-client / other-client
    read-only UI isolation acceptance remains; do not create another snapshot or
    republish.
@@ -100,6 +104,12 @@ Major completed launch-critical merges:
    superseded or unsafe PRs were closed with evidence. Only the still-missing
    P0 MCP result/ownership correction from #380 was retained; no provider or
    protected production action was included.
+7. **#377 MCP reliability**: the retained #561/#562 task-read/result subset is merged,
+   deployed and operationally verified in production v24. The original issue's stronger
+   per-human identity/delegation concept is NOT cryptographically solved by Project context:
+   the intentional communal company OAuth cannot prove which physical staff member is using
+   a ChatGPT Project. Keep that limitation explicit; do not reopen the rejected stale #380
+   delegation seam or pretend exact UUID context proves human identity.
 
 Do not open overlapping redesign lanes.
 
@@ -133,9 +143,15 @@ Do not open overlapping redesign lanes.
   with the current durable Meta worker. Real-provider work remains under #505 and
   was explicitly excluded from #558.
 
-#561 changes code only in the existing private MCP read path. It adds no schema,
-secret, scheduler, provider configuration or production data change. Deployment
-of `cg-dynamics-mcp` remains a separate protected production gate.
+#561/#562 changed only the existing private MCP read path. No schema, secret,
+scheduler, provider configuration or production data change was required. Production
+`cg-dynamics-mcp` is now ACTIVE v24 with bundle hash
+`f3badd8ada21c74045d06ff4daae31d7edaa3d4eca26bdf2bbc28a1efe1b2c58` and
+`verify_jwt=false` preserved. Live Christie-Ann acceptance proved 19/19 exact assignment
+links, zero bad review/source-removed rows, `error: null` success handling and fail-closed
+cross-profile task reads. The earlier v22 rollout exposed the nonexistent
+`planner_tasks_canonical.assigned_to_user_id` select; it was removed from service and
+corrected by #562 before final v24 rollout.
 
 ## 4. Final package + service-scope truth
 
