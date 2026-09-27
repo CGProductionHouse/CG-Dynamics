@@ -2,7 +2,7 @@
 
 Status: CURRENT authority for a fresh supervisor chat.
 
-Updated: 23 September 2026 after the #513 Neshora readiness checkpoint, #519 portal reconciliation, and read-only Website M1 production-state reconciliation.
+Updated: 27 September 2026 after TikTok guarded recovery, the protected nine-client portal rollout, reviewed strategy draft amendments, and manual Codex final-launch cleanup dispatch.
 
 ## 1. Fresh-chat recovery order
 
@@ -26,9 +26,9 @@ If chat history conflicts with this file, current GitHub + verified production s
 
 Latest verified runtime merge baseline:
 
-`8807f36330e40a92b8340ed45ca52e5d9ecbb3e4` — PR #517 website snapshot period-contract correction.
+`14770996f2786cb68f2da8bf9bca2994a2c717d2` — PR #555 protected-production closure handover reconciliation.
 
-Current main also contains later docs-only continuity commits. Always refetch `main` before code or merge actions.
+Always refetch `main` before code or merge actions; this baseline may advance while the manual Codex lane is active.
 
 Major completed launch-critical merges:
 - #490 Meta integration crash fix.
@@ -48,6 +48,13 @@ Major completed launch-critical merges:
 - #535 57-client portal access reconciliation.
 - #536 Website M1 current-production acceptance/readiness reconciliation.
 - #537 TikTok sync lint blocker correction.
+- #541 TikTok refresh endpoint correction.
+- #543 guarded exact-client TikTok recovery.
+- #546 Neshora reviewed first-party strategy intelligence.
+- #549 monthly-strategy-autopilot runtime parity lock.
+- #553 protected TikTok recovery worker path.
+- #554 protected nine-client portal rollout.
+- #555 protected-production closure handover reconciliation.
 
 ## 3. Launch scoreboard
 
@@ -72,15 +79,29 @@ Major completed launch-critical merges:
 
 ### CURRENT closure lanes
 
-1. #513: Neshora reviewed intelligence is complete; canonical Sep/Oct draft
-   creation remains protected, and the frozen 46-client/92-row plan remains unapplied.
-2. #505: TikTok live truth is 0 connected / 10 needs_reauth / 37 not connected
-   until guarded silent recovery is applied; four client-help holds and 33
-   exact-identity gates remain. Standalone Instagram provider gates also remain.
-3. Website M1: optional final authenticated Red Oak-client / other-client UI
-   isolation check; do not create another snapshot or republish.
-4. #519: protected nine-client access batch remains unapplied.
-5. #217: optional final real-phone human signoff if CA still wants it.
+1. **#505 provider closure**: TikTok is healthy at 10 connected / 0 needs_reauth /
+   37 not connected. Four client-help holds remain (Emmanuel Funerals, Emoya
+   Estate Driving Range, Piek Group, We Ar Fuels); the other unconnected TikTok
+   rows remain exact-identity gated. Standalone Instagram remains the main active
+   provider lane: Meta App Review/Advanced Access, Live mode, secure
+   `INSTAGRAM_APP_SECRET`, activation flag, then exact-client OAuth/confirmation.
+2. **#513 strategy**: the migration is applied; frozen 92 reviewed fleet rows plus
+   the two exact existing Neshora Sep/Oct rows are amended to reviewed draft v2.
+   Current truth is 114 Sep/Oct rows total = 94 reviewed v2 + 20 non-applicable
+   v1; 0 approved / 0 published. Approval/publication is still a separate
+   protected gate.
+3. **Portal**: protected nine-client rollout is complete. Production has 46/46
+   enabled exact mappings across 46 clients/auth users. #519 and #548 are closed.
+4. **Website M1**: only optional final authenticated Red Oak-client / other-client
+   read-only UI isolation acceptance remains; do not create another snapshot or
+   republish.
+5. **#217**: optional real-phone human signoff only.
+6. **#558 MANUAL CODEX ACTIVE**: CA's one manual Codex session owns final launch
+   code cleanup / stale open-PR reconciliation. Candidate old PRs: #438, #458,
+   #422, #387, #384, #380, #375, #336, #273, #362, #312, #310, #202. A fresh
+   supervisor chat MUST NOT duplicate or independently rewrite this lane while
+   Codex is active. Read #558 for its completion handover before touching any of
+   those PRs.
 
 Do not open overlapping redesign lanes.
 
