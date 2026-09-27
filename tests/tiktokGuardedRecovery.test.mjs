@@ -43,3 +43,24 @@ test('apply restores connected only after successful silent refresh', () => {
   assert.ok(connectedUpdate > refreshCall)
   assert.match(recovery, /last_error: null/)
 })
+
+
+test('guarded recovery accepts only the configured internal worker token as the server-to-server alternative', () => {
+  assert.match(recovery, /WORKER_INTERNAL_TOKEN/)
+  assert.match(recovery, /X-Internal-Worker-Token/)
+  assert.match(recovery, /configuredWorkerToken\.length >= 32 && suppliedWorkerToken === configuredWorkerToken/)
+  assert.match(recovery, /if \(!isInternalWorker\) \{[\s\S]*auth\.getUser\(bearer\)/)
+})
+
+test('background worker recovers an exact needs_reauth connection before normal TikTok sync', () => {
+  const worker = read('../supabase/functions/background-worker/index.ts')
+  const recoveryCall = worker.indexOf('/functions/v1/tiktok-recover-connection')
+  const syncCall = worker.indexOf('/functions/v1/tiktok-sync', recoveryCall)
+  assert.ok(recoveryCall > 0)
+  assert.ok(syncCall > recoveryCall)
+  assert.match(worker, /\.eq\('id', connectionId\)[\s\S]*\.eq\('client_id', clientId\)[\s\S]*\.eq\('tiktok_open_id', tiktokOpenId\)/)
+  assert.match(worker, /exactConnection\.status === 'needs_reauth'/)
+  assert.match(worker, /expectedConnectionId: connectionId/)
+  assert.match(worker, /expectedTiktokOpenId: tiktokOpenId/)
+  assert.match(worker, /mode: 'apply'/)
+})
