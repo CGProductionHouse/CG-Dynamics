@@ -46,6 +46,8 @@ Major completed launch-critical merges:
 - #517 website period-contract correction.
 - #534 Neshora strategy readiness dry-run.
 - #535 57-client portal access reconciliation.
+- #536 Website M1 current-production acceptance/readiness reconciliation.
+- #537 TikTok sync lint blocker correction.
 
 ## 3. Launch scoreboard
 
@@ -86,8 +88,8 @@ Do not open overlapping redesign lanes.
 ## 4. Final package + service-scope truth
 
 Package rollout is complete:
-- 56 active.
-- 56 confirmed.
+- 57 active.
+- 57 confirmed.
 - 0 unverified.
 - unknowns preserved as null.
 - no client was hard-deleted during package confirmation.
@@ -172,8 +174,8 @@ Recovery 5:
 - snapshot hash `af696f0a33ac36fe1a7dc7b6b6c01d23929658187f1a614e6a65f69233a17f35`
 - 5 more reports applied and verified.
 
-Total:
-- **112 live verified reports**
+Current report truth:
+- **119 published reports across 40 active clients**
 - 56 withheld due to real evidence gaps.
 - fresh read-only discovery found no additional safe rows.
 
@@ -408,21 +410,16 @@ and a different client to prove the portal result end to end.
 
 ## 9. Portal coverage — #519
 
-#519 owns read-only reconciliation of current 57-client/service truth against the older completed portal rollout.
+#519 read-only reconciliation is **COMPLETE / CLOSED**.
 
 Older portal/auth foundation:
 - exact-client username login/admin access proven.
 - prior rollout completed 37 canonical mappings.
 - no duplicate/cross-client/auth regressions.
 
-#519 should:
-- compare current 57-client service truth to existing mappings;
-- identify only the smallest current launch batch needing access/provisioning;
-- remain read-only until reviewed.
-
 Do not assume all 57 need client portal access merely because they are active.
 
-Read-only production reconciliation captured on 23 Sep 2026:
+Final read-only production reconciliation captured on 23 Sep 2026:
 - 57 active clients = 47 recurring-social eligible / 10 excluded;
 - 37 enabled canonical mappings, all backed by one exact active client profile;
 - 0 duplicate mappings, 0 mapped clients without an active exact profile and
@@ -442,6 +439,14 @@ Read-only production reconciliation captured on 23 Sep 2026:
 
 No user, mapping, credential or production data was created or changed during
 this reconciliation. Starter credentials are not included in its artifacts.
+
+The remaining nine-client access batch is a **separate protected production action**:
+- link the existing Braize profile;
+- link the existing CG Production House profile;
+- provision access for All Around PVC, Bat Hill Royale, Case Bloemfontein, HMHI,
+  The Staffordshire, Vrystaat Kunstefees and Zooz Lifestyle WFF through the
+  existing #399 flow.
+Do not reopen #519 merely to repeat reconciliation.
 
 ## 10. Production authorities
 
