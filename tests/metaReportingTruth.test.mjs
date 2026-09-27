@@ -349,14 +349,25 @@ test('rendered current followers are a snapshot with no percentage', () => {
   assert.doesNotMatch(html, /vs last month/)
 })
 
-test('rendered unavailable fact is hidden from clients but retained in staff diagnostics', () => {
+test('rendered unavailable fact is hidden from client-facing cards and retained in staff diagnostics', () => {
   const unavailable = fact({ platform: 'facebook', metricKey: 'unique_viewers', value: null, availability: 'unavailable', aggregation: 'unique', sourceMetric: 'page_total_media_view_unique', comparableGroup: 'fb_media_viewers_v2' })
   const html = renderReport({ facts: [unavailable], previousFacts: [] })
   assert.doesNotMatch(html, /Facebook viewers|Unavailable from the connected Meta source/)
   assert.doesNotMatch(html, />0</)
-  const staffHtml = renderReport({ facts: [unavailable], previousFacts: [], showAdminDiagnostics: true })
-  assert.match(staffHtml, /Facebook viewers/)
-  assert.match(staffHtml, /Unavailable from the connected Meta source/)
+  const staffHtml = renderReport({
+    facts: [unavailable],
+    previousFacts: [],
+    showAdminDiagnostics: true,
+    dataHealth: [{
+      id: 'health-1', platform: 'facebook', report_month: '2026-06', metric_key: 'unique_viewers',
+      source_metric: 'page_total_media_view_unique', availability: 'unavailable', last_attempt_at: '2026-06-30T00:00:00Z',
+      last_success_at: null, api_version: 'v25.0', connector_version: 'meta-connector-v3', extraction_ref: 'health-ref',
+      comparison_eligible: false, readiness_status: 'review_required',
+    }],
+  })
+  assert.doesNotMatch(staffHtml, /Facebook viewers|Unavailable from the connected Meta source/)
+  assert.match(staffHtml, /unique_viewers/)
+  assert.match(staffHtml, /page_total_media_view_unique/)
 })
 
 test('rendered exclusions promote the next eligible post and expose admin controls only to staff callback', () => {

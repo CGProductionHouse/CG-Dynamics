@@ -37,8 +37,7 @@ test('verified TikTok facts render with provider-native labels and explicit zero
 })
 
 test('client metrics hide unavailable cards while staff diagnostics retain the truth model', () => {
-  assert.match(reportView, /filter\(line => showUnavailable \|\| line\.hasValue\)/)
-  assert.match(reportView, /showUnavailable=\{showAdminDiagnostics\}/)
+  assert.match(reportView, /filter\(line => line\.hasValue\)/)
   assert.match(reportView, /ConnectorDataHealth/)
   assert.match(reportView, /Taps on the website link from the Instagram profile/)
 })
@@ -59,6 +58,10 @@ test('Piek failure fixture is rejected without blocking useful client-ready dire
   const generic = strategy.emptyStrategyData()
   generic.goldStandard.objective = 'Increase engagement and build brand awareness.'
   assert.deepEqual(strategy.clientFacingStrategyQualityIssues(generic), ['Generic marketing filler is not an exact client strategy.'])
+
+  const internalIdentity = strategy.emptyStrategyData()
+  internalIdentity.strategyDrivers = ['exact client ID: cdb11a82-339e-4b46-9b09-bde1a23efeaf']
+  assert.deepEqual(strategy.clientFacingStrategyQualityIssues(internalIdentity), ['Internal record identifiers must not appear in client strategy.'])
 
   const good = strategy.emptyStrategyData()
   good.strategyGoingForward = 'Start from the actual image, video or poster and add a useful branch-specific reason to act.'

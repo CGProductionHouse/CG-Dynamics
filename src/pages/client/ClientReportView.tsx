@@ -528,7 +528,7 @@ function OverviewTab({
         /* Verified, availability-aware Overview — per-platform, never combined,
            invalid month-on-month movement suppressed by the comparability gate. */
         hasVerified
-          ? <VerifiedOverview sections={verifiedSections} showUnavailable={showAdminDiagnostics} />
+          ? <VerifiedOverview sections={verifiedSections} />
           : <VerifiedFactsUnavailable />
       ) : (
         <>
@@ -628,8 +628,10 @@ function VerifiedFactsUnavailable() {
 }
 
 // ── Verified Overview (facts-driven, per-platform, comparability-gated) ───────
-function VerifiedOverview({ sections, showUnavailable }: { sections: VerifiedSection[]; showUnavailable: boolean }) {
-  const lines = sections.flatMap(section => section.lines).filter(line => showUnavailable || line.hasValue)
+function VerifiedOverview({ sections }: { sections: VerifiedSection[] }) {
+  // The report surface stays client-presentable even in staff preview. Missing
+  // facts remain available in the staff-only connector-health table below.
+  const lines = sections.flatMap(section => section.lines).filter(line => line.hasValue)
   const platforms = [...new Set(lines.map(line => line.platform))]
   return (
     <div className="mb-14 space-y-10">
@@ -1606,7 +1608,7 @@ function PlatformTab({
     return (
       <>
         <SectionHeading eyebrow={performance.label} title={`${performance.label} performance`} />
-        {sections.length > 0 ? <VerifiedOverview sections={sections} showUnavailable={false} /> : <VerifiedFactsUnavailable />}
+        {sections.length > 0 ? <VerifiedOverview sections={sections} /> : <VerifiedFactsUnavailable />}
         <PlatformContent performance={performance} view={view} />
         <PlatformNotes view={view} />
       </>
