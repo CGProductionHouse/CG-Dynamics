@@ -26,7 +26,7 @@ If chat history conflicts with this file, current GitHub + verified production s
 
 Latest verified runtime merge baseline:
 
-`14770996f2786cb68f2da8bf9bca2994a2c717d2` — PR #555 protected-production closure handover reconciliation.
+`bcc91e05c3beb06e55142823f0784fa535792791` — PR #560 strategy/Website/#217 launch acceptance.
 
 Always refetch `main` before code or merge actions; this baseline may advance while the manual Codex lane is active.
 
@@ -96,14 +96,46 @@ Major completed launch-critical merges:
    read-only UI isolation acceptance remains; do not create another snapshot or
    republish.
 5. **#217**: optional real-phone human signoff only.
-6. **#558 MANUAL CODEX ACTIVE**: CA's one manual Codex session owns final launch
-   code cleanup / stale open-PR reconciliation. Candidate old PRs: #438, #458,
-   #422, #387, #384, #380, #375, #336, #273, #362, #312, #310, #202. A fresh
-   supervisor chat MUST NOT duplicate or independently rewrite this lane while
-   Codex is active. Read #558 for its completion handover before touching any of
-   those PRs.
+6. **#558 stale-PR reconciliation**: complete in PR #561. Twelve stale, future,
+   superseded or unsafe PRs were closed with evidence. Only the still-missing
+   P0 MCP result/ownership correction from #380 was retained; no provider or
+   protected production action was included.
 
 Do not open overlapping redesign lanes.
+
+### #558 final stale-PR disposition
+
+- **#380 — partially retained, then closed**: salvaged only typed MCP error
+  discrimination plus exact-profile canonical personal-task reads into #561.
+  The stale delegation seam and synthetic freshness behavior were rejected.
+- **#438 — closed, deferred**: code review was accepted, but authenticated
+  Content Guideline UI acceptance was never completed and Creative Intelligence
+  is not a launch-critical requirement. #437 remains the future product owner.
+- **#458 / #387 — closed, superseded**: no product code; obsolete package-version
+  churn and launch claims contradicted later live reconciliation.
+- **#422 — closed, deferred**: Website lead-inbox M2A is substantial future
+  schema/runtime work, not Website M1 launch closure; its unapplied migration
+  must be rebuilt/reviewed from current #405 authority before any revival.
+- **#384 / #362 — closed, superseded**: old CG Hours audit/helper checkpoints;
+  #361 is complete and current canonical CG Hours contracts have moved on.
+- **#375 — closed, deferred/stale**: an isolated Email Marketing shell predating
+  the current Marketing workspace; #374 remains future product work.
+- **#336 — closed, stale/conflicting**: the old GA4 attribution branch conflicts
+  with the now-live Website snapshot/reporting authority and is not M1 closure.
+- **#273 — closed, unsafe/stale**: old TikTok Business scheduling/publishing
+  architecture predates the canonical #238 provider path and external publishing
+  remains protected.
+- **#312 — closed, deferred**: large documentation-only poster-production lane;
+  not launch-critical and predates current Content Autopilot/guideline authority.
+- **#310 — closed, superseded**: historical 52-branch recovery ledger predates
+  completed 57-client package/dossier reconciliation and is not current authority.
+- **#202 — closed, unsafe/superseded**: old Meta parallel-worker/migrations conflict
+  with the current durable Meta worker. Real-provider work remains under #505 and
+  was explicitly excluded from #558.
+
+#561 changes code only in the existing private MCP read path. It adds no schema,
+secret, scheduler, provider configuration or production data change. Deployment
+of `cg-dynamics-mcp` remains a separate protected production gate.
 
 ## 4. Final package + service-scope truth
 
