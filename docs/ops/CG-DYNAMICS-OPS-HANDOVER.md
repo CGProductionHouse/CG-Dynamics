@@ -192,8 +192,9 @@ It created the original 56/56 exact-client strategy dossiers. The current
 changing the frozen reviewed fleet plan.
 
 Current canonical strategy rows:
-- 56 September drafts.
-- 56 October drafts.
+- 57 September drafts.
+- 57 October drafts.
+- 114 total rows.
 - all remain unapproved/unpublished.
 
 Gold-strategy rule:
@@ -232,12 +233,19 @@ merged reviewed first-party intelligence from the exact client OneDrive at
 brand assets and the 21 Sep 2026 client shoot with 79 photo/video assets.
 Its separate zero-write readiness dry-run preserves reviewed plan hash
 `4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b`
-and now marks September and October ready for canonical draft creation inside
-the exact 1 professional video / 4 photo posts / 4 design posters package.
+and now marks September and October ready for reviewed amendment inside the
+exact 1 professional video / 4 photo posts / 4 design posters package.
 Medical, service, product, contact and outcome claims remain fail-closed unless
-separately confirmed. Production still has no Neshora monthly-strategy row.
-The next protected action is exact Sep/Oct draft creation through the existing
-#391/#463 monthly strategy contract; this must not silently alter the frozen fleet plan.
+separately confirmed.
+
+Production already contains exactly two Neshora rows, auto-seeded before the
+package/runtime corrections:
+- Sep `345ff5dc-a669-4e71-8312-e11472a3494f`;
+- Oct `c4db3ace-ceed-4c8f-99cb-2841edf12613`.
+Both remain draft v1, staff-unamended, unapproved and unpublished, and still carry
+their stale `PACKAGE_UNVERIFIED` seed blockers. Do not create duplicate rows.
+The next protected action is exact amendment of these two existing rows from the
+reviewed #546 proposal; this must not silently alter the frozen fleet plan.
 
 PR #523 passed supervisor review and merged the frozen v2 artifact at
 `45b794ff655d0bee7b71d5c3ae0dd4c187d23755`.
@@ -249,11 +257,15 @@ seed-context-hash state, applies only through the guarded atomic RPC, uses
 deterministic idempotency keys, verifies 92 durable amendment receipts and proves
 the 20 non-applicable rows remain unchanged. It contains no approve/publish path.
 
-Production remains unchanged: migration
-`20260923193000_monthly_strategy_context_amend.sql` is still unapplied and no
-#513 strategy mutation has occurred. The next live sequence is migration apply,
-same-hash preflight and exact 92-row draft amendment; approval/publication remains
-a later separate gate.
+PR #549 merged at `5748b1f99f02bbb911d6ee43683f376b2899cd2a` and production
+`monthly-strategy-autopilot` was redeployed as ACTIVE v6 with canonical
+`clients.package_settings` authority. The old legacy package-readiness gate is
+absent. The function was not invoked and existing strategy rows were unchanged.
+
+Migration `20260923193000_monthly_strategy_context_amend.sql` is still unapplied.
+The next protected live sequence is exact preflight, migration apply, the frozen
+92-row reviewed fleet amendment plus the two exact Neshora row amendments.
+Approval/publication remains a later separate gate.
 
 Kundedienste must not receive a fabricated recurring-social strategy.
 
