@@ -26,3 +26,21 @@ test('draft partial periods and malformed legacy ranges remain hidden', () => {
   assert.equal(periods.isPublishedMonthToDateReport(legacy), false)
   assert.deepEqual(periods.selectMonthlyReports([draft, legacy]), [])
 })
+
+test('published current-month full-range reports remain selectable without admitting drafts or future months', () => {
+  const now = new Date('2026-09-27T12:00:00+02:00')
+  const published = {
+    id: 'september-published', platform: null, status: 'published',
+    period_start: '2026-09-01', period_end: '2026-09-30', created_at: '2026-09-24T00:00:00Z',
+  }
+  const draft = { ...published, id: 'september-draft', status: 'draft' }
+  const future = {
+    ...published, id: 'october-published', period_start: '2026-10-01', period_end: '2026-10-31',
+  }
+
+  assert.equal(periods.isPublishedCurrentMonthReport(published, now), true)
+  assert.equal(periods.isPublishedCurrentMonthReport(draft, now), false)
+  assert.equal(periods.isPublishedCurrentMonthReport(future, now), false)
+  assert.deepEqual(periods.selectMonthlyReports([future, draft, published], now).map(report => report.id), [published.id])
+  assert.equal(periods.reportPeriodDisclosure(published), null)
+})

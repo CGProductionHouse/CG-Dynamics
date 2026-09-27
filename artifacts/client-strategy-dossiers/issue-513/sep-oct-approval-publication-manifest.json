@@ -1,0 +1,2872 @@
+{
+  "schema_version": 1,
+  "issue": 513,
+  "mode": "read_only_approval_publication_manifest",
+  "generated_at": "2026-09-27T15:31:52.118Z",
+  "write_count": 0,
+  "authority": {
+    "fleet_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+    "neshora_plan_hash": "4e709c3af9aa3ba46175db2fa5527772bb03e1468f78e3389209bacd82d9ddaf"
+  },
+  "counts": {
+    "canonical_sep_oct_rows": 114,
+    "reviewed_amended_v2_rows": 94,
+    "reviewed_clients": 47,
+    "non_applicable_unamended_v1_rows": 20,
+    "ready_for_human_approval": 94,
+    "blocked": 0,
+    "approved": 0,
+    "published": 0
+  },
+  "audit_errors": [],
+  "execution_gate": "This manifest is evidence only. Approval and publication are separate protected actions and were not performed.",
+  "rows": [
+    {
+      "client_id": "fd16ebae-a50b-4920-afe0-94c2631f8f06",
+      "client_name": "All Around PVC",
+      "strategy_id": "63ffa8c2-ceb8-48ac-b2a5-72b35b8da113",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "27caf0dfc6f719430cc5fc5d98e67d1d5d1661e98cc68668bae7a5841c1951a4",
+      "seed_context_hash": "d346a8ab288cca626c1533cd8023cf252144ebfd57cb23fa6bc490a451052681",
+      "source_evidence_hash": "1d9f4961c59379e578ec42cc0b272bb2ad1436f663ae3b7eb754c759fc176e85",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "fd16ebae-a50b-4920-afe0-94c2631f8f06",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "22214868-ecd3-5871-a483-7ed1241f65f3"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "fd16ebae-a50b-4920-afe0-94c2631f8f06",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "797d97e9-6c54-51a6-88bb-59beabe9c4a1"
+      }
+    },
+    {
+      "client_id": "fd16ebae-a50b-4920-afe0-94c2631f8f06",
+      "client_name": "All Around PVC",
+      "strategy_id": "b2c7531b-a888-426f-a0aa-ede295261421",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "e3eac224dac86790dd8523f883f75ffd36647aedb73efd94f6bcb91760f9f563",
+      "seed_context_hash": "cd6260461e1379c07e973a07610d46b7ab0f86909add58a2012844e5a246a85d",
+      "source_evidence_hash": "1d9f4961c59379e578ec42cc0b272bb2ad1436f663ae3b7eb754c759fc176e85",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "fd16ebae-a50b-4920-afe0-94c2631f8f06",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "5caa2e92-9192-5931-9e1a-bbc931742905"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "fd16ebae-a50b-4920-afe0-94c2631f8f06",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "02905b89-954b-566c-aa85-c1e804e57c12"
+      }
+    },
+    {
+      "client_id": "3b85973f-bcad-49eb-b8f1-c27f7c7f1aba",
+      "client_name": "AV Event Life",
+      "strategy_id": "da634a01-5b83-41a4-93f0-53abe5fa9ab9",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "cb9b2206c04456cf3dcdb864afb2f9ac2222dc739f515a0856497beb00bd78e1",
+      "seed_context_hash": "a91910f742de056e66f0cfe7f952231d52b0a1584228a49c4f681a9d280fcfe3",
+      "source_evidence_hash": "12727114357a401ba459a2ee2103cbca3decf3b1a150a8a5f74ae668bdfc0d0f",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "3b85973f-bcad-49eb-b8f1-c27f7c7f1aba",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "45a79723-b6f5-52cd-87e9-e58e1425ab8c"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "3b85973f-bcad-49eb-b8f1-c27f7c7f1aba",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "5d953294-01ed-5c99-9a31-1ce39d8898c1"
+      }
+    },
+    {
+      "client_id": "3b85973f-bcad-49eb-b8f1-c27f7c7f1aba",
+      "client_name": "AV Event Life",
+      "strategy_id": "117fcf9e-488f-4c52-bd14-fd09645c9ceb",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "9e44f5140c812edda052fbcbf2a332bb5fbc780f13621326bca6b320e1402a86",
+      "seed_context_hash": "6cb4b0f821d58df0c92d90d2200a807448da92208c2800d22e5a01ea91f5383d",
+      "source_evidence_hash": "12727114357a401ba459a2ee2103cbca3decf3b1a150a8a5f74ae668bdfc0d0f",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "3b85973f-bcad-49eb-b8f1-c27f7c7f1aba",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "ed4bfc7d-b7af-57f8-be1b-694c3114a9fd"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "3b85973f-bcad-49eb-b8f1-c27f7c7f1aba",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "7e78e7e5-31b4-58b7-82ce-f3c3e18988b4"
+      }
+    },
+    {
+      "client_id": "32bd9db3-5339-4404-825b-5a615cadec6a",
+      "client_name": "Bat Hill Royale",
+      "strategy_id": "ea724c46-3fd3-4b2f-a3c4-8b513533a41e",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "0298b8c0d3904c1a1ac71404c0e0473a092a7dca53765cc92c096f0ef7bd4cfa",
+      "seed_context_hash": "3c5f046e4c8e4f6a133a97b7dcaa1375df2870d8c7d461073a4b7ed093ab5207",
+      "source_evidence_hash": "30089c19a30d2d349fdeaa8b0dcca1c117b523d34087a43e129f7a5cd8bdbae0",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "32bd9db3-5339-4404-825b-5a615cadec6a",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "8f1251c9-a96c-5d56-b23e-0a6ff2b51b2c"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "32bd9db3-5339-4404-825b-5a615cadec6a",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "78b238ba-5a4d-57fe-aec9-2344f14fe9ea"
+      }
+    },
+    {
+      "client_id": "32bd9db3-5339-4404-825b-5a615cadec6a",
+      "client_name": "Bat Hill Royale",
+      "strategy_id": "f542696d-888f-4926-bcc1-7bf1803c1afc",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "c644dfedd94a47bcb55f7e9b9b5472312322ad502f6fed2f6a99f55be3ad0af2",
+      "seed_context_hash": "bd30d1e29fb022f1bae4cb9b6007e935d42b97df59c399b8dfdb5f49aba1224b",
+      "source_evidence_hash": "30089c19a30d2d349fdeaa8b0dcca1c117b523d34087a43e129f7a5cd8bdbae0",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "32bd9db3-5339-4404-825b-5a615cadec6a",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "7451e2c7-56d8-5219-8724-8dbdd3b07c89"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "32bd9db3-5339-4404-825b-5a615cadec6a",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "98947fcc-e5b0-5cc6-bbc9-288c86ebfad5"
+      }
+    },
+    {
+      "client_id": "b28af30a-3d44-490a-8290-1e56dac7b127",
+      "client_name": "Bloem Action Sports",
+      "strategy_id": "06b020cf-c782-41b7-bb26-eb400491a554",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "7e2b77ceba2989294fbf8c7be6c64fdcc0dce9655632d4b13b870ddc455fc027",
+      "seed_context_hash": "a55440c72b0e60922ca833ea0196b0d0d264797bdf83b3162ea0507ab319aa07",
+      "source_evidence_hash": "d7b6a3817c35fad44b6bfa48efb7dead797e7c8f5033c3f7a47548b64eb05420",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "b28af30a-3d44-490a-8290-1e56dac7b127",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "a491cf6c-e36d-53ac-b46c-07d1f6dcf440"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "b28af30a-3d44-490a-8290-1e56dac7b127",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "0e5b98cd-7069-5b23-88ae-7934aa03446f"
+      }
+    },
+    {
+      "client_id": "b28af30a-3d44-490a-8290-1e56dac7b127",
+      "client_name": "Bloem Action Sports",
+      "strategy_id": "9e1e5efa-ab19-49de-942a-05523f4218b5",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "f07df158410ceb3ce832621f2371fe0adfb6054f1a62dbc67efc140173e1286b",
+      "seed_context_hash": "8d045d5072b63680e0a07752526a5738962d5641fdd9d77d54a8a9003f5da26b",
+      "source_evidence_hash": "d7b6a3817c35fad44b6bfa48efb7dead797e7c8f5033c3f7a47548b64eb05420",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "b28af30a-3d44-490a-8290-1e56dac7b127",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "201d0e7c-b173-504b-b728-0b2d32dc294e"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "b28af30a-3d44-490a-8290-1e56dac7b127",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "895d9a68-9338-507f-8857-cc7b89a01ba0"
+      }
+    },
+    {
+      "client_id": "89e0ad6d-e08c-4a75-8b8e-abea71af581c",
+      "client_name": "Bloem Marble & Granite",
+      "strategy_id": "dc16ae75-4ae0-45b3-a1ff-193212490193",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "d3e24a0fb07bc2ea30293d99d0107e8df1ed1e302d249289f28939f45e04db37",
+      "seed_context_hash": "4331fb031762da0ea39e11f3dda213c78606e812a39fb5107904cc41569c55d5",
+      "source_evidence_hash": "c93e572bf8aefc57694d5537403ee8211e41045ba92caae683af3d02b707a80f",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "89e0ad6d-e08c-4a75-8b8e-abea71af581c",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "df358c16-e53b-5348-bd96-32610702efeb"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "89e0ad6d-e08c-4a75-8b8e-abea71af581c",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "29cfd79c-d963-5233-93cf-8b67cd36f365"
+      }
+    },
+    {
+      "client_id": "89e0ad6d-e08c-4a75-8b8e-abea71af581c",
+      "client_name": "Bloem Marble & Granite",
+      "strategy_id": "12ae2002-f11c-4be9-93b0-6374e220fdfb",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "d5f991d08a65e5682fb007dfa2e646f301e44edf548a11a2540713ad4658cffe",
+      "seed_context_hash": "81c222e83120bde4a12472a3fdee12b8e791214741036fb528511190c3e5790b",
+      "source_evidence_hash": "c93e572bf8aefc57694d5537403ee8211e41045ba92caae683af3d02b707a80f",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "89e0ad6d-e08c-4a75-8b8e-abea71af581c",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "3fe83b44-e851-5f7c-9380-f26fd2d9dd71"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "89e0ad6d-e08c-4a75-8b8e-abea71af581c",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "2bcdd68e-3906-5e49-b8b1-d0b7a49948e2"
+      }
+    },
+    {
+      "client_id": "5dfdf4bd-9d94-4cc6-9dee-0e480a2234cb",
+      "client_name": "Bohemia Quick Stop",
+      "strategy_id": "f375f7c1-642b-442c-9f18-24a303a30eba",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "2efe5ff81e1a3c74319887bca1ce0829b749ce2d56f4705fd9d869689adfd7f0",
+      "seed_context_hash": "7fb05c0bc5e6ac0625a7c87384e3af7c4488e1fa405258a8c6699695f1a62de1",
+      "source_evidence_hash": "41cc7210826e5628b98817c834a2cfaf97410269148270b550c0c4f69140f754",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "5dfdf4bd-9d94-4cc6-9dee-0e480a2234cb",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "52d7099c-e8a5-5e97-be94-16b0f07252ea"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "5dfdf4bd-9d94-4cc6-9dee-0e480a2234cb",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "dc0a13b6-27bd-529d-a276-c26b61f58434"
+      }
+    },
+    {
+      "client_id": "5dfdf4bd-9d94-4cc6-9dee-0e480a2234cb",
+      "client_name": "Bohemia Quick Stop",
+      "strategy_id": "7f7c46bf-6765-4694-9486-1066a5670d1b",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "be5dbb0b0c4be2baabb6b8a117a3620f8b17720bc32954d3746c87c03e92d9dc",
+      "seed_context_hash": "38a7757d8e78eeeb49dda394482f285c007dfadce4dbec1bde7ab0eee945c9db",
+      "source_evidence_hash": "41cc7210826e5628b98817c834a2cfaf97410269148270b550c0c4f69140f754",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "5dfdf4bd-9d94-4cc6-9dee-0e480a2234cb",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "4b139042-2e12-5f82-86a5-79143a9226f6"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "5dfdf4bd-9d94-4cc6-9dee-0e480a2234cb",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "aca26e4d-f741-5918-9bf5-6ac573dc0ada"
+      }
+    },
+    {
+      "client_id": "8e448cf9-1534-4ba1-89a4-93e4c8b83d2f",
+      "client_name": "Bouwer & Coetzee Attorneys",
+      "strategy_id": "15de50c6-052a-454f-a725-b39b9817dd66",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "7f45152a9beb4d46dbef7198df15c881ae41d30b40552c654fada4ff5a5bcced",
+      "seed_context_hash": "315a7508cc57279f0bb37455b78abbaf0e1dc9d8c639fff96502016798d68256",
+      "source_evidence_hash": "0aea81a9ed9472a6db91b8bac2c080ffa1221b9ee7631a71156cf2757936526f",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "8e448cf9-1534-4ba1-89a4-93e4c8b83d2f",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "4a1d8536-bdd9-5fca-9dd2-a6189376a223"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "8e448cf9-1534-4ba1-89a4-93e4c8b83d2f",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "c2e5ab02-1800-51d5-adcd-e46d5cf11593"
+      }
+    },
+    {
+      "client_id": "8e448cf9-1534-4ba1-89a4-93e4c8b83d2f",
+      "client_name": "Bouwer & Coetzee Attorneys",
+      "strategy_id": "45ec2687-c74d-4d1f-803e-2b40cfec57db",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "3b83e8d460865eabe2a9f7a6ff1ef4a4e4f4c583453c415552ba57b172e7ffe6",
+      "seed_context_hash": "4092315e1b3fcd3191aaa7c50a45ac547c3b57eac6460bb5197869078de12095",
+      "source_evidence_hash": "0aea81a9ed9472a6db91b8bac2c080ffa1221b9ee7631a71156cf2757936526f",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "8e448cf9-1534-4ba1-89a4-93e4c8b83d2f",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "3e191c2d-d0f8-53ff-a18c-ee618b1a26cb"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "8e448cf9-1534-4ba1-89a4-93e4c8b83d2f",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "f5a26588-8466-5ab6-9de4-83109ec4acd6"
+      }
+    },
+    {
+      "client_id": "6b67a2df-e2ab-418b-bcee-03aef5963d37",
+      "client_name": "Braize",
+      "strategy_id": "50164773-6fcd-48f3-8a16-3e3995beeecf",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "4fceea2af1eea44b71517a27dcd4a12bb4e4d43c6d8e504779e2367a64908f03",
+      "seed_context_hash": "5e95f7596b819525a8af86392be43b2b340eae70d35dcdfece65dc13d7047211",
+      "source_evidence_hash": "20d091548dbfeea4e50ee3b376f05d3b7824f8786e5a80236ea8b581e2ba65a2",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "6b67a2df-e2ab-418b-bcee-03aef5963d37",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "25ef97fc-6978-5e65-8481-5408f1d743b5"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "6b67a2df-e2ab-418b-bcee-03aef5963d37",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "efe8c9b1-da5d-598d-89a3-a9422cb4f093"
+      }
+    },
+    {
+      "client_id": "6b67a2df-e2ab-418b-bcee-03aef5963d37",
+      "client_name": "Braize",
+      "strategy_id": "0d532439-99de-4283-820a-d67c89ae5d36",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "a11eb248fd9a9c4291a1a76a666fdf6974e1c3e3bfdbe9be21117d729f1903fb",
+      "seed_context_hash": "c070730a30fce0eb94b7999aa918ecc5c58696fa274d22e24fc38e71df839404",
+      "source_evidence_hash": "20d091548dbfeea4e50ee3b376f05d3b7824f8786e5a80236ea8b581e2ba65a2",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "6b67a2df-e2ab-418b-bcee-03aef5963d37",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "c3d9a0a8-2af2-523e-b35c-c39d6a0ec952"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "6b67a2df-e2ab-418b-bcee-03aef5963d37",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "e7f11b7c-e096-5f1d-8cf5-84adbae067fa"
+      }
+    },
+    {
+      "client_id": "afb62c53-d6d3-4ef8-9393-def88ed899d8",
+      "client_name": "C&L Innovations",
+      "strategy_id": "d5b1efbf-baac-458f-8585-73b1f536a359",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "10008e5a687c894e026bc561307d21acf87bd42aa4283035011995d3e5d702f6",
+      "seed_context_hash": "218788b409d8f025c4c807f69a766183f768c97b043b6c0e0f1f43b343e0a36e",
+      "source_evidence_hash": "5515590298c19da8d0e8be3f2d5a1c0e20be28d6f77f8f54facc0fea4254215a",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "afb62c53-d6d3-4ef8-9393-def88ed899d8",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "e898cf45-1d9f-5ccf-98b4-90e5068b0efb"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "afb62c53-d6d3-4ef8-9393-def88ed899d8",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "d1273ba4-01a2-55da-b644-5f1e48a0d2fa"
+      }
+    },
+    {
+      "client_id": "afb62c53-d6d3-4ef8-9393-def88ed899d8",
+      "client_name": "C&L Innovations",
+      "strategy_id": "a99738fc-26a1-43a3-ad35-5ff2ae8eceb4",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "6ce166ee423022ba1d9573bcc493b3cc5d76106d24a465cc3d21ab1a113660bc",
+      "seed_context_hash": "d6580a50480223f7781d3c4b90532049e89d9bb4bc9af86591f37427413a919b",
+      "source_evidence_hash": "5515590298c19da8d0e8be3f2d5a1c0e20be28d6f77f8f54facc0fea4254215a",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "afb62c53-d6d3-4ef8-9393-def88ed899d8",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "736acddc-0e5b-5cf1-b8ce-b917d61c4c54"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "afb62c53-d6d3-4ef8-9393-def88ed899d8",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "1b4ecda9-7a0f-500c-9845-b64c796a2879"
+      }
+    },
+    {
+      "client_id": "42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa",
+      "client_name": "Cape Lumber",
+      "strategy_id": "a0819349-d90d-475a-8358-cb1d5e837777",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "37e8e81b21fbe39bd6af8e8d12c1e2bc907fb7ab16cbef64911b20b40ca07309",
+      "seed_context_hash": "ec07efbfe9c729232823876ab28be9f35fe2872a789ec09937568b55ee2c603b",
+      "source_evidence_hash": "b461c8d79eed1af7a5cdfa8d01e33301c95b0d77d7a30ab77ff13004b28f6b66",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "4f32839a-c3ac-5b96-bdaf-3673068f5f32"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "9432b26d-f891-586e-b1d6-2c923cf198a7"
+      }
+    },
+    {
+      "client_id": "42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa",
+      "client_name": "Cape Lumber",
+      "strategy_id": "5d19b1c2-a5eb-41d1-a216-4000f1b85f73",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "50af7f57fabcf19db1e62f2e0d700e0c6fb8c20b1288e93b6d9bf285b1089962",
+      "seed_context_hash": "db2ac8b8adb620360a24239ad83478e244abad1a159e0a019c44466fb4d2ba4f",
+      "source_evidence_hash": "b461c8d79eed1af7a5cdfa8d01e33301c95b0d77d7a30ab77ff13004b28f6b66",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "7293eed9-b4fe-5322-a577-938a8e74e102"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "127d3652-3b04-5d28-9986-600b5fa5ee61"
+      }
+    },
+    {
+      "client_id": "079df21e-783a-4648-b3fa-0acae6e68867",
+      "client_name": "Case Bloemfontein",
+      "strategy_id": "dea93c2e-c257-4192-8350-bce1d0ee3beb",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "59db7674227fe040bd542102b1007547445f4a29423078041b34f082d1af7929",
+      "seed_context_hash": "7fb761f0dcc74d32456f79d8049360ae1cbc2e588707206799197d84dc7ef9fc",
+      "source_evidence_hash": "96c628106a79a355663347dac680726c2323dd09e005dad60ab90ca8fea2788c",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "079df21e-783a-4648-b3fa-0acae6e68867",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "b3a0c6c9-e6b6-55d9-ba67-6d9590019a85"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "079df21e-783a-4648-b3fa-0acae6e68867",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "63d1e79e-2d8e-5270-8a3c-e0a4c0647628"
+      }
+    },
+    {
+      "client_id": "079df21e-783a-4648-b3fa-0acae6e68867",
+      "client_name": "Case Bloemfontein",
+      "strategy_id": "be70b4e6-7895-4b05-abbb-ad61e4fb0c15",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "4d19607e8a9e4f2217e0e2961a91196437e8506c5f324249a6f85cf6e86374a6",
+      "seed_context_hash": "eeea8c69336e3ec5796b9552af9f805bc6b32ee107fd92d1aafcb33ee8b21996",
+      "source_evidence_hash": "96c628106a79a355663347dac680726c2323dd09e005dad60ab90ca8fea2788c",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "079df21e-783a-4648-b3fa-0acae6e68867",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "4da0d487-8223-5f64-bcee-4f33769c7e7a"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "079df21e-783a-4648-b3fa-0acae6e68867",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "300f558e-e31e-56b5-babb-3ed6a623680a"
+      }
+    },
+    {
+      "client_id": "6b313cac-283e-48c4-9df6-ba43af2f7353",
+      "client_name": "Central Canvas",
+      "strategy_id": "5dc86207-6b62-4c78-a191-b656f4e8594a",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "1af983ae568234f83982d8c0a1138c05aec9bf7ee3bb70df5aa62af767616577",
+      "seed_context_hash": "35b717e7e9b03949baf8eac03d49869d139a6fde5b494e1c1ef0b8c6ff4b130c",
+      "source_evidence_hash": "55c3e462e15b6c1cb25b42e0d9b2c8ad709d924bf06f8b18a5c0d6e69ab3dd04",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "6b313cac-283e-48c4-9df6-ba43af2f7353",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "ffa55914-a32d-5ce8-b8a7-b2a556731cd2"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "6b313cac-283e-48c4-9df6-ba43af2f7353",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "175f073b-0afb-5de6-b06c-f2fd798f3977"
+      }
+    },
+    {
+      "client_id": "6b313cac-283e-48c4-9df6-ba43af2f7353",
+      "client_name": "Central Canvas",
+      "strategy_id": "de06935a-925e-4def-a40e-14f38944b904",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "818a9f681e160576bfdb3c138731cac3213383627902df96894bcbd92df579ae",
+      "seed_context_hash": "d3ef072e1d7ebf95009b9304caa55ca53588534caa01f6153feaa1c5fe14b857",
+      "source_evidence_hash": "55c3e462e15b6c1cb25b42e0d9b2c8ad709d924bf06f8b18a5c0d6e69ab3dd04",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "6b313cac-283e-48c4-9df6-ba43af2f7353",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "44b70385-20ed-5bf9-a51f-fad9d1ecf9ef"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "6b313cac-283e-48c4-9df6-ba43af2f7353",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "6444f0fe-dde4-5e70-9cde-569680245cd5"
+      }
+    },
+    {
+      "client_id": "c27d2185-08e4-4c49-be48-2572564ceecf",
+      "client_name": "CG Production House",
+      "strategy_id": "f6d14edf-7ada-4709-a730-7c25d7fc6558",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "d860196978065a100e19391b780c7e4ee8e6f0dc68fbaf53d5e6a575fe78a3a3",
+      "seed_context_hash": "ae755d565c56b0da5aa572c125d5af29e79dee9f0e7da841bcdca22da0b645f9",
+      "source_evidence_hash": "07edb8cbd5e73eaed9d9397537e277987f96939d52235ce81c3a719e7c86f9e3",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "c27d2185-08e4-4c49-be48-2572564ceecf",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "8d3bae40-84bf-5ac0-9002-085920dac231"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "c27d2185-08e4-4c49-be48-2572564ceecf",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "b4201171-37b1-53df-b10f-5a7aad02302b"
+      }
+    },
+    {
+      "client_id": "c27d2185-08e4-4c49-be48-2572564ceecf",
+      "client_name": "CG Production House",
+      "strategy_id": "8d166fae-9eab-4e1c-9e73-c73e730ad6d1",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "6c54b078fbba08fb53a35267affc9d48304ae13381b6baa5c7e3950ee4642255",
+      "seed_context_hash": "25425b8557a9884bd79e9f0be770c94ed991d5f0f053429a18165c83e830f466",
+      "source_evidence_hash": "07edb8cbd5e73eaed9d9397537e277987f96939d52235ce81c3a719e7c86f9e3",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "c27d2185-08e4-4c49-be48-2572564ceecf",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "255c837b-164a-55a3-883b-d318d37851b1"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "c27d2185-08e4-4c49-be48-2572564ceecf",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "2e57c74b-c097-50d4-889d-dc8f8d8855f7"
+      }
+    },
+    {
+      "client_id": "3404f726-a693-4b2d-8c13-c9d3dfd17bbc",
+      "client_name": "Daisy & Co",
+      "strategy_id": "eecde6d8-5558-49fb-a6c8-4f841c50d6e0",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "68ced615a88468fbc66aabea83d702e98d48d07711c7ab7b03e4bfc9b1df266a",
+      "seed_context_hash": "a9d1f7bd9b678939b68261d71349dc0873fa08767f3c2d4c8ae0575db878e334",
+      "source_evidence_hash": "75e94c1f51bffa01cb5fe0a04d37234989e634dcfe1c40222c54706d37724ebb",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "3404f726-a693-4b2d-8c13-c9d3dfd17bbc",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "9fe967da-3374-5c55-bd7f-d84789c1b664"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "3404f726-a693-4b2d-8c13-c9d3dfd17bbc",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "711f2ffa-8dd9-5f23-ba6b-04f51af95785"
+      }
+    },
+    {
+      "client_id": "3404f726-a693-4b2d-8c13-c9d3dfd17bbc",
+      "client_name": "Daisy & Co",
+      "strategy_id": "8d5847bd-36b7-45cc-b62d-eb8bcdeb3476",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "eec560387b867669552c34344a961a18e720f510285823265baa8816868e2da8",
+      "seed_context_hash": "d7f1e32b17dcacfb2b0610fa1b7875439c9003d696094b54e273fa0382cfccf8",
+      "source_evidence_hash": "75e94c1f51bffa01cb5fe0a04d37234989e634dcfe1c40222c54706d37724ebb",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "3404f726-a693-4b2d-8c13-c9d3dfd17bbc",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "77b0acfc-3926-5651-bb55-65caf02d4df7"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "3404f726-a693-4b2d-8c13-c9d3dfd17bbc",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "46c60645-3b7d-5ed1-a3a5-037f26c4c201"
+      }
+    },
+    {
+      "client_id": "06b20bb1-ed4a-4aa1-9f48-8c6cb0531aba",
+      "client_name": "Delta Gas",
+      "strategy_id": "55e4a510-056b-45b6-b4ea-f9cf3aba39d0",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "b1a038e9b2f77ca84fe207d5d8dac753eb3333a5f0d36278933467f2be921219",
+      "seed_context_hash": "4a2200b8d559baa04342abd42fd1670bdcc2ecce3e542285448b8a507d77eace",
+      "source_evidence_hash": "9a1d0a6ea9ece9167038fe05c1d0d466e4e2d82945b20b3f1a6c921748948a86",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "06b20bb1-ed4a-4aa1-9f48-8c6cb0531aba",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "fb062462-bb4a-5ea8-b25c-80d70fbb8f96"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "06b20bb1-ed4a-4aa1-9f48-8c6cb0531aba",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "81c07a12-9992-5358-a033-cef2b32603b9"
+      }
+    },
+    {
+      "client_id": "06b20bb1-ed4a-4aa1-9f48-8c6cb0531aba",
+      "client_name": "Delta Gas",
+      "strategy_id": "9131502e-313a-47e7-a032-a5e3820f5c10",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "a8fa5dc1adf6019d826aa7a92c7846bfd859bf58519f4ac46360e6e26d08e574",
+      "seed_context_hash": "7dd7833fcb64ee04151acd5d4e43600cd66a37eaf8407b9d4808464e4789cf47",
+      "source_evidence_hash": "9a1d0a6ea9ece9167038fe05c1d0d466e4e2d82945b20b3f1a6c921748948a86",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "06b20bb1-ed4a-4aa1-9f48-8c6cb0531aba",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "48d0eb02-03de-5276-88bf-aad14219c554"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "06b20bb1-ed4a-4aa1-9f48-8c6cb0531aba",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "42f9f27b-1bbc-5146-b787-766db213a9bf"
+      }
+    },
+    {
+      "client_id": "2aed8a31-bd53-4ad1-a3dc-432865adfb3d",
+      "client_name": "Dulux Paint & Paper Bloemfontein",
+      "strategy_id": "324a58db-a475-4e60-ad93-a50bb220a550",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "ea1e587af9b38f79c987d00fd6bc3af82d10e45605f9108ba2e8a44e086ea6e7",
+      "seed_context_hash": "bcfd2bf42fc2d8babe62e72b1a02d6d46b36ec1c05b3699ea2f6b9f52b3dbb52",
+      "source_evidence_hash": "711a2e530c67732991cc27a0ad97f597bc3942996d53ac041d84c25fd86ccbd1",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "2aed8a31-bd53-4ad1-a3dc-432865adfb3d",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "413ab4b1-9cc0-512a-859e-3332a7d4f2d5"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "2aed8a31-bd53-4ad1-a3dc-432865adfb3d",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "3a0facc4-47d5-5814-b0fd-ff7bf8e883e1"
+      }
+    },
+    {
+      "client_id": "2aed8a31-bd53-4ad1-a3dc-432865adfb3d",
+      "client_name": "Dulux Paint & Paper Bloemfontein",
+      "strategy_id": "ba3be9e0-28e8-496a-abbc-ae03d322e1f7",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "26838b3401c0bf92a66ad847edd3d163462bfff30e8a06954082a94ba86f6428",
+      "seed_context_hash": "f471461981831d1199f841cdbd919a4a85e04f45ac447addaf9e4fc38ff56f41",
+      "source_evidence_hash": "711a2e530c67732991cc27a0ad97f597bc3942996d53ac041d84c25fd86ccbd1",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "2aed8a31-bd53-4ad1-a3dc-432865adfb3d",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "298e097e-03ab-547f-9dfc-12e230bd274d"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "2aed8a31-bd53-4ad1-a3dc-432865adfb3d",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "da52fcbb-ca48-546a-a31c-b1eafd73f908"
+      }
+    },
+    {
+      "client_id": "ec643c75-51f5-4839-829f-3f5b7f48829a",
+      "client_name": "Ehrlich Park Butchery",
+      "strategy_id": "9105d51f-a999-43b3-8cd8-ff97432a3876",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "59ee0da677a606b456cbfb9084495c79b21df2bf8a979a4a3f61ec1a033455f6",
+      "seed_context_hash": "b6099a5a9e491487da26a52dbec97dc8a15c9b694253a5079732ea94eb96bff5",
+      "source_evidence_hash": "7f4c62b374b3e66664374aaf9ebfa1b99195c43834cb0ffc600b1f041306100f",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "ec643c75-51f5-4839-829f-3f5b7f48829a",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "2e3fae59-124a-5e39-bf1d-f4a532ecb82e"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "ec643c75-51f5-4839-829f-3f5b7f48829a",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "9f2aeeec-5930-50a6-b2a3-e8864f04c330"
+      }
+    },
+    {
+      "client_id": "ec643c75-51f5-4839-829f-3f5b7f48829a",
+      "client_name": "Ehrlich Park Butchery",
+      "strategy_id": "d79c28e1-986a-45af-b6d6-9c966098f9d6",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "08658247dbc796310f90e70fc7966c9860ead162521a210c9b54c3247be0210a",
+      "seed_context_hash": "92901c619a967feb09880c1fc95ab77e3d0452ca151b6999805367ac168478af",
+      "source_evidence_hash": "7f4c62b374b3e66664374aaf9ebfa1b99195c43834cb0ffc600b1f041306100f",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "ec643c75-51f5-4839-829f-3f5b7f48829a",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "73a61ea6-11c7-53a1-aae6-695df65a2855"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "ec643c75-51f5-4839-829f-3f5b7f48829a",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "40657ce9-388a-55b4-a458-e60bcc68236a"
+      }
+    },
+    {
+      "client_id": "d53d8e62-9e6a-4bb9-be3f-554f40942d45",
+      "client_name": "Emmanuel Funerals",
+      "strategy_id": "1bba0379-97f6-4d8c-8e05-0294a8a8e831",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "02502efcc27b36228516e209e2e13220e47d1af6d65483bb936a5c1292eab9f7",
+      "seed_context_hash": "3d8d80425d890764e609638849620c47943821e920e9cc3b9b146d3f2b648f64",
+      "source_evidence_hash": "c8f78bbde5eda6bf760a50e1d8dfbb4043eeb9cd8823f8bae5d7a716a79489d6",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "d53d8e62-9e6a-4bb9-be3f-554f40942d45",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "05a2da17-2495-5698-9bb0-fcc5e133a561"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "d53d8e62-9e6a-4bb9-be3f-554f40942d45",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "93e3e8c0-0c72-5ff9-b4d6-ffbf305e38aa"
+      }
+    },
+    {
+      "client_id": "d53d8e62-9e6a-4bb9-be3f-554f40942d45",
+      "client_name": "Emmanuel Funerals",
+      "strategy_id": "0a5e39bc-cc13-44db-af9f-d4ce8c5a877a",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "ff396f2061855b54f81ce0f842549f59f3ded9159c73ba15fb4e331df58989f3",
+      "seed_context_hash": "c28ccdeef80b6918e40d0cf60c75a3e7d472e88eba53b8ea98bfd94a055b42b9",
+      "source_evidence_hash": "c8f78bbde5eda6bf760a50e1d8dfbb4043eeb9cd8823f8bae5d7a716a79489d6",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "d53d8e62-9e6a-4bb9-be3f-554f40942d45",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "accc97cc-c1f0-51a0-9628-645937aafa21"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "d53d8e62-9e6a-4bb9-be3f-554f40942d45",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "de6b1447-4084-5ae4-9f98-3b210bd7072f"
+      }
+    },
+    {
+      "client_id": "217a547c-7b22-45cc-bf88-9d45a8e93dfe",
+      "client_name": "Emoya Estate Driving Range",
+      "strategy_id": "248d877f-12c3-4aa3-9f79-7414484f2bee",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "8a3293ecf737b26339ad7c65cc03be48f5fed568e2b910f7bbfce618dcd5be5a",
+      "seed_context_hash": "b7664cbf5392628183672bb6c2242b83ac4bc6e54257d99974d60efcc14b7d18",
+      "source_evidence_hash": "a19694e83a099b28ded683b2d8b8b7c9b3e114927a42e3f44a61df873695ce47",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "217a547c-7b22-45cc-bf88-9d45a8e93dfe",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "94e05330-4964-5ca7-b1f3-a76b7c8b7a83"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "217a547c-7b22-45cc-bf88-9d45a8e93dfe",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "dfd9d12e-c77d-5537-9bd0-5db63e400012"
+      }
+    },
+    {
+      "client_id": "217a547c-7b22-45cc-bf88-9d45a8e93dfe",
+      "client_name": "Emoya Estate Driving Range",
+      "strategy_id": "ac19f5d5-3e7f-4034-b7f6-ff590ea6251b",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "9985feed67fbeaf0dfde2211bb0f44d89b9cb0fe8c3d88fe0825c446d2ddc614",
+      "seed_context_hash": "ccc20115393be6466f55afc6368f8116456dcc1d9ff1ab3615ccd7e44a0099c4",
+      "source_evidence_hash": "a19694e83a099b28ded683b2d8b8b7c9b3e114927a42e3f44a61df873695ce47",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "217a547c-7b22-45cc-bf88-9d45a8e93dfe",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "191609e3-c321-56ef-a661-86da41c578c7"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "217a547c-7b22-45cc-bf88-9d45a8e93dfe",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "ab0b870c-fb3e-5d99-a821-8cf205e52749"
+      }
+    },
+    {
+      "client_id": "4424ed69-7270-4d30-a1ea-0b77d76912df",
+      "client_name": "Forklift Trucks",
+      "strategy_id": "e4ccbafa-20cc-46d7-bd35-d0f72420ee3a",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "24b9a899b495a7884948b9c3b506df07c1b4efcada506e6588504e828d438216",
+      "seed_context_hash": "d4d10028bfc9e66d6574b59574768ecf9103efb13598d92322b7a0618b6a9d9f",
+      "source_evidence_hash": "937383a9dedeb76cef370fa0926cc8d4e7d4d75b9f76c5a91b89e10c9d1c0b8b",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "4424ed69-7270-4d30-a1ea-0b77d76912df",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "44733832-7ebb-5a1f-956d-28b4d3bf31e3"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "4424ed69-7270-4d30-a1ea-0b77d76912df",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "f4cce744-44f9-5fd9-89c5-3f624f7412e3"
+      }
+    },
+    {
+      "client_id": "4424ed69-7270-4d30-a1ea-0b77d76912df",
+      "client_name": "Forklift Trucks",
+      "strategy_id": "6ff52455-ea17-42b4-baf6-68953de434fd",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "461a3af0a7052f5ccb0931fbda6b7cd86fdc0c60e0f719973255da1ea91242a3",
+      "seed_context_hash": "c97883cf2ea58c5b6a525760535383167e3cad85304408e95c9c1560bd47a341",
+      "source_evidence_hash": "937383a9dedeb76cef370fa0926cc8d4e7d4d75b9f76c5a91b89e10c9d1c0b8b",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "4424ed69-7270-4d30-a1ea-0b77d76912df",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "eb817537-f3dd-5a90-a85d-0aa5981a7f41"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "4424ed69-7270-4d30-a1ea-0b77d76912df",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "b9518929-532c-5dc2-b417-89df0fb58b85"
+      }
+    },
+    {
+      "client_id": "b6052710-417d-4b3b-8348-0f126bfea671",
+      "client_name": "Germoparts",
+      "strategy_id": "a9d5928f-fda3-48a8-8803-4eb6bfdd4194",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "570c0f6582cff7951ecf3793bd4ba9858d8a4be2f11d95fdec7ce5deba6afa78",
+      "seed_context_hash": "4100087a3142329de3cd54f206666e46d6e6c51f5308f0eb0a07e4e5386c46ac",
+      "source_evidence_hash": "38d23e1d90fd4085bd07da245c917fb19c55c2f66e9f90464cbdcd1937e48338",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "b6052710-417d-4b3b-8348-0f126bfea671",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "c728fe66-597d-54e9-a4ad-d8b6de898668"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "b6052710-417d-4b3b-8348-0f126bfea671",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "71e0201d-12ee-5dc4-becb-7d4016cbd4e2"
+      }
+    },
+    {
+      "client_id": "b6052710-417d-4b3b-8348-0f126bfea671",
+      "client_name": "Germoparts",
+      "strategy_id": "73ac8493-8746-4e67-9889-d8c27abec853",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "fc982a0adaa4347d53a1c310c7cb9cd3a05ce0f824c6b4edf932b6aa1f0dee8c",
+      "seed_context_hash": "6add36184367ded342615c54ebd8c6784307983f35b5d9ff6243e14b03922135",
+      "source_evidence_hash": "38d23e1d90fd4085bd07da245c917fb19c55c2f66e9f90464cbdcd1937e48338",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "b6052710-417d-4b3b-8348-0f126bfea671",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "c9f18a57-af3e-55a5-b0ad-67af89ce58d7"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "b6052710-417d-4b3b-8348-0f126bfea671",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "5fa8290e-ea67-5eb2-965c-de3c583ee26c"
+      }
+    },
+    {
+      "client_id": "1007e58b-3fea-4515-88b7-ddaa85763de6",
+      "client_name": "Hino Trucks",
+      "strategy_id": "301c64d8-da2b-4289-9869-0c4196ca7986",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "172b786fba757c6b653bcf382f6fa7a93e2349d5839070c97244f24f73e3a813",
+      "seed_context_hash": "50ca2844a3d7192a35b295b256c96b22118c81546fef2a337df94d671be96812",
+      "source_evidence_hash": "3ea0036a3123e387e74ae289413d6ac588056076dcd06f1d0fe07de89a1ebf9b",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [
+        "Toyota Bloemfontein"
+      ],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "1007e58b-3fea-4515-88b7-ddaa85763de6",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "52d2d564-f92d-5d6c-894a-610371b08749"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "1007e58b-3fea-4515-88b7-ddaa85763de6",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "999b76ec-9ca4-5e65-981f-1702dac33429"
+      }
+    },
+    {
+      "client_id": "1007e58b-3fea-4515-88b7-ddaa85763de6",
+      "client_name": "Hino Trucks",
+      "strategy_id": "5bbc7dfa-de11-47d2-a3fc-a5ba897deba9",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "0f8994ffaac8c96500d2e7c47007180076da7f9e4787a2672ef5b55618ead109",
+      "seed_context_hash": "c034d4e88d17d3eb049a25c95da71812e2691cffa4e35cf7bfe28d42c7d1e17e",
+      "source_evidence_hash": "3ea0036a3123e387e74ae289413d6ac588056076dcd06f1d0fe07de89a1ebf9b",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [
+        "Toyota Bloemfontein"
+      ],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "1007e58b-3fea-4515-88b7-ddaa85763de6",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "c7bd34e4-32e7-51a5-b309-90ddb55a5c5b"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "1007e58b-3fea-4515-88b7-ddaa85763de6",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "207354be-d021-5b6a-84c0-7b3aa307bcc2"
+      }
+    },
+    {
+      "client_id": "572555e0-d4d0-404a-8d67-beeeeed6a1f2",
+      "client_name": "HMHI",
+      "strategy_id": "967e09a5-88de-4649-8e36-50b9b83639b2",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "ae06b62d7c2bafc63d1b9885657cd892b6bb50f1eabac7850fa076268fc209ee",
+      "seed_context_hash": "23c044fe8871fc8477aa5d6c6f040dd18182225e8806b1d3ab8efabc6aba9d5d",
+      "source_evidence_hash": "5a7e52bf885c15630f302bfc3496286f49ddbd8a74379ad07c12df4615d49308",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "572555e0-d4d0-404a-8d67-beeeeed6a1f2",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "540f89eb-0820-5e71-8f90-6be4fc3727ae"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "572555e0-d4d0-404a-8d67-beeeeed6a1f2",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "0f9a026e-ca08-5da3-8373-ebdeacb1f95c"
+      }
+    },
+    {
+      "client_id": "572555e0-d4d0-404a-8d67-beeeeed6a1f2",
+      "client_name": "HMHI",
+      "strategy_id": "f8ff3a3d-3e34-4d39-a0e8-9c447cbd1349",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "d2657c23ad0f665121b18505f46ff1824dec4097827c680ba7e14048cfcaea40",
+      "seed_context_hash": "a7229745e37efa97242058746448f115cbef4dea0fbfe33f496e188a405b466f",
+      "source_evidence_hash": "5a7e52bf885c15630f302bfc3496286f49ddbd8a74379ad07c12df4615d49308",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "572555e0-d4d0-404a-8d67-beeeeed6a1f2",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "48342b94-dfd4-5934-81c3-b8522e52eab9"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "572555e0-d4d0-404a-8d67-beeeeed6a1f2",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "9a7d7c21-3206-58a4-b802-82e5ac3dfe02"
+      }
+    },
+    {
+      "client_id": "816c7f59-d56c-46a3-ba15-f76971d83769",
+      "client_name": "Human Auto",
+      "strategy_id": "3242464f-0a3f-49ab-a7ce-1d8902919702",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "1a44435b483431d1b3811808544a3f3f374997f834eee55571bc15c7f4ca754c",
+      "seed_context_hash": "493355e36561425b132ed007cfac41841136def24f40df06853bd9cc238d2c44",
+      "source_evidence_hash": "1292ab9c32b1a28cf0152bd6ed5878ae2dbccf2b789f8a8a1216666dd68140b8",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "816c7f59-d56c-46a3-ba15-f76971d83769",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "c84021a1-04ba-5ae5-8df9-a442fd8cb78d"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "816c7f59-d56c-46a3-ba15-f76971d83769",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "8fb03939-92b3-5ac6-878f-89887657b13c"
+      }
+    },
+    {
+      "client_id": "816c7f59-d56c-46a3-ba15-f76971d83769",
+      "client_name": "Human Auto",
+      "strategy_id": "08dba9ea-c267-456d-96f8-dfc5910d674e",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "38bdf4c1f4bff90f702e52cb8448ce73815f99f40cfd9afa85161d8893703f4f",
+      "seed_context_hash": "8172b1f393a860510f571dd98b15efb652ce4b1c8f4be31e7efe13cb7ee9c5e1",
+      "source_evidence_hash": "1292ab9c32b1a28cf0152bd6ed5878ae2dbccf2b789f8a8a1216666dd68140b8",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "816c7f59-d56c-46a3-ba15-f76971d83769",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "5051a926-6029-55de-9a14-6fb1dbd981ad"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "816c7f59-d56c-46a3-ba15-f76971d83769",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "cb96250b-3199-5609-afc8-6a2e6dc91f14"
+      }
+    },
+    {
+      "client_id": "a5eab798-3e00-44cc-947e-463386fdac39",
+      "client_name": "Jenkor",
+      "strategy_id": "19873077-2f40-42e2-94d7-0fab337ce255",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "9dd921aa736bef4e7c63120a5b6f37c846cd4c366357ef5306b67a26fdb7ca68",
+      "seed_context_hash": "6fa2fb858d3ab148465f0ed97173a92644bea1eafb675cb4b4a5835796bf3b3a",
+      "source_evidence_hash": "d11aecd5d44e8d92d4fce4f56af1a90596034479181594729a66e43420ae6111",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [
+        "CG Production House"
+      ],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "a5eab798-3e00-44cc-947e-463386fdac39",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "20d5a4c6-90f9-5e68-892e-2e6337dcf8dd"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "a5eab798-3e00-44cc-947e-463386fdac39",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "ddc0f1b0-23a1-5c77-8101-42eccb8642dd"
+      }
+    },
+    {
+      "client_id": "a5eab798-3e00-44cc-947e-463386fdac39",
+      "client_name": "Jenkor",
+      "strategy_id": "32400dc4-f32c-46af-bc7c-dd5f1fd23824",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "af07a67e906b8d606ffcaaf78c6ac654d5becbed0a983494e72aee40b8c82d4e",
+      "seed_context_hash": "6f70d33bde4c7a35f7b1e13f6f59451339b0276c97500d5cda8e4735562ef9f5",
+      "source_evidence_hash": "d11aecd5d44e8d92d4fce4f56af1a90596034479181594729a66e43420ae6111",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [
+        "CG Production House"
+      ],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "a5eab798-3e00-44cc-947e-463386fdac39",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "f3e46177-503e-5ce4-b2b6-a23130545960"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "a5eab798-3e00-44cc-947e-463386fdac39",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "8f456564-97d0-5680-8cbb-1428aa46a7b2"
+      }
+    },
+    {
+      "client_id": "21300630-6755-4591-9a49-e22abbaf7e3d",
+      "client_name": "Loraclox",
+      "strategy_id": "2d167efd-552c-42ad-886f-d8ef509393b8",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "7d715561fe6468d24ca75fa4a7ad974ffedbae8c575ba620e3c2b2795629edd4",
+      "seed_context_hash": "537214596890db888d2bf331f5f424aa86de108f312a3f76c31d8badf0c9b224",
+      "source_evidence_hash": "3cdc0ddb125609ecfbdde592438b5b2b3ab6708c1ab9db387ea6960de1fc2706",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "21300630-6755-4591-9a49-e22abbaf7e3d",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "7ca4b45e-22d1-5596-aaa2-93e4573221cf"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "21300630-6755-4591-9a49-e22abbaf7e3d",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "acc60ff4-5c9b-5619-bf96-361d2f3ff0fd"
+      }
+    },
+    {
+      "client_id": "21300630-6755-4591-9a49-e22abbaf7e3d",
+      "client_name": "Loraclox",
+      "strategy_id": "83d94b72-5627-49be-a6ec-0d129487902f",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "3a69b62bdc981b6c931e4d29ee46cc8fe2628890e609b816f8061651fc0a6283",
+      "seed_context_hash": "80e20ecbaa0aa0a99e233d4fea2233a7b960f352d97e53f3434c05666c727998",
+      "source_evidence_hash": "3cdc0ddb125609ecfbdde592438b5b2b3ab6708c1ab9db387ea6960de1fc2706",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "21300630-6755-4591-9a49-e22abbaf7e3d",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "50cdca70-cb3b-5223-ade4-48ed9bd1a6d1"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "21300630-6755-4591-9a49-e22abbaf7e3d",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "9bf10260-240d-55cb-a62a-4be820c99979"
+      }
+    },
+    {
+      "client_id": "7b47afb0-fa55-4916-85f6-09c57e5905b9",
+      "client_name": "Madison Wear",
+      "strategy_id": "a205344a-497c-4eb6-8194-19d20e43c8a5",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "c0c6932bd1440ae90a80c55e98abb7b6890dbf919159d0ffc02937a65918cf98",
+      "seed_context_hash": "3b2c5757c65e76e36daa2b636b9d4bbdd0952c1f3d40716733d8715819a4d2ea",
+      "source_evidence_hash": "6c5e403d70b51aad6e208253a3aa3f586d7dbfc69da0b854a44efdc971931e68",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "7b47afb0-fa55-4916-85f6-09c57e5905b9",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "994208d9-f291-55d3-8841-cf069958d606"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "7b47afb0-fa55-4916-85f6-09c57e5905b9",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "2317ca51-173e-59e5-a5b0-2c314fedc2fa"
+      }
+    },
+    {
+      "client_id": "7b47afb0-fa55-4916-85f6-09c57e5905b9",
+      "client_name": "Madison Wear",
+      "strategy_id": "53fee98b-3b68-46f5-9e93-f976c9413c14",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "0c4ab1acde7274a8acd6e61f646eef5124c73eeb02fe0ae3f759376075dde3c8",
+      "seed_context_hash": "9f6c9d64f39408c257590b88bab2be8aa76bd10bc7db12b8d35680bb27ee92d7",
+      "source_evidence_hash": "6c5e403d70b51aad6e208253a3aa3f586d7dbfc69da0b854a44efdc971931e68",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "7b47afb0-fa55-4916-85f6-09c57e5905b9",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "427138a5-ba93-5111-992f-b99255370c9e"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "7b47afb0-fa55-4916-85f6-09c57e5905b9",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "cbfe0f43-8c98-5432-9e8c-a32a6a8e834e"
+      }
+    },
+    {
+      "client_id": "3c20fae1-8e91-41d5-98eb-1c331600e6e3",
+      "client_name": "Neshora Oxygen",
+      "strategy_id": "345ff5dc-a669-4e71-8312-e11472a3494f",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "0e04f03ad9e3f82558a43086c542867a5fed366b58a705dab74649fe1dab8758",
+      "seed_context_hash": "d2531fb445659e2dbda9dc48076b824eb911b4ee3d49d0be02a348f732c65def",
+      "source_evidence_hash": "376630a6efc1dc5b008b25d4808832b9f8a384226c9974fb6ff3f1c36237ec33",
+      "reviewed_plan_hash": "4e709c3af9aa3ba46175db2fa5527772bb03e1468f78e3389209bacd82d9ddaf",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "3c20fae1-8e91-41d5-98eb-1c331600e6e3",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "5e572391-4850-585b-b753-f9832744a96e"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "3c20fae1-8e91-41d5-98eb-1c331600e6e3",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "2576403b-9fb1-58b5-b1bd-0634c16296d3"
+      }
+    },
+    {
+      "client_id": "3c20fae1-8e91-41d5-98eb-1c331600e6e3",
+      "client_name": "Neshora Oxygen",
+      "strategy_id": "c4db3ace-ceed-4c8f-99cb-2841edf12613",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "fe80ed33ab153a313d3b683bbc790cc40932b5081f4171962e4150f3e61db919",
+      "seed_context_hash": "28b6deb747e6ffdf4b58c54d413682e89abef4e1fac96c2d771b5206dd59ea79",
+      "source_evidence_hash": "376630a6efc1dc5b008b25d4808832b9f8a384226c9974fb6ff3f1c36237ec33",
+      "reviewed_plan_hash": "4e709c3af9aa3ba46175db2fa5527772bb03e1468f78e3389209bacd82d9ddaf",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "3c20fae1-8e91-41d5-98eb-1c331600e6e3",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "15b04bad-738a-56de-a535-08c0db948aa1"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "3c20fae1-8e91-41d5-98eb-1c331600e6e3",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "3d8375a3-7010-531f-9037-4144fe760ec0"
+      }
+    },
+    {
+      "client_id": "4236a60a-990f-484f-8d19-13d2f92fbe3b",
+      "client_name": "Novus Steel",
+      "strategy_id": "3d97dd9d-d38f-42f1-9051-263a70509ce9",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "309779dc2c70969bed765ccf3657b72ea33795cc8ed4ce4fad9e5e225e92a223",
+      "seed_context_hash": "a615b92f8fa111f1e073dc5b3ab6c4c8fbe724677d56623eb7c53d53976a7261",
+      "source_evidence_hash": "669241319340b853b3f6892bb20fa3ff6c8fe18e03bb78ddaedc8092565a2231",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "4236a60a-990f-484f-8d19-13d2f92fbe3b",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "9bebab84-e23e-58f7-9319-cecd0d92efc9"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "4236a60a-990f-484f-8d19-13d2f92fbe3b",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "1b8657be-d811-5916-a673-5a0b7e2ebee9"
+      }
+    },
+    {
+      "client_id": "4236a60a-990f-484f-8d19-13d2f92fbe3b",
+      "client_name": "Novus Steel",
+      "strategy_id": "b12c6061-5dbd-4098-a626-3d8db992ded8",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "8195aac282e20959a4d7998d81f9a6a2444a1b460b7dd440842e753fadd03670",
+      "seed_context_hash": "fca6743eddae07cc5ab8ede023f33ffa56061d2c4a1e5bc487fb89ef6f10c5a1",
+      "source_evidence_hash": "669241319340b853b3f6892bb20fa3ff6c8fe18e03bb78ddaedc8092565a2231",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "4236a60a-990f-484f-8d19-13d2f92fbe3b",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "e621c153-ed42-5e1a-9a24-028103923f8e"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "4236a60a-990f-484f-8d19-13d2f92fbe3b",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "c45c163d-f5f2-591d-be78-52f36f23bf6d"
+      }
+    },
+    {
+      "client_id": "a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b",
+      "client_name": "Peyper Bonds",
+      "strategy_id": "8281c9d0-86a6-4223-809a-6c7a98467efe",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "755685841517a0e40e76a2d34d4df7eab052a626bd373ecbc3c8fab711087c21",
+      "seed_context_hash": "5b3f17c676b489978077b6476c123bb99f2f8cb3b0358fb7652ef8252a4da53a",
+      "source_evidence_hash": "f6c46109eacc4da32165828caca2e5da2df6c3cc35ed1d6e869f5bbe1c39e11c",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "a79153bb-0868-5072-bdb1-292ea0817378"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "6dc40fba-70ec-5f1b-8909-dd337c32973b"
+      }
+    },
+    {
+      "client_id": "a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b",
+      "client_name": "Peyper Bonds",
+      "strategy_id": "2ed8b4fc-2225-4df0-8b92-194989e8fb8e",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "f934c43b5abafa703f784fcd804e51e51ab8e7c2e964ee6ab44fa3b5eba252f6",
+      "seed_context_hash": "1189e07efd4378d20c535cc890c325914f2df3f16ab1e4c75127c44f852adbce",
+      "source_evidence_hash": "f6c46109eacc4da32165828caca2e5da2df6c3cc35ed1d6e869f5bbe1c39e11c",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "4d41cb76-34d2-548e-90fa-c5d961a3ee50"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "de454c47-9bd9-52eb-98a5-9e830ad84942"
+      }
+    },
+    {
+      "client_id": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
+      "client_name": "Piek Group",
+      "strategy_id": "3e53cc67-945e-4696-a336-63d170b8d4eb",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "a76afb3aba5c853db2cdce429c886f00df9ecaddae3dbbd75810227b055a91fe",
+      "seed_context_hash": "969d44a8cd42012f7737d02f90515d0a9d99ebe8a5d2367b77fa1dbc0ecbdbed",
+      "source_evidence_hash": "3da13393bc5d6c961027dda92d7e65aeea0e1eecf3bdd9795d68ca6a5e09402a",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [
+        "CG Production House"
+      ],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "9bfdc2b6-112b-5ca6-bc6b-7a60644e6f06"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "8066bc8f-a5d8-50d9-856b-f33641e07645"
+      }
+    },
+    {
+      "client_id": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
+      "client_name": "Piek Group",
+      "strategy_id": "e3d7a58e-e20e-4cae-a75e-b57cd2075501",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "42cf18bb7da7c033db95c2d0a0802d087d83d9d452749601fd663a076fbd71b4",
+      "seed_context_hash": "66f30422cb922d8129533771a683bb04bfb27b5818f04ac8aea58de9b7fcf1c3",
+      "source_evidence_hash": "3da13393bc5d6c961027dda92d7e65aeea0e1eecf3bdd9795d68ca6a5e09402a",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [
+        "CG Production House"
+      ],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "2bfad164-65be-5426-86b0-789ad6c48a55"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "e7db4b50-257d-5063-b22f-f65fb15c34fb"
+      }
+    },
+    {
+      "client_id": "29a28efd-c998-45e2-a57c-4a751e779e66",
+      "client_name": "PSG Bloemfontein",
+      "strategy_id": "f2a0111e-3128-405f-8a0a-71960cf00f13",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "f8ec678e047d6d23af9d81db0a544979c93f63b243e141c8931ba474977da9a3",
+      "seed_context_hash": "e652bb00f3928ec4e6a4dd452a017768cbe97f85322daa1d4714309d419f46a7",
+      "source_evidence_hash": "26186f0a745d4630d0b2ffdfc44803ea50ddc737ed37bbb67da5f0fca3d775be",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "29a28efd-c998-45e2-a57c-4a751e779e66",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "6d0f8693-9f43-5ff2-b2bb-a8ff617a019d"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "29a28efd-c998-45e2-a57c-4a751e779e66",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "5843587e-907f-5127-8dd9-975634fa5d62"
+      }
+    },
+    {
+      "client_id": "29a28efd-c998-45e2-a57c-4a751e779e66",
+      "client_name": "PSG Bloemfontein",
+      "strategy_id": "bb5c1073-e0e0-404e-8f95-6c7d7494efc1",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "66306cff1d1914a3e856d5efe61bfd0869a71b978c8db93ca642c7314c482a99",
+      "seed_context_hash": "089e9c20927caacba435440c73735e9586aab2e8968c94e4e13e5e09c09bff34",
+      "source_evidence_hash": "26186f0a745d4630d0b2ffdfc44803ea50ddc737ed37bbb67da5f0fca3d775be",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "29a28efd-c998-45e2-a57c-4a751e779e66",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "917b8eb2-3000-5d8d-9218-ff6d9e1f72f0"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "29a28efd-c998-45e2-a57c-4a751e779e66",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "d465fbda-a946-5fd9-90e6-67751c34cf88"
+      }
+    },
+    {
+      "client_id": "4f6106de-c437-404e-8cef-fbe848de0665",
+      "client_name": "RC-Polypipe",
+      "strategy_id": "199dafa0-0186-425b-ba8d-c46830d18da0",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "0dc0071f3988a0f73fa160c2541f1e2ce650a1ab91e0b6635b23dcbe5cdd9f5c",
+      "seed_context_hash": "60775e017760132f858d8b5194031ae820daa21fb38f708451962fdc0deba3e0",
+      "source_evidence_hash": "912552d62eb24f57ca3a84327029701108d51a9cc3fbda1d40cad6fba8908c66",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "4f6106de-c437-404e-8cef-fbe848de0665",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "e0038f3c-4e79-5732-b4ee-02f9611be40c"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "4f6106de-c437-404e-8cef-fbe848de0665",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "c2ea3cd4-532b-566c-9001-c1b04569ada3"
+      }
+    },
+    {
+      "client_id": "4f6106de-c437-404e-8cef-fbe848de0665",
+      "client_name": "RC-Polypipe",
+      "strategy_id": "49fb40ec-94a9-4aef-b595-d9ec7b4ac1fc",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "dcb453500d615d13eb5d14323b79b0f9c1e55a6ae996e066d78176c2cd41ddc8",
+      "seed_context_hash": "9daa55a8da02a50d385aa781a938b0c897eabb2a7d236ce5267cb37da80cb9ca",
+      "source_evidence_hash": "912552d62eb24f57ca3a84327029701108d51a9cc3fbda1d40cad6fba8908c66",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "4f6106de-c437-404e-8cef-fbe848de0665",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "70cb795f-1eaf-5f75-8cc4-be9ca1304eef"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "4f6106de-c437-404e-8cef-fbe848de0665",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "731c966b-7a55-5f52-9d80-2f6fc422e8e6"
+      }
+    },
+    {
+      "client_id": "cdb11a82-339e-4b46-9b09-bde1a23efeaf",
+      "client_name": "Red Oak",
+      "strategy_id": "8966dc51-f14b-4046-b16e-2d8ddab1561c",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "7495c7b4ef5c69cd9c58452b0e561f4cc84d073a625bbbe55ad4099f33158880",
+      "seed_context_hash": "7e1bba76cda595271a8bff56fa6aef8ce36230c9c78402335db28d75bd723e11",
+      "source_evidence_hash": "a40b6e4ff4d83d374b404c3415e0c7364d5e500ec65cd1734a07f4a18f070630",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "cdb11a82-339e-4b46-9b09-bde1a23efeaf",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "b8c68d5b-1eca-527f-83e7-b19e2677d954"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "cdb11a82-339e-4b46-9b09-bde1a23efeaf",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "9507fed8-edc8-546e-8806-9d9c7d0d4809"
+      }
+    },
+    {
+      "client_id": "cdb11a82-339e-4b46-9b09-bde1a23efeaf",
+      "client_name": "Red Oak",
+      "strategy_id": "77fb2d24-b8f7-4ea3-8390-21c65caf1f35",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "2db12e4fe7d4c409de83beacd39816a37a2f03e6da3c3435df04a1193769cc8b",
+      "seed_context_hash": "750ff822b86fc7dd997c5118e4b947c219246d26dcea2f6c8a06d064055d5890",
+      "source_evidence_hash": "a40b6e4ff4d83d374b404c3415e0c7364d5e500ec65cd1734a07f4a18f070630",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "cdb11a82-339e-4b46-9b09-bde1a23efeaf",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "66dc9766-abb1-555f-b87c-c24006e1ad9e"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "cdb11a82-339e-4b46-9b09-bde1a23efeaf",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "17fc772c-439a-55ae-b5c8-42343d8e764c"
+      }
+    },
+    {
+      "client_id": "917d6f7c-1c2a-4c20-82f0-daa41b9062f5",
+      "client_name": "SecuriForce",
+      "strategy_id": "1d5cdcec-9df1-4cbf-baf4-9d7c9b5d028b",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "9452c72a616e13cb7ec386a61036763f2cfaf45c82591802c75991751abeaae1",
+      "seed_context_hash": "1b353e5d02326b9eb5b7fac4ab1ad60207730fedaf6fff743f7c2446acaa72ef",
+      "source_evidence_hash": "79e1a9c97f4ebd0b626b4ae38fcf643304ed900e323fa254485f7990fc963f29",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "917d6f7c-1c2a-4c20-82f0-daa41b9062f5",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "0094d9ea-0d02-50e3-ac5d-aebd7097ea60"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "917d6f7c-1c2a-4c20-82f0-daa41b9062f5",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "9f63b357-7d92-5123-9e1a-5c173898fbc2"
+      }
+    },
+    {
+      "client_id": "917d6f7c-1c2a-4c20-82f0-daa41b9062f5",
+      "client_name": "SecuriForce",
+      "strategy_id": "5f39bd38-00ed-4060-b55b-1283065e82dd",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "7074b4cdd6984b743d4b40dc8f1a0957c4cb9d536e37134f9b92bbf3c3b9815d",
+      "seed_context_hash": "2019024d9208035a545f7eff6f26a81f19109572289ba57ce497eed05b20a7b4",
+      "source_evidence_hash": "79e1a9c97f4ebd0b626b4ae38fcf643304ed900e323fa254485f7990fc963f29",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "917d6f7c-1c2a-4c20-82f0-daa41b9062f5",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "aa6d1934-966f-5bd3-b5af-9ce45de7ca94"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "917d6f7c-1c2a-4c20-82f0-daa41b9062f5",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "c64fea52-9ccb-5958-a0e8-d7b06be88c7d"
+      }
+    },
+    {
+      "client_id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+      "client_name": "Supa Quick BFN",
+      "strategy_id": "0d52c3ef-1c75-4ad0-80ea-4fc6ad9d4500",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "4088112a4bb8f84606f06d5e9d11e9dd736b058da7a067993a3e8ea37dd0f1eb",
+      "seed_context_hash": "f2b4399940a7cead150912b40c2569f06d51dcebaa4446277ead352ce7e565ca",
+      "source_evidence_hash": "818f9351f18d897129972d9df2925b9a4398837dcff1e6f399d277994e7683b4",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "712f045c-37f9-5798-bd10-3a94f5e1a27f"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "a72875cb-697c-5e9c-9f5b-549d3d1d55bc"
+      }
+    },
+    {
+      "client_id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+      "client_name": "Supa Quick BFN",
+      "strategy_id": "f9648334-0284-4b8c-b6f5-d667026a9694",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "5b6bd7727930bd1af6a685e2d5a49bc6914624082427a53aa12c97a16256a4bf",
+      "seed_context_hash": "6e704f8d8be55acf05d2e6922876d4e459017054f6324e35030ddfddf22ed90e",
+      "source_evidence_hash": "818f9351f18d897129972d9df2925b9a4398837dcff1e6f399d277994e7683b4",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "4b916431-1e07-5485-bf61-6fb8fbe62da0"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "fc528be8-4cb3-58ef-ad0b-a58b0dc1c675"
+      }
+    },
+    {
+      "client_id": "e2870110-930c-4e63-b2fe-c858030f7258",
+      "client_name": "Supa Quick Centurion",
+      "strategy_id": "fa436891-a3ec-403e-9ddf-b8196624b329",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "bf4c81026dab86a1cfcd4098584b4db8c77e728a006e252f4ed387d996a4fb81",
+      "seed_context_hash": "591bbeeae7f880863090c486c75f2a963214552fd1d721fe294dc894b7765a25",
+      "source_evidence_hash": "6ed6bb55fa527da96f2fbea3d5a2a1f31a9690e9d39de6f0f4b7f1730a61a328",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "e2870110-930c-4e63-b2fe-c858030f7258",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "9b04f074-36a1-54a4-a48e-87d8f7470502"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "e2870110-930c-4e63-b2fe-c858030f7258",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "e2c2bc76-ac13-519d-a0cb-b94b16beaa93"
+      }
+    },
+    {
+      "client_id": "e2870110-930c-4e63-b2fe-c858030f7258",
+      "client_name": "Supa Quick Centurion",
+      "strategy_id": "c14da54d-c12e-442c-aeb2-72314fcd3eb5",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "870cbbbd415b22b6307bb72e86404c6d212f5b5709c7c25c0d813c924e7de94b",
+      "seed_context_hash": "f26ad7ac4e8f35aeef4c189f3a488b9e279462b4a72adb4266849495848643c9",
+      "source_evidence_hash": "6ed6bb55fa527da96f2fbea3d5a2a1f31a9690e9d39de6f0f4b7f1730a61a328",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "e2870110-930c-4e63-b2fe-c858030f7258",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "26995078-981b-5786-a2f6-01c65b2dfe43"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "e2870110-930c-4e63-b2fe-c858030f7258",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "cc29abe2-09fe-50d1-ab7c-a64fb72f52cc"
+      }
+    },
+    {
+      "client_id": "a36ba938-e9dc-4ecf-bb67-4853608b1c01",
+      "client_name": "TBS Brokers",
+      "strategy_id": "5d1267c1-ada6-4f03-8abc-99f4f0ee287a",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "3807d4881b586734e83c0227b2785b93d5323c22446f19e1a206aed65ecea44b",
+      "seed_context_hash": "f3682f656bbe27835f040f74d6a78ab612c72d11ad1a0f3d54589b41539c70ae",
+      "source_evidence_hash": "e79f9a89dec73a5f6eb63ebccc873c3c3e15897109c72a1e65b6c2efb079c01d",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [
+        "PSG Bloemfontein"
+      ],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "a36ba938-e9dc-4ecf-bb67-4853608b1c01",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "ce0c719c-9e31-501e-816a-e4af5c382cda"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "a36ba938-e9dc-4ecf-bb67-4853608b1c01",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "ef57c6fd-80bb-5cf0-b957-a42567cda7a5"
+      }
+    },
+    {
+      "client_id": "a36ba938-e9dc-4ecf-bb67-4853608b1c01",
+      "client_name": "TBS Brokers",
+      "strategy_id": "5ecaabe0-1f6d-4a34-a932-e1e81c2c1188",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "dc0e6a0bbe98b449e41e3f0e22261eab26f637359b29c566b4d48a5d4c008b22",
+      "seed_context_hash": "31e06fef015749edf1c02d73d1ca95011a7102de8e0868101488bb12aea61923",
+      "source_evidence_hash": "e79f9a89dec73a5f6eb63ebccc873c3c3e15897109c72a1e65b6c2efb079c01d",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [
+        "PSG Bloemfontein"
+      ],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "a36ba938-e9dc-4ecf-bb67-4853608b1c01",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "f4ea0cfa-860e-56b2-ba94-fdf36cc3719e"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "a36ba938-e9dc-4ecf-bb67-4853608b1c01",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "bee27057-67d8-58d1-8825-72b8549e634c"
+      }
+    },
+    {
+      "client_id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+      "client_name": "The Staffordshire",
+      "strategy_id": "6ab1de4d-aabc-4ef5-9cc0-3ab5ba8ef898",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "b11a13a3c20d2dee5ccf21cbe0c03eae2cb5336dcea53752c9c6585d5b2184f8",
+      "seed_context_hash": "8f977db1b475de8961f7c764a24df9915604cf71044304856a43193ef8117046",
+      "source_evidence_hash": "2e3fbaadda6c6f808f7b479c67f2e95ba45c7aa9682d24b5dfff6e731d7fd979",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [
+        "TBS Brokers"
+      ],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "b0b357c7-b3ad-58dc-9b00-37147cbf570d"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "c14cd91a-72c3-5aeb-a9f2-4f84ce9ff0f7"
+      }
+    },
+    {
+      "client_id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+      "client_name": "The Staffordshire",
+      "strategy_id": "ec9fd062-ffee-44ca-afca-e230949da6fe",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "869f35477c63593e2aa1102c0c4ef53397180e54b47109a6c24561b031e84f92",
+      "seed_context_hash": "d18d967759628bea3201510885e46f484782a1e9a35217fdebe95580b4faecfa",
+      "source_evidence_hash": "2e3fbaadda6c6f808f7b479c67f2e95ba45c7aa9682d24b5dfff6e731d7fd979",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [
+        "TBS Brokers"
+      ],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "d3c9626b-66d3-597c-a878-afba5da7be5d"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "2e96bbfa-d847-5eeb-83ef-017d80a58c48"
+      }
+    },
+    {
+      "client_id": "204f4f22-14c7-42ed-a956-da57af102706",
+      "client_name": "Tobich Optics",
+      "strategy_id": "18e3b9c1-bd84-4ef0-b73c-83f1a4c2f0eb",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "fd13611cb563d742f7ff2729888483892ac8b765648042ce751c02ff934bf171",
+      "seed_context_hash": "105ddfed6630fc3086a3c4e353e1b2c8ca3f15be891c85827e8cb02665517260",
+      "source_evidence_hash": "e60f6861d718e6c6b21547b642b152fb1c3f6244fc8ab89d21c946b97dc08c38",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "204f4f22-14c7-42ed-a956-da57af102706",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "0a13dc8c-e6d1-5940-ab55-a0bd52d8b963"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "204f4f22-14c7-42ed-a956-da57af102706",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "7f2726b3-5cd3-52e6-9ff7-d8830e723b96"
+      }
+    },
+    {
+      "client_id": "204f4f22-14c7-42ed-a956-da57af102706",
+      "client_name": "Tobich Optics",
+      "strategy_id": "33c0bdca-0caa-4839-aee1-c423d232f78c",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "78995879a098671a9f988673fdcc15c145110ce2699d7a9814ec2a61d11396b2",
+      "seed_context_hash": "a77e3927a4e88c2ad7f59306bcf231966e1fc1bf2568e05491730585d903e7ab",
+      "source_evidence_hash": "e60f6861d718e6c6b21547b642b152fb1c3f6244fc8ab89d21c946b97dc08c38",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "204f4f22-14c7-42ed-a956-da57af102706",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "f9044fa9-1187-5590-a38c-97b83697a731"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "204f4f22-14c7-42ed-a956-da57af102706",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "ac38deb2-d97e-5915-822a-01142ca38086"
+      }
+    },
+    {
+      "client_id": "e2ad6d57-5b06-46e1-b75b-b67f017d57f1",
+      "client_name": "Toyota Bloemfontein",
+      "strategy_id": "948d7fa1-5853-4edf-b1f3-8bf49f93d93b",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "2c16372fb57caff7990e77d2ee8edb83608439b01bc07f46807623375bf5affd",
+      "seed_context_hash": "21ada662879d1f62cae424aed24324e62fd9b8cada020cb5acc1b04c6552aa74",
+      "source_evidence_hash": "8792b532b64145cf11843375e38691bd2616bd608aa6d9cf6b1d11ec489fe089",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "e2ad6d57-5b06-46e1-b75b-b67f017d57f1",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "dcc27f75-1e86-50c0-891f-32737f2ffe98"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "e2ad6d57-5b06-46e1-b75b-b67f017d57f1",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "f51bc26b-4fb2-5b93-8da9-4c828230aa24"
+      }
+    },
+    {
+      "client_id": "e2ad6d57-5b06-46e1-b75b-b67f017d57f1",
+      "client_name": "Toyota Bloemfontein",
+      "strategy_id": "d36ae793-6ff4-4b93-8f2a-1da6d30b0a4b",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "63105651443fb7d8ca379eae5fe3078605d0b45fe31a74bda9ced9dcb3c73b64",
+      "seed_context_hash": "287ce8a5cbc6d2a63546f107b17ebb7f1dd744f0b386e1a1d948353e9b98a343",
+      "source_evidence_hash": "8792b532b64145cf11843375e38691bd2616bd608aa6d9cf6b1d11ec489fe089",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "e2ad6d57-5b06-46e1-b75b-b67f017d57f1",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "fd9673da-4ee3-5b5d-84cf-4a59229e32aa"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "e2ad6d57-5b06-46e1-b75b-b67f017d57f1",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "da7bfda7-33e5-5b57-8635-985093e96ac5"
+      }
+    },
+    {
+      "client_id": "1f0406bb-d643-4b83-bc3e-b1ebe87eeb89",
+      "client_name": "Vrystaat Kunstefees",
+      "strategy_id": "aae812d7-7cb6-4f0d-bd4c-b4aea2e7e349",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "6235d0b2350edd031631de6c015e7225cd380ef07a1daa9d5c1282ca33581cd3",
+      "seed_context_hash": "036e94cd654964b0e12167d3310f972db876b274d50f2fafd2fae0221a39a5fa",
+      "source_evidence_hash": "23b6ff96d69c1d63ccc27c60a85a89e02d18e885e622962f0b23642279c44652",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "1f0406bb-d643-4b83-bc3e-b1ebe87eeb89",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "16a59f00-fbf3-554a-ae8f-6040db854dfd"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "1f0406bb-d643-4b83-bc3e-b1ebe87eeb89",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "d8b31efe-0f10-51d0-84af-1d4e6b3ffd7b"
+      }
+    },
+    {
+      "client_id": "1f0406bb-d643-4b83-bc3e-b1ebe87eeb89",
+      "client_name": "Vrystaat Kunstefees",
+      "strategy_id": "9b309868-6f16-422a-a945-337c5cf374ed",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "01243b65edb5a0122031566562f398aef2a0b84c8ccd5a7d9d035f2b12e91177",
+      "seed_context_hash": "49d0e2bbbb360cf3da5fdcec169d0e30bb194a988b663ce827d4f8ee238bda79",
+      "source_evidence_hash": "23b6ff96d69c1d63ccc27c60a85a89e02d18e885e622962f0b23642279c44652",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "1f0406bb-d643-4b83-bc3e-b1ebe87eeb89",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "fefdf7e2-d4f7-5683-9f7d-5b8901eea954"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "1f0406bb-d643-4b83-bc3e-b1ebe87eeb89",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "4aa6ec0c-eac6-5eab-b5e6-d5b57fde85cf"
+      }
+    },
+    {
+      "client_id": "e1cb958e-3f68-4a77-b5ea-b471ea62bdef",
+      "client_name": "Watch Addict",
+      "strategy_id": "b181aadd-2de8-425b-b3d6-6903e7474a40",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "9622b34f9b6b716d79c923819e1c46b84984c0900405efea2beb291a992f7abf",
+      "seed_context_hash": "17192350fe2150e3b0d2b0c7612222b8e78600a1ebdc07e65b31604af278a4df",
+      "source_evidence_hash": "a1e5024789059f818999f8a5c1f5448966f369917076c6ad9750c7de62ca7f04",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "e1cb958e-3f68-4a77-b5ea-b471ea62bdef",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "dc7d24e5-ea9f-5609-b2cc-68b36e1d0aba"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "e1cb958e-3f68-4a77-b5ea-b471ea62bdef",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "3a6a7049-7aa1-5303-b4d9-3f381f9d3d8d"
+      }
+    },
+    {
+      "client_id": "e1cb958e-3f68-4a77-b5ea-b471ea62bdef",
+      "client_name": "Watch Addict",
+      "strategy_id": "51e32ba6-e2f2-45e2-932d-0e72d005690d",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "d464b7f0c5173c1d9979d5405d7938190fb9f84e0c0c3ca5a44045a8db6d7321",
+      "seed_context_hash": "e26cbd72fbf660c1eb9f9e8dc555c2d7e90d5cd0e491b8575b41fe1f965b4456",
+      "source_evidence_hash": "a1e5024789059f818999f8a5c1f5448966f369917076c6ad9750c7de62ca7f04",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "e1cb958e-3f68-4a77-b5ea-b471ea62bdef",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "b5425057-9139-565f-9f70-1b800e4ba444"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "e1cb958e-3f68-4a77-b5ea-b471ea62bdef",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "4fdf9684-f1e3-55e8-9e0c-048cbe90374b"
+      }
+    },
+    {
+      "client_id": "2b953772-e791-4dff-a278-d4dd3521f02e",
+      "client_name": "We Ar Fuels",
+      "strategy_id": "701628b8-143e-4235-a539-a50074576c72",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "59a07f9d48a2e7927f32352f3cfc49b0005f14afdba4eb59256c7870829a7bed",
+      "seed_context_hash": "10d0cb4960c4ac7fd571719efe7ed55c6b4f20a33530c9e8a1e5b848d022cb2a",
+      "source_evidence_hash": "d5e1d141cf76e514e4bca11f2d2983b0e958184f5f364aff251225fe28aceff3",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "2b953772-e791-4dff-a278-d4dd3521f02e",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "7f3a2ad5-0bba-5b61-9eec-71886e40d321"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "2b953772-e791-4dff-a278-d4dd3521f02e",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "23856cd0-b735-5ad3-8de2-b5af94956821"
+      }
+    },
+    {
+      "client_id": "2b953772-e791-4dff-a278-d4dd3521f02e",
+      "client_name": "We Ar Fuels",
+      "strategy_id": "cc3ecad0-1137-4b8c-be01-f957a7a52931",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "d3174f9d47cae12135b51504c3d78d71f7d0ffe39e12c2b404a9a40b3fc542c4",
+      "seed_context_hash": "625a741e9f0da9a12435447a300447f765f0fb338e9c9866c919f3f611fb7fe4",
+      "source_evidence_hash": "d5e1d141cf76e514e4bca11f2d2983b0e958184f5f364aff251225fe28aceff3",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "2b953772-e791-4dff-a278-d4dd3521f02e",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "14fdba11-0c97-59b9-8875-0cf60592bfbf"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "2b953772-e791-4dff-a278-d4dd3521f02e",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "c277a19e-a21a-5f6b-b6a6-53624a70e7fc"
+      }
+    },
+    {
+      "client_id": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
+      "client_name": "Wiseman Group",
+      "strategy_id": "968d85d5-5090-46e1-b804-423e0c45d706",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "22c36f66932b087f84c5187ba6e72f63804d9c550e9c9fd4685900c7dde40b30",
+      "seed_context_hash": "1935ffab686681f563e609b004b2d4a0be778034f6dd4bf3a963f4f8eb798a81",
+      "source_evidence_hash": "128fe4bd9d587d79543aaba65f52b2cda2459af48524cd541f75161f595e1a5c",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "d0945706-53ec-5a82-88cc-ce5621e6ca6b"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "4e1ffea5-e58c-5ba9-a1eb-df94b29bcb6d"
+      }
+    },
+    {
+      "client_id": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
+      "client_name": "Wiseman Group",
+      "strategy_id": "b3516817-6970-4b44-a465-42c8b7668815",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "1a3221d402aeefbc3ab3ae9c66278d3141a88bbcfd52378b2eae0ad9dbd4cf4e",
+      "seed_context_hash": "a4bed80bdb675fc219c492f17aff0cfe4490705f53151e5621ff2b1d47ee1ad4",
+      "source_evidence_hash": "128fe4bd9d587d79543aaba65f52b2cda2459af48524cd541f75161f595e1a5c",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "5fbad05d-b902-5d2e-a737-5ade4bab0c6c"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "f9cf2e1e-d1e4-5b51-8044-e93f24810fc1"
+      }
+    },
+    {
+      "client_id": "504113ee-fba9-4993-807e-a86066615212",
+      "client_name": "WiseRide",
+      "strategy_id": "a7dab01a-f180-4879-bcc4-a19df82aaef7",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "11556119ff95ef4336696e46007a580a265735ef235b10158826717fbf917a34",
+      "seed_context_hash": "94372642f0df4f841404e8cf70c938d2e6a6fc0a2ab1192c36c79b873795f639",
+      "source_evidence_hash": "57282c684638f517feea5a01ed53fbda8a1de1216a8e7d810e86bbeb4e6436ff",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [
+        "CG Production House",
+        "Wiseman Group"
+      ],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "504113ee-fba9-4993-807e-a86066615212",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "e76ba15f-4932-51be-9d41-94f9ed75be4b"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "504113ee-fba9-4993-807e-a86066615212",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "26b58f4a-f745-5d18-9ffb-a8fb113f76a9"
+      }
+    },
+    {
+      "client_id": "504113ee-fba9-4993-807e-a86066615212",
+      "client_name": "WiseRide",
+      "strategy_id": "445f15e8-d62a-4b15-8539-dd1e7053f220",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "ef81de15e4163d05a5e54e58696cc0ca9454a798a083e580512a7052d8f3db20",
+      "seed_context_hash": "ed44f0663be24a5247399f2f94077eb95fdeb7a9bb6121556fb24c8f8c30ff0b",
+      "source_evidence_hash": "57282c684638f517feea5a01ed53fbda8a1de1216a8e7d810e86bbeb4e6436ff",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [
+        "CG Production House",
+        "Wiseman Group"
+      ],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "504113ee-fba9-4993-807e-a86066615212",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "fa3f301e-93f1-5367-a1f4-a92104a589e4"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "504113ee-fba9-4993-807e-a86066615212",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "5fde9a80-3c71-5ba7-9e7c-ea316ed25430"
+      }
+    },
+    {
+      "client_id": "0c01d90f-ba5e-4251-a597-bf3c83f990fa",
+      "client_name": "Zooz Lifestyle WFF",
+      "strategy_id": "84bbb4a4-8457-4c6b-8574-8a496504df71",
+      "strategy_month": "2026-09-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "4dc76d1518e0bfcc8bbfc1b0323c508bfe14d85466eb9e25a9856f46a65386ec",
+      "seed_context_hash": "4a1cb0a4765fb76a68f8537211064f2956bf57e69cfb99142299a7d104f5b97c",
+      "source_evidence_hash": "32a5bf63bdd8392ab2421e36cea8b62c43c219cdae667a8a48d9efc700254984",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "0c01d90f-ba5e-4251-a597-bf3c83f990fa",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "322b888c-1ec2-5303-9317-c2a3b3e7af4e"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "0c01d90f-ba5e-4251-a597-bf3c83f990fa",
+        "strategy_month": "2026-09-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "d89d9c66-951c-5b69-a57a-1201820aacf8"
+      }
+    },
+    {
+      "client_id": "0c01d90f-ba5e-4251-a597-bf3c83f990fa",
+      "client_name": "Zooz Lifestyle WFF",
+      "strategy_id": "e25e2fe1-d0ed-4557-8687-6e1313dfa57c",
+      "strategy_month": "2026-10-01",
+      "current_version": 2,
+      "current_status": "draft",
+      "strategy_hash": "881a79d3b76e1ff1d95775b60a03eec62788b117a548ec2d23ab4b93ac107645",
+      "seed_context_hash": "148feecf668ac5e9d74bcc12f4e18b3f47eaba17b07d921259454a98886a1fca",
+      "source_evidence_hash": "32a5bf63bdd8392ab2421e36cea8b62c43c219cdae667a8a48d9efc700254984",
+      "reviewed_plan_hash": "4f84133b981aa449b0805fc11424c06f8acb2ec73b72cedcc0795a83502fef6b",
+      "package_verification_version": 2,
+      "reviewed_boundary_references": [],
+      "audit_status": "ready_for_human_approval",
+      "audit_errors": [],
+      "approval_transition": {
+        "client_id": "0c01d90f-ba5e-4251-a597-bf3c83f990fa",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "approved",
+        "idempotency_key": "82c6807f-3163-53f0-b08b-69be63ceba9f"
+      },
+      "publication_transition_after_separate_review": {
+        "client_id": "0c01d90f-ba5e-4251-a597-bf3c83f990fa",
+        "strategy_month": "2026-10-01",
+        "expected_version": 2,
+        "target_status": "published",
+        "idempotency_key": "8e465c48-9db9-5675-8112-ae137f372ede"
+      }
+    }
+  ],
+  "manifest_hash": "11c6d3317c033bf0aa46c7deac6e4f89d20ca9a863ebca213b4f870e7630cca7"
+}
