@@ -26,7 +26,7 @@ If chat history conflicts with this file, current GitHub + verified production s
 
 Latest verified runtime merge baseline:
 
-`bf4e88cac1e9975abd6e7677f013c4822487ddef` — PR #562 production MCP task-read schema correction.
+`54f316949968a51bce972f82cb74633626ffec37` — PR #565 final launch transition-status correction.
 
 Always refetch `main` before code or merge actions.
 
@@ -58,6 +58,7 @@ Major completed launch-critical merges:
 - #560 strategy/Website/#217 launch acceptance.
 - #561 final stale-PR cleanup + canonical MCP task-read reliability.
 - #562 production MCP task-view schema correction.
+- #565 final launch transition-status correction.
 
 ## 3. Launch scoreboard
 
