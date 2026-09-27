@@ -871,6 +871,39 @@ async function runJob(
       await updateJobProgress(supabase, job.id, worker, 90)
       return body
     }
+    case 'client_portal_provision': {
+      await updateJobProgress(supabase, job.id, worker, 40)
+      const workerToken = (Deno.env.get('WORKER_INTERNAL_TOKEN') ?? '').trim()
+      if (workerToken.length < 32) throw new Error('Portal provisioning worker authentication is not configured')
+      const clientId = typeof payload.clientId === 'string' ? payload.clientId : ''
+      const username = typeof payload.username === 'string' ? payload.username : ''
+      const action = payload.action === 'link_existing' ? 'link_existing' : payload.action === 'provision' ? 'provision' : ''
+      if (!clientId || !/^[0-9a-f-]{36}$/i.test(clientId) || !/^[a-z0-9]{3,64}$/.test(username) || !action) {
+        throw new Error('Portal provisioning job is missing its exact approved identity')
+      }
+      const response = await fetch(`${url}/functions/v1/client-portal-access`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${serviceKey}`,
+          'X-Internal-Worker-Token': workerToken,
+        },
+        body: JSON.stringify({ action, client_id: clientId, username }),
+      })
+      const body = await response.json().catch(() => null) as Record<string, unknown> | null
+      if (!response.ok || body?.ok !== true) {
+        const detail = typeof body?.error === 'string' ? body.error : `HTTP ${response.status}`
+        throw new Error(`Portal provisioning did not complete: ${detail}`)
+      }
+      await updateJobProgress(supabase, job.id, worker, 90)
+      return {
+        ok: true,
+        clientId,
+        action,
+        username: body.username ?? username,
+        status: body.status ?? 'complete',
+      }
+    }
     case 'content_autopilot': {
       // #450: prepare content for upcoming real Content Runs on the normal operating
       // cycle. Idempotent and read-mostly: the only content write is the canonical

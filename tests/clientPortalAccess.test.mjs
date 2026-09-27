@@ -42,8 +42,9 @@ test('provisioning uses Auth Admin and links the created profile to one exact cl
   assert.match(EDGE, /client_id: clientId/)
   assert.match(EDGE, /from\('client_portal_access'\)\s*\.upsert/)
   assert.match(EDGE, /That portal username is already assigned\./)
-  assert.match(EDGE, /client_packages/)
-  assert.match(EDGE, /ACTIVE_PACKAGE_STATUSES/)
+  assert.match(EDGE, /package_settings/)
+  assert.match(EDGE, /packageIsConfirmed/)
+  assert.doesNotMatch(EDGE, /from\('client_packages'\)/)
   assert.doesNotMatch(EDGE, /insert\s+into\s+auth\.users/i)
 })
 
@@ -96,4 +97,30 @@ test('existing exact client profiles are linked rather than duplicated', () => {
 test('normal provision refuses to create a duplicate over an existing active client profile', () => {
   assert.match(EDGE, /An active exact client profile already exists; link it instead of provisioning a duplicate\./)
   assert.match(EDGE, /\.eq\('client_id', clientId\)[\s\S]*\.eq\('role', 'client'\)[\s\S]*\.eq\('is_active', true\)/)
+})
+
+
+test('internal worker portal activation is hard-pinned to the reviewed nine-client batch', () => {
+  assert.match(EDGE, /INTERNAL_PORTAL_ACTIVATION/)
+  for (const clientId of [
+    '6b67a2df-e2ab-418b-bcee-03aef5963d37',
+    'c27d2185-08e4-4c49-be48-2572564ceecf',
+    'fd16ebae-a50b-4920-afe0-94c2631f8f06',
+    '32bd9db3-5339-4404-825b-5a615cadec6a',
+    '079df21e-783a-4648-b3fa-0acae6e68867',
+    '572555e0-d4d0-404a-8d67-beeeeed6a1f2',
+    'dfa47255-875d-43cf-8a22-cfe1a6247fb7',
+    '1f0406bb-d643-4b83-bc3e-b1ebe87eeb89',
+    '0c01d90f-ba5e-4251-a597-bf3c83f990fa',
+  ]) assert.match(EDGE, new RegExp(clientId))
+  assert.match(EDGE, /WORKER_INTERNAL_TOKEN/)
+  assert.match(EDGE, /X-Internal-Worker-Token/)
+  assert.match(EDGE, /approved\.action !== action \|\| approved\.username !== username/)
+  assert.match(EDGE, /systemProfile\.role !== 'admin'/)
+})
+
+test('portal eligibility uses canonical confirmed package_settings rather than legacy client_packages', () => {
+  assert.match(EDGE, /select\('id,name,active,package_settings'\)/)
+  assert.match(EDGE, /packageIsConfirmed\(client\.package_settings\)/)
+  assert.doesNotMatch(EDGE, /from\('client_packages'\)/)
 })
