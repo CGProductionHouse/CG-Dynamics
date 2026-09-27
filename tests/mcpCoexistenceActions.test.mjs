@@ -330,11 +330,12 @@ test('default staff task reads exclude terminal, archived and source-removed his
   assert.doesNotMatch(activeStates, /'done'|'completed'/, 'terminal states are not in the default active set')
   const day = slice('const handleGetMyDay', 'const handleListMyTasks')
   const tasks = slice('const handleListMyTasks', 'const handleGetTask')
+  const ownedTaskReader = slice('async function listOwnedPlannerTasks', 'const handleGetMyDay')
   for (const handler of [day, tasks]) {
-    assert.match(handler, /\.is\('archived_at', null\)/)
-    assert.match(handler, /\.is\('microsoft_source_removed_at', null\)/)
     assert.match(handler, /\.in\('status', ACTIVE_TASK_STATES\)/)
   }
+  assert.match(ownedTaskReader, /\.from\('planner_tasks_canonical'\)/, 'canonical view excludes archived and superseded history')
+  assert.match(ownedTaskReader, /\.is\('microsoft_source_removed_at', null\)/)
   assert.match(tasks, /if \(input\.status\)/, 'explicit status still allows a history query')
 })
 

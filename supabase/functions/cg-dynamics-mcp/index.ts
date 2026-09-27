@@ -9,6 +9,7 @@
 // Canonical services: same RPCs and tables used by CG Dynamics UI and #208 CG Assistant.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { fetchAllRows, fetchAllRowsByIdChunks } from '../_shared/paginatedRows.ts'
 import { CG_DYNAMICS_MCP_TOOLS, CG_DYNAMICS_MCP_SECURITY_SCHEMES } from './toolCatalog.ts'
 import { filterCapabilitiesByScope } from './capabilityManifest.ts'
 import {
@@ -100,6 +101,7 @@ import {
   CG_HOURS_BACKEND_AUTHORITY,
   type CgHoursStaffLoggerResult,
 } from './cgHoursStaffLogger.ts'
+import { canReadPlannerTask } from './taskReadPolicy.ts'
 
 const STAFF_ROLES = new Set(['admin', 'manager', 'staff', 'team'])
 const MCP_PROTOCOL_VERSION = '2025-03-26'
@@ -207,6 +209,16 @@ interface AuthenticatedStaff {
   effectiveClientId: string | null
   effectiveClientName: string | null
   connection: ConnectionPrincipal
+}
+
+function isMcpErrorResult(result: unknown): result is { error: string } {
+  return Boolean(
+    result
+    && typeof result === 'object'
+    && 'error' in result
+    && typeof (result as Record<string, unknown>).error === 'string'
+    && (result as Record<string, unknown>).error,
+  )
 }
 
 interface AuthChallenge {
@@ -507,6 +519,40 @@ const ACTIVE_TASK_STATES = [
   'ready_internal_review', 'approved', 'scheduled',
 ]
 
+async function listVerifiedPlannerTaskIds(staff: AuthenticatedStaff) {
+  return fetchAllRows<{ task_id: string }>(async (from, to) => {
+    const result = await staff.supabase
+      .from('planner_task_assignees')
+      .select('task_id')
+      .eq('profile_id', staff.profileId)
+      .order('task_id', { ascending: true })
+      .range(from, to)
+    return { data: result.data as { task_id: string }[] | null, error: result.error }
+  })
+}
+
+async function listOwnedPlannerTasks(
+  staff: AuthenticatedStaff,
+  configure: (query: ReturnType<AuthenticatedStaff['supabase']['from']>) => ReturnType<AuthenticatedStaff['supabase']['from']>,
+) {
+  const assignments = await listVerifiedPlannerTaskIds(staff)
+  if (assignments.error || assignments.data.length === 0) {
+    return { data: [] as Record<string, unknown>[], error: assignments.error }
+  }
+  const taskIds = assignments.data.map(row => row.task_id)
+  return fetchAllRowsByIdChunks<Record<string, unknown>>(taskIds, async (taskIdChunk, from, to) => {
+    let query = staff.supabase
+      .from('planner_tasks_canonical')
+      .select(`id, title, assigned_to_name, assigned_to_user_id, due_date, status, notes, client_name, client_id, created_at, updated_at, assignment_review_state, ${PLANNER_MICROSOFT_FIELDS.join(', ')}`)
+      .in('id', taskIdChunk)
+      .eq('assignment_review_state', 'ok')
+      .is('microsoft_source_removed_at', null)
+    query = configure(query)
+    const result = await query.order('due_date', { ascending: true }).order('id', { ascending: true }).range(from, to)
+    return { data: result.data as Record<string, unknown>[] | null, error: result.error }
+  })
+}
+
 const handleGetMyDay: ToolHandler = async (staff) => {
   // CG operates in Africa/Johannesburg (UTC+2). Deriving the day from UTC returned the
   // PREVIOUS date between 00:00-02:00 SAST (#325/#327 defect: 00:37 SAST on 10 Sep -> 9 Sep).
@@ -515,16 +561,9 @@ const handleGetMyDay: ToolHandler = async (staff) => {
   const tomorrow = cgDatePlusDays(1, now)
 
   const [tasksResult, calendarResult, scheduleResult] = await Promise.all([
-    staff.supabase
-      .from('planner_tasks')
-      .select('id, title, assigned_to_name, due_date, status, notes, client_name, client_id')
-      .eq('assigned_to_name', staff.fullName)
-      .is('archived_at', null)
-      .is('microsoft_source_removed_at', null)
+    listOwnedPlannerTasks(staff, query => query
       .in('status', ACTIVE_TASK_STATES)
-      .lte('due_date', tomorrow)
-      .order('due_date', { ascending: true })
-      .limit(20),
+      .or(`due_date.is.null,due_date.lte.${tomorrow}`)),
     staff.supabase
       .from('company_calendar_events')
       .select('id, title, event_type, start_at, end_at, client_name, status, assigned_to_name')
@@ -545,7 +584,7 @@ const handleGetMyDay: ToolHandler = async (staff) => {
     today,
     timezone: CG_TIMEZONE,
     staff_name: staff.fullName,
-    tasks: tasksResult.data ?? [],
+    tasks: withSourceLinkage(tasksResult.data, 'planner'),
     calendar_events: calendarResult.data ?? [],
     deliverables: flattenDeliverableClient(scheduleResult.data),
     errors: [tasksResult.error?.message, calendarResult.error?.message, scheduleResult.error?.message].filter(Boolean),
@@ -553,20 +592,13 @@ const handleGetMyDay: ToolHandler = async (staff) => {
 }
 
 const handleListMyTasks: ToolHandler = async (staff, input) => {
-  let query = staff.supabase
-    .from('planner_tasks')
-    .select(`id, title, assigned_to_name, due_date, status, notes, client_name, client_id, created_at, updated_at, ${PLANNER_MICROSOFT_FIELDS.join(', ')}`)
-    .eq('assigned_to_name', staff.fullName)
-    .is('archived_at', null)
-    .is('microsoft_source_removed_at', null)
-    .order('due_date', { ascending: true })
-    .limit(50)
-
-  if (input.status) query = query.eq('status', input.status)
-  else query = query.in('status', ACTIVE_TASK_STATES)
-  if (input.due_before) query = query.lte('due_date', input.due_before)
-
-  const { data, error } = await query
+  const { data, error } = await listOwnedPlannerTasks(staff, query => {
+    let filtered = query
+    if (input.status) filtered = filtered.eq('status', input.status)
+    else filtered = filtered.in('status', ACTIVE_TASK_STATES)
+    if (input.due_before) filtered = filtered.lte('due_date', input.due_before)
+    return filtered
+  })
   // #325: durable Microsoft identity + freshness so the Assistant can reconcile by ID.
   return { tasks: withSourceLinkage(data, 'planner'), error: error?.message ?? null }
 }
@@ -574,14 +606,19 @@ const handleListMyTasks: ToolHandler = async (staff, input) => {
 const handleGetTask: ToolHandler = async (staff, input) => {
   const taskId = input.task_id as string
   const { data, error } = await staff.supabase
-    .from('planner_tasks')
-    .select('id, title, assigned_to_name, due_date, status, notes, client_name, client_id, created_at, updated_at')
+    .from('planner_tasks_canonical')
+    .select('id, title, assigned_to_name, assigned_to_user_id, due_date, status, notes, client_name, client_id, created_at, updated_at, assignment_review_state')
     .eq('id', taskId)
     .maybeSingle()
 
   if (error) return { error: error.message }
   if (!data) return { error: 'Task not found.' }
-  if (data.assigned_to_name !== staff.fullName && staff.role === 'staff') {
+  const { data: assignments, error: assignmentError } = await staff.supabase
+    .from('planner_task_assignees')
+    .select('profile_id')
+    .eq('task_id', taskId)
+  if (assignmentError) return { error: assignmentError.message }
+  if (!canReadPlannerTask(data, (assignments ?? []).map(row => row.profile_id), staff.profileId, staff.role)) {
     return { error: 'You can only read tasks assigned to you.' }
   }
   return data
@@ -3452,7 +3489,7 @@ async function handleToolsCall(
   // The context-bootstrap tool runs before any operating context exists.
   if (toolName === CONTEXT_BOOTSTRAP_TOOL) {
     const result = await handleResolveProjectContext(supabase, connection, rawToolInput)
-    const isError = result && typeof result === 'object' && 'error' in result
+    const isError = isMcpErrorResult(result)
     return jsonRpcResponse(id, { content: [{ type: 'text', text: JSON.stringify(result) }], isError: !!isError })
   }
 
@@ -3528,11 +3565,11 @@ async function handleToolsCall(
 
     if (isWrite && canonicalIdempotencyKey && !replayThroughCanonicalKey) {
       const inputHash = computeInputHash(toolInput as Record<string, unknown>)
-      const hasError = result && typeof result === 'object' && 'error' in result
+      const hasError = isMcpErrorResult(result)
       await recordIdempotency(staff.supabase, staff.profileId, toolName, canonicalIdempotencyKey, inputHash, hasError ? 'error' : 'success', audit)
     }
 
-    const isError = result && typeof result === 'object' && 'error' in result
+    const isError = isMcpErrorResult(result)
     // Dual-principal audit on every call: communal connection principal + effective context.
     const payload = result && typeof result === 'object' && !Array.isArray(result)
       ? { ...(result as Record<string, unknown>), _context: audit }
