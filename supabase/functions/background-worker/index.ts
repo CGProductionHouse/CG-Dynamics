@@ -812,6 +812,40 @@ async function runJob(
         throw new Error('TikTok refresh job is missing its exact client/account identity')
       }
 
+      const { data: exactConnection, error: connectionError } = await supabase
+        .from('tiktok_connections')
+        .select('id,client_id,tiktok_open_id,status')
+        .eq('id', connectionId)
+        .eq('client_id', clientId)
+        .eq('tiktok_open_id', tiktokOpenId)
+        .maybeSingle()
+      if (connectionError || !exactConnection) {
+        throw new Error('TikTok refresh job exact client/account identity no longer matches')
+      }
+      if (exactConnection.status === 'needs_reauth') {
+        const recoveryResponse = await fetch(`${url}/functions/v1/tiktok-recover-connection`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${serviceKey}`,
+            'X-Internal-Worker-Token': workerToken,
+          },
+          body: JSON.stringify({
+            clientId,
+            expectedConnectionId: connectionId,
+            expectedTiktokOpenId: tiktokOpenId,
+            mode: 'apply',
+          }),
+        })
+        const recoveryBody = await recoveryResponse.json().catch(() => null) as Record<string, unknown> | null
+        if (!recoveryResponse.ok || recoveryBody?.ok !== true || recoveryBody?.status !== 'connected') {
+          const detail = typeof recoveryBody?.error === 'string' ? recoveryBody.error : `HTTP ${recoveryResponse.status}`
+          throw new Error(`TikTok guarded recovery did not complete: ${detail}`)
+        }
+      } else if (exactConnection.status !== 'connected') {
+        throw new Error(`TikTok connection is not recoverable from status ${exactConnection.status}`)
+      }
+
       const response = await fetch(`${url}/functions/v1/tiktok-sync`, {
         method: 'POST',
         headers: {
