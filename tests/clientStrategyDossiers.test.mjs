@@ -51,15 +51,18 @@ test('all 52 production-ready guides enrich only their exact-client dossiers', (
     }
   })
   assert.equal(runtimeGuides.length, 52)
-  assert.equal(index.strategy_ready_count, 55)
-  assert.equal(index.strategy_blocked_count, 2)
-  assert.deepEqual(index.clients.filter(client => client.strategy_status === 'blocked').map(client => client.name), ['Kundedienste', 'Neshora Oxygen'])
+  assert.equal(index.strategy_ready_count, 56)
+  assert.equal(index.strategy_blocked_count, 1)
+  assert.deepEqual(index.clients.filter(client => client.strategy_status === 'blocked').map(client => client.name), ['Kundedienste'])
 })
 
-test('Neshora is package-grounded without inventing missing strategy evidence', () => {
+test('Neshora is package-grounded and uses only reviewed first-party strategy evidence', () => {
   const neshora = readFileSync('artifacts/client-strategy-dossiers/issue-513/neshora-oxygen.md', 'utf8')
   assert.match(neshora, /1 professional videos\/month; 4 photo posts\/month; 4 design posters\/month/)
-  assert.match(neshora, /NO_EVIDENCE_BACKED_RECOMMENDATION/)
-  assert.match(neshora, /No reviewed exact-client business or industry intelligence exists yet/)
+  assert.match(neshora, /21 September 2026 content shoot with 79 photo\/video assets/)
+  assert.match(neshora, /nasal oxygen cannula in calm everyday\/lifestyle scenes/)
+  assert.match(neshora, /Do not turn visible oxygen use into a medical-benefit or therapeutic-outcome claim/)
+  assert.match(neshora, /ready for gold-strategy drafting/)
+  assert.doesNotMatch(neshora, /NO_EVIDENCE_BACKED_RECOMMENDATION/)
   assert.doesNotMatch(neshora, /artifact:issue-501-recovery-pass-1-snapshot\.json#3c20fae1/)
 })
