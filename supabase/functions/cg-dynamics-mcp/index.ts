@@ -543,7 +543,7 @@ async function listOwnedPlannerTasks(
   return fetchAllRowsByIdChunks<Record<string, unknown>>(taskIds, async (taskIdChunk, from, to) => {
     let query = staff.supabase
       .from('planner_tasks_canonical')
-      .select(`id, title, assigned_to_name, assigned_to_user_id, due_date, status, notes, client_name, client_id, created_at, updated_at, assignment_review_state, ${PLANNER_MICROSOFT_FIELDS.join(', ')}`)
+      .select(`id, title, assigned_to_name, due_date, status, notes, client_name, client_id, created_at, updated_at, assignment_review_state, ${PLANNER_MICROSOFT_FIELDS.join(', ')}`)
       .in('id', taskIdChunk)
       .eq('assignment_review_state', 'ok')
       .is('microsoft_source_removed_at', null)
@@ -607,7 +607,7 @@ const handleGetTask: ToolHandler = async (staff, input) => {
   const taskId = input.task_id as string
   const { data, error } = await staff.supabase
     .from('planner_tasks_canonical')
-    .select('id, title, assigned_to_name, assigned_to_user_id, due_date, status, notes, client_name, client_id, created_at, updated_at, assignment_review_state')
+    .select('id, title, assigned_to_name, due_date, status, notes, client_name, client_id, created_at, updated_at, assignment_review_state')
     .eq('id', taskId)
     .maybeSingle()
 
