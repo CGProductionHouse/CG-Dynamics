@@ -561,13 +561,19 @@ On a fresh CG Dynamics chat:
 4. act directly on safe work.
 
 Priority order:
-1. #513: retain the frozen reviewed 46 / 10 / 0 plan; source reviewed Neshora
-   intelligence and create its canonical drafts before a separate reviewed plan.
-2. #505: TikTok normal sweep is paused at 10 connected; four named clients require client help and the other 33 remain identity-gated. Standalone Instagram is prepared but still blocked on Meta App Review/Live mode/secure app secret before OAuth rollout.
+1. #505: provider closure remains the main active launch lane. TikTok has 10 healthy
+   connected accounts, four named CLIENT_HELP_REQUIRED holds and the remaining
+   unconnected clients exact-identity gated. Standalone Instagram remains blocked
+   on Meta App Review/Advanced Access, Live mode, secure app-secret/config activation
+   and exact-client consent.
+2. #556 / #513: strategy draft amendment is complete. Prepare/review the exact
+   94-row approval-readiness batch only; do not approve or publish without a new
+   explicit protected-action authorization.
 3. Website M1: no repeat write; only optional authenticated cross-client UI proof remains.
-4. #519: review the exact nine-client protected access batch; no provisioning occurred.
-5. #217: optional real-phone signoff if CA still wants it.
-6. Then close current client launch and proceed to #493 LinkedIn + #361 CG Hours.
+4. #217: optional real-phone visual signoff only; no current code/data defect remains.
+5. Portal rollout is complete at 46 enabled exact mappings; do not reopen #519 or
+   repeat the protected nine-client batch.
+6. After current launch closure, proceed to #493 LinkedIn + #361 CG Hours.
 
 ## 15. Control-plane warning
 
