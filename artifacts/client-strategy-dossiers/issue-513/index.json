@@ -5,8 +5,8 @@
   "package_authority": "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
   "active_client_count": 57,
   "dossier_complete_count": 57,
-  "strategy_ready_count": 55,
-  "strategy_blocked_count": 2,
+  "strategy_ready_count": 56,
+  "strategy_blocked_count": 1,
   "clients": [
     {
       "name": "Agri-Secure",
@@ -631,11 +631,9 @@
       "id": "3c20fae1-8e91-41d5-98eb-1c331600e6e3",
       "file": "neshora-oxygen.md",
       "dossier_status": "complete",
-      "strategy_status": "blocked",
-      "blockers": [
-        "NO_EVIDENCE_BACKED_RECOMMENDATION"
-      ],
-      "evidence_hash": "58359d6b25209a38c5f05c92f7207e8e6585ce3e747fe70f81d1fa0ff718809d",
+      "strategy_status": "ready",
+      "blockers": [],
+      "evidence_hash": "376630a6efc1dc5b008b25d4808832b9f8a384226c9974fb6ff3f1c36237ec33",
       "reports": 0,
       "posts": 0
     }
