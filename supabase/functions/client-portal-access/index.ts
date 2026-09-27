@@ -170,6 +170,65 @@ async function handleList(admin: AdminClient) {
   return jsonResponse({ ok: true, clients })
 }
 
+async function handleLinkExistingProfile(body: Record<string, unknown>, admin: AdminClient, adminUserId: string) {
+  const clientId = typeof body.client_id === 'string' ? body.client_id.trim() : ''
+  const username = normalizeUsername(body.username)
+
+  if (!clientId || !USERNAME_PATTERN.test(username)) {
+    return jsonResponse({ ok: false, error: 'Choose a valid client and username.' }, 400)
+  }
+
+  const eligibility = await eligibleClient(admin, clientId)
+  if (!eligibility.client) return jsonResponse({ ok: false, error: eligibility.error }, 400)
+
+  const { data: mappings, error: mappingReadError } = await admin
+    .from('client_portal_access')
+    .select('client_id,username,auth_user_id,enabled')
+    .or(`client_id.eq.${clientId},username.eq.${username}`)
+  if (mappingReadError) return jsonResponse({ ok: false, error: 'Portal mapping state could not be checked.' }, 503)
+  const conflicting = (mappings ?? []).find(row => row.client_id !== clientId || row.username !== username)
+  if (conflicting) return jsonResponse({ ok: false, error: 'That client or username already has a different portal mapping.' }, 409)
+
+  const { data: profiles, error: profileReadError } = await admin
+    .from('profiles')
+    .select('id,client_id,role,is_active')
+    .eq('client_id', clientId)
+    .eq('role', 'client')
+    .eq('is_active', true)
+  if (profileReadError) return jsonResponse({ ok: false, error: 'Existing client profile could not be checked.' }, 503)
+  if ((profiles ?? []).length !== 1) {
+    return jsonResponse({ ok: false, error: 'Exactly one active existing client profile is required for linking.' }, 409)
+  }
+
+  const authUserId = profiles![0].id as string
+  const { data: authUser, error: authReadError } = await admin.auth.admin.getUserById(authUserId)
+  if (authReadError || !authUser.user) {
+    return jsonResponse({ ok: false, error: 'The existing client profile has no matching auth user.' }, 409)
+  }
+
+  const password = starterPassword(username)
+  const { error: userError } = await admin.auth.admin.updateUserById(authUserId, {
+    password,
+    user_metadata: { ...authUser.user.user_metadata, full_name: eligibility.client.name, cg_portal_client_id: clientId },
+    ban_duration: 'none',
+  })
+  if (userError) return jsonResponse({ ok: false, error: 'Existing portal auth account could not be prepared.' }, 503)
+
+  const { error: mapError } = await admin
+    .from('client_portal_access')
+    .upsert({
+      client_id: clientId,
+      username,
+      auth_user_id: authUserId,
+      enabled: true,
+      created_by: adminUserId,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'client_id' })
+  if (mapError) return jsonResponse({ ok: false, error: 'Portal username mapping could not be saved.' }, 503)
+
+  return jsonResponse({ ok: true, client_id: clientId, client_name: eligibility.client.name, username, status: 'linked_existing' })
+}
+
 async function handleProvision(body: Record<string, unknown>, admin: AdminClient, adminUserId: string) {
   const clientId = typeof body.client_id === 'string' ? body.client_id.trim() : ''
   const username = normalizeUsername(body.username)
@@ -197,6 +256,19 @@ async function handleProvision(body: Record<string, unknown>, admin: AdminClient
     .eq('client_id', clientId)
     .maybeSingle()
   if (existingError) return jsonResponse({ ok: false, error: 'Existing portal access could not be checked.' }, 503)
+
+  if (!existing) {
+    const { data: exactProfiles, error: exactProfilesError } = await admin
+      .from('profiles')
+      .select('id')
+      .eq('client_id', clientId)
+      .eq('role', 'client')
+      .eq('is_active', true)
+    if (exactProfilesError) return jsonResponse({ ok: false, error: 'Existing client profile could not be checked.' }, 503)
+    if ((exactProfiles ?? []).length > 0) {
+      return jsonResponse({ ok: false, error: 'An active exact client profile already exists; link it instead of provisioning a duplicate.' }, 409)
+    }
+  }
 
   const password = starterPassword(username)
   let authUserId = existing?.auth_user_id as string | undefined
@@ -344,6 +416,7 @@ Deno.serve(async (request: Request) => {
 
   if (action === 'list') return handleList(admin)
   if (action === 'provision') return handleProvision(body, admin, authorization.userId)
+  if (action === 'link_existing') return handleLinkExistingProfile(body, admin, authorization.userId)
   if (action === 'reset') return handleReset(body, admin)
   if (action === 'disable') return handleEnabled(body, admin, false)
   if (action === 'enable') return handleEnabled(body, admin, true)
