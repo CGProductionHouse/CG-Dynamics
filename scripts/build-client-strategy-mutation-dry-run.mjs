@@ -37,7 +37,8 @@ function usableEvidence(values) {
   const seen = new Set()
   return values.map(value => String(value ?? '').replace(/\s+/g, ' ').replace(/[.;]+$/, '').trim())
     .filter(value => value.length >= 8)
-    .filter(value => !/(^exact client id:|^client id:|^tier:|https?:\/\/|^[0-9a-f]{8}-[0-9a-f-]{27,}$)/i.test(value))
+    .filter(value => !/(^exact client id:|^client id:|^tier:|https?:\/\/|^[0-9a-f]{8}-[0-9a-f-]{27,}$|CGProductionHouse\/|\.(?:pdf|md|json)\b|\bPDFs?\b|\b(?:repo(?:sitory)?|github|evidence|dossier|source pack|dynamics intelligence|this guide|authoritative public sources|old project|current client\/CG Production House correction)\b)/i.test(value))
+    .filter(value => !/Correct facts are only the starting point/i.test(value))
     .filter(value => {
       const key = value.toLowerCase()
       if (seen.has(key)) return false
@@ -70,32 +71,32 @@ function packageSummary(settings) {
 
 function buildGoldStandard({ live, drivers, recommendations, constraints }) {
   const evidence = usableEvidence(drivers)
-  const direction = recommendations.filter(Boolean).slice(0, 2).join(' ') || evidence[0] || `${live.name} exact-client evidence`
-  const primary = evidence[0] || direction
-  const secondary = evidence[1] || direction
-  const tertiary = evidence[2] || secondary
-  const fourth = evidence[3] || tertiary
+  const actions = usableEvidence(recommendations)
+  const direction = actions.slice(0, 3).join(' ') || evidence[0]
+  const primary = actions[0] || evidence[0]
+  const secondary = actions[1] || evidence[1] || primary
+  const tertiary = actions[2] || evidence[2] || secondary
   const guardrails = usableEvidence(constraints).slice(0, 3)
   const guardrailText = guardrails.length > 0 ? guardrails.join('; ') : 'unverified offers, dates, prices, quantities, access claims or unsupported business facts'
   const scope = packageSummary(live.package_settings)
   const month = live.strategy_month.slice(0, 7)
 
   return {
-    objective: `${live.name} ${month}: use the verified client evidence "${primary}" to drive the practical direction "${direction}" while staying inside confirmed scope.`,
-    audienceAndIntent: `For ${live.name}, use "${secondary}" together with "${primary}" as the strongest available evidence of customer/context intent; shape calls to action around that evidence without inventing demographics or demand signals.`,
-    coreMessage: `${live.name}'s core message should connect "${primary}" with "${secondary}" and keep "${direction}" as the concrete content direction rather than falling back to generic brand claims.`,
-    formatsAndRationale: `${scope}. Use only enabled formats to express "${primary}" and "${direction}"; unknown package capacities remain disabled rather than being inferred from posting history.`,
-    testAndChange: `For ${live.name}, test one controlled variation around "${tertiary}" while keeping "${primary}" stable, then use only real exact-client report/post evidence to decide whether the direction should change.`,
-    pillarsAndHooks: `Build ${live.name}'s hooks from these exact dossier points: "${primary}"; "${secondary}"; "${tertiary}"; "${fourth}". Do not introduce unrelated generic pillars.`,
+    objective: `${live.name} ${month}: ${direction}. Keep every execution inside the confirmed monthly package.`,
+    audienceAndIntent: `Audience detail is not confirmed. Shape each ${live.name} piece around the specific customer situation, asset and occasion named in the approved brief; do not invent demographics or intent.`,
+    coreMessage: `${primary}. Add ${secondary.toLowerCase()} so the work gives people a useful reason to notice or act instead of merely repeating supplied artwork.`,
+    formatsAndRationale: `${scope}. Use each enabled format to carry the approved message in a way suited to the supplied asset; do not infer capacity from posting history.`,
+    testAndChange: `Test one controlled execution change: ${tertiary}. Keep the offer and business facts stable, then assess only available platform or enquiry signals.`,
+    pillarsAndHooks: `Open with the real asset, customer situation or occasion. Then ${primary.toLowerCase()} and ${secondary.toLowerCase()}. Each hook must name the relevant branch, service or product when the brief confirms it.`,
     mustAvoid: `For ${live.name}, avoid ${guardrailText}. Also avoid invented package quantities, offers, dates, prices, audience claims or services outside confirmed scope.`,
-    channelIntegration: `Carry "${primary}" consistently across only the social channels and formats CG is authorised to manage for ${live.name}; adapt execution to ${scope} and do not assume additional provider access.`,
-    successSignals: `Judge ${live.name}'s ${month} work against real available exact-client signals tied to "${direction}"—reach, views, interactions or CTA response only where those metrics actually exist; do not invent targets.`,
-    nextMonthGamePlan: `For ${live.name}, sequence "${primary}" first, "${secondary}" second and "${tertiary}" as the controlled follow-up, carrying forward only exact-client learnings while staying within ${scope}.`,
+    channelIntegration: `Carry the same approved message across only the channels and formats CG manages for ${live.name}. Adapt the opening and call to action per channel without adding an unsupported service or provider claim.`,
+    successSignals: `Use only available views, interactions, profile actions or enquiries for ${month}; an unavailable metric stays unavailable and no target is invented.`,
+    nextMonthGamePlan: `Sequence the work around these priorities: ${primary}; ${secondary}; ${tertiary}. Retain only the executions supported by the observed response and the next approved brief.`,
   }
 }
 
 function packageActionPlan(settings, recommendations, facts) {
-  const sourceItems = [...recommendations, ...facts].slice(0, 4)
+  const sourceItems = usableEvidence([...recommendations, ...facts]).slice(0, 4)
   const mapping = {
     professional_video: 'professional_videos_per_month',
     reels: 'reels_per_month',
@@ -178,9 +179,10 @@ for (const live of source.rows) {
   const constraints = section(markdown, 'Client and CG constraints')
   const observations = section(markdown, 'Research observations')
   const recommendations = section(markdown, 'Evidence-backed recommendations')
-  const meaningfulFacts = facts.filter(value => !/^docs\//i.test(value))
-  const drivers = [...meaningfulFacts, ...observations, ...recommendations].slice(0, 8)
-  if (meaningfulFacts.length === 0 || recommendations.length === 0) {
+  const meaningfulFacts = usableEvidence(facts)
+  const safeRecommendations = usableEvidence(recommendations)
+  const drivers = usableEvidence([...safeRecommendations, ...meaningfulFacts, ...observations]).slice(0, 8)
+  if (safeRecommendations.length === 0) {
     rows.push({ ...base, disposition: 'blocked', reason: 'INSUFFICIENT_EXACT_STRATEGY_EVIDENCE' })
     continue
   }
@@ -189,14 +191,14 @@ for (const live of source.rows) {
   let guideId = live.seed_context?.sources?.client_guide_id ?? null
   try { guideId = JSON.parse(readFileSync(guideMetaPath, 'utf8')).guide_id } catch {}
 
-  const actionPlan = packageActionPlan(live.package_settings, recommendations, meaningfulFacts)
+  const actionPlan = packageActionPlan(live.package_settings, safeRecommendations, meaningfulFacts)
   const proposed = {
     ...live.strategy_data,
     strategyDrivers: drivers,
-    strategyGoingForward: recommendations.slice(0, 2).join(' '),
-    clientActionsRequired: constraints.filter(value => /confirm|verify|approval|current|must|do not|unknown/i.test(value)).slice(0, 6),
+    strategyGoingForward: safeRecommendations.slice(0, 3).join(' '),
+    clientActionsRequired: usableEvidence(constraints).filter(value => /confirm|verify|approval|current|must|do not|unknown|correct|valid/i.test(value)).slice(0, 6),
     actionPlan,
-    goldStandard: buildGoldStandard({ live, drivers, recommendations, constraints }),
+    goldStandard: buildGoldStandard({ live, drivers, recommendations: safeRecommendations, constraints }),
   }
   const proposedSeed = {
     ...live.seed_context,

@@ -9,10 +9,11 @@ const reportView = read('../src/pages/client/ClientReportView.tsx')
 const legacyCampaigns = read('../src/pages/client/ClientCampaignsPage.tsx')
 const providerIcons = read('../src/components/client/PerformanceProviderIcon.tsx')
 
-test('Performance exposes the complete icon-led provider workspace', () => {
-  for (const key of ['overview', 'facebook', 'instagram', 'google', 'tiktok', 'linkedin', 'web', 'email']) {
+test('Performance exposes only evidence-backed icon-led provider destinations', () => {
+  for (const key of ['overview', 'facebook', 'instagram', 'google', 'tiktok', 'web']) {
     assert.match(reportView, new RegExp(`key: '${key}'.*icon: '${key}'`))
   }
+  assert.doesNotMatch(reportView, /key: 'linkedin'|key: 'email'/)
   assert.match(reportView, /PerformanceProviderIcon/)
   assert.match(reportView, /aria-label=\{item\.label\}/)
   assert.match(reportView, /title=\{item\.label\}/)
@@ -53,27 +54,21 @@ test('branded providers use recognizable official glyph paths, not letter placeh
   assert.doesNotMatch(providerIcons, />\s*[FIGTL]\s*<\//)
 })
 
-test('Google stays grouped with URL-backed Ads and Business surfaces', () => {
+test('Google renders verified Ads without a dead Business placeholder', () => {
   assert.match(reportView, /Google Performance/)
-  assert.match(reportView, /Google performance services/)
-  assert.match(reportView, /\(\['ads', 'business'\] as const\)/)
-  assert.match(performance, /parseGoogleSurface\(searchParams\.get\('surface'\)\)/)
-  assert.match(performance, /next\.set\('surface', surface\)/)
+  assert.doesNotMatch(reportView, /Google performance services|Google Business Profile|Coming soon/)
 })
 
-test('provider panels remain visible and never fabricate unavailable metrics', () => {
+test('provider panels are evidence-gated and never fabricate unavailable metrics', () => {
   assert.match(reportView, /title="Website Performance"/)
-  assert.match(reportView, /<PublishedWebsitePerformance report=\{report\.website_report \?\? null\} \/>/)
-  assert.match(reportView, /No approved website snapshot was published with this monthly report\. No figures are inferred or shown as zero\./)
-  assert.match(reportView, /title="Email Marketing"/)
-  assert.match(reportView, /title="LinkedIn"/)
-  assert.match(reportView, /status="Coming soon"/)
-  assert.match(reportView, /status=\{activeTab === 'tiktok' \? 'Coming soon' : 'Not connected'\}/)
+  assert.match(reportView, /<PublishedWebsitePerformance report=\{report\.website_report \?\? null\} managedWebsite=\{managedWebsite\} \/>/)
+  assert.match(reportView, /no approved website snapshot was published with this monthly report/i)
+  assert.doesNotMatch(reportView, /title="Email Marketing"|title="LinkedIn"/)
+  assert.match(reportView, /status="Unavailable"/)
+  assert.doesNotMatch(reportView, /activeTab === 'tiktok'.*Coming soon/)
 })
 
-test('campaign direction comes only from the selected published report strategy', () => {
-  assert.match(reportView, /readStrategyData\(report\.strategy_data\)/)
-  assert.match(reportView, /strategy\.strategyGoingForward/)
-  assert.match(reportView, /strategy\.clientDirection/)
-  assert.match(reportView, /strategy\.actionPlan\.campaign_recommendation/)
+test('monthly action direction comes only from the canonical monthly strategy', () => {
+  assert.match(reportView, /monthlyStrategy\.strategyData/)
+  assert.doesNotMatch(reportView, /buildStrategyCards|report\.previous_month_reflection/)
 })

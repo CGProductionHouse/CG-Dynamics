@@ -31,6 +31,7 @@ export function activeOrganicPlatforms(facts: PlatformFact[]): string[] {
   const supported = new Map([
     ['facebook', 'Facebook'],
     ['instagram', 'Instagram'],
+    ['tiktok', 'TikTok'],
   ])
 
   return [...supported.entries()]
@@ -50,10 +51,10 @@ export function buildClientStrategyPreview(report: Report | ClientReport | null)
 
   const strategy = readStrategyData(report.strategy_data)
   const candidates: Array<ClientStrategyPreview | null> = [
-    clean(strategy.strategyGoingForward || report.previous_month_reflection || report.performance_comments)
+    clean(strategy.strategyGoingForward)
       ? {
           label: 'Strategy going forward',
-          value: clean(strategy.strategyGoingForward || report.previous_month_reflection || report.performance_comments)!,
+          value: clean(strategy.strategyGoingForward)!,
           phase: 'action',
         }
       : null,
@@ -68,13 +69,6 @@ export function buildClientStrategyPreview(report: Report | ClientReport | null)
       ? {
           label: 'Client direction',
           value: strategy.clientDirection.map(d => `• ${d}`).join('\n'),
-          phase: 'action',
-        }
-      : null,
-    clean(report.content_direction_next_month)
-      ? {
-          label: 'Upcoming content direction',
-          value: clean(report.content_direction_next_month)!,
           phase: 'action',
         }
       : null,

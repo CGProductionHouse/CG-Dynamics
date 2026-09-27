@@ -19,6 +19,16 @@ const GENERIC_FILLER = [
   /\bcreate engaging content\b/i,
   /\bconnect with (?:the|our) audience\b/i,
 ]
+const INTERNAL_OR_NON_STRATEGY_COPY = [
+  /\bCGProductionHouse\//i,
+  /\b(?:github|repository|repo)\b/i,
+  /\b(?:source[_ -]?reference|source[_ -]?id|evidence[_ -]?label|confidence[_ -]?level|seed[_ -]?context)\b/i,
+  /\b(?:verified facts?|exact-client evidence|evidence dossier|research dossier|source pack)\b/i,
+  /\bPublished-content record:/i,
+  /\bCorrect facts are only the starting point\b/i,
+  /(?:^|[\\/])(?:docs|sources|artifacts)[\\/]/i,
+  /\.(?:md|pdf|json)\b/i,
+]
 const ACTION_PACKAGE_FIELDS = {
   professional_video: 'professional_videos_per_month',
   reels: 'reels_per_month',
@@ -92,6 +102,7 @@ export function auditStrategyRow({ row, client, reviewed, allClients }) {
     if (value.length < 20) errors.push(`GOLD_FIELD_INCOMPLETE:${field}`)
   }
   if (GENERIC_FILLER.some(pattern => pattern.test(strategyText))) errors.push('GENERIC_FILLER_DETECTED')
+  if (INTERNAL_OR_NON_STRATEGY_COPY.some(pattern => pattern.test(strategyText))) errors.push('INTERNAL_OR_NON_STRATEGY_COPY')
 
   for (const [action, packageField] of Object.entries(ACTION_PACKAGE_FIELDS)) {
     const expected = Number.isInteger(client.package_settings?.[packageField]) && client.package_settings[packageField] > 0

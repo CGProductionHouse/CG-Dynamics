@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "issue": 567,
+  "generated_at": "2026-09-27T00:00:00+02:00",
+  "write_count": 0,
+  "authority": {
+    "website_fleet": "https://github.com/CGProductionHouse/cg-website-editor/issues/20#issuecomment-5794846898",
+    "reporting_rollout": "https://github.com/CGProductionHouse/cg-website-editor/issues/27#issuecomment-5799532040",
+    "dynamics_clients": "read-only production clients query on 2026-09-27"
+  },
+  "counts": {
+    "verified_cg_built_websites": 9,
+    "exact_active_dynamics_clients": 4,
+    "without_exact_active_dynamics_client": 5,
+    "published_website_snapshot_clients": 1
+  },
+  "websites": [
+    { "website_id": 1, "name": "Piek Group", "repository": "CGProductionHouse/PiekGroup-Website", "canonical_host": "www.piekgroup.co.za", "dynamics_client_id": "ed7aa1ae-de21-4151-a8f9-54796b234c1f", "dynamics_state": "exact_active_client", "reporting_state": "identity_requires_guarded_activation" },
+    { "website_id": 2, "name": "Get Together", "repository": "CGProductionHouse/gettogether-website", "canonical_host": "www.gettogethercs.co.za", "dynamics_client_id": null, "dynamics_state": "no_exact_active_client", "reporting_state": "held_no_exact_client" },
+    { "website_id": 4, "name": "Imbewu", "repository": "CGProductionHouse/Imbewu-Website", "canonical_host": "www.imbewuvend.com", "dynamics_client_id": null, "dynamics_state": "no_exact_active_client", "reporting_state": "held_no_exact_client" },
+    { "website_id": 5, "name": "CG ARCC", "repository": "CGProductionHouse/cg-arcc", "canonical_host": "cg-arcc.vercel.app", "dynamics_client_id": null, "dynamics_state": "no_exact_active_client", "reporting_state": "held_no_exact_client" },
+    { "website_id": 6, "name": "Emmanuel Funeral Services", "repository": "CGProductionHouse/emmanuelfunerals-website", "canonical_host": "emmanuelfunerals.com", "dynamics_client_id": "d53d8e62-9e6a-4bb9-be3f-554f40942d45", "dynamics_state": "exact_active_client", "reporting_state": "identity_requires_guarded_activation" },
+    { "website_id": 7, "name": "Red Oak", "repository": "CGProductionHouse/redoak-website", "canonical_host": "www.redoakgroup.co.za", "dynamics_client_id": "cdb11a82-339e-4b46-9b09-bde1a23efeaf", "dynamics_state": "exact_active_client", "reporting_state": "published_snapshot_proven" },
+    { "website_id": 8, "name": "All Around PVC", "repository": "CGProductionHouse/allaroundpvc-website", "canonical_host": "www.allaroundpvc.co.za", "dynamics_client_id": "fd16ebae-a50b-4920-afe0-94c2631f8f06", "dynamics_state": "exact_active_client", "reporting_state": "identity_requires_guarded_activation" },
+    { "website_id": 9, "name": "JFJ Electrical Group", "repository": "CGProductionHouse/jfj-electrical-website", "canonical_host": "jfj-electrical-website.vercel.app", "dynamics_client_id": null, "dynamics_state": "no_exact_active_client", "reporting_state": "held_no_exact_client" },
+    { "website_id": 10, "name": "Raadzaal", "repository": "CGProductionHouse/raadzaal-website", "canonical_host": "www.raadzaal.co.za", "dynamics_client_id": null, "dynamics_state": "no_exact_active_client", "reporting_state": "held_no_exact_client" }
+  ]
+}

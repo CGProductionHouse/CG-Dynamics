@@ -62,7 +62,7 @@ test('client report queries use active-role, published own-client projections', 
 // ── 2. Published-only, no draft/strategy leakage ─────────────────────────────
 test('strategy preview is published-only with an honest empty state', () => {
   const published = { id: 'r', client_id: 'c', platform: null, period_start: '2026-05-01', period_end: '2026-05-31', status: 'published', previous_month_reflection: 'Observed.', strategy_next_month: 'Do X.', strategy_data: null, content_direction_next_month: null, boost_recommendation: null, performance_comments: null, report_title: null }
-  assert.ok(cp.buildClientStrategyPreview(published).length > 0)
+  assert.deepEqual(cp.buildClientStrategyPreview(published), [])
   assert.deepEqual(cp.buildClientStrategyPreview({ ...published, status: 'draft' }), [])
   assert.deepEqual(cp.buildClientStrategyPreview(null), [])
 })
@@ -90,14 +90,14 @@ test('month-on-month movement is suppressed when the reporting definition change
 })
 
 // ── 4. Unsupported integrations never appear connected ───────────────────────
-test('only genuinely available Facebook/Instagram become active organic platforms', () => {
+test('only genuinely available Facebook, Instagram and TikTok become active organic platforms', () => {
   const base = { metricKey: 'brand_views', value: 10, availability: 'complete', comparableGroup: null, aggregation: 'sum' }
   const facts = [
     { ...base, platform: 'facebook' },
     { ...base, platform: 'instagram', value: null, availability: 'unavailable' },
     { ...base, platform: 'tiktok', value: 999 },
   ]
-  assert.deepEqual(cp.activeOrganicPlatforms(facts), ['Facebook'])
+  assert.deepEqual(cp.activeOrganicPlatforms(facts), ['Facebook', 'TikTok'])
 })
 
 test('provider workspace never presents unsupported platforms as active data sources', () => {
@@ -281,20 +281,19 @@ test('report view uses verified, per-platform availability-aware Overview when n
   assert.match(REPORT_VIEW, /VerifiedFactsUnavailable/)
 })
 
-test('report view keeps every provider destination visible and gates data by report truth', () => {
+test('report view shows only provider destinations supported by report truth', () => {
   assert.match(REPORT_VIEW, /reportPlatforms/)
-  for (const key of ['overview', 'facebook', 'instagram', 'google', 'tiktok', 'linkedin', 'web', 'email']) {
+  for (const key of ['overview', 'facebook', 'instagram', 'google', 'tiktok', 'web']) {
     assert.match(REPORT_VIEW, new RegExp(`key: '${key}'.*icon: '${key}'`))
   }
+  assert.doesNotMatch(REPORT_VIEW, /key: 'linkedin'|key: 'email'/)
   assert.match(REPORT_VIEW, /reportPlatforms\.includes/)
 })
 
-test('Google is grouped with Ads and Business while provider data remains gated', () => {
+test('Google exposes verified Ads without a dead Business placeholder', () => {
   assert.match(REPORT_VIEW, /hasGoogleAdsSource/)
   assert.match(REPORT_VIEW, /hasGoogleAds/)
-  assert.match(REPORT_VIEW, /Google performance services/)
-  assert.match(REPORT_VIEW, /\['ads', 'business'\]/)
-  assert.match(REPORT_VIEW, /Google Business Profile/)
+  assert.doesNotMatch(REPORT_VIEW, /Google performance services|Google Business Profile|Coming soon/)
 })
 
 test('icon-led provider navigation uses official brand glyphs and accessible names', () => {
@@ -337,12 +336,10 @@ test('performance dashboard separates load states for report list and report det
 })
 
 // ── 18. Performance Google panel completeness ─────────────────────────────────
-test('Google Ads shows CG review and optimisation direction from published report strategy', () => {
+test('Google Ads does not promote legacy report strategy into client direction', () => {
   assert.match(REPORT_VIEW, /GooglePerformanceTab/)
-  assert.match(REPORT_VIEW, /readStrategyData/)
-  assert.match(REPORT_VIEW, /strategyGoingForward/)
-  assert.match(REPORT_VIEW, /campaign_recommendation/)
-  assert.match(REPORT_VIEW, /CG review.*optimisation direction/i)
+  const googlePanel = REPORT_VIEW.slice(REPORT_VIEW.indexOf('function GooglePerformanceTab'), REPORT_VIEW.indexOf('function GoogleAdsEmptyState'))
+  assert.doesNotMatch(googlePanel, /readStrategyData|strategyGoingForward|campaign_recommendation|CG review.*optimisation direction/i)
 })
 
 test('Google Ads shows campaign objective, lifecycle status and per-campaign metrics', () => {

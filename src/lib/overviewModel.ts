@@ -122,11 +122,19 @@ export const METRIC_LABELS: Record<string, string> = {
   ads_clicks: 'Clicks',
   ads_spend: 'Spend',
   ads_conversions: 'Conversions',
+  views: 'Video views',
+  likes: 'Likes',
+  comments: 'Comments',
+  shares: 'Shares',
+  following_count: 'Following',
+  total_likes: 'Total likes',
+  video_count: 'Published videos',
 }
 
 export const PLATFORM_TITLES: Record<string, string> = {
   facebook: 'Facebook',
   instagram: 'Instagram',
+  tiktok: 'TikTok',
   google_ads: 'Google Ads',
 }
 
@@ -152,8 +160,8 @@ export interface OverviewSection {
 }
 
 const SECTION_METRICS: Record<OverviewSection['key'], string[]> = {
-  brand_visibility: ['brand_views', 'unique_viewers', 'reach'],
-  audience_response: ['content_interactions', 'post_engagements', 'profile_visits', 'follows_gained', 'unfollows', 'net_follows', 'current_followers'],
+  brand_visibility: ['brand_views', 'unique_viewers', 'reach', 'views', 'video_count'],
+  audience_response: ['content_interactions', 'post_engagements', 'profile_visits', 'follows_gained', 'unfollows', 'net_follows', 'current_followers', 'likes', 'comments', 'shares', 'following_count', 'total_likes'],
   commercial_intent: ['website_clicks', 'page_visits'],
 }
 
@@ -163,8 +171,8 @@ const SECTION_TITLES: Record<OverviewSection['key'], string> = {
   commercial_intent: 'Commercial intent',
 }
 
-// Platform display order — Facebook first, then Instagram, for stable layout.
-const PLATFORM_ORDER = ['facebook', 'instagram']
+// Platform display order is stable while keeping every provider fact separate.
+const PLATFORM_ORDER = ['facebook', 'instagram', 'tiktok']
 
 function metricLabel(fact: PlatformFact): string {
   if (fact.platform === 'facebook'
@@ -175,7 +183,7 @@ function metricLabel(fact: PlatformFact): string {
   if (fact.platform === 'instagram'
       && fact.metricKey === 'website_clicks'
       && fact.sourceMetric === 'website_clicks') {
-    return 'Website clicks'
+    return 'Profile website clicks'
   }
   return METRIC_LABELS[fact.metricKey] ?? fact.metricKey
 }

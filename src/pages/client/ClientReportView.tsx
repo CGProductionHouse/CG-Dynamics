@@ -5,7 +5,8 @@ import type { Client } from '../../lib/db/clients'
 import type { ReportManualMetric } from '../../lib/db/manualMetrics'
 import BrandMark from '../../components/BrandMark'
 import { ClientLogo } from '../../components/ClientLogo'
-import { readStrategyData } from '../../lib/strategyEngine'
+import { clientFacingStrategyQualityIssues, readStrategyData, type StrategyData } from '../../lib/strategyEngine'
+import { GuidedStrategyView } from '../../components/strategy/GuidedStrategy'
 import { getReportMonthFromPeriod, monthDisplayLabel, normalizeReportToCalendarMonth, previousReportMonth, reportPeriodDisclosure } from '../../lib/reportPeriod'
 import { isWithinMetaProviderPeriod } from '../../../supabase/functions/_shared/metaPeriod'
 import type { MasterReportData, MetricMovement, Platform, PlatformView, ReportStatsPost } from '../../lib/reportStats'
@@ -31,7 +32,6 @@ import {
   buildPlatformPerformance,
   buildReportPerformance,
   type GrowthSeriesItem,
-  type NextStep,
   type PerformanceMetric,
   type PlatformPerformance,
   type ReportPerformance,
@@ -52,9 +52,14 @@ import {
   PerformanceProviderIcon,
   type PerformanceProviderIconKey,
 } from '../../components/client/PerformanceProviderIcon'
+import { cgManagedWebsiteForClient, type CgManagedWebsite } from '../../lib/cgWebsiteFleet'
 
 export type ReportTabKey = 'overview' | 'facebook' | 'instagram' | 'google' | 'tiktok' | 'linkedin' | 'web' | 'email'
-export type GoogleSurface = 'ads' | 'business'
+export interface MonthlyStrategyPresentation {
+  month: string
+  status: 'draft' | 'approved' | 'published'
+  strategyData: StrategyData
+}
 
 const LOGO_FRAME = 'border border-white/10 bg-[#06110f] shadow-[0_18px_35px_-24px_rgba(45,212,191,0.7)]'
 
@@ -99,10 +104,9 @@ export function ClientReportView({
   contentExclusions = [],
   onSetContentExcluded,
   curationBusyId = null,
+  monthlyStrategy = null,
   initialTab = 'overview',
   onTabChange,
-  initialGoogleSurface = 'ads',
-  onGoogleSurfaceChange,
 }: {
   report: RenderableReport
   client?: Client | null
@@ -128,15 +132,13 @@ export function ClientReportView({
   /** Staff-only explicit curation action. Omitted on client routes. */
   onSetContentExcluded?: (post: ReportStatsPost, excluded: boolean) => void | Promise<void>
   curationBusyId?: string | null
+  /** Canonical monthly strategy. Client routes may pass published projection only. */
+  monthlyStrategy?: MonthlyStrategyPresentation | null
   initialTab?: ReportTabKey
   onTabChange?: (tab: ReportTabKey) => void
-  initialGoogleSurface?: GoogleSurface
-  onGoogleSurfaceChange?: (surface: GoogleSurface) => void
 }) {
   const [localTab, setLocalTab] = useState<ReportTabKey>('overview')
   const tab = onTabChange ? initialTab : localTab
-  const [localGoogleSurface, setLocalGoogleSurface] = useState<GoogleSurface>('ads')
-  const googleSurface = onGoogleSurfaceChange ? initialGoogleSurface : localGoogleSurface
 
   // Verified, availability-aware Overview sections built ONLY from normalized
   // facts. Per-platform (no cross-platform unique summing); the comparability
@@ -166,30 +168,25 @@ export function ClientReportView({
     ...availablePlatforms.map(view => view.platform),
     ...facts
       .map(fact => fact.platform)
-      .filter((platform): platform is Platform => platform === 'facebook' || platform === 'instagram'),
+      .filter((platform): platform is Platform => platform === 'facebook' || platform === 'instagram' || platform === 'tiktok'),
   ]))
   const hasMeta = availablePlatforms.some(view => view.platform === 'facebook' || view.platform === 'instagram')
     || facts.some(fact => fact.platform === 'facebook' || fact.platform === 'instagram')
   const hasGoogleAds = googleAds !== null || googleAdsState !== 'disconnected'
+  const managedWebsite = cgManagedWebsiteForClient(client?.id ?? ('client_id' in report ? report.client_id : null))
   const hasGoogleAdsSource = googleAdsState === 'data' || googleAdsState === 'no-activity'
   const tabs: { key: ReportTabKey; label: string; icon: PerformanceProviderIconKey }[] = [
     { key: 'overview', label: 'Overview', icon: 'overview' },
-    { key: 'facebook', label: 'Facebook', icon: 'facebook' },
-    { key: 'instagram', label: 'Instagram', icon: 'instagram' },
-    { key: 'google', label: 'Google', icon: 'google' },
-    { key: 'tiktok', label: 'TikTok', icon: 'tiktok' },
-    { key: 'linkedin', label: 'LinkedIn', icon: 'linkedin' },
-    { key: 'web', label: 'Website Performance', icon: 'web' },
-    { key: 'email', label: 'Email Marketing', icon: 'email' },
+    ...(reportPlatforms.includes('facebook') ? [{ key: 'facebook' as const, label: 'Facebook', icon: 'facebook' as const }] : []),
+    ...(reportPlatforms.includes('instagram') ? [{ key: 'instagram' as const, label: 'Instagram', icon: 'instagram' as const }] : []),
+    ...(hasGoogleAds ? [{ key: 'google' as const, label: 'Google', icon: 'google' as const }] : []),
+    ...(reportPlatforms.includes('tiktok') ? [{ key: 'tiktok' as const, label: 'TikTok', icon: 'tiktok' as const }] : []),
+    ...(report.website_report || managedWebsite || showAdminDiagnostics ? [{ key: 'web' as const, label: 'Website Performance', icon: 'web' as const }] : []),
   ]
   const activeTab = tabs.some(item => item.key === tab) ? tab : 'overview'
   const selectTab = (nextTab: ReportTabKey) => {
     if (onTabChange) onTabChange(nextTab)
     else setLocalTab(nextTab)
-  }
-  const selectGoogleSurface = (surface: GoogleSurface) => {
-    if (onGoogleSurfaceChange) onGoogleSurfaceChange(surface)
-    else setLocalGoogleSurface(surface)
   }
 
   const month = monthDisplayLabel(getReportMonthFromPeriod(report))
@@ -240,7 +237,6 @@ export function ClientReportView({
           master={master}
           performance={performance}
           showEmptyStrategy={showEmptyStrategy}
-          nextSteps={performance.nextSteps}
           showAdminDiagnostics={showAdminDiagnostics}
           googleAds={googleAds}
           googleAdsState={googleAdsState}
@@ -252,34 +248,18 @@ export function ClientReportView({
           statsPosts={statsPosts}
           onSetContentExcluded={onSetContentExcluded}
           curationBusyId={curationBusyId}
+          monthlyStrategy={monthlyStrategy}
         />
       ) : activeTab === 'google' ? (
         <GooglePerformanceTab
-          report={report}
           month={month}
           googleAds={googleAds}
           state={googleAdsState}
           error={googleAdsError}
           hasGoogleAds={hasGoogleAds}
-          surface={googleSurface}
-          onSurfaceChange={selectGoogleSurface}
         />
       ) : activeTab === 'web' ? (
-        <PublishedWebsitePerformance report={report.website_report ?? null} />
-      ) : activeTab === 'email' ? (
-        <ProviderAvailabilityPanel
-          eyebrow="Owned audience"
-          title="Email Marketing"
-          status="Coming soon"
-          description="Email Marketing performance will appear here when the client reporting lane is available and connected."
-        />
-      ) : activeTab === 'linkedin' ? (
-        <ProviderAvailabilityPanel
-          eyebrow="Professional audience"
-          title="LinkedIn"
-          status="Coming soon"
-          description="LinkedIn performance is not yet available in the client portal. No figures are inferred or shown as zero."
-        />
+        <PublishedWebsitePerformance report={report.website_report ?? null} managedWebsite={managedWebsite} />
       ) : reportPlatforms.includes(activeTab as Platform) ? (
         <PlatformTab
           view={master.platforms.find(item => item.platform === activeTab)!}
@@ -295,10 +275,8 @@ export function ClientReportView({
         <ProviderAvailabilityPanel
           eyebrow="Platform performance"
           title={activeTab === 'facebook' ? 'Facebook' : activeTab === 'instagram' ? 'Instagram' : 'TikTok'}
-          status={activeTab === 'tiktok' ? 'Coming soon' : 'Not connected'}
-          description={activeTab === 'tiktok'
-            ? 'TikTok performance is not yet available in the client portal. No figures are inferred or shown as zero.'
-            : `No verified ${activeTab === 'facebook' ? 'Facebook' : 'Instagram'} reporting source is connected for this published month.`}
+          status="Unavailable"
+          description={`No verified ${activeTab === 'facebook' ? 'Facebook' : activeTab === 'instagram' ? 'Instagram' : 'TikTok'} reporting facts are available for this published month.`}
         />
       )}
 
@@ -316,13 +294,15 @@ export function ClientReportView({
   )
 }
 
-function PublishedWebsitePerformance({ report }: { report: RenderableReport['website_report'] }) {
+function PublishedWebsitePerformance({ report, managedWebsite }: { report: RenderableReport['website_report']; managedWebsite: CgManagedWebsite | null }) {
   if (!report) {
     return <ProviderAvailabilityPanel
       eyebrow="Digital experience"
       title="Website Performance"
-      status="Not connected"
-      description="No approved website snapshot was published with this monthly report. No figures are inferred or shown as zero."
+      status="Unavailable"
+      description={managedWebsite
+        ? `CG manages ${managedWebsite.canonicalHost}, but no approved website snapshot was published with this monthly report. Reporting setup or review is still in progress; no figures are inferred or shown as zero.`
+        : 'No approved website snapshot was published with this monthly report. No figures are inferred or shown as zero.'}
     />
   }
 
@@ -495,7 +475,6 @@ function OverviewTab({
   master,
   performance,
   showEmptyStrategy,
-  nextSteps,
   showAdminDiagnostics,
   googleAds,
   googleAdsState,
@@ -507,12 +486,12 @@ function OverviewTab({
   statsPosts,
   onSetContentExcluded,
   curationBusyId,
+  monthlyStrategy,
 }: {
   report: RenderableReport
   master: MasterReportData
   performance: ReportPerformance
   showEmptyStrategy: boolean
-  nextSteps: NextStep[]
   showAdminDiagnostics: boolean
   googleAds: GoogleAdsDashboardData | null
   googleAdsState: GoogleAdsDashboardState
@@ -524,6 +503,7 @@ function OverviewTab({
   statsPosts: ReportStatsPost[]
   onSetContentExcluded?: (post: ReportStatsPost, excluded: boolean) => void | Promise<void>
   curationBusyId: string | null
+  monthlyStrategy: MonthlyStrategyPresentation | null
 }) {
   const strategy = readStrategyData(report.strategy_data)
   const platformsWithData = master.platforms.filter(view => view.source !== 'none')
@@ -548,7 +528,7 @@ function OverviewTab({
         /* Verified, availability-aware Overview — per-platform, never combined,
            invalid month-on-month movement suppressed by the comparability gate. */
         hasVerified
-          ? <VerifiedOverview sections={verifiedSections} monthLabel={performance.monthLabel} />
+          ? <VerifiedOverview sections={verifiedSections} showUnavailable={showAdminDiagnostics} />
           : <VerifiedFactsUnavailable />
       ) : (
         <>
@@ -623,11 +603,9 @@ function OverviewTab({
 
       {/* CG action plan */}
       <StrategyBlocks
-        report={report}
-        strategy={strategy}
+        monthlyStrategy={monthlyStrategy}
         showEmptyStrategy={showEmptyStrategy}
-        nextSteps={normalizedFactsActive ? [] : nextSteps}
-        recommendations={normalizedFactsActive ? [] : performance.recommendations}
+        staffPreview={showAdminDiagnostics}
       />
 
       {/* Staff-only connector data health (never rendered on client routes) */}
@@ -650,14 +628,14 @@ function VerifiedFactsUnavailable() {
 }
 
 // ── Verified Overview (facts-driven, per-platform, comparability-gated) ───────
-function VerifiedOverview({ sections }: { sections: VerifiedSection[]; monthLabel: string }) {
-  const lines = sections.flatMap(section => section.lines)
+function VerifiedOverview({ sections, showUnavailable }: { sections: VerifiedSection[]; showUnavailable: boolean }) {
+  const lines = sections.flatMap(section => section.lines).filter(line => showUnavailable || line.hasValue)
   const platforms = [...new Set(lines.map(line => line.platform))]
   return (
     <div className="mb-14 space-y-10">
       {platforms.map(platform => (
         <section key={platform}>
-          <SectionHeading eyebrow="Meta insights" title={platform === 'facebook' ? 'Facebook' : 'Instagram'} />
+          <SectionHeading eyebrow="Verified platform insights" title={PLATFORM_LABELS[platform as Platform] ?? platform} />
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {lines.filter(line => line.platform === platform).map(line => (
               <VerifiedMetricCard key={`${line.platform}:${line.metricKey}`} line={line} />
@@ -688,6 +666,9 @@ function VerifiedMetricCard({ line }: { line: VerifiedLine }) {
   return (
     <div className="rounded-3xl border border-white/[0.08] bg-white/[0.045] p-5">
       <p className="text-[0.7rem] uppercase tracking-[0.18em] text-slate-400">{line.label}</p>
+      {line.platform === 'instagram' && line.metricKey === 'website_clicks' && (
+        <p className="mt-1 text-xs leading-relaxed text-slate-500">Taps on the website link from the Instagram profile.</p>
+      )}
       <p className="mt-2 text-3xl font-semibold text-white">
         {line.hasValue && typeof line.value === 'number' ? formatNumber(line.value) : '—'}
       </p>
@@ -1410,7 +1391,7 @@ function ProviderAvailabilityPanel({
 }: {
   eyebrow: string
   title: string
-  status: 'Not connected' | 'Coming soon'
+  status: 'Unavailable'
   description: string
 }) {
   return (
@@ -1429,32 +1410,18 @@ function ProviderAvailabilityPanel({
 }
 
 function GooglePerformanceTab({
-  report,
   month,
   googleAds,
   state,
   error,
   hasGoogleAds,
-  surface,
-  onSurfaceChange,
 }: {
-  report: RenderableReport
   month: string
   googleAds: GoogleAdsDashboardData | null
   state: GoogleAdsDashboardState
   error: string | null
   hasGoogleAds: boolean
-  surface: GoogleSurface
-  onSurfaceChange: (surface: GoogleSurface) => void
 }) {
-  const strategy = readStrategyData(report.strategy_data)
-  const campaignRecommendation = strategy.actionPlan.campaign_recommendation
-  const hasDirection = Boolean(
-    strategy.strategyGoingForward
-      || strategy.clientDirection.length > 0
-      || campaignRecommendation.enabled,
-  )
-
   return (
     <div className="space-y-8">
       <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#071311]/95 p-6 shadow-[0_35px_90px_-45px_rgba(0,0,0,0.95)] sm:p-9">
@@ -1472,35 +1439,7 @@ function GooglePerformanceTab({
             <p className="mt-2 text-xl font-black text-white">{month}</p>
           </div>
         </div>
-        <div role="tablist" aria-label="Google performance services" className="relative mt-7 flex w-fit rounded-full border border-white/10 bg-black/25 p-1">
-          {(['ads', 'business'] as const).map(item => {
-            const selected = surface === item
-            const label = item === 'ads' ? 'Ads' : 'Business'
-            return (
-              <button
-                key={item}
-                type="button"
-                role="tab"
-                aria-selected={selected}
-                onClick={() => onSurfaceChange(item)}
-                className={`rounded-full px-5 py-2 text-sm font-bold transition ${selected ? 'bg-white text-[#07110f]' : 'text-slate-400 hover:text-white'}`}
-              >
-                {label}
-              </button>
-            )
-          })}
-        </div>
       </section>
-
-      {surface === 'business' ? (
-        <ProviderAvailabilityPanel
-          eyebrow="Google local presence"
-          title="Google Business Profile"
-          status="Coming soon"
-          description="Google Business Profile performance is not yet available in the client portal. No local-search figures are inferred or shown as zero."
-        />
-      ) : (
-        <>
       {hasGoogleAds ? (
         <section className="rounded-[2rem] border border-[#f59e0b]/20 bg-[linear-gradient(135deg,rgba(245,158,11,0.10),rgba(255,255,255,0.025))] p-6 sm:p-8">
           <div className="mb-6">
@@ -1525,59 +1464,12 @@ function GooglePerformanceTab({
         </section>
       )}
 
-      {hasDirection && (
-        <section>
-          <SectionHeading eyebrow="CG review & optimisation direction" title="Strategy for paid media" />
-          <div className="grid gap-4 lg:grid-cols-2">
-            {strategy.strategyGoingForward && (
-              <article className="rounded-[1.75rem] border border-[#2dd4bf]/20 bg-[linear-gradient(145deg,rgba(45,212,191,0.10),rgba(255,255,255,0.025))] p-6 sm:p-7">
-                <p className="text-[0.68rem] font-black uppercase tracking-[0.2em] text-[#2dd4bf]">Going forward</p>
-                <p className="mt-4 whitespace-pre-line text-sm leading-7 text-slate-200">{strategy.strategyGoingForward}</p>
-              </article>
-            )}
-            {strategy.clientDirection.length > 0 && (
-              <article className="rounded-[1.75rem] border border-white/[0.08] bg-white/[0.035] p-6 sm:p-7">
-                <p className="text-[0.68rem] font-black uppercase tracking-[0.2em] text-slate-500">Campaign direction</p>
-                <ul className="mt-4 space-y-3">
-                  {strategy.clientDirection.map((direction, index) => (
-                    <li key={index} className="flex items-start gap-3 text-sm leading-6 text-slate-300">
-                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#2dd4bf]" />
-                      {direction}
-                    </li>
-                  ))}
-                </ul>
-              </article>
-            )}
-            {campaignRecommendation.enabled && (
-              <article className="rounded-[1.75rem] border border-[#f97316]/20 bg-[linear-gradient(145deg,rgba(249,115,22,0.10),rgba(255,255,255,0.025))] p-6 sm:p-7 lg:col-span-2">
-                <p className="text-[0.68rem] font-black uppercase tracking-[0.2em] text-[#fb923c]">Next campaign recommendation</p>
-                {campaignRecommendation.items.length > 0 && (
-                  <ul className="mt-4 grid gap-3 sm:grid-cols-2">
-                    {campaignRecommendation.items.map((item, index) => (
-                      <li key={index} className="flex items-start gap-3 text-sm leading-6 text-slate-300">
-                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#fb923c]" />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                {campaignRecommendation.notes && (
-                  <p className="mt-4 whitespace-pre-line text-sm leading-7 text-slate-200">{campaignRecommendation.notes}</p>
-                )}
-              </article>
-            )}
-          </div>
-        </section>
-      )}
-
       <aside className="rounded-[1.75rem] border border-[#2dd4bf]/15 bg-[#2dd4bf]/[0.045] p-6 sm:p-7">
         <p className="text-xs font-black uppercase tracking-[0.2em] text-[#2dd4bf]">Campaign feedback</p>
         <p className="mt-3 max-w-4xl text-sm leading-7 text-slate-300">
           Tell CG whether the campaign leads were valuable and relevant to your business. That real-world feedback helps refine targeting, messaging and campaign direction.
         </p>
       </aside>
-        </>
-      )}
     </div>
   )
 }
@@ -1628,76 +1520,36 @@ function GoogleAdsEmptyState({
 }
 
 function StrategyBlocks({
-  report,
-  strategy,
+  monthlyStrategy,
   showEmptyStrategy,
-  nextSteps,
-  recommendations,
+  staffPreview,
 }: {
-  report: RenderableReport
-  strategy: ReturnType<typeof readStrategyData>
+  monthlyStrategy: MonthlyStrategyPresentation | null
   showEmptyStrategy: boolean
-  nextSteps: NextStep[]
-  recommendations: string[]
+  staffPreview: boolean
 }) {
-  const cards = buildStrategyCards(report, strategy)
-  const isPublished = report.status === 'published'
-
-  if (cards.length === 0 && isPublished && nextSteps.length > 0) {
-    // Published report without strategy - show next steps as a fallback action plan.
-    return (
-      <section className="mb-4">
-        <SectionHeading eyebrow="CG action plan" title="What we do next" />
-        <div className="grid gap-4 lg:grid-cols-2">
-          {nextSteps.slice(0, 4).map(step => (
-            <article
-              key={step.priority}
-              className="rounded-3xl border border-white/[0.08] bg-[linear-gradient(135deg,rgba(255,255,255,0.07),rgba(255,255,255,0.035))] p-6 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.95)] sm:p-7"
-            >
-              <p className="text-xs font-black uppercase tracking-[0.22em] text-[#2dd4bf]">Next step</p>
-              <h3 className="mt-3 text-xl font-black tracking-[-0.03em] text-white">{step.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-slate-400">{step.why}</p>
-              <p className="mt-3 text-[0.95rem] leading-relaxed text-slate-300">{step.action}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-    )
-  }
-
-  if (cards.length === 0 && isPublished) {
-    // Published with no strategy and no generated next steps - safe placeholder.
-    return (
-      <section className="mb-4">
-        <SectionHeading eyebrow="CG action plan" title="What we do next" />
-        <div className="grid gap-4 lg:grid-cols-2">
-          {recommendations.slice(0, 4).map((rec, index) => (
-            <article
-              key={index}
-              className="rounded-3xl border border-white/[0.08] bg-[linear-gradient(135deg,rgba(255,255,255,0.07),rgba(255,255,255,0.035))] p-6 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.95)] sm:p-7"
-            >
-              <p className="text-xs font-black uppercase tracking-[0.22em] text-[#2dd4bf]">Recommended focus</p>
-              <p className="mt-4 text-[0.95rem] leading-relaxed text-slate-300">{rec}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-    )
-  }
-
-  if (cards.length === 0 && isPublished) {
-    return null
-  }
-
-  if (cards.length === 0) {
+  if (!monthlyStrategy) {
     if (!showEmptyStrategy) return null
-
     return (
       <section className="mb-4">
         <SectionHeading eyebrow="CG action plan" title="What we do next" />
         <p className="rounded-3xl border border-white/[0.08] bg-white/[0.045] p-6 text-sm text-slate-400">
-          CG action plan will be added before final publishing.
+          The monthly strategy is still under review. Nothing is inferred from report notes or performance data.
         </p>
+      </section>
+    )
+  }
+
+  const qualityIssues = clientFacingStrategyQualityIssues(monthlyStrategy.strategyData)
+  if (qualityIssues.length > 0) {
+    if (!staffPreview) return null
+    return (
+      <section className="mb-4 rounded-3xl border border-amber-300/25 bg-amber-300/[0.06] p-6">
+        <p className="text-xs font-black uppercase tracking-[0.2em] text-amber-200">Strategy preview held</p>
+        <p className="mt-3 text-sm leading-6 text-amber-50">This canonical strategy contains internal or non-actionable copy and is not presentation-ready.</p>
+        <ul className="mt-3 list-disc space-y-1 pl-5 text-xs text-amber-100/80">
+          {qualityIssues.map(issue => <li key={issue}>{issue}</li>)}
+        </ul>
       </section>
     )
   }
@@ -1705,114 +1557,19 @@ function StrategyBlocks({
   return (
     <section className="mb-4">
       <SectionHeading eyebrow="CG action plan" title="What we do next" />
-      <div className="grid gap-4 lg:grid-cols-2">
-        {cards.map(card => (
-          <article
-            key={card.title}
-            className="rounded-3xl border border-white/[0.08] bg-[linear-gradient(135deg,rgba(255,255,255,0.07),rgba(255,255,255,0.035))] p-6 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.95)] sm:p-7"
-          >
-            <p className="text-xs font-black uppercase tracking-[0.22em] text-[#2dd4bf]">{card.label}</p>
-            <h3 className="mt-3 text-xl font-black tracking-[-0.03em] text-white">{card.title}</h3>
-            <p className="mt-4 whitespace-pre-line text-[0.95rem] leading-relaxed text-slate-300">{card.text}</p>
-          </article>
-        ))}
+      <div className="mb-5 flex flex-wrap items-center gap-2 text-xs">
+        <span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 font-semibold text-slate-200">
+          {monthDisplayLabel(monthlyStrategy.month)} strategy
+        </span>
+        {staffPreview && (
+          <span className={`rounded-full px-3 py-1 font-bold uppercase tracking-[0.12em] ${monthlyStrategy.status === 'draft' ? 'bg-amber-300/10 text-amber-200' : 'bg-emerald-300/10 text-emerald-200'}`}>
+            {monthlyStrategy.status === 'draft' ? 'Draft — not visible to client' : monthlyStrategy.status}
+          </span>
+        )}
       </div>
+      <GuidedStrategyView data={monthlyStrategy.strategyData} hideTopContent variant="report" />
     </section>
   )
-}
-
-function buildStrategyCards(report: RenderableReport, strategy: ReturnType<typeof readStrategyData>) {
-  const record = strategy as unknown as Record<string, unknown>
-
-  const guidedCards = [
-    {
-      label: 'Direction',
-      title: 'Client direction',
-      text: textFromKeys(record, ['clientDirection', 'direction', 'monthlyDirection']),
-    },
-    {
-      label: 'Focus',
-      title: 'Strategy going forward',
-      text: textFromKeys(record, ['strategyGoingForward', 'strategyNextMonth', 'strategy', 'nextMonthFocus']),
-    },
-    {
-      label: 'Execution',
-      title: 'Action plan',
-      text: textFromKeys(record, ['actionPlan', 'recommendedActions', 'actions', 'contentPlan']),
-    },
-    {
-      label: 'Client input',
-      title: 'Client actions required',
-      text: textFromKeys(record, ['clientActionsRequired', 'clientActions', 'clientNeeds', 'requirements']),
-    },
-    {
-      label: 'Campaigns',
-      title: 'Campaign recommendation',
-      text: textFromKeys(record, ['campaignRecommendation', 'boostRecommendation', 'paidMediaRecommendation', 'campaign']),
-    },
-  ]
-
-  const legacyCards = [
-    { label: 'Performance', title: 'What worked', text: report.performance_comments },
-    { label: 'Opportunity', title: 'Opportunities', text: report.previous_month_reflection },
-    { label: 'Focus', title: 'Next month focus', text: report.strategy_next_month },
-    {
-      label: 'Action',
-      title: 'Recommended actions',
-      text: [report.content_direction_next_month, report.boost_recommendation].filter(Boolean).join('\n\n') || null,
-    },
-  ]
-
-  return [...guidedCards, ...legacyCards]
-    .map(card => ({ ...card, text: cleanText(card.text) }))
-    .filter(card => card.text)
-}
-
-function textFromKeys(record: Record<string, unknown>, keys: string[]) {
-  for (const key of keys) {
-    const value = record[key]
-    const formatted = formatStrategyValue(value)
-    if (formatted) return formatted
-  }
-  return null
-}
-
-function formatStrategyValue(value: unknown): string | null {
-  if (typeof value === 'string') return value.trim() || null
-
-  if (Array.isArray(value)) {
-    const parts = value.map(item => formatStrategyValue(item)).filter(Boolean)
-    return parts.length > 0 ? parts.join('\n') : null
-  }
-
-  if (value && typeof value === 'object') {
-    const entries = Object.entries(value as Record<string, unknown>)
-      .map(([key, item]) => {
-        const formatted = formatStrategyValue(item)
-        if (!formatted) return null
-        return `${humanLabel(key)}: ${formatted}`
-      })
-      .filter(Boolean)
-
-    return entries.length > 0 ? entries.join('\n') : null
-  }
-
-  return null
-}
-
-function cleanText(value: unknown): string | null {
-  if (typeof value !== 'string') return null
-  const trimmed = value.trim()
-  return trimmed.length > 0 ? trimmed : null
-}
-
-function humanLabel(key: string) {
-  return key
-    .replace(/([A-Z])/g, ' $1')
-    .replace(/[_-]+/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .replace(/^./, char => char.toUpperCase())
 }
 
 function PlatformTab({
@@ -1849,7 +1606,7 @@ function PlatformTab({
     return (
       <>
         <SectionHeading eyebrow={performance.label} title={`${performance.label} performance`} />
-        {sections.length > 0 ? <VerifiedOverview sections={sections} monthLabel={monthLabel} /> : <VerifiedFactsUnavailable />}
+        {sections.length > 0 ? <VerifiedOverview sections={sections} showUnavailable={false} /> : <VerifiedFactsUnavailable />}
         <PlatformContent performance={performance} view={view} />
         <PlatformNotes view={view} />
       </>

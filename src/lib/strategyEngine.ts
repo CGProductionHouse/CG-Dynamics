@@ -228,6 +228,42 @@ export function hasStrategyContent(data: StrategyData): boolean {
   )
 }
 
+const CLIENT_FACING_STRATEGY_FORBIDDEN: Array<{ pattern: RegExp; reason: string }> = [
+  { pattern: /\bCGProductionHouse\//i, reason: 'Repository names are internal provenance, not client strategy.' },
+  { pattern: /\b(?:github|repository|repo)\b/i, reason: 'Repository references are internal provenance, not client strategy.' },
+  { pattern: /\b(?:source[_ -]?reference|source[_ -]?id|evidence[_ -]?label|confidence[_ -]?level|seed[_ -]?context)\b/i, reason: 'Evidence-system jargon must not appear in client strategy.' },
+  { pattern: /\b(?:verified facts?|exact-client evidence|evidence dossier|research dossier|source pack)\b/i, reason: 'Internal evidence-workflow jargon must not appear in client strategy.' },
+  { pattern: /\bPublished-content record:/i, reason: 'A factual publishing receipt is not a strategy.' },
+  { pattern: /\bCorrect facts are only the starting point\b/i, reason: 'Generic quality commentary is not an actionable client strategy.' },
+  { pattern: /\b(?:increase engagement|build (?:brand )?awareness|post consistently|grow social media|create engaging content)\b/i, reason: 'Generic marketing filler is not an exact client strategy.' },
+  { pattern: /(?:^|[\\/])(?:docs|sources|artifacts)[\\/]/i, reason: 'Internal file paths must not appear in client strategy.' },
+  { pattern: /\.(?:md|pdf|json)\b/i, reason: 'Internal source filenames must not appear in client strategy.' },
+]
+
+function clientFacingStrategyText(data: StrategyData): string[] {
+  return [
+    ...data.clientDirection,
+    data.clientRequestNotes,
+    ...data.strategyDrivers,
+    data.strategyGoingForward,
+    ...data.clientActionsRequired,
+    ...Object.values(data.actionPlan).flatMap(section => [...section.items, section.notes]),
+    ...Object.values(data.goldStandard),
+  ].map(value => value.trim()).filter(Boolean)
+}
+
+/**
+ * Fail-closed presentation gate for client-facing strategy copy. This does not
+ * mutate or approve a strategy; it prevents internal provenance and known
+ * non-strategy filler from leaking into a client preview.
+ */
+export function clientFacingStrategyQualityIssues(data: StrategyData): string[] {
+  const text = clientFacingStrategyText(data).join('\n')
+  return CLIENT_FACING_STRATEGY_FORBIDDEN
+    .filter(rule => rule.pattern.test(text))
+    .map(rule => rule.reason)
+}
+
 // ─── completion checklist ────────────────────────────────────────────────────
 //
 // Guides staff through finishing a report before publishing. Never blocks

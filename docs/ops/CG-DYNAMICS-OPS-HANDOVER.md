@@ -2,7 +2,7 @@
 
 Status: CURRENT authority for a fresh supervisor chat.
 
-Updated: 27 September 2026 after direct production Client Preview review reopened launch closure under P0 #567. TikTok/reporting/strategy/website client-facing defects remain active.
+Updated: 27 September 2026 for the #567 Client Performance repair. The code repair and zero-write evidence artifacts are complete; merge/deployment acceptance and guarded website-reporting identity activation remain to be recorded on #567.
 
 ## 1. Fresh-chat recovery order
 
@@ -84,7 +84,7 @@ Major completed launch-critical merges:
 
 ### CURRENT closure lanes
 
-0. **#567 Client Performance launch repair — ACTIVE P0**: direct production review disproved launch readiness. TikTok facts are hidden behind a hard-coded Coming soon state; known-unavailable Facebook Viewer cards clutter client reports; Instagram website-click naming is ambiguous; factual report-reconciliation text is being presented as strategy; Piek proves current monthly-strategy quality can contain generic/internal-provenance wording; Website Performance has only 1 production snapshot/client (Red Oak M1) rather than fleet coverage for verified CG-built sites. Do not call the app launch-ready until #567 is merged and production-verified.
+0. **#567 Client Performance launch repair — ACTIVE P0 until production acceptance**: the code repair now renders verified TikTok facts, hides unavailable client metrics while retaining staff diagnostics, labels Instagram profile-link clicks, removes non-live provider tabs and report-text strategy fallbacks, and uses canonical monthly strategy with draft-only staff preview / published-only client projection. Client-facing strategy quality now rejects repository paths, evidence jargon and the Piek generic filler fixture. A zero-write 94-row readiness artifact passes all 94 proposals but deliberately performs no strategy amendment, approval or publication. Website fleet evidence identifies nine verified CG-managed production sites; four have exact active Dynamics clients (All Around PVC, Emmanuel Funerals, Piek Group and Red Oak), while five are held because no exact active Dynamics client exists. Red Oak remains the only proven published snapshot. The client UI now names exact CG-managed sites and reports a missing approved snapshot truthfully instead of generic `Not connected`. Exact reporting identities/snapshots for the other three active clients must still be established through the existing guarded Website Operations contract after authenticated authority is available; never guess them from a name or URL.
 
 1. **#505 provider closure**: TikTok is healthy at 10 connected / 0 needs_reauth /
    37 not connected. Four client-help holds remain (Emmanuel Funerals, Emoya
