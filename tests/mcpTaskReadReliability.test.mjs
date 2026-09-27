@@ -37,6 +37,8 @@ test('MCP personal task reads use canonical assignment IDs, not display-name mat
   assert.doesNotMatch(taskReadHelper, /eq\('assigned_to_name'/)
   assert.match(index, /from\('planner_task_assignees'\)[\s\S]*eq\('profile_id', staff\.profileId\)/)
   assert.match(index, /from\('planner_tasks_canonical'\)/)
+  assert.doesNotMatch(taskReadHelper, /assigned_to_user_id/)
+  assert.doesNotMatch(oneTask, /assigned_to_user_id/)
   assert.match(oneTask, /canReadPlannerTask/)
   assert.doesNotMatch(oneTask, /assigned_to_name !== staff\.fullName/)
 })
