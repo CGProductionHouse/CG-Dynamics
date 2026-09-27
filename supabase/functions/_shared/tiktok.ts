@@ -218,7 +218,8 @@ export async function refreshTiktokToken(
   sb: ReturnType<typeof createClient>,
   connectionId: string,
   refreshToken: string,
-): Promise<{ accessToken: string; expiresIn: number; refreshToken: string } | null> {
+  expectedOpenId?: string,
+): Promise<{ accessToken: string; expiresIn: number; refreshToken: string; openId: string | null } | null> {
   const config = resolveTiktokConfig()
 
   const params = new URLSearchParams({
@@ -259,7 +260,12 @@ export async function refreshTiktokToken(
     return null
   }
 
-  // Update stored tokens
+  if (expectedOpenId && body.open_id !== expectedOpenId) {
+    console.error('TikTok token refresh returned a different provider identity')
+    return null
+  }
+
+  // Update stored tokens only after exact provider identity verification
   await sb
     .from('tiktok_connection_tokens')
     .update({
@@ -273,6 +279,7 @@ export async function refreshTiktokToken(
     accessToken: body.access_token,
     expiresIn: body.expires_in ?? 86400,
     refreshToken: body.refresh_token ?? refreshToken,
+    openId: body.open_id ?? null,
   }
 }
 
