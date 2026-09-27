@@ -170,3 +170,81 @@ test('active-client scan is genuinely paginated and seed remains the only write 
   assert.match(source, /\.eq\('active_client_id', clientId\)[\s\S]*\.limit\(30\)/)
   assert.doesNotMatch(source, /\.from\('monthly_client_strategies'\)\.insert|\.update\(/)
 })
+
+test('package readiness uses canonical clients.package_settings via readPackageAuthority, not client_packages/monthly_deliverables inference', () => {
+  const source = read('../supabase/functions/_shared/monthlyStrategyAutopilot.ts')
+  assert.match(source, /readPackageAuthority\(client\.package_settings\)/)
+  assert.doesNotMatch(source, /function packageFromDeliverables/)
+  assert.doesNotMatch(source, /client_packages.*monthly_deliverables|monthly_deliverables.*client_packages/)
+})
+
+test('client_packages table query exists only for seedContext provenance, not package readiness decision', () => {
+  const source = read('../supabase/functions/_shared/monthlyStrategyAutopilot.ts')
+  const packageQueryIndex = source.indexOf("from('client_packages')")
+  const packageAuthorityIndex = source.indexOf('readPackageAuthority(client.package_settings)')
+  const blockerCheckIndex = source.indexOf("prepared.blockers.length > 0")
+  assert.ok(packageQueryIndex >= 0, 'client_packages query should exist for provenance')
+  assert.ok(packageAuthorityIndex >= 0, 'readPackageAuthority should exist for package readiness')
+  assert.ok(blockerCheckIndex >= 0, 'blocker check should exist')
+  assert.ok(packageAuthorityIndex < blockerCheckIndex, 'package authority decision must precede blocker check')
+})
+
+test('confirmed monthly_deliverables without confirmed package_settings still produces PACKAGE_UNVERIFIED blocker', async () => {
+  const fake = new FakeSupabase({
+    clients: [{ id: 'client-a', name: 'Client A', active: true, package_settings: {} }],
+    monthly_client_strategies: [],
+    monthly_deliverables: [
+      { id: 'd-1', client_id: 'client-a', month: '2026-09-01', archived_at: null, deliverable_type: 'reel', title: 'Reel' },
+      { id: 'd-2', client_id: 'client-a', month: '2026-09-01', archived_at: null, deliverable_type: 'video', title: 'Video' },
+      { id: 'd-3', client_id: 'client-a', month: '2026-10-01', archived_at: null, deliverable_type: 'reel', title: 'Reel' },
+    ],
+    company_calendar_events: [], reports: [], client_context_updates: [], client_guides: [],
+    client_packages: [{ id: 'package-a', client_id: 'client-a', status: 'active', start_date: '2026-01-01', end_date: null }],
+    client_industry_profiles: [], skill_cards: [],
+  })
+  const result = await autopilot.runMonthlyStrategyAutopilot(fake, { today: '2026-09-22', systemProfileId: 'system-profile' })
+  assert.equal(result.drafts_created, 0)
+  assert.equal(result.blocked, 2)
+  assert.equal(result.blockers.PACKAGE_UNVERIFIED, 2)
+  assert.equal(fake.calls.length, 0)
+})
+
+test('active client_packages row without confirmed package_settings still produces PACKAGE_UNVERIFIED blocker', async () => {
+  const fake = new FakeSupabase({
+    clients: [{ id: 'client-a', name: 'Client A', active: true, package_settings: { professional_videos_per_month: 1 } }],
+    monthly_client_strategies: [],
+    monthly_deliverables: [],
+    company_calendar_events: [], reports: [], client_context_updates: [], client_guides: [],
+    client_packages: [{ id: 'package-a', client_id: 'client-a', status: 'active', start_date: '2026-01-01', end_date: null }],
+    client_industry_profiles: [], skill_cards: [],
+  })
+  const result = await autopilot.runMonthlyStrategyAutopilot(fake, { today: '2026-09-22', systemProfileId: 'system-profile' })
+  assert.equal(result.drafts_created, 0)
+  assert.equal(result.blocked, 2)
+  assert.equal(result.blockers.PACKAGE_UNVERIFIED, 2)
+  assert.equal(fake.calls.length, 0)
+})
+
+test('only confirmed package_settings with verification receipt allows draft creation', async () => {
+  const confirmedPackage = {
+    professional_videos_per_month: 1, reels_per_month: 2, photo_posts_per_month: 1,
+    design_posters_per_month: 2, animated_posters_per_month: 0,
+    campaign_management_included: false, monthly_campaign_budget: 0,
+    shoot_days_per_month: 1, website_updates_per_month: 0,
+    other_agreed_deliverables: '', package_notes: 'Confirmed package', package_exclusions: '',
+    verification: { status: 'confirmed', version: 1, confirmed_at: '2026-09-20T08:00:00Z', confirmed_by_profile_id: 'admin-a', evidence_note: 'Client contract checked', inference_note: '', source_references: ['contract-2026'] },
+  }
+  const fake = new FakeSupabase({
+    clients: [{ id: 'client-a', name: 'Client A', active: true, package_settings: confirmedPackage }],
+    monthly_client_strategies: [],
+    monthly_deliverables: [],
+    company_calendar_events: [], reports: [], client_context_updates: [], client_guides: [],
+    client_packages: [],
+    client_industry_profiles: [], skill_cards: [],
+  })
+  const result = await autopilot.runMonthlyStrategyAutopilot(fake, { today: '2026-09-22', systemProfileId: 'system-profile' })
+  assert.equal(result.drafts_created, 2)
+  assert.equal(result.blocked, 0)
+  assert.equal(result.blockers.PACKAGE_UNVERIFIED, undefined)
+  assert.equal(fake.calls.length, 2)
+})
