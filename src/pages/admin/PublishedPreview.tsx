@@ -14,7 +14,7 @@ import {
   type ManualPlatformMetric,
 } from '../../lib/db/manualMetrics'
 import { getReportMonthFromPeriod, monthDisplayLabel, previousReportMonth, selectMonthlyReports } from '../../lib/reportPeriod'
-import { ClientDashboardShell, ClientReportView } from '../client/ClientReportView'
+import { ClientDashboardShell, ClientReportView, type MonthlyStrategyPresentation } from '../client/ClientReportView'
 import { ClientMonthAhead } from '../../components/client/ClientMonthAhead'
 import { EmptyState } from '../../components/ui/States'
 import {
@@ -32,6 +32,8 @@ import {
 } from '../../lib/db/reportingTruth'
 import type { PlatformFact } from '../../lib/overviewModel'
 import type { ReportStatsPost } from '../../lib/reportStats'
+import { actionMonthForReport } from '../../lib/clientPortal'
+import { getMonthlyStrategy } from '../../lib/monthlyStrategy'
 import { isStaffRole } from '../../lib/roles'
 import { loadStaffSetupPreview } from '../../features/client-onboarding/api'
 import { ClientSetupContent } from '../../features/client-onboarding/ClientSetupPage'
@@ -76,6 +78,7 @@ export default function PublishedPreview() {
   const [facts, setFacts] = useState<PlatformFact[]>([])
   const [previousFacts, setPreviousFacts] = useState<PlatformFact[]>([])
   const [normalizedFactsAttempted, setNormalizedFactsAttempted] = useState(false)
+  const [monthlyStrategy, setMonthlyStrategy] = useState<MonthlyStrategyPresentation | null>(null)
   const [dataHealth, setDataHealth] = useState<ReportFactHealth[]>([])
   const [contentExclusions, setContentExclusions] = useState<ReportContentExclusion[]>([])
   const [curationBusyId, setCurationBusyId] = useState<string | null>(null)
@@ -185,6 +188,7 @@ export default function PublishedPreview() {
       setFacts([])
       setPreviousFacts([])
       setNormalizedFactsAttempted(false)
+      setMonthlyStrategy(null)
       setDataHealth([])
       setContentExclusions([])
       setReportLoading(true)
@@ -204,7 +208,8 @@ export default function PublishedPreview() {
           const previous = previousMonth
             ? reports.find(report => report.client_id === data.client_id && getReportMonthFromPeriod(report) === previousMonth)
             : null
-          const [metricsResult, previousReportResult, previousMetricsResult, googleAdsResult, factsResult, healthResult, exclusionsResult] = await Promise.all([
+          const actionMonth = actionMonthForReport(data)
+          const [metricsResult, previousReportResult, previousMetricsResult, googleAdsResult, factsResult, healthResult, exclusionsResult, strategyResult] = await Promise.all([
             listManualMetricsForClientMonth(data.client_id, currentMonth),
             previous ? getReportWithPosts(previous.id) : Promise.resolve({ data: null, error: null }),
             previousMonth ? listManualMetricsForClientMonth(data.client_id, previousMonth) : Promise.resolve({ data: [], error: null }),
@@ -212,6 +217,7 @@ export default function PublishedPreview() {
             loadReportPlatformFacts(data.id, currentMonth, previousMonth),
             loadReportFactHealth(data.id),
             loadReportContentExclusions(data.id),
+            actionMonth ? getMonthlyStrategy(data.client_id, actionMonth) : Promise.resolve({ data: null, error: null }),
           ])
           if (!active) return
           if (factsResult.error || healthResult.error || exclusionsResult.error) {
@@ -229,6 +235,11 @@ export default function PublishedPreview() {
           setNormalizedFactsAttempted(factsResult.normalizedAttempted)
           setDataHealth(healthResult.data)
           setContentExclusions(exclusionsResult.data)
+          setMonthlyStrategy(strategyResult.data ? {
+            month: strategyResult.data.strategy_month,
+            status: strategyResult.data.workflow_status,
+            strategyData: strategyResult.data.strategy_data,
+          } : null)
         }
       } catch (error) {
         if (!active) return
@@ -289,6 +300,7 @@ export default function PublishedPreview() {
       setFacts([])
       setPreviousFacts([])
       setNormalizedFactsAttempted(false)
+      setMonthlyStrategy(null)
       setDataHealth([])
       setContentExclusions([])
     }
@@ -471,6 +483,7 @@ export default function PublishedPreview() {
               facts={facts}
               previousFacts={previousFacts}
               normalizedFactsAttempted={normalizedFactsAttempted}
+              monthlyStrategy={monthlyStrategy}
               dataHealth={dataHealth}
               contentExclusions={contentExclusions}
               onSetContentExcluded={isAdmin ? handleContentExcluded : undefined}

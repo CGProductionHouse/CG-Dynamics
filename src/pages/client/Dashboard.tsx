@@ -17,7 +17,6 @@ import { getReportMonthFromPeriod, monthDisplayLabel, previousReportMonth, selec
 import {
   ClientReportView,
   EmptyReportState,
-  type GoogleSurface,
   type ReportTabKey,
 } from './ClientReportView'
 import { ClientMonthAhead } from '../../components/client/ClientMonthAhead'
@@ -30,6 +29,9 @@ import {
   loadReportPlatformFacts,
 } from '../../lib/db/reportingTruth'
 import type { PlatformFact } from '../../lib/overviewModel'
+import { actionMonthForReport } from '../../lib/clientPortal'
+import { getClientPublishedMonthlyStrategy } from '../../lib/monthlyStrategy'
+import type { MonthlyStrategyPresentation } from './ClientReportView'
 
 function errorMessage(error: unknown, fallback: string) {
   if (error instanceof Error) return error.message
@@ -57,6 +59,7 @@ export default function Dashboard() {
   const [facts, setFacts] = useState<PlatformFact[]>([])
   const [previousFacts, setPreviousFacts] = useState<PlatformFact[]>([])
   const [normalizedFactsAttempted, setNormalizedFactsAttempted] = useState(false)
+  const [monthlyStrategy, setMonthlyStrategy] = useState<MonthlyStrategyPresentation | null>(null)
   const [loading, setLoading] = useState(true)
   const [reportLoading, setReportLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -65,21 +68,12 @@ export default function Dashboard() {
 
   const months = useMemo(() => selectMonthlyReports(reports), [reports])
   const requestedTab = parseReportTab(searchParams.get('tab'))
-  const requestedGoogleSurface = parseGoogleSurface(searchParams.get('surface'))
 
   const handleTabChange = (tab: ReportTabKey) => {
     const next = new URLSearchParams(searchParams)
     if (tab === 'overview') next.delete('tab')
     else next.set('tab', tab)
-    if (tab !== 'google') next.delete('surface')
-    setSearchParams(next, { replace: true })
-  }
-
-  const handleGoogleSurfaceChange = (surface: GoogleSurface) => {
-    const next = new URLSearchParams(searchParams)
-    next.set('tab', 'google')
-    if (surface === 'ads') next.delete('surface')
-    else next.set('surface', surface)
+    next.delete('surface')
     setSearchParams(next, { replace: true })
   }
 
@@ -151,6 +145,7 @@ export default function Dashboard() {
       setFacts([])
       setPreviousFacts([])
       setNormalizedFactsAttempted(false)
+      setMonthlyStrategy(null)
       setReportLoading(true)
       setError(null)
       try {
@@ -164,10 +159,12 @@ export default function Dashboard() {
         if (data) {
           const currentMonth = getReportMonthFromPeriod(data)
           const previousMonth = previousReportMonth(currentMonth)
-          const [metricsResult, googleAdsResult, factsResult] = await Promise.all([
+          const actionMonth = actionMonthForReport(data)
+          const [metricsResult, googleAdsResult, factsResult, strategyResult] = await Promise.all([
             listClientReportManualMetrics(data.id),
             loadGoogleAdsDashboard(data.id, currentMonth),
             loadReportPlatformFacts(data.id, currentMonth, previousMonth),
+            actionMonth ? getClientPublishedMonthlyStrategy(actionMonth) : Promise.resolve({ data: null, error: null }),
           ])
           if (!requestIsCurrent()) return
           if (factsResult.error || metricsResult.error) {
@@ -185,6 +182,11 @@ export default function Dashboard() {
           setFacts(factsResult.facts)
           setPreviousFacts(factsResult.previousFacts)
           setNormalizedFactsAttempted(factsResult.normalizedAttempted)
+          setMonthlyStrategy(strategyResult.data ? {
+            month: strategyResult.data.strategy_month,
+            status: 'published',
+            strategyData: strategyResult.data.strategy_data,
+          } : null)
         }
       } catch (error) {
         if (!requestIsCurrent()) return
@@ -262,10 +264,9 @@ export default function Dashboard() {
           facts={facts}
           previousFacts={previousFacts}
           normalizedFactsAttempted={normalizedFactsAttempted}
+          monthlyStrategy={monthlyStrategy}
           initialTab={requestedTab}
           onTabChange={handleTabChange}
-          initialGoogleSurface={requestedGoogleSurface}
-          onGoogleSurfaceChange={handleGoogleSurfaceChange}
         />
       ) : (
         <EmptyReportState
@@ -285,8 +286,4 @@ function parseReportTab(value: string | null): ReportTabKey {
   if (value === 'campaigns' || value === 'google_ads') return 'google'
   if (value === 'facebook' || value === 'instagram' || value === 'google' || value === 'tiktok' || value === 'linkedin' || value === 'web' || value === 'email') return value
   return 'overview'
-}
-
-function parseGoogleSurface(value: string | null): GoogleSurface {
-  return value === 'business' ? 'business' : 'ads'
 }

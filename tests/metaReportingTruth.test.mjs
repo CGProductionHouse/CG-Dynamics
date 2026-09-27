@@ -191,7 +191,7 @@ test('provider-specific metrics use labels that do not imply Business Suite pari
   ]
   const lines = ov.buildOverviewSections(current, []).flatMap(section => section.lines)
   assert.equal(lines.find(line => line.platform === 'facebook')?.label, 'Facebook post engagements')
-  assert.equal(lines.find(line => line.platform === 'instagram')?.label, 'Instagram website clicks')
+  assert.equal(lines.find(line => line.platform === 'instagram')?.label, 'Instagram profile website clicks')
 })
 
 test('current followers is a snapshot and never shows month-on-month growth', () => {
@@ -349,12 +349,14 @@ test('rendered current followers are a snapshot with no percentage', () => {
   assert.doesNotMatch(html, /vs last month/)
 })
 
-test('rendered unavailable fact is explicit and never becomes zero', () => {
+test('rendered unavailable fact is hidden from clients but retained in staff diagnostics', () => {
   const unavailable = fact({ platform: 'facebook', metricKey: 'unique_viewers', value: null, availability: 'unavailable', aggregation: 'unique', sourceMetric: 'page_total_media_view_unique', comparableGroup: 'fb_media_viewers_v2' })
   const html = renderReport({ facts: [unavailable], previousFacts: [] })
-  assert.match(html, /Facebook viewers/)
-  assert.match(html, /Unavailable from the connected Meta source/)
+  assert.doesNotMatch(html, /Facebook viewers|Unavailable from the connected Meta source/)
   assert.doesNotMatch(html, />0</)
+  const staffHtml = renderReport({ facts: [unavailable], previousFacts: [], showAdminDiagnostics: true })
+  assert.match(staffHtml, /Facebook viewers/)
+  assert.match(staffHtml, /Unavailable from the connected Meta source/)
 })
 
 test('rendered exclusions promote the next eligible post and expose admin controls only to staff callback', () => {

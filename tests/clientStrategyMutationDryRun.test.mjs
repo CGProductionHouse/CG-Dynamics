@@ -86,6 +86,17 @@ test('ready proposals contain a complete exact-client gold-standard brief', () =
   }
 })
 
+test('Piek proposals are client-ready and contain no repository or evidence-workflow filler', () => {
+  const piek = plan.rows.filter(row => row.client_name === 'Piek Group')
+  assert.equal(piek.length, 2)
+  for (const row of piek) {
+    const text = JSON.stringify(row.proposed_strategy_data)
+    assert.match(text, /actual image\/video\/poster/i)
+    assert.match(text, /asset, branch, audience and occasion/i)
+    assert.doesNotMatch(text, /CGProductionHouse\/|github|repository|\.pdf\b|\.md\b|verified facts|exact-client evidence|evidence dossier|source pack|Correct facts are only the starting point/i)
+  }
+})
+
 test('never enables unknown or zero package formats or campaign work', () => {
   const mapping = {
     professional_video: 'professional_videos_per_month',

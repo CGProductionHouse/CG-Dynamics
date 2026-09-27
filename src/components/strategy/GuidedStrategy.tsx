@@ -16,6 +16,7 @@ import {
 import {
   ACTION_PLAN_LABELS,
   CONTENT_TYPES,
+  GOLD_STANDARD_FIELDS,
   generateActionPlan,
   generateStrategyGoingForward,
   type ActionPlanKey,
@@ -703,6 +704,9 @@ export function GuidedStrategyView({
   const activePlans = (Object.keys(ACTION_PLAN_LABELS) as ActionPlanKey[])
     .map(key => ({ key, section: data.actionPlan[key] }))
     .filter(({ section }) => section.enabled && (section.items.length > 0 || section.notes.trim() !== ''))
+  const goldStandardFields = GOLD_STANDARD_FIELDS
+    .map(field => ({ ...field, value: data.goldStandard[field.key].trim() }))
+    .filter(field => field.value)
 
   const report = variant === 'report'
   const body = report ? 'text-report-text' : 'text-white'
@@ -729,6 +733,19 @@ export function GuidedStrategyView({
       {data.strategyDrivers.length > 0 && (
         <ViewCard title="Strategic drivers" variant={variant}>
           <ChipRow items={data.strategyDrivers} variant={variant} />
+        </ViewCard>
+      )}
+
+      {goldStandardFields.length > 0 && (
+        <ViewCard title="Monthly strategy" variant={variant} wide>
+          <div className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
+            {goldStandardFields.map(field => (
+              <div key={field.key}>
+                <p className={`text-xs font-semibold uppercase tracking-[0.12em] ${accent}`}>{field.label}</p>
+                <p className={`mt-2 whitespace-pre-line text-sm leading-relaxed ${body}`}>{field.value}</p>
+              </div>
+            ))}
+          </div>
         </ViewCard>
       )}
 

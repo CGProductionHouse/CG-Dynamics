@@ -71,6 +71,13 @@ test('fails closed on foreign client evidence, generic filler and package overre
   assert.ok(result.errors.includes('REVIEWED_PROVENANCE_HASH_MISMATCH'))
 })
 
+test('fails closed on repository names and non-strategy evidence jargon', () => {
+  const row = structuredClone(liveRow)
+  row.strategy_data.goldStandard.objective = 'Use current CGProductionHouse/PiekGroup-Website verified facts from the evidence dossier.'
+  const result = auditStrategyRow({ row, client, reviewed, allClients: [client] })
+  assert.ok(result.errors.includes('INTERNAL_OR_NON_STRATEGY_COPY'))
+})
+
 test('manifest is read-only, deterministic apart from explicit audit time, and prepares separate transitions', () => {
   const fleetPlan = {
     plan_hash: 'b'.repeat(64),
