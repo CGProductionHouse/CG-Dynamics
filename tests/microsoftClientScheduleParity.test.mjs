@@ -234,10 +234,10 @@ test('apply path calls the template RPC then a create, in dependency order', () 
 })
 
 // ── Launch: honest Microsoft transition state ───────────────────────────────
-test('Microsoft admin page shows the transition/pending banner and gates apply behind preview', () => {
+test('Microsoft admin page shows the current transition boundary and gates apply behind preview', () => {
   const page = readRel('../src/pages/admin/MicrosoftImportPage.tsx')
-  assert.match(page, /Final live package\s+parity verification is still pending/)
-  assert.match(page, /Do not retire Microsoft Planner until the full dated reconciliation/)
+  assert.match(page, /Automatic Microsoft collection and the last verified Dynamics mirror are active/)
+  assert.match(page, /Do not retire Microsoft Planner until CA completes the separate\s+transition decision/)
   // Apply must require a reviewed preview snapshot first (no blind apply).
   assert.match(page, /const canApply = Boolean\(snapshot\)[\s\S]*reviewed[\s\S]*applicableCount > 0/)
   assert.match(page, /disabled=\{!canApply\}/)
