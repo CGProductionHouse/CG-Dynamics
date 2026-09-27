@@ -2,7 +2,7 @@
 
 Status: CURRENT authority for a fresh supervisor chat.
 
-Updated: 27 September 2026 during #564 final launch-week closure, after TikTok guarded recovery, protected portal rollout, reviewed strategy draft amendments, final stale-PR cleanup, authenticated Website M1 / #217 acceptance, and production MCP v24 operational verification.
+Updated: 27 September 2026 after direct production Client Preview review reopened launch closure under P0 #567. TikTok/reporting/strategy/website client-facing defects remain active.
 
 ## 1. Fresh-chat recovery order
 
@@ -26,7 +26,7 @@ If chat history conflicts with this file, current GitHub + verified production s
 
 Latest verified runtime merge baseline:
 
-`54f316949968a51bce972f82cb74633626ffec37` — PR #565 final launch transition-status correction.
+`c7b6af8b76ee5359918f340bb984914b1d7d8cf3` — docs-only PR #566 after PR #565. CURRENT LAUNCH AUTHORITY: app is NOT launch-ready while #567 remains open.
 
 Always refetch `main` before code or merge actions.
 
@@ -84,6 +84,8 @@ Major completed launch-critical merges:
 
 ### CURRENT closure lanes
 
+0. **#567 Client Performance launch repair — ACTIVE P0**: direct production review disproved launch readiness. TikTok facts are hidden behind a hard-coded Coming soon state; known-unavailable Facebook Viewer cards clutter client reports; Instagram website-click naming is ambiguous; factual report-reconciliation text is being presented as strategy; Piek proves current monthly-strategy quality can contain generic/internal-provenance wording; Website Performance has only 1 production snapshot/client (Red Oak M1) rather than fleet coverage for verified CG-built sites. Do not call the app launch-ready until #567 is merged and production-verified.
+
 1. **#505 provider closure**: TikTok is healthy at 10 connected / 0 needs_reauth /
    37 not connected. Four client-help holds remain (Emmanuel Funerals, Emoya
    Estate Driving Range, Piek Group, We Ar Fuels); the other unconnected TikTok
@@ -111,15 +113,10 @@ Major completed launch-critical merges:
    the intentional communal company OAuth cannot prove which physical staff member is using
    a ChatGPT Project. Keep that limitation explicit; do not reopen the rejected stale #380
    delegation seam or pretend exact UUID context proves human identity.
-8. **#564 final launch-week closure**: authenticated admin desktop acceptance passed
-   across Hub, Work, Calendar, Client Schedule, Clients, Performance, Packages,
-   Reports/Preview, Integrations, Marketing, Assistant, Onboarding, Content,
-   Strategy, Users and System with no body overflow or fatal route state. The stale
-   Microsoft transition banner was corrected to reflect active automatic collection
-   and last-verified-mirror authority while retaining the separate Planner-retirement
-   decision. The browser session expired before the final post-deploy 375px and
-   client-role pass; those checks require a fresh authenticated human session and
-   must not be inferred from staff preview access.
+8. **#564 historical closure pass**: authenticated admin desktop acceptance passed
+   across the major routes and PR #565 corrected the stale Microsoft transition banner,
+   but subsequent direct production Client Preview review exposed additional launch
+   blockers now owned by #567. #564 must NOT be treated as current launch-ready authority.
 
 Do not open overlapping redesign lanes.
 
