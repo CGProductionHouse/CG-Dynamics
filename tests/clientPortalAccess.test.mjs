@@ -83,3 +83,17 @@ test('admin access API never persists generated credentials client-side', () => 
   assert.doesNotMatch(API, /localStorage|sessionStorage/)
   assert.doesNotMatch(ADMIN, /localStorage|sessionStorage/)
 })
+
+
+test('existing exact client profiles are linked rather than duplicated', () => {
+  assert.match(EDGE, /action === 'link_existing'/)
+  assert.match(EDGE, /handleLinkExistingProfile/)
+  assert.match(EDGE, /Exactly one active existing client profile is required for linking\./)
+  assert.match(EDGE, /auth\.admin\.getUserById\(authUserId\)/)
+  assert.match(EDGE, /status: 'linked_existing'/)
+})
+
+test('normal provision refuses to create a duplicate over an existing active client profile', () => {
+  assert.match(EDGE, /An active exact client profile already exists; link it instead of provisioning a duplicate\./)
+  assert.match(EDGE, /\.eq\('client_id', clientId\)[\s\S]*\.eq\('role', 'client'\)[\s\S]*\.eq\('is_active', true\)/)
+})
