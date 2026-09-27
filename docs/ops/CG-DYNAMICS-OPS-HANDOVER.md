@@ -211,7 +211,8 @@ Gold-strategy rule:
 - no out-of-package work.
 
 PR #522 merged the approval-capable v2 plan contract and guarded atomic
-strategy-plus-seed-context RPC in code. Its migration remains unapplied.
+strategy-plus-seed-context RPC in code. Its migration is now applied and ledgered
+in production under the explicitly authorised 27 Sep 2026 protected rollout.
 
 The v2 dry-run is regenerated from current production:
 - source cutoff: `2026-09-23T17:46:08.174Z`;
@@ -319,11 +320,11 @@ Never reuse another client’s TikTok session.
 
 Current production TikTok fleet (27 Sep 2026):
 - **47 eligible**
-- **0 connected**
-- **10 needs_reauth / guarded-recovery candidates**
+- **10 connected**
+- **0 needs_reauth**
 - **37 not connected**
 
-The ten previously connected exact clients are:
+Recovered exact clients:
 - CG Production House
 - Red Oak
 - Braize
@@ -335,14 +336,19 @@ The ten previously connected exact clients are:
 - The Staffordshire
 - Neshora Oxygen
 
-All ten failed after the first access-token expiry because the shared refresh helper
-still called the obsolete `/v2/oauth/token/refresh/` route. PR #541 corrected the
-current TikTok Login Kit contract to `POST /v2/oauth/token/` with
-`grant_type=refresh_token`; live `tiktok-sync` is v13. PR #543 added exact-client,
-exact-connection, exact-open-id guarded recovery; `tiktok-recover-connection` v1
-is live and defaults to preflight. Read-only verification proves all ten still
-have token rows and non-empty stored refresh tokens. Do not force ten manual
-OAuth logins before guarded silent recovery has been tried.
+All ten had failed after the first access-token expiry because the shared refresh
+helper still called the obsolete `/v2/oauth/token/refresh/` route. PR #541
+corrected the current TikTok Login Kit contract to `POST /v2/oauth/token/` with
+`grant_type=refresh_token`. PR #543 added exact-client, exact-connection,
+exact-open-id guarded recovery.
+
+Under explicit CA authorization on 27 Sep 2026:
+- PR #553 merged at `307c514b863fdc4fee0d18d5fc9ef6919711e619`;
+- exact guarded recovery ran for only the ten previously connected accounts;
+- 10 / 10 recovered on first attempt without manual OAuth;
+- live readback proves 10 / 10 connected, 10 / 10 refresh tokens still present
+  and 10 / 10 current access-token expiries;
+- no publishing scopes, ad scopes or account ownership changes were introduced.
 
 Client-assisted holds:
 - **Emmanuel Funerals**
@@ -454,38 +460,25 @@ Older portal/auth foundation:
 
 Do not assume all 57 need client portal access merely because they are active.
 
-Final read-only production reconciliation captured on 23 Sep 2026:
+Final reconciliation and protected portal rollout are complete:
 - 57 active clients = 47 recurring-social eligible / 10 excluded;
-- 37 enabled canonical mappings, all backed by one exact active client profile;
-- 0 duplicate mappings, 0 mapped clients without an active exact profile and
-  0 inactive-profile conflicts;
-- 119 currently published reports across 40 clients;
-- preserve all 37 existing mappings, including four excluded-scope clients;
-- Braize and CG Production House each have an exact active client profile but
-  no portal mapping: link those existing profiles, never create duplicates;
-- seven clients have published client-facing reports but neither mapping nor
-  client profile: All Around PVC, Bat Hill Royale, Case Bloemfontein, HMHI,
-  The Staffordshire, Vrystaat Kunstefees and Zooz Lifestyle WFF;
-- the smallest protected launch batch is therefore nine clients: two existing
-  profiles to link plus seven new accesses through the existing #399 flow;
-- the remaining 11 unmapped clients have no published client-facing report and
-  currently require no portal. This includes Neshora Oxygen; social eligibility
-  alone is not portal-need authority.
+- the original 37 enabled mappings were preserved;
+- Braize and CG Production House were linked to their existing exact active
+  Auth-backed client profiles;
+- new access was provisioned through the existing #399 flow for All Around PVC,
+  Bat Hill Royale, Case Bloemfontein, HMHI, The Staffordshire,
+  Vrystaat Kunstefees and Zooz Lifestyle WFF;
+- PR #554 merged at `37543e6aacc2ee126b02f94d9e8be989cbc19d2d`;
+- live production now has **46 mappings / 46 enabled / 46 distinct clients /
+  46 distinct usernames / 46 distinct auth users**;
+- 0 mappings are missing a profile or auth user and 0 exact-profile/client
+  identity mismatches remain;
+- the remaining unmapped clients still have no current portal need under the
+  published-report/client-access rule. Neshora Oxygen remains correctly
+  unprovisioned until a real portal need exists.
 
-No user, mapping, credential or production data was created or changed during
-this reconciliation. Starter credentials are not included in its artifacts.
-
-PR #545 merged the duplicate-safe existing-profile link path and deployed
-`client-portal-access` v9. Braize and CG Production House each have exactly one
-active client profile with a matching auth user and no portal mapping.
-
-The remaining nine-client access batch is a **separate protected production action**:
-- link the existing Braize profile;
-- link the existing CG Production House profile;
-- provision access for All Around PVC, Bat Hill Royale, Case Bloemfontein, HMHI,
-  The Staffordshire, Vrystaat Kunstefees and Zooz Lifestyle WFF through the
-  existing #399 flow.
-Do not reopen #519 merely to repeat reconciliation.
+No credential values are stored in the handover or GitHub evidence.
+Do not reopen #519 merely to repeat reconciliation or re-run the protected batch.
 
 ## 10. Production authorities
 
