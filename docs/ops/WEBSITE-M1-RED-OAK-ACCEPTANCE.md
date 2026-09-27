@@ -1,6 +1,6 @@
 # Website M1 — Red Oak acceptance reconciliation
 
-Status: production path complete; optional end-to-end client-session isolation check remains.
+Status: production path and authenticated admin-preview acceptance complete; optional end-to-end client-role isolation check remains.
 
 This document records read-only production truth observed on 23 September 2026. It is not authority to save another snapshot, edit a report, or publish again.
 
@@ -24,6 +24,14 @@ This document records read-only production truth observed on 23 September 2026. 
 - The client-safe projection removes `identity.dynamicsClientId` while retaining the production host, period, aggregate traffic, aggregate conversion and explicit data-quality limitations.
 - `authenticated` has no direct SELECT privilege on `website_report_snapshots`.
 - `client_published_reports()` remains executable by authenticated users but filters to `status = 'published'` and `report.client_id = my_client_id()`.
+
+## Authenticated browser acceptance — 27 September 2026
+
+- Used a separate Chrome task session authenticated as `CG Production House Admin` (`info@cgproductionhouse.com`); the unrelated Instagram tab was not used.
+- Red Oak's exact September published report rendered Website 7 / `www.redoakgroup.co.za`, the stale-snapshot age, Johannesburg coverage, 103 visitors, 258 page views, one action, zero enquiries and the explicit partial-coverage notes. No internal Dynamics client ID was visible in the client panel.
+- A separate Cape Lumber preview rendered only Cape Lumber's published September report and did not surface Red Oak Website data.
+- A code defect was reproduced: the default Red Oak preview selected July even though September was published, because a current-month report stored with full calendar-month bounds was excluded. `selectMonthlyReports` now admits only a **published** current-month canonical range; drafts and future rows remain excluded. A focused regression covers the boundary.
+- These checks used an admin preview account. They supplement, but do not replace, the existing RLS/RPC isolation proof or the optional two-client-role session below.
 
 ## Do not repeat
 

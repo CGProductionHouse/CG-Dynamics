@@ -191,6 +191,24 @@ export function isPublishedMonthToDateReport(
     && report.period_end < bounds.end
 }
 
+// Published reports for the live calendar month remain selectable even when
+// their canonical period is stored as the full month. Publication is the
+// authority here; draft/future rows must not become client-visible merely
+// because their dates look complete.
+export function isPublishedCurrentMonthReport(
+  report: { period_start: string; period_end: string; status?: string },
+  now = new Date()
+): boolean {
+  if (report.status !== 'published') return false
+  const month = report.period_start.slice(0, 7)
+  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  if (month !== currentMonth) return false
+  const bounds = calendarMonthBounds(month)
+  return report.period_start === bounds.start
+    && report.period_end >= bounds.start
+    && report.period_end <= bounds.end
+}
+
 export function reportPeriodDisclosure(
   report: { period_start: string; period_end: string; status?: string }
 ): string | null {
@@ -259,11 +277,15 @@ export function selectMonthlyReports<
     created_at?: string | null
     published_at?: string | null
   }
->(reports: T[]): T[] {
+>(reports: T[], now = new Date()): T[] {
   const byMonth = new Map<string, T>()
   for (const report of reports) {
     const month = getReportMonthFromPeriod(report)
-    if (!isCompletedMonth(month) && !isPublishedMonthToDateReport(report)) continue
+    if (
+      !isCompletedMonth(month)
+      && !isPublishedMonthToDateReport(report)
+      && !isPublishedCurrentMonthReport(report, now)
+    ) continue
     const existing = byMonth.get(month)
     if (!existing) {
       byMonth.set(month, report)
