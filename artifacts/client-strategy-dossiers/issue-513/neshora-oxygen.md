@@ -4,7 +4,7 @@ Client ID: `3c20fae1-8e91-41d5-98eb-1c331600e6e3`
 
 Issue: #513
 
-Evidence hash: `376630a6efc1dc5b008b25d4808832b9f8a384226c9974fb6ff3f1c36237ec33`
+Evidence hash: `e7503fe962e4f56048533dd0322d9edea9b3c8070655f0b3c9078c6db17a7886`
 Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Verified facts
@@ -38,8 +38,7 @@ Status: **dossier complete; ready for gold-strategy drafting**
 
 ## Research observations
 
-- The current first-party creative bank is substantially richer than the original 23 September repository snapshot: exact brand assets plus a 79-asset lifestyle shoot now exist in the client OneDrive.
-- The reviewed visuals support a calm, human-first creative direction. They do not prove a diagnosis, medical outcome, device specification, product catalogue or service model.
+- No exact evidence available; do not fill this gap with generic copy.
 
 ## Evidence-backed recommendations
 
@@ -56,7 +55,4 @@ Status: **dossier complete; ready for gold-strategy drafting**
 ## Sources
 
 - OneDrive:/Clients/Neshora Oxygen
-- OneDrive:/Clients/Neshora Oxygen/Brand Identity
-- OneDrive:/Clients/Neshora Oxygen/VIDEOS/2026/2026_10_OCT/2026_09_21
-- https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5801092086
 - https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876
