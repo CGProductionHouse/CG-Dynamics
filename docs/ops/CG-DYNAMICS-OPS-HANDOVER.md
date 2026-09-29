@@ -2,7 +2,7 @@
 
 Status: CURRENT authority for a fresh supervisor chat.
 
-Updated: 27 September 2026 after authenticated production acceptance of #567. PRs #570 and #571 are merged; the exact merge build is green and desktop plus 375px Client Preview acceptance passed. Guarded website-reporting identity/snapshot activation remains external to the presentation-safe UI repair.
+Updated: 27 September 2026 after #573 production Website Performance activation for Piek Group, Emmanuel Funerals and All Around PVC. Their exact mappings and September snapshots are live; only authenticated Admin Client Preview desktop/375 evidence remains.
 
 ## 1. Fresh-chat recovery order
 
@@ -26,7 +26,7 @@ If chat history conflicts with this file, current GitHub + verified production s
 
 Latest verified runtime merge baseline:
 
-`d80c2c791f7faf3b3dd39905c3488ac4423dabaa` — #567 production-acceptance correction after PRs #570/#571. Client Performance is presentation-safe; remaining launch gates below are protected/human actions.
+`0a9b20b51e82d2d97ee1d690bf2c6b82b4cb0c78` — PR #575 #573 Website Performance production activation handover. Exact mappings/snapshots are live for Websites 1, 6, 7 and 8; only authenticated Admin Client Preview evidence remains for #573.
 
 Always refetch `main` before code or merge actions.
 
@@ -59,6 +59,7 @@ Major completed launch-critical merges:
 - #561 final stale-PR cleanup + canonical MCP task-read reliability.
 - #562 production MCP task-view schema correction.
 - #565 final launch transition-status correction.
+- #575 Website Performance activation handover.
 
 ## 3. Launch scoreboard
 
