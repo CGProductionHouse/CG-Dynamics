@@ -6,7 +6,7 @@ import { createServer } from 'vite'
 let server
 let evidenceModule
 before(async () => {
-  server = await createServer({ root: process.cwd(), logLevel: 'error', server: { middlewareMode: true, hmr: false }, appType: 'custom', optimizeDeps: { noDiscovery: true } })
+  server = await createServer({ root: process.cwd(), mode: 'test', mode: 'test', logLevel: 'error', server: { middlewareMode: true, hmr: false }, appType: 'custom', optimizeDeps: { noDiscovery: true } })
   evidenceModule = await server.ssrLoadModule('/src/lib/packageEvidence.ts')
 })
 after(async () => { await server?.close() })

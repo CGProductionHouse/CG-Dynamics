@@ -11,7 +11,7 @@ const RESULTS = read('../src/components/client/GoogleAdsResults.tsx')
 
 let server, native, dashboard, googleAds
 before(async () => {
-  server = await createServer({ server: { middlewareMode: true, hmr: false }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', server: { middlewareMode: true, hmr: false }, appType: 'custom' })
   native = await server.ssrLoadModule('/supabase/functions/_shared/google-ads-native.ts')
   dashboard = await server.ssrLoadModule('/src/lib/googleAdsDashboard.ts')
   googleAds = await server.ssrLoadModule('/src/lib/googleAds.ts')

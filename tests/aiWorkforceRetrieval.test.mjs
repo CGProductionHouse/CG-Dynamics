@@ -8,7 +8,7 @@ const MIGRATION = read('../supabase/phase-23a-ai-workforce-source-rights.sql')
 
 let server, reg, rt
 before(async () => {
-  server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', server: { middlewareMode: true }, appType: 'custom' })
   reg = await server.ssrLoadModule('/src/features/ai-workforce/agents/agentRegistry.ts')
   rt = await server.ssrLoadModule('/src/features/ai-workforce/retrieval/retrievalV1.ts')
 })

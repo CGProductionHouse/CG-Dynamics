@@ -9,7 +9,7 @@ import { createServer } from 'vite'
 let server
 let presentation
 before(async () => {
-  server = await createServer({ root: process.cwd(), server: { middlewareMode: true, hmr: false }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', server: { middlewareMode: true, hmr: false }, appType: 'custom' })
   presentation = await server.ssrLoadModule('/supabase/functions/cg-dynamics-mcp/assistantPresentationPolicy.ts')
 })
 after(async () => { await server?.close() })

@@ -13,7 +13,7 @@ import { FakeSupabase } from './helpers/fakeSupabase.mjs'
 
 let server, ap, pass
 before(async () => {
-  server = await createServer({ root: process.cwd(), logLevel: 'error', server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', logLevel: 'error', server: { middlewareMode: true }, appType: 'custom' })
   ap = await server.ssrLoadModule('/src/lib/contentAutopilot.ts')
   pass = await server.ssrLoadModule('/supabase/functions/_shared/contentAutopilotPass.ts')
 })

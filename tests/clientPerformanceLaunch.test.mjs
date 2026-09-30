@@ -15,7 +15,7 @@ let strategy
 let websiteFleet
 
 before(async () => {
-  server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', server: { middlewareMode: true }, appType: 'custom' })
   overview = await server.ssrLoadModule('/src/lib/overviewModel.ts')
   strategy = await server.ssrLoadModule('/src/lib/strategyEngine.ts')
   websiteFleet = await server.ssrLoadModule('/src/lib/cgWebsiteFleet.ts')

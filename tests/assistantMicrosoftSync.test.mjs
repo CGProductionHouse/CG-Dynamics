@@ -22,7 +22,7 @@ const CTX = {
 }
 
 before(async () => {
-  server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', server: { middlewareMode: true }, appType: 'custom' })
   ;({ parseAssistantAction, defaultMicrosoftSyncRange } = await server.ssrLoadModule('/src/lib/assistantActions.ts'))
 })
 

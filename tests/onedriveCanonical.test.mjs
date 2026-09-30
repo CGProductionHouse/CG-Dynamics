@@ -6,9 +6,7 @@ let server
 let m
 
 before(async () => {
-  server = await createServer({
-    root: process.cwd(),
-    server: { middlewareMode: true, hmr: false },
+  server = await createServer({ root: process.cwd(), mode: 'test', mode: 'test', server: { middlewareMode: true, hmr: false },
     appType: 'custom',
   })
   m = await server.ssrLoadModule('/src/lib/onedriveCanonical.ts')

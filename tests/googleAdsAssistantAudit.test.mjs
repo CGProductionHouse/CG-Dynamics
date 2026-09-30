@@ -5,7 +5,7 @@ import { createServer } from 'vite'
 
 let server, audit
 before(async () => {
-  server = await createServer({ root: process.cwd(), logLevel: 'error', server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', logLevel: 'error', server: { middlewareMode: true }, appType: 'custom' })
   audit = await server.ssrLoadModule('/supabase/functions/cg-dynamics-mcp/googleAdsAudit.ts')
 })
 after(async () => { await server?.close() })

@@ -7,9 +7,7 @@ let parseWebmDurationSeconds
 let parseMp4DurationSeconds
 
 before(async () => {
-  server = await createServer({
-    root: process.cwd(),
-    server: { middlewareMode: true },
+  server = await createServer({ root: process.cwd(), mode: 'test', mode: 'test', server: { middlewareMode: true },
     appType: 'custom',
     optimizeDeps: { noDiscovery: true },
   })

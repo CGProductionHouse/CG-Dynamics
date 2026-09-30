@@ -26,7 +26,7 @@ const STAFFY_JULY = [
 
 let server, prev, map
 before(async () => {
-  server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', server: { middlewareMode: true }, appType: 'custom' })
   prev = await server.ssrLoadModule('/src/lib/microsoftImportPreview.ts')
   map = await server.ssrLoadModule('/src/lib/microsoftImportMap.ts')
 })

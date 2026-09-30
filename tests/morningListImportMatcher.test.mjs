@@ -25,7 +25,7 @@ let parseMorningList
 let morningEditToInput
 
 before(async () => {
-  const server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
+  const server = await createServer({ root: process.cwd(), mode: 'test', server: { middlewareMode: true }, appType: 'custom' })
   // Close in finally: if the module fails to load (for example missing
   // VITE_SUPABASE_* values), a leaked server keeps the process alive and
   // hangs npm test instead of failing it.

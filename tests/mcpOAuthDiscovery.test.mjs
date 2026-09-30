@@ -5,8 +5,7 @@ import { createServer } from 'vite'
 
 let server, oauth
 before(async () => {
-  server = await createServer({
-    root: process.cwd(), logLevel: 'error', server: { middlewareMode: true }, appType: 'custom',
+  server = await createServer({ root: process.cwd(), mode: 'test', mode: 'test', logLevel: 'error', server: { middlewareMode: true }, appType: 'custom',
     optimizeDeps: { noDiscovery: true },
   })
   oauth = await server.ssrLoadModule('/supabase/functions/cg-dynamics-mcp/oauthDiscovery.ts')

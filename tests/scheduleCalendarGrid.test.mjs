@@ -11,7 +11,7 @@ let todayIso
 let localIso
 
 before(async () => {
-  server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', server: { middlewareMode: true }, appType: 'custom' })
   const mod = await server.ssrLoadModule('/src/lib/scheduleCalendar.ts')
   monthGridCells = mod.monthGridCells
   todayIso = mod.todayIso

@@ -21,7 +21,7 @@ function fnBody(name) {
 
 let server, lib
 before(async () => {
-  server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', server: { middlewareMode: true }, appType: 'custom' })
   lib = await server.ssrLoadModule('/src/lib/skillCardReview.ts')
 })
 after(async () => { await server.close() })

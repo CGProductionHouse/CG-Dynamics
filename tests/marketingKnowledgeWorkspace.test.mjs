@@ -11,7 +11,7 @@ import { createServer } from 'vite'
 let server, filters, registry, extraction, generated, skilled
 
 before(async () => {
-  server = await createServer({ root: process.cwd(), logLevel: 'error', server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', logLevel: 'error', server: { middlewareMode: true }, appType: 'custom' })
   filters = await server.ssrLoadModule('/src/lib/marketing-library/knowledgeFilters.ts')
   registry = await server.ssrLoadModule('/src/lib/marketing-library/sourceRegistry.ts')
   extraction = await server.ssrLoadModule('/src/lib/marketing-library/citedSourceExtraction.ts')

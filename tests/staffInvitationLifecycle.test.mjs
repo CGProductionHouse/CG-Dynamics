@@ -24,7 +24,7 @@ const invitesAdminSrc = read('../src/pages/admin/InvitesAdmin.tsx')
 
 let server, policy
 before(async () => {
-  server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', server: { middlewareMode: true }, appType: 'custom' })
   policy = await server.ssrLoadModule('/supabase/functions/admin-invite-user/staff-invitation.ts')
 })
 after(async () => { await server.close() })

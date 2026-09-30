@@ -12,7 +12,7 @@ let metaProviderPeriod
 let isWithinMetaProviderPeriod
 
 before(async () => {
-  server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', server: { middlewareMode: true }, appType: 'custom' })
   ;({ metaProviderPeriod, isWithinMetaProviderPeriod } = await server.ssrLoadModule('/supabase/functions/_shared/meta.ts'))
 })
 

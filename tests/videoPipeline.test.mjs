@@ -11,7 +11,7 @@ let server
 let r
 
 before(async () => {
-  server = await createServer({ root: process.cwd(), logLevel: 'error', server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', logLevel: 'error', server: { middlewareMode: true }, appType: 'custom' })
   r = await server.ssrLoadModule('/src/lib/videoPipelineRules.ts')
 })
 after(async () => { await server?.close() })

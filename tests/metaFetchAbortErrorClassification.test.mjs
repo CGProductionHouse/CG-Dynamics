@@ -11,7 +11,7 @@ let server
 let metaFetch, isTransientMetaRequestAbort, planMetaRequestAbortRetry, MetaProviderTimeoutError, MetaSyncDeadlineError
 
 before(async () => {
-  server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', server: { middlewareMode: true }, appType: 'custom' })
   ;({ metaFetch, isTransientMetaRequestAbort, planMetaRequestAbortRetry, MetaProviderTimeoutError, MetaSyncDeadlineError } = await server.ssrLoadModule('/supabase/functions/_shared/meta.ts'))
 })
 after(async () => { await server.close() })

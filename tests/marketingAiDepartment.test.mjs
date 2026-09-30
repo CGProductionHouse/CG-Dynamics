@@ -22,7 +22,7 @@ let buildRetrievalPlan
 let AI_WORKFORCE_AGENTS
 
 before(async () => {
-  server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', server: { middlewareMode: true }, appType: 'custom' })
   ;({ normaliseAgentKey, cardTargetsAgent, getAgentProfile, AI_WORKFORCE_AGENTS } =
     await server.ssrLoadModule('/src/features/ai-workforce/agents/agentRegistry.ts'))
   ;({ isCardRetrievable, buildRetrievalPlan } =

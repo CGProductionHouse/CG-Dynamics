@@ -14,9 +14,7 @@ const readyCard = { source_id: 'source-1', last_reviewed: '2026-07-20' }
 const approvedReview = [{ review_status: 'approved' }]
 
 before(async () => {
-  server = await createServer({
-    root: process.cwd(),
-    logLevel: 'error',
+  server = await createServer({ root: process.cwd(), mode: 'test', mode: 'test', logLevel: 'error',
     server: { middlewareMode: true },
     appType: 'custom',
     define: {

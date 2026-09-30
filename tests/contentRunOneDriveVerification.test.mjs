@@ -8,9 +8,7 @@ const index = read('../supabase/functions/cg-dynamics-mcp/index.ts')
 
 let server, verification, catalog
 before(async () => {
-  server = await createServer({
-    root: process.cwd(),
-    logLevel: 'error',
+  server = await createServer({ root: process.cwd(), mode: 'test', mode: 'test', logLevel: 'error',
     server: { middlewareMode: true },
     appType: 'custom',
     optimizeDeps: { noDiscovery: true },

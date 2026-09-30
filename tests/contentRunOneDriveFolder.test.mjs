@@ -11,9 +11,7 @@ let server
 let lib
 
 before(async () => {
-  server = await createServer({
-    root: process.cwd(),
-    server: { middlewareMode: true, hmr: false },
+  server = await createServer({ root: process.cwd(), mode: 'test', mode: 'test', server: { middlewareMode: true, hmr: false },
     appType: 'custom',
   })
   lib = await server.ssrLoadModule('/src/lib/contentRunOneDrive.ts')

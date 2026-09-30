@@ -5,7 +5,7 @@ import { createServer } from 'vite'
 
 let server, jm
 before(async () => {
-  server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', server: { middlewareMode: true }, appType: 'custom' })
   jm = await server.ssrLoadModule('/supabase/functions/microsoft-transition-sync/job-machine.ts')
 })
 after(async () => { await server?.close() })

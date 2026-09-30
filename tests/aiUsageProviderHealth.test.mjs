@@ -34,9 +34,7 @@ let resolveProviderSecret
 let configuredProviderNames
 
 before(async () => {
-  server = await createServer({
-    root: process.cwd(),
-    server: { middlewareMode: true },
+  server = await createServer({ root: process.cwd(), mode: 'test', mode: 'test', server: { middlewareMode: true },
     appType: 'custom',
     optimizeDeps: { noDiscovery: true },
   })

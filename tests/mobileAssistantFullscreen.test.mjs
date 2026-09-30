@@ -22,7 +22,7 @@ let friendlyAssistantError
 let MOBILE_MEDIA_QUERY
 
 before(async () => {
-  server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', server: { middlewareMode: true }, appType: 'custom' })
   ;({ friendlyAssistantError } = await server.ssrLoadModule('/src/lib/assistantErrors.ts'))
   ;({ MOBILE_MEDIA_QUERY } = await server.ssrLoadModule('/src/lib/mobileViewport.ts'))
 })

@@ -9,7 +9,7 @@ const CLOSEOUT_MIGRATION = read('../supabase/migrations/20260909160000_content_r
 
 let server, catalog
 before(async () => {
-  server = await createServer({ root: process.cwd(), logLevel: 'error', server: { middlewareMode: true }, appType: 'custom', optimizeDeps: { noDiscovery: true } })
+  server = await createServer({ root: process.cwd(), mode: 'test', logLevel: 'error', server: { middlewareMode: true }, appType: 'custom', optimizeDeps: { noDiscovery: true } })
   catalog = await server.ssrLoadModule('/supabase/functions/cg-dynamics-mcp/toolCatalog.ts')
 })
 after(async () => { await server?.close() })

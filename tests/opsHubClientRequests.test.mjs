@@ -16,7 +16,7 @@ const OPS_HUB_PAGE = read('../src/pages/admin/OpsHubPage.tsx')
 
 let server, cc
 before(async () => {
-  server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', server: { middlewareMode: true }, appType: 'custom' })
   cc = await server.ssrLoadModule('/src/lib/commandCentre.ts')
 })
 after(async () => { await server?.close() })

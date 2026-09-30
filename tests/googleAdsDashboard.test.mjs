@@ -33,7 +33,7 @@ let supabase
 let originalRpc
 
 before(async () => {
-  server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', server: { middlewareMode: true }, appType: 'custom' })
   ;({ loadGoogleAdsDashboard, googleAdsCampaignPeriodLabel, parseGoogleAdsDashboardData, isGoogleAdsTrendComparable } = await server.ssrLoadModule('/src/lib/googleAdsDashboard.ts'))
   ;({ formatGoogleAdsCampaignBudget, formatGoogleAdsCustomerId } = await server.ssrLoadModule('/src/lib/googleAds.ts'))
   ;({ supabase } = await server.ssrLoadModule('/src/lib/supabase.ts'))

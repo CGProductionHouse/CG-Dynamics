@@ -17,7 +17,7 @@ const sql = read('../supabase/migrations/20260805100000_canonical_staff_identity
 let server, M
 
 before(async () => {
-  server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', server: { middlewareMode: true }, appType: 'custom' })
   M = await server.ssrLoadModule('/src/lib/staffIdentity.ts')
 })
 after(async () => { await server.close() })

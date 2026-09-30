@@ -46,9 +46,7 @@ const allFilters = {
 }
 
 before(async () => {
-  server = await createServer({
-    root: process.cwd(),
-    logLevel: 'error',
+  server = await createServer({ root: process.cwd(), mode: 'test', mode: 'test', logLevel: 'error',
     server: { middlewareMode: true },
     appType: 'custom',
   })

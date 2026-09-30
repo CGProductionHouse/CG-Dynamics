@@ -11,7 +11,7 @@ const hoursClientId = '11111111-1111-4111-8111-111111111111'
 const requestId = '22222222-2222-4222-8222-222222222222'
 
 before(async () => {
-  server = await createServer({ root: process.cwd(), logLevel: 'error', server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', logLevel: 'error', server: { middlewareMode: true }, appType: 'custom' })
   ;({ parseEnsureClientInput, secretsMatch } = await server.ssrLoadModule('/supabase/functions/ensure-client-from-cg-hours/policy.ts'))
 })
 

@@ -6,7 +6,7 @@ import { createServer } from 'vite'
 
 let server, actions, ap, catalog, context, serverSource
 before(async () => {
-  server = await createServer({ root: process.cwd(), logLevel: 'error', server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', logLevel: 'error', server: { middlewareMode: true }, appType: 'custom' })
   actions = await server.ssrLoadModule('/supabase/functions/cg-dynamics-mcp/contentGuidelineActions.ts')
   ap = await server.ssrLoadModule('/src/lib/contentAutopilot.ts')
   catalog = readFileSync('supabase/functions/cg-dynamics-mcp/toolCatalog.ts', 'utf8')

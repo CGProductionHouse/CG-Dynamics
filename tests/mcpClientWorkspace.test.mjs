@@ -13,7 +13,7 @@ let ctx
 let ws
 let catalog
 before(async () => {
-  server = await createServer({ root: process.cwd(), server: { middlewareMode: true, hmr: false }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', server: { middlewareMode: true, hmr: false }, appType: 'custom' })
   const load = p => server.ssrLoadModule(`/supabase/functions/cg-dynamics-mcp/${p}`)
   ctx = await load('projectContext.ts')
   ws = await load('clientWorkspace.ts')

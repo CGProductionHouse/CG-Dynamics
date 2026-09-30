@@ -43,7 +43,7 @@ let ClientReportView
 let reportStats
 
 before(async () => {
-  server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', server: { middlewareMode: true }, appType: 'custom' })
   ov = await server.ssrLoadModule('/src/lib/overviewModel.ts')
   ;({ ClientReportView } = await server.ssrLoadModule('/src/pages/client/ClientReportView.tsx'))
   reportStats = await server.ssrLoadModule('/src/lib/reportStats.ts')

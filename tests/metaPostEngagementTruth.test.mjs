@@ -14,7 +14,7 @@ let engagement
 let reportStats
 let reportPerformance
 before(async () => {
-  server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', server: { middlewareMode: true }, appType: 'custom' })
   engagement = await server.ssrLoadModule('/supabase/functions/_shared/metaPostEngagement.ts')
   reportStats = await server.ssrLoadModule('/src/lib/reportStats.ts')
   reportPerformance = await server.ssrLoadModule('/src/lib/reportPerformance.ts')

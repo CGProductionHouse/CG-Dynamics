@@ -17,7 +17,7 @@ let server
 let validation
 
 before(async () => {
-  server = await createServer({ root: process.cwd(), server: { middlewareMode: true, hmr: false }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', server: { middlewareMode: true, hmr: false }, appType: 'custom' })
   validation = await server.ssrLoadModule('/src/features/client-onboarding/validation.ts')
 })
 

@@ -18,7 +18,7 @@ import { FakeSupabase } from './helpers/fakeSupabase.mjs'
 
 let server, pass, schedule
 before(async () => {
-  server = await createServer({ root: process.cwd(), logLevel: 'error', server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', logLevel: 'error', server: { middlewareMode: true }, appType: 'custom' })
   pass = await server.ssrLoadModule('/supabase/functions/_shared/contentAutopilotPass.ts')
   schedule = await server.ssrLoadModule('/supabase/functions/_shared/contentAutopilotSchedule.ts')
 })

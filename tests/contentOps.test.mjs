@@ -5,7 +5,7 @@ import { createServer } from 'vite'
 // #220 content operations dashboard — pure classifier (no DB).
 let server, ops
 before(async () => {
-  server = await createServer({ root: process.cwd(), logLevel: 'error', server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', logLevel: 'error', server: { middlewareMode: true }, appType: 'custom' })
   ops = await server.ssrLoadModule('/src/lib/contentOps.ts')
 })
 after(async () => { await server?.close() })

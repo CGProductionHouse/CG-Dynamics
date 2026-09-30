@@ -9,7 +9,7 @@ import { createServer } from 'vite'
 
 let server, batch
 before(async () => {
-  server = await createServer({ root: process.cwd(), logLevel: 'error', server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', logLevel: 'error', server: { middlewareMode: true }, appType: 'custom' })
   batch = await server.ssrLoadModule('/src/lib/marketing-library/contentBatch200.ts')
 })
 after(async () => { await server?.close() })

@@ -9,7 +9,7 @@ import { createServer } from 'vite'
 
 let share
 before(async () => {
-  const server = await createServer({ root: process.cwd(), server: { middlewareMode: true, hmr: false }, appType: 'custom' })
+  const server = await createServer({ root: process.cwd(), mode: 'test', server: { middlewareMode: true, hmr: false }, appType: 'custom' })
   // Close in finally: a load failure must fail these tests, not hang the suite.
   try {
     share = await server.ssrLoadModule('/src/lib/myDayContextShare.ts')

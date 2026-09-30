@@ -25,7 +25,7 @@ let validateGoogleAdsDateRange
 let validateGoogleAdsModeCoexistence
 
 before(async () => {
-  server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', server: { middlewareMode: true }, appType: 'custom' })
   ;({
     calculateGoogleAdsReport,
     deriveGoogleAdsCampaignReview,

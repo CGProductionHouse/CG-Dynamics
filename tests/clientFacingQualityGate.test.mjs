@@ -33,7 +33,7 @@ const PORTAL_STATES = read('../src/components/client/ClientPortalStates.tsx')
 
 let server, ov, cp, ga
 before(async () => {
-  server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', server: { middlewareMode: true }, appType: 'custom' })
   ov = await server.ssrLoadModule('/src/lib/overviewModel.ts')
   cp = await server.ssrLoadModule('/src/lib/clientPortal.ts')
   ga = await server.ssrLoadModule('/src/lib/googleAdsDashboard.ts')

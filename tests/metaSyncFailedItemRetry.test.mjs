@@ -15,7 +15,7 @@ const sql = read('../supabase/migrations/20260805090000_meta_sync_failed_item_re
 let server, classifyMetaFailure, groupMetaFailuresByClient, summariseMetaTerminalResult
 
 before(async () => {
-  server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', server: { middlewareMode: true }, appType: 'custom' })
   ;({ classifyMetaFailure, groupMetaFailuresByClient, summariseMetaTerminalResult } =
     await server.ssrLoadModule('/src/lib/metaSyncFailures.ts'))
 })

@@ -13,7 +13,7 @@ let deliverableIdentity, templateCodeInstance, buildMicrosoftImportPreview, reso
 let flagDeliverableSlotConflicts, deliverableSlotKey
 
 before(async () => {
-  server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', server: { middlewareMode: true }, appType: 'custom' })
   ;({ deliverableIdentity, templateCodeInstance, buildMicrosoftImportPreview, resolveUnnumberedClientScheduleDeliverables,
       flagDeliverableSlotConflicts, deliverableSlotKey } =
     await server.ssrLoadModule('/src/lib/microsoftImportPreview.ts'))

@@ -3,7 +3,7 @@ import { after, before, test } from 'node:test'
 import { createServer } from 'vite'
 let server, describeGoogleAdsStatus
 before(async () => {
-  server = await createServer({ root: process.cwd(), server: { middlewareMode: true, hmr: false }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', server: { middlewareMode: true, hmr: false }, appType: 'custom' })
   ;({ describeGoogleAdsStatus } = await server.ssrLoadModule('/supabase/functions/cg-assistant-chat/googleAdsStatus.ts'))
 })
 after(async () => { await server.close() })

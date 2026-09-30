@@ -77,7 +77,7 @@ function snapshot(records, rangeStart = '2026-05-19T00:00:00+02:00') {
 }
 
 before(async () => {
-  server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', server: { middlewareMode: true }, appType: 'custom' })
   ;({ previewPlannerTask, previewOutlookEvent, outlookClientLabel } = await server.ssrLoadModule('/src/lib/microsoftImportPreview.ts'))
   ;({ resolveMicrosoftBucketMapping } = await server.ssrLoadModule('/src/lib/microsoftImportMap.ts'))
   ;({ buildMicrosoftReconciliation } = await server.ssrLoadModule('/src/lib/microsoftSync.ts'))

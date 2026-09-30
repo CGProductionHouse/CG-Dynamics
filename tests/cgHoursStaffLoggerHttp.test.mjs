@@ -12,8 +12,7 @@ const INDEX = readFileSync(new URL('../supabase/functions/cg-dynamics-mcp/index.
 
 let server, staffLogger, catalog
 before(async () => {
-  server = await createServer({
-    root: process.cwd(), logLevel: 'error', server: { middlewareMode: true, hmr: false }, appType: 'custom',
+  server = await createServer({ root: process.cwd(), mode: 'test', mode: 'test', logLevel: 'error', server: { middlewareMode: true, hmr: false }, appType: 'custom',
     optimizeDeps: { noDiscovery: true },
   })
   staffLogger = await server.ssrLoadModule('/supabase/functions/cg-dynamics-mcp/cgHoursStaffLogger.ts')

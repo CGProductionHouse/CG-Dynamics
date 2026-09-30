@@ -22,7 +22,7 @@ let previewOutlookEvent
 let resolveMicrosoftBucketMapping
 
 before(async () => {
-  server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', server: { middlewareMode: true }, appType: 'custom' })
   ;({ resolveMicrosoftClient, previewPlannerTask, previewOutlookEvent } = await server.ssrLoadModule('/src/lib/microsoftImportPreview.ts'))
   ;({ resolveMicrosoftBucketMapping } = await server.ssrLoadModule('/src/lib/microsoftImportMap.ts'))
 })

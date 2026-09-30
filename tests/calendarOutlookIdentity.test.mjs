@@ -92,7 +92,7 @@ function snapshot(records) {
 }
 
 before(async () => {
-  server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', server: { middlewareMode: true }, appType: 'custom' })
   ;({ reconcileCalendarLogicalItems } = await server.ssrLoadModule('/src/lib/calendarIdentity.ts'))
   ;({ buildMicrosoftReconciliation } = await server.ssrLoadModule('/src/lib/microsoftSync.ts'))
   ;({ approveCalendarDuplicateAsSeparate, getMicrosoftReviewedItems, buildMicrosoftRecoveryPlan } = await server.ssrLoadModule('/src/lib/microsoftRecovery.ts'))

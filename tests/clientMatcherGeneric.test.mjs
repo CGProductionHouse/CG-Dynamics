@@ -18,7 +18,7 @@ const migration = read('../supabase/migrations/20260805130000_client_aliases_dir
 
 let server, M
 before(async () => {
-  server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', server: { middlewareMode: true }, appType: 'custom' })
   M = await server.ssrLoadModule('/src/lib/clientMatcher.ts')
 })
 after(async () => { await server.close() })

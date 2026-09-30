@@ -42,7 +42,7 @@ function deliverable(overrides = {}) {
 }
 
 before(async () => {
-  server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', server: { middlewareMode: true }, appType: 'custom' })
   ;({ guidelineScheduleCandidates, guidelineScriptFromDeliverable, normalizeGuidelineVideoMonth } = await server.ssrLoadModule('/src/lib/contentWorkflow.ts'))
 })
 

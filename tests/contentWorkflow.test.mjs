@@ -11,7 +11,7 @@ let server
 let rules
 
 before(async () => {
-  server = await createServer({ root: process.cwd(), logLevel: 'error', server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', logLevel: 'error', server: { middlewareMode: true }, appType: 'custom' })
   rules = await server.ssrLoadModule('/src/lib/contentWorkflowRules.ts')
 })
 after(async () => { await server?.close() })

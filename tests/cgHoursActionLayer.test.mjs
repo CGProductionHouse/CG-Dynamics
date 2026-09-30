@@ -6,9 +6,7 @@ let server
 let mod
 
 before(async () => {
-  server = await createServer({
-    root: process.cwd(),
-    server: { middlewareMode: true },
+  server = await createServer({ root: process.cwd(), mode: 'test', mode: 'test', server: { middlewareMode: true },
     appType: 'custom',
   })
   mod = await server.ssrLoadModule('/src/lib/cgHours/cgHoursActionLayer.ts')

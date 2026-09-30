@@ -22,7 +22,7 @@ function request(overrides = {}) {
 }
 
 before(async () => {
-  server = await createServer({ root: process.cwd(), logLevel: 'error', server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ root: process.cwd(), mode: 'test', logLevel: 'error', server: { middlewareMode: true }, appType: 'custom' })
   ;({ decideInviteDelivery, isAdminRole, parseInviteRequest, validateClientAccess } = await server.ssrLoadModule('/supabase/functions/admin-invite-user/invite-policy.ts'))
 })
 
