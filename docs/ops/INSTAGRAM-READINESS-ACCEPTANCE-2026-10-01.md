@@ -14,7 +14,7 @@ sync, production data, migration or Edge deployment changed.
 - State/token tables RLS enabled and neither anon nor authenticated has SELECT grants. Connection metadata is governed by an active-admin/manager SELECT policy; no client/staff token access. No plaintext token column exists.
 - Names-only configuration: six required Instagram names present; `INSTAGRAM_APP_SECRET` absent. Names/presence do not prove values are valid.
 - Callback HEAD without state/code: HTTP302 to old Vercel origin with `instagram=activation_blocked`; no exchange/state mutation. Correct shared `APP_PUBLIC_URL` under separate config authorization before live consent.
-- Public Privacy/Terms URLs both HTTP200 with app shell; code routes are outside auth guards. Browser legal-page capture later failed when Chrome debugger detached; rendered legal acceptance is not claimed.
+- Public Privacy/Terms URLs both HTTP200, outside auth guards; post-merge rendered acceptance passes on desktop1536 and mobile375. Privacy contains Instagram reporting, encrypted standalone tokens and owner-revocation disclosures.
 
 ## Identity evidence recheck
 
@@ -70,6 +70,23 @@ Workstation-local captures (not committed generated artifacts):
 `artifacts/issue-505-instagram-desktop.png` and
 `artifacts/issue-505-instagram-375.png`.
 
+Final production acceptance after PR #586 merged at
+`cacc4f9975a9056d72892e4e278524c4f33d2537`: a fresh tab in the same authenticated
+Chrome profile recovered the detached browser connection without changing credentials
+or operating other open tabs. Admin queue shows 47 eligible / 10 excluded / 0 held,
+25 unmapped rows and the corrected unchecked-Page wording. Desktop1536 and mobile375
+have no horizontal body overflow; mobile navigation and wrapped queue remain usable.
+Privacy and Terms render correctly at both widths. Subsequent captured console errors
+are empty. One initial stale lazy-chunk load error during the deployment transition
+showed the recoverable error boundary; its Refresh page action restored the page.
+This transient error is recorded, not represented as an error-free entire session.
+No provider-read, OAuth, confirmation or sync action was invoked.
+
+Final workstation-local screenshots (not committed):
+`artifacts/issue-505-instagram-final-desktop.png`,
+`artifacts/issue-505-instagram-final-375.png` and
+`artifacts/issue-505-instagram-privacy-375.png`.
+
 ## Verification
 
 - 254/254 Instagram + Meta + social-eligibility tests pass (six new regressions).
@@ -79,8 +96,8 @@ Workstation-local captures (not committed generated artifacts):
   `tests/reportPeriodMtd.test.mjs:44` published-versus-draft selection regression;
   it reproduces independently and neither that test nor its source was edited.
   Test-generated strategy artifacts were reverted to their initial contents.
-- Browser detached after initial desktop/mobile captures; fresh post-merge UI/legal
-  check remains explicitly unverified until extension reconnects.
+- PR #586 and its merged-main Vercel deployments are green. Fresh production
+  desktop/mobile queue and public legal-page acceptance pass as recorded above.
 
 ## Protected remaining order
 
