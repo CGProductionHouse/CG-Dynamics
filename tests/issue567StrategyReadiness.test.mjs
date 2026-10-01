@@ -1,11 +1,9 @@
 import assert from 'node:assert/strict'
-import { execFileSync } from 'node:child_process'
-import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
+import { strategyArtifactSandbox } from './helpers/strategyArtifactSandbox.mjs'
 
-execFileSync(process.execPath, ['scripts/build-client-strategy-mutation-dry-run.mjs'], { stdio: 'pipe' })
-execFileSync(process.execPath, ['scripts/build-issue-567-strategy-quality-readiness.mjs'], { stdio: 'pipe' })
-const artifact = JSON.parse(readFileSync('artifacts/client-strategy-dossiers/issue-513/issue-567-sep-oct-strategy-quality-readiness.json', 'utf8'))
+const readArtifact = strategyArtifactSandbox(['build-client-strategy-mutation-dry-run', 'build-issue-567-strategy-quality-readiness'])
+const artifact = JSON.parse(readArtifact('issue-567-sep-oct-strategy-quality-readiness.json'))
 
 test('regenerates the complete 94-row quality/readiness matrix without writes or transitions', () => {
   assert.equal(artifact.mode, 'zero_write_strategy_quality_readiness')

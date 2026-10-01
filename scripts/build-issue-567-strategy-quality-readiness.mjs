@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 const ROOT = resolve(import.meta.dirname, '..')
-const DIR = resolve(ROOT, 'artifacts/client-strategy-dossiers/issue-513')
+const DIR = process.env.CG_STRATEGY_ARTIFACT_DIR ? resolve(process.env.CG_STRATEGY_ARTIFACT_DIR) : resolve(ROOT, 'artifacts/client-strategy-dossiers/issue-513')
 const FLEET = resolve(DIR, 'sep-oct-strategy-mutation-dry-run.json')
 const NESHORA = resolve(DIR, 'neshora-strategy-readiness-dry-run.json')
 const CURRENT = resolve(DIR, 'sep-oct-approval-publication-manifest.json')
