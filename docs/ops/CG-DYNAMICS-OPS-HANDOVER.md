@@ -28,6 +28,27 @@ authentication gate and a new bounded validation attempt; #598 writes remain hel
 
 A fresh chat must recover state in this order:
 
+#606 explicitly authorized temporary bridge/validator attempt supersedes the
+#604 private-source gate below. PR #605 merged at
+`8af6245a0afde69dc552ec91e4559f5c0a59daa2` after exact-head/green-Vercel checks.
+Both temporary functions used `verify_jwt=false` with exact in-handler auth:
+bridge required runtime service-role bearer; validator required BOTH runtime
+service-role bearer and existing internal-worker token before crypto reads.
+Bridge never read Instagram encryption config; credentials stayed runtime-local
+on its one possible fixed HTTPS validator call (no redirects/retries). The
+unchanged Instagram helper performed only a harmless in-memory round-trip.
+Nine local mock checks passed. **One external bridge invocation returned HTTP
+401 with no crypto facts.** Which authentication leg rejected was not established;
+do not claim a successful internal validation. No retry or auth weakening.
+Canonical base64, decoded byte count, actual version-format validity and
+production round-trip remain UNVERIFIED, not structural FAIL/PASS. BOTH
+temporary functions were immediately deleted in finally cleanup; both are absent
+from inventory, both endpoints return 404, and all original 42 function versions/
+bundles are unchanged. Activation remains OFF. No key/version/config/Meta/OAuth/
+provider/DB/data changes occurred. #600/#606 remain authentication-blocked;
+the #598 protected writes remain held. A future attempt needs separate CA
+authorization; never rotate credentials or weaken the boundary to bypass this.
+
 #604 dual-auth execution preflight (main `781cdc59bff515200dd922a46f36dbec9ed6b2e2`):
 CA authorized gateway JWT false only with BOTH exact existing service-role bearer
 and existing `WORKER_INTERNAL_TOKEN` checked in-handler before encryption reads.
