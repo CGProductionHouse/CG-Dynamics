@@ -11,6 +11,10 @@ import { onboardingEmptyState } from './emptyState'
 
 type StatusFilter = 'all' | 'not_started' | 'in_progress' | 'completed' | 'revoked' | 'expired'
 
+function hasSession(session: StaffOnboardingSummary): boolean {
+  return Boolean(session.sessionId && session.sessionId.trim())
+}
+
 export default function InternalOnboardingPage() {
   const [clients, setClients] = useState<Client[]>([])
   const [sessions, setSessions] = useState<StaffOnboardingSummary[]>([])
@@ -155,6 +159,7 @@ export default function InternalOnboardingPage() {
               className="min-h-10 w-full rounded-xl border border-white/10 bg-black/20 px-4 text-sm text-white placeholder:text-report-faint sm:w-56"
             />
             <StatusPill label="All" count={statusCounts.all} active={statusFilter === 'all'} onClick={() => setStatusFilter('all')} />
+            <StatusPill label="Not started" count={statusCounts.not_started} active={statusFilter === 'not_started'} onClick={() => setStatusFilter('not_started')} />
             <StatusPill label="Active" count={statusCounts.in_progress} active={statusFilter === 'in_progress'} onClick={() => setStatusFilter('in_progress')} tone="accent" />
             <StatusPill label="Done" count={statusCounts.completed} active={statusFilter === 'completed'} onClick={() => setStatusFilter('completed')} tone="teal" />
             <StatusPill label="Expired" count={statusCounts.expired} active={statusFilter === 'expired'} onClick={() => setStatusFilter('expired')} />
@@ -170,6 +175,7 @@ export default function InternalOnboardingPage() {
           <div className="mt-4 space-y-4">
             {filteredSessions.map(session => {
               const isExpanded = expandedId === session.clientId
+              const sessionExists = hasSession(session)
               return (
                 <article key={session.clientId} className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
                   <div className="flex flex-wrap items-start justify-between gap-3">
@@ -178,7 +184,7 @@ export default function InternalOnboardingPage() {
                         <h3 className="font-bold text-white hover:text-brand-teal transition-colors">{clientNames.get(session.clientId) ?? session.clientName}</h3>
                       </button>
                       <p className="mt-1 text-xs text-brand-primary/70">
-                        {session.sessionId ? (
+                        {sessionExists ? (
                           <>Started {formatDate(session.startedAt)} · Completed {formatDate(session.completedAt)} · Last activity {formatDate(session.lastActivityAt)}</>
                         ) : (
                           <span className="text-brand-primary/50">Not started</span>
@@ -187,20 +193,20 @@ export default function InternalOnboardingPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       <SessionStatusBadge status={session.status} expiresAt={session.expiresAt} revokedAt={session.revokedAt} />
-                      {session.sessionId && !session.revokedAt && session.status !== 'completed' && (
+                      {sessionExists && !session.revokedAt && session.status !== 'completed' && (
                         <ActionButton variant="secondary" className="min-h-9 text-xs" onClick={() => void revoke(session.sessionId)}>Revoke</ActionButton>
                       )}
                     </div>
                   </div>
 
                   {/* Progress bar */}
-                    <div className="mt-4">
-                      <ProgressStrip session={session} />
-                    </div>
+                  <div className="mt-4">
+                    <ProgressStrip session={session} />
+                  </div>
 
-                    <Link to={`/admin/published?client=${session.clientId}&view=setup`} className="mt-4 inline-flex min-h-11 items-center text-sm font-bold text-brand-teal hover:underline">
-                      Preview onboarding
-                    </Link>
+                  <Link to={`/admin/published?client=${session.clientId}&view=setup`} className="mt-4 inline-flex min-h-11 items-center text-sm font-bold text-brand-teal hover:underline">
+                    Preview onboarding
+                  </Link>
 
                   {/* Quick status */}
                   <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -219,7 +225,7 @@ export default function InternalOnboardingPage() {
                               <span className="font-semibold text-white">{PLATFORM_GUIDES[access.platform].label}</span>
                               <div className="flex items-center gap-2">
                                 <span className="text-brand-primary/70">{access.clientChoice ?? 'no choice'} · {access.connectionState.replaceAll('_', ' ')}</span>
-                                {access.clientChoice === 'connect_now' && !access.verifiedAt && (
+                                {sessionExists && access.clientChoice === 'connect_now' && !access.verifiedAt && (
                                   <>
                                     <button type="button" className="min-h-9 rounded-lg border border-brand-teal/30 px-3 text-xs font-bold text-brand-teal" onClick={() => void updateStaffAccess(session.sessionId, access.platform, 'verified').then(load)}>Verify</button>
                                     <button type="button" className="min-h-9 rounded-lg border border-red-400/25 px-3 text-xs font-bold text-red-300" onClick={() => void updateStaffAccess(session.sessionId, access.platform, 'failed').then(load)}>Needs follow-up</button>
