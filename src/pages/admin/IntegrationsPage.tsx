@@ -5,7 +5,8 @@ import { PremiumCard } from '../../components/ui/PremiumCard'
 import { ActionButton } from '../../components/ui/Buttons'
 import { StatusBadge, Pill } from '../../components/ui/Badges'
 import { getGoogleAdsWorkspace } from '../../lib/googleAds'
-import { getTiktokConnectionStatus } from '../../lib/tiktok'
+import { getTiktokConnectionQueue, type TiktokConnectionQueue } from '../../lib/tiktok'
+import { tiktokIntegrationSummary } from '../../lib/tiktokIntegrationSummary'
 import { useAuth } from '../../contexts/AuthContext'
 import { isAdminRole, isManagerRole } from '../../lib/roles'
 import { getMicrosoftConnectionStatus } from '../../lib/microsoftImportData'
@@ -23,7 +24,8 @@ export default function IntegrationsPage() {
   const [linkedClients, setLinkedClients] = useState<number | null>(null)
   const [googleState, setGoogleState] = useState<MetaState>('loading')
   const [googleLinkedClients, setGoogleLinkedClients] = useState<number | null>(null)
-  const [tiktokState, setTiktokState] = useState<MetaState>('loading')
+  const [tiktokQueue, setTiktokQueue] = useState<TiktokConnectionQueue | null>(null)
+  const [tiktokLoading, setTiktokLoading] = useState(true)
   const [microsoftState, setMicrosoftState] = useState<MetaState>('loading')
   const [microsoftSourceCount, setMicrosoftSourceCount] = useState(0)
   const [microsoftFreshness, setMicrosoftFreshness] = useState<ReturnType<typeof microsoftFreshnessEvidence> | null>(null)
@@ -84,15 +86,16 @@ export default function IntegrationsPage() {
         })))
       })
 
-    // TikTok connection status
-    getTiktokConnectionStatus()
+    // The status endpoint requires an exact client; fleet truth comes from the queue.
+    if (canManageGoogleAds) getTiktokConnectionQueue()
       .then(data => {
         if (!active) return
-        setTiktokState(data?.connected ? 'connected' : 'disconnected')
+        setTiktokQueue(data)
       })
       .catch(() => {
-        if (active) setTiktokState('disconnected')
+        if (active) setTiktokQueue(null)
       })
+      .finally(() => { if (active) setTiktokLoading(false) })
 
     if (canManageGoogleAds) {
       getGoogleAdsWorkspace()
@@ -151,12 +154,7 @@ export default function IntegrationsPage() {
       : 'Facebook and Instagram are connected. Link clients to start syncing monthly reports.'
     : 'Connect Facebook Pages and Instagram accounts to create monthly report drafts automatically.'
   const metaButtonLabel = metaConnected ? 'Manage Meta' : 'Set up Meta'
-  const tiktokConnected = tiktokState === 'connected'
-  const tiktokStatus = tiktokState === 'loading' ? 'Checking...' : tiktokConnected ? 'Connected' : 'Not connected'
-  const tiktokDescription = tiktokConnected
-    ? 'TikTok is connected. Sync organic analytics or publish content.'
-    : 'Connect TikTok for organic analytics sync and content publishing.'
-  const tiktokButtonLabel = tiktokConnected ? 'Manage TikTok' : 'Set up TikTok'
+  const tiktokSummary = tiktokIntegrationSummary(tiktokQueue, tiktokLoading, canManageGoogleAds)
   const googleConnected = googleState === 'connected'
   const googleStatus = !canManageGoogleAds ? 'Manager access' : googleState === 'loading' ? 'Checking…' : googleConnected ? 'Connected' : 'Not connected'
   const googleDescription = !canManageGoogleAds
@@ -232,17 +230,17 @@ export default function IntegrationsPage() {
                 <div className="flex items-center justify-between gap-2">
                   <h2 className="text-base font-semibold text-white">TikTok</h2>
                   <StatusBadge
-                    label={tiktokStatus}
-                    variant={tiktokConnected ? 'published' : tiktokState === 'loading' ? 'default' : 'internal-draft'}
+                    label={tiktokSummary.status}
+                    variant={tiktokSummary.connected ? 'published' : tiktokLoading ? 'default' : 'internal-draft'}
                     size="sm"
                   />
                 </div>
-                <p className="mt-1.5 text-sm leading-relaxed text-brand-primary">{tiktokDescription}</p>
+                <p className="mt-1.5 text-sm leading-relaxed text-brand-primary">{tiktokSummary.description}</p>
               </div>
             </div>
             <div className="mt-auto pt-5">
               <ActionButton variant="outline" onClick={() => navigate('/admin/integrations/tiktok')} fullWidth>
-                {tiktokButtonLabel}
+                {tiktokSummary.buttonLabel}
               </ActionButton>
             </div>
           </div>
