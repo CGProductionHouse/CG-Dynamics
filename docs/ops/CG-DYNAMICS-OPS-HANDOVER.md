@@ -28,6 +28,20 @@ authentication gate and a new bounded validation attempt; #598 writes remain hel
 
 A fresh chat must recover state in this order:
 
+#604 dual-auth execution preflight (main `781cdc59bff515200dd922a46f36dbec9ed6b2e2`):
+CA authorized gateway JWT false only with BOTH exact existing service-role bearer
+and existing `WORKER_INTERNAL_TOKEN` checked in-handler before encryption reads.
+The worker-token production name exists, but its value is unavailable to the
+caller: absent from process/standard local environment sources; read-only Vault
+name checks found no worker/internal-token entry. Management metadata provides
+only digests. **No validator was deployed or invoked in #604**; the one-invocation
+authorization has not been consumed. Do not fabricate, replace, leak, self-inject
+or omit the second credential. CA must identify the existing private provisioning
+source (path only, never token in chat) before execution can continue. All four
+crypto facts remain UNVERIFIED. Both temporary validator URLs return 404, neither
+appears in inventory, all 42 original function versions/bundles are unchanged,
+and activation is still OFF. No production changes occurred in this preflight.
+
 ```text
 AGENTS.md
 -> this handover
