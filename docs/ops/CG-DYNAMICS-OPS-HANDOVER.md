@@ -2,7 +2,7 @@
 
 Status: CURRENT authority for a fresh supervisor chat.
 
-Updated: 27 September 2026 after #573 production Website Performance activation for Piek Group, Emmanuel Funerals and All Around PVC. Their exact mappings and September snapshots are live; only authenticated Admin Client Preview desktop/375 evidence remains.
+Updated: 1 October 2026 after final read-only #573 authenticated Admin Client Preview acceptance on `www.cgdynamics.co.za`. Piek, Emmanuel, All Around PVC and Red Oak passed desktop and 375px. No production writes occurred.
 
 ## 1. Fresh-chat recovery order
 
@@ -26,7 +26,7 @@ If chat history conflicts with this file, current GitHub + verified production s
 
 Latest verified runtime merge baseline:
 
-`0a9b20b51e82d2d97ee1d690bf2c6b82b4cb0c78` — PR #575 #573 Website Performance production activation handover. Exact mappings/snapshots are live for Websites 1, 6, 7 and 8; only authenticated Admin Client Preview evidence remains for #573.
+`ab53c2e020c7a495c96c6ebe1f173189c8fc7ce6` — PR #576 merged with green Vercel. Exact September Website snapshots for Websites 1, 6, 7 and 8 are now authenticated-browser accepted on desktop and 375px; see `artifacts/issue-573-browser-acceptance.md`.
 
 Always refetch `main` before code or merge actions.
 
@@ -89,7 +89,7 @@ Major completed launch-critical merges:
 
 0. **#567 Client Performance launch repair — PRODUCTION ACCEPTED**: PRs #570/#571 now render verified TikTok facts, hide unavailable client metric cards while retaining the exact truth in staff diagnostics, label Instagram profile-link clicks, remove non-live provider tabs/report-text strategy fallbacks, and use canonical monthly strategy with draft-only staff preview / published-only client projection. The fail-closed strategy presentation gate rejects repository paths, evidence jargon, generic filler and internal UUIDs; authenticated production checks held both Piek and Red Oak's unsafe drafts. The zero-write readiness artifact covers all 94 proposed rows and deliberately performs no strategy amendment, approval or publication. Website fleet evidence identifies nine verified CG-managed sites; four have exact active Dynamics clients (All Around PVC, Emmanuel Funerals, Piek Group and Red Oak), while five have no exact active Dynamics client. Red Oak established the guarded snapshot reference; #573 subsequently activated the other three exact sites without changing the reporting contract. Production acceptance passed on desktop and 375px with no horizontal body overflow or console/runtime errors.
 
-0.1 **#573 Website Performance activation — COMPLETE, UI SESSION EVIDENCE PENDING**:
+0.1 **#573 Website Performance activation — COMPLETE, AUTHENTICATED UI ACCEPTED**:
 Piek Group (Website 1 / `www.piekgroup.co.za`), Emmanuel Funerals (Website 6 /
 `emmanuelfunerals.com`) and All Around PVC (Website 8 /
 `www.allaroundpvc.co.za`) now have exact canonical Website Editor identities,
@@ -99,10 +99,15 @@ snapshot truthfully reports provider-observed 1 visitor / 1 pageview from collec
 start on 27 Sep, partial coverage, empty unsupported breakdowns and unavailable
 contact actions (`not_connected`, total null); no zero or cross-client fallback was
 introduced. The client-safe projection passed exact-client/published-only and internal-
-identifier stripping checks. Public desktop rendering passed without horizontal
-overflow. Authenticated Admin Client Preview desktop/375 visual capture remains
-unverified only because both available Chrome profiles redirect to Dynamics sign-in;
-no credential reset or new session was created.
+identifier stripping checks. On 1 October, the existing CG Production House Admin
+Chrome session at `www.cgdynamics.co.za/admin/published` passed all three plus Red Oak
+on desktop (1536px) and 375px. Correct hosts, published September snapshots, 1/1,
+27 Sep coverage notes and unavailable contact/breakdown states remain truthful.
+Snapshots now correctly display stale age; no refresh or republish was performed.
+Red Oak remains 103 visitors / 258 pageviews, 1 action / 0 enquiries with its original
+18 Sep traffic and 22 Sep contact coverage. No body overflow, captured console errors,
+internal Website/provider/Dynamics identifiers or cross-client Website leakage occurred.
+Screenshots and DOM evidence are recorded in `artifacts/issue-573-browser-acceptance.md`.
 1. **#505 provider closure**: TikTok is healthy at 10 connected / 0 needs_reauth /
    37 not connected. Four client-help holds remain (Emmanuel Funerals, Emoya
    Estate Driving Range, Piek Group, We Ar Fuels); the other unconnected TikTok
@@ -117,9 +122,8 @@ no credential reset or new session was created.
 3. **Portal**: protected nine-client rollout is complete. Production has 46/46
    enabled exact mappings across 46 clients/auth users. #519, #539 and #548 are closed.
 4. **Website M1**: guarded activation is complete for Websites 1, 6, 7 and 8.
-   Do not create another September snapshot or republish. The sole remaining optional
-   evidence is authenticated Admin Client Preview desktop/375 capture after CA opens
-   an active Dynamics staff session; the client-safe data contract itself is proven.
+   Do not create another September snapshot or republish. Authenticated Admin Client
+   Preview desktop/375 acceptance is complete; no #573 blocker remains.
 5. **#217**: optional real-phone human signoff only.
 6. **#558 stale-PR reconciliation**: complete in PR #561. Twelve stale, future,
    superseded or unsafe PRs were closed with evidence. Only the still-missing
@@ -570,10 +574,10 @@ Current production truth (read-only reconciliation after #518 closure):
 - client-safe projections proved published-only exact-client selection and removed
   Website Editor/Dynamics/Vercel internal identities.
 
-Do not repeat any September snapshot save or republish. The only remaining optional
-acceptance is authenticated Admin Client Preview desktop/375 visual evidence after an
-active Dynamics staff browser session is available; current Chrome sessions redirect
-to sign-in. This is a session-evidence gate, not a reporting-data or isolation defect.
+Do not repeat any September snapshot save or republish. Final authenticated Admin
+Client Preview desktop/375 acceptance passed on 1 October on `www.cgdynamics.co.za`.
+The earlier `cg-dynamics.vercel.app` login block did not apply to the connected custom-
+domain staff session. This acceptance did not create credentials or write production data.
 
 ## 9. Portal coverage — #519
 
@@ -698,8 +702,8 @@ Priority order:
 3. Website M1: all four exact active-client CG-managed sites now have guarded
    September website snapshots. Red Oak authenticated admin-preview acceptance is
    retained; Websites 1/6/8 passed provider, snapshot, exact-client and safe-projection
-   verification. Their final Admin Client Preview desktop/375 capture needs CA to open
-   an authenticated Dynamics staff session; current Chrome profiles redirect to login.
+   verification plus final authenticated Admin Client Preview desktop/375 capture
+   on 1 October. #573 has no remaining acceptance blocker.
 4. #217: authenticated Chrome acceptance passed at the 375px narrow viewport with
    no body overflow, usable mobile navigation and none of the four stale task
    examples. Optional physical-phone human signoff remains; it is not a code gate.
