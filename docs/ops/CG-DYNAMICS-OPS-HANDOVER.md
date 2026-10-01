@@ -2,7 +2,9 @@
 
 Status: CURRENT authority for a fresh supervisor chat.
 
-Updated: 1 October 2026 after CA-approved #595 Phase B callback migration/three-function rollout from main `ad95c9de0c75e81cebb0799cc179e474b0575b28`. Schema/grants/source parity and harmless fail-closed checks passed. Activation stays OFF, app secret absent, no provider/connection data mutation. Earlier #573 desktop/375px acceptance remains unchanged.
+Updated: 1 October 2026 after read-only #598 config/Meta-save preflight from main `0be26fbdf8790dab9dd18a7782ea31e7988b300e`. Production app ID exactly matches Meta Instagram product; activation is literal OFF. App secret is absent and APP_PUBLIC_URL still uses the old Vercel origin. Existing encryption key/version names exist but their structure requires private CA validation. #595 callback rollout remains healthy; no production writes occurred in #598.
+
+Next protected pack: [#598 exact config / Meta-save preflight](INSTAGRAM-CONFIG-META-SAVE-PREFLIGHT-598.md). Only separately approved app-secret addition, canonical public-origin correction and five public Meta field saves are proposed; no permission/Live/OAuth/activation change. Secret Show was not clicked. Do not replay the completed #595 migration/deploy sequence.
 
 ## 1. Fresh-chat recovery order
 
