@@ -74,6 +74,10 @@ for (const [name, overrides, code] of [
   ['missing encrypted token', { token: { ciphertext_base64: null } }, 'encrypted_token_missing'],
   ['unsupported key version', { supportedKeyVersion: 'v2' }, 'key_version_unsupported'],
   ['expired token', { token: { token_expires_at: '2026-09-22T10:00:00.000Z' } }, 'token_expired'],
+  ['missing expiry', { token: { token_expires_at: null } }, 'token_expired'],
+  ['malformed expiry', { token: { token_expires_at: 'not-a-date' } }, 'token_expired'],
+  ['out-of-range expiry', { token: { token_expires_at: '999999-01-01T00:00:00Z' } }, 'token_expired'],
+  ['expiry exactly now', { token: { token_expires_at: now.toISOString() } }, 'token_expired'],
 ]) {
   test(`standalone route fails closed on ${name}`, async () => {
     await assert.rejects(resolveInstagramReportingCredential(await fixture(overrides)), error => error.code === code)

@@ -57,13 +57,14 @@ export function PrivacyPolicyPage() {
   return (
     <LegalPage
       title="Privacy Policy"
-      intro="This policy explains how CG Production House uses personal information in CG Dynamics, including information received when an authorized user connects a TikTok account."
+      intro="This policy explains how CG Production House uses personal information in CG Dynamics, including information received when an authorized user connects a TikTok or Instagram account."
       sections={[
         {
           title: 'Information we handle',
           items: [
             'Account and profile information supplied by authorized CG Dynamics users.',
             'TikTok account identifiers, profile details, public video details, and account or video statistics permitted by the scopes the user approves.',
+            'Instagram professional account identifiers, usernames, account type, media and account/media insights permitted by the reporting permissions the account holder approves.',
             'OAuth access and refresh tokens needed to maintain an authorized connection.',
             'Operational records such as connection status, synchronization history, approvals, and provider errors.',
           ],
@@ -73,6 +74,7 @@ export function PrivacyPolicyPage() {
           items: [
             'To connect the selected client in CG Dynamics to the exact TikTok account authorized by that account holder.',
             'To display TikTok-native profile and video performance without combining unlike provider metrics.',
+            'To connect the selected client to the exact authorized Instagram Business or Creator account and display its permitted reporting data. Standalone Instagram Login does not request publishing, messaging or advertising permissions.',
             'To operate approved content workflows and, only when separately enabled and authorized, provider publishing functions.',
             'To secure, diagnose, and audit the integration.',
           ],
@@ -81,12 +83,14 @@ export function PrivacyPolicyPage() {
           title: 'Sharing and service providers',
           paragraphs: [
             'CG Production House does not sell TikTok account information. Information is shared only with service providers needed to operate CG Dynamics, such as hosting and database providers, and with TikTok when an authorized user invokes a TikTok function. Those providers process information under their own terms and privacy policies.',
+            'CG Production House does not sell Instagram account information. Instagram reporting data is processed by the hosting/database services needed to operate CG Dynamics and by Meta/Instagram for authorized reporting requests, under their own policies. CG Dynamics does not collect Instagram passwords; standalone OAuth tokens are encrypted on the server and are not exposed to clients.',
           ],
         },
         {
           title: 'Access, retention, and deletion',
           paragraphs: [
             'Access is restricted to authorized CG Production House staff and the relevant client-facing account where applicable. We retain integration information only while it is needed for the service, audit, security, or legal obligations. An authorized account holder may revoke TikTok access in TikTok and may contact us to request disconnection, access, correction, or deletion of associated personal information.',
+            'Instagram account holders may revoke access through Instagram/Meta and contact info@cgproductionhouse.com to request disconnection, access, correction or deletion of associated information. Client-facing reporting is restricted to that client’s published, safe reporting data.',
           ],
         },
         {

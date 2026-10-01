@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { Client } from '../../lib/db/clients'
-import { exactHandleMatches, instagramFleetEvidenceFor } from '../../lib/instagramConnectionQueue'
+import { exactHandleMatches, instagramFleetEvidenceFor, instagramPageRouteEvidence } from '../../lib/instagramConnectionQueue'
 import { classifySocialProviderEligibility } from '../../lib/socialProviderEligibility'
 import { supabase } from '../../lib/supabase'
 import { StatusBadge } from '../ui/Badges'
@@ -226,9 +226,7 @@ export function InstagramConnectionQueue({
               ) : (
                 <div className="mt-4 space-y-3">
                   <p className="text-xs leading-relaxed text-brand-primary/65">
-                    {hasFacebookPage
-                      ? 'The saved Facebook Page did not expose a linked Instagram account in the loaded provider assets.'
-                      : 'No saved Facebook Page route is available for this client.'}
+                    {instagramPageRouteEvidence(hasFacebookPage, providerAssetsLoaded)}
                     {' '}{evidence?.reviewNote ?? 'Confirm the exact owner-controlled account before staff approval.'}
                   </p>
                   <ActionButton variant="outline" size="sm" disabled={!canStartStandalone || busy} onClick={() => void startStandalone(client)}>

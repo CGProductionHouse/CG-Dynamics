@@ -2,6 +2,8 @@
 
 Updated: 23 September 2026
 
+1 October reconciliation: OAuth start/callback/confirm are ACTIVE v5 and match current main; the 47/22/25/0 fleet counts below remain correct. This is a prepared submission packet, not proof of provider approval or a recorded successful demo. Use the current activation runbook for protected sequencing, missing app secret, canonical return-origin correction and the pending credential-expiry runtime deployment. No submission, Live-mode change or consent occurred in the reconciliation.
+
 ## Current production state
 
 - Active clients: 57.
@@ -13,7 +15,7 @@ Updated: 23 September 2026
 - Standalone Instagram OAuth connections: 0.
 - Standalone encrypted token rows: 0.
 - Pending standalone reviews: 0.
-- Instagram OAuth start/callback/confirm Edge Functions: ACTIVE v4.
+- Instagram OAuth start/callback/confirm Edge Functions: ACTIVE v5 (verified 1 October).
 - Standalone schema, encrypted-token correction and review-binding migrations: applied.
 - Canonical production callback:
   `https://ehtjfntukiwbgptqgbzy.supabase.co/functions/v1/instagram-oauth-callback`
