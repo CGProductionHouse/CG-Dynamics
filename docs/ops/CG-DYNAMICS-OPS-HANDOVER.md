@@ -2,7 +2,7 @@
 
 Status: CURRENT authority for a fresh supervisor chat.
 
-Updated: 1 October 2026 after #595 Phase A read-only Instagram callback rollout preflight against accepted main `63c6fe4b40be957aaeb9a8a32eed6c093cedf98d`. No production writes occurred; Phase B still requires explicit CA authorization. Earlier #573 desktop/375px acceptance remains unchanged.
+Updated: 1 October 2026 after CA-approved #595 Phase B callback migration/three-function rollout from main `ad95c9de0c75e81cebb0799cc179e474b0575b28`. Schema/grants/source parity and harmless fail-closed checks passed. Activation stays OFF, app secret absent, no provider/connection data mutation. Earlier #573 desktop/375px acceptance remains unchanged.
 
 ## 1. Fresh-chat recovery order
 
@@ -26,7 +26,7 @@ If chat history conflicts with this file, current GitHub + verified production s
 
 Latest verified runtime merge baseline:
 
-`fb5118dd5ae24635ba82d8547af1080ae870e27d` — PR #584 merged with green Vercel. TikTok exact-account blocker reconciliation is complete for all 37 unconnected rows; Website #573 acceptance remains complete.
+`ad95c9de0c75e81cebb0799cc179e474b0575b28` — PR #596 Phase A handover merged with green Vercel; its reviewed callback runtime is now deployed under the separately approved #595 Phase B below. TikTok exact-account blocker reconciliation remains complete for all 37 unconnected rows; Website #573 acceptance remains complete.
 
 Always refetch `main` before code or merge actions.
 
@@ -641,8 +641,8 @@ This pack does not grant protected execution authority; #505 remains OPEN.
 
 #593 supersedes only #591's missing-code callback gate: exact standalone HMAC
 deauthorize/deletion handlers, namespaced OAuth persistence and service-only atomic
-SQL are implemented/tested. Migration `20261001131621_instagram_provider_callbacks.sql`
-is NOT applied; Edge functions are NOT deployed; Meta fields are NOT saved.
+SQL are implemented/tested. The earlier unapplied/undeployed state was superseded
+by the separately CA-approved #595 Phase B below. Meta fields are still NOT saved.
 Final URLs and protected rollout: `docs/ops/INSTAGRAM-PROVIDER-CALLBACKS-593.md`.
 Callbacks match only verified app-scoped identity; historical app namespace remains
 unknown/held. Deauthorization purges token and revokes the exact route; deletion
@@ -651,10 +651,11 @@ Facebook and unrelated client truth remain untouched. Persistent opaque receipts
 transaction locks and generation checks prevent replay/concurrent reconnect damage.
 48 new tests include 16 executable local PostgreSQL cases; full 3347 tests, build,
 Deno Edge typecheck, scoped lint and diff PASS. No protected production action.
-Separate CA migration/deployment/secret/provider-save and authorized fixture gates
-remain; verification/App Review/Live/consent gates are unchanged. #505 stays OPEN.
+The migration/three-function deployment gate is now complete under #595; secret/
+provider-save/authorized fixture and verification/App Review/Live/consent gates
+remain unchanged. #505 stays OPEN.
 
-#595 Phase A is complete, not a production rollout. Fresh production metadata proves
+#595 historical Phase A completed before rollout. Its production metadata proved
 OAuth callback ACTIVE v5 lacks the new namespace argument; both new handlers and
 the callback migration are absent. Prerequisite migrations exist under live ledger
 versions `20260923083506`, `20260923083514`, `20260923104013`; do not replay the
@@ -665,9 +666,33 @@ namespace backfill is needed or authorized. No-code/no-state GET returned 302 /
 except `INSTAGRAM_APP_SECRET`; no values were retrieved. Missing secret means a
 deployment alone remains unavailable (503), not provider-signature acceptance.
 Exact pinned apply/deploy, post-verification and coupled rollback/stop plan:
-`docs/ops/INSTAGRAM-CALLBACK-ROLLOUT-595.md`. Keep activation OFF. Stop for CA approval
-before the exact migration and three Edge deployments; secret/Meta-save/fixture/
-App Review/Live/real callback gates remain separate. Fresh signature tests 32 PASS.
+`docs/ops/INSTAGRAM-CALLBACK-ROLLOUT-595.md`. At that observation the migration and
+three deployments were still pending approval; the completed Phase B below now
+supersedes that hold. Secret/Meta-save/fixture/App Review/Live/real callback gates
+remain separate. Fresh signature tests 32 PASS.
+
+#595 Phase B COMPLETE under explicit CA authorization (1 October, verified 16:27
+SAST), from accepted main `ad95c9de0c75e81cebb0799cc179e474b0575b28` with unchanged
+reviewed runtime. Applied ONLY repository migration
+`20261001131621_instagram_provider_callbacks.sql`; management API ledger receipt
+is `20261001142241` / `instagram_provider_callbacks`. Do not replay/repair timestamps.
+Nullable namespace/index, receipt RLS/owner-only table ACL, service-only three RPCs,
+owner-only renamed helper, exact SQL body hashes and unchanged existing policies/
+grants passed. Sequential Edge rollout: OAuth callback ACTIVE v6, deauthorize v1,
+data-deletion v1, all `verify_jwt=false`; every deployed source/dependency matched.
+All other function versions/hashes/JWT settings unchanged. Harmless acceptance:
+OAuth no-code/no-state 302 `activation_blocked`; unsigned/forged POSTs both handlers
+503 (missing app secret, NOT successful live HMAC acceptance); unknown/malformed/
+absent deletion status 404. Connections/tokens/bindings/receipts/unnamespaced rows
+all remain zero. Names-only config unchanged; `INSTAGRAM_APP_SECRET` remains absent;
+no secret/config/flag/provider/Meta-save/OAuth/real callback/data-revoke/delete action.
+Fresh 32 tests passed; bounded deployment logs had no matched runtime-error signatures.
+Current versions/hashes, exact receipts and remaining protected gates are in
+`docs/ops/INSTAGRAM-CALLBACK-ROLLOUT-595.md`. Next gate is separately approved correct
+Instagram app-secret provisioning/private identity validation, then harmless HMAC
+rejection checks, separately authorized Meta callback saves and coherent owner
+fixture consent/removal/deletion acceptance. Business verification/Review/Live/
+activation remain separate. Never rollback OAuth to v5 alone after this migration.
 
 ## 8. Website reporting — #518
 
