@@ -623,6 +623,22 @@ text, capture script/screenshots and protected prerequisites are in
 Review, not merely an approval click. No permissions/mode/secret/config/OAuth/
 mapping/provider data/Edge changes occurred. #505 remains OPEN.
 
+#591 prerequisite-only follow-up (1 October, baseline `e348c7ac`): CG's Security
+Center is Eligible for verification for the developer-permissions use case, Start
+enabled but NOT clicked. Business info has legal entity CG Design Solutions (pty)
+ltd, distinct from the portfolio name; CA must compare its saved address/phone/
+website with private official proof. Exact current values, official document
+categories, available-vs-locked actions and click-by-click protected checklist:
+`docs/ops/META-591-PROTECTED-PREREQUISITES-2026-10-01.md`.
+Privacy/Terms and App Basic human deletion-instructions URL have exact reviewed
+public values. Product deauthorization/deletion machine callbacks have NO canonical
+implemented URL: do not invent one or point them at OAuth/HTML. No proven CG-owned
+unmapped professional demo account exists in the inspected approved evidence;
+portfolio asset access is not client owner consent. A separately approved coherent
+fixture is needed, not unbinding CG's existing Page-linked account. No dashboard
+save/verification/tester/permission/mode/OAuth/config/secret/Edge action occurred.
+This pack does not grant protected execution authority; #505 remains OPEN.
+
 ## 8. Website reporting — #518
 
 PR #517 is merged at:
