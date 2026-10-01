@@ -1,0 +1,23 @@
+name: Website enquiry transaction acceptance
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/website-enquiry-transaction.yml'
+      - 'scripts/website-enquiry-transaction-acceptance.mjs'
+      - 'supabase/migrations/*website_enquiry_transaction.sql'
+      - 'tests/sql/405_website_enquiry_transaction_acceptance.sql'
+      - 'tests/websiteEnquiryTransaction.test.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  postgres-acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - run: node --test tests/websiteEnquiryTransaction.test.mjs
+      - run: node scripts/website-enquiry-transaction-acceptance.mjs

@@ -67,6 +67,15 @@ Every exposed table has RLS enabled. Policies follow least-privilege:
 - Google Ads: OAuth flow through Edge Functions, tokens stored server-side.
 - Microsoft: Edge Function with isolated service-role access, no client exposure.
 
+## Proposed Website enquiries — #405 M2A (unapplied)
+
+Configuration-free exact-client transaction + versioned server-owned form/recipient
+bindings + incoming-customer identities + pending outbox + acquisition event.
+All eight tables enforce RLS; browser grants/policies and RPC execution are absent.
+The service-role SECURITY INVOKER transaction is the only submission RPC.
+Enquiry/event runtime grants are append-only even with broad default privileges.
+See `docs/ops/WEBSITE-ENQUIRY-M2A-405-CURRENT.md` for proof and protected gates.
+
 ## Web Push notifications
 
 - The existing `notifications` row remains the canonical message; Web Push is an additive delivery transport.
