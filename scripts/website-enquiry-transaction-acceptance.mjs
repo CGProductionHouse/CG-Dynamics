@@ -11,7 +11,7 @@ function docker(args, input) {
   return result.stdout
 }
 function sql(input, database = 'cg_website_enquiry_acceptance') {
-  return docker(['exec', '-i', container, 'psql', '-U', 'postgres', '-d', database, '-v', 'ON_ERROR_STOP=1', '-X'], input)
+  return docker(['exec', '-i', '-e', 'PGPASSWORD=postgres', container, 'psql', '-h', '127.0.0.1', '-U', 'postgres', '-d', database, '-v', 'ON_ERROR_STOP=1', '-X'], input)
 }
 let created = false
 try {
@@ -19,7 +19,9 @@ try {
   created = true
   let ready = false
   for (let attempt = 0; attempt < 40; attempt++) {
-    const result = spawnSync('docker', ['exec', container, 'pg_isready', '-U', 'postgres'], { encoding: 'utf8' })
+    // The image's temporary init server accepts sockets before its final restart.
+    // TCP readiness proves the final server, avoiding the init/shutdown race.
+    const result = spawnSync('docker', ['exec', container, 'pg_isready', '-h', '127.0.0.1', '-U', 'postgres'], { encoding: 'utf8' })
     if (result.status === 0) { ready = true; break }
     await new Promise(resolve => setTimeout(resolve, 500))
   }
