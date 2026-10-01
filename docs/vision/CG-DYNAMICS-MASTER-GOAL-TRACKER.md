@@ -291,6 +291,24 @@ As of 2026-08-13:
 6. Resume active-client research from Human Auto only when CA explicitly says `go`.
 7. Expand Website Intelligence / GA4 / Search Console / Google Ads attribution and leads only after the active foundations are stable.
 
+### OpenAI API Platform foundation
+
+Status: Post-launch milestone — not a launch blocker
+
+Goal:
+Set up a deliberate CG Dynamics OpenAI API Platform organisation/project under the correct business ownership so CG Dynamics can call OpenAI models programmatically where that creates real product value.
+
+Required before use:
+- decide the correct CG business/account ownership rather than casually using a personal account;
+- create the API organisation/project with least-privilege service credentials;
+- set budget/spend limits, alerts and usage monitoring before any production traffic;
+- keep API keys server-side only and never expose them in browser/client code;
+- define which CG Dynamics features may call OpenAI and what data each feature is allowed to send;
+- add auditability, rate limits, failure handling and provider-cost visibility;
+- start with one bounded internal use case before wider AI Workforce rollout.
+
+Do not confuse this with the ChatGPT/Codex browser-extension connection used for human acceptance work. They are separate systems.
+
 ## Long-term outcome
 
 CG Dynamics should get smarter with every client, campaign, task, report and reviewed lesson.
