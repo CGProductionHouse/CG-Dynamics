@@ -136,6 +136,12 @@ No step here is authorized merely by this runbook. #505 remains OPEN.
 
 1. CA verifies the existing Instagram product, exact callback URL and the two reporting permissions in Meta. Prepare the demonstration from `INSTAGRAM-META-REVIEW-SUBMISSION-2026-09-23.md`; select one owner-controlled professional review account. The packet is prepared, not submitted or provider-accepted. Any reviewer/test-account consent needed before submission requires separate authorization; never bypass the production gate for a demo.
 2. CA completes Meta App Review/Advanced Access. Record provider approval evidence, not a guessed status. Current dashboard review/access/mode was not re-inspected in this pass.
+   Superseding 1 October dashboard inspection: Development; empty unsubmitted
+   request; both standalone scopes Standard access/zero calls; Insights advanced
+   request disabled. Business is Unverified and access verification blocked.
+   Privacy URL blank, Terms/deletion instructions are facebook.com, product
+   deauthorize/deletion URLs blank. Resolve those protected prerequisites and a
+   real authorized demo before submission. See `INSTAGRAM-META-REVIEW-PREP-2026-10-01.md`.
 3. CA switches to the required Live state only after approval.
 4. Under separate protected authority, securely configure the missing `INSTAGRAM_APP_SECRET`; privately validate all existing names. Encryption key must decode to exactly 32 bytes, key version must be `v1`/`v2` etc., and Graph version must be explicit. Verify `INSTAGRAM_REDIRECT_URI` equals `https://ehtjfntukiwbgptqgbzy.supabase.co/functions/v1/instagram-oauth-callback`. Correct/verify `APP_PUBLIC_URL` to the authenticated canonical origin `https://www.cgdynamics.co.za`: the current blocked callback redirects to the old `cg-dynamics.vercel.app` origin. No configuration was changed in this pass.
 5. Before enabling consent, deploy the accepted shared credential-expiry correction to both existing consumers (`meta-sync` and `meta-sync-worker`) under separate Edge deployment authorization. No migration or new scheduler is needed. Keep standalone activation disabled until all server/provider prerequisites pass.

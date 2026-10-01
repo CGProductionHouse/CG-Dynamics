@@ -2,6 +2,13 @@
 
 Updated: 23 September 2026
 
+Authoritative live dashboard supplement (1 October):
+`INSTAGRAM-META-REVIEW-PREP-2026-10-01.md`. Existing app is Development, submission
+empty/not submitted, both standalone scopes Standard access with zero API calls;
+Insights advanced request disabled. Business/access verification, Meta legal URLs
+and a genuine authorized demonstration remain prerequisites. This is NOT a packet
+waiting only for Submit for Review. Do not use Meta's five-scope sample Embed URL.
+
 1 October reconciliation: OAuth start/callback/confirm are ACTIVE v5 and match current main; the 47/22/25/0 fleet counts below remain correct. This is a prepared submission packet, not proof of provider approval or a recorded successful demo. Use the current activation runbook for protected sequencing, missing app secret, canonical return-origin correction and the pending credential-expiry runtime deployment. No submission, Live-mode change or consent occurred in the reconciliation.
 
 ## Current production state
