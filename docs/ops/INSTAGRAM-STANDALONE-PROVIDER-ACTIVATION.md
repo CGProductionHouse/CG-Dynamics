@@ -138,7 +138,8 @@ No step here is authorized merely by this runbook. #505 remains OPEN.
 Do not replay its migration or three deployments. Before consent/demo, follow
 `INSTAGRAM-CONFIG-META-SAVE-PREFLIGHT-598.md`: app ID is verified, app secret is
 absent, public origin still needs its canonical correction, and existing key/
-version structure requires private validation. Config and exact public Meta URL
+version structure was subsequently satisfied by the separately CA-authorized
+#600 known-good 32-byte reset/readback; see the ops handover receipt. Config and exact public Meta URL
 saves require separate approval. Keep activation OFF throughout; #598 made no
 production changes.
 

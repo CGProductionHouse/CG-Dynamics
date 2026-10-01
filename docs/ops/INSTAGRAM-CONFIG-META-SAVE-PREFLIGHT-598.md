@@ -4,6 +4,13 @@ Read-only inspection: 1 October 2026. Repository baseline:
 `0be26fbdf8790dab9dd18a7782ea31e7988b300e`.
 This document is a protected execution plan, not authorization to execute it.
 
+Superseding #600 receipt: CA subsequently authorized a known-good encryption
+pair reset only after all four standalone tables were proven zero. Fresh 32-byte
+CSPRNG key canonical-base64/length/version/helper round-trip checks and private
+production readback passed. The historical key-structure hold in this preflight
+is now satisfied; see the current ops handover reset receipt. No app-secret,
+public-origin or Meta URL save was authorized or performed by that reset.
+
 ## Verified private production / dashboard state
 
 Authenticated Meta Developers: parent CG Dynamics app `976168728361566`,
