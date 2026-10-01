@@ -2,7 +2,7 @@
 
 Status: CURRENT authority for a fresh supervisor chat.
 
-Updated: 1 October 2026 after final read-only #573 authenticated Admin Client Preview acceptance on `www.cgdynamics.co.za`. Piek, Emmanuel, All Around PVC and Red Oak passed desktop and 375px. No production writes occurred.
+Updated: 1 October 2026 after #595 Phase A read-only Instagram callback rollout preflight against accepted main `63c6fe4b40be957aaeb9a8a32eed6c093cedf98d`. No production writes occurred; Phase B still requires explicit CA authorization. Earlier #573 desktop/375px acceptance remains unchanged.
 
 ## 1. Fresh-chat recovery order
 
@@ -653,6 +653,21 @@ transaction locks and generation checks prevent replay/concurrent reconnect dama
 Deno Edge typecheck, scoped lint and diff PASS. No protected production action.
 Separate CA migration/deployment/secret/provider-save and authorized fixture gates
 remain; verification/App Review/Live/consent gates are unchanged. #505 stays OPEN.
+
+#595 Phase A is complete, not a production rollout. Fresh production metadata proves
+OAuth callback ACTIVE v5 lacks the new namespace argument; both new handlers and
+the callback migration are absent. Prerequisite migrations exist under live ledger
+versions `20260923083506`, `20260923083514`, `20260923104013`; do not replay the
+differently timestamped repository files. Actual persistence contract/grants/RLS
+were inspected. Standalone connections/tokens/bindings are 0/0/0, so no historical
+namespace backfill is needed or authorized. No-code/no-state GET returned 302 /
+`activation_blocked` before database/provider activity. Required names are present
+except `INSTAGRAM_APP_SECRET`; no values were retrieved. Missing secret means a
+deployment alone remains unavailable (503), not provider-signature acceptance.
+Exact pinned apply/deploy, post-verification and coupled rollback/stop plan:
+`docs/ops/INSTAGRAM-CALLBACK-ROLLOUT-595.md`. Keep activation OFF. Stop for CA approval
+before the exact migration and three Edge deployments; secret/Meta-save/fixture/
+App Review/Live/real callback gates remain separate. Fresh signature tests 32 PASS.
 
 ## 8. Website reporting — #518
 
