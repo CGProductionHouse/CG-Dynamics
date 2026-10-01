@@ -607,6 +607,22 @@ Exact evidence and protected activation order are in
 `docs/ops/INSTAGRAM-READINESS-ACCEPTANCE-2026-10-01.md` and
 `docs/ops/INSTAGRAM-STANDALONE-PROVIDER-ACTIVATION.md`. #505 remains OPEN.
 
+#505 Meta-review preparation (1 October, main `60093376`): live authenticated
+dashboard proves CG Dynamics app `976168728361566`, Instagram product/app
+`1383360116973315`, exact saved OAuth callback, Development mode, empty unsubmitted
+review, Standard access/zero calls for both standalone reporting scopes. Insights'
+advanced request is disabled and lists business verification/access verification/
+App Review prerequisites. CG business is Unverified; access verification blocked.
+Meta Privacy URL is blank; Terms/deletion point to facebook.com; product deletion/
+deauthorize URLs blank. Production public legal pages themselves render correctly.
+CG's own `@cg_production.house` is owner-controlled/professional, but already
+Page-linked: do not unbind or reuse it under another client for a standalone demo.
+No legitimate consent video or reviewer access is claimed. Exact copy-ready scope
+text, capture script/screenshots and protected prerequisites are in
+`docs/ops/INSTAGRAM-META-REVIEW-PREP-2026-10-01.md`. Stop is earlier than Submit for
+Review, not merely an approval click. No permissions/mode/secret/config/OAuth/
+mapping/provider data/Edge changes occurred. #505 remains OPEN.
+
 ## 8. Website reporting — #518
 
 PR #517 is merged at:
