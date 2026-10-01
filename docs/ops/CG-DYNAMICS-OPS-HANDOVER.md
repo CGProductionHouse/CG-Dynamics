@@ -474,7 +474,21 @@ Client-assisted holds:
 
 These four must not be repeatedly treated as ordinary autonomous rollout work. Resume only when the client can complete the required owner-side login, approval, 2FA or provider interaction.
 
-The remaining **33** unconnected eligible clients stay identity-gated until an exact owner-controlled TikTok identity is verified. Do not infer or guess identities.
+The 1 October #505 TikTok-only pass rechecked all 37 against the live authenticated
+queue, approved local TikTok column and exact-client dossier evidence. Final counts
+remain **10 connected / 0 reconnect / 37 not connected**; no new connection could
+be safely made. All 37 have exact dispositions in
+`docs/ops/TIKTOK-505-EXACT-IDENTITY-BLOCKERS-2026-10-01.md`:
+- 4 existing `CLIENT_HELP_REQUIRED` holds preserved;
+- Bat Hill Royale: one signed-out provider login returned `Account doesn't exist`;
+- WiseRide: one signed-out provider login returned credential mismatch;
+- 31 other ordinary rows: 24 blank TikTok source records / 7 no corresponding row,
+  with no authoritative TikTok identity in current reviewed dossier evidence.
+Those gaps do not mean the clients have no TikTok. No account was guessed or created,
+no password reset/retry, OAuth, mapping, provider scope or production data write was
+performed. Credential values were never returned or committed. CA/owner evidence
+must resolve these exact per-client gates; #505 remains OPEN. Instagram remains a
+separate CA-owned lane and was not touched.
 
 No TikTok publishing scopes, live publishing, advertising campaigns or ad spend are enabled through Dynamics.
 
