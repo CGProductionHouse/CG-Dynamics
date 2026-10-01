@@ -5,6 +5,7 @@ import {
   INSTAGRAM_FLEET_EVIDENCE,
   exactHandleMatches,
   instagramFleetEvidenceFor,
+  instagramPageRouteEvidence,
 } from '../src/lib/instagramConnectionQueue.ts'
 
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
@@ -14,6 +15,26 @@ const start = read('../supabase/functions/instagram-oauth-start/index.ts')
 const callback = read('../supabase/functions/instagram-oauth-callback/index.ts')
 const confirm = read('../supabase/functions/instagram-connection-confirm/index.ts')
 const migration = read('../supabase/migrations/20260923120000_instagram_connection_review_binding.sql')
+
+test('public privacy disclosure covers Instagram reporting, encryption and owner revocation', () => {
+  const legal = read('../src/pages/LegalPage.tsx')
+  const routes = read('../src/App.tsx')
+  assert.match(legal, /Instagram professional account identifiers/)
+  assert.match(legal, /Standalone Instagram Login does not request publishing, messaging or advertising permissions/)
+  assert.match(legal, /does not collect Instagram passwords/)
+  assert.match(legal, /standalone OAuth tokens are encrypted on the server/)
+  assert.match(legal, /Instagram account holders may revoke access/)
+  assert.match(routes, /path="\/privacy-policy" element=\{<PrivacyPolicyPage \/>\}/)
+})
+
+test('an unchecked saved Page route never claims provider absence', () => {
+  assert.match(instagramPageRouteEvidence(true, false), /has not been checked yet/)
+  assert.doesNotMatch(instagramPageRouteEvidence(true, false), /did not expose/)
+  assert.match(instagramPageRouteEvidence(true, true), /did not expose/)
+  assert.match(instagramPageRouteEvidence(false, false), /No saved Facebook Page route/)
+  assert.match(instagramPageRouteEvidence(false, true), /No saved Facebook Page route/)
+  assert.match(page, /instagramPageRouteEvidence\(hasFacebookPage, providerAssetsLoaded\)/)
+})
 
 test('fleet evidence contains the exact 25 Instagram-unmapped recurring-social clients', () => {
   const expectedClients = [

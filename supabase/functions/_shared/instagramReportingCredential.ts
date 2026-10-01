@@ -128,7 +128,8 @@ export async function resolveInstagramReportingCredential(input: {
   if (!input.encryptionKeyBase64) {
     unusable('encryption_key_missing', 'the credential decryption service is not configured.')
   }
-  if (!tokenRow.token_expires_at || new Date(tokenRow.token_expires_at).getTime() <= (input.now ?? new Date()).getTime()) {
+  const expiresAt = tokenRow.token_expires_at ? Date.parse(tokenRow.token_expires_at) : NaN
+  if (!Number.isFinite(expiresAt) || expiresAt <= (input.now ?? new Date()).getTime()) {
     unusable('token_expired', 'the provider credential has expired.')
   }
 

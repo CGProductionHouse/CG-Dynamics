@@ -519,7 +519,7 @@ If provider requires 2FA, QR owner approval, Business Account conversion or anot
 
 Page-linked Instagram remains preferred.
 
-Live production fleet truth (23 Sep 2026):
+Live production fleet truth (read-only reverified 1 Oct 2026):
 - 47 recurring-social eligible clients;
 - 22 currently have a canonical Instagram mapping;
 - 25 remain unmapped;
@@ -531,7 +531,7 @@ Standalone infrastructure is already deployed:
 - fallback foundation migration is ledgered in production;
 - encrypted-token correction migration is ledgered in production;
 - review-binding migration is ledgered in production;
-- Instagram OAuth start/callback/confirm Edge Functions are ACTIVE (v4);
+- Instagram OAuth start/callback/confirm Edge Functions are ACTIVE v5; deployed source files match main `2f5d4dad94ecba91f3c3f38a85180fb5c52ac0f9`;
 - standalone reviewed encrypted tokens can feed the canonical Meta sync path after exact staff confirmation.
 
 Exact reviewed handles already known among the 25 unmapped clients:
@@ -555,6 +555,31 @@ Real remaining standalone provider gates:
 - exact account-owner consent/re-auth/2FA where required.
 
 Do not expose provider secret values.
+
+#505 Instagram-only readiness follow-up (1 October): the authenticated admin queue
+and canonical package classification agree at 47 eligible / 22 eligible mappings /
+25 unmapped / 10 excluded / 0 held. The database has three additional retained
+Instagram mappings for excluded clients; those are not rollout eligibility and
+were not changed. Standalone connections, encrypted rows and pending reviews are
+all zero. All eight reviewed handles are preserved; 17 identities remain unresolved.
+Six Instagram config names exist; `INSTAGRAM_APP_SECRET` is absent. The callback
+still fails closed with `activation_blocked`, but returns to the old Vercel origin;
+`APP_PUBLIC_URL` needs protected correction/verification against the authenticated
+custom-domain session before consent. No config or secret was changed.
+
+Local safe fixes reject malformed/out-of-range credential expiry, distinguish an
+unchecked saved Page route from provider-confirmed absence, and disclose Instagram
+reporting/encryption/revocation in the public Privacy policy without altering TikTok
+behavior. The shared expiry helper needs separately authorized deployment to both
+`meta-sync` and `meta-sync-worker` before standalone reporting activation. No Edge
+deployment was performed. Desktop/375 read-only acceptance captured no body overflow
+or console errors; browser connection later detached during legal-page inspection,
+so post-merge rendered acceptance must not be assumed. Full repository tests exposed
+an unrelated existing `reportPeriodMtd.test.mjs` failure (draft wins a published
+current-month fixture); report-period code was not changed in the Instagram lane.
+Exact evidence and protected activation order are in
+`docs/ops/INSTAGRAM-READINESS-ACCEPTANCE-2026-10-01.md` and
+`docs/ops/INSTAGRAM-STANDALONE-PROVIDER-ACTIVATION.md`. #505 remains OPEN.
 
 ## 8. Website reporting — #518
 

@@ -50,3 +50,10 @@ export function instagramFleetEvidenceFor(clientName: string): InstagramFleetEvi
 export function exactHandleMatches(expectedHandle: string | null, providerHandle: string): boolean {
   return expectedHandle !== null && expectedHandle.toLowerCase() === providerHandle.toLowerCase()
 }
+
+export function instagramPageRouteEvidence(hasFacebookPage: boolean, providerAssetsLoaded: boolean): string {
+  if (!hasFacebookPage) return 'No saved Facebook Page route is available for this client.'
+  return providerAssetsLoaded
+    ? 'The saved Facebook Page did not expose a linked Instagram account in the loaded provider assets.'
+    : 'The saved Facebook Page route has not been checked yet. Load Page-linked assets before choosing standalone OAuth.'
+}
