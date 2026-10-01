@@ -134,16 +134,20 @@ export function calendarMonthBounds(month: string): { start: string; end: string
   return { start: `${month}-01`, end }
 }
 
-// True only when the last day of the month is strictly before today (UTC).
-export function isMonthComplete(month: string): boolean {
+// True only when the last day precedes the supplied clock's local calendar day.
+function isMonthCompleteAt(month: string, now: Date): boolean {
   const match = /^(\d{4})-(\d{2})$/.exec(month)
   if (!match) return false
   const year = Number(match[1])
   const monthIndex = Number(match[2])
+  if (monthIndex < 1 || monthIndex > 12 || !Number.isFinite(now.getTime())) return false
   const lastDay = new Date(Date.UTC(year, monthIndex, 0))
-  const today = new Date()
-  const todayUtc = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()))
+  const todayUtc = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()))
   return lastDay < todayUtc
+}
+
+export function isMonthComplete(month: string): boolean {
+  return isMonthCompleteAt(month, new Date())
 }
 
 // "May 2026" — long month name + year for display headings.
@@ -176,8 +180,8 @@ export function isFullCalendarMonth(periodStart: string, periodEnd: string): boo
 
 // True only when the calendar month has fully elapsed (alias of isMonthComplete,
 // named for the task's vocabulary).
-export function isCompletedMonth(month: string): boolean {
-  return isMonthComplete(month)
+export function isCompletedMonth(month: string, now = new Date()): boolean {
+  return isMonthCompleteAt(month, now)
 }
 
 export function isPublishedMonthToDateReport(
@@ -265,13 +269,20 @@ export function monthFullyCoveredByRange(month: string, range: { start: string; 
   return range.start <= start && range.end >= end
 }
 
-// Reduce a raw report list to the client-facing set: only reports whose intended
-// month is a completed calendar month, deduped to one report per month. When a
+function isCalendarDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
+  const date = new Date(`${value}T00:00:00Z`)
+  return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value
+}
+
+// Reduce a raw report list to the client-facing published set: completed months
+// or the current month, using one supplied clock for both. When a
 // month has duplicates, the latest updated (then master, then newest) wins.
 export function selectMonthlyReports<
   T extends {
     period_start: string
     period_end: string
+    status?: string
     platform?: unknown
     updated_at?: string | null
     created_at?: string | null
@@ -280,10 +291,16 @@ export function selectMonthlyReports<
 >(reports: T[], now = new Date()): T[] {
   const byMonth = new Map<string, T>()
   for (const report of reports) {
+    if (report.status !== 'published'
+      || !isCalendarDate(report.period_start)
+      || !isCalendarDate(report.period_end)) continue
     const month = getReportMonthFromPeriod(report)
+    const bounds = calendarMonthBounds(month)
+    if (report.period_start !== bounds.start
+      || report.period_end < bounds.start
+      || report.period_end > bounds.end) continue
     if (
-      !isCompletedMonth(month)
-      && !isPublishedMonthToDateReport(report)
+      !isCompletedMonth(month, now)
       && !isPublishedCurrentMonthReport(report, now)
     ) continue
     const existing = byMonth.get(month)
