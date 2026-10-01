@@ -16,7 +16,7 @@
       "strategy_month": "2026-09-01",
       "disposition": "ready_for_draft_creation",
       "reason": "REVIEWED_EXACT_CLIENT_INTELLIGENCE_READY_CANONICAL_DRAFT_MISSING",
-      "source_evidence_hash": "376630a6efc1dc5b008b25d4808832b9f8a384226c9974fb6ff3f1c36237ec33",
+      "source_evidence_hash": "e7503fe962e4f56048533dd0322d9edea9b3c8070655f0b3c9078c6db17a7886",
       "package": {
         "professional_videos_per_month": 1,
         "photo_posts_per_month": 4,
@@ -28,7 +28,6 @@
         "monthly_strategies",
         "content_guidelines"
       ],
-      "safe_next_action": "Create this exact client/month as a canonical draft through the existing monthly strategy contract, then review before any approval or publication.",
       "reviewed_intelligence_sources": [
         "OneDrive:/Clients/Neshora Oxygen/Brand Identity",
         "OneDrive:/Clients/Neshora Oxygen/VIDEOS/2026/2026_10_OCT/2026_09_21",
@@ -102,7 +101,8 @@
           "successSignals": "Once provider analytics are available, compare real reach, video views and interactions for human/lifestyle assets versus identity-led graphics. Until then, success is factual consistency, complete use of the confirmed package and zero unsupported claims rather than invented numerical targets.",
           "nextMonthGamePlan": "Use the September introduction to seed October’s full package from the existing 21 September shoot, then add only client-confirmed product/service facts and measure the first complete month before expanding any content pillar."
         }
-      }
+      },
+      "safe_next_action": "Create this exact client/month as a canonical draft through the existing monthly strategy contract, then review before any approval or publication."
     },
     {
       "client_id": "3c20fae1-8e91-41d5-98eb-1c331600e6e3",
@@ -110,7 +110,7 @@
       "strategy_month": "2026-10-01",
       "disposition": "ready_for_draft_creation",
       "reason": "REVIEWED_EXACT_CLIENT_INTELLIGENCE_READY_CANONICAL_DRAFT_MISSING",
-      "source_evidence_hash": "376630a6efc1dc5b008b25d4808832b9f8a384226c9974fb6ff3f1c36237ec33",
+      "source_evidence_hash": "e7503fe962e4f56048533dd0322d9edea9b3c8070655f0b3c9078c6db17a7886",
       "package": {
         "professional_videos_per_month": 1,
         "photo_posts_per_month": 4,
@@ -122,7 +122,6 @@
         "monthly_strategies",
         "content_guidelines"
       ],
-      "safe_next_action": "Create this exact client/month as a canonical draft through the existing monthly strategy contract, then review before any approval or publication.",
       "reviewed_intelligence_sources": [
         "OneDrive:/Clients/Neshora Oxygen/Brand Identity",
         "OneDrive:/Clients/Neshora Oxygen/VIDEOS/2026/2026_10_OCT/2026_09_21",
@@ -196,8 +195,9 @@
           "successSignals": "Once provider analytics are available, compare real reach, video views and interactions for human/lifestyle assets versus identity-led graphics. Until then, success is factual consistency, complete use of the confirmed package and zero unsupported claims rather than invented numerical targets.",
           "nextMonthGamePlan": "Use October as the clean baseline month, then carry forward only the human-vs-graphic creative patterns supported by real Neshora metrics and newly confirmed client facts. Keep all unknown package fields disabled."
         }
-      }
+      },
+      "safe_next_action": "Create this exact client/month as a canonical draft through the existing monthly strategy contract, then review before any approval or publication."
     }
   ],
-  "plan_hash": "4e709c3af9aa3ba46175db2fa5527772bb03e1468f78e3389209bacd82d9ddaf"
+  "plan_hash": "4fde6d2f875a9bd2b312aaea4687c82f6b51f64efb36f97d7edd4420c45a8e5d"
 }
