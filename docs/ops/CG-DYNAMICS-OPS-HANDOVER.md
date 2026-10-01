@@ -572,9 +572,13 @@ unchecked saved Page route from provider-confirmed absence, and disclose Instagr
 reporting/encryption/revocation in the public Privacy policy without altering TikTok
 behavior. The shared expiry helper needs separately authorized deployment to both
 `meta-sync` and `meta-sync-worker` before standalone reporting activation. No Edge
-deployment was performed. Desktop/375 read-only acceptance captured no body overflow
-or console errors; browser connection later detached during legal-page inspection,
-so post-merge rendered acceptance must not be assumed. Full repository tests exposed
+deployment was performed. PR #586 merged at `cacc4f9975a9056d72892e4e278524c4f33d2537`
+with green head/main Vercel. Fresh same-profile Chrome acceptance proves the corrected
+production queue and Privacy/Terms at desktop1536 and mobile375, with no horizontal
+body overflow or subsequent captured console errors. An initial stale lazy-chunk
+error during the deployment transition recovered through Refresh page; the earlier
+browser detachment is resolved, not an outstanding login/acceptance blocker.
+Full repository tests exposed
 an unrelated existing `reportPeriodMtd.test.mjs` failure (draft wins a published
 current-month fixture); report-period code was not changed in the Instagram lane.
 Exact evidence and protected activation order are in
