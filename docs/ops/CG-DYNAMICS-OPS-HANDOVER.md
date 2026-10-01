@@ -26,7 +26,7 @@ If chat history conflicts with this file, current GitHub + verified production s
 
 Latest verified runtime merge baseline:
 
-`ab53c2e020c7a495c96c6ebe1f173189c8fc7ce6` — PR #576 merged with green Vercel. Exact September Website snapshots for Websites 1, 6, 7 and 8 are now authenticated-browser accepted on desktop and 375px; see `artifacts/issue-573-browser-acceptance.md`.
+`fb5118dd5ae24635ba82d8547af1080ae870e27d` — PR #584 merged with green Vercel. TikTok exact-account blocker reconciliation is complete for all 37 unconnected rows; Website #573 acceptance remains complete.
 
 Always refetch `main` before code or merge actions.
 
@@ -60,6 +60,7 @@ Major completed launch-critical merges:
 - #562 production MCP task-view schema correction.
 - #565 final launch transition-status correction.
 - #575 Website Performance activation handover.
+- #584 TikTok exact-account evidence/blocker ledger.
 
 ## 3. Launch scoreboard
 
@@ -108,11 +109,14 @@ Red Oak remains 103 visitors / 258 pageviews, 1 action / 0 enquiries with its or
 18 Sep traffic and 22 Sep contact coverage. No body overflow, captured console errors,
 internal Website/provider/Dynamics identifiers or cross-client Website leakage occurred.
 Screenshots and DOM evidence are recorded in `artifacts/issue-573-browser-acceptance.md`.
-1. **#505 provider closure**: TikTok is healthy at 10 connected / 0 needs_reauth /
-   37 not connected. Four client-help holds remain (Emmanuel Funerals, Emoya
-   Estate Driving Range, Piek Group, We Ar Fuels); the other unconnected TikTok
-   rows remain exact-identity gated. Standalone Instagram remains the main active
-   provider lane: Meta App Review/Advanced Access, Live mode, secure
+1. **#505 provider closure — OPEN**: TikTok remains 10 connected / 0 needs_reauth /
+   37 unconnected. All 37 now have precise dispositions from PR #584:
+   4 CLIENT_HELP_REQUIRED holds (Emmanuel Funerals, Emoya Estate Driving Range,
+   Piek Group, We Ar Fuels); 2 provider-rejected exact local records (Bat Hill:
+   account does not exist; WiseRide: credential mismatch); 31 exact TikTok identity/login
+   evidence gaps. These 31 are not proof that no TikTok account exists. No further TikTok
+   binding is safe without exact owner evidence. Standalone Instagram remains the main
+   executable provider lane: Meta App Review/Advanced Access, Live mode, secure
    `INSTAGRAM_APP_SECRET`, activation flag, then exact-client OAuth/confirmation.
 2. **#513 strategy**: the migration is applied; frozen 92 reviewed fleet rows plus
    the two exact existing Neshora Sep/Oct rows are amended to reviewed draft v2.
