@@ -639,6 +639,21 @@ fixture is needed, not unbinding CG's existing Page-linked account. No dashboard
 save/verification/tester/permission/mode/OAuth/config/secret/Edge action occurred.
 This pack does not grant protected execution authority; #505 remains OPEN.
 
+#593 supersedes only #591's missing-code callback gate: exact standalone HMAC
+deauthorize/deletion handlers, namespaced OAuth persistence and service-only atomic
+SQL are implemented/tested. Migration `20261001131621_instagram_provider_callbacks.sql`
+is NOT applied; Edge functions are NOT deployed; Meta fields are NOT saved.
+Final URLs and protected rollout: `docs/ops/INSTAGRAM-PROVIDER-CALLBACKS-593.md`.
+Callbacks match only verified app-scoped identity; historical app namespace remains
+unknown/held. Deauthorization purges token and revokes the exact route; deletion
+purges its standalone credential/connection/asset identity only. Reports/posts,
+Facebook and unrelated client truth remain untouched. Persistent opaque receipts,
+transaction locks and generation checks prevent replay/concurrent reconnect damage.
+48 new tests include 16 executable local PostgreSQL cases; full 3347 tests, build,
+Deno Edge typecheck, scoped lint and diff PASS. No protected production action.
+Separate CA migration/deployment/secret/provider-save and authorized fixture gates
+remain; verification/App Review/Live/consent gates are unchanged. #505 stays OPEN.
+
 ## 8. Website reporting — #518
 
 PR #517 is merged at:

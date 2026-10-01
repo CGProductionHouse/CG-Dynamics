@@ -2,3 +2,11 @@
 # Server-to-server authentication is enforced inside the function with the
 # dedicated CG_HOURS_BRIDGE_SECRET. The caller never receives a Dynamics JWT.
 verify_jwt = false
+
+[functions.instagram-deauthorize]
+# Meta HMAC-SHA256 signed_request verified by the handler, not a Supabase JWT.
+verify_jwt = false
+
+[functions.instagram-data-deletion]
+# POST: Meta signed_request. GET: opaque bearer confirmation, safe status only.
+verify_jwt = false

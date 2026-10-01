@@ -134,6 +134,13 @@ Standalone Instagram is production-ready only when:
 
 No step here is authorized merely by this runbook. #505 remains OPEN.
 
+#593 callback prerequisite is now implemented, not production-active. Before any
+consent/demo, follow `INSTAGRAM-PROVIDER-CALLBACKS-593.md`: separately approve/apply
+the additive migration, deploy updated OAuth callback plus both signed provider
+handlers, privately validate existing Instagram app secret/ID, then separately
+authorize only the exact product callback URL saves and fixture acceptance.
+Keep activation OFF throughout. No protected action occurred in the code lane.
+
 1. CA verifies the existing Instagram product, exact callback URL and the two reporting permissions in Meta. Prepare the demonstration from `INSTAGRAM-META-REVIEW-SUBMISSION-2026-09-23.md`; select one owner-controlled professional review account. The packet is prepared, not submitted or provider-accepted. Any reviewer/test-account consent needed before submission requires separate authorization; never bypass the production gate for a demo.
 2. CA completes Meta App Review/Advanced Access. Record provider approval evidence, not a guessed status. Current dashboard review/access/mode was not re-inspected in this pass.
    Superseding 1 October dashboard inspection: Development; empty unsubmitted
