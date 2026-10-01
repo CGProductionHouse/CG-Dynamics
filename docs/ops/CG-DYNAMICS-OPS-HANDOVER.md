@@ -10,6 +10,22 @@ Next protected pack: [#598 exact config / Meta-save preflight](INSTAGRAM-CONFIG-
 
 ## 1. Fresh-chat recovery order
 
+#600 protected runtime attempt supersedes the access-only attempt above: PR #601
+was merged at `bc409610d0b59da5b78fed23861c0cd749af63f1` after exact head and green
+Vercel checks. The expressly authorized temporary `instagram-config-validation-600`
+used gateway JWT verification plus exact existing service-role bearer authorization
+before any Instagram config reads, five-minute expiry, the unchanged deployed
+encryption helper, no DB/provider calls and minimal structural-only output.
+Six local mocked checks passed. The **single** production invocation returned
+HTTP **401**, not structural facts. No retry/auth weakening occurred. Decoded
+length, actual version-format validity and production round-trip remain
+**UNVERIFIED**; no structural failure is established. The validator was deleted
+immediately in cleanup; deployment inventory confirms absence, endpoint GET is
+404, and all 42 original function versions/bundles remain unchanged. Activation
+remains OFF; no key/version/config writes, OAuth, provider callbacks or DB/data
+writes occurred. Next requires separately authorized resolution of the invocation
+authentication gate and a new bounded validation attempt; #598 writes remain held.
+
 A fresh chat must recover state in this order:
 
 ```text
