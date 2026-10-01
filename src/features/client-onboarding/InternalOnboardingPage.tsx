@@ -7,6 +7,7 @@ import { generateOnboardingLink, listStaffOnboarding, revokeOnboardingLink, upda
 import { OnboardingActivityFeed } from './OnboardingActivityFeed'
 import { ONBOARDING_PLATFORMS, type OnboardingPlatform, type StaffOnboardingSummary } from './types'
 import { PLATFORM_GUIDES } from './platformGuides'
+import { onboardingEmptyState } from './emptyState'
 
 type StatusFilter = 'all' | 'not_started' | 'in_progress' | 'completed' | 'revoked' | 'expired'
 
@@ -95,6 +96,8 @@ export default function InternalOnboardingPage() {
     return counts
   }, [sessions])
 
+  const emptyState = onboardingEmptyState({ activeClients: clients.length, sessions: sessions.length, filteredSessions: filteredSessions.length, loading, error })
+
   return (
     <div className="w-full max-w-7xl p-4 sm:p-6 lg:p-8">
       <header>
@@ -162,7 +165,7 @@ export default function InternalOnboardingPage() {
         {loading ? (
           <p className="mt-4 text-sm text-brand-primary">Loading onboarding status...</p>
         ) : filteredSessions.length === 0 ? (
-          <EmptyState className="mt-4" title="No clients found" message={sessions.length === 0 ? 'No active clients available.' : 'No sessions match your filters.'} />
+          emptyState && <EmptyState className="mt-4" title={emptyState.title} message={emptyState.message} />
         ) : (
           <div className="mt-4 space-y-4">
             {filteredSessions.map(session => {
