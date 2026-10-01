@@ -2,9 +2,39 @@
 
 Status: CURRENT authority for a fresh supervisor chat.
 
-Updated: 1 October 2026 after read-only #598 config/Meta-save preflight from main `0be26fbdf8790dab9dd18a7782ea31e7988b300e`. Production app ID exactly matches Meta Instagram product; activation is literal OFF. App secret is absent and APP_PUBLIC_URL still uses the old Vercel origin. Existing encryption key/version names exist but their structure requires private CA validation. #595 callback rollout remains healthy; no production writes occurred in #598.
+Updated: 1 October 2026 after the separately CA-authorized #600 encryption-pair reset. PR #607 merged at `1584604de26d9d678225f447e8a895738563c044` after exact head/green Vercel. All four standalone tables were zero before writing. A fresh CSPRNG 32-byte key and valid version were validated privately with the existing helper, written only to the two encryption config names, and proven by private digest-match readback. No secret material is recorded. Activation remains OFF; app secret absent and public origin unchanged. The historical failed validation attempts below are superseded by this known-good reset receipt.
 
 Next protected pack: [#598 exact config / Meta-save preflight](INSTAGRAM-CONFIG-META-SAVE-PREFLIGHT-598.md). Only separately approved app-secret addition, canonical public-origin correction and five public Meta field saves are proposed; no permission/Live/OAuth/activation change. Secret Show was not clicked. Do not replay the completed #595 migration/deploy sequence.
+
+## #600 known-good pair reset receipt (supersedes structural-validation holds)
+
+- Canonical RFC4648 base64 PASS; decoded byte count **32**; runtime version format
+  PASS; existing AES-256-GCM helper in-memory encrypt/decrypt round-trip PASS.
+- Only `INSTAGRAM_TOKEN_ENCRYPTION_KEY_B64` and
+  `INSTAGRAM_TOKEN_ENCRYPTION_KEY_VERSION` overwritten under explicit CA approval.
+  Generation/validation/write/readback occurred in process memory; no key/version
+  material, digest or ciphertext printed, logged, committed or persisted locally.
+  Readback matches the exact validated pair; every unrelated config digest unchanged.
+- Connections, tokens, OAuth states and callback receipts: **0 / 0 / 0 / 0** before
+  and after. Active Meta assets **42**, reports **230**, posts **3729**, unchanged.
+  No production DB/data/provider writes. Page-linked reporting resolves its existing
+  Meta/Page credential before the standalone decrypt path; its secrets are unchanged.
+- OAuth callback GET without code/state: **302 activation_blocked**, original public
+  origin preserved. Activation remains literal false; no OAuth initiation or real
+  callback. No app-secret/public-origin/Meta/dashboard/review/Live changes.
+- Supabase secret update advanced all **42** function revision numbers by one;
+  **all bundle hashes/source and function inventory remain identical**. This was the
+  platform's config-update effect, not a function-source deployment. OAuth callback
+  is now v7; deauthorize/data-deletion v2; their JWT contracts remain unchanged.
+- Focused login/encryption/provider-callback tests **52 PASS**. No temporary
+  validator/bridge or new credential was created in this reset mission.
+- Meta reporting/Page-linked credential tests **54 PASS** using non-production
+  Vite fixture env (initial run without required Vite env failed at import).
+  Build, scoped encryption/credential lint and diff check PASS.
+
+The #600 crypto gate is satisfied by the known-good reset and may be closed.
+#606 remains a historical failed authentication attempt, not proof of crypto failure.
+Future #598 app-secret/origin/public-URL saves still require separate CA approval.
 
 #600 read-only validation attempt (main `8904391f9cd50c84bdebcd61a11fb320d1c9dc9c`): both production encryption config names are present, but current-pair structural validation is **BLOCKED**, not FAIL/PASS. Supabase management metadata exposes digests, not recoverable values; neither requested value is in the process environment or standard local `.env`/`.env.local`/`supabase/functions/.env` sources in the primary checkout and current worktree. No broad credential search was performed. Decoded byte length and actual version-format validity remain unknown. The ACTIVE v6 OAuth callback's deployed encryption helper exactly matches main (LF-normalized SHA-256 `d794ef15b83112bc3f96ef43d7a5b597cac78348a1c838464bb78257b2191c11`); 9 encryption contract tests pass, but those fixtures do not prove production key compatibility. CA must identify an existing secure provisioning source for an in-memory digest-matched local validation, or separately authorize a narrowly scoped in-runtime validation mechanism. Do not paste the key into chat or rotate/rewrite it. No secret/config/provider/runtime changes or OAuth/callback invocations occurred. #598 protected writes remain held until this validation passes.
 
