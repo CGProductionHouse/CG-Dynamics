@@ -1,8 +1,12 @@
 # #593 — standalone Instagram provider callbacks
 
 Code baseline: main `df6610746d4a285d76e06ff203f3dfb0a69e1b44`.
-Code/test preparation only. Nothing here authorizes migration application, Edge
-deployment, Meta saves, secrets, OAuth or real-data deletion.
+This document originally recorded code/test preparation only. #595 Phase B now
+completed the separately CA-approved migration and three Edge deployments from
+main `ad95c9de0c75e81cebb0799cc179e474b0575b28`; exact live receipts/versions/parity
+are in `INSTAGRAM-CALLBACK-ROLLOUT-595.md`. Consent remains OFF and the app secret
+absent; callbacks are deployed but POSTs fail closed with 503. Meta saves, secrets,
+OAuth and real-data deletion are still NOT authorized by this runbook.
 
 ## Official requirements checked before implementation
 

@@ -1,8 +1,96 @@
-# #595 Phase A — read-only callback rollout preflight
+# #595 — standalone Instagram callback rollout
+
+## Current production state — Phase B completed under explicit CA authority
+
+1 October 2026, verified 16:27 SAST. Deployed from exact accepted main
+`ad95c9de0c75e81cebb0799cc179e474b0575b28`; runtime/SQL are unchanged from the
+Phase A reviewed `63c6fe4b40be957aaeb9a8a32eed6c093cedf98d` target.
+
+Only `20261001131621_instagram_provider_callbacks.sql` was applied, using its
+unmodified SQL through the single-migration management operation. Supabase assigned
+live ledger version **`20261001142241`**, name `instagram_provider_callbacks`.
+This is the approved file's application receipt, not a second migration. Do not
+reapply the repository filename or repair the ledger to make timestamps match.
+The three prerequisite ledger entries/hashes and existing RPC/grants/RLS, zero
+standalone rows, OAuth v5 hash, missing secret and blocked activation were freshly
+revalidated before apply. No precondition mismatch occurred.
+
+Schema verification passed before deployment:
+
+- Nullable text app namespace, numeric check and exact partial unique app/user index.
+- Receipt RLS enabled, owner-only table ACL, no policies or direct privileges for
+  PUBLIC/anon/authenticated/service-role, including DML/TRUNCATE/reference/trigger.
+- Three public RPCs service-only with empty search paths; original 12-argument
+  public signature absent and renamed helper owner-only. Existing connection/token/
+  OAuth-state grants, RLS and manager-read policy unchanged.
+- New SQL function bodies match the approved migration exactly (MD5): wrapper
+  `17dbee45e7a8b791d73df7008130a4f8`; apply `42bad6c0774d6cecb765225f3611f336`;
+  status `31a98b7ebe534c747cce8a96d3185a84`.
+- Connections / encrypted tokens / standalone bindings / callback receipts /
+  unnamespaced connections remain **0 / 0 / 0 / 0 / 0** after harmless acceptance.
+  No backfill, valid callback, revoke/delete, consent or provider request ran.
+
+Sequential deployment and deployed-source/dependency parity passed:
+
+| Function | Live version | JWT verification | Deployed bundle SHA256 |
+|---|---|---|---|
+| `instagram-oauth-callback` | ACTIVE v6 | false | `f2ee94b5a260a5fe907197057fcfe7caa96cb3b0365d945f7395e808b468c3d2` |
+| `instagram-deauthorize` | ACTIVE v1 | false | `824259d3d0d75ea998ab0a35a6187dd95a09d309af5e345d7aee4e44bbd8e451` |
+| `instagram-data-deletion` | ACTIVE v1 | false | `391917292d95cd5fc8500048a0fb258b6983363d026275d750ac2d61d29131ba` |
+
+All six OAuth files and three files per new handler matched pinned repository
+contents after LF normalization. The management API returns the new handlers'
+paths rooted at `functions/`; those paths were resolved under repository `supabase/`
+before content comparison. This was only artifact-path normalization, not a source
+change. OAuth entrypoint hash matches the Phase A target; new entrypoints are
+`674c47f0b6087e9a08632425e186deb6484d4cadfb1a335c6bef6bcdc6498517` (deauthorize)
+and `4e415bf755c43195204d7204249a055917fb0a869aba6db53521cac0b926761b` (deletion).
+Shared runtime/verifier hashes respectively:
+`e7de6d5158568ef6229f1ae40e7c3c198fe8adbd6448c108018d2bea812b9999` /
+`67aa21965ef98fc940e05444018940d1f4d0da8d659770cbe8ca1e44c5f6b747`.
+No other deployed function's version/hash/JWT setting changed, including OAuth start
+and connection confirm (both remain v5).
+
+Eight harmless HTTP checks passed:
+
+- OAuth GET without code/state: **302 `activation_blocked`**, before DB/provider path.
+- Unsigned and forged-invalid POSTs to each callback: **503**, no completion.
+  `INSTAGRAM_APP_SECRET` is still absent. This is expected configuration fail-closed,
+  NOT a successful live signature-verification/real-provider acceptance claim.
+- Unknown 64-zero, malformed and absent deletion status codes: **404**.
+
+Names-only config presence is unchanged; no secret values were read and no secret,
+config or flag was written. Strict consent activation remains effectively OFF.
+Bounded logs 14:22–14:27:01 UTC returned 6 function-edge and 10 function-runtime
+events, with zero matched Uncaught/Unhandled/BOOT_ERROR/WORKER_ERROR/function-failed/
+SyntaxError signatures. Fresh local callback suite: 32 PASS, no failures/skips.
+No production mutation RPC was called and no Meta dashboard field was saved.
+
+### Exact remaining gates — NOT authorized by Phase B
+
+1. CA privately verifies the approved Instagram app identity and separately
+   authorizes provisioning **`INSTAGRAM_APP_SECRET`**. Callback POSTs cannot become
+   functional until then; do not bypass missing configuration with another secret.
+2. After that approval, repeat harmless unsigned/forged checks (400/401 expected),
+   unknown status 404, deployed parity and zero mutation counts; keep consent OFF.
+3. Separately authorize saving the exact Instagram product Deauthorize/Data deletion
+   URLs from #593. No App Mode, permissions, Facebook routes or scopes changed here.
+4. Establish an exact owner-authorized coherent standalone fixture and separately
+   authorize real OAuth/provider callback/removal/deletion acceptance. No production
+   client, canonical Page-linked account or guessed identity may serve as a fixture.
+5. Business verification, reviewer/tester access, Advanced Access/App Review,
+   submission, Live mode and eventual standalone consent activation remain protected.
+
+The schema/Edge rollout gate is complete; #505 provider/config/owner gates remain.
+Rollback remains coordinated as documented below: never roll OAuth back alone to
+v5 after the namespaced migration, automatically reverse SQL, or delete receipts.
+
+## Historical Phase A evidence and approved execution checklist
 
 Observed 1 October 2026. Source target: accepted main
 `63c6fe4b40be957aaeb9a8a32eed6c093cedf98d` (PR #594).
-**Phase A complete; Phase B is NOT authorized or executed.**
+At this Phase A observation, Phase B was not yet authorized/executed. The current
+status above supersedes the historical pending-state statements below.
 
 ## Live production evidence
 
