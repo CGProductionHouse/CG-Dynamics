@@ -284,6 +284,28 @@ Current report truth:
 
 Do not fabricate missing reports/posts/metrics.
 
+### #588 supplied-clock / published-only monthly selection correction
+
+The 1 October full-suite regression was reproduced before editing: September
+draft/legacy rows entered client monthly selection because month completion read
+the wall clock instead of the caller's supplied September clock. The corrected
+canonical `selectMonthlyReports` requires explicit publication and a valid,
+ordered single-month range starting on day 1; both historical completion and
+current-month eligibility use the same supplied clock. Future published partial
+ranges no longer bypass the clock through the MTD shortcut. Historical published
+months, historical/current published MTD, current published full ranges and
+published-only duplicate preference remain intact. The one-argument
+`isMonthComplete` API is retained for existing import callers.
+
+Verification: 10 focused period tests (seven new), 95 reporting/portal/isolation
+regressions and the full 3,299-test suite pass; TypeScript/Vite build, scoped lint
+and diff check pass. Existing large-bundle warning only. Test-generated strategy
+artifacts are restored, not part of this lane. No report publication, production
+data, strategy, migration, provider or Edge Function change is required.
+PR/head/main deployment evidence is recorded on #588 and #381 at merge completion.
+The earlier reportPeriodMtd failure recorded in the Instagram handover is historical
+and superseded by this focused correction; no Instagram/TikTok code was changed.
+
 ## 6. Strategy lane — Agent 03 / #513
 
 PR #514 is merged:
