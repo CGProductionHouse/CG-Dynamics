@@ -125,6 +125,7 @@ Deno.serve(async req => {
       },
     })
     const { error: saveError } = await sb.rpc('complete_instagram_login_connection', {
+      p_instagram_app_id: appId,
       p_client_id: oauthState.client_id,
       p_connected_by: oauthState.user_id,
       p_app_scoped_user_id: identity.appScopedUserId,

@@ -33,13 +33,13 @@ function bytesToBase64(bytes: Uint8Array): string {
   return btoa(binary)
 }
 
-function strictBase64ToBytes(value: unknown, label: string): Uint8Array {
+function strictBase64ToBytes(value: unknown, label: string): Uint8Array<ArrayBuffer> {
   const encoded = requiredString(value, label)
   if (!/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(encoded)) {
     throw new Error(`Instagram token ${label} must be canonical RFC 4648 base64.`)
   }
 
-  let bytes: Uint8Array
+  let bytes: Uint8Array<ArrayBuffer>
   try {
     bytes = Uint8Array.from(atob(encoded), character => character.charCodeAt(0))
   } catch {
@@ -51,7 +51,7 @@ function strictBase64ToBytes(value: unknown, label: string): Uint8Array {
   return bytes
 }
 
-export function decodeInstagramTokenEncryptionKey(keyBase64: unknown): Uint8Array {
+export function decodeInstagramTokenEncryptionKey(keyBase64: unknown): Uint8Array<ArrayBuffer> {
   const key = strictBase64ToBytes(keyBase64, 'encryption key')
   if (key.byteLength !== AES_256_KEY_BYTES) {
     throw new Error('Instagram token encryption key must decode to exactly 32 bytes.')
@@ -69,7 +69,7 @@ function validateContext(context: InstagramTokenEncryptionContext): InstagramTok
   return { clientId, instagramAccountId, keyVersion }
 }
 
-export function buildInstagramTokenAdditionalData(context: InstagramTokenEncryptionContext): Uint8Array {
+export function buildInstagramTokenAdditionalData(context: InstagramTokenEncryptionContext): Uint8Array<ArrayBuffer> {
   const checked = validateContext(context)
   return new TextEncoder().encode([
     'cg-dynamics',
