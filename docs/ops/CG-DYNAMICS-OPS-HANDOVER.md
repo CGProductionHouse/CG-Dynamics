@@ -641,6 +641,7 @@ These are next milestones, not reasons to hold the current client launch indefin
 - #493 LinkedIn client provider connection + truthful analytics.
 - #361 CG Hours company-ChatGPT own-hours + travel-km activation.
 - #437/#438 creative-intelligence follow-up if still relevant.
+- OpenAI API Platform foundation for CG Dynamics: create the correct business-owned API org/project, budgets/limits, least-privilege server-side credentials and one bounded first integration. This is post-launch roadmap work, not a current launch blocker and not the same as the Codex browser extension.
 
 ## 12. Security / protected actions
 
