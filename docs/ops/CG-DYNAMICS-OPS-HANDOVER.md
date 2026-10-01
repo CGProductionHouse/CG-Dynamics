@@ -158,7 +158,7 @@ The next supervisor should treat this as the current sequence:
    - the five reviewed Meta legal/callback field saves.
 3. Save/read back only those approved values while activation remains OFF.
 4. Reverify callback health and exact app-secret/app-ID pairing without exposing the secret.
-5. Reverify whether the accepted shared credential-expiry correction for `meta-sync` and `meta-sync-worker` has been deployed. If still pending, deploy it only under separate Edge authority before enabling standalone consent.
+5. The accepted #586 shared credential-expiry correction is confirmed **not yet parity-live** in either `meta-sync` or `meta-sync-worker`. Live indexes match current main, but both deployed bundles still carry the old helper expiry check; current main fails malformed/out-of-range expiry closed with `Date.parse` + `Number.isFinite`. Deploy exactly these two existing consumers under separate Edge authority before enabling standalone consent. Current-main `instagramTokenEncryption.ts` differs from the deployed copy only by TypeScript `Uint8Array<ArrayBuffer>` annotations (no runtime behavior change); do not broaden the rollout to unrelated functions.
 6. Complete Meta Business Verification with CA's actual company documents/private verification channel.
 7. Complete Access Verification.
 8. Establish an owner-authorized, genuine standalone professional demo fixture/tester path; do not borrow an unauthorised client account.
@@ -325,12 +325,13 @@ On a fresh chat:
 3. Confirm #600 closed; treat #602/#604/#606 as historical/superseded.
 4. Re-read `docs/ops/INSTAGRAM-CONFIG-META-SAVE-PREFLIGHT-598.md` and `docs/ops/INSTAGRAM-STANDALONE-PROVIDER-ACTIVATION.md`.
 5. Read-only recheck the exact live Instagram config names/provider fields if consequential.
-6. The next real gate is a bounded protected #505 session for:
+6. The immediate next real gate is explicit CA authorization for a bounded two-function Edge rollout of the already-merged #586 expiry correction to **only** `meta-sync` and `meta-sync-worker`; keep activation OFF and perform no config/provider/data writes.
+7. After that rollout passes source-parity and read-only acceptance, the next separate protected #505 session is:
    - `INSTAGRAM_APP_SECRET`;
    - canonical `APP_PUBLIC_URL`;
    - five Meta legal/callback saves;
    while activation remains OFF.
-7. Do not cross that protected write gate without CA's explicit authorization.
-8. After each consequential action, update #505, #381 and this handover.
+8. Do not cross either protected write gate without CA's explicit authorization.
+9. After each consequential action, update #505, #381 and this handover.
 
 The supervisor should keep CA out of routine mechanics and bring her in only for the exact protected decisions, provider verification/2FA/document steps or human review gates that truly require her.
