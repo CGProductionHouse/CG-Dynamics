@@ -6,6 +6,8 @@ Updated: 1 October 2026 after read-only #598 config/Meta-save preflight from mai
 
 Next protected pack: [#598 exact config / Meta-save preflight](INSTAGRAM-CONFIG-META-SAVE-PREFLIGHT-598.md). Only separately approved app-secret addition, canonical public-origin correction and five public Meta field saves are proposed; no permission/Live/OAuth/activation change. Secret Show was not clicked. Do not replay the completed #595 migration/deploy sequence.
 
+#600 read-only validation attempt (main `8904391f9cd50c84bdebcd61a11fb320d1c9dc9c`): both production encryption config names are present, but current-pair structural validation is **BLOCKED**, not FAIL/PASS. Supabase management metadata exposes digests, not recoverable values; neither requested value is in the process environment or standard local `.env`/`.env.local`/`supabase/functions/.env` sources in the primary checkout and current worktree. No broad credential search was performed. Decoded byte length and actual version-format validity remain unknown. The ACTIVE v6 OAuth callback's deployed encryption helper exactly matches main (LF-normalized SHA-256 `d794ef15b83112bc3f96ef43d7a5b597cac78348a1c838464bb78257b2191c11`); 9 encryption contract tests pass, but those fixtures do not prove production key compatibility. CA must identify an existing secure provisioning source for an in-memory digest-matched local validation, or separately authorize a narrowly scoped in-runtime validation mechanism. Do not paste the key into chat or rotate/rewrite it. No secret/config/provider/runtime changes or OAuth/callback invocations occurred. #598 protected writes remain held until this validation passes.
+
 ## 1. Fresh-chat recovery order
 
 A fresh chat must recover state in this order:
