@@ -24,6 +24,7 @@ import { guidelineVideoName, guidelineVideoNumber } from '../../lib/contentGuide
 import { listMonthlyDeliverablesByMonth, type MonthlyDeliverable } from '../../lib/planner'
 import { monthDisplayLabel } from '../../lib/reportPeriod'
 import { humanizeStatus, INPUT_CLS, LABEL_CLS } from './contentGuidelineHelpers'
+import CanonicalCreativeIntelligence from './CanonicalCreativeIntelligence'
 
 interface Props {
   guideline: ContentGuideline
@@ -792,6 +793,10 @@ export default function ContentGuidelineDocumentEditor({
                       When a matching Client Schedule deliverable exists, link it here.
                     </span>
                   </label>
+                  <div className="mt-3">
+                    <CanonicalCreativeIntelligence clientId={guideline.client_id} month={draft.targetMonth} deliverableId={draft.deliverableId}
+                      draft={{ objective: video.objective ?? '', hook: video.hook ?? '', cta: video.cta ?? '', shot_breakdown: draft.shotBreakdown, requirements: draft.requirements }} />
+                  </div>
                   <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-white/35">Production: {humanizeStatus(video.production_status)}</span>
                     <ActionButton size="sm" variant="secondary" disabled={!changed} loading={busy === video.id} onClick={() => void saveVideo(video)}>Save video</ActionButton>
@@ -836,6 +841,10 @@ export default function ContentGuidelineDocumentEditor({
             )}
             {scheduleError && <span className="block text-[11px] text-red-300">{scheduleError}</span>}
           </label>
+          <div className="mt-3">
+            <CanonicalCreativeIntelligence clientId={guideline.client_id} month={newTargetMonth} deliverableId={newDeliverableId}
+              draft={{ objective: '', hook: '', cta: '', shot_breakdown: '', requirements: '' }} />
+          </div>
           <div className="mt-3 flex justify-end">
             <ActionButton size="sm" loading={busy === 'add'} onClick={() => void addVideo()}>Add {guidelineVideoNumber(videos.length + 1)}</ActionButton>
           </div>
