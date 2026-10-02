@@ -6,6 +6,44 @@ Updated: **2 October 2026** after the Piek #405 stored-lead production pilot (se
 
 This file is intentionally current-state-first. Historical failed attempts are summarized only where they prevent repeated work.
 
+### #505 current verification/review draft — 2 October, read-only
+
+Fresh info@cgproductionhouse.com Chrome: Development; Business Unverified / eligible;
+Access Verification disabled until Business Verified; Review Not submitted / empty.
+Both exact reporting scopes Standard / Ready to use (0) / no review requested;
+Insights advanced request disabled. Saved legal/product callback/redirect values
+remain correct. #598 is COMPLETE; do not repeat saves or #600 crypto work.
+
+Official verification/document guides read authenticated: exact legal entity match,
+portfolio full control, conditional registration/incorporation/tax/bank evidence;
+utility bill supports address/phone only, not legal-name proof. Actual CG wizard
+fields, document limits/channel and Access Verification questionnaire are not yet
+observable without protected execution; do not invent them.
+
+SELECT-only active package/mapping evidence is unchanged: 57 active / 47 eligible /
+10 excluded / 22 eligible canonical / 25 unmapped; standalone 0/0/0/0 at 12:19:54 UTC.
+Three safe identity improvements: managed inventory plus matching public profiles
+corroborate Central Canvas `central_canvas`, Ehrlich Park `ehrlichparkbutchery`, and
+exact Tobich Otjiwarongo `tobich_optics_otjiwarongo`. No canonical matches; portfolio
+connected-assets tabs show none, not proof of global Page unlinking/professional
+type/consent. Eight reviewed queue handles unchanged; 14 remaining identity holds.
+No new handle promoted in runtime code. 0 CONNECTABLE / 0 proven review fixtures.
+
+Complete offline text/checklist/storyboard and ranked eight-handle suitability:
+`INSTAGRAM-505-VERIFICATION-REVIEW-PACKET-2026-10-02.md`. Emoya Driving Range and
+Toyota Bloemfontein are strongest structural candidates, not authorized fixtures;
+CG own canonical/Page-linked account rejected. Real consent videos/reviewer access
+remain absent. **BLOCKED: needs CA instruction** for Business/Access Verification,
+fixture/tester/reviewer/demo/OAuth, request addition/submission, later Live/activation.
+No approval prompt requested. No Meta save, secrets/config, provider/OAuth/sync/map,
+DB write, migration/deploy, Website/Piek/TikTok work or production UI change.
+
+Docs-only verification: 136 focused tests, 120 PASS / 16 disposable-DB skips /
+0 failures; initial missing local public Vite env resolved with fake test-only env,
+not production credentials. TypeScript/Vite build, scoped lint, diff check PASS;
+existing bundle advisory. Browser evidence is provider/identity read-only, not a
+successful standalone connection or new product/mobile acceptance.
+
 ### #598 bounded protected packet — COMPLETE, 2 October
 
 Supersedes the owner-auth STOP receipt below. Under CA authorization #598 comment 5950879579 / #505 comment 5950880151 and CA's subsequent private reauthentication, completed exactly seven approved changes in `info@cgproductionhouse.com` Chrome:
