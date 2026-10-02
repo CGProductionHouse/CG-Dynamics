@@ -20,6 +20,7 @@ on:
       - 'supabase/functions/website-enquiry-delivery-*/**'
       - 'supabase/functions/_shared/websiteEnquiryIntake.ts'
       - 'supabase/functions/website-enquiry-intake/**'
+      - 'supabase/migrations/*website_enquiry_intake_guard.sql'
       - 'scripts/website-enquiry-intake-acceptance.mjs'
       - 'tests/sql/624_website_enquiry_intake_fixtures.sql'
       - 'tests/websiteEnquiryIntake.test.mjs'

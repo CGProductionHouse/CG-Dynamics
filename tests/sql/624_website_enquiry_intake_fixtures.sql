@@ -7,6 +7,11 @@ insert into public.clients (id, name, active) values
 insert into auth.users (id) values ('62420000-0000-4000-8000-000000000001');
 insert into public.profiles (id, full_name, role, client_id, is_active) values
   ('62420000-0000-4000-8000-000000000001', 'Intake Reviewer', 'manager', null, true);
+insert into auth.users (id) values
+  ('62401000-0000-4000-8000-000000000002'), ('62401000-0000-4000-8000-000000000003');
+insert into public.profiles (id, full_name, role, client_id, is_active) values
+  ('62401000-0000-4000-8000-000000000002', 'Client A User', 'client', '62400000-0000-4000-8000-000000000001', true),
+  ('62401000-0000-4000-8000-000000000003', 'Client B User', 'client', '62400000-0000-4000-8000-000000000002', true);
 
 -- 1 enabled; 2 disabled; 3 draft schema only; 4 no approved recipients; 5 other client.
 insert into public.website_enquiry_endpoints (id, intake_key, client_id, website_editor_website_id, environment, canonical_host)

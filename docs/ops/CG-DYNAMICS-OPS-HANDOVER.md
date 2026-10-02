@@ -26,6 +26,14 @@ Current-main baseline `2b72c0553f2c00f9d43e9a09ba76417b17981162`. Reproduced the
 
 ## 1. Fresh supervisor recovery order
 
+### #623 ordered finish — 2 October, no agent merge/production action
+
+- Baseline `fd4f86bf3d3b13cc4b253f458b126540bdbc5d2c`: supervisor independently merged corrected #620 (`9185585`) then #621 (`fd4f86b`). All Website migrations remain unapplied. Independently verified 25 Website tests, three disposable PostgreSQL suites and actual Deno worker/webhook checks.
+- Existing UI PRs reconciled sequentially, feature code unchanged, every additive receipt preserved: #613 `a763d5ff393518747491720d6d3a7bea242c0fab` (129 focused, full 3367 passed/16 skipped), #615 `747e30affb9ba95aede81aed5390a6d0e90bc28e` (189 focused, full 3361/16), #616 `23e0dc2e877c8e3f58f3fb2a828c10cfa390ff5b` (97 focused, full 3362/16). All build/scoped lint/diff and exact-head Vercel PASS. Changed-preview auth is an environmental gate; post-merge production smoke is not claimed in this user-prohibited-merge lane.
+- Parallel M2C authority is existing #624/PR #625 plus Piek #16/PR #17. Overlapping #626 was closed unmerged; candidate commit `30c668fbc81c8a34780648eb3d0a6af66299e52c` preserved, unpublished site draft stashed. Do not activate that alternative API. Same-PR #625 hardening preserves canonical `x-cg-intake-key` / schema / receipt/Piek contracts, adding bounded persistent admission, body timeout/error handling and verified receipt shape. See `WEBSITE-ENQUIRY-INTAKE-624.md` for the new unapplied admission migration and exact protected sequence.
+- Piek form was not mounted on current main; PR #17 requires CA/client form-placement approval. No Piek duplicate PR or provider/runtime/config action by this lane. Instagram/TikTok/strategy authority is untouched.
+- Same-PR #625 hardening verification: 35 Website tests; full 3383 total / 3367 passed / 16 skipped / 0 failed with canonical placeholder env; build/scoped lint/diff and actual Deno intake check PASS. Real disposable PG17 intake→canonical enquiry/outbox→exact-client Inbox, 20-session admission, hourly exhaustion, monotonic bucket and RLS/grants PASS. Browser retry encountered creation timeout followed by `Debugger unattached`; the existing changed-preview tab remains at `/login`. No authenticated changed-code acceptance is claimed and no credentials/tokens were copied.
+
 A new supervisor must recover in this order:
 
 ```text

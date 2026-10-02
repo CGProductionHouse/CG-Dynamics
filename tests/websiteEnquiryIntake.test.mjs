@@ -4,7 +4,8 @@ import { test } from 'node:test'
 import {
   INTAKE_KEY_HEADER,
   classifySubmitError,
-  handleIntakeRequest,
+  handleIntakeRequest as handler,
+  readCapped,
   parseIntakeBody,
 } from '../supabase/functions/_shared/websiteEnquiryIntake.ts'
 
@@ -13,6 +14,8 @@ const entry = read('../supabase/functions/website-enquiry-intake/index.ts')
 const shared = read('../supabase/functions/_shared/websiteEnquiryIntake.ts')
 const config = read('../supabase/config.toml')
 const acceptance = read('../scripts/website-enquiry-intake-acceptance.mjs')
+const handleIntakeRequest = (request, deps) => handler(request, { admit: async () => ({ data: { state: 'allowed' } }), ...deps })
+const receiptId = '62420000-0000-4000-8000-000000000001'
 
 const KEY = '62410000-0000-4000-8000-000000000001'
 const valid = { schemaKey: 'contact_form', schemaVersion: 1, submissionKey: 'site-submission-0001', answers: { email: 'a@example.test' } }
@@ -64,10 +67,10 @@ test('honeypot never reaches the canonical transaction', async () => {
 test('only safe receipt truth is returned and the key is passed only to the RPC', async () => {
   let seen
   const response = await handleIntakeRequest(req(valid), {
-    submit: async (args) => { seen = args; return { data: { accepted: true, receipt_id: 'r-1', accepted_at: '2026-10-02T10:00:00Z', replayed: false, internal: 'x' } } },
+    submit: async (args) => { seen = args; return { data: { accepted: true, receipt_id: receiptId, accepted_at: '2026-10-02T10:00:00Z', replayed: false, internal: 'x' } } },
   })
   assert.equal(response.status, 201)
-  assert.deepEqual(await response.json(), { ok: true, handled: true, accepted: true, receiptId: 'r-1', acceptedAt: '2026-10-02T10:00:00Z', replayed: false })
+  assert.deepEqual(await response.json(), { ok: true, handled: true, accepted: true, receiptId, acceptedAt: '2026-10-02T10:00:00Z', replayed: false })
   assert.equal(seen.p_intake_key, KEY)
   assert.deepEqual(Object.keys(seen).sort(), ['p_answers', 'p_attribution', 'p_intake_key', 'p_schema_key', 'p_schema_version', 'p_submission_key'])
 })
@@ -82,4 +85,30 @@ test('executable acceptance covers every #624 scenario', () => {
   for (const marker of [/honeypot created an enquiry/, /replayed, true/, /submission_conflict/, /intake_unavailable/,
     /server_to_server_only/, /status, 413|MAX_INTAKE_BODY_BYTES \+ 1/, /log leaked/, /intake attempted delivery/, /recipientEmail/])
     assert.match(acceptance, marker)
+})
+
+test('exhausted, unavailable or malformed admission never enters the canonical transaction', async () => {
+  for (const state of ['rate_limited', 'unavailable', 'unexpected']) {
+    let calls = 0
+    const response = await handleIntakeRequest(req(valid), { admit: async key => { assert.equal(key, KEY); return { data: { state, retry_after: 3600 } } }, submit: async () => { calls++; return {} } })
+    assert.equal(calls, 0)
+    assert.equal(response.status, state === 'rate_limited' ? 429 : state === 'unavailable' ? 403 : 503)
+    if (state === 'rate_limited') { assert.equal(response.headers.get('retry-after'), '3600'); assert.equal((await response.json()).retryable, true) }
+  }
+})
+
+test('timed-out or errored body streams fail closed even with a parseable prefix', async () => {
+  const stream = new ReadableStream({ start(controller) { controller.enqueue(new TextEncoder().encode('{}')) } })
+  await assert.rejects(readCapped(new Request('https://example.test', { method: 'POST', body: stream, duplex: 'half' }), 100, 5), /body_timeout/)
+  const broken = new ReadableStream({ start(controller) { controller.error(new Error('private stream diagnostic')) } })
+  const response = await handleIntakeRequest(new Request('https://example.test', { method: 'POST', headers: { 'content-type': 'application/json', [INTAKE_KEY_HEADER]: KEY }, body: broken, duplex: 'half' }), { submit: async () => { throw Error('must not run') } })
+  assert.equal(response.status, 400)
+  assert.equal((await response.json()).error, 'invalid_request')
+})
+
+test('invalid canonical receipt identity or time can never claim success', async () => {
+  for (const data of [{ receipt_id: 'invalid', accepted_at: '2026-10-02T10:00:00Z' }, { receipt_id: receiptId, accepted_at: 'invalid' }]) {
+    const response = await handleIntakeRequest(req(valid), { submit: async () => ({ data: { accepted: true, ...data } }) })
+    assert.equal(response.status, 503)
+  }
 })

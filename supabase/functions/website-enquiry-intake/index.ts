@@ -18,6 +18,11 @@ const log = (entry: IntakeLogEntry) => console.log(JSON.stringify(entry))
 
 Deno.serve((req) => handleIntakeRequest(req, {
   log,
+  admit: async (intakeKey) => {
+    if (!admin) return { error: { code: 'config' } }
+    const { data, error } = await admin.rpc('reserve_website_enquiry_intake', { p_intake_key: intakeKey })
+    return { data, error: error ? { code: error.code } : null }
+  },
   submit: async (args: SubmitArgs) => {
     if (!admin) return { error: { code: 'config', message: 'Server configuration missing' } }
     const { data, error } = await admin.rpc('submit_website_enquiry', args)

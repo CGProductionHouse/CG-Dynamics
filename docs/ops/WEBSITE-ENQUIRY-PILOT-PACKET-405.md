@@ -41,8 +41,9 @@ in order, after a read-only preflight (`select to_regclass('public.website_enqui
 returns null; `clients`/`profiles` columns present):
 
 1. `20261001181932_website_enquiry_transaction.sql`
-2. `20261002090000_website_lead_lifecycle.sql`
-3. `20261002110000_website_enquiry_delivery_runtime.sql`
+2. `20261002085355_website_enquiry_intake_guard.sql` (#623/#624 admission only, unapplied)
+3. `20261002090000_website_lead_lifecycle.sql`
+4. `20261002110000_website_enquiry_delivery_runtime.sql`
 
 Deploy functions: `website-enquiry-intake`, `website-enquiry-delivery-worker`,
 `website-enquiry-delivery-webhook` (all `verify_jwt = false` per `supabase/config.toml`).

@@ -39,6 +39,7 @@ export type IntakeErrorCategory =
   | 'invalid_submission'
   | 'submission_conflict'
   | 'temporarily_unavailable'
+  | 'rate_limited'
 
 export interface SubmitArgs {
   p_intake_key: string
@@ -61,6 +62,7 @@ export interface IntakeLogEntry {
 }
 
 export interface IntakeDeps {
+  admit: (intakeKey: string) => Promise<SubmitResult>
   submit: (args: SubmitArgs) => Promise<SubmitResult>
   log?: (entry: IntakeLogEntry) => void
 }
@@ -77,6 +79,7 @@ const STATUS: Record<IntakeErrorCategory, number> = {
   invalid_submission: 422,
   submission_conflict: 409,
   temporarily_unavailable: 503,
+  rate_limited: 429,
 }
 
 function json(body: unknown, status: number, extraHeaders: Record<string, string> = {}): Response {
@@ -90,7 +93,7 @@ function fail(deps: IntakeDeps, category: IntakeErrorCategory): Response {
   const status = STATUS[category]
   deps.log?.({ event: 'website_enquiry_intake', outcome: category, status })
   // Only `temporarily_unavailable` is worth retrying with the same submission key.
-  return json({ ok: false, error: category, retryable: category === 'temporarily_unavailable' }, status,
+  return json({ ok: false, error: category, retryable: category === 'temporarily_unavailable' || category === 'rate_limited' }, status,
     category === 'method_not_allowed' ? { Allow: 'POST' } : {})
 }
 
@@ -159,11 +162,14 @@ export function classifySubmitError(error: { code?: string; message?: string }):
 }
 
 /** Reads at most `limit` bytes; returns null (and stops reading) once exceeded. */
-async function readCapped(req: Request, limit: number): Promise<Uint8Array | null> {
+export async function readCapped(req: Request, limit: number, timeoutMs = 5000): Promise<Uint8Array | null> {
   if (!req.body) return new Uint8Array()
   const reader = req.body.getReader()
   const chunks: Uint8Array[] = []
   let total = 0
+  let timedOut = false
+  const timer = setTimeout(() => { timedOut = true; void reader.cancel().catch(() => {}) }, timeoutMs)
+  try {
   for (;;) {
     const { done, value } = await reader.read()
     if (done) break
@@ -174,10 +180,12 @@ async function readCapped(req: Request, limit: number): Promise<Uint8Array | nul
     }
     chunks.push(value)
   }
+  if (timedOut) throw new Error('body_timeout')
   const out = new Uint8Array(total)
   let offset = 0
   for (const chunk of chunks) { out.set(chunk, offset); offset += chunk.byteLength }
   return out
+  } finally { clearTimeout(timer); reader.releaseLock() }
 }
 
 export async function handleIntakeRequest(req: Request, deps: IntakeDeps): Promise<Response> {
@@ -194,7 +202,9 @@ export async function handleIntakeRequest(req: Request, deps: IntakeDeps): Promi
 
   const declaredLength = Number(req.headers.get('content-length') ?? '0')
   if (Number.isFinite(declaredLength) && declaredLength > MAX_INTAKE_BODY_BYTES) return fail(deps, 'payload_too_large')
-  const raw = await readCapped(req, MAX_INTAKE_BODY_BYTES)
+  let raw: Uint8Array | null
+  try { raw = await readCapped(req, MAX_INTAKE_BODY_BYTES) }
+  catch { return fail(deps, 'invalid_request') }
   if (raw === null) return fail(deps, 'payload_too_large')
 
   let body: unknown
@@ -213,6 +223,16 @@ export async function handleIntakeRequest(req: Request, deps: IntakeDeps): Promi
 
   let result: SubmitResult
   try {
+    const admission = await deps.admit(intakeKey)
+    const state = admission.data as Record<string, unknown> | null
+    if (admission.error || !state) return fail(deps, 'temporarily_unavailable')
+    if (state.state === 'unavailable') return fail(deps, 'intake_unavailable')
+    if (state.state === 'rate_limited') {
+      deps.log?.({ event: 'website_enquiry_intake', outcome: 'rate_limited', status: 429 })
+      return json({ ok: false, error: 'rate_limited', retryable: true }, 429,
+        { 'Retry-After': state.retry_after === 3600 ? '3600' : '60' })
+    }
+    if (state.state !== 'allowed') return fail(deps, 'temporarily_unavailable')
     result = await deps.submit({ p_intake_key: intakeKey, ...parsed.args })
   } catch {
     return fail(deps, 'temporarily_unavailable')
@@ -220,7 +240,8 @@ export async function handleIntakeRequest(req: Request, deps: IntakeDeps): Promi
   if (result.error) return fail(deps, classifySubmitError(result.error))
 
   const receipt = result.data as Record<string, unknown> | null
-  if (!receipt || receipt.accepted !== true || typeof receipt.receipt_id !== 'string' || typeof receipt.accepted_at !== 'string') {
+  if (!receipt || receipt.accepted !== true || typeof receipt.receipt_id !== 'string' || !UUID.test(receipt.receipt_id)
+    || typeof receipt.accepted_at !== 'string' || !Number.isFinite(Date.parse(receipt.accepted_at))) {
     return fail(deps, 'temporarily_unavailable')
   }
   const replayed = receipt.replayed === true
