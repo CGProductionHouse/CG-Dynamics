@@ -10,20 +10,21 @@ Source: `artifacts/issue-567-cg-built-production-website-fleet.json` (read-only,
 
 | Website | Exact Dynamics client | Current enquiry path | Reporting |
 | --- | --- | --- | --- |
-| **1 — Piek Group** `www.piekgroup.co.za` | `ed7aa1ae-de21-4151-a8f9-54796b234c1f` | `src/components/ContactForm.tsx` (name, email, phone, subject, message) builds a **`mailto:` only**; "No data is stored on our server" | identity requires guarded activation |
+| **1 — Piek Group** `www.piekgroup.co.za` | `ed7aa1ae-de21-4151-a8f9-54796b234c1f` | `ContactForm.tsx` is mailto-only **and not mounted by the current contact page**; live page exposes direct contact links | identity requires guarded activation |
 | 7 — Red Oak `www.redoakgroup.co.za` | `cdb11a82-339e-4b46-9b09-bde1a23efeaf` | **no form**; tel/mailto/booking clicks only (`/api/contact-actions` tracking proxy) | published snapshot proven |
 | 6 — Emmanuel Funerals, 8 — All Around PVC | exact active | no form found on `origin/main` | guarded activation |
 
 **Recommended first pilot: Website 1 — Piek Group.** It is the only verified
-exact-client CG site with an existing enquiry form, so the pilot changes the submit
-transport, not the client's content. Red Oak is the stronger reporting benchmark but
+exact-client CG site with a reusable enquiry form component, but mounting that form
+also needs approval: do not mistake an unused component for a live form. Red Oak is the stronger reporting benchmark but
 would need a new form approved by the client. Imbewu/Raadzaal excluded (web-only/last).
 Supervisor confirms the choice and Piek's package before step 4.
 
 ## 2. Missing adapter (explicit, M2C)
 
-There is **no public intake adapter** yet — by design M2A exposes
-`submit_website_enquiry` to `service_role` only. Required before a real submission:
+M2C now has a **proposed inert public intake adapter**; it is not deployed or
+activated. M2A still exposes `submit_website_enquiry` to `service_role` only.
+See `WEBSITE-ENQUIRY-INTAKE-M2C-623.md`. Required before a real submission:
 
 1. Dynamics edge function `website-enquiry-intake` (new, M2C): accepts POST from the
    site's server with `intake_key` in a server-only header, origin/host check against
@@ -36,13 +37,14 @@ There is **no public intake adapter** yet — by design M2A exposes
 
 ## 3. Migration / code order [CA]
 
-#614 is merged. Merge #620 → retarget #621 to `main`, merge. Then apply,
+#614, #620 and #621 are merged. Review M2C separately. Then apply,
 in order, after a read-only preflight (`select to_regclass('public.website_enquiries')`
 returns null; `clients`/`profiles` columns present):
 
 1. `20261001181932_website_enquiry_transaction.sql`
-2. `20261002090000_website_lead_lifecycle.sql`
-3. `20261002110000_website_enquiry_delivery_runtime.sql`
+2. `20261002085355_website_enquiry_intake_guard.sql` (M2C proposal, unapplied)
+3. `20261002090000_website_lead_lifecycle.sql`
+4. `20261002110000_website_enquiry_delivery_runtime.sql`
 
 Deploy functions: `website-enquiry-delivery-worker`, `website-enquiry-delivery-webhook`
 (and the M2C intake function once built).
@@ -112,8 +114,8 @@ Resend webhook (`email.delivered`, `email.bounced`) to
 ## 7. Rollback / recovery
 
 - Stop intake instantly: `update website_enquiry_endpoints set enabled=false where id='<endpoint_id>';`
-  (site route must then show the phone/email fallback). Replays of already-accepted
-  submission keys still return their receipt.
+  (site route must then show the phone/email fallback). The public adapter stops
+  intake/replays; canonical already-accepted receipts remain durable and accessible.
 - Stop email: set `WEBSITE_ENQUIRY_EMAIL_ENABLED=false` (worker claims nothing; jobs
   wait as `pending`, nothing lost).
 - Wrong recipient: retire the approved configuration and approve a new version; already
@@ -121,5 +123,5 @@ Resend webhook (`email.delivered`, `email.bounced`) to
 - Ambiguous sends: inspect `delivery_state='reconcile'`; within 23h the worker replays
   with the same idempotency key; older ones need manual provider lookup and
   `resolve_website_enquiry_delivery_reconcile(job,'found'|'absent',id)`.
-- Code: revert the site's form to the current `mailto:` component. Migrations are
+- Code: turn the site's new form flag OFF to retain the current contact-links page. Migrations are
   additive; do not drop tables holding real enquiries.

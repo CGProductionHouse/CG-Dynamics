@@ -26,6 +26,14 @@ Current-main baseline `2b72c0553f2c00f9d43e9a09ba76417b17981162`. Reproduced the
 
 ## 1. Fresh supervisor recovery order
 
+### #623 ordered finish — 2 October, code-only
+
+- Current baseline `fd4f86bf3d3b13cc4b253f458b126540bdbc5d2c`: supervisor independently merged corrected #620 (`9185585`) then #621 (`fd4f86b`). This agent did not merge. All Website migrations remain unapplied; no live provider/config/data action.
+- Existing UI PRs reconciled sequentially to that baseline, preserving all additive handover receipts and unchanged feature code: #613 `a763d5ff393518747491720d6d3a7bea242c0fab` (129 focused; full 3367 passed/16 skipped), #615 `747e30affb9ba95aede81aed5390a6d0e90bc28e` (189 focused; full 3361/16), #616 `23e0dc2e877c8e3f58f3fb2a828c10cfa390ff5b` (97 focused; full 3362/16). Each has build/scoped lint/diff PASS and exact-head green Vercel. Legitimate changed-preview login remains unavailable; supervisor merge and subsequent authenticated production smoke are not claimed by this no-merge lane.
+- Independent corrected Website acceptance: 25 M2A/M2B/delivery tests, all three actual disposable PostgreSQL suites and actual Deno worker/webhook checks pass. Lifecycle quality, SAST month, custom gateway auth and durable early webhook evidence are present; no duplicate fix PR.
+- M2C intake proposal reuses only canonical transaction/Inbox, exact private server capability and host/form binding, bounded persistent admission and receipt-only output; activation defaults OFF. Disposable real HTTP→PostgreSQL→Inbox acceptance proves replay/isolation/RLS/concurrent admission. See `WEBSITE-ENQUIRY-INTAKE-M2C-623.md` for unapplied migration, deployment/config/recipient/pilot gates.
+- Corrected stale pilot evidence: Piek's mailto form component exists but is not mounted on its current contact page. New form transport must remain explicitly gated; existing live contact page is not silently replaced.
+
 A new supervisor must recover in this order:
 
 ```text

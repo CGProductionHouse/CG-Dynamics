@@ -19,3 +19,8 @@ verify_jwt = false
 [functions.website-enquiry-delivery-webhook]
 # Provider (Resend/Svix) HMAC signature verified by the handler, not a Supabase JWT.
 verify_jwt = false
+
+[functions.website-enquiry-intake]
+# Only a trusted Website server with a private exact endpoint capability reaches
+# the canonical service-only RPC. Handler authenticates/binds; no browser JWT.
+verify_jwt = false
