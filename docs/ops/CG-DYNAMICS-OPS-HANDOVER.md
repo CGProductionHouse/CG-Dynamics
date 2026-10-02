@@ -2,7 +2,7 @@
 
 Status: **CURRENT authority for a fresh supervisor chat**
 
-Updated: **2 October 2026, after Agent 01 freshness rollout-readiness acceptance and Agent 02 Batch 3 assignment**
+Updated: **2 October 2026, after Agent 02 Batch 3 #644 merge and Batch 4 assignment**
 
 Current accepted main before this handover-only docs update: **`d8d9691cd068f7faaffc579237c8e665fe7d28ca`**. Latest freshness runtime-code merge remains **`2c27e74fe0d798fdffff877d358a0fa13f355292`**; #643 changes offline strategy review tooling/artifacts only. The handover edit itself advances `main`; **always refetch current main on takeover and before every merge**.
 
@@ -183,37 +183,30 @@ Accepted:
 - #638 zero-write compiler/quality plan → `cbf21ca5cbcb699bd09fb2d8341f7127b4415caa`
 - #640 Batch 1 → `2ce29344a78bcef5d4a96fd27a87a7a2699fb2ee`
 - #643 Batch 2 → `d8d9691cd068f7faaffc579237c8e665fe7d28ca`
+- #644 Batch 3 → `262d281a209ed0b528a647363655f0b6a7d6b40b`
 
-Batch 2 supervisor receipt:
-- #513 comment **`5957232525`**
-- #381 comment **`5957233655`**
-- exact-head Vercel was SUCCESS before merge;
-- human copy/evidence pass accepted 9 clients / 18 Sep+Oct rows;
-- **Zooz Lifestyle WFF remains blocked for both months** because the exact runtime guide/current programme-product-event evidence is absent; no substitute was used.
+Batch 3 supervisor receipt:
+- #513 comment **`5957811814`**
+- #381 comment **`5957812440`**
+- exact-head Vercel SUCCESS before merge;
+- 89/89 focused tests + build + scoped lint + diff check green;
+- human copy/evidence pass accepted all 10 requested clients / 20 Sep+Oct rows;
+- all 42 predecessor accepted rows remained byte-stable;
+- all 20 exclusions unchanged;
+- Zooz remains blocked and was not retried.
 
 Current ZERO-WRITE fleet state:
 - 94 reviewed v2 rows
-- **42 amendment-needed**
-- **52 blocked**
+- **62 amendment-needed**
+- **32 blocked**
 - 20 non-applicable untouched
 - 0 approved
 - 0 published
 - 0 production strategy writes
-- plan hash `336979000c9074496bfbcead8f55653349a2fd84e902b23aa3dfebcadd7bb518`
-- Batch 2 packet hash `e30210b55ba1d328bfd69b55daa10944cb1faebd03088f2c0b57ea8b5b9f648a`
+- plan hash `ccadbbf6db6c761929dfbf5ef62d94e81eda555ca2c0311e9eaf2b93a81afa21`
+- Batch 3 packet hash `181aa3a1103268d6f851499ed13195b5fd52c6ee914914e7953d6e857b9da74d`
 
-Accepted Batch 2 clients:
-1. The Staffordshire
-2. Delta Gas
-3. CG Production House
-4. RC-Polypipe
-5. Peyper Bonds
-6. Loraclox
-7. Tobich Optics
-8. AV Event Life
-9. Braize
-
-**CURRENT Agent 02 mission = Batch 3** using the same deterministic evidence ranking, exact next set:
+Accepted Batch 3 clients:
 1. C&L Innovations
 2. Central Canvas
 3. Bouwer & Coetzee Attorneys
@@ -225,7 +218,12 @@ Accepted Batch 2 clients:
 9. Supa Quick BFN
 10. Supa Quick Centurion
 
-For any Batch 3 client that fails exact evidence sufficiency, stop that client truthfully and document the gap; **do not silently substitute another client**.
+**CURRENT Agent 02 mission = Batch 4**, deliberately only the final three clients in the current deterministic evidence-rich ranking:
+1. HMHI
+2. Ehrlich Park Butchery
+3. Bohemia Quick Stop
+
+Do not pad Batch 4 or substitute weaker clients. For any of the three that fails exact evidence sufficiency, stop it truthfully and document the gap. Zooz stays held/blocked.
 
 Hard strategy rules remain:
 - zero-write review until direct protected strategy amendment instruction;
@@ -235,13 +233,15 @@ Hard strategy rules remain:
 - package quantities never inferred from historical posting;
 - no repo/evidence/UUID/internal workflow jargon client-side;
 - no invented offers/prices/stock/ROI/legal/medical/financial/event claims;
-- preserve Piek/Neshora + Batch 1 + Batch 2 accepted rows byte-stable unless a real drift guard stops them;
-- preserve staff notes, provenance, live row/revision/package guards and all 20 non-applicable fingerprints;
+- preserve Piek/Neshora + Batch 1 + Batch 2 + Batch 3 accepted rows byte-stable unless a real drift guard stops them;
+- preserve staff notes, provenance, live row/revision/package/source guards and all 20 non-applicable fingerprints;
 - Zooz remains blocked until approved exact-client evidence exists;
 - no #505, #389, Website/#405 or external communication;
 - master handover remains supervisor-owned.
 
-**NEXT SUPERVISOR ACTION when Agent 02 returns:** independently inspect the Batch 3 PR, copy/evidence, tests and exact-head Vercel. Merge automatically if safe, update #513/#381, then give the next Agent 02 mission in the same turn.
+Batch 4 must also return an **exact inventory of every still-blocked client and its evidence gap**. After the final evidence-rich three are reviewed, do not continue blind repetitive review; supervisor should move Agent 02 into targeted evidence remediation or another safe launch-critical lane based on that inventory.
+
+**NEXT SUPERVISOR ACTION when Agent 02 returns:** independently inspect Batch 4 PR, copy/evidence, tests and exact-head Vercel. Merge automatically if safe, update #513/#381, then use the returned blocked-client inventory to assign the next bounded task.
 
 ---
 
