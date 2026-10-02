@@ -13,7 +13,8 @@ An additive admission-only migration is proposed and **UNAPPLIED**:
 - Sole credential: one opaque per-endpoint UUID in header **`x-cg-intake-key`**
   (`website_enquiry_endpoints.intake_key`). Client, Website, environment and approved
   recipients are resolved only by the canonical transaction from that key.
-- Requests carrying `Origin`, `Sec-Fetch-Site` or `Sec-Fetch-Mode` (browsers) → 403.
+- Requests carrying `Origin` or `Sec-Fetch-Site` (browsers) → 403. `Sec-Fetch-Mode` alone is
+  allowed: Node/undici server-side `fetch` (Vercel routes) always sends `sec-fetch-mode: cors`.
   No CORS headers are ever sent. `Cache-Control: no-store` on every response.
 - `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` (platform-provided) stay inside the
   function and are used only for the RPC.
