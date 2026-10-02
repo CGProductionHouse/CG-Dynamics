@@ -11,6 +11,11 @@ on:
       - 'scripts/website-lead-lifecycle-acceptance.mjs'
       - 'tests/sql/405_website_lead_lifecycle_acceptance.sql'
       - 'tests/websiteLeadLifecycle.test.mjs'
+      - 'supabase/migrations/*website_lead_breakdown.sql'
+      - 'tests/sql/405_website_lead_breakdown_acceptance.sql'
+      - 'tests/websiteLeadBreakdown.test.mjs'
+      - 'src/lib/db/websiteLeads.ts'
+      - 'src/components/website/WebsiteLead*.tsx'
       - 'src/lib/websiteLeads.ts'
       - 'supabase/migrations/*website_enquiry_delivery_runtime.sql'
       - 'supabase/migrations/*website_enquiry_delivery_suppression.sql'
@@ -60,7 +65,7 @@ jobs:
           node-version: '24'
       - run: node --test tests/websiteEnquiryTransaction.test.mjs
       - run: node scripts/website-enquiry-transaction-acceptance.mjs
-      - run: node --test tests/websiteLeadLifecycle.test.mjs
+      - run: node --test tests/websiteLeadLifecycle.test.mjs tests/websiteLeadBreakdown.test.mjs
       - run: node scripts/website-lead-lifecycle-acceptance.mjs
       - run: node --test tests/websiteEnquiryDelivery.test.mjs
       - run: node scripts/website-enquiry-delivery-acceptance.mjs

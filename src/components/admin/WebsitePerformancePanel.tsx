@@ -8,6 +8,7 @@ import {
   type WebsitePerformanceState,
 } from '../../lib/websitePerformance'
 import { PremiumCard, PremiumCardHeader } from '../ui/PremiumCard'
+import { WebsiteLeadBreakdownCard } from '../website/WebsiteLeadBreakdownCard'
 import { WebsiteLeadMetricsCard } from '../website/WebsiteLeadMetricsCard'
 import { currentReportingMonth, monthWindow } from '../../lib/websiteLeads'
 
@@ -98,7 +99,10 @@ export function WebsitePerformancePanel({ clients, canSave }: { clients: Client[
         </div>
         {result.report.dataQuality.gaps.length > 0 && <p className="mt-5 text-xs leading-relaxed text-brand-primary/60">Measurement notes: {result.report.dataQuality.gaps.join(' ')}</p>}
       </>}
-      {clientId && monthWindow(month) && <WebsiteLeadMetricsCard clientId={clientId} from={monthWindow(month)!.from} to={monthWindow(month)!.to} title="Website lead outcomes" />}
+      {clientId && monthWindow(month) && <>
+        <WebsiteLeadMetricsCard clientId={clientId} from={monthWindow(month)!.from} to={monthWindow(month)!.to} title="Website lead outcomes" />
+        <WebsiteLeadBreakdownCard clientId={clientId} from={monthWindow(month)!.from} to={monthWindow(month)!.to} />
+      </>}
     </PremiumCard>
   </section>
 }

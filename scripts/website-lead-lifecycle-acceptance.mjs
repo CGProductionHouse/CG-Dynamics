@@ -39,8 +39,12 @@ try {
       client_id uuid references public.clients(id), is_active boolean not null default true);`)
   sql(readFileSync(new URL('../supabase/migrations/20261001181932_website_enquiry_transaction.sql', import.meta.url), 'utf8'))
   sql(readFileSync(new URL('../supabase/migrations/20261002090000_website_lead_lifecycle.sql', import.meta.url), 'utf8'))
-  sql(readFileSync(new URL('../tests/sql/405_website_lead_lifecycle_acceptance.sql', import.meta.url), 'utf8'))
+  sql(readFileSync(new URL('../supabase/migrations/20261003010000_website_lead_breakdown.sql', import.meta.url), 'utf8'))
+  // One session: the breakdown acceptance reuses the lifecycle fixtures (temp lead_ids, pg_temp.as_user).
+  sql(readFileSync(new URL('../tests/sql/405_website_lead_lifecycle_acceptance.sql', import.meta.url), 'utf8') +
+    readFileSync(new URL('../tests/sql/405_website_lead_breakdown_acceptance.sql', import.meta.url), 'utf8'))
   console.log('PASS: M2B lead lifecycle — exact-client inbox, lifecycle/quality rules, cross-client rejection, synthetic exclusion, PII-free metrics and audit trail')
+  console.log('PASS: qualified-lead breakdown — landing page/source keys only, minimum-sample flag, top-10 + remainder, exact-client, not-connected')
 } finally {
   // This exact container was created by this invocation, never a shared server.
   if (created) docker(['stop', container])

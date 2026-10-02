@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { ClientPortalErrorState, ClientPortalLoadingState } from '../../components/client/ClientPortalStates'
+import { WebsiteLeadBreakdownCard } from '../../components/website/WebsiteLeadBreakdownCard'
 import { WebsiteLeadMetricsCard } from '../../components/website/WebsiteLeadMetricsCard'
 import { listWebsiteLeads, saveWebsiteLeadLifecycle, type LeadLoad } from '../../lib/db/websiteLeads'
 import {
@@ -63,6 +64,7 @@ export default function ClientLeadsPage() {
   return <div className="space-y-6">
     <Intro>
       {period && <WebsiteLeadMetricsCard clientId={null} from={period.from} to={period.to} title="This month" />}
+      {period && <WebsiteLeadBreakdownCard clientId={null} from={period.from} to={period.to} />}
     </Intro>
 
     {leads.length === 0

@@ -115,6 +115,70 @@ export interface WebsiteLeadMetrics {
   qualificationRate: number | null
 }
 
+export type LeadBreakdownDimension = 'landing_page' | 'source'
+
+export interface WebsiteLeadBreakdownRow {
+  /** Landing path or source; null when the enquiry carried no such attribution. */
+  key: string | null
+  total: number
+  qualified: number
+  poor: number
+  unreviewed: number
+  qualificationRate: number
+  /** True once the row has the minimum sample to inform an optimisation decision. */
+  sufficientSample: boolean
+}
+
+export interface WebsiteLeadBreakdown {
+  state: 'available' | 'not_connected'
+  dimension: LeadBreakdownDimension
+  minSample: number
+  rows: WebsiteLeadBreakdownRow[]
+  /** Groups beyond the top rows, counted rather than silently dropped. */
+  otherRows: number
+}
+
+const isCount = (value: unknown): value is number => typeof value === 'number' && Number.isInteger(value) && value >= 0
+
+/** Strict mapping of website_lead_breakdown: anything unexpected is rejected, never guessed. */
+export function mapWebsiteLeadBreakdown(value: unknown, dimension: LeadBreakdownDimension): WebsiteLeadBreakdown {
+  if (!value || typeof value !== 'object') throw new Error('Lead breakdown is missing.')
+  const data = value as Record<string, unknown>
+  if (data.dimension !== dimension) throw new Error('Lead breakdown dimension mismatch.')
+  if (data.state !== 'available' && data.state !== 'not_connected') throw new Error('Lead breakdown state is not recognised.')
+  if (!isCount(data.minSample) || data.minSample < 1 || !isCount(data.otherRows) || !Array.isArray(data.rows)) {
+    throw new Error('Lead breakdown is not in the expected shape.')
+  }
+  const rows = data.rows.map((raw) => {
+    const row = (raw ?? {}) as Record<string, unknown>
+    const key = row.key === null ? null : typeof row.key === 'string' && row.key.trim() ? row.key : undefined
+    if (key === undefined || ![row.total, row.qualified, row.poor, row.unreviewed].every(isCount)
+      || typeof row.qualificationRate !== 'number' || typeof row.sufficientSample !== 'boolean') {
+      throw new Error('Lead breakdown row is not in the expected shape.')
+    }
+    const total = row.total as number
+    if (total < 1 || (row.qualified as number) + (row.poor as number) + (row.unreviewed as number) > total) {
+      throw new Error('Lead breakdown row counts are inconsistent.')
+    }
+    return {
+      key,
+      total,
+      qualified: row.qualified as number,
+      poor: row.poor as number,
+      unreviewed: row.unreviewed as number,
+      qualificationRate: row.qualificationRate,
+      sufficientSample: row.sufficientSample,
+    }
+  })
+  return { state: data.state, dimension, minSample: data.minSample, rows, otherRows: data.otherRows }
+}
+
+/** Human label for a breakdown key; missing attribution is stated, not invented. */
+export function breakdownKeyLabel(dimension: LeadBreakdownDimension, key: string | null): string {
+  if (key !== null) return key
+  return dimension === 'landing_page' ? 'Landing page not recorded' : 'Source not recorded'
+}
+
 /** Mirrors the database rules so the form can explain a rejection before saving. */
 export function validateLeadLifecycle(input: LeadLifecycleInput): string | null {
   if (!LEAD_STATUSES.includes(input.status)) return 'Choose a lead status.'
