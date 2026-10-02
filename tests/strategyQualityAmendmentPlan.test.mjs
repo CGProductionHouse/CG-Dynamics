@@ -34,6 +34,41 @@ function fixture() {
   return {snapshot,fleet:structuredClone(fleet),neshora:structuredClone(neshora),manifest:baseline,quality:structuredClone(quality)}
 }
 
+test('Batch 2 cumulative compiler derives 42/52, preserves prior rows and rejects duplicate/foreign/internal/drift',()=>{
+  const input=fixture(),packets=[buildReviewedBatch(),buildReviewedBatch(2)]
+  for(const packet of packets){
+    for(const row of packet.rows){
+      const live=input.snapshot.strategies.find(r=>r.id===row.row_id)
+      row.guard={fingerprint:sha(live),revision_hash:sha(input.snapshot.revisions.find(r=>r.strategy_id===live.id)),strategy_hash:sha(live.strategy_data),seed_hash:sha(live.seed_context),package_hash:sha(live.package_settings),internal_notes:live.internal_notes}
+      const{reviewed_hash,...core}=row;row.reviewed_hash=sha(core)
+    }
+    const{packet_hash,...core}=packet;packet.packet_hash=sha(core)
+  }
+  const before=sha(input),first=buildQualityPlan({...input,reviewedOverrides:packets[0]}),result=buildQualityPlan({...input,reviewedOverrides:packets})
+  assert.equal(sha(input),before);assert.equal(result.counts.amendment_needed,42);assert.equal(result.counts.blocked,52)
+  for(const row of first.rows.filter(r=>r.disposition==='amendment_needed'))assert.deepEqual(result.rows.find(r=>r.row_id===row.row_id),row)
+  assert.deepEqual(result.excluded,first.excluded)
+  const stable=buildQualityPlan({...input,reviewedOverrides:packets,preservedPlan:first})
+  for(const row of first.rows.filter(r=>r.disposition==='amendment_needed'))assert.equal(JSON.stringify(stable.rows.find(r=>r.row_id===row.row_id)),JSON.stringify(row))
+  const changedPrior=structuredClone(first);changedPrior.rows.find(r=>r.disposition==='amendment_needed').proposed_strategy_data.goldStandard.objective+=' changed'
+  const{plan_hash,...priorCore}=changedPrior;changedPrior.plan_hash=sha(priorCore)
+  assert.throws(()=>buildQualityPlan({...input,reviewedOverrides:packets,preservedPlan:changedPrior}),/Accepted quality row drift/)
+  assert.throws(()=>buildQualityPlan({...input,reviewedOverrides:[...packets,packets[0]]}),/Duplicate cumulative/)
+  const target=packets[1].rows[0]
+  for(const text of [' Repository worker queue.',' Emmanuel Funerals.',' Guaranteed approval.']){
+    const changed=structuredClone(packets),r=changed[1].rows[0];r.patch.goldStandard.coreMessage+=text
+    const{reviewed_hash,...rowCore}=r;r.reviewed_hash=sha(rowCore)
+    const{packet_hash,...core}=changed[1];changed[1].packet_hash=sha(core)
+    const blocked=buildQualityPlan({...input,reviewedOverrides:changed}).rows.find(r=>r.row_id===target.row_id)
+    assert.equal(blocked.disposition,'blocked')
+  }
+  for(const edit of [r=>r.internal_notes='later edit',r=>r.version=3,r=>r.strategy_data.goldStandard.objective='later staff text',r=>r.package_settings.photo_posts_per_month=100,r=>r.seed_context.new='later provenance']){
+    const drift=structuredClone(input),r=drift.snapshot.strategies.find(r=>r.id===target.row_id);edit(r)
+    assert.equal(buildQualityPlan({...drift,reviewedOverrides:packets}).rows.find(row=>row.row_id===r.id).disposition,'blocked')
+    assert.throws(()=>assertNoDrift(result,drift.snapshot),/Drift refusal/)
+  }
+})
+
 test('reviewed batch runs through actual 94-row compiler with staff context preservation and drift refusal',()=>{
   const input=fixture(),packet=buildReviewedBatch()
   // Synthetic fixture rows have intentionally different receipts/timestamps from production.

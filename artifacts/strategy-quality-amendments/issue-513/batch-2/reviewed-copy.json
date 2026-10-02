@@ -1,0 +1,372 @@
+{
+  "issue": 513,
+  "batch": 2,
+  "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+  "blocked_clients": [{
+    "client_id": "0c01d90f-ba5e-4251-a597-bf3c83f990fa",
+    "client_name": "Zooz Lifestyle WFF",
+    "months": ["2026-09-01", "2026-10-01"],
+    "reason": "MISSING_EXACT_CLIENT_RUNTIME_GUIDE",
+    "gap": "Exact runtime guide is absent. Dossier research observations explicitly contain no exact evidence. Flexible recurring social scope is confirmed, but current brands, product/programme claims and event/athlete briefs cannot be filled from historical posts. Both months remain blocked; no substitute and no patch.",
+    "source_receipts": [
+      {"path":"artifacts/client-strategy-dossiers/issue-513/zooz-lifestyle-wff.md","sha256":"be5e015d34f6b955ee911f23bde81dd6b4b95432192dd0d9734df174811f7e31","quotes":["No exact evidence available; do not fill this gap with generic copy."]},
+      {"path":"artifacts/client-strategy-dossiers/issue-513/index.json","sha256":"e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023","quotes":[]},
+      {"path":"artifacts/client-strategy-dossiers/issue-513/sep-oct-approval-publication-manifest.json","sha256":"baa8110244c9c7f37b0e488db7823d33e98b7343ffe3691e7f9e7641972d0c0a","quotes":[]},
+      {"path":"artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json","sha256":"7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481","quotes":[]}
+    ]
+  }],
+  "clients": [
+    {
+      "client_id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+      "client_name": "The Staffordshire",
+      "guide_quotes": ["pub & restaurant", "Never use the word", "preserve the real Staffy logo shape"],
+      "specificity_anchors": ["dog", "table", "private function"],
+      "audienceAndIntent": "Help people considering a table visit or private function picture the real Staffy venue. Use crowd-facing pub language, not a claimed age or income segment; a ticket enquiry needs a separately confirmed event brief.",
+      "formatsAndRationale": "Four professional videos, four photo posts and four design posters can connect real hospitality moments to a table or private-function question. Additional posters are on request with no fixed count. Daily specials have Instagram Story and actual Facebook-post scope only when a current special is supplied; reels and animated quotas remain unknown.",
+      "mustAvoid": "Never use gees, borrow another pub's menu or substitute stock nightlife for the real venue. Do not reuse old performers, braai packs, fixtures, ticket prices, kitchen hours, menu items or promotions as current. Preserve black/yellow branding and the dog mark; no private-function capacity or deposit promises.",
+      "channelIntegration": "Keep The Staffy voice and real dog-mark branding consistent on already-managed channels. A freshly confirmed daily special uses the agreed Story and Facebook-post treatment; do not extend that pattern into unconfirmed events or extra fixed output.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Assess September's pub presentation around the reason for a table visit versus a private function. Keep the dog-mark venue identity recognisable while separating expired music, rugby and occasion announcements from reusable hospitality images.",
+          "coreMessage": "The Staffy's real table and entrance should carry the invitation. A private function is a different decision from an ordinary pub visit, so do not bury both beneath a recycled event headline.",
+          "pillarsAndHooks": "The dog-mark entrance; a real table moment; the human opening to a supplied announcement; an approved private-function setting. Review what each scene actually communicates instead of recycling last month's performers or menu.",
+          "testAndChange": "Review table-led and announcement-led September openings using available comparable viewing measures. Look separately for table and private-function questions; the number of posts does not prove that an event sold tickets.",
+          "successSignals": "Recorded enquiries naming a table visit or private function are useful intent signals. Views and interactions may support the review where coverage exists; missing booking attribution is unavailable, not zero.",
+          "nextMonthGamePlan": "For October, move from expired event urgency to an invitation built around the real venue and the visitor's next question. Request a separate approved brief before reserving any creative angle for a new event or special.",
+          "clientActionsRequired": ["Identify September venue and table images cleared for reuse, including any people permissions.", "Confirm current specials and private-function wording before selection; remove expired event dates and hours."],
+          "items": {
+            "professional_video": ["Review the real dog-mark entrance opening.", "Review a table-level hospitality moment.", "Review an approved private-function room view.", "Review a human announcement without retaining expired event facts."],
+            "photo_content": ["Dog-mark entrance with original signage intact.", "Real table scene without invented menu items.", "Approved venue hospitality detail.", "Permitted private-function setting."],
+            "design_poster": ["Table invitation grounded in the pictured venue.", "A private-function enquiry question.", "A freshly supplied daily special; otherwise a venue invitation.", "One human pub moment, not an old artist announcement."]
+          }
+        },
+        "2026-10-01": {
+          "objective": "Plan October around two distinct reasons to choose The Staffy: a table visit in the real pub and a conversation about hosting a private function. Let the dog-mark entrance and actual people create recognition rather than promising an unconfirmed entertainment calendar.",
+          "coreMessage": "Picture your table here, then ask about the occasion you want to host. Keep the private function invitation specific to the real space and leave event or menu details to a current confirmed brief.",
+          "pillarsAndHooks": "Open on the dog mark before entering the venue; contrast a table-level moment with an approved function setting; let a real speaker invite the next question. Build special artwork only after receiving the current offer, never from an old promotion.",
+          "testAndChange": "Compare a table-level opening with an entrance-first opening for the same visitor invitation. Keep the facts stable and judge available responses and recorded table questions rather than assuming booking uplift.",
+          "successSignals": "Look for questions distinguishing a normal table booking from hosting a private function. Report available native viewing and interaction measures only; do not assign ticket or booking revenue to an untracked post.",
+          "nextMonthGamePlan": "Use October's actual visitor questions to choose the next table or function explanation. Refresh any specials, booking terms and event brief before reuse instead of maintaining a fictional recurring event programme.",
+          "clientActionsRequired": ["Approve usable entrance, table and function visuals for the four video concepts.", "Supply exact current special wording and any separately approved event brief; confirm the booking route when needed."],
+          "items": {
+            "professional_video": ["Dog-mark entrance into the real pub atmosphere.", "Table-level invitation with genuine hospitality movement.", "Approved private-function setting and one hosting question.", "Real speaker's venue invitation; use a new event announcement only with a complete current brief."],
+            "photo_content": ["Recognisable entrance detail.", "Actual table hospitality scene.", "Approved function-space image.", "Real person or venue moment with publication permission."],
+            "design_poster": ["What occasion would you like to host?", "A table invitation matching the selected photo.", "Current client-supplied special, or a non-offer venue piece.", "One venue-specific visitor question answered without invented terms."]
+          }
+        }
+      }
+    },
+    {
+      "client_id": "06b20bb1-ed4a-4aa1-9f48-8c6cb0531aba",
+      "client_name": "Delta Gas",
+      "guide_quotes": ["ORYX agent for Bloemfontein and surrounding areas", "nominal gas size", "contents"],
+      "specificity_anchors": ["ORYX", "tare", "cylinder"],
+      "audienceAndIntent": "Help a household customer ask an accurate cylinder or appliance question and a commercial buyer specify a supply need. These are demonstrated buying situations, not invented demographic targeting.",
+      "formatsAndRationale": "One professional video can show a real cylinder marking and explanation; three photos provide actual label, product and service context; three posters clarify different customer questions. Reels, animation, paid campaigns and extra shoot days remain unconfirmed.",
+      "mustAvoid": "No invented refill/exchange brands, sizes, stock, delivery times, branch roster, appliance compatibility, safety procedures or CoC service. ORYX agency does not imply exclusivity. Preserve labels and proportions; do not describe visitors as staff.",
+      "channelIntegration": "Use Delta's practical owner-like tone across already-managed channels. Captions and posters require the exact current address, phone, email and website footer; reconfirm mutable contact values before final artwork, without inventing WhatsApp.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Review September's cylinder content for whether it distinguishes gas contents from full-cylinder weight and helps a customer form a useful enquiry. Check that ORYX identity and real tare markings are preserved without treating old stock examples as current availability.",
+          "coreMessage": "The cylinder's tare and its gas contents are different things. Delta's practical explanation should help a customer ask about the actual cylinder, not promise that every nominal size has one universal full weight.",
+          "pillarsAndHooks": "Actual tare marking beside the cylinder; the ORYX identity shown accurately; one customer product question; a real service moment without a delivery promise. The opening starts with what the label means, not an energy slogan.",
+          "testAndChange": "Classify September label-first and customer-question openings before comparing available viewing response. Read recorded enquiries for a specific cylinder or appliance question; historical post volume cannot prove supply or sales.",
+          "successSignals": "Useful signals are recorded questions identifying a cylinder or product and available native views/interactions. Missing enquiry detail remains unavailable, and no refill volume or sales conversion is inferred.",
+          "nextMonthGamePlan": "Make October's single video a clear cylinder-marking explanation, then use the photo/poster mix to prompt better product enquiries. Confirm current product and exchange rules before any named offer is carried forward.",
+          "clientActionsRequired": ["Select a real labelled cylinder and approve the contents-versus-tare explanation.", "Confirm current product and contact details; keep delivery, branch and exchange-brand gaps unresolved."],
+          "items": {
+            "professional_video": ["Review a real cylinder's contents-versus-tare explanation without an invented total weight."],
+            "photo_content": ["Actual tare/label detail with markings intact.", "Real cylinder showing correct proportions and branding.", "Approved customer-service or appliance image, without claiming stock."],
+            "design_poster": ["Contents and tare are different labels.", "What cylinder/product question to bring to Delta.", "ORYX agency identity with exact current contact footer."]
+          }
+        },
+        "2026-10-01": {
+          "objective": "Build October's Delta content around a better first cylinder enquiry: show the real tare marking, identify the product being discussed and ask for the customer's requirement. Keep ORYX identity factual while separating information from an availability promise.",
+          "coreMessage": "Bring the actual cylinder or product question, not an assumed weight or exchange rule. A clear label reference helps Delta answer the requirement before price or availability is discussed.",
+          "pillarsAndHooks": "One visual-first tare explanation; one real product detail; one owner/service question; three posters separating cylinder information, appliance enquiry and how to contact Delta. Safety content waits for approved authoritative wording.",
+          "testAndChange": "For comparable cylinder pieces, compare a label-question CTA with a requirement-question CTA. Change the prompt rather than technical facts, and use only recorded enquiries and covered viewing measures.",
+          "successSignals": "Check whether enquiries provide the actual cylinder/product and intended requirement. Read available interactions without claiming buying frequency, delivery reliability or a safety outcome.",
+          "nextMonthGamePlan": "Choose the next explanation from real cylinder or appliance questions received in October. Reconfirm the product and any operating terms before extending the approach into another month.",
+          "clientActionsRequired": ["Supply the labelled cylinder and one approved staff explanation for the video.", "Approve three real photo subjects and the exact footer; confirm any product-specific fact before naming it."],
+          "items": {
+            "professional_video": ["Visual-first cylinder marking explanation with one plain-language customer question."],
+            "photo_content": ["The actual label used in the explanation.", "A client-identified cylinder/product detail.", "A permitted real service moment inviting a requirement enquiry."],
+            "design_poster": ["Ask about your actual cylinder marking.", "Confirm the appliance/product requirement before assuming compatibility.", "Contact Delta with a clear LPG question and the exact approved footer."]
+          }
+        }
+      }
+    },
+    {
+      "client_id": "c27d2185-08e4-4c49-be48-2572564ceecf",
+      "client_name": "CG Production House",
+      "guide_quotes": ["Videography/video production", "CG Studios / in-house production-studio services", "Add, do not repeat."],
+      "specificity_anchors": ["studio", "camera", "brief"],
+      "audienceAndIntent": "Help a business buyer describe a video, photography or design brief and understand the real production work behind it. Team and studio culture can be human without pretending that attention is a measured commercial result.",
+      "formatsAndRationale": "Four professional videos can show a brief becoming real visual work. Eight photo deliverables include four collaborations with CG Studios, not twelve total; four design posters answer distinct brief questions. Reel, animated-poster and paid-campaign quantities remain unknown.",
+      "mustAvoid": "No invented client results, ROI, turnaround, prices, awards, portfolio permission or staff roles. Preserve real cameras, faces and logos. Keep customer copy focused on creative production rather than private administration; do not invent a WhatsApp route.",
+      "channelIntegration": "Keep service posts focused on one business question across the channels already managed. Use the approved public website/email/phone footer where a service enquiry needs it; lighter team/studio moments do not need a forced sales footer.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Assess September's camera and studio presentation for whether a buyer can connect a real production moment to a useful brief. Separate approved portfolio work from playful team material and check the four studio collaborations remain within the eight-photo total.",
+          "coreMessage": "A camera or studio scene becomes useful when it shows the decision behind the finished piece. Explain the brief and the visible creative choice, rather than making a general promise about growing a business.",
+          "pillarsAndHooks": "The actual camera setup; a studio lighting or composition choice; the person carrying out the visible work; an approved finished piece beside its real brief. Keep human team moments distinct from unsupported results stories.",
+          "testAndChange": "Review September production-detail openings against finished-piece openings where comparable material exists. Check recorded enquiries for a specific video, photography or design brief; do not infer sales from views.",
+          "successSignals": "Enquiries describing purpose, usable assets or the intended output are meaningful when recorded. Available native views and interactions support the creative review but cannot prove revenue or campaign ROI.",
+          "nextMonthGamePlan": "For October, organise four video stories around the brief-to-visual decision and coordinate four studio collaboration photos within the eight-photo allowance. Ask permission before selecting customer portfolio work.",
+          "clientActionsRequired": ["Confirm which real portfolio and team material may appear publicly.", "Identify the four studio collaboration photo briefs within the eight total; approve service facts and contact wording."],
+          "items": {
+            "professional_video": ["Review the brief behind an approved real video scene.", "Review an actual camera/setup decision.", "Review a studio composition or lighting moment.", "Review a human production-team moment without invented job titles."],
+            "photo_content": ["Four approved CG Studios collaboration photo concepts within eight total.", "Up to four further real production/team/product details within the same eight-photo capacity."],
+            "design_poster": ["What purpose should a video brief describe?", "What real product or brand assets should a photography brief include?", "One approved design decision explained.", "A service enquiry prompt without turnaround or outcome promises."]
+          }
+        },
+        "2026-10-01": {
+          "objective": "Plan October to make the first creative brief more concrete: a business purpose, real subject and visible production choice. Use camera and studio moments as explanation, with four studio collaborations inside the eight-photo capacity rather than an extra output promise.",
+          "coreMessage": "Tell us what the piece needs to communicate and show us the real subject. The production story should reveal a creative decision, not sell a vague transformation or a guaranteed business outcome.",
+          "pillarsAndHooks": "Open one story on the brief question, another on the camera choice, another on a studio visual decision and another on the finished piece with permission. Give each poster one practical brief question rather than a list of every service.",
+          "testAndChange": "Compare a brief-question opening with a finished-piece reveal for the same approved production. Keep the subject and facts constant; evaluate available viewing response and the specificity of recorded enquiries.",
+          "successSignals": "Look for enquiries containing a purpose and usable subject/assets, rather than only a request for a generic price. Record covered interactions without inventing attribution or claims about client business growth.",
+          "nextMonthGamePlan": "Use October's actual brief questions to select the next production explanation. Retain the useful opening only when real responses support it, and refresh portfolio permission before reusing another customer's work.",
+          "clientActionsRequired": ["Select four real video subjects and approve portfolio/public-person permissions.", "Confirm four collaboration photo subjects plus the remaining photo choices within eight; approve factual service copy for four posters."],
+          "items": {
+            "professional_video": ["Real brief question to its approved visual result.", "Camera decision shown with the actual equipment.", "Studio composition detail explained in plain language.", "Human production moment that adds context beyond the finished piece."],
+            "photo_content": ["Four agreed studio collaboration subjects, counted within eight.", "Four additional real production or team subjects if supplied and approved; no extra collaboration quota."],
+            "design_poster": ["Purpose before the production brief.", "Real subject/assets needed for a photography enquiry.", "One visible creative decision from the approved work.", "A specific video/design enquiry with the task-appropriate public footer."]
+          }
+        }
+      }
+    },
+    {
+      "client_id": "4f6106de-c437-404e-8cef-fbe848de0665",
+      "client_name": "RC-Polypipe",
+      "guide_quotes": ["field-irrigation / level-or-slight-downgrade application", "website-led installation-video sequence", "published"],
+      "specificity_anchors": ["field", "pipe", "guidance"],
+      "audienceAndIntent": "Help a farming or irrigation buyer describe the field situation and ask an application-specific pipe question. Do not invent acreage, crop, purchasing power or technical suitability for that buyer.",
+      "formatsAndRationale": "One professional video can explain a real field-irrigation application using approved RC guidance; three photos show actual pipe and application detail; four posters prompt distinct application/quotation questions. No additional reel, animation or installation service is implied.",
+      "mustAvoid": "No unverified diameter-unit conversion, pressure class, stock, price, warranty, installation-service claim or quantified savings. Published comparative claims are not independent proof. Preserve pipe texture/scale and qualify guidance for field conditions.",
+      "channelIntegration": "Keep RC's concise practical farming language on already-managed channels. Captions add a useful application question and five dynamically chosen hashtags, not a second headline or a fixed generic tag bank.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Review September's pipe presentation for whether the actual field application and limits of the guidance are clear. Separate visible product proof from comparative savings claims and unresolved diameter units before selecting reusable work.",
+          "coreMessage": "The field and its conditions matter before the pipe specification. RC's actual guidance should frame the question, not turn a creative image into proof of universal irrigation performance.",
+          "pillarsAndHooks": "The real pipe in its field context; a website-led explanation; one visible connection detail without improvised steps; an application question leading to a quotation. Avoid repeating a cost-effectiveness percentage as measured fact.",
+          "testAndChange": "Review application-first and product-close-up September openings using comparable available measures. Read recorded enquiries for field context; post counts cannot establish water, energy or labour savings.",
+          "successSignals": "Recorded questions explaining the field situation or asking for an appropriate specification are useful. Views/interactions remain coverage-bound and missing application or order attribution stays unavailable.",
+          "nextMonthGamePlan": "Make October's single video answer one field-context question using the verified RC sequence, then select photos/posters that help buyers describe their application without guessing diameter units.",
+          "clientActionsRequired": ["Approve the exact guidance excerpt and real pipe/application visuals for reuse.", "Resolve diameter units before specification artwork; confirm any current product and contact facts used."],
+          "items": {
+            "professional_video": ["Review a real field-irrigation explanation against the published RC guidance."],
+            "photo_content": ["Actual pipe surface and scale.", "Real field application without a universal suitability claim.", "Visible connection/product detail, not an invented installation step."],
+            "design_poster": ["Describe the field before discussing pipe specification.", "One approved guidance question with its condition qualifier.", "Ask for clarification where diameter units are unresolved.", "Quotation next step without promised delivery or savings."]
+          }
+        },
+        "2026-10-01": {
+          "objective": "Build October around an application-aware RC enquiry: describe the field conditions, examine the real pipe and ask the right specification question. Keep the one video grounded in client-approved guidance rather than a sweeping savings or installation promise.",
+          "coreMessage": "Show the field situation before choosing the specification. A real pipe detail and a qualified explanation are more useful than an unsupported percentage claim.",
+          "pillarsAndHooks": "Open with the field question, follow with the actual pipe, and explain one verified guidance point. Three photos isolate material/application detail; four posters collect the next buyer question without manufacturing technical numbers.",
+          "testAndChange": "Compare a field-question CTA with a product-detail CTA on otherwise comparable RC pieces. Keep specifications constant and evaluate only recorded application detail and available native response.",
+          "successSignals": "Look for enquiries that describe the field and ask a concrete specification question. Do not treat engagement as an order or report unmeasured irrigation savings.",
+          "nextMonthGamePlan": "Choose the following explanation from real October application questions. Refresh approved technical wording and unresolved units before building a new how-it-works sequence.",
+          "clientActionsRequired": ["Supply a real application and the approved explanation for the one video.", "Confirm specification wording before the four posters; do not publish unresolved units or stock promises."],
+          "items": {
+            "professional_video": ["Field-question opening followed by one client-approved RC guidance point."],
+            "photo_content": ["Real pipe detail at truthful scale.", "Application image tied to the buyer's field question.", "Client-identified connection detail with no unsupported specification."],
+            "design_poster": ["What field context to include in an enquiry.", "A qualified application point from approved guidance.", "One confirmed specification question without guessed units.", "A practical quote request without installation or quantified savings claims."]
+          }
+        }
+      }
+    },
+    {
+      "client_id": "a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b",
+      "client_name": "Peyper Bonds",
+      "guide_quotes": ["bond originator / property-finance specialist", "The lender makes the credit decision.", "paperwork/application administration support"],
+      "specificity_anchors": ["originator", "paperwork", "lender"],
+      "audienceAndIntent": "Help a homebuyer understand the application-support role and an estate agent understand the origination handoff. Keep general process explanation separate from personalised financial or legal advice and do not assume a credit profile.",
+      "formatsAndRationale": "One professional video can explain the originator/lender distinction; three photos show approved human support and privacy-safe paperwork context; three posters answer separate application questions. No paid campaign, reel or animated allocation is confirmed.",
+      "mustAvoid": "No approval odds, guaranteed savings, lowest rates, personalised advice, lender accreditation or legal-registration capability. Do not import other group-company services or contacts. Hide financial information and never fabricate an approval letter or testimonial.",
+      "channelIntegration": "Keep origination/application support consistent across managed channels. Use the exact approved informative-post contact block when required, not a neighbouring group business's phone; informal team content can remain human without a forced sales footer.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Review September's home-loan explanations for a clear boundary: the originator supports paperwork and comparison while the lender makes the decision. Identify reusable process questions without carrying forward stale rate figures or approval language.",
+          "coreMessage": "The originator helps with the paperwork and the application conversation; the lender decides the credit outcome. Personal support is a real service, not a promise that a home loan will be approved.",
+          "pillarsAndHooks": "Who handles the paperwork; what the originator does when offers arrive; where the lender's decision sits; a real team's role with private documents hidden. Start from a buyer question rather than a property-dreams slogan.",
+          "testAndChange": "Review September role-explanation and preparation-question openings using available response. Check recorded enquiries for an application-stage question, never interpret attention as an approval outcome.",
+          "successSignals": "Recorded questions naming paperwork, application stage or comparing received offers are useful. Covered video measures may support the review; missing lender-outcome attribution remains unavailable.",
+          "nextMonthGamePlan": "Make October's video a simple who-does-what explanation and use the photo/poster mix for practical application preparation. Confirm current team/contact facts before selecting any staff profile.",
+          "clientActionsRequired": ["Approve process wording that keeps the lender decision and legal registration roles separate.", "Supply publication-safe team/office images and the latest approved contact block; exclude private documents."],
+          "items": {
+            "professional_video": ["Review an originator-versus-lender explanation without a success guarantee."],
+            "photo_content": ["Approved application-support team image.", "Privacy-safe paperwork context with no personal information.", "Permitted office/service moment with accurate current role wording."],
+            "design_poster": ["Who helps with the application paperwork?", "Who makes the credit decision?", "What to ask when comparing the actual offers received, without recommending a product."]
+          }
+        },
+        "2026-10-01": {
+          "objective": "Plan October around a better-informed application conversation: distinguish originator, lender and legal registration roles, then ask a concrete paperwork question. Make human support visible without promising a rate, approval or financial result.",
+          "coreMessage": "Ask what the application step needs, and know who is responsible for it. The originator's support and the lender's decision are different roles; general information cannot decide a buyer's personal loan choice.",
+          "pillarsAndHooks": "Open on a real paperwork question, explain the originator's support, then distinguish the lender's role. Photo stories show people rather than financial documents; posters separate preparation, offer questions and role boundaries.",
+          "testAndChange": "Compare a paperwork-question opening with a who-decides opening for the same general application topic. Evaluate recorded process questions and covered views, not approval rates or promised financial improvements.",
+          "successSignals": "Look for enquiries identifying the application stage or the document question that needs help. Do not claim approval, savings or faster registration from the content response.",
+          "nextMonthGamePlan": "Choose the next explanation from October's actual application questions. Recheck current process and team facts before reuse, and keep rate or bank-specific material on hold until separately confirmed.",
+          "clientActionsRequired": ["Approve the one process video and three distinct general-information poster questions.", "Confirm current team roles and public contact block; redact all personal or financial material before production."],
+          "items": {
+            "professional_video": ["One plain-language application question separating originator support from the lender decision."],
+            "photo_content": ["Real person answering a general application question.", "Redacted paperwork setting without readable customer information.", "Approved team/service moment, not an invented success story."],
+            "design_poster": ["Preparing a clear application-support question.", "Understanding the roles around the lender's decision.", "Comparing received offers: questions to discuss, not personalised financial advice."]
+          }
+        }
+      }
+    },
+    {
+      "client_id": "21300630-6755-4591-9a49-e22abbaf7e3d",
+      "client_name": "Loraclox",
+      "guide_quotes": ["technology-led electronic-security/CCTV systems business", "neat cabling, mounting and finishing detail", "phones therefore remain an unresolved"],
+      "specificity_anchors": ["CCTV", "cabling", "mounting"],
+      "audienceAndIntent": "Help a customer considering CCTV system work ask about the actual system and service need. Explain a visible technical detail without using fear, guessing site vulnerabilities or promoting unverified historic services.",
+      "formatsAndRationale": "Three photo posts can show approved CCTV, cabling and mounting workmanship; three design posters turn those details into service questions. Professional video, reels and animation have no confirmed quantity, so there is no filming allocation.",
+      "mustAvoid": "No armed response, guarding, monitoring, biometric specifications, PSiRA status, security guarantees or equipment performance claims without exact current confirmation. Hide sites, screens, credentials and weaknesses. Contact numbers conflict and must not be silently chosen.",
+      "channelIntegration": "Use concise, technical but understandable wording on already-managed channels. A contact CTA waits for the current phone/email to be confirmed; do not invent a website from the email domain or add unrelated service labels.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Review September's CCTV images for whether mounting and cabling workmanship are visible safely and accurately. Separate current system work from older biometric or alarm labels and remove any contact or capability assumption before reuse.",
+          "coreMessage": "A real CCTV mounting or cabling detail should explain the work shown, not imply guaranteed protection. The customer question is about that system's actual service need.",
+          "pillarsAndHooks": "A safe mounting detail; neat cabling without revealing routes; a permitted maintenance moment. Let the visible work carry the hook, with no security slogan or unverified list of services.",
+          "testAndChange": "Review September workmanship-detail posts against service-question posts using available covered interactions. Check recorded CCTV enquiries for the system/service need; missing enquiry coverage cannot establish zero demand.",
+          "successSignals": "Useful signals are recorded CCTV service questions and available response to specific workmanship images. Do not invent crime-prevention, system uptime or identification outcomes.",
+          "nextMonthGamePlan": "Build October around three privacy-safe workmanship photos and three distinct CCTV service questions. Resolve current contact wording before a booking CTA, rather than carrying the conflicting numbers forward.",
+          "clientActionsRequired": ["Approve safe CCTV installation/service images with site details and credentials hidden.", "Confirm the public phone/email and any current service claims before final copy; historical biometric topics remain on hold."],
+          "items": {
+            "photo_content": ["Permitted CCTV mounting detail.", "Safe cabling finish without exposing a site route.", "Real system service image with screens/logs redacted."],
+            "design_poster": ["Ask about the CCTV service actually required.", "One visible mounting/workmanship point without performance claims.", "A system-maintenance question with the contact CTA held until verified."]
+          }
+        },
+        "2026-10-01": {
+          "objective": "Plan October's CCTV sequence around what the customer should ask about the real work: mounting, cabling finish and the service requirement. Keep technical competence visible through authorised details, not a promise about protection or unverified system features.",
+          "coreMessage": "Ask about the system and the job, not an all-purpose safety promise. An approved mounting or cabling image can explain one Loraclox service point clearly without exposing a customer's security layout.",
+          "pillarsAndHooks": "Three separate close-up workmanship stories paired with three specific customer questions. Use concise one-point copy, and keep service scope and contact uncertainty out of affirmative advertising.",
+          "testAndChange": "Compare a visible-detail caption with a system-service-question caption for comparable CCTV images. Assess covered interactions and recorded enquiry detail while keeping specifications and privacy safeguards unchanged.",
+          "successSignals": "Look for enquiries that identify a real CCTV system or service need. Content response cannot show guaranteed protection, certification or maintenance effectiveness; absent metrics stay unavailable.",
+          "nextMonthGamePlan": "Use October's actual system questions to choose the next image explanation. Obtain current confirmation before adding historic service lines and recheck each site's publication safety.",
+          "clientActionsRequired": ["Select three real workmanship details with permission and security redactions.", "Approve three CCTV questions and resolve the exact current public contact route before any enquiry footer."],
+          "items": {
+            "photo_content": ["Actual camera mounting detail with location obscured.", "Neat cabling finish without showing vulnerable routes.", "Approved service-work detail with sensitive screens hidden."],
+            "design_poster": ["A mounting question tied to the shown equipment.", "A cabling/workmanship consideration in plain language.", "Which CCTV service does your actual system need? No unverified feature or contact."]
+          }
+        }
+      }
+    },
+    {
+      "client_id": "204f4f22-14c7-42ed-a956-da57af102706",
+      "client_name": "Tobich Optics",
+      "guide_quotes": ["Tobich Optics Otjiwarongo", "frame and lens selection", "brand-range/content facts, not guaranteed current stock"],
+      "specificity_anchors": ["Otjiwarongo", "frame", "lens"],
+      "audienceAndIntent": "Help an Otjiwarongo customer describe the eyewear choice they want to discuss and understand the appointment enquiry route. Frame styling can be shown, but personal vision needs and lens suitability belong with the qualified practice.",
+      "formatsAndRationale": "Four photo posts show real frame geometry, brand detail and approved lifestyle/service context; four design posters ask distinct frame or appointment questions. No video, reel or animated-post quota is confirmed.",
+      "mustAvoid": "No clinical outcomes, treatment, lens-performance or suitability claims, invented models, stock, prices, UV/polarisation or authorised-dealer status. Use exact Otjiwarongo context, never substitute another branch or stale address; preserve frame geometry and real people.",
+      "channelIntegration": "Keep clean, helpful product-specific wording on managed channels. Use the current task-appropriate Otjiwarongo marketing route, not administrative/provider contacts. A depicted brand is a creative reference, not a promise of current stock.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Review September's Otjiwarongo eyewear presentation for whether the actual frame shape and visible brand are described accurately. Separate styling observations from lens performance and remove stock or branch assumptions before reuse.",
+          "coreMessage": "The frame shown is the starting point for a real choice conversation in Otjiwarongo. Its visible shape can be described; the image alone cannot establish lens technology, suitability or availability.",
+          "pillarsAndHooks": "Actual frame silhouette; bridge and temple detail; a permitted lifestyle view; a plain appointment question. Keep each visual's specific choice separate from a medical or better-vision promise.",
+          "testAndChange": "Review frame-detail openings against lifestyle-context openings in September's usable material. Compare covered interactions and recorded product questions, not presumed clinical or sales outcomes.",
+          "successSignals": "Recorded questions naming a shown frame or asking about an Otjiwarongo appointment are useful. Missing product/appointment attribution remains unavailable, not zero demand.",
+          "nextMonthGamePlan": "For October, pair four real photo subjects with four useful frame/appointment questions. Reconfirm product identity and the marketing route before selection; do not carry historical range posts into a stock announcement.",
+          "clientActionsRequired": ["Identify the exact real frames and approve any lifestyle/person permissions.", "Confirm the Otjiwarongo marketing route and product wording; obtain clinician approval for any clinical content outside this styling plan."],
+          "items": {
+            "photo_content": ["Real frame silhouette with original proportions.", "Visible bridge/temple detail without a material claim.", "Permitted lifestyle image of the actual eyewear.", "Approved Otjiwarongo service/appointment context."],
+            "design_poster": ["A frame-shape choice tied to the actual photo.", "One visible styling detail without lens-performance language.", "An appointment enquiry using the correct marketing route.", "Identify the supplied frame, without announcing stock or price."]
+          }
+        },
+        "2026-10-01": {
+          "objective": "Plan October around a clearer Otjiwarongo eyewear conversation: notice the frame shape, bring the choice question and ask the practice about personal lens needs. Keep product detail helpful without advertising unconfirmed stock or clinical capability.",
+          "coreMessage": "Look at the real frame and ask about your own choice. Visible style and individual lens needs are different questions, and a product image does not answer the clinical one.",
+          "pillarsAndHooks": "Open on a specific frame shape; show the real bridge/temple geometry; use a permitted lifestyle view; finish with the exact Otjiwarongo appointment question. Posters provide one useful question rather than generic optical slogans.",
+          "testAndChange": "Compare a frame-shape question with a lifestyle-choice question using comparable product imagery. Hold product facts constant and assess covered interactions or recorded enquiries without claiming improved vision.",
+          "successSignals": "Look for questions that identify the pictured frame or request the correct appointment route. Do not turn native interactions into stock demand, medical benefit or appointment conversion without a recorded link.",
+          "nextMonthGamePlan": "Choose the next frame explanation from October's actual product questions. Reconfirm the pictured item and permission before reuse, and leave personal clinical guidance to the exact practice.",
+          "clientActionsRequired": ["Supply four accurately identified real eyewear/service photo subjects.", "Approve four distinct choice/appointment poster angles and the exact marketing contacts; keep prices and availability out unless separately confirmed."],
+          "items": {
+            "photo_content": ["Specific frame shape as the visual hero.", "Real temple and bridge geometry retained.", "Approved lifestyle context with the same identified eyewear.", "Otjiwarongo service-person moment with permission."],
+            "design_poster": ["What frame-shape question would you like to discuss?", "One visible styling detail from the supplied item.", "Personal lens needs are a practice conversation, not a poster diagnosis.", "Correct Otjiwarongo appointment enquiry, without specialist service or stock claims."]
+          }
+        }
+      }
+    },
+    {
+      "client_id": "3b85973f-bcad-49eb-b8f1-c27f7c7f1aba",
+      "client_name": "AV Event Life",
+      "guide_quotes": ["audiovisual and technical event-production business", "what guests see versus what crew prepared", "soundcheck"],
+      "specificity_anchors": ["soundcheck", "crew", "setup"],
+      "audienceAndIntent": "Help an event buyer explain the sound, visual or lighting requirement and see the real technical preparation behind an approved job. Do not invent an event, guest count, customer relationship or procurement commitment.",
+      "formatsAndRationale": "Four photo posts can show permitted setup, soundcheck, operator and final-room details; four design posters turn those into distinct technical enquiry questions. Social management/captions are included; video, reels and animation quantities remain unknown.",
+      "mustAvoid": "No invented event dates, sponsors, crowd scale, pricing, recurring work, owned inventory, rigging certification, nationwide/Cape Town footprint or failure-proof service. Do not replace actual equipment or inflate a small production into a stadium.",
+      "channelIntegration": "Keep the service actually shown consistent on managed channels. Promotional enquiry copy follows the approved email/phone convention after freshness confirmation; informal crew images need no forced footer. No unconfirmed booking availability.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Review September's production images for the real setup decision behind the finished room: soundcheck, crew preparation and the visible AV contribution. Separate reusable technical detail from past event names and any unconfirmed footprint or equipment claims.",
+          "coreMessage": "What guests saw depended on the setup the crew actually prepared. Show that visible production decision without inventing a technical crisis, event scale or future booking.",
+          "pillarsAndHooks": "A permitted soundcheck moment; crew setup detail; operator preparation; the actual finished room. Explain what is visible rather than guessing specifications or repeating an event-magic slogan.",
+          "testAndChange": "Review crew-preparation and final-room openings using available comparable response. Check recorded enquiries for a sound, visual or lighting requirement, not a presumed event booking from post volume.",
+          "successSignals": "Recorded technical briefs identifying the service requirement are useful. Covered native interactions can support creative selection; missing enquiry or job attribution stays unavailable.",
+          "nextMonthGamePlan": "Plan October as four real technical-preparation photo stories paired with four distinct buyer questions. Obtain job permissions and current service wording before selecting a recap.",
+          "clientActionsRequired": ["Identify permitted September setup/crew images and confirm the exact contribution shown.", "Approve technical descriptions and the current enquiry contact block; do not supply old event details as a future brief."],
+          "items": {
+            "photo_content": ["Permitted soundcheck detail.", "Real crew setup with event permission.", "Actual operator/preparation moment.", "Finished room showing the verified contribution."],
+            "design_poster": ["What sound requirement does the buyer need to describe?", "A screen/visual requirement tied to the shown work.", "One setup decision explained without equipment specifications.", "A service enquiry prompt with current confirmed contacts."]
+          }
+        },
+        "2026-10-01": {
+          "objective": "Build October around the technical brief before the event: what needs to be heard, seen or operated and how a real crew prepares it. Use soundcheck and setup photos as truthful explanation, not a promise of a future event or a fixed equipment package.",
+          "coreMessage": "Describe the moment your audience needs to hear or see, then discuss the actual setup requirement. AV Event Life's visible preparation should make the brief clearer rather than sell unmeasured spectacle.",
+          "pillarsAndHooks": "Lead with the soundcheck question, show the crew's real setup detail, explain one operator task and reveal a permitted result. Posters answer separate buyer requirements rather than claim that every job uses the same inventory.",
+          "testAndChange": "Compare a requirement-question caption with a visible-preparation caption for comparable approved job images. Keep the contribution factual and assess covered response or recorded technical brief detail.",
+          "successSignals": "Look for enquiries that specify sound, visual or technical support requirements. Do not claim event attendance, bookings, failure rates or commercial return from interactions.",
+          "nextMonthGamePlan": "Use October's actual technical questions to choose the next permitted job story. Refresh each event's contribution and permissions instead of assuming a recurring client or venue commitment.",
+          "clientActionsRequired": ["Select four actual technical-preparation/result photos with job and people permission.", "Approve four requirement-led poster angles and current contact wording; confirm any service-specific detail before use."],
+          "items": {
+            "photo_content": ["Actual soundcheck or audio-preparation image.", "Real setup detail without invented hardware.", "Permitted crew/operator task.", "Approved result connected to the same verified contribution."],
+            "design_poster": ["What needs to be heard clearly at your event?", "What does the audience need to see?", "What technical task needs an operator? Scope to be confirmed.", "Bring a specific AV brief, without a date, price or capacity promise."]
+          }
+        }
+      }
+    },
+    {
+      "client_id": "6b67a2df-e2ab-418b-bcee-03aef5963d37",
+      "client_name": "Braize",
+      "guide_quotes": ["event-staffing / promotional-personnel positioning", "not-a-catering-company distinction", "busy-bar / serving / crowd-pressure moments"],
+      "specificity_anchors": ["bar", "serving", "staffing"],
+      "audienceAndIntent": "Help an event buyer describe the actual bar-support, serving or promotional-staffing job. Use real service-pressure moments to explain the role, not guessed audience demographics or a national capability promise.",
+      "formatsAndRationale": "Four photo posts show permitted actual staff/service moments; four posters ask distinct event-staffing questions. Video, reels and animation have no confirmed quota even if older creative history used them.",
+      "mustAvoid": "No invented event dates, sponsors, prices, staff numbers, recurring bookings, national reach, training/vetting/backup guarantees or mobile-bar launch. Braize is not catering. Protect staff dignity; no sexualised imagery or drinking-on-shift humour.",
+      "channelIntegration": "Keep energetic one-thought copy consistent on managed channels and tied to the actual staffing job. Public footer/contact facts need current confirmation before final copy, not a guessed website or dormant business's identity.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Review September's staffing presentation for what the bar or serving moment actually shows. Retain specific service-pressure hooks while separating past event context from unverified future availability and staffing guarantees.",
+          "coreMessage": "The serving moment shows the staffing job more clearly than a list of adjectives. Describe the real bar-support or event role without promising that a past team's size or service terms apply to every booking.",
+          "pillarsAndHooks": "A real busy-bar moment; a visible serving task; permitted staff personality; the specific event job with naming permission. Review which detail adds to the image rather than repeating a professional-staff slogan.",
+          "testAndChange": "Review service-action and staff-personality September images using covered responses. Read recorded enquiries for the role required; interactions do not prove availability, staffing reliability or bookings.",
+          "successSignals": "Useful signals are enquiries that identify bar support, serving or promotional staffing. Missing booking/role attribution remains unavailable, and no operational guarantee is measured by content response.",
+          "nextMonthGamePlan": "For October, pair four real service/staff images with four precise staffing questions. Confirm each depicted role and permission before selecting the angle, without adding mobile-bar or catering scope.",
+          "clientActionsRequired": ["Confirm the actual role and publication permission for each selected staff/event image.", "Approve current bookable role wording and contact/footer details; keep availability, training and pricing claims out unless separately confirmed."],
+          "items": {
+            "photo_content": ["Permitted real bar-support moment.", "Actual serving task with correct role.", "Approved staff-personality image.", "Real promotional/event task without an invented sponsor relationship."],
+            "design_poster": ["Which serving role does the event need?", "A bar-support question tied to the real service image.", "One permitted staff story with dignity intact.", "Ask about the exact staffing requirement, not a fixed package or guaranteed roster."]
+          }
+        },
+        "2026-10-01": {
+          "objective": "Plan October around the staffing job an organiser needs filled: bar support, serving or a confirmed promotional role. Let real service movement and staff personality explain the brief without promising dates, team size or recurring event availability.",
+          "coreMessage": "Tell Braize what the people need to do at the event. The bar or serving task sets the conversation; staffing scope and availability must be confirmed for the actual brief.",
+          "pillarsAndHooks": "Open on the actual bar-support task, contrast it with a serving moment, add a permitted staff-personality image and a verified promotional-role scene. Each poster asks a different job question instead of stacking generic traits.",
+          "testAndChange": "Compare a role-question caption with a visible service-action caption for comparable approved images. Keep role facts stable and assess recorded staffing requirements, not assumed event bookings.",
+          "successSignals": "Look for enquiries that describe the staffing role and actual event requirement. Do not equate engagement with booked shifts, trained capacity or a guaranteed service outcome.",
+          "nextMonthGamePlan": "Choose the next service story from October's real role enquiries and permitted work. Refresh contact and role wording before reuse; no monthly recurring-event commitment follows from this creative plan.",
+          "clientActionsRequired": ["Supply four real approved staff/service photo subjects and confirm each role.", "Approve four focused staffing-question posters and the current contact route; confirm event-specific terms separately."],
+          "items": {
+            "photo_content": ["Real bar-support task with correct staff identity.", "Actual serving moment with event permission.", "Staff personality without sexualising or drinking-on-shift implications.", "Verified promotional-role moment without sponsor invention."],
+            "design_poster": ["What bar-support job needs to be covered?", "What serving task should the organiser describe?", "A specific staff/service moment, not an unsupported training promise.", "Ask about the actual staffing brief; availability and terms require confirmation."]
+          }
+        }
+      }
+    }
+  ]
+}
