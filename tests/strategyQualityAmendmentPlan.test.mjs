@@ -34,6 +34,31 @@ function fixture() {
   return {snapshot,fleet:structuredClone(fleet),neshora:structuredClone(neshora),manifest:baseline,quality:structuredClone(quality)}
 }
 
+test('Batch 4 actual cumulative compiler derives 68/26, preserves 62 prior rows, refuses package/revision/exclusion drift',()=>{
+  const input=fixture(),packets=[1,2,3,4].map(buildReviewedBatch)
+  for(const packet of packets){
+    for(const row of packet.rows){const live=input.snapshot.strategies.find(r=>r.id===row.row_id)
+      row.guard={fingerprint:sha(live),revision_hash:sha(input.snapshot.revisions.find(r=>r.strategy_id===live.id)),strategy_hash:sha(live.strategy_data),seed_hash:sha(live.seed_context),package_hash:sha(live.package_settings),internal_notes:live.internal_notes}
+      const{reviewed_hash,...core}=row;row.reviewed_hash=sha(core)
+    }
+    const{packet_hash,...core}=packet;packet.packet_hash=sha(core)
+  }
+  const previous=buildQualityPlan({...input,reviewedOverrides:packets.slice(0,3)})
+  const result=buildQualityPlan({...input,reviewedOverrides:packets,preservedPlan:previous})
+  assert.equal(result.counts.amendment_needed,68);assert.equal(result.counts.blocked,26)
+  for(const row of previous.rows.filter(r=>r.disposition==='amendment_needed'))assert.equal(JSON.stringify(result.rows.find(r=>r.row_id===row.row_id)),JSON.stringify(row))
+  assert.equal(JSON.stringify(result.excluded),JSON.stringify(previous.excluded));assertNoDrift(result,input.snapshot)
+  const target=packets[3].rows[0]
+  for(const edit of [r=>r.version=3,r=>r.package_settings.design_posters_per_month=99,r=>r.internal_notes='later note',r=>r.seed_context.new='later source']){
+    const changed=structuredClone(input);edit(changed.snapshot.strategies.find(r=>r.id===target.row_id))
+    assert.throws(()=>buildQualityPlan({...changed,reviewedOverrides:packets,preservedPlan:previous}),/Drift refusal/)
+  }
+  const revision=structuredClone(input);revision.snapshot.revisions.find(r=>r.strategy_id===target.row_id).record_version=3
+  assert.throws(()=>buildQualityPlan({...revision,reviewedOverrides:packets,preservedPlan:previous}),/Revision drift/)
+  const excluded=structuredClone(input);excluded.snapshot.strategies.find(r=>r.id===result.excluded[0].row_id).internal_notes='change'
+  assert.throws(()=>buildQualityPlan({...excluded,reviewedOverrides:packets,preservedPlan:previous}),/Drift refusal/)
+})
+
 test('Batch 3 executes cumulative compiler, preserves all 42 accepted rows and refuses staff/exclusion drift',()=>{
   const input=fixture(),packets=[1,2,3].map(buildReviewedBatch)
   for(const packet of packets){

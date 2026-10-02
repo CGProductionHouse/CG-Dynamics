@@ -1,0 +1,198 @@
+{
+  "issue": 513,
+  "batch": 4,
+  "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+  "blocked_clients": [],
+  "clients": [
+    {
+      "client_id": "572555e0-d4d0-404a-8d67-beeeeed6a1f2",
+      "client_name": "HMHI",
+      "guide_quotes": [
+        "Publicly use **Hill, McHardy & Herbst** or **Hill, McHardy & Herbst Inc.**",
+        "General legal education is context, not personalised legal advice.",
+        "One useful idea per post/video is usually stronger than cramming several legal points together."
+      ],
+      "specificity_anchors": [
+        "Hill, McHardy & Herbst",
+        "estates",
+        "correspondent work"
+      ],
+      "audienceAndIntent": "Help a person approaching Hill, McHardy & Herbst understand which verified service category fits their question, and help legal practitioners recognise correspondent work. These are topic intents, not an asserted demographic or a promise of a legal result.",
+      "formatsAndRationale": "Three design posters per month support one clear legal topic each, with a direct title and short explanation. Professional video, photo posts, reels and animation are unconfirmed and receive no allocated work. Prefer real office context when an approved image is supplied.",
+      "mustAvoid": "No personalised legal advice, deadlines, guaranteed outcomes, fees, success rates, jurisdiction or practitioner qualifications inferred from old material. Do not borrow the separate Lydenburg practice's facts, use HMHI as the public brand, invent staff roles or confidential case stories, or create court imagery that appears documentary.",
+      "channelIntegration": "Keep the Hill, McHardy & Herbst public identity consistent on channels already managed for this exact firm. General education uses the confirmed website or no footer; a consultation contact block needs a current brief and fresh verification. No new platform entitlement is implied.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Review September's three-poster direction for Hill, McHardy & Herbst: do estates, conveyancing and correspondent work each explain one recognisable service without turning the post into legal advice?",
+          "coreMessage": "Hill, McHardy & Herbst can be introduced through a clear estates question, a property-process topic and the practical purpose of correspondent work; each explanation needs a calm, human second layer.",
+          "pillarsAndHooks": "Estates: introduce the distinction between asking about a will and estate administration, with attorney-approved wording. Conveyancing: frame a question about the property process, not a timetable. Correspondent work: explain its role for another practice without claiming a specific court entitlement.",
+          "testAndChange": "Read September's service titles against their captions: identify where a caption simply repeats the poster and replace that repetition with one firm-approved useful question. Compare available saves and topic-specific enquiries; September coverage is provisional and no winning topic is declared.",
+          "successSignals": "Useful September signals are service-specific questions and available saves or interactions on the actual posters. If enquiry or platform detail is unavailable, leave it unavailable; poster volume is not a legal outcome or client-acquisition result.",
+          "nextMonthGamePlan": "For October, move from service labels towards helping a reader prepare a sensible first question for the firm. Choose the verified legal topics from the September review, but have an attorney review all explanatory wording before it is public.",
+          "clientActionsRequired": [
+            "Approve the estates, conveyancing and correspondent-work wording used in the September review.",
+            "Confirm the public firm identity and current consultation route before any contact-led piece."
+          ],
+          "items": {
+            "design_poster": [
+              "Review an estates service explainer for one clear non-advisory idea.",
+              "Review a conveyancing question without deadlines or case promises.",
+              "Review the purpose of correspondent work using firm-approved category wording."
+            ]
+          }
+        },
+        "2026-10-01": {
+          "objective": "For October, use Hill, McHardy & Herbst's three posters to make a first estates or conveyancing conversation easier to start and correspondent work easier for a fellow practice to understand, without providing personal advice.",
+          "coreMessage": "A useful first question is more approachable than a legal slogan: Hill, McHardy & Herbst can explain how to raise an estates topic, a property-process query or a correspondent-work enquiry with the firm.",
+          "pillarsAndHooks": "First estates conversation: invite a general question rather than prescribe documents. Property-process clarity: one term chosen and checked by the firm. Correspondent work: a practitioner-facing explanation of an approved activity, avoiding claims about individual rights of appearance.",
+          "testAndChange": "Within three posters, contrast a question-led opening with a concise term-led explanation on the confirmed topic mix. Keep the firm's approved factual boundaries fixed and assess whether actual questions become more specific; do not promise more consultations.",
+          "successSignals": "Track available saved explanations and incoming questions that name the legal topic. Staff can note whether a question is clearer, but no conversion target, case result or improvement is claimed without actual comparable records.",
+          "nextMonthGamePlan": "After October, retain the question or term structure that prompts useful real enquiries and refresh the topics with the firm's current priorities. Do not repeat the same legal point or turn a response into personalised advice in next month's social copy.",
+          "clientActionsRequired": [
+            "Choose and legally review the exact three October topics before design.",
+            "Confirm which correspondent-work activity can be described at firm level, and the appropriate enquiry route."
+          ],
+          "items": {
+            "design_poster": [
+              "A first estates question, with wording approved by the firm.",
+              "One conveyancing term explained calmly without advising on a specific transaction.",
+              "A practitioner-facing correspondent-work activity, checked for current firm scope."
+            ]
+          }
+        }
+      }
+    },
+    {
+      "client_id": "ec643c75-51f5-4839-829f-3f5b7f48829a",
+      "client_name": "Ehrlich Park Butchery",
+      "guide_quotes": [
+        "A long-established Bloemfontein neighbourhood butchery that should market real meat, real counter craft, practical buying help and local braai/family occasions without generic supermarket or luxury-meat filler.",
+        "Never assume a historical product, cut, pack or price is available today.",
+        "These are idea systems, not fixed weekly obligations."
+      ],
+      "specificity_anchors": [
+        "counter",
+        "braai",
+        "meal"
+      ],
+      "audienceAndIntent": "Help someone choosing meat for a real meal or braai understand the product actually pictured and the counter service actually shown. Use the neighbourhood butchery voice rather than inventing customer segments, favourite-product rankings or today's catalogue.",
+      "formatsAndRationale": "One professional video can show real counter preparation. Three photo posts can pair an actual product with its preparation and useful meal context; four design posters clarify those ideas with title and subtitle. Reels and animation remain unknown, and these angles do not create weekly obligations.",
+      "mustAvoid": "No assumed current stock, pack weights, prices, meat grade, origin, supplier, certifications, health benefits, guaranteed tenderness or delivery terms. Keep the 5-versus-55 address and footer/WhatsApp conflicts unresolved until confirmed. No invented customer testimony, best-seller claim or standing special; preserve real products, labels and people.",
+      "channelIntegration": "Let the video, photographs and posters tell complementary parts of the same real product/counter story on the channels already managed. Captions add a practical second layer instead of copying the artwork. Confirm the footer choice rather than spreading conflicting address or contact details.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Review September's Ehrlich Park Butchery work for useful counter proof: does the meat shown connect to a real meal or braai occasion, and does the caption add buying help rather than repeat the poster?",
+          "coreMessage": "A real counter action tells more than a butchery slogan: show what is being prepared, then give the pictured meat a specific meal or braai context that the team can verify.",
+          "pillarsAndHooks": "Counter craft: the weighing, portioning or packing action actually visible. Meal use: one suitable occasion for the supplied meat. Braai choice: a practical question about the product shown, without turning an old pack into today's special.",
+          "testAndChange": "Compare available September response to a product-only opening and a visible counter-action opening. First check that the actual meat and context are comparable; thin September coverage cannot establish a favourite or sales winner.",
+          "successSignals": "Look for product-specific questions, available saves of useful meal ideas and interactions with the real counter work. Missing sales, enquiry or platform details stay unavailable; do not use post volume as proof of demand.",
+          "nextMonthGamePlan": "Use October to join product and preparation more deliberately: choose one currently supplied meat item, capture the counter action and explain a suitable meal use. Confirm the product and factual preparation guidance instead of reusing an old special.",
+          "clientActionsRequired": [
+            "Identify the meat and actual counter actions pictured in September.",
+            "Resolve the address/footer choice before any location-led October artwork, and confirm the next supplied product."
+          ],
+          "items": {
+            "professional_video": [
+              "Review the actual September counter-preparation opening; explain the work visible, not an invented service."
+            ],
+            "photo_content": [
+              "Review the pictured meat identity and label.",
+              "Review a real weighing or packing moment.",
+              "Review a supported meal or braai context without assuming availability."
+            ],
+            "design_poster": [
+              "A practical point about the meat actually shown.",
+              "Counter craft explained in a concise title and subtitle.",
+              "A meal-use idea checked for the supplied product.",
+              "A braai-choice question that does not revive an old offer."
+            ]
+          }
+        },
+        "2026-10-01": {
+          "objective": "For October, build one coherent Ehrlich Park Butchery product-to-meal story across counter footage, photographs and posters: help viewers choose a use for the meat supplied now without asserting a live catalogue or special.",
+          "coreMessage": "Start at the counter and end with a realistic meal or braai idea: the exact product, the visible preparation and one useful buying question should belong to the same story.",
+          "pillarsAndHooks": "Product-to-meal sequence: show the supplied meat, its real preparation and a suitable serving context only when confirmed. Ask the Butcher: one product-specific customer question answered by the team. Braai planning: explain a use-case rather than an invented pack.",
+          "testAndChange": "Within the three photographs, contrast a counter-detail opening and a meal-use opening for the same confirmed product. Use the one video to show the visible process; compare actual question quality and available responses, keeping product facts fixed.",
+          "successSignals": "Observe questions about the pictured meat and saves of the practical preparation or meal context, where recorded. Distinguish attention from purchases; no sales increase, stock movement or favourite ranking is asserted.",
+          "nextMonthGamePlan": "After October, choose the counter-detail or meal-use angle that produced useful real questions. Ask for a fresh product before the next sequence, reconfirm any promotion separately and retire captions that merely repeat design text.",
+          "clientActionsRequired": [
+            "Supply the actual meat, preparation visuals and any product-specific guidance the team approves.",
+            "Confirm all mutable product facts and the appropriate contact/footer route; offers require a separate current brief."
+          ],
+          "items": {
+            "professional_video": [
+              "One real counter-to-preparation sequence with team-approved product wording."
+            ],
+            "photo_content": [
+              "The supplied meat with its original labels preserved.",
+              "An actual portioning or packing detail.",
+              "A suitable meal or braai context for that same product, confirmed by the team."
+            ],
+            "design_poster": [
+              "One clear buying question about the actual product.",
+              "Ask the Butcher: a short team-approved practical answer.",
+              "One meal-use idea with no health or stock claim.",
+              "The visible counter action explained, not a generic quality slogan."
+            ]
+          }
+        }
+      }
+    },
+    {
+      "client_id": "5dfdf4bd-9d94-4cc6-9dee-0e480a2234cb",
+      "client_name": "Bohemia Quick Stop",
+      "guide_quotes": [
+        "Bohemia is verified as a petrol station/fuel forecourt and deli, not a workshop.",
+        "the free coffee is not a standing offer;",
+        "captions must add rather than restate;"
+      ],
+      "specificity_anchors": [
+        "diesel",
+        "Reddersburg Road",
+        "deli"
+      ],
+      "audienceAndIntent": "Address a person deciding on a practical fuel or convenience stop on Reddersburg Road: explain the verified diesel/forecourt role and the deli category in plain language. Driver intent is supported by prior content direction, not a claimed fleet contract or demographic.",
+      "formatsAndRationale": "Two design posters per month support a clear service/location message and a distinct convenience angle. No professional video, photo-post, reel or animation quantity is confirmed. Supplied real forecourt or deli imagery can support poster design without creating additional deliverables.",
+      "mustAvoid": "No invented fuel supplier or grades, fleet payment methods, truck-stop amenities, hours, menu, stock, prices or time savings. The historic coupon/free-coffee mechanic is not current. Do not present workshop services, import another fuel client's contacts, promise a recurring offer or use generic quick-stop slogans.",
+      "channelIntegration": "Keep concise poster text and an additive caption on channels already managed for Bohemia. Use only freshly confirmed phone/email/location details when a direct contact footer is needed; no staff-name footer unless a spotlight is explicitly requested.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Review September's two-poster Bohemia Quick Stop direction: is diesel on Reddersburg Road explained with a specific customer moment, and is the deli angle kept distinct from a recycled forecourt slogan?",
+          "coreMessage": "Bohemia's diesel message should make the Reddersburg Road stop recognisable; a separate deli message can show a supplied coffee or snack moment without suggesting a coupon is active.",
+          "pillarsAndHooks": "Diesel/location: identify the actual forecourt and Reddersburg Road in plain driving language. Deli/convenience: start with the real item shown. Caption usefulness: add why that particular stop or item matters rather than repeat the poster title.",
+          "testAndChange": "Read September's two designs and captions for repeated quick-stop slogans, then compare available response to the service/location angle and the supplied deli moment. Four historical posts across three months do not prove a commercial winner.",
+          "successSignals": "Useful signals are available interactions and enquiries about the actual stop or item, not claims of faster journeys or more visits. Missing enquiry, sales and platform detail remain unavailable.",
+          "nextMonthGamePlan": "For October, move from identifying the stop to a simple journey decision: pair a clear diesel-location piece with one presently confirmed deli item. Retain professional driver wording and reconfirm contacts rather than recycling a past coupon.",
+          "clientActionsRequired": [
+            "Confirm the forecourt/diesel context and deli item represented in September.",
+            "Supply the next real deli visual and verify contact details before the October contact-led design."
+          ],
+          "items": {
+            "design_poster": [
+              "Review the diesel-location piece for a recognisable Reddersburg Road customer moment.",
+              "Review the supplied deli item and remove any wording that implies an active old coupon."
+            ]
+          }
+        },
+        "2026-10-01": {
+          "objective": "For October, give Bohemia Quick Stop's two posters distinct jobs: help a driver recognise the diesel stop on Reddersburg Road and help a convenience customer understand the actual deli item supplied for this month.",
+          "coreMessage": "Make the stopping decision concrete: the real diesel forecourt on Reddersburg Road in one piece, and a confirmed deli item in the other, with useful details rather than an all-purpose convenience promise.",
+          "pillarsAndHooks": "Recognisable forecourt: begin with the actual diesel/service visual and location. Specific deli choice: show only the item the client confirms now. Helpful caption: one customer-use detail that the design does not already state, with no guessed amenity.",
+          "testAndChange": "Across the two posters, test a location-first diesel opening against a specific deli-item opening, treating them as different customer intents rather than equal sales experiments. Check which real questions each prompts without claiming faster refuelling or more visits.",
+          "successSignals": "Look for exact location or item questions and available engagement on each topic. Keep diesel and deli responses separate; absent enquiries or sales records remain unavailable and cannot establish demand.",
+          "nextMonthGamePlan": "After October, keep the topic that raises useful actual questions and rotate the supplied customer moment rather than repeat a fuel slogan. Check the next deli item and any promotion anew; an old coupon never becomes a standing offer.",
+          "clientActionsRequired": [
+            "Confirm the exact October diesel visual and current location/contact wording.",
+            "Provide the actual deli item and verify its description; promotional mechanics need their own new approved brief."
+          ],
+          "items": {
+            "design_poster": [
+              "Location-first diesel piece using the real Bohemia forecourt visual.",
+              "One currently confirmed deli item with an additive customer-use caption."
+            ]
+          }
+        }
+      }
+    }
+  ]
+}
