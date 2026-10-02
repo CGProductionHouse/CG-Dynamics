@@ -2,7 +2,7 @@
 
 Status: **CURRENT authority for a fresh supervisor chat**
 
-Updated: **1 October 2026** after reconciliation of the #600 Instagram encryption reset, #595 callback rollout, #505 provider closure state, #513 strategy state, #377 MCP production acceptance and #573 Website Performance closure.
+Updated: **2 October 2026** after #623 UI PR reconciliation and canonical Website intake/Piek hardening. Earlier #600/#595/#505/#513/#377/#573 production receipts remain below; no new protected production action occurred in #623.
 
 This file is intentionally current-state-first. Historical failed attempts are summarized only where they prevent repeated work.
 
@@ -25,6 +25,16 @@ Current-main baseline `2b72c0553f2c00f9d43e9a09ba76417b17981162`. Reproduced the
 2 Oct 2026: #614 merged (`2b72c05`). #405 PRs: #620 M2B Lead Inbox/lifecycle + Website Performance lead metrics, deterministic Good→Qualified / Poor→Closed-Lost, Johannesburg month (`20261002090000`, unapplied); #621 delivery runtime (`20261002110000`, unapplied), inert Resend adapter, durable provider-event inbox, worker `verify_jwt=false` + x-worker-secret — provider not approved, no secrets/emails. First pilot packet (Piek Group, Website 1; M2C intake adapter missing): `WEBSITE-ENQUIRY-PILOT-PACKET-405.md`.
 
 ## 1. Fresh supervisor recovery order
+
+### #623 ordered finish — 2 October, no agent merge/production action
+
+- Baseline `fd4f86bf3d3b13cc4b253f458b126540bdbc5d2c`: supervisor independently merged corrected #620 (`9185585`) then #621 (`fd4f86b`). All Website migrations remain unapplied. Independently verified 25 Website tests, three disposable PostgreSQL suites and actual Deno worker/webhook checks.
+- Existing UI PRs reconciled sequentially, feature code unchanged, every additive receipt preserved: #613 `a763d5ff393518747491720d6d3a7bea242c0fab` (129 focused, full 3367 passed/16 skipped), #615 `747e30affb9ba95aede81aed5390a6d0e90bc28e` (189 focused, full 3361/16), #616 `23e0dc2e877c8e3f58f3fb2a828c10cfa390ff5b` (97 focused, full 3362/16). All build/scoped lint/diff and exact-head Vercel PASS. Changed-preview auth is an environmental gate; post-merge production smoke is not claimed in this user-prohibited-merge lane.
+- Parallel M2C authority is existing #624/PR #625 plus Piek #16/PR #17. Overlapping #626 was closed unmerged; candidate commit `30c668fbc81c8a34780648eb3d0a6af66299e52c` preserved, unpublished site draft stashed. Do not activate that alternative API. Same-PR #625 hardening preserves canonical `x-cg-intake-key` / schema / receipt/Piek contracts, adding bounded persistent admission, body timeout/error handling and verified receipt shape. See `WEBSITE-ENQUIRY-INTAKE-624.md` for the new unapplied admission migration and exact protected sequence.
+- Piek form was not mounted on current main; PR #17 requires CA/client form-placement approval. No Piek duplicate PR or provider/runtime/config action by this lane. Instagram/TikTok/strategy authority is untouched.
+- Same-PR #625 hardening verification: 35 Website tests; full 3383 total / 3367 passed / 16 skipped / 0 failed with canonical placeholder env; build/scoped lint/diff and actual Deno intake check PASS. Real disposable PG17 intake→canonical enquiry/outbox→exact-client Inbox, 20-session admission, hourly exhaustion, monotonic bucket and RLS/grants PASS. Browser retry encountered creation timeout followed by `Debugger unattached`; the existing changed-preview tab remains at `/login`. No authenticated changed-code acceptance is claimed and no credentials/tokens were copied.
+- Existing Piek #17 additionally hardened in the same PR at `e145a39cca8428094792ed25bfb672cb89d5557d`: approved exact upstream URL + no credential redirects, bounded body/error handling, valid receipt/time, frozen entire ambiguous retry payload and same-tick duplicate guard, truthful receipt-versus-email/honeypot copy. 11 tests/typecheck/build/scoped ESLint (existing Dynamics tool, no new site dependency)/diff PASS; client bundle scan finds no capability/config/function strings. Local production-build desktop 1280 and 375/390/430px synthetic fail-closed acceptance passed, no overflow or console warn/error; screenshot evidence retained under `C:/Users/chris/.codex/artifacts/issue-623/`. No real submission, email or authenticated production pilot. CA/client must approve the newly mounted form and privacy/recipient scope before rollout. The canonical server-only env names remain `CG_ENQUIRY_INTAKE_URL` and `CG_ENQUIRY_INTAKE_KEY`, Production only.
+- Control Centre write-back could not be grounded: connected Drive searches for `CG Dynamics Control Centre` and `Control Centre` returned no accessible spreadsheet; mandatory current docs contain no exact tracker URL. No guessed/replacement sheet or cell writes. GitHub owning issues/#381 and this handover contain the durable current receipts; restore exact tracker access/reference separately if it remains an active coordination authority.
 
 A new supervisor must recover in this order:
 
