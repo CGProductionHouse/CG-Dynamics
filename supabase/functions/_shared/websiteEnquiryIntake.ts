@@ -9,7 +9,7 @@
 //   client, Website, environment and approved recipients from that key alone.
 // - The body can never name a client, Website, environment, recipient, role or
 //   lifecycle state: unknown top-level fields are rejected outright.
-// - Browser requests (Origin / Sec-Fetch-* present) are refused and no CORS headers are
+// - Browser requests (Origin or Sec-Fetch-Site present) are refused and no CORS headers are
 //   sent; this is for CG website server routes only.
 // - A filled honeypot creates nothing and returns a generic "handled" response.
 // - Logs carry outcome categories only — never the key, body, answers or PII.
@@ -190,7 +190,10 @@ export async function readCapped(req: Request, limit: number, timeoutMs = 5000):
 
 export async function handleIntakeRequest(req: Request, deps: IntakeDeps): Promise<Response> {
   if (req.method !== 'POST') return fail(deps, 'method_not_allowed')
-  if (req.headers.has('origin') || req.headers.has('sec-fetch-site') || req.headers.has('sec-fetch-mode')) {
+  // Browsers always send Origin and Sec-Fetch-Site on a cross-site POST. Sec-Fetch-Mode is
+  // NOT a browser signal: Node/undici server-side fetch (e.g. a Vercel route) always sends
+  // `sec-fetch-mode: cors`, so rejecting it blocked every legitimate website server.
+  if (req.headers.has('origin') || req.headers.has('sec-fetch-site')) {
     return fail(deps, 'server_to_server_only')
   }
 

@@ -112,3 +112,43 @@ test('invalid canonical receipt identity or time can never claim success', async
     assert.equal(response.status, 503)
   }
 })
+
+test('real Node server-side fetch (as used by Vercel routes) is accepted; browsers are not', async () => {
+  // Regression for the 2 Oct Piek production pilot: undici fetch always adds
+  // `sec-fetch-mode: cors`, which the guard wrongly treated as a browser request.
+  const http = await import('node:http')
+  const captured = await new Promise((resolve) => {
+    const server = http.createServer((incoming, res) => {
+      const headers = new Headers()
+      for (const [name, value] of Object.entries(incoming.headers)) headers.set(name, String(value))
+      const chunks = []
+      incoming.on('data', (chunk) => chunks.push(chunk))
+      incoming.on('end', () => {
+        res.end('{}')
+        server.close()
+        resolve({ headers, body: Buffer.concat(chunks).toString('utf8') })
+      })
+    })
+    server.listen(0, () => {
+      fetch(`http://127.0.0.1:${server.address().port}/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', [INTAKE_KEY_HEADER]: KEY },
+        body: JSON.stringify(valid),
+        redirect: 'error',
+        cache: 'no-store',
+      })
+    })
+  })
+  assert.equal(captured.headers.get('sec-fetch-mode'), 'cors', 'premise: Node fetch sends sec-fetch-mode')
+  const replayed = new Request('https://x.test/', { method: 'POST', headers: captured.headers, body: captured.body })
+  let calls = 0
+  const response = await handleIntakeRequest(replayed, {
+    submit: async () => { calls++; return { data: { accepted: true, receipt_id: '7b0c1d2e-3f40-4a5b-8c6d-7e8f90a1b2c3', accepted_at: '2026-10-02T10:00:00Z', replayed: false } } },
+  })
+  assert.equal(response.status, 201)
+  assert.equal(calls, 1)
+  for (const browserHeader of [{ origin: 'https://www.piekgroup.co.za' }, { 'sec-fetch-site': 'cross-site' }, { 'sec-fetch-site': 'same-origin', 'sec-fetch-mode': 'cors' }]) {
+    const blocked = await handleIntakeRequest(req(valid, browserHeader), { submit: async () => { throw new Error('must not be called') } })
+    assert.equal(blocked.status, 403, JSON.stringify(browserHeader))
+  }
+})
