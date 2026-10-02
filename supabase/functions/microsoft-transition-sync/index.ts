@@ -1,5 +1,5 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
-import { createClient } from 'jsr:@supabase/supabase-js@2'
+import { createClient, type SupabaseClient } from 'jsr:@supabase/supabase-js@2'
 import { runBoundedWorkers } from './bounded-workers.ts'
 import { shouldFetchPlannerTaskDetails } from './planner-details.ts'
 import {
@@ -30,6 +30,7 @@ import {
   automaticSystemRange,
 } from './job-machine.ts'
 import { applyAutomaticMicrosoftMirrors } from './automatic-reconciliation.ts'
+import { automaticSourceDomain, isAutomaticMirrorSource, plannerAssigneeIds, canFinishAutomaticProtectedDetails, readAutomaticJobSnapshot } from './automatic-snapshot.ts'
 
 interface GraphBatchItem { id: string; status: number; headers?: Record<string, string>; body?: { description?: unknown } }
 
@@ -200,7 +201,7 @@ async function fetchOutlookUnit(token: string, manifest: SourceManifest, source:
   return accumulateOutlookPage((source.records ?? []) as Array<Record<string, unknown>>, newRecords, result)
 }
 
-async function fetchPlannerTasksUnit(token: string, source: JobSourceRow): Promise<SourceUnitResult> {
+async function fetchPlannerTasksUnit(token: string, source: JobSourceRow, automaticSystem = false): Promise<SourceUnitResult> {
   const [taskResult, bucketResult] = await Promise.all([
     graphPages(`/planner/plans/${encodeURIComponent(source.source_id)}/tasks`, token, undefined, source.pagination_cursor ?? undefined),
     graphPages(`/planner/plans/${encodeURIComponent(source.source_id)}/buckets`, token),
@@ -218,10 +219,14 @@ async function fetchPlannerTasksUnit(token: string, source: JobSourceRow): Promi
       percentComplete: typeof task.percentComplete === 'number' ? task.percentComplete : null,
       completedDate: dateOnly(task.completedDateTime),
       sourceModifiedAt: typeof task.lastModifiedDateTime === 'string' ? task.lastModifiedDateTime : null,
-      _needsDetail: shouldFetchPlannerTaskDetails(source.source_name, task.percentComplete),
+      _needsDetail: shouldFetchPlannerTaskDetails(source.source_name, task.percentComplete, automaticSystem),
     }
   })
-  return accumulatePlannerPage((source.records ?? []) as Array<Record<string, unknown>>, newRecords, taskResult, bucketResult)
+  // A deployed repair can resume pages fetched by the older blanket-hydration
+  // path. Clear only the protected automatic markers; never skip enumeration.
+  const existing = automaticSystem && automaticSourceDomain(source) === 'client_schedule'
+    ? (source.records ?? []).map(record => ({ ...record, _needsDetail: false })) : source.records ?? []
+  return accumulatePlannerPage(existing, newRecords, taskResult, bucketResult)
 }
 
 Deno.serve(async request => {
@@ -323,7 +328,7 @@ Deno.serve(async request => {
       .select('id,status,created_at,updated_at,exported_at,automatic_retry_count,automatic_retry_after').eq('created_by', user.id)
       .order('created_at', { ascending: false }).limit(1).maybeSingle()
     const { data: appliedRun } = latestSystemJob?.id ? await sb.from('microsoft_sync_runs')
-      .select('id,status,finished_at').eq('preview_job_id', latestSystemJob.id)
+      .select('id,status,finished_at').eq('preview_job_id', latestSystemJob.id).eq('trigger_type', 'agent')
       .order('created_at', { ascending: false }).limit(1).maybeSingle() : { data: null }
     const { data: recoverySources } = latestSystemJob?.id ? await sb.from('microsoft_sync_job_sources')
       .select('required,stage,complete').eq('job_id', latestSystemJob.id) : { data: [] }
@@ -453,7 +458,7 @@ Deno.serve(async request => {
     await sb.from('microsoft_sync_jobs').update({ status: done ? 'complete' : (jobProgress(jobRows).anyFailed ? 'running' : 'complete'), updated_at: new Date().toISOString() }).eq('id', jobId)
     if (systemRequest && done) {
       const automatic = await automaticallyApplyJob(sb, jobId)
-      return jsonResponse({ ok: automatic.status !== 'failed', phase: 'apply', jobId, finished: true, sources: statusList(rows ?? []), progress: jobProgress(jobRows), automatic }, automatic.status === 'failed' ? 500 : 200)
+      return jsonResponse({ ok: automatic.status === 'completed', phase: 'apply', jobId, finished: true, sources: statusList(rows ?? []), progress: jobProgress(jobRows), automatic }, automatic.status === 'failed' ? 500 : 200)
     }
     return jsonResponse({ ok: true, jobId, finished: true, sources: statusList(rows ?? []), progress: jobProgress(jobRows) })
   }
@@ -472,13 +477,13 @@ Deno.serve(async request => {
       const source: JobSourceRow = { ...pick, records: Array.isArray(current?.records) ? current!.records as Array<Record<string, unknown>> : [] }
       const result = pick.source_type === 'outlook_calendar'
         ? await fetchOutlookUnit(graphToken, manifest, source)
-        : await fetchPlannerTasksUnit(graphToken, source)
+        : await fetchPlannerTasksUnit(graphToken, source, systemRequest)
       // planSourceUpdate (job-machine.ts) owns the transition: a Graph error fails the
       // source (retryable) instead of pinning it in fetching_tasks; a cursor keeps
       // paging; pending detail work moves to fetching_details; otherwise complete.
       const update = planSourceUpdate(result, attempts)
-      if (pick.source_type === 'planner_plan' && update.stage === 'complete') {
-        const assignees = await resolveAssignees(update.records.flatMap(r => (r.assigneeMicrosoftIds as string[]) ?? []), graphToken)
+      if (pick.source_type === 'planner_plan' && update.stage === 'complete' && (!systemRequest || isAutomaticMirrorSource(pick))) {
+        const assignees = await resolveAssignees(plannerAssigneeIds({ ...pick, records: update.records }, systemRequest), graphToken)
         await mergeAssignees(sb, jobId, job.assignee_map as Record<string, unknown>, assignees)
       }
       await sb.from('microsoft_sync_job_sources').update({ ...update, updated_at: now() }).eq('id', dbId)
@@ -486,26 +491,32 @@ Deno.serve(async request => {
       const { data: full } = await sb.from('microsoft_sync_job_sources').select('records, pending_detail_ids, safe_error').eq('id', dbId).single()
       const records = Array.isArray(full?.records) ? full!.records as Array<Record<string, unknown>> : []
       const pending = Array.isArray(full?.pending_detail_ids) ? full!.pending_detail_ids as string[] : []
-      const { batch, rest } = nextDetailBatch(pending)
-      const { descriptions, complete } = await graphTaskDescriptions(batch, graphToken)
-      for (const record of records) {
-        const taskId = String(record.sourceTaskId ?? '')
-        if (descriptions.has(taskId)) record.description = descriptions.get(taskId) ?? null
-      }
-      if (rest.length === 0) {
-        const assignees = await resolveAssignees(records.flatMap(r => (r.assigneeMicrosoftIds as string[]) ?? []), graphToken)
-        await mergeAssignees(sb, jobId, job.assignee_map as Record<string, unknown>, assignees)
-        const detailComplete = complete && (full?.safe_error ?? null) === null
-        await sb.from('microsoft_sync_job_sources').update({
-          stage: detailComplete ? 'complete' : 'failed',
-          complete: detailComplete,
-          safe_error: detailComplete ? null : 'Some Planner task details could not be fetched. Retry the failed source.',
-          records,
-          pending_detail_ids: [],
-          updated_at: now(),
-        }).eq('id', dbId)
+      if (systemRequest && canFinishAutomaticProtectedDetails({ ...pick, records, safe_error: full?.safe_error ?? null })) {
+        await sb.from('microsoft_sync_job_sources').update({ stage: 'complete', complete: true, pending_detail_ids: [], updated_at: now() }).eq('id', dbId)
       } else {
-        await sb.from('microsoft_sync_job_sources').update({ records, pending_detail_ids: rest, safe_error: complete ? (full?.safe_error ?? null) : 'Some Planner task details could not be fetched.', updated_at: now() }).eq('id', dbId)
+        const { batch, rest } = nextDetailBatch(pending)
+        const { descriptions, complete } = await graphTaskDescriptions(batch, graphToken)
+        for (const record of records) {
+          const taskId = String(record.sourceTaskId ?? '')
+          if (descriptions.has(taskId)) record.description = descriptions.get(taskId) ?? null
+        }
+        if (rest.length === 0) {
+          if (!systemRequest || isAutomaticMirrorSource(pick)) {
+            const assignees = await resolveAssignees(plannerAssigneeIds({ ...pick, records }, systemRequest), graphToken)
+            await mergeAssignees(sb, jobId, job.assignee_map as Record<string, unknown>, assignees)
+          }
+          const detailComplete = complete && (full?.safe_error ?? null) === null
+          await sb.from('microsoft_sync_job_sources').update({
+            stage: detailComplete ? 'complete' : 'failed',
+            complete: detailComplete,
+            safe_error: detailComplete ? null : 'Some Planner task details could not be fetched. Retry the failed source.',
+            records,
+            pending_detail_ids: [],
+            updated_at: now(),
+          }).eq('id', dbId)
+        } else {
+          await sb.from('microsoft_sync_job_sources').update({ records, pending_detail_ids: rest, safe_error: complete ? (full?.safe_error ?? null) : 'Some Planner task details could not be fetched.', updated_at: now() }).eq('id', dbId)
+        }
       }
     }
   } catch {
@@ -520,13 +531,13 @@ Deno.serve(async request => {
   }
   if (systemRequest && progress.finished && requiredSourcesComplete(afterRows)) {
     const automatic = await automaticallyApplyJob(sb, jobId)
-    return jsonResponse({ ok: automatic.status !== 'failed', phase: 'apply', jobId, finished: true, sources: statusList(after ?? []), progress, automatic }, automatic.status === 'failed' ? 500 : 200)
+    return jsonResponse({ ok: automatic.status === 'completed', phase: 'apply', jobId, finished: true, sources: statusList(after ?? []), progress, automatic }, automatic.status === 'failed' ? 500 : 200)
   }
   return jsonResponse({ ok: true, jobId, finished: progress.finished, sources: statusList(after ?? []), progress })
 })
 
-async function automaticallyApplyJob(sb: ReturnType<typeof createClient>, jobId: string) {
-  const { data: existing } = await sb.from('microsoft_sync_runs').select('id,status,summary,safe_error,started_at,automatic_recovery_count,automatic_recovery_after').eq('preview_job_id', jobId).order('created_at', { ascending: false }).limit(1).maybeSingle()
+async function automaticallyApplyJob(sb: SupabaseClient, jobId: string) {
+  const { data: existing } = await sb.from('microsoft_sync_runs').select('id,status,summary,safe_error,started_at,automatic_recovery_count,automatic_recovery_after').eq('preview_job_id', jobId).eq('trigger_type', 'agent').order('created_at', { ascending: false }).limit(1).maybeSingle()
   let recoveryRunId: string | undefined
   let recoveryGeneration = 0
   if (existing) {
@@ -542,22 +553,16 @@ async function automaticallyApplyJob(sb: ReturnType<typeof createClient>, jobId:
     recoveryRunId = existing.id
     recoveryGeneration = Number(existing.automatic_recovery_count ?? 0) + 1
   }
-  const [{ data: job }, { data: rows }] = await Promise.all([
-    sb.from('microsoft_sync_jobs').select('assignee_map,exported_at').eq('id', jobId).single(),
-    sb.from('microsoft_sync_job_sources').select('position,source_type,source_id,source_name,required,stage,record_count,complete,safe_error,records,range_start,range_end,pagination_cursor').eq('job_id', jobId),
-  ])
-  const jobRows = (rows ?? []).map((row: Record<string, unknown>) => ({
-    position: Number(row.position), source_type: String(row.source_type), source_id: String(row.source_id), source_name: String(row.source_name), required: Boolean(row.required), stage: row.stage as JobSourceRow['stage'], record_count: Number(row.record_count), complete: Boolean(row.complete), safe_error: row.safe_error as string | null, pending_detail_ids: [], range_start: row.range_start as string | null, range_end: row.range_end as string | null, pagination_cursor: row.pagination_cursor as string | null, records: Array.isArray(row.records) ? row.records as Array<Record<string, unknown>> : [],
-  }))
-  if (!job || !requiredSourcesComplete(jobRows)) return { status: 'failed' as const, runId: null, applied: 0, skipped: 0, failed: 1, conflicts: 0, clientScheduleExcluded: 0, error: 'Required Microsoft sources are incomplete.' }
-  const exportedAt = (job.exported_at as string | null) ?? new Date().toISOString()
-  const snapshot = assembleSnapshot(jobRows, (job.assignee_map as Record<string, unknown>) ?? {}, exportedAt)
-  if (!job.exported_at) await sb.from('microsoft_sync_jobs').update({ exported_at: exportedAt, status: 'complete', updated_at: exportedAt }).eq('id', jobId)
+  let prepared: Awaited<ReturnType<typeof readAutomaticJobSnapshot>>
+  try { prepared = await readAutomaticJobSnapshot(sb, jobId, new Date().toISOString()) }
+  catch { return { status: 'failed' as const, runId: null, applied: 0, skipped: 0, failed: 1, conflicts: 0, clientScheduleExcluded: 0, error: 'Required Microsoft sources or automatic mirror payloads are incomplete.' } }
+  const snapshot = prepared.snapshot
+  if (prepared.needsExportTimestamp) await sb.from('microsoft_sync_jobs').update({ exported_at: snapshot.exportedAt, status: 'complete', updated_at: snapshot.exportedAt }).eq('id', jobId)
   return applyAutomaticMicrosoftMirrors(sb, snapshot, jobId, Deno.env.get('MICROSOFT_SYNC_SYSTEM_USER_ID') ?? '', recoveryRunId, recoveryGeneration)
 }
 
 async function mergeAssignees(
-  sb: ReturnType<typeof createClient>,
+  sb: SupabaseClient,
   jobId: string,
   current: Record<string, unknown>,
   additions: Record<string, unknown>,

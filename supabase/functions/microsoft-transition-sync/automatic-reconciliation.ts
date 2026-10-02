@@ -6,8 +6,10 @@ import type { MicrosoftExistingTarget } from '../../../src/lib/microsoftImport.t
 import type { MicrosoftPreviewMappingContext } from '../../../src/lib/microsoftImportPreview.ts'
 import type { MicrosoftSnapshot } from '../../../src/lib/microsoftSnapshot.ts'
 import { automaticApplyLeaseDeadline } from './job-machine.ts'
+import { resolveMicrosoftPlanMapping } from '../../../src/lib/microsoftImportMap.ts'
+import { fetchAllRows } from '../_shared/paginatedRows.ts'
 
-type Db = { from: (table: string) => any; rpc: (name: string, args?: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string; code?: string } | null }> }
+type Db = { from: (table: string) => any; rpc: (name: string, args?: Record<string, unknown>) => PromiseLike<{ data: unknown; error: { message: string; code?: string } | null }> }
 
 export interface AutomaticReconciliationResult {
   status: 'applying' | 'completed' | 'partial' | 'failed'
@@ -29,8 +31,8 @@ export async function applyAutomaticMicrosoftMirrors(db: Db, snapshot: Microsoft
     db.from('client_aliases').select('client_id,alias'),
     db.from('planner_boards').select('id,slug').is('archived_at', null),
     db.from('planner_buckets').select('id,board_id,name').is('archived_at', null),
-    db.from('planner_tasks').select('id,updated_at,microsoft_plan_id,microsoft_task_id,microsoft_last_synced_at,microsoft_source_hash,microsoft_source_removed_at,board_id,bucket_id,title,client_id,client_name,status,priority,start_date,due_date,notes,source,original_plan_name,original_bucket_name,assigned_to_name,helper_names').not('microsoft_task_id', 'is', null),
-    db.from('company_calendar_events').select('id,updated_at,microsoft_calendar_id,microsoft_event_id,microsoft_last_synced_at,microsoft_source_hash,microsoft_source_removed_at,title,event_type,client_id,client_name,start_at,end_at,all_day,location,notes,status'),
+    fetchAllRows<any>((from, to) => db.from('planner_tasks').select('id,updated_at,microsoft_plan_id,microsoft_task_id,microsoft_last_synced_at,microsoft_source_hash,microsoft_source_removed_at,board_id,bucket_id,title,client_id,client_name,status,priority,start_date,due_date,notes,source,original_plan_name,original_bucket_name,assigned_to_name,helper_names').not('microsoft_task_id', 'is', null).order('id').range(from, to)),
+    fetchAllRows<any>((from, to) => db.from('company_calendar_events').select('id,updated_at,microsoft_calendar_id,microsoft_event_id,microsoft_last_synced_at,microsoft_source_hash,microsoft_source_removed_at,title,event_type,client_id,client_name,start_at,end_at,all_day,location,notes,status').order('id').range(from, to)),
   ])
   const readError = [clients, aliases, boards, buckets, planner, calendar].find(result => result.error)?.error
   if (readError) return { status: 'failed', runId: null, applied: 0, skipped: 0, failed: 1, conflicts: 0, clientScheduleExcluded: 0, error: readError.message }
@@ -57,8 +59,15 @@ export async function applyAutomaticMicrosoftMirrors(db: Db, snapshot: Microsoft
     })),
   ]
   const nativeCalendarRows = (calendar.data ?? []).filter((row: any) => !row.microsoft_calendar_id && !row.microsoft_event_id && row.status !== 'cancelled').map((row: any) => ({ id: row.id, updatedAt: row.updated_at, title: row.title, startAt: row.start_at, endAt: row.end_at, allDay: Boolean(row.all_day), status: row.status }))
-  const preview = buildMicrosoftReconciliation(snapshot, context, targets, new Set(), items => items, new Map(), nativeCalendarRows)
-  const clientScheduleExcluded = preview.filter(item => item.destination === 'client_schedule').length
+  const mirrorSources = snapshot.sources.filter(source => source.sourceType === 'outlook_calendar' || resolveMicrosoftPlanMapping(source.sourceName).target === 'planner')
+  const clientScheduleExcluded = snapshot.sources.filter(source => source.sourceType === 'planner_plan' && resolveMicrosoftPlanMapping(source.sourceName).target === 'client_schedule').reduce((count, source) => count + source.recordCount, 0)
+  const mirrorSnapshot = { ...snapshot, records: snapshot.records.filter(record => mirrorSources.some(source => record.sourceType === 'outlook_event'
+    ? source.sourceType === 'outlook_calendar' && source.sourceId === record.sourceCalendarId
+    : source.sourceType === 'planner_plan' && source.sourceId === record.sourcePlanId && source.sourceName === record.sourcePlanName)) }
+  const mirrorTargets = targets.filter(target => mirrorSources.some(source => target.destination === 'planner'
+    ? source.sourceType === 'planner_plan' && source.sourceId === target.microsoftPlanId
+    : target.destination === 'cg_calendar' && source.sourceType === 'outlook_calendar' && source.sourceId === target.microsoftCalendarId))
+  const preview = buildMicrosoftReconciliation(mirrorSnapshot, context, mirrorTargets, new Set(), items => items, new Map(), nativeCalendarRows, true)
   const items = preview.filter(item => item.destination === 'planner' || item.destination === 'cg_calendar')
   const conflicts = items.filter(item => item.reconciliationAction === 'conflict').length
   const runResult = existingRunId
