@@ -8,6 +8,19 @@ const ROOT = resolve(import.meta.dirname, '..')
 export const FORMAT_FIELDS = { professional_video:'professional_videos_per_month', reels:'reels_per_month', photo_content:'photo_posts_per_month', design_poster:'design_posters_per_month', animated_poster:'animated_posters_per_month' }
 const PATCH_FIELDS = ['strategyDrivers','strategyGoingForward','clientActionsRequired','goldStandard','actionPlan']
 const GOLD_FIELDS = ['objective','audienceAndIntent','coreMessage','formatsAndRationale','mustAvoid','channelIntegration','pillarsAndHooks','testAndChange','successSignals','nextMonthGamePlan']
+// Supervisor's exact Batch 3 identity contract; creative copy stays in the artifact.
+export const BATCH3_CLIENTS = {
+  'afb62c53-d6d3-4ef8-9393-def88ed899d8':'C&L Innovations',
+  '6b313cac-283e-48c4-9df6-ba43af2f7353':'Central Canvas',
+  '8e448cf9-1534-4ba1-89a4-93e4c8b83d2f':'Bouwer & Coetzee Attorneys',
+  '2b953772-e791-4dff-a278-d4dd3521f02e':'We Ar Fuels',
+  '4236a60a-990f-484f-8d19-13d2f92fbe3b':'Novus Steel',
+  'e1cb958e-3f68-4a77-b5ea-b471ea62bdef':'Watch Addict',
+  '29a28efd-c998-45e2-a57c-4a751e779e66':'PSG Bloemfontein',
+  '3404f726-a693-4b2d-8c13-c9d3dfd17bbc':'Daisy & Co',
+  'a60b4d07-0a30-4f1c-8d48-7bd9ea649c97':'Supa Quick BFN',
+  'e2870110-930c-4e63-b2fe-c858030f7258':'Supa Quick Centurion',
+}
 const norm = s => s.toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()
 // Git checkouts may use CRLF on Windows and LF in CI; content identity is LF-normalised.
 export const fileHash = path => createHash('sha256').update(readFileSync(path,'utf8').replace(/\r\n/g,'\n')).digest('hex')
@@ -28,6 +41,16 @@ export function indexOverrides(packet) {
   const blocked = packet.batch === 2 ? packet.blocked_clients : []
   const validGap = packet.batch === 2 && Array.isArray(blocked) && blocked.length === 1 && blocked[0].client_id === '0c01d90f-ba5e-4251-a597-bf3c83f990fa' && blocked[0].client_name === 'Zooz Lifestyle WFF' && blocked[0].reason === 'MISSING_EXACT_CLIENT_RUNTIME_GUIDE' && packet.rows.every(r=>r.client_id!==blocked[0].client_id)
   if (sha(core) !== packet_hash || packet.mode !== 'ZERO_WRITE_REVIEWED_OVERRIDES' || packet.write_count !== 0 || packet.rows.length !== (validGap ? 18 : 20) || new Set(packet.rows.map(r=>r.client_id)).size !== (validGap ? 9 : 10) || (packet.batch === 2 && !validGap)) throw new Error('Invalid reviewed batch packet')
+  if (packet.batch === 3) {
+    const expected=Object.keys(BATCH3_CLIENTS).sort()
+    if (sha([...new Set(packet.rows.map(r=>r.client_id))].sort())!==sha(expected) || sha([...packet.selection.selected].sort())!==sha(expected) || packet.rows.some(r=>BATCH3_CLIENTS[r.client_id]!==r.client_name) || packet.blocked_clients?.length!==0 || sha(packet.held_clients)!==sha([{client_id:'0c01d90f-ba5e-4251-a597-bf3c83f990fa',client_name:'Zooz Lifestyle WFF',reason:'MISSING_EXACT_CLIENT_RUNTIME_GUIDE'}])) throw new Error('Batch 3 exact identity/held-client contract')
+    const index=JSON.parse(readFileSync(resolve(ROOT,'artifacts/client-strategy-dossiers/issue-513/index.json'),'utf8'))
+    for (const row of packet.rows) {
+      const client=index.clients.find(c=>c.id===row.client_id)
+      const paths=row.source_receipts.map(r=>r.path)
+      if (!paths.includes(`artifacts/client-strategy-dossiers/issue-513/${client.file}`) || !paths.includes(`artifacts/client-strategy-dossiers/issue-513/runtime-guides/${client.file}`) || row.source_receipts.find(r=>r.path.includes('/runtime-guides/'))?.quotes.length<3) throw new Error('Batch 3 exact-client source contract')
+    }
+  }
   if (validGap) {
     if (sha(blocked[0].months)!==sha(['2026-09-01','2026-10-01']) || existsSync(resolve(ROOT,'artifacts/client-strategy-dossiers/issue-513/runtime-guides/zooz-lifestyle-wff.md'))) throw new Error('Evidence gap changed; re-review required')
     verifySources(blocked[0].source_receipts)
