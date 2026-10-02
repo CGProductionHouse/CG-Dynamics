@@ -2,7 +2,7 @@
 
 Status: **CURRENT authority for a fresh supervisor chat**
 
-Updated: **2 October 2026, after Agent 02 Batch 4 #646 merge and targeted evidence-remediation assignment**
+Updated: **2 October 2026, after Agent 01 #645 observer merge/reassignment and Agent 02 #646 evidence-remediation assignment**
 
 Current accepted main before this handover-only docs update: **`d8d9691cd068f7faaffc579237c8e665fe7d28ca`**. Latest freshness runtime-code merge remains **`2c27e74fe0d798fdffff877d358a0fa13f355292`**; #643 changes offline strategy review tooling/artifacts only. The handover edit itself advances `main`; **always refetch current main on takeover and before every merge**.
 
@@ -123,57 +123,60 @@ Client/business communication is **draft only** unless the user explicitly says 
 
 ## CURRENT TWO-AGENT BOARD
 
-### AGENT 01 — FRESHNESS / PRODUCTION ROLLOUT READINESS
+### AGENT 01 — FRESHNESS COMPLETE / SAFE UI REASSIGNMENT
 
-Owning issues: **#451 + #623**, consolidated in **#381**.
+Freshness owning issues: **#451 + #623**, consolidated in **#381**.
 
-Latest accepted merges:
+Accepted freshness merges:
 - #639 Microsoft CPU/runtime repair → `7ff12f492003c89ad164da42b2c92495560bd4ce`
 - #642 Meta terminal-bootstrap churn repair → `2c27e74fe0d798fdffff877d358a0fa13f355292`
+- #645 bounded read-only acceptance observer → `23d2e45d34568cf24d6891b2efd34b579e4e17f5`
 
 Accepted zero-write rollout preflight:
 - exact manifest: #451 comment **`5957561266`**
-- supervisor acceptance/gate: #451 comment **`5957656853`**
-- #381 state: comment **`5957657374`**
-- #623 receipt: comment **`5957659578`**
-- preflight was pinned to main `93bad42ef97fe975efc680a5ba44d0dd48e9685f`; later unrelated Website/#405 changes require only a source/config drift recheck immediately before any authorized deploy.
+- supervisor rollout gate: #451 comment **`5957656853`**
+- observer merge receipt: #451 comment **`5958361612`**
+- reassignment brief: #623 comment **`5958362363`**
+- #381 receipt: comment **`5958370756`**
 
-Accepted protected future rollout order:
-1. `microsoft-transition-sync` — current-main closure; preserve JWT=true + captured root import map; rollback source/config = production v39.
-2. `background-worker` — current-main closure; preserve JWT=false; rollback source/config = production v27.
-3. `meta-connection-status` — current-main closure; preserve JWT=false; rollback source/config = production v33.
-
-Accepted readiness findings:
-- all three production bundles are behind accepted main;
-- full import/runtime/type closures resolve and Edge checks pass;
-- required live schema/RPC/grants/cron and secret **names** exist;
-- no migration, cron, secret/env-value, provider-permission/mapping or flag change is required;
-- rollback means restore exact captured SOURCE/CONFIG, not DB data;
-- no manual reconciliation/sync trigger is included.
+Protected future rollout remains:
+1. `microsoft-transition-sync` — preserve JWT=true + captured root import map; rollback source/config = production v39 snapshot.
+2. `background-worker` — preserve JWT=false; rollback source/config = production v27 snapshot.
+3. `meta-connection-status` — preserve JWT=false; rollback source/config = production v33 snapshot.
 
 **BLOCKED: needs CA instruction — deploy exactly those three Edge functions in the accepted order with captured JWT/import-map settings and allow their existing automatic cron/queue/mirror/diagnostic behavior during acceptance.**
 
-That protected authorization would NOT include:
-- explicit manual Microsoft reconciliation/sync trigger;
-- Meta manual sync trigger;
-- migration/SQL/data repair;
-- cron/cadence change;
-- secret/config/env mutation;
-- provider/access/OAuth/mapping change;
-- permission broadening.
+No manual sync/reconciliation trigger, migration/SQL/data repair, cron change, secret/config/env mutation, provider/access/OAuth/mapping change or permission broadening is included.
 
-Production freshness remains unrepaired until protected rollout + live acceptance completes.
+Freshness engineering/readiness/observer work is complete on main. Do not re-audit it unless deployed source/config drift occurs or live post-rollout evidence disproves the accepted contract.
 
-**CURRENT Agent 01 safe mission = read-only rollout acceptance observer/harness.**
-Build one bounded offline/read-only ops collector for #451/#623 that can capture comparable pre/post rollout evidence without invoking write-capable function handlers or mutating production. It should collect/pin:
-- Microsoft job/run/source coverage, terminal apply state, 546/CPU errors, July manual run identity, protected Client Schedule/monthly_deliverables fingerprints and exact completed/cancelled mirror truth;
-- Meta batch/item/checkpoint/fact-age/cooldown evidence, dynamic mapped fleet, consecutive scheduler-tick batch creation, blocked-vs-healthy independence and empty-batch detection;
-- canonical status evidence sufficient to compare UI later without calling the diagnostic endpoint;
-- before/after hashes/receipts that prove protected rows and unrelated lanes did not change.
+The merged #645 observer is intentionally:
+- fixed-project;
+- offline-default;
+- read-only Management API database/log/function-inventory capture;
+- one SELECT-only SQL snapshot;
+- no Edge handler invocation;
+- no deploy/apply/sync/reconcile mode;
+- no credential fallback/recovery;
+- private local receipt only;
+- fail closed on access/schema/RLS/limits;
+- explicit that fetch/cron HTTP success is not terminal APPLY/PASS.
 
-The harness must default to read-only, fail closed on missing access/schema, expose no secret values, have no deploy/sync/apply mode and no write-capable function invocation. Add deterministic tests and a short runbook. No Website/#405, #505, #513, #389 or master-handover edits by Agent 01.
+**CURRENT Agent 01 mission = existing PR #615 TikTok Integrations truth reconciliation.**
 
-**NEXT SUPERVISOR ACTION when Agent 01 returns:** independently review the observer/harness PR, merge if safe, update #451/#623/#381, then keep Agent 01 on another safe task unless CA has explicitly authorized the protected rollout.
+PR #615 is an already accepted-in-scope UI fix but is behind current main. Agent 01 must:
+- use the SAME PR/branch; no replacement PR;
+- reconcile onto current main;
+- preserve current supervisor handover and drop/resolve the stale additive handover branch receipt rather than overwriting current handover truth;
+- preserve feature scope: canonical admin/manager TikTok connection queue for fleet summary, no invalid client-less status call, count-consistency validation, unavailable/read-failed evidence remains unavailable, connection coverage separate from reporting freshness, no publishing promise;
+- no backend/provider/OAuth/config/mapping/worker/data change;
+- no #405/#513/#389 work;
+- run focused TikTok/Integrations/freshness tests, full suite, build, scoped lint, diff check and fresh exact-head Vercel;
+- if authenticated changed-preview remains unavailable, record the limitation once and do not bypass auth or copy credentials/tokens.
+
+Current pre-reassignment PR #615 head was `747e30affb9ba95aede81aed5390a6d0e90bc28e`, far behind current main by many commits. Current main must be refetched before reconciliation.
+
+**NEXT SUPERVISOR ACTION when Agent 01 returns:** independently inspect #615's reconciled diff against current main. Ensure only TikTok integration source/tests plus any legitimate non-stale receipt remain. Merge automatically if safe/green; then perform/record production smoke if legitimate session is available, otherwise mark that acceptance gap truthfully and assign the next existing safe UI PR (#616 or #613) rather than returning Agent 01 to blocked freshness.
 
 ### AGENT 02 — #513 STRATEGY QUALITY / EVIDENCE REMEDIATION
 
