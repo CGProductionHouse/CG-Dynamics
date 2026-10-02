@@ -67,6 +67,9 @@ try {
     create trigger real_planner_projection after insert on public.planner_tasks for each row execute function public.sync_planner_task_legacy_assignees();`)
   sql(read('supabase/migrations/20261002124434_client_service_entitlements.sql'))
   sql(read('tests/sql/389_service_expansion_acceptance.sql'))
+  sql('alter table public.clients add package_settings jsonb;')
+  sql(read('supabase/migrations/20261002140843_client_entitlement_resolution_queue.sql'))
+  sql(read('tests/sql/389_entitlement_resolution_acceptance.sql'))
   // Six distinct sessions race one tenant key through the actual transaction.
   const query = `set role authenticated; set request.jwt.claim.sub='10000000-0000-0000-0000-000000000001';
     select public.submit_client_service_expansion_request('linkedin','concurrent','30000000-0000-0000-0000-000000000006','performance');`
