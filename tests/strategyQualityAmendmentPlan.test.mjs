@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs'
 import { buildQualityPlan, assertNoDrift, assertIsolated, piekCorrection } from '../scripts/build-strategy-quality-amendment-plan.mjs'
 import { sha } from '../scripts/audit-monthly-strategy-approval-manifest.mjs'
 import { strategyArtifactSandbox } from './helpers/strategyArtifactSandbox.mjs'
+import { buildReviewedBatch } from '../scripts/build-strategy-quality-batch.mjs'
 
 const read = strategyArtifactSandbox(['build-client-strategy-mutation-dry-run', 'build-issue-567-strategy-quality-readiness'])
 const fleet = JSON.parse(read('sep-oct-strategy-mutation-dry-run.json'))
@@ -32,6 +33,34 @@ function fixture() {
   }
   return {snapshot,fleet:structuredClone(fleet),neshora:structuredClone(neshora),manifest:baseline,quality:structuredClone(quality)}
 }
+
+test('reviewed batch runs through actual 94-row compiler with staff context preservation and drift refusal',()=>{
+  const input=fixture(),packet=buildReviewedBatch()
+  // Synthetic fixture rows have intentionally different receipts/timestamps from production.
+  // Bind only the test packet to those exact fixtures; production packet remains immutable.
+  for(const row of packet.rows){
+    const live=input.snapshot.strategies.find(r=>r.id===row.row_id)
+    row.guard={fingerprint:sha(live),revision_hash:sha(input.snapshot.revisions.find(r=>r.strategy_id===live.id)),strategy_hash:sha(live.strategy_data),seed_hash:sha(live.seed_context),package_hash:sha(live.package_settings),internal_notes:live.internal_notes}
+    const {reviewed_hash,...core}=row;row.reviewed_hash=sha(core)
+  }
+  const {packet_hash,...core}=packet;packet.packet_hash=sha(core)
+  const before=sha(input),baseline=buildQualityPlan(input),plan=buildQualityPlan({...input,reviewedOverrides:packet})
+  assert.equal(sha(input),before);assert.equal(plan.counts.amendment_needed,24);assert.equal(plan.counts.blocked,70)
+  assert.deepEqual(plan.excluded,baseline.excluded)
+  for(const name of ['Piek Group','Neshora Oxygen']) assert.deepEqual(plan.rows.filter(r=>r.client_name===name),baseline.rows.filter(r=>r.client_name===name))
+  for(const row of plan.rows.filter(r=>r.reviewed_override)){
+    assert.equal(row.disposition,'amendment_needed')
+    const live=input.snapshot.strategies.find(r=>r.id===row.row_id)
+    assert.deepEqual(row.later_guard.seed_context,live.seed_context)
+    assert.equal(row.later_guard.internal_notes,live.internal_notes)
+    for(const field of ['topContent','calendarSelections','clientDirection','clientRequestNotes']) assert.deepEqual(row.proposed_strategy_data[field],live.strategy_data[field])
+  }
+  const live=input.snapshot.strategies.find(r=>r.id===packet.rows[0].row_id)
+  live.internal_notes='Later staff note'
+  const drift=buildQualityPlan({...input,reviewedOverrides:packet}).rows.find(r=>r.row_id===live.id)
+  assert.equal(drift.disposition,'blocked');assert.ok(drift.stop_reasons.includes('REVIEWED_OVERRIDE_LIVE_DRIFT'))
+  assert.throws(()=>assertNoDrift(plan,input.snapshot),/Drift refusal/)
+})
 
 test('94 exact rows, 47 clients, 20 excluded; deterministic and no input mutation',()=>{
   const input=fixture(),before=sha(input),a=buildQualityPlan(input),b=buildQualityPlan(input)
