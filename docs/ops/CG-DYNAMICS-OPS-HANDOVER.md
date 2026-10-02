@@ -2,9 +2,415 @@
 
 Status: **CURRENT authority for a fresh supervisor chat**
 
-Updated: **2 October 2026** after the Piek #405 stored-lead production pilot (see #405 section), #623 UI PR reconciliation and canonical Website intake/Piek hardening. Earlier #600/#595/#505/#513/#377/#573 production receipts remain below; no new protected production action occurred in #623.
+Updated: **2 October 2026, after #642 merge and Agent 02 Batch 2 draft #643**
 
-This file is intentionally current-state-first. Historical failed attempts are summarized only where they prevent repeated work.
+Current main: **`2c27e74fe0d798fdffff877d358a0fa13f355292`**
+
+This file is the supervisor takeover authority. Read this section FIRST before touching GitHub, Codex agents, Supabase, Meta, Microsoft, Website/#405, strategy or production. Historical receipts follow below and are retained so completed work is not repeated.
+
+---
+
+## READ THIS FIRST — SUPERVISOR OPERATING CONTRACT
+
+The user expects the new chat to take over as **active CG Dynamics supervisor**, not as a passive summariser.
+
+### What the supervisor must do
+
+- Independently inspect every agent result/PR against GitHub truth before accepting it.
+- If a PR is safe, correct and unprotected, **merge it automatically**. Do not ask the user whether it should be merged.
+- After every agent result, do NOT stop at a summary. Always determine the next useful mission and give the user the exact next Codex prompt unless that lane is genuinely blocked.
+- Never leave an agent idle when there is safe useful work available.
+- If the agent result is wrong/incomplete, give one precise correction mission on the same PR/lane.
+- Keep #381 as the consolidated supervisor state board and update the owning issue as durable truth after meaningful changes.
+- The supervisor owns this master handover file. Manual agents must not edit it unless specifically assigned.
+- Re-fetch current `main` before merges because parallel lanes may have advanced it.
+- Preserve lane isolation. Do not let one agent casually “help” another lane and create collisions.
+- Use connected private GitHub tooling for repo truth. Do not rely on public web search for private-repo state.
+- When a protected action is genuinely required, do not manufacture approval theatre. Record the exact blocker, keep other safe work moving, and wait for a direct user instruction covering that exact protected scope.
+
+### The reply behaviour the user expects
+
+This is important. The user gets frustrated when the supervisor merely says “looks good” and stops.
+
+When the user pastes an Agent 01 or Agent 02 result:
+
+1. Reply briefly that you are independently reviewing it.
+2. Inspect PR/commit/diff/checks/current main + latest owning issue comments.
+3. Check collisions and protected-action boundaries.
+4. Merge automatically if safe.
+5. Update durable GitHub truth (#381 + owning issue).
+6. **Immediately give the NEXT mission/prompt for that same agent.**
+7. The prompt itself must visibly say **AGENT 01** or **AGENT 02** at the top so the user instantly knows which Codex window gets it.
+8. Do not ask “want me to continue?” or “do you want the next prompt?” Continue automatically.
+
+If the lane is genuinely blocked, say exactly what blocks it and reassign the agent to another safe launch-critical task instead of repeatedly re-auditing the same blocker.
+
+### Manual Codex prompt contract
+
+The user manually controls the Codex agents. Keep prompts compact but complete. GitHub is the long-form authority.
+
+Every prompt MUST start with the actual agent number and lane, for example:
+
+```text
+AGENT 01 — MICROSOFT / META FRESHNESS
+
+Read AGENTS.md + latest #451/#623/#381. GitHub is the full brief.
+Continue ONLY the assigned lane.
+<one bounded objective>
+Do not touch <explicit exclusions>.
+Verify and update GitHub. Return completed / verification / blocker.
+```
+
+or
+
+```text
+AGENT 02 — STRATEGY QUALITY BATCH 2
+
+Read AGENTS.md + latest #513/#381. GitHub is the full brief.
+Continue ONLY #513.
+<one bounded objective>
+No production strategy writes / approval / publication.
+Update #513/#381 and return head/artifacts/tests/blockers.
+```
+
+Do not send vague prompts like “continue please”. The prompt should state:
+- agent number;
+- lane;
+- owning issue(s);
+- exact next objective;
+- exclusions;
+- protected-write boundary;
+- expected verification/return.
+
+### No approval theatre
+
+Durable rule remains:
+- #505 comment `5951902435`
+- #381 comment `5951903122`
+
+Safe/unprotected launch actions continue automatically.
+
+Do **not** ask the user to type “approve X” for routine mechanics. If a protected action is required, durable truth should say:
+
+`BLOCKED: needs CA instruction — <exact protected scope>`
+
+Then continue another safe useful lane.
+
+Never infer protected authority from silence, old unrelated approvals, or “continue”. A direct user instruction only authorises its exact stated scope.
+
+### Protected actions
+
+Do not execute without direct current user instruction:
+- production DB/schema/data writes or migration application;
+- Edge/function deployment;
+- secrets/config/env changes;
+- Meta/TikTok/provider permission, verification, App Review, Live/activation changes;
+- OAuth/client consent;
+- strategy amendment/approval/publication;
+- external client/business communication or publication/spend;
+- destructive OneDrive/data actions;
+- credential rotation/recovery/guessing;
+- account binding/unbinding/rebinding;
+- production reconciliation/sync trigger where it writes live truth.
+
+Safe read-only production inspection, local/disposable tests, docs, GitHub comments, code/PR work and unprotected merges continue automatically.
+
+### External communication rule
+
+Client/business communication is **draft only** unless the user explicitly says to send it. Do not email/message clients or providers merely because a draft packet exists.
+
+---
+
+## CURRENT TWO-AGENT BOARD
+
+### AGENT 01 — FRESHNESS / PRODUCTION ROLLOUT READINESS
+
+Owning issues: **#451 + #623**, consolidated in **#381**.
+
+Latest accepted merges:
+- #639 Microsoft CPU/runtime repair → `7ff12f492003c89ad164da42b2c92495560bd4ce`
+- #642 Meta terminal-bootstrap churn repair → `2c27e74fe0d798fdffff877d358a0fa13f355292`
+
+Both code repairs are on current main.
+
+**Production is NOT repaired yet.**
+No protected Edge rollout has occurred.
+
+Agent 01's CURRENT mission is the zero-write combined deployment-readiness packet from #451 comment **`5956901250`**:
+
+Functions ONLY:
+1. `microsoft-transition-sync`
+2. `background-worker`
+3. `meta-connection-status`
+
+Required current work:
+- deployed-vs-main source parity/hash;
+- import closure;
+- current JWT/auth/secret contract;
+- prove no schema/cron/secret/provider/env change required;
+- exact rollout order;
+- exact rollback version/target;
+- post-deploy acceptance;
+- stop conditions.
+
+Expected rollout order to validate, not blindly assume:
+1. microsoft-transition-sync
+2. background-worker
+3. meta-connection-status
+
+No deployment or production sync trigger is authorised in this mission.
+
+#### Why #639 mattered
+
+Read-only acceptance proved Microsoft mirror was stale:
+- last full applied mirror 19 Aug;
+- previous 6/6 fetch completed but no apply;
+- 189 inner HTTP 546 / CPU Time exceeded failures;
+- 18 completed upstream Planner tasks remained active;
+- huge `2025 CLIENTS SCHEDULE` (~5.5k rows) was being expensively hydrated/assembled despite automatic apply excluding client_schedule.
+
+#639 fixed automatic-only runtime work:
+- six-source counts/completeness remain truthful;
+- automatic writable snapshot contains only Planner/Calendar mirror payloads;
+- Client Schedule remains protected/read-only;
+- manual/admin full-preview path unchanged;
+- no `monthly_deliverables` write path;
+- legacy July manual applying run cannot be silently adopted;
+- production-sized 7,500 / 5,500 fixture proved the hot path reduction.
+
+Do not re-open that design unless live rollout disproves it.
+
+#### Why #642 mattered
+
+Red Oak had no current checkpoint and Page access was permission-blocked.
+Missing checkpoint meant bootstrap-due every minute.
+Failed items left queued/running dedupe, so scheduler created a fresh doomed batch each minute.
+
+#642:
+- uses existing durable queue evidence, no migration;
+- exact terminal permission/access failures suppress new fleet enqueue for max 1 hour;
+- suppression is non-renewing on scheduler reads;
+- expiry or real mapping/reconnect/new checkpoint permits retry;
+- transient timeout/rate-limit paths remain existing retry behavior;
+- one blocked asset cannot suppress healthy assets;
+- health remains STALE/PARTIAL, never fake green;
+- production item timestamp read was corrected to real `finished_at` because live `meta_sync_batch_items` has no `updated_at`.
+
+Production Red Oak churn remains until the Edge functions are actually deployed.
+
+### AGENT 02 — #513 STRATEGY QUALITY
+
+Owning issue: **#513**, consolidated in **#381**.
+
+Accepted:
+- #638 zero-write compiler/quality plan → `cbf21ca5cbcb699bd09fb2d8341f7127b4415caa`
+- #640 Batch 1 → `2ce29344a78bcef5d4a96fd27a87a7a2699fb2ee`
+
+Batch 1 accepted 10 clients / 20 Sep+Oct rows:
+- Bloem Marble & Granite
+- Cape Lumber
+- SecuriForce
+- Madison Wear
+- Case Bloemfontein
+- Germoparts
+- Wiseman Group
+- Emmanuel Funerals
+- Dulux Paint & Paper Bloemfontein
+- TBS Brokers
+
+Accepted state after Batch 1:
+- 94 reviewed v2 rows
+- 24 amendment-needed
+- 70 blocked
+- 20 non-applicable untouched
+- 0 approved
+- 0 published
+- production unchanged
+
+CURRENT Agent 02 work:
+- draft **PR #643**
+- head **`05f38798129c02598938bc23e484364ab3d1acbc`**
+- based on current main `2c27e74fe0d798fdffff877d358a0fa13f355292`
+- latest checkpoint: #513 comment **`5957053504`**
+
+Batch 2 prescribed exact set:
+1. The Staffordshire
+2. Delta Gas
+3. CG Production House
+4. RC-Polypipe
+5. Zooz Lifestyle WFF
+6. Peyper Bonds
+7. Loraclox
+8. Tobich Optics
+9. AV Event Life
+10. Braize
+
+Current Batch 2 result:
+- 9 clients / 18 month-specific reviewed overrides passed;
+- **Zooz Lifestyle WFF STOPPED truthfully**, no substitute;
+- reason: flexible recurring-social scope is known but fixed quantities/current exact guide/programme/product/event constraints are not sufficiently evidenced for useful client-specific quality review;
+- derived fleet plan: **42 amendment-needed / 52 blocked / 20 excluded / 0 approved / 0 published / 0 writes**;
+- plan hash `336979000c9074496bfbcead8f55653349a2fd84e902b23aa3dfebcadd7bb518`;
+- packet hash `e30210b55ba1d328bfd69b55daa10944cb1faebd03088f2c0b57ea8b5b9f648a`;
+- 80/80 focused tests, build/lint/diff green;
+- current production 114/114 row/revision receipts still matched at final read-only check;
+- Vercel was still building at the checkpoint and must be rechecked before supervisor acceptance.
+
+**NEXT SUPERVISOR ACTION when Agent 02 returns:** independently review PR #643 content/evidence and exact-head Vercel. If safe, merge automatically. Then assign Batch 3 immediately; do not stop after saying “merged”.
+
+Hard strategy rules remain:
+- zero-write review until direct protected strategy amendment instruction;
+- no approval/publication;
+- no generic renameable copy;
+- Sep and Oct materially distinct;
+- package quantities never inferred from historical posting;
+- no repo/evidence/UUID/internal workflow jargon client-side;
+- Piek/Neshora + Batch 1 accepted rows byte-stable unless real drift;
+- all 20 non-applicable rows untouched;
+- Zooz remains blocked until approved exact-client evidence exists.
+
+---
+
+## #505 PROVIDER / INSTAGRAM-TIKTOK STATE — PARKED BEHIND HUMAN/PROVIDER RECEIPTS
+
+Do NOT send Agent 01 back into generic identity hunting or broken-browser retry loops.
+
+Current Instagram truth:
+- 57 active clients
+- 47 recurring-social eligible
+- 10 excluded
+- **22 canonical/Page-linked**
+- **25 unmapped**
+- **0 standalone**
+- standalone connections/tokens/OAuth states/callback receipts: **0/0/0/0**
+
+The 25-row first-party Meta audit and owner-action packets are complete for current evidence.
+
+Important first-wave Instagram evidence:
+- strongest visible Page + IG identity routes: Central Canvas, Ehrlich Park Butchery, Tobich Optics Otjiwarongo, We Ar Fuels;
+- Neshora exact unsaved Page: `1340961499097681`;
+- WiseRide exact unsaved Page: `727048853820569`;
+- Red Oak canonical saved Page recovery remains separate; do not substitute the rugby-club Page;
+- Piek canonical saved Page recovery remains separate; do not substitute the visible Engen Page.
+
+Owner-action packets are complete for:
+Instagram:
+- Central Canvas
+- Ehrlich Park Butchery
+- Tobich Optics Otji
+- We Ar Fuels
+- Neshora Oxygen
+- WiseRide
+- Red Oak
+- Piek Group
+
+TikTok:
+- Emmanuel Funerals
+- Emoya Estate Driving Range
+- Piek Group
+- We Ar Fuels
+- Bat Hill Royale
+- WiseRide
+
+Do not ask owners for passwords or 2FA codes. Owner remains in control of login/approval.
+
+#505 is blocked on real first-party/human/provider evidence:
+- Meta exact Page↔Instagram relationship and owner authority;
+- Neshora/WiseRide exact Instagram identity;
+- Red Oak/Piek canonical Page recovery;
+- six concrete TikTok owner identity/access corrections;
+- Meta Business Verification;
+- Access Verification;
+- genuine owner-authorised review fixture;
+- App Review;
+- later Live/activation/OAuth/mapping/sync.
+
+Do not repeat #598/#600/#595 completed work.
+
+---
+
+## #389 CLIENT PORTAL EXPANSION STATE
+
+Code lane is complete on main:
+- #635 merged `df1b36b471b4b4ee09c1abacd6877b18b28a81ee`
+- #637 merged `820d1bd98a4b6576500da779a0ba2e496fb86b10`
+
+Built:
+- separate `client_service_entitlements` authority;
+- secure exact-client expansion request seam into canonical Operations CLIENT REQUESTS;
+- client UI four-state logic;
+- fail-closed client UI for missing RPC/schema/read failure/all-unknown;
+- admin Entitlement Resolution Queue;
+- explicit one-service verification; no bulk “mark all not included”.
+
+Latest evidence matrix:
+- 57 active clients × 7 services = 399 cells;
+- 3 explicit evidence-ready included rows;
+- 396 unresolved;
+- 0 evidence-backed `not_included` rows yet;
+- therefore no client upgrade CTA should be fabricated yet.
+
+Both entitlement migrations remain unapplied in production. Do not apply/seed without direct protected instruction.
+
+---
+
+## WEBSITE/#405 LANE OWNERSHIP
+
+**Website/#405 is a separate Claude lane. Codex Agent 01 and Agent 02 must not touch it.**
+
+This correction is durable in:
+- #623 comment `5952486427`
+- #381 operating board history.
+
+Do not hand Website work to Agent 01/02 unless the user explicitly changes lane ownership.
+
+Historical Website production receipts remain below in this document.
+
+---
+
+## CRITICAL “DON'T MAKE THE USER REPEAT THIS” LIST
+
+- Always put **AGENT 01** or **AGENT 02** visibly in the prompt itself.
+- After an agent result, **review → merge/fix → durable GitHub update → NEXT PROMPT** in the same supervisor turn.
+- Do not merely summarise and wait.
+- Do not ask the user whether to merge safe PRs.
+- Do not ask for routine “approval” language.
+- Do not send agents into repeated browser retries after a browser/transport blocker is already proven.
+- Do not restart completed #505 Instagram identity research.
+- Do not redo #598 legal/callback/app-secret packet.
+- Do not redo #600 crypto repair.
+- Do not invent Instagram mappings from handles/public search.
+- Do not confuse “unmapped” with “must use standalone OAuth”: Page-linked Meta route is preferred where exact Page/IG relationship can be established.
+- Do not call cron HTTP 200 “freshness success”.
+- Do not turn genuine PARTIAL/STALE into green UI.
+- Do not hand-edit Microsoft’s 18 stale task statuses; the canonical reconciliation path must repair them after protected rollout.
+- Do not let Red Oak’s alternate rugby Page replace the canonical Page.
+- Do not let Piek’s Engen Page replace the canonical Page.
+- Do not infer missing provider mapping = service not included.
+- Do not infer historical posting volume = package entitlement.
+- Do not approve/publish strategies just because zero-write reviewed proposals exist.
+- Never expose secrets, keys, passwords or 2FA codes.
+- Never send external client/provider communication without explicit send instruction.
+- Keep answers operational and concise; GitHub carries the long-form detail.
+
+---
+
+## IMMEDIATE NEW-CHAT STARTUP
+
+On takeover, do this without asking the user to repeat context:
+
+1. Read `AGENTS.md`.
+2. Read this handover top section.
+3. Read latest #381.
+4. Read latest #451/#623 for Agent 01.
+5. Read latest #513 + PR #643 for Agent 02.
+6. Re-fetch current main.
+7. Determine whether either manual agent has returned new work.
+8. If an agent result is provided, supervise it immediately.
+9. If no new agent result is provided, continue safe supervisor work from the current board; do not invent protected authority.
+10. Keep Website/#405 outside the Codex two-agent board.
+
+Historical detailed receipts follow below. When an old receipt conflicts with this top current-state block, **this top block wins**.
 
 ### #505 current verification/review draft — 2 October, read-only
 
