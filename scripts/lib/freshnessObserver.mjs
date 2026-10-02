@@ -40,6 +40,7 @@ export const logsQuery = `select source, log_attributes['function_id'] as functi
 
 function validateEvidence(db, window) {
   if (!db || db.unfiltered !== true || !iso(db.observed_at)) throw new Error('DB_ACCESS_OR_SNAPSHOT_UNVERIFIED')
+  if (!['active','paused','completed'].includes(db.microsoft_lifecycle?.transition_status)) throw new Error('MICROSOFT_LIFECYCLE_UNAVAILABLE')
   if (Date.parse(window.to)>Date.parse(db.observed_at) || Date.parse(db.window?.from)!==Date.parse(window.from) || Date.parse(db.window?.to)!==Date.parse(window.to)) throw new Error('DB_WINDOW_MISMATCH')
   for (const key of arrays) if (!Array.isArray(db[key]) || db[key].length>MAX_ROWS) throw new Error('MISSING_OR_TRUNCATED_EVIDENCE')
   if (db.ticks.length !== window.minutes || db.scheduler.length!==1) throw new Error('INCOMPLETE_SCHEDULER_EVIDENCE')
@@ -60,12 +61,12 @@ export function projectEvidence(db) {
   const job = db.jobs[0] ?? null
   const sources = db.sources.filter(s => s.job_id===job?.id)
   const linked = db.runs.filter(r => r.trigger_type==='agent' && r.preview_job_id===job?.id).sort((a,b) => Date.parse(b.created_at)-Date.parse(a.created_at) || b.id.localeCompare(a.id))[0] ?? null
-  const successful = db.runs.filter(r => r.trigger_type==='agent' && r.status==='completed' && iso(r.applied_at) && Date.parse(r.applied_at)<=Date.parse(db.observed_at)
+  const successful = db.runs.filter(r => r.trigger_type==='agent' && r.status==='completed' && !r.has_error && r.failed===0 && Number.isSafeInteger(r.applied) && Number.isSafeInteger(r.skipped) && iso(r.applied_at) && Date.parse(r.applied_at)<=Date.parse(db.observed_at)
     && Array.isArray(r.source_completeness) && r.source_completeness.filter(s=>s.required!==false).length===6
     && r.source_completeness.filter(s=>s.required!==false).every(s=>s.complete===true && !s.has_error && Number.isSafeInteger(s.recordCount)))
     .sort((a,b)=>Date.parse(b.applied_at)-Date.parse(a.applied_at))[0] ?? null
   const covered = sources.filter(s=>s.required).length===6 && sources.filter(s=>s.required).every(s=>s.complete && !s.has_error && !s.has_cursor && s.records_count===s.record_count && s.pending_details===0)
-  const microsoft = microsoftFreshnessEvidence({ now:db.observed_at,connected:db.jobs.length>0,lastJobStartedAt:job?.created_at ?? null,lastJobCompletedAt:job?.exported_at ?? null,
+  const microsoft = microsoftFreshnessEvidence({ now:db.observed_at,connected:db.microsoft_lifecycle.transition_status==='active',lastJobStartedAt:job?.created_at ?? null,lastJobCompletedAt:job?.exported_at ?? null,
     lastSuccessfulReconciliationAt:successful?.applied_at ?? null,applyStatus:linked?.status ?? null,
     requiredSources:covered ? sources.filter(s=>s.required).map(s=>({name:s.source_name,complete:true,error:null})) : [{name:'Six required sources not verified',complete:false,error:null}],
     recoveryInProgress:job?.status==='running' || linked?.status==='applying' })

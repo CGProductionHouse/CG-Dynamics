@@ -9,7 +9,7 @@ const functions=FUNCTIONS.map(f=>({...f,version:1,ezbr_sha256:'b'.repeat(64)}))
 function fixture() {
   const sourceNames=['Calendar','To Do','MASTER CLIENT TO DO','CG Socials','Client Socials - July 2026','2025 CLIENTS SCHEDULE']
   const counts=[150,800,200,500,350,5500]
-  return {observed_at:to,window:{from,to},unfiltered:true,
+  return {observed_at:to,window:{from,to},unfiltered:true,microsoft_lifecycle:{transition_status:'active'},
     jobs:[{id:'job',status:'complete',created_at:from,exported_at:to}],
     sources:sourceNames.map((source_name,i)=>({id:`s${i}`,job_id:'job',source_id:`plan${i}`,source_type:i===0?'outlook_calendar':'planner_plan',source_name,required:true,stage:'complete',record_count:counts[i],records_count:counts[i],pending_details:0,has_error:false,complete:true,has_cursor:false})),
     runs:[],mirror_observations:[],planner_plan_guards:[{plan_id:'plan5',count:1,hash:'d'.repeat(64)}],
@@ -141,6 +141,13 @@ test('log null/empty counts and foreign function identity fail closed, numeric z
   assert.equal(make([log]).logs[0].events,0)
   for (const invalid of [null,'',undefined,-1]) assert.throws(()=>make([{...log,http_546:invalid}]))
   assert.throws(()=>make([{...log,function_id:'foreign'}]))
+})
+test('paused lifecycle and failed/missing terminal apply counts cannot certify PASS',()=>{
+  const db=applied(fixture()); db.microsoft_lifecycle.transition_status='paused'
+  assert.notEqual(receipt(db).projection.microsoft.verdict,'PASS')
+  db.microsoft_lifecycle.transition_status='active'
+  for (const failed of [1,null,undefined]) { db.runs[0].failed=failed; assert.notEqual(receipt(db).projection.microsoft.verdict,'PASS') }
+  delete db.microsoft_lifecycle; assert.throws(()=>receipt(db))
 })
 test('advanced fact age needs exact-client/platform/month terminal stored run evidence',()=>{
   const db=fixture(); db.facts=[{id:'f',client_id:'c',asset_id:'a',platform:'facebook',period_month:'2026-10-01',metric_key:'followers',comparable_group:'snapshot',availability:'complete',value:1,verified_at:from,sync_run_id:'sync'}]

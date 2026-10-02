@@ -37,7 +37,7 @@ at `observed_at`, not a historical DB reconstruction at the window end.
 
 ## Evidence and interpretation
 
-- Microsoft: latest 20 jobs; all six sources of the newest job with counts,
+- Microsoft: stored transition lifecycle; latest 20 jobs; all six sources of the newest job with counts,
   completeness/cursor/detail/error flags; linked apply runs, latest completed
   automatic run, and July manual applying identity/recovery metadata. APPLY must
   be terminal and exact-job-linked: fetch-only completion is not PASS. Raw upstream
@@ -91,3 +91,13 @@ events; worker 10 HTTP events / 0 HTTP 546. These are failures, not launch PASS.
 The standalone CLI capture is blocked in this session by absence of a privately
 provisioned `SUPABASE_ACCESS_TOKEN`; no credential fallback was attempted. No real
 post-deployment receipt exists because deployment is not authorized in this lane.
+
+Corrected SQL snapshot at 17:47:52Z: latest job `2f61bb61-3b27-416e-83f8-6b6cfa345e82`
+complete, six complete sources / 7,509 fetched records (5,546 Client Schedule),
+zero pending details; no automatic APPLY row. Legacy admin applying run
+`1eb1aedc-e37e-4483-aab1-f0f3c3b29378` remains separate. Dynamic fleet: 42
+assets, 66 checkpoints, 2,432 monthly facts, 373 platform runs; 10 window batches.
+Protected counts: 3,654 monthly deliverables, 4,150 native Planner, 57 native
+Calendar, 10 July manual runs. These are snapshot-specific evidence, not constants
+in the observer. Lifecycle separately read back active; all required tables are
+included in the final RLS visibility check.

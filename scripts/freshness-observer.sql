@@ -32,6 +32,7 @@ jobs AS (
 ), guard_scopes AS (
   SELECT unnest(ARRAY['monthly_deliverables','native_planner','native_calendar','july_manual_apply']) AS scope
 ), tables AS (
+  SELECT 'public.microsoft_sync_settings' AS name UNION ALL
   SELECT unnest(ARRAY['public.microsoft_sync_jobs','public.microsoft_sync_job_sources','public.microsoft_sync_runs','public.microsoft_sync_run_items','public.monthly_deliverables','public.planner_tasks','public.company_calendar_events','public.clients','public.meta_connections','public.meta_client_assets','public.meta_sync_batches','public.meta_sync_batch_items','public.meta_asset_sync_checkpoints','public.platform_metric_facts_monthly','public.platform_sync_runs','cron.job','cron.job_run_details']) AS name
 ), mirror_observations AS (
   SELECT s.job_id,s.id AS source_row_id,s.source_id,s.source_name,s.updated_at AS observed_at,
@@ -47,6 +48,7 @@ jobs AS (
     AND (r->>'percentComplete'='100' OR r->>'cancelled'='true')
 )
 SELECT jsonb_build_object(
+ 'microsoft_lifecycle',(SELECT jsonb_build_object('transition_status',transition_status) FROM public.microsoft_sync_settings WHERE id=true),
  'observed_at',now(),'window',jsonb_build_object('from',(SELECT lo FROM bounds),'to',(SELECT hi FROM bounds)),
  'unfiltered',NOT EXISTS(SELECT 1 FROM tables WHERE row_security_active(name::regclass)),
  'jobs',COALESCE((SELECT jsonb_agg(jsonb_build_object('id',id,'status',status,'created_at',created_at,'updated_at',updated_at,'exported_at',exported_at,'automatic_retry_count',automatic_retry_count,'automatic_retry_after',automatic_retry_after,'has_failure',automatic_failure IS NOT NULL) ORDER BY created_at DESC,id) FROM jobs),'[]'::jsonb),
