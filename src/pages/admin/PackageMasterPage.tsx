@@ -21,6 +21,7 @@ import {
   type DeliverableType,
 } from '../../lib/planner'
 import { listActiveClients, type ClientOption } from '../../lib/commandCentre'
+import { EntitlementResolutionQueue } from '../../components/admin/EntitlementResolutionQueue'
 
 const TYPE_LABELS = {
   ...PACKAGE_DELIVERABLE_LABELS,
@@ -356,6 +357,7 @@ export default function PackageMasterPage() {
       </div>
 
       {/* Client selector */}
+      <EntitlementResolutionQueue />
       <div className="mb-5">
         <label className="mb-1.5 block text-xs font-medium text-white/50">Client</label>
         {clientsLoading ? (

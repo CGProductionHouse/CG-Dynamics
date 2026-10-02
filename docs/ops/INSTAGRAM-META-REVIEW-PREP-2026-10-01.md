@@ -1,5 +1,10 @@
 # #505 Meta App Review preparation — 1 October 2026
 
+**Historical packet:** callback/config/legal gaps below are now satisfied by
+#593/#595/#600/#598. Use the [Oct 2 read-only current verification/review packet](INSTAGRAM-505-VERIFICATION-REVIEW-PACKET-2026-10-02.md)
+for current gates; do not replay old protected steps. No genuine standalone fixture
+or real consent video is claimed by either draft.
+
 Code baseline: `60093376d8b363aad894d70ea74767896bb44dbc`.
 Authenticated read-only Chrome inspection; no provider/config/data writes.
 This packet supersedes assumed dashboard readiness in the September packet.

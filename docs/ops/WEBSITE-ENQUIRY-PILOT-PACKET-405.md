@@ -10,7 +10,7 @@ Source: `artifacts/issue-567-cg-built-production-website-fleet.json` (read-only,
 
 | Website | Exact Dynamics client | Current enquiry path | Reporting |
 | --- | --- | --- | --- |
-| **1 — Piek Group** `www.piekgroup.co.za` | `ed7aa1ae-de21-4151-a8f9-54796b234c1f` | `src/components/ContactForm.tsx` (name, email, phone, subject, message) builds a **`mailto:` only**; "No data is stored on our server" | identity requires guarded activation |
+| **1 — Piek Group** `www.piekgroup.co.za` | `ed7aa1ae-de21-4151-a8f9-54796b234c1f` | **Correction (2 Oct):** `ContactForm.tsx` (name, email, phone, subject, message; `mailto:` only) exists but is **not rendered** — `/contact` replaced it with a visual in commit `1b4fbcf` (25 Jun 2026). Live site has no form. | identity requires guarded activation |
 | 7 — Red Oak `www.redoakgroup.co.za` | `cdb11a82-339e-4b46-9b09-bde1a23efeaf` | **no form**; tel/mailto/booking clicks only (`/api/contact-actions` tracking proxy) | published snapshot proven |
 | 6 — Emmanuel Funerals, 8 — All Around PVC | exact active | no form found on `origin/main` | guarded activation |
 
@@ -20,19 +20,19 @@ transport, not the client's content. Red Oak is the stronger reporting benchmark
 would need a new form approved by the client. Imbewu/Raadzaal excluded (web-only/last).
 Supervisor confirms the choice and Piek's package before step 4.
 
-## 2. Missing adapter (explicit, M2C)
+## 2. Intake adapter (M2C) — code PRs, unmerged
 
-There is **no public intake adapter** yet — by design M2A exposes
-`submit_website_enquiry` to `service_role` only. Required before a real submission:
-
-1. Dynamics edge function `website-enquiry-intake` (new, M2C): accepts POST from the
-   site's server with `intake_key` in a server-only header, origin/host check against
-   the endpoint's `canonical_host`, size/rate limits and spam honeypot, then calls
-   `submit_website_enquiry` with the browser-generated `submission_key` (UUID).
-2. Piek site: server route (e.g. `src/app/api/enquiry/route.ts`) holding the intake key
-   in Vercel env (never in the browser), and `ContactForm.tsx` posting to it, showing the
-   receipt on success and a phone/email fallback on failure. Remove the mailto path only
-   after the durable path is proven.
+1. Dynamics `website-enquiry-intake` — CG-Dynamics #625 (#624). Contract:
+   `docs/ops/WEBSITE-ENQUIRY-INTAKE-624.md`. `verify_jwt = false`; sole credential is the
+   endpoint `intake_key` in header `x-cg-intake-key`; uses platform `SUPABASE_URL` /
+   `SUPABASE_SERVICE_ROLE_KEY` only.
+2. Piek site — PiekGroup-Website #17 (#16): same-origin `/api/enquiry` route →
+   Dynamics intake; durable `ContactForm`. **Placement decision:** the PR re-introduces a
+   form on `/contact` (as a new section below the kept visual); CA/client must confirm
+   before merge. Piek **production** Vercel env only (never Preview/Development):
+   - `CG_ENQUIRY_INTAKE_URL` = `https://<dynamics-project-ref>.supabase.co/functions/v1/website-enquiry-intake`
+   - `CG_ENQUIRY_INTAKE_KEY` = the Piek production endpoint `intake_key` (step 4)
+   The route fails closed unless `VERCEL_ENV=production` and both are set.
 
 ## 3. Migration / code order [CA]
 
@@ -41,11 +41,12 @@ in order, after a read-only preflight (`select to_regclass('public.website_enqui
 returns null; `clients`/`profiles` columns present):
 
 1. `20261001181932_website_enquiry_transaction.sql`
-2. `20261002090000_website_lead_lifecycle.sql`
-3. `20261002110000_website_enquiry_delivery_runtime.sql`
+2. `20261002085355_website_enquiry_intake_guard.sql` (#623/#624 admission only, unapplied)
+3. `20261002090000_website_lead_lifecycle.sql`
+4. `20261002110000_website_enquiry_delivery_runtime.sql`
 
-Deploy functions: `website-enquiry-delivery-worker`, `website-enquiry-delivery-webhook`
-(and the M2C intake function once built).
+Deploy functions: `website-enquiry-intake`, `website-enquiry-delivery-worker`,
+`website-enquiry-delivery-webhook` (all `verify_jwt = false` per `supabase/config.toml`).
 
 ## 4. Binding configuration [CA] — values to confirm, then insert
 

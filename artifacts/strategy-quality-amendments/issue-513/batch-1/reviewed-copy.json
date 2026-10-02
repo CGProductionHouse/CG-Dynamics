@@ -1,0 +1,327 @@
+{
+  "issue": 513,
+  "batch": 1,
+  "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+  "clients": [
+    {
+      "client_id": "89e0ad6d-e08c-4a75-8b8e-abea71af581c",
+      "client_name": "Bloem Marble & Granite",
+      "guide_quotes": ["stone fabrication/custom-stone business", "kitchen tops/worktops, bathroom vanities", "Tombstones are a current verified offer but require a separate tone."],
+      "specificity_anchors": ["slab", "vanity", "veining"],
+      "audienceAndIntent": "Help homeowners choosing a kitchen worktop or bathroom vanity judge the actual surface and room together; give architects and designers a concrete material or finish question to bring to a quotation conversation. Keep memorial enquiries separate from interiors.",
+      "formatsAndRationale": "Two professional videos can show the movement from slab detail to finished worktop or vanity. Four design posters can isolate a surface decision and a quotation question. Photo-post, reel and animated-poster quantities are unconfirmed; no extra format is added.",
+      "mustAvoid": "Do not identify a slab from its appearance, promise stock or installation dates, or call quartz heat-proof or scratch-proof. Preserve real veining and edges in edits. Keep memorial imagery respectful and permission-based, with no playful interiors hooks or private inscriptions.",
+      "channelIntegration": "Keep the same named material and room context across the channels already managed for Bloem Marble & Granite. Use a calm, separate treatment for memorial work; do not turn a finished-room render into proof of an installed project.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Review September’s kitchen and vanity presentation around one decision: how the actual slab’s veining and edge read in the finished room. Separate usable completed-project images from conceptual renders before planning any carry-forward.",
+          "coreMessage": "A slab close-up and the finished worktop should tell the same story. Show the real veining, edge and room relationship rather than calling every surface timeless.",
+          "pillarsAndHooks": "Pair slab detail with a kitchen result; explain one vanity finish decision; show real cutting or installation detail only where the supplied footage contains it. The hook is what changes between the close-up and the room, not a claim that the material suits every application.",
+          "testAndChange": "Classify the September material-led and finished-room openings before comparing available views or enquiry records. Publishing a post alone does not show which opening worked better.",
+          "successSignals": "Look for enquiries that name a surface, room or quotation requirement. Available views and interactions can support the review, but missing enquiry attribution or metric coverage remains unavailable, not zero.",
+          "nextMonthGamePlan": "Use the September asset review to select one worktop story and one vanity/material story for October. Keep any memorial brief on its own tone track and confirm publication permission before selection.",
+          "clientActionsRequired": ["Identify the exact stone and confirm permission for each real project selected for reuse.", "Confirm which completed worktop and vanity assets can be used; keep stock and installation dates out until supplied."],
+          "items": {"professional_video": ["Review a real slab-to-worktop visual sequence, preserving its veining and edge.", "Review a vanity or fabrication detail sequence without claiming unseen processes."], "design_poster": ["A kitchen surface decision tied to the pictured slab.", "One visible vanity edge or finish detail.", "A quotation prompt asking for the room and material requirement.", "A separate respectful memorial design only if the client supplies an approved brief; otherwise a second room/material decision."]}
+        },
+        "2026-10-01": {
+          "objective": "Plan October around two concrete quotation conversations: choosing a worktop from a real slab reference and choosing a vanity finish from a supplied room image. Make the material-to-room relationship the organising idea, not a generic makeover promise.",
+          "coreMessage": "Bring the room context and look closely at the actual surface. A veining or edge choice is easier to discuss when the material and finished application are shown together.",
+          "pillarsAndHooks": "Open one video on veining at close range before revealing the worktop; open the other on a vanity detail before its room context. Posters answer four different selection or quotation questions instead of repeating a reveal headline.",
+          "testAndChange": "Compare a slab-first opening with a finished-worktop-first opening using comparable available viewing measures. Hold the material and factual brief stable; change the opening rather than inventing a new product benefit.",
+          "successSignals": "Assess whether the posts prompt more specific material, edge or room questions where enquiry records exist. Read video views and interactions within their real coverage; do not claim quotation conversion without a recorded link.",
+          "nextMonthGamePlan": "After October, retain the opening that helps viewers articulate a surface or room decision only if the response supports it. Obtain the next real project permission before turning the approach into a repeat series.",
+          "clientActionsRequired": ["Supply the exact material labels and usable worktop/vanity references for the two video concepts.", "Approve any care or performance statement against the exact product before it enters poster copy."],
+          "items": {"professional_video": ["Slab veining close-up to the same real finished worktop.", "Vanity finish detail to its supplied room context."], "design_poster": ["What room context to bring when discussing a worktop.", "One real edge-detail question from the selected project.", "One named material decision without universal performance claims.", "A specific quotation prompt for the selected kitchen or vanity application."]}
+        }
+      }
+    },
+    {
+      "client_id": "42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa",
+      "client_name": "Cape Lumber",
+      "guide_quotes": ["supplier, not a contractor", "S5 structural Pine", "The official site labels this **“Office Only.”**"],
+      "specificity_anchors": ["timber list", "laminated", "supplier"],
+      "audienceAndIntent": "Speak to builders, joiners, architects and project buyers preparing a timber or board order. Help them send a usable material list or specification; serious homeowner enquiries remain supply-led rather than installation enquiries.",
+      "formatsAndRationale": "Three photo posts can show real timber, board or load details at believable scale; four design posters can answer specification and sourcing questions. Professional video, reel and animated-poster quantities are unknown, so no filming quota is created.",
+      "mustAvoid": "Do not present Cape Lumber as an installer, give structural span advice, promise unlimited sourcing or delivery times, claim H4/H5 supply, or invite collection at an office-only address. Never invent stock, dimensions, treatment certification or in-house machining.",
+      "channelIntegration": "Use the same supplier-led product and quote language on Cape Lumber’s already-managed channels. Direct enquiries towards a timber list or specification rather than a DIY construction tutorial; do not add paid-media scope.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Review September’s timber and board content for whether a project buyer can tell what to specify, rather than merely seeing a delivery or product photo. Separate historical stock examples from confirmed current supply before reusing them.",
+          "coreMessage": "A usable timber list starts with the required product, quantity and specification. Cape Lumber supplies the material; the buyer’s construction and engineering decisions remain separate.",
+          "pillarsAndHooks": "Laminated beam scale; the actual board or timber profile pictured; loading as supplier context rather than construction proof. Use one sourcing or order-detail question alongside each visual.",
+          "testAndChange": "Review September enquiries, if recorded, for a timber list or specification versus an unspecific availability question. Publishing a product image alone does not establish that it converted better.",
+          "successSignals": "Prefer observable quote requests containing a product, dimensions or project quantity. Keep enquiry completeness distinct from sales or delivery outcomes; missing enquiry records are unavailable.",
+          "nextMonthGamePlan": "Use the September review to prepare October’s specification-first timber and board sequence. Confirm the products actually available to photograph and remove any old delivery promise before reuse.",
+          "clientActionsRequired": ["Confirm the product, grade, treatment and dimensions in each selected photo.", "Supply current sourcing or delivery wording for the exact order context; do not infer it from older loads."],
+          "items": {"photo_content": ["Review a real laminated beam image for scale and identification.", "Review the actual board edge or timber profile without inventing a grade.", "Review a genuine prepared load as supplier activity, not an installation."], "design_poster": ["What to include in a timber list.", "A confirmed grade or treatment decision for the pictured product.", "A sourcing enquiry tied to a specified length or profile.", "A quote prompt that distinguishes supplying material from building the project."]}
+        },
+        "2026-10-01": {
+          "objective": "Build October’s photo-and-poster sequence around a better first quotation enquiry: product, specification and quantity. Show laminated timber and board detail only from confirmed available visuals, then make the next buyer step explicit.",
+          "coreMessage": "Send the timber list, not an assumed installation brief. The clearer the required species, profile or board specification, the clearer the supply conversation can be.",
+          "pillarsAndHooks": "One laminated timber question, one board specification question and one real order/load detail. Posters turn those visuals into practical enquiry prompts without promising that every item is stocked.",
+          "testAndChange": "Compare a timber-list CTA with a specific board-specification CTA in otherwise comparable product posts. Count usable enquiry detail only where it is recorded, not presumed purchases.",
+          "successSignals": "Look for enquiries that include dimensions, quantities and the intended product rather than requests for contracting work. Available interactions support the review but cannot prove order value or procurement speed.",
+          "nextMonthGamePlan": "Carry the more useful quote prompt into the following month if actual enquiries support it. Refresh product availability and lead-time wording before choosing the next material, rather than repeating October stock claims.",
+          "clientActionsRequired": ["Choose confirmed laminated timber and board references for three photo slots.", "Approve the specification questions and current sourcing wording before poster production."],
+          "items": {"photo_content": ["Actual laminated timber length/profile with believable scale.", "Confirmed board edge or sheet detail for a specification enquiry.", "A real order/load detail with no delivery-date promise."], "design_poster": ["Send the timber list: product and quantity.", "Send the board specification: the confirmed category and dimensions needed.", "Ask about a particular laminated profile or length, without a stock promise.", "Supplier-only quotation next step, with construction responsibility kept separate."]}
+        }
+      }
+    },
+    {
+      "client_id": "917d6f7c-1c2a-4c20-82f0-daa41b9062f5",
+      "client_name": "SecuriForce",
+      "guide_quotes": ["Alarm and CCTV/off-site Monitoring.", "24/7 Control Room/monitoring operation", "Do not include location references in normal SecuriForce captions."],
+      "specificity_anchors": ["control room", "monitoring", "guarding"],
+      "audienceAndIntent": "Help people deciding between guarding, alarm/CCTV monitoring and technical support understand the actual service step. Reassure through a real team or process detail without treating fear as an audience segment.",
+      "formatsAndRationale": "Four professional videos can separate team, monitoring, guarding and technical-support stories. Four photo posts show approved people or service detail; four posters explain distinct service questions. Reels and animated posters remain unknown quantities.",
+      "mustAvoid": "No guaranteed response time, crime-prevention promise, invented registration or blanket 24/7 claim for every service. Keep locations out of ordinary captions. Hide operational screens, access codes, routes and client vulnerabilities; never present a staged incident as real.",
+      "channelIntegration": "Keep each service label consistent across SecuriForce’s managed channels while varying team and process openings. Ordinary captions stay non-location-based. Do not use control-room contacts as an automatic sales footer.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Review September’s security presentation for the difference between people-led reassurance and actual service explanation. Retain useful guarding or monitoring context, but remove stale voting urgency and unqualified response promises before reuse.",
+          "coreMessage": "Protection is easier to understand when a real service step is visible: an officer’s role, a monitoring handoff or a technical check. Dramatic incident footage is not a substitute for that explanation.",
+          "pillarsAndHooks": "The person behind a monitoring step; what guarding means on site; a technical task shown safely; real community involvement only where approved. Let the specific service moment carry the opening.",
+          "testAndChange": "Review the September team-led and process-led openings using comparable available video measures. Do not infer that a playful campaign improved security enquiries from post counts alone.",
+          "successSignals": "Track recorded questions that identify guarding, monitoring or technical help. Missing service attribution or view coverage stays unavailable; no response-speed or prevented-crime measure is invented.",
+          "nextMonthGamePlan": "Prepare October as a clear sequence of four service stories rather than another blanket reassurance campaign. Select safe footage and get operational review of every process scene before filming or reuse.",
+          "clientActionsRequired": ["Confirm the service and permission for each team or process visual.", "Check that no screen, code, route or private client detail is visible; remove old voting or offer wording."],
+          "items": {"professional_video": ["Review a monitoring handoff with sensitive screens hidden.", "Review a guarding role from an approved on-site moment.", "Review a technical task without exposing settings.", "Review a real staff/community moment without staging an incident."], "photo_content": ["Approved monitoring-team detail.", "Approved officer image with accurate uniform.", "Safe technical-equipment detail.", "Permitted team/community photo."], "design_poster": ["Guarding and the role actually provided.", "Alarm/CCTV monitoring as a distinct service.", "Technical support with qualified hours wording.", "A clear service enquiry prompt without a response-time guarantee."]}
+        },
+        "2026-10-01": {
+          "objective": "Organise October around four useful service explanations: guarding, monitoring, technical help and the people carrying out the work. Show competence through one real step per story, not action-film staging or a general safety guarantee.",
+          "coreMessage": "Know which SecuriForce service you are asking for and what the visible team step does. Monitoring, guarding and technical support are related but not interchangeable promises.",
+          "pillarsAndHooks": "Open with the monitoring handoff, the on-site guarding responsibility, a technical check and a real staff question. Pair each video with an approved photo and one concise service poster rather than copying every headline into the caption.",
+          "testAndChange": "Compare a staff-question opening with a process-step opening for the same service where comparable footage exists. Keep service claims stable and compare only available native viewing or enquiry records.",
+          "successSignals": "Look for better-specified guarding or monitoring enquiries and real viewing response to the service explanations. Do not count missing enquiries as zero or equate video attention with prevented incidents.",
+          "nextMonthGamePlan": "Use October’s recorded service questions to choose the next explanation. Retain the team/process balance only where real responses support it; obtain fresh operational approval for any new location or client footage.",
+          "clientActionsRequired": ["Confirm safe filming subjects for four service stories and staff availability.", "Approve service wording and operational redactions before production; no invented compliance or response claim."],
+          "items": {"professional_video": ["One safe monitoring handoff explained by the relevant team.", "One approved guarding responsibility on site.", "One technical check with credentials/settings hidden.", "One real staff question answered without a universal protection promise."], "photo_content": ["Approved team image for the monitoring story.", "Officer/uniform detail for guarding.", "Safe technical service detail.", "Human staff moment belonging to the approved story."], "design_poster": ["Which guarding service the customer needs.", "What alarm/CCTV monitoring refers to.", "When technical service or standby wording applies.", "How to ask about the specific service, without operational or response-time claims."]}
+        }
+      }
+    },
+    {
+      "client_id": "7b47afb0-fa55-4916-85f6-09c57e5905b9",
+      "client_name": "Madison Wear",
+      "guide_quotes": ["Current public/trading identity: **Madisons Menswear**", "men's clothing", "Do not freeze a permanent brand list."],
+      "specificity_anchors": ["Madisons Menswear", "garment", "outfit"],
+      "audienceAndIntent": "Help men considering an outfit or footwear pairing picture a specific in-store choice at Madisons Menswear. Focus on visible garment detail and shopping assistance, not invented demographic groups or a permanent brand roster.",
+      "formatsAndRationale": "Two professional videos show an outfit decision or real shopping assistance. Eight photo posts can cover distinct garments, footwear and pairings; eight design posters give concise shopper questions. Reels and animated posters are not added as fixed capacity.",
+      "mustAvoid": "No assumed stock, sizes, prices, fabric performance, payment plans or kids range. Do not claim online ordering, delivery or click-and-collect from the historical site. Preserve real cut, colour, stitching and logos; never let a generated garment establish availability.",
+      "channelIntegration": "Use Madisons Menswear as the public identity across managed channels and keep garment details consistent. Direct the buying conversation to verified in-store assistance rather than an unconfirmed online checkout or another branch’s contact.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Review September’s menswear presentation for whether each piece gives a shopper a visible fit, pairing or occasion decision beyond a catalogue label. Preserve actual garment identity and separate historical brands or payment messages from current buying information.",
+          "coreMessage": "Look at the garment and how it is worn. A visible cut, stitching detail or outfit pairing says more than promising that every item is premium or a must-have.",
+          "pillarsAndHooks": "A product-on-model detail; a footwear/outfit pairing; the practical question answered by real shopping assistance. Use the exact item pictured, not a permanent list of labels.",
+          "testAndChange": "Review September product-only and outfit-context openings with available native measures. Publishing a product does not establish fabric comfort, sales or a winning clothing brand.",
+          "successSignals": "Look for recorded questions about a depicted item, size or pairing. Keep shop enquiries separate from unsupported ecommerce conversions; unavailable attribution remains unavailable.",
+          "nextMonthGamePlan": "Prepare October around one outfit-pairing story and one real assistance story, using confirmed garments. Choose eight varied photo subjects before writing eight poster messages, so the feed does not merely rename the same product.",
+          "clientActionsRequired": ["Confirm exact garments, usable model imagery and any product facts needed for reuse.", "Confirm the store/branch details used for the buying CTA; do not reuse old payment terms."],
+          "items": {"professional_video": ["Review an actual outfit pairing without inventing garment composition.", "Review a real shopping-assistance moment with participant permission."], "photo_content": ["Exact garment-on-model detail.", "Visible stitching or cut close-up.", "Confirmed footwear with an outfit.", "A second distinct garment pairing."], "design_poster": ["One shopper question about the pictured garment.", "A pairing idea using only shown items.", "An in-store assistance prompt.", "A visible footwear or cut detail without a comfort guarantee."]}
+        },
+        "2026-10-01": {
+          "objective": "Make October a practical outfit-selection month: show how confirmed garments and footwear work together, then show the real in-store assistance behind the choice. Keep the emphasis on buying decisions, not unconfirmed arrivals or discounts.",
+          "coreMessage": "Choose an outfit from what is actually shown, then ask about the exact item in store. Styling and visible detail should lead the conversation before a generic fashion slogan.",
+          "pillarsAndHooks": "One outfit reveal built from a garment detail; one assistance-led answer to a shopper question; eight varied garment/footwear photo slots and concise pairing posters. Leave unnamed brand or material claims out until confirmed.",
+          "testAndChange": "Compare a close-up-detail opening with an outfit-context opening for the same confirmed item. Hold product facts stable and assess available views and specific shopper questions rather than assumed purchases.",
+          "successSignals": "Assess whether enquiries mention the actual garment, footwear or pairing shown. Use available viewing/interactions without claiming online sales, stock movement or size availability from attention alone.",
+          "nextMonthGamePlan": "Use October’s real item and pairing questions to choose the following month’s subjects. Confirm stock again before reuse and retain only the styling angle that helps shoppers ask a more specific question.",
+          "clientActionsRequired": ["Select confirmed garments and footwear for varied photo slots and two video subjects.", "Approve product labels and the exact in-store CTA; reconfirm any promotion before adding it."],
+          "items": {"professional_video": ["Garment-detail opening to a real outfit pairing.", "Real in-store assistance answering one item or pairing question."], "photo_content": ["Confirmed garment in a full outfit.", "The same item’s visible cut/detail.", "A different confirmed footwear pairing.", "A real assistance/store moment with permission."], "design_poster": ["A specific pairing question for the chosen outfit.", "One visible garment-detail decision.", "Ask about the actual footwear shown.", "An in-store assistance prompt without online-order or payment-plan claims."]}
+        }
+      }
+    },
+    {
+      "client_id": "079df21e-783a-4648-b3fa-0acae6e68867",
+      "client_name": "Case Bloemfontein",
+      "guide_quotes": ["parts/technical support are part of the official dealership positioning", "dedicated Husqvarna workshop and after-sales service centre", "Husqvarna K 770"],
+      "specificity_anchors": ["Husqvarna", "parts", "machine"],
+      "audienceAndIntent": "Help farmers, operators and contractors ask a useful local machine, parts or after-sales question. Keep the agricultural equipment conversation and the Husqvarna workshop conversation distinct rather than treating national catalogue claims as local availability.",
+      "formatsAndRationale": "Two professional videos can separate machinery-in-application from Husqvarna after-sales or parts guidance. Twelve design posters allow distinct product/application questions. Photo, reel and animated-poster quantities remain unknown; catalogue breadth does not add capacity.",
+      "mustAvoid": "Do not transfer another branch’s stock or contacts, advertise historical used units as available, or turn national finance/warranty examples into local terms. Preserve exact machine and Husqvarna markings. No invented model stock, demo dates, service turnaround or operating specifications.",
+      "channelIntegration": "Keep Case Bloemfontein’s local identity and actual machine subject consistent across managed channels. Separate agricultural and Husqvarna topics, using only the corresponding confirmed product or service facts.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Review September’s machine and event presentation for a concrete operator or parts question. Separate past agricultural-event personality from current equipment availability, and preserve the local dealership boundary in any reused material.",
+          "coreMessage": "A machine shown doing a real job gives the operator a useful question to ask. Product lettering and the local service context matter more than another claim that tough machines tackle tough jobs.",
+          "pillarsAndHooks": "Actual machine/application detail; one parts or technical-support question; a separate Husqvarna product/workshop subject. Historical event footage stays retrospective, not proof of a new event or model in stock.",
+          "testAndChange": "Review machine-first and people/event-first September openings only within comparable available coverage. Historical participation or a pictured model does not prove enquiries, local stock or future demonstrations.",
+          "successSignals": "Look for recorded local enquiries naming an application, machine or parts need. Available views support the review; do not turn unspecified post formats into package or performance conclusions.",
+          "nextMonthGamePlan": "Plan October’s two videos around an actual application question and a separate Husqvarna after-sales topic. Select the poster subjects from confirmed local machines or parts, not an old national promotion.",
+          "clientActionsRequired": ["Confirm the actual machine, local availability facts and readable model markings for reused assets.", "Supply the parts/after-sales detail and local contact route; reconfirm any event or offer before mention."],
+          "items": {"professional_video": ["Review a real machine/application sequence with exact markings preserved.", "Review a separate Husqvarna parts or workshop subject without a stock promise."], "design_poster": ["A machine/application question tied to the shown equipment.", "A local parts enquiry prompt.", "A separate Husqvarna after-sales question.", "Retrospective event context only for approved historical footage; no future-event announcement."]}
+        },
+        "2026-10-01": {
+          "objective": "Give October a useful local decision sequence: what the shown machine is being asked to do, which parts question follows, and where a Husqvarna after-sales enquiry belongs. Avoid blending equipment streams into a single broad productivity slogan.",
+          "coreMessage": "Start with the job and the exact machine, then ask the local dealership the relevant parts or after-sales question. The Husqvarna subject keeps its own product and workshop context.",
+          "pillarsAndHooks": "Open one video on a real application before naming the machine; open the other on an actual Husqvarna maintenance or parts question. Posters separate agricultural application, local parts and workshop topics within twelve slots.",
+          "testAndChange": "Compare a job-first opening with a machine-name-first opening on a confirmed subject. Keep specs and availability wording unchanged; assess available viewing and application-specific enquiry records, not an invented sales lift.",
+          "successSignals": "Read recorded enquiries for clearer machine/application or parts detail. Keep Husqvarna service questions distinct from agricultural equipment enquiries; unavailable attribution or native metrics stay unavailable.",
+          "nextMonthGamePlan": "Carry forward October’s question-led opening only if real enquiries support it. Obtain a new local subject and recheck model/stock facts before preparing the next machine or Husqvarna story.",
+          "clientActionsRequired": ["Choose a confirmed local machine/application subject and a separate Husqvarna after-sales subject.", "Approve exact product lettering and any technical statement; no assumed stock, finance or demonstration date."],
+          "items": {"professional_video": ["Real application opening followed by the exact local machine subject.", "A distinct Husqvarna after-sales or parts question with confirmed details."], "design_poster": ["Ask about the job the selected machine must do.", "A precise local parts question without invented compatibility.", "A Husqvarna workshop/after-sales enquiry route.", "A confirmed product detail, not a historical finance or used-stock offer."]}
+        }
+      }
+    },
+    {
+      "client_id": "b6052710-417d-4b3b-8348-0f126bfea671",
+      "client_name": "Germoparts",
+      "guide_quotes": ["steering racks;", "brake-light switches;", "do not improvise compatibility;"],
+      "specificity_anchors": ["part number", "vehicle", "branch"],
+      "audienceAndIntent": "Help workshops and vehicle owners turn a parts question into an accurate enquiry: vehicle detail, the exact supplied part number and the relevant branch. Keep technical uncertainty visible rather than promising fitment to win attention.",
+      "formatsAndRationale": "Two professional videos can show a real parts-enquiry or branch sequence. Twelve design posters can answer different category/application questions. Unknown photo, reel and animated capacities stay disabled; historical posting volume is not extra package scope.",
+      "mustAvoid": "Never invent vehicle compatibility, change an OE/part number, describe aftermarket stock as genuine/OEM without proof, or transfer one branch’s delivery terms nationwide. Keep old campaign prices and supplier promotions out; preserve real packaging, labels and part geometry.",
+      "channelIntegration": "Use the same exact part/category wording across Germoparts’ managed channels, with branch-specific enquiries routed to that branch. Plain contact text stays readable, without borrowing another branch’s hours or delivery claims.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Review September’s parts presentation for enquiry accuracy: did a post make the relevant vehicle/application question clear without merely repeating a product card? Keep historical part numbers and campaign terms attached to their original brief.",
+          "coreMessage": "The right parts conversation needs the vehicle detail and exact part reference, not a generic promise to keep every vehicle running. A steering or brake-light subject should make the next enquiry more precise.",
+          "pillarsAndHooks": "One real part detail; the vehicle information needed to ask about it; a branch shelf or service moment. Keep staff recognition separate from supplier promotions, even when similar people or branding appear.",
+          "testAndChange": "Review September category-led versus enquiry-question openings. Where enquiry records exist, assess whether vehicle/part detail was supplied; publishing a part does not prove fitment success or sales.",
+          "successSignals": "Specific vehicle and part-number enquiries are useful observable signals when recorded. Missing compatibility verification, branch attribution or enquiry metrics remains unavailable; no fitting or delivery outcome is presumed.",
+          "nextMonthGamePlan": "Prepare October around a better parts enquiry and a separate real branch story. Use confirmed category subjects, leaving old prices, Saturday-delivery promises and supplier competitions out unless newly supplied.",
+          "clientActionsRequired": ["Confirm exact part/application wording and legible labels on reusable assets.", "Approve the relevant branch contact and any current delivery wording; do not generalise old branch claims."],
+          "items": {"professional_video": ["Review a real part close-up to the vehicle-detail enquiry it needs.", "Review a branch shelf/team sequence without implying nationwide stock."], "design_poster": ["Vehicle details to supply for the pictured category.", "The exact supplied part number kept intact.", "One confirmed brake or steering category question.", "A branch-specific enquiry prompt without old pricing or delivery terms."]}
+        },
+        "2026-10-01": {
+          "objective": "Make October’s parts content help customers prepare an accurate first enquiry. Pair one vehicle-detail story with one exact-branch parts environment, and give the twelve poster slots specific category questions rather than a catalogue of unsupported compatibility claims.",
+          "coreMessage": "Send the vehicle details and the part number you have. Germoparts’ part/category content should make it easier to ask the branch the right question, not suggest that a visually similar part will fit.",
+          "pillarsAndHooks": "Open on the exact label or part geometry; ask the vehicle/application question; show the real branch context separately. Category posters can cover brakes, steering or service parts only with supplied part detail.",
+          "testAndChange": "Compare a part-label-first opening with a vehicle-question-first opening for the same confirmed subject. Keep compatibility wording unchanged and assess only available views and enquiry completeness.",
+          "successSignals": "Look for recorded enquiries carrying vehicle details and a precise part reference. Do not call enquiries successful fitments or orders without the corresponding record; native metrics with missing coverage stay unavailable.",
+          "nextMonthGamePlan": "Choose the next parts question from October’s real enquiries, then confirm the product reference again. Keep branch stories human and separate from any newly approved supplier or staff campaign.",
+          "clientActionsRequired": ["Choose confirmed part references and a usable branch filming subject for two videos.", "Verify the part labels, branch CTA and any compatibility statement before production."],
+          "items": {"professional_video": ["Exact part-label opening followed by the vehicle details needed for an enquiry.", "Real branch parts environment with one practical customer question."], "design_poster": ["Send vehicle details for the chosen part category.", "Use the supplied part number exactly, without adding fitment claims.", "A confirmed brakes/steering/service-parts question.", "Ask the correct branch about availability rather than promising all-branch stock."]}
+        }
+      }
+    },
+    {
+      "client_id": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
+      "client_name": "Wiseman Group",
+      "guide_quotes": ["Treat **Wiseman Group** as its own exact marketing identity.", "Do not turn every caption into a list of divisions.", "Historical Golf Day work proves group event/community content has existed"],
+      "specificity_anchors": ["group-level", "wisemangroup.co.za", "office"],
+      "audienceAndIntent": "Help someone seeing Wiseman Group understand the actual people and group-level activity shown, and distinguish a group enquiry from a child-business buying question. Do not turn related-business relationships into assumed shared services or ownership claims.",
+      "formatsAndRationale": "One professional video can follow a real group office/team moment. Four photo posts provide distinct people/activity views; four posters explain group-level context. Reels and animated posters remain unknown, and no division-specific service capacity is added.",
+      "mustAvoid": "No borrowed child-business contacts, prices or service promises; no invented division ownership or annual Golf Day. Avoid emojis, corporate-group slogans and flashy staged interactions. Preserve genuine people, vehicles and branding; normal copy uses the group website rather than an automatic full contact block.",
+      "channelIntegration": "Keep Wiseman Group’s own identity and wisemangroup.co.za across managed channels. Add group phone/email only for an actual event, booking or time-sensitive group enquiry; a child-business promotion does not become group-level content by changing its logo.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Review September’s group identity for a visible people or office story that genuinely belongs to Wiseman Group. Separate usable group moments from child-business sales messages before carrying anything forward.",
+          "coreMessage": "Show the people behind the group-level activity actually pictured. A real office or coordination moment is more useful than a list of divisions or a promise that every related business offers the same service.",
+          "pillarsAndHooks": "The person and task in a genuine group office moment; a real branded asset; a past group event only with its original context. Keep the website footer concise and reserve booking contacts for a real enquiry need.",
+          "testAndChange": "Review people-led and branded-asset September openings with available measures. A published group moment does not prove group-wide sales, division performance or current sponsorship.",
+          "successSignals": "Look for recorded enquiries that identify the group-level subject rather than a child-business price or booking. Available interactions support the review, but missing attribution remains unavailable.",
+          "nextMonthGamePlan": "Prepare one October office/team video with four distinct supporting photo subjects. Confirm the current people and group activity first; do not manufacture a recurring event to fill the package.",
+          "clientActionsRequired": ["Confirm that selected September people/activity assets belong to Wiseman Group and have publication permission.", "Confirm any event or role used for reuse; keep child-business contacts out of group copy."],
+          "items": {"professional_video": ["Review one real group office/team moment with a concise website end frame."], "photo_content": ["A genuine group office moment.", "A real group team detail with permission.", "An accurately branded group asset.", "An approved group activity, without claiming a recurring event."], "design_poster": ["Explain the actual group-level activity shown.", "Introduce one confirmed office/team context.", "A concise group website next step.", "An event or booking note only if its exact group-level brief is confirmed; otherwise another real office moment."]}
+        },
+        "2026-10-01": {
+          "objective": "Give October one coherent Wiseman Group office/team story rather than a collage of related-business offers. Let viewers understand a real group-level activity and the correct group enquiry route without inventing ownership or uniform service standards.",
+          "coreMessage": "Meet the people doing the group work actually shown. The name Wiseman Group should frame that human activity, not absorb every related business’s products and promises.",
+          "pillarsAndHooks": "A lightly edited office task-to-person video; four distinct group people/asset photos; four concise group-context posters. Use wisemangroup.co.za as the ordinary next step and only add booking contacts for an approved enquiry context.",
+          "testAndChange": "Compare an office-task-first opening with a person-first opening within the one confirmed video subject. Keep roles and group facts fixed; assess available response without inventing division-level outcomes.",
+          "successSignals": "Read whether recorded questions concern the actual group story and whether the website CTA is used where tracking exists. Missing website/enquiry attribution remains unavailable rather than proof of no interest.",
+          "nextMonthGamePlan": "Use October’s real group questions to select the next office/team subject. Retain the task or person opening only if observable responses support it; reconfirm roles and any new group event before planning.",
+          "clientActionsRequired": ["Supply a real current group office/team subject and confirm participants’ roles and permission.", "Approve the exact group-level CTA; do not fill the brief with related-business services."],
+          "items": {"professional_video": ["Real office-task-to-person story, lightly edited, with wisemangroup.co.za end frame."], "photo_content": ["The approved group task.", "The person doing that task.", "A real group-branded asset connected to the story.", "A different group office/team detail."], "design_poster": ["What the pictured group activity means.", "A confirmed people/office detail.", "A concise group website enquiry next step.", "One distinct group-context message without a division roster or borrowed offer."]}
+        }
+      }
+    },
+    {
+      "client_id": "d53d8e62-9e6a-4bb9-be3f-554f40942d45",
+      "client_name": "Emmanuel Funerals",
+      "guide_quotes": ["death registration and doctors' documentation", "funeral and cremation services", "Do not expose deceased persons, private family documents"],
+      "specificity_anchors": ["documentation", "cremation", "Emmanuel"],
+      "audienceAndIntent": "Help a family trying to understand the next funeral or cremation arrangement ask a calm practical question. Separate service logistics from memorial remembrance and policy education; do not assume beliefs, exploit bereavement or target invented vulnerable segments.",
+      "formatsAndRationale": "One professional video can answer a practical arrangement question. Three photo posts show approved team, floral/setup or service detail; four design posters explain distinct next steps. Reel and animated quantities remain unknown; funeral-cover campaigns are not invented to fill slots.",
+      "mustAvoid": "No identifiable grieving families, deceased persons or private documents without explicit permission. No invented policy benefits, premiums, legal/FSP claims, livestreaming, memorial plaques or turnaround guarantees. Keep maroon branding and real arrangements accurate; avoid manipulative urgency and grief clichés.",
+      "channelIntegration": "Keep the same calm service facts across Emmanuel’s managed channels. Use the website for general team or atmosphere pieces; choose service or urgent contact wording only when the actual brief needs it. Policy content remains separately fact-checked.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Review September’s funeral-service content for whether it reduces uncertainty about an actual next step, rather than repeating sympathy slogans. Preserve useful logistics or remembrance context while separating family privacy and regulated cover claims.",
+          "coreMessage": "Emmanuel’s clear explanation of the next documentation or arrangement step can help without making a promise about every funeral. Service guidance and a private family tribute need different tones.",
+          "pillarsAndHooks": "One documentation/arrangement question; approved team preparation; a respectful floral or setup detail. Memorial wording stays reflective and permission-based, not a sales hook attached to a grieving face.",
+          "testAndChange": "Review practical-question and atmosphere-led September pieces with available measures. Do not equate interaction with bereavement demand or claim that a family selected a service without a record.",
+          "successSignals": "Use recorded practical questions about arrangements, documentation or cremation as signals of clarity. Missing enquiries or metric coverage remain unavailable; no emotional response, policy conversion or service outcome is assumed.",
+          "nextMonthGamePlan": "Prepare October’s one video around an approved what-happens-next question, with three calm supporting images and four distinct service-step posters. Confirm the exact explanation and safe imagery before planning.",
+          "clientActionsRequired": ["Approve the specific service explanation and publication permission for each selected visual.", "Confirm that no private documents, deceased persons or grieving family identity are exposed."],
+          "items": {"professional_video": ["Review one calm documentation or arrangement explanation by a confirmed representative."], "photo_content": ["Approved team preparation without private records.", "A floral or service-setup detail.", "A respectful atmosphere or memorial-work detail with permission."], "design_poster": ["A documentation question to ask Emmanuel.", "An arrangement next step stated calmly.", "A funeral-versus-cremation enquiry prompt without assumed terms.", "A respectful service contact decision without a generic sympathy slogan."]}
+        },
+        "2026-10-01": {
+          "objective": "Make October’s service guidance a calm practical sequence: one approved arrangement question on video, supported by documentation, funeral/cremation and contact-choice posters. Keep remembrance images separate from service selling.",
+          "coreMessage": "Ask the next practical question, one step at a time. Emmanuel’s documentation and arrangement guidance should explain what to discuss without assuming a family’s beliefs or promising unconfirmed service terms.",
+          "pillarsAndHooks": "Open on a real arrangement question rather than a sympathy slogan; show an approved preparation or floral detail; distinguish funeral and cremation questions in plain language. Keep policy terms out unless a current approved brief exists.",
+          "testAndChange": "Compare a direct what-happens-next opening with a quieter service-detail opening for the same approved explanation. Assess available views and actual practical questions, not emotional vulnerability or assumed bookings.",
+          "successSignals": "Look for clearer recorded arrangement or documentation questions. Keep routine enquiries distinct from urgent contacts and policy queries; missing attribution cannot be reported as zero or as proof of a booked funeral.",
+          "nextMonthGamePlan": "Choose the following month’s explanation from the questions families actually ask, if recorded. Confirm any new service facts and imagery permission before extending the series; no automatic cover or memorial-product campaign.",
+          "clientActionsRequired": ["Choose and approve one practical video question and a current representative.", "Confirm safe team/setup imagery and exact service wording for the four poster subjects."],
+          "items": {"professional_video": ["A confirmed representative answers one arrangement or documentation next-step question."], "photo_content": ["Approved preparation detail with no private paperwork.", "Real floral or completed-setup detail.", "Calm team/atmosphere image with permission."], "design_poster": ["What documentation question to bring to the conversation.", "One funeral arrangement next step.", "One cremation arrangement enquiry question.", "When a general versus urgent service contact is relevant, using only confirmed wording."]}
+        }
+      }
+    },
+    {
+      "client_id": "2aed8a31-bd53-4ad1-a3dc-432865adfb3d",
+      "client_name": "Dulux Paint & Paper Bloemfontein",
+      "guide_quotes": ["Describe colour by **what it does to the room**", "real swatches;", "primers and preparation;"],
+      "specificity_anchors": ["swatch", "tinting", "surface"],
+      "audienceAndIntent": "Help a person choosing paint for an actual room or surface bring a useful colour or preparation question into the store. Colour accuracy and substrate decisions matter more than vague inspiration or an invented demographic profile.",
+      "formatsAndRationale": "Two professional videos can separate a real swatch/tinting decision from a preparation question. Four photo posts show colour, surface or staff/process detail; four design posters explain distinct project decisions. Reel and animated quantities remain unknown.",
+      "mustAvoid": "Do not promise screen-to-paint colour accuracy, assume national ranges are local stock, or invent coverage, compatibility, drying, durability or warranty claims. Confirm staff availability and current technical facts. No stale award/voting, promotion or app CTA; no em dashes or forced language mixing.",
+      "channelIntegration": "Keep the actual colour code, surface and product label consistent across managed Dulux content. Use physical swatches and the correct in-store project question, not an unsupported national product or online colour-match promise.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Review September’s paint and colour presentation for whether a viewer understands the effect in a real room or the preparation decision involved. Separate usable tinting/swatches footage from stale voting, promotions or unsupported product claims.",
+          "coreMessage": "A colour choice belongs in the room’s light; a product choice belongs on the right surface. Show the real swatch or preparation question rather than describing every result as beautiful.",
+          "pillarsAndHooks": "Physical swatch against room context; tinting/process movement; one surface-preparation question; a real staff explanation if the role is confirmed. Do not convert a digital colour reveal into an exact matching promise.",
+          "testAndChange": "Review September colour-first and preparation-first openings using available comparable measures. A published colour or demonstration does not prove paint sales, technical suitability or staff popularity.",
+          "successSignals": "Look for recorded questions that name a colour code, room or surface. Available views/interactions support the review; missing store enquiry or sales attribution remains unavailable rather than zero.",
+          "nextMonthGamePlan": "Plan October’s two videos as a real-light swatch question and a separate surface/preparation question. Select four actual process/product photos and four concise project decisions, without reusing expired campaign treatments.",
+          "clientActionsRequired": ["Confirm the swatches, labels, surface and usable process footage for reuse.", "Approve technical statements and current staff participation; remove expired voting, offer or app wording."],
+          "items": {"professional_video": ["Review real swatch/tinting footage for a room-light decision.", "Review one surface/preparation explanation without inventing compatibility."], "photo_content": ["Actual physical swatch.", "Readable label or colour code.", "Real tinting/process detail.", "Confirmed surface or staff-advice context."], "design_poster": ["Bring a colour code or room reference.", "Check a physical swatch in the room’s light.", "Ask which preparation step belongs to the surface.", "A current product/project question without a performance or stock promise."]}
+        },
+        "2026-10-01": {
+          "objective": "Make October help customers arrive with a better paint question: their room/light reference or their surface/preparation problem. Use two distinct visual stories so colour inspiration does not obscure the product decision.",
+          "coreMessage": "Compare the real swatch, then ask about the actual surface. A screen image cannot make the colour or product decision for every room.",
+          "pillarsAndHooks": "Open the colour video with a physical swatch in two real lighting contexts when available; open the second with the actual surface question. Support them with four process/detail photos and four concise preparation or colour-choice posters.",
+          "testAndChange": "Compare a swatch-first opening with a room-question-first opening on the same confirmed colour subject. Keep colour labels stable; assess available viewing and specific project questions, not an assumed purchase uplift.",
+          "successSignals": "Read recorded enquiries for room, colour-code or surface detail. Treat technical/product suitability as a fact-check, not a marketing metric; missing sales attribution stays unavailable.",
+          "nextMonthGamePlan": "Use October’s actual room and preparation questions to choose the following month’s demonstration. Confirm the new surface/product information before writing it, and keep physical colour checks central.",
+          "clientActionsRequired": ["Choose confirmed swatch/lighting and surface subjects for two videos.", "Supply current technical support for the preparation explanation and confirm staff/filming availability."],
+          "items": {"professional_video": ["Physical swatch to the real room-light question, with no digital matching guarantee.", "One actual surface/preparation question answered with current approved product facts."], "photo_content": ["Physical swatch in a genuine lighting context.", "Readable current product label.", "Real tinting detail.", "The selected surface or a confirmed staff demonstration."], "design_poster": ["Bring your room reference when discussing colour.", "Compare the actual swatch rather than a screen shade.", "Name the surface before choosing a preparation step.", "Ask the store about the confirmed product/project subject, without stock or warranty claims."]}
+        }
+      }
+    },
+    {
+      "client_id": "a36ba938-e9dc-4ecf-bb67-4853608b1c01",
+      "client_name": "TBS Brokers",
+      "guide_quotes": ["Retirement Annuities;", "Office Contents;", "captions should add a second layer rather than repeat artwork wording;"],
+      "specificity_anchors": ["office contents", "retirement", "broker"],
+      "audienceAndIntent": "Help someone preparing a retirement-planning or business-insurance conversation bring a practical question to TBS Brokers. Keep general information separate from personal suitability or product recommendations; do not invent risk or demographic segments.",
+      "formatsAndRationale": "Four photo/review-template slots can show permitted service or team context, while four design slots address distinct planning questions. A design slot may swap to video by agreement; there is no fixed extra video quota. Reel and animated quantities remain unknown.",
+      "mustAvoid": "No promised returns, tax result, premiums, acceptance, claims payout or personalised suitability advice. Do not invent provider relationships, team roles or testimonials. Avoid fear and cheeky financial copy; obtain current approval for material regulated statements and use only the approved TBS contact route.",
+      "channelIntegration": "Keep TBS Brokers’ planning and insurance topics distinct across managed channels. Use the approved website/contact route for a real broker conversation, not another business’s footer or a national provider promotion assumed to apply locally.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Review September’s financial-service presentation for whether a viewer can identify the actual planning or insurance question being addressed. Keep any real review/testimonial context, but do not generalise one service experience into a promised outcome.",
+          "coreMessage": "A retirement conversation and an office-contents conversation start with different questions. Name the topic plainly and invite a broker discussion rather than promising a secure future or a payout.",
+          "pillarsAndHooks": "A retirement-planning question; an office-contents question; a real permitted service experience; current team context only where confirmed. Keep cover and investment topics separate and avoid a list of unqualified benefits.",
+          "testAndChange": "Review question-led and service-experience-led September pieces where comparable measures exist. Enquiry records may show the topic asked about, but a published post cannot demonstrate suitability, investment performance or claims success.",
+          "successSignals": "Look for recorded retirement or office-contents enquiries that identify a topic for the broker conversation. Missing attribution remains unavailable; never use returns or claim outcomes as assumed marketing proof.",
+          "nextMonthGamePlan": "Prepare October around distinct retirement and office-contents questions, supported by permission-based review/template imagery. Keep the agreed design-to-video swap optional and inside the existing four design slots, not an extra deliverable.",
+          "clientActionsRequired": ["Approve the exact general-information topics and any real testimonial permission.", "Confirm current team/contact facts and whether an agreed design-slot swap is wanted; do not create a fixed video quota."],
+          "items": {"photo_content": ["Review a permission-based service/review-template image.", "Review a confirmed team/service context without outcome claims."], "design_poster": ["A retirement-planning conversation question.", "An office-contents conversation question.", "A practical broker-service next step.", "A permitted review/template or distinct planning topic; any video swap uses this slot only by agreement."]}
+        },
+        "2026-10-01": {
+          "objective": "Make October’s TBS content prepare better broker conversations: separate a retirement-planning question from an office-contents risk question, then show the real service people or permitted review context behind those conversations.",
+          "coreMessage": "Bring the question to the broker before assuming the answer. Retirement planning and office-contents cover need their own discussion; a social post is not a personal recommendation.",
+          "pillarsAndHooks": "One plain-language retirement question, one business office-contents question, one confirmed service/team context and one permitted review. Four design slots remain the ceiling even when one becomes an agreed video treatment.",
+          "testAndChange": "Compare a practical topic-question opening with a permitted service-experience opening for the same general topic. Keep disclosures stable; assess available enquiries and native interactions without implying better returns or cover outcomes.",
+          "successSignals": "Read whether recorded enquiries name the retirement or office-contents topic clearly enough for follow-up. Do not call attention a qualified sale or infer suitability; missing attribution remains unavailable.",
+          "nextMonthGamePlan": "Choose the following month’s general-information question from October’s real enquiry topics. Obtain fresh regulated-copy approval and testimonial permission before reuse; any future slot swap still needs agreement.",
+          "clientActionsRequired": ["Approve the retirement and office-contents question wording as general information.", "Confirm permitted review imagery, current service/team details and any explicit design-slot-to-video agreement."],
+          "items": {"photo_content": ["Permitted review/template image tied to a real service experience.", "Current confirmed broker/team service context."], "design_poster": ["One general retirement-planning question, without advice or returns.", "One office-contents cover question, without guaranteed acceptance.", "A practical next step for a broker conversation.", "A permitted service-review or distinct planning message; an agreed video treatment replaces, never adds to, this slot."]}
+        }
+      }
+    }
+  ]
+}

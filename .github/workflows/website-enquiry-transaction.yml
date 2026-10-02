@@ -13,11 +13,37 @@ on:
       - 'tests/websiteLeadLifecycle.test.mjs'
       - 'src/lib/websiteLeads.ts'
       - 'supabase/migrations/*website_enquiry_delivery_runtime.sql'
+      - 'supabase/migrations/*website_enquiry_delivery_suppression.sql'
+      - 'supabase/migrations/*website_enquiry_delivery_ses_events.sql'
+      - 'supabase/functions/_shared/awsSigV4.ts'
+      - 'supabase/functions/_shared/websiteEnquirySes*.ts'
+      - 'supabase/functions/_shared/websiteEnquiryProviders.ts'
+      - 'supabase/functions/website-enquiry-ses-events/**'
+      - 'scripts/website-enquiry-ses-acceptance.mjs'
+      - 'tests/websiteEnquirySes.test.mjs'
+      - 'scripts/ops/ses-af-south-1-setup.sh'
+      - 'scripts/ops/ses-setup-verify.mjs'
+      - 'tests/sesSetupScript.test.mjs'
+      - 'tests/fixtures/ses-setup-stubs/**'
+      - 'tests/websiteEnquirySesTrust.test.mjs'
+      - 'tests/helpers/snsTestPki.mjs'
+      - 'tests/fixtures/sns-trust/**'
+      - 'supabase/functions/_shared/snsCertificateTrust.ts'
+      - 'supabase/functions/_shared/amazonTrustRoots.ts'
+      - 'scripts/website-enquiry-delivery-suppression-acceptance.mjs'
+      - 'tests/sql/405_website_enquiry_delivery_suppression_acceptance.sql'
+      - 'tests/websiteEnquiryDeliverySuppression.test.mjs'
       - 'scripts/website-enquiry-delivery-acceptance.mjs'
       - 'tests/sql/405_website_enquiry_delivery_acceptance.sql'
       - 'tests/websiteEnquiryDelivery.test.mjs'
       - 'supabase/functions/_shared/websiteEnquiryDelivery.ts'
       - 'supabase/functions/website-enquiry-delivery-*/**'
+      - 'supabase/functions/_shared/websiteEnquiryIntake.ts'
+      - 'supabase/functions/website-enquiry-intake/**'
+      - 'supabase/migrations/*website_enquiry_intake_guard.sql'
+      - 'scripts/website-enquiry-intake-acceptance.mjs'
+      - 'tests/sql/624_website_enquiry_intake_fixtures.sql'
+      - 'tests/websiteEnquiryIntake.test.mjs'
   workflow_dispatch:
 permissions:
   contents: read
@@ -36,6 +62,13 @@ jobs:
       - run: node scripts/website-lead-lifecycle-acceptance.mjs
       - run: node --test tests/websiteEnquiryDelivery.test.mjs
       - run: node scripts/website-enquiry-delivery-acceptance.mjs
+      - run: node --test tests/websiteEnquiryDeliverySuppression.test.mjs
+      - run: node scripts/website-enquiry-delivery-suppression-acceptance.mjs
+      - run: node --test tests/websiteEnquirySes.test.mjs tests/websiteEnquirySesTrust.test.mjs
+      - run: node scripts/website-enquiry-ses-acceptance.mjs
+      - run: node --test tests/sesSetupScript.test.mjs
+      - run: node --test tests/websiteEnquiryIntake.test.mjs
+      - run: node scripts/website-enquiry-intake-acceptance.mjs
   deno-check:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -44,4 +77,6 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-      - run: deno check --no-lock --node-modules-dir=none supabase/functions/website-enquiry-delivery-worker/index.ts supabase/functions/website-enquiry-delivery-webhook/index.ts
+      - run: deno check --no-lock --node-modules-dir=none supabase/functions/website-enquiry-delivery-worker/index.ts supabase/functions/website-enquiry-delivery-webhook/index.ts supabase/functions/website-enquiry-intake/index.ts supabase/functions/website-enquiry-ses-events/index.ts
+      # Same X.509 trust suite on the Deno runtime family used by Supabase Edge.
+      - run: deno test -A --no-lock --node-modules-dir=none tests/websiteEnquirySesTrust.test.mjs

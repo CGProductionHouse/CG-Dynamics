@@ -1,0 +1,2937 @@
+{
+  "schema_version": 1,
+  "issue": 513,
+  "batch": 1,
+  "mode": "ZERO_WRITE_REVIEWED_OVERRIDES",
+  "write_count": 0,
+  "baseline_plan_hash": "c133b1977bda76395b5ef30ce429d551b877f5ec03b11f95225fd0064cacb5b8",
+  "authored_copy_hash": "791d1c69289131355ee658a44e0f2310a1d8111daaf3f1187c0141b15e0898dc",
+  "selection": {
+    "rule": "Among blocked clients with confirmed package, ready exact dossier/guide and three frozen monthly reports, rank post identity coverage descending, then exact UUID. Coverage is not performance.",
+    "qualifying": [
+      {
+        "client_id": "89e0ad6d-e08c-4a75-8b8e-abea71af581c",
+        "name": "Bloem Marble & Granite",
+        "reports": 3,
+        "posts": 277
+      },
+      {
+        "client_id": "42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa",
+        "name": "Cape Lumber",
+        "reports": 3,
+        "posts": 115
+      },
+      {
+        "client_id": "917d6f7c-1c2a-4c20-82f0-daa41b9062f5",
+        "name": "SecuriForce",
+        "reports": 3,
+        "posts": 107
+      },
+      {
+        "client_id": "7b47afb0-fa55-4916-85f6-09c57e5905b9",
+        "name": "Madison Wear",
+        "reports": 3,
+        "posts": 91
+      },
+      {
+        "client_id": "079df21e-783a-4648-b3fa-0acae6e68867",
+        "name": "Case Bloemfontein",
+        "reports": 3,
+        "posts": 87
+      },
+      {
+        "client_id": "b6052710-417d-4b3b-8348-0f126bfea671",
+        "name": "Germoparts",
+        "reports": 3,
+        "posts": 85
+      },
+      {
+        "client_id": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
+        "name": "Wiseman Group",
+        "reports": 3,
+        "posts": 74
+      },
+      {
+        "client_id": "d53d8e62-9e6a-4bb9-be3f-554f40942d45",
+        "name": "Emmanuel Funerals",
+        "reports": 3,
+        "posts": 59
+      },
+      {
+        "client_id": "2aed8a31-bd53-4ad1-a3dc-432865adfb3d",
+        "name": "Dulux Paint & Paper Bloemfontein",
+        "reports": 3,
+        "posts": 52
+      },
+      {
+        "client_id": "a36ba938-e9dc-4ecf-bb67-4853608b1c01",
+        "name": "TBS Brokers",
+        "reports": 3,
+        "posts": 49
+      },
+      {
+        "client_id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+        "name": "The Staffordshire",
+        "reports": 3,
+        "posts": 47
+      },
+      {
+        "client_id": "06b20bb1-ed4a-4aa1-9f48-8c6cb0531aba",
+        "name": "Delta Gas",
+        "reports": 3,
+        "posts": 40
+      },
+      {
+        "client_id": "c27d2185-08e4-4c49-be48-2572564ceecf",
+        "name": "CG Production House",
+        "reports": 3,
+        "posts": 40
+      },
+      {
+        "client_id": "4f6106de-c437-404e-8cef-fbe848de0665",
+        "name": "RC-Polypipe",
+        "reports": 3,
+        "posts": 39
+      },
+      {
+        "client_id": "0c01d90f-ba5e-4251-a597-bf3c83f990fa",
+        "name": "Zooz Lifestyle WFF",
+        "reports": 3,
+        "posts": 37
+      },
+      {
+        "client_id": "a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b",
+        "name": "Peyper Bonds",
+        "reports": 3,
+        "posts": 37
+      },
+      {
+        "client_id": "21300630-6755-4591-9a49-e22abbaf7e3d",
+        "name": "Loraclox",
+        "reports": 3,
+        "posts": 31
+      },
+      {
+        "client_id": "204f4f22-14c7-42ed-a956-da57af102706",
+        "name": "Tobich Optics",
+        "reports": 3,
+        "posts": 29
+      },
+      {
+        "client_id": "3b85973f-bcad-49eb-b8f1-c27f7c7f1aba",
+        "name": "AV Event Life",
+        "reports": 3,
+        "posts": 22
+      },
+      {
+        "client_id": "6b67a2df-e2ab-418b-bcee-03aef5963d37",
+        "name": "Braize",
+        "reports": 3,
+        "posts": 22
+      },
+      {
+        "client_id": "afb62c53-d6d3-4ef8-9393-def88ed899d8",
+        "name": "C&L Innovations",
+        "reports": 3,
+        "posts": 22
+      },
+      {
+        "client_id": "6b313cac-283e-48c4-9df6-ba43af2f7353",
+        "name": "Central Canvas",
+        "reports": 3,
+        "posts": 21
+      },
+      {
+        "client_id": "8e448cf9-1534-4ba1-89a4-93e4c8b83d2f",
+        "name": "Bouwer & Coetzee Attorneys",
+        "reports": 3,
+        "posts": 21
+      },
+      {
+        "client_id": "2b953772-e791-4dff-a278-d4dd3521f02e",
+        "name": "We Ar Fuels",
+        "reports": 3,
+        "posts": 20
+      },
+      {
+        "client_id": "4236a60a-990f-484f-8d19-13d2f92fbe3b",
+        "name": "Novus Steel",
+        "reports": 3,
+        "posts": 17
+      },
+      {
+        "client_id": "e1cb958e-3f68-4a77-b5ea-b471ea62bdef",
+        "name": "Watch Addict",
+        "reports": 3,
+        "posts": 17
+      },
+      {
+        "client_id": "29a28efd-c998-45e2-a57c-4a751e779e66",
+        "name": "PSG Bloemfontein",
+        "reports": 3,
+        "posts": 15
+      },
+      {
+        "client_id": "3404f726-a693-4b2d-8c13-c9d3dfd17bbc",
+        "name": "Daisy & Co",
+        "reports": 3,
+        "posts": 14
+      },
+      {
+        "client_id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+        "name": "Supa Quick BFN",
+        "reports": 3,
+        "posts": 13
+      },
+      {
+        "client_id": "e2870110-930c-4e63-b2fe-c858030f7258",
+        "name": "Supa Quick Centurion",
+        "reports": 3,
+        "posts": 13
+      },
+      {
+        "client_id": "572555e0-d4d0-404a-8d67-beeeeed6a1f2",
+        "name": "HMHI",
+        "reports": 3,
+        "posts": 11
+      },
+      {
+        "client_id": "ec643c75-51f5-4839-829f-3f5b7f48829a",
+        "name": "Ehrlich Park Butchery",
+        "reports": 3,
+        "posts": 6
+      },
+      {
+        "client_id": "5dfdf4bd-9d94-4cc6-9dee-0e480a2234cb",
+        "name": "Bohemia Quick Stop",
+        "reports": 3,
+        "posts": 4
+      }
+    ],
+    "selected": [
+      "89e0ad6d-e08c-4a75-8b8e-abea71af581c",
+      "42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa",
+      "917d6f7c-1c2a-4c20-82f0-daa41b9062f5",
+      "7b47afb0-fa55-4916-85f6-09c57e5905b9",
+      "079df21e-783a-4648-b3fa-0acae6e68867",
+      "b6052710-417d-4b3b-8348-0f126bfea671",
+      "899c9988-8207-4e45-a8fc-a7446dfcf96b",
+      "d53d8e62-9e6a-4bb9-be3f-554f40942d45",
+      "2aed8a31-bd53-4ad1-a3dc-432865adfb3d",
+      "a36ba938-e9dc-4ecf-bb67-4853608b1c01"
+    ]
+  },
+  "rows": [
+    {
+      "row_id": "dc16ae75-4ae0-45b3-a1ff-193212490193",
+      "client_id": "89e0ad6d-e08c-4a75-8b8e-abea71af581c",
+      "client_name": "Bloem Marble & Granite",
+      "strategy_month": "2026-09-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/bloem-marble-and-granite.md",
+          "sha256": "b9af95ffd01cf22bb9e909d4fc9a0412068a72e13491341d50880a61d6d7299a",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/bloem-marble-and-granite.md",
+          "sha256": "ee026566b563d9c4b84413c9b84b50886c4e931255866586b6057d464a1e653c",
+          "quotes": [
+            "stone fabrication/custom-stone business",
+            "kitchen tops/worktops, bathroom vanities",
+            "Tombstones are a current verified offer but require a separate tone."
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "slab",
+        "vanity",
+        "veining"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "5965f92a-251e-477b-bb2e-ba4f8e06a2ff",
+          "post_count": 108,
+          "post_identity_hash": "e04ea605bbc1b8c73d530482c3a19e2f8c19d4f359dae68cf426d995688c4b8a",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "e6a63210-af72-45e9-89c5-d6d3f90b071d",
+          "post_count": 110,
+          "post_identity_hash": "985be1457f49bcdc0ce5ba8502b560dc9eab5dfaabd1ac9ca8adb68e4c5c0c61",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "e1b1c3ac-15ae-4912-b86e-def50c05712b",
+          "post_count": 59,
+          "post_identity_hash": "d3e179da8b3f856fde526bd3a874b2de3b8afc9875a2a940a60d50142e35eaa0",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "0fda521b1bf199171ec6b3946bd691397eac86a748a28af4b1fed7b27d3ecd6a",
+        "revision_hash": "58a9fea1b75d05d2fedaf7e2f67f3ec56bb4b3c42679436d828b9e95f7c29b45",
+        "strategy_hash": "d3e24a0fb07bc2ea30293d99d0107e8df1ed1e302d249289f28939f45e04db37",
+        "seed_hash": "4331fb031762da0ea39e11f3dda213c78606e812a39fb5107904cc41569c55d5",
+        "package_hash": "9af1254c488168f6cda25d1aaaab2f105efac4b402d36ec157c6f8517ebda18a",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Review September’s kitchen and vanity presentation around one decision: how the actual slab’s veining and edge read in the finished room. Separate usable completed-project images from conceptual renders before planning any carry-forward.",
+          "Pair slab detail with a kitchen result; explain one vanity finish decision; show real cutting or installation detail only where the supplied footage contains it. The hook is what changes between the close-up and the room, not a claim that the material suits every application."
+        ],
+        "strategyGoingForward": "A slab close-up and the finished worktop should tell the same story. Show the real veining, edge and room relationship rather than calling every surface timeless.",
+        "clientActionsRequired": [
+          "Identify the exact stone and confirm permission for each real project selected for reuse.",
+          "Confirm which completed worktop and vanity assets can be used; keep stock and installation dates out until supplied."
+        ],
+        "goldStandard": {
+          "objective": "Review September’s kitchen and vanity presentation around one decision: how the actual slab’s veining and edge read in the finished room. Separate usable completed-project images from conceptual renders before planning any carry-forward.",
+          "audienceAndIntent": "Help homeowners choosing a kitchen worktop or bathroom vanity judge the actual surface and room together; give architects and designers a concrete material or finish question to bring to a quotation conversation. Keep memorial enquiries separate from interiors.",
+          "coreMessage": "A slab close-up and the finished worktop should tell the same story. Show the real veining, edge and room relationship rather than calling every surface timeless.",
+          "formatsAndRationale": "Two professional videos can show the movement from slab detail to finished worktop or vanity. Four design posters can isolate a surface decision and a quotation question. Photo-post, reel and animated-poster quantities are unconfirmed; no extra format is added.",
+          "mustAvoid": "Do not identify a slab from its appearance, promise stock or installation dates, or call quartz heat-proof or scratch-proof. Preserve real veining and edges in edits. Keep memorial imagery respectful and permission-based, with no playful interiors hooks or private inscriptions.",
+          "channelIntegration": "Keep the same named material and room context across the channels already managed for Bloem Marble & Granite. Use a calm, separate treatment for memorial work; do not turn a finished-room render into proof of an installed project.",
+          "pillarsAndHooks": "Pair slab detail with a kitchen result; explain one vanity finish decision; show real cutting or installation detail only where the supplied footage contains it. The hook is what changes between the close-up and the room, not a claim that the material suits every application.",
+          "testAndChange": "Classify the September material-led and finished-room openings before comparing available views or enquiry records. Publishing a post alone does not show which opening worked better.",
+          "successSignals": "Look for enquiries that name a surface, room or quotation requirement. Available views and interactions can support the review, but missing enquiry attribution or metric coverage remains unavailable, not zero.",
+          "nextMonthGamePlan": "Use the September asset review to select one worktop story and one vanity/material story for October. Keep any memorial brief on its own tone track and confirm publication permission before selection."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "Review a real slab-to-worktop visual sequence, preserving its veining and edge.",
+              "Review a vanity or fabrication detail sequence without claiming unseen processes."
+            ],
+            "notes": "Monthly capacity: 2. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "A kitchen surface decision tied to the pictured slab.",
+              "One visible vanity edge or finish detail.",
+              "A quotation prompt asking for the room and material requirement.",
+              "A separate respectful memorial design only if the client supplies an approved brief; otherwise a second room/material decision."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "15df79ec5f5ff2b4d82322bb971fbf0454a1712bf1b26c2a102f8cbc7a5c927e"
+    },
+    {
+      "row_id": "12ae2002-f11c-4be9-93b0-6374e220fdfb",
+      "client_id": "89e0ad6d-e08c-4a75-8b8e-abea71af581c",
+      "client_name": "Bloem Marble & Granite",
+      "strategy_month": "2026-10-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/bloem-marble-and-granite.md",
+          "sha256": "b9af95ffd01cf22bb9e909d4fc9a0412068a72e13491341d50880a61d6d7299a",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/bloem-marble-and-granite.md",
+          "sha256": "ee026566b563d9c4b84413c9b84b50886c4e931255866586b6057d464a1e653c",
+          "quotes": [
+            "stone fabrication/custom-stone business",
+            "kitchen tops/worktops, bathroom vanities",
+            "Tombstones are a current verified offer but require a separate tone."
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "slab",
+        "vanity",
+        "veining"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "5965f92a-251e-477b-bb2e-ba4f8e06a2ff",
+          "post_count": 108,
+          "post_identity_hash": "e04ea605bbc1b8c73d530482c3a19e2f8c19d4f359dae68cf426d995688c4b8a",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "e6a63210-af72-45e9-89c5-d6d3f90b071d",
+          "post_count": 110,
+          "post_identity_hash": "985be1457f49bcdc0ce5ba8502b560dc9eab5dfaabd1ac9ca8adb68e4c5c0c61",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "e1b1c3ac-15ae-4912-b86e-def50c05712b",
+          "post_count": 59,
+          "post_identity_hash": "d3e179da8b3f856fde526bd3a874b2de3b8afc9875a2a940a60d50142e35eaa0",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "318891ceab76c02868704e82777daccd161226b075f73426408f441ab2a43f48",
+        "revision_hash": "3b66a15dc67cb9582f3b7d7bc1edd7cddee69a553d9f964aa3531a5bd25e3123",
+        "strategy_hash": "d5f991d08a65e5682fb007dfa2e646f301e44edf548a11a2540713ad4658cffe",
+        "seed_hash": "81c222e83120bde4a12472a3fdee12b8e791214741036fb528511190c3e5790b",
+        "package_hash": "9af1254c488168f6cda25d1aaaab2f105efac4b402d36ec157c6f8517ebda18a",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Plan October around two concrete quotation conversations: choosing a worktop from a real slab reference and choosing a vanity finish from a supplied room image. Make the material-to-room relationship the organising idea, not a generic makeover promise.",
+          "Open one video on veining at close range before revealing the worktop; open the other on a vanity detail before its room context. Posters answer four different selection or quotation questions instead of repeating a reveal headline."
+        ],
+        "strategyGoingForward": "Bring the room context and look closely at the actual surface. A veining or edge choice is easier to discuss when the material and finished application are shown together.",
+        "clientActionsRequired": [
+          "Supply the exact material labels and usable worktop/vanity references for the two video concepts.",
+          "Approve any care or performance statement against the exact product before it enters poster copy."
+        ],
+        "goldStandard": {
+          "objective": "Plan October around two concrete quotation conversations: choosing a worktop from a real slab reference and choosing a vanity finish from a supplied room image. Make the material-to-room relationship the organising idea, not a generic makeover promise.",
+          "audienceAndIntent": "Help homeowners choosing a kitchen worktop or bathroom vanity judge the actual surface and room together; give architects and designers a concrete material or finish question to bring to a quotation conversation. Keep memorial enquiries separate from interiors.",
+          "coreMessage": "Bring the room context and look closely at the actual surface. A veining or edge choice is easier to discuss when the material and finished application are shown together.",
+          "formatsAndRationale": "Two professional videos can show the movement from slab detail to finished worktop or vanity. Four design posters can isolate a surface decision and a quotation question. Photo-post, reel and animated-poster quantities are unconfirmed; no extra format is added.",
+          "mustAvoid": "Do not identify a slab from its appearance, promise stock or installation dates, or call quartz heat-proof or scratch-proof. Preserve real veining and edges in edits. Keep memorial imagery respectful and permission-based, with no playful interiors hooks or private inscriptions.",
+          "channelIntegration": "Keep the same named material and room context across the channels already managed for Bloem Marble & Granite. Use a calm, separate treatment for memorial work; do not turn a finished-room render into proof of an installed project.",
+          "pillarsAndHooks": "Open one video on veining at close range before revealing the worktop; open the other on a vanity detail before its room context. Posters answer four different selection or quotation questions instead of repeating a reveal headline.",
+          "testAndChange": "Compare a slab-first opening with a finished-worktop-first opening using comparable available viewing measures. Hold the material and factual brief stable; change the opening rather than inventing a new product benefit.",
+          "successSignals": "Assess whether the posts prompt more specific material, edge or room questions where enquiry records exist. Read video views and interactions within their real coverage; do not claim quotation conversion without a recorded link.",
+          "nextMonthGamePlan": "After October, retain the opening that helps viewers articulate a surface or room decision only if the response supports it. Obtain the next real project permission before turning the approach into a repeat series."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "Slab veining close-up to the same real finished worktop.",
+              "Vanity finish detail to its supplied room context."
+            ],
+            "notes": "Monthly capacity: 2. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "What room context to bring when discussing a worktop.",
+              "One real edge-detail question from the selected project.",
+              "One named material decision without universal performance claims.",
+              "A specific quotation prompt for the selected kitchen or vanity application."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "46a31fc533a6127e223af5eb5efdb7246b5995f167e3f36f0f026fa2afa02a2e"
+    },
+    {
+      "row_id": "a0819349-d90d-475a-8358-cb1d5e837777",
+      "client_id": "42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa",
+      "client_name": "Cape Lumber",
+      "strategy_month": "2026-09-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/cape-lumber.md",
+          "sha256": "30c07c204154bd616fe26213d28bde636234899c73b2888ecf3daa6d570701b8",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/cape-lumber.md",
+          "sha256": "baaa4102989d7ec2f8c488efbaab54ced1ab52c1a7112e93a039d96e2eda9ea8",
+          "quotes": [
+            "supplier, not a contractor",
+            "S5 structural Pine",
+            "The official site labels this **“Office Only.”**"
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "timber list",
+        "laminated",
+        "supplier"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "5ecb8b7c-5853-407b-bbdf-98346b8c9f45",
+          "post_count": 47,
+          "post_identity_hash": "8e855fcf6b8c352ad966a1c3a764a5f9ef59e18f4158f9fe2170e46fe33e7cd2",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "d335f176-51ea-49f7-b0eb-a98335ec71bb",
+          "post_count": 35,
+          "post_identity_hash": "4179d73e144748803c847ee11bd213f41a2785ab4ca0f06a27b0a72c31cf5bdc",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "8d6f68b6-11eb-4bf7-b9fe-e0128cad809b",
+          "post_count": 33,
+          "post_identity_hash": "0ae36358c8d5de44c46e8cba48447349e827b7405869750ef2b5328e0bd53081",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "1cf1c60aaaa3ce58ffbc63be374275c6324b0ab344d007221cabf7fbc1108422",
+        "revision_hash": "943a7b65d61fbc1008795044bcf205825aedb3597ad5316dd2340bff93c83dc0",
+        "strategy_hash": "37e8e81b21fbe39bd6af8e8d12c1e2bc907fb7ab16cbef64911b20b40ca07309",
+        "seed_hash": "ec07efbfe9c729232823876ab28be9f35fe2872a789ec09937568b55ee2c603b",
+        "package_hash": "536fe0c07202c962c97c8a9ffa64c137f57f66e93f14d6ad4ea9751c3df7b538",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Review September’s timber and board content for whether a project buyer can tell what to specify, rather than merely seeing a delivery or product photo. Separate historical stock examples from confirmed current supply before reusing them.",
+          "Laminated beam scale; the actual board or timber profile pictured; loading as supplier context rather than construction proof. Use one sourcing or order-detail question alongside each visual."
+        ],
+        "strategyGoingForward": "A usable timber list starts with the required product, quantity and specification. Cape Lumber supplies the material; the buyer’s construction and engineering decisions remain separate.",
+        "clientActionsRequired": [
+          "Confirm the product, grade, treatment and dimensions in each selected photo.",
+          "Supply current sourcing or delivery wording for the exact order context; do not infer it from older loads."
+        ],
+        "goldStandard": {
+          "objective": "Review September’s timber and board content for whether a project buyer can tell what to specify, rather than merely seeing a delivery or product photo. Separate historical stock examples from confirmed current supply before reusing them.",
+          "audienceAndIntent": "Speak to builders, joiners, architects and project buyers preparing a timber or board order. Help them send a usable material list or specification; serious homeowner enquiries remain supply-led rather than installation enquiries.",
+          "coreMessage": "A usable timber list starts with the required product, quantity and specification. Cape Lumber supplies the material; the buyer’s construction and engineering decisions remain separate.",
+          "formatsAndRationale": "Three photo posts can show real timber, board or load details at believable scale; four design posters can answer specification and sourcing questions. Professional video, reel and animated-poster quantities are unknown, so no filming quota is created.",
+          "mustAvoid": "Do not present Cape Lumber as an installer, give structural span advice, promise unlimited sourcing or delivery times, claim H4/H5 supply, or invite collection at an office-only address. Never invent stock, dimensions, treatment certification or in-house machining.",
+          "channelIntegration": "Use the same supplier-led product and quote language on Cape Lumber’s already-managed channels. Direct enquiries towards a timber list or specification rather than a DIY construction tutorial; do not add paid-media scope.",
+          "pillarsAndHooks": "Laminated beam scale; the actual board or timber profile pictured; loading as supplier context rather than construction proof. Use one sourcing or order-detail question alongside each visual.",
+          "testAndChange": "Review September enquiries, if recorded, for a timber list or specification versus an unspecific availability question. Publishing a product image alone does not establish that it converted better.",
+          "successSignals": "Prefer observable quote requests containing a product, dimensions or project quantity. Keep enquiry completeness distinct from sales or delivery outcomes; missing enquiry records are unavailable.",
+          "nextMonthGamePlan": "Use the September review to prepare October’s specification-first timber and board sequence. Confirm the products actually available to photograph and remove any old delivery promise before reuse."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "Review a real laminated beam image for scale and identification.",
+              "Review the actual board edge or timber profile without inventing a grade.",
+              "Review a genuine prepared load as supplier activity, not an installation."
+            ],
+            "notes": "Monthly capacity: 3. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "What to include in a timber list.",
+              "A confirmed grade or treatment decision for the pictured product.",
+              "A sourcing enquiry tied to a specified length or profile.",
+              "A quote prompt that distinguishes supplying material from building the project."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "7e31c73d43f6c543b3e752cb5b14a043d548b13b6f6fc314063a53a9c85d8870"
+    },
+    {
+      "row_id": "5d19b1c2-a5eb-41d1-a216-4000f1b85f73",
+      "client_id": "42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa",
+      "client_name": "Cape Lumber",
+      "strategy_month": "2026-10-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/cape-lumber.md",
+          "sha256": "30c07c204154bd616fe26213d28bde636234899c73b2888ecf3daa6d570701b8",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/cape-lumber.md",
+          "sha256": "baaa4102989d7ec2f8c488efbaab54ced1ab52c1a7112e93a039d96e2eda9ea8",
+          "quotes": [
+            "supplier, not a contractor",
+            "S5 structural Pine",
+            "The official site labels this **“Office Only.”**"
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "timber list",
+        "laminated",
+        "supplier"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "5ecb8b7c-5853-407b-bbdf-98346b8c9f45",
+          "post_count": 47,
+          "post_identity_hash": "8e855fcf6b8c352ad966a1c3a764a5f9ef59e18f4158f9fe2170e46fe33e7cd2",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "d335f176-51ea-49f7-b0eb-a98335ec71bb",
+          "post_count": 35,
+          "post_identity_hash": "4179d73e144748803c847ee11bd213f41a2785ab4ca0f06a27b0a72c31cf5bdc",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "8d6f68b6-11eb-4bf7-b9fe-e0128cad809b",
+          "post_count": 33,
+          "post_identity_hash": "0ae36358c8d5de44c46e8cba48447349e827b7405869750ef2b5328e0bd53081",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "c2e28c6c2b0613ecbd06231cbe67c505cfc19698d9eae1cc292de4acb1c06d98",
+        "revision_hash": "b6154265ce5957f29c0909d433bc01b7be8f12790ae5777a0f7a93c737109812",
+        "strategy_hash": "50af7f57fabcf19db1e62f2e0d700e0c6fb8c20b1288e93b6d9bf285b1089962",
+        "seed_hash": "db2ac8b8adb620360a24239ad83478e244abad1a159e0a019c44466fb4d2ba4f",
+        "package_hash": "536fe0c07202c962c97c8a9ffa64c137f57f66e93f14d6ad4ea9751c3df7b538",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Build October’s photo-and-poster sequence around a better first quotation enquiry: product, specification and quantity. Show laminated timber and board detail only from confirmed available visuals, then make the next buyer step explicit.",
+          "One laminated timber question, one board specification question and one real order/load detail. Posters turn those visuals into practical enquiry prompts without promising that every item is stocked."
+        ],
+        "strategyGoingForward": "Send the timber list, not an assumed installation brief. The clearer the required species, profile or board specification, the clearer the supply conversation can be.",
+        "clientActionsRequired": [
+          "Choose confirmed laminated timber and board references for three photo slots.",
+          "Approve the specification questions and current sourcing wording before poster production."
+        ],
+        "goldStandard": {
+          "objective": "Build October’s photo-and-poster sequence around a better first quotation enquiry: product, specification and quantity. Show laminated timber and board detail only from confirmed available visuals, then make the next buyer step explicit.",
+          "audienceAndIntent": "Speak to builders, joiners, architects and project buyers preparing a timber or board order. Help them send a usable material list or specification; serious homeowner enquiries remain supply-led rather than installation enquiries.",
+          "coreMessage": "Send the timber list, not an assumed installation brief. The clearer the required species, profile or board specification, the clearer the supply conversation can be.",
+          "formatsAndRationale": "Three photo posts can show real timber, board or load details at believable scale; four design posters can answer specification and sourcing questions. Professional video, reel and animated-poster quantities are unknown, so no filming quota is created.",
+          "mustAvoid": "Do not present Cape Lumber as an installer, give structural span advice, promise unlimited sourcing or delivery times, claim H4/H5 supply, or invite collection at an office-only address. Never invent stock, dimensions, treatment certification or in-house machining.",
+          "channelIntegration": "Use the same supplier-led product and quote language on Cape Lumber’s already-managed channels. Direct enquiries towards a timber list or specification rather than a DIY construction tutorial; do not add paid-media scope.",
+          "pillarsAndHooks": "One laminated timber question, one board specification question and one real order/load detail. Posters turn those visuals into practical enquiry prompts without promising that every item is stocked.",
+          "testAndChange": "Compare a timber-list CTA with a specific board-specification CTA in otherwise comparable product posts. Count usable enquiry detail only where it is recorded, not presumed purchases.",
+          "successSignals": "Look for enquiries that include dimensions, quantities and the intended product rather than requests for contracting work. Available interactions support the review but cannot prove order value or procurement speed.",
+          "nextMonthGamePlan": "Carry the more useful quote prompt into the following month if actual enquiries support it. Refresh product availability and lead-time wording before choosing the next material, rather than repeating October stock claims."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "Actual laminated timber length/profile with believable scale.",
+              "Confirmed board edge or sheet detail for a specification enquiry.",
+              "A real order/load detail with no delivery-date promise."
+            ],
+            "notes": "Monthly capacity: 3. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "Send the timber list: product and quantity.",
+              "Send the board specification: the confirmed category and dimensions needed.",
+              "Ask about a particular laminated profile or length, without a stock promise.",
+              "Supplier-only quotation next step, with construction responsibility kept separate."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "2e52280a0f780909ec8feb92145afa8b335ae841e0d23d4dd2ba7947dfb7874c"
+    },
+    {
+      "row_id": "1d5cdcec-9df1-4cbf-baf4-9d7c9b5d028b",
+      "client_id": "917d6f7c-1c2a-4c20-82f0-daa41b9062f5",
+      "client_name": "SecuriForce",
+      "strategy_month": "2026-09-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/securiforce.md",
+          "sha256": "664b3499c2156d2e675462e9948f5f7ea3f0fed75da317d85496f49eb48616a4",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/securiforce.md",
+          "sha256": "de64cc1135213223fcab4f75c417e0a67ed1155a9ed415d239c66094e13f4c2b",
+          "quotes": [
+            "Alarm and CCTV/off-site Monitoring.",
+            "24/7 Control Room/monitoring operation",
+            "Do not include location references in normal SecuriForce captions."
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "control room",
+        "monitoring",
+        "guarding"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "0a3f0d25-d484-44c9-bec6-cc5bcecc0636",
+          "post_count": 27,
+          "post_identity_hash": "dec5d9af392b70693f97c5986f1feb2c06594978da8b533c96f6d54adb0231c3",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "bc6848e0-7d28-493b-8bbd-5456566f89f3",
+          "post_count": 46,
+          "post_identity_hash": "7a98a91ea79d86b0f89b0c91c36c4441b1c8cad10f2b8af18db626fbe37d971d",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "0f769515-a302-4dc1-be05-b6b12733f950",
+          "post_count": 34,
+          "post_identity_hash": "662fc5a40198430e8925e6ad455422f207c91a5d5265d4ecefb0d2035f2af819",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "cb90c78f02a3876402bacae871aef4efce6c0cb0af5c75d596c993b1650223a4",
+        "revision_hash": "f8715b41d5d5eb45f7d45ffc557bce5f4896b30e5c0a4217b764af276c3dd4d1",
+        "strategy_hash": "9452c72a616e13cb7ec386a61036763f2cfaf45c82591802c75991751abeaae1",
+        "seed_hash": "1b353e5d02326b9eb5b7fac4ab1ad60207730fedaf6fff743f7c2446acaa72ef",
+        "package_hash": "c123466c89a580fd3925b6952fc6acff03726f1bc1ae5aee2bd01fb2e319dc05",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Review September’s security presentation for the difference between people-led reassurance and actual service explanation. Retain useful guarding or monitoring context, but remove stale voting urgency and unqualified response promises before reuse.",
+          "The person behind a monitoring step; what guarding means on site; a technical task shown safely; real community involvement only where approved. Let the specific service moment carry the opening."
+        ],
+        "strategyGoingForward": "Protection is easier to understand when a real service step is visible: an officer’s role, a monitoring handoff or a technical check. Dramatic incident footage is not a substitute for that explanation.",
+        "clientActionsRequired": [
+          "Confirm the service and permission for each team or process visual.",
+          "Check that no screen, code, route or private client detail is visible; remove old voting or offer wording."
+        ],
+        "goldStandard": {
+          "objective": "Review September’s security presentation for the difference between people-led reassurance and actual service explanation. Retain useful guarding or monitoring context, but remove stale voting urgency and unqualified response promises before reuse.",
+          "audienceAndIntent": "Help people deciding between guarding, alarm/CCTV monitoring and technical support understand the actual service step. Reassure through a real team or process detail without treating fear as an audience segment.",
+          "coreMessage": "Protection is easier to understand when a real service step is visible: an officer’s role, a monitoring handoff or a technical check. Dramatic incident footage is not a substitute for that explanation.",
+          "formatsAndRationale": "Four professional videos can separate team, monitoring, guarding and technical-support stories. Four photo posts show approved people or service detail; four posters explain distinct service questions. Reels and animated posters remain unknown quantities.",
+          "mustAvoid": "No guaranteed response time, crime-prevention promise, invented registration or blanket 24/7 claim for every service. Keep locations out of ordinary captions. Hide operational screens, access codes, routes and client vulnerabilities; never present a staged incident as real.",
+          "channelIntegration": "Keep each service label consistent across SecuriForce’s managed channels while varying team and process openings. Ordinary captions stay non-location-based. Do not use control-room contacts as an automatic sales footer.",
+          "pillarsAndHooks": "The person behind a monitoring step; what guarding means on site; a technical task shown safely; real community involvement only where approved. Let the specific service moment carry the opening.",
+          "testAndChange": "Review the September team-led and process-led openings using comparable available video measures. Do not infer that a playful campaign improved security enquiries from post counts alone.",
+          "successSignals": "Track recorded questions that identify guarding, monitoring or technical help. Missing service attribution or view coverage stays unavailable; no response-speed or prevented-crime measure is invented.",
+          "nextMonthGamePlan": "Prepare October as a clear sequence of four service stories rather than another blanket reassurance campaign. Select safe footage and get operational review of every process scene before filming or reuse."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "Review a monitoring handoff with sensitive screens hidden.",
+              "Review a guarding role from an approved on-site moment.",
+              "Review a technical task without exposing settings.",
+              "Review a real staff/community moment without staging an incident."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "Approved monitoring-team detail.",
+              "Approved officer image with accurate uniform.",
+              "Safe technical-equipment detail.",
+              "Permitted team/community photo."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "Guarding and the role actually provided.",
+              "Alarm/CCTV monitoring as a distinct service.",
+              "Technical support with qualified hours wording.",
+              "A clear service enquiry prompt without a response-time guarantee."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "5269ac094529a66ca6b4b632d1331fbb40ced67be8d27c8a551b5353e5d65fb3"
+    },
+    {
+      "row_id": "5f39bd38-00ed-4060-b55b-1283065e82dd",
+      "client_id": "917d6f7c-1c2a-4c20-82f0-daa41b9062f5",
+      "client_name": "SecuriForce",
+      "strategy_month": "2026-10-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/securiforce.md",
+          "sha256": "664b3499c2156d2e675462e9948f5f7ea3f0fed75da317d85496f49eb48616a4",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/securiforce.md",
+          "sha256": "de64cc1135213223fcab4f75c417e0a67ed1155a9ed415d239c66094e13f4c2b",
+          "quotes": [
+            "Alarm and CCTV/off-site Monitoring.",
+            "24/7 Control Room/monitoring operation",
+            "Do not include location references in normal SecuriForce captions."
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "control room",
+        "monitoring",
+        "guarding"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "0a3f0d25-d484-44c9-bec6-cc5bcecc0636",
+          "post_count": 27,
+          "post_identity_hash": "dec5d9af392b70693f97c5986f1feb2c06594978da8b533c96f6d54adb0231c3",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "bc6848e0-7d28-493b-8bbd-5456566f89f3",
+          "post_count": 46,
+          "post_identity_hash": "7a98a91ea79d86b0f89b0c91c36c4441b1c8cad10f2b8af18db626fbe37d971d",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "0f769515-a302-4dc1-be05-b6b12733f950",
+          "post_count": 34,
+          "post_identity_hash": "662fc5a40198430e8925e6ad455422f207c91a5d5265d4ecefb0d2035f2af819",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "43c1f5439e7cf89c83e8997e606b0245d2baea1581cc0bdd769365973e4e594e",
+        "revision_hash": "9e59959f0889d0df54eaeb9386d6e5f0f949aef51c6cae2f4125dcf01a0a719d",
+        "strategy_hash": "7074b4cdd6984b743d4b40dc8f1a0957c4cb9d536e37134f9b92bbf3c3b9815d",
+        "seed_hash": "2019024d9208035a545f7eff6f26a81f19109572289ba57ce497eed05b20a7b4",
+        "package_hash": "c123466c89a580fd3925b6952fc6acff03726f1bc1ae5aee2bd01fb2e319dc05",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Organise October around four useful service explanations: guarding, monitoring, technical help and the people carrying out the work. Show competence through one real step per story, not action-film staging or a general safety guarantee.",
+          "Open with the monitoring handoff, the on-site guarding responsibility, a technical check and a real staff question. Pair each video with an approved photo and one concise service poster rather than copying every headline into the caption."
+        ],
+        "strategyGoingForward": "Know which SecuriForce service you are asking for and what the visible team step does. Monitoring, guarding and technical support are related but not interchangeable promises.",
+        "clientActionsRequired": [
+          "Confirm safe filming subjects for four service stories and staff availability.",
+          "Approve service wording and operational redactions before production; no invented compliance or response claim."
+        ],
+        "goldStandard": {
+          "objective": "Organise October around four useful service explanations: guarding, monitoring, technical help and the people carrying out the work. Show competence through one real step per story, not action-film staging or a general safety guarantee.",
+          "audienceAndIntent": "Help people deciding between guarding, alarm/CCTV monitoring and technical support understand the actual service step. Reassure through a real team or process detail without treating fear as an audience segment.",
+          "coreMessage": "Know which SecuriForce service you are asking for and what the visible team step does. Monitoring, guarding and technical support are related but not interchangeable promises.",
+          "formatsAndRationale": "Four professional videos can separate team, monitoring, guarding and technical-support stories. Four photo posts show approved people or service detail; four posters explain distinct service questions. Reels and animated posters remain unknown quantities.",
+          "mustAvoid": "No guaranteed response time, crime-prevention promise, invented registration or blanket 24/7 claim for every service. Keep locations out of ordinary captions. Hide operational screens, access codes, routes and client vulnerabilities; never present a staged incident as real.",
+          "channelIntegration": "Keep each service label consistent across SecuriForce’s managed channels while varying team and process openings. Ordinary captions stay non-location-based. Do not use control-room contacts as an automatic sales footer.",
+          "pillarsAndHooks": "Open with the monitoring handoff, the on-site guarding responsibility, a technical check and a real staff question. Pair each video with an approved photo and one concise service poster rather than copying every headline into the caption.",
+          "testAndChange": "Compare a staff-question opening with a process-step opening for the same service where comparable footage exists. Keep service claims stable and compare only available native viewing or enquiry records.",
+          "successSignals": "Look for better-specified guarding or monitoring enquiries and real viewing response to the service explanations. Do not count missing enquiries as zero or equate video attention with prevented incidents.",
+          "nextMonthGamePlan": "Use October’s recorded service questions to choose the next explanation. Retain the team/process balance only where real responses support it; obtain fresh operational approval for any new location or client footage."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "One safe monitoring handoff explained by the relevant team.",
+              "One approved guarding responsibility on site.",
+              "One technical check with credentials/settings hidden.",
+              "One real staff question answered without a universal protection promise."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "Approved team image for the monitoring story.",
+              "Officer/uniform detail for guarding.",
+              "Safe technical service detail.",
+              "Human staff moment belonging to the approved story."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "Which guarding service the customer needs.",
+              "What alarm/CCTV monitoring refers to.",
+              "When technical service or standby wording applies.",
+              "How to ask about the specific service, without operational or response-time claims."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "61288e1a1f56854719a1d170bc2832e08cb56dc0937dabcc991dfc1b23d67b76"
+    },
+    {
+      "row_id": "a205344a-497c-4eb6-8194-19d20e43c8a5",
+      "client_id": "7b47afb0-fa55-4916-85f6-09c57e5905b9",
+      "client_name": "Madison Wear",
+      "strategy_month": "2026-09-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/madison-wear.md",
+          "sha256": "0c5625197529a2964f5206824ad012f7d654f5de68ff5956801d8c58875b88b9",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/madison-wear.md",
+          "sha256": "559e835b621295975afdea3bacb52d6b812da55486fe6d93189e5b459838eb03",
+          "quotes": [
+            "Current public/trading identity: **Madisons Menswear**",
+            "men's clothing",
+            "Do not freeze a permanent brand list."
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "Madisons Menswear",
+        "garment",
+        "outfit"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "d52630dc-d639-40f9-bce6-ddff6def1958",
+          "post_count": 35,
+          "post_identity_hash": "6d1045d7f69100f43821c86f4208273ab2d5b6552edfdbaaa18dcd8bd401a18d",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "df86a486-acea-4fcb-bf85-805ba78fe264",
+          "post_count": 32,
+          "post_identity_hash": "a27fc84e5f2ddf9ed6f7603a83a9271b39d09a8ab573d8c79dbee98ae4a69e9f",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "52fe986e-3a03-4c0b-99b9-2ed99356aa73",
+          "post_count": 24,
+          "post_identity_hash": "ee0ae75146a99b7ba6277f4a920a063f01eaa51eac67b414ae6f646da0991c1d",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "eccfd4f6285bbcc341ba66b7d3a778983bafe44f028ec4f89e118d958226b4f7",
+        "revision_hash": "86e20107313256c2ec83bba4a840759e0e113bcde79c5f99def2b8d4e46ab24a",
+        "strategy_hash": "c0c6932bd1440ae90a80c55e98abb7b6890dbf919159d0ffc02937a65918cf98",
+        "seed_hash": "3b2c5757c65e76e36daa2b636b9d4bbdd0952c1f3d40716733d8715819a4d2ea",
+        "package_hash": "89517c1e3f1fd03df91470e91bc9e5d00fd58d04b61c4dc29a67af2c23a86887",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Review September’s menswear presentation for whether each piece gives a shopper a visible fit, pairing or occasion decision beyond a catalogue label. Preserve actual garment identity and separate historical brands or payment messages from current buying information.",
+          "A product-on-model detail; a footwear/outfit pairing; the practical question answered by real shopping assistance. Use the exact item pictured, not a permanent list of labels."
+        ],
+        "strategyGoingForward": "Look at the garment and how it is worn. A visible cut, stitching detail or outfit pairing says more than promising that every item is premium or a must-have.",
+        "clientActionsRequired": [
+          "Confirm exact garments, usable model imagery and any product facts needed for reuse.",
+          "Confirm the store/branch details used for the buying CTA; do not reuse old payment terms."
+        ],
+        "goldStandard": {
+          "objective": "Review September’s menswear presentation for whether each piece gives a shopper a visible fit, pairing or occasion decision beyond a catalogue label. Preserve actual garment identity and separate historical brands or payment messages from current buying information.",
+          "audienceAndIntent": "Help men considering an outfit or footwear pairing picture a specific in-store choice at Madisons Menswear. Focus on visible garment detail and shopping assistance, not invented demographic groups or a permanent brand roster.",
+          "coreMessage": "Look at the garment and how it is worn. A visible cut, stitching detail or outfit pairing says more than promising that every item is premium or a must-have.",
+          "formatsAndRationale": "Two professional videos show an outfit decision or real shopping assistance. Eight photo posts can cover distinct garments, footwear and pairings; eight design posters give concise shopper questions. Reels and animated posters are not added as fixed capacity.",
+          "mustAvoid": "No assumed stock, sizes, prices, fabric performance, payment plans or kids range. Do not claim online ordering, delivery or click-and-collect from the historical site. Preserve real cut, colour, stitching and logos; never let a generated garment establish availability.",
+          "channelIntegration": "Use Madisons Menswear as the public identity across managed channels and keep garment details consistent. Direct the buying conversation to verified in-store assistance rather than an unconfirmed online checkout or another branch’s contact.",
+          "pillarsAndHooks": "A product-on-model detail; a footwear/outfit pairing; the practical question answered by real shopping assistance. Use the exact item pictured, not a permanent list of labels.",
+          "testAndChange": "Review September product-only and outfit-context openings with available native measures. Publishing a product does not establish fabric comfort, sales or a winning clothing brand.",
+          "successSignals": "Look for recorded questions about a depicted item, size or pairing. Keep shop enquiries separate from unsupported ecommerce conversions; unavailable attribution remains unavailable.",
+          "nextMonthGamePlan": "Prepare October around one outfit-pairing story and one real assistance story, using confirmed garments. Choose eight varied photo subjects before writing eight poster messages, so the feed does not merely rename the same product."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "Review an actual outfit pairing without inventing garment composition.",
+              "Review a real shopping-assistance moment with participant permission."
+            ],
+            "notes": "Monthly capacity: 2. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "Exact garment-on-model detail.",
+              "Visible stitching or cut close-up.",
+              "Confirmed footwear with an outfit.",
+              "A second distinct garment pairing."
+            ],
+            "notes": "Monthly capacity: 8. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "One shopper question about the pictured garment.",
+              "A pairing idea using only shown items.",
+              "An in-store assistance prompt.",
+              "A visible footwear or cut detail without a comfort guarantee."
+            ],
+            "notes": "Monthly capacity: 8. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "3172dc134e188fca90127c2c2b4619379b930a03505d9645dc6b5a04d3e631d2"
+    },
+    {
+      "row_id": "53fee98b-3b68-46f5-9e93-f976c9413c14",
+      "client_id": "7b47afb0-fa55-4916-85f6-09c57e5905b9",
+      "client_name": "Madison Wear",
+      "strategy_month": "2026-10-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/madison-wear.md",
+          "sha256": "0c5625197529a2964f5206824ad012f7d654f5de68ff5956801d8c58875b88b9",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/madison-wear.md",
+          "sha256": "559e835b621295975afdea3bacb52d6b812da55486fe6d93189e5b459838eb03",
+          "quotes": [
+            "Current public/trading identity: **Madisons Menswear**",
+            "men's clothing",
+            "Do not freeze a permanent brand list."
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "Madisons Menswear",
+        "garment",
+        "outfit"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "d52630dc-d639-40f9-bce6-ddff6def1958",
+          "post_count": 35,
+          "post_identity_hash": "6d1045d7f69100f43821c86f4208273ab2d5b6552edfdbaaa18dcd8bd401a18d",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "df86a486-acea-4fcb-bf85-805ba78fe264",
+          "post_count": 32,
+          "post_identity_hash": "a27fc84e5f2ddf9ed6f7603a83a9271b39d09a8ab573d8c79dbee98ae4a69e9f",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "52fe986e-3a03-4c0b-99b9-2ed99356aa73",
+          "post_count": 24,
+          "post_identity_hash": "ee0ae75146a99b7ba6277f4a920a063f01eaa51eac67b414ae6f646da0991c1d",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "4a67e43fadcce43b66ecdf5aa4a917ca4c328c2a968e1e48a800f849f0b720c8",
+        "revision_hash": "4e7def655d6b96a57346267730dd0f15108dd1f8ad0c7a5edb99415466899be4",
+        "strategy_hash": "0c4ab1acde7274a8acd6e61f646eef5124c73eeb02fe0ae3f759376075dde3c8",
+        "seed_hash": "9f6c9d64f39408c257590b88bab2be8aa76bd10bc7db12b8d35680bb27ee92d7",
+        "package_hash": "89517c1e3f1fd03df91470e91bc9e5d00fd58d04b61c4dc29a67af2c23a86887",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Make October a practical outfit-selection month: show how confirmed garments and footwear work together, then show the real in-store assistance behind the choice. Keep the emphasis on buying decisions, not unconfirmed arrivals or discounts.",
+          "One outfit reveal built from a garment detail; one assistance-led answer to a shopper question; eight varied garment/footwear photo slots and concise pairing posters. Leave unnamed brand or material claims out until confirmed."
+        ],
+        "strategyGoingForward": "Choose an outfit from what is actually shown, then ask about the exact item in store. Styling and visible detail should lead the conversation before a generic fashion slogan.",
+        "clientActionsRequired": [
+          "Select confirmed garments and footwear for varied photo slots and two video subjects.",
+          "Approve product labels and the exact in-store CTA; reconfirm any promotion before adding it."
+        ],
+        "goldStandard": {
+          "objective": "Make October a practical outfit-selection month: show how confirmed garments and footwear work together, then show the real in-store assistance behind the choice. Keep the emphasis on buying decisions, not unconfirmed arrivals or discounts.",
+          "audienceAndIntent": "Help men considering an outfit or footwear pairing picture a specific in-store choice at Madisons Menswear. Focus on visible garment detail and shopping assistance, not invented demographic groups or a permanent brand roster.",
+          "coreMessage": "Choose an outfit from what is actually shown, then ask about the exact item in store. Styling and visible detail should lead the conversation before a generic fashion slogan.",
+          "formatsAndRationale": "Two professional videos show an outfit decision or real shopping assistance. Eight photo posts can cover distinct garments, footwear and pairings; eight design posters give concise shopper questions. Reels and animated posters are not added as fixed capacity.",
+          "mustAvoid": "No assumed stock, sizes, prices, fabric performance, payment plans or kids range. Do not claim online ordering, delivery or click-and-collect from the historical site. Preserve real cut, colour, stitching and logos; never let a generated garment establish availability.",
+          "channelIntegration": "Use Madisons Menswear as the public identity across managed channels and keep garment details consistent. Direct the buying conversation to verified in-store assistance rather than an unconfirmed online checkout or another branch’s contact.",
+          "pillarsAndHooks": "One outfit reveal built from a garment detail; one assistance-led answer to a shopper question; eight varied garment/footwear photo slots and concise pairing posters. Leave unnamed brand or material claims out until confirmed.",
+          "testAndChange": "Compare a close-up-detail opening with an outfit-context opening for the same confirmed item. Hold product facts stable and assess available views and specific shopper questions rather than assumed purchases.",
+          "successSignals": "Assess whether enquiries mention the actual garment, footwear or pairing shown. Use available viewing/interactions without claiming online sales, stock movement or size availability from attention alone.",
+          "nextMonthGamePlan": "Use October’s real item and pairing questions to choose the following month’s subjects. Confirm stock again before reuse and retain only the styling angle that helps shoppers ask a more specific question."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "Garment-detail opening to a real outfit pairing.",
+              "Real in-store assistance answering one item or pairing question."
+            ],
+            "notes": "Monthly capacity: 2. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "Confirmed garment in a full outfit.",
+              "The same item’s visible cut/detail.",
+              "A different confirmed footwear pairing.",
+              "A real assistance/store moment with permission."
+            ],
+            "notes": "Monthly capacity: 8. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "A specific pairing question for the chosen outfit.",
+              "One visible garment-detail decision.",
+              "Ask about the actual footwear shown.",
+              "An in-store assistance prompt without online-order or payment-plan claims."
+            ],
+            "notes": "Monthly capacity: 8. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "fe758a8e9029e7453a312237f7ef2e0679de9bba86df05fa3d5585142571f4e0"
+    },
+    {
+      "row_id": "dea93c2e-c257-4192-8350-bce1d0ee3beb",
+      "client_id": "079df21e-783a-4648-b3fa-0acae6e68867",
+      "client_name": "Case Bloemfontein",
+      "strategy_month": "2026-09-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/case-bloemfontein.md",
+          "sha256": "6f1e07deae82e0ae0e86e21b17c609b7ff11389e337b3a482927458f0bade97b",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/case-bloemfontein.md",
+          "sha256": "cd12b2e737334ace456007e935acc5503fbcc5d8916b1e984146b3f0de3dd6d0",
+          "quotes": [
+            "parts/technical support are part of the official dealership positioning",
+            "dedicated Husqvarna workshop and after-sales service centre",
+            "Husqvarna K 770"
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "Husqvarna",
+        "parts",
+        "machine"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "5530ac78-3732-49ee-b0c7-c6685f05256d",
+          "post_count": 45,
+          "post_identity_hash": "128c08dfb2d678ed19103671d95c970ca7a5a514c4b04c872d8825bf531e2afa",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "a9529609-10f5-4b22-8f9d-10d69d91cc3b",
+          "post_count": 16,
+          "post_identity_hash": "8b15bd4bf576e0140d2ed361d8b9b5a7f2de3551f3f520bb0e1b8ca62f8ba1ca",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "877629ce-a309-4e7f-aa1a-540078c0478b",
+          "post_count": 26,
+          "post_identity_hash": "63d330bf01c289347e57818bf1032111cec384945a773b1ceaa89603579e8513",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "b0147b8e3d6cbf648dad993e42a35437ff3cb77e4531b1657e9663fb21de08e0",
+        "revision_hash": "0418eef24e7985e91be1c073bcca064b330770ac2bfbf0db9e84cd5e78c6bf46",
+        "strategy_hash": "59db7674227fe040bd542102b1007547445f4a29423078041b34f082d1af7929",
+        "seed_hash": "7fb761f0dcc74d32456f79d8049360ae1cbc2e588707206799197d84dc7ef9fc",
+        "package_hash": "a63e80864a6ba8f665b85a5e0e1cdca0a8f4625ea2ab79e1985778c2a13e0b10",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Review September’s machine and event presentation for a concrete operator or parts question. Separate past agricultural-event personality from current equipment availability, and preserve the local dealership boundary in any reused material.",
+          "Actual machine/application detail; one parts or technical-support question; a separate Husqvarna product/workshop subject. Historical event footage stays retrospective, not proof of a new event or model in stock."
+        ],
+        "strategyGoingForward": "A machine shown doing a real job gives the operator a useful question to ask. Product lettering and the local service context matter more than another claim that tough machines tackle tough jobs.",
+        "clientActionsRequired": [
+          "Confirm the actual machine, local availability facts and readable model markings for reused assets.",
+          "Supply the parts/after-sales detail and local contact route; reconfirm any event or offer before mention."
+        ],
+        "goldStandard": {
+          "objective": "Review September’s machine and event presentation for a concrete operator or parts question. Separate past agricultural-event personality from current equipment availability, and preserve the local dealership boundary in any reused material.",
+          "audienceAndIntent": "Help farmers, operators and contractors ask a useful local machine, parts or after-sales question. Keep the agricultural equipment conversation and the Husqvarna workshop conversation distinct rather than treating national catalogue claims as local availability.",
+          "coreMessage": "A machine shown doing a real job gives the operator a useful question to ask. Product lettering and the local service context matter more than another claim that tough machines tackle tough jobs.",
+          "formatsAndRationale": "Two professional videos can separate machinery-in-application from Husqvarna after-sales or parts guidance. Twelve design posters allow distinct product/application questions. Photo, reel and animated-poster quantities remain unknown; catalogue breadth does not add capacity.",
+          "mustAvoid": "Do not transfer another branch’s stock or contacts, advertise historical used units as available, or turn national finance/warranty examples into local terms. Preserve exact machine and Husqvarna markings. No invented model stock, demo dates, service turnaround or operating specifications.",
+          "channelIntegration": "Keep Case Bloemfontein’s local identity and actual machine subject consistent across managed channels. Separate agricultural and Husqvarna topics, using only the corresponding confirmed product or service facts.",
+          "pillarsAndHooks": "Actual machine/application detail; one parts or technical-support question; a separate Husqvarna product/workshop subject. Historical event footage stays retrospective, not proof of a new event or model in stock.",
+          "testAndChange": "Review machine-first and people/event-first September openings only within comparable available coverage. Historical participation or a pictured model does not prove enquiries, local stock or future demonstrations.",
+          "successSignals": "Look for recorded local enquiries naming an application, machine or parts need. Available views support the review; do not turn unspecified post formats into package or performance conclusions.",
+          "nextMonthGamePlan": "Plan October’s two videos around an actual application question and a separate Husqvarna after-sales topic. Select the poster subjects from confirmed local machines or parts, not an old national promotion."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "Review a real machine/application sequence with exact markings preserved.",
+              "Review a separate Husqvarna parts or workshop subject without a stock promise."
+            ],
+            "notes": "Monthly capacity: 2. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "A machine/application question tied to the shown equipment.",
+              "A local parts enquiry prompt.",
+              "A separate Husqvarna after-sales question.",
+              "Retrospective event context only for approved historical footage; no future-event announcement."
+            ],
+            "notes": "Monthly capacity: 12. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "1952486a4e0f4c0071bae825d78d9899bd76f4dd6e0a1a47a4ab4dd5d311e9a5"
+    },
+    {
+      "row_id": "be70b4e6-7895-4b05-abbb-ad61e4fb0c15",
+      "client_id": "079df21e-783a-4648-b3fa-0acae6e68867",
+      "client_name": "Case Bloemfontein",
+      "strategy_month": "2026-10-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/case-bloemfontein.md",
+          "sha256": "6f1e07deae82e0ae0e86e21b17c609b7ff11389e337b3a482927458f0bade97b",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/case-bloemfontein.md",
+          "sha256": "cd12b2e737334ace456007e935acc5503fbcc5d8916b1e984146b3f0de3dd6d0",
+          "quotes": [
+            "parts/technical support are part of the official dealership positioning",
+            "dedicated Husqvarna workshop and after-sales service centre",
+            "Husqvarna K 770"
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "Husqvarna",
+        "parts",
+        "machine"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "5530ac78-3732-49ee-b0c7-c6685f05256d",
+          "post_count": 45,
+          "post_identity_hash": "128c08dfb2d678ed19103671d95c970ca7a5a514c4b04c872d8825bf531e2afa",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "a9529609-10f5-4b22-8f9d-10d69d91cc3b",
+          "post_count": 16,
+          "post_identity_hash": "8b15bd4bf576e0140d2ed361d8b9b5a7f2de3551f3f520bb0e1b8ca62f8ba1ca",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "877629ce-a309-4e7f-aa1a-540078c0478b",
+          "post_count": 26,
+          "post_identity_hash": "63d330bf01c289347e57818bf1032111cec384945a773b1ceaa89603579e8513",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "8c9940025b2d65cdc3f8f9e21cfd3cbe8ca493b87605e77a856e240c307c1dc3",
+        "revision_hash": "3fe60a59a9ed1add065aa0afc3617411e3cb6e93c02d358f5e36bc85448aff92",
+        "strategy_hash": "4d19607e8a9e4f2217e0e2961a91196437e8506c5f324249a6f85cf6e86374a6",
+        "seed_hash": "eeea8c69336e3ec5796b9552af9f805bc6b32ee107fd92d1aafcb33ee8b21996",
+        "package_hash": "a63e80864a6ba8f665b85a5e0e1cdca0a8f4625ea2ab79e1985778c2a13e0b10",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Give October a useful local decision sequence: what the shown machine is being asked to do, which parts question follows, and where a Husqvarna after-sales enquiry belongs. Avoid blending equipment streams into a single broad productivity slogan.",
+          "Open one video on a real application before naming the machine; open the other on an actual Husqvarna maintenance or parts question. Posters separate agricultural application, local parts and workshop topics within twelve slots."
+        ],
+        "strategyGoingForward": "Start with the job and the exact machine, then ask the local dealership the relevant parts or after-sales question. The Husqvarna subject keeps its own product and workshop context.",
+        "clientActionsRequired": [
+          "Choose a confirmed local machine/application subject and a separate Husqvarna after-sales subject.",
+          "Approve exact product lettering and any technical statement; no assumed stock, finance or demonstration date."
+        ],
+        "goldStandard": {
+          "objective": "Give October a useful local decision sequence: what the shown machine is being asked to do, which parts question follows, and where a Husqvarna after-sales enquiry belongs. Avoid blending equipment streams into a single broad productivity slogan.",
+          "audienceAndIntent": "Help farmers, operators and contractors ask a useful local machine, parts or after-sales question. Keep the agricultural equipment conversation and the Husqvarna workshop conversation distinct rather than treating national catalogue claims as local availability.",
+          "coreMessage": "Start with the job and the exact machine, then ask the local dealership the relevant parts or after-sales question. The Husqvarna subject keeps its own product and workshop context.",
+          "formatsAndRationale": "Two professional videos can separate machinery-in-application from Husqvarna after-sales or parts guidance. Twelve design posters allow distinct product/application questions. Photo, reel and animated-poster quantities remain unknown; catalogue breadth does not add capacity.",
+          "mustAvoid": "Do not transfer another branch’s stock or contacts, advertise historical used units as available, or turn national finance/warranty examples into local terms. Preserve exact machine and Husqvarna markings. No invented model stock, demo dates, service turnaround or operating specifications.",
+          "channelIntegration": "Keep Case Bloemfontein’s local identity and actual machine subject consistent across managed channels. Separate agricultural and Husqvarna topics, using only the corresponding confirmed product or service facts.",
+          "pillarsAndHooks": "Open one video on a real application before naming the machine; open the other on an actual Husqvarna maintenance or parts question. Posters separate agricultural application, local parts and workshop topics within twelve slots.",
+          "testAndChange": "Compare a job-first opening with a machine-name-first opening on a confirmed subject. Keep specs and availability wording unchanged; assess available viewing and application-specific enquiry records, not an invented sales lift.",
+          "successSignals": "Read recorded enquiries for clearer machine/application or parts detail. Keep Husqvarna service questions distinct from agricultural equipment enquiries; unavailable attribution or native metrics stay unavailable.",
+          "nextMonthGamePlan": "Carry forward October’s question-led opening only if real enquiries support it. Obtain a new local subject and recheck model/stock facts before preparing the next machine or Husqvarna story."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "Real application opening followed by the exact local machine subject.",
+              "A distinct Husqvarna after-sales or parts question with confirmed details."
+            ],
+            "notes": "Monthly capacity: 2. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "Ask about the job the selected machine must do.",
+              "A precise local parts question without invented compatibility.",
+              "A Husqvarna workshop/after-sales enquiry route.",
+              "A confirmed product detail, not a historical finance or used-stock offer."
+            ],
+            "notes": "Monthly capacity: 12. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "32394848040c5e2f0d84678332a9ed1c405f9e111d62f10d6341af627b81fa22"
+    },
+    {
+      "row_id": "a9d5928f-fda3-48a8-8803-4eb6bfdd4194",
+      "client_id": "b6052710-417d-4b3b-8348-0f126bfea671",
+      "client_name": "Germoparts",
+      "strategy_month": "2026-09-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/germoparts.md",
+          "sha256": "f4e03ac4fdf3c98b2203074da9a633edda594863c5975835cac4b7425349696a",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/germoparts.md",
+          "sha256": "23b2a8007e11b3917d991f6bcb6be23cf8b427248261779b6e0040d465e5c33b",
+          "quotes": [
+            "steering racks;",
+            "brake-light switches;",
+            "do not improvise compatibility;"
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "part number",
+        "vehicle",
+        "branch"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "a12a0a26-594d-41a8-93ed-610a26713715",
+          "post_count": 28,
+          "post_identity_hash": "62b51d9ea13e8ab12a545c6868b5f83269142263ac3eb8855b020bb1fd96b79c",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "b9199d5e-50f9-4436-9876-740b00205700",
+          "post_count": 34,
+          "post_identity_hash": "737af06a3344b5ff0c15421bc12f217a0b6e0d8e4ffabb75ceff33f6a6be55bc",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "880903b6-0bfa-4364-8132-3d264463a96f",
+          "post_count": 23,
+          "post_identity_hash": "25feb0bb53a063014edc0ba7986578c224cfe4df8cb1adebf14ea665d70fc069",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "ba62737aae9e6d921a53d0901efd98b3c748d24ab578415bb38900da2d872db1",
+        "revision_hash": "074ed899c8233a95d5f80c1c9fa70db13f2e07787e79797be3041d02ca3c12e5",
+        "strategy_hash": "570c0f6582cff7951ecf3793bd4ba9858d8a4be2f11d95fdec7ce5deba6afa78",
+        "seed_hash": "4100087a3142329de3cd54f206666e46d6e6c51f5308f0eb0a07e4e5386c46ac",
+        "package_hash": "28e93e17bbc662ecb61750a05187c8b056426a6afbe99cef11961aad782807c0",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Review September’s parts presentation for enquiry accuracy: did a post make the relevant vehicle/application question clear without merely repeating a product card? Keep historical part numbers and campaign terms attached to their original brief.",
+          "One real part detail; the vehicle information needed to ask about it; a branch shelf or service moment. Keep staff recognition separate from supplier promotions, even when similar people or branding appear."
+        ],
+        "strategyGoingForward": "The right parts conversation needs the vehicle detail and exact part reference, not a generic promise to keep every vehicle running. A steering or brake-light subject should make the next enquiry more precise.",
+        "clientActionsRequired": [
+          "Confirm exact part/application wording and legible labels on reusable assets.",
+          "Approve the relevant branch contact and any current delivery wording; do not generalise old branch claims."
+        ],
+        "goldStandard": {
+          "objective": "Review September’s parts presentation for enquiry accuracy: did a post make the relevant vehicle/application question clear without merely repeating a product card? Keep historical part numbers and campaign terms attached to their original brief.",
+          "audienceAndIntent": "Help workshops and vehicle owners turn a parts question into an accurate enquiry: vehicle detail, the exact supplied part number and the relevant branch. Keep technical uncertainty visible rather than promising fitment to win attention.",
+          "coreMessage": "The right parts conversation needs the vehicle detail and exact part reference, not a generic promise to keep every vehicle running. A steering or brake-light subject should make the next enquiry more precise.",
+          "formatsAndRationale": "Two professional videos can show a real parts-enquiry or branch sequence. Twelve design posters can answer different category/application questions. Unknown photo, reel and animated capacities stay disabled; historical posting volume is not extra package scope.",
+          "mustAvoid": "Never invent vehicle compatibility, change an OE/part number, describe aftermarket stock as genuine/OEM without proof, or transfer one branch’s delivery terms nationwide. Keep old campaign prices and supplier promotions out; preserve real packaging, labels and part geometry.",
+          "channelIntegration": "Use the same exact part/category wording across Germoparts’ managed channels, with branch-specific enquiries routed to that branch. Plain contact text stays readable, without borrowing another branch’s hours or delivery claims.",
+          "pillarsAndHooks": "One real part detail; the vehicle information needed to ask about it; a branch shelf or service moment. Keep staff recognition separate from supplier promotions, even when similar people or branding appear.",
+          "testAndChange": "Review September category-led versus enquiry-question openings. Where enquiry records exist, assess whether vehicle/part detail was supplied; publishing a part does not prove fitment success or sales.",
+          "successSignals": "Specific vehicle and part-number enquiries are useful observable signals when recorded. Missing compatibility verification, branch attribution or enquiry metrics remains unavailable; no fitting or delivery outcome is presumed.",
+          "nextMonthGamePlan": "Prepare October around a better parts enquiry and a separate real branch story. Use confirmed category subjects, leaving old prices, Saturday-delivery promises and supplier competitions out unless newly supplied."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "Review a real part close-up to the vehicle-detail enquiry it needs.",
+              "Review a branch shelf/team sequence without implying nationwide stock."
+            ],
+            "notes": "Monthly capacity: 2. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "Vehicle details to supply for the pictured category.",
+              "The exact supplied part number kept intact.",
+              "One confirmed brake or steering category question.",
+              "A branch-specific enquiry prompt without old pricing or delivery terms."
+            ],
+            "notes": "Monthly capacity: 12. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "c621a3f661bcfaea4cc651ea74ded452fce922c0c8a550d9fc0a06539866f22a"
+    },
+    {
+      "row_id": "73ac8493-8746-4e67-9889-d8c27abec853",
+      "client_id": "b6052710-417d-4b3b-8348-0f126bfea671",
+      "client_name": "Germoparts",
+      "strategy_month": "2026-10-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/germoparts.md",
+          "sha256": "f4e03ac4fdf3c98b2203074da9a633edda594863c5975835cac4b7425349696a",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/germoparts.md",
+          "sha256": "23b2a8007e11b3917d991f6bcb6be23cf8b427248261779b6e0040d465e5c33b",
+          "quotes": [
+            "steering racks;",
+            "brake-light switches;",
+            "do not improvise compatibility;"
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "part number",
+        "vehicle",
+        "branch"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "a12a0a26-594d-41a8-93ed-610a26713715",
+          "post_count": 28,
+          "post_identity_hash": "62b51d9ea13e8ab12a545c6868b5f83269142263ac3eb8855b020bb1fd96b79c",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "b9199d5e-50f9-4436-9876-740b00205700",
+          "post_count": 34,
+          "post_identity_hash": "737af06a3344b5ff0c15421bc12f217a0b6e0d8e4ffabb75ceff33f6a6be55bc",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "880903b6-0bfa-4364-8132-3d264463a96f",
+          "post_count": 23,
+          "post_identity_hash": "25feb0bb53a063014edc0ba7986578c224cfe4df8cb1adebf14ea665d70fc069",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "36d3db14f2427e59cd79c2285d69bd5c7b46b4a3dca9148efcacb6b924cc05e1",
+        "revision_hash": "80a9b041cee3b28a85916f0d96a0ab4ae0a452eaf5c19ea31cd3d5f4e4191c83",
+        "strategy_hash": "fc982a0adaa4347d53a1c310c7cb9cd3a05ce0f824c6b4edf932b6aa1f0dee8c",
+        "seed_hash": "6add36184367ded342615c54ebd8c6784307983f35b5d9ff6243e14b03922135",
+        "package_hash": "28e93e17bbc662ecb61750a05187c8b056426a6afbe99cef11961aad782807c0",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Make October’s parts content help customers prepare an accurate first enquiry. Pair one vehicle-detail story with one exact-branch parts environment, and give the twelve poster slots specific category questions rather than a catalogue of unsupported compatibility claims.",
+          "Open on the exact label or part geometry; ask the vehicle/application question; show the real branch context separately. Category posters can cover brakes, steering or service parts only with supplied part detail."
+        ],
+        "strategyGoingForward": "Send the vehicle details and the part number you have. Germoparts’ part/category content should make it easier to ask the branch the right question, not suggest that a visually similar part will fit.",
+        "clientActionsRequired": [
+          "Choose confirmed part references and a usable branch filming subject for two videos.",
+          "Verify the part labels, branch CTA and any compatibility statement before production."
+        ],
+        "goldStandard": {
+          "objective": "Make October’s parts content help customers prepare an accurate first enquiry. Pair one vehicle-detail story with one exact-branch parts environment, and give the twelve poster slots specific category questions rather than a catalogue of unsupported compatibility claims.",
+          "audienceAndIntent": "Help workshops and vehicle owners turn a parts question into an accurate enquiry: vehicle detail, the exact supplied part number and the relevant branch. Keep technical uncertainty visible rather than promising fitment to win attention.",
+          "coreMessage": "Send the vehicle details and the part number you have. Germoparts’ part/category content should make it easier to ask the branch the right question, not suggest that a visually similar part will fit.",
+          "formatsAndRationale": "Two professional videos can show a real parts-enquiry or branch sequence. Twelve design posters can answer different category/application questions. Unknown photo, reel and animated capacities stay disabled; historical posting volume is not extra package scope.",
+          "mustAvoid": "Never invent vehicle compatibility, change an OE/part number, describe aftermarket stock as genuine/OEM without proof, or transfer one branch’s delivery terms nationwide. Keep old campaign prices and supplier promotions out; preserve real packaging, labels and part geometry.",
+          "channelIntegration": "Use the same exact part/category wording across Germoparts’ managed channels, with branch-specific enquiries routed to that branch. Plain contact text stays readable, without borrowing another branch’s hours or delivery claims.",
+          "pillarsAndHooks": "Open on the exact label or part geometry; ask the vehicle/application question; show the real branch context separately. Category posters can cover brakes, steering or service parts only with supplied part detail.",
+          "testAndChange": "Compare a part-label-first opening with a vehicle-question-first opening for the same confirmed subject. Keep compatibility wording unchanged and assess only available views and enquiry completeness.",
+          "successSignals": "Look for recorded enquiries carrying vehicle details and a precise part reference. Do not call enquiries successful fitments or orders without the corresponding record; native metrics with missing coverage stay unavailable.",
+          "nextMonthGamePlan": "Choose the next parts question from October’s real enquiries, then confirm the product reference again. Keep branch stories human and separate from any newly approved supplier or staff campaign."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "Exact part-label opening followed by the vehicle details needed for an enquiry.",
+              "Real branch parts environment with one practical customer question."
+            ],
+            "notes": "Monthly capacity: 2. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "Send vehicle details for the chosen part category.",
+              "Use the supplied part number exactly, without adding fitment claims.",
+              "A confirmed brakes/steering/service-parts question.",
+              "Ask the correct branch about availability rather than promising all-branch stock."
+            ],
+            "notes": "Monthly capacity: 12. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "0e97f8da2c6e15f53d24be2e9197da814a47bfb10b579b0195a4abdef0f15669"
+    },
+    {
+      "row_id": "968d85d5-5090-46e1-b804-423e0c45d706",
+      "client_id": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
+      "client_name": "Wiseman Group",
+      "strategy_month": "2026-09-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/wiseman-group.md",
+          "sha256": "0fd470e3c8e897ceb76d80dd02f10ae499206c371dd790eea2c3294a32337d74",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/wiseman-group.md",
+          "sha256": "9b937ff915b8c0a51dd25ab58a1625e2629a7c62dbda1f2b06df00babee1ca8c",
+          "quotes": [
+            "Treat **Wiseman Group** as its own exact marketing identity.",
+            "Do not turn every caption into a list of divisions.",
+            "Historical Golf Day work proves group event/community content has existed"
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "group-level",
+        "wisemangroup.co.za",
+        "office"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "a12353ab-4b66-4cd0-8621-27c13aa353a8",
+          "post_count": 25,
+          "post_identity_hash": "5b6d490564b82c9f9bb0cd371f9724435a860f635957e85f838c1bb0a5a7181d",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "5fb547fd-1557-49dc-a576-c1480a1f5dc0",
+          "post_count": 22,
+          "post_identity_hash": "9aed8a30ab1c20b120c836142fdccb641ca12c3d8b2bf9152bab26886ef9b191",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "1d89f3a8-ee76-4a21-aee0-fdddfa969156",
+          "post_count": 27,
+          "post_identity_hash": "887126fdf0eeeb85c39f0933389908667b3f4d32e603a0091d598a71ae7f96d0",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "6282cc2b98d1734a783db9141a4dfd5715549273fdf1eeeb3a953ebee227d249",
+        "revision_hash": "1e425ad795253869c8476a87f5a91a06fc260c0063636ea196bbfa969553d630",
+        "strategy_hash": "22c36f66932b087f84c5187ba6e72f63804d9c550e9c9fd4685900c7dde40b30",
+        "seed_hash": "1935ffab686681f563e609b004b2d4a0be778034f6dd4bf3a963f4f8eb798a81",
+        "package_hash": "4864dc8daa99708dd8e89de01a0073a3ecba50651501db478f3a667ae13f4b1c",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Review September’s group identity for a visible people or office story that genuinely belongs to Wiseman Group. Separate usable group moments from child-business sales messages before carrying anything forward.",
+          "The person and task in a genuine group office moment; a real branded asset; a past group event only with its original context. Keep the website footer concise and reserve booking contacts for a real enquiry need."
+        ],
+        "strategyGoingForward": "Show the people behind the group-level activity actually pictured. A real office or coordination moment is more useful than a list of divisions or a promise that every related business offers the same service.",
+        "clientActionsRequired": [
+          "Confirm that selected September people/activity assets belong to Wiseman Group and have publication permission.",
+          "Confirm any event or role used for reuse; keep child-business contacts out of group copy."
+        ],
+        "goldStandard": {
+          "objective": "Review September’s group identity for a visible people or office story that genuinely belongs to Wiseman Group. Separate usable group moments from child-business sales messages before carrying anything forward.",
+          "audienceAndIntent": "Help someone seeing Wiseman Group understand the actual people and group-level activity shown, and distinguish a group enquiry from a child-business buying question. Do not turn related-business relationships into assumed shared services or ownership claims.",
+          "coreMessage": "Show the people behind the group-level activity actually pictured. A real office or coordination moment is more useful than a list of divisions or a promise that every related business offers the same service.",
+          "formatsAndRationale": "One professional video can follow a real group office/team moment. Four photo posts provide distinct people/activity views; four posters explain group-level context. Reels and animated posters remain unknown, and no division-specific service capacity is added.",
+          "mustAvoid": "No borrowed child-business contacts, prices or service promises; no invented division ownership or annual Golf Day. Avoid emojis, corporate-group slogans and flashy staged interactions. Preserve genuine people, vehicles and branding; normal copy uses the group website rather than an automatic full contact block.",
+          "channelIntegration": "Keep Wiseman Group’s own identity and wisemangroup.co.za across managed channels. Add group phone/email only for an actual event, booking or time-sensitive group enquiry; a child-business promotion does not become group-level content by changing its logo.",
+          "pillarsAndHooks": "The person and task in a genuine group office moment; a real branded asset; a past group event only with its original context. Keep the website footer concise and reserve booking contacts for a real enquiry need.",
+          "testAndChange": "Review people-led and branded-asset September openings with available measures. A published group moment does not prove group-wide sales, division performance or current sponsorship.",
+          "successSignals": "Look for recorded enquiries that identify the group-level subject rather than a child-business price or booking. Available interactions support the review, but missing attribution remains unavailable.",
+          "nextMonthGamePlan": "Prepare one October office/team video with four distinct supporting photo subjects. Confirm the current people and group activity first; do not manufacture a recurring event to fill the package."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "Review one real group office/team moment with a concise website end frame."
+            ],
+            "notes": "Monthly capacity: 1. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "A genuine group office moment.",
+              "A real group team detail with permission.",
+              "An accurately branded group asset.",
+              "An approved group activity, without claiming a recurring event."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "Explain the actual group-level activity shown.",
+              "Introduce one confirmed office/team context.",
+              "A concise group website next step.",
+              "An event or booking note only if its exact group-level brief is confirmed; otherwise another real office moment."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "7d4e1a44376d967410b17b790f99b2e81cfc31d53a07b2de17a2a2482f513825"
+    },
+    {
+      "row_id": "b3516817-6970-4b44-a465-42c8b7668815",
+      "client_id": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
+      "client_name": "Wiseman Group",
+      "strategy_month": "2026-10-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/wiseman-group.md",
+          "sha256": "0fd470e3c8e897ceb76d80dd02f10ae499206c371dd790eea2c3294a32337d74",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/wiseman-group.md",
+          "sha256": "9b937ff915b8c0a51dd25ab58a1625e2629a7c62dbda1f2b06df00babee1ca8c",
+          "quotes": [
+            "Treat **Wiseman Group** as its own exact marketing identity.",
+            "Do not turn every caption into a list of divisions.",
+            "Historical Golf Day work proves group event/community content has existed"
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "group-level",
+        "wisemangroup.co.za",
+        "office"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "a12353ab-4b66-4cd0-8621-27c13aa353a8",
+          "post_count": 25,
+          "post_identity_hash": "5b6d490564b82c9f9bb0cd371f9724435a860f635957e85f838c1bb0a5a7181d",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "5fb547fd-1557-49dc-a576-c1480a1f5dc0",
+          "post_count": 22,
+          "post_identity_hash": "9aed8a30ab1c20b120c836142fdccb641ca12c3d8b2bf9152bab26886ef9b191",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "1d89f3a8-ee76-4a21-aee0-fdddfa969156",
+          "post_count": 27,
+          "post_identity_hash": "887126fdf0eeeb85c39f0933389908667b3f4d32e603a0091d598a71ae7f96d0",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "c9cca567fc937544b2451bc2d4053d1391ce3844ba2e246335a4d75fb2ed870e",
+        "revision_hash": "c3e8b6c2f22363d8cca1498d56164eb451df82ba27cff5cce20922ee1231bafc",
+        "strategy_hash": "1a3221d402aeefbc3ab3ae9c66278d3141a88bbcfd52378b2eae0ad9dbd4cf4e",
+        "seed_hash": "a4bed80bdb675fc219c492f17aff0cfe4490705f53151e5621ff2b1d47ee1ad4",
+        "package_hash": "4864dc8daa99708dd8e89de01a0073a3ecba50651501db478f3a667ae13f4b1c",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Give October one coherent Wiseman Group office/team story rather than a collage of related-business offers. Let viewers understand a real group-level activity and the correct group enquiry route without inventing ownership or uniform service standards.",
+          "A lightly edited office task-to-person video; four distinct group people/asset photos; four concise group-context posters. Use wisemangroup.co.za as the ordinary next step and only add booking contacts for an approved enquiry context."
+        ],
+        "strategyGoingForward": "Meet the people doing the group work actually shown. The name Wiseman Group should frame that human activity, not absorb every related business’s products and promises.",
+        "clientActionsRequired": [
+          "Supply a real current group office/team subject and confirm participants’ roles and permission.",
+          "Approve the exact group-level CTA; do not fill the brief with related-business services."
+        ],
+        "goldStandard": {
+          "objective": "Give October one coherent Wiseman Group office/team story rather than a collage of related-business offers. Let viewers understand a real group-level activity and the correct group enquiry route without inventing ownership or uniform service standards.",
+          "audienceAndIntent": "Help someone seeing Wiseman Group understand the actual people and group-level activity shown, and distinguish a group enquiry from a child-business buying question. Do not turn related-business relationships into assumed shared services or ownership claims.",
+          "coreMessage": "Meet the people doing the group work actually shown. The name Wiseman Group should frame that human activity, not absorb every related business’s products and promises.",
+          "formatsAndRationale": "One professional video can follow a real group office/team moment. Four photo posts provide distinct people/activity views; four posters explain group-level context. Reels and animated posters remain unknown, and no division-specific service capacity is added.",
+          "mustAvoid": "No borrowed child-business contacts, prices or service promises; no invented division ownership or annual Golf Day. Avoid emojis, corporate-group slogans and flashy staged interactions. Preserve genuine people, vehicles and branding; normal copy uses the group website rather than an automatic full contact block.",
+          "channelIntegration": "Keep Wiseman Group’s own identity and wisemangroup.co.za across managed channels. Add group phone/email only for an actual event, booking or time-sensitive group enquiry; a child-business promotion does not become group-level content by changing its logo.",
+          "pillarsAndHooks": "A lightly edited office task-to-person video; four distinct group people/asset photos; four concise group-context posters. Use wisemangroup.co.za as the ordinary next step and only add booking contacts for an approved enquiry context.",
+          "testAndChange": "Compare an office-task-first opening with a person-first opening within the one confirmed video subject. Keep roles and group facts fixed; assess available response without inventing division-level outcomes.",
+          "successSignals": "Read whether recorded questions concern the actual group story and whether the website CTA is used where tracking exists. Missing website/enquiry attribution remains unavailable rather than proof of no interest.",
+          "nextMonthGamePlan": "Use October’s real group questions to select the next office/team subject. Retain the task or person opening only if observable responses support it; reconfirm roles and any new group event before planning."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "Real office-task-to-person story, lightly edited, with wisemangroup.co.za end frame."
+            ],
+            "notes": "Monthly capacity: 1. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "The approved group task.",
+              "The person doing that task.",
+              "A real group-branded asset connected to the story.",
+              "A different group office/team detail."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "What the pictured group activity means.",
+              "A confirmed people/office detail.",
+              "A concise group website enquiry next step.",
+              "One distinct group-context message without a division roster or borrowed offer."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "835a3c7ac42bc2bc38040852888116fd0d3f3dea2686e27626b545db1ef549f0"
+    },
+    {
+      "row_id": "1bba0379-97f6-4d8c-8e05-0294a8a8e831",
+      "client_id": "d53d8e62-9e6a-4bb9-be3f-554f40942d45",
+      "client_name": "Emmanuel Funerals",
+      "strategy_month": "2026-09-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/emmanuel-funerals.md",
+          "sha256": "afc009bc455937f028414bc2a948b9eb701609010025b3d0bd1b7a771ec515a3",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/emmanuel-funerals.md",
+          "sha256": "4d5ce847276c26dd591d4603ea9880ef15c16f04df4b367b4e0fd8499db2b8e2",
+          "quotes": [
+            "death registration and doctors' documentation",
+            "funeral and cremation services",
+            "Do not expose deceased persons, private family documents"
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "documentation",
+        "cremation",
+        "Emmanuel"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "be23ae46-e54d-45ef-9f67-1522a5d89693",
+          "post_count": 24,
+          "post_identity_hash": "32502e11ec6a581fdabc92a68a12766f68c2164bc11334f0207fa39d94e10124",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "f96f76bd-3a89-4e36-a35b-47d6356d6b24",
+          "post_count": 20,
+          "post_identity_hash": "beb9b7146cfbc3942f83fbcff63925cd31f684f1d4bb6eaf10be690f4e92a6b6",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "a4e59f2d-805a-4e2c-838d-e1c271f17ace",
+          "post_count": 15,
+          "post_identity_hash": "611c5e0ea01c97d20a42e8a7f129450a38407f8a8b6d634d871925eddac86a57",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "09fee76d4441fd31b6ac1b2a7ccf8b99372df463ed757ece57fc18ea286042aa",
+        "revision_hash": "3891f26863a01adb4a5d8a39a6112b39582176493eafc2bf66fcb2edc44d4989",
+        "strategy_hash": "02502efcc27b36228516e209e2e13220e47d1af6d65483bb936a5c1292eab9f7",
+        "seed_hash": "3d8d80425d890764e609638849620c47943821e920e9cc3b9b146d3f2b648f64",
+        "package_hash": "c10ed85d4f5c51798d588cc7da29504374f75f53b71b16ec9d56c421e2167cdb",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Review September’s funeral-service content for whether it reduces uncertainty about an actual next step, rather than repeating sympathy slogans. Preserve useful logistics or remembrance context while separating family privacy and regulated cover claims.",
+          "One documentation/arrangement question; approved team preparation; a respectful floral or setup detail. Memorial wording stays reflective and permission-based, not a sales hook attached to a grieving face."
+        ],
+        "strategyGoingForward": "Emmanuel’s clear explanation of the next documentation or arrangement step can help without making a promise about every funeral. Service guidance and a private family tribute need different tones.",
+        "clientActionsRequired": [
+          "Approve the specific service explanation and publication permission for each selected visual.",
+          "Confirm that no private documents, deceased persons or grieving family identity are exposed."
+        ],
+        "goldStandard": {
+          "objective": "Review September’s funeral-service content for whether it reduces uncertainty about an actual next step, rather than repeating sympathy slogans. Preserve useful logistics or remembrance context while separating family privacy and regulated cover claims.",
+          "audienceAndIntent": "Help a family trying to understand the next funeral or cremation arrangement ask a calm practical question. Separate service logistics from memorial remembrance and policy education; do not assume beliefs, exploit bereavement or target invented vulnerable segments.",
+          "coreMessage": "Emmanuel’s clear explanation of the next documentation or arrangement step can help without making a promise about every funeral. Service guidance and a private family tribute need different tones.",
+          "formatsAndRationale": "One professional video can answer a practical arrangement question. Three photo posts show approved team, floral/setup or service detail; four design posters explain distinct next steps. Reel and animated quantities remain unknown; funeral-cover campaigns are not invented to fill slots.",
+          "mustAvoid": "No identifiable grieving families, deceased persons or private documents without explicit permission. No invented policy benefits, premiums, legal/FSP claims, livestreaming, memorial plaques or turnaround guarantees. Keep maroon branding and real arrangements accurate; avoid manipulative urgency and grief clichés.",
+          "channelIntegration": "Keep the same calm service facts across Emmanuel’s managed channels. Use the website for general team or atmosphere pieces; choose service or urgent contact wording only when the actual brief needs it. Policy content remains separately fact-checked.",
+          "pillarsAndHooks": "One documentation/arrangement question; approved team preparation; a respectful floral or setup detail. Memorial wording stays reflective and permission-based, not a sales hook attached to a grieving face.",
+          "testAndChange": "Review practical-question and atmosphere-led September pieces with available measures. Do not equate interaction with bereavement demand or claim that a family selected a service without a record.",
+          "successSignals": "Use recorded practical questions about arrangements, documentation or cremation as signals of clarity. Missing enquiries or metric coverage remain unavailable; no emotional response, policy conversion or service outcome is assumed.",
+          "nextMonthGamePlan": "Prepare October’s one video around an approved what-happens-next question, with three calm supporting images and four distinct service-step posters. Confirm the exact explanation and safe imagery before planning."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "Review one calm documentation or arrangement explanation by a confirmed representative."
+            ],
+            "notes": "Monthly capacity: 1. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "Approved team preparation without private records.",
+              "A floral or service-setup detail.",
+              "A respectful atmosphere or memorial-work detail with permission."
+            ],
+            "notes": "Monthly capacity: 3. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "A documentation question to ask Emmanuel.",
+              "An arrangement next step stated calmly.",
+              "A funeral-versus-cremation enquiry prompt without assumed terms.",
+              "A respectful service contact decision without a generic sympathy slogan."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "a69a7e13c7c15f9a0fbded868886dc3c016cf99a9555aa0f28b3bb93a5b35ef0"
+    },
+    {
+      "row_id": "0a5e39bc-cc13-44db-af9f-d4ce8c5a877a",
+      "client_id": "d53d8e62-9e6a-4bb9-be3f-554f40942d45",
+      "client_name": "Emmanuel Funerals",
+      "strategy_month": "2026-10-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/emmanuel-funerals.md",
+          "sha256": "afc009bc455937f028414bc2a948b9eb701609010025b3d0bd1b7a771ec515a3",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/emmanuel-funerals.md",
+          "sha256": "4d5ce847276c26dd591d4603ea9880ef15c16f04df4b367b4e0fd8499db2b8e2",
+          "quotes": [
+            "death registration and doctors' documentation",
+            "funeral and cremation services",
+            "Do not expose deceased persons, private family documents"
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "documentation",
+        "cremation",
+        "Emmanuel"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "be23ae46-e54d-45ef-9f67-1522a5d89693",
+          "post_count": 24,
+          "post_identity_hash": "32502e11ec6a581fdabc92a68a12766f68c2164bc11334f0207fa39d94e10124",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "f96f76bd-3a89-4e36-a35b-47d6356d6b24",
+          "post_count": 20,
+          "post_identity_hash": "beb9b7146cfbc3942f83fbcff63925cd31f684f1d4bb6eaf10be690f4e92a6b6",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "a4e59f2d-805a-4e2c-838d-e1c271f17ace",
+          "post_count": 15,
+          "post_identity_hash": "611c5e0ea01c97d20a42e8a7f129450a38407f8a8b6d634d871925eddac86a57",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "4ae4a66387430711ff43aabad693cdbb63be949bbca41a79bb7f30183e292f2b",
+        "revision_hash": "9a49bbee9f897bd9a70eae1424e981fd5b170772613ef064446c98d127609b32",
+        "strategy_hash": "ff396f2061855b54f81ce0f842549f59f3ded9159c73ba15fb4e331df58989f3",
+        "seed_hash": "c28ccdeef80b6918e40d0cf60c75a3e7d472e88eba53b8ea98bfd94a055b42b9",
+        "package_hash": "c10ed85d4f5c51798d588cc7da29504374f75f53b71b16ec9d56c421e2167cdb",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Make October’s service guidance a calm practical sequence: one approved arrangement question on video, supported by documentation, funeral/cremation and contact-choice posters. Keep remembrance images separate from service selling.",
+          "Open on a real arrangement question rather than a sympathy slogan; show an approved preparation or floral detail; distinguish funeral and cremation questions in plain language. Keep policy terms out unless a current approved brief exists."
+        ],
+        "strategyGoingForward": "Ask the next practical question, one step at a time. Emmanuel’s documentation and arrangement guidance should explain what to discuss without assuming a family’s beliefs or promising unconfirmed service terms.",
+        "clientActionsRequired": [
+          "Choose and approve one practical video question and a current representative.",
+          "Confirm safe team/setup imagery and exact service wording for the four poster subjects."
+        ],
+        "goldStandard": {
+          "objective": "Make October’s service guidance a calm practical sequence: one approved arrangement question on video, supported by documentation, funeral/cremation and contact-choice posters. Keep remembrance images separate from service selling.",
+          "audienceAndIntent": "Help a family trying to understand the next funeral or cremation arrangement ask a calm practical question. Separate service logistics from memorial remembrance and policy education; do not assume beliefs, exploit bereavement or target invented vulnerable segments.",
+          "coreMessage": "Ask the next practical question, one step at a time. Emmanuel’s documentation and arrangement guidance should explain what to discuss without assuming a family’s beliefs or promising unconfirmed service terms.",
+          "formatsAndRationale": "One professional video can answer a practical arrangement question. Three photo posts show approved team, floral/setup or service detail; four design posters explain distinct next steps. Reel and animated quantities remain unknown; funeral-cover campaigns are not invented to fill slots.",
+          "mustAvoid": "No identifiable grieving families, deceased persons or private documents without explicit permission. No invented policy benefits, premiums, legal/FSP claims, livestreaming, memorial plaques or turnaround guarantees. Keep maroon branding and real arrangements accurate; avoid manipulative urgency and grief clichés.",
+          "channelIntegration": "Keep the same calm service facts across Emmanuel’s managed channels. Use the website for general team or atmosphere pieces; choose service or urgent contact wording only when the actual brief needs it. Policy content remains separately fact-checked.",
+          "pillarsAndHooks": "Open on a real arrangement question rather than a sympathy slogan; show an approved preparation or floral detail; distinguish funeral and cremation questions in plain language. Keep policy terms out unless a current approved brief exists.",
+          "testAndChange": "Compare a direct what-happens-next opening with a quieter service-detail opening for the same approved explanation. Assess available views and actual practical questions, not emotional vulnerability or assumed bookings.",
+          "successSignals": "Look for clearer recorded arrangement or documentation questions. Keep routine enquiries distinct from urgent contacts and policy queries; missing attribution cannot be reported as zero or as proof of a booked funeral.",
+          "nextMonthGamePlan": "Choose the following month’s explanation from the questions families actually ask, if recorded. Confirm any new service facts and imagery permission before extending the series; no automatic cover or memorial-product campaign."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "A confirmed representative answers one arrangement or documentation next-step question."
+            ],
+            "notes": "Monthly capacity: 1. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "Approved preparation detail with no private paperwork.",
+              "Real floral or completed-setup detail.",
+              "Calm team/atmosphere image with permission."
+            ],
+            "notes": "Monthly capacity: 3. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "What documentation question to bring to the conversation.",
+              "One funeral arrangement next step.",
+              "One cremation arrangement enquiry question.",
+              "When a general versus urgent service contact is relevant, using only confirmed wording."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "350d94617852c103d7067d3c33a80226cfc5aa57268fc3d90299ce330b5a0947"
+    },
+    {
+      "row_id": "324a58db-a475-4e60-ad93-a50bb220a550",
+      "client_id": "2aed8a31-bd53-4ad1-a3dc-432865adfb3d",
+      "client_name": "Dulux Paint & Paper Bloemfontein",
+      "strategy_month": "2026-09-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/dulux-paint-and-paper-bloemfontein.md",
+          "sha256": "d771c9a3c7c4afdd2d7d654b85b9e6dd1f95a3cc6b780348dba8c2a5800684cb",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/dulux-paint-and-paper-bloemfontein.md",
+          "sha256": "690942220fd26584440158196b82d6fd6aef6ab26a84e9e1042fa7980ec0034d",
+          "quotes": [
+            "Describe colour by **what it does to the room**",
+            "real swatches;",
+            "primers and preparation;"
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "swatch",
+        "tinting",
+        "surface"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "c47ca1ed-4aec-4066-a397-65d81045cabf",
+          "post_count": 20,
+          "post_identity_hash": "a14f7ad39871ea7b45a10d036056beb2929232a5672f7d94d729dd37ead506a7",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "43eeb81a-8c47-4e21-a078-c8be11a87897",
+          "post_count": 18,
+          "post_identity_hash": "28bbf5e607f57c6ce7a5968b1ac0d6d2d22851aa902e16ace9bfbec0f82cb967",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "f0414b33-8def-4fda-9496-7c732d11d7a6",
+          "post_count": 14,
+          "post_identity_hash": "5cbe9ea20f5fb2dd420e72753ec85bf8293b0fdcd8f76f7935719c76a77d00bd",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "37f35438272283f3628bade12546f51ae95ce4d056a46c47b44bc1ae7e248655",
+        "revision_hash": "b2194fb1344897ed10e7e2c131ac7cc82235bad6dd10c3a592ced9641d92f65c",
+        "strategy_hash": "ea1e587af9b38f79c987d00fd6bc3af82d10e45605f9108ba2e8a44e086ea6e7",
+        "seed_hash": "bcfd2bf42fc2d8babe62e72b1a02d6d46b36ec1c05b3699ea2f6b9f52b3dbb52",
+        "package_hash": "ee5198d3b35ade7dc7fa8e71873460b1e6d84efc010cff5b5fe2e13d49eaabb1",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Review September’s paint and colour presentation for whether a viewer understands the effect in a real room or the preparation decision involved. Separate usable tinting/swatches footage from stale voting, promotions or unsupported product claims.",
+          "Physical swatch against room context; tinting/process movement; one surface-preparation question; a real staff explanation if the role is confirmed. Do not convert a digital colour reveal into an exact matching promise."
+        ],
+        "strategyGoingForward": "A colour choice belongs in the room’s light; a product choice belongs on the right surface. Show the real swatch or preparation question rather than describing every result as beautiful.",
+        "clientActionsRequired": [
+          "Confirm the swatches, labels, surface and usable process footage for reuse.",
+          "Approve technical statements and current staff participation; remove expired voting, offer or app wording."
+        ],
+        "goldStandard": {
+          "objective": "Review September’s paint and colour presentation for whether a viewer understands the effect in a real room or the preparation decision involved. Separate usable tinting/swatches footage from stale voting, promotions or unsupported product claims.",
+          "audienceAndIntent": "Help a person choosing paint for an actual room or surface bring a useful colour or preparation question into the store. Colour accuracy and substrate decisions matter more than vague inspiration or an invented demographic profile.",
+          "coreMessage": "A colour choice belongs in the room’s light; a product choice belongs on the right surface. Show the real swatch or preparation question rather than describing every result as beautiful.",
+          "formatsAndRationale": "Two professional videos can separate a real swatch/tinting decision from a preparation question. Four photo posts show colour, surface or staff/process detail; four design posters explain distinct project decisions. Reel and animated quantities remain unknown.",
+          "mustAvoid": "Do not promise screen-to-paint colour accuracy, assume national ranges are local stock, or invent coverage, compatibility, drying, durability or warranty claims. Confirm staff availability and current technical facts. No stale award/voting, promotion or app CTA; no em dashes or forced language mixing.",
+          "channelIntegration": "Keep the actual colour code, surface and product label consistent across managed Dulux content. Use physical swatches and the correct in-store project question, not an unsupported national product or online colour-match promise.",
+          "pillarsAndHooks": "Physical swatch against room context; tinting/process movement; one surface-preparation question; a real staff explanation if the role is confirmed. Do not convert a digital colour reveal into an exact matching promise.",
+          "testAndChange": "Review September colour-first and preparation-first openings using available comparable measures. A published colour or demonstration does not prove paint sales, technical suitability or staff popularity.",
+          "successSignals": "Look for recorded questions that name a colour code, room or surface. Available views/interactions support the review; missing store enquiry or sales attribution remains unavailable rather than zero.",
+          "nextMonthGamePlan": "Plan October’s two videos as a real-light swatch question and a separate surface/preparation question. Select four actual process/product photos and four concise project decisions, without reusing expired campaign treatments."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "Review real swatch/tinting footage for a room-light decision.",
+              "Review one surface/preparation explanation without inventing compatibility."
+            ],
+            "notes": "Monthly capacity: 2. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "Actual physical swatch.",
+              "Readable label or colour code.",
+              "Real tinting/process detail.",
+              "Confirmed surface or staff-advice context."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "Bring a colour code or room reference.",
+              "Check a physical swatch in the room’s light.",
+              "Ask which preparation step belongs to the surface.",
+              "A current product/project question without a performance or stock promise."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "8845162212c80197aaa1e7ec4afe13d06ef18339c77f031176893e6d675b775d"
+    },
+    {
+      "row_id": "ba3be9e0-28e8-496a-abbc-ae03d322e1f7",
+      "client_id": "2aed8a31-bd53-4ad1-a3dc-432865adfb3d",
+      "client_name": "Dulux Paint & Paper Bloemfontein",
+      "strategy_month": "2026-10-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/dulux-paint-and-paper-bloemfontein.md",
+          "sha256": "d771c9a3c7c4afdd2d7d654b85b9e6dd1f95a3cc6b780348dba8c2a5800684cb",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/dulux-paint-and-paper-bloemfontein.md",
+          "sha256": "690942220fd26584440158196b82d6fd6aef6ab26a84e9e1042fa7980ec0034d",
+          "quotes": [
+            "Describe colour by **what it does to the room**",
+            "real swatches;",
+            "primers and preparation;"
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "swatch",
+        "tinting",
+        "surface"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "c47ca1ed-4aec-4066-a397-65d81045cabf",
+          "post_count": 20,
+          "post_identity_hash": "a14f7ad39871ea7b45a10d036056beb2929232a5672f7d94d729dd37ead506a7",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "43eeb81a-8c47-4e21-a078-c8be11a87897",
+          "post_count": 18,
+          "post_identity_hash": "28bbf5e607f57c6ce7a5968b1ac0d6d2d22851aa902e16ace9bfbec0f82cb967",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "f0414b33-8def-4fda-9496-7c732d11d7a6",
+          "post_count": 14,
+          "post_identity_hash": "5cbe9ea20f5fb2dd420e72753ec85bf8293b0fdcd8f76f7935719c76a77d00bd",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "c589e636a04fb140d13a9a70e4b97b0e19edbd072f4ceae2193e14c259e4d263",
+        "revision_hash": "8801a2585ab85758a10bde2db9183fd3374aebbdde5fe0d2352b47291dd37820",
+        "strategy_hash": "26838b3401c0bf92a66ad847edd3d163462bfff30e8a06954082a94ba86f6428",
+        "seed_hash": "f471461981831d1199f841cdbd919a4a85e04f45ac447addaf9e4fc38ff56f41",
+        "package_hash": "ee5198d3b35ade7dc7fa8e71873460b1e6d84efc010cff5b5fe2e13d49eaabb1",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Make October help customers arrive with a better paint question: their room/light reference or their surface/preparation problem. Use two distinct visual stories so colour inspiration does not obscure the product decision.",
+          "Open the colour video with a physical swatch in two real lighting contexts when available; open the second with the actual surface question. Support them with four process/detail photos and four concise preparation or colour-choice posters."
+        ],
+        "strategyGoingForward": "Compare the real swatch, then ask about the actual surface. A screen image cannot make the colour or product decision for every room.",
+        "clientActionsRequired": [
+          "Choose confirmed swatch/lighting and surface subjects for two videos.",
+          "Supply current technical support for the preparation explanation and confirm staff/filming availability."
+        ],
+        "goldStandard": {
+          "objective": "Make October help customers arrive with a better paint question: their room/light reference or their surface/preparation problem. Use two distinct visual stories so colour inspiration does not obscure the product decision.",
+          "audienceAndIntent": "Help a person choosing paint for an actual room or surface bring a useful colour or preparation question into the store. Colour accuracy and substrate decisions matter more than vague inspiration or an invented demographic profile.",
+          "coreMessage": "Compare the real swatch, then ask about the actual surface. A screen image cannot make the colour or product decision for every room.",
+          "formatsAndRationale": "Two professional videos can separate a real swatch/tinting decision from a preparation question. Four photo posts show colour, surface or staff/process detail; four design posters explain distinct project decisions. Reel and animated quantities remain unknown.",
+          "mustAvoid": "Do not promise screen-to-paint colour accuracy, assume national ranges are local stock, or invent coverage, compatibility, drying, durability or warranty claims. Confirm staff availability and current technical facts. No stale award/voting, promotion or app CTA; no em dashes or forced language mixing.",
+          "channelIntegration": "Keep the actual colour code, surface and product label consistent across managed Dulux content. Use physical swatches and the correct in-store project question, not an unsupported national product or online colour-match promise.",
+          "pillarsAndHooks": "Open the colour video with a physical swatch in two real lighting contexts when available; open the second with the actual surface question. Support them with four process/detail photos and four concise preparation or colour-choice posters.",
+          "testAndChange": "Compare a swatch-first opening with a room-question-first opening on the same confirmed colour subject. Keep colour labels stable; assess available viewing and specific project questions, not an assumed purchase uplift.",
+          "successSignals": "Read recorded enquiries for room, colour-code or surface detail. Treat technical/product suitability as a fact-check, not a marketing metric; missing sales attribution stays unavailable.",
+          "nextMonthGamePlan": "Use October’s actual room and preparation questions to choose the following month’s demonstration. Confirm the new surface/product information before writing it, and keep physical colour checks central."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "Physical swatch to the real room-light question, with no digital matching guarantee.",
+              "One actual surface/preparation question answered with current approved product facts."
+            ],
+            "notes": "Monthly capacity: 2. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "Physical swatch in a genuine lighting context.",
+              "Readable current product label.",
+              "Real tinting detail.",
+              "The selected surface or a confirmed staff demonstration."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "Bring your room reference when discussing colour.",
+              "Compare the actual swatch rather than a screen shade.",
+              "Name the surface before choosing a preparation step.",
+              "Ask the store about the confirmed product/project subject, without stock or warranty claims."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "67f5e466d2ecd1afd46677a18a4be9a6f1cfcaf99de83fa21f2013c76e538a05"
+    },
+    {
+      "row_id": "5d1267c1-ada6-4f03-8abc-99f4f0ee287a",
+      "client_id": "a36ba938-e9dc-4ecf-bb67-4853608b1c01",
+      "client_name": "TBS Brokers",
+      "strategy_month": "2026-09-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/tbs-brokers.md",
+          "sha256": "6df730c677cdc6a9c3a3fa2cfddbad115a7d80c9a8e59e738c59d2a1ce8482fc",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/tbs-brokers.md",
+          "sha256": "48459a66a3b3080402b32e5d5f0dad835aa81a602ed6db2ec5ab8ecc6177790c",
+          "quotes": [
+            "Retirement Annuities;",
+            "Office Contents;",
+            "captions should add a second layer rather than repeat artwork wording;"
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "office contents",
+        "retirement",
+        "broker"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "1aabde3c-366f-4433-aded-5f443caecd25",
+          "post_count": 17,
+          "post_identity_hash": "c2a0bf5b0194035b2271539292a3c1f84e3bce48443ac6bbe8d42c6509708e88",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "c78aef3a-09a0-4a79-8c36-61b9027c1033",
+          "post_count": 21,
+          "post_identity_hash": "ac3101c00815cc3a721f832d7992da66f862b46f2b8ec52185b8f7746c6340e2",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "e0a2896b-ac9c-4406-bfe4-d98f8d02e98f",
+          "post_count": 11,
+          "post_identity_hash": "d7daee0217a2e2d872a5f4cfa51bb8d664bf2e3742ca06a8ec86ee9763ae41d6",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "a16affbaba48bac401b8ee963030a042d15e912becafb13c5eb9b97ff4f75013",
+        "revision_hash": "83177cbb66b5a9bd442a1b708065d7f82fe1ae70822b7ea9e55fc4528cfda26d",
+        "strategy_hash": "3807d4881b586734e83c0227b2785b93d5323c22446f19e1a206aed65ecea44b",
+        "seed_hash": "f3682f656bbe27835f040f74d6a78ab612c72d11ad1a0f3d54589b41539c70ae",
+        "package_hash": "4ea621fcb6d94eb04711f070e401384495b1d522396599f7c55a1dd75d37f33c",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Review September’s financial-service presentation for whether a viewer can identify the actual planning or insurance question being addressed. Keep any real review/testimonial context, but do not generalise one service experience into a promised outcome.",
+          "A retirement-planning question; an office-contents question; a real permitted service experience; current team context only where confirmed. Keep cover and investment topics separate and avoid a list of unqualified benefits."
+        ],
+        "strategyGoingForward": "A retirement conversation and an office-contents conversation start with different questions. Name the topic plainly and invite a broker discussion rather than promising a secure future or a payout.",
+        "clientActionsRequired": [
+          "Approve the exact general-information topics and any real testimonial permission.",
+          "Confirm current team/contact facts and whether an agreed design-slot swap is wanted; do not create a fixed video quota."
+        ],
+        "goldStandard": {
+          "objective": "Review September’s financial-service presentation for whether a viewer can identify the actual planning or insurance question being addressed. Keep any real review/testimonial context, but do not generalise one service experience into a promised outcome.",
+          "audienceAndIntent": "Help someone preparing a retirement-planning or business-insurance conversation bring a practical question to TBS Brokers. Keep general information separate from personal suitability or product recommendations; do not invent risk or demographic segments.",
+          "coreMessage": "A retirement conversation and an office-contents conversation start with different questions. Name the topic plainly and invite a broker discussion rather than promising a secure future or a payout.",
+          "formatsAndRationale": "Four photo/review-template slots can show permitted service or team context, while four design slots address distinct planning questions. A design slot may swap to video by agreement; there is no fixed extra video quota. Reel and animated quantities remain unknown.",
+          "mustAvoid": "No promised returns, tax result, premiums, acceptance, claims payout or personalised suitability advice. Do not invent provider relationships, team roles or testimonials. Avoid fear and cheeky financial copy; obtain current approval for material regulated statements and use only the approved TBS contact route.",
+          "channelIntegration": "Keep TBS Brokers’ planning and insurance topics distinct across managed channels. Use the approved website/contact route for a real broker conversation, not another business’s footer or a national provider promotion assumed to apply locally.",
+          "pillarsAndHooks": "A retirement-planning question; an office-contents question; a real permitted service experience; current team context only where confirmed. Keep cover and investment topics separate and avoid a list of unqualified benefits.",
+          "testAndChange": "Review question-led and service-experience-led September pieces where comparable measures exist. Enquiry records may show the topic asked about, but a published post cannot demonstrate suitability, investment performance or claims success.",
+          "successSignals": "Look for recorded retirement or office-contents enquiries that identify a topic for the broker conversation. Missing attribution remains unavailable; never use returns or claim outcomes as assumed marketing proof.",
+          "nextMonthGamePlan": "Prepare October around distinct retirement and office-contents questions, supported by permission-based review/template imagery. Keep the agreed design-to-video swap optional and inside the existing four design slots, not an extra deliverable."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "Review a permission-based service/review-template image.",
+              "Review a confirmed team/service context without outcome claims."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "A retirement-planning conversation question.",
+              "An office-contents conversation question.",
+              "A practical broker-service next step.",
+              "A permitted review/template or distinct planning topic; any video swap uses this slot only by agreement."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "6a7aedf8da1931a364b23e7afd05b734142cfd2e384de804f2c5476acf934b0d"
+    },
+    {
+      "row_id": "5ecaabe0-1f6d-4a34-a932-e1e81c2c1188",
+      "client_id": "a36ba938-e9dc-4ecf-bb67-4853608b1c01",
+      "client_name": "TBS Brokers",
+      "strategy_month": "2026-10-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/tbs-brokers.md",
+          "sha256": "6df730c677cdc6a9c3a3fa2cfddbad115a7d80c9a8e59e738c59d2a1ce8482fc",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/tbs-brokers.md",
+          "sha256": "48459a66a3b3080402b32e5d5f0dad835aa81a602ed6db2ec5ab8ecc6177790c",
+          "quotes": [
+            "Retirement Annuities;",
+            "Office Contents;",
+            "captions should add a second layer rather than repeat artwork wording;"
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "office contents",
+        "retirement",
+        "broker"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "1aabde3c-366f-4433-aded-5f443caecd25",
+          "post_count": 17,
+          "post_identity_hash": "c2a0bf5b0194035b2271539292a3c1f84e3bce48443ac6bbe8d42c6509708e88",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "c78aef3a-09a0-4a79-8c36-61b9027c1033",
+          "post_count": 21,
+          "post_identity_hash": "ac3101c00815cc3a721f832d7992da66f862b46f2b8ec52185b8f7746c6340e2",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "e0a2896b-ac9c-4406-bfe4-d98f8d02e98f",
+          "post_count": 11,
+          "post_identity_hash": "d7daee0217a2e2d872a5f4cfa51bb8d664bf2e3742ca06a8ec86ee9763ae41d6",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "950ace3f4c98ee7b8a56a92e610329dc133787c4c92dfe92bcebc75e5eeb73fa",
+        "revision_hash": "cadbb684692eff9799c8a5f269044796d9a016cf7dfa4e13168c5b9ec7122607",
+        "strategy_hash": "dc0e6a0bbe98b449e41e3f0e22261eab26f637359b29c566b4d48a5d4c008b22",
+        "seed_hash": "31e06fef015749edf1c02d73d1ca95011a7102de8e0868101488bb12aea61923",
+        "package_hash": "4ea621fcb6d94eb04711f070e401384495b1d522396599f7c55a1dd75d37f33c",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Make October’s TBS content prepare better broker conversations: separate a retirement-planning question from an office-contents risk question, then show the real service people or permitted review context behind those conversations.",
+          "One plain-language retirement question, one business office-contents question, one confirmed service/team context and one permitted review. Four design slots remain the ceiling even when one becomes an agreed video treatment."
+        ],
+        "strategyGoingForward": "Bring the question to the broker before assuming the answer. Retirement planning and office-contents cover need their own discussion; a social post is not a personal recommendation.",
+        "clientActionsRequired": [
+          "Approve the retirement and office-contents question wording as general information.",
+          "Confirm permitted review imagery, current service/team details and any explicit design-slot-to-video agreement."
+        ],
+        "goldStandard": {
+          "objective": "Make October’s TBS content prepare better broker conversations: separate a retirement-planning question from an office-contents risk question, then show the real service people or permitted review context behind those conversations.",
+          "audienceAndIntent": "Help someone preparing a retirement-planning or business-insurance conversation bring a practical question to TBS Brokers. Keep general information separate from personal suitability or product recommendations; do not invent risk or demographic segments.",
+          "coreMessage": "Bring the question to the broker before assuming the answer. Retirement planning and office-contents cover need their own discussion; a social post is not a personal recommendation.",
+          "formatsAndRationale": "Four photo/review-template slots can show permitted service or team context, while four design slots address distinct planning questions. A design slot may swap to video by agreement; there is no fixed extra video quota. Reel and animated quantities remain unknown.",
+          "mustAvoid": "No promised returns, tax result, premiums, acceptance, claims payout or personalised suitability advice. Do not invent provider relationships, team roles or testimonials. Avoid fear and cheeky financial copy; obtain current approval for material regulated statements and use only the approved TBS contact route.",
+          "channelIntegration": "Keep TBS Brokers’ planning and insurance topics distinct across managed channels. Use the approved website/contact route for a real broker conversation, not another business’s footer or a national provider promotion assumed to apply locally.",
+          "pillarsAndHooks": "One plain-language retirement question, one business office-contents question, one confirmed service/team context and one permitted review. Four design slots remain the ceiling even when one becomes an agreed video treatment.",
+          "testAndChange": "Compare a practical topic-question opening with a permitted service-experience opening for the same general topic. Keep disclosures stable; assess available enquiries and native interactions without implying better returns or cover outcomes.",
+          "successSignals": "Read whether recorded enquiries name the retirement or office-contents topic clearly enough for follow-up. Do not call attention a qualified sale or infer suitability; missing attribution remains unavailable.",
+          "nextMonthGamePlan": "Choose the following month’s general-information question from October’s real enquiry topics. Obtain fresh regulated-copy approval and testimonial permission before reuse; any future slot swap still needs agreement."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "Permitted review/template image tied to a real service experience.",
+              "Current confirmed broker/team service context."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "One general retirement-planning question, without advice or returns.",
+              "One office-contents cover question, without guaranteed acceptance.",
+              "A practical next step for a broker conversation.",
+              "A permitted service-review or distinct planning message; an agreed video treatment replaces, never adds to, this slot."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "d6d433baa005488aa88f6a4e086b1703cb3497d32190a1cdc14560ab7e3e2831"
+    }
+  ],
+  "packet_hash": "96d5b773358c20b3c58829474da7575f68f3bc1e6f43eaf1c6020c97cca3724b"
+}

@@ -3,6 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { inspectMetaAccessToken } from '../_shared/metaTokenDiagnostics.ts'
 import { resolveMetaGraphConfig } from '../_shared/meta.ts'
 import { fetchAllRows, fetchAllRowsByIdChunks } from '../_shared/paginatedRows.ts'
+import { META_TERMINAL_ACCESS_COOLDOWN_MS, metaTerminalAccessBlocks } from '../_shared/metaFleetTerminalBackoff.ts'
 
 const REQUIRED_SCOPES = [
   'pages_show_list',
@@ -236,26 +237,28 @@ Deno.serve(async (req) => {
     })
   }
 
-  const { data: activeAssets } = await fetchAllRows((from, to) => sb
+  const { data: activeAssets, error: assetEvidenceError } = await fetchAllRows((from, to) => sb
     .from('meta_client_assets')
-    .select('id, client_id, facebook_page_id, instagram_account_id')
+    .select('id, client_id, connection_id, facebook_page_id, instagram_account_id, updated_at')
     .eq('is_active', true)
     .range(from, to))
   const assetIds = (activeAssets ?? []).map(asset => asset.id).filter(Boolean)
-  const { data: checkpoints } = schemaReady && assetIds.length > 0
+  const { data: checkpoints, error: checkpointEvidenceError } = schemaReady && assetIds.length > 0
     ? await fetchAllRowsByIdChunks(assetIds, (ids, from, to) => sb.from('meta_asset_sync_checkpoints')
       .select('asset_id, client_id, platform, last_sync_kind, last_status, last_health_state, last_attempted_at, last_successful_at, last_successful_month, high_watermark_at, next_due_at, api_version, connector_version, last_error_code')
       .in('asset_id', ids)
       .range(from, to))
-    : { data: [] }
-  const { data: recoveryItems } = assetIds.length > 0
+    : { data: [], error: null }
+  const { data: recoveryItems, error: recoveryEvidenceError } = assetIds.length > 0
     ? await fetchAllRowsByIdChunks(assetIds, (ids, from, to) => sb.from('meta_sync_batch_items')
-      .select('asset_id, status, facebook_sync_state, instagram_sync_state, error, cooldown_until, updated_at')
+      .select('id,batch_id,asset_id,client_id,month,status,facebook_sync_state,instagram_sync_state,error,cooldown_until,finished_at,created_at,meta_sync_batches(summary)')
       .in('asset_id', ids)
       .in('status', ['queued', 'running', 'failed'])
-      .order('updated_at', { ascending: false })
+      .or(`status.in.(queued,running),finished_at.gte.${new Date(now - META_TERMINAL_ACCESS_COOLDOWN_MS).toISOString()}`)
+      .order('created_at', { ascending: false })
+      .order('id')
       .range(from, to))
-    : { data: [] }
+    : { data: [], error: null }
   const recoveryByAsset = new Map<string, Record<string, unknown>>()
   for (const item of recoveryItems ?? []) {
     if (!recoveryByAsset.has(String(item.asset_id))) recoveryByAsset.set(String(item.asset_id), item)
@@ -276,16 +279,26 @@ Deno.serve(async (req) => {
     next_due_at: checkpoint.next_due_at,
     last_error_code: checkpoint.last_error_code,
   } : null
-  const assetHealth = schemaReady ? (activeAssets ?? []).map(asset => {
+  const assetHealth = schemaReady && !assetEvidenceError && !checkpointEvidenceError && !recoveryEvidenceError ? (activeAssets ?? []).map(asset => {
     const recovery = recoveryByAsset.get(String(asset.id))
     const retrying = recovery?.status === 'queued' || recovery?.status === 'running'
-    const withRecovery = (run: ReturnType<typeof asRun>, platform: 'facebook' | 'instagram') => ({
-      ...(run ?? {}),
-      status: recovery?.status === 'failed' && recovery[`${platform}_sync_state`] === 'failed' ? 'failed' : run?.status ?? null,
-      last_error_code: recovery?.status === 'failed' && recovery[`${platform}_sync_state`] === 'failed' ? (recovery.error ?? run?.last_error_code ?? null) : run?.last_error_code ?? null,
-      retrying: retrying && !['complete', 'not_applicable'].includes(String(recovery?.[`${platform}_sync_state`] ?? '')),
-      cooldown_until: recovery?.cooldown_until ?? null,
-    })
+    const exactFailures = (recoveryItems ?? []).filter(item => item.asset_id === asset.id && item.client_id === asset.client_id)
+    const blocks = [...new Set(exactFailures.map(item => item.month))].flatMap(month => metaTerminalAccessBlocks({
+      ...asset, meta_asset_sync_checkpoints: (checkpoints ?? []).filter(checkpoint => checkpoint.asset_id === asset.id),
+    }, month, exactFailures, new Date(now).toISOString(), asset.connection_id === latest.id ? latest.last_connected_at : null))
+    const withRecovery = (run: ReturnType<typeof asRun>, platform: 'facebook' | 'instagram') => {
+      const supersededFailure = recovery?.status === 'failed' && run?.last_successful_at
+        && Date.parse(String(run.last_successful_at)) > Date.parse(String(recovery.finished_at))
+      const failedStage = recovery?.status === 'failed' && recovery[`${platform}_sync_state`] === 'failed'
+        && !supersededFailure
+      return {
+        ...(run ?? {}),
+        status: failedStage ? 'failed' : run?.status ?? null,
+        last_error_code: blocks.find(block => block.platform === platform)?.blocker ?? (failedStage ? (recovery.error ?? run?.last_error_code ?? null) : run?.last_error_code ?? null),
+        retrying: retrying && !['complete', 'not_applicable'].includes(String(recovery?.[`${platform}_sync_state`] ?? '')),
+        cooldown_until: blocks.find(block => block.platform === platform)?.retryAt ?? (supersededFailure ? null : recovery?.cooldown_until ?? null),
+      }
+    }
     return {
       assetId: asset.id,
       clientId: asset.client_id,

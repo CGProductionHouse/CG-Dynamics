@@ -1,6 +1,12 @@
 # Standalone Instagram provider activation runbook — Issue #505
 
-Updated: 1 October 2026 (read-only #505 reconciliation)
+Updated: 2 October 2026 (#505 evidence + authorized #598 configuration receipt)
+
+Superseding protected #598 execution: correct Instagram-product app secret,
+canonical `APP_PUBLIC_URL` and all five legal/callback fields are now saved and
+readback verified under explicit CA approval. Activation remains OFF and mode
+Development. See ops handover completion receipt; do not replay the configuration
+packet. No Review/Live/tester/OAuth/mapping/sync/Edge/data action was performed.
 
 ## Purpose
 
@@ -15,9 +21,9 @@ Finish the remaining standalone Instagram provider activation without weakening 
 - Standalone encrypted token rows: 0.
 - Pending standalone reviews: 0.
 - Standalone foundation, encrypted-token correction and review-binding migrations are already ledgered in production.
-- `instagram-oauth-start`, `instagram-oauth-callback` and `instagram-connection-confirm` are ACTIVE v5. All deployed source files match the accepted main baseline `2f5d4dad94ecba91f3c3f38a85180fb5c52ac0f9` after line-ending normalization.
+- Post-#598 inventory: `instagram-oauth-start`, `instagram-oauth-callback` and `instagram-connection-confirm` ACTIVE v8/v9/v8; deauthorize/data-deletion v4/v4. Config propagation advanced revisions; no Edge deployment occurred. Callback source parity and external JWT contracts remain verified. #595 callback deployment is completed.
 - The canonical Instagram business-login callback is already saved in the Meta developer configuration.
-- Names-only production inspection confirms six Instagram configuration names exist. `INSTAGRAM_APP_SECRET` is absent. Presence does not prove valid values; validate the key/version, Graph version and redirect contract privately before consent.
+- #598 execution confirms the correct product `INSTAGRAM_APP_SECRET` is present and privately matches its source; canonical public origin is saved. Only these two entries changed; all other config unchanged. #600's approved key/version reset/readback is already satisfied. Do not repeat crypto or config provisioning.
 - `INSTAGRAM_STANDALONE_LIVE_ACTIVATION_ENABLED` remains deliberately fail-closed until provider review is complete.
 
 ## Provider product and permissions
@@ -134,16 +140,20 @@ Standalone Instagram is production-ready only when:
 
 No step here is authorized merely by this runbook. #505 remains OPEN.
 
+The configuration/legal-save portion of step 1 is COMPLETE under #598. The
+remaining first protected actions are Business/Access Verification and exact
+owner-authorized professional fixture preparation. None is authorized by #598.
+
 #593 callback prerequisite is production-active under completed #595 Phase B.
 Do not replay its migration or three deployments. Before consent/demo, follow
 `INSTAGRAM-CONFIG-META-SAVE-PREFLIGHT-598.md`: app ID is verified, app secret is
-absent, public origin still needs its canonical correction, and existing key/
+now configured, public origin is corrected, and existing key/
 version structure was subsequently satisfied by the separately CA-authorized
 #600 known-good 32-byte reset/readback; see the ops handover receipt. Config and exact public Meta URL
-saves require separate approval. Keep activation OFF throughout; #598 made no
-production changes.
+saves were separately approved and completed 2 October. Keep activation OFF;
+the 1 October preflight itself made no production changes.
 
-1. CA verifies the existing Instagram product, exact callback URL and the two reporting permissions in Meta. Prepare the demonstration from `INSTAGRAM-META-REVIEW-SUBMISSION-2026-09-23.md`; select one owner-controlled professional review account. The packet is prepared, not submitted or provider-accepted. Any reviewer/test-account consent needed before submission requires separate authorization; never bypass the production gate for a demo.
+1. **First protected packet:** separately authorize the #598 exact app secret + canonical `APP_PUBLIC_URL` correction + five legal/callback saves/readbacks, with activation OFF. These prerequisites precede review/demo, not follow Live mode. Preserve the existing callback and two scopes. CA then verifies the existing Instagram product and prepares the demonstration from `INSTAGRAM-META-REVIEW-SUBMISSION-2026-09-23.md`; select one owner-controlled professional review account. The packet is prepared, not submitted or provider-accepted. Any reviewer/test-account consent needed before submission requires separate authorization; never bypass the production gate for a demo.
 2. CA completes Meta App Review/Advanced Access. Record provider approval evidence, not a guessed status. Current dashboard review/access/mode was not re-inspected in this pass.
    Superseding 1 October dashboard inspection: Development; empty unsubmitted
    request; both standalone scopes Standard access/zero calls; Insights advanced
@@ -152,8 +162,8 @@ production changes.
    deauthorize/deletion URLs blank. Resolve those protected prerequisites and a
    real authorized demo before submission. See `INSTAGRAM-META-REVIEW-PREP-2026-10-01.md`.
 3. CA switches to the required Live state only after approval.
-4. Under separate protected authority, securely configure the missing `INSTAGRAM_APP_SECRET`; privately validate all existing names. Encryption key must decode to exactly 32 bytes, key version must be `v1`/`v2` etc., and Graph version must be explicit. Verify `INSTAGRAM_REDIRECT_URI` equals `https://ehtjfntukiwbgptqgbzy.supabase.co/functions/v1/instagram-oauth-callback`. Correct/verify `APP_PUBLIC_URL` to the authenticated canonical origin `https://www.cgdynamics.co.za`: the current blocked callback redirects to the old `cg-dynamics.vercel.app` origin. No configuration was changed in this pass.
-5. Before enabling consent, deploy the accepted shared credential-expiry correction to both existing consumers (`meta-sync` and `meta-sync-worker`) under separate Edge deployment authorization. No migration or new scheduler is needed. Keep standalone activation disabled until all server/provider prerequisites pass.
+4. Recheck the step-1 config/legal receipts before enabling consent: Graph version explicit; `INSTAGRAM_REDIRECT_URI` is `https://ehtjfntukiwbgptqgbzy.supabase.co/functions/v1/instagram-oauth-callback`; `APP_PUBLIC_URL` is `https://www.cgdynamics.co.za`; no values leaked. The #600 known-good 32-byte key/version receipt remains satisfied. No configuration was changed in this read-only pass.
+5. Shared credential-expiry correction is already deployed; post-#598 config propagation reports `meta-sync` v55 and `meta-sync-worker` v42. **Do not redeploy it as a pending gate.** Keep standalone activation disabled until all server/provider prerequisites pass.
 6. Only then, with explicit authorization, enable `INSTAGRAM_STANDALONE_LIVE_ACTIVATION_ENABLED=true` and conduct one exact-client consent. Load Page-linked assets first; do not use standalone when the exact Page supplies the account.
 7. Verify exact `/me` account ID, username, Business/Creator type and both granted scopes; one-time state consumption; ciphertext-only persistence; `pending_review`; no canonical mapping yet. Confirm the exact returned identity separately as an active admin/manager. Check another client cannot use/read that connection.
 8. Under explicit sync authority, verify canonical Instagram reporting/freshness, provider observation age and unavailable/null metrics. No auto-publish. Roll out remaining clients individually only after that acceptance; the 17 unresolved handles require exact owner evidence first.
@@ -161,3 +171,7 @@ production changes.
 Present names: `INSTAGRAM_APP_ID`, `INSTAGRAM_REDIRECT_URI`, `INSTAGRAM_GRAPH_VERSION`, `INSTAGRAM_TOKEN_ENCRYPTION_KEY_B64`, `INSTAGRAM_TOKEN_ENCRYPTION_KEY_VERSION`, `INSTAGRAM_STANDALONE_LIVE_ACTIVATION_ENABLED`; shared `APP_PUBLIC_URL` also exists. No secret values are recorded here.
 
 Evidence and verification: `docs/ops/INSTAGRAM-READINESS-ACCEPTANCE-2026-10-01.md`.
+
+Superseding Oct 2 queue evidence and exact per-client blockers:
+`INSTAGRAM-505-ROLLOUT-MATRIX-2026-10-02.md`. No new Meta dashboard inspection,
+provider permission, OAuth, secret/config, mapping or sync action occurred.

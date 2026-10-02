@@ -51,9 +51,32 @@ export function exactHandleMatches(expectedHandle: string | null, providerHandle
   return expectedHandle !== null && expectedHandle.toLowerCase() === providerHandle.toLowerCase()
 }
 
-export function instagramPageRouteEvidence(hasFacebookPage: boolean, providerAssetsLoaded: boolean): string {
-  if (!hasFacebookPage) return 'No saved Facebook Page route is available for this client.'
-  return providerAssetsLoaded
-    ? 'The saved Facebook Page did not expose a linked Instagram account in the loaded provider assets.'
-    : 'The saved Facebook Page route has not been checked yet. Load Page-linked assets before choosing standalone OAuth.'
+export interface InstagramPageRouteInput {
+  facebookPageId: string | null
+  providerAssetsLoaded: boolean
+  providerPagesAvailable: boolean
+  providerPages: readonly { id: string; instagramAccount: { id: string } | null }[]
+}
+
+/** A successful discovery response does not prove a missing saved Page was checked. */
+export function instagramPageRouteEvidence(input: InstagramPageRouteInput) {
+  const page = input.facebookPageId
+    ? input.providerPages.find(item => item.id === input.facebookPageId)
+    : null
+  if (!input.providerAssetsLoaded) {
+    return { state: 'not_checked', canStartStandalone: false, text: 'The Page-linked route has not been checked yet. Load Page-linked assets before choosing standalone OAuth.' } as const
+  }
+  if (!input.providerPagesAvailable) {
+    return { state: 'unavailable', canStartStandalone: false, text: 'Page-linked discovery is unavailable. Resolve provider access before choosing standalone OAuth; missing evidence is not proof of no linked account.' } as const
+  }
+  if (!input.facebookPageId) {
+    return { state: 'no_saved_page', canStartStandalone: true, text: 'No saved Facebook Page route is available for this client. This does not prove the professional account is unlinked; exact owner evidence is still required.' } as const
+  }
+  if (!page) {
+    return { state: 'saved_page_not_returned', canStartStandalone: false, text: 'The saved Facebook Page was not returned by discovery. Page access or inventory coverage is unresolved; do not start standalone OAuth.' } as const
+  }
+  if (page.instagramAccount?.id) {
+    return { state: 'page_linked_available', canStartStandalone: false, text: 'An exact Instagram account is available through this client’s saved Facebook Page; use the Page-linked workflow.' } as const
+  }
+  return { state: 'no_account_observed', canStartStandalone: true, text: 'The exact saved Facebook Page was returned without an Instagram account in this observation. This is not global unlinking or professional-type proof; exact owner evidence is still required.' } as const
 }
