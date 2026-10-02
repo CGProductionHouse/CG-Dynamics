@@ -11,7 +11,8 @@ import { signRequest } from '../supabase/functions/_shared/awsSigV4.ts'
 import { buildSesSendRequest, classifySesResponse, snsStringToSign } from '../supabase/functions/_shared/websiteEnquirySes.ts'
 import { handleSesSnsRequest } from '../supabase/functions/_shared/websiteEnquirySesEvents.ts'
 import { verifySnsSigningCertificate } from '../supabase/functions/_shared/snsCertificateTrust.ts'
-import { buildPki, SNS_ISSUER_URL } from '../tests/helpers/snsTestPki.mjs'
+import { nodeX509 } from '../supabase/functions/_shared/snsX509Node.ts'
+import { buildPki } from '../tests/helpers/snsTestPki.mjs'
 
 const container = `cg-405-ses-acceptance-${randomUUID()}`
 const database = 'cg_website_enquiry_acceptance'
@@ -57,7 +58,7 @@ async function fakeSes(request, behaviour) {
 
 const dir = mkdtempSync(join(tmpdir(), 'cg-ses-acc-'))
 // Test PKI: root -> intermediate -> sns.amazonaws.com leaf. The REAL trust verifier runs with
-// this root injected; an attacker PKI must still fail against the pinned Amazon roots.
+// this intermediate + root injected; an attacker leaf (own intermediate) must still fail.
 const pki = buildPki({ name: 'acceptance' })
 const attacker = buildPki({ name: 'acceptance-attacker' })
 const keyPath = pki.leafKey
@@ -74,10 +75,7 @@ const ingestLogs = []
 const deps = {
   topicArn: TOPIC,
   fetchCertificate: async (url) => { assert.equal(url, CERT_URL); return leafInUse },
-  trustCertificate: (pem) => verifySnsSigningCertificate(pem, {
-    fetchIssuer: async (url) => { assert.equal(url, SNS_ISSUER_URL); return pem === pki.leafPem ? pki.intermediateDer : attacker.intermediateDer },
-    roots: [pki.rootPem],
-  }),
+  trustCertificate: (pem) => verifySnsSigningCertificate(pem, { x509: nodeX509, intermediates: [pki.intermediatePem], roots: [pki.rootPem] }),
   confirmSubscription: async () => true,
   log: (entry) => ingestLogs.push(entry),
   findReconcileJob: async (key) => asService(`select id from public.website_enquiry_delivery_jobs where delivery_key = '${key}' and provider = 'ses' and delivery_state = 'reconcile';`) || null,
@@ -194,7 +192,7 @@ try {
     return { ...message, Signature: execFileSync('openssl', ['dgst', '-sha256', '-sign', attacker.leafKey, input]).toString('base64') }
   })()
   const attackerResult = await ingest(attackerSigned)
-  assert.deepEqual([attackerResult.status, attackerResult.outcome, attackerResult.reason], [401, 'untrusted_certificate', 'issuer_not_anchored_to_amazon_root'])
+  assert.deepEqual([attackerResult.status, attackerResult.outcome, attackerResult.reason], [401, 'untrusted_certificate', 'leaf_not_signed_by_pinned_intermediate'])
   leafInUse = certificatePem
   assert.equal(sql('select count(*) from public.website_enquiry_delivery_provider_events;'), before)
 

@@ -156,6 +156,17 @@ test('an unreadable Supabase secret list fails closed before any change', () => 
   assert.deepEqual(r.calls.filter((call) => MUTATING.test(call)), [])
 })
 
+test('a PendingConfirmation subscription is re-requested; a confirmed one is left alone', () => {
+  const subscribe = (calls) => calls.filter((call) => call.includes('sns subscribe'))
+  const pending = run(['--apply'], { STUB_SUB: 'PendingConfirmation' })
+  assert.equal(pending.status, 0, pending.output)
+  assert.match(pending.output, /PendingConfirmation; requesting a new confirmation/)
+  assert.equal(subscribe(pending.calls).length, 1)
+  const confirmed = run(['--apply'], { STUB_SUB: 'arn:aws:sns:af-south-1:123456789012:cg-dynamics-ses-events:abc' })
+  assert.equal(confirmed.status, 0, confirmed.output)
+  assert.equal(subscribe(confirmed.calls).length, 0)
+})
+
 test('production access is requested only with explicit opt-in, as TRANSACTIONAL', () => {
   const r = run(['--apply'], { REQUEST_PRODUCTION_ACCESS: 'yes' })
   const request = r.calls.find((call) => call.includes('put-account-details'))

@@ -138,7 +138,9 @@ step "7. Supabase: topic ARN first (the endpoint only confirms its configured to
 run supabase secrets set --project-ref "$PROJECT_REF" "WEBSITE_ENQUIRY_SES_SNS_TOPIC_ARN=${TOPIC_ARN}"
 EXISTING_SUB="$("${AWS[@]}" sns list-subscriptions-by-topic --topic-arn "$TOPIC_ARN" \
   --query "Subscriptions[?Endpoint=='${ENDPOINT}'].SubscriptionArn | [0]" --output text 2>/dev/null || echo None)"
-if [[ "$EXISTING_SUB" == "None" || -z "$EXISTING_SUB" ]]; then
+if [[ "$EXISTING_SUB" == "None" || -z "$EXISTING_SUB" || "$EXISTING_SUB" == "PendingConfirmation" ]]; then
+  # Subscribing again while PendingConfirmation makes SNS resend the SubscriptionConfirmation.
+  [[ "$EXISTING_SUB" == "PendingConfirmation" ]] && say "  subscription is PendingConfirmation; requesting a new confirmation"
   if (( APPLY )); then sleep 20; fi   # let the secret reach the deployed function before SNS calls it
   run "${AWS[@]}" sns subscribe --topic-arn "$TOPIC_ARN" --protocol https --notification-endpoint "$ENDPOINT" --return-subscription-arn
 else
