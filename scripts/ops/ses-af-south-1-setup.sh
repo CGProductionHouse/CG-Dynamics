@@ -174,9 +174,11 @@ if (( APPLY )); then
   } >> "$SECRET_TMP"
   supabase secrets set --project-ref "$PROJECT_REF" --env-file "$SECRET_TMP" >/dev/null
   # Same worker secret into Vault for the pg_cron schedule (read there, never stored in cron.job).
-  printf "select case when exists (select 1 from vault.secrets where name = '%s')\n then vault.update_secret((select id from vault.secrets where name = '%s'), '%s')\n else vault.create_secret('%s', '%s', 'x-worker-secret for website-enquiry-delivery-worker') end;\n" \
-    "$VAULT_NAME" "$VAULT_NAME" "$WORKER_SECRET" "$WORKER_SECRET" "$VAULT_NAME" > "$SECRET_TMP"
-  supabase db query --project-ref "$PROJECT_REF" -f "$SECRET_TMP" >/dev/null
+  # Two statements: update_secret returns void and create_secret returns uuid, so one CASE fails.
+  printf "select vault.update_secret(id, '%s') from vault.secrets where name = '%s';\nselect vault.create_secret('%s', '%s', 'x-worker-secret for website-enquiry-delivery-worker')\n where not exists (select 1 from vault.secrets where name = '%s');\n" \
+    "$WORKER_SECRET" "$VAULT_NAME" "$WORKER_SECRET" "$VAULT_NAME" "$VAULT_NAME" > "$SECRET_TMP"
+  supabase db query --linked --project-ref "$PROJECT_REF" -f "$SECRET_TMP" >/dev/null \
+    || die "Vault write failed (supabase db query --linked). Supabase secrets are set; re-run --apply to write a fresh worker secret to both."
   unset WORKER_SECRET
   rm -f "$SECRET_TMP"; SECRET_TMP=""
   say "  secrets set: PROVIDER, FROM, SES_REGION, SES_CONFIGURATION_SET, WORKER_SECRET (+Vault), SES keys as above"

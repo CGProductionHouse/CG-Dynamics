@@ -67,7 +67,7 @@ test('apply converges the full setup in the safe order', () => {
     'iam put-user-policy --user-name cg-dynamics-ses-sender',
     'iam create-access-key --user-name cg-dynamics-ses-sender',
     'secrets set --project-ref ehtjfntukiwbgptqgbzy --env-file',
-    'db query --project-ref ehtjfntukiwbgptqgbzy -f',
+    'db query --linked --project-ref ehtjfntukiwbgptqgbzy -f',
   ]
   let cursor = -1
   for (const expected of order) {
@@ -102,6 +102,10 @@ test('secrets reach Supabase and Vault only — never stdout — and sending sta
   const worker = r.secrets.match(/^WEBSITE_ENQUIRY_WORKER_SECRET=([0-9a-f]{64})$/m)?.[1]
   assert.ok(worker, 'worker secret not generated')
   assert.ok(r.vault.includes(worker) && r.vault.includes("'website_enquiry_worker_secret'"), 'worker secret not stored in Vault')
+  // update_secret returns void and create_secret uuid: they must not share one CASE (Postgres 42804).
+  assert.doesNotMatch(r.vault, /\bcase\b/i)
+  assert.match(r.vault, /select vault\.update_secret\(id, '[0-9a-f]{64}'\) from vault\.secrets where name = 'website_enquiry_worker_secret';/)
+  assert.match(r.vault, /select vault\.create_secret\('[0-9a-f]{64}', 'website_enquiry_worker_secret', '[^']+'\)\s+where not exists \(select 1 from vault\.secrets where name = 'website_enquiry_worker_secret'\);/)
   assert.doesNotMatch(r.secrets, /WEBSITE_ENQUIRY_EMAIL_ENABLED/)
   for (const secret of ['STUBSECRETSTUBSECRET', worker]) {
     assert.ok(!r.output.includes(secret), 'a secret was printed')

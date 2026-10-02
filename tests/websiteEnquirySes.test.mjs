@@ -178,12 +178,12 @@ test('SES event mapping: final outcomes only, delivery-key tag carried', () => {
 test('SNS ingest handler: topic/cert/signature gates, subscription confirm, durable store, reconcile by tag', async () => {
   const dir = mkdtempSync(join(tmpdir(), 'cg-sns-h-'))
   const good = makeCert(dir, 'h-good')
-  const calls = { applied: [], confirmed: [], resolved: [] }
+  const calls = { applied: [], confirmed: [], resolved: [], trustedUrls: [] }
   const logs = []
   const deps = (over = {}) => ({
     topicArn: TOPIC,
     fetchCertificate: async () => good.pem,
-    trustCertificate: async (pem) => ({ ok: true, spki: new Uint8Array(new X509Certificate(pem).publicKey.export({ type: 'spki', format: 'der' })) }),
+    trustCertificate: async (pem, certUrl) => (calls.trustedUrls.push(certUrl), { ok: true, spki: new Uint8Array(new X509Certificate(pem).publicKey.export({ type: 'spki', format: 'der' })) }),
     confirmSubscription: async url => { calls.confirmed.push(url); return true },
     findReconcileJob: async key => key === job.delivery_key ? 'job-reconcile' : null,
     resolveFound: async (jobId, messageId) => { calls.resolved.push([jobId, messageId]); return true },
@@ -198,6 +198,8 @@ test('SNS ingest handler: topic/cert/signature gates, subscription confirm, dura
   assert.equal((await handleSesSnsRequest(post(delivered), deps())).status, 200)
   assert.deepEqual(calls.applied.at(-1), { eventId: 'sns-1', messageId: 'ses-message-1', event: 'delivered', occurredAt: '2026-10-02T10:00:05Z' })
   assert.deepEqual(calls.resolved.at(-1), ['job-reconcile', 'ses-message-1'])
+  // Trust receives the validated SigningCertURL so a regional leaf is bound to its own host.
+  assert.equal(calls.trustedUrls.at(-1), CERT_URL)
 
   assert.equal((await handleSesSnsRequest(post({ ...delivered, TopicArn: TOPIC.replace('cg-dynamics', 'other') }), deps())).status, 403)
   assert.equal((await handleSesSnsRequest(post({ ...delivered, SigningCertURL: 'https://evil.test/x.pem' }), deps())).status, 403)
