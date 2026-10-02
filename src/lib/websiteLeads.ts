@@ -10,6 +10,44 @@ export type LeadQuality = (typeof LEAD_QUALITIES)[number]
 export const POOR_LEAD_REASONS = ['spam', 'wrong_service', 'out_of_area', 'no_budget', 'duplicate', 'unreachable', 'other'] as const
 export type PoorLeadReason = (typeof POOR_LEAD_REASONS)[number]
 
+/**
+ * The only lead states a client can choose. Good lead = Qualified (which can later be
+ * Won or Lost); Poor lead = Closed-Lost/disqualified with a reason. Mirrors the
+ * database constraint, so contradictory status/quality pairs cannot be expressed.
+ */
+export const LEAD_OUTCOMES = ['new', 'contacted', 'good', 'won', 'lost', 'poor'] as const
+export type LeadOutcome = (typeof LEAD_OUTCOMES)[number]
+
+export const LEAD_OUTCOME_LABELS: Record<LeadOutcome, string> = {
+  new: 'New',
+  contacted: 'Contacted',
+  good: 'Good lead – Qualified',
+  won: 'Won (good lead)',
+  lost: 'Lost (good lead, did not go ahead)',
+  poor: 'Poor lead – Closed out',
+}
+
+const OUTCOME_STATE: Record<LeadOutcome, { status: LeadStatus; quality: LeadQuality | null }> = {
+  new: { status: 'new', quality: null },
+  contacted: { status: 'contacted', quality: null },
+  good: { status: 'qualified', quality: 'good' },
+  won: { status: 'won', quality: 'good' },
+  lost: { status: 'closed_lost', quality: 'good' },
+  poor: { status: 'closed_lost', quality: 'poor' },
+}
+
+/** Returns the outcome for a valid status/quality pair, or null when the pair is contradictory. */
+export function leadOutcome(status: LeadStatus, quality: LeadQuality | null): LeadOutcome | null {
+  return LEAD_OUTCOMES.find((outcome) => OUTCOME_STATE[outcome].status === status && OUTCOME_STATE[outcome].quality === quality) ?? null
+}
+
+export function lifecycleForOutcome(outcome: LeadOutcome, poorReason: PoorLeadReason | null = null, poorNote: string | null = null): LeadLifecycleInput {
+  const state = OUTCOME_STATE[outcome]
+  return outcome === 'poor'
+    ? { ...state, poorReason, poorNote }
+    : { ...state, poorReason: null, poorNote: null }
+}
+
 export const LEAD_STATUS_LABELS: Record<LeadStatus, string> = {
   new: 'New',
   contacted: 'Contacted',
@@ -70,6 +108,7 @@ export interface WebsiteLeadMetrics {
   qualified: number
   won: number
   closedLost: number
+  lost: number
   good: number
   poor: number
   unreviewed: number
@@ -80,6 +119,9 @@ export interface WebsiteLeadMetrics {
 export function validateLeadLifecycle(input: LeadLifecycleInput): string | null {
   if (!LEAD_STATUSES.includes(input.status)) return 'Choose a lead status.'
   if (input.quality !== null && !LEAD_QUALITIES.includes(input.quality)) return 'Choose Good or Poor.'
+  if (!leadOutcome(input.status, input.quality)) {
+    return 'Good leads are Qualified, Won or Lost; Poor leads are closed out; New and Contacted leads are not yet reviewed.'
+  }
   const note = input.poorNote?.trim() || null
   if (input.quality === 'poor') {
     if (!input.poorReason || !POOR_LEAD_REASONS.includes(input.poorReason)) return 'A poor lead needs a reason.'
@@ -154,6 +196,7 @@ export function mapWebsiteLeadRow(row: Record<string, unknown>): WebsiteLead {
   if (quality !== null && !LEAD_QUALITIES.includes(quality)) throw new Error('Lead quality is not recognised.')
   const poorReason = (row.poor_reason ?? null) as PoorLeadReason | null
   if (poorReason !== null && !POOR_LEAD_REASONS.includes(poorReason)) throw new Error('Poor-lead reason is not recognised.')
+  if (!leadOutcome(status, quality)) throw new Error('Lead status and quality are contradictory.')
   const fields = Array.isArray(row.fields) ? row.fields : []
   const attribution = row.attribution && typeof row.attribution === 'object' ? row.attribution as Record<string, unknown> : {}
   return {
@@ -179,6 +222,17 @@ export function mapWebsiteLeadRow(row: Record<string, unknown>): WebsiteLead {
     poorNote: asString(row.poor_note),
     lifecycleUpdatedAt: asString(row.lifecycle_updated_at),
   }
+}
+
+/**
+ * Current reporting month (YYYY-MM) in Africa/Johannesburg, the reporting authority.
+ * UTC would select the previous month between 00:00 and 02:00 SAST on the 1st.
+ */
+export function currentReportingMonth(now: Date = new Date()): string {
+  const parts = new Intl.DateTimeFormat('en-CA', { timeZone: 'Africa/Johannesburg', year: 'numeric', month: '2-digit' }).formatToParts(now)
+  const year = parts.find((part) => part.type === 'year')?.value
+  const month = parts.find((part) => part.type === 'month')?.value
+  return `${year}-${month}`
 }
 
 /** Month window [from, to) used by Website Performance, as ISO dates. */

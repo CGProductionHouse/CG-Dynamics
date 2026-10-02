@@ -25,6 +25,14 @@ create table public.website_enquiry_lead_states (
   updated_at timestamptz not null default now(),
   foreign key (enquiry_id, client_id)
     references public.website_enquiries(id, client_id) on delete restrict,
+  -- Deterministic #405 mapping: Good lead = Qualified (which may later be Won or
+  -- Lost); Poor lead = Closed-Lost/disqualified with a reason; New/Contacted are
+  -- unreviewed. Every other combination is unrepresentable.
+  constraint website_enquiry_lead_states_outcome_check check (
+    (status in ('new', 'contacted') and quality is null)
+    or (status in ('qualified', 'won') and quality is not distinct from 'good')
+    or (status = 'closed_lost' and quality is not null and quality in ('good', 'poor'))
+  ),
   check ((quality = 'poor') = (poor_reason is not null)),
   check (poor_note is null or quality = 'poor'),
   check (poor_reason <> 'other' or poor_note is not null)
@@ -235,6 +243,15 @@ begin
   if p_quality is not null and p_quality not in ('good', 'poor') then
     raise exception 'Lead quality is invalid' using errcode = '22023';
   end if;
+  if not coalesce(
+    (p_status in ('new', 'contacted') and p_quality is null)
+    or (p_status in ('qualified', 'won') and p_quality is not distinct from 'good')
+    or (p_status = 'closed_lost' and p_quality is not null and p_quality in ('good', 'poor')),
+    false
+  ) then
+    raise exception 'Lead status and quality do not match: Good leads are Qualified, Won or Lost; Poor leads are Closed-Lost; New and Contacted leads are unreviewed'
+      using errcode = '22023';
+  end if;
   if p_quality = 'poor' and p_poor_reason is null then
     raise exception 'A poor lead requires a reason' using errcode = '22023';
   end if;
@@ -321,14 +338,16 @@ begin
     'total', count(*),
     'new', count(*) filter (where coalesce(lead_state.status, 'new') = 'new'),
     'contacted', count(*) filter (where lead_state.status = 'contacted'),
-    'qualified', count(*) filter (where lead_state.status in ('qualified', 'won')),
+    -- A Good lead is a qualified lead, whatever its later Won/Lost outcome.
+    'qualified', count(*) filter (where lead_state.quality = 'good'),
     'won', count(*) filter (where lead_state.status = 'won'),
     'closedLost', count(*) filter (where lead_state.status = 'closed_lost'),
+    'lost', count(*) filter (where lead_state.status = 'closed_lost' and lead_state.quality = 'good'),
     'good', count(*) filter (where lead_state.quality = 'good'),
     'poor', count(*) filter (where lead_state.quality = 'poor'),
     'unreviewed', count(*) filter (where lead_state.quality is null),
     'qualificationRate', case when count(*) = 0 then null else round(
-      (count(*) filter (where lead_state.status in ('qualified', 'won')))::numeric / count(*), 4
+      (count(*) filter (where lead_state.quality = 'good'))::numeric / count(*), 4
     ) end
   ) into v_result
   from public.website_enquiries enquiry

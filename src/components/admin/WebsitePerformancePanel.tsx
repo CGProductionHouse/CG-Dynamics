@@ -9,14 +9,13 @@ import {
 } from '../../lib/websitePerformance'
 import { PremiumCard, PremiumCardHeader } from '../ui/PremiumCard'
 import { WebsiteLeadMetricsCard } from '../website/WebsiteLeadMetricsCard'
-import { monthWindow } from '../../lib/websiteLeads'
+import { currentReportingMonth, monthWindow } from '../../lib/websiteLeads'
 
-const currentMonth = () => new Date().toISOString().slice(0, 7)
 const label = (value: number | null) => value === null ? 'Unavailable' : new Intl.NumberFormat('en-ZA').format(value)
 
 export function WebsitePerformancePanel({ clients, canSave }: { clients: Client[]; canSave: boolean }) {
   const [clientId, setClientId] = useState('')
-  const [month, setMonth] = useState(currentMonth)
+  const [month, setMonth] = useState(() => currentReportingMonth())
   const [result, setResult] = useState<WebsitePerformanceResult | null>(null)
   const [state, setState] = useState<'idle' | 'loading' | 'error'>('idle')
   const [saving, setSaving] = useState(false)

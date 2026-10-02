@@ -3,23 +3,28 @@ import { ClientPortalErrorState, ClientPortalLoadingState } from '../../componen
 import { WebsiteLeadMetricsCard } from '../../components/website/WebsiteLeadMetricsCard'
 import { listWebsiteLeads, saveWebsiteLeadLifecycle, type LeadLoad } from '../../lib/db/websiteLeads'
 import {
+  LEAD_OUTCOMES,
+  LEAD_OUTCOME_LABELS,
   LEAD_STATUSES,
   LEAD_STATUS_LABELS,
   POOR_LEAD_REASONS,
   POOR_LEAD_REASON_LABELS,
+  currentReportingMonth,
   leadContactActions,
+  leadOutcome,
+  lifecycleForOutcome,
   monthWindow,
   validateLeadLifecycle,
   type LeadLifecycleInput,
+  type LeadOutcome,
   type LeadStatus,
+  type PoorLeadReason,
   type WebsiteLead,
 } from '../../lib/websiteLeads'
 
 const dateTime = (value: string) => new Intl.DateTimeFormat('en-ZA', {
   dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Johannesburg',
 }).format(new Date(value))
-
-const currentMonth = () => new Date().toISOString().slice(0, 7)
 
 type Filter = 'all' | LeadStatus
 
@@ -28,7 +33,7 @@ export default function ClientLeadsPage() {
   const [load, setLoad] = useState<LeadLoad<WebsiteLead[]> | null>(null)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [filter, setFilter] = useState<Filter>('all')
-  const month = currentMonth()
+  const month = currentReportingMonth()
   const period = monthWindow(month)
 
   const refresh = useCallback(async () => {
@@ -104,9 +109,10 @@ function StatusBadge({ status }: { status: LeadStatus }) {
 }
 
 function LeadDetail({ lead, onSaved }: { lead: WebsiteLead; onSaved: () => Promise<unknown> }) {
-  const [draft, setDraft] = useState<LeadLifecycleInput>({
-    status: lead.status, quality: lead.quality, poorReason: lead.poorReason, poorNote: lead.poorNote,
-  })
+  const [outcome, setOutcome] = useState<LeadOutcome>(leadOutcome(lead.status, lead.quality) ?? 'new')
+  const [poorReason, setPoorReason] = useState<PoorLeadReason | null>(lead.poorReason)
+  const [poorNote, setPoorNote] = useState<string | null>(lead.poorNote)
+  const draft: LeadLifecycleInput = lifecycleForOutcome(outcome, poorReason, poorNote)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null)
   const actions = leadContactActions(lead)
@@ -145,30 +151,23 @@ function LeadDetail({ lead, onSaved }: { lead: WebsiteLead; onSaved: () => Promi
 
     <fieldset className="mt-6 space-y-4 border-t border-white/10 pt-5" disabled={saving}>
       <legend className="sr-only">Lead progress</legend>
-      <label className="block text-xs font-bold uppercase tracking-widest text-slate-400">Status
-        <select className="mt-1 block w-full rounded-xl border border-white/15 bg-[#0d1a1a] px-3 py-2 text-sm normal-case tracking-normal text-white" value={draft.status}
-          onChange={(event) => setDraft({ ...draft, status: event.target.value as LeadStatus })}>
-          {LEAD_STATUSES.map((status) => <option key={status} value={status}>{LEAD_STATUS_LABELS[status]}</option>)}
+      <label className="block text-xs font-bold uppercase tracking-widest text-slate-400">Lead progress
+        <select className="mt-1 block w-full rounded-xl border border-white/15 bg-[#0d1a1a] px-3 py-2 text-sm normal-case tracking-normal text-white" value={outcome}
+          onChange={(event) => setOutcome(event.target.value as LeadOutcome)}>
+          {LEAD_OUTCOMES.map((value) => <option key={value} value={value}>{LEAD_OUTCOME_LABELS[value]}</option>)}
         </select>
       </label>
-      <div role="radiogroup" aria-label="Lead quality" className="flex flex-wrap gap-2">
-        {([['good', 'Good lead'], ['poor', 'Poor lead'], [null, 'Not reviewed']] as const).map(([value, text]) => (
-          <button key={text} type="button" role="radio" aria-checked={draft.quality === value}
-            onClick={() => setDraft({ ...draft, quality: value, poorReason: value === 'poor' ? draft.poorReason : null, poorNote: value === 'poor' ? draft.poorNote : null })}
-            className={`rounded-xl border px-3 py-2 text-sm font-bold ${draft.quality === value ? 'border-brand-accent bg-brand-accent/15 text-white' : 'border-white/15 text-slate-300'}`}>{text}</button>
-        ))}
-      </div>
       {draft.quality === 'poor' && <>
         <label className="block text-xs font-bold uppercase tracking-widest text-slate-400">Why is this a poor lead? (required)
-          <select className="mt-1 block w-full rounded-xl border border-white/15 bg-[#0d1a1a] px-3 py-2 text-sm normal-case tracking-normal text-white" value={draft.poorReason ?? ''}
-            onChange={(event) => setDraft({ ...draft, poorReason: (event.target.value || null) as LeadLifecycleInput['poorReason'] })}>
+          <select className="mt-1 block w-full rounded-xl border border-white/15 bg-[#0d1a1a] px-3 py-2 text-sm normal-case tracking-normal text-white" value={poorReason ?? ''}
+            onChange={(event) => setPoorReason((event.target.value || null) as PoorLeadReason | null)}>
             <option value="">Choose a reason</option>
             {POOR_LEAD_REASONS.map((reason) => <option key={reason} value={reason}>{POOR_LEAD_REASON_LABELS[reason]}</option>)}
           </select>
         </label>
         <label className="block text-xs font-bold uppercase tracking-widest text-slate-400">Note{draft.poorReason === 'other' ? ' (required)' : ' (optional)'}
-          <textarea maxLength={500} rows={2} className="mt-1 block w-full rounded-xl border border-white/15 bg-[#0d1a1a] px-3 py-2 text-sm normal-case tracking-normal text-white" value={draft.poorNote ?? ''}
-            onChange={(event) => setDraft({ ...draft, poorNote: event.target.value })} />
+          <textarea maxLength={500} rows={2} className="mt-1 block w-full rounded-xl border border-white/15 bg-[#0d1a1a] px-3 py-2 text-sm normal-case tracking-normal text-white" value={poorNote ?? ''}
+            onChange={(event) => setPoorNote(event.target.value)} />
         </label>
       </>}
       {validation && <p className="text-sm text-amber-200">{validation}</p>}

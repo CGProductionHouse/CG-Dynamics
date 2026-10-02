@@ -2,7 +2,11 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 import {
+  LEAD_OUTCOMES,
+  currentReportingMonth,
   formatQualificationRate,
+  leadOutcome,
+  lifecycleForOutcome,
   isLeadInboxUnavailableError,
   leadContactActions,
   mapWebsiteLeadRow,
@@ -31,6 +35,31 @@ test('poor leads require a reason and good/unreviewed leads carry none', () => {
     { status: 'won', quality: 'good', poorReason: null, poorNote: null })
 })
 
+test('Good maps to Qualified, Poor to Closed-Lost, and contradictions are rejected', () => {
+  assert.deepEqual(lifecycleForOutcome('good'), { status: 'qualified', quality: 'good', poorReason: null, poorNote: null })
+  assert.deepEqual(lifecycleForOutcome('poor', 'spam'), { status: 'closed_lost', quality: 'poor', poorReason: 'spam', poorNote: null })
+  assert.deepEqual(lifecycleForOutcome('won', 'spam', 'x'), { status: 'won', quality: 'good', poorReason: null, poorNote: null })
+  for (const outcome of LEAD_OUTCOMES) {
+    const value = lifecycleForOutcome(outcome, 'wrong_service')
+    assert.equal(leadOutcome(value.status, value.quality), outcome)
+  }
+  for (const [status, quality] of [['new', 'good'], ['contacted', 'good'], ['new', 'poor'], ['qualified', 'poor'], ['won', 'poor'], ['qualified', null], ['won', null], ['closed_lost', null]]) {
+    assert.equal(leadOutcome(status, quality), null, `${status}/${quality}`)
+    assert.match(validateLeadLifecycle({ status, quality, poorReason: quality === 'poor' ? 'spam' : null, poorNote: null }), /Good leads are Qualified/)
+  }
+})
+
+test('current reporting month follows Africa/Johannesburg, not UTC', () => {
+  // 31 Oct 22:30 UTC is already 1 Nov 00:30 in Johannesburg.
+  assert.equal(currentReportingMonth(new Date('2026-10-31T22:30:00Z')), '2026-11')
+  assert.equal(currentReportingMonth(new Date('2026-12-31T22:00:00Z')), '2027-01')
+  assert.equal(currentReportingMonth(new Date('2026-10-31T21:59:59Z')), '2026-10')
+  for (const file of [page, read('../src/components/admin/WebsitePerformancePanel.tsx')]) {
+    assert.doesNotMatch(file, /toISOString\(\)\.slice\(0, 7\)/)
+    assert.match(file, /currentReportingMonth\(\)/)
+  }
+})
+
 test('contact actions come only from stored lead fields', () => {
   assert.deepEqual(leadContactActions({ contactPhone: '082 000 0001', contactEmail: 'visitor@example.test' }), {
     call: 'tel:0820000001', whatsapp: 'https://wa.me/27820000001', email: 'mailto:visitor@example.test',
@@ -54,6 +83,7 @@ test('row mapping rejects unknown lifecycle values instead of guessing', () => {
   assert.deepEqual(lead.attribution, { utm_source: 'google' })
   assert.throws(() => mapWebsiteLeadRow({ ...row, status: 'archived' }))
   assert.throws(() => mapWebsiteLeadRow({ ...row, quality: 'great' }))
+  assert.throws(() => mapWebsiteLeadRow({ ...row, status: 'won', quality: null }))
 })
 
 test('metrics formatting and unavailable detection stay truthful', () => {
@@ -72,6 +102,9 @@ test('lifecycle is separate from immutable acquisition evidence', () => {
   assert.doesNotMatch(migration, /update public\.website_enquiries\b/i)
   assert.doesNotMatch(migration, /insert into public\.(clients|website_enquiry_endpoints|website_enquiries)\b/i)
   assert.match(migration, /check \(\(quality = 'poor'\) = \(poor_reason is not null\)\)/i)
+  assert.match(migration, /website_enquiry_lead_states_outcome_check/)
+  assert.match(acceptance, /impossible combination accepted/)
+  assert.match(acceptance, /table accepted unreviewed Won/)
   assert.match(migration, /website_enquiry_lead_state_events/i)
 })
 
@@ -100,6 +133,8 @@ test('disposable PostgreSQL acceptance covers isolation, rules and PII-free metr
 test('UI is client-pinned, analytics-free and truthful when unavailable or empty', () => {
   assert.match(page, /listWebsiteLeads\(\)/)
   assert.match(page, /clientId=\{null\}/)
+  assert.match(page, /LEAD_OUTCOMES\.map/)
+  assert.doesNotMatch(page, /role="radiogroup"/)
   assert.match(page, /not been switched on/)
   assert.match(page, /No website enquiries yet/)
   assert.doesNotMatch(page + metricsCard + db, /gtag|dataLayer|googletagmanager|analytics\.track/i)

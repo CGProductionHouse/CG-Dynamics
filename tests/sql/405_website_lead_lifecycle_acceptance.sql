@@ -170,6 +170,30 @@ begin
 end $$;
 select public.set_website_lead_lifecycle((select id from lead_ids where submission_key = 'lead-a-0000000002'), 'closed_lost', 'poor', 'wrong_service', 'Asked for plumbing');
 
+-- Deterministic Good/Poor mapping: every contradictory combination is rejected by the RPC.
+do $$
+declare
+  v_lead uuid := (select id from lead_ids where submission_key = 'lead-a-0000000003');
+  v_combo record;
+  v_message text;
+begin
+  for v_combo in
+    select * from (values
+      ('new', 'good', null), ('contacted', 'good', null), ('new', 'poor', 'spam'),
+      ('contacted', 'poor', 'spam'), ('qualified', 'poor', 'spam'), ('won', 'poor', 'spam'),
+      ('qualified', null, null), ('won', null, null), ('closed_lost', null, null)
+    ) as combo(status, quality, reason)
+  loop
+    begin
+      perform public.set_website_lead_lifecycle(v_lead, v_combo.status, v_combo.quality, v_combo.reason);
+      raise exception 'impossible combination accepted: % / %', v_combo.status, v_combo.quality;
+    exception when invalid_parameter_value then
+      get stacked diagnostics v_message = message_text;
+      assert v_message like 'Lead status and quality do not match%', v_message;
+    end;
+  end loop;
+end $$;
+
 do $$
 declare
   v_message text;
@@ -224,6 +248,37 @@ begin
   end;
 end $$;
 commit;
+
+-- The table constraint itself rejects contradictory state even for privileged writers.
+do $$
+declare
+  v_lead uuid := (select id from lead_ids where submission_key = 'lead-a-0000000003');
+begin
+  begin
+    insert into public.website_enquiry_lead_states (enquiry_id, client_id, status, quality, updated_by)
+    values (v_lead, '40600000-0000-4000-8000-000000000001', 'new', 'good', '40610000-0000-4000-8000-000000000001');
+    raise exception 'table accepted Good + New';
+  exception when check_violation then null;
+  end;
+  begin
+    insert into public.website_enquiry_lead_states (enquiry_id, client_id, status, quality, poor_reason, updated_by)
+    values (v_lead, '40600000-0000-4000-8000-000000000001', 'won', 'poor', 'spam', '40610000-0000-4000-8000-000000000001');
+    raise exception 'table accepted Poor + Won';
+  exception when check_violation then null;
+  end;
+  begin
+    insert into public.website_enquiry_lead_states (enquiry_id, client_id, status, quality, updated_by)
+    values (v_lead, '40600000-0000-4000-8000-000000000001', 'closed_lost', null, '40610000-0000-4000-8000-000000000001');
+    raise exception 'table accepted unreviewed Closed-Lost';
+  exception when check_violation then null;
+  end;
+  begin
+    insert into public.website_enquiry_lead_states (enquiry_id, client_id, status, quality, updated_by)
+    values (v_lead, '40600000-0000-4000-8000-000000000001', 'won', null, '40610000-0000-4000-8000-000000000001');
+    raise exception 'table accepted unreviewed Won';
+  exception when check_violation then null;
+  end;
+end $$;
 
 -- Acquisition evidence was not rewritten by lifecycle work.
 do $$
@@ -288,6 +343,17 @@ begin
   assert (select count(*) from public.website_lead_inbox('40600000-0000-4000-8000-000000000002')) = 1, 'staff client B inbox wrong';
   perform public.set_website_lead_lifecycle((select id from lead_ids where submission_key = 'lead-b-0000000001'), 'contacted');
   assert (select status from public.website_lead_inbox('40600000-0000-4000-8000-000000000002')) = 'contacted', 'staff update lost';
+  -- A Good (qualified) lead that later does not buy is Lost but still counts as qualified.
+  perform public.set_website_lead_lifecycle((select id from lead_ids where submission_key = 'lead-b-0000000001'), 'qualified', 'good');
+  perform public.set_website_lead_lifecycle((select id from lead_ids where submission_key = 'lead-b-0000000001'), 'closed_lost', 'good');
+  declare
+    v_metrics jsonb := public.website_lead_metrics('40600000-0000-4000-8000-000000000002',
+      (now() at time zone 'Africa/Johannesburg')::date, (now() at time zone 'Africa/Johannesburg')::date + 1);
+  begin
+    assert (v_metrics ->> 'qualified')::int = 1 and (v_metrics ->> 'lost')::int = 1
+      and (v_metrics ->> 'won')::int = 0 and (v_metrics ->> 'poor')::int = 0
+      and (v_metrics ->> 'qualificationRate')::numeric = 1, v_metrics::text;
+  end;
 end $$;
 commit;
 
