@@ -6,8 +6,9 @@
 // - SES has NO idempotency key. A response that may or may not have produced a message is
 //   `ambiguous` -> reconcile, and is never auto-replayed. Every message carries the job's
 //   delivery_key as an SES message tag so a later SES event can prove it was sent.
-// Events: SES event publishing -> SNS topic -> HTTPS. Every SNS message signature is
-// verified against an AWS-hosted certificate before anything is trusted.
+// Events: SES event publishing -> SNS topic -> HTTPS. The signing certificate must chain to a
+// pinned Amazon root (snsCertificateTrust.ts) and the SignatureVersion 2 (SHA256) signature
+// must verify with that certificate's key before anything is trusted.
 
 import { signRequest, type SigV4Credentials } from './awsSigV4.ts'
 import { composeEnquiryEmail, type ClaimedDelivery, type DeliveryOutcome } from './websiteEnquiryDelivery.ts'
@@ -109,7 +110,7 @@ export interface SnsMessage {
   TopicArn: string
   Message: string
   Timestamp: string
-  SignatureVersion: '1' | '2'
+  SignatureVersion: '2'
   Signature: string
   SigningCertURL: string
   Subject?: string
@@ -117,12 +118,17 @@ export interface SnsMessage {
   SubscribeURL?: string
 }
 
-/** SNS certificates are only ever served from sns.<region>.amazonaws.com over HTTPS. */
+/**
+ * SNS certificates are only ever served from sns.<region>.amazonaws.com over HTTPS at
+ * /SimpleNotificationService-<id>.pem. This only decides whether to fetch; trust is then
+ * established cryptographically by verifySnsSigningCertificate.
+ */
 export function isTrustedSnsCertUrl(value: string): boolean {
   try {
     const url = new URL(value)
     return url.protocol === 'https:' && /^sns\.[a-z0-9-]+\.amazonaws\.com(\.cn)?$/.test(url.hostname)
-      && url.pathname.endsWith('.pem') && !url.username && !url.password && (url.port === '' || url.port === '443')
+      && /^\/SimpleNotificationService-[A-Za-z0-9]{8,64}\.pem$/.test(url.pathname) && !url.search
+      && !url.username && !url.password && (url.port === '' || url.port === '443')
   } catch {
     return false
   }
@@ -134,8 +140,9 @@ export function parseSnsMessage(value: unknown): SnsMessage | null {
   const str = (key: string) => typeof m[key] === 'string' ? m[key] as string : null
   const type = str('Type')
   if (type !== 'Notification' && type !== 'SubscriptionConfirmation' && type !== 'UnsubscribeConfirmation') return null
-  const version = str('SignatureVersion')
-  if (version !== '1' && version !== '2') return null
+  // SignatureVersion 1 is SHA1. CG owns the topic and configures SignatureVersion=2, so
+  // anything else is rejected rather than verified with a weaker hash.
+  if (str('SignatureVersion') !== '2') return null
   for (const key of ['MessageId', 'TopicArn', 'Message', 'Timestamp', 'Signature', 'SigningCertURL']) if (!str(key)) return null
   if (type !== 'Notification' && (!str('Token') || !str('SubscribeURL'))) return null
   return m as unknown as SnsMessage
@@ -149,44 +156,12 @@ export function snsStringToSign(message: SnsMessage): string {
   return fields.map((field) => `${field}\n${(message as unknown as Record<string, string>)[field]}\n`).join('')
 }
 
-// Minimal DER walker: Certificate -> tbsCertificate -> subjectPublicKeyInfo (7th element when
-// the [0] version tag is present). Enough for RSA certificates served by SNS.
-function readTlv(bytes: Uint8Array, offset: number): { tag: number; start: number; end: number; next: number } {
-  const tag = bytes[offset]
-  let length = bytes[offset + 1]
-  let start = offset + 2
-  if (length & 0x80) {
-    const count = length & 0x7f
-    if (count < 1 || count > 4) throw new Error('unsupported DER length')
-    length = 0
-    for (let index = 0; index < count; index++) length = (length << 8) | bytes[start + index]
-    start += count
-  }
-  const end = start + length
-  if (end > bytes.length) throw new Error('truncated DER')
-  return { tag, start, end, next: end }
-}
-
-export function spkiFromCertificatePem(pem: string): Uint8Array {
-  const match = pem.match(/-----BEGIN CERTIFICATE-----([\s\S]+?)-----END CERTIFICATE-----/)
-  if (!match) throw new Error('not a PEM certificate')
-  const der = Uint8Array.from(atob(match[1].replace(/\s+/g, '')), (char) => char.charCodeAt(0))
-  const certificate = readTlv(der, 0)
-  const tbs = readTlv(der, certificate.start)
-  let cursor = tbs.start
-  let element = readTlv(der, cursor)
-  if (element.tag === 0xa0) { cursor = element.next; element = readTlv(der, cursor) } // explicit version
-  // serialNumber, signature, issuer, validity, subject, subjectPublicKeyInfo
-  for (let skip = 0; skip < 5; skip++) { cursor = element.next; element = readTlv(der, cursor) }
-  if (element.tag !== 0x30) throw new Error('subjectPublicKeyInfo not found')
-  return der.slice(cursor, element.end)
-}
-
-export async function verifySnsSignature(message: SnsMessage, certificatePem: string): Promise<boolean> {
+/** Verifies the SHA256 SNS signature with the public key of a chain-verified certificate. */
+export async function verifySnsSignature(message: SnsMessage, trustedSpki: Uint8Array): Promise<boolean> {
+  if (message.SignatureVersion !== '2') return false
   try {
     const key = await crypto.subtle.importKey(
-      'spki', spkiFromCertificatePem(certificatePem) as Uint8Array<ArrayBuffer>,
-      { name: 'RSASSA-PKCS1-v1_5', hash: message.SignatureVersion === '2' ? 'SHA-256' : 'SHA-1' }, false, ['verify'],
+      'spki', trustedSpki as Uint8Array<ArrayBuffer>, { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['verify'],
     )
     const signature = Uint8Array.from(atob(message.Signature), (char) => char.charCodeAt(0))
     return await crypto.subtle.verify('RSASSA-PKCS1-v1_5', key, signature, new TextEncoder().encode(snsStringToSign(message)))

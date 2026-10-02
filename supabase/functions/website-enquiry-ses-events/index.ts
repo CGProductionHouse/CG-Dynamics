@@ -1,11 +1,13 @@
 // Issue #405: Amazon SES delivery/bounce/complaint events via an SNS HTTPS subscription.
 //
 // Gateway: `verify_jwt = false` (supabase/config.toml). SNS cannot send a Supabase JWT; the
-// SNS message signature (AWS-hosted certificate) plus the configured topic ARN are the sole
-// authority, verified in the shared handler before anything is stored or confirmed.
+// configured topic ARN, an SNS signing certificate that chains to a pinned Amazon root, and
+// the SHA256 message signature are the sole authority, all verified in the shared handler
+// before anything is stored or a subscription is confirmed.
 // Config: WEBSITE_ENQUIRY_SES_SNS_TOPIC_ARN (unset/invalid -> 503, nothing processed).
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 import { handleSesSnsRequest } from '../_shared/websiteEnquirySesEvents.ts'
+import { verifySnsSigningCertificate } from '../_shared/snsCertificateTrust.ts'
 import { isTrustedSnsCertUrl, isTrustedSnsSubscribeUrl, isValidSnsTopicArn } from '../_shared/websiteEnquirySes.ts'
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
@@ -14,6 +16,20 @@ const admin = supabaseUrl && serviceRoleKey
   ? createClient(supabaseUrl, serviceRoleKey, { auth: { persistSession: false } })
   : null
 const certificates = new Map<string, string>()
+const issuers = new Map<string, Uint8Array>()
+
+async function fetchIssuer(url: string): Promise<Uint8Array> {
+  const cached = issuers.get(url)
+  if (cached) return cached
+  // URL already restricted to crt.*.amazontrust.com; the bytes are trusted only if they chain
+  // to a pinned Amazon root, so transport (AWS publishes these over http) does not matter.
+  const response = await fetch(url, { redirect: 'error', signal: AbortSignal.timeout(5000) })
+  if (!response.ok) throw new Error('issuer fetch failed')
+  const bytes = new Uint8Array(await response.arrayBuffer())
+  if (bytes.byteLength > 16 * 1024) throw new Error('issuer too large')
+  issuers.set(url, bytes)
+  return bytes
+}
 
 Deno.serve((req) => {
   const topicArn = Deno.env.get('WEBSITE_ENQUIRY_SES_SNS_TOPIC_ARN')?.trim() ?? ''
@@ -27,9 +43,11 @@ Deno.serve((req) => {
       const response = await fetch(url, { redirect: 'error', signal: AbortSignal.timeout(5000) })
       if (!response.ok) throw new Error('certificate fetch failed')
       const pem = await response.text()
+      if (pem.length > 16 * 1024) throw new Error('certificate too large')
       certificates.set(url, pem)
       return pem
     },
+    trustCertificate: (pem) => verifySnsSigningCertificate(pem, { fetchIssuer }),
     confirmSubscription: async (url) => {
       if (!isTrustedSnsSubscribeUrl(url)) return false
       const response = await fetch(url, { redirect: 'error', signal: AbortSignal.timeout(5000) })

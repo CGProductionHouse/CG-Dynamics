@@ -149,8 +149,8 @@ unchanged — SES sits behind the provider-neutral outbox.
   SES reconcile jobs resolve from SES's own evidence: any SES event carrying the job's
   `cg_delivery_key` tag (incl. `Send`) resolves `found` with the SES MessageId.
 - `website-enquiry-ses-events` (`verify_jwt = false`) — SNS HTTPS endpoint: topic ARN must
-  equal `WEBSITE_ENQUIRY_SES_SNS_TOPIC_ARN`; signature verified before anything is stored or a
-  subscription confirmed; Delivery → `delivered`, permanent Bounce / Reject → `bounced`,
+  equal `WEBSITE_ENQUIRY_SES_SNS_TOPIC_ARN`; certificate chain trust + signature verified
+  before anything is stored or a subscription confirmed (see *SNS certificate trust*); Delivery → `delivered`, permanent Bounce / Reject → `bounced`,
   Complaint → `complained` (new terminal state), transient bounce / delay ignored. Stored in
   the durable provider-event inbox (keyed by SNS MessageId) before 2xx; storage failure → 5xx.
 - Migration `20261002160000_website_enquiry_delivery_ses_events.sql` (**unapplied**): adds
@@ -166,6 +166,31 @@ sent); other 4xx (e.g. `MessageRejected`) → permanent.
 `WEBSITE_ENQUIRY_SES_SECRET_ACCESS_KEY`, `WEBSITE_ENQUIRY_SES_CONFIGURATION_SET`,
 `WEBSITE_ENQUIRY_SES_SNS_TOPIC_ARN`, `WEBSITE_ENQUIRY_WORKER_SECRET`.
 
+### SNS certificate trust (AWS: "issued by Amazon SNS", "chain of trust is valid")
+
+`_shared/snsCertificateTrust.ts` uses the platform's maintained X.509 verifier
+(`node:crypto` `X509Certificate` — OpenSSL in Node, Deno's built-in on Supabase Edge; no
+hand-written ASN.1). It accepts exactly **leaf → Amazon intermediate → pinned Amazon root**:
+- `SigningCertURL` must be `https://sns.<region>.amazonaws.com/SimpleNotificationService-<id>.pem`
+  (no query/credentials/other port) — this only decides whether to fetch;
+- leaf: one certificate, not a CA, SAN `DNS:sns.amazonaws.com`, RSA, valid now;
+- intermediate: fetched **only** from the leaf's AIA "CA Issuers" URL on `crt.*.amazontrust.com`
+  (AWS serves these over http; integrity comes from the signature chain, not transport),
+  a CA, valid now, issued the leaf and signed it;
+- root: one of Amazon Root CA 1–4 (`_shared/amazonTrustRoots.ts`, SHA-256 fingerprint-pinned
+  and re-asserted in tests), valid now, issued and signed the intermediate;
+- only **SignatureVersion 2 (SHA256)** messages are accepted; the SHA256 signature is then
+  verified with the chain-verified leaf key.
+Failures: untrusted chain → 401 `untrusted_certificate` (named reason), nothing stored;
+unreachable intermediate → 503 (SNS retries). Not implemented (documented limitation):
+revocation (OCSP/CRL) checks — consistent with the AWS SDK verifiers.
+
+Tests: real Amazon roots + real current Amazon RSA 2048 M01–M04 intermediates (anchor to Root
+CA 1), the genuine expired SNS leaf from the AWS SDK for Ruby spec, and OpenSSL-built PKIs —
+an **otherwise-valid attacker chain** (own root, `sns.amazonaws.com` leaf, amazontrust AIA,
+valid signature) is rejected with `issuer_not_anchored_to_amazon_root`; the suite also runs
+under Deno. Removing root anchoring makes it fail (negative control).
+
 ### SES protected activation gate (CA) — exact order
 1. Merge the SES PR; apply `20261002160000` ledger-exact; deploy `website-enquiry-delivery-worker`
    and `website-enquiry-ses-events` from the merge commit.
@@ -177,7 +202,8 @@ sent); other 4xx (e.g. `MessageRejected`) → permanent.
 5. Create a configuration set (e.g. `cg-dynamics-events`) with event destination → SNS topic for
    Send, Delivery, Bounce, Complaint, Reject; HTTPS subscription to
    `https://ehtjfntukiwbgptqgbzy.supabase.co/functions/v1/website-enquiry-ses-events`
-   (auto-confirmed by the function only for the configured topic).
+   (auto-confirmed by the function only for the configured topic). Set the topic attribute
+   **`SignatureVersion=2`** — SHA1 (version 1) messages are rejected by design.
 6. IAM user/role with **only** `ses:SendEmail` on the verified identity + configuration set.
 7. CA sets the secrets above from a terminal (never pasted into GitHub/chat); keep
    `WEBSITE_ENQUIRY_EMAIL_ENABLED` unset; worker secret also in Vault for the schedule.

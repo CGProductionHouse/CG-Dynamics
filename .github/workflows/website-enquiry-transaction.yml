@@ -21,6 +21,11 @@ on:
       - 'supabase/functions/website-enquiry-ses-events/**'
       - 'scripts/website-enquiry-ses-acceptance.mjs'
       - 'tests/websiteEnquirySes.test.mjs'
+      - 'tests/websiteEnquirySesTrust.test.mjs'
+      - 'tests/helpers/snsTestPki.mjs'
+      - 'tests/fixtures/sns-trust/**'
+      - 'supabase/functions/_shared/snsCertificateTrust.ts'
+      - 'supabase/functions/_shared/amazonTrustRoots.ts'
       - 'scripts/website-enquiry-delivery-suppression-acceptance.mjs'
       - 'tests/sql/405_website_enquiry_delivery_suppression_acceptance.sql'
       - 'tests/websiteEnquiryDeliverySuppression.test.mjs'
@@ -55,7 +60,7 @@ jobs:
       - run: node scripts/website-enquiry-delivery-acceptance.mjs
       - run: node --test tests/websiteEnquiryDeliverySuppression.test.mjs
       - run: node scripts/website-enquiry-delivery-suppression-acceptance.mjs
-      - run: node --test tests/websiteEnquirySes.test.mjs
+      - run: node --test tests/websiteEnquirySes.test.mjs tests/websiteEnquirySesTrust.test.mjs
       - run: node scripts/website-enquiry-ses-acceptance.mjs
       - run: node --test tests/websiteEnquiryIntake.test.mjs
       - run: node scripts/website-enquiry-intake-acceptance.mjs
@@ -68,3 +73,5 @@ jobs:
         with:
           deno-version: v2.x
       - run: deno check --no-lock --node-modules-dir=none supabase/functions/website-enquiry-delivery-worker/index.ts supabase/functions/website-enquiry-delivery-webhook/index.ts supabase/functions/website-enquiry-intake/index.ts supabase/functions/website-enquiry-ses-events/index.ts
+      # Same X.509 trust suite on the Deno runtime family used by Supabase Edge.
+      - run: deno test -A --no-lock --node-modules-dir=none tests/websiteEnquirySesTrust.test.mjs

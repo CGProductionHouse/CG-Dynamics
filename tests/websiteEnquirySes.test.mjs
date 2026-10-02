@@ -6,6 +6,7 @@ import { join } from 'node:path'
 import { test } from 'node:test'
 import { signRequest, signingKey } from '../supabase/functions/_shared/awsSigV4.ts'
 import {
+  parseSnsMessage,
   buildSesSendRequest,
   classifySesResponse,
   isTrustedSnsCertUrl,
@@ -13,11 +14,11 @@ import {
   isValidSnsTopicArn,
   parseSesEvent,
   snsStringToSign,
-  spkiFromCertificatePem,
   verifySnsSignature,
 } from '../supabase/functions/_shared/websiteEnquirySes.ts'
 import { resolveProviderConfig } from '../supabase/functions/_shared/websiteEnquiryProviders.ts'
 import { handleSesSnsRequest } from '../supabase/functions/_shared/websiteEnquirySesEvents.ts'
+import { X509Certificate } from 'node:crypto'
 
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8')
 const worker = read('../supabase/functions/website-enquiry-delivery-worker/index.ts').replace(/\r\n/g, '\n')
@@ -124,31 +125,35 @@ export function signSns(message, keyPath, dir) {
   const digest = message.SignatureVersion === '2' ? '-sha256' : '-sha1'
   return { ...message, Signature: execFileSync('openssl', ['dgst', digest, '-sign', keyPath, input]).toString('base64') }
 }
-export const CERT_URL = 'https://sns.eu-west-1.amazonaws.com/SimpleNotificationService-abc.pem'
+export const CERT_URL = 'https://sns.eu-west-1.amazonaws.com/SimpleNotificationService-0123456789abcdef0123456789abcdef.pem'
 export function sesEventMessage(eventType, extra = {}, messageId = 'ses-message-1', deliveryKey = job.delivery_key) {
   const mail = { messageId, timestamp: '2026-10-02T10:00:00.000Z', tags: deliveryKey ? { cg_delivery_key: [deliveryKey] } : {} }
   return JSON.stringify({ eventType, mail, ...extra })
 }
 
-test('SNS signatures (v1 SHA1 + v2 SHA256) verify against the certificate; tampering and wrong certs fail', async () => {
+test('SNS SHA256 signatures verify with the certificate key; tampering, wrong keys and SignatureVersion 1 fail', async () => {
   const dir = mkdtempSync(join(tmpdir(), 'cg-sns-'))
   const good = makeCert(dir, 'sns-good'), other = makeCert(dir, 'sns-other')
-  assert.equal(spkiFromCertificatePem(good.pem)[0], 0x30)
-  for (const SignatureVersion of ['1', '2']) {
-    const message = signSns({ Type: 'Notification', MessageId: 'm-1', TopicArn: TOPIC, Message: sesEventMessage('Delivery', { delivery: { timestamp: '2026-10-02T10:00:05Z' } }), Timestamp: '2026-10-02T10:00:06Z', SignatureVersion, SigningCertURL: CERT_URL }, good.key, dir)
-    assert.equal(await verifySnsSignature(message, good.pem), true, `v${SignatureVersion}`)
-    assert.equal(await verifySnsSignature({ ...message, Message: message.Message.replace('Delivery', 'Bounce') }, good.pem), false)
-    assert.equal(await verifySnsSignature(message, other.pem), false)
-  }
+  const spki = (pem) => new Uint8Array(new X509Certificate(pem).publicKey.export({ type: 'spki', format: 'der' }))
+  const message = signSns({ Type: 'Notification', MessageId: 'm-1', TopicArn: TOPIC, Message: sesEventMessage('Delivery', { delivery: { timestamp: '2026-10-02T10:00:05Z' } }), Timestamp: '2026-10-02T10:00:06Z', SignatureVersion: '2', SigningCertURL: CERT_URL }, good.key, dir)
+  assert.equal(await verifySnsSignature(message, spki(good.pem)), true)
+  assert.equal(await verifySnsSignature({ ...message, Message: message.Message.replace('Delivery', 'Bounce') }, spki(good.pem)), false)
+  assert.equal(await verifySnsSignature(message, spki(other.pem)), false)
+  // SignatureVersion 1 (SHA1) is rejected outright, even when its signature is valid.
+  const v1 = signSns({ ...message, Signature: undefined, SignatureVersion: '1' }, good.key, dir)
+  assert.equal(await verifySnsSignature(v1, spki(good.pem)), false)
+  assert.equal(parseSnsMessage(v1), null)
   const withSubject = signSns({ Type: 'Notification', MessageId: 'm-2', TopicArn: TOPIC, Subject: 'S', Message: '{}', Timestamp: 't', SignatureVersion: '2', SigningCertURL: CERT_URL }, good.key, dir)
-  assert.equal(await verifySnsSignature(withSubject, good.pem), true)
-  assert.equal(await verifySnsSignature({ ...withSubject, Subject: 'T' }, good.pem), false)
+  assert.equal(await verifySnsSignature(withSubject, spki(good.pem)), true)
+  assert.equal(await verifySnsSignature({ ...withSubject, Subject: 'T' }, spki(good.pem)), false)
 })
 
 test('certificate, subscribe URL and topic ARN trust rules', () => {
   assert.equal(isTrustedSnsCertUrl(CERT_URL), true)
   for (const bad of ['http://sns.eu-west-1.amazonaws.com/x.pem', 'https://sns.eu-west-1.amazonaws.com.evil.test/x.pem',
-    'https://evil.test/sns.eu-west-1.amazonaws.com/x.pem', 'https://sns.eu-west-1.amazonaws.com/x.txt', 'https://u:p@sns.eu-west-1.amazonaws.com/x.pem'])
+    'https://evil.test/sns.eu-west-1.amazonaws.com/x.pem', 'https://sns.eu-west-1.amazonaws.com/x.txt', 'https://u:p@sns.eu-west-1.amazonaws.com/x.pem',
+    'https://sns.eu-west-1.amazonaws.com/x.pem', 'https://sns.eu-west-1.amazonaws.com/SimpleNotificationService-abc.pem',
+    'https://sns.eu-west-1.amazonaws.com/SimpleNotificationService-0123456789abcdef.pem?x=1', 'https://sns.eu-west-1.amazonaws.com/a/SimpleNotificationService-0123456789abcdef.pem'])
     assert.equal(isTrustedSnsCertUrl(bad), false, bad)
   assert.equal(isTrustedSnsSubscribeUrl('https://sns.eu-west-1.amazonaws.com/?Action=ConfirmSubscription&TopicArn=x&Token=y'), true)
   assert.equal(isTrustedSnsSubscribeUrl('https://evil.test/?Action=ConfirmSubscription'), false)
@@ -178,6 +183,7 @@ test('SNS ingest handler: topic/cert/signature gates, subscription confirm, dura
   const deps = (over = {}) => ({
     topicArn: TOPIC,
     fetchCertificate: async () => good.pem,
+    trustCertificate: async (pem) => ({ ok: true, spki: new Uint8Array(new X509Certificate(pem).publicKey.export({ type: 'spki', format: 'der' })) }),
     confirmSubscription: async url => { calls.confirmed.push(url); return true },
     findReconcileJob: async key => key === job.delivery_key ? 'job-reconcile' : null,
     resolveFound: async (jobId, messageId) => { calls.resolved.push([jobId, messageId]); return true },
@@ -197,6 +203,13 @@ test('SNS ingest handler: topic/cert/signature gates, subscription confirm, dura
   assert.equal((await handleSesSnsRequest(post({ ...delivered, SigningCertURL: 'https://evil.test/x.pem' }), deps())).status, 403)
   assert.equal((await handleSesSnsRequest(post({ ...delivered, Message: delivered.Message.replace('Delivery', 'Complaint') }), deps())).status, 401)
   assert.equal((await handleSesSnsRequest(post(delivered), deps({ topicArn: '' }))).status, 503)
+  const untrusted = await handleSesSnsRequest(post(delivered), deps({ trustCertificate: async () => ({ ok: false, reason: 'issuer_not_anchored_to_amazon_root' }) }))
+  assert.equal(untrusted.status, 401)
+  assert.equal((await untrusted.json()).outcome, 'untrusted_certificate')
+  assert.equal((await handleSesSnsRequest(post(delivered), deps({ trustCertificate: async () => ({ ok: false, reason: 'issuer_unavailable' }) }))).status, 503)
+  const appliedBeforeV1 = calls.applied.length
+  assert.equal((await handleSesSnsRequest(post({ ...delivered, SignatureVersion: '1' }), deps())).status, 400)
+  assert.equal(calls.applied.length, appliedBeforeV1, 'untrusted inputs stored an event')
   assert.equal((await handleSesSnsRequest(post(delivered), deps({ applyEvent: async () => { throw new Error('db down') } }))).status, 500)
   assert.equal((await handleSesSnsRequest(post(delivered), deps({ applyEvent: async () => ({ stored: false }) }))).status, 500)
   assert.equal((await handleSesSnsRequest(new Request('https://x.test/'), deps())).status, 405)

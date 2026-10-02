@@ -10,11 +10,13 @@ import { join } from 'node:path'
 import { signRequest } from '../supabase/functions/_shared/awsSigV4.ts'
 import { buildSesSendRequest, classifySesResponse, snsStringToSign } from '../supabase/functions/_shared/websiteEnquirySes.ts'
 import { handleSesSnsRequest } from '../supabase/functions/_shared/websiteEnquirySesEvents.ts'
+import { verifySnsSigningCertificate } from '../supabase/functions/_shared/snsCertificateTrust.ts'
+import { buildPki, SNS_ISSUER_URL } from '../tests/helpers/snsTestPki.mjs'
 
 const container = `cg-405-ses-acceptance-${randomUUID()}`
 const database = 'cg_website_enquiry_acceptance'
 const TOPIC = 'arn:aws:sns:eu-west-1:123456789012:cg-dynamics-ses-events'
-const CERT_URL = 'https://sns.eu-west-1.amazonaws.com/SimpleNotificationService-test.pem'
+const CERT_URL = 'https://sns.eu-west-1.amazonaws.com/SimpleNotificationService-0123456789abcdef0123456789abcdef.pem'
 const SECRET = 'wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY'
 const ses = {
   provider: 'ses', from: 'CG Dynamics Leads <leads@notify.example.test>', region: 'eu-west-1', configurationSet: 'cg-dynamics-events',
@@ -54,9 +56,13 @@ async function fakeSes(request, behaviour) {
 }
 
 const dir = mkdtempSync(join(tmpdir(), 'cg-ses-acc-'))
-const keyPath = join(dir, 'sns.key'), certPath = join(dir, 'sns.pem')
-execFileSync('openssl', ['req', '-x509', '-newkey', 'rsa:2048', '-nodes', '-keyout', keyPath, '-out', certPath, '-days', '1', '-subj', '/CN=sns.test'], { stdio: 'ignore' })
-const certificatePem = readFileSync(certPath, 'utf8')
+// Test PKI: root -> intermediate -> sns.amazonaws.com leaf. The REAL trust verifier runs with
+// this root injected; an attacker PKI must still fail against the pinned Amazon roots.
+const pki = buildPki({ name: 'acceptance' })
+const attacker = buildPki({ name: 'acceptance-attacker' })
+const keyPath = pki.leafKey
+const certificatePem = pki.leafPem
+let leafInUse = certificatePem
 function snsNotification(id, eventType, mail, extra = {}) {
   const message = { Type: 'Notification', MessageId: id, TopicArn: TOPIC, Message: JSON.stringify({ eventType, mail, ...extra }),
     Timestamp: new Date().toISOString(), SignatureVersion: '2', SigningCertURL: CERT_URL }
@@ -67,7 +73,11 @@ function snsNotification(id, eventType, mail, extra = {}) {
 const ingestLogs = []
 const deps = {
   topicArn: TOPIC,
-  fetchCertificate: async (url) => { assert.equal(url, CERT_URL); return certificatePem },
+  fetchCertificate: async (url) => { assert.equal(url, CERT_URL); return leafInUse },
+  trustCertificate: (pem) => verifySnsSigningCertificate(pem, {
+    fetchIssuer: async (url) => { assert.equal(url, SNS_ISSUER_URL); return pem === pki.leafPem ? pki.intermediateDer : attacker.intermediateDer },
+    roots: [pki.rootPem],
+  }),
   confirmSubscription: async () => true,
   log: (entry) => ingestLogs.push(entry),
   findReconcileJob: async (key) => asService(`select id from public.website_enquiry_delivery_jobs where delivery_key = '${key}' and provider = 'ses' and delivery_state = 'reconcile';`) || null,
@@ -174,6 +184,18 @@ try {
   const forged = snsNotification('sns-x', 'Delivery', mail('ses-msg-1', k1), { delivery: { timestamp: '2026-10-02T10:00:05.000Z' } })
   assert.equal((await ingest({ ...forged, Message: forged.Message.replace('Delivery', 'Bounce') })).status, 401)
   assert.equal((await ingest({ ...forged, TopicArn: TOPIC.replace('cg-dynamics', 'other') })).status, 403)
+  // Attacker chain (own root, sns.amazonaws.com leaf, amazontrust AIA) with a VALID signature
+  // made by the attacker's leaf key: rejected by chain trust, nothing stored.
+  leafInUse = attacker.leafPem
+  const attackerSigned = (() => {
+    const message = { ...forged, Signature: undefined, MessageId: 'sns-attacker' }
+    const input = join(dir, 'attacker.txt')
+    writeFileSync(input, snsStringToSign(message))
+    return { ...message, Signature: execFileSync('openssl', ['dgst', '-sha256', '-sign', attacker.leafKey, input]).toString('base64') }
+  })()
+  const attackerResult = await ingest(attackerSigned)
+  assert.deepEqual([attackerResult.status, attackerResult.outcome, attackerResult.reason], [401, 'untrusted_certificate', 'issuer_not_anchored_to_amazon_root'])
+  leafInUse = certificatePem
   assert.equal(sql('select count(*) from public.website_enquiry_delivery_provider_events;'), before)
 
   // Evidence and logs.
