@@ -14,6 +14,10 @@ This file is intentionally current-state-first. Historical failed attempts are s
 - Reproduced the source of the repeated artifact noise: strategy generator tests wrote into the frozen #513 directory. Generator tests now use isolated temporary copies; an executable recursive byte-hash regression proves all four generators leave reviewed evidence unchanged. Generator CLI defaults remain unchanged; no strategy content is changed.
 - Authenticated production Chrome access is available as CG Production House Admin in a separate Dynamics tab. CA's Meta/Instagram tabs are untouched. Desktop Hub/Content render without observed console errors; further responsive acceptance and #437/#405 work continue under #611.
 
+### #611 / #405 inert current-main recovery
+
+Closed #422 M2A is absent from main. A new, unapplied transaction migration is proposed; no public adapter, recipient, sender or live data is activated. Existing marketing `client_contacts` and internal CG `business_development_leads` are not incoming client enquiries. Disposable six-session PostgreSQL tests cover tenant idempotency, rollback and browser privilege denial. Recovery closes missing-type, approved-route reassignment and default-service-grant gaps. See `WEBSITE-ENQUIRY-M2A-405-CURRENT.md`. Supervisor review and later CA production approval remain required; no overnight merge/deploy.
+
 ## 1. Fresh supervisor recovery order
 
 A new supervisor must recover in this order:
