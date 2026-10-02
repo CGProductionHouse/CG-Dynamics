@@ -424,6 +424,17 @@ Verification: 91 focused passes / 16 disposable-DB skips / 0 failures; 25-name/e
 
 OAuth start/callback/confirm ACTIVE v6/v7/v6; deauthorize/deletion v2/v2; Meta sync/worker v53/v40. Completed #595/#600 and credential-expiry deployment are satisfied; do not replay. App secret absent, activation literal false, APP_PUBLIC_URL still old Vercel origin (names/structural checks only). Next protected packet is #598 secret + canonical public origin + five legal/callback saves/readbacks with activation OFF, not a bulk connection approval. Meta dashboard deliberately untouched; Oct 1 provider review state needs fresh CA readback. No Website/TikTok/provider/config/OAuth/sync/mapping/data/deployment action; #505 stays OPEN.
 
+### #405 Website enquiries — SES af-south-1 SETUP COMPLETE, SENDING DISABLED (2 October, 21:30 SAST)
+
+**Current authority for the outbound-email lane (supersedes "Next" lines below).** Runbook: `docs/ops/WEBSITE-ENQUIRY-SES-SETUP-405.md`.
+- Code on main: #641 `93bad42` (setup script/verifier), #647 `4e1ca8e` (Vault write + regional SNS SAN), #649 `7a959ca` (SNS trust on the Edge runtime: `@peculiar/x509` WebCrypto backend, pinned Amazon RSA 2048 M01–M04), #651 `79da18b` (verifier fails closed; schedule recorded). `website-enquiry-ses-events` deployed from `7a959ca`.
+- AWS account `611597330034`, af-south-1: SES pricing `NONE` (à-la-carte), VDM `DISABLED`, 0 dedicated IP pools. Configuration set `cg-dynamics-events`; identity `notify.cgdynamics.co.za` (Easy DKIM RSA-2048, MAIL FROM `mail.notify.cgdynamics.co.za`, default config set `cg-dynamics-events`); event destination `cg-dynamics-sns` (SEND/DELIVERY/BOUNCE/COMPLAINT/REJECT) → SNS `cg-dynamics-ses-events` (SignatureVersion 2, SES-only policy); HTTPS subscription to `website-enquiry-ses-events` **Confirmed** (1 confirmed / 0 pending). IAM user `cg-dynamics-ses-sender`: inline `ses:SendEmail` on the identity + configuration set, `ses:FromAddress = leads@notify.cgdynamics.co.za`; 1 active key (values only in Supabase secrets). Onboarding config set `my-first-configuration-set` deleted; identity `info@cgproductionhouse.com` (PENDING) kept as possible sandbox recipient.
+- Production access: TRANSACTIONAL request submitted, review **PENDING** (case `179096864300565`); sandbox quota 200/day, 1/s.
+- Supabase: 8 `WEBSITE_ENQUIRY_*` provider secrets set (names only verified); **`WEBSITE_ENQUIRY_EMAIL_ENABLED` unset**. Vault `website_enquiry_worker_secret` (19:17 UTC). `pg_cron` job 3 `website-enquiry-delivery-worker` every minute reads Vault; worker answers `state: disabled` (`WEBSITE_ENQUIRY_EMAIL_ENABLED is not true`), claimed 0.
+- Production data unchanged: 1 delivery job (`suppressed`), 0 provider events, ledger 153. No email sent by CG Dynamics.
+- **Blocked on CA (Afrihost):** the 5 DNS records are not published (all four authoritative NS return none; zone SOA serial still `2026090701`). Exact records are on #405. DKIM/MAIL FROM stay PENDING until they resolve.
+- **Next:** after DNS resolves and SES shows the identity verified, CA-approved activation: set `WEBSITE_ENQUIRY_EMAIL_ENABLED=true`, one CG-owned acceptance send (sandbox needs a verified recipient until production access is granted), then SES simulator bounce/complaint. No client-facing send before all three pass.
+
 ### #405 Website enquiries — PIEK STORED-LEAD PILOT COMPLETE (2 October, 13:53 SAST)
 
 **Production receipt (supersedes the step list below; keep it as history).**
