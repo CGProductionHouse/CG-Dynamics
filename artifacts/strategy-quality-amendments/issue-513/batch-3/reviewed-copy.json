@@ -1,0 +1,708 @@
+{
+  "issue": 513,
+  "batch": 3,
+  "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+  "blocked_clients": [],
+  "clients": [
+    {
+      "client_id": "afb62c53-d6d3-4ef8-9393-def88ed899d8",
+      "client_name": "C&L Innovations",
+      "guide_quotes": [
+        "Start from the exact item, room, material detail or process shown.",
+        "A photo alone does **not** prove:",
+        "No frozen hashtag bank."
+      ],
+      "specificity_anchors": [
+        "furniture",
+        "joinery",
+        "room"
+      ],
+      "audienceAndIntent": "Speak to someone judging a real furniture piece for their room: help them notice its shape, practical use and visible construction before asking about the exact item. Do not invent a designer or hospitality customer segment.",
+      "formatsAndRationale": "Two photo posts can show the full furniture piece and a close detail. Two design posters make a room-fit question and a construction detail easy to grasp. No recurring professional video is agreed; reels and animation remain unconfirmed.",
+      "mustAvoid": "No assumed wood species, solid-wood composition, sizes, seating, custom-order availability, stock, price, lead time, delivery, lifetime warranty or sustainability. Do not revive old range names or sales-recovery offers. Preserve real furniture proportions and avoid generic luxury slogans.",
+      "channelIntegration": "Use matching furniture identity across the social channels already managed for C&L. Product enquiries use the freshly confirmed Chris/Lize route when relevant; process and room-inspiration posts need no forced sales footer.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Review September's real furniture presentation: does a viewer see the whole piece, its joinery and its scale in a room, rather than a mood image that hides what they would buy?",
+          "coreMessage": "Let the furniture do the talking: a full-piece view explains the shape; a joinery or edge detail gives the eye a specific reason to pause.",
+          "pillarsAndHooks": "Full furniture silhouette; visible joinery or edge profile; believable room placement. Open with the real tabletop or base detail rather than a promise to transform a home.",
+          "testAndChange": "Compare available response to a whole-piece photograph and a close-detail photograph from September, checking whether enquiries name the item. Treat incomplete September results as provisional; do not declare a winning style.",
+          "successSignals": "Look for item-specific questions, saved product views and available interactions on the actual furniture posts. Missing enquiry or platform records remain unavailable, and post count is not a sales result.",
+          "nextMonthGamePlan": "Use the September review to choose one real piece for an October room-fit story, provided its current details can be confirmed. Keep the close-detail approach only if it helps customers ask a more specific question.",
+          "clientActionsRequired": [
+            "Identify the furniture pictured in September and confirm any descriptions used.",
+            "Confirm the item and current enquiry route for the next room-fit story."
+          ],
+          "items": {
+            "photo_content": [
+              "Review the full-piece image for clear shape and believable scale.",
+              "Review a joinery or edge close-up without inferring the timber species."
+            ],
+            "design_poster": [
+              "One visible workmanship detail, not a luxury slogan.",
+              "A practical room-fit question using the real furniture image."
+            ]
+          }
+        },
+        "2026-10-01": {
+          "objective": "For October, turn interest in a real furniture piece into a useful room-fit conversation: connect its shape and joinery to the space a customer is considering, without promising unconfirmed manufacturing options.",
+          "coreMessage": "Before choosing a furniture piece, picture how its shape will sit in your room and ask about the exact details that matter to your space.",
+          "pillarsAndHooks": "Room-fit question; tabletop/base relationship; visible joinery. Start with a real customer decision about space, then bring the eye back to the supplied piece instead of an invented lifestyle setting.",
+          "testAndChange": "Within the two-photo capacity, contrast a room-context opening with a detail-led opening for the same confirmed piece. Track which produces clearer product questions; keep the item and factual description consistent.",
+          "successSignals": "Useful signals are questions about the pictured piece, room measurements supplied voluntarily and available saves or interactions. Do not claim commissions, revenue or an improvement until those records exist.",
+          "nextMonthGamePlan": "After October, retain the room-fit or detail angle that prompts the most useful actual questions. Ask for a fresh real piece before extending the story, and reconfirm current buying details instead of recycling them.",
+          "clientActionsRequired": [
+            "Supply the actual October piece and confirm which dimensions or material details can be stated.",
+            "Confirm whether a commission enquiry is currently appropriate before offering that route."
+          ],
+          "items": {
+            "photo_content": [
+              "Full-piece view in believable room context, preserving proportions.",
+              "Close view of a real edge, base or joinery detail."
+            ],
+            "design_poster": [
+              "What space are you choosing this piece for? Keep wording tied to the actual furniture.",
+              "One practical question to ask about the exact piece before buying."
+            ]
+          }
+        }
+      }
+    },
+    {
+      "client_id": "6b313cac-283e-48c4-9df6-ba43af2f7353",
+      "client_name": "Central Canvas",
+      "guide_quotes": [
+        "truck-tarp/service education is a recurring video territory.",
+        "charcoal + orange are the main design colours;",
+        "no em dashes in social copy;"
+      ],
+      "specificity_anchors": [
+        "truck tarps",
+        "cargo nets",
+        "Bloemfontein"
+      ],
+      "audienceAndIntent": "Address people evaluating an actual truck tarp, cargo net or other confirmed canvas application in Bloemfontein. Explain the job in front of them; do not assume a fleet contract, region or installation entitlement.",
+      "formatsAndRationale": "One professional video can carry a staff-led truck-tarp explanation. Four photos show actual workshop/application details; three design posters keep separate service questions readable. Reels and animated posters remain unconfirmed.",
+      "mustAvoid": "No inferred material specifications, repair turnaround, fitment, delivery, stock, warranties or performance guarantees. Do not resolve the Ryno/Megan contact conflict in copy. Preserve vehicle geometry and tarp colour; no em dashes or repetitive covering/finished slogans.",
+      "channelIntegration": "Keep each real application consistent on already managed channels. Use charcoal and orange with green as an accent, not a colour-heavy logo template. Confirm the current contact route before service enquiries; captions add to the visual.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Review whether September's Bloemfontein workshop content made truck tarps and cargo nets understandable as distinct applications, rather than treating every image as the same general covering story.",
+          "coreMessage": "A truck tarp and a cargo net have different jobs. Show the real application and explain the one detail the viewer can actually see.",
+          "pillarsAndHooks": "Truck tarps and repairs; cargo nets in their actual application; real warehouse staff. Start with the job or visible repair point, and let dispatch images speak about dispatch.",
+          "testAndChange": "Separate September workshop/process posts from finished application posts when reviewing available responses. Check which prompts relevant questions; the partial month and absent caption detail cannot prove a creative winner.",
+          "successSignals": "Look for application-specific enquiries and available interactions on tarp versus net content. Leave absent measurements unavailable; do not convert post volume into demand or a repair-speed claim.",
+          "nextMonthGamePlan": "Choose a confirmed truck-tarp question for October's staff-led video and supporting application images, after checking the actual materials and service wording with the team.",
+          "clientActionsRequired": [
+            "Confirm which September images depict truck tarps, repairs or cargo nets.",
+            "Resolve the enquiry contact for the next service story without reusing disputed names."
+          ],
+          "items": {
+            "professional_video": [
+              "Review an actual staff-led truck-tarp explanation for useful service context."
+            ],
+            "photo_content": [
+              "Actual truck-tarp detail.",
+              "Cargo-net application.",
+              "Real workshop moment.",
+              "Dispatch image with dispatch-specific context."
+            ],
+            "design_poster": [
+              "Truck tarps and repairs: one real service question.",
+              "Cargo nets: explain the application shown.",
+              "Workshop staff: one useful process detail."
+            ]
+          }
+        },
+        "2026-10-01": {
+          "objective": "Make October's truck-tarp enquiry more informed: show an actual tarp/repair question from the workshop and help the customer describe the application before requesting specifics.",
+          "coreMessage": "Tell us what the tarp needs to do. A real truck-tarp example and a clear question are more useful than a vague promise about coverage.",
+          "pillarsAndHooks": "Staff explains truck tarps in the Bloemfontein workshop; repair detail shown honestly; cargo nets as a separate application. Open the video with the visible job, then clarify what information the team needs.",
+          "testAndChange": "Compare a visible repair-detail opening against an application-question opening in supporting content, keeping the service facts fixed. Evaluate the clarity of enquiries rather than claiming faster repairs.",
+          "successSignals": "Watch for customers identifying the tarp/application in enquiries and available saves or video response. Any delivery, turnaround or technical result requires separate confirmation and is not a target in this plan.",
+          "nextMonthGamePlan": "Use the questions received in October to choose the next tarp or net explanation. Carry forward only current service wording and supplied visuals; do not expand into historical product categories without confirmation.",
+          "clientActionsRequired": [
+            "Supply one real tarp/repair example and approve the staff explanation.",
+            "Confirm any repair capabilities, technical details and current enquiry contacts used."
+          ],
+          "items": {
+            "professional_video": [
+              "Staff explains one real truck-tarp question using the actual job."
+            ],
+            "photo_content": [
+              "Truck-tarp application view.",
+              "Repair detail with approved description.",
+              "Cargo-net use kept distinct.",
+              "Warehouse or dispatch moment."
+            ],
+            "design_poster": [
+              "What application is your tarp for?",
+              "One question to ask about a repair, without a turnaround promise.",
+              "Cargo-net application rather than a generic covering slogan."
+            ]
+          }
+        }
+      }
+    },
+    {
+      "client_id": "8e448cf9-1534-4ba1-89a4-93e4c8b83d2f",
+      "client_name": "Bouwer & Coetzee Attorneys",
+      "guide_quotes": [
+        "property transfers and conveyancing;",
+        "Bloemfontein correspondent-attorney services;",
+        "Never make the client or their problem the joke."
+      ],
+      "specificity_anchors": [
+        "conveyancing",
+        "Deeds Office",
+        "antenuptial"
+      ],
+      "audienceAndIntent": "Separate a person trying to understand a property transfer from an attorney seeking Bloemfontein correspondent assistance. Antenuptial content is practical shared-future planning, not a fear appeal or individual legal advice.",
+      "formatsAndRationale": "One founder-led professional video explains a single general process question. Seven design posters can distinguish conveyancing, correspondent and antenuptial topics without dense legal essays. Photo posts, reels and animation remain unconfirmed.",
+      "mustAvoid": "No legal outcome, compensation, registration date, fee, specialist status or personalised advice. No unconfirmed wills/estates/labour services. Keep sensitive family matters respectful, protect client confidentiality and require responsible attorney review of legal statements.",
+      "channelIntegration": "Maintain the firm's approachable founder-led voice on managed channels. Consumer process pieces and Deeds Office B2B pieces need different wording. Reconfirm any public contacts and website launch status; do not invent a domain.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Review September's conveyancing and Deeds Office content for audience clarity: could a property client distinguish a general transfer explanation from correspondent services aimed at other attorneys?",
+          "coreMessage": "Conveyancing explains the property-transfer process; Bloemfontein Deeds Office correspondence speaks to attorneys needing local document support. Keep those conversations distinct.",
+          "pillarsAndHooks": "A general conveyancing step; Deeds Office document follow-up; antenuptial planning before signing. Use a useful question, not a promise of results or a generic legal-partner slogan.",
+          "testAndChange": "Review available responses to consumer process questions separately from correspondent-service posts. Check the enquiry topic rather than assuming all legal interactions represent the same intent.",
+          "successSignals": "Relevant transfer questions and clearly identified correspondent enquiries are useful signals when recorded. Unavailable enquiry details remain unavailable; no case success or registration-speed metric is claimed.",
+          "nextMonthGamePlan": "Prepare October around one founder-led before-you-sign question, supported by separate correspondent and antenuptial posters reviewed for legal accuracy.",
+          "clientActionsRequired": [
+            "Confirm September's published topics and any questions received.",
+            "Have the responsible attorney check the general legal wording and current service scope."
+          ],
+          "items": {
+            "professional_video": [
+              "Review a founder-led general conveyancing explanation, with no client details."
+            ],
+            "design_poster": [
+              "One conveyancing process point.",
+              "Correspondent-service audience cue.",
+              "Deeds Office document follow-up topic.",
+              "Antenuptial planning question.",
+              "Before signing a contract: general question.",
+              "Legal word in plain language.",
+              "Firm introduction using real approved identity."
+            ]
+          }
+        },
+        "2026-10-01": {
+          "objective": "For October, make a before-you-sign question useful without turning a social post into legal advice. Keep conveyancing, antenuptial planning and Deeds Office correspondent work in clearly labelled lanes.",
+          "coreMessage": "A clear question before signing can start a better consultation. Explain the general process in plain language, then direct the person to discuss their own circumstances.",
+          "pillarsAndHooks": "Founder-led before-you-sign Q&A; antenuptial planning as a shared-future conversation; Deeds Office correspondence for attorneys. Each piece answers one general question and names its intended audience.",
+          "testAndChange": "Compare a plain-language question heading with a process-step heading in appropriate poster topics. Keep attorney-reviewed facts unchanged and assess enquiry relevance, not promised legal outcomes.",
+          "successSignals": "Track whether incoming questions identify the general topic and whether attorney enquiries recognise the correspondent lane. Available response is descriptive only; no guaranteed conversion or case result.",
+          "nextMonthGamePlan": "Select the next general explanation from actual October questions after attorney review. Keep personal matters in consultation and reconfirm any service before adding it to future content.",
+          "clientActionsRequired": [
+            "Choose and review one general founder-led Q&A topic.",
+            "Approve each material legal statement and the current enquiry route before publication."
+          ],
+          "items": {
+            "professional_video": [
+              "Founder-led before-you-sign question, framed as general information."
+            ],
+            "design_poster": [
+              "One conveyancing question in plain language.",
+              "A property-transfer process step approved by the attorney.",
+              "Correspondent work: clearly address other attorneys.",
+              "Deeds Office follow-up: general service description.",
+              "Antenuptial planning as a practical conversation.",
+              "One contract question without personalised advice.",
+              "A consultation invitation without outcome promises."
+            ]
+          }
+        }
+      }
+    },
+    {
+      "client_id": "2b953772-e791-4dff-a278-d4dd3521f02e",
+      "client_name": "We Ar Fuels",
+      "guide_quotes": [
+        "diesel/fuel delivery to farms, homes and businesses, bulk delivery, mobile refuelling and operational/agricultural support.",
+        "real delivery/service moments;",
+        "Do not turn a once-off campaign into a permanent service rule."
+      ],
+      "specificity_anchors": [
+        "fuel delivery",
+        "mobile refuelling",
+        "farm"
+      ],
+      "audienceAndIntent": "Help a farm or business describe its actual fuel-delivery need, and help household enquiries ask a clear service question. The service category is supported; exact regions, quantities and delivery commitments must be confirmed individually.",
+      "formatsAndRationale": "One professional video can explain a real fuel-delivery moment. Four photos give vehicle, team and safe process context; three design posters clarify service questions. No assumed reels, animation, paid budget or campaign-management capacity.",
+      "mustAvoid": "No invented grade, supplier relationship, minimum litres, current price, delivery radius, turnaround, emergency service, licence or equipment capacity. Do not reuse the historical Hertzogville threshold as a standing rule or sibling-business facts/contact routes.",
+      "channelIntegration": "Use We Ar Fuels identity across existing managed channels, with current approved regional footer details checked at publication. Keep Sentraal Vrystaat and Wes Vrystaat contact order intact; do not replace it with an old personal route.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Review September's fuel-delivery content for practical clarity: do farm and business viewers understand the actual delivery or mobile refuelling moment shown without an unsupported area or quantity promise?",
+          "coreMessage": "Show the fuel delivery as it happened: the actual vehicle, team and customer context give the service meaning beyond a generic powering-success slogan.",
+          "pillarsAndHooks": "Real farm delivery moment; vehicle/team detail; mobile refuelling context where supplied. Start with the operational need visible in the creative, not an invented emergency or delivery-speed claim.",
+          "testAndChange": "Compare available response to actual delivery scenes and service-question posters in September. Record the topic of any enquiries; incomplete response cannot establish a region, fuel grade or preferred supplier.",
+          "successSignals": "Useful signals are enquiries describing location and service need, plus available interactions on delivery content. Missing enquiry or metric records stay unavailable, not zero orders.",
+          "nextMonthGamePlan": "Use the September questions to build an October fuel-planning explanation with the team, keeping quantity, grade and coverage confirmation separate from creative direction.",
+          "clientActionsRequired": [
+            "Confirm what the supplied delivery images actually depict and what can be described publicly.",
+            "Reconfirm the regional public contact details and service facts used."
+          ],
+          "items": {
+            "professional_video": [
+              "Review one real fuel-delivery or mobile refuelling moment."
+            ],
+            "photo_content": [
+              "Actual delivery vehicle.",
+              "Team in a real service moment.",
+              "Safe loading/process detail approved by the client.",
+              "Farm/business context without a coverage promise."
+            ],
+            "design_poster": [
+              "One fuel-delivery enquiry question.",
+              "Mobile refuelling context where confirmed.",
+              "Operational planning prompt without a minimum-order claim."
+            ]
+          }
+        },
+        "2026-10-01": {
+          "objective": "For October, help farm and business customers ask a more useful fuel-delivery question before planning their work. Clarify the information to discuss, without declaring a delivery promise or new service area.",
+          "coreMessage": "Start a fuel-delivery conversation with the job and location you need supported. Let the team confirm the service details for that exact request.",
+          "pillarsAndHooks": "Farm fuel-planning question; business delivery brief; real mobile refuelling process. Open with the customer's operational question and answer only the part the team has confirmed.",
+          "testAndChange": "Contrast an actual delivery-process opening with a customer-planning question in supporting content. Check whether enquiries become more specific about the job; do not report order growth without records.",
+          "successSignals": "Assess enquiry clarity and available video or poster response. Exact fulfilled orders and delivery times are not assumed from interactions; provider gaps remain unavailable.",
+          "nextMonthGamePlan": "After October, select the next planning topic from real enquiries and freshly confirmed service scope. Keep useful vehicle/team visuals, but recheck regional details before reuse.",
+          "clientActionsRequired": [
+            "Approve one practical planning explanation using an actual service example.",
+            "Confirm the current regional footer and any location/quantity/grade mentioned."
+          ],
+          "items": {
+            "professional_video": [
+              "Team answers one general fuel-delivery planning question beside actual equipment."
+            ],
+            "photo_content": [
+              "Real service vehicle detail.",
+              "Safe process image without capacity claims.",
+              "Team/customer context with permission.",
+              "Confirmed farm or business delivery scene."
+            ],
+            "design_poster": [
+              "Describe the delivery job before asking for specifics.",
+              "Ask the team to confirm service availability for the actual location.",
+              "One mobile refuelling question, with exact scope checked."
+            ]
+          }
+        }
+      }
+    },
+    {
+      "client_id": "4236a60a-990f-484f-8d19-13d2f92fbe3b",
+      "client_name": "Novus Steel",
+      "guide_quotes": [
+        "in-house drafting for fabrication/cutting detail;",
+        "laser cutting;",
+        "Do **not** turn Novus Steel into a generic retail steel merchant."
+      ],
+      "specificity_anchors": [
+        "fabrication",
+        "laser cutting",
+        "drafting"
+      ],
+      "audienceAndIntent": "Address someone evaluating a steel construction or fabrication requirement, using the project stage and application actually shown. Do not infer procurement capacity or an engineering authority from workshop imagery.",
+      "formatsAndRationale": "One professional video can connect drafting and fabrication through a real example. Four photos carry workshop/site detail; four design posters explain separate verified capabilities. Reels, animation and paid campaigns remain unconfirmed.",
+      "mustAvoid": "No retail steel stock catalogue, material grade/thickness, tolerance, crane capacity, certification, engineering sign-off, turnaround, cost saving or solar energy output. Keep solar-support work on the steel side and use actual project imagery with permission.",
+      "channelIntegration": "Keep practical workshop/site language across managed Novus channels. Use the approved direct phone/email route after a freshness check, not a vague DM instruction; do not name staff roles or supplier relationships from logos.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Review September's fabrication and project-stage content: can a viewer see what the steel component is for and how drafting or laser cutting supports the actual job?",
+          "coreMessage": "Explain the stage, not just the steel: drafting, laser cutting and fabrication become meaningful when linked to the component or structure shown.",
+          "pillarsAndHooks": "Real fabrication detail; drafting-to-cutting context; structure progress. Start with the visible fit-up, shape or stage rather than calling the business a stock supplier.",
+          "testAndChange": "Review workshop-detail and on-site progress content separately in September's available responses. If the creative response or enquiry result is unavailable, do not infer a winning capability.",
+          "successSignals": "Look for project-specific questions and available interactions naming the process shown. Missing enquiry or platform data stays unavailable; no programme saving or engineering performance is claimed.",
+          "nextMonthGamePlan": "Select an actual drafting-to-fabrication example for October after confirming what drawings, process and project detail may be shown publicly.",
+          "clientActionsRequired": [
+            "Identify the real project/application and public permissions for September visuals.",
+            "Confirm one current fabrication example and its safe technical description."
+          ],
+          "items": {
+            "professional_video": [
+              "Review a real fabrication/process explanation for clear application context."
+            ],
+            "photo_content": [
+              "Actual workshop fit-up.",
+              "Laser-cut component with approved description.",
+              "Real structure progress.",
+              "Drafting detail with private information removed."
+            ],
+            "design_poster": [
+              "What this fabrication stage is for.",
+              "Laser cutting as a supported capability.",
+              "Drafting for fabrication, not engineering sign-off.",
+              "Steel support structure: actual application only."
+            ]
+          }
+        },
+        "2026-10-01": {
+          "objective": "For October, help a project enquiry describe the component or structure it needs. Use an actual drafting-to-fabrication story to show how a brief becomes a real steel part, without promising specifications or certification.",
+          "coreMessage": "Bring the steel requirement into focus: show the drawing detail that can be shared, the fabrication step and the component's actual purpose.",
+          "pillarsAndHooks": "Approved drawing detail; real laser cutting; workshop fit-up; component/application connection. Keep one job as the through-line rather than mixing unrelated structures into a capability claim.",
+          "testAndChange": "Compare a component-purpose opening with a fabrication-step opening in supporting posts. Keep the job and technical facts fixed; judge the specificity of enquiries before extending the story.",
+          "successSignals": "Relevant project briefs and available response to the process story are useful signals. Do not label informal questions as awarded work or claim lead-time, load or energy results.",
+          "nextMonthGamePlan": "Use October's real project questions to choose a further verified application for the next month. Obtain permission and fresh technical wording before showing another project.",
+          "clientActionsRequired": [
+            "Supply a real example linking permitted drafting detail to fabrication.",
+            "Approve the technical description and any customer/project identification."
+          ],
+          "items": {
+            "professional_video": [
+              "Actual drafting-to-fabrication explanation using a public-safe example."
+            ],
+            "photo_content": [
+              "Permitted drawing detail.",
+              "Laser-cut part.",
+              "Fabrication stage.",
+              "Actual component or structure application."
+            ],
+            "design_poster": [
+              "What does this component need to do?",
+              "One fabrication step explained clearly.",
+              "Laser cutting for the specific part shown.",
+              "Steel-support application without electrical or engineering claims."
+            ]
+          }
+        }
+      }
+    },
+    {
+      "client_id": "e1cb958e-3f68-4a77-b5ea-b471ea62bdef",
+      "client_name": "Watch Addict",
+      "guide_quotes": [
+        "online watch and accessory retailer serving South Africa",
+        "do not claim authorised dealer, official reseller, exclusive distributor or manufacturer warranty without direct current proof.",
+        "The caption must **add to the artwork/video instead of repeating it**."
+      ],
+      "specificity_anchors": [
+        "watch",
+        "dial",
+        "wrist"
+      ],
+      "audienceAndIntent": "Help an online shopper evaluate the exact watch shown: notice its visible dial/design and decide what product information to check next. Do not invent a collector, investment buyer or physical-store audience.",
+      "formatsAndRationale": "One professional video shows the actual watch in motion or on a wrist. One photo makes a visible design detail clear; two design posters support product choice and online enquiry. Reels and animation remain unconfirmed.",
+      "mustAvoid": "No inferred model/specs, water resistance, movement, current stock/price, scarcity, dealer rights, manufacturer warranty or delivery window. Preserve the exact dial, case and bracelet in edits. Historical brand lists and offers are not current product confirmation.",
+      "channelIntegration": "Product content on already managed channels points to the current matching website product route after verification. Use the approved website footer for product/promotional posts; direct email/WhatsApp only for a real enquiry need.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Review September's watch presentation for product recognition: does a viewer see the actual dial and wrist proportions, and can they tell which exact watch to look up online?",
+          "coreMessage": "The dial, case and wrist view should make the watch recognisable before any specification is mentioned. Give the customer one useful reason to inspect the exact product.",
+          "pillarsAndHooks": "Visible dial detail; real wrist placement; product-page next step. Keep premium rhythm tied to the watch shown, not a generic timeless-elegance line.",
+          "testAndChange": "Review available response to close product detail and wrist/lifestyle framing in September. Confirm the actual model before linking enquiries; do not invent a sales or collector-value conclusion.",
+          "successSignals": "Track model-specific questions and available product-content interactions. Website visits or sales need their own records; missing commerce data is unavailable rather than zero purchasing interest.",
+          "nextMonthGamePlan": "Choose one confirmed watch for October's design-to-wear story, with current product-page identity checked before producing the website CTA.",
+          "clientActionsRequired": [
+            "Confirm the exact model in each supplied September asset.",
+            "Supply the current matching product page and approve any technical facts used."
+          ],
+          "items": {
+            "professional_video": [
+              "Review the real watch on wrist or in motion without invented specs."
+            ],
+            "photo_content": [
+              "Exact dial/case close-up preserving the actual watch."
+            ],
+            "design_poster": [
+              "One visible watch-design detail.",
+              "Clear website product lookup, with exact model confirmed."
+            ]
+          }
+        },
+        "2026-10-01": {
+          "objective": "For October, connect the exact watch's visible design to how it looks on a wrist, then guide the shopper to check that model online. Keep the plan editorial rather than inventing a sale or new arrival.",
+          "coreMessage": "See the watch clearly, picture its wrist presence, then inspect the matching product details online before choosing.",
+          "pillarsAndHooks": "Actual dial personality; case/bracelet relationship; natural wrist context. Begin with the visible design contrast, then bring the viewer to the exact product rather than a claim of rarity.",
+          "testAndChange": "Contrast a dial-led opening and a wrist-context opening around the same confirmed watch. Use available response and model-specific questions; do not imply a revenue uplift.",
+          "successSignals": "Useful signals are accurate model questions, available saves and any verified product-page visits. Sales, return rates and stock movement remain unclaimed without actual commerce records.",
+          "nextMonthGamePlan": "After October, choose a fresh confirmed model based on real customer questions and available content response. Recheck its page, stock and specifications instead of carrying old claims forward.",
+          "clientActionsRequired": [
+            "Confirm the selected October watch and matching live product page.",
+            "Approve any model/specification or policy wording before it is used."
+          ],
+          "items": {
+            "professional_video": [
+              "Real watch design-to-wrist sequence with model identity preserved."
+            ],
+            "photo_content": [
+              "Natural wrist view of the same exact watch."
+            ],
+            "design_poster": [
+              "A visible dial detail with short supporting context.",
+              "How to find the matching watch online, without stock or sale promises."
+            ]
+          }
+        }
+      }
+    },
+    {
+      "client_id": "29a28efd-c998-45e2-a57c-4a751e779e66",
+      "client_name": "PSG Bloemfontein",
+      "guide_quotes": [
+        "Current local services | Commercial insurance advice + personal insurance advice",
+        "National PSG capability is never local proof by itself.",
+        "default to concise one-sentence main captions for normal social posts;"
+      ],
+      "specificity_anchors": [
+        "commercial insurance",
+        "personal insurance",
+        "Donald Murray"
+      ],
+      "audienceAndIntent": "Address people with a commercial or personal insurance question for the Donald Murray Bloemfontein office. Explain a general question to discuss with an adviser, not a recommended product or an assumed investment service.",
+      "formatsAndRationale": "One professional video carries one general adviser-led question, subject to current adviser confirmation. Three design posters make commercial and personal insurance questions readable. Photo posts, reels, animation and paid campaigns are unconfirmed.",
+      "mustAvoid": "No returns, guarantees, premiums, tax outcome, suitability, underwriting eligibility, claim outcome, adviser authority or FSP status. Do not transfer national wealth/investment services or historical agricultural/cyber categories into local claims. Recheck staff/contact facts; no fear-based pressure.",
+      "channelIntegration": "Keep the local Bloemfontein/Donald Murray identity consistent on already managed channels. Use concise, normally emoji-free captions with one useful idea and a freshly confirmed office/adviser route where relevant, not an old mobile footer.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Review September's Donald Murray content for local service clarity: do commercial insurance and personal insurance posts pose a useful question without drifting into national investment or broad finance slogans?",
+          "coreMessage": "A useful local insurance conversation starts with one clear question about your circumstances, not a promise of certainty or a national service catalogue.",
+          "pillarsAndHooks": "Commercial insurance question; personal insurance question; local Donald Murray conversation. Use one practical review trigger at a time and keep the main caption concise.",
+          "testAndChange": "Review available response to commercial versus personal insurance questions separately. Check the topic of any recorded enquiries, without treating interactions as suitability, advice uptake or approved cover.",
+          "successSignals": "Relevant general questions and available interactions are descriptive signals. Missing enquiries or metrics stay unavailable; no claim payout, return, premium saving or policy outcome is assumed.",
+          "nextMonthGamePlan": "Choose one October adviser-led question from the actual topics raised, after confirming current local scope and responsible adviser participation.",
+          "clientActionsRequired": [
+            "Confirm the local topics and actual questions received in September.",
+            "Have the responsible adviser review every material financial statement and current contact."
+          ],
+          "items": {
+            "professional_video": [
+              "Review a general local insurance question with current adviser participation confirmed."
+            ],
+            "design_poster": [
+              "One commercial insurance question, not a product recommendation.",
+              "One personal insurance review question.",
+              "Donald Murray local conversation invitation with verified contact route."
+            ]
+          }
+        },
+        "2026-10-01": {
+          "objective": "For October, help someone prepare one useful question for the Donald Murray office when their personal or business circumstances change. Keep the content educational and clearly separate from individual insurance advice.",
+          "coreMessage": "What changed in your circumstances? Bring that question to a local insurance conversation before assuming an old arrangement still fits.",
+          "pillarsAndHooks": "Personal insurance conversation trigger; business-change question within commercial insurance; local adviser discussion. Focus on the question to ask, not a preselected policy or a promised outcome.",
+          "testAndChange": "Compare a circumstances-change opening with a plain insurance-question heading in supporting posts. Evaluate the relevance of actual enquiries and available response, with adviser-reviewed wording fixed.",
+          "successSignals": "Look for enquiries that state the question they want to discuss and available saves or video response. Do not label them as suitable products, bound policies or improved financial results.",
+          "nextMonthGamePlan": "After October, use real general questions to choose the next explanation with the responsible adviser. Reconfirm local service and contact facts; keep individual recommendations inside consultation.",
+          "clientActionsRequired": [
+            "Approve one general circumstances-change question within verified local insurance scope.",
+            "Confirm the current adviser, participation and office enquiry route before publication."
+          ],
+          "items": {
+            "professional_video": [
+              "Current adviser explains one general question to bring to an insurance conversation."
+            ],
+            "design_poster": [
+              "A personal-circumstances question without a cover promise.",
+              "A business-change question within commercial insurance.",
+              "Prepare your question for the local office, without recommending a policy."
+            ]
+          }
+        }
+      }
+    },
+    {
+      "client_id": "3404f726-a693-4b2d-8c13-c9d3dfd17bbc",
+      "client_name": "Daisy & Co",
+      "guide_quotes": [
+        "gifts/homeware;",
+        "captions short when the artwork already carries the detail.",
+        "Do not infer current stock or services from that list."
+      ],
+      "specificity_anchors": [
+        "Preller Square",
+        "gift",
+        "table"
+      ],
+      "audienceAndIntent": "Help a Preller Square shopper see a real gift, homeware or counter item in a believable occasion or table setting. Do not assume a demographic segment, corporate-gifting service or ordering arrangement.",
+      "formatsAndRationale": "One professional video can show a real shop/display moment. Three photos keep actual products and details central; three design posters frame useful occasion or choice questions. Reels, animation and paid campaigns remain unconfirmed.",
+      "mustAvoid": "No current brands/stock, flower schedule, prices, offers, preorders, platters, gift wrapping, delivery or special hours without confirmation. No invented occasion date. Preserve real product appearance and baked-item decoration; avoid empty seasonal slogans.",
+      "channelIntegration": "Keep warm, human Daisy identity on already managed channels, with Preller Square context when useful. Captions add one customer situation beyond the artwork. Use English or natural Afrikaans as the actual brief fits and only confirmed contact details.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Review September's gift and table/product content for a real customer idea: did Preller Square context and the actual item give the post meaning beyond a generic spring or celebration line?",
+          "coreMessage": "A real gift or table detail can carry a human moment. Show the item clearly and add the occasion or choice question the visual does not already answer.",
+          "pillarsAndHooks": "Actual gift detail; table/product styling; real shop personality. Review seasonal material for human relevance, without turning historical spring or Heritage directions into a current offer.",
+          "testAndChange": "Compare available September response to product-led and occasion-led openings where those assets exist. Do not assume historical products are still stocked or declare a winner from partial-month interactions.",
+          "successSignals": "Look for questions about the pictured item and available responses to product choices. Missing stock, enquiry or sales records remain unavailable; reactions are not proof of purchases.",
+          "nextMonthGamePlan": "Choose confirmed October products for a shop-choice story, using the customer questions actually received rather than reviving old brand or seasonal offers.",
+          "clientActionsRequired": [
+            "Identify the real September products and the context that can be used.",
+            "Confirm the actual October items and contact route before public availability wording."
+          ],
+          "items": {
+            "professional_video": [
+              "Review a real display/shop moment for product clarity."
+            ],
+            "photo_content": [
+              "Actual gift item.",
+              "Real table/product detail.",
+              "Shop personality image with permission."
+            ],
+            "design_poster": [
+              "One gift-choice question.",
+              "One table/item context line.",
+              "Preller Square visit context, without hours or stock claims."
+            ]
+          }
+        },
+        "2026-10-01": {
+          "objective": "For October, make a real gift or table choice easier to picture at Preller Square. Build the story around the items the shop confirms now, without promising a bundle, preorder or seasonal offer.",
+          "coreMessage": "Which detail would you choose for this occasion? Let a real gift and table moment prompt the conversation, with the actual item kept centre stage.",
+          "pillarsAndHooks": "Two actual item choices; a believable table moment; staff pick only when supplied. Start with the visible product difference instead of something-for-everyone wording.",
+          "testAndChange": "Compare a product-detail opening with an occasion-question opening using confirmed items. Track relevant choice questions and available response; do not manufacture a promotion to create urgency.",
+          "successSignals": "Useful signals are questions naming the item, actual product-choice responses and available saves. Any sale, reservation or stock availability needs a separate real record.",
+          "nextMonthGamePlan": "Use October's actual questions to select the next shop-choice story. Refresh product availability and any ordering facts first, and vary the creative angle instead of repeating seasonal filler.",
+          "clientActionsRequired": [
+            "Supply the exact items and approve any current availability statement.",
+            "Confirm whether a staff pick or real shop story may be shown and approve contacts."
+          ],
+          "items": {
+            "professional_video": [
+              "Real shop/display story around the confirmed October items."
+            ],
+            "photo_content": [
+              "One confirmed gift item.",
+              "Second product detail for a real choice.",
+              "Believable table setting preserving the exact items."
+            ],
+            "design_poster": [
+              "Which detail suits the occasion?",
+              "One product-choice prompt tied to actual items.",
+              "A local shop invitation without invented opening times or ordering services."
+            ]
+          }
+        }
+      }
+    },
+    {
+      "client_id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+      "client_name": "Supa Quick BFN",
+      "guide_quotes": [
+        "real workshop/staff process;",
+        "Use branch-specific contacts only when the branch is known.",
+        "Do not stage fake faults, invent a diagnosis from a symptom or use dramatic safety claims."
+      ],
+      "specificity_anchors": [
+        "Bloemfontein",
+        "alignment",
+        "balancing"
+      ],
+      "audienceAndIntent": "Help a Bloemfontein motorist understand the real workshop process and ask a branch-specific question about tyres or confirmed alignment/balancing work. Do not assign a service or offer to every branch by default.",
+      "formatsAndRationale": "One professional video can explain one actual in-store process. Three design posters give distinct tyre, alignment and balancing questions after branch verification. Photos, reels, animation and paid campaigns remain unconfirmed.",
+      "mustAvoid": "No inferred diagnosis, tyre size/compatibility, stock, price, free check, warranty, safety guarantee or national programme. Do not transfer minor services outside CBD. Full Church Street address and Preller postal code conflicts remain unresolved.",
+      "channelIntegration": "Use exact BFN managed channels and match any public contact to the branch shown. A broad website route follows the approved BFN convention when useful; avoid a fabricated universal phone/WhatsApp and keep branch imagery recognisable.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Review September's Bloemfontein workshop content for practical service clarity: could a motorist distinguish alignment and balancing questions and identify the branch actually shown?",
+          "coreMessage": "Show what is happening in the Bloemfontein workshop, then add one useful tyre or alignment question. A visible process is not a diagnosis or a promise of safety.",
+          "pillarsAndHooks": "Real staff/workshop moment; tyre-fitment detail; alignment versus balancing explanation once the branch confirms it. Keep the content in-store and tied to what the asset actually depicts.",
+          "testAndChange": "Review available September response to process-led video and service-question posters, separately by known branch. Do not treat a symptom comment as a fault diagnosis or interactions as booked work.",
+          "successSignals": "Useful signals are relevant branch-specific service questions and available video or poster response. Missing enquiries and job records stay unavailable; no accident prevention or sales improvement is claimed.",
+          "nextMonthGamePlan": "Choose one verified BFN workshop explanation for October and prepare branch-labelled tyre/service questions, checking local availability and contacts first.",
+          "clientActionsRequired": [
+            "Confirm the exact branch and service shown in September's assets.",
+            "Check the October service wording and branch contact, leaving disputed address details out."
+          ],
+          "items": {
+            "professional_video": [
+              "Review actual in-store staff/process content for branch clarity."
+            ],
+            "design_poster": [
+              "Tyre question tied to the actual product/service.",
+              "Alignment question after exact branch confirmation.",
+              "Balancing explanation once confirmed, without diagnosis claims."
+            ]
+          }
+        },
+        "2026-10-01": {
+          "objective": "For October, make a Bloemfontein workshop enquiry more informed: explain one confirmed alignment or balancing question and help the driver identify what to discuss at the exact branch.",
+          "coreMessage": "Ask about the process, not a guessed fault. A real Bloemfontein workshop explanation can help you describe the service question you want checked.",
+          "pillarsAndHooks": "Actual alignment/balancing explanation; tyre-fitment enquiry preparation; recognisable branch staff. Start with the real task shown and a useful driver question rather than road-confidence slogans.",
+          "testAndChange": "Compare a process-step opening with a driver-question heading in supporting content. Keep service facts and branch identity fixed, and assess enquiry relevance without claiming bookings or repairs.",
+          "successSignals": "Look for enquiries identifying the branch and the service question, plus available video response. Do not turn a comment into diagnosis, confirmed compatibility or guaranteed prevention.",
+          "nextMonthGamePlan": "Use actual October questions to select the next locally confirmed workshop topic. Recheck branch service and contact facts rather than recycling a national offer.",
+          "clientActionsRequired": [
+            "Approve one real workshop explanation and confirm branch availability.",
+            "Verify any tyre details and the exact branch enquiry contact before publication."
+          ],
+          "items": {
+            "professional_video": [
+              "Staff explains one real alignment/balancing process after branch confirmation."
+            ],
+            "design_poster": [
+              "What information helps a tyre-fitment enquiry?",
+              "One locally confirmed service question.",
+              "Exact branch next step without a free-check or turnaround promise."
+            ]
+          }
+        }
+      }
+    },
+    {
+      "client_id": "e2870110-930c-4e63-b2fe-c858030f7258",
+      "client_name": "Supa Quick Centurion",
+      "guide_quotes": [
+        "Tyres / tyre fitment are safe durable branch categories.",
+        "Wheel fitment is an established Centurion marketing/service theme in supplied Project creative.",
+        "Never recycle an old price, offer or tyre-size claim from previous content."
+      ],
+      "specificity_anchors": [
+        "Centurion",
+        "wheel fitment",
+        "Lifestyle"
+      ],
+      "audienceAndIntent": "Speak to a motorist considering tyres or wheel fitment at Centurion Lifestyle. Help them prepare a specific vehicle/product question, without implying compatibility or importing broader national service categories.",
+      "formatsAndRationale": "One professional video can explain an actual tyre/wheel fitment step. Three design posters support tyre choice, fitment questions and the local enquiry route. Photos, reels, animation and paid campaigns remain unconfirmed.",
+      "mustAvoid": "No unverified alignment, balancing, brakes, batteries, shocks or exhaust service. No diagnosis, stock, prices, savings, free checks, tyre compatibility or guarantees. Do not substitute another branch or silently replace the approved marketing footer with conflicting public forms.",
+      "channelIntegration": "Keep Centurion Lifestyle identity on existing managed channels and use the approved branch footer when contacts are needed, without emojis/icons. Keep captions short but useful and preserve the actual wheels, tyres, vehicles and staff.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Review September's Centurion Lifestyle tyre and wheel fitment content: does the actual product/process carry the message, without a recycled precision slogan or implied compatibility promise?",
+          "coreMessage": "Make the wheel fitment moment understandable at Centurion Lifestyle. Show the real task and add the question a driver should confirm before choosing.",
+          "pillarsAndHooks": "Actual tyre-fitment process; wheel fitment detail; Centurion local next step. Distinguish a visible workshop action from an unverified technical service or result.",
+          "testAndChange": "Review available response to wheel-detail and driver-question openings in September. Check whether enquiries identify the product/vehicle question, without diagnosing faults or assuming sale results.",
+          "successSignals": "Relevant tyre/wheel enquiries and available video or poster response are useful. Missing job, enquiry and stock records remain unavailable; informal interactions are not completed service results.",
+          "nextMonthGamePlan": "Prepare October around one confirmed tyre/wheel fitment question, using actual branch assets and checking current product details and approved contacts.",
+          "clientActionsRequired": [
+            "Identify the real product and fitment step in September's creative.",
+            "Confirm any product facts and the approved Centurion contact/footer for reuse."
+          ],
+          "items": {
+            "professional_video": [
+              "Review a real tyre/wheel fitment clip for clear customer context."
+            ],
+            "design_poster": [
+              "One wheel fitment question.",
+              "Tyre choice: confirm exact product details.",
+              "Centurion Lifestyle enquiry route using the approved footer."
+            ]
+          }
+        },
+        "2026-10-01": {
+          "objective": "For October, help a Centurion Lifestyle motorist prepare a useful wheel fitment enquiry. Explain what to confirm about the actual vehicle and tyre/wheel combination without deciding compatibility in a social post.",
+          "coreMessage": "Bring your wheel fitment question into focus: identify the vehicle and the product you mean, then ask the Centurion team to confirm the specifics.",
+          "pillarsAndHooks": "Tyre/wheel enquiry preparation; actual fitment step; Lifestyle branch context. Open with a concrete question, not a price promise or a generic road-ahead message.",
+          "testAndChange": "Contrast a product-detail opening and an enquiry-preparation opening around the same confirmed fitment topic. Track how specific actual questions become; no repair, cost or safety uplift is assumed.",
+          "successSignals": "Look for enquiries that describe the actual vehicle/product question and available response to the fitment explanation. Compatibility, booking and completed work need separate verification.",
+          "nextMonthGamePlan": "Use October's real fitment questions for the next locally approved explanation. Refresh product facts and any service participation before considering a broader topic.",
+          "clientActionsRequired": [
+            "Approve one real tyre/wheel fitment explanation and the safe vehicle/product wording.",
+            "Confirm the exact branch footer and any mutable stock or product details used."
+          ],
+          "items": {
+            "professional_video": [
+              "Real fitment explanation focused on the information to confirm, not diagnosis."
+            ],
+            "design_poster": [
+              "Identify the vehicle before asking about the tyre/wheel.",
+              "One actual wheel fitment detail with approved description.",
+              "Local next step using the approved Centurion footer, without an offer."
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

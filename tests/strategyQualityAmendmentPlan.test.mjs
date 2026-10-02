@@ -34,6 +34,36 @@ function fixture() {
   return {snapshot,fleet:structuredClone(fleet),neshora:structuredClone(neshora),manifest:baseline,quality:structuredClone(quality)}
 }
 
+test('Batch 3 executes cumulative compiler, preserves all 42 accepted rows and refuses staff/exclusion drift',()=>{
+  const input=fixture(),packets=[1,2,3].map(buildReviewedBatch)
+  for(const packet of packets){
+    for(const row of packet.rows){
+      const live=input.snapshot.strategies.find(r=>r.id===row.row_id)
+      row.guard={fingerprint:sha(live),revision_hash:sha(input.snapshot.revisions.find(r=>r.strategy_id===live.id)),strategy_hash:sha(live.strategy_data),seed_hash:sha(live.seed_context),package_hash:sha(live.package_settings),internal_notes:live.internal_notes}
+      const{reviewed_hash,...core}=row;row.reviewed_hash=sha(core)
+    }
+    const{packet_hash,...core}=packet;packet.packet_hash=sha(core)
+  }
+  const previous=buildQualityPlan({...input,reviewedOverrides:packets.slice(0,2)})
+  const result=buildQualityPlan({...input,reviewedOverrides:packets,preservedPlan:previous})
+  assert.equal(result.counts.amendment_needed,62);assert.equal(result.counts.blocked,32)
+  for(const row of previous.rows.filter(r=>r.disposition==='amendment_needed'))assert.equal(JSON.stringify(result.rows.find(r=>r.row_id===row.row_id)),JSON.stringify(row))
+  assert.equal(JSON.stringify(result.excluded),JSON.stringify(previous.excluded));assertNoDrift(result,input.snapshot)
+  const target=packets[2].rows[0]
+  for(const text of [' Supa Quick Centurion.',' Repository worker.',' Guaranteed returns.']){
+    const changed=structuredClone(packets),r=changed[2].rows[0];r.patch.goldStandard.coreMessage+=text
+    const{reviewed_hash,...core}=r;r.reviewed_hash=sha(core)
+    const{packet_hash,...packetCore}=changed[2];changed[2].packet_hash=sha(packetCore)
+    assert.equal(buildQualityPlan({...input,reviewedOverrides:changed,preservedPlan:previous}).rows.find(r=>r.row_id===target.row_id).disposition,'blocked')
+  }
+  for(const edit of [r=>r.internal_notes='later note',r=>r.version=3,r=>r.package_settings.design_posters_per_month=99,r=>r.strategy_data.strategyGoingForward='staff edit']){
+    const changed=structuredClone(input);edit(changed.snapshot.strategies.find(r=>r.id===target.row_id))
+    assert.throws(()=>buildQualityPlan({...changed,reviewedOverrides:packets,preservedPlan:previous}),/Drift refusal/)
+  }
+  const excluded=structuredClone(input);excluded.snapshot.strategies.find(r=>r.id===result.excluded[0].row_id).internal_notes='change'
+  assert.throws(()=>buildQualityPlan({...excluded,reviewedOverrides:packets,preservedPlan:previous}),/Drift refusal/)
+})
+
 test('Batch 2 cumulative compiler derives 42/52, preserves prior rows and rejects duplicate/foreign/internal/drift',()=>{
   const input=fixture(),packets=[buildReviewedBatch(),buildReviewedBatch(2)]
   for(const packet of packets){

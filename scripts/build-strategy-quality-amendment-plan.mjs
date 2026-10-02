@@ -178,10 +178,10 @@ export function assertIsolated(directory) {
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
-  if (![4,5,6].includes(process.argv.length)) throw new Error('Usage: node scripts/build-strategy-quality-amendment-plan.mjs LIVE_SNAPSHOT ISOLATED_DIRECTORY [BATCH_1] [BATCH_2] (no apply mode)')
+  if (![4,5,6,7].includes(process.argv.length)) throw new Error('Usage: node scripts/build-strategy-quality-amendment-plan.mjs LIVE_SNAPSHOT ISOLATED_DIRECTORY [BATCH_1] [BATCH_2] [BATCH_3] (no apply mode)')
   const directory = assertIsolated(resolve(process.argv[3]))
   const read = path => JSON.parse(readFileSync(path,'utf8'))
-  const plan = buildQualityPlan({ snapshot:read(resolve(process.argv[2])), fleet:read(resolve(directory,'sep-oct-strategy-mutation-dry-run.json')), neshora:read(resolve(directory,'neshora-strategy-readiness-dry-run.json')), manifest:read(resolve(FROZEN,'sep-oct-approval-publication-manifest.json')), quality:read(resolve(FROZEN,'issue-567-sep-oct-strategy-quality-readiness.json')), reviewedOverrides:process.argv.length>4 ? process.argv.slice(4).map(p=>read(resolve(p))) : undefined, preservedPlan:process.argv.length===6 ? read(resolve(ROOT,'artifacts/strategy-quality-amendments/issue-513/batch-1/canonical-quality-amendment-plan.json')) : undefined })
+  const plan = buildQualityPlan({ snapshot:read(resolve(process.argv[2])), fleet:read(resolve(directory,'sep-oct-strategy-mutation-dry-run.json')), neshora:read(resolve(directory,'neshora-strategy-readiness-dry-run.json')), manifest:read(resolve(FROZEN,'sep-oct-approval-publication-manifest.json')), quality:read(resolve(FROZEN,'issue-567-sep-oct-strategy-quality-readiness.json')), reviewedOverrides:process.argv.length>4 ? process.argv.slice(4).map(p=>read(resolve(p))) : undefined, preservedPlan:process.argv.length>=6 ? read(resolve(ROOT,`artifacts/strategy-quality-amendments/issue-513/batch-${process.argv.length-5}/canonical-quality-amendment-plan.json`)) : undefined })
   writeFileSync(resolve(directory,'canonical-quality-amendment-plan.json'),`${JSON.stringify(plan,null,2)}\n`)
   process.stdout.write(`${JSON.stringify({plan_hash:plan.plan_hash,...plan.counts},null,2)}\n`)
 }
