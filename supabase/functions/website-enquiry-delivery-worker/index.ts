@@ -1,7 +1,7 @@
 // Issue #405: website enquiry notification worker.
 //
 // Drains the transactional outbox created by submit_website_enquiry. Fail-closed:
-// unless WEBSITE_ENQUIRY_EMAIL_ENABLED/PROVIDER/FROM/API key are all configured it
+// unless WEBSITE_ENQUIRY_EMAIL_ENABLED/PROVIDER/FROM and the provider's own values are set it
 // claims nothing, so pending jobs (and every stored enquiry) simply wait.
 // Auth: x-worker-secret == WEBSITE_ENQUIRY_WORKER_SECRET (scheduler only). The gateway
 // does not verify a JWT for this function (supabase/config.toml verify_jwt = false), so
@@ -11,10 +11,11 @@ import { jsonResponse } from '../_shared/cors.ts'
 import {
   classifyResendResponse,
   composeEnquiryEmail,
-  resolveDeliveryConfig,
   type ClaimedDelivery,
   type DeliveryOutcome,
 } from '../_shared/websiteEnquiryDelivery.ts'
+import { resolveProviderConfig, type ProviderConfig } from '../_shared/websiteEnquiryProviders.ts'
+import { buildSesSendRequest, classifySesResponse, type SesConfig } from '../_shared/websiteEnquirySes.ts'
 
 const CLAIM_LIMIT = 10
 const LEASE_SECONDS = 120
@@ -58,6 +59,31 @@ async function sendViaResend(job: ClaimedDelivery, from: string, apiKey: string)
   }
 }
 
+async function sendViaSes(job: ClaimedDelivery, config: SesConfig): Promise<DeliveryOutcome> {
+  let request
+  try {
+    request = await buildSesSendRequest(job, config)
+  } catch {
+    return { outcome: 'permanent_failure', errorCode: 'invalid_recipient_snapshot' }
+  }
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), SEND_TIMEOUT_MS)
+  try {
+    const response = await fetch(request.url, { method: request.method, headers: request.headers, body: request.body, signal: controller.signal })
+    const body = await response.json().catch(() => null)
+    return classifySesResponse({ status: response.status, body, requestSent: true })
+  } catch {
+    // SES has no idempotency key: a lost response is ambiguous -> reconcile, never resent.
+    return classifySesResponse({ requestSent: true })
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+function send(job: ClaimedDelivery, config: Exclude<ProviderConfig, { state: 'disabled' }>): Promise<DeliveryOutcome> {
+  return config.provider === 'ses' ? sendViaSes(job, config) : sendViaResend(job, config.from, config.apiKey)
+}
+
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return jsonResponse({ ok: false, error: 'Method not allowed' }, 405)
   const expected = Deno.env.get('WEBSITE_ENQUIRY_WORKER_SECRET') ?? ''
@@ -65,7 +91,7 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'Unauthorized' }, 401)
   }
 
-  const config = resolveDeliveryConfig((name) => Deno.env.get(name))
+  const config = resolveProviderConfig((name) => Deno.env.get(name))
   if (config.state === 'disabled') {
     return jsonResponse({ ok: true, state: 'disabled', gate: config.reason, claimed: 0 })
   }
@@ -75,24 +101,26 @@ Deno.serve(async (req) => {
   if (!supabaseUrl || !serviceRoleKey) return jsonResponse({ ok: false, error: 'Server configuration missing' }, 500)
   const admin = createClient(supabaseUrl, serviceRoleKey, { auth: { persistSession: false } })
 
-  // Reconcile: inside the provider's idempotency window the same delivery_key is
-  // replayed, so an already-accepted message is returned rather than duplicated.
-  // Older ambiguous jobs stay in reconcile for staff review.
-  const replayCutoff = new Date(Date.now() - REPLAY_WINDOW_MS).toISOString()
-  const { data: reconcileJobs, error: reconcileError } = await admin
-    .from('website_enquiry_delivery_jobs')
-    .select('id')
-    .eq('delivery_state', 'reconcile')
-    .eq('provider', config.provider)
-    .gt('created_at', replayCutoff)
-    .limit(CLAIM_LIMIT)
-  if (reconcileError) return jsonResponse({ ok: false, error: 'Reconcile scan failed' }, 500)
+  // Reconcile: only providers that dedupe on the delivery_key (Resend) get the same key
+  // replayed inside their idempotency window. SES has no idempotency key, so SES reconcile
+  // jobs are resolved only from SES event evidence or by staff — never resent.
   let replayed = 0
-  for (const job of reconcileJobs ?? []) {
-    const { data } = await admin.rpc('resolve_website_enquiry_delivery_reconcile', {
-      p_job_id: job.id, p_resolution: 'idempotent_replay', p_provider_message_id: null,
-    })
-    if (data?.applied) replayed++
+  if (config.supportsIdempotentReplay) {
+    const replayCutoff = new Date(Date.now() - REPLAY_WINDOW_MS).toISOString()
+    const { data: reconcileJobs, error: reconcileError } = await admin
+      .from('website_enquiry_delivery_jobs')
+      .select('id')
+      .eq('delivery_state', 'reconcile')
+      .eq('provider', config.provider)
+      .gt('created_at', replayCutoff)
+      .limit(CLAIM_LIMIT)
+    if (reconcileError) return jsonResponse({ ok: false, error: 'Reconcile scan failed' }, 500)
+    for (const job of reconcileJobs ?? []) {
+      const { data } = await admin.rpc('resolve_website_enquiry_delivery_reconcile', {
+        p_job_id: job.id, p_resolution: 'idempotent_replay', p_provider_message_id: null,
+      })
+      if (data?.applied) replayed++
+    }
   }
 
   // Belt and braces: apply any stored provider events whose job is now accepted.
@@ -106,7 +134,7 @@ Deno.serve(async (req) => {
 
   const results: Record<string, number> = { accepted: 0, retryable_failure: 0, permanent_failure: 0, ambiguous: 0, stale: 0 }
   for (const job of (claimed ?? []) as ClaimedDelivery[]) {
-    const outcome = await sendViaResend(job, config.from, config.apiKey)
+    const outcome = await send(job, config)
     const { data, error } = await admin.rpc('complete_website_enquiry_delivery', {
       p_job_id: job.job_id,
       p_lease_token: job.lease_token,

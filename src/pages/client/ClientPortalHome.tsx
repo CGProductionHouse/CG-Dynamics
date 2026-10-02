@@ -6,6 +6,7 @@ import { ClientPortalErrorState, ClientPortalLoadingState } from '../../componen
 import { useAuth } from '../../contexts/AuthContext'
 import { activeOrganicPlatforms, actionMonthForReport, buildClientStrategyPreview } from '../../lib/clientPortal'
 import { fetchClientMonthAhead } from '../../lib/clientPortalCalendar'
+import { ClientServiceExpansion } from '../../components/client/ClientServiceExpansion'
 import { listClientPublishedReports, type ClientReport } from '../../lib/db/reports'
 import { loadReportPlatformFacts } from '../../lib/db/reportingTruth'
 import { loadGoogleAdsDashboard, type GoogleAdsDashboardState } from '../../lib/googleAdsDashboard'
@@ -320,6 +321,7 @@ export default function ClientPortalHome() {
           </section>
         </>
       )}
+      <ClientServiceExpansion surface="overview" />
     </>
   )
 }

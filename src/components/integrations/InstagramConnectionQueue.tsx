@@ -35,6 +35,7 @@ interface Props {
   linkedAssets: LinkedInstagramAsset[]
   providerPages: ProviderPage[]
   providerAssetsLoaded: boolean
+  providerPagesAvailable: boolean
   onLoadProviderAssets: () => void
   onCanonicalMappingChanged: () => Promise<void>
 }
@@ -44,6 +45,7 @@ export function InstagramConnectionQueue({
   linkedAssets,
   providerPages,
   providerAssetsLoaded,
+  providerPagesAvailable,
   onLoadProviderAssets,
   onCanonicalMappingChanged,
 }: Props) {
@@ -102,11 +104,18 @@ export function InstagramConnectionQueue({
         evidence,
         connection: connections.find(item => item.client_id === client.id) ?? null,
         pageLinkedAccount: providerPage?.instagramAccount ?? null,
-        hasFacebookPage: Boolean(link?.facebook_page_id),
+        pageRoute: instagramPageRouteEvidence({
+          facebookPageId: link?.facebook_page_id ?? null,
+          providerAssetsLoaded,
+          providerPagesAvailable,
+          providerPages,
+        }),
       }
-    }), [eligibility, connections, linkedAssets, providerPages])
+    }), [eligibility, connections, linkedAssets, providerPages, providerAssetsLoaded, providerPagesAvailable])
 
   async function startStandalone(client: Client) {
+    const row = queue.find(item => item.client.id === client.id)
+    if (!row?.pageRoute.canStartStandalone || row.connection?.status === 'pending_review') return
     setBusyClientId(client.id)
     setMessage(null)
     try {
@@ -169,7 +178,7 @@ export function InstagramConnectionQueue({
         </div>
       )}
 
-      {!providerAssetsLoaded && queue.length > 0 && (
+      {(!providerAssetsLoaded || !providerPagesAvailable) && queue.length > 0 && (
         <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-brand-accent/20 bg-brand-accent/[0.06] p-4">
           <div>
             <p className="font-semibold text-white">Check the preferred Page-linked route first</p>
@@ -180,13 +189,13 @@ export function InstagramConnectionQueue({
       )}
 
       <div className="mt-5 grid gap-3 lg:grid-cols-2">
-        {queue.map(({ client, evidence, connection, pageLinkedAccount, hasFacebookPage }) => {
+        {queue.map(({ client, evidence, connection, pageLinkedAccount, pageRoute }) => {
           const expectedMatches = connection && evidence
             ? exactHandleMatches(evidence.verifiedHandle, connection.instagram_username)
             : false
           const pending = connection?.status === 'pending_review'
           const busy = busyClientId === client.id
-          const canStartStandalone = providerAssetsLoaded && !pageLinkedAccount && !pending
+          const canStartStandalone = pageRoute.canStartStandalone && !pageLinkedAccount && !pending
           return (
             <article key={client.id} className="rounded-2xl border border-white/10 bg-black/15 p-4 sm:p-5">
               <div className="flex flex-wrap items-start justify-between gap-3">
@@ -197,7 +206,7 @@ export function InstagramConnectionQueue({
                   </p>
                 </div>
                 <StatusBadge
-                  label={pageLinkedAccount ? 'Page-linked available' : pending ? 'Review exact account' : evidence?.verifiedHandle ? 'Standalone candidate' : 'Identity needed'}
+                  label={pageLinkedAccount ? 'Page-linked available' : pending ? 'Review exact account' : !pageRoute.canStartStandalone ? 'Page route unresolved' : evidence?.verifiedHandle ? 'Standalone candidate' : 'Identity needed'}
                   variant={pageLinkedAccount ? 'published' : pending ? 'ready-to-publish' : 'needs-strategy'}
                 />
               </div>
@@ -226,11 +235,11 @@ export function InstagramConnectionQueue({
               ) : (
                 <div className="mt-4 space-y-3">
                   <p className="text-xs leading-relaxed text-brand-primary/65">
-                    {instagramPageRouteEvidence(hasFacebookPage, providerAssetsLoaded)}
+                    {pageRoute.text}
                     {' '}{evidence?.reviewNote ?? 'Confirm the exact owner-controlled account before staff approval.'}
                   </p>
                   <ActionButton variant="outline" size="sm" disabled={!canStartStandalone || busy} onClick={() => void startStandalone(client)}>
-                    {busy ? 'Opening Instagram…' : providerAssetsLoaded ? 'Connect exact Instagram account' : 'Check Page route first'}
+                    {busy ? 'Opening Instagram…' : canStartStandalone ? 'Connect exact Instagram account' : 'Check Page route first'}
                   </ActionButton>
                 </div>
               )}

@@ -238,8 +238,18 @@ export function buildMicrosoftReconciliation(
   prepareItems: (items: MicrosoftImportPreviewItem[]) => MicrosoftImportPreviewItem[] = items => items,
   unlinkedSlotRows: Map<string, UnlinkedSlotRow[]> = new Map(),
   unlinkedCalendarRows: MicrosoftUnlinkedCalendarRow[] = [],
+  cacheSourceCompleteness = false,
 ): MicrosoftImportPreviewItem[] {
   const mapped = prepareItems(buildMicrosoftImportPreview(snapshot.records, context))
+  // Automatic mirror preparation checks each exact source once, not once per
+  // item (quadratic on multi-thousand-record jobs). Manual preview stays on its
+  // existing path. Cache lives only inside this immutable reconciliation call.
+  const completeness = new Map<MicrosoftSnapshotSource, boolean>()
+  const completeSource = (source: MicrosoftSnapshotSource | null) => {
+    if (!cacheSourceCompleteness || !source) return sourceActuallyComplete(source, mapped)
+    if (!completeness.has(source)) completeness.set(source, sourceActuallyComplete(source, mapped))
+    return completeness.get(source)!
+  }
   const targetsByKey = new Map<string, MicrosoftExistingTarget[]>()
   for (const target of existingTargets) {
     const key = targetKey(target)
@@ -256,7 +266,7 @@ export function buildMicrosoftReconciliation(
 
   const reconciled: MicrosoftImportPreviewItem[] = mapped.map(item => {
     const source = sourceForItem(item, snapshot.sources)
-    const sourceComplete = sourceActuallyComplete(source, mapped)
+    const sourceComplete = completeSource(source)
     const key = itemKey(item)
     if (key) seen.add(key)
     // A proposed package-template correction is a reviewed action of its own; it
@@ -349,7 +359,7 @@ export function buildMicrosoftReconciliation(
     const key = targetKey(target)
     if (!key || seen.has(key) || target.microsoftSourceRemovedAt) continue
     const source = snapshot.sources.find(candidate => sourceCoversTarget(candidate, target))
-    if (source && sourceActuallyComplete(source, mapped)) reconciled.push(removedItem(target, source))
+    if (source && completeSource(source)) reconciled.push(removedItem(target, source))
   }
   return flagDeliverableSlotConflicts(reconciled, deliverableSlotKeys, unlinkedSlotRows)
 }
