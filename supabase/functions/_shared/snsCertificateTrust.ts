@@ -7,7 +7,9 @@
 // implementation on Supabase Edge) — no hand-written ASN.1 parsing.
 //
 // Accepted chain, exactly: leaf -> Amazon intermediate -> pinned Amazon Trust Services root.
-// - leaf: single certificate, not a CA, SAN contains DNS:sns.amazonaws.com, RSA key,
+// - leaf: single certificate, not a CA, SAN contains DNS:sns.amazonaws.com or exactly the
+//   regional SNS host the certificate was fetched from (sns.<region>.amazonaws.com — e.g.
+//   af-south-1 leaves are issued to sns-signing.af-south-1 / sns.af-south-1 only), RSA key,
 //   currently valid, issued and signed by the intermediate;
 // - intermediate: obtained only from the leaf's AIA "CA Issuers" URL on crt.*.amazontrust.com
 //   (transport is irrelevant: it must chain to a pinned root), a CA, currently valid;
@@ -18,6 +20,7 @@ import { X509Certificate } from 'node:crypto'
 import { AMAZON_TRUST_ROOTS } from './amazonTrustRoots.ts'
 
 export const SNS_SIGNING_CERT_DNS = 'sns.amazonaws.com'
+const REGIONAL_SNS_HOST = /^sns\.[a-z]{2}(-[a-z]+)+-\d\.amazonaws\.com$/
 const TRUSTED_ISSUER_URL = /^https?:\/\/crt\.[a-z0-9]{1,32}\.amazontrust\.com\/[a-z0-9]{1,32}\.(cer|crt)$/
 
 export type TrustResult = { ok: true; spki: Uint8Array } | { ok: false; reason: string }
@@ -25,6 +28,8 @@ export type TrustResult = { ok: true; spki: Uint8Array } | { ok: false; reason: 
 export interface TrustDeps {
   /** Fetches the intermediate (DER or PEM) from an already-validated amazontrust.com URL. */
   fetchIssuer: (url: string) => Promise<Uint8Array>
+  /** Host of the (already validated) SigningCertURL; a leaf issued to exactly this regional SNS host is accepted. */
+  certUrlHost?: string
   now?: Date
   /** Test seam only; production always uses the pinned Amazon roots. */
   roots?: ReadonlyArray<string>
@@ -50,7 +55,8 @@ export async function verifySnsSigningCertificate(leafPem: string, deps: TrustDe
   let leaf: X509Certificate
   try { leaf = new X509Certificate(leafPem) } catch { return { ok: false, reason: 'unparseable_certificate' } }
   if (leaf.ca) return { ok: false, reason: 'leaf_is_ca' }
-  if (!sanDnsNames(leaf).includes(SNS_SIGNING_CERT_DNS)) return { ok: false, reason: 'not_issued_to_sns' }
+  const snsNames = [SNS_SIGNING_CERT_DNS, ...(deps.certUrlHost && REGIONAL_SNS_HOST.test(deps.certUrlHost) ? [deps.certUrlHost] : [])]
+  if (!sanDnsNames(leaf).some((name) => snsNames.includes(name))) return { ok: false, reason: 'not_issued_to_sns' }
   if (leaf.publicKey.asymmetricKeyType !== 'rsa') return { ok: false, reason: 'unexpected_key_type' }
   if (!validAt(leaf, now)) return { ok: false, reason: 'leaf_not_valid_now' }
 

@@ -87,3 +87,14 @@ apply converges in the safe order with least-privilege policies; secrets reach S
 but never stdout, the summary or a command line; existing keys are never duplicated and are
 reused only when both SES credential secrets exist, otherwise the run stops before any change
 (also when the secret list is unreadable); production access only on explicit opt-in.
+
+## Lessons from the first live run (2 Oct 2026)
+
+- Vault write: `vault.update_secret` returns `void` and `vault.create_secret` returns `uuid`, so they
+  cannot share one `CASE` (Postgres 42804). The script now issues two statements and calls
+  `supabase db query --linked --project-ref` (`--project-ref` alone is rejected by the CLI).
+- af-south-1 SNS signing certificates are issued to `sns-signing.af-south-1.amazonaws.com` /
+  `sns.af-south-1.amazonaws.com` only (no `sns.amazonaws.com` SAN). Trust accepts a regional SAN
+  only when it equals the validated SigningCertURL host; the Amazon chain and pinned roots are
+  unchanged. Before this fix the endpoint answered the SubscriptionConfirmation with
+  `401 untrusted_certificate`, leaving the subscription `PendingConfirmation`.
