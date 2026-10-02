@@ -13,6 +13,10 @@ on:
       - 'tests/websiteLeadLifecycle.test.mjs'
       - 'src/lib/websiteLeads.ts'
       - 'supabase/migrations/*website_enquiry_delivery_runtime.sql'
+      - 'supabase/migrations/*website_enquiry_delivery_suppression.sql'
+      - 'scripts/website-enquiry-delivery-suppression-acceptance.mjs'
+      - 'tests/sql/405_website_enquiry_delivery_suppression_acceptance.sql'
+      - 'tests/websiteEnquiryDeliverySuppression.test.mjs'
       - 'scripts/website-enquiry-delivery-acceptance.mjs'
       - 'tests/sql/405_website_enquiry_delivery_acceptance.sql'
       - 'tests/websiteEnquiryDelivery.test.mjs'
@@ -42,6 +46,8 @@ jobs:
       - run: node scripts/website-lead-lifecycle-acceptance.mjs
       - run: node --test tests/websiteEnquiryDelivery.test.mjs
       - run: node scripts/website-enquiry-delivery-acceptance.mjs
+      - run: node --test tests/websiteEnquiryDeliverySuppression.test.mjs
+      - run: node scripts/website-enquiry-delivery-suppression-acceptance.mjs
       - run: node --test tests/websiteEnquiryIntake.test.mjs
       - run: node scripts/website-enquiry-intake-acceptance.mjs
   deno-check:

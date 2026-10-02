@@ -79,3 +79,45 @@ claims, stable idempotency key, stale-lease rejection, accepted/delivered/bounce
 distinctness, webhook idempotency, retry backoff and 5-attempt cap, ambiguous and
 expired-lease reconcile without resend, 23h replay window, and that enquiries survive
 every failure path. No provider is contacted.
+
+## Suppression before activation (`20261002140000_website_enquiry_delivery_suppression.sql`)
+
+`suppressed` is a terminal delivery state. A suppressed job is never claimed (the claim RPC
+leases `pending` only), never replayed (reconcile resolution acts on `reconcile` only) and
+keeps its enquiry, event and Lead Inbox evidence. Columns `suppressed_at/_by/_from_state`,
+`suppression_reason` (`acceptance_test|duplicate|spam|client_request|other`, note required
+for `other`) are enforced together by `website_enquiry_delivery_suppression_complete`.
+
+- `suppress_website_enquiry_delivery(job_id, reason, note)` — SECURITY DEFINER, callable by
+  `authenticated` but only succeeds for an **active `admin` or `manager`** (`auth.uid()`).
+  Allowed from `pending`, `failed`, `reconcile` only. `leased` (in flight) and
+  `accepted/delivered/bounced` return `not_suppressible`; a repeat returns
+  `already_suppressed`. The row lock serialises with the worker's
+  `FOR UPDATE SKIP LOCKED` claim, so a job being suppressed is skipped, never leased.
+- `website_enquiry_delivery_preflight()` — admin/manager read of every job a worker could
+  still send (`pending`/`reconcile`): receipt, client, Website, recipient, contact email,
+  subject. No message body.
+
+### Protected activation gate (CA) — exact order
+
+1. Apply `20261002140000_website_enquiry_delivery_suppression.sql` through the same
+   ledger-exact path used for the four #405 migrations (file + ledger row with the exact
+   repo version/name in one transaction; verify MD5 of `statements[1]`).
+2. As the CG admin identity, run the preflight and suppress the Piek pilot job
+   (enquiry `8a7ec21d-4c64-40f3-9b81-120f05f8c87c`, receipt `4bf9fcc9-…`):
+
+   ```sql
+   begin;
+   set local role authenticated;
+   select set_config('request.jwt.claims', json_build_object('sub', '<active CG admin profile id>', 'role', 'authenticated')::text, true);
+   select * from public.website_enquiry_delivery_preflight();
+   select public.suppress_website_enquiry_delivery(job.id, 'acceptance_test', 'Piek #405 production pilot - DO NOT ACTION')
+   from public.website_enquiry_delivery_jobs job
+   where job.enquiry_id = '8a7ec21d-4c64-40f3-9b81-120f05f8c87c' and job.delivery_state = 'pending';
+   commit;
+   ```
+   Expect `{"applied": true, "state": "suppressed", "from": "pending"}` and the job absent
+   from a second preflight.
+3. **Activation precondition:** the preflight returns no acceptance/test job. Only then
+   approve the provider, verify the CG sending domain (DNS), set the six secrets, deploy
+   worker + webhook (`verify_jwt = false`), register the webhook and schedule the worker.
