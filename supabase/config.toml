@@ -10,3 +10,12 @@ verify_jwt = false
 [functions.instagram-data-deletion]
 # POST: Meta signed_request. GET: opaque bearer confirmation, safe status only.
 verify_jwt = false
+
+[functions.website-enquiry-delivery-worker]
+# Scheduler authenticates with x-worker-secret (WEBSITE_ENQUIRY_WORKER_SECRET), checked in
+# constant time by the handler. No Supabase JWT or service-role bearer is issued to it.
+verify_jwt = false
+
+[functions.website-enquiry-delivery-webhook]
+# Provider (Resend/Svix) HMAC signature verified by the handler, not a Supabase JWT.
+verify_jwt = false

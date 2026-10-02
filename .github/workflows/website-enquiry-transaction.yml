@@ -12,6 +12,12 @@ on:
       - 'tests/sql/405_website_lead_lifecycle_acceptance.sql'
       - 'tests/websiteLeadLifecycle.test.mjs'
       - 'src/lib/websiteLeads.ts'
+      - 'supabase/migrations/*website_enquiry_delivery_runtime.sql'
+      - 'scripts/website-enquiry-delivery-acceptance.mjs'
+      - 'tests/sql/405_website_enquiry_delivery_acceptance.sql'
+      - 'tests/websiteEnquiryDelivery.test.mjs'
+      - 'supabase/functions/_shared/websiteEnquiryDelivery.ts'
+      - 'supabase/functions/website-enquiry-delivery-*/**'
   workflow_dispatch:
 permissions:
   contents: read
@@ -28,3 +34,14 @@ jobs:
       - run: node scripts/website-enquiry-transaction-acceptance.mjs
       - run: node --test tests/websiteLeadLifecycle.test.mjs
       - run: node scripts/website-lead-lifecycle-acceptance.mjs
+      - run: node --test tests/websiteEnquiryDelivery.test.mjs
+      - run: node scripts/website-enquiry-delivery-acceptance.mjs
+  deno-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: deno check --no-lock --node-modules-dir=none supabase/functions/website-enquiry-delivery-worker/index.ts supabase/functions/website-enquiry-delivery-webhook/index.ts
