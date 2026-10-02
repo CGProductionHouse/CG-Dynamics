@@ -72,8 +72,14 @@ export function piekCorrection(data, month) {
   return next
 }
 
-export function buildQualityPlan({ snapshot, fleet, neshora, manifest, quality, reviewedOverrides }) {
-  const overrides = indexOverrides(reviewedOverrides)
+export function buildQualityPlan({ snapshot, fleet, neshora, manifest, quality, reviewedOverrides, preservedPlan }) {
+  if (preservedPlan) assertNoDrift(preservedPlan,snapshot)
+  const packets = Array.isArray(reviewedOverrides) ? reviewedOverrides : reviewedOverrides ? [reviewedOverrides] : []
+  const overrides = new Map(), packetHashes = new Map()
+  for (const packet of packets) for (const [key,row] of indexOverrides(packet)) {
+    if (overrides.has(key)) throw new Error('Duplicate cumulative exact client/month override')
+    overrides.set(key,row); packetHashes.set(key,packet.packet_hash)
+  }
   const live = snapshot.strategies
   const reviews = manifest.rows
   const proposals = [...fleet.rows.filter(r => r.disposition === 'ready'), ...neshora.rows]
@@ -124,7 +130,7 @@ export function buildQualityPlan({ snapshot, fleet, neshora, manifest, quality, 
     const diff = changes(current.strategy_data, proposed), proposedHash = sha(proposed)
     const preserved = Object.keys(current.strategy_data).filter(f => !diff.some(d => d.field === f || d.field.startsWith(`${f}.`)))
     return {
-      ...(override ? { reviewed_override: { packet_hash: reviewedOverrides.packet_hash, reviewed_hash: override.reviewed_hash, source_receipts: override.source_receipts, report_context: override.report_context } } : {}),
+      ...(override ? { reviewed_override: { packet_hash: packetHashes.get(key(review)), reviewed_hash: override.reviewed_hash, source_receipts: override.source_receipts, report_context: override.report_context } } : {}),
       row_id: current.id, client_id: current.client_id, client_name: current.client_name, strategy_month: current.strategy_month,
       current_revision: current.version, current_revision_receipt: revision ?? null, current_status: current.workflow_status, current_strategy_hash: sha(current.strategy_data),
       committed_567_proposed_hash: q.reviewed_strategy_hash, proposed_strategy_hash: proposedHash,
@@ -136,7 +142,20 @@ export function buildQualityPlan({ snapshot, fleet, neshora, manifest, quality, 
       later_guard: { expected_version: current.version, expected_updated_at: current.updated_at, expected_fingerprint: fingerprint(current), idempotency_key: deterministicUuid(`513-quality:${current.id}:${current.version}:${sha(current.strategy_data)}:${proposedHash}:${sha(current.seed_context)}:${sha(pkg)}`), rpc: 'amend_monthly_client_strategy_with_context', seed_context: current.seed_context, internal_notes: current.internal_notes, stop_condition: 'Any identity, version, status, strategy, provenance, notes, package or protected-row fingerprint drift; blocked quality; no explicit protected-action approval.' },
     }
   })
-  const core = { schema_version: 1, issue: 513, mode: 'ZERO_WRITE_QUALITY_AMENDMENT_PLAN', write_count: 0, captured_at: snapshot.captured_at, authority: { reviewed_manifest_hash: manifest.manifest_hash, regenerated_fleet_hash: fleet.plan_hash, neshora_plan_hash: neshora.plan_hash }, counts: { reviewed: rows.length, clients: new Set(rows.map(r=>r.client_id)).size, amendment_needed: rows.filter(r=>r.disposition==='amendment_needed').length, already_quality_equal: rows.filter(r=>r.disposition==='already_quality_equal').length, blocked: rows.filter(r=>r.disposition==='blocked').length, differing_payloads: rows.filter(r=>r.amendment_needed).length, non_applicable_untouched: excluded.length, approved: live.filter(r=>r.approved_at).length, published: live.filter(r=>r.published_at).length }, rows, excluded: excluded.map(r=>({ row_id:r.id, client_id:r.client_id, client_name:r.client_name, strategy_month:r.strategy_month, fingerprint:fingerprint(r), database_fingerprint:r.database_fingerprint })) }
+  if (preservedPlan) for (const previous of preservedPlan.rows.filter(r=>r.disposition==='amendment_needed')) {
+    const i=rows.findIndex(r=>r.row_id===previous.row_id)
+    if (i<0 || sha(rows[i])!==sha(previous)) throw new Error('Accepted quality row drift; preserve and re-review')
+    // JSONB key order is not stable across SELECTs. Retain the complete accepted
+    // serialization, but ONLY after full live/revision and semantic equality checks.
+    rows[i]=structuredClone(previous)
+  }
+  let exclusionRecords=excluded.map(r=>({ row_id:r.id, client_id:r.client_id, client_name:r.client_name, strategy_month:r.strategy_month, fingerprint:fingerprint(r), database_fingerprint:r.database_fingerprint }))
+  if (preservedPlan) {
+    const sorted=records=>[...records].sort((a,b)=>a.row_id.localeCompare(b.row_id))
+    if (sha(sorted(exclusionRecords))!==sha(sorted(preservedPlan.excluded))) throw new Error('Protected exclusion drift')
+    exclusionRecords=structuredClone(preservedPlan.excluded)
+  }
+  const core = { schema_version: 1, issue: 513, mode: 'ZERO_WRITE_QUALITY_AMENDMENT_PLAN', write_count: 0, captured_at: snapshot.captured_at, authority: { reviewed_manifest_hash: manifest.manifest_hash, regenerated_fleet_hash: fleet.plan_hash, neshora_plan_hash: neshora.plan_hash }, counts: { reviewed: rows.length, clients: new Set(rows.map(r=>r.client_id)).size, amendment_needed: rows.filter(r=>r.disposition==='amendment_needed').length, already_quality_equal: rows.filter(r=>r.disposition==='already_quality_equal').length, blocked: rows.filter(r=>r.disposition==='blocked').length, differing_payloads: rows.filter(r=>r.amendment_needed).length, non_applicable_untouched: excluded.length, approved: live.filter(r=>r.approved_at).length, published: live.filter(r=>r.published_at).length }, rows, excluded: exclusionRecords }
   return structuredClone({ ...core, plan_hash: sha(core) })
 }
 
@@ -159,10 +178,10 @@ export function assertIsolated(directory) {
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
-  if (![4,5].includes(process.argv.length)) throw new Error('Usage: node scripts/build-strategy-quality-amendment-plan.mjs LIVE_SNAPSHOT ISOLATED_DIRECTORY [REVIEWED_OVERRIDES] (no apply mode)')
+  if (![4,5,6].includes(process.argv.length)) throw new Error('Usage: node scripts/build-strategy-quality-amendment-plan.mjs LIVE_SNAPSHOT ISOLATED_DIRECTORY [BATCH_1] [BATCH_2] (no apply mode)')
   const directory = assertIsolated(resolve(process.argv[3]))
   const read = path => JSON.parse(readFileSync(path,'utf8'))
-  const plan = buildQualityPlan({ snapshot:read(resolve(process.argv[2])), fleet:read(resolve(directory,'sep-oct-strategy-mutation-dry-run.json')), neshora:read(resolve(directory,'neshora-strategy-readiness-dry-run.json')), manifest:read(resolve(FROZEN,'sep-oct-approval-publication-manifest.json')), quality:read(resolve(FROZEN,'issue-567-sep-oct-strategy-quality-readiness.json')), reviewedOverrides:process.argv[4] ? read(resolve(process.argv[4])) : undefined })
+  const plan = buildQualityPlan({ snapshot:read(resolve(process.argv[2])), fleet:read(resolve(directory,'sep-oct-strategy-mutation-dry-run.json')), neshora:read(resolve(directory,'neshora-strategy-readiness-dry-run.json')), manifest:read(resolve(FROZEN,'sep-oct-approval-publication-manifest.json')), quality:read(resolve(FROZEN,'issue-567-sep-oct-strategy-quality-readiness.json')), reviewedOverrides:process.argv.length>4 ? process.argv.slice(4).map(p=>read(resolve(p))) : undefined, preservedPlan:process.argv.length===6 ? read(resolve(ROOT,'artifacts/strategy-quality-amendments/issue-513/batch-1/canonical-quality-amendment-plan.json')) : undefined })
   writeFileSync(resolve(directory,'canonical-quality-amendment-plan.json'),`${JSON.stringify(plan,null,2)}\n`)
   process.stdout.write(`${JSON.stringify({plan_hash:plan.plan_hash,...plan.counts},null,2)}\n`)
 }

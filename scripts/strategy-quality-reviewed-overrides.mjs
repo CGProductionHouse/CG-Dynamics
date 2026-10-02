@@ -1,5 +1,5 @@
 // Offline only. Reviewed copy is not approval and cannot execute an amendment.
-import { readFileSync, realpathSync } from 'node:fs'
+import { readFileSync, realpathSync, existsSync } from 'node:fs'
 import { resolve, relative, isAbsolute } from 'node:path'
 import { createHash } from 'node:crypto'
 import { sha } from './audit-monthly-strategy-approval-manifest.mjs'
@@ -25,7 +25,13 @@ export function verifySources(receipts) {
 export function indexOverrides(packet) {
   if (!packet) return new Map()
   const {packet_hash,...core} = packet
-  if (sha(core) !== packet_hash || packet.mode !== 'ZERO_WRITE_REVIEWED_OVERRIDES' || packet.write_count !== 0 || packet.rows.length !== 20 || new Set(packet.rows.map(r=>r.client_id)).size !== 10) throw new Error('Invalid reviewed batch packet')
+  const blocked = packet.batch === 2 ? packet.blocked_clients : []
+  const validGap = packet.batch === 2 && Array.isArray(blocked) && blocked.length === 1 && blocked[0].client_id === '0c01d90f-ba5e-4251-a597-bf3c83f990fa' && blocked[0].client_name === 'Zooz Lifestyle WFF' && blocked[0].reason === 'MISSING_EXACT_CLIENT_RUNTIME_GUIDE' && packet.rows.every(r=>r.client_id!==blocked[0].client_id)
+  if (sha(core) !== packet_hash || packet.mode !== 'ZERO_WRITE_REVIEWED_OVERRIDES' || packet.write_count !== 0 || packet.rows.length !== (validGap ? 18 : 20) || new Set(packet.rows.map(r=>r.client_id)).size !== (validGap ? 9 : 10) || (packet.batch === 2 && !validGap)) throw new Error('Invalid reviewed batch packet')
+  if (validGap) {
+    if (sha(blocked[0].months)!==sha(['2026-09-01','2026-10-01']) || existsSync(resolve(ROOT,'artifacts/client-strategy-dossiers/issue-513/runtime-guides/zooz-lifestyle-wff.md'))) throw new Error('Evidence gap changed; re-review required')
+    verifySources(blocked[0].source_receipts)
+  }
   const result = new Map(), signatures = new Set()
   for (const row of packet.rows) {
     const key = `${row.client_id}:${row.strategy_month}`
@@ -55,6 +61,7 @@ export function validateOverride(current, row, revision) {
   if (Object.keys(row.patch).sort().join() !== [...PATCH_FIELDS].sort().join() || Object.keys(row.patch.goldStandard).sort().join() !== [...GOLD_FIELDS].sort().join() || GOLD_FIELDS.some(f=>typeof row.patch.goldStandard[f] !== 'string' || row.patch.goldStandard[f].length < 40)) stop.push('REVIEWED_OVERRIDE_CONTRACT')
   const creative = norm(['objective','coreMessage','pillarsAndHooks'].map(f=>row.patch.goldStandard[f]).join(' '))
   if (/\bfrozen\b|\bpost identit(?:y|ies)\b|\breviewed_hash\b/i.test(JSON.stringify(row.patch))) stop.push('REVIEWED_OVERRIDE_INTERNAL_COPY')
+  if (claimSafetyStops(row.patch).length) stop.push('REVIEWED_OVERRIDE_UNSUPPORTED_CLAIM')
   if (row.specificity_anchors.length < 3 || row.specificity_anchors.filter(a=>creative.includes(norm(a))).length < 2) stop.push('REVIEWED_OVERRIDE_NOT_CLIENT_SPECIFIC')
   const actions = row.patch.actionPlan
   if (Object.keys(actions).sort().join() !== [...Object.keys(FORMAT_FIELDS),'campaign_recommendation'].sort().join()) stop.push('REVIEWED_OVERRIDE_ACTION_KEYS')
@@ -64,6 +71,21 @@ export function validateOverride(current, row, revision) {
   }
   if (actions.campaign_recommendation?.enabled!==false || actions.campaign_recommendation?.items?.length || actions.campaign_recommendation?.notes!=='') stop.push('REVIEWED_OVERRIDE_CAMPAIGN')
   return stop
+}
+
+// Conservative offline claim gate, not a replacement for human/source review.
+// Examine affirmative creative statements, not the separate must-avoid instructions.
+export function claimSafetyStops(patch) {
+  const content = {drivers:patch.strategyDrivers,going:patch.strategyGoingForward,
+    gold:Object.fromEntries(Object.entries(patch.goldStandard).filter(([key])=>key!=='mustAvoid')),
+    items:Object.values(patch.actionPlan).flatMap(a=>a.items)}
+  const strings = value => typeof value==='string' ? [value] : value && typeof value==='object' ? Object.values(value).flatMap(strings) : []
+  // Never discard a whole sentence just because it starts with a negation: an
+  // unsupported affirmative promise could follow it in the same sentence.
+  // Put prohibited-claim explanations in mustAvoid, not affirmative creative.
+  const clauses = strings(content).flatMap(s=>s.split(/[.!?;]\s+/))
+  const prohibited = /\b(?:guaranteed (?:approval|savings|returns|safety)|(?:lowest|best) (?:interest )?rate|(?:we|Peyper) (?:guarantee|approve)|cures?\b|treats? (?:dry eye|keratoconus)|OCT (?:scans?|services?)|retinal tomography|in stock now|same.day lenses|zero blind spots|failure.proof|every (?:Friday|Saturday)|sponsored by|Windhoek|Rundu)\b|\b\d{1,2} (?:October|November)\b|\bR\s*\d+|\b\d+% (?:ROI|savings|return)|\b2 for 1\b/i
+  return clauses.filter(s=>prohibited.test(s))
 }
 export function reviewedPatch(client, month, pkg) {
   const m=client.months[month]

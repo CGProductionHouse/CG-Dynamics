@@ -1,0 +1,2647 @@
+{
+  "schema_version": 1,
+  "issue": 513,
+  "batch": 2,
+  "mode": "ZERO_WRITE_REVIEWED_OVERRIDES",
+  "write_count": 0,
+  "baseline_plan_hash": "9ebcae3ea26a7201fb6856157b03b5d8199836629f604817804e055318493716",
+  "authored_copy_hash": "d8ae25beeb8dc650a51a29b785ca3a1d926c7d7813cf6f84c2ec65df96fae3c5",
+  "selection": {
+    "rule": "Among blocked clients with confirmed package, ready exact dossier/guide and three frozen monthly reports, rank post identity coverage descending, then exact UUID. Coverage is not performance.",
+    "qualifying": [
+      {
+        "client_id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+        "name": "The Staffordshire",
+        "reports": 3,
+        "posts": 47
+      },
+      {
+        "client_id": "06b20bb1-ed4a-4aa1-9f48-8c6cb0531aba",
+        "name": "Delta Gas",
+        "reports": 3,
+        "posts": 40
+      },
+      {
+        "client_id": "c27d2185-08e4-4c49-be48-2572564ceecf",
+        "name": "CG Production House",
+        "reports": 3,
+        "posts": 40
+      },
+      {
+        "client_id": "4f6106de-c437-404e-8cef-fbe848de0665",
+        "name": "RC-Polypipe",
+        "reports": 3,
+        "posts": 39
+      },
+      {
+        "client_id": "0c01d90f-ba5e-4251-a597-bf3c83f990fa",
+        "name": "Zooz Lifestyle WFF",
+        "reports": 3,
+        "posts": 37
+      },
+      {
+        "client_id": "a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b",
+        "name": "Peyper Bonds",
+        "reports": 3,
+        "posts": 37
+      },
+      {
+        "client_id": "21300630-6755-4591-9a49-e22abbaf7e3d",
+        "name": "Loraclox",
+        "reports": 3,
+        "posts": 31
+      },
+      {
+        "client_id": "204f4f22-14c7-42ed-a956-da57af102706",
+        "name": "Tobich Optics",
+        "reports": 3,
+        "posts": 29
+      },
+      {
+        "client_id": "3b85973f-bcad-49eb-b8f1-c27f7c7f1aba",
+        "name": "AV Event Life",
+        "reports": 3,
+        "posts": 22
+      },
+      {
+        "client_id": "6b67a2df-e2ab-418b-bcee-03aef5963d37",
+        "name": "Braize",
+        "reports": 3,
+        "posts": 22
+      },
+      {
+        "client_id": "afb62c53-d6d3-4ef8-9393-def88ed899d8",
+        "name": "C&L Innovations",
+        "reports": 3,
+        "posts": 22
+      },
+      {
+        "client_id": "6b313cac-283e-48c4-9df6-ba43af2f7353",
+        "name": "Central Canvas",
+        "reports": 3,
+        "posts": 21
+      },
+      {
+        "client_id": "8e448cf9-1534-4ba1-89a4-93e4c8b83d2f",
+        "name": "Bouwer & Coetzee Attorneys",
+        "reports": 3,
+        "posts": 21
+      },
+      {
+        "client_id": "2b953772-e791-4dff-a278-d4dd3521f02e",
+        "name": "We Ar Fuels",
+        "reports": 3,
+        "posts": 20
+      },
+      {
+        "client_id": "4236a60a-990f-484f-8d19-13d2f92fbe3b",
+        "name": "Novus Steel",
+        "reports": 3,
+        "posts": 17
+      },
+      {
+        "client_id": "e1cb958e-3f68-4a77-b5ea-b471ea62bdef",
+        "name": "Watch Addict",
+        "reports": 3,
+        "posts": 17
+      },
+      {
+        "client_id": "29a28efd-c998-45e2-a57c-4a751e779e66",
+        "name": "PSG Bloemfontein",
+        "reports": 3,
+        "posts": 15
+      },
+      {
+        "client_id": "3404f726-a693-4b2d-8c13-c9d3dfd17bbc",
+        "name": "Daisy & Co",
+        "reports": 3,
+        "posts": 14
+      },
+      {
+        "client_id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+        "name": "Supa Quick BFN",
+        "reports": 3,
+        "posts": 13
+      },
+      {
+        "client_id": "e2870110-930c-4e63-b2fe-c858030f7258",
+        "name": "Supa Quick Centurion",
+        "reports": 3,
+        "posts": 13
+      },
+      {
+        "client_id": "572555e0-d4d0-404a-8d67-beeeeed6a1f2",
+        "name": "HMHI",
+        "reports": 3,
+        "posts": 11
+      },
+      {
+        "client_id": "ec643c75-51f5-4839-829f-3f5b7f48829a",
+        "name": "Ehrlich Park Butchery",
+        "reports": 3,
+        "posts": 6
+      },
+      {
+        "client_id": "5dfdf4bd-9d94-4cc6-9dee-0e480a2234cb",
+        "name": "Bohemia Quick Stop",
+        "reports": 3,
+        "posts": 4
+      }
+    ],
+    "selected": [
+      "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+      "06b20bb1-ed4a-4aa1-9f48-8c6cb0531aba",
+      "c27d2185-08e4-4c49-be48-2572564ceecf",
+      "4f6106de-c437-404e-8cef-fbe848de0665",
+      "0c01d90f-ba5e-4251-a597-bf3c83f990fa",
+      "a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b",
+      "21300630-6755-4591-9a49-e22abbaf7e3d",
+      "204f4f22-14c7-42ed-a956-da57af102706",
+      "3b85973f-bcad-49eb-b8f1-c27f7c7f1aba",
+      "6b67a2df-e2ab-418b-bcee-03aef5963d37"
+    ]
+  },
+  "rows": [
+    {
+      "row_id": "6ab1de4d-aabc-4ef5-9cc0-3ab5ba8ef898",
+      "client_id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+      "client_name": "The Staffordshire",
+      "strategy_month": "2026-09-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/the-staffordshire.md",
+          "sha256": "9437b71a24395d9b6a33a25f1bee4881f29b44c8c03a796184f60fd768c4a833",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/the-staffordshire.md",
+          "sha256": "5c32138b9e10af5dc11b7a31638fa6034bdab2ca6daa0b9f553928650c3667cf",
+          "quotes": [
+            "pub & restaurant",
+            "Never use the word",
+            "preserve the real Staffy logo shape"
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "dog",
+        "table",
+        "private function"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "ca84e407-a667-41ff-9cb1-3943796a24fc",
+          "post_count": 20,
+          "post_identity_hash": "681b031c8734b4d155f29d131c2da68cfc133b849940b750365a836525c5d78c",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "088ea68e-d72e-4dda-9f7c-538930e4f575",
+          "post_count": 15,
+          "post_identity_hash": "7a3d098b5eb88665e282bda32fdfa4e8f1465ecd19d4ab2174ffdb62b203b005",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "6a3a157f-09bf-48e4-add2-2a80308ed151",
+          "post_count": 12,
+          "post_identity_hash": "c35fd09766027d365cff77dd6766df5df82e6d81ae9f9ac9dcf6f6eb34c96134",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "f4e2c8fc1ae5268b6f80e4ee5b11a519528c75db54fdc686c249305975844ebd",
+        "revision_hash": "840985e19e17d9173218d30ee994696cf4bd7436b44a97e9aba7b25418355672",
+        "strategy_hash": "b11a13a3c20d2dee5ccf21cbe0c03eae2cb5336dcea53752c9c6585d5b2184f8",
+        "seed_hash": "8f977db1b475de8961f7c764a24df9915604cf71044304856a43193ef8117046",
+        "package_hash": "c05f4db9b9855503e5bfccb1f4f9ec6e701d703139b2b592aca567d7076b0851",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Assess September's pub presentation around the reason for a table visit versus a private function. Keep the dog-mark venue identity recognisable while separating expired music, rugby and occasion announcements from reusable hospitality images.",
+          "The dog-mark entrance; a real table moment; the human opening to a supplied announcement; an approved private-function setting. Review what each scene actually communicates instead of recycling last month's performers or menu."
+        ],
+        "strategyGoingForward": "The Staffy's real table and entrance should carry the invitation. A private function is a different decision from an ordinary pub visit, so do not bury both beneath a recycled event headline.",
+        "clientActionsRequired": [
+          "Identify September venue and table images cleared for reuse, including any people permissions.",
+          "Confirm current specials and private-function wording before selection; remove expired event dates and hours."
+        ],
+        "goldStandard": {
+          "objective": "Assess September's pub presentation around the reason for a table visit versus a private function. Keep the dog-mark venue identity recognisable while separating expired music, rugby and occasion announcements from reusable hospitality images.",
+          "audienceAndIntent": "Help people considering a table visit or private function picture the real Staffy venue. Use crowd-facing pub language, not a claimed age or income segment; a ticket enquiry needs a separately confirmed event brief.",
+          "coreMessage": "The Staffy's real table and entrance should carry the invitation. A private function is a different decision from an ordinary pub visit, so do not bury both beneath a recycled event headline.",
+          "formatsAndRationale": "Four professional videos, four photo posts and four design posters can connect real hospitality moments to a table or private-function question. Additional posters are on request with no fixed count. Daily specials have Instagram Story and actual Facebook-post scope only when a current special is supplied; reels and animated quotas remain unknown.",
+          "mustAvoid": "Never use gees, borrow another pub's menu or substitute stock nightlife for the real venue. Do not reuse old performers, braai packs, fixtures, ticket prices, kitchen hours, menu items or promotions as current. Preserve black/yellow branding and the dog mark; no private-function capacity or deposit promises.",
+          "channelIntegration": "Keep The Staffy voice and real dog-mark branding consistent on already-managed channels. A freshly confirmed daily special uses the agreed Story and Facebook-post treatment; do not extend that pattern into unconfirmed events or extra fixed output.",
+          "pillarsAndHooks": "The dog-mark entrance; a real table moment; the human opening to a supplied announcement; an approved private-function setting. Review what each scene actually communicates instead of recycling last month's performers or menu.",
+          "testAndChange": "Review table-led and announcement-led September openings using available comparable viewing measures. Look separately for table and private-function questions; the number of posts does not prove that an event sold tickets.",
+          "successSignals": "Recorded enquiries naming a table visit or private function are useful intent signals. Views and interactions may support the review where coverage exists; missing booking attribution is unavailable, not zero.",
+          "nextMonthGamePlan": "For October, move from expired event urgency to an invitation built around the real venue and the visitor's next question. Request a separate approved brief before reserving any creative angle for a new event or special."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "Review the real dog-mark entrance opening.",
+              "Review a table-level hospitality moment.",
+              "Review an approved private-function room view.",
+              "Review a human announcement without retaining expired event facts."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "Dog-mark entrance with original signage intact.",
+              "Real table scene without invented menu items.",
+              "Approved venue hospitality detail.",
+              "Permitted private-function setting."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "Table invitation grounded in the pictured venue.",
+              "A private-function enquiry question.",
+              "A freshly supplied daily special; otherwise a venue invitation.",
+              "One human pub moment, not an old artist announcement."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "40d2017900049c1527fc03f220f7eee237325029ed9d33ad159c7d25750a3cc8"
+    },
+    {
+      "row_id": "ec9fd062-ffee-44ca-afca-e230949da6fe",
+      "client_id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+      "client_name": "The Staffordshire",
+      "strategy_month": "2026-10-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/the-staffordshire.md",
+          "sha256": "9437b71a24395d9b6a33a25f1bee4881f29b44c8c03a796184f60fd768c4a833",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/the-staffordshire.md",
+          "sha256": "5c32138b9e10af5dc11b7a31638fa6034bdab2ca6daa0b9f553928650c3667cf",
+          "quotes": [
+            "pub & restaurant",
+            "Never use the word",
+            "preserve the real Staffy logo shape"
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "dog",
+        "table",
+        "private function"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "ca84e407-a667-41ff-9cb1-3943796a24fc",
+          "post_count": 20,
+          "post_identity_hash": "681b031c8734b4d155f29d131c2da68cfc133b849940b750365a836525c5d78c",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "088ea68e-d72e-4dda-9f7c-538930e4f575",
+          "post_count": 15,
+          "post_identity_hash": "7a3d098b5eb88665e282bda32fdfa4e8f1465ecd19d4ab2174ffdb62b203b005",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "6a3a157f-09bf-48e4-add2-2a80308ed151",
+          "post_count": 12,
+          "post_identity_hash": "c35fd09766027d365cff77dd6766df5df82e6d81ae9f9ac9dcf6f6eb34c96134",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "87b5017da522a05db9337cd59daf92d3d9e2f50062ac852eaed644743f7bb47b",
+        "revision_hash": "73ff6ed4170ac0373f6d0c5b0651e458c51e33175aac0c59ffe0d0cc01a0c5a4",
+        "strategy_hash": "869f35477c63593e2aa1102c0c4ef53397180e54b47109a6c24561b031e84f92",
+        "seed_hash": "d18d967759628bea3201510885e46f484782a1e9a35217fdebe95580b4faecfa",
+        "package_hash": "c05f4db9b9855503e5bfccb1f4f9ec6e701d703139b2b592aca567d7076b0851",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Plan October around two distinct reasons to choose The Staffy: a table visit in the real pub and a conversation about hosting a private function. Let the dog-mark entrance and actual people create recognition rather than promising an unconfirmed entertainment calendar.",
+          "Open on the dog mark before entering the venue; contrast a table-level moment with an approved function setting; let a real speaker invite the next question. Build special artwork only after receiving the current offer, never from an old promotion."
+        ],
+        "strategyGoingForward": "Picture your table here, then ask about the occasion you want to host. Keep the private function invitation specific to the real space and leave event or menu details to a current confirmed brief.",
+        "clientActionsRequired": [
+          "Approve usable entrance, table and function visuals for the four video concepts.",
+          "Supply exact current special wording and any separately approved event brief; confirm the booking route when needed."
+        ],
+        "goldStandard": {
+          "objective": "Plan October around two distinct reasons to choose The Staffy: a table visit in the real pub and a conversation about hosting a private function. Let the dog-mark entrance and actual people create recognition rather than promising an unconfirmed entertainment calendar.",
+          "audienceAndIntent": "Help people considering a table visit or private function picture the real Staffy venue. Use crowd-facing pub language, not a claimed age or income segment; a ticket enquiry needs a separately confirmed event brief.",
+          "coreMessage": "Picture your table here, then ask about the occasion you want to host. Keep the private function invitation specific to the real space and leave event or menu details to a current confirmed brief.",
+          "formatsAndRationale": "Four professional videos, four photo posts and four design posters can connect real hospitality moments to a table or private-function question. Additional posters are on request with no fixed count. Daily specials have Instagram Story and actual Facebook-post scope only when a current special is supplied; reels and animated quotas remain unknown.",
+          "mustAvoid": "Never use gees, borrow another pub's menu or substitute stock nightlife for the real venue. Do not reuse old performers, braai packs, fixtures, ticket prices, kitchen hours, menu items or promotions as current. Preserve black/yellow branding and the dog mark; no private-function capacity or deposit promises.",
+          "channelIntegration": "Keep The Staffy voice and real dog-mark branding consistent on already-managed channels. A freshly confirmed daily special uses the agreed Story and Facebook-post treatment; do not extend that pattern into unconfirmed events or extra fixed output.",
+          "pillarsAndHooks": "Open on the dog mark before entering the venue; contrast a table-level moment with an approved function setting; let a real speaker invite the next question. Build special artwork only after receiving the current offer, never from an old promotion.",
+          "testAndChange": "Compare a table-level opening with an entrance-first opening for the same visitor invitation. Keep the facts stable and judge available responses and recorded table questions rather than assuming booking uplift.",
+          "successSignals": "Look for questions distinguishing a normal table booking from hosting a private function. Report available native viewing and interaction measures only; do not assign ticket or booking revenue to an untracked post.",
+          "nextMonthGamePlan": "Use October's actual visitor questions to choose the next table or function explanation. Refresh any specials, booking terms and event brief before reuse instead of maintaining a fictional recurring event programme."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "Dog-mark entrance into the real pub atmosphere.",
+              "Table-level invitation with genuine hospitality movement.",
+              "Approved private-function setting and one hosting question.",
+              "Real speaker's venue invitation; use a new event announcement only with a complete current brief."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "Recognisable entrance detail.",
+              "Actual table hospitality scene.",
+              "Approved function-space image.",
+              "Real person or venue moment with publication permission."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "What occasion would you like to host?",
+              "A table invitation matching the selected photo.",
+              "Current client-supplied special, or a non-offer venue piece.",
+              "One venue-specific visitor question answered without invented terms."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "f3e9486eaabe3ba814318afbed88a4f2c43083335a8d9e924e62382c423b0e2b"
+    },
+    {
+      "row_id": "55e4a510-056b-45b6-b4ea-f9cf3aba39d0",
+      "client_id": "06b20bb1-ed4a-4aa1-9f48-8c6cb0531aba",
+      "client_name": "Delta Gas",
+      "strategy_month": "2026-09-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/delta-gas.md",
+          "sha256": "bbc5d6ddd61a3351d2f8412a9352f5186cbf7a17e0835957fccfe9e1f3a9e505",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/delta-gas.md",
+          "sha256": "31c9df55f4658607d376b7fee645b7c0244f36b237b0f96d0e88b2df85839280",
+          "quotes": [
+            "ORYX agent for Bloemfontein and surrounding areas",
+            "nominal gas size",
+            "contents"
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "ORYX",
+        "tare",
+        "cylinder"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "8ed4c1c2-a520-4ea4-a755-81c7f8062d06",
+          "post_count": 13,
+          "post_identity_hash": "e20acc028c2b1530b502ecf64f3358907c2682109f2216d20286849c1f02014e",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "e89edcdc-750f-4cbe-9269-25af8af1274d",
+          "post_count": 15,
+          "post_identity_hash": "67a0041763434a435a8adf14c42fdbb3ffce08d3881f4bca2a424ef4032e89b8",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "48d988fd-ba77-4b33-8322-eb79569c2e56",
+          "post_count": 12,
+          "post_identity_hash": "79b99d49c3802dfccd55cd13b9f45f4e0aeb42987b849cedc7f21251e0643b26",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "c157e0084326736b7540819c67d1867aace7294158a946f6b91ed47e72ee3ea9",
+        "revision_hash": "176d73ecd1ee9fb32e7ed83e1dab7fca5132ba95a9774e8c5e007135782a9dec",
+        "strategy_hash": "b1a038e9b2f77ca84fe207d5d8dac753eb3333a5f0d36278933467f2be921219",
+        "seed_hash": "4a2200b8d559baa04342abd42fd1670bdcc2ecce3e542285448b8a507d77eace",
+        "package_hash": "fa70b8307241a5a6ee41e2d3754cea46b3d7e8a40edc50f8b9a04415087ee3f8",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Review September's cylinder content for whether it distinguishes gas contents from full-cylinder weight and helps a customer form a useful enquiry. Check that ORYX identity and real tare markings are preserved without treating old stock examples as current availability.",
+          "Actual tare marking beside the cylinder; the ORYX identity shown accurately; one customer product question; a real service moment without a delivery promise. The opening starts with what the label means, not an energy slogan."
+        ],
+        "strategyGoingForward": "The cylinder's tare and its gas contents are different things. Delta's practical explanation should help a customer ask about the actual cylinder, not promise that every nominal size has one universal full weight.",
+        "clientActionsRequired": [
+          "Select a real labelled cylinder and approve the contents-versus-tare explanation.",
+          "Confirm current product and contact details; keep delivery, branch and exchange-brand gaps unresolved."
+        ],
+        "goldStandard": {
+          "objective": "Review September's cylinder content for whether it distinguishes gas contents from full-cylinder weight and helps a customer form a useful enquiry. Check that ORYX identity and real tare markings are preserved without treating old stock examples as current availability.",
+          "audienceAndIntent": "Help a household customer ask an accurate cylinder or appliance question and a commercial buyer specify a supply need. These are demonstrated buying situations, not invented demographic targeting.",
+          "coreMessage": "The cylinder's tare and its gas contents are different things. Delta's practical explanation should help a customer ask about the actual cylinder, not promise that every nominal size has one universal full weight.",
+          "formatsAndRationale": "One professional video can show a real cylinder marking and explanation; three photos provide actual label, product and service context; three posters clarify different customer questions. Reels, animation, paid campaigns and extra shoot days remain unconfirmed.",
+          "mustAvoid": "No invented refill/exchange brands, sizes, stock, delivery times, branch roster, appliance compatibility, safety procedures or CoC service. ORYX agency does not imply exclusivity. Preserve labels and proportions; do not describe visitors as staff.",
+          "channelIntegration": "Use Delta's practical owner-like tone across already-managed channels. Captions and posters require the exact current address, phone, email and website footer; reconfirm mutable contact values before final artwork, without inventing WhatsApp.",
+          "pillarsAndHooks": "Actual tare marking beside the cylinder; the ORYX identity shown accurately; one customer product question; a real service moment without a delivery promise. The opening starts with what the label means, not an energy slogan.",
+          "testAndChange": "Classify September label-first and customer-question openings before comparing available viewing response. Read recorded enquiries for a specific cylinder or appliance question; historical post volume cannot prove supply or sales.",
+          "successSignals": "Useful signals are recorded questions identifying a cylinder or product and available native views/interactions. Missing enquiry detail remains unavailable, and no refill volume or sales conversion is inferred.",
+          "nextMonthGamePlan": "Make October's single video a clear cylinder-marking explanation, then use the photo/poster mix to prompt better product enquiries. Confirm current product and exchange rules before any named offer is carried forward."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "Review a real cylinder's contents-versus-tare explanation without an invented total weight."
+            ],
+            "notes": "Monthly capacity: 1. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "Actual tare/label detail with markings intact.",
+              "Real cylinder showing correct proportions and branding.",
+              "Approved customer-service or appliance image, without claiming stock."
+            ],
+            "notes": "Monthly capacity: 3. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "Contents and tare are different labels.",
+              "What cylinder/product question to bring to Delta.",
+              "ORYX agency identity with exact current contact footer."
+            ],
+            "notes": "Monthly capacity: 3. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "049fbf7cdc098593b581adebc6f86bd6f4bcddd1c5f06cdd174c89aa85aaa591"
+    },
+    {
+      "row_id": "9131502e-313a-47e7-a032-a5e3820f5c10",
+      "client_id": "06b20bb1-ed4a-4aa1-9f48-8c6cb0531aba",
+      "client_name": "Delta Gas",
+      "strategy_month": "2026-10-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/delta-gas.md",
+          "sha256": "bbc5d6ddd61a3351d2f8412a9352f5186cbf7a17e0835957fccfe9e1f3a9e505",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/delta-gas.md",
+          "sha256": "31c9df55f4658607d376b7fee645b7c0244f36b237b0f96d0e88b2df85839280",
+          "quotes": [
+            "ORYX agent for Bloemfontein and surrounding areas",
+            "nominal gas size",
+            "contents"
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "ORYX",
+        "tare",
+        "cylinder"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "8ed4c1c2-a520-4ea4-a755-81c7f8062d06",
+          "post_count": 13,
+          "post_identity_hash": "e20acc028c2b1530b502ecf64f3358907c2682109f2216d20286849c1f02014e",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "e89edcdc-750f-4cbe-9269-25af8af1274d",
+          "post_count": 15,
+          "post_identity_hash": "67a0041763434a435a8adf14c42fdbb3ffce08d3881f4bca2a424ef4032e89b8",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "48d988fd-ba77-4b33-8322-eb79569c2e56",
+          "post_count": 12,
+          "post_identity_hash": "79b99d49c3802dfccd55cd13b9f45f4e0aeb42987b849cedc7f21251e0643b26",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "f27c8fd1b8b4749f40a7ff9e6d5b2ec05df283f65518644549edf2ba61f23506",
+        "revision_hash": "b6885d8033f27db13d19f2f4c422407665640ccc6a7d3f8c86eae22fd2924b97",
+        "strategy_hash": "a8fa5dc1adf6019d826aa7a92c7846bfd859bf58519f4ac46360e6e26d08e574",
+        "seed_hash": "7dd7833fcb64ee04151acd5d4e43600cd66a37eaf8407b9d4808464e4789cf47",
+        "package_hash": "fa70b8307241a5a6ee41e2d3754cea46b3d7e8a40edc50f8b9a04415087ee3f8",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Build October's Delta content around a better first cylinder enquiry: show the real tare marking, identify the product being discussed and ask for the customer's requirement. Keep ORYX identity factual while separating information from an availability promise.",
+          "One visual-first tare explanation; one real product detail; one owner/service question; three posters separating cylinder information, appliance enquiry and how to contact Delta. Safety content waits for approved authoritative wording."
+        ],
+        "strategyGoingForward": "Bring the actual cylinder or product question, not an assumed weight or exchange rule. A clear label reference helps Delta answer the requirement before price or availability is discussed.",
+        "clientActionsRequired": [
+          "Supply the labelled cylinder and one approved staff explanation for the video.",
+          "Approve three real photo subjects and the exact footer; confirm any product-specific fact before naming it."
+        ],
+        "goldStandard": {
+          "objective": "Build October's Delta content around a better first cylinder enquiry: show the real tare marking, identify the product being discussed and ask for the customer's requirement. Keep ORYX identity factual while separating information from an availability promise.",
+          "audienceAndIntent": "Help a household customer ask an accurate cylinder or appliance question and a commercial buyer specify a supply need. These are demonstrated buying situations, not invented demographic targeting.",
+          "coreMessage": "Bring the actual cylinder or product question, not an assumed weight or exchange rule. A clear label reference helps Delta answer the requirement before price or availability is discussed.",
+          "formatsAndRationale": "One professional video can show a real cylinder marking and explanation; three photos provide actual label, product and service context; three posters clarify different customer questions. Reels, animation, paid campaigns and extra shoot days remain unconfirmed.",
+          "mustAvoid": "No invented refill/exchange brands, sizes, stock, delivery times, branch roster, appliance compatibility, safety procedures or CoC service. ORYX agency does not imply exclusivity. Preserve labels and proportions; do not describe visitors as staff.",
+          "channelIntegration": "Use Delta's practical owner-like tone across already-managed channels. Captions and posters require the exact current address, phone, email and website footer; reconfirm mutable contact values before final artwork, without inventing WhatsApp.",
+          "pillarsAndHooks": "One visual-first tare explanation; one real product detail; one owner/service question; three posters separating cylinder information, appliance enquiry and how to contact Delta. Safety content waits for approved authoritative wording.",
+          "testAndChange": "For comparable cylinder pieces, compare a label-question CTA with a requirement-question CTA. Change the prompt rather than technical facts, and use only recorded enquiries and covered viewing measures.",
+          "successSignals": "Check whether enquiries provide the actual cylinder/product and intended requirement. Read available interactions without claiming buying frequency, delivery reliability or a safety outcome.",
+          "nextMonthGamePlan": "Choose the next explanation from real cylinder or appliance questions received in October. Reconfirm the product and any operating terms before extending the approach into another month."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "Visual-first cylinder marking explanation with one plain-language customer question."
+            ],
+            "notes": "Monthly capacity: 1. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "The actual label used in the explanation.",
+              "A client-identified cylinder/product detail.",
+              "A permitted real service moment inviting a requirement enquiry."
+            ],
+            "notes": "Monthly capacity: 3. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "Ask about your actual cylinder marking.",
+              "Confirm the appliance/product requirement before assuming compatibility.",
+              "Contact Delta with a clear LPG question and the exact approved footer."
+            ],
+            "notes": "Monthly capacity: 3. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "d3ababa5e31a095d9e2e0c824d717ce9271d4b2f2b85996bc8984bcfcb36a9d9"
+    },
+    {
+      "row_id": "f6d14edf-7ada-4709-a730-7c25d7fc6558",
+      "client_id": "c27d2185-08e4-4c49-be48-2572564ceecf",
+      "client_name": "CG Production House",
+      "strategy_month": "2026-09-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/cg-production-house.md",
+          "sha256": "6108d6a92d66592fda7c458d903eae87ea6d5d3bfc6c01634463b7607c870f9d",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/cg-production-house.md",
+          "sha256": "847203369ed11cee5eff64952fbbd9cad927e774be662f9f09257e09f27e2cbd",
+          "quotes": [
+            "Videography/video production",
+            "CG Studios / in-house production-studio services",
+            "Add, do not repeat."
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "studio",
+        "camera",
+        "brief"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "32c74f93-b713-4e84-8201-70bb197eeccb",
+          "post_count": 15,
+          "post_identity_hash": "d3591d1b793b0f2ae1d59582fe4120652ee295388c1ea901eac6e7505c0488fe",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "3bdf09f7-33e1-4d03-9485-43eb4f95cb3a",
+          "post_count": 16,
+          "post_identity_hash": "f90963427884ccc996a3d4ea2682b93fde973bde685dc3f1e2c6e77e2279f938",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "9c69bbe1-f7d6-4251-9712-c84c235ef123",
+          "post_count": 9,
+          "post_identity_hash": "885d8c8290d8ffbdedd7c60e90a46814f1ee330afa80963573e51c8913c5ea11",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "2f60ff1ea8950a17d8127c8c6680c45031df8a410d1c280725342cb441426591",
+        "revision_hash": "d48741868eba5b1b85fcfddb3bb0a358fc3ecb88e05ee8545d5552129e7c5cb8",
+        "strategy_hash": "d860196978065a100e19391b780c7e4ee8e6f0dc68fbaf53d5e6a575fe78a3a3",
+        "seed_hash": "ae755d565c56b0da5aa572c125d5af29e79dee9f0e7da841bcdca22da0b645f9",
+        "package_hash": "695ce482372f985938f6e72b28896d18bd747ed996eed788db514948175d2e96",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Assess September's camera and studio presentation for whether a buyer can connect a real production moment to a useful brief. Separate approved portfolio work from playful team material and check the four studio collaborations remain within the eight-photo total.",
+          "The actual camera setup; a studio lighting or composition choice; the person carrying out the visible work; an approved finished piece beside its real brief. Keep human team moments distinct from unsupported results stories."
+        ],
+        "strategyGoingForward": "A camera or studio scene becomes useful when it shows the decision behind the finished piece. Explain the brief and the visible creative choice, rather than making a general promise about growing a business.",
+        "clientActionsRequired": [
+          "Confirm which real portfolio and team material may appear publicly.",
+          "Identify the four studio collaboration photo briefs within the eight total; approve service facts and contact wording."
+        ],
+        "goldStandard": {
+          "objective": "Assess September's camera and studio presentation for whether a buyer can connect a real production moment to a useful brief. Separate approved portfolio work from playful team material and check the four studio collaborations remain within the eight-photo total.",
+          "audienceAndIntent": "Help a business buyer describe a video, photography or design brief and understand the real production work behind it. Team and studio culture can be human without pretending that attention is a measured commercial result.",
+          "coreMessage": "A camera or studio scene becomes useful when it shows the decision behind the finished piece. Explain the brief and the visible creative choice, rather than making a general promise about growing a business.",
+          "formatsAndRationale": "Four professional videos can show a brief becoming real visual work. Eight photo deliverables include four collaborations with CG Studios, not twelve total; four design posters answer distinct brief questions. Reel, animated-poster and paid-campaign quantities remain unknown.",
+          "mustAvoid": "No invented client results, ROI, turnaround, prices, awards, portfolio permission or staff roles. Preserve real cameras, faces and logos. Keep customer copy focused on creative production rather than private administration; do not invent a WhatsApp route.",
+          "channelIntegration": "Keep service posts focused on one business question across the channels already managed. Use the approved public website/email/phone footer where a service enquiry needs it; lighter team/studio moments do not need a forced sales footer.",
+          "pillarsAndHooks": "The actual camera setup; a studio lighting or composition choice; the person carrying out the visible work; an approved finished piece beside its real brief. Keep human team moments distinct from unsupported results stories.",
+          "testAndChange": "Review September production-detail openings against finished-piece openings where comparable material exists. Check recorded enquiries for a specific video, photography or design brief; do not infer sales from views.",
+          "successSignals": "Enquiries describing purpose, usable assets or the intended output are meaningful when recorded. Available native views and interactions support the creative review but cannot prove revenue or campaign ROI.",
+          "nextMonthGamePlan": "For October, organise four video stories around the brief-to-visual decision and coordinate four studio collaboration photos within the eight-photo allowance. Ask permission before selecting customer portfolio work."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "Review the brief behind an approved real video scene.",
+              "Review an actual camera/setup decision.",
+              "Review a studio composition or lighting moment.",
+              "Review a human production-team moment without invented job titles."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "Four approved CG Studios collaboration photo concepts within eight total.",
+              "Up to four further real production/team/product details within the same eight-photo capacity."
+            ],
+            "notes": "Monthly capacity: 8. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "What purpose should a video brief describe?",
+              "What real product or brand assets should a photography brief include?",
+              "One approved design decision explained.",
+              "A service enquiry prompt without turnaround or outcome promises."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "7cbbd5be8b4daf0130a70e6d030160490ebc92e4644d254f848bcb5a2f687ffb"
+    },
+    {
+      "row_id": "8d166fae-9eab-4e1c-9e73-c73e730ad6d1",
+      "client_id": "c27d2185-08e4-4c49-be48-2572564ceecf",
+      "client_name": "CG Production House",
+      "strategy_month": "2026-10-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/cg-production-house.md",
+          "sha256": "6108d6a92d66592fda7c458d903eae87ea6d5d3bfc6c01634463b7607c870f9d",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/cg-production-house.md",
+          "sha256": "847203369ed11cee5eff64952fbbd9cad927e774be662f9f09257e09f27e2cbd",
+          "quotes": [
+            "Videography/video production",
+            "CG Studios / in-house production-studio services",
+            "Add, do not repeat."
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "studio",
+        "camera",
+        "brief"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "32c74f93-b713-4e84-8201-70bb197eeccb",
+          "post_count": 15,
+          "post_identity_hash": "d3591d1b793b0f2ae1d59582fe4120652ee295388c1ea901eac6e7505c0488fe",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "3bdf09f7-33e1-4d03-9485-43eb4f95cb3a",
+          "post_count": 16,
+          "post_identity_hash": "f90963427884ccc996a3d4ea2682b93fde973bde685dc3f1e2c6e77e2279f938",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "9c69bbe1-f7d6-4251-9712-c84c235ef123",
+          "post_count": 9,
+          "post_identity_hash": "885d8c8290d8ffbdedd7c60e90a46814f1ee330afa80963573e51c8913c5ea11",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "d5faab7158c800845b80059509f70b59fd94554b04470383ec497a8204e9130f",
+        "revision_hash": "c11277faad5e9730351ae00bba2d8d68824f956d3987fdb240fe0032347214d4",
+        "strategy_hash": "6c54b078fbba08fb53a35267affc9d48304ae13381b6baa5c7e3950ee4642255",
+        "seed_hash": "25425b8557a9884bd79e9f0be770c94ed991d5f0f053429a18165c83e830f466",
+        "package_hash": "695ce482372f985938f6e72b28896d18bd747ed996eed788db514948175d2e96",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Plan October to make the first creative brief more concrete: a business purpose, real subject and visible production choice. Use camera and studio moments as explanation, with four studio collaborations inside the eight-photo capacity rather than an extra output promise.",
+          "Open one story on the brief question, another on the camera choice, another on a studio visual decision and another on the finished piece with permission. Give each poster one practical brief question rather than a list of every service."
+        ],
+        "strategyGoingForward": "Tell us what the piece needs to communicate and show us the real subject. The production story should reveal a creative decision, not sell a vague transformation or a guaranteed business outcome.",
+        "clientActionsRequired": [
+          "Select four real video subjects and approve portfolio/public-person permissions.",
+          "Confirm four collaboration photo subjects plus the remaining photo choices within eight; approve factual service copy for four posters."
+        ],
+        "goldStandard": {
+          "objective": "Plan October to make the first creative brief more concrete: a business purpose, real subject and visible production choice. Use camera and studio moments as explanation, with four studio collaborations inside the eight-photo capacity rather than an extra output promise.",
+          "audienceAndIntent": "Help a business buyer describe a video, photography or design brief and understand the real production work behind it. Team and studio culture can be human without pretending that attention is a measured commercial result.",
+          "coreMessage": "Tell us what the piece needs to communicate and show us the real subject. The production story should reveal a creative decision, not sell a vague transformation or a guaranteed business outcome.",
+          "formatsAndRationale": "Four professional videos can show a brief becoming real visual work. Eight photo deliverables include four collaborations with CG Studios, not twelve total; four design posters answer distinct brief questions. Reel, animated-poster and paid-campaign quantities remain unknown.",
+          "mustAvoid": "No invented client results, ROI, turnaround, prices, awards, portfolio permission or staff roles. Preserve real cameras, faces and logos. Keep customer copy focused on creative production rather than private administration; do not invent a WhatsApp route.",
+          "channelIntegration": "Keep service posts focused on one business question across the channels already managed. Use the approved public website/email/phone footer where a service enquiry needs it; lighter team/studio moments do not need a forced sales footer.",
+          "pillarsAndHooks": "Open one story on the brief question, another on the camera choice, another on a studio visual decision and another on the finished piece with permission. Give each poster one practical brief question rather than a list of every service.",
+          "testAndChange": "Compare a brief-question opening with a finished-piece reveal for the same approved production. Keep the subject and facts constant; evaluate available viewing response and the specificity of recorded enquiries.",
+          "successSignals": "Look for enquiries containing a purpose and usable subject/assets, rather than only a request for a generic price. Record covered interactions without inventing attribution or claims about client business growth.",
+          "nextMonthGamePlan": "Use October's actual brief questions to select the next production explanation. Retain the useful opening only when real responses support it, and refresh portfolio permission before reusing another customer's work."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "Real brief question to its approved visual result.",
+              "Camera decision shown with the actual equipment.",
+              "Studio composition detail explained in plain language.",
+              "Human production moment that adds context beyond the finished piece."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "Four agreed studio collaboration subjects, counted within eight.",
+              "Four additional real production or team subjects if supplied and approved; no extra collaboration quota."
+            ],
+            "notes": "Monthly capacity: 8. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "Purpose before the production brief.",
+              "Real subject/assets needed for a photography enquiry.",
+              "One visible creative decision from the approved work.",
+              "A specific video/design enquiry with the task-appropriate public footer."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "3e38242bca0dae2827c2538cf84150d0c3a9ee53eceed2eea2fed17cd9183a56"
+    },
+    {
+      "row_id": "199dafa0-0186-425b-ba8d-c46830d18da0",
+      "client_id": "4f6106de-c437-404e-8cef-fbe848de0665",
+      "client_name": "RC-Polypipe",
+      "strategy_month": "2026-09-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/rc-polypipe.md",
+          "sha256": "83c88baf0998741073778926e8aed8823d75218dab6987e164dfaa70587ed31f",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/rc-polypipe.md",
+          "sha256": "696f7f0b6a9c7e4822eb4ee5d70aac37bcc0294eac9252c49269cb62c756e881",
+          "quotes": [
+            "field-irrigation / level-or-slight-downgrade application",
+            "website-led installation-video sequence",
+            "published"
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "field",
+        "pipe",
+        "guidance"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "10eb4432-f267-44d2-aacb-e84a327b9e2c",
+          "post_count": 13,
+          "post_identity_hash": "86c1ca5d2ac50d4b850875ff99d4d115a74b18c0800f8b79f20371f8cf868420",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "66dfad56-eecd-4fbf-a58f-998d53ca778c",
+          "post_count": 14,
+          "post_identity_hash": "c81346b5df2808b5f244cccb8e1d1025ac108377887be8368326c79843d0eceb",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "f183e150-b4a0-452f-bab6-51ae709c7fc3",
+          "post_count": 12,
+          "post_identity_hash": "0c75cc9055b41fee20204084d3cea66f347746c82289bc46049f725329b0e0a5",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "7a91892eae5d28243143f2ae7276d6fb47dedd74a84da012052360d745fea0f3",
+        "revision_hash": "0793a67ce4b97765bc73c6ec8985b2f675ffd8ac329be45616a73c38be54b7fb",
+        "strategy_hash": "0dc0071f3988a0f73fa160c2541f1e2ce650a1ab91e0b6635b23dcbe5cdd9f5c",
+        "seed_hash": "60775e017760132f858d8b5194031ae820daa21fb38f708451962fdc0deba3e0",
+        "package_hash": "46ba195344454d1570ae5473f994a74717b7e3e722f6c1635f17968384c6c77c",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Review September's pipe presentation for whether the actual field application and limits of the guidance are clear. Separate visible product proof from comparative savings claims and unresolved diameter units before selecting reusable work.",
+          "The real pipe in its field context; a website-led explanation; one visible connection detail without improvised steps; an application question leading to a quotation. Avoid repeating a cost-effectiveness percentage as measured fact."
+        ],
+        "strategyGoingForward": "The field and its conditions matter before the pipe specification. RC's actual guidance should frame the question, not turn a creative image into proof of universal irrigation performance.",
+        "clientActionsRequired": [
+          "Approve the exact guidance excerpt and real pipe/application visuals for reuse.",
+          "Resolve diameter units before specification artwork; confirm any current product and contact facts used."
+        ],
+        "goldStandard": {
+          "objective": "Review September's pipe presentation for whether the actual field application and limits of the guidance are clear. Separate visible product proof from comparative savings claims and unresolved diameter units before selecting reusable work.",
+          "audienceAndIntent": "Help a farming or irrigation buyer describe the field situation and ask an application-specific pipe question. Do not invent acreage, crop, purchasing power or technical suitability for that buyer.",
+          "coreMessage": "The field and its conditions matter before the pipe specification. RC's actual guidance should frame the question, not turn a creative image into proof of universal irrigation performance.",
+          "formatsAndRationale": "One professional video can explain a real field-irrigation application using approved RC guidance; three photos show actual pipe and application detail; four posters prompt distinct application/quotation questions. No additional reel, animation or installation service is implied.",
+          "mustAvoid": "No unverified diameter-unit conversion, pressure class, stock, price, warranty, installation-service claim or quantified savings. Published comparative claims are not independent proof. Preserve pipe texture/scale and qualify guidance for field conditions.",
+          "channelIntegration": "Keep RC's concise practical farming language on already-managed channels. Captions add a useful application question and five dynamically chosen hashtags, not a second headline or a fixed generic tag bank.",
+          "pillarsAndHooks": "The real pipe in its field context; a website-led explanation; one visible connection detail without improvised steps; an application question leading to a quotation. Avoid repeating a cost-effectiveness percentage as measured fact.",
+          "testAndChange": "Review application-first and product-close-up September openings using comparable available measures. Read recorded enquiries for field context; post counts cannot establish water, energy or labour savings.",
+          "successSignals": "Recorded questions explaining the field situation or asking for an appropriate specification are useful. Views/interactions remain coverage-bound and missing application or order attribution stays unavailable.",
+          "nextMonthGamePlan": "Make October's single video answer one field-context question using the verified RC sequence, then select photos/posters that help buyers describe their application without guessing diameter units."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "Review a real field-irrigation explanation against the published RC guidance."
+            ],
+            "notes": "Monthly capacity: 1. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "Actual pipe surface and scale.",
+              "Real field application without a universal suitability claim.",
+              "Visible connection/product detail, not an invented installation step."
+            ],
+            "notes": "Monthly capacity: 3. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "Describe the field before discussing pipe specification.",
+              "One approved guidance question with its condition qualifier.",
+              "Ask for clarification where diameter units are unresolved.",
+              "Quotation next step without promised delivery or savings."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "aa0ecfc12aa2fd3a57a90c0eb26a90c8b2cfe90ddff774b82509507bc079e4c0"
+    },
+    {
+      "row_id": "49fb40ec-94a9-4aef-b595-d9ec7b4ac1fc",
+      "client_id": "4f6106de-c437-404e-8cef-fbe848de0665",
+      "client_name": "RC-Polypipe",
+      "strategy_month": "2026-10-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/rc-polypipe.md",
+          "sha256": "83c88baf0998741073778926e8aed8823d75218dab6987e164dfaa70587ed31f",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/rc-polypipe.md",
+          "sha256": "696f7f0b6a9c7e4822eb4ee5d70aac37bcc0294eac9252c49269cb62c756e881",
+          "quotes": [
+            "field-irrigation / level-or-slight-downgrade application",
+            "website-led installation-video sequence",
+            "published"
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "field",
+        "pipe",
+        "guidance"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "10eb4432-f267-44d2-aacb-e84a327b9e2c",
+          "post_count": 13,
+          "post_identity_hash": "86c1ca5d2ac50d4b850875ff99d4d115a74b18c0800f8b79f20371f8cf868420",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "66dfad56-eecd-4fbf-a58f-998d53ca778c",
+          "post_count": 14,
+          "post_identity_hash": "c81346b5df2808b5f244cccb8e1d1025ac108377887be8368326c79843d0eceb",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "f183e150-b4a0-452f-bab6-51ae709c7fc3",
+          "post_count": 12,
+          "post_identity_hash": "0c75cc9055b41fee20204084d3cea66f347746c82289bc46049f725329b0e0a5",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "0031f75411e043fda4e870ddec11601ab77e98d557c5ed20b6bd9211e1e0ae34",
+        "revision_hash": "6546ea52becc307353ca0dbefe144ba2a2329ed0a19c98241aed827fcd7e4cdd",
+        "strategy_hash": "dcb453500d615d13eb5d14323b79b0f9c1e55a6ae996e066d78176c2cd41ddc8",
+        "seed_hash": "9daa55a8da02a50d385aa781a938b0c897eabb2a7d236ce5267cb37da80cb9ca",
+        "package_hash": "46ba195344454d1570ae5473f994a74717b7e3e722f6c1635f17968384c6c77c",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Build October around an application-aware RC enquiry: describe the field conditions, examine the real pipe and ask the right specification question. Keep the one video grounded in client-approved guidance rather than a sweeping savings or installation promise.",
+          "Open with the field question, follow with the actual pipe, and explain one verified guidance point. Three photos isolate material/application detail; four posters collect the next buyer question without manufacturing technical numbers."
+        ],
+        "strategyGoingForward": "Show the field situation before choosing the specification. A real pipe detail and a qualified explanation are more useful than an unsupported percentage claim.",
+        "clientActionsRequired": [
+          "Supply a real application and the approved explanation for the one video.",
+          "Confirm specification wording before the four posters; do not publish unresolved units or stock promises."
+        ],
+        "goldStandard": {
+          "objective": "Build October around an application-aware RC enquiry: describe the field conditions, examine the real pipe and ask the right specification question. Keep the one video grounded in client-approved guidance rather than a sweeping savings or installation promise.",
+          "audienceAndIntent": "Help a farming or irrigation buyer describe the field situation and ask an application-specific pipe question. Do not invent acreage, crop, purchasing power or technical suitability for that buyer.",
+          "coreMessage": "Show the field situation before choosing the specification. A real pipe detail and a qualified explanation are more useful than an unsupported percentage claim.",
+          "formatsAndRationale": "One professional video can explain a real field-irrigation application using approved RC guidance; three photos show actual pipe and application detail; four posters prompt distinct application/quotation questions. No additional reel, animation or installation service is implied.",
+          "mustAvoid": "No unverified diameter-unit conversion, pressure class, stock, price, warranty, installation-service claim or quantified savings. Published comparative claims are not independent proof. Preserve pipe texture/scale and qualify guidance for field conditions.",
+          "channelIntegration": "Keep RC's concise practical farming language on already-managed channels. Captions add a useful application question and five dynamically chosen hashtags, not a second headline or a fixed generic tag bank.",
+          "pillarsAndHooks": "Open with the field question, follow with the actual pipe, and explain one verified guidance point. Three photos isolate material/application detail; four posters collect the next buyer question without manufacturing technical numbers.",
+          "testAndChange": "Compare a field-question CTA with a product-detail CTA on otherwise comparable RC pieces. Keep specifications constant and evaluate only recorded application detail and available native response.",
+          "successSignals": "Look for enquiries that describe the field and ask a concrete specification question. Do not treat engagement as an order or report unmeasured irrigation savings.",
+          "nextMonthGamePlan": "Choose the following explanation from real October application questions. Refresh approved technical wording and unresolved units before building a new how-it-works sequence."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "Field-question opening followed by one client-approved RC guidance point."
+            ],
+            "notes": "Monthly capacity: 1. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "Real pipe detail at truthful scale.",
+              "Application image tied to the buyer's field question.",
+              "Client-identified connection detail with no unsupported specification."
+            ],
+            "notes": "Monthly capacity: 3. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "What field context to include in an enquiry.",
+              "A qualified application point from approved guidance.",
+              "One confirmed specification question without guessed units.",
+              "A practical quote request without installation or quantified savings claims."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "4c8f73cdf6d3b992674a9c45c4b0ad42b9777027d2357a727d761f2c83dfaccc"
+    },
+    {
+      "row_id": "8281c9d0-86a6-4223-809a-6c7a98467efe",
+      "client_id": "a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b",
+      "client_name": "Peyper Bonds",
+      "strategy_month": "2026-09-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/peyper-bonds.md",
+          "sha256": "7f0faa164b98c7c88c1db1221f6ae0c3a52fe3e179abf1714297f8ffbf5b31af",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/peyper-bonds.md",
+          "sha256": "1c53cd3763060daf4acfe84bdd815f15ec18c3ece7e8d873b965228877c20079",
+          "quotes": [
+            "bond originator / property-finance specialist",
+            "The lender makes the credit decision.",
+            "paperwork/application administration support"
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "originator",
+        "paperwork",
+        "lender"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "8445e8ca-0549-445c-a6bd-ccb03210e566",
+          "post_count": 10,
+          "post_identity_hash": "c22ad08709df23894b64352b9d83ea64905319c84624561bb08edc6c59c0d72e",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "f3eb72dc-619a-456c-aff1-4cbf01023320",
+          "post_count": 17,
+          "post_identity_hash": "4641657ac0f8e45a541977c4370736b357d2e9500a28f30571458e9ba1cde15e",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "a2c5735e-69ab-4572-8234-662c1f2adffb",
+          "post_count": 10,
+          "post_identity_hash": "cbde0fcea3b2a8221aedd98fb4d9a165328e98629d43060bd7502caf93a7e473",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "31cb510b663ec2179d46cf04442d12e9b174b5eeff0eacc8ed9fda14b069923c",
+        "revision_hash": "06c3d65f180129a5e159b49c940d1446d04d7b8f513f1b82644ebaf8bc5d6f42",
+        "strategy_hash": "755685841517a0e40e76a2d34d4df7eab052a626bd373ecbc3c8fab711087c21",
+        "seed_hash": "5b3f17c676b489978077b6476c123bb99f2f8cb3b0358fb7652ef8252a4da53a",
+        "package_hash": "52421b552a4691ed51bd95b9d419209cd7c49d50d59916dadd85e1b010bd8f5e",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Review September's home-loan explanations for a clear boundary: the originator supports paperwork and comparison while the lender makes the decision. Identify reusable process questions without carrying forward stale rate figures or approval language.",
+          "Who handles the paperwork; what the originator does when offers arrive; where the lender's decision sits; a real team's role with private documents hidden. Start from a buyer question rather than a property-dreams slogan."
+        ],
+        "strategyGoingForward": "The originator helps with the paperwork and the application conversation; the lender decides the credit outcome. Personal support is a real service, not a promise that a home loan will be approved.",
+        "clientActionsRequired": [
+          "Approve process wording that keeps the lender decision and legal registration roles separate.",
+          "Supply publication-safe team/office images and the latest approved contact block; exclude private documents."
+        ],
+        "goldStandard": {
+          "objective": "Review September's home-loan explanations for a clear boundary: the originator supports paperwork and comparison while the lender makes the decision. Identify reusable process questions without carrying forward stale rate figures or approval language.",
+          "audienceAndIntent": "Help a homebuyer understand the application-support role and an estate agent understand the origination handoff. Keep general process explanation separate from personalised financial or legal advice and do not assume a credit profile.",
+          "coreMessage": "The originator helps with the paperwork and the application conversation; the lender decides the credit outcome. Personal support is a real service, not a promise that a home loan will be approved.",
+          "formatsAndRationale": "One professional video can explain the originator/lender distinction; three photos show approved human support and privacy-safe paperwork context; three posters answer separate application questions. No paid campaign, reel or animated allocation is confirmed.",
+          "mustAvoid": "No approval odds, guaranteed savings, lowest rates, personalised advice, lender accreditation or legal-registration capability. Do not import other group-company services or contacts. Hide financial information and never fabricate an approval letter or testimonial.",
+          "channelIntegration": "Keep origination/application support consistent across managed channels. Use the exact approved informative-post contact block when required, not a neighbouring group business's phone; informal team content can remain human without a forced sales footer.",
+          "pillarsAndHooks": "Who handles the paperwork; what the originator does when offers arrive; where the lender's decision sits; a real team's role with private documents hidden. Start from a buyer question rather than a property-dreams slogan.",
+          "testAndChange": "Review September role-explanation and preparation-question openings using available response. Check recorded enquiries for an application-stage question, never interpret attention as an approval outcome.",
+          "successSignals": "Recorded questions naming paperwork, application stage or comparing received offers are useful. Covered video measures may support the review; missing lender-outcome attribution remains unavailable.",
+          "nextMonthGamePlan": "Make October's video a simple who-does-what explanation and use the photo/poster mix for practical application preparation. Confirm current team/contact facts before selecting any staff profile."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "Review an originator-versus-lender explanation without a success guarantee."
+            ],
+            "notes": "Monthly capacity: 1. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "Approved application-support team image.",
+              "Privacy-safe paperwork context with no personal information.",
+              "Permitted office/service moment with accurate current role wording."
+            ],
+            "notes": "Monthly capacity: 3. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "Who helps with the application paperwork?",
+              "Who makes the credit decision?",
+              "What to ask when comparing the actual offers received, without recommending a product."
+            ],
+            "notes": "Monthly capacity: 3. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "7c47b9d7edd19c1ef81fa51589073f39b3f584338ed4284d6ce0102be80a582d"
+    },
+    {
+      "row_id": "2ed8b4fc-2225-4df0-8b92-194989e8fb8e",
+      "client_id": "a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b",
+      "client_name": "Peyper Bonds",
+      "strategy_month": "2026-10-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/peyper-bonds.md",
+          "sha256": "7f0faa164b98c7c88c1db1221f6ae0c3a52fe3e179abf1714297f8ffbf5b31af",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/peyper-bonds.md",
+          "sha256": "1c53cd3763060daf4acfe84bdd815f15ec18c3ece7e8d873b965228877c20079",
+          "quotes": [
+            "bond originator / property-finance specialist",
+            "The lender makes the credit decision.",
+            "paperwork/application administration support"
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "originator",
+        "paperwork",
+        "lender"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "8445e8ca-0549-445c-a6bd-ccb03210e566",
+          "post_count": 10,
+          "post_identity_hash": "c22ad08709df23894b64352b9d83ea64905319c84624561bb08edc6c59c0d72e",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "f3eb72dc-619a-456c-aff1-4cbf01023320",
+          "post_count": 17,
+          "post_identity_hash": "4641657ac0f8e45a541977c4370736b357d2e9500a28f30571458e9ba1cde15e",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "a2c5735e-69ab-4572-8234-662c1f2adffb",
+          "post_count": 10,
+          "post_identity_hash": "cbde0fcea3b2a8221aedd98fb4d9a165328e98629d43060bd7502caf93a7e473",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "415e4d01aaa721978096049fefc140750d4dcf4bb9c8ea1a583766c3dafdbf95",
+        "revision_hash": "18920252a69908a8ff3d8de9b12d9babf8a2b4dc7481c34b3c55bf4889d1bd2c",
+        "strategy_hash": "f934c43b5abafa703f784fcd804e51e51ab8e7c2e964ee6ab44fa3b5eba252f6",
+        "seed_hash": "1189e07efd4378d20c535cc890c325914f2df3f16ab1e4c75127c44f852adbce",
+        "package_hash": "52421b552a4691ed51bd95b9d419209cd7c49d50d59916dadd85e1b010bd8f5e",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Plan October around a better-informed application conversation: distinguish originator, lender and legal registration roles, then ask a concrete paperwork question. Make human support visible without promising a rate, approval or financial result.",
+          "Open on a real paperwork question, explain the originator's support, then distinguish the lender's role. Photo stories show people rather than financial documents; posters separate preparation, offer questions and role boundaries."
+        ],
+        "strategyGoingForward": "Ask what the application step needs, and know who is responsible for it. The originator's support and the lender's decision are different roles; general information cannot decide a buyer's personal loan choice.",
+        "clientActionsRequired": [
+          "Approve the one process video and three distinct general-information poster questions.",
+          "Confirm current team roles and public contact block; redact all personal or financial material before production."
+        ],
+        "goldStandard": {
+          "objective": "Plan October around a better-informed application conversation: distinguish originator, lender and legal registration roles, then ask a concrete paperwork question. Make human support visible without promising a rate, approval or financial result.",
+          "audienceAndIntent": "Help a homebuyer understand the application-support role and an estate agent understand the origination handoff. Keep general process explanation separate from personalised financial or legal advice and do not assume a credit profile.",
+          "coreMessage": "Ask what the application step needs, and know who is responsible for it. The originator's support and the lender's decision are different roles; general information cannot decide a buyer's personal loan choice.",
+          "formatsAndRationale": "One professional video can explain the originator/lender distinction; three photos show approved human support and privacy-safe paperwork context; three posters answer separate application questions. No paid campaign, reel or animated allocation is confirmed.",
+          "mustAvoid": "No approval odds, guaranteed savings, lowest rates, personalised advice, lender accreditation or legal-registration capability. Do not import other group-company services or contacts. Hide financial information and never fabricate an approval letter or testimonial.",
+          "channelIntegration": "Keep origination/application support consistent across managed channels. Use the exact approved informative-post contact block when required, not a neighbouring group business's phone; informal team content can remain human without a forced sales footer.",
+          "pillarsAndHooks": "Open on a real paperwork question, explain the originator's support, then distinguish the lender's role. Photo stories show people rather than financial documents; posters separate preparation, offer questions and role boundaries.",
+          "testAndChange": "Compare a paperwork-question opening with a who-decides opening for the same general application topic. Evaluate recorded process questions and covered views, not approval rates or promised financial improvements.",
+          "successSignals": "Look for enquiries identifying the application stage or the document question that needs help. Do not claim approval, savings or faster registration from the content response.",
+          "nextMonthGamePlan": "Choose the next explanation from October's actual application questions. Recheck current process and team facts before reuse, and keep rate or bank-specific material on hold until separately confirmed."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "One plain-language application question separating originator support from the lender decision."
+            ],
+            "notes": "Monthly capacity: 1. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "Real person answering a general application question.",
+              "Redacted paperwork setting without readable customer information.",
+              "Approved team/service moment, not an invented success story."
+            ],
+            "notes": "Monthly capacity: 3. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "Preparing a clear application-support question.",
+              "Understanding the roles around the lender's decision.",
+              "Comparing received offers: questions to discuss, not personalised financial advice."
+            ],
+            "notes": "Monthly capacity: 3. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "7845b261dd7e0b3e6845970a0a445989cc44c9117ab3f5626ba5e8ec5b12b210"
+    },
+    {
+      "row_id": "2d167efd-552c-42ad-886f-d8ef509393b8",
+      "client_id": "21300630-6755-4591-9a49-e22abbaf7e3d",
+      "client_name": "Loraclox",
+      "strategy_month": "2026-09-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/loraclox.md",
+          "sha256": "792d8aad5e58deece8d2297f37015f6b5f11c58836803e1b80f6fd9ff591a21d",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/loraclox.md",
+          "sha256": "c936fcc997b330d0bc630bebf4e1444d580534c46f6c6c805738dfa65f9e18af",
+          "quotes": [
+            "technology-led electronic-security/CCTV systems business",
+            "neat cabling, mounting and finishing detail",
+            "phones therefore remain an unresolved"
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "CCTV",
+        "cabling",
+        "mounting"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "53d5a8a0-e215-40c3-a8fc-0dbb9171060b",
+          "post_count": 12,
+          "post_identity_hash": "c1428e04528ebe2569b47d096b45e9e13a80ed0b731d8b95131da14e6b119bd3",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "46a59f76-b292-42f6-93cf-c340990756db",
+          "post_count": 11,
+          "post_identity_hash": "1f9f4e69980f7dd34d42b3c6bbc6e4399d6e657d08a9b7ae483a30d3ee6fb3fd",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "c734c362-6ad9-414d-9788-57b2461531fb",
+          "post_count": 8,
+          "post_identity_hash": "c62eb4ceaab7ed0d13fe04388a894fb34a8d54c51ca6b7a24f6478504c3ab906",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "c313ed18d39528082a8fe84bb6e2898c0a536c5538157686c82666df28abff13",
+        "revision_hash": "611347dbb44f927a69874260e49f9533d54a9aa372ad7d8a7ae10ec8068a55d3",
+        "strategy_hash": "7d715561fe6468d24ca75fa4a7ad974ffedbae8c575ba620e3c2b2795629edd4",
+        "seed_hash": "537214596890db888d2bf331f5f424aa86de108f312a3f76c31d8badf0c9b224",
+        "package_hash": "ea50b397dd3f94b12210a6362cc8672875e5b04ee0dbad8964673af38d585c28",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Review September's CCTV images for whether mounting and cabling workmanship are visible safely and accurately. Separate current system work from older biometric or alarm labels and remove any contact or capability assumption before reuse.",
+          "A safe mounting detail; neat cabling without revealing routes; a permitted maintenance moment. Let the visible work carry the hook, with no security slogan or unverified list of services."
+        ],
+        "strategyGoingForward": "A real CCTV mounting or cabling detail should explain the work shown, not imply guaranteed protection. The customer question is about that system's actual service need.",
+        "clientActionsRequired": [
+          "Approve safe CCTV installation/service images with site details and credentials hidden.",
+          "Confirm the public phone/email and any current service claims before final copy; historical biometric topics remain on hold."
+        ],
+        "goldStandard": {
+          "objective": "Review September's CCTV images for whether mounting and cabling workmanship are visible safely and accurately. Separate current system work from older biometric or alarm labels and remove any contact or capability assumption before reuse.",
+          "audienceAndIntent": "Help a customer considering CCTV system work ask about the actual system and service need. Explain a visible technical detail without using fear, guessing site vulnerabilities or promoting unverified historic services.",
+          "coreMessage": "A real CCTV mounting or cabling detail should explain the work shown, not imply guaranteed protection. The customer question is about that system's actual service need.",
+          "formatsAndRationale": "Three photo posts can show approved CCTV, cabling and mounting workmanship; three design posters turn those details into service questions. Professional video, reels and animation have no confirmed quantity, so there is no filming allocation.",
+          "mustAvoid": "No armed response, guarding, monitoring, biometric specifications, PSiRA status, security guarantees or equipment performance claims without exact current confirmation. Hide sites, screens, credentials and weaknesses. Contact numbers conflict and must not be silently chosen.",
+          "channelIntegration": "Use concise, technical but understandable wording on already-managed channels. A contact CTA waits for the current phone/email to be confirmed; do not invent a website from the email domain or add unrelated service labels.",
+          "pillarsAndHooks": "A safe mounting detail; neat cabling without revealing routes; a permitted maintenance moment. Let the visible work carry the hook, with no security slogan or unverified list of services.",
+          "testAndChange": "Review September workmanship-detail posts against service-question posts using available covered interactions. Check recorded CCTV enquiries for the system/service need; missing enquiry coverage cannot establish zero demand.",
+          "successSignals": "Useful signals are recorded CCTV service questions and available response to specific workmanship images. Do not invent crime-prevention, system uptime or identification outcomes.",
+          "nextMonthGamePlan": "Build October around three privacy-safe workmanship photos and three distinct CCTV service questions. Resolve current contact wording before a booking CTA, rather than carrying the conflicting numbers forward."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "Permitted CCTV mounting detail.",
+              "Safe cabling finish without exposing a site route.",
+              "Real system service image with screens/logs redacted."
+            ],
+            "notes": "Monthly capacity: 3. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "Ask about the CCTV service actually required.",
+              "One visible mounting/workmanship point without performance claims.",
+              "A system-maintenance question with the contact CTA held until verified."
+            ],
+            "notes": "Monthly capacity: 3. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "3aeac7601296a0443bad37f53967b1c625023f6b6c03f3fa73433f70d02f667d"
+    },
+    {
+      "row_id": "83d94b72-5627-49be-a6ec-0d129487902f",
+      "client_id": "21300630-6755-4591-9a49-e22abbaf7e3d",
+      "client_name": "Loraclox",
+      "strategy_month": "2026-10-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/loraclox.md",
+          "sha256": "792d8aad5e58deece8d2297f37015f6b5f11c58836803e1b80f6fd9ff591a21d",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/loraclox.md",
+          "sha256": "c936fcc997b330d0bc630bebf4e1444d580534c46f6c6c805738dfa65f9e18af",
+          "quotes": [
+            "technology-led electronic-security/CCTV systems business",
+            "neat cabling, mounting and finishing detail",
+            "phones therefore remain an unresolved"
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "CCTV",
+        "cabling",
+        "mounting"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "53d5a8a0-e215-40c3-a8fc-0dbb9171060b",
+          "post_count": 12,
+          "post_identity_hash": "c1428e04528ebe2569b47d096b45e9e13a80ed0b731d8b95131da14e6b119bd3",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "46a59f76-b292-42f6-93cf-c340990756db",
+          "post_count": 11,
+          "post_identity_hash": "1f9f4e69980f7dd34d42b3c6bbc6e4399d6e657d08a9b7ae483a30d3ee6fb3fd",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "c734c362-6ad9-414d-9788-57b2461531fb",
+          "post_count": 8,
+          "post_identity_hash": "c62eb4ceaab7ed0d13fe04388a894fb34a8d54c51ca6b7a24f6478504c3ab906",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "68ecc516807c91f84523688558c5afc652f337f641aac29907efbe0d8c421e83",
+        "revision_hash": "a69f3be2ba596125e851875a101f3de4f6beb128e2aa776c5a541d80caf9a097",
+        "strategy_hash": "3a69b62bdc981b6c931e4d29ee46cc8fe2628890e609b816f8061651fc0a6283",
+        "seed_hash": "80e20ecbaa0aa0a99e233d4fea2233a7b960f352d97e53f3434c05666c727998",
+        "package_hash": "ea50b397dd3f94b12210a6362cc8672875e5b04ee0dbad8964673af38d585c28",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Plan October's CCTV sequence around what the customer should ask about the real work: mounting, cabling finish and the service requirement. Keep technical competence visible through authorised details, not a promise about protection or unverified system features.",
+          "Three separate close-up workmanship stories paired with three specific customer questions. Use concise one-point copy, and keep service scope and contact uncertainty out of affirmative advertising."
+        ],
+        "strategyGoingForward": "Ask about the system and the job, not an all-purpose safety promise. An approved mounting or cabling image can explain one Loraclox service point clearly without exposing a customer's security layout.",
+        "clientActionsRequired": [
+          "Select three real workmanship details with permission and security redactions.",
+          "Approve three CCTV questions and resolve the exact current public contact route before any enquiry footer."
+        ],
+        "goldStandard": {
+          "objective": "Plan October's CCTV sequence around what the customer should ask about the real work: mounting, cabling finish and the service requirement. Keep technical competence visible through authorised details, not a promise about protection or unverified system features.",
+          "audienceAndIntent": "Help a customer considering CCTV system work ask about the actual system and service need. Explain a visible technical detail without using fear, guessing site vulnerabilities or promoting unverified historic services.",
+          "coreMessage": "Ask about the system and the job, not an all-purpose safety promise. An approved mounting or cabling image can explain one Loraclox service point clearly without exposing a customer's security layout.",
+          "formatsAndRationale": "Three photo posts can show approved CCTV, cabling and mounting workmanship; three design posters turn those details into service questions. Professional video, reels and animation have no confirmed quantity, so there is no filming allocation.",
+          "mustAvoid": "No armed response, guarding, monitoring, biometric specifications, PSiRA status, security guarantees or equipment performance claims without exact current confirmation. Hide sites, screens, credentials and weaknesses. Contact numbers conflict and must not be silently chosen.",
+          "channelIntegration": "Use concise, technical but understandable wording on already-managed channels. A contact CTA waits for the current phone/email to be confirmed; do not invent a website from the email domain or add unrelated service labels.",
+          "pillarsAndHooks": "Three separate close-up workmanship stories paired with three specific customer questions. Use concise one-point copy, and keep service scope and contact uncertainty out of affirmative advertising.",
+          "testAndChange": "Compare a visible-detail caption with a system-service-question caption for comparable CCTV images. Assess covered interactions and recorded enquiry detail while keeping specifications and privacy safeguards unchanged.",
+          "successSignals": "Look for enquiries that identify a real CCTV system or service need. Content response cannot show guaranteed protection, certification or maintenance effectiveness; absent metrics stay unavailable.",
+          "nextMonthGamePlan": "Use October's actual system questions to choose the next image explanation. Obtain current confirmation before adding historic service lines and recheck each site's publication safety."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "Actual camera mounting detail with location obscured.",
+              "Neat cabling finish without showing vulnerable routes.",
+              "Approved service-work detail with sensitive screens hidden."
+            ],
+            "notes": "Monthly capacity: 3. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "A mounting question tied to the shown equipment.",
+              "A cabling/workmanship consideration in plain language.",
+              "Which CCTV service does your actual system need? No unverified feature or contact."
+            ],
+            "notes": "Monthly capacity: 3. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "263dc238e846de2142a3d653e64f630e63ed7869fea1e6ba5b3885fa7cd5d23a"
+    },
+    {
+      "row_id": "18e3b9c1-bd84-4ef0-b73c-83f1a4c2f0eb",
+      "client_id": "204f4f22-14c7-42ed-a956-da57af102706",
+      "client_name": "Tobich Optics",
+      "strategy_month": "2026-09-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/tobich-optics.md",
+          "sha256": "9f530cfcc16f457526e72ce495dec3eb1f26e52e349928b971c60b481ae419c5",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/tobich-optics.md",
+          "sha256": "053bd9457b58d2376de4dddd74429053e8c4eb84bef8f590b0b09a71b25db75c",
+          "quotes": [
+            "Tobich Optics Otjiwarongo",
+            "frame and lens selection",
+            "brand-range/content facts, not guaranteed current stock"
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "Otjiwarongo",
+        "frame",
+        "lens"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "1a5ed68a-4484-4a3e-8431-b05ed05fde22",
+          "post_count": 14,
+          "post_identity_hash": "a233ce5af895722c35ae5fc137a48231db76c06abf130c52f7dd1cd7c738615c",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "7a900ba8-f973-4916-b9f9-1057998c8044",
+          "post_count": 9,
+          "post_identity_hash": "ac660dc59389866733e1d7950625f754d42f75b0af18128814034679148df00e",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "38cf1f09-75eb-4209-95db-91dd3be44510",
+          "post_count": 6,
+          "post_identity_hash": "c53bea49ce6644f9fdc609c1bb2b5558259ca995c7f3a161df2b1d5df10b2ea4",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "35c2a1d17c8b74772e33ab402dfde18cc9afe5f2fe82367039ee7c57c3ae5395",
+        "revision_hash": "ffb4a01b5b4443165cbb0369a465e1ddf964f441fd908eb89feabe45fe9d262a",
+        "strategy_hash": "fd13611cb563d742f7ff2729888483892ac8b765648042ce751c02ff934bf171",
+        "seed_hash": "105ddfed6630fc3086a3c4e353e1b2c8ca3f15be891c85827e8cb02665517260",
+        "package_hash": "903b03826150fd7837e5642e6ca229f5a3be5dbd7c31b88e797e6c75a9ad6141",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Review September's Otjiwarongo eyewear presentation for whether the actual frame shape and visible brand are described accurately. Separate styling observations from lens performance and remove stock or branch assumptions before reuse.",
+          "Actual frame silhouette; bridge and temple detail; a permitted lifestyle view; a plain appointment question. Keep each visual's specific choice separate from a medical or better-vision promise."
+        ],
+        "strategyGoingForward": "The frame shown is the starting point for a real choice conversation in Otjiwarongo. Its visible shape can be described; the image alone cannot establish lens technology, suitability or availability.",
+        "clientActionsRequired": [
+          "Identify the exact real frames and approve any lifestyle/person permissions.",
+          "Confirm the Otjiwarongo marketing route and product wording; obtain clinician approval for any clinical content outside this styling plan."
+        ],
+        "goldStandard": {
+          "objective": "Review September's Otjiwarongo eyewear presentation for whether the actual frame shape and visible brand are described accurately. Separate styling observations from lens performance and remove stock or branch assumptions before reuse.",
+          "audienceAndIntent": "Help an Otjiwarongo customer describe the eyewear choice they want to discuss and understand the appointment enquiry route. Frame styling can be shown, but personal vision needs and lens suitability belong with the qualified practice.",
+          "coreMessage": "The frame shown is the starting point for a real choice conversation in Otjiwarongo. Its visible shape can be described; the image alone cannot establish lens technology, suitability or availability.",
+          "formatsAndRationale": "Four photo posts show real frame geometry, brand detail and approved lifestyle/service context; four design posters ask distinct frame or appointment questions. No video, reel or animated-post quota is confirmed.",
+          "mustAvoid": "No clinical outcomes, treatment, lens-performance or suitability claims, invented models, stock, prices, UV/polarisation or authorised-dealer status. Use exact Otjiwarongo context, never substitute another branch or stale address; preserve frame geometry and real people.",
+          "channelIntegration": "Keep clean, helpful product-specific wording on managed channels. Use the current task-appropriate Otjiwarongo marketing route, not administrative/provider contacts. A depicted brand is a creative reference, not a promise of current stock.",
+          "pillarsAndHooks": "Actual frame silhouette; bridge and temple detail; a permitted lifestyle view; a plain appointment question. Keep each visual's specific choice separate from a medical or better-vision promise.",
+          "testAndChange": "Review frame-detail openings against lifestyle-context openings in September's usable material. Compare covered interactions and recorded product questions, not presumed clinical or sales outcomes.",
+          "successSignals": "Recorded questions naming a shown frame or asking about an Otjiwarongo appointment are useful. Missing product/appointment attribution remains unavailable, not zero demand.",
+          "nextMonthGamePlan": "For October, pair four real photo subjects with four useful frame/appointment questions. Reconfirm product identity and the marketing route before selection; do not carry historical range posts into a stock announcement."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "Real frame silhouette with original proportions.",
+              "Visible bridge/temple detail without a material claim.",
+              "Permitted lifestyle image of the actual eyewear.",
+              "Approved Otjiwarongo service/appointment context."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "A frame-shape choice tied to the actual photo.",
+              "One visible styling detail without lens-performance language.",
+              "An appointment enquiry using the correct marketing route.",
+              "Identify the supplied frame, without announcing stock or price."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "f50ac63fdf269caa112be8b977754f8d858bd3c677178b8ffdef88a221739d36"
+    },
+    {
+      "row_id": "33c0bdca-0caa-4839-aee1-c423d232f78c",
+      "client_id": "204f4f22-14c7-42ed-a956-da57af102706",
+      "client_name": "Tobich Optics",
+      "strategy_month": "2026-10-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/tobich-optics.md",
+          "sha256": "9f530cfcc16f457526e72ce495dec3eb1f26e52e349928b971c60b481ae419c5",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/tobich-optics.md",
+          "sha256": "053bd9457b58d2376de4dddd74429053e8c4eb84bef8f590b0b09a71b25db75c",
+          "quotes": [
+            "Tobich Optics Otjiwarongo",
+            "frame and lens selection",
+            "brand-range/content facts, not guaranteed current stock"
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "Otjiwarongo",
+        "frame",
+        "lens"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "1a5ed68a-4484-4a3e-8431-b05ed05fde22",
+          "post_count": 14,
+          "post_identity_hash": "a233ce5af895722c35ae5fc137a48231db76c06abf130c52f7dd1cd7c738615c",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "7a900ba8-f973-4916-b9f9-1057998c8044",
+          "post_count": 9,
+          "post_identity_hash": "ac660dc59389866733e1d7950625f754d42f75b0af18128814034679148df00e",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "38cf1f09-75eb-4209-95db-91dd3be44510",
+          "post_count": 6,
+          "post_identity_hash": "c53bea49ce6644f9fdc609c1bb2b5558259ca995c7f3a161df2b1d5df10b2ea4",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "7d7c579e02cedcac625b9984ecf70e78d4928403bb5828cf0a53c037982d580b",
+        "revision_hash": "11cc87beb6b4a3994bea5636cc924b78d017aa0850454044cd1abef5c1f55c2e",
+        "strategy_hash": "78995879a098671a9f988673fdcc15c145110ce2699d7a9814ec2a61d11396b2",
+        "seed_hash": "a77e3927a4e88c2ad7f59306bcf231966e1fc1bf2568e05491730585d903e7ab",
+        "package_hash": "903b03826150fd7837e5642e6ca229f5a3be5dbd7c31b88e797e6c75a9ad6141",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Plan October around a clearer Otjiwarongo eyewear conversation: notice the frame shape, bring the choice question and ask the practice about personal lens needs. Keep product detail helpful without advertising unconfirmed stock or clinical capability.",
+          "Open on a specific frame shape; show the real bridge/temple geometry; use a permitted lifestyle view; finish with the exact Otjiwarongo appointment question. Posters provide one useful question rather than generic optical slogans."
+        ],
+        "strategyGoingForward": "Look at the real frame and ask about your own choice. Visible style and individual lens needs are different questions, and a product image does not answer the clinical one.",
+        "clientActionsRequired": [
+          "Supply four accurately identified real eyewear/service photo subjects.",
+          "Approve four distinct choice/appointment poster angles and the exact marketing contacts; keep prices and availability out unless separately confirmed."
+        ],
+        "goldStandard": {
+          "objective": "Plan October around a clearer Otjiwarongo eyewear conversation: notice the frame shape, bring the choice question and ask the practice about personal lens needs. Keep product detail helpful without advertising unconfirmed stock or clinical capability.",
+          "audienceAndIntent": "Help an Otjiwarongo customer describe the eyewear choice they want to discuss and understand the appointment enquiry route. Frame styling can be shown, but personal vision needs and lens suitability belong with the qualified practice.",
+          "coreMessage": "Look at the real frame and ask about your own choice. Visible style and individual lens needs are different questions, and a product image does not answer the clinical one.",
+          "formatsAndRationale": "Four photo posts show real frame geometry, brand detail and approved lifestyle/service context; four design posters ask distinct frame or appointment questions. No video, reel or animated-post quota is confirmed.",
+          "mustAvoid": "No clinical outcomes, treatment, lens-performance or suitability claims, invented models, stock, prices, UV/polarisation or authorised-dealer status. Use exact Otjiwarongo context, never substitute another branch or stale address; preserve frame geometry and real people.",
+          "channelIntegration": "Keep clean, helpful product-specific wording on managed channels. Use the current task-appropriate Otjiwarongo marketing route, not administrative/provider contacts. A depicted brand is a creative reference, not a promise of current stock.",
+          "pillarsAndHooks": "Open on a specific frame shape; show the real bridge/temple geometry; use a permitted lifestyle view; finish with the exact Otjiwarongo appointment question. Posters provide one useful question rather than generic optical slogans.",
+          "testAndChange": "Compare a frame-shape question with a lifestyle-choice question using comparable product imagery. Hold product facts constant and assess covered interactions or recorded enquiries without claiming improved vision.",
+          "successSignals": "Look for questions that identify the pictured frame or request the correct appointment route. Do not turn native interactions into stock demand, medical benefit or appointment conversion without a recorded link.",
+          "nextMonthGamePlan": "Choose the next frame explanation from October's actual product questions. Reconfirm the pictured item and permission before reuse, and leave personal clinical guidance to the exact practice."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "Specific frame shape as the visual hero.",
+              "Real temple and bridge geometry retained.",
+              "Approved lifestyle context with the same identified eyewear.",
+              "Otjiwarongo service-person moment with permission."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "What frame-shape question would you like to discuss?",
+              "One visible styling detail from the supplied item.",
+              "Personal lens needs are a practice conversation, not a poster diagnosis.",
+              "Correct Otjiwarongo appointment enquiry, without specialist service or stock claims."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "9b620454f6b8c4e260dacc5421748c1f12e45f613316bc0eb35761d09bbca8d8"
+    },
+    {
+      "row_id": "da634a01-5b83-41a4-93f0-53abe5fa9ab9",
+      "client_id": "3b85973f-bcad-49eb-b8f1-c27f7c7f1aba",
+      "client_name": "AV Event Life",
+      "strategy_month": "2026-09-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/av-event-life.md",
+          "sha256": "47333f4f6adf943dddd1ab9f78d1e4ec94833285cb6a0c04130e1bec1c8070d8",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/av-event-life.md",
+          "sha256": "e13004e7f725ce7449276c4e3f5c820708ce24bd289ab06650f9dc2e554232f1",
+          "quotes": [
+            "audiovisual and technical event-production business",
+            "what guests see versus what crew prepared",
+            "soundcheck"
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "soundcheck",
+        "crew",
+        "setup"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "b4be89f6-3cbe-458f-81f9-78d57d7f5d19",
+          "post_count": 8,
+          "post_identity_hash": "1cfe4532d704a072b886116ff7b9f5059d189aa98b88737d9c6f847e7b213999",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "0d57b251-e3fc-42df-8c81-7e9dd08ddf5d",
+          "post_count": 8,
+          "post_identity_hash": "16d9b207b03bfcff1bc14f20c77b69425ccf1826ce12d79aecff44d8d8b92779",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "e5e1ab76-5f12-431b-8787-78a68795be9b",
+          "post_count": 6,
+          "post_identity_hash": "d1d976f710d2e2102a8d890016f4d307c28e4e744d86a78bd3c4acd51ebcd31a",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "b2fb461c8188351728efe705ea9c893077595678a72b760573ad0dd2bb857173",
+        "revision_hash": "7e23035a712b7a3155c84139bccc8fe18f2b7c4a34d046363ee0340245a8d8a6",
+        "strategy_hash": "cb9b2206c04456cf3dcdb864afb2f9ac2222dc739f515a0856497beb00bd78e1",
+        "seed_hash": "a91910f742de056e66f0cfe7f952231d52b0a1584228a49c4f681a9d280fcfe3",
+        "package_hash": "145a64bfd726d2721dd2c8bc3168ca595db3586d878bd4b0e211a6c4f0557e86",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Review September's production images for the real setup decision behind the finished room: soundcheck, crew preparation and the visible AV contribution. Separate reusable technical detail from past event names and any unconfirmed footprint or equipment claims.",
+          "A permitted soundcheck moment; crew setup detail; operator preparation; the actual finished room. Explain what is visible rather than guessing specifications or repeating an event-magic slogan."
+        ],
+        "strategyGoingForward": "What guests saw depended on the setup the crew actually prepared. Show that visible production decision without inventing a technical crisis, event scale or future booking.",
+        "clientActionsRequired": [
+          "Identify permitted September setup/crew images and confirm the exact contribution shown.",
+          "Approve technical descriptions and the current enquiry contact block; do not supply old event details as a future brief."
+        ],
+        "goldStandard": {
+          "objective": "Review September's production images for the real setup decision behind the finished room: soundcheck, crew preparation and the visible AV contribution. Separate reusable technical detail from past event names and any unconfirmed footprint or equipment claims.",
+          "audienceAndIntent": "Help an event buyer explain the sound, visual or lighting requirement and see the real technical preparation behind an approved job. Do not invent an event, guest count, customer relationship or procurement commitment.",
+          "coreMessage": "What guests saw depended on the setup the crew actually prepared. Show that visible production decision without inventing a technical crisis, event scale or future booking.",
+          "formatsAndRationale": "Four photo posts can show permitted setup, soundcheck, operator and final-room details; four design posters turn those into distinct technical enquiry questions. Social management/captions are included; video, reels and animation quantities remain unknown.",
+          "mustAvoid": "No invented event dates, sponsors, crowd scale, pricing, recurring work, owned inventory, rigging certification, nationwide/Cape Town footprint or failure-proof service. Do not replace actual equipment or inflate a small production into a stadium.",
+          "channelIntegration": "Keep the service actually shown consistent on managed channels. Promotional enquiry copy follows the approved email/phone convention after freshness confirmation; informal crew images need no forced footer. No unconfirmed booking availability.",
+          "pillarsAndHooks": "A permitted soundcheck moment; crew setup detail; operator preparation; the actual finished room. Explain what is visible rather than guessing specifications or repeating an event-magic slogan.",
+          "testAndChange": "Review crew-preparation and final-room openings using available comparable response. Check recorded enquiries for a sound, visual or lighting requirement, not a presumed event booking from post volume.",
+          "successSignals": "Recorded technical briefs identifying the service requirement are useful. Covered native interactions can support creative selection; missing enquiry or job attribution stays unavailable.",
+          "nextMonthGamePlan": "Plan October as four real technical-preparation photo stories paired with four distinct buyer questions. Obtain job permissions and current service wording before selecting a recap."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "Permitted soundcheck detail.",
+              "Real crew setup with event permission.",
+              "Actual operator/preparation moment.",
+              "Finished room showing the verified contribution."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "What sound requirement does the buyer need to describe?",
+              "A screen/visual requirement tied to the shown work.",
+              "One setup decision explained without equipment specifications.",
+              "A service enquiry prompt with current confirmed contacts."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "39528faab05eb17dcc5347c9d427a2ed6f87f92025f84907d7795c720faf86d0"
+    },
+    {
+      "row_id": "117fcf9e-488f-4c52-bd14-fd09645c9ceb",
+      "client_id": "3b85973f-bcad-49eb-b8f1-c27f7c7f1aba",
+      "client_name": "AV Event Life",
+      "strategy_month": "2026-10-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/av-event-life.md",
+          "sha256": "47333f4f6adf943dddd1ab9f78d1e4ec94833285cb6a0c04130e1bec1c8070d8",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/av-event-life.md",
+          "sha256": "e13004e7f725ce7449276c4e3f5c820708ce24bd289ab06650f9dc2e554232f1",
+          "quotes": [
+            "audiovisual and technical event-production business",
+            "what guests see versus what crew prepared",
+            "soundcheck"
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "soundcheck",
+        "crew",
+        "setup"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "b4be89f6-3cbe-458f-81f9-78d57d7f5d19",
+          "post_count": 8,
+          "post_identity_hash": "1cfe4532d704a072b886116ff7b9f5059d189aa98b88737d9c6f847e7b213999",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "0d57b251-e3fc-42df-8c81-7e9dd08ddf5d",
+          "post_count": 8,
+          "post_identity_hash": "16d9b207b03bfcff1bc14f20c77b69425ccf1826ce12d79aecff44d8d8b92779",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "e5e1ab76-5f12-431b-8787-78a68795be9b",
+          "post_count": 6,
+          "post_identity_hash": "d1d976f710d2e2102a8d890016f4d307c28e4e744d86a78bd3c4acd51ebcd31a",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "fb9868b049f62d95195ac93213cc2586987cb115ad9c607305a747b528ce8b3e",
+        "revision_hash": "6970007b889c96cc193194d54378edca1378a3df36947b0b8ace9e3d0a26f0ad",
+        "strategy_hash": "9e44f5140c812edda052fbcbf2a332bb5fbc780f13621326bca6b320e1402a86",
+        "seed_hash": "6cb4b0f821d58df0c92d90d2200a807448da92208c2800d22e5a01ea91f5383d",
+        "package_hash": "145a64bfd726d2721dd2c8bc3168ca595db3586d878bd4b0e211a6c4f0557e86",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Build October around the technical brief before the event: what needs to be heard, seen or operated and how a real crew prepares it. Use soundcheck and setup photos as truthful explanation, not a promise of a future event or a fixed equipment package.",
+          "Lead with the soundcheck question, show the crew's real setup detail, explain one operator task and reveal a permitted result. Posters answer separate buyer requirements rather than claim that every job uses the same inventory."
+        ],
+        "strategyGoingForward": "Describe the moment your audience needs to hear or see, then discuss the actual setup requirement. AV Event Life's visible preparation should make the brief clearer rather than sell unmeasured spectacle.",
+        "clientActionsRequired": [
+          "Select four actual technical-preparation/result photos with job and people permission.",
+          "Approve four requirement-led poster angles and current contact wording; confirm any service-specific detail before use."
+        ],
+        "goldStandard": {
+          "objective": "Build October around the technical brief before the event: what needs to be heard, seen or operated and how a real crew prepares it. Use soundcheck and setup photos as truthful explanation, not a promise of a future event or a fixed equipment package.",
+          "audienceAndIntent": "Help an event buyer explain the sound, visual or lighting requirement and see the real technical preparation behind an approved job. Do not invent an event, guest count, customer relationship or procurement commitment.",
+          "coreMessage": "Describe the moment your audience needs to hear or see, then discuss the actual setup requirement. AV Event Life's visible preparation should make the brief clearer rather than sell unmeasured spectacle.",
+          "formatsAndRationale": "Four photo posts can show permitted setup, soundcheck, operator and final-room details; four design posters turn those into distinct technical enquiry questions. Social management/captions are included; video, reels and animation quantities remain unknown.",
+          "mustAvoid": "No invented event dates, sponsors, crowd scale, pricing, recurring work, owned inventory, rigging certification, nationwide/Cape Town footprint or failure-proof service. Do not replace actual equipment or inflate a small production into a stadium.",
+          "channelIntegration": "Keep the service actually shown consistent on managed channels. Promotional enquiry copy follows the approved email/phone convention after freshness confirmation; informal crew images need no forced footer. No unconfirmed booking availability.",
+          "pillarsAndHooks": "Lead with the soundcheck question, show the crew's real setup detail, explain one operator task and reveal a permitted result. Posters answer separate buyer requirements rather than claim that every job uses the same inventory.",
+          "testAndChange": "Compare a requirement-question caption with a visible-preparation caption for comparable approved job images. Keep the contribution factual and assess covered response or recorded technical brief detail.",
+          "successSignals": "Look for enquiries that specify sound, visual or technical support requirements. Do not claim event attendance, bookings, failure rates or commercial return from interactions.",
+          "nextMonthGamePlan": "Use October's actual technical questions to choose the next permitted job story. Refresh each event's contribution and permissions instead of assuming a recurring client or venue commitment."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "Actual soundcheck or audio-preparation image.",
+              "Real setup detail without invented hardware.",
+              "Permitted crew/operator task.",
+              "Approved result connected to the same verified contribution."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "What needs to be heard clearly at your event?",
+              "What does the audience need to see?",
+              "What technical task needs an operator? Scope to be confirmed.",
+              "Bring a specific AV brief, without a date, price or capacity promise."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "2ddad29e7b0df0f2c7751ee57aee0e4567462cd77b7adcca1a3233c81c1cc843"
+    },
+    {
+      "row_id": "50164773-6fcd-48f3-8a16-3e3995beeecf",
+      "client_id": "6b67a2df-e2ab-418b-bcee-03aef5963d37",
+      "client_name": "Braize",
+      "strategy_month": "2026-09-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/braize.md",
+          "sha256": "0e49be9227f4fdad3e54bde24bfeb2c0c00290b82a0fd0e89e335ab63fbf7dbc",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/braize.md",
+          "sha256": "b2b55c9358a605f9ccdac8c89a11c961c2e6cefc0c8712dcc57f3c9970225c06",
+          "quotes": [
+            "event-staffing / promotional-personnel positioning",
+            "not-a-catering-company distinction",
+            "busy-bar / serving / crowd-pressure moments"
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "bar",
+        "serving",
+        "staffing"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "17bc901e-71a3-4cf0-ae4c-22f43bd7cbb0",
+          "post_count": 8,
+          "post_identity_hash": "fedede0be532b69118f08882cc26d4056fe5a031e03a67209c122b2982e27450",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "005bf6ff-bf4a-48bb-9d09-16b9943f02ba",
+          "post_count": 2,
+          "post_identity_hash": "181c83655832a73ecf5efad63935cbfa4d3aa8d566d58e70a403174e5ced2bcf",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "4d024d2b-d0bd-49aa-b32c-51518f6d31c1",
+          "post_count": 12,
+          "post_identity_hash": "9241d33dbdc41f1ff9c9322552c85267fba73ed6b509c652c2a1a81f7dabb5a4",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "8386058eb89feb28f9b7c747d9893bc726354617b4862f13bf8e64f9e0191b56",
+        "revision_hash": "d9ce87346001b3ee7181a59e8d66ffdf093a1ed81af611811dff30566195c669",
+        "strategy_hash": "4fceea2af1eea44b71517a27dcd4a12bb4e4d43c6d8e504779e2367a64908f03",
+        "seed_hash": "5e95f7596b819525a8af86392be43b2b340eae70d35dcdfece65dc13d7047211",
+        "package_hash": "021b616c668c61628e6af582d4329d446560fec61e5fa5c115379dc6ca67cc38",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Review September's staffing presentation for what the bar or serving moment actually shows. Retain specific service-pressure hooks while separating past event context from unverified future availability and staffing guarantees.",
+          "A real busy-bar moment; a visible serving task; permitted staff personality; the specific event job with naming permission. Review which detail adds to the image rather than repeating a professional-staff slogan."
+        ],
+        "strategyGoingForward": "The serving moment shows the staffing job more clearly than a list of adjectives. Describe the real bar-support or event role without promising that a past team's size or service terms apply to every booking.",
+        "clientActionsRequired": [
+          "Confirm the actual role and publication permission for each selected staff/event image.",
+          "Approve current bookable role wording and contact/footer details; keep availability, training and pricing claims out unless separately confirmed."
+        ],
+        "goldStandard": {
+          "objective": "Review September's staffing presentation for what the bar or serving moment actually shows. Retain specific service-pressure hooks while separating past event context from unverified future availability and staffing guarantees.",
+          "audienceAndIntent": "Help an event buyer describe the actual bar-support, serving or promotional-staffing job. Use real service-pressure moments to explain the role, not guessed audience demographics or a national capability promise.",
+          "coreMessage": "The serving moment shows the staffing job more clearly than a list of adjectives. Describe the real bar-support or event role without promising that a past team's size or service terms apply to every booking.",
+          "formatsAndRationale": "Four photo posts show permitted actual staff/service moments; four posters ask distinct event-staffing questions. Video, reels and animation have no confirmed quota even if older creative history used them.",
+          "mustAvoid": "No invented event dates, sponsors, prices, staff numbers, recurring bookings, national reach, training/vetting/backup guarantees or mobile-bar launch. Braize is not catering. Protect staff dignity; no sexualised imagery or drinking-on-shift humour.",
+          "channelIntegration": "Keep energetic one-thought copy consistent on managed channels and tied to the actual staffing job. Public footer/contact facts need current confirmation before final copy, not a guessed website or dormant business's identity.",
+          "pillarsAndHooks": "A real busy-bar moment; a visible serving task; permitted staff personality; the specific event job with naming permission. Review which detail adds to the image rather than repeating a professional-staff slogan.",
+          "testAndChange": "Review service-action and staff-personality September images using covered responses. Read recorded enquiries for the role required; interactions do not prove availability, staffing reliability or bookings.",
+          "successSignals": "Useful signals are enquiries that identify bar support, serving or promotional staffing. Missing booking/role attribution remains unavailable, and no operational guarantee is measured by content response.",
+          "nextMonthGamePlan": "For October, pair four real service/staff images with four precise staffing questions. Confirm each depicted role and permission before selecting the angle, without adding mobile-bar or catering scope."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "Permitted real bar-support moment.",
+              "Actual serving task with correct role.",
+              "Approved staff-personality image.",
+              "Real promotional/event task without an invented sponsor relationship."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "Which serving role does the event need?",
+              "A bar-support question tied to the real service image.",
+              "One permitted staff story with dignity intact.",
+              "Ask about the exact staffing requirement, not a fixed package or guaranteed roster."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "d5abf414720b2d3e6545ad16fc35fd16cc2eeba519b0ab25574a8d8afab6c2d4"
+    },
+    {
+      "row_id": "0d532439-99de-4283-820a-d67c89ae5d36",
+      "client_id": "6b67a2df-e2ab-418b-bcee-03aef5963d37",
+      "client_name": "Braize",
+      "strategy_month": "2026-10-01",
+      "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/braize.md",
+          "sha256": "0e49be9227f4fdad3e54bde24bfeb2c0c00290b82a0fd0e89e335ab63fbf7dbc",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/braize.md",
+          "sha256": "b2b55c9358a605f9ccdac8c89a11c961c2e6cefc0c8712dcc57f3c9970225c06",
+          "quotes": [
+            "event-staffing / promotional-personnel positioning",
+            "not-a-catering-company distinction",
+            "busy-bar / serving / crowd-pressure moments"
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ],
+      "specificity_anchors": [
+        "bar",
+        "serving",
+        "staffing"
+      ],
+      "report_context": [
+        {
+          "month": "2026-07",
+          "report_id": "17bc901e-71a3-4cf0-ae4c-22f43bd7cbb0",
+          "post_count": 8,
+          "post_identity_hash": "fedede0be532b69118f08882cc26d4056fe5a031e03a67209c122b2982e27450",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-08",
+          "report_id": "005bf6ff-bf4a-48bb-9d09-16b9943f02ba",
+          "post_count": 2,
+          "post_identity_hash": "181c83655832a73ecf5efad63935cbfa4d3aa8d566d58e70a403174e5ced2bcf",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        },
+        {
+          "month": "2026-09",
+          "report_id": "4d024d2b-d0bd-49aa-b32c-51518f6d31c1",
+          "post_count": 12,
+          "post_identity_hash": "9241d33dbdc41f1ff9c9322552c85267fba73ed6b509c652c2a1a81f7dabb5a4",
+          "coverage": "Frozen identities only; September is month-to-date as of 2026-09-23. No creative winner or conversion claim."
+        }
+      ],
+      "guard": {
+        "fingerprint": "83349441c8ad59bd0ce27dc15f1a7265f73623d759cba8a619b66e8e55c7e8ef",
+        "revision_hash": "69de69de92cafe03b9470ba3d2af09b79cc39ef18e548bf8907f16c58e29070e",
+        "strategy_hash": "a11eb248fd9a9c4291a1a76a666fdf6974e1c3e3bfdbe9be21117d729f1903fb",
+        "seed_hash": "c070730a30fce0eb94b7999aa918ecc5c58696fa274d22e24fc38e71df839404",
+        "package_hash": "021b616c668c61628e6af582d4329d446560fec61e5fa5c115379dc6ca67cc38",
+        "internal_notes": null
+      },
+      "patch": {
+        "strategyDrivers": [
+          "Plan October around the staffing job an organiser needs filled: bar support, serving or a confirmed promotional role. Let real service movement and staff personality explain the brief without promising dates, team size or recurring event availability.",
+          "Open on the actual bar-support task, contrast it with a serving moment, add a permitted staff-personality image and a verified promotional-role scene. Each poster asks a different job question instead of stacking generic traits."
+        ],
+        "strategyGoingForward": "Tell Braize what the people need to do at the event. The bar or serving task sets the conversation; staffing scope and availability must be confirmed for the actual brief.",
+        "clientActionsRequired": [
+          "Supply four real approved staff/service photo subjects and confirm each role.",
+          "Approve four focused staffing-question posters and the current contact route; confirm event-specific terms separately."
+        ],
+        "goldStandard": {
+          "objective": "Plan October around the staffing job an organiser needs filled: bar support, serving or a confirmed promotional role. Let real service movement and staff personality explain the brief without promising dates, team size or recurring event availability.",
+          "audienceAndIntent": "Help an event buyer describe the actual bar-support, serving or promotional-staffing job. Use real service-pressure moments to explain the role, not guessed audience demographics or a national capability promise.",
+          "coreMessage": "Tell Braize what the people need to do at the event. The bar or serving task sets the conversation; staffing scope and availability must be confirmed for the actual brief.",
+          "formatsAndRationale": "Four photo posts show permitted actual staff/service moments; four posters ask distinct event-staffing questions. Video, reels and animation have no confirmed quota even if older creative history used them.",
+          "mustAvoid": "No invented event dates, sponsors, prices, staff numbers, recurring bookings, national reach, training/vetting/backup guarantees or mobile-bar launch. Braize is not catering. Protect staff dignity; no sexualised imagery or drinking-on-shift humour.",
+          "channelIntegration": "Keep energetic one-thought copy consistent on managed channels and tied to the actual staffing job. Public footer/contact facts need current confirmation before final copy, not a guessed website or dormant business's identity.",
+          "pillarsAndHooks": "Open on the actual bar-support task, contrast it with a serving moment, add a permitted staff-personality image and a verified promotional-role scene. Each poster asks a different job question instead of stacking generic traits.",
+          "testAndChange": "Compare a role-question caption with a visible service-action caption for comparable approved images. Keep role facts stable and assess recorded staffing requirements, not assumed event bookings.",
+          "successSignals": "Look for enquiries that describe the staffing role and actual event requirement. Do not equate engagement with booked shifts, trained capacity or a guaranteed service outcome.",
+          "nextMonthGamePlan": "Choose the next service story from October's real role enquiries and permitted work. Refresh contact and role wording before reuse; no monthly recurring-event commitment follows from this creative plan."
+        },
+        "actionPlan": {
+          "professional_video": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "Real bar-support task with correct staff identity.",
+              "Actual serving moment with event permission.",
+              "Staff personality without sexualising or drinking-on-shift implications.",
+              "Verified promotional-role moment without sponsor invention."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "What bar-support job needs to be covered?",
+              "What serving task should the organiser describe?",
+              "A specific staff/service moment, not an unsupported training promise.",
+              "Ask about the actual staffing brief; availability and terms require confirmation."
+            ],
+            "notes": "Monthly capacity: 4. These are proposed creative angles within that capacity, not booked or scheduled posts."
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        }
+      },
+      "reviewed_hash": "1b9783d538014fcb49140d7441066ac166b3f7d3bc155cb0fa3eb5319be492bd"
+    }
+  ],
+  "blocked_clients": [
+    {
+      "client_id": "0c01d90f-ba5e-4251-a597-bf3c83f990fa",
+      "client_name": "Zooz Lifestyle WFF",
+      "months": [
+        "2026-09-01",
+        "2026-10-01"
+      ],
+      "reason": "MISSING_EXACT_CLIENT_RUNTIME_GUIDE",
+      "gap": "Exact runtime guide is absent. Dossier research observations explicitly contain no exact evidence. Flexible recurring social scope is confirmed, but current brands, product/programme claims and event/athlete briefs cannot be filled from historical posts. Both months remain blocked; no substitute and no patch.",
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/zooz-lifestyle-wff.md",
+          "sha256": "be5e015d34f6b955ee911f23bde81dd6b4b95432192dd0d9734df174811f7e31",
+          "quotes": [
+            "No exact evidence available; do not fill this gap with generic copy."
+          ]
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/sep-oct-approval-publication-manifest.json",
+          "sha256": "baa8110244c9c7f37b0e488db7823d33e98b7343ffe3691e7f9e7641972d0c0a",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        }
+      ]
+    }
+  ],
+  "packet_hash": "e30210b55ba1d328bfd69b55daa10944cb1faebd03088f2c0b57ea8b5b9f648a"
+}

@@ -9,12 +9,17 @@ const DIR='artifacts/strategy-quality-amendments/issue-513/batch-1'
 const FROZEN='artifacts/client-strategy-dossiers/issue-513'
 const REPORTS='artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json'
 const read=p=>JSON.parse(readFileSync(resolve(ROOT,p),'utf8'))
-export function buildReviewedBatch() {
-  const copy=read(`${DIR}/reviewed-copy.json`), baseline=read('artifacts/strategy-quality-amendments/issue-513/canonical-quality-amendment-plan.json'), index=read(`${FROZEN}/index.json`), history=read(REPORTS)
+export function buildReviewedBatch(batch = 1) {
+  if (![1,2].includes(batch)) throw new Error('Unsupported review batch')
+  const directory = batch === 1 ? DIR : 'artifacts/strategy-quality-amendments/issue-513/batch-2'
+  const copy=read(`${directory}/reviewed-copy.json`), baseline=read(batch === 1 ? 'artifacts/strategy-quality-amendments/issue-513/canonical-quality-amendment-plan.json' : `${DIR}/canonical-quality-amendment-plan.json`), index=read(`${FROZEN}/index.json`), history=read(REPORTS)
   const candidates=index.clients.filter(c=>baseline.rows.filter(r=>r.client_id===c.id && r.disposition==='blocked' && r.package_receipt?.verification?.status==='confirmed').length===2 && c.strategy_status==='ready' && c.reports===3).sort((a,b)=>b.posts-a.posts || a.id.localeCompare(b.id))
   const selected=candidates.slice(0,10)
-  if (copy.clients.length!==10 || sha(copy.clients.map(c=>c.client_id).sort())!==sha(selected.map(c=>c.id).sort())) throw new Error('Reviewed copy does not match strongest ten qualifying clients')
-  const rows=selected.flatMap(c=>{
+  const blocked = batch === 2 ? copy.blocked_clients : []
+  const requested = [...copy.clients,...blocked]
+  if (requested.length!==10 || sha(requested.map(c=>c.client_id).sort())!==sha(selected.map(c=>c.id).sort()) || requested.some(c=>index.clients.find(i=>i.id===c.client_id)?.name!==c.client_name)) throw new Error('Reviewed copy does not match strongest ten qualifying clients')
+  if (batch === 2 && (blocked.length !== 1 || blocked[0].client_name !== 'Zooz Lifestyle WFF' || blocked[0].reason !== 'MISSING_EXACT_CLIENT_RUNTIME_GUIDE' || !blocked[0].source_receipts.length)) throw new Error('Invalid bounded evidence gap')
+  const rows=selected.filter(c=>!blocked.some(b=>b.client_id===c.id)).flatMap(c=>{
     const authored=copy.clients.find(a=>a.client_id===c.id)
     if (authored.client_name!==c.name) throw new Error('Exact dossier name mismatch')
     const sources=[sourceReceipt(`${FROZEN}/${c.file}`),sourceReceipt(`${FROZEN}/runtime-guides/${c.file}`,authored.guide_quotes),sourceReceipt(`${FROZEN}/index.json`),sourceReceipt(REPORTS)]
@@ -31,14 +36,14 @@ export function buildReviewedBatch() {
       return {...core,reviewed_hash:sha(core)}
     })
   })
-  const core={schema_version:1,issue:513,batch:1,mode:'ZERO_WRITE_REVIEWED_OVERRIDES',write_count:0,baseline_plan_hash:baseline.plan_hash,authored_copy_hash:sha(copy),selection:{rule:'Among blocked clients with confirmed package, ready exact dossier/guide and three frozen monthly reports, rank post identity coverage descending, then exact UUID. Coverage is not performance.',qualifying:candidates.map(c=>({client_id:c.id,name:c.name,reports:c.reports,posts:c.posts})),selected:selected.map(c=>c.id)},rows}
+  const core={schema_version:1,issue:513,batch,mode:'ZERO_WRITE_REVIEWED_OVERRIDES',write_count:0,baseline_plan_hash:baseline.plan_hash,authored_copy_hash:sha(copy),selection:{rule:'Among blocked clients with confirmed package, ready exact dossier/guide and three frozen monthly reports, rank post identity coverage descending, then exact UUID. Coverage is not performance.',qualifying:candidates.map(c=>({client_id:c.id,name:c.name,reports:c.reports,posts:c.posts})),selected:selected.map(c=>c.id)},rows,...(batch === 2 ? {blocked_clients:blocked} : {})}
   const packet={...core,packet_hash:sha(core)}
   indexOverrides(packet)
   return packet
 }
 if (process.argv[1] && import.meta.url===pathToFileURL(resolve(process.argv[1])).href) {
-  if (process.argv.length!==2) throw new Error('Offline build has no apply or alternate input mode')
-  const packet=buildReviewedBatch()
-  writeFileSync(resolve(ROOT,DIR,'reviewed-overrides.json'),`${JSON.stringify(packet,null,2)}\n`)
+  if (process.argv.length>3 || (process.argv[2] && process.argv[2]!=='2')) throw new Error('Offline build accepts only optional batch 2; no apply mode')
+  const packet=buildReviewedBatch(process.argv[2] ? 2 : 1)
+  writeFileSync(resolve(ROOT,`artifacts/strategy-quality-amendments/issue-513/batch-${packet.batch}`,'reviewed-overrides.json'),`${JSON.stringify(packet,null,2)}\n`)
   console.log(JSON.stringify({packet_hash:packet.packet_hash,clients:packet.selection.selected.length,rows:packet.rows.length}))
 }
