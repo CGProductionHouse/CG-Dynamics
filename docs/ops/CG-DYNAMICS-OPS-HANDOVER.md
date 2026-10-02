@@ -89,7 +89,9 @@ OAuth start/callback/confirm ACTIVE v6/v7/v6; deauthorize/deletion v2/v2; Meta s
 - Final pilot state: `closed_lost` / `poor` / `other`, note `pilot test`; audit `new→qualified/good`, `qualified→closed_lost/poor` (staff). Nothing deleted.
 - **No email sent.** Delivery worker/webhook undeployed, provider OFF, 0 provider events.
 
-**Next (separate, CA-gated):** outbound email activation (provider approval, CG sending domain/DNS, six delivery secrets, worker/webhook deploy, schedule, delivered/bounced acceptance). The pending pilot job stays pending; decide whether to suppress it before the worker is ever enabled so the "DO NOT ACTION" test is not mailed to Piek.
+**Pilot delivery job suppressed (2 Oct, 14:38 SAST, CA-approved #631 packet).** #631 merged `b405b5ca50710f0b69a2c59409461ba4aa866cf7`; migration `20261002140000_website_enquiry_delivery_suppression` applied ledger-exact (ledger 152, MD5 `fe8981ff…` matches GitHub). As CG admin: preflight listed exactly the Piek pilot job (recipient `admin@piekgroup.co.za`); `suppress_website_enquiry_delivery` → job `74112f4d-8021-43f0-aaa1-f0cff3038abe` `pending → suppressed` (`acceptance_test`, note `Piek #405 production pilot - DO NOT ACTION`). Preflight now empty; 0 sendable jobs; 0 provider events; enquiry/event/lead evidence unchanged. No provider/worker/webhook/schedule/DNS/secret touched.
+
+**Next (separate, CA-gated):** outbound email activation only — provider approval, CG sending domain/DNS, six delivery secrets, worker/webhook deploy (`verify_jwt=false`), webhook registration, schedule, delivered/bounced acceptance. Precondition: `website_enquiry_delivery_preflight()` shows no acceptance/test job (currently satisfied).
 
 ### #405 Website enquiries — activation history (2 October, 11:58 SAST)
 

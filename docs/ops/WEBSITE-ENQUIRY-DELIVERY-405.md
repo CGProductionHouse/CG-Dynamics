@@ -98,6 +98,14 @@ for `other`) are enforced together by `website_enquiry_delivery_suppression_comp
   still send (`pending`/`reconcile`): receipt, client, Website, recipient, contact email,
   subject. No message body.
 
+### Executed 2 Oct 2026 (CA-approved)
+
+Steps 1–2 below are **done**: migration `20261002140000` applied ledger-exact (ledger 151→152,
+MD5 `fe8981ff68908d4f08d36672d1ccac13` = GitHub file); Piek pilot job
+`74112f4d-8021-43f0-aaa1-f0cff3038abe` suppressed `pending → suppressed`, reason
+`acceptance_test`, by the CG admin profile; preflight now empty; 0 sendable jobs; 0 provider
+events. Only step 3 (email activation) remains, under a separate CA approval.
+
 ### Protected activation gate (CA) — exact order
 
 1. Apply `20261002140000_website_enquiry_delivery_suppression.sql` through the same
@@ -111,9 +119,10 @@ for `other`) are enforced together by `website_enquiry_delivery_suppression_comp
    set local role authenticated;
    select set_config('request.jwt.claims', json_build_object('sub', '<active CG admin profile id>', 'role', 'authenticated')::text, true);
    select * from public.website_enquiry_delivery_preflight();
-   select public.suppress_website_enquiry_delivery(job.id, 'acceptance_test', 'Piek #405 production pilot - DO NOT ACTION')
-   from public.website_enquiry_delivery_jobs job
-   where job.enquiry_id = '8a7ec21d-4c64-40f3-9b81-120f05f8c87c' and job.delivery_state = 'pending';
+   -- `authenticated` has no table access by design: take the job id from the preflight.
+   select public.suppress_website_enquiry_delivery(p.job_id, 'acceptance_test', 'Piek #405 production pilot - DO NOT ACTION')
+   from public.website_enquiry_delivery_preflight() p
+   where p.enquiry_id = '8a7ec21d-4c64-40f3-9b81-120f05f8c87c' and p.delivery_state = 'pending';
    commit;
    ```
    Expect `{"applied": true, "state": "suppressed", "from": "pending"}` and the job absent
