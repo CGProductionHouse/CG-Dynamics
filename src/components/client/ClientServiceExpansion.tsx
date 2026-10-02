@@ -1,37 +1,35 @@
 import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { readMyServiceEntitlements, recordServiceSurface, requestServiceExpansion } from '../../lib/clientServiceEntitlements'
-import { SERVICE_COPY, SERVICE_KEYS, servicePresentation, type ServiceEntitlement } from '../../lib/clientServicePresentation'
+import { SERVICE_COPY, servicePresentation, visibleClientServices, type ServiceEntitlement } from '../../lib/clientServicePresentation'
 import { PerformanceProviderIcon } from './PerformanceProviderIcon'
 
 export function ClientServiceExpansion({ surface = 'performance' }: { surface?: 'overview' | 'performance' }) {
   const { profile } = useAuth()
   const identity = `${profile?.id}:${profile?.client_id}`
-  const [result, setResult] = useState<{ identity: string; items: ServiceEntitlement[]; error?: boolean } | null>(null)
+  const [result, setResult] = useState<{ identity: string; surface: string; items: ServiceEntitlement[] } | null>(null)
   const viewKey = useRef(crypto.randomUUID())
   useEffect(() => {
     let current = true
     if (!profile?.client_id) return
     void readMyServiceEntitlements().then(items => {
       if (!current) return
-      setResult({ identity, items })
+      setResult({ identity, surface, items })
       // Measurement failure must not masquerade as a failed entitlement read.
-      void recordServiceSurface(surface, viewKey.current).catch(() => undefined)
-    }).catch(() => { if (current) setResult({ identity, items: [], error: true }) })
+      if (visibleClientServices(items, surface).length) void recordServiceSurface(surface, viewKey.current).catch(() => undefined)
+    }).catch(() => { if (current) setResult({ identity, surface, items: [] }) })
     return () => { current = false }
   }, [identity, profile?.client_id, surface])
   if (!profile?.client_id) return null
-  const current = result?.identity === identity ? result : null
-  const items = SERVICE_KEYS.map(key => current?.items.find(item => item.service_key === key) ?? {
-    service_key: key, state: 'unknown' as const, connection: 'unavailable' as const, verified_at: null, requested_at: null,
-  }).filter(item => surface === 'performance' || item.state === 'not_included').slice(0, surface === 'overview' ? 2 : 7)
-  if (surface === 'overview' && !items.length) return null
+  const current = result?.identity === identity && result.surface === surface ? result : null
+  const items = visibleClientServices(current?.items ?? null, surface)
+  // Absent migration, loading, failed reads and unverified scope are invisible
+  // on client surfaces. Rollout diagnostics belong in admin Package Master.
+  if (!items.length) return null
   return <section aria-labelledby={`services-${surface}`} className="mt-16 border-t border-report-line pt-10 sm:mt-20 sm:pt-14">
     <p className="text-xs font-black uppercase tracking-[0.24em] text-report-accent">Your next chapter</p>
     <h2 id={`services-${surface}`} className="mt-3 text-3xl font-black tracking-tight text-report-text sm:text-5xl">A presence with purpose.</h2>
     <p className="mt-4 max-w-2xl text-base leading-7 text-report-muted">Your verified services, and thoughtful ways to extend your reach. Every addition starts with a conversation, not an automatic package change.</p>
-    {!current && <p role="status" className="mt-5 text-sm text-report-muted">Checking your verified services…</p>}
-    {current?.error && <p role="status" className="mt-5 text-sm text-report-muted">Service verification is temporarily unavailable. Your package has not changed.</p>}
     <div className="mt-8 divide-y divide-report-line">
       {items.map(item => <ServiceStory key={`${identity}:${item.service_key}`} item={item} surface={surface} />)}
     </div>

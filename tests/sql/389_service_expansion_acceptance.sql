@@ -99,7 +99,7 @@ set role authenticated; set request.jwt.claim.sub='10000000-0000-0000-0000-00000
 select check389((select value->>'connection'='needs_connection' from jsonb_array_elements(get_my_client_service_entitlements()) where value->>'service_key'='instagram'),'standalone exact asset client guard');
 select record_client_service_surface('performance','30000000-0000-0000-0000-000000000005');
 reset role;
-select check389((select count(*)=7 from planner_activity_log where action='client_service_surface_shown' and metadata->>'view_key'='30000000-0000-0000-0000-000000000005'),'seven measured states including unknown');
+select check389((select count(*)=2 from planner_activity_log where action='client_service_surface_shown' and metadata->>'view_key'='30000000-0000-0000-0000-000000000005'),'only verified visible states are measured');
 set role authenticated; set request.jwt.claim.sub='10000000-0000-0000-0000-000000000003';
 select check389((select value->>'requests'='1' and value->>'surface_views'='2' from jsonb_array_elements(get_client_service_expansion_review('20000000-0000-0000-0000-000000000001')) where value->>'service_key'='linkedin'),'manager exact request/view measurements');
 select check389((select value->>'requests'='0' from jsonb_array_elements(get_client_service_expansion_review('20000000-0000-0000-0000-000000000002')) where value->>'service_key'='linkedin'),'measurement exact-client isolation');

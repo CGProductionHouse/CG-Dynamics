@@ -145,7 +145,8 @@ begin
     select s.key as service_key,coalesce(e.state,'unknown') as state
     from unnest(array['linkedin','google_ads','meta_ads','instagram','tiktok','google_business_profile','website_digital_experience']) with ordinality s(key,position)
     left join public.client_service_entitlements e on e.client_id=v_actor.client_id and e.service_key=s.key
-    where p_surface='performance' or e.state='not_included'
+    where e.verified_at is not null
+      and ((p_surface='performance' and e.state in ('included','not_included','not_applicable')) or (p_surface='overview' and e.state='not_included'))
     order by s.position limit case when p_surface='overview' then 2 else 7 end
   loop
     insert into public.planner_activity_log(entity_type,entity_id,action,actor_user_id,actor_name,metadata)

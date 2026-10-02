@@ -52,13 +52,18 @@ try {
   for (const [name, width, height] of [['desktop',1440,1000],['mobile',390,844]]) {
     const page = await browser.newPage({ viewport: { width, height } })
     const errors = []; const requests = []; let failOnce = true; let receipt = null; let verifyPayload
+    let scenario = 'mixed'; let releaseRead; let measurements = 0
     page.on('pageerror', error => errors.push(error.message))
     await page.route('http://127.0.0.1:1/rest/v1/**', async route => {
       const url = route.request().url()
       const payload = route.request().postDataJSON()
       if (url.includes('/rpc/get_my_client_service_entitlements')) {
+        if (scenario === 'loading') await new Promise(resolve => { releaseRead = resolve })
+        const failure = { missing_rpc: ['PGRST202',404], missing_schema: ['42P01',404], read_failure: ['XX000',503] }[scenario]
+        if (failure) { await route.fulfill({ status: failure[1], json: { code: failure[0], message: 'Local rollout failure fixture' } }); return }
+        if (scenario === 'malformed') { await route.fulfill({ json: [] }); return }
         const identity = await page.evaluate(() => window.fixtureProfile.client_id)
-        const rows = keys.map((service_key,i) => ({ service_key, state: identity === 'fixture-a' ? states[i] : 'unknown',
+        const rows = keys.map((service_key,i) => ({ service_key, state: scenario === 'all_unknown' || identity !== 'fixture-a' ? 'unknown' : scenario === 'three_opportunities' && [0,4,5].includes(i) ? 'not_included' : states[i],
           connection: i === 3 ? 'connected' : i === 1 ? 'needs_connection' : 'unavailable', verified_at: '2026-10-02T12:00:00Z', requested_at: identity === 'fixture-a' && i === 0 ? receipt : null }))
         await route.fulfill({ json: rows })
       } else if (url.includes('/rpc/submit_client_service_expansion_request')) {
@@ -66,6 +71,7 @@ try {
         if (failOnce) { failOnce = false; await route.fulfill({ status: 503, json: { message: 'Fixture ambiguous failure' } }) }
         else { receipt = '2026-10-02T12:01:00Z'; await route.fulfill({ json: { submitted_at: receipt, replayed: false } }) }
       } else if (url.includes('/rpc/record_client_service_surface')) {
+        measurements += 1
         await route.fulfill({ body: '', status: 204 })
       } else if (url.includes('/rpc/get_client_service_expansion_review')) {
         await route.fulfill({ json: [] })
@@ -77,10 +83,11 @@ try {
     })
     await page.goto(`${server.resolvedUrls.local[0]}__389`, { waitUntil: 'domcontentloaded' })
     await page.getByText('Included · connected', { exact: true }).waitFor()
-    assert.equal(await page.locator('article').count(),7)
+    assert.equal(await page.locator('article').count(),6)
     assert.equal(await page.getByRole('button',{name:/Ask CG about this/}).count(),2)
     assert.equal(await page.getByText('Included · connection needed',{exact:true}).count(),1)
-    assert.equal(await page.getByText('Package verification pending',{exact:true}).count(),1)
+    assert.equal(await page.getByText('Package verification pending',{exact:true}).count(),0)
+    assert.equal(await page.getByRole('heading',{name:'TikTok',exact:true}).count(),0)
     assert.equal(await page.locator('vite-error-overlay').count(),0)
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${name} overflow`)
     await page.screenshot({ path: join(tmpdir(),`cg-389-${name}.png`), fullPage:true })
@@ -98,9 +105,12 @@ try {
     await page.getByRole('button',{name:'overview',exact:true}).click()
     await page.getByText(/Request received/).waitFor()
     assert.equal(await page.locator('article').count(),2)
+    const switchedRead = page.waitForResponse(response => response.url().includes('/rpc/get_my_client_service_entitlements'))
     await page.evaluate(() => window.switchFixture('fixture-b'))
     await page.getByRole('button',{name:'performance',exact:true}).click()
-    await page.waitForFunction(() => document.querySelectorAll('article').length === 7 && [...document.querySelectorAll('article')].every(a=>a.textContent.includes('Package verification pending')))
+    await switchedRead
+    await page.waitForLoadState('networkidle')
+    assert.equal(await page.locator('[aria-labelledby^="services-"]').count(),0)
     assert.equal(await page.getByText(/Request received/).count(),0)
     assert.equal(await page.getByRole('button',{name:/Ask CG about this/}).count(),0)
     await page.getByRole('button',{name:'admin',exact:true}).click()
@@ -115,9 +125,44 @@ try {
     assert.equal(verifyPayload.p_client_id,'fixture-b')
     assert.equal(verifyPayload.p_expected_revision,0)
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${name} admin overflow`)
+
+    // A fresh mount must stay invisible for an in-flight read as well as every
+    // absent-migration/error/unknown case. These execute the actual RPC helper,
+    // parser, effects and rendered component, not a duplicated fake selector.
+    scenario = 'loading'
+    const loadingRequest = page.waitForRequest(request => request.url().includes('/rpc/get_my_client_service_entitlements'))
+    await page.reload({ waitUntil: 'domcontentloaded' })
+    await loadingRequest
+    assert.equal(await page.locator('[aria-labelledby^="services-"]').count(),0)
+    releaseRead()
+    await page.getByText('Included · connected',{exact:true}).waitFor()
+    await page.waitForLoadState('networkidle')
+    for (const failureScenario of ['missing_rpc','missing_schema','read_failure','all_unknown','malformed']) {
+      scenario = failureScenario
+      const before = measurements
+      await page.reload({ waitUntil: 'networkidle' })
+      for (const surface of ['performance','overview']) {
+        if (surface === 'overview') {
+          const read = page.waitForResponse(response => response.url().includes('/rpc/get_my_client_service_entitlements'))
+          await page.getByRole('button',{name:surface,exact:true}).click()
+          await read; await page.waitForLoadState('networkidle')
+        }
+        assert.equal(await page.locator('[aria-labelledby^="services-"]').count(),0,`${name} ${failureScenario} ${surface} has no module`)
+        assert.equal(await page.locator('article').count(),0)
+        assert.equal(await page.getByRole('button',{name:/Ask CG about this/}).count(),0)
+        assert.equal(await page.getByText(/Package verification pending|Checking your verified services|Service verification is temporarily unavailable/).count(),0)
+      }
+      assert.equal(measurements,before,`${name} hidden ${failureScenario} is not measured`)
+    }
+    scenario = 'three_opportunities'
+    await page.reload({waitUntil:'networkidle'})
+    await page.getByRole('button',{name:'overview',exact:true}).click()
+    await page.getByRole('heading',{name:'TikTok',exact:true}).waitFor()
+    assert.equal(await page.locator('article').count(),2,`${name} Overview caps three verified opportunities at two`)
+    assert.equal(await page.getByRole('heading',{name:'Google Business Profile',exact:true}).count(),0)
     assert.deepEqual(errors,[])
     await page.close()
-    console.log(`PASS ${name}: seven states, CTAs, safe exact retry, durable receipt, Overview/Performance switch, client-switch isolation, admin evidence, no overflow/runtime errors`)
+    console.log(`PASS ${name}: verified-only states, no UI for loading/missing RPC/schema/read failure/all unknown/malformed reads, Overview max two, no hidden-view measurement, safe retry/receipt, route/client switching, admin evidence, no overflow/runtime errors`)
   }
 } finally {
   if (browser) await browser.close()

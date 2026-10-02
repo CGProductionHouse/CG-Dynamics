@@ -35,3 +35,22 @@ test('client submission helper sends no trusted client/actor/board/price or pack
   assert.doesNotMatch(seam, /client_id|actor|board|bucket|price|assigned/)
   assert.doesNotMatch(source, /package_settings|socialProviderEligibility|\.insert\(|\.update\(|\.upsert\(/)
 })
+
+test('client rollout selection hides absent/read-failed/all-unknown data and only exposes verified states', async () => {
+  const server = await createServer({ server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true, include: [] }, configFile: false })
+  try {
+    const { SERVICE_KEYS, visibleClientServices } = await server.ssrLoadModule('/src/lib/clientServicePresentation.ts')
+    for (const surface of ['overview', 'performance']) {
+      assert.deepEqual(visibleClientServices(null, surface), [])
+      assert.deepEqual(visibleClientServices([], surface), [])
+      assert.deepEqual(visibleClientServices(SERVICE_KEYS.map(service_key => ({ service_key, state: 'unknown', verified_at: '2026-10-02' })), surface), [])
+      assert.deepEqual(visibleClientServices(SERVICE_KEYS.map(service_key => ({ service_key, state: 'not_included', verified_at: null })), surface), [])
+    }
+    const rows = SERVICE_KEYS.map((service_key, i) => ({ service_key,
+      state: ['included','not_included','not_applicable','unknown','not_included','not_included','included'][i],
+      verified_at: '2026-10-02', connection: 'needs_connection', requested_at: null }))
+    assert.deepEqual(visibleClientServices(rows, 'performance').map(row => row.service_key), SERVICE_KEYS.filter(key => key !== 'instagram'))
+    assert.deepEqual(visibleClientServices(rows, 'overview').map(row => row.service_key), ['google_ads','tiktok'])
+    assert.equal(visibleClientServices([{ ...rows[0], verified_at: 'invalid' }], 'performance').length, 0)
+  } finally { await server.close() }
+})
