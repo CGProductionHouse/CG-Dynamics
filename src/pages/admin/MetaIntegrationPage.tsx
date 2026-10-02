@@ -1766,6 +1766,7 @@ export default function MetaIntegrationPage() {
         linkedAssets={linkedAssets}
         providerPages={pages}
         providerAssetsLoaded={assetsLoaded}
+        providerPagesAvailable={pagesDiagnostic?.available === true}
         onLoadProviderAssets={() => { void loadAssets() }}
         onCanonicalMappingChanged={loadLinkedAssets}
       />
