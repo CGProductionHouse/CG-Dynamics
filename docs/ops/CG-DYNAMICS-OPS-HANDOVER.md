@@ -6,6 +6,16 @@ Updated: **2 October 2026** after #623 UI PR reconciliation and canonical Websit
 
 This file is intentionally current-state-first. Historical failed attempts are summarized only where they prevent repeated work.
 
+### #505 Instagram-only executable queue — 2 October
+
+Read-only current-main baseline `2e6d14484319b4b48d3180b676e29032e4c77ab3` and #505 supervisor comment 5949760923. Production: 57 active / 47 recurring-social eligible / 10 excluded / 0 scope-held; 22 canonical Instagram / 25 unmapped; standalone connections/tokens/states/callback receipts 0/0/0/0. Authenticated staff Chrome Page-first discovery exposes no Instagram option for the 25: 15 saved Pages loaded without an IG option, Red Oak's saved Page absent, nine no saved Page. This is not complete provider inventory (discovery limit/access boundaries), nor proof an account does not exist. Suggestions for Neshora/WiseRide are not mappings.
+
+All eight reviewed handles preserved; remaining 17 exact identity holds investigated: nine populated supporting local Instagram records, eight blank/no matching record, no new verified public identity or guessed handle. Credentials were neither emitted nor used. **Zero presently CONNECTABLE**: owner professional-account/consent proof and shared provider/config gates remain. Full 25-client evidence/actions: `INSTAGRAM-505-ROLLOUT-MATRIX-2026-10-02.md`.
+
+Verification: 91 focused passes / 16 disposable-DB skips / 0 failures; 25-name/eight-handle canonical manifest assertion, TypeScript/Vite build, scoped lint and diff check PASS. Docs only; no runtime changes or new production UI deployment required.
+
+OAuth start/callback/confirm ACTIVE v6/v7/v6; deauthorize/deletion v2/v2; Meta sync/worker v53/v40. Completed #595/#600 and credential-expiry deployment are satisfied; do not replay. App secret absent, activation literal false, APP_PUBLIC_URL still old Vercel origin (names/structural checks only). Next protected packet is #598 secret + canonical public origin + five legal/callback saves/readbacks with activation OFF, not a bulk connection approval. Meta dashboard deliberately untouched; Oct 1 provider review state needs fresh CA readback. No Website/TikTok/provider/config/OAuth/sync/mapping/data/deployment action; #505 stays OPEN.
+
 ### #611 overnight safe lane — 1 October
 
 - Baseline main: `04fe827ad2f724fcfe5af211541f776a67dfa85c`. No merge, deploy, config/provider/OAuth or production data/schema writes are authorized in this lane.
