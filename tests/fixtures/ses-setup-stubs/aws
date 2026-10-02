@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Test stub for the AWS CLI used by tests/sesSetupScript.test.mjs. Logs every call; returns
+# canned, deterministic output. Never contacts AWS.
+printf '%s\n' "$*" >> "$STUB_LOG"
+args=" $* "
+case "$args" in
+  *" sts get-caller-identity "*) echo 123456789012 ;;
+  *" account get-region-opt-status "*) echo "${STUB_OPT:-ENABLED}" ;;
+  *" get-account "*"PricingAttributes.CurrentPlan"*) echo "${STUB_PLAN:-NONE}" ;;
+  *" get-account "*"VdmAttributes.VdmEnabled"*) echo "${STUB_VDM:-None}" ;;
+  *" get-account "*"ProductionAccessEnabled"*) echo "${STUB_PROD:-False}" ;;
+  *" list-dedicated-ip-pools "*) echo "${STUB_POOLS:-0}" ;;
+  *" get-configuration-set "*) exit 254 ;;
+  *" get-email-identity "*"DkimAttributes.Tokens"*) printf 'tokaaa\ttokbbb\ttokccc\n' ;;
+  *" get-email-identity "*"SigningHostedZone"*) echo dkim.amazonses.com ;;
+  *" get-email-identity "*) exit 254 ;;
+  *" get-configuration-set-event-destinations "*) echo 0 ;;
+  *" list-subscriptions-by-topic "*) echo None ;;
+  *" iam get-user "*) exit 254 ;;
+  *" iam list-access-keys "*) echo "${STUB_KEYS:-0}" ;;
+  *" iam create-access-key "*) printf 'AKIASTUBSTUBSTUBSTUB\tSTUBSECRETSTUBSECRETSTUBSECRETSTUBSECRET\n' ;;
+  *) : ;;
+esac
+exit 0

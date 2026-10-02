@@ -21,6 +21,10 @@ on:
       - 'supabase/functions/website-enquiry-ses-events/**'
       - 'scripts/website-enquiry-ses-acceptance.mjs'
       - 'tests/websiteEnquirySes.test.mjs'
+      - 'scripts/ops/ses-af-south-1-setup.sh'
+      - 'scripts/ops/ses-setup-verify.mjs'
+      - 'tests/sesSetupScript.test.mjs'
+      - 'tests/fixtures/ses-setup-stubs/**'
       - 'tests/websiteEnquirySesTrust.test.mjs'
       - 'tests/helpers/snsTestPki.mjs'
       - 'tests/fixtures/sns-trust/**'
@@ -62,6 +66,7 @@ jobs:
       - run: node scripts/website-enquiry-delivery-suppression-acceptance.mjs
       - run: node --test tests/websiteEnquirySes.test.mjs tests/websiteEnquirySesTrust.test.mjs
       - run: node scripts/website-enquiry-ses-acceptance.mjs
+      - run: node --test tests/sesSetupScript.test.mjs
       - run: node --test tests/websiteEnquiryIntake.test.mjs
       - run: node scripts/website-enquiry-intake-acceptance.mjs
   deno-check:

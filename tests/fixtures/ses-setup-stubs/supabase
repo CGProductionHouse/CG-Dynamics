@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Test stub for the Supabase CLI used by tests/sesSetupScript.test.mjs. Captures what would be
+# stored (so tests can prove secrets reach Supabase/Vault but never stdout). Never contacts Supabase.
+printf '%s\n' "$*" >> "$STUB_LOG"
+args=("$@")
+for ((i = 0; i < ${#args[@]}; i++)); do
+  case "${args[$i]}" in
+    --env-file) cat "${args[$((i + 1))]}" >> "$STUB_SECRETS" ;;
+    -f) cat "${args[$((i + 1))]}" >> "$STUB_VAULT" ;;
+  esac
+done
+if [[ "$1 $2" == "secrets list" ]]; then printf 'NAME\n%s\n' "${STUB_SECRET_NAMES:-SUPABASE_URL}"; fi
+exit 0
