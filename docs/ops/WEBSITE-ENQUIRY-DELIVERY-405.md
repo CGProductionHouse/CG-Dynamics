@@ -130,3 +130,57 @@ events. Only step 3 (email activation) remains, under a separate CA approval.
 3. **Activation precondition:** the preflight returns no acceptance/test job. Only then
    approve the provider, verify the CG sending domain (DNS), set the six secrets, deploy
    worker + webhook (`verify_jwt = false`), register the webhook and schedule the worker.
+
+## Amazon SES transport (primary fleet transport — code ready, inert)
+
+Decision (#405, 2 Oct): **Amazon SES à-la-carte** with shared IPs is the primary transport.
+Resend stays inactive; Afrihost SMTP is a bounded fallback only. Client websites are
+unchanged — SES sits behind the provider-neutral outbox.
+
+**Code (no AWS SDK; WebCrypto only)**
+- `_shared/awsSigV4.ts` — SigV4 signer, verified against AWS's published IAM example.
+- `_shared/websiteEnquirySes.ts` — SES v2 `SendEmail` request (approved From, visitor
+  Reply-To only, `ConfigurationSetName`, tag `cg_delivery_key=<delivery_key>`), response
+  classification, SNS signature verification (cert URL pinned to `sns.<region>.amazonaws.com`,
+  SHA1/SHA256 RSA), SES event mapping.
+- `_shared/websiteEnquiryProviders.ts` — `WEBSITE_ENQUIRY_EMAIL_PROVIDER=ses|resend`, fail-closed.
+- Worker dispatches by provider. **SES has no idempotency key**: a 5xx / lost response is
+  `ambiguous → reconcile` and is **never auto-replayed** (replay stays Resend-only).
+  SES reconcile jobs resolve from SES's own evidence: any SES event carrying the job's
+  `cg_delivery_key` tag (incl. `Send`) resolves `found` with the SES MessageId.
+- `website-enquiry-ses-events` (`verify_jwt = false`) — SNS HTTPS endpoint: topic ARN must
+  equal `WEBSITE_ENQUIRY_SES_SNS_TOPIC_ARN`; signature verified before anything is stored or a
+  subscription confirmed; Delivery → `delivered`, permanent Bounce / Reject → `bounced`,
+  Complaint → `complained` (new terminal state), transient bounce / delay ignored. Stored in
+  the durable provider-event inbox (keyed by SNS MessageId) before 2xx; storage failure → 5xx.
+- Migration `20261002160000_website_enquiry_delivery_ses_events.sql` (**unapplied**): adds
+  `complained` state/event + `complained_at`; redefines event processing with the same
+  lock/never-regress rules. Rehearsed over a production-shaped suppressed job.
+
+Classification: 2xx with `MessageId` → accepted; 2xx without id, 5xx, lost response →
+ambiguous; 429 / throttling / sending-paused / account / credential errors → retryable (not
+sent); other 4xx (e.g. `MessageRejected`) → permanent.
+
+**Secrets (names only)** — `WEBSITE_ENQUIRY_EMAIL_ENABLED`, `WEBSITE_ENQUIRY_EMAIL_PROVIDER=ses`,
+`WEBSITE_ENQUIRY_EMAIL_FROM`, `WEBSITE_ENQUIRY_SES_REGION`, `WEBSITE_ENQUIRY_SES_ACCESS_KEY_ID`,
+`WEBSITE_ENQUIRY_SES_SECRET_ACCESS_KEY`, `WEBSITE_ENQUIRY_SES_CONFIGURATION_SET`,
+`WEBSITE_ENQUIRY_SES_SNS_TOPIC_ARN`, `WEBSITE_ENQUIRY_WORKER_SECRET`.
+
+### SES protected activation gate (CA) — exact order
+1. Merge the SES PR; apply `20261002160000` ledger-exact; deploy `website-enquiry-delivery-worker`
+   and `website-enquiry-ses-events` from the merge commit.
+2. AWS (CA): choose region; confirm **à-la-carte** pricing, shared IPs, no dedicated IP / VDM /
+   paid add-ons (warn before any recurring-cost feature).
+3. Verify `notify.cgdynamics.co.za` in SES (Easy DKIM CNAMEs + custom MAIL FROM MX/TXT) — records
+   added at the existing cgdynamics.co.za DNS host only; root mail untouched.
+4. Request SES production access (sandbox: 200/24h, 1/s, verified recipients only).
+5. Create a configuration set (e.g. `cg-dynamics-events`) with event destination → SNS topic for
+   Send, Delivery, Bounce, Complaint, Reject; HTTPS subscription to
+   `https://ehtjfntukiwbgptqgbzy.supabase.co/functions/v1/website-enquiry-ses-events`
+   (auto-confirmed by the function only for the configured topic).
+6. IAM user/role with **only** `ses:SendEmail` on the verified identity + configuration set.
+7. CA sets the secrets above from a terminal (never pasted into GitHub/chat); keep
+   `WEBSITE_ENQUIRY_EMAIL_ENABLED` unset; worker secret also in Vault for the schedule.
+8. Agent: verify names, schedule worker (reads Vault), confirm `state: disabled`; with CA approval
+   enable; one CG-owned acceptance send (→ delivered via SNS) and the SES mailbox simulator
+   (`bounce@simulator.amazonses.com`, `complaint@simulator.amazonses.com`) for bounce/complaint.

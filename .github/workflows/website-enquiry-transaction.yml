@@ -14,6 +14,13 @@ on:
       - 'src/lib/websiteLeads.ts'
       - 'supabase/migrations/*website_enquiry_delivery_runtime.sql'
       - 'supabase/migrations/*website_enquiry_delivery_suppression.sql'
+      - 'supabase/migrations/*website_enquiry_delivery_ses_events.sql'
+      - 'supabase/functions/_shared/awsSigV4.ts'
+      - 'supabase/functions/_shared/websiteEnquirySes*.ts'
+      - 'supabase/functions/_shared/websiteEnquiryProviders.ts'
+      - 'supabase/functions/website-enquiry-ses-events/**'
+      - 'scripts/website-enquiry-ses-acceptance.mjs'
+      - 'tests/websiteEnquirySes.test.mjs'
       - 'scripts/website-enquiry-delivery-suppression-acceptance.mjs'
       - 'tests/sql/405_website_enquiry_delivery_suppression_acceptance.sql'
       - 'tests/websiteEnquiryDeliverySuppression.test.mjs'
@@ -48,6 +55,8 @@ jobs:
       - run: node scripts/website-enquiry-delivery-acceptance.mjs
       - run: node --test tests/websiteEnquiryDeliverySuppression.test.mjs
       - run: node scripts/website-enquiry-delivery-suppression-acceptance.mjs
+      - run: node --test tests/websiteEnquirySes.test.mjs
+      - run: node scripts/website-enquiry-ses-acceptance.mjs
       - run: node --test tests/websiteEnquiryIntake.test.mjs
       - run: node scripts/website-enquiry-intake-acceptance.mjs
   deno-check:
@@ -58,4 +67,4 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-      - run: deno check --no-lock --node-modules-dir=none supabase/functions/website-enquiry-delivery-worker/index.ts supabase/functions/website-enquiry-delivery-webhook/index.ts supabase/functions/website-enquiry-intake/index.ts
+      - run: deno check --no-lock --node-modules-dir=none supabase/functions/website-enquiry-delivery-worker/index.ts supabase/functions/website-enquiry-delivery-webhook/index.ts supabase/functions/website-enquiry-intake/index.ts supabase/functions/website-enquiry-ses-events/index.ts
