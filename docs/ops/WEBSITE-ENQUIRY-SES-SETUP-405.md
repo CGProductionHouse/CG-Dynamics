@@ -95,6 +95,15 @@ reused only when both SES credential secrets exist, otherwise the run stops befo
   `supabase db query --linked --project-ref` (`--project-ref` alone is rejected by the CLI).
 - af-south-1 SNS signing certificates are issued to `sns-signing.af-south-1.amazonaws.com` /
   `sns.af-south-1.amazonaws.com` only (no `sns.amazonaws.com` SAN). Trust accepts a regional SAN
-  only when it equals the validated SigningCertURL host; the Amazon chain and pinned roots are
-  unchanged. Before this fix the endpoint answered the SubscriptionConfirmation with
-  `401 untrusted_certificate`, leaving the subscription `PendingConfirmation`.
+  only when it equals the validated SigningCertURL host. Before this fix the endpoint answered the
+  SubscriptionConfirmation with `401 untrusted_certificate`, leaving it `PendingConfirmation`.
+- The Supabase Edge runtime's `node:crypto` `X509Certificate` leaves `subjectAltName` undefined
+  and throws `ERR_NOT_IMPLEMENTED` for `infoAccess`, `raw`, `checkHost`, `checkIssued` and
+  `verify` (reproduced in `public.ecr.aws/supabase/edge-runtime:v1.74.3`). Trust therefore runs
+  behind `X509Backend` (`_shared/snsX509.ts`): the Edge function uses `@peculiar/x509` over
+  WebCrypto (`snsX509WebCrypto.ts`); Node uses `node:crypto` (`snsX509Node.ts`). The same trust
+  suite runs on both (Node in `npm test`, WebCrypto in CI `deno test`). Intermediates are pinned
+  (Amazon RSA 2048 M01–M04, `amazonSnsIntermediates.ts`) instead of fetched from AIA. If AWS
+  rotates SNS onto a new intermediate, confirmations fail closed with
+  `leaf_not_signed_by_pinned_intermediate`: add the new Amazon intermediate (anchored to a pinned
+  root, fingerprint asserted in tests) and redeploy.

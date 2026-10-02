@@ -28,6 +28,8 @@ on:
       - 'tests/websiteEnquirySesTrust.test.mjs'
       - 'tests/helpers/snsTestPki.mjs'
       - 'tests/fixtures/sns-trust/**'
+      - 'supabase/functions/_shared/snsX509*.ts'
+      - 'supabase/functions/_shared/amazon*.ts'
       - 'supabase/functions/_shared/snsCertificateTrust.ts'
       - 'supabase/functions/_shared/amazonTrustRoots.ts'
       - 'scripts/website-enquiry-delivery-suppression-acceptance.mjs'

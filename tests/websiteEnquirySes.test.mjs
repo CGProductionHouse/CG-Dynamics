@@ -208,7 +208,7 @@ test('SNS ingest handler: topic/cert/signature gates, subscription confirm, dura
   const untrusted = await handleSesSnsRequest(post(delivered), deps({ trustCertificate: async () => ({ ok: false, reason: 'issuer_not_anchored_to_amazon_root' }) }))
   assert.equal(untrusted.status, 401)
   assert.equal((await untrusted.json()).outcome, 'untrusted_certificate')
-  assert.equal((await handleSesSnsRequest(post(delivered), deps({ trustCertificate: async () => ({ ok: false, reason: 'issuer_unavailable' }) }))).status, 503)
+  assert.equal((await handleSesSnsRequest(post(delivered), deps({ fetchCertificate: async () => { throw new Error('down') } }))).status, 503)
   const appliedBeforeV1 = calls.applied.length
   assert.equal((await handleSesSnsRequest(post({ ...delivered, SignatureVersion: '1' }), deps())).status, 400)
   assert.equal(calls.applied.length, appliedBeforeV1, 'untrusted inputs stored an event')

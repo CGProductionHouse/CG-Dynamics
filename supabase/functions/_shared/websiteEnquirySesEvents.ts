@@ -1,9 +1,9 @@
 // Issue #405: SES event ingest (SNS HTTPS subscription) — pure handler, injected deps.
 //
 // - Only SNS messages for the configured topic are trusted, and only when the signing
-//   certificate chains to a pinned Amazon root (leaf -> Amazon intermediate -> root, issued to
-//   sns.amazonaws.com) AND the SignatureVersion 2 signature verifies with that key.
-//   Anything else: 401/403 (or 503 if the issuer cannot be fetched), nothing stored.
+//   certificate is issued to SNS and chains to pinned Amazon intermediates and roots
+//   (snsCertificateTrust.ts) AND the SignatureVersion 2 signature verifies with that key.
+//   Anything else: 401/403 (503 if the certificate cannot be fetched), nothing stored.
 // - SubscriptionConfirmation is confirmed only for the configured topic.
 // - Delivery / permanent Bounce / Reject / Complaint are stored durably in the canonical
 //   provider-event inbox (keyed by SNS MessageId) before 2xx; storage failure -> 5xx so SNS
@@ -58,12 +58,7 @@ export async function handleSesSnsRequest(req: Request, deps: SesEventDeps): Pro
   let certificate: string
   try { certificate = await deps.fetchCertificate(message.SigningCertURL) } catch { return respond(deps, 503, 'certificate_unavailable') }
   const trust = await deps.trustCertificate(certificate, message.SigningCertURL)
-  if (!trust.ok) {
-    // An unreachable intermediate is transient (SNS retries); every other failure is final.
-    return trust.reason === 'issuer_unavailable'
-      ? respond(deps, 503, 'certificate_issuer_unavailable')
-      : respond(deps, 401, 'untrusted_certificate', { reason: trust.reason })
-  }
+  if (!trust.ok) return respond(deps, 401, 'untrusted_certificate', { reason: trust.reason })
   if (!(await verifySnsSignature(message, trust.spki))) return respond(deps, 401, 'invalid_signature')
 
   if (message.Type === 'UnsubscribeConfirmation') return respond(deps, 200, 'unsubscribe_ignored')
