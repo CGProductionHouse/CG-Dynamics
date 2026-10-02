@@ -1,7 +1,7 @@
 export const DATABASE_PAGE_SIZE = 1000
 
 export async function fetchAllRows<T>(
-  fetchPage: (from: number, to: number) => Promise<{ data: T[] | null; error: { message: string } | null }>,
+  fetchPage: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: { message: string } | null }>,
   pageSize = DATABASE_PAGE_SIZE,
 ): Promise<{ data: T[]; error: { message: string } | null }> {
   const data: T[] = []
@@ -16,7 +16,7 @@ export async function fetchAllRows<T>(
 
 export async function fetchAllRowsByIdChunks<T>(
   ids: string[],
-  fetchChunkPage: (ids: string[], from: number, to: number) => Promise<{ data: T[] | null; error: { message: string } | null }>,
+  fetchChunkPage: (ids: string[], from: number, to: number) => PromiseLike<{ data: T[] | null; error: { message: string } | null }>,
   chunkSize = 200,
   pageSize = DATABASE_PAGE_SIZE,
 ): Promise<{ data: T[]; error: { message: string } | null }> {

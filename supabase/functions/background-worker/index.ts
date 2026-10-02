@@ -4,11 +4,12 @@
 // pg_net) and opportunistically by the app. verify_jwt is false because it only
 // drains the durable queue with its own service role; it performs no action on
 // behalf of the caller and trusts nothing from the request body.
-import { createClient } from 'jsr:@supabase/supabase-js@2'
+import { createClient, type SupabaseClient } from 'jsr:@supabase/supabase-js@2'
 import webpush from 'npm:web-push@3.6.7'
 import { dispatchMetaWorker } from '../_shared/metaWorkerDispatch.ts'
 import { currentMetaMonth, previousMetaMonth, currentMonthHasIncrementalWindow } from '../_shared/metaPeriod.ts'
 import { fetchAllRows } from '../_shared/paginatedRows.ts'
+import { META_TERMINAL_ACCESS_COOLDOWN_MS, metaTerminalAccessBlocks } from '../_shared/metaFleetTerminalBackoff.ts'
 import { GENERATION_FLAG, VIDEO_FOLDER_FLAG, recordContentAutopilotPass, runContentAutopilotPass } from '../_shared/contentAutopilotPass.ts'
 import {
   CONTENT_AUTOPILOT_ENABLED_FLAG,
@@ -155,7 +156,7 @@ Deno.serve(async () => {
 })
 
 async function ensureTiktokFreshnessJobs(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient,
 ): Promise<Record<string, unknown>> {
   const operatingDate = tiktokOperatingDate()
   const periodMonth = currentTiktokMonth()
@@ -262,7 +263,7 @@ async function ensureTiktokFreshnessJobs(
 }
 
 async function ensureDailyMonthlyStrategyAutopilotJob(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient,
 ): Promise<Record<string, unknown>> {
   const today = monthlyStrategyAutopilotOperatingDate()
   const idempotencyKey = monthlyStrategyAutopilotIdempotencyKey(today)
@@ -300,7 +301,7 @@ async function ensureDailyMonthlyStrategyAutopilotJob(
 }
 
 async function ensureDailyContentAutopilotJob(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient,
   monthlyStrategySchedule: Record<string, unknown>,
 ): Promise<Record<string, unknown>> {
   const enabled = (Deno.env.get(CONTENT_AUTOPILOT_ENABLED_FLAG) ?? '').trim().toLowerCase() === 'true'
@@ -360,7 +361,7 @@ interface LaneRecoveryRow {
 }
 
 async function recoverMetaSyncLanes(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient,
   url: string,
 ): Promise<Array<{ batchId: string; laneId: number; invoked: boolean }>> {
   const { data, error } = await supabase.rpc('meta_sync_lane_recovery_candidates', { p_limit: 8 })
@@ -388,7 +389,7 @@ interface StalledBatchRow {
 }
 
 async function reapStalledMetaSyncBatches(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient,
   url: string,
 ): Promise<Array<{ batchId: string; queued: number; staleRunning: number; invoked: boolean; detail?: string }>> {
   const out: Array<{ batchId: string; queued: number; staleRunning: number; invoked: boolean; detail?: string }> = []
@@ -442,6 +443,7 @@ interface FleetFreshnessBatch {
   clientCount: number
   months: string[]
   assetCount: number
+  itemsEnqueued: number
 }
 
 interface CheckpointRow {
@@ -452,10 +454,13 @@ interface CheckpointRow {
     last_status: string | null
     last_health_state: string | null
     last_successful_month: string | null
+    client_id: string
+    last_attempted_at: string | null
+    last_successful_at: string | null
   }
 
   async function enqueueFleetMetaFreshness(
-    supabase: ReturnType<typeof createClient>,
+    supabase: SupabaseClient,
     url: string,
   ): Promise<Array<FleetFreshnessBatch | { detail: string }>> {
     const out: Array<FleetFreshnessBatch | { detail: string }> = []
@@ -474,17 +479,22 @@ interface CheckpointRow {
     .select(`
       id,
       client_id,
+      connection_id,
       facebook_page_id,
       instagram_account_id,
+      updated_at,
       is_active,
       meta_asset_sync_checkpoints!left (
         asset_id,
+        client_id,
         platform,
         next_due_at,
         last_sync_kind,
         last_status,
         last_health_state,
-        last_successful_month
+        last_successful_month,
+        last_attempted_at,
+        last_successful_at
       )
     `)
     .eq('is_active', true)
@@ -527,7 +537,7 @@ interface CheckpointRow {
         (c: CheckpointRow) => c.platform === 'facebook'
       ) ?? null
       fbBootstrap = !fbCheckpoint
-      fbDue = fbBootstrap || (fbCheckpoint?.next_due_at && fbCheckpoint.next_due_at <= now)
+      fbDue = fbBootstrap || Boolean(fbCheckpoint?.next_due_at && fbCheckpoint.next_due_at <= now)
     }
 
     // Instagram platform
@@ -536,7 +546,7 @@ interface CheckpointRow {
         (c: CheckpointRow) => c.platform === 'instagram'
       ) ?? null
       igBootstrap = !igCheckpoint
-      igDue = igBootstrap || (igCheckpoint?.next_due_at && igCheckpoint.next_due_at <= now)
+      igDue = igBootstrap || Boolean(igCheckpoint?.next_due_at && igCheckpoint.next_due_at <= now)
     }
 
     if (!fbDue && !igDue) continue
@@ -583,11 +593,30 @@ interface CheckpointRow {
   // The worker controls retry timing; the scheduler must treat all queued/running
   // asset+month as active logical work to prevent duplicate enqueue.
   const activeWorkKeys = new Set<string>()
-  const { data: activeItems } = await fetchAllRows((from, to) => supabase
+  const { data: activeItems, error: activeError } = await fetchAllRows((from, to) => supabase
     .from('meta_sync_batch_items')
     .select('asset_id, month')
     .in('status', ['queued', 'running'])
+    .order('id')
     .range(from, to))
+
+  if (activeError) return [{ detail: 'Meta active queue evidence unavailable; fleet enqueue held.' }]
+
+  // Failed preflight work has no platform checkpoint and is no longer active
+  // queue work. Read its existing durable receipt before making a NEW batch.
+  const { data: failedItems, error: failedError } = await fetchAllRows((from, to) => supabase
+    .from('meta_sync_batch_items')
+    .select('id,batch_id,asset_id,client_id,month,status,error,facebook_sync_state,instagram_sync_state,finished_at,cooldown_until,meta_sync_batches!inner(summary)')
+    .eq('status', 'failed')
+    .gte('finished_at', new Date(Date.parse(now) - META_TERMINAL_ACCESS_COOLDOWN_MS).toISOString())
+    .order('finished_at', { ascending: false })
+    .order('id')
+    .range(from, to))
+  const { data: connections, error: connectionError } = await fetchAllRows((from, to) => supabase.from('meta_connections')
+    .select('id,last_connected_at').order('id').range(from, to))
+  if (failedError || connectionError) return [{ detail: 'Meta terminal recovery evidence unavailable; fleet enqueue held.' }]
+  const connectionRecovery = new Map(connections.map(connection => [connection.id, connection.last_connected_at]))
+  const targetById = new Map(expectedTargets.map(asset => [asset.id, asset]))
 
   if (activeItems) {
     for (const item of activeItems) {
@@ -645,6 +674,15 @@ interface CheckpointRow {
       for (const month of months) {
         // Skip if this asset+month already has active work (regardless of platform)
         if (activeWorkKeys.has(`${plan.assetId}:${month}`)) {
+          continue
+        }
+        const target = targetById.get(plan.assetId)!
+        const blocks = metaTerminalAccessBlocks(target, month, failedItems, now, connectionRecovery.get(target.connection_id) ?? null)
+        const duePlatforms = [plan.hasFacebook ? 'facebook' : null, plan.hasInstagram ? 'instagram' : null].filter(Boolean)
+        // An item owns both platforms: never hold healthy due work because its
+        // sibling platform is blocked. No checkpoint/fact is marked complete.
+        if (duePlatforms.every(platform => blocks.some(block => block.platform === platform))) {
+          out.push({ detail: `Meta access cooldown for ${clientName} (${month}): ${blocks.map(block => `${block.platform}: ${block.blocker} Retry after ${block.retryAt}`).join('; ')}` })
           continue
         }
         const syncKind = month === currentMonth ? 'incremental' : 'historical'
@@ -742,7 +780,7 @@ interface CheckpointRow {
 // Runs one job to its real completion and returns a TRUTHFUL result summary that
 // is stored on the job row. Throwing marks the job failed (with retry/backoff).
 async function runJob(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient,
   job: JobRow,
   url: string,
   serviceKey: string,
@@ -973,7 +1011,7 @@ async function runJob(
             if (!res.ok) return { ok: false, error: `content-run-onedrive-folder returned ${res.status}` }
             const body = await res.json().catch(() => null) as { status?: string; results?: unknown[]; error?: string } | null
             if (body?.error) return { ok: false, error: body.error }
-            const created = (body?.results ?? []).filter((r: Record<string, unknown>) => r.state === 'created' || r.state === 'mapped_existing')
+            const created = (body?.results ?? []).filter(r => (r as Record<string, unknown>).state === 'created' || (r as Record<string, unknown>).state === 'mapped_existing')
             return { ok: true, ensured: created.length }
           },
         })
@@ -992,7 +1030,7 @@ async function runJob(
 }
 
 async function updateJobProgress(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient,
   jobId: string,
   worker: string,
   progress: number,
@@ -1012,7 +1050,7 @@ function previousMonthStr(offset = 1): string {
 }
 
 async function runMetaSyncBatch(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient,
   job: JobRow,
   url: string,
   payload: Record<string, unknown>,
@@ -1168,7 +1206,7 @@ function safePushLink(value: unknown): string {
 }
 
 async function runWebPushDelivery(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient,
   payload: Record<string, unknown>,
 ): Promise<JobResult> {
   const notificationId = typeof payload.notification_id === 'string' ? payload.notification_id : ''
