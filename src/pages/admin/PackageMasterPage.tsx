@@ -21,6 +21,7 @@ import {
   type DeliverableType,
 } from '../../lib/planner'
 import { listActiveClients, type ClientOption } from '../../lib/commandCentre'
+import { ServiceEntitlementReview } from '../../components/admin/ServiceEntitlementReview'
 
 const TYPE_LABELS = {
   ...PACKAGE_DELIVERABLE_LABELS,
@@ -406,6 +407,7 @@ export default function PackageMasterPage() {
         />
       ) : (
         <>
+          {(profile?.role === 'admin' || profile?.role === 'manager') && <ServiceEntitlementReview key={selectedClient.id} clientId={selectedClient.id} />}
           {packagesLoading ? (
             <div className="mb-5 h-20 animate-pulse rounded-xl bg-white/[0.04]" />
           ) : packages.length === 0 ? (
