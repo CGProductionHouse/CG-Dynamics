@@ -44,6 +44,41 @@ export async function checkRecord(resolver, record) {
   }
 }
 
+const hasName = (listing, name) => new RegExp(`(^|[^A-Z0-9_])${name}([^A-Z0-9_]|$)`, 'm').test(listing)
+
+/**
+ * Checks Supabase secret NAMES. `listing` is the `supabase secrets list` output, or null when it
+ * could not be read — which fails closed (never reported as "ENABLED is unset").
+ */
+export function checkSecretNames(listing) {
+  if (listing === null) {
+    return { failed: 1, lines: ['FAIL could not list Supabase secret names; secrets and WEBSITE_ENQUIRY_EMAIL_ENABLED unverified'] }
+  }
+  const lines = []
+  let failed = 0
+  for (const name of REQUIRED_SECRET_NAMES) {
+    const present = hasName(listing, name)
+    if (!present) failed++
+    lines.push(`${present ? 'OK  ' : 'MISS'} secret name ${name}`)
+  }
+  const enabled = hasName(listing, 'WEBSITE_ENQUIRY_EMAIL_ENABLED')
+  if (enabled) failed++
+  lines.push(`${enabled ? 'FAIL' : 'OK  '} WEBSITE_ENQUIRY_EMAIL_ENABLED is ${enabled ? 'SET (must stay unset)' : 'unset'}`)
+  return { failed, lines }
+}
+
+function listSecretNames(projectRef) {
+  if (!/^[a-z]{20}$/.test(projectRef)) throw new Error('invalid project ref')
+  const args = ['secrets', 'list', '--project-ref', projectRef]
+  // npm installs the Supabase CLI as a .cmd shim on Windows, which Node cannot spawn directly.
+  const [command, argv] = process.platform === 'win32' ? ['cmd.exe', ['/d', '/s', '/c', 'supabase', ...args]] : ['supabase', args]
+  try {
+    return execFileSync(command, argv, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] })
+  } catch {
+    return null
+  }
+}
+
 if (import.meta.url === `file://${process.argv[1].replace(/\\/g, '/')}` || process.argv[1]?.endsWith('ses-setup-verify.mjs')) {
   const file = process.argv[2]
   if (!file) { console.error('usage: node scripts/ops/ses-setup-verify.mjs <summary.txt> [--project-ref ref]'); process.exit(2) }
@@ -60,16 +95,9 @@ if (import.meta.url === `file://${process.argv[1].replace(/\\/g, '/')}` || proce
       console.log(`${ok ? 'OK  ' : 'MISS'} [${servers[0]}] ${record.type} ${record.name}`)
     }
   }
-  let names = ''
-  try { names = execFileSync('supabase', ['secrets', 'list', '--project-ref', projectRef], { encoding: 'utf8' }) } catch { names = '' }
-  for (const name of REQUIRED_SECRET_NAMES) {
-    const present = new RegExp(`(^|\\s)${name}(\\s|$)`, 'm').test(names)
-    if (!present) failed++
-    console.log(`${present ? 'OK  ' : 'MISS'} secret name ${name}`)
-  }
-  const enabled = /(^|\s)WEBSITE_ENQUIRY_EMAIL_ENABLED(\s|$)/m.test(names)
-  if (enabled) failed++
-  console.log(`${enabled ? 'FAIL' : 'OK  '} WEBSITE_ENQUIRY_EMAIL_ENABLED is ${enabled ? 'SET (must stay unset)' : 'unset'}`)
+  const secrets = checkSecretNames(listSecretNames(projectRef))
+  failed += secrets.failed
+  for (const line of secrets.lines) console.log(line)
   console.log(failed ? `\n${failed} check(s) not yet satisfied` : '\nAll DNS records and secret names verified; sending remains disabled.')
   process.exit(failed ? 1 : 0)
 }
