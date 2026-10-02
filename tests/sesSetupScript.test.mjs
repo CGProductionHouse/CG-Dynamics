@@ -201,3 +201,18 @@ test('post-setup verifier parses the summary format the setup script writes', as
   assert.ok(REQUIRED_SECRET_NAMES.includes('WEBSITE_ENQUIRY_SES_SNS_TOPIC_ARN'))
   assert.ok(!REQUIRED_SECRET_NAMES.includes('WEBSITE_ENQUIRY_EMAIL_ENABLED'))
 })
+
+test('post-setup verifier: secret names fail closed when the listing is unreadable', async () => {
+  const { checkSecretNames, REQUIRED_SECRET_NAMES } = await import('../scripts/ops/ses-setup-verify.mjs')
+  // Unreadable listing: one failure, and never an "ENABLED is unset" OK line.
+  const unreadable = checkSecretNames(null)
+  assert.equal(unreadable.failed, 1)
+  assert.ok(unreadable.lines.every((line) => line.startsWith('FAIL')), unreadable.lines.join('\n'))
+  // `supabase secrets list` table output with every required name (and pipes/padding).
+  const table = ['   NAME   | DIGEST', '  --------|--------', ...REQUIRED_SECRET_NAMES.map((name) => `  ${name} | abc123`)].join('\n')
+  assert.deepEqual(checkSecretNames(table), { failed: 0, lines: [...REQUIRED_SECRET_NAMES.map((name) => `OK   secret name ${name}`), 'OK   WEBSITE_ENQUIRY_EMAIL_ENABLED is unset'] })
+  // ENABLED present fails; a look-alike longer name does not satisfy a required one.
+  assert.equal(checkSecretNames(`${table}\n  WEBSITE_ENQUIRY_EMAIL_ENABLED | x`).failed, 1)
+  const lookalike = table.replace(/ WEBSITE_ENQUIRY_SES_REGION \|/, ' WEBSITE_ENQUIRY_SES_REGION_OLD |')
+  assert.equal(checkSecretNames(lookalike).failed, 1)
+})

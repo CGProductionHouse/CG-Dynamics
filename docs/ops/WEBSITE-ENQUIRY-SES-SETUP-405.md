@@ -73,6 +73,34 @@ Supabase secrets / Vault through a 0600 temp file that is removed on exit.
    then SES mailbox simulator `bounce@simulator.amazonses.com` / `complaint@simulator.amazonses.com`.
    No client-facing send until all three pass.
 
+## Worker schedule (created 2 Oct 2026, `cron.job` id 3)
+
+The secret is read from Vault at run time; `cron.job.command` holds no secret value.
+
+```sql
+select cron.schedule(
+  'website-enquiry-delivery-worker',
+  '* * * * *',
+  $job$
+  select net.http_post(
+    url := 'https://ehtjfntukiwbgptqgbzy.supabase.co/functions/v1/website-enquiry-delivery-worker',
+    headers := jsonb_build_object(
+      'Content-Type', 'application/json',
+      'x-worker-secret', (select decrypted_secret from vault.decrypted_secrets where name = 'website_enquiry_worker_secret')
+    ),
+    body := '{}'::jsonb,
+    timeout_milliseconds := 20000
+  );
+  $job$
+);
+```
+
+While `WEBSITE_ENQUIRY_EMAIL_ENABLED` is unset the worker answers
+`{"ok":true,"state":"disabled","gate":"WEBSITE_ENQUIRY_EMAIL_ENABLED is not true","claimed":0}`
+(check `net._http_response`). Remove with `select cron.unschedule('website-enquiry-delivery-worker');`.
+If the worker secret is rotated (re-running `--apply` writes a fresh one to both Supabase and
+Vault), the schedule picks it up on the next run.
+
 ## Rollback
 
 Unset `WEBSITE_ENQUIRY_EMAIL_PROVIDER` (worker returns `disabled`); delete the IAM access key;
