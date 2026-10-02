@@ -18,6 +18,11 @@ on:
       - 'tests/websiteEnquiryDelivery.test.mjs'
       - 'supabase/functions/_shared/websiteEnquiryDelivery.ts'
       - 'supabase/functions/website-enquiry-delivery-*/**'
+      - 'supabase/functions/_shared/websiteEnquiryIntake.ts'
+      - 'supabase/functions/website-enquiry-intake/**'
+      - 'scripts/website-enquiry-intake-acceptance.mjs'
+      - 'tests/sql/624_website_enquiry_intake_fixtures.sql'
+      - 'tests/websiteEnquiryIntake.test.mjs'
   workflow_dispatch:
 permissions:
   contents: read
@@ -36,6 +41,8 @@ jobs:
       - run: node scripts/website-lead-lifecycle-acceptance.mjs
       - run: node --test tests/websiteEnquiryDelivery.test.mjs
       - run: node scripts/website-enquiry-delivery-acceptance.mjs
+      - run: node --test tests/websiteEnquiryIntake.test.mjs
+      - run: node scripts/website-enquiry-intake-acceptance.mjs
   deno-check:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -44,4 +51,4 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-      - run: deno check --no-lock --node-modules-dir=none supabase/functions/website-enquiry-delivery-worker/index.ts supabase/functions/website-enquiry-delivery-webhook/index.ts
+      - run: deno check --no-lock --node-modules-dir=none supabase/functions/website-enquiry-delivery-worker/index.ts supabase/functions/website-enquiry-delivery-webhook/index.ts supabase/functions/website-enquiry-intake/index.ts
