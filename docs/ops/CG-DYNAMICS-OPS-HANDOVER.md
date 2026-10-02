@@ -2,9 +2,542 @@
 
 Status: **CURRENT authority for a fresh supervisor chat**
 
-Updated: **1 October 2026** after reconciliation of the #600 Instagram encryption reset, #595 callback rollout, #505 provider closure state, #513 strategy state, #377 MCP production acceptance and #573 Website Performance closure.
+Updated: **2 October 2026, after both agents received overnight safe-finish standing authority**
 
-This file is intentionally current-state-first. Historical failed attempts are summarized only where they prevent repeated work.
+Current accepted main before this handover-only docs update: **`d8d9691cd068f7faaffc579237c8e665fe7d28ca`**. Latest freshness runtime-code merge remains **`2c27e74fe0d798fdffff877d358a0fa13f355292`**; #643 changes offline strategy review tooling/artifacts only. The handover edit itself advances `main`; **always refetch current main on takeover and before every merge**.
+
+This file is the supervisor takeover authority. Read this section FIRST before touching GitHub, Codex agents, Supabase, Meta, Microsoft, Website/#405, strategy or production. Historical receipts follow below and are retained so completed work is not repeated.
+
+---
+
+## READ THIS FIRST — SUPERVISOR OPERATING CONTRACT
+
+The user expects the new chat to take over as **active CG Dynamics supervisor**, not as a passive summariser.
+
+### What the supervisor must do
+
+- Independently inspect every agent result/PR against GitHub truth before accepting it.
+- If a PR is safe, correct and unprotected, **merge it automatically**. Do not ask the user whether it should be merged.
+- After every agent result, do NOT stop at a summary. Always determine the next useful mission and give the user the exact next Codex prompt unless that lane is genuinely blocked.
+- Never leave an agent idle when there is safe useful work available.
+- If the agent result is wrong/incomplete, give one precise correction mission on the same PR/lane.
+- Keep #381 as the consolidated supervisor state board and update the owning issue as durable truth after meaningful changes.
+- The supervisor owns this master handover file. Manual agents must not edit it unless specifically assigned.
+- Re-fetch current `main` before merges because parallel lanes may have advanced it.
+- Preserve lane isolation. Do not let one agent casually “help” another lane and create collisions.
+- Use connected private GitHub tooling for repo truth. Do not rely on public web search for private-repo state.
+- When a protected action is genuinely required, do not manufacture approval theatre. Record the exact blocker, keep other safe work moving, and wait for a direct user instruction covering that exact protected scope.
+
+### The reply behaviour the user expects
+
+This is important. The user gets frustrated when the supervisor merely says “looks good” and stops.
+
+When the user pastes an Agent 01 or Agent 02 result:
+
+1. Reply briefly that you are independently reviewing it.
+2. Inspect PR/commit/diff/checks/current main + latest owning issue comments.
+3. Check collisions and protected-action boundaries.
+4. Merge automatically if safe.
+5. Update durable GitHub truth (#381 + owning issue).
+6. **Immediately give the NEXT mission/prompt for that same agent.**
+7. The prompt itself must visibly say **AGENT 01** or **AGENT 02** at the top so the user instantly knows which Codex window gets it.
+8. Do not ask “want me to continue?” or “do you want the next prompt?” Continue automatically.
+
+If the lane is genuinely blocked, say exactly what blocks it and reassign the agent to another safe launch-critical task instead of repeatedly re-auditing the same blocker.
+
+### Manual Codex prompt contract
+
+The user manually controls the Codex agents. Keep prompts compact but complete. GitHub is the long-form authority.
+
+Every prompt MUST start with the actual agent number and lane, for example:
+
+```text
+AGENT 01 — MICROSOFT / META FRESHNESS
+
+Read AGENTS.md + latest #451/#623/#381. GitHub is the full brief.
+Continue ONLY the assigned lane.
+<one bounded objective>
+Do not touch <explicit exclusions>.
+Verify and update GitHub. Return completed / verification / blocker.
+```
+
+or
+
+```text
+AGENT 02 — STRATEGY QUALITY BATCH 2
+
+Read AGENTS.md + latest #513/#381. GitHub is the full brief.
+Continue ONLY #513.
+<one bounded objective>
+No production strategy writes / approval / publication.
+Update #513/#381 and return head/artifacts/tests/blockers.
+```
+
+Do not send vague prompts like “continue please”. The prompt should state:
+- agent number;
+- lane;
+- owning issue(s);
+- exact next objective;
+- exclusions;
+- protected-write boundary;
+- expected verification/return.
+
+### No approval theatre
+
+Durable rule remains:
+- #505 comment `5951902435`
+- #381 comment `5951903122`
+
+Safe/unprotected launch actions continue automatically.
+
+Do **not** ask the user to type “approve X” for routine mechanics. If a protected action is required, durable truth should say:
+
+`BLOCKED: needs CA instruction — <exact protected scope>`
+
+Then continue another safe useful lane.
+
+Never infer protected authority from silence, old unrelated approvals, or “continue”. A direct user instruction only authorises its exact stated scope.
+
+### Protected actions
+
+Do not execute without direct current user instruction:
+- production DB/schema/data writes or migration application;
+- Edge/function deployment;
+- secrets/config/env changes;
+- Meta/TikTok/provider permission, verification, App Review, Live/activation changes;
+- OAuth/client consent;
+- strategy amendment/approval/publication;
+- external client/business communication or publication/spend;
+- destructive OneDrive/data actions;
+- credential rotation/recovery/guessing;
+- account binding/unbinding/rebinding;
+- production reconciliation/sync trigger where it writes live truth.
+
+Safe read-only production inspection, local/disposable tests, docs, GitHub comments, code/PR work and unprotected merges continue automatically.
+
+### External communication rule
+
+Client/business communication is **draft only** unless the user explicitly says to send it. Do not email/message clients or providers merely because a draft packet exists.
+
+---
+
+## CURRENT TWO-AGENT BOARD
+
+### AGENT 01 — OVERNIGHT SAFE LAUNCH FINISHER
+
+Freshness engineering is complete on main:
+- #639 Microsoft CPU/runtime repair → `7ff12f492003c89ad164da42b2c92495560bd4ce`
+- #642 Meta terminal-bootstrap churn repair → `2c27e74fe0d798fdffff877d358a0fa13f355292`
+- #645 bounded read-only acceptance observer → `23d2e45d34568cf24d6891b2efd34b579e4e17f5`
+
+Freshness protected rollout remains blocked on direct CA instruction. Exact accepted rollout order/manifest remains on #451 comments `5957561266` + `5957656853`. Do not redo preflight/observer work.
+
+Safe UI progress:
+- #615 truthful TikTok Integrations fleet summary merged → `482a4325c315b6b5770bf866fdeb1d99972b6cef`.
+- Final #615 diff only: `src/lib/tiktokIntegrationSummary.ts`, `src/pages/admin/IntegrationsPage.tsx`, `tests/tiktokIntegrationSummary.test.mjs`.
+- Accepted behavior: canonical admin/manager queue, count-integrity guard, malformed/read-failed => unavailable not fake disconnected/zero, connection coverage separate from reporting freshness, no publishing promise.
+- Preview redirected to /login; under current #623 authority this environmental preview-auth limitation does NOT justify parking already-reviewed safe UI work forever.
+
+CA explicitly requested **overnight no-back-and-forth execution** for Agent 01. Latest authority: #623 comment **`5958795947`** and #381 comment **`5958796474`**.
+
+**CURRENT overnight sequence:**
+1. Existing PR #616 — onboarding empty-state inventory truth. Reconcile SAME PR onto current main, drop stale handover-only branch changes, preserve narrow accepted source/tests, run focused/full/build/lint/diff/exact-head Vercel, self-review exact diff, and MERGE if safe/green. Then attempt legitimate read-only production desktop + mobile smoke if an existing session is available; if not, record once and continue.
+2. Existing PR #613 — research-backed Content Guideline intelligence. Same current-main reconcile/self-review/verification/merge process. Then legitimate read-only production smoke if available; otherwise record once and continue.
+3. After #616/#613, refetch current main + #623/#381 + open PR/issues. Continue the highest-value **SAFE, UNOWNED, launch-critical** task. Prefer finishing existing accepted work over new architecture. Reproduce before fixing. Reuse an owning PR/branch instead of creating duplicates.
+4. After every completed chunk, update owning issue + #623 + #381 with exact SHA/PR/tests/blockers, then continue immediately. Ordinary code-only GitHub merges are authorised during this overnight mission when exact-head verification is green.
+
+**Hard exclusions / protected gates remain:**
+- no production DB/schema/data migration/write;
+- no Edge/function deployment;
+- no secrets/env/config;
+- no provider/OAuth/App Review/Live/permission/mapping;
+- no manual sync/reconciliation trigger;
+- no strategy amendment/approval/publication;
+- no external send/spend;
+- no credential recovery/guessing;
+- no destructive data;
+- no Website/#405 (Claude-owned);
+- no #513/#501 strategy lane (Agent 02/supervisor);
+- no #389 protected production rollout;
+- no freshness three-function production rollout.
+
+When a task hits a protected gate, write exactly `BLOCKED: needs CA instruction — <exact scope>`, do not attempt it, and move to the next independent safe task.
+
+Do not edit this master handover. Do not retry preview auth endlessly. End only when current #623/#381 contain no remaining safe unowned work; then leave one concise overnight completion receipt with merges, verification, smoke evidence, and exact remaining protected/human/provider blockers.
+
+
+### AGENT 02 — OVERNIGHT STRATEGY / EVIDENCE FINISHER
+
+Owning issues: **#513 + #501**, consolidated in **#381**.
+
+Accepted strategy merges remain:
+- #638 compiler/quality plan → `cbf21ca5cbcb699bd09fb2d8341f7127b4415caa`
+- #640 Batch 1 → `2ce29344a78bcef5d4a96fd27a87a7a2699fb2ee`
+- #643 Batch 2 → `d8d9691cd068f7faaffc579237c8e665fe7d28ca`
+- #644 Batch 3 → `262d281a209ed0b528a647363655f0b6a7d6b40b`
+- #646 Batch 4 → `84d2e630a573b287286d2b05a37e453766ea680c`
+
+Current ZERO-WRITE state before overnight continuation:
+- 94 reviewed
+- 68 amendment-needed
+- 26 blocked
+- 20 exclusions
+- 0 approved
+- 0 published
+- 0 production strategy writes
+
+Wave A read-only evidence remediation is supervisor-accepted:
+- #513 `5958751620`
+- #501 `5958752061`
+- #381 `5958760469`
+- supervisor overnight authority: #513 `5958838698`, #501 `5958839237`, #381 `5958839806`
+
+Accepted Wave A truth:
+- Bat Hill Royale: July unavailable; Aug 20; Sep 25 incl. four post-Sep23 MTD identities → targeted Sep/Oct review may proceed with gaps explicit and flexible quantities preserved.
+- All Around PVC: July unavailable; Aug 1 Pacific-boundary post; Sep 14 → targeted Sep/Oct review may proceed within exact 1 video / 3 photo / 3 poster scope; Sep evidence remains MTD.
+- Vrystaat Kunstefees: retrospective evidence improved but paired review remains held on current programme/application confirmation + unresolved Vlieks deadline conflict; no fixed quantities.
+- Red Oak: July 41; Aug/Sep exact stored post evidence absent → held; preserve 8 video / 2 photo + flexible posters.
+
+**CURRENT overnight sequence for Agent 02:**
+1. targeted ZERO-WRITE Sep/Oct review for exactly Bat Hill Royale + All Around PVC; self-review and merge safe code/artifact-only PR when exact-head tests/build/lint/diff/Vercel are green;
+2. then continue exact-client READ-ONLY evidence remediation across remaining guided blocked clients and immediately review any client whose evidence becomes sufficient;
+3. remaining guided set includes Vrystaat Kunstefees, Red Oak, Bloem Action Sports, Emoya Estate Driving Range, Forklift Trucks, Hino Trucks, Human Auto, Jenkor, Toyota Bloemfontein, WiseRide;
+4. record genuinely unavailable/human-confirmation blockers and move on; no repeat loops;
+5. Zooz remains held absent exact approved guide + current brand/product/programme/WFF constraints;
+6. finish with one exact final ZERO-WRITE strategy state, blocked inventory and protected next-action receipt.
+
+Protected boundaries remain unchanged: no strategy amendment RPC/production write, approval/publication, report publication/write, provider refresh/sync, migration/schema/data mutation, external communication, #405/#505/#389, or master-handover edits by Agent 02. Missing evidence never becomes zero performance.
+
+**NEXT SUPERVISOR ACTION:** review the overnight final receipts and any merged safe PRs. Only production strategy amendment/approval/publication or report/provider mutations require fresh CA instruction.
+
+---
+
+## #505 PROVIDER / INSTAGRAM-TIKTOK STATE — PARKED BEHIND HUMAN/PROVIDER RECEIPTS
+
+Do NOT send Agent 01 back into generic identity hunting or broken-browser retry loops.
+
+Current Instagram truth:
+- 57 active clients
+- 47 recurring-social eligible
+- 10 excluded
+- **22 canonical/Page-linked**
+- **25 unmapped**
+- **0 standalone**
+- standalone connections/tokens/OAuth states/callback receipts: **0/0/0/0**
+
+The 25-row first-party Meta audit and owner-action packets are complete for current evidence.
+
+Important first-wave Instagram evidence:
+- strongest visible Page + IG identity routes: Central Canvas, Ehrlich Park Butchery, Tobich Optics Otjiwarongo, We Ar Fuels;
+- Neshora exact unsaved Page: `1340961499097681`;
+- WiseRide exact unsaved Page: `727048853820569`;
+- Red Oak canonical saved Page recovery remains separate; do not substitute the rugby-club Page;
+- Piek canonical saved Page recovery remains separate; do not substitute the visible Engen Page.
+
+Owner-action packets are complete for:
+Instagram:
+- Central Canvas
+- Ehrlich Park Butchery
+- Tobich Optics Otji
+- We Ar Fuels
+- Neshora Oxygen
+- WiseRide
+- Red Oak
+- Piek Group
+
+TikTok:
+- Emmanuel Funerals
+- Emoya Estate Driving Range
+- Piek Group
+- We Ar Fuels
+- Bat Hill Royale
+- WiseRide
+
+Do not ask owners for passwords or 2FA codes. Owner remains in control of login/approval.
+
+#505 is blocked on real first-party/human/provider evidence:
+- Meta exact Page↔Instagram relationship and owner authority;
+- Neshora/WiseRide exact Instagram identity;
+- Red Oak/Piek canonical Page recovery;
+- six concrete TikTok owner identity/access corrections;
+- Meta Business Verification;
+- Access Verification;
+- genuine owner-authorised review fixture;
+- App Review;
+- later Live/activation/OAuth/mapping/sync.
+
+Do not repeat #598/#600/#595 completed work.
+
+---
+
+## #389 CLIENT PORTAL EXPANSION STATE
+
+Code lane is complete on main:
+- #635 merged `df1b36b471b4b4ee09c1abacd6877b18b28a81ee`
+- #637 merged `820d1bd98a4b6576500da779a0ba2e496fb86b10`
+
+Built:
+- separate `client_service_entitlements` authority;
+- secure exact-client expansion request seam into canonical Operations CLIENT REQUESTS;
+- client UI four-state logic;
+- fail-closed client UI for missing RPC/schema/read failure/all-unknown;
+- admin Entitlement Resolution Queue;
+- explicit one-service verification; no bulk “mark all not included”.
+
+Latest evidence matrix:
+- 57 active clients × 7 services = 399 cells;
+- 3 explicit evidence-ready included rows;
+- 396 unresolved;
+- 0 evidence-backed `not_included` rows yet;
+- therefore no client upgrade CTA should be fabricated yet.
+
+Both entitlement migrations remain unapplied in production. Do not apply/seed without direct protected instruction.
+
+---
+
+## WEBSITE/#405 LANE OWNERSHIP
+
+**Website/#405 is a separate Claude lane. Codex Agent 01 and Agent 02 must not touch it.**
+
+This correction is durable in:
+- #623 comment `5952486427`
+- #381 operating board history.
+
+Do not hand Website work to Agent 01/02 unless the user explicitly changes lane ownership.
+
+Historical Website production receipts remain below in this document.
+
+---
+
+## CRITICAL “DON'T MAKE THE USER REPEAT THIS” LIST
+
+- Always put **AGENT 01** or **AGENT 02** visibly in the prompt itself.
+- After an agent result, **review → merge/fix → durable GitHub update → NEXT PROMPT** in the same supervisor turn.
+- Do not merely summarise and wait.
+- Do not ask the user whether to merge safe PRs.
+- Do not ask for routine “approval” language.
+- Do not send agents into repeated browser retries after a browser/transport blocker is already proven.
+- Do not restart completed #505 Instagram identity research.
+- Do not redo #598 legal/callback/app-secret packet.
+- Do not redo #600 crypto repair.
+- Do not invent Instagram mappings from handles/public search.
+- Do not confuse “unmapped” with “must use standalone OAuth”: Page-linked Meta route is preferred where exact Page/IG relationship can be established.
+- Do not call cron HTTP 200 “freshness success”.
+- Do not turn genuine PARTIAL/STALE into green UI.
+- Do not hand-edit Microsoft’s 18 stale task statuses; the canonical reconciliation path must repair them after protected rollout.
+- Do not let Red Oak’s alternate rugby Page replace the canonical Page.
+- Do not let Piek’s Engen Page replace the canonical Page.
+- Do not infer missing provider mapping = service not included.
+- Do not infer historical posting volume = package entitlement.
+- Do not approve/publish strategies just because zero-write reviewed proposals exist.
+- Never expose secrets, keys, passwords or 2FA codes.
+- Never send external client/provider communication without explicit send instruction.
+- Keep answers operational and concise; GitHub carries the long-form detail.
+
+---
+
+## IMMEDIATE NEW-CHAT STARTUP
+
+On takeover, do this without asking the user to repeat context:
+
+1. Read `AGENTS.md`.
+2. Read this handover top section.
+3. Read latest #381.
+4. Read latest #451/#623 for Agent 01.
+5. Read latest #513 + PR #643 for Agent 02.
+6. Re-fetch current main.
+7. Determine whether either manual agent has returned new work.
+8. If an agent result is provided, supervise it immediately.
+9. If no new agent result is provided, continue safe supervisor work from the current board; do not invent protected authority.
+10. Keep Website/#405 outside the Codex two-agent board.
+
+Historical detailed receipts follow below. When an old receipt conflicts with this top current-state block, **this top block wins**.
+
+### #505 current verification/review draft — 2 October, read-only
+
+Fresh info@cgproductionhouse.com Chrome: Development; Business Unverified / eligible;
+Access Verification disabled until Business Verified; Review Not submitted / empty.
+Both exact reporting scopes Standard / Ready to use (0) / no review requested;
+Insights advanced request disabled. Saved legal/product callback/redirect values
+remain correct. #598 is COMPLETE; do not repeat saves or #600 crypto work.
+
+Official verification/document guides read authenticated: exact legal entity match,
+portfolio full control, conditional registration/incorporation/tax/bank evidence;
+utility bill supports address/phone only, not legal-name proof. Actual CG wizard
+fields, document limits/channel and Access Verification questionnaire are not yet
+observable without protected execution; do not invent them.
+
+SELECT-only active package/mapping evidence is unchanged: 57 active / 47 eligible /
+10 excluded / 22 eligible canonical / 25 unmapped; standalone 0/0/0/0 at 12:19:54 UTC.
+Three safe identity improvements: managed inventory plus matching public profiles
+corroborate Central Canvas `central_canvas`, Ehrlich Park `ehrlichparkbutchery`, and
+exact Tobich Otjiwarongo `tobich_optics_otjiwarongo`. No canonical matches; portfolio
+connected-assets tabs show none, not proof of global Page unlinking/professional
+type/consent. Eight reviewed queue handles unchanged; 14 remaining identity holds.
+No new handle promoted in runtime code. 0 CONNECTABLE / 0 proven review fixtures.
+
+Complete offline text/checklist/storyboard and ranked eight-handle suitability:
+`INSTAGRAM-505-VERIFICATION-REVIEW-PACKET-2026-10-02.md`. Emoya Driving Range and
+Toyota Bloemfontein are strongest structural candidates, not authorized fixtures;
+CG own canonical/Page-linked account rejected. Real consent videos/reviewer access
+remain absent. **BLOCKED: needs CA instruction** for Business/Access Verification,
+fixture/tester/reviewer/demo/OAuth, request addition/submission, later Live/activation.
+No approval prompt requested. No Meta save, secrets/config, provider/OAuth/sync/map,
+DB write, migration/deploy, Website/Piek/TikTok work or production UI change.
+
+Docs-only verification: 136 focused tests, 120 PASS / 16 disposable-DB skips /
+0 failures; initial missing local public Vite env resolved with fake test-only env,
+not production credentials. TypeScript/Vite build, scoped lint, diff check PASS;
+existing bundle advisory. Browser evidence is provider/identity read-only, not a
+successful standalone connection or new product/mobile acceptance.
+
+### #598 bounded protected packet — COMPLETE, 2 October
+
+Supersedes the owner-auth STOP receipt below. Under CA authorization #598 comment 5950879579 / #505 comment 5950880151 and CA's subsequent private reauthentication, completed exactly seven approved changes in `info@cgproductionhouse.com` Chrome:
+
+- Correct Instagram-product app secret securely provisioned as `INSTAGRAM_APP_SECRET`; private digest-to-source comparison PASS. Product is CG Dynamics-IG `1383360116973315`, parent CG Dynamics `976168728361566`. Parent-app secret was not used. No secret/digest was exposed, copied to clipboard, logged or stored in repository; temporary private value cleared and Meta field remasked.
+- `APP_PUBLIC_URL=https://www.cgdynamics.co.za`, private readback PASS. Before/after config inventory proves **only** `APP_PUBLIC_URL` and `INSTAGRAM_APP_SECRET` changed; all unrelated entries unchanged, none removed. Activation remains literal `false`; existing app ID/redirect/Graph/encryption config unchanged.
+- Meta Basic Privacy `https://www.cgdynamics.co.za/privacy-policy`, Terms `https://www.cgdynamics.co.za/terms-of-service`, deletion instructions `https://www.cgdynamics.co.za/privacy-policy` saved and reload-readback PASS. Instructions-URL mode preserved.
+- Instagram business-login Deauthorize `https://ehtjfntukiwbgptqgbzy.supabase.co/functions/v1/instagram-deauthorize` and Data deletion request `https://ehtjfntukiwbgptqgbzy.supabase.co/functions/v1/instagram-data-deletion` saved, reloaded/reopened and readback PASS. Exact existing OAuth redirect `https://ehtjfntukiwbgptqgbzy.supabase.co/functions/v1/instagram-oauth-callback` preserved.
+
+Acceptance: deployed OAuth-start helper retains exactly `instagram_business_basic` + `instagram_business_manage_insights`; Meta's extra-scope generated Embed URL was not used. No-code/state OAuth callback returns 302 to canonical origin with `instagram=activation_blocked`; malformed unsigned deauthorize/deletion requests return 400 (not missing-secret 503), unknown receipt 404. No valid signed callbacks or OAuth start invoked. Standalone connections/tokens/states/callback receipts remain **0/0/0/0** after checks. Three deployed callback source trees parity-match accepted main and retain `verify_jwt=false`. Secret saves advanced callback revisions to v9/v4/v4; this is config propagation, **not an Edge deployment**. Development mode and Business Unverified/access-verification gate remain.
+
+Non-secret browser evidence: `C:/Users/chris/.codex/artifacts/issue-598/2026-10-02-meta-legal-readback.jpg` and `2026-10-02-meta-callback-readback.jpg`. No Review submission, business/access verification change, tester addition, permission expansion, Live switch, OAuth/consent, client mapping, sync, migration, Edge deploy or DB/client/report data write. #598 packet has no remaining execution blocker; #505 remains OPEN at separately authorized Business/Access Verification, genuine owner-authorized standalone fixture, Review/Live and later one-client controlled activation/consent. Do not repeat #600 or these seven completed saves.
+
+### #598 authorized packet — STOPPED at owner reauthentication, 2 October
+
+CA explicitly authorized only the app-secret/public-origin/five-URL packet in #598 comment 5950879579 and #505 comment 5950880151. No production save/write occurred. In the requested `info@cgproductionhouse.com` Chrome profile, Meta Developers shows the exact CG Dynamics parent app `976168728361566`, Instagram business-login product CG Dynamics-IG `1383360116973315`, Development mode and the unchanged exact OAuth redirect. The generated Meta Embed URL still has extra scopes and was not used; canonical runtime code retains only `instagram_business_basic` + `instagram_business_manage_insights`.
+
+Fresh names/digest-to-known-public-value checks: production app ID/redirect match; activation matches literal `false`; app secret absent; public origin still old Vercel origin. SELECT-only standalone connections/tokens/states/callback receipts remain 0/0/0/0. The product-specific Show action presented **Please re-enter your password** for Christie-Ann Groenewald. Secret was not retrieved, emitted or copied. No password was entered; dialog left open for CA private reauthentication. Do not use the parent-app secret, bypass reauthentication, search unrelated credentials or send a password/secret to chat.
+
+Exact next action: CA completes only this Meta owner reauthentication directly in the open product-secret dialog, then agent resumes the already-authorized bounded #598 saves/readbacks. No App Review, verification changes, testers, Live, OAuth, mappings, sync, unrelated config or data writes are authorized. The seven approved changes remain pending; no partial origin/URL saves were attempted. #600 crypto remains satisfied and must not be repeated. Non-secret screenshot: `C:/Users/chris/.codex/artifacts/issue-598/2026-10-02-owner-reauthentication.jpg`.
+
+Docs-only receipt verification: 52 local login/callback/encryption fixture tests passed, TypeScript/Vite build PASS (existing bundle advisory), scoped login/OAuth lint and diff check PASS. These are local regressions, not another production crypto validation. No runtime source changed.
+
+### #505 Instagram-only executable queue — 2 October
+
+Read-only current-main baseline `2e6d14484319b4b48d3180b676e29032e4c77ab3` and #505 supervisor comment 5949760923. Production: 57 active / 47 recurring-social eligible / 10 excluded / 0 scope-held; 22 canonical Instagram / 25 unmapped; standalone connections/tokens/states/callback receipts 0/0/0/0. Authenticated staff Chrome Page-first discovery exposes no Instagram option for the 25: 15 saved Pages loaded without an IG option, Red Oak's saved Page absent, nine no saved Page. This is not complete provider inventory (discovery limit/access boundaries), nor proof an account does not exist. Suggestions for Neshora/WiseRide are not mappings.
+
+All eight reviewed handles preserved; remaining 17 exact identity holds investigated: nine populated supporting local Instagram records, eight blank/no matching record, no new verified public identity or guessed handle. Credentials were neither emitted nor used. **Zero presently CONNECTABLE**: owner professional-account/consent proof and shared provider/config gates remain. Full 25-client evidence/actions: `INSTAGRAM-505-ROLLOUT-MATRIX-2026-10-02.md`.
+
+Verification: 91 focused passes / 16 disposable-DB skips / 0 failures; 25-name/eight-handle canonical manifest assertion, TypeScript/Vite build, scoped lint and diff check PASS. Docs only; no runtime changes or new production UI deployment required.
+
+OAuth start/callback/confirm ACTIVE v6/v7/v6; deauthorize/deletion v2/v2; Meta sync/worker v53/v40. Completed #595/#600 and credential-expiry deployment are satisfied; do not replay. App secret absent, activation literal false, APP_PUBLIC_URL still old Vercel origin (names/structural checks only). Next protected packet is #598 secret + canonical public origin + five legal/callback saves/readbacks with activation OFF, not a bulk connection approval. Meta dashboard deliberately untouched; Oct 1 provider review state needs fresh CA readback. No Website/TikTok/provider/config/OAuth/sync/mapping/data/deployment action; #505 stays OPEN.
+
+### #405 Website enquiries — PIEK STORED-LEAD PILOT COMPLETE (2 October, 13:53 SAST)
+
+**Production receipt (supersedes the step list below; keep it as history).**
+- Piek Vercel env: `CG_ENQUIRY_INTAKE_URL`, `CG_ENQUIRY_INTAKE_KEY` — **Production only** (Sensitive); none for Preview/Development; key piped from production, never printed.
+- Piek PR #17 merged `c45e275dc898202eb3c5a6a1a439dd58f3ca581c` (head `e145a39`); production deployment `dpl_FAkrcKhFDJJMAEgjrvtf2ardoGZW` READY, aliased `www.piekgroup.co.za` / `piekgroup.co.za`. Live assets contain no intake key, Dynamics URL, env names or preview URL.
+- First live submit (10:49 UTC) was rejected by intake v3 `server_to_server_only` (Node/undici fetch sends `sec-fetch-mode: cors`); nothing stored. Fixed by #628 merged `e08d51d9f46606d8753722d7e07df1d22fab36c7`; `website-enquiry-intake` redeployed **v4**, `verify_jwt=false`, from that commit.
+- Controlled live-form submission (11:51 UTC): receipt `4bf9fcc9-7bfd-4de1-a376-bfda97bc7610` (site reference `4BF9FCC9`), enquiry `8a7ec21d-4c64-40f3-9b81-120f05f8c87c` — Piek Group / Website 1 / production / `www.piekgroup.co.za` / `contact_form` v1. Exactly 1 enquiry, 1 `generate_lead` (non-synthetic), 1 contact, 1 delivery job `pending` (0 attempts, no provider). Identical replay through the live route returned the same reference; counts unchanged. Intake logs: `accepted/201`, `replayed/200` only.
+- Piek client identity (RPC as `authenticated`, rolled back): Lead Inbox lists exactly this lead. Delta Gas client identity: own inbox 0; read Piek inbox/metrics → `42501 Not authorized for this client`; mutate → `42501 Not authorized for this lead`; direct table read → `42501`.
+- CG admin marked Good → `qualified/good`; Piek-view Website Performance (Oct, Africa/Johannesburg): total 1, qualified 1, qualification rate 1.0.
+- Final pilot state: `closed_lost` / `poor` / `other`, note `pilot test`; audit `new→qualified/good`, `qualified→closed_lost/poor` (staff). Nothing deleted.
+- **No email sent.** Delivery worker/webhook undeployed, provider OFF, 0 provider events.
+
+**Pilot delivery job suppressed (2 Oct, 14:38 SAST, CA-approved #631 packet).** #631 merged `b405b5ca50710f0b69a2c59409461ba4aa866cf7`; migration `20261002140000_website_enquiry_delivery_suppression` applied ledger-exact (ledger 152, MD5 `fe8981ff…` matches GitHub). As CG admin: preflight listed exactly the Piek pilot job (recipient `admin@piekgroup.co.za`); `suppress_website_enquiry_delivery` → job `74112f4d-8021-43f0-aaa1-f0cff3038abe` `pending → suppressed` (`acceptance_test`, note `Piek #405 production pilot - DO NOT ACTION`). Preflight now empty; 0 sendable jobs; 0 provider events; enquiry/event/lead evidence unchanged. No provider/worker/webhook/schedule/DNS/secret touched.
+
+**Next (separate, CA-gated):** outbound email activation only — provider approval, CG sending domain/DNS, six delivery secrets, worker/webhook deploy (`verify_jwt=false`), webhook registration, schedule, delivered/bounced acceptance. Precondition: `website_enquiry_delivery_preflight()` shows no acceptance/test job (currently satisfied).
+
+### #405 Website enquiries — activation history (2 October, 11:58 SAST)
+
+CA has assigned the supervisor to run the Website/#405 rollout to completion and expects the next concrete action to be stated and executed whenever safe. Do not hand routine mechanics back to CA.
+
+**Current GitHub / code truth**
+- current main at handover refresh: `f6d4fae42bd2e2921a54f10d3ec9424337fa1ac1` (latest commit is unrelated Instagram rollout docs; Website runtime code below remains on main);
+- #614 merged `2b72c0553f2c00f9d43e9a09ba76417b17981162` — canonical website enquiry transaction;
+- #620 merged `9185585874225305142d80eb50b17e95e9bafaef` — exact-client Lead Inbox/lifecycle + Website Performance lead outcomes;
+- #621 merged `fd4f86bf3d3b13cc4b253f458b126540bdbc5d2c` — provider-neutral delivery runtime + durable provider-event inbox, still operationally disabled;
+- #625 merged `2e6d14484319b4b48d3180b676e29032e4c77ab3` — server-to-server `website-enquiry-intake` + bounded admission guard;
+- #624 closed completed;
+- Piek `CGProductionHouse/PiekGroup-Website` Issue #16 / PR #17 remains OPEN, current verified head `e145a39cca8428094792ed25bfb672cb89d5557d`, exact-head Vercel green. It keeps the current contact visual and adds the durable contact form below it. Do not merge it until its Production-only backend env binding is present.
+
+**Production schema — COMPLETE**
+Project: `ehtjfntukiwbgptqgbzy`.
+
+All four numbered repo migrations were applied in the exact required order and ledgered under their real repo versions:
+1. `20261001181932 website_enquiry_transaction`
+2. `20261002085355 website_enquiry_intake_guard`
+3. `20261002090000 website_lead_lifecycle`
+4. `20261002110000 website_enquiry_delivery_runtime`
+
+Production ledger moved 147 -> 151 rows. The stored migration statements were verified byte-equivalent to the GitHub files. Do **not** use blanket `supabase db push` on this project: many older migrations were historically ledgered under different timestamps and the CLI sees a large false-unapplied set. Preserve the exact numbered ledger history.
+
+Post-apply verification:
+- 12 Website-enquiry tables;
+- RLS enabled + forced;
+- no anon/authenticated direct table grants;
+- pipeline RPCs service-role only;
+- authenticated access only through the intended exact-client Lead Inbox/lifecycle/metrics RPCs;
+- no synthetic enquiries created during migration.
+
+**Production Edge runtime — STEP 2 COMPLETE**
+- `website-enquiry-intake` deployed ACTIVE **v1**;
+- `verify_jwt=false` is deliberate because authority is the opaque per-endpoint `x-cg-intake-key`; browser-origin requests are refused by the handler;
+- deployed source was fetched back and matches merged #625/current-main intake implementation;
+- only platform-provided `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are used internally;
+- delivery worker + webhook remain undeployed / inactive for the first stored-lead pilot; outbound email is not required for the pilot.
+
+**Piek Website 1 production binding — STEP 3 COMPLETE**
+Exact production binding now exists:
+- endpoint id `9287592d-c860-4e70-aeb1-f7e14643feba`;
+- Website Editor ID `1`;
+- Dynamics client `ed7aa1ae-de21-4151-a8f9-54796b234c1f` (Piek Group);
+- environment `production`;
+- canonical host `www.piekgroup.co.za`;
+- endpoint enabled;
+- `contact_form` schema v1 ACTIVE;
+- recipient config v1 APPROVED;
+- route `piek_head_office` -> existing public site contact `admin@piekgroup.co.za`;
+- endpoint intake key generated by Postgres and intentionally **not** written to GitHub/chat/docs.
+
+The recipient choice is grounded in Piek main's current public site source of truth (`src/data/site.ts`), not guessed from memory. A later client-confirmed routing change should create/update the canonical recipient configuration rather than rewriting history.
+
+**Important secret rule**
+Never print, paste, comment, log, hash, or otherwise expose the Piek intake key. If setting Vercel env, read it directly from production and pipe/set it without surfacing the value.
+
+**IMMEDIATE NEXT SUPERVISOR ACTIONS — continue in this order**
+1. Set Piek Vercel **Production only** server env:
+   - `CG_ENQUIRY_INTAKE_URL` = canonical deployed `website-enquiry-intake` URL;
+   - `CG_ENQUIRY_INTAKE_KEY` = Piek endpoint capability read directly from production without printing it.
+   Confirm both names exist for Production only; do not expose values.
+2. Re-read Piek PR #17 exact head/checks and current main. If still clean, merge #17 only after env is present.
+3. Wait for the Piek production deployment to be READY on the merged head and confirm `www.piekgroup.co.za` serves that deployment.
+4. Run **one controlled real Piek enquiry** through the live form. Use clearly synthetic supervisor acceptance data, not a real person's information.
+5. Verify end-to-end:
+   - safe receipt returned;
+   - exactly one canonical enquiry row created for Piek Website 1;
+   - exactly one lead-state row / exact-client Lead Inbox visibility;
+   - no cross-client visibility;
+   - mark the acceptance lead through Good -> Qualified (or Poor -> Closed-Lost if testing the other path);
+   - Website Performance lead metrics update truthfully for the Johannesburg reporting month;
+   - idempotent retry with the same submission key does not duplicate;
+   - intake logs contain outcome/status only, no PII/key/body.
+6. Mark the acceptance enquiry as test/synthetic according to the canonical packet so it does not pollute business reporting.
+7. Update #405, Piek #16/#17 and this handover with the exact production receipt.
+
+**Email is a separate later activation**
+Do not block stored-lead / Lead Inbox acceptance on outbound email.
+Still outstanding before email can go live:
+- approved transactional provider (Resend is only the current candidate, not yet activated by this Website lane);
+- verified CG sending domain / DNS;
+- `WEBSITE_ENQUIRY_EMAIL_ENABLED`
+- `WEBSITE_ENQUIRY_EMAIL_PROVIDER`
+- `WEBSITE_ENQUIRY_EMAIL_FROM`
+- `WEBSITE_ENQUIRY_RESEND_API_KEY`
+- `WEBSITE_ENQUIRY_WORKER_SECRET`
+- `WEBSITE_ENQUIRY_RESEND_WEBHOOK_SECRET`
+- delivery worker/webhook deployment, provider webhook registration and worker schedule;
+- real accepted/delivered/bounced/reconcile acceptance.
+
+Until then, enquiries may be stored and worked in Dynamics normally; delivery jobs remain pending/inert and no blind resend is allowed.
+
+**Website fleet context**
+Red Oak remains the accepted end-to-end Website Performance reference. Published September Website snapshots also exist for Piek Group, Emmanuel Funerals and All Around PVC. Get Together, CG ARCC and JFJ remain future fleet reporting/contact rollout targets. Imbewu and Raadzaal are web-only clients and explicitly last. Do not confuse Website Operations enablement (9 verified CG-built sites) with full Dynamics reporting/enquiry activation.
+
+**Commercial/product direction already locked**
+Issue #389 is the premium client-portal / expansion authority: the client experience should show substantial current value and truthful optional upgrades (new CG website, LinkedIn, Google Ads, etc.) with clear request-to-CG/Amonique actions, without fake ROI/dark patterns. This is not the immediate blocker; finish the Piek real lead pilot first.
 
 ### #611 overnight safe lane — 1 October
 
@@ -21,44 +554,20 @@ Closed #422 M2A is absent from main. A new, unapplied transaction migration is p
 ### #619 deterministic Meta boundary fixture — 2 October
 
 Current-main baseline `2b72c0553f2c00f9d43e9a09ba76417b17981162`. Reproduced the obsolete wall-clock assertion in `metaFleetFreshnessBehavioral.test.mjs`; isolated correction uses test-scoped Node Date mocks only. At `2026-10-02T06:59:59Z` (Oct 1 Pacific), October bounds are null; at `07:00:00Z` (Oct 2 Pacific), they are Oct 1–Oct 1. Both now execute the real unchanged helper and eligibility predicate. Boundary fixtures pass under UTC and Johannesburg host timezones; 236 focused Meta/freshness tests pass, full suite 3340 passed / 16 skipped / 0 failed. Runtime defaults, America/Los_Angeles, provider/worker/config/data/Edge state remain unchanged. Exact verification/head recorded on #619 and its tiny PR; #613/#615/#616 branches are untouched and their legitimate preview-auth gates remain separate. No merge or production action in this lane.
-### #611 overnight acceptance — 2 October handoff
-
-Baseline remained `04fe827ad2f724fcfe5af211541f776a67dfa85c`. Five independent current-main PRs await supervisor review; none merged/deployed overnight:
-
-- #612 `a9014bd40ab845566c570985a45a19a37b1d23ac`: sandbox test generators so verification cannot rewrite frozen #513 artifacts; 24 focused, full 3332 passed / 16 skipped.
-- #613 `1cb8d9e1d84a0b40c90e1de3dc5c21e187293d49`: recovered #437 guidance-only Creative Intelligence, existing specialist routing, exact client/month/provenance and explicit unknowns; 135 focused. Authenticated preview sign-in remains required; production session does not authenticate preview.
-- #614 `e5e6527cb62747cfcc71fe0d7742382a31b819d2`: #405 inert M2A transaction foundation; 136 focused, full 3339 passed / 16 skipped, real disposable PostgreSQL 17 acceptance and GitHub CI green. Migration `20261001181932_website_enquiry_transaction.sql` is UNAPPLIED; no public intake/mail sender/provider path. Requires supervisor security review then separate protected preflight/CA apply.
-- #615 `2c85c9e393a3acd338992bad74349b7a9bf6d1fc`: proven Integrations TikTok fleet false-disconnected summary; uses existing canonical manager queue, preserves unavailable states; 146 focused, full 3335 passed / 16 skipped.
-- #611 onboarding follow-up: production has 57 active confirmed clients but zero sessions; empty session list wrongly said no active clients. Separate inventory/session empty-state projection also suppresses false-empty claims on loading/read errors. 97 onboarding tests; full 3336 passed / 16 skipped. Link generation remains disabled behind OneDrive adapter gate.
-
-All five builds/scoped lint/diff checks passed; existing bundle-size warning remains. #612–#615 Vercel green at listed heads. Their additive handover notes must all survive supervisor merge reconciliation.
-
-Closed stale #569 (current-main superseded TikTok reporting) and #577–#581 (older generated Neshora artifacts would overwrite reviewed 79-asset evidence; #578 also had unused fake test env). No unique accepted runtime work discarded.
-
-Read-only production: original #513 accepted manifest fingerprints still match 92/92 full rows + 2/2 Neshora selected-field rows, all 94 amended v2 drafts, zero approved/published. This is NOT quality approval: newer #567 quality proposals remain unapplied, with Piek's old draft still needing canonical quality amendment before human approval/publication. No strategy writes performed.
-
-Authenticated CG Production House Admin Chrome acceptance: Hub, Work, Content, Integrations, TikTok queue, Performance, Clients/package queue, Reports, Client Preview/Piek Website and mobile Assistant open/close. Work, Integrations, Performance, Clients and Piek Website measured 375/390/430 with no horizontal body overflow; Content and TikTok queue checked at 375. October defaults and published September selection remained truthful. Piek website retains exact host, 1 visitor / 1 pageview, partial-from-27-Sep note, stale snapshot and unavailable actions/enquiries. No captured console warnings/errors. Actual client-role/physical phone and authenticated changed-preview acceptance were NOT performed; do not equate admin preview/emulation with those checks.
-
-Fleet readback: Instagram 47 eligible / 22 canonical / 25 unmapped / 10 excluded / 0 held / 0 standalone; TikTok 10 connected / 37 outstanding (4 owner-help, 2 provider rejection, 31 identity gaps). Meta summary FAILED (1 failed, 17 stale, 47 partial), Microsoft STALE (6 sources, last full success 19 August), not false PASS. MCP ACTIVE v26 includes canonical Google Ads audit action; no new MCP defect reproduced. #493 remains explicitly timing-held; #441 is already merged, not missing product work.
-
-No production migrations/data writes, Edge deploys, secret/config/provider/OAuth changes, strategy approval/publication, messages/publishing, Microsoft or OneDrive writes. #600 crypto work and CA provider tabs untouched. Morning priority: review #612 first to stop verification modifying reviewed evidence, then review the four other bounded PRs with legitimate preview auth before UI merge. #598 protected provider activation, strategy quality amendment/approval, freshness reconciliation, owner consent and optional physical-phone signoff remain separate gates.
-
-### #611 reconciliation — 2 October current follow-up
-
-Supervisor merged #612 as current main `4d291f85bf20c7e95918fab0c01bf6d43053212f`. The overnight receipts above are retained as historical evidence, not current PR heads. #613, #614, #615 and #616 are being sequentially rebased onto that exact main; no merge or protected production action is authorized in this follow-up. Accepted feature/schema/test files are unchanged; every base and original lane handover receipt is preserved verbatim.
-
-Reverified/pushed heads: #613 `c6063eb2a3593311eabdf1bf552cc13b04a7920f` (124 focused, full 3342 passed / 16 skipped); #614 `280d483fcbdbfcf46e62198f069330fe053f8e7a` (96 nearest regressions, full 3340 passed / 16 skipped, disposable PostgreSQL acceptance + CI green); #615 `112dec7006dc1625de6b0e175e8bb3ad8451ce41` (189 focused, full 3336 passed / 16 skipped). All three builds/scoped lint/diff checks passed; #612 prevents frozen strategy artifact modifications. #616's final head/results and all final Vercel states are recorded on the existing PRs and #611 after verification.
-
-Changed-preview desktop/mobile acceptance is not yet proven. Initial Chrome connection/preview-open timeouts were recovered through the documented exact-profile tab API. All three current green previews (#613/#615/#616) redirect to `/login` and visibly show Dynamics **Sign in**; no legitimate authenticated preview session is available. Local sign-in screenshots are in `C:/Users/chris/.codex/visualizations/611-reconciliation-2026-10-02`. No credentials/tokens were copied or guessed and no provider tab was used. #613/#615/#616 retain their legitimate preview-auth acceptance gate; current production acceptance is not a substitute. #614 changes no UI and its production migration remains UNAPPLIED/protected. Continue safe PR verification when an auth lane is blocked; do not merge, deploy or cross any production/provider/OAuth/data/strategy transition.
-
-#616 final docs-only rerun: 97 focused passed; full suite 3336 passed / 16 skipped / 1 failed after Pacific midnight. The unchanged current-main fixture `tests/metaFleetFreshnessBehavioral.test.mjs:358` assumes October has no completed day, but the real clock now correctly yields 1 October. Earlier #616 full run passed before that boundary. This is a pre-existing calendar-dependent test blocker, not an onboarding runtime regression; no Meta runtime/test scope was altered. Final build/lint/diff and exact pushed head are recorded on #616/#611. Legitimate authenticated preview acceptance remains separately blocked.
-### #623 current reconciliation — 2 October
-
-The historical #616 calendar-fixture failure above is superseded by merged #619/#622 on current main `de57480e11367d448a0056c34f7ff14f1aa8f0ec`. #613/#615/#616 are reconciled sequentially onto this main, preserving complete additive receipts and unchanged accepted feature scopes. Latest CA instruction prohibits merges even though #623's issue text permits them; therefore changed production smoke remains dependent on a separately authorized merge, not a claimed acceptance. Exact current heads/full verification are recorded on the existing PRs and #623. Continue safe #405 code work rather than treating unavailable preview auth as a runtime defect; no token copying/auth weakening or protected production action.
 
 2 Oct 2026: #614 merged (`2b72c05`). #405 PRs: #620 M2B Lead Inbox/lifecycle + Website Performance lead metrics, deterministic Good→Qualified / Poor→Closed-Lost, Johannesburg month (`20261002090000`, unapplied); #621 delivery runtime (`20261002110000`, unapplied), inert Resend adapter, durable provider-event inbox, worker `verify_jwt=false` + x-worker-secret — provider not approved, no secrets/emails. First pilot packet (Piek Group, Website 1; M2C intake adapter missing): `WEBSITE-ENQUIRY-PILOT-PACKET-405.md`.
 
 ## 1. Fresh supervisor recovery order
+
+### #623 ordered finish — 2 October, no agent merge/production action
+
+- Baseline `fd4f86bf3d3b13cc4b253f458b126540bdbc5d2c`: supervisor independently merged corrected #620 (`9185585`) then #621 (`fd4f86b`). All Website migrations remain unapplied. Independently verified 25 Website tests, three disposable PostgreSQL suites and actual Deno worker/webhook checks.
+- Existing UI PRs reconciled sequentially, feature code unchanged, every additive receipt preserved: #613 `a763d5ff393518747491720d6d3a7bea242c0fab` (129 focused, full 3367 passed/16 skipped), #615 `747e30affb9ba95aede81aed5390a6d0e90bc28e` (189 focused, full 3361/16), #616 `23e0dc2e877c8e3f58f3fb2a828c10cfa390ff5b` (97 focused, full 3362/16). All build/scoped lint/diff and exact-head Vercel PASS. Changed-preview auth is an environmental gate; post-merge production smoke is not claimed in this user-prohibited-merge lane.
+- Parallel M2C authority is existing #624/PR #625 plus Piek #16/PR #17. Overlapping #626 was closed unmerged; candidate commit `30c668fbc81c8a34780648eb3d0a6af66299e52c` preserved, unpublished site draft stashed. Do not activate that alternative API. Same-PR #625 hardening preserves canonical `x-cg-intake-key` / schema / receipt/Piek contracts, adding bounded persistent admission, body timeout/error handling and verified receipt shape. See `WEBSITE-ENQUIRY-INTAKE-624.md` for the new unapplied admission migration and exact protected sequence.
+- Piek form was not mounted on current main; PR #17 requires CA/client form-placement approval. No Piek duplicate PR or provider/runtime/config action by this lane. Instagram/TikTok/strategy authority is untouched.
+- Same-PR #625 hardening verification: 35 Website tests; full 3383 total / 3367 passed / 16 skipped / 0 failed with canonical placeholder env; build/scoped lint/diff and actual Deno intake check PASS. Real disposable PG17 intake→canonical enquiry/outbox→exact-client Inbox, 20-session admission, hourly exhaustion, monotonic bucket and RLS/grants PASS. Browser retry encountered creation timeout followed by `Debugger unattached`; the existing changed-preview tab remains at `/login`. No authenticated changed-code acceptance is claimed and no credentials/tokens were copied.
+- Existing Piek #17 additionally hardened in the same PR at `e145a39cca8428094792ed25bfb672cb89d5557d`: approved exact upstream URL + no credential redirects, bounded body/error handling, valid receipt/time, frozen entire ambiguous retry payload and same-tick duplicate guard, truthful receipt-versus-email/honeypot copy. 11 tests/typecheck/build/scoped ESLint (existing Dynamics tool, no new site dependency)/diff PASS; client bundle scan finds no capability/config/function strings. Local production-build desktop 1280 and 375/390/430px synthetic fail-closed acceptance passed, no overflow or console warn/error; screenshot evidence retained under `C:/Users/chris/.codex/artifacts/issue-623/`. No real submission, email or authenticated production pilot. CA/client must approve the newly mounted form and privacy/recipient scope before rollout. The canonical server-only env names remain `CG_ENQUIRY_INTAKE_URL` and `CG_ENQUIRY_INTAKE_KEY`, Production only.
+- Control Centre write-back could not be grounded: connected Drive searches for `CG Dynamics Control Centre` and `Control Centre` returned no accessible spreadsheet; mandatory current docs contain no exact tracker URL. No guessed/replacement sheet or cell writes. GitHub owning issues/#381 and this handover contain the durable current receipts; restore exact tracker access/reference separately if it remains an active coordination authority.
 
 A new supervisor must recover in this order:
 
@@ -95,7 +604,10 @@ CA expects the supervisor to run the project rather than hand routine work back 
 
 ## 3. Current verified production / GitHub baseline
 
-The last runtime-affecting Instagram action was the separately CA-authorized #600 encryption-pair reset performed after PR #607 merged at:
+The latest runtime-affecting Instagram action is the completed bounded #598
+app-secret/public-origin packet recorded above; no source deployment or schema
+change accompanied it. Earlier separately CA-authorized #600 encryption-pair
+reset was performed after PR #607 merged at:
 
 `1584604de26d9d678225f447e8a895738563c044`
 
@@ -168,15 +680,9 @@ Current Meta/App Review truth from authenticated provider inspection:
 
 Current config/provider blockers:
 
-- `INSTAGRAM_APP_SECRET` is **absent**
-- `APP_PUBLIC_URL` still points to the old Vercel origin and must be corrected to:
-  `https://www.cgdynamics.co.za`
+- #598 app-secret and public-origin gates are **COMPLETE**; correct Instagram-product secret readback passed and `APP_PUBLIC_URL=https://www.cgdynamics.co.za`.
 - standalone activation remains OFF
-- Meta Privacy URL remains unsaved/incorrect in provider settings
-- Meta Terms URL remains incorrect
-- App Basic deletion instructions URL remains incorrect
-- Instagram Deauthorize callback URL remains unsaved
-- Instagram Data deletion request URL remains unsaved
+- All five locked Meta legal/callback fields are saved and reload-readback verified; see the completion receipt above. Remaining provider gates are Business/Access Verification, authorized fixture, Review/Live and later consent, not missing URL/config prerequisites.
 
 Reviewed public values to use only under explicit provider-save authority:
 
@@ -202,6 +708,10 @@ Client-branded portfolio assets are not a consent-free test pool.
 ### Remaining protected Instagram order
 
 The next supervisor should treat this as the current sequence:
+
+Steps 1–4 below are completed by the 2 October authorized #598 receipt above.
+Do not re-provision or replay saves. Step 5 is also already satisfied. The next
+protected decision is step 6 Business Verification; not authorized by #598.
 
 1. Re-read #598 save pack and current live config/provider state.
 2. Obtain exact CA authorization for only:
@@ -384,12 +894,8 @@ On a fresh chat:
 3. Confirm #600 closed; treat #602/#604/#606 as historical/superseded.
 4. Re-read `docs/ops/INSTAGRAM-CONFIG-META-SAVE-PREFLIGHT-598.md` and `docs/ops/INSTAGRAM-STANDALONE-PROVIDER-ACTIVATION.md`.
 5. Read-only recheck the exact live Instagram config names/provider fields if consequential.
-6. The next separate protected #505 session is:
-   - `INSTAGRAM_APP_SECRET`;
-   - canonical `APP_PUBLIC_URL`;
-   - five Meta legal/callback saves;
-   while activation remains OFF.
-7. Do not cross that protected write gate without CA's explicit authorization.
+6. The #598 app-secret/public-origin/five-URL packet is COMPLETE with activation OFF. Next separate protected #505 session is Meta Business Verification with CA's exact company documents, then Access Verification and a genuine owner-authorized review fixture. Review/Live/activation/OAuth remain separately protected.
+7. Do not cross those further protected gates without CA's explicit authorization.
 8. After each consequential action, update #505, #381 and this handover.
 
 The supervisor should keep CA out of routine mechanics and bring her in only for the exact protected decisions, provider verification/2FA/document steps or human review gates that truly require her.

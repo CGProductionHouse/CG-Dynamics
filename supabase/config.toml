@@ -19,3 +19,14 @@ verify_jwt = false
 [functions.website-enquiry-delivery-webhook]
 # Provider (Resend/Svix) HMAC signature verified by the handler, not a Supabase JWT.
 verify_jwt = false
+
+[functions.website-enquiry-intake]
+# Server-to-server only. CG website server routes send the per-endpoint intake key in
+# x-cg-intake-key; the handler and canonical M2A transaction are the sole authority. No
+# Supabase JWT or service-role key is ever given to a website.
+verify_jwt = false
+
+[functions.website-enquiry-ses-events]
+# Amazon SNS cannot send a Supabase JWT. The handler verifies the SNS message signature
+# against an AWS-hosted certificate and the configured topic ARN before trusting anything.
+verify_jwt = false

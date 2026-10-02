@@ -40,6 +40,9 @@ try {
   sql(readFileSync(new URL('../supabase/migrations/20261001181932_website_enquiry_transaction.sql', import.meta.url), 'utf8'))
   sql(readFileSync(new URL('../supabase/migrations/20261002090000_website_lead_lifecycle.sql', import.meta.url), 'utf8'))
   sql(readFileSync(new URL('../supabase/migrations/20261002110000_website_enquiry_delivery_runtime.sql', import.meta.url), 'utf8'))
+  // Later #405 migrations redefine event processing; the race suite must keep passing on them.
+  sql(readFileSync(new URL('../supabase/migrations/20261002140000_website_enquiry_delivery_suppression.sql', import.meta.url), 'utf8'))
+  sql(readFileSync(new URL('../supabase/migrations/20261002160000_website_enquiry_delivery_ses_events.sql', import.meta.url), 'utf8'))
   sql(readFileSync(new URL('../tests/sql/405_website_enquiry_delivery_acceptance.sql', import.meta.url), 'utf8'))
   console.log('PASS: delivery runtime — lease/claim isolation, accepted/delivered/bounced distinct, retry backoff + cap, ambiguous and expired-lease reconcile without blind resend, enquiries never lost')
 } finally {

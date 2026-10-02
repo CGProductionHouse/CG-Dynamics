@@ -4,6 +4,23 @@ Read-only inspection: 1 October 2026. Repository baseline:
 `0be26fbdf8790dab9dd18a7782ea31e7988b300e`.
 This document is a protected execution plan, not authorization to execute it.
 
+## Superseding execution receipt — 2 October 2026
+
+The bounded packet was explicitly authorized in #598 comment 5950879579 and
+#505 comment 5950880151. After CA completed private owner reauthentication,
+the exact Instagram-product secret and canonical public origin were saved and
+privately read back; exactly those two Supabase entries changed. All five URLs
+below were saved and reload/reopen readback verified, preserving instructions
+mode, OAuth redirect and the runtime's two reporting scopes. Activation remains
+literal false; Development mode and zero standalone connection/token/state/
+callback receipts remain. No-code/state callback returns canonical-origin
+`activation_blocked`; malformed signatures 400; unknown receipt 404. No valid
+provider callback, OAuth, client binding, sync, Edge deploy or DB data write.
+See the current ops handover for the complete non-secret receipt. The historical
+missing-config/URL findings below are superseded; do not repeat these saves.
+Business/Access Verification, owner-authorized demo, Review/Live and activation
+remain separate protected gates, not authorized by this completed packet.
+
 Superseding #600 receipt: CA subsequently authorized a known-good encryption
 pair reset only after all four standalone tables were proven zero. Fresh 32-byte
 CSPRNG key canonical-base64/length/version/helper round-trip checks and private
