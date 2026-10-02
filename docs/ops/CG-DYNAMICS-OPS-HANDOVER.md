@@ -2,7 +2,7 @@
 
 Status: **CURRENT authority for a fresh supervisor chat**
 
-Updated: **1 October 2026** after reconciliation of the #600 Instagram encryption reset, #595 callback rollout, #505 provider closure state, #513 strategy state, #377 MCP production acceptance and #573 Website Performance closure.
+Updated: **2 October 2026** after #623 UI PR reconciliation and canonical Website intake/Piek hardening. Earlier #600/#595/#505/#513/#377/#573 production receipts remain below; no new protected production action occurred in #623.
 
 This file is intentionally current-state-first. Historical failed attempts are summarized only where they prevent repeated work.
 
@@ -34,6 +34,7 @@ Current-main baseline `2b72c0553f2c00f9d43e9a09ba76417b17981162`. Reproduced the
 - Piek form was not mounted on current main; PR #17 requires CA/client form-placement approval. No Piek duplicate PR or provider/runtime/config action by this lane. Instagram/TikTok/strategy authority is untouched.
 - Same-PR #625 hardening verification: 35 Website tests; full 3383 total / 3367 passed / 16 skipped / 0 failed with canonical placeholder env; build/scoped lint/diff and actual Deno intake check PASS. Real disposable PG17 intake→canonical enquiry/outbox→exact-client Inbox, 20-session admission, hourly exhaustion, monotonic bucket and RLS/grants PASS. Browser retry encountered creation timeout followed by `Debugger unattached`; the existing changed-preview tab remains at `/login`. No authenticated changed-code acceptance is claimed and no credentials/tokens were copied.
 - Existing Piek #17 additionally hardened in the same PR at `e145a39cca8428094792ed25bfb672cb89d5557d`: approved exact upstream URL + no credential redirects, bounded body/error handling, valid receipt/time, frozen entire ambiguous retry payload and same-tick duplicate guard, truthful receipt-versus-email/honeypot copy. 11 tests/typecheck/build/scoped ESLint (existing Dynamics tool, no new site dependency)/diff PASS; client bundle scan finds no capability/config/function strings. Local production-build desktop 1280 and 375/390/430px synthetic fail-closed acceptance passed, no overflow or console warn/error; screenshot evidence retained under `C:/Users/chris/.codex/artifacts/issue-623/`. No real submission, email or authenticated production pilot. CA/client must approve the newly mounted form and privacy/recipient scope before rollout. The canonical server-only env names remain `CG_ENQUIRY_INTAKE_URL` and `CG_ENQUIRY_INTAKE_KEY`, Production only.
+- Control Centre write-back could not be grounded: connected Drive searches for `CG Dynamics Control Centre` and `Control Centre` returned no accessible spreadsheet; mandatory current docs contain no exact tracker URL. No guessed/replacement sheet or cell writes. GitHub owning issues/#381 and this handover contain the durable current receipts; restore exact tracker access/reference separately if it remains an active coordination authority.
 
 A new supervisor must recover in this order:
 
