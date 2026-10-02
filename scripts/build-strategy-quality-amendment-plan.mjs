@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync, realpathSync } from 'node:fs'
 import { resolve, relative, isAbsolute } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { sha } from './audit-monthly-strategy-approval-manifest.mjs'
+import { indexOverrides, validateOverride } from './strategy-quality-reviewed-overrides.mjs'
 
 const ROOT = resolve(import.meta.dirname, '..')
 const FROZEN = resolve(ROOT, 'artifacts/client-strategy-dossiers/issue-513')
@@ -71,7 +72,8 @@ export function piekCorrection(data, month) {
   return next
 }
 
-export function buildQualityPlan({ snapshot, fleet, neshora, manifest, quality }) {
+export function buildQualityPlan({ snapshot, fleet, neshora, manifest, quality, reviewedOverrides }) {
+  const overrides = indexOverrides(reviewedOverrides)
   const live = snapshot.strategies
   const reviews = manifest.rows
   const proposals = [...fleet.rows.filter(r => r.disposition === 'ready'), ...neshora.rows]
@@ -80,6 +82,7 @@ export function buildQualityPlan({ snapshot, fleet, neshora, manifest, quality }
   const liveBy = indexed(live), proposedBy = indexed(proposals), qualityBy = indexed(quality.rows)
   if (live.length !== 114 || reviews.length !== 94 || proposals.length !== 94 || quality.rows.length !== 94 || new Set(reviews.map(r => r.client_id)).size !== 47) throw new Error('Expected exact 114/94/47 partition')
   const reviewedKeys = new Set(reviews.map(key))
+  for (const overrideKey of overrides.keys()) if (!reviewedKeys.has(overrideKey)) throw new Error('Override outside exact reviewed partition')
   const excluded = live.filter(r => !reviewedKeys.has(key(r)))
   const expectedExcluded = fleet.rows.filter(r => r.disposition === 'non_applicable')
   if (excluded.length !== 20 || expectedExcluded.length !== 20 || excluded.some(r => !expectedExcluded.some(e => e.strategy_id === r.id && key(e) === key(r)) || r.version !== 1 || r.staff_amended_at || r.workflow_status !== 'draft' || r.approved_at || r.published_at)) throw new Error('Non-applicable partition drift')
@@ -102,6 +105,10 @@ export function buildQualityPlan({ snapshot, fleet, neshora, manifest, quality }
     let proposed = overlay(current.strategy_data, proposal.proposed_strategy_data)
     if (isPiek) proposed = piekCorrection(proposed, review.strategy_month.slice(0, 7))
     if (isNeshora) proposed = neshoraCopyCorrection(proposed)
+    const override = overrides.get(key(review))
+    const overrideStops = override ? validateOverride(current, override, revision) : []
+    stop.push(...overrideStops)
+    if (override && !overrideStops.length) proposed = overlay(current.strategy_data, override.patch)
     for (const [action, field] of Object.entries(PACKAGE_FIELDS)) {
       const enabled = Number.isInteger(pkg?.[field]) && pkg[field] > 0
       if (proposed.actionPlan?.[action]?.enabled !== enabled || (!enabled && proposed.actionPlan?.[action]?.items?.length)) stop.push(`PACKAGE_FORMAT_MISMATCH:${field}`)
@@ -113,10 +120,11 @@ export function buildQualityPlan({ snapshot, fleet, neshora, manifest, quality }
     if (isNeshora && (sources?.issue_513_evidence_hash !== NESHORA_EVIDENCE || pkg.professional_videos_per_month !== 1 || pkg.photo_posts_per_month !== 4 || pkg.design_posters_per_month !== 4 || ['reels_per_month', 'animated_posters_per_month', 'campaign_management_included', 'monthly_campaign_budget'].some(f => pkg[f] !== null))) stop.push('NESHORA_546_SCOPE_OR_PROVENANCE_DRIFT')
     // Existing #567 regex approval is not proof of a client-specific monthly plan.
     // Never auto-clear the other 45 clients merely because their names occur in copy.
-    if (!isPiek && !isNeshora) stop.push('CLIENT_SPECIFIC_MONTHLY_QUALITY_REVIEW_REQUIRED_567_IS_NOT_ACCEPTANCE')
+    if (!isPiek && !isNeshora && (!override || overrideStops.length)) stop.push('CLIENT_SPECIFIC_MONTHLY_QUALITY_REVIEW_REQUIRED_567_IS_NOT_ACCEPTANCE')
     const diff = changes(current.strategy_data, proposed), proposedHash = sha(proposed)
     const preserved = Object.keys(current.strategy_data).filter(f => !diff.some(d => d.field === f || d.field.startsWith(`${f}.`)))
     return {
+      ...(override ? { reviewed_override: { packet_hash: reviewedOverrides.packet_hash, reviewed_hash: override.reviewed_hash, source_receipts: override.source_receipts, report_context: override.report_context } } : {}),
       row_id: current.id, client_id: current.client_id, client_name: current.client_name, strategy_month: current.strategy_month,
       current_revision: current.version, current_revision_receipt: revision ?? null, current_status: current.workflow_status, current_strategy_hash: sha(current.strategy_data),
       committed_567_proposed_hash: q.reviewed_strategy_hash, proposed_strategy_hash: proposedHash,
@@ -151,10 +159,10 @@ export function assertIsolated(directory) {
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
-  if (process.argv.length !== 4) throw new Error('Usage: node scripts/build-strategy-quality-amendment-plan.mjs LIVE_SNAPSHOT ISOLATED_DIRECTORY (no apply mode)')
+  if (![4,5].includes(process.argv.length)) throw new Error('Usage: node scripts/build-strategy-quality-amendment-plan.mjs LIVE_SNAPSHOT ISOLATED_DIRECTORY [REVIEWED_OVERRIDES] (no apply mode)')
   const directory = assertIsolated(resolve(process.argv[3]))
   const read = path => JSON.parse(readFileSync(path,'utf8'))
-  const plan = buildQualityPlan({ snapshot:read(resolve(process.argv[2])), fleet:read(resolve(directory,'sep-oct-strategy-mutation-dry-run.json')), neshora:read(resolve(directory,'neshora-strategy-readiness-dry-run.json')), manifest:read(resolve(FROZEN,'sep-oct-approval-publication-manifest.json')), quality:read(resolve(FROZEN,'issue-567-sep-oct-strategy-quality-readiness.json')) })
+  const plan = buildQualityPlan({ snapshot:read(resolve(process.argv[2])), fleet:read(resolve(directory,'sep-oct-strategy-mutation-dry-run.json')), neshora:read(resolve(directory,'neshora-strategy-readiness-dry-run.json')), manifest:read(resolve(FROZEN,'sep-oct-approval-publication-manifest.json')), quality:read(resolve(FROZEN,'issue-567-sep-oct-strategy-quality-readiness.json')), reviewedOverrides:process.argv[4] ? read(resolve(process.argv[4])) : undefined })
   writeFileSync(resolve(directory,'canonical-quality-amendment-plan.json'),`${JSON.stringify(plan,null,2)}\n`)
   process.stdout.write(`${JSON.stringify({plan_hash:plan.plan_hash,...plan.counts},null,2)}\n`)
 }
