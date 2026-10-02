@@ -19,7 +19,6 @@ export function buildPki({
   intermediateIsCa = true,
   aiaUrl = SNS_ISSUER_URL,
   leafDays = 2,
-  leafStart,
 } = {}) {
   const dir = mkdtempSync(join(tmpdir(), `cg-sns-pki-${name}-`))
   const path = (file) => join(dir, file)
@@ -39,8 +38,8 @@ export function buildPki({
       `subjectAltName=DNS:${leafDns}`,
       ...(aiaUrl ? [`authorityInfoAccess=caIssuers;URI:${aiaUrl}`] : []),
     ])]
-  if (leafStart) leafArgs.push('-not_before', leafStart, '-not_after', '20991231000000Z')
-  else leafArgs.push('-days', String(leafDays))
+  // Only options available in OpenSSL 3.0 (CI) are used.
+  leafArgs.push('-days', String(leafDays))
   openssl(leafArgs)
 
   const intermediateDer = openssl(['x509', '-in', path('int.pem'), '-outform', 'der'])

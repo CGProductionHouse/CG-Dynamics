@@ -89,7 +89,6 @@ test('every structural rule fails closed with a named reason', async () => {
     ['untrusted_issuer_location', buildPki({ name: 'aia', aiaUrl: 'http://crt.evil.example/r2m02.cer' })],
     ['untrusted_issuer_location', buildPki({ name: 'noaia', aiaUrl: null })],
     ['issuer_not_ca', buildPki({ name: 'intca', intermediateIsCa: false })],
-    ['leaf_not_valid_now', buildPki({ name: 'future', leafStart: '20990101000000Z' })],
   ]
   for (const [reason, pki] of cases) {
     const result = await verifySnsSigningCertificate(pki.leafPem, { fetchIssuer: async () => pki.intermediateDer, roots: [pki.rootPem] })
@@ -101,6 +100,9 @@ test('every structural rule fails closed with a named reason', async () => {
   assert.deepEqual(await verifySnsSigningCertificate(good.leafPem, { fetchIssuer: async () => { throw new Error('dns') }, roots: [good.rootPem] }),
     { ok: false, reason: 'issuer_unavailable' })
   assert.deepEqual(await verifySnsSigningCertificate(good.leafPem, { fetchIssuer: async () => good.intermediateDer, roots: [good.rootPem], now: new Date('2100-01-01T00:00:00Z') }),
+    { ok: false, reason: 'leaf_not_valid_now' })
+  // Not yet valid (before notBefore) — portable across OpenSSL versions via an injected clock.
+  assert.deepEqual(await verifySnsSigningCertificate(good.leafPem, { fetchIssuer: async () => good.intermediateDer, roots: [good.rootPem], now: new Date('2000-01-01T00:00:00Z') }),
     { ok: false, reason: 'leaf_not_valid_now' })
   assert.deepEqual(await verifySnsSigningCertificate('-----BEGIN CERTIFICATE-----\nAAAA\n-----END CERTIFICATE-----', { fetchIssuer: async () => good.intermediateDer }),
     { ok: false, reason: 'unparseable_certificate' })
