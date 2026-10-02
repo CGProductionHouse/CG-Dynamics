@@ -4,7 +4,8 @@ function isClientSchedulePlan(planName: string): boolean {
     || normalized === '2025 clients schedule'
 }
 
-export function shouldFetchPlannerTaskDetails(planName: string, percentComplete: unknown): boolean {
+export function shouldFetchPlannerTaskDetails(planName: string, percentComplete: unknown, isAutomatic = false): boolean {
+  if (isAutomatic && isClientSchedulePlan(planName)) return false
   if (isClientSchedulePlan(planName)) return true
   return typeof percentComplete !== 'number' || percentComplete < 100
 }
