@@ -2,7 +2,7 @@
 
 Status: **CURRENT authority for a fresh supervisor chat**
 
-Updated: **2 October 2026, after Agent 01 #645 observer merge/reassignment and Agent 02 #646 evidence-remediation assignment**
+Updated: **2 October 2026, after #615 merge and Agent 01 overnight standing authority**
 
 Current accepted main before this handover-only docs update: **`d8d9691cd068f7faaffc579237c8e665fe7d28ca`**. Latest freshness runtime-code merge remains **`2c27e74fe0d798fdffff877d358a0fa13f355292`**; #643 changes offline strategy review tooling/artifacts only. The handover edit itself advances `main`; **always refetch current main on takeover and before every merge**.
 
@@ -123,60 +123,48 @@ Client/business communication is **draft only** unless the user explicitly says 
 
 ## CURRENT TWO-AGENT BOARD
 
-### AGENT 01 — FRESHNESS COMPLETE / SAFE UI REASSIGNMENT
+### AGENT 01 — OVERNIGHT SAFE LAUNCH FINISHER
 
-Freshness owning issues: **#451 + #623**, consolidated in **#381**.
-
-Accepted freshness merges:
+Freshness engineering is complete on main:
 - #639 Microsoft CPU/runtime repair → `7ff12f492003c89ad164da42b2c92495560bd4ce`
 - #642 Meta terminal-bootstrap churn repair → `2c27e74fe0d798fdffff877d358a0fa13f355292`
 - #645 bounded read-only acceptance observer → `23d2e45d34568cf24d6891b2efd34b579e4e17f5`
 
-Accepted zero-write rollout preflight:
-- exact manifest: #451 comment **`5957561266`**
-- supervisor rollout gate: #451 comment **`5957656853`**
-- observer merge receipt: #451 comment **`5958361612`**
-- reassignment brief: #623 comment **`5958362363`**
-- #381 receipt: comment **`5958370756`**
+Freshness protected rollout remains blocked on direct CA instruction. Exact accepted rollout order/manifest remains on #451 comments `5957561266` + `5957656853`. Do not redo preflight/observer work.
 
-Protected future rollout remains:
-1. `microsoft-transition-sync` — preserve JWT=true + captured root import map; rollback source/config = production v39 snapshot.
-2. `background-worker` — preserve JWT=false; rollback source/config = production v27 snapshot.
-3. `meta-connection-status` — preserve JWT=false; rollback source/config = production v33 snapshot.
+Safe UI progress:
+- #615 truthful TikTok Integrations fleet summary merged → `482a4325c315b6b5770bf866fdeb1d99972b6cef`.
+- Final #615 diff only: `src/lib/tiktokIntegrationSummary.ts`, `src/pages/admin/IntegrationsPage.tsx`, `tests/tiktokIntegrationSummary.test.mjs`.
+- Accepted behavior: canonical admin/manager queue, count-integrity guard, malformed/read-failed => unavailable not fake disconnected/zero, connection coverage separate from reporting freshness, no publishing promise.
+- Preview redirected to /login; under current #623 authority this environmental preview-auth limitation does NOT justify parking already-reviewed safe UI work forever.
 
-**BLOCKED: needs CA instruction — deploy exactly those three Edge functions in the accepted order with captured JWT/import-map settings and allow their existing automatic cron/queue/mirror/diagnostic behavior during acceptance.**
+CA explicitly requested **overnight no-back-and-forth execution** for Agent 01. Latest authority: #623 comment **`5958795947`** and #381 comment **`5958796474`**.
 
-No manual sync/reconciliation trigger, migration/SQL/data repair, cron change, secret/config/env mutation, provider/access/OAuth/mapping change or permission broadening is included.
+**CURRENT overnight sequence:**
+1. Existing PR #616 — onboarding empty-state inventory truth. Reconcile SAME PR onto current main, drop stale handover-only branch changes, preserve narrow accepted source/tests, run focused/full/build/lint/diff/exact-head Vercel, self-review exact diff, and MERGE if safe/green. Then attempt legitimate read-only production desktop + mobile smoke if an existing session is available; if not, record once and continue.
+2. Existing PR #613 — research-backed Content Guideline intelligence. Same current-main reconcile/self-review/verification/merge process. Then legitimate read-only production smoke if available; otherwise record once and continue.
+3. After #616/#613, refetch current main + #623/#381 + open PR/issues. Continue the highest-value **SAFE, UNOWNED, launch-critical** task. Prefer finishing existing accepted work over new architecture. Reproduce before fixing. Reuse an owning PR/branch instead of creating duplicates.
+4. After every completed chunk, update owning issue + #623 + #381 with exact SHA/PR/tests/blockers, then continue immediately. Ordinary code-only GitHub merges are authorised during this overnight mission when exact-head verification is green.
 
-Freshness engineering/readiness/observer work is complete on main. Do not re-audit it unless deployed source/config drift occurs or live post-rollout evidence disproves the accepted contract.
+**Hard exclusions / protected gates remain:**
+- no production DB/schema/data migration/write;
+- no Edge/function deployment;
+- no secrets/env/config;
+- no provider/OAuth/App Review/Live/permission/mapping;
+- no manual sync/reconciliation trigger;
+- no strategy amendment/approval/publication;
+- no external send/spend;
+- no credential recovery/guessing;
+- no destructive data;
+- no Website/#405 (Claude-owned);
+- no #513/#501 strategy lane (Agent 02/supervisor);
+- no #389 protected production rollout;
+- no freshness three-function production rollout.
 
-The merged #645 observer is intentionally:
-- fixed-project;
-- offline-default;
-- read-only Management API database/log/function-inventory capture;
-- one SELECT-only SQL snapshot;
-- no Edge handler invocation;
-- no deploy/apply/sync/reconcile mode;
-- no credential fallback/recovery;
-- private local receipt only;
-- fail closed on access/schema/RLS/limits;
-- explicit that fetch/cron HTTP success is not terminal APPLY/PASS.
+When a task hits a protected gate, write exactly `BLOCKED: needs CA instruction — <exact scope>`, do not attempt it, and move to the next independent safe task.
 
-**CURRENT Agent 01 mission = existing PR #615 TikTok Integrations truth reconciliation.**
+Do not edit this master handover. Do not retry preview auth endlessly. End only when current #623/#381 contain no remaining safe unowned work; then leave one concise overnight completion receipt with merges, verification, smoke evidence, and exact remaining protected/human/provider blockers.
 
-PR #615 is an already accepted-in-scope UI fix but is behind current main. Agent 01 must:
-- use the SAME PR/branch; no replacement PR;
-- reconcile onto current main;
-- preserve current supervisor handover and drop/resolve the stale additive handover branch receipt rather than overwriting current handover truth;
-- preserve feature scope: canonical admin/manager TikTok connection queue for fleet summary, no invalid client-less status call, count-consistency validation, unavailable/read-failed evidence remains unavailable, connection coverage separate from reporting freshness, no publishing promise;
-- no backend/provider/OAuth/config/mapping/worker/data change;
-- no #405/#513/#389 work;
-- run focused TikTok/Integrations/freshness tests, full suite, build, scoped lint, diff check and fresh exact-head Vercel;
-- if authenticated changed-preview remains unavailable, record the limitation once and do not bypass auth or copy credentials/tokens.
-
-Current pre-reassignment PR #615 head was `747e30affb9ba95aede81aed5390a6d0e90bc28e`, far behind current main by many commits. Current main must be refetched before reconciliation.
-
-**NEXT SUPERVISOR ACTION when Agent 01 returns:** independently inspect #615's reconciled diff against current main. Ensure only TikTok integration source/tests plus any legitimate non-stale receipt remain. Merge automatically if safe/green; then perform/record production smoke if legitimate session is available, otherwise mark that acceptance gap truthfully and assign the next existing safe UI PR (#616 or #613) rather than returning Agent 01 to blocked freshness.
 
 ### AGENT 02 — #513 STRATEGY QUALITY / EVIDENCE REMEDIATION
 
@@ -231,7 +219,7 @@ Remaining blocked clients / exact evidence class:
 
 Important: #501 is the canonical report-truth ledger. On 23 Sep it had 112 published/verified reports and no further qualifying recovery rows after the authorized 5-row recovery. Missing report/post evidence means **missing evidence**, never zero performance. Do not fabricate content reports from metrics-only rows.
 
-**CURRENT Agent 02 mission = targeted evidence-remediation wave A, READ ONLY** for exactly:
+**Wave A RETURNED on #381 comment `5958760469`; supervisor review is pending. Agent 01 must not enter this lane.**\n\nReturned read-only findings: Bat Hill Royale and All Around PVC can likely return to targeted Sep/Oct quality review with explicit July/current-claim limits; Vrystaat remains held on current programme/application truth; Red Oak remains held on missing recent exact post history. No production writes occurred.\n\nThe previously assigned mission was targeted evidence-remediation wave A, READ ONLY for exactly:
 1. Bat Hill Royale
 2. Vrystaat Kunstefees
 3. All Around PVC
