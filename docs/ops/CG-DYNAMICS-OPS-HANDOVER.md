@@ -2,7 +2,7 @@
 
 Status: **CURRENT authority for a fresh supervisor chat**
 
-Updated: **2 October 2026, after Agent 02 Batch 2 #643 merge and Batch 3 assignment**
+Updated: **2 October 2026, after Agent 01 freshness rollout-readiness acceptance and Agent 02 Batch 3 assignment**
 
 Current accepted main before this handover-only docs update: **`d8d9691cd068f7faaffc579237c8e665fe7d28ca`**. Latest freshness runtime-code merge remains **`2c27e74fe0d798fdffff877d358a0fa13f355292`**; #643 changes offline strategy review tooling/artifacts only. The handover edit itself advances `main`; **always refetch current main on takeover and before every merge**.
 
@@ -131,72 +131,49 @@ Latest accepted merges:
 - #639 Microsoft CPU/runtime repair → `7ff12f492003c89ad164da42b2c92495560bd4ce`
 - #642 Meta terminal-bootstrap churn repair → `2c27e74fe0d798fdffff877d358a0fa13f355292`
 
-Both code repairs are on current main.
+Accepted zero-write rollout preflight:
+- exact manifest: #451 comment **`5957561266`**
+- supervisor acceptance/gate: #451 comment **`5957656853`**
+- #381 state: comment **`5957657374`**
+- #623 receipt: comment **`5957659578`**
+- preflight was pinned to main `93bad42ef97fe975efc680a5ba44d0dd48e9685f`; later unrelated Website/#405 changes require only a source/config drift recheck immediately before any authorized deploy.
 
-**Production is NOT repaired yet.**
-No protected Edge rollout has occurred.
+Accepted protected future rollout order:
+1. `microsoft-transition-sync` — current-main closure; preserve JWT=true + captured root import map; rollback source/config = production v39.
+2. `background-worker` — current-main closure; preserve JWT=false; rollback source/config = production v27.
+3. `meta-connection-status` — current-main closure; preserve JWT=false; rollback source/config = production v33.
 
-Agent 01's CURRENT mission is the zero-write combined deployment-readiness packet from #451 comment **`5956901250`**:
+Accepted readiness findings:
+- all three production bundles are behind accepted main;
+- full import/runtime/type closures resolve and Edge checks pass;
+- required live schema/RPC/grants/cron and secret **names** exist;
+- no migration, cron, secret/env-value, provider-permission/mapping or flag change is required;
+- rollback means restore exact captured SOURCE/CONFIG, not DB data;
+- no manual reconciliation/sync trigger is included.
 
-Functions ONLY:
-1. `microsoft-transition-sync`
-2. `background-worker`
-3. `meta-connection-status`
+**BLOCKED: needs CA instruction — deploy exactly those three Edge functions in the accepted order with captured JWT/import-map settings and allow their existing automatic cron/queue/mirror/diagnostic behavior during acceptance.**
 
-Required current work:
-- deployed-vs-main source parity/hash;
-- import closure;
-- current JWT/auth/secret contract;
-- prove no schema/cron/secret/provider/env change required;
-- exact rollout order;
-- exact rollback version/target;
-- post-deploy acceptance;
-- stop conditions.
+That protected authorization would NOT include:
+- explicit manual Microsoft reconciliation/sync trigger;
+- Meta manual sync trigger;
+- migration/SQL/data repair;
+- cron/cadence change;
+- secret/config/env mutation;
+- provider/access/OAuth/mapping change;
+- permission broadening.
 
-Expected rollout order to validate, not blindly assume:
-1. microsoft-transition-sync
-2. background-worker
-3. meta-connection-status
+Production freshness remains unrepaired until protected rollout + live acceptance completes.
 
-No deployment or production sync trigger is authorised in this mission.
+**CURRENT Agent 01 safe mission = read-only rollout acceptance observer/harness.**
+Build one bounded offline/read-only ops collector for #451/#623 that can capture comparable pre/post rollout evidence without invoking write-capable function handlers or mutating production. It should collect/pin:
+- Microsoft job/run/source coverage, terminal apply state, 546/CPU errors, July manual run identity, protected Client Schedule/monthly_deliverables fingerprints and exact completed/cancelled mirror truth;
+- Meta batch/item/checkpoint/fact-age/cooldown evidence, dynamic mapped fleet, consecutive scheduler-tick batch creation, blocked-vs-healthy independence and empty-batch detection;
+- canonical status evidence sufficient to compare UI later without calling the diagnostic endpoint;
+- before/after hashes/receipts that prove protected rows and unrelated lanes did not change.
 
-#### Why #639 mattered
+The harness must default to read-only, fail closed on missing access/schema, expose no secret values, have no deploy/sync/apply mode and no write-capable function invocation. Add deterministic tests and a short runbook. No Website/#405, #505, #513, #389 or master-handover edits by Agent 01.
 
-Read-only acceptance proved Microsoft mirror was stale:
-- last full applied mirror 19 Aug;
-- previous 6/6 fetch completed but no apply;
-- 189 inner HTTP 546 / CPU Time exceeded failures;
-- 18 completed upstream Planner tasks remained active;
-- huge `2025 CLIENTS SCHEDULE` (~5.5k rows) was being expensively hydrated/assembled despite automatic apply excluding client_schedule.
-
-#639 fixed automatic-only runtime work:
-- six-source counts/completeness remain truthful;
-- automatic writable snapshot contains only Planner/Calendar mirror payloads;
-- Client Schedule remains protected/read-only;
-- manual/admin full-preview path unchanged;
-- no `monthly_deliverables` write path;
-- legacy July manual applying run cannot be silently adopted;
-- production-sized 7,500 / 5,500 fixture proved the hot path reduction.
-
-Do not re-open that design unless live rollout disproves it.
-
-#### Why #642 mattered
-
-Red Oak had no current checkpoint and Page access was permission-blocked.
-Missing checkpoint meant bootstrap-due every minute.
-Failed items left queued/running dedupe, so scheduler created a fresh doomed batch each minute.
-
-#642:
-- uses existing durable queue evidence, no migration;
-- exact terminal permission/access failures suppress new fleet enqueue for max 1 hour;
-- suppression is non-renewing on scheduler reads;
-- expiry or real mapping/reconnect/new checkpoint permits retry;
-- transient timeout/rate-limit paths remain existing retry behavior;
-- one blocked asset cannot suppress healthy assets;
-- health remains STALE/PARTIAL, never fake green;
-- production item timestamp read was corrected to real `finished_at` because live `meta_sync_batch_items` has no `updated_at`.
-
-Production Red Oak churn remains until the Edge functions are actually deployed.
+**NEXT SUPERVISOR ACTION when Agent 01 returns:** independently review the observer/harness PR, merge if safe, update #451/#623/#381, then keep Agent 01 on another safe task unless CA has explicitly authorized the protected rollout.
 
 ### AGENT 02 — #513 STRATEGY QUALITY
 
