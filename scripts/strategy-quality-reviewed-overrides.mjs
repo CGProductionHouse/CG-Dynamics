@@ -22,6 +22,11 @@ export const BATCH3_CLIENTS = {
   'e2870110-930c-4e63-b2fe-c858030f7258':'Supa Quick Centurion',
 }
 const norm = s => s.toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()
+export const BATCH4_CLIENTS = {
+  '572555e0-d4d0-404a-8d67-beeeeed6a1f2':'HMHI',
+  'ec643c75-51f5-4839-829f-3f5b7f48829a':'Ehrlich Park Butchery',
+  '5dfdf4bd-9d94-4cc6-9dee-0e480a2234cb':'Bohemia Quick Stop',
+}
 // Git checkouts may use CRLF on Windows and LF in CI; content identity is LF-normalised.
 export const fileHash = path => createHash('sha256').update(readFileSync(path,'utf8').replace(/\r\n/g,'\n')).digest('hex')
 export function sourceReceipt(path, quotes = []) { return { path, sha256:fileHash(resolve(ROOT,path)), quotes } }
@@ -40,15 +45,25 @@ export function indexOverrides(packet) {
   const {packet_hash,...core} = packet
   const blocked = packet.batch === 2 ? packet.blocked_clients : []
   const validGap = packet.batch === 2 && Array.isArray(blocked) && blocked.length === 1 && blocked[0].client_id === '0c01d90f-ba5e-4251-a597-bf3c83f990fa' && blocked[0].client_name === 'Zooz Lifestyle WFF' && blocked[0].reason === 'MISSING_EXACT_CLIENT_RUNTIME_GUIDE' && packet.rows.every(r=>r.client_id!==blocked[0].client_id)
-  if (sha(core) !== packet_hash || packet.mode !== 'ZERO_WRITE_REVIEWED_OVERRIDES' || packet.write_count !== 0 || packet.rows.length !== (validGap ? 18 : 20) || new Set(packet.rows.map(r=>r.client_id)).size !== (validGap ? 9 : 10) || (packet.batch === 2 && !validGap)) throw new Error('Invalid reviewed batch packet')
+  const stopped4 = packet.batch === 4 ? packet.blocked_clients : []
+  if (!Array.isArray(stopped4) || stopped4.some(c=>BATCH4_CLIENTS[c.client_id]!==c.client_name || !['MISSING_EXACT_CLIENT_RUNTIME_GUIDE','INSUFFICIENT_EXACT_CLIENT_EVIDENCE'].includes(c.reason) || typeof c.detail!=='string' || c.detail.length<40 || sha(c.months)!==sha(['2026-09-01','2026-10-01']) || !c.source_receipts?.length) || new Set(stopped4.map(c=>c.client_id)).size!==stopped4.length) throw new Error('Invalid Batch 4 stopped-client evidence gap')
+  const expectedClients = packet.batch === 4 ? 3-stopped4.length : validGap ? 9 : 10
+  if (![1,2,3,4].includes(packet.batch) || sha(core) !== packet_hash || packet.mode !== 'ZERO_WRITE_REVIEWED_OVERRIDES' || packet.write_count !== 0 || packet.rows.length !== expectedClients*2 || new Set(packet.rows.map(r=>r.client_id)).size !== expectedClients || (packet.batch === 2 && !validGap)) throw new Error('Invalid reviewed batch packet')
+  if (packet.batch === 4) {
+    const expected=Object.keys(BATCH4_CLIENTS).sort(), actual=[...new Set(packet.rows.map(r=>r.client_id)),...stopped4.map(c=>c.client_id)].sort()
+    if (sha(actual)!==sha(expected) || sha([...packet.selection.selected].sort())!==sha(expected) || sha(packet.selection.qualifying.map(c=>c.client_id).sort())!==sha(expected) || packet.rows.some(r=>BATCH4_CLIENTS[r.client_id]!==r.client_name || stopped4.some(c=>c.client_id===r.client_id)) || sha(packet.held_clients)!==sha([{client_id:'0c01d90f-ba5e-4251-a597-bf3c83f990fa',client_name:'Zooz Lifestyle WFF',reason:'MISSING_EXACT_CLIENT_RUNTIME_GUIDE'}])) throw new Error('Batch 4 exact three-client/held-client contract')
+    for (const gap of stopped4) verifySources(gap.source_receipts)
+  }
   if (packet.batch === 3) {
     const expected=Object.keys(BATCH3_CLIENTS).sort()
     if (sha([...new Set(packet.rows.map(r=>r.client_id))].sort())!==sha(expected) || sha([...packet.selection.selected].sort())!==sha(expected) || packet.rows.some(r=>BATCH3_CLIENTS[r.client_id]!==r.client_name) || packet.blocked_clients?.length!==0 || sha(packet.held_clients)!==sha([{client_id:'0c01d90f-ba5e-4251-a597-bf3c83f990fa',client_name:'Zooz Lifestyle WFF',reason:'MISSING_EXACT_CLIENT_RUNTIME_GUIDE'}])) throw new Error('Batch 3 exact identity/held-client contract')
+  }
+  if ([3,4].includes(packet.batch)) {
     const index=JSON.parse(readFileSync(resolve(ROOT,'artifacts/client-strategy-dossiers/issue-513/index.json'),'utf8'))
     for (const row of packet.rows) {
       const client=index.clients.find(c=>c.id===row.client_id)
       const paths=row.source_receipts.map(r=>r.path)
-      if (!paths.includes(`artifacts/client-strategy-dossiers/issue-513/${client.file}`) || !paths.includes(`artifacts/client-strategy-dossiers/issue-513/runtime-guides/${client.file}`) || row.source_receipts.find(r=>r.path.includes('/runtime-guides/'))?.quotes.length<3) throw new Error('Batch 3 exact-client source contract')
+      if (!paths.includes(`artifacts/client-strategy-dossiers/issue-513/${client.file}`) || !paths.includes(`artifacts/client-strategy-dossiers/issue-513/runtime-guides/${client.file}`) || row.source_receipts.find(r=>r.path.includes('/runtime-guides/'))?.quotes.length<3) throw new Error(`Batch ${packet.batch} exact-client source contract`)
     }
   }
   if (validGap) {
