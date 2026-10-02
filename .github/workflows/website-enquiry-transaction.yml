@@ -7,6 +7,11 @@ on:
       - 'supabase/migrations/*website_enquiry_transaction.sql'
       - 'tests/sql/405_website_enquiry_transaction_acceptance.sql'
       - 'tests/websiteEnquiryTransaction.test.mjs'
+      - 'supabase/migrations/*website_lead_lifecycle.sql'
+      - 'scripts/website-lead-lifecycle-acceptance.mjs'
+      - 'tests/sql/405_website_lead_lifecycle_acceptance.sql'
+      - 'tests/websiteLeadLifecycle.test.mjs'
+      - 'src/lib/websiteLeads.ts'
   workflow_dispatch:
 permissions:
   contents: read
@@ -21,3 +26,5 @@ jobs:
           node-version: '24'
       - run: node --test tests/websiteEnquiryTransaction.test.mjs
       - run: node scripts/website-enquiry-transaction-acceptance.mjs
+      - run: node --test tests/websiteLeadLifecycle.test.mjs
+      - run: node scripts/website-lead-lifecycle-acceptance.mjs

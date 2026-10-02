@@ -62,6 +62,7 @@ const ClientContentGuidesPage = lazyRoute(() => import('./pages/client/ClientCon
 const ClientPlanPage = lazyRoute(() => import('./pages/client/ClientPlanPage'))
 const ClientPlanLegacyRedirect = lazyRoute(() => import('./pages/client/ClientPlanPage').then(module => ({ default: module.ClientPlanLegacyRedirect })))
 const ClientCampaignsPage = lazyRoute(() => import('./pages/client/ClientCampaignsPage'))
+const ClientLeadsPage = lazyRoute(() => import('./pages/client/ClientLeadsPage'))
 const ClientSetupPage = lazyRoute(() => import('./features/client-onboarding/ClientSetupPage'))
 const InternalOnboardingPage = lazyRoute(() => import('./features/client-onboarding/InternalOnboardingPage'))
 const OAuthConsentPage = lazyRoute(() => import('./pages/OAuthConsentPage'))
@@ -196,6 +197,7 @@ export default function App() {
               <Route path="/client" element={<ClientPortalHome />} />
               <Route path="/client/plan" element={<ClientPlanPage />} />
               <Route path="/client/performance" element={<Dashboard />} />
+              <Route path="/client/leads" element={<ClientLeadsPage />} />
               <Route path="/client/approvals" element={<ContentReviewsPage clientView />} />
               {/* Pass 1: /client/brand-hub renders existing Setup until Pass 4 refines */}
               <Route path="/client/brand-hub" element={<ClientSetupPage />} />

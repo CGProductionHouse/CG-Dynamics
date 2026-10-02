@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { to: '/client', label: 'Overview', end: true },
   { to: '/client/plan', label: 'Plan', end: false },
   { to: '/client/performance', label: 'Performance', end: false },
+  { to: '/client/leads', label: 'Leads', end: false },
   { to: '/client/approvals', label: 'Approvals', end: false },
   { to: '/client/brand-hub', label: 'Brand Hub', end: false },
 ] as const

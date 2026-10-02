@@ -8,13 +8,14 @@ import {
   type WebsitePerformanceState,
 } from '../../lib/websitePerformance'
 import { PremiumCard, PremiumCardHeader } from '../ui/PremiumCard'
+import { WebsiteLeadMetricsCard } from '../website/WebsiteLeadMetricsCard'
+import { currentReportingMonth, monthWindow } from '../../lib/websiteLeads'
 
-const currentMonth = () => new Date().toISOString().slice(0, 7)
 const label = (value: number | null) => value === null ? 'Unavailable' : new Intl.NumberFormat('en-ZA').format(value)
 
 export function WebsitePerformancePanel({ clients, canSave }: { clients: Client[]; canSave: boolean }) {
   const [clientId, setClientId] = useState('')
-  const [month, setMonth] = useState(currentMonth)
+  const [month, setMonth] = useState(() => currentReportingMonth())
   const [result, setResult] = useState<WebsitePerformanceResult | null>(null)
   const [state, setState] = useState<'idle' | 'loading' | 'error'>('idle')
   const [saving, setSaving] = useState(false)
@@ -97,6 +98,7 @@ export function WebsitePerformancePanel({ clients, canSave }: { clients: Client[
         </div>
         {result.report.dataQuality.gaps.length > 0 && <p className="mt-5 text-xs leading-relaxed text-brand-primary/60">Measurement notes: {result.report.dataQuality.gaps.join(' ')}</p>}
       </>}
+      {clientId && monthWindow(month) && <WebsiteLeadMetricsCard clientId={clientId} from={monthWindow(month)!.from} to={monthWindow(month)!.to} title="Website lead outcomes" />}
     </PremiumCard>
   </section>
 }
