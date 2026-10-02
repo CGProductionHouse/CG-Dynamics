@@ -1,5 +1,11 @@
 # #505 executable Instagram rollout matrix — 2 October 2026
 
+**Later Oct 2 superseding receipt:** #598 config/legal packet is COMPLETE, not the
+pending gate recorded below. Current provider state, three newly corroborated
+identity candidates (not promoted queue handles), verification checklist and
+draft review packet: [current receipt](INSTAGRAM-505-VERIFICATION-REVIEW-PACKET-2026-10-02.md).
+Historical Page-first results/eight reviewed handles remain intact; no binding authority.
+
 Baseline: `2e6d14484319b4b48d3180b676e29032e4c77ab3`. Instagram only.
 Authority: #505 supervisor comment 5949760923 and current production, not old
 campaign counts or generic `active=true`. No Website or TikTok execution.
