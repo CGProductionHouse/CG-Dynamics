@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useClientPortal } from '../../components/client/ClientPortalContext'
+import { ClientServiceExpansion } from '../../components/client/ClientServiceExpansion'
 import { ClientPortalErrorState, ClientPortalLoadingState } from '../../components/client/ClientPortalStates'
 import { useAuth } from '../../contexts/AuthContext'
 import {
@@ -220,10 +221,13 @@ export default function Dashboard() {
 
   if (months.length === 0) {
     return (
+      <>
       <EmptyReportState
         title="No published report yet"
         message="Your monthly reports will appear here as soon as they are published by CG Production House."
       />
+      <ClientServiceExpansion />
+      </>
     )
   }
 
@@ -278,6 +282,7 @@ export default function Dashboard() {
       {/* Forward-looking: this month's CG plan (client-safe; renders nothing
           until the client has visible schedule data). */}
       {profile.client_id && <ClientMonthAhead clientId={profile.client_id} />}
+      <ClientServiceExpansion />
     </>
   )
 }
