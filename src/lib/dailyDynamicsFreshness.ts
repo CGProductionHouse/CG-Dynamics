@@ -118,8 +118,10 @@ export function metaFleetFreshnessEvidence(
       checkpoint.nextDueAt,
     ].some(value => value != null && !Number.isFinite(Date.parse(value)))) {
       verdict = 'UNAVAILABLE'; reason = 'Freshness evidence contains an invalid timestamp and cannot be verified.'
+    } else if (checkpoint.errorCode?.startsWith('Meta permission/access blocked.')) {
+      verdict = checkpoint.lastSuccessfulAt ? 'PARTIAL' : 'STALE'; reason = checkpoint.errorCode
     } else if (!checkpoint.lastAttemptedAt) {
-      verdict = 'STALE'; reason = 'Mapped platform has never completed its bootstrap checkpoint.'
+      verdict = 'STALE'; reason = checkpoint.errorCode ?? 'Mapped platform has never completed its bootstrap checkpoint.'
     } else if (checkpoint.status === 'failed') {
       verdict = checkpoint.lastSuccessfulAt ? 'PARTIAL' : 'FAILED'; reason = checkpoint.errorCode ?? 'Latest sync attempt failed.'
     } else if (checkpoint.healthState === 'partial' || checkpoint.healthState === 'verified_partial') {
