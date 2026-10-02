@@ -2,7 +2,7 @@
 
 Status: **CURRENT authority for a fresh supervisor chat**
 
-Updated: **2 October 2026, after #615 merge and Agent 01 overnight standing authority**
+Updated: **2 October 2026, after both agents received overnight safe-finish standing authority**
 
 Current accepted main before this handover-only docs update: **`d8d9691cd068f7faaffc579237c8e665fe7d28ca`**. Latest freshness runtime-code merge remains **`2c27e74fe0d798fdffff877d358a0fa13f355292`**; #643 changes offline strategy review tooling/artifacts only. The handover edit itself advances `main`; **always refetch current main on takeover and before every merge**.
 
@@ -166,81 +166,49 @@ When a task hits a protected gate, write exactly `BLOCKED: needs CA instruction 
 Do not edit this master handover. Do not retry preview auth endlessly. End only when current #623/#381 contain no remaining safe unowned work; then leave one concise overnight completion receipt with merges, verification, smoke evidence, and exact remaining protected/human/provider blockers.
 
 
-### AGENT 02 — #513 STRATEGY QUALITY / EVIDENCE REMEDIATION
+### AGENT 02 — OVERNIGHT STRATEGY / EVIDENCE FINISHER
 
-Owning issue: **#513**, cross-referencing report truth **#501**, consolidated in **#381**.
+Owning issues: **#513 + #501**, consolidated in **#381**.
 
-Accepted:
-- #638 zero-write compiler/quality plan → `cbf21ca5cbcb699bd09fb2d8341f7127b4415caa`
+Accepted strategy merges remain:
+- #638 compiler/quality plan → `cbf21ca5cbcb699bd09fb2d8341f7127b4415caa`
 - #640 Batch 1 → `2ce29344a78bcef5d4a96fd27a87a7a2699fb2ee`
 - #643 Batch 2 → `d8d9691cd068f7faaffc579237c8e665fe7d28ca`
 - #644 Batch 3 → `262d281a209ed0b528a647363655f0b6a7d6b40b`
 - #646 Batch 4 → `84d2e630a573b287286d2b05a37e453766ea680c`
 
-Batch 4 supervisor receipts:
-- #513 comment **`5958293748`**
-- #501 comment **`5958294362`**
-- #381 comment **`5958294965`**
-- exact-head Vercel SUCCESS before merge;
-- 97/97 focused tests + build + scoped lint + diff check green;
-- human copy/evidence pass accepted HMHI, Ehrlich Park Butchery and Bohemia Quick Stop for both Sep/Oct;
-- all 62 predecessor accepted rows remained byte-stable;
-- all 20 exclusions unchanged;
-- blocked inventory is exact and source-hashed.
-
-Current ZERO-WRITE strategy state:
-- 94 reviewed v2 rows
-- **68 amendment-needed**
-- **26 blocked**
-- 20 non-applicable untouched
+Current ZERO-WRITE state before overnight continuation:
+- 94 reviewed
+- 68 amendment-needed
+- 26 blocked
+- 20 exclusions
 - 0 approved
 - 0 published
 - 0 production strategy writes
-- plan hash `568a56a72b0dbbccb8f45dbf7ee80cc6e165133859b3e6179553b7a51e6f8f97`
-- Batch 4 packet hash `2096b633467994393d7fc2ec1634e8680aee45d9b04eb801aa927240562c5159`
-- blocked inventory hash `ecea0581351279496c7529dbd46c21fd90cb4818a6868e654da88ef49d89694a`
 
-**Blind strategy review batches are exhausted. Do not start Batch 5.**
+Wave A read-only evidence remediation is supervisor-accepted:
+- #513 `5958751620`
+- #501 `5958752061`
+- #381 `5958760469`
+- supervisor overnight authority: #513 `5958838698`, #501 `5958839237`, #381 `5958839806`
 
-Remaining blocked clients / exact evidence class:
-- All Around PVC — Jul missing report; Aug no in-month post evidence; internal copy.
-- Bat Hill Royale — Jul missing report; Aug/Sep history exists.
-- Bloem Action Sports — Jul/Aug/Sep reports/history absent; internal copy.
-- Emoya Estate Driving Range — Jul/Aug/Sep reports/history absent; internal copy.
-- Forklift Trucks — Jul/Aug/Sep reports/history absent; internal copy.
-- Hino Trucks — Jul/Aug/Sep history absent; internal + foreign Toyota Bloemfontein copy.
-- Human Auto — Jul/Aug/Sep history absent; internal copy.
-- Jenkor — Jul/Aug/Sep history absent; internal copy.
-- Red Oak — Aug/Sep reports exist but no in-month post evidence; internal copy; preserve 8 video / 2 photo + flexible poster scope.
-- Toyota Bloemfontein — Jul/Aug/Sep history absent; internal copy.
-- Vrystaat Kunstefees — Jul missing report; Aug/Sep history exists; current programme/event details still need current confirmation; flexible scope unquantified.
-- WiseRide — Jul/Aug/Sep history absent; internal + foreign Wiseman Group copy; shared video capacity is not fixed WiseRide capacity.
-- Zooz Lifestyle WFF — HELD: exact approved guide/current brand-product-programme and WFF event/athlete constraints absent. Existing history does not cure this.
+Accepted Wave A truth:
+- Bat Hill Royale: July unavailable; Aug 20; Sep 25 incl. four post-Sep23 MTD identities → targeted Sep/Oct review may proceed with gaps explicit and flexible quantities preserved.
+- All Around PVC: July unavailable; Aug 1 Pacific-boundary post; Sep 14 → targeted Sep/Oct review may proceed within exact 1 video / 3 photo / 3 poster scope; Sep evidence remains MTD.
+- Vrystaat Kunstefees: retrospective evidence improved but paired review remains held on current programme/application confirmation + unresolved Vlieks deadline conflict; no fixed quantities.
+- Red Oak: July 41; Aug/Sep exact stored post evidence absent → held; preserve 8 video / 2 photo + flexible posters.
 
-Important: #501 is the canonical report-truth ledger. On 23 Sep it had 112 published/verified reports and no further qualifying recovery rows after the authorized 5-row recovery. Missing report/post evidence means **missing evidence**, never zero performance. Do not fabricate content reports from metrics-only rows.
+**CURRENT overnight sequence for Agent 02:**
+1. targeted ZERO-WRITE Sep/Oct review for exactly Bat Hill Royale + All Around PVC; self-review and merge safe code/artifact-only PR when exact-head tests/build/lint/diff/Vercel are green;
+2. then continue exact-client READ-ONLY evidence remediation across remaining guided blocked clients and immediately review any client whose evidence becomes sufficient;
+3. remaining guided set includes Vrystaat Kunstefees, Red Oak, Bloem Action Sports, Emoya Estate Driving Range, Forklift Trucks, Hino Trucks, Human Auto, Jenkor, Toyota Bloemfontein, WiseRide;
+4. record genuinely unavailable/human-confirmation blockers and move on; no repeat loops;
+5. Zooz remains held absent exact approved guide + current brand/product/programme/WFF constraints;
+6. finish with one exact final ZERO-WRITE strategy state, blocked inventory and protected next-action receipt.
 
-**Wave A RETURNED on #381 comment `5958760469`; supervisor review is pending. Agent 01 must not enter this lane.**\n\nReturned read-only findings: Bat Hill Royale and All Around PVC can likely return to targeted Sep/Oct quality review with explicit July/current-claim limits; Vrystaat remains held on current programme/application truth; Red Oak remains held on missing recent exact post history. No production writes occurred.\n\nThe previously assigned mission was targeted evidence-remediation wave A, READ ONLY for exactly:
-1. Bat Hill Royale
-2. Vrystaat Kunstefees
-3. All Around PVC
-4. Red Oak
+Protected boundaries remain unchanged: no strategy amendment RPC/production write, approval/publication, report publication/write, provider refresh/sync, migration/schema/data mutation, external communication, #405/#505/#389, or master-handover edits by Agent 02. Missing evidence never becomes zero performance.
 
-Mission:
-- fresh read-only current canonical evidence re-scan against the frozen 23 Sep #501 snapshot;
-- determine whether missing Jul/Aug/Sep canonical report or exact in-month post evidence now exists;
-- separate recoverable-now vs genuinely unavailable vs human/current-client confirmation needed;
-- preserve exact client/month/provider-period semantics;
-- no provider refresh/sync trigger;
-- no report publication/write;
-- no strategy write/amendment/approval/publication;
-- no fabricated report/posts/metrics/zeroes;
-- Red Oak 1 Aug UTC post remains July if Pacific provider-period rules still place it there;
-- Vrystaat historical event evidence does not substitute for current programme/event confirmation;
-- unknown/flexible scope stays unknown/flexible.
-
-Agent 02 should produce one zero-write remediation artifact/runbook with hashes and executable cross-client/month/provider-period guards. If no code/artifact changes are needed, a durable #513/#501/#381 receipt is sufficient; do not open a pointless PR.
-
-**NEXT SUPERVISOR ACTION when Agent 02 returns:** independently inspect the current-evidence receipts and any PR. Merge safe tooling/artifact changes automatically. Then either route genuinely recovered clients back to targeted Sep/Oct review or assign the next evidence-remediation wave; never clear a gate merely because evidence is missing/unavailable.
+**NEXT SUPERVISOR ACTION:** review the overnight final receipts and any merged safe PRs. Only production strategy amendment/approval/publication or report/provider mutations require fresh CA instruction.
 
 ---
 
