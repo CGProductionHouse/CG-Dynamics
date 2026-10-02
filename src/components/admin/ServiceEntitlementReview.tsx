@@ -3,7 +3,7 @@ import { readServiceEvidence, readServiceExpansionReview, verifyServiceEvidence,
 import { Link } from 'react-router-dom'
 import { SERVICE_COPY, SERVICE_KEYS, type EntitlementState, type ServiceKey } from '../../lib/clientServicePresentation'
 
-export function ServiceEntitlementReview({ clientId }: { clientId: string }) {
+export function ServiceEntitlementReview({ clientId, service, onVerified }: { clientId: string; service?: ServiceKey; onVerified?: () => void }) {
   const [result, setResult] = useState<{ clientId: string; rows: ServiceEvidence[]; review: ServiceExpansionReview[] } | null>(null)
   const [error, setError] = useState(false)
   const [reload, setReload] = useState(0)
@@ -20,7 +20,7 @@ export function ServiceEntitlementReview({ clientId }: { clientId: string }) {
     <p className="mt-2 text-sm leading-6 text-white/60">Separate from deliverable quantities. Verify from an approved package or agreement, never a missing connection or inferred notes. No package, provider or billing change is made here.</p>
     <Link to="/admin/work?tab=board" className="mt-3 inline-block text-sm text-brand-teal underline underline-offset-4">Review expansion requests in Operations → CLIENT REQUESTS</Link>
     {result?.clientId === clientId && <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs text-white/60">{result.review.filter(row => row.surface_views || row.requests).map(row => <p key={row.service_key}>{SERVICE_COPY[row.service_key].name}: {row.surface_views} service views · {row.requests} requests</p>)}</div>}
-    {error ? <p role="alert" className="mt-4 text-sm text-amber-300">Evidence could not be loaded. Migration application and verification remain protected rollout gates.</p> : !rows ? <p role="status" className="mt-4 text-white/50">Loading evidence…</p> : SERVICE_KEYS.map(key => <EvidenceEditor key={`${clientId}:${key}:${rows.find(row => row.service_key === key)?.revision ?? 0}`} clientId={clientId} service={key} evidence={rows.find(row => row.service_key === key)} onSaved={() => setReload(value => value + 1)} />)}
+    {error ? <p role="alert" className="mt-4 text-sm text-amber-300">Evidence could not be loaded. Migration application and verification remain protected rollout gates.</p> : !rows ? <p role="status" className="mt-4 text-white/50">Loading evidence…</p> : SERVICE_KEYS.filter(key => !service || key === service).map(key => <EvidenceEditor key={`${clientId}:${key}:${rows.find(row => row.service_key === key)?.revision ?? 0}`} clientId={clientId} service={key} evidence={rows.find(row => row.service_key === key)} onSaved={() => { setReload(value => value + 1); onVerified?.() }} />)}
   </section>
 }
 
