@@ -349,11 +349,13 @@ describe('Incremental bounds executable: MTD window behaviour', () => {
 
 describe('Day-1 month boundary edge case: no fabricated reporting bucket', () => {
 
-  test('Oct 1 Pacific → no October incremental window (null)', () => {
-    // When called for a future month (October) where yesterday is still in
-    // September, incrementalMonthBounds must return null — not clamp to Oct 01.
-    // Today is Sep 19; yesterday is Sep 18. Asking for October bounds
-    // simulates the "Oct 1" edge case: no October day has completed yet.
+  test('Oct 1 Pacific → no October incremental window (null)', t => {
+    // UTC is already Oct 2, but Pacific is still Oct 1. Test-scoped Date
+    // mocking leaves runtime defaults/callers untouched and resets after this test.
+    t.mock.timers.enable({ apis: ['Date'], now: Date.parse('2026-10-02T06:59:59Z') })
+    assert.equal(currentMetaMonth(), '2026-10')
+    assert.equal(incrementalMonthEnd(), '2026-09-30')
+    assert.equal(currentMonthHasIncrementalWindow(), false)
     const bounds = incrementalMonthBounds('2026-10')
     assert.equal(bounds, null,
       'incrementalMonthBounds for October must return null when no October day is complete')
@@ -370,22 +372,16 @@ describe('Day-1 month boundary edge case: no fabricated reporting bucket', () =>
     assert.match(background, /if \(needsReconciliation\) months\.push\(prevCompletedMonth\)/)
   })
 
-  test('Oct 2 → October incremental window is Oct 1–Oct 1 (one completed day)', () => {
-    // On Oct 2, incrementalMonthEnd() would return Oct 1 (yesterday in Pacific).
-    // Since Oct 1 starts with "2026-10" which matches the month prefix,
-    // incrementalMonthBounds('2026-10') should return { periodStart: '2026-10-01', periodEnd: '2026-10-01' }.
-    // We verify this by checking the function logic: when end.startsWith(monthPrefix)
-    // is true, it returns the bounds. The only way to get Oct 1 as end is if
-    // yesterday in Pacific is Oct 1 — which we can't simulate, so we verify the
-    // structural invariant instead.
-    const fn = read('../supabase/functions/_shared/metaPeriod.ts')
-    const fnBody = fn.slice(fn.indexOf('export function incrementalMonthBounds'))
-    // When end is in the month: returns { periodStart: month-01, periodEnd: end }
-    assert.match(fnBody, /return \{/)
-    assert.match(fnBody, /periodStart: `\$\{month\}-01`/)
-    assert.match(fnBody, /periodEnd: end/)
-    // The periodEnd is always the raw incrementalMonthEnd() value (yesterday)
-    // Never a fabricated day. On Oct 2, end = Oct 1, so window = Oct 1–Oct 1.
+  test('Oct 2 → October incremental window is Oct 1–Oct 1 (one completed day)', t => {
+    // Exactly Pacific midnight: one October reporting day has now completed.
+    t.mock.timers.enable({ apis: ['Date'], now: Date.parse('2026-10-02T07:00:00Z') })
+    assert.equal(currentMetaMonth(), '2026-10')
+    assert.equal(incrementalMonthEnd(), '2026-10-01')
+    assert.equal(currentMonthHasIncrementalWindow(), true)
+    assert.deepEqual(incrementalMonthBounds('2026-10'), {
+      periodStart: '2026-10-01',
+      periodEnd: '2026-10-01',
+    })
   })
 
   test('mid-month behavior: bounds are periodStart=month-01 to yesterday', () => {
