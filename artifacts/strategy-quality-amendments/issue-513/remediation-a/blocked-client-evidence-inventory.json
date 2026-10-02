@@ -1,0 +1,962 @@
+{
+  "schema_version": 1,
+  "issue": 513,
+  "mode": "ZERO_WRITE_BLOCKED_EVIDENCE_INVENTORY",
+  "write_count": 0,
+  "plan_hash": "bb50da38748b62ef26e4bf73f618ea223629fc7edde3e687b5b0a121b60542c1",
+  "source_scope": "Committed exact July/August/September snapshot; September MTD as of 2026-09-23. Not a fresh provider/report completeness audit. Zero post identities means missing evidence here, never zero performance.",
+  "counts": {
+    "clients": 11,
+    "rows": 22,
+    "held": 1
+  },
+  "clients": [
+    {
+      "client_id": "b28af30a-3d44-490a-8290-1e56dac7b127",
+      "client_name": "Bloem Action Sports",
+      "months": [
+        {
+          "row_id": "06b020cf-c782-41b7-bb26-eb400491a554",
+          "month": "2026-09-01",
+          "current_revision": 2,
+          "current_strategy_hash": "7e2b77ceba2989294fbf8c7be6c64fdcc0dce9655632d4b13b870ddc455fc027",
+          "stop_reasons": [
+            "PROPOSED_INTERNAL_OR_UUID_COPY",
+            "CLIENT_SPECIFIC_MONTHLY_QUALITY_REVIEW_REQUIRED_567_IS_NOT_ACCEPTANCE"
+          ]
+        },
+        {
+          "row_id": "9e1e5efa-ab19-49de-942a-05523f4218b5",
+          "month": "2026-10-01",
+          "current_revision": 2,
+          "current_strategy_hash": "f07df158410ceb3ce832621f2371fe0adfb6054f1a62dbc67efc140173e1286b",
+          "stop_reasons": [
+            "PROPOSED_INTERNAL_OR_UUID_COPY",
+            "CLIENT_SPECIFIC_MONTHLY_QUALITY_REVIEW_REQUIRED_567_IS_NOT_ACCEPTANCE"
+          ]
+        }
+      ],
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/bloem-action-sports.md",
+          "sha256": "9fedd3ae6f5b7ce05cb7c7c0b26c18fbbd6f9ed53620a71af66979b8ee828c52",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/sep-oct-approval-publication-manifest.json",
+          "sha256": "baa8110244c9c7f37b0e488db7823d33e98b7343ffe3691e7f9e7641972d0c0a",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/bloem-action-sports.md",
+          "sha256": "b6f5fd56243293883cc0e76e3d76bde693c490aca537aa2d2f38e9d66a8f92df",
+          "quotes": []
+        }
+      ],
+      "guide_present": true,
+      "history": [
+        {
+          "month": "2026-07",
+          "report_id": null,
+          "post_identity_count": 0,
+          "gap": "MISSING_CANONICAL_REPORT"
+        },
+        {
+          "month": "2026-08",
+          "report_id": null,
+          "post_identity_count": 0,
+          "gap": "MISSING_CANONICAL_REPORT"
+        },
+        {
+          "month": "2026-09",
+          "report_id": null,
+          "post_identity_count": 0,
+          "gap": "MISSING_CANONICAL_REPORT"
+        }
+      ],
+      "evidence_gaps": [
+        "2026-07: MISSING_CANONICAL_REPORT",
+        "2026-08: MISSING_CANONICAL_REPORT",
+        "2026-09: MISSING_CANONICAL_REPORT",
+        "SEPARATE_EXACT_CLIENT_SEPTEMBER_AND_OCTOBER_QUALITY_REVIEW_NOT_ACCEPTED"
+      ],
+      "held": false,
+      "review_status": "STOPPED_NOT_REVIEWED_IN_BATCH_4",
+      "package_status": "Confirmed receipt exists; unknown/flexible capacities remain unknown/flexible, never inferred from posts.",
+      "next_evidence_action": "Resolve or explicitly document unavailable 2026-07, 2026-08, 2026-09 history for this exact client, then request a targeted separate Sep/Oct quality review using the existing guide. Do not clear the gate automatically.",
+      "copy_rejections": [
+        "PROPOSED_INTERNAL_OR_UUID_COPY"
+      ]
+    },
+    {
+      "client_id": "217a547c-7b22-45cc-bf88-9d45a8e93dfe",
+      "client_name": "Emoya Estate Driving Range",
+      "months": [
+        {
+          "row_id": "248d877f-12c3-4aa3-9f79-7414484f2bee",
+          "month": "2026-09-01",
+          "current_revision": 2,
+          "current_strategy_hash": "8a3293ecf737b26339ad7c65cc03be48f5fed568e2b910f7bbfce618dcd5be5a",
+          "stop_reasons": [
+            "PROPOSED_INTERNAL_OR_UUID_COPY",
+            "CLIENT_SPECIFIC_MONTHLY_QUALITY_REVIEW_REQUIRED_567_IS_NOT_ACCEPTANCE"
+          ]
+        },
+        {
+          "row_id": "ac19f5d5-3e7f-4034-b7f6-ff590ea6251b",
+          "month": "2026-10-01",
+          "current_revision": 2,
+          "current_strategy_hash": "9985feed67fbeaf0dfde2211bb0f44d89b9cb0fe8c3d88fe0825c446d2ddc614",
+          "stop_reasons": [
+            "PROPOSED_INTERNAL_OR_UUID_COPY",
+            "CLIENT_SPECIFIC_MONTHLY_QUALITY_REVIEW_REQUIRED_567_IS_NOT_ACCEPTANCE"
+          ]
+        }
+      ],
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/emoya-estate-driving-range.md",
+          "sha256": "8df6b3e4253b67ab51cd5dfb35ce9e8c4614371d793fce6f29cff28f7cb3e844",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/sep-oct-approval-publication-manifest.json",
+          "sha256": "baa8110244c9c7f37b0e488db7823d33e98b7343ffe3691e7f9e7641972d0c0a",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/emoya-estate-driving-range.md",
+          "sha256": "d41fc0eeb3d162be319ea5246d4efee641c25a652da40490ba23582d79608ced",
+          "quotes": []
+        }
+      ],
+      "guide_present": true,
+      "history": [
+        {
+          "month": "2026-07",
+          "report_id": null,
+          "post_identity_count": 0,
+          "gap": "MISSING_CANONICAL_REPORT"
+        },
+        {
+          "month": "2026-08",
+          "report_id": null,
+          "post_identity_count": 0,
+          "gap": "MISSING_CANONICAL_REPORT"
+        },
+        {
+          "month": "2026-09",
+          "report_id": null,
+          "post_identity_count": 0,
+          "gap": "MISSING_CANONICAL_REPORT"
+        }
+      ],
+      "evidence_gaps": [
+        "2026-07: MISSING_CANONICAL_REPORT",
+        "2026-08: MISSING_CANONICAL_REPORT",
+        "2026-09: MISSING_CANONICAL_REPORT",
+        "SEPARATE_EXACT_CLIENT_SEPTEMBER_AND_OCTOBER_QUALITY_REVIEW_NOT_ACCEPTED"
+      ],
+      "held": false,
+      "review_status": "STOPPED_NOT_REVIEWED_IN_BATCH_4",
+      "package_status": "Confirmed receipt exists; unknown/flexible capacities remain unknown/flexible, never inferred from posts.",
+      "next_evidence_action": "Resolve or explicitly document unavailable 2026-07, 2026-08, 2026-09 history for this exact client, then request a targeted separate Sep/Oct quality review using the existing guide. Do not clear the gate automatically.",
+      "copy_rejections": [
+        "PROPOSED_INTERNAL_OR_UUID_COPY"
+      ]
+    },
+    {
+      "client_id": "4424ed69-7270-4d30-a1ea-0b77d76912df",
+      "client_name": "Forklift Trucks",
+      "months": [
+        {
+          "row_id": "e4ccbafa-20cc-46d7-bd35-d0f72420ee3a",
+          "month": "2026-09-01",
+          "current_revision": 2,
+          "current_strategy_hash": "24b9a899b495a7884948b9c3b506df07c1b4efcada506e6588504e828d438216",
+          "stop_reasons": [
+            "PROPOSED_INTERNAL_OR_UUID_COPY",
+            "CLIENT_SPECIFIC_MONTHLY_QUALITY_REVIEW_REQUIRED_567_IS_NOT_ACCEPTANCE"
+          ]
+        },
+        {
+          "row_id": "6ff52455-ea17-42b4-baf6-68953de434fd",
+          "month": "2026-10-01",
+          "current_revision": 2,
+          "current_strategy_hash": "461a3af0a7052f5ccb0931fbda6b7cd86fdc0c60e0f719973255da1ea91242a3",
+          "stop_reasons": [
+            "PROPOSED_INTERNAL_OR_UUID_COPY",
+            "CLIENT_SPECIFIC_MONTHLY_QUALITY_REVIEW_REQUIRED_567_IS_NOT_ACCEPTANCE"
+          ]
+        }
+      ],
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/forklift-trucks.md",
+          "sha256": "ee3b3f06388bb4555e5baf096761c01685dff29f4f8a3a93a197ce4df3cac07f",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/sep-oct-approval-publication-manifest.json",
+          "sha256": "baa8110244c9c7f37b0e488db7823d33e98b7343ffe3691e7f9e7641972d0c0a",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/forklift-trucks.md",
+          "sha256": "c7bcc9d65066a9c8b7b07418fcdb7852b9b0ac92f7ab18322f4f9d84ab32eb98",
+          "quotes": []
+        }
+      ],
+      "guide_present": true,
+      "history": [
+        {
+          "month": "2026-07",
+          "report_id": null,
+          "post_identity_count": 0,
+          "gap": "MISSING_CANONICAL_REPORT"
+        },
+        {
+          "month": "2026-08",
+          "report_id": null,
+          "post_identity_count": 0,
+          "gap": "MISSING_CANONICAL_REPORT"
+        },
+        {
+          "month": "2026-09",
+          "report_id": null,
+          "post_identity_count": 0,
+          "gap": "MISSING_CANONICAL_REPORT"
+        }
+      ],
+      "evidence_gaps": [
+        "2026-07: MISSING_CANONICAL_REPORT",
+        "2026-08: MISSING_CANONICAL_REPORT",
+        "2026-09: MISSING_CANONICAL_REPORT",
+        "SEPARATE_EXACT_CLIENT_SEPTEMBER_AND_OCTOBER_QUALITY_REVIEW_NOT_ACCEPTED"
+      ],
+      "held": false,
+      "review_status": "STOPPED_NOT_REVIEWED_IN_BATCH_4",
+      "package_status": "Confirmed receipt exists; unknown/flexible capacities remain unknown/flexible, never inferred from posts.",
+      "next_evidence_action": "Resolve or explicitly document unavailable 2026-07, 2026-08, 2026-09 history for this exact client, then request a targeted separate Sep/Oct quality review using the existing guide. Do not clear the gate automatically.",
+      "copy_rejections": [
+        "PROPOSED_INTERNAL_OR_UUID_COPY"
+      ]
+    },
+    {
+      "client_id": "1007e58b-3fea-4515-88b7-ddaa85763de6",
+      "client_name": "Hino Trucks",
+      "months": [
+        {
+          "row_id": "301c64d8-da2b-4289-9869-0c4196ca7986",
+          "month": "2026-09-01",
+          "current_revision": 2,
+          "current_strategy_hash": "172b786fba757c6b653bcf382f6fa7a93e2349d5839070c97244f24f73e3a813",
+          "stop_reasons": [
+            "PROPOSED_INTERNAL_OR_UUID_COPY",
+            "FOREIGN_CLIENT_COPY:Toyota Bloemfontein",
+            "CLIENT_SPECIFIC_MONTHLY_QUALITY_REVIEW_REQUIRED_567_IS_NOT_ACCEPTANCE"
+          ]
+        },
+        {
+          "row_id": "5bbc7dfa-de11-47d2-a3fc-a5ba897deba9",
+          "month": "2026-10-01",
+          "current_revision": 2,
+          "current_strategy_hash": "0f8994ffaac8c96500d2e7c47007180076da7f9e4787a2672ef5b55618ead109",
+          "stop_reasons": [
+            "PROPOSED_INTERNAL_OR_UUID_COPY",
+            "FOREIGN_CLIENT_COPY:Toyota Bloemfontein",
+            "CLIENT_SPECIFIC_MONTHLY_QUALITY_REVIEW_REQUIRED_567_IS_NOT_ACCEPTANCE"
+          ]
+        }
+      ],
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/hino-trucks.md",
+          "sha256": "fb9547fcf14febb83edc94a786b10f6702bdb6612214dab652ee686c3d1f6a5c",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/sep-oct-approval-publication-manifest.json",
+          "sha256": "baa8110244c9c7f37b0e488db7823d33e98b7343ffe3691e7f9e7641972d0c0a",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/hino-trucks.md",
+          "sha256": "09d804c5c0cb0b7e8ba712e3788ec801ef752eb6bce227cdf6216002d41e0c7f",
+          "quotes": []
+        }
+      ],
+      "guide_present": true,
+      "history": [
+        {
+          "month": "2026-07",
+          "report_id": null,
+          "post_identity_count": 0,
+          "gap": "MISSING_CANONICAL_REPORT"
+        },
+        {
+          "month": "2026-08",
+          "report_id": null,
+          "post_identity_count": 0,
+          "gap": "MISSING_CANONICAL_REPORT"
+        },
+        {
+          "month": "2026-09",
+          "report_id": null,
+          "post_identity_count": 0,
+          "gap": "MISSING_CANONICAL_REPORT"
+        }
+      ],
+      "evidence_gaps": [
+        "2026-07: MISSING_CANONICAL_REPORT",
+        "2026-08: MISSING_CANONICAL_REPORT",
+        "2026-09: MISSING_CANONICAL_REPORT",
+        "SEPARATE_EXACT_CLIENT_SEPTEMBER_AND_OCTOBER_QUALITY_REVIEW_NOT_ACCEPTED"
+      ],
+      "held": false,
+      "review_status": "STOPPED_NOT_REVIEWED_IN_BATCH_4",
+      "package_status": "Confirmed receipt exists; unknown/flexible capacities remain unknown/flexible, never inferred from posts.",
+      "next_evidence_action": "Resolve or explicitly document unavailable 2026-07, 2026-08, 2026-09 history for this exact client, then request a targeted separate Sep/Oct quality review using the existing guide. Do not clear the gate automatically.",
+      "copy_rejections": [
+        "PROPOSED_INTERNAL_OR_UUID_COPY",
+        "FOREIGN_CLIENT_COPY:Toyota Bloemfontein"
+      ]
+    },
+    {
+      "client_id": "816c7f59-d56c-46a3-ba15-f76971d83769",
+      "client_name": "Human Auto",
+      "months": [
+        {
+          "row_id": "3242464f-0a3f-49ab-a7ce-1d8902919702",
+          "month": "2026-09-01",
+          "current_revision": 2,
+          "current_strategy_hash": "1a44435b483431d1b3811808544a3f3f374997f834eee55571bc15c7f4ca754c",
+          "stop_reasons": [
+            "PROPOSED_INTERNAL_OR_UUID_COPY",
+            "CLIENT_SPECIFIC_MONTHLY_QUALITY_REVIEW_REQUIRED_567_IS_NOT_ACCEPTANCE"
+          ]
+        },
+        {
+          "row_id": "08dba9ea-c267-456d-96f8-dfc5910d674e",
+          "month": "2026-10-01",
+          "current_revision": 2,
+          "current_strategy_hash": "38bdf4c1f4bff90f702e52cb8448ce73815f99f40cfd9afa85161d8893703f4f",
+          "stop_reasons": [
+            "PROPOSED_INTERNAL_OR_UUID_COPY",
+            "CLIENT_SPECIFIC_MONTHLY_QUALITY_REVIEW_REQUIRED_567_IS_NOT_ACCEPTANCE"
+          ]
+        }
+      ],
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/human-auto.md",
+          "sha256": "d1016dff29f03450468abedc58afbe34ebc65300903e959010701d43fdeb515c",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/sep-oct-approval-publication-manifest.json",
+          "sha256": "baa8110244c9c7f37b0e488db7823d33e98b7343ffe3691e7f9e7641972d0c0a",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/human-auto.md",
+          "sha256": "f39d7355ed4fa53efe029116947105bb01b807d1c64f8a98c03ce6a799eae863",
+          "quotes": []
+        }
+      ],
+      "guide_present": true,
+      "history": [
+        {
+          "month": "2026-07",
+          "report_id": null,
+          "post_identity_count": 0,
+          "gap": "MISSING_CANONICAL_REPORT"
+        },
+        {
+          "month": "2026-08",
+          "report_id": null,
+          "post_identity_count": 0,
+          "gap": "MISSING_CANONICAL_REPORT"
+        },
+        {
+          "month": "2026-09",
+          "report_id": null,
+          "post_identity_count": 0,
+          "gap": "MISSING_CANONICAL_REPORT"
+        }
+      ],
+      "evidence_gaps": [
+        "2026-07: MISSING_CANONICAL_REPORT",
+        "2026-08: MISSING_CANONICAL_REPORT",
+        "2026-09: MISSING_CANONICAL_REPORT",
+        "SEPARATE_EXACT_CLIENT_SEPTEMBER_AND_OCTOBER_QUALITY_REVIEW_NOT_ACCEPTED"
+      ],
+      "held": false,
+      "review_status": "STOPPED_NOT_REVIEWED_IN_BATCH_4",
+      "package_status": "Confirmed receipt exists; unknown/flexible capacities remain unknown/flexible, never inferred from posts.",
+      "next_evidence_action": "Resolve or explicitly document unavailable 2026-07, 2026-08, 2026-09 history for this exact client, then request a targeted separate Sep/Oct quality review using the existing guide. Do not clear the gate automatically.",
+      "copy_rejections": [
+        "PROPOSED_INTERNAL_OR_UUID_COPY"
+      ]
+    },
+    {
+      "client_id": "a5eab798-3e00-44cc-947e-463386fdac39",
+      "client_name": "Jenkor",
+      "months": [
+        {
+          "row_id": "19873077-2f40-42e2-94d7-0fab337ce255",
+          "month": "2026-09-01",
+          "current_revision": 2,
+          "current_strategy_hash": "9dd921aa736bef4e7c63120a5b6f37c846cd4c366357ef5306b67a26fdb7ca68",
+          "stop_reasons": [
+            "PROPOSED_INTERNAL_OR_UUID_COPY",
+            "CLIENT_SPECIFIC_MONTHLY_QUALITY_REVIEW_REQUIRED_567_IS_NOT_ACCEPTANCE"
+          ]
+        },
+        {
+          "row_id": "32400dc4-f32c-46af-bc7c-dd5f1fd23824",
+          "month": "2026-10-01",
+          "current_revision": 2,
+          "current_strategy_hash": "af07a67e906b8d606ffcaaf78c6ac654d5becbed0a983494e72aee40b8c82d4e",
+          "stop_reasons": [
+            "PROPOSED_INTERNAL_OR_UUID_COPY",
+            "CLIENT_SPECIFIC_MONTHLY_QUALITY_REVIEW_REQUIRED_567_IS_NOT_ACCEPTANCE"
+          ]
+        }
+      ],
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/jenkor.md",
+          "sha256": "1cd7ca06f28eed54f3efdd58be73f5e40adf27365823c74a314285082c325b1e",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/sep-oct-approval-publication-manifest.json",
+          "sha256": "baa8110244c9c7f37b0e488db7823d33e98b7343ffe3691e7f9e7641972d0c0a",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/jenkor.md",
+          "sha256": "3d2eb915b1c8552913de710f26474edf97f8d9ee25f0834ef7aaed65f388e0e4",
+          "quotes": []
+        }
+      ],
+      "guide_present": true,
+      "history": [
+        {
+          "month": "2026-07",
+          "report_id": null,
+          "post_identity_count": 0,
+          "gap": "MISSING_CANONICAL_REPORT"
+        },
+        {
+          "month": "2026-08",
+          "report_id": null,
+          "post_identity_count": 0,
+          "gap": "MISSING_CANONICAL_REPORT"
+        },
+        {
+          "month": "2026-09",
+          "report_id": null,
+          "post_identity_count": 0,
+          "gap": "MISSING_CANONICAL_REPORT"
+        }
+      ],
+      "evidence_gaps": [
+        "2026-07: MISSING_CANONICAL_REPORT",
+        "2026-08: MISSING_CANONICAL_REPORT",
+        "2026-09: MISSING_CANONICAL_REPORT",
+        "SEPARATE_EXACT_CLIENT_SEPTEMBER_AND_OCTOBER_QUALITY_REVIEW_NOT_ACCEPTED"
+      ],
+      "held": false,
+      "review_status": "STOPPED_NOT_REVIEWED_IN_BATCH_4",
+      "package_status": "Confirmed receipt exists; unknown/flexible capacities remain unknown/flexible, never inferred from posts.",
+      "next_evidence_action": "Resolve or explicitly document unavailable 2026-07, 2026-08, 2026-09 history for this exact client, then request a targeted separate Sep/Oct quality review using the existing guide. Do not clear the gate automatically.",
+      "copy_rejections": [
+        "PROPOSED_INTERNAL_OR_UUID_COPY"
+      ]
+    },
+    {
+      "client_id": "cdb11a82-339e-4b46-9b09-bde1a23efeaf",
+      "client_name": "Red Oak",
+      "months": [
+        {
+          "row_id": "8966dc51-f14b-4046-b16e-2d8ddab1561c",
+          "month": "2026-09-01",
+          "current_revision": 2,
+          "current_strategy_hash": "7495c7b4ef5c69cd9c58452b0e561f4cc84d073a625bbbe55ad4099f33158880",
+          "stop_reasons": [
+            "PROPOSED_INTERNAL_OR_UUID_COPY",
+            "CLIENT_SPECIFIC_MONTHLY_QUALITY_REVIEW_REQUIRED_567_IS_NOT_ACCEPTANCE"
+          ]
+        },
+        {
+          "row_id": "77fb2d24-b8f7-4ea3-8390-21c65caf1f35",
+          "month": "2026-10-01",
+          "current_revision": 2,
+          "current_strategy_hash": "2db12e4fe7d4c409de83beacd39816a37a2f03e6da3c3435df04a1193769cc8b",
+          "stop_reasons": [
+            "PROPOSED_INTERNAL_OR_UUID_COPY",
+            "CLIENT_SPECIFIC_MONTHLY_QUALITY_REVIEW_REQUIRED_567_IS_NOT_ACCEPTANCE"
+          ]
+        }
+      ],
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/red-oak.md",
+          "sha256": "0277e7e6fa50713e31c2b61e85106e8c872d8509842ececfcf39957f9d0732fe",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/sep-oct-approval-publication-manifest.json",
+          "sha256": "baa8110244c9c7f37b0e488db7823d33e98b7343ffe3691e7f9e7641972d0c0a",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/red-oak.md",
+          "sha256": "925d4e5c12ea724936f282b3562634535ceda04d824839103567a042aaafec89",
+          "quotes": []
+        }
+      ],
+      "guide_present": true,
+      "history": [
+        {
+          "month": "2026-07",
+          "report_id": "dbf001c9-8ee3-4c3a-a310-85661c6fc41a",
+          "post_identity_count": 40,
+          "gap": null
+        },
+        {
+          "month": "2026-08",
+          "report_id": "bad9a8e6-0110-4b0b-ad8d-0ff6067addf6",
+          "post_identity_count": 0,
+          "gap": "NO_IN_MONTH_POST_EVIDENCE"
+        },
+        {
+          "month": "2026-09",
+          "report_id": "e3a4649f-49af-4b38-8b98-3e4f2b96b67f",
+          "post_identity_count": 0,
+          "gap": "NO_IN_MONTH_POST_EVIDENCE"
+        }
+      ],
+      "evidence_gaps": [
+        "2026-08: NO_IN_MONTH_POST_EVIDENCE",
+        "2026-09: NO_IN_MONTH_POST_EVIDENCE",
+        "SEPARATE_EXACT_CLIENT_SEPTEMBER_AND_OCTOBER_QUALITY_REVIEW_NOT_ACCEPTED"
+      ],
+      "held": false,
+      "review_status": "STOPPED_NOT_REVIEWED_IN_BATCH_4",
+      "package_status": "Confirmed receipt exists; unknown/flexible capacities remain unknown/flexible, never inferred from posts.",
+      "next_evidence_action": "Resolve or explicitly document unavailable 2026-08, 2026-09 history for this exact client, then request a targeted separate Sep/Oct quality review using the existing guide. Do not clear the gate automatically.",
+      "copy_rejections": [
+        "PROPOSED_INTERNAL_OR_UUID_COPY"
+      ]
+    },
+    {
+      "client_id": "e2ad6d57-5b06-46e1-b75b-b67f017d57f1",
+      "client_name": "Toyota Bloemfontein",
+      "months": [
+        {
+          "row_id": "948d7fa1-5853-4edf-b1f3-8bf49f93d93b",
+          "month": "2026-09-01",
+          "current_revision": 2,
+          "current_strategy_hash": "2c16372fb57caff7990e77d2ee8edb83608439b01bc07f46807623375bf5affd",
+          "stop_reasons": [
+            "PROPOSED_INTERNAL_OR_UUID_COPY",
+            "CLIENT_SPECIFIC_MONTHLY_QUALITY_REVIEW_REQUIRED_567_IS_NOT_ACCEPTANCE"
+          ]
+        },
+        {
+          "row_id": "d36ae793-6ff4-4b93-8f2a-1da6d30b0a4b",
+          "month": "2026-10-01",
+          "current_revision": 2,
+          "current_strategy_hash": "63105651443fb7d8ca379eae5fe3078605d0b45fe31a74bda9ced9dcb3c73b64",
+          "stop_reasons": [
+            "PROPOSED_INTERNAL_OR_UUID_COPY",
+            "CLIENT_SPECIFIC_MONTHLY_QUALITY_REVIEW_REQUIRED_567_IS_NOT_ACCEPTANCE"
+          ]
+        }
+      ],
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/toyota-bloemfontein.md",
+          "sha256": "fd3a1b2ded9af426e4235ca4a3fd13f6d777f0f4c1553791976c17a8a2aca716",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/sep-oct-approval-publication-manifest.json",
+          "sha256": "baa8110244c9c7f37b0e488db7823d33e98b7343ffe3691e7f9e7641972d0c0a",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/toyota-bloemfontein.md",
+          "sha256": "8a5b1d28e29a8ea5ca5dbf41193ff08f8260aefd1d38428f9eb896ef8f966230",
+          "quotes": []
+        }
+      ],
+      "guide_present": true,
+      "history": [
+        {
+          "month": "2026-07",
+          "report_id": null,
+          "post_identity_count": 0,
+          "gap": "MISSING_CANONICAL_REPORT"
+        },
+        {
+          "month": "2026-08",
+          "report_id": null,
+          "post_identity_count": 0,
+          "gap": "MISSING_CANONICAL_REPORT"
+        },
+        {
+          "month": "2026-09",
+          "report_id": null,
+          "post_identity_count": 0,
+          "gap": "MISSING_CANONICAL_REPORT"
+        }
+      ],
+      "evidence_gaps": [
+        "2026-07: MISSING_CANONICAL_REPORT",
+        "2026-08: MISSING_CANONICAL_REPORT",
+        "2026-09: MISSING_CANONICAL_REPORT",
+        "SEPARATE_EXACT_CLIENT_SEPTEMBER_AND_OCTOBER_QUALITY_REVIEW_NOT_ACCEPTED"
+      ],
+      "held": false,
+      "review_status": "STOPPED_NOT_REVIEWED_IN_BATCH_4",
+      "package_status": "Confirmed receipt exists; unknown/flexible capacities remain unknown/flexible, never inferred from posts.",
+      "next_evidence_action": "Resolve or explicitly document unavailable 2026-07, 2026-08, 2026-09 history for this exact client, then request a targeted separate Sep/Oct quality review using the existing guide. Do not clear the gate automatically.",
+      "copy_rejections": [
+        "PROPOSED_INTERNAL_OR_UUID_COPY"
+      ]
+    },
+    {
+      "client_id": "1f0406bb-d643-4b83-bc3e-b1ebe87eeb89",
+      "client_name": "Vrystaat Kunstefees",
+      "months": [
+        {
+          "row_id": "aae812d7-7cb6-4f0d-bd4c-b4aea2e7e349",
+          "month": "2026-09-01",
+          "current_revision": 2,
+          "current_strategy_hash": "6235d0b2350edd031631de6c015e7225cd380ef07a1daa9d5c1282ca33581cd3",
+          "stop_reasons": [
+            "CLIENT_SPECIFIC_MONTHLY_QUALITY_REVIEW_REQUIRED_567_IS_NOT_ACCEPTANCE"
+          ]
+        },
+        {
+          "row_id": "9b309868-6f16-422a-a945-337c5cf374ed",
+          "month": "2026-10-01",
+          "current_revision": 2,
+          "current_strategy_hash": "01243b65edb5a0122031566562f398aef2a0b84c8ccd5a7d9d035f2b12e91177",
+          "stop_reasons": [
+            "CLIENT_SPECIFIC_MONTHLY_QUALITY_REVIEW_REQUIRED_567_IS_NOT_ACCEPTANCE"
+          ]
+        }
+      ],
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/vrystaat-kunstefees.md",
+          "sha256": "a098f140f2f04c5719848cfa7b15a580b735cdf9c0c93b953746289c664168c5",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/sep-oct-approval-publication-manifest.json",
+          "sha256": "baa8110244c9c7f37b0e488db7823d33e98b7343ffe3691e7f9e7641972d0c0a",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/vrystaat-kunstefees.md",
+          "sha256": "19740805e0cf7d987cabaae914beb8856c0d06a8951fc1841207b37560e8cd2f",
+          "quotes": []
+        }
+      ],
+      "guide_present": true,
+      "history": [
+        {
+          "month": "2026-07",
+          "report_id": null,
+          "post_identity_count": 0,
+          "gap": "MISSING_CANONICAL_REPORT"
+        },
+        {
+          "month": "2026-08",
+          "report_id": "2b2a969e-d6cd-484d-8cf6-8e665078f4cb",
+          "post_identity_count": 17,
+          "gap": null
+        },
+        {
+          "month": "2026-09",
+          "report_id": "87b4f217-3fe7-4b57-94a4-46222025606f",
+          "post_identity_count": 14,
+          "gap": null
+        }
+      ],
+      "evidence_gaps": [
+        "2026-07: MISSING_CANONICAL_REPORT",
+        "SEPARATE_EXACT_CLIENT_SEPTEMBER_AND_OCTOBER_QUALITY_REVIEW_NOT_ACCEPTED"
+      ],
+      "held": false,
+      "review_status": "STOPPED_NOT_REVIEWED_IN_BATCH_4",
+      "package_status": "Confirmed receipt exists; unknown/flexible capacities remain unknown/flexible, never inferred from posts.",
+      "next_evidence_action": "Resolve or explicitly document unavailable 2026-07 history for this exact client, then request a targeted separate Sep/Oct quality review using the existing guide. Do not clear the gate automatically.",
+      "copy_rejections": []
+    },
+    {
+      "client_id": "504113ee-fba9-4993-807e-a86066615212",
+      "client_name": "WiseRide",
+      "months": [
+        {
+          "row_id": "a7dab01a-f180-4879-bcc4-a19df82aaef7",
+          "month": "2026-09-01",
+          "current_revision": 2,
+          "current_strategy_hash": "11556119ff95ef4336696e46007a580a265735ef235b10158826717fbf917a34",
+          "stop_reasons": [
+            "PROPOSED_INTERNAL_OR_UUID_COPY",
+            "FOREIGN_CLIENT_COPY:Wiseman Group",
+            "CLIENT_SPECIFIC_MONTHLY_QUALITY_REVIEW_REQUIRED_567_IS_NOT_ACCEPTANCE"
+          ]
+        },
+        {
+          "row_id": "445f15e8-d62a-4b15-8539-dd1e7053f220",
+          "month": "2026-10-01",
+          "current_revision": 2,
+          "current_strategy_hash": "ef81de15e4163d05a5e54e58696cc0ca9454a798a083e580512a7052d8f3db20",
+          "stop_reasons": [
+            "PROPOSED_INTERNAL_OR_UUID_COPY",
+            "FOREIGN_CLIENT_COPY:Wiseman Group",
+            "CLIENT_SPECIFIC_MONTHLY_QUALITY_REVIEW_REQUIRED_567_IS_NOT_ACCEPTANCE"
+          ]
+        }
+      ],
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/wiseride.md",
+          "sha256": "3f4ad51d9e73c1bc480cdd52684a7d4aec0fe792f07ceabae6edae77be1fc4b8",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/sep-oct-approval-publication-manifest.json",
+          "sha256": "baa8110244c9c7f37b0e488db7823d33e98b7343ffe3691e7f9e7641972d0c0a",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/runtime-guides/wiseride.md",
+          "sha256": "19f0783d4cd680d396a2155ddf14551e5a4091dc6a2756511e2fd8b6fb31e5d3",
+          "quotes": []
+        }
+      ],
+      "guide_present": true,
+      "history": [
+        {
+          "month": "2026-07",
+          "report_id": null,
+          "post_identity_count": 0,
+          "gap": "MISSING_CANONICAL_REPORT"
+        },
+        {
+          "month": "2026-08",
+          "report_id": null,
+          "post_identity_count": 0,
+          "gap": "MISSING_CANONICAL_REPORT"
+        },
+        {
+          "month": "2026-09",
+          "report_id": null,
+          "post_identity_count": 0,
+          "gap": "MISSING_CANONICAL_REPORT"
+        }
+      ],
+      "evidence_gaps": [
+        "2026-07: MISSING_CANONICAL_REPORT",
+        "2026-08: MISSING_CANONICAL_REPORT",
+        "2026-09: MISSING_CANONICAL_REPORT",
+        "SEPARATE_EXACT_CLIENT_SEPTEMBER_AND_OCTOBER_QUALITY_REVIEW_NOT_ACCEPTED"
+      ],
+      "held": false,
+      "review_status": "STOPPED_NOT_REVIEWED_IN_BATCH_4",
+      "package_status": "Confirmed receipt exists; unknown/flexible capacities remain unknown/flexible, never inferred from posts.",
+      "next_evidence_action": "Resolve or explicitly document unavailable 2026-07, 2026-08, 2026-09 history for this exact client, then request a targeted separate Sep/Oct quality review using the existing guide. Do not clear the gate automatically.",
+      "copy_rejections": [
+        "PROPOSED_INTERNAL_OR_UUID_COPY",
+        "FOREIGN_CLIENT_COPY:Wiseman Group"
+      ]
+    },
+    {
+      "client_id": "0c01d90f-ba5e-4251-a597-bf3c83f990fa",
+      "client_name": "Zooz Lifestyle WFF",
+      "months": [
+        {
+          "row_id": "84bbb4a4-8457-4c6b-8574-8a496504df71",
+          "month": "2026-09-01",
+          "current_revision": 2,
+          "current_strategy_hash": "4dc76d1518e0bfcc8bbfc1b0323c508bfe14d85466eb9e25a9856f46a65386ec",
+          "stop_reasons": [
+            "CLIENT_SPECIFIC_MONTHLY_QUALITY_REVIEW_REQUIRED_567_IS_NOT_ACCEPTANCE"
+          ]
+        },
+        {
+          "row_id": "e25e2fe1-d0ed-4557-8687-6e1313dfa57c",
+          "month": "2026-10-01",
+          "current_revision": 2,
+          "current_strategy_hash": "881a79d3b76e1ff1d95775b60a03eec62788b117a548ec2d23ab4b93ac107645",
+          "stop_reasons": [
+            "CLIENT_SPECIFIC_MONTHLY_QUALITY_REVIEW_REQUIRED_567_IS_NOT_ACCEPTANCE"
+          ]
+        }
+      ],
+      "source_receipts": [
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/zooz-lifestyle-wff.md",
+          "sha256": "be5e015d34f6b955ee911f23bde81dd6b4b95432192dd0d9734df174811f7e31",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/index.json",
+          "sha256": "e223a12c6e68b9a9c3305c411ec0d043d8ab1e88fdc5b4194efc6ec237455023",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json",
+          "sha256": "7c081751706bb5d7920ef2031536f686f8cf1edb91a7dd175a3020415fe53481",
+          "quotes": []
+        },
+        {
+          "path": "artifacts/client-strategy-dossiers/issue-513/sep-oct-approval-publication-manifest.json",
+          "sha256": "baa8110244c9c7f37b0e488db7823d33e98b7343ffe3691e7f9e7641972d0c0a",
+          "quotes": []
+        }
+      ],
+      "guide_present": false,
+      "history": [
+        {
+          "month": "2026-07",
+          "report_id": "510cfc6f-8b35-47ca-8d63-95b060745e27",
+          "post_identity_count": 20,
+          "gap": null
+        },
+        {
+          "month": "2026-08",
+          "report_id": "4d5499e0-726d-4bf3-be0b-f89d5cd340f5",
+          "post_identity_count": 15,
+          "gap": null
+        },
+        {
+          "month": "2026-09",
+          "report_id": "b9bb6e96-7b2b-4865-8d8d-a656e8de8166",
+          "post_identity_count": 2,
+          "gap": null
+        }
+      ],
+      "evidence_gaps": [
+        "MISSING_EXACT_CLIENT_RUNTIME_GUIDE",
+        "SEPARATE_EXACT_CLIENT_SEPTEMBER_AND_OCTOBER_QUALITY_REVIEW_NOT_ACCEPTED",
+        "APPROVED_CURRENT_ZOOZ_BRAND_VOICE_PRODUCT_PROGRAMME_AND_WFF_EVENT_ATHLETE_CONSTRAINTS_REQUIRED"
+      ],
+      "held": true,
+      "review_status": "STOPPED_NOT_REVIEWED_IN_BATCH_4",
+      "package_status": "Confirmed receipt exists; unknown/flexible capacities remain unknown/flexible, never inferred from posts.",
+      "next_evidence_action": "Obtain an approved exact-client guide and separate current ZooZ/WFF constraints; do not retry until that evidence exists.",
+      "copy_rejections": []
+    }
+  ],
+  "inventory_hash": "dbf2f3f9cc5f5a154a9e602552f539a66ef11da8640e229d1392f2efe3b05b7b"
+}
