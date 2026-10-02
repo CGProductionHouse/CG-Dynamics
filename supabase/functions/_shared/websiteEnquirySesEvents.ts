@@ -27,7 +27,7 @@ export interface SesEventDeps {
   topicArn: string
   fetchCertificate: (url: string) => Promise<string>
   /** X.509 chain trust (verifySnsSigningCertificate in production). */
-  trustCertificate: (pem: string) => Promise<TrustResult>
+  trustCertificate: (pem: string, certUrl: string) => Promise<TrustResult>
   confirmSubscription: (url: string) => Promise<boolean>
   findReconcileJob: (deliveryKey: string) => Promise<string | null>
   resolveFound: (jobId: string, providerMessageId: string) => Promise<boolean>
@@ -57,7 +57,7 @@ export async function handleSesSnsRequest(req: Request, deps: SesEventDeps): Pro
 
   let certificate: string
   try { certificate = await deps.fetchCertificate(message.SigningCertURL) } catch { return respond(deps, 503, 'certificate_unavailable') }
-  const trust = await deps.trustCertificate(certificate)
+  const trust = await deps.trustCertificate(certificate, message.SigningCertURL)
   if (!trust.ok) {
     // An unreachable intermediate is transient (SNS retries); every other failure is final.
     return trust.reason === 'issuer_unavailable'

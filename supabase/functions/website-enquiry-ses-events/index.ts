@@ -47,7 +47,7 @@ Deno.serve((req) => {
       certificates.set(url, pem)
       return pem
     },
-    trustCertificate: (pem) => verifySnsSigningCertificate(pem, { fetchIssuer }),
+    trustCertificate: (pem, certUrl) => verifySnsSigningCertificate(pem, { fetchIssuer, certUrlHost: new URL(certUrl).hostname }),
     confirmSubscription: async (url) => {
       if (!isTrustedSnsSubscribeUrl(url)) return false
       const response = await fetch(url, { redirect: 'error', signal: AbortSignal.timeout(5000) })

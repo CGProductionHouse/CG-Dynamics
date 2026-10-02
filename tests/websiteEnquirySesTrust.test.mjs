@@ -82,6 +82,35 @@ test('genuine SNS leaf fails closed when expired or presented with the wrong Ama
     { ok: false, reason: 'issuer_not_valid_now' })
 })
 
+test('genuine af-south-1 SNS leaf (regional SAN only) is trusted via real M01 + pinned root, bound to its cert-URL host', async () => {
+  const leaf = fixture('sns-af-south-1-2026-leaf.pem')
+  const cert = new X509Certificate(leaf)
+  assert.equal(cert.subjectAltName, 'DNS:sns-signing.af-south-1.amazonaws.com, DNS:sns.af-south-1.amazonaws.com')
+  assert.deepEqual(trustedIssuerUrls(cert), ['http://crt.r2m01.amazontrust.com/r2m01.cer'])
+  const realM01 = new Uint8Array(new X509Certificate(fixture('amazon-rsa-2048-m01.pem')).raw)
+  const now = new Date('2026-10-02T18:00:00Z')
+  const verify = (certUrlHost) => verifySnsSigningCertificate(leaf, { fetchIssuer: async () => realM01, now, ...(certUrlHost === undefined ? {} : { certUrlHost }) })
+  const trusted = await verify('sns.af-south-1.amazonaws.com')
+  assert.equal(trusted.ok, true, trusted.reason)
+  assert.deepEqual(Buffer.from(trusted.spki), cert.publicKey.export({ type: 'spki', format: 'der' }))
+  // Without the host binding, or bound to another region / a non-SNS host, the regional leaf is not SNS's.
+  for (const host of [undefined, 'sns.eu-west-1.amazonaws.com', 'sns-signing.af-south-1.amazonaws.com', 'evil.example', 'sns.af-south-1.amazonaws.com.evil.example']) {
+    assert.deepEqual(await verify(host), { ok: false, reason: 'not_issued_to_sns' }, String(host))
+  }
+  // Expired: still fails closed after notAfter.
+  assert.deepEqual(await verifySnsSigningCertificate(leaf, { fetchIssuer: async () => realM01, certUrlHost: 'sns.af-south-1.amazonaws.com', now: new Date('2027-03-01T00:00:00Z') }),
+    { ok: false, reason: 'leaf_not_valid_now' })
+})
+
+test('a regional host binding never lets an attacker chain through the pinned roots', async () => {
+  const attacker = buildPki({ name: 'regional-attacker', leafDns: 'sns.af-south-1.amazonaws.com' })
+  assert.deepEqual(await verifySnsSigningCertificate(attacker.leafPem, { fetchIssuer: issuerFrom(attacker.intermediateDer), certUrlHost: 'sns.af-south-1.amazonaws.com' }),
+    { ok: false, reason: 'issuer_not_anchored_to_amazon_root' })
+  const regional = buildPki({ name: 'regional', leafDns: 'sns.af-south-1.amazonaws.com' })
+  const ok = await verifySnsSigningCertificate(regional.leafPem, { fetchIssuer: issuerFrom(regional.intermediateDer), roots: [regional.rootPem], certUrlHost: 'sns.af-south-1.amazonaws.com' })
+  assert.equal(ok.ok, true, ok.reason)
+})
+
 test('every structural rule fails closed with a named reason', async () => {
   const cases = [
     ['not_issued_to_sns', buildPki({ name: 'san', leafDns: 'sns.evil.example' })],
