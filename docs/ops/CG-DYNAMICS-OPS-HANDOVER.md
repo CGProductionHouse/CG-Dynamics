@@ -6,6 +6,29 @@ Updated: **2 October 2026** after the Piek #405 stored-lead production pilot (se
 
 This file is intentionally current-state-first. Historical failed attempts are summarized only where they prevent repeated work.
 
+### #598 bounded protected packet — COMPLETE, 2 October
+
+Supersedes the owner-auth STOP receipt below. Under CA authorization #598 comment 5950879579 / #505 comment 5950880151 and CA's subsequent private reauthentication, completed exactly seven approved changes in `info@cgproductionhouse.com` Chrome:
+
+- Correct Instagram-product app secret securely provisioned as `INSTAGRAM_APP_SECRET`; private digest-to-source comparison PASS. Product is CG Dynamics-IG `1383360116973315`, parent CG Dynamics `976168728361566`. Parent-app secret was not used. No secret/digest was exposed, copied to clipboard, logged or stored in repository; temporary private value cleared and Meta field remasked.
+- `APP_PUBLIC_URL=https://www.cgdynamics.co.za`, private readback PASS. Before/after config inventory proves **only** `APP_PUBLIC_URL` and `INSTAGRAM_APP_SECRET` changed; all unrelated entries unchanged, none removed. Activation remains literal `false`; existing app ID/redirect/Graph/encryption config unchanged.
+- Meta Basic Privacy `https://www.cgdynamics.co.za/privacy-policy`, Terms `https://www.cgdynamics.co.za/terms-of-service`, deletion instructions `https://www.cgdynamics.co.za/privacy-policy` saved and reload-readback PASS. Instructions-URL mode preserved.
+- Instagram business-login Deauthorize `https://ehtjfntukiwbgptqgbzy.supabase.co/functions/v1/instagram-deauthorize` and Data deletion request `https://ehtjfntukiwbgptqgbzy.supabase.co/functions/v1/instagram-data-deletion` saved, reloaded/reopened and readback PASS. Exact existing OAuth redirect `https://ehtjfntukiwbgptqgbzy.supabase.co/functions/v1/instagram-oauth-callback` preserved.
+
+Acceptance: deployed OAuth-start helper retains exactly `instagram_business_basic` + `instagram_business_manage_insights`; Meta's extra-scope generated Embed URL was not used. No-code/state OAuth callback returns 302 to canonical origin with `instagram=activation_blocked`; malformed unsigned deauthorize/deletion requests return 400 (not missing-secret 503), unknown receipt 404. No valid signed callbacks or OAuth start invoked. Standalone connections/tokens/states/callback receipts remain **0/0/0/0** after checks. Three deployed callback source trees parity-match accepted main and retain `verify_jwt=false`. Secret saves advanced callback revisions to v9/v4/v4; this is config propagation, **not an Edge deployment**. Development mode and Business Unverified/access-verification gate remain.
+
+Non-secret browser evidence: `C:/Users/chris/.codex/artifacts/issue-598/2026-10-02-meta-legal-readback.jpg` and `2026-10-02-meta-callback-readback.jpg`. No Review submission, business/access verification change, tester addition, permission expansion, Live switch, OAuth/consent, client mapping, sync, migration, Edge deploy or DB/client/report data write. #598 packet has no remaining execution blocker; #505 remains OPEN at separately authorized Business/Access Verification, genuine owner-authorized standalone fixture, Review/Live and later one-client controlled activation/consent. Do not repeat #600 or these seven completed saves.
+
+### #598 authorized packet — STOPPED at owner reauthentication, 2 October
+
+CA explicitly authorized only the app-secret/public-origin/five-URL packet in #598 comment 5950879579 and #505 comment 5950880151. No production save/write occurred. In the requested `info@cgproductionhouse.com` Chrome profile, Meta Developers shows the exact CG Dynamics parent app `976168728361566`, Instagram business-login product CG Dynamics-IG `1383360116973315`, Development mode and the unchanged exact OAuth redirect. The generated Meta Embed URL still has extra scopes and was not used; canonical runtime code retains only `instagram_business_basic` + `instagram_business_manage_insights`.
+
+Fresh names/digest-to-known-public-value checks: production app ID/redirect match; activation matches literal `false`; app secret absent; public origin still old Vercel origin. SELECT-only standalone connections/tokens/states/callback receipts remain 0/0/0/0. The product-specific Show action presented **Please re-enter your password** for Christie-Ann Groenewald. Secret was not retrieved, emitted or copied. No password was entered; dialog left open for CA private reauthentication. Do not use the parent-app secret, bypass reauthentication, search unrelated credentials or send a password/secret to chat.
+
+Exact next action: CA completes only this Meta owner reauthentication directly in the open product-secret dialog, then agent resumes the already-authorized bounded #598 saves/readbacks. No App Review, verification changes, testers, Live, OAuth, mappings, sync, unrelated config or data writes are authorized. The seven approved changes remain pending; no partial origin/URL saves were attempted. #600 crypto remains satisfied and must not be repeated. Non-secret screenshot: `C:/Users/chris/.codex/artifacts/issue-598/2026-10-02-owner-reauthentication.jpg`.
+
+Docs-only receipt verification: 52 local login/callback/encryption fixture tests passed, TypeScript/Vite build PASS (existing bundle advisory), scoped login/OAuth lint and diff check PASS. These are local regressions, not another production crypto validation. No runtime source changed.
+
 ### #505 Instagram-only executable queue — 2 October
 
 Read-only current-main baseline `2e6d14484319b4b48d3180b676e29032e4c77ab3` and #505 supervisor comment 5949760923. Production: 57 active / 47 recurring-social eligible / 10 excluded / 0 scope-held; 22 canonical Instagram / 25 unmapped; standalone connections/tokens/states/callback receipts 0/0/0/0. Authenticated staff Chrome Page-first discovery exposes no Instagram option for the 25: 15 saved Pages loaded without an IG option, Red Oak's saved Page absent, nine no saved Page. This is not complete provider inventory (discovery limit/access boundaries), nor proof an account does not exist. Suggestions for Neshora/WiseRide are not mappings.
@@ -194,7 +217,10 @@ CA expects the supervisor to run the project rather than hand routine work back 
 
 ## 3. Current verified production / GitHub baseline
 
-The last runtime-affecting Instagram action was the separately CA-authorized #600 encryption-pair reset performed after PR #607 merged at:
+The latest runtime-affecting Instagram action is the completed bounded #598
+app-secret/public-origin packet recorded above; no source deployment or schema
+change accompanied it. Earlier separately CA-authorized #600 encryption-pair
+reset was performed after PR #607 merged at:
 
 `1584604de26d9d678225f447e8a895738563c044`
 
@@ -267,15 +293,9 @@ Current Meta/App Review truth from authenticated provider inspection:
 
 Current config/provider blockers:
 
-- `INSTAGRAM_APP_SECRET` is **absent**
-- `APP_PUBLIC_URL` still points to the old Vercel origin and must be corrected to:
-  `https://www.cgdynamics.co.za`
+- #598 app-secret and public-origin gates are **COMPLETE**; correct Instagram-product secret readback passed and `APP_PUBLIC_URL=https://www.cgdynamics.co.za`.
 - standalone activation remains OFF
-- Meta Privacy URL remains unsaved/incorrect in provider settings
-- Meta Terms URL remains incorrect
-- App Basic deletion instructions URL remains incorrect
-- Instagram Deauthorize callback URL remains unsaved
-- Instagram Data deletion request URL remains unsaved
+- All five locked Meta legal/callback fields are saved and reload-readback verified; see the completion receipt above. Remaining provider gates are Business/Access Verification, authorized fixture, Review/Live and later consent, not missing URL/config prerequisites.
 
 Reviewed public values to use only under explicit provider-save authority:
 
@@ -301,6 +321,10 @@ Client-branded portfolio assets are not a consent-free test pool.
 ### Remaining protected Instagram order
 
 The next supervisor should treat this as the current sequence:
+
+Steps 1–4 below are completed by the 2 October authorized #598 receipt above.
+Do not re-provision or replay saves. Step 5 is also already satisfied. The next
+protected decision is step 6 Business Verification; not authorized by #598.
 
 1. Re-read #598 save pack and current live config/provider state.
 2. Obtain exact CA authorization for only:
@@ -483,12 +507,8 @@ On a fresh chat:
 3. Confirm #600 closed; treat #602/#604/#606 as historical/superseded.
 4. Re-read `docs/ops/INSTAGRAM-CONFIG-META-SAVE-PREFLIGHT-598.md` and `docs/ops/INSTAGRAM-STANDALONE-PROVIDER-ACTIVATION.md`.
 5. Read-only recheck the exact live Instagram config names/provider fields if consequential.
-6. The next separate protected #505 session is:
-   - `INSTAGRAM_APP_SECRET`;
-   - canonical `APP_PUBLIC_URL`;
-   - five Meta legal/callback saves;
-   while activation remains OFF.
-7. Do not cross that protected write gate without CA's explicit authorization.
+6. The #598 app-secret/public-origin/five-URL packet is COMPLETE with activation OFF. Next separate protected #505 session is Meta Business Verification with CA's exact company documents, then Access Verification and a genuine owner-authorized review fixture. Review/Live/activation/OAuth remain separately protected.
+7. Do not cross those further protected gates without CA's explicit authorization.
 8. After each consequential action, update #505, #381 and this handover.
 
 The supervisor should keep CA out of routine mechanics and bring her in only for the exact protected decisions, provider verification/2FA/document steps or human review gates that truly require her.
