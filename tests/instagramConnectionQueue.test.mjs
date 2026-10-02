@@ -28,12 +28,55 @@ test('public privacy disclosure covers Instagram reporting, encryption and owner
 })
 
 test('an unchecked saved Page route never claims provider absence', () => {
-  assert.match(instagramPageRouteEvidence(true, false), /has not been checked yet/)
-  assert.doesNotMatch(instagramPageRouteEvidence(true, false), /did not expose/)
-  assert.match(instagramPageRouteEvidence(true, true), /did not expose/)
-  assert.match(instagramPageRouteEvidence(false, false), /No saved Facebook Page route/)
-  assert.match(instagramPageRouteEvidence(false, true), /No saved Facebook Page route/)
-  assert.match(page, /instagramPageRouteEvidence\(hasFacebookPage, providerAssetsLoaded\)/)
+  const route = instagramPageRouteEvidence({ facebookPageId: 'red-oak-page', providerAssetsLoaded: false, providerPagesAvailable: false, providerPages: [] })
+  assert.match(route.text, /has not been checked yet/)
+  assert.equal(route.canStartStandalone, false)
+  assert.match(page, /pageRoute\.text/)
+})
+
+const routeInput = { facebookPageId: 'red-oak-page', providerAssetsLoaded: true, providerPagesAvailable: true, providerPages: [] }
+
+test('a completed response missing the exact saved Page is unresolved, never standalone-ready', () => {
+  const route = instagramPageRouteEvidence(routeInput)
+  assert.equal(route.state, 'saved_page_not_returned')
+  assert.equal(route.canStartStandalone, false)
+  assert.match(route.text, /not returned.*unresolved/)
+  assert.doesNotMatch(route.text, /did not expose/)
+})
+
+test('failed or missing Page diagnostic stays unavailable even with returned rows', () => {
+  for (const providerPagesAvailable of [false, undefined]) {
+    const route = instagramPageRouteEvidence({ ...routeInput, providerPagesAvailable, providerPages: [{ id: 'red-oak-page', instagramAccount: null }] })
+    assert.equal(route.state, 'unavailable')
+    assert.equal(route.canStartStandalone, false)
+  }
+})
+
+test('another client Page and account cannot satisfy the exact saved Page check', () => {
+  const route = instagramPageRouteEvidence({ ...routeInput, providerPages: [{ id: 'other-client-page', instagramAccount: { id: 'other-client-ig' } }] })
+  assert.equal(route.state, 'saved_page_not_returned')
+  assert.equal(route.canStartStandalone, false)
+})
+
+test('only an observed exact Page without an account offers a conditional standalone route', () => {
+  const route = instagramPageRouteEvidence({ ...routeInput, providerPages: [{ id: 'red-oak-page', instagramAccount: null }] })
+  assert.equal(route.state, 'no_account_observed')
+  assert.equal(route.canStartStandalone, true)
+  assert.match(route.text, /not global unlinking or professional-type proof/)
+})
+
+test('an observed linked account remains Page-first and blocks standalone', () => {
+  const route = instagramPageRouteEvidence({ ...routeInput, providerPages: [{ id: 'red-oak-page', instagramAccount: { id: 'exact-ig' } }] })
+  assert.equal(route.state, 'page_linked_available')
+  assert.equal(route.canStartStandalone, false)
+})
+
+test('no saved Page still requires successful discovery and exact owner evidence', () => {
+  assert.equal(instagramPageRouteEvidence({ ...routeInput, facebookPageId: null, providerPagesAvailable: false }).canStartStandalone, false)
+  const route = instagramPageRouteEvidence({ ...routeInput, facebookPageId: null })
+  assert.equal(route.state, 'no_saved_page')
+  assert.equal(route.canStartStandalone, true)
+  assert.match(route.text, /does not prove.*unlinked/)
 })
 
 test('fleet evidence contains the exact 25 Instagram-unmapped recurring-social clients', () => {
@@ -121,7 +164,9 @@ test('queue is confirmed-social-scope-only, excludes canonical mappings and pref
   assert.match(page, /pageLinkedAccount \? 'Page-linked available'/)
   assert.match(page, /do not start standalone OAuth/)
   assert.match(page, /Passwords are entered only on Instagram's own consent screen/)
-  assert.match(page, /providerAssetsLoaded && !pageLinkedAccount && !pending/)
+  assert.match(page, /pageRoute\.canStartStandalone && !pageLinkedAccount && !pending/)
+  assert.match(page, /if \(!row\?\.pageRoute\.canStartStandalone \|\| row\.connection\?\.status === 'pending_review'\) return/)
+  assert.match(integration, /providerPagesAvailable=\{pagesDiagnostic\?\.available === true\}/)
   assert.match(integration, /<InstagramConnectionQueue/)
 })
 
