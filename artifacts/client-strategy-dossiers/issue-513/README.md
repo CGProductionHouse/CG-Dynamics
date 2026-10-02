@@ -4,8 +4,8 @@ Generated from the immutable #501 recovery snapshot and the confirmed #504 packa
 
 - Active clients: 57
 - Dossiers complete: 57
-- Ready for gold-strategy drafting from reviewed evidence: 56
-- Strategy-gate blocked pending missing exact evidence: 1
+- Ready for gold-strategy drafting from repository evidence: 56
+- Strategy-gate blocked pending production-guide retrieval or missing exact evidence: 1
 
 | Client | Reports | Posts | Status | Blockers |
 |---|---:|---:|---|---|
