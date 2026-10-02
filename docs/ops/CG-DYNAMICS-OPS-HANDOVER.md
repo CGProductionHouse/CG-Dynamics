@@ -18,6 +18,10 @@ This file is intentionally current-state-first. Historical failed attempts are s
 
 Closed #422 M2A is absent from main. A new, unapplied transaction migration is proposed; no public adapter, recipient, sender or live data is activated. Existing marketing `client_contacts` and internal CG `business_development_leads` are not incoming client enquiries. Disposable six-session PostgreSQL tests cover tenant idempotency, rollback and browser privilege denial. Recovery closes missing-type, approved-route reassignment and default-service-grant gaps. See `WEBSITE-ENQUIRY-M2A-405-CURRENT.md`. Supervisor review and later CA production approval remain required; no overnight merge/deploy.
 
+### #619 deterministic Meta boundary fixture — 2 October
+
+Current-main baseline `2b72c0553f2c00f9d43e9a09ba76417b17981162`. Reproduced the obsolete wall-clock assertion in `metaFleetFreshnessBehavioral.test.mjs`; isolated correction uses test-scoped Node Date mocks only. At `2026-10-02T06:59:59Z` (Oct 1 Pacific), October bounds are null; at `07:00:00Z` (Oct 2 Pacific), they are Oct 1–Oct 1. Both now execute the real unchanged helper and eligibility predicate. Boundary fixtures pass under UTC and Johannesburg host timezones; 236 focused Meta/freshness tests pass, full suite 3340 passed / 16 skipped / 0 failed. Runtime defaults, America/Los_Angeles, provider/worker/config/data/Edge state remain unchanged. Exact verification/head recorded on #619 and its tiny PR; #613/#615/#616 branches are untouched and their legitimate preview-auth gates remain separate. No merge or production action in this lane.
+
 ## 1. Fresh supervisor recovery order
 
 A new supervisor must recover in this order:
