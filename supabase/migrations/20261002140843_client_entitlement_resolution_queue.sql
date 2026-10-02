@@ -46,4 +46,3 @@ begin
 end $$;
 revoke all on function public.get_admin_entitlement_resolution_queue(uuid,integer) from public,anon;
 grant execute on function public.get_admin_entitlement_resolution_queue(uuid,integer) to authenticated;
-
