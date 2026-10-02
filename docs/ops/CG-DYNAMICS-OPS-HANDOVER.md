@@ -4,7 +4,7 @@ Status: **CURRENT authority for a fresh supervisor chat**
 
 Updated: **2 October 2026, after #642 merge and Agent 02 Batch 2 draft #643**
 
-Current main: **`2c27e74fe0d798fdffff877d358a0fa13f355292`**
+Current accepted runtime-code SHA before this handover-only docs update: **`2c27e74fe0d798fdffff877d358a0fa13f355292`**. The handover edit itself advances `main`; **always refetch current main on takeover and before every merge**.
 
 This file is the supervisor takeover authority. Read this section FIRST before touching GitHub, Codex agents, Supabase, Meta, Microsoft, Website/#405, strategy or production. Historical receipts follow below and are retained so completed work is not repeated.
 
