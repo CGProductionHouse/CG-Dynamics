@@ -9,5 +9,6 @@ for ((i = 0; i < ${#args[@]}; i++)); do
     -f) cat "${args[$((i + 1))]}" >> "$STUB_VAULT" ;;
   esac
 done
-if [[ "$1 $2" == "secrets list" ]]; then printf 'NAME\n%s\n' "${STUB_SECRET_NAMES:-SUPABASE_URL}"; fi
+if [[ "$1 $2" == "secrets list" ]]; then printf 'NAME\n'; printf '%s\n' ${STUB_SECRET_NAMES:-SUPABASE_URL}; fi
+if [[ "$1 $2" == "secrets list" && -n "${STUB_SECRETS_LIST_FAIL:-}" ]]; then exit 1; fi
 exit 0

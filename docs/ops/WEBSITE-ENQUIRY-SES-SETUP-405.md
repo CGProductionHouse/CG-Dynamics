@@ -24,9 +24,11 @@ Supabase secrets / Vault through a 0600 temp file that is removed on exit.
   `ns.dns1.co.za`/`otherdns`). The agent has no Afrihost access; CA adds the records.
 - `*.cgdynamics.co.za` is a **wildcard A** (`102.222.124.101`). Harmless: the explicit
   CNAME/MX/TXT records below take precedence for their names.
-- Parent DMARC is `p=none; adkim=s; aspf=s` (strict). From `leads@notify.cgdynamics.co.za`
-  is DKIM-signed as `notify.cgdynamics.co.za` (strict DKIM alignment passes); the MAIL FROM
-  `mail.notify…` does not strictly align SPF, which is fine because DMARC passes on DKIM.
+- Parent DMARC is `p=none; adkim=s; aspf=s`: **strict alignment with a non-enforcing `p=none`
+  policy** (`adkim=s; aspf=s` set strict alignment; `p=none` is monitoring, not enforcement).
+  From `leads@notify.cgdynamics.co.za` is DKIM-signed as `notify.cgdynamics.co.za`, so strict DKIM
+  alignment passes; the MAIL FROM `mail.notify…` does not strictly align SPF, which is fine because
+  DMARC passes on DKIM alone.
 - DKIM CNAME targets are taken from SES (`DkimAttributes.SigningHostedZone`), never guessed.
 
 ## Exact order
@@ -35,7 +37,14 @@ Supabase secrets / Vault through a 0600 temp file that is removed on exit.
    if a plan is shown, **Cancel plan** → à-la-carte. No dedicated IPs, VDM or other add-ons.
 2. **Dry run (CA):** `bash scripts/ops/ses-af-south-1-setup.sh` — read-only checks and plan.
 3. **Apply (CA):** `REQUEST_PRODUCTION_ACCESS=yes bash scripts/ops/ses-af-south-1-setup.sh --apply`
-   (omit the variable to defer the production-access request). It converges:
+   (omit the variable to defer the production-access request). Before any change it fails closed
+   (exit 2) if: the region is not enabled; the plan is not `NONE`; dedicated IP pools or VDM exist;
+   Supabase secret names cannot be listed; `WEBSITE_ENQUIRY_EMAIL_ENABLED` exists; or
+   `cg-dynamics-ses-sender` already has access keys while `WEBSITE_ENQUIRY_SES_ACCESS_KEY_ID` and
+   `WEBSITE_ENQUIRY_SES_SECRET_ACCESS_KEY` are not both set in Supabase. AWS never returns an
+   existing secret key, so that last state is unrecoverable: deactivate and delete the unused
+   key(s) in IAM (after confirming nothing uses them) and re-run. If both secret names exist, a
+   re-run reuses the existing key. Then it converges:
    - configuration set `cg-dynamics-events` (no dedicated pool / VDM / reputation options);
    - identity `notify.cgdynamics.co.za` (Easy DKIM, default configuration set) + MAIL FROM
      `mail.notify.cgdynamics.co.za` (`USE_DEFAULT_VALUE` on MX failure);
@@ -75,5 +84,6 @@ Inbox never depend on email.
 `node --test tests/sesSetupScript.test.mjs` runs the script against stub `aws`/`supabase` CLIs:
 dry run makes zero mutating calls; each cost/region/ENABLED guard stops before any change;
 apply converges in the safe order with least-privilege policies; secrets reach Supabase/Vault
-but never stdout, the summary or a command line; existing keys are never duplicated;
-production access only on explicit opt-in.
+but never stdout, the summary or a command line; existing keys are never duplicated and are
+reused only when both SES credential secrets exist, otherwise the run stops before any change
+(also when the secret list is unreadable); production access only on explicit opt-in.

@@ -111,14 +111,45 @@ test('secrets reach Supabase and Vault only — never stdout — and sending sta
 })
 
 test('existing access key is never duplicated; an existing ENABLED flag stops the run', () => {
-  const reuse = run(['--apply'], { STUB_KEYS: '1' })
+  const stored = 'SUPABASE_URL WEBSITE_ENQUIRY_SES_ACCESS_KEY_ID WEBSITE_ENQUIRY_SES_SECRET_ACCESS_KEY'
+  const reuse = run(['--apply'], { STUB_KEYS: '1', STUB_SECRET_NAMES: stored })
   assert.equal(reuse.status, 0, reuse.output)
+  assert.match(reuse.output, /both SES credential secrets exist; reusing them/)
   assert.ok(!reuse.calls.some((call) => call.includes('create-access-key')))
   assert.doesNotMatch(reuse.secrets, /SES_SECRET_ACCESS_KEY/)
   const enabled = run(['--apply'], { STUB_SECRET_NAMES: 'WEBSITE_ENQUIRY_EMAIL_ENABLED' })
   assert.equal(enabled.status, 2)
   assert.match(enabled.output, /must stay unset/)
   assert.deepEqual(enabled.calls.filter((call) => MUTATING.test(call)), [], 'changes made before the ENABLED guard')
+})
+
+test('pre-existing IAM keys without both SES credential secrets fail closed before any change', () => {
+  for (const [keys, names] of [
+    ['1', 'SUPABASE_URL'],
+    ['2', 'SUPABASE_URL'],
+    ['1', 'WEBSITE_ENQUIRY_SES_ACCESS_KEY_ID'],
+    ['1', 'WEBSITE_ENQUIRY_SES_SECRET_ACCESS_KEY'],
+    // A longer name must not satisfy the whole-name match.
+    ['1', 'WEBSITE_ENQUIRY_SES_ACCESS_KEY_ID_OLD WEBSITE_ENQUIRY_SES_SECRET_ACCESS_KEY'],
+  ]) {
+    for (const args of [['--apply'], []]) {
+      const label = JSON.stringify({ keys, names, args })
+      const r = run(args, { STUB_KEYS: keys, STUB_SECRET_NAMES: names })
+      assert.equal(r.status, 2, label)
+      assert.match(r.output, /cannot be completed.*deactivate then delete the unused key\(s\).*Nothing was changed/s, label)
+      assert.deepEqual(r.calls.filter((call) => MUTATING.test(call)), [], label)
+      assert.ok(!r.calls.some((call) => /create-access-key|create-user|put-user-policy/.test(call)), label)
+      assert.equal(r.secrets, '', label)
+      assert.equal(r.vault, '', label)
+    }
+  }
+})
+
+test('an unreadable Supabase secret list fails closed before any change', () => {
+  const r = run(['--apply'], { STUB_SECRETS_LIST_FAIL: '1' })
+  assert.equal(r.status, 2, r.output)
+  assert.match(r.output, /cannot list Supabase secret names/)
+  assert.deepEqual(r.calls.filter((call) => MUTATING.test(call)), [])
 })
 
 test('production access is requested only with explicit opt-in, as TRANSACTIONAL', () => {

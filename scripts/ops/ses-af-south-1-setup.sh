@@ -70,8 +70,33 @@ VDM="$("${AWS[@]}" sesv2 get-account --query 'VdmAttributes.VdmEnabled' --output
 say "  dedicated IP pools: 0; VDM: ${VDM}"
 SENDING="$("${AWS[@]}" sesv2 get-account --query 'ProductionAccessEnabled' --output text)"
 say "  production access currently: ${SENDING}"
-if supabase secrets list --project-ref "$PROJECT_REF" 2>/dev/null | grep -q 'WEBSITE_ENQUIRY_EMAIL_ENABLED'; then
+SECRET_NAMES="$(supabase secrets list --project-ref "$PROJECT_REF" 2>/dev/null)" || die "cannot list Supabase secret names for ${PROJECT_REF}"
+has_secret() { grep -Eq "(^|[^A-Z0-9_])${1}([^A-Z0-9_]|\$)" <<<"$SECRET_NAMES"; }
+if has_secret WEBSITE_ENQUIRY_EMAIL_ENABLED; then
   die "WEBSITE_ENQUIRY_EMAIL_ENABLED exists in Supabase secrets; it must stay unset until the CA activation gate."
+fi
+
+step "2b. Credential preflight: existing IAM keys must already be stored in Supabase"
+# AWS never returns an existing secret access key, so pre-existing keys without both SES credential
+# secrets is an unrecoverable, incomplete state. Stop here, before any change, instead of converging.
+if aws iam get-user --user-name "$IAM_USER" >/dev/null 2>&1; then
+  KEYS="$(aws iam list-access-keys --user-name "$IAM_USER" --query 'length(AccessKeyMetadata)' --output text)"     || die "cannot list access keys for ${IAM_USER}"
+else
+  KEYS=0
+fi
+[[ "$KEYS" =~ ^[0-9]+$ ]] || die "unexpected access-key count for ${IAM_USER}: '${KEYS}'"
+if (( KEYS > 0 )); then
+  if has_secret WEBSITE_ENQUIRY_SES_ACCESS_KEY_ID && has_secret WEBSITE_ENQUIRY_SES_SECRET_ACCESS_KEY; then
+    say "  ${IAM_USER} has ${KEYS} access key(s) and both SES credential secrets exist; reusing them"
+  else
+    die "${IAM_USER} already has ${KEYS} access key(s) but WEBSITE_ENQUIRY_SES_ACCESS_KEY_ID and
+      WEBSITE_ENQUIRY_SES_SECRET_ACCESS_KEY are not both set in Supabase. AWS cannot return an existing
+      secret key, so this state cannot be completed. Recovery: in IAM > Users > ${IAM_USER} > Security
+      credentials, deactivate then delete the unused key(s) (confirm nothing else uses them), then re-run;
+      the script creates exactly one new key and stores it straight into Supabase. Nothing was changed."
+  fi
+else
+  say "  ${IAM_USER}: no existing access keys"
 fi
 
 step "3. Configuration set ${CONFIG_SET} (no dedicated pool, no VDM options)"
@@ -126,7 +151,6 @@ if ! aws iam get-user --user-name "$IAM_USER" >/dev/null 2>&1; then
   run aws iam create-user --user-name "$IAM_USER" --tags Key=purpose,Value=cg-dynamics-website-enquiry-ses
 fi
 run aws iam put-user-policy --user-name "$IAM_USER" --policy-name "$IAM_POLICY" --policy-document "$SEND_POLICY"
-KEYS="$(aws iam list-access-keys --user-name "$IAM_USER" --query 'length(AccessKeyMetadata)' --output text 2>/dev/null || echo 0)"
 
 step "9. Supabase secrets (values never printed). WEBSITE_ENQUIRY_EMAIL_ENABLED is NOT set."
 if (( APPLY )); then
@@ -138,7 +162,7 @@ if (( APPLY )); then
       | awk '{ printf "WEBSITE_ENQUIRY_SES_ACCESS_KEY_ID=%s\nWEBSITE_ENQUIRY_SES_SECRET_ACCESS_KEY=%s\n", $1, $2 }' >> "$SECRET_TMP"
     say "  created one access key for ${IAM_USER}"
   else
-    say "  ${IAM_USER} already has ${KEYS} access key(s); not creating another (rotate deliberately if needed)"
+    say "  ${IAM_USER} already has ${KEYS} access key(s), already stored in Supabase (preflight); not creating another"
   fi
   WORKER_SECRET="$(openssl rand -hex 32)"
   {

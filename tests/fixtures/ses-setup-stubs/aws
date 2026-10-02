@@ -16,7 +16,7 @@ case "$args" in
   *" get-email-identity "*) exit 254 ;;
   *" get-configuration-set-event-destinations "*) echo 0 ;;
   *" list-subscriptions-by-topic "*) echo None ;;
-  *" iam get-user "*) exit 254 ;;
+  *" iam get-user "*) [[ "${STUB_KEYS:-0}" != "0" ]] || exit 254 ;;
   *" iam list-access-keys "*) echo "${STUB_KEYS:-0}" ;;
   *" iam create-access-key "*) printf 'AKIASTUBSTUBSTUBSTUB\tSTUBSECRETSTUBSECRETSTUBSECRETSTUBSECRET\n' ;;
   *) : ;;
