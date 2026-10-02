@@ -1,0 +1,132 @@
+{
+  "issue": 513,
+  "wave": "remediation-a",
+  "review_state": "agent_quality_reviewed_proposals_not_staff_approval",
+  "clients": [
+    {
+      "client_id": "32bd9db3-5339-4404-825b-5a615cadec6a",
+      "client_name": "Bat Hill Royale",
+      "guide_quotes": [
+        "Bat Hill Royale is an indoor golf centre and sports/entertainment venue in Bloemfontein.",
+        "calm confidence around TrackMan/performance/fitting;",
+        "Verify exact brands, stock, prices and inclusions."
+      ],
+      "specificity_anchors": [
+        "TrackMan",
+        "club fitting",
+        "indoor golf"
+      ],
+      "audienceAndIntent": "Separate two reasons to consider Bat Hill Royale: a golfer wanting to understand a practice or club-fitting session, and a group deciding whether indoor golf suits a shared visit in Bloemfontein. These are content intents, not assumed customer demographics or booking results.",
+      "formatsAndRationale": "Recurring social content is included, but professional-video, photo, poster, reel and animation quantities are not fixed. Choose supplied TrackMan, fitting or social-play visuals with the client before allocating a format; no extra shoot, fixed monthly count or paid campaign is promised.",
+      "mustAvoid": "Do not carry September prices, giveaways or school-holiday offers into October. Confirm current booking route, equipment availability, coaching conditions and group-use details. No guaranteed swing improvement, best-in-country claim, invented facility count, sponsor, date, prize or recurring league commitment.",
+      "channelIntegration": "Keep performance-led and social-play messages distinct on the Facebook and Instagram channels already managed for Bat Hill Royale. Match captions to the actual visual, and confirm the current booking/footer packet before any direct booking CTA. No new channel entitlement is implied.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Read September's Bat Hill Royale work as two different choices: understanding TrackMan and club fitting, versus choosing indoor golf for a social visit. Review the actual coaching, fitting and corporate-gathering pieces without treating a busy feed as proof of bookings.",
+          "coreMessage": "Indoor golf at Bat Hill Royale has both a practice purpose and a shared-play purpose. September's TrackMan, club-fitting and real group moments should explain the difference rather than use one generic venue caption for everything.",
+          "pillarsAndHooks": "TrackMan/club fitting: start with the actual golfer and the decision being explored, not a claim about better scores. Social play: start with a genuine reaction or pressure shot from supplied footage. Group visits: add a practical question about the experience shown, not an invented event package.",
+          "testAndChange": "Separate September responses to a fitting-led opening from responses to a social-play opening, only where the actual pieces and responses are available. Mark expired promotion-led pieces separately so their urgency is not mistaken for lasting interest in the venue.",
+          "successSignals": "Look for available questions about club fitting, practice sessions or group visits, and compare available responses on the corresponding pieces. July history is unavailable; September reporting is month-to-date. Do not claim completed-month growth, attendance or booking conversion.",
+          "nextMonthGamePlan": "For October, select an approved fitting/practice angle and a separate shared-play angle from visuals actually available. Resolve current booking and service details first; leave old prices and competitions behind rather than reusing September's promotional terms.",
+          "clientActionsRequired": [
+            "Identify which September pieces were intended for practice/fitting and which were intended for social visits.",
+            "Confirm any actual enquiry context and distinguish it from likes or views.",
+            "Agree an October format allocation without inventing fixed quantities."
+          ],
+          "items": {}
+        },
+        "2026-10-01": {
+          "objective": "Help an October viewer decide what to ask Bat Hill Royale about: a TrackMan-supported club-fitting or practice visit, or indoor golf with their group. Build the next creative choices around real session moments and clearly different booking questions, not last month's expired offers.",
+          "coreMessage": "Show the question behind the swing: what a golfer wants to explore during club fitting, and what friends enjoy during shared indoor golf. Bat Hill Royale's real people and TrackMan setting give each story its own reason to contact the venue.",
+          "pillarsAndHooks": "Practice/fitting: open with a golfer's approved question and show the real setup used to explore it. Shared play: use a human reaction or friendly rivalry moment rather than a montage of empty bays. Group planning: explain what a prospective organiser should confirm before a visit, without asserting capacity or catering terms.",
+          "testAndChange": "For an approved fitting piece, compare a question-first opening with a real session-moment opening when suitable footage exists; keep the service and CTA consistent. Review topic-specific questions and available watch responses before choosing the next approach.",
+          "successSignals": "Track whether available responses distinguish a fitting/practice question from a group-visit question, alongside available viewing or interaction measures. Missing enquiry or watch data stays unavailable; the test has no promised numerical uplift or revenue result.",
+          "nextMonthGamePlan": "Use the responses to decide whether the next cycle needs clearer fitting explanations or more human shared-play context. Refresh service and booking details, then choose visuals and formats jointly within the flexible recurring scope before promising any shoot or date.",
+          "clientActionsRequired": [
+            "Approve the exact fitting/practice service and real visuals available for the next pieces.",
+            "Supply current booking/footer details and clarify group-use conditions needed for any CTA.",
+            "Agree the flexible format mix and flag footage or staff permissions still needed."
+          ],
+          "items": {}
+        }
+      }
+    },
+    {
+      "client_id": "fd16ebae-a50b-4920-afe0-94c2631f8f06",
+      "client_name": "All Around PVC",
+      "guide_quotes": [
+        "Current product hierarchy from the strongest current evidence:",
+        "PVC ceilings and polystyrene cornices.",
+        "SPC flooring.",
+        "Luxury PVC wall panels."
+      ],
+      "specificity_anchors": [
+        "PVC ceilings",
+        "SPC flooring",
+        "wall panels"
+      ],
+      "audienceAndIntent": "Help a person comparing finishes for a room distinguish the ceiling, wall and floor question before contacting All Around PVC. Focus on the material and the decision shown; do not assume a budget, trade qualification, household demographic or installation arrangement.",
+      "formatsAndRationale": "One professional video, three photo posts and three design posters are confirmed monthly. Use the video for a concise product-category walkthrough, photos for real finish details, and posters for one material question each. Reels and animation remain unconfirmed; no paid campaign or additional shoot capacity is included.",
+      "mustAvoid": "No current stock, price, warranty, waterproofing/performance guarantee, delivery area or in-house installation promise without current product/client confirmation. Do not publish an unconfirmed showroom address, borrow fencing/gate services, or present generated installation imagery as a completed client project.",
+      "channelIntegration": "Keep the ceiling/wall/floor wording consistent across the existing Facebook and Instagram work. A caption adds a practical question rather than repeating the poster; confirm current public contact details before adding an enquiry footer. No website build, new channel or provider setup is part of this plan.",
+      "months": {
+        "2026-09-01": {
+          "objective": "Review September's All Around PVC content by the surface decision it helps with: PVC ceilings, wall panels or SPC flooring. Check whether captions add useful buying questions beyond the artwork and keep historical technical language separate from currently confirmed specifications.",
+          "coreMessage": "Start with the room surface, then the product question. September's PVC ceiling, wall-panel and SPC flooring pieces give All Around PVC a practical way to explain its categories without turning a general finish description into a stock or installation promise.",
+          "pillarsAndHooks": "PVC ceilings: identify the ceiling finish shown and ask what detail the customer needs to compare. Wall panels: show the actual texture or panel detail rather than a vague room transformation. SPC flooring: frame a range/specification question instead of promising performance for every product.",
+          "testAndChange": "Review caption-plus-artwork pairs for repeated wording. Where a caption adds nothing, replace repetition with a specific surface question and compare available product-related enquiries or saves; do not declare a winning category from posting volume.",
+          "successSignals": "Use available questions that identify ceiling, wall-panel or SPC flooring needs, and available saves/interactions on the actual pieces. July history is unavailable and August history is limited; September is month-to-date, not demonstrated full-month performance.",
+          "nextMonthGamePlan": "For October, shift from broad finish descriptions to a three-surface comparison supported by real product details. Ask for current range/specification confirmation and approved imagery before drafting technical benefits or a direct enquiry CTA.",
+          "clientActionsRequired": [
+            "Identify which September material details remain accurate for the supplied products.",
+            "Provide any available ceiling/wall/floor enquiry context without treating unavailable records as no demand.",
+            "Confirm approved real product imagery for October and any public contact/footer changes."
+          ],
+          "items": {
+            "professional_video": [
+              "Review one existing category-overview angle for a clear ceiling, wall-panel and floor distinction."
+            ],
+            "photo_content": [
+              "Review an actual PVC ceiling finish detail for a useful caption question.",
+              "Review a real wall-panel detail without a generic transformation claim.",
+              "Review an SPC flooring image against the range information supplied."
+            ],
+            "design_poster": [
+              "Review a PVC ceiling message for a concrete material question.",
+              "Review a wall-panel message for information beyond the image.",
+              "Review an SPC flooring message for unsupported technical claims."
+            ]
+          }
+        },
+        "2026-10-01": {
+          "objective": "Make October's All Around PVC material choices easier to discuss: one video distinguishes PVC ceilings, wall panels and SPC flooring; three photo and three poster concepts answer one surface question at a time, using confirmed product details rather than decorative slogans.",
+          "coreMessage": "Choose the surface first, then ask the right material question. All Around PVC can help a viewer name whether they need PVC ceiling, wall-panel or SPC flooring information before a practical enquiry, without promising a specification or availability not confirmed for that range.",
+          "pillarsAndHooks": "Ceiling: begin with the actual profile or finish and the customer's comparison question. Wall: lead with a real panel detail and what needs confirming for the room. Floor: pair a real SPC flooring visual with a request for the relevant range information, not a blanket durability or waterproof claim.",
+          "testAndChange": "Within an approved material category, compare a surface-question heading with a product-detail heading while keeping the pictured product and contact route consistent. Use available category-specific questions and saves to decide which explanation needs refinement.",
+          "successSignals": "Look for enquiries that name a surface or request a relevant product detail, and available saves/interactions on that category. Missing enquiry attribution stays unavailable; no conversion, sales, stock turnover or percentage-return target is invented.",
+          "nextMonthGamePlan": "Select the next cycle's explanation from the material questions actually received, or keep the result unresolved when response data is absent. Refresh range/specification facts before reuse and choose the next creative mix within the same one-video/three-photo/three-poster capacity.",
+          "clientActionsRequired": [
+            "Confirm current product ranges and any specification needed for each proposed explanation.",
+            "Approve real imagery and distinguish supplied material from completed-installation proof.",
+            "Confirm the public enquiry route and any technical wording before copy is public."
+          ],
+          "items": {
+            "professional_video": [
+              "One concise walkthrough separating the ceiling, wall and floor questions using supplied real product visuals."
+            ],
+            "photo_content": [
+              "A PVC ceiling detail with one practical comparison question.",
+              "A wall-panel texture/detail image with confirmed range wording.",
+              "An SPC flooring detail with a range-information prompt."
+            ],
+            "design_poster": [
+              "A ceiling-first question tied to the actual PVC product shown.",
+              "A wall-finish question using an approved panel image.",
+              "A floor-selection question that avoids unverified technical guarantees."
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

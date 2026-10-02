@@ -5,6 +5,7 @@ import { buildQualityPlan, assertNoDrift, assertIsolated, piekCorrection } from 
 import { sha } from '../scripts/audit-monthly-strategy-approval-manifest.mjs'
 import { strategyArtifactSandbox } from './helpers/strategyArtifactSandbox.mjs'
 import { buildReviewedBatch } from '../scripts/build-strategy-quality-batch.mjs'
+import { buildRemediationPacket } from '../scripts/build-strategy-quality-remediation.mjs'
 
 const read = strategyArtifactSandbox(['build-client-strategy-mutation-dry-run', 'build-issue-567-strategy-quality-readiness'])
 const fleet = JSON.parse(read('sep-oct-strategy-mutation-dry-run.json'))
@@ -33,6 +34,28 @@ function fixture() {
   }
   return {snapshot,fleet:structuredClone(fleet),neshora:structuredClone(neshora),manifest:baseline,quality:structuredClone(quality)}
 }
+
+test('targeted Wave A executes actual cumulative compiler, derives 72/22 and preserves all 68 predecessors',()=>{
+  const input=fixture(),packets=[...[1,2,3,4].map(buildReviewedBatch),buildRemediationPacket()]
+  for(const packet of packets){
+    for(const row of packet.rows){const live=input.snapshot.strategies.find(r=>r.id===row.row_id)
+      row.guard={fingerprint:sha(live),revision_hash:sha(input.snapshot.revisions.find(r=>r.strategy_id===live.id)),strategy_hash:sha(live.strategy_data),seed_hash:sha(live.seed_context),package_hash:sha(live.package_settings),internal_notes:live.internal_notes}
+      const{reviewed_hash,...core}=row;row.reviewed_hash=sha(core)
+    }
+    const{packet_hash,...core}=packet;packet.packet_hash=sha(core)
+  }
+  const previous=buildQualityPlan({...input,reviewedOverrides:packets.slice(0,4)})
+  const result=buildQualityPlan({...input,reviewedOverrides:packets,preservedPlan:previous})
+  assert.equal(result.counts.amendment_needed,72);assert.equal(result.counts.blocked,22)
+  for(const row of previous.rows.filter(r=>r.disposition==='amendment_needed'))assert.equal(JSON.stringify(result.rows.find(r=>r.row_id===row.row_id)),JSON.stringify(row))
+  assert.equal(JSON.stringify(result.excluded),JSON.stringify(previous.excluded));assertNoDrift(result,input.snapshot)
+  for(const edit of [r=>r.version=3,r=>r.package_settings.professional_videos_per_month=99,r=>r.internal_notes='later staff note',r=>r.seed_context.changed=true]){
+    const changed=structuredClone(input);edit(changed.snapshot.strategies.find(r=>r.id===packets[4].rows[0].row_id))
+    assert.throws(()=>buildQualityPlan({...changed,reviewedOverrides:packets,preservedPlan:previous}),/Drift refusal/)
+  }
+  const revision=structuredClone(input);revision.snapshot.revisions.find(r=>r.strategy_id===packets[4].rows[0].row_id).record_version=3
+  assert.throws(()=>buildQualityPlan({...revision,reviewedOverrides:packets,preservedPlan:previous}),/Revision drift/)
+})
 
 test('Batch 4 actual cumulative compiler derives 68/26, preserves 62 prior rows, refuses package/revision/exclusion drift',()=>{
   const input=fixture(),packets=[1,2,3,4].map(buildReviewedBatch)
