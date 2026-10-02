@@ -6,6 +6,14 @@ Updated: **1 October 2026** after reconciliation of the #600 Instagram encryptio
 
 This file is intentionally current-state-first. Historical failed attempts are summarized only where they prevent repeated work.
 
+### #611 overnight safe lane — 1 October
+
+- Baseline main: `04fe827ad2f724fcfe5af211541f776a67dfa85c`. No merge, deploy, config/provider/OAuth or production data/schema writes are authorized in this lane.
+- Read-only production recount: 57 active / 57 confirmed packages; Sep/Oct strategies remain 94 amended v2 drafts + 20 unamended v1 drafts; standalone connections/tokens/OAuth states/callback receipts remain 0/0/0/0. No strategy approval/publication occurred.
+- Closed stale PRs #569 and #577–#581. #569's TikTok behavior is superseded by merged #570/#567; the other five repeat stale artifact generation that would downgrade Neshora's reviewed evidence hash/source references. None contained missing launch code.
+- Reproduced the source of the repeated artifact noise: strategy generator tests wrote into the frozen #513 directory. Generator tests now use isolated temporary copies; an executable recursive byte-hash regression proves all four generators leave reviewed evidence unchanged. Generator CLI defaults remain unchanged; no strategy content is changed.
+- Authenticated production Chrome access is available as CG Production House Admin in a separate Dynamics tab. CA's Meta/Instagram tabs are untouched. Desktop Hub/Content render without observed console errors; further responsive acceptance and #437/#405 work continue under #611.
+
 ## 1. Fresh supervisor recovery order
 
 A new supervisor must recover in this order:

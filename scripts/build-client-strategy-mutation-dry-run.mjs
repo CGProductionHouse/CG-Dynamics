@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 
 const ROOT = resolve(import.meta.dirname, '..')
-const DIR = join(ROOT, 'artifacts/client-strategy-dossiers/issue-513')
+const DIR = process.env.CG_STRATEGY_ARTIFACT_DIR ? resolve(process.env.CG_STRATEGY_ARTIFACT_DIR) : join(ROOT, 'artifacts/client-strategy-dossiers/issue-513')
 const SOURCE = join(DIR, 'strategy-source-snapshot.json')
 const INDEX = join(DIR, 'index.json')
 const OUTPUT = join(DIR, 'sep-oct-strategy-mutation-dry-run.json')

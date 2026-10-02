@@ -1,12 +1,9 @@
 import assert from 'node:assert/strict'
-import { execFileSync } from 'node:child_process'
-import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
+import { strategyArtifactSandbox } from './helpers/strategyArtifactSandbox.mjs'
 
-execFileSync(process.execPath, ['scripts/build-client-strategy-dossiers.mjs'], { stdio: 'pipe' })
-execFileSync(process.execPath, ['scripts/build-neshora-strategy-readiness-dry-run.mjs'], { stdio: 'pipe' })
-
-const plan = JSON.parse(readFileSync('artifacts/client-strategy-dossiers/issue-513/neshora-strategy-readiness-dry-run.json', 'utf8'))
+const readArtifact = strategyArtifactSandbox(['build-client-strategy-dossiers', 'build-neshora-strategy-readiness-dry-run'])
+const plan = JSON.parse(readArtifact('neshora-strategy-readiness-dry-run.json'))
 
 test('Neshora dry-run is exact-client, zero-write, and does not alter the reviewed fleet plan', () => {
   assert.equal(plan.issue, 513)

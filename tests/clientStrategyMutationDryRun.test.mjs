@@ -1,12 +1,10 @@
 import assert from 'node:assert/strict'
-import { execFileSync } from 'node:child_process'
-import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
+import { strategyArtifactSandbox } from './helpers/strategyArtifactSandbox.mjs'
 
-execFileSync(process.execPath, ['scripts/build-client-strategy-dossiers.mjs'], { stdio: 'pipe' })
-execFileSync(process.execPath, ['scripts/build-client-strategy-mutation-dry-run.mjs'], { stdio: 'pipe' })
-const plan = JSON.parse(readFileSync('artifacts/client-strategy-dossiers/issue-513/sep-oct-strategy-mutation-dry-run.json', 'utf8'))
-const source = JSON.parse(readFileSync('artifacts/client-strategy-dossiers/issue-513/strategy-source-snapshot.json', 'utf8'))
+const readArtifact = strategyArtifactSandbox(['build-client-strategy-dossiers', 'build-client-strategy-mutation-dry-run'])
+const plan = JSON.parse(readArtifact('sep-oct-strategy-mutation-dry-run.json'))
+const source = JSON.parse(readArtifact('strategy-source-snapshot.json'))
 const sourceByStrategy = new Map(source.rows.map(row => [row.strategy_id, row]))
 const goldFields = [
   'objective', 'audienceAndIntent', 'coreMessage', 'formatsAndRationale',

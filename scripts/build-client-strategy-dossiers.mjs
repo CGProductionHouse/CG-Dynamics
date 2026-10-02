@@ -4,7 +4,7 @@ import { basename, join, resolve } from 'node:path'
 
 const ROOT = resolve(import.meta.dirname, '..')
 const INTELLIGENCE_DIR = join(ROOT, 'docs/ai-workforce/client-intelligence')
-const OUTPUT_DIR = join(ROOT, 'artifacts/client-strategy-dossiers/issue-513')
+const OUTPUT_DIR = process.env.CG_STRATEGY_ARTIFACT_DIR ? resolve(process.env.CG_STRATEGY_ARTIFACT_DIR) : join(ROOT, 'artifacts/client-strategy-dossiers/issue-513')
 const RUNTIME_GUIDE_DIR = join(OUTPUT_DIR, 'runtime-guides')
 const REPORT_SNAPSHOT = join(ROOT, 'artifacts/report-truth/issue-501-recovery-pass-1-snapshot.json')
 const PACKAGE_AUTHORITY = 'https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876'
