@@ -2,9 +2,9 @@
 
 Status: **CURRENT authority for a fresh supervisor chat**
 
-Updated: **2 October 2026, after #642 merge and Agent 02 Batch 2 draft #643**
+Updated: **2 October 2026, after Agent 02 Batch 2 #643 merge and Batch 3 assignment**
 
-Current accepted runtime-code SHA before this handover-only docs update: **`2c27e74fe0d798fdffff877d358a0fa13f355292`**. The handover edit itself advances `main`; **always refetch current main on takeover and before every merge**.
+Current accepted main before this handover-only docs update: **`d8d9691cd068f7faaffc579237c8e665fe7d28ca`**. Latest freshness runtime-code merge remains **`2c27e74fe0d798fdffff877d358a0fa13f355292`**; #643 changes offline strategy review tooling/artifacts only. The handover edit itself advances `main`; **always refetch current main on takeover and before every merge**.
 
 This file is the supervisor takeover authority. Read this section FIRST before touching GitHub, Codex agents, Supabase, Meta, Microsoft, Website/#405, strategy or production. Historical receipts follow below and are retained so completed work is not repeated.
 
@@ -205,69 +205,66 @@ Owning issue: **#513**, consolidated in **#381**.
 Accepted:
 - #638 zero-write compiler/quality plan → `cbf21ca5cbcb699bd09fb2d8341f7127b4415caa`
 - #640 Batch 1 → `2ce29344a78bcef5d4a96fd27a87a7a2699fb2ee`
+- #643 Batch 2 → `d8d9691cd068f7faaffc579237c8e665fe7d28ca`
 
-Batch 1 accepted 10 clients / 20 Sep+Oct rows:
-- Bloem Marble & Granite
-- Cape Lumber
-- SecuriForce
-- Madison Wear
-- Case Bloemfontein
-- Germoparts
-- Wiseman Group
-- Emmanuel Funerals
-- Dulux Paint & Paper Bloemfontein
-- TBS Brokers
+Batch 2 supervisor receipt:
+- #513 comment **`5957232525`**
+- #381 comment **`5957233655`**
+- exact-head Vercel was SUCCESS before merge;
+- human copy/evidence pass accepted 9 clients / 18 Sep+Oct rows;
+- **Zooz Lifestyle WFF remains blocked for both months** because the exact runtime guide/current programme-product-event evidence is absent; no substitute was used.
 
-Accepted state after Batch 1:
+Current ZERO-WRITE fleet state:
 - 94 reviewed v2 rows
-- 24 amendment-needed
-- 70 blocked
+- **42 amendment-needed**
+- **52 blocked**
 - 20 non-applicable untouched
 - 0 approved
 - 0 published
-- production unchanged
+- 0 production strategy writes
+- plan hash `336979000c9074496bfbcead8f55653349a2fd84e902b23aa3dfebcadd7bb518`
+- Batch 2 packet hash `e30210b55ba1d328bfd69b55daa10944cb1faebd03088f2c0b57ea8b5b9f648a`
 
-CURRENT Agent 02 work:
-- draft **PR #643**
-- head **`05f38798129c02598938bc23e484364ab3d1acbc`**
-- based on current main `2c27e74fe0d798fdffff877d358a0fa13f355292`
-- latest checkpoint: #513 comment **`5957053504`**
-
-Batch 2 prescribed exact set:
+Accepted Batch 2 clients:
 1. The Staffordshire
 2. Delta Gas
 3. CG Production House
 4. RC-Polypipe
-5. Zooz Lifestyle WFF
-6. Peyper Bonds
-7. Loraclox
-8. Tobich Optics
-9. AV Event Life
-10. Braize
+5. Peyper Bonds
+6. Loraclox
+7. Tobich Optics
+8. AV Event Life
+9. Braize
 
-Current Batch 2 result:
-- 9 clients / 18 month-specific reviewed overrides passed;
-- **Zooz Lifestyle WFF STOPPED truthfully**, no substitute;
-- reason: flexible recurring-social scope is known but fixed quantities/current exact guide/programme/product/event constraints are not sufficiently evidenced for useful client-specific quality review;
-- derived fleet plan: **42 amendment-needed / 52 blocked / 20 excluded / 0 approved / 0 published / 0 writes**;
-- plan hash `336979000c9074496bfbcead8f55653349a2fd84e902b23aa3dfebcadd7bb518`;
-- packet hash `e30210b55ba1d328bfd69b55daa10944cb1faebd03088f2c0b57ea8b5b9f648a`;
-- 80/80 focused tests, build/lint/diff green;
-- current production 114/114 row/revision receipts still matched at final read-only check;
-- Vercel was still building at the checkpoint and must be rechecked before supervisor acceptance.
+**CURRENT Agent 02 mission = Batch 3** using the same deterministic evidence ranking, exact next set:
+1. C&L Innovations
+2. Central Canvas
+3. Bouwer & Coetzee Attorneys
+4. We Ar Fuels
+5. Novus Steel
+6. Watch Addict
+7. PSG Bloemfontein
+8. Daisy & Co
+9. Supa Quick BFN
+10. Supa Quick Centurion
 
-**NEXT SUPERVISOR ACTION when Agent 02 returns:** independently review PR #643 content/evidence and exact-head Vercel. If safe, merge automatically. Then assign Batch 3 immediately; do not stop after saying “merged”.
+For any Batch 3 client that fails exact evidence sufficiency, stop that client truthfully and document the gap; **do not silently substitute another client**.
 
 Hard strategy rules remain:
 - zero-write review until direct protected strategy amendment instruction;
-- no approval/publication;
+- no amendment RPC / approval / publication;
 - no generic renameable copy;
-- Sep and Oct materially distinct;
+- September and October materially distinct;
 - package quantities never inferred from historical posting;
 - no repo/evidence/UUID/internal workflow jargon client-side;
-- Piek/Neshora + Batch 1 accepted rows byte-stable unless real drift;
-- all 20 non-applicable rows untouched;
-- Zooz remains blocked until approved exact-client evidence exists.
+- no invented offers/prices/stock/ROI/legal/medical/financial/event claims;
+- preserve Piek/Neshora + Batch 1 + Batch 2 accepted rows byte-stable unless a real drift guard stops them;
+- preserve staff notes, provenance, live row/revision/package guards and all 20 non-applicable fingerprints;
+- Zooz remains blocked until approved exact-client evidence exists;
+- no #505, #389, Website/#405 or external communication;
+- master handover remains supervisor-owned.
+
+**NEXT SUPERVISOR ACTION when Agent 02 returns:** independently inspect the Batch 3 PR, copy/evidence, tests and exact-head Vercel. Merge automatically if safe, update #513/#381, then give the next Agent 02 mission in the same turn.
 
 ---
 
