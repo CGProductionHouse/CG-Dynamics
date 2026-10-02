@@ -66,8 +66,9 @@ exact fleet candidates above. Additional settings on several unrelated accounts
 require login; no login, assignment, Connect assets or account conversion attempted.
 Public bios/categories, managed-asset presence, null mappings and an empty
 Connected assets tab cannot prove API Business/Creator type or global Page unlinking.
-We Ar Fuels Connected assets did not finish loading before browser-control timeout;
-no result is claimed for that tab.
+After browser-control recovery in the CG Chrome profile, We Ar Fuels Connected
+assets completed with `You don't have any connected assets`. This is only the
+visible portfolio observation, not global Page unlinking or professional-type proof.
 
 The three corroborated candidates remain evidence-only as recorded in #632.
 Thus eight approved handles + three corroborated identity candidates + fourteen
@@ -141,11 +142,17 @@ Issue #505 remains OPEN. Supervisor owns master-handover reconciliation.
 PR #634: five runtime/test files plus this additive receipt. Eighteen focused
 tests include three executable rendered UI regressions; wider Instagram/TikTok/
 eligibility suite: 211 passed, 16 skipped, 0 failed. Full suite/build/lint/diff
-results are recorded on the exact final PR head. The 16 database integration skips
+final rerun: **3,381 passed / 16 skipped / 0 failed** (3,397 tests). TypeScript/Vite
+build, scoped ESLint on all three changed runtime files and `git diff --check`
+passed. Existing bundle-size advisory remains. The 16 database integration skips
 need disposable local PostgreSQL; no production test was substituted.
 
 Production defect screenshot and fresh authenticated TikTok queue screenshot:
 `C:/Users/chris/.codex/artifacts/issue-505-provider-exhaustion/red-oak-before.jpg`
 and `tiktok-current.jpg`. Changed-preview authenticated desktop/mobile acceptance
-is not claimed until actual browser evidence exists; browser control timed out
-while opening the green changed preview. This is not a credential/auth diagnosis.
+is **BLOCKED**: after recovering browser control in the verified CG Chrome profile,
+the green preview `/admin/integrations/meta` displayed Dynamics **Sign in**, not
+the authenticated staff queue. No credentials/session tokens were copied or auth
+bypassed. Evidence: `preview-auth-blocked.jpg` in the same private directory.
+Three executable rendered-component regressions prove the corrected states, but
+are not a substitute for authenticated preview or mobile browser acceptance.
