@@ -2,7 +2,7 @@
 
 Status: **CURRENT authority for a fresh supervisor chat**
 
-Updated: **2 October 2026** after #623 UI PR reconciliation and canonical Website intake/Piek hardening. Earlier #600/#595/#505/#513/#377/#573 production receipts remain below; no new protected production action occurred in #623.
+Updated: **2 October 2026** after the Piek #405 stored-lead production pilot (see #405 section), #623 UI PR reconciliation and canonical Website intake/Piek hardening. Earlier #600/#595/#505/#513/#377/#573 production receipts remain below; no new protected production action occurred in #623.
 
 This file is intentionally current-state-first. Historical failed attempts are summarized only where they prevent repeated work.
 
@@ -16,7 +16,21 @@ Verification: 91 focused passes / 16 disposable-DB skips / 0 failures; 25-name/e
 
 OAuth start/callback/confirm ACTIVE v6/v7/v6; deauthorize/deletion v2/v2; Meta sync/worker v53/v40. Completed #595/#600 and credential-expiry deployment are satisfied; do not replay. App secret absent, activation literal false, APP_PUBLIC_URL still old Vercel origin (names/structural checks only). Next protected packet is #598 secret + canonical public origin + five legal/callback saves/readbacks with activation OFF, not a bulk connection approval. Meta dashboard deliberately untouched; Oct 1 provider review state needs fresh CA readback. No Website/TikTok/provider/config/OAuth/sync/mapping/data/deployment action; #505 stays OPEN.
 
-### #405 Website enquiries — PRODUCTION ACTIVATION IN PROGRESS (2 October, 11:58 SAST)
+### #405 Website enquiries — PIEK STORED-LEAD PILOT COMPLETE (2 October, 13:53 SAST)
+
+**Production receipt (supersedes the step list below; keep it as history).**
+- Piek Vercel env: `CG_ENQUIRY_INTAKE_URL`, `CG_ENQUIRY_INTAKE_KEY` — **Production only** (Sensitive); none for Preview/Development; key piped from production, never printed.
+- Piek PR #17 merged `c45e275dc898202eb3c5a6a1a439dd58f3ca581c` (head `e145a39`); production deployment `dpl_FAkrcKhFDJJMAEgjrvtf2ardoGZW` READY, aliased `www.piekgroup.co.za` / `piekgroup.co.za`. Live assets contain no intake key, Dynamics URL, env names or preview URL.
+- First live submit (10:49 UTC) was rejected by intake v3 `server_to_server_only` (Node/undici fetch sends `sec-fetch-mode: cors`); nothing stored. Fixed by #628 merged `e08d51d9f46606d8753722d7e07df1d22fab36c7`; `website-enquiry-intake` redeployed **v4**, `verify_jwt=false`, from that commit.
+- Controlled live-form submission (11:51 UTC): receipt `4bf9fcc9-7bfd-4de1-a376-bfda97bc7610` (site reference `4BF9FCC9`), enquiry `8a7ec21d-4c64-40f3-9b81-120f05f8c87c` — Piek Group / Website 1 / production / `www.piekgroup.co.za` / `contact_form` v1. Exactly 1 enquiry, 1 `generate_lead` (non-synthetic), 1 contact, 1 delivery job `pending` (0 attempts, no provider). Identical replay through the live route returned the same reference; counts unchanged. Intake logs: `accepted/201`, `replayed/200` only.
+- Piek client identity (RPC as `authenticated`, rolled back): Lead Inbox lists exactly this lead. Delta Gas client identity: own inbox 0; read Piek inbox/metrics → `42501 Not authorized for this client`; mutate → `42501 Not authorized for this lead`; direct table read → `42501`.
+- CG admin marked Good → `qualified/good`; Piek-view Website Performance (Oct, Africa/Johannesburg): total 1, qualified 1, qualification rate 1.0.
+- Final pilot state: `closed_lost` / `poor` / `other`, note `pilot test`; audit `new→qualified/good`, `qualified→closed_lost/poor` (staff). Nothing deleted.
+- **No email sent.** Delivery worker/webhook undeployed, provider OFF, 0 provider events.
+
+**Next (separate, CA-gated):** outbound email activation (provider approval, CG sending domain/DNS, six delivery secrets, worker/webhook deploy, schedule, delivered/bounced acceptance). The pending pilot job stays pending; decide whether to suppress it before the worker is ever enabled so the "DO NOT ACTION" test is not mailed to Piek.
+
+### #405 Website enquiries — activation history (2 October, 11:58 SAST)
 
 CA has assigned the supervisor to run the Website/#405 rollout to completion and expects the next concrete action to be stated and executed whenever safe. Do not hand routine mechanics back to CA.
 
