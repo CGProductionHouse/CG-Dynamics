@@ -6,6 +6,16 @@ Updated: **2 October 2026** after #623 UI PR reconciliation and canonical Websit
 
 This file is intentionally current-state-first. Historical failed attempts are summarized only where they prevent repeated work.
 
+### #598 authorized packet — STOPPED at owner reauthentication, 2 October
+
+CA explicitly authorized only the app-secret/public-origin/five-URL packet in #598 comment 5950879579 and #505 comment 5950880151. No production save/write occurred. In the requested `info@cgproductionhouse.com` Chrome profile, Meta Developers shows the exact CG Dynamics parent app `976168728361566`, Instagram business-login product CG Dynamics-IG `1383360116973315`, Development mode and the unchanged exact OAuth redirect. The generated Meta Embed URL still has extra scopes and was not used; canonical runtime code retains only `instagram_business_basic` + `instagram_business_manage_insights`.
+
+Fresh names/digest-to-known-public-value checks: production app ID/redirect match; activation matches literal `false`; app secret absent; public origin still old Vercel origin. SELECT-only standalone connections/tokens/states/callback receipts remain 0/0/0/0. The product-specific Show action presented **Please re-enter your password** for Christie-Ann Groenewald. Secret was not retrieved, emitted or copied. No password was entered; dialog left open for CA private reauthentication. Do not use the parent-app secret, bypass reauthentication, search unrelated credentials or send a password/secret to chat.
+
+Exact next action: CA completes only this Meta owner reauthentication directly in the open product-secret dialog, then agent resumes the already-authorized bounded #598 saves/readbacks. No App Review, verification changes, testers, Live, OAuth, mappings, sync, unrelated config or data writes are authorized. The seven approved changes remain pending; no partial origin/URL saves were attempted. #600 crypto remains satisfied and must not be repeated. Non-secret screenshot: `C:/Users/chris/.codex/artifacts/issue-598/2026-10-02-owner-reauthentication.jpg`.
+
+Docs-only receipt verification: 52 local login/callback/encryption fixture tests passed, TypeScript/Vite build PASS (existing bundle advisory), scoped login/OAuth lint and diff check PASS. These are local regressions, not another production crypto validation. No runtime source changed.
+
 ### #505 Instagram-only executable queue — 2 October
 
 Read-only current-main baseline `2e6d14484319b4b48d3180b676e29032e4c77ab3` and #505 supervisor comment 5949760923. Production: 57 active / 47 recurring-social eligible / 10 excluded / 0 scope-held; 22 canonical Instagram / 25 unmapped; standalone connections/tokens/states/callback receipts 0/0/0/0. Authenticated staff Chrome Page-first discovery exposes no Instagram option for the 25: 15 saved Pages loaded without an IG option, Red Oak's saved Page absent, nine no saved Page. This is not complete provider inventory (discovery limit/access boundaries), nor proof an account does not exist. Suggestions for Neshora/WiseRide are not mappings.
