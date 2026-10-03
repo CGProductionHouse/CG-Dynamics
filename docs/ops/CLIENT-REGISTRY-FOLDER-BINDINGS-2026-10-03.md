@@ -71,4 +71,3 @@ Common observed drive ID: `A2AC9FE4B255F52F`. These internal Graph identifiers m
 Re-read each exact Graph root/Videos item and parent relationship immediately before mapping; stop on moved/deleted IDs, changed name, wrong parent, conflicting existing mapping or withdrawn access. Reuse the existing `upsert_client_onedrive_mapping` active-admin/service-only contract for individually reviewed client IDs. Do not guess short codes, rename folders, create copies, move/delete files, provision portal libraries or publish any asset. Bindings do not make internal Admin/Photos/Videos folders client-visible.
 
 Local Deli and Madison Wear remain held until CA resolves the separate Local Meat Deli and Madisons Hours identities. This is only a folder-binding ambiguity: their existing Dynamics/Hours exact-name registry IDs are preserved, and their history is not merged.
-

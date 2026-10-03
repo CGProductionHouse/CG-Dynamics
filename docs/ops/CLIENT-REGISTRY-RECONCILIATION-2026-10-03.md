@@ -98,4 +98,3 @@ Status: PROPOSED / NOT APPLIED. Live read-only IDs below are candidates for expl
 5. Re-read exact mappings/counts and compare Hours client IDs plus full time-entry/timesheet fingerprints before and after. Stop on unexpected changes; no historical UUIDs are removed or rewritten.
 
 OneDrive candidate evidence is in #381 comment 5967288668. Folder names are not mapping authority; the Local Deli/Local Meat Deli and Madison Wear/Madisons folder ambiguities remain held. This packet is not authorization to provision or expose client files.
-
