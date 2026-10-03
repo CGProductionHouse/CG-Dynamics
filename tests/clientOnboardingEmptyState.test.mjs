@@ -29,5 +29,5 @@ test('page reuses the separate inventory/session projection and preserves protec
   const page = readFileSync('src/features/client-onboarding/InternalOnboardingPage.tsx', 'utf8')
   assert.match(page, /onboardingEmptyState\(\{ activeClients: clients.length, sessions: sessions.length, filteredSessions: filteredSessions.length, loading, error \}\)/)
   assert.match(page, /emptyState && <EmptyState/)
-  assert.match(page, /disabled loading=\{working\} onClick=\{\(\) => void generate\(\)\}/)
+  assert.match(page, /disabled=\{loading \|\| working \|\| !clientId \|\| linkReadiness\?\.canGenerate !== true\}/)
 })
