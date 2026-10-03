@@ -81,6 +81,17 @@ Do NOT:
 
 ## Workflow rules
 
+### Mandatory hosting / uptime gate — #679
+
+Read `docs/ops/HOSTING-BUDGET-AND-UPTIME-POLICY.md` before any push, merge,
+preview, release or hosting action. Client uptime outranks development convenience.
+Default unapproved cloud-build allowance is **ZERO**. Develop, test and build locally;
+GitHub pushes are not deployment authorization. Preserve `git.deploymentEnabled=false`
+in `vercel.json`. Never bypass it through CLI/dashboard/automation without an explicit
+CA-approved release packet and fresh budget evidence. Never pause client production,
+raise/remove spending limits, delete deployments or change hosting/DNS to fund development.
+This gate overrides older automatic-main/fresh-Vercel instructions while the freeze applies.
+
 - run `git status` first;
 - pull latest `main`;
 - inspect open PRs before creating a branch;
