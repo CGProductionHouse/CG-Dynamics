@@ -2,9 +2,9 @@
 
 Status: **CURRENT authority for a fresh supervisor chat**
 
-Updated: **3 October 2026, morning supervisor reconciliation after overnight completion**
+Updated: **3 October 2026, after direct Codex registry completion and #656 launch-finisher assignment**
 
-Current live `main` before this handover-only docs update: **`22e907c043b930689b6f2825dabb4586320b70b6`**. This includes the completed overnight Agent 01/02 merges plus later independent Website/#405 Claude-lane work. The handover edit itself advances `main`; **always refetch current main on takeover and before every merge**.
+Current live `main` before this handover-only docs update: **`4ccaac92569073739eec95f5901f1415092f2243`**. Registry/history/OneDrive reconciliation is complete there; always refetch current main before merges.
 
 This file is the supervisor takeover authority. Read this section FIRST before touching GitHub, Codex agents, Supabase, Meta, Microsoft, Website/#405, strategy or production. Historical receipts follow below and are retained so completed work is not repeated.
 
@@ -118,6 +118,58 @@ Safe read-only production inspection, local/disposable tests, docs, GitHub comme
 ### External communication rule
 
 Client/business communication is **draft only** unless the user explicitly says to send it. Do not email/message clients or providers merely because a draft packet exists.
+
+---
+
+## CURRENT DIRECT CODEX LAUNCH-FINISHER LANE
+
+CA is currently running one Codex session directly to finish launch readiness. This is the active manual coding lane.
+
+Latest accepted handoff:
+- #381 comment `5968438047`
+- supervisor acceptance / next authority: #381 comment `5968462292`
+- #656 execution authority: comment `5968462000`
+
+Verified merged state:
+- #654 registry/history safeguards → `af07b8130996faf1696ff327c2c20d8c71468035`
+- #655 activation receipt → `6f0a293cd45abcaabf87721e5899bac1a6084df0`
+- #657 reconciliation receipts → `4ccaac92569073739eec95f5901f1415092f2243`
+- CG Hours #45 history-safe client labels → `a8a2b135fc0d780ecbc0fe00a0d7dc87b7a2705f`
+- #404 closed completed.
+
+Accepted cross-system state:
+- 61 active Dynamics clients;
+- 61 exact CG Hours mappings;
+- 61 mapped receipts / 0 outstanding;
+- all 61 current existing OneDrive root + Videos bindings saved from verified existing Graph identities;
+- no OneDrive create/move/rename/delete/share performed;
+- all 4,211 Hours time entries and 3,260 timesheet rows preserved;
+- JFJ Electrical + VCS created canonically; Neshora not duplicated;
+- Local Meat Deli / Madisons handled as historical aliases, not deleted/merged into history.
+
+**CURRENT active Codex mission = #656 Strategy client-preview redesign.**
+
+The agent must inspect the linked Google Drive screenshots before coding and implement the already-approved Monthly Performance Report design language. No brown slab/chip-heavy invented UI. Strategy must become visually interactive/scannable with strong hierarchy and useful progressive disclosure while preserving all existing strategy truth/status/client/month/package/evidence semantics.
+
+#656 is presentation-only. Prepared #513 amendments remain separate/protected:
+- 72 amendment-needed
+- 22 blocked
+- 0 approved
+- 0 published
+- 0 production strategy writes
+
+After #656, active Codex should refetch #381 and continue the next highest-value SAFE, UNOWNED launch-critical item without stopping at a status summary. Protected/human/provider gates remain protected.
+
+Known genuine remaining launch gates:
+- #656 design implementation;
+- protected strategy amendment/approval/publication decisions;
+- exact Instagram owner/access actions and later Dynamics mapping/sync;
+- authenticated CG Hours browser acceptance when a legitimate session exists;
+- four package rows unverified: Elcheck, LHP, JFJ, VCS;
+- eleven historical Hours-only names still lacking current-service evidence;
+- separately owned Website/#405 lane.
+
+Do not restart completed registry/#404/Hours reconciliation work.
 
 ---
 
