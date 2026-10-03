@@ -14,8 +14,6 @@ import {
   confirmClientPackage,
   archiveClient,
   restoreClient,
-  deleteClient,
-  clientHasData,
   readPackageSettings,
   readPackageAuthority,
   type Client,
@@ -25,6 +23,7 @@ import { ClientLogo } from '../../components/ClientLogo'
 import { PACKAGE_NUMBER_FIELDS, type PackageVerificationReceipt } from '../../lib/packageAuthority'
 import { loadActiveClientPackageEvidenceMatrix, type ActiveClientPackageEvidence } from '../../lib/packageEvidence'
 import { PackageEvidenceReviewModal } from '../../components/clients/PackageEvidenceReviewModal'
+import { findClientNameConflict, clientSaveFailureMessage } from '../../lib/clientRegistrySafety'
 
 function errorMessage(_error: unknown, fallback: string) {
   return fallback
@@ -46,7 +45,6 @@ type ViewFilter = 'active' | 'archived' | 'all'
 type ConfirmAction =
   | { type: 'archive'; client: Client }
   | { type: 'restore'; client: Client }
-  | { type: 'delete'; client: Client; checkingData: boolean; hasData: boolean | null }
 
 export default function ClientsList() {
   const { profile } = useAuth()
@@ -105,22 +103,6 @@ export default function ClientsList() {
     const { error } = await restoreClient(client.id)
     if (error) throw error
     setClients(prev => prev.map(c => c.id === client.id ? { ...c, active: true } : c))
-  }
-
-  async function doDelete(client: Client) {
-    const { error } = await deleteClient(client.id)
-    if (error) throw error
-    setClients(prev => prev.filter(c => c.id !== client.id))
-  }
-
-  async function openDeleteConfirm(client: Client) {
-    setConfirmAction({ type: 'delete', client, checkingData: true, hasData: null })
-    const has = await clientHasData(client.id)
-    setConfirmAction(prev =>
-      prev?.type === 'delete' && prev.client.id === client.id
-        ? { ...prev, checkingData: false, hasData: has }
-        : prev
-    )
   }
 
   useEffect(() => {
@@ -195,6 +177,9 @@ export default function ClientsList() {
   ): Promise<string | null> {
     try {
       const existing = modal.client
+      if (findClientNameConflict(clients, input.name, existing?.id)) {
+        return 'A client with this name already exists. Edit or restore the existing client instead.'
+      }
       let savedId: string | null = null
       if (existing) {
         const { data, error } = await updateClient(existing.id, {
@@ -203,7 +188,7 @@ export default function ClientsList() {
           active: input.active,
           logo_url: input.logo_url,
         })
-        if (error) return 'Could not update this client.'
+        if (error) return clientSaveFailureMessage(error, 'Could not update this client.')
         if (data) {
           savedId = data.id
           setClients(current => upsertClient(current, data))
@@ -214,7 +199,7 @@ export default function ClientsList() {
           tier: input.tier,
           active: input.active,
         })
-        if (error) return 'Could not create this client.'
+        if (error) return clientSaveFailureMessage(error, 'Could not create this client.')
         if (data) {
           savedId = data.id
           setClients(current => upsertClient(current, data))
@@ -356,7 +341,6 @@ export default function ClientsList() {
                     isAdmin && (
                       <div className="mt-4 flex flex-wrap gap-2">
                         <ActionButton variant="secondary" size="sm" onClick={() => setConfirmAction({ type: 'restore', client: c })}>Restore</ActionButton>
-                        <ActionButton variant="danger" size="sm" onClick={() => void openDeleteConfirm(c)}>Delete</ActionButton>
                       </div>
                     )
                   )}
@@ -452,7 +436,6 @@ export default function ClientsList() {
                             <td className="px-4 py-3 text-right">
                               <div className="flex flex-wrap items-center justify-end gap-1.5">
                                 <ActionButton variant="ghost" size="sm" onClick={() => setConfirmAction({ type: 'restore', client: c })}>Restore</ActionButton>
-                                <ActionButton variant="danger" size="sm" onClick={() => void openDeleteConfirm(c)}>Delete</ActionButton>
                               </div>
                             </td>
                           )}
@@ -481,7 +464,6 @@ export default function ClientsList() {
           onClose={() => setConfirmAction(null)}
           onArchive={doArchive}
           onRestore={doRestore}
-          onDelete={doDelete}
         />
       )}
 
@@ -939,22 +921,19 @@ function ClientModal({
   )
 }
 
-// Confirm modal (archive / restore / delete)
+// Confirm modal (archive / restore; never hard-delete client history)
 
 function ConfirmModal({
   action,
   onClose,
   onArchive,
   onRestore,
-  onDelete,
 }: {
   action: ConfirmAction
   onClose: () => void
   onArchive: (c: Client) => Promise<void>
   onRestore: (c: Client) => Promise<void>
-  onDelete: (c: Client) => Promise<void>
 }) {
-  const [confirmName, setConfirmName] = useState('')
   const [saving, setSaving] = useState(false)
   const [modalError, setModalError] = useState<string | null>(null)
 
@@ -1000,7 +979,7 @@ function ConfirmModal({
         <div className={PANEL}>
           <h2 className="mb-1 text-base font-semibold text-white">Archive client?</h2>
           <p className="mb-5 text-sm text-brand-primary">
-            <strong className="text-white">{action.client.name}</strong> will be hidden from all workflows. You can restore them at any time.
+            <strong className="text-white">{action.client.name}</strong> will be hidden from active-client lists. Existing records and history remain intact. You can restore them at any time. CG Hours status is unchanged.
           </p>
           {modalError && <p className="mb-3 rounded-lg border border-red-400/20 bg-red-400/10 px-3 py-2 text-sm text-red-400">{modalError}</p>}
           <div className="flex gap-3">
@@ -1014,64 +993,7 @@ function ConfirmModal({
     )
   }
 
-  // Delete flow
-  if (action.checkingData) {
-    return (
-      <div className={OVERLAY}>
-        <div className={PANEL}>
-          <p className="text-sm text-brand-primary">Checking for existing data...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (action.hasData) {
-    return (
-      <div className={OVERLAY} onClick={e => { if (!saving && e.target === e.currentTarget) onClose() }}>
-        <div className={PANEL}>
-          <h2 className="mb-1 text-base font-semibold text-white">Cannot delete</h2>
-          <p className="mb-5 text-sm text-brand-primary">
-            <strong className="text-white">{action.client.name}</strong> has report data. Archive instead to keep history safe.
-          </p>
-          {modalError && <p className="mb-3 rounded-lg border border-red-400/20 bg-red-400/10 px-3 py-2 text-sm text-red-400">{modalError}</p>}
-          <div className="flex gap-3">
-            <ActionButton onClick={onClose} disabled={saving} variant="secondary" size="sm">Cancel</ActionButton>
-            <button onClick={() => execute(() => onArchive(action.client))} disabled={saving} className={`${btnBase} bg-amber-600 text-white hover:brightness-110`}>
-              {saving ? 'Archiving...' : 'Archive instead'}
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // No data - require name match to confirm permanent deletion
-  const nameMatches = confirmName === action.client.name
-
-  return (
-    <div className={OVERLAY} onClick={e => { if (!saving && e.target === e.currentTarget) onClose() }}>
-      <div className={PANEL}>
-        <h2 className="mb-1 text-base font-semibold text-white">Delete permanently?</h2>
-        <p className="mb-4 text-sm text-brand-primary">
-          This cannot be undone. Type <strong className="text-white">{action.client.name}</strong> to confirm.
-        </p>
-        <input
-          value={confirmName}
-          onChange={e => setConfirmName(e.target.value)}
-          disabled={saving}
-          placeholder={action.client.name}
-          className="mb-4 w-full rounded-lg border border-brand-muted bg-brand-bg px-3.5 py-2.5 text-sm text-white placeholder-brand-primary/40 focus:outline-none focus:ring-2 focus:ring-red-500 transition disabled:opacity-60"
-        />
-        {modalError && <p className="mb-3 rounded-lg border border-red-400/20 bg-red-400/10 px-3 py-2 text-sm text-red-400">{modalError}</p>}
-        <div className="flex gap-3">
-          <ActionButton onClick={onClose} disabled={saving} variant="secondary" size="sm">Cancel</ActionButton>
-          <button onClick={() => execute(() => onDelete(action.client))} disabled={saving || !nameMatches} className={`${btnBase} bg-red-600 text-white hover:brightness-110`}>
-            {saving ? 'Deleting...' : 'Delete permanently'}
-          </button>
-        </div>
-      </div>
-    </div>
-  )
+  return null
 }
 
 // Bulk import modal
