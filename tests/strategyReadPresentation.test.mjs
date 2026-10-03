@@ -46,7 +46,29 @@ test('presentation work does not weaken publication, exact month or content-qual
   assert.match(source, /clientFacingStrategyQualityIssues\(monthlyStrategy.strategyData\)/)
   assert.match(source, /if \(!staffPreview\) return null/)
   assert.match(source, /Draft — not visible to client/)
-  assert.match(source, /monthDisplayLabel\(monthlyStrategy.month\)/)
+  assert.match(source, /monthDisplayLabel\(monthlyStrategy.month.slice\(0, 7\)\)/)
   const page = readFileSync(new URL('../src/pages/client/ClientStrategyPage.tsx', import.meta.url), 'utf8')
   assert.match(page, /getClientPublishedMonthlyStrategy\(strategyMonth\)/)
+})
+
+test('actual report labels a canonical date-backed October strategy separately from a September report', async () => {
+  const server = await createServer({ configFile: false, server: { middlewareMode: true, hmr: false }, esbuild: { jsx: 'automatic' }, optimizeDeps: { noDiscovery: true }, define: {
+    'import.meta.env.VITE_SUPABASE_URL': JSON.stringify('https://fixture.supabase.co'),
+    'import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY': JSON.stringify('fixture-anon-key'),
+  } })
+  try {
+    const { ClientReportView } = await server.ssrLoadModule('/src/pages/client/ClientReportView.tsx')
+    const { emptyStrategyData } = await server.ssrLoadModule('/src/lib/strategyEngine.ts')
+    const strategyData = emptyStrategyData()
+    strategyData.strategyGoingForward = 'Show the product in use and answer real customer questions.'
+    const report = { id: 'fixture-report', client_id: 'fixture-client', status: 'published', period_start: '2026-09-01', period_end: '2026-09-23', posts: [], report_title: 'Fixture client', summary: null }
+    const monthlyStrategy = { month: '2026-10-01', status: 'draft', strategyData }
+    const before = JSON.stringify({ report, monthlyStrategy })
+    const html = renderToStaticMarkup(createElement(ClientReportView, { report, monthlyStrategy, showAdminDiagnostics: true, googleAds: null, googleAdsState: 'unmapped', googleAdsError: null }))
+    assert.match(html, /September 2026/)
+    assert.match(html, /October 2026 strategy/)
+    assert.doesNotMatch(html, /2026-10-01 strategy/)
+    assert.match(html, /Draft — not visible to client/)
+    assert.equal(JSON.stringify({ report, monthlyStrategy }), before)
+  } finally { await server.close() }
 })
