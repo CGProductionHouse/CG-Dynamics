@@ -142,7 +142,7 @@ test('home page has loading, error and empty states', () => {
   assert.match(HOME, /ClientPortalLoadingState/)
   assert.match(HOME, /ClientPortalErrorState/)
   assert.match(HOME, /no published report/i)
-  assert.match(HOME, /Your next strategy update will appear here/i)
+  assert.match(HOME, /direction will appear once its strategy is reviewed and published/i)
 })
 
 test('performance dashboard has loading, error and empty states', () => {
