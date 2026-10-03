@@ -229,6 +229,7 @@ export function hasStrategyContent(data: StrategyData): boolean {
 }
 
 const CLIENT_FACING_STRATEGY_FORBIDDEN: Array<{ pattern: RegExp; reason: string }> = [
+  { pattern: /\b(?:use the verified client evidence\b|canonical client:|strongest available evidence of customer\/context intent\b)/i, reason: 'Internal evidence-template instructions are not client strategy.' },
   { pattern: /\b[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\b/i, reason: 'Internal record identifiers must not appear in client strategy.' },
   { pattern: /\bCGProductionHouse\//i, reason: 'Repository names are internal provenance, not client strategy.' },
   { pattern: /\b(?:github|repository|repo)\b/i, reason: 'Repository references are internal provenance, not client strategy.' },
