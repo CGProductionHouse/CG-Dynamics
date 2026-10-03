@@ -14,6 +14,7 @@ const CAMPAIGNS = read('../src/pages/client/ClientCampaignsPage.tsx')
 const PROVIDER_ICONS = read('../src/components/client/PerformanceProviderIcon.tsx')
 const CALENDAR = read('../src/pages/client/ClientContentCalendarPage.tsx')
 const REPORT_VIEW = read('../src/pages/client/ClientReportView.tsx')
+const SERVICE_TABS = read('../src/lib/performanceServiceCatalog.ts')
 const HOME = read('../src/pages/client/ClientPortalHome.tsx')
 const PERFORMANCE = read('../src/pages/client/Dashboard.tsx')
 const REPORTS_DB = read('../src/lib/db/reports.ts')
@@ -102,8 +103,8 @@ test('only genuinely available Facebook, Instagram and TikTok become active orga
 
 test('provider workspace never presents unsupported platforms as active data sources', () => {
   assert.doesNotMatch(REPORT_VIEW, /Meta Ads|TikTok Ads|Planned integration/)
-  assert.match(REPORT_VIEW, /No verified campaign source is configured/)
-  assert.match(REPORT_VIEW, /Missing data is never presented as zero/)
+  assert.match(REPORT_VIEW, /PerformanceServiceStory service="google"/)
+  assert.match(REPORT_VIEW, /reportPlatforms\.includes/)
   // No confirmed-revenue framing; the canonical formatter fails closed.
   assert.match(GOOGLE_ADS_RESULTS, /if \(micros === null \|\| !currency\) return 'Unavailable'/)
 })
@@ -281,12 +282,12 @@ test('report view uses verified, per-platform availability-aware Overview when n
   assert.match(REPORT_VIEW, /VerifiedFactsUnavailable/)
 })
 
-test('report view shows only provider destinations supported by report truth', () => {
+test('service destinations remain discoverable while provider results require report truth', () => {
   assert.match(REPORT_VIEW, /reportPlatforms/)
-  for (const key of ['overview', 'facebook', 'instagram', 'google', 'tiktok', 'web']) {
-    assert.match(REPORT_VIEW, new RegExp(`key: '${key}'.*icon: '${key}'`))
+  for (const key of ['overview', 'facebook', 'instagram', 'google', 'tiktok', 'web', 'linkedin', 'email']) {
+    assert.match(SERVICE_TABS, new RegExp(`key: '${key}'.*icon: '${key}'`))
   }
-  assert.doesNotMatch(REPORT_VIEW, /key: 'linkedin'|key: 'email'/)
+  assert.match(REPORT_VIEW, /PERFORMANCE_SERVICE_TABS/)
   assert.match(REPORT_VIEW, /reportPlatforms\.includes/)
 })
 
@@ -355,7 +356,7 @@ test('Google Ads shares the complete state machine and gates disconnected source
   assert.match(REPORT_VIEW, /unmapped/)
   assert.match(REPORT_VIEW, /not-synced/)
   assert.match(REPORT_VIEW, /no-activity/)
-  assert.match(REPORT_VIEW, /googleAds !== null \|\| googleAdsState !== 'disconnected'/)
+  assert.match(REPORT_VIEW, /googleAds !== null \|\| \['data', 'not-synced', 'error', 'no-activity'\]\.includes\(googleAdsState\)/)
 })
 
 // ── 19. Content Calendar completeness ─────────────────────────────────────────

@@ -165,7 +165,7 @@ test('admin Client View passes Google Ads while diagnostics remain role-gated', 
   assert.match(PREVIEW_SOURCE, />\s*Client View\s*</)
   assert.match(PREVIEW_SOURCE, /googleAds=\{googleAds\}/)
   assert.doesNotMatch(PREVIEW_SOURCE, /previousGoogleAds/)
-  assert.match(PREVIEW_SOURCE, /showAdminDiagnostics=\{isStaff\}/)
+  assert.match(PREVIEW_SOURCE, /showAdminDiagnostics=\{mode === 'staff' && isStaff\}/)
   assert.match(REPORT_VIEW_SOURCE, /\{showAdminDiagnostics && <AdminDataHealth/)
 })
 

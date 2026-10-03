@@ -47,7 +47,7 @@ function reportLabel(report: Report) {
   return monthDisplayLabel(getReportMonthFromPeriod(report))
 }
 
-type DashboardMode = 'client' | 'editor'
+type DashboardMode = 'client' | 'staff' | 'editor'
 type PreviewSurface = 'dashboard' | 'setup'
 
 function statusLabel(status: Report['status']) {
@@ -426,13 +426,16 @@ export default function PublishedPreview() {
             </select>
           </label>}
 
-          {surface === 'dashboard' && <div className="grid grid-cols-2 rounded-lg border border-brand-muted bg-brand-bg p-1">
+          {surface === 'dashboard' && <div className="grid grid-cols-3 rounded-lg border border-brand-muted bg-brand-bg p-1">
             <button
               type="button"
               onClick={() => setMode('client')}
               className={`rounded-md px-3 py-2 text-sm font-semibold transition ${mode === 'client' ? 'bg-brand-accent text-black' : 'text-brand-primary hover:text-white'}`}
             >
               Client View
+            </button>
+            <button type="button" onClick={() => setMode('staff')} className={`min-h-11 rounded-md px-3 text-sm font-semibold transition ${mode === 'staff' ? 'bg-brand-accent text-black' : 'text-brand-primary hover:text-white'}`}>
+              Staff review
             </button>
             <button
               type="button"
@@ -468,9 +471,9 @@ export default function PublishedPreview() {
           onPublish={() => void handleStatusChange('published')}
           onUnpublish={() => void handleStatusChange('draft')}
         />
-      ) : report ? (
+      ) : report && (mode === 'staff' || report.status === 'published') ? (
         <div className="overflow-hidden rounded-xl border border-brand-muted">
-          <ClientDashboardShell action={<span className="rounded-full bg-report-elevated px-3 py-1 text-xs font-medium text-report-accent">Client view</span>} client={selectedClient}>
+          <ClientDashboardShell action={<span className="rounded-full bg-report-elevated px-3 py-1 text-xs font-medium text-report-accent">{mode === 'staff' ? 'Staff review · may include drafts' : 'Client view'}</span>} client={selectedClient}>
             <ClientReportView
               report={report}
               client={selectedClient}
@@ -483,21 +486,21 @@ export default function PublishedPreview() {
               facts={facts}
               previousFacts={previousFacts}
               normalizedFactsAttempted={normalizedFactsAttempted}
-              monthlyStrategy={monthlyStrategy}
+              monthlyStrategy={mode === 'staff' || monthlyStrategy?.status === 'published' ? monthlyStrategy : null}
               dataHealth={dataHealth}
               contentExclusions={contentExclusions}
-              onSetContentExcluded={isAdmin ? handleContentExcluded : undefined}
+              onSetContentExcluded={mode === 'staff' && isAdmin ? handleContentExcluded : undefined}
               curationBusyId={curationBusyId}
               showEmptyStrategy
-              showAdminDiagnostics={isStaff}
+              showAdminDiagnostics={mode === 'staff' && isStaff}
             />
             {selectedClientId && <ClientMonthAhead clientId={selectedClientId} />}
           </ClientDashboardShell>
         </div>
       ) : (
         <EmptyState
-          title={initialMonth ? 'No dashboard for this synced month' : 'No report selected'}
-          message={initialMonth ? 'No monthly dashboard exists for this period.' : 'Choose a client and report period above.'}
+          title={report ? 'This report is not visible to clients' : initialMonth ? 'No dashboard for this synced month' : 'No report selected'}
+          message={report ? 'Use Staff review to inspect the draft. Client View shows only published reports and strategies.' : initialMonth ? 'No monthly dashboard exists for this period.' : 'Choose a client and report period above.'}
           compact
         />
       )}

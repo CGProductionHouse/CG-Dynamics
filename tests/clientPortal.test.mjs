@@ -156,7 +156,7 @@ test('only genuinely available Facebook, Instagram and TikTok facts become activ
   assert.deepEqual(activeOrganicPlatforms(facts), ['Facebook', 'TikTok'])
   assert.doesNotMatch(HOME_SOURCE, /TikTok reporting is active|Google Business Profile reporting is active/)
   assert.doesNotMatch(REPORT_VIEW_SOURCE, /Meta Ads|TikTok Ads|Planned integration/)
-  assert.match(REPORT_VIEW_SOURCE, /No verified campaign source is configured/)
+  assert.match(REPORT_VIEW_SOURCE, /PerformanceServiceStory service="google"/)
 })
 
 test('legacy report prose is never promoted into a strategy preview', () => {

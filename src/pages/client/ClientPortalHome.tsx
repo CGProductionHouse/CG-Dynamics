@@ -8,7 +8,6 @@ import { activeOrganicPlatforms, buildPublishedMonthlyStrategyPreview, type Publ
 import { businessMonthKey } from '../../lib/businessTime'
 import { getClientPublishedMonthlyStrategy } from '../../lib/monthlyStrategy'
 import { fetchClientMonthAhead } from '../../lib/clientPortalCalendar'
-import { ClientServiceExpansion } from '../../components/client/ClientServiceExpansion'
 import { listClientPublishedReports, type ClientReport } from '../../lib/db/reports'
 import { loadReportPlatformFacts } from '../../lib/db/reportingTruth'
 import { loadGoogleAdsDashboard, type GoogleAdsDashboardState } from '../../lib/googleAdsDashboard'
@@ -191,12 +190,12 @@ export default function ClientPortalHome() {
                     tone="teal"
                   />
                 )}
-                <MetricCard
+                {data.googleAdsState === 'data' && <MetricCard
                   label="Paid media"
                   value={paidMediaStatus.value}
                   detail={paidMediaStatus.detail}
                   tone="warm"
-                />
+                />}
                 {reportMonth && (
                   <MetricCard
                     label="Published review"
@@ -330,7 +329,6 @@ export default function ClientPortalHome() {
           </section>
         </>
       )}
-      <ClientServiceExpansion surface="overview" />
     </>
   )
 }

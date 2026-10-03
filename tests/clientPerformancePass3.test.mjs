@@ -6,14 +6,15 @@ const read = path => readFileSync(new URL(path, import.meta.url), 'utf8')
 const app = read('../src/App.tsx')
 const performance = read('../src/pages/client/Dashboard.tsx')
 const reportView = read('../src/pages/client/ClientReportView.tsx')
+const serviceTabs = read('../src/lib/performanceServiceCatalog.ts')
 const legacyCampaigns = read('../src/pages/client/ClientCampaignsPage.tsx')
 const providerIcons = read('../src/components/client/PerformanceProviderIcon.tsx')
 
-test('Performance exposes only evidence-backed icon-led provider destinations', () => {
-  for (const key of ['overview', 'facebook', 'instagram', 'google', 'tiktok', 'web']) {
-    assert.match(reportView, new RegExp(`key: '${key}'.*icon: '${key}'`))
+test('Performance exposes all service destinations without claiming provider evidence', () => {
+  for (const key of ['overview', 'facebook', 'instagram', 'google', 'tiktok', 'web', 'linkedin', 'email']) {
+    assert.match(serviceTabs, new RegExp(`key: '${key}'.*icon: '${key}'`))
   }
-  assert.doesNotMatch(reportView, /key: 'linkedin'|key: 'email'/)
+  assert.match(reportView, /reportPlatforms\.includes/)
   assert.match(reportView, /PerformanceProviderIcon/)
   assert.match(reportView, /aria-label=\{item\.label\}/)
   assert.match(reportView, /title=\{item\.label\}/)
@@ -36,9 +37,9 @@ test('legacy Campaigns deep link redirects to the Performance tab without anothe
 })
 
 test('only configured campaign sources render and missing values are not presented as zero', () => {
-  assert.match(reportView, /googleAds !== null \|\| googleAdsState !== 'disconnected'/)
-  assert.match(reportView, /No verified campaign source is configured/)
-  assert.match(reportView, /Missing data is never presented as zero/)
+  assert.match(reportView, /googleAds !== null \|\| \['data', 'not-synced', 'error', 'no-activity'\]\.includes\(googleAdsState\)/)
+  assert.match(reportView, /PerformanceServiceStory service="google"/)
+  assert.match(reportView, /googleAds !== null && \['data', 'no-activity'\]\.includes\(googleAdsState\)/)
   assert.doesNotMatch(reportView, /Meta Ads|TikTok Ads|Planned integration/)
 })
 
