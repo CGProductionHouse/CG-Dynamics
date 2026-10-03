@@ -1,6 +1,6 @@
 # Exact registry reconciliation packet — 3 October 2026
 
-Status: APPLIED for the exact 59 existing-client pairs below after CA's explicit approval of PR #654's packet on 3 October 2026. Each pair has one canonical Dynamics mapping, one immutable mapped request receipt and one corresponding mapped Hours outbox receipt. No client was created, renamed, merged, archived or deleted; no time entry was reassigned. The 16 Hours-only entries remain outside this authorization. See `CLIENT-REGISTRY-ACTIVATION-2026-10-03.md` for production verification.
+Status: COMPLETE for 61 exact current Dynamics/Hours pairs under CA's explicit completion authorization on 3 October 2026: the original 59 bindings below plus canonical creation of JFJ Electrical and VCS Cleaning Solutions. Each has a canonical mapping and mapped request/outbox receipt; zero outstanding delivery. All 61 exact OneDrive root/Videos bindings are saved. No client or history was deleted/merged/reassigned. Two proven historical Hours aliases were soft archived only after the history-label fix was live. See `CLIENT-REGISTRY-ACTIVATION-2026-10-03.md` for current verification; the original packet below is retained as audit history.
 
 ## Existing active clients: reuse these Dynamics UUIDs
 
@@ -68,7 +68,7 @@ Status: APPLIED for the exact 59 existing-client pairs below after CA's explicit
 | WiseRide | `504113ee-fba9-4993-807e-a86066615212` | `21473bed-5b9c-4bd2-98f4-abd5bde402a0` | 0 | 0 |
 | Zooz Lifestyle WFF | `0c01d90f-ba5e-4251-a597-bf3c83f990fa` | `49da8753-d9a7-4dbe-9f00-764a55226664` | 46 | 44 |
 
-## Hours-only active entries — preserve, do not silently import or merge
+## Original Hours-only inventory — historical baseline, current disposition below
 
 | Hours name | Hours UUID | Time entries | Timesheet rows | Decision needed |
 |---|---|---:|---:|---|
@@ -97,4 +97,17 @@ Status: APPLIED for the exact 59 existing-client pairs below after CA's explicit
 4. Configure/deploy the existing #404 bridge while OFF, verify contracts, then enable only at the approved activation gate. Future Hours creates must resolve to exactly one Dynamics row through durable idempotent delivery.
 5. Re-read exact mappings/counts and compare Hours client IDs plus full time-entry/timesheet fingerprints before and after. Stop on unexpected changes; no historical UUIDs are removed or rewritten.
 
-OneDrive candidate evidence is in #381 comment 5967288668. Folder names are not mapping authority; the Local Deli/Local Meat Deli and Madison Wear/Madisons folder ambiguities remain held. This packet is not authorization to provision or expose client files.
+The five-step completion gate above records the original staged authorization, not pending instructions to replay. CA subsequently explicitly authorized bounded completion. Current applied receipt:
+
+| Created exact client | Dynamics UUID | Existing Hours UUID | Canonical request UUID |
+|---|---|---|---|
+| JFJ Electrical | `aece5a86-c962-4234-a1fe-7904c20f03ff` | `94dc9b9f-d9d6-45ea-9ddc-ef055bb237f4` | `273cc04e-703c-4317-805d-3c6c219cad39` |
+| VCS Cleaning Solutions | `bbd1629e-79fb-4c41-b1e4-88a1f160bd34` | `c45ae65c-a151-47b9-a9f2-324ec799b381` | `4fe0f52f-247b-452c-a34a-d2041947271d` |
+
+Both reuse `ensure_client_from_cg_hours`, keep package settings `{}` / unknown and short code null, and retain original Hours IDs/history. All original 60 Dynamics client rows are unchanged. Production is 62 total / 61 active Dynamics clients and 61 mapped Hours receipts.
+
+Local Meat Deli (`688ef097-563c-4e2b-9063-0bbc65cacc14`) and Madisons (`fdc999c3-ff86-434b-b866-88963c8af941`) are proven historical aliases of Local Deli and Madison Wear respectively by existing exact-client dossiers, not name similarity. They are archived, not deleted: original 11/46 time entries and 9/40 timesheet rows remain under their original IDs. Hours PR #45 preserves selected archived client labels in desktop and grouped/mobile My Week; new work offers active clients only. Restore remains available.
+
+Hours now has 130 retained clients / 73 active. The remaining 12 active Hours-only entries are Once Off (legitimate operational bucket, not a Dynamics client) and 11 entries with unresolved current service status: Adnitor, Avodah, BFN Polisie Klub, Brocor, Dabo, Full Rig Auto Worx, G6, My City, Net Nine Nine, Nikan Solar and Van Pie. Existing 8 September reconciliation explicitly says active Hours status is not proof of current service; Avodah/Dabo old-client evidence conflicts with it. No service/package status was guessed or obsolete client imported. Their history remains intact; these are evidence gaps, not another migration/permission gate.
+
+OneDrive bindings are fully applied; see `CLIENT-REGISTRY-FOLDER-BINDINGS-2026-10-03.md`. No Graph file writes, portal provisioning or client file exposure occurred.

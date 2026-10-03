@@ -1,8 +1,8 @@
 # CG Hours → CG Dynamics client-registry bridge activation
 
-Status: **Activated under explicit CA approval on 3 October 2026** for the exact 59 existing-client pairs in PR #654's reviewed packet. See `CLIENT-REGISTRY-ACTIVATION-2026-10-03.md` for applied scope and acceptance. OFF remains the code default; merging implementation alone never authorizes activation. The historical inspection and prerequisites below are not pending instructions to replay.
+Status: **Activated and bounded completion executed under explicit CA approval on 3 October 2026**: 61 exact Dynamics/Hours pairs (59 existing plus canonical JFJ/VCS creation), 61 mapped Hours receipts, zero outstanding, and all 61 existing OneDrive root/Videos bindings saved. Two proven historical Hours aliases recoverably archived after history-label PR #45 became production-ready; original time/timesheet history unchanged. See `CLIENT-REGISTRY-ACTIVATION-2026-10-03.md` for applied scope and acceptance. OFF remains the code default; merging implementation alone never authorizes activation. The historical inspection and prerequisites below are not pending instructions to replay.
 
-## 3 October 2026 read-only reconciliation — supersedes historical backfill assumptions
+## Original 3 October 2026 pre-activation inspection — historical, not current runtime
 
 Production inspection found 59 active Dynamics clients and 75 active CG Hours clients. All 59 have a unique exact-name Hours counterpart, but names alone do **not** establish an audited cross-system UUID mapping. The bridge mapping/request tables and Hours outbox are absent in production. No activation or backfill was performed.
 
@@ -13,6 +13,8 @@ Existing Hours client UUIDs, time entries and timesheet rows must remain intact.
 Physical OneDrive folders are supporting evidence, not canonical bindings: the audit found candidate folders for all 59 active Dynamics clients, but zero saved OneDrive/onboarding mappings or portal library/asset rows. Do not recreate folders or claim portal readiness from names alone. The supervisor receipts are #381 comment 5967288668 and #404 comment 5967289444.
 
 Scope: Dynamics #404 / PR #411 and CG Hours #7 / PR #8 only. Staff Logger PR #3 and Dynamics #376 are outside this runbook.
+
+The historical findings above were superseded by the explicit applied receipts in `CLIENT-REGISTRY-ACTIVATION-2026-10-03.md`: bridge tables/migrations/function/config are live; JFJ/VCS exist; name/history guard is applied; OneDrive mappings are saved. Do not replay absent-table preflight, create Neshora again or repeat secret provisioning. Current Hours source is `a8a2b135fc0d780ecbc0fe00a0d7dc87b7a2705f`, green production `dpl_78X8GaffHdGdA5PoNYsdawgDWcuo`; existing daily cron unchanged. Unresolved service status for eleven other Hours-only entries is not permission to invent active packages. Master handover remains supervisor-owned.
 
 ## Safety contract while OFF
 
