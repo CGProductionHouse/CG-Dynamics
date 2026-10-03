@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Navigate, useLocation, useSearchParams } from 'react-router-dom'
 import { monthDisplayLabel } from '../../lib/reportPeriod'
+import { businessMonthKey } from '../../lib/businessTime'
 import ClientContentCalendarPage from './ClientContentCalendarPage'
 import ClientContentGuidesPage from './ClientContentGuidesPage'
 import ClientStrategyPage from './ClientStrategyPage'
@@ -15,8 +16,7 @@ const PLAN_TABS = [
 type PlanTab = (typeof PLAN_TABS)[number]['key']
 
 function currentMonth() {
-  const now = new Date()
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  return businessMonthKey()
 }
 
 function shiftMonth(month: string, amount: number) {

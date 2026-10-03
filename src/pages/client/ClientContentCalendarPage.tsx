@@ -13,13 +13,13 @@ import { EVENT_TYPE_LABELS } from '../../lib/companyCalendar'
 import { getClient, type Client } from '../../lib/db/clients'
 import { CLIENT_SAFE_STATUS_LABELS, PACKAGE_DELIVERABLE_LABELS } from '../../lib/planner'
 import { monthDisplayLabel } from '../../lib/reportPeriod'
-import { CALENDAR_HEADERS, monthGridCells, todayIso } from '../../lib/scheduleCalendar'
+import { CALENDAR_HEADERS, monthGridCells } from '../../lib/scheduleCalendar'
+import { businessDateKey, businessMonthKey } from '../../lib/businessTime'
 
-const MONTH_PATTERN = /^\d{4}-\d{2}$/
+const MONTH_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/
 
 function currentMonth(): string {
-  const date = new Date()
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+  return businessMonthKey()
 }
 
 function shiftMonth(month: string, amount: number): string {
@@ -31,10 +31,7 @@ function shiftMonth(month: string, amount: number): string {
 function localDateKey(value: string): string {
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return value.slice(0, 10)
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
+  return businessDateKey(date)
 }
 
 export default function ClientContentCalendarPage({ embedded = false, month: controlledMonth }: { embedded?: boolean; month?: string }) {
@@ -209,7 +206,7 @@ function MonthGrid({
   events: ClientCalendarEvent[]
 }) {
   const cells = monthGridCells(month)
-  const today = todayIso()
+  const today = businessDateKey()
 
   return (
     <section aria-label={`${monthDisplayLabel(month)} content calendar`} className="overflow-hidden rounded-3xl border border-white/[0.08] bg-black/20 shadow-[0_28px_80px_-50px_rgba(0,0,0,0.95)]">
@@ -256,7 +253,7 @@ function Agenda({
 }) {
   const [selectedDay, setSelectedDay] = useState<string | null>(null)
   const cells = monthGridCells(month)
-  const today = todayIso()
+  const today = businessDateKey()
 
   // Default to today when it is in the visible month, otherwise the first day
   // of the selected month (not an adjacent-month padding cell).

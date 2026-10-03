@@ -7,6 +7,7 @@ import { fetchPublishedGuides, type PublishedContentGuideline } from '../../lib/
 import { getClient, type Client } from '../../lib/db/clients'
 import { guidelineVideoName } from '../../lib/contentGuidelineNaming'
 import { monthDisplayLabel } from '../../lib/reportPeriod'
+import { businessMonthKey } from '../../lib/businessTime'
 
 export default function ClientContentGuidesPage({ preview = false, embedded = false, month }: { preview?: boolean; embedded?: boolean; month?: string }) {
   const { profile } = useAuth()
@@ -16,10 +17,9 @@ export default function ClientContentGuidesPage({ preview = false, embedded = fa
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const now = new Date()
-  const fallbackMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  const fallbackMonth = businessMonthKey()
   const requestedMonth = searchParams.get('month')
-  const currentMonth = month ?? (requestedMonth && /^\d{4}-\d{2}$/.test(requestedMonth) ? requestedMonth : fallbackMonth)
+  const currentMonth = month ?? (requestedMonth && /^\d{4}-(0[1-9]|1[0-2])$/.test(requestedMonth) ? requestedMonth : fallbackMonth)
   const selectedGuideKey = searchParams.get('guide')
   const canPreview = preview && (profile?.role === 'admin' || profile?.role === 'manager')
   const clientId = canPreview ? searchParams.get('client') : profile?.client_id

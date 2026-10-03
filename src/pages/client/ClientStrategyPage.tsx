@@ -5,11 +5,11 @@ import { useAuth } from '../../contexts/AuthContext'
 import { getClient, type Client } from '../../lib/db/clients'
 import { getClientPublishedMonthlyStrategy } from '../../lib/monthlyStrategy'
 import { monthDisplayLabel } from '../../lib/reportPeriod'
-import { readStrategyData, type StrategyData } from '../../lib/strategyEngine'
+import { clientFacingStrategyQualityIssues, hasStrategyContent, readStrategyData, type StrategyData } from '../../lib/strategyEngine'
+import { businessMonthKey } from '../../lib/businessTime'
 
 function currentMonth() {
-  const now = new Date()
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  return businessMonthKey()
 }
 
 export default function ClientStrategyPage({ embedded = false, month }: { embedded?: boolean; month?: string }) {
@@ -46,14 +46,9 @@ export default function ClientStrategyPage({ embedded = false, month }: { embedd
     return () => { active = false }
   }, [embedded, profile?.client_id, strategyMonth])
 
-  const hasPublishedContent = useMemo(() => strategy && (
-    strategy.strategyGoingForward.trim()
-    || strategy.strategyDrivers.length > 0
-    || strategy.clientDirection.length > 0
-    || strategy.clientActionsRequired.length > 0
-    || strategy.calendarSelections.some(selection => selection.use)
-    || Object.values(strategy.actionPlan).some(section => section.enabled && (section.items.length > 0 || section.notes.trim()))
-  ), [strategy])
+  const hasPublishedContent = useMemo(() => strategy && (hasStrategyContent(strategy)
+    || strategy.calendarSelections.some(selection => selection.use))
+    && clientFacingStrategyQualityIssues(strategy).length === 0, [strategy])
 
   const content = (
     <>

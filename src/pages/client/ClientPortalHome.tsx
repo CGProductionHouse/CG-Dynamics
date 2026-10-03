@@ -4,7 +4,9 @@ import { ClientLogo } from '../../components/ClientLogo'
 import { useClientPortal } from '../../components/client/ClientPortalContext'
 import { ClientPortalErrorState, ClientPortalLoadingState } from '../../components/client/ClientPortalStates'
 import { useAuth } from '../../contexts/AuthContext'
-import { activeOrganicPlatforms, actionMonthForReport, buildClientStrategyPreview } from '../../lib/clientPortal'
+import { activeOrganicPlatforms, buildPublishedMonthlyStrategyPreview, type PublishedMonthlyStrategy } from '../../lib/clientPortal'
+import { businessMonthKey } from '../../lib/businessTime'
+import { getClientPublishedMonthlyStrategy } from '../../lib/monthlyStrategy'
 import { fetchClientMonthAhead } from '../../lib/clientPortalCalendar'
 import { ClientServiceExpansion } from '../../components/client/ClientServiceExpansion'
 import { listClientPublishedReports, type ClientReport } from '../../lib/db/reports'
@@ -18,6 +20,8 @@ type PortalData = {
   facts: PlatformFact[]
   googleAdsState: GoogleAdsDashboardState
   calendarCount: number | null
+  monthlyStrategy: PublishedMonthlyStrategy | null
+  strategyUnavailable: boolean
 }
 
 const EMPTY_DATA: PortalData = {
@@ -25,11 +29,14 @@ const EMPTY_DATA: PortalData = {
   facts: [],
   googleAdsState: 'no-activity',
   calendarCount: null,
+  monthlyStrategy: null,
+  strategyUnavailable: false,
 }
 
 export default function ClientPortalHome() {
   const { profile } = useAuth()
   const { client } = useClientPortal()
+  const [workingMonth] = useState(() => businessMonthKey())
   const [data, setData] = useState<PortalData>(EMPTY_DATA)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -52,17 +59,15 @@ export default function ClientPortalHome() {
 
         const report = selectMonthlyReports(reportsResult.data)[0] ?? null
         const reportMonth = report ? getReportMonthFromPeriod(report) : null
-        const actionMonth = actionMonthForReport(report)
-        const [factsResult, googleAdsResult, calendarResult] = await Promise.all([
+        const [factsResult, googleAdsResult, calendarResult, strategyResult] = await Promise.all([
           report && reportMonth
             ? loadReportPlatformFacts(report.id, reportMonth, null)
             : Promise.resolve({ facts: [], previousFacts: [], normalizedAttempted: false, error: null }),
           report && reportMonth
             ? loadGoogleAdsDashboard(report.id, reportMonth)
             : Promise.resolve({ data: null, state: 'no-activity' as const, error: null }),
-          actionMonth
-            ? fetchClientMonthAhead(profile.client_id, actionMonth)
-            : Promise.resolve(null),
+          fetchClientMonthAhead(profile.client_id, workingMonth),
+          getClientPublishedMonthlyStrategy(workingMonth).catch(() => ({ data: null, error: { message: 'Unavailable' } })),
         ])
         if (!active) return
 
@@ -73,6 +78,8 @@ export default function ClientPortalHome() {
           calendarCount: calendarResult && !calendarResult.loadFailed
             ? calendarResult.posts.length
             : null,
+          monthlyStrategy: strategyResult.error ? null : strategyResult.data,
+          strategyUnavailable: Boolean(strategyResult.error),
         })
       } catch {
         if (active) setError(true)
@@ -83,12 +90,12 @@ export default function ClientPortalHome() {
 
     void load()
     return () => { active = false }
-  }, [profile?.client_id])
+  }, [profile?.client_id, workingMonth])
 
-  const strategy = useMemo(() => buildClientStrategyPreview(data.report), [data.report])
+  const strategy = useMemo(() => buildPublishedMonthlyStrategyPreview(data.monthlyStrategy, workingMonth), [data.monthlyStrategy, workingMonth])
   const activeOrganic = useMemo(() => activeOrganicPlatforms(data.facts), [data.facts])
   const reportMonth = data.report ? getReportMonthFromPeriod(data.report) : null
-  const actionMonth = actionMonthForReport(data.report)
+  const actionMonth = workingMonth
   const hasPerformanceSummary = activeOrganic.length > 0 || reportMonth !== null
   const performanceStatus = activeOrganic.length > 0
     ? `${activeOrganic.length} verified channel${activeOrganic.length === 1 ? '' : 's'}`
@@ -259,7 +266,9 @@ export default function ClientPortalHome() {
               ) : (
                 <div className="relative mt-7 rounded-2xl border border-white/[0.08] bg-white/[0.04] px-5 py-6">
                   <p className="text-sm leading-6 text-slate-400">
-                    Your next strategy update will appear here once the current reporting review is complete.
+                    {data.strategyUnavailable
+                      ? 'Your monthly direction could not be loaded right now. Please try again shortly.'
+                      : `Your ${monthDisplayLabel(workingMonth)} direction will appear once its strategy is reviewed and published.`}
                   </p>
                 </div>
               )}

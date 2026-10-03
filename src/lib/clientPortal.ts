@@ -2,12 +2,32 @@ import type { ClientReport, Report } from './db/reports'
 import type { PlatformFact } from './overviewModel'
 import { hasRenderableFact } from './overviewModel'
 import { getReportMonthFromPeriod } from './reportPeriod'
-import { readStrategyData, type StrategyData } from './strategyEngine'
+import { clientFacingStrategyQualityIssues, readStrategyData, type StrategyData } from './strategyEngine'
 
 export interface ClientStrategyPreview {
   label: string
   value: string
   phase: 'review' | 'action'
+}
+
+export type PublishedMonthlyStrategy = {
+  strategy_month: string
+  strategy_data: unknown
+  published_at: string | null
+}
+
+/** Only the canonical client RPC's published exact-month projection is current direction. */
+export function buildPublishedMonthlyStrategyPreview(row: PublishedMonthlyStrategy | null, month: string): ClientStrategyPreview[] {
+  if (!row || !/^\d{4}-(0[1-9]|1[0-2])$/.test(month) || row.strategy_month !== `${month}-01`
+    || !row.published_at || !Number.isFinite(Date.parse(row.published_at))) return []
+  const data = readStrategyData(row.strategy_data)
+  if (clientFacingStrategyQualityIssues(data).length) return []
+  return [
+    { label: 'Monthly objective', value: data.goldStandard.objective, phase: 'action' as const },
+    { label: 'Strategy going forward', value: data.strategyGoingForward, phase: 'action' as const },
+    { label: 'Client direction', value: data.clientDirection.join('\n'), phase: 'action' as const },
+    { label: 'What we need from you', value: data.clientActionsRequired.join('\n'), phase: 'action' as const },
+  ].filter(item => item.value.trim()).slice(0, 3)
 }
 
 function clean(value: string | null | undefined): string | null {
