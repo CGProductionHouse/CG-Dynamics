@@ -29,6 +29,28 @@ select public.submit_website_enquiry('40621000-0000-4000-8000-000000000003', 'co
   jsonb_build_object('name', 'B Visitor ' || n, 'email', 'b' || n || '@example.test', 'message', 'B'),
   jsonb_build_object('landing_path', '/b-page-' || lpad(n::text, 2, '0')))
 from generate_series(1, 11) n;
+-- Client B: hostile/malformed attribution. None of these strings may ever appear as a key.
+select public.submit_website_enquiry('40621000-0000-4000-8000-000000000003', 'contact_form', 1, 'lead-b-neg-' || lpad(n::text, 6, '0'),
+  jsonb_build_object('name', 'B Neg ' || n, 'email', 'bneg' || n || '@example.test', 'message', 'B'),
+  attribution)
+from (values
+  -- email-like utm_source falls back to a valid referrer host
+  (1, '{"utm_source":"john.doe@example.test","referrer":"https://news.example.org/story?id=1"}'::jsonb),
+  -- whitespace-heavy (a name)
+  (2, '{"utm_source":"  John   Smith  "}'::jsonb),
+  -- URL-like, carrying a query
+  (3, '{"utm_source":"https://evil.example/?email=jane"}'::jsonb),
+  -- overlong token (41 chars)
+  (4, jsonb_build_object('utm_source', 'a' || repeat('b', 40))),
+  -- percent-encoded email
+  (5, '{"utm_source":"jane%40example.test"}'::jsonb),
+  -- unsafe landing path (email in path) with a safe utm_source
+  (6, '{"utm_source":"Newsletter","landing_path":"/thank-you/jane@example.test"}'::jsonb),
+  -- invalid referrer host and an encoded landing path
+  (7, '{"referrer":"https://bad_host!.example/x","landing_path":"/thanks/jane%40example.test"}'::jsonb),
+  -- a token at the maximum safe length (32) is kept
+  (8, jsonb_build_object('utm_source', 'm' || repeat('k', 31)))
+) as fixture(n, attribution);
 reset role;
 
 insert into lead_ids
@@ -109,12 +131,23 @@ do $$
 declare
   v_today date := (now() at time zone 'Africa/Johannesburg')::date;
   v_pages jsonb := public.website_lead_breakdown('40600000-0000-4000-8000-000000000002', v_today, v_today + 1, 'landing_page');
+  v_sources jsonb;
 begin
   assert v_pages ->> 'clientId' = '40600000-0000-4000-8000-000000000002', v_pages::text;
   assert jsonb_array_length(v_pages -> 'rows') = 10 and (v_pages ->> 'otherRows')::int = 2, v_pages::text;
   -- lead-b-1 is the only Good lead, with no recorded landing page: it ranks first.
   assert v_pages -> 'rows' -> 0 ->> 'key' is null and (v_pages -> 'rows' -> 0 ->> 'qualified')::int = 1, v_pages::text;
   assert v_pages -> 'rows' -> 1 ->> 'key' = '/b-page-01', v_pages::text;
+  -- Unsafe landing paths join the "not recorded or not recognised" bucket (b-1 + 8 hostile rows).
+  assert (v_pages -> 'rows' -> 0 ->> 'total')::int = 9, v_pages::text;
+
+  -- Sources: only safe tokens or valid referrer hosts survive; everything else is null.
+  v_sources := public.website_lead_breakdown('40600000-0000-4000-8000-000000000002', v_today, v_today + 1, 'source');
+  assert (select jsonb_agg(row_value -> 'key') from jsonb_array_elements(v_sources -> 'rows') row_value)
+    = jsonb_build_array(null, 'mkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk', 'news.example.org', 'newsletter'), v_sources::text;
+  assert (v_sources -> 'rows' -> 0 ->> 'total')::int = 17 and (v_sources ->> 'otherRows')::int = 0, v_sources::text;
+  assert not ((v_pages::text || v_sources::text) ~* '@|%40|john|smith|jane|https?:|evil|bad_host|story|abbbb|\s{2}'),
+    'hostile attribution leaked into breakdown keys';
   begin
     perform public.website_lead_breakdown(null, v_today, v_today + 1, 'source');
     raise exception 'staff read breakdown without client';
@@ -138,7 +171,7 @@ commit;
 -- Read-only: the breakdown changed no evidence.
 do $$
 begin
-  assert (select count(*) from public.website_enquiries) = 22, 'unexpected enquiry count';
+  assert (select count(*) from public.website_enquiries) = 30, 'unexpected enquiry count';
   assert (select count(*) from public.website_enquiry_lead_states) = 7, 'unexpected lifecycle rows';
 end $$;
 

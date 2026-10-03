@@ -35,15 +35,25 @@ test('breakdown mapping is strict: shape, dimension, counts and keys', () => {
     ['numeric key', payload({ rows: [row({ key: 7 })] })],
     ['missing sample flag', payload({ rows: [row({ sufficientSample: undefined })] })],
     ['zero minSample', payload({ minSample: 0 })],
+    ['rate above 1', payload({ rows: [row({ qualificationRate: 1.2 })] })],
+    ['negative rate', payload({ rows: [row({ qualificationRate: -0.1 })] })],
+    ['NaN rate', payload({ rows: [row({ qualificationRate: Number.NaN })] })],
+    ['infinite rate', payload({ rows: [row({ qualificationRate: Number.POSITIVE_INFINITY })] })],
+    ['rate inconsistent with counts', payload({ rows: [row({ qualificationRate: 0.4 })] })],
+    ['string rate', payload({ rows: [row({ qualificationRate: '0.6' })] })],
   ]) {
     assert.throws(() => mapWebsiteLeadBreakdown(bad, 'landing_page'), Error, label)
   }
   assert.throws(() => mapWebsiteLeadBreakdown(null, 'source'))
+  // Rounded rates the RPC really produces are accepted, including the [0,1] bounds.
+  assert.equal(mapWebsiteLeadBreakdown(payload({ rows: [row({ total: 3, qualified: 1, poor: 1, unreviewed: 1, qualificationRate: 0.3333 })] }), 'landing_page').rows[0].qualificationRate, 0.3333)
+  assert.equal(mapWebsiteLeadBreakdown(payload({ rows: [row({ total: 1, qualified: 1, poor: 0, unreviewed: 0, qualificationRate: 1 })] }), 'landing_page').rows[0].qualificationRate, 1)
+  assert.equal(mapWebsiteLeadBreakdown(payload({ rows: [row({ total: 2, qualified: 0, poor: 1, unreviewed: 1, qualificationRate: 0 })] }), 'landing_page').rows[0].qualificationRate, 0)
 })
 
 test('missing attribution is labelled honestly, never invented', () => {
-  assert.equal(breakdownKeyLabel('landing_page', null), 'Landing page not recorded')
-  assert.equal(breakdownKeyLabel('source', null), 'Source not recorded')
+  assert.equal(breakdownKeyLabel('landing_page', null), 'Landing page not recorded or not recognised')
+  assert.equal(breakdownKeyLabel('source', null), 'Source not recorded or not recognised')
   assert.equal(breakdownKeyLabel('source', 'google'), 'google')
 })
 
@@ -54,6 +64,10 @@ test('RPC is aggregate-only, exact-client, production-only and keyed by path/sou
   assert.match(migration, /enquiry\.environment = 'production'/)
   assert.match(migration, /p_dimension not in \('landing_page', 'source'\)/)
   assert.match(migration, /c_min_sample constant integer := 5/)
+  // Keys fail closed to a bounded safe vocabulary (supervisor privacy review).
+  assert.match(migration, /when utm_source ~ '\^\[a-z\]\[a-z0-9\._-\]\{0,31\}\$' then utm_source/)
+  assert.match(migration, /case when landing_path ~ '\^\/\[A-Za-z0-9\/\._~-\]\{0,199\}\$' then landing_path end/)
+  assert.match(migration, /char_length\(referrer_host\) <= 253/)
   assert.match(migration, /'sufficientSample', total >= c_min_sample/)
   assert.match(migration, /'otherRows'/)
   // Only attribution keys are read: never the visitor's submitted payload or contact snapshot.

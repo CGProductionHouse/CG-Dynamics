@@ -118,7 +118,7 @@ export interface WebsiteLeadMetrics {
 export type LeadBreakdownDimension = 'landing_page' | 'source'
 
 export interface WebsiteLeadBreakdownRow {
-  /** Landing path or source; null when the enquiry carried no such attribution. */
+  /** Safe landing path or source token; null when not recorded or not recognised as safe. */
   key: string | null
   total: number
   qualified: number
@@ -160,6 +160,11 @@ export function mapWebsiteLeadBreakdown(value: unknown, dimension: LeadBreakdown
     if (total < 1 || (row.qualified as number) + (row.poor as number) + (row.unreviewed as number) > total) {
       throw new Error('Lead breakdown row counts are inconsistent.')
     }
+    // The RPC rounds qualified/total to 4 decimals; anything else is not this RPC's output.
+    const rate = row.qualificationRate
+    if (!Number.isFinite(rate) || rate < 0 || rate > 1 || Math.abs(rate - (row.qualified as number) / total) > 0.00005) {
+      throw new Error('Lead breakdown qualification rate is out of range.')
+    }
     return {
       key,
       total,
@@ -173,10 +178,13 @@ export function mapWebsiteLeadBreakdown(value: unknown, dimension: LeadBreakdown
   return { state: data.state, dimension, minSample: data.minSample, rows, otherRows: data.otherRows }
 }
 
-/** Human label for a breakdown key; missing attribution is stated, not invented. */
+/**
+ * Human label for a breakdown key. Null covers both missing attribution and values the RPC
+ * refused to report (not a safe path/source token); it is stated, never invented.
+ */
 export function breakdownKeyLabel(dimension: LeadBreakdownDimension, key: string | null): string {
   if (key !== null) return key
-  return dimension === 'landing_page' ? 'Landing page not recorded' : 'Source not recorded'
+  return dimension === 'landing_page' ? 'Landing page not recorded or not recognised' : 'Source not recorded or not recognised'
 }
 
 /** Mirrors the database rules so the form can explain a rejection before saving. */
