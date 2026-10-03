@@ -34,6 +34,25 @@ range input, nullable synthetic-session expiry typing and an owned Uint8Array
 copy for WebCrypto import. No encryption algorithm/key/config or permissions
 change.
 
+## Additional reproduced portal resolver defect
+
+Read-only OneDrive evidence confirms Daisy's portal is nested under its exact
+bound client root, not directly under global Clients. The existing admin resolver
+scanned the wrong parent and would return404 despite a complete existing portal.
+It now reads the selected client's canonical production binding, checks exact
+client/drive identity and unique folder-ID membership under Clients, and scopes
+portal/category discovery to that root. No fuzzy historical-name matching or
+folder creation. Ambiguous portal roots stop before category reads or any saves;
+existing exact category guards and disabled-by-default registration remain.
+
+Five executable regressions cover the original failure, corrected nested path,
+foreign/missing/blank/wrong-drive bindings, durable-ID vs name isolation,
+file/duplicate rejection, category completeness and admin-only handler ordering.
+The complete61-client read-only physical evidence matrix is recorded in
+`CLIENT-SAFE-FOLDER-EVIDENCE-2026-10-03.md`:60 complete exact portals, VCS missing.
+Physical evidence is not permission to map/enable/publish libraries or infer
+upload destinations.
+
 ## Fresh production inventory (SELECT only)
 
 | Authority | Count |
@@ -61,7 +80,7 @@ scope or to disclose/create starter credentials.
 
 ## Verification / release gate
 
-- 216 focused onboarding, portal and delegated-adapter regressions passed.
+- 221 focused onboarding, portal and delegated-adapter regressions passed.
 - Actual `deno check --no-lock --node-modules-dir=none` for the complete
   `client-onboarding/index.ts` import closure passed.
 - TypeScript/Vite build, emitted onboarding application chunk, scoped lint and
