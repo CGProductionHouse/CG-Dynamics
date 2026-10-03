@@ -19,6 +19,7 @@ const ResetPassword = lazyRoute(() => import('./pages/ResetPassword'))
 const PrivacyPolicyPage = lazyRoute(() => import('./pages/LegalPage').then(module => ({ default: module.PrivacyPolicyPage })))
 const TermsOfServicePage = lazyRoute(() => import('./pages/LegalPage').then(module => ({ default: module.TermsOfServicePage })))
 const ClientPerformancePage = lazyRoute(() => import('./pages/admin/ClientPerformancePage'))
+const WebsiteLeadsPreviewPage = lazyRoute(() => import('./pages/admin/WebsiteLeadsPreviewPage'))
 const CgHubPage = lazyRoute(() => import('./pages/admin/CgHubPage'))
 const ClientsList = lazyRoute(() => import('./pages/admin/ClientsList'))
 const ImportMetaCsv = lazyRoute(() => import('./pages/admin/ImportMetaCsv'))
@@ -116,6 +117,7 @@ export default function App() {
               {/* Read access for all staff (admin + team) */}
               <Route path="/admin" element={<Navigate to="/admin/cg-hub" replace />} />
               <Route path="/admin/client-performance" element={<ClientPerformancePage />} />
+              <Route path="/admin/website-leads" element={<WebsiteLeadsPreviewPage />} />
               <Route path="/admin/cg-hub" element={<CgHubPage />} />
               <Route path="/admin/ops-hub" element={<OpsHubPage />} />
               <Route path="/admin/work" element={<MyWorkPage />} />

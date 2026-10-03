@@ -132,7 +132,11 @@ test('disposable PostgreSQL acceptance covers isolation, rules and PII-free metr
 
 test('UI is client-pinned, analytics-free and truthful when unavailable or empty', () => {
   assert.match(page, /listWebsiteLeads\(\)/)
-  assert.match(page, /clientId=\{null\}/)
+  // The client route names no client: <LeadInbox /> defaults clientId to null, so the server
+  // pins reads/writes to the signed-in client; only the staff preview passes a clientId.
+  assert.match(page, /export default function ClientLeadsPage\(\) \{\s*return <LeadInbox \/>/)
+  assert.match(page, /clientId = null/)
+  assert.match(page, /WebsiteLeadMetricsCard clientId=\{clientId\}/)
   assert.match(page, /LEAD_OUTCOMES\.map/)
   assert.doesNotMatch(page, /role="radiogroup"/)
   assert.match(page, /not been switched on/)
