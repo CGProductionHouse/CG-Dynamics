@@ -71,6 +71,14 @@ test('webhook signatures are verified and replays outside 5 minutes rejected', a
   assert.equal(await verifySvixSignature({ secret: 'nope', id: 'evt', timestamp: String(now), signatureHeader: `v1,${sign('evt', now)}`, body, nowSeconds: now }), false)
   assert.deepEqual(parseResendWebhookEvent(JSON.parse(body)), { providerMessageId: 'msg-1', event: 'delivered', occurredAt: '2026-10-02T08:01:00Z' })
   assert.equal(parseResendWebhookEvent({ type: 'email.opened', created_at: '2026-10-02T08:01:00Z', data: { email_id: 'm' } }), null)
+  // Complaints are terminal and suppressing (same canonical state as SES); bounces stay distinct.
+  const at = '2026-10-03T09:00:00Z'
+  assert.deepEqual(parseResendWebhookEvent({ type: 'email.complained', created_at: at, data: { email_id: 'm' } }), { providerMessageId: 'm', event: 'complained', occurredAt: at })
+  assert.deepEqual(parseResendWebhookEvent({ type: 'email.bounced', created_at: at, data: { email_id: 'm' } }), { providerMessageId: 'm', event: 'bounced', occurredAt: at })
+  // Inherited object keys and non-delivery outcomes never map to an event.
+  for (const type of ['constructor', 'toString', '__proto__', 'email.failed', 'email.suppressed', 'email.delivery_delayed', 'email.sent', 7]) {
+    assert.equal(parseResendWebhookEvent({ type, created_at: at, data: { email_id: 'm' } }), null, String(type))
+  }
 })
 
 test('runtime is service-role only, reuses the idempotency key and never blind-resends', () => {

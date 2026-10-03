@@ -136,14 +136,22 @@ export function classifyResendResponse(input: {
   return { outcome: 'permanent_failure', errorCode: `http_${input.status}${name ? `_${name}` : ''}`.slice(0, 120) }
 }
 
-export type ProviderDeliveryEvent = { providerMessageId: string; event: 'delivered' | 'bounced'; occurredAt: string }
+export type ProviderDeliveryEvent = { providerMessageId: string; event: 'delivered' | 'bounced' | 'complained'; occurredAt: string }
+
+const RESEND_EVENTS: Record<string, ProviderDeliveryEvent['event']> = {
+  'email.delivered': 'delivered',
+  // Permanent rejection by the recipient's server.
+  'email.bounced': 'bounced',
+  // Delivered, then marked as spam: terminal, and suppresses further sends (same as SES).
+  'email.complained': 'complained',
+}
 
 /** Maps a verified Resend webhook payload; unrelated event types are ignored (null). */
 export function parseResendWebhookEvent(payload: unknown): ProviderDeliveryEvent | null {
   if (!payload || typeof payload !== 'object') return null
   const record = payload as Record<string, unknown>
   const data = record.data && typeof record.data === 'object' ? record.data as Record<string, unknown> : {}
-  const event = record.type === 'email.delivered' ? 'delivered' : record.type === 'email.bounced' ? 'bounced' : null
+  const event = typeof record.type === 'string' && Object.hasOwn(RESEND_EVENTS, record.type) ? RESEND_EVENTS[record.type] : null
   const id = typeof data.email_id === 'string' ? data.email_id.trim() : ''
   const occurredAt = typeof record.created_at === 'string' && !Number.isNaN(Date.parse(record.created_at)) ? record.created_at : null
   if (!event || !id || !occurredAt) return null
