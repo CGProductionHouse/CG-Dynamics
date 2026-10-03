@@ -45,6 +45,7 @@ on:
       - 'scripts/website-enquiry-delivery-acceptance.mjs'
       - 'tests/sql/405_website_enquiry_delivery_acceptance.sql'
       - 'tests/websiteEnquiryDelivery.test.mjs'
+      - 'tests/websiteEnquiryRecipientGate.test.mjs'
       - 'supabase/functions/_shared/websiteEnquiryDelivery.ts'
       - 'supabase/functions/website-enquiry-delivery-*/**'
       - 'supabase/functions/_shared/websiteEnquiryIntake.ts'
@@ -69,7 +70,7 @@ jobs:
       - run: node scripts/website-enquiry-transaction-acceptance.mjs
       - run: node --test tests/websiteLeadLifecycle.test.mjs tests/websiteLeadBreakdown.test.mjs
       - run: node scripts/website-lead-lifecycle-acceptance.mjs
-      - run: node --test tests/websiteEnquiryDelivery.test.mjs
+      - run: node --test tests/websiteEnquiryDelivery.test.mjs tests/websiteEnquiryRecipientGate.test.mjs
       - run: node scripts/website-enquiry-delivery-acceptance.mjs
       - run: node --test tests/websiteEnquiryDeliverySuppression.test.mjs
       - run: node scripts/website-enquiry-delivery-suppression-acceptance.mjs

@@ -14,13 +14,15 @@ import {
   type ClaimedDelivery,
   type DeliveryOutcome,
 } from '../_shared/websiteEnquiryDelivery.ts'
-import { resolveProviderConfig, type ProviderConfig } from '../_shared/websiteEnquiryProviders.ts'
+import { recipientAllowed, resolveProviderConfig, resolveRecipientGate, type ProviderConfig } from '../_shared/websiteEnquiryProviders.ts'
 import { buildSesSendRequest, classifySesResponse, type SesConfig } from '../_shared/websiteEnquirySes.ts'
 
 const CLAIM_LIMIT = 10
 const LEASE_SECONDS = 120
 const SEND_TIMEOUT_MS = 20_000
 const REPLAY_WINDOW_MS = 23 * 60 * 60 * 1000
+// Upper bound on due jobs inspected by the recipient allowlist pre-check; more than this holds.
+const ALLOWLIST_SCAN_LIMIT = 200
 
 function constantTimeEqual(a: string, b: string) {
   if (!a || a.length !== b.length) return false
@@ -95,6 +97,10 @@ Deno.serve(async (req) => {
   if (config.state === 'disabled') {
     return jsonResponse({ ok: true, state: 'disabled', gate: config.reason, claimed: 0 })
   }
+  const recipients = resolveRecipientGate((name) => Deno.env.get(name))
+  if (recipients.mode === 'invalid') {
+    return jsonResponse({ ok: true, state: 'held', gate: 'WEBSITE_ENQUIRY_EMAIL_RECIPIENT_ALLOWLIST is invalid', claimed: 0 })
+  }
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
@@ -109,13 +115,15 @@ Deno.serve(async (req) => {
     const replayCutoff = new Date(Date.now() - REPLAY_WINDOW_MS).toISOString()
     const { data: reconcileJobs, error: reconcileError } = await admin
       .from('website_enquiry_delivery_jobs')
-      .select('id')
+      .select('id, recipient_email_snapshot')
       .eq('delivery_state', 'reconcile')
       .eq('provider', config.provider)
       .gt('created_at', replayCutoff)
       .limit(CLAIM_LIMIT)
     if (reconcileError) return jsonResponse({ ok: false, error: 'Reconcile scan failed' }, 500)
     for (const job of reconcileJobs ?? []) {
+      // A replay is a send: never to a recipient outside the allowlist.
+      if (!recipientAllowed(recipients, job.recipient_email_snapshot)) continue
       const { data } = await admin.rpc('resolve_website_enquiry_delivery_reconcile', {
         p_job_id: job.id, p_resolution: 'idempotent_replay', p_provider_message_id: null,
       })
@@ -127,13 +135,40 @@ Deno.serve(async (req) => {
   const { data: swept, error: sweepError } = await admin.rpc('sweep_website_enquiry_provider_events', { p_limit: 50 })
   if (sweepError) return jsonResponse({ ok: false, error: 'Provider event sweep failed' }, 500)
 
+  // Allowlist mode: claim nothing while any due job is addressed outside the allowlist, so a
+  // real client enquiry arriving during a CG-only acceptance run simply waits (no attempt used).
+  if (recipients.mode === 'allowlist') {
+    const { data: due, error: dueError } = await admin
+      .from('website_enquiry_delivery_jobs')
+      .select('recipient_email_snapshot')
+      .eq('delivery_state', 'pending')
+      .lte('next_attempt_at', new Date().toISOString())
+      .limit(ALLOWLIST_SCAN_LIMIT)
+    if (dueError) return jsonResponse({ ok: false, error: 'Allowlist pre-check failed' }, 500)
+    const blocked = (due ?? []).filter((job) => !recipientAllowed(recipients, job.recipient_email_snapshot)).length
+    if (blocked > 0 || (due ?? []).length >= ALLOWLIST_SCAN_LIMIT) {
+      return jsonResponse({ ok: true, state: 'held', gate: 'recipient allowlist', replayed, swept: swept ?? 0, claimed: 0, held: blocked })
+    }
+  }
+
   const { data: claimed, error: claimError } = await admin.rpc('claim_website_enquiry_deliveries', {
     p_provider: config.provider, p_limit: CLAIM_LIMIT, p_lease_seconds: LEASE_SECONDS,
   })
   if (claimError) return jsonResponse({ ok: false, error: 'Claim failed' }, 500)
 
-  const results: Record<string, number> = { accepted: 0, retryable_failure: 0, permanent_failure: 0, ambiguous: 0, stale: 0 }
+  const results: Record<string, number> = { accepted: 0, retryable_failure: 0, permanent_failure: 0, ambiguous: 0, stale: 0, held: 0 }
   for (const job of (claimed ?? []) as ClaimedDelivery[]) {
+    // Race guard (a job created between the pre-check and the claim): never send it. Returned
+    // as retryable so it waits for normal routing; nothing reaches the provider.
+    if (!recipientAllowed(recipients, job.recipient_email)) {
+      const { error } = await admin.rpc('complete_website_enquiry_delivery', {
+        p_job_id: job.job_id, p_lease_token: job.lease_token, p_outcome: 'retryable_failure',
+        p_provider_message_id: null, p_error_code: 'held_recipient_allowlist',
+      })
+      if (error) results.stale++
+      else results.held++
+      continue
+    }
     const outcome = await send(job, config)
     const { data, error } = await admin.rpc('complete_website_enquiry_delivery', {
       p_job_id: job.job_id,

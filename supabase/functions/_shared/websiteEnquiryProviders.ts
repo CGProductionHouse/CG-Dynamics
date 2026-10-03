@@ -27,3 +27,28 @@ export function resolveProviderConfig(env: (name: string) => string | undefined)
   // SES has no idempotency key: ambiguous sends are never auto-replayed.
   return { state: 'ready', supportsIdempotentReplay: false, from: base.from, ...ses.config }
 }
+
+// Optional acceptance/rollout gate. When WEBSITE_ENQUIRY_EMAIL_RECIPIENT_ALLOWLIST is set (a
+// comma-separated list of exact addresses), the worker sends only to those recipients: it claims
+// nothing while any due job is addressed elsewhere, and never sends a claimed job addressed
+// elsewhere. Unset or blank = normal routing. Malformed = hold everything (fail closed).
+export type RecipientGate =
+  | { mode: 'open' }
+  | { mode: 'allowlist'; allowed: ReadonlySet<string> }
+  | { mode: 'invalid' }
+
+const ALLOWLIST_EMAIL = /^[^\s@<>",]+@[^\s@<>",]+\.[^\s@<>",]+$/
+
+export function resolveRecipientGate(env: (name: string) => string | undefined): RecipientGate {
+  const raw = env('WEBSITE_ENQUIRY_EMAIL_RECIPIENT_ALLOWLIST')
+  if (raw === undefined || raw.trim() === '') return { mode: 'open' }
+  const entries = raw.split(',').map((entry) => entry.trim().toLowerCase())
+  if (entries.some((entry) => !ALLOWLIST_EMAIL.test(entry)) || entries.length > 20) return { mode: 'invalid' }
+  return { mode: 'allowlist', allowed: new Set(entries) }
+}
+
+export function recipientAllowed(gate: RecipientGate, recipient: string | null | undefined): boolean {
+  if (gate.mode === 'open') return true
+  if (gate.mode === 'invalid' || typeof recipient !== 'string') return false
+  return gate.allowed.has(recipient.trim().toLowerCase())
+}
