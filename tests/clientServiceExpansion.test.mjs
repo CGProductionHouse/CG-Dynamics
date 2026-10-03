@@ -8,6 +8,8 @@ test('actual four-state presentation never converts unknown or disconnection int
   try {
     const { SERVICE_KEYS, SERVICE_COPY, servicePresentation, parseServiceEntitlements } = await server.ssrLoadModule('/src/lib/clientServicePresentation.ts')
     assert.equal(SERVICE_KEYS.length, 7)
+    assert.equal(SERVICE_COPY.website_digital_experience.name, 'Premium CG-built website')
+    assert.match(SERVICE_COPY.website_digital_experience.benefit, /before anything is added to your package/)
     for (const service_key of SERVICE_KEYS) {
       assert.ok(SERVICE_COPY[service_key].benefit.length > 80)
       for (const connection of ['connected','needs_connection','unavailable']) {

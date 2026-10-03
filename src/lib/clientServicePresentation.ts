@@ -40,7 +40,7 @@ export const SERVICE_COPY: Record<ServiceKey, { name: string; benefit: string; v
   instagram: { name: 'Instagram', icon: 'instagram', benefit: 'Help people discover the visual side of your brand. Showcase your work through a cohesive feed, Stories and Reels that make your business recognisable.', value: 'A visual home for your brand story.' },
   tiktok: { name: 'TikTok', icon: 'tiktok', benefit: 'Bring your business to life through native short-form video. Build discovery with useful, engaging stories shaped for how people watch on TikTok.', value: 'Short-form stories made for discovery.' },
   google_business_profile: { name: 'Google Business Profile', icon: 'google', benefit: 'Make local discovery easier on Google Search and Maps. Keep your presence useful for people looking for directions, contact details and reviews.', value: 'A clear local presence on Search and Maps.' },
-  website_digital_experience: { name: 'Website / Digital Experience', icon: 'web', benefit: 'Give discovery a destination. Connect your website, search visibility and enquiry journey with a considered SEO, AEO/GEO and analytics plan appropriate to your business.', value: 'A considered digital destination and enquiry journey.' },
+  website_digital_experience: { name: 'Premium CG-built website', icon: 'web', benefit: 'Give your brand a premium digital home, built by CG. Explore a website shaped around your business, with a clear enquiry journey and an agreed measurement plan. Scope and pricing are confirmed with you before anything is added to your package.', value: 'Your brand. A premium CG-built destination.' },
 }
 
 export function servicePresentation(item: ServiceEntitlement) {
