@@ -145,3 +145,22 @@ Substantive strategy synthesis and client-by-client semantic acceptance remain
 open: each written decision must connect a real objective, customer obstacle,
 evidenced angle, confirmed execution capacity and measurement to exact-client
 sources. A compile pass or lexical quality check is not that acceptance.
+
+## Calendar evidence is not an inferred empty month
+
+The existing client calendar already has a desktop month grid and mobile
+day-selection agenda; preserve that architecture and its published/exact-client
+visibility RPCs. A new executable regression reproduced null RPC data returning
+`loadFailed: false`, falsely presenting no scheduled work. Missing/non-array or
+malformed row envelopes now return unavailable; only explicit valid empty arrays
+mean a verified empty month. No fallback table reads, schema changes or calendar
+data writes. 78 focused PASS; full 3,618 total /3,601 PASS /17 skip /0 fail,
+TypeScript/Vite, scoped lint and diff check PASS (same Windows Bash exclusion).
+
+Exact post-to-portal-asset navigation remains an explicit contract gap: the safe
+calendar returns opaque post keys, while the published asset projection returns
+display title/month but no corresponding post key. Never join by title or expose
+OneDrive/internal IDs to fake this link. A separately reviewed, exact-client,
+published-only opaque linkage is required before claiming this acceptance.
+The #674 full portal preview and current paused-Vercel authenticated acceptance
+gates are not resolved by this calendar correction.

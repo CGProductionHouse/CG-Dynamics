@@ -85,8 +85,16 @@ export async function fetchClientMonthAheadWithRpc(
     rpc('client_portal_month_ahead_events', { p_client_id: clientId, p_month: monthStart }),
   ])
   if (postsResult.error || eventsResult.error) return unavailable
+  // SETOF RPCs must return arrays, including an explicit [] for a verified
+  // empty month. Missing/malformed evidence must not produce fake empty counts.
+  if (!Array.isArray(postsResult.data) || !Array.isArray(eventsResult.data)) return unavailable
+  const hasStrings = (row: unknown, keys: string[]): row is Record<string, unknown> =>
+    row != null && typeof row === 'object' && !Array.isArray(row)
+      && keys.every(key => typeof (row as Record<string, unknown>)[key] === 'string' && (row as Record<string, string>)[key].trim().length > 0)
+  if (!postsResult.data.every(row => hasStrings(row, ['row_key', 'title', 'post_type', 'client_safe_status']))
+    || !eventsResult.data.every(row => hasStrings(row, ['row_key', 'title', 'event_type', 'start_time']))) return unavailable
 
-  const posts: ClientCalendarPost[] = ((postsResult.data ?? []) as ClientPortalPostRow[])
+  const posts: ClientCalendarPost[] = (postsResult.data as ClientPortalPostRow[])
     .filter(row => CLIENT_PORTAL_POST_TYPES.has(row.post_type) && CLIENT_PORTAL_POST_STATUSES.has(row.client_safe_status))
     .map(row => ({
       id: row.row_key,
@@ -96,7 +104,7 @@ export async function fetchClientMonthAheadWithRpc(
       status: row.client_safe_status as ClientSafeStatus,
     }))
 
-  const events: ClientCalendarEvent[] = ((eventsResult.data ?? []) as ClientPortalEventRow[])
+  const events: ClientCalendarEvent[] = (eventsResult.data as ClientPortalEventRow[])
     .filter(row => CLIENT_PORTAL_EVENT_TYPES.has(row.event_type))
     .map(row => ({
       id: row.row_key,

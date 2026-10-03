@@ -312,6 +312,32 @@ test('supported visibility capability loads only allowlisted safe rows', async (
   assert.deepEqual(result.events.map(event => event.id), ['event-safe'])
 })
 
+test('missing or malformed calendar envelopes remain unavailable, not a verified empty month', async () => {
+  for (const broken of [null, undefined, {}, { rows: [] }, '[]', [null], [{}], ['row'], [{ row_key: 'r', title: 0 }]]) {
+    for (const failedName of ['client_portal_month_ahead_posts_v2', 'client_portal_month_ahead_events']) {
+      const result = await fetchClientMonthAheadWithRpc(async name => ({
+        data: name === 'client_portal_visibility_contract_version' ? 1 : name === failedName ? broken : [],
+        error: null,
+      }), 'client-1', '2026-08')
+      assert.equal(result.loadFailed, true, `${failedName}: ${JSON.stringify(broken)}`)
+      assert.deepEqual(result.posts, [])
+      assert.deepEqual(result.events, [])
+    }
+  }
+})
+
+test('explicit empty calendar arrays are a verified empty month and preserve exact request scope', async () => {
+  const calls = []
+  const result = await fetchClientMonthAheadWithRpc(async (name, args) => {
+    calls.push({ name, args })
+    return { data: name === 'client_portal_visibility_contract_version' ? 1 : [], error: null }
+  }, 'client-1', '2026-08')
+  assert.equal(result.loadFailed, false)
+  assert.deepEqual(result.posts, [])
+  assert.deepEqual(result.events, [])
+  for (const call of calls.slice(1)) assert.deepEqual(call.args, { p_client_id: 'client-1', p_month: '2026-08-01' })
+})
+
 test('the frontend checks capability before either projection with no legacy fallback', () => {
   const capability = calendarData.indexOf("rpc('client_portal_visibility_contract_version')")
   const posts = calendarData.indexOf("rpc('client_portal_month_ahead_posts_v2'")
