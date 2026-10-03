@@ -31,10 +31,14 @@ import {
 } from '../cg-assistant-chat/ai-router.ts'
 import { fetchAiUsageReplay, type AiUsageClient } from '../_shared/aiUsage.ts'
 import { monthlyStrategyAlignmentLines, type MonthlyStrategyAlignmentRow } from '../_shared/monthlyStrategyAlignment.ts'
+import { fetchAllRows } from '../_shared/paginatedRows.ts'
+import { directorOperatingDate, selectDirectorKnowledge, type DirectorCard } from './directorKnowledge.ts'
+import type { DirectorKnowledgeReference } from '../../../src/lib/contentDirectorEvidence.ts'
 import {
   buildDevelopPrompt,
   buildIdeasPrompt,
   buildResearchPrompt,
+  directorIdeaPersistencePayload,
   clientGuideExcerpt,
   DEVELOP_MAX_OUTPUT_TOKENS,
   IDEAS_MAX_OUTPUT_TOKENS,
@@ -431,16 +435,21 @@ Deno.serve(async (req) => {
 
   // 5. Marketing Library: active skill cards — industry-specific (matching
   //    the client's industry), universal principles, and SA market knowledge.
-  const kbLayers: string[] = ['universal_principle', 'south_african_market']
+  const kbLayers: string[] = ['universal_principle', 'universal', 'south_african_market', 'sa_market', 'active_client_specific', 'client_specific', 'internal_learning']
   if (industryProfile?.primary_industry) {
     kbLayers.push('industry_specific')
   }
-  const { data: skillCards } = await sb
+  const candidateCards = await fetchAllRows<DirectorCard>((from, to) => sb
     .from('skill_cards')
-    .select('title, principle, summary, knowledge_layer')
-    .eq('status', 'active')
-    .in('knowledge_layer', kbLayers)
-    .limit(30)
+    .select('id,title,principle,summary,status,knowledge_layer,client_specific,active_client_id,source_id,source_type,source_reference,relevant_agents,relevant_industries,review_expires_at,confidence_level,evidence_label,safe_claim,prohibited_overclaim,updated_at,linked_source:marketing_library_sources!inner(trust_tier,source_type,rights_status)')
+    .eq('status', 'active').in('knowledge_layer', kbLayers)
+    .or(`and(client_specific.eq.false,active_client_id.is.null),and(client_specific.eq.true,active_client_id.eq.${clientId})`)
+    .order('id').range(from, to))
+  if (candidateCards.error) return jsonResponse({ error: 'Approved knowledge is unavailable. No partial retrieval is substituted.' }, 503)
+  const reviewedIndustry = industryProfile && ['reviewed', 'active'].includes(industryProfile.review_state)
+    ? industryProfile.primary_industry as string | null : null
+  const directorKnowledge = selectDirectorKnowledge(candidateCards.data, clientId, reviewedIndustry, directorOperatingDate())
+  const skillCards = candidateCards.data.filter(card => directorKnowledge.references.some(reference => reference.card_id === card.id))
 
   // 6. SA calendar context for coverage months
   const coverageMonthNums = new Set(coverageMonths.map((m) => parseInt(m.slice(5, 7), 10)))
@@ -461,9 +470,7 @@ Deno.serve(async (req) => {
     ...monthlyStrategyAlignmentLines(monthlyStrategies as MonthlyStrategyAlignmentRow[] | null, monthlyStrategyError),
   ]
 
-  const marketingLibraryKnowledge = (skillCards ?? []).map(
-    (c) => `[${c.knowledge_layer}] ${c.title}: ${c.principle}`,
-  )
+  const marketingLibraryKnowledge = directorKnowledge.lines
 
   // Record which knowledge layers were actually used.
   const usedLayers = new Set((skillCards ?? []).map((c) => c.knowledge_layer))
@@ -501,6 +508,7 @@ Deno.serve(async (req) => {
         deliverableType: String(slot.deliverable_type),
       })),
       marketingKnowledge: marketingLibraryKnowledge,
+      knowledgeReferences: directorKnowledge.references,
       calendar: saCalendarContext,
       canonicalInternal,
       existingTitles: existingVideos.map(video => video.title),
@@ -582,7 +590,7 @@ Deno.serve(async (req) => {
     : 'No cross-client duplication detected.'
 
   const marketingLibraryContext = (skillCards ?? []).length > 0
-    ? skillCards.map((c) => `  - [${c.knowledge_layer}] ${c.title}: ${c.summary ?? c.principle}`).join('\n')
+    ? directorKnowledge.lines.join('\n')
     : '  No active Marketing Library skill cards found for the relevant layers.'
 
   const calendarContext = relevantCalendar.length > 0
@@ -780,6 +788,7 @@ interface DirectorContext {
   coverageMonths: string[]
   slots: ScheduleSlot[]
   marketingKnowledge: string[]
+  knowledgeReferences: DirectorKnowledgeReference[]
   calendar: string[]
   canonicalInternal: string[]
   existingTitles: string[]
@@ -819,6 +828,7 @@ function directorSources(context: DirectorContext, research: { findings: string[
     saCalendarContext: context.calendar,
     liveExternalResearch: [research.note, ...research.findings],
     researchSources: research.sources,
+    knowledgeReferences: context.knowledgeReferences,
   }
 }
 
@@ -908,6 +918,7 @@ async function handleIdeasMode(context: DirectorContext): Promise<Response> {
     deliverableIds: new Set(context.slots.map(slot => slot.id)),
     months: new Set(context.coverageMonths),
     researchUris: new Set(research.sources.map(source => source.uri)),
+    knowledgeReferences: context.knowledgeReferences,
   }
   const sources = directorSources(context, research)
   const baseContext = {
@@ -968,7 +979,9 @@ async function handleIdeasMode(context: DirectorContext): Promise<Response> {
       p_guideline_id: context.guidelineId,
       p_client_id: context.client.id,
       p_actor_profile_id: context.userId,
-      p_ideas: ideas,
+      // Existing RPC stores angle in notes. Preserve trusted receipts there
+      // without changing the returned creative angle, schema or staff text.
+      p_ideas: ideas.map(directorIdeaPersistencePayload),
     })
     if (saved.error) return jsonResponse({ error: `Generated ideas were not persisted: ${saved.error.message}` }, 500)
     persisted = Number(saved.data ?? 0)

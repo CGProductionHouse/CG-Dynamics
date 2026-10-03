@@ -205,13 +205,13 @@ const AGENT_KEY_ALIASES: Record<string, string> = {
 }
 
 export function normaliseAgentKey(key: string | null | undefined): string | null {
-  if (!key) return null
+  if (typeof key !== 'string' || !key) return null
   const canonical = AGENT_KEY_ALIASES[key.trim().toLowerCase()] ?? null
   return canonical && AGENT_CONTRACTS[canonical] ? canonical : null
 }
 
 export function cardTargetsAgent(relevantAgents: string[] | null | undefined, agentKey: string): boolean {
-  if (!relevantAgents || relevantAgents.length === 0) return false
+  if (!Array.isArray(relevantAgents) || relevantAgents.length === 0) return false
   const target = normaliseAgentKey(agentKey)
   if (!target) return false
   return relevantAgents.some(raw => normaliseAgentKey(raw) === target)
@@ -229,12 +229,17 @@ export interface GateContext {
 }
 
 export function isCardRetrievable(card: CardRow, ctx: GateContext): boolean {
+  if (typeof card.client_specific !== 'boolean' || (!card.client_specific && card.active_client_id != null)) return false
   if (card.source_type && NON_AUTHORITATIVE.has(card.source_type)) return false
   if (ctx.mode === 'production') {
     if (card.status !== 'active') return false
     // An active card whose review has lapsed is stale: it was approved for a
     // window that has now passed, so it cannot ground a production answer.
+    if (card.review_expires_at != null && typeof card.review_expires_at !== 'string') return false
     const expiresOn = card.review_expires_at?.slice(0, 10)
+    if (card.review_expires_at != null && (!expiresOn || !/^\d{4}-\d{2}-\d{2}$/.test(card.review_expires_at)
+      || !Number.isFinite(Date.parse(`${expiresOn}T00:00:00Z`))
+      || new Date(`${expiresOn}T00:00:00Z`).toISOString().slice(0, 10) !== expiresOn)) return false
     if (expiresOn && expiresOn < ctx.today) return false
   } else if (!['active', 'needs_review', 'reviewed'].includes(card.status)) {
     return false
