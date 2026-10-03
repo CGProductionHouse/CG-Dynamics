@@ -203,10 +203,10 @@ export function GuidedStrategyEditor({
       {/* 3. Strategy going forward */}
       <Section
         title="Strategy going forward"
-        subtitle="Pick the drivers, generate an editable draft, then refine."
+        subtitle="Write the objective, core message and intended test first. Notes and caption rules are not a strategy."
         action={
           <button type="button" onClick={handleGenerateStrategy} disabled={!context.packageSettings} className={GENERATE_BTN}>
-            Generate draft
+            Use written brief
           </button>
         }
       >
@@ -231,7 +231,7 @@ export function GuidedStrategyEditor({
       {/* 4. Action plan */}
       <Section
         title="Action plan"
-        subtitle="Auto-generated from the package, then fully editable."
+        subtitle="Your package sets capacity, not the concept. Add a specific idea for each format; existing work is preserved."
         action={
           <button type="button" onClick={handleGenerateActionPlan} disabled={!context.packageSettings} className={GENERATE_BTN}>
             Generate from package

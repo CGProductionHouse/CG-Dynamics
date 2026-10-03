@@ -373,18 +373,6 @@ export function assessGoldStandardStrategy(
 
 // ─── draft generators ────────────────────────────────────────────────────────
 
-function lowerFirst(text: string) {
-  return text ? text.charAt(0).toLowerCase() + text.slice(1) : text
-}
-
-function joinList(items: string[]): string {
-  const clean = items.map(i => i.trim()).filter(Boolean)
-  if (clean.length === 0) return ''
-  if (clean.length === 1) return clean[0]
-  if (clean.length === 2) return `${clean[0]} and ${clean[1]}`
-  return `${clean.slice(0, -1).join(', ')} and ${clean[clean.length - 1]}`
-}
-
 interface GenerateContext {
   clientName: string
   data: StrategyData
@@ -393,85 +381,38 @@ interface GenerateContext {
 }
 
 /**
- * Draft, editable "Strategy going forward" paragraph synthesised from client
- * direction, the top content insight, why-it-worked selections and any chosen
- * calendar suggestions. Always editable afterwards.
+ * Assemble explicitly written strategy fields, not a marketing recommendation.
+ * Preserve an existing staff draft. Guide snippets, calendar dates, quantity
+ * and a top-post snapshot alone do not prove a business objective or causation.
  */
 export function generateStrategyGoingForward(ctx: GenerateContext): string {
-  const { data, selectedCalendar } = ctx
-  const parts: string[] = []
-
-  const drivers = joinList(data.strategyDrivers.map(lowerFirst))
-  const direction = joinList(data.clientDirection.map(lowerFirst))
-  const why = joinList(data.topContent.whyItWorked.map(lowerFirst))
-  const dates = joinList(selectedCalendar.filter(s => s.use).map(s => s.title))
-
-  let opening = 'Based on this period’s results'
-  if (direction) opening += ` and the client’s focus on ${direction}`
-  opening += ', the strategy going forward is'
-
-  if (drivers) {
-    opening += ` to ${drivers}`
-  } else if (why) {
-    opening += ` to build on what worked - ${why}`
-  } else {
-    opening += ' to build on the strongest performing content and keep momentum'
-  }
-  parts.push(`${opening}.`)
-
-  if (why && drivers) {
-    parts.push(`This period’s best response came from content that was ${why}, so we will lean further into that.`)
-  }
-  if (dates) {
-    parts.push(`We will also prepare timely content around ${dates}.`)
-  }
-
-  return parts.join(' ')
-}
-
-const ACTION_DEFAULTS: Record<ActionPlanKey, string> = {
-  professional_video: 'Plan and shoot the professional video deliverable(s) for the month.',
-  reels: 'Produce short-form reels, prioritising the strongest performing style.',
-  photo_content: 'Capture photo content that showcases the product, service or real business experience.',
-  design_poster: 'Design posters that support the client’s current offer or key dates.',
-  animated_poster: 'Produce animated posters for the most important announcement(s).',
-  campaign_recommendation: 'No paid campaign recommended this month unless the client confirms a budget.',
+  const { data } = ctx
+  if (data.strategyGoingForward.trim()) return data.strategyGoingForward
+  const parts = [data.goldStandard.objective, data.goldStandard.coreMessage, data.goldStandard.testAndChange]
+  if (parts.some(value => value.trim().length < 20) || clientFacingStrategyQualityIssues(data).length > 0) return ''
+  return parts.map(value => value.trim()).join('\n\n')
 }
 
 /**
- * Draft action plan. Enables a section when the package includes that
- * deliverable, and seeds an editable default line plus the package quantity.
- * Campaign section is enabled when campaign management is included.
+ * Package capacity is not a content concept. Open confirmed format sections,
+ * retaining written concepts and notes verbatim, without invented default tasks.
+ * Unknown/zero scope stays disabled; retained staff text is never discarded.
  */
 export function generateActionPlan(
   ctx: GenerateContext
 ): Record<ActionPlanKey, ActionPlanSection> {
   const pkg = ctx.packageSettings
-  const dateTitles = ctx.selectedCalendar.filter(s => s.use).map(s => s.title)
-  const dateLine = dateTitles.length > 0 ? `Tie content to: ${joinList(dateTitles)}.` : ''
-
-  const make = (key: ActionPlanKey, enabled: boolean, qty?: number | null): ActionPlanSection => {
-    const items: string[] = []
-    const base = ACTION_DEFAULTS[key]
-    items.push(qty && qty > 0 ? `${base} (${qty} this month)` : base)
-    if (dateLine && key !== 'campaign_recommendation') items.push(dateLine)
-    return { enabled, items, notes: '' }
+  const make = (key: ActionPlanKey, enabled: boolean): ActionPlanSection => {
+    const existing = ctx.data.actionPlan[key]
+    return { enabled, items: [...existing.items], notes: existing.notes }
   }
 
   return {
-    professional_video: make('professional_video', typeof pkg.professional_videos_per_month === 'number' && pkg.professional_videos_per_month > 0, pkg.professional_videos_per_month),
-    reels: make('reels', typeof pkg.reels_per_month === 'number' && pkg.reels_per_month > 0, pkg.reels_per_month),
-    photo_content: make('photo_content', typeof pkg.photo_posts_per_month === 'number' && pkg.photo_posts_per_month > 0, pkg.photo_posts_per_month),
-    design_poster: make('design_poster', typeof pkg.design_posters_per_month === 'number' && pkg.design_posters_per_month > 0, pkg.design_posters_per_month),
-    animated_poster: make('animated_poster', typeof pkg.animated_posters_per_month === 'number' && pkg.animated_posters_per_month > 0, pkg.animated_posters_per_month),
-    campaign_recommendation: {
-      enabled: pkg.campaign_management_included === true,
-      items: [
-        pkg.campaign_management_included === true && typeof pkg.monthly_campaign_budget === 'number' && pkg.monthly_campaign_budget > 0
-          ? `Manage the monthly campaign budget of R${pkg.monthly_campaign_budget.toLocaleString('en-ZA')}.`
-          : ACTION_DEFAULTS.campaign_recommendation,
-      ],
-      notes: '',
-    },
+    professional_video: make('professional_video', typeof pkg.professional_videos_per_month === 'number' && pkg.professional_videos_per_month > 0),
+    reels: make('reels', typeof pkg.reels_per_month === 'number' && pkg.reels_per_month > 0),
+    photo_content: make('photo_content', typeof pkg.photo_posts_per_month === 'number' && pkg.photo_posts_per_month > 0),
+    design_poster: make('design_poster', typeof pkg.design_posters_per_month === 'number' && pkg.design_posters_per_month > 0),
+    animated_poster: make('animated_poster', typeof pkg.animated_posters_per_month === 'number' && pkg.animated_posters_per_month > 0),
+    campaign_recommendation: make('campaign_recommendation', pkg.campaign_management_included === true),
   }
 }

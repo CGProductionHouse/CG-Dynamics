@@ -270,7 +270,8 @@ export async function prepareMonthlyStrategySeed(clientId: string, month: string
   }
 
   const strategyData = emptyStrategyData()
-  strategyData.clientDirection = baseline.clientDirection
+  // Source notes remain staff evidence below; they are not automatically a
+  // customer objective, audience, message or approved monthly strategy.
   strategyData.topContent = previous.topContent
   const topPost = previousPosts[0]
   if (topPost) {
@@ -289,7 +290,6 @@ export async function prepareMonthlyStrategySeed(clientId: string, month: string
   if (!strategyData.topContent.whatThisTellsUs && typeof reportResult.data?.performance_comments === 'string') {
     strategyData.topContent.whatThisTellsUs = reportResult.data.performance_comments
   }
-  strategyData.strategyDrivers = baseline.strategyDrivers
   strategyData.calendarSelections = calendar.selections
   strategyData.actionPlan = generateActionPlan({
     clientName: clientResult.data.name,
@@ -316,14 +316,8 @@ export async function prepareMonthlyStrategySeed(clientId: string, month: string
     .map(([count, label]) => `${count} ${label}`)
     .join(', ')
   const confirmedPackageMix = packageMix || 'no quantitatively confirmed deliverables'
-  strategyData.goldStandard.objective = baseline.clientDirection[0]
-    ? `${clientResult.data.name}: ${baseline.clientDirection[0]}`
-    : ''
-  strategyData.goldStandard.formatsAndRationale = `Work within ${clientResult.data.name}’s confirmed monthly package of ${confirmedPackageMix}; staff must tie each selected format to an evidenced objective before approval.`
-  strategyData.goldStandard.testAndChange = previous.topContent.whatThisTellsUs
-    ? `Use the previous exact-client finding “${previous.topContent.whatThisTellsUs}” to define one controlled change for ${clientResult.data.name}.`
-    : ''
-  strategyData.goldStandard.nextMonthGamePlan = `Plan and sequence only the confirmed ${confirmedPackageMix}. ${packageSettings.package_exclusions ? `Excluded: ${packageSettings.package_exclusions}` : 'No additional scope may be inferred.'}`
+  // Leave strategy decisions genuinely unwritten. Capacity and prior findings
+  // are inputs to a researched decision, not a completed plan or causal claim.
   baseline.evidence.push({
     authority: 'confirmed_client_package',
     source_id: clientId,
