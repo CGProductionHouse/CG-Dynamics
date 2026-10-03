@@ -8,7 +8,7 @@ const read = (path) => readFileSync(new URL(path, import.meta.url), 'utf8')
 const migration = read('../supabase/migrations/20261003010000_website_lead_breakdown.sql')
 const card = read('../src/components/website/WebsiteLeadBreakdownCard.tsx')
 const db = read('../src/lib/db/websiteLeads.ts')
-const panel = read('../src/components/admin/WebsitePerformancePanel.tsx')
+const panel = read('../src/components/website/WebsitePerformanceDashboard.tsx') + read('../src/components/admin/WebsitePerformancePanel.tsx')
 const clientPage = read('../src/pages/client/ClientLeadsPage.tsx')
 const runner = read('../scripts/website-lead-lifecycle-acceptance.mjs')
 const workflow = read('../.github/workflows/website-enquiry-transaction.yml')
@@ -83,7 +83,10 @@ test('UI degrades to nothing when the RPC is unapplied and is shown to staff and
   assert.match(card, /current\?\.state === 'unavailable'/)
   assert.match(card, /low sample/)
   assert.match(panel, /<WebsiteLeadBreakdownCard clientId=\{clientId\}/)
-  assert.match(clientPage, /<WebsiteLeadBreakdownCard clientId=\{null\}/)
+  // Client route renders <LeadInbox /> with clientId defaulting to null (server-pinned to the signed-in client).
+  assert.match(clientPage, /<WebsiteLeadBreakdownCard clientId=\{clientId\}/)
+  assert.match(clientPage, /export default function ClientLeadsPage\(\) \{\s*return <LeadInbox \/>/)
+  assert.match(clientPage, /clientId = null/)
 })
 
 test('PostgreSQL acceptance and CI cover the breakdown', () => {
