@@ -33,14 +33,14 @@ export function parseServiceEntitlements(data: unknown): ServiceEntitlement[] {
       connection: row.connection as ServiceEntitlement['connection'], verified_at: row.verified_at as string | null, requested_at: row.requested_at as string | null }
   })
 }
-export const SERVICE_COPY: Record<ServiceKey, { name: string; benefit: string; value: string; icon: 'linkedin' | 'google' | 'facebook' | 'instagram' | 'tiktok' | 'web' }> = {
+export const SERVICE_COPY: Record<ServiceKey, { name: string; opportunityName?: string; benefit: string; value: string; icon: 'linkedin' | 'google' | 'facebook' | 'instagram' | 'tiktok' | 'web' }> = {
   linkedin: { name: 'LinkedIn', icon: 'linkedin', benefit: 'Build credibility with professional decision-makers. Share your expertise, grow your network and support recruitment with a considered business presence.', value: 'A professional voice for your business.' },
   google_ads: { name: 'Google Ads', icon: 'google', benefit: 'Reach people already searching for what you offer. A focused paid-search plan can connect relevant searches with calls and enquiries, with measurement built in.', value: 'Intent-led search, with clear measurement.' },
   meta_ads: { name: 'Meta Ads', icon: 'facebook', benefit: 'Give strong creative a targeted audience. Explore local reach and relevant retargeting through paid Facebook and Instagram campaigns, separate from organic content.', value: 'Targeted distribution for your campaign creative.' },
   instagram: { name: 'Instagram', icon: 'instagram', benefit: 'Help people discover the visual side of your brand. Showcase your work through a cohesive feed, Stories and Reels that make your business recognisable.', value: 'A visual home for your brand story.' },
   tiktok: { name: 'TikTok', icon: 'tiktok', benefit: 'Bring your business to life through native short-form video. Build discovery with useful, engaging stories shaped for how people watch on TikTok.', value: 'Short-form stories made for discovery.' },
   google_business_profile: { name: 'Google Business Profile', icon: 'google', benefit: 'Make local discovery easier on Google Search and Maps. Keep your presence useful for people looking for directions, contact details and reviews.', value: 'A clear local presence on Search and Maps.' },
-  website_digital_experience: { name: 'Premium CG-built website', icon: 'web', benefit: 'Give your brand a premium digital home, built by CG. Explore a website shaped around your business, with a clear enquiry journey and an agreed measurement plan. Scope and pricing are confirmed with you before anything is added to your package.', value: 'Your brand. A premium CG-built destination.' },
+  website_digital_experience: { name: 'Website / Digital Experience', opportunityName: 'Premium CG-built website', icon: 'web', benefit: 'Give your brand a premium digital home, built by CG. Explore a website shaped around your business, with a clear enquiry journey and an agreed measurement plan. Scope and pricing are confirmed with you before anything is added to your package.', value: 'A considered digital destination and enquiry journey.' },
 }
 
 export function servicePresentation(item: ServiceEntitlement) {

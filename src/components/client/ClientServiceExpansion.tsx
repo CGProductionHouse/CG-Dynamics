@@ -58,7 +58,7 @@ export function ServiceStory({ item, surface }: { item: ServiceEntitlement; surf
   }
   return <article className={`grid gap-5 py-8 sm:gap-8 sm:py-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.65fr)] ${presentation.kind === 'opportunity' ? 'bg-gradient-to-r from-transparent to-[#b77949]/[0.035]' : ''}`}>
     <div>
-      <div className="flex items-center gap-3"><PerformanceProviderIcon provider={copy.icon} /><h3 className="text-xl font-bold text-report-text sm:text-2xl">{copy.name}</h3></div>
+      <div className="flex items-center gap-3"><PerformanceProviderIcon provider={copy.icon} /><h3 className="text-xl font-bold text-report-text sm:text-2xl">{presentation.kind === 'opportunity' ? copy.opportunityName ?? copy.name : copy.name}</h3></div>
       <p className={`mt-3 text-xs font-semibold tracking-wide ${presentation.kind === 'connected' ? 'text-report-accent' : 'text-report-muted'}`}>{presentation.label}</p>
     </div>
     <div className="min-w-0">
