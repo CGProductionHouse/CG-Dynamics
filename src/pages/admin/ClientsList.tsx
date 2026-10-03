@@ -23,7 +23,7 @@ import { ClientLogo } from '../../components/ClientLogo'
 import { PACKAGE_NUMBER_FIELDS, type PackageVerificationReceipt } from '../../lib/packageAuthority'
 import { loadActiveClientPackageEvidenceMatrix, type ActiveClientPackageEvidence } from '../../lib/packageEvidence'
 import { PackageEvidenceReviewModal } from '../../components/clients/PackageEvidenceReviewModal'
-import { findClientNameConflict, clientSaveFailureMessage } from '../../lib/clientRegistrySafety'
+import { findClientNameConflict, clientSaveFailureMessage, parseBulkClientNames } from '../../lib/clientRegistrySafety'
 
 function errorMessage(_error: unknown, fallback: string) {
   return fallback
@@ -998,28 +998,6 @@ function ConfirmModal({
 
 // Bulk import modal
 
-function parseBulkText(text: string, existingClients: Client[]) {
-  const lines = text.split('\n').map(l => l.trim()).filter(Boolean)
-  const seen = new Set<string>()
-  const unique: string[] = []
-  const inListDupes: string[] = []
-  for (const line of lines) {
-    const key = line.toLowerCase()
-    if (seen.has(key)) {
-      inListDupes.push(line)
-    } else {
-      seen.add(key)
-      unique.push(line)
-    }
-  }
-  const activeLower = new Set(existingClients.filter(c => c.active).map(c => c.name.toLowerCase()))
-  const archivedLower = new Set(existingClients.filter(c => !c.active).map(c => c.name.toLowerCase()))
-  const toAdd = unique.filter(n => !activeLower.has(n.toLowerCase()) && !archivedLower.has(n.toLowerCase()))
-  const toSkip = unique.filter(n => activeLower.has(n.toLowerCase()))
-  const toRestoreInstead = unique.filter(n => archivedLower.has(n.toLowerCase()))
-  return { toAdd, toSkip, inListDupes, toRestoreInstead }
-}
-
 type BulkDraft = { text: string; tier: 'standard' | 'premium' }
 
 function BulkImportModal({
@@ -1041,7 +1019,7 @@ function BulkImportModal({
   const [result, setResult] = useState<{ added: string[]; failed: string[] } | null>(null)
 
   const { toAdd, toSkip, inListDupes, toRestoreInstead } = useMemo(
-    () => parseBulkText(text, clients),
+    () => parseBulkClientNames(text, clients),
     [text, clients]
   )
 

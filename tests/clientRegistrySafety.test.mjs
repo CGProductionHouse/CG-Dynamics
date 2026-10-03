@@ -3,10 +3,10 @@ import { after, before, test } from 'node:test'
 import { readFile } from 'node:fs/promises'
 import { createServer } from 'vite'
 
-let server, findClientNameConflict, clientSaveFailureMessage
+let server, findClientNameConflict, clientSaveFailureMessage, parseBulkClientNames
 before(async () => {
   server = await createServer({ logLevel: 'error', optimizeDeps: { noDiscovery: true, include: [] }, server: { middlewareMode: true, hmr: false }, appType: 'custom' })
-  ;({ findClientNameConflict, clientSaveFailureMessage } = await server.ssrLoadModule('/src/lib/clientRegistrySafety.ts'))
+  ;({ findClientNameConflict, clientSaveFailureMessage, parseBulkClientNames } = await server.ssrLoadModule('/src/lib/clientRegistrySafety.ts'))
 })
 after(async () => { await server?.close() })
 
@@ -22,6 +22,12 @@ test('similar historical names are not auto-merged or treated as exact identity'
   assert.equal(findClientNameConflict(clients, 'Madison Wear'), undefined)
   assert.equal(findClientNameConflict(clients, 'Local Deli'), undefined)
   assert.equal(findClientNameConflict(clients, 'Red Oak Rugby Club'), undefined)
+})
+
+test('bulk add uses the same normalized-name reservation for active and archived rows', () => {
+  assert.deepEqual(parseBulkClientNames('red oak\n MADISONS \nMadison Wear\nmadison wear', [
+    { name: ' Red Oak ', active: true }, { name: ' Madisons ', active: false },
+  ]), { toAdd: ['Madison Wear'], toSkip: ['red oak'], toRestoreInstead: ['MADISONS'], inListDupes: ['madison wear'] })
 })
 
 test('concurrent database collision gets actionable truthful feedback; other errors stay errors', () => {
