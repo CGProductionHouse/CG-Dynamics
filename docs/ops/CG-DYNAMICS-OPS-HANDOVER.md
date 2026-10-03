@@ -1,5 +1,21 @@
 # CG Dynamics Ops Handover
 
+## Highest-priority hosting override — #679, 3 October 2026
+
+CA requires local-first development and ZERO unapproved cloud builds. Read
+`HOSTING-BUDGET-AND-UPTIME-POLICY.md`; it supersedes old automatic-deploy/fresh-Vercel
+instructions. Dynamics Git deployments are disabled by the #679 configuration guard
+once merged; CLI/dashboard bypasses remain protected. No current deployment is paused
+or replaced by that guard. Other repositories require explicit guard verification.
+
+All 15 projects previously auto-paused by the $1 team cap were resumed under CA
+authorization (#381 comment 5973461433). Piek, All Around PVC, Emmanuel, Red Oak,
+Dynamics and Hours rechecked HTTP 200 on 3 October; no second outage reproduced.
+Temporary $5 on-demand cap still has Pause ON: shared-team production remains at
+risk if exhausted. Do not promise uninterrupted service or silently remove the cap.
+Protected next decision: isolate production/development spend or approve a sustainable
+fixed-cost serving plan. Do not change billing, DNS, hosting, retention or secrets.
+
 Status: **CURRENT authority for a fresh supervisor chat**
 
 Updated: **3 October 2026, after direct Codex registry completion and #656 launch-finisher assignment**
