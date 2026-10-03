@@ -16,6 +16,7 @@ import {
 import { getReportMonthFromPeriod, monthDisplayLabel, previousReportMonth, selectMonthlyReports } from '../../lib/reportPeriod'
 import { ClientDashboardShell, ClientReportView, type MonthlyStrategyPresentation } from '../client/ClientReportView'
 import { ClientMonthAhead } from '../../components/client/ClientMonthAhead'
+import { ClientPackageSummary } from '../../components/client/ClientPackageSummary'
 import { EmptyState } from '../../components/ui/States'
 import {
   loadGoogleAdsDashboard,
@@ -494,6 +495,7 @@ export default function PublishedPreview() {
               showEmptyStrategy
               showAdminDiagnostics={mode === 'staff' && isStaff}
             />
+            <ClientPackageSummary packageSettings={selectedClient?.package_settings} />
             {selectedClientId && <ClientMonthAhead clientId={selectedClientId} />}
           </ClientDashboardShell>
         </div>
