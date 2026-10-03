@@ -5,6 +5,8 @@ import { businessMonthKey } from '../../lib/businessTime'
 import ClientContentCalendarPage from './ClientContentCalendarPage'
 import ClientContentGuidesPage from './ClientContentGuidesPage'
 import ClientStrategyPage from './ClientStrategyPage'
+import { useClientPortal } from '../../components/client/ClientPortalContext'
+import { ClientPackageSummary } from '../../components/client/ClientPackageSummary'
 
 const MONTH_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/
 const PLAN_TABS = [
@@ -25,6 +27,7 @@ function shiftMonth(month: string, amount: number) {
 }
 
 export default function ClientPlanPage() {
+  const { client } = useClientPortal()
   const [searchParams, setSearchParams] = useSearchParams()
 
   const requestedMonth = searchParams.get('month')
@@ -80,6 +83,7 @@ export default function ClientPlanPage() {
         </div>
       </section>
 
+      <ClientPackageSummary packageSettings={client?.package_settings} />
       <div className="mt-6 overflow-x-auto pb-1" aria-label="Plan sections">
         <div role="tablist" className="flex min-w-max w-fit gap-1 rounded-full border border-white/[0.08] bg-white/[0.035] p-1">
           {PLAN_TABS.map(item => (

@@ -83,3 +83,14 @@ Focused strategy/package/workflow suites: 55 pass. Full suite: 3,604 tests,
 3,587 pass, 17 skip, zero failures; same Windows Bash fixture limitation above.
 Build, scoped lint and diff check pass. This is a truth correction, not completion
 of researched strategy synthesis or an endorsement of the 72 stored drafts.
+
+## Exact package presentation
+
+Plan and selected-client report preview now share a read-only package summary
+from the existing confirmed package authority. Fixed quantities, explicit zero
+and unknown/null remain distinct. Campaign inclusion preserves its three states.
+Private source receipts, notes and IDs are not rendered. Capacity is labelled
+separately from actually scheduled work; no contractual scope is inferred.
+99 focused portal/package checks pass. Full suite: 3,606 tests / 3,589 pass /
+17 skip / zero failures, with the same Windows-only Bash exclusion. Build,
+scoped lint and diff check pass. Full portal preview remains outstanding.
