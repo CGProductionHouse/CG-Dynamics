@@ -74,6 +74,7 @@ export async function applyAutomaticMicrosoftMirrors(db: Db, snapshot: Microsoft
     ? { data: { id: existingRunId }, error: null }
     : await db.from('microsoft_sync_runs').insert({
       trigger_type: 'agent', status: 'applying', snapshot_exported_at: snapshot.exportedAt,
+      snapshot_exported_by: snapshot.exportedBy, requested_by: systemUserId,
       source_completeness: snapshot.sources, preview_job_id: previewJobId,
       automatic_recovery_count: 0, automatic_recovery_after: automaticApplyLeaseDeadline(new Date().toISOString()),
       summary: { automatic: true, reviewed: items.length, clientScheduleExcluded, conflicts }, reviewed_items: [],

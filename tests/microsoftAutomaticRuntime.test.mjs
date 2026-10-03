@@ -183,6 +183,9 @@ function database(rows = fleet()) {
         then(resolve, reject) {
           try {
             if (failRead === table && mode === 'read') return Promise.resolve({ data: null, error: { message: 'read failed' } }).then(resolve, reject)
+            if (mode === 'insert' && table === 'microsoft_sync_runs' && typeof inserted.snapshot_exported_by !== 'string') {
+              return Promise.resolve({ data: null, error: { code: '23502', message: 'snapshot_exported_by violates not-null constraint' } }).then(resolve, reject)
+            }
             if (mode === 'insert') tables[table].push(inserted)
             let selected = tables[table].filter(r => filters.every(f => f(r))).slice(range[0], range[1] + 1)
             if (mode === 'update') {
@@ -211,6 +214,36 @@ function database(rows = fleet()) {
   }
   return db
 }
+
+test('automatic apply persists canonical exporter and approved system attribution required by production', async () => {
+  const rows = fleet().map(s => ({ ...s, records: s.records.slice(0, 1), record_count: 1 }))
+  const input = automatic.assembleAutomaticSnapshot(rows, {}, now)
+  const db = database(rows)
+  const result = await applyMirrors(db, input, 'job', 'system-user')
+  assert.equal(result.status, 'completed')
+  assert.equal(db.tables.microsoft_sync_runs.length, 1)
+  const run = db.tables.microsoft_sync_runs[0]
+  assert.equal(run.snapshot_exported_by, input.exportedBy)
+  assert.equal(run.snapshot_exported_at, input.exportedAt)
+  assert.equal(run.requested_by, 'system-user')
+  assert.equal(run.preview_job_id, 'job')
+  assert.equal(run.trigger_type, 'agent')
+  assert.deepEqual(run.source_completeness, input.sources)
+  assert.equal(result.clientScheduleExcluded, 2)
+})
+
+test('missing canonical exporter fails closed before any mirror application', async () => {
+  const rows = fleet().map(s => ({ ...s, records: s.records.slice(0, 1), record_count: 1 }))
+  const input = { ...automatic.assembleAutomaticSnapshot(rows, {}, now), exportedBy: null }
+  const db = database(rows)
+  const result = await applyMirrors(db, input, 'job', 'system-user')
+  assert.equal(result.status, 'failed')
+  assert.equal(result.runId, null)
+  assert.match(result.error, /snapshot_exported_by/)
+  assert.equal(db.tables.microsoft_sync_runs.length, 0)
+  assert.equal(db.calls.some(c => c.rpc), false)
+  assert.equal(db.mutations, 0)
+})
 
 test('actual automatic snapshot loader never reads protected payloads and preserves all source counts', async () => {
   const db = database()
@@ -252,7 +285,12 @@ test('completed upstream tasks apply done by exact IDs; cancellation, idempotenc
   assert.ok(db.calls.some(c => c.rpc && c.args.p_action === 'cancel' && c.args.p_patch.status === 'cancelled'))
   assert.ok(db.mutations >= writesBeforeRecovery)
   const mutations = db.mutations
+  const originalExporter = db.tables.microsoft_sync_runs[0].snapshot_exported_by
+  const originalRequester = db.tables.microsoft_sync_runs[0].requested_by
   await applyMirrors(db, current, 'job', 'system-user', 'run-0', 0)
+  assert.equal(db.tables.microsoft_sync_runs.length, 1)
+  assert.equal(db.tables.microsoft_sync_runs[0].snapshot_exported_by, originalExporter)
+  assert.equal(db.tables.microsoft_sync_runs[0].requested_by, originalRequester)
   assert.equal(db.mutations, mutations, 'exact audit item keys prevent duplicate application on replay')
   assert.ok(db.calls.filter(c => c.rpc).every(c => c.args.p_patch.client_id === undefined || c.args.p_patch.client_id === null || c.args.p_patch.client_id === 'fixture-client'))
   assert.equal(db.tables.microsoft_sync_runs[0].source_completeness.length, 6)
