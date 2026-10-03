@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { basename, join, resolve } from 'node:path'
+import { extractStrategyDossierEvidence } from './lib/strategyDossierEvidence.mjs'
 
 const ROOT = resolve(import.meta.dirname, '..')
 const INTELLIGENCE_DIR = join(ROOT, 'docs/ai-workforce/client-intelligence')
@@ -131,10 +132,6 @@ function parseRows() {
   })
 }
 
-function clean(text) {
-  return text.replace(/\[([^\]]+)]\([^\)]+\)/g, '$1').replace(/[*_`>#]/g, '').replace(/\s+/g, ' ').trim()
-}
-
 function findLocalResearch(row) {
   const runtime = join(RUNTIME_GUIDE_DIR, `${slug(row.name)}.md`)
   if (existsSync(runtime)) return runtime
@@ -159,33 +156,6 @@ function findLocalResearch(row) {
     return tokens.length > 0 && tokens.every(token => normalized.includes(token))
   })
   return candidates.length === 1 ? join(INTELLIGENCE_DIR, candidates[0]) : null
-}
-
-function extractEvidence(markdown, runtimeGuide = false) {
-  const sections = { facts: [], constraints: [], observations: [], recommendations: [] }
-  let bucket = runtimeGuide ? null : 'facts'
-  for (const raw of markdown.split(/\r?\n/)) {
-    const heading = raw.match(/^#{1,4}\s+(.+)/)?.[1]?.toLowerCase()
-    if (heading) {
-      if (/avoid|constraint|guardrail|must not|risk|compliance|freshness|unknown|confirm/.test(heading)) bucket = 'constraints'
-      else if (/recommend|strategy|opportunit|content pillar|content that suits|campaign|next step|plan|caption|poster|reels?|video|seo|working rule|creative|project instructions/.test(heading)) bucket = 'recommendations'
-      else if (/performance|observation|competitor|pattern|signal|what happened/.test(heading)) bucket = 'observations'
-      else if (!runtimeGuide || /business|brand|audience|product|service|offer|voice|identity|history|evidence|website|social|client truth|current|what .* is/.test(heading)) bucket = 'facts'
-      else if (!bucket) bucket = null
-      continue
-    }
-    if (!bucket) continue
-    const isListItem = /^\s*(?:[-*]|\d+\.)\s+/.test(raw)
-    if (!isListItem && !(runtimeGuide && bucket === 'recommendations' && raw.trim().length >= 40)) continue
-    const cleaned = clean(isListItem ? raw.replace(/^\s*(?:[-*]|\d+\.)\s+/, '') : raw)
-    const values = isListItem ? [cleaned] : cleaned.split(/(?<=[.!?])\s+/)
-    for (const value of values) {
-      if (value.length < 28 || value.length > 320 || /^(file|commit|issue|branch|status|source|date|scope):/i.test(value)) continue
-      if (runtimeGuide && (/\.(?:md|tsx?|mjs|json)\b|github\.com\/CGProductionHouse\/CG-Dynamics\/(?:issues|pull)\//i.test(value))) continue
-      if (!sections[bucket].includes(value) && sections[bucket].length < 6) sections[bucket].push(value)
-    }
-  }
-  return sections
 }
 
 function packageLines(pkg) {
@@ -220,7 +190,7 @@ for (const row of rows) {
   const guidePath = findLocalResearch(row)
   const guide = guidePath ? readFileSync(guidePath, 'utf8') : ''
   const runtimeGuide = guidePath?.startsWith(RUNTIME_GUIDE_DIR)
-  const extracted = guide ? extractEvidence(guide, runtimeGuide) : { facts: [], constraints: [], observations: [], recommendations: [] }
+  const extracted = extractStrategyDossierEvidence(guide, runtimeGuide)
   for (const key of ['facts', 'constraints', 'recommendations']) {
     for (const value of special?.[key] ?? []) if (!extracted[key].includes(value)) extracted[key].push(value)
   }
@@ -267,6 +237,10 @@ ${bullet(extracted.constraints)}
 ## Research observations
 
 ${bullet(extracted.observations)}
+
+## Internal voice and production guidance — not strategy
+
+${bullet(extracted.internalGuidance)}
 
 ## Evidence-backed recommendations
 

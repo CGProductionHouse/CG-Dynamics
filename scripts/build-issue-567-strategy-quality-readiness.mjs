@@ -49,14 +49,18 @@ const neshora = JSON.parse(readFileSync(NESHORA, 'utf8'))
 const current = JSON.parse(readFileSync(CURRENT, 'utf8'))
 const currentByIdentity = new Map(current.rows.map(row => [`${row.client_id}:${row.strategy_month}`, row]))
 const proposals = [
-  ...fleet.rows.filter(row => row.disposition === 'ready').map(row => ({ ...row, proposed_hash: row.proposed_strategy_hash })),
+  // Keep blocked social rows in the matrix: extraction becoming more honest
+  // must not silently remove clients from the readiness denominator.
+  ...fleet.rows.filter(row => ['ready', 'blocked'].includes(row.disposition)).map(row => ({ ...row, proposed_hash: row.proposed_strategy_hash ?? null })),
   ...neshora.rows.map(row => ({ ...row, proposed_hash: sha(row.proposed_strategy_data) })),
 ]
 
 const rows = proposals.map(proposal => {
   const identity = `${proposal.client_id}:${proposal.strategy_month}`
   const live = currentByIdentity.get(identity)
-  const errors = qualityErrors(proposal.proposed_strategy_data)
+  const errors = proposal.disposition === 'blocked'
+    ? ['INSUFFICIENT_EXACT_STRATEGY_EVIDENCE']
+    : qualityErrors(proposal.proposed_strategy_data)
   const matches = live?.strategy_hash === proposal.proposed_hash
   return {
     client_id: proposal.client_id,

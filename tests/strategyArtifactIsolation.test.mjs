@@ -20,6 +20,11 @@ test('all strategy generators execute without modifying any frozen reviewed evid
     'build-neshora-strategy-readiness-dry-run', 'build-issue-567-strategy-quality-readiness',
   ])
   assert.equal(JSON.parse(readArtifact('index.json')).active_client_count, 57)
-  assert.equal(JSON.parse(readArtifact('issue-567-sep-oct-strategy-quality-readiness.json')).rows.length, 94)
+  const readiness = JSON.parse(readArtifact('issue-567-sep-oct-strategy-quality-readiness.json'))
+  assert.equal(readiness.rows.length, 94)
+  const piek = readiness.rows.filter(row => row.client_name === 'Piek Group')
+  assert.equal(piek.length, 2)
+  assert.ok(piek.every(row => row.quality_status === 'blocked' && row.canonical_readiness === 'blocked'))
+  assert.ok(piek.every(row => row.reviewed_strategy_hash === null))
   assert.deepEqual(snapshot(directory), before)
 })

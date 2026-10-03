@@ -27,10 +27,11 @@ test('uses the exact #515/#516 client partition', () => {
   assert.equal(eligible.size, 46)
   assert.equal(clientNames('CONFIRMED_NO_RECURRING_SOCIAL_SERVICE_SCOPE').size, 10)
   assert.equal(clientNames('ISSUE_516_SERVICE_SCOPE_HELD').size, 0)
-  assert.equal(plan.counts.ready, 92)
+  // Voice/footer instructions no longer qualify as strategic recommendation.
+  assert.equal(plan.counts.ready, 76)
   assert.equal(plan.counts.non_applicable, 20)
   assert.equal(plan.counts.held, 0)
-  assert.equal(plan.counts.blocked, 0)
+  assert.equal(plan.counts.blocked, 16)
 })
 
 test('ready proposals are evidence-linked and freeze both strategy and provenance preconditions', () => {
@@ -84,14 +85,13 @@ test('ready proposals contain a complete exact-client gold-standard brief', () =
   }
 })
 
-test('Piek proposals are client-ready and contain no repository or evidence-workflow filler', () => {
+test('Piek voice/asset instructions do not qualify as an authored strategy proposal', () => {
   const piek = plan.rows.filter(row => row.client_name === 'Piek Group')
   assert.equal(piek.length, 2)
   for (const row of piek) {
-    const text = JSON.stringify(row.proposed_strategy_data)
-    assert.match(text, /actual image\/video\/poster/i)
-    assert.match(text, /asset, branch, audience and occasion/i)
-    assert.doesNotMatch(text, /CGProductionHouse\/|github|repository|\.pdf\b|\.md\b|verified facts|exact-client evidence|evidence dossier|source pack|Correct facts are only the starting point/i)
+    assert.equal(row.disposition, 'blocked')
+    assert.equal(row.reason, 'INSUFFICIENT_EXACT_STRATEGY_EVIDENCE')
+    assert.equal(row.proposed_strategy_data, undefined)
   }
 })
 

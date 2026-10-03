@@ -121,3 +121,27 @@ paragraphs. Existing dossier-ready/readiness counts must not be interpreted
 as proof of researched strategic value. Fixing that briefing extraction and
 reviewing the substantive decisions remain part of #668/#513/#433, not a
 strategy publication authorization.
+
+## Briefing extraction: business evidence is not voice guidance
+
+The offline dossier path reproduced the same category error: voice bullets
+became verified facts, caption/footer instructions became recommendations,
+and useful business-description paragraphs were skipped. A pure extractor now
+retains business paragraphs, separates internal voice/contact/production guidance,
+resets unknown top-level guide sections, and preserves constraints independently.
+Actual We Ar Fuels and Daisy guides are executable fixtures. No new research,
+client facts, package scope or marketing claims are invented by this extraction.
+
+The newly extracted historical sandbox produces 76 compilable proposals, 16
+insufficient-evidence holds and 20 non-applicable rows. These are OFFLINE compiler
+results, not live fleet counts or human semantic acceptance. Piek's two rows stay
+blocked rather than passing on caption instructions. The readiness generator
+retains blocked clients in the 94-row denominator with no proposed hash; it must
+never silently drop them or manufacture a plan. Frozen reviewed artifacts and
+production strategy rows are unchanged. Previously reviewed amendment receipts
+remain historical evidence, not retroactively rewritten approvals.
+
+Substantive strategy synthesis and client-by-client semantic acceptance remain
+open: each written decision must connect a real objective, customer obstacle,
+evidenced angle, confirmed execution capacity and measurement to exact-client
+sources. A compile pass or lexical quality check is not that acceptance.
