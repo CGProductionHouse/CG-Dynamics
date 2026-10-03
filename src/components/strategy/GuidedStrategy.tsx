@@ -709,15 +709,18 @@ export function GuidedStrategyView({
     .filter(field => field.value)
 
   const report = variant === 'report'
-  const body = report ? 'text-report-text' : 'text-white'
-  const sub = report ? 'text-report-muted' : 'text-brand-primary'
-  const accent = report ? 'text-report-accent' : 'text-brand-accent'
+  const body = 'text-white'
+  const sub = 'text-slate-400'
+  const accent = 'text-teal-300'
 
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
+    <div className="grid min-w-0 gap-6 [overflow-wrap:anywhere] lg:grid-cols-2 lg:gap-8">
       {data.strategyGoingForward.trim() && (
         <ViewCard title="Strategy going forward" variant={variant} wide>
-          <p className={`text-[0.95rem] leading-relaxed whitespace-pre-line ${body}`}>{data.strategyGoingForward}</p>
+          <details open className="group">
+            <summary className="min-h-11 cursor-pointer py-2 text-sm font-semibold text-teal-300 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-300">Read the direction for this month</summary>
+            <p className={`mt-4 max-w-4xl text-lg leading-relaxed whitespace-pre-line ${body}`}>{data.strategyGoingForward}</p>
+          </details>
         </ViewCard>
       )}
 
@@ -738,12 +741,15 @@ export function GuidedStrategyView({
 
       {goldStandardFields.length > 0 && (
         <ViewCard title="Monthly strategy" variant={variant} wide>
-          <div className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
-            {goldStandardFields.map(field => (
-              <div key={field.key}>
-                <p className={`text-xs font-semibold uppercase tracking-[0.12em] ${accent}`}>{field.label}</p>
-                <p className={`mt-2 whitespace-pre-line text-sm leading-relaxed ${body}`}>{field.value}</p>
-              </div>
+          <p className="mb-5 text-sm leading-relaxed text-slate-400">Explore each part of the plan. Expand a heading to read the full direction.</p>
+          <div className="divide-y divide-white/10">
+            {goldStandardFields.map((field, index) => (
+              <details key={field.key} open={index === 0} className="group py-3">
+                <summary className="min-h-11 cursor-pointer py-3 text-base font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-300">
+                  <span className="mr-3 text-xs font-bold tabular-nums text-teal-300">{String(index + 1).padStart(2, '0')}</span>{field.label}
+                </summary>
+                <p className={`max-w-4xl pb-4 pt-2 whitespace-pre-line text-base leading-7 ${body}`}>{field.value}</p>
+              </details>
             ))}
           </div>
         </ViewCard>
@@ -783,10 +789,13 @@ export function GuidedStrategyView({
 
       {activePlans.length > 0 && (
         <ViewCard title="Action plan" variant={variant} wide>
-          <div className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
-            {activePlans.map(({ key, section }) => (
-              <div key={key}>
-                <p className={`text-sm font-semibold ${accent}`}>{ACTION_PLAN_LABELS[key]}</p>
+          <p className="mb-5 text-sm leading-relaxed text-slate-400">Choose a format to explore its planned work. Only enabled formats with an existing plan are shown.</p>
+          <div className="grid items-start gap-4 sm:grid-cols-2">
+            {activePlans.map(({ key, section }, planIndex) => (
+              <details key={key} open={planIndex === 0} className="min-w-0 rounded-2xl border border-white/10 bg-[#06110f] p-5">
+                <summary className="min-h-11 cursor-pointer py-2 text-lg font-bold text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-300">
+                  <span className="mr-3 text-xs font-bold tabular-nums text-orange-400">{String(planIndex + 1).padStart(2, '0')}</span>{ACTION_PLAN_LABELS[key]}
+                </summary>
                 {section.items.length > 0 && (
                   <ul className="mt-2 space-y-1.5">
                     {section.items.map((item, index) => (
@@ -800,7 +809,7 @@ export function GuidedStrategyView({
                 {section.notes.trim() && (
                   <p className={`mt-2 text-sm leading-relaxed whitespace-pre-line ${sub}`}>{section.notes}</p>
                 )}
-              </div>
+              </details>
             ))}
           </div>
         </ViewCard>
@@ -847,16 +856,13 @@ function ViewCard({
   variant?: ViewVariant
   wide?: boolean
 }) {
-  const report = variant === 'report'
-  const shell = report
-    ? 'rounded-2xl bg-report-surface p-6 shadow-[0_24px_50px_-38px_rgba(0,0,0,0.9)] sm:p-7'
-    : 'rounded-xl border border-brand-muted bg-brand-surface p-5 sm:p-6'
-  const heading = report
-    ? 'mb-4 font-display text-lg font-semibold text-report-text'
-    : 'mb-3 text-xs uppercase tracking-[0.18em] text-brand-primary'
+  const shell = 'min-w-0 rounded-[1.5rem] border border-white/10 bg-[#071311]/95 p-6 shadow-[0_24px_50px_-38px_rgba(0,0,0,0.9)] sm:p-8'
+  const heading = variant === 'report'
+    ? 'mb-5 text-2xl font-black tracking-tight text-white sm:text-3xl'
+    : 'mb-5 text-2xl font-bold tracking-tight text-white'
   return (
     <article className={`${shell} ${wide ? 'lg:col-span-2' : ''}`}>
-      <p className={heading}>{title}</p>
+      <h3 className={heading}>{title}</h3>
       {children}
     </article>
   )
@@ -864,16 +870,15 @@ function ViewCard({
 
 function ChipRow({ items, variant = 'default' }: { items: string[]; variant?: ViewVariant }) {
   const report = variant === 'report'
-  const chip = report
-    ? 'bg-report-accent/15 text-report-accent'
-    : 'border border-brand-accent/30 bg-brand-accent/10 text-brand-accent'
+  const itemStyle = report ? 'text-slate-200' : 'text-white'
   return (
-    <div className="flex flex-wrap gap-2">
+    <ul className="space-y-3">
       {items.map((item, index) => (
-        <span key={index} className={`rounded-full px-3 py-1 text-xs font-medium ${chip}`}>
-          {item}
-        </span>
+        <li key={index} className={`flex min-w-0 gap-3 text-sm leading-6 ${itemStyle}`}>
+          <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-teal-400" />
+          <span>{item}</span>
+        </li>
       ))}
-    </div>
+    </ul>
   )
 }
