@@ -53,6 +53,7 @@ import {
   type PerformanceProviderIconKey,
 } from '../../components/client/PerformanceProviderIcon'
 import { cgManagedWebsiteForClient, type CgManagedWebsite } from '../../lib/cgWebsiteFleet'
+import { websiteReportPresentation } from '../../lib/websiteReportPresentation'
 
 export type ReportTabKey = 'overview' | 'facebook' | 'instagram' | 'google' | 'tiktok' | 'linkedin' | 'web' | 'email'
 export interface MonthlyStrategyPresentation {
@@ -181,7 +182,7 @@ export function ClientReportView({
     ...(reportPlatforms.includes('instagram') ? [{ key: 'instagram' as const, label: 'Instagram', icon: 'instagram' as const }] : []),
     ...(hasGoogleAds ? [{ key: 'google' as const, label: 'Google', icon: 'google' as const }] : []),
     ...(reportPlatforms.includes('tiktok') ? [{ key: 'tiktok' as const, label: 'TikTok', icon: 'tiktok' as const }] : []),
-    ...(report.website_report || managedWebsite || showAdminDiagnostics ? [{ key: 'web' as const, label: 'Website Performance', icon: 'web' as const }] : []),
+    ...(report.website_report || managedWebsite ? [{ key: 'web' as const, label: 'Website Performance', icon: 'web' as const }] : []),
   ]
   const activeTab = tabs.some(item => item.key === tab) ? tab : 'overview'
   const selectTab = (nextTab: ReportTabKey) => {
@@ -280,7 +281,7 @@ export function ClientReportView({
         />
       )}
 
-      {(hasMeta || hasGoogleAdsSource) && (
+      {activeTab !== 'web' && (hasMeta || hasGoogleAdsSource) && (
         <p className="mx-auto mt-16 max-w-3xl border-t border-white/10 pt-6 text-center text-xs leading-relaxed text-slate-500">
           {hasMeta && hasGoogleAdsSource
             ? 'Sources: Meta Business Sync and Google Ads Sync.'
@@ -306,40 +307,49 @@ function PublishedWebsitePerformance({ report, managedWebsite }: { report: Rende
     />
   }
 
-  const stale = report.dataQuality.sourceReadAt
-    ? new Date(report.dataQuality.sourceReadAt).getTime() < new Date(`${report.period.to}T00:00:00Z`).getTime()
-    : true
-  const state = stale ? 'stale' : report.dataQuality.state
-  const stateLabel = state === 'available' ? 'Available' : state === 'partial' ? 'Partial period' : 'Stale snapshot'
+  const presentation = websiteReportPresentation(report)
 
   return (
     <section aria-label="Published website performance">
       <SectionHeading eyebrow="Digital experience" title="Website Performance" />
       <div className="mb-6 rounded-2xl border border-white/10 bg-white/[0.045] p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm font-bold text-white">{report.identity.canonicalHost}</p>
-          <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-semibold text-slate-300">{stateLabel}</span>
+          <p className="break-all text-lg font-bold text-white">{report.identity.canonicalHost}</p>
+          <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-semibold text-slate-300">{presentation.stateLabel}</span>
         </div>
         <p className="mt-2 text-xs text-slate-400">
-          Coverage: {formatDate(report.period.from)} to {formatDate(report.period.to)} · {report.period.timezone}
+          Report window: {formatDate(report.period.from)} to {presentation.periodEnd ? formatDate(presentation.periodEnd) : 'Unavailable'} · {report.period.timezone}
+        </p>
+        <p className="mt-4 text-sm leading-relaxed text-slate-300">
+          {presentation.coverageFrom ? `Tracked traffic starts ${formatDate(presentation.coverageFrom)}. ` : 'The start of measurement coverage is unavailable. '}
+          {presentation.partial ? 'These figures cover only part of the report window, not the whole month.' : 'Figures below come from the published snapshot, not a live traffic feed.'}
         </p>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2">
         <WebsiteMetric title="Visitors" value={report.traffic.visitors} />
         <WebsiteMetric title="Page views" value={report.traffic.pageviews} />
-        <WebsiteMetric title="Actions" value={report.conversions.total} />
-        <WebsiteMetric
-          title="Enquiries"
-          value={report.conversions.byType.find(item => item.type === 'enquiry_submit')?.count ?? (report.conversions.total === null ? null : 0)}
-        />
+      </div>
+      <p className="mt-3 text-sm leading-relaxed text-slate-400">Visitors measures your website audience; page views counts the pages they viewed. These are separate measures, not numbers to add together.</p>
+      <div className="mt-6 rounded-2xl border border-white/10 bg-[#071311] p-5 sm:p-6">
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-teal-300">From visits to enquiries</p>
+        <h3 className="mt-2 text-xl font-bold text-white">Contact journey</h3>
+        <div className="mt-4 grid gap-5 sm:grid-cols-2">
+          <div><p className="text-sm text-slate-300">Tracked contact actions</p><p className="mt-1 font-bold text-white">{report.conversions.total === null ? 'Measurement unavailable' : formatNumber(report.conversions.total)}</p></div>
+          <div><p className="text-sm text-slate-300">Submitted enquiries</p><p className="mt-1 font-bold text-white">{presentation.enquiries === null ? 'Measurement unavailable' : formatNumber(presentation.enquiries)}</p></div>
+        </div>
+        {(report.conversions.total === null || presentation.enquiries === null) && <p className="mt-4 text-sm leading-relaxed text-slate-400">This snapshot cannot establish the missing contact or enquiry figures. Unavailable means unknown—not that nobody contacted your business.</p>}
       </div>
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
         <WebsiteBreakdown title="Top pages" rows={report.traffic.topPages.map(item => [item.label, item.pageviews])} />
         <WebsiteBreakdown title="Traffic sources" rows={report.traffic.sources.map(item => [item.label, item.visitors])} />
       </div>
       {report.dataQuality.gaps.length > 0 && (
-        <p className="mt-7 text-sm leading-relaxed text-slate-400">Measurement notes: {report.dataQuality.gaps.join(' ')}</p>
+        <details className="mt-7 rounded-2xl border border-white/10 p-5 text-sm text-slate-400">
+          <summary className="cursor-pointer font-semibold text-teal-300">Measurement details and limitations</summary>
+          <ul className="mt-4 space-y-3 leading-relaxed">{report.dataQuality.gaps.map((gap, index) => <li key={index}>{gap}</li>)}</ul>
+        </details>
       )}
+      <p className="mt-6 text-xs leading-relaxed text-slate-400">{presentation.sourceLabel}</p>
     </section>
   )
 }
@@ -347,16 +357,21 @@ function PublishedWebsitePerformance({ report, managedWebsite }: { report: Rende
 function WebsiteMetric({ title, value }: { title: string; value: number | null }) {
   return <div className="rounded-2xl border border-white/10 bg-white/[0.045] p-5">
     <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">{title}</p>
-    <p className="mt-3 text-3xl font-black text-white">{value === null ? 'Unavailable' : formatNumber(value)}</p>
+    <p className="mt-3 break-words text-3xl font-black text-white">{value === null ? 'Unavailable' : formatNumber(value)}</p>
+    {value === null && <p className="mt-2 text-xs text-slate-400">Unavailable in this snapshot; not zero.</p>}
   </div>
 }
 
 function WebsiteBreakdown({ title, rows }: { title: string; rows: [string, number][] }) {
-  return <div>
+  const maximum = Math.max(0, ...rows.map(([, value]) => value))
+  return <div className="min-w-0 rounded-2xl border border-white/10 bg-white/[0.025] p-5 sm:p-6">
     <h3 className="text-sm font-bold text-white">{title}</h3>
     {rows.length ? <ul className="mt-3 space-y-2 text-sm text-slate-300">
-      {rows.slice(0, 8).map(([name, value]) => <li key={name} className="flex justify-between gap-4"><span className="truncate">{name}</span><span className="font-semibold text-white">{formatNumber(value)}</span></li>)}
-    </ul> : <p className="mt-3 text-sm text-slate-500">No tracked data for this period.</p>}
+      {rows.slice(0, 8).map(([name, value]) => <li key={name}>
+        <div className="flex justify-between gap-4"><span className="min-w-0 break-words">{name}</span><span className="shrink-0 font-semibold text-white">{formatNumber(value)}</span></div>
+        <div aria-hidden className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/5"><div className="h-full rounded-full bg-teal-400/80" style={{ width: `${maximum > 0 ? Math.max(0, value) / maximum * 100 : 0}%` }} /></div>
+      </li>)}
+    </ul> : <p className="mt-3 text-sm text-slate-400">This breakdown is unavailable in the published snapshot.</p>}
   </div>
 }
 
