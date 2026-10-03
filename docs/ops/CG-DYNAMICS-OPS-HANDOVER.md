@@ -1,5 +1,22 @@
 # CG Dynamics Ops Handover
 
+### #668 package presentation correction — local release pending, 3 October
+
+CA requests only Video, Posters (photo + designed), Content planning, plus Website
+maintenance for CG-built sites. Canonical package fields/receipts remain unchanged.
+Combined total requires both observed quantities; partial known allowance is labelled
+as a subtotal, never blank-to-zero. Shoot/reel/animated/campaign tiles are hidden only
+in the client summary. Professional Video allowance is not silently expanded to reels.
+Maintenance is included by CA direction for exact CG-built clients: Piek, Emmanuel,
+Red Oak, All Around PVC, JFJ. JFJ exact ID comes from the 3 October registry receipt;
+this does not create a reporting mapping. Unknown update quantities stay unknown.
+Get Together, Imbewu, CG ARCC and Raadzaal have no exact Dynamics binding in the
+reviewed nine-site artifact; do not guess one. Other-builder maintenance awaits exact
+scope evidence. Both client Plan and admin report preview pass scoped client IDs.
+No production data/package write, Vercel build/deploy, provider or reporting activation.
+Release and authenticated changed-code browser acceptance remain pending local-first
+hosting rules. Preserve this simplified presentation; do not restore staff-only clutter.
+
 ## Highest-priority hosting override — #679, 3 October 2026
 
 CA requires local-first development and ZERO unapproved cloud builds. Read
