@@ -4,14 +4,14 @@ import { performance } from 'node:perf_hooks'
 import { createServer } from 'vite'
 import { readFileSync } from 'node:fs'
 
-let server, jm, details, reconcile, automatic, applyMirrors, freshness
+let server, jm, details, reconcile, automatic, applyMirrors, claimContinuation, freshness
 before(async () => {
   server = await createServer({ server: { middlewareMode: true }, appType: 'custom', logLevel: 'silent' })
   jm = await server.ssrLoadModule('/supabase/functions/microsoft-transition-sync/job-machine.ts')
   details = await server.ssrLoadModule('/supabase/functions/microsoft-transition-sync/planner-details.ts')
   ;({ buildMicrosoftReconciliation: reconcile } = await server.ssrLoadModule('/src/lib/microsoftSync.ts'))
   automatic = await server.ssrLoadModule('/supabase/functions/microsoft-transition-sync/automatic-snapshot.ts')
-  ;({ applyAutomaticMicrosoftMirrors: applyMirrors } = await server.ssrLoadModule('/supabase/functions/microsoft-transition-sync/automatic-reconciliation.ts'))
+  ;({ applyAutomaticMicrosoftMirrors: applyMirrors, claimAutomaticApplyContinuation: claimContinuation } = await server.ssrLoadModule('/supabase/functions/microsoft-transition-sync/automatic-reconciliation.ts'))
   ;({ microsoftFreshnessEvidence: freshness } = await server.ssrLoadModule('/src/lib/dailyDynamicsFreshness.ts'))
 })
 after(async () => { await server?.close() })
@@ -158,23 +158,25 @@ function database(rows = fleet()) {
   const tables = {
     clients: context.clients.map(c => ({ ...c })), client_aliases: [],
     planner_boards: context.boards, planner_buckets: context.buckets.map(b => ({ id: b.id, board_id: b.boardId, name: b.name })),
-    planner_tasks: [], company_calendar_events: [], microsoft_sync_runs: [],
+    planner_tasks: [], company_calendar_events: [], microsoft_sync_runs: [], microsoft_sync_run_items: [],
     microsoft_sync_jobs: [{ id: 'job', assignee_map: {}, exported_at: now }],
     microsoft_sync_job_sources: rows.map(s => ({ ...s, id: `row-${s.position}`, job_id: 'job' })),
   }
   const calls = [], audit = new Set()
-  let mutations = 0, crashAfter = null, loseLease = false, failRead = null
+  let mutations = 0, crashAfter = null, loseLease = false, failRead = null, rpcError = null, omitReceipt = false
   const db = {
     tables, calls, audit,
     get mutations() { return mutations },
     set crashAfter(value) { crashAfter = value },
     set loseLease(value) { loseLease = value },
     set failRead(value) { failRead = value },
+    set rpcError(value) { rpcError = value },
+    set omitReceipt(value) { omitReceipt = value },
     from(table) {
       assert.notEqual(table, 'monthly_deliverables')
       const filters = []; let mode = 'read', patch, single = false, columns = '', range = [0, 999], inserted
       const query = {
-        select(value) { columns = value; return query }, eq(key, value) { filters.push(r => r[key] === value); return query },
+        select(value) { columns = value; return query }, eq(key, value) { filters.push(r => key === 'summary' ? JSON.stringify(r[key]) === value : r[key] === value); return query },
         in(key, values) { filters.push(r => values.includes(r[key])); return query },
         is() { return query }, not() { return query }, order() { return query }, range(from, to) { range = [from, to]; return query },
         insert(value) { mode = 'insert'; inserted = { ...value, id: `run-${tables[table].length}` }; return query },
@@ -205,9 +207,11 @@ function database(rows = fleet()) {
       assert.ok(['planner', 'cg_calendar'].includes(args.p_destination))
       calls.push({ rpc: name, args })
       if (crashAfter !== null && audit.size >= crashAfter) throw new Error('simulated crash')
+      if (rpcError) return { data: null, error: { message: rpcError } }
       if (!audit.has(args.p_item_key)) {
         audit.add(args.p_item_key)
         if (args.p_should_apply) mutations++
+        if (!omitReceipt) tables.microsoft_sync_run_items.push({ id: `receipt-${audit.size}`, run_id: args.p_run_id, item_key: args.p_item_key, result_status: args.p_should_apply ? 'applied' : 'skipped' })
       }
       return { data: { duplicate: true }, error: null }
     },
@@ -276,7 +280,13 @@ test('completed upstream tasks apply done by exact IDs; cancellation, idempotenc
   await assert.rejects(applyMirrors(db, current, 'job', 'system-user'), /simulated crash/)
   const writesBeforeRecovery = db.mutations
   db.crashAfter = null
-  const result = await applyMirrors(db, current, 'job', 'system-user', 'run-0', 0)
+  let result = await applyMirrors(db, current, 'job', 'system-user', 'run-0', 0)
+  let passes = 1
+  while (result.status === 'applying' && db.tables.microsoft_sync_runs[0].summary.continuationReady) {
+    assert.ok(passes++ < 10, 'finite snapshot must finish bounded passes')
+    assert.equal(await claimContinuation(db, structuredClone(db.tables.microsoft_sync_runs[0])), true)
+    result = await applyMirrors(db, current, 'job', 'system-user', 'run-0', 0)
+  }
   assert.equal(result.status, 'completed')
   assert.equal(result.clientScheduleExcluded, 5850)
   const done = db.calls.filter(c => c.rpc && c.args.p_action === 'complete')
@@ -295,6 +305,76 @@ test('completed upstream tasks apply done by exact IDs; cancellation, idempotenc
   assert.ok(db.calls.filter(c => c.rpc).every(c => c.args.p_patch.client_id === undefined || c.args.p_patch.client_id === null || c.args.p_patch.client_id === 'fixture-client'))
   assert.equal(db.tables.microsoft_sync_runs[0].source_completeness.length, 6)
   t.diagnostic(`AUTOMATIC MOCK APPLY/CRASH/2 REPLAYS: ${(performance.now() - started).toFixed(1)}ms; ${db.audit.size} unique mirror audit keys; ${db.mutations} unique mutations; zero protected writes`)
+})
+
+test('production-sized automatic apply yields at 200 and resumes without replay or consuming crash budget', async () => {
+  const rows = fleet()
+  const input = automatic.assembleAutomaticSnapshot(rows, {}, now)
+  const db = database(rows)
+  let result = await applyMirrors(db, input, 'job', 'system-user')
+  assert.equal(result.status, 'applying')
+  assert.equal(db.calls.filter(c => c.rpc).length, 200)
+  assert.equal(db.tables.microsoft_sync_runs[0].summary.remaining, 1450)
+  let passes = 1
+  while (result.status === 'applying') {
+    const run = structuredClone(db.tables.microsoft_sync_runs[0])
+    assert.equal(await claimContinuation(db, run), true)
+    assert.equal(await claimContinuation(db, run), false, 'same handoff cannot be claimed twice')
+    const previousCalls = db.calls.filter(c => c.rpc).length
+    result = await applyMirrors(db, input, 'job', 'system-user', run.id, run.automatic_recovery_count)
+    assert.ok(db.calls.filter(c => c.rpc).length - previousCalls <= 200)
+    assert.ok(++passes <= 9)
+  }
+  assert.equal(result.status, 'completed')
+  assert.equal(db.calls.filter(c => c.rpc).length, 1650)
+  assert.equal(db.audit.size, 1650)
+  assert.equal(db.tables.microsoft_sync_runs.length, 1)
+  assert.equal(db.tables.microsoft_sync_runs[0].automatic_recovery_count, 0)
+  assert.equal(result.applied + result.skipped, 1650)
+  assert.equal(result.clientScheduleExcluded, 5850)
+  assert.equal(db.tables.microsoft_sync_runs[0].summary.remaining, 0)
+})
+
+test('continuations reject manual, terminal, changed and concurrently claimed handoffs; unreadable receipts do not apply', async () => {
+  const db = database()
+  const run = { id: 'yielded', preview_job_id: 'job', trigger_type: 'agent', status: 'applying', automatic_recovery_count: 1, summary: { continuationReady: true } }
+  db.tables.microsoft_sync_runs.push(structuredClone(run))
+  for (const patch of [{ trigger_type: 'admin' }, { status: 'completed' }, { automatic_recovery_count: 0 }, { preview_job_id: 'another-job' }, { summary: { continuationReady: false } }]) {
+    assert.equal(await claimContinuation(db, { ...run, ...patch }), false)
+  }
+  const claims = await Promise.all([claimContinuation(db, structuredClone(run)), claimContinuation(db, structuredClone(run))])
+  assert.equal(claims.filter(Boolean).length, 1)
+  db.failRead = 'microsoft_sync_run_items'
+  const result = await applyMirrors(db, automatic.assembleAutomaticSnapshot(fleet(), {}, now), 'job', 'system-user', run.id, 1)
+  assert.equal(result.status, 'applying')
+  assert.equal(result.failed, 1)
+  assert.equal(db.calls.some(c => c.rpc), false)
+})
+
+test('a failed bounded pass terminates truthfully rather than yielding endlessly on unacknowledged items', async () => {
+  const rows = fleet().map(s => ({ ...s, records: s.records.slice(0, s.position === 1 ? 201 : 1), record_count: s.position === 1 ? 201 : 1 }))
+  const db = database(rows)
+  db.rpcError = 'inner apply failed'
+  const result = await applyMirrors(db, automatic.assembleAutomaticSnapshot(rows, {}, now), 'job', 'system-user')
+  assert.equal(result.status, 'failed')
+  assert.equal(result.failed, 200)
+  assert.equal(db.tables.microsoft_sync_runs[0].summary.remaining, 4)
+  assert.notEqual(db.tables.microsoft_sync_runs[0].summary.continuationReady, true)
+  assert.equal(db.tables.microsoft_sync_runs[0].automatic_recovery_after, null)
+  assert.equal(db.audit.size, 0)
+  assert.equal(db.mutations, 0)
+})
+
+test('transport success without durable item evidence cannot finish or continue as verified', async () => {
+  const rows = fleet().map(s => ({ ...s, records: s.records.slice(0, 1), record_count: 1 }))
+  const db = database(rows)
+  db.omitReceipt = true
+  const result = await applyMirrors(db, automatic.assembleAutomaticSnapshot(rows, {}, now), 'job', 'system-user')
+  assert.equal(result.status, 'failed')
+  assert.equal(result.applied, 0)
+  assert.equal(result.skipped, 0)
+  assert.equal(result.failed, 4)
+  assert.match(result.error, /no durable successful acknowledgement/)
 })
 
 test('lease fencing, paginated target reads, duplicate identities and inner failure remain fail closed', async () => {

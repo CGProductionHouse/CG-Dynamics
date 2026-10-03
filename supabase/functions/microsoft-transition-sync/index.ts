@@ -29,7 +29,7 @@ import {
   planAutomaticSystemCycle,
   automaticSystemRange,
 } from './job-machine.ts'
-import { applyAutomaticMicrosoftMirrors } from './automatic-reconciliation.ts'
+import { applyAutomaticMicrosoftMirrors, claimAutomaticApplyContinuation } from './automatic-reconciliation.ts'
 import { automaticSourceDomain, isAutomaticMirrorSource, plannerAssigneeIds, canFinishAutomaticProtectedDetails, readAutomaticJobSnapshot } from './automatic-snapshot.ts'
 
 interface GraphBatchItem { id: string; status: number; headers?: Record<string, string>; body?: { description?: unknown } }
@@ -537,21 +537,27 @@ Deno.serve(async request => {
 })
 
 async function automaticallyApplyJob(sb: SupabaseClient, jobId: string) {
-  const { data: existing } = await sb.from('microsoft_sync_runs').select('id,status,summary,safe_error,started_at,automatic_recovery_count,automatic_recovery_after').eq('preview_job_id', jobId).eq('trigger_type', 'agent').order('created_at', { ascending: false }).limit(1).maybeSingle()
+  const { data: existing } = await sb.from('microsoft_sync_runs').select('id,preview_job_id,trigger_type,status,summary,safe_error,started_at,automatic_recovery_count,automatic_recovery_after').eq('preview_job_id', jobId).eq('trigger_type', 'agent').order('created_at', { ascending: false }).limit(1).maybeSingle()
   let recoveryRunId: string | undefined
   let recoveryGeneration = 0
   if (existing) {
-    const recovery = planAutomaticApplyRecovery({ status: existing.status, startedAt: existing.started_at, recoveryCount: Number(existing.automatic_recovery_count ?? 0), recoveryAfter: existing.automatic_recovery_after ?? null, now: new Date().toISOString() })
-    if (recovery.kind === 'terminal' || recovery.kind === 'fresh') return { status: existing.status, runId: existing.id, ...(existing.summary ?? {}), error: existing.safe_error ?? null }
-    if (recovery.kind === 'exhausted') {
-      const error = 'Automatic Microsoft apply recovery was exhausted; the last verified mirror remains in use.'
-      await sb.from('microsoft_sync_runs').update({ status: 'failed', safe_error: error, finished_at: new Date().toISOString() }).eq('id', existing.id).eq('status', 'applying')
-      return { status: 'failed' as const, runId: existing.id, ...(existing.summary ?? {}), error }
+    if (existing.status === 'applying' && existing.summary?.continuationReady === true) {
+      if (!await claimAutomaticApplyContinuation(sb, existing)) return { status: 'applying' as const, runId: existing.id, ...(existing.summary ?? {}), error: null }
+      recoveryRunId = existing.id
+      recoveryGeneration = Number(existing.automatic_recovery_count ?? 0)
+    } else {
+      const recovery = planAutomaticApplyRecovery({ status: existing.status, startedAt: existing.started_at, recoveryCount: Number(existing.automatic_recovery_count ?? 0), recoveryAfter: existing.automatic_recovery_after ?? null, now: new Date().toISOString() })
+      if (recovery.kind === 'terminal' || recovery.kind === 'fresh') return { status: existing.status, runId: existing.id, ...(existing.summary ?? {}), error: existing.safe_error ?? null }
+      if (recovery.kind === 'exhausted') {
+        const error = 'Automatic Microsoft apply recovery was exhausted; the last verified mirror remains in use.'
+        await sb.from('microsoft_sync_runs').update({ status: 'failed', safe_error: error, finished_at: new Date().toISOString() }).eq('id', existing.id).eq('status', 'applying')
+        return { status: 'failed' as const, runId: existing.id, ...(existing.summary ?? {}), error }
+      }
+      const { data: claimed } = await sb.rpc('claim_microsoft_automatic_apply_recovery', { p_run_id: existing.id })
+      if (!claimed) return { status: 'applying' as const, runId: existing.id, ...(existing.summary ?? {}), error: null }
+      recoveryRunId = existing.id
+      recoveryGeneration = Number(existing.automatic_recovery_count ?? 0) + 1
     }
-    const { data: claimed } = await sb.rpc('claim_microsoft_automatic_apply_recovery', { p_run_id: existing.id })
-    if (!claimed) return { status: 'applying' as const, runId: existing.id, ...(existing.summary ?? {}), error: null }
-    recoveryRunId = existing.id
-    recoveryGeneration = Number(existing.automatic_recovery_count ?? 0) + 1
   }
   let prepared: Awaited<ReturnType<typeof readAutomaticJobSnapshot>>
   try { prepared = await readAutomaticJobSnapshot(sb, jobId, new Date().toISOString()) }

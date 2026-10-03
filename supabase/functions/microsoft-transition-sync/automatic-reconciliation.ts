@@ -11,6 +11,25 @@ import { fetchAllRows } from '../_shared/paginatedRows.ts'
 
 type Db = { from: (table: string) => any; rpc: (name: string, args?: Record<string, unknown>) => PromiseLike<{ data: unknown; error: { message: string; code?: string } | null }> }
 
+// Bound work per hosted invocation, not provider counts or source completeness.
+export const AUTOMATIC_APPLY_ITEMS_PER_PASS = 200
+
+/** A deliberate yield is not a crashed recovery. Claim its exact summary atomically
+ * before resuming; concurrent scheduler ticks cannot acquire the same handoff. */
+export async function claimAutomaticApplyContinuation(db: Db, run: {
+  id: string; preview_job_id: string; trigger_type: string; status: string;
+  automatic_recovery_count: number; summary: Record<string, unknown>
+}) {
+  if (run.trigger_type !== 'agent' || run.status !== 'applying' || run.summary?.continuationReady !== true) return false
+  const result = await db.from('microsoft_sync_runs').update({
+    summary: { ...run.summary, continuationReady: false },
+    automatic_recovery_after: automaticApplyLeaseDeadline(new Date().toISOString()),
+  }).eq('id', run.id).eq('preview_job_id', run.preview_job_id).eq('trigger_type', 'agent')
+    .eq('status', 'applying').eq('automatic_recovery_count', run.automatic_recovery_count)
+    .eq('summary', JSON.stringify(run.summary)).select('id').maybeSingle()
+  return !result.error && Boolean(result.data)
+}
+
 export interface AutomaticReconciliationResult {
   status: 'applying' | 'completed' | 'partial' | 'failed'
   runId: string | null
@@ -88,8 +107,17 @@ export async function applyAutomaticMicrosoftMirrors(db: Db, snapshot: Microsoft
     }
   }
   if (runError || !run) return { status: 'failed', runId: null, applied: 0, skipped: 0, failed: 1, conflicts, clientScheduleExcluded, error: runError?.message ?? 'Could not create automatic reconciliation run.' }
-  let applied = 0; let skipped = 0; let failed = 0; let firstError: string | null = null
-  for (const item of items) {
+  const receipts = await fetchAllRows<any>((from, to) => db.from('microsoft_sync_run_items')
+    .select('id,item_key,result_status').eq('run_id', run.id).order('id').range(from, to))
+  if (receipts.error) return { status: 'applying', runId: run.id, applied: 0, skipped: 0, failed: 1, conflicts, clientScheduleExcluded, error: receipts.error.message }
+  const completedKeys = new Set<string>((receipts.data ?? [])
+    .filter((r: any) => r.result_status === 'applied' || r.result_status === 'skipped').map((r: any) => r.item_key))
+  let applied = (receipts.data ?? []).filter((r: any) => r.result_status === 'applied').length
+  let skipped = (receipts.data ?? []).filter((r: any) => r.result_status === 'skipped').length
+  let failed = 0; let firstError: string | null = null
+  const successfulKeys = new Set<string>()
+  const pending = items.filter(item => !completedKeys.has(microsoftStableItemKey(item)))
+  for (const item of pending.slice(0, AUTOMATIC_APPLY_ITEMS_PER_PASS)) {
     const lease = await db.from('microsoft_sync_runs')
       .update({ automatic_recovery_after: automaticApplyLeaseDeadline(new Date().toISOString()) })
       .eq('id', run.id).eq('status', 'applying').eq('automatic_recovery_count', recoveryGeneration)
@@ -100,12 +128,29 @@ export async function applyAutomaticMicrosoftMirrors(db: Db, snapshot: Microsoft
     const args = buildMicrosoftApplyRpcArgs(item, snapshot, run.id, microsoftStableItemKey(item), true)
     const result = await db.rpc('apply_microsoft_sync_item_automatic', { ...args, p_system_user_id: systemUserId } as unknown as Record<string, unknown>)
     if (result.error) { failed += 1; firstError ??= result.error.message }
-    else if (args.p_should_apply) applied += 1
-    else skipped += 1
+    else successfulKeys.add(microsoftStableItemKey(item))
+  }
+  // Counts come from durable acknowledgements, not guessed RPC outcomes or a
+  // replay's current proposed action (which may now be "skip" after creation).
+  const acknowledged = await fetchAllRows<any>((from, to) => db.from('microsoft_sync_run_items')
+    .select('id,item_key,result_status').eq('run_id', run.id).order('id').range(from, to))
+  if (acknowledged.error) return { status: 'applying', runId: run.id, applied, skipped, failed: failed + 1, conflicts, clientScheduleExcluded, error: acknowledged.error.message }
+  applied = (acknowledged.data ?? []).filter((r: any) => r.result_status === 'applied').length
+  skipped = (acknowledged.data ?? []).filter((r: any) => r.result_status === 'skipped').length
+  const verifiedKeys = new Set<string>((acknowledged.data ?? []).filter((r: any) => r.result_status === 'applied' || r.result_status === 'skipped').map((r: any) => r.item_key))
+  const unacknowledged = [...successfulKeys].filter(key => !verifiedKeys.has(key)).length
+  if (unacknowledged) { failed += unacknowledged; firstError ??= 'Automatic apply has no durable successful acknowledgement.' }
+  const remaining = Math.max(0, pending.length - AUTOMATIC_APPLY_ITEMS_PER_PASS)
+  if (remaining > 0 && failed === 0) {
+    const yielded = await db.from('microsoft_sync_runs').update({
+      automatic_recovery_after: new Date().toISOString(),
+      summary: { automatic: true, continuationReady: true, remaining, applied, skipped, failed, conflicts, clientScheduleExcluded },
+    }).eq('id', run.id).eq('status', 'applying').eq('automatic_recovery_count', recoveryGeneration).select('id').maybeSingle()
+    return { status: 'applying', runId: run.id, applied, skipped, failed, conflicts, clientScheduleExcluded, error: yielded.error?.message ?? null }
   }
   const status = failed > 0 ? microsoftRunFinalStatus(applied, failed, 0) : conflicts > 0 ? 'partial' as const : 'completed' as const
   const finalized = await db.from('microsoft_sync_runs')
-    .update({ status, finished_at: new Date().toISOString(), applied_at: new Date().toISOString(), automatic_recovery_after: null, safe_error: firstError, summary: { automatic: true, applied, skipped, failed, conflicts, clientScheduleExcluded } })
+    .update({ status, finished_at: new Date().toISOString(), applied_at: new Date().toISOString(), automatic_recovery_after: null, safe_error: firstError, summary: { automatic: true, remaining, applied, skipped, failed, conflicts, clientScheduleExcluded } })
     .eq('id', run.id).eq('status', 'applying').eq('automatic_recovery_count', recoveryGeneration)
     .select('id').maybeSingle()
   if (finalized.error || !finalized.data) {
