@@ -1576,7 +1576,7 @@ function StrategyBlocks({
       <SectionHeading eyebrow="CG action plan" title="What we do next" />
       <div className="mb-5 flex flex-wrap items-center gap-2 text-xs">
         <span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 font-semibold text-slate-200">
-          {monthDisplayLabel(monthlyStrategy.month)} strategy
+          {monthDisplayLabel(monthlyStrategy.month.slice(0, 7))} strategy
         </span>
         {staffPreview && (
           <span className={`rounded-full px-3 py-1 font-bold uppercase tracking-[0.12em] ${monthlyStrategy.status === 'draft' ? 'bg-amber-300/10 text-amber-200' : 'bg-emerald-300/10 text-emerald-200'}`}>
