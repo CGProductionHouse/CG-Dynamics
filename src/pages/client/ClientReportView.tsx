@@ -54,6 +54,8 @@ import {
 } from '../../components/client/PerformanceProviderIcon'
 import { cgManagedWebsiteForClient, type CgManagedWebsite } from '../../lib/cgWebsiteFleet'
 import { websiteReportPresentation } from '../../lib/websiteReportPresentation'
+import { PerformanceServiceStory } from '../../components/client/PerformanceServiceStory'
+import { PERFORMANCE_SERVICE_TABS } from '../../lib/performanceServiceCatalog'
 
 export type ReportTabKey = 'overview' | 'facebook' | 'instagram' | 'google' | 'tiktok' | 'linkedin' | 'web' | 'email'
 export interface MonthlyStrategyPresentation {
@@ -173,17 +175,10 @@ export function ClientReportView({
   ]))
   const hasMeta = availablePlatforms.some(view => view.platform === 'facebook' || view.platform === 'instagram')
     || facts.some(fact => fact.platform === 'facebook' || fact.platform === 'instagram')
-  const hasGoogleAds = googleAds !== null || googleAdsState !== 'disconnected'
+  const hasGoogleAds = googleAds !== null || ['data', 'not-synced', 'error', 'no-activity'].includes(googleAdsState)
   const managedWebsite = cgManagedWebsiteForClient(client?.id ?? ('client_id' in report ? report.client_id : null))
-  const hasGoogleAdsSource = googleAdsState === 'data' || googleAdsState === 'no-activity'
-  const tabs: { key: ReportTabKey; label: string; icon: PerformanceProviderIconKey }[] = [
-    { key: 'overview', label: 'Overview', icon: 'overview' },
-    ...(reportPlatforms.includes('facebook') ? [{ key: 'facebook' as const, label: 'Facebook', icon: 'facebook' as const }] : []),
-    ...(reportPlatforms.includes('instagram') ? [{ key: 'instagram' as const, label: 'Instagram', icon: 'instagram' as const }] : []),
-    ...(hasGoogleAds ? [{ key: 'google' as const, label: 'Google', icon: 'google' as const }] : []),
-    ...(reportPlatforms.includes('tiktok') ? [{ key: 'tiktok' as const, label: 'TikTok', icon: 'tiktok' as const }] : []),
-    ...(report.website_report || managedWebsite ? [{ key: 'web' as const, label: 'Website Performance', icon: 'web' as const }] : []),
-  ]
+  const hasGoogleAdsSource = googleAds !== null && ['data', 'no-activity'].includes(googleAdsState)
+  const tabs = [...PERFORMANCE_SERVICE_TABS]
   const activeTab = tabs.some(item => item.key === tab) ? tab : 'overview'
   const selectTab = (nextTab: ReportTabKey) => {
     if (onTabChange) onTabChange(nextTab)
@@ -223,8 +218,8 @@ export function ClientReportView({
       </p>
 
       {periodDisclosure && (
-        <p className="mb-6 rounded-xl border border-amber-300/20 bg-amber-300/[0.06] px-4 py-3 text-center text-sm font-semibold text-amber-100">
-          {periodDisclosure}. This is not a completed monthly report.
+        <p className="mb-6 px-4 text-center text-xs leading-6 text-slate-400">
+          {periodDisclosure}. Partial reporting period.
         </p>
       )}
 
@@ -258,9 +253,12 @@ export function ClientReportView({
           state={googleAdsState}
           error={googleAdsError}
           hasGoogleAds={hasGoogleAds}
+          clientName={client?.name}
         />
       ) : activeTab === 'web' ? (
-        <PublishedWebsitePerformance report={report.website_report ?? null} managedWebsite={managedWebsite} />
+        report.website_report || managedWebsite
+          ? <PublishedWebsitePerformance report={report.website_report ?? null} managedWebsite={managedWebsite} />
+          : <PerformanceServiceStory service="web" clientName={client?.name} />
       ) : reportPlatforms.includes(activeTab as Platform) ? (
         <PlatformTab
           view={master.platforms.find(item => item.platform === activeTab)!}
@@ -273,12 +271,7 @@ export function ClientReportView({
           normalizedFactsActive={normalizedFactsActive}
         />
       ) : (
-        <ProviderAvailabilityPanel
-          eyebrow="Platform performance"
-          title={activeTab === 'facebook' ? 'Facebook' : activeTab === 'instagram' ? 'Instagram' : 'TikTok'}
-          status="Unavailable"
-          description={`No verified ${activeTab === 'facebook' ? 'Facebook' : activeTab === 'instagram' ? 'Instagram' : 'TikTok'} reporting facts are available for this published month.`}
-        />
+        <PerformanceServiceStory service={activeTab} clientName={client?.name} />
       )}
 
       {activeTab !== 'web' && (hasMeta || hasGoogleAdsSource) && (
@@ -522,9 +515,9 @@ function OverviewTab({
 }) {
   const strategy = readStrategyData(report.strategy_data)
   const platformsWithData = master.platforms.filter(view => view.source !== 'none')
-  const hasGoogleAdsSection = googleAds !== null || googleAdsState !== 'disconnected'
+  const hasGoogleAdsSection = googleAds !== null && ['data', 'no-activity'].includes(googleAdsState)
   const hasVerified = verifiedSections.length > 0
-  const hasData = normalizedFactsActive || platformsWithData.length > 0 || performance.metrics.length > 0 || hasGoogleAdsSection
+  const hasData = normalizedFactsActive || platformsWithData.length > 0 || performance.metrics.length > 0 || hasGoogleAdsSection || monthlyStrategy !== null
 
   if (!hasData) {
     return (
@@ -544,7 +537,7 @@ function OverviewTab({
            invalid month-on-month movement suppressed by the comparability gate. */
         hasVerified
           ? <VerifiedOverview sections={verifiedSections} />
-          : <VerifiedFactsUnavailable />
+          : showAdminDiagnostics ? <VerifiedFactsUnavailable /> : null
       ) : (
         <>
           {/* Legacy fallback for reports synced before normalized facts exist.
@@ -1432,12 +1425,14 @@ function GooglePerformanceTab({
   state,
   error,
   hasGoogleAds,
+  clientName,
 }: {
   month: string
   googleAds: GoogleAdsDashboardData | null
   state: GoogleAdsDashboardState
   error: string | null
   hasGoogleAds: boolean
+  clientName?: string
 }) {
   return (
     <div className="space-y-8">
@@ -1471,22 +1466,15 @@ function GooglePerformanceTab({
             <GoogleAdsEmptyState state={state} hasError={state === 'error' && Boolean(error)} compact />
           )}
         </section>
-      ) : (
-        <section className="rounded-[2rem] border border-white/[0.08] bg-white/[0.035] p-7 sm:p-9">
-          <p className="text-xs font-black uppercase tracking-[0.22em] text-slate-500">Campaign sources</p>
-          <h3 className="mt-3 text-2xl font-black tracking-[-0.03em] text-white">No verified campaign source is configured</h3>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
-            Paid campaign figures are intentionally withheld for this published month. Missing data is never presented as zero.
-          </p>
-        </section>
-      )}
+      ) : null}
+      <PerformanceServiceStory service="google" clientName={clientName} />
 
-      <aside className="rounded-[1.75rem] border border-[#2dd4bf]/15 bg-[#2dd4bf]/[0.045] p-6 sm:p-7">
+      {googleAds && <aside className="rounded-[1.75rem] border border-[#2dd4bf]/15 bg-[#2dd4bf]/[0.045] p-6 sm:p-7">
         <p className="text-xs font-black uppercase tracking-[0.2em] text-[#2dd4bf]">Campaign feedback</p>
         <p className="mt-3 max-w-4xl text-sm leading-7 text-slate-300">
           Tell CG whether the campaign leads were valuable and relevant to your business. That real-world feedback helps refine targeting, messaging and campaign direction.
         </p>
-      </aside>
+      </aside>}
     </div>
   )
 }

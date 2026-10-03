@@ -35,6 +35,7 @@ test('website tab cannot inherit the Meta source footer or manufacture enquiry z
   assert.doesNotMatch(source, /conversions.total === null \? null : 0/)
   assert.match(source, /Report window:/)
   assert.match(source, /Measurement details and limitations/)
-  assert.match(source, /report.website_report \|\| managedWebsite \?/)
+  assert.match(source, /report.website_report \|\| managedWebsite\s*\?/)
+  assert.match(source, /PerformanceServiceStory service="web"/)
   assert.doesNotMatch(source, /report.website_report \|\| managedWebsite \|\| showAdminDiagnostics/)
 })
