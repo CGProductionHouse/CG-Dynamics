@@ -48,7 +48,7 @@ function BreakdownPanel({ clientId, from, to, dimension, title }: {
   // Nothing to say until lead tracking exists; the metrics card already explains why.
   if (current?.state === 'unavailable' || (current?.state === 'ready' && current.data.state === 'not_connected')) return null
 
-  return <div className="rounded-xl border border-white/10 bg-white/[0.025] p-4" aria-label={title}>
+  return <div className="min-w-0 rounded-xl border border-white/10 bg-white/[0.025] p-4" aria-label={title}>
     <h3 className="text-sm font-bold text-white">{title}</h3>
     {!current && <p className="mt-2 text-sm text-brand-primary/75">Loading…</p>}
     {current?.state === 'error' && <p className="mt-2 text-sm text-amber-200">{current.message}</p>}
@@ -57,23 +57,23 @@ function BreakdownPanel({ clientId, from, to, dimension, title }: {
       : <>
           <table className="mt-3 w-full text-left text-sm">
             <thead>
-              <tr className="text-[0.68rem] uppercase tracking-widest text-brand-primary/60">
-                <th className="pb-2 font-semibold">{dimension === 'landing_page' ? 'Page' : 'Source'}</th>
-                <th className="pb-2 text-right font-semibold">Leads</th>
-                <th className="pb-2 text-right font-semibold">Qualified</th>
-                <th className="pb-2 text-right font-semibold">Rate</th>
+              <tr className="text-[0.68rem] uppercase tracking-wider text-brand-primary/60">
+                <th className="w-full pb-2 font-semibold">{dimension === 'landing_page' ? 'Page' : 'Source'}</th>
+                <th className="pb-2 pl-3 text-right font-semibold">Leads</th>
+                <th className="pb-2 pl-3 text-right font-semibold">Qualified</th>
+                <th className="pb-2 pl-3 text-right font-semibold">Rate</th>
               </tr>
             </thead>
             <tbody>
               {current.data.rows.map((row) => <tr key={row.key ?? '(not recorded)'} className="border-t border-white/5">
-                <td className="max-w-[14rem] truncate py-1.5 pr-2 text-white" title={breakdownKeyLabel(dimension, row.key)}>
+                <td className="max-w-0 truncate py-1.5 pr-2 align-top text-white" title={breakdownKeyLabel(dimension, row.key)}>
                   {row.key === null ? <span className="text-brand-primary/60">{breakdownKeyLabel(dimension, row.key)}</span> : row.key}
                 </td>
-                <td className="py-1.5 text-right text-white">{number(row.total)}</td>
-                <td className="py-1.5 text-right text-white">{number(row.qualified)}</td>
-                <td className="py-1.5 text-right text-white">
+                <td className="py-1.5 pl-3 text-right align-top text-white">{number(row.total)}</td>
+                <td className="py-1.5 pl-3 text-right align-top text-white">{number(row.qualified)}</td>
+                <td className="py-1.5 pl-3 text-right align-top text-white">
                   {formatQualificationRate(row.qualificationRate)}
-                  {!row.sufficientSample && <span className="ml-1 text-[0.68rem] text-brand-primary/60" title={`Fewer than ${current.data.minSample} leads`}>low sample</span>}
+                  {!row.sufficientSample && <span className="block text-[0.68rem] font-normal text-brand-primary/60" title={`Fewer than ${current.data.minSample} leads`}>low sample</span>}
                 </td>
               </tr>)}
             </tbody>
