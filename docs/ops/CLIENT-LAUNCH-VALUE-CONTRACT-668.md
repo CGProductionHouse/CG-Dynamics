@@ -94,3 +94,30 @@ separately from actually scheduled work; no contractual scope is inferred.
 99 focused portal/package checks pass. Full suite: 3,606 tests / 3,589 pass /
 17 skip / zero failures, with the same Windows-only Bash exclusion. Build,
 scoped lint and diff check pass. Full portal preview remains outstanding.
+
+## Automatic draft path: same source/decision boundary
+
+A real regression reproduced Monthly Strategy Autopilot producing
+"Prioritise no influencer language, forced humour, slang or hype" as its
+direction, with package quantities as the remainder of its plan. That is
+briefing material, not marketing strategy. The automatic preparation path
+now keeps guide/context/card references and package receipts in canonical
+`seed_context.intelligence_evidence`; it does not promote them into objective,
+drivers, direction, format concepts, rationale, experiments or next-month plan.
+It reuses the shared package-capacity projection rather than another set of
+strategy defaults. Prior measured facts and calendar context remain inputs.
+
+Two executable regressions prove note/card/package separation, positive/zero/
+unknown capacity, repeat-run idempotency and unchanged saved staff strategy.
+Full suite: 3,608 total / 3,591 pass / 17 skip / zero failures (same Windows
+Bash exclusion); TypeScript/Vite, scoped lint and diff check pass. No production
+function deployment, job/reconciliation trigger or saved strategy amendment
+occurs. The Edge rollout remains separately protected. This is recurrence
+prevention, not semantic acceptance of the stored draft fleet.
+
+The source audit also found that the legacy dossier extractor treated voice
+bullets as verified business facts while skipping business-description
+paragraphs. Existing dossier-ready/readiness counts must not be interpreted
+as proof of researched strategic value. Fixing that briefing extraction and
+reviewing the substantive decisions remain part of #668/#513/#433, not a
+strategy publication authorization.

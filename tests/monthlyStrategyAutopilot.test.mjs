@@ -4,6 +4,7 @@ import { test } from 'node:test'
 
 const autopilot = await import('../supabase/functions/_shared/monthlyStrategyAutopilot.ts')
 const alignment = await import('../supabase/functions/_shared/monthlyStrategyAlignment.ts')
+const { buildPackageFieldStates } = await import('../src/lib/packageAuthority.ts')
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
 
 class Query {
@@ -67,6 +68,31 @@ test('targets the Johannesburg operating month and next month', () => {
   assert.deepEqual(autopilot.strategyAutopilotMonths('2026-12-15'), ['2026-12-01', '2027-01-01'])
 })
 
+test('automatic preparation preserves briefing evidence without selling guardrails or capacity as strategy', async () => {
+  const fake = fixture()
+  fake.tables.client_context_updates = [{ id: 'note-a', client_id: 'client-a', review_state: 'incorporated', title: 'Caption voice', body: 'No influencer language, forced humour, slang or hype.' }]
+  fake.tables.client_guides[0].guide_markdown = '## Client identity and positioning\n- Keep the exact client isolated from unrelated same-name businesses.'
+  fake.tables.skill_cards = [{ id: 'card-a', status: 'active', active_client_id: null, knowledge_layer: 'universal_principle', relevant_agents: ['marketing_strategist'], principle: 'Use one clear call to action.', review_expires_at: null }]
+  await autopilot.runMonthlyStrategyAutopilot(fake, { today: '2026-09-22', systemProfileId: 'system-profile' })
+  assert.equal(fake.calls.length, 2)
+  for (const call of fake.calls) {
+    const data = call.p_strategy_data
+    assert.equal(data.strategyGoingForward, '')
+    assert.deepEqual(data.clientDirection, [])
+    assert.deepEqual(data.strategyDrivers, [])
+    assert.ok(Object.values(data.goldStandard).every(value => value === ''))
+    assert.ok(Object.values(data.actionPlan).every(value => value.items.length === 0))
+    assert.equal(data.actionPlan.reels.enabled, true)
+    assert.equal(data.actionPlan.animated_poster.enabled, false)
+    assert.equal(data.actionPlan.campaign_recommendation.enabled, false)
+    const evidence = JSON.stringify(call.p_seed_context.intelligence_evidence)
+    assert.match(evidence, /No influencer language/)
+    assert.match(evidence, /Use one clear call to action/)
+    assert.match(evidence, /confirmed_client_package/)
+    assert.deepEqual(call.p_seed_context.sources.marketing_library_skill_card_ids, ['card-a'])
+  }
+})
+
 test('Marketing Library expiry is Johannesburg-date bounded and today remains current', () => {
   assert.equal(autopilot.strategyKnowledgeCardIsCurrent({ review_expires_at: null }, '2026-09-22'), true)
   assert.equal(autopilot.strategyKnowledgeCardIsCurrent({ review_expires_at: '2026-09-21' }, '2026-09-22'), false)
@@ -92,8 +118,9 @@ test('creates current and next draft through #391 from one confirmed package', a
   assert.equal(result.blockers.PACKAGE_UNVERIFIED, undefined)
   assert.equal(result.blocked, 0)
   assert.ok(fake.calls.every(call => call.p_seed_context.sources.package_verification_confirmed_at === '2026-09-20T08:00:00Z'))
-  assert.match(fake.calls[0].p_strategy_data.actionPlan.reels.items[0], /2 reels from the confirmed package/)
-  assert.doesNotMatch(fake.calls[0].p_strategy_data.actionPlan.reels.items[0], /1 reel/)
+  assert.equal(fake.calls[0].p_strategy_data.actionPlan.reels.enabled, true)
+  assert.deepEqual(fake.calls[0].p_strategy_data.actionPlan.reels.items, [])
+  assert.match(JSON.stringify(fake.calls[0].p_seed_context.intelligence_evidence), /2 reels/)
 })
 
 test('confirmed package_settings remains authoritative when legacy package and schedule tables are empty', async () => {
@@ -107,13 +134,37 @@ test('confirmed package_settings remains authoritative when legacy package and s
   assert.equal(result.blocked, 0)
   assert.equal(result.blockers.PACKAGE_UNVERIFIED, undefined)
   assert.equal(fake.calls.length, 2)
-  assert.match(fake.calls[0].p_strategy_data.actionPlan.professional_video.items[0], /1 professional video from the confirmed package/)
-  assert.match(fake.calls[0].p_strategy_data.actionPlan.reels.items[0], /2 reels from the confirmed package/)
-  assert.match(fake.calls[0].p_strategy_data.actionPlan.photo_content.items[0], /1 photo post from the confirmed package/)
-  assert.match(fake.calls[0].p_strategy_data.actionPlan.design_poster.items[0], /2 design posters from the confirmed package/)
+  for (const key of ['professional_video', 'reels', 'photo_content', 'design_poster']) {
+    assert.equal(fake.calls[0].p_strategy_data.actionPlan[key].enabled, true)
+    assert.deepEqual(fake.calls[0].p_strategy_data.actionPlan[key].items, [])
+  }
+  assert.match(JSON.stringify(fake.calls[0].p_seed_context.intelligence_evidence), /1 professional video, 2 reels, 1 photo post, 2 design posters/)
   assert.equal(fake.calls[0].p_seed_context.sources.client_package_id, null)
   assert.equal(fake.calls[0].p_seed_context.source_coverage.monthly_deliverables, 'none')
   assert.equal(fake.calls[0].p_seed_context.source_coverage.client_package, 'available')
+})
+
+test('automatic capacity keeps positive, zero and unknown distinct, while repeat runs and saved staff strategies stay untouched', async () => {
+  const saved = { id: 'staff-a', client_id: 'client-a', strategy_month: '2026-09-01', workflow_status: 'approved', version: 7, strategy_data: { strategyGoingForward: 'Staff-authored direction' } }
+  const fake = fixture([saved])
+  fake.tables.clients[0].package_settings.reels_per_month = null
+  fake.tables.clients[0].package_settings.animated_posters_per_month = 1
+  const settings = fake.tables.clients[0].package_settings
+  settings.other_agreed_deliverables = null
+  settings.package_exclusions = null
+  settings.verification = { ...settings.verification, version: 2, field_states: buildPackageFieldStates(settings) }
+  const before = JSON.stringify(saved)
+  await autopilot.runMonthlyStrategyAutopilot(fake, { today: '2026-09-22', systemProfileId: 'system-profile' })
+  assert.equal(fake.calls.length, 1)
+  const data = fake.calls[0].p_strategy_data
+  assert.equal(data.actionPlan.reels.enabled, false)
+  assert.equal(data.actionPlan.animated_poster.enabled, true)
+  assert.deepEqual(data.actionPlan.animated_poster.items, [])
+  assert.equal(data.actionPlan.campaign_recommendation.enabled, false)
+  const repeat = await autopilot.runMonthlyStrategyAutopilot(fake, { today: '2026-09-22', systemProfileId: 'system-profile' })
+  assert.equal(repeat.drafts_created, 0)
+  assert.equal(fake.calls.length, 1)
+  assert.equal(JSON.stringify(saved), before)
 })
 
 test('only active clients enter the strategy preparation queue', async () => {
