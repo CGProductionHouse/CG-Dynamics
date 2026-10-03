@@ -1,0 +1,74 @@
+# Proposed exact production-folder bindings — 3 October 2026
+
+Read-only Microsoft list-children evidence. NOT APPLIED, NOT APPROVED. This supplements `CLIENT-REGISTRY-RECONCILIATION-2026-10-03.md`. All 59 candidate roots and Videos subfolders were observed, not inferred or created. Names/portal labels support review; they do not constitute existing Dynamics UUID bindings. Current production mapping count is zero.
+
+Common observed drive ID: `A2AC9FE4B255F52F`. These internal Graph identifiers must never be exposed to clients.
+
+| Client | Dynamics UUID | Existing root name | Root item ID | Videos item ID | Review state |
+|---|---|---|---|---|---|
+| Agri-Secure | `893992a5-23cd-4ee6-b5d9-ccf7b17fe071` | Agri-Secure | `A2AC9FE4B255F52F!s379bf71c890444b1bb66068cfd835ea4` | `A2AC9FE4B255F52F!s8a74d351d0514ea4ac62485124fa9aeb` | Proposed exact binding — CA review required |
+| All Around PVC | `fd16ebae-a50b-4920-afe0-94c2631f8f06` | All Around PVC | `A2AC9FE4B255F52F!s75a8718e172d4c02aebe8ee7a223160d` | `A2AC9FE4B255F52F!sf9164f89246b497bb690c0e5bf39c4f4` | Proposed exact binding — CA review required |
+| AV Event Life | `3b85973f-bcad-49eb-b8f1-c27f7c7f1aba` | AV Event Life | `A2AC9FE4B255F52F!1871` | `A2AC9FE4B255F52F!sb784eccd9a10495589ab84444f3d1d32` | Proposed exact binding — CA review required |
+| Bat Hill Royale | `32bd9db3-5339-4404-825b-5a615cadec6a` | Bat Hill Royale | `A2AC9FE4B255F52F!s92c9da44c5724b04ae03d2120605380f` | `A2AC9FE4B255F52F!sd29f0b0edf6c459a9bd4d6f76a5994d5` | Proposed exact binding — CA review required |
+| Bloem Action Sports | `b28af30a-3d44-490a-8290-1e56dac7b127` | Bloem Action Sports | `A2AC9FE4B255F52F!s484c294b072a438c939924bfdd9262ae` | `A2AC9FE4B255F52F!s92fe394352044b30aa3fd0b59a4b2a69` | Proposed exact binding — CA review required |
+| Bloem Marble & Granite | `89e0ad6d-e08c-4a75-8b8e-abea71af581c` | Bloem Marble | `A2AC9FE4B255F52F!s5d2a85d1ad3248969a3f704bc3ddacc0` | `A2AC9FE4B255F52F!s10995c97058848118740775bf603b467` | Proposed exact binding — CA review required |
+| Bloem Vascular | `2d16262d-8450-458d-ae7e-084ef9ff662d` | BloemVascular | `A2AC9FE4B255F52F!s24ea887216774b0cad053d2439fa003e` | `A2AC9FE4B255F52F!s372ceb80b41b43659b691ad0cb2e9991` | Proposed exact binding — CA review required |
+| Bohemia Quick Stop | `5dfdf4bd-9d94-4cc6-9dee-0e480a2234cb` | Bohemia Quick Stop | `A2AC9FE4B255F52F!s57bbdbef0e7a4ed08f1b5b7363431e8d` | `A2AC9FE4B255F52F!s6a5c128bad2b482c85a5321927a96155` | Proposed exact binding — CA review required |
+| Bouwer & Coetzee Attorneys | `8e448cf9-1534-4ba1-89a4-93e4c8b83d2f` | Bouwer Coetzee | `A2AC9FE4B255F52F!s3730a1c6a75540e797a6bbf8690a0ad2` | `A2AC9FE4B255F52F!s623edb49b00c4eccad3221d4eaf73c33` | Proposed exact binding — CA review required |
+| Braize | `6b67a2df-e2ab-418b-bcee-03aef5963d37` | Braize | `A2AC9FE4B255F52F!se8216f67e829445590dce7c7f6fc4c9f` | `A2AC9FE4B255F52F!seb99578613fe44eb87ed9471eaba2897` | Proposed exact binding — CA review required |
+| C&L Innovations | `afb62c53-d6d3-4ef8-9393-def88ed899d8` | C&L Innovations | `A2AC9FE4B255F52F!s51f42b8af760408cbf2d2501c6f0c81d` | `A2AC9FE4B255F52F!sd3c0090a32934b6fa395093962861c6c` | Proposed exact binding — CA review required |
+| Cape Lumber | `42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa` | Cape Lumber | `A2AC9FE4B255F52F!sc6c4f3956ff4456381046d4cffda61c6` | `A2AC9FE4B255F52F!s9129299561a3435694451936720045fd` | Proposed exact binding — CA review required |
+| Case Bloemfontein | `079df21e-783a-4648-b3fa-0acae6e68867` | Case | `A2AC9FE4B255F52F!s036a3ed604e547f29936f13eb0b38907` | `A2AC9FE4B255F52F!s3135a219a4e14acbaf16a0d6a1a729ab` | Proposed exact binding — CA review required |
+| Central Canvas | `6b313cac-283e-48c4-9df6-ba43af2f7353` | Central Canvas | `A2AC9FE4B255F52F!32429` | `A2AC9FE4B255F52F!s6f5a978d836b479ea26e5105506fd90c` | Proposed exact binding — CA review required |
+| CG Production House | `c27d2185-08e4-4c49-be48-2572564ceecf` | CG Production House | `A2AC9FE4B255F52F!s566871c0b8134957b663610bdaeb0cc1` | `A2AC9FE4B255F52F!s99de3b18d2d8448388d6475fa9f8f046` | Proposed exact binding — CA review required |
+| Daisy & Co | `3404f726-a693-4b2d-8c13-c9d3dfd17bbc` | Daizy & Co | `A2AC9FE4B255F52F!s71336f8736604b4c8d7868640ce0307b` | `A2AC9FE4B255F52F!scd0d0ee9c1e6474da49bbc1af0be6fe7` | Proposed exact binding — CA review required |
+| Delta Gas | `06b20bb1-ed4a-4aa1-9f48-8c6cb0531aba` | Delta Gas | `A2AC9FE4B255F52F!s8e8f1d69f0574282810f18198dd344b5` | `A2AC9FE4B255F52F!sab7f60d4c1bf41aebc316fcd797223e1` | Proposed exact binding — CA review required |
+| Dulux Paint & Paper Bloemfontein | `2aed8a31-bd53-4ad1-a3dc-432865adfb3d` | Dulux Paint Bloemfontein | `A2AC9FE4B255F52F!s4c4f135fb91e4af9896bf1716d8fd39a` | `A2AC9FE4B255F52F!sc2b9f6d79d6148c1b2be246f727a5461` | Proposed exact binding — CA review required |
+| Econofoods | `61acf81b-1011-404e-9fae-2e209be65fca` | ECONO | `A2AC9FE4B255F52F!5333` | `A2AC9FE4B255F52F!sed4fdb0a88ea4290b86a349156da5baa` | Proposed exact binding — CA review required |
+| Ehrlich Park Butchery | `ec643c75-51f5-4839-829f-3f5b7f48829a` | Ehlrich Park Slaghuis | `A2AC9FE4B255F52F!37435` | `A2AC9FE4B255F52F!s325d5e3f9ce1450cb40084058dfa8557` | Proposed exact binding — CA review required |
+| Elcheck | `7b7d244f-77b4-4b2a-88f0-8ce3f7e1c202` | Elcheck | `A2AC9FE4B255F52F!s7d756a9141d04e5e95d1c85735264a7e` | `A2AC9FE4B255F52F!sdc188c5a6611406fa8b64a98c2f16095` | Proposed exact binding — CA review required |
+| Emmanuel Funerals | `d53d8e62-9e6a-4bb9-be3f-554f40942d45` | Emmanuel Funerals | `A2AC9FE4B255F52F!96622` | `A2AC9FE4B255F52F!s01e4419d6f8e4487a7617b19776f77fb` | Proposed exact binding — CA review required |
+| Emoya Estate Driving Range | `217a547c-7b22-45cc-bf88-9d45a8e93dfe` | Emoya Driving Range | `A2AC9FE4B255F52F!s600edfea4be64f0590253cf5418c64e3` | `A2AC9FE4B255F52F!s5460ffaae92e437197171f1bb3e7366c` | Proposed exact binding — CA review required |
+| First Technology Central | `c8d34a97-8400-4f52-8b0d-843491fe3d3b` | First Technology | `A2AC9FE4B255F52F!16253` | `A2AC9FE4B255F52F!s9341f9e8d1da450eaaa92713c0608a34` | Proposed exact binding — CA review required |
+| Forklift Trucks | `4424ed69-7270-4d30-a1ea-0b77d76912df` | Forklift Trucks OFS | `A2AC9FE4B255F52F!se7ab3f8e894247489441cafd52522534` | `A2AC9FE4B255F52F!s91b7151ce4404d159a018d2fd6f42c20` | Proposed exact binding — CA review required |
+| Germoparts | `b6052710-417d-4b3b-8348-0f126bfea671` | Germoparts | `A2AC9FE4B255F52F!sb2323346b604477aa3a06194ded95354` | `A2AC9FE4B255F52F!s0c28f5ea1bc145c8a6c38bdb3c59afb2` | Proposed exact binding — CA review required |
+| Hino Trucks | `1007e58b-3fea-4515-88b7-ddaa85763de6` | Hino | `A2AC9FE4B255F52F!s3407425083924ae5979605196cb848c7` | `A2AC9FE4B255F52F!sac982d0b15fb4847a070f60501418548` | Proposed exact binding — CA review required |
+| HMHI | `572555e0-d4d0-404a-8d67-beeeeed6a1f2` | HMHI Attorneys | `A2AC9FE4B255F52F!s4f234e299cf74432adb1d3c77f653f5e` | `A2AC9FE4B255F52F!s2ce94036013e4914a453e284608f324a` | Proposed exact binding — CA review required |
+| Human Auto | `816c7f59-d56c-46a3-ba15-f76971d83769` | Human Auto | `A2AC9FE4B255F52F!se67a2b9f8d704687b3b077c22cbc5bee` | `A2AC9FE4B255F52F!s624177929db1491fab4641bdf07090fb` | Proposed exact binding — CA review required |
+| Ipopeng Office Supplies | `2e643855-e2ad-481f-a6c6-3d934b9f4a50` | Ipopeng Office Supplies | `A2AC9FE4B255F52F!s81424f05de414d6a8ec3faa1c9db8273` | `A2AC9FE4B255F52F!s163b5d32e1f945c3ae6ae1b12e9c9175` | Proposed exact binding — CA review required |
+| Jenkor | `a5eab798-3e00-44cc-947e-463386fdac39` | Jenkor | `A2AC9FE4B255F52F!sc0925b60e5cc4714a37ab14251c98cc3` | `A2AC9FE4B255F52F!s8859fbc2d58040338caf72f4e1a1fc96` | Proposed exact binding — CA review required |
+| Kundedienste | `5e4e3335-a89c-4629-9efc-b6a194bec80c` | Kundendienst | `A2AC9FE4B255F52F!scca37ac167b4440188080bd3e9dd8115` | `A2AC9FE4B255F52F!sdee6981efe66415cbe70bcb6f2fe9ef0` | Proposed exact binding — CA review required |
+| LHP Student Village & Block | `1a6d6c62-7e5e-4e1e-93e6-21d9157f0a01` | LHP Student Village & Block | `A2AC9FE4B255F52F!sb1bb7f42a4bc4a0fb82b62fdde17d005` | `A2AC9FE4B255F52F!sa4ea7690132f4cb99d896cba38d43407` | Proposed exact binding — CA review required |
+| Local Deli | `2a5ea019-64f5-4f8e-8a61-61a28940aa6e` | Local Meat Deli | `A2AC9FE4B255F52F!s9a1fb6e28f0643229bb9329a761c2c4b` | `A2AC9FE4B255F52F!sac84659984a94694a82ba12f27da14b7` | HOLD — separate Hours identity matches folder name |
+| Loraclox | `21300630-6755-4591-9a49-e22abbaf7e3d` | Loraclox | `A2AC9FE4B255F52F!s74c55190b30e48e39b63a5554762fb57` | `A2AC9FE4B255F52F!sd9378ce55cce49d6aedc28f7083053f4` | Proposed exact binding — CA review required |
+| Madison Wear | `7b47afb0-fa55-4916-85f6-09c57e5905b9` | Madisons | `A2AC9FE4B255F52F!s629f3165a32246ebb5b77d0b77f72dd9` | `A2AC9FE4B255F52F!s775dbc8f35bc4cb38080209036ba9b40` | HOLD — separate Hours identity matches folder name |
+| Mimosa Mall | `e276f019-a580-44c5-a7ab-e43840c33a64` | Mimosa | `A2AC9FE4B255F52F!s0067bd2079b04fbd86e6094f9be303a2` | `A2AC9FE4B255F52F!s8add5d4d090f4e1f90cb5705a7f0b6f1` | Proposed exact binding — CA review required |
+| NCNA | `94fe2568-3cf1-47dc-801e-d8d5396a0965` | NCNA | `A2AC9FE4B255F52F!s0d8b390cc32d415db5e2c9dc448f47e4` | `A2AC9FE4B255F52F!s042237de6601437da0a2223fcdb9a17d` | Proposed exact binding — CA review required |
+| Neshora Oxygen | `3c20fae1-8e91-41d5-98eb-1c331600e6e3` | Neshora Oxygen | `A2AC9FE4B255F52F!sd6dca10cddc3432da1678c3b3f537232` | `A2AC9FE4B255F52F!s42007e7ebfa94cecab75d4b7b8dbbd23` | Proposed exact binding — CA review required |
+| Novus Steel | `4236a60a-990f-484f-8d19-13d2f92fbe3b` | Novus Steel | `A2AC9FE4B255F52F!s3fe84ecdd7314ceba788c4f1525d1ccb` | `A2AC9FE4B255F52F!seb40e2f33a6f4ebba555727fa08ac1be` | Proposed exact binding — CA review required |
+| Peyper Bonds | `a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b` | Peyper Bonds | `A2AC9FE4B255F52F!s835a6600775e4be7ba58d8c2f907f41d` | `A2AC9FE4B255F52F!s6fe5c8a5764842528805a2334dc99bc2` | Proposed exact binding — CA review required |
+| Piek Group | `ed7aa1ae-de21-4151-a8f9-54796b234c1f` | Piek Group | `A2AC9FE4B255F52F!s257d058c781645dca57eb752b725ea40` | `A2AC9FE4B255F52F!s95e0fb7986bb4f6f88edd58e09a6c13e` | Proposed exact binding — CA review required |
+| PSG Bloemfontein | `29a28efd-c998-45e2-a57c-4a751e779e66` | PSG | `A2AC9FE4B255F52F!33925` | `A2AC9FE4B255F52F!s6537012015234535b323938bff7e07f5` | Proposed exact binding — CA review required |
+| RC-Polypipe | `4f6106de-c437-404e-8cef-fbe848de0665` | RC Polypipe | `A2AC9FE4B255F52F!s147b8a108d5f47428738b1b6c5fc2abc` | `A2AC9FE4B255F52F!sada2180196de4c958655cf8baca79e8e` | Proposed exact binding — CA review required |
+| Red Oak | `cdb11a82-339e-4b46-9b09-bde1a23efeaf` | Red Oak | `A2AC9FE4B255F52F!5350` | `A2AC9FE4B255F52F!s0823c9e9fffc4e37ad62591816fac9d2` | Proposed exact binding — CA review required |
+| Rusoord Farmstay | `ac4c5e0c-c5d3-4512-8472-fe59192abeca` | Rusoord Farmstay | `A2AC9FE4B255F52F!sa6d3b516d03340689aaa8c9af45668fe` | `A2AC9FE4B255F52F!s94f18a4397974e0487f644a04fc7018f` | Proposed exact binding — CA review required |
+| SecuriForce | `917d6f7c-1c2a-4c20-82f0-daa41b9062f5` | Securiforce | `A2AC9FE4B255F52F!s404810c6953749c8bffced64c789f1b7` | `A2AC9FE4B255F52F!s242fc0f78d2e499a9ea3803b17e7cd34` | Proposed exact binding — CA review required |
+| Supa Quick BFN | `a60b4d07-0a30-4f1c-8d48-7bd9ea649c97` | Supa Quick BFN | `A2AC9FE4B255F52F!s868ca17c3dab41959f63e59dd2fd520c` | `A2AC9FE4B255F52F!s579120e3cdc54772b24b02f4afba06a9` | Proposed exact binding — CA review required |
+| Supa Quick Centurion | `e2870110-930c-4e63-b2fe-c858030f7258` | Supa Quick Centurion | `A2AC9FE4B255F52F!sbce9a84d534d4605ad07f11f16ed8eee` | `A2AC9FE4B255F52F!se34db86674bc4473a20b232170a2d9f4` | Proposed exact binding — CA review required |
+| TBS Brokers | `a36ba938-e9dc-4ecf-bb67-4853608b1c01` | TBS Brokers | `A2AC9FE4B255F52F!1772` | `A2AC9FE4B255F52F!s8ef68b66e47e455e899b1ca98834d2d0` | Proposed exact binding — CA review required |
+| The Staffordshire | `dfa47255-875d-43cf-8a22-cfe1a6247fb7` | The Staffy | `A2AC9FE4B255F52F!s562a887bdae743e7a967a169e29b091e` | `A2AC9FE4B255F52F!s6a3fd97d08594de9b299505467312292` | Proposed exact binding — CA review required |
+| Tobich Optics | `204f4f22-14c7-42ed-a956-da57af102706` | Tobich Optics | `A2AC9FE4B255F52F!62469` | `A2AC9FE4B255F52F!s62739b1ed25c49ad952e46a8dd6abaac` | Proposed exact binding — CA review required |
+| Toyota Bloemfontein | `e2ad6d57-5b06-46e1-b75b-b67f017d57f1` | Toyota | `A2AC9FE4B255F52F!se89564f7b8be42019c9f5cfaa3d9fa74` | `A2AC9FE4B255F52F!sde6d9f4222e04844a5791d60112316e4` | Proposed exact binding — CA review required |
+| Vrystaat Kunstefees | `1f0406bb-d643-4b83-bc3e-b1ebe87eeb89` | Vrystaat Kunstefees | `A2AC9FE4B255F52F!s0a4b7c1f23bd46b5ad7313dcc8968077` | `A2AC9FE4B255F52F!s0cc6aa54dae64dc48a8343ad3204b804` | Proposed exact binding — CA review required |
+| Watch Addict | `e1cb958e-3f68-4a77-b5ea-b471ea62bdef` | Watch addict | `A2AC9FE4B255F52F!5063` | `A2AC9FE4B255F52F!sdc4d295c82ce4cb58933ae476e5f3fc9` | Proposed exact binding — CA review required |
+| We Ar Fuels | `2b953772-e791-4dff-a278-d4dd3521f02e` | We Ar Fuels | `A2AC9FE4B255F52F!20500` | `A2AC9FE4B255F52F!s0d75462845c94d4fa7de63932dd3ea9c` | Proposed exact binding — CA review required |
+| Wiseman Group | `899c9988-8207-4e45-a8fc-a7446dfcf96b` | Wiseman Group | `A2AC9FE4B255F52F!5325` | `A2AC9FE4B255F52F!s58bacf4bd58f4b8f9f2d33916e3b56a0` | Proposed exact binding — CA review required |
+| WiseRide | `504113ee-fba9-4993-807e-a86066615212` | WiseRide | `A2AC9FE4B255F52F!s42da4a04264243c3a8ae9b36741bce33` | `A2AC9FE4B255F52F!s1ca2463009f2406c9722d41c0c96c7f7` | Proposed exact binding — CA review required |
+| Zooz Lifestyle WFF | `0c01d90f-ba5e-4251-a597-bf3c83f990fa` | Zooz Lifestyle | `A2AC9FE4B255F52F!sd2503b2b299346bb8610491da5196efe` | `A2AC9FE4B255F52F!sf78852ba51b840a5bd6840c547a27ccb` | Proposed exact binding — CA review required |
+
+## Bounded apply after explicit authorization
+
+Re-read each exact Graph root/Videos item and parent relationship immediately before mapping; stop on moved/deleted IDs, changed name, wrong parent, conflicting existing mapping or withdrawn access. Reuse the existing `upsert_client_onedrive_mapping` active-admin/service-only contract for individually reviewed client IDs. Do not guess short codes, rename folders, create copies, move/delete files, provision portal libraries or publish any asset. Bindings do not make internal Admin/Photos/Videos folders client-visible.
+
+Local Deli and Madison Wear remain held until CA resolves the separate Local Meat Deli and Madisons Hours identities. This is only a folder-binding ambiguity: their existing Dynamics/Hours exact-name registry IDs are preserved, and their history is not merged.
+
