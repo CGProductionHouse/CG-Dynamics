@@ -41,6 +41,15 @@ test('Performance keeps all service choices without inferring package or connect
       assert.doesNotMatch(render('overview', state), /Google Ads|WhatsApp|connection before using|No paid campaigns/)
     }
     assert.match(render('google', 'error'), /Google Ads performance is unavailable/)
+    // A Facebook source elsewhere in the report must not label an unrelated
+    // service offer as Meta-synced evidence.
+    for (const tab of ['google', 'web', 'linkedin', 'tiktok', 'email', 'instagram']) {
+      const html = renderToStaticMarkup(createElement(ClientReportView, {
+        report, client, facts: [{ platform: 'facebook' }], googleAds: null,
+        googleAdsState: 'unmapped', initialTab: tab, onTabChange: () => {},
+      }))
+      assert.doesNotMatch(html, /Source: Meta Business Sync|Source: Google Ads Sync|Sources: Meta/)
+    }
     const url = new URL(serviceConversationUrl('Google Business Profile', 'A & B'))
     assert.equal(url.hostname, 'wa.me')
     assert.equal(url.pathname, '/27791152339')

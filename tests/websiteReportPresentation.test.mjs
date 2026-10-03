@@ -30,7 +30,8 @@ test('published website presentation preserves half-open dates, partial coverage
 
 test('website tab cannot inherit the Meta source footer or manufacture enquiry zero', () => {
   const source = readFileSync(new URL('../src/pages/client/ClientReportView.tsx', import.meta.url), 'utf8')
-  assert.match(source, /activeTab !== 'web' && \(hasMeta/)
+  assert.match(source, /showMetaSource \|\| showGoogleSource/)
+  assert.match(source, /activeTab === 'overview' \|\| activeTab === 'google'/)
   assert.match(source, /presentation.enquiries === null \? 'Measurement unavailable'/)
   assert.doesNotMatch(source, /conversions.total === null \? null : 0/)
   assert.match(source, /Report window:/)
