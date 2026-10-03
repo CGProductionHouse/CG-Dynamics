@@ -2,6 +2,16 @@
 
 Status: **OFF by default**. Merging the implementation PRs does not authorize any production activation step.
 
+## 3 October 2026 read-only reconciliation — supersedes historical backfill assumptions
+
+Production inspection found 59 active Dynamics clients and 75 active CG Hours clients. All 59 have a unique exact-name Hours counterpart, but names alone do **not** establish an audited cross-system UUID mapping. The bridge mapping/request tables and Hours outbox are absent in production. No activation or backfill was performed.
+
+Neshora Oxygen already exists in Dynamics. Do **not** replay the historical three-client creation list below: the existing Neshora row requires reviewed exact-UUID reconciliation, not another client. JFJ Electrical and VCS Cleaning Solutions are currently Hours-only. The other Hours-only rows require current service-status decisions; similar names such as Madisons/Madison Wear and Local Meat Deli/Local Deli must not be merged by inference.
+
+Existing Hours client UUIDs, time entries and timesheet rows must remain intact. Dynamics archive/restore does not change Hours status. The new `20261003085222_client_registry_identity_history_guard.sql` is a proposed, **unapplied** safeguard: it reserves normalized exact names (including archived rows) and revokes browser-role client DELETE. It neither reconciles UUIDs nor activates the bridge. Its unique-index preflight must reject existing collisions rather than deleting or merging history to make it pass.
+
+Physical OneDrive folders are supporting evidence, not canonical bindings: the audit found candidate folders for all 59 active Dynamics clients, but zero saved OneDrive/onboarding mappings or portal library/asset rows. Do not recreate folders or claim portal readiness from names alone. The supervisor receipts are #381 comment 5967288668 and #404 comment 5967289444.
+
 Scope: Dynamics #404 / PR #411 and CG Hours #7 / PR #8 only. Staff Logger PR #3 and Dynamics #376 are outside this runbook.
 
 ## Safety contract while OFF
