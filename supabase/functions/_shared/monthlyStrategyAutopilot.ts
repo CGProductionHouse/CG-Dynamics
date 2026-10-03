@@ -8,7 +8,7 @@
 import { getMonthEvents } from '../../../src/lib/contentCalendar.ts'
 import { buildMonthlyBaseline } from '../../../src/lib/monthlyStrategySeed.ts'
 import { readPackageAuthority } from '../../../src/lib/packageAuthority.ts'
-import { readStrategyData } from '../../../src/lib/strategyEngine.ts'
+import { generateActionPlan, readStrategyData } from '../../../src/lib/strategyEngine.ts'
 import { cardTargetsAgent } from '../../../src/features/ai-workforce/agents/agentRegistry.ts'
 
 export const STRATEGY_AUTOPILOT_PAGE_SIZE = 500
@@ -131,10 +131,6 @@ function deliverableLabel(type: string): string {
   return ({ video: 'professional video', reel: 'reel', photo: 'photo post', dp: 'design poster' } as Record<string, string>)[type] ?? type
 }
 
-function addUnique(target: string[], value: string, limit: number) {
-  if (value.length >= 12 && !target.some(item => item.toLowerCase() === value.toLowerCase()) && target.length < limit) target.push(value)
-}
-
 /** PostgreSQL date semantics: a card remains current through its expiry date. */
 export function strategyKnowledgeCardIsCurrent(card: { review_expires_at?: unknown }, operatingDate: string): boolean {
   const expiresOn = clean(card.review_expires_at, 10)
@@ -198,19 +194,14 @@ async function prepareDraft(sb: StrategyAutopilotClient, client: Record<string, 
     previousDrivers: previousData.strategyDrivers,
     deliverables: ds.map(row => ({ id: String(row.id), deliverable_type: String(row.deliverable_type) })),
   })
-  draft.clientDirection = baseline.clientDirection
-  draft.strategyDrivers = baseline.strategyDrivers
+  // Source snippets are briefing evidence, not authored monthly decisions.
+  // Keep them in seedContext rather than rendering them as client strategy.
   evidence.push(...baseline.evidence)
   if (!packageAuthority.settings || !packageAuthority.verification) blockers.push('PACKAGE_UNVERIFIED')
   if (!prior.data && !report.data && updateRows.length === 0 && !guideRow) blockers.push('CLIENT_EVIDENCE_UNVERIFIED')
-  if (industryRow?.primary_industry) {
-    const value = `Apply relevant ${clean(industryRow.primary_industry, 80)} category context without adding unverified client claims.`
-    addUnique(draft.strategyDrivers, value, 6)
-  }
   for (const card of cardRows.slice(0, 3)) {
     const value = clean(card.principle || card.summary)
     if (!value) continue
-    addUnique(draft.strategyDrivers, value, 6)
     evidence.push({ authority: 'marketing_library_skill_card', source_id: String(card.id), field: 'strategyDrivers', excerpt: value })
   }
 
@@ -226,13 +217,13 @@ async function prepareDraft(sb: StrategyAutopilotClient, client: Record<string, 
       if (typeof count === 'number') counts.set(type, count)
     }
   }
-  for (const [type, count] of counts) {
-    const key = ({ video: 'professional_video', reel: 'reels', photo: 'photo_content', dp: 'design_poster' } as Record<string, string>)[type]
-    if (!key || !draft.actionPlan[key]) continue
-    draft.actionPlan[key] = { enabled: count > 0, items: count > 0 ? [`Prepare ${count} ${deliverableLabel(type)}${count === 1 ? '' : 's'} from the confirmed package.`] : [], notes: 'Scope comes from the explicitly confirmed client package; Client Schedule remains execution evidence.' }
+  if (packageAuthority.settings) {
+    draft.actionPlan = generateActionPlan({
+      clientName: String(client.name), data: readStrategyData(draft),
+      selectedCalendar: [], packageSettings: packageAuthority.settings,
+    })
   }
   const mix = [...counts].map(([type, count]) => `${count} ${deliverableLabel(type)}${count === 1 ? '' : 's'}`).join(', ')
-  if (mix) addUnique(draft.strategyDrivers, `Deliver the confirmed monthly mix: ${mix}.`, 6)
   if (packageAuthority.verification) {
     evidence.push({ authority: 'confirmed_client_package', source_id: clientId, field: 'actionPlan', excerpt: `Confirmed ${packageAuthority.verification.confirmed_at}: ${mix}.` })
   }
@@ -274,15 +265,9 @@ async function prepareDraft(sb: StrategyAutopilotClient, client: Record<string, 
     draft.topContent.whatThisTellsUs = performance
     evidence.push({ authority: 'published_report', source_id: String(reportRow?.id), field: 'topContent', excerpt: performance })
   }
-  draft.strategyGoingForward = [
-    draft.clientDirection[0] ? `Prioritise ${draft.clientDirection[0].replace(/[.]$/, '').toLowerCase()}.` : '',
-    mix ? `Execute the confirmed ${mix} package without extending scope.` : 'Keep production scope provisional until the package and deliverables are confirmed.',
-    evs.length ? 'Use only the recorded client events selected above; staff must verify any promotional detail.' : '',
-  ].filter(Boolean).join(' ')
-  draft.goldStandard.objective = draft.clientDirection[0] ? `${String(client.name)}: ${draft.clientDirection[0]}` : ''
-  draft.goldStandard.formatsAndRationale = mix ? `Work within ${String(client.name)}’s confirmed package of ${mix}; each format still needs an evidence-backed role.` : ''
-  draft.goldStandard.testAndChange = draft.topContent.whatThisTellsUs ? `Use the previous exact-client finding “${draft.topContent.whatThisTellsUs}” to define one controlled change.` : ''
-  draft.goldStandard.nextMonthGamePlan = mix ? `Sequence only the confirmed ${mix}; do not add channels or deliverables outside package.` : ''
+  // Package capacity, prior findings and event selections do not constitute
+  // a marketing objective, format rationale or experiment. Leave decisions
+  // unwritten until authored through the canonical strategy workflow.
   if (blockers.length) draft.clientActionsRequired.push('Confirm the monthly package and Client Schedule scope before approval.')
 
   return {
