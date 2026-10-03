@@ -1,6 +1,6 @@
 # CG Hours → CG Dynamics client-registry bridge activation
 
-Status: **OFF by default**. Merging the implementation PRs does not authorize any production activation step.
+Status: **Activated under explicit CA approval on 3 October 2026** for the exact 59 existing-client pairs in PR #654's reviewed packet. See `CLIENT-REGISTRY-ACTIVATION-2026-10-03.md` for applied scope and acceptance. OFF remains the code default; merging implementation alone never authorizes activation. The historical inspection and prerequisites below are not pending instructions to replay.
 
 ## 3 October 2026 read-only reconciliation — supersedes historical backfill assumptions
 
