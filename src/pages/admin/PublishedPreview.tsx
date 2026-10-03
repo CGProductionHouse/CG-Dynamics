@@ -449,6 +449,8 @@ export default function PublishedPreview() {
         </div>
       </section>
 
+      {selectedClientId && (profile?.role === 'admin' || profile?.role === 'manager') && <Link to={`/admin/client-portal-preview?client=${encodeURIComponent(selectedClientId)}&area=overview`} className="mb-6 inline-flex min-h-11 items-center rounded-full border border-teal-300/25 bg-teal-300/[0.07] px-5 py-2 text-sm font-bold text-teal-200">Open selected client portal preview ↗</Link>}
+
       {surface === 'setup' ? (
         setupLoading ? (
           <p className="text-sm text-brand-primary">Loading Setup preview...</p>

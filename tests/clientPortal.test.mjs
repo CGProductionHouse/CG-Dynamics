@@ -116,7 +116,7 @@ test('login preserves role-valid client deep links and staff guards avoid the da
 })
 
 test('portal pages use the signed-in client and only published monthly reports', () => {
-  assert.match(HOME_SOURCE, /profile\.client_id/)
+  assert.match(HOME_SOURCE, /const clientId = previewClientId \?\? profile\?\.client_id/)
   assert.match(HOME_SOURCE, /listClientPublishedReports\(\)/)
   assert.match(PERFORMANCE_SOURCE, /listClientPublishedReports\(\)/)
   assert.match(CAMPAIGNS_SOURCE, /Navigate to="\/client\/performance\?tab=google" replace/)
@@ -126,7 +126,8 @@ test('portal pages use the signed-in client and only published monthly reports',
 })
 
 test('client calendar uses only safe RPC projections and database ownership enforcement', () => {
-  assert.match(CALENDAR_PAGE_SOURCE, /fetchClientMonthAhead\(profile\.client_id, month\)/)
+  assert.match(CALENDAR_PAGE_SOURCE, /const clientId = previewClientId \?\? profile\?\.client_id/)
+  assert.match(CALENDAR_PAGE_SOURCE, /fetchClientMonthAhead\(clientId, month\)/)
   assert.doesNotMatch(CALENDAR_PAGE_SOURCE, /monthly_deliverables|company_calendar_events|assigned_to|internal_notes|priority/)
   assert.match(CALENDAR_LIB_SOURCE, /client_portal_month_ahead_posts/)
   assert.match(CALENDAR_LIB_SOURCE, /client_portal_month_ahead_events/)

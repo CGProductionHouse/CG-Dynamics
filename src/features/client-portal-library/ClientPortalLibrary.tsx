@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { ClientPortalLink as Link } from '../../components/client/ClientPortalLink'
+import { useOptionalClientPortal } from '../../components/client/ClientPortalContext'
 import { ClientPortalEmptyState } from '../../components/client/ClientPortalStates'
 import { getClientPortalAssetAccess, loadClientPortalLibraryFiles } from './api'
 import type {
@@ -45,6 +46,7 @@ export function ClientPortalLibrary({ library }: { library: ClientPortalLibraryS
 }
 
 function LibraryCategory({ summary }: { summary: ClientPortalLibraryCategorySummary }) {
+  const previewClientId = useOptionalClientPortal()?.previewClientId
   const flat = summary.category === 'brand_identity'
   const [selectedYear, setSelectedYear] = useState<number | null>(null)
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null)
@@ -62,7 +64,7 @@ function LibraryCategory({ summary }: { summary: ClientPortalLibraryCategorySumm
     setSelectedMonth(month)
     setLoading(true)
     setError(null)
-    const result = await loadClientPortalLibraryFiles(summary.category, year, month, offset)
+    const result = await loadClientPortalLibraryFiles(summary.category, year, month, offset, previewClientId)
     if (requestSequence.current !== requestId) return
     if (!result.data) {
       setError(result.error)
@@ -148,6 +150,7 @@ function FileList({ page, loading, error, onMore }: { page: ClientPortalLibraryF
 }
 
 function LibraryAssetRow({ asset }: { asset: ClientPortalLibraryAsset }) {
+  const previewClientId = useOptionalClientPortal()?.previewClientId
   const [busy, setBusy] = useState<'inline' | 'download' | 'stream' | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [videoUrl, setVideoUrl] = useState<string | null>(null)
@@ -157,7 +160,7 @@ function LibraryAssetRow({ asset }: { asset: ClientPortalLibraryAsset }) {
   async function access(purpose: 'inline' | 'download' | 'stream') {
     setBusy(purpose)
     setError(null)
-    const result = await getClientPortalAssetAccess(asset.id, purpose)
+    const result = await getClientPortalAssetAccess(asset.id, purpose, previewClientId)
     if (!result.data) {
       setError(result.error)
       setBusy(null)
@@ -202,6 +205,7 @@ function LibraryAssetRow({ asset }: { asset: ClientPortalLibraryAsset }) {
 }
 
 function LazyThumbnail({ asset }: { asset: ClientPortalLibraryAsset }) {
+  const previewClientId = useOptionalClientPortal()?.previewClientId
   const holder = useRef<HTMLDivElement>(null)
   const [url, setUrl] = useState<string | null>(null)
   const eligible = /^(image\/|video\/)/i.test(asset.mimeType ?? '')
@@ -212,7 +216,7 @@ function LazyThumbnail({ asset }: { asset: ClientPortalLibraryAsset }) {
     if (!node) return
     let active = true
     const load = async () => {
-      const result = await getClientPortalAssetAccess(asset.id, 'thumbnail')
+      const result = await getClientPortalAssetAccess(asset.id, 'thumbnail', previewClientId)
       if (active && result.data) setUrl(result.data.url)
     }
     if (!('IntersectionObserver' in window)) {
@@ -227,7 +231,7 @@ function LazyThumbnail({ asset }: { asset: ClientPortalLibraryAsset }) {
     }, { rootMargin: '120px' })
     observer.observe(node)
     return () => { active = false; observer.disconnect() }
-  }, [asset.id, eligible, url])
+  }, [asset.id, eligible, previewClientId, url])
 
   if (!eligible) return null
   return <div ref={holder} className="h-14 w-20 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/[0.04]">{url && <img src={url} alt="" loading="lazy" className="h-full w-full object-cover" />}</div>

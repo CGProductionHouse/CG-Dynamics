@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { ClientPortalLink as Link } from '../../components/client/ClientPortalLink'
 import { ClientLogo } from '../../components/ClientLogo'
 import { useClientPortal } from '../../components/client/ClientPortalContext'
 import { ClientPortalErrorState, ClientPortalLoadingState } from '../../components/client/ClientPortalStates'
@@ -13,6 +13,7 @@ import { loadReportPlatformFacts } from '../../lib/db/reportingTruth'
 import { loadGoogleAdsDashboard, type GoogleAdsDashboardState } from '../../lib/googleAdsDashboard'
 import type { PlatformFact } from '../../lib/overviewModel'
 import { getReportMonthFromPeriod, monthDisplayLabel, selectMonthlyReports } from '../../lib/reportPeriod'
+import { getPreviewStrategy, listPreviewReports } from '../../lib/clientPortalPreview'
 
 type PortalData = {
   report: ClientReport | null
@@ -34,7 +35,8 @@ const EMPTY_DATA: PortalData = {
 
 export default function ClientPortalHome() {
   const { profile } = useAuth()
-  const { client } = useClientPortal()
+  const { client, previewClientId } = useClientPortal()
+  const clientId = previewClientId ?? profile?.client_id
   const [workingMonth] = useState(() => businessMonthKey())
   const [data, setData] = useState<PortalData>(EMPTY_DATA)
   const [loading, setLoading] = useState(true)
@@ -44,15 +46,16 @@ export default function ClientPortalHome() {
     let active = true
 
     async function load() {
-      if (!profile?.client_id) {
+      if (!clientId) {
         setLoading(false)
         return
       }
 
       setLoading(true)
+      setData(EMPTY_DATA)
       setError(false)
       try {
-        const reportsResult = await listClientPublishedReports()
+        const reportsResult = await (previewClientId ? listPreviewReports(previewClientId) : listClientPublishedReports())
         if (!active) return
         if (reportsResult.error) throw new Error('Portal data unavailable')
 
@@ -65,8 +68,8 @@ export default function ClientPortalHome() {
           report && reportMonth
             ? loadGoogleAdsDashboard(report.id, reportMonth)
             : Promise.resolve({ data: null, state: 'no-activity' as const, error: null }),
-          fetchClientMonthAhead(profile.client_id, workingMonth),
-          getClientPublishedMonthlyStrategy(workingMonth).catch(() => ({ data: null, error: { message: 'Unavailable' } })),
+          fetchClientMonthAhead(clientId, workingMonth),
+          (previewClientId ? getPreviewStrategy(previewClientId, workingMonth) : getClientPublishedMonthlyStrategy(workingMonth)).catch(() => ({ data: null, error: { message: 'Unavailable' } })),
         ])
         if (!active) return
 
@@ -89,7 +92,7 @@ export default function ClientPortalHome() {
 
     void load()
     return () => { active = false }
-  }, [profile?.client_id, workingMonth])
+  }, [clientId, previewClientId, workingMonth])
 
   const strategy = useMemo(() => buildPublishedMonthlyStrategyPreview(data.monthlyStrategy, workingMonth), [data.monthlyStrategy, workingMonth])
   const activeOrganic = useMemo(() => activeOrganicPlatforms(data.facts), [data.facts])

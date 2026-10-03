@@ -21,7 +21,7 @@ export function ContentReviewCard({ review, canDecide, onChanged, staffView = fa
     return () => { active = false }
   }, [review.asset_path, review.id, review.state, staffView])
   async function decide(approve: boolean) {
-    if (busy) return
+    if (!canDecide || busy) return
     setBusy(true); setError(null)
     try {
       const result = await supabase.rpc('decide_content_review', { p_version_id: review.id, p_approve: approve, p_note: note || null })

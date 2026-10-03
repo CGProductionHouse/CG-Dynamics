@@ -112,7 +112,8 @@ test('provider workspace never presents unsupported platforms as active data sou
 // ── 5. No staff-only data in client projections ──────────────────────────────
 test('client content calendar exposes no staff notes/assignments and uses safe RPCs', () => {
   assert.doesNotMatch(CALENDAR, /assigned_to|internal_notes|helper_names|staff_note|priority/)
-  assert.match(CALENDAR, /fetchClientMonthAhead\(profile\.client_id/)
+  assert.match(CALENDAR, /previewClientId \?\? profile\?\.client_id/)
+  assert.match(CALENDAR, /fetchClientMonthAhead\(clientId/)
   assert.match(CALENDAR_LIB, /client_portal_month_ahead_(posts|events)/)
 })
 
@@ -394,7 +395,8 @@ test('calendar page shows unscheduled posts in a separate section', () => {
 })
 
 test('calendar page uses SECURITY-DEFINER RPC keyed to profile.client_id, never direct table queries', () => {
-  assert.match(CALENDAR, /fetchClientMonthAhead\(profile\.client_id/)
+  assert.match(CALENDAR, /previewClientId \?\? profile\?\.client_id/)
+  assert.match(CALENDAR, /fetchClientMonthAhead\(clientId/)
   assert.doesNotMatch(CALENDAR, /monthly_deliverables/)
   assert.doesNotMatch(CALENDAR, /company_calendar_events/)
   assert.doesNotMatch(CALENDAR, /assigned_to|internal_notes|helper_names|priority/)

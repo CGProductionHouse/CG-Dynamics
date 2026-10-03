@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
+import { ClientPortalLink as Link } from '../../components/client/ClientPortalLink'
 import { ClientPortalShell } from '../../components/client/ClientPortalShell'
 import { ClientPortalErrorState, ClientPortalLoadingState } from '../../components/client/ClientPortalStates'
 import { useAuth } from '../../contexts/AuthContext'
@@ -15,6 +16,7 @@ import { CLIENT_SAFE_STATUS_LABELS, PACKAGE_DELIVERABLE_LABELS } from '../../lib
 import { monthDisplayLabel } from '../../lib/reportPeriod'
 import { CALENDAR_HEADERS, monthGridCells } from '../../lib/scheduleCalendar'
 import { businessDateKey, businessMonthKey } from '../../lib/businessTime'
+import { useOptionalClientPortal } from '../../components/client/ClientPortalContext'
 
 const MONTH_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/
 
@@ -36,6 +38,8 @@ function localDateKey(value: string): string {
 
 export default function ClientContentCalendarPage({ embedded = false, month: controlledMonth }: { embedded?: boolean; month?: string }) {
   const { profile } = useAuth()
+  const previewClientId = useOptionalClientPortal()?.previewClientId
+  const clientId = previewClientId ?? profile?.client_id
   const [searchParams, setSearchParams] = useSearchParams()
   const requestedMonth = searchParams.get('month')
   const month = controlledMonth ?? (requestedMonth && MONTH_PATTERN.test(requestedMonth) ? requestedMonth : currentMonth())
@@ -47,16 +51,18 @@ export default function ClientContentCalendarPage({ embedded = false, month: con
     let active = true
 
     async function load() {
-      if (!profile?.client_id) {
+      if (!clientId) {
         setLoading(false)
         return
       }
 
       setLoading(true)
+      setCalendar(null)
+      setClient(null)
       try {
         const [clientResult, calendarResult] = await Promise.all([
-          getClient(profile.client_id),
-          fetchClientMonthAhead(profile.client_id, month),
+          getClient(clientId),
+          fetchClientMonthAhead(clientId, month),
         ])
         if (!active) return
         setClient(clientResult.data)
@@ -71,7 +77,7 @@ export default function ClientContentCalendarPage({ embedded = false, month: con
 
     void load()
     return () => { active = false }
-  }, [month, profile?.client_id])
+  }, [month, clientId])
 
   function changeMonth(next: string) {
     if (controlledMonth) return

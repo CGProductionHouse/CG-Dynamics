@@ -8,9 +8,11 @@ import { getClient, type Client } from '../../lib/db/clients'
 import { guidelineVideoName } from '../../lib/contentGuidelineNaming'
 import { monthDisplayLabel } from '../../lib/reportPeriod'
 import { businessMonthKey } from '../../lib/businessTime'
+import { useOptionalClientPortal } from '../../components/client/ClientPortalContext'
 
 export default function ClientContentGuidesPage({ preview = false, embedded = false, month }: { preview?: boolean; embedded?: boolean; month?: string }) {
   const { profile } = useAuth()
+  const scopedPreviewClientId = useOptionalClientPortal()?.previewClientId
   const [searchParams, setSearchParams] = useSearchParams()
   const [client, setClient] = useState<Client | null>(null)
   const [guidelines, setGuidelines] = useState<PublishedContentGuideline[]>([])
@@ -22,14 +24,17 @@ export default function ClientContentGuidesPage({ preview = false, embedded = fa
   const currentMonth = month ?? (requestedMonth && /^\d{4}-(0[1-9]|1[0-2])$/.test(requestedMonth) ? requestedMonth : fallbackMonth)
   const selectedGuideKey = searchParams.get('guide')
   const canPreview = preview && (profile?.role === 'admin' || profile?.role === 'manager')
-  const clientId = canPreview ? searchParams.get('client') : profile?.client_id
+  const clientId = scopedPreviewClientId ?? (canPreview ? searchParams.get('client') : profile?.client_id)
 
   useEffect(() => {
     let active = true
     async function load() {
       if (!clientId) { setLoading(false); return }
       setLoading(true)
+      setGuidelines([])
+      setClient(null)
       setError(null)
+      try {
       const [clientResult, guidelineResult] = await Promise.all([
         getClient(clientId),
         fetchPublishedGuides(clientId, currentMonth),
@@ -40,6 +45,11 @@ export default function ClientContentGuidesPage({ preview = false, embedded = fa
       if (guidelineResult.error) { setError(guidelineResult.error); setLoading(false); return }
       setGuidelines(guidelineResult.data ?? [])
       setLoading(false)
+      } catch {
+        if (!active) return
+        setError('Published guidelines could not be loaded safely.')
+        setLoading(false)
+      }
     }
     void load()
     return () => { active = false }

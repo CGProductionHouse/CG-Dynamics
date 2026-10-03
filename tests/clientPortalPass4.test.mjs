@@ -39,8 +39,9 @@ test('client approvals stay on the canonical review queue and real decision acti
 })
 
 test('Brand Hub uses the dedicated client-safe library projection and keeps onboarding context optional', () => {
-  assert.match(brandHub, /loadClientPortalLibrary\(\)/)
-  assert.match(brandHub, /loadPortalSetup\(\)/)
+  assert.match(brandHub, /loadClientPortalLibrary\(previewClientId\)/)
+  assert.match(brandHub, /loadPortalSetup\(previewClientId\)/)
+  assert.match(brandHub, /const clientId = previewClientId \?\? profile\?\.client_id/)
   assert.match(brandHub, /<ClientPortalLibrary library=\{library\} \/>/)
   assert.doesNotMatch(brandHub.slice(brandHub.indexOf('function ClientBrandHub')), /BrandAssetLibrary/)
   assert.doesNotMatch(brandHub, /drive_item_id|drive_path|sharepoint|onedrive/i)

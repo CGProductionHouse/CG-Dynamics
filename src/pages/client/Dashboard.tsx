@@ -33,6 +33,7 @@ import type { PlatformFact } from '../../lib/overviewModel'
 import { actionMonthForReport } from '../../lib/clientPortal'
 import { getClientPublishedMonthlyStrategy } from '../../lib/monthlyStrategy'
 import type { MonthlyStrategyPresentation } from './ClientReportView'
+import { getPreviewMetrics, getPreviewReport, getPreviewStrategy, listPreviewReports } from '../../lib/clientPortalPreview'
 
 function errorMessage(error: unknown, fallback: string) {
   if (error instanceof Error) return error.message
@@ -48,7 +49,8 @@ function monthLabel(report: ClientReport) {
 
 export default function Dashboard() {
   const { profile } = useAuth()
-  const { client } = useClientPortal()
+  const { client, previewClientId } = useClientPortal()
+  const scopedClientId = previewClientId ?? profile?.client_id
   const [searchParams, setSearchParams] = useSearchParams()
   const [reports, setReports] = useState<ClientReport[]>([])
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null)
@@ -81,10 +83,10 @@ export default function Dashboard() {
   useEffect(() => {
     const requestId = ++reportsRequestRef.current
     const requestedProfileId = profile?.id ?? null
-    const requestedClientId = profile?.client_id ?? null
+    const requestedClientId = scopedClientId ?? null
     const requestIsCurrent = () => requestId === reportsRequestRef.current
       && profile?.id === requestedProfileId
-      && profile?.client_id === requestedClientId
+      && scopedClientId === requestedClientId
 
     async function loadReports() {
       setReports([])
@@ -102,7 +104,7 @@ export default function Dashboard() {
       setLoading(true)
       setError(null)
       try {
-        const reportsRes = await listClientPublishedReports()
+        const reportsRes = await (previewClientId ? listPreviewReports(previewClientId) : listClientPublishedReports())
         if (!requestIsCurrent()) return
         const { data, error } = reportsRes
         if (error) {
@@ -120,16 +122,16 @@ export default function Dashboard() {
 
     void loadReports()
     return () => { reportsRequestRef.current += 1 }
-  }, [profile?.client_id, profile?.id])
+  }, [profile?.client_id, profile?.id, previewClientId, scopedClientId])
 
   useEffect(() => {
     const requestId = ++reportRequestRef.current
     const requestedProfileId = profile?.id ?? null
-    const requestedClientId = profile?.client_id ?? null
+    const requestedClientId = scopedClientId ?? null
     const requestedReportId = selectedReportId
     const requestIsCurrent = () => requestId === reportRequestRef.current
       && profile?.id === requestedProfileId
-      && profile?.client_id === requestedClientId
+      && scopedClientId === requestedClientId
       && selectedReportId === requestedReportId
 
     if (!requestedReportId || !requestedClientId || !requestedProfileId) {
@@ -150,7 +152,7 @@ export default function Dashboard() {
       setReportLoading(true)
       setError(null)
       try {
-        const { data, error } = await getClientPublishedReportWithPosts(reportId)
+        const { data, error } = await (previewClientId ? getPreviewReport(previewClientId, reportId) : getClientPublishedReportWithPosts(reportId))
         if (!requestIsCurrent()) return
         if (error) {
           setError(error.message)
@@ -162,10 +164,10 @@ export default function Dashboard() {
           const previousMonth = previousReportMonth(currentMonth)
           const actionMonth = actionMonthForReport(data)
           const [metricsResult, googleAdsResult, factsResult, strategyResult] = await Promise.all([
-            listClientReportManualMetrics(data.id),
+            previewClientId ? getPreviewMetrics(previewClientId, currentMonth) : listClientReportManualMetrics(data.id),
             loadGoogleAdsDashboard(data.id, currentMonth),
             loadReportPlatformFacts(data.id, currentMonth, previousMonth),
-            actionMonth ? getClientPublishedMonthlyStrategy(actionMonth) : Promise.resolve({ data: null, error: null }),
+            actionMonth ? (previewClientId ? getPreviewStrategy(previewClientId, actionMonth) : getClientPublishedMonthlyStrategy(actionMonth)) : Promise.resolve({ data: null, error: null }),
           ])
           if (!requestIsCurrent()) return
           if (factsResult.error || metricsResult.error) {
@@ -200,9 +202,9 @@ export default function Dashboard() {
 
     void loadReport()
     return () => { reportRequestRef.current += 1 }
-  }, [profile?.client_id, profile?.id, selectedReportId])
+  }, [profile?.client_id, profile?.id, previewClientId, scopedClientId, selectedReportId])
 
-  if (!profile?.client_id) {
+  if (!scopedClientId) {
     return (
       <EmptyReportState
         title="Your account is pending setup"
@@ -281,7 +283,7 @@ export default function Dashboard() {
 
       {/* Forward-looking: this month's CG plan (client-safe; renders nothing
           until the client has visible schedule data). */}
-      {profile.client_id && <ClientMonthAhead clientId={profile.client_id} />}
+      {scopedClientId && <ClientMonthAhead clientId={scopedClientId} />}
       <ClientServiceExpansion />
     </>
   )

@@ -33,6 +33,7 @@ const ManualMetricsAdmin = lazyRoute(() => import('./pages/admin/ManualMetricsAd
 const ContentReviewsPage = lazyRoute(() => import('./pages/admin/ContentReviewsPage'))
 const ContentOperationsPage = lazyRoute(() => import('./pages/admin/ContentOperationsPage'))
 const PublishedPreview = lazyRoute(() => import('./pages/admin/PublishedPreview'))
+const ClientPortalPreview = lazyRoute(() => import('./pages/admin/ClientPortalPreview'))
 const IntegrationsPage = lazyRoute(() => import('./pages/admin/IntegrationsPage'))
 const MetaIntegrationPage = lazyRoute(() => import('./pages/admin/MetaIntegrationPage'))
 const GoogleAdsIntegrationPage = lazyRoute(() => import('./pages/admin/GoogleAdsIntegrationPage'))
@@ -190,6 +191,12 @@ export default function App() {
                 <Route path="/admin/marketing-library" element={<MarketingLibraryPage />} />
                 <Route path="/admin/skill-card-review" element={<SkillCardReviewPage />} />
               </Route>
+            </Route>
+          </Route>
+
+          <Route element={<RequireStaff />}>
+            <Route element={<RequireManager />}>
+              <Route path="/admin/client-portal-preview" element={<ClientPortalPreview />} />
             </Route>
           </Route>
 

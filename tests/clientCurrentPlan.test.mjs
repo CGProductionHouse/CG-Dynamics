@@ -15,7 +15,8 @@ test('Overview working month and direction do not depend on an old report or leg
   const home = readFileSync('src/pages/client/ClientPortalHome.tsx', 'utf8')
   assert.doesNotMatch(home, /actionMonthForReport|buildClientStrategyPreview\(data.report\)/)
   assert.match(home, /getClientPublishedMonthlyStrategy\(workingMonth\)/)
-  assert.match(home, /fetchClientMonthAhead\(profile.client_id, workingMonth\)/)
+  assert.match(home, /previewClientId \?\? profile\?\.client_id/)
+  assert.match(home, /fetchClientMonthAhead\(clientId, workingMonth\)/)
   assert.match(home, /businessMonthKey/)
 })
 

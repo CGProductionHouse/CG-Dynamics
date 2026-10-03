@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useOptionalClientPortal } from '../../components/client/ClientPortalContext'
 import { downloadOnboardingFile } from './api'
 import type { ClientOnboardingState } from './types'
 import { PLATFORM_GUIDES } from './platformGuides'
@@ -45,11 +46,12 @@ function SummaryCard({ title, ready, children }: { title: string; ready: boolean
 }
 
 function DownloadButton({ uploadId, audience }: { uploadId: string; audience: 'client' | 'staff' }) {
+  const previewClientId = useOptionalClientPortal()?.previewClientId
   const [downloading, setDownloading] = useState(false)
 
   async function download() {
     setDownloading(true)
-    const { data, error } = await downloadOnboardingFile(uploadId, audience)
+    const { data, error } = await downloadOnboardingFile(uploadId, audience, previewClientId)
     if (data) {
       const blob = data as Blob
       const url = URL.createObjectURL(blob)

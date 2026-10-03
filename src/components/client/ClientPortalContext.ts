@@ -3,6 +3,11 @@ import type { Client } from '../../lib/db/clients'
 
 export type ClientPortalContextValue = {
   client: Client | null
+  previewClientId?: string
+}
+
+export function useOptionalClientPortal() {
+  return useContext(ClientPortalContext)
 }
 
 export const ClientPortalContext = createContext<ClientPortalContextValue | null>(null)
