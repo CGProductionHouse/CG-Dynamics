@@ -182,7 +182,7 @@ export function ClientReportView({
     ...(reportPlatforms.includes('instagram') ? [{ key: 'instagram' as const, label: 'Instagram', icon: 'instagram' as const }] : []),
     ...(hasGoogleAds ? [{ key: 'google' as const, label: 'Google', icon: 'google' as const }] : []),
     ...(reportPlatforms.includes('tiktok') ? [{ key: 'tiktok' as const, label: 'TikTok', icon: 'tiktok' as const }] : []),
-    ...(report.website_report || managedWebsite || showAdminDiagnostics ? [{ key: 'web' as const, label: 'Website Performance', icon: 'web' as const }] : []),
+    ...(report.website_report || managedWebsite ? [{ key: 'web' as const, label: 'Website Performance', icon: 'web' as const }] : []),
   ]
   const activeTab = tabs.some(item => item.key === tab) ? tab : 'overview'
   const selectTab = (nextTab: ReportTabKey) => {

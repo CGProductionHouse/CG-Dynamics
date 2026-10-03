@@ -15,6 +15,7 @@ The published snapshot remains the only reporting authority. No collection, save
 - Partial coverage survives an older snapshot verdict. Observation day uses the snapshot timezone; invalid timestamps/timezones cannot establish freshness.
 - Enquiries require an explicit safe nonnegative integer enquiry observation, including observed zero. Missing breakdowns never become zero.
 - Website source is identified independently of the report's social sources.
+- A client with neither a published website snapshot nor a verified managed-site record no longer gets a dead Website tab merely because a staff member is previewing the report. Unknown service scope is not converted into an upgrade claim.
 - Traffic metrics, contact measurement readiness, real breakdown bars and keyboard-operable measurement disclosure use the existing black/green/teal report language.
 
 ## Premium website offer / #389
@@ -25,6 +26,8 @@ Unknown scope stays hidden. Included/disconnected services remain connection hel
 
 The #635/#637 entitlement migrations and exact per-client service verification remain separately protected. Missing analytics or a missing website mapping must never be used to infer a purchasable exclusion.
 
+Fresh read-only production check on 3 October: 61 active clients; `client_service_entitlements` is absent; migration ledger contains neither `20261002124434` nor `20261002140843`. This is the concrete reason the client expansion surface remains hidden, not evidence all services are included or excluded.
+
 ## Remaining launch boundaries
 
 - Piek's published snapshot contains 1 visitor / 1 pageview with coverage beginning 27 September. UI changes cannot create richer history or missing breakdowns.
@@ -32,5 +35,6 @@ The #635/#637 entitlement migrations and exact per-client service verification r
 - Do not overlap the active #405 Website delivery/provider lane.
 - Strategy presentation #656 and strategy-content amendments are separate outstanding work; this receipt does not claim either complete.
 - Changed Vercel preview opened the normal Dynamics sign-in screen; production authenticated access works. No credentials/tokens copied or auth bypassed.
+- The #656 Drive reference folder reports “You need access” to the requested `info@cgproductionhouse.com` Chrome account. No access request or profile switch was made.
 
 Verification results and exact release/browser evidence are recorded on the PR and #381.
