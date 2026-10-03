@@ -69,6 +69,31 @@ test('Piek failure fixture is rejected without blocking useful client-ready dire
   assert.deepEqual(strategy.clientFacingStrategyQualityIssues(good), [])
 })
 
+test('live blocked evidence-template prose cannot masquerade as presentation-ready strategy', () => {
+  for (const value of [
+    'Vrystaat Kunstefees 2026-10: use the verified client evidence "specific to the real programme" to drive the practical direction.',
+    'Daisy & Co core message should connect "Canonical client: Daisy & Co" with the supplied direction.',
+    'Shape calls to action around the strongest available evidence of customer/context intent.',
+  ]) {
+    const data = strategy.emptyStrategyData()
+    data.strategyGoingForward = 'Use the actual artist announcement to explain the correct application route.'
+    data.goldStandard.objective = value
+    const before = JSON.stringify(data)
+    assert.ok(strategy.clientFacingStrategyQualityIssues(data).length > 0, value)
+    assert.equal(JSON.stringify(data), before, 'presentation guard must not amend or publish copy')
+  }
+})
+
+test('presentation gate retains all 72 accepted amended payloads and holds all 22 unresolved templates', () => {
+  const plan = JSON.parse(read('../artifacts/strategy-quality-amendments/issue-513/remediation-a/canonical-quality-amendment-plan.json'))
+  const accepted = plan.rows.filter(row => row.disposition === 'amendment_needed')
+  const held = plan.rows.filter(row => row.disposition === 'blocked')
+  assert.equal(accepted.length, 72)
+  assert.equal(held.length, 22)
+  for (const row of accepted) assert.deepEqual(strategy.clientFacingStrategyQualityIssues(strategy.readStrategyData(row.proposed_strategy_data)), [], row.client_name)
+  for (const row of held) assert.ok(strategy.clientFacingStrategyQualityIssues(strategy.readStrategyData(row.current_strategy_data)).length, row.client_name)
+})
+
 test('reviewed CG-built active-client website identities are exact and never inferred by name', () => {
   assert.equal(websiteFleet.cgManagedWebsiteForClient('ed7aa1ae-de21-4151-a8f9-54796b234c1f')?.canonicalHost, 'www.piekgroup.co.za')
   assert.equal(websiteFleet.cgManagedWebsiteForClient('cdb11a82-339e-4b46-9b09-bde1a23efeaf')?.canonicalHost, 'www.redoakgroup.co.za')

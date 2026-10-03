@@ -1,0 +1,13 @@
+# Client strategy presentation acceptance — 3 October 2026
+
+Authenticated production Admin Client Preview for Vrystaat Kunstefees reproduced a concrete display defect after the 72 reviewed amendments: its blocked October draft still rendered "use the verified client evidence" and other evidence-template instructions as monthly strategy. The existing quality gate did not catch these exact phrases. This is not useful client strategy, and a clear draft badge alone does not make it presentation-ready.
+
+Small correction: extend the existing shared client-facing quality guard for three proven evidence-template signatures. Existing surfaces already hold bad admin previews with an explicit warning and suppress bad client copy; no new UI, fallback, store or write is added. Exact strategy data, scope, approvals and publication remain unchanged. Legitimate reference to client names alone is not banned.
+
+Executable regression reproduced failure before the change. Exact accepted #513 corpus test proves all 72 reviewed amendment payloads still pass and all 22 unresolved old templates are held. Existing Piek/generic/internal-ID controls, client-only published exact-month contract and accessible strategy reader stay intact. 37 focused report/Plan/quality/presentation tests PASS. TypeScript/Vite application build (guard text in emitted application chunk), scoped lint and diff check PASS. Full regression results and exact-head Vercel are attached to the PR/owning issues.
+
+The 22 unresolved rows belong to 11 clients, September and October each: Bloem Action Sports; Emoya Estate Driving Range; Forklift Trucks; Hino Trucks; Human Auto; Jenkor; Red Oak; Toyota Bloemfontein; Vrystaat Kunstefees; WiseRide; Zooz Lifestyle WFF. Source/performance evidence gaps remain human/provider gates, not invented prose. The 72 v3 reviewed drafts need separate actual approval/publication review before clients can see them; zero approvals/publications occurred.
+
+Browser evidence already captured this session: Daisy desktop 1536/mobile 375 useful new draft copy, unchanged published September facts, no body overflow. Integrations desktop/mobile retains STALE/PARTIAL truth. Three listener/message-channel errors captured on Integrations are recorded rather than claimed clean. A later Piek selector action could not dispatch through Chrome transport; exact control was present, but action timed out. No credentials/auth were bypassed and no other provider tab was used. Changed-guard post-deploy browser readback must be recorded independently; source/bundle checks are not client-role authentication acceptance.
+
+Master handover remains supervisor-owned; #513/#567/#623/#381 carry fresh durable state. This receipt does not claim every launch gate is complete.
