@@ -2,9 +2,9 @@
 
 Status: **CURRENT authority for a fresh supervisor chat**
 
-Updated: **2 October 2026, after both agents received overnight safe-finish standing authority**
+Updated: **3 October 2026, morning supervisor reconciliation after overnight completion**
 
-Current accepted main before this handover-only docs update: **`d8d9691cd068f7faaffc579237c8e665fe7d28ca`**. Latest freshness runtime-code merge remains **`2c27e74fe0d798fdffff877d358a0fa13f355292`**; #643 changes offline strategy review tooling/artifacts only. The handover edit itself advances `main`; **always refetch current main on takeover and before every merge**.
+Current live `main` before this handover-only docs update: **`22e907c043b930689b6f2825dabb4586320b70b6`**. This includes the completed overnight Agent 01/02 merges plus later independent Website/#405 Claude-lane work. The handover edit itself advances `main`; **always refetch current main on takeover and before every merge**.
 
 This file is the supervisor takeover authority. Read this section FIRST before touching GitHub, Codex agents, Supabase, Meta, Microsoft, Website/#405, strategy or production. Historical receipts follow below and are retained so completed work is not repeated.
 
@@ -123,94 +123,126 @@ Client/business communication is **draft only** unless the user explicitly says 
 
 ## CURRENT TWO-AGENT BOARD
 
-### AGENT 01 — OVERNIGHT SAFE LAUNCH FINISHER
+### OVERNIGHT MANUAL LANES — COMPLETE / RELEASED
 
-Freshness engineering is complete on main:
-- #639 Microsoft CPU/runtime repair → `7ff12f492003c89ad164da42b2c92495560bd4ce`
-- #642 Meta terminal-bootstrap churn repair → `2c27e74fe0d798fdffff877d358a0fa13f355292`
-- #645 bounded read-only acceptance observer → `23d2e45d34568cf24d6891b2efd34b579e4e17f5`
+Both manual Codex lanes completed their overnight safe scope and are **released**. Do not restart either from stale comments or previous prompts.
 
-Freshness protected rollout remains blocked on direct CA instruction. Exact accepted rollout order/manifest remains on #451 comments `5957561266` + `5957656853`. Do not redo preflight/observer work.
+#### AGENT 01 — SAFE LAUNCH FINISHER COMPLETE
 
-Safe UI progress:
-- #615 truthful TikTok Integrations fleet summary merged → `482a4325c315b6b5770bf866fdeb1d99972b6cef`.
-- Final #615 diff only: `src/lib/tiktokIntegrationSummary.ts`, `src/pages/admin/IntegrationsPage.tsx`, `tests/tiktokIntegrationSummary.test.mjs`.
-- Accepted behavior: canonical admin/manager queue, count-integrity guard, malformed/read-failed => unavailable not fake disconnected/zero, connection coverage separate from reporting freshness, no publishing promise.
-- Preview redirected to /login; under current #623 authority this environmental preview-auth limitation does NOT justify parking already-reviewed safe UI work forever.
+Supervisor morning acceptance:
+- #623 comment **`5966049885`**
+- #381 comment **`5966050515`**
 
-CA explicitly requested **overnight no-back-and-forth execution** for Agent 01. Latest authority: #623 comment **`5958795947`** and #381 comment **`5958796474`**.
+Accepted merges:
+- #615 TikTok Integrations fleet truth → `482a4325c315b6b5770bf866fdeb1d99972b6cef`
+- #616 onboarding empty-state truth → `2937456e48676d41be83059820f90eab07d8c46c`
+- #613 read-only Creative Intelligence recovery → `f3094c643b8b1e228f6495a894a50247a88c54e4`
+- #648 expose Creative Intelligence in the live canonical editor → `fe1a70d103a3c6b40b178edf9b4cdf8f86a07abf`
 
-**CURRENT overnight sequence:**
-1. Existing PR #616 — onboarding empty-state inventory truth. Reconcile SAME PR onto current main, drop stale handover-only branch changes, preserve narrow accepted source/tests, run focused/full/build/lint/diff/exact-head Vercel, self-review exact diff, and MERGE if safe/green. Then attempt legitimate read-only production desktop + mobile smoke if an existing session is available; if not, record once and continue.
-2. Existing PR #613 — research-backed Content Guideline intelligence. Same current-main reconcile/self-review/verification/merge process. Then legitimate read-only production smoke if available; otherwise record once and continue.
-3. After #616/#613, refetch current main + #623/#381 + open PR/issues. Continue the highest-value **SAFE, UNOWNED, launch-critical** task. Prefer finishing existing accepted work over new architecture. Reproduce before fixing. Reuse an owning PR/branch instead of creating duplicates.
-4. After every completed chunk, update owning issue + #623 + #381 with exact SHA/PR/tests/blockers, then continue immediately. Ordinary code-only GitHub merges are authorised during this overnight mission when exact-head verification is green.
+Independent supervisor review of #648 confirmed:
+- read-only canonical reads only;
+- exact client/month/deliverable identity fencing;
+- late-response fencing;
+- no write/apply/publish callback;
+- panel is rendered in the actual `ContentGuidelineDocumentEditor`, not only an unused legacy form;
+- exact-head Vercel green.
 
-**Hard exclusions / protected gates remain:**
-- no production DB/schema/data migration/write;
-- no Edge/function deployment;
-- no secrets/env/config;
-- no provider/OAuth/App Review/Live/permission/mapping;
-- no manual sync/reconciliation trigger;
-- no strategy amendment/approval/publication;
-- no external send/spend;
-- no credential recovery/guessing;
-- no destructive data;
-- no Website/#405 (Claude-owned);
-- no #513/#501 strategy lane (Agent 02/supervisor);
-- no #389 protected production rollout;
-- no freshness three-function production rollout.
+Durable production acceptance from the overnight lane:
+- legitimate authenticated CG Production House Admin Chrome was used;
+- onboarding desktop/mobile truth accepted;
+- Hub/Work/Clients/Reports/Integrations/Client Preview/Assistant mobile smoke covered;
+- live canonical Piek Creative Intelligence panel accepted on desktop and 375/390/430 widths;
+- Meta/Microsoft/TikTok freshness/connection wording remained truthful;
+- no app render exception found;
+- no protected production/provider action occurred.
 
-When a task hits a protected gate, write exactly `BLOCKED: needs CA instruction — <exact scope>`, do not attempt it, and move to the next independent safe task.
+Do NOT redo:
+- #615/#616/#613/#648;
+- #639/#642/#645 freshness engineering/preflight/observer;
+- generic launch-hardening sweeps already covered by the overnight receipt unless a NEW reproducible defect appears.
 
-Do not edit this master handover. Do not retry preview auth endlessly. End only when current #623/#381 contain no remaining safe unowned work; then leave one concise overnight completion receipt with merges, verification, smoke evidence, and exact remaining protected/human/provider blockers.
+Freshness production rollout remains a separate protected gate:
+1. `microsoft-transition-sync`
+2. `background-worker`
+3. `meta-connection-status`
 
+Exact rollout manifest/gate remains #451 comments `5957561266` + `5957656853`.
+No deployment, sync trigger, migration, secret/config/provider change is implied by the overnight completion.
 
-### AGENT 02 — OVERNIGHT STRATEGY / EVIDENCE FINISHER
+#### AGENT 02 — STRATEGY / EVIDENCE FINISHER COMPLETE
 
-Owning issues: **#513 + #501**, consolidated in **#381**.
+Supervisor morning acceptance:
+- #513 comment **`5966050092`**
+- #501 comment **`5966050325`**
+- #381 comment **`5966050515`**
 
-Accepted strategy merges remain:
+Accepted strategy merges:
 - #638 compiler/quality plan → `cbf21ca5cbcb699bd09fb2d8341f7127b4415caa`
 - #640 Batch 1 → `2ce29344a78bcef5d4a96fd27a87a7a2699fb2ee`
 - #643 Batch 2 → `d8d9691cd068f7faaffc579237c8e665fe7d28ca`
 - #644 Batch 3 → `262d281a209ed0b528a647363655f0b6a7d6b40b`
 - #646 Batch 4 → `84d2e630a573b287286d2b05a37e453766ea680c`
+- #650 targeted Bat Hill Royale + All Around PVC review → `05fd48e492792e52c10734f3ea89f055bd00283c`
 
-Current ZERO-WRITE state before overnight continuation:
-- 94 reviewed
-- 68 amendment-needed
-- 26 blocked
-- 20 exclusions
+Final safe ZERO-WRITE strategy preparation state:
+- 94 reviewed rows / 47 clients
+- **72 amendment-needed proposals**
+- **22 blocked rows / 11 clients**
+- 20 non-applicable exclusions untouched
 - 0 approved
 - 0 published
 - 0 production strategy writes
+- plan hash `bb50da38748b62ef26e4bf73f618ea223629fc7edde3e687b5b0a121b60542c1`
+- final packet `e55b6f0f7de7bf0809c65f10224aa2cf7163f3a0969ce0ba11e24220ac4ca118`
 
-Wave A read-only evidence remediation is supervisor-accepted:
-- #513 `5958751620`
-- #501 `5958752061`
-- #381 `5958760469`
-- supervisor overnight authority: #513 `5958838698`, #501 `5958839237`, #381 `5958839806`
+Remaining blocked clients:
+- Bloem Action Sports
+- Emoya Estate Driving Range
+- Forklift Trucks
+- Hino Trucks
+- Human Auto
+- Jenkor
+- Toyota Bloemfontein
+- WiseRide
+- Red Oak
+- Vrystaat Kunstefees
+- Zooz Lifestyle WFF
 
-Accepted Wave A truth:
-- Bat Hill Royale: July unavailable; Aug 20; Sep 25 incl. four post-Sep23 MTD identities → targeted Sep/Oct review may proceed with gaps explicit and flexible quantities preserved.
-- All Around PVC: July unavailable; Aug 1 Pacific-boundary post; Sep 14 → targeted Sep/Oct review may proceed within exact 1 video / 3 photo / 3 poster scope; Sep evidence remains MTD.
-- Vrystaat Kunstefees: retrospective evidence improved but paired review remains held on current programme/application confirmation + unresolved Vlieks deadline conflict; no fixed quantities.
-- Red Oak: July 41; Aug/Sep exact stored post evidence absent → held; preserve 8 video / 2 photo + flexible posters.
+Exact blocker inventory: #513 comment `5959792007`; final overnight handover `5959828868`.
 
-**CURRENT overnight sequence for Agent 02:**
-1. targeted ZERO-WRITE Sep/Oct review for exactly Bat Hill Royale + All Around PVC; self-review and merge safe code/artifact-only PR when exact-head tests/build/lint/diff/Vercel are green;
-2. then continue exact-client READ-ONLY evidence remediation across remaining guided blocked clients and immediately review any client whose evidence becomes sufficient;
-3. remaining guided set includes Vrystaat Kunstefees, Red Oak, Bloem Action Sports, Emoya Estate Driving Range, Forklift Trucks, Hino Trucks, Human Auto, Jenkor, Toyota Bloemfontein, WiseRide;
-4. record genuinely unavailable/human-confirmation blockers and move on; no repeat loops;
-5. Zooz remains held absent exact approved guide + current brand/product/programme/WFF constraints;
-6. finish with one exact final ZERO-WRITE strategy state, blocked inventory and protected next-action receipt.
+Stopping condition is accepted:
+- eight guided clients lack exact Sep creative/approved retrospective + Oct priority/real assets;
+- Red Oak lacks Aug/Sep exact content history/current terms;
+- Vrystaat needs current programme/application truth and the Vlieks deadline conflict resolved;
+- Zooz lacks an approved exact guide/current brand-product-programme-WFF constraints.
 
-Protected boundaries remain unchanged: no strategy amendment RPC/production write, approval/publication, report publication/write, provider refresh/sync, migration/schema/data mutation, external communication, #405/#505/#389, or master-handover edits by Agent 02. Missing evidence never becomes zero performance.
+Do NOT start Batch 5 or repeat canonical scans. Missing evidence is unavailable, never zero performance.
 
-**NEXT SUPERVISOR ACTION:** review the overnight final receipts and any merged safe PRs. Only production strategy amendment/approval/publication or report/provider mutations require fresh CA instruction.
+Any next strategy step is now one of:
+- exact human/client evidence supplied;
+- protected exact-client historical provider/report recovery;
+- guarded production strategy amendment;
+- human review, approval and explicit publication.
 
----
+Those require a new bounded instruction/authority as applicable.
+
+### CURRENT OPEN PR / MANUAL OWNERSHIP
+
+Live branch check before this handover update:
+- current main: `22e907c043b930689b6f2825dabb4586320b70b6`
+- only open PR: **#653 — Website/#405 qualified-lead breakdown**
+
+#653 is **NOT** Agent 01/02 work. It is Website/#405 lane work and includes an unapplied production migration/RPC. It remains behind supervisor/CA protected review. Do not merge/apply it from a generic “continue Dynamics” instruction.
+
+Website/#405 also advanced main independently after Agent 01 ended; therefore never quote `fe1a70d...` or `05fd48e...` as current main without refetching.
+
+### MANUAL AGENT STATUS
+
+- Agent 01: **RELEASED**
+- Agent 02: **RELEASED**
+- Do not send either a new prompt merely to keep them busy.
+- New manual work should be dispatched only when there is a fresh safe unowned mission with a clear acceptance contract.
+
 
 ## #505 PROVIDER / INSTAGRAM-TIKTOK STATE — PARKED BEHIND HUMAN/PROVIDER RECEIPTS
 
