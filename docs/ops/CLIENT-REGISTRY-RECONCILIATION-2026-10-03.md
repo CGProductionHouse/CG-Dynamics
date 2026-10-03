@@ -1,6 +1,6 @@
 # Exact registry reconciliation packet — 3 October 2026
 
-Status: PROPOSED / NOT APPLIED. Live read-only IDs below are candidates for explicit reviewed binding, not name-derived mapping authority. Hours records remain untouched. No deletion, merge, archival or time-entry reassignment is proposed.
+Status: APPLIED for the exact 59 existing-client pairs below after CA's explicit approval of PR #654's packet on 3 October 2026. Each pair has one canonical Dynamics mapping, one immutable mapped request receipt and one corresponding mapped Hours outbox receipt. No client was created, renamed, merged, archived or deleted; no time entry was reassigned. The 16 Hours-only entries remain outside this authorization. See `CLIENT-REGISTRY-ACTIVATION-2026-10-03.md` for production verification.
 
 ## Existing active clients: reuse these Dynamics UUIDs
 
