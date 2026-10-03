@@ -164,3 +164,25 @@ OneDrive/internal IDs to fake this link. A separately reviewed, exact-client,
 published-only opaque linkage is required before claiming this acceptance.
 The #674 full portal preview and current paused-Vercel authenticated acceptance
 gates are not resolved by this calendar correction.
+
+## Fresh production readback: do not confuse old screenshots with current drafts
+
+SELECT-only inspection reconciled all 94 exact client/month keys from the existing
+remediation-a manifest: 72 v3 drafts, 22 held v2 drafts, no approved/published
+strategy or published snapshot. All 94 packages have confirmed receipts; the five
+fixed-format plan-count screen found no unknown/zero-enabled or over-capacity
+violation. The 20 non-applicable v1 rows remain outside this target.
+
+We Ar Fuels, Daisy and Piek now have substantive v3 wording; the screenshot's old
+We Ar internal-template wording is not its current stored draft. Authenticated
+Staff review confirms the current October fuel-delivery enquiry direction and
+draft label; Client View withholds it. No strategy data was changed in this run.
+The exact 94-row disposition receipt is in #668 comment 5972737913 and #513
+comment 5972738078. These consistency checks do not certify marketing excellence,
+source entailment, performance-led adaptation or human semantic acceptance.
+
+All 22 v2 rows still fail internal-template screening. Piek's v3 direction repeats
+across months and needs real month-specific learning assessment, not a cosmetic
+date rewrite. Hino/WiseRide other-client-name mentions are review flags in existing
+isolation guidance, not automatically proof of cross-client leakage. Retain these
+distinctions; never resurrect a blanket 94-ready claim.
