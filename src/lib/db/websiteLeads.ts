@@ -1,11 +1,14 @@
 import { supabase } from '../supabase'
 import {
   isLeadInboxUnavailableError,
+  mapWebsiteLeadBreakdown,
   mapWebsiteLeadRow,
   normaliseLeadLifecycle,
   validateLeadLifecycle,
+  type LeadBreakdownDimension,
   type LeadLifecycleInput,
   type WebsiteLead,
+  type WebsiteLeadBreakdown,
   type WebsiteLeadMetrics,
 } from '../websiteLeads'
 
@@ -60,4 +63,27 @@ export async function getWebsiteLeadMetrics(clientId: string | null, from: strin
   const metrics = data as WebsiteLeadMetrics & { clientId?: string }
   if (clientId && metrics.clientId !== clientId) return { state: 'error', message: 'Lead metrics identity mismatch.' }
   return { state: 'ready', data: metrics }
+}
+
+/** Qualified leads by landing page or source. Unapplied migration -> 'unavailable', never zeros. */
+export async function getWebsiteLeadBreakdown(
+  clientId: string | null,
+  from: string,
+  to: string,
+  dimension: LeadBreakdownDimension,
+): Promise<LeadLoad<WebsiteLeadBreakdown>> {
+  const { data, error } = await supabase.rpc('website_lead_breakdown', {
+    p_client_id: clientId,
+    p_from: from,
+    p_to: to,
+    p_dimension: dimension,
+  })
+  if (isLeadInboxUnavailableError(error)) return { state: 'unavailable' }
+  if (error) return { state: 'error', message: 'Lead sources could not be loaded.' }
+  if (clientId && (data as { clientId?: string } | null)?.clientId !== clientId) return { state: 'error', message: 'Lead breakdown identity mismatch.' }
+  try {
+    return { state: 'ready', data: mapWebsiteLeadBreakdown(data, dimension) }
+  } catch {
+    return { state: 'error', message: 'Lead breakdown was not in the expected shape.' }
+  }
 }
