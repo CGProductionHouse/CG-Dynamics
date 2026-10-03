@@ -61,3 +61,25 @@ inferred from a build or Vercel success.
 
 No provider, OAuth, secret, database, migration, strategy approval/publication,
 OneDrive or external communication action belongs to this UI patch.
+
+## Drafting root-cause correction
+
+The legacy strategy engine manufactured a results-led paragraph from selected
+drivers and generic format tasks from package capacity. The canonical browser
+seed also promoted baseline notes into an objective and package bookkeeping into
+strategic rationale. Those are not researched strategy decisions.
+
+The corrected draft assembly preserves existing staff text, uses explicitly
+written objective/message/test fields verbatim, and otherwise leaves direction
+unwritten. Package assembly opens confirmed formats without inventing concepts;
+null/zero scope stays disabled, with staff proposals retained rather than deleted.
+Canonical seed keeps source IDs, card evidence/confidence, package receipts and
+intelligence evidence, but does not manufacture strategic fields from them.
+Existing saved strategies are not changed. Approval/publication remains separate.
+
+Four executable regressions cover guardrail-only input, written brief assembly,
+staff-edit preservation, unknown/zero scope and canonical seed separation.
+Focused strategy/package/workflow suites: 55 pass. Full suite: 3,604 tests,
+3,587 pass, 17 skip, zero failures; same Windows Bash fixture limitation above.
+Build, scoped lint and diff check pass. This is a truth correction, not completion
+of researched strategy synthesis or an endorsement of the 72 stored drafts.
