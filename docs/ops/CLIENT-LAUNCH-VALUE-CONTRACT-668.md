@@ -215,3 +215,69 @@ changed-preview browser check reached `/login`; authenticated changed-preview
 acceptance is not claimed. Normal frontend deployment may be verified using
 the existing authenticated production staff session; Brand Hub server rollout
 remains separately protected and no function is deployed here.
+## Calendar evidence is not an inferred empty month
+
+4 October continuation on the same #678: malformed/missing calendar dates,
+impossible day rollover and malformed event display fields are unavailable rather
+than safe-renderable evidence. Month-ahead render state is fenced by exact client
+ID; a previous client's plan disappears immediately on selection change, and late
+requests cannot update the new selection. Read rejection is handled without an
+unhandled promise. Two new regressions failed before correction; 84 focused tests
+now pass. Full supported Node suite: 3,622 total /3,605 pass /17 skip /0 fail;
+Windows-only `sesSetupScript.test.mjs` excluded, not passed. Local build/lint/diff PASS.
+
+Package #681 independently reverified and merged at `d4090063`; NOT deployed.
+Synthetic local browser package fixture: desktop 1536px and actual CDP 375px had
+equal viewport/body/document widths, no captured warn/error; unrelated client did
+not receive website maintenance. No real authentication/provider/DB calls. Browser
+screenshot capture timed out, so no screenshot or authenticated production
+acceptance is claimed. Temporary emulation was reset. #679 Git deployment guard
+remains OFF; no Vercel action is authorized by this verification.
+
+The existing client calendar already has a desktop month grid and mobile
+day-selection agenda; preserve that architecture and its published/exact-client
+visibility RPCs. A new executable regression reproduced null RPC data returning
+`loadFailed: false`, falsely presenting no scheduled work. Missing/non-array or
+malformed row envelopes now return unavailable; only explicit valid empty arrays
+mean a verified empty month. No fallback table reads, schema changes or calendar
+data writes. 78 focused PASS; full 3,618 total /3,601 PASS /17 skip /0 fail,
+TypeScript/Vite, scoped lint and diff check PASS (same Windows Bash exclusion).
+
+Exact post-to-portal-asset navigation remains an explicit contract gap: the safe
+calendar returns opaque post keys, while the published asset projection returns
+display title/month but no corresponding post key. Never join by title or expose
+OneDrive/internal IDs to fake this link. A separately reviewed, exact-client,
+published-only opaque linkage is required before claiming this acceptance.
+The #674 full portal preview and current paused-Vercel authenticated acceptance
+gates are not resolved by this calendar correction.
+
+## Fresh production readback: do not confuse old screenshots with current drafts
+
+SELECT-only inspection reconciled all 94 exact client/month keys from the existing
+remediation-a manifest: 72 v3 drafts, 22 held v2 drafts, no approved/published
+strategy or published snapshot. All 94 packages have confirmed receipts; the five
+fixed-format plan-count screen found no unknown/zero-enabled or over-capacity
+violation. The 20 non-applicable v1 rows remain outside this target.
+
+We Ar Fuels, Daisy and Piek now have substantive v3 wording; the screenshot's old
+We Ar internal-template wording is not its current stored draft. Authenticated
+Staff review confirms the current October fuel-delivery enquiry direction and
+draft label; Client View withholds it. No strategy data was changed in this run.
+The exact 94-row disposition receipt is in #668 comment 5972737913 and #513
+comment 5972738078. These consistency checks do not certify marketing excellence,
+source entailment, performance-led adaptation or human semantic acceptance.
+
+All 22 v2 rows still fail internal-template screening. Piek's v3 direction repeats
+across months and needs real month-specific learning assessment, not a cosmetic
+date rewrite. Hino/WiseRide other-client-name mentions are review flags in existing
+isolation guidance, not automatically proof of cross-client leakage. Retain these
+distinctions; never resurrect a blanket 94-ready claim.
+
+## 4 October local-first preview reconciliation
+
+Both the full-preview and calendar/package/strategy receipts above are preserved.
+Historical cloud-preview instructions do not override #679: Git deployments stay
+OFF, no Vercel build or deployment is requested. Current GitHub main is not proof
+of changed-code production serving. The prior legitimate preview attempt reached
+login; do not bypass authentication or copy sessions to manufacture acceptance.
+Brand Hub's server read-scope change remains a separately protected Edge rollout.

@@ -434,9 +434,16 @@ Automated lint/build is not a replacement for browser/device/visual QA.
 
 ## 15. Vercel / deployment / domain handover
 
+**#679 mandatory override:** read `../ops/HOSTING-BUDGET-AND-UPTIME-POLICY.md`.
+CG shared-team development is local-first with ZERO unapproved cloud builds.
+Do not enable an automatic deployment trigger as part of routine bootstrap.
+Record exact project, fresh budget/headroom, cost ceiling, CA release authorization
+and rollback before cloud builds. Propagate this gate to each project's instructions
+and verify its actual trigger; this document is not universal technical enforcement.
+
 Shared lessons:
 
-- connect GitHub/Vercel early enough to verify automatic `main` deployment;
+- connect GitHub early; connect Vercel deployment only inside an authorized release window;
 - record the real temporary Vercel URL;
 - standard Next.js projects must not inherit stale static `public` output settings;
 - current Vercel CLI capabilities must be checked before automation creates a project;
