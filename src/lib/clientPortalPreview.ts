@@ -59,7 +59,11 @@ export async function getPreviewReport(clientId: string, reportId: string): Prom
 
 export async function getPreviewMetrics(clientId: string, month: string) {
   const result = await listManualMetricsForClientMonth(clientId, month)
-  return { error: result.error, data: result.data.filter(row => row.client_id === clientId && row.month === month).map(row => ({
+  if (result.error) return { error: result.error, data: [] }
+  // Match client_published_report_manual_metrics exactly: legacy automated
+  // unavailable placeholders are not observations, even when numeric.
+  return { error: null, data: result.data.filter(row => row.client_id === clientId && row.month === month
+    && !(row.source_type === 'other' && /^Meta sync account totals for unavailable metrics/i.test(row.general_notes ?? ''))).map(row => ({
     month: row.month, platform: row.platform, source_type: row.source_type,
     views: row.views, reach: row.reach, engagements: row.engagements, accounts_engaged: row.accounts_engaged,
     profile_visits: row.profile_visits, external_link_taps: row.external_link_taps, followers: row.followers,

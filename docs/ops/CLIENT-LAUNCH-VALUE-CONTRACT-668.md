@@ -296,3 +296,18 @@ verification, not an authenticated browser or deployed-runtime claim.
 82 focused PASS; full supported run 3,628 total /3,611 PASS /17 intentional
 skips /0 failures; Windows Bash-only SES fixture excluded. Local TypeScript/Vite
 build (application code present), scoped lint and diff PASS. Deployment guard OFF.
+
+### Preview manual-metric parity follow-up
+
+An executed pre-edit regression reproduced raw manual metrics entering preview
+even when the existing client RPC excludes them. Preview now mirrors the exact
+`client_published_report_manual_metrics` legacy predicate: source `other` AND
+case-insensitive note prefix `Meta sync account totals for unavailable metrics`.
+Those rows are unavailable placeholders, not complete observed figures; numeric
+positive values do not certify them. Genuine manual/import zero, null and positive
+values remain unchanged. Exact client/month filtering and private-field stripping
+remain; a read error returns no partial rows. SQL/RLS/grants and production rows
+are unchanged. This is local executable mocked-query parity, not live DB acceptance.
+Verification: 95 focused PASS; full supported suite 3,629 total /3,612 PASS /
+17 intentional skips /0 failures; Windows Bash-only SES fixture excluded.
+Local TS/Vite build contains the corrected preview helper; scoped ESLint/diff PASS.

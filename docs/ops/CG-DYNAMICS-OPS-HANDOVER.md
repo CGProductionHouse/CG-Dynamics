@@ -1,5 +1,15 @@
 # CG Dynamics Ops Handover
 
+### Pending #674 manual-metric parity correction
+
+Local regression reproduced preview retaining old automated unavailable-metric
+placeholders that the client RPC already excludes. The preview now matches that
+exact source/note-prefix predicate, preserves observed zero/null/positive manual
+values, strips private fields, enforces exact client/month and discards rows on
+read error. Existing SQL/RLS/grants, real-client RPC and all production data are
+unchanged. Same PR; no new deployment, Vercel/config or provider action. Mocked
+read acceptance is not live DB/browser acceptance; retain the protected gates below.
+
 ### 4 October 11:38 SAST read-only serving check
 
 All nine canonical hosts in the reviewed #567 website fleet returned HTTP 200,

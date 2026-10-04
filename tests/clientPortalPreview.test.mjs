@@ -10,6 +10,43 @@ const clientA = '11111111-1111-4111-8111-111111111111'
 const clientB = '22222222-2222-4222-8222-222222222222'
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
 
+test('preview manual metrics match client exclusion of legacy unavailable placeholders without losing observed zero or null', async () => {
+  const server = await createServer({ configFile: false, server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true } })
+  try {
+    const { supabase } = await server.ssrLoadModule('/src/lib/supabase.ts')
+    const { getPreviewMetrics } = await server.ssrLoadModule('/src/lib/clientPortalPreview.ts')
+    const original = supabase.from
+    const base = { client_id: clientA, month: '2026-10', platform: 'facebook', source_type: 'manual_summary', views: 0, reach: null, general_notes: 'PRIVATE', created_by: 'PRIVATE' }
+    let response = { data: [
+      { ...base, source_type: 'other', general_notes: 'Meta sync account totals for unavailable metrics: legacy', views: 99 },
+      { ...base, source_type: 'other', general_notes: 'mEtA SyNc AcCoUnT ToTaLs FoR UnAvAiLaBlE MeTrIcS', views: 98 },
+      base, { ...base, views: 7 },
+      { ...base, source_type: 'other', general_notes: 'Genuine explicit import', views: 8 },
+      { ...base, source_type: 'meta_csv', general_notes: 'Meta sync account totals for unavailable metrics', views: 9 },
+      { ...base, client_id: clientB, views: 97 }, { ...base, month: '2026-09', views: 96 },
+    ], error: null }
+    const calls = []
+    supabase.from = table => {
+      calls.push(['from', table])
+      const chain = { then: resolve => Promise.resolve(response).then(resolve) }
+      for (const method of ['select', 'eq']) chain[method] = (...args) => { calls.push([method, ...args]); return chain }
+      return chain
+    }
+    try {
+      const result = await getPreviewMetrics(clientA, '2026-10')
+      assert.deepEqual(result.data.map(row => row.views), [0, 7, 8, 9])
+      assert.equal(result.data[0].reach, null)
+      assert.doesNotMatch(JSON.stringify(result.data), /PRIVATE|client_id|general_notes|created_by/)
+      assert.ok(calls.some(call => JSON.stringify(call) === JSON.stringify(['eq', 'client_id', clientA])))
+      assert.ok(calls.some(call => JSON.stringify(call) === JSON.stringify(['eq', 'month', '2026-10'])))
+      response = { data: [base], error: { message: 'Read unavailable' } }
+      assert.deepEqual((await getPreviewMetrics(clientA, '2026-10')).data, [])
+    } finally { supabase.from = original }
+    const sql = read('../supabase/migrations/20260801190000_client_report_safe_projection.sql')
+    assert.match(sql, /m\.source_type = 'other'[\s\S]*ilike 'Meta sync account totals for unavailable metrics%'/)
+  } finally { await server.close() }
+})
+
 test('full preview announces only the selected navigation area as the current page', async () => {
   const server = await createServer({ configFile: false, server: { middlewareMode: true, hmr: false }, esbuild: { jsx: 'automatic' }, optimizeDeps: { noDiscovery: true } })
   try {
