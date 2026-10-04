@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import {
   fetchClientMonthAhead,
+  clientMonthAheadForScope,
   type ClientCalendarEvent,
   type ClientCalendarPost,
-  type ClientMonthAhead,
+  type ClientMonthAheadState,
 } from '../../lib/clientPortalCalendar'
 import { CLIENT_SAFE_STATUS_LABELS, monthKey, type ClientSafeStatus, type DeliverableType } from '../../lib/planner'
 import { EVENT_TYPE_LABELS } from '../../lib/companyCalendar'
@@ -48,12 +49,15 @@ function monthHeading(month: string) {
 }
 
 export function ClientMonthAhead({ clientId }: { clientId: string }) {
-  const [data, setData] = useState<ClientMonthAhead | null>(null)
+  const [state, setState] = useState<ClientMonthAheadState | null>(null)
+  const data = clientMonthAheadForScope(state, clientId)
 
   useEffect(() => {
     let cancelled = false
     void fetchClientMonthAhead(clientId, monthKey(new Date())).then(result => {
-      if (!cancelled) setData(result)
+      if (!cancelled) setState({ clientId, data: result })
+    }).catch(() => {
+      if (!cancelled) setState({ clientId, data: { month: monthKey(new Date()), posts: [], events: [], loadFailed: true } })
     })
     return () => { cancelled = true }
   }, [clientId])

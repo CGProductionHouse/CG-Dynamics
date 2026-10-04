@@ -148,6 +148,23 @@ sources. A compile pass or lexical quality check is not that acceptance.
 
 ## Calendar evidence is not an inferred empty month
 
+4 October continuation on the same #678: malformed/missing calendar dates,
+impossible day rollover and malformed event display fields are unavailable rather
+than safe-renderable evidence. Month-ahead render state is fenced by exact client
+ID; a previous client's plan disappears immediately on selection change, and late
+requests cannot update the new selection. Read rejection is handled without an
+unhandled promise. Two new regressions failed before correction; 84 focused tests
+now pass. Full supported Node suite: 3,622 total /3,605 pass /17 skip /0 fail;
+Windows-only `sesSetupScript.test.mjs` excluded, not passed. Local build/lint/diff PASS.
+
+Package #681 independently reverified and merged at `d4090063`; NOT deployed.
+Synthetic local browser package fixture: desktop 1536px and actual CDP 375px had
+equal viewport/body/document widths, no captured warn/error; unrelated client did
+not receive website maintenance. No real authentication/provider/DB calls. Browser
+screenshot capture timed out, so no screenshot or authenticated production
+acceptance is claimed. Temporary emulation was reset. #679 Git deployment guard
+remains OFF; no Vercel action is authorized by this verification.
+
 The existing client calendar already has a desktop month grid and mobile
 day-selection agenda; preserve that architecture and its published/exact-client
 visibility RPCs. A new executable regression reproduced null RPC data returning

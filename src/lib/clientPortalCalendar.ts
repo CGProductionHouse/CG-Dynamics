@@ -43,6 +43,27 @@ export interface ClientMonthAhead {
   loadFailed: boolean
 }
 
+export interface ClientMonthAheadState {
+  clientId: string
+  data: ClientMonthAhead
+}
+
+/** Selection changes must not reuse another client's previously loaded plan. */
+export function clientMonthAheadForScope(state: ClientMonthAheadState | null, clientId: string): ClientMonthAhead | null {
+  return state?.clientId === clientId ? state.data : null
+}
+
+function calendarDate(value: unknown): value is string {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
+  const date = new Date(`${value}T00:00:00Z`)
+  return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value
+}
+
+function calendarTimestamp(value: unknown): value is string {
+  return typeof value === 'string' && calendarDate(value.slice(0, 10))
+    && /^\d{4}-\d{2}-\d{2}T/.test(value) && Number.isFinite(Date.parse(value))
+}
+
 type ClientPortalPostRow = {
   row_key: string
   schedule_date: string | null
@@ -93,6 +114,12 @@ export async function fetchClientMonthAheadWithRpc(
       && keys.every(key => typeof (row as Record<string, unknown>)[key] === 'string' && (row as Record<string, string>)[key].trim().length > 0)
   if (!postsResult.data.every(row => hasStrings(row, ['row_key', 'title', 'post_type', 'client_safe_status']))
     || !eventsResult.data.every(row => hasStrings(row, ['row_key', 'title', 'event_type', 'start_time']))) return unavailable
+  if (!postsResult.data.every(row => row.schedule_date === null || calendarDate(row.schedule_date))
+    || !eventsResult.data.every(row => calendarTimestamp(row.start_time)
+      && (row.end_time === null || calendarTimestamp(row.end_time))
+      && typeof row.all_day === 'boolean'
+      && (row.location === null || typeof row.location === 'string')
+      && (row.guideline_row_key === null || typeof row.guideline_row_key === 'string'))) return unavailable
 
   const posts: ClientCalendarPost[] = (postsResult.data as ClientPortalPostRow[])
     .filter(row => CLIENT_PORTAL_POST_TYPES.has(row.post_type) && CLIENT_PORTAL_POST_STATUSES.has(row.client_safe_status))
