@@ -57,8 +57,12 @@ intentional skips are reported. Node Edge static/runtime regressions are not a
 local Deno type check. No production DB round-trip, model-output entailment or
 authenticated changed-preview acceptance is asserted from these tests.
 
-Executed local full suite: 3,622 total / 3,605 pass / 17 skip / zero failures.
-TypeScript/Vite build, scoped ESLint and `git diff --check` pass.
+Original branch verification: 3,622 total / 3,605 pass / 17 skip / zero failures.
+4 October reconciliation includes guarded main `116c280f80370753d8d45eb4119e0f109d3beafb`.
+TypeScript/Vite build and scoped ESLint pass locally; current-head suite receipts
+are recorded in PR #677. No paid/cloud build is part of this verification.
+Reconciled local run: 85 focused PASS; 3,628 total / 3,611 PASS / 17 intentional
+skips / zero failures (Windows Bash-only SES fixture excluded). Diff check PASS.
 
 After protected runtime rollout, acceptance must use a disposable authorized
 guideline: one eligible/one denied source, human-selected hook/order, reload and
@@ -72,7 +76,10 @@ work. Eligible citations do not establish semantic entailment or premium strateg
 
 ## Deployment gate
 
-As observed during #668, Vercel reports the project paused. Pushes can retain code
-and tests, but no merge/production UI claim is permitted without fresh exact-head
-green Vercel and legitimate authenticated acceptance. No configuration unpause,
-Edge deployment or credential copying is part of this PR.
+The #679 hosting policy supersedes the historical paused-project/fresh-Vercel gate.
+Keep `vercel.json` Git deployments OFF. Local code verification and routine GitHub
+review/merge do not authorize cloud builds or establish live production acceptance.
+No Vercel action, configuration unpause, Edge deployment or credential copying is
+part of this PR. The changed Edge runtime remains undeployed; a local Deno check
+and legitimate authenticated save/reload acceptance are not claimed. Keep those
+gaps explicit before any separately approved runtime release.
