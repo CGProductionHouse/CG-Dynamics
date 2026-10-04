@@ -285,3 +285,14 @@ Same #674 verification on reconciled main: 98 focused PASS; full supported Node
 suite 3,627 total /3,610 PASS /17 intentional skips /0 failures (Windows Bash-only
 SES fixture excluded). Local TypeScript/Vite build, scoped ESLint and diff PASS.
 No new changed-preview authentication claim or production write.
+
+4 October follow-up: an actual shared-shell render reproduced six simultaneous
+`aria-current="page"` links in staff preview because all six areas use one route.
+Desktop and mobile links now explicitly mark only the selected preview area as
+current; ordinary client route behavior remains unchanged. A regression renders
+every area through the real shell/router/auth provider (SSR, no auth/data effects).
+It failed 6-versus-1 before correction and passes after. This is local render
+verification, not an authenticated browser or deployed-runtime claim.
+82 focused PASS; full supported run 3,628 total /3,611 PASS /17 intentional
+skips /0 failures; Windows Bash-only SES fixture excluded. Local TypeScript/Vite
+build (application code present), scoped lint and diff PASS. Deployment guard OFF.

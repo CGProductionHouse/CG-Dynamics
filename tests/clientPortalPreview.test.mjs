@@ -10,6 +10,22 @@ const clientA = '11111111-1111-4111-8111-111111111111'
 const clientB = '22222222-2222-4222-8222-222222222222'
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
 
+test('full preview announces only the selected navigation area as the current page', async () => {
+  const server = await createServer({ configFile: false, server: { middlewareMode: true, hmr: false }, esbuild: { jsx: 'automatic' }, optimizeDeps: { noDiscovery: true } })
+  try {
+    const { AuthProvider } = await server.ssrLoadModule('/src/contexts/AuthContext.tsx')
+    const { ClientPortalShell } = await server.ssrLoadModule('/src/components/client/ClientPortalShell.tsx')
+    for (const area of ['overview', 'plan', 'performance', 'leads', 'approvals', 'brand-hub']) {
+      const html = renderToStaticMarkup(createElement(MemoryRouter, {
+        initialEntries: [`/admin/client-portal-preview?client=${clientA}&area=${area}`],
+      }, createElement(AuthProvider, {}, createElement(ClientPortalShell, { client: null, previewClientId: clientA }, 'Read-only fixture'))))
+      const currentLinks = html.match(/<a\b[^>]*aria-current="page"[^>]*>/g) ?? []
+      assert.equal(currentLinks.length, 1, `${area}: only one navigation link can announce current page`)
+      assert.match(currentLinks[0], new RegExp(`area=${area}`))
+    }
+  } finally { await server.close() }
+})
+
 test('preview queries pin publication/client visibility and deny child reads when ownership is unavailable', async () => {
   const server = await createServer({ configFile: false, server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true } })
   try {

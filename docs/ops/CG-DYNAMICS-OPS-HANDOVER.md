@@ -1,5 +1,18 @@
 # CG Dynamics Ops Handover
 
+### 4 October 11:38 SAST read-only serving check
+
+All nine canonical hosts in the reviewed #567 website fleet returned HTTP 200,
+with no paused-deployment page: Piek, Get Together, Imbewu, CG ARCC, Emmanuel,
+Red Oak, All Around PVC, JFJ production alias and Raadzaal. Each passed a bounded
+same-origin static-asset HEAD sample (script/CSS/image where present). Dynamics,
+Hours and Imbewu's production alias also returned 200. No builds/deploys, dashboard,
+billing/config changes, submissions or production data writes occurred. This is
+availability/static-resource smoke, not full interactive/browser acceptance.
+CG ARCC still serves `[CONFIRM ORGANISATION NAME]` as its HTML title: do not certify
+its client presentation. Shared finite $5/Pause-ON risk remains; this observation
+is neither a spend forecast nor a future uptime guarantee. Receipt: #679.
+
 ### 4 October pending PR receipts — not deployed
 
 Main `116c280f80370753d8d45eb4119e0f109d3beafb` includes package #681 and

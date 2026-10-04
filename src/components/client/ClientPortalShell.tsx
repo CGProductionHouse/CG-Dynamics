@@ -95,6 +95,7 @@ export function ClientPortalShell({
                   key={item.to}
                   to={target(item.to)}
                   end={item.end}
+                  aria-current={isPreview ? (activeItem.to === item.to ? 'page' : false) : undefined}
                   onClick={() => setMobileMenuOpen(false)}
                   className={({ isActive: routeActive }) => {
                     const isActive = isPreview ? activeItem.to === item.to : routeActive
@@ -121,6 +122,7 @@ export function ClientPortalShell({
                 key={item.to}
                 to={target(item.to)}
                 end={item.end}
+                aria-current={isPreview ? (activeItem.to === item.to ? 'page' : false) : undefined}
                 className={({ isActive: routeActive }) => {
                   const isActive = isPreview ? activeItem.to === item.to : routeActive
                   return (
