@@ -1,5 +1,21 @@
 # CG Dynamics Ops Handover
 
+### 4 October local-only launch continuation — #668/#678
+
+#681 package cleanup merged as `d4090063`, not deployed. Current rollout remains
+OFF under #679; do not confuse GitHub main with live production. #678 reconciled
+that guarded main and now also fences month-ahead state by exact client ID,
+rejects malformed/impossible dates/event fields and handles read rejection.
+84 focused PASS; full supported suite 3,622 total /3,605 PASS /17 skips /0 fail;
+Windows Bash SES fixture explicitly excluded. Local build/lint/diff PASS.
+Synthetic package browser checks at desktop 1536 and true 375px: no body overflow,
+no captured warn/error, maintenance absent for unrelated-client fixture. Screenshot
+capture timed out; no authenticated changed-code production acceptance claimed.
+No Vercel, Edge, database, provider, secret, strategy or external communication action.
+PR #682's launch-ready statement based on missing-env test failures is not acceptance;
+it changes only Node type dependencies. Remaining substantive strategy/portal/release
+gates in #668 remain open, not superseded by compilation or synthetic fixtures.
+
 ### #668 package presentation correction — local release pending, 3 October
 
 CA requests only Video, Posters (photo + designed), Content planning, plus Website
