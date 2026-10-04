@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom'
 import { ActionButton } from '../../components/ui/Buttons'
 import { EmptyState } from '../../components/ui/States'
 import { listClients, type Client } from '../../lib/db/clients'
-import { generateOnboardingLink, listStaffOnboarding, revokeOnboardingLink, updateStaffAccess } from './api'
+import { generateOnboardingLink, listStaffOnboarding, loadOnboardingLinkReadiness, revokeOnboardingLink, updateStaffAccess } from './api'
+import type { OnboardingLinkReadiness } from '../../../supabase/functions/client-onboarding/link-readiness'
 import { OnboardingActivityFeed } from './OnboardingActivityFeed'
 import { ONBOARDING_PLATFORMS, type OnboardingPlatform, type StaffOnboardingSummary } from './types'
 import { PLATFORM_GUIDES } from './platformGuides'
@@ -20,6 +21,7 @@ export default function InternalOnboardingPage() {
   const [loading, setLoading] = useState(true)
   const [working, setWorking] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [linkReadiness, setLinkReadiness] = useState<OnboardingLinkReadiness | null>(null)
 
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
@@ -46,10 +48,19 @@ export default function InternalOnboardingPage() {
     return () => { active = false }
   }, [])
 
+  useEffect(() => {
+    if (!clientId) return
+    let active = true
+    void loadOnboardingLinkReadiness(clientId).then(result => {
+      if (active) setLinkReadiness(result.data)
+    })
+    return () => { active = false }
+  }, [clientId])
+
   const clientNames = useMemo(() => new Map(clients.map(client => [client.id, client.name])), [clients])
 
   async function generate() {
-    if (!clientId) return
+    if (!clientId || linkReadiness?.canGenerate !== true) return
     setWorking(true)
     setGeneratedLink(null)
     const result = await generateOnboardingLink(clientId, platforms)
@@ -112,14 +123,14 @@ export default function InternalOnboardingPage() {
         <h2 className="text-lg font-bold text-white">Generate onboarding link</h2>
         <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <label className="text-sm font-semibold text-brand-primary">Client
-            <select value={clientId} onChange={event => setClientId(event.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-white/10 bg-brand-bg px-4 text-white">
+            <select value={clientId} onChange={event => { setLinkReadiness(null); setGeneratedLink(null); setClientId(event.target.value) }} className="mt-2 min-h-12 w-full rounded-xl border border-white/10 bg-brand-bg px-4 text-white">
               <option value="">Select a client</option>
               {clients.map(client => <option key={client.id} value={client.id}>{client.name}</option>)}
             </select>
           </label>
-          <ActionButton className="min-h-12" disabled loading={working} onClick={() => void generate()}>Generate secure link</ActionButton>
+          <ActionButton className="min-h-12" disabled={loading || working || !clientId || linkReadiness?.canGenerate !== true} loading={working} onClick={() => void generate()}>Generate secure link</ActionButton>
         </div>
-        <p className="mt-3 text-sm text-[#e5b18d]">Link generation is disabled until the approved OneDrive upload adapter is connected. This prevents clients entering a setup they cannot complete.</p>
+        <p role="status" className="mt-3 text-sm text-brand-primary/80">{loading ? 'Checking secure-link availability…' : !clientId ? 'Select an active client to check secure-link availability.' : linkReadiness?.canGenerate === true ? 'Secure links are enabled for this client.' : linkReadiness?.state === 'admin_required' ? 'Only an admin can generate secure links.' : linkReadiness?.state === 'activation_off' ? 'Secure-link activation is still off.' : linkReadiness?.state === 'client_unavailable' ? 'This client’s upload destinations are not ready. Link generation stays blocked.' : 'Secure-link readiness is unavailable. Link generation stays blocked until secure file transfer is ready.'}</p>
         <fieldset className="mt-5">
           <legend className="text-sm font-semibold text-white">Platforms CG manages for this client</legend>
           <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
