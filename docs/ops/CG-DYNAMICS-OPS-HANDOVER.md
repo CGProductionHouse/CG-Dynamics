@@ -1,5 +1,31 @@
 # CG Dynamics Ops Handover
 
+### 4 October #668/#674 Brand Hub truth and Calendar navigation — local only
+
+Continued the same draft #674 on `codex/668-complete-client-preview`, no replacement
+PR or Vercel action. Executable reproduction found library summary/files accepting
+malformed evidence and the flat Brand Identity section hiding failed reads. Added
+strict allowlisted projection preserving verified zero/null, consistent counts,
+published timestamps, exact category and bounded cursor; invalid/missing reads
+remain unavailable. Existing authenticated Edge/client scope remains canonical.
+Flat category loading/error/retry now renders truthfully. Library “View in Plan”
+preserves exact client/month and opens Calendar, not Strategy. No schedule/asset
+title matching, private transport fields or new ID exposure.
+
+Actual-component synthetic local browser checks PASS at 1440/375/390/430px, with
+four read calls only, no body overflow or captured runtime errors. 375px screenshot
+visually inspected. Not authenticated production acceptance. Focused 133 PASS;
+full supported suite 3,637 total /3,620 PASS /17 intentional skips /0 fail; Bash-only
+SES Windows exclusion remains explicit. Local build/lint/diff PASS. Runbook:
+`CLIENT-PLAN-LOCAL-ACCEPTANCE.md`. No production schema/data/Edge/provider/auth-copy
+or Vercel operation. Keep deployment disabled and protected gates intact.
+
+Remaining code contract: reverse Calendar-post-to-published-asset linkage still
+needs a canonical server-safe shared identity; current month/title projection
+cannot prove that relation. #513 substantive strategies and #433/#677 research
+runtime ownership remain separate; no strategy approval/publication or knowledge
+activation is implied by these UI checks. Do not certify the app launch-ready.
+
 ### 4 October #668/#674 published-guideline and Plan acceptance — local only
 
 Reproduced the published-guideline reader accepting malformed/null and wrong-month

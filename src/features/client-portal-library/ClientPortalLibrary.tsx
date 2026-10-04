@@ -103,6 +103,8 @@ function LibraryCategory({ summary }: { summary: ClientPortalLibraryCategorySumm
       ) : flat ? (
         <div className="mt-5">
           {!visiblePage && <BrowseButton loading={loading} onClick={() => void loadFiles(null, null)}>View files</BrowseButton>}
+          {loading && !visiblePage && <p className="mt-3 text-sm text-slate-400" role="status">Loading files…</p>}
+          {error && !visiblePage && <p className="mt-3 text-sm text-[#fb923c]" role="alert">{error}</p>}
           {visiblePage && <FileList page={visiblePage} loading={loading} error={error} onMore={() => void loadFiles(null, null, visiblePage.nextOffset ?? 0)} />}
         </div>
       ) : (
@@ -192,7 +194,7 @@ function LibraryAssetRow({ asset }: { asset: ClientPortalLibraryAsset }) {
           {asset.deliverableTitle && <p className="mt-1 truncate text-xs text-slate-400">Linked to {asset.deliverableTitle}</p>}
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
-          {asset.planMonth && <Link to={`/client/plan?month=${encodeURIComponent(asset.planMonth)}`} className="inline-flex min-h-10 items-center rounded-xl border border-white/10 px-3 text-xs font-bold text-slate-300">View in Plan</Link>}
+          {asset.planMonth && <Link to={`/client/plan?tab=calendar&month=${encodeURIComponent(asset.planMonth)}`} className="inline-flex min-h-10 items-center rounded-xl border border-white/10 px-3 text-xs font-bold text-slate-300">View in Plan</Link>}
           {canPlay && <button type="button" disabled={busy !== null} onClick={() => void access('stream')} className="min-h-10 rounded-xl border border-white/10 px-3 text-xs font-bold text-slate-300 disabled:opacity-50">{busy === 'stream' ? 'Preparing…' : 'Play'}</button>}
           {canView && <button type="button" disabled={busy !== null} onClick={() => void access('inline')} className="min-h-10 rounded-xl border border-white/10 px-3 text-xs font-bold text-slate-300 disabled:opacity-50">{busy === 'inline' ? 'Opening…' : 'View'}</button>}
           <button type="button" disabled={busy !== null} onClick={() => void access('download')} className="min-h-10 rounded-xl bg-[#2dd4bf] px-3 text-xs font-black text-[#03110e] disabled:opacity-50">{busy === 'download' ? 'Preparing…' : 'Download'}</button>

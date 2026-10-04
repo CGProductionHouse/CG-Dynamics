@@ -114,6 +114,6 @@ test('library UI is metadata-first with Category -> Year -> Month -> Files and n
   assert.match(library, /<video controls playsInline preload="metadata"/)
   assert.match(library, /getClientPortalAssetAccess\(asset\.id, purpose, previewClientId\)/)
   assert.doesNotMatch(library, /URL\.createObjectURL|\.blob\(/)
-  assert.match(library, /\/client\/plan\?month=/)
+  assert.match(library, /\/client\/plan\?tab=calendar&month=/)
   assert.match(library, /Working files, source files and raw production assets remain private/)
 })
