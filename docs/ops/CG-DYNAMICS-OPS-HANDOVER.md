@@ -6,7 +6,8 @@ Reproduced the published-guideline reader accepting malformed/null and wrong-mon
 responses, retaining extra private transport fields, and treating unavailable reads
 as empty. It now projects only the existing RPC's public fields, rejects malformed
 client/month/row/video/publication evidence, preserves ordered full scripts and
-canonical nullable text, and fails closed on read rejection. Existing exact-client
+canonical nullable text, and fails closed on read rejection. Null/blank scripts
+display unavailable, not an empty “Complete script” block. Existing exact-client
 RPC authorization, SQL/RLS/grants and all production data remain unchanged. The
 Plan read panel remounts by client/month/tab without reloading the portal shell.
 Local browser inspection also reproduced the clipped third Plan tab at 375px;
@@ -17,8 +18,8 @@ passes 1440/375/390/430px: exact scoped transition fencing, complete scripts,
 unavailable vs verified-empty states, fully visible tab controls, no body overflow
 or captured runtime errors, plus actual desktop grid/mobile agenda event navigation
 to the exact client/month/published guideline. Screenshots are local artifacts, not authenticated
-production acceptance. Runbook: `CLIENT-PLAN-LOCAL-ACCEPTANCE.md`. Focused 122 PASS;
-full supported suite 3,633 total /3,616 PASS /17 intentional skips /0 fail,
+production acceptance. Runbook: `CLIENT-PLAN-LOCAL-ACCEPTANCE.md`. Focused 123 PASS;
+full supported suite 3,634 total /3,617 PASS /17 intentional skips /0 fail,
 Windows Bash-only `sesSetupScript.test.mjs` excluded explicitly. Local build,
 scoped lint and diff check PASS. No Vercel build/deploy/config, Edge/SQL/provider,
 auth-copying, strategy transition or production mutation occurred.

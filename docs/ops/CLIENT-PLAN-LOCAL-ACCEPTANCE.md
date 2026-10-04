@@ -14,6 +14,8 @@ valid/invalid envelopes instead of silently displaying partial corrupted guidanc
 The actual Plan page now keys only its read panel by client/month/tab. An in-flight
 new scope cannot render the preceding scope's scripts under a new working month.
 All three tab controls fit at 375px rather than clipping the third tab.
+Null or blank scripts render an explicit unavailable statement, not a misleading
+“Complete script” heading over empty space; no replacement script is invented.
 
 ## Executable browser check
 
@@ -39,9 +41,9 @@ asset link for scheduled posts: that separate canonical linkage remains outstand
 
 ## Verification boundaries
 
-122 focused tests pass across published guidelines, full-preview scope, Plan,
+123 focused tests pass across published guidelines, full-preview scope, Plan,
 Content Guideline usability/Creative Intelligence/workflow and calendar release.
-Full supported suite: 3,633 tests, 3,616 pass, 17 intentional skips, zero failures.
+Full supported suite: 3,634 tests, 3,617 pass, 17 intentional skips, zero failures.
 The Bash-only SES shell test is excluded on this Windows environment, not called
 passed. Existing Git OpenSSL is placed on PATH for executable SES trust fixtures.
 TypeScript/Vite build, scoped lint and diff check pass locally.

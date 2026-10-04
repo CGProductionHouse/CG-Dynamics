@@ -117,8 +117,8 @@ export default function ClientContentGuidesPage({ preview = false, embedded = fa
                   <li key={`${guideline.row_key}-${video.position}`} className="p-5 sm:p-7">
                     <h3 className="text-xl font-semibold text-white">{guidelineVideoName(video.position ?? index + 1, video.title)}</h3>
                     <div className="mt-5 rounded-2xl border border-white/[0.08] bg-black/15 p-4 sm:p-5">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-report-faint">Complete script</p>
-                      <p className="mt-2 whitespace-pre-wrap text-sm leading-7 text-report-text">{video.script}</p>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-report-faint">{video.script?.trim() ? 'Complete script' : 'Script'}</p>
+                      <p className="mt-2 whitespace-pre-wrap text-sm leading-7 text-report-text">{video.script?.trim() ? video.script : 'A script is not available for this video.'}</p>
                     </div>
                     {(video.objective || video.hook || video.shot_breakdown || video.cta || video.visual_notes) && (
                       <div className="mt-5 grid gap-4 sm:grid-cols-2">
