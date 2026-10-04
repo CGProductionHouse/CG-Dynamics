@@ -1,5 +1,13 @@
 # Autonomous coding orchestration — CG Dynamics
 
+## Mandatory hosting gate — #679
+
+Read `../ops/HOSTING-BUDGET-AND-UPTIME-POLICY.md` before dispatch/push/release.
+Autonomous workers must use local verification, preserve the Git deployment OFF
+guard and never invoke cloud deployment/retry actions without a CA-approved budgeted
+release. Old requirements for fresh Vercel checks are BLOCKED during this freeze,
+not permission to build. Never pause production to conserve development budget.
+
 Last updated: 8 September 2026.
 
 This document is the continuity record for the new **wake-and-supervise coding-agent workflow**. Its purpose is to remove CA from being the manual relay between coding agents.
