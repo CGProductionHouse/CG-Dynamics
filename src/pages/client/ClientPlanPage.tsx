@@ -83,7 +83,7 @@ export default function ClientPlanPage() {
         </div>
       </section>
 
-      <ClientPackageSummary packageSettings={client?.package_settings} />
+      <ClientPackageSummary packageSettings={client?.package_settings} clientId={client?.id} />
       <div className="mt-6 overflow-x-auto pb-1" aria-label="Plan sections">
         <div role="tablist" className="flex min-w-max w-fit gap-1 rounded-full border border-white/[0.08] bg-white/[0.035] p-1">
           {PLAN_TABS.map(item => (

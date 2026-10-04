@@ -1,5 +1,54 @@
 # CG Dynamics Ops Handover
 
+### 4 October local-only launch continuation — #668/#678
+
+#681 package cleanup merged as `d4090063`, not deployed. Current rollout remains
+OFF under #679; do not confuse GitHub main with live production. #678 reconciled
+that guarded main and now also fences month-ahead state by exact client ID,
+rejects malformed/impossible dates/event fields and handles read rejection.
+84 focused PASS; full supported suite 3,622 total /3,605 PASS /17 skips /0 fail;
+Windows Bash SES fixture explicitly excluded. Local build/lint/diff PASS.
+Synthetic package browser checks at desktop 1536 and true 375px: no body overflow,
+no captured warn/error, maintenance absent for unrelated-client fixture. Screenshot
+capture timed out; no authenticated changed-code production acceptance claimed.
+No Vercel, Edge, database, provider, secret, strategy or external communication action.
+PR #682's launch-ready statement based on missing-env test failures is not acceptance;
+it changes only Node type dependencies. Remaining substantive strategy/portal/release
+gates in #668 remain open, not superseded by compilation or synthetic fixtures.
+
+### #668 package presentation correction — local release pending, 3 October
+
+CA requests only Video, Posters (photo + designed), Content planning, plus Website
+maintenance for CG-built sites. Canonical package fields/receipts remain unchanged.
+Combined total requires both observed quantities; partial known allowance is labelled
+as a subtotal, never blank-to-zero. Shoot/reel/animated/campaign tiles are hidden only
+in the client summary. Professional Video allowance is not silently expanded to reels.
+Maintenance is included by CA direction for exact CG-built clients: Piek, Emmanuel,
+Red Oak, All Around PVC, JFJ. JFJ exact ID comes from the 3 October registry receipt;
+this does not create a reporting mapping. Unknown update quantities stay unknown.
+Get Together, Imbewu, CG ARCC and Raadzaal have no exact Dynamics binding in the
+reviewed nine-site artifact; do not guess one. Other-builder maintenance awaits exact
+scope evidence. Both client Plan and admin report preview pass scoped client IDs.
+No production data/package write, Vercel build/deploy, provider or reporting activation.
+Release and authenticated changed-code browser acceptance remain pending local-first
+hosting rules. Preserve this simplified presentation; do not restore staff-only clutter.
+
+## Highest-priority hosting override — #679, 3 October 2026
+
+CA requires local-first development and ZERO unapproved cloud builds. Read
+`HOSTING-BUDGET-AND-UPTIME-POLICY.md`; it supersedes old automatic-deploy/fresh-Vercel
+instructions. Dynamics Git deployments are disabled by the #679 configuration guard
+once merged; CLI/dashboard bypasses remain protected. No current deployment is paused
+or replaced by that guard. Other repositories require explicit guard verification.
+
+All 15 projects previously auto-paused by the $1 team cap were resumed under CA
+authorization (#381 comment 5973461433). Piek, All Around PVC, Emmanuel, Red Oak,
+Dynamics and Hours rechecked HTTP 200 on 3 October; no second outage reproduced.
+Temporary $5 on-demand cap still has Pause ON: shared-team production remains at
+risk if exhausted. Do not promise uninterrupted service or silently remove the cap.
+Protected next decision: isolate production/development spend or approve a sustainable
+fixed-cost serving plan. Do not change billing, DNS, hosting, retention or secrets.
+
 Status: **CURRENT authority for a fresh supervisor chat**
 
 Updated: **3 October 2026, after direct Codex registry completion and #656 launch-finisher assignment**

@@ -495,7 +495,7 @@ export default function PublishedPreview() {
               showEmptyStrategy
               showAdminDiagnostics={mode === 'staff' && isStaff}
             />
-            <ClientPackageSummary packageSettings={selectedClient?.package_settings} />
+            <ClientPackageSummary packageSettings={selectedClient?.package_settings} clientId={selectedClient?.id} />
             {selectedClientId && <ClientMonthAhead clientId={selectedClientId} />}
           </ClientDashboardShell>
         </div>

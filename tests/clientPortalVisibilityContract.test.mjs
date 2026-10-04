@@ -312,6 +312,59 @@ test('supported visibility capability loads only allowlisted safe rows', async (
   assert.deepEqual(result.events.map(event => event.id), ['event-safe'])
 })
 
+test('missing or malformed calendar envelopes remain unavailable, not a verified empty month', async () => {
+  for (const broken of [null, undefined, {}, { rows: [] }, '[]', [null], [{}], ['row'], [{ row_key: 'r', title: 0 }]]) {
+    for (const failedName of ['client_portal_month_ahead_posts_v2', 'client_portal_month_ahead_events']) {
+      const result = await fetchClientMonthAheadWithRpc(async name => ({
+        data: name === 'client_portal_visibility_contract_version' ? 1 : name === failedName ? broken : [],
+        error: null,
+      }), 'client-1', '2026-08')
+      assert.equal(result.loadFailed, true, `${failedName}: ${JSON.stringify(broken)}`)
+      assert.deepEqual(result.posts, [])
+      assert.deepEqual(result.events, [])
+    }
+  }
+})
+
+test('explicit empty calendar arrays are a verified empty month and preserve exact request scope', async () => {
+  const calls = []
+  const result = await fetchClientMonthAheadWithRpc(async (name, args) => {
+    calls.push({ name, args })
+    return { data: name === 'client_portal_visibility_contract_version' ? 1 : [], error: null }
+  }, 'client-1', '2026-08')
+  assert.equal(result.loadFailed, false)
+  assert.deepEqual(result.posts, [])
+  assert.deepEqual(result.events, [])
+  for (const call of calls.slice(1)) assert.deepEqual(call.args, { p_client_id: 'client-1', p_month: '2026-08-01' })
+})
+
+test('malformed calendar dates and event fields fail closed rather than reaching the client renderer', async () => {
+  const post = { row_key: 'p', title: 'Poster', post_type: 'dp', client_safe_status: 'scheduled', schedule_date: '2026-08-12' }
+  const event = { row_key: 'e', title: 'Shoot', event_type: 'shoot', start_time: '2026-08-12T08:00:00Z', end_time: null, all_day: false, location: null, guideline_row_key: null }
+  const cases = [
+    ...['invalid', '2026-02-30', 0, undefined].map(date => ['client_portal_month_ahead_posts_v2', { ...post, schedule_date: date }]),
+    ...['invalid', '2026-02-30T08:00:00Z'].map(date => ['client_portal_month_ahead_events', { ...event, start_time: date }]),
+    ['client_portal_month_ahead_events', { ...event, end_time: 'invalid' }],
+    ['client_portal_month_ahead_events', { ...event, all_day: 'false' }],
+    ['client_portal_month_ahead_events', { ...event, location: {} }],
+  ]
+  for (const [brokenRpc, row] of cases) {
+    const result = await fetchClientMonthAheadWithRpc(async name => ({ data: name === 'client_portal_visibility_contract_version' ? 1 : name === brokenRpc ? [row] : [], error: null }), 'client-1', '2026-08')
+    assert.equal(result.loadFailed, true, JSON.stringify(row))
+  }
+})
+
+test('month-ahead display rejects previous-client state during a selection change', async () => {
+  const { clientMonthAheadForScope } = await server.ssrLoadModule('/src/lib/clientPortalCalendar.ts')
+  const data = { month: '2026-08', posts: [{ id: 'p', title: 'Client A only' }], events: [], loadFailed: false }
+  assert.equal(clientMonthAheadForScope({ clientId: 'A', data }, 'B'), null)
+  assert.equal(clientMonthAheadForScope({ clientId: 'A', data }, 'A'), data)
+  assert.equal(clientMonthAheadForScope(null, 'A'), null)
+  const component = read('../src/components/client/ClientMonthAhead.tsx')
+  assert.match(component, /clientMonthAheadForScope\(state, clientId\)/)
+  assert.match(component, /setState\(\{ clientId, data: result \}\)/)
+})
+
 test('the frontend checks capability before either projection with no legacy fallback', () => {
   const capability = calendarData.indexOf("rpc('client_portal_visibility_contract_version')")
   const posts = calendarData.indexOf("rpc('client_portal_month_ahead_posts_v2'")

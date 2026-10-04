@@ -17,3 +17,11 @@ export function cgManagedWebsiteForClient(clientId: string | null | undefined): 
   if (!clientId) return null
   return ACTIVE_DYNAMICS_WEBSITES.find(website => website.clientId === clientId) ?? null
 }
+
+// Maintenance presentation is not reporting activation. JFJ's exact Dynamics
+// identity was established by the reviewed 3 October registry receipt; its site
+// remains reporting-held. Never match an unbound website by client name.
+export function hasCgWebsiteMaintenance(clientId: string | null | undefined): boolean {
+  return cgManagedWebsiteForClient(clientId) !== null
+    || clientId === 'aece5a86-c962-4234-a1fe-7904c20f03ff'
+}
