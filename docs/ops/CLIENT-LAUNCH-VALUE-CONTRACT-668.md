@@ -281,3 +281,7 @@ OFF, no Vercel build or deployment is requested. Current GitHub main is not proo
 of changed-code production serving. The prior legitimate preview attempt reached
 login; do not bypass authentication or copy sessions to manufacture acceptance.
 Brand Hub's server read-scope change remains a separately protected Edge rollout.
+Same #674 verification on reconciled main: 98 focused PASS; full supported Node
+suite 3,627 total /3,610 PASS /17 intentional skips /0 failures (Windows Bash-only
+SES fixture excluded). Local TypeScript/Vite build, scoped ESLint and diff PASS.
+No new changed-preview authentication claim or production write.

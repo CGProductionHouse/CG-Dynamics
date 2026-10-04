@@ -1,5 +1,21 @@
 # CG Dynamics Ops Handover
 
+### 4 October pending PR receipts — not deployed
+
+Main `116c280f80370753d8d45eb4119e0f109d3beafb` includes package #681 and
+calendar #678; both are GitHub merges only under the #679 cloud-build freeze.
+#677 remains a draft at `0925560005ac5b5fe959772bb39d7ee88304dd65`, reconciled
+with that main: 85 focused PASS, full 3,628 /3,611 PASS /17 skip /0 fail,
+local build/lint/diff PASS. No Deno/runtime save/reload acceptance is claimed;
+historical knowledge approvals are not revision-bound. Trusted citations are not
+substantive strategy acceptance. Existing #674 is reconciled, not replaced; its
+full portal preview retains exact-client/publication gates and read-only controls.
+Same #674: 98 focused PASS, full 3,627 /3,610 PASS /17 skip /0 fail,
+local TypeScript/Vite build, scoped lint and diff PASS (same SES exclusion).
+Previous changed-preview attempt reached login. Brand Hub server scope is still
+undeployed and separately protected. No auth copying, Vercel, production data,
+Edge, provider, secret or strategy transition is authorized by these receipts.
+
 ### 4 October local-only launch continuation — #668/#678
 
 #681 package cleanup merged as `d4090063`, not deployed. Current rollout remains
