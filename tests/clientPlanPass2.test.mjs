@@ -55,11 +55,18 @@ test('Plan preserves the exact month when switching tabs and changing months', (
   assert.match(PLAN_SOURCE, /onClick=\{\(\) => updatePlan\(\{ tab: item\.key \}\)\}/)
 })
 
+test('Plan remounts only the read panel on exact client/month/tab transitions before stale child state can render', () => {
+  assert.match(PLAN_SOURCE, /<section key=\{`\$\{client\?\.id \?\? 'unavailable'\}:\$\{month\}:\$\{tab\}`\} role="tabpanel"/)
+  assert.doesNotMatch(PLAN_SOURCE, /window\.location|location\.reload|AuthProvider|setSession/)
+})
+
 test('Plan month controls and tabs expose accessible button state', () => {
   assert.match(PLAN_SOURCE, /aria-label="Previous month"/)
   assert.match(PLAN_SOURCE, /aria-label="Next month"/)
   assert.match(PLAN_SOURCE, /aria-pressed=\{tab === item\.key\}/)
   assert.match(PLAN_SOURCE, /min-h-11/)
+  assert.match(PLAN_SOURCE, /grid w-full grid-cols-3/)
+  assert.doesNotMatch(PLAN_SOURCE, /min-w-max|overflow-x-auto/)
 })
 
 test('an empty client month still renders its real calendar canvas', () => {

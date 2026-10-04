@@ -1,5 +1,33 @@
 # CG Dynamics Ops Handover
 
+### 4 October #668/#674 published-guideline and Plan acceptance — local only
+
+Reproduced the published-guideline reader accepting malformed/null and wrong-month
+responses, retaining extra private transport fields, and treating unavailable reads
+as empty. It now projects only the existing RPC's public fields, rejects malformed
+client/month/row/video/publication evidence, preserves ordered full scripts and
+canonical nullable text, and fails closed on read rejection. Existing exact-client
+RPC authorization, SQL/RLS/grants and all production data remain unchanged. The
+Plan read panel remounts by client/month/tab without reloading the portal shell.
+Local browser inspection also reproduced the clipped third Plan tab at 375px;
+all three now fit without horizontal navigation scrolling.
+
+Same #674, no replacement PR. Actual-component synthetic read-only browser fixture
+passes 1440/375/390/430px: exact scoped transition fencing, complete scripts,
+unavailable vs verified-empty states, fully visible tab controls, no body overflow
+or captured runtime errors, plus actual desktop grid/mobile agenda event navigation
+to the exact client/month/published guideline. Screenshots are local artifacts, not authenticated
+production acceptance. Runbook: `CLIENT-PLAN-LOCAL-ACCEPTANCE.md`. Focused 122 PASS;
+full supported suite 3,633 total /3,616 PASS /17 intentional skips /0 fail,
+Windows Bash-only `sesSetupScript.test.mjs` excluded explicitly. Local build,
+scoped lint and diff check PASS. No Vercel build/deploy/config, Edge/SQL/provider,
+auth-copying, strategy transition or production mutation occurred.
+
+Do not certify launch from these checks: substantive #513 strategy review/remediation,
+#433/#677 research-to-creative runtime acceptance, canonical scheduled-post/portal
+asset linkage and authenticated full-preview/Brand Hub release remain open. Preserve
+the separate CG Calendar and monthly_deliverables Client Schedule authorities.
+
 ### Pending #674 manual-metric parity correction
 
 Local regression reproduced preview retaining old automated unavailable-metric

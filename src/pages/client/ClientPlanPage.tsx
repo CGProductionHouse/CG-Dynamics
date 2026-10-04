@@ -84,8 +84,8 @@ export default function ClientPlanPage() {
       </section>
 
       <ClientPackageSummary packageSettings={client?.package_settings} clientId={client?.id} />
-      <div className="mt-6 overflow-x-auto pb-1" aria-label="Plan sections">
-        <div role="tablist" className="flex min-w-max w-fit gap-1 rounded-full border border-white/[0.08] bg-white/[0.035] p-1">
+      <div className="mt-6 pb-1" aria-label="Plan sections">
+        <div role="tablist" className="grid w-full grid-cols-3 gap-1 rounded-full border border-white/[0.08] bg-white/[0.035] p-1 sm:flex sm:w-fit">
           {PLAN_TABS.map(item => (
             <button
               key={item.key}
@@ -94,7 +94,7 @@ export default function ClientPlanPage() {
               aria-selected={tab === item.key}
               aria-pressed={tab === item.key}
               onClick={() => updatePlan({ tab: item.key })}
-              className={`min-h-11 rounded-full px-5 py-2 text-sm font-bold transition ${tab === item.key ? 'bg-white text-[#06110f] shadow-lg' : 'text-slate-400 hover:bg-white/[0.055] hover:text-white'}`}
+              className={`min-h-11 min-w-0 rounded-full px-2 py-2 text-xs font-bold transition sm:px-5 sm:text-sm ${tab === item.key ? 'bg-white text-[#06110f] shadow-lg' : 'text-slate-400 hover:bg-white/[0.055] hover:text-white'}`}
             >
               {item.label}
             </button>
@@ -102,7 +102,10 @@ export default function ClientPlanPage() {
         </div>
       </div>
 
-      <section role="tabpanel" className="mt-7">{tabPanel}</section>
+      {/* A new client/month is a new read scope, not the previous panel's state.
+          Remount before effects run so old scripts/calendar/strategy cannot flash
+          beneath the newly selected month. The persistent portal shell stays put. */}
+      <section key={`${client?.id ?? 'unavailable'}:${month}:${tab}`} role="tabpanel" className="mt-7">{tabPanel}</section>
     </>
   )
 }
