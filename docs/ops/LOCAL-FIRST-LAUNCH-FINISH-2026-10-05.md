@@ -141,5 +141,9 @@ but only delete exact validated ignored/untracked targets, never active environm
 5 October audit identified 70 inactive Dynamics generated folders, 5,310,555,604
 logical bytes (about 4.95 GiB); exact workstation inventory is local, not secret-bearing
 GitHub content. Execution safety blocked deletion before it ran: **zero folders
-removed**. Source, credentials, unpushed work and accounting are untouched. The
-pending cleanup is not a claimed storage saving and must not be bypassed.
+removed**. Source, credentials, unpushed work and accounting are untouched.
+Subsequent explicit CA instruction authorized recoverable staging instead of deletion.
+All 70 folders were revalidated and moved to `C:\CG-Cleanup-Review-2026-10-05`,
+with original/staged paths in a local manifest and all 70 moves verified. Current
+working dependencies remain present. Zero folders deleted; no disk space saving
+yet. CA can manually delete the staging folder and empty its Recycle Bin items.

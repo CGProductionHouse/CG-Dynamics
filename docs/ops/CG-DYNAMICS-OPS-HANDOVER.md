@@ -1,5 +1,18 @@
 # CG Dynamics Ops Handover
 
+### 5 October cleanup staging completed — no deletion or cloud action
+
+CA explicitly requested moving the checked generated folders into a delete-review
+folder for manual disposal. Revalidated exact paths, canonical remote/lockfile,
+ignored/untracked status, active PR exclusions and visible process references.
+Moved all 70 selected old Dynamics dependency/build folders (~4.95 GiB logical)
+to `C:\CG-Cleanup-Review-2026-10-05`. Manifest/README remain local; 70 destinations
+verified, originals absent, current primary/active worktree dependencies intact.
+Source, Git history, private credentials/assets and accounting remain untouched.
+This supersedes the earlier cleanup-blocked receipt for staging only. Zero
+deletions and zero reclaimed-space claims; CA's manual removal remains necessary.
+No Vercel, provider or production action. Local-first launch plan unchanged.
+
 ### 5 October local-first finish plan + disk cleanup audit
 
 CA requested safe local app/website cleanup (accounting excluded) and a concrete
