@@ -1,5 +1,26 @@
 # CG Dynamics Ops Handover
 
+### 5 October local-first finish plan + disk cleanup audit
+
+CA requested safe local app/website cleanup (accounting excluded) and a concrete
+GitHub plan to finish Dynamics without Vercel usage. Execution authority is now
+`LOCAL-FIRST-LAUNCH-FINISH-2026-10-05.md`, additive to #668/#679 and the existing
+hosting policy; not a replacement strategy/calendar/knowledge authority. Ordered
+work, existing PR ownership, actual browser/test completion gates and outstanding
+backend/semantic-strategy contracts are explicit. Future preferred release: one
+production-target local prebuilt artifact, one staged upload without live domain
+assignment, legitimate role acceptance, then same-deployment promotion. Compatibility,
+fresh budget/serving reserve, captured rollback and explicit CA approval are required.
+No Vercel commands/config/build/deploy, production data/Edge/provider or strategy
+transitions were performed. Git automatic deployment remains OFF.
+
+Local audit selected 70 ignored/untracked generated Dynamics folders (~4.95 GiB),
+excluding active open-PR branches/current working environments and accounting.
+The execution safety layer blocked removal before running; zero folders deleted,
+zero storage saving claimed. Source, local-only work, credentials/assets and history
+remain intact. Do not bypass that block or assume GitHub covers ignored/private files.
+Exact workstation inventory remains local. #679/#668/#381 carry the durable plan.
+
 ### 4 October #668/#674 Brand Hub truth and Calendar navigation — local only
 
 Continued the same draft #674 on `codex/668-complete-client-preview`, no replacement

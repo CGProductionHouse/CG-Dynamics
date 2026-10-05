@@ -3,6 +3,11 @@
 CA instruction, 3 October 2026. Applies to CG agents, automation and new-app planning.
 Client production availability is a release requirement, not a disposable development resource.
 
+The current executable finish/release plan is
+`LOCAL-FIRST-LAUNCH-FINISH-2026-10-05.md` (#668/#679). Finish and verify locally;
+prefer one production-target prebuilt staged artifact and same-deployment promotion
+only in an explicitly authorized release window. No Vercel command today.
+
 ## Hard development limits
 
 - ZERO unapproved cloud builds/deployments. Local code, tests, production builds and
