@@ -99,8 +99,10 @@ try {
         await route.fulfill({ json: [] })
       } else throw new Error(`Unexpected local request: ${url}`)
     })
+    const initialView = page.waitForResponse(response => response.url().includes('/rpc/record_client_service_surface'))
     await page.goto(`${server.resolvedUrls.local[0]}__389`, { waitUntil: 'domcontentloaded' })
     await page.getByText('Included · connected', { exact: true }).waitFor()
+    await initialView
     assert.equal(await page.locator('article').count(),6)
     assert.equal(await page.getByRole('button',{name:/Ask CG about this/}).count(),2)
     assert.equal(await page.getByText('Included · connection needed',{exact:true}).count(),1)
@@ -157,8 +159,10 @@ try {
     await page.reload({ waitUntil: 'domcontentloaded' })
     await loadingRequest
     assert.equal(await page.locator('[aria-labelledby^="services-"]').count(),0)
+    const loadingView = page.waitForResponse(response => response.url().includes('/rpc/record_client_service_surface'))
     releaseRead()
     await page.getByText('Included · connected',{exact:true}).waitFor()
+    await loadingView
     await page.waitForLoadState('networkidle')
     for (const failureScenario of ['missing_rpc','missing_schema','read_failure','all_unknown','malformed']) {
       scenario = failureScenario
@@ -177,15 +181,19 @@ try {
       assert.equal(measurements,before,`${name} hidden ${failureScenario} is not measured`)
     }
     scenario = 'three_opportunities'
+    const threeView = page.waitForResponse(response => response.url().includes('/rpc/record_client_service_surface'))
     await page.reload({waitUntil:'networkidle'})
+    await threeView
     const beforeThreeOverview = { entitlementReads, measurements }
     await page.getByRole('button',{name:'overview',exact:true}).click()
     await page.waitForLoadState('networkidle')
     assert.equal(await page.locator('article').count(),0,`${name} Overview excludes every opportunity`)
     assert.equal(await page.getByRole('heading',{name:'Google Business Profile',exact:true}).count(),0)
     assert.deepEqual({ entitlementReads, measurements },beforeThreeOverview)
+    const returnedPerformanceView = page.waitForResponse(response => response.url().includes('/rpc/record_client_service_surface'))
     await page.getByRole('button',{name:'performance',exact:true}).click()
     await page.getByRole('heading',{name:'Google Business Profile',exact:true}).waitFor()
+    await returnedPerformanceView
     assert.equal(await page.getByRole('heading',{name:'TikTok',exact:true}).count(),1)
     assert.equal(await page.getByRole('heading',{name:'LinkedIn',exact:true}).count(),1)
     // Unmount the preceding Performance fixture before pinning the Dashboard
@@ -197,15 +205,20 @@ try {
     await page.getByRole('tab',{name:'Facebook',exact:true}).waitFor()
     await page.waitForLoadState('networkidle')
     assert.equal(await page.locator('[aria-labelledby^="services-"]').count(),0,`${name} actual Dashboard default Overview is clean`)
+    assert.equal(await page.getByText('Best platform',{exact:true}).count(),0,`${name} no empty ranking headline`)
+    await page.getByText('No verified performance figures for this period',{exact:true}).waitFor()
     assert.deepEqual({ entitlementReads, measurements },beforeDashboard)
+    const dashboardPerformanceView = page.waitForResponse(response => response.url().includes('/rpc/record_client_service_surface'))
     await page.getByRole('tab',{name:'Facebook',exact:true}).click()
     await page.locator('#services-performance').waitFor()
+    await dashboardPerformanceView
     await page.waitForLoadState('networkidle')
     const beforeDashboardOverview = { entitlementReads, measurements }
     await page.getByRole('tab',{name:'Overview',exact:true}).click()
     await page.locator('[aria-labelledby^="services-"]').waitFor({state:'hidden'})
     await page.waitForLoadState('networkidle')
     assert.equal(await page.locator('[aria-labelledby^="services-"]').count(),0)
+    await page.getByText('No verified performance figures for this period',{exact:true}).waitFor()
     assert.deepEqual({ entitlementReads, measurements },beforeDashboardOverview)
     await page.screenshot({path:join(tmpdir(),`cg-dashboard-clean-overview-${name}.png`),fullPage:true})
     await page.evaluate(() => { window.fixtureNoReports=true; window.switchFixture('fixture-empty') })

@@ -426,10 +426,10 @@ function ReportHero({
           </div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+        <div className={`grid gap-3 ${master.bestPlatform ? 'sm:grid-cols-3' : 'sm:grid-cols-2'} lg:grid-cols-1`}>
           <HeroMiniCard label="Status" value={report.status.charAt(0).toUpperCase() + report.status.slice(1)} accent="teal" />
           <HeroMiniCard label="Report month" value={month} accent="amber" />
-          <HeroMiniCard label="Best platform" value={master.bestPlatform?.label ?? '-'} accent="teal" />
+          {master.bestPlatform && <HeroMiniCard label="Best platform" value={master.bestPlatform.label} accent="teal" />}
         </div>
       </div>
     </section>
@@ -527,15 +527,16 @@ function OverviewTab({
   const strategy = readStrategyData(report.strategy_data)
   const platformsWithData = master.platforms.filter(view => view.source !== 'none')
   const hasGoogleAdsSection = googleAds !== null && ['data', 'no-activity'].includes(googleAdsState)
-  const hasVerified = verifiedSections.length > 0
-  const hasData = normalizedFactsActive || platformsWithData.length > 0 || performance.metrics.length > 0 || hasGoogleAdsSection || monthlyStrategy !== null
+  const hasVerified = verifiedSections.some(section => section.lines.some(line => line.hasValue))
+  const hasData = hasVerified || (!normalizedFactsActive && (platformsWithData.length > 0 || performance.metrics.length > 0))
+    || hasGoogleAdsSection || monthlyStrategy !== null || performance.topContent !== null
 
-  if (!hasData) {
+  if (!hasData && !showAdminDiagnostics) {
     return (
       <div className="rounded-[2rem] border border-white/[0.08] bg-white/[0.045] p-8 text-center sm:p-10">
-        <p className="text-base font-semibold text-white">No report data yet</p>
+        <p className="text-base font-semibold text-white">No verified performance figures for this period</p>
         <p className="mt-3 text-sm leading-relaxed text-slate-400">
-          Performance data will appear here once the month is synced and the report is published.
+          This report does not currently contain verified performance figures. Unavailable values are not shown as zero.
         </p>
       </div>
     )
@@ -1183,7 +1184,7 @@ function ContentSection({
                 {contentType && <Pill tone="teal">{contentType}</Pill>}
                 {platformLabel && <Pill>{platformLabel}</Pill>}
                 {rankingMetric && tone === 'top' && <Pill tone="teal">Top content by {rankingMetric}</Pill>}
-                <Pill tone="teal">Top overall performer</Pill>
+                {tone === 'top' && <Pill tone="teal">Top overall performer</Pill>}
                 {tone === 'learning' && <Pill tone="amber">Highest activity post this month</Pill>}
                 {tone === 'baseline' && <Pill tone="neutral">Content baseline</Pill>}
               </div>
@@ -1248,7 +1249,7 @@ function DesignedPlaceholder({ contentType }: { contentType: string }) {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(45,212,191,0.38),transparent_36%),radial-gradient(circle_at_80%_90%,rgba(249,115,22,0.32),transparent_34%),linear-gradient(135deg,#06110f,#030706)]" />
       <div className="absolute -left-8 top-8 h-40 w-40 rounded-full border border-white/10" />
       <div className="absolute bottom-6 right-6 text-7xl font-black tracking-[-0.08em] text-white/[0.05]">
-        TOP
+        CG
       </div>
       <div className="relative text-center">
         <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl border border-white/10 bg-white/[0.06] text-[#2dd4bf] shadow-2xl">

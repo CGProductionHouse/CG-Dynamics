@@ -23,10 +23,12 @@ const fixture = {
         posts:[post('covered','2026-09-24T06:59:59.999Z','Covered Pacific final-day result',0),
           post('later','2026-09-24T07:00:00Z','Uncovered later result',999)]};
       const strategyData=emptyStrategyData();strategyData.strategyGoingForward='Explain the application routes so contributors can prepare the correct submission.';
-      function App(){const[status,setStatus]=useState('draft');const[client,setClient]=useState(null);window.showPublishedFixture=()=>setStatus('published');
+      function App(){const[status,setStatus]=useState('draft');const[client,setClient]=useState(null);const[lowSignal,setLowSignal]=useState(false);window.showPublishedFixture=()=>setStatus('published');
+        window.showLowSignalFixture=()=>setLowSignal(true);
         window.showMaintainedSiteFixture=()=>setClient({id:'aece5a86-c962-4234-a1fe-7904c20f03ff',name:'JFJ Electrical'});
         return React.createElement('main',{className:'mx-auto max-w-6xl p-3 sm:p-8'},
-          React.createElement(ClientReportView,{report:client?{...report,client_id:client.id}:report,client,googleAds:null,googleAdsState:'unmapped',
+          React.createElement(ClientReportView,{report:{...report,client_id:client?.id??report.client_id,
+            posts:lowSignal?report.posts.map(post=>({...post,impressions:0,reach:0,engagements:null})):report.posts},client,googleAds:null,googleAdsState:'unmapped',
             googleAdsError:null,monthlyStrategy:{month:'2026-09-01',status,strategyData}}));}
       createRoot(document.getElementById('root')).render(React.createElement(App));`
   },
@@ -68,6 +70,8 @@ try {
     })
     await page.goto(`http://127.0.0.1:${port}/__cutoff`, { waitUntil: 'networkidle' })
     await page.getByText('Covered Pacific final-day result', { exact: true }).first().waitFor()
+    assert.equal(await page.getByText('Best platform', { exact: true }).count(), 1, `${width} observed reach keeps its headline`)
+    assert.equal(await page.getByText('Top overall performer', { exact: true }).count(), 1, `${width} strong observed content keeps its badge`)
     assert.equal(await page.getByText('Uncovered later result', { exact: true }).count(), 0)
     assert.doesNotMatch(await page.locator('body').innerText(), /recommended weekly rhythm|Build posting consistency|compounding visibility|Where to focus next/)
     assert.ok((await page.locator('body').innerText()).includes('23 September 2026'))
@@ -88,6 +92,15 @@ try {
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width} maintained-site overflow`)
     assert.deepEqual(errors, [])
     await page.screenshot({ path: join(tmpdir(), `cg-maintained-site-${width}.png`), fullPage: true })
+    await page.evaluate(() => window.showLowSignalFixture())
+    await page.getByRole('tab', { name: 'Overview', exact: true }).click()
+    await page.getByText('Content learning', { exact: true }).waitFor()
+    assert.equal(await page.getByText('Top overall performer', { exact: true }).count(), 0, `${width} observed zero is not called a top performer`)
+    assert.equal(await page.getByText('TOP', { exact: true }).count(), 0, `${width} placeholder does not invent a performance claim`)
+    await page.getByText('Covered Pacific final-day result', { exact: true }).first().waitFor()
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width} zero-evidence overflow`)
+    assert.deepEqual(errors, [])
+    await page.screenshot({ path: join(tmpdir(), `cg-report-observed-zero-${width}.png`), fullPage: true })
     await page.close()
     console.log(`PASS ${width}px: actual Overview/Facebook/held managed Website, cutoff/observed zero, no later highlight/duplicate site upsell/overflow/runtime errors; localhost GET only`)
   }

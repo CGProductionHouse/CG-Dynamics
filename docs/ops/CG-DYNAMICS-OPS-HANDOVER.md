@@ -1,5 +1,44 @@
 # CG Dynamics Ops Handover
 
+### 7 October reporting winner truth — local #668 continuation
+
+Clean Overview #698 merged `c6446aa05024fe6f835c85d9d285955440edf0a6`.
+Local 375px actual Dashboard screenshot then exposed a useless empty Best platform
+tile. Executable reproduction also found missing reach on both channels selecting
+Facebook alphabetically as best, potentially feeding an unsupported channel signal.
+Both existing ranking projections now require finite observed reach; zero remains
+an observation and known reach/tie ordering is unchanged. No per-platform figures,
+metrics definitions, report/strategy data or publishing contract is rewritten.
+The hero omits an absent ranking and uses two balanced metadata columns; it retains
+the existing approved report-family palette/layout and a known winner's tile.
+Fifteen nearest reporting/engagement/service/isolation tests, local build/scoped
+lint/diff PASS. Two actual-component browser suites pass desktop/375/390/430:
+missing ranking hidden, observed ranking retained, safe cutoff/Website unavailable
+facts and clean Overview. The service fixture explicitly waits preceding
+Performance view responses before pinning zero Overview calls; no assertion waived.
+Further reproduction found a completed empty normalized read left Overview blank,
+and observed-zero Content learning still carried a Top overall performer badge.
+Overview now checks observed values rather than read-attempt/section presence,
+shows a neutral unavailable state, preserves observed zero and staff diagnostics,
+and only strong content gets the existing top badge. Its purely decorative TOP
+placeholder is neutral CG branding, not a performance claim. New executable SSR and
+actual desktop/375/390/430 browser regressions cover both. Pre-fix empty-state
+assertion failed; corrected nearest 15 tests PASS. Intermediate full run stopped
+after the visual placeholder finding; it is not a final PASS receipt. Full
+final-head verification PASS on `74653535e9a1e4d9790280d727d58dc4d6e2e0b2`,
+tree `28567908c6e44b97724e8aeeb3130057b0cff44e`: all twelve steps,
+3,730 total /3,713 PASS /17 intentional skips /0 failures. TypeScript/local Vite
+and nine integrated desktop/375/390/430 suites PASS. Receipt
+`%TEMP%/cg-local-launch-74653535e9a1.json`, SHA256
+`baff65c9285085160aa2f295ba85c3485104f0e5503fa05da9e3b4793b7ed855`.
+Windows Bash SES excluded, not passed; synthetic dist never releaseable.
+375px empty Overview and observed-zero cards visually inspected. Final receipt
+docs do not alter tested application/tool/test/config. Reviewer: no blocking
+scope/safety/regression finding; actual authenticated changed-runtime acceptance
+and human/content/hosting gates remain unresolved.
+No Vercel, production, provider, model or content transition. This is not premium
+strategy approval or changed-production authenticated acceptance.
+
 ### 7 October clean Overview — local #668 continuation
 
 PR #697 merged `b0848438321ce076857765cb7ad9b7ec3f99934b`; its pinned approval
