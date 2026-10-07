@@ -1,5 +1,4 @@
 import { useEffect, useEffectEvent, useState } from 'react'
-import { useAuth } from '../../contexts/AuthContext'
 import { ActionButton } from '../../components/ui/Buttons'
 import { Pill } from '../../components/ui/Badges'
 import {
@@ -47,7 +46,6 @@ export default function SkillCardReviewSection({
   source: MarketingLibrarySource | null
   onChanged: () => void | Promise<void>
 }) {
-  const { profile } = useAuth()
   const [reviews, setReviews] = useState<SkillCardReviewRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [note, setNote] = useState('')
@@ -69,14 +67,13 @@ export default function SkillCardReviewSection({
   }, [card.id])
 
   const readiness = evaluateSkillCardActivation(card, source, reviews)
-  const reviewedBy = profile?.full_name ?? 'Admin'
   const noteRequired = !note.trim()
 
   async function runReviewAction(action: SkillCardReviewAction) {
     if (noteRequired || busy) return
     setBusy(true)
     setError(null)
-    const response = await submitSkillCardReviewAction({ skillCardId: card.id, action, note, reviewedBy })
+    const response = await submitSkillCardReviewAction({ skillCardId: card.id, expectedContentHash: card.content_hash ?? null, action, note })
     setBusy(false)
     if (response.error) { setError(response.error); return }
     setNote('')
@@ -120,7 +117,7 @@ export default function SkillCardReviewSection({
           <p className="mt-1"><span className="text-white/35">Linked source: </span>{source ? source.source_name : (card.source_id ? 'Unknown (not loaded)' : 'None')}</p>
           <p className="mt-1"><span className="text-white/35">Trust tier: </span>{source ? humanize(source.trust_tier) : '—'}</p>
           <p className="mt-1"><span className="text-white/35">Last reviewed: </span>{card.last_reviewed ?? 'Never'}</p>
-          <p className="mt-1"><span className="text-white/35">Approved reviews: </span>{reviews.filter(review => review.review_status === 'approved').length}</p>
+          <p className="mt-1"><span className="text-white/35">Current content approvals: </span>{reviews.filter(review => review.review_status === 'approved' && review.review_kind === 'content_review' && review.reviewed_content_hash === card.content_hash).length}</p>
         </div>
       </div>
 

@@ -68,6 +68,7 @@ test('cardTargetsAgent matches across legacy and canonical spellings', () => {
 // ── The correct cards reach the correct specialists ─────────────────────────
 function card(over = {}) {
   return {
+    contentHash: 'a'.repeat(64), reviewedContentHash: 'a'.repeat(64),
     id: 'c1', status: 'active', knowledgeLayer: 'universal_principle',
     clientSpecific: false, activeClientId: null, sourceType: 'book', sourceId: 's1',
     title: 'Card', relevantAgents: ['marketing_strategist'], ...over,
@@ -134,7 +135,7 @@ test('the Deno copy mirrors the same aliases and gate', () => {
   assert.match(denoAgents, /export function normaliseAgentKey/)
   assert.match(denoAgents, /if \(!cardTargetsAgent\(card\.relevant_agents, ctx\.agent\.key\)\) return false/)
   // The card query must actually select the routing column.
-  assert.match(chatFn, /relevant_agents, review_expires_at'\)/)
+  assert.match(chatFn, /relevant_agents, review_expires_at, content_hash, reviewed_content_hash'\)/)
 })
 
 // ── Data model: versions, history, approval ─────────────────────────────────

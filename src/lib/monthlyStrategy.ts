@@ -1,3 +1,4 @@
+import { isSkillCardContentApproved } from './skillCardApproval'
 import { getMonthEvents, type CalendarEvent, type DeliverableType as CalendarDeliverableType } from './contentCalendar'
 import { cardTargetsAgent } from '../features/ai-workforce/agents/agentRegistry'
 import { readPackageAuthority } from './db/clients'
@@ -208,8 +209,8 @@ export async function prepareMonthlyStrategySeed(clientId: string, month: string
     supabase.from('client_context_updates').select('id,title,body,decisions').eq('client_id', clientId).eq('review_state', 'incorporated').order('created_at', { ascending: false }).limit(5),
     supabase.from('client_guides').select('id,guide_markdown').eq('client_id', clientId).eq('runtime_readiness', 'ready').order('version', { ascending: false }).limit(1).maybeSingle(),
     supabase.from('client_packages').select('id').eq('client_id', clientId).eq('status', 'active').lt('start_date', followingMonth).or(`end_date.is.null,end_date.gte.${targetMonth}`).order('start_date', { ascending: false }).limit(1).maybeSingle(),
-    supabase.from('skill_cards').select('id,title,principle,summary,relevant_agents,confidence_level,evidence_label,source_id,review_expires_at').eq('status', 'active').is('active_client_id', null).in('knowledge_layer', ['universal_principle', 'south_african_market']).or(`review_expires_at.is.null,review_expires_at.gte.${operatingDate}`).limit(30),
-    supabase.from('skill_cards').select('id,title,principle,summary,relevant_agents,confidence_level,evidence_label,source_id,review_expires_at').eq('status', 'active').eq('active_client_id', clientId).or(`review_expires_at.is.null,review_expires_at.gte.${operatingDate}`).limit(30),
+    supabase.from('skill_cards').select('id,title,principle,summary,relevant_agents,confidence_level,evidence_label,source_id,review_expires_at,content_hash,reviewed_content_hash').eq('status', 'active').is('active_client_id', null).in('knowledge_layer', ['universal_principle', 'south_african_market']).or(`review_expires_at.is.null,review_expires_at.gte.${operatingDate}`).limit(30),
+    supabase.from('skill_cards').select('id,title,principle,summary,relevant_agents,confidence_level,evidence_label,source_id,review_expires_at,content_hash,reviewed_content_hash').eq('status', 'active').eq('active_client_id', clientId).or(`review_expires_at.is.null,review_expires_at.gte.${operatingDate}`).limit(30),
   ])
 
   if (clientResult.error || !clientResult.data?.active || clientResult.data.id !== clientId) {
@@ -259,6 +260,7 @@ export async function prepareMonthlyStrategySeed(clientId: string, month: string
     ...((clientCardsResult.data ?? []) as Array<Record<string, unknown>>),
     ...((sharedCardsResult.data ?? []) as Array<Record<string, unknown>>),
   ].filter(card => {
+    if (!isSkillCardContentApproved(card.content_hash, card.reviewed_content_hash)) return false
     const agents = Array.isArray(card.relevant_agents) ? card.relevant_agents.filter((value): value is string => typeof value === 'string') : []
     return cardTargetsAgent(agents, 'marketing_strategist') || cardTargetsAgent(agents, 'content_planner')
   }).sort((left, right) => String(left.id).localeCompare(String(right.id))).slice(0, 5)

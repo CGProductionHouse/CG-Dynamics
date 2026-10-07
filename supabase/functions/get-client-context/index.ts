@@ -1,3 +1,4 @@
+import { isSkillCardContentApproved } from '../../../src/lib/skillCardApproval.ts'
 // get-client-context — Task-scoped client context retrieval for ChatGPT bridge
 //
 // POST /get-client-context
@@ -30,7 +31,7 @@ import {
   CLIENT_CONTEXT_TASK_TYPES as TASK_TYPES,
   type ClientContextTaskType as TaskType,
 } from '../_shared/clientContextContract.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 interface ContextRequest {
   client_id: string
@@ -143,7 +144,7 @@ Deno.serve(async (req) => {
   const today = new Date().toISOString().slice(0, 10)
   let cardQuery = supabase
     .from('skill_cards')
-    .select('id, slug, title, category, subcategory, principle, summary, why_it_matters, how_to_apply, mistakes_to_avoid, agent_instructions, relevant_agents, knowledge_layer, client_specific, active_client_id, client_scope_key, status, review_expires_at')
+    .select('id, slug, title, category, subcategory, principle, summary, why_it_matters, how_to_apply, mistakes_to_avoid, agent_instructions, relevant_agents, knowledge_layer, client_specific, active_client_id, client_scope_key, status, review_expires_at, content_hash, reviewed_content_hash')
     .eq('active_client_id', client_id)
     .eq('status', 'active')
     .eq('client_specific', true)
@@ -153,6 +154,7 @@ Deno.serve(async (req) => {
 
   // Filter expired cards
   const activeCards = (cards ?? []).filter(c => {
+    if (!isSkillCardContentApproved(c.content_hash, c.reviewed_content_hash)) return false
     if (!c.review_expires_at) return true
     return c.review_expires_at.slice(0, 10) >= today
   })
@@ -309,7 +311,7 @@ function buildTaskContext(
 }
 
 async function loadContactContext(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient,
   clientId: string,
   scopeKey: string | null,
   contentMode: string,

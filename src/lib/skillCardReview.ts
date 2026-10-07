@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { isSkillCardContentApproved } from './skillCardApproval'
 
 // Skill Card admin review.
 //
@@ -10,6 +11,8 @@ import { supabase } from './supabase'
 export type ReviewDecision = 'approved' | 'changes_requested' | 'rejected' | 'deprecated' | 'needs_review'
 
 export interface SkillCardReviewRow {
+  content_hash: string | null
+  reviewed_content_hash: string | null
   id: string
   slug: string
   title: string
@@ -88,8 +91,8 @@ export function summariseReadiness(rows: SkillCardReviewRow[]): ReadinessSummary
   const has = (r: SkillCardReviewRow, needle: string) => r.blockers.some(b => b.includes(needle))
   return {
     total: rows.length,
-    active: rows.filter(r => r.status === 'active').length,
-    needsReview: rows.filter(r => r.status === 'needs_review').length,
+    active: rows.filter(r => r.status === 'active' && isSkillCardContentApproved(r.content_hash, r.reviewed_content_hash) && r.blockers.length === 0).length,
+    needsReview: rows.filter(r => r.status === 'needs_review' || (r.status === 'active' && !isSkillCardContentApproved(r.content_hash, r.reviewed_content_hash))).length,
     readyToActivate: rows.filter(r => r.ready_to_activate).length,
     blockedMissingSource: rows.filter(r => has(r, 'No linked source')).length,
     blockedMissingApprovedReview: rows.filter(r => has(r, 'No approved review')).length,
@@ -105,11 +108,13 @@ export function summariseReadiness(rows: SkillCardReviewRow[]): ReadinessSummary
  */
 export async function recordSkillCardReview(input: {
   cardId: string
+  expectedContentHash: string | null
   decision: ReviewDecision
   note?: string
   edits?: Partial<Record<EditableField, string>>
 }) {
   return supabase.rpc('skill_card_record_review', {
+    p_expected_content_hash: input.expectedContentHash,
     p_card_id: input.cardId,
     p_decision: input.decision,
     p_note: input.note ?? null,
@@ -127,7 +132,8 @@ export const ALL_SPECIALISTS = [
 /**
  * Change which specialists a card reaches. Kept separate from wording review on
  * purpose: routing is structural, so it must be a deliberate decision rather
- * than something that rides along with a copy edit. Never changes status.
+ * than something that rides along with a copy edit. Material routing changes
+ * invalidate content approval and return active/reviewed cards to needs_review.
  */
 export async function setSkillCardRouting(input: { cardId: string; agents: string[]; note?: string }) {
   return supabase.rpc('skill_card_set_routing', {
@@ -166,7 +172,7 @@ export function applyQueueFilters(rows: SkillCardReviewRow[], f: QueueFilters): 
     if (f.status === 'active' && r.status !== 'active') return false
     if (f.status === 'client_specific' && !r.client_specific) return false
     if (f.status === 'ready_to_activate' && !r.ready_to_activate) return false
-    if (f.status === 'activation_blocked' && (r.status === 'active' || r.blockers.length === 0)) return false
+    if (f.status === 'activation_blocked' && r.blockers.length === 0) return false
 
     if (f.specialist && !r.resolved_agents.includes(f.specialist)) return false
     if (f.trust && (r.source_trust_tier ?? '(none)') !== f.trust) return false
@@ -197,7 +203,8 @@ export function applyQueueFilters(rows: SkillCardReviewRow[], f: QueueFilters): 
  */
 export function recommendedQueue(rows: SkillCardReviewRow[], limit = 12): SkillCardReviewRow[] {
   return rows
-    .filter(r => r.status !== 'active' && r.status !== 'deprecated' && r.priority_group <= 3)
+    .filter(r => !(r.status === 'active' && isSkillCardContentApproved(r.content_hash, r.reviewed_content_hash) && r.blockers.length === 0)
+      && r.status !== 'deprecated' && r.priority_group <= 3)
     .sort((a, b) => {
       if (a.priority_group !== b.priority_group) return a.priority_group - b.priority_group
       // Within a group, the closest to activation first.

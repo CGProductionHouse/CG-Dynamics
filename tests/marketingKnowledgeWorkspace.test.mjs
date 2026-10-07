@@ -158,6 +158,7 @@ test('the phase-28a seed is valid against the schema, idempotent, and mirrors th
 test('production grounding uses the date-only freshness boundary', () => {
   const agent = skilled.AGENT_CONTRACTS.copywriting_agent
   const base = {
+    content_hash: 'a'.repeat(64), reviewed_content_hash: 'a'.repeat(64),
     id: 'x', status: 'active', knowledge_layer: 'universal', client_specific: false, active_client_id: null,
     source_type: 'book', source_id: 's1', title: 'Hook', principle: 'Open strong', summary: 's',
     source_reference: null, relevant_agents: ['copywriting_agent'],

@@ -129,9 +129,7 @@ export default function SkillCardReviewPage() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setNote(() => '')
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setEdits(() => ({}))
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setRouting(() => null)
   }, [openId])
 
@@ -151,7 +149,7 @@ export default function SkillCardReviewPage() {
     if (!open || busy) return
     setBusy(true); setError(null); setNotice(null)
     try {
-      const res = await recordSkillCardReview({ cardId: open.id, decision, note: note.trim() || undefined, edits })
+      const res = await recordSkillCardReview({ cardId: open.id, expectedContentHash: open.content_hash, decision, note: note.trim() || undefined, edits })
       if (res.error) { setError(res.error.message); return }
       setNotice(`Recorded "${decision.replace(/_/g, ' ')}" on "${open.title}".`)
       setNote(''); setEdits({})
@@ -193,7 +191,7 @@ export default function SkillCardReviewPage() {
       {/* ── Readiness summary ─────────────────────────────────────────────── */}
       <section className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-8">
         <SummaryTile label="Total cards" value={summary.total} />
-        <SummaryTile label="Active" value={summary.active} tone="border-[#2dd4bf]/25 bg-[#2dd4bf]/[0.06]" />
+        <SummaryTile label="Active & current" value={summary.active} tone="border-[#2dd4bf]/25 bg-[#2dd4bf]/[0.06]" />
         <SummaryTile label="Needs review" value={summary.needsReview} tone="border-amber-400/25 bg-amber-400/[0.06]" />
         <SummaryTile label="Ready to activate" value={summary.readyToActivate} tone="border-[#2dd4bf]/25 bg-[#2dd4bf]/[0.06]" />
         <SummaryTile label="No source" value={summary.blockedMissingSource} />
@@ -342,7 +340,7 @@ export default function SkillCardReviewPage() {
                 </div>
 
                 {/* Why it cannot activate */}
-                {open.status !== 'active' && (
+                {(open.status !== 'active' || open.blockers.length > 0) && (
                   open.blockers.length > 0 ? (
                     <div className="mt-3 rounded-lg border border-amber-400/25 bg-amber-400/[0.06] p-3">
                       <p className="text-[11px] font-black uppercase tracking-wide text-amber-200">Cannot activate yet</p>

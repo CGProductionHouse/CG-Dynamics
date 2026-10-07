@@ -51,7 +51,7 @@ test('AI-generated and unsourced sources are never authoritative', () => {
 
 // ── Skill Card trust + retrieval isolation ───────────────────────────────────
 const strategist = () => ({ agent: reg.getAgentProfile('marketing_strategist'), activeClientId: 'client-A', industry: null, mode: 'production', today: '2026-08-10' })
-const card = o => ({ id: 'x', status: 'active', knowledgeLayer: 'universal', clientSpecific: false, activeClientId: null, sourceType: 'book', sourceId: 's1', title: 'T', relevantAgents: ['marketing_strategist'], ...o })
+const card = o => ({ contentHash: 'a'.repeat(64), reviewedContentHash: 'a'.repeat(64), id: 'x', status: 'active', knowledgeLayer: 'universal', clientSpecific: false, activeClientId: null, sourceType: 'book', sourceId: 's1', title: 'T', relevantAgents: ['marketing_strategist'], ...o })
 
 test('needs-review cards never reach production; active cards do; deprecated excluded', () => {
   assert.equal(rt.isCardRetrievable(card({ status: 'needs_review' }), strategist()), false)

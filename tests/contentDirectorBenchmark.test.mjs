@@ -3,7 +3,7 @@ import { before, after, test } from 'node:test'
 import { createServer } from 'vite'
 
 let server, modes, knowledge, edits, engagement, benchmark
-const card = patch => ({ id: 'fixture-card', title: 'Verified proof guidance', status: 'active', principle: 'Use verified proof.',
+const card = patch => ({ content_hash: 'a'.repeat(64), reviewed_content_hash: 'a'.repeat(64), id: 'fixture-card', title: 'Verified proof guidance', status: 'active', principle: 'Use verified proof.',
   summary: 'Apply only the supported claim.', knowledge_layer: 'universal_principle', client_specific: false, active_client_id: null,
   relevant_agents: ['creative_director_agent'], source_id: 'fixture-source', source_type: 'book', source_reference: 'Fixture section 2',
   linked_source: { trust_tier: 'tier_1_primary', source_type: 'book', rights_status: 'citation_only' },
@@ -69,11 +69,12 @@ test('reference_integrity: actual parser resolves only server-selected provenanc
   assert.equal(parsed[0].evidence[0].knowledgeReference.source_id, 'fixture-source')
   assert.equal(parsed[0].evidence[1].kind, 'inference'); assert.equal(parsed[0].evidence[1].knowledgeReference, undefined)
 })
-test('review_revision: characterize unresolved historical-review gap, never certify it repaired', () => {
-  const edited = card({ principle: 'Materially changed after old approval', updated_at: '2026-10-07T08:00:00Z' })
-  assert.equal(select([edited]).references.length, 1, 'Known gap remains observable')
+test('review_revision: changed content is withheld without certifying production rollout', () => {
+  const edited = card({ principle: 'Materially changed after old approval', content_hash: 'b'.repeat(64), updated_at: '2026-10-07T08:00:00Z' })
+  assert.equal(select([edited]).references.length, 0)
   const receipt = benchmark.creativeBenchmarkReceipt({ codeSha: 'fixture', promptHashes: {}, fixtureVersion: 'v1', model: null, selectedCardRevisions: [] }, true)
-  assert.equal(receipt.scenarios.find(row => row.id === 'review_revision').contractCheck, 'characterized_gap')
+  assert.equal(receipt.scenarios.find(row => row.id === 'review_revision').contractCheck, 'passed')
+  assert.equal(receipt.productionApprovalOrPublication, false)
 })
 test('uncertain_platform: actual prompt cannot label stored guidance fresh platform evidence', () => {
   assert.match(ideasPrompt().system, /not.*current platform rule/)

@@ -55,6 +55,7 @@ const MIGRATION_WISERIDE_BACKFILL = read('../supabase/migrations/20260909130000_
 const MIGRATION_WORKFLOW_DOC = read('../docs/chatgpt-client-knowledge-migration-2026-09-08.md')
 
 const capeCard = {
+  content_hash: 'a'.repeat(64), reviewed_content_hash: 'a'.repeat(64),
   id: 'cape-1', slug: 'cape-lumber-positioning', title: 'Cape Lumber: supplier, not contractor',
   status: 'active', knowledge_layer: 'active_client_specific', source_type: 'staff_observation',
   source_id: 's1', principle: 'Cape Lumber is a supplier', summary: 'Supply-led positioning',
@@ -62,6 +63,7 @@ const capeCard = {
   relevant_agents: ['copywriting_agent'], review_expires_at: null,
 }
 const bloemCard = {
+  content_hash: 'b'.repeat(64), reviewed_content_hash: 'b'.repeat(64),
   id: 'bloem-1', slug: 'action-sport-voice', title: 'Bloem Action Sports: voice rules',
   status: 'active', knowledge_layer: 'active_client_specific', source_type: 'staff_observation',
   source_id: 's2', principle: 'Voice rules', summary: 'Local energetic tone',
@@ -69,6 +71,7 @@ const bloemCard = {
   relevant_agents: ['copywriting_agent'], review_expires_at: null,
 }
 const duluxCard = {
+  content_hash: 'c'.repeat(64), reviewed_content_hash: 'c'.repeat(64),
   id: 'dulux-1', slug: 'dulux-bfn-colour-copy', title: 'Dulux BFN: colour by room effect',
   status: 'active', knowledge_layer: 'active_client_specific', source_type: 'staff_observation',
   source_id: 's3', principle: 'Room-effect language', summary: 'Describe what colour does',
@@ -117,6 +120,7 @@ test('client_specific cards are excluded when no activeClientId is set', () => {
 // ── Stale / rejected / superseded knowledge is excluded from grounding ──────
 
 const baseCard = {
+  content_hash: 'a'.repeat(64), reviewed_content_hash: 'a'.repeat(64),
   id: 'active-1', slug: 'test', title: 'Test card', status: 'active',
   knowledge_layer: 'universal', source_type: 'book', source_id: 's1',
   principle: 'Test', summary: 'Test', client_specific: false, active_client_id: null,

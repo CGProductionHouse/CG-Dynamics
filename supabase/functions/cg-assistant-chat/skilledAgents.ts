@@ -15,6 +15,8 @@
 //  - insufficient evidence is stated honestly — never a silent generic answer.
 // ============================================================================
 
+import { isSkillCardContentApproved } from '../../../src/lib/skillCardApproval.ts'
+
 export type KnowledgeLayer =
   | 'active_client_specific' | 'industry_specific' | 'south_african_market'
   | 'universal' | 'internal_learning' | 'source_chunks'
@@ -174,6 +176,8 @@ export interface CardRow {
    * a window that has passed). Null means no expiry was recorded.
    */
   review_expires_at?: string | null
+  content_hash?: string | null
+  reviewed_content_hash?: string | null
 }
 
 // Seeded cards carry legacy agent spellings (notably `creative_director_agent`
@@ -233,6 +237,7 @@ export function isCardRetrievable(card: CardRow, ctx: GateContext): boolean {
   if (card.source_type && NON_AUTHORITATIVE.has(card.source_type)) return false
   if (ctx.mode === 'production') {
     if (card.status !== 'active') return false
+    if (!isSkillCardContentApproved(card.content_hash, card.reviewed_content_hash)) return false
     // An active card whose review has lapsed is stale: it was approved for a
     // window that has now passed, so it cannot ground a production answer.
     if (card.review_expires_at != null && typeof card.review_expires_at !== 'string') return false

@@ -13,7 +13,7 @@ before(async () => {
   registry = await server.ssrLoadModule('/src/features/ai-workforce/agents/agentRegistry.ts')
 })
 after(async () => { await server?.close() })
-const card = patch => ({ id: 'card-a', status: 'active', title: 'Useful creative principle', principle: 'Use verified proof before an offer.', summary: 'A source-backed example', knowledge_layer: 'universal_principle', client_specific: false, active_client_id: null, source_id: 'source-a', source_type: 'book', source_reference: 'Reviewed source, section 2', relevant_agents: ['creative_director_agent'], relevant_industries: ['automotive'], review_expires_at: '2026-10-03', evidence_label: 'source_backed', confidence_level: 'medium', safe_claim: 'Guidance, not an uplift promise', prohibited_overclaim: 'No guaranteed outcome', updated_at: '2026-10-01T10:00:00Z', ...patch })
+const card = patch => ({ content_hash: 'a'.repeat(64), reviewed_content_hash: 'a'.repeat(64), id: 'card-a', status: 'active', title: 'Useful creative principle', principle: 'Use verified proof before an offer.', summary: 'A source-backed example', knowledge_layer: 'universal_principle', client_specific: false, active_client_id: null, source_id: 'source-a', source_type: 'book', source_reference: 'Reviewed source, section 2', relevant_agents: ['creative_director_agent'], relevant_industries: ['automotive'], review_expires_at: '2026-10-03', evidence_label: 'source_backed', confidence_level: 'medium', safe_claim: 'Guidance, not an uplift promise', prohibited_overclaim: 'No guaranteed outcome', updated_at: '2026-10-01T10:00:00Z', ...patch })
 const select = cards => knowledge.selectDirectorKnowledge(cards.map(value => ({ linked_source: { trust_tier: 'tier_1_primary', source_type: 'book', rights_status: 'citation_only' }, ...value })), 'client-a', 'automotive', '2026-10-03')
 
 test('actual specialist gate admits relevant legacy alias, exact client and known industry deterministically', () => {
@@ -41,7 +41,7 @@ test('local operating-day expiry and frontend/server gate parity fail closed', (
   assert.equal(knowledge.directorOperatingDate(new Date('2026-10-02T22:30:00Z')), '2026-10-03')
   const ctx = { agent: registry.getAgentProfile('creative_director'), activeClientId: 'client-a', mode: 'production', today: '2026-10-03' }
   for (const expiry of [null, '2026-10-03', '2026-10-02', '2026-02-30', 'garbage', 42]) {
-    const eligible = retrieval.isCardRetrievable({ id: 'a', status: 'active', title: 'T', knowledgeLayer: 'universal', clientSpecific: false, activeClientId: null, sourceType: 'book', sourceId: 's', relevantAgents: ['creative_director_agent'], reviewExpiresAt: expiry }, ctx)
+    const eligible = retrieval.isCardRetrievable({ id: 'a', status: 'active', title: 'T', knowledgeLayer: 'universal', clientSpecific: false, activeClientId: null, sourceType: 'book', sourceId: 's', relevantAgents: ['creative_director_agent'], reviewExpiresAt: expiry, contentHash: 'a'.repeat(64), reviewedContentHash: 'a'.repeat(64) }, ctx)
     assert.equal(eligible, select([card({ review_expires_at: expiry })]).references.length === 1)
   }
 })

@@ -445,7 +445,7 @@ Deno.serve(async (req) => {
   }
   const candidateCards = await fetchAllRows<DirectorCard>((from, to) => sb
     .from('skill_cards')
-    .select('id,title,principle,summary,status,knowledge_layer,client_specific,active_client_id,source_id,source_type,source_reference,relevant_agents,relevant_industries,review_expires_at,confidence_level,evidence_label,safe_claim,prohibited_overclaim,updated_at,linked_source:marketing_library_sources!inner(trust_tier,source_type,rights_status)')
+    .select('id,title,principle,summary,status,knowledge_layer,client_specific,active_client_id,source_id,source_type,source_reference,relevant_agents,relevant_industries,review_expires_at,confidence_level,evidence_label,safe_claim,prohibited_overclaim,updated_at,content_hash,reviewed_content_hash,linked_source:marketing_library_sources!inner(trust_tier,source_type,rights_status)')
     .eq('status', 'active').in('knowledge_layer', kbLayers)
     .or(`and(client_specific.eq.false,active_client_id.is.null),and(client_specific.eq.true,active_client_id.eq.${clientId})`)
     .order('id').range(from, to).returns<DirectorCard[]>())

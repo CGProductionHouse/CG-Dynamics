@@ -1,5 +1,25 @@
 # CG Dynamics Ops Handover
 
+### 7 October #433 current-content review binding — local continuation
+
+#686 W3 packet merged as `302acb4e7db556207559b5cfe4b72439b5089885`.
+Its thirteen offline task contracts are not model/human semantic acceptance.
+Continuing the concrete historical-approval defect on
+`codex/433-reviewed-content-revision`: DB-owned material/source/scope/routing
+fingerprints, atomic snapshot-fenced human review through both existing screens,
+immutable canonical actor receipts, audit-only activation/routing and matching
+frontend/Edge retrieval. No second knowledge store or automatic reapproval.
+The new `20261007102349_skill_card_review_revision_binding.sql` is **UNAPPLIED**.
+Historical approvals stay null/audit until explicit individual human review.
+See `SKILL-CARD-REVIEW-REVISION-433.md` for local proof and protected release order.
+Focused draft PR #687 source head `b259001323b76f8375e2a47ac3c88132d2d5b1c8`.
+Local supported full suite: 3,700 total /3,683 PASS /17 skips /0 fail, Bash-only
+SES excluded. Actual review screens passed localhost desktop/375/390/430 with
+stale conflict/no write and no overflow/runtime error. Five Edge closures checked.
+No Vercel, production/provider/strategy/knowledge write, migration or deploy.
+These receipts supersede the old source-gap wording below, not protected rollout
+or semantic-quality gates. Work continues; this is not a launch completion claim.
+
 ### 7 October #433 precise correction merged; task-level acceptance continues
 
 #685 merged as `1b5b2e5ed6f1be301911e3aa6165c9b3d7dd9702`, no deployment.

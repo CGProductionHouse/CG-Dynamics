@@ -1,3 +1,4 @@
+import { isSkillCardContentApproved } from '../skillCardApproval'
 import { supabase } from '../supabase'
 import type {
   ConfidenceLevel,
@@ -74,6 +75,8 @@ export interface MarketingLibrarySource {
 }
 
 export interface SkillCardRecord {
+  content_hash?: string | null
+  reviewed_content_hash?: string | null
   id: string
   slug: string
   title: string
@@ -113,6 +116,9 @@ export interface SkillCardRecord {
 }
 
 export interface SkillCardReviewRecord {
+  review_kind?: 'audit' | 'content_review'
+  reviewed_content_hash?: string | null
+  reviewer_profile_id?: string | null
   id: string
   skill_card_id: string
   reviewed_by: string | null
@@ -247,10 +253,8 @@ export async function deleteMarketingLibrarySource(id: string): Promise<QueryRes
 
 // Admin view: every card regardless of status or client scope (RLS admin policy).
 export async function listSkillCards(): Promise<QueryResult<SkillCardRecord[]>> {
-  const { data, error } = await supabase
-    .from('skill_cards')
-    .select('*')
-    .order('updated_at', { ascending: false })
+  // The same DB snapshot supplies displayed content and its material revision, including legacy rows.
+  const { data, error } = await supabase.rpc('skill_card_review_cards')
   return result((data ?? []) as SkillCardRecord[], error, [])
 }
 
@@ -266,7 +270,8 @@ export async function listActiveSharedSkillCards(): Promise<QueryResult<SkillCar
     .eq('client_specific', false)
     .or(`review_expires_at.is.null,review_expires_at.gte.${today}`)
     .order('category', { ascending: true })
-  return result((data ?? []) as SkillCardRecord[], error, [])
+  return result(((data ?? []) as SkillCardRecord[]).filter(card =>
+    isSkillCardContentApproved(card.content_hash, card.reviewed_content_hash)), error, [])
 }
 
 export async function createSkillCard(input: SkillCardInput): Promise<QueryResult<SkillCardRecord | null>> {
@@ -337,20 +342,22 @@ export interface SkillCardActivationReadiness {
 // Pure activation-readiness check. Mirrors phase-18c exactly:
 // linked source + trusted tier + an approved review + a last_reviewed date.
 export function evaluateSkillCardActivation(
-  card: Pick<SkillCardRecord, 'source_id' | 'last_reviewed'>,
+  card: Pick<SkillCardRecord, 'source_id' | 'last_reviewed' | 'content_hash' | 'reviewed_content_hash'>,
   source: Pick<MarketingLibrarySource, 'trust_tier'> | null,
-  reviews: Array<Pick<SkillCardReviewRecord, 'review_status'>>,
+  reviews: Array<Pick<SkillCardReviewRecord, 'review_status' | 'review_kind' | 'reviewed_content_hash' | 'reviewer_profile_id'>>,
 ): SkillCardActivationReadiness {
   const hasSource = Boolean(card.source_id)
   const sourceTrustAcceptable = hasSource && source != null && !BLOCKED_ACTIVATION_TRUST_TIERS.includes(source.trust_tier)
-  const hasApprovedReview = reviews.some(review => review.review_status === 'approved')
+  const hasApprovedReview = isSkillCardContentApproved(card.content_hash, card.reviewed_content_hash)
+    && reviews.some(review => review.review_status === 'approved' && review.review_kind === 'content_review'
+      && review.reviewed_content_hash === card.content_hash && Boolean(review.reviewer_profile_id))
   const lastReviewedSet = Boolean(card.last_reviewed)
 
   const missing: string[] = []
   if (!hasSource) missing.push('Link a source')
   else if (source == null) missing.push('Linked source could not be loaded to verify its trust tier')
   else if (!sourceTrustAcceptable) missing.push('Source trust tier must not be "needs review" or "tier 4 low trust"')
-  if (!hasApprovedReview) missing.push('At least one approved review')
+  if (!hasApprovedReview) missing.push('An approved human review of this exact content revision')
   if (!lastReviewedSet) missing.push('Last reviewed date must be set')
 
   return {
@@ -369,11 +376,11 @@ export async function checkSkillCardActivationReadiness(
 ): Promise<QueryResult<SkillCardActivationReadiness | null>> {
   const { data: card, error: cardError } = await supabase
     .from('skill_cards')
-    .select('source_id, last_reviewed')
+    .select('source_id, last_reviewed, content_hash, reviewed_content_hash')
     .eq('id', cardId)
     .single()
   if (cardError) return result(null, cardError, null)
-  const cardRow = card as Pick<SkillCardRecord, 'source_id' | 'last_reviewed'>
+  const cardRow = card as Pick<SkillCardRecord, 'source_id' | 'last_reviewed' | 'content_hash' | 'reviewed_content_hash'>
 
   let source: Pick<MarketingLibrarySource, 'trust_tier'> | null = null
   if (cardRow.source_id) {
@@ -388,47 +395,31 @@ export async function checkSkillCardActivationReadiness(
 
   const { data: reviews, error: reviewError } = await supabase
     .from('skill_card_reviews')
-    .select('review_status')
+    .select('review_status, review_kind, reviewed_content_hash, reviewer_profile_id')
     .eq('skill_card_id', cardId)
   if (reviewError) return result(null, reviewError, null)
 
-  const readiness = evaluateSkillCardActivation(cardRow, source, (reviews ?? []) as Array<Pick<SkillCardReviewRecord, 'review_status'>>)
+  const readiness = evaluateSkillCardActivation(cardRow, source, (reviews ?? []) as Array<Pick<SkillCardReviewRecord, 'review_status' | 'review_kind' | 'reviewed_content_hash' | 'reviewer_profile_id'>>)
   return { data: readiness, error: null, migrationNeeded: false }
 }
 
-// Maps each review action to the review row it logs and the card status it sets.
-const REVIEW_ACTION_MAP: Record<SkillCardReviewAction, { review: SkillCardReviewStatus; card: SkillCardStatus; setLastReviewed: boolean }> = {
-  approve: { review: 'approved', card: 'reviewed', setLastReviewed: true },
-  request_changes: { review: 'changes_requested', card: 'needs_review', setLastReviewed: false },
-  reject: { review: 'rejected', card: 'draft', setLastReviewed: false },
-  deprecate: { review: 'deprecated', card: 'deprecated', setLastReviewed: false },
+// Every screen uses the same atomic human review authority; identity comes from auth.uid().
+const REVIEW_ACTION_MAP: Record<SkillCardReviewAction, SkillCardReviewStatus> = {
+  approve: 'approved', request_changes: 'changes_requested', reject: 'rejected', deprecate: 'deprecated',
 }
-
-// Record a review action: log the review (note required), then move the card to
-// the matching status. Never activates — activation is a separate gated step.
 export async function submitSkillCardReviewAction(params: {
   skillCardId: string
+  expectedContentHash: string | null
   action: SkillCardReviewAction
   note: string
-  reviewedBy?: string | null
 }): Promise<QueryResult<SkillCardRecord | null>> {
   const note = params.note.trim()
   if (!note) return { data: null, error: 'A short review note is required.', migrationNeeded: false }
-
-  const mapping = REVIEW_ACTION_MAP[params.action]
-  const reviewResponse = await createSkillCardReview({
-    skill_card_id: params.skillCardId,
-    review_status: mapping.review,
-    reviewed_by: params.reviewedBy ?? null,
-    review_notes: note,
+  const { data, error } = await supabase.rpc('skill_card_record_review', {
+    p_card_id: params.skillCardId, p_expected_content_hash: params.expectedContentHash,
+    p_decision: REVIEW_ACTION_MAP[params.action], p_note: note, p_edits: null,
   })
-  if (reviewResponse.error || reviewResponse.migrationNeeded) {
-    return { data: null, error: reviewResponse.error, migrationNeeded: reviewResponse.migrationNeeded }
-  }
-
-  const patch: Partial<SkillCardInput> = { status: mapping.card }
-  if (mapping.setLastReviewed) patch.last_reviewed = new Date().toISOString().slice(0, 10)
-  return updateSkillCard(params.skillCardId, patch)
+  return result(data as SkillCardRecord | null, error, null)
 }
 
 // Activate a card only after readiness passes. The phase-18c trigger is the
@@ -441,5 +432,6 @@ export async function activateSkillCard(cardId: string): Promise<QueryResult<Ski
   if (!readiness.data || !readiness.data.ready) {
     return { data: null, error: `Cannot activate: ${readiness.data?.missing.join('; ') ?? 'requirements not met'}.`, migrationNeeded: false }
   }
-  return updateSkillCard(cardId, { status: 'active' })
+  const { data, error } = await supabase.rpc('skill_card_activate', { p_card_id: cardId })
+  return result(data as SkillCardRecord | null, error, null)
 }
