@@ -53,6 +53,7 @@ test('platform ranking requires observed finite reach, preserving zero and stabl
     const lowSignal = render([post('facebook', 0)])
     assert.match(lowSignal, /Content learning/)
     assert.doesNotMatch(lowSignal, /Top overall performer/)
+    assert.doesNotMatch(lowSignal, />TOP<\/div>/)
     assert.match(render([post('facebook', 100)]), /Top overall performer/)
   } finally { await server.close() }
 })

@@ -96,6 +96,7 @@ try {
     await page.getByRole('tab', { name: 'Overview', exact: true }).click()
     await page.getByText('Content learning', { exact: true }).waitFor()
     assert.equal(await page.getByText('Top overall performer', { exact: true }).count(), 0, `${width} observed zero is not called a top performer`)
+    assert.equal(await page.getByText('TOP', { exact: true }).count(), 0, `${width} placeholder does not invent a performance claim`)
     await page.getByText('Covered Pacific final-day result', { exact: true }).first().waitFor()
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width} zero-evidence overflow`)
     assert.deepEqual(errors, [])

@@ -20,9 +20,12 @@ Further reproduction found a completed empty normalized read left Overview blank
 and observed-zero Content learning still carried a Top overall performer badge.
 Overview now checks observed values rather than read-attempt/section presence,
 shows a neutral unavailable state, preserves observed zero and staff diagnostics,
-and only strong content gets the existing top badge. New executable SSR and
+and only strong content gets the existing top badge. Its purely decorative TOP
+placeholder is neutral CG branding, not a performance claim. New executable SSR and
 actual desktop/375/390/430 browser regressions cover both. Pre-fix empty-state
-assertion failed; corrected nearest 15 tests PASS. Full final-head verification follows.
+assertion failed; corrected nearest 15 tests PASS. Intermediate full run stopped
+after the visual placeholder finding; it is not a final PASS receipt. Full
+final-head verification follows.
 No Vercel, production, provider, model or content transition. This is not premium
 strategy approval or changed-production authenticated acceptance.
 

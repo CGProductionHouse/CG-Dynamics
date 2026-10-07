@@ -1249,7 +1249,7 @@ function DesignedPlaceholder({ contentType }: { contentType: string }) {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(45,212,191,0.38),transparent_36%),radial-gradient(circle_at_80%_90%,rgba(249,115,22,0.32),transparent_34%),linear-gradient(135deg,#06110f,#030706)]" />
       <div className="absolute -left-8 top-8 h-40 w-40 rounded-full border border-white/10" />
       <div className="absolute bottom-6 right-6 text-7xl font-black tracking-[-0.08em] text-white/[0.05]">
-        TOP
+        CG
       </div>
       <div className="relative text-center">
         <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl border border-white/10 bg-white/[0.06] text-[#2dd4bf] shadow-2xl">
