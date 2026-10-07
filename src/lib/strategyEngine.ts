@@ -322,7 +322,7 @@ export function strategyChecklist(data: StrategyData): StrategyChecklistItem[] {
 // True once all required (non-optional) checklist items are done. Used to mark a
 // completed-month draft as "Ready to publish" in the reports workflow board.
 export function strategyRequiredComplete(data: StrategyData): boolean {
-  return strategyChecklist(data)
+  return clientFacingStrategyQualityIssues(data).length === 0 && strategyChecklist(data)
     .filter(item => !item.optional)
     .every(item => item.done)
 }
@@ -345,7 +345,7 @@ export function assessGoldStandardStrategy(
   packageSettings: PackageSettings | null,
   exactEvidenceAvailable: boolean,
 ): string[] {
-  const issues: string[] = []
+  const issues: string[] = clientFacingStrategyQualityIssues(data)
   if (!packageSettings) issues.push('Confirm the exact client package before approval.')
   if (!exactEvidenceAvailable) issues.push('Add exact-client intelligence or previous performance evidence.')
   for (const field of GOLD_STANDARD_FIELDS) {
