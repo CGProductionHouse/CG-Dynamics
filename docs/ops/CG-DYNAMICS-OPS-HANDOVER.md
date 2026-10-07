@@ -11,8 +11,14 @@ handlers stay unchanged. Actual-component browser acceptance passes at
 375/390/430, 844px phone landscape and 1440px desktop: real open/close taps,
 Escape, unsent draft preservation, navigation hiding/restoration, no overflow,
 runtime errors or writes. No credentials, provider traffic or send occurred.
-92 focused Assistant regressions, scoped lint and diff check PASS; local build
-and final clean-tree acceptance receipts follow on the owning PR/#668.
+PR #691 tested source `163adb7af8dd33757a38b09b4464c043b98f5e31`:
+92 focused Assistant regressions, local build, scoped lint/diff and all twelve
+clean-tree runner steps PASS: 3,710 total /3,693 PASS /17 intentional skips /
+0 failures. Nine existing responsive component browser suites plus the separate
+five-size real-pointer launcher fixture PASS. Receipt:
+`%TEMP%/cg-local-launch-163adb7af8dd.json`. Work-page browser logs later captured
+asynchronous listener/message-channel errors; no blanket zero-console claim or
+unproven attribution to app code. Marketing at 375px had body/document width360.
 This is a local fix, NOT a released production claim. Vercel remains untouched.
 
 ### 7 October work Chrome restored; local Creative Intelligence follow-through
