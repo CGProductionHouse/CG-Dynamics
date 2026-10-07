@@ -9,6 +9,7 @@
 // Pure: no network, no Deno APIs. The handler supplies context and calls the AI router.
 
 import { ANTI_SLOP_PATTERNS, HUMAN_CREATIVE_STANDARD } from '../_shared/humanCreativeStandard.ts'
+import { directorKnowledgeReceipt, type DirectorKnowledgeReference } from '../../../src/lib/contentDirectorEvidence.ts'
 
 export const DIRECTOR_MODES = ['suggest', 'ideas', 'develop'] as const
 export type DirectorMode = typeof DIRECTOR_MODES[number]
@@ -28,6 +29,7 @@ export interface IdeaEvidence {
   kind: EvidenceKind
   note: string
   sourceUri: string | null
+  knowledgeReference?: DirectorKnowledgeReference
 }
 
 export interface VideoIdea {
@@ -118,7 +120,7 @@ function parseJsonObject(raw: string): Record<string, unknown> | null {
   return null
 }
 
-function parseEvidence(value: unknown, researchUris: Set<string>): IdeaEvidence[] {
+function parseEvidence(value: unknown, researchUris: Set<string>, knowledgeReferences: DirectorKnowledgeReference[] = []): IdeaEvidence[] {
   if (!Array.isArray(value)) return []
   const out: IdeaEvidence[] = []
   for (const item of value.slice(0, 6)) {
@@ -131,7 +133,11 @@ function parseEvidence(value: unknown, researchUris: Set<string>): IdeaEvidence[
     const sourceUri = uri && researchUris.has(uri) ? uri : null
     // Fresh research is only fresh research when it cites a real grounding source from this session.
     if (kind === 'fresh_research' && !sourceUri) kind = 'inference'
-    out.push({ kind, note, sourceUri: kind === 'fresh_research' ? sourceUri : null })
+    const reference = kind === 'cg_knowledge' && typeof entry.cardId === 'string'
+      ? knowledgeReferences.find(card => card.card_id === entry.cardId) : undefined
+    if (kind === 'cg_knowledge' && !reference) kind = 'inference'
+    out.push({ kind, note, sourceUri: kind === 'fresh_research' ? sourceUri : null,
+      ...(reference ? { knowledgeReference: { ...reference } } : {}) })
   }
   return out
 }
@@ -142,7 +148,7 @@ function parseEvidence(value: unknown, researchUris: Set<string>): IdeaEvidence[
  */
 export function parseIdeas(
   raw: string,
-  allowed: { deliverableIds: Set<string>; months: Set<string>; researchUris: Set<string> },
+  allowed: { deliverableIds: Set<string>; months: Set<string>; researchUris: Set<string>; knowledgeReferences?: DirectorKnowledgeReference[] },
 ): VideoIdea[] {
   const parsed = parseJsonObject(raw)
   const list = Array.isArray(parsed?.ideas) ? parsed!.ideas as unknown[] : []
@@ -171,12 +177,19 @@ export function parseIdeas(
       angle: text(idea.angle, 600),
       deliverableId,
       targetMonth: allowed.months.has(month) ? month : null,
-      evidence: parseEvidence(idea.evidence, allowed.researchUris),
+      evidence: parseEvidence(idea.evidence, allowed.researchUris, allowed.knowledgeReferences),
       needsConfirmation: text(idea.needsConfirmation, 400) || null,
     })
     if (ideas.length >= MAX_IDEAS) break
   }
   return ideas
+}
+
+/** The canonical worker RPC stores angle in notes; preserve provenance there. */
+export function directorIdeaPersistencePayload(idea: VideoIdea): VideoIdea {
+  return { ...idea, angle: [idea.angle,
+    ...idea.evidence.flatMap(item => item.knowledgeReference ? [directorKnowledgeReceipt(item.knowledgeReference)] : []),
+  ].filter(Boolean).join('\n\n') }
 }
 
 /** Keep only developments for the requested saved videos, one each, in the saved order. */
@@ -260,8 +273,9 @@ export function buildIdeasPrompt(input: {
     '- angle: the concrete creative approach and why it suits THIS client (not a generic category idea).',
     '- deliverableId: the id of ONE schedule slot below that this idea fills, or null. Use each slot at most once.',
     '- targetMonth: one coverage month (YYYY-MM) or null.',
-    '- evidence: 1-4 items {"kind","note","sourceUri"}; kind is one of client_fact, cg_knowledge, fresh_research, inference, needs_confirmation. fresh_research REQUIRES the exact sourceUri of a listed source.',
+    '- evidence: 1-4 items {"kind","note","sourceUri","cardId"}; kind is one of client_fact, cg_knowledge, fresh_research, inference, needs_confirmation. fresh_research REQUIRES the exact sourceUri of a listed source. cg_knowledge REQUIRES the exact card_id of a listed CG guidance record in cardId; do not invent an ID, source, approval or confidence.',
     '- needsConfirmation: anything staff must confirm with the client before shooting, or null.',
+    'Stored CG guidance is not a client fact, fresh research, a current platform rule or a forecast. Apply only its supported claim and retain its limitations; do not turn a voice/production guardrail into a business objective.',
     '',
     'Order the ideas in the recommended shoot/publish order. Prefer 3-6 strong ideas over filler; never exceed 12.',
     'Every schedule slot should normally be covered by one idea; extra ideas are allowed when they are genuinely strong.',

@@ -1,6 +1,6 @@
 import { describeGoogleAdsStatus, type GoogleAdsSavedStatus } from './googleAdsStatus.ts'
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
-import { createClient } from 'npm:@supabase/supabase-js@2.106.2'
+import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2.106.2'
 import {
   getProviderDiagnostics,
   routeAiChat,
@@ -38,6 +38,8 @@ interface AssistantToolStatus {
 }
 
 interface LocalWorkContext {
+  // Optional legacy context: normalisation does not currently populate this field.
+  currentClientName?: string | null
   today: string
   userName: string | null
   focusCount: number
@@ -121,7 +123,7 @@ const TOOL_REGISTRY: AssistantToolStatus[] = [
   },
 ]
 
-async function getGoogleAdsSavedStatus(sb: ReturnType<typeof createClient>): Promise<GoogleAdsSavedStatus | null> {
+async function getGoogleAdsSavedStatus(sb: SupabaseClient): Promise<GoogleAdsSavedStatus | null> {
   try {
     const [accounts, runs] = await Promise.all([
       sb.from('google_ads_accounts').select('id', { head: true, count: 'exact' }).eq('is_active', true),
@@ -151,7 +153,7 @@ const META_REQUIRED_SCOPES = [
 // endpoint reads (meta_connections, meta_connection_tokens, meta_client_assets).
 // Used so the assistant answers Meta capability questions from live diagnostics
 // instead of a static model guess. Returns null only when the schema is missing.
-async function getMetaIntegrationState(sb: ReturnType<typeof createClient>): Promise<MetaIntegrationState | null> {
+async function getMetaIntegrationState(sb: SupabaseClient): Promise<MetaIntegrationState | null> {
   try {
     const { count: linkedAssetsCount } = await sb
       .from('meta_client_assets')
@@ -232,7 +234,7 @@ interface MicrosoftIntegrationState {
 // transition lifecycle switch. Without this the model answered Microsoft
 // questions from the static TOOL_REGISTRY and wrongly claimed "not connected"
 // while Planner/Outlook were live. Returns null only when the schema is missing.
-async function getMicrosoftIntegrationState(sb: ReturnType<typeof createClient>): Promise<MicrosoftIntegrationState | null> {
+async function getMicrosoftIntegrationState(sb: SupabaseClient): Promise<MicrosoftIntegrationState | null> {
   try {
     const tenantId = Deno.env.get('MICROSOFT_TENANT_ID')
     const clientId = Deno.env.get('MICROSOFT_CLIENT_ID')
@@ -294,7 +296,7 @@ interface MarketingAiState {
 // Real Marketing AI department state. Read from the same tables the workflow
 // uses, so capability answers reflect what is actually approved and running
 // rather than a static registry entry. Returns null only if the schema is absent.
-async function getMarketingAiState(sb: ReturnType<typeof createClient>): Promise<MarketingAiState | null> {
+async function getMarketingAiState(sb: SupabaseClient): Promise<MarketingAiState | null> {
   try {
     const today = new Date().toISOString().slice(0, 10)
     const { data: cards } = await sb
@@ -635,7 +637,7 @@ function requestId(value: unknown): string {
 }
 
 async function aiRequestContext(
-  sb: ReturnType<typeof createClient>,
+  sb: SupabaseClient,
   actorId: string,
   idempotencyKey: string,
   action: string,
@@ -769,7 +771,7 @@ function buildLocalWorkResponse(context: LocalWorkContext): string {
 // Client Schedule query: answers "What's Red Oak posting this week?" etc.
 // Uses the same monthly_deliverables table the Client Schedule page reads.
 async function handleClientScheduleQuery(
-  sb: ReturnType<typeof createClient>,
+  sb: SupabaseClient,
   message: string,
 ): Promise<{ answer: string; clientId: string | null; clientName: string | null } | null> {
   const lower = message.toLowerCase()
@@ -893,7 +895,7 @@ async function handleClientScheduleQuery(
 // Calendar query: answers "What's on today?", "Show me today's meetings" etc.
 // Uses the same company_events table the CG Calendar page reads.
 async function handleCalendarQuery(
-  sb: ReturnType<typeof createClient>,
+  sb: SupabaseClient,
   message: string,
   localWorkContext: LocalWorkContext | null,
 ): Promise<{ answer: string } | null> {
@@ -954,7 +956,7 @@ async function handleCalendarQuery(
 // Schedule overdue query: answers "What's overdue?", "Any missing posts?" etc.
 // Uses the same monthly_deliverables table the Client Schedule page reads.
 async function handleScheduleOverdueQuery(
-  sb: ReturnType<typeof createClient>,
+  sb: SupabaseClient,
   message: string,
 ): Promise<{ answer: string } | null> {
   const lower = message.toLowerCase()
@@ -1273,7 +1275,7 @@ User: "Create a task to call Red Oak and schedule a meeting with them tomorrow"
 // Returns an ActionProposal if the model confidently extracts a valid action,
 // or null if the message should fall through to general chat.
 async function extractSemanticIntent(
-  sb: ReturnType<typeof createClient>,
+  sb: SupabaseClient,
   userId: string,
   idempotencyKey: string,
   role: string,
@@ -1348,7 +1350,7 @@ async function extractSemanticIntent(
     if (isValidCompoundIntent(parsed)) {
       const actions: Record<string, unknown>[] = []
       for (const intent of parsed.actions) {
-        if (intent.action_type === 'none') continue
+        if ((intent.action_type as string) === 'none') continue
         const action = buildActionFromIntent(intent, clientList, staffNames, taskList, localWorkContext)
         if (action) actions.push(action)
       }
@@ -1371,7 +1373,7 @@ async function extractSemanticIntent(
 
     // Handle single intent (backwards compatible).
     if (!isValidSemanticIntent(parsed)) return null
-    if (parsed.action_type === 'none') return null
+    if ((parsed.action_type as string) === 'none') return null
 
     // Build ActionProposal from validated intent.
     const action = buildActionFromIntent(parsed, clientList, staffNames, taskList, localWorkContext)
@@ -1394,7 +1396,7 @@ function buildActionFromIntent(
   localWorkContext: LocalWorkContext | null,
 ): Record<string, unknown> | null {
   // Resolve client name to ID.
-  const resolveClient = (name: string | null): { id: string; name: string } | null => {
+  const resolveClient = (name: string | null | undefined): { id: string; name: string } | null => {
     if (!name) return null
     const lower = name.toLowerCase()
     const match = clients.find(c => c.name.toLowerCase() === lower || c.name.toLowerCase().includes(lower))
@@ -1402,7 +1404,7 @@ function buildActionFromIntent(
   }
 
   // Resolve staff name — returns null if not found (model output is never authority).
-  const resolveStaff = (name: string | null): string | null => {
+  const resolveStaff = (name: string | null | undefined): string | null => {
     if (!name) return null
     const lower = name.toLowerCase()
     const match = staffNames.find(s => s.toLowerCase() === lower || s.toLowerCase().includes(lower))
@@ -1410,7 +1412,7 @@ function buildActionFromIntent(
   }
 
   // Resolve task from follow-up reference or title match.
-  const resolveTask = (title: string | null, followUp: string | null): { id: string; title: string } | null => {
+  const resolveTask = (title: string | null | undefined, followUp: string | null | undefined): { id: string; title: string } | null => {
     if (followUp === 'last_task' && localWorkContext?.currentTaskTitle) {
       const task = tasks.find(t => t.title === localWorkContext.currentTaskTitle)
       return task ? { id: task.id, title: task.title } : null
@@ -1424,7 +1426,7 @@ function buildActionFromIntent(
   }
 
   // Resolve schedule item from follow-up reference or title match.
-  const resolveScheduleItem = (title: string | null, followUp: string | null): { id: string; title: string } | null => {
+  const resolveScheduleItem = (title: string | null | undefined, followUp: string | null | undefined): { id: string; title: string } | null => {
     if (followUp === 'last_schedule_item' && localWorkContext?.upcomingDeliverableSummaries?.[0]) {
       const item = localWorkContext.upcomingDeliverableSummaries[0]
       return { id: item.id, title: item.title }
@@ -1438,7 +1440,7 @@ function buildActionFromIntent(
   }
 
   // Resolve content run from follow-up reference or title match.
-  const resolveContentRun = (title: string | null, followUp: string | null): { id: string; title: string } | null => {
+  const resolveContentRun = (title: string | null | undefined, followUp: string | null | undefined): { id: string; title: string } | null => {
     if (followUp === 'last_content_run' && localWorkContext?.upcomingDeliverableSummaries?.[0]) {
       const run = localWorkContext.upcomingDeliverableSummaries[0]
       return { id: run.id, title: run.title }
@@ -1714,7 +1716,7 @@ function buildSystemPrompt(
 }
 
 async function auditAssistantRequest(
-  sb: ReturnType<typeof createClient>,
+  sb: SupabaseClient,
   values: AuditValues
 ) {
   try {
@@ -1734,7 +1736,7 @@ async function auditAssistantRequest(
   }
 }
 
-async function auditStatus(sb: ReturnType<typeof createClient>): Promise<'available' | 'pending'> {
+async function auditStatus(sb: SupabaseClient): Promise<'available' | 'pending'> {
   try {
     const { error } = await sb
       .from('cg_assistant_audit_logs')
@@ -1747,7 +1749,7 @@ async function auditStatus(sb: ReturnType<typeof createClient>): Promise<'availa
   }
 }
 
-async function handleDiagnostics(sb: ReturnType<typeof createClient>) {
+async function handleDiagnostics(sb: SupabaseClient) {
   let routes: AiProviderRoute[] | null = null
   try {
     const textRoutes = await loadAiProviderRouteInventory(sb as unknown as AiUsageClient, 'text')
@@ -1788,7 +1790,7 @@ async function handleDiagnostics(sb: ReturnType<typeof createClient>) {
 }
 
 async function handleProviderTest(
-  sb: ReturnType<typeof createClient>,
+  sb: SupabaseClient,
   userId: string,
   role: string,
   idempotencyKey: string,
@@ -1860,7 +1862,7 @@ async function handleProviderTest(
 // honest NO_SOURCE_MESSAGE instead of a silent generic answer. Provider failure
 // still returns the citations it gathered.
 async function handleSkilledChat(
-  sb: ReturnType<typeof createClient>,
+  sb: SupabaseClient,
   actorId: string,
   idempotencyKey: string,
   role: string,

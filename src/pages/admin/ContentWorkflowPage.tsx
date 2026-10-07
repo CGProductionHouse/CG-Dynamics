@@ -649,6 +649,7 @@ export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defau
                                     <div className="h-px flex-1 bg-brand-teal/20" />
                                   </div>
                                   <ContentGuidelineDocumentEditor
+                                    key={runGuideline.id}
                                     guideline={runGuideline}
                                     run={selectedRun}
                                     videos={runGuidelineVideos}

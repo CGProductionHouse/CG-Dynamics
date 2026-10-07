@@ -179,6 +179,77 @@ Previous changed-preview attempt reached login. Brand Hub server scope is still
 undeployed and separately protected. No auth copying, Vercel, production data,
 Edge, provider, secret or strategy transition is authorized by these receipts.
 
+### 7 October #677 expanded Assistant entry closure
+
+Full entry-point Deno checking exposed 94 inherited Assistant typing errors not
+covered by the earlier helper check. Type-only repairs preserve emitted runtime
+JavaScript (executable parity regression), auth/query/action behavior and the
+existing provider contract. Full Assistant + Director suggestion Deno checks PASS
+locally. No deployment, cloud build, secret/config or production data change.
+
+### 7 October #433 / same #677 local continuation
+
+Existing saved Director receipts/confirmation context were hidden after reload;
+now a compact staff-only plain-text readback displays existing video notes without
+re-certifying approval or writing fields. Content Workflow's editor now keys exact
+guideline identity like Full Content Guide: the unkeyed local fixture reproduces
+previous-client proposed-idea leakage; keyed fixture passes departure/reload at
+1440/375/390/430px. Local synthetic acceptance, not production auth. 135 focused
+tests PASS. Real Deno import-closure check found/fixed 20 typing errors; now PASS,
+with no auth/provider/runtime behavior change. See CONTENT-DIRECTOR-EVIDENCE-433.md.
+No Vercel, backend deployment, config or production data operation. Historical
+approval/revision binding and semantic concept review remain explicit separate gates.
+Preserve additive #674 portal/file and #683 strategy-screening receipts when integrating;
+no stale branch handover may overwrite main or another lane's accepted state.
+### 7 October — substantive Vrystaat proposal from fresh exact evidence
+
+Same #683 adds `STRATEGY-VRYSTAAT-REVIEW-PROPOSAL.md`: distinct retrospective
+September learning and October application-route execution proposal, not voice
+rules presented as strategy. SELECT-only package/strategy/post readback pins
+exact identities and original metric observation ages. Flexible quantities stay
+null; partial Facebook subtotal is not ranked against complete Instagram data;
+Vlieks27/28 November conflict remains confirmation-gated; expired September
+bursary is not October offer. Held v2 rows and frozen artifacts are unchanged.
+No strategy store/transition/source activation or production/Vercel action.
+This reduces a stale evidence-gap assumption, not two semantic review holds.
+
+### 7 October local strategy gate correction — #513 / #668
+
+`build-issue-567-strategy-quality-readiness.mjs` no longer turns a negative regex
+screen into `quality_review_passed` or stamps historical counts as fresh production
+truth. Pure tested projection separates copy screening, hash alignment and missing
+current evidence from semantic acceptance; default CLI refuses frozen-evidence
+overwrite. See `STRATEGY-READINESS-SCREENING-TRUTH.md`. Frozen receipts unchanged.
+SELECT-only production readback still finds 72 v3 /22 v2 /20 v1 Sep/Oct drafts and
+zero frozen published strategy snapshots. No content was amended/approved/published.
+This receipt is additive: #674 portal/file work and #677 Director ownership remain
+intact. No Vercel, migration, Edge, provider, config or production data action.
+Substantive strategy review, exact missing evidence, protected rollout and actual
+client-visible publication remain separate; do not certify only-push readiness.
+
+### 7 October — published MTD post cutoff, local-only
+
+Fresh read-only Vrystaat evidence reproduced posts beyond the stored published
+September 23 cutoff being included by the full-month client renderer. Narrow
+presentation correction fences published MTD highlights/totals to that cutoff,
+preserving Pacific Meta semantics, UTC other-platform semantics, full-month and
+staff draft behavior. No stored report/fact/provider contract changed. See
+`REPORT-POST-CUTOFF-ACCEPTANCE.md`: 54 focused PASS; full 3,626 /3,609 PASS /17
+skips /0 fail (Windows Bash SES excluded); local build/scoped lint/diff PASS;
+actual synthetic browser 1440/375/390/430 PASS. No Vercel or production action.
+Substantive strategy, backend rollout and authenticated release gates are not
+cleared by this receipt. Preserve all other additive lane receipts.
+
+Continued actual-render acceptance also removed legacy client-facing posting-quota,
+cross-channel and canned next-month advice unsupported by package/business evidence.
+Actual metrics/staff insight and canonical strategy remain. A positive-control
+test reproduced draft working-copy props rendering without staff flag; client
+renderer now additionally requires published status, staff draft preview intact.
+59 focused PASS and four-width browser PASS including synthetic published/draft
+state change. No canonical strategy/data transition or production operation.
+Final full supported suite3,628 /3,611 PASS /17 skips /0 fail, Windows Bash SES
+excluded; final local build/scoped lint/diff PASS. No Vercel acceptance claimed.
+
 ### 4 October local-only launch continuation — #668/#678
 
 #681 package cleanup merged as `d4090063`, not deployed. Current rollout remains

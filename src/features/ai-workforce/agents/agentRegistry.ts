@@ -234,7 +234,7 @@ const AGENT_KEY_ALIASES: Record<string, string> = {
 
 /** Canonical agent key for a stored/legacy value, or null when unrecognised. */
 export function normaliseAgentKey(key: string | null | undefined): string | null {
-  if (!key) return null
+  if (typeof key !== 'string' || !key) return null
   const canonical = AGENT_KEY_ALIASES[key.trim().toLowerCase()] ?? null
   // Only ever return a key that is a real registered agent.
   return canonical && AI_WORKFORCE_AGENTS.some(a => a.key === canonical) ? canonical : null
@@ -242,7 +242,7 @@ export function normaliseAgentKey(key: string | null | undefined): string | null
 
 /** True when a card's relevant_agents list targets this agent. */
 export function cardTargetsAgent(relevantAgents: readonly string[] | null | undefined, agentKey: string): boolean {
-  if (!relevantAgents || relevantAgents.length === 0) return false
+  if (!Array.isArray(relevantAgents) || relevantAgents.length === 0) return false
   const target = normaliseAgentKey(agentKey)
   if (!target) return false
   return relevantAgents.some(raw => normaliseAgentKey(raw) === target)

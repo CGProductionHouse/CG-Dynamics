@@ -102,6 +102,7 @@ export function isSourceAuthoritative(source: SourceRecord): boolean {
 
 // Whether a Skill Card may reach a production agent for this context.
 export function isCardRetrievable(card: SkillCardRecord, ctx: RetrievalContext): boolean {
+  if (typeof card.clientSpecific !== 'boolean' || (!card.clientSpecific && card.activeClientId != null)) return false
   // AI-generated / unsourced source cards are never authoritative.
   if (card.sourceType && NON_AUTHORITATIVE_SOURCE_TYPES.has(card.sourceType)) return false
   // Production only ever sees active reviewed cards; admin research may see needs-review.
@@ -109,7 +110,11 @@ export function isCardRetrievable(card: SkillCardRecord, ctx: RetrievalContext):
     if (card.status !== 'active') return false
     // A review-expired active card is stale: it was approved for a window that
     // has passed, so it cannot ground a production answer.
+    if (card.reviewExpiresAt != null && typeof card.reviewExpiresAt !== 'string') return false
     const expiresOn = card.reviewExpiresAt?.slice(0, 10)
+    if (card.reviewExpiresAt != null && (!expiresOn || !/^\d{4}-\d{2}-\d{2}$/.test(card.reviewExpiresAt)
+      || !Number.isFinite(Date.parse(`${expiresOn}T00:00:00Z`))
+      || new Date(`${expiresOn}T00:00:00Z`).toISOString().slice(0, 10) !== expiresOn)) return false
     if (expiresOn && expiresOn < ctx.today) return false
   } else if (!['active', 'needs_review'].includes(card.status)) {
     return false

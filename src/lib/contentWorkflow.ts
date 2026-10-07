@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { directorKnowledgeReceipt, type DirectorKnowledgeReference } from './contentDirectorEvidence'
 import {
   guideActionTarget,
   isMicrosoftOwnedEvent,
@@ -750,6 +751,7 @@ export interface ContentDirectorEvidence {
   kind: 'client_fact' | 'cg_knowledge' | 'fresh_research' | 'inference' | 'needs_confirmation'
   note: string
   sourceUri: string | null
+  knowledgeReference?: DirectorKnowledgeReference
 }
 
 export interface GuidelineVideoIdea {
@@ -857,6 +859,7 @@ export function ideaToVideoInput(
     idea.audience?.trim() ? `Audience: ${idea.audience.trim()}` : '',
     idea.needsConfirmation?.trim() ? `Confirm with client: ${idea.needsConfirmation.trim()}` : '',
     ...idea.evidence.filter(item => item.kind === 'fresh_research' && item.sourceUri).map(item => `Research: ${item.note} (${item.sourceUri})`),
+    ...idea.evidence.flatMap(item => item.knowledgeReference ? [directorKnowledgeReceipt(item.knowledgeReference)] : []),
   ].filter(Boolean).join('\n')
   return {
     title: idea.title,
