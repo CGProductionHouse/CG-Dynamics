@@ -49,7 +49,7 @@ try {
   browser = await chromium.launch({ headless: true })
   const keys = ['linkedin','google_ads','meta_ads','instagram','tiktok','google_business_profile','website_digital_experience']
   const states = ['not_included','included','not_applicable','included','unknown','not_included','included']
-  for (const [name, width, height] of [['desktop',1440,1000],['mobile',390,844]]) {
+  for (const [name, width, height] of [['desktop',1440,1000],['mobile-375',375,844],['mobile-390',390,844],['mobile-430',430,900]]) {
     const page = await browser.newPage({ viewport: { width, height } })
     const errors = []; const requests = []; let failOnce = true; let receipt = null; let verifyPayload
     let scenario = 'mixed'; let releaseRead; let measurements = 0

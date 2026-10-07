@@ -26,8 +26,8 @@ review screens, service entitlement states and management resolution queue.
 The last two existing fixtures include explicit *synthetic* writes to their
 in-memory mock handlers, never production saves. All other production actions
 remain forbidden. The actual-component checks retain their own width/assertion
-contracts: seven exercise desktop/375/390/430, the two older service-management
-fixtures exercise desktop/390. Do not claim every fixture checks all widths.
+contracts. All nine now exercise desktop/375/390/430; the two older service-
+management fixtures have been expanded from desktop/390 for this integrated pass.
 
 Receipts/logs are generated in the local TEMP directory and pin exact source SHA,
 tree, lockfile hash, executed step exit codes, honest test totals/skips and emitted
@@ -42,6 +42,23 @@ production public configuration and use the single-artifact release procedure in
 acceptance, authenticated production acceptance nor authorization to publish.
 
 ## Exact remaining gates after local source closure
+
+### Reproduced owned-site presentation defect
+
+Actual JFJ Electrical render failed before the fix: its reviewed exact-ID CG
+maintenance receipt was present, but its separately held reporting mapping sent
+Website Performance to the new-site upsell. The report now reuses the existing
+maintenance authority to show unavailable reporting without selling the owned
+site again. No host, mapping, metric or connection is invented. Both client-row
+and exact report-identity entry paths are covered; names/foreign IDs do not match.
+The original four reporting identities/hosts are unchanged. Existing published
+snapshot rendering is unchanged. A browser fixture exercises the held Website
+tab at all four widths, with network limited to localhost GET requests.
+
+The earlier pinned runner candidate `275d90a5e2c3a7cae963c6be21763ab6e16b7341`
+passed all twelve steps: 3,705 total /3,688 PASS /17 skips /0 failures, build and
+nine browsers. That receipt predates this reproduced edge-case correction and
+is not a certificate for the final changed candidate; the final run is separate.
 
 - Apply/verify the separately approved portal post-assets migration and deploy
   the narrow `client-onboarding` read scope before live full-preview file proof.

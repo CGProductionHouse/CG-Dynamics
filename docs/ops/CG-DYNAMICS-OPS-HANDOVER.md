@@ -1,5 +1,24 @@
 # CG Dynamics Ops Handover
 
+### 7 October integrated local acceptance / owned website presentation
+
+#687 merged as `9c8a0187e342d83e04de2c1bcf7d19973b959df4`; its migration remains
+UNAPPLIED. Continuing same local launch lane in PR #688. Fixed runner pins exact
+clean source/tree/lock/log/bundle evidence; twelve local-only steps reuse the nine
+existing actual-component fixtures, full supported suite and TypeScript/Vite.
+Production credentials/config are excluded from fixture subprocesses. No cloud
+or production action. Generated fixture-configured dist MUST NOT be uploaded.
+
+Baseline runner `275d90a5` passed 3,705 total /3,688 PASS /17 intentional skips /
+0 failures, all twelve steps and unchanged tree. Subsequent actual JFJ render
+reproduced an owned-site upsell: maintenance was known, reporting remained held.
+Correction uses existing exact-ID maintenance authority, keeps reporting
+unavailable/no invented host or metrics and unchanged guarded reporting mappings.
+Service/package fixtures now cover 375/390/430 as well as desktop. Final changed
+candidate verification continues; baseline is not the final result.
+See `LOCAL-LAUNCH-ACCEPTANCE.md` for exact remaining protected/human gates.
+
+
 ### 7 October #433 current-content review binding — local continuation
 
 #686 W3 packet merged as `302acb4e7db556207559b5cfe4b72439b5089885`.
