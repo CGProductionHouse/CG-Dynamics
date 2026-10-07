@@ -24,6 +24,7 @@
 
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import {
   AiDuplicateRequestError,
   routeAiChat,
@@ -444,7 +445,7 @@ Deno.serve(async (req) => {
     .select('id,title,principle,summary,status,knowledge_layer,client_specific,active_client_id,source_id,source_type,source_reference,relevant_agents,relevant_industries,review_expires_at,confidence_level,evidence_label,safe_claim,prohibited_overclaim,updated_at,linked_source:marketing_library_sources!inner(trust_tier,source_type,rights_status)')
     .eq('status', 'active').in('knowledge_layer', kbLayers)
     .or(`and(client_specific.eq.false,active_client_id.is.null),and(client_specific.eq.true,active_client_id.eq.${clientId})`)
-    .order('id').range(from, to))
+    .order('id').range(from, to).returns<DirectorCard[]>())
   if (candidateCards.error) return jsonResponse({ error: 'Approved knowledge is unavailable. No partial retrieval is substituted.' }, 503)
   const reviewedIndustry = industryProfile && ['reviewed', 'active'].includes(industryProfile.review_state)
     ? industryProfile.primary_industry as string | null : null
@@ -778,7 +779,7 @@ Deno.serve(async (req) => {
 // both return drafts: nothing here writes into a guideline.
 
 interface DirectorContext {
-  sb: ReturnType<typeof createClient>
+  sb: SupabaseClient
   userId: string
   requestId: string
   client: { id: string; name: string; tier: string }
@@ -799,7 +800,7 @@ interface DirectorContext {
 
 type ReadyGuide = { markdown: string } | { notReady: { reason: string } }
 
-async function loadReadyClientGuide(sb: ReturnType<typeof createClient>, clientId: string): Promise<ReadyGuide> {
+async function loadReadyClientGuide(sb: SupabaseClient, clientId: string): Promise<ReadyGuide> {
   const { data } = await sb
     .from('client_guides')
     .select('client_id, guide_markdown, runtime_readiness, readiness_reason')

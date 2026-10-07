@@ -1,5 +1,20 @@
 # CG Dynamics Ops Handover
 
+### 7 October #433 / same #677 local continuation
+
+Existing saved Director receipts/confirmation context were hidden after reload;
+now a compact staff-only plain-text readback displays existing video notes without
+re-certifying approval or writing fields. Content Workflow's editor now keys exact
+guideline identity like Full Content Guide: the unkeyed local fixture reproduces
+previous-client proposed-idea leakage; keyed fixture passes departure/reload at
+1440/375/390/430px. Local synthetic acceptance, not production auth. 135 focused
+tests PASS. Real Deno import-closure check found/fixed 20 typing errors; now PASS,
+with no auth/provider/runtime behavior change. See CONTENT-DIRECTOR-EVIDENCE-433.md.
+No Vercel, backend deployment, config or production data operation. Historical
+approval/revision binding and semantic concept review remain explicit separate gates.
+Preserve additive #674 portal/file and #683 strategy-screening receipts when integrating;
+no stale branch handover may overwrite main or another lane's accepted state.
+
 ### 4 October local-only launch continuation — #668/#678
 
 #681 package cleanup merged as `d4090063`, not deployed. Current rollout remains

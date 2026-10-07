@@ -26,6 +26,7 @@ import { monthDisplayLabel } from '../../lib/reportPeriod'
 import { humanizeStatus, INPUT_CLS, LABEL_CLS } from './contentGuidelineHelpers'
 import CanonicalCreativeIntelligence from './CanonicalCreativeIntelligence'
 import { directorKnowledgeReceipt } from '../../lib/contentDirectorEvidence'
+import SavedDirectorContext from './SavedDirectorContext'
 
 interface Props {
   guideline: ContentGuideline
@@ -758,6 +759,7 @@ export default function ContentGuidelineDocumentEditor({
                       placeholder="Enter the complete spoken and on-screen script..."
                     />
                   </label>
+                  <SavedDirectorContext objective={video.objective} hook={video.hook} notes={video.notes} />
                   {([
                     ['shotBreakdown', 'Shot-by-shot breakdown'],
                     ['requirements', 'People, products & props'],

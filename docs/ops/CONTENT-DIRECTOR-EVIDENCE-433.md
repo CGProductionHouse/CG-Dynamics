@@ -1,5 +1,47 @@
 # #433 W1: reviewed guidance in a real editable draft
 
+## 7 October local finish continuation (supersedes local-check gaps below)
+
+Found/fixed actual readback gap: `ideaToVideoInput` preserved angle, audience,
+confirmation questions and trusted receipts in existing `content_guide_ideas.notes`,
+but the document editor hid that saved context after reload. Compact staff-only
+`SavedDirectorContext` now displays the existing objective/hook/notes as escaped
+text. It explicitly calls this saved draft context, not freshly verified research
+or a new recommendation. Empty context stays absent. No arbitrary source links,
+client projection, new store or automatic field update. Existing explicit script
+saves leave notes/objective/hook untouched.
+
+Actual-editor local browser fixture reproduces a second defect: with an unkeyed
+editor, previous-client proposed ideas survive a guideline switch. Content Workflow
+now uses the same exact-guideline key as Full Content Guide. Counterfactual
+`CG_REPRO_UNKEYED=1` fixture FAILS the isolation assertion; default fixture PASS
+at 1440/375/390/430px, including reload, proposed-idea departure, escaped script/URL
+notes, unchanged human script and no horizontal overflow/captured page errors.
+Synthetic local-only auth/context/model response, not production role acceptance.
+All non-fixture network is denied; no write buttons/provider calls are invoked.
+Screenshots: local TEMP `cg-director-context-{width}.png` and
+`cg-director-saved-{width}.png`; 375px context screenshot visually inspected.
+
+Real Deno 2.5.1 import-closure check exposed 20 type errors hidden from Vite:
+generic `ReturnType<typeof createClient>` inferred an unusable unknown schema;
+the ungenerated joined-source query lacked its actual row type; AI diagnostics
+omitted the existing `canonical` secret-source enum. Corrected with existing SDK
+`SupabaseClient`, explicit DirectorCard query return shape and canonical shared
+`ProviderSecretSource` type. No auth/query/filter/secret resolution/provider routing
+behavior changed. `deno check --no-lock supabase/functions/suggest-content-videos/index.ts`
+now PASS. Tool installed in disposable npm tool cache only; no production dependency
+or lockfile added. Frontend build, scoped lint and diff remain required on head.
+135 focused content/Director/knowledge/governance regressions PASS.
+Final supported suite: 3,632 total /3,615 PASS /17 intentional skips /0 failures;
+Windows Bash-only SES setup test explicitly excluded, not passed. Final local
+TypeScript/Vite, TypeScript and Node/browser-script scoped lint, diff check and
+real Deno import-closure check PASS. Existing >500k bundle warning unchanged.
+
+Historical review-version binding remains the separately documented canonical
+authority gap, not repaired by displaying a receipt. Actual protected Edge rollout,
+authorized saved-data round-trip and semantic concept acceptance remain pending.
+No Vercel, production mutation, model invocation, knowledge activation or publication.
+
 ## Bounded change
 
 Content Director now uses the existing creative-director specialist contract and

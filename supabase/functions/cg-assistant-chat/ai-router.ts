@@ -17,6 +17,7 @@ import {
   providerIsOptional,
   resolveProviderSecret,
   type AiProviderName,
+  type ProviderSecretSource,
 } from '../_shared/providerSecrets.ts'
 
 export type { AiProviderName } from '../_shared/providerSecrets.ts'
@@ -72,7 +73,7 @@ export interface AiProviderDiagnostic {
   provider: AiProviderName
   model: string
   configured: boolean
-  keyStatus: 'configured' | 'legacy' | 'missing'
+  keyStatus: ProviderSecretSource
   optional: boolean
   enabled: boolean
 }
