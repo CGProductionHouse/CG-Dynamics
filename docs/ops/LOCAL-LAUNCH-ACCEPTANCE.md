@@ -60,6 +60,25 @@ passed all twelve steps: 3,705 total /3,688 PASS /17 skips /0 failures, build an
 nine browsers. That receipt predates this reproduced edge-case correction and
 is not a certificate for the final changed candidate; the final run is separate.
 
+The subsequent `8b661b83` full run stopped truthfully: 3,707 total /3,689 PASS /
+17 skips /1 failure. The failure was an old source-text assertion requiring the
+Website component's exact previous prop list; it did not admit the new maintenance
+prop. The contract assertion is updated, not removed; actual rendering/isolation
+regressions remain. The runner issued INCOMPLETE_OR_FAILED, never a green receipt.
+
+### Historical strategy manifest is not semantic approval
+
+The older `audit-monthly-strategy-approval-manifest.mjs` independently reproduced
+two misleading outputs: a formal hash/package screen labelled a row ready for
+human approval, and even a blocked/empty strategy received executable transition
+payloads. The pure builder now labels only historical v2 contract screening,
+explicitly records semantic review not performed and emits no approval/publication
+payloads, for either screened or blocked rows. V3 drift remains blocked by its
+existing historical-version fence. Hash/package/source/isolation checks and
+zero-write behavior are preserved. Frozen historical artifacts are NOT rewritten;
+the old 94-ready manifest remains a historical receipt, not current authority.
+The production-read CLI is not invoked during this local correction.
+
 - Apply/verify the separately approved portal post-assets migration and deploy
   the narrow `client-onboarding` read scope before live full-preview file proof.
   Actual client-published files must exist; no fabricated file publication.

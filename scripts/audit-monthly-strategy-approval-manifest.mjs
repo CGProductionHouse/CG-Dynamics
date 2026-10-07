@@ -58,14 +58,6 @@ function selectReviewedFields(value, reviewedValue) {
   ]))
 }
 
-function deterministicUuid(seed) {
-  const bytes = Buffer.from(createHash('sha256').update(seed).digest().subarray(0, 16))
-  bytes[6] = (bytes[6] & 0x0f) | 0x50
-  bytes[8] = (bytes[8] & 0x3f) | 0x80
-  const hex = bytes.toString('hex')
-  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`
-}
-
 function normalizedText(value) {
   return String(value ?? '').toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, ' ').trim()
 }
@@ -188,22 +180,9 @@ export function buildManifest({ liveRows, clients, fleetPlan, neshoraPlan, audit
       reviewed_plan_hash: review.reviewed_plan_hash,
       package_verification_version: audit.package_verification_version,
       reviewed_boundary_references: audit.reviewed_boundary_references,
-      audit_status: audit.errors.length === 0 ? 'ready_for_human_approval' : 'blocked',
+      audit_status: audit.errors.length === 0 ? 'contract_screen_passed_requires_semantic_review' : 'blocked',
+      semantic_review: 'not_performed_by_this_audit',
       audit_errors: audit.errors,
-      approval_transition: {
-        client_id: client.id,
-        strategy_month: row.strategy_month,
-        expected_version: row.version,
-        target_status: 'approved',
-        idempotency_key: deterministicUuid(`strategy-approval:${row.id}:${audit.strategy_hash}`),
-      },
-      publication_transition_after_separate_review: {
-        client_id: client.id,
-        strategy_month: row.strategy_month,
-        expected_version: row.version,
-        target_status: 'published',
-        idempotency_key: deterministicUuid(`strategy-publication:${row.id}:${audit.strategy_hash}`),
-      },
     })
   }
 
@@ -215,9 +194,9 @@ export function buildManifest({ liveRows, clients, fleetPlan, neshoraPlan, audit
   if (blocked.length) globalErrors.push(`BLOCKED_REVIEWED_ROWS:${blocked.length}`)
 
   const core = {
-    schema_version: 1,
+    schema_version: 2,
     issue: 513,
-    mode: 'read_only_approval_publication_manifest',
+    mode: 'historical_v2_contract_screen_not_approval_authority',
     generated_at: auditedAt,
     write_count: 0,
     authority: {
@@ -229,13 +208,13 @@ export function buildManifest({ liveRows, clients, fleetPlan, neshoraPlan, audit
       reviewed_amended_v2_rows: manifestRows.length,
       reviewed_clients: new Set(manifestRows.map(row => row.client_id)).size,
       non_applicable_unamended_v1_rows: nonApplicable.length,
-      ready_for_human_approval: manifestRows.filter(row => row.audit_status === 'ready_for_human_approval').length,
+      contract_screen_passed_requires_semantic_review: manifestRows.filter(row => row.audit_status === 'contract_screen_passed_requires_semantic_review').length,
       blocked: blocked.length,
       approved: liveRows.filter(row => row.approved_at != null).length,
       published: liveRows.filter(row => row.published_at != null).length,
     },
     audit_errors: globalErrors,
-    execution_gate: 'This manifest is evidence only. Approval and publication are separate protected actions and were not performed.',
+    execution_gate: 'Historical v2 contract/hash checks are not semantic strategy acceptance or current production verification. No approval/publication payloads are prepared. Review current exact business outcome, customer obstacle, creative execution, package, source support, month-specific timing and measurement separately. This output authorizes no transition.',
     rows: manifestRows,
   }
   return { ...core, manifest_hash: sha(core) }

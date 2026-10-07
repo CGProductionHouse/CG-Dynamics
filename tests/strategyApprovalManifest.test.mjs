@@ -78,7 +78,7 @@ test('fails closed on repository names and non-strategy evidence jargon', () => 
   assert.ok(result.errors.includes('INTERNAL_OR_NON_STRATEGY_COPY'))
 })
 
-test('manifest is read-only, deterministic apart from explicit audit time, and prepares separate transitions', () => {
+test('legacy contract screening never prepares approval/publication or certifies semantic strategy quality', () => {
   const fleetPlan = {
     plan_hash: 'b'.repeat(64),
     rows: [{ disposition: 'ready', client_id: client.id, client_name: client.name, strategy_id: liveRow.id, strategy_month: liveRow.strategy_month,
@@ -87,9 +87,18 @@ test('manifest is read-only, deterministic apart from explicit audit time, and p
   const neshoraPlan = { plan_hash: 'c'.repeat(64), rows: [] }
   const manifest = buildManifest({ liveRows: [liveRow], clients: [client], fleetPlan, neshoraPlan, auditedAt: '2026-09-27T00:00:00Z' })
   assert.equal(manifest.write_count, 0)
-  assert.equal(manifest.rows[0].approval_transition.target_status, 'approved')
-  assert.equal(manifest.rows[0].publication_transition_after_separate_review.target_status, 'published')
-  assert.equal(manifest.rows[0].approval_transition.expected_version, 2)
-  assert.notEqual(manifest.rows[0].approval_transition.idempotency_key, manifest.rows[0].publication_transition_after_separate_review.idempotency_key)
+  assert.equal(manifest.rows[0].audit_status, 'contract_screen_passed_requires_semantic_review')
+  assert.equal(manifest.rows[0].semantic_review, 'not_performed_by_this_audit')
+  assert.equal(manifest.counts.ready_for_human_approval, undefined)
+  assert.doesNotMatch(JSON.stringify(manifest), /approval_transition|publication_transition|target_status|ready_for_human_approval/)
+  assert.equal(manifest.mode, 'historical_v2_contract_screen_not_approval_authority')
+  assert.equal(manifest.counts.contract_screen_passed_requires_semantic_review, 1)
+  const blocked = buildManifest({ liveRows: [{ ...liveRow, strategy_data: { goldStandard: {} } }], clients: [client], fleetPlan, neshoraPlan, auditedAt: '2026-09-27T00:00:00Z' })
+  assert.equal(blocked.rows[0].audit_status, 'blocked')
+  assert.doesNotMatch(JSON.stringify(blocked), /approval_transition|publication_transition|target_status/)
+  const v3 = buildManifest({ liveRows: [{ ...liveRow, version: 3 }], clients: [client], fleetPlan, neshoraPlan, auditedAt: '2026-09-27T00:00:00Z' })
+  assert.ok(v3.rows[0].audit_errors.includes('NOT_AMENDED_V2'))
+  assert.equal(v3.rows[0].audit_status, 'blocked', 'Historical v2 tool must not endorse current v3 content')
+  assert.equal(manifest.manifest_hash, buildManifest({ liveRows: [liveRow], clients: [client], fleetPlan, neshoraPlan, auditedAt: '2026-09-27T00:00:00Z' }).manifest_hash)
   assert.ok(manifest.audit_errors.includes('REVIEWED_PARTITION_NOT_94_ROWS_47_CLIENTS'))
 })
