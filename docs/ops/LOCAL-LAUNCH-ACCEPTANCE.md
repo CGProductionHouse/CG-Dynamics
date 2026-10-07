@@ -101,3 +101,54 @@ The production-read CLI is not invoked during this local correction.
 
 No blanket “only push left”, “94 ready” or “all data accurate” certification may
 replace these named gates. Onboarding is not being resurrected as launch focus.
+
+## Final local closure receipt — 7 October 2026
+
+Tested code: `c8c26739b8f61ec91efe58df564b9ee0d93c0155` (PR #688).
+The fixed runner completed all twelve steps between 11:41:50 and 11:52:02 UTC:
+**3,707 total /3,690 PASS /17 intentional skips /0 failures /0 cancelled /0 todo**.
+Windows Bash-only SES was excluded explicitly, not claimed passed. TypeScript,
+local Vite build and all nine actual-component browser fixtures passed at desktop,
+375px, 390px and 430px. Tree remained unchanged. Nearest 51 focused regressions,
+scoped lint and diff check passed; six affected Edge import closures passed Deno
+checking on the unchanged #687 Edge source. Browser fixtures use synthetic local
+evidence, not authenticated production roles. No production mutation occurred.
+
+Receipt: `%TEMP%/cg-local-launch-c8c26739b8f6.json`;
+SHA256 `137fe9e5e616c5e8a5889c7d60aab0bfc1fd61aa9510dd08a91f3a0693321cdb`.
+Pinned tree: `0f66fd313066e0c70bbb16cc20295eac5588fe26`.
+Docs-only receipt commits do not change the tested application/tool/test source.
+Fixture-configured `dist` is NOT a production artifact and MUST NOT be uploaded.
+
+Fresh read-only production evidence on 7 October:
+
+- 61 active clients; 57 confirmed packages; four unconfirmed: Elcheck, JFJ
+  Electrical, LHP Student Village & Block, VCS Cleaning Solutions. Null stays null.
+- Target September/October strategies: 72 v3 drafts plus 22 held v2 drafts;
+  no frozen published strategy snapshots. Historical v1 drafts are separate.
+  This is not semantic approval or permission to publish any of the 94 rows.
+- Zero active published portal assets. Source code cannot substitute for genuine
+  reviewed final files and explicitly authorized publication.
+- Both `20261007100000_client_portal_post_assets.sql` and
+  `20261007102349_skill_card_review_revision_binding.sql` absent from the live
+  ledger; their new RPCs and review-binding columns also absent. **UNAPPLIED**.
+- Public HEAD checks returned HTTP 200 for CG Dynamics, Piek Group, Emmanuel
+  Funerals, All Around PVC and Red Oak. This proves sampled reachability only,
+  not authenticated behavior, all sites, future uptime or budget sustainability.
+
+### Bounded protected release order (not executed)
+
+1. Obtain specific approval, recheck schema/grants/RLS and apply only the two
+   separately reviewed migrations above; verify each before proceeding.
+2. Coordinate their dependent frontend and affected Edge release using the
+   existing runbooks. Preserve auth, credentials, activation flags and scheduler
+   contracts; do not release a frontend requiring absent RPCs/columns.
+3. Resolve the four exact package confirmations, individually review knowledge,
+   provide genuine published assets, and resolve/review the 94 exact-client/month
+   strategies. Each confirmation/amendment/approval/publication requires its own
+   canonical authorized flow; no bulk inferred scope or automatic reapproval.
+4. When the hosting gate is authorized, build one production-configured release
+   artifact under #679's budget/rollback controls, perform legitimate authenticated
+   staff/client acceptance on the changed runtime and promote once. No Vercel
+   operation was performed in this local closure. Provider/owner consent and
+   hosting sustainability remain separately owned gates.
