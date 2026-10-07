@@ -7,7 +7,7 @@ import BrandMark from '../../components/BrandMark'
 import { ClientLogo } from '../../components/ClientLogo'
 import { clientFacingStrategyQualityIssues, readStrategyData, type StrategyData } from '../../lib/strategyEngine'
 import { GuidedStrategyView } from '../../components/strategy/GuidedStrategy'
-import { getReportMonthFromPeriod, monthDisplayLabel, normalizeReportToCalendarMonth, previousReportMonth, reportPeriodDisclosure } from '../../lib/reportPeriod'
+import { getReportMonthFromPeriod, isPublishedMonthToDateReport, monthDisplayLabel, normalizeReportToCalendarMonth, previousReportMonth, reportPeriodDisclosure } from '../../lib/reportPeriod'
 import { isWithinMetaProviderPeriod } from '../../../supabase/functions/_shared/metaPeriod'
 import type { MasterReportData, MetricMovement, Platform, PlatformView, ReportStatsPost } from '../../lib/reportStats'
 import {
@@ -69,18 +69,23 @@ const LOGO_FRAME = 'border border-white/10 bg-[#06110f] shadow-[0_18px_35px_-24p
 type RenderableReport = ReportWithPosts | ClientReportWithPosts
 
 function postsForReportMonth(report: RenderableReport): ReportStatsPost[] {
-  const { start, end } = normalizeReportToCalendarMonth(report)
+  const bounds = normalizeReportToCalendarMonth(report)
+  const partial = isPublishedMonthToDateReport(report)
+  // A published MTD report's disclosed cutoff remains authoritative even if
+  // later ingestion attaches more posts to the same monthly report identity.
+  const { start } = bounds
+  const end = partial ? report.period_end : bounds.end
   const startTime = new Date(`${start}T00:00:00Z`).getTime()
   const endTime = new Date(`${end}T23:59:59.999Z`).getTime()
 
   return report.posts
     .filter(post => {
-      if (!post.publish_time) return true
+      if (!post.publish_time) return !partial
       if (post.platform === 'facebook' || post.platform === 'instagram') {
         return isWithinMetaProviderPeriod(post.publish_time, start, end)
       }
       const time = new Date(post.publish_time).getTime()
-      return Number.isNaN(time) || (time >= startTime && time <= endTime)
+      return (Number.isNaN(time) && !partial) || (time >= startTime && time <= endTime)
     })
     .map(reportPostToStatsPost)
 }
@@ -607,9 +612,8 @@ function OverviewTab({
       />
 
       {/* Recommendations */}
-      {!normalizedFactsActive && performance.recommendations.length > 0 && (
-        <RecommendationsSection recommendations={performance.recommendations} />
-      )}
+      {/* The canonical monthly strategy below owns client recommendations.
+          Legacy metric heuristics do not know package scope or business intent. */}
 
       {/* CG action plan */}
       <StrategyBlocks
@@ -1056,33 +1060,6 @@ function Bar({ heightPct, value, tone }: { heightPct: number; value: number; ton
   )
 }
 
-// ── F: auto recommendations ──────────────────────────────────────────────────
-function RecommendationsSection({ recommendations }: { recommendations: string[] }) {
-  return (
-    <section className="mb-14">
-      <SectionHeading eyebrow="Recommendations" title="Where to focus next" />
-      <RecommendationList recommendations={recommendations} />
-    </section>
-  )
-}
-
-function RecommendationList({ recommendations }: { recommendations: string[] }) {
-  return (
-    <div className="rounded-[2rem] border border-white/[0.08] bg-white/[0.04] p-6 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.95)] sm:p-8">
-      <ul className="space-y-4">
-        {recommendations.map((rec, index) => (
-          <li key={index} className="flex items-start gap-4">
-            <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#2dd4bf]/15 text-sm font-black text-[#2dd4bf]">
-              {index + 1}
-            </span>
-            <p className="text-[0.95rem] leading-relaxed text-slate-200">{rec}</p>
-          </li>
-        ))}
-      </ul>
-    </div>
-  )
-}
-
 function SectionHeading({ eyebrow, title }: { eyebrow: string; title: string }) {
   return (
     <div className="mb-5">
@@ -1091,11 +1068,6 @@ function SectionHeading({ eyebrow, title }: { eyebrow: string; title: string }) 
     </div>
   )
 }
-
-const LEARNING_COPY =
-  'This post created the highest activity for the month, but engagement is still building. Next month’s focus is stronger hooks, clearer product value, and more interactive captions.'
-const BASELINE_COPY =
-  'This sets a clear content baseline for the month. Next month we build on it with sharper formats and a consistent posting rhythm.'
 
 // E - Content section. Adapts wording to the real strength of the top content
 // so weak content is framed as learning, never celebrated as a win.
@@ -1161,7 +1133,7 @@ function ContentSection({
         ? { eyebrow: 'Content', title: 'Content learning' }
         : { eyebrow: 'Content', title: 'Content baseline' }
 
-  const insight = cgInsight || (tone === 'learning' ? LEARNING_COPY : tone === 'baseline' ? BASELINE_COPY : '')
+  const insight = cgInsight
 
   return (
     <section className="mb-14">
@@ -1547,6 +1519,10 @@ function StrategyBlocks({
     )
   }
 
+  // Readers enforce publication server-side; this presentation boundary must
+  // also reject accidental draft/approved working-copy props on client views.
+  if (!staffPreview && monthlyStrategy.status !== 'published') return null
+
   const qualityIssues = clientFacingStrategyQualityIssues(monthlyStrategy.strategyData)
   if (qualityIssues.length > 0) {
     if (!staffPreview) return null
@@ -1624,8 +1600,8 @@ function PlatformTab({
 }
 
 // Unified Meta-style platform dashboard: header + headline, performance cards,
-// audience base, momentum (period metrics only), adaptive content, and
-// platform-specific recommendations.
+// audience base, momentum (period metrics only), and adaptive content.
+// Client recommendations belong to the canonical monthly strategy, not metrics.
 function PlatformPerformanceView({ performance, view }: { performance: PlatformPerformance; view: PlatformView }) {
   return (
     <>
@@ -1666,14 +1642,6 @@ function PlatformPerformanceView({ performance, view }: { performance: PlatformP
       {/* E - Content overview (adaptive wording) */}
       <PlatformContent performance={performance} view={view} />
 
-      {/* F - Platform recommendations */}
-      {performance.recommendations.length > 0 && (
-        <section className="mb-12">
-          <SectionHeading eyebrow="Recommendations" title={`Next steps for ${performance.label}`} />
-          <RecommendationList recommendations={performance.recommendations} />
-        </section>
-      )}
-
       {/* Manual summary notes (when this platform is summary-only) */}
       <PlatformNotes view={view} />
     </>
@@ -1713,11 +1681,6 @@ function MomentumCard({ metric }: { metric: PerformanceMetric }) {
   )
 }
 
-const PLATFORM_LEARNING_COPY =
-  'This post created the highest activity for the month, but engagement is still building. Next month’s focus is stronger hooks, clearer product value, and more interactive content.'
-const PLATFORM_BASELINE_COPY =
-  'This sets a clear content baseline for the month. Next month we build on it with sharper formats and a consistent posting rhythm.'
-
 function PlatformContent({ performance, view }: { performance: PlatformPerformance; view: PlatformView }) {
   const tc = performance.topContent
   if (!tc) return null
@@ -1735,7 +1698,6 @@ function PlatformContent({ performance, view }: { performance: PlatformPerforman
   // Hero metric: first available from views → reach → interactions
   const heroMetric = metrics.length > 0 ? metrics[0] : null
   const metricRowStr = metrics.map(m => `${formatNumber(m.value)} ${m.label.toLowerCase()}`).join(' · ')
-  const copy = tone === 'learning' ? PLATFORM_LEARNING_COPY : tone === 'baseline' ? PLATFORM_BASELINE_COPY : null
 
   return (
     <section className="mb-12">
@@ -1773,7 +1735,6 @@ function PlatformContent({ performance, view }: { performance: PlatformPerforman
           </div>
         )}
 
-        {copy && <p className="mt-7 text-[0.95rem] leading-relaxed text-slate-300">{copy}</p>}
       </div>
 
       {view.topPosts.length > 0 && (
