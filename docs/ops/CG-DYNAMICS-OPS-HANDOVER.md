@@ -1,5 +1,30 @@
 # CG Dynamics Ops Handover
 
+### 7 October — substantive Vrystaat proposal from fresh exact evidence
+
+Same #683 adds `STRATEGY-VRYSTAAT-REVIEW-PROPOSAL.md`: distinct retrospective
+September learning and October application-route execution proposal, not voice
+rules presented as strategy. SELECT-only package/strategy/post readback pins
+exact identities and original metric observation ages. Flexible quantities stay
+null; partial Facebook subtotal is not ranked against complete Instagram data;
+Vlieks27/28 November conflict remains confirmation-gated; expired September
+bursary is not October offer. Held v2 rows and frozen artifacts are unchanged.
+No strategy store/transition/source activation or production/Vercel action.
+This reduces a stale evidence-gap assumption, not two semantic review holds.
+
+### 7 October local strategy gate correction — #513 / #668
+
+`build-issue-567-strategy-quality-readiness.mjs` no longer turns a negative regex
+screen into `quality_review_passed` or stamps historical counts as fresh production
+truth. Pure tested projection separates copy screening, hash alignment and missing
+current evidence from semantic acceptance; default CLI refuses frozen-evidence
+overwrite. See `STRATEGY-READINESS-SCREENING-TRUTH.md`. Frozen receipts unchanged.
+SELECT-only production readback still finds 72 v3 /22 v2 /20 v1 Sep/Oct drafts and
+zero frozen published strategy snapshots. No content was amended/approved/published.
+This receipt is additive: #674 portal/file work and #677 Director ownership remain
+intact. No Vercel, migration, Edge, provider, config or production data action.
+Substantive strategy review, exact missing evidence, protected rollout and actual
+client-visible publication remain separate; do not certify only-push readiness.
 ### 7 October — published MTD post cutoff, local-only
 
 Fresh read-only Vrystaat evidence reproduced posts beyond the stored published
