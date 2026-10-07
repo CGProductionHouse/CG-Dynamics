@@ -1,5 +1,15 @@
 # CG Dynamics Ops Handover
 
+### 7 October #433 precise correction merged; task-level acceptance continues
+
+#685 merged as `1b5b2e5ed6f1be301911e3aa6165c9b3d7dd9702`, no deployment.
+Saved-brief/CTA-only revision-fenced source is now on main; runtime release and
+authenticated semantic acceptance remain protected/unexecuted. Continuing ordered
+W3 on `codex/433-creative-task-benchmark`: twelve client-neutral offline contracts,
+versioned receipt and explicit human creative checklist. No model/cost/time results
+invented, no unified quality score. Historical review-revision gap stays BLOCKED,
+not masked by a green fixture test. See `CONTENT-DIRECTOR-TASK-BENCHMARK-433.md`.
+
 ### 7 October current merged source and #433 W2 continuation — no Vercel
 
 GitHub source now includes #684 (`4f504160`), #683 (`3ce52296`), #677
