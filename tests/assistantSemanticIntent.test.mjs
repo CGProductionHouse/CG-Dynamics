@@ -16,7 +16,7 @@ test('semantic intent schema: valid task_create action', () => {
     confidence: 0.9,
   }
   assert.ok(edge.includes('VALID_SEMANTIC_ACTION_TYPES'))
-  assert.ok(edge.includes("'task_create'"))
+  assert.ok(edge.includes(`'${validAction.action_type}'`))
   assert.ok(edge.includes("'task_assign'"))
   assert.ok(edge.includes("'task_due_date'"))
   assert.ok(edge.includes("'task_complete'"))
