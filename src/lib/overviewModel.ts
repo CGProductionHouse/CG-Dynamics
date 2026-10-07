@@ -151,6 +151,23 @@ export interface OverviewLine {
   changePercent: number | null
   comparable: boolean
   comparisonReason: string | null
+  periodStart: string | null
+  periodEnd: string | null
+}
+
+// Stored provider windows are not the published content cutoff or an observation
+// timestamp. Never infer either endpoint from the report month or the wall clock.
+export function platformFactWindowLabel(start: string | null, end: string | null): string {
+  const valid = (value: string | null): value is string => {
+    if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
+    const date = new Date(`${value}T00:00:00Z`)
+    return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value
+  }
+  if (!valid(start) || !valid(end) || end < start) return 'Platform window unavailable'
+  const formatter = new Intl.DateTimeFormat('en-ZA', {
+    day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
+  })
+  return `Recorded platform window: ${formatter.format(new Date(`${start}T00:00:00Z`))} – ${formatter.format(new Date(`${end}T00:00:00Z`))}`
 }
 
 export interface OverviewSection {
@@ -207,6 +224,8 @@ function lineFor(current: PlatformFact, previous: PlatformFact | null): Overview
     changePercent: cmp.changePercent,
     comparable: cmp.comparable,
     comparisonReason: cmp.reason,
+    periodStart: current.periodStart ?? null,
+    periodEnd: current.periodEnd ?? null,
   }
 }
 

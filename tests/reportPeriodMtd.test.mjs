@@ -16,7 +16,7 @@ test('published partial-month reports remain visible and disclose their evidence
   }
   assert.equal(periods.isPublishedMonthToDateReport(september), true)
   assert.equal(periods.selectMonthlyReports([september], new Date('2026-09-27T12:00:00Z'))[0]?.id, september.id)
-  assert.match(periods.reportPeriodDisclosure(september), /Month to date · as of latest verified evidence on 22 September 2026/)
+  assert.match(periods.reportPeriodDisclosure(september), /Content month to date · through 22 September 2026/)
 })
 
 test('draft partial periods and malformed legacy ranges remain hidden', () => {

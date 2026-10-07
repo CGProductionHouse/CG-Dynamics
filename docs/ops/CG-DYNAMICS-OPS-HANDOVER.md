@@ -1,5 +1,21 @@
 # CG Dynamics Ops Handover
 
+### 7 October late evening — report fact windows locally verified
+
+PR #702 resolves the reproduced Sep-23 content /Sep-30 TikTok fact contradiction
+through separate per-metric window disclosure, not aggregate truncation or false
+freshness. `REPORT-FACT-WINDOW-ACCEPTANCE-2026-10-07.md` pins source
+`474abab42a58cfd8212ae94602b22bb33e086fc6`: all twelve local steps PASS,
+3,714 PASS /17 intentional skips /0 failures, TypeScript/Vite, nine responsive
+actual-component suites, scoped lint/diff. Supplemental Approvals/strategy review
+and guideline/calendar/library/isolation checks pass. One obsolete copy assertion
+failed the first full run; corrected and fully rerun, not waived. Receipt hash
+`311a152f1d6a0e8b0ea884ffe6c3b5cd20b35ccbd343d348b5cc9fce66131439`.
+The previous next-code-lane note below is superseded locally; old production is
+not changed. ZERO Vercel/production/provider/content actions. Remaining exact
+package/source/semantic-review/final-assets/owner-consent/released-role gates are
+listed in that receipt; local fixtures are not whole-launch or production acceptance.
+
 ### 7 October evening — four-client source recovery and TikTok acceptance
 
 `BLOEMFONTEIN-CLIENT-EVIDENCE-2026-10-07.md` records actual visible CA-authored

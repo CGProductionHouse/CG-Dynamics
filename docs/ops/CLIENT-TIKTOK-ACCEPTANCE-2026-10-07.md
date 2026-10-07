@@ -50,12 +50,18 @@ do not recreate those fixes or deploy to Vercel to obtain this receipt.
 
 ## Newly reproduced period-contract issue — next bounded code lane
 
+**Locally resolved by PR #702, not yet released:** exact per-metric recorded
+windows now appear separately from report content coverage. No truncation,
+provider read, SQL change or inferred observation timestamp. Full pinned local
+receipt is `REPORT-FACT-WINDOW-ACCEPTANCE-2026-10-07.md`. The following original
+production reproduction remains historical evidence, not a still-unfixed code task.
+
 Braize/Dulux published reports disclose Sep 1–23, while normalized TikTok facts
 read back with Sep 1–30 bounds and Sep 30 verification. The current production
 `get_report_metric_facts` function filters exact client, permitted metric and current/
 previous month, **not the published cutoff**. Browser output mixes those facts
 under the report's Sep-23 coverage statement without stating their own window.
-This is an unresolved evidence/presentation contradiction, not accepted launch truth.
+This was a reproduced evidence/presentation contradiction, not accepted launch truth.
 
 Do not truncate an already aggregated provider fact, relabel it Sep-23, invent a
 zero or call a provider to repair it. The next lane must reproduce the exact
