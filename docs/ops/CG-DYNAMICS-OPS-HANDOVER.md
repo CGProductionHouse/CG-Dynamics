@@ -47,6 +47,7 @@ This receipt is additive: #674 portal/file work and #677 Director ownership rema
 intact. No Vercel, migration, Edge, provider, config or production data action.
 Substantive strategy review, exact missing evidence, protected rollout and actual
 client-visible publication remain separate; do not certify only-push readiness.
+
 ### 7 October — published MTD post cutoff, local-only
 
 Fresh read-only Vrystaat evidence reproduced posts beyond the stored published
