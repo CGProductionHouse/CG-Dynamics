@@ -11,15 +11,15 @@ totals. October's latest verification does not refresh September's fact age.
 | Exact client | Latest fact verification UTC, Oct 7 | September published report | Client browser evidence |
 | --- | --- | --- | --- |
 | Braize | 14:47:03 | Yes, cutoff Sep 23 | Settled authenticated Overview renders TikTok facts; tab action transport timed out; not counted as clicked-tab acceptance |
-| CG Production House | 14:46:10 | Yes, cutoff Sep 23 | DB evidence only this pass |
+| CG Production House | 14:46:10 | Yes, cutoff Sep 23 | Settled authenticated TikTok tab, 2,359 partial views |
 | Dulux Paint & Paper Bloemfontein | 14:48:02 | Yes, cutoff Sep 23 | Desktop Overview + TikTok tab; 375px TikTok tab |
 | Forklift Trucks | 14:45:05 | No September/October report | Cannot claim published client performance; connection is not publication |
-| Madison Wear | 14:48:04 | Yes, cutoff Sep 23 | DB evidence only this pass |
+| Madison Wear | 14:48:04 | Yes, cutoff Sep 23 | Settled authenticated TikTok tab, partial zero views / 4 account videos |
 | Neshora Oxygen | 14:49:02 | No September/October report | Cannot claim published client performance; connection is not publication |
 | Red Oak | 14:49:11 | Yes, cutoff Sep 30 | Desktop Overview + TikTok tab |
-| Staffordshire | 14:47:05 | Yes, cutoff Sep 23 | DB evidence only this pass |
-| Watch Addict | 14:46:12 | Yes, cutoff Sep 23 | DB evidence only this pass |
-| Wiseman Group | 14:45:08 | Yes, cutoff Sep 23 | DB evidence only this pass |
+| Staffordshire | 14:47:05 | Yes, cutoff Sep 23 | Settled authenticated TikTok tab, 8,650 partial views |
+| Watch Addict | 14:46:12 | Yes, cutoff Sep 23 | Settled authenticated TikTok tab, partial zero views / 23 account videos |
+| Wiseman Group | 14:45:08 | Yes, cutoff Sep 23 | Settled authenticated TikTok tab, 194 partial views; no captured error logs |
 
 All eight clients with September reports had October drafts, not client-published
 October reports. All Around PVC had historical September facts but was not in
@@ -67,9 +67,30 @@ additive database change must stay unapplied until separately authorised.
 ## Remaining acceptance
 
 - Authenticated changed-local-runtime acceptance (no token copying/auth bypass).
-- Remaining five published client previews and mobile controls; no retry loops if
-  browser transport fails. DB evidence is not browser acceptance.
+- Seven published clients' actual TikTok tabs and Braize's Overview were inspected;
+  Braize clicked-tab acceptance and remaining mobile controls are not complete.
+  No retry loops if transport fails. DB evidence is not browser acceptance.
 - Exact original source cutoff/observation age retained through the projection.
 - Forklift/Neshora need the existing reviewed report workflow, not fake figures or
   auto-publication. Keep this protected business action distinct from code repair.
 - No guarantee of sales from TikTok video response or account totals.
+
+## Pinned local verification — PR #701
+
+Runtime/test candidate `e978bbecc12524bfc875d0df0d52839b0e19df31`, tree
+`4617e816eb60b44f42f380cd0f0e7afc6bac3cb8`: full supported suite **3,731 total /
+3,714 PASS /17 intentional skips /0 failures**. All twelve local runner steps
+PASS: full suite, TypeScript, Vite 7.3.6 production build and nine actual-component
+browser fixtures covering desktop/375/390/430, portal shell, Plan, library,
+report cutoff, saved/precise briefs, knowledge review, service expansion and
+entitlement isolation. Scoped ESLint/diff check PASS. Emitted application bundle
+contains the corrected snapshot wording. These fixtures use disposable/local
+data: not authenticated changed-production acceptance and not a deployable
+production-configured artifact.
+
+Receipt `%TEMP%/cg-local-launch-e978bbecc125.json`, SHA256
+`05544e1aa66ab776f82a1632dda61b592b96876028e2012d84e9bdd1ccab7744`.
+The first full run failed only its old snapshot-copy assertion; corrected and
+rerun fully, not ignored. Standalone Meta renderer tests require local fixture
+env: 47 PASS after supplying it. Earlier 108 nearest tests also PASS.
+The final receipt/doc follow-through does not alter the pinned runtime or tests.

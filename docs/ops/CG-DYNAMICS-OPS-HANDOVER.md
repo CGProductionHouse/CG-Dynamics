@@ -27,6 +27,18 @@ coverage disclosure. Next code lane must resolve that contract without truncatin
 aggregates, fabricating totals or publishing data. No launch-complete claim.
 ZERO Vercel operations and no production/provider/data/config writes.
 
+PR #701 runtime/test candidate `e978bbecc12524bfc875d0df0d52839b0e19df31`
+passes all twelve local steps: 3,731 tests /3,714 PASS /17 intentional skips /
+0 failures, TypeScript/Vite and nine real-component responsive fixtures. Receipt
+hash/commands in the TikTok acceptance document. Seven actual published TikTok
+tabs plus Braize Overview inspected; one 375px check, not all-mobile completion.
+The four new clients also have no canonical Sep/Oct strategies/published reports/
+ready guides/incorporated context: they are outside the 94 existing draft rows.
+Their recovered evidence must enter the existing reviewed authority under its
+separate gate. Quiet same-chat overnight continuation is scheduled to finish
+safe local work, next the reproduced fact/report period contradiction, with no
+Vercel or protected writes. Do not repeat solved work or claim only push remains.
+
 ### 7 October — final reporting repair + remaining held-client review material
 
 PR #699 merged `a906edf5da2edfaecad37600a92990cf91cd48cd`; its full pinned

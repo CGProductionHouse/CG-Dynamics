@@ -21,6 +21,11 @@ client package objects still `{}`. No observed chat fragment proved contractual
 monthly quantities. Six caption drafts or a three-slide carousel do not establish
 six monthly posts or three contracted deliverables. All capacities stay unknown;
 the canonical strategy capacity gate must remain closed until exact confirmation.
+Later exact SELECTs also found no Sep/Oct monthly strategy rows, published
+reports, ready guides or incorporated context for these four IDs. They are not
+part of the existing 94-row strategy review target. Existing chat work is real,
+but it has not become canonical reviewed client intelligence in Dynamics. Do
+not silently seed them or count their proposals as already operational.
 
 | Exact client | Canonical client UUID | Package / decision boundary |
 | --- | --- | --- |
