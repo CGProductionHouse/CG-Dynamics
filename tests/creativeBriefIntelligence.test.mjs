@@ -23,6 +23,7 @@ const base = () => ({
   cards: [], draft: { objective: '', hook: '', cta: '', shot_breakdown: '', requirements: '' }, today: '2026-09-20',
 })
 const card = (overrides = {}) => ({ id: 'card-a', title: 'Evidence card', status: 'active', client_specific: false, active_client_id: null,
+  content_hash: 'a'.repeat(64), reviewed_content_hash: 'a'.repeat(64),
   relevant_agents: ['content_planner'],
   review_expires_at: '2026-09-20', how_to_apply: ['Test a process demonstration'], prohibited_overclaim: 'Do not promise results',
   safe_claim: 'Process can be shown', source_reference: 'Source 1', confidence_level: 'medium', evidence_label: 'practitioner', ...overrides })
@@ -47,6 +48,36 @@ test('inactive, client-specific and expired cards never influence output', () =>
   assert.equal(result.researchAvailable, false)
   assert.equal(result.sources.length, 0)
   assert.match(result.needsConfirmation.join(' '), /Approved research unavailable/)
+})
+
+test('projection itself rejects historical, changed and malformed review bindings', () => {
+  const hash = 'a'.repeat(64)
+  for (const patch of [
+    { content_hash: null, reviewed_content_hash: null },
+    { content_hash: hash, reviewed_content_hash: null },
+    { content_hash: 'b'.repeat(64), reviewed_content_hash: hash },
+    { content_hash: 'approved', reviewed_content_hash: 'approved' },
+  ]) {
+    const input = base(); input.cards = [card(patch)]
+    const before = structuredClone(input)
+    const result = build(input)
+    assert.equal(result.researchAvailable, false)
+    assert.deepEqual(result.sources, [])
+    assert.deepEqual(result.sourceBackedGuidance, [])
+    assert.doesNotMatch(result.warnings.join(' '), /Do not promise results/)
+    assert.match(result.needsConfirmation.join(' '), /Approved research unavailable/)
+    assert.deepEqual(input, before)
+  }
+})
+
+test('unreviewed cards cannot consume the three-card limit or displace reviewed guidance', () => {
+  const input = base()
+  input.cards = [
+    ...['a', 'b', 'c'].map(id => card({ id, reviewed_content_hash: null })),
+    ...['z', 'y', 'x'].map(id => card({ id })),
+  ]
+  assert.deepEqual(build(input).sources.map(source => source.id), ['x', 'y', 'z'])
+  assert.deepEqual(build(input), build({ ...input, cards: [...input.cards].reverse() }))
 })
 
 test('mismatched strategy is ignored and mismatched deliverable fails closed', () => {

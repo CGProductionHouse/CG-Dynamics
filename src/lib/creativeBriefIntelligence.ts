@@ -2,6 +2,7 @@ import type { SkillCardRecord } from './marketing-library/skillCardsData'
 import type { MonthlyClientStrategy } from './monthlyStrategy'
 import type { MonthlyDeliverable } from './planner'
 import { cardTargetsAgent } from '../features/ai-workforce/agents/agentRegistry'
+import { isSkillCardContentApproved } from './skillCardApproval'
 
 const CREATIVE_SPECIALISTS = ['content_planner', 'creative_director', 'copywriting_agent', 'social_media_strategist', 'marketing_strategist'] as const
 
@@ -68,6 +69,7 @@ export function buildCreativeBriefIntelligence(input: CreativeBriefInput): Creat
     base.needsConfirmation.push('Exact client/month strategy unavailable; confirm the objective and angle.')
   }
   const cards = input.cards.filter(card => card.status === 'active' && !card.client_specific && !card.active_client_id
+    && isSkillCardContentApproved(card.content_hash, card.reviewed_content_hash)
     && validDate(input.today)
     && (!card.review_expires_at || (validDate(card.review_expires_at) && card.review_expires_at >= input.today))
     && CREATIVE_SPECIALISTS.some(agent => cardTargetsAgent(card.relevant_agents, agent)))
