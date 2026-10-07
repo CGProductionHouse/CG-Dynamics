@@ -65,6 +65,18 @@ Do not invent replacements. Human Auto's separate research requires AGENTS' skip
 decision. Resolve each gap from exact existing evidence where available before
 requesting genuinely missing owner facts. Keep other safe lanes moving.
 
+7 October bounded fresh readback supersedes blanket historical-gap assumptions:
+Vrystaat now has 20 September and two October exact stored post identities (not
+all covered by its published September23 cutoff). Its held v2 strategy rows are
+unchanged. `STRATEGY-VRYSTAAT-REVIEW-PROPOSAL.md` supplies genuinely separate
+September learning and October application-route concepts from the existing guide
+and exact observed posts, with no invented quantities or application outcomes.
+It flags Vlieks27/28 November source conflict rather than choosing a date. This
+is internal proposed copy, NOT semantic acceptance/amendment/publication. The
+two held rows are not automatically promoted and frozen reviewed artifacts stay
+unchanged. Remaining eight clients' absent recent report/post rows are evidence
+gaps, not zero results; Red Oak/Zooz require their own exact review.
+
 ## Local verification / release boundary
 
 Run the generator only in a copied temporary evidence directory; compare frozen
