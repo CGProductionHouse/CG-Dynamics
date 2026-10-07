@@ -1,5 +1,38 @@
 # CG Dynamics Ops Handover
 
+### 7 October Integrations read failures — local truth correction
+
+PR #692 merged `04918d7003c3febfa0679774bf3c7acfdfdca945`; no frontend
+release. Continued local actual-component error-envelope acceptance reproduced
+Meta, Google Ads and Microsoft read failures labelled `Not connected`; canonical
+TikTok already correctly remained `Unavailable`. The narrow frontend correction
+keeps observed true/false separate from failed/missing/malformed reads, removes
+unknown Microsoft source-count zero and handles inventory read rejection without
+unhandled runtime errors. Connection coverage remains separate from freshness;
+missing inventory/checkpoints cannot show PASS or inferred client counts.
+No provider/Edge/auth/queue/sync/config/data contract changes or status-handler
+invocation. Existing role guards/navigation and verified zero remain intact.
+80 focused tests, local TypeScript/Vite build, scoped lint/diff and actual-component browser checks PASS:
+seven scenarios at desktop/375/390/430 (28 cases), including resolved errors,
+rejections, malformed evidence, observed disconnected, connected/missing inventory,
+known inventory/missing freshness, and explicit observed zero. No overflow/runtime
+errors or writes in those local fixtures. PR #693 exact tested source
+`27a5685cc43c02cb27ed598a29f61e3af01f981d` completed all twelve pinned local
+runner steps: 3,721 total /3,704 PASS /17 intentional skips /0 failures,
+stable tree `6a0518947d053bfc62de44b8062ff77c7c6bf485`. Windows Bash-only SES
+remains explicitly excluded, not passed. Receipt `%TEMP%/cg-local-launch-27a5685cc43c.json`,
+SHA256 `3953b672f68eeeed4b910ff0805909f080bf6bf8fb3e76783812523f5000f706`.
+Nine integrated desktop/375/390/430 component suites PASS; fresh supplemental
+Assistant five-size real-pointer, My Day four-size Los Angeles clock and
+Integrations 28-case fixtures also PASS on that exact source. Scoped lint/diff
+PASS; 375px Integrations screenshot visually inspected. No new Edge code or
+schema, therefore no new Edge deployment/type closure required for this lane.
+Vercel remains entirely untouched, Git automatic deployment OFF. This is local
+code acceptance, not changed-production or genuine staff/client-role acceptance.
+Four unconfirmed packages, genuine current knowledge review, 94 target draft
+strategy semantic review and real final portal files/publication remain actual
+human/content gates; successful tests must not relabel them complete.
+
 ### 7 October My Day current/next truth — local correction
 
 PR #691 merged as `ddbb0f158c1efbf35372aa54441a008c09736aa6`; no frontend

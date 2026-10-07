@@ -12,22 +12,21 @@ import { isAdminRole, isManagerRole } from '../../lib/roles'
 import { getMicrosoftConnectionStatus } from '../../lib/microsoftImportData'
 import { PageContainer, PageHeader } from '../../components/layout/PageShell'
 import { metaFleetFreshnessEvidence, microsoftFreshnessEvidence, type FreshnessVerdict, type MetaCheckpointInput, type MetaInventoryInput } from '../../lib/dailyDynamicsFreshness'
-
-type MetaState = 'loading' | 'connected' | 'disconnected'
+import { observedConnectionState, integrationConnectionLabel, type IntegrationConnectionState } from '../../lib/integrationReadTruth'
 
 export default function IntegrationsPage() {
   const navigate = useNavigate()
   const { profile } = useAuth()
   const canManageGoogleAds = isManagerRole(profile?.role)
   const canManageMicrosoft = isAdminRole(profile?.role)
-  const [metaState, setMetaState] = useState<MetaState>('loading')
+  const [metaState, setMetaState] = useState<IntegrationConnectionState>('loading')
   const [linkedClients, setLinkedClients] = useState<number | null>(null)
-  const [googleState, setGoogleState] = useState<MetaState>('loading')
+  const [googleState, setGoogleState] = useState<IntegrationConnectionState>('loading')
   const [googleLinkedClients, setGoogleLinkedClients] = useState<number | null>(null)
   const [tiktokQueue, setTiktokQueue] = useState<TiktokConnectionQueue | null>(null)
   const [tiktokLoading, setTiktokLoading] = useState(true)
-  const [microsoftState, setMicrosoftState] = useState<MetaState>('loading')
-  const [microsoftSourceCount, setMicrosoftSourceCount] = useState(0)
+  const [microsoftState, setMicrosoftState] = useState<IntegrationConnectionState>('loading')
+  const [microsoftSourceCount, setMicrosoftSourceCount] = useState<number | null>(null)
   const [microsoftFreshness, setMicrosoftFreshness] = useState<ReturnType<typeof microsoftFreshnessEvidence> | null>(null)
   const [metaCheckpoints, setMetaCheckpoints] = useState<MetaCheckpointInput[] | null>(null)
   const [metaCheckpointEvidenceAvailable, setMetaCheckpointEvidenceAvailable] = useState(false)
@@ -39,10 +38,16 @@ export default function IntegrationsPage() {
     // Connection status from the server (reliable source of truth).
     supabase.functions
       .invoke('meta-connection-status', { method: 'POST' })
-      .then(({ data }) => {
+      .then(({ data, error }) => {
         if (!active) return
-        setMetaState(data?.ok && data?.connected ? 'connected' : 'disconnected')
-        const checkpoints: MetaCheckpointInput[] = (data?.assetHealth ?? []).flatMap((asset: Record<string, unknown>) => {
+        const state = observedConnectionState(data?.connected, !error && data?.ok === true)
+        setMetaState(state)
+        if (state === 'unavailable') {
+          setMetaCheckpoints(null)
+          setMetaCheckpointEvidenceAvailable(false)
+          return
+        }
+        const checkpoints: MetaCheckpointInput[] = (Array.isArray(data?.assetHealth) ? data.assetHealth : []).flatMap((asset: Record<string, unknown>) => {
           const rows: MetaCheckpointInput[] = []
           for (const platform of ['facebook', 'instagram'] as const) {
             const mapped = Boolean(asset[`${platform}Mapped`])
@@ -67,16 +72,25 @@ export default function IntegrationsPage() {
         setMetaCheckpointEvidenceAvailable(Array.isArray(data?.assetHealth))
       })
       .catch(() => {
-        if (active) setMetaState('disconnected')
+        if (active) {
+          setMetaState('unavailable')
+          setMetaCheckpoints(null)
+          setMetaCheckpointEvidenceAvailable(false)
+        }
       })
 
     // Linked client/asset count (best-effort; staff can read via RLS).
-    supabase
+    Promise.resolve(supabase
       .from('meta_client_assets')
       .select('id, client_id, facebook_page_id, instagram_account_id')
-      .eq('is_active', true)
-      .then(({ data }) => {
-        if (!active || !data) return
+      .eq('is_active', true))
+      .then(({ data, error }) => {
+        if (!active) return
+        if (error || !Array.isArray(data)) {
+          setLinkedClients(null)
+          setMetaInventory(null)
+          return
+        }
         setLinkedClients(new Set(data.map(r => r.client_id as string)).size)
         setMetaInventory(data.map(row => ({
           clientId: String(row.client_id),
@@ -84,6 +98,9 @@ export default function IntegrationsPage() {
           facebookMapped: Boolean(row.facebook_page_id),
           instagramMapped: Boolean(row.instagram_account_id),
         })))
+      })
+      .catch(() => {
+        if (active) { setLinkedClients(null); setMetaInventory(null) }
       })
 
     // The status endpoint requires an exact client; fleet truth comes from the queue.
@@ -101,25 +118,26 @@ export default function IntegrationsPage() {
       getGoogleAdsWorkspace()
         .then(workspace => {
           if (!active) return
-          setGoogleState(workspace.accounts.length > 0 ? 'connected' : 'disconnected')
           const linkedClientIds = [
             ...workspace.accountLinks.filter(link => link.active).map(link => link.clientId),
             ...workspace.campaignLinks.filter(link => link.active).map(link => link.clientId),
           ]
+          setGoogleState(workspace.accounts.length > 0 ? 'connected' : 'disconnected')
           setGoogleLinkedClients(new Set(linkedClientIds).size)
         })
         .catch(() => {
-          if (active) setGoogleState('disconnected')
+          if (active) setGoogleState('unavailable')
         })
     }
     if (canManageMicrosoft) {
       getMicrosoftConnectionStatus()
         .then(result => {
           if (!active) return
-          setMicrosoftState(result.data?.connected ? 'connected' : 'disconnected')
-          setMicrosoftSourceCount(result.data?.sources.length ?? 0)
+          const state = observedConnectionState(result.data?.connected, !result.error && Boolean(result.data))
+          setMicrosoftState(state)
+          setMicrosoftSourceCount(state !== 'unavailable' && Array.isArray(result.data?.sources) ? result.data.sources.length : null)
           const freshness = result.data?.freshness
-          setMicrosoftFreshness(result.data && freshness ? microsoftFreshnessEvidence({
+          setMicrosoftFreshness(state !== 'unavailable' && result.data && freshness ? microsoftFreshnessEvidence({
             now: new Date().toISOString(), connected: result.data.connected,
             lastJobStartedAt: freshness.lastJobStartedAt,
             lastJobCompletedAt: freshness.lastJobCompletedAt,
@@ -132,7 +150,11 @@ export default function IntegrationsPage() {
           }) : null)
         })
         .catch(() => {
-          if (active) setMicrosoftState('disconnected')
+          if (active) {
+            setMicrosoftState('unavailable')
+            setMicrosoftSourceCount(null)
+            setMicrosoftFreshness(null)
+          }
         })
     }
 
@@ -146,19 +168,24 @@ export default function IntegrationsPage() {
     : null, [metaCheckpointEvidenceAvailable, metaCheckpoints, metaInventory, metaState])
 
   const metaConnected = metaState === 'connected'
-  const metaStatus =
-    metaState === 'loading' ? 'Checking...' : metaConnected ? 'Connected' : 'Not connected'
-  const metaDescription = metaConnected
-    ? linkedClients && linkedClients > 0
+  const metaStatus = integrationConnectionLabel(metaState)
+  const metaDescription = metaState === 'unavailable'
+    ? 'Meta connection status could not be verified. Existing connections are unchanged.'
+    : metaConnected
+    ? linkedClients === null
+      ? 'Meta is connected; linked-client inventory is unavailable. No client count is inferred.'
+      : linkedClients > 0
       ? `Facebook and Instagram are connected. ${linkedClients} client${linkedClients === 1 ? '' : 's'} linked for monthly sync.`
       : 'Facebook and Instagram are connected. Link clients to start syncing monthly reports.'
     : 'Connect Facebook Pages and Instagram accounts to create monthly report drafts automatically.'
-  const metaButtonLabel = metaConnected ? 'Manage Meta' : 'Set up Meta'
+  const metaButtonLabel = metaConnected || metaState === 'unavailable' ? 'Manage Meta' : 'Set up Meta'
   const tiktokSummary = tiktokIntegrationSummary(tiktokQueue, tiktokLoading, canManageGoogleAds)
   const googleConnected = googleState === 'connected'
-  const googleStatus = !canManageGoogleAds ? 'Manager access' : googleState === 'loading' ? 'Checking…' : googleConnected ? 'Connected' : 'Not connected'
+  const googleStatus = !canManageGoogleAds ? 'Manager access' : integrationConnectionLabel(googleState)
   const googleDescription = !canManageGoogleAds
     ? 'Google Ads account setup and sync controls are available to managers and admins.'
+    : googleState === 'unavailable'
+    ? 'Google Ads connection evidence is unavailable. No disconnected or zero-count claim is inferred.'
     : googleConnected
     ? googleLinkedClients && googleLinkedClients > 0
       ? `${googleLinkedClients} client${googleLinkedClients === 1 ? '' : 's'} linked for Google Ads data sync.`
@@ -201,6 +228,7 @@ export default function IntegrationsPage() {
                   />
                 </div>
                 <p className="mt-1.5 text-sm leading-relaxed text-brand-primary">{metaDescription}</p>
+                {metaConnected && !metaFreshness && <p className="mt-2 text-xs text-brand-primary">Fleet freshness evidence is unavailable and has not been verified.</p>}
                 {metaFreshness && <div className="mt-3 rounded-lg border border-white/10 bg-black/20 p-3 text-xs text-white/65">
                   <div className="flex items-center justify-between gap-2"><span>Fleet freshness</span><StatusBadge label={metaFreshness.verdict} variant={freshnessTone(metaFreshness.verdict)} size="sm" /></div>
                   <p className="mt-2">{metaFreshness.mappedClients} clients · {metaFreshness.mappedAssets} assets · {metaFreshness.platforms.length} mapped platforms</p>
@@ -266,7 +294,7 @@ export default function IntegrationsPage() {
             </div>
             <div className="mt-auto pt-5">
               <ActionButton variant="outline" disabled={!canManageGoogleAds} onClick={() => navigate('/admin/integrations/google-ads')} fullWidth>
-                {!canManageGoogleAds ? 'Manager only' : googleConnected ? 'Manage Google Ads' : 'Set up Google Ads'}
+                {!canManageGoogleAds ? 'Manager only' : googleConnected || googleState === 'unavailable' ? 'Manage Google Ads' : 'Set up Google Ads'}
               </ActionButton>
             </div>
           </div>
@@ -280,10 +308,10 @@ export default function IntegrationsPage() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
                     <h2 className="text-base font-semibold text-white">Microsoft 365</h2>
-                    <StatusBadge label={microsoftState === 'loading' ? 'Checking...' : microsoftState === 'connected' ? 'Connected' : 'Not connected'} variant={microsoftState === 'connected' ? 'published' : microsoftState === 'loading' ? 'default' : 'internal-draft'} size="sm" />
+                    <StatusBadge label={integrationConnectionLabel(microsoftState)} variant={microsoftState === 'connected' ? 'published' : microsoftState === 'loading' ? 'default' : 'internal-draft'} size="sm" />
                   </div>
                   <p className="mt-1.5 text-sm leading-relaxed text-brand-primary">
-                    {microsoftState === 'connected' ? `${microsoftSourceCount} Planner and Outlook source${microsoftSourceCount === 1 ? '' : 's'} available for controlled reconciliation.` : 'Connect Planner and Outlook for reviewed operations imports.'}
+                    {microsoftState === 'unavailable' ? 'Microsoft connection evidence is unavailable. No source count or disconnection is inferred.' : microsoftState === 'connected' ? microsoftSourceCount === null ? 'Microsoft is connected; source inventory is unavailable.' : `${microsoftSourceCount} Planner and Outlook source${microsoftSourceCount === 1 ? '' : 's'} available for controlled reconciliation.` : 'Connect Planner and Outlook for reviewed operations imports.'}
                   </p>
                   {microsoftFreshness && <div className="mt-3 rounded-lg border border-white/10 bg-black/20 p-3 text-xs text-white/65">
                     <div className="flex items-center justify-between gap-2"><span>Reconciliation freshness</span><StatusBadge label={microsoftFreshness.verdict} variant={freshnessTone(microsoftFreshness.verdict)} size="sm" /></div>
