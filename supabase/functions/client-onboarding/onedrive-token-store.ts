@@ -31,7 +31,7 @@ interface TokenRow {
   scope: string | null
 }
 
-function encKey(): Uint8Array | null {
+function encKey(): ReturnType<typeof Uint8Array.from> | null {
   const b64 = Deno.env.get('ONEDRIVE_TOKEN_ENC_KEY') ?? ''
   if (!b64) return null
   try {

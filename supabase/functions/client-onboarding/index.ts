@@ -297,12 +297,12 @@ async function authorizePortalAsset(service: SupabaseClient, assetId: string): P
     && library.drive_id === asset.drive_id
     && isCanonicalPortalRoot(library.root_folder_name)
     && category?.client_id === asset.client_id
-    && category.library_id === library.id
-    && category.drive_id === asset.drive_id
-    && category.folder_item_id === asset.parent_folder_item_id
-    && Boolean(category.last_verified_at)
+    && category!.library_id === library.id
+    && category!.drive_id === asset.drive_id
+    && category!.folder_item_id === asset.parent_folder_item_id
+    && Boolean(category!.last_verified_at)
     && categoryName != null
-    && PORTAL_CATEGORY_LABELS[categoryName] === category.folder_name
+    && PORTAL_CATEGORY_LABELS[categoryName] === category!.folder_name
     && validPeriod
   if (!exactBoundary) return null
   return { ...asset, category: categoryName } as AuthorizedPortalAsset
@@ -443,7 +443,7 @@ async function safeState(service: SupabaseClient, session: SessionRow, includeIn
     startedAt: session.started_at,
     completedAt: session.completed_at,
     lastActivityAt: session.last_activity_at,
-    expiresAt: session.token_expires_at,
+    expiresAt: session.token_expires_at as string | null,
     vectorUnavailable: session.vector_unavailable,
     uploads: (uploadsResult.data ?? []).map(row => ({
       id: row.id,

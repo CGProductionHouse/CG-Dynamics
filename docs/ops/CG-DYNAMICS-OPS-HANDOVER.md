@@ -1,5 +1,13 @@
 # CG Dynamics Ops Handover
 
+### 7 October #674 full portal entry closure
+
+Full local Deno entry/import check exposed eight inherited type errors; type-only
+repairs now pass with emitted-JavaScript parity regressions for all three changed
+files. Actual category boundary test still denies absent/wrong-client categories.
+139 focused portal/file/OneDrive compatibility tests PASS; local build/lint/diff
+PASS. No OneDrive invocation, secret/config change, Edge deploy or production write.
+
 ### 7 October full portal shell continuation — #674, local only
 
 Actual persistent preview shell plus all six lazy routes now have localhost-only

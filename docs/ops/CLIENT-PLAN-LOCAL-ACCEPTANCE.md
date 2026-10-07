@@ -179,3 +179,24 @@ The pre-continuation local integration of #674/#677/#683 passed 3,658 total /
 Windows Bash-only SES fixture excluded. Local build and scoped lint PASS. The
 later additive #674 test-setup commit `a29a71f9` is preserved, inspected, and its
 real disposable PostgreSQL acceptance reran PASS (2/2); no main merge is claimed.
+
+## 7 October — full portal Edge entry type closure
+
+Expanded local Deno 2.5.1 `check --no-lock` found eight inherited entry/import
+typing errors. The exact category short-circuit already rejects missing/wrong-client
+categories; non-null annotations now describe its existing guarded field reads.
+The range helper accepts its existing absent-thumbnail range, placeholder expiry
+remains nullable, and the existing encryption helper declares its actual fresh
+ArrayBuffer-backed byte array. No algorithm, key, token, auth, storage or handler
+behavior changes: three executable emitted-JavaScript parity checks pass, plus an
+actual category boundary check including null, undefined and wrong-client denial.
+139 focused portal/file/OneDrive compatibility regressions PASS. Full entry Deno,
+local TypeScript/Vite build, scoped lint and diff check PASS. No OneDrive runtime
+invocation, credential/config access, deployment or production mutation occurred.
+
+Final supported suite: 3,646 total /3,629 PASS /17 intentional skips /zero failures;
+Windows Bash-only SES fixture excluded. Actual localhost file-library and six-route
+preview browser fixtures reran PASS at 1440/375/390/430 with exact-scope departure,
+read-only controls and no captured page errors/body overflow. 375px Plan screenshot
+visually inspected; synthetic local evidence only, not live authorized acceptance.
+Final local build contains the app Plan bundle; existing chunk-size warning remains.
