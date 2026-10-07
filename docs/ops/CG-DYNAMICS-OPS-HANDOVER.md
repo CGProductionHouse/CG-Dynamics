@@ -1,5 +1,25 @@
 # CG Dynamics Ops Handover
 
+### 7 October My Day current/next truth — local correction
+
+PR #691 merged as `ddbb0f158c1efbf35372aa54441a008c09736aa6`; no frontend
+deployment. Continued authenticated Work acceptance reproduced NEXT pointing to
+an elapsed 09:00 calendar event beside the current 16:00 event and a future
+20:00 event. Existing prefetch seam reproduced the same result deterministically
+before editing (four of five initial behavior checks failed). Summary now uses
+the existing Johannesburg clock and excludes elapsed fixed calendar records from
+fallback recommendations. Future after-hours calendar work remains eligible
+during the normal workday but does not inflate normal capacity. Unfinished
+exact-ID flexible tasks, before/after-workday policy, completed/cancelled filters,
+ownership and calendar/history remain unchanged. Six executable new regressions
+PASS, including UTC/Los Angeles environments and immutable prefetched evidence;
+67 nearest ownership/My Day regressions, scoped lint/diff and local build PASS.
+Actual My Day component/CSS with existing prefetch seam and Los Angeles browser
+clock passes desktop/375/390/430 current/next/history/no overflow/errors/DB calls.
+No calendar/schedule/task/database writes, provider
+actions, Vercel or production activation. Final exact-source receipts follow
+on the focused PR/#668; this is not released production acceptance.
+
 ### 7 October mobile Assistant launcher — local correction
 
 Authenticated work Chrome at 375px reproduced an inert `Open CG Assistant`

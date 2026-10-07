@@ -339,7 +339,7 @@ function buildTimelineBlocks(todayItems: MyDayItem[], now = new Date()): MyDayTi
     })
   }
 
-  const currentMinute = now.getHours() * 60 + now.getMinutes()
+  const currentMinute = businessMinutes(now) ?? Number.NaN
   if (currentMinute < WORKDAY_START_MINUTES || currentMinute > WORKDAY_END_MINUTES) {
     return blocks
   }
@@ -353,7 +353,7 @@ function buildSummary(
   now = new Date(),
 ): MyDaySummary {
   const workBlocks = timelineBlocks.filter(block => block.item)
-  const currentMinute = now.getHours() * 60 + now.getMinutes()
+  const currentMinute = businessMinutes(now) ?? Number.NaN
   const currentBlock = workBlocks.find(block => {
     const start = Number(block.startLabel.slice(0, 2)) * 60 + Number(block.startLabel.slice(3, 5))
     const end = Number(block.endLabel.slice(0, 2)) * 60 + Number(block.endLabel.slice(3, 5))
@@ -367,7 +367,12 @@ function buildSummary(
   const currentTask = insideWorkday ? currentBlock?.item ?? null : null
   const nextTask = nextBlock?.item && nextBlock.item.id !== currentTask?.id
     ? nextBlock.item
-    : insideWorkday ? focusItems.find(item => item.id !== currentTask?.id) ?? null : null
+    : insideWorkday ? focusItems.find(item => item.id !== currentTask?.id && (
+      item.source !== 'calendar_event'
+      // Fixed calendar work cannot be rescheduled by a suggested fallback.
+      // Keep future after-hours events visible without inflating workday capacity.
+      || (item.date === businessDateKey(now) && typeof item.startMinutes === 'number' && item.startMinutes > currentMinute)
+    )) ?? null : null
   const plannedMinutes = workBlocks.reduce((total, block) => {
     if (!/^\d{2}:\d{2}$/.test(block.startLabel) || !/^\d{2}:\d{2}$/.test(block.endLabel)) return total
     const start = Number(block.startLabel.slice(0, 2)) * 60 + Number(block.startLabel.slice(3, 5))
