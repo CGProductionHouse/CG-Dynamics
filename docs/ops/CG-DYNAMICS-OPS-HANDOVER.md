@@ -1,5 +1,44 @@
 # CG Dynamics Ops Handover
 
+### 7 October — final reporting repair + remaining held-client review material
+
+PR #699 merged `a906edf5da2edfaecad37600a92990cf91cd48cd`; its full pinned
+reporting receipt follows. No Vercel/frontend production release occurred.
+`STRATEGY-HELD-REVIEW-PROPOSALS-2.md` adds six internal, evidence-bounded business
+plans: Hino, Human Auto, Jenkor, Red Oak, Toyota Bloemfontein and WiseRide. Each
+has an exact source hash, known package boundary, real creative sequence,
+separate historical learning and proposed measurement. Existing three-client
+and Vrystaat proposals remain: ten of eleven held clients now have internal
+review material. Zooz's absent reviewed current guide/programme facts remain
+the concrete evidence hold. No proposal is accepted research, a canonical
+amendment, premium semantic approval or a published strategy; all held statuses
+and frozen artifacts are unchanged. No new Human Auto research was started.
+
+Historical morning migration/release notes and the older #567 blanket-quality
+artifact are now explicitly marked superseded, without erasing their receipts.
+The two approved backend migrations and six dependent Edge releases are already
+live under `LAUNCH-BACKEND-ACTIVATION-2026-10-07.md`; do not replay them using
+their repository timestamps. Existing screening tests distinguish copy checks
+from semantic review; the frozen historical artifact is not a current certificate.
+
+The exact remaining client-information gates are unchanged: four empty/unconfirmed
+packages (Elcheck, JFJ Electrical, LHP Student Village & Block, VCS Cleaning
+Solutions), actual current-revision human knowledge reviews, separate semantic
+acceptance of 72 v3 +22 held v2 drafts, and genuine final portal assets followed
+by explicitly authorized publication. Missing scope/results/files cannot be
+manufactured by blanket finish approval. Current-code legitimate staff/client
+role acceptance is still release-bound; local fixtures are not that evidence.
+Provider/owner consent and hosting budget/uptime gates remain separately owned.
+No new production data/schema/Edge/config/provider/model/content transition or
+Vercel operation in this continuation; Git automatic deployment remains OFF.
+Six source hashes were revalidated against LF-normalized exact guides; 76 nearest
+strategy/package/frozen-artifact regressions PASS with zero skips/failures. This
+docs-only continuation changes no tested runtime/source/test/config; final
+integrated reporting acceptance remains the pinned twelve-step receipt below.
+Fresh local TypeScript/Vite build, unchanged-source scoped ESLint and diff check
+PASS; only documentation differs from the integrated tested source. Existing
+515KB entry-chunk warning is unchanged, not a cloud-build request or hidden failure.
+
 ### 7 October reporting winner truth — local #668 continuation
 
 Clean Overview #698 merged `c6446aa05024fe6f835c85d9d285955440edf0a6`.
