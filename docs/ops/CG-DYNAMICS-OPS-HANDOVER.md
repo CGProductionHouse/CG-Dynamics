@@ -25,7 +25,17 @@ placeholder is neutral CG branding, not a performance claim. New executable SSR 
 actual desktop/375/390/430 browser regressions cover both. Pre-fix empty-state
 assertion failed; corrected nearest 15 tests PASS. Intermediate full run stopped
 after the visual placeholder finding; it is not a final PASS receipt. Full
-final-head verification follows.
+final-head verification PASS on `74653535e9a1e4d9790280d727d58dc4d6e2e0b2`,
+tree `28567908c6e44b97724e8aeeb3130057b0cff44e`: all twelve steps,
+3,730 total /3,713 PASS /17 intentional skips /0 failures. TypeScript/local Vite
+and nine integrated desktop/375/390/430 suites PASS. Receipt
+`%TEMP%/cg-local-launch-74653535e9a1.json`, SHA256
+`baff65c9285085160aa2f295ba85c3485104f0e5503fa05da9e3b4793b7ed855`.
+Windows Bash SES excluded, not passed; synthetic dist never releaseable.
+375px empty Overview and observed-zero cards visually inspected. Final receipt
+docs do not alter tested application/tool/test/config. Reviewer: no blocking
+scope/safety/regression finding; actual authenticated changed-runtime acceptance
+and human/content/hosting gates remain unresolved.
 No Vercel, production, provider, model or content transition. This is not premium
 strategy approval or changed-production authenticated acceptance.
 

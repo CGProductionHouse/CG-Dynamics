@@ -1,5 +1,23 @@
 # Integrated local launch acceptance — #668 / #679
 
+**Latest reporting truth candidate — PR #699:** tested source
+`74653535e9a1e4d9790280d727d58dc4d6e2e0b2`, tree
+`28567908c6e44b97724e8aeeb3130057b0cff44e`: all twelve local steps PASS;
+3,730 total /3,713 PASS /17 intentional skips /0 failures. Missing reach cannot
+select a platform winner or feed a channel recommendation; observed zero stays
+evidence. Empty normalized reads show neutral unavailable Overview; staff
+diagnostics remain. Weak Content learning has no top-performance badge or TOP
+placeholder. Fifteen nearest regressions, local build/scoped lint/diff and actual
+desktop/375/390/430 reporting/Dashboard checks PASS. Intermediate run was stopped
+for the visual watermark finding, not certified. Final receipt
+`%TEMP%/cg-local-launch-74653535e9a1.json`, SHA256
+`baff65c9285085160aa2f295ba85c3485104f0e5503fa05da9e3b4793b7ed855`.
+Nine integrated responsive suites PASS; 375px screenshots visually inspected.
+Windows Bash SES excluded, not passed. Receipt-only docs leave tested code intact.
+No production data/auth/config/provider/strategy transition or Vercel operation;
+automatic deployment OFF. Fixtures are not actual released-role acceptance.
+Never upload synthetic-configured dist or relabel human/content gates complete.
+
 **Latest clean Overview candidate — PR #698:** tested source
 `c4c19b3eddb8fb20b0c35e963fea487d5170f17f`, tree
 `1d9e73c3b702b9b809dd8df3d273632ab9ebeef5`: all twelve local steps PASS;
