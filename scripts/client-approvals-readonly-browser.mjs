@@ -14,8 +14,8 @@ const fixture = {
     const path = id.replaceAll('\\', '/')
     if (path.endsWith('/contexts/AuthContext.tsx')) return `export function useAuth(){return {profile:{role:'client',client_id:'synthetic-only'}}}`
     if (path.endsWith('/lib/supabase.ts')) return `export const supabase={
-      rpc:async(name)=>{if(name!=='client_content_review_queue')throw Error('Mutation forbidden');return{data:window.fixtureRows,error:null}},
-      storage:{from:()=>({createSignedUrl:async()=>{if(window.fixtureReject)throw Error('Synthetic transport rejection');if(window.fixtureBrokenMedia)return{data:{signedUrl:location.origin+'/fixture-missing-image.png'},error:null};return{data:null,error:{message:'PRIVATE_STORAGE_DIAGNOSTIC'}}}})}
+      rpc:async(name)=>{if(name==='decide_content_review'&&window.fixtureDecisionError){window.fixtureDecisionAttempts++;throw Error('PRIVATE_BACKEND_DIAGNOSTIC synthetic-only')}if(name!=='client_content_review_queue')throw Error('Mutation forbidden');return{data:window.fixtureRows,error:null}},
+      storage:{from:()=>({createSignedUrl:async()=>{if(window.fixtureDecisionError)return{data:{signedUrl:'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/%3E'},error:null};if(window.fixtureReject)throw Error('Synthetic transport rejection');if(window.fixtureBrokenMedia)return{data:{signedUrl:location.origin+'/fixture-missing-image.png'},error:null};return{data:null,error:{message:'PRIVATE_STORAGE_DIAGNOSTIC'}}}})}
     }`
   },
   load(id) {
@@ -36,17 +36,19 @@ const server = await createServer({ configFile: false, plugins: [fixture, react(
 let browser
 try {
   await server.listen(); browser = await chromium.launch({ headless: true })
-  for (const width of [375, 390, 430, 1440]) for (const kind of ['approved', 'mixed', 'rejected', 'missing-queue', 'broken-media']) {
+  for (const width of [375, 390, 430, 1440]) for (const kind of ['approved', 'mixed', 'rejected', 'missing-queue', 'broken-media', 'decision-error']) {
     const page = await browser.newPage({ viewport: { width, height: 1000 } })
     const errors = []; page.on('pageerror', error => errors.push(error.message))
     await page.route('**/*', route => { assert.equal(new URL(route.request().url()).origin, 'http://127.0.0.1:53995', 'No external network'); return route.continue() })
     await page.addInitScript(kind => {
       window.fixtureReject = kind === 'rejected'
       window.fixtureBrokenMedia = kind === 'broken-media'
+      window.fixtureDecisionError = kind === 'decision-error'
+      window.fixtureDecisionAttempts = 0
       const row = { id:'approved',title:'Reviewed delivery video',asset_path:'synthetic-only',media_type:'video/mp4',caption:'Exact delivery process.',channels:['facebook'],scheduled_at:'2026-10-12T10:00:00Z',state:'approved' }
       window.fixtureRows = kind !== 'approved' ? [row,{...row,id:'pending',state:'client_review',title:'Next delivery video'}] : [row]
       if (kind === 'missing-queue') window.fixtureRows = null
-      if (kind === 'broken-media') window.fixtureRows = window.fixtureRows.map(row => ({...row,media_type:'image/png'}))
+      if (kind === 'broken-media' || kind === 'decision-error') window.fixtureRows = window.fixtureRows.map(row => ({...row,media_type:'image/png'}))
     }, kind)
     await page.goto('http://127.0.0.1:53995/client/approvals')
     if (kind === 'missing-queue') {
@@ -61,6 +63,18 @@ try {
     await page.getByRole('heading', { name: 'Approvals', exact: true }).waitFor()
     await page.getByText(kind !== 'approved' ? '1 item waiting' : 'Nothing waiting', { exact: true }).waitFor()
     await page.getByText('Your approval is recorded. Publication is managed by CG.', { exact: true }).waitFor()
+    if (kind === 'decision-error') {
+      await page.getByRole('button', { name:'Approve',exact:true }).click()
+      assert.equal(await page.getByRole('alert').innerText(), 'Could not record your decision. Please try again shortly.')
+      assert.doesNotMatch(await page.locator('body').innerText(), /PRIVATE_BACKEND_DIAGNOSTIC/)
+      assert.equal(await page.evaluate(() => window.fixtureDecisionAttempts), 1, 'One synthetic failing attempt, no server writes')
+      assert.equal(await page.getByText('1 item waiting', {exact:true}).count(), 1, 'Failed decision never appears approved')
+      assert.deepEqual(errors, [])
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
+      await page.screenshot({ path:join(tmpdir(), `cg-approvals-${kind}-${width}.png`),fullPage:true })
+      console.log(`PASS actual client approvals ${width}px: synthetic decision error is safe, no real write`)
+      await page.close(); continue
+    }
     await page.getByText('Content preview is unavailable. Please try again shortly.', { exact: true }).first().waitFor()
     assert.doesNotMatch(await page.locator('body').innerText(), /Publish manually|PRIVATE_STORAGE_DIAGNOSTIC/)
     if (kind !== 'approved') assert.equal(await page.getByRole('button', { name:'Approve',exact:true }).isDisabled(), true, 'No approval without asset preview')

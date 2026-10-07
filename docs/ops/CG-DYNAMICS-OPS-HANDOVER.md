@@ -1,5 +1,26 @@
 # CG Dynamics Ops Handover
 
+### 7 October safe continuation — approval retry + substantive held proposals
+
+PR #696 merged `6e911cb07ac7ab32b9f5de761b43f19ca76343ab`: three internal
+business-game-plan proposals for Bloem Action Sports, Emoya Estate Driving Range
+and Forklift Trucks in `STRATEGY-HELD-REVIEW-PROPOSALS.md`. Exact guide hashes,
+package allocations, September evidence gaps and separate October choices are
+explicit. These are NOT accepted research, canonical amendments or human semantic
+approval; the three clients remain held. Vrystaat's earlier proposal remains.
+83 nearest strategy/isolation tests PASS after synthetic local config was supplied;
+initial missing-env attempt failed and is not counted as passed. Source hash checks
+PASS. No application change in #696 and no production/content transition.
+
+Further actual Approvals interaction reproduced raw backend diagnostics exposed
+to clients after a failed decision. Client errors are now safe retry wording;
+staff diagnostics remain unchanged, asset presence is checked in the approve
+handler as well as the button. Synthetic failed decisions cannot look approved.
+Twenty-four actual desktop/375/390/430 cases PASS, including four new failed
+decision cases. No real server decision call/data write. Local build/scoped
+lint/diff PASS. Full pinned acceptance in progress; no changed-production claim.
+Vercel operations remain ZERO and Git deployment remains OFF.
+
 ### 7 October client Approvals truth — PR #695 local acceptance
 
 Continued from main `ef6e9563ccb5c1045beb84d6df2fed66a4230b6d` under #668.
