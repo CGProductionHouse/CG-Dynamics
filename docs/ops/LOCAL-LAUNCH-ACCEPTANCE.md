@@ -1,5 +1,15 @@
 # Integrated local launch acceptance — #668 / #679
 
+**Latest report-window candidate — PR #702:** tested source
+`474abab42a58cfd8212ae94602b22bb33e086fc6`, tree
+`c4c6ab3555a8db9df58bb799fdba37cd1cd79ab4`: all twelve steps PASS,
+3,731 total /3,714 PASS /17 intentional skips /0 failures, local TypeScript/Vite,
+nine actual-component desktop/375/390/430 suites, scoped lint/diff. Per-metric
+windows remain distinct from content cutoff and observation age. See
+`REPORT-FACT-WINDOW-ACCEPTANCE-2026-10-07.md` for exact hash, failed-first-run
+disclosure, supplementary checks and remaining human/protected gates. No Vercel
+or production mutations; not authenticated changed-production acceptance.
+
 **Latest reporting truth candidate — PR #699:** tested source
 `74653535e9a1e4d9790280d727d58dc4d6e2e0b2`, tree
 `28567908c6e44b97724e8aeeb3130057b0cff44e`: all twelve local steps PASS;
