@@ -11,7 +11,7 @@ export function ClientServiceExpansion({ surface = 'performance' }: { surface?: 
   const viewKey = useRef(crypto.randomUUID())
   useEffect(() => {
     let current = true
-    if (!profile?.client_id) return
+    if (!profile?.client_id || surface === 'overview') return
     void readMyServiceEntitlements().then(items => {
       if (!current) return
       setResult({ identity, surface, items })
@@ -20,7 +20,7 @@ export function ClientServiceExpansion({ surface = 'performance' }: { surface?: 
     }).catch(() => { if (current) setResult({ identity, surface, items: [] }) })
     return () => { current = false }
   }, [identity, profile?.client_id, surface])
-  if (!profile?.client_id) return null
+  if (!profile?.client_id || surface === 'overview') return null
   const current = result?.identity === identity && result.surface === surface ? result : null
   const items = visibleClientServices(current?.items ?? null, surface)
   // Absent migration, loading, failed reads and unverified scope are invisible

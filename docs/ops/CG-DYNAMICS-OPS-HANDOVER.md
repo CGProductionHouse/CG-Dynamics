@@ -1,5 +1,35 @@
 # CG Dynamics Ops Handover
 
+### 7 October clean Overview — local #668 continuation
+
+PR #697 merged `b0848438321ce076857765cb7ad9b7ec3f99934b`; its pinned approval
+retry acceptance is recorded below. Reproduced another explicit #668 contradiction:
+the service selector offered two upsells on Overview, and Dashboard mounted the
+default Performance expansion in both report-present and no-report Overview.
+Overview now selects no services, does not read entitlements or record service
+views, and Dashboard supplies its actual selected destination in both paths.
+Performance benefits/opportunities, seven discoverable tabs, exact package scope,
+canonical RPCs and explicit requests are unchanged. No new backend or authority.
+Three pre-fix focused failures reproduced the defect; five service tests and
+15 nearest preview/service/isolation tests PASS after correction. Actual Dashboard
+and service components at desktop/375/390/430 PASS: initial Overview, tab return,
+empty report, no Overview offers/reads/measurement, preserved Performance offers,
+exact retry/client transition and no overflow/page runtime errors. Early browser
+assertions raced a prior Performance receipt/React route commit; fixture now
+settles the preceding surface and waits for the actual hidden module, retaining
+the zero Overview-call assertions. Local build/scoped lint/diff PASS; full pinned
+acceptance PASS on `c4c19b3eddb8fb20b0c35e963fea487d5170f17f`, tree
+`1d9e73c3b702b9b809dd8df3d273632ab9ebeef5`: all twelve steps, 3,729 total /
+3,712 PASS /17 intentional skips /0 failures. Receipt
+`%TEMP%/cg-local-launch-c4c19b3eddb8.json`, SHA256
+`9441e81f3fc34570096a96180c742f0ea0a5fc77fad213151121c91d1c229960`.
+TypeScript/local Vite/nine integrated responsive suites PASS. Windows Bash SES
+excluded, not passed; 375px Dashboard screenshot visually inspected. Final
+receipt-only docs do not change tested application/tool/test/config.
+Synthetic data only, not authenticated changed-production
+acceptance. Zero Vercel operations, automatic Git deployment OFF; no content,
+package, provider, schema or production data change.
+
 ### 7 October safe continuation — approval retry + substantive held proposals
 
 PR #696 merged `6e911cb07ac7ab32b9f5de761b43f19ca76343ab`: three internal
