@@ -1,5 +1,29 @@
 # CG Dynamics Ops Handover
 
+### 7 October CA-authorized backend prerequisites now live
+
+Supersedes UNAPPLIED/deploy-pending statements below for these exact two changes
+only. Target main `f4a2fab34018c683abd8562bebc8cfbd94013114`. CA explicitly approved
+the two named migrations, then necessary completion work. Applied post-assets
+(ledger `client_portal_post_assets`, `20261007141122`) and current-content review
+(ledger `skill_card_review_revision_binding`, `20261007141211`) separately.
+Supabase assigned deployment timestamps: do not replay the original repo filename
+timestamps or blanket db-push. Schema/RPC/grants/guards verified; original card,
+review, deliverable and asset fingerprints plus RLS/table grants unchanged.
+No historical backfill/review/activation or client data publication.
+
+Dependent Edge source parity/auth verified: client-onboarding v28 (JWT false,
+existing custom auth preserved), context v28, Director v37, Assistant v37,
+marketing workflow v35, monthly strategy v26 (other five JWT true unchanged).
+Six unauthenticated probes 401; other 41 functions unchanged, inventory47.
+No Vercel, secret/config/cron/provider action or authorized worker/model invocation.
+Frontend still NOT released; old review calls fail closed, not silently approve.
+Requested info-account Dynamics browser session absent; observed Chrome is
+christie-ann/no Dynamics tab. No auth bypass or accounting/provider-tab action.
+Individual human knowledge/strategy/package review and genuine final published
+assets remain required. Full exact live receipts and stops:
+`LAUNCH-BACKEND-ACTIVATION-2026-10-07.md`.
+
 ### 7 October final local source acceptance — PR #688
 
 Supersedes the pending final-run wording below. Tested code

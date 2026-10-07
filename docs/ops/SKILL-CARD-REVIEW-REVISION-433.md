@@ -1,5 +1,12 @@
 # #433 exact-content human review authority
 
+**Live update, 7 October:** CA-authorized review-binding migration now applied as
+ledger `20261007141211 / skill_card_review_revision_binding`; dependent Edge reads
+deployed/verified. Historical null bindings remain untouched. No card reviewed or
+activated. Frontend/Vercel and positive authenticated acceptance still pending.
+Exact receipts: `LAUNCH-BACKEND-ACTIVATION-2026-10-07.md`. The following implementation
+and protected-packet descriptions retain their original pre-apply context.
+
 Local implementation only. No migration applied, card reviewed/activated, model
 call, production save, deployment or Vercel operation occurred in this lane.
 

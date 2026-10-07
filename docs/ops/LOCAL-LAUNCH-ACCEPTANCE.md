@@ -1,5 +1,11 @@
 # Integrated local launch acceptance — #668 / #679
 
+**Live update, 7 October:** after explicit CA approval, both backend migrations and
+six dependent Edge releases below were applied and verified. Their prior pending
+statements are historical. See `LAUNCH-BACKEND-ACTIVATION-2026-10-07.md` for exact
+deployment-time ledger versions, preserved data/access fingerprints and auth/source
+readback. Frontend/Vercel and human/content publication gates are still incomplete.
+
 Run against a clean committed candidate, not production. No Vercel command,
 provider handler, copied session, migration application or production data write.
 The fixed runner reuses the nine existing actual-component browser fixtures;
