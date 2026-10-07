@@ -1,5 +1,18 @@
 # CG Dynamics Ops Handover
 
+### 7 October full portal shell continuation — #674, local only
+
+Actual persistent preview shell plus all six lazy routes now have localhost-only
+read-only browser acceptance at 1440/375/390/430: nav/mobile menu, exact client,
+unpublished/empty/error states, denied role and no write controls/overflow/page
+runtime errors. No copied authentication or production acceptance claim. See
+`CLIENT-PLAN-LOCAL-ACCEPTANCE.md`; screenshots remain synthetic local artifacts.
+Preserved the concurrent additive test-setup commit `a29a71f9`; its actual isolated
+PostgreSQL test passes. Local #674/#677/#683 integration previously passed 3,641
+tests /17 skips, build/lint; integration is not merged main or a release certificate.
+Protected backend rollout, real final files, substantive strategy review/publication
+and authenticated role acceptance remain separate. No Vercel or production action.
+
 ### 7 October local launch continuation — same #674, no Vercel
 
 Current main refetched as `116c280f80370753d8d45eb4119e0f109d3beafb`.

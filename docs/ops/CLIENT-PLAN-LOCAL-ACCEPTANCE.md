@@ -154,3 +154,28 @@ table/history or calendar function must be dropped/replayed. With zero published
 production portal assets observed on 7 October, code alone cannot populate files.
 Strategy quality/approval/publication, research runtime and authenticated full-role
 release acceptance remain separate requirements, not solved by a file button.
+
+## 7 October — actual full-preview route acceptance
+
+`node scripts/client-portal-shell-readonly-browser.mjs` uses the real preview,
+persistent client shell and six lazy page routes: Overview, Plan, Performance,
+Approvals, Brand Hub and Leads. Synthetic local table/read-RPC/Edge responses
+exercise missing publication and unavailable backend evidence. Every external
+origin, table mutation, non-allowlisted RPC/Edge action is forbidden by the fixture.
+Authentication is an explicit dummy local admin, never production credentials.
+
+PASS at 1440/375/390/430: actual desktop/mobile navigation, exact selected-client
+switch, all six routes, clear unpublished/unavailable/empty states, no approval,
+publish/upload/connect controls, no new reads after staff/client/anonymous role
+denial, no horizontal body overflow or captured page runtime exceptions. Screenshot
+`TEMP/cg-portal-{area}-{width}.png`; 375px Plan visually inspected. These checks
+prove local empty/error navigation, NOT authenticated or populated production
+acceptance. They do not prove source freshness, semantic strategy quality or real
+published content. Existing detailed Plan/file fixtures remain separate positive
+coverage. No website/provider/Vercel/backend/production operation occurred.
+
+The pre-continuation local integration of #674/#677/#683 passed 3,658 total /
+3,641 PASS /17 intentional skips /0 failures, including disposable SQL acceptance;
+Windows Bash-only SES fixture excluded. Local build and scoped lint PASS. The
+later additive #674 test-setup commit `a29a71f9` is preserved, inspected, and its
+real disposable PostgreSQL acceptance reran PASS (2/2); no main merge is claimed.
