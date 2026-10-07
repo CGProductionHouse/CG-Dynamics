@@ -2,19 +2,39 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { CONTENT_REVIEW_BUCKET, REVIEW_LABELS, type ContentReview } from '../../lib/contentReviews'
 
-export function ContentReviewCard({ review, canDecide, onChanged, staffView = false }: { review: ContentReview; canDecide: boolean; onChanged: () => void; staffView?: boolean }) {
+type ContentReviewCardProps = { review: ContentReview; canDecide: boolean; onChanged: () => void; staffView?: boolean }
+
+export function ContentReviewCard(props: ContentReviewCardProps) {
+  // A new asset/review/access scope must never reuse the preceding preview or notes.
+  return <ContentReviewCardBody key={`${props.review.id}:${props.review.asset_path}:${props.review.state}:${Boolean(props.staffView)}`} {...props} />
+}
+
+function ContentReviewCardBody({ review, canDecide, onChanged, staffView = false }: ContentReviewCardProps) {
   const [url, setUrl] = useState<string | null>(null)
   const [events, setEvents] = useState<Array<{ action: string; note: string | null }>>([])
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  function previewUnavailable() {
+    setUrl(null)
+    setError('Content preview is unavailable. Please try again shortly.')
+  }
   useEffect(() => {
     let active = true
-    void supabase.storage.from(CONTENT_REVIEW_BUCKET).createSignedUrl(review.asset_path, 600).then(result => {
-      if (!active) return
-      setUrl(result.data?.signedUrl ?? null)
-      setError(result.error?.message ?? null)
-    })
+    async function loadAsset() {
+      try {
+        const result = await supabase.storage.from(CONTENT_REVIEW_BUCKET).createSignedUrl(review.asset_path, 600)
+        if (!active) return
+        if (result.error || !result.data?.signedUrl) {
+          setError('Content preview is unavailable. Please try again shortly.')
+          return
+        }
+        setUrl(result.data.signedUrl)
+      } catch {
+        if (active) setError('Content preview is unavailable. Please try again shortly.')
+      }
+    }
+    void loadAsset()
     if (staffView) void supabase.from('content_review_events').select('action,note').eq('version_id', review.id).order('created_at').then(result => {
       if (active) setEvents(result.data ?? [])
     })
@@ -31,12 +51,12 @@ export function ContentReviewCard({ review, canDecide, onChanged, staffView = fa
     finally { setBusy(false) }
   }
   return <article className="min-w-0 space-y-3 rounded-xl border border-white/10 bg-white/[0.03] p-4">
-    <div className="flex flex-wrap justify-between gap-2"><h3 className="font-bold text-white">{review.title}</h3><span className="text-xs text-brand-teal">{REVIEW_LABELS[review.state]}</span></div>
+    <div className="flex flex-wrap justify-between gap-2"><h3 className="font-bold text-white">{review.title}</h3><span className="text-xs text-brand-teal">{!staffView && review.state === 'approved' ? 'Approved' : REVIEW_LABELS[review.state]}</span></div>
     {staffView && review.client?.name && <p className="text-xs text-white/60">{review.client.name}</p>}
-    {url && (review.media_type === 'video/mp4' ? <video controls preload="metadata" src={url} className="max-h-96 w-full rounded-lg" /> : <img src={url} alt={review.title} className="max-h-96 w-full rounded-lg object-contain" />)}
+    {url && (review.media_type === 'video/mp4' ? <video controls preload="metadata" src={url} onError={previewUnavailable} className="max-h-96 w-full rounded-lg" /> : <img src={url} alt={review.title} onError={previewUnavailable} className="max-h-96 w-full rounded-lg object-contain" />)}
     <p className="whitespace-pre-wrap break-words text-sm text-white/80">{review.caption}</p>
     <p className="text-xs text-white/60">{review.channels.join(' · ')} · {new Date(review.scheduled_at).toLocaleString('en-ZA', { timeZone: 'Africa/Johannesburg' })} SAST</p>
-    {review.state === 'approved' && <p className="text-xs text-amber-200">Approved. Publish manually through the connected channel; this item has not been scheduled or posted by Dynamics.</p>}
+    {review.state === 'approved' && <p className="text-xs text-white/60">{staffView ? 'Approved. Publish manually through the connected channel; this item has not been scheduled or posted by Dynamics.' : 'Your approval is recorded. Publication is managed by CG.'}</p>}
     {canDecide && <div className="space-y-2">
       <label className="block text-sm text-white/70">Comment<textarea className="mt-1 min-h-20 w-full rounded-lg border border-white/10 bg-black/30 p-2" value={note} onChange={event => setNote(event.target.value)} maxLength={2000} /></label>
       <div className="flex flex-wrap gap-2"><button type="button" disabled={busy || !url} onClick={() => void decide(true)} className="min-h-11 rounded-lg bg-brand-teal px-4 font-bold text-black disabled:opacity-40">Approve</button>
