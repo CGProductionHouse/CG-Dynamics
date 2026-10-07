@@ -13,7 +13,12 @@ Unbound cards provide neither guidance, warnings nor citations; current approved
 cards retain deterministic selection and provenance. Input and staff draft remain
 unchanged. A second regression proves three unreviewed low-ID cards cannot displace
 reviewed cards. Nearest Creative Intelligence/review/activation/workflow tests:
-36 PASS /0 failures. Full integrated local verification is required before merge.
+36 PASS /0 failures. Final integrated candidate
+`a3d3f9f3f3179efccdbb1190730038213ea273db` passed all twelve local steps:
+3,709 total /3,692 PASS /17 intentional skips /0 failures; TypeScript, Vite
+application bundle and nine actual-component browser suites at desktop/375/390/430
+PASS. Scoped lint/diff PASS. Receipt `%TEMP%/cg-local-launch-a3d3f9f3f317.json`,
+SHA256 `1c70ad65e9e10ecfe56c0a6fe23e3b79a04dd034d747ad16052aa21f2f1de194`.
 No schema/Edge/auth/secret/config/data change or Vercel action in this follow-up.
 
 **Live update, 7 October:** CA-authorized review-binding migration now applied as
