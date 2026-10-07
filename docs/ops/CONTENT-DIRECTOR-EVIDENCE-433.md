@@ -118,6 +118,20 @@ work. Eligible citations do not establish semantic entailment or premium strateg
 
 ## Deployment gate
 
+7 October expanded entry-point verification: checking the full Assistant entry
+revealed 94 inherited type errors beyond the previously checked router/helper
+closure. Correct Supabase client typing resolves the erased generic schema;
+optional legacy context/action argument typing and defensive action comparisons
+now compile without changing emitted JavaScript. An executable transpilation
+parity regression covers that boundary. Deno 2.5.1 checks both Assistant and
+Director suggestion entries locally with `--no-lock`; no runtime deployment,
+credential/config access or provider invocation is involved. This does not certify
+historical knowledge review-version binding or semantic strategy quality.
+
+Expanded-entry continuation: 514 focused PASS; full supported suite 3,633 total /
+3,616 PASS /17 intentional skips /zero failures (Windows Bash-only SES fixture
+excluded). Local TypeScript/Vite build, scoped entry lint and diff check PASS.
+
 The #679 hosting policy supersedes the historical paused-project/fresh-Vercel gate.
 Keep `vercel.json` Git deployments OFF. Local code verification and routine GitHub
 review/merge do not authorize cloud builds or establish live production acceptance.

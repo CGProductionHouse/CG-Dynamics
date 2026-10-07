@@ -81,7 +81,7 @@ test('semantic intent extraction: validates output against schema', () => {
 })
 
 test('semantic intent extraction: returns null for "none" action_type', () => {
-  assert.ok(edge.includes("parsed.action_type === 'none'"))
+  assert.ok(edge.includes("(parsed.action_type as string) === 'none'"))
 })
 
 test('semantic intent extraction: audits with semantic_intent status', () => {

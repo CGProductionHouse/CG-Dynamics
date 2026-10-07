@@ -1,5 +1,13 @@
 # CG Dynamics Ops Handover
 
+### 7 October #677 expanded Assistant entry closure
+
+Full entry-point Deno checking exposed 94 inherited Assistant typing errors not
+covered by the earlier helper check. Type-only repairs preserve emitted runtime
+JavaScript (executable parity regression), auth/query/action behavior and the
+existing provider contract. Full Assistant + Director suggestion Deno checks PASS
+locally. No deployment, cloud build, secret/config or production data change.
+
 ### 7 October #433 / same #677 local continuation
 
 Existing saved Director receipts/confirmation context were hidden after reload;
