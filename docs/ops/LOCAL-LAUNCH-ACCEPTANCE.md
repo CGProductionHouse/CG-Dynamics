@@ -1,5 +1,21 @@
 # Integrated local launch acceptance — #668 / #679
 
+**Latest integrated candidate, 7 October:** PR #693 tested source
+`27a5685cc43c02cb27ed598a29f61e3af01f981d`, tree
+`6a0518947d053bfc62de44b8062ff77c7c6bf485`: all twelve steps PASS,
+3,721 total /3,704 PASS /17 intentional skips /0 failures. Fresh TypeScript,
+local Vite application bundle and nine desktop/375/390/430 component suites PASS;
+scoped lint/diff PASS. Supplemental actual-component Assistant launcher (five
+sizes), My Day (four sizes/Los Angeles browser clock) and Integrations (seven
+evidence states at four sizes) PASS on the same source. Receipt:
+`%TEMP%/cg-local-launch-27a5685cc43c.json`, SHA256
+`3953b672f68eeeed4b910ff0805909f080bf6bf8fb3e76783812523f5000f706`.
+Windows Bash-only SES remains excluded, not passed. This receipt supersedes
+earlier test totals only, not human/content or production acceptance gates.
+The source includes #690 current-review projection, #691 mobile launcher and
+#692 My Day fixes. No Vercel operation or production mutation in these lanes;
+automatic Git deployment remains OFF. Never upload the fixture-configured dist.
+
 **Live update, 7 October:** after explicit CA approval, both backend migrations and
 six dependent Edge releases below were applied and verified. Their prior pending
 statements are historical. See `LAUNCH-BACKEND-ACTIVATION-2026-10-07.md` for exact

@@ -16,8 +16,22 @@ invocation. Existing role guards/navigation and verified zero remain intact.
 seven scenarios at desktop/375/390/430 (28 cases), including resolved errors,
 rejections, malformed evidence, observed disconnected, connected/missing inventory,
 known inventory/missing freshness, and explicit observed zero. No overflow/runtime
-errors or writes in those local fixtures. Full pinned local runner and final
-exact-head receipt follow on #668/#451. Vercel remains entirely untouched.
+errors or writes in those local fixtures. PR #693 exact tested source
+`27a5685cc43c02cb27ed598a29f61e3af01f981d` completed all twelve pinned local
+runner steps: 3,721 total /3,704 PASS /17 intentional skips /0 failures,
+stable tree `6a0518947d053bfc62de44b8062ff77c7c6bf485`. Windows Bash-only SES
+remains explicitly excluded, not passed. Receipt `%TEMP%/cg-local-launch-27a5685cc43c.json`,
+SHA256 `3953b672f68eeeed4b910ff0805909f080bf6bf8fb3e76783812523f5000f706`.
+Nine integrated desktop/375/390/430 component suites PASS; fresh supplemental
+Assistant five-size real-pointer, My Day four-size Los Angeles clock and
+Integrations 28-case fixtures also PASS on that exact source. Scoped lint/diff
+PASS; 375px Integrations screenshot visually inspected. No new Edge code or
+schema, therefore no new Edge deployment/type closure required for this lane.
+Vercel remains entirely untouched, Git automatic deployment OFF. This is local
+code acceptance, not changed-production or genuine staff/client-role acceptance.
+Four unconfirmed packages, genuine current knowledge review, 94 target draft
+strategy semantic review and real final portal files/publication remain actual
+human/content gates; successful tests must not relabel them complete.
 
 ### 7 October My Day current/next truth — local correction
 
