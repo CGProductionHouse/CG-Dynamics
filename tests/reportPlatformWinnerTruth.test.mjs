@@ -36,11 +36,23 @@ test('platform ranking requires observed finite reach, preserving zero and stabl
     assert.equal(buildMasterReport([post('facebook', 10), post('instagram', 20)], []).bestPlatform.platform, 'instagram')
     assert.deepEqual(missingPosts, before)
     const report = { id: 'fixture-report', client_id: 'fixture-client', status: 'published', period_start: '2026-09-01', period_end: '2026-09-30', report_title: 'Local report', posts: [] }
-    const render = posts => renderToStaticMarkup(createElement(ClientReportView, { report: { ...report, posts }, client: null,
-      googleAds: null, googleAdsState: 'unmapped', googleAdsError: null }))
+    const render = (posts, props = {}) => renderToStaticMarkup(createElement(ClientReportView, { report: { ...report, posts }, client: null,
+      googleAds: null, googleAdsState: 'unmapped', googleAdsError: null, ...props }))
     assert.doesNotMatch(render([]), /Best platform/)
     assert.doesNotMatch(render(missingPosts), /Best platform/)
     assert.match(render([post('instagram', 0)]), /Best platform/)
     assert.match(render([post('facebook', 10)]), /Best platform/)
+    assert.match(render([], { normalizedFactsAttempted: true }), /No verified performance figures for this period/)
+    const fact = { platform: 'facebook', metricKey: 'brand_views', value: null, availability: 'unavailable', comparableGroup: null, aggregation: 'sum' }
+    assert.match(render([], { facts: [fact], normalizedFactsAttempted: true }), /No verified performance figures for this period/)
+    const observedZero = render([], { facts: [{ ...fact, value: 0, availability: 'valid_zero' }], normalizedFactsAttempted: true })
+    assert.doesNotMatch(observedZero, /No verified performance figures for this period/)
+    assert.match(observedZero, /Facebook views/)
+    assert.match(observedZero, />0<\/p>/)
+    assert.match(render([], { normalizedFactsAttempted: true, showAdminDiagnostics: true }), /Verified platform figures are unavailable for this month/)
+    const lowSignal = render([post('facebook', 0)])
+    assert.match(lowSignal, /Content learning/)
+    assert.doesNotMatch(lowSignal, /Top overall performer/)
+    assert.match(render([post('facebook', 100)]), /Top overall performer/)
   } finally { await server.close() }
 })

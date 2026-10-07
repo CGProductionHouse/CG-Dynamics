@@ -527,15 +527,16 @@ function OverviewTab({
   const strategy = readStrategyData(report.strategy_data)
   const platformsWithData = master.platforms.filter(view => view.source !== 'none')
   const hasGoogleAdsSection = googleAds !== null && ['data', 'no-activity'].includes(googleAdsState)
-  const hasVerified = verifiedSections.length > 0
-  const hasData = normalizedFactsActive || platformsWithData.length > 0 || performance.metrics.length > 0 || hasGoogleAdsSection || monthlyStrategy !== null
+  const hasVerified = verifiedSections.some(section => section.lines.some(line => line.hasValue))
+  const hasData = hasVerified || (!normalizedFactsActive && (platformsWithData.length > 0 || performance.metrics.length > 0))
+    || hasGoogleAdsSection || monthlyStrategy !== null || performance.topContent !== null
 
-  if (!hasData) {
+  if (!hasData && !showAdminDiagnostics) {
     return (
       <div className="rounded-[2rem] border border-white/[0.08] bg-white/[0.045] p-8 text-center sm:p-10">
-        <p className="text-base font-semibold text-white">No report data yet</p>
+        <p className="text-base font-semibold text-white">No verified performance figures for this period</p>
         <p className="mt-3 text-sm leading-relaxed text-slate-400">
-          Performance data will appear here once the month is synced and the report is published.
+          This report does not currently contain verified performance figures. Unavailable values are not shown as zero.
         </p>
       </div>
     )
@@ -1183,7 +1184,7 @@ function ContentSection({
                 {contentType && <Pill tone="teal">{contentType}</Pill>}
                 {platformLabel && <Pill>{platformLabel}</Pill>}
                 {rankingMetric && tone === 'top' && <Pill tone="teal">Top content by {rankingMetric}</Pill>}
-                <Pill tone="teal">Top overall performer</Pill>
+                {tone === 'top' && <Pill tone="teal">Top overall performer</Pill>}
                 {tone === 'learning' && <Pill tone="amber">Highest activity post this month</Pill>}
                 {tone === 'baseline' && <Pill tone="neutral">Content baseline</Pill>}
               </div>

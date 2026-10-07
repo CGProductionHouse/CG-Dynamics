@@ -16,7 +16,13 @@ lint/diff PASS. Two actual-component browser suites pass desktop/375/390/430:
 missing ranking hidden, observed ranking retained, safe cutoff/Website unavailable
 facts and clean Overview. The service fixture explicitly waits preceding
 Performance view responses before pinning zero Overview calls; no assertion waived.
-Full pinned verification follows.
+Further reproduction found a completed empty normalized read left Overview blank,
+and observed-zero Content learning still carried a Top overall performer badge.
+Overview now checks observed values rather than read-attempt/section presence,
+shows a neutral unavailable state, preserves observed zero and staff diagnostics,
+and only strong content gets the existing top badge. New executable SSR and
+actual desktop/375/390/430 browser regressions cover both. Pre-fix empty-state
+assertion failed; corrected nearest 15 tests PASS. Full final-head verification follows.
 No Vercel, production, provider, model or content transition. This is not premium
 strategy approval or changed-production authenticated acceptance.
 
