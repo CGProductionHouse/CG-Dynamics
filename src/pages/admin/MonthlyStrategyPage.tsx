@@ -22,6 +22,7 @@ import {
   type MonthlyStrategyStatus,
 } from '../../lib/monthlyStrategy'
 import { monthDisplayLabel } from '../../lib/reportPeriod'
+import { businessMonthKey } from '../../lib/businessTime'
 import {
   GOLD_STANDARD_FIELDS,
   assessGoldStandardStrategy,
@@ -33,8 +34,7 @@ import {
 const MONTH_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/
 
 function currentMonth() {
-  const now = new Date()
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  return businessMonthKey()
 }
 
 function statusVariant(status: MonthlyStrategyStatus) {
@@ -304,7 +304,7 @@ export default function MonthlyStrategyPage() {
                 ))}
               </div>
               <div className={`mt-4 rounded-xl border px-4 py-3 text-sm ${qualityIssues.length === 0 ? 'border-brand-teal/20 bg-brand-teal/10 text-brand-teal' : 'border-amber-300/20 bg-amber-300/10 text-amber-100'}`}>
-                {qualityIssues.length === 0 ? 'Package and exact-client strategy quality gates are complete.' : (
+                {qualityIssues.length === 0 ? 'Automated checks passed. Review the actual strategy before approval.' : (
                   <>
                     <p className="font-bold">Approval is blocked until:</p>
                     <ul className="mt-2 list-disc space-y-1 pl-5">{qualityIssues.map(issue => <li key={issue}>{issue}</li>)}</ul>
@@ -327,7 +327,7 @@ export default function MonthlyStrategyPage() {
 
           <section className="sticky bottom-3 z-20 mt-6 flex flex-col gap-3 rounded-2xl border border-white/10 bg-[#07100f]/95 p-4 shadow-2xl backdrop-blur sm:flex-row sm:items-center sm:justify-between">
             <p className="text-xs leading-5 text-brand-primary">
-              {dirty ? 'Unsaved staff amendments. Save before approval.' : strategy.workflow_status === 'published' ? 'The published client snapshot is live.' : 'All changes saved.'}
+              {dirty ? 'Unsaved staff amendments. Save before approval or publication.' : strategy.workflow_status === 'published' ? 'The published client snapshot is live.' : 'All changes saved.'}
             </p>
             <div className="flex flex-wrap gap-2">
               <ActionButton
@@ -351,7 +351,7 @@ export default function MonthlyStrategyPage() {
               {strategy.workflow_status === 'approved' && (
                 <ActionButton
                   loading={busy === 'publish'}
-                  disabled={qualityIssues.length > 0}
+                  disabled={dirty || qualityIssues.length > 0}
                   onClick={() => {
                     if (!window.confirm(`Publish ${client?.name ?? 'this client'}’s ${monthDisplayLabel(month)} strategy to the client portal?`)) return
                     void runAction('publish', () => transitionMonthlyStrategy({ clientId, month, expectedVersion: strategy.version, targetStatus: 'published', actorProfileId: profile?.id, idempotencyKey: crypto.randomUUID() }), 'Strategy published to the exact client-month portal view.')

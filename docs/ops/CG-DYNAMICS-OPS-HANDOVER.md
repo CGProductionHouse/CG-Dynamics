@@ -1,5 +1,37 @@
 # CG Dynamics Ops Handover
 
+### 7 October strategy review readiness — PR #694 local acceptance
+
+Continued CA-authorized local launch work from main `f918a4b2f781e79a4c9f508cf91ed557674a7cab`.
+Reproduced populated internal/evidence-template strategy passing approval/readiness
+checks despite rejection by the existing client-facing quality authority, and the
+actual approved review page enabling publication after unsaved internal-note edits.
+The focused correction reuses that same quality authority in both readiness paths,
+blocks publication while dirty, defaults to the canonical Johannesburg month, and
+labels passing automated checks honestly: human strategy review remains required.
+No generated strategy, authority/store/RPC/schema change or production transition.
+Five executable regressions and 50 nearest strategy/package/report-isolation tests
+PASS; actual page at desktop/375/390/430 passes 12 synthetic read-only browser cases
+including Los Angeles/Johannesburg month boundary, rejected copy and preserved edits.
+Local TypeScript/Vite build, scoped lint and diff PASS. Exact tested source
+`6ba43f068c59a3febf7ee5317c0ca42200b18b75`, tree
+`0e5b2092a2fc960c76126b5710508bcbc5aaae1a`: all twelve pinned local runner
+steps PASS; 3,726 total /3,709 PASS /17 intentional skips /0 failures. Nine
+integrated desktop/375/390/430 component suites PASS; supplemental strategy
+review twelve cases also PASS on that exact source. Receipt
+`%TEMP%/cg-local-launch-6ba43f068c59.json`, SHA256
+`84e8af3ac2785c4ac0a54c5361c41f03da3680e3da3fdb8314f933cf8b8cc1c4`.
+Windows Bash-only SES remains excluded, not passed. Receipt-only follow-up docs
+do not change tested application/tool/test/config. This is not changed-production
+acceptance or premium semantic strategy approval. Reviewer checklist passed;
+existing database human approval contracts are unchanged by this UI correction.
+No Vercel operations; automatic Git deployment stays OFF. No strategy approval,
+publication, model invocation, provider/config/data action. Fresh read-only production
+still has four unconfirmed empty packages (Elcheck, JFJ Electrical, LHP Student
+Village & Block, VCS Cleaning Solutions), 72 v3 +22 held v2 target drafts and zero
+published active portal assets. Broad finish approval does not supply missing scope,
+reviewed strategy decisions or real final files. Preserve all earlier receipts below.
+
 ### 7 October Integrations read failures — local truth correction
 
 PR #692 merged `04918d7003c3febfa0679774bf3c7acfdfdca945`; no frontend

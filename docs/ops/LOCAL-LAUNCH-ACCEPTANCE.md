@@ -1,5 +1,22 @@
 # Integrated local launch acceptance — #668 / #679
 
+**Latest strategy review candidate, 7 October — PR #694:** tested source
+`6ba43f068c59a3febf7ee5317c0ca42200b18b75`, tree
+`0e5b2092a2fc960c76126b5710508bcbc5aaae1a`: all twelve steps PASS,
+3,726 total /3,709 PASS /17 intentional skips /0 failures. Five new behavioral
+regressions, 50 focused strategy/package/report-isolation tests and 12 actual
+strategy-review page cases at desktop/375/390/430 PASS. Reproduced known bad
+copy passing readiness and dirty approved revision permitting publication before
+editing; fixed with existing quality authority and saved-revision gating. Default
+month uses Johannesburg even in a Los Angeles browser. Automated checks are not
+human semantic approval. Fresh local build/application bundle, scoped lint/diff,
+nine integrated component suites PASS. Receipt:
+`%TEMP%/cg-local-launch-6ba43f068c59.json`, SHA256
+`84e8af3ac2785c4ac0a54c5361c41f03da3680e3da3fdb8314f933cf8b8cc1c4`.
+Windows SES exclusion and production/content/role acceptance gaps below remain.
+No Vercel operations, production writes, new schema or Edge change. This receipt
+supersedes earlier test totals only; never upload the synthetic-configured dist.
+
 **Latest integrated candidate, 7 October:** PR #693 tested source
 `27a5685cc43c02cb27ed598a29f61e3af01f981d`, tree
 `6a0518947d053bfc62de44b8062ff77c7c6bf485`: all twelve steps PASS,
