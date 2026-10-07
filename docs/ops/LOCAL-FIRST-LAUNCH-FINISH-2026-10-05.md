@@ -1,5 +1,11 @@
 # Finish Dynamics locally; release one verified artifact
 
+7 October live supersession: the two narrow portal-post-assets/current-content
+review migrations and six dependent Edge releases are now CA-authorized, applied
+and verified; see `LAUNCH-BACKEND-ACTIVATION-2026-10-07.md`. Earlier UNAPPLIED/backend
+pending wording below is historical. No Vercel action occurred; frontend release,
+legitimate authenticated acceptance and actual human/content gates remain open.
+
 CA instruction, 5 October 2026. Product owner: #668; release/budget owner: #679;
 coordination: #381. This is the execution plan, not a launch-complete claim or
 authorization to deploy. Current main checked: `116c280f80370753d8d45eb4119e0f109d3beafb`.
