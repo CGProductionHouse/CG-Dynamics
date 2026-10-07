@@ -1,5 +1,30 @@
 # CG Dynamics Ops Handover
 
+### 7 October evening — four-client source recovery and TikTok acceptance
+
+`BLOEMFONTEIN-CLIENT-EVIDENCE-2026-10-07.md` records actual visible CA-authored
+briefs in the requested info account: Elcheck service/artwork direction, JFJ
+project/copy work, LHP's 2027 viewing/application campaign and VCS's 23–31 October
+promotion. Four distinct concrete working plans are proposed, not approved
+research or canonical strategies. All four production packages remain `{}`;
+caption counts cannot establish contractual capacity. LHP room/inclusion claims
+and original booklet need review; AI summaries are not independent evidence.
+The Business workspace shows Deactivated; readable existing projects were used
+without changing account settings. Partial older-history loading is documented.
+
+`CLIENT-TIKTOK-ACCEPTANCE-2026-10-07.md` pins ten connected accounts, eight
+published September reports and two without reports (Forklift/Neshora). All
+September TikTok facts are partial. Legitimate Red Oak/Dulux tabs render facts;
+Dulux 375px has no body overflow/captured console errors. Braize Overview renders
+facts; browser action transport prevented clicked-tab acceptance. No bypass/retry
+loop. Production still uses old frontend, not locally verified current main.
+The reproduced snapshot mislabelling is corrected locally with an executable
+actual-component regression; no value/provider changes. A separate period gap
+is now proven: Sep-23 reports receive Sep-30 normalized facts without distinct
+coverage disclosure. Next code lane must resolve that contract without truncating
+aggregates, fabricating totals or publishing data. No launch-complete claim.
+ZERO Vercel operations and no production/provider/data/config writes.
+
 ### 7 October — final reporting repair + remaining held-client review material
 
 PR #699 merged `a906edf5da2edfaecad37600a92990cf91cd48cd`; its full pinned

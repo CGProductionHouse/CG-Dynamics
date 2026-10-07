@@ -703,7 +703,7 @@ function VerifiedMetricCard({ line }: { line: VerifiedLine }) {
         {unavailableMessage ? (
           <span className="text-slate-500">{unavailableMessage}</span>
         ) : line.isSnapshot ? (
-          <span className="text-slate-500">Current followers snapshot at the latest sync</span>
+          <span className="text-slate-500">Account snapshot for this report · not monthly growth</span>
         ) : showMovement ? (
           <span className={up ? 'text-emerald-300' : down ? 'text-amber-300' : 'text-slate-400'}>
             {formatPercent(line.changePercent as number)} vs last month
