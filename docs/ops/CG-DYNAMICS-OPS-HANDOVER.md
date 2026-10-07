@@ -1,5 +1,19 @@
 # CG Dynamics Ops Handover
 
+### 7 October local strategy gate correction — #513 / #668
+
+`build-issue-567-strategy-quality-readiness.mjs` no longer turns a negative regex
+screen into `quality_review_passed` or stamps historical counts as fresh production
+truth. Pure tested projection separates copy screening, hash alignment and missing
+current evidence from semantic acceptance; default CLI refuses frozen-evidence
+overwrite. See `STRATEGY-READINESS-SCREENING-TRUTH.md`. Frozen receipts unchanged.
+SELECT-only production readback still finds 72 v3 /22 v2 /20 v1 Sep/Oct drafts and
+zero frozen published strategy snapshots. No content was amended/approved/published.
+This receipt is additive: #674 portal/file work and #677 Director ownership remain
+intact. No Vercel, migration, Edge, provider, config or production data action.
+Substantive strategy review, exact missing evidence, protected rollout and actual
+client-visible publication remain separate; do not certify only-push readiness.
+
 ### 4 October local-only launch continuation — #668/#678
 
 #681 package cleanup merged as `d4090063`, not deployed. Current rollout remains
