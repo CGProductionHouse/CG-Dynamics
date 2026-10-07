@@ -53,7 +53,27 @@ test('client rollout selection hides absent/read-failed/all-unknown data and onl
       state: ['included','not_included','not_applicable','unknown','not_included','not_included','included'][i],
       verified_at: '2026-10-02', connection: 'needs_connection', requested_at: null }))
     assert.deepEqual(visibleClientServices(rows, 'performance').map(row => row.service_key), SERVICE_KEYS.filter(key => key !== 'instagram'))
-    assert.deepEqual(visibleClientServices(rows, 'overview').map(row => row.service_key), ['google_ads','tiktok'])
+    assert.deepEqual(visibleClientServices(rows, 'overview'), [])
     assert.equal(visibleClientServices([{ ...rows[0], verified_at: 'invalid' }], 'performance').length, 0)
   } finally { await server.close() }
+})
+
+test('Overview never offers services in any verified scope or connection state', async () => {
+  const server = await createServer({ server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true, include: [] }, configFile: false })
+  try {
+    const { SERVICE_KEYS, visibleClientServices } = await server.ssrLoadModule('/src/lib/clientServicePresentation.ts')
+    for (const state of ['included', 'not_included', 'not_applicable', 'unknown']) {
+      for (const connection of ['connected', 'needs_connection', 'unavailable']) {
+        const rows = SERVICE_KEYS.map(service_key => ({ service_key, state, connection, verified_at: '2026-10-02', requested_at: null }))
+        assert.deepEqual(visibleClientServices(rows, 'overview'), [])
+        assert.equal(visibleClientServices(rows, 'performance').length, state === 'unknown' ? 0 : 7)
+      }
+    }
+  } finally { await server.close() }
+})
+
+test('Dashboard passes its selected destination to expansion in populated and empty report states', () => {
+  const source = readFileSync(new URL('../src/pages/client/Dashboard.tsx', import.meta.url), 'utf8')
+  assert.equal((source.match(/<ClientServiceExpansion surface=\{requestedTab === 'overview' \? 'overview' : 'performance'\} \/>/g) ?? []).length, 2)
+  assert.doesNotMatch(source, /<ClientServiceExpansion \/>/)
 })

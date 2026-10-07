@@ -228,7 +228,7 @@ export default function Dashboard() {
         title="No published report yet"
         message="Your monthly reports will appear here as soon as they are published by CG Production House."
       />
-      <ClientServiceExpansion />
+      <ClientServiceExpansion surface={requestedTab === 'overview' ? 'overview' : 'performance'} />
       </>
     )
   }
@@ -284,7 +284,7 @@ export default function Dashboard() {
       {/* Forward-looking: this month's CG plan (client-safe; renders nothing
           until the client has visible schedule data). */}
       {scopedClientId && <ClientMonthAhead clientId={scopedClientId} />}
-      <ClientServiceExpansion />
+      <ClientServiceExpansion surface={requestedTab === 'overview' ? 'overview' : 'performance'} />
     </>
   )
 }

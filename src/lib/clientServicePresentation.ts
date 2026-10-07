@@ -7,13 +7,13 @@ export interface ServiceEntitlement {
   verified_at: string | null; requested_at: string | null
 }
 export function visibleClientServices(items: readonly ServiceEntitlement[] | null, surface: 'overview' | 'performance'): ServiceEntitlement[] {
-  if (!items) return []
+  // Overview is a results destination, never a setup or upsell surface.
+  if (surface === 'overview' || !items) return []
   return SERVICE_KEYS.flatMap(key => {
     const item = items.find(row => row.service_key === key)
     if (!item?.verified_at || !Number.isFinite(Date.parse(item.verified_at))) return []
-    if (surface === 'overview') return item.state === 'not_included' ? [item] : []
     return ['included', 'not_included', 'not_applicable'].includes(item.state) ? [item] : []
-  }).slice(0, surface === 'overview' ? 2 : 7)
+  }).slice(0, 7)
 }
 export function parseServiceEntitlements(data: unknown): ServiceEntitlement[] {
   if (!Array.isArray(data) || data.length !== SERVICE_KEYS.length) throw new Error('Incomplete service verification')
