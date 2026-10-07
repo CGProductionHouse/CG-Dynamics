@@ -426,10 +426,10 @@ function ReportHero({
           </div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+        <div className={`grid gap-3 ${master.bestPlatform ? 'sm:grid-cols-3' : 'sm:grid-cols-2'} lg:grid-cols-1`}>
           <HeroMiniCard label="Status" value={report.status.charAt(0).toUpperCase() + report.status.slice(1)} accent="teal" />
           <HeroMiniCard label="Report month" value={month} accent="amber" />
-          <HeroMiniCard label="Best platform" value={master.bestPlatform?.label ?? '-'} accent="teal" />
+          {master.bestPlatform && <HeroMiniCard label="Best platform" value={master.bestPlatform.label} accent="teal" />}
         </div>
       </div>
     </section>

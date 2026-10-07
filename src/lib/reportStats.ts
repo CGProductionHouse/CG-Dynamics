@@ -269,10 +269,12 @@ export function calculatePlatformBreakdowns(posts: ReportStatsPost[]): PlatformB
   })
 }
 
-// Best platform is ranked by reach first (missing reach sorts low), then
-// engagements as a tie-breaker.
+// The existing reach ranking requires an observed reach; missing data cannot
+// win merely because a post/source exists. Equal reach uses stable platform order.
 export function bestPlatform(breakdowns: PlatformBreakdown[]): PlatformBreakdown | null {
-  const withData = breakdowns.filter(breakdown => breakdown.hasData)
+  const withData = breakdowns.filter(breakdown => breakdown.hasData
+    && typeof breakdown.stats.totalReach === 'number'
+    && Number.isFinite(breakdown.stats.totalReach))
   if (withData.length === 0) return null
 
   return [...withData].sort((a, b) => {
@@ -433,7 +435,7 @@ export function buildMasterReport(
 
   const withData = platforms.filter(view => view.source !== 'none')
 
-  const bestPlatform = [...withData].sort((a, b) => {
+  const bestPlatform = withData.filter(view => typeof view.reach === 'number' && Number.isFinite(view.reach)).sort((a, b) => {
     const ar = a.reach ?? -1
     const br = b.reach ?? -1
     if (br !== ar) return br - ar

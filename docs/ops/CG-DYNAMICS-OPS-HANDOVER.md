@@ -1,5 +1,25 @@
 # CG Dynamics Ops Handover
 
+### 7 October reporting winner truth — local #668 continuation
+
+Clean Overview #698 merged `c6446aa05024fe6f835c85d9d285955440edf0a6`.
+Local 375px actual Dashboard screenshot then exposed a useless empty Best platform
+tile. Executable reproduction also found missing reach on both channels selecting
+Facebook alphabetically as best, potentially feeding an unsupported channel signal.
+Both existing ranking projections now require finite observed reach; zero remains
+an observation and known reach/tie ordering is unchanged. No per-platform figures,
+metrics definitions, report/strategy data or publishing contract is rewritten.
+The hero omits an absent ranking and uses two balanced metadata columns; it retains
+the existing approved report-family palette/layout and a known winner's tile.
+Fifteen nearest reporting/engagement/service/isolation tests, local build/scoped
+lint/diff PASS. Two actual-component browser suites pass desktop/375/390/430:
+missing ranking hidden, observed ranking retained, safe cutoff/Website unavailable
+facts and clean Overview. The service fixture explicitly waits preceding
+Performance view responses before pinning zero Overview calls; no assertion waived.
+Full pinned verification follows.
+No Vercel, production, provider, model or content transition. This is not premium
+strategy approval or changed-production authenticated acceptance.
+
 ### 7 October clean Overview — local #668 continuation
 
 PR #697 merged `b0848438321ce076857765cb7ad9b7ec3f99934b`; its pinned approval

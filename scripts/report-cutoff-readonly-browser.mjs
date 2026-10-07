@@ -68,6 +68,7 @@ try {
     })
     await page.goto(`http://127.0.0.1:${port}/__cutoff`, { waitUntil: 'networkidle' })
     await page.getByText('Covered Pacific final-day result', { exact: true }).first().waitFor()
+    assert.equal(await page.getByText('Best platform', { exact: true }).count(), 1, `${width} observed reach keeps its headline`)
     assert.equal(await page.getByText('Uncovered later result', { exact: true }).count(), 0)
     assert.doesNotMatch(await page.locator('body').innerText(), /recommended weekly rhythm|Build posting consistency|compounding visibility|Where to focus next/)
     assert.ok((await page.locator('body').innerText()).includes('23 September 2026'))
