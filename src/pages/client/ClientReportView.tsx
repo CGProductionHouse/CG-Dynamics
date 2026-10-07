@@ -7,7 +7,7 @@ import BrandMark from '../../components/BrandMark'
 import { ClientLogo } from '../../components/ClientLogo'
 import { clientFacingStrategyQualityIssues, readStrategyData, type StrategyData } from '../../lib/strategyEngine'
 import { GuidedStrategyView } from '../../components/strategy/GuidedStrategy'
-import { getReportMonthFromPeriod, monthDisplayLabel, normalizeReportToCalendarMonth, previousReportMonth, reportPeriodDisclosure } from '../../lib/reportPeriod'
+import { getReportMonthFromPeriod, isPublishedMonthToDateReport, monthDisplayLabel, normalizeReportToCalendarMonth, previousReportMonth, reportPeriodDisclosure } from '../../lib/reportPeriod'
 import { isWithinMetaProviderPeriod } from '../../../supabase/functions/_shared/metaPeriod'
 import type { MasterReportData, MetricMovement, Platform, PlatformView, ReportStatsPost } from '../../lib/reportStats'
 import {
@@ -69,18 +69,23 @@ const LOGO_FRAME = 'border border-white/10 bg-[#06110f] shadow-[0_18px_35px_-24p
 type RenderableReport = ReportWithPosts | ClientReportWithPosts
 
 function postsForReportMonth(report: RenderableReport): ReportStatsPost[] {
-  const { start, end } = normalizeReportToCalendarMonth(report)
+  const bounds = normalizeReportToCalendarMonth(report)
+  const partial = isPublishedMonthToDateReport(report)
+  // A published MTD report's disclosed cutoff remains authoritative even if
+  // later ingestion attaches more posts to the same monthly report identity.
+  const { start } = bounds
+  const end = partial ? report.period_end : bounds.end
   const startTime = new Date(`${start}T00:00:00Z`).getTime()
   const endTime = new Date(`${end}T23:59:59.999Z`).getTime()
 
   return report.posts
     .filter(post => {
-      if (!post.publish_time) return true
+      if (!post.publish_time) return !partial
       if (post.platform === 'facebook' || post.platform === 'instagram') {
         return isWithinMetaProviderPeriod(post.publish_time, start, end)
       }
       const time = new Date(post.publish_time).getTime()
-      return Number.isNaN(time) || (time >= startTime && time <= endTime)
+      return (Number.isNaN(time) && !partial) || (time >= startTime && time <= endTime)
     })
     .map(reportPostToStatsPost)
 }

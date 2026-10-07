@@ -408,6 +408,68 @@ test('client report uses the Meta Pacific half-open period at the UTC month boun
   assert.doesNotMatch(html, /Next Pacific month/)
 })
 
+test('published MTD content highlights never exceed the displayed evidence cutoff', () => {
+  const post = (id, publish_time, caption, engagements) => ({
+    id, platform: 'facebook', publish_time, post_type: 'Photo', caption,
+    permalink: null, impressions: 300, reach: 100, engagements, excluded: false,
+  })
+  const posts = [
+    post('covered', '2026-09-23T18:00:00Z', 'Covered application announcement', 2),
+    post('later', '2026-09-29T18:00:00Z', 'Later announcement outside coverage', 999),
+  ]
+  const report = { ...baseReport, status: 'published', period_start: '2026-09-01', period_end: '2026-09-23', posts }
+  const html = renderReport({ report })
+  assert.match(html, /23 September 2026/)
+  assert.doesNotMatch(html, /Later announcement outside coverage/)
+  assert.match(html, /Covered application announcement/)
+  // Explicitly extending a full-month report admits its real later post.
+  assert.match(renderReport({ report: { ...report, period_end: '2026-09-30' } }), /Later announcement outside coverage/)
+})
+
+test('MTD cutoff preserves Pacific end-of-day and rejects next-day Meta evidence', () => {
+  const post = (id, publish_time, caption, engagements) => ({
+    id, platform: 'instagram', publish_time, post_type: 'Photo', caption,
+    permalink: null, impressions: 300, reach: 100, engagements, excluded: false,
+  })
+  const html = renderReport({ report: {
+    ...baseReport, status: 'published', period_start: '2026-09-01', period_end: '2026-09-23',
+    posts: [
+      post('last', '2026-09-24T06:59:59.999Z', 'Last covered Pacific moment', 0),
+      post('next', '2026-09-24T07:00:00.000Z', 'Uncovered Pacific next day', 999),
+    ],
+  } })
+  assert.match(html, /Last covered Pacific moment/)
+  assert.doesNotMatch(html, /Uncovered Pacific next day/)
+})
+
+test('MTD cannot rank undated/invalid or later UTC-platform posts as covered', () => {
+  const post = (id, publish_time, caption, engagements) => ({
+    id, platform: 'tiktok', publish_time, post_type: 'Video', caption,
+    permalink: null, impressions: 300, reach: 100, engagements, excluded: false,
+  })
+  const posts = [
+    post('covered', '2026-09-23T23:59:59.999Z', 'Covered UTC video', 2),
+    post('next', '2026-09-24T00:00:00.000Z', 'Uncovered UTC video', 999),
+    post('undated', null, 'Unknown publication date', 999),
+    post('malformed', 'not-a-date', 'Invalid publication date', 999),
+  ]
+  const html = renderReport({ report: {
+    ...baseReport, status: 'published', period_start: '2026-09-01', period_end: '2026-09-23', posts,
+  } })
+  assert.match(html, /Covered UTC video/)
+  assert.doesNotMatch(html, /Uncovered UTC video|Unknown publication date|Invalid publication date/)
+})
+
+test('staff full-month draft preview keeps later in-month content', () => {
+  const html = renderReport({ report: {
+    ...baseReport, status: 'draft', period_start: '2026-09-01', period_end: '2026-09-23',
+    posts: [{ id: 'later', platform: 'facebook', publish_time: '2026-09-29T18:00:00Z',
+      post_type: 'Photo', caption: 'Staff full-month preview', permalink: null,
+      impressions: 300, reach: 100, engagements: 2, excluded: false }],
+  } })
+  assert.match(html, /Staff full-month preview/)
+})
+
 test('legacy fallback renders no ungated prior-month percentage', () => {
   const manual = [{ platform: 'instagram', views: 100, reach: 50, engagements: 5, profile_visits: 2, followers: 10, source_type: 'manual', general_notes: null }]
   const previous = [{ ...manual[0], views: 50, reach: 25 }]

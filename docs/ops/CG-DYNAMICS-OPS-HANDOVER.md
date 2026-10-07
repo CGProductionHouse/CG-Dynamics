@@ -1,5 +1,18 @@
 # CG Dynamics Ops Handover
 
+### 7 October — published MTD post cutoff, local-only
+
+Fresh read-only Vrystaat evidence reproduced posts beyond the stored published
+September 23 cutoff being included by the full-month client renderer. Narrow
+presentation correction fences published MTD highlights/totals to that cutoff,
+preserving Pacific Meta semantics, UTC other-platform semantics, full-month and
+staff draft behavior. No stored report/fact/provider contract changed. See
+`REPORT-POST-CUTOFF-ACCEPTANCE.md`: 54 focused PASS; full 3,626 /3,609 PASS /17
+skips /0 fail (Windows Bash SES excluded); local build/scoped lint/diff PASS;
+actual synthetic browser 1440/375/390/430 PASS. No Vercel or production action.
+Substantive strategy, backend rollout and authenticated release gates are not
+cleared by this receipt. Preserve all other additive lane receipts.
+
 ### 4 October local-only launch continuation — #668/#678
 
 #681 package cleanup merged as `d4090063`, not deployed. Current rollout remains
