@@ -1,3 +1,4 @@
+import { isSkillCardContentApproved } from '../../../src/lib/skillCardApproval.ts'
 // Issue #463 — canonical Monthly Strategy Autopilot pass.
 //
 // This module deliberately has no scheduler and does not modify the shared worker.
@@ -155,8 +156,8 @@ async function prepareDraft(sb: StrategyAutopilotClient, client: Record<string, 
     sb.from('client_guides').select('id,guide_markdown').eq('client_id', clientId).eq('runtime_readiness', 'ready').order('version', { ascending: false }).limit(1).maybeSingle(),
     sb.from('client_packages').select('id').eq('client_id', clientId).eq('status', 'active').lt('start_date', nextMonth).or(`end_date.is.null,end_date.gte.${strategyMonth}`).order('start_date', { ascending: false }).limit(1).maybeSingle(),
     sb.from('client_industry_profiles').select('primary_industry,secondary_industry,review_state').eq('client_id', clientId).maybeSingle(),
-    sb.from('skill_cards').select('id,title,principle,summary,knowledge_layer,category,subcategory,active_client_id,review_expires_at,relevant_agents,confidence_level,evidence_label,source_id').eq('status', 'active').is('active_client_id', null).in('knowledge_layer', ['universal_principle', 'south_african_market', 'industry_specific']).or(`review_expires_at.is.null,review_expires_at.gte.${operatingDate}`).limit(30),
-    sb.from('skill_cards').select('id,title,principle,summary,knowledge_layer,category,subcategory,active_client_id,review_expires_at,relevant_agents,confidence_level,evidence_label,source_id').eq('status', 'active').eq('active_client_id', clientId).or(`review_expires_at.is.null,review_expires_at.gte.${operatingDate}`).limit(30),
+    sb.from('skill_cards').select('id,title,principle,summary,knowledge_layer,category,subcategory,active_client_id,review_expires_at,relevant_agents,confidence_level,evidence_label,source_id,content_hash,reviewed_content_hash').eq('status', 'active').is('active_client_id', null).in('knowledge_layer', ['universal_principle', 'south_african_market', 'industry_specific']).or(`review_expires_at.is.null,review_expires_at.gte.${operatingDate}`).limit(30),
+    sb.from('skill_cards').select('id,title,principle,summary,knowledge_layer,category,subcategory,active_client_id,review_expires_at,relevant_agents,confidence_level,evidence_label,source_id,content_hash,reviewed_content_hash').eq('status', 'active').eq('active_client_id', clientId).or(`review_expires_at.is.null,review_expires_at.gte.${operatingDate}`).limit(30),
   ])
   for (const result of [deliverables, events, prior, report, updates, guide, packageRow, industry, sharedCards, clientCards]) {
     if (result.error) throw new Error(result.error.message)
@@ -171,6 +172,7 @@ async function prepareDraft(sb: StrategyAutopilotClient, client: Record<string, 
     ...((clientCards.data ?? []) as Array<Record<string, unknown>>),
     ...((sharedCards.data ?? []) as Array<Record<string, unknown>>),
   ].filter(card => {
+    if (!isSkillCardContentApproved(card.content_hash, card.reviewed_content_hash)) return false
     if (!strategyKnowledgeCardIsCurrent(card, operatingDate)) return false
     const agents = Array.isArray(card.relevant_agents) ? card.relevant_agents.filter((value): value is string => typeof value === 'string') : []
     if (!cardTargetsAgent(agents, 'marketing_strategist') && !cardTargetsAgent(agents, 'content_planner')) return false

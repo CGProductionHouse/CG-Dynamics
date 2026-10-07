@@ -22,7 +22,7 @@ is **undefined/null**, not zero. No aggregate quality score or employee ranking.
 | CTA-only correction | Actual parser/patch masks fields and denies stale revision | Useful CTA; human hook/script/shots survive real save/reload |
 | Knowledge eligibility | Actual specialist gate excludes expired/unreviewed/wrong-client/unrelated cards | Chosen source supports the decision, not decorative citation |
 | Reference integrity | Real parser resolves selected ID only, rejects forged approval/source | Rationale honestly reflects what the source proves |
-| Material edit after approval | Characterizes existing historical-review authority gap | **BLOCKED** until exact content-revision review authority is corrected |
+| Material edit after approval | Current-revision mismatch is excluded by the actual specialist gate | **BLOCKED** on protected schema/runtime rollout and authenticated review acceptance |
 | Uncertain platform rule | Actual prompt distinguishes stored guidance from current rules/research | Unknown surface/region/freshness remains labelled, no invented rule |
 | Unsupported uplift | Actual selected warning/claim scope survives projection | No invented growth percentages, causation or guarantee |
 | Partial statistics | Actual Meta evidence preserves missing/zero/coverage/original age | Partial subtotal never becomes complete performance or a fresh observation |
@@ -48,10 +48,10 @@ is **undefined/null**, not zero. No aggregate quality score or employee ranking.
 6. Keep a later unseen task set separate. Passing these twelve prepared contracts
    is not performance on unseen work and never automatically approves/publishes.
 
-The review-revision task intentionally reports `characterized_gap`, not repaired.
-Existing source-trust/expiry gates and observed `updated_at` do not bind historical
-approval to changed content. The separately scoped correction proposal is in
-`CONTENT-DIRECTOR-EVIDENCE-433.md`; no production backfill or reapproval is authorized.
+The separate local revision-binding correction is described in
+`SKILL-CARD-REVIEW-REVISION-433.md`. The benchmark now verifies the actual gate
+withholds changed content. This is not production/schema rollout or human
+semantic acceptance; no production backfill or reapproval is authorized.
 
 Actual CTA editor acceptance is recorded separately in
 `CONTENT-DIRECTOR-PRECISE-EDIT-433.md`. These files distinguish implementation,

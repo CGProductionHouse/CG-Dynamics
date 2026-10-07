@@ -72,7 +72,7 @@ test('automatic preparation preserves briefing evidence without selling guardrai
   const fake = fixture()
   fake.tables.client_context_updates = [{ id: 'note-a', client_id: 'client-a', review_state: 'incorporated', title: 'Caption voice', body: 'No influencer language, forced humour, slang or hype.' }]
   fake.tables.client_guides[0].guide_markdown = '## Client identity and positioning\n- Keep the exact client isolated from unrelated same-name businesses.'
-  fake.tables.skill_cards = [{ id: 'card-a', status: 'active', active_client_id: null, knowledge_layer: 'universal_principle', relevant_agents: ['marketing_strategist'], principle: 'Use one clear call to action.', review_expires_at: null }]
+  fake.tables.skill_cards = [{ id: 'card-a', content_hash: 'a'.repeat(64), reviewed_content_hash: 'a'.repeat(64), status: 'active', active_client_id: null, knowledge_layer: 'universal_principle', relevant_agents: ['marketing_strategist'], principle: 'Use one clear call to action.', review_expires_at: null }]
   await autopilot.runMonthlyStrategyAutopilot(fake, { today: '2026-09-22', systemProfileId: 'system-profile' })
   assert.equal(fake.calls.length, 2)
   for (const call of fake.calls) {
@@ -200,11 +200,11 @@ test('knowledge retrieval excludes expired, unreviewed-industry and other-client
   const fake = fixture()
   fake.tables.client_industry_profiles = [{ client_id: 'client-a', review_state: 'draft', primary_industry: 'Agriculture' }]
   fake.tables.skill_cards = [
-    { id: 'other-client', status: 'active', active_client_id: 'client-b', knowledge_layer: 'active_client_specific', relevant_agents: ['marketing_strategist'], principle: 'Private other-client truth', review_expires_at: null },
-    { id: 'expired', status: 'active', active_client_id: null, knowledge_layer: 'universal_principle', relevant_agents: ['marketing_strategist'], principle: 'Expired truth', review_expires_at: '2026-09-21' },
-    { id: 'today', status: 'active', active_client_id: null, knowledge_layer: 'universal_principle', relevant_agents: ['marketing_strategist_agent'], principle: 'Current through today', review_expires_at: '2026-09-22' },
-    { id: 'unrelated', status: 'active', active_client_id: null, knowledge_layer: 'universal_principle', relevant_agents: ['paid_ads_agent'], principle: 'Unrelated active truth', review_expires_at: null },
-    { id: 'industry-draft', status: 'active', active_client_id: null, knowledge_layer: 'industry_specific', relevant_agents: ['content_planner'], category: 'Agriculture', principle: 'Industry truth', review_expires_at: null },
+    { id: 'other-client', content_hash: 'a'.repeat(64), reviewed_content_hash: 'a'.repeat(64), status: 'active', active_client_id: 'client-b', knowledge_layer: 'active_client_specific', relevant_agents: ['marketing_strategist'], principle: 'Private other-client truth', review_expires_at: null },
+    { id: 'expired', content_hash: 'a'.repeat(64), reviewed_content_hash: 'a'.repeat(64), status: 'active', active_client_id: null, knowledge_layer: 'universal_principle', relevant_agents: ['marketing_strategist'], principle: 'Expired truth', review_expires_at: '2026-09-21' },
+    { id: 'today', content_hash: 'a'.repeat(64), reviewed_content_hash: 'a'.repeat(64), status: 'active', active_client_id: null, knowledge_layer: 'universal_principle', relevant_agents: ['marketing_strategist_agent'], principle: 'Current through today', review_expires_at: '2026-09-22' },
+    { id: 'unrelated', content_hash: 'a'.repeat(64), reviewed_content_hash: 'a'.repeat(64), status: 'active', active_client_id: null, knowledge_layer: 'universal_principle', relevant_agents: ['paid_ads_agent'], principle: 'Unrelated active truth', review_expires_at: null },
+    { id: 'industry-draft', content_hash: 'a'.repeat(64), reviewed_content_hash: 'a'.repeat(64), status: 'active', active_client_id: null, knowledge_layer: 'industry_specific', relevant_agents: ['content_planner'], category: 'Agriculture', principle: 'Industry truth', review_expires_at: null },
   ]
   await autopilot.runMonthlyStrategyAutopilot(fake, { today: '2026-09-22', systemProfileId: 'system-profile' })
   const sourceIds = fake.calls[0].p_seed_context.sources.marketing_library_skill_card_ids

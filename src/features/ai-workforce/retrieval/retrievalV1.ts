@@ -12,6 +12,7 @@
 // ============================================================================
 import { cardTargetsAgent } from '../agents/agentRegistry'
 import type { AgentProfile, KnowledgeLayer } from '../agents/agentRegistry'
+import { isSkillCardContentApproved } from '../../../lib/skillCardApproval'
 
 export interface RetrievalContext {
   agent: AgentProfile
@@ -45,6 +46,8 @@ export interface SkillCardRecord {
    * card past this date is stale and must not ground a production answer.
    */
   reviewExpiresAt?: string | null
+  contentHash?: string | null
+  reviewedContentHash?: string | null
 }
 
 export interface SourceRecord {
@@ -108,6 +111,7 @@ export function isCardRetrievable(card: SkillCardRecord, ctx: RetrievalContext):
   // Production only ever sees active reviewed cards; admin research may see needs-review.
   if (ctx.mode === 'production') {
     if (card.status !== 'active') return false
+    if (!isSkillCardContentApproved(card.contentHash, card.reviewedContentHash)) return false
     // A review-expired active card is stale: it was approved for a window that
     // has passed, so it cannot ground a production answer.
     if (card.reviewExpiresAt != null && typeof card.reviewExpiresAt !== 'string') return false

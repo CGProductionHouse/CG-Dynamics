@@ -17,7 +17,7 @@ before(async () => {
 after(async () => { await server?.close() })
 
 // A rights card shaped like the seeded MCR/TIK cards (needs_review, universal_principle).
-const rightsCard = o => ({
+const rightsCard = o => ({ contentHash: 'a'.repeat(64), reviewedContentHash: 'a'.repeat(64),
   id: 'r', status: 'needs_review', knowledgeLayer: 'universal_principle', clientSpecific: false,
   activeClientId: null, sourceType: 'official_documentation', sourceId: 's', title: 'Rights',
   relevantAgents: ['brand_guardian'], ...o,

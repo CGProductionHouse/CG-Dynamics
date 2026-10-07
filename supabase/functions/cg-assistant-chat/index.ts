@@ -301,10 +301,10 @@ async function getMarketingAiState(sb: SupabaseClient): Promise<MarketingAiState
     const today = new Date().toISOString().slice(0, 10)
     const { data: cards } = await sb
       .from('skill_cards')
-      .select('relevant_agents, source_type, review_expires_at')
+      .select('relevant_agents, source_type, review_expires_at, content_hash, reviewed_content_hash')
       .eq('status', 'active')
       .or(`review_expires_at.is.null,review_expires_at.gte.${today}`)
-    const rows = cards ?? []
+    const rows = (cards ?? []).filter(row => isSkillCardContentApproved(row.content_hash, row.reviewed_content_hash))
     const perSpecialist = new Map<string, number>()
     for (const row of rows) {
       const agents = Array.isArray((row as { relevant_agents?: unknown }).relevant_agents)
@@ -1890,7 +1890,7 @@ async function handleSkilledChat(
   const statuses = mode === 'production' ? ['active'] : ['active', 'reviewed', 'needs_review']
   const { data: rawCards } = await sb
     .from('skill_cards')
-    .select('id, status, knowledge_layer, client_specific, active_client_id, source_type, source_id, title, principle, summary, source_reference, relevant_agents, review_expires_at')
+    .select('id, status, knowledge_layer, client_specific, active_client_id, source_type, source_id, title, principle, summary, source_reference, relevant_agents, review_expires_at, content_hash, reviewed_content_hash')
     .in('status', statuses)
   const cards = (rawCards ?? []) as unknown as CardRow[]
 
@@ -2410,3 +2410,4 @@ Deno.serve(async (req) => {
     })
   }
 })
+import { isSkillCardContentApproved } from '../../../src/lib/skillCardApproval.ts'

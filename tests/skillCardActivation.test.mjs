@@ -10,8 +10,8 @@ let server
 let evaluateSkillCardActivation
 
 const tier1Source = { trust_tier: 'tier_1_primary' }
-const readyCard = { source_id: 'source-1', last_reviewed: '2026-07-20' }
-const approvedReview = [{ review_status: 'approved' }]
+const readyCard = { source_id: 'source-1', last_reviewed: '2026-07-20', content_hash: 'a'.repeat(64), reviewed_content_hash: 'a'.repeat(64) }
+const approvedReview = [{ review_status: 'approved', review_kind: 'content_review', reviewer_profile_id: 'fixture-admin', reviewed_content_hash: 'a'.repeat(64) }]
 
 before(async () => {
   server = await createServer({

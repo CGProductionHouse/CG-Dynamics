@@ -27,6 +27,7 @@ before(async () => {
 after(async () => { await server.close() })
 
 const card = (o = {}) => ({
+  content_hash: 'a'.repeat(64), reviewed_content_hash: 'a'.repeat(64),
   id: 'c1', slug: 's', title: 'T', category: 'Marketing Library', subcategory: null,
   status: 'needs_review', knowledge_layer: 'universal_principle', principle: 'P', summary: 'S',
   why_it_matters: null, how_to_apply: null, agent_instructions: null, safe_claim: null,

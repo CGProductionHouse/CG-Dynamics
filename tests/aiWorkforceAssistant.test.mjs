@@ -13,7 +13,7 @@ before(async () => {
 })
 after(async () => { await server?.close() })
 
-const card = o => ({
+const card = o => ({ content_hash: 'a'.repeat(64), reviewed_content_hash: 'a'.repeat(64),
   id: 'c1', status: 'active', knowledge_layer: 'universal_principle', client_specific: false,
   active_client_id: null, source_type: 'book', source_id: 's1', title: 'T', principle: 'P', summary: 'S', source_reference: null,
   // Real cards always name their specialist; the gate now routes on it.

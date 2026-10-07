@@ -3,7 +3,8 @@ import type { ClientReportPost, ReportPost } from './db/reports'
 import type { ReportManualMetric } from './db/manualMetrics'
 import { projectMetaPostEngagement } from '../../supabase/functions/_shared/metaPostEngagement.ts'
 
-export type Platform = 'facebook' | 'instagram' | 'tiktok'
+import type { Platform } from '../types/reportPlatform'
+export type { Platform } from '../types/reportPlatform'
 
 export const PLATFORMS: Platform[] = ['facebook', 'instagram', 'tiktok']
 

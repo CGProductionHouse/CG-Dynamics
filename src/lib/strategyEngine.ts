@@ -6,8 +6,8 @@
 // client-facing report. Selected option *labels* are stored here, so editing
 // the global option library never changes already-saved reports.
 
-import type { Platform } from './reportStats'
-import type { PackageSettings } from './db/clients'
+import type { Platform } from '../types/reportPlatform'
+import type { PackageSettings } from './packageAuthority'
 
 export const CONTENT_TYPES = [
   'Professional video',
