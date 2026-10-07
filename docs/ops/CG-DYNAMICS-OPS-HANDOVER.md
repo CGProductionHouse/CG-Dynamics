@@ -7,8 +7,10 @@ briefs in the requested info account: Elcheck service/artwork direction, JFJ
 project/copy work, LHP's 2027 viewing/application campaign and VCS's 23–31 October
 promotion. Four distinct concrete working plans are proposed, not approved
 research or canonical strategies. All four production packages remain `{}`;
-caption counts cannot establish contractual capacity. LHP room/inclusion claims
-and original booklet need review; AI summaries are not independent evidence.
+caption counts cannot establish contractual capacity. Original LHP booklet
+viewer now proves its 19-room/2027 context and internal all-inclusive versus
+separately billed utilities contradiction; owner correction is still needed.
+AI summaries and the source's own promotional claims are not semantic approval.
 The Business workspace shows Deactivated; readable existing projects were used
 without changing account settings. Partial older-history loading is documented.
 

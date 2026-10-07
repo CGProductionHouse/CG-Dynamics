@@ -345,7 +345,8 @@ test('rendered ClientReportView uses normalized facts and only valid comparisons
 test('rendered current followers are a snapshot with no percentage', () => {
   const followers = fact({ platform: 'instagram', metricKey: 'current_followers', value: 891, aggregation: 'snapshot', sourceMetric: 'followers_count', comparableGroup: 'ig_followers_snapshot_v1', includesPaid: 'organic' })
   const html = renderReport({ facts: [followers], previousFacts: [previousFact({ ...followers, value: 880 })] })
-  assert.match(html, /Current followers snapshot at the latest sync/)
+  assert.match(html, /Account snapshot for this report/)
+  assert.doesNotMatch(html, /at the latest sync/)
   assert.doesNotMatch(html, /vs last month/)
 })
 

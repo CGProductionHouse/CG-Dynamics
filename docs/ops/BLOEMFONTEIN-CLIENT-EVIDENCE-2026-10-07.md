@@ -95,13 +95,27 @@ segment, approved project images, monthly capacity and confirmed offer.
 
 **Direct sources:** [CA's exact 2027 campaign brief](https://chatgpt.com/g/g-p-6abf592ba6c88191ba5d824ca07bded7/c/6abf5d03-2ecc-83ea-9b8d-c4ec1174b2ac),
 [scope/website consolidation discussion](https://chatgpt.com/g/g-p-6abf592ba6c88191ba5d824ca07bded7/c/6abfab05-ed40-83e9-a340-48d7907ead9b).
+**Original-source follow-through:** exact document search located the booklet at
+[this authenticated original file](https://chatgpt.com/library/file/libfile_7f4e693ec0b48191adb357b1db3d72c3).
+Download returned HTTP 500; no credential workaround or repeated download was
+used. Its 19-page viewer was readable. Cover/introduction, room descriptions,
+price-list and final additional-information pages were inspected. The cover
+states 19 furnished en-suite rooms and the introduction availability from
+1 January 2027. The final page explicitly lists prepaid electricity/gas and
+water billed to the student, while another page advertises all-inclusive rental
+options: **a contradiction inside the source itself**, not merely an AI mistake.
+Use qualified verified inclusions and obtain the owner's corrected terms before
+any public all-inclusive claim. Prices differ by room; the marketing package
+quantities remain unknown. This verifies what the source says, not current room
+availability, owner approval of every claim or scope for The Block.
+
 CA-authored brief states 2027 applications, arranging a viewing, Langenhovenpark
 Bloemfontein and LHP Student Village. It names Stefan/Igna as business enquiry
 contacts. Her requested urgency is a creative preference, not proof rooms are
 selling fast. The assistant cites a 2027 booklet and flags **19 vs 21 rooms** and
-**utilities not fully included vs old all-inclusive wording**. The actual booklet
-was not accessible from the inspected visible citation links, so those details
-remain source-review gates. Do not treat its AI summary as verified amenities.
+**utilities not fully included vs old all-inclusive wording**. The later original
+viewer inspection above substantiates the room/utilities source distinction;
+not every amenity page was inspected. Do not promote uninspected AI summaries.
 CA also explicitly distinguishes included website essentials from additional
 nice-to-have work requiring a quote. The Block/umbrella scope remains unconfirmed.
 
