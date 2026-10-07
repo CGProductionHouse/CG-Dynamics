@@ -21,7 +21,9 @@ test('Performance keeps all service choices without inferring package or connect
       const html = render(tab.key)
       for (const choice of PERFORMANCE_SERVICE_TABS) assert.ok(html.includes(`aria-label="${choice.label}"`), choice.label)
       assert.doesNotMatch(html, /No paid campaigns are linked|border-amber-300\/20|This is not a completed monthly report/)
-      assert.match(html, /Partial reporting period/)
+      assert.match(html, /Partial content reporting period/)
+      assert.match(html, /Report content coverage:/)
+      assert.doesNotMatch(html, /latest verified evidence|latest sync/)
     }
     for (const social of ['facebook', 'instagram']) {
       const html = render(social)
