@@ -23,13 +23,16 @@ const fixture = {
         posts:[post('covered','2026-09-24T06:59:59.999Z','Covered Pacific final-day result',0),
           post('later','2026-09-24T07:00:00Z','Uncovered later result',999)]};
       const strategyData=emptyStrategyData();strategyData.strategyGoingForward='Explain the application routes so contributors can prepare the correct submission.';
-      function App(){const[status,setStatus]=useState('draft');const[client,setClient]=useState(null);const[lowSignal,setLowSignal]=useState(false);window.showPublishedFixture=()=>setStatus('published');
+      function App(){const[status,setStatus]=useState('draft');const[client,setClient]=useState(null);const[lowSignal,setLowSignal]=useState(false);const[facts,setFacts]=useState([]);window.showPublishedFixture=()=>setStatus('published');
+        window.showPlatformWindowFixture=()=>setFacts([{platform:'tiktok',metricKey:'views',value:57944,availability:'partial',aggregation:'sum',comparableGroup:'tiktok-cohort',sourceMetric:'views',periodStart:'2026-09-01',periodEnd:'2026-09-30'},
+          {platform:'tiktok',metricKey:'comments',value:0,availability:'partial',aggregation:'sum',comparableGroup:'tiktok-cohort',sourceMetric:'comments',periodStart:'2026-09-01',periodEnd:'2026-09-23'},
+          {platform:'tiktok',metricKey:'total_likes',value:52555,availability:'partial',aggregation:'snapshot',comparableGroup:null,sourceMetric:'total_likes',periodStart:null,periodEnd:null}]);
         window.showLowSignalFixture=()=>setLowSignal(true);
         window.showMaintainedSiteFixture=()=>setClient({id:'aece5a86-c962-4234-a1fe-7904c20f03ff',name:'JFJ Electrical'});
         return React.createElement('main',{className:'mx-auto max-w-6xl p-3 sm:p-8'},
           React.createElement(ClientReportView,{report:{...report,client_id:client?.id??report.client_id,
             posts:lowSignal?report.posts.map(post=>({...post,impressions:0,reach:0,engagements:null})):report.posts},client,googleAds:null,googleAdsState:'unmapped',
-            googleAdsError:null,monthlyStrategy:{month:'2026-09-01',status,strategyData}}));}
+            googleAdsError:null,facts,monthlyStrategy:{month:'2026-09-01',status,strategyData}}));}
       createRoot(document.getElementById('root')).render(React.createElement(App));`
   },
   configureServer(server) {
@@ -101,6 +104,23 @@ try {
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width} zero-evidence overflow`)
     assert.deepEqual(errors, [])
     await page.screenshot({ path: join(tmpdir(), `cg-report-observed-zero-${width}.png`), fullPage: true })
+    await page.evaluate(() => window.showPlatformWindowFixture())
+    await page.getByText('Recorded platform window: 1 September 2026 – 30 September 2026', { exact: true }).waitFor()
+    for (const tab of ['Overview', 'TikTok']) {
+      await page.getByRole('tab', { name: tab, exact: true }).click()
+      const body = await page.locator('body').innerText()
+      assert.match(body, /Content month to date · through 23 September 2026/)
+      assert.match(body, /Report content coverage:/)
+      assert.match(body, /Recorded platform window: 1 September 2026 – 30 September 2026/)
+      assert.match(body, /Recorded platform window: 1 September 2026 – 23 September 2026/)
+      assert.match(body, /Platform window unavailable/)
+      assert.match(body, /57,944/)
+      assert.match(body, /Account snapshot for this report/)
+      assert.doesNotMatch(body, /latest verified evidence|latest sync|vs last month/)
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width} fact-window overflow`)
+      assert.deepEqual(errors, [])
+    }
+    await page.screenshot({ path: join(tmpdir(), `cg-report-fact-window-${width}.png`), fullPage: true })
     await page.close()
     console.log(`PASS ${width}px: actual Overview/Facebook/held managed Website, cutoff/observed zero, no later highlight/duplicate site upsell/overflow/runtime errors; localhost GET only`)
   }

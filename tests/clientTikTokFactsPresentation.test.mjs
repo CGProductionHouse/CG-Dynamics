@@ -11,7 +11,7 @@ test('TikTok client facts retain partial/zero/null truth and distinguish account
   } })
   try {
     const { ClientReportView } = await server.ssrLoadModule('/src/pages/client/ClientReportView.tsx')
-    const { buildOverviewSections } = await server.ssrLoadModule('/src/lib/overviewModel.ts')
+    const { buildOverviewSections, platformFactWindowLabel } = await server.ssrLoadModule('/src/lib/overviewModel.ts')
     const fact = (metricKey, value, aggregation = 'sum', availability = 'partial') => ({
       platform: 'tiktok', metricKey, value, aggregation, availability, comparableGroup: 'tiktok-provider-video-cohort',
       sourceMetric: metricKey, periodStart: '2026-09-01', periodEnd: '2026-09-30',
@@ -40,5 +40,35 @@ test('TikTok client facts retain partial/zero/null truth and distinguish account
     assert.ok(lines.every(line => !line.comparable))
     assert.doesNotMatch(render([fact('views', null, 'sum', 'unavailable')]), />0<\/p>/)
     assert.deepEqual(facts, before)
+
+    const cutoffHtml = renderToStaticMarkup(createElement(ClientReportView, {
+      report: { ...report, period_end: '2026-09-23' }, googleAds: null,
+      googleAdsState: 'unmapped', googleAdsError: null, normalizedFactsAttempted: true,
+      facts, initialTab: 'tiktok', onTabChange: () => {},
+    }))
+    assert.match(cutoffHtml, /Report content coverage:/)
+    assert.match(cutoffHtml, /Content month to date · through 23 September 2026/)
+    assert.match(cutoffHtml, /Recorded platform window: 1 September 2026 – 30 September 2026/)
+    assert.doesNotMatch(cutoffHtml, /as of latest verified evidence|latest sync/)
+    assert.match(cutoffHtml, /57,944/)
+    const unknownWindow = render([{ ...fact('views', 0), periodEnd: null }])
+    assert.match(unknownWindow, /Platform window unavailable/)
+    assert.match(unknownWindow, />0<\/p>/)
+    for (const [start, end] of [[null, null], ['2026-09-01', null], ['bad', '2026-09-30'],
+      ['2026-02-30', '2026-03-01'], ['2026-09-30', '2026-09-01']]) {
+      assert.equal(platformFactWindowLabel(start, end), 'Platform window unavailable')
+    }
+    assert.equal(platformFactWindowLabel('2026-09-01', '2026-09-23'), 'Recorded platform window: 1 September 2026 – 23 September 2026')
+    // Exact window is preserved per metric, including mixed provider cutoffs.
+    const mixed = [fact('views', 57944), { ...fact('comments', 0), periodEnd: '2026-09-23' }]
+    const mixedHtml = render(mixed)
+    assert.match(mixedHtml, /1 September 2026 – 30 September 2026/)
+    assert.match(mixedHtml, /1 September 2026 – 23 September 2026/)
+    assert.deepEqual(buildOverviewSections(mixed).flatMap(s => s.lines).map(l => l.periodEnd), ['2026-09-30', '2026-09-23'])
+    // Full-month behavior and definitive comparable metrics remain intact.
+    const current = fact('views', 100, 'sum', 'complete')
+    const previous = { ...current, value: 50, periodStart: '2026-08-01', periodEnd: '2026-08-31' }
+    assert.equal(buildOverviewSections([current], [previous])[0].lines[0].changePercent, 100)
+    assert.doesNotMatch(render(facts), /Content month to date/)
   } finally { await server.close() }
 })

@@ -220,7 +220,7 @@ export function reportPeriodDisclosure(
   const asOf = new Intl.DateTimeFormat('en-ZA', {
     day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
   }).format(new Date(`${report.period_end}T00:00:00Z`))
-  return `Month to date · as of latest verified evidence on ${asOf}`
+  return `Content month to date · through ${asOf}`
 }
 
 // The calendar month a report belongs to. Derived from period_start so that a

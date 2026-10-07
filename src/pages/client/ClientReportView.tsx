@@ -42,6 +42,7 @@ import {
 } from '../../components/client/GoogleAdsResults'
 import {
   buildOverviewSections,
+  platformFactWindowLabel,
   type OverviewSection as VerifiedSection,
   type OverviewLine as VerifiedLine,
   type PlatformFact,
@@ -223,12 +224,18 @@ export function ClientReportView({
       <ReportHero report={report} client={client} month={month} master={master} />
 
       <p className="mb-6 text-center text-xs text-slate-500">
-        Reporting period: {report.period_start ? formatDate(report.period_start) : '-'} to {report.period_end ? formatDate(report.period_end) : '-'}
+        Report content coverage: {report.period_start ? formatDate(report.period_start) : '-'} to {report.period_end ? formatDate(report.period_end) : '-'}
       </p>
 
       {periodDisclosure && (
         <p className="mb-6 px-4 text-center text-xs leading-6 text-slate-400">
-          {periodDisclosure}. Partial reporting period.
+          {periodDisclosure}. Partial content reporting period.
+        </p>
+      )}
+
+      {verifiedSections.some(section => section.lines.some(line => line.hasValue)) && (
+        <p className="mb-6 px-4 text-center text-xs leading-6 text-slate-400">
+          Platform figures have their own recorded windows, shown with each figure. They may differ from the content coverage above; account snapshots are not monthly growth.
         </p>
       )}
 
@@ -692,6 +699,9 @@ function VerifiedMetricCard({ line }: { line: VerifiedLine }) {
       )}
       <p className="mt-2 text-3xl font-semibold text-white">
         {line.hasValue && typeof line.value === 'number' ? formatNumber(line.value) : '—'}
+      </p>
+      <p className="mt-2 text-xs leading-relaxed text-slate-400">
+        {platformFactWindowLabel(line.periodStart, line.periodEnd)}
       </p>
       <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
         {line.reconstructed && (
