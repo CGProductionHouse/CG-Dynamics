@@ -65,3 +65,11 @@ authenticated saved-row acceptance and human review of generated creative qualit
 remain separate. Old deployed responses without a saved revision cannot be accepted
 by the new UI. Coordinate the eventual frontend/Edge release; do not bypass the
 version guard. Hosting #679 remains OFF/local-first.
+
+Final local verification: 50 focused PASS; full supported suite **3,678 total /
+3,661 PASS /17 intentional skips /0 failures**, including disposable PostgreSQL
+fixtures (Windows Bash-only SES fixture excluded, not passed). Fresh local
+TypeScript/Vite build, scoped TS and explicit Node/browser lint, diff and full
+Director Deno 2.5.1 `--no-lock` import closure PASS. Existing >500k bundle warning
+unchanged; emitted app bundle contains the actual CTA-only control. All four
+browser widths PASS; 375px screenshot visually inspected. No cloud build/deploy.
