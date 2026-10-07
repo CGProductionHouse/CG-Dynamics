@@ -29,6 +29,14 @@ before(async () => {
 after(async () => { await server.close() })
 
 // ── The sheet is sized to what the user can actually see ────────────────────
+test('collapsed mobile launcher accepts taps without making the entire dock intercept input', () => {
+  const launcher = composer.slice(composer.indexOf('{!mobileFullscreen && !open && isMobile ? ('), composer.indexOf('aria-label="Open CG Assistant"'))
+  assert.match(launcher, /onClick=\{\(\) => setOpen\(true\)\}/)
+  assert.match(launcher, /className="pointer-events-auto mx-auto flex h-11 w-11/)
+  const dock = composer.slice(composer.indexOf('const shellClass'), composer.indexOf('const innerClass'))
+  assert.match(dock, /pointer-events-none fixed/)
+})
+
 test('the full-screen sheet is sized to the VISUAL viewport, never a vh unit', () => {
   // Measured in-browser: with a 336px keyboard on a 390x844 iPhone the sheet
   // ended at exactly 508px — the keyboard's top edge. A 100dvh sheet would have
