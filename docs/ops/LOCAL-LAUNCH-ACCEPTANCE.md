@@ -1,5 +1,18 @@
 # Integrated local launch acceptance — #668 / #679
 
+**Latest clean Overview candidate — PR #698:** tested source
+`c4c19b3eddb8fb20b0c35e963fea487d5170f17f`, tree
+`1d9e73c3b702b9b809dd8df3d273632ab9ebeef5`: all twelve local steps PASS;
+3,729 total /3,712 PASS /17 intentional skips /0 failures. Three pre-fix
+failures reproduced offers on Overview. Actual Dashboard populated/empty/default/
+return-to-Overview plus service components pass desktop/375/390/430: zero Overview
+offers/entitlement reads/view records, preserved Performance offers and client
+scope transitions, no overflow/page runtime errors. Fifteen nearest tests, local
+build/scoped lint/diff PASS. Receipt `%TEMP%/cg-local-launch-c4c19b3eddb8.json`,
+SHA256 `9441e81f3fc34570096a96180c742f0ea0a5fc77fad213151121c91d1c229960`.
+Synthetic fixture only; no real client request, auth bypass, production or Vercel
+operation. Git deployment OFF; Windows Bash SES excluded; never upload synthetic dist.
+
 **Latest approval retry candidate, 7 October — PR #697:** tested source
 `57248ff4e00289ba4bb97121cdcf096d6f62083f`, tree
 `ea23a0d76c2bdac127d3203d99e609f621be3f1e`: all twelve local steps PASS;
