@@ -1,5 +1,30 @@
 # CG Dynamics Ops Handover
 
+### 7 October work Chrome restored; local Creative Intelligence follow-through
+
+The requested work Chrome profile is now connected and genuinely authenticated
+as CG Production House Admin. This supersedes the browser-absent receipt below.
+Read-only Hub/Performance/Client Preview/Setup/Content navigation resolved with
+no captured warning/error logs. We Ar Fuels and Piek switches cleared the previous
+client panel before loading the exact new report. At 375px, both sampled report
+bodies remained 360px wide (no horizontal body overflow). Piek's published host,
+1 visitor/1 pageview, September 27 partial coverage and unavailable contact/
+enquiry/breakdown facts remain truthful. All service tabs were discoverable;
+standard Instagram recovery is not an upsell, optional discussion links use
+Amonique's approved number without sending a message.
+
+This is acceptance of the EXISTING frontend, not current-main release acceptance.
+Old eight-tile packages and old Creative Intelligence card reads remain live;
+clean package/full-preview/current-review source is not yet frontend-released.
+The canonical Econofoods guideline's three scripts/order/linked schedule identity
+and staff draft-versus-unknown context loaded read-only; no save/import/generation
+or publication was invoked. Its historical cards cannot certify current approval.
+The pure Creative Intelligence projection additionally reproduced admission of
+unbound/changed card revisions despite the guarded read adapter. It now reuses
+the existing current-content approval helper before routing/order/three-card cap;
+no new authority/store or production action. Focused regression evidence is in
+`SKILL-CARD-REVIEW-REVISION-433.md`. Vercel remains entirely untouched.
+
 ### 7 October CA-authorized backend prerequisites now live
 
 Supersedes UNAPPLIED/deploy-pending statements below for these exact two changes

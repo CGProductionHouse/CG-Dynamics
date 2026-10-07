@@ -1,5 +1,21 @@
 # #433 exact-content human review authority
 
+## 7 October pure Creative Intelligence boundary correction
+
+The production read adapter already filters current approval. The pure projection
+still admitted an active/shared card with null historical hashes, a changed revision
+or matching malformed strings if supplied directly. A new executable regression
+failed on old source (`researchAvailable=true` instead of false), using loopback
+fixture config; an earlier missing-fixture-config setup failure is not reproduction
+evidence. The projection now reuses `isSkillCardContentApproved`, before the existing
+specialist routing/sort/three-card limit. It does not create another review system.
+Unbound cards provide neither guidance, warnings nor citations; current approved
+cards retain deterministic selection and provenance. Input and staff draft remain
+unchanged. A second regression proves three unreviewed low-ID cards cannot displace
+reviewed cards. Nearest Creative Intelligence/review/activation/workflow tests:
+36 PASS /0 failures. Full integrated local verification is required before merge.
+No schema/Edge/auth/secret/config/data change or Vercel action in this follow-up.
+
 **Live update, 7 October:** CA-authorized review-binding migration now applied as
 ledger `20261007141211 / skill_card_review_revision_binding`; dependent Edge reads
 deployed/verified. Historical null bindings remain untouched. No card reviewed or
