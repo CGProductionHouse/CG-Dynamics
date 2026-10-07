@@ -245,10 +245,12 @@ declare
   v_client_id uuid;
   v_status text;
   v_report_month text;
+  v_report_period_end date;
 begin
   select r.client_id, r.status,
-         to_char(date_trunc('month', r.period_end), 'YYYY-MM')
-  into v_client_id, v_status, v_report_month
+         to_char(date_trunc('month', r.period_end), 'YYYY-MM'),
+         r.period_end
+  into v_client_id, v_status, v_report_month, v_report_period_end
   from public.reports r
   where r.id = p_report_id;
 
@@ -276,6 +278,7 @@ begin
       v_report_month,
       to_char(to_date(v_report_month || '-01', 'YYYY-MM-DD') - interval '1 month', 'YYYY-MM')
     )
+    and (f.period_month <> v_report_month or f.period_end <= v_report_period_end)
     and exists (
       select 1
       from public.metric_registry mr
@@ -308,9 +311,12 @@ declare
   v_client_id uuid;
   v_status text;
   v_report_month text;
+  v_report_period_end date;
 begin
-  select r.client_id, r.status, to_char(date_trunc('month', r.period_end), 'YYYY-MM')
-    into v_client_id, v_status, v_report_month
+  select r.client_id, r.status,
+         to_char(date_trunc('month', r.period_end), 'YYYY-MM'),
+         r.period_end
+    into v_client_id, v_status, v_report_month, v_report_period_end
   from public.reports r
   where r.id = p_report_id;
 
@@ -331,10 +337,14 @@ begin
       where sr.client_id = v_client_id and sr.period_month = v_report_month
     ) or exists (
       select 1 from public.platform_metric_facts_monthly f
-      where f.client_id = v_client_id and f.period_month = v_report_month
+      where f.client_id = v_client_id
+        and f.period_month = v_report_month
+        and f.period_end <= v_report_period_end
     ),
     (select count(*) from public.platform_metric_facts_monthly f
-      where f.client_id = v_client_id and f.period_month = v_report_month),
+      where f.client_id = v_client_id
+        and f.period_month = v_report_month
+        and f.period_end <= v_report_period_end),
     (select count(*)
       from public.platform_metric_facts_monthly f
       join public.metric_registry mr
@@ -342,6 +352,7 @@ begin
        and mr.client_safe and mr.status = 'active'
       where f.client_id = v_client_id
         and f.period_month = v_report_month
+        and f.period_end <= v_report_period_end
         and f.availability in ('complete', 'valid_zero')
         and f.value is not null);
 end
