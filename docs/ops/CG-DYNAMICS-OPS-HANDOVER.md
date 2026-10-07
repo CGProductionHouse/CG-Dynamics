@@ -1,5 +1,184 @@
 # CG Dynamics Ops Handover
 
+### 7 October #674 full portal entry closure
+
+Full local Deno entry/import check exposed eight inherited type errors; type-only
+repairs now pass with emitted-JavaScript parity regressions for all three changed
+files. Actual category boundary test still denies absent/wrong-client categories.
+139 focused portal/file/OneDrive compatibility tests PASS; local build/lint/diff
+PASS. No OneDrive invocation, secret/config change, Edge deploy or production write.
+
+### 7 October full portal shell continuation — #674, local only
+
+Actual persistent preview shell plus all six lazy routes now have localhost-only
+read-only browser acceptance at 1440/375/390/430: nav/mobile menu, exact client,
+unpublished/empty/error states, denied role and no write controls/overflow/page
+runtime errors. No copied authentication or production acceptance claim. See
+`CLIENT-PLAN-LOCAL-ACCEPTANCE.md`; screenshots remain synthetic local artifacts.
+Preserved the concurrent additive test-setup commit `a29a71f9`; its actual isolated
+PostgreSQL test passes. Local #674/#677/#683 integration previously passed 3,641
+tests /17 skips, build/lint; integration is not merged main or a release certificate.
+Protected backend rollout, real final files, substantive strategy review/publication
+and authenticated role acceptance remain separate. No Vercel or production action.
+
+### 7 October local launch continuation — same #674, no Vercel
+
+Current main refetched as `116c280f80370753d8d45eb4119e0f109d3beafb`.
+Continue same `codex/668-complete-client-preview` / draft #674; no replacement PR.
+Implemented the outstanding exact Calendar-post -> published portal-file reader:
+existing visibility authority + canonical deliverable/asset/library boundary,
+bounded public metadata, lazy exact client/month/post disclosure and existing
+file broker. New migration `20261007100000_client_portal_post_assets.sql` is
+**UNAPPLIED**; separately approved migration/Brand Hub Edge rollout still required.
+Executable disposable PostgreSQL proof uses actual historical visibility/foundation
+SQL, synthetic fixtures, no network/ports and automatic own-container cleanup.
+91 focused tests PASS.
+Full supported suite: 3,642 total /3,625 PASS /17 intentional skips /0 fail,
+including the local SQL test; Windows Bash-only SES fixture excluded, not passed.
+TypeScript/Vite build, scoped lint and diff check PASS; existing chunk warning.
+Actual-component Plan/Calendar/Files checks PASS at desktop 1440 and
+375/390/430px; synthetic, NOT authenticated production acceptance.
+Runbook: `CLIENT-PLAN-LOCAL-ACCEPTANCE.md`.
+
+Also reproduced/fixed malformed calendar timestamps/ranges and a pending file
+response opening after departure. Exact signed URL transport and scope-lifetime
+fences preserve the existing server auth contract; no direct table fallback.
+Fresh read-only production evidence: 61 active clients, 72 v3 + 22 held v2 target
+drafts, zero published strategy snapshots and zero active published portal assets.
+This supersedes stale blanket “only #505/#513 launch blockers” wording below:
+semantic strategy/research acceptance, unpublished evidence, protected backend
+rollout and authenticated role acceptance still remain. No launch certification.
+All Vercel operations remain forbidden; Git automatic deployment OFF preserved.
+No production data, secret/config/provider/OAuth/strategy or Microsoft write.
+
+### 5 October cleanup staging completed — no deletion or cloud action
+
+CA explicitly requested moving the checked generated folders into a delete-review
+folder for manual disposal. Revalidated exact paths, canonical remote/lockfile,
+ignored/untracked status, active PR exclusions and visible process references.
+Moved all 70 selected old Dynamics dependency/build folders (~4.95 GiB logical)
+to `C:\CG-Cleanup-Review-2026-10-05`. Manifest/README remain local; 70 destinations
+verified, originals absent, current primary/active worktree dependencies intact.
+Source, Git history, private credentials/assets and accounting remain untouched.
+This supersedes the earlier cleanup-blocked receipt for staging only. Zero
+deletions and zero reclaimed-space claims; CA's manual removal remains necessary.
+No Vercel, provider or production action. Local-first launch plan unchanged.
+
+### 5 October local-first finish plan + disk cleanup audit
+
+CA requested safe local app/website cleanup (accounting excluded) and a concrete
+GitHub plan to finish Dynamics without Vercel usage. Execution authority is now
+`LOCAL-FIRST-LAUNCH-FINISH-2026-10-05.md`, additive to #668/#679 and the existing
+hosting policy; not a replacement strategy/calendar/knowledge authority. Ordered
+work, existing PR ownership, actual browser/test completion gates and outstanding
+backend/semantic-strategy contracts are explicit. Future preferred release: one
+production-target local prebuilt artifact, one staged upload without live domain
+assignment, legitimate role acceptance, then same-deployment promotion. Compatibility,
+fresh budget/serving reserve, captured rollback and explicit CA approval are required.
+No Vercel commands/config/build/deploy, production data/Edge/provider or strategy
+transitions were performed. Git automatic deployment remains OFF.
+
+Local audit selected 70 ignored/untracked generated Dynamics folders (~4.95 GiB),
+excluding active open-PR branches/current working environments and accounting.
+The execution safety layer blocked removal before running; zero folders deleted,
+zero storage saving claimed. Source, local-only work, credentials/assets and history
+remain intact. Do not bypass that block or assume GitHub covers ignored/private files.
+Exact workstation inventory remains local. #679/#668/#381 carry the durable plan.
+
+### 4 October #668/#674 Brand Hub truth and Calendar navigation — local only
+
+Continued the same draft #674 on `codex/668-complete-client-preview`, no replacement
+PR or Vercel action. Executable reproduction found library summary/files accepting
+malformed evidence and the flat Brand Identity section hiding failed reads. Added
+strict allowlisted projection preserving verified zero/null, consistent counts,
+published timestamps, exact category and bounded cursor; invalid/missing reads
+remain unavailable. Existing authenticated Edge/client scope remains canonical.
+Flat category loading/error/retry now renders truthfully. Library “View in Plan”
+preserves exact client/month and opens Calendar, not Strategy. No schedule/asset
+title matching, private transport fields or new ID exposure.
+
+Actual-component synthetic local browser checks PASS at 1440/375/390/430px, with
+four read calls only, no body overflow or captured runtime errors. 375px screenshot
+visually inspected. Not authenticated production acceptance. Focused 133 PASS;
+full supported suite 3,637 total /3,620 PASS /17 intentional skips /0 fail; Bash-only
+SES Windows exclusion remains explicit. Local build/lint/diff PASS. Runbook:
+`CLIENT-PLAN-LOCAL-ACCEPTANCE.md`. No production schema/data/Edge/provider/auth-copy
+or Vercel operation. Keep deployment disabled and protected gates intact.
+
+Remaining code contract: reverse Calendar-post-to-published-asset linkage still
+needs a canonical server-safe shared identity; current month/title projection
+cannot prove that relation. #513 substantive strategies and #433/#677 research
+runtime ownership remain separate; no strategy approval/publication or knowledge
+activation is implied by these UI checks. Do not certify the app launch-ready.
+
+### 4 October #668/#674 published-guideline and Plan acceptance — local only
+
+Reproduced the published-guideline reader accepting malformed/null and wrong-month
+responses, retaining extra private transport fields, and treating unavailable reads
+as empty. It now projects only the existing RPC's public fields, rejects malformed
+client/month/row/video/publication evidence, preserves ordered full scripts and
+canonical nullable text, and fails closed on read rejection. Null/blank scripts
+display unavailable, not an empty “Complete script” block. Existing exact-client
+RPC authorization, SQL/RLS/grants and all production data remain unchanged. The
+Plan read panel remounts by client/month/tab without reloading the portal shell.
+Local browser inspection also reproduced the clipped third Plan tab at 375px;
+all three now fit without horizontal navigation scrolling.
+
+Same #674, no replacement PR. Actual-component synthetic read-only browser fixture
+passes 1440/375/390/430px: exact scoped transition fencing, complete scripts,
+unavailable vs verified-empty states, fully visible tab controls, no body overflow
+or captured runtime errors, plus actual desktop grid/mobile agenda event navigation
+to the exact client/month/published guideline. Screenshots are local artifacts, not authenticated
+production acceptance. Runbook: `CLIENT-PLAN-LOCAL-ACCEPTANCE.md`. Focused 123 PASS;
+full supported suite 3,634 total /3,617 PASS /17 intentional skips /0 fail,
+Windows Bash-only `sesSetupScript.test.mjs` excluded explicitly. Local build,
+scoped lint and diff check PASS. No Vercel build/deploy/config, Edge/SQL/provider,
+auth-copying, strategy transition or production mutation occurred.
+
+Do not certify launch from these checks: substantive #513 strategy review/remediation,
+#433/#677 research-to-creative runtime acceptance, canonical scheduled-post/portal
+asset linkage and authenticated full-preview/Brand Hub release remain open. Preserve
+the separate CG Calendar and monthly_deliverables Client Schedule authorities.
+
+### Pending #674 manual-metric parity correction
+
+Local regression reproduced preview retaining old automated unavailable-metric
+placeholders that the client RPC already excludes. The preview now matches that
+exact source/note-prefix predicate, preserves observed zero/null/positive manual
+values, strips private fields, enforces exact client/month and discards rows on
+read error. Existing SQL/RLS/grants, real-client RPC and all production data are
+unchanged. Same PR; no new deployment, Vercel/config or provider action. Mocked
+read acceptance is not live DB/browser acceptance; retain the protected gates below.
+
+### 4 October 11:38 SAST read-only serving check
+
+All nine canonical hosts in the reviewed #567 website fleet returned HTTP 200,
+with no paused-deployment page: Piek, Get Together, Imbewu, CG ARCC, Emmanuel,
+Red Oak, All Around PVC, JFJ production alias and Raadzaal. Each passed a bounded
+same-origin static-asset HEAD sample (script/CSS/image where present). Dynamics,
+Hours and Imbewu's production alias also returned 200. No builds/deploys, dashboard,
+billing/config changes, submissions or production data writes occurred. This is
+availability/static-resource smoke, not full interactive/browser acceptance.
+CG ARCC still serves `[CONFIRM ORGANISATION NAME]` as its HTML title: do not certify
+its client presentation. Shared finite $5/Pause-ON risk remains; this observation
+is neither a spend forecast nor a future uptime guarantee. Receipt: #679.
+
+### 4 October pending PR receipts — not deployed
+
+Main `116c280f80370753d8d45eb4119e0f109d3beafb` includes package #681 and
+calendar #678; both are GitHub merges only under the #679 cloud-build freeze.
+#677 remains a draft at `0925560005ac5b5fe959772bb39d7ee88304dd65`, reconciled
+with that main: 85 focused PASS, full 3,628 /3,611 PASS /17 skip /0 fail,
+local build/lint/diff PASS. No Deno/runtime save/reload acceptance is claimed;
+historical knowledge approvals are not revision-bound. Trusted citations are not
+substantive strategy acceptance. Existing #674 is reconciled, not replaced; its
+full portal preview retains exact-client/publication gates and read-only controls.
+Same #674: 98 focused PASS, full 3,627 /3,610 PASS /17 skip /0 fail,
+local TypeScript/Vite build, scoped lint and diff PASS (same SES exclusion).
+Previous changed-preview attempt reached login. Brand Hub server scope is still
+undeployed and separately protected. No auth copying, Vercel, production data,
+Edge, provider, secret or strategy transition is authorized by these receipts.
+
 ### 7 October #677 expanded Assistant entry closure
 
 Full entry-point Deno checking exposed 94 inherited Assistant typing errors not

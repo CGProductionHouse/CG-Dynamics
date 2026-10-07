@@ -1,4 +1,5 @@
 import { supabase } from '../../lib/supabase'
+import { projectLibraryAccess, projectLibraryFiles, projectLibraryState } from './projection'
 import type {
   ClientPortalAssetAccess,
   ClientPortalAssetPurpose,
@@ -9,14 +10,19 @@ import type {
 
 type ApiResult<T> = { data: T | null; error: string | null }
 
-export async function loadClientPortalLibrary(): Promise<ApiResult<ClientPortalLibraryState>> {
-  const { data, error } = await supabase.functions.invoke('client-onboarding', {
-    body: { action: 'portal_library_load' },
-  })
-  if (error || !data?.ok) {
+export async function loadClientPortalLibrary(previewClientId?: string): Promise<ApiResult<ClientPortalLibraryState>> {
+  try {
+    const { data, error } = await supabase.functions.invoke('client-onboarding', {
+      body: previewClientId ? { action: 'staff_preview_portal_library_load', clientId: previewClientId } : { action: 'portal_library_load' },
+    })
+    if (error || data?.ok !== true) {
+      return { data: null, error: 'Your client-safe library is unavailable right now. Please try again.' }
+    }
+    const projected = projectLibraryState(data.data)
+    return projected ? { data: projected, error: null } : { data: null, error: 'Your client-safe library is unavailable right now. Please try again.' }
+  } catch {
     return { data: null, error: 'Your client-safe library is unavailable right now. Please try again.' }
   }
-  return { data: data.data as ClientPortalLibraryState, error: null }
 }
 
 export async function loadClientPortalLibraryFiles(
@@ -24,24 +30,32 @@ export async function loadClientPortalLibraryFiles(
   year: number | null,
   month: number | null,
   offset = 0,
+  previewClientId?: string,
 ): Promise<ApiResult<ClientPortalLibraryFilesPage>> {
-  const { data, error } = await supabase.functions.invoke('client-onboarding', {
-    body: { action: 'portal_library_month', category, year, month, offset },
-  })
-  if (error || !data?.ok) return { data: null, error: 'These files are unavailable right now. Please try again.' }
-  return { data: data.data as ClientPortalLibraryFilesPage, error: null }
+  try {
+    const { data, error } = await supabase.functions.invoke('client-onboarding', {
+      body: { action: previewClientId ? 'staff_preview_portal_library_month' : 'portal_library_month', ...(previewClientId ? { clientId: previewClientId } : {}), category, year, month, offset },
+    })
+    if (error || data?.ok !== true) return { data: null, error: 'These files are unavailable right now. Please try again.' }
+    const projected = projectLibraryFiles(data.data, category, offset)
+    return projected ? { data: projected, error: null } : { data: null, error: 'These files are unavailable right now. Please try again.' }
+  } catch {
+    return { data: null, error: 'These files are unavailable right now. Please try again.' }
+  }
 }
 
 export async function getClientPortalAssetAccess(
   assetId: string,
   purpose: ClientPortalAssetPurpose,
+  previewClientId?: string,
 ): Promise<ApiResult<ClientPortalAssetAccess>> {
   try {
     const { data, error } = await supabase.functions.invoke('client-onboarding', {
-      body: { action: 'portal_library_access', assetId, purpose },
+      body: { action: previewClientId ? 'staff_preview_portal_library_access' : 'portal_library_access', ...(previewClientId ? { clientId: previewClientId } : {}), assetId, purpose },
     })
-    if (error || !data?.ok) return { data: null, error: 'File access failed.' }
-    return { data: data.data as ClientPortalAssetAccess, error: null }
+    if (error || data?.ok !== true) return { data: null, error: 'File access failed.' }
+    const projected = projectLibraryAccess(data.data, assetId, purpose, import.meta.env.VITE_SUPABASE_URL)
+    return projected ? { data: projected, error: null } : { data: null, error: 'File access failed.' }
   } catch {
     return { data: null, error: 'File access failed.' }
   }

@@ -25,6 +25,7 @@ test('invalid or multi ranges fail closed with a 416-compatible result', () => {
   assert.equal(normalizeRangeHeader('bytes=200-100', 1_000), null)
   assert.equal(normalizeRangeHeader('bytes=0-1,3-4', 1_000), null)
   assert.equal(normalizeRangeHeader(null, 1_000), undefined)
+  assert.equal(normalizeRangeHeader(undefined, 1_000), undefined)
 })
 
 test('range delivery accepts only matching 206 partial-content responses', () => {

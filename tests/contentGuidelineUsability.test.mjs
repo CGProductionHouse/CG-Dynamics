@@ -15,6 +15,11 @@ const CLIENT_PAGE = read('src/pages/client/ClientContentGuidesPage.tsx')
 const CLIENT_DATA = read('src/lib/clientContentGuides.ts')
 const CALENDAR = read('src/pages/admin/CompanyCalendarPage.tsx')
 
+test('missing published video scripts stay explicitly unavailable rather than labelled complete', () => {
+  assert.match(CLIENT_PAGE, /video\.script\?\.trim\(\) \? 'Complete script' : 'Script'/)
+  assert.match(CLIENT_PAGE, /video\.script\?\.trim\(\) \? video\.script : 'A script is not available for this video\.'/)
+})
+
 test('one canonical Content Guideline is enforced per Content Run', () => {
   assert.match(MIGRATION, /content_run_id uuid not null references public\.content_runs\(id\)/)
   assert.match(MIGRATION, /constraint content_guidelines_one_per_run unique \(content_run_id\)/)

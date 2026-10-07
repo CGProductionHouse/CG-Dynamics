@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
+import { ClientPortalLink as Link } from '../../components/client/ClientPortalLink'
 import { ClientPortalShell } from '../../components/client/ClientPortalShell'
 import { ClientPortalErrorState, ClientPortalLoadingState } from '../../components/client/ClientPortalStates'
 import { useAuth } from '../../contexts/AuthContext'
@@ -15,6 +16,8 @@ import { CLIENT_SAFE_STATUS_LABELS, PACKAGE_DELIVERABLE_LABELS } from '../../lib
 import { monthDisplayLabel } from '../../lib/reportPeriod'
 import { CALENDAR_HEADERS, monthGridCells } from '../../lib/scheduleCalendar'
 import { businessDateKey, businessMonthKey } from '../../lib/businessTime'
+import { useOptionalClientPortal } from '../../components/client/ClientPortalContext'
+import { ClientCalendarPostFiles } from '../../features/client-portal-library/ClientCalendarPostFiles'
 
 const MONTH_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/
 
@@ -36,6 +39,8 @@ function localDateKey(value: string): string {
 
 export default function ClientContentCalendarPage({ embedded = false, month: controlledMonth }: { embedded?: boolean; month?: string }) {
   const { profile } = useAuth()
+  const previewClientId = useOptionalClientPortal()?.previewClientId
+  const clientId = previewClientId ?? profile?.client_id
   const [searchParams, setSearchParams] = useSearchParams()
   const requestedMonth = searchParams.get('month')
   const month = controlledMonth ?? (requestedMonth && MONTH_PATTERN.test(requestedMonth) ? requestedMonth : currentMonth())
@@ -47,16 +52,18 @@ export default function ClientContentCalendarPage({ embedded = false, month: con
     let active = true
 
     async function load() {
-      if (!profile?.client_id) {
+      if (!clientId) {
         setLoading(false)
         return
       }
 
       setLoading(true)
+      setCalendar(null)
+      setClient(null)
       try {
         const [clientResult, calendarResult] = await Promise.all([
-          getClient(profile.client_id),
-          fetchClientMonthAhead(profile.client_id, month),
+          getClient(clientId),
+          fetchClientMonthAhead(clientId, month),
         ])
         if (!active) return
         setClient(clientResult.data)
@@ -71,7 +78,7 @@ export default function ClientContentCalendarPage({ embedded = false, month: con
 
     void load()
     return () => { active = false }
-  }, [month, profile?.client_id])
+  }, [month, clientId])
 
   function changeMonth(next: string) {
     if (controlledMonth) return
@@ -163,7 +170,7 @@ function CalendarSurface({
       <div className="mt-6 sm:hidden">
         <Agenda month={month} posts={scheduledPosts} events={calendar.events} />
       </div>
-      {unscheduledPosts.length > 0 && <Unscheduled posts={unscheduledPosts} />}
+      {unscheduledPosts.length > 0 && <Unscheduled posts={unscheduledPosts} month={month} />}
     </>
   )
 }
@@ -231,7 +238,7 @@ function MonthGrid({
             >
               <p className={`px-1 text-xs font-medium ${isToday ? 'text-report-accent' : 'text-report-faint'}`}>{cell.day}</p>
               <div className="mt-2 space-y-1.5">
-                {dayPosts.map(post => <PostChip key={post.id} post={post} />)}
+                {dayPosts.map(post => <PostChip key={post.id} post={post} month={month} />)}
                 {dayEvents.map(event => <EventChip key={event.id} event={event} />)}
               </div>
             </div>
@@ -302,7 +309,7 @@ function Agenda({
           {new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(`${day}T12:00:00`))}
         </p>
         <div className="mt-3 space-y-2">
-          {dayPosts.map(post => <PostChip key={post.id} post={post} />)}
+          {dayPosts.map(post => <PostChip key={post.id} post={post} month={month} />)}
           {dayEvents.map(event => <EventChip key={event.id} event={event} />)}
           {dayPosts.length === 0 && dayEvents.length === 0 && (
             <p className="py-2 text-sm text-report-faint">Nothing scheduled on this day.</p>
@@ -313,24 +320,25 @@ function Agenda({
   )
 }
 
-function Unscheduled({ posts }: { posts: ClientCalendarPost[] }) {
+function Unscheduled({ posts, month }: { posts: ClientCalendarPost[]; month: string }) {
   return (
     <section className="mt-8">
       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-report-faint">Date being finalised</p>
       <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-        {posts.map(post => <PostChip key={post.id} post={post} />)}
+        {posts.map(post => <PostChip key={post.id} post={post} month={month} />)}
       </div>
     </section>
   )
 }
 
-function PostChip({ post }: { post: ClientCalendarPost }) {
+function PostChip({ post, month }: { post: ClientCalendarPost; month: string }) {
   return (
     <div className="rounded-md border border-report-accent/15 bg-report-accent/[0.07] px-2.5 py-2">
       <p className="line-clamp-2 text-xs font-medium leading-4 text-white">{post.title}</p>
       <p className="mt-1 text-[0.68rem] leading-4 text-report-muted">
         {PACKAGE_DELIVERABLE_LABELS[post.type] ?? post.type} / {CLIENT_SAFE_STATUS_LABELS[post.status] ?? post.status}
       </p>
+      <ClientCalendarPostFiles key={`${month}:${post.id}`} postKey={post.id} month={month} />
     </div>
   )
 }

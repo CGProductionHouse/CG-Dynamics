@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { loadPortalSetup } from './api'
+import { useOptionalClientPortal } from '../../components/client/ClientPortalContext'
 import { loadClientPortalLibrary } from '../client-portal-library/api'
 import { ClientPortalLibrary } from '../client-portal-library/ClientPortalLibrary'
 import type { ClientPortalLibraryState } from '../client-portal-library/types'
@@ -13,6 +14,8 @@ import { ClientPortalErrorState, ClientPortalLoadingState } from '../../componen
 
 export default function ClientSetupPage() {
   const { profile } = useAuth()
+  const previewClientId = useOptionalClientPortal()?.previewClientId
+  const clientId = previewClientId ?? profile?.client_id
   const [state, setState] = useState<ClientOnboardingState | null>(null)
   const [library, setLibrary] = useState<ClientPortalLibraryState | null>(null)
   const [loading, setLoading] = useState(true)
@@ -21,23 +24,33 @@ export default function ClientSetupPage() {
   useEffect(() => {
     let active = true
     async function load() {
-      if (!profile?.client_id) {
+      if (!clientId) {
         setLoading(false)
         return
       }
+      setLoading(true)
+      setState(null)
+      setLibrary(null)
+      setError(null)
+      try {
       const [libraryResult, setupResult] = await Promise.all([
-        loadClientPortalLibrary(),
-        loadPortalSetup(),
+        loadClientPortalLibrary(previewClientId),
+        loadPortalSetup(previewClientId),
       ])
       if (!active) return
       setState(setupResult.data)
       setLibrary(libraryResult.data)
       setError(libraryResult.error)
       setLoading(false)
+      } catch {
+        if (!active) return
+        setError('Brand Hub could not be loaded safely.')
+        setLoading(false)
+      }
     }
     void load()
     return () => { active = false }
-  }, [profile?.client_id])
+  }, [clientId, previewClientId])
 
   if (loading) return <ClientPortalLoadingState />
   if (error || !library) {

@@ -345,6 +345,9 @@ test('malformed calendar dates and event fields fail closed rather than reaching
     ...['invalid', '2026-02-30', 0, undefined].map(date => ['client_portal_month_ahead_posts_v2', { ...post, schedule_date: date }]),
     ...['invalid', '2026-02-30T08:00:00Z'].map(date => ['client_portal_month_ahead_events', { ...event, start_time: date }]),
     ['client_portal_month_ahead_events', { ...event, end_time: 'invalid' }],
+    ['client_portal_month_ahead_events', { ...event, start_time: '2026-08-12T08:00:00' }],
+    ['client_portal_month_ahead_events', { ...event, start_time: '2026-08-12T24:00:00Z' }],
+    ['client_portal_month_ahead_events', { ...event, end_time: '2026-08-12T07:59:59Z' }],
     ['client_portal_month_ahead_events', { ...event, all_day: 'false' }],
     ['client_portal_month_ahead_events', { ...event, location: {} }],
   ]
@@ -352,6 +355,14 @@ test('malformed calendar dates and event fields fail closed rather than reaching
     const result = await fetchClientMonthAheadWithRpc(async name => ({ data: name === 'client_portal_visibility_contract_version' ? 1 : name === brokenRpc ? [row] : [], error: null }), 'client-1', '2026-08')
     assert.equal(result.loadFailed, true, JSON.stringify(row))
   }
+})
+
+test('calendar event offsets retain provider instants and equal end times are valid', async () => {
+  const row = { row_key: 'e', title: 'Shoot', event_type: 'shoot', start_time: '2026-08-12T10:00:00+02:00', end_time: '2026-08-12T08:00:00Z', all_day: false, location: null, guideline_row_key: null }
+  const result = await fetchClientMonthAheadWithRpc(async name => ({ data: name === 'client_portal_visibility_contract_version' ? 1 : name === 'client_portal_month_ahead_events' ? [row] : [], error: null }), 'client-1', '2026-08')
+  assert.equal(result.loadFailed, false)
+  assert.equal(result.events[0].startAt, row.start_time)
+  assert.equal(result.events[0].endAt, row.end_time)
 })
 
 test('month-ahead display rejects previous-client state during a selection change', async () => {

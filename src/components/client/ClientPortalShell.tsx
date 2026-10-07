@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { Link, NavLink, useLocation } from 'react-router-dom'
+import { portalPreviewPath } from '../../lib/clientPortalPreviewPolicy'
 import { ClientLogo } from '../ClientLogo'
 import BrandMark from '../BrandMark'
 import { useAuth } from '../../contexts/AuthContext'
@@ -17,16 +18,21 @@ const NAV_ITEMS = [
 export function ClientPortalShell({
   client,
   children,
+  previewClientId,
 }: {
   client: Client | null
   children: ReactNode
+  previewClientId?: string | null
 }) {
   const { signOut } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const location = useLocation()
+  const isPreview = previewClientId !== undefined
+  const activePath = isPreview ? `/client/${new URLSearchParams(location.search).get('area') === 'overview' ? '' : new URLSearchParams(location.search).get('area') ?? ''}`.replace(/\/$/, '') : location.pathname
+  const target = (path: string) => isPreview ? (previewClientId ? portalPreviewPath(previewClientId, path) : '/admin/client-portal-preview') : path
   const activeItem = NAV_ITEMS.find(item => item.end
-    ? location.pathname === item.to
-    : location.pathname.startsWith(item.to)) ?? NAV_ITEMS[0]
+    ? activePath === item.to
+    : activePath.startsWith(item.to)) ?? NAV_ITEMS[0]
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-[#030706] text-report-text">
@@ -59,13 +65,13 @@ export function ClientPortalShell({
             )}
           </div>
 
-          <button
+          {isPreview ? <Link to={`/admin/published${previewClientId ? `?client=${encodeURIComponent(previewClientId)}` : ''}`} className="ml-auto inline-flex min-h-11 shrink-0 items-center rounded-full border border-white/10 px-4 text-xs font-bold text-slate-300">Exit preview</Link> : <button
             type="button"
             onClick={() => void signOut()}
             className="ml-auto min-h-11 shrink-0 rounded-full border border-white/10 bg-white/[0.035] px-4 py-2 text-xs font-bold text-slate-400 transition hover:border-[#2dd4bf]/35 hover:bg-white/[0.06] hover:text-white sm:text-sm"
           >
             Sign out
-          </button>
+          </button>}
         </div>
 
         <div className="mx-auto px-4 pb-4 sm:hidden">
@@ -87,16 +93,20 @@ export function ClientPortalShell({
               {NAV_ITEMS.map(item => (
                 <NavLink
                   key={item.to}
-                  to={item.to}
+                  to={target(item.to)}
                   end={item.end}
+                  aria-current={isPreview ? (activeItem.to === item.to ? 'page' : false) : undefined}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={({ isActive }) =>
+                  className={({ isActive: routeActive }) => {
+                    const isActive = isPreview ? activeItem.to === item.to : routeActive
+                    return (
                     `flex min-h-11 items-center rounded-xl border px-3 py-2 text-sm font-bold transition-colors ${
                       isActive
                         ? 'border-[#2dd4bf]/35 bg-[#2dd4bf]/10 text-white shadow-[inset_0_0_18px_rgba(45,212,191,0.05)]'
                         : 'border-transparent text-slate-400 hover:border-white/10 hover:bg-white/[0.04] hover:text-white'
                     }`
-                  }
+                    )
+                  }}
                 >
                   {item.label}
                 </NavLink>
@@ -110,15 +120,19 @@ export function ClientPortalShell({
             {NAV_ITEMS.map(item => (
               <NavLink
                 key={item.to}
-                to={item.to}
+                to={target(item.to)}
                 end={item.end}
-                className={({ isActive }) =>
+                aria-current={isPreview ? (activeItem.to === item.to ? 'page' : false) : undefined}
+                className={({ isActive: routeActive }) => {
+                  const isActive = isPreview ? activeItem.to === item.to : routeActive
+                  return (
                   `inline-flex min-h-10 items-center rounded-full px-4 py-2 text-sm font-bold transition ${
                     isActive
                       ? 'bg-white text-[#06110f] shadow-lg'
                       : 'text-slate-400 hover:bg-white/[0.055] hover:text-white'
                   }`
-                }
+                  )
+                }}
               >
                 {item.label}
               </NavLink>

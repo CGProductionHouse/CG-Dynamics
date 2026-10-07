@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { ClientPortalLink as Link } from '../../components/client/ClientPortalLink'
+import { useOptionalClientPortal } from '../../components/client/ClientPortalContext'
 import { ClientPortalEmptyState } from '../../components/client/ClientPortalStates'
 import { getClientPortalAssetAccess, loadClientPortalLibraryFiles } from './api'
 import type {
@@ -45,6 +46,7 @@ export function ClientPortalLibrary({ library }: { library: ClientPortalLibraryS
 }
 
 function LibraryCategory({ summary }: { summary: ClientPortalLibraryCategorySummary }) {
+  const previewClientId = useOptionalClientPortal()?.previewClientId
   const flat = summary.category === 'brand_identity'
   const [selectedYear, setSelectedYear] = useState<number | null>(null)
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null)
@@ -62,7 +64,7 @@ function LibraryCategory({ summary }: { summary: ClientPortalLibraryCategorySumm
     setSelectedMonth(month)
     setLoading(true)
     setError(null)
-    const result = await loadClientPortalLibraryFiles(summary.category, year, month, offset)
+    const result = await loadClientPortalLibraryFiles(summary.category, year, month, offset, previewClientId)
     if (requestSequence.current !== requestId) return
     if (!result.data) {
       setError(result.error)
@@ -101,6 +103,8 @@ function LibraryCategory({ summary }: { summary: ClientPortalLibraryCategorySumm
       ) : flat ? (
         <div className="mt-5">
           {!visiblePage && <BrowseButton loading={loading} onClick={() => void loadFiles(null, null)}>View files</BrowseButton>}
+          {loading && !visiblePage && <p className="mt-3 text-sm text-slate-400" role="status">Loading files…</p>}
+          {error && !visiblePage && <p className="mt-3 text-sm text-[#fb923c]" role="alert">{error}</p>}
           {visiblePage && <FileList page={visiblePage} loading={loading} error={error} onMore={() => void loadFiles(null, null, visiblePage.nextOffset ?? 0)} />}
         </div>
       ) : (
@@ -147,17 +151,31 @@ function FileList({ page, loading, error, onMore }: { page: ClientPortalLibraryF
   )
 }
 
-function LibraryAssetRow({ asset }: { asset: ClientPortalLibraryAsset }) {
+export function LibraryAssetRow({ asset, compact = false }: { asset: ClientPortalLibraryAsset; compact?: boolean }) {
+  const previewClientId = useOptionalClientPortal()?.previewClientId
   const [busy, setBusy] = useState<'inline' | 'download' | 'stream' | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [videoUrl, setVideoUrl] = useState<string | null>(null)
+  const accessGeneration = useRef(0)
+  const accessPending = useRef(false)
   const canView = Boolean(asset.mimeType && /^(image\/(?:avif|gif|jpeg|png|webp)|application\/pdf)$/i.test(asset.mimeType))
   const canPlay = /^video\/mp4$/i.test(asset.mimeType ?? '')
 
+  useEffect(() => {
+    accessGeneration.current += 1
+    accessPending.current = false
+    return () => { accessGeneration.current += 1 }
+  }, [asset.id, previewClientId])
+
   async function access(purpose: 'inline' | 'download' | 'stream') {
+    if (accessPending.current) return
+    accessPending.current = true
+    const generation = accessGeneration.current
     setBusy(purpose)
     setError(null)
-    const result = await getClientPortalAssetAccess(asset.id, purpose)
+    const result = await getClientPortalAssetAccess(asset.id, purpose, previewClientId)
+    if (accessGeneration.current !== generation) return
+    accessPending.current = false
     if (!result.data) {
       setError(result.error)
       setBusy(null)
@@ -181,7 +199,7 @@ function LibraryAssetRow({ asset }: { asset: ClientPortalLibraryAsset }) {
 
   return (
     <div className="py-4 first:pt-1 last:pb-1">
-      <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center">
+      <div className={`flex min-w-0 flex-col gap-3 ${compact ? '' : 'sm:flex-row sm:items-center'}`}>
         <LazyThumbnail asset={asset} />
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-bold text-white">{asset.displayName}</p>
@@ -189,7 +207,7 @@ function LibraryAssetRow({ asset }: { asset: ClientPortalLibraryAsset }) {
           {asset.deliverableTitle && <p className="mt-1 truncate text-xs text-slate-400">Linked to {asset.deliverableTitle}</p>}
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
-          {asset.planMonth && <Link to={`/client/plan?month=${encodeURIComponent(asset.planMonth)}`} className="inline-flex min-h-10 items-center rounded-xl border border-white/10 px-3 text-xs font-bold text-slate-300">View in Plan</Link>}
+          {asset.planMonth && <Link to={`/client/plan?tab=calendar&month=${encodeURIComponent(asset.planMonth)}`} className="inline-flex min-h-10 items-center rounded-xl border border-white/10 px-3 text-xs font-bold text-slate-300">View in Plan</Link>}
           {canPlay && <button type="button" disabled={busy !== null} onClick={() => void access('stream')} className="min-h-10 rounded-xl border border-white/10 px-3 text-xs font-bold text-slate-300 disabled:opacity-50">{busy === 'stream' ? 'Preparing…' : 'Play'}</button>}
           {canView && <button type="button" disabled={busy !== null} onClick={() => void access('inline')} className="min-h-10 rounded-xl border border-white/10 px-3 text-xs font-bold text-slate-300 disabled:opacity-50">{busy === 'inline' ? 'Opening…' : 'View'}</button>}
           <button type="button" disabled={busy !== null} onClick={() => void access('download')} className="min-h-10 rounded-xl bg-[#2dd4bf] px-3 text-xs font-black text-[#03110e] disabled:opacity-50">{busy === 'download' ? 'Preparing…' : 'Download'}</button>
@@ -202,6 +220,7 @@ function LibraryAssetRow({ asset }: { asset: ClientPortalLibraryAsset }) {
 }
 
 function LazyThumbnail({ asset }: { asset: ClientPortalLibraryAsset }) {
+  const previewClientId = useOptionalClientPortal()?.previewClientId
   const holder = useRef<HTMLDivElement>(null)
   const [url, setUrl] = useState<string | null>(null)
   const eligible = /^(image\/|video\/)/i.test(asset.mimeType ?? '')
@@ -212,7 +231,7 @@ function LazyThumbnail({ asset }: { asset: ClientPortalLibraryAsset }) {
     if (!node) return
     let active = true
     const load = async () => {
-      const result = await getClientPortalAssetAccess(asset.id, 'thumbnail')
+      const result = await getClientPortalAssetAccess(asset.id, 'thumbnail', previewClientId)
       if (active && result.data) setUrl(result.data.url)
     }
     if (!('IntersectionObserver' in window)) {
@@ -227,7 +246,7 @@ function LazyThumbnail({ asset }: { asset: ClientPortalLibraryAsset }) {
     }, { rootMargin: '120px' })
     observer.observe(node)
     return () => { active = false; observer.disconnect() }
-  }, [asset.id, eligible, url])
+  }, [asset.id, eligible, previewClientId, url])
 
   if (!eligible) return null
   return <div ref={holder} className="h-14 w-20 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/[0.04]">{url && <img src={url} alt="" loading="lazy" className="h-full w-full object-cover" />}</div>

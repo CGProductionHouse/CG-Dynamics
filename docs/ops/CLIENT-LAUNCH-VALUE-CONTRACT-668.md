@@ -146,6 +146,75 @@ open: each written decision must connect a real objective, customer obstacle,
 evidenced angle, confirmed execution capacity and measurement to exact-client
 sources. A compile pass or lexical quality check is not that acceptance.
 
+## Full selected-client preview (#668 continuation)
+
+`/admin/client-portal-preview?client=<exact UUID>&area=overview` reuses the
+actual client shell and pages. Admin/manager access is required; the staff
+authentication session is never replaced. No default client is substituted.
+Changing client or area remounts the page and invalidates prior reads. Plan
+links preserve exact client, selected month and guideline context. Approval
+decisions are disabled in both rendering and the handler.
+
+Reporting reads prove exact ownership/publication before child reads and
+strip private notes, raw provider payloads and legacy strategy fields. Monthly
+strategy remains exact-client/exact-month/published-only. Package capacity
+uses the existing confirmed authority, with unknown/null intact. Calendar
+and guidelines keep their existing published client-safe RPCs.
+
+Brand Hub has a narrow server scope after JWT/active-profile authentication:
+only admin/manager + exact UUID + the five read actions (library, month,
+file access, setup load and setup download). Existing published-asset,
+folder/client, visibility, pagination and file-purpose checks remain. The
+download also verifies the upload belongs to the selected client. No writes,
+provisioning or client-role override are admitted. Normal client requests
+still use their authenticated profile scope.
+
+### Protected deployment and acceptance gate
+
+The `client-onboarding` server read additions are **not deployed** by this
+mission. Until separately authorized and deployed, Brand Hub preview must
+show unavailable truth, not silently fall back to an unscoped staff read.
+Authorization must cover source/import parity, unchanged JWT/config contract,
+rollback to the prior deployed version and fail-closed role/client/file tests.
+No migration/config/secret/provider change is required by this code.
+
+The Leads preview reuses the canonical read-only `LeadInbox` seam from
+#672, now merged as 76f2fbfe4b526f7061b910dbb815fc8b45d5f9b1; it does not
+recreate the Website/#405 lane. Integration is not evidence that the full
+portal has passed authenticated production acceptance.
+
+Acceptance must check Overview, Plan (strategy/calendar/guidelines),
+Performance, Approvals, Brand Hub and Leads for two different clients at
+desktop and 375px, including switching during an in-flight read. No writes,
+approval decisions or provider actions may be exercised. Confirm staff-only
+diagnostics are absent, reports/strategy are published-only, null stays null,
+the exact client/month survives navigation, and errors terminate loading.
+
+The already merged service/package changes were read back for We Ar Fuels:
+Google Business offer has no Meta source attribution, the exact package is
+1 professional video / 4 photo posts / 3 design posters, and five unknown
+capacity fields remain To confirm. Desktop body/document 1536; true 375px
+viewport body/document 360; observed warning/error log empty. No production
+package, strategy or provider mutation occurred.
+
+Preview verification: 210 focused tests pass; full suite 3,610 total /
+3,593 pass / 17 skip / zero failures (same Windows Bash fixture exclusion).
+TypeScript/Vite build, scoped lint and diff check pass. The emitted preview
+chunk contains application code. Changed-preview authentication and production
+acceptance remain separate checks; neither server deployment nor strategy
+approval/publication is authorized by this verification.
+
+Reconciled #674 against #672/#675/#676 while preserving every additive receipt.
+The strategy preview now reads `published_strategy_data`, exactly as the
+client RPC does, even when staff have since started another draft amendment;
+it never renders the editable row as the published plan. An executable mock
+query test proves publication-copy parity, exact client/month and no snapshot
+fallback. Latest verification: 38 focused; full 3,621 total / 3,604 pass /
+17 skip / zero failures, build/scoped lint/diff pass. The one legitimate
+changed-preview browser check reached `/login`; authenticated changed-preview
+acceptance is not claimed. Normal frontend deployment may be verified using
+the existing authenticated production staff session; Brand Hub server rollout
+remains separately protected and no function is deployed here.
 ## Calendar evidence is not an inferred empty month
 
 4 October continuation on the same #678: malformed/missing calendar dates,
@@ -203,3 +272,42 @@ across months and needs real month-specific learning assessment, not a cosmetic
 date rewrite. Hino/WiseRide other-client-name mentions are review flags in existing
 isolation guidance, not automatically proof of cross-client leakage. Retain these
 distinctions; never resurrect a blanket 94-ready claim.
+
+## 4 October local-first preview reconciliation
+
+Both the full-preview and calendar/package/strategy receipts above are preserved.
+Historical cloud-preview instructions do not override #679: Git deployments stay
+OFF, no Vercel build or deployment is requested. Current GitHub main is not proof
+of changed-code production serving. The prior legitimate preview attempt reached
+login; do not bypass authentication or copy sessions to manufacture acceptance.
+Brand Hub's server read-scope change remains a separately protected Edge rollout.
+Same #674 verification on reconciled main: 98 focused PASS; full supported Node
+suite 3,627 total /3,610 PASS /17 intentional skips /0 failures (Windows Bash-only
+SES fixture excluded). Local TypeScript/Vite build, scoped ESLint and diff PASS.
+No new changed-preview authentication claim or production write.
+
+4 October follow-up: an actual shared-shell render reproduced six simultaneous
+`aria-current="page"` links in staff preview because all six areas use one route.
+Desktop and mobile links now explicitly mark only the selected preview area as
+current; ordinary client route behavior remains unchanged. A regression renders
+every area through the real shell/router/auth provider (SSR, no auth/data effects).
+It failed 6-versus-1 before correction and passes after. This is local render
+verification, not an authenticated browser or deployed-runtime claim.
+82 focused PASS; full supported run 3,628 total /3,611 PASS /17 intentional
+skips /0 failures; Windows Bash-only SES fixture excluded. Local TypeScript/Vite
+build (application code present), scoped lint and diff PASS. Deployment guard OFF.
+
+### Preview manual-metric parity follow-up
+
+An executed pre-edit regression reproduced raw manual metrics entering preview
+even when the existing client RPC excludes them. Preview now mirrors the exact
+`client_published_report_manual_metrics` legacy predicate: source `other` AND
+case-insensitive note prefix `Meta sync account totals for unavailable metrics`.
+Those rows are unavailable placeholders, not complete observed figures; numeric
+positive values do not certify them. Genuine manual/import zero, null and positive
+values remain unchanged. Exact client/month filtering and private-field stripping
+remain; a read error returns no partial rows. SQL/RLS/grants and production rows
+are unchanged. This is local executable mocked-query parity, not live DB acceptance.
+Verification: 95 focused PASS; full supported suite 3,629 total /3,612 PASS /
+17 intentional skips /0 failures; Windows Bash-only SES fixture excluded.
+Local TS/Vite build contains the corrected preview helper; scoped ESLint/diff PASS.

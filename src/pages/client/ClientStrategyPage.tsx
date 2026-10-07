@@ -7,6 +7,8 @@ import { getClientPublishedMonthlyStrategy } from '../../lib/monthlyStrategy'
 import { monthDisplayLabel } from '../../lib/reportPeriod'
 import { clientFacingStrategyQualityIssues, hasStrategyContent, readStrategyData, type StrategyData } from '../../lib/strategyEngine'
 import { businessMonthKey } from '../../lib/businessTime'
+import { useOptionalClientPortal } from '../../components/client/ClientPortalContext'
+import { getPreviewStrategy } from '../../lib/clientPortalPreview'
 
 function currentMonth() {
   return businessMonthKey()
@@ -14,6 +16,8 @@ function currentMonth() {
 
 export default function ClientStrategyPage({ embedded = false, month }: { embedded?: boolean; month?: string }) {
   const { profile } = useAuth()
+  const previewClientId = useOptionalClientPortal()?.previewClientId
+  const clientId = previewClientId ?? profile?.client_id
   const [client, setClient] = useState<Client | null>(null)
   const [strategy, setStrategy] = useState<StrategyData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -23,14 +27,14 @@ export default function ClientStrategyPage({ embedded = false, month }: { embedd
   useEffect(() => {
     let active = true
     async function load() {
-      if (!profile?.client_id) { setLoading(false); return }
+      if (!clientId) { setLoading(false); return }
       setLoading(true)
       setError(false)
       setStrategy(null)
       try {
         const [clientResult, strategyResult] = await Promise.all([
-          embedded ? Promise.resolve({ data: null, error: null }) : getClient(profile.client_id),
-          getClientPublishedMonthlyStrategy(strategyMonth),
+          embedded ? Promise.resolve({ data: null, error: null }) : getClient(clientId),
+          previewClientId ? getPreviewStrategy(previewClientId, strategyMonth) : getClientPublishedMonthlyStrategy(strategyMonth),
         ])
         if (!active) return
         if (clientResult.error || strategyResult.error) throw new Error('Data unavailable')
@@ -44,7 +48,7 @@ export default function ClientStrategyPage({ embedded = false, month }: { embedd
     }
     void load()
     return () => { active = false }
-  }, [embedded, profile?.client_id, strategyMonth])
+  }, [embedded, clientId, previewClientId, strategyMonth])
 
   const hasPublishedContent = useMemo(() => strategy && (hasStrategyContent(strategy)
     || strategy.calendarSelections.some(selection => selection.use))

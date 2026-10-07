@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { ClientPortalLink as Link } from '../../components/client/ClientPortalLink'
 import { useAuth } from '../../contexts/AuthContext'
 import { ContentReviewCard } from '../../components/content/ContentReviewCard'
 import { ClientPortalEmptyState, ClientPortalErrorState, ClientPortalLoadingState } from '../../components/client/ClientPortalStates'
 import { listContentReviews, type ContentReview } from '../../lib/contentReviews'
 import { supabase } from '../../lib/supabase'
+import { useOptionalClientPortal } from '../../components/client/ClientPortalContext'
+import { listPreviewApprovals } from '../../lib/clientPortalPreview'
 
 export default function ContentReviewsPage({ clientView = false }: { clientView?: boolean }) {
   const { profile } = useAuth()
+  const previewClientId = useOptionalClientPortal()?.previewClientId
   const [reviews, setReviews] = useState<ContentReview[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -15,21 +18,30 @@ export default function ContentReviewsPage({ clientView = false }: { clientView?
   useEffect(() => {
     let active = true
     const load = async () => {
-      const result = await (clientView ? supabase.rpc('client_content_review_queue') : listContentReviews())
+      setLoading(true)
+      setReviews([])
+      try {
+      const result = await (clientView ? (previewClientId ? listPreviewApprovals(previewClientId) : supabase.rpc('client_content_review_queue')) : listContentReviews())
       if (!active) return
       setReviews((result.data ?? []) as ContentReview[])
       setError(result.error?.message ?? null)
       setLoading(false)
+      } catch {
+        if (!active) return
+        setError('Review queue could not be loaded safely.')
+        setLoading(false)
+      }
     }
     void load()
     return () => { active = false }
-  }, [clientView, profile?.client_id, revision])
+  }, [clientView, profile?.client_id, previewClientId, revision])
   if (clientView) {
     return (
       <ClientApprovalsView
         reviews={reviews}
         loading={loading}
         error={error}
+        readOnly={Boolean(previewClientId)}
         onChanged={() => setRevision(value => value + 1)}
       />
     )
@@ -50,11 +62,13 @@ function ClientApprovalsView({
   loading,
   error,
   onChanged,
+  readOnly = false,
 }: {
   reviews: ContentReview[]
   loading: boolean
   error: string | null
   onChanged: () => void
+  readOnly?: boolean
 }) {
   if (loading) return <ClientPortalLoadingState />
   if (error) return <ClientPortalErrorState title="Approvals could not be loaded" message="Your review queue is temporarily unavailable. No approval status has been changed." />
@@ -94,7 +108,7 @@ function ClientApprovalsView({
           <div className="grid gap-4 lg:grid-cols-2">
             {reviews.map(review => (
               <div key={review.id} className="min-w-0 rounded-[1.75rem] border border-white/[0.08] bg-white/[0.025] p-1 shadow-[0_24px_60px_-42px_rgba(0,0,0,0.95)]">
-                <ContentReviewCard staffView={false} review={review} canDecide={review.state === 'client_review'} onChanged={onChanged} />
+                <ContentReviewCard staffView={false} review={review} canDecide={!readOnly && review.state === 'client_review'} onChanged={onChanged} />
               </div>
             ))}
           </div>

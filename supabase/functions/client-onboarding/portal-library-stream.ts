@@ -9,7 +9,7 @@ export function isPortalAccessPurpose(value: unknown): value is PortalAccessPurp
   return value === 'inline' || value === 'download' || value === 'stream' || value === 'thumbnail'
 }
 
-export function normalizeRangeHeader(value: string | null, sizeBytes: number): string | null | undefined {
+export function normalizeRangeHeader(value: string | null | undefined, sizeBytes: number): string | null | undefined {
   if (!value) return undefined
   if (!Number.isSafeInteger(sizeBytes) || sizeBytes <= 0) return null
   const match = /^bytes=(\d*)-(\d*)$/.exec(value.trim())

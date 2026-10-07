@@ -61,7 +61,10 @@ function calendarDate(value: unknown): value is string {
 
 function calendarTimestamp(value: unknown): value is string {
   return typeof value === 'string' && calendarDate(value.slice(0, 10))
-    && /^\d{4}-\d{2}-\d{2}T/.test(value) && Number.isFinite(Date.parse(value))
+    // timestamptz evidence must name its offset. Date.parse alone accepts
+    // machine-local times and normalises 24:00 into a different calendar day.
+    && /^\d{4}-\d{2}-\d{2}T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/.test(value)
+    && Number.isFinite(Date.parse(value))
 }
 
 type ClientPortalPostRow = {
@@ -116,7 +119,7 @@ export async function fetchClientMonthAheadWithRpc(
     || !eventsResult.data.every(row => hasStrings(row, ['row_key', 'title', 'event_type', 'start_time']))) return unavailable
   if (!postsResult.data.every(row => row.schedule_date === null || calendarDate(row.schedule_date))
     || !eventsResult.data.every(row => calendarTimestamp(row.start_time)
-      && (row.end_time === null || calendarTimestamp(row.end_time))
+      && (row.end_time === null || (calendarTimestamp(row.end_time) && Date.parse(row.end_time) >= Date.parse(row.start_time)))
       && typeof row.all_day === 'boolean'
       && (row.location === null || typeof row.location === 'string')
       && (row.guideline_row_key === null || typeof row.guideline_row_key === 'string'))) return unavailable
