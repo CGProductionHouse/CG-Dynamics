@@ -1,5 +1,25 @@
 # CG Dynamics Ops Handover
 
+### 7 October client Approvals truth — local continuation in verification
+
+Continued from main `ef6e9563ccb5c1045beb84d6df2fed66a4230b6d` under #668.
+Actual canonical client queue includes both pending and approved rows; reproduced
+an approved-only queue labelled "1 item waiting" and exposing staff publishing
+instructions. Client waiting count now includes only `client_review`; approved
+history remains visible with client-safe wording, while staff instructions remain.
+Missing/malformed queue data stays unavailable, not "Nothing waiting". Failed
+signed-preview reads/rejections and broken media stay safely unavailable and
+cannot enable approval without viewing the asset. A changed review/asset/access
+scope remounts before old preview/comment/history can carry across. Existing
+exact-client queue, RLS, Storage, explicit decision RPC and preview read-only
+contracts are unchanged; no new data/store/schema/dependency or production action.
+18 focused preview/report-isolation/render tests and 20 actual client-Approvals
+desktop/375/390/430 fixtures PASS; local build/scoped lint/diff PASS. Full pinned
+acceptance pending. Fixtures are synthetic, not authenticated changed-production
+acceptance; deliberate missing-media requests are expected test failures, not a
+blanket zero-console assertion. Vercel operations remain zero; automatic deployment
+OFF. No actual approval, publication, provider, model or data/config write.
+
 ### 7 October strategy review readiness — PR #694 local acceptance
 
 Continued CA-authorized local launch work from main `f918a4b2f781e79a4c9f508cf91ed557674a7cab`.

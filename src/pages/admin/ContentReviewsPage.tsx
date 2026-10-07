@@ -23,6 +23,7 @@ export default function ContentReviewsPage({ clientView = false }: { clientView?
       try {
       const result = await (clientView ? (previewClientId ? listPreviewApprovals(previewClientId) : supabase.rpc('client_content_review_queue')) : listContentReviews())
       if (!active) return
+      if (clientView && !result.error && !Array.isArray(result.data)) throw new Error('Invalid review queue evidence')
       setReviews((result.data ?? []) as ContentReview[])
       setError(result.error?.message ?? null)
       setLoading(false)
@@ -57,7 +58,7 @@ export default function ContentReviewsPage({ clientView = false }: { clientView?
   </div>
 }
 
-function ClientApprovalsView({
+export function ClientApprovalsView({
   reviews,
   loading,
   error,
@@ -73,6 +74,8 @@ function ClientApprovalsView({
   if (loading) return <ClientPortalLoadingState />
   if (error) return <ClientPortalErrorState title="Approvals could not be loaded" message="Your review queue is temporarily unavailable. No approval status has been changed." />
 
+  const waitingCount = reviews.filter(review => review.state === 'client_review').length
+
   return (
     <div className="space-y-7">
       <section className="relative overflow-hidden rounded-[2rem] border border-white/[0.08] bg-[radial-gradient(circle_at_12%_5%,rgba(45,212,191,0.18),transparent_34%),radial-gradient(circle_at_92%_18%,rgba(249,115,22,0.12),transparent_28%),linear-gradient(145deg,rgba(10,27,24,0.96),rgba(5,12,11,0.94))] px-6 py-9 shadow-[0_34px_100px_-55px_rgba(0,0,0,0.95)] sm:px-9 sm:py-11">
@@ -84,8 +87,8 @@ function ClientApprovalsView({
             Client-ready content that needs your decision appears here—clearly separated from CG's internal production work.
           </p>
           <div className="mt-7 inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/[0.045] px-4 py-2 text-sm text-slate-300">
-            <span className={`h-2 w-2 rounded-full ${reviews.length > 0 ? 'bg-[#f97316]' : 'bg-[#2dd4bf]'}`} />
-            {reviews.length > 0 ? `${reviews.length} item${reviews.length === 1 ? '' : 's'} waiting` : 'Nothing waiting'}
+            <span className={`h-2 w-2 rounded-full ${waitingCount > 0 ? 'bg-[#f97316]' : 'bg-[#2dd4bf]'}`} />
+            {waitingCount > 0 ? `${waitingCount} item${waitingCount === 1 ? '' : 's'} waiting` : 'Nothing waiting'}
           </div>
         </div>
       </section>
@@ -101,8 +104,8 @@ function ClientApprovalsView({
         <section>
           <div className="mb-5 flex items-end justify-between gap-4">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.24em] text-[#2dd4bf]">Waiting for you</p>
-              <h2 className="mt-3 text-3xl font-black tracking-[-0.04em] text-white">Ready to review</h2>
+              <p className="text-xs font-black uppercase tracking-[0.24em] text-[#2dd4bf]">Your review queue</p>
+              <h2 className="mt-3 text-3xl font-black tracking-[-0.04em] text-white">{waitingCount > 0 ? 'Ready to review' : 'Approved content'}</h2>
             </div>
           </div>
           <div className="grid gap-4 lg:grid-cols-2">
