@@ -1,5 +1,29 @@
 # CG Dynamics Ops Handover
 
+### 7 October current merged source and #433 W2 continuation — no Vercel
+
+GitHub source now includes #684 (`4f504160`), #683 (`3ce52296`), #677
+(`47812423`) and #674 (`bae8e11b`); current merged main is
+`bae8e11b889724594d1c3cfe44a6051714358ae2`. These supersede older local-only
+status receipts below, not their protected rollout/semantic acceptance gates.
+Combined application tree passed 3,669 tests /3,652 PASS /17 intentional skips
+(Windows Bash-only SES fixture excluded), local build/lint/diff and all three
+full Deno entries. Five actual-component localhost browser fixtures passed all
+four widths. No Vercel/deployment/production data action. Portal post-assets
+migration remains unapplied; strategy drafts remain unapproved/unpublished.
+
+Continue #433 W2 on `codex/433-director-precise-brief`: actual saved placement,
+delivery mode/production brief, CTA-only proposal/diff/accept/reject and atomic
+saved-revision protection through existing canonical editor/helper. No second
+store/schema or provider call. See `CONTENT-DIRECTOR-PRECISE-EDIT-433.md`.
+Focused/browser checks are local synthetic evidence, not authenticated live AI
+or a launch completion certificate. Historical knowledge review-version binding
+and substantive strategy/client evidence gaps remain explicitly unresolved.
+W2 final local checks: 50 focused PASS; 3,678 total /3,661 PASS /17 skips /0 fail
+(Windows Bash-only SES excluded), build/TS+Node scoped lint/diff/full Director
+Deno closure PASS. Actual editor 1440/375/390/430 diff/accept/reload/discard and
+concurrent conflict PASS; 375px visually checked. No production/provider call.
+
 ### 7 October #674 full portal entry closure
 
 Full local Deno entry/import check exposed eight inherited type errors; type-only

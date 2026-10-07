@@ -1,5 +1,6 @@
 import { supabase } from './supabase'
 import { directorKnowledgeReceipt, type DirectorKnowledgeReference } from './contentDirectorEvidence'
+import { validSavedRevision, type DirectorEditField } from './contentDirectorEdits'
 import {
   guideActionTarget,
   isMicrosoftOwnedEvent,
@@ -146,8 +147,16 @@ export async function createGuideIdea(input: ContentGuideInput): Promise<QueryRe
   return wrap((data as ContentGuideIdea) ?? null, error, null)
 }
 
-export async function updateGuideIdea(id: string, patch: ContentGuideInput | Partial<ContentGuideIdea>): Promise<QueryResult<ContentGuideIdea | null>> {
-  const { data, error } = await supabase.from('content_guide_ideas').update(patch).eq('id', id).select('*').single()
+export async function updateGuideIdea(id: string, patch: ContentGuideInput | Partial<ContentGuideIdea>, expectedUpdatedAt?: string): Promise<QueryResult<ContentGuideIdea | null>> {
+  if (expectedUpdatedAt !== undefined && !validSavedRevision(expectedUpdatedAt)) {
+    return { data: null, error: 'Saved revision unavailable. Reload before saving.', migrationNeeded: false }
+  }
+  let query = supabase.from('content_guide_ideas').update(patch).eq('id', id)
+  if (expectedUpdatedAt !== undefined) query = query.eq('updated_at', expectedUpdatedAt)
+  const { data, error } = await query.select('*').single()
+  if (expectedUpdatedAt !== undefined && error?.code === 'PGRST116') {
+    return { data: null, error: 'This video changed or is no longer accessible. Reload before saving; your draft was not applied.', migrationNeeded: false }
+  }
   return wrap((data as ContentGuideIdea) ?? null, error, null)
 }
 
@@ -588,11 +597,12 @@ export async function importGuidelineVideosFromSchedule(
 export async function updateGuidelineVideo(
   id: string,
   patch: Partial<ContentGuidelineVideo>,
+  expectedUpdatedAt?: string,
 ): Promise<QueryResult<ContentGuidelineVideo | null>> {
   const normalizedPatch = patch.month === undefined
     ? patch
     : { ...patch, month: normalizeGuidelineVideoMonth(patch.month) }
-  return updateGuideIdea(id, normalizedPatch)
+  return updateGuideIdea(id, normalizedPatch, expectedUpdatedAt)
 }
 
 export async function reorderGuidelineVideos(
@@ -774,6 +784,8 @@ export interface GuidelineVideoDevelopment {
   visualNotes: string
   cta: string
   notes: string | null
+  baseUpdatedAt?: string | null
+  targetFields?: DirectorEditField[]
 }
 
 export interface ContentDirectorSources {
@@ -837,6 +849,7 @@ export function developGuidelineVideos(
   guideline: ContentGuideline,
   coverage: { start: string; end: string },
   videoIds?: string[],
+  targetFields?: DirectorEditField[],
 ): Promise<QueryResult<DevelopVideosResult>> {
   return callContentDirector<DevelopVideosResult>({
     mode: 'develop',
@@ -845,6 +858,7 @@ export function developGuidelineVideos(
     coverageStart: coverage.start,
     coverageEnd: coverage.end,
     ...(videoIds && videoIds.length > 0 ? { videoIds } : {}),
+    ...(targetFields ? { targetFields } : {}),
   })
 }
 
