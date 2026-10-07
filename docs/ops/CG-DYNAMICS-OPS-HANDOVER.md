@@ -1,5 +1,20 @@
 # CG Dynamics Ops Handover
 
+### 7 October mobile Assistant launcher — local correction
+
+Authenticated work Chrome at 375px reproduced an inert `Open CG Assistant`
+button: computed pointer-events was `none`, inherited from the collapsed dock.
+The same actual source/CSS failed a local real-pointer browser fixture before
+editing. The launcher alone now opts into pointer events and a 44px target;
+surrounding dock click-through, desktop, fullscreen/keyboard and all send/action
+handlers stay unchanged. Actual-component browser acceptance passes at
+375/390/430, 844px phone landscape and 1440px desktop: real open/close taps,
+Escape, unsent draft preservation, navigation hiding/restoration, no overflow,
+runtime errors or writes. No credentials, provider traffic or send occurred.
+92 focused Assistant regressions, scoped lint and diff check PASS; local build
+and final clean-tree acceptance receipts follow on the owning PR/#668.
+This is a local fix, NOT a released production claim. Vercel remains untouched.
+
 ### 7 October work Chrome restored; local Creative Intelligence follow-through
 
 The requested work Chrome profile is now connected and genuinely authenticated

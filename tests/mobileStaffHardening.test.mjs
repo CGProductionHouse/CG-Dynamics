@@ -334,7 +334,7 @@ test('controls stay within the mobile composer width', () => {
 
 test('all main controls meet the 44px tap-target requirement', () => {
   const fixed44 = composer.match(/h-11 w-11/g) ?? []
-  assert.equal(fixed44.length, 5, 'action, mobile mic/send and desktop mic/send are all exactly 44px')
+  assert.equal(fixed44.length, 6, 'launcher, action, mobile mic/send and desktop mic/send are all exactly 44px')
   assert.match(composer, /min-h-11 min-w-11 rounded-md px-1 text-\[10px\]/)
 })
 

@@ -2309,7 +2309,7 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="mx-auto flex h-10 w-10 items-center justify-center rounded-full border border-white/12 bg-white/[0.04] text-lg font-bold text-brand-primary transition-colors hover:text-white"
+            className="pointer-events-auto mx-auto flex h-11 w-11 items-center justify-center rounded-full border border-white/12 bg-white/[0.04] text-lg font-bold text-brand-primary transition-colors hover:text-white"
             aria-label="Open CG Assistant"
           >
             +
