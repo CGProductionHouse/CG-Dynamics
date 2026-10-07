@@ -34,6 +34,19 @@ Read latest owning issues before execution: current GitHub supersedes this snaps
 
 ## Local verification matrix — no cloud dependency
 
+7 October source reconciliation: #674 full preview/post-asset contract, #677 W1,
+#685 saved-brief/CTA correction and #686 offline task packet are merged. This
+supersedes their old draft/code-gap statuses above, not their production rollout
+or human semantic acceptance. #687 additionally closes the reproduced historical
+Skill Card review-binding defect locally; its migration is UNAPPLIED. The final
+supported suite is 3,700 total /3,683 PASS /17 intentional skips /0 failures,
+with disposable SQL and no production access. Both review UIs pass synthetic
+1440/375/390/430 acceptance; five changed Edge closures type-check. See the
+owning review-revision runbook for coordinated schema/frontend/Edge release gates.
+Do not call this “only Vercel push left”: authentic role acceptance, individual
+knowledge review, substantive held strategy evidence and publication remain
+separate human/protected gates.
+
 For each changed lane: reproduce first; regression fails on old code; smallest fix;
 focused tests; scoped lint; diff check; then full supported suite and production
 build for the integrated candidate. Use the lockfile/runtime already approved.

@@ -12,7 +12,8 @@ frontend/Edge retrieval. No second knowledge store or automatic reapproval.
 The new `20261007102349_skill_card_review_revision_binding.sql` is **UNAPPLIED**.
 Historical approvals stay null/audit until explicit individual human review.
 See `SKILL-CARD-REVIEW-REVISION-433.md` for local proof and protected release order.
-Local supported full suite: 3,699 total /3,682 PASS /17 skips /0 fail, Bash-only
+Focused draft PR #687 source head `b259001323b76f8375e2a47ac3c88132d2d5b1c8`.
+Local supported full suite: 3,700 total /3,683 PASS /17 skips /0 fail, Bash-only
 SES excluded. Actual review screens passed localhost desktop/375/390/430 with
 stale conflict/no write and no overflow/runtime error. Five Edge closures checked.
 No Vercel, production/provider/strategy/knowledge write, migration or deploy.

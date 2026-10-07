@@ -59,7 +59,7 @@ platform type re-export; no runtime contact/strategy/report behavior is changed.
   stale conflict/no write, note retained, explicit approval/no activation,
   no horizontal overflow or console/page error. External network is blocked;
   this is synthetic localhost acceptance, **not authenticated production proof**.
-- Full supported suite: 3,699 total /3,682 PASS /17 intentional skips /0 fail,
+- Full supported suite: 3,700 total /3,683 PASS /17 intentional skips /0 fail,
   disposable SQL enabled; Windows Bash-only SES fixture explicitly excluded.
   Local TypeScript/Vite build and scoped lint/diff verified; five full Edge entry
   import closures checked with Deno 2.5.1, no lock/dependency change.
