@@ -46,10 +46,12 @@ import {
   isDirectorMode,
   MAX_DEVELOP_VIDEOS,
   parseDevelopments,
+  validDevelopmentFields,
   parseIdeas,
   parseResearchFindings,
   RESEARCH_MAX_OUTPUT_TOKENS,
   type DevelopTarget,
+  type DevelopmentField,
   type DirectorMode,
   type ResearchInput,
   type ScheduleSlot,
@@ -104,6 +106,7 @@ interface SuggestRequest {
   mode?: string
   /** 'develop' only: a subset of the guideline's saved videos. */
   videoIds?: string[]
+  targetFields?: DevelopmentField[]
 }
 
 interface VideoSuggestion {
@@ -489,6 +492,17 @@ Deno.serve(async (req) => {
   // ── AI Content Director modes (#224) ────────────────────────────────────────
   // Handled below, so the shipped single-pass flow that follows is unchanged.
   if (mode === 'ideas' || mode === 'develop') {
+    if (body.targetFields !== undefined && (mode !== 'develop' || isInternalWorker || !validDevelopmentFields(body.targetFields))) {
+      return jsonResponse({ error: 'Targeted proposals require a staff development request and valid fields.' }, 400)
+    }
+    if (body.videoIds !== undefined && (!Array.isArray(body.videoIds) || !body.videoIds.length
+      || body.videoIds.length > MAX_DEVELOP_VIDEOS || new Set(body.videoIds).size !== body.videoIds.length
+      || body.videoIds.some(id => typeof id !== 'string' || !uuidRE.test(id)))) {
+      return jsonResponse({ error: 'Requested video IDs must be a nonempty exact bounded set.' }, 400)
+    }
+    if (body.targetFields !== undefined && !body.videoIds?.length) {
+      return jsonResponse({ error: 'Targeted proposals require exact saved video IDs.' }, 400)
+    }
     const requestedVideoIds = Array.isArray(body.videoIds)
       ? body.videoIds.filter(id => typeof id === 'string' && uuidRE.test(id)).slice(0, MAX_DEVELOP_VIDEOS)
       : []
@@ -518,7 +532,7 @@ Deno.serve(async (req) => {
     }
     return mode === 'ideas'
       ? await handleIdeasMode(directorContext)
-      : await handleDevelopMode(directorContext, requestedVideoIds)
+      : await handleDevelopMode(directorContext, requestedVideoIds, body.targetFields)
   }
 
   // ── Build system prompt ──────────────────────────────────────────────────────
@@ -993,19 +1007,22 @@ async function handleIdeasMode(context: DirectorContext): Promise<Response> {
   return jsonResponse({ mode: 'ideas', ideas, context: baseContext, sources, persisted })
 }
 
-async function handleDevelopMode(context: DirectorContext, requestedVideoIds: string[]): Promise<Response> {
+async function handleDevelopMode(context: DirectorContext, requestedVideoIds: string[], targetFields?: DevelopmentField[]): Promise<Response> {
   if (!context.guidelineId) return jsonResponse({ error: 'guidelineId is required to develop saved videos.' }, 400)
   const guide = await loadReadyClientGuide(context.sb, context.client.id)
   if ('notReady' in guide) return clientContextNotReady(context.client.name, guide.notReady.reason)
 
   // The guideline's SAVED rows are the authority: staff order and staff edits win.
-  const { data: savedVideos } = await context.sb
+  const { data: savedVideos, error: savedReadError } = await context.sb
     .from('content_guide_ideas')
-    .select('id, position, title, objective, hook, notes, month, deliverable_id')
+    .select('id, position, title, objective, hook, notes, month, deliverable_id, platform, format, updated_at, script, shot_breakdown, cta, requirements')
     .eq('content_guideline_id', context.guidelineId)
+    .eq('client_id', context.client.id)
     .neq('status', 'archived')
     .order('position', { ascending: true })
     .order('created_at', { ascending: true })
+
+  if (savedReadError) return jsonResponse({ error: 'Saved videos could not be read. No proposal generated.' }, 503)
 
   const slotLabels = new Map(context.slots.map(slot => [slot.id, `${slot.code ?? slot.deliverableType}${slot.title ? ` — ${slot.title}` : ''} (${slot.month.slice(0, 7)})`]))
   const wanted = new Set(requestedVideoIds)
@@ -1019,12 +1036,22 @@ async function handleDevelopMode(context: DirectorContext, requestedVideoIds: st
       objective: (video.objective as string | null) ?? null,
       hook: (video.hook as string | null) ?? null,
       notes: (video.notes as string | null) ?? null,
+      platform: (video.platform as string | null) ?? null,
+      format: (video.format as string | null) ?? null,
+      updatedAt: (video.updated_at as string | null) ?? null,
+      script: (video.script as string | null) ?? null,
+      shotBreakdown: (video.shot_breakdown as string | null) ?? null,
+      cta: (video.cta as string | null) ?? null,
+      requirements: (video.requirements as string | null) ?? null,
       targetMonth: video.month ? String(video.month).slice(0, 7) : null,
       deliverableLabel: video.deliverable_id ? (slotLabels.get(video.deliverable_id as string) ?? 'linked to Client Schedule') : null,
     }))
 
   if (targets.length === 0) {
     return jsonResponse({ error: 'There are no saved videos to develop yet. Accept ideas into the guideline first.' }, 409)
+  }
+  if (wanted.size > 0 && (targets.length !== wanted.size || targets.some(target => !wanted.has(target.id)))) {
+    return jsonResponse({ error: 'Every requested video must belong to this exact client and guideline.' }, 409)
   }
 
   const guideExcerpt = clientGuideExcerpt(guide.markdown)
@@ -1036,6 +1063,7 @@ async function handleDevelopMode(context: DirectorContext, requestedVideoIds: st
     guideExcerpt,
     targets,
     marketingKnowledge: context.marketingKnowledge,
+    targetFields,
   })
   let routed: Awaited<ReturnType<typeof routeAiChat>>
   try {
@@ -1052,18 +1080,19 @@ async function handleDevelopMode(context: DirectorContext, requestedVideoIds: st
           clientId: context.client.id,
           guidelineId: context.guidelineId,
           videoIds: targets.map(target => target.id),
+          ...(context.persist ? {} : { savedRevisions: targets.map(target => target.updatedAt), targetFields: targetFields ?? null }),
           kind: 'develop',
         })),
         complexity: 'complex',
         maxOutputTokens: DEVELOP_MAX_OUTPUT_TOKENS,
-        validateContent: content => parseDevelopments(content, targets).length > 0,
+        validateContent: content => parseDevelopments(content, targets, targetFields).length > 0,
       },
     )
   } catch (error) {
     const mapped = directorProviderError(error)
     return jsonResponse({ mode: 'develop', developments: [], context: baseContext, sources, ...mapped.body }, mapped.status)
   }
-  const developments = parseDevelopments(routed.content, targets)
+  const developments = parseDevelopments(routed.content, targets, targetFields)
   if (developments.length === 0) {
     return jsonResponse({
       mode: 'develop',

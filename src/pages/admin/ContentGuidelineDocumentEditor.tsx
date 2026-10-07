@@ -27,6 +27,7 @@ import { humanizeStatus, INPUT_CLS, LABEL_CLS } from './contentGuidelineHelpers'
 import CanonicalCreativeIntelligence from './CanonicalCreativeIntelligence'
 import { directorKnowledgeReceipt } from '../../lib/contentDirectorEvidence'
 import SavedDirectorContext from './SavedDirectorContext'
+import { developmentPatch } from '../../lib/contentDirectorEdits'
 
 interface Props {
   guideline: ContentGuideline
@@ -44,6 +45,23 @@ interface VideoDraft {
   shotBreakdown: string
   requirements: string
   visualNotes: string
+  cta: string
+  platform: string
+  format: string
+  baseUpdatedAt: string
+}
+
+function savedVideoDraft(video: ContentGuidelineVideo): VideoDraft {
+  return { title: video.title, script: video.script ?? '', targetMonth: video.month?.slice(0, 7) ?? '',
+    deliverableId: video.deliverable_id ?? '', shotBreakdown: video.shot_breakdown ?? '',
+    requirements: video.requirements ?? '', visualNotes: video.visual_notes ?? '', cta: video.cta ?? '',
+    platform: video.platform ?? '', format: video.format ?? '', baseUpdatedAt: video.updated_at }
+}
+
+function videoDraftChanged(video: ContentGuidelineVideo, draft?: VideoDraft): boolean {
+  if (!draft) return false
+  const saved = savedVideoDraft(video)
+  return (Object.keys(saved) as (keyof VideoDraft)[]).some(field => field !== 'baseUpdatedAt' && draft[field] !== saved[field])
 }
 
 function toMonthOption(date: string | null): string {
@@ -116,15 +134,7 @@ export default function ContentGuidelineDocumentEditor({
       setDocumentTitle(guideline.title)
       setCoverageStart(toMonthOption(guideline.coverage_start ?? guideline.month))
       setCoverageEnd(toMonthOption(guideline.coverage_end ?? guideline.coverage_start ?? guideline.month))
-      setDrafts(current => Object.fromEntries(videos.map(video => [video.id, current[video.id] ?? {
-        title: video.title,
-        script: video.script ?? '',
-        targetMonth: video.month?.slice(0, 7) ?? '',
-        deliverableId: video.deliverable_id ?? '',
-        shotBreakdown: video.shot_breakdown ?? '',
-        requirements: video.requirements ?? '',
-        visualNotes: video.visual_notes ?? '',
-      }])))
+      setDrafts(current => Object.fromEntries(videos.map(video => [video.id, current[video.id] ?? savedVideoDraft(video)])))
     }, 0)
     return () => window.clearTimeout(timer)
   }, [guideline.id, guideline.title, guideline.coverage_start, guideline.coverage_end, guideline.month, videos])
@@ -278,7 +288,10 @@ export default function ContentGuidelineDocumentEditor({
       shot_breakdown: draft.shotBreakdown.trim() || null,
       requirements: draft.requirements.trim() || null,
       visual_notes: draft.visualNotes.trim() || null,
-    })
+      cta: draft.cta.trim() || null,
+      platform: draft.platform.trim() || null,
+      format: draft.format.trim() || null,
+    }, draft.baseUpdatedAt)
     setBusy(null)
     if (result.error) { setError(result.error); return }
     setDrafts(current => {
@@ -308,12 +321,7 @@ export default function ContentGuidelineDocumentEditor({
     if (publish) {
       if (videos.some(video => {
         const draft = drafts[video.id]
-        return draft && (draft.title !== video.title || draft.script !== (video.script ?? '')
-          || draft.targetMonth !== (video.month?.slice(0, 7) ?? '')
-          || draft.deliverableId !== (video.deliverable_id ?? '')
-          || draft.shotBreakdown !== (video.shot_breakdown ?? '')
-          || draft.requirements !== (video.requirements ?? '')
-          || draft.visualNotes !== (video.visual_notes ?? ''))
+        return videoDraftChanged(video, draft)
       })) {
         setError('Save your video changes before publishing the guideline.')
         return
@@ -395,7 +403,7 @@ export default function ContentGuidelineDocumentEditor({
   }
 
   // ── Step 2: develop the SAVED videos — saved order and staff edits are authoritative ──
-  async function developSavedVideos() {
+  async function developSavedVideos(onlyCtaFor?: ContentGuidelineVideo) {
     if (videos.length === 0) {
       setDevelopError('Accept or add at least one video first.')
       return
@@ -404,10 +412,16 @@ export default function ContentGuidelineDocumentEditor({
       setDevelopError('Set the coverage window first.')
       return
     }
+    const requested = onlyCtaFor ? [onlyCtaFor] : videos
+    if (requested.some(video => videoDraftChanged(video, drafts[video.id]))) {
+      setDevelopError('Save or discard your local edits before requesting a proposal against the saved brief.')
+      return
+    }
     setDevelopLoading(true)
     setDevelopError(null)
     setDevelopments([])
-    const result = await developGuidelineVideos(guideline, { start: `${coverageStart}-01`, end: `${coverageEnd}-01` })
+    const result = await developGuidelineVideos(guideline, { start: `${coverageStart}-01`, end: `${coverageEnd}-01` },
+      onlyCtaFor ? [onlyCtaFor.id] : undefined, onlyCtaFor ? ['cta'] : undefined)
     setDevelopLoading(false)
     if (result.error) { setDevelopError(result.error); return }
     setDevelopments(result.data.developments)
@@ -429,24 +443,21 @@ export default function ContentGuidelineDocumentEditor({
 
   /** `fill` writes only empty fields; `replace` overwrites the staff text as well (explicit click). */
   async function applyDevelopment(video: ContentGuidelineVideo, development: GuidelineVideoDevelopment, mode: 'fill' | 'replace') {
-    const patch: Record<string, string> = {}
-    for (const [draftField, videoField] of DEVELOP_FIELDS) {
-      const value = development[draftField]?.trim()
-      if (!value) continue
-      const existing = (video[videoField] as string | null)?.trim()
-      if (!existing || mode === 'replace') patch[videoField] = value
-    }
-    if (Object.keys(patch).length === 0) {
-      setDevelopError('Every field already has your own text. Use Replace to overwrite it.')
+    if (videoDraftChanged(video, drafts[video.id])) {
+      setDevelopError('Save or discard local edits first. The proposal has not changed them.')
       return
     }
+    const prepared = developmentPatch({ ...video }, { ...development }, mode)
+    if (prepared.error) { setDevelopError(prepared.error); return }
+    const localDraft = drafts[video.id]
     setBusy(`develop-${video.id}`)
     setDevelopError(null)
-    const result = await updateGuidelineVideo(video.id, patch)
+    const result = await updateGuidelineVideo(video.id, prepared.patch, development.baseUpdatedAt!)
     setBusy(null)
     if (result.error) { setDevelopError(result.error); return }
     setDevelopments(current => current.filter(item => item.videoId !== video.id))
     setDrafts(current => {
+      if (current[video.id] !== localDraft) return current
       const next = { ...current }
       delete next[video.id]
       return next
@@ -663,6 +674,9 @@ export default function ContentGuidelineDocumentEditor({
                           {DEVELOP_FIELDS.map(([draftField, , label]) => development[draftField]?.trim() ? (
                             <div key={draftField}>
                               <p className="text-[10px] font-bold uppercase tracking-wider text-white/35">{label}</p>
+                              <p className="mt-1 text-[10px] text-white/40">Currently saved</p>
+                              <pre className="whitespace-pre-wrap break-words rounded bg-black/20 px-2 py-1.5 text-[11px] text-white/45">{video[DEVELOP_FIELDS.find(([field]) => field === draftField)![1]] || 'Not set'}</pre>
+                              <p className="mt-1 text-[10px] text-brand-teal">Proposed replacement · not saved</p>
                               <pre className="mt-0.5 whitespace-pre-wrap rounded bg-black/40 px-2 py-1.5 text-[11px] leading-relaxed text-white/55">{development[draftField]}</pre>
                             </div>
                           ) : null)}
@@ -671,11 +685,11 @@ export default function ContentGuidelineDocumentEditor({
                       </details>
                       <div className="mt-2 flex flex-wrap gap-2">
                         <ActionButton size="sm" loading={busy === `develop-${video.id}`} onClick={() => void applyDevelopment(video, development, 'fill')}>
-                          {conflicts.length > 0 ? 'Fill empty fields' : 'Apply to this video'}
+                          {development.targetFields?.length === 1 && development.targetFields[0] === 'cta' && conflicts.length === 0 ? 'Accept CTA only' : conflicts.length > 0 ? 'Fill empty fields' : 'Apply to this video'}
                         </ActionButton>
                         {conflicts.length > 0 && (
                           <ActionButton size="sm" variant="secondary" loading={busy === `develop-${video.id}`} onClick={() => void applyDevelopment(video, development, 'replace')}>
-                            Replace my text
+                            {development.targetFields?.length === 1 && development.targetFields[0] === 'cta' ? 'Accept CTA only' : 'Replace my text'}
                           </ActionButton>
                         )}
                         <ActionButton size="sm" variant="ghost" onClick={() => setDevelopments(current => current.filter(item => item.videoId !== development.videoId))}>Discard draft</ActionButton>
@@ -695,22 +709,8 @@ export default function ContentGuidelineDocumentEditor({
         ) : (
           <ol className="space-y-4">
             {videos.map((video, index) => {
-              const draft = drafts[video.id] ?? {
-                title: video.title,
-                script: video.script ?? '',
-                targetMonth: video.month?.slice(0, 7) ?? '',
-                deliverableId: video.deliverable_id ?? '',
-                shotBreakdown: video.shot_breakdown ?? '',
-                requirements: video.requirements ?? '',
-                visualNotes: video.visual_notes ?? '',
-              }
-              const changed = draft.title !== video.title
-                || draft.script !== (video.script ?? '')
-                || draft.targetMonth !== (video.month?.slice(0, 7) ?? '')
-                || draft.deliverableId !== (video.deliverable_id ?? '')
-                || draft.shotBreakdown !== (video.shot_breakdown ?? '')
-                || draft.requirements !== (video.requirements ?? '')
-                || draft.visualNotes !== (video.visual_notes ?? '')
+              const draft = drafts[video.id] ?? savedVideoDraft(video)
+              const changed = videoDraftChanged(video, draft)
               return (
                 <li key={video.id} className="rounded-xl border border-white/10 bg-black/20 p-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">
@@ -760,9 +760,17 @@ export default function ContentGuidelineDocumentEditor({
                     />
                   </label>
                   <SavedDirectorContext objective={video.objective} hook={video.hook} notes={video.notes} />
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    {([['platform', 'Placement / platform'], ['format', 'Delivery mode / format']] as const).map(([field, label]) => (
+                      <label key={field} className="block space-y-1.5"><span className={LABEL_CLS}>{label}</span>
+                        <input className={INPUT_CLS} value={draft[field]} placeholder={field === 'platform' ? 'e.g. Instagram Reels' : 'e.g. text-only; no spoken dialogue'}
+                          onChange={event => setDrafts(current => ({ ...current, [video.id]: { ...draft, [field]: event.target.value } }))} />
+                      </label>
+                    ))}
+                  </div>
                   {([
                     ['shotBreakdown', 'Shot-by-shot breakdown'],
-                    ['requirements', 'People, products & props'],
+                    ['requirements', 'Production brief · duration, people, products & props'],
                     ['visualNotes', 'Visual / filming notes'],
                   ] as const).map(([field, label]) => (
                     <label key={field} className="mt-3 block space-y-1.5">
@@ -772,6 +780,13 @@ export default function ContentGuidelineDocumentEditor({
                         onChange={event => setDrafts(current => ({ ...current, [video.id]: { ...draft, [field]: event.target.value } }))} />
                     </label>
                   ))}
+                  <label className="mt-3 block space-y-1.5"><span className={LABEL_CLS}>Call to action</span>
+                    <textarea className={`${INPUT_CLS} min-h-20 resize-y`} value={draft.cta}
+                      onChange={event => setDrafts(current => ({ ...current, [video.id]: { ...draft, cta: event.target.value } }))} />
+                    <span className="block text-[11px] text-white/40">The saved production brief controls duration. Missing details remain unconfirmed.</span>
+                  </label>
+                  <ActionButton size="sm" variant="ghost" disabled={changed || developLoading || Boolean(busy)}
+                    onClick={() => void developSavedVideos(video)}>Propose CTA only</ActionButton>
                   <label className="mt-3 block space-y-1.5">
                     <span className={LABEL_CLS}>Client Schedule video</span>
                     <select
@@ -799,10 +814,12 @@ export default function ContentGuidelineDocumentEditor({
                   </label>
                   <div className="mt-3">
                     <CanonicalCreativeIntelligence clientId={guideline.client_id} month={draft.targetMonth} deliverableId={draft.deliverableId}
-                      draft={{ objective: video.objective ?? '', hook: video.hook ?? '', cta: video.cta ?? '', shot_breakdown: draft.shotBreakdown, requirements: draft.requirements }} />
+                      draft={{ objective: video.objective ?? '', hook: video.hook ?? '', cta: draft.cta, shot_breakdown: draft.shotBreakdown, requirements: draft.requirements }} />
                   </div>
                   <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-white/35">Production: {humanizeStatus(video.production_status)}</span>
+                    {(changed || draft.baseUpdatedAt !== video.updated_at) && <ActionButton size="sm" variant="ghost" disabled={Boolean(busy)}
+                      onClick={() => setDrafts(current => ({ ...current, [video.id]: savedVideoDraft(video) }))}>Discard local edits</ActionButton>}
                     <ActionButton size="sm" variant="secondary" disabled={!changed} loading={busy === video.id} onClick={() => void saveVideo(video)}>Save video</ActionButton>
                   </div>
                 </li>

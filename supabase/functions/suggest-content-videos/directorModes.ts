@@ -53,6 +53,22 @@ export interface DevelopTarget {
   notes: string | null
   targetMonth: string | null
   deliverableLabel: string | null
+  platform?: string | null
+  format?: string | null
+  updatedAt?: string | null
+  script?: string | null
+  shotBreakdown?: string | null
+  cta?: string | null
+  requirements?: string | null
+}
+
+export const DEVELOPMENT_FIELDS = ['script', 'shotBreakdown', 'requirements', 'visualNotes', 'cta'] as const
+export type DevelopmentField = typeof DEVELOPMENT_FIELDS[number]
+
+export function validDevelopmentFields(value: unknown): value is DevelopmentField[] {
+  return Array.isArray(value) && value.length > 0 && value.length <= DEVELOPMENT_FIELDS.length
+    && new Set(value).size === value.length
+    && value.every(field => DEVELOPMENT_FIELDS.includes(field as DevelopmentField))
 }
 
 export interface VideoDevelopment {
@@ -63,6 +79,8 @@ export interface VideoDevelopment {
   visualNotes: string
   cta: string
   notes: string | null
+  baseUpdatedAt?: string | null
+  targetFields?: DevelopmentField[]
 }
 
 export interface ScheduleSlot {
@@ -193,7 +211,8 @@ export function directorIdeaPersistencePayload(idea: VideoIdea): VideoIdea {
 }
 
 /** Keep only developments for the requested saved videos, one each, in the saved order. */
-export function parseDevelopments(raw: string, targets: DevelopTarget[]): VideoDevelopment[] {
+export function parseDevelopments(raw: string, targets: DevelopTarget[], targetFields?: DevelopmentField[]): VideoDevelopment[] {
+  if (targetFields !== undefined && !validDevelopmentFields(targetFields)) return []
   const parsed = parseJsonObject(raw)
   const list = Array.isArray(parsed?.developments) ? parsed!.developments as unknown[] : []
   const byId = new Map<string, VideoDevelopment>()
@@ -203,15 +222,21 @@ export function parseDevelopments(raw: string, targets: DevelopTarget[]): VideoD
     const dev = item as Record<string, unknown>
     const videoId = text(dev.videoId, 64)
     const script = text(dev.script, 6000)
-    if (!targetIds.has(videoId) || byId.has(videoId) || !script) continue
+    if (!targetIds.has(videoId) || byId.has(videoId)
+      || (targetFields ? !targetFields.every(field => text(dev[field], 6000)) : !script)) continue
+    const target = targets.find(row => row.id === videoId)!
+    const selectedText = (field: DevelopmentField, limit: number) =>
+      !targetFields || targetFields.includes(field) ? text(dev[field], limit) : ''
     byId.set(videoId, {
       videoId,
-      script,
-      shotBreakdown: text(dev.shotBreakdown, 4000),
-      requirements: text(dev.requirements, 2000),
-      visualNotes: text(dev.visualNotes, 2000),
-      cta: text(dev.cta, 400),
+      script: selectedText('script', 6000),
+      shotBreakdown: selectedText('shotBreakdown', 4000),
+      requirements: selectedText('requirements', 2000),
+      visualNotes: selectedText('visualNotes', 2000),
+      cta: selectedText('cta', 400),
       notes: text(dev.notes, 600) || null,
+      ...(target.updatedAt !== undefined ? { baseUpdatedAt: target.updatedAt } : {}),
+      ...(targetFields ? { targetFields: [...targetFields] } : {}),
     })
   }
   return targets.flatMap((target) => byId.get(target.id) ?? [])
@@ -318,6 +343,7 @@ export function buildDevelopPrompt(input: {
   guideExcerpt: string
   targets: DevelopTarget[]
   marketingKnowledge: string[]
+  targetFields?: DevelopmentField[]
 }): { system: string; user: string } {
   const system = [
     'You are the Content Director at CG Production House writing production-ready material for a real shoot for ONE exact client.',
@@ -325,12 +351,13 @@ export function buildDevelopPrompt(input: {
     '',
     'Return ONLY a JSON object: {"developments":[...]}, one entry per video id given, in the given order.',
     'Each entry: {"videoId","script","shotBreakdown","requirements","visualNotes","cta","notes"}',
-    '- script: the complete usable script (30-75 seconds): spoken lines plus on-screen text, opening with the given hook.',
+    '- script: honour the exact duration, placement and delivery mode in the staff brief. Never impose a default duration. Text-only means on-screen text, not spoken dialogue. Missing or conflicting brief details need confirmation in notes, not invented certainty.',
     '- shotBreakdown: a numbered shot list in filming order (shot type, subject, action).',
     '- requirements: the exact people, products, props and location needed.',
     '- visualNotes: visual direction, framing, pace and on-screen text styling.',
     '- cta: one clear call to action consistent with the client guide.',
     '- notes: anything to confirm with the client before filming, or null.',
+    ...(input.targetFields ? [`Propose ONLY these requested fields: ${input.targetFields.join(', ')}. Do not rewrite any other field; keep the saved hook, script and shot order unless that exact field was requested.`] : []),
     ...SHARED_RULES,
   ].join('\n')
   const user = [
@@ -348,6 +375,12 @@ export function buildDevelopPrompt(input: {
       `  title: ${target.title}`,
       `  objective: ${target.objective ?? '(not set)'}`,
       `  hook: ${target.hook ?? '(not set — write one)'}`,
+      `  placement/platform: ${target.platform ?? '(not set — needs confirmation)'}`,
+      `  format/delivery mode: ${target.format ?? '(not set — needs confirmation)'}`,
+      `  saved script: ${target.script ?? '(not set)'}`,
+      `  saved shot order: ${target.shotBreakdown ?? '(not set)'}`,
+      `  saved CTA: ${target.cta ?? '(not set)'}`,
+      `  staff production brief (including exact duration when known): ${target.requirements ?? '(not set — needs confirmation)'}`,
       `  target month: ${target.targetMonth ?? 'unallocated'}`,
       `  schedule slot: ${target.deliverableLabel ?? 'not linked'}`,
       `  staff notes: ${target.notes ?? '(none)'}`,
