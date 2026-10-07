@@ -41,7 +41,8 @@ function ContentReviewCardBody({ review, canDecide, onChanged, staffView = false
     return () => { active = false }
   }, [review.asset_path, review.id, review.state, staffView])
   async function decide(approve: boolean) {
-    if (!canDecide || busy || (approve && !url)) return
+    if (!canDecide || busy) return
+    if (approve && !url) return
     setBusy(true); setError(null)
     try {
       const result = await supabase.rpc('decide_content_review', { p_version_id: review.id, p_approve: approve, p_note: note || null })
