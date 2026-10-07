@@ -1,6 +1,6 @@
 # CG Dynamics Ops Handover
 
-### 7 October client Approvals truth — local continuation in verification
+### 7 October client Approvals truth — PR #695 local acceptance
 
 Continued from main `ef6e9563ccb5c1045beb84d6df2fed66a4230b6d` under #668.
 Actual canonical client queue includes both pending and approved rows; reproduced
@@ -15,7 +15,14 @@ exact-client queue, RLS, Storage, explicit decision RPC and preview read-only
 contracts are unchanged; no new data/store/schema/dependency or production action.
 18 focused preview/report-isolation/render tests and 20 actual client-Approvals
 desktop/375/390/430 fixtures PASS; local build/scoped lint/diff PASS. Full pinned
-acceptance pending. Fixtures are synthetic, not authenticated changed-production
+acceptance PASS on source `3bd4a42d64df7534d5f1b24beedc42043f1cb394`, tree
+`efd403b1f13508e9f5a99756f21c6a6087a8ff1c`: all twelve runner steps PASS;
+3,727 total /3,710 PASS /17 intentional skips /0 failures. TypeScript, local
+Vite build and nine integrated responsive component suites PASS; supplemental
+strategy review twelve cases PASS. Receipt `%TEMP%/cg-local-launch-3bd4a42d64df.json`,
+SHA256 `e1872fba1960d5f86a53549fadde819a4871437d812311a299122c1f3d56ee29`.
+Windows Bash-only SES remains excluded, not passed. Receipt-only documentation
+does not change tested application/tool/test/config. Fixtures are synthetic, not authenticated changed-production
 acceptance; deliberate missing-media requests are expected test failures, not a
 blanket zero-console assertion. Vercel operations remain zero; automatic deployment
 OFF. No actual approval, publication, provider, model or data/config write.

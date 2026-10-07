@@ -1,5 +1,21 @@
 # Integrated local launch acceptance — #668 / #679
 
+**Latest client Approvals candidate, 7 October — PR #695:** tested source
+`3bd4a42d64df7534d5f1b24beedc42043f1cb394`, tree
+`efd403b1f13508e9f5a99756f21c6a6087a8ff1c`: all twelve steps PASS,
+3,727 total /3,710 PASS /17 intentional skips /0 failures. Reproduced approved
+history counted as waiting and staff publishing instructions exposed to clients.
+Pending-only counts, safe approved history and fail-closed queue/media failures
+now pass 18 focused tests and 20 actual-component desktop/375/390/430 cases.
+Supplemental strategy-review twelve cases PASS. Local build, scoped lint/diff
+and nine integrated responsive suites PASS. Receipt
+`%TEMP%/cg-local-launch-3bd4a42d64df.json`, SHA256
+`e1872fba1960d5f86a53549fadde819a4871437d812311a299122c1f3d56ee29`.
+No actual approval or publication occurred. Synthetic fixtures are not legitimate
+changed-production authentication acceptance; deliberate missing-media requests
+are expected. Windows SES exclusion and existing human/content gates remain.
+Zero Vercel operations; automatic deployment OFF. Never upload synthetic dist.
+
 **Latest strategy review candidate, 7 October — PR #694:** tested source
 `6ba43f068c59a3febf7ee5317c0ca42200b18b75`, tree
 `0e5b2092a2fc960c76126b5710508bcbc5aaae1a`: all twelve steps PASS,
