@@ -1,5 +1,27 @@
 # CG Dynamics Ops Handover
 
+### 7 October #677 expanded Assistant entry closure
+
+Full entry-point Deno checking exposed 94 inherited Assistant typing errors not
+covered by the earlier helper check. Type-only repairs preserve emitted runtime
+JavaScript (executable parity regression), auth/query/action behavior and the
+existing provider contract. Full Assistant + Director suggestion Deno checks PASS
+locally. No deployment, cloud build, secret/config or production data change.
+
+### 7 October #433 / same #677 local continuation
+
+Existing saved Director receipts/confirmation context were hidden after reload;
+now a compact staff-only plain-text readback displays existing video notes without
+re-certifying approval or writing fields. Content Workflow's editor now keys exact
+guideline identity like Full Content Guide: the unkeyed local fixture reproduces
+previous-client proposed-idea leakage; keyed fixture passes departure/reload at
+1440/375/390/430px. Local synthetic acceptance, not production auth. 135 focused
+tests PASS. Real Deno import-closure check found/fixed 20 typing errors; now PASS,
+with no auth/provider/runtime behavior change. See CONTENT-DIRECTOR-EVIDENCE-433.md.
+No Vercel, backend deployment, config or production data operation. Historical
+approval/revision binding and semantic concept review remain explicit separate gates.
+Preserve additive #674 portal/file and #683 strategy-screening receipts when integrating;
+no stale branch handover may overwrite main or another lane's accepted state.
 ### 7 October — substantive Vrystaat proposal from fresh exact evidence
 
 Same #683 adds `STRATEGY-VRYSTAAT-REVIEW-PROPOSAL.md`: distinct retrospective
@@ -25,6 +47,7 @@ This receipt is additive: #674 portal/file work and #677 Director ownership rema
 intact. No Vercel, migration, Edge, provider, config or production data action.
 Substantive strategy review, exact missing evidence, protected rollout and actual
 client-visible publication remain separate; do not certify only-push readiness.
+
 ### 7 October — published MTD post cutoff, local-only
 
 Fresh read-only Vrystaat evidence reproduced posts beyond the stored published

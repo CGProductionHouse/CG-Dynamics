@@ -25,6 +25,8 @@ import { listMonthlyDeliverablesByMonth, type MonthlyDeliverable } from '../../l
 import { monthDisplayLabel } from '../../lib/reportPeriod'
 import { humanizeStatus, INPUT_CLS, LABEL_CLS } from './contentGuidelineHelpers'
 import CanonicalCreativeIntelligence from './CanonicalCreativeIntelligence'
+import { directorKnowledgeReceipt } from '../../lib/contentDirectorEvidence'
+import SavedDirectorContext from './SavedDirectorContext'
 
 interface Props {
   guideline: ContentGuideline
@@ -615,6 +617,7 @@ export default function ContentGuidelineDocumentEditor({
                               {idea.evidence.map((item, evidenceIndex) => (
                                 <li key={evidenceIndex} className="text-[11px] text-white/45">
                                   <span className="font-bold uppercase tracking-wider text-white/35">{humanizeStatus(item.kind)}</span>{' '}{item.note}
+                                  {item.knowledgeReference && <span className="mt-1 block whitespace-pre-line break-words">{directorKnowledgeReceipt(item.knowledgeReference)}</span>}
                                   {item.sourceUri && (
                                     <a className="ml-1 text-brand-teal underline" href={item.sourceUri} target="_blank" rel="noreferrer">source</a>
                                   )}
@@ -756,6 +759,7 @@ export default function ContentGuidelineDocumentEditor({
                       placeholder="Enter the complete spoken and on-screen script..."
                     />
                   </label>
+                  <SavedDirectorContext objective={video.objective} hook={video.hook} notes={video.notes} />
                   {([
                     ['shotBreakdown', 'Shot-by-shot breakdown'],
                     ['requirements', 'People, products & props'],
