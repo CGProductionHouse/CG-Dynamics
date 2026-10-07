@@ -1,5 +1,22 @@
 # CG Dynamics Ops Handover
 
+### 7 October #433 precise correction merged; task-level acceptance continues
+
+#685 merged as `1b5b2e5ed6f1be301911e3aa6165c9b3d7dd9702`, no deployment.
+Saved-brief/CTA-only revision-fenced source is now on main; runtime release and
+authenticated semantic acceptance remain protected/unexecuted. Continuing ordered
+W3 on `codex/433-creative-task-benchmark`: twelve client-neutral offline contracts,
+versioned receipt and explicit human creative checklist. No model/cost/time results
+invented, no unified quality score. Historical review-revision gap stays BLOCKED,
+not masked by a green fixture test. See `CONTENT-DIRECTOR-TASK-BENCHMARK-433.md`.
+W3 offline fixture/runner PASS: 13 focused; full 3,691 total /3,674 PASS /17
+intentional skips /0 fail (Windows Bash SES excluded), local build/scoped TS+Node
+lint/diff PASS. Twelve model/human/semantic acceptances remain NOT RUN/not
+established; cost/time/retries stay null. Next bounded integrity correction is
+exact-content review revision binding, covering both canonical and legacy review
+screens plus routing/activation audit distinction; #433 comment 6035862068 pins
+the scope. No production apply/backfill/activation is authorized.
+
 ### 7 October current merged source and #433 W2 continuation — no Vercel
 
 GitHub source now includes #684 (`4f504160`), #683 (`3ce52296`), #677
