@@ -42,12 +42,13 @@ function ContentReviewCardBody({ review, canDecide, onChanged, staffView = false
   }, [review.asset_path, review.id, review.state, staffView])
   async function decide(approve: boolean) {
     if (!canDecide || busy) return
+    if (approve && !url) return
     setBusy(true); setError(null)
     try {
       const result = await supabase.rpc('decide_content_review', { p_version_id: review.id, p_approve: approve, p_note: note || null })
       if (result.error) throw result.error
       onChanged()
-    } catch (reason) { setError(reason instanceof Error ? reason.message : 'Could not record your decision.') }
+    } catch (reason) { setError(staffView && reason instanceof Error ? reason.message : 'Could not record your decision. Please try again shortly.') }
     finally { setBusy(false) }
   }
   return <article className="min-w-0 space-y-3 rounded-xl border border-white/10 bg-white/[0.03] p-4">

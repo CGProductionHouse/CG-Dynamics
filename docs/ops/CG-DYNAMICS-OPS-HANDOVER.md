@@ -1,5 +1,38 @@
 # CG Dynamics Ops Handover
 
+### 7 October safe continuation — approval retry + substantive held proposals
+
+PR #696 merged `6e911cb07ac7ab32b9f5de761b43f19ca76343ab`: three internal
+business-game-plan proposals for Bloem Action Sports, Emoya Estate Driving Range
+and Forklift Trucks in `STRATEGY-HELD-REVIEW-PROPOSALS.md`. Exact guide hashes,
+package allocations, September evidence gaps and separate October choices are
+explicit. These are NOT accepted research, canonical amendments or human semantic
+approval; the three clients remain held. Vrystaat's earlier proposal remains.
+83 nearest strategy/isolation tests PASS after synthetic local config was supplied;
+initial missing-env attempt failed and is not counted as passed. Source hash checks
+PASS. No application change in #696 and no production/content transition.
+
+Further actual Approvals interaction reproduced raw backend diagnostics exposed
+to clients after a failed decision. Client errors are now safe retry wording;
+staff diagnostics remain unchanged, asset presence is checked in the approve
+handler as well as the button. Synthetic failed decisions cannot look approved.
+Twenty-four actual desktop/375/390/430 cases PASS, including four new failed
+decision cases. No real server decision call/data write. Local build/scoped
+lint/diff PASS. Full pinned acceptance PASS on `57248ff4e00289ba4bb97121cdcf096d6f62083f`,
+tree `ea23a0d76c2bdac127d3203d99e609f621be3f1e`: all twelve local steps,
+3,727 total /3,710 PASS /17 intentional skips /0 failures. Receipt
+`%TEMP%/cg-local-launch-57248ff4e002.json`, SHA256
+`2e5603e06bb72f57b6cad4fb8c19dff439aafd76ceca90174c56a9bd718ae8b7`.
+The first candidate failed the existing preview guard source assertion; corrected
+by preserving the original preview guard and adding the asset guard separately,
+not weakening the test. Windows Bash SES excluded, not passed. Nine integrated
+responsive suites PASS; no changed-production claim. Receipt-only docs do not
+alter tested application, fixtures or config. Stale PRs #617 and #682 closed:
+#617 removed accepted Neshora evidence/frozen receipts; #682 was an unrelated
+dependency bump with an unsupported launch-ready claim. Branches remain recoverable.
+PR #618 warned about the same stale evidence; not changed or closed.
+Vercel operations remain ZERO and Git deployment remains OFF.
+
 ### 7 October client Approvals truth — PR #695 local acceptance
 
 Continued from main `ef6e9563ccb5c1045beb84d6df2fed66a4230b6d` under #668.

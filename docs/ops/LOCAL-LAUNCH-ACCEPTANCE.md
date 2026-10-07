@@ -1,5 +1,18 @@
 # Integrated local launch acceptance — #668 / #679
 
+**Latest approval retry candidate, 7 October — PR #697:** tested source
+`57248ff4e00289ba4bb97121cdcf096d6f62083f`, tree
+`ea23a0d76c2bdac127d3203d99e609f621be3f1e`: all twelve local steps PASS;
+3,727 total /3,710 PASS /17 intentional skips /0 failures. Safe client retry
+wording, unchanged staff diagnostics and approve-handler asset guard; 24 actual
+Approvals desktop/375/390/430 fixture cases PASS. First candidate failed the
+existing preview guard assertion; preserved that guard rather than waiving it.
+Receipt `%TEMP%/cg-local-launch-57248ff4e002.json`, SHA256
+`2e5603e06bb72f57b6cad4fb8c19dff439aafd76ceca90174c56a9bd718ae8b7`.
+TypeScript/local Vite/nine integrated responsive suites/scoped lint/diff PASS.
+Windows Bash SES excluded, not passed. No real decisions, changed-production
+auth acceptance or Vercel operations; Git deployment OFF, never upload synthetic dist.
+
 **Latest client Approvals candidate, 7 October — PR #695:** tested source
 `3bd4a42d64df7534d5f1b24beedc42043f1cb394`, tree
 `efd403b1f13508e9f5a99756f21c6a6087a8ff1c`: all twelve steps PASS,
