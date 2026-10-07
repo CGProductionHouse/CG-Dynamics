@@ -201,7 +201,17 @@ The production-read CLI is not invoked during this local correction.
 No blanket “only push left”, “94 ready” or “all data accurate” certification may
 replace these named gates. Onboarding is not being resurrected as launch focus.
 
-## Final local closure receipt — 7 October 2026
+## Historical morning local receipt — 7 October 2026 (superseded)
+
+This section records the morning observation, NOT the current migration gate.
+Both migrations below were subsequently applied under explicit CA approval as
+`client_portal_post_assets` / `20261007141122` and
+`skill_card_review_revision_binding` / `20261007141211`, followed by the six
+dependent Edge releases. See `LAUNCH-BACKEND-ACTIVATION-2026-10-07.md` for exact
+schema/grants/auth/source receipts. Do not replay either migration because the
+repository timestamp differs from its assigned production ledger version.
+Current frontend, genuine role acceptance and human/content gates remain open;
+later pinned local receipts above supersede the test totals here.
 
 Tested code: `c8c26739b8f61ec91efe58df564b9ee0d93c0155` (PR #688).
 The fixed runner completed all twelve steps between 11:41:50 and 11:52:02 UTC:
@@ -235,7 +245,11 @@ Fresh read-only production evidence on 7 October:
   Funerals, All Around PVC and Red Oak. This proves sampled reachability only,
   not authenticated behavior, all sites, future uptime or budget sustainability.
 
-### Bounded protected release order (not executed)
+### Historical morning protected release order (steps 1–2 now superseded)
+
+Steps 1–2 below are historical instructions, not an executable pending packet.
+Their two migrations and six dependent Edge functions are already verified live.
+Remaining frontend release and human/content actions retain their separate gates.
 
 1. Obtain specific approval, recheck schema/grants/RLS and apply only the two
    separately reviewed migrations above; verify each before proceeding.

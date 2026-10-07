@@ -2,6 +2,15 @@
 
 ## Captured truth and isolated artifacts
 
+7 October supersession: this section and its `quality_review_passed` artifact
+are historical 2 October receipts, not current quality certification. The current
+generator deliberately distinguishes copy screening from semantic review; read
+`STRATEGY-READINESS-SCREENING-TRUTH.md` and the latest #668/handover receipts.
+The current read-only target is 72 v3 +22 held v2 drafts, zero approved/published
+snapshots. Do not overwrite the frozen historical receipt or infer that the 94
+strategies are accepted. Internal held-client proposals supply review material,
+not approval or canonical amendment authority.
+
 Base main: `820d1bd98a4b6576500da779a0ba2e496fb86b10`.
 Production SELECT snapshot: **2026-10-02 14:47:42.384012+00**. Read project:
 `ehtjfntukiwbgptqgbzy`. No mutation, migration, transition or provider operation.

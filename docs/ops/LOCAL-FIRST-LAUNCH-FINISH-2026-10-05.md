@@ -26,7 +26,16 @@ Read latest owning issues before execution: current GitHub supersedes this snaps
 - Every CA correction maps to an issue and an executable acceptance assertion.
   Guardrails in source material are NOT a client strategy. Unknown is not zero.
 
-## Ordered finish queue and concrete acceptance
+## Ordered finish queue and concrete acceptance (historical code-status snapshot)
+
+The table preserves the original plan, not current open-PR or migration state.
+#674/#677/#685/#686/#687 are merged; the reverse post-asset contract and current
+review-binding backend are implemented and live under the exact receipts in
+`LAUNCH-BACKEND-ACTIVATION-2026-10-07.md`. Do not resurrect their old draft/code
+gaps or repeat the applied migrations/Edge releases. Current local verification
+is pinned in `LOCAL-LAUNCH-ACCEPTANCE.md` and the ops handover. Frontend release,
+real changed-runtime authentication and actual business/content decisions remain
+separate, unresolved gates; source tests do not make them complete.
 
 | Order / owner | Work to finish locally | Completion evidence / remaining protected boundary |
 | --- | --- | --- |
