@@ -52,7 +52,7 @@ import {
   PerformanceProviderIcon,
   type PerformanceProviderIconKey,
 } from '../../components/client/PerformanceProviderIcon'
-import { cgManagedWebsiteForClient, type CgManagedWebsite } from '../../lib/cgWebsiteFleet'
+import { cgManagedWebsiteForClient, hasCgWebsiteMaintenance, type CgManagedWebsite } from '../../lib/cgWebsiteFleet'
 import { websiteReportPresentation } from '../../lib/websiteReportPresentation'
 import { PerformanceServiceStory } from '../../components/client/PerformanceServiceStory'
 import { PERFORMANCE_SERVICE_TABS } from '../../lib/performanceServiceCatalog'
@@ -181,7 +181,9 @@ export function ClientReportView({
   const hasMeta = availablePlatforms.some(view => view.platform === 'facebook' || view.platform === 'instagram')
     || facts.some(fact => fact.platform === 'facebook' || fact.platform === 'instagram')
   const hasGoogleAds = googleAds !== null || ['data', 'not-synced', 'error', 'no-activity'].includes(googleAdsState)
-  const managedWebsite = cgManagedWebsiteForClient(client?.id ?? ('client_id' in report ? report.client_id : null))
+  const exactWebsiteClientId = client?.id ?? ('client_id' in report ? report.client_id : null)
+  const managedWebsite = cgManagedWebsiteForClient(exactWebsiteClientId)
+  const knownWebsiteMaintenance = hasCgWebsiteMaintenance(exactWebsiteClientId)
   const hasGoogleAdsSource = googleAds !== null && ['data', 'no-activity'].includes(googleAdsState)
   const tabs = [...PERFORMANCE_SERVICE_TABS]
   const activeTab = tabs.some(item => item.key === tab) ? tab : 'overview'
@@ -263,8 +265,8 @@ export function ClientReportView({
           clientName={client?.name}
         />
       ) : activeTab === 'web' ? (
-        report.website_report || managedWebsite
-          ? <PublishedWebsitePerformance report={report.website_report ?? null} managedWebsite={managedWebsite} />
+        report.website_report || managedWebsite || knownWebsiteMaintenance
+          ? <PublishedWebsitePerformance report={report.website_report ?? null} managedWebsite={managedWebsite} maintenanceIncluded={knownWebsiteMaintenance} />
           : <PerformanceServiceStory service="web" clientName={client?.name} />
       ) : reportPlatforms.includes(activeTab as Platform) ? (
         <PlatformTab
@@ -295,7 +297,7 @@ export function ClientReportView({
   )
 }
 
-function PublishedWebsitePerformance({ report, managedWebsite }: { report: RenderableReport['website_report']; managedWebsite: CgManagedWebsite | null }) {
+function PublishedWebsitePerformance({ report, managedWebsite, maintenanceIncluded }: { report: RenderableReport['website_report']; managedWebsite: CgManagedWebsite | null; maintenanceIncluded: boolean }) {
   if (!report) {
     return <ProviderAvailabilityPanel
       eyebrow="Digital experience"
@@ -303,7 +305,9 @@ function PublishedWebsitePerformance({ report, managedWebsite }: { report: Rende
       status="Unavailable"
       description={managedWebsite
         ? `CG manages ${managedWebsite.canonicalHost}, but no approved website snapshot was published with this monthly report. Reporting setup or review is still in progress; no figures are inferred or shown as zero.`
-        : 'No approved website snapshot was published with this monthly report. No figures are inferred or shown as zero.'}
+        : maintenanceIncluded
+          ? 'Your CG-built website is maintained by CG. Verified website reporting is not yet available for this month. No figures are inferred or shown as zero.'
+          : 'No approved website snapshot was published with this monthly report. No figures are inferred or shown as zero.'}
     />
   }
 

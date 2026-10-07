@@ -23,9 +23,10 @@ const fixture = {
         posts:[post('covered','2026-09-24T06:59:59.999Z','Covered Pacific final-day result',0),
           post('later','2026-09-24T07:00:00Z','Uncovered later result',999)]};
       const strategyData=emptyStrategyData();strategyData.strategyGoingForward='Explain the application routes so contributors can prepare the correct submission.';
-      function App(){const[status,setStatus]=useState('draft');window.showPublishedFixture=()=>setStatus('published');
+      function App(){const[status,setStatus]=useState('draft');const[client,setClient]=useState(null);window.showPublishedFixture=()=>setStatus('published');
+        window.showMaintainedSiteFixture=()=>setClient({id:'aece5a86-c962-4234-a1fe-7904c20f03ff',name:'JFJ Electrical'});
         return React.createElement('main',{className:'mx-auto max-w-6xl p-3 sm:p-8'},
-          React.createElement(ClientReportView,{report,googleAds:null,googleAdsState:'not-connected',
+          React.createElement(ClientReportView,{report:client?{...report,client_id:client.id}:report,client,googleAds:null,googleAdsState:'unmapped',
             googleAdsError:null,monthlyStrategy:{month:'2026-09-01',status,strategyData}}));}
       createRoot(document.getElementById('root')).render(React.createElement(App));`
   },
@@ -80,8 +81,15 @@ try {
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width} overflow`)
     assert.deepEqual(errors, [])
     await page.screenshot({ path: join(tmpdir(), `cg-report-cutoff-${width}.png`), fullPage: true })
+    await page.evaluate(() => window.showMaintainedSiteFixture())
+    await page.getByRole('tab', { name: 'Website Performance', exact: true }).click()
+    await page.getByText('Your CG-built website is maintained by CG.', { exact: false }).waitFor()
+    assert.doesNotMatch(await page.locator('body').innerText(), /Explore adding this service|Discuss my package|A premium CG-built website|aece5a86/)
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width} maintained-site overflow`)
+    assert.deepEqual(errors, [])
+    await page.screenshot({ path: join(tmpdir(), `cg-maintained-site-${width}.png`), fullPage: true })
     await page.close()
-    console.log(`PASS ${width}px: actual Overview/Facebook, published cutoff/Pacific boundary/observed zero, no later highlight/overflow/runtime errors; localhost GET only`)
+    console.log(`PASS ${width}px: actual Overview/Facebook/held managed Website, cutoff/observed zero, no later highlight/duplicate site upsell/overflow/runtime errors; localhost GET only`)
   }
 } finally {
   if (browser) await browser.close()

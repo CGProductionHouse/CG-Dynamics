@@ -62,7 +62,7 @@ test('Google renders verified Ads without a dead Business placeholder', () => {
 
 test('provider panels are evidence-gated and never fabricate unavailable metrics', () => {
   assert.match(reportView, /title="Website Performance"/)
-  assert.match(reportView, /<PublishedWebsitePerformance report=\{report\.website_report \?\? null\} managedWebsite=\{managedWebsite\} \/>/)
+  assert.match(reportView, /<PublishedWebsitePerformance report=\{report\.website_report \?\? null\} managedWebsite=\{managedWebsite\} maintenanceIncluded=\{knownWebsiteMaintenance\} \/>/)
   assert.match(reportView, /no approved website snapshot was published with this monthly report/i)
   assert.doesNotMatch(reportView, /title="Email Marketing"|title="LinkedIn"/)
   assert.match(reportView, /status="Unavailable"/)

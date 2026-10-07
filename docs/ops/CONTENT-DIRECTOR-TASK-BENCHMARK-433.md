@@ -64,3 +64,9 @@ tsc/Vite build, scoped TS/Node lint and diff PASS. Runner executed successfully;
 the JSON receipt preserves twelve `not_run`/`not_established` semantic states,
 one explicitly characterized review gap and null cost/time. No UI/runtime changed
 in this W3 packet; no authenticated/model/production acceptance is claimed.
+
+That last paragraph is the historical #686 run receipt. #687, merged as
+`9c8a0187e342d83e04de2c1bcf7d19973b959df4`, subsequently corrected the characterized
+review-binding code gap and refreshed its actual gate test. Its migration/runtime
+release and the twelve human/model semantic acceptances remain unexecuted gates;
+neither the historical receipt nor the new local pass authorizes reapproval.

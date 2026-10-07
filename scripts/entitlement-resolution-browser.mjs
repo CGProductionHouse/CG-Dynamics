@@ -19,7 +19,7 @@ const server=await createServer({configFile:false,plugins:[react(),fixture],cach
 let browser
 try {
   await server.listen();browser=await chromium.launch({headless:true})
-  for(const[name,width,height]of[['desktop',1440,1000],['mobile',390,844]]) {
+  for(const[name,width,height]of[['desktop',1440,1000],['mobile-375',375,844],['mobile-390',390,844],['mobile-430',430,900]]) {
     const page=await browser.newPage({viewport:{width,height}}),writes=[],errors=[]
     let scenario='normal',readCount=0,clients=resolutionFixtures()
     clients[0].entitlements=[{service_key:'linkedin',state:'unknown',evidence_note:'Local reviewed unknown',source_references:[],verified_at:'2026-10-02T10:00:00Z',revision:1,notes:null}]

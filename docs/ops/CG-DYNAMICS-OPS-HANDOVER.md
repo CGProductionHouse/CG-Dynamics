@@ -1,5 +1,45 @@
 # CG Dynamics Ops Handover
 
+### 7 October final local source acceptance — PR #688
+
+Supersedes the pending final-run wording below. Tested code
+`c8c26739b8f61ec91efe58df564b9ee0d93c0155`: all twelve local runner steps PASS,
+3,707 total /3,690 PASS /17 intentional skips /0 failures. TypeScript/local Vite,
+nine browser suites at desktop/375/390/430, 51 nearest focused regressions,
+scoped lint/diff and six unchanged Edge import closures PASS. Local synthetic
+acceptance is not authenticated changed-production proof; fixture dist MUST NOT
+be uploaded. No Vercel, production data/migration/Edge/provider action occurred.
+
+Final fixes: exact-ID maintained JFJ website no longer receives a new-site upsell;
+historical strategy contract screening emits no approval/publication payloads or
+semantic-ready claim; integrated local runner pins hashes and fails closed.
+Current read-only production gates: 61 active/57 confirmed packages (four held:
+Elcheck, JFJ Electrical, LHP Student Village & Block, VCS Cleaning Solutions);
+72 v3 +22 held v2 target drafts, no published strategy snapshots; zero active
+published portal assets. Both new portal post-assets and current-content review
+migrations/RPCs remain absent live. Five sampled public site HEADs returned 200.
+Exact protected sequence and receipt hashes: `LOCAL-LAUNCH-ACCEPTANCE.md`.
+Do not describe this as “only push left” or semantic approval of the 94 drafts.
+
+### 7 October integrated local acceptance / owned website presentation
+
+#687 merged as `9c8a0187e342d83e04de2c1bcf7d19973b959df4`; its migration remains
+UNAPPLIED. Continuing same local launch lane in PR #688. Fixed runner pins exact
+clean source/tree/lock/log/bundle evidence; twelve local-only steps reuse the nine
+existing actual-component fixtures, full supported suite and TypeScript/Vite.
+Production credentials/config are excluded from fixture subprocesses. No cloud
+or production action. Generated fixture-configured dist MUST NOT be uploaded.
+
+Baseline runner `275d90a5` passed 3,705 total /3,688 PASS /17 intentional skips /
+0 failures, all twelve steps and unchanged tree. Subsequent actual JFJ render
+reproduced an owned-site upsell: maintenance was known, reporting remained held.
+Correction uses existing exact-ID maintenance authority, keeps reporting
+unavailable/no invented host or metrics and unchanged guarded reporting mappings.
+Service/package fixtures now cover 375/390/430 as well as desktop. Final changed
+candidate verification continues; baseline is not the final result.
+See `LOCAL-LAUNCH-ACCEPTANCE.md` for exact remaining protected/human gates.
+
+
 ### 7 October #433 current-content review binding — local continuation
 
 #686 W3 packet merged as `302acb4e7db556207559b5cfe4b72439b5089885`.
