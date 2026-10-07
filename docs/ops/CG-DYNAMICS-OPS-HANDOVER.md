@@ -1,5 +1,35 @@
 # CG Dynamics Ops Handover
 
+### 7 October local launch continuation — same #674, no Vercel
+
+Current main refetched as `116c280f80370753d8d45eb4119e0f109d3beafb`.
+Continue same `codex/668-complete-client-preview` / draft #674; no replacement PR.
+Implemented the outstanding exact Calendar-post -> published portal-file reader:
+existing visibility authority + canonical deliverable/asset/library boundary,
+bounded public metadata, lazy exact client/month/post disclosure and existing
+file broker. New migration `20261007100000_client_portal_post_assets.sql` is
+**UNAPPLIED**; separately approved migration/Brand Hub Edge rollout still required.
+Executable disposable PostgreSQL proof uses actual historical visibility/foundation
+SQL, synthetic fixtures, no network/ports and automatic own-container cleanup.
+91 focused tests PASS.
+Full supported suite: 3,642 total /3,625 PASS /17 intentional skips /0 fail,
+including the local SQL test; Windows Bash-only SES fixture excluded, not passed.
+TypeScript/Vite build, scoped lint and diff check PASS; existing chunk warning.
+Actual-component Plan/Calendar/Files checks PASS at desktop 1440 and
+375/390/430px; synthetic, NOT authenticated production acceptance.
+Runbook: `CLIENT-PLAN-LOCAL-ACCEPTANCE.md`.
+
+Also reproduced/fixed malformed calendar timestamps/ranges and a pending file
+response opening after departure. Exact signed URL transport and scope-lifetime
+fences preserve the existing server auth contract; no direct table fallback.
+Fresh read-only production evidence: 61 active clients, 72 v3 + 22 held v2 target
+drafts, zero published strategy snapshots and zero active published portal assets.
+This supersedes stale blanket “only #505/#513 launch blockers” wording below:
+semantic strategy/research acceptance, unpublished evidence, protected backend
+rollout and authenticated role acceptance still remain. No launch certification.
+All Vercel operations remain forbidden; Git automatic deployment OFF preserved.
+No production data, secret/config/provider/OAuth/strategy or Microsoft write.
+
 ### 5 October cleanup staging completed — no deletion or cloud action
 
 CA explicitly requested moving the checked generated folders into a delete-review

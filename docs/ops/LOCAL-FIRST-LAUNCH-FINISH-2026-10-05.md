@@ -40,6 +40,17 @@ build for the integrated candidate. Use the lockfile/runtime already approved.
 Record exact SHA, commands, counts, skips, emitted app bundle and screenshots.
 Never call a skipped/unavailable check passed.
 
+7 October continuation on the same #674: the reverse Calendar-post -> exact
+published-asset code contract is now implemented and tested locally (see
+`CLIENT-PLAN-LOCAL-ACCEPTANCE.md`), superseding the CODE-gap wording in row 2 only.
+Its additive `20261007100000_client_portal_post_assets.sql` is unapplied; deployment
+and actual published assets are still protected prerequisites, not “only Vercel
+push left.” Fresh read-only production SELECTs: 61 active clients; targeted Sep/Oct
+72 v3 drafts + 22 v2 drafts, zero frozen published strategy snapshots; zero active
+published portal assets. Historical v1 drafts remain outside that 94-row target.
+Do not infer strategy semantic quality, client-visible approval or complete content
+files from a successful local build. No data/config/Edge/provider/Vercel writes.
+
 Browser acceptance at desktop 1440/1536 and 375/390/430: every portal surface,
 keyboard/focus/disclosure/navigation, no body overflow, loading/error/empty,
 current-month boundaries, two-client switch while reads are held, published-only

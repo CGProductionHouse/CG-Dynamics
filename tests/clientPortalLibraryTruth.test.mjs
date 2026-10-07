@@ -62,3 +62,39 @@ test('library pagination, numeric range and real-client reads keep the existing 
   reply({data:{ok:'yes',data:page},error:null});assert.ok((await api.loadClientPortalLibraryFiles('video',2026,10,24)).error)
   reply({data:{ok:true,data:summary},error:new Error('denied')});assert.ok((await api.loadClientPortalLibrary()).error)
 }))
+
+test('file access rejects malformed success envelopes before a view, download or player opens',async()=>fixture(async(api,reply,calls)=>{
+  for(const data of [null,{}, {url:null,expiresAt:null},{url:'javascript:alert(1)',expiresAt:'2026-10-08T00:00:00Z'}, {url:'https://foreign.example/private',expiresAt:'2026-10-08T00:00:00Z'}]){
+    reply({data:{ok:true,data},error:null})
+    const result=await api.getClientPortalAssetAccess(asset.id,'inline',clientId)
+    assert.equal(result.data,null); assert.ok(result.error)
+  }
+  reply({data:{ok:'yes',data:{url:'https://foreign.example',expiresAt:'2026-10-08T00:00:00Z'}},error:null})
+  assert.equal((await api.getClientPortalAssetAccess(asset.id,'inline',clientId)).data,null)
+  const expires=Math.floor(Date.now()/1000)+300
+  const access={url:`http://127.0.0.1:1/functions/v1/client-onboarding?asset=${asset.id}&purpose=inline&expires=${expires}&signature=${'a'.repeat(64)}`,expiresAt:new Date(expires*1000).toISOString()}
+  reply({data:{ok:true,data:{...access,private_note:'PRIVATE'}},error:null})
+  assert.deepEqual((await api.getClientPortalAssetAccess(asset.id,'inline',clientId)).data,access)
+  assert.ok(calls.every(call=>call.body.action==='staff_preview_portal_library_access'&&call.body.clientId===clientId&&call.body.assetId===asset.id))
+}))
+
+test('access projection fences exact asset/purpose, expiry, broker origin and signed query shape',async()=>{
+  const server=await createServer({configFile:false,server:{middlewareMode:true,hmr:false},optimizeDeps:{noDiscovery:true}})
+  try{
+    const {projectLibraryAccess}=await server.ssrLoadModule('/src/features/client-portal-library/projection.ts')
+    const now=Date.parse('2026-10-07T10:00:00Z');const expires=now/1000+300;const base='https://project.example'
+    const make=purpose=>({url:`${base}/functions/v1/client-onboarding?asset=${asset.id}&purpose=${purpose}&expires=${expires}&signature=${'a'.repeat(64)}`,expiresAt:new Date(expires*1000).toISOString()})
+    for(const purpose of ['inline','download','stream','thumbnail'])assert.deepEqual(projectLibraryAccess(make(purpose),asset.id,purpose,base,now),make(purpose))
+    const good=make('inline');const original=structuredClone(good)
+    assert.deepEqual(projectLibraryAccess({...good,drive_id:'PRIVATE'},asset.id,'inline',base,now),good)
+    const badUrls=[good.url.replace(asset.id,clientId),good.url.replace('purpose=inline','purpose=download'),good.url.replace(base,'https://foreign.example'),good.url.replace('client-onboarding?','other?'),`${good.url}&asset=${asset.id}`,`${good.url}&extra=1`,`${good.url}#fragment`,good.url.replace('https://','https://user:password@'),good.url.replace('a'.repeat(64),'invalid')]
+    for(const url of badUrls)assert.equal(projectLibraryAccess({...good,url},asset.id,'inline',base,now),null,url)
+    for(const age of [-1,3601]){
+      const seconds=now/1000+age
+      assert.equal(projectLibraryAccess({url:good.url.replace(String(expires),String(seconds)),expiresAt:new Date(seconds*1000).toISOString()},asset.id,'inline',base,now),null)
+    }
+    assert.equal(projectLibraryAccess({...good,expiresAt:new Date((expires+1)*1000).toISOString()},asset.id,'inline',base,now),null)
+    assert.equal(projectLibraryAccess(good,asset.id,'inline','not a URL',now),null)
+    assert.deepEqual(good,original)
+  }finally{await server.close()}
+})

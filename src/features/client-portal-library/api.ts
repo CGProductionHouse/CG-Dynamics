@@ -1,5 +1,5 @@
 import { supabase } from '../../lib/supabase'
-import { projectLibraryFiles, projectLibraryState } from './projection'
+import { projectLibraryAccess, projectLibraryFiles, projectLibraryState } from './projection'
 import type {
   ClientPortalAssetAccess,
   ClientPortalAssetPurpose,
@@ -53,8 +53,9 @@ export async function getClientPortalAssetAccess(
     const { data, error } = await supabase.functions.invoke('client-onboarding', {
       body: { action: previewClientId ? 'staff_preview_portal_library_access' : 'portal_library_access', ...(previewClientId ? { clientId: previewClientId } : {}), assetId, purpose },
     })
-    if (error || !data?.ok) return { data: null, error: 'File access failed.' }
-    return { data: data.data as ClientPortalAssetAccess, error: null }
+    if (error || data?.ok !== true) return { data: null, error: 'File access failed.' }
+    const projected = projectLibraryAccess(data.data, assetId, purpose, import.meta.env.VITE_SUPABASE_URL)
+    return projected ? { data: projected, error: null } : { data: null, error: 'File access failed.' }
   } catch {
     return { data: null, error: 'File access failed.' }
   }

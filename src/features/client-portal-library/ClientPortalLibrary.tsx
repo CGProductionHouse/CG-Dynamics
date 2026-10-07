@@ -151,18 +151,31 @@ function FileList({ page, loading, error, onMore }: { page: ClientPortalLibraryF
   )
 }
 
-function LibraryAssetRow({ asset }: { asset: ClientPortalLibraryAsset }) {
+export function LibraryAssetRow({ asset, compact = false }: { asset: ClientPortalLibraryAsset; compact?: boolean }) {
   const previewClientId = useOptionalClientPortal()?.previewClientId
   const [busy, setBusy] = useState<'inline' | 'download' | 'stream' | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [videoUrl, setVideoUrl] = useState<string | null>(null)
+  const accessGeneration = useRef(0)
+  const accessPending = useRef(false)
   const canView = Boolean(asset.mimeType && /^(image\/(?:avif|gif|jpeg|png|webp)|application\/pdf)$/i.test(asset.mimeType))
   const canPlay = /^video\/mp4$/i.test(asset.mimeType ?? '')
 
+  useEffect(() => {
+    accessGeneration.current += 1
+    accessPending.current = false
+    return () => { accessGeneration.current += 1 }
+  }, [asset.id, previewClientId])
+
   async function access(purpose: 'inline' | 'download' | 'stream') {
+    if (accessPending.current) return
+    accessPending.current = true
+    const generation = accessGeneration.current
     setBusy(purpose)
     setError(null)
     const result = await getClientPortalAssetAccess(asset.id, purpose, previewClientId)
+    if (accessGeneration.current !== generation) return
+    accessPending.current = false
     if (!result.data) {
       setError(result.error)
       setBusy(null)
@@ -186,7 +199,7 @@ function LibraryAssetRow({ asset }: { asset: ClientPortalLibraryAsset }) {
 
   return (
     <div className="py-4 first:pt-1 last:pb-1">
-      <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center">
+      <div className={`flex min-w-0 flex-col gap-3 ${compact ? '' : 'sm:flex-row sm:items-center'}`}>
         <LazyThumbnail asset={asset} />
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-bold text-white">{asset.displayName}</p>

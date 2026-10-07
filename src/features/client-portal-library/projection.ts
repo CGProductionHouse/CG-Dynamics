@@ -1,4 +1,4 @@
-import { CLIENT_PORTAL_LIBRARY_CATEGORIES, type ClientPortalLibraryCategory, type ClientPortalLibraryFilesPage, type ClientPortalLibraryState } from './types'
+import { CLIENT_PORTAL_LIBRARY_CATEGORIES, type ClientPortalAssetAccess, type ClientPortalAssetPurpose, type ClientPortalLibraryAsset, type ClientPortalLibraryCategory, type ClientPortalLibraryFilesPage, type ClientPortalLibraryState } from './types'
 
 const record = (value: unknown): value is Record<string, unknown> => value != null && typeof value === 'object' && !Array.isArray(value)
 const text = (value: unknown): value is string => typeof value === 'string' && value.trim().length > 0
@@ -12,6 +12,27 @@ function timestamp(value: unknown): value is string {
   if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}T/.test(value) || !Number.isFinite(Date.parse(value))) return false
   const date = new Date(`${value.slice(0, 10)}T00:00:00Z`)
   return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value.slice(0, 10)
+}
+
+/** Transport validation only; the existing authenticated server and signature verifier authorize access. */
+export function projectLibraryAccess(value: unknown, assetId: string, purpose: ClientPortalAssetPurpose, publicApiUrl: string, now = Date.now()): ClientPortalAssetAccess | null {
+  if (!record(value) || !text(value.url) || !timestamp(value.expiresAt) || !uuid.test(assetId)) return null
+  try {
+    const base = new URL(publicApiUrl)
+    const url = new URL(value.url)
+    if (url.origin !== base.origin || url.pathname !== `${base.pathname.replace(/\/$/, '')}/functions/v1/client-onboarding`
+      || url.username || url.password || url.hash
+      || !['https:', 'http:'].includes(url.protocol)) return null
+    const keys = ['asset', 'purpose', 'expires', 'signature']
+    if ([...url.searchParams].length !== keys.length || keys.some(key => url.searchParams.getAll(key).length !== 1)
+      || url.searchParams.get('asset') !== assetId || url.searchParams.get('purpose') !== purpose
+      || !/^[a-f0-9]{64}$/.test(url.searchParams.get('signature') ?? '')) return null
+    const expires = url.searchParams.get('expires') ?? ''
+    const seconds = Number(expires)
+    if (!/^\d+$/.test(expires) || !Number.isSafeInteger(seconds) || seconds * 1000 !== Date.parse(value.expiresAt)
+      || seconds * 1000 < now || seconds * 1000 > now + 60 * 60 * 1000) return null
+    return { url: value.url, expiresAt: value.expiresAt }
+  } catch { return null }
 }
 
 /** Validate the existing server projection, never fill unknown counts or carry extra transport fields. */
@@ -61,4 +82,18 @@ export function projectLibraryFiles(value: unknown, requestedCategory: ClientPor
       deliverableTitle: asset.deliverableTitle, planMonth: asset.planMonth })
   }
   return { assets, nextOffset: value.nextOffset as number | null }
+}
+
+export function projectCalendarPostAssets(value: unknown, requestedMonth: string): ClientPortalLibraryAsset[] | null {
+  if (!month.test(requestedMonth) || !Array.isArray(value) || value.length > 24) return null
+  const seen = new Set<string>()
+  const assets: ClientPortalLibraryAsset[] = []
+  for (const row of value) {
+    if (!row || !['graphic_design', 'video'].includes(row.category) || row.planMonth !== requestedMonth) return null
+    const projected = projectLibraryFiles({ assets: [row], nextOffset: null }, row.category, 0)?.assets[0]
+    if (!projected || seen.has(projected.id.toLowerCase())) return null
+    seen.add(projected.id.toLowerCase())
+    assets.push(projected)
+  }
+  return assets
 }

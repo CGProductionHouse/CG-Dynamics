@@ -91,3 +91,66 @@ the current server contract exposes an opaque calendar row key and the library's
 linked month/title, not their shared public identity. Do not manufacture a link
 from titles or expose raw OneDrive IDs. This needs a separately verified canonical
 server projection before release; today's correction does not claim it solved.
+
+## 7 October — exact published post files and reader hardening
+
+The previous reverse-link CODE gap is now implemented locally, not production-live.
+`client_portal_post_assets(client UUID, month date, opaque post key)` explicitly
+executes the existing month-post ownership/visibility authority, then joins the
+exact deliverable to its published, active portal assets and verified enabled
+library/category/drive/folder boundary. At most 24 public final-file metadata rows
+are returned, with no internal drive/item/path, provider URL or private text.
+Same title is never an association. Existing calendar RPCs, RLS/table grants,
+scheduling and publication semantics are unchanged. New additive migration:
+`20261007100000_client_portal_post_assets.sql` — **UNAPPLIED**.
+
+Calendar post disclosures reuse the existing file opener, not a second portal.
+Reads are lazy and scope-keyed by client/month/post. Null/malformed/foreign-month
+responses stay unavailable; an explicit empty array alone means no linked files.
+Missing migration/auth stays unavailable without falling back to direct tables.
+Files remain reauthorized by the existing Edge boundary when opened. There is no
+publish, share, mapping, copy, approve or scheduling control in this disclosure.
+
+Two other defects were reproduced: timestamps without offsets/24:00/reversed event
+ranges entered the calendar; leaving Files during a pending View still opened the
+departed client's response. Strict timestamp validation preserves valid offsets;
+file access now fences unmount/scope and duplicate pending actions. Access transport
+validation accepts only the exact existing signed broker URL, asset, purpose and
+one-hour expiry contract; malformed/external/duplicate query evidence fails closed.
+This is defence in depth, not a new authorization system.
+
+Commands: the two browser commands above; focused `node --test` on
+clientCalendarPostAssets, clientPortalLibrary, clientPortalLibraryTruth,
+clientPortalVisibilityContract, clientPortalPreview, clientPlanPass2,
+clientPublishedGuidesTruth and hostingBudgetPolicy. Set `CG_RUN_LOCAL_DB=1` for the
+disposable PostgreSQL acceptance. It uses an already installed `postgres:17-alpine`
+image, `--pull=never`, no network/host ports, tmpfs data, synthetic identities and
+removes only its own container in `finally`. Never point these fixtures at production.
+The actual historical visibility function and foundation migration are executed,
+not replaced by a mocked authorization function. This is NOT a full production
+migration replay or proof that production prerequisites have been applied.
+
+91 focused tests PASS including executable SQL ownership/publication/access checks.
+Integrated full supported suite: 3,642 total /3,625 PASS /17 intentional skips /
+zero failures, with `CG_RUN_LOCAL_DB=1` so the new disposable SQL acceptance ran.
+The Windows Bash-only SES fixture remains explicitly excluded, not passed.
+TypeScript/Vite build, scoped ESLint and diff check PASS; existing bundle-size
+warning unchanged. Projection-only Fast Refresh lint finding was corrected by
+keeping the pure projection in the existing TypeScript projection module.
+Local actual-component checks PASS 1440/375/390/430: exact post file rendering,
+unavailable versus empty/retry, full guideline navigation, held-read month changes,
+valid broker opening, malformed refusal and departure-response fencing. No body
+overflow or captured page runtime exceptions. Desktop calendar narrow-cell file
+layout is compact to avoid clipping controls/titles. 375px screenshot visually
+inspected. Screenshots: TEMP/cg-plan-calendar-{width}.png, cg-library-{width}.png,
+cg-library-departed-{width}.png. These remain synthetic, not authenticated live checks.
+
+Release prerequisites: review/apply only the new migration through its separate
+protected gate; deploy the already-pending Brand Hub exact-preview Edge seam;
+retain the signed file broker and verify real published final assets. Rollback of
+this additive reader is to remove only its new function (separately authorized);
+the old calendar continues and the new disclosure reports unavailable. No existing
+table/history or calendar function must be dropped/replayed. With zero published
+production portal assets observed on 7 October, code alone cannot populate files.
+Strategy quality/approval/publication, research runtime and authenticated full-role
+release acceptance remain separate requirements, not solved by a file button.
