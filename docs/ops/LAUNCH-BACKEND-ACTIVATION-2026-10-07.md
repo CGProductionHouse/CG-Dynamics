@@ -83,10 +83,13 @@ rollback requires preserving the current snapshot/approval boundary and schema.
   Build one production-configured artifact only in the authorized #679 release
   window; never upload fixture-configured dist. Changed frontend authenticated
   acceptance cannot be claimed from backend source readback or old live UI.
-- Browser inventory showed only Chrome `christie-ann` with no Dynamics tab, not
-  the requested info-account staff session. No token copy, credential search,
-  login bypass or provider/accounting-tab interaction. Positive authenticated
-  role/exact-client runtime acceptance remains unperformed.
+- The later 7 October work Chrome connection supersedes the earlier missing-tab
+  receipt: genuine CG Production House Admin read-only navigation now resolves.
+  Sampled exact-client switches, reports, Content/Calendar/Work/Marketing were
+  inspected on the existing frontend; no profile impersonation or token copy.
+  This is NOT changed-frontend acceptance or a client/staff-role login proof.
+  Local mobile launcher and My Day defects are addressed by #691/#692 under the
+  no-Vercel hold. Final changed-runtime role acceptance remains pending release.
 - Four packages still need genuine exact evidence/confirmation: Elcheck, JFJ
   Electrical, LHP Student Village & Block, VCS Cleaning Solutions. Preserve nulls.
 - 72 v3 +22 held v2 target strategies remain drafts, not semantically certified
