@@ -40,3 +40,29 @@ one observation age.
 Authenticated changed-code production acceptance remains a future release
 gate, not replaced by these synthetic checks. Automatic Vercel builds remain
 disabled; no deployment, data mutation or strategy transition occurred.
+
+## Continued client-report truth correction
+
+The real local screenshot exposed another unsupported client-facing promise:
+legacy heuristics recommended increasing posting below eight posts and extending
+Facebook formats to Instagram regardless of confirmed scope, connected channel,
+business priority or actual format evidence. Overview/platform recommendation
+sections and canned future-plan insight fallbacks are removed from this renderer.
+Stored staff insight, observed metrics, curation and canonical monthly strategy
+remain; no helper's staff diagnostic or strategy-generation contract was replaced.
+No generic doctrine is substituted for the removed text.
+
+A new actual-render positive control then reproduced draft working-copy props
+rendering without a staff-preview flag. Server reads already enforce publication;
+the renderer now independently requires `published` on client views. Approved
+working copy is not the frozen published projection. Staff diagnostics still
+permits clearly labelled draft preview. No status or stored strategy is changed.
+
+Two additional tests prove absence of manufactured advice for one observed post
+at stronger and weak metric levels; published strategy renders while draft,
+approved, unknown and missing status do not; staff draft still labels correctly.
+Actual localhost browser now executes synthetic draft-to-published React state
+change (no request/write) and confirms recommendations remain absent in Overview
+and Facebook at all four widths. Final focused reporting/presentation:59 PASS.
+Final supported full suite:3,628 total /3,611 PASS /17 intentional skips /0 fail;
+Windows Bash-only SES excluded. Fresh local build/scoped lint/diff PASS.

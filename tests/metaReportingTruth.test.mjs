@@ -470,6 +470,35 @@ test('staff full-month draft preview keeps later in-month content', () => {
   assert.match(html, /Staff full-month preview/)
 })
 
+test('client report does not manufacture a posting quota or cross-channel strategy from one observed post', () => {
+  const report = { ...baseReport, posts: [{ id: 'one', platform: 'facebook',
+    publish_time: '2026-06-10T12:00:00Z', post_type: 'Photo', caption: 'Actual observed work',
+    permalink: null, impressions: 100, reach: 50, engagements: 0, excluded: false }] }
+  for (const impressions of [100, 5]) {
+    const current = { ...report, posts: [{ ...report.posts[0], impressions, reach: 3 }] }
+    const overview = renderReport({ report: current })
+    const facebook = renderReport({ report: current, initialTab: 'facebook', onTabChange: () => {} })
+    for (const html of [overview, facebook]) {
+      assert.match(html, /Actual observed work/)
+      assert.doesNotMatch(html, /recommended weekly rhythm|Increase posting consistency|Build posting consistency|compounding visibility|Where to focus next|Next steps for Facebook|Next month’s focus is stronger hooks|sharper formats and a consistent posting rhythm/)
+    }
+  }
+})
+
+test('canonical published strategy remains visible while working copy stays staff-only', async () => {
+  const { emptyStrategyData } = await server.ssrLoadModule('/src/lib/strategyEngine.ts')
+  const strategyData = emptyStrategyData()
+  strategyData.strategyGoingForward = 'Explain the verified application routes so contributors can prepare the correct submission.'
+  const monthlyStrategy = { month: '2026-06-01', status: 'published', strategyData }
+  const before = JSON.stringify(monthlyStrategy)
+  assert.match(renderReport({ monthlyStrategy }), /Explain the verified application routes/)
+  for (const status of ['draft', 'approved', 'unknown', undefined]) {
+    assert.doesNotMatch(renderReport({ monthlyStrategy: { ...monthlyStrategy, status } }), /Explain the verified application routes/)
+  }
+  assert.match(renderReport({ monthlyStrategy: { ...monthlyStrategy, status: 'draft' }, showAdminDiagnostics: true }), /Draft — not visible to client/)
+  assert.equal(JSON.stringify(monthlyStrategy), before)
+})
+
 test('legacy fallback renders no ungated prior-month percentage', () => {
   const manual = [{ platform: 'instagram', views: 100, reach: 50, engagements: 5, profile_visits: 2, followers: 10, source_type: 'manual', general_notes: null }]
   const previous = [{ ...manual[0], views: 50, reach: 25 }]
