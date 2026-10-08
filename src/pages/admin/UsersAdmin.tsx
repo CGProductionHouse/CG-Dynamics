@@ -18,12 +18,20 @@ function isPending(profile: Profile) {
   return profile.role === 'client' && !profile.client_id
 }
 
+function isGeneratedPortalLogin(profile: Profile) {
+  return profile.role === 'client' && profile.email?.endsWith('@portal.cgdynamics.co.za')
+}
+
+type UserView = 'team' | 'clients' | 'pending' | 'all'
+
 export default function UsersAdmin({ embedded = false }: { embedded?: boolean }) {
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [editing, setEditing] = useState<Profile | null>(null)
+  const [view, setView] = useState<UserView>('team')
+  const [search, setSearch] = useState('')
 
   // Pending/unlinked users float to the top; otherwise newest first.
   const sortedProfiles = useMemo(() => {
@@ -35,6 +43,19 @@ export default function UsersAdmin({ embedded = false }: { embedded?: boolean })
   }, [profiles])
 
   const pendingCount = useMemo(() => profiles.filter(isPending).length, [profiles])
+  const teamCount = useMemo(() => profiles.filter(profile => profile.role !== 'client').length, [profiles])
+  const clientCount = profiles.length - teamCount
+  const visibleProfiles = useMemo(() => {
+    const query = search.trim().toLocaleLowerCase()
+    return sortedProfiles.filter(profile => {
+      if (view === 'team' && profile.role === 'client') return false
+      if (view === 'clients' && profile.role !== 'client') return false
+      if (view === 'pending' && !isPending(profile)) return false
+      if (!query) return true
+      const linkedClient = clients.find(client => client.id === profile.client_id)?.name ?? ''
+      return [profile.full_name, profile.email, linkedClient].some(value => value?.toLocaleLowerCase().includes(query))
+    })
+  }, [sortedProfiles, clients, view, search])
 
   async function loadAll(options: { silent?: boolean } = {}): Promise<string | null> {
     if (!options.silent) {
@@ -104,20 +125,31 @@ export default function UsersAdmin({ embedded = false }: { embedded?: boolean })
 
   return (
     <div className={embedded ? 'w-full' : 'w-full max-w-5xl p-4 sm:p-6 lg:p-8'}>
-      <div className="mb-6 flex items-center justify-between">
-        {!embedded && <h1 className="text-xl font-semibold text-white">Users</h1>}
-        {embedded && <h2 className="text-xl font-semibold text-white">Users</h2>}
+      <div className="mb-3 flex items-center justify-between gap-3">
+        {!embedded && <h1 className="text-xl font-semibold text-white">Accounts</h1>}
+        {embedded && <h2 className="text-xl font-semibold text-white">Accounts</h2>}
         {pendingCount > 0 && (
           <span className="rounded-full bg-amber-400/10 px-3 py-1 text-xs font-medium text-amber-300">
-            {pendingCount} pending setup
+            {pendingCount} unlinked client {pendingCount === 1 ? 'login' : 'logins'}
           </span>
         )}
       </div>
 
-      <p className="text-xs text-brand-primary mb-5">
-        Users appear here after accepting an admin invitation. Assign roles and link clients as
-        needed. Pending users with no linked client are highlighted and sorted to the top.
-      </p>
+      <div className="mb-3 flex flex-wrap gap-1 rounded-lg border border-white/10 bg-white/[0.025] p-1" aria-label="Filter user accounts">
+        {([
+          ['team', `Team ${teamCount}`],
+          ['clients', `Client logins ${clientCount}`],
+          ['pending', `Unlinked ${pendingCount}`],
+          ['all', `All ${profiles.length}`],
+        ] as const).map(([option, label]) => (
+          <button key={option} type="button" aria-pressed={view === option} onClick={() => setView(option)} className={`min-h-10 rounded-md px-3 py-2 text-xs font-semibold transition-colors ${view === option ? 'bg-brand-accent text-black' : 'text-brand-primary hover:bg-white/[0.04] hover:text-white'}`}>{label}</button>
+        ))}
+      </div>
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <label className="sr-only" htmlFor="user-account-search">Search accounts</label>
+        <input id="user-account-search" type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Search name, email or client" className="min-h-11 w-full max-w-sm rounded-lg border border-white/10 bg-brand-bg px-3 text-sm text-white placeholder:text-white/40 outline-none focus:border-brand-accent/50" />
+        {!loading && !error && <span className="text-xs text-brand-primary/60">Showing {visibleProfiles.length} of {profiles.length}</span>}
+      </div>
 
       {loading ? (
         <p className="text-brand-primary text-sm">Loading...</p>
@@ -126,12 +158,12 @@ export default function UsersAdmin({ embedded = false }: { embedded?: boolean })
       ) : (
         <>
           <div className="space-y-3 md:hidden">
-            {sortedProfiles.length === 0 ? (
+            {visibleProfiles.length === 0 ? (
               <div className="rounded-xl border border-brand-muted bg-brand-surface px-4 py-8 text-center text-sm text-brand-primary">
-                No users yet.
+                {profiles.length === 0 ? 'No users yet.' : 'No accounts match this view.'}
               </div>
             ) : (
-              sortedProfiles.map(p => {
+              visibleProfiles.map(p => {
                 const pending = isPending(p)
                 return (
                   <article
@@ -145,12 +177,12 @@ export default function UsersAdmin({ embedded = false }: { embedded?: boolean })
                         <h2 className="text-base font-semibold text-white break-words">
                           {p.full_name ?? <span className="text-brand-primary italic">Unnamed</span>}
                         </h2>
-                        <p className="mt-0.5 text-sm text-brand-primary break-all">{p.email ?? 'No email'}</p>
+                        <div className="mt-0.5 text-sm text-brand-primary"><LoginIdentity profile={p} /></div>
                         <div className="mt-3 flex flex-wrap items-center gap-2">
                           <span className={`inline-block text-xs px-2 py-1 rounded-full font-medium ${roleBadge[p.role]}`}>
                             {roleLabel(p.role)}
                           </span>
-                          <StatusBadge pending={pending} />
+                          <StatusBadge profile={p} />
                           <span className="text-sm text-brand-primary break-all">
                             {p.role === 'client' ? clientName(p.client_id) : 'All clients'}
                           </span>
@@ -158,7 +190,7 @@ export default function UsersAdmin({ embedded = false }: { embedded?: boolean })
                       </div>
                       <button
                         onClick={() => setEditing(p)}
-                        className={`shrink-0 rounded-lg border px-3 py-2 text-sm ${
+                        className={`min-h-11 shrink-0 rounded-lg border px-3 py-2 text-sm ${
                           pending
                             ? 'border-amber-400/40 text-amber-300 hover:text-amber-200'
                             : 'border-brand-muted text-brand-primary hover:text-brand-accent'
@@ -186,14 +218,14 @@ export default function UsersAdmin({ embedded = false }: { embedded?: boolean })
                 </tr>
               </thead>
               <tbody>
-                {sortedProfiles.length === 0 ? (
+                {visibleProfiles.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-4 py-8 text-center text-brand-primary">
-                      No users yet.
+                      {profiles.length === 0 ? 'No users yet.' : 'No accounts match this view.'}
                     </td>
                   </tr>
                 ) : (
-                  sortedProfiles.map(p => {
+                  visibleProfiles.map(p => {
                     const pending = isPending(p)
                     return (
                       <tr
@@ -205,7 +237,7 @@ export default function UsersAdmin({ embedded = false }: { embedded?: boolean })
                         <td className="px-4 py-3 text-white">
                           {p.full_name ?? <span className="text-brand-primary italic">Unnamed</span>}
                         </td>
-                        <td className="px-4 py-3 text-brand-primary break-all">{p.email ?? '-'}</td>
+                        <td className="max-w-64 px-4 py-3 text-brand-primary"><LoginIdentity profile={p} /></td>
                         <td className="px-4 py-3">
                           <span
                             className={`inline-block text-xs px-2 py-0.5 rounded-full font-medium ${roleBadge[p.role]}`}
@@ -217,12 +249,12 @@ export default function UsersAdmin({ embedded = false }: { embedded?: boolean })
                           {p.role === 'client' ? clientName(p.client_id) : 'All clients'}
                         </td>
                         <td className="px-4 py-3">
-                          <StatusBadge pending={pending} />
+                          <StatusBadge profile={p} />
                         </td>
                         <td className="px-4 py-3 text-right">
                           <button
                             onClick={() => setEditing(p)}
-                            className={`text-xs transition-colors ${
+                            className={`min-h-10 rounded-md px-2 text-xs transition-colors ${
                               pending
                                 ? 'text-amber-300 hover:text-amber-200 font-medium'
                                 : 'text-brand-primary hover:text-brand-accent'
@@ -253,13 +285,30 @@ export default function UsersAdmin({ embedded = false }: { embedded?: boolean })
   )
 }
 
-function StatusBadge({ pending }: { pending: boolean }) {
-  if (pending) {
+function LoginIdentity({ profile }: { profile: Profile }) {
+  if (!profile.email) return <span>No email</span>
+  if (!isGeneratedPortalLogin(profile)) return <span className="break-all">{profile.email}</span>
+  return (
+    <details className="min-w-0 text-xs">
+      <summary className="cursor-pointer text-brand-primary/70 hover:text-white">Generated portal login</summary>
+      <p className="mt-1 break-all text-brand-primary">{profile.email}</p>
+    </details>
+  )
+}
+
+function StatusBadge({ profile }: { profile: Profile }) {
+  if (profile.is_active === false) {
+    return <span className="inline-block rounded-full bg-white/[0.05] px-2 py-0.5 text-xs font-medium text-brand-primary/65">Inactive</span>
+  }
+  if (isPending(profile)) {
     return (
       <span className="inline-block rounded-full bg-amber-400/10 px-2 py-0.5 text-xs font-medium text-amber-300">
         Pending setup
       </span>
     )
+  }
+  if (profile.is_active !== true) {
+    return <span className="inline-block rounded-full bg-white/[0.05] px-2 py-0.5 text-xs font-medium text-brand-primary/65">Status unverified</span>
   }
   return (
     <span className="inline-block rounded-full bg-brand-muted px-2 py-0.5 text-xs font-medium text-brand-primary">

@@ -23,17 +23,17 @@ export default function UsersHub() {
 
   return (
     <PageContainer width="content" gap={false}>
-      <div className="mb-5 rounded-2xl border border-white/10 bg-brand-surface/60 p-4 sm:p-5">
-        <p className="text-xs font-black uppercase tracking-[0.22em] text-brand-accent">Administration</p>
-          <h1 className="mt-2 text-3xl font-black text-white">Users</h1>
-        <p className="mt-1 text-sm text-brand-primary/65">Manage workforce access, client users and invitations.</p>
-        <div className="mt-5 grid grid-cols-3 gap-2 rounded-xl border border-white/10 bg-black/20 p-1">
+      <div className="mb-4 border-b border-white/10 pb-3">
+        <h1 className="text-3xl font-bold tracking-tight text-white">Users</h1>
+        <p className="mt-1 text-sm text-brand-primary/65">Team access, client logins and invitations.</p>
+        <div className="mt-4 flex flex-wrap gap-1 rounded-xl border border-white/10 bg-white/[0.025] p-1" aria-label="User management area">
           {tabs.map(item => (
             <button
               key={item.key}
               type="button"
+              aria-pressed={tab === item.key}
               onClick={() => setSearchParams({ tab: item.key })}
-              className={`rounded-lg px-4 py-3 text-sm font-bold transition-colors ${
+              className={`min-h-10 flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition-colors sm:flex-none ${
                 tab === item.key
                   ? 'bg-brand-accent text-black'
                   : 'text-brand-primary hover:bg-white/[0.04] hover:text-white'

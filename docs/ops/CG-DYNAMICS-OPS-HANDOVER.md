@@ -19,7 +19,14 @@ then compacted the empty Client Schedule change-review state and combined CG
 Calendar layer/event filters while preserving errors, pending review, the
 optional Planner overlay and the separate calendar authorities. Its production
 baseline was read-only; code acceptance remains local until the final release.
-No client or provider records were changed.
+That lane merged in PR #715 as `26e2e3c486069b8fd864876b03c4c221ccf843d7`.
+A focused Users lane separates workforce, client login and unlinked views so
+generated portal logins do not bury team access; search remains across exact
+names/email/linked client. It also stops labelling inactive or unknown profiles
+as Active. Its live baseline was read-only; synthetic actual-component
+1440px/375px cases, the full 3,737-pass local suite and build passed. This
+code still needs review/merge and is not live. No client or provider records
+were changed.
 This is **not live**. Continue the remaining #712 internal surfaces one coherent
 lane at a time; do not claim whole-app acceptance from this first pass.
 `git.deploymentEnabled=false` remains in force. No Vercel build, preview,
