@@ -49,6 +49,14 @@ test('canonical strategy status is role-safe and legacy report prose is not an a
   assert.doesNotMatch(reportView, /report\.previous_month_reflection|Published report without strategy|Recommended focus/)
 })
 
+test('failed canonical strategy reads are distinct from a successful empty strategy result', () => {
+  assert.match(clientDashboard, /setStrategyReadUnavailable\(Boolean\(strategyResult\.error\)\)/)
+  assert.match(staffPreview, /setStrategyReadUnavailable\(Boolean\(strategyResult\.error\)\)/)
+  assert.match(reportView, /if \(strategyReadUnavailable\)/)
+  assert.match(reportView, /Monthly strategy is temporarily unavailable/)
+  assert.match(reportView, /The monthly strategy is still under review/)
+})
+
 test('Piek failure fixture is rejected without blocking useful client-ready direction', () => {
   const bad = strategy.emptyStrategyData()
   bad.strategyGoingForward = 'Correct facts are only the starting point.'

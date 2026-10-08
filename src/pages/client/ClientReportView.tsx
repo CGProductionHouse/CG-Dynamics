@@ -114,6 +114,7 @@ export function ClientReportView({
   onSetContentExcluded,
   curationBusyId = null,
   monthlyStrategy = null,
+  strategyReadUnavailable = false,
   initialTab = 'overview',
   onTabChange,
 }: {
@@ -143,6 +144,8 @@ export function ClientReportView({
   curationBusyId?: string | null
   /** Canonical monthly strategy. Client routes may pass published projection only. */
   monthlyStrategy?: MonthlyStrategyPresentation | null
+  /** A failed canonical strategy read is not evidence that no strategy exists. */
+  strategyReadUnavailable?: boolean
   initialTab?: ReportTabKey
   onTabChange?: (tab: ReportTabKey) => void
 }) {
@@ -261,6 +264,7 @@ export function ClientReportView({
           onSetContentExcluded={onSetContentExcluded}
           curationBusyId={curationBusyId}
           monthlyStrategy={monthlyStrategy}
+          strategyReadUnavailable={strategyReadUnavailable}
         />
       ) : activeTab === 'google' ? (
         <GooglePerformanceTab
@@ -513,6 +517,7 @@ function OverviewTab({
   onSetContentExcluded,
   curationBusyId,
   monthlyStrategy,
+  strategyReadUnavailable,
 }: {
   report: RenderableReport
   master: MasterReportData
@@ -530,13 +535,14 @@ function OverviewTab({
   onSetContentExcluded?: (post: ReportStatsPost, excluded: boolean) => void | Promise<void>
   curationBusyId: string | null
   monthlyStrategy: MonthlyStrategyPresentation | null
+  strategyReadUnavailable: boolean
 }) {
   const strategy = readStrategyData(report.strategy_data)
   const platformsWithData = master.platforms.filter(view => view.source !== 'none')
   const hasGoogleAdsSection = googleAds !== null && ['data', 'no-activity'].includes(googleAdsState)
   const hasVerified = verifiedSections.some(section => section.lines.some(line => line.hasValue))
   const hasData = hasVerified || (!normalizedFactsActive && (platformsWithData.length > 0 || performance.metrics.length > 0))
-    || hasGoogleAdsSection || monthlyStrategy !== null || performance.topContent !== null
+    || hasGoogleAdsSection || monthlyStrategy !== null || strategyReadUnavailable || performance.topContent !== null
 
   if (!hasData && !showAdminDiagnostics) {
     return (
@@ -630,6 +636,7 @@ function OverviewTab({
       {/* CG action plan */}
       <StrategyBlocks
         monthlyStrategy={monthlyStrategy}
+        strategyReadUnavailable={strategyReadUnavailable}
         showEmptyStrategy={showEmptyStrategy}
         staffPreview={showAdminDiagnostics}
       />
@@ -1515,13 +1522,25 @@ function GoogleAdsEmptyState({
 
 function StrategyBlocks({
   monthlyStrategy,
+  strategyReadUnavailable,
   showEmptyStrategy,
   staffPreview,
 }: {
   monthlyStrategy: MonthlyStrategyPresentation | null
+  strategyReadUnavailable: boolean
   showEmptyStrategy: boolean
   staffPreview: boolean
 }) {
+  if (strategyReadUnavailable) {
+    return (
+      <section className="mb-4">
+        <SectionHeading eyebrow="CG action plan" title="What we do next" />
+        <p className="rounded-3xl border border-white/[0.08] bg-white/[0.045] p-6 text-sm text-slate-400">
+          Monthly strategy is temporarily unavailable. Please try again shortly.
+        </p>
+      </section>
+    )
+  }
   if (!monthlyStrategy) {
     if (!showEmptyStrategy) return null
     return (
