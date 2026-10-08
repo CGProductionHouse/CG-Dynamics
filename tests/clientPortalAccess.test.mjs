@@ -55,7 +55,8 @@ test('phase-one starter credential is never returned or rendered after provision
   assert.doesNotMatch(API, /starter_password/)
   assert.doesNotMatch(ADMIN, /starter_password/)
   assert.doesNotMatch(ADMIN, /Password:\s*<strong/)
-  assert.match(ADMIN, /generated only when an admin deliberately copies login details/)
+  assert.match(ADMIN, /The password is copied only on an explicit/)
+  assert.match(ADMIN, /never displayed or returned by the provisioning action/)
 })
 
 test('existing staff email login remains while username login uses the server resolver', () => {
@@ -75,7 +76,10 @@ test('client access management stays inside the admin Users workspace', () => {
   assert.match(ADMIN, /provisionClientPortalAccess/)
   assert.match(ADMIN, /resetClientPortalAccess/)
   assert.match(ADMIN, /setClientPortalAccessEnabled/)
-  assert.match(ADMIN, /Copy login details/)
+  assert.match(ADMIN, /Copy username/)
+  assert.match(ADMIN, /Copy password/)
+  assert.match(ADMIN, /Clipboard access failed/)
+  assert.match(ADMIN, /role="status"/)
 })
 
 test('admin access API never persists generated credentials client-side', () => {

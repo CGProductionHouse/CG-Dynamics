@@ -1,5 +1,24 @@
 # CG Dynamics Ops Handover
 
+### 8 October — CG Production House client-login recovery and copy UX
+
+CA reported that Client Access Reset appeared to do nothing and the combined
+clipboard text did not fill both login fields. Read-only production checks found
+the exact CG Production House username mapping enabled, the active exact-client
+profile/Auth identity confirmed and unbanned, and the reset credential matched
+Auth. One bounded real client-portal login request returned HTTP 200 with a
+client session; no credential or session token was printed, saved or shared.
+The live UI then showed the reset-ready banner, but its single multi-line
+**Copy login details** action had no success/failure feedback and could be
+mis-pasted into a single field. A focused frontend fix gives separate explicit
+Copy username / Copy password actions, announces clipboard success/failure,
+scrolls the ready receipt into view and avoids the list-loading flicker on
+reset. The password remains unrendered and unpersisted. Synthetic actual-
+component desktop/375px browser checks and the full supported suite pass;
+build/scoped lint/diff pass. Git deployments stay OFF. This code is **not live**
+until the separately budgeted final frontend release; it does not prove
+authenticated client dashboard acceptance or resolve strategy/asset gates.
+
 ### 8 October — client Overview schedule truth candidate, local gate PASS
 
 The client Overview previously counted undated posts as scheduled and called a
