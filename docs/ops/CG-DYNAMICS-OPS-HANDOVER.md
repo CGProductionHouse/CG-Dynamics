@@ -64,6 +64,14 @@ large unresolved-ownership legacy list beneath the task queue. The focused
 staff-only follow-up defers the draft text until Preview or Copy, caps preview
 height, and keeps the real ownership warning plus both Copy actions visible.
 It changes no task assignment or message contents.
+PR #722 merged as `8b215807a324b89ee0f1e130d7f2e08164f78f73`;
+the full local suite passed and it is not live. Authenticated System Health
+then exposed an unbroken wall of 12 imported-data statistics and five detailed
+lists below the launch action queue. A focused admin-only presentation pass
+keeps launch blockers and exact missing-link/date counts up front, while source
+totals and all five breakdowns move behind labelled native disclosures; the
+unmatched Client Schedule bucket count remains visible in the summary.
+No diagnostics, source calculations or database rows are changed.
 This is **not live**. Continue the remaining #712 internal surfaces one coherent
 lane at a time; do not claim whole-app acceptance from this first pass.
 `git.deploymentEnabled=false` remains in force. No Vercel build, preview,
