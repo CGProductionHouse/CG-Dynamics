@@ -175,8 +175,8 @@ export default function IntegrationsPage() {
     ? linkedClients === null
       ? 'Meta is connected; linked-client inventory is unavailable. No client count is inferred.'
       : linkedClients > 0
-      ? `Facebook and Instagram are connected. ${linkedClients} client${linkedClients === 1 ? '' : 's'} linked for monthly sync.`
-      : 'Facebook and Instagram are connected. Link clients to start syncing monthly reports.'
+      ? `Meta provider connected. ${linkedClients} client${linkedClients === 1 ? '' : 's'} with an active asset link; see fleet freshness below.`
+      : 'Meta provider connected. No active client assets are mapped yet.'
     : 'Connect Facebook Pages and Instagram accounts to create monthly report drafts automatically.'
   const metaButtonLabel = metaConnected || metaState === 'unavailable' ? 'Manage Meta' : 'Set up Meta'
   const tiktokSummary = tiktokIntegrationSummary(tiktokQueue, tiktokLoading, canManageGoogleAds)
@@ -198,18 +198,10 @@ export default function IntegrationsPage() {
       <PageHeader
         eyebrow="Integrations"
         title="Integrations"
-        description="Provider sync and connection setup in one place — Meta, Google Ads, Microsoft and imports."
+        description="Connection coverage and reporting freshness are separate."
       />
 
-      <div className="max-w-3xl rounded-xl border border-brand-muted bg-gradient-to-r from-brand-surface to-brand-bg p-4 sm:p-5">
-        <p className="text-sm leading-relaxed text-brand-primary">
-          <span className="font-medium text-white">Meta is the main workflow.</span> Facebook and
-          Instagram sync creates monthly report drafts automatically. CSV import remains available as a
-          fallback when a platform can't be synced.
-        </p>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-5">
+      <section aria-label="Provider connections" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-5">
         {/* Meta — live status */}
         <PremiumCard padding="md" className="relative">
           <div className="absolute inset-x-0 top-0 h-0.5 rounded-t-2xl bg-gradient-to-r from-brand-accent to-sky-400" />
@@ -328,28 +320,15 @@ export default function IntegrationsPage() {
             </div>
           </PremiumCard>
         )}
-        {canManageGoogleAds && (
-          <PremiumCard padding="md">
-            <div className="flex flex-col">
-              <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-teal/15 text-sm font-bold text-brand-teal">PI</div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <h2 className="text-base font-semibold text-white">Planner Import</h2>
-                    <Pill tone="neutral">Import</Pill>
-                  </div>
-                  <p className="mt-1.5 text-sm leading-relaxed text-brand-primary">
-                    Import a morning task list or Planner export into the operations board.
-                  </p>
-                </div>
-              </div>
-              <div className="mt-auto pt-5">
-                <ActionButton variant="outline" onClick={() => navigate('/admin/planner-import')} fullWidth>Open Planner Import</ActionButton>
-              </div>
-            </div>
-          </PremiumCard>
-        )}
-      </div>
+      </section>
+      {canManageGoogleAds && <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.025] px-4 py-3">
+        <div className="flex items-center gap-2">
+          <h2 className="text-sm font-semibold text-white">Planner Import</h2>
+          <Pill tone="neutral">Import</Pill>
+          <span className="hidden text-xs text-brand-primary/70 sm:inline">Morning task lists and Planner exports</span>
+        </div>
+        <ActionButton variant="outline" onClick={() => navigate('/admin/planner-import')}>Open Planner Import</ActionButton>
+      </div>}
     </PageContainer>
   )
 }

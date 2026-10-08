@@ -43,6 +43,12 @@ staff-only Marketing lane gives search and filters a compact responsive row,
 accessible labels and visible filtered-result counts without changing trusted
 knowledge, source review, RLS or client dashboard contracts. These changes are
 local-only until the final release.
+The authenticated Integrations baseline also labelled the Meta provider
+"Connected" while describing Facebook and Instagram together as connected,
+despite a PARTIAL mapped fleet. The focused staff-only correction distinguishes
+the provider connection from active client-asset coverage/freshness, keeps
+the PARTIAL/STALE/FAILED verdicts visible, removes redundant intro copy and
+separates Planner Import from provider cards. It changes no provider state.
 This is **not live**. Continue the remaining #712 internal surfaces one coherent
 lane at a time; do not claim whole-app acceptance from this first pass.
 `git.deploymentEnabled=false` remains in force. No Vercel build, preview,
