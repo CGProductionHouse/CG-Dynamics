@@ -108,7 +108,21 @@ performed by this preflight.
   further release action and preserve the client-site reserve. No second build,
   retry, alias promotion, migration, production data or provider action.
 
-Next: finish real client-role and staff staged read-only desktop/375px checks,
-then promote **this same deployment only** if exact-client/published-only
-truth, layout, runtime and reserve gates pass. Otherwise leave canonical
-domains on `dpl_4zLdbHKXzHs8rDzyErJHtcZfUneE` and document the blocker.
+## Later client Overview correction — final promotion instruction superseded
+
+The stage above remains READY but source `4072e40d` predates the reproduced
+client Overview schedule-count/read-failure correction. Exact local code candidate
+`37aecf0e9976a828ed98a6e114c4b5080e8eca45` passed 3,719 supported tests,
+17 intentional skips, TypeScript/Vite and ten browser suites in a stable
+13-step run. The receipt is `%TEMP%/cg-local-launch-37aecf0e9976.json`.
+The staged deployment can still inform broad authenticated read-only route
+acceptance, but **do not promote it as final** after this correction merges.
+
+Keep the canonical domains on `dpl_4zLdbHKXzHs8rDzyErJHtcZfUneE` until the
+real client-role, strategy/package/asset and budget gates are satisfied.
+Bundle all remaining safe UI changes before making exactly one new final-source
+production-configured cloud build, stage with `--skip-domain`, accept that exact
+artifact in real staff/client sessions, then promote the **same** accepted
+deployment without rebuilding. Re-read live billing and preserve a client-site
+serving reserve. Never upload the synthetic local `dist` or use the redacted
+prebuilt output. No new Vercel operation occurred for this correction.
