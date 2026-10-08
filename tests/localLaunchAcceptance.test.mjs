@@ -17,7 +17,7 @@ test('fixture subprocesses never inherit production credentials or config', () =
 
 test('fixed local plan reuses actual fixtures and excludes unsupported fixture honestly', () => {
   const plan = acceptancePlan(['z.test.mjs', '../apply.test.mjs', 'a.test.mjs', 'sesSetupScript.test.mjs', 'provider-apply.mjs'])
-  assert.equal(plan.length, 12)
+  assert.equal(plan.length, 3 + browserFixtures.length)
   assert.deepEqual(plan[0].args.slice(3), ['tests/a.test.mjs', 'tests/z.test.mjs'])
   assert.deepEqual(plan.slice(3).map(step => step.name), browserFixtures)
   assert.doesNotMatch(JSON.stringify(plan), /vercel|supabase deploy|provider-apply|sesSetupScript|\.\.\//)
@@ -30,8 +30,8 @@ test('test totals never convert skipped, cancelled or incomplete checks into pas
   for (const output of ['', totals.replace('# fail 0', '# fail 1'), totals.replace('# cancelled 0', '# cancelled 1'), totals.replace('# todo 0', '# todo 1'), totals.replace('# tests 10', '# tests 11')]) assert.throws(() => testTotals(output))
 })
 
-test('only all twelve stable local checks earn the local-only verdict', () => {
-  const steps = Array.from({ length: 12 }, () => ({ exit: 0 }))
+test('only all required stable local checks earn the local-only verdict', () => {
+  const steps = Array.from({ length: 3 + browserFixtures.length }, () => ({ exit: 0 }))
   assert.equal(localVerdict(steps, true, true), 'LOCAL_CODE_ACCEPTANCE_PASS')
   assert.equal(localVerdict(steps, true), 'INCOMPLETE_OR_FAILED', 'A failed bundle/count assertion cannot earn PASS')
   assert.equal(localVerdict(steps, false, true), 'INCOMPLETE_OR_FAILED')

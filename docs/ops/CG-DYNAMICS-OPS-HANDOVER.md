@@ -1,5 +1,30 @@
 # CG Dynamics Ops Handover
 
+### 8 October — client Overview schedule truth candidate, local gate PASS
+
+The client Overview previously counted undated posts as scheduled and called a
+failed calendar read "Schedule pending". Focused source `37aecf0e9976a828ed98a6e114c4b5080e8eca45`
+now counts only dated posts plus client-visible events, labels undated work as
+planning, and keeps failed/missing reads unavailable rather than empty. Exact
+client actual-component desktop/375px browser cases pass for failed, planning,
+scheduled and verified-empty states without overflow or runtime errors. Clean
+13-step local acceptance passed 3,719 tests / 17 intentional skips / 0 fail,
+TypeScript/Vite and ten browser suites. Receipt:
+`%TEMP%/cg-local-launch-37aecf0e9976.json`, SHA256
+`f236c5f945e9311960cbb7b68b992b38c06a07e07b88df2d1d97c035598ba833`.
+The emitted `dist` uses synthetic fixture configuration and is never an upload
+artifact. Scoped lint/diff passed. No production, provider or Vercel action.
+
+**Release hold:** the staged READY deployment `dpl_DyiXG9689oAjZUhEBbHEsL3AKLAi`
+predates this UI truth fix. It may help with broader authenticated read-only
+acceptance, but must **not** be promoted as the final source if this fix merges.
+Bundle later safe changes, finish real client-role/authenticated acceptance and
+owner content gates, then budget **one** final production-configured cloud build
+and same-deployment promotion; preserve the shared client-site reserve and
+known-good production deployment. The 94 strategy drafts, four unknown package
+quantities, real final portal assets and client-role login gates remain exactly
+unresolved; local passing tests do not approve or publish them.
+
 ### 8 October — one staged frontend build, **not promoted**
 
 CA authorised the lowest-spend bounded release attempt after the #708 packet.

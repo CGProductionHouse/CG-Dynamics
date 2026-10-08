@@ -8,6 +8,7 @@ import { activeOrganicPlatforms, buildPublishedMonthlyStrategyPreview, type Publ
 import { businessMonthKey } from '../../lib/businessTime'
 import { getClientPublishedMonthlyStrategy } from '../../lib/monthlyStrategy'
 import { fetchClientMonthAhead } from '../../lib/clientPortalCalendar'
+import { summarizeClientOverviewSchedule, type ClientOverviewSchedule } from '../../lib/clientOverviewSchedule'
 import { listClientPublishedReports, type ClientReport } from '../../lib/db/reports'
 import { loadReportPlatformFacts } from '../../lib/db/reportingTruth'
 import { loadGoogleAdsDashboard, type GoogleAdsDashboardState } from '../../lib/googleAdsDashboard'
@@ -20,7 +21,7 @@ type PortalData = {
   facts: PlatformFact[]
   factsUnavailable: boolean
   googleAdsState: GoogleAdsDashboardState
-  calendarCount: number | null
+  schedule: ClientOverviewSchedule
   monthlyStrategy: PublishedMonthlyStrategy | null
   strategyUnavailable: boolean
 }
@@ -30,7 +31,7 @@ const EMPTY_DATA: PortalData = {
   facts: [],
   factsUnavailable: false,
   googleAdsState: 'no-activity',
-  calendarCount: null,
+  schedule: summarizeClientOverviewSchedule(null),
   monthlyStrategy: null,
   strategyUnavailable: false,
 }
@@ -70,7 +71,7 @@ export default function ClientPortalHome() {
           report && reportMonth
             ? loadGoogleAdsDashboard(report.id, reportMonth)
             : Promise.resolve({ data: null, state: 'no-activity' as const, error: null }),
-          fetchClientMonthAhead(clientId, workingMonth),
+          fetchClientMonthAhead(clientId, workingMonth).catch(() => null),
           (previewClientId ? getPreviewStrategy(previewClientId, workingMonth) : getClientPublishedMonthlyStrategy(workingMonth)).catch(() => ({ data: null, error: { message: 'Unavailable' } })),
         ])
         if (!active) return
@@ -80,9 +81,7 @@ export default function ClientPortalHome() {
           facts: factsResult.error ? [] : factsResult.facts,
           factsUnavailable: Boolean(factsResult.error),
           googleAdsState: googleAdsResult.state,
-          calendarCount: calendarResult && !calendarResult.loadFailed
-            ? calendarResult.posts.length
-            : null,
+          schedule: summarizeClientOverviewSchedule(calendarResult),
           monthlyStrategy: strategyResult.error ? null : strategyResult.data,
           strategyUnavailable: Boolean(strategyResult.error),
         })
@@ -108,11 +107,13 @@ export default function ClientPortalHome() {
     ? `${activeOrganic.length} verified channel${activeOrganic.length === 1 ? '' : 's'}`
     : 'Awaiting verified data'
   const paidMediaStatus = googleAdsStatusLabel(data.googleAdsState)
-  const contentStatus = data.calendarCount === null
+  const contentStatus = data.schedule.state === 'unavailable'
     ? 'Schedule unavailable'
-    : data.calendarCount === 0
+    : data.schedule.state === 'empty'
       ? 'No items scheduled'
-      : `${data.calendarCount} item${data.calendarCount === 1 ? '' : 's'} scheduled`
+      : data.schedule.state === 'planning'
+        ? 'Content in planning'
+        : `${data.schedule.scheduledCount} item${data.schedule.scheduledCount === 1 ? '' : 's'} scheduled`
 
   return (
     <>
@@ -308,20 +309,24 @@ export default function ClientPortalHome() {
               </div>
 
               <div className="relative mt-8 border-l-2 border-[#f97316]/60 pl-5">
-                {data.calendarCount !== null && data.calendarCount > 0 ? (
+                {data.schedule.state === 'scheduled' ? (
                   <>
-                    <p className="text-6xl font-black leading-none tracking-[-0.06em] text-white">{data.calendarCount}</p>
+                    <p className="text-6xl font-black leading-none tracking-[-0.06em] text-white">{data.schedule.scheduledCount}</p>
                     <p className="mt-3 text-sm leading-6 text-slate-300">
-                      scheduled item{data.calendarCount === 1 ? '' : 's'} for the planning month
+                      scheduled item{data.schedule.scheduledCount === 1 ? '' : 's'} for the planning month
                     </p>
                   </>
                 ) : (
                   <>
-                    <p className="text-xl font-black text-white">{data.calendarCount === 0 ? 'A clear canvas' : 'Schedule pending'}</p>
+                    <p className="text-xl font-black text-white">
+                      {data.schedule.state === 'empty' ? 'A clear canvas' : data.schedule.state === 'planning' ? 'Plan in progress' : 'Schedule temporarily unavailable'}
+                    </p>
                     <p className="mt-3 text-sm leading-6 text-slate-400">
-                      {data.calendarCount === 0
+                      {data.schedule.state === 'empty'
                         ? 'No client-visible content is scheduled for this planning month yet.'
-                        : 'Content scheduling details will appear here as they become available.'}
+                        : data.schedule.state === 'planning'
+                          ? `${data.schedule.unscheduledCount} content item${data.schedule.unscheduledCount === 1 ? '' : 's'} in planning; no dates confirmed yet.`
+                          : 'We could not load the content calendar right now. Please try again shortly.'}
                     </p>
                   </>
                 )}
