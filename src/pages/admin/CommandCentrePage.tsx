@@ -1318,7 +1318,8 @@ function MorningMessageCard({ ownershipGrouping, copiedSection, onCopy }: {
   copiedSection: string | null
   onCopy: (section: string, text: string) => void
 }) {
-  const message = useMemo(() => buildMorningMessage(ownershipGrouping), [ownershipGrouping])
+  const [previewOpen, setPreviewOpen] = useState(false)
+  const message = useMemo(() => previewOpen ? buildMorningMessage(ownershipGrouping) : '', [ownershipGrouping, previewOpen])
   const totals = useMemo(() => ownershipCounts(ownershipGrouping), [ownershipGrouping])
   const hasAnything = totals.verified + totals.needsReview + totals.conflicts + totals.unassigned > 0
   const isCopied = copiedSection === 'morning'
@@ -1330,14 +1331,16 @@ function MorningMessageCard({ ownershipGrouping, copiedSection, onCopy }: {
           <h2 className="text-base font-semibold text-white">WhatsApp morning message</h2>
           <p className="text-xs text-brand-primary">Copy-ready daily task summary.</p>
         </div>
-        <ActionButton
-          variant="outline"
-          size="sm"
-          onClick={() => onCopy('morning', message)}
-          disabled={!hasAnything}
-        >
-          {isCopied ? 'Copied!' : 'Copy'}
-        </ActionButton>
+        <div className="flex flex-wrap gap-2">
+          {hasAnything && (
+            <ActionButton variant="outline" size="sm" onClick={() => setPreviewOpen(open => !open)} aria-expanded={previewOpen} aria-controls="morning-message-preview">
+              {previewOpen ? 'Hide preview' : 'Preview message'}
+            </ActionButton>
+          )}
+          <ActionButton variant="outline" size="sm" onClick={() => onCopy('morning', message || buildMorningMessage(ownershipGrouping))} disabled={!hasAnything}>
+            {isCopied ? 'Copied!' : 'Copy'}
+          </ActionButton>
+        </div>
       </div>
       {/* Truthful headline. Most legacy work is awaiting identity resolution;
           hiding that would misrepresent how much of this is actually verified. */}
@@ -1346,8 +1349,8 @@ function MorningMessageCard({ ownershipGrouping, copiedSection, onCopy }: {
       </p>
       {!hasAnything ? (
         <p className="mt-3 text-xs text-brand-primary/60">No tasks to generate a message.</p>
-      ) : (
-        <pre className="mt-3 overflow-x-auto rounded-lg border border-brand-muted bg-brand-bg p-3 text-xs leading-relaxed text-brand-primary/80 whitespace-pre-wrap font-mono">
+      ) : previewOpen && (
+        <pre id="morning-message-preview" className="mt-3 max-h-80 overflow-auto rounded-lg border border-brand-muted bg-brand-bg p-3 text-xs leading-relaxed text-brand-primary/80 whitespace-pre-wrap font-mono">
           {message}
         </pre>
       )}
@@ -1361,7 +1364,8 @@ function EndOfDayCard({ allRelevant, ownershipOf, copiedSection, onCopy }: {
   copiedSection: string | null
   onCopy: (section: string, text: string) => void
 }) {
-  const message = useMemo(() => buildEndOfDay(allRelevant, ownershipOf), [allRelevant, ownershipOf])
+  const [previewOpen, setPreviewOpen] = useState(false)
+  const message = useMemo(() => previewOpen ? buildEndOfDay(allRelevant, ownershipOf) : '', [allRelevant, ownershipOf, previewOpen])
   const isCopied = copiedSection === 'end-of-day'
 
   return (
@@ -1371,19 +1375,21 @@ function EndOfDayCard({ allRelevant, ownershipOf, copiedSection, onCopy }: {
           <h2 className="text-base font-semibold text-white">End-of-day update</h2>
           <p className="text-xs text-brand-primary">Progress summary ready to share.</p>
         </div>
-        <ActionButton
-          variant="outline"
-          size="sm"
-          onClick={() => onCopy('end-of-day', message)}
-          disabled={allRelevant.length === 0}
-        >
-          {isCopied ? 'Copied!' : 'Copy'}
-        </ActionButton>
+        <div className="flex flex-wrap gap-2">
+          {allRelevant.length > 0 && (
+            <ActionButton variant="outline" size="sm" onClick={() => setPreviewOpen(open => !open)} aria-expanded={previewOpen} aria-controls="end-of-day-preview">
+              {previewOpen ? 'Hide preview' : 'Preview update'}
+            </ActionButton>
+          )}
+          <ActionButton variant="outline" size="sm" onClick={() => onCopy('end-of-day', message || buildEndOfDay(allRelevant, ownershipOf))} disabled={allRelevant.length === 0}>
+            {isCopied ? 'Copied!' : 'Copy'}
+          </ActionButton>
+        </div>
       </div>
       {allRelevant.length === 0 ? (
         <p className="mt-3 text-xs text-brand-primary/60">No tasks to generate a summary.</p>
-      ) : (
-        <pre className="mt-3 overflow-x-auto rounded-lg border border-brand-muted bg-brand-bg p-3 text-xs leading-relaxed text-brand-primary/80 whitespace-pre-wrap font-mono">
+      ) : previewOpen && (
+        <pre id="end-of-day-preview" className="mt-3 max-h-80 overflow-auto rounded-lg border border-brand-muted bg-brand-bg p-3 text-xs leading-relaxed text-brand-primary/80 whitespace-pre-wrap font-mono">
           {message}
         </pre>
       )}
