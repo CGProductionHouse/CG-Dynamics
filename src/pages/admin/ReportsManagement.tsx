@@ -119,6 +119,7 @@ export default function ReportsManagement() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all')
   const [searchQuery, setSearchQuery] = useState('')
+  const [visibleCount, setVisibleCount] = useState(25)
   const [sourceById, setSourceById] = useState<Map<string, ReportSource>>(new Map())
 
   const clientById = useMemo(() => {
@@ -245,6 +246,8 @@ export default function ReportsManagement() {
     }
 
     result.sort((a, b) => {
+      const monthDiff = getReportMonthFromPeriod(b).localeCompare(getReportMonthFromPeriod(a))
+      if (monthDiff !== 0) return monthDiff
       const aSource = sourceById.get(a.id) ?? 'manual'
       const bSource = sourceById.get(b.id) ?? 'manual'
       const sourceOrder: Record<ReportSource, number> = { meta: 0, mixed: 1, manual: 2 }
@@ -257,6 +260,7 @@ export default function ReportsManagement() {
 
     return result
   }, [reports, clientFilter, monthFilter, statusFilter, sourceFilter, sourceById, searchQuery, clientNameById])
+  const visibleReports = filteredReports.slice(0, visibleCount)
 
   async function handleStatus(report: Report) {
     const nextStatus = report.status === 'published' ? 'draft' : 'published'
@@ -345,6 +349,7 @@ export default function ReportsManagement() {
     setStatusFilter('all')
     setSourceFilter('all')
     setSearchQuery('')
+    setVisibleCount(25)
   }
 
   const hasActiveFilters = clientFilter !== 'all' || monthFilter !== 'all' || statusFilter !== 'all' || sourceFilter !== 'all' || searchQuery !== ''
@@ -400,8 +405,9 @@ export default function ReportsManagement() {
           <div className="min-w-0 flex-1 sm:flex sm:flex-wrap sm:items-end sm:gap-3">
             <FilterGroup label="Client">
               <select
+                aria-label="Client"
                 value={clientFilter}
-                onChange={e => setClientFilter(e.target.value)}
+                onChange={e => { setClientFilter(e.target.value); setVisibleCount(25) }}
                 className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
               >
                 <option value="all">All clients</option>
@@ -413,8 +419,9 @@ export default function ReportsManagement() {
 
             <FilterGroup label="Month">
               <select
+                aria-label="Month"
                 value={monthFilter}
-                onChange={e => setMonthFilter(e.target.value)}
+                onChange={e => { setMonthFilter(e.target.value); setVisibleCount(25) }}
                 className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
               >
                 <option value="all">All months</option>
@@ -426,8 +433,9 @@ export default function ReportsManagement() {
 
             <FilterGroup label="Status">
               <select
+                aria-label="Status"
                 value={statusFilter}
-                onChange={e => setStatusFilter(e.target.value as StatusFilter)}
+                onChange={e => { setStatusFilter(e.target.value as StatusFilter); setVisibleCount(25) }}
                 className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
               >
                 {STATUS_OPTIONS.map(opt => (
@@ -438,8 +446,9 @@ export default function ReportsManagement() {
 
             <FilterGroup label="Source">
               <select
+                aria-label="Source"
                 value={sourceFilter}
-                onChange={e => setSourceFilter(e.target.value as SourceFilter)}
+                onChange={e => { setSourceFilter(e.target.value as SourceFilter); setVisibleCount(25) }}
                 className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent"
               >
                 {SOURCE_OPTIONS.map(opt => (
@@ -452,8 +461,9 @@ export default function ReportsManagement() {
               <label className="mb-1 block text-xs text-brand-primary">Search</label>
               <input
                 type="text"
+                aria-label="Search reports"
                 value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
+                onChange={e => { setSearchQuery(e.target.value); setVisibleCount(25) }}
                 placeholder="Client name or title..."
                 className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white placeholder-brand-primary/50 focus:outline-none focus:ring-1 focus:ring-brand-accent"
               />
@@ -470,7 +480,7 @@ export default function ReportsManagement() {
         {!loading && (
           <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-brand-primary">
             <span>
-              Showing {filteredReports.length} of {reports.length} reports
+              Showing {visibleReports.length} of {filteredReports.length} matching reports ({reports.length} total)
             </span>
             {statusCounts['internal-draft'] > 0 && (
               <span>Internal drafts: <span className="text-white">{statusCounts['internal-draft']}</span></span>
@@ -509,7 +519,7 @@ export default function ReportsManagement() {
         />
       ) : (
         <div className="space-y-3">
-          {filteredReports.map(report => {
+          {visibleReports.map(report => {
             const client = clientById.get(report.client_id)
             const clientName = clientNameById.get(report.client_id) ?? report.client_id
             const isPartial = !isFullCalendarMonth(report.period_start, report.period_end)
@@ -566,17 +576,8 @@ export default function ReportsManagement() {
                       size="sm"
                       onClick={() => navigate(`/admin/reports/${report.id}/edit`)}
                     >
-                      {ready || report.status === 'published' ? 'Review report' : 'Edit strategy'}
+                      {ready || report.status === 'published' ? 'Review report' : 'Add CG action plan'}
                     </ActionButton>
-                    {!ready && report.status !== 'published' && (
-                      <ActionButton
-                        variant="outline"
-                        size="sm"
-                        onClick={() => navigate(`/admin/reports/${report.id}/edit`)}
-                      >
-                        Add CG action plan
-                      </ActionButton>
-                    )}
                     {monthComplete && (
                       <ActionButton
                         variant="secondary"
@@ -598,16 +599,6 @@ export default function ReportsManagement() {
                             Publish
                           </ActionButton>
                         )}
-                        {report.status === 'published' && (
-                          <ActionButton
-                            variant="secondary"
-                            size="sm"
-                            onClick={() => void handleStatus(report)}
-                            disabled={busyReportId === report.id}
-                          >
-                            Unpublish
-                          </ActionButton>
-                        )}
                         {isPartial && (
                           <ActionButton
                             variant="secondary"
@@ -618,14 +609,15 @@ export default function ReportsManagement() {
                             Repair to calendar month
                           </ActionButton>
                         )}
-                        <ActionButton
-                          variant="danger"
-                          size="sm"
-                          onClick={() => void handleDelete(report)}
-                          disabled={busyReportId === report.id}
-                        >
-                          Delete
-                        </ActionButton>
+                        <details className="relative">
+                          <summary className="cursor-pointer rounded-lg border border-white/10 px-3 py-2 text-xs font-semibold text-white/75 hover:border-white/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-accent">More actions</summary>
+                          <div className="mt-2 flex flex-wrap gap-2 sm:absolute sm:right-0 sm:top-full sm:z-10 sm:min-w-44 sm:flex-col sm:rounded-xl sm:border sm:border-white/10 sm:bg-brand-bg sm:p-2 sm:shadow-xl">
+                            {report.status === 'published' && (
+                              <ActionButton variant="secondary" size="sm" onClick={() => void handleStatus(report)} disabled={busyReportId === report.id}>Unpublish</ActionButton>
+                            )}
+                            <ActionButton variant="danger" size="sm" onClick={() => void handleDelete(report)} disabled={busyReportId === report.id}>Delete</ActionButton>
+                          </div>
+                        </details>
                       </>
                     )}
                   </div>
@@ -633,6 +625,12 @@ export default function ReportsManagement() {
               </PremiumCard>
             )
           })}
+          {visibleReports.length < filteredReports.length && (
+            <button type="button" onClick={() => setVisibleCount(count => count + 25)}
+              className="w-full rounded-xl border border-white/10 px-4 py-3 text-sm font-semibold text-white hover:border-brand-accent/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-accent">
+              Show next {Math.min(25, filteredReports.length - visibleReports.length)} reports
+            </button>
+          )}
         </div>
       )}
     </div>
