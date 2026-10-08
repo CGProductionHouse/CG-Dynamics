@@ -1,5 +1,18 @@
 # CG Dynamics Ops Handover
 
+### 8 October — #656 presentation scope closed; content and release gates remain
+
+Issue #656 is closed: its presentation-only strategy redesign is on `main`
+through #660/#661, with the later #667 unsafe-copy hold. This does **not**
+approve or publish the 94 Sep/Oct strategy drafts, establish their semantic
+quality, or prove authenticated client-role acceptance of the changed frontend.
+Those distinct gates remain with #513/#668/#679. The older “CURRENT active
+Codex mission = #656” section below is historical, not a live assignment.
+In the authenticated `info@cgproductionhouse.com` work Chrome account, a
+bounded read-only Drive search for `VCS` and `Snowsoft` found no referenced
+Excel price sheet. The VCS offer image is still not proof of current stock,
+final prices or terms. No Vercel or production action occurred.
+
 ### 8 October — Performance strategy-read error truth, local only
 
 The existing staff Client Preview silently treated a failed canonical monthly
@@ -982,7 +995,7 @@ Accepted cross-system state:
 - JFJ Electrical + VCS created canonically; Neshora not duplicated;
 - Local Meat Deli / Madisons handled as historical aliases, not deleted/merged into history.
 
-**CURRENT active Codex mission = #656 Strategy client-preview redesign.**
+**Historical assignment (completed/closed 8 October): #656 Strategy client-preview redesign.**
 
 The agent must inspect the linked Google Drive screenshots before coding and implement the already-approved Monthly Performance Report design language. No brown slab/chip-heavy invented UI. Strategy must become visually interactive/scannable with strong hierarchy and useful progressive disclosure while preserving all existing strategy truth/status/client/month/package/evidence semantics.
 
@@ -995,8 +1008,7 @@ The agent must inspect the linked Google Drive screenshots before coding and imp
 
 After #656, active Codex should refetch #381 and continue the next highest-value SAFE, UNOWNED launch-critical item without stopping at a status summary. Protected/human/provider gates remain protected.
 
-Known genuine remaining launch gates:
-- #656 design implementation;
+Known genuine remaining launch gates (reconcile with newer notes above):
 - protected strategy amendment/approval/publication decisions;
 - exact Instagram owner/access actions and later Dynamics mapping/sync;
 - authenticated CG Hours browser acceptance when a legitimate session exists;
