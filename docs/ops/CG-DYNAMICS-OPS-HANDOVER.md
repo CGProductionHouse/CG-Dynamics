@@ -1,5 +1,21 @@
 # CG Dynamics Ops Handover
 
+### 8 October — #712 staff/admin usability, local-first and client dashboard locked
+
+CA rejected the current internal workspace density/hierarchy and requested a
+premium, task-first staff/admin finish. Issue #712 records the complete surface
+matrix and makes `docs/cg-dynamics-brand-ui-direction.md` the visual authority.
+The first focused local change removes repeated Hub task-card lists in favour
+of one selectable queue, puts assigned work ahead of secondary My Day details
+on mobile, and simplifies Work navigation without changing task/source/role
+contracts. Actual-component 1440px/375px browser fixtures and the full local
+suite/build pass; the accepted client dashboard source and styling are untouched.
+This is **not live**. Continue the remaining #712 internal surfaces one coherent
+lane at a time; do not claim whole-app acceptance from this first pass.
+`git.deploymentEnabled=false` remains in force. No Vercel build, preview,
+deployment or promotion for iterative UI work. A final cloud build must use a
+reviewed exact SHA and the shared client-site reserve/release packet below.
+
 ### 8 October — CG Production House client-login recovery and copy UX
 
 CA reported that Client Access Reset appeared to do nothing and the combined

@@ -22,12 +22,22 @@ test('ordinary no-result states can use the compact shared treatment', () => {
   }
 })
 
-test('Hub does not repeat Today Focus metrics above the same work cards', () => {
+test('Hub uses one selectable work queue instead of repeating six task card lists', () => {
   assert.doesNotMatch(hub, /HubMetricCard/)
   assert.doesNotMatch(hub, /What needs your attention/)
   assert.doesNotMatch(hub, /Package deliverables and schedule/)
-  assert.match(hub, /title="Today Focus"/)
+  assert.match(hub, /aria-label="Choose work queue"/)
+  assert.match(hub, /aria-pressed=\{selectedQueue === queue\.id\}/)
+  assert.match(hub, /activeQueue\.tasks\.slice\(0, 8\)/)
+  assert.doesNotMatch(hub, /<HubWorkCard\s+title="Priority Queue"/)
   assert.match(hub, /title="Production Schedule"/)
+})
+
+test('Hub calendar suppresses empty future-day cards but preserves the seven-day window and full calendar link', () => {
+  assert.match(hub, /const visibleDays = days\.filter\(day => day\.isToday \|\| day\.events\.length > 0\)/)
+  assert.match(hub, /Next 7 days/)
+  assert.match(hub, /No events in the next seven days/)
+  assert.match(hub, /View full CG Calendar/)
 })
 
 test('Work and Planner remove duplicate framing and internal import terminology', () => {
