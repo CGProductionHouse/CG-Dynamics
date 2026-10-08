@@ -165,9 +165,8 @@ function RunForm({
 export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defaultTab?: ContentTab }) {
   const { profile } = useAuth()
   const isMobile = useIsMobileViewport()
-  const effectiveDefaultTab = isMobile ? ('runs' as ContentTab) : defaultTab
   const [searchParams, setSearchParams] = useSearchParams()
-  const tab = resolveContentTab(searchParams.get('tab'), effectiveDefaultTab)
+  const tab = resolveContentTab(searchParams.get('tab'), defaultTab)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [migrationNeeded, setMigrationNeeded] = useState(false)
@@ -435,7 +434,7 @@ export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defau
     <button
       type="button"
       onClick={() => switchTab(value)}
-      className={`rounded-full border px-4 py-2 text-sm font-black transition-colors ${tab === value ? 'border-brand-teal/50 bg-brand-teal/10 text-brand-teal' : 'border-white/10 text-white/45 hover:text-white/70'}`}
+      className={`min-h-10 rounded-lg border px-3 py-2 text-sm font-semibold transition-colors ${tab === value ? 'border-brand-teal/50 bg-brand-teal/10 text-brand-teal' : 'border-white/10 text-white/60 hover:text-white'}`}
     >
       {label} {count > 0 && <span className="opacity-60">{count}</span>}
     </button>
@@ -457,37 +456,33 @@ export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defau
         />
       )}
 
-      <header className="overflow-hidden rounded-3xl border border-brand-teal/20 bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.14),transparent_40%),linear-gradient(145deg,rgba(255,255,255,0.05),rgba(255,255,255,0.015))] p-5 sm:p-8">
-        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-brand-teal">Content production</p>
-        <h1 className="mt-3 text-3xl font-black tracking-tight text-white sm:text-4xl">Content</h1>
-        <div className="mt-3 flex flex-wrap gap-2">
+      <header className="flex flex-wrap items-end justify-between gap-3 border-b border-white/10 pb-4">
+        <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">Content</h1>
+        <div className="flex flex-wrap gap-2">
           <Link to="/admin/content-reviews" className="inline-flex min-h-11 items-center rounded-lg border border-brand-teal/30 px-3 text-sm font-bold text-brand-teal">Review content</Link>
           <Link to="/admin/content-ops" className="inline-flex min-h-11 items-center rounded-lg border border-brand-teal/30 px-3 text-sm font-bold text-brand-teal">Content operations</Link>
         </div>
-        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-brand-primary/75">
-          Plan Content Runs, use each canonical guideline during the shoot, and track ordered videos through production.
-        </p>
       </header>
 
       {!migrationNeeded && (
         <>
-          {/* Mobile: compact sticky segment control for Runs | Guidelines | Pipeline */}
+          {/* The action overview is available on mobile as well as desktop. */}
           {isMobile && (
             <div className="mt-4 sticky top-0 z-10 flex items-center gap-1 rounded-xl border border-white/10 bg-brand-bg/95 backdrop-blur px-2 py-1.5 sm:hidden" role="tablist" aria-label="Content sections">
-              {(['runs', 'guidelines', 'pipeline'] as ContentTab[]).map(value => (
+              {(['overview', 'runs', 'guidelines', 'pipeline'] as ContentTab[]).map(value => (
                 <button
                   key={value}
                   type="button"
                   role="tab"
                   aria-selected={tab === value}
                   onClick={() => switchTab(value)}
-                  className={`rounded-full px-3 py-1.5 text-xs font-black transition-colors ${
+                  className={`min-h-10 rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${
                     tab === value
                       ? 'border-brand-teal/50 bg-brand-teal/10 text-brand-teal'
                       : 'border-white/10 text-white/45 hover:text-white/70'
                   }`}
                 >
-                  {value === 'runs' ? 'Runs' : value === 'guidelines' ? 'Guidelines' : 'Pipeline'}
+                  {value === 'overview' ? 'Overview' : value === 'runs' ? 'Runs' : value === 'guidelines' ? 'Guidelines' : 'Pipeline'}
                   {value === 'runs' && runs.length > 0 && <span className="ml-1 opacity-60">{runs.length}</span>}
                   {value === 'guidelines' && documents.length > 0 && <span className="ml-1 opacity-60">{documents.length}</span>}
                 </button>
@@ -519,7 +514,7 @@ export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defau
       ) : loadError ? (
         <EmptyState className="mt-8" title="Could not load Content Workflow" message={loadError} action={<ActionButton variant="secondary" onClick={() => void loadAll()}>Try again</ActionButton>} />
       ) : tab === 'overview' ? (
-        <ContentOverview clients={clients} staff={staff} runs={runs} documents={documents} onOpenRun={openOverviewRun} onOpenGuideline={openOverviewGuideline} onOpenPipeline={() => switchTab('pipeline')} />
+        <ContentOverview clients={clients} staff={staff} runs={runs} documents={documents} onOpenRun={openOverviewRun} onOpenGuideline={openOverviewGuideline} onOpenPipeline={() => switchTab('pipeline')} onOpenRuns={() => switchTab('runs')} onOpenGuidelines={() => switchTab('guidelines')} />
       ) : tab === 'guidelines' ? (
         <FullContentGuidePage embedded />
       ) : tab === 'pipeline' ? (

@@ -218,22 +218,33 @@ test('ContentWorkflowPage imports useIsMobileViewport for mobile detection', () 
   assert.match(contentWorkflow, /mobileViewport/)
 })
 
-test('ContentWorkflowPage defaults to runs tab on mobile viewport', () => {
+test('ContentWorkflowPage keeps the action overview available and selected by default on mobile', () => {
   assert.match(contentWorkflow, /const isMobile = useIsMobileViewport\(\)/)
-  assert.match(contentWorkflow, /const effectiveDefaultTab = isMobile \? \('runs' as ContentTab\) : defaultTab/)
-  assert.match(contentWorkflow, /const tab = resolveContentTab\(searchParams\.get\('tab'\), effectiveDefaultTab\)/)
+  assert.match(contentWorkflow, /const tab = resolveContentTab\(searchParams\.get\('tab'\), defaultTab\)/)
+  assert.match(contentWorkflow, /\(\['overview', 'runs', 'guidelines', 'pipeline'\] as ContentTab\[\]\)/)
 })
 
-test('ContentWorkflowPage renders compact sticky Runs|Guidelines|Pipeline segment control at 390px', () => {
+test('ContentWorkflowPage renders compact sticky Overview|Runs|Guidelines|Pipeline control at 390px', () => {
   // Mobile-only segment control (sm:hidden)
   assert.match(contentWorkflow, /isMobile \&\& \(/)
   assert.match(contentWorkflow, /sm:hidden/)
   assert.match(contentWorkflow, /sticky top-0 z-10/)
   assert.match(contentWorkflow, /role="tablist"/)
+  assert.match(contentWorkflow, /Overview/)
   assert.match(contentWorkflow, /Runs/)
   assert.match(contentWorkflow, /Guidelines/)
   assert.match(contentWorkflow, /Pipeline/)
   assert.match(contentWorkflow, /aria-selected={tab === value}/)
+})
+
+test('ContentOverview keeps exact attention counts and hides empty decorative history sections', () => {
+  assert.match(contentOverview, /return items\s*\n/)
+  assert.match(contentOverview, /visibleAttentionItems = attentionExpanded \? attentionItems : attentionItems\.slice\(0, 12\)/)
+  assert.match(contentOverview, /visibleAttentionItems\.map\(item/)
+  assert.match(contentOverview, /Show remaining/)
+  assert.match(contentOverview, /publishedDocuments\.length > 0 && <Section/)
+  assert.match(contentOverview, /completedRuns\.length > 0 && <Section/)
+  assert.match(contentOverview, /onOpenRuns/)
 })
 
 test('ContentWorkflowPage moves filter controls behind Filters disclosure on mobile', () => {

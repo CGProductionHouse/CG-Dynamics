@@ -5,11 +5,17 @@
 CA rejected the current internal workspace density/hierarchy and requested a
 premium, task-first staff/admin finish. Issue #712 records the complete surface
 matrix and makes `docs/cg-dynamics-brand-ui-direction.md` the visual authority.
-The first focused local change removes repeated Hub task-card lists in favour
+PR #713 merged as `7b2cb85bae43f4e6c2c44ee6983007cdc508e1bd`. It removes repeated Hub task-card lists in favour
 of one selectable queue, puts assigned work ahead of secondary My Day details
 on mobile, and simplifies Work navigation without changing task/source/role
 contracts. Actual-component 1440px/375px browser fixtures and the full local
 suite/build pass; the accepted client dashboard source and styling are untouched.
+The next local Content lane removes the giant introduction and duplicate
+overview cards, makes its action queue the first work surface, preserves the
+full attention count with an explicit expand control, and restores the action
+overview on mobile (previously silently defaulted to Runs). It is still under
+local verification/review, not live. CG Calendar and Client Schedule remain
+separate; no client or provider records were changed.
 This is **not live**. Continue the remaining #712 internal surfaces one coherent
 lane at a time; do not claim whole-app acceptance from this first pass.
 `git.deploymentEnabled=false` remains in force. No Vercel build, preview,
