@@ -146,9 +146,26 @@ No guaranteed occupancy, invented distance, all-inclusive or safety assurances.
 CA explicitly says the client supplied a **Pre-Black Friday Special, 23–31 October**.
 She asks for two distinct design concepts and describes designs as not final.
 Blackout Access / The Clean Sweep are proposed creative routes, not approved
-campaign strategy. Existing PDFs/images are referenced, but exact SKU, price,
-stock and terms were not independently read/approved here. Vasilis's first-party
-site requires JavaScript; third-party/stale offer mirrors were not accepted.
+campaign strategy. On 8 October the **original user-attached offer image** in the
+first linked conversation was read in the requested work Chrome profile. It says
+"23rd October till 31st of October Pre Black Friday Special" and lists these
+proposed offer rows, headed **pricing inc VAT**:
+
+| Source code | Source description | Source price inc VAT |
+| --- | --- | ---: |
+| `2SV24` | Snowsoft Toilet Paper Virgin 2-Ply 350 Sheets 24s | R119.99 |
+| `SV18L` | Snowsoft Toilet Paper Virgin 2-Ply 350 Sheets 18s | R89.99 |
+| `SS3V9` | Snowsoft Toilet Paper Virgin 2-Ply 350 Sheets 8 x 9s | R45.00 |
+
+This is the client's supplied design brief as shown in CA's chat, **not** a
+current approved price list or stock feed. The image itself instructs the
+designer to check descriptions, prices and images against an Excel sheet; that
+sheet was not available in this bounded review. It asks for a website under
+"SHOP ONLINE" but does not supply its exact address. Do not invent the URL,
+stock, discount, ordering terms or final creative approval. The three adjacent
+product photos show Snowsoft packs; they do not validate current availability.
+Vasilis's first-party site requires JavaScript; third-party/stale offer mirrors
+were not accepted.
 
 **Proposed objective:** make verified promotional products easy for customers to
 select and enquire/order during those exact dates. **Buyer hypothesis:** repeat or
@@ -159,15 +176,18 @@ unqualified cheapest/best claim; give a clear ordering/enquiry next step. Sequen
 teaser before 23 October → approved offers from 23 October → relevant product/use
 case → final-date reminder by 31 October. This is proposed sequencing, not a
 promise of additional contracted posts or an approved promotion launch.
-**Proof gate:** reviewed final product/price list, VAT basis, pack sizes, stock,
-terms, trading/ordering details, permissioned assets and chosen concept. No fake
+**Proof gate:** reconcile these three source-image rows to the referenced Excel
+sheet and obtain owner review of current prices, stock, pack sizes, terms,
+trading/ordering details, exact shop URL, permissioned assets and chosen concept.
+The source image establishes the stated VAT basis, not final approval. No fake
 discounts, scarcity or product performance. **Learning:** actual offer enquiries
 and orders where recorded, with product-specific results; likes are not sales.
 
 ## Next executable and protected steps
 
-1. Review exact original attachments/older briefs when available; retain conflicting
-   claims rather than choose whichever looks better. No generic identity hunting.
+1. Review the referenced VCS Excel sheet and any remaining original attachments/
+   older briefs when available; retain conflicting claims rather than choose
+   whichever looks better. No generic identity hunting.
 2. Confirm each package through the existing exact audited package flow only after
    CA reviews direct commercial evidence. Unknown does not become zero or false.
 3. Turn accepted evidence and business decisions into the canonical exact-client,

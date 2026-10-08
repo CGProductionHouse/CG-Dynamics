@@ -1,5 +1,16 @@
 # CG Dynamics Ops Handover
 
+### 8 October — VCS original offer attachment recovered (read-only)
+
+The original VCS user-attached 23–31 October promotion image in the requested
+work Chrome chat was read directly. `BLOEMFONTEIN-CLIENT-EVIDENCE-2026-10-07.md`
+now pins three exact Snowsoft source codes, descriptions and VAT-inclusive
+proposed prices, separate from the AI-generated concepts. The image requires
+cross-checking against an Excel sheet not seen here; current stock, final
+price/terms, exact shop URL and owner approval remain unknown. No package,
+strategy, client content or production data changed. The four-client package
+and semantic/publication/release gates below are unchanged. ZERO Vercel action.
+
 ### 7 October late evening — report fact windows locally verified
 
 PR #702 resolves the reproduced Sep-23 content /Sep-30 TikTok fact contradiction
