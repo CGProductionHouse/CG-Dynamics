@@ -24,9 +24,7 @@ A focused Users lane separates workforce, client login and unlinked views so
 generated portal logins do not bury team access; search remains across exact
 names/email/linked client. It also stops labelling inactive or unknown profiles
 as Active. Its live baseline was read-only; synthetic actual-component
-1440px/375px cases, the full 3,737-pass local suite and build passed. This
-code still needs review/merge and is not live. No client or provider records
-were changed.
+1440px/375px cases, the full 3,737-pass local suite and build passed. The Users lane merged in PR #716 as `a8d3978c05706951dfe3cbbbb9f6b847ae7bd7df`; it passed 3,737 local tests with 19 intentional skips, build/lint/diff and 1440px/375px actual-component acceptance. The code is merged but not production-live. No client or provider records were changed.
 This is **not live**. Continue the remaining #712 internal surfaces one coherent
 lane at a time; do not claim whole-app acceptance from this first pass.
 `git.deploymentEnabled=false` remains in force. No Vercel build, preview,
