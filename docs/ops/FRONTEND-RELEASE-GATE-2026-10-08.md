@@ -79,3 +79,36 @@ client-role or semantic strategy acceptance.
 
 No Vercel build/upload/promotion, production data or provider action was
 performed by this preflight.
+
+## Staging receipt — 8 October, after CA go-ahead
+
+- Exact clean source: `4072e40d1395960ecd434316eabee4c181666351`;
+  no app-source change from the locally verified `bbba236c` candidate.
+- The private Vercel production-env pull redacted both Sensitive-marked
+  `VITE_SUPABASE_*` values as `[SENSITIVE]`. The local `vercel build --prod`
+  output was therefore invalid and **was not uploaded**. Its generated env
+  files were removed. Do not use that output for a later `--prebuilt` deploy.
+- A dry run excluded `.env*`, `.vercel/output` and `dist` from source upload.
+  Exactly one cloud build was made with
+  `vercel deploy --prod --skip-domain --project prj_jHVsExoStNjI7ikqlJyXZx26Ahuu --scope cg-dynamics-projects --yes`.
+  It is READY: `dpl_DyiXG9689oAjZUhEBbHEsL3AKLAi`,
+  `https://cg-dynamics-fzavq49oa-cg-dynamics-projects.vercel.app`.
+- `www.cgdynamics.co.za` still resolves to READY rollback target
+  `dpl_4zLdbHKXzHs8rDzyErJHtcZfUneE`; do not create another deployment.
+  Vercel did assign `cg-dynamics-cg-dynamics-projects.vercel.app` to the staged
+  build despite `--skip-domain`. That Vercel-owned alias is **not** evidence of
+  custom-domain promotion.
+- Staged unauthenticated desktop and 375px login rendered; no captured console
+  warnings/errors and `scrollWidth=clientWidth=375`. Authenticated admin/client
+  routes are **not yet accepted**. A genuine client test account must sign in
+  on the staged URL; never use a copied browser token or staff preview as a
+  substitute. Five sampled canonical hosts returned HTTP 200 after staging.
+- Refreshed shared-team spend: $3.50 before cloud build, $3.53 at first
+  post-build readback, $10 Pause-ON cap. Billing may lag; re-read before any
+  further release action and preserve the client-site reserve. No second build,
+  retry, alias promotion, migration, production data or provider action.
+
+Next: finish real client-role and staff staged read-only desktop/375px checks,
+then promote **this same deployment only** if exact-client/published-only
+truth, layout, runtime and reserve gates pass. Otherwise leave canonical
+domains on `dpl_4zLdbHKXzHs8rDzyErJHtcZfUneE` and document the blocker.

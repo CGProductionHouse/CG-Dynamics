@@ -1,5 +1,29 @@
 # CG Dynamics Ops Handover
 
+### 8 October — one staged frontend build, **not promoted**
+
+CA authorised the lowest-spend bounded release attempt after the #708 packet.
+The exact clean `main` `4072e40d1395960ecd434316eabee4c181666351`
+was staged once as Vercel production-target deployment
+`dpl_DyiXG9689oAjZUhEBbHEsL3AKLAi` with `--skip-domain`; it is READY at
+`https://cg-dynamics-fzavq49oa-cg-dynamics-projects.vercel.app`. Vercel's
+Sensitive-marked public Vite variables came down as literal `[SENSITIVE]`, so
+the locally produced prebuilt artifact was **discarded without upload**. The
+single cloud-build fallback used the existing production environment. No
+preview build or retry was made. The CLI assigned its Vercel-owned team alias
+despite `--skip-domain`, but `www.cgdynamics.co.za` still resolves to the
+known-good `dpl_4zLdbHKXzHs8rDzyErJHtcZfUneE`; no canonical domain was
+promoted. Staged unauthenticated desktop/375px login rendered with no captured
+console warnings/errors or 375px body overflow. Five sampled Dynamics/client
+hosts returned HTTP 200 after staging. Refreshed billing rose from $3.50 to
+$3.53 of the shared $10 Pause-ON cap; billing can lag, so this is not a final
+cost assertion. The exact client-role staged acceptance remains **BLOCKED**
+until an existing test client signs into that staged URL in the work Chrome
+session; do not copy credentials or treat staff Client View as a substitute.
+No promotion, client-content approval/publication, Supabase or provider write.
+The independent 94-strategy/package/asset gates below are unchanged. See
+`FRONTEND-RELEASE-GATE-2026-10-08.md` for the no-rebuild next step and rollback.
+
 ### 8 October — one-build frontend release packet, still gated
 
 CA asked for a low-usage Vercel push after Dynamics is ready. The exact local
