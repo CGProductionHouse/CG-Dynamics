@@ -20,6 +20,7 @@ export default function ClientSetupPage() {
   const [library, setLibrary] = useState<ClientPortalLibraryState | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [setupUnavailable, setSetupUnavailable] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -32,6 +33,7 @@ export default function ClientSetupPage() {
       setState(null)
       setLibrary(null)
       setError(null)
+      setSetupUnavailable(false)
       try {
       const [libraryResult, setupResult] = await Promise.all([
         loadClientPortalLibrary(previewClientId),
@@ -41,6 +43,7 @@ export default function ClientSetupPage() {
       setState(setupResult.data)
       setLibrary(libraryResult.data)
       setError(libraryResult.error)
+      setSetupUnavailable(Boolean(setupResult.error))
       setLoading(false)
       } catch {
         if (!active) return
@@ -56,7 +59,7 @@ export default function ClientSetupPage() {
   if (error || !library) {
     return <ClientPortalErrorState title="Brand Hub is not available yet" message="Your CG team will make this space available once your client-safe library is ready." />
   }
-  return <ClientBrandHub library={library} state={state} />
+  return <ClientBrandHub library={library} state={state} setupUnavailable={setupUnavailable} />
 }
 
 export function ClientSetupContent({ state, audience = 'staff' }: { state: ClientOnboardingState; audience?: 'client' | 'staff' }) {
@@ -70,7 +73,7 @@ export function ClientSetupContent({ state, audience = 'staff' }: { state: Clien
   )
 }
 
-function ClientBrandHub({ library, state }: { library: ClientPortalLibraryState; state: ClientOnboardingState | null }) {
+function ClientBrandHub({ library, state, setupUnavailable }: { library: ClientPortalLibraryState; state: ClientOnboardingState | null; setupUnavailable: boolean }) {
   return (
     <div className="space-y-7">
       <section className="relative overflow-hidden rounded-[2rem] border border-white/[0.08] bg-[radial-gradient(circle_at_12%_5%,rgba(45,212,191,0.18),transparent_34%),radial-gradient(circle_at_92%_18%,rgba(249,115,22,0.12),transparent_28%),linear-gradient(145deg,rgba(10,27,24,0.96),rgba(5,12,11,0.94))] px-6 py-9 shadow-[0_34px_100px_-55px_rgba(0,0,0,0.95)] sm:px-9 sm:py-11">
@@ -84,6 +87,10 @@ function ClientBrandHub({ library, state }: { library: ClientPortalLibraryState;
       </section>
 
       <ClientPortalLibrary library={library} />
+
+      {setupUnavailable && <p role="status" className="rounded-2xl border border-white/10 bg-white/[0.035] px-5 py-4 text-sm text-slate-300">
+        Brand foundation details are temporarily unavailable.
+      </p>}
 
       {state && <div className="grid gap-5 lg:grid-cols-5">
         <section className="rounded-[2rem] border border-white/[0.08] bg-white/[0.035] p-6 sm:p-8 lg:col-span-3">
