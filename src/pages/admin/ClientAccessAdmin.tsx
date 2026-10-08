@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   listClientPortalAccess,
   provisionClientPortalAccess,
@@ -19,10 +19,12 @@ export default function ClientAccessAdmin() {
   const [busyId, setBusyId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [lastAction, setLastAction] = useState<(ClientPortalAccessReceipt & { client_name: string }) | null>(null)
+  const [copyStatus, setCopyStatus] = useState<string | null>(null)
   const [query, setQuery] = useState('')
+  const readyRef = useRef<HTMLDivElement>(null)
 
-  async function load() {
-    setLoading(true)
+  async function load(quiet = false) {
+    if (!quiet) setLoading(true)
     setError(null)
     const result = await listClientPortalAccess()
     if (result.error) {
@@ -43,6 +45,10 @@ export default function ClientAccessAdmin() {
     return () => window.clearTimeout(timer)
   }, [])
 
+  useEffect(() => {
+    if (lastAction) readyRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' })
+  }, [lastAction])
+
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase()
     if (!needle) return rows
@@ -56,11 +62,12 @@ export default function ClientAccessAdmin() {
     setBusyId(row.client_id)
     setError(null)
     setLastAction(null)
+    setCopyStatus(null)
     try {
       const result = await provisionClientPortalAccess(row.client_id, usernames[row.client_id] ?? row.proposed_username)
       if (result.error || !result.data) throw result.error ?? new Error('Could not provision client access.')
       setLastAction({ ...result.data, client_name: row.client_name })
-      await load()
+      await load(true)
     } catch (error) {
       setError(message(error, 'Could not provision client access.'))
     } finally {
@@ -72,11 +79,12 @@ export default function ClientAccessAdmin() {
     setBusyId(row.client_id)
     setError(null)
     setLastAction(null)
+    setCopyStatus(null)
     try {
       const result = await resetClientPortalAccess(row.client_id)
       if (result.error || !result.data) throw result.error ?? new Error('Could not reset client access.')
       setLastAction({ ...result.data, client_name: row.client_name })
-      await load()
+      await load(true)
     } catch (error) {
       setError(message(error, 'Could not reset client access.'))
     } finally {
@@ -98,12 +106,21 @@ export default function ClientAccessAdmin() {
     }
   }
 
-  async function copyCredentials() {
+  async function copyCredential(kind: 'username' | 'password') {
     if (!lastAction) return
-    // CA-approved Phase 1 convention. Keep the password out of rendered DOM and API responses.
-    const password = lastAction.username + '_cg$'
-    const text = `CG Dynamics\nUsername: ${lastAction.username}\nPassword: ${password}\nLogin: https://www.cgdynamics.co.za/login`
-    await navigator.clipboard.writeText(text)
+    setCopyStatus(null)
+    setError(null)
+    // CA-approved Phase 1 convention. The password is copied only on an explicit
+    // admin click; it is never rendered, returned by the API or stored locally.
+    const value = kind === 'username' ? lastAction.username : lastAction.username + '_cg$'
+    try {
+      await navigator.clipboard.writeText(value)
+      setCopyStatus(kind === 'username'
+        ? 'Username copied. Paste it into the Username or email field.'
+        : 'Password copied. Paste it into the Password field.')
+    } catch {
+      setError('Clipboard access failed. Check your browser clipboard permission and try again.')
+    }
   }
 
   return (
@@ -124,27 +141,29 @@ export default function ClientAccessAdmin() {
       </div>
 
       {lastAction && (
-        <div className="mb-5 rounded-xl border border-brand-accent/30 bg-brand-accent/10 p-4">
+        <div ref={readyRef} className="mb-5 scroll-mt-6 rounded-xl border border-brand-accent/30 bg-brand-accent/10 p-4">
           <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-accent">Client access ready</p>
           <p className="mt-2 text-sm font-semibold text-white">{lastAction.client_name}</p>
           <p className="mt-2 text-sm text-brand-primary">
             Username: <strong className="text-white">{lastAction.username}</strong>
           </p>
-          <button
-            type="button"
-            onClick={() => void copyCredentials()}
-            className="mt-3 rounded-lg bg-brand-accent px-3 py-2 text-xs font-bold text-black transition hover:brightness-110"
-          >
-            Copy login details
-          </button>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button type="button" onClick={() => void copyCredential('username')} className="rounded-lg bg-brand-accent px-3 py-2 text-xs font-bold text-black transition hover:brightness-110">
+              Copy username
+            </button>
+            <button type="button" onClick={() => void copyCredential('password')} className="rounded-lg bg-brand-accent px-3 py-2 text-xs font-bold text-black transition hover:brightness-110">
+              Copy password
+            </button>
+          </div>
+          {copyStatus && <p role="status" className="mt-2 text-xs text-brand-accent">{copyStatus}</p>}
           <p className="mt-2 text-xs text-brand-primary/70">
-            Starter password is not rendered or returned by the provisioning action. It is generated only when an admin deliberately copies login details.
+            Paste each value into its own sign-in field in a private window. The starter password is never displayed or returned by the provisioning action.
           </p>
         </div>
       )}
 
       {error && (
-        <p className="mb-5 rounded-lg border border-red-400/20 bg-red-400/10 px-3 py-2 text-sm text-red-300">{error}</p>
+        <p role="alert" className="mb-5 rounded-lg border border-red-400/20 bg-red-400/10 px-3 py-2 text-sm text-red-300">{error}</p>
       )}
 
       {loading ? (
