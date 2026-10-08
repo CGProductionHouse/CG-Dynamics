@@ -143,6 +143,8 @@ export default function ClientPerformancePage() {
   const [linkedMetaClients, setLinkedMetaClients] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [showAllAttention, setShowAllAttention] = useState(false)
+  const [onboardingOpened, setOnboardingOpened] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -251,7 +253,7 @@ export default function ClientPerformancePage() {
       publishedReports,
       draftReports,
       stateCounts,
-      attention: attention.slice(0, 5),
+      attention,
     }
   }, [clients, reports])
 
@@ -274,11 +276,11 @@ export default function ClientPerformancePage() {
       <section className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="font-display text-4xl font-black uppercase tracking-wide text-white">Performance</h1>
-          <p className="mt-2 text-sm text-brand-primary/80">Client and monthly dashboard status.</p>
+          <p className="mt-1 text-sm text-brand-primary/70">Review what needs attention before clients see it.</p>
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <HeaderAction to="/admin/integrations/meta">Sync Meta</HeaderAction>
+          <HeaderAction to="/admin/integrations/meta">Meta status</HeaderAction>
           <HeaderAction to="/admin/client-dashboard" primary>Client Dashboard</HeaderAction>
         </div>
       </section>
@@ -297,7 +299,7 @@ export default function ClientPerformancePage() {
         />
       ) : (
         <>
-          <section className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <section className="mt-5 grid grid-cols-2 gap-2 lg:grid-cols-4" aria-label="Performance snapshot">
             <SnapshotCard
               label="Active clients"
               value={snapshot.activeClients}
@@ -324,14 +326,14 @@ export default function ClientPerformancePage() {
             />
           </section>
 
-          {canManageOnboarding && <OnboardingStatusCard clients={clients} />}
-          <WebsitePerformancePanel clients={clients} canSave={canManageOnboarding} />
-
-          <section className="mt-6">
+          <section className="mt-5">
             <PremiumCard padding="lg" className="bg-white/[0.035]">
               <PremiumCardHeader
                 title="Dashboard queue"
               />
+              <p className="mb-3 text-xs text-brand-primary/65">
+                {snapshot.attention.length} reports need review · repair and publication checks stay visible until resolved
+              </p>
 
               {snapshot.attention.length === 0 ? (
                 <div className="rounded-2xl border border-brand-teal/20 bg-brand-teal/[0.06] p-4">
@@ -342,7 +344,7 @@ export default function ClientPerformancePage() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {snapshot.attention.map(item => (
+                  {(showAllAttention ? snapshot.attention : snapshot.attention.slice(0, 5)).map(item => (
                     <Link
                       key={item.report.id}
                       to={dashboardPath(item.report)}
@@ -360,38 +362,41 @@ export default function ClientPerformancePage() {
                       <p className="mt-2 text-xs leading-relaxed text-brand-primary/75">{item.message}</p>
                     </Link>
                   ))}
+                  {snapshot.attention.length > 5 && (
+                    <button type="button" onClick={() => setShowAllAttention(value => !value)}
+                      aria-expanded={showAllAttention}
+                      className="w-full rounded-xl border border-white/10 px-4 py-2.5 text-sm font-semibold text-white hover:border-brand-teal/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-teal">
+                      {showAllAttention ? 'Show fewer reports' : `Show all ${snapshot.attention.length} reports`}
+                    </button>
+                  )}
                 </div>
               )}
             </PremiumCard>
           </section>
 
-          <section className="mt-6">
-            <PremiumCard padding="lg" className="bg-white/[0.025]">
-              <PremiumCardHeader
-                title="Performance workspaces"
-              />
+          <WebsitePerformancePanel clients={clients} canSave={canManageOnboarding} />
 
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          <details className="mt-6 rounded-xl border border-white/10 bg-white/[0.02] p-4">
+            <summary className="cursor-pointer text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-teal">More performance tools</summary>
+              <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {LINKS.filter(link => link.to !== '/admin/client-onboarding' || canManageOnboarding).map((link) => (
                   <Link
                     key={link.to}
                     to={link.to}
-                    className="group flex min-h-40 flex-col rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-teal/25 hover:bg-brand-teal/[0.05]"
+                    className="group flex min-w-0 items-center gap-3 rounded-lg border border-white/[0.08] bg-white/[0.03] p-3 transition-colors hover:border-brand-teal/25 hover:bg-brand-teal/[0.05] focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-teal"
                   >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-teal/10 text-brand-teal transition-colors group-hover:bg-brand-teal/20">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-teal/10 text-brand-teal [&_svg]:h-4 [&_svg]:w-4">
                       {link.icon}
                     </div>
-                    <h2 className="mt-4 text-base font-bold text-white transition-colors group-hover:text-brand-teal">
-                      {link.title}
-                    </h2>
-                    <p className="mt-1 text-sm text-brand-primary/65">
-                      {link.description}
-                    </p>
+                    <span className="min-w-0"><span className="block truncate text-sm font-semibold text-white group-hover:text-brand-teal">{link.title}</span><span className="block truncate text-xs text-brand-primary/65">{link.description}</span></span>
                   </Link>
                 ))}
               </div>
-            </PremiumCard>
-          </section>
+          </details>
+          {canManageOnboarding && <details onToggle={event => { if (event.currentTarget.open) setOnboardingOpened(true) }} className="mt-3 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3">
+            <summary className="cursor-pointer text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-teal">Client onboarding status</summary>
+            {onboardingOpened && <OnboardingStatusCard clients={clients} />}
+          </details>}
         </>
       )}
     </div>
@@ -431,10 +436,10 @@ function SnapshotCard({
   }[tone]
 
   return (
-    <PremiumCard padding="md" className={`bg-gradient-to-br ${toneClass}`}>
+    <PremiumCard padding="sm" className={`min-w-0 bg-gradient-to-br ${toneClass}`}>
       <p className="text-[10px] font-black uppercase tracking-[0.16em] text-brand-primary/70">{label}</p>
-      <p className="mt-3 text-3xl font-black tracking-tight text-white">{value}</p>
-      <p className="mt-2 text-xs leading-relaxed text-brand-primary/70">{helper}</p>
+      <p className="mt-1 text-2xl font-bold tracking-tight text-white sm:text-3xl">{value}</p>
+      <p className="mt-1 text-xs leading-relaxed text-brand-primary/70">{helper}</p>
     </PremiumCard>
   )
 }
@@ -467,9 +472,8 @@ function OnboardingStatusCard({ clients }: { clients: Client[] }) {
   const notStarted = activeClients.filter(c => !sessionMap.has(c.id) || sessionMap.get(c.id) === 'not_started').length
 
   return (
-    <section className="mt-6">
-      <PremiumCard padding="lg" className="bg-white/[0.025]">
-        <PremiumCardHeader title="Client onboarding status" />
+    <section className="mt-3">
+      <PremiumCard padding="md" className="bg-white/[0.025]">
         {loading ? (
           <p className="text-sm text-brand-primary/65">Loading onboarding status...</p>
         ) : error ? (
