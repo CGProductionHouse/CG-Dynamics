@@ -64,6 +64,7 @@ export default function ClientsList() {
   const [modal, setModal] = useState<{ open: boolean; client?: Client }>({ open: false })
   const [bulkOpen, setBulkOpen] = useState<boolean>(() => getBulkOpen() ?? false)
   const [viewFilter, setViewFilter] = useState<ViewFilter>('active')
+  const [search, setSearch] = useState('')
   const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null)
   const [packageNotice, setPackageNotice] = useState<string | null>(null)
   const [packageEvidence, setPackageEvidence] = useState<ActiveClientPackageEvidence[]>([])
@@ -73,10 +74,13 @@ export default function ClientsList() {
   const [reviewClientId, setReviewClientId] = useState<string | null>(null)
 
   const displayClients = useMemo(() => {
-    if (viewFilter === 'active') return clients.filter(c => c.active)
-    if (viewFilter === 'archived') return clients.filter(c => !c.active)
-    return clients
-  }, [clients, viewFilter])
+    const query = search.trim().toLocaleLowerCase()
+    return clients.filter(client => {
+      if (viewFilter === 'active' && !client.active) return false
+      if (viewFilter === 'archived' && client.active) return false
+      return !query || client.name.toLocaleLowerCase().includes(query)
+    })
+  }, [clients, viewFilter, search])
   const packageQueue = useMemo(() => {
     const activeClients = clients.filter(client => client.active)
     const confirmed = activeClients.filter(client => readPackageAuthority(client.package_settings).status === 'confirmed').length
@@ -242,23 +246,28 @@ export default function ClientsList() {
 
   return (
     <div className="w-full max-w-7xl p-4 sm:p-6 lg:p-8">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-display text-4xl font-black uppercase tracking-wide text-white">Clients</h1>
-          <p className="mt-2 text-xs text-brand-primary">
+          <h1 className="font-display text-3xl font-bold tracking-tight text-white">Clients</h1>
+          <p className="mt-1 text-xs text-brand-primary">
             Active package queue · {packageQueue.confirmed} confirmed · {packageQueue.unverified} unverified · {packageQueue.total} active
           </p>
         </div>
         {isAdmin && (
-          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-            <ActionButton variant="secondary" onClick={() => setShowEvidenceMatrix(value => !value)}>
-              {showEvidenceMatrix ? 'Hide evidence matrix' : 'Evidence matrix'}
-            </ActionButton>
-            <ActionButton variant="secondary" onClick={openNextUnconfirmed} disabled={!nextUnconfirmed || packageEvidenceLoading}>
-              Review next unconfirmed
-            </ActionButton>
-            <ActionButton variant="secondary" onClick={openBulk}>Bulk add clients</ActionButton>
+          <div className="flex flex-wrap items-start gap-2">
             <ActionButton variant="primary" onClick={() => setModal({ open: true })}>Add client</ActionButton>
+            <details className="group rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-brand-primary">
+              <summary className="flex min-h-8 cursor-pointer items-center font-semibold hover:text-white">Admin tools</summary>
+              <div className="mt-3 flex flex-wrap gap-2 border-t border-white/10 pt-3">
+                <ActionButton variant="secondary" onClick={() => setShowEvidenceMatrix(value => !value)}>
+                  {showEvidenceMatrix ? 'Hide evidence matrix' : 'Evidence matrix'}
+                </ActionButton>
+                <ActionButton variant="secondary" onClick={openNextUnconfirmed} disabled={!nextUnconfirmed || packageEvidenceLoading}>
+                  Review next unconfirmed
+                </ActionButton>
+                <ActionButton variant="secondary" onClick={openBulk}>Bulk add clients</ActionButton>
+              </div>
+            </details>
           </div>
         )}
       </div>
@@ -291,27 +300,34 @@ export default function ClientsList() {
         <p className="text-red-400 text-sm">{error}</p>
       ) : (
         <>
-          <div className="mb-4 flex w-fit gap-1 rounded-md border border-white/10 bg-white/[0.04] p-1">
-            {(['active', 'archived', 'all'] as const).map(f => (
-              <button
-                key={f}
-                onClick={() => setViewFilter(f)}
-                className={`rounded-md px-3 py-1.5 text-xs font-medium capitalize transition ${
-                  viewFilter === f
-                    ? 'bg-brand-accent text-black'
-                    : 'text-brand-primary hover:text-white'
-                }`}
-              >
-                {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
-              </button>
-            ))}
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            <div className="flex w-fit gap-1 rounded-md border border-white/10 bg-white/[0.04] p-1">
+              {(['active', 'archived', 'all'] as const).map(f => (
+                <button
+                  key={f}
+                  type="button"
+                  aria-pressed={viewFilter === f}
+                  onClick={() => setViewFilter(f)}
+                  className={`rounded-md px-3 py-1.5 text-xs font-medium capitalize transition ${
+                    viewFilter === f
+                      ? 'bg-brand-accent text-black'
+                      : 'text-brand-primary hover:text-white'
+                  }`}
+                >
+                  {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
+                </button>
+              ))}
+            </div>
+            <label className="sr-only" htmlFor="client-list-search">Search clients</label>
+            <input id="client-list-search" type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Find a client" className="min-h-10 w-full rounded-lg border border-white/10 bg-brand-bg px-3 text-sm text-white placeholder:text-white/40 outline-none focus:border-brand-accent/50 sm:ml-auto sm:w-64" />
+            <span className="text-xs text-brand-primary/60">Showing {displayClients.length} of {clients.length}</span>
           </div>
 
           <div className="space-y-3 md:hidden">
             {displayClients.length === 0 ? (
               <EmptyState
-                title={viewFilter === 'archived' ? 'No archived clients' : viewFilter === 'active' ? 'No active clients' : 'No clients yet'}
-                message={viewFilter === 'archived' ? 'Archived clients will appear here.' : viewFilter === 'active' ? 'Active clients will appear here.' : 'Clients will appear here.'}
+                title={search ? 'No matching clients' : viewFilter === 'archived' ? 'No archived clients' : viewFilter === 'active' ? 'No active clients' : 'No clients yet'}
+                message={search ? 'Try another name or clear the search.' : viewFilter === 'archived' ? 'Archived clients will appear here.' : viewFilter === 'active' ? 'Active clients will appear here.' : 'Clients will appear here.'}
                 centered={false}
                 compact
               />
@@ -336,7 +352,7 @@ export default function ClientsList() {
                   </div>
 
                   {c.active ? (
-                    <ClientQuickActions client={c} isAdmin={isAdmin} onEdit={() => setModal({ open: true, client: c })} />
+                    <ClientQuickActions client={c} isAdmin={isAdmin} onEdit={() => setModal({ open: true, client: c })} onArchive={() => setConfirmAction({ type: 'archive', client: c })} />
                   ) : (
                     isAdmin && (
                       <div className="mt-4 flex flex-wrap gap-2">
@@ -345,11 +361,6 @@ export default function ClientsList() {
                     )
                   )}
 
-                  {c.active && isAdmin && (
-                    <div className="mt-2 border-t border-brand-muted/40 pt-2">
-                      <ActionButton variant="ghost" size="sm" onClick={() => setConfirmAction({ type: 'archive', client: c })}>Archive client</ActionButton>
-                    </div>
-                  )}
                 </PremiumCard>
               ))
             )}
@@ -372,8 +383,8 @@ export default function ClientsList() {
                     <td colSpan={isAdmin ? 5 : 4} className="px-4 py-8">
                       <div className="mx-auto max-w-sm">
                         <EmptyState
-                          title={viewFilter === 'archived' ? 'No archived clients' : viewFilter === 'active' ? 'No active clients' : 'No clients yet'}
-                          message={viewFilter === 'archived' ? 'Archived clients will appear here.' : viewFilter === 'active' ? 'Active clients will appear here.' : 'Clients will appear here.'}
+                          title={search ? 'No matching clients' : viewFilter === 'archived' ? 'No archived clients' : viewFilter === 'active' ? 'No active clients' : 'No clients yet'}
+                          message={search ? 'Try another name or clear the search.' : viewFilter === 'archived' ? 'Archived clients will appear here.' : viewFilter === 'active' ? 'Active clients will appear here.' : 'Clients will appear here.'}
                           centered={false}
                           compact
                         />
@@ -409,22 +420,18 @@ export default function ClientsList() {
                           <td className="px-4 py-3">
                             <div className="flex flex-wrap gap-1.5">
                                <ClientActionLink to={`/admin/client-dashboard?client=${c.id}`} label="Client Dashboard" teal />
-                               <ClientActionLink to={`/admin/published?client=${c.id}&view=setup`} label="Setup preview" />
-                              {isAdmin && <ClientActionLink to={`/admin/integrations/meta?client=${c.id}`} label="Meta / Sync" />}
+                              {!isAdmin && <ClientActionLink to={`/admin/published?client=${c.id}&view=setup`} label="Setup preview" />}
                             </div>
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex flex-wrap gap-1.5">
-                              <ClientActionLink to={`/admin/package-master?client=${c.id}`} label="Package" />
                               <ClientActionLink to={`/admin/client-schedule?view=calendar&client=${c.id}`} label="Client Schedule" />
+                              <ClientActionLink to={`/admin/package-master?client=${c.id}`} label="Package" />
                             </div>
                           </td>
                           {isAdmin && (
                             <td className="px-4 py-3 text-right">
-                              <div className="flex flex-wrap items-center justify-end gap-1.5">
-                                <ActionButton variant="ghost" size="sm" onClick={() => setModal({ open: true, client: c })}>Edit</ActionButton>
-                                <ActionButton variant="ghost" size="sm" onClick={() => setConfirmAction({ type: 'archive', client: c })}>Archive</ActionButton>
-                              </div>
+                              <ClientMoreActions client={c} isAdmin onEdit={() => setModal({ open: true, client: c })} onArchive={() => setConfirmAction({ type: 'archive', client: c })} />
                             </td>
                           )}
                         </>
@@ -536,7 +543,7 @@ function ClientActionLink({ to, label, teal = false }: { to: string; label: stri
   return (
     <Link
       to={to}
-      className={`rounded-md border px-2.5 py-1 text-xs font-bold transition ${
+      className={`inline-flex min-h-11 items-center rounded-md border px-2.5 py-1 text-xs font-bold transition ${
         teal
           ? 'border-brand-teal/30 bg-brand-teal/[0.07] text-[#2dd4bf] hover:border-brand-teal/60 hover:text-white'
           : 'border-white/8 bg-white/[0.03] text-brand-primary hover:border-white/20 hover:text-white'
@@ -597,40 +604,34 @@ function ClientQuickActions({
   client,
   isAdmin,
   onEdit,
+  onArchive,
 }: {
   client: Client
   isAdmin: boolean
   onEdit: () => void
+  onArchive: () => void
 }) {
   return (
-    <div className="mt-4 space-y-2.5">
-      <div>
-        <p className="mb-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-white/25">Performance</p>
-        <div className="flex flex-wrap gap-1.5">
-          <ClientActionLink to={`/admin/client-dashboard?client=${client.id}`} label="Client Dashboard" teal />
-          <ClientActionLink to={`/admin/published?client=${client.id}&view=setup`} label="Setup preview" />
-          {isAdmin && <ClientActionLink to={`/admin/integrations/meta?client=${client.id}`} label="Meta / Sync" />}
-        </div>
-      </div>
-      <div>
-        <p className="mb-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-white/25">Production</p>
-        <div className="flex flex-wrap gap-1.5">
-          <ClientActionLink to={`/admin/package-master?client=${client.id}`} label="Package" />
-          <ClientActionLink to={`/admin/client-schedule?view=calendar&client=${client.id}`} label="Client Schedule" />
-        </div>
-      </div>
-      {isAdmin && (
-        <div className="pt-1">
-          <button
-            type="button"
-            onClick={onEdit}
-            className="rounded-md border border-white/8 px-3 py-1 text-xs font-bold text-brand-primary/60 transition hover:border-white/20 hover:text-white"
-          >
-            Edit
-          </button>
-        </div>
-      )}
+    <div className="mt-4 flex flex-wrap items-start gap-2 border-t border-white/10 pt-3">
+      <ClientActionLink to={`/admin/client-dashboard?client=${client.id}`} label="Client Dashboard" teal />
+      <ClientActionLink to={`/admin/client-schedule?view=calendar&client=${client.id}`} label="Client Schedule" />
+      <ClientActionLink to={`/admin/package-master?client=${client.id}`} label="Package" />
+      <ClientMoreActions client={client} isAdmin={isAdmin} onEdit={onEdit} onArchive={onArchive} />
     </div>
+  )
+}
+
+function ClientMoreActions({ client, isAdmin, onEdit, onArchive }: { client: Client; isAdmin: boolean; onEdit: () => void; onArchive: () => void }) {
+  return (
+    <details className="inline-block rounded-md border border-white/10 bg-white/[0.025] px-2.5 py-1 text-left text-xs text-brand-primary">
+      <summary className="flex min-h-9 cursor-pointer items-center font-bold hover:text-white">More actions</summary>
+      <div className="mt-2 flex min-w-32 flex-col items-start gap-2 border-t border-white/10 pt-2">
+        <ClientActionLink to={`/admin/published?client=${client.id}&view=setup`} label="Setup preview" />
+        {isAdmin && <ClientActionLink to={`/admin/integrations/meta?client=${client.id}`} label="Meta / Sync" />}
+        {isAdmin && <button type="button" onClick={onEdit} className="min-h-11 px-2 text-xs font-bold hover:text-white">Edit client</button>}
+        {isAdmin && <button type="button" onClick={onArchive} className="min-h-11 px-2 text-xs font-bold text-amber-200 hover:text-white">Archive client</button>}
+      </div>
+    </details>
   )
 }
 
