@@ -49,6 +49,14 @@ despite a PARTIAL mapped fleet. The focused staff-only correction distinguishes
 the provider connection from active client-asset coverage/freshness, keeps
 the PARTIAL/STALE/FAILED verdicts visible, removes redundant intro copy and
 separates Planner Import from provider cards. It changes no provider state.
+PR #720 merged as `fdf04e7aa94cb1d695ccd6e5f7c8335296a5c11c`.
+The authenticated Reports baseline loaded all 272 report cards at once and
+placed older published items before newer work, with Unpublish/Delete repeated
+on every row. A focused staff-only Reports lane sorts latest report month first,
+renders 25 at a time with explicit next-page reveal and full matching/total
+counts, and puts destructive actions behind a native More actions disclosure.
+The historical month filter, repair/review/preview routes and confirmation
+guards remain intact. This is not a report data or publication change.
 This is **not live**. Continue the remaining #712 internal surfaces one coherent
 lane at a time; do not claim whole-app acceptance from this first pass.
 `git.deploymentEnabled=false` remains in force. No Vercel build, preview,
