@@ -6,7 +6,7 @@ import { join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 
 export const browserFixtures = Object.freeze([
-  'client-portal-shell-readonly-browser.mjs', 'client-plan-readonly-browser.mjs',
+  'client-portal-shell-readonly-browser.mjs', 'client-overview-schedule-browser.mjs', 'client-plan-readonly-browser.mjs',
   'client-library-readonly-browser.mjs', 'report-cutoff-readonly-browser.mjs',
   'director-saved-context-browser.mjs', 'director-precise-edit-browser.mjs',
   'skill-card-review-browser.mjs', 'client-service-expansion-browser.mjs',
@@ -54,7 +54,7 @@ export function testTotals(output) {
 }
 
 export function localVerdict(steps, stableTree, evidenceComplete = false) {
-  return evidenceComplete && stableTree && steps.length === 12 && steps.every(step => step.exit === 0) ? 'LOCAL_CODE_ACCEPTANCE_PASS' : 'INCOMPLETE_OR_FAILED'
+  return evidenceComplete && stableTree && steps.length === 3 + browserFixtures.length && steps.every(step => step.exit === 0) ? 'LOCAL_CODE_ACCEPTANCE_PASS' : 'INCOMPLETE_OR_FAILED'
 }
 
 const digest = bytes => createHash('sha256').update(bytes).digest('hex')
