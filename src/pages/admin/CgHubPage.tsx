@@ -352,23 +352,21 @@ export default function CgHubPage() {
   // ── Render ──────────────────────────────────────────────────
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-6xl px-4 py-5 sm:px-6 lg:px-8">
       {/* A — Hero Header */}
-      <div className="mb-8">
+      <div className="mb-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.28em] text-[#2dd4bf]">CG Production House</p>
-            <h1 className="mt-2 font-display text-4xl font-black uppercase leading-none tracking-wide text-white sm:text-6xl">
-              CG Hub
-            </h1>
-            <p className="mt-2 text-sm text-brand-primary/70">{todayNice}</p>
+            <p className="text-xs font-medium text-brand-primary/70">{todayNice}</p>
+            <h1 className="mt-1 font-display text-3xl font-black tracking-tight text-white sm:text-4xl">Hub</h1>
           </div>
           <form onSubmit={handleQuickAdd} className="flex min-w-0 items-center gap-2 sm:max-w-xs">
             <input
               type="text"
               value={quickTitle}
               onChange={e => setQuickTitle(e.target.value)}
-              placeholder="Quick Add Task..."
+              placeholder="Add a task"
+              aria-label="Task title"
               disabled={quickSaving}
               className="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2.5 text-sm text-white placeholder:text-brand-primary/30 focus:border-[#2dd4bf]/40 focus:outline-none focus:ring-1 focus:ring-[#2dd4bf]/20 disabled:opacity-50"
             />
@@ -403,10 +401,9 @@ export default function CgHubPage() {
         </div>
       ) : (
         <>
-          {/* B — Today Focus */}
+          {/* Personal context, followed by one deduplicated work queue. */}
           <MyDayHubCard context={myDayContext} />
 
-          {/* C — Today Focus */}
           <TodayFocusSection
             today={today}
             priorityQueue={priorityQueue}
@@ -487,7 +484,6 @@ export default function CgHubPage() {
 function MyDayHubCard({ context }: { context: MyDayContext | null }) {
   if (!context) return null
 
-  const focusCount = context.overdue.length + context.dueToday.length
   const currentItem = context.summary.currentTask
   const nextItem = context.summary.nextTask
   const todayEvents = context.events.filter(item => item.date === context.today).length
@@ -495,61 +491,49 @@ function MyDayHubCard({ context }: { context: MyDayContext | null }) {
   const plannedHours = Math.round(context.summary.plannedMinutes / 60)
 
   return (
-    <div className="mb-8 rounded-2xl border border-brand-teal/20 bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.12),transparent_36%),rgba(255,255,255,0.035)] p-4 sm:p-5">
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
-        <div className="min-w-0">
-          <p className="text-[10px] font-black uppercase tracking-[0.22em] text-brand-teal">My Day</p>
-          <h2 className="mt-1 truncate font-display text-2xl font-black uppercase tracking-wide text-white">
-            {currentItem ? currentItem.title : focusCount > 0 ? `${focusCount} focus item${focusCount === 1 ? '' : 's'} today` : 'Your assigned day is clear'}
-          </h2>
-          {nextItem && (
-            <p className="mt-1 text-sm text-brand-primary/65">Next: {nextItem.title}</p>
-          )}
-          {context.summary.workloadWarning && (
-            <p className="mt-2 text-xs font-semibold text-amber-200">{context.summary.workloadWarning}</p>
-          )}
-          <div className="mt-4 grid gap-2 sm:grid-cols-2">
-            <MyDayFocusCard label="Current focus" item={currentItem} />
-            <MyDayFocusCard label="Next up" item={nextItem} />
+    <section className="mb-6 rounded-xl border border-white/10 bg-white/[0.025] p-4" aria-label="My Day summary">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-semibold text-brand-teal">My Day</p>
+          <div className="mt-2 grid gap-3 sm:grid-cols-2">
+            <MyDayFocusCard label="Current" item={currentItem} />
+            {nextItem && <MyDayFocusCard label="Next" item={nextItem} />}
+            {!currentItem && !nextItem && <p className="text-sm text-brand-primary">No assigned focus yet.</p>}
           </div>
+          {context.summary.workloadWarning && (
+            <p className="mt-2 text-xs font-semibold text-amber-200" role="status">{context.summary.workloadWarning}</p>
+          )}
         </div>
-        <div className="flex flex-wrap gap-2 lg:max-w-sm lg:justify-end">
-          <span className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-xs font-semibold text-brand-primary">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 lg:max-w-xs lg:justify-end">
+          <span className="text-xs text-brand-primary">
             {todayEvents} event{todayEvents === 1 ? '' : 's'} today
           </span>
-          <span className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-xs font-semibold text-brand-primary">
+          <span className="text-xs text-brand-primary">
             {clientWork} client work
           </span>
-          <span className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-xs font-semibold text-brand-primary">
+          <span className="text-xs text-brand-primary">
             {plannedHours}h planned
           </span>
           <Link
             to="/admin/my-day"
-            className="mt-1 w-full rounded-lg border border-brand-teal/30 bg-brand-teal/[0.08] px-4 py-2.5 text-center text-xs font-black uppercase tracking-[0.1em] text-[#2dd4bf] transition hover:border-brand-teal/60 hover:text-white lg:mt-2"
+            className="rounded-lg border border-brand-teal/30 px-3 py-2 text-xs font-semibold text-brand-teal transition hover:bg-brand-teal/10 hover:text-white"
           >
-            Open My Day
+            Open My Day →
           </Link>
         </div>
       </div>
-    </div>
+    </section>
   )
 }
 
 function MyDayFocusCard({ label, item }: { label: string; item: MyDayItem | null }) {
-  if (!item) {
-    return (
-      <div className="rounded-xl border border-white/8 bg-black/20 p-3">
-        <p className="text-[10px] font-black uppercase tracking-[0.16em] text-brand-primary/40">{label}</p>
-        <p className="mt-1 text-sm text-brand-primary/45">Nothing assigned</p>
-      </div>
-    )
-  }
+  if (!item) return <p className="text-sm text-brand-primary">{label}: Nothing assigned</p>
 
   return (
-    <div className="rounded-xl border border-white/8 bg-black/20 p-3">
-      <p className="text-[10px] font-black uppercase tracking-[0.16em] text-brand-primary/40">{label}</p>
-      <p className="mt-1 truncate text-sm font-semibold text-white">{item.title}</p>
-      <p className="mt-1 text-xs text-brand-primary/50">
+    <div className="min-w-0 border-l-2 border-brand-teal/45 pl-3">
+      <p className="text-[11px] font-semibold text-brand-primary/70">{label}</p>
+      <p className="truncate text-sm font-semibold text-white" title={item.title}>{item.title}</p>
+      <p className="truncate text-xs text-brand-primary/70">
         {sourceLabel(item.source)}{item.clientName ? ` · ${item.clientName}` : ''}
       </p>
     </div>
@@ -573,79 +557,37 @@ function TodayFocusSection({
   waitingReview: CommandCentreTask[]
   myActiveWork: CommandCentreTask[]
 }) {
+  const [selectedQueue, setSelectedQueue] = useState('priority')
+  const queues = [
+    { id: 'priority', label: 'Priority', tasks: priorityQueue },
+    { id: 'due', label: 'Due today', tasks: dueToday },
+    { id: 'overdue', label: 'Overdue', tasks: overdue },
+    { id: 'requests', label: 'Client requests', tasks: clientRequests },
+    { id: 'review', label: 'Waiting review', tasks: waitingReview },
+    { id: 'mine', label: 'My active work', tasks: myActiveWork },
+  ]
+  const activeQueue = queues.find(queue => queue.id === selectedQueue) ?? queues[0]
+
   return (
-    <div className="mb-8">
-      <HubSectionHeader title="Today Focus" />
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <HubWorkCard
-          title="Priority Queue"
-          count={priorityQueue.length}
-          viewAllTo="/admin/command-centre"
-          emptyText="No urgent tasks right now"
-        >
-          {priorityQueue.slice(0, 5).map(t => (
-            <TaskRow key={t.id} task={t} todayStr={today} />
-          ))}
-        </HubWorkCard>
-
-        <HubWorkCard
-          title="Due Today"
-          count={dueToday.length}
-          viewAllTo="/admin/command-centre"
-          emptyText="No tasks due today"
-        >
-          {dueToday.slice(0, 5).map(t => (
-            <TaskRow key={t.id} task={t} todayStr={today} />
-          ))}
-        </HubWorkCard>
-
-        <HubWorkCard
-          title="Overdue"
-          count={overdue.length}
-          viewAllTo="/admin/command-centre"
-          emptyText="Nothing overdue"
-          danger
-        >
-          {overdue.slice(0, 5).map(t => (
-            <TaskRow key={t.id} task={t} todayStr={today} />
-          ))}
-        </HubWorkCard>
-
-        <HubWorkCard
-          title="Client Requests"
-          count={clientRequests.length}
-          viewAllTo="/admin/command-centre"
-          emptyText="No client requests waiting"
-        >
-          {clientRequests.slice(0, 5).map(t => (
-            <TaskRow key={t.id} task={t} todayStr={today} />
-          ))}
-        </HubWorkCard>
-
-        <HubWorkCard
-          title="Waiting for Review"
-          count={waitingReview.length}
-          viewAllTo="/admin/command-centre"
-          emptyText="Nothing waiting for review"
-        >
-          {waitingReview.slice(0, 5).map(t => (
-            <TaskRow key={t.id} task={t} todayStr={today} />
-          ))}
-        </HubWorkCard>
-
-        <HubWorkCard
-          title="My Active Work"
-          count={myActiveWork.length}
-          viewAllTo="/admin/command-centre"
-          emptyText="No active tasks assigned to you"
-        >
-          {myActiveWork.slice(0, 5).map(t => (
-            <TaskRow key={t.id} task={t} todayStr={today} />
-          ))}
-        </HubWorkCard>
+    <section className="mb-7" aria-labelledby="hub-focus-heading">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <h2 id="hub-focus-heading" className="text-xl font-bold tracking-tight text-white">Focus</h2>
+        <Link to="/admin/work" className="text-xs font-semibold text-brand-teal hover:text-white">Open Work →</Link>
       </div>
-    </div>
+      <div className="mb-3 flex flex-wrap gap-2" role="group" aria-label="Choose work queue">
+        {queues.map(queue => (
+          <button key={queue.id} type="button" aria-pressed={selectedQueue === queue.id} onClick={() => setSelectedQueue(queue.id)} className={`min-h-9 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors hover:bg-white/[0.08] ${selectedQueue === queue.id ? 'border-brand-teal/50 bg-brand-teal/10 text-white' : queue.id === 'overdue' && queue.tasks.length > 0 ? 'border-amber-400/30 text-amber-200' : 'border-white/10 text-brand-primary'}`}>
+            {queue.label} <strong className="ml-1 text-white">{queue.tasks.length}</strong>
+          </button>
+        ))}
+      </div>
+      <div className="divide-y divide-white/10 rounded-xl border border-white/10 bg-white/[0.025] px-2 py-1" aria-live="polite">
+        {activeQueue.tasks.length === 0
+          ? <p className="px-3 py-4 text-sm text-brand-primary">Nothing in {activeQueue.label.toLowerCase()}.</p>
+          : activeQueue.tasks.slice(0, 8).map(task => <TaskRow key={task.id} task={task} todayStr={today} />)}
+      </div>
+      {activeQueue.tasks.length > 8 && <p className="mt-2 text-xs text-brand-primary">Showing 8 of {activeQueue.tasks.length}. Open Work for the full list.</p>}
+    </section>
   )
 }
 
@@ -678,6 +620,7 @@ function CompanyCalendarSection({
   }
 
   const eventCount = days.reduce((count, day) => count + day.events.length, 0)
+  const visibleDays = days.filter(day => day.isToday || day.events.length > 0)
 
   return (
     <div className="mb-8">
@@ -686,11 +629,12 @@ function CompanyCalendarSection({
         subtitle={`Next 7 days · ${eventCount} event${eventCount === 1 ? '' : 's'}`}
       />
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        {days.map(day => (
+      {eventCount === 0 && <p className="mb-3 text-sm text-brand-primary">No events in the next seven days.</p>}
+      <div className="grid gap-2 sm:grid-cols-2">
+        {visibleDays.map(day => (
           <div
             key={day.date}
-            className={`rounded-xl border p-3 ${day.isToday ? 'border-brand-teal/30 bg-brand-teal/[0.06]' : 'border-white/8 bg-brand-surface/80'}`}
+            className={`rounded-lg border p-3 ${day.isToday ? 'border-brand-teal/30 bg-brand-teal/[0.04]' : 'border-white/10 bg-white/[0.02]'}`}
           >
             <div className="mb-2 flex items-center justify-between gap-2">
               <p className={`text-[10px] font-black uppercase tracking-[0.16em] ${day.isToday ? 'text-brand-teal' : 'text-brand-primary/55'}`}>
@@ -760,8 +704,10 @@ function ProductionScheduleSection({
   upcomingDeliverables: MonthlyDeliverable[]
   unscheduledDeliverables: MonthlyDeliverable[]
 }) {
+  if (dueTodayDeliverables.length + upcomingDeliverables.length + unscheduledDeliverables.length === 0) return null
+
   return (
-    <div className="mb-8">
+    <div className="mb-7">
       <HubSectionHeader title="Production Schedule" />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -810,21 +756,21 @@ function ClientsAttentionSection({ clients }: {
   clients: Array<{ name: string; clientId: string; openRequests: number; overdueTasks: number; waitingDeliverables: number; unscheduledItems: number }>
 }) {
   return (
-    <div className="mb-8">
+    <div className="mb-7">
       <HubSectionHeader
         title="Clients Needing Attention"
         subtitle={`${clients.length} client${clients.length === 1 ? '' : 's'} with open items`}
       />
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="divide-y divide-white/10 rounded-xl border border-white/10 bg-white/[0.025] px-3">
         {clients.slice(0, 6).map(client => (
           <Link
             key={client.clientId}
             to={`/admin/client-schedule?client=${encodeURIComponent(client.clientId)}&mode=needs-action`}
-            className="rounded-xl border border-white/8 bg-brand-surface/90 p-4 transition-all hover:border-white/20"
+            className="flex flex-wrap items-center justify-between gap-2 py-3 transition-colors hover:bg-white/[0.04]"
           >
             <p className="text-sm font-semibold text-white">{client.name}</p>
-            <div className="mt-2 flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2">
               {client.openRequests > 0 && (
                 <span className="rounded-full border border-brand-accent/25 bg-brand-accent/10 px-2 py-0.5 text-[10px] font-semibold text-[#f2b66f]">
                   {client.openRequests} request{client.openRequests !== 1 ? 's' : ''}
@@ -857,10 +803,9 @@ function ClientsAttentionSection({ clients }: {
 
 function HubSectionHeader({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
-    <div className="mb-4 flex items-center gap-3">
-      <h2 className="font-display text-xl font-black uppercase tracking-wide text-white sm:text-2xl">{title}</h2>
-      <div className="h-px flex-1 bg-white/10" />
-      {subtitle && <p className="shrink-0 text-xs text-brand-primary/50">{subtitle}</p>}
+    <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+      <h2 className="text-lg font-bold tracking-tight text-white">{title}</h2>
+      {subtitle && <p className="text-xs text-brand-primary/70">{subtitle}</p>}
     </div>
   )
 }

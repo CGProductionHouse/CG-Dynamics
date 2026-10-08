@@ -265,31 +265,31 @@ export default function MyWorkPage() {
   return (
     <div>
       <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
-        <div className="rounded-2xl border border-white/10 bg-brand-surface/60 p-3 sm:p-4">
+        <div className="border-b border-white/10 pb-3">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="mt-1 text-2xl font-black text-white">Work</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-white">Work</h1>
             </div>
             <div className="flex flex-col gap-2 sm:items-end">
-              <div className={`grid gap-1 rounded-xl border border-white/10 bg-black/20 p-1 ${canViewWorkload ? 'grid-cols-2 lg:grid-cols-4' : 'grid-cols-3'}`}>
+              <div className={`grid gap-1 rounded-lg border border-white/10 bg-white/[0.025] p-1 ${canViewWorkload ? 'grid-cols-2 lg:grid-cols-4' : 'grid-cols-3'}`} role="group" aria-label="Work views">
               {([
                 ['my-day', 'My Day'],
                 ['board', 'Team Board'],
                 ['daily-tasks', 'Daily Tasks'],
                 ...(canViewWorkload ? [['workload', 'Workload'] as const] : []),
               ] as Array<[WorkTab, string]>).map(([value, label]) => (
-                <button key={value} type="button" onClick={() => switchTab(value)} className={`rounded-lg px-3 py-3 text-sm font-black transition-colors ${tab === value ? 'bg-brand-teal text-black' : 'text-brand-primary hover:bg-white/[0.05] hover:text-white'}`}>
+                <button key={value} type="button" aria-pressed={tab === value} onClick={() => switchTab(value)} className={`min-h-11 rounded-md px-3 py-2 text-sm font-semibold transition-colors ${tab === value ? 'bg-brand-teal/15 text-brand-teal' : 'text-brand-primary hover:bg-white/[0.05] hover:text-white'}`}>
                   {label}
                 </button>
               ))}
               </div>
-              <div className="flex flex-wrap gap-2 text-xs font-bold">
+              {tab === 'board' && <div className="flex flex-wrap gap-3 text-xs font-semibold">
                 <Link to="?tab=board&scope=overdue" className="text-amber-300 hover:text-white">Overdue work</Link>
                 <Link to="?tab=board&scope=blocked" className="text-red-300 hover:text-white">Blocked work</Link>
                 {canViewWorkload && <Link to="?tab=board&scope=unassigned" className="text-brand-teal hover:text-white">Unassigned work</Link>}
-              </div>
-              {canViewWorkload && (
-                <div className="flex flex-wrap gap-2 text-xs font-bold">
+              </div>}
+              {tab === 'daily-tasks' && canViewWorkload && (
+                <div className="flex flex-wrap gap-3 text-xs font-semibold">
                   <Link to="/admin/command-centre" className="text-brand-teal hover:text-white">Team Work / Command Centre</Link>
                   <Link to="/admin/command-centre#morning-import" className="text-brand-teal hover:text-white">Morning List Import</Link>
                 </div>

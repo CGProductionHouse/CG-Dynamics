@@ -49,7 +49,15 @@ test('kicker, plan and workday summaries drop redundant sentences', () => {
 
 test('hub My Day card stops repeating the empty plan sentence', () => {
   assert.doesNotMatch(hub, /context\.summary\.suggestedNextAction/)
-  assert.match(hub, /nextItem && \(/) // "Next: X" is shown only when there is one
+  assert.match(hub, /nextItem && <MyDayFocusCard/) // Next appears only when there is one
+  assert.doesNotMatch(hub, /currentItem \? currentItem\.title/) // Current title is not repeated in the headline
+})
+
+test('My Day prioritises assigned actions above secondary source/timeline details on mobile', () => {
+  assert.match(myDay, /<section className="order-1 space-y-5">/)
+  assert.match(myDay, /<section className="order-2 space-y-5">/)
+  assert.match(myDay, /<details className="rounded-xl border border-white\/10/)
+  assert.match(myDay, /<summary className="cursor-pointer text-sm font-semibold text-white">Connected work sources/)
 })
 
 test('useful work, warnings and actions are preserved', () => {
