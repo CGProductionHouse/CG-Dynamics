@@ -1,5 +1,21 @@
 # CG Dynamics Ops Handover
 
+### 8 October — Brand Hub partial-read truth, local only
+
+The actual Brand Hub component silently hid its setup/foundation panel when the
+optional `portal_load` read returned an error while the separate client-safe
+library read succeeded. A new isolated browser fixture reproduced that gap
+before the fix. The local patch keeps the successful library usable and labels
+the foundation details temporarily unavailable; a successful empty setup read
+does not receive a false failure label. Exact preview client UUID/read actions,
+desktop/375px layout and no runtime/body-overflow were asserted. The existing
+six-route preview (1440/375/390/430) and library (same widths) fixtures pass.
+The supported full suite passed 3,714/3,731 with 17 intentional skips and zero
+failures once the existing Git-for-Windows OpenSSL was on the local test process
+path; the first failed environment run was not accepted. Local TypeScript/Vite
+and scoped lint/diff pass. No new API, RLS, Edge, production or Vercel action.
+This does not establish authenticated changed-runtime client acceptance.
+
 ### 8 October — VCS original offer attachment recovered (read-only)
 
 The original VCS user-attached 23–31 October promotion image in the requested
