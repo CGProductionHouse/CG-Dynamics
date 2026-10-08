@@ -1,5 +1,19 @@
 # CG Dynamics Ops Handover
 
+### 8 October — Overview failed channel-fact read truth, local only
+
+The actual client Overview rendered a published September review beside
+"Awaiting verified data" when the report-bound normalized channel-facts RPC
+failed. A local actual-component browser fixture reproduced this false waiting
+state before the fix. Overview now distinguishes **Channel facts unavailable**
+from a successful empty facts read, while retaining the published-report card
+and never displaying failed data as zero/disconnected. Desktop/375px screenshots,
+exact-client read-only RPC assertions, no captured runtime errors/body overflow,
+and the successful-empty contrast pass. Focused 33 tests, supported full suite
+3,714 PASS/17 intentional skips/0 failures, TypeScript/Vite, scoped lint and
+diff check pass. No data/query/RPC, provider, production or Vercel change. The
+current frontend and authenticated changed-runtime acceptance remain gated.
+
 ### 8 October — Brand Hub partial-read truth, local only
 
 The actual Brand Hub component silently hid its setup/foundation panel when the
