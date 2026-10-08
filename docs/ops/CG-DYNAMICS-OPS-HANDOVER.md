@@ -10,12 +10,16 @@ of one selectable queue, puts assigned work ahead of secondary My Day details
 on mobile, and simplifies Work navigation without changing task/source/role
 contracts. Actual-component 1440px/375px browser fixtures and the full local
 suite/build pass; the accepted client dashboard source and styling are untouched.
-The next local Content lane removes the giant introduction and duplicate
-overview cards, makes its action queue the first work surface, preserves the
-full attention count with an explicit expand control, and restores the action
-overview on mobile (previously silently defaulted to Runs). It is still under
-local verification/review, not live. CG Calendar and Client Schedule remain
-separate; no client or provider records were changed.
+PR #714 merged as `d908122a4d362a5b43dffb2017666db095ba6840`. Content now leads
+with its action queue, preserves the full attention count behind an explicit
+expand control, removes duplicated run/empty cards, and restores Overview on
+mobile (previously silently defaulted to Runs). Actual-component 1440px/375px
+browser and full local suite/build passed. A focused planning-workspace lane
+then compacted the empty Client Schedule change-review state and combined CG
+Calendar layer/event filters while preserving errors, pending review, the
+optional Planner overlay and the separate calendar authorities. Its production
+baseline was read-only; code acceptance remains local until the final release.
+No client or provider records were changed.
 This is **not live**. Continue the remaining #712 internal surfaces one coherent
 lane at a time; do not claim whole-app acceptance from this first pass.
 `git.deploymentEnabled=false` remains in force. No Vercel build, preview,

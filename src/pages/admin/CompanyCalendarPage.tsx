@@ -387,10 +387,10 @@ export default function CompanyCalendarPage() {
   ]
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="mx-auto max-w-6xl px-4 py-5 sm:px-6 lg:px-8">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="mt-1 text-3xl font-black tracking-tight text-white sm:text-4xl">CG Calendar</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-white">CG Calendar</h1>
         </div>
         {canManage && <ActionButton variant="primary" onClick={() => handleCreateEvent()}>
           + Add Event
@@ -404,7 +404,7 @@ export default function CompanyCalendarPage() {
         <button type="button" onClick={() => setSelectedMonth(shiftMonth(selectedMonth, 1))} className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-bold text-brand-primary hover:text-white">Next</button>
         <div className="ml-auto flex rounded-lg border border-white/[0.08] bg-white/[0.03] p-1">
           {(['calendar', 'agenda'] as const).map(option => (
-            <button key={option} type="button" onClick={() => setViewMode(option)} className={`rounded-md px-3 py-1.5 text-xs font-bold capitalize transition-colors ${viewMode === option ? 'bg-brand-accent text-black' : 'text-brand-primary/60 hover:text-brand-primary'}`}>{option}</button>
+            <button key={option} type="button" aria-pressed={viewMode === option} onClick={() => setViewMode(option)} className={`rounded-md px-3 py-1.5 text-xs font-bold capitalize transition-colors ${viewMode === option ? 'bg-brand-accent text-black' : 'text-brand-primary/60 hover:text-brand-primary'}`}>{option}</button>
           ))}
         </div>
       </div>
@@ -419,6 +419,16 @@ export default function CompanyCalendarPage() {
         <label className="flex cursor-pointer items-center gap-2 text-xs font-bold text-amber-200">
           <input type="checkbox" checked={layers.tasks} onChange={event => setLayers(prev => ({ ...prev, tasks: event.target.checked }))} className="h-3.5 w-3.5 accent-amber-400" />
           Planner tasks ({monthTasks.length})
+        </label>
+        <label className="flex w-full items-center gap-2 text-xs text-brand-primary/65 sm:ml-auto sm:w-auto">
+          <span className="shrink-0">Event type</span>
+          <select
+            value={filter}
+            onChange={event => setFilter(event.target.value as EventFilter)}
+            className="min-w-0 flex-1 rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-sm font-bold text-white outline-none focus:border-brand-teal/50 sm:w-44"
+          >
+            {filterTabs.map(tab => <option key={tab.value} value={tab.value}>{tab.label} ({tab.count})</option>)}
+          </select>
         </label>
       </div>
 
@@ -510,17 +520,6 @@ export default function CompanyCalendarPage() {
           recurrenceMigrationNeeded={recurrenceMigrationNeeded}
         />
       )}
-
-      <label className="mb-6 block max-w-xs space-y-1.5">
-        <span className="text-[10px] font-black uppercase tracking-[0.18em] text-brand-primary/45">Event type</span>
-        <select
-          value={filter}
-          onChange={event => setFilter(event.target.value as EventFilter)}
-          className="w-full rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-sm font-bold text-white outline-none focus:border-brand-teal/50"
-        >
-          {filterTabs.map(tab => <option key={tab.value} value={tab.value}>{tab.label} ({tab.count})</option>)}
-        </select>
-      </label>
 
       {viewMode === 'calendar' ? (
         <CgCalendarGrid

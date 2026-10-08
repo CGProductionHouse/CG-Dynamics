@@ -96,6 +96,14 @@ test('Client Schedule exposes pending review and requester outcome UI', () => {
   assert.match(page, /min-h-11/)
 })
 
+test('empty schedule review is compact without hiding errors, outcomes, or review controls', () => {
+  assert.match(page, /const noRequests = !loading && !error && !success && pending\.length === 0 && mine\.length === 0/)
+  assert.match(page, /noRequests && <p[^>]*>No pending or personal requests\.<\/p>/)
+  assert.match(page, /loading \? <p[^>]*>Loading schedule requests\.\.\.<\/p> : !noRequests &&/)
+  assert.match(page, /aria-pressed=\{view === option\}/)
+  assert.match(page, /aria-pressed=\{mode === value\}/)
+})
+
 test('drawer role gate gives staff production status only', () => {
   assert.match(page, /canManage \? SIMPLIFIED_STATUS_OPTIONS : SIMPLIFIED_STATUS_OPTIONS\.slice\(0, 4\)/)
   assert.match(page, /Staff can update production status only/)

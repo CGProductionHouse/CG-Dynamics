@@ -347,7 +347,7 @@ export default function ClientSchedulePage() {
     <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
       <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h1 className="mt-2 font-display text-4xl font-black uppercase tracking-wide text-white">Client Schedule</h1>
+          <h1 className="font-display text-3xl font-bold tracking-tight text-white">Client Schedule</h1>
           <p className="mt-1 text-sm text-brand-primary/65">
             {view === 'year' ? selectedYear : formatMonthHeading(selectedMonth)}
           </p>
@@ -372,7 +372,7 @@ export default function ClientSchedulePage() {
 
       <div className="mb-4 flex flex-wrap gap-2">
         {(Object.keys(VIEW_LABELS) as ScheduleView[]).map(option => (
-          <button key={option} type="button" onClick={() => setView(option)} className={`rounded-lg px-3 py-2 text-xs font-black transition-colors ${view === option ? 'bg-brand-accent text-black' : 'border border-white/10 text-brand-primary/70 hover:text-white'}`}>
+          <button key={option} type="button" aria-pressed={view === option} onClick={() => setView(option)} className={`rounded-lg px-3 py-2 text-xs font-bold transition-colors ${view === option ? 'bg-brand-accent text-black' : 'border border-white/10 text-brand-primary/70 hover:text-white'}`}>
             {VIEW_LABELS[option]}
           </button>
         ))}
@@ -406,7 +406,7 @@ export default function ClientSchedulePage() {
               ['unscheduled', `Unscheduled ${counts.unscheduled}`],
               ['posted-history', `Posted / History ${counts.history}`],
             ] as const).map(([value, label]) => (
-              <button key={value} type="button" onClick={() => setMode(value)} className={`rounded-md px-3 py-1.5 text-xs font-bold transition-colors ${mode === value ? 'bg-brand-accent text-black' : 'text-brand-primary/60 hover:text-brand-primary'}`}>
+              <button key={value} type="button" aria-pressed={mode === value} onClick={() => setMode(value)} className={`rounded-md px-3 py-1.5 text-xs font-bold transition-colors ${mode === value ? 'bg-brand-accent text-black' : 'text-brand-primary/60 hover:text-brand-primary'}`}>
                 {label}
               </button>
             ))}
@@ -419,8 +419,6 @@ export default function ClientSchedulePage() {
           Some dates were imported from Teams and still need review.
         </p>
       )}
-      {!hasLegacyDates && <div className="mb-4" />}
-
       <ScheduleReviewSection canReview={isManagerRole(profile?.role)} onApplied={load} />
 
       {error && <div className="mb-3 rounded-lg bg-red-400/10 px-3 py-2 text-sm text-red-200">{error}</div>}
@@ -538,17 +536,20 @@ function ScheduleReviewSection({ canReview, onApplied }: { canReview: boolean; o
     setActing(null)
   }
 
+  const noRequests = !loading && !error && !success && pending.length === 0 && mine.length === 0
+
   return (
-    <section className="mb-5 rounded-xl border border-white/[0.08] bg-white/[0.025] p-3 sm:p-4" aria-labelledby="schedule-review-heading">
+    <section className={`mb-4 rounded-xl border border-white/[0.08] bg-white/[0.025] ${noRequests ? 'px-3 py-2' : 'p-3 sm:p-4'}`} aria-labelledby="schedule-review-heading">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h2 id="schedule-review-heading" className="text-sm font-black text-white">Schedule change review</h2>
+          {noRequests && <p className="text-xs text-white/55">No pending or personal requests.</p>}
         </div>
         <button type="button" onClick={() => void loadRequests()} disabled={loading} className="min-h-11 rounded-lg border border-white/10 px-3 py-2 text-xs font-bold text-white/70 hover:text-white disabled:opacity-50">Refresh requests</button>
       </div>
       {error && <p role="alert" className="mt-3 rounded-lg bg-red-400/10 px-3 py-2 text-sm text-red-200">{error}</p>}
       {success && <p role="status" className="mt-3 rounded-lg bg-brand-teal/10 px-3 py-2 text-sm text-brand-teal">{success}</p>}
-      {loading ? <p className="mt-3 text-sm text-white/50">Loading schedule requests...</p> : (
+      {loading ? <p className="mt-3 text-sm text-white/50">Loading schedule requests...</p> : !noRequests && (
         <div className={`mt-4 grid gap-4 ${canReview ? 'lg:grid-cols-2' : ''}`}>
           {canReview && (
             <div>
