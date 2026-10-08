@@ -29,8 +29,14 @@ merged as `a8d3978c05706951dfe3cbbbb9f6b847ae7bd7df`; it is not live.
 A focused Clients lane adds name search and reduces the 61-row wall of repeated
 secondary actions while retaining exact-client Dashboard, Schedule, Package,
 Setup, Meta and archive/restore routes. Its local 1440px/375px component
-checks, full 3,739-pass suite, build/lint/diff passed; it remains under review.
-No client or provider records were changed.
+checks, full 3,739-pass suite, build/lint/diff passed. PR #717 merged as
+`461da865891923bfc22410950d247b0c2b2bc449`; it is not live. No client
+or provider records were changed.
+The next focused Performance lane puts the report repair/publication queue
+before secondary onboarding and workspace navigation. Its existing five-row
+preview now discloses the full queue count and allows the complete list to be
+opened; no report state is silently lost. Website Performance, onboarding and
+all staff routes remain available. This is local-only until the final release.
 This is **not live**. Continue the remaining #712 internal surfaces one coherent
 lane at a time; do not claim whole-app acceptance from this first pass.
 `git.deploymentEnabled=false` remains in force. No Vercel build, preview,

@@ -32,6 +32,18 @@ test('Performance removes the repeated workflow and does not show snapshots afte
   assert.match(performance, /linkedMetaClients === null/)
 })
 
+test('Performance keeps the complete report repair queue and defers secondary navigation', () => {
+  assert.match(performance, /stateCounts,\s*attention,/)
+  assert.match(performance, /snapshot\.attention\.length > 5/)
+  assert.match(performance, /Show all \$\{snapshot\.attention\.length\} reports/)
+  assert.match(performance, /aria-expanded=\{showAllAttention\}/)
+  assert.ok(performance.indexOf('title="Dashboard queue"') < performance.indexOf('<WebsitePerformancePanel'))
+  assert.ok(performance.indexOf('<WebsitePerformancePanel') < performance.indexOf('More performance tools'))
+  assert.ok(performance.indexOf('More performance tools') < performance.indexOf('Client onboarding status'))
+  assert.match(performance, /onboardingOpened && <OnboardingStatusCard/)
+  assert.doesNotMatch(performance, /min-h-40/)
+})
+
 test('Reports keeps workflow truth without the repeated guide or raw backend errors', () => {
   assert.doesNotMatch(reports, /WorkflowGuide/)
   assert.doesNotMatch(reports, /Sync data, review performance, add CG strategy/)
