@@ -1,5 +1,17 @@
 # CG Dynamics Ops Handover
 
+### 8 October — one-build frontend release packet, still gated
+
+CA asked for a low-usage Vercel push after Dynamics is ready. The exact local
+`main` candidate passed 3,715 supported tests (17 intentional skips),
+TypeScript/Vite and nine responsive actual-component suites; full lint has zero
+errors. Fresh Vercel readback shows a shared $10 Pause-ON cap with $3.22 spent,
+not a safe assumed release allowance. Known-good production rollback is
+`dpl_4zLdbHKXzHs8rDzyErJHtcZfUneE`. No cloud action was taken. The release
+ceiling/site-serving reserve, legitimate staged client-role acceptance and the
+separate strategy/package/asset evidence gates remain unresolved. Exact
+one-build procedure and receipt: `FRONTEND-RELEASE-GATE-2026-10-08.md`.
+
 ### 8 October — #656 presentation scope closed; content and release gates remain
 
 Issue #656 is closed: its presentation-only strategy redesign is on `main`
