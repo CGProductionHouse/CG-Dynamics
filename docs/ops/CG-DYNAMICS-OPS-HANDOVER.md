@@ -72,8 +72,18 @@ keeps launch blockers and exact missing-link/date counts up front, while source
 totals and all five breakdowns move behind labelled native disclosures; the
 unmatched Client Schedule bucket count remains visible in the summary.
 No diagnostics, source calculations or database rows are changed.
-This is **not live**. Continue the remaining #712 internal surfaces one coherent
-lane at a time; do not claim whole-app acceptance from this first pass.
+PR #723 merged as `ac222f9ec95416806d47f8defa45179a9b061680`.
+The exact clean-tree local launch runner on that SHA returned
+`LOCAL_CODE_ACCEPTANCE_PASS`: 3,739 supported tests passed, 17 intentional
+skips, zero failures; TypeScript, Vite and ten client-facing browser fixtures
+all passed. Receipt: `%TEMP%/cg-local-launch-ac222f9ec954.json` (SHA-256
+`f35ac162c56739d48e0dd692e0c11e74b9a43303d909349f8ff6154d2fc3d826`).
+The runner performed zero Vercel operations and no production acceptance;
+the previously staged build predates these fixes and must not be promoted.
+This is **not live**. The #712 staff/admin code matrix is locally covered;
+genuine changed-build admin and client-role acceptance still belongs to the
+one budgeted release gate. Do not claim whole-app or client-content acceptance
+from fixtures.
 `git.deploymentEnabled=false` remains in force. No Vercel build, preview,
 deployment or promotion for iterative UI work. A final cloud build must use a
 reviewed exact SHA and the shared client-site reserve/release packet below.

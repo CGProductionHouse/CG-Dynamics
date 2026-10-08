@@ -1,5 +1,28 @@
 # Dynamics frontend release gate — 8 October 2026
 
+## Later #712 internal UX source supersession — no cloud action
+
+The final staff/admin UX pass through PR #723 is merged in app-source main
+`ac222f9ec95416806d47f8defa45179a9b061680` (tree
+`e62f747baa611e9f1670a47679f4f5c42b17daca`). The exact clean-tree local
+runner returned `LOCAL_CODE_ACCEPTANCE_PASS`: 3,739 supported tests passed,
+17 intentional skips, zero failures; TypeScript/Vite and ten client-facing
+actual-component browser fixtures passed. Receipt:
+`%TEMP%/cg-local-launch-ac222f9ec954.json`, SHA-256
+`f35ac162c56739d48e0dd692e0c11e74b9a43303d909349f8ff6154d2fc3d826`.
+Focused staff UX desktop/375px browser checks and scoped lint/diff also passed
+in PRs #713–#723; see #712 for the exact surface matrix.
+
+This does **not** supersede the independent client strategy/package/asset,
+real client-role, shared-budget and client-site reserve gates below. The older
+READY deployment `dpl_DyiXG9689oAjZUhEBbHEsL3AKLAi` predates these fixes and
+must not be promoted. Before any new cloud operation, re-read current-cycle
+usage/headroom and obtain an explicit incremental spend ceiling and serving/
+storage reserve for client sites. Bundle only a reviewed final source, stage
+once, accept the exact staged build in authenticated admin and real client
+sessions, then promote that same deployment without rebuilding. No Vercel
+operation or production write occurred in #712.
+
 CA requested a clean, low-usage Vercel release **after** finishing the app. This
 is permission to prepare a release, not evidence that the client-facing content
 or shared-team spend reserve is ready. Do not relabel a local fixture pass as
