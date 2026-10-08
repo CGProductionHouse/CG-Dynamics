@@ -57,6 +57,13 @@ renders 25 at a time with explicit next-page reveal and full matching/total
 counts, and puts destructive actions behind a native More actions disclosure.
 The historical month filter, repair/review/preview routes and confirmation
 guards remain intact. This is not a report data or publication change.
+PR #721 merged as `42c17e90384ed3cc81a8dca54102ea61be5ad1b4`;
+full local suite passed, and this is not live. Authenticated Team Work then
+showed both copy-ready daily messages expanded by default, including a very
+large unresolved-ownership legacy list beneath the task queue. The focused
+staff-only follow-up defers the draft text until Preview or Copy, caps preview
+height, and keeps the real ownership warning plus both Copy actions visible.
+It changes no task assignment or message contents.
 This is **not live**. Continue the remaining #712 internal surfaces one coherent
 lane at a time; do not claim whole-app acceptance from this first pass.
 `git.deploymentEnabled=false` remains in force. No Vercel build, preview,
