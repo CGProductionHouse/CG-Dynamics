@@ -57,7 +57,7 @@ import { listClients, type Client } from '../../lib/db/clients'
 // (staff → active shared cards only; sources/reviews → admin). Nothing here
 // writes, approves or bypasses a boundary.
 
-const INPUT_CLS = 'w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none focus:border-brand-teal/50'
+const INPUT_CLS = 'min-w-0 rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none focus:border-brand-teal/50'
 const today = () => new Date().toISOString().slice(0, 10)
 
 type Section = 'library' | 'sources' | 'review' | 'registration' | 'ai' | 'client-guides'
@@ -123,18 +123,18 @@ function LibrarySection({ isAdmin }: { isAdmin: boolean }) {
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-end justify-between gap-2">
-        <p className="text-xs text-white/50">{cards.length} {isAdmin && allStates ? 'card' : 'approved shared card'}{cards.length === 1 ? '' : 's'}{isAdmin ? '' : ' you can use'}</p>
+        <p className="text-xs text-white/50">Showing {filtered.length} of {cards.length} {isAdmin && allStates ? 'card' : 'approved shared card'}{cards.length === 1 ? '' : 's'}{isAdmin ? '' : ' you can use'}</p>
         <div className="flex items-center gap-2">
           {isAdmin && <label className="flex items-center gap-1.5 text-xs text-white/60"><input type="checkbox" className="h-3.5 w-3.5 accent-teal-400" checked={allStates} onChange={e => setAllStates(e.target.checked)} />All states</label>}
           <ActionButton size="sm" variant="secondary" onClick={() => void reload()} loading={loading}>Refresh</ActionButton>
         </div>
       </div>
-      <div className="flex flex-wrap items-center gap-2">
-        <input className={`${INPUT_CLS} min-w-[12rem] flex-1`} placeholder="Search knowledge (title, summary, principle)" value={filters.query ?? ''} onChange={e => set('query', e.target.value)} />
-        <select className={`${INPUT_CLS} w-auto`} value={filters.category} onChange={e => set('category', e.target.value)}><option value="all">All categories</option>{categories.map(c => <option key={c} value={c}>{c}</option>)}</select>
-        <select className={`${INPUT_CLS} w-auto`} value={filters.knowledgeLayer} onChange={e => set('knowledgeLayer', e.target.value as KnowledgeLayer | 'all')}><option value="all">All layers</option>{(Object.keys(KNOWLEDGE_LAYER_LABELS) as KnowledgeLayer[]).map(l => <option key={l} value={l}>{KNOWLEDGE_LAYER_LABELS[l]}</option>)}</select>
-        <select className={`${INPUT_CLS} w-auto`} value={filters.industry} onChange={e => set('industry', e.target.value as IndustryTag | 'all')}><option value="all">All industries</option>{(Object.keys(INDUSTRY_LABELS) as IndustryTag[]).map(i => <option key={i} value={i}>{INDUSTRY_LABELS[i]}</option>)}</select>
-        {isAdmin && allStates && <select className={`${INPUT_CLS} w-auto`} value={filters.status} onChange={e => set('status', e.target.value as SkillCardStatus | 'all')}><option value="all">All statuses</option>{(Object.keys(SKILL_STATUS_LABELS) as SkillCardStatus[]).map(s => <option key={s} value={s}>{SKILL_STATUS_LABELS[s]}</option>)}</select>}
+      <div className="flex flex-wrap gap-2">
+        <input aria-label="Search knowledge" className={`${INPUT_CLS} w-full flex-[2_1_20rem]`} placeholder="Search knowledge (title, summary, principle)" value={filters.query ?? ''} onChange={e => set('query', e.target.value)} />
+        <select aria-label="Knowledge category" className={`${INPUT_CLS} min-w-36 flex-1 lg:flex-[0_1_12rem]`} value={filters.category} onChange={e => set('category', e.target.value)}><option value="all">All categories</option>{categories.map(c => <option key={c} value={c}>{c}</option>)}</select>
+        <select aria-label="Knowledge layer" className={`${INPUT_CLS} min-w-36 flex-1 lg:flex-[0_1_12rem]`} value={filters.knowledgeLayer} onChange={e => set('knowledgeLayer', e.target.value as KnowledgeLayer | 'all')}><option value="all">All layers</option>{(Object.keys(KNOWLEDGE_LAYER_LABELS) as KnowledgeLayer[]).map(l => <option key={l} value={l}>{KNOWLEDGE_LAYER_LABELS[l]}</option>)}</select>
+        <select aria-label="Knowledge industry" className={`${INPUT_CLS} min-w-36 flex-1 lg:flex-[0_1_12rem]`} value={filters.industry} onChange={e => set('industry', e.target.value as IndustryTag | 'all')}><option value="all">All industries</option>{(Object.keys(INDUSTRY_LABELS) as IndustryTag[]).map(i => <option key={i} value={i}>{INDUSTRY_LABELS[i]}</option>)}</select>
+        {isAdmin && allStates && <select aria-label="Knowledge status" className={`${INPUT_CLS} min-w-36 flex-1 lg:flex-[0_1_12rem]`} value={filters.status} onChange={e => set('status', e.target.value as SkillCardStatus | 'all')}><option value="all">All statuses</option>{(Object.keys(SKILL_STATUS_LABELS) as SkillCardStatus[]).map(s => <option key={s} value={s}>{SKILL_STATUS_LABELS[s]}</option>)}</select>}
       </div>
       {migrationNeeded ? <p className="rounded-lg border border-amber-300/25 bg-amber-300/[0.07] px-3 py-2 text-sm text-amber-100">The Marketing Library tables are not in this database yet.</p>
         : loading ? <LoadingState message="Loading knowledge…" />
@@ -197,13 +197,13 @@ function SourcesSection() {
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-end justify-between gap-2">
-        <p className="text-xs text-white/50">{sources.length} registered source{sources.length === 1 ? '' : 's'}{reviewCount > 0 ? ` · ${reviewCount} need review` : ''}</p>
+        <p className="text-xs text-white/50">Showing {filtered.length} of {sources.length} registered source{sources.length === 1 ? '' : 's'}{reviewCount > 0 ? ` · ${reviewCount} need review` : ''}</p>
         <ActionButton size="sm" variant="secondary" onClick={() => void reload()} loading={loading}>Refresh</ActionButton>
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        <input className={`${INPUT_CLS} min-w-[12rem] flex-1`} placeholder="Search title, author, notes" value={filters.query ?? ''} onChange={e => set('query', e.target.value)} />
-        <select className={`${INPUT_CLS} w-auto`} value={filters.sourceType} onChange={e => set('sourceType', e.target.value as SourceType | 'all')}><option value="all">All types</option>{(Object.keys(SOURCE_TYPE_LABELS) as SourceType[]).map(t => <option key={t} value={t}>{SOURCE_TYPE_LABELS[t]}</option>)}</select>
-        <select className={`${INPUT_CLS} w-auto`} value={filters.trustTier} onChange={e => set('trustTier', e.target.value as SourceTrustTier | 'all')}><option value="all">All trust tiers</option>{(Object.keys(TRUST_TIER_LABELS) as SourceTrustTier[]).map(t => <option key={t} value={t}>{TRUST_TIER_LABELS[t]}</option>)}</select>
+        <input aria-label="Search sources" className={`${INPUT_CLS} w-full flex-[2_1_20rem]`} placeholder="Search title, author, notes" value={filters.query ?? ''} onChange={e => set('query', e.target.value)} />
+        <select aria-label="Source type" className={`${INPUT_CLS} min-w-36 flex-1 lg:flex-[0_1_12rem]`} value={filters.sourceType} onChange={e => set('sourceType', e.target.value as SourceType | 'all')}><option value="all">All types</option>{(Object.keys(SOURCE_TYPE_LABELS) as SourceType[]).map(t => <option key={t} value={t}>{SOURCE_TYPE_LABELS[t]}</option>)}</select>
+        <select aria-label="Source trust tier" className={`${INPUT_CLS} min-w-36 flex-1 lg:flex-[0_1_12rem]`} value={filters.trustTier} onChange={e => set('trustTier', e.target.value as SourceTrustTier | 'all')}><option value="all">All trust tiers</option>{(Object.keys(TRUST_TIER_LABELS) as SourceTrustTier[]).map(t => <option key={t} value={t}>{TRUST_TIER_LABELS[t]}</option>)}</select>
         <label className="flex items-center gap-1.5 text-xs text-white/60"><input type="checkbox" className="h-3.5 w-3.5 accent-teal-400" checked={filters.hasUrl ?? false} onChange={e => set('hasUrl', e.target.checked)} />Has link</label>
         <label className="flex items-center gap-1.5 text-xs text-white/60"><input type="checkbox" className="h-3.5 w-3.5 accent-teal-400" checked={filters.needsReview ?? false} onChange={e => set('needsReview', e.target.checked)} />Needs review</label>
       </div>
@@ -698,7 +698,7 @@ export default function MarketingWorkspacePage() {
       <PageHeader
         eyebrow="Marketing & Knowledge"
         title="Marketing"
-        description="Search trusted marketing knowledge, review it, and use it in AI — one workspace."
+        description="Trusted knowledge, source review and client guides."
       />
       <div className="flex flex-wrap gap-2">
         {tabs.map(tab => (
