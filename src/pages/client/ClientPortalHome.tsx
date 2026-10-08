@@ -18,6 +18,7 @@ import { getPreviewStrategy, listPreviewReports } from '../../lib/clientPortalPr
 type PortalData = {
   report: ClientReport | null
   facts: PlatformFact[]
+  factsUnavailable: boolean
   googleAdsState: GoogleAdsDashboardState
   calendarCount: number | null
   monthlyStrategy: PublishedMonthlyStrategy | null
@@ -27,6 +28,7 @@ type PortalData = {
 const EMPTY_DATA: PortalData = {
   report: null,
   facts: [],
+  factsUnavailable: false,
   googleAdsState: 'no-activity',
   calendarCount: null,
   monthlyStrategy: null,
@@ -76,6 +78,7 @@ export default function ClientPortalHome() {
         setData({
           report,
           facts: factsResult.error ? [] : factsResult.facts,
+          factsUnavailable: Boolean(factsResult.error),
           googleAdsState: googleAdsResult.state,
           calendarCount: calendarResult && !calendarResult.loadFailed
             ? calendarResult.posts.length
@@ -99,7 +102,9 @@ export default function ClientPortalHome() {
   const reportMonth = data.report ? getReportMonthFromPeriod(data.report) : null
   const actionMonth = workingMonth
   const hasPerformanceSummary = activeOrganic.length > 0 || reportMonth !== null
-  const performanceStatus = activeOrganic.length > 0
+  const performanceStatus = data.factsUnavailable
+    ? 'Channel facts unavailable'
+    : activeOrganic.length > 0
     ? `${activeOrganic.length} verified channel${activeOrganic.length === 1 ? '' : 's'}`
     : 'Awaiting verified data'
   const paidMediaStatus = googleAdsStatusLabel(data.googleAdsState)
@@ -190,6 +195,14 @@ export default function ClientPortalHome() {
                     label="Verified channels"
                     value={String(activeOrganic.length)}
                     detail={activeOrganic.join(', ')}
+                    tone="teal"
+                  />
+                )}
+                {data.factsUnavailable && (
+                  <MetricCard
+                    label="Verified channels"
+                    value="Unavailable"
+                    detail="Verified channel facts could not be loaded right now"
                     tone="teal"
                   />
                 )}
