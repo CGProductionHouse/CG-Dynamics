@@ -1,5 +1,19 @@
 # CG Dynamics Ops Handover
 
+### 8 October — Performance strategy-read error truth, local only
+
+The existing staff Client Preview silently treated a failed canonical monthly
+strategy read as an absent strategy and displayed “still under review”; the
+client Performance route silently omitted the action plan on that same read
+failure. The actual report component now distinguishes a failed read from a
+successful empty response, saying only that the monthly strategy is temporarily
+unavailable. Published/draft visibility, report facts and canonical strategy
+data are unchanged. The synthetic actual-component report fixture reproduced
+the missing error state before the patch, then passed on desktop and 375/390/
+430px, including a successful-empty contrast and no body overflow/runtime
+errors. This is local-only truth hardening, not strategy quality approval or
+changed-production acceptance. No Vercel, data, provider or publishing action.
+
 ### 8 October — Overview failed channel-fact read truth, local only
 
 The actual client Overview rendered a published September review beside

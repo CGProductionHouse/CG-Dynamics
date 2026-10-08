@@ -63,6 +63,7 @@ export default function Dashboard() {
   const [previousFacts, setPreviousFacts] = useState<PlatformFact[]>([])
   const [normalizedFactsAttempted, setNormalizedFactsAttempted] = useState(false)
   const [monthlyStrategy, setMonthlyStrategy] = useState<MonthlyStrategyPresentation | null>(null)
+  const [strategyReadUnavailable, setStrategyReadUnavailable] = useState(false)
   const [loading, setLoading] = useState(true)
   const [reportLoading, setReportLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -95,6 +96,7 @@ export default function Dashboard() {
       setManualMetrics([])
       setFacts([])
       setPreviousFacts([])
+      setStrategyReadUnavailable(false)
       reportRequestRef.current += 1
       if (!requestedClientId) {
         setLoading(false)
@@ -149,6 +151,7 @@ export default function Dashboard() {
       setPreviousFacts([])
       setNormalizedFactsAttempted(false)
       setMonthlyStrategy(null)
+      setStrategyReadUnavailable(false)
       setReportLoading(true)
       setError(null)
       try {
@@ -185,6 +188,7 @@ export default function Dashboard() {
           setFacts(factsResult.facts)
           setPreviousFacts(factsResult.previousFacts)
           setNormalizedFactsAttempted(factsResult.normalizedAttempted)
+          setStrategyReadUnavailable(Boolean(strategyResult.error))
           setMonthlyStrategy(strategyResult.data ? {
             month: strategyResult.data.strategy_month,
             status: 'published',
@@ -271,6 +275,7 @@ export default function Dashboard() {
           previousFacts={previousFacts}
           normalizedFactsAttempted={normalizedFactsAttempted}
           monthlyStrategy={monthlyStrategy}
+          strategyReadUnavailable={strategyReadUnavailable}
           initialTab={requestedTab}
           onTabChange={handleTabChange}
         />

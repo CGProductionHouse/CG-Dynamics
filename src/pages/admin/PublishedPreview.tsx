@@ -80,6 +80,7 @@ export default function PublishedPreview() {
   const [previousFacts, setPreviousFacts] = useState<PlatformFact[]>([])
   const [normalizedFactsAttempted, setNormalizedFactsAttempted] = useState(false)
   const [monthlyStrategy, setMonthlyStrategy] = useState<MonthlyStrategyPresentation | null>(null)
+  const [strategyReadUnavailable, setStrategyReadUnavailable] = useState(false)
   const [dataHealth, setDataHealth] = useState<ReportFactHealth[]>([])
   const [contentExclusions, setContentExclusions] = useState<ReportContentExclusion[]>([])
   const [curationBusyId, setCurationBusyId] = useState<string | null>(null)
@@ -190,6 +191,7 @@ export default function PublishedPreview() {
       setPreviousFacts([])
       setNormalizedFactsAttempted(false)
       setMonthlyStrategy(null)
+      setStrategyReadUnavailable(false)
       setDataHealth([])
       setContentExclusions([])
       setReportLoading(true)
@@ -236,6 +238,7 @@ export default function PublishedPreview() {
           setNormalizedFactsAttempted(factsResult.normalizedAttempted)
           setDataHealth(healthResult.data)
           setContentExclusions(exclusionsResult.data)
+          setStrategyReadUnavailable(Boolean(strategyResult.error))
           setMonthlyStrategy(strategyResult.data ? {
             month: strategyResult.data.strategy_month,
             status: strategyResult.data.workflow_status,
@@ -490,6 +493,7 @@ export default function PublishedPreview() {
               previousFacts={previousFacts}
               normalizedFactsAttempted={normalizedFactsAttempted}
               monthlyStrategy={mode === 'staff' || monthlyStrategy?.status === 'published' ? monthlyStrategy : null}
+              strategyReadUnavailable={strategyReadUnavailable}
               dataHealth={dataHealth}
               contentExclusions={contentExclusions}
               onSetContentExcluded={mode === 'staff' && isAdmin ? handleContentExcluded : undefined}
