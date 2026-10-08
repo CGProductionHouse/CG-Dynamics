@@ -266,33 +266,40 @@ export default function ImportHealthPage() {
           </div>
 
           <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <HealthStat label="Planner tasks" value={counts.plannerTasks} />
-            <HealthStat label="Client packages" value={counts.clientPackages} />
-            <HealthStat label="Package templates" value={counts.packageTemplates} />
-            <HealthStat label="Monthly deliverables" value={counts.monthlyDeliverables} />
-          </div>
-
-          <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <HealthStat label="Missing date" value={missingDueOrSchedule} warn={missingDueOrSchedule > 0} />
             <HealthStat label="Missing client" value={missingLinks.client} warn={missingLinks.client > 0} />
             <HealthStat label="Missing package" value={missingLinks.package} warn={missingLinks.package > 0} />
             <HealthStat label="Missing template" value={missingLinks.template} warn={missingLinks.template > 0} />
           </div>
 
-          <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <HealthStat label={`${selectedYear} master visible`} value={visibleThisYear} />
-            <HealthStat label="Planner linked clients" value={plannerLinked} />
-            <HealthStat label="Planner unlinked" value={plannerUnlinked} warn={plannerUnlinked > 0} />
-            <HealthNote title="Client Schedule source" value="monthly_deliverables" />
-          </div>
+          <details className="mb-3 rounded-xl border border-white/10 bg-white/[0.025]">
+            <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-accent">
+              Imported data totals and source <span className="ml-2 text-xs font-normal text-brand-primary/70">{counts.plannerTasks.toLocaleString()} tasks · {counts.monthlyDeliverables.toLocaleString()} deliverables · {plannerUnlinked.toLocaleString()} planner tasks without a client</span>
+            </summary>
+            <div className="grid gap-3 border-t border-white/10 p-4 sm:grid-cols-2 lg:grid-cols-4">
+              <HealthStat label="Planner tasks" value={counts.plannerTasks} />
+              <HealthStat label="Client packages" value={counts.clientPackages} />
+              <HealthStat label="Package templates" value={counts.packageTemplates} />
+              <HealthStat label="Monthly deliverables" value={counts.monthlyDeliverables} />
+              <HealthStat label={`${selectedYear} master visible`} value={visibleThisYear} />
+              <HealthStat label="Planner linked clients" value={plannerLinked} />
+              <HealthStat label="Planner unlinked" value={plannerUnlinked} warn={plannerUnlinked > 0} />
+              <HealthNote title="Client Schedule source" value="monthly_deliverables" />
+            </div>
+          </details>
 
-          <div className="grid gap-4 lg:grid-cols-3">
-            <HealthList title="Planner buckets with tasks" rows={plannerBucketCounts} />
-            <ClientMatchList rows={clientScheduleBuckets} />
-            <HealthList title="Monthly deliverables by client" rows={monthlyByClient} />
-            <HealthList title="Deliverables by month" rows={deliverablesByMonth} />
-            <HealthList title="Deliverables by status" rows={deliverablesByStatus} />
-          </div>
+          <details className="rounded-xl border border-white/10 bg-white/[0.025]">
+            <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-accent">
+              Explore imported-data breakdowns <span className={`ml-2 text-xs font-normal ${unmatchedClientBuckets > 0 ? 'text-amber-300' : 'text-brand-primary/70'}`}>{unmatchedClientBuckets} unmatched client schedule buckets</span>
+            </summary>
+            <div className="grid gap-4 border-t border-white/10 p-4 lg:grid-cols-3">
+              <HealthList title="Planner buckets with tasks" rows={plannerBucketCounts} />
+              <ClientMatchList rows={clientScheduleBuckets} />
+              <HealthList title="Monthly deliverables by client" rows={monthlyByClient} />
+              <HealthList title="Deliverables by month" rows={deliverablesByMonth} />
+              <HealthList title="Deliverables by status" rows={deliverablesByStatus} />
+            </div>
+          </details>
         </>
       )}
     </div>
