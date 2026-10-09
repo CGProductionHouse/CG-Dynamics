@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "status": "EDITORIAL_CANDIDATE_NOT_CANONICAL",
+  "client_id": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
+  "client_name": "Piek Group",
+  "strategy_month": "2026-11-01",
+  "source_refs": [
+    "artifacts/client-strategy-dossiers/issue-513/piek-group.md",
+    "docs/ai-workforce/client-intelligence/PIEK-GROUP-CLIENT-OPERATIONAL-INTELLIGENCE-2026-09.md",
+    "docs/ops/STRATEGY-CURRENT-NEXT-EXACT-CLIENT-PROPOSALS-2026-10-09.md",
+    "https://www.piekgroup.co.za/"
+  ],
+  "package": {
+    "confirmed_professional_videos": 4,
+    "confirmed_design_posters": 12,
+    "photo_posts": null,
+    "reels": null,
+    "animated_posters": null
+  },
+  "goldStandard": {
+    "objective": "In November, help a person choose the right Piek destination for a real need: a verified fuel-and-convenience stop at a named Engen or Sasol branch, or a Get Together food-and-coffee visit. Build recognition of the group through one genuine people-and-operations story. The goal is a clearer branch-specific visit or enquiry decision, not an unmeasured footfall or sales promise.",
+    "audienceAndIntent": "A driver needs to know which named station offers the service actually shown; a Get Together visitor needs to picture the exact venue and a current reason to sit down; a group-level viewer needs to understand the people behind the network. These are different decisions, not one broad Piek audience or an assumed demographic segment.",
+    "coreMessage": "Choose the actual place for the actual need. Engen and Sasol pieces show their own verified branch, service and visual identity; Get Together pieces show a real table, food or coffee moment at its named venue; the group piece connects a named team decision to a visible customer experience. A viewer should know where to go and what to ask before reading a long caption.",
+    "formatsAndRationale": "Use the four monthly professional videos for one Engen service/stop journey, one distinct Sasol journey, one real Get Together visit and one Piek team or site-improvement story. Use the twelve design posters as three supporting choices for each lane: what is there, a practical branch or visit detail, and a different useful follow-up question. This is a proposed production mix, not a posting timetable; November priorities may move posters between lanes without changing the total.",
+    "testAndChange": "Within Get Together only, compare a food-or-coffee detail opening with a welcoming table/arrival opening if both real visuals are available. Keep the venue, offer, invitation, format and observation window comparable. Consider views/interactions alongside the questions people actually ask the venue. If the comparison cannot be measured fairly this month, keep it as a future test instead of declaring a winner.",
+    "pillarsAndHooks": "Engen: a recognisable stop and one site-specific convenience answer. Sasol: a different genuine journey and service fact, not the Engen script with another logo. Get Together: the specific food/coffee/table moment that makes a visit imaginable. Piek people: who improved or runs one real customer-facing detail. Each opening begins with the visible situation or a practical choice, then names the correct place.",
+    "mustAvoid": "Do not imply that a partner, restaurant, shop, product or promotion is available at every branch. Keep Engen, Sasol, Get Together and the Piek group recognisably separate. Do not recycle an expired offer, invent hours, stock, menu or prices, or credit content with visits or revenue that were not actually measured.",
+    "channelIntegration": "Place each piece on the channel for the brand and location it actually shows. A Get Together visit piece should lead to that venue's confirmed visit or enquiry route; a station piece should name its actual branch. This is an organic content plan, not a claim that a paid campaign or a new channel is included. Where a channel has no reliable results yet, leave those figures unavailable.",
+    "successSignals": "Look for branch-specific questions that identify the intended stop, Get Together enquiries that mention the shown visit reason, and group-level enquiries reaching the right team. Compare views and interactions only over like-for-like reporting periods. Use bookings, visits or sales as outcomes only where Piek has actual records; missing measurements are not poor performance.",
+    "nextMonthGamePlan": "At November review, choose the December lane from actual published November creative, branch-specific questions and owner feedback. Expand the most useful verified service/visit explanation within the newly confirmed December package; replace a weak lane rather than repeating all four by habit. If no reliable results exist, ask branch and venue teams for their recurring customer questions before choosing a December campaign. No December promotion, holiday event or quantity is promised now."
+  },
+  "actionPlan": {
+    "professional_video": {
+      "enabled": true,
+      "items": [
+        "Engen: film a named branch's real stop from arrival through one confirmed convenience or service moment; close on that branch.",
+        "Sasol: film a separately approved branch and a genuinely different reason to stop; retain Sasol-only branding.",
+        "Get Together: show an approved food, coffee or table moment at the exact venue and its real visit path.",
+        "Piek people: show a named, consenting team member explaining one real change or decision with a visible customer benefit."
+      ],
+      "notes": "Four confirmed monthly professional videos total. Verify site, subject, permissions, offering and partner before each brief."
+    },
+    "reels": { "enabled": false, "items": [], "notes": "" },
+    "photo_content": { "enabled": false, "items": [], "notes": "" },
+    "design_poster": {
+      "enabled": true,
+      "items": [
+        "Engen: service/use moment, verified branch visit detail, and a distinct practical question.",
+        "Sasol: service/use moment, verified branch visit detail, and a distinct practical question.",
+        "Get Together: venue or food/coffee moment, current visit detail, and a distinct occasion or menu question.",
+        "Piek people: the actual operation, its customer-facing effect, and one reason to learn more about that site."
+      ],
+      "notes": "Twelve confirmed design posters total, proposed as three per lane. This is a working allocation pending November client priority and approved creative; no extra photo/reel capacity inferred."
+    },
+    "animated_poster": { "enabled": false, "items": [], "notes": "" },
+    "campaign_recommendation": { "enabled": false, "items": [], "notes": "" }
+  },
+  "review_gates": [
+    "Compare current Piek website branch/partner claims with September intelligence and obtain owner readback before branch copy.",
+    "Check the live November canonical strategy version, staff edits and package receipt before any amendment.",
+    "Check real October published creative/results before using a learning claim; absence stays unavailable.",
+    "Confirm exact production subjects, venues, staff/customer consents, permitted channels and final CTAs."
+  ]
+}

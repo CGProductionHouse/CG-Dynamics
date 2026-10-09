@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "status": "EDITORIAL_CANDIDATE_NOT_CANONICAL",
+  "client_id": "3404f726-a693-4b2d-8c13-c9d3dfd17bbc",
+  "client_name": "Daisy & Co",
+  "strategy_month": "2026-11-01",
+  "source_refs": [
+    "artifacts/client-strategy-dossiers/issue-513/daisy-and-co.md",
+    "docs/ai-workforce/client-intelligence/DAISY-CO-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md",
+    "docs/ops/STRATEGY-CURRENT-NEXT-EXACT-CLIENT-PROPOSALS-2026-10-09.md"
+  ],
+  "package": {
+    "confirmed_professional_videos": 1,
+    "confirmed_design_posters": 3,
+    "photo_posts": 3,
+    "reels": null,
+    "animated_posters": null
+  },
+  "goldStandard": {
+    "objective": "Make Daisy & Co the easy-to-picture Preller Square stop for one genuine November gifting or small-spoil occasion. Show a real, currently stocked item in the situation where a shopper would choose it, then make the in-store next step clear. This is a practical choice campaign, not an invented holiday sale or promise of gift bundles.",
+    "audienceAndIntent": "One shopper needs a thoughtful item for someone else without visiting several stores; another is choosing a treat or home detail for themselves. These are different purchase decisions, so select the occasion Daisy confirms as the November priority. The viewer should recognise the actual item and know what to ask about at Shop 8A, Preller Square.",
+    "coreMessage": "A real Daisy find can make a small occasion feel considered. Let the item and its setting do the work: the cup on a table, the gift in someone's hands or a fresh treat ready to share, only where that exact item and service are available now. The caption adds the human reason to choose it rather than repeating the product label.",
+    "formatsAndRationale": "The one confirmed professional video follows a single current item from discovery in the shop to its credible gift or table use. Three photos show the same choice from product detail, real context and the in-store selection moment. Three posters answer distinct practical questions: what the item is, which occasion it suits and how to find or ask for it. This keeps the seven confirmed pieces connected without claiming extra reels, bundles or services.",
+    "testAndChange": "For the same approved item, compare a close product-detail opening with an occasion-led setting. Keep the item, price wording and store route stable. Use available item-specific questions and comparable viewing response to decide which opening helps selection; if the shop has actual sales records for the item, examine them separately without attributing every sale to content.",
+    "pillarsAndHooks": "The specific gift choice; a believable table, coffee-corner or thank-you moment; the detail a shopper might miss on a shelf; and Daisy's real Preller Square discovery experience. Open with an object or occasion the viewer can see. Avoid a sequence of interchangeable 'perfect gift' captions.",
+    "mustAvoid": "Do not use Crazy Daisy as current branding, import products from another Daisy-named business, advertise a bundle or delivery arrangement that the shop has not confirmed, or revive old opening hours, prices or product lines. Do not claim an item is in stock throughout November based on a single shoot day.",
+    "channelIntegration": "Use the shop's existing approved channel to lead from the visual choice to the correct Daisy & Co in-store enquiry or visit path. A product post should not send shoppers to an unrelated same-name business. Any website, booking, paid promotion or new service route needs a separate confirmed brief; this plan does not assume it is included.",
+    "successSignals": "Watch for questions that name the shown item or occasion and for in-store staff reports of shoppers seeking that exact piece, if those records are available. Compare native views or interactions only over covered periods. A question, a visit and a purchase are different signals; do not turn a missing sales feed into zero sales.",
+    "nextMonthGamePlan": "At the November review, ask Daisy which shown item or occasion generated the clearest customer questions and which products remain available. Build December around the real next shopping need within the newly confirmed monthly package, rather than automatically changing the captions to a generic festive sale. Any December range, price, gift service or opening-hours claim needs fresh store approval."
+  },
+  "actionPlan": {
+    "professional_video": {
+      "enabled": true,
+      "items": ["Follow one currently stocked Daisy item from a real shop discovery to a believable gift or table moment, ending with the Preller Square visit choice."],
+      "notes": "One confirmed professional video. Shop approves the item, setting, people, stock statement and filming rights."
+    },
+    "reels": { "enabled": false, "items": [], "notes": "" },
+    "photo_content": {
+      "enabled": true,
+      "items": [
+        "Show the approved item's material, colour or use detail clearly enough for a shopper to identify it.",
+        "Show that same item in a genuine gifting, table or small-spoil setting selected by Daisy.",
+        "Show the real in-store selection context and correct location without implying a bundled service."
+      ],
+      "notes": "Three confirmed photo posts; use current products and distinct jobs for each image."
+    },
+    "design_poster": {
+      "enabled": true,
+      "items": [
+        "Identify the real item and a visible detail that helps the shopper choose.",
+        "Connect the same confirmed item to one approved occasion without an invented offer.",
+        "Answer the exact in-store question or visit step Daisy wants customers to take."
+      ],
+      "notes": "Three confirmed design posters; no assumed price, bundle or delivery service."
+    },
+    "animated_poster": { "enabled": false, "items": [], "notes": "" },
+    "campaign_recommendation": { "enabled": false, "items": [], "notes": "" }
+  },
+  "review_gates": [
+    "Confirm November commercial priority and current actual item/range; the August intelligence offers hypotheses, not a live product catalogue.",
+    "Recheck exact Preller Square address, opening hours and any fulfilment claim with Daisy before public copy.",
+    "Validate current November canonical row/version, staff amendments and package receipt before guarded update.",
+    "Obtain consent for people and use only Daisy's own product imagery, not an unrelated same-name business."
+  ]
+}

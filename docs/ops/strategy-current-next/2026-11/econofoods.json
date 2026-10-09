@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "status": "EDITORIAL_CANDIDATE_NOT_CANONICAL",
+  "client_id": "61acf81b-1011-404e-9fae-2e209be65fca",
+  "client_name": "Econofoods",
+  "strategy_month": "2026-11-01",
+  "source_refs": [
+    "artifacts/client-strategy-dossiers/issue-513/econofoods.md",
+    "docs/ai-workforce/client-intelligence/ECONOFOODS-SOUTH-AFRICA-VIDEO-COMMERCIAL-PLAYBOOK-2026-08.md",
+    "docs/ops/STRATEGY-CURRENT-NEXT-EXACT-CLIENT-PROPOSALS-2026-10-09.md"
+  ],
+  "package": {
+    "confirmed_professional_videos": 5,
+    "confirmed_design_posters": null,
+    "photo_posts": null,
+    "reels": null,
+    "animated_posters": null
+  },
+  "goldStandard": {
+    "objective": "Give Econofoods one coherent November video campaign that turns a real food choice into a memorable shopping decision. Show how a verified item or category helps with a practical freezer, meal or bulk-buying problem, then hand the finished videos to Econofoods for its own channel decisions. CG's job here is five commercial videos, not management of Econofoods' social pages.",
+    "audienceAndIntent": "A household shopper may be choosing ingredients for several meals; a reseller or foodservice buyer may be planning a different quantity and ordering route. Choose one of those jobs with Econofoods before scripting, rather than blending retail and trade claims. The viewer should recognise the food and know where to check the current offer or product details.",
+    "coreMessage": "The funny moment must make the food decision clearer. Econofoods' energetic voice can dramatise a familiar shopping or freezer-planning problem, but the real item, useful quantity or meal outcome is the reason the joke works. Every film should leave the viewer remembering the actual category or product, not just the skit.",
+    "formatsAndRationale": "Use the five confirmed professional videos as a connected production set: shopper problem, real product/use proof, meal or freezer-plan choice, a second buying perspective only if the brief confirms it, and a human or brand payoff. Give each video a distinct commercial job and capture enough approved product detail to cut the story clearly. No photo, poster, reel or channel-management output is added to this production scope.",
+    "testAndChange": "Test two genuinely different opening mechanisms on comparable product-led films: a recognisable shopper behaviour versus an immediate food/product reveal. Keep the item, current product facts and destination stable. Econofoods can share covered video-level viewing and audience questions after distribution; if that access is absent, use a client creative review rather than claiming one opening sold more food.",
+    "pillarsAndHooks": "A freezer-plan moment that feels familiar; the real product reveal that solves it; a meal-use demonstration with appetising footage; a distinct bulk or trade question only when the buying route is confirmed; and a person-led brand beat that feels like Econofoods. Make the item essential to the punchline. Avoid five versions of the same price gag.",
+    "mustAvoid": "No old prices, pack weights, store openings, regional specials, stock claims, delivery promises or participating-store lists from earlier work. Do not call a joke commercially successful because it has views alone. Keep any trade-buyer route separate from household shopping and do not imply CG controls Econofoods' posting, paid media or store sales.",
+    "channelIntegration": "Deliver the approved video masters and any agreed cutdowns to Econofoods with exact product, region, date and destination notes for its publishing team. Econofoods chooses the channel and release schedule. A film referring to a store, special or online route can use it only after Econofoods confirms that destination is current for the intended audience.",
+    "successSignals": "For each delivered film, record the commercial job, item/category, opening mechanism and Econofoods' creative approval. If Econofoods later supplies comparable distribution results, examine video completion or covered viewing together with actual product questions. Store traffic, orders and sales are separate outcomes that require Econofoods' own records; no missing metric is treated as zero.",
+    "nextMonthGamePlan": "For December, retain the video franchise whose product recall or useful customer questions Econofoods can actually substantiate, and replace a mechanism that obscured the item. Reconfirm the December product, store/region, stock, price and package before scripting; do not roll a November special or five-video quantity forward as an automatic December promise. If results are unavailable, make the next brief from Econofoods' merchandising priority and producer review, clearly labelled as a new test."
+  },
+  "actionPlan": {
+    "professional_video": {
+      "enabled": true,
+      "items": [
+        "Film a recognisable shopper or freezer-planning problem around one item Econofoods currently approves.",
+        "Reveal the actual item or category and the useful product detail that resolves that problem.",
+        "Show a real meal or freezer-use outcome with appetising footage, without a price or pack-size claim unless supplied for this campaign.",
+        "Address a different confirmed buyer question, such as household choice or trade buying, only after Econofoods selects that audience and route.",
+        "Close the set with a human Econofoods moment that makes the product or shopping decision memorable, not a standalone generic brand film."
+      ],
+      "notes": "Five confirmed professional videos for the current month; production only. Exact products, locations, people and distribution details require client brief and rights checks."
+    },
+    "reels": { "enabled": false, "items": [], "notes": "" },
+    "photo_content": { "enabled": false, "items": [], "notes": "" },
+    "design_poster": { "enabled": false, "items": [], "notes": "" },
+    "animated_poster": { "enabled": false, "items": [], "notes": "" },
+    "campaign_recommendation": { "enabled": false, "items": [], "notes": "" }
+  },
+  "review_gates": [
+    "Reconfirm five-video November production receipt and current campaign owner; Econofoods is not a CG-managed social account.",
+    "Obtain the actual November merchandising brief, current item/pack/stock/region and permitted destination before script.",
+    "Verify the live canonical November row version and staff edits before an amendment; no bulk overwrite.",
+    "Confirm Econofoods approvals for people, product footage, humour, claim wording and final cutdowns."
+  ]
+}

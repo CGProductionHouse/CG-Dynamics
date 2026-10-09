@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "status": "EDITORIAL_CANDIDATE_NOT_CANONICAL",
+  "client_id": "2b953772-e791-4dff-a278-d4dd3521f02e",
+  "client_name": "We Ar Fuels",
+  "strategy_month": "2026-11-01",
+  "source_refs": [
+    "artifacts/client-strategy-dossiers/issue-513/we-ar-fuels.md",
+    "artifacts/client-strategy-dossiers/issue-513/runtime-guides/we-ar-fuels.md",
+    "docs/ops/STRATEGY-CURRENT-NEXT-EXACT-CLIENT-PROPOSALS-2026-10-09.md"
+  ],
+  "package": {
+    "confirmed_professional_videos": 1,
+    "confirmed_design_posters": 3,
+    "photo_posts": 4,
+    "reels": null,
+    "animated_posters": null
+  },
+  "goldStandard": {
+    "objective": "Move We Ar Fuels' November content from general fuel-delivery awareness to a better first supply conversation. A farm or business customer should know what location, use and timing to discuss with the correct regional team, while the team remains responsible for confirming whether and how it can serve that exact request. The desired result is a clearer qualified enquiry, not a promised delivery or measured sales uplift.",
+    "audienceAndIntent": "A farm manager planning operational fuel and a business buyer arranging supply need practical information before they contact a distributor. Select the real customer situation We Ar Fuels wants to address this month; do not assume a harvest season, vehicle fleet, minimum order or delivery radius. Keep a household enquiry separate if the client makes it an actual priority.",
+    "coreMessage": "A useful fuel enquiry begins with the work that needs to happen and the place it needs to happen. Show a real We Ar Fuels person, vehicle or delivery-planning moment and invite the customer to explain their requirement to the correct regional contact. The team—not a post—then confirms product, area, timing, quantity and next step.",
+    "formatsAndRationale": "The one confirmed professional video follows a real, permissioned planning or delivery handoff without displaying private route/customer information. Four photos give separate views of the actual customer need, the team, a safe operational detail and the handoff question. Three posters answer distinct enquiry-preparation questions: what work is planned, where it is needed and what to discuss with the region. These are connected pieces within the 1-video/4-photo/3-poster monthly package, not extra services.",
+    "testAndChange": "For one approved supply topic, compare an opening that shows the real process with an opening phrased as the customer's planning question. Keep region, service facts and enquiry route fixed. Compare the specificity of actual enquiries if We Ar Fuels records them, while viewing response remains a separate channel signal. If the two pieces do not have comparable coverage, do not call either a winner.",
+    "pillarsAndHooks": "The work the customer needs fuel for; the real planning step before a vehicle moves; a team member's practical question; a visible but safe handoff detail; and the exact regional next step. Open with a situation a farm or business recognises, not 'fueling your journey' or a generic truck montage.",
+    "mustAvoid": "No implied delivery promise, stock position, fuel grade, minimum litres, emergency response, service radius, supplier relationship or price without current We Ar Fuels approval. Keep Fuels distinct from similarly named workwear and canvas businesses. Do not show a customer's private site, route or equipment detail without permission, and do not attribute orders to post engagement.",
+    "channelIntegration": "Use the authorised We Ar Fuels channel and the current client-approved regional contact route for every public piece. A Sentraal Vrystaat question must reach the currently approved central contact; a Wes Vrystaat question follows the approved western route. Do not paste old or unrelated contact details into creative. Any website, paid or new-channel role requires a separate confirmed brief.",
+    "successSignals": "Record whether incoming questions specify the customer's use, location and time need, and whether the correct regional team receives them. Where available, compare enquiry completeness and actual quoted or fulfilled requests as separate stages. Views, comments and absent reporting do not establish litres sold, delivery success or zero demand.",
+    "nextMonthGamePlan": "At November review, ask the two regional teams which enquiry detail customers still miss and whether any published piece helped a better conversation. Make that exact question December's lead explanation within the newly confirmed package, using a fresh real subject. If no enquiry records exist, choose the next test from team observations and label it a hypothesis; no seasonal promotion or delivery commitment carries forward automatically."
+  },
+  "actionPlan": {
+    "professional_video": {
+      "enabled": true,
+      "items": ["Film one approved planning-to-handoff story: customer's real need, the team's safe preparation and the exact regional question a prospective customer should ask."],
+      "notes": "One confirmed monthly professional video. Client approves site, people, vehicle, safety, private detail and service facts."
+    },
+    "reels": { "enabled": false, "items": [], "notes": "" },
+    "photo_content": {
+      "enabled": true,
+      "items": [
+        "Show an approved real farm or business use context without exposing private site information.",
+        "Introduce the We Ar Fuels team member who handles a relevant supply question, with consent.",
+        "Show one safe, permitted operational detail that explains preparation rather than implying a turnaround promise.",
+        "Show the handoff point and ask for the use, location and timing details the regional team confirms it needs."
+      ],
+      "notes": "Four confirmed monthly photo posts; no stock image standing in for a real delivery."
+    },
+    "design_poster": {
+      "enabled": true,
+      "items": [
+        "Ask what work the fuel is needed for, with wording checked against the actual service.",
+        "Ask where the work will happen without advertising an unverified delivery area.",
+        "Explain the current regional enquiry handoff without publishing old or private contact data."
+      ],
+      "notes": "Three confirmed monthly design posters; each has a different job in the enquiry sequence."
+    },
+    "animated_poster": { "enabled": false, "items": [], "notes": "" },
+    "campaign_recommendation": { "enabled": false, "items": [], "notes": "" }
+  },
+  "review_gates": [
+    "Reconfirm November regional priority, exact service area, fuel product and operational subject with We Ar Fuels.",
+    "Retrieve current public footer/contact through the governed private exact-client source at final copy stage; never embed its value here.",
+    "Verify canonical November row/version, staff changes and active package before an exact-client draft amendment.",
+    "Check consent, customer/site privacy and any safety/compliance claims before production or publication."
+  ]
+}
