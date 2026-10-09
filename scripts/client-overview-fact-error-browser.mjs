@@ -79,8 +79,8 @@ try {
     })
     await page.goto('http://127.0.0.1:53990/__overview-fact-error')
     await page.getByRole('heading', { name: 'Synthetic A', exact: true }).waitFor()
-    await page.getByText('Channel facts unavailable', { exact: true }).waitFor({ timeout: 1500 })
-    assert.equal(await page.getByText('Awaiting verified data', { exact: true }).count(), 0)
+    await page.getByText('Unavailable', { exact: true }).waitFor({ timeout: 1500 })
+    assert.equal(await page.getByText('0 verified channels', { exact: true }).count(), 0)
     await page.getByText('Verified channel facts could not be loaded right now', { exact: true }).waitFor()
     assert.ok(reads.includes('/rest/v1/rpc/get_report_metric_facts'))
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width}px body overflow`)
@@ -88,8 +88,9 @@ try {
     await page.screenshot({ path: join(tmpdir(), `cg-overview-fact-error-${width}.png`), fullPage: true })
     factMode = 'empty'
     await page.reload()
-    await page.getByText('Awaiting verified data', { exact: true }).waitFor()
-    assert.equal(await page.getByText('Channel facts unavailable', { exact: true }).count(), 0, 'Successful empty facts read is not a failure')
+    await page.getByText('Published review', { exact: true }).waitFor()
+    assert.equal(await page.getByText('Unavailable', { exact: true }).count(), 0, 'Successful empty facts read is not a failure')
+    assert.equal(await page.getByText('0 verified channels', { exact: true }).count(), 0, 'Missing facts do not become zero')
     factMode = 'verified'
     await page.reload()
     await page.getByText('600', { exact: true }).waitFor()
