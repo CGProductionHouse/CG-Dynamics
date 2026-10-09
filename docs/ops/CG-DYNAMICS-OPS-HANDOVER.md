@@ -31,6 +31,15 @@ be checked before guarded per-client draft updates. Preserve current staff
 amendments; do not bulk overwrite, approve or publish. The user wants one final
 quality review per client, not manual initiation of every research draft.
 
+**In-flight, unmerged:** draft PR #730 (`codex/november-exact-strategy-drafts`)
+begins full ten-field November authoring for Piek Group, Daisy & Co, We Ar
+Fuels and Econofoods (video-production-only). It is intentionally a **draft**:
+four candidates do not complete the 47-client social fleet, the candidate JSON
+is not canonical client data, and none is approved or published. The local
+scope/source regression, serialized full suite with local test prerequisites,
+build, scoped lint and diff check passed. Continue this exact PR for further
+authored candidates; do not create a duplicate batch or merge it as completion.
+
 ### 9 October — client Plan confirmed-scope presentation, local-only candidate
 
 PR #726 merged as `465eb2a12a330b5cc97ca0419aaa5027af095b9b` from
