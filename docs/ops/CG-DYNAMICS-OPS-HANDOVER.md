@@ -1,5 +1,27 @@
 # CG Dynamics Ops Handover
 
+### 9 October — #731 guarded generation candidate in draft PR #736
+
+Draft PR #736 (`codex/731-strategy-autopilot-generation`) prepares a bounded
+next-month AI proposal path on the existing strategy worker/row and a new
+service-role-only guarded amendment RPC. It is **not merged, deployed or
+activated**. `MONTHLY_STRATEGY_AI_ENABLED` defaults OFF; the proposed migration
+has not been applied. Existing 57 November drafts remain blank in production,
+and client strategy projection remains published-only. The ordinary context
+amend RPC was not reused for automatic writes because canonical approval does
+not increment version; the new RPC checks draft status under row lock.
+
+Focused strategy tests (31/31), local build, scoped lint/diff and Deno Edge
+type-check pass. The full suite ran 3,786 tests: 3,766 pass, 19 skip, and one
+unrelated fixed-expiry Brand Hub file-access fixture fails on 9 October; repair
+that test on its own lane. PR #736 still requires actual model-quality review
+for the named exact-client fixtures, staff/mobile browser acceptance and a
+separate #679 migration/Edge/model-spend/backfill release decision. No
+strategy approval/publication, production data write or Vercel operation
+occurred. See `MONTHLY-STRATEGY-GENERATION-RUNBOOK.md` and #731 for the
+activation boundary. Preserve the additive #734 and live acceptance receipts
+below.
+
 ### 9 October — #734 merged; live client launch still gated
 
 The focused mobile client-portal change #734 was reviewed, locally accepted and
