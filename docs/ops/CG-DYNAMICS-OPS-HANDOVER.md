@@ -1,5 +1,20 @@
 # CG Dynamics Ops Handover
 
+### 9 October — confirmed package presentation follow-up merged locally
+
+PR #743 merged to main as `3783b8ef6a9bbd3c8f2b0f0c7809ab35efb965c7`.
+For a package with only a confirmed design-poster component, the client card
+now says "Posters" and marks its count as confirmed; it does not add an unknown
+photo-post component. A static "Once-off" card is available only when an
+audited confirmed package contains the exact `Once-off` marker in its agreed-
+deliverables field. Unverified packages and arbitrary private text remain
+hidden. This is a frontend code change, **not** a production deployment or an
+LHP package confirmation. The existing production package state remains
+60 confirmed / 1 unverified (LHP) until an exact one-off scope is established.
+Focused package/Plan/preview checks 30/30, supported full local Windows suite
+excluding only the 12 SES shell-stub tests, TypeScript/Vite build, emitted
+bundle, scoped lint and diff check passed. No Vercel operation occurred.
+
 ### 9 October — CA-confirmed Bloemfontein package receipts (production)
 
 CA supplied exact monthly quantities in this chat. Using the authenticated
