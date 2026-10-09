@@ -1,5 +1,19 @@
 # Dynamics frontend release gate — 8 October 2026
 
+## 9 October source supersession — #668 client Plan/Overview
+
+PR #726 merged into main `465eb2a12a330b5cc97ca0419aaa5027af095b9b`
+(app head `42aa8f33e36a6f31bdbc6dec42f63f1c7aba3ddb`). It adds the
+confirmed-only Plan package presentation and strictly same-window recorded
+views on client Overview. Exact-head local suite: 3,750 pass, 19 intentional
+skips, zero failures; TypeScript/Vite, scoped lint, diff and actual-component
+Plan 1440/375/390/430 plus Overview 1440/375 pass. The older READY staged
+deployment predates this change and is ineligible for promotion. No Vercel
+operation occurred for #726. Before any final release, pin a new exact main
+source, recheck the real client-role experience and #679 incremental spend plus
+client-site reserve. Do not use the previously invalid Sensitive-redacted
+local prebuilt output or spend a new cloud build on a stale source.
+
 ## Later #712 internal UX source supersession — no cloud action
 
 The final staff/admin UX pass through PR #723 is merged in app-source main
