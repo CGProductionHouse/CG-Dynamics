@@ -13,6 +13,14 @@ When user feedback changes direction:
 3. If it changes the actual product direction, update `docs/cg-dynamics-product-goals.md` too.
 4. Do not treat small UI feedback as permission to forget the bigger workflow.
 
+## Monthly strategy automation correction — 9 October 2026
+
+| Request | Status | Notes |
+|---|---|---|
+| Launch the bounded client app without hand-authoring a strategy JSON fleet | OPEN release gate | PR #730 closed unmerged; #668/#679 own client-role and budget/uptime release acceptance. Published-only strategy truth remains intact. |
+| Automatically draft the next month's substantive exact-client game plan | NEXT MILESTONE #731 | Existing #463 autopilot seeds rows but does not write researched strategic decisions. Use verified findings, approved research, exact package and provenance; no generic fallback. |
+| Integrate exact-client ChatGPT meeting notes into the existing plan | NEXT MILESTONE #731 | Existing meeting debrief/context-update authority feeds a reviewed, version-fenced revision proposal; preserve staff edits and require explicit application/approval before client publication. |
+
 ## Client Schedule board scroll rule
 
 Board view (`/admin/client-schedule?mode=all&view=board`) must be horizontally scrollable to the final client lane. The sticky scrollbar (`StickyHScroll`) uses ratio-based sync so the bar range maps correctly regardless of page padding vs bar width. Do not use direct `scrollLeft` copy — it clips the bar before the content reaches the end. Grid and Year views use the same `StickyHScroll` wrapper and must not regress.

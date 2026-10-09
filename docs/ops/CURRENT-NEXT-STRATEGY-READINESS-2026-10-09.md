@@ -2,6 +2,13 @@
 
 9 October 2026 · #668 / #381. Internal preparation receipt, **not** client publication or semantic acceptance.
 
+**Later CA correction, 9 October:** do not interpret the preparation contract below
+as a request to hand-author a JSON strategy fleet. PR #730 was closed unmerged.
+The application itself must generate and revise substantive next-month drafts;
+#731 owns that next milestone. This document remains the read-only production
+inventory and quality/evidence constraint. Current launch release decisions
+remain under #668/#679, not an excuse to expose the blank drafts.
+
 ## Product decision
 
 The client Strategy view offers only the Johannesburg current month and next month. Historical Calendar and Content Guidelines remain accessible in Plan; historical performance remains in Performance. A stale/future Strategy deep link is canonicalized to the current month. Staff may still inspect historical strategy in the existing admin workflow. The monthly autopilot already seeds current/next drafts without a per-client manual request, but it must not promote a package list, voice note or unreviewed AI output into a client-facing business game plan. The final client-visible projection remains exact-client, exact-month and published-only. CA's requested one-pass review is a content-quality/business sign-off, not a requirement to manually initiate every draft.

@@ -359,6 +359,16 @@ This should come after the main planner/package workflow is stable, but it is pa
 
 CG Assistant should help without adding noise.
 
+For monthly client strategy, staff should not hand-author every plan from a
+blank template. The next milestone is an automatic, source-backed draft for
+the next month using that exact client's verified previous results, approved
+research, incorporated meeting decisions and confirmed package. Meeting notes
+supplied to the exact-client ChatGPT workspace should become a reviewable,
+version-fenced revision proposal to the existing plan. A model may draft
+commercial/creative choices, but unknowns remain explicit, staff edits are
+preserved and client visibility still requires canonical approval/publication.
+See #731.
+
 Good future uses:
 
 - turn Amonique voice-note text into tasks
