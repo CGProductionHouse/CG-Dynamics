@@ -21,6 +21,8 @@ import {
 } from './portal-library-stream.ts'
 import { visiblePortalMonths, resolvePortalMapping, portalRootFolderName } from '../_shared/portal-visibility.ts'
 import { resolveLibraryReadScope } from './portal-preview-scope.ts'
+import { hasCompleteClientUploadMappings, onboardingLinkReadiness } from './link-readiness.ts'
+import { getStoredTokens } from './onedrive-token-store.ts'
 
 const PLATFORMS = new Set(['facebook', 'instagram', 'meta_business', 'linkedin', 'tiktok', 'website', 'google', 'outlook'])
 const CHOICES = new Set(['connect_now', 'do_later', 'not_needed'])
@@ -296,11 +298,12 @@ async function authorizePortalAsset(service: SupabaseClient, assetId: string): P
     && library.client_id === asset.client_id
     && library.drive_id === asset.drive_id
     && isCanonicalPortalRoot(library.root_folder_name)
-    && category?.client_id === asset.client_id
-    && category!.library_id === library.id
-    && category!.drive_id === asset.drive_id
-    && category!.folder_item_id === asset.parent_folder_item_id
-    && Boolean(category!.last_verified_at)
+    && category !== null
+    && category.client_id === asset.client_id
+    && category.library_id === library.id
+    && category.drive_id === asset.drive_id
+    && category.folder_item_id === asset.parent_folder_item_id
+    && Boolean(category.last_verified_at)
     && categoryName != null
     && PORTAL_CATEGORY_LABELS[categoryName] === category!.folder_name
     && validPeriod
@@ -354,7 +357,7 @@ async function handlePortalStreamRequest(service: SupabaseClient, request: Reque
     return json({ ok: false, error: 'Streaming is unavailable for this file.' }, 409)
   }
   const requestedRange = purposeValue === 'thumbnail'
-    ? undefined
+    ? null
     : purposeValue === 'stream'
       ? request.headers.get('range') ?? 'bytes=0-'
       : request.headers.get('range')
@@ -1018,12 +1021,27 @@ Deno.serve(async request => {
     return json({ ok: true, data: sessions })
   }
 
-  if (action === 'staff_generate') {
+  if (action === 'staff_link_readiness' || action === 'staff_generate') {
+    if (!['admin', 'manager'].includes(authorized.profile.role)) return json({ ok: false, error: 'Manager access required.' }, 403)
+    const clientId = cleanString(body.clientId, 50)
+    const readiness = await onboardingLinkReadiness({
+      role: authorized.profile.role,
+      uploadsEnabled: Deno.env.get('CLIENT_ONBOARDING_UPLOADS_ENABLED') === 'true',
+      adapterConfigured: isUploadAdapterConfigured(),
+      hasStoredConsent: async () => Boolean((await getStoredTokens())?.refreshToken),
+      hasClientUploadMappings: async () => {
+        const { data: client, error: clientError } = await service.from('clients').select('id').eq('id', clientId).eq('active', true).maybeSingle()
+        if (clientError || !client) return false
+        const { data: mappings, error } = await service.from('client_onboarding_drive_mapping')
+          .select('client_id, upload_category, drive_id, folder_item_id').eq('client_id', clientId).eq('active', true)
+        return !error && hasCompleteClientUploadMappings(clientId, mappings ?? [])
+      },
+    })
+    if (action === 'staff_link_readiness') return json({ ok: true, data: readiness })
     if (authorized.profile.role !== 'admin') return json({ ok: false, error: 'Admin access required.' }, 403)
-    if (Deno.env.get('CLIENT_ONBOARDING_UPLOADS_ENABLED') !== 'true') {
+    if (!readiness.canGenerate) {
       return json({ ok: false, error: 'Onboarding links stay disabled until secure file transfer is connected.' }, 409)
     }
-    const clientId = cleanString(body.clientId, 50)
     const platforms = [...new Set(cleanStringArray(body.platforms, 8, 30).filter(platform => PLATFORMS.has(platform)))]
     const { data: client } = await service.from('clients').select('id').eq('id', clientId).eq('active', true).maybeSingle()
     if (!client) return json({ ok: false, error: 'Select an active client.' }, 400)
