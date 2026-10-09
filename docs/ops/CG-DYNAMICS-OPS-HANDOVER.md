@@ -1,5 +1,30 @@
 # CG Dynamics Ops Handover
 
+### 9 October — CA strategy correction: launch first, generation next milestone
+
+CA rejected hand-authoring a fleet of monthly strategy JSON files as the product
+solution. Draft PR #730 was closed unmerged; its five local candidates were
+never canonical, client-visible, approved or published. Merged #729 remains an
+exact-client editorial/source packet, not generated strategy truth. Issue #731
+owns the next milestone: Dynamics should automatically generate a substantive,
+package-bounded next-month draft from exact-client prior findings, published
+performance, approved research and incorporated meeting decisions. An exact-
+client ChatGPT meeting update should propose a version-fenced revision to the
+existing plan without replacing staff edits or silently publishing it. Reuse
+`monthly_client_strategies`, `client_context_updates`, `meeting_debriefs` and
+the existing monthly autopilot; no second store or scheduler.
+
+Current autopilot only seeds blank/structural drafts and leaves existing rows
+untouched. It is not substantive strategy generation. The 9 October receipt
+remains 57 November drafts, zero nonblank objectives and zero published
+strategies. Do not continue #730's manual JSON fleet, present package-only
+text as a plan, or let this next-milestone engine silently delay the bounded
+frontend release. Preserve published-only client visibility; decide explicitly
+whether a strategy-empty client experience is acceptable for release, rather
+than exposing blank or unreviewed drafts. #679 budget/uptime and authenticated
+changed-runtime release gates still apply. This correction caused no deploy,
+runtime model activation or production strategy transition.
+
 ### 9 October — current/next strategy window and substantive November gap
 
 CA requires complete, exact-client October and November strategies prepared without
