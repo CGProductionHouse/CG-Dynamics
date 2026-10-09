@@ -11,11 +11,11 @@ and client strategy projection remains published-only. The ordinary context
 amend RPC was not reused for automatic writes because canonical approval does
 not increment version; the new RPC checks draft status under row lock.
 
-Focused strategy tests (31/31), local build, scoped lint/diff and Deno Edge
-type-check pass. A corrected full local run with the Brand Hub fixture's
-localhost origin and OpenSSL on PATH ran 3,788 tests: 3,769 pass, 19 skip,
-zero fail. The earlier single signed-link failure was a mismatched local test
-origin, not a product defect. The generated-proposal staff review panel passed
+Focused strategy tests (33/33), local build, scoped lint/diff and Deno Edge
+type-check pass. The exact-head full local suite with the Brand Hub fixture's
+localhost origin and OpenSSL on PATH ran 3,790 tests serially: 3,771 pass,
+19 skip, zero fail. The earlier single signed-link failure was a mismatched
+local test origin, not a product defect. The generated-proposal staff review panel passed
 read-only 375/390/430/1440px local browser checks. PR #736 still requires actual model-quality review
 for the named exact-client fixtures, staff/mobile browser acceptance and a
 separate #679 migration/Edge/model-spend/backfill release decision. No
