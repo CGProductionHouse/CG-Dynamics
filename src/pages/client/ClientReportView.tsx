@@ -483,14 +483,15 @@ function ReportTabs({
             aria-label={item.label}
             title={item.label}
             onClick={() => onChange(item.key)}
-            className={`group relative flex h-11 w-11 items-center justify-center rounded-2xl border transition sm:h-12 sm:w-12 ${
+            className={`group relative flex min-h-14 min-w-[4.25rem] flex-col items-center justify-center gap-1 rounded-2xl border px-1 transition sm:h-12 sm:min-h-0 sm:w-12 sm:min-w-0 sm:flex-row sm:gap-0 sm:px-0 ${
               isActive
                 ? 'border-[#2dd4bf]/55 bg-[linear-gradient(145deg,rgba(45,212,191,0.22),rgba(255,255,255,0.12))] text-white shadow-[0_14px_30px_-16px_rgba(45,212,191,0.9)]'
                 : 'border-transparent text-slate-400 hover:border-white/10 hover:bg-white/[0.06] hover:text-white'
             }`}
           >
             <PerformanceProviderIcon provider={item.icon} />
-            <span className="pointer-events-none absolute left-1/2 top-[calc(100%+0.45rem)] z-20 hidden -translate-x-1/2 whitespace-nowrap rounded-lg border border-white/10 bg-[#07110f] px-2.5 py-1.5 text-[0.68rem] font-bold text-white shadow-xl group-hover:block group-focus-visible:block">
+            <span className="text-center text-[0.62rem] font-bold leading-none sm:hidden">{item.key === 'web' ? 'Website' : item.key === 'email' ? 'Email' : item.label}</span>
+            <span className="pointer-events-none absolute left-1/2 top-[calc(100%+0.45rem)] z-20 hidden -translate-x-1/2 whitespace-nowrap rounded-lg border border-white/10 bg-[#07110f] px-2.5 py-1.5 text-[0.68rem] font-bold text-white shadow-xl sm:group-hover:block sm:group-focus-visible:block">
               {item.label}
             </span>
           </button>

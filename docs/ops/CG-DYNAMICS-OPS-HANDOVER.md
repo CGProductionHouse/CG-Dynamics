@@ -1,5 +1,40 @@
 # CG Dynamics Ops Handover
 
+### 9 October — mobile client portal and live freshness/schedule acceptance
+
+The live Braize phone screenshots reproduced a discoverability defect: the
+client's six desktop destinations were hidden behind an ambiguous mobile
+control. A local-only responsive candidate keeps desktop navigation unchanged,
+adds persistent labelled Overview/Plan/Performance/Approvals navigation and a
+More panel for Leads/Brand Hub, shortens the mobile Overview hero, and gives
+mobile Performance provider icons visible names (including TikTok). Its actual
+component browser checks cover 1440/375/390/430px. It is **not deployed**;
+authenticated changed-runtime/physical-phone acceptance remains a release gate.
+
+Read-only production acceptance at 2026-10-09 10:34 UTC did **not** prove Meta
+uniformly green: 42 active mapped assets have 42 Facebook and 25 Instagram
+routes; 64 checkpoints are complete and 2 Facebook checkpoints (AV Event Life,
+Zooz Lifestyle WFF) are failed with `provider_error`. In the preceding 24 h,
+283 batches completed but 157 items failed, including repeated Red Oak failures.
+Last verified facts must remain intact; do not present cron/batch completion as
+full fleet freshness. #451 owns exact error/recovery work; no sync was triggered.
+
+The Braize September TikTok published facts have eight partial metrics (7
+videos, 23 followers, 70 account likes, 1 following and observed zero views,
+likes, comments, shares), not complete per-video reporting. Braize has no
+canonical TikTok content mappings. Merged #701/#702 local presentation fixes
+are not proof of production deployment. Do not invent missing TikTok metrics.
+
+The client posting calendar reads client-safe `monthly_deliverables` through
+`client_portal_month_ahead_posts_v2`, **not** Teams Planner tasks. Teams Planner
+remains operational task truth and does not silently become the posting source.
+At this read-only check, only 5 of 61 active clients had an October/November
+Client Schedule slot (5 total, all dated); Braize had no October/November slot
+and no client-linked Planner tasks. Thus “no items scheduled” is truthful but
+fleet posting plans are not launch-complete. Schedule entry/reconciliation needs
+an exact operational owner decision; no production writes were made. #679's
+shared Vercel budget gate and #396/#731 gates remain unchanged.
+
 ### 9 October — live Brand Hub mapping and release gate
 
 Read-only production SQL on the exact CG Dynamics project found **61 active
