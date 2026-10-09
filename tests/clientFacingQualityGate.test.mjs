@@ -140,11 +140,12 @@ test('the client report exposes reporting methodology + honest source language',
 //  9. Loading, empty and error states for every client page
 // ══════════════════════════════════════════════════════════════════════════════
 
-test('home page has loading, error and empty states', () => {
+test('home page keeps loading/error states and sends empty strategy/report detail to their pages', () => {
   assert.match(HOME, /ClientPortalLoadingState/)
   assert.match(HOME, /ClientPortalErrorState/)
-  assert.match(HOME, /no published report/i)
-  assert.match(HOME, /direction will appear once its strategy is reviewed and published/i)
+  assert.match(HOME, /hasPerformanceSummary && <section/)
+  assert.match(HOME, /hasDirectionHighlight && <article/)
+  assert.doesNotMatch(HOME, /no published report|direction will appear once its strategy is reviewed/i)
 })
 
 test('performance dashboard has loading, error and empty states', () => {

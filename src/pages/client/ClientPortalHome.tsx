@@ -23,7 +23,6 @@ type PortalData = {
   googleAdsState: GoogleAdsDashboardState
   schedule: ClientOverviewSchedule
   monthlyStrategy: PublishedMonthlyStrategy | null
-  strategyUnavailable: boolean
 }
 
 const EMPTY_DATA: PortalData = {
@@ -33,7 +32,6 @@ const EMPTY_DATA: PortalData = {
   googleAdsState: 'no-activity',
   schedule: summarizeClientOverviewSchedule(null),
   monthlyStrategy: null,
-  strategyUnavailable: false,
 }
 
 export default function ClientPortalHome() {
@@ -83,7 +81,6 @@ export default function ClientPortalHome() {
           googleAdsState: googleAdsResult.state,
           schedule: summarizeClientOverviewSchedule(calendarResult),
           monthlyStrategy: strategyResult.error ? null : strategyResult.data,
-          strategyUnavailable: Boolean(strategyResult.error),
         })
       } catch {
         if (active) setError(true)
@@ -102,19 +99,13 @@ export default function ClientPortalHome() {
   const reportMonth = data.report ? getReportMonthFromPeriod(data.report) : null
   const actionMonth = workingMonth
   const hasPerformanceSummary = activeOrganic.length > 0 || reportMonth !== null
-  const performanceStatus = data.factsUnavailable
-    ? 'Channel facts unavailable'
-    : activeOrganic.length > 0
-    ? `${activeOrganic.length} verified channel${activeOrganic.length === 1 ? '' : 's'}`
-    : 'Awaiting verified data'
+  const hasDirectionHighlight = strategy.length > 0
+  const hasScheduleHighlight = data.schedule.state === 'scheduled' || data.schedule.state === 'planning'
+  const performanceStatus = `${activeOrganic.length} verified channel${activeOrganic.length === 1 ? '' : 's'}`
   const paidMediaStatus = googleAdsStatusLabel(data.googleAdsState)
-  const contentStatus = data.schedule.state === 'unavailable'
-    ? 'Schedule unavailable'
-    : data.schedule.state === 'empty'
-      ? 'No items scheduled'
-      : data.schedule.state === 'planning'
-        ? 'Content in planning'
-        : `${data.schedule.scheduledCount} item${data.schedule.scheduledCount === 1 ? '' : 's'} scheduled`
+  const contentStatus = data.schedule.state === 'planning'
+    ? 'Content in planning'
+    : `${data.schedule.scheduledCount} item${data.schedule.scheduledCount === 1 ? '' : 's'} scheduled`
 
   return (
     <>
@@ -152,31 +143,29 @@ export default function ClientPortalHome() {
                 <h1 className="mt-6 max-w-4xl text-4xl font-black leading-[0.98] tracking-[-0.055em] text-white sm:mt-8 sm:text-7xl lg:text-[5.5rem]">
                   {client?.name ?? 'Your portal'}
                 </h1>
-                <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-300 sm:mt-6 sm:text-lg">
-                  {reportMonth
-                    ? `The clearest view of your ${monthDisplayLabel(reportMonth)} performance, current direction and what CG is moving forward next.`
-                    : 'Your strategy, performance and upcoming content will come together here as verified work is published.'}
-                </p>
+                {reportMonth && <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-300 sm:mt-6 sm:text-lg">
+                  {`${monthDisplayLabel(reportMonth)} performance at a glance.`}
+                </p>}
 
                 <div className="mt-6 flex flex-wrap gap-3 sm:mt-8">
-                  <Link to="/client/performance" className="inline-flex min-h-11 items-center rounded-full bg-white px-5 py-2.5 text-sm font-black text-[#06110f] shadow-lg transition hover:bg-[#dffcf6]">
+                  {hasPerformanceSummary && <Link to="/client/performance" className="inline-flex min-h-11 items-center rounded-full bg-white px-5 py-2.5 text-sm font-black text-[#06110f] shadow-lg transition hover:bg-[#dffcf6]">
                     Open performance <span aria-hidden className="ml-2">↗</span>
-                  </Link>
+                  </Link>}
                   <Link to="/client/plan" className="inline-flex min-h-11 items-center rounded-full border border-white/15 bg-white/[0.05] px-5 py-2.5 text-sm font-bold text-white transition hover:border-[#2dd4bf]/40 hover:bg-white/[0.08]">
                     View the plan
                   </Link>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-1 [&>*:last-child]:col-span-2 sm:[&>*:last-child]:col-span-1">
-                <HeroSignal label="Performance" value={performanceStatus} tone="teal" />
-                <HeroSignal label="Latest report" value={reportMonth ? monthDisplayLabel(reportMonth) : 'Not published yet'} tone="warm" />
-                <HeroSignal label="Coming up" value={contentStatus} tone="teal" />
-              </div>
+              {(hasPerformanceSummary || hasScheduleHighlight) && <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-1">
+                {activeOrganic.length > 0 && !data.factsUnavailable && <HeroSignal label="Performance" value={performanceStatus} tone="teal" />}
+                {reportMonth && <HeroSignal label="Latest report" value={monthDisplayLabel(reportMonth)} tone="warm" />}
+                {hasScheduleHighlight && <HeroSignal label="Coming up" value={contentStatus} tone="teal" />}
+              </div>}
             </div>
           </section>
 
-          <section className="mt-14">
+          {hasPerformanceSummary && <section className="mt-14">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.26em] text-[#2dd4bf]">Performance pulse</p>
@@ -190,7 +179,6 @@ export default function ClientPortalHome() {
               </Link>
             </div>
 
-            {hasPerformanceSummary ? (
               <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {crossChannelViews && !data.factsUnavailable && <MetricCard
                   label="Recorded views"
@@ -228,23 +216,7 @@ export default function ClientPortalHome() {
                     tone="teal"
                   />
                 )}
-                {!reportMonth && activeOrganic.length === 0 && (
-                  <MetricCard
-                    label="Published review"
-                    value="Pending"
-                    detail="No published report yet"
-                    tone="teal"
-                  />
-                )}
               </div>
-            ) : (
-              <div className="relative mt-7 overflow-hidden rounded-[2rem] border border-white/[0.08] bg-white/[0.04] px-6 py-8 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.95)] sm:px-8">
-                <div aria-hidden className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-[#2dd4bf]/10 blur-3xl" />
-                <p className="relative max-w-2xl text-sm leading-6 text-slate-400">
-                  Performance data will appear here once your reporting sources are connected and verified.
-                </p>
-              </div>
-            )}
 
             <Link
               to="/client/performance"
@@ -252,10 +224,10 @@ export default function ClientPortalHome() {
             >
               Explore the full report <span aria-hidden className="ml-1">↗</span>
             </Link>
-          </section>
+          </section>}
 
-          <section className="mt-14 grid gap-5 lg:grid-cols-5">
-            <article className="relative overflow-hidden rounded-[2rem] border border-white/[0.08] bg-[#0b1715]/85 p-6 shadow-[0_30px_80px_-48px_rgba(0,0,0,0.95)] sm:p-8 lg:col-span-3">
+          {(hasDirectionHighlight || hasScheduleHighlight) && <section className="mt-14 grid gap-5 lg:grid-cols-5">
+            {hasDirectionHighlight && <article className={`relative overflow-hidden rounded-[2rem] border border-white/[0.08] bg-[#0b1715]/85 p-6 shadow-[0_30px_80px_-48px_rgba(0,0,0,0.95)] sm:p-8 ${hasScheduleHighlight ? 'lg:col-span-3' : 'lg:col-span-5'}`}>
               <div aria-hidden className="absolute -right-16 -top-20 h-52 w-52 rounded-full bg-[#2dd4bf]/10 blur-3xl" />
               <div className="relative flex items-end justify-between gap-4">
                 <div>
@@ -270,7 +242,6 @@ export default function ClientPortalHome() {
                 </Link>
               </div>
 
-              {strategy.length > 0 ? (
                 <div className="relative mt-7 space-y-3">
                   {strategy.map(item => (
                     <article
@@ -286,21 +257,12 @@ export default function ClientPortalHome() {
                     </article>
                   ))}
                 </div>
-              ) : (
-                <div className="relative mt-7 rounded-2xl border border-white/[0.08] bg-white/[0.04] px-5 py-6">
-                  <p className="text-sm leading-6 text-slate-400">
-                    {data.strategyUnavailable
-                      ? 'Your monthly direction could not be loaded right now. Please try again shortly.'
-                      : `Your ${monthDisplayLabel(workingMonth)} direction will appear once its strategy is reviewed and published.`}
-                  </p>
-                </div>
-              )}
               <Link to="/client/plan" className="relative mt-5 inline-flex text-sm font-bold text-[#2dd4bf] transition hover:text-white sm:hidden">
                 Open plan <span aria-hidden className="ml-1">↗</span>
               </Link>
-            </article>
+            </article>}
 
-            <article className="relative overflow-hidden rounded-[2rem] border border-[#f97316]/15 bg-[linear-gradient(155deg,rgba(249,115,22,0.12),rgba(255,255,255,0.035)_58%,rgba(45,212,191,0.055))] p-6 shadow-[0_30px_80px_-48px_rgba(0,0,0,0.95)] sm:p-8 lg:col-span-2">
+            {hasScheduleHighlight && <article className={`relative overflow-hidden rounded-[2rem] border border-[#f97316]/15 bg-[linear-gradient(155deg,rgba(249,115,22,0.12),rgba(255,255,255,0.035)_58%,rgba(45,212,191,0.055))] p-6 shadow-[0_30px_80px_-48px_rgba(0,0,0,0.95)] sm:p-8 ${hasDirectionHighlight ? 'lg:col-span-2' : 'lg:col-span-5'}`}>
               <div aria-hidden className="absolute -bottom-20 -right-16 h-52 w-52 rounded-full bg-[#f97316]/10 blur-3xl" />
               <div className="relative flex items-end justify-between gap-4">
                 <div>
@@ -325,15 +287,9 @@ export default function ClientPortalHome() {
                   </>
                 ) : (
                   <>
-                    <p className="text-xl font-black text-white">
-                      {data.schedule.state === 'empty' ? 'A clear canvas' : data.schedule.state === 'planning' ? 'Plan in progress' : 'Schedule temporarily unavailable'}
-                    </p>
+                    <p className="text-xl font-black text-white">Plan in progress</p>
                     <p className="mt-3 text-sm leading-6 text-slate-400">
-                      {data.schedule.state === 'empty'
-                        ? 'No client-visible content is scheduled for this planning month yet.'
-                        : data.schedule.state === 'planning'
-                          ? `${data.schedule.unscheduledCount} content item${data.schedule.unscheduledCount === 1 ? '' : 's'} in planning; no dates confirmed yet.`
-                          : 'We could not load the content calendar right now. Please try again shortly.'}
+                      {data.schedule.unscheduledCount} content item{data.schedule.unscheduledCount === 1 ? '' : 's'} in planning; no dates confirmed yet.
                     </p>
                   </>
                 )}
@@ -345,8 +301,8 @@ export default function ClientPortalHome() {
               >
                 Open calendar <span aria-hidden className="ml-1">↗</span>
               </Link>
-            </article>
-          </section>
+            </article>}
+          </section>}
 
           <section className="mt-5 overflow-hidden rounded-[2rem] border border-white/[0.08] bg-white/[0.035] shadow-[0_24px_60px_-42px_rgba(0,0,0,0.95)]">
             <div className="grid sm:grid-cols-3">

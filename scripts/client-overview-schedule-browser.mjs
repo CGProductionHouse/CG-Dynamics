@@ -40,7 +40,7 @@ let browser
 try {
   await server.listen()
   browser = await chromium.launch({ headless: true })
-  for (const width of [1440, 375]) {
+  for (const width of [1440, 375, 390, 430]) {
     const page = await browser.newPage({ viewport: { width, height: 900 } })
     const errors = []
     page.on('pageerror', error => errors.push(error.message))
@@ -71,20 +71,26 @@ try {
       return route.fulfill({ json: posts })
     })
     for (const [nextState, expected] of [
-      ['unavailable', 'Schedule temporarily unavailable'],
+      ['unavailable', null],
       ['planning', 'Plan in progress'],
       ['scheduled', /scheduled item for the planning month/],
-      ['empty', 'A clear canvas'],
+      ['empty', null],
     ]) {
       state = nextState
       await page.goto('http://127.0.0.1:53991/__overview-schedule')
-      await page.getByText(expected, { exact: typeof expected === 'string' }).waitFor({ timeout: 5000 })
+      if (expected) await page.getByText(expected, { exact: typeof expected === 'string' }).waitFor({ timeout: 5000 })
+      else {
+        await page.getByRole('link', { name: 'View the plan' }).waitFor({ timeout: 5000 })
+        assert.equal(await page.getByText('Coming up', { exact: true }).count(), 0)
+      }
       if (nextState === 'scheduled') assert.equal(await page.getByText('1', { exact: true }).count(), 1)
       assert.equal(await page.getByText('Schedule pending', { exact: true }).count(), 0)
+      assert.equal(await page.getByText('A clear canvas', { exact: true }).count(), 0)
+      assert.equal(await page.getByText('Schedule temporarily unavailable', { exact: true }).count(), 0)
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width}px body overflow`)
       assert.deepEqual(errors, [])
     }
-    console.log(`PASS ${width}px: failed, undated, scheduled and empty states render truthfully; no body overflow or runtime errors`)
+    console.log(`PASS ${width}px: only real planned/scheduled work is highlighted; no body overflow or runtime errors`)
     await page.close()
   }
 } finally { if (browser) await browser.close(); await server.close() }
