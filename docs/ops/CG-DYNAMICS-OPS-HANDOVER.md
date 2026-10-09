@@ -1,5 +1,32 @@
 # CG Dynamics Ops Handover
 
+### 9 October — #734 merged; live client launch still gated
+
+The focused mobile client-portal change #734 was reviewed, locally accepted and
+merged to `main` as `c45ada9be92cba69d204fb76971f9a78ddaa75be`. The
+merged head passes the client portal/preview/service-tab/calendar tests (24/24),
+TikTok presentation and Meta terminal-bootstrap tests (23/23), and local
+TypeScript/Vite build. The earlier full-suite and 1440/375/390/430 component
+browser acceptance belong to the same exact #734 head. Automatic Vercel Git
+deployments remain disabled; this merge is **not** live/authenticated mobile
+acceptance and caused no cloud build or production write.
+
+Read-only live Braize Performance still serves the older TikTok presentation:
+eight partial facts, including 7 published videos, 23 current followers,
+70 account likes, 1 following and observed zero views/likes/comments/shares.
+The old card helper text incorrectly repeats the follower-snapshot label;
+merged #701/#702 remove that wording locally but are not yet deployed. There
+are no canonical Braize per-video mappings, so fuller video-level reporting
+requires exact provider/content evidence rather than a cosmetic zero fill.
+
+The merged mobile fix does not clear #679's shared-budget/uptime release gate,
+#396's protected Brand Hub mapping/permission gate, #731's substantive
+strategy-generation milestone, or the exact-client Client Schedule population
+gap. Meta terminal access failures remain #451 owner/provider recovery work;
+the one-hour exact-asset cooldown and truthful STALE/PARTIAL health tests pass
+locally. A release still needs the #679 packet and real authenticated
+client-role phone acceptance; no deployment or background sync occurred here.
+
 ### 9 October — mobile client portal and live freshness/schedule acceptance
 
 The live Braize phone screenshots reproduced a discoverability defect: the
