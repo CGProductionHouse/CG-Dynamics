@@ -1,5 +1,40 @@
 # CG Dynamics Ops Handover
 
+### 9 October — exact-main frontend release live, content gates remain
+
+CA authorised a conservative Dynamics-only release under #679. Production
+`www.cgdynamics.co.za` now resolves to READY deployment
+`dpl_6diK6P2pNhRF4hpNXrcfi3iMR8y4`, built locally from app-code main
+`8c2add235be4d3c94e4ea6e899e56bd1e8285526` and promoted without a
+second cloud build. The shipped entry `index-Dl3JIZjd.js` matches the locally
+verified production-configured bundle; the previous known-good rollback target
+is `dpl_4zLdbHKXzHs8rDzyErJHtcZfUneE`. An earlier invalid isolated stage
+was caught as a blank page and **never** promoted. Automatic Git deployments
+remain disabled and no hosting budget/configuration was changed.
+
+After promotion, the existing authenticated Braize client session loaded
+Approvals, Plan, confirmed-only package (Posters 8/month), and Overview on the
+live domain. At 390 px the labelled Overview/Plan/Performance/Approvals/More
+navigation was visible; Braize Overview showed 9,618 recorded Facebook plus
+Instagram view events in the same verified window and explicitly excluded
+TikTok's missing view fact. The read-only staged staff preview had also loaded
+the same client-facing components for Braize and Vrystaat Kunstefees, including
+the honest partial TikTok and unmapped Brand Hub states. That preview is not
+an impersonated client-role session; live Braize authenticated acceptance is
+the client-role check. The five checked canonical Dynamics/client-site URLs
+returned HTTP 200 before and after. Shared Vercel on-demand spend displayed
+`$4.82/$10`, Pause ON, after promotion; delayed billing means this is not an
+uptime guarantee or budget increase. Keep the $5 client-site serving reserve
+and avoid new Vercel builds/previews without a fresh #679 gate.
+
+This was a **frontend release**, not client launch completion. Braize October
+strategy remains under review, its client calendar has no scheduled October
+work, and its Brand Hub is still being prepared because production mappings
+are absent. Production package confirmations, #396 library mapping/permission
+work, #731 substantive strategy quality/activation, and exact client schedule
+population remain separate protected/data gates. Do not turn these into green
+status or claim every client login is ready.
+
 ### 9 October — client Overview relevance cleanup merged locally (#668)
 
 The authenticated Braize client Overview still displayed prominent empty
