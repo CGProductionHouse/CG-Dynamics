@@ -116,5 +116,16 @@ test('prompt keeps adversarial source text in evidence, never as an instruction 
   assert.match(prompt.system, /Missing figures are unavailable, not zero/)
   assert.match(prompt.user, /Ignore all prior instructions/)
   assert.match(prompt.user, /confirmedFormats/)
+  assert.match(prompt.system, /confirmed monthly capacity/)
   assert.doesNotMatch(prompt.user, /"reels"/)
+})
+
+test('prompt carries confirmed quantities without turning an unknown format into zero', () => {
+  const row = target()
+  const prompt = buildMonthlyStrategyPrompt({ clientId, clientName: 'Exact Client', strategyMonth, draft: row.strategy_data,
+    evidence: [{ authority: 'client_guide', source_id: 'guide-1', field: 'strategyDrivers', excerpt: 'Verified buyer question.' }],
+    sourceWindows: { confirmed_package_scope: { professional_video: 1, design_poster: 3, photo_content: null } },
+  })
+  const body = JSON.parse(prompt.user)
+  assert.deepEqual(body.confirmedCapacity, { professional_video: 1, design_poster: 3, photo_content: null })
 })

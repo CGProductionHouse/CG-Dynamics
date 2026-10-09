@@ -174,6 +174,8 @@ test('automatic capacity keeps positive, zero and unknown distinct, while repeat
   assert.equal(data.actionPlan.animated_poster.enabled, true)
   assert.deepEqual(data.actionPlan.animated_poster.items, [])
   assert.equal(data.actionPlan.campaign_recommendation.enabled, false)
+  assert.equal(fake.calls[0].p_seed_context.source_windows.confirmed_package_scope.animated_poster, 1)
+  assert.equal(fake.calls[0].p_seed_context.source_windows.confirmed_package_scope.reels, null)
   const repeat = await autopilot.runMonthlyStrategyAutopilot(fake, { today: '2026-09-22', systemProfileId: 'system-profile' })
   assert.equal(repeat.drafts_created, 0)
   assert.equal(fake.calls.length, 1)

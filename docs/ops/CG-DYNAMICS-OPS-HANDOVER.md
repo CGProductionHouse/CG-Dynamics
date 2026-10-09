@@ -1,5 +1,24 @@
 # CG Dynamics Ops Handover
 
+### 9 October — #736 confirmed-quantity source fence, still draft/OFF
+
+The prepared #731 strategy proposal now includes confirmed per-format monthly
+quantities in the model brief and source digest. A positive quantity correction
+while a model response is in flight is rejected even when the set of enabled
+formats is unchanged; unknown quantities remain null. Focused strategy tests
+49/49, TypeScript/Vite build, scoped lint, app-bundle presence and diff checks
+pass. Deno CLI was not available in this shell for a fresh Edge type-check;
+the two Edge entrypoints passed earlier at the preceding PR head. No model,
+Vercel, production, migration or provider operation occurred. PR #736 remains
+draft/OFF pending exact-client semantic review and protected activation.
+
+Read-only Vercel billing on 9 October showed $20/$20 included consumed and
+$4.54/$10 on-demand under the shared Pause-ON budget. The nominal $5.46 left
+is not a Dynamics build allowance; client websites share this cap. Five
+canonical sites returned HTTP HEAD 200: Dynamics, Piek, Emmanuel, All Around
+PVC and Red Oak. Await CA's explicit incremental Dynamics spend ceiling and
+reserved client-site headroom before staging any release under #679.
+
 ### 9 October — local launch continuation; production still older than main
 
 Current main `8c2add235be4d3c94e4ea6e899e56bd1e8285526` includes merged

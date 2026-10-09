@@ -5,6 +5,7 @@ import { emptyStrategyData } from '../src/lib/strategyEngine.ts'
 
 const server = await createServer({ configFile: false, server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true } })
 const { runNextMonthStrategyGeneration } = await server.ssrLoadModule('/supabase/functions/_shared/monthlyStrategyGeneration.ts')
+const { monthlyStrategySourceDigest } = await server.ssrLoadModule('/supabase/functions/_shared/monthlyStrategyModel.ts')
 after(() => server.close())
 
 const clientId = '11111111-1111-4111-8111-111111111111'
@@ -174,6 +175,21 @@ test('a package correction during model work fences the old deliverable scope', 
     generateProposal: async () => {
       fake.tables.clients[0].package_settings.photo_posts_per_month = 3
       return generated()
+    },
+  })
+  assert.equal(result.blocker, 'SOURCE_CHANGED_DURING_GENERATION')
+  assert.deepEqual(row, before)
+  assert.equal(fake.writes.length, 0)
+})
+
+test('a positive quantity correction fences the proposal even when enabled formats stay the same', async () => {
+  const { fake, row } = fixture()
+  const before = structuredClone(row)
+  const result = await runNextMonthStrategyGeneration(fake, input, {
+    generateProposal: async request => {
+      const sourceDigest = await monthlyStrategySourceDigest(request)
+      fake.tables.clients[0].package_settings.design_posters_per_month = 2
+      return generated(sourceDigest)
     },
   })
   assert.equal(result.blocker, 'SOURCE_CHANGED_DURING_GENERATION')
