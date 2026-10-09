@@ -93,6 +93,21 @@ test('model output is fenced to exact client, month, sources and confirmed forma
   assert.equal(parseMonthlyStrategyProposal('{invalid', allowed), null)
 })
 
+test('provider output must cover every confirmed format and cannot recycle rule-only or repeated strategy prose', () => {
+  const allowed = { clientId, strategyMonth, sourceIds: new Set(['report-1', 'guide-1']), enabledFormats: new Set(['professional_video', 'design_poster']) }
+  const missingPoster = { ...proposal, actionPlan: { professional_video: proposal.actionPlan.professional_video } }
+  assert.equal(parseMonthlyStrategyProposal(JSON.stringify(missingPoster), allowed), null)
+  assert.equal(mergeMonthlyStrategyProposal(target(), missingPoster).reason, 'INCOMPLETE_CONFIRMED_FORMAT_PLAN')
+
+  const ruleObjective = { ...proposal, goldStandard: { ...goldStandard, objective: 'Do not use influencer language, forced humour, slang or hype.' } }
+  assert.equal(parseMonthlyStrategyProposal(JSON.stringify(ruleObjective), allowed), null)
+  assert.equal(mergeMonthlyStrategyProposal(target(), ruleObjective).reason, 'RULE_OR_REPEATED_STRATEGY')
+
+  const repeated = { ...proposal, goldStandard: { ...goldStandard, coreMessage: goldStandard.objective } }
+  assert.equal(parseMonthlyStrategyProposal(JSON.stringify(repeated), allowed), null)
+  assert.equal(mergeMonthlyStrategyProposal(target(), repeated).reason, 'RULE_OR_REPEATED_STRATEGY')
+})
+
 test('prompt keeps adversarial source text in evidence, never as an instruction or approved claim', () => {
   const row = target()
   const prompt = buildMonthlyStrategyPrompt({ clientId, clientName: 'Exact Client', strategyMonth, draft: row.strategy_data,

@@ -46,6 +46,7 @@ export function buildMonthlyStrategyPrompt(input: {
       'When an outcome is unknown, frame a measurable proposed test or an owner question, not a claim.',
       'Internal caption rules, contact footers and identity guardrails are constraints, not business strategy.',
       'Produce a concise commercial objective, customer problem, differentiated creative thesis, jobs within confirmed formats, timing, test and learning decision.',
+      'Give every confirmed format at least one distinct, actionable concept. Do not repeat one sentence across the strategy fields or substitute writing rules for the business plan.',
       'Return ONLY a JSON object with clientId, strategyMonth, sourceIds, goldStandard (all ten string fields) and actionPlan (arrays for confirmed format keys).',
       'Cite only listed source IDs in sourceIds. Do not request publication, approval, access or data writes.',
     ].join(' '),
@@ -79,7 +80,12 @@ export function parseMonthlyStrategyProposal(raw: string, allowed: {
       if (typeof value.goldStandard[key] !== 'string' || clean(value.goldStandard[key]).length < 20 ||
           clean(value.goldStandard[key]).length > 1_200) return null
     }
+    if (!hasDistinctStrategicFields(value.goldStandard as GoldStandardStrategy)) return null
     if (!value.actionPlan || typeof value.actionPlan !== 'object') return null
+    for (const key of allowed.enabledFormats) {
+      const items = value.actionPlan[key]
+      if (!Array.isArray(items) || items.length === 0) return null
+    }
     for (const [key, items] of Object.entries(value.actionPlan)) {
       if (!ACTION_KEYS.includes(key as ActionPlanKey) || !allowed.enabledFormats.has(key as ActionPlanKey) ||
           !Array.isArray(items) || items.some(item => typeof item !== 'string' || clean(item).length < 12 || clean(item).length > 300) || items.length > 6) return null
@@ -116,6 +122,14 @@ const ACTION_KEYS: ActionPlanKey[] = [
 ]
 
 const clean = (value: string) => value.replace(/\s+/g, ' ').trim()
+const RULE_ONLY = /^(?:do not|don't|never|avoid|no influencer|keep captions|use natural|canonical client|approved (?:regional )?footer)\b/i
+
+function hasDistinctStrategicFields(gold: GoldStandardStrategy): boolean {
+  const strategic = GOLD_STANDARD_FIELDS.filter(({ key }) => key !== 'mustAvoid')
+    .map(({ key }) => clean(gold[key]))
+  if (strategic.some(value => RULE_ONLY.test(value))) return false
+  return new Set(strategic.map(value => value.toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' '))).size === strategic.length
+}
 
 /** Validate the exact-client/month boundary before any version-fenced RPC. */
 export function mergeMonthlyStrategyProposal(target: ProposalTarget, proposal: MonthlyStrategyProposal, previous?: PreviousGeneratedProposal): ProposalMerge {
@@ -134,6 +148,7 @@ export function mergeMonthlyStrategyProposal(target: ProposalTarget, proposal: M
     return blocked('MISSING_SOURCE_PROVENANCE')
   }
   if (!proposal.goldStandard || typeof proposal.goldStandard !== 'object') return blocked('INVALID_PROPOSAL')
+  if (!hasDistinctStrategicFields(proposal.goldStandard)) return blocked('RULE_OR_REPEATED_STRATEGY')
 
   const current = readStrategyData(target.strategy_data)
   const merged = structuredClone(current)
@@ -170,6 +185,7 @@ export function mergeMonthlyStrategyProposal(target: ProposalTarget, proposal: M
       if (proposedItems.length) conflicts.push(`actionPlan.${key}.disabled`)
       continue
     }
+    if (proposedItems.length === 0) return blocked('INCOMPLETE_CONFIRMED_FORMAT_PLAN')
     if (current.actionPlan[key].items.length > 0) {
       const existingItems = current.actionPlan[key].items.map(clean)
       const newItems = proposedItems.map(clean)
