@@ -2,6 +2,9 @@
 
 ### 9 October — client Plan confirmed-scope presentation, local-only candidate
 
+PR #726 merged as `465eb2a12a330b5cc97ca0419aaa5027af095b9b` from
+head `42aa8f33e36a6f31bdbc6dec42f63f1c7aba3ddb`. It is **not live**.
+
 CA's signed-in CG Production House client Plan still showed the older eight-card
 package with five “To confirm” entries below the useful Plan tabs. The current
 main source was already more compact but still inferred CG-built website care
