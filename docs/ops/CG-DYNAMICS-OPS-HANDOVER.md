@@ -1,6 +1,6 @@
 # CG Dynamics Ops Handover
 
-### 9 October — client Overview relevance cleanup prepared locally (#668)
+### 9 October — client Overview relevance cleanup merged locally (#668)
 
 The authenticated Braize client Overview still displayed prominent empty
 strategy and schedule cards even though the Plan has no published October
@@ -9,9 +9,11 @@ direction and calendar highlights on Overview only when the canonical
 published strategy or client-visible scheduled/planning work exists; the Plan
 remains the place for detailed empty/error states. Verified performance stays
 visible. This is frontend-only and does not create strategy, package or posting
-data. Four-width read-only local browser acceptance and tests must be attached
-to its PR before merge; live production remains unchanged until a separately
-approved, budgeted release under #679.
+data. PR #738 head `628f96c16cc61f397adc1e56ba1eec8147471200`
+merged to main as `403d541a753092c5968e9591c9d0b04deebf0df1` after
+98/98 focused tests, 3,740 runnable Windows-suite passes (19 skipped), build,
+lint/diff and read-only 1440/375/390/430px browser checks. Live production
+remains unchanged until a separately approved, budgeted release under #679.
 
 ### 9 October — #734 merged; live client launch still gated
 
