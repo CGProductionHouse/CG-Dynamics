@@ -1,5 +1,22 @@
 # CG Dynamics Ops Handover
 
+### 9 October — current/next strategy window and substantive November gap
+
+CA requires complete, exact-client October and November strategies prepared without
+manually initiating every draft, then one client-by-client quality review. A
+SELECT-only 9 October receipt found 61 active clients; 57 October and 57 November
+canonical rows, all draft and zero published snapshots. October has 47 nonblank
+objectives (not semantic acceptance). November has **zero** nonblank objectives;
+45 package-only sequencing entries are not business strategy. Four new clients
+(Elcheck, JFJ Electrical, LHP Student Village & Block, VCS) lack confirmed
+packages and both canonical month rows. The exact scope and evidence gates are in
+`CURRENT-NEXT-STRATEGY-READINESS-2026-10-09.md`. A local-only client Plan change
+limits Strategy to Johannesburg current/next months while retaining historical
+Calendar/Guidelines and published-only visibility. It does not create, approve
+or publish strategy or change production; local verification/PR receipt pending.
+Do not tell CA that automatic draft seeding or a nonblank package sentence has
+completed the substantive 47-client November plan.
+
 ### 9 October — client Plan confirmed-scope presentation, local-only candidate
 
 PR #726 merged as `465eb2a12a330b5cc97ca0419aaa5027af095b9b` from
