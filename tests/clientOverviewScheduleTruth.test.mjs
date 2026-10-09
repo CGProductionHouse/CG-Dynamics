@@ -41,10 +41,12 @@ test('verified empty and failed/missing reads remain distinct', () => {
   assert.deepEqual(summarizeClientOverviewSchedule(null), { scheduledCount: 0, unscheduledCount: 0, state: 'unavailable' })
 })
 
-test('client Overview renders unavailable and planning states without a false schedule claim', () => {
+test('client Overview highlights real planning or dated work without empty/unavailable noise', () => {
   const home = readFileSync('src/pages/client/ClientPortalHome.tsx', 'utf8')
   assert.match(home, /summarizeClientOverviewSchedule/)
-  assert.match(home, /Schedule temporarily unavailable/)
+  assert.match(home, /data\.schedule\.state === 'scheduled' \|\| data\.schedule\.state === 'planning'/)
   assert.match(home, /Plan in progress/)
-  assert.doesNotMatch(home, /Schedule pending/)
+  assert.doesNotMatch(home, /No items scheduled|A clear canvas|Schedule temporarily unavailable/)
+  assert.match(home, /hasDirectionHighlight && <article/)
+  assert.doesNotMatch(home, /direction will appear once its strategy is reviewed/)
 })

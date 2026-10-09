@@ -216,7 +216,8 @@ test('legacy report prose is never promoted into a strategy preview', () => {
 
   assert.deepEqual(preview, [])
   assert.deepEqual(buildClientStrategyPreview({ ...report, status: 'draft' }), [])
-  assert.match(HOME_SOURCE, /direction will appear once its strategy is reviewed and published/)
+  assert.match(HOME_SOURCE, /hasDirectionHighlight && <article/)
+  assert.doesNotMatch(HOME_SOURCE, /direction will appear once its strategy is reviewed and published/)
 })
 
 test('verified performance reporting loaders and availability model remain in place', () => {
