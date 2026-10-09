@@ -6,7 +6,7 @@ const read = path => readFileSync(new URL(path, import.meta.url), 'utf8').replac
 const migration = read('../supabase/migrations/20260917173138_canonical_monthly_client_strategy.sql')
 const runtime = read('../src/lib/monthlyStrategy.ts')
 const contract = read('../docs/canonical-monthly-client-strategy.md')
-const { buildMonthlyBaseline } = await import('../src/lib/monthlyStrategySeed.ts')
+const { buildMonthlyBaseline, extractReadyGuideSignals } = await import('../src/lib/monthlyStrategySeed.ts')
 
 function functionDefinition(signatureStart) {
   const start = migration.indexOf(signatureStart)
@@ -110,6 +110,23 @@ test('rich clients receive a materially client-specific seed from approved intel
   assert.ok(baseline.evidence.some(item => item.authority === 'client_guide' && item.source_id === 'guide-cape-lumber'))
   assert.ok(baseline.evidence.some(item => item.authority === 'client_context_update' && item.source_id === 'update-1'))
   assert.ok(baseline.strategyDrivers.every(value => !value.includes('info@example.com')))
+})
+
+test('ready guides contribute client-specific opportunities, not identity or copy guardrails', () => {
+  const guide = name => read(`../artifacts/client-strategy-dossiers/issue-513/runtime-guides/${name}.md`)
+  const daisy = extractReadyGuideSignals(guide('daisy-and-co'))
+  const weAr = extractReadyGuideSignals(guide('we-ar-fuels'))
+  const av = extractReadyGuideSignals(guide('av-event-life'))
+  const piek = extractReadyGuideSignals(guide('piek-group'))
+
+  assert.ok(daisy.some(value => /new-in-store products/i.test(value)))
+  assert.ok(weAr.some(value => /delivery\/service moments/i.test(value)))
+  assert.ok(av.some(value => /venue|load-in|soundcheck/i.test(value)))
+  assert.ok(piek.some(value => /family\/group story|network growth/i.test(value)))
+  for (const signals of [daisy, weAr, av, piek]) {
+    assert.ok(signals.length > 0 && signals.length <= 4)
+    assert.ok(signals.every(value => !/canonical client|same-name businesses|no influencer|do not|never|@|https?:\/\//i.test(value)))
+  }
 })
 
 test('sparse clients receive no generic strategy fallback from recorded deliverables alone', () => {

@@ -1,5 +1,22 @@
 # CG Dynamics Ops Handover
 
+### 9 October — CA corrected four Bloemfontein client scopes; no production mutation
+
+CA directly confirmed Elcheck and JFJ Electrical each have 3 design posters,
+3 photo posts and 1 video monthly; VCS Cleaning Solutions has 8 design posters
+and 1 video monthly; LHP Student Village & Block is once-off, not a recurring
+monthly social package. All unspecified fields remain unknown, not zero. The
+9 October SELECT-only read still found `{}` package objects for all four exact
+client IDs. The work Chrome Dynamics tab is authenticated as Braize client,
+not an admin; do not bypass the audited `confirm_client_package_settings` flow
+with direct SQL. Existing exact-client research and first-party public sources
+were reconciled in `CA-PACKAGE-AND-SOURCE-RECEIPT-2026-10-09.md`; there is no
+new generic identity search or request for facts already documented. LHP's
+original booklet has unresolved utilities/terms conflict. #736 generation
+remains OFF and these source packets are not automatically trusted runtime
+guides. No client package, strategy, schedule, publication, provider or
+Vercel write occurred from this receipt.
+
 ### 9 October — #731 guarded generation candidate in draft PR #736
 
 Draft PR #736 (`codex/731-strategy-autopilot-generation`) prepares a bounded
