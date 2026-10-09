@@ -68,6 +68,12 @@ export interface DriveChild {
   isFolder: boolean
 }
 
+export interface ClientFolderBinding {
+  driveId: string
+  itemId: string
+  folderName: string
+}
+
 export interface PortalMappingPlan {
   rootItemId: string
   rootFolderName: string
@@ -89,6 +95,27 @@ export const PORTAL_REQUIRED_CATEGORIES = [
   { key: 'graphic_design', expectedName: 'Graphic Design' },
   { key: 'video', expectedName: 'Video' },
 ] as const
+
+/**
+ * Anchor portal discovery to the client's existing durable OneDrive binding.
+ * Portal roots live inside Clients/<bound client folder>, never directly in
+ * Clients. A matching display name alone is not sufficient client identity.
+ */
+export function resolveMappedClientFolder(
+  clientsDriveId: string,
+  clientsChildren: readonly DriveChild[],
+  binding: ClientFolderBinding,
+): DriveChild | PortalMappingError {
+  if (!binding.driveId || binding.driveId.toLowerCase() !== clientsDriveId.toLowerCase() ||
+      !binding.itemId || !binding.folderName) {
+    return { error: 'Exact client folder binding is unavailable', httpStatus: 409 }
+  }
+  const matches = clientsChildren.filter(child => child.isFolder && child.id === binding.itemId)
+  if (matches.length !== 1 || matches[0].name !== binding.folderName) {
+    return { error: 'Exact client folder binding no longer matches OneDrive', httpStatus: 409 }
+  }
+  return matches[0]
+}
 
 /**
  * Pure portal root + category resolution.

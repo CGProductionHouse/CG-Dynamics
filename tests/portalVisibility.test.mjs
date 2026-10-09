@@ -6,6 +6,7 @@ import {
   PORTAL_VISIBILITY_TIMEZONE,
   portalClientSlug,
   portalRootFolderName,
+  resolveMappedClientFolder,
   resolvePortalMapping,
   PORTAL_REQUIRED_CATEGORIES,
 } from '../supabase/functions/_shared/portal-visibility.ts'
@@ -196,6 +197,15 @@ test('EF uses portalRootFolderName from shared module', () => {
   assert.ok(ef.includes('portalRootFolderName(client.name)'), 'EF uses portalRootFolderName')
 })
 
+test('staff resolver enters the exact bound client folder before looking for a portal root', () => {
+  const block = ef.slice(ef.indexOf("action === 'staff_resolve_portal_root'"), ef.indexOf('// ── Download actions'))
+  assert.match(block, /from\('client_onedrive_mappings'\)[\s\S]*?\.eq\('client_id', clientId\)/)
+  assert.match(block, /resolveMappedClientFolder\(clientsFolder\.driveId, clientsChildren/)
+  assert.match(block, /listChildren\(clientsFolder\.driveId, clientFolder\.id\)/)
+  assert.ok(block.indexOf('resolveMappedClientFolder') < block.indexOf('const rootChildren'), 'client binding is verified before portal discovery')
+  assert.ok(!block.includes('listChildren(clientsFolder.driveId, clientsFolder.itemId)\n\n    const expectedRootName'), 'portal root is never sought directly under Clients')
+})
+
 test('EF imports portalRootFolderName', () => {
   assert.ok(ef.includes('portalRootFolderName') && ef.includes("from '../_shared/portal-visibility.ts'"), 'imports portalRootFolderName')
 })
@@ -264,6 +274,41 @@ function makeFolder(id, name) {
 function makeFile(id, name) {
   return { id, name, isFolder: false }
 }
+
+test('mapped-folder resolver selects the durable client folder, then the nested portal root', () => {
+  const clientsChildren = [
+    makeFolder('client-red-oak', 'Red Oak'),
+    makeFolder('client-rugby-club', 'Red Oak Rugby Club'),
+    makeFolder('misleading-portal', 'A_ClientPortal_Red_Oak'),
+  ]
+  const folder = resolveMappedClientFolder('drive-1', clientsChildren, {
+    driveId: 'drive-1', itemId: 'client-red-oak', folderName: 'Red Oak',
+  })
+  assert.ok(!('error' in folder))
+  assert.equal(folder.id, 'client-red-oak')
+  const nested = resolvePortalMapping('Red Oak', [makeFolder('portal-red-oak', 'A_ClientPortal_Red_Oak')], VALID_CATEGORY_CHILDREN)
+  assert.ok(!('error' in nested))
+  assert.equal(nested.rootItemId, 'portal-red-oak')
+})
+
+test('mapped-folder resolver fails closed on missing, moved, renamed or cross-drive binding', () => {
+  const children = [makeFolder('client-red-oak', 'Red Oak'), makeFile('file-red-oak', 'Red Oak')]
+  for (const binding of [
+    { driveId: 'other-drive', itemId: 'client-red-oak', folderName: 'Red Oak' },
+    { driveId: 'drive-1', itemId: 'missing', folderName: 'Red Oak' },
+    { driveId: 'drive-1', itemId: 'client-red-oak', folderName: 'Red Oak Rugby Club' },
+    { driveId: 'drive-1', itemId: 'file-red-oak', folderName: 'Red Oak' },
+  ]) {
+    const result = resolveMappedClientFolder('drive-1', children, binding)
+    assert.equal(result.httpStatus, 409)
+  }
+})
+
+test('a shortened physical portal name is an explicit owner exception, never a fuzzy match', () => {
+  const result = resolvePortalMapping('VCS Cleaning Solutions', [makeFolder('short-vcs-root', 'A_ClientPortal_VCS')], VALID_CATEGORY_CHILDREN)
+  assert.equal(result.httpStatus, 404)
+  assert.match(result.error, /A_ClientPortal_VCS_Cleaning_Solutions/)
+})
 
 const VALID_ROOT_CHILDREN = [
   makeFolder('root-id-red-oak', 'A_ClientPortal_Red_Oak'),

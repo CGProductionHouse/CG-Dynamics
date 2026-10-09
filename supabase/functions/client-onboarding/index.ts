@@ -19,7 +19,7 @@ import {
   verifyPortalAccess,
   type PortalAccessPurpose,
 } from './portal-library-stream.ts'
-import { visiblePortalMonths, resolvePortalMapping, portalRootFolderName } from '../_shared/portal-visibility.ts'
+import { visiblePortalMonths, resolveMappedClientFolder, resolvePortalMapping, portalRootFolderName } from '../_shared/portal-visibility.ts'
 import { resolveLibraryReadScope } from './portal-preview-scope.ts'
 
 const PLATFORMS = new Set(['facebook', 'instagram', 'meta_business', 'linkedin', 'tiktok', 'website', 'google', 'outlook'])
@@ -1096,14 +1096,30 @@ Deno.serve(async request => {
     const clientsFolder = await resolveClientsFolder()
     if (!clientsFolder) return json({ ok: false, error: 'OneDrive is not connected.' }, 503)
 
-    const rootChildren = await listChildren(clientsFolder.driveId, clientsFolder.itemId)
-    if (!rootChildren) return json({ ok: false, error: 'Could not list OneDrive folders.' }, 503)
+    const { data: boundFolder, error: bindingError } = await service
+      .from('client_onedrive_mappings')
+      .select('drive_id,client_folder_item_id,folder_name')
+      .eq('client_id', clientId)
+      .maybeSingle()
+    if (bindingError || !boundFolder) return json({ ok: false, error: 'Exact client folder binding is unavailable.' }, 409)
+
+    const clientsChildren = await listChildren(clientsFolder.driveId, clientsFolder.itemId)
+    if (!clientsChildren) return json({ ok: false, error: 'Could not list OneDrive folders.' }, 503)
+    const clientFolder = resolveMappedClientFolder(clientsFolder.driveId, clientsChildren, {
+      driveId: boundFolder.drive_id,
+      itemId: boundFolder.client_folder_item_id,
+      folderName: boundFolder.folder_name,
+    })
+    if ('error' in clientFolder) return json({ ok: false, error: clientFolder.error }, clientFolder.httpStatus)
+
+    const rootChildren = await listChildren(clientsFolder.driveId, clientFolder.id)
+    if (!rootChildren) return json({ ok: false, error: 'Could not list client portal folders.' }, 503)
 
     const expectedRootName = portalRootFolderName(client.name)
-    const portalRoot = rootChildren.find(c => c.isFolder && c.name === expectedRootName)
-    if (!portalRoot) return json({ ok: false, error: `Portal folder not found: ${expectedRootName}` }, 404)
+    const portalRoots = rootChildren.filter(c => c.isFolder && c.name === expectedRootName)
+    if (portalRoots.length !== 1) return json({ ok: false, error: portalRoots.length ? 'Duplicate portal roots.' : `Portal folder not found: ${expectedRootName}` }, portalRoots.length ? 409 : 404)
 
-    const categoryChildren = await listChildren(clientsFolder.driveId, portalRoot.id)
+    const categoryChildren = await listChildren(clientsFolder.driveId, portalRoots[0].id)
     if (!categoryChildren) return json({ ok: false, error: 'Could not list portal categories.' }, 503)
 
     const fullMapping = resolvePortalMapping(client.name, rootChildren, categoryChildren)

@@ -1,5 +1,37 @@
 # CG Dynamics Ops Handover
 
+### 9 October — #396 exact nested Brand Hub route, local correction
+
+The old #396 31-root activation target is not the current physical roster.
+Fresh read-only first-party OneDrive inspection found 61 distinct
+`A_ClientPortal_*` roots under 61 exact `Clients/<client folder>` parents,
+each with Brand Identity, Graphic Design and Video (183/183 required
+categories). All 61 active clients have an existing durable
+`client_onedrive_mappings` row, and each mapped folder ID/name matches an
+immediate child of the canonical OneDrive `Clients` root. This is physical
+folder evidence only: production still has zero portal library/category/asset
+mappings, zero enabled libraries and no proven named client permissions.
+
+The merged staff resolver in `client-onboarding` incorrectly searched for
+`A_ClientPortal_*` directly under `Clients`, so its protected mapping action
+would 404 for these real nested roots. A focused local #396 correction first
+verifies the exact active client's durable folder binding against the Clients
+root, then discovers the portal root and three categories *inside that bound
+folder*. Missing/moved/renamed/cross-drive bindings fail closed; mapping
+remains disabled. Do not deploy or run the production resolver from this code
+receipt. The physical VCS root is shortened to `A_ClientPortal_VCS`, while
+the canonical name helper expects `A_ClientPortal_VCS_Cleaning_Solutions`;
+VCS must stay blocked pending an explicit owner rename or governed exact alias,
+not fuzzy matching. VCS also has a nonempty extra `Client Received` folder
+inside its client-safe root; review its contents/permission intent before
+sharing or enablement. Elcheck and LHP have empty `Client Received` extras.
+
+Read-only migration preflight found zero portal library/category/asset rows,
+the existing category constraint still permits Photography, and the expected
+folder-name constraint is absent. The Photography-removal and post-assets
+migrations still need separate protected approval; no SQL/OneDrive/provider
+write or Vercel operation occurred in this audit. #396 owns that gate.
+
 ### 9 October — confirmed package presentation follow-up merged locally
 
 PR #743 merged to main as `3783b8ef6a9bbd3c8f2b0f0c7809ab35efb965c7`.
