@@ -20,6 +20,8 @@ test('Performance keeps all service choices without inferring package or connect
     for (const tab of PERFORMANCE_SERVICE_TABS) {
       const html = render(tab.key)
       for (const choice of PERFORMANCE_SERVICE_TABS) assert.ok(html.includes(`aria-label="${choice.label}"`), choice.label)
+      assert.match(html, /sm:hidden">TikTok<\/span>/, 'mobile report tabs show provider names without hover')
+      assert.match(html, /sm:hidden">Website<\/span>/, 'long mobile labels remain readable')
       assert.doesNotMatch(html, /No paid campaigns are linked|border-amber-300\/20|This is not a completed monthly report/)
       assert.match(html, /Partial content reporting period/)
       assert.match(html, /Report content coverage:/)

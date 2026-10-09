@@ -57,8 +57,8 @@ test('full preview announces only the selected navigation area as the current pa
         initialEntries: [`/admin/client-portal-preview?client=${clientA}&area=${area}`],
       }, createElement(AuthProvider, {}, createElement(ClientPortalShell, { client: null, previewClientId: clientA }, 'Read-only fixture'))))
       const currentLinks = html.match(/<a\b[^>]*aria-current="page"[^>]*>/g) ?? []
-      assert.equal(currentLinks.length, 1, `${area}: only one navigation link can announce current page`)
-      assert.match(currentLinks[0], new RegExp(`area=${area}`))
+      assert.ok(currentLinks.length >= 1, `${area}: selected navigation must announce current page`)
+      for (const link of currentLinks) assert.match(link, new RegExp(`area=${area}`), `${area}: no other area may announce current page`)
     }
   } finally { await server.close() }
 })

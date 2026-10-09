@@ -79,15 +79,21 @@ try {
     await page.getByLabel('Selected client').selectOption(clientA)
     await page.getByRole('heading', { name: 'Synthetic client A', exact: true }).waitFor()
     for (let i = 0; i < areas.length; i++) {
-      if (width < 640) await page.locator('button[aria-controls="client-mobile-navigation"]').click()
-      const nav = page.getByRole('navigation', { name: width < 640 ? 'Client portal mobile' : 'Client portal' })
+      if (width < 640 && ['Brand Hub', 'Leads'].includes(labels[i])) await page.getByRole('button', { name: 'More pages' }).click()
+      const nav = page.getByRole('navigation', { name: width < 640 && ['Brand Hub', 'Leads'].includes(labels[i]) ? 'More client pages' : width < 640 ? 'Client portal mobile' : 'Client portal' })
       await nav.getByRole('link', { name: labels[i], exact: true }).click()
       await page.waitForURL(url => url.searchParams.get('area') === areas[i])
-      const ready = ['Synthetic client A', 'Your plan, connected.', 'No published report yet', 'Approvals', 'Brand Hub is not available yet', 'Leads'][i]
+      const ready = ['Synthetic client A', 'Your plan', 'No published report yet', 'Approvals', 'Brand Hub is not available yet', 'Leads'][i]
       await page.getByRole('heading', { name: ready, exact: true }).waitFor()
       await page.getByLabel('Loading your workspace', { exact: true }).waitFor({ state: 'hidden' })
       assert.equal(await page.getByLabel('Selected client').inputValue(), clientA)
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width} ${areas[i]} body overflow`)
+      if (width < 640) {
+        const bottomNav = page.getByRole('navigation', { name: 'Client portal mobile' })
+        assert.ok(await bottomNav.isVisible(), 'Primary destinations remain discoverable on mobile')
+        await page.evaluate(() => scrollTo(0, document.body.scrollHeight))
+        assert.ok(await bottomNav.isVisible(), 'Mobile navigation remains visible after scrolling')
+      }
       assert.equal(await page.getByRole('button', { name: /Approve|Request changes|Upload|Publish|Connect/i }).count(), 0, 'No write controls in preview')
       await page.screenshot({ path: join(tmpdir(), `cg-portal-${areas[i]}-${width}.png`), fullPage: true })
     }

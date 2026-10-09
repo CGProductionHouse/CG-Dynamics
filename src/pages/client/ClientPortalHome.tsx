@@ -129,7 +129,7 @@ export default function ClientPortalHome() {
             <div aria-hidden className="absolute right-6 top-2 hidden text-[10rem] font-black leading-none tracking-[-0.12em] text-white/[0.035] lg:block">CG</div>
             <div aria-hidden className="absolute left-0 top-0 h-1 w-full bg-gradient-to-r from-[#2dd4bf] via-[#14b8a6] to-[#f97316]" />
 
-            <div className="relative grid gap-8 p-6 sm:p-9 lg:grid-cols-[1.2fr_0.8fr] lg:items-end lg:p-12">
+            <div className="relative grid gap-6 p-5 sm:gap-8 sm:p-9 lg:grid-cols-[1.2fr_0.8fr] lg:items-end lg:p-12">
               <div className="min-w-0">
                 <div className="flex items-center gap-4 sm:gap-5">
                   {client && (
@@ -149,16 +149,16 @@ export default function ClientPortalHome() {
                   </div>
                 </div>
 
-                <h1 className="mt-8 max-w-4xl text-5xl font-black leading-[0.92] tracking-[-0.055em] text-white sm:text-7xl lg:text-[5.5rem]">
+                <h1 className="mt-6 max-w-4xl text-4xl font-black leading-[0.98] tracking-[-0.055em] text-white sm:mt-8 sm:text-7xl lg:text-[5.5rem]">
                   {client?.name ?? 'Your portal'}
                 </h1>
-                <p className="mt-6 max-w-2xl text-base leading-relaxed text-slate-300 sm:text-lg">
+                <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-300 sm:mt-6 sm:text-lg">
                   {reportMonth
                     ? `The clearest view of your ${monthDisplayLabel(reportMonth)} performance, current direction and what CG is moving forward next.`
                     : 'Your strategy, performance and upcoming content will come together here as verified work is published.'}
                 </p>
 
-                <div className="mt-8 flex flex-wrap gap-3">
+                <div className="mt-6 flex flex-wrap gap-3 sm:mt-8">
                   <Link to="/client/performance" className="inline-flex min-h-11 items-center rounded-full bg-white px-5 py-2.5 text-sm font-black text-[#06110f] shadow-lg transition hover:bg-[#dffcf6]">
                     Open performance <span aria-hidden className="ml-2">↗</span>
                   </Link>
@@ -168,7 +168,7 @@ export default function ClientPortalHome() {
                 </div>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-1 [&>*:last-child]:col-span-2 sm:[&>*:last-child]:col-span-1">
                 <HeroSignal label="Performance" value={performanceStatus} tone="teal" />
                 <HeroSignal label="Latest report" value={reportMonth ? monthDisplayLabel(reportMonth) : 'Not published yet'} tone="warm" />
                 <HeroSignal label="Coming up" value={contentStatus} tone="teal" />

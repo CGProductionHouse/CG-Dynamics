@@ -99,10 +99,12 @@ test('one persistent client layout owns the shell while routed pages render cont
 })
 
 test('client mobile navigation exposes every destination without horizontal-scroll discovery', () => {
-  assert.match(SHELL_SOURCE, /activeItem\.label/)
   assert.match(SHELL_SOURCE, /id="client-mobile-navigation"/)
-  assert.match(SHELL_SOURCE, /className="mt-2 grid grid-cols-2 gap-2/)
-  assert.match(SHELL_SOURCE, /min-h-11/)
+  assert.match(SHELL_SOURCE, /aria-label="Client portal mobile"/)
+  assert.match(SHELL_SOURCE, /aria-label="More pages"/)
+  assert.match(SHELL_SOURCE, /MOBILE_PRIMARY = \[NAV_ITEMS\[0\], NAV_ITEMS\[1\], NAV_ITEMS\[2\]\]/)
+  assert.match(SHELL_SOURCE, /MOBILE_MORE = \[NAV_ITEMS\[3\], NAV_ITEMS\[5\]\]/)
+  assert.match(SHELL_SOURCE, /min-h-14/)
   assert.match(SHELL_SOURCE, /env\(safe-area-inset-bottom\)/)
 })
 
