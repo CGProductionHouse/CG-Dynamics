@@ -1,0 +1,174 @@
+import assert from 'node:assert/strict'
+import { after, test } from 'node:test'
+import { createServer } from 'vite'
+import { emptyStrategyData } from '../src/lib/strategyEngine.ts'
+
+const server = await createServer({ configFile: false, server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true } })
+const { runNextMonthStrategyGeneration } = await server.ssrLoadModule('/supabase/functions/_shared/monthlyStrategyGeneration.ts')
+after(() => server.close())
+
+const clientId = '11111111-1111-4111-8111-111111111111'
+const actorId = '22222222-2222-4222-8222-222222222222'
+const month = '2026-11-01'
+const today = '2026-10-09'
+const settings = {
+  professional_videos_per_month: 1, reels_per_month: 0, photo_posts_per_month: 0,
+  design_posters_per_month: 1, animated_posters_per_month: 0,
+  campaign_management_included: false, monthly_campaign_budget: 0,
+  shoot_days_per_month: 0, website_updates_per_month: 0,
+  other_agreed_deliverables: '', package_notes: '', package_exclusions: '',
+  verification: { status: 'confirmed', version: 1, confirmed_at: '2026-09-20T08:00:00Z', confirmed_by_profile_id: actorId, evidence_note: 'Signed package', inference_note: '', source_references: ['signed-package'] },
+}
+const gold = Object.fromEntries([
+  'objective', 'audienceAndIntent', 'coreMessage', 'formatsAndRationale', 'testAndChange',
+  'pillarsAndHooks', 'mustAvoid', 'channelIntegration', 'successSignals', 'nextMonthGamePlan',
+].map(key => [key, `Evidence-bounded proposed ${key} for an exact local buyer question and test.`]))
+const proposal = { clientId, strategyMonth: month, sourceIds: ['guide-1'], goldStandard: gold,
+  actionPlan: { professional_video: ['Film one exact service demonstration with a buyer question.'], design_poster: ['Design one question-to-enquiry poster for the verified service.'] } }
+
+class Query {
+  constructor(fake, table) { this.fake = fake; this.table = table; this.filters = []; this.sort = null; this.max = null }
+  select() { return this }
+  eq(key, value) { this.filters.push(row => row[key] === value); return this }
+  neq(key, value) { this.filters.push(row => row[key] !== value); return this }
+  not(key, operator, value) { assert.equal(operator, 'is'); this.filters.push(row => value === null ? row[key] != null : row[key] !== value); return this }
+  is(key, value) { this.filters.push(row => row[key] === value); return this }
+  lt(key, value) { this.filters.push(row => String(row[key]) < String(value)); return this }
+  gte(key, value) { this.filters.push(row => String(row[key]) >= String(value)); return this }
+  in(key, values) { this.filters.push(row => values.includes(row[key])); return this }
+  or() { return this }
+  order(key, options) { this.sort = [key, options.ascending]; return this }
+  limit(value) { this.max = value; return this }
+  maybeSingle() { return Promise.resolve({ data: this.result().data[0] ?? null, error: null }) }
+  result() {
+    let data = [...(this.fake.tables[this.table] ?? [])].filter(row => this.filters.every(filter => filter(row)))
+    if (this.sort) data.sort((a, b) => String(a[this.sort[0]]).localeCompare(String(b[this.sort[0]])) * (this.sort[1] ? 1 : -1))
+    if (this.max != null) data = data.slice(0, this.max)
+    return { data, error: null }
+  }
+  then(resolve, reject) { return Promise.resolve(this.result()).then(resolve, reject) }
+}
+
+function fixture() {
+  const data = emptyStrategyData()
+  data.actionPlan.professional_video.enabled = true
+  data.actionPlan.design_poster.enabled = true
+  const row = { id: 'strategy-1', client_id: clientId, strategy_month: month, workflow_status: 'draft',
+    published_version: null, version: 1, strategy_data: data, seed_context: { client_id: clientId, strategy_month: month }, internal_notes: 'Staff note stays.' }
+  const fake = {
+    tables: {
+      clients: [{ id: clientId, name: 'Exact Client', active: true, package_settings: structuredClone(settings) }],
+      monthly_client_strategies: [row], monthly_deliverables: [], company_calendar_events: [],
+      reports: [], posts: [], client_context_updates: [],
+      client_guides: [{ id: 'guide-1', client_id: clientId, runtime_readiness: 'ready', version: 1,
+        guide_markdown: '## Client identity and positioning\n- Serves exact local buyers with a verified service.' }],
+      client_packages: [], client_industry_profiles: [], skill_cards: [],
+    },
+    writes: [],
+    from(table) { return new Query(this, table) },
+    async rpc(name, args) {
+      assert.equal(name, 'propose_monthly_client_strategy_generation')
+      this.writes.push(args)
+      if (this.conflict) return { data: null, error: { message: 'Strategy version conflict' } }
+      assert.equal(args.p_client_id, clientId)
+      assert.equal(args.p_strategy_month, month)
+      assert.equal(args.p_expected_version, row.version)
+      assert.equal(row.workflow_status, 'draft')
+      row.strategy_data = args.p_strategy_data
+      row.seed_context = args.p_seed_context
+      row.version += 1
+      return { data: { version: row.version }, error: null }
+    },
+  }
+  return { fake, row }
+}
+
+const input = { clientId, strategyMonth: month, today, systemProfileId: actorId }
+function generated(sourceDigest = 'digest-a') { return { proposal, sourceDigest, provider: 'fixture' } }
+
+test('fills an exact next-month draft, preserves staff fields and keeps it unpublished', async () => {
+  const { fake, row } = fixture()
+  row.strategy_data.goldStandard.objective = 'Staff-owned commercial objective remains unchanged.'
+  const result = await runNextMonthStrategyGeneration(fake, input, {
+    sourceDigest: async () => 'digest-a', generateProposal: async () => generated(),
+  })
+  assert.equal(result.state, 'review_conflicts')
+  assert.equal(row.strategy_data.goldStandard.objective, 'Staff-owned commercial objective remains unchanged.')
+  assert.equal(row.strategy_data.goldStandard.audienceAndIntent, gold.audienceAndIntent)
+  assert.equal(row.strategy_data.actionPlan.professional_video.items.length, 1)
+  assert.equal(row.workflow_status, 'draft')
+  assert.equal(row.published_version, null)
+  assert.equal(row.internal_notes, 'Staff note stays.')
+  assert.equal(fake.writes.length, 1)
+  assert.deepEqual(Object.keys(fake.tables.monthly_deliverables), [])
+})
+
+test('unchanged evidence does not call the model again; an incorporated meeting note reopens the draft', async () => {
+  const { fake, row } = fixture()
+  let calls = 0
+  const deps = { sourceDigest: async ({ evidence }) => evidence.some(item => item.source_id === 'meeting-1') ? 'digest-b' : 'digest-a',
+    generateProposal: async ({ evidence }) => {
+      calls++
+      if (!evidence.some(item => item.source_id === 'meeting-1')) return generated()
+      return { ...generated('digest-b'), proposal: { ...proposal,
+        goldStandard: { ...gold, objective: 'Meeting decision changes the test to a more useful local service demonstration.' },
+      } }
+    } }
+  assert.equal((await runNextMonthStrategyGeneration(fake, input, deps)).state, 'draft_filled')
+  assert.equal((await runNextMonthStrategyGeneration(fake, input, deps)).state, 'unchanged')
+  assert.equal(calls, 1)
+  fake.tables.client_context_updates.push({ id: 'meeting-1', client_id: clientId, review_state: 'incorporated', title: 'Meeting decision', body: 'Test a more useful service demonstration for local buyers.' })
+  const next = await runNextMonthStrategyGeneration(fake, input, deps)
+  assert.equal(next.state, 'draft_filled')
+  assert.equal(calls, 2)
+  assert.equal(row.seed_context.generation.sourceDigest, 'digest-b')
+  assert.match(row.strategy_data.goldStandard.objective, /Meeting decision/)
+})
+
+test('reviewed, published, cross-client and wrong-month targets fail closed before model work', async () => {
+  const { fake, row } = fixture()
+  let calls = 0
+  const deps = { sourceDigest: async () => 'digest-a', generateProposal: async () => { calls++; return generated() } }
+  row.workflow_status = 'approved'
+  assert.equal((await runNextMonthStrategyGeneration(fake, input, deps)).blocker, 'REVIEWED_OR_PUBLISHED_STRATEGY')
+  row.workflow_status = 'draft'; row.published_version = 1
+  assert.equal((await runNextMonthStrategyGeneration(fake, input, deps)).blocker, 'REVIEWED_OR_PUBLISHED_STRATEGY')
+  row.published_version = null
+  assert.equal((await runNextMonthStrategyGeneration(fake, { ...input, clientId: 'other' }, deps)).blocker, 'EXACT_CLIENT_STRATEGY_UNAVAILABLE')
+  assert.equal((await runNextMonthStrategyGeneration(fake, { ...input, strategyMonth: '2026-10-01' }, deps)).blocker, 'NOT_NEXT_MONTH')
+  assert.equal(calls, 0)
+  assert.equal(fake.writes.length, 0)
+})
+
+test('mid-generation staff edit returns conflict instead of overwriting', async () => {
+  const { fake, row } = fixture()
+  fake.conflict = true
+  const before = structuredClone(row)
+  const result = await runNextMonthStrategyGeneration(fake, input, { sourceDigest: async () => 'digest-a', generateProposal: async () => generated() })
+  assert.equal(result.blocker, 'MID_GENERATION_STAFF_EDIT')
+  assert.deepEqual(row, before)
+})
+
+test('unverified package or missing substantive exact-client evidence never invokes model', async () => {
+  const { fake } = fixture()
+  fake.tables.clients[0].package_settings.verification.status = 'unverified'
+  assert.equal((await runNextMonthStrategyGeneration(fake, input, { sourceDigest: async () => 'digest-a', generateProposal: async () => generated() })).state, 'blocked')
+  assert.equal(fake.writes.length, 0)
+})
+
+test('changed package scope and provider failure leave the canonical draft untouched', async () => {
+  const { fake, row } = fixture()
+  row.strategy_data.actionPlan.reels.enabled = true
+  const before = structuredClone(row)
+  assert.equal((await runNextMonthStrategyGeneration(fake, input, {
+    sourceDigest: async () => 'digest-a', generateProposal: async () => generated(),
+  })).blocker, 'PACKAGE_STRATEGY_SCOPE_DRIFT')
+  assert.deepEqual(row, before)
+  row.strategy_data.actionPlan.reels.enabled = false
+  const reset = structuredClone(row)
+  await assert.rejects(() => runNextMonthStrategyGeneration(fake, input, {
+    sourceDigest: async () => 'digest-a', generateProposal: async () => { throw new Error('provider unavailable') },
+  }), /provider unavailable/)
+  assert.deepEqual(row, reset)
+  assert.equal(fake.writes.length, 0)
+})

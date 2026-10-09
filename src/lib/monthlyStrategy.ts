@@ -11,6 +11,8 @@ import {
   readStrategyData,
   type CalendarSelection,
   type StrategyData,
+  type GoldStandardStrategy,
+  type ActionPlanKey,
 } from './strategyEngine'
 
 export type MonthlyStrategyStatus = 'draft' | 'approved' | 'published'
@@ -68,6 +70,22 @@ export interface MonthlyStrategySeedContext {
   }>
   intelligence_evidence: BaselineEvidence[]
   source_coverage: Record<string, 'available' | 'none' | 'unavailable'>
+  source_windows?: {
+    previous_report_period_end: string | null
+    previous_strategy_month: string | null
+    incorporated_context_updates: Array<{ id: string; created_at: string | null }>
+  }
+  generation?: {
+    sourceDigest: string
+    baseVersion: number
+    proposedSourceIds: string[]
+    proposedGoldStandard: GoldStandardStrategy
+    proposedActionPlan: Partial<Record<ActionPlanKey, string[]>>
+    filledFields: string[]
+    conflicts: string[]
+    status: 'draft_filled' | 'review_conflicts'
+    provider: string
+  }
 }
 
 export interface MonthlyStrategyReceipt {
