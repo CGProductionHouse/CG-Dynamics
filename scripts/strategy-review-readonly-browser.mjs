@@ -23,7 +23,8 @@ const fixture = {
         for(const field of GOLD_STANDARD_FIELDS)data.goldStandard[field.key]='Explain the delivery process and ordering questions using real service footage: '+field.label;
         data.strategyGoingForward='Show the real delivery process and test a clearer ordering prompt.';
         if(window.fixtureKind==='bad')data.goldStandard.objective='Use the verified client evidence to drive the practical direction for this month.';
-        return {error:null,data:{id:'fixture-strategy',client_id:id,strategy_month:month+'-01',workflow_status:window.fixtureKind==='dirty'?'approved':'draft',version:3,strategy_data:data,internal_notes:'Fixture saved review note',seed_context:{client_id:id,strategy_month:month+'-01',source_coverage:{client_guide:'available'},intelligence_evidence:[{authority:'client_guide',source_id:'fixture-guide',excerpt:'Delivery service process'}],sources:{deliverable_ids:[],client_calendar_event_ids:[],approved_client_context_update_ids:[],previous_report_id:null,previous_monthly_strategy_id:null}}}};
+        const generation=window.fixtureKind==='generated'?{sourceDigest:'fixture-digest',baseVersion:2,proposedSourceIds:['fixture-guide'],proposedGoldStandard:{...data.goldStandard,objective:'Test a different local buyer question in a clear service demonstration.'},proposedActionPlan:{},filledFields:['goldStandard.audienceAndIntent'],conflicts:['goldStandard.objective'],status:'review_conflicts',provider:'fixture'}:undefined;
+        return {error:null,data:{id:'fixture-strategy',client_id:id,strategy_month:month+'-01',workflow_status:window.fixtureKind==='dirty'?'approved':'draft',version:3,strategy_data:data,internal_notes:'Fixture saved review note',seed_context:{client_id:id,strategy_month:month+'-01',source_coverage:{client_guide:'available'},source_windows:{previous_report_period_end:'2026-09-30',previous_strategy_month:null,incorporated_context_updates:[]},intelligence_evidence:[{authority:'client_guide',source_id:'fixture-guide',excerpt:'Delivery service process'}],sources:{deliverable_ids:[],client_calendar_event_ids:[],approved_client_context_update_ids:[],previous_report_id:null,previous_monthly_strategy_id:null},generation}}};
       }
       const forbidden=async()=>{window.fixtureWrites++;throw new Error('Mutation forbidden')};
       export const amendMonthlyStrategy=forbidden,seedMonthlyStrategy=forbidden,transitionMonthlyStrategy=forbidden;`
@@ -50,8 +51,8 @@ try {
   await server.listen()
   browser = await chromium.launch({ headless: true })
   for (const width of [375, 390, 430, 1440]) {
-    for (const kind of process.argv[2] ? [process.argv[2]] : ['dirty', 'bad', 'clock']) {
-      assert.ok(['dirty', 'bad', 'clock'].includes(kind))
+    for (const kind of process.argv[2] ? [process.argv[2]] : ['dirty', 'bad', 'clock', 'generated']) {
+      assert.ok(['dirty', 'bad', 'clock', 'generated'].includes(kind))
       const page = await browser.newPage({ viewport: { width, height: 1000 }, timezoneId: 'America/Los_Angeles' })
       const errors = []
       page.on('pageerror', error => errors.push(error.message))
@@ -86,6 +87,12 @@ try {
       } else if (kind === 'bad') {
         assert.equal(await page.getByRole('button', { name: 'Approve strategy', exact: true }).isDisabled(), true)
         await page.getByText('Internal evidence-template instructions are not client strategy.', { exact: true }).waitFor()
+      } else if (kind === 'generated') {
+        const receipt = page.getByText(/Auto-prepared draft · 1 fields added or refreshed · 1 staff choices kept/)
+        await receipt.waitFor()
+        await receipt.click()
+        await page.getByText('Test a different local buyer question in a clear service demonstration.', { exact: false }).waitFor()
+        await page.getByText('Exact monthly objective · staff wording retained', { exact: true }).waitFor()
       } else {
         assert.equal(await page.locator('input[type="month"]').inputValue(), '2026-10', 'Johannesburg October, not Los Angeles September')
         await page.getByText('Automated checks passed. Review the actual strategy before approval.', { exact: true }).waitFor()

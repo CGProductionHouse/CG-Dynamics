@@ -12,9 +12,11 @@ amend RPC was not reused for automatic writes because canonical approval does
 not increment version; the new RPC checks draft status under row lock.
 
 Focused strategy tests (31/31), local build, scoped lint/diff and Deno Edge
-type-check pass. The full suite ran 3,786 tests: 3,766 pass, 19 skip, and one
-unrelated fixed-expiry Brand Hub file-access fixture fails on 9 October; repair
-that test on its own lane. PR #736 still requires actual model-quality review
+type-check pass. A corrected full local run with the Brand Hub fixture's
+localhost origin and OpenSSL on PATH ran 3,788 tests: 3,769 pass, 19 skip,
+zero fail. The earlier single signed-link failure was a mismatched local test
+origin, not a product defect. The generated-proposal staff review panel passed
+read-only 375/390/430/1440px local browser checks. PR #736 still requires actual model-quality review
 for the named exact-client fixtures, staff/mobile browser acceptance and a
 separate #679 migration/Edge/model-spend/backfill release decision. No
 strategy approval/publication, production data write or Vercel operation

@@ -264,14 +264,26 @@ export async function prepareDraft(sb: StrategyAutopilotClient, client: Record<s
   if (reportRow?.id) {
     const postResult = await sb.from('posts').select('id,caption,platform,reach,views,reactions,comments,shares,total_clicks,raw').eq('report_id', reportRow.id).order('reach', { ascending: false }).limit(5)
     if (postResult.error) throw new Error(postResult.error.message)
-    const topPost = ((postResult.data ?? []) as Array<Record<string, unknown>>)[0]
+    const publishedPosts = (postResult.data ?? []) as Array<Record<string, unknown>>
+    const topPost = publishedPosts[0]
     if (topPost) {
-      const reach = typeof topPost.reach === 'number' ? topPost.reach : null
+      const reach = typeof topPost.reach === 'number' && Number.isFinite(topPost.reach) && topPost.reach >= 0 ? topPost.reach : null
       draft.topContent.autoCaption = clean(topPost.caption, 500) || null
       draft.topContent.autoPlatform = clean(topPost.platform, 30) || null
       draft.topContent.autoMetricLabel = reach == null ? null : 'Reach'
       draft.topContent.autoMetricValue = reach
-      evidence.push({ authority: 'published_report_post', source_id: String(topPost.id), field: 'topContent', excerpt: clean(topPost.caption, 180) || 'Top post from the previous published report.' })
+      for (const [index, post] of publishedPosts.slice(0, 3).entries()) {
+        const metrics = ([
+          ['reach', post.reach], ['views', post.views], ['reactions', post.reactions],
+          ['comments', post.comments], ['shares', post.shares], ['clicks', post.total_clicks],
+        ] as Array<[string, unknown]>)
+          .filter(([, value]) => typeof value === 'number' && Number.isFinite(value) && value >= 0)
+          .map(([label, value]) => `${label} ${value}`)
+        evidence.push({
+          authority: 'published_report_post', source_id: String(post.id), field: 'topContent',
+          excerpt: clean(`Published report ended ${clean(reportRow.period_end, 10) || 'unknown date'}; observed post ${index + 1} by reach on ${clean(post.platform, 30) || 'unknown platform'}: ${clean(post.caption, 110) || 'caption unavailable'}; ${metrics.length ? metrics.join(', ') : 'metrics unavailable'}.`, 320),
+        })
+      }
     }
   }
   const performance = clean(reportRow?.performance_comments)
@@ -339,12 +351,13 @@ export async function runMonthlyStrategyAutopilot(
 
   for (const client of clients) for (const strategyMonth of months) {
     try {
-      const existing = await sb.from('monthly_client_strategies').select('id,workflow_status,version').eq('client_id', client.id).eq('strategy_month', strategyMonth).maybeSingle()
+      const existing = await sb.from('monthly_client_strategies').select('id,workflow_status,version,published_version').eq('client_id', client.id).eq('strategy_month', strategyMonth).maybeSingle()
       if (existing.error) throw new Error(existing.error.message)
       if (existing.data) {
         existingUntouched += 1
         if (options.enqueueGeneration && strategyMonth === months[1] &&
-            (existing.data as Record<string, unknown>).workflow_status === 'draft') generationCandidates.add(String(client.id))
+            (existing.data as Record<string, unknown>).workflow_status === 'draft' &&
+            (existing.data as Record<string, unknown>).published_version == null) generationCandidates.add(String(client.id))
         continue
       }
       const prepared = await prepareDraft(sb, client, strategyMonth, options.today)

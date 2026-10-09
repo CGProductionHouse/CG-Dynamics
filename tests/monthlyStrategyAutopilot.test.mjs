@@ -32,7 +32,11 @@ class Query {
   maybeSingle() { const result = this.result(); return Promise.resolve({ data: result.data[0] ?? null, error: null }) }
   result() {
     let data = [...(this.fake.tables[this.table] ?? [])].filter(row => this.filters.every(filter => filter(row)))
-    if (this.sort) data.sort((a, b) => String(a[this.sort[0]]).localeCompare(String(b[this.sort[0]])) * (this.sort[1] ? 1 : -1))
+    if (this.sort) data.sort((a, b) => {
+      const left = a[this.sort[0]], right = b[this.sort[0]]
+      const order = typeof left === 'number' && typeof right === 'number' ? left - right : String(left).localeCompare(String(right))
+      return order * (this.sort[1] ? 1 : -1)
+    })
     if (this.max != null) data = data.slice(0, this.max)
     if (this.slice) data = data.slice(...this.slice)
     return { data, error: null }
@@ -227,6 +231,13 @@ test('opt-in generation does not enqueue approved next-month rows', async () => 
   assert.equal(fake.jobUpserts.length, 0)
 })
 
+test('opt-in generation does not enqueue an amended published next-month row', async () => {
+  const fake = fixture([{ id: 'published-next', client_id: 'client-a', strategy_month: '2026-10-01', workflow_status: 'draft', version: 3, published_version: 2 }])
+  const result = await autopilot.runMonthlyStrategyAutopilot(fake, { today: '2026-09-22', systemProfileId: 'system-profile', enqueueGeneration: true })
+  assert.equal(result.generation_jobs_requested, 0)
+  assert.equal(fake.jobUpserts.length, 0)
+})
+
 test('knowledge retrieval excludes expired, unreviewed-industry and other-client cards before grounding', async () => {
   const fake = fixture()
   fake.tables.client_industry_profiles = [{ client_id: 'client-a', review_state: 'draft', primary_industry: 'Agriculture' }]
@@ -254,6 +265,22 @@ test('next-month grounding reads the prior published snapshot, never an unpublis
   assert.match(evidence, /Published finding: buyers responded/)
   assert.doesNotMatch(evidence, /Unpublished staff revision/)
   assert.equal(next.p_seed_context.sources.previous_monthly_strategy_id, 'published-prior')
+})
+
+test('published post evidence carries its fact window and observed metrics without filling missing facts as zero', async () => {
+  const fake = fixture()
+  fake.tables.reports = [{ id: 'report-a', client_id: 'client-a', status: 'published', platform: null, period_end: '2026-09-30', performance_comments: null }]
+  fake.tables.posts = [
+    { id: 'post-a', report_id: 'report-a', platform: 'facebook', caption: 'Actual delivery demonstration', reach: 120, views: null, reactions: 0, comments: null, shares: 2, total_clicks: null },
+    { id: 'post-b', report_id: 'report-a', platform: 'instagram', caption: 'Another buyer question', reach: 75, views: 90, reactions: null, comments: null, shares: null, total_clicks: null },
+  ]
+  const prepared = await autopilot.prepareDraft(fake, fake.tables.clients[0], '2026-11-01', '2026-10-09')
+  const postEvidence = prepared.evidence.filter(item => item.authority === 'published_report_post')
+  assert.equal(postEvidence.length, 2)
+  assert.match(postEvidence[0].excerpt, /Published report ended 2026-09-30/)
+  assert.match(postEvidence[0].excerpt, /reach 120, reactions 0, shares 2/)
+  assert.doesNotMatch(postEvidence[0].excerpt, /views 0|comments 0|clicks 0/)
+  assert.equal(prepared.seedContext.source_windows.previous_report_period_end, '2026-09-30')
 })
 
 test('a failed canonical strategy read explicitly withholds alignment without replacing guideline authority', () => {
