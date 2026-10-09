@@ -83,6 +83,32 @@ export async function runNextMonthStrategyGeneration(
     evidence: prepared.evidence, sourceWindows: prepared.seedContext.source_windows, targetVersion: target.version,
   })
   if (generated.sourceDigest !== sourceDigest) throw new Error('STRATEGY_SOURCE_CHANGED_DURING_GENERATION')
+  // A model response can arrive after a meeting decision, guide revision or
+  // package correction. The row-version RPC fences staff edits, but those
+  // independent sources need their own pre-write freshness check.
+  const freshClientRead = await sb.from('clients').select('id,name,active,package_settings').eq('id', input.clientId).maybeSingle()
+  if (freshClientRead.error) throw new Error('STRATEGY_SOURCE_READ_UNAVAILABLE')
+  const freshClient = freshClientRead.data as Record<string, unknown> | null
+  if (!freshClient || freshClient.id !== input.clientId || freshClient.active !== true) {
+    return { ok: true, state: 'conflict', blocker: 'SOURCE_CHANGED_DURING_GENERATION' }
+  }
+  const freshPrepared = await prepareDraft(sb, freshClient, input.strategyMonth, input.today)
+  if (freshPrepared.blockers.length) {
+    return { ok: true, state: 'conflict', blocker: 'SOURCE_CHANGED_DURING_GENERATION' }
+  }
+  const freshStrategy = readStrategyData(freshPrepared.draft)
+  const freshFormats = Object.entries(freshStrategy.actionPlan).filter(([, section]) => section.enabled).map(([key]) => key).sort()
+  if (JSON.stringify(freshFormats) !== JSON.stringify(preparedFormats)) {
+    return { ok: true, state: 'conflict', blocker: 'SOURCE_CHANGED_DURING_GENERATION' }
+  }
+  const freshDigest = await (dependencies.sourceDigest ?? monthlyStrategySourceDigest)({
+    clientId: input.clientId, strategyMonth: input.strategyMonth,
+    draft: freshStrategy, evidence: freshPrepared.evidence,
+    sourceWindows: freshPrepared.seedContext.source_windows,
+  })
+  if (freshDigest !== sourceDigest || freshClient.name !== client.name) {
+    return { ok: true, state: 'conflict', blocker: 'SOURCE_CHANGED_DURING_GENERATION' }
+  }
   const merged = mergeMonthlyStrategyProposal(target, generated.proposal, previousGeneration as {
     proposedGoldStandard?: MonthlyStrategyProposal['goldStandard']
     proposedActionPlan?: MonthlyStrategyProposal['actionPlan']

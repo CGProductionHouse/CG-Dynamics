@@ -149,6 +149,38 @@ test('mid-generation staff edit returns conflict instead of overwriting', async 
   assert.deepEqual(row, before)
 })
 
+test('incorporated evidence arriving during model work fences the stale proposal before any write', async () => {
+  const { fake, row } = fixture()
+  const before = structuredClone(row)
+  const result = await runNextMonthStrategyGeneration(fake, input, {
+    sourceDigest: async ({ evidence }) => evidence.some(item => item.source_id === 'meeting-1') ? 'digest-b' : 'digest-a',
+    generateProposal: async () => {
+      fake.tables.client_context_updates.push({ id: 'meeting-1', client_id: clientId, review_state: 'incorporated',
+        title: 'New decision', body: 'Test the exact local service question.', created_at: '2026-10-09T10:00:00Z' })
+      return generated()
+    },
+  })
+  assert.equal(result.state, 'conflict')
+  assert.equal(result.blocker, 'SOURCE_CHANGED_DURING_GENERATION')
+  assert.deepEqual(row, before)
+  assert.equal(fake.writes.length, 0)
+})
+
+test('a package correction during model work fences the old deliverable scope', async () => {
+  const { fake, row } = fixture()
+  const before = structuredClone(row)
+  const result = await runNextMonthStrategyGeneration(fake, input, {
+    sourceDigest: async () => 'digest-a',
+    generateProposal: async () => {
+      fake.tables.clients[0].package_settings.photo_posts_per_month = 3
+      return generated()
+    },
+  })
+  assert.equal(result.blocker, 'SOURCE_CHANGED_DURING_GENERATION')
+  assert.deepEqual(row, before)
+  assert.equal(fake.writes.length, 0)
+})
+
 test('unverified package or missing substantive exact-client evidence never invokes model', async () => {
   const { fake } = fixture()
   fake.tables.clients[0].package_settings.verification.status = 'unverified'
