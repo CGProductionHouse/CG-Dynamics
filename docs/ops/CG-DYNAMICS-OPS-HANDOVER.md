@@ -1,5 +1,36 @@
 # CG Dynamics Ops Handover
 
+### 9 October — live Brand Hub mapping and release gate
+
+Read-only production SQL on the exact CG Dynamics project found **61 active
+clients, zero mapped portal libraries, zero enabled libraries, zero mapped
+categories and zero active published portal assets**. Braize and CG Production
+House both have no library mapping; the client-facing "library is being
+prepared" state is therefore truthful, not proof of a frontend defect. The
+separate canonical Braize *internal* client-folder binding is not a Brand Hub
+mapping. Read-only first-party OneDrive search confirmed Braize's exact
+`A_ClientPortal_Braize` root under `Clients/Braize` and its Brand Identity,
+Graphic Design and Video children. The first two category folders are empty;
+Video has two children requiring final-asset review before any publication.
+This does not establish client read-only permission or approved final content.
+
+The foundation migration `20260918113000` is recorded as applied, while the
+Photography-removal `20260919100000` and exact post-file
+`20261007100000` migrations are absent from the production ledger. Do not run
+the production resolver, enable libraries, publish assets or share OneDrive
+folders until the #396 exact-client migration/mapping/permission gate is
+approved and each boundary is verified. Current code cannot make a live Brand
+Hub appear by a frontend deployment alone.
+
+Authenticated Vercel billing readback on 9 October: 18 September–18 October
+cycle, included USD 20/20 consumed, on-demand USD 4.34 against the shared
+USD 10 Pause-ON cap. Nominal unspent USD 5.66 is delayed billing evidence and
+**not** a Dynamics development allowance; client sites share this cap. The
+#679 release packet still needs an explicit incremental spend ceiling, client-
+site uptime reserve, exact final commit, rollback and authenticated staged
+client-role acceptance. No migration, OneDrive share, production data write,
+Edge deployment, Vercel build or promotion occurred in this audit.
+
 ### 9 October — CA strategy correction: launch first, generation next milestone
 
 CA rejected hand-authoring a fleet of monthly strategy JSON files as the product
