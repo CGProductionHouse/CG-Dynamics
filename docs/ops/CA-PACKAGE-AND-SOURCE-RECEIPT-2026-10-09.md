@@ -1,6 +1,6 @@
 # CA package correction and exact-client strategy sources — 9 October 2026
 
-Internal operating receipt for #668/#731. CA supplied the following scope directly in this chat on 9 October. This supersedes the **quantity unknown** statements in the 7 October Bloemfontein research packet, but it does not claim that `clients.package_settings` has been confirmed in production. At the read-only 9 October check, all four exact client rows still contained `{}`. No package RPC, strategy amendment, publication, OneDrive/provider action or production write occurred in this receipt.
+Internal operating receipt for #668/#731. CA supplied the following scope directly in this chat on 9 October. This supersedes the **quantity unknown** statements in the 7 October Bloemfontein research packet. The table below records that initial CA evidence; at the initial read-only check all four production package rows still contained `{}`. **Later on 9 October**, Elcheck, JFJ Electrical and VCS were confirmed through the existing audited production admin package flow, bringing the fleet to 60 confirmed / 1 unverified (LHP). That later package write did not amend, approve or publish strategy, schedule work, share OneDrive content or act on a provider.
 
 | Exact client | Canonical client ID | CA-confirmed scope | Canonical field interpretation | Still unknown |
 | --- | --- | --- | --- | --- |
@@ -9,7 +9,7 @@ Internal operating receipt for #668/#731. CA supplied the following scope direct
 | LHP Student Village & Block | `1a6d6c62-7e5e-4e1e-93e6-21d9157f0a01` | Once-off | No recurring monthly count; keep automatic monthly strategy/package gate closed | Exact commissioned once-off deliverables and whether Village or Block is in scope |
 | VCS Cleaning Solutions | `bbd1629e-79fb-4c41-b1e4-88a1f160bd34` | 8 posters, 1 video | `design_posters_per_month=8`, `professional_videos_per_month=1` | Photo posts and all other fields; no inferred zero |
 
-Do not collapse these into a guessed social-management contract, add shoot days/reels/campaign management, or show unknown extras in the client UI. Once entered through the existing audited `confirm_client_package_settings` admin flow, known positive values may be shown cleanly; the client package component already combines positive photo/design capacity into one Posters card and hides unknown cards. Until then, the production package remains unverified and is intentionally not projected as confirmed.
+Do not collapse these into a guessed social-management contract, add shoot days/reels/campaign management, or show unknown extras in the client UI. The three confirmed monthly packages may project their known positive values after a fresh package/version read. LHP remains unverified and intentionally does not project a recurring monthly promise.
 
 ## Research-to-decision chain, not caption rules masquerading as strategy
 
@@ -22,6 +22,6 @@ The four other requested quality fixtures are not waiting for more generic web r
 
 ## Remaining executable gates
 
-1. Record CA's exact scope in the existing audited admin package-confirmation flow under the correct client IDs, leaving all unspecified fields `null`; do not bypass its actor/evidence receipt with direct SQL. LHP stays once-off, not a monthly package. The available work Chrome Dynamics session is a Braize client session, not an admin session, so it was not used for package mutation.
+1. The Elcheck, JFJ and VCS package confirmation is complete; verify its current audited version before future generation. LHP still needs an exact owner-approved once-off deliverable scope and must not be turned into a monthly package. Do not repeat the completed package write or bypass its actor/evidence receipt with direct SQL.
 2. Review/activate exact-client evidence through the governed knowledge/guide path. Repository packets and private chats are not automatically trusted runtime knowledge. The current generator remains OFF and cannot fill these four solely from this document.
 3. Run the model against real exact-client fixtures under the separate #679 spend/activation gate; judge its *actual* business objective, offer/segment choice, creative jobs, tests and learning. Preserve staff edits; approve/publish only through the existing workflow. Client Schedule needs actual dated owner-confirmed items; package capacity alone is not a posting calendar.

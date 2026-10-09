@@ -1,5 +1,27 @@
 # CG Dynamics Ops Handover
 
+### 9 October — CA launch-finish order and #736 reconciliation
+
+CA's current client-by-client launch contract is #668 comment 6085424890,
+cross-linked from #381. Work in this order: reconcile the existing #731/#736
+guarded strategy draft; prepare real posting dates only from canonical Client
+Schedule evidence; complete #396 exact client-safe Brand Hub roots/finals/access;
+accept each client role on a phone across Overview, Plan, Performance,
+Approvals and Brand Hub; then use one #679 budgeted, reversible release packet.
+No blanket launch claim from frontend compilation or synthetic fixtures. The
+production content gates remain zero published strategies, only five clients
+with October/November dated Client Schedule slots, zero enabled Brand Hubs,
+and 60/61 confirmed packages with LHP's once-off scope unresolved.
+
+Draft #736 was reconciled onto current main without discarding either its
+strategy receipt or the later package/live-release receipts. Elcheck, JFJ and
+VCS are now confirmed in production through the audited admin flow; old
+"package rows have not changed" preparation prose was corrected. The
+generator remains OFF. This merge is code/receipt reconciliation only: no
+model call, strategy amendment/publication, production migration/Edge action,
+or Vercel operation. Actual generated quality and protected activation remain
+#731/#679 gates.
+
 ### 9 October — #736 confirmed-quantity source fence, still draft/OFF
 
 The prepared #731 strategy proposal now includes confirmed per-format monthly
@@ -83,6 +105,79 @@ strategy approval/publication, production data write or Vercel operation
 occurred. See `MONTHLY-STRATEGY-GENERATION-RUNBOOK.md` and #731 for the
 activation boundary. Preserve the additive #734 and live acceptance receipts
 below.
+### 9 October — confirmed package presentation follow-up merged locally
+
+PR #743 merged to main as `3783b8ef6a9bbd3c8f2b0f0c7809ab35efb965c7`.
+For a package with only a confirmed design-poster component, the client card
+now says "Posters" and marks its count as confirmed; it does not add an unknown
+photo-post component. A static "Once-off" card is available only when an
+audited confirmed package contains the exact `Once-off` marker in its agreed-
+deliverables field. Unverified packages and arbitrary private text remain
+hidden. This is a frontend code change, **not** a production deployment or an
+LHP package confirmation. The existing production package state remains
+60 confirmed / 1 unverified (LHP) until an exact one-off scope is established.
+Focused package/Plan/preview checks 30/30, supported full local Windows suite
+excluding only the 12 SES shell-stub tests, TypeScript/Vite build, emitted
+bundle, scoped lint and diff check passed. No Vercel operation occurred.
+
+### 9 October — CA-confirmed Bloemfontein package receipts (production)
+
+CA supplied exact monthly quantities in this chat. Using the authenticated
+admin Clients form and its audited package-confirmation RPC, Elcheck and JFJ
+Electrical were each confirmed as 1 professional video, 3 photo posts and 3
+design posters per month. VCS Cleaning Solutions was confirmed as 1 video and
+8 posters per month; the existing admin schema records those posters in its
+design-poster field, while photo posts and all other unspecified fields remain
+unknown. The admin queue changed from 57 confirmed / 4 unverified to 60
+confirmed / 1 unverified among 61 active clients. Read-only staff client-portal
+preview subsequently showed Elcheck and JFJ as 1 video + 6 combined posters,
+and VCS as 1 video + 8 design posters. This is package evidence, not proof of
+scheduled work, published strategy, provider freshness or client-role login.
+
+LHP Student Village & Block is the one remaining unverified package. CA said
+"once-off" but supplied no exact deliverable scope or monthly quantity; its
+admin package fields and notes were blank on inspection. Do **not** convert it
+to a recurring monthly promise or confirm an empty package. The exact one-off
+scope and client-facing representation need an owner decision. No strategy,
+Client Schedule, report, provider or other production record was changed by
+this package pass. #731's draft generator must use the new confirmed quantities
+only after its separate guarded rollout; do not infer missing fields as zero.
+
+### 9 October — exact-main frontend release live, content gates remain
+
+CA authorised a conservative Dynamics-only release under #679. Production
+`www.cgdynamics.co.za` now resolves to READY deployment
+`dpl_6diK6P2pNhRF4hpNXrcfi3iMR8y4`, built locally from app-code main
+`8c2add235be4d3c94e4ea6e899e56bd1e8285526` and promoted without a
+second cloud build. The shipped entry `index-Dl3JIZjd.js` matches the locally
+verified production-configured bundle; the previous known-good rollback target
+is `dpl_4zLdbHKXzHs8rDzyErJHtcZfUneE`. An earlier invalid isolated stage
+was caught as a blank page and **never** promoted. Automatic Git deployments
+remain disabled and no hosting budget/configuration was changed.
+
+After promotion, the existing authenticated Braize client session loaded
+Approvals, Plan, confirmed-only package (Posters 8/month), and Overview on the
+live domain. At 390 px the labelled Overview/Plan/Performance/Approvals/More
+navigation was visible; Braize Overview showed 9,618 recorded Facebook plus
+Instagram view events in the same verified window and explicitly excluded
+TikTok's missing view fact. The read-only staged staff preview had also loaded
+the same client-facing components for Braize and Vrystaat Kunstefees, including
+the honest partial TikTok and unmapped Brand Hub states. That preview is not
+an impersonated client-role session; live Braize authenticated acceptance is
+the client-role check. The five checked canonical Dynamics/client-site URLs
+returned HTTP 200 before and after. Shared Vercel on-demand spend displayed
+`$4.82/$10`, Pause ON, after promotion; delayed billing means this is not an
+uptime guarantee or budget increase. Keep the $5 client-site serving reserve
+and avoid new Vercel builds/previews without a fresh #679 gate.
+
+This was a **frontend release**, not client launch completion. Braize October
+strategy remains under review, its client calendar has no scheduled October
+work, and its Brand Hub is still being prepared because production mappings
+are absent. Production package confirmations, #396 library mapping/permission
+work, #731 substantive strategy quality/activation, and exact client schedule
+population remain separate protected/data gates. Do not turn these into green
+status or claim every client login is ready.
+
 ### 9 October — client Overview relevance cleanup merged locally (#668)
 
 The authenticated Braize client Overview still displayed prominent empty

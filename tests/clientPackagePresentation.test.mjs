@@ -47,7 +47,7 @@ test('client package renders confirmed capacity while preserving unknown/zero an
       assert.doesNotMatch(render(row), /Campaign management|>Included<\/dd>|>Not included<\/dd>/)
     }
     for (const [photo, design, expected] of [
-      [null, null, null], [null, 12, '12 per month'],
+      [null, null, null], [null, 12, '12 confirmed per month'],
       [4, null, '4 per month'], [0, 0, null], [4, 3, '7 per month'],
     ]) {
       const next = { ...values, photo_posts_per_month: photo, design_posters_per_month: design }
@@ -57,6 +57,18 @@ test('client package renders confirmed capacity while preserving unknown/zero an
       if (expected) assert.ok(rendered.includes(expected))
       assert.doesNotMatch(rendered, /To confirm/)
     }
+    const designOnly = { ...values, photo_posts_per_month: null, design_posters_per_month: 8 }
+    const designOnlyRow = { ...confirmed, ...designOnly, verification: { ...confirmed.verification, field_states: buildPackageFieldStates(designOnly) } }
+    const designOnlyHtml = render(designOnlyRow)
+    assert.match(designOnlyHtml, /Posters<\/dt>[\s\S]*8 confirmed per month/)
+    assert.doesNotMatch(designOnlyHtml, /Design posters|9 per month|To confirm/)
+    const onceOff = { ...values, professional_videos_per_month: null, photo_posts_per_month: null, design_posters_per_month: null, other_agreed_deliverables: 'Once-off' }
+    const onceOffRow = { ...confirmed, ...onceOff, verification: { ...confirmed.verification, field_states: buildPackageFieldStates(onceOff) } }
+    assert.match(render(onceOffRow), /Engagement<\/dt>[\s\S]*Once-off<\/dd>/)
+    assert.doesNotMatch(render(onceOff), /Engagement|Once-off/)
+    const privateText = { ...onceOff, other_agreed_deliverables: 'Private service details' }
+    const privateRow = { ...confirmed, ...privateText, verification: { ...confirmed.verification, field_states: buildPackageFieldStates(privateText) } }
+    assert.doesNotMatch(render(privateRow), /Private service details|Engagement/)
     const renderFor = clientId => renderToStaticMarkup(createElement(ClientPackageSummary, { packageSettings: confirmed, clientId }))
     for (const id of ['ed7aa1ae-de21-4151-a8f9-54796b234c1f', 'd53d8e62-9e6a-4bb9-be3f-554f40942d45',
       'cdb11a82-339e-4b46-9b09-bde1a23efeaf', 'fd16ebae-a50b-4920-afe0-94c2631f8f06',
