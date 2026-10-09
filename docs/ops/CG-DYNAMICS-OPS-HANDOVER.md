@@ -1,5 +1,29 @@
 # CG Dynamics Ops Handover
 
+### 9 October — local launch continuation; production still older than main
+
+Current main `8c2add235be4d3c94e4ea6e899e56bd1e8285526` includes merged
+frontend Overview cleanup #738 and test-only error-state receipt #740. Local
+actual-component client preview, Plan, Approvals, library, service tabs and
+Overview checks passed at desktop and phone widths; these are **not**
+changed-production acceptance. Authenticated production Braize still shows the
+older empty Overview cards and `To confirm` package cards, no published October
+strategy, no October scheduled posts, and a Brand Hub awaiting its verified
+client-safe mapping. #679 prohibits a cloud build/release until an explicit
+incremental spend ceiling and client-site reserve are set. Do not claim the
+app is live-ready from the local fixtures.
+
+Existing draft PR #736 includes source-fence commit
+`26fe8c06eaa32d49764e3834b3e6850dbe3dd0b8`: the source/evidence/package
+is re-read after the model responds, before the
+version-fenced draft RPC. A mid-response incorporated decision or corrected
+format fails closed without writing an obsolete proposal. Focused strategy
+36/36, runnable Windows suite 3,763 pass/19 skip/0 fail, build/scoped lint,
+Deno entrypoint and diff checks pass. The generator remains OFF; no model call,
+migration, Edge deploy, production strategy write, approval or publication.
+Actual client-specific semantic quality, confirmed production package records,
+#396 library mapping and #679 release/activation gates remain open.
+
 ### 9 October — CA corrected four Bloemfontein client scopes; no production mutation
 
 CA directly confirmed Elcheck and JFJ Electrical each have 3 design posters,
