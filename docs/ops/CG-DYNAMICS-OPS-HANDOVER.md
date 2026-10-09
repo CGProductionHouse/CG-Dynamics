@@ -1,5 +1,28 @@
 # CG Dynamics Ops Handover
 
+### 9 October — CA-confirmed Bloemfontein package receipts (production)
+
+CA supplied exact monthly quantities in this chat. Using the authenticated
+admin Clients form and its audited package-confirmation RPC, Elcheck and JFJ
+Electrical were each confirmed as 1 professional video, 3 photo posts and 3
+design posters per month. VCS Cleaning Solutions was confirmed as 1 video and
+8 posters per month; the existing admin schema records those posters in its
+design-poster field, while photo posts and all other unspecified fields remain
+unknown. The admin queue changed from 57 confirmed / 4 unverified to 60
+confirmed / 1 unverified among 61 active clients. Read-only staff client-portal
+preview subsequently showed Elcheck and JFJ as 1 video + 6 combined posters,
+and VCS as 1 video + 8 design posters. This is package evidence, not proof of
+scheduled work, published strategy, provider freshness or client-role login.
+
+LHP Student Village & Block is the one remaining unverified package. CA said
+"once-off" but supplied no exact deliverable scope or monthly quantity; its
+admin package fields and notes were blank on inspection. Do **not** convert it
+to a recurring monthly promise or confirm an empty package. The exact one-off
+scope and client-facing representation need an owner decision. No strategy,
+Client Schedule, report, provider or other production record was changed by
+this package pass. #731's draft generator must use the new confirmed quantities
+only after its separate guarded rollout; do not infer missing fields as zero.
+
 ### 9 October — exact-main frontend release live, content gates remain
 
 CA authorised a conservative Dynamics-only release under #679. Production
