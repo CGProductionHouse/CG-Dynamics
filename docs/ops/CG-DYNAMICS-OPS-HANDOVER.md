@@ -40,6 +40,20 @@ strategy approval/publication, production data write or Vercel operation
 occurred. See `MONTHLY-STRATEGY-GENERATION-RUNBOOK.md` and #731 for the
 activation boundary. Preserve the additive #734 and live acceptance receipts
 below.
+### 9 October — client Overview relevance cleanup merged locally (#668)
+
+The authenticated Braize client Overview still displayed prominent empty
+strategy and schedule cards even though the Plan has no published October
+strategy or October/November posting slots. A focused local change now shows
+direction and calendar highlights on Overview only when the canonical
+published strategy or client-visible scheduled/planning work exists; the Plan
+remains the place for detailed empty/error states. Verified performance stays
+visible. This is frontend-only and does not create strategy, package or posting
+data. PR #738 head `628f96c16cc61f397adc1e56ba1eec8147471200`
+merged to main as `403d541a753092c5968e9591c9d0b04deebf0df1` after
+98/98 focused tests, 3,740 runnable Windows-suite passes (19 skipped), build,
+lint/diff and read-only 1440/375/390/430px browser checks. Live production
+remains unchanged until a separately approved, budgeted release under #679.
 
 ### 9 October — #734 merged; live client launch still gated
 
