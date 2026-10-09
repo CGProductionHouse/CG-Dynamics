@@ -12,10 +12,24 @@ objectives (not semantic acceptance). November has **zero** nonblank objectives;
 packages and both canonical month rows. The exact scope and evidence gates are in
 `CURRENT-NEXT-STRATEGY-READINESS-2026-10-09.md`. A local-only client Plan change
 limits Strategy to Johannesburg current/next months while retaining historical
-Calendar/Guidelines and published-only visibility. It does not create, approve
-or publish strategy or change production; local verification/PR receipt pending.
+Calendar/Guidelines and published-only visibility. PR #728 merged as
+`bceaca29eb0df757d4920639b6b15d3e4f1c882f`; focused 16, full suite
+3,752 pass/19 intentional skips, TypeScript/Vite build, scoped lint/diff and
+actual Plan browser 1440/375/390/430 passed. It did not create, approve or
+publish strategy or change production; Vercel remained untouched.
 Do not tell CA that automatic draft seeding or a nonblank package sentence has
 completed the substantive 47-client November plan.
+
+The exact-client local editorial packet
+`STRATEGY-CURRENT-NEXT-EXACT-CLIENT-PROPOSALS-2026-10-09.md` now separates
+Piek + 35 other October-authored clients, ten historically held clients with
+guides, Zooz's unresolved evidence, four new Bloemfontein clients with
+unconfirmed packages, and ten non-social/not-currently-social rows. It gives
+distinct November decisions but is **not** a ten-field canonical amendment or
+client-visible strategy. Its source pointers and conditional owner gates must
+be checked before guarded per-client draft updates. Preserve current staff
+amendments; do not bulk overwrite, approve or publish. The user wants one final
+quality review per client, not manual initiation of every research draft.
 
 ### 9 October — client Plan confirmed-scope presentation, local-only candidate
 
