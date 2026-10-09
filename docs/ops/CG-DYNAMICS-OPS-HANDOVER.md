@@ -26,6 +26,19 @@ not fuzzy matching. VCS also has a nonempty extra `Client Received` folder
 inside its client-safe root; review its contents/permission intent before
 sharing or enablement. Elcheck and LHP have empty `Client Received` extras.
 
+Further read-only Graph permission checks on the canonical `Clients` parent and
+all 61 exact portal roots show anonymous **view** inherited from `Clients` in
+61/61 roots, and anonymous **edit** inherited in 59/61. NCNA and Econofoods
+are the two roots without the inherited edit link in this pass; both still
+inherit anonymous view. The `Clients` parent itself has both anonymous view
+and edit links. This is a security hold, not a
+client-library approval: do not activate/share any client portal root or expose
+those links while an owner reviews the parent-level sharing policy and proves
+exact-client isolation. No permissions were changed and no link values are
+recorded here. The VCS `Client Received` extra has three populated subfolders
+(October specials, pre-Black-Friday material and logos); its contents remain
+unreviewed for release.
+
 Read-only migration preflight found zero portal library/category/asset rows,
 the existing category constraint still permits Photography, and the expected
 folder-name constraint is absent. The Photography-removal and post-assets
