@@ -679,9 +679,10 @@ function VerifiedOverview({ sections }: { sections: VerifiedSection[] }) {
         </section>
       ))}
       <p className="text-xs leading-relaxed text-slate-500">
-        Figures are shown per platform. Views, viewers and reach are never added together across
-        platforms because the same person can appear on more than one. A month-on-month change is
-        shown only when both months measured the same thing the same way.
+        Figures here are shown per platform. Overview may sum verified recorded view events from
+        the same reporting window; that is not a count of unique people. Viewers and reach are
+        never added across platforms. A month-on-month change appears only when both months
+        measured the same thing the same way.
       </p>
     </div>
   )

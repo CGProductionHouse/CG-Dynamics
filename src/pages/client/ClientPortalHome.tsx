@@ -4,7 +4,7 @@ import { ClientLogo } from '../../components/ClientLogo'
 import { useClientPortal } from '../../components/client/ClientPortalContext'
 import { ClientPortalErrorState, ClientPortalLoadingState } from '../../components/client/ClientPortalStates'
 import { useAuth } from '../../contexts/AuthContext'
-import { activeOrganicPlatforms, buildPublishedMonthlyStrategyPreview, type PublishedMonthlyStrategy } from '../../lib/clientPortal'
+import { activeOrganicPlatforms, buildPublishedMonthlyStrategyPreview, summarizeCrossChannelViews, type PublishedMonthlyStrategy } from '../../lib/clientPortal'
 import { businessMonthKey } from '../../lib/businessTime'
 import { getClientPublishedMonthlyStrategy } from '../../lib/monthlyStrategy'
 import { fetchClientMonthAhead } from '../../lib/clientPortalCalendar'
@@ -98,6 +98,7 @@ export default function ClientPortalHome() {
 
   const strategy = useMemo(() => buildPublishedMonthlyStrategyPreview(data.monthlyStrategy, workingMonth), [data.monthlyStrategy, workingMonth])
   const activeOrganic = useMemo(() => activeOrganicPlatforms(data.facts), [data.facts])
+  const crossChannelViews = useMemo(() => summarizeCrossChannelViews(data.facts), [data.facts])
   const reportMonth = data.report ? getReportMonthFromPeriod(data.report) : null
   const actionMonth = workingMonth
   const hasPerformanceSummary = activeOrganic.length > 0 || reportMonth !== null
@@ -191,6 +192,12 @@ export default function ClientPortalHome() {
 
             {hasPerformanceSummary ? (
               <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {crossChannelViews && !data.factsUnavailable && <MetricCard
+                  label="Recorded views"
+                  value={crossChannelViews.value.toLocaleString('en-ZA')}
+                  detail={`${crossChannelViews.platforms.join(' + ')} · ${crossChannelViews.periodStart} to ${crossChannelViews.periodEnd}. Views, not unique people.${crossChannelViews.excludedChannels ? ` ${crossChannelViews.excludedChannels} channel${crossChannelViews.excludedChannels === 1 ? '' : 's'} without verified views excluded.` : ''}`}
+                  tone="teal"
+                />}
                 {activeOrganic.length > 0 && (
                   <MetricCard
                     label="Verified channels"

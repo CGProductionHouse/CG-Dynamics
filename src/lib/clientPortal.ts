@@ -59,6 +59,34 @@ export function activeOrganicPlatforms(facts: PlatformFact[]): string[] {
     .map(([, label]) => label)
 }
 
+export interface CrossChannelViews {
+  value: number
+  platforms: string[]
+  periodStart: string
+  periodEnd: string
+  excludedChannels: number
+}
+
+/** Add recorded view events, never unique audiences, incomplete facts or mixed windows. */
+export function summarizeCrossChannelViews(facts: PlatformFact[]): CrossChannelViews | null {
+  const viewKey = (fact: PlatformFact) => fact.platform === 'tiktok' ? 'views' : 'brand_views'
+  const viewFacts = facts.filter(fact =>
+    ['facebook', 'instagram', 'tiktok'].includes(fact.platform) && fact.metricKey === viewKey(fact))
+  const candidates = viewFacts.filter(fact => ['complete', 'valid_zero'].includes(fact.availability)
+    && fact.aggregation === 'sum' && Number.isSafeInteger(fact.value) && (fact.value as number) >= 0)
+  if (!candidates.length || new Set(candidates.map(fact => fact.platform)).size !== candidates.length) return null
+  const windowStart = candidates[0].periodStart
+  const windowEnd = candidates[0].periodEnd
+  if (!windowStart || !windowEnd || !/^\d{4}-\d{2}-\d{2}$/.test(windowStart)
+    || !/^\d{4}-\d{2}-\d{2}$/.test(windowEnd) || windowEnd < windowStart) return null
+  if (candidates.some(fact => fact.periodStart !== windowStart || fact.periodEnd !== windowEnd)) return null
+  const value = candidates.reduce((sum, fact) => sum + (fact.value as number), 0)
+  if (!Number.isSafeInteger(value)) return null
+  const labels: Record<string, string> = { facebook: 'Facebook', instagram: 'Instagram', tiktok: 'TikTok' }
+  return { value, platforms: candidates.map(fact => labels[fact.platform]), periodStart: windowStart, periodEnd: windowEnd,
+    excludedChannels: new Set(viewFacts.map(fact => fact.platform)).size - candidates.length }
+}
+
 function campaignRecValue(strategy: StrategyData): string | null {
   const cr = strategy.actionPlan.campaign_recommendation
   if (!cr.enabled) return null

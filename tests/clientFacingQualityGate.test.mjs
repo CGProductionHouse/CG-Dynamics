@@ -326,8 +326,9 @@ test('Performance Google uses provider-native Ads semantics without generic MoM'
 })
 
 test('the report view explains that reach and viewers are never added across platforms', () => {
-  assert.match(REPORT_VIEW, /never added together across/)
-  assert.match(REPORT_VIEW, /not added together across/)
+  assert.match(REPORT_VIEW, /Viewers and reach are[\s\S]*never added across platforms/)
+  assert.match(REPORT_VIEW, /not a count of unique people/)
+  assert.match(REPORT_VIEW, /same reporting window/)
 })
 
 test('performance dashboard separates load states for report list and report detail', () => {

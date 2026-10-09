@@ -43,7 +43,7 @@ try {
   browser = await chromium.launch({ headless: true })
   for (const width of [1440, 375]) {
     const page = await browser.newPage({ viewport: { width, height: 900 } })
-    const errors = []; const reads = []; let failFacts = true
+    const errors = []; const reads = []; let factMode = 'failure'
     page.on('pageerror', error => errors.push(error.message))
     await page.route('**/*', route => {
       const request = route.request(); const url = new URL(request.url())
@@ -66,7 +66,12 @@ try {
       const body = request.postDataJSON()
       if (rpc === 'get_report_metric_facts') {
         assert.equal(body.p_report_id, reportId)
-        if (failFacts) return route.fulfill({ status: 503, json: { message: 'Synthetic channel read failure' } })
+        if (factMode === 'failure') return route.fulfill({ status: 503, json: { message: 'Synthetic channel read failure' } })
+        if (factMode === 'verified') return route.fulfill({ json: [
+          ['facebook', 'brand_views', 100], ['instagram', 'brand_views', 200], ['tiktok', 'views', 300],
+        ].map(([platform, metric_key, value]) => ({ platform, metric_key, value, period_month: '2026-09',
+          period_start: '2026-09-01', period_end: '2026-09-23', availability: 'complete',
+          aggregation: 'sum', comparable_group: `${platform}_views`, source_metric: 'synthetic_views', includes_paid: 'both' })) })
       }
       if (rpc === 'get_report_metric_fact_status') assert.equal(body.p_report_id, reportId)
       if (rpc === 'client_portal_month_ahead_posts_v2' || rpc === 'client_portal_month_ahead_events') assert.equal(body.p_client_id, clientId)
@@ -81,12 +86,18 @@ try {
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width}px body overflow`)
     assert.deepEqual(errors, [])
     await page.screenshot({ path: join(tmpdir(), `cg-overview-fact-error-${width}.png`), fullPage: true })
-    failFacts = false
+    factMode = 'empty'
     await page.reload()
     await page.getByText('Awaiting verified data', { exact: true }).waitFor()
     assert.equal(await page.getByText('Channel facts unavailable', { exact: true }).count(), 0, 'Successful empty facts read is not a failure')
+    factMode = 'verified'
+    await page.reload()
+    await page.getByText('600', { exact: true }).waitFor()
+    await page.getByText(/Facebook \+ Instagram \+ TikTok · 2026-09-01 to 2026-09-23\. Views, not unique people/).waitFor()
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width}px verified views overflow`)
+    await page.screenshot({ path: join(tmpdir(), `cg-overview-recorded-views-${width}.png`), fullPage: true })
     assert.deepEqual(errors, [])
-    console.log(`PASS ${width}px: failed facts unavailable, successful empty distinct, published report remains, no body overflow`)
+    console.log(`PASS ${width}px: failed facts unavailable, successful empty distinct, same-window verified views, published report remains, no body overflow`)
     await page.close()
   }
 } finally { if (browser) await browser.close(); await server.close() }
