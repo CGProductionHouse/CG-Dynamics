@@ -33,8 +33,8 @@ quality review per client, not manual initiation of every research draft.
 
 **In-flight, unmerged:** draft PR #730 (`codex/november-exact-strategy-drafts`)
 begins full ten-field November authoring for Piek Group, Daisy & Co, We Ar
-Fuels and Econofoods (video-production-only). It is intentionally a **draft**:
-four candidates do not complete the 47-client social fleet, the candidate JSON
+Fuels, AV Event Life and Econofoods (video-production-only). It is intentionally a **draft**:
+five candidates do not complete the 47-client social fleet, the candidate JSON
 is not canonical client data, and none is approved or published. The local
 scope/source regression, serialized full suite with local test prerequisites,
 build, scoped lint and diff check passed. Continue this exact PR for further

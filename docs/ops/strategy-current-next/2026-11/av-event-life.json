@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "status": "EDITORIAL_CANDIDATE_NOT_CANONICAL",
+  "client_id": "3b85973f-bcad-49eb-b8f1-c27f7c7f1aba",
+  "client_name": "AV Event Life",
+  "strategy_month": "2026-11-01",
+  "source_refs": [
+    "artifacts/client-strategy-dossiers/issue-513/av-event-life.md",
+    "docs/ai-workforce/client-intelligence/AV-EVENT-LIFE-CLIENT-MARKETING-INTELLIGENCE-2026-08.md",
+    "docs/ops/STRATEGY-CURRENT-NEXT-EXACT-CLIENT-PROPOSALS-2026-10-09.md"
+  ],
+  "package": {
+    "confirmed_professional_videos": null,
+    "confirmed_design_posters": 4,
+    "photo_posts": 4,
+    "reels": null,
+    "animated_posters": null
+  },
+  "goldStandard": {
+    "objective": "Help an event organiser send AV Event Life a usable technical brief in November. Use one real, approved setup to show the decision that mattered before guests arrived, what the crew prepared, and what information the next organiser should provide. The result sought is a clearer sound, screen or lighting enquiry—not a claim that every event needs the same equipment.",
+    "audienceAndIntent": "An organiser may know how the event should feel but not how to explain what must be heard, seen or lit. The November story should help that person describe the room, audience experience and essential cues before asking for a quote. Choose one verified event type and technical question with the AV lead; do not assume every buyer is planning a luxury function.",
+    "coreMessage": "The audience sees the event; the crew solves a specific problem before it starts. Make one visible preparation decision understandable, such as where sound must carry or what a screen must show, without drowning the organiser in equipment names. Show how an accurate brief lets AV Event Life propose the right technical conversation.",
+    "formatsAndRationale": "Use four confirmed photo posts as a sequence from permitted room requirement, crew setup, technical detail and finished audience view. Use four confirmed design posters to turn that case into buyer questions: purpose, venue conditions, cues/content, and what to bring to a technical discussion. This creates a useful brief pathway from the available eight pieces; professional video, reels and hardware-package claims are not included.",
+    "testAndChange": "For the same authorised event, compare a buyer-question opening with a visible-preparation opening on two comparable images. Keep event facts and contact destination the same. Review whether enquiries specify the relevant technical requirement; measure native image response separately, and do not call event bookings caused by a post without records.",
+    "pillarsAndHooks": "An empty room with a real technical constraint; a crew member preparing for it; the detail a guest notices only when it works; and the final moment that proves why planning mattered. Open with the organiser's practical challenge or the true before/after, not generic 'bring your event to life' language.",
+    "mustAvoid": "No invented future event, customer endorsement, guest count, production specification, owned-equipment claim or fixed hire package. Do not present a subcontractor's equipment as AV Event Life property or use a client's venue/guests without permission. Avoid a promise of flawless results, a booking guarantee or superiority over another supplier.",
+    "channelIntegration": "Publish the approved case only on AV Event Life's authorised channels and lead the interested organiser to its current technical enquiry route. Keep the venue and customer permissions attached to each image. This organic story does not add video production, paid ads or a new booking system to the confirmed package.",
+    "successSignals": "Track whether genuine enquiries name the venue, event purpose and sound/screen/lighting need, and whether the AV lead can prepare a useful follow-up from those details. Separately review covered post views and interactions. Quotations and confirmed bookings count only if the client shares exact records; missing event outcomes remain unknown.",
+    "nextMonthGamePlan": "At November review, ask the crew which part of the technical brief still causes repeat questions. Make that the December explanation if the approved case and newly confirmed package support it. If the chosen event cannot be shown, select another permissioned real job rather than staging a fictional one. Do not promise December dates, equipment or quantities from this November plan."
+  },
+  "actionPlan": {
+    "professional_video": { "enabled": false, "items": [], "notes": "" },
+    "reels": { "enabled": false, "items": [], "notes": "" },
+    "photo_content": {
+      "enabled": true,
+      "items": [
+        "Show the authorised room or event requirement that created the actual technical challenge.",
+        "Show a consenting crew member preparing one relevant part of the setup.",
+        "Show the specific sound, screen or lighting detail the AV lead approves for explanation.",
+        "Show the final audience-facing view without implying that the image proves an unmeasured result."
+      ],
+      "notes": "Four confirmed photo posts. All images must come from the same permissioned case or be clearly separated as distinct jobs."
+    },
+    "design_poster": {
+      "enabled": true,
+      "items": [
+        "Ask what guests must hear, see or understand at the selected event.",
+        "Explain which room or venue information matters for that technical discussion.",
+        "Ask which presentation, cue or programme material the organiser can supply.",
+        "Show the exact next brief or enquiry step that AV Event Life confirms."
+      ],
+      "notes": "Four confirmed design posters; each answers a different brief-preparation question."
+    },
+    "animated_poster": { "enabled": false, "items": [], "notes": "" },
+    "campaign_recommendation": { "enabled": false, "items": [], "notes": "" }
+  },
+  "review_gates": [
+    "AV lead selects one real November case and approves the technical interpretation and relevant buyer question.",
+    "Obtain venue, client, guest and crew image rights; verify equipment ownership/partner attribution where it matters.",
+    "Recheck exact November canonical row/version, staff changes, active package and authorised channel before amendment.",
+    "Confirm current enquiry path; never claim specific hardware availability or event booking dates without client facts."
+  ]
+}
