@@ -1,5 +1,30 @@
 # CG Dynamics Ops Handover
 
+### 9 October — client Plan confirmed-scope presentation, local-only candidate
+
+CA's signed-in CG Production House client Plan still showed the older eight-card
+package with five “To confirm” entries below the useful Plan tabs. The current
+main source was already more compact but still inferred CG-built website care
+from fleet ownership and showed an incomplete poster total. The focused client
+candidate now makes Strategy/Calendar/Content Guidelines/Your package the
+top-level Plan tabs, with package last; shows only positive quantities from an
+exact confirmed package receipt; never turns null or zero into a service; keeps
+photo/design components separate when a combined poster total is not proven;
+and offers Amonique's existing business WhatsApp and telephone as explicit
+package-amendment choices. No message is sent automatically. CG-built site
+ownership alone does not prove a contracted maintenance quantity or package
+inclusion. The client Overview adds a recorded-views highlight only for
+definitive same-window additive Facebook/Instagram/TikTok view events, with
+exact contributing channels and a non-unique-audience label. Partial/failed
+channels are excluded and called out; mixed reporting windows do not produce a
+combined number. This is not a report, package, strategy or production-data
+mutation. Local client Plan actual-component 1440/375/390/430 and Overview
+1440/375 browser fixtures pass without body overflow/runtime errors; full suite
+3,750 pass/19 intentional skip/0 fail, TypeScript/Vite build, scoped lint and
+diff check pass. Current production remains older. Final authenticated
+changed-build client-role acceptance and the #679 one-build budget/uptime gate
+remain before any Vercel promotion; do not treat this local candidate as live.
+
 ### 8 October — #712 staff/admin usability, local-first and client dashboard locked
 
 CA rejected the current internal workspace density/hierarchy and requested a

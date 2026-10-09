@@ -13,6 +13,7 @@ const PLAN_TABS = [
   { key: 'strategy', label: 'Strategy' },
   { key: 'calendar', label: 'Calendar' },
   { key: 'guidelines', label: 'Content Guidelines' },
+  { key: 'package', label: 'Your package' },
 ] as const
 
 type PlanTab = (typeof PLAN_TABS)[number]['key']
@@ -57,19 +58,21 @@ export default function ClientPlanPage() {
     ? <ClientContentCalendarPage embedded month={month} />
     : tab === 'guidelines'
       ? <ClientContentGuidesPage embedded month={month} />
-      : <ClientStrategyPage embedded month={month} />
+      : tab === 'package'
+        ? <ClientPackageSummary packageSettings={client?.package_settings} clientId={client?.id} />
+        : <ClientStrategyPage embedded month={month} />
 
   return (
     <>
-      <section className="relative overflow-hidden rounded-[2rem] border border-white/[0.08] bg-[radial-gradient(circle_at_12%_5%,rgba(45,212,191,0.16),transparent_34%),radial-gradient(circle_at_90%_15%,rgba(249,115,22,0.12),transparent_28%),linear-gradient(145deg,rgba(10,27,24,0.96),rgba(5,12,11,0.94))] px-5 py-7 shadow-[0_34px_100px_-55px_rgba(0,0,0,0.95)] sm:px-8 sm:py-10 lg:px-10">
+      <section className="relative overflow-hidden rounded-[2rem] border border-white/[0.08] bg-[radial-gradient(circle_at_12%_5%,rgba(45,212,191,0.16),transparent_34%),radial-gradient(circle_at_90%_15%,rgba(249,115,22,0.12),transparent_28%),linear-gradient(145deg,rgba(10,27,24,0.96),rgba(5,12,11,0.94))] px-5 py-6 shadow-[0_34px_100px_-55px_rgba(0,0,0,0.95)] sm:px-8 sm:py-10 lg:px-10">
         <div aria-hidden className="absolute -left-16 top-8 h-44 w-44 rounded-full bg-[#2dd4bf]/10 blur-3xl" />
         <div aria-hidden className="absolute -right-20 bottom-0 h-52 w-52 rounded-full bg-[#f97316]/10 blur-3xl" />
-        <div className="relative flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+        <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
             <p className="text-xs font-black uppercase tracking-[0.26em] text-[#2dd4bf]">Monthly direction</p>
-            <h1 className="mt-4 text-4xl font-black tracking-[-0.045em] text-white sm:text-6xl">Your plan, connected.</h1>
-            <p className="mt-5 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
-              Strategy, scheduled content and production guidance for one shared working month.
+            <h1 className="mt-2 text-3xl font-black tracking-[-0.045em] text-white sm:text-6xl">Your plan</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base">
+              Strategy, calendar and content guidelines.
             </p>
           </div>
           <div className="shrink-0 rounded-2xl border border-white/10 bg-black/20 p-2 backdrop-blur">
@@ -83,9 +86,8 @@ export default function ClientPlanPage() {
         </div>
       </section>
 
-      <ClientPackageSummary packageSettings={client?.package_settings} clientId={client?.id} />
       <div className="mt-6 pb-1" aria-label="Plan sections">
-        <div role="tablist" className="grid w-full grid-cols-3 gap-1 rounded-full border border-white/[0.08] bg-white/[0.035] p-1 sm:flex sm:w-fit">
+        <div role="tablist" className="grid w-full grid-cols-2 gap-1 rounded-2xl border border-white/[0.08] bg-white/[0.035] p-1 sm:flex sm:w-fit sm:rounded-full">
           {PLAN_TABS.map(item => (
             <button
               key={item.key}

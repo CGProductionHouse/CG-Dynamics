@@ -28,10 +28,11 @@ const ADMIN_GUARD_SOURCE = readSource('../src/components/guards/RequireAdmin.tsx
 let server
 let activeOrganicPlatforms
 let buildClientStrategyPreview
+let summarizeCrossChannelViews
 
 before(async () => {
   server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom' })
-  ;({ activeOrganicPlatforms, buildClientStrategyPreview } = await server.ssrLoadModule('/src/lib/clientPortal.ts'))
+  ;({ activeOrganicPlatforms, buildClientStrategyPreview, summarizeCrossChannelViews } = await server.ssrLoadModule('/src/lib/clientPortal.ts'))
 })
 
 after(async () => {
@@ -158,6 +159,34 @@ test('only genuinely available Facebook, Instagram and TikTok facts become activ
   assert.doesNotMatch(HOME_SOURCE, /TikTok reporting is active|Google Business Profile reporting is active/)
   assert.doesNotMatch(REPORT_VIEW_SOURCE, /Meta Ads|TikTok Ads|Planned integration/)
   assert.match(REPORT_VIEW_SOURCE, /PerformanceServiceStory service="google"/)
+})
+
+test('Overview sums only definitive recorded views for the same provider window and labels exact coverage', () => {
+  const base = { value: 100, availability: 'complete', aggregation: 'sum', periodStart: '2026-09-01', periodEnd: '2026-09-23' }
+  const fb = { ...base, platform: 'facebook', metricKey: 'brand_views' }
+  const ig = { ...base, platform: 'instagram', metricKey: 'brand_views', value: 0, availability: 'valid_zero' }
+  const tik = { ...base, platform: 'tiktok', metricKey: 'views', value: 250 }
+  assert.deepEqual(summarizeCrossChannelViews([fb, ig, tik]), {
+    value: 350, platforms: ['Facebook', 'Instagram', 'TikTok'], periodStart: base.periodStart,
+    periodEnd: base.periodEnd, excludedChannels: 0,
+  })
+  const partial = summarizeCrossChannelViews([fb, { ...ig, value: null, availability: 'unavailable' }, tik])
+  assert.equal(partial.value, 350)
+  assert.deepEqual(partial.platforms, ['Facebook', 'TikTok'])
+  assert.equal(partial.excludedChannels, 1)
+  for (const unsafe of [
+    { ...ig, periodEnd: '2026-09-22' },
+    { ...ig, aggregation: 'unique' },
+    { ...ig, availability: 'partial' },
+    { ...ig, value: -1 },
+    { ...ig, value: 1.5 },
+  ]) {
+    const result = summarizeCrossChannelViews([fb, unsafe])
+    assert.ok(result === null || !result.platforms.includes('Instagram'), 'unsafe fact never enters total')
+  }
+  assert.equal(summarizeCrossChannelViews([{ ...fb, aggregation: 'unique' }]), null)
+  assert.equal(summarizeCrossChannelViews([fb, { ...fb, value: 30 }]), null)
+  assert.match(HOME_SOURCE, /Views, not unique people/)
 })
 
 test('legacy report prose is never promoted into a strategy preview', () => {

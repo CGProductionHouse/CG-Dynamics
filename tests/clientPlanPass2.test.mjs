@@ -10,7 +10,7 @@ const STRATEGY_SOURCE = readSource('../src/pages/client/ClientStrategyPage.tsx')
 const CALENDAR_SOURCE = readSource('../src/pages/client/ClientContentCalendarPage.tsx')
 const GUIDELINES_SOURCE = readSource('../src/pages/client/ClientContentGuidesPage.tsx')
 
-test('Plan is one monthly experience with the three canonical tabs', () => {
+test('Plan is one monthly experience with canonical work tabs and package', () => {
   assert.match(APP_SOURCE, /path="\/client\/plan" element=\{<ClientPlanPage \/>\}/)
   assert.match(PLAN_SOURCE, /key: 'strategy', label: 'Strategy'/)
   assert.match(PLAN_SOURCE, /key: 'calendar', label: 'Calendar'/)
@@ -65,7 +65,7 @@ test('Plan month controls and tabs expose accessible button state', () => {
   assert.match(PLAN_SOURCE, /aria-label="Next month"/)
   assert.match(PLAN_SOURCE, /aria-pressed=\{tab === item\.key\}/)
   assert.match(PLAN_SOURCE, /min-h-11/)
-  assert.match(PLAN_SOURCE, /grid w-full grid-cols-3/)
+  assert.match(PLAN_SOURCE, /grid w-full grid-cols-2/)
   assert.doesNotMatch(PLAN_SOURCE, /min-w-max|overflow-x-auto/)
 })
 
