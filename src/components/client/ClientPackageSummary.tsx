@@ -9,7 +9,7 @@ function confirmedPosters(photo: number | null, design: number | null): PackageC
   if (photoCount && designCount) return { label: 'Posters', value: `${photoCount + designCount} per month` }
   return photoCount
     ? { label: 'Photo posts', value: `${photoCount} per month` }
-    : { label: 'Design posters', value: `${designCount} per month` }
+    : { label: 'Posters', value: `${designCount} confirmed per month` }
 }
 
 /** Render canonical confirmed quantities only, never private receipt metadata. */
@@ -20,6 +20,9 @@ export function ClientPackageSummary({ packageSettings }: { packageSettings: unk
     cards.push({ label: 'Professional videos', value: `${settings.professional_videos_per_month} per month` })
   }
   if (settings) {
+    if (settings.other_agreed_deliverables?.trim().toLowerCase() === 'once-off') {
+      cards.push({ label: 'Engagement', value: 'Once-off' })
+    }
     const posters = confirmedPosters(settings.photo_posts_per_month, settings.design_posters_per_month)
     if (posters) cards.push(posters)
     if (settings.website_updates_per_month !== null && settings.website_updates_per_month > 0) {
