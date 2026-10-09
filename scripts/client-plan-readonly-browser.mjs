@@ -48,6 +48,7 @@ try {
   browser=await chromium.launch({headless:true})
   for (const width of [1440,375,390,430]) {
     const page=await browser.newPage({viewport:{width,height:1000}})
+    await page.clock.install({time:new Date('2026-10-09T08:00:00.000Z')})
     const errors=[]; const reads=[]; let scenario='valid'; let hold=false; let assetScenario='valid'; const pending=[]
     page.on('pageerror',error=>errors.push(error.message))
     await page.route('**/*',async route=>{
@@ -57,6 +58,10 @@ try {
       if (url.pathname==='/rest/v1/clients') {
         assert.equal(request.method(),'GET','Client reads only')
         return route.fulfill({json:{id:url.searchParams.get('id')?.slice(3),name:'Synthetic client'}})
+      }
+      if (url.pathname==='/rest/v1/monthly_client_strategies') {
+        assert.equal(request.method(),'GET','Strategy reads only')
+        return route.fulfill({json:[]})
       }
       if (url.pathname==='/rest/v1/rpc/client_portal_visibility_contract_version') return route.fulfill({json:1})
       const payload=request.postDataJSON()
@@ -80,6 +85,13 @@ try {
       const videos=[{position:1,title:'Film',script:scenario==='missing_script'?null:'Complete script '+label+'\nSecond line',objective:null,hook:null,shot_breakdown:null,cta:null,visual_notes:null,platform:null,format:null}]
       await route.fulfill({json:scenario==='malformed'?null:scenario==='empty'?[]:[{row_key:'synthetic-guide',title:'Guide '+label,month:payload.p_month,run_name:'Synthetic run',filming_date:null,published_at:'2026-10-01T12:00:00Z',videos}]})
     })
+    await page.goto('http://127.0.0.1:53988/__plan?tab=strategy&month=2026-09')
+    await page.getByRole('button',{name:'October 2026',exact:true}).waitFor()
+    assert.equal(new URL(page.url()).searchParams.get('month'),'2026-10','Historical strategy deep link resolves to current month')
+    assert.equal(await page.getByRole('button',{name:'September 2026',exact:true}).count(),0,'Only current/next strategy months offered')
+    await page.getByRole('button',{name:'November 2026',exact:true}).click()
+    assert.equal(new URL(page.url()).searchParams.get('month'),'2026-11','Next strategy month selectable')
+    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${width} strategy month overflow`)
     await page.goto('http://127.0.0.1:53988/__plan?tab=guidelines&month=2026-10')
     await page.getByText('Complete script A 2026-10\nSecond line',{exact:true}).waitFor()
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${width} body overflow`)

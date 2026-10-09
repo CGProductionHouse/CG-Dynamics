@@ -9,6 +9,7 @@ import { clientFacingStrategyQualityIssues, hasStrategyContent, readStrategyData
 import { businessMonthKey } from '../../lib/businessTime'
 import { useOptionalClientPortal } from '../../components/client/ClientPortalContext'
 import { getPreviewStrategy } from '../../lib/clientPortalPreview'
+import { selectClientStrategyMonth } from '../../lib/clientStrategyMonths'
 
 function currentMonth() {
   return businessMonthKey()
@@ -22,7 +23,7 @@ export default function ClientStrategyPage({ embedded = false, month }: { embedd
   const [strategy, setStrategy] = useState<StrategyData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
-  const strategyMonth = month ?? currentMonth()
+  const strategyMonth = selectClientStrategyMonth(month ?? currentMonth())
 
   useEffect(() => {
     let active = true

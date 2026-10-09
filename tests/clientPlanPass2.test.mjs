@@ -43,15 +43,19 @@ test('Plan uses the canonical exact-month published strategy projection', () => 
 })
 
 test('Plan canonicalizes a missing or invalid month immediately without report-driven fallback', () => {
-  assert.match(PLAN_SOURCE, /const month = requestedMonth && MONTH_PATTERN\.test\(requestedMonth\) \? requestedMonth : currentMonth\(\)/)
+  assert.match(PLAN_SOURCE, /tab === 'strategy'\s*\? selectClientStrategyMonth\(requestedMonth\)/)
+  assert.match(PLAN_SOURCE, /requestedMonth && MONTH_PATTERN\.test\(requestedMonth\) \? requestedMonth : currentMonth\(\)/)
   assert.match(PLAN_SOURCE, /canonical\.set\('month', month\)/)
   assert.match(PLAN_SOURCE, /\{ replace: true \}/)
   assert.doesNotMatch(PLAN_SOURCE, /fallbackMonth|actionMonthForReport|listClientPublishedReports|selectMonthlyReports/)
 })
 
-test('Plan preserves the exact month when switching tabs and changing months', () => {
-  assert.match(PLAN_SOURCE, /updated\.set\('tab', next\.tab \?\? tab\)/)
-  assert.match(PLAN_SOURCE, /updated\.set\('month', next\.month \?\? month\)/)
+test('Plan preserves calendar/guideline history but restricts strategy to current and next month', () => {
+  assert.match(PLAN_SOURCE, /const nextTab = next\.tab \?\? tab/)
+  assert.match(PLAN_SOURCE, /updated\.set\('tab', nextTab\)/)
+  assert.match(PLAN_SOURCE, /nextTab === 'strategy' \? selectClientStrategyMonth\(next\.month \?\? month\) : next\.month \?\? month/)
+  assert.match(PLAN_SOURCE, /\[strategyCurrentMonth, strategyNextMonth\]\.map/)
+  assert.match(STRATEGY_SOURCE, /selectClientStrategyMonth\(month \?\? currentMonth\(\)\)/)
   assert.match(PLAN_SOURCE, /onClick=\{\(\) => updatePlan\(\{ tab: item\.key \}\)\}/)
 })
 

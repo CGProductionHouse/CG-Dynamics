@@ -7,6 +7,7 @@ import ClientContentGuidesPage from './ClientContentGuidesPage'
 import ClientStrategyPage from './ClientStrategyPage'
 import { useClientPortal } from '../../components/client/ClientPortalContext'
 import { ClientPackageSummary } from '../../components/client/ClientPackageSummary'
+import { clientStrategyMonths, selectClientStrategyMonth } from '../../lib/clientStrategyMonths'
 
 const MONTH_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/
 const PLAN_TABS = [
@@ -32,9 +33,12 @@ export default function ClientPlanPage() {
   const [searchParams, setSearchParams] = useSearchParams()
 
   const requestedMonth = searchParams.get('month')
-  const month = requestedMonth && MONTH_PATTERN.test(requestedMonth) ? requestedMonth : currentMonth()
   const requestedTab = searchParams.get('tab')
   const tab: PlanTab = PLAN_TABS.some(item => item.key === requestedTab) ? requestedTab as PlanTab : 'strategy'
+  const month = tab === 'strategy'
+    ? selectClientStrategyMonth(requestedMonth)
+    : requestedMonth && MONTH_PATTERN.test(requestedMonth) ? requestedMonth : currentMonth()
+  const [strategyCurrentMonth, strategyNextMonth] = clientStrategyMonths()
 
   useEffect(() => {
     if (requestedMonth === month) return
@@ -48,8 +52,9 @@ export default function ClientPlanPage() {
   function updatePlan(next: { tab?: PlanTab; month?: string }) {
     setSearchParams(current => {
       const updated = new URLSearchParams(current)
-      updated.set('tab', next.tab ?? tab)
-      updated.set('month', next.month ?? month)
+      const nextTab = next.tab ?? tab
+      updated.set('tab', nextTab)
+      updated.set('month', nextTab === 'strategy' ? selectClientStrategyMonth(next.month ?? month) : next.month ?? month)
       return updated
     })
   }
@@ -77,11 +82,19 @@ export default function ClientPlanPage() {
           </div>
           <div className="shrink-0 rounded-2xl border border-white/10 bg-black/20 p-2 backdrop-blur">
             <p className="px-3 pt-1 text-[0.65rem] font-black uppercase tracking-[0.2em] text-slate-500">Working month</p>
-            <div className="mt-2 flex items-center gap-1">
-              <button type="button" aria-label="Previous month" onClick={() => updatePlan({ month: shiftMonth(month, -1) })} className="min-h-11 min-w-11 rounded-xl text-lg text-slate-400 transition hover:bg-white/[0.07] hover:text-white">‹</button>
-              <p className="min-w-36 text-center text-sm font-black text-white sm:min-w-40">{monthDisplayLabel(month)}</p>
-              <button type="button" aria-label="Next month" onClick={() => updatePlan({ month: shiftMonth(month, 1) })} className="min-h-11 min-w-11 rounded-xl text-lg text-slate-400 transition hover:bg-white/[0.07] hover:text-white">›</button>
-            </div>
+            {tab === 'strategy' ? (
+              <div className="mt-2 flex items-center gap-1" aria-label="Strategy months">
+                {[strategyCurrentMonth, strategyNextMonth].map(strategyOption => (
+                  <button key={strategyOption} type="button" aria-pressed={month === strategyOption} onClick={() => updatePlan({ month: strategyOption })} className={`min-h-11 rounded-xl px-3 text-sm font-bold transition ${month === strategyOption ? 'bg-white text-[#06110f]' : 'text-slate-400 hover:bg-white/[0.07] hover:text-white'}`}>{monthDisplayLabel(strategyOption)}</button>
+                ))}
+              </div>
+            ) : (
+              <div className="mt-2 flex items-center gap-1">
+                <button type="button" aria-label="Previous month" onClick={() => updatePlan({ month: shiftMonth(month, -1) })} className="min-h-11 min-w-11 rounded-xl text-lg text-slate-400 transition hover:bg-white/[0.07] hover:text-white">‹</button>
+                <p className="min-w-36 text-center text-sm font-black text-white sm:min-w-40">{monthDisplayLabel(month)}</p>
+                <button type="button" aria-label="Next month" onClick={() => updatePlan({ month: shiftMonth(month, 1) })} className="min-h-11 min-w-11 rounded-xl text-lg text-slate-400 transition hover:bg-white/[0.07] hover:text-white">›</button>
+              </div>
+            )}
           </div>
         </div>
       </section>
