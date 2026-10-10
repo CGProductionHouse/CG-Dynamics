@@ -24,11 +24,13 @@ import {
 import { monthDisplayLabel } from '../../lib/reportPeriod'
 import { businessMonthKey } from '../../lib/businessTime'
 import {
+  ACTION_PLAN_LABELS,
   GOLD_STANDARD_FIELDS,
   assessGoldStandardStrategy,
   emptyStrategyData,
   readStrategyData,
   type StrategyData,
+  type ActionPlanKey,
 } from '../../lib/strategyEngine'
 
 const MONTH_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/
@@ -162,6 +164,8 @@ export default function MonthlyStrategyPage() {
   ), [draftData, internalNotes, strategy])
 
   const coverage = strategy ? Object.entries(strategy.seed_context.source_coverage) : []
+  const generation = strategy?.seed_context.generation
+  const sourceWindows = strategy?.seed_context.source_windows
   const exactEvidenceAvailable = Boolean(
     strategy && (
       (Array.isArray(strategy.seed_context.intelligence_evidence) && strategy.seed_context.intelligence_evidence.length > 0)
@@ -258,11 +262,35 @@ export default function MonthlyStrategyPage() {
                     <p>Package sources: {strategy.seed_context.sources.package_source_references?.join(', ') || 'none recorded'}</p>
                     <p>Client guide: {strategy.seed_context.sources.client_guide_id ?? 'none'} · Previous report: {strategy.seed_context.sources.previous_report_id ?? 'none'} · Previous strategy: {strategy.seed_context.sources.previous_monthly_strategy_id ?? 'none'}</p>
                     <p>Deliverables: {strategy.seed_context.sources.deliverable_ids.join(', ') || 'none'} · Prior posts: {strategy.seed_context.sources.previous_post_ids?.join(', ') || 'none'}</p>
+                    {sourceWindows && <p>Prior report ended: {sourceWindows.previous_report_period_end ?? 'none'} · Published prior strategy: {sourceWindows.previous_strategy_month ?? 'none'} · Incorporated meeting records: {sourceWindows.incorporated_context_updates.map(item => `${item.id} (${item.created_at ?? 'undated'})`).join(', ') || 'none'}</p>}
                     {(strategy.seed_context.sources.marketing_library_cards ?? []).map(card => (
                       <p key={card.id}>Skill Card {card.id} · {card.title} · {card.evidence_label} · {card.confidence_level} · source {card.source_id ?? 'unavailable'}</p>
                     ))}
                   </div>
                 </details>
+                {generation && (
+                  <details className="mt-3 rounded-xl border border-brand-teal/20 bg-brand-teal/[0.06] p-3 text-sm text-brand-primary">
+                    <summary className="cursor-pointer font-bold text-white">
+                      Auto-prepared draft · {generation.filledFields.length} fields added or refreshed{generation.conflicts.length ? ` · ${generation.conflicts.length} staff choices kept` : ''}
+                    </summary>
+                    <div className="mt-3 space-y-2 leading-6">
+                      <p>Internal proposal only. Staff decisions and the published client view are unchanged until separately reviewed and published.</p>
+                      <p>Source records: {generation.proposedSourceIds.join(', ') || 'none'}</p>
+                      {generation.conflicts.map(conflict => {
+                        const goldKey = conflict.startsWith('goldStandard.') ? conflict.slice('goldStandard.'.length) : null
+                        const actionKey = conflict.startsWith('actionPlan.') ? conflict.split('.')[1] as ActionPlanKey : null
+                        const label = goldKey ? GOLD_STANDARD_FIELDS.find(field => field.key === goldKey)?.label : actionKey ? ACTION_PLAN_LABELS[actionKey] : conflict
+                        const suggestion = goldKey
+                          ? generation.proposedGoldStandard[goldKey as keyof typeof generation.proposedGoldStandard]
+                          : actionKey ? generation.proposedActionPlan[actionKey]?.join(' · ') : null
+                        return <div key={conflict} className="rounded-lg border border-amber-300/15 bg-amber-300/[0.04] p-3">
+                          <p className="font-bold text-amber-100">{label ?? conflict} · staff wording retained</p>
+                          {suggestion && <p className="mt-1">New evidence suggested: {suggestion}</p>}
+                        </div>
+                      })}
+                    </div>
+                  </details>
+                )}
               </div>
               <div className="text-xs leading-5 text-brand-primary/70 lg:text-right">
                 <p>Version {strategy.version}</p>

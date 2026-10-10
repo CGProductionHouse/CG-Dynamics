@@ -1,5 +1,161 @@
 # CG Dynamics Ops Handover
 
+### 10 October — #745 code-only merge, protected library gate unchanged
+
+PR #745 was locally reviewed and merged to main as
+`ea0723519b649f60623c863859d1cd7685e953aa`. Its exact nested-root
+resolver still creates disabled mappings only; it was not deployed or invoked
+against production. The 61 inherited anonymous-view/59 inherited anonymous-edit
+hold, VCS exact-root/content decision, production migration/mapping and client
+isolation acceptance remain under #396. Do not describe the library as ready.
+
+### 10 October — #736 current-main reconciliation and exact package receipt
+
+The existing draft #736 branch was reconciled with main
+`f17b10d864df5298a24c8cc98a75622a1a18491a` without replacing the
+later Braize production acceptance or mixed-source footer receipts. Its
+Bloemfontein preparation note now reflects the audited Elcheck, JFJ and VCS
+package confirmations; LHP remains a once-off scope hold. This is a source
+receipt correction, not a strategy amendment. Focused strategy tests 52/52,
+supported serial local suite 3,769 pass/19 skip/0 fail, build, scoped lint,
+diff and 16/16 read-only actual strategy-review browser fixtures at phone and
+desktop widths pass. The model flag remains OFF; there is still no actual
+generated exact-client quality verdict, production migration/Edge deployment,
+model spend, strategy approval/publication or Vercel operation. #731/#679
+remain the protected activation and release gates.
+
+### 10 October — #736 client-copy quality fence before draft mutation
+
+The existing draft strategy generation path now applies the canonical
+client-facing copy-quality gate to model-authored prose before accepting a
+provider response or merging it into an unpublished draft. The regression
+reproduced structurally valid generic marketing filler passing the earlier
+parser; it now rejects that and internal evidence jargon while leaving
+unrelated staff-authored fields alone. This is a local #736 change only, not a
+model-quality verdict, production generation, approval or publication.
+The exact-client semantic review and protected #731/#679 activation gates
+remain in force.
+
+### 10 October — #731/#736 reviewed-evidence coverage, still draft/OFF
+
+The existing #736 strategy branch now reserves the bounded model-prompt window
+for exact-client decisions, ready guide facts, prior published outcomes and
+current content-approved Skill Cards before calendar detail; it ranks
+exact-client and recently reviewed cards ahead of arbitrary UUID order. Model
+citations are limited to evidence actually shown. This is local code in the
+existing draft PR, not a production-generated strategy or knowledge approval.
+The latest checked Drive daily research (9 October) and the 6 October branch
+remain `needs_review` / `activation_allowed:false`; the stable cumulative
+research pointer remains v0.9. No raw Drive source is auto-promoted to a
+strategy. #731 retains exact-client output review, migration/Edge/model budget
+and #679 hosting release gates. No production/model/Vercel action occurred.
+
+### 9 October — CA launch-finish order and #736 reconciliation
+
+CA's current client-by-client launch contract is #668 comment 6085424890,
+cross-linked from #381. Work in this order: reconcile the existing #731/#736
+guarded strategy draft; prepare real posting dates only from canonical Client
+Schedule evidence; complete #396 exact client-safe Brand Hub roots/finals/access;
+accept each client role on a phone across Overview, Plan, Performance,
+Approvals and Brand Hub; then use one #679 budgeted, reversible release packet.
+No blanket launch claim from frontend compilation or synthetic fixtures. The
+production content gates remain zero published strategies, only five clients
+with October/November dated Client Schedule slots, zero enabled Brand Hubs,
+and 60/61 confirmed packages with LHP's once-off scope unresolved.
+
+Draft #736 was reconciled onto current main without discarding either its
+strategy receipt or the later package/live-release receipts. Elcheck, JFJ and
+VCS are now confirmed in production through the audited admin flow; old
+"package rows have not changed" preparation prose was corrected. The
+generator remains OFF. This merge is code/receipt reconciliation only: no
+model call, strategy amendment/publication, production migration/Edge action,
+or Vercel operation. Actual generated quality and protected activation remain
+#731/#679 gates.
+
+### 9 October — #736 confirmed-quantity source fence, still draft/OFF
+
+The prepared #731 strategy proposal now includes confirmed per-format monthly
+quantities in the model brief and source digest. A positive quantity correction
+while a model response is in flight is rejected even when the set of enabled
+formats is unchanged; unknown quantities remain null. Focused strategy tests
+49/49, TypeScript/Vite build, scoped lint, app-bundle presence and diff checks
+pass. Deno CLI was not available in this shell for a fresh Edge type-check;
+the two Edge entrypoints passed earlier at the preceding PR head. No model,
+Vercel, production, migration or provider operation occurred. PR #736 remains
+draft/OFF pending exact-client semantic review and protected activation.
+
+Read-only Vercel billing on 9 October showed $20/$20 included consumed and
+$4.54/$10 on-demand under the shared Pause-ON budget. The nominal $5.46 left
+is not a Dynamics build allowance; client websites share this cap. Five
+canonical sites returned HTTP HEAD 200: Dynamics, Piek, Emmanuel, All Around
+PVC and Red Oak. Await CA's explicit incremental Dynamics spend ceiling and
+reserved client-site headroom before staging any release under #679.
+
+### 9 October — local launch continuation; production still older than main
+
+Current main `8c2add235be4d3c94e4ea6e899e56bd1e8285526` includes merged
+frontend Overview cleanup #738 and test-only error-state receipt #740. Local
+actual-component client preview, Plan, Approvals, library, service tabs and
+Overview checks passed at desktop and phone widths; these are **not**
+changed-production acceptance. Authenticated production Braize still shows the
+older empty Overview cards and `To confirm` package cards, no published October
+strategy, no October scheduled posts, and a Brand Hub awaiting its verified
+client-safe mapping. #679 prohibits a cloud build/release until an explicit
+incremental spend ceiling and client-site reserve are set. Do not claim the
+app is live-ready from the local fixtures.
+
+Existing draft PR #736 includes source-fence commit
+`26fe8c06eaa32d49764e3834b3e6850dbe3dd0b8`: the source/evidence/package
+is re-read after the model responds, before the
+version-fenced draft RPC. A mid-response incorporated decision or corrected
+format fails closed without writing an obsolete proposal. Focused strategy
+36/36, runnable Windows suite 3,763 pass/19 skip/0 fail, build/scoped lint,
+Deno entrypoint and diff checks pass. The generator remains OFF; no model call,
+migration, Edge deploy, production strategy write, approval or publication.
+Actual client-specific semantic quality, confirmed production package records,
+#396 library mapping and #679 release/activation gates remain open.
+
+### 9 October — CA corrected four Bloemfontein client scopes; no production mutation
+
+CA directly confirmed Elcheck and JFJ Electrical each have 3 design posters,
+3 photo posts and 1 video monthly; VCS Cleaning Solutions has 8 design posters
+and 1 video monthly; LHP Student Village & Block is once-off, not a recurring
+monthly social package. All unspecified fields remain unknown, not zero. The
+9 October SELECT-only read still found `{}` package objects for all four exact
+client IDs. The work Chrome Dynamics tab is authenticated as Braize client,
+not an admin; do not bypass the audited `confirm_client_package_settings` flow
+with direct SQL. Existing exact-client research and first-party public sources
+were reconciled in `CA-PACKAGE-AND-SOURCE-RECEIPT-2026-10-09.md`; there is no
+new generic identity search or request for facts already documented. LHP's
+original booklet has unresolved utilities/terms conflict. #736 generation
+remains OFF and these source packets are not automatically trusted runtime
+guides. No client package, strategy, schedule, publication, provider or
+Vercel write occurred from this receipt.
+
+### 9 October — #731 guarded generation candidate in draft PR #736
+
+Draft PR #736 (`codex/731-strategy-autopilot-generation`) prepares a bounded
+next-month AI proposal path on the existing strategy worker/row and a new
+service-role-only guarded amendment RPC. It is **not merged, deployed or
+activated**. `MONTHLY_STRATEGY_AI_ENABLED` defaults OFF; the proposed migration
+has not been applied. Existing 57 November drafts remain blank in production,
+and client strategy projection remains published-only. The ordinary context
+amend RPC was not reused for automatic writes because canonical approval does
+not increment version; the new RPC checks draft status under row lock.
+
+Focused strategy tests (33/33), local build, scoped lint/diff and Deno Edge
+type-check pass. The exact-head full local suite with the Brand Hub fixture's
+localhost origin and OpenSSL on PATH ran 3,790 tests serially: 3,771 pass,
+19 skip, zero fail. The earlier single signed-link failure was a mismatched
+local test origin, not a product defect. The generated-proposal staff review panel passed
+read-only 375/390/430/1440px local browser checks. PR #736 still requires actual model-quality review
+for the named exact-client fixtures, staff/mobile browser acceptance and a
+separate #679 migration/Edge/model-spend/backfill release decision. No
+strategy approval/publication, production data write or Vercel operation
+occurred. See `MONTHLY-STRATEGY-GENERATION-RUNBOOK.md` and #731 for the
+activation boundary. Preserve the additive #734 and live acceptance receipts
+below.
+
 ### 10 October — #745 exact OneDrive drive-ID fence
 
 The existing draft #745 nested portal resolver now compares the durable
@@ -80,8 +236,8 @@ applies. Recheck its exact footer on the next authorised release.
 
 The safe code lanes are prepared, not business-approved: #731/PR #736 remains
 draft/OFF with model-proposal quality rejection but no production generation;
-#396/PR #745 remains draft/OFF with exact nested-root resolution but zero
-production portal mappings. The 9 October accepted queue still has 57 October
+#396/PR #745 is merged but its exact nested-root resolution is not deployed or
+activated and production still has zero portal mappings. The 9 October accepted queue still has 57 October
 and 57 November draft strategies, none published; only five of 61 active
 clients have October/November posting rows and none has disclosure evidence.
 LHP once-off scope remains unverified. All 61 OneDrive portal roots inherit

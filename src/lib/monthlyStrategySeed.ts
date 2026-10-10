@@ -23,10 +23,12 @@ export interface MonthlyBaselineInput {
 }
 
 const MAX_SIGNAL_LENGTH = 180
-const SAFE_GUIDE_HEADING = /(identity|positioning|audience|human marketing|marketing voice|content ideas|recurring formats|content[, /]+reels|reels? \/ video|social\/content lessons|visual direction|working rule|bottom line)/i
+const CONTENT_GUIDE_HEADING = /(content (ideas|formats|that suits)|recurring formats|content[, /]+reels|reels? \/ video|social\/content lessons|(?:umbrella|engen|sasol|get together) mode)/i
+const POSITIONING_GUIDE_HEADING = /(identity|positioning|audience)/i
 const UNSAFE_GUIDE_HEADING = /(contact|address|website|hashtag|freshness|unresolved|mistakes|guardrail)/i
 const UNSAFE_SIGNAL = /(@|https?:\/\/|www\.|\+\d|\b\d{2,4}[ -]\d{3}[ -]\d{3,4}\b)/i
-const ADMINISTRATIVE_SIGNAL = /^(canonical cg client|public trading style)\s*:/i
+const ADMINISTRATIVE_SIGNAL = /^(canonical (cg )?client|public trading style)\s*:/i
+const NEGATIVE_SIGNAL = /^(?:do not|don't|never|avoid|no |only |keep |use |prefer |must |where |when |if )/i
 
 function cleanSignal(value: string): string {
   const cleaned = value
@@ -62,34 +64,64 @@ function uniqueSignals(values: string[], limit: number): string[] {
  * deliberately excluded from automatic campaign direction.
  */
 export function extractReadyGuideSignals(markdown: string): string[] {
-  const candidates: string[] = []
-  let safeSection = false
+  const contentByTopic = new Map<string, string[]>()
+  const positioning: string[] = []
+  let section: 'content' | 'positioning' | 'other' = 'other'
   let unsafeSubsection = false
+  let topic = ''
+  let inUsefulThemes = false
 
   for (const rawLine of markdown.replace(/\r\n/g, '\n').split('\n')) {
     const heading = rawLine.match(/^(#{2,4})\s+(.+)$/)
     if (heading) {
       const title = cleanSignal(heading[2])
       if (heading[1].length === 2) {
-        safeSection = SAFE_GUIDE_HEADING.test(title) && !UNSAFE_GUIDE_HEADING.test(title)
+        section = UNSAFE_GUIDE_HEADING.test(title) ? 'other'
+          : CONTENT_GUIDE_HEADING.test(title) ? 'content'
+            : POSITIONING_GUIDE_HEADING.test(title) ? 'positioning' : 'other'
         unsafeSubsection = false
+        topic = title.replace(/^\d+[.)]\s*/, '')
+        inUsefulThemes = !/\bmode\b/i.test(title)
       } else {
         unsafeSubsection = UNSAFE_GUIDE_HEADING.test(title)
+        topic = title
       }
       continue
     }
-    if (!safeSection || unsafeSubsection) continue
+    if (section === 'other' || unsafeSubsection) continue
 
     const line = rawLine.trim()
     if (!line || line.startsWith('#')) continue
-    if (/^(use|avoid|prefer|rules?|do not|never):?$/i.test(cleanSignal(line))) continue
+    if (/^useful themes:?$/i.test(cleanSignal(line))) {
+      inUsefulThemes = true
+      continue
+    }
+    if (/^(?:voice|avoid|prefer|rules?|do not|never|content approach):?$/i.test(cleanSignal(line))) {
+      inUsefulThemes = false
+      continue
+    }
 
     const isBullet = /^[-*+]\s+/.test(line)
     const isNamedStrategyFact = /^(primary audience|business|positioning|content (priority|focus)|brand voice)\s*:/i.test(cleanSignal(line))
-    if (isBullet || isNamedStrategyFact) candidates.push(line)
+    const positioningBullet = isBullet && /^(?:serves?|supplies?|provides?|offers?|operates?|specialis(?:es|t))\b/i.test(cleanSignal(line))
+    if (section === 'positioning' && (isNamedStrategyFact || positioningBullet)) positioning.push(line)
+    if (section === 'content' && isBullet && inUsefulThemes) {
+      const signal = cleanSignal(line)
+      if (NEGATIVE_SIGNAL.test(signal)) continue
+      const key = topic.toLocaleLowerCase()
+      contentByTopic.set(key, [...(contentByTopic.get(key) ?? []), signal])
+    }
   }
 
-  return uniqueSignals(candidates, 4)
+  // Take one opportunity per topic before cycling back. A long guardrail or
+  // single format list must not crowd out the client's other creative routes.
+  const content: string[] = []
+  for (let index = 0; index < 4; index += 1) {
+    for (const signals of contentByTopic.values()) {
+      if (signals[index]) content.push(signals[index])
+    }
+  }
+  return uniqueSignals([...positioning.slice(0, 1), ...content], 4)
 }
 
 function decisionStrings(value: unknown): string[] {

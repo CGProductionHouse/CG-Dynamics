@@ -12,6 +12,7 @@ class Query {
   select() { return this }
   eq(key, value) { this.filters.push(row => row[key] === value); return this }
   neq(key, value) { this.filters.push(row => row[key] !== value); return this }
+  not(key, operator, value) { assert.equal(operator, 'is'); this.filters.push(row => value === null ? row[key] != null : row[key] !== value); return this }
   is(key, value) { this.filters.push(row => row[key] === value); return this }
   lt(key, value) { this.filters.push(row => String(row[key]) < String(value)); return this }
   gte(key, value) { this.filters.push(row => String(row[key]) >= String(value)); return this }
@@ -20,10 +21,22 @@ class Query {
   order(key, options) { this.sort = [key, options.ascending]; return this }
   limit(value) { this.max = value; return this }
   range(from, to) { this.slice = [from, to + 1]; return Promise.resolve(this.result()) }
+  upsert(rows, options) {
+    assert.equal(this.table, 'background_jobs')
+    assert.deepEqual(options, { onConflict: 'idempotency_key', ignoreDuplicates: true })
+    this.fake.jobUpserts.push(rows)
+    const jobs = this.fake.tables.background_jobs ?? (this.fake.tables.background_jobs = [])
+    for (const row of rows) if (!jobs.some(job => job.idempotency_key === row.idempotency_key)) jobs.push(row)
+    return Promise.resolve({ error: null })
+  }
   maybeSingle() { const result = this.result(); return Promise.resolve({ data: result.data[0] ?? null, error: null }) }
   result() {
     let data = [...(this.fake.tables[this.table] ?? [])].filter(row => this.filters.every(filter => filter(row)))
-    if (this.sort) data.sort((a, b) => String(a[this.sort[0]]).localeCompare(String(b[this.sort[0]])) * (this.sort[1] ? 1 : -1))
+    if (this.sort) data.sort((a, b) => {
+      const left = a[this.sort[0]], right = b[this.sort[0]]
+      const order = typeof left === 'number' && typeof right === 'number' ? left - right : String(left).localeCompare(String(right))
+      return order * (this.sort[1] ? 1 : -1)
+    })
     if (this.max != null) data = data.slice(0, this.max)
     if (this.slice) data = data.slice(...this.slice)
     return { data, error: null }
@@ -32,7 +45,7 @@ class Query {
 }
 
 class FakeSupabase {
-  constructor(tables) { this.tables = tables; this.calls = [] }
+  constructor(tables) { this.tables = tables; this.calls = []; this.jobUpserts = [] }
   from(table) { return new Query(this, table) }
   async rpc(name, args) {
     assert.equal(name, 'seed_monthly_client_strategy')
@@ -161,6 +174,8 @@ test('automatic capacity keeps positive, zero and unknown distinct, while repeat
   assert.equal(data.actionPlan.animated_poster.enabled, true)
   assert.deepEqual(data.actionPlan.animated_poster.items, [])
   assert.equal(data.actionPlan.campaign_recommendation.enabled, false)
+  assert.equal(fake.calls[0].p_seed_context.source_windows.confirmed_package_scope.animated_poster, 1)
+  assert.equal(fake.calls[0].p_seed_context.source_windows.confirmed_package_scope.reels, null)
   const repeat = await autopilot.runMonthlyStrategyAutopilot(fake, { today: '2026-09-22', systemProfileId: 'system-profile' })
   assert.equal(repeat.drafts_created, 0)
   assert.equal(fake.calls.length, 1)
@@ -196,6 +211,35 @@ test('an existing or staff-amended client/month strategy is never sent to the se
   assert.equal(fake.calls[0].p_strategy_month, '2026-10-01')
 })
 
+test('opt-in next-month generation queues an existing draft once per day without touching its strategy', async () => {
+  const saved = { id: 'existing-next', client_id: 'client-a', strategy_month: '2026-10-01', workflow_status: 'draft', version: 4, strategy_data: { strategyGoingForward: 'Staff draft stays untouched.' } }
+  const fake = fixture([saved])
+  const before = JSON.stringify(saved)
+  const result = await autopilot.runMonthlyStrategyAutopilot(fake, { today: '2026-09-22', systemProfileId: 'system-profile', enqueueGeneration: true })
+  assert.equal(result.generation_jobs_requested, 1)
+  assert.equal(result.drafts_created, 1)
+  assert.equal(JSON.stringify(saved), before)
+  assert.deepEqual(fake.jobUpserts[0].map(row => row.payload), [{ action: 'generate_next_month', clientId: 'client-a', strategyMonth: '2026-10-01', today: '2026-09-22' }])
+  await autopilot.runMonthlyStrategyAutopilot(fake, { today: '2026-09-22', systemProfileId: 'system-profile', enqueueGeneration: true })
+  assert.equal(fake.tables.background_jobs.length, 1)
+  assert.equal(fake.tables.background_jobs[0].max_attempts, 3)
+  assert.equal(JSON.stringify(saved), before)
+})
+
+test('opt-in generation does not enqueue approved next-month rows', async () => {
+  const fake = fixture([{ id: 'reviewed-next', client_id: 'client-a', strategy_month: '2026-10-01', workflow_status: 'approved', version: 2 }])
+  const result = await autopilot.runMonthlyStrategyAutopilot(fake, { today: '2026-09-22', systemProfileId: 'system-profile', enqueueGeneration: true })
+  assert.equal(result.generation_jobs_requested, 0)
+  assert.equal(fake.jobUpserts.length, 0)
+})
+
+test('opt-in generation does not enqueue an amended published next-month row', async () => {
+  const fake = fixture([{ id: 'published-next', client_id: 'client-a', strategy_month: '2026-10-01', workflow_status: 'draft', version: 3, published_version: 2 }])
+  const result = await autopilot.runMonthlyStrategyAutopilot(fake, { today: '2026-09-22', systemProfileId: 'system-profile', enqueueGeneration: true })
+  assert.equal(result.generation_jobs_requested, 0)
+  assert.equal(fake.jobUpserts.length, 0)
+})
+
 test('knowledge retrieval excludes expired, unreviewed-industry and other-client cards before grounding', async () => {
   const fake = fixture()
   fake.tables.client_industry_profiles = [{ client_id: 'client-a', review_state: 'draft', primary_industry: 'Agriculture' }]
@@ -211,6 +255,52 @@ test('knowledge retrieval excludes expired, unreviewed-industry and other-client
   assert.deepEqual(sourceIds, ['today'])
 })
 
+test('exact-client and recently reviewed cards outrank arbitrary UUID order', async () => {
+  const fake = fixture()
+  const card = (id, lastReviewed, activeClientId = null) => ({
+    id, last_reviewed: lastReviewed, content_hash: 'a'.repeat(64), reviewed_content_hash: 'a'.repeat(64),
+    status: 'active', active_client_id: activeClientId, knowledge_layer: activeClientId ? 'active_client_specific' : 'universal_principle',
+    relevant_agents: ['marketing_strategist'], principle: `Specific reviewed research ${id} for the client plan.`, review_expires_at: null,
+  })
+  fake.tables.skill_cards = [
+    card('aaa-old', '2026-08-01'), card('zzz-new', '2026-09-20'),
+    card('yyy-middle', '2026-09-10'), card('client-card', '2026-07-01', 'client-a'),
+  ]
+  const prepared = await autopilot.prepareDraft(fake, fake.tables.clients[0], '2026-10-01', '2026-09-22')
+  assert.deepEqual(prepared.seedContext.sources.marketing_library_skill_card_ids,
+    ['client-card', 'zzz-new', 'yyy-middle'])
+})
+
+test('next-month grounding reads the prior published snapshot, never an unpublished staff draft', async () => {
+  const fake = fixture([
+    { id: 'published-prior', client_id: 'client-a', strategy_month: '2026-09-01', workflow_status: 'draft', version: 4,
+      strategy_data: { goldStandard: { objective: 'Unpublished staff revision must never become AI evidence.' } },
+      published_strategy_data: { goldStandard: { objective: 'Published finding: buyers responded to a clear service demonstration.' } } },
+  ])
+  await autopilot.runMonthlyStrategyAutopilot(fake, { today: '2026-10-09', systemProfileId: 'system-profile' })
+  const next = fake.calls.find(call => call.p_strategy_month === '2026-11-01')
+  const evidence = JSON.stringify(next.p_seed_context.intelligence_evidence)
+  assert.match(evidence, /Published finding: buyers responded/)
+  assert.doesNotMatch(evidence, /Unpublished staff revision/)
+  assert.equal(next.p_seed_context.sources.previous_monthly_strategy_id, 'published-prior')
+})
+
+test('published post evidence carries its fact window and observed metrics without filling missing facts as zero', async () => {
+  const fake = fixture()
+  fake.tables.reports = [{ id: 'report-a', client_id: 'client-a', status: 'published', platform: null, period_end: '2026-09-30', performance_comments: null }]
+  fake.tables.posts = [
+    { id: 'post-a', report_id: 'report-a', platform: 'facebook', caption: 'Actual delivery demonstration', reach: 120, views: null, reactions: 0, comments: null, shares: 2, total_clicks: null },
+    { id: 'post-b', report_id: 'report-a', platform: 'instagram', caption: 'Another buyer question', reach: 75, views: 90, reactions: null, comments: null, shares: null, total_clicks: null },
+  ]
+  const prepared = await autopilot.prepareDraft(fake, fake.tables.clients[0], '2026-11-01', '2026-10-09')
+  const postEvidence = prepared.evidence.filter(item => item.authority === 'published_report_post')
+  assert.equal(postEvidence.length, 2)
+  assert.match(postEvidence[0].excerpt, /Published report ended 2026-09-30/)
+  assert.match(postEvidence[0].excerpt, /reach 120, reactions 0, shares 2/)
+  assert.doesNotMatch(postEvidence[0].excerpt, /views 0|comments 0|clicks 0/)
+  assert.equal(prepared.seedContext.source_windows.previous_report_period_end, '2026-09-30')
+})
+
 test('a failed canonical strategy read explicitly withholds alignment without replacing guideline authority', () => {
   assert.deepEqual(
     alignment.monthlyStrategyAlignmentLines(null, { message: 'database unavailable' }),
@@ -224,6 +314,8 @@ test('handler is worker-only and shared worker/sync ownership remains untouched'
   const handler = read('../supabase/functions/monthly-strategy-autopilot/index.ts')
   const guideline = read('../supabase/functions/suggest-content-videos/index.ts')
   assert.match(handler, /workerToken\.length < 32 \|\| suppliedToken !== workerToken/)
+  assert.match(handler, /suppliedBearer !== `Bearer \$\{serviceKey\}`/)
+  assert.match(handler, /MONTHLY_STRATEGY_AI_ENABLED/)
   assert.match(handler, /WORKER_SYSTEM_PROFILE_ID/)
   assert.match(handler, /runMonthlyStrategyAutopilot/)
   assert.doesNotMatch(handler, /approved|published|transition_monthly_client_strategy/)
@@ -231,6 +323,16 @@ test('handler is worker-only and shared worker/sync ownership remains untouched'
   assert.match(guideline, /eq\('client_id', clientId\)/)
   assert.match(guideline, /monthlyStrategyAlignmentLines/)
   assert.match(guideline, /monthlyStrategyError/)
+})
+
+test('automatic proposal RPC is service-only, draft-only and preserves staff amendment metadata', () => {
+  const source = read('../supabase/migrations/20261009120000_guard_monthly_strategy_generation.sql')
+  assert.match(source, /auth\.jwt\(\)->>'role'.*<> 'service_role'/)
+  assert.match(source, /v_strategy\.workflow_status <> 'draft' or v_strategy\.published_version is not null/)
+  assert.match(source, /p_expected_version <> v_strategy\.version/)
+  assert.match(source, /grant execute on function public\.propose_monthly_client_strategy_generation[\s\S]*to service_role/)
+  assert.doesNotMatch(source, /staff_amended_at\s*=/)
+  assert.doesNotMatch(source, /published_strategy_data\s*=/)
 })
 
 test('active-client scan is genuinely paginated and seed remains the only write contract', () => {

@@ -24,11 +24,13 @@ type QueryBuilder = {
   in: (column: string, values: unknown[]) => QueryBuilder
   is: (column: string, value: unknown) => QueryBuilder
   neq: (column: string, value: unknown) => QueryBuilder
+  not: (column: string, operator: string, value: unknown) => QueryBuilder
   or: (filters: string) => QueryBuilder
   order: (column: string, options: { ascending: boolean }) => QueryBuilder
   limit: (count: number) => QueryBuilder
   range: (from: number, to: number) => QueryBuilder
   maybeSingle: () => Promise<QueryResult>
+  upsert: (rows: Array<Record<string, unknown>>, options: { onConflict: string; ignoreDuplicates: boolean }) => Promise<{ error: { message: string } | null }>
   then: Promise<QueryResult>['then']
 }
 
@@ -84,7 +86,10 @@ export interface StrategyAutopilotResult {
   blocked: number
   blockers: Record<string, number>
   receipts: Array<Record<string, unknown>>
+  generation_jobs_requested?: number
 }
+
+export const STRATEGY_GENERATION_MAX_ENQUEUES = 250
 
 const clean = (value: unknown, max = 220) => typeof value === 'string'
   ? value.replace(/\s+/g, ' ').trim().slice(0, max)
@@ -142,7 +147,7 @@ export function approvedIndustryProfile(row: Record<string, unknown> | null): Re
   return row && (row.review_state === 'reviewed' || row.review_state === 'active') ? row : null
 }
 
-async function prepareDraft(sb: StrategyAutopilotClient, client: Record<string, unknown>, strategyMonth: string, operatingDate: string) {
+export async function prepareDraft(sb: StrategyAutopilotClient, client: Record<string, unknown>, strategyMonth: string, operatingDate: string) {
   const clientId = String(client.id)
   const next = new Date(`${strategyMonth}T00:00:00Z`)
   next.setUTCMonth(next.getUTCMonth() + 1)
@@ -150,14 +155,14 @@ async function prepareDraft(sb: StrategyAutopilotClient, client: Record<string, 
   const [deliverables, events, prior, report, updates, guide, packageRow, industry, sharedCards, clientCards] = await Promise.all([
     sb.from('monthly_deliverables').select('id,deliverable_type,title').eq('client_id', clientId).eq('month', strategyMonth).is('archived_at', null),
     sb.from('company_calendar_events').select('id,title,event_type,start_at').eq('client_id', clientId).gte('start_at', `${strategyMonth}T00:00:00+02:00`).lt('start_at', `${nextMonth}T00:00:00+02:00`).neq('status', 'cancelled').is('superseded_by_event_id', null),
-    sb.from('monthly_client_strategies').select('id,strategy_data').eq('client_id', clientId).lt('strategy_month', strategyMonth).order('strategy_month', { ascending: false }).limit(1).maybeSingle(),
+    sb.from('monthly_client_strategies').select('id,strategy_month,published_strategy_data').eq('client_id', clientId).lt('strategy_month', strategyMonth).not('published_strategy_data', 'is', null).order('strategy_month', { ascending: false }).limit(1).maybeSingle(),
     sb.from('reports').select('id,strategy_data,performance_comments,period_end').eq('client_id', clientId).eq('status', 'published').is('platform', null).lt('period_end', strategyMonth).order('period_end', { ascending: false }).limit(1).maybeSingle(),
-    sb.from('client_context_updates').select('id,title,body,decisions').eq('client_id', clientId).eq('review_state', 'incorporated').order('created_at', { ascending: false }).limit(5),
+    sb.from('client_context_updates').select('id,title,body,decisions,created_at').eq('client_id', clientId).eq('review_state', 'incorporated').order('created_at', { ascending: false }).limit(5),
     sb.from('client_guides').select('id,guide_markdown').eq('client_id', clientId).eq('runtime_readiness', 'ready').order('version', { ascending: false }).limit(1).maybeSingle(),
     sb.from('client_packages').select('id').eq('client_id', clientId).eq('status', 'active').lt('start_date', nextMonth).or(`end_date.is.null,end_date.gte.${strategyMonth}`).order('start_date', { ascending: false }).limit(1).maybeSingle(),
     sb.from('client_industry_profiles').select('primary_industry,secondary_industry,review_state').eq('client_id', clientId).maybeSingle(),
-    sb.from('skill_cards').select('id,title,principle,summary,knowledge_layer,category,subcategory,active_client_id,review_expires_at,relevant_agents,confidence_level,evidence_label,source_id,content_hash,reviewed_content_hash').eq('status', 'active').is('active_client_id', null).in('knowledge_layer', ['universal_principle', 'south_african_market', 'industry_specific']).or(`review_expires_at.is.null,review_expires_at.gte.${operatingDate}`).limit(30),
-    sb.from('skill_cards').select('id,title,principle,summary,knowledge_layer,category,subcategory,active_client_id,review_expires_at,relevant_agents,confidence_level,evidence_label,source_id,content_hash,reviewed_content_hash').eq('status', 'active').eq('active_client_id', clientId).or(`review_expires_at.is.null,review_expires_at.gte.${operatingDate}`).limit(30),
+    sb.from('skill_cards').select('id,title,principle,summary,knowledge_layer,category,subcategory,active_client_id,last_reviewed,review_expires_at,relevant_agents,confidence_level,evidence_label,source_id,content_hash,reviewed_content_hash').eq('status', 'active').is('active_client_id', null).in('knowledge_layer', ['universal_principle', 'south_african_market', 'industry_specific']).or(`review_expires_at.is.null,review_expires_at.gte.${operatingDate}`).order('last_reviewed', { ascending: false }).limit(30),
+    sb.from('skill_cards').select('id,title,principle,summary,knowledge_layer,category,subcategory,active_client_id,last_reviewed,review_expires_at,relevant_agents,confidence_level,evidence_label,source_id,content_hash,reviewed_content_hash').eq('status', 'active').eq('active_client_id', clientId).or(`review_expires_at.is.null,review_expires_at.gte.${operatingDate}`).order('last_reviewed', { ascending: false }).limit(30),
   ])
   for (const result of [deliverables, events, prior, report, updates, guide, packageRow, industry, sharedCards, clientCards]) {
     if (result.error) throw new Error(result.error.message)
@@ -180,13 +185,21 @@ async function prepareDraft(sb: StrategyAutopilotClient, client: Record<string, 
     if (card.knowledge_layer !== 'industry_specific') return true
     const labels = `${clean(card.category, 100)} ${clean(card.subcategory, 100)}`.toLowerCase()
     return Boolean(primaryIndustry) && labels.includes(primaryIndustry)
-  }).sort((left, right) => String(left.id).localeCompare(String(right.id))).slice(0, 30)
+  }).sort((left, right) => {
+    // Exact-client reviewed knowledge wins; newest reviewed shared knowledge
+    // follows. UUID order is not a relevance or recency signal.
+    const scope = Number(Boolean(right.active_client_id)) - Number(Boolean(left.active_client_id))
+    if (scope) return scope
+    const recency = String(right.last_reviewed ?? '').localeCompare(String(left.last_reviewed ?? ''))
+    return recency || String(left.id).localeCompare(String(right.id))
+  }).slice(0, 30)
   const draft = emptyDraft()
   const evidence: Evidence[] = []
   const blockers: string[] = []
   const packageAuthority = readPackageAuthority(client.package_settings)
   const guideRow = guide.data as Record<string, unknown> | null
-  const previousData = readStrategyData((prior.data as Record<string, unknown> | null)?.strategy_data ?? (report.data as Record<string, unknown> | null)?.strategy_data)
+  const priorRow = prior.data as Record<string, unknown> | null
+  const previousData = readStrategyData(priorRow?.published_strategy_data ?? (report.data as Record<string, unknown> | null)?.strategy_data)
   const baseline = buildMonthlyBaseline({
     clientName: String(client.name),
     guideId: guideRow?.id as string | undefined,
@@ -199,6 +212,12 @@ async function prepareDraft(sb: StrategyAutopilotClient, client: Record<string, 
   // Source snippets are briefing evidence, not authored monthly decisions.
   // Keep them in seedContext rather than rendering them as client strategy.
   evidence.push(...baseline.evidence)
+  if (priorRow?.published_strategy_data) {
+    for (const key of ['objective', 'testAndChange', 'successSignals', 'nextMonthGamePlan'] as const) {
+      const excerpt = clean(previousData.goldStandard[key], 220)
+      if (excerpt) evidence.push({ authority: 'published_monthly_strategy', source_id: String(priorRow.id), field: key, excerpt: `${priorRow.strategy_month}: ${excerpt}` })
+    }
+  }
   if (!packageAuthority.settings || !packageAuthority.verification) blockers.push('PACKAGE_UNVERIFIED')
   if (!prior.data && !report.data && updateRows.length === 0 && !guideRow) blockers.push('CLIENT_EVIDENCE_UNVERIFIED')
   for (const card of cardRows.slice(0, 3)) {
@@ -252,14 +271,26 @@ async function prepareDraft(sb: StrategyAutopilotClient, client: Record<string, 
   if (reportRow?.id) {
     const postResult = await sb.from('posts').select('id,caption,platform,reach,views,reactions,comments,shares,total_clicks,raw').eq('report_id', reportRow.id).order('reach', { ascending: false }).limit(5)
     if (postResult.error) throw new Error(postResult.error.message)
-    const topPost = ((postResult.data ?? []) as Array<Record<string, unknown>>)[0]
+    const publishedPosts = (postResult.data ?? []) as Array<Record<string, unknown>>
+    const topPost = publishedPosts[0]
     if (topPost) {
-      const reach = typeof topPost.reach === 'number' ? topPost.reach : null
+      const reach = typeof topPost.reach === 'number' && Number.isFinite(topPost.reach) && topPost.reach >= 0 ? topPost.reach : null
       draft.topContent.autoCaption = clean(topPost.caption, 500) || null
       draft.topContent.autoPlatform = clean(topPost.platform, 30) || null
       draft.topContent.autoMetricLabel = reach == null ? null : 'Reach'
       draft.topContent.autoMetricValue = reach
-      evidence.push({ authority: 'published_report_post', source_id: String(topPost.id), field: 'topContent', excerpt: clean(topPost.caption, 180) || 'Top post from the previous published report.' })
+      for (const [index, post] of publishedPosts.slice(0, 3).entries()) {
+        const metrics = ([
+          ['reach', post.reach], ['views', post.views], ['reactions', post.reactions],
+          ['comments', post.comments], ['shares', post.shares], ['clicks', post.total_clicks],
+        ] as Array<[string, unknown]>)
+          .filter(([, value]) => typeof value === 'number' && Number.isFinite(value) && value >= 0)
+          .map(([label, value]) => `${label} ${value}`)
+        evidence.push({
+          authority: 'published_report_post', source_id: String(post.id), field: 'topContent',
+          excerpt: clean(`Published report ended ${clean(reportRow.period_end, 10) || 'unknown date'}; observed post ${index + 1} by reach on ${clean(post.platform, 30) || 'unknown platform'}: ${clean(post.caption, 110) || 'caption unavailable'}; ${metrics.length ? metrics.join(', ') : 'metrics unavailable'}.`, 320),
+        })
+      }
     }
   }
   const performance = clean(reportRow?.performance_comments)
@@ -299,6 +330,19 @@ async function prepareDraft(sb: StrategyAutopilotClient, client: Record<string, 
         company_calendar: evs.length ? 'available' : 'none', approved_client_context: updateRows.length ? 'available' : 'none',
         client_guide: guide.data ? 'available' : 'none', marketing_library: cardRows.length ? 'available' : 'none',
       },
+      source_windows: {
+        previous_report_period_end: reportRow?.period_end ?? null,
+        previous_strategy_month: priorRow?.strategy_month ?? null,
+        incorporated_context_updates: updateRows.map(row => ({ id: row.id, created_at: row.created_at ?? null })),
+        confirmed_package_scope: packageAuthority.settings ? {
+          professional_video: packageAuthority.settings.professional_videos_per_month,
+          reels: packageAuthority.settings.reels_per_month,
+          photo_content: packageAuthority.settings.photo_posts_per_month,
+          design_poster: packageAuthority.settings.design_posters_per_month,
+          animated_poster: packageAuthority.settings.animated_posters_per_month,
+          campaign_recommendation: packageAuthority.settings.campaign_management_included,
+        } : null,
+      },
     },
     previousReportId: reportRow?.id ?? null,
   }
@@ -306,7 +350,7 @@ async function prepareDraft(sb: StrategyAutopilotClient, client: Record<string, 
 
 export async function runMonthlyStrategyAutopilot(
   sb: StrategyAutopilotClient,
-  options: { today: string; systemProfileId: string; enhanceDraft?: StrategyDraftEnhancer },
+  options: { today: string; systemProfileId: string; enhanceDraft?: StrategyDraftEnhancer; enqueueGeneration?: boolean },
 ): Promise<StrategyAutopilotResult> {
   if (!options.systemProfileId) throw new Error('Configured system profile is required.')
   const clients = await fetchAll(sb.from('clients').select('id,name,active,package_settings').eq('active', true).order('id', { ascending: true }))
@@ -317,13 +361,20 @@ export async function runMonthlyStrategyAutopilot(
   let existingUntouched = 0
   let failed = 0
   let blocked = 0
+  const generationCandidates = new Set<string>()
   const note = (code: string) => { blockers[code] = (blockers[code] ?? 0) + 1 }
 
   for (const client of clients) for (const strategyMonth of months) {
     try {
-      const existing = await sb.from('monthly_client_strategies').select('id,workflow_status,version').eq('client_id', client.id).eq('strategy_month', strategyMonth).maybeSingle()
+      const existing = await sb.from('monthly_client_strategies').select('id,workflow_status,version,published_version').eq('client_id', client.id).eq('strategy_month', strategyMonth).maybeSingle()
       if (existing.error) throw new Error(existing.error.message)
-      if (existing.data) { existingUntouched += 1; continue }
+      if (existing.data) {
+        existingUntouched += 1
+        if (options.enqueueGeneration && strategyMonth === months[1] &&
+            (existing.data as Record<string, unknown>).workflow_status === 'draft' &&
+            (existing.data as Record<string, unknown>).published_version == null) generationCandidates.add(String(client.id))
+        continue
+      }
       const prepared = await prepareDraft(sb, client, strategyMonth, options.today)
       for (const blocker of prepared.blockers) note(blocker)
       if (prepared.blockers.length > 0) { blocked += 1; continue }
@@ -339,12 +390,28 @@ export async function runMonthlyStrategyAutopilot(
       if (seeded.error) throw new Error(seeded.error.message)
       const receipt = (seeded.data ?? {}) as Record<string, unknown>
       receipts.push(receipt)
-      if (receipt.created === true) draftsCreated += 1
+      if (receipt.created === true) {
+        draftsCreated += 1
+        if (options.enqueueGeneration && strategyMonth === months[1]) generationCandidates.add(String(client.id))
+      }
       else existingUntouched += 1
     } catch {
       failed += 1
       note('STRATEGY_PREPARATION_FAILED')
     }
   }
-  return { ok: failed === 0, operating_date: options.today, target_months: months, active_clients: clients.length, drafts_created: draftsCreated, existing_untouched: existingUntouched, blocked, failed, blockers, receipts }
+  let generationJobsRequested = 0
+  if (options.enqueueGeneration && generationCandidates.size > 0) {
+    if (generationCandidates.size > STRATEGY_GENERATION_MAX_ENQUEUES) throw new Error('STRATEGY_GENERATION_FLEET_CAP')
+    const rows = [...generationCandidates].sort().map(clientId => ({
+      job_type: 'monthly_strategy_autopilot',
+      payload: { action: 'generate_next_month', clientId, strategyMonth: months[1], today: options.today },
+      idempotency_key: `monthly-strategy-generate:${clientId}:${months[1]}:${options.today}`,
+      max_attempts: 3,
+    }))
+    const enqueued = await sb.from('background_jobs').upsert(rows, { onConflict: 'idempotency_key', ignoreDuplicates: true })
+    if (enqueued.error) throw new Error(`STRATEGY_GENERATION_ENQUEUE_FAILED: ${enqueued.error.message}`)
+    generationJobsRequested = rows.length
+  }
+  return { ok: failed === 0, operating_date: options.today, target_months: months, active_clients: clients.length, drafts_created: draftsCreated, existing_untouched: existingUntouched, blocked, failed, blockers, receipts, generation_jobs_requested: generationJobsRequested }
 }

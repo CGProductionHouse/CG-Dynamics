@@ -816,9 +816,8 @@ async function runJob(
       return { ok: true, ...(data as Record<string, unknown>) }
     }
     case MONTHLY_STRATEGY_AUTOPILOT_JOB_TYPE: {
-      // #463 delegates to the accepted internal Edge boundary. That function
-      // owns Johannesburg-month selection and the canonical #391 seed RPC;
-      // it never updates an existing staff-amended/approved/published strategy.
+      // The daily job seeds canonical drafts; an exact-client child job may
+      // propose next-month content only when the separate model flag is on.
       await updateJobProgress(supabase, job.id, worker, 40)
       const workerToken = (Deno.env.get('WORKER_INTERNAL_TOKEN') ?? '').trim()
       if (workerToken.length < 32) throw new Error('Monthly strategy worker authentication is not configured')
@@ -829,6 +828,9 @@ async function runJob(
           Authorization: `Bearer ${serviceKey}`,
           'X-Internal-Worker-Token': workerToken,
         },
+        body: JSON.stringify(payload.action === 'generate_next_month'
+          ? { action: 'generate_next_month', clientId: payload.clientId, strategyMonth: payload.strategyMonth }
+          : {}),
       })
       const body = await response.json().catch(() => null) as Record<string, unknown> | null
       if (!response.ok || body?.ok !== true) {
