@@ -108,6 +108,25 @@ test('provider output must cover every confirmed format and cannot recycle rule-
   assert.equal(mergeMonthlyStrategyProposal(target(), repeated).reason, 'RULE_OR_REPEATED_STRATEGY')
 })
 
+test('model output cannot save client-facing filler or internal evidence jargon as a draft', () => {
+  const allowed = { clientId, strategyMonth, sourceIds: new Set(['report-1', 'guide-1']), enabledFormats: new Set(['professional_video', 'design_poster']) }
+  const generic = { ...proposal, goldStandard: { ...goldStandard, objective: 'Increase engagement by posting consistently across the client channels.' } }
+  assert.equal(parseMonthlyStrategyProposal(JSON.stringify(generic), allowed), null)
+  assert.equal(mergeMonthlyStrategyProposal(target(), generic).reason, 'CLIENT_FACING_STRATEGY_QUALITY')
+
+  const internal = { ...proposal, actionPlan: { ...proposal.actionPlan,
+    design_poster: ['Use the verified facts from the evidence dossier as the poster headline.'] } }
+  assert.equal(parseMonthlyStrategyProposal(JSON.stringify(internal), allowed), null)
+  assert.equal(mergeMonthlyStrategyProposal(target(), internal).reason, 'CLIENT_FACING_STRATEGY_QUALITY')
+
+  const staffOwned = target()
+  staffOwned.strategy_data.goldStandard.objective = generic.goldStandard.objective
+  const preserved = mergeMonthlyStrategyProposal(staffOwned, proposal)
+  assert.equal(preserved.state, 'applied')
+  assert.equal(preserved.strategyData.goldStandard.objective, generic.goldStandard.objective)
+  assert.ok(preserved.conflicts.includes('goldStandard.objective'))
+})
+
 test('prompt keeps adversarial source text in evidence, never as an instruction or approved claim', () => {
   const row = target()
   const prompt = buildMonthlyStrategyPrompt({ clientId, clientName: 'Exact Client', strategyMonth, draft: row.strategy_data,

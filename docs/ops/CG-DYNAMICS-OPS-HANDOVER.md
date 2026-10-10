@@ -1,5 +1,17 @@
 # CG Dynamics Ops Handover
 
+### 10 October — #736 client-copy quality fence before draft mutation
+
+The existing draft strategy generation path now applies the canonical
+client-facing copy-quality gate to model-authored prose before accepting a
+provider response or merging it into an unpublished draft. The regression
+reproduced structurally valid generic marketing filler passing the earlier
+parser; it now rejects that and internal evidence jargon while leaving
+unrelated staff-authored fields alone. This is a local #736 change only, not a
+model-quality verdict, production generation, approval or publication.
+The exact-client semantic review and protected #731/#679 activation gates
+remain in force.
+
 ### 10 October — #731/#736 reviewed-evidence coverage, still draft/OFF
 
 The existing #736 strategy branch now reserves the bounded model-prompt window

@@ -1,5 +1,6 @@
 import {
   GOLD_STANDARD_FIELDS,
+  clientFacingStrategyQualityIssues,
   readStrategyData,
   type ActionPlanKey,
   type GoldStandardStrategy,
@@ -118,6 +119,7 @@ export function parseMonthlyStrategyProposal(raw: string, allowed: {
       if (!ACTION_KEYS.includes(key as ActionPlanKey) || !allowed.enabledFormats.has(key as ActionPlanKey) ||
           !Array.isArray(items) || items.some(item => typeof item !== 'string' || clean(item).length < 12 || clean(item).length > 300) || items.length > 6) return null
     }
+    if (hasClientFacingQualityIssue(value as MonthlyStrategyProposal)) return null
     return value as MonthlyStrategyProposal
   } catch { return null }
 }
@@ -159,6 +161,18 @@ function hasDistinctStrategicFields(gold: GoldStandardStrategy): boolean {
   return new Set(strategic.map(value => value.toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' '))).size === strategic.length
 }
 
+function hasClientFacingQualityIssue(proposal: Pick<MonthlyStrategyProposal, 'goldStandard' | 'actionPlan'>): boolean {
+  // Apply the existing client-copy gate to model-authored text before it can
+  // enter a canonical draft. Unrelated staff text in the target stays separate.
+  const proposed = readStrategyData({
+    goldStandard: proposal.goldStandard,
+    actionPlan: Object.fromEntries(Object.entries(proposal.actionPlan ?? {}).map(([key, items]) => [
+      key, { enabled: true, items, notes: '' },
+    ])),
+  })
+  return clientFacingStrategyQualityIssues(proposed).length > 0
+}
+
 /** Validate the exact-client/month boundary before any version-fenced RPC. */
 export function mergeMonthlyStrategyProposal(target: ProposalTarget, proposal: MonthlyStrategyProposal, previous?: PreviousGeneratedProposal): ProposalMerge {
   const blocked = (reason: string): ProposalMerge => ({
@@ -177,6 +191,7 @@ export function mergeMonthlyStrategyProposal(target: ProposalTarget, proposal: M
   }
   if (!proposal.goldStandard || typeof proposal.goldStandard !== 'object') return blocked('INVALID_PROPOSAL')
   if (!hasDistinctStrategicFields(proposal.goldStandard)) return blocked('RULE_OR_REPEATED_STRATEGY')
+  if (hasClientFacingQualityIssue(proposal)) return blocked('CLIENT_FACING_STRATEGY_QUALITY')
 
   const current = readStrategyData(target.strategy_data)
   const merged = structuredClone(current)
