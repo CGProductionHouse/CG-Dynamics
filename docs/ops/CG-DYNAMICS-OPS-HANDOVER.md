@@ -1,5 +1,20 @@
 # CG Dynamics Ops Handover
 
+### 10 October — #736 current-main reconciliation and exact package receipt
+
+The existing draft #736 branch was reconciled with main
+`f17b10d864df5298a24c8cc98a75622a1a18491a` without replacing the
+later Braize production acceptance or mixed-source footer receipts. Its
+Bloemfontein preparation note now reflects the audited Elcheck, JFJ and VCS
+package confirmations; LHP remains a once-off scope hold. This is a source
+receipt correction, not a strategy amendment. Focused strategy tests 52/52,
+supported serial local suite 3,769 pass/19 skip/0 fail, build, scoped lint,
+diff and 16/16 read-only actual strategy-review browser fixtures at phone and
+desktop widths pass. The model flag remains OFF; there is still no actual
+generated exact-client quality verdict, production migration/Edge deployment,
+model spend, strategy approval/publication or Vercel operation. #731/#679
+remain the protected activation and release gates.
+
 ### 10 October — #736 client-copy quality fence before draft mutation
 
 The existing draft strategy generation path now applies the canonical
