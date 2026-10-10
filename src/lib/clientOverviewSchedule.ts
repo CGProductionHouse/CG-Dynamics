@@ -1,4 +1,5 @@
 import type { ClientMonthAhead } from './clientPortalCalendar'
+import { businessDateKey } from './businessTime'
 
 export type ClientOverviewSchedule = {
   scheduledCount: number
@@ -6,14 +7,18 @@ export type ClientOverviewSchedule = {
   state: 'scheduled' | 'planning' | 'empty' | 'unavailable'
 }
 
-/** Never turn a failed read or an undated post into a confirmed schedule. */
-export function summarizeClientOverviewSchedule(calendar: ClientMonthAhead | null): ClientOverviewSchedule {
+/** Only work still ahead belongs in the Overview's "Coming up" summary. */
+export function summarizeClientOverviewSchedule(calendar: ClientMonthAhead | null, now = new Date()): ClientOverviewSchedule {
   if (!calendar || calendar.loadFailed) {
     return { scheduledCount: 0, unscheduledCount: 0, state: 'unavailable' }
   }
 
-  const scheduledCount = calendar.posts.filter(post => post.date !== null).length + calendar.events.length
-  const unscheduledCount = calendar.posts.filter(post => post.date === null).length
+  const today = businessDateKey(now)
+  const scheduledCount = calendar.posts.filter(post => post.date !== null && post.date >= today && post.status !== 'posted').length
+    + calendar.events.filter(event => event.allDay
+      ? event.endAt ? Date.parse(event.endAt) > now.getTime() : businessDateKey(event.startAt) >= today
+      : Date.parse(event.endAt ?? event.startAt) >= now.getTime()).length
+  const unscheduledCount = calendar.posts.filter(post => post.date === null && post.status !== 'posted').length
   return {
     scheduledCount,
     unscheduledCount,
