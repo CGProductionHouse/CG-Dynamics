@@ -1,5 +1,17 @@
 # CG Dynamics Ops Handover
 
+### 10 October — exact 61-client launch review sheet, no activation
+
+The read-only fleet cross-check and client-by-client decision codes are in
+`docs/ops/EXACT-CLIENT-LAUNCH-REVIEW-2026-10-10.md` / #668. It reconciles
+confirmed package markers, October/November draft state, dated posting rows,
+private logo staging and seeded portal access without treating any of those as
+publication or external recipient proof. All 61 Brand Hubs remain unmapped;
+zero strategies are published and zero dated posts were disclosed. Browser
+transport timed out before authenticated client acceptance. #731 strategy
+activation, Client Schedule confirmation, #396 asset/access isolation and
+#679 budgeted release remain executable gates before CA's final client review.
+
 ### 10 October — private logo staging, not client publication
 
 CA asked for exact existing internal logos to be available in each matching
