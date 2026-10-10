@@ -40,9 +40,9 @@ let browser
 try {
   await server.listen()
   browser = await chromium.launch({ headless: true })
-  for (const width of [1440, 375]) {
+  for (const width of [1440, 375, 390, 430]) {
     const page = await browser.newPage({ viewport: { width, height: 900 } })
-    const errors = []; const actions = []; let failSetup = true
+    const errors = []; const actions = []; let failSetup = true; let available = true
     page.on('pageerror', error => errors.push(error.message))
     await page.route('**/*', route => {
       const request = route.request(); const url = new URL(request.url())
@@ -51,7 +51,7 @@ try {
       assert.equal(request.method(), 'POST')
       const body = request.postDataJSON(); actions.push(body.action)
       assert.equal(body.clientId, clientId, 'Exact selected client only')
-      if (body.action === 'staff_preview_portal_library_load') return route.fulfill({ json: { ok: true, data: { clientName: 'Synthetic A', clientLogoUrl: null, available: true, categories: [] } } })
+      if (body.action === 'staff_preview_portal_library_load') return route.fulfill({ json: { ok: true, data: { clientName: 'Synthetic A', clientLogoUrl: null, available, categories: [] } } })
       assert.equal(body.action, 'staff_preview_portal_load', 'Only existing read actions')
       return route.fulfill({ json: failSetup
         ? { ok: false, error: 'Synthetic setup read failure' }
@@ -67,7 +67,13 @@ try {
     await page.reload()
     await page.getByRole('heading', { name: 'Library', exact: true }).waitFor()
     assert.equal(await page.getByText('Brand foundation details are temporarily unavailable.', { exact: true }).count(), 0, 'No false failure for an empty successful setup read')
-    assert.deepEqual(actions.sort(), ['staff_preview_portal_library_load', 'staff_preview_portal_library_load', 'staff_preview_portal_load', 'staff_preview_portal_load'])
+    available = false; failSetup = true
+    await page.reload()
+    await page.getByRole('heading', { name: 'Your library is being prepared' }).waitFor()
+    assert.equal(await page.getByText('Brand foundation details are temporarily unavailable.', { exact: true }).count(), 0, 'Disabled library has one clear holding state, not an additional setup warning')
+    assert.equal(await page.getByText('Approved brand files and final client-ready content, kept together in one clear space.', { exact: true }).count(), 0, 'Do not promise available files while the library is disabled')
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width}px disabled-library overflow`)
+    assert.deepEqual(actions.sort(), ['staff_preview_portal_library_load', 'staff_preview_portal_library_load', 'staff_preview_portal_library_load', 'staff_preview_portal_load', 'staff_preview_portal_load', 'staff_preview_portal_load'])
     assert.deepEqual(errors, [])
     console.log(`PASS ${width}px: library remains available, failed setup explicit, successful empty setup not mislabeled, exact client and read-only`)
     await page.close()
