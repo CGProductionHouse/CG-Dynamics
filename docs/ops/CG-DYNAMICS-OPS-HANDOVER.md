@@ -1,5 +1,23 @@
 # CG Dynamics Ops Handover
 
+### 10 October — private logo staging, not client publication
+
+CA asked for exact existing internal logos to be available in each matching
+OneDrive client-portal Brand Identity folder. The 61 destinations were empty
+before this pass. Forty-four small image/PDF files were copied into 43 exact
+client folders (JFJ Electrical has light/dark digital variants). Every copy
+matched the source filename, byte size and file hash on readback; all 44
+copied files and all 61 portal roots still have zero anonymous permissions.
+Eighteen Brand Identity folders remain empty because an exact current logo
+source/variant could not be established safely. The full file-by-file receipt
+and hold list is `docs/ops/CLIENT-PORTAL-LOGO-STAGING-2026-10-10.md` / #396.
+The physical copies consume about 29.5 MiB; a zero-space shortcut into an
+internal working folder was not used because it would undermine isolation.
+No original was moved/deleted, and there was no named sharing, Dynamics
+mapping, publication, production SQL/Edge action or Vercel operation. These
+private staged assets still require brand/current-version review and the
+separate #396 client-role isolation and enablement gate.
+
 ### 10 October — live portal boundary and strategy quality audit (not activated)
 
 CA authorised removal of the two anonymous view/edit links on the shared
