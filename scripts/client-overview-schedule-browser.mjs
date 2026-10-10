@@ -42,6 +42,7 @@ try {
   browser = await chromium.launch({ headless: true })
   for (const width of [1440, 375, 390, 430]) {
     const page = await browser.newPage({ viewport: { width, height: 900 } })
+    await page.clock.install({ time: new Date('2026-10-08T10:00:00+02:00') })
     const errors = []
     page.on('pageerror', error => errors.push(error.message))
     let state = 'unavailable'
@@ -67,13 +68,14 @@ try {
       assert.equal(request.postDataJSON().p_client_id, clientId)
       if (state === 'unavailable' && rpc === 'client_portal_month_ahead_posts_v2') return route.fulfill({ status: 503, json: { message: 'Synthetic calendar read failure' } })
       if (rpc === 'client_portal_month_ahead_events') return route.fulfill({ json: [] })
-      const posts = state === 'empty' ? [] : [{ row_key: 'post-a', schedule_date: state === 'scheduled' ? '2026-10-09' : null, title: 'Exact client post', post_type: 'photo', client_safe_status: 'scheduled' }]
+      const posts = state === 'empty' ? [] : [{ row_key: 'post-a', schedule_date: state === 'scheduled' ? '2026-10-09' : state === 'past' ? '2026-10-07' : null, title: 'Exact client post', post_type: 'photo', client_safe_status: 'scheduled' }]
       return route.fulfill({ json: posts })
     })
     for (const [nextState, expected] of [
       ['unavailable', null],
       ['planning', 'Plan in progress'],
-      ['scheduled', /scheduled item for the planning month/],
+      ['scheduled', /upcoming item this month/],
+      ['past', null],
       ['empty', null],
     ]) {
       state = nextState

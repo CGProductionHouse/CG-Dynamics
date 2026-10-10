@@ -12,6 +12,7 @@ import { useVisualViewportBottomInset } from '../../lib/mobileViewport'
 import { useAuth } from '../../contexts/AuthContext'
 import { isManagerRole } from '../../lib/roles'
 import { CALENDAR_HEADERS, monthGridCells, todayIso } from '../../lib/scheduleCalendar'
+import { businessDateKey } from '../../lib/businessTime'
 import {
   approveScheduleChange,
   listMyScheduleChangeRequests,
@@ -28,6 +29,7 @@ import {
   SIMPLIFIED_TO_BACKEND_STATUS,
   isNeedsActionStatus,
   isPostedOrHistoryStatus,
+  listPastDatedScheduleItems,
   listMonthlyDeliverablesByMonth,
   listMonthlyDeliverablesByYear,
   matchesScheduleStatusFilter,
@@ -39,7 +41,7 @@ import {
 } from '../../lib/planner'
 
 type ScheduleView = 'grid' | 'board' | 'calendar' | 'charts' | 'year'
-type ScheduleMode = 'needs-action' | 'all' | 'posted-history' | 'unscheduled'
+type ScheduleMode = 'needs-action' | 'all' | 'posted-history' | 'unscheduled' | 'past-dated'
 
 const VIEW_LABELS: Record<ScheduleView, string> = {
   grid: 'Grid',
@@ -203,6 +205,12 @@ export default function ClientSchedulePage() {
     () => (item: MonthlyDeliverable) => resolveClientDisplay(item, clientNameById, clients),
     [clientNameById, clients],
   )
+  const today = businessDateKey()
+  const pastDateItems = useMemo(
+    () => selectedMonth === today.slice(0, 7) && view !== 'year' ? listPastDatedScheduleItems(deliverables, today) : [],
+    [deliverables, selectedMonth, today, view],
+  )
+  const pastDateIds = useMemo(() => new Set(pastDateItems.map(item => item.id)), [pastDateItems])
 
   function setView(next: ScheduleView) {
     const params = new URLSearchParams(searchParams)
@@ -213,6 +221,15 @@ export default function ClientSchedulePage() {
   function setMode(next: ScheduleMode) {
     const params = new URLSearchParams(searchParams)
     params.set('mode', next)
+    setSearchParams(params)
+  }
+
+  function openPastDateQueue() {
+    setStatusFilter('all')
+    setSearch('')
+    const params = new URLSearchParams(searchParams)
+    params.set('view', 'grid')
+    params.set('mode', 'past-dated')
     setSearchParams(params)
   }
 
@@ -269,7 +286,7 @@ export default function ClientSchedulePage() {
     const q = search.trim().toLowerCase()
     return deliverables.filter(deliverable => {
       if (!PACKAGE_DELIVERABLE_TYPES.includes(deliverable.deliverable_type)) return false
-      if (!matchesMode(deliverable, mode)) return false
+      if (mode === 'past-dated' ? !pastDateIds.has(deliverable.id) : !matchesMode(deliverable, mode)) return false
       const status = scheduleStatusOf(deliverable)
       if (!matchesScheduleStatusFilter(status, statusFilter)) return false
       if (q) {
@@ -286,7 +303,7 @@ export default function ClientSchedulePage() {
         a.code.localeCompare(b.code) ||
         a.instance_number - b.instance_number
     })
-  }, [clientDisplay, clientNameById, deliverables, mode, search, statusFilter])
+  }, [clientDisplay, clientNameById, deliverables, mode, pastDateIds, search, statusFilter])
 
   const calendarItems = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -402,6 +419,7 @@ export default function ClientSchedulePage() {
           <div className="mb-4 flex flex-wrap gap-1 rounded-lg border border-white/[0.08] bg-white/[0.03] p-1">
             {([
               ['needs-action', `Needs Action ${counts.needsAction}`],
+              ...(pastDateItems.length > 0 || mode === 'past-dated' ? ([['past-dated', `Past dates ${pastDateItems.length}`]] as const) : []),
               ['all', `All Schedule ${counts.all}`],
               ['unscheduled', `Unscheduled ${counts.unscheduled}`],
               ['posted-history', `Posted / History ${counts.history}`],
@@ -420,6 +438,17 @@ export default function ClientSchedulePage() {
         </p>
       )}
       <ScheduleReviewSection canReview={isManagerRole(profile?.role)} onApplied={load} />
+
+      {!loading && !error && pastDateItems.length > 0 && view !== 'year' && (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-400/20 bg-amber-400/[0.055] px-4 py-3">
+          <p className="text-sm font-semibold text-amber-100">
+            {pastDateItems.length} past schedule date{pastDateItems.length === 1 ? '' : 's'} need team review. No dates have been moved automatically.
+          </p>
+          <button type="button" onClick={openPastDateQueue} className="min-h-10 rounded-lg border border-amber-300/30 px-3 py-2 text-xs font-bold text-amber-100 hover:bg-amber-300/10">
+            Review dates
+          </button>
+        </div>
+      )}
 
       {error && <div className="mb-3 rounded-lg bg-red-400/10 px-3 py-2 text-sm text-red-200">{error}</div>}
       {loading ? (

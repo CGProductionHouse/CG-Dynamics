@@ -438,6 +438,22 @@ export function getEffectiveScheduleDate(deliverable: MonthlyDeliverable): strin
   return deliverable.scheduled_date ?? deliverable.due_date ?? null
 }
 
+/** Read-only review queue: an unfinished package item with a schedule date before today. */
+export function listPastDatedScheduleItems(deliverables: MonthlyDeliverable[], today: string): MonthlyDeliverable[] {
+  return deliverables.filter(deliverable => {
+    const date = getEffectiveScheduleDate(deliverable)
+    return PACKAGE_DELIVERABLE_TYPES.includes(deliverable.deliverable_type)
+      && !deliverable.archived_at
+      && !deliverable.posted_at
+      && date !== null
+      && date < today
+      && isNeedsActionStatus(normalizeScheduleStatus(deliverable.production_status))
+  }).sort((a, b) => {
+    const dateOrder = (getEffectiveScheduleDate(a) ?? '').localeCompare(getEffectiveScheduleDate(b) ?? '')
+    return dateOrder || a.id.localeCompare(b.id)
+  })
+}
+
 // ── Helpers ───────────────────────────────────────────────────
 
 export function formatDeliverableCode(code: string, instance: number): string {

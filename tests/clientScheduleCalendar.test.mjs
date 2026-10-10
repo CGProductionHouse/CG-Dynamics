@@ -1,12 +1,14 @@
 import assert from 'node:assert/strict'
 import { after, before, test } from 'node:test'
 import { createServer } from 'vite'
+import { readFileSync } from 'node:fs'
 
 let server
 let isNeedsActionStatus
 let isPostedOrHistoryStatus
 let normalizeScheduleStatus
 let getEffectiveScheduleDate
+let listPastDatedScheduleItems
 
 function mockDeliverable(status, { scheduledDate, dueDate } = {}) {
   return { production_status: status, scheduled_date: scheduledDate ?? null, due_date: dueDate ?? null }
@@ -18,6 +20,7 @@ before(async () => {
   isNeedsActionStatus = planner.isNeedsActionStatus
   isPostedOrHistoryStatus = planner.isPostedOrHistoryStatus
   normalizeScheduleStatus = planner.normalizeScheduleStatus
+  listPastDatedScheduleItems = planner.listPastDatedScheduleItems
   // Extract the inlined helper from the module source.
   // getEffectiveScheduleDate is inlined in ClientSchedulePage; replicate here.
   getEffectiveScheduleDate = (d) => d.scheduled_date ?? d.due_date ?? null
@@ -83,4 +86,32 @@ test('calendar receives all statuses with dates — union across needs-action, m
     assert.equal(isNeedsAction, normalized !== 'scheduled_posted' && normalized !== 'meta_drafts',
       `grid/board needs-action hides ${normalized}: ${!isNeedsAction}`)
   }
+})
+
+test('past-date review selects only unfinished package posts before the business day', () => {
+  const rows = [
+    { ...mockDeliverable('not_started', { scheduledDate: '2026-10-06' }), id: 'past', deliverable_type: 'photo' },
+    { ...mockDeliverable('in_progress', { dueDate: '2026-10-07' }), id: 'legacy', deliverable_type: 'dp' },
+    { ...mockDeliverable('not_started', { scheduledDate: '2026-10-10' }), id: 'today', deliverable_type: 'photo' },
+    { ...mockDeliverable('not_started', { scheduledDate: '2026-10-12', dueDate: '2026-10-06' }), id: 'rescheduled', deliverable_type: 'photo' },
+    { ...mockDeliverable('posted', { scheduledDate: '2026-10-06' }), id: 'posted', deliverable_type: 'photo' },
+    { ...mockDeliverable('not_started', { scheduledDate: '2026-10-06' }), id: 'posted-at', deliverable_type: 'photo', posted_at: '2026-10-06T10:00:00Z' },
+    { ...mockDeliverable('not_started', { scheduledDate: '2026-10-06' }), id: 'archived', deliverable_type: 'photo', archived_at: '2026-10-07T10:00:00Z' },
+    { ...mockDeliverable('meta_drafts', { scheduledDate: '2026-10-06' }), id: 'meta', deliverable_type: 'photo' },
+    { ...mockDeliverable('not_started'), id: 'undated', deliverable_type: 'photo' },
+    { ...mockDeliverable('not_started', { scheduledDate: '2026-10-06' }), id: 'not-post', deliverable_type: 'admin' },
+  ]
+  assert.deepEqual(listPastDatedScheduleItems(rows, '2026-10-10').map(row => row.id), ['past', 'legacy'])
+  assert.deepEqual(rows.map(row => row.id), ['past', 'legacy', 'today', 'rescheduled', 'posted', 'posted-at', 'archived', 'meta', 'undated', 'not-post'])
+})
+
+test('staff review entry stays read-only and routes to the exact filtered grid', () => {
+  const page = readFileSync('src/pages/admin/ClientSchedulePage.tsx', 'utf8')
+  assert.match(page, /listPastDatedScheduleItems\(deliverables, today\)/)
+  assert.match(page, /params\.set\('view', 'grid'\)/)
+  assert.match(page, /params\.set\('mode', 'past-dated'\)/)
+  assert.match(page, /setStatusFilter\('all'\)/)
+  assert.match(page, /setSearch\(''\)/)
+  assert.match(page, /pastDateIds\.has\(deliverable\.id\)/)
+  assert.match(page, /No dates have been moved automatically/)
 })

@@ -1,5 +1,18 @@
 # CG Dynamics Ops Handover
 
+### 10 October — current-month past-date staff review queue, no date writes
+
+The Client Schedule now identifies unfinished package posts whose effective
+schedule date is before the South African business day. Its compact entry
+opens a filtered staff Grid; posted, archived, Meta-draft and rescheduled
+items are excluded. Nothing automatically moves a date, changes a status or
+discloses a post to a client. The 10 October SELECT-only fleet receipt still
+has five past-dated October rows and zero disclosed posting rows; staff must
+confirm their real dates/work before any client calendar promise. The client
+Overview separately excludes elapsed/posted work from “Coming up” (PR #756).
+The #731 strategy, #396 Brand Hub, #679 release and authenticated client-role
+gates below are unchanged.
+
 ### 10 October — recorded client-note confirmation path prepared, not live
 
 The #731 follow-up adds a proposed active-manager, exact-client confirmation
