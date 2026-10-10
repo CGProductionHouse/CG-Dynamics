@@ -1,5 +1,15 @@
 # CG Dynamics Ops Handover
 
+### 10 October — #745 exact OneDrive drive-ID fence
+
+The existing draft #745 nested portal resolver now compares the durable
+OneDrive drive ID byte-for-byte with the current Clients drive. A case-only
+ID mismatch previously passed despite the IDs being opaque; the focused
+regression now fails closed. The resolver still stores any exact mapping as
+disabled. This code fix does **not** change the inherited anonymous
+view/edit security hold, production mappings, OneDrive permissions, or the
+owner isolation/asset-review gates under #396.
+
 ### 9 October — #396 exact nested Brand Hub route, local correction
 
 The old #396 31-root activation target is not the current physical roster.

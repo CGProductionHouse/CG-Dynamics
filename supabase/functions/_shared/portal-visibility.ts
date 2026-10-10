@@ -106,7 +106,7 @@ export function resolveMappedClientFolder(
   clientsChildren: readonly DriveChild[],
   binding: ClientFolderBinding,
 ): DriveChild | PortalMappingError {
-  if (!binding.driveId || binding.driveId.toLowerCase() !== clientsDriveId.toLowerCase() ||
+  if (!binding.driveId || binding.driveId !== clientsDriveId ||
       !binding.itemId || !binding.folderName) {
     return { error: 'Exact client folder binding is unavailable', httpStatus: 409 }
   }

@@ -291,10 +291,11 @@ test('mapped-folder resolver selects the durable client folder, then the nested 
   assert.equal(nested.rootItemId, 'portal-red-oak')
 })
 
-test('mapped-folder resolver fails closed on missing, moved, renamed or cross-drive binding', () => {
+test('mapped-folder resolver fails closed on missing, moved, renamed or non-exact drive binding', () => {
   const children = [makeFolder('client-red-oak', 'Red Oak'), makeFile('file-red-oak', 'Red Oak')]
   for (const binding of [
     { driveId: 'other-drive', itemId: 'client-red-oak', folderName: 'Red Oak' },
+    { driveId: 'Drive-1', itemId: 'client-red-oak', folderName: 'Red Oak' },
     { driveId: 'drive-1', itemId: 'missing', folderName: 'Red Oak' },
     { driveId: 'drive-1', itemId: 'client-red-oak', folderName: 'Red Oak Rugby Club' },
     { driveId: 'drive-1', itemId: 'file-red-oak', folderName: 'Red Oak' },
