@@ -25,7 +25,7 @@ test('new post-assets RPC executes real ownership/publication/RLS checks in disp
   try{
     let ready=false
     for(let attempt=0;attempt<60;attempt++){
-      if(docker(['exec',id,'pg_isready','-U','postgres']).status===0){ready=true;break}
+      if(docker(['exec',id,'pg_isready','-h','127.0.0.1','-U','postgres']).status===0){ready=true;break}
       Atomics.wait(new Int32Array(new SharedArrayBuffer(4)),0,0,250)
     }
     assert.ok(ready,'Disposable local database startup')
@@ -37,7 +37,7 @@ test('new post-assets RPC executes real ownership/publication/RLS checks in disp
       +read('../supabase/migrations/20260918113000_client_portal_library_foundation.sql')
       +read('../supabase/migrations/20261007100000_client_portal_post_assets.sql')
       +read('./sql/668_post_assets_local_acceptance.sql')
-    const result=docker(['exec','-i',id,'psql','-U','postgres','-v','ON_ERROR_STOP=1'],sql)
+    const result=docker(['exec','-i',id,'psql','-h','127.0.0.1','-U','postgres','-v','ON_ERROR_STOP=1'],sql)
     assert.equal(result.status,0,result.stdout+'\n'+result.stderr)
     assert.match(result.stdout,/POST ASSET ACCEPTANCE PASS/)
   }finally{
