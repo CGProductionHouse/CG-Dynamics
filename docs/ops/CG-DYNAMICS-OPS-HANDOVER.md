@@ -1,5 +1,25 @@
 # CG Dynamics Ops Handover
 
+### 10 October — disabled Brand Hub clarity, local acceptance only
+
+The authenticated Braize tab exposed a disabled Brand Hub placeholder plus a
+second, unrelated brand-foundation failure message. The client page now shows
+one holding state and does not imply approved files are present while its
+library is disabled; an enabled library still reports a separate setup-read
+failure. A fail-first actual-component browser check reproduced the duplicate.
+The portal browser fixture now covers 1440/375/390/430 and joins the integrated
+local harness. A local PostgreSQL post-assets test startup race was separately
+fixed by waiting for the final TCP server; its disposable fixture passed three
+consecutive runs. Exact code head `07fefd844c8dc4217a1c6bf1e511417fae3d2383`
+passed 3,789 tests / 17 intentional skips / zero failures, TypeScript, emitted
+Vite bundle and all eleven browser fixtures; source tree stable, Vercel writes
+zero. The local fixture public config is **not** a production artifact.
+
+This does not activate any Brand Hub: all 61 production library mappings still
+require #396 approved finals, named recipients, client/sibling isolation and
+separate protected enablement. Authenticated full phone/desktop acceptance,
+strategy publication, posting disclosure and #679 release remain open.
+
 ### 10 October — exact-main local launch acceptance passed; production gates remain
 
 The clean managed checkout at `869209751075b47030a158f2921a39fa272236d7`

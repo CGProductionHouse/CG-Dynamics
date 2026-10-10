@@ -1,5 +1,18 @@
 # Integrated local launch acceptance — #668 / #679
 
+**Disabled Brand Hub clarity candidate — PR #759:** exact code head
+`07fefd844c8dc4217a1c6bf1e511417fae3d2383`, tree
+`c74db591e9a82f4825e08ae93db34caacf89318e`: fourteen local steps PASS,
+3,806 supported tests / 3,789 PASS / 17 intentional skips / zero failures,
+TypeScript/Vite and eleven actual-component browser fixtures. The disabled
+library now has one client-facing holding state; the enabled library retains
+its separate setup-read warning. Fail-first browser reproduction and
+1440/375/390/430 retests passed. One intermediate full run found a disposable
+PostgreSQL startup fixture race; final-TCP readiness/psql passed three focused
+runs and the full rerun. No production or Vercel write. This remains synthetic
+local code acceptance, not client-role isolation, approved asset, strategy,
+release or authenticated production acceptance.
+
 **Latest report-window candidate — PR #702:** tested source
 `474abab42a58cfd8212ae94602b22bb33e086fc6`, tree
 `c4c6ab3555a8db9df58bb799fdba37cd1cd79ab4`: all twelve steps PASS,
