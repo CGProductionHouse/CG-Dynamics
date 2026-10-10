@@ -1,5 +1,35 @@
 # CG Dynamics Ops Handover
 
+### 10 October — exact-client Leads navigation and Braize client-role read
+
+The signed-in Braize client portal was read-only checked on the currently
+deployed build at desktop and a temporary 390px phone viewport (reset after
+inspection). Overview showed 9,618 recorded Facebook + Instagram view events
+with TikTok excluded from that total; October Plan strategy remained under
+review, the calendar had no client-visible dated posts, Approvals had nothing
+waiting, and Brand Hub remained disabled. The current deployed navigation still
+offered Leads even though its metrics said no website enquiry form was connected.
+This is an exact Braize observation, not all-client, released-head or sibling
+isolation acceptance. TikTok's published report retains partial coverage and
+zero recorded video views; do not infer missing views or provider freshness.
+
+The focused client-shell correction hides Leads in ordinary navigation only
+when the existing exact-client metrics RPC confirms no production form endpoint
+**and** a one-row historical inbox check finds no retained enquiries. Unknown
+or failed reads leave the destination visible; direct deep links remain a
+truthful holding page. Client-role RPCs remain server-pinned; staff preview
+names its exact client. Code head `c145b00d138802ac6a06ccf00cb81b5db201b2b7`
+(tree `6a89282b3322aed64a7f35dd577f1398a8760b34`) passed the full local
+harness: 3,807 supported tests (3,790 pass / 17 intentional skip / 0 fail),
+TypeScript, Vite and all eleven actual-component browser fixtures at relevant
+desktop/phone widths. Receipt `%TEMP%/cg-local-launch-c145b00d1388.json`,
+stable tree, zero Vercel/production writes. One first attempt stopped at a
+local Plan fixture allowlist newly needing this read; the fixture was corrected
+to enforce a server-pinned client request before the passing rerun. This is
+local code acceptance only. #731 strategy, five real posting dates, #396
+approved finals/mappings/recipient isolation, #405 first genuine Piek enquiry,
+and #679 budgeted release and changed-code authenticated acceptance remain open.
+
 ### 10 October — disabled Brand Hub clarity, local acceptance only
 
 The authenticated Braize tab exposed a disabled Brand Hub placeholder plus a

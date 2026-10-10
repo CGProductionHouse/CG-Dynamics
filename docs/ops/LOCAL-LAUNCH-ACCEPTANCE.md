@@ -1,5 +1,21 @@
 # Integrated local launch acceptance — #668 / #679
 
+**Exact-client Leads navigation candidate:** source
+`c145b00d138802ac6a06ccf00cb81b5db201b2b7`, tree
+`6a89282b3322aed64a7f35dd577f1398a8760b34`, receipt
+`%TEMP%/cg-local-launch-c145b00d1388.json`: fourteen local steps PASS,
+3,807 supported tests / 3,790 PASS / 17 intentional skips / zero failures,
+TypeScript/Vite and eleven actual-component browser fixtures. A genuine
+signed-in Braize read of the deployed build exposed an irrelevant Leads tab
+with no connected website enquiry form. The code now hides that tab only after
+exact-client metrics and one-row history both prove it absent; access/read
+failure and historical leads never become a false disconnected verdict. Direct
+deep links remain. The first aggregate attempt failed only because a local
+Plan fixture rejected the new read-only eligibility RPC; its updated contract
+asserts server-pinned client scope and the exact-head rerun passed. No Vercel,
+production data or provider write. The Braize read was one client on the older
+deployed build, not changed-code or fleet acceptance.
+
 **Disabled Brand Hub clarity candidate — PR #759:** exact code head
 `07fefd844c8dc4217a1c6bf1e511417fae3d2383`, tree
 `c74db591e9a82f4825e08ae93db34caacf89318e`: fourteen local steps PASS,

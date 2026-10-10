@@ -65,6 +65,10 @@ try {
       }
       if (url.pathname==='/rest/v1/rpc/client_portal_visibility_contract_version') return route.fulfill({json:1})
       const payload=request.postDataJSON()
+      if (url.pathname==='/rest/v1/rpc/website_lead_metrics') {
+        assert.equal(payload.p_client_id,null,'Standalone client shell keeps lead eligibility server-pinned')
+        return route.fulfill({json:{state:'available'}})
+      }
       if(url.pathname==='/rest/v1/rpc/client_portal_post_assets'){
         assert.equal(payload.p_client_id,clientB);assert.equal(payload.p_post_key,'post-aaaaaaaaaaaaaaaa');assert.match(payload.p_month,/^2027-0[23]-01$/)
         return route.fulfill({json:assetScenario==='malformed'?null:assetScenario==='empty'?[]:[{id:'33333333-3333-4333-8333-333333333333',category:'graphic_design',displayName:'Exact published final B',mimeType:'application/pdf',sizeBytes:null,publishedAt:'2026-10-01T12:00:00Z',deliverableTitle:'Planned poster B',planMonth:payload.p_month.slice(0,7)}]})

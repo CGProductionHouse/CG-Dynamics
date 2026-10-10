@@ -9,7 +9,7 @@ This is a **read-only decision sheet**, not client publication or launch accepta
 - Five dated, unarchived October/November Client Schedule rows across the fleet; **zero** has `sent_to_client_at`. All five dates are past, so they are operational correction/confirmation work, not upcoming client posts. No November dated row.
 - All 61 exact private OneDrive portal roots and their three required sections exist. 43 Brand Identity folders hold 44 private staged logo candidates (S); 18 remain empty/ambiguous (H). Staging does not approve a brand asset.
 - Production Dynamics has **zero** `client_portal_libraries` mappings. No Brand Hub can be called client-ready. 46 clients have seeded portal-access rows (S), 15 are missing (M); only two have accepted client-role invites (+I). A seeded row is **not** a verified external recipient or permission test.
-- Authentic logged-in phone/desktop acceptance is still unverified because the open client Chrome tab timed out at the browser transport before inspection. No auth was bypassed or retried.
+- A later authenticated Braize read on the currently deployed build reached Overview, Plan, Performance, Approvals, Brand Hub and Leads at desktop and temporary 390px phone width (then reset). Braize still has no published October strategy, dated visible posts, or enabled Brand Hub; its disconnected-form Leads navigation prompted a focused local code fix. This is **one-client, old-deployment partial journey evidence**, not changed-head, all-client, responsive-interaction, recipient-isolation or release acceptance. No auth was bypassed.
 
 ## Per-client decision matrix
 

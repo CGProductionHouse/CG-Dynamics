@@ -5,6 +5,7 @@ import { ClientLogo } from '../ClientLogo'
 import BrandMark from '../BrandMark'
 import { useAuth } from '../../contexts/AuthContext'
 import type { Client } from '../../lib/db/clients'
+import { hasClientLeadsDestination } from '../../lib/clientLeadsNavigation'
 
 const NAV_ITEMS = [
   { to: '/client', label: 'Overview', end: true },
@@ -40,14 +41,32 @@ export function ClientPortalShell({
 }) {
   const { signOut } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [leadNav, setLeadNav] = useState<{ clientId: string; visible: boolean } | null>(null)
   const location = useLocation()
   const isPreview = previewClientId !== undefined
+  const exactClientId = client?.id ?? null
   const activePath = isPreview ? `/client/${new URLSearchParams(location.search).get('area') === 'overview' ? '' : new URLSearchParams(location.search).get('area') ?? ''}`.replace(/\/$/, '') : location.pathname
+  // Preserve explicit deep-link orientation even when the ordinary menu hides
+  // a disconnected service. This route remains a truthful holding state.
+  const showLeads = activePath.startsWith('/client/leads') || (exactClientId !== null && leadNav?.clientId === exactClientId && leadNav.visible)
+  const visibleNavItems = NAV_ITEMS.filter(item => item.to !== '/client/leads' || showLeads)
+  const visibleMobileMore = MOBILE_MORE.filter(item => item.to !== '/client/leads' || showLeads)
   const target = (path: string) => isPreview ? (previewClientId ? portalPreviewPath(previewClientId, path) : '/admin/client-portal-preview') : path
   const activeItem = NAV_ITEMS.find(item => item.end
     ? activePath === item.to
     : activePath.startsWith(item.to)) ?? NAV_ITEMS[0]
   const moreIsActive = MOBILE_MORE.some(item => item.to === activeItem.to)
+
+  useEffect(() => {
+    if (!exactClientId) return
+    let active = true
+    // Client reads are server-pinned to the signed-in identity; staff preview
+    // supplies the selected exact client. A failed read leaves the tab visible.
+    void hasClientLeadsDestination(isPreview ? exactClientId : null).then(visible => {
+      if (active) setLeadNav({ clientId: exactClientId, visible })
+    })
+    return () => { active = false }
+  }, [exactClientId, isPreview])
 
   useEffect(() => {
     if (!mobileMenuOpen) return
@@ -100,7 +119,7 @@ export function ClientPortalShell({
 
         <nav aria-label="Client portal" className="mx-auto hidden max-w-7xl overflow-x-auto px-6 pb-4 sm:block lg:px-8">
           <div className="flex min-w-max w-fit gap-1 rounded-full border border-white/[0.08] bg-white/[0.035] p-1 shadow-[0_18px_50px_-38px_rgba(0,0,0,0.95)]">
-            {NAV_ITEMS.map(item => (
+            {visibleNavItems.map(item => (
               <NavLink
                 key={item.to}
                 to={target(item.to)}
@@ -129,8 +148,8 @@ export function ClientPortalShell({
       </main>
 
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#06110f]/95 shadow-[0_-18px_55px_-32px_rgba(0,0,0,0.95)] backdrop-blur-2xl sm:hidden">
-        {mobileMenuOpen && <nav id="client-mobile-navigation" aria-label="More client pages" className="absolute inset-x-3 bottom-[calc(100%+0.5rem)] grid grid-cols-2 gap-2 rounded-2xl border border-white/15 bg-[#0a1815] p-3 shadow-2xl">
-          {MOBILE_MORE.map(item => <NavLink key={item.to} to={target(item.to)} end={item.end}
+        {mobileMenuOpen && <nav id="client-mobile-navigation" aria-label="More client pages" className={`absolute inset-x-3 bottom-[calc(100%+0.5rem)] grid gap-2 rounded-2xl border border-white/15 bg-[#0a1815] p-3 shadow-2xl ${visibleMobileMore.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+          {visibleMobileMore.map(item => <NavLink key={item.to} to={target(item.to)} end={item.end}
             aria-current={isPreview ? (activeItem.to === item.to ? 'page' : false) : undefined}
             onClick={() => setMobileMenuOpen(false)}
             className={({ isActive }) => `flex min-h-12 items-center justify-center rounded-xl border px-3 text-sm font-bold ${(isPreview ? activeItem.to === item.to : isActive) ? 'border-[#2dd4bf]/40 bg-[#2dd4bf]/10 text-white' : 'border-white/10 bg-white/[0.04] text-slate-200'}`}>
