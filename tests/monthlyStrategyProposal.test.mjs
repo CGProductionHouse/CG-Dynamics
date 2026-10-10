@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { emptyStrategyData } from '../src/lib/strategyEngine.ts'
-import { buildMonthlyStrategyPrompt, mergeMonthlyStrategyProposal, parseMonthlyStrategyProposal } from '../supabase/functions/_shared/monthlyStrategyProposal.ts'
+import { buildMonthlyStrategyPrompt, mergeMonthlyStrategyProposal, parseMonthlyStrategyProposal, selectMonthlyStrategyEvidence } from '../supabase/functions/_shared/monthlyStrategyProposal.ts'
 
 const clientId = '11111111-1111-4111-8111-111111111111'
 const strategyMonth = '2026-11-01'
@@ -128,4 +128,21 @@ test('prompt carries confirmed quantities without turning an unknown format into
   })
   const body = JSON.parse(prompt.user)
   assert.deepEqual(body.confirmedCapacity, { professional_video: 1, design_poster: 3, photo_content: null })
+})
+
+test('bounded prompt keeps reviewed research and observed results when calendar evidence is large', () => {
+  const evidence = [
+    ...Array.from({ length: 30 }, (_, index) => ({ authority: 'content_calendar', source_id: `calendar-${index}`, field: 'calendarSelections', excerpt: `Calendar event ${index}` })),
+    { authority: 'marketing_library_skill_card', source_id: 'reviewed-card', field: 'strategyDrivers', excerpt: 'Use a customer question and genuine product demonstration.' },
+    { authority: 'published_report_post', source_id: 'observed-post', field: 'topContent', excerpt: 'Published report ended 2026-09-30; reach 320.' },
+    { authority: 'client_guide', source_id: 'exact-guide', field: 'strategyDrivers', excerpt: 'This exact client serves project buyers.' },
+  ]
+  const selected = selectMonthlyStrategyEvidence(evidence)
+  const prompt = buildMonthlyStrategyPrompt({ clientId, clientName: 'Exact Client', strategyMonth, draft: target().strategy_data, evidence })
+  const shown = JSON.parse(prompt.user).evidence
+  assert.ok(shown.length <= 25)
+  assert.deepEqual(shown.map(item => item.sourceId), selected.map(item => item.source_id))
+  assert.ok(shown.some(item => item.sourceId === 'reviewed-card'))
+  assert.ok(shown.some(item => item.sourceId === 'observed-post'))
+  assert.ok(shown.some(item => item.sourceId === 'exact-guide'))
 })

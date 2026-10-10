@@ -3,6 +3,7 @@ import { fetchAiUsageReplay, type AiUsageClient } from './aiUsage.ts'
 import {
   buildMonthlyStrategyPrompt,
   parseMonthlyStrategyProposal,
+  selectMonthlyStrategyEvidence,
   type MonthlyStrategyProposal,
   type ProposalEvidence,
 } from './monthlyStrategyProposal.ts'
@@ -42,7 +43,8 @@ export async function generateMonthlyStrategyProposal(input: {
   sourceWindows?: Record<string, unknown>
   targetVersion: number
 }): Promise<{ proposal: MonthlyStrategyProposal; sourceDigest: string; provider: string }> {
-  const sourceIds = new Set(input.evidence.map(row => row.source_id).filter(Boolean))
+  // The provider may cite only evidence actually included in its bounded prompt.
+  const sourceIds = new Set(selectMonthlyStrategyEvidence(input.evidence).map(row => row.source_id).filter(Boolean))
   if (sourceIds.size === 0) throw new Error('STRATEGY_EVIDENCE_UNAVAILABLE')
   const enabledFormats = new Set((Object.keys(input.draft.actionPlan) as ActionPlanKey[])
     .filter(key => input.draft.actionPlan[key].enabled))

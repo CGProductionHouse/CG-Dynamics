@@ -255,6 +255,22 @@ test('knowledge retrieval excludes expired, unreviewed-industry and other-client
   assert.deepEqual(sourceIds, ['today'])
 })
 
+test('exact-client and recently reviewed cards outrank arbitrary UUID order', async () => {
+  const fake = fixture()
+  const card = (id, lastReviewed, activeClientId = null) => ({
+    id, last_reviewed: lastReviewed, content_hash: 'a'.repeat(64), reviewed_content_hash: 'a'.repeat(64),
+    status: 'active', active_client_id: activeClientId, knowledge_layer: activeClientId ? 'active_client_specific' : 'universal_principle',
+    relevant_agents: ['marketing_strategist'], principle: `Specific reviewed research ${id} for the client plan.`, review_expires_at: null,
+  })
+  fake.tables.skill_cards = [
+    card('aaa-old', '2026-08-01'), card('zzz-new', '2026-09-20'),
+    card('yyy-middle', '2026-09-10'), card('client-card', '2026-07-01', 'client-a'),
+  ]
+  const prepared = await autopilot.prepareDraft(fake, fake.tables.clients[0], '2026-10-01', '2026-09-22')
+  assert.deepEqual(prepared.seedContext.sources.marketing_library_skill_card_ids,
+    ['client-card', 'zzz-new', 'yyy-middle'])
+})
+
 test('next-month grounding reads the prior published snapshot, never an unpublished staff draft', async () => {
   const fake = fixture([
     { id: 'published-prior', client_id: 'client-a', strategy_month: '2026-09-01', workflow_status: 'draft', version: 4,

@@ -161,8 +161,8 @@ export async function prepareDraft(sb: StrategyAutopilotClient, client: Record<s
     sb.from('client_guides').select('id,guide_markdown').eq('client_id', clientId).eq('runtime_readiness', 'ready').order('version', { ascending: false }).limit(1).maybeSingle(),
     sb.from('client_packages').select('id').eq('client_id', clientId).eq('status', 'active').lt('start_date', nextMonth).or(`end_date.is.null,end_date.gte.${strategyMonth}`).order('start_date', { ascending: false }).limit(1).maybeSingle(),
     sb.from('client_industry_profiles').select('primary_industry,secondary_industry,review_state').eq('client_id', clientId).maybeSingle(),
-    sb.from('skill_cards').select('id,title,principle,summary,knowledge_layer,category,subcategory,active_client_id,review_expires_at,relevant_agents,confidence_level,evidence_label,source_id,content_hash,reviewed_content_hash').eq('status', 'active').is('active_client_id', null).in('knowledge_layer', ['universal_principle', 'south_african_market', 'industry_specific']).or(`review_expires_at.is.null,review_expires_at.gte.${operatingDate}`).limit(30),
-    sb.from('skill_cards').select('id,title,principle,summary,knowledge_layer,category,subcategory,active_client_id,review_expires_at,relevant_agents,confidence_level,evidence_label,source_id,content_hash,reviewed_content_hash').eq('status', 'active').eq('active_client_id', clientId).or(`review_expires_at.is.null,review_expires_at.gte.${operatingDate}`).limit(30),
+    sb.from('skill_cards').select('id,title,principle,summary,knowledge_layer,category,subcategory,active_client_id,last_reviewed,review_expires_at,relevant_agents,confidence_level,evidence_label,source_id,content_hash,reviewed_content_hash').eq('status', 'active').is('active_client_id', null).in('knowledge_layer', ['universal_principle', 'south_african_market', 'industry_specific']).or(`review_expires_at.is.null,review_expires_at.gte.${operatingDate}`).order('last_reviewed', { ascending: false }).limit(30),
+    sb.from('skill_cards').select('id,title,principle,summary,knowledge_layer,category,subcategory,active_client_id,last_reviewed,review_expires_at,relevant_agents,confidence_level,evidence_label,source_id,content_hash,reviewed_content_hash').eq('status', 'active').eq('active_client_id', clientId).or(`review_expires_at.is.null,review_expires_at.gte.${operatingDate}`).order('last_reviewed', { ascending: false }).limit(30),
   ])
   for (const result of [deliverables, events, prior, report, updates, guide, packageRow, industry, sharedCards, clientCards]) {
     if (result.error) throw new Error(result.error.message)
@@ -185,7 +185,14 @@ export async function prepareDraft(sb: StrategyAutopilotClient, client: Record<s
     if (card.knowledge_layer !== 'industry_specific') return true
     const labels = `${clean(card.category, 100)} ${clean(card.subcategory, 100)}`.toLowerCase()
     return Boolean(primaryIndustry) && labels.includes(primaryIndustry)
-  }).sort((left, right) => String(left.id).localeCompare(String(right.id))).slice(0, 30)
+  }).sort((left, right) => {
+    // Exact-client reviewed knowledge wins; newest reviewed shared knowledge
+    // follows. UUID order is not a relevance or recency signal.
+    const scope = Number(Boolean(right.active_client_id)) - Number(Boolean(left.active_client_id))
+    if (scope) return scope
+    const recency = String(right.last_reviewed ?? '').localeCompare(String(left.last_reviewed ?? ''))
+    return recency || String(left.id).localeCompare(String(right.id))
+  }).slice(0, 30)
   const draft = emptyDraft()
   const evidence: Evidence[] = []
   const blockers: string[] = []

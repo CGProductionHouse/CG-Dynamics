@@ -1,5 +1,19 @@
 # CG Dynamics Ops Handover
 
+### 10 October — #731/#736 reviewed-evidence coverage, still draft/OFF
+
+The existing #736 strategy branch now reserves the bounded model-prompt window
+for exact-client decisions, ready guide facts, prior published outcomes and
+current content-approved Skill Cards before calendar detail; it ranks
+exact-client and recently reviewed cards ahead of arbitrary UUID order. Model
+citations are limited to evidence actually shown. This is local code in the
+existing draft PR, not a production-generated strategy or knowledge approval.
+The latest checked Drive daily research (9 October) and the 6 October branch
+remain `needs_review` / `activation_allowed:false`; the stable cumulative
+research pointer remains v0.9. No raw Drive source is auto-promoted to a
+strategy. #731 retains exact-client output review, migration/Edge/model budget
+and #679 hosting release gates. No production/model/Vercel action occurred.
+
 ### 9 October — CA launch-finish order and #736 reconciliation
 
 CA's current client-by-client launch contract is #668 comment 6085424890,

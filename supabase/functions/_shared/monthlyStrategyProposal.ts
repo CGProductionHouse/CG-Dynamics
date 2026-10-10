@@ -22,6 +22,32 @@ export interface ProposalEvidence {
   excerpt: string
 }
 
+const EVIDENCE_LIMIT = 25
+const EVIDENCE_BUDGET: Array<[string, number]> = [
+  ['client_context_update', 5], ['client_guide', 4],
+  ['published_report', 2], ['published_report_post', 3],
+  ['published_monthly_strategy', 3], ['marketing_library_skill_card', 3],
+  ['confirmed_client_package', 1], ['monthly_deliverables', 1],
+  ['company_calendar', 1], ['content_calendar', 2],
+]
+
+/** Reserve room for client facts, observed results and reviewed knowledge before calendar detail. */
+export function selectMonthlyStrategyEvidence(evidence: ProposalEvidence[]): ProposalEvidence[] {
+  const selected: ProposalEvidence[] = []
+  const seen = new Set<ProposalEvidence>()
+  for (const [authority, budget] of EVIDENCE_BUDGET) {
+    for (const row of evidence.filter(item => item.authority === authority).slice(0, budget)) {
+      selected.push(row)
+      seen.add(row)
+    }
+  }
+  for (const row of evidence) {
+    if (selected.length >= EVIDENCE_LIMIT) break
+    if (!seen.has(row)) selected.push(row)
+  }
+  return selected.slice(0, EVIDENCE_LIMIT)
+}
+
 export function buildMonthlyStrategyPrompt(input: {
   clientId: string
   clientName: string
@@ -31,7 +57,7 @@ export function buildMonthlyStrategyPrompt(input: {
   sourceWindows?: Record<string, unknown>
 }): { system: string; user: string } {
   const allowedFormats = ACTION_KEYS.filter(key => input.draft.actionPlan[key].enabled)
-  const evidence = input.evidence.slice(0, 25).map(item => ({
+  const evidence = selectMonthlyStrategyEvidence(input.evidence).map(item => ({
     authority: item.authority,
     sourceId: item.source_id,
     field: item.field,
