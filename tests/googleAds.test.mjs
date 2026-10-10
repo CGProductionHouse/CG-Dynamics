@@ -238,7 +238,8 @@ test('resolved reporting isolates clients and excludes unmapped shared campaigns
   assert.match(SQL_SOURCE, /al\.client_id = p_client_id/)
   assert.match(LIB_SOURCE, /\.rpc\('get_google_ads_client_campaign_metrics'/)
   assert.doesNotMatch(LIB_SOURCE, /\.from\('google_ads_campaign_daily_metrics'\)/)
-  assert.match(REPORT_VIEW_SOURCE, /Source: Google Ads Sync/)
+  assert.match(REPORT_VIEW_SOURCE, /reportSourceAttribution\(activeTab/)
+  assert.match(REPORT_VIEW_SOURCE, /googleAds: hasGoogleAdsSource/)
 })
 
 test('frontend setup has no direct mutation endpoint or table mutation', () => {
