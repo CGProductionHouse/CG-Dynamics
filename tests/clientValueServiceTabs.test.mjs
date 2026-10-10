@@ -54,6 +54,11 @@ test('Performance keeps all service choices without inferring package or connect
       }))
       assert.doesNotMatch(html, /Source: Meta Business Sync|Source: Google Ads Sync|Sources: Meta/)
     }
+    const sourcedOverview = renderToStaticMarkup(createElement(ClientReportView, {
+      report, client, facts: [{ platform: 'facebook' }, { platform: 'tiktok' }],
+      googleAds: null, googleAdsState: 'unmapped', initialTab: 'overview', onTabChange: () => {},
+    }))
+    assert.match(sourcedOverview, /Sources: Meta Business Sync and TikTok reporting\./)
     const url = new URL(serviceConversationUrl('Google Business Profile', 'A & B'))
     assert.equal(url.hostname, 'wa.me')
     assert.equal(url.pathname, '/27791152339')
