@@ -38,7 +38,7 @@ const server = await createServer({ configFile: false, plugins: [fixture, react(
 })
 const areas = ['overview', 'plan', 'performance', 'approvals', 'brand-hub', 'leads']
 const labels = ['Overview', 'Plan', 'Performance', 'Approvals', 'Brand Hub', 'Leads']
-const readRpcs = new Set(['client_portal_visibility_contract_version', 'client_portal_month_ahead_posts_v2', 'client_portal_month_ahead_events', 'get_my_client_service_entitlements', 'website_lead_inbox'])
+const readRpcs = new Set(['client_portal_visibility_contract_version', 'client_portal_month_ahead_posts_v2', 'client_portal_month_ahead_events', 'get_my_client_service_entitlements', 'website_lead_inbox', 'website_lead_metrics'])
 let browser
 try {
   await server.listen()
@@ -55,7 +55,17 @@ try {
       if (url.pathname.startsWith('/rest/v1/rpc/')) {
         assert.ok(readRpcs.has(url.pathname.split('/').at(-1)), 'Only allowlisted read RPCs')
         if (url.pathname.endsWith('client_portal_visibility_contract_version')) return route.fulfill({ json: 1 })
-        if (url.pathname.endsWith('website_lead_inbox')) return route.fulfill({ status: 404, json: { code: 'PGRST202', message: 'Local unavailable fixture' } })
+        if (url.pathname.endsWith('website_lead_inbox')) {
+          const payload = request.postDataJSON()
+          assert.ok([clientA, clientB].includes(payload.p_client_id), 'Lead inbox remains exact-client scoped')
+          if (payload.p_limit === 1) return route.fulfill({ json: [] })
+          return route.fulfill({ status: 404, json: { code: 'PGRST202', message: 'Local unavailable fixture' } })
+        }
+        if (url.pathname.endsWith('website_lead_metrics')) {
+          const payload = request.postDataJSON()
+          assert.ok([clientA, clientB].includes(payload.p_client_id), 'Lead metrics remain exact-client scoped')
+          return route.fulfill({ json: { clientId: payload.p_client_id, state: payload.p_client_id === clientA ? 'not_connected' : 'available' } })
+        }
         if (url.pathname.endsWith('get_my_client_service_entitlements')) return route.fulfill({ status: 503, json: { message: 'Local unavailable fixture' } })
         const payload = request.postDataJSON()
         assert.ok([clientA, clientB].includes(payload.p_client_id), 'Exact named preview scope')
@@ -79,9 +89,15 @@ try {
     await page.getByLabel('Selected client').selectOption(clientA)
     await page.getByRole('heading', { name: 'Synthetic client A', exact: true }).waitFor()
     for (let i = 0; i < areas.length; i++) {
-      if (width < 640 && ['Brand Hub', 'Leads'].includes(labels[i])) await page.getByRole('button', { name: 'More pages' }).click()
-      const nav = page.getByRole('navigation', { name: width < 640 && ['Brand Hub', 'Leads'].includes(labels[i]) ? 'More client pages' : width < 640 ? 'Client portal mobile' : 'Client portal' })
-      await nav.getByRole('link', { name: labels[i], exact: true }).click()
+      if (areas[i] === 'leads') {
+        if (width < 640) await page.getByRole('button', { name: 'More pages' }).click()
+        assert.equal(await page.getByRole('link', { name: 'Leads', exact: true }).count(), 0, 'Disconnected client has no irrelevant Leads navigation')
+        await page.goto(`${base}?client=${clientA}&area=leads`)
+      } else {
+        if (width < 640 && labels[i] === 'Brand Hub') await page.getByRole('button', { name: 'More pages' }).click()
+        const nav = page.getByRole('navigation', { name: width < 640 && labels[i] === 'Brand Hub' ? 'More client pages' : width < 640 ? 'Client portal mobile' : 'Client portal' })
+        await nav.getByRole('link', { name: labels[i], exact: true }).click()
+      }
       await page.waitForURL(url => url.searchParams.get('area') === areas[i])
       const ready = ['Synthetic client A', 'Your plan', 'No published report yet', 'Approvals', 'Brand Hub is not available yet', 'Leads'][i]
       await page.getByRole('heading', { name: ready, exact: true }).waitFor()
@@ -100,6 +116,8 @@ try {
     // Switch exact client inside the actual persistent shell; no auth exchange.
     await page.getByLabel('Selected client').selectOption(clientB)
     await page.waitForURL(url => url.searchParams.get('client') === clientB)
+    if (width < 640) await page.getByRole('button', { name: 'More pages' }).click()
+    await page.getByRole('link', { name: 'Leads', exact: true }).first().waitFor()
     await page.waitForTimeout(150)
     assert.equal(await page.locator('header').getByText('Synthetic client A', { exact: true }).count(), 0, 'Old client header absent')
     failing = true
