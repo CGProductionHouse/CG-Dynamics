@@ -63,23 +63,29 @@ The audit reproduced a code-level rollout defect: all 105 November format
 items are exact legacy `Prepare N ... from the confirmed package.` system seeds.
 The guarded proposal merge treated those nonempty items as staff-owned and
 would report conflicts instead of replacing them with reviewed model concepts.
-The focused local fix on `codex/portal-strategy-live-audit` replaces only an
+PR #749, reviewed head `5a730582d4d37edbb5f5bb21d01dc7a9db07db15`
+and merge commit `a509180cb7456f335736af6f9002360403bdb099`, replaces only an
 exact legacy item and note when the draft origin is the autopilot and no staff
 amendment exists; anything staff-touched, differently worded or already
-approved remains untouched. The production rows have not been changed. This
-fix must pass review/merge and be deployed before any governed generation pilot.
+approved remains untouched. Focused 44/44, supported full local Windows suite
+3,776 pass/19 skip/0 fail, TypeScript/Vite build, scoped lint and diff passed.
+The production rows have not been changed; the fix is merged but not deployed
+to the Edge runtime and is not permission to run a model or generate drafts.
+Exact source/quality findings: #731 comment 6097280855.
+Cross-lane status: #668 comment 6097283310 and #381 comment 6097287295.
 
 ### 10 October — guarded launch code merged; live gates remain
 
-Current main `5399a833f0e3a81f5a4652661e79e85a4db2eebc` contains the
+Current main `a509180cb7456f335736af6f9002360403bdb099` contains the
 reviewed code-only #745 Brand Hub nested resolver (`ea0723519b649f60623c863859d1cd7685e953aa`)
 and #736 next-month strategy proposal workflow
-(`0e482e0ce2ad59c9768367a7d92cb6ddefc434c8`), followed by the additive
-handover #748. Both code PRs are merged, not
-open drafts. The resolver leaves mappings disabled and the model flag remains
+(`0e482e0ce2ad59c9768367a7d92cb6ddefc434c8`), additive handover #748,
+and focused #749 legacy-seed merge correction. All three code PRs are merged,
+not open drafts. The resolver leaves mappings disabled and the model flag remains
 OFF. No production migration, Edge deploy, model call, OneDrive permission or
 mapping change, schedule/strategy write, publication or Vercel build/deploy
-was performed by these merges. The strategy migration
+was performed by those code merges. The separately CA-authorised OneDrive
+permission cleanup is recorded above. The strategy migration
 `20261009120000_guard_monthly_strategy_generation.sql` was absent from the
 10 October read-only production migration list (latest was
 `20261007141211_skill_card_review_revision_binding`). The exact post-merge
