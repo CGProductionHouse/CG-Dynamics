@@ -1,5 +1,45 @@
 # CG Dynamics Ops Handover
 
+### 10 October — guarded launch code merged; live gates remain
+
+Current main `0e482e0ce2ad59c9768367a7d92cb6ddefc434c8` contains the
+reviewed code-only #745 Brand Hub nested resolver (`ea0723519b649f60623c863859d1cd7685e953aa`)
+and #736 next-month strategy proposal workflow
+(`0e482e0ce2ad59c9768367a7d92cb6ddefc434c8`). Both PRs are merged, not
+open drafts. The resolver leaves mappings disabled and the model flag remains
+OFF. No production migration, Edge deploy, model call, OneDrive permission or
+mapping change, schedule/strategy write, publication or Vercel build/deploy
+was performed by these merges. The strategy migration
+`20261009120000_guard_monthly_strategy_generation.sql` was absent from the
+10 October read-only production migration list (latest was
+`20261007141211_skill_card_review_revision_binding`). The exact post-merge
+strategy head passed 52 focused tests, a supported Windows serial suite of
+3,775 pass/17 skip/0 fail, build, scoped lint and diff check. The excluded
+SES Bash-stub fixture is not a pass.
+
+Vercel's authenticated billing page displayed $20/$20 included credit and
+$5.44/$10 on-demand spend with Pause ON when checked on 10 October. This is
+point-in-time, delayed billing, **not** $4.56 approved Dynamics headroom;
+client websites share the cap. Git automatic deployment remains OFF. #679
+still requires an explicit incremental spend ceiling and client-site reserve
+before any release. #396 still requires an owner decision on inherited
+anonymous Clients sharing and VCS root/content, then demonstrated isolation
+before Brand Hub enablement. #731 still requires real named-client generated
+output review and separately approved migration/Edge/model activation before
+any strategy generation. Client Schedule dates/disclosure must come from
+actual confirmed work, not Teams Planner inference; LHP's once-off terms are
+still unconfirmed. Do not describe the client fleet as launch-complete.
+
+The 10 October SELECT-only posting recheck found exactly five unarchived
+October/November `monthly_deliverables` rows and no November rows. Each is
+still `to_do` with a past 6 or 7 October date: Cape Lumber (photo), Ehrlich
+Park Butchery (design poster), Germoparts (design poster), Supa Quick Centurion
+(design poster) and TBS Brokers (design poster). These are stale operational
+slots, **not** evidence of upcoming or client-disclosed posts. Do not move or
+copy their dates without staff confirmation. The same read-only check found
+57 October and 57 November strategy drafts and no published row in those
+months.
+
 ### 10 October — #745 code-only merge, protected library gate unchanged
 
 PR #745 was locally reviewed and merged to main as
