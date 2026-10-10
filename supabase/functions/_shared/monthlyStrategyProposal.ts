@@ -131,6 +131,8 @@ export interface ProposalTarget {
   published_version: number | null
   version: number
   strategy_data: unknown
+  seed_context?: Record<string, unknown> | null
+  staff_amended_at?: string | null
 }
 
 export interface ProposalMerge {
@@ -153,6 +155,22 @@ const ACTION_KEYS: ActionPlanKey[] = [
 
 const clean = (value: string) => value.replace(/\s+/g, ' ').trim()
 const RULE_ONLY = /^(?:do not|don't|never|avoid|no influencer|keep captions|use natural|canonical client|approved (?:regional )?footer)\b/i
+const LEGACY_PACKAGE_NOTE = 'Scope comes from the explicitly confirmed client package; Client Schedule remains execution evidence.'
+const LEGACY_PACKAGE_ITEMS: Partial<Record<ActionPlanKey, RegExp>> = {
+  professional_video: /^Prepare [1-9]\d* professional videos? from the confirmed package\.$/,
+  photo_content: /^Prepare [1-9]\d* photo posts? from the confirmed package\.$/,
+  design_poster: /^Prepare [1-9]\d* design posters? from the confirmed package\.$/,
+}
+
+/** Only the exact old system seed is replaceable; staff copy is never inferred to be a placeholder. */
+function isUneditedLegacyPackageSeed(target: ProposalTarget, current: StrategyData, key: ActionPlanKey): boolean {
+  const section = current.actionPlan[key]
+  const pattern = LEGACY_PACKAGE_ITEMS[key]
+  return target.seed_context?.origin === 'monthly_strategy_autopilot' &&
+    target.staff_amended_at === null &&
+    Boolean(pattern && section.enabled && section.items.length === 1 &&
+      pattern.test(clean(section.items[0])) && clean(section.notes) === LEGACY_PACKAGE_NOTE)
+}
 
 function hasDistinctStrategicFields(gold: GoldStandardStrategy): boolean {
   const strategic = GOLD_STANDARD_FIELDS.filter(({ key }) => key !== 'mustAvoid')
@@ -233,7 +251,12 @@ export function mergeMonthlyStrategyProposal(target: ProposalTarget, proposal: M
       const existingItems = current.actionPlan[key].items.map(clean)
       const newItems = proposedItems.map(clean)
       if (JSON.stringify(existingItems) === JSON.stringify(newItems)) continue
-      if (previous?.proposedActionPlan?.[key] &&
+      if (isUneditedLegacyPackageSeed(target, current, key)) {
+        merged.actionPlan[key].items = newItems
+        merged.actionPlan[key].notes = ''
+        filledFields.push(`actionPlan.${key}.items`)
+        filledFields.push(`actionPlan.${key}.notes`)
+      } else if (previous?.proposedActionPlan?.[key] &&
           JSON.stringify(existingItems) === JSON.stringify(previous.proposedActionPlan[key]?.map(clean))) {
         if (newItems.length) {
           merged.actionPlan[key].items = newItems

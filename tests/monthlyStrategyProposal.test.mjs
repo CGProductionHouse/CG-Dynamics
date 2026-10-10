@@ -51,6 +51,46 @@ test('retains staff-written fields and identifies real conflicts without overwri
   assert.ok(merged.conflicts.includes('actionPlan.professional_video.items'))
 })
 
+test('replaces only the exact untouched legacy November capacity seed with researched concepts', () => {
+  const row = target()
+  row.seed_context = { origin: 'monthly_strategy_autopilot' }
+  row.staff_amended_at = null
+  row.strategy_data.actionPlan.professional_video.items = ['Prepare 1 professional video from the confirmed package.']
+  row.strategy_data.actionPlan.professional_video.notes = 'Scope comes from the explicitly confirmed client package; Client Schedule remains execution evidence.'
+  row.strategy_data.actionPlan.design_poster.items = ['Prepare 3 design posters from the confirmed package.']
+  row.strategy_data.actionPlan.design_poster.notes = row.strategy_data.actionPlan.professional_video.notes
+
+  const merged = mergeMonthlyStrategyProposal(row, proposal)
+  assert.equal(merged.state, 'applied')
+  assert.deepEqual(merged.strategyData.actionPlan.professional_video.items, proposal.actionPlan.professional_video)
+  assert.deepEqual(merged.strategyData.actionPlan.design_poster.items, proposal.actionPlan.design_poster)
+  assert.equal(merged.strategyData.actionPlan.professional_video.notes, '')
+  assert.equal(merged.strategyData.actionPlan.design_poster.notes, '')
+  assert.deepEqual(merged.conflicts, [])
+  assert.ok(merged.filledFields.includes('actionPlan.professional_video.items'))
+  assert.ok(merged.filledFields.includes('actionPlan.professional_video.notes'))
+})
+
+test('similar-looking text, changed notes or any staff amendment keeps ownership and conflicts', () => {
+  const seed = target()
+  seed.seed_context = { origin: 'monthly_strategy_autopilot' }
+  seed.staff_amended_at = null
+  seed.strategy_data.actionPlan.professional_video.items = ['Prepare 1 professional video from the confirmed package.']
+  seed.strategy_data.actionPlan.professional_video.notes = 'Scope comes from the explicitly confirmed client package; Client Schedule remains execution evidence.'
+  for (const change of [
+    row => { row.staff_amended_at = '2026-10-10T10:00:00Z' },
+    row => { row.seed_context.origin = 'issue_513_reviewed_dossier_plan' },
+    row => { row.strategy_data.actionPlan.professional_video.notes = 'Staff approved the video brief.' },
+    row => { row.strategy_data.actionPlan.professional_video.items = ['Prepare 1 professional video for the launch meeting.'] },
+  ]) {
+    const row = structuredClone(seed)
+    change(row)
+    const merged = mergeMonthlyStrategyProposal(row, proposal)
+    assert.deepEqual(merged.strategyData.actionPlan.professional_video.items, row.strategy_data.actionPlan.professional_video.items)
+    assert.ok(merged.conflicts.includes('actionPlan.professional_video.items'))
+  }
+})
+
 test('incorporated new evidence refreshes only unchanged system-authored fields', () => {
   const row = target()
   row.strategy_data.goldStandard.objective = goldStandard.objective

@@ -29,7 +29,13 @@ const proposal = { clientId, strategyMonth: month, sourceIds: ['guide-1'], goldS
 
 class Query {
   constructor(fake, table) { this.fake = fake; this.table = table; this.filters = []; this.sort = null; this.max = null }
-  select() { return this }
+  select(columns) {
+    if (this.table === 'monthly_client_strategies' && this.fake.requireStrategyAmendmentField &&
+        columns.includes('workflow_status') && columns.includes('seed_context')) {
+      assert.match(columns, /(?:^|,)staff_amended_at(?:,|$)/)
+    }
+    return this
+  }
   eq(key, value) { this.filters.push(row => row[key] === value); return this }
   neq(key, value) { this.filters.push(row => row[key] !== value); return this }
   not(key, operator, value) { assert.equal(operator, 'is'); this.filters.push(row => value === null ? row[key] != null : row[key] !== value); return this }
@@ -102,6 +108,32 @@ test('fills an exact next-month draft, preserves staff fields and keeps it unpub
   assert.equal(row.internal_notes, 'Staff note stays.')
   assert.equal(fake.writes.length, 1)
   assert.deepEqual(Object.keys(fake.tables.monthly_deliverables), [])
+})
+
+test('production-shaped untouched package placeholders are replaced once, without publishing or changing scope', async () => {
+  const { fake, row } = fixture()
+  fake.requireStrategyAmendmentField = true
+  const note = 'Scope comes from the explicitly confirmed client package; Client Schedule remains execution evidence.'
+  row.seed_context.origin = 'monthly_strategy_autopilot'
+  row.staff_amended_at = null
+  row.strategy_data.actionPlan.professional_video.items = ['Prepare 1 professional video from the confirmed package.']
+  row.strategy_data.actionPlan.professional_video.notes = note
+  row.strategy_data.actionPlan.design_poster.items = ['Prepare 1 design poster from the confirmed package.']
+  row.strategy_data.actionPlan.design_poster.notes = note
+  const deps = { sourceDigest: async () => 'digest-a', generateProposal: async () => generated() }
+
+  const first = await runNextMonthStrategyGeneration(fake, input, deps)
+  assert.equal(first.state, 'draft_filled')
+  assert.deepEqual(row.strategy_data.actionPlan.professional_video.items, proposal.actionPlan.professional_video)
+  assert.deepEqual(row.strategy_data.actionPlan.design_poster.items, proposal.actionPlan.design_poster)
+  assert.equal(row.strategy_data.actionPlan.professional_video.notes, '')
+  assert.equal(row.strategy_data.actionPlan.design_poster.notes, '')
+  assert.equal(row.workflow_status, 'draft')
+  assert.equal(row.published_version, null)
+  assert.equal(row.staff_amended_at, null)
+  assert.equal(fake.writes.length, 1)
+  assert.equal((await runNextMonthStrategyGeneration(fake, input, deps)).state, 'unchanged')
+  assert.equal(fake.writes.length, 1)
 })
 
 test('unchanged evidence does not call the model again; an incorporated meeting note reopens the draft', async () => {

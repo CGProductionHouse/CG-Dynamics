@@ -1,11 +1,81 @@
 # CG Dynamics Ops Handover
 
+### 10 October — live portal boundary and strategy quality audit (not activated)
+
+CA authorised removal of the two anonymous view/edit links on the shared
+OneDrive `Clients` parent. Graph readback now shows owner-only permission there.
+The 61 exact client bindings and nested portal roots were rechecked: each root
+exists once; all 183 required Brand Identity, Graphic Design and Video folders
+exist. The sole resolver-name exception, VCS, was renamed in place to
+`A_ClientPortal_VCS_Cleaning_Solutions` with its durable item ID unchanged.
+Its populated `Client Received` source folder, and the empty equivalents in
+Elcheck and LHP, were moved intact to their exact internal client folders.
+Two Red Oak Premiere source files and one Piek production-audio file were also
+moved intact from portal Video branches to their respective internal Videos
+folders. No file was deleted or published.
+
+**Anonymous-link boundary repaired:** CA authorised the exact cleanup of
+existing public edit links. The 18 client-folder links, the VCS internal
+`Client Received` link and the one Red Oak video link were removed through
+OneDrive, with each removal checked against the exact Graph item permission.
+The 61/61 exact portal roots were then re-read: zero anonymous links and zero
+permission-read errors. Root/category and all 953 pre-move nested-item
+permissions were read without error before the cleanup; there was no other
+direct anonymous link in that nested set. Existing old public URLs no longer
+work for those items; anyone relying on them needs a new scoped share. Named
+recipient access and sibling isolation still need a real client-role test
+before any library is enabled or link distributed. The pre-move traversal found
+281 nested folders, 729 nested files and 5 files at category roots. After the
+three source-file moves, 726 nested files remain. Filename/location alone
+does not establish approval as client-safe
+final content. Keep all Brand Hubs disabled: production still has zero library,
+category and asset mappings. Do not distribute old OneDrive links or treat
+the folder audit as client-role isolation acceptance. Details: #396 comments
+6096568758 and 6097132107.
+
+**Strategy quality HOLD remains:** 60/61 active clients have a confirmed
+package in canonical `clients.package_settings`; LHP is the CA-deferred
+once-off case. October has 57 draft strategies: 10 blank objective/plan,
+11 internal evidence-template/identity-rule objectives, 36 concrete first-pass
+commercial candidates requiring named source and semantic review. Elcheck,
+JFJ, LHP and VCS have no October or November row. All 57 November drafts
+have blank objective/audience/next-month game plan; all 105 enabled-format
+items are generic `Prepare N ...` capacity placeholders, not concepts.
+No October/November strategy is published. Existing guarded generation remains
+OFF, its migration unapplied and no model call was made. The 36 candidates are
+not automatically approved for clients. Exact lists: #731 comments 6096657324
+and 6096714096. No Vercel, Edge, migration or Dynamics data write occurred in
+this audit.
+
+Read-only provenance review of those 36 October candidates: all 36 have a
+previous monthly strategy and staff amendment timestamp; 35 have a ready
+exact-client guide and Neshora instead cites first-party client evidence.
+Only four have a previous published report in their source coverage (Braize,
+Cape Lumber, CG Production House, SecuriForce). Neshora still has two literal
+client-fact placeholder concepts requiring client confirmation, and Bat Hill
+Royale has no enabled confirmed format/action-plan item. Treat those as explicit
+content holds rather than extrapolating a result or a package. The other
+candidates remain unapproved until their own factual claims and proposed tests
+are checked against current exact-client sources; past report absence is not
+proof of zero performance.
+
+The audit reproduced a code-level rollout defect: all 105 November format
+items are exact legacy `Prepare N ... from the confirmed package.` system seeds.
+The guarded proposal merge treated those nonempty items as staff-owned and
+would report conflicts instead of replacing them with reviewed model concepts.
+The focused local fix on `codex/portal-strategy-live-audit` replaces only an
+exact legacy item and note when the draft origin is the autopilot and no staff
+amendment exists; anything staff-touched, differently worded or already
+approved remains untouched. The production rows have not been changed. This
+fix must pass review/merge and be deployed before any governed generation pilot.
+
 ### 10 October — guarded launch code merged; live gates remain
 
-Current main `0e482e0ce2ad59c9768367a7d92cb6ddefc434c8` contains the
+Current main `5399a833f0e3a81f5a4652661e79e85a4db2eebc` contains the
 reviewed code-only #745 Brand Hub nested resolver (`ea0723519b649f60623c863859d1cd7685e953aa`)
 and #736 next-month strategy proposal workflow
-(`0e482e0ce2ad59c9768367a7d92cb6ddefc434c8`). Both PRs are merged, not
+(`0e482e0ce2ad59c9768367a7d92cb6ddefc434c8`), followed by the additive
+handover #748. Both code PRs are merged, not
 open drafts. The resolver leaves mappings disabled and the model flag remains
 OFF. No production migration, Edge deploy, model call, OneDrive permission or
 mapping change, schedule/strategy write, publication or Vercel build/deploy
@@ -22,8 +92,8 @@ $5.44/$10 on-demand spend with Pause ON when checked on 10 October. This is
 point-in-time, delayed billing, **not** $4.56 approved Dynamics headroom;
 client websites share the cap. Git automatic deployment remains OFF. #679
 still requires an explicit incremental spend ceiling and client-site reserve
-before any release. #396 still requires an owner decision on inherited
-anonymous Clients sharing and VCS root/content, then demonstrated isolation
+before any release. #396 now requires approved-final content classification,
+named-recipient sharing and demonstrated client isolation
 before Brand Hub enablement. #731 still requires real named-client generated
 output review and separately approved migration/Edge/model activation before
 any strategy generation. Client Schedule dates/disclosure must come from
