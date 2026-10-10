@@ -1,5 +1,17 @@
 # CG Dynamics Ops Handover
 
+### 10 October — recorded client-note confirmation path prepared, not live
+
+The #731 follow-up adds a proposed active-manager, exact-client confirmation
+path for ChatGPT-recorded context updates that default to `unreviewed`. Staff
+can inspect the note in a compact Monthly Strategy panel and explicitly
+incorporate or reject it. The RPC records actor/time but never edits or
+publishes a strategy; incorporated notes enter the existing guarded daily
+generator only after separate activation. The new migration is **unapplied**,
+and no production note/review/model write occurred. This closes a code-path
+gap, not the protected #731 model-quality, deployment or client publication
+gate. See the strategy generation runbook and owning issue for review.
+
 ### 10 October — current-month meeting-note strategy revision prepared locally
 
 The guarded #731 monthly strategy worker now has a focused local change for

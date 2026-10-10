@@ -12,6 +12,10 @@ The existing daily `monthly_strategy_autopilot` worker remains the only schedule
 - System-authored text may refresh after a new incorporated decision only while it exactly matches its previous generated value. Staff wording, review state, internal notes and published snapshots are retained. Actual conflicts are visible to staff in the strategy editor. No automatic publication exists.
 - Current-month meeting revisions require the newly incorporated source IDs to be cited in the proposal. Unreviewed notes, unchanged context, staff-origin rows and reviewed/published strategies do not enter this path. A provider response that ignores the new decision leaves the draft intact and records a blocked job; a later retry needs a fresh eligible job/source receipt.
 
+## Staff confirmation of recorded client updates — proposed, not activated
+
+`record_client_update` stores an append-only exact-client note with `review_state=unreviewed`. The proposed `review_client_context_update` RPC gives only an active admin/manager an exact-client, row-locked `unreviewed → incorporated/rejected` decision with actor/time readback; it does not write any strategy or schedule. The staff Monthly Strategy page shows only pending updates for its selected exact client, with the note details collapsed by default. Rejection needs a second explicit click. The list refills after each decision. A confirmed source enters the existing daily generator on a later guarded run, but the strategy draft is **not** changed by the confirmation click. The SQL migration is not applied to production; until that gate is separately authorised and the new UI deployed, the panel cannot perform the action.
+
 ## Protected release gate
 
 Under #679, first resolve the Vercel spend ceiling/client-site reserve and separately authorize the bounded hosting release. Applying the new migration, deploying the two changed Edge functions, enabling model spend, production backfill and any production data write each require their own protected approval/receipt. Do not use production to test an incomplete model prompt.
