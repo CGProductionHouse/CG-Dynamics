@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { ClientPicker } from '../../components/ClientPicker'
 import { GuidedStrategyEditor, type StrategyContext } from '../../components/strategy/GuidedStrategy'
+import { ClientContextReview } from '../../components/strategy/ClientContextReview'
 import { StatusBadge } from '../../components/ui/Badges'
 import { ActionButton } from '../../components/ui/Buttons'
 import { useAuth } from '../../contexts/AuthContext'
@@ -177,6 +178,7 @@ export default function MonthlyStrategyPage() {
     ? assessGoldStandardStrategy(draftData, packageAuthority.settings, exactEvidenceAvailable)
     : []
   const isAdmin = profile?.role === 'admin'
+  const canReviewClientContext = isAdmin || profile?.role === 'manager'
 
   return (
     <div className="w-full max-w-7xl p-4 sm:p-6 lg:p-8">
@@ -217,6 +219,7 @@ export default function MonthlyStrategyPage() {
 
       {error && <p className="mt-4 rounded-xl border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-300">{error}</p>}
       {success && <p className="mt-4 rounded-xl border border-brand-teal/25 bg-brand-teal/10 px-4 py-3 text-sm text-[#66d0c3]">{success}</p>}
+      {client && !loading && canReviewClientContext && <ClientContextReview key={clientId} clientId={clientId} />}
 
       {!clientId ? (
         <section className="mt-6 rounded-3xl border border-dashed border-white/10 bg-white/[0.025] px-6 py-12 text-center">
