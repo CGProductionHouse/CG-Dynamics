@@ -4,7 +4,7 @@ import { createServer } from 'vite'
 import { emptyStrategyData } from '../src/lib/strategyEngine.ts'
 
 const server = await createServer({ configFile: false, server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true } })
-const { runNextMonthStrategyGeneration } = await server.ssrLoadModule('/supabase/functions/_shared/monthlyStrategyGeneration.ts')
+const { runNextMonthStrategyGeneration, runCurrentMonthStrategyContextRevision } = await server.ssrLoadModule('/supabase/functions/_shared/monthlyStrategyGeneration.ts')
 const { monthlyStrategySourceDigest } = await server.ssrLoadModule('/supabase/functions/_shared/monthlyStrategyModel.ts')
 after(() => server.close())
 
@@ -78,7 +78,7 @@ function fixture() {
       this.writes.push(args)
       if (this.conflict) return { data: null, error: { message: 'Strategy version conflict' } }
       assert.equal(args.p_client_id, clientId)
-      assert.equal(args.p_strategy_month, month)
+      assert.equal(args.p_strategy_month, row.strategy_month)
       assert.equal(args.p_expected_version, row.version)
       assert.equal(row.workflow_status, 'draft')
       row.strategy_data = args.p_strategy_data
@@ -156,6 +156,59 @@ test('unchanged evidence does not call the model again; an incorporated meeting 
   assert.equal(calls, 2)
   assert.equal(row.seed_context.generation.sourceDigest, 'digest-b')
   assert.match(row.strategy_data.goldStandard.objective, /Meeting decision/)
+})
+
+test('current-month revision needs a newly incorporated exact-client note and preserves staff work', async () => {
+  const { fake, row } = fixture()
+  row.strategy_month = '2026-10-01'
+  row.seed_context = { origin: 'monthly_strategy_autopilot', sources: { approved_client_context_update_ids: ['old-note'] } }
+  row.strategy_data.goldStandard.objective = 'Staff-owned objective.'
+  fake.tables.client_context_updates.push({ id: 'old-note', client_id: clientId, review_state: 'incorporated', title: 'Old', body: 'Old decision' })
+  const currentInput = { ...input, strategyMonth: row.strategy_month }
+  const nextProposal = { ...proposal, strategyMonth: row.strategy_month, sourceIds: ['guide-1', 'new-note'] }
+  const deps = { sourceDigest: async () => 'digest-current', generateProposal: async request => {
+    assert.equal(request.generationPurpose, 'current_context')
+    return { proposal: nextProposal, sourceDigest: 'digest-current', provider: 'fixture' }
+  } }
+  assert.equal((await runCurrentMonthStrategyContextRevision(fake, currentInput, deps)).blocker, 'NO_NEW_INCORPORATED_CONTEXT')
+  assert.equal(fake.writes.length, 0)
+  fake.tables.client_context_updates.push({ id: 'new-note', client_id: clientId, review_state: 'incorporated', title: 'Confirmed meeting decision', body: 'Test a local buyer question.' })
+  const result = await runCurrentMonthStrategyContextRevision(fake, currentInput, deps)
+  assert.equal(result.state, 'review_conflicts')
+  assert.equal(row.strategy_data.goldStandard.objective, 'Staff-owned objective.')
+  assert.equal(row.seed_context.sources.approved_client_context_update_ids.includes('new-note'), true)
+  assert.deepEqual(row.seed_context.generation.incorporatedContextIds, ['new-note'])
+  assert.equal(row.workflow_status, 'draft')
+  assert.equal(row.published_version, null)
+  assert.equal((await runCurrentMonthStrategyContextRevision(fake, currentInput, deps)).blocker, 'NO_NEW_INCORPORATED_CONTEXT')
+  assert.equal(fake.writes.length, 1)
+})
+
+test('current-month proposal that ignores the new meeting decision cannot amend the draft', async () => {
+  const { fake, row } = fixture()
+  row.strategy_month = '2026-10-01'
+  row.seed_context = { origin: 'monthly_strategy_autopilot', sources: { approved_client_context_update_ids: [] } }
+  fake.tables.client_context_updates.push({ id: 'new-note', client_id: clientId, review_state: 'incorporated', title: 'Decision', body: 'Test the exact local buyer question.' })
+  const before = structuredClone(row)
+  const result = await runCurrentMonthStrategyContextRevision(fake, { ...input, strategyMonth: row.strategy_month }, {
+    sourceDigest: async () => 'digest-current',
+    generateProposal: async () => ({ ...generated('digest-current'), proposal: { ...proposal, strategyMonth: row.strategy_month } }),
+  })
+  assert.equal(result.blocker, 'NEW_CONTEXT_NOT_CITED')
+  assert.deepEqual(row, before)
+  assert.equal(fake.writes.length, 0)
+})
+
+test('current-month note revision refuses an unreviewed note or a published version', async () => {
+  const { fake, row } = fixture()
+  row.strategy_month = '2026-10-01'
+  row.seed_context = { origin: 'monthly_strategy_autopilot', sources: { approved_client_context_update_ids: [] } }
+  const currentInput = { ...input, strategyMonth: row.strategy_month }
+  fake.tables.client_context_updates.push({ id: 'pending-note', client_id: clientId, review_state: 'pending', title: 'Unreviewed', body: 'Do not use.' })
+  assert.equal((await runCurrentMonthStrategyContextRevision(fake, currentInput)).blocker, 'NO_NEW_INCORPORATED_CONTEXT')
+  row.published_version = 1
+  assert.equal((await runCurrentMonthStrategyContextRevision(fake, currentInput)).blocker, 'REVIEWED_OR_PUBLISHED_STRATEGY')
+  assert.equal(fake.writes.length, 0)
 })
 
 test('reviewed, published, cross-client and wrong-month targets fail closed before model work', async () => {

@@ -42,6 +42,7 @@ export async function generateMonthlyStrategyProposal(input: {
   evidence: ProposalEvidence[]
   sourceWindows?: Record<string, unknown>
   targetVersion: number
+  generationPurpose?: 'next_month' | 'current_context'
 }): Promise<{ proposal: MonthlyStrategyProposal; sourceDigest: string; provider: string }> {
   // The provider may cite only evidence actually included in its bounded prompt.
   const sourceIds = new Set(selectMonthlyStrategyEvidence(input.evidence).map(row => row.source_id).filter(Boolean))
@@ -60,7 +61,7 @@ export async function generateMonthlyStrategyProposal(input: {
       {
         usageClient: input.sb,
         feature: 'monthly_strategy',
-        action: 'generate_next_month_draft',
+        action: input.generationPurpose === 'current_context' ? 'revise_current_month_context' : 'generate_next_month_draft',
         actorId: input.actorId,
         idempotencyKey: `monthly-strategy:${input.clientId}:${input.strategyMonth}:${fingerprint}`,
         fingerprint,
