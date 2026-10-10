@@ -33,6 +33,25 @@ category and asset mappings. Do not distribute old OneDrive links or treat
 the folder audit as client-role isolation acceptance. Details: #396 comments
 6096568758 and 6097132107.
 
+**Recipient identity is not solved by the existing login rows:** a fresh
+SELECT-only production join found 46 `client_portal_access` rows covering 46
+active clients, each with a matching `profiles` row/client ID and non-null
+email, but all 46 profile addresses use the internal
+`portal.cgdynamics.co.za` domain. They are not verified external OneDrive
+share recipients. Fifteen active clients have no `client_portal_access` row:
+Agri-Secure, Bloem Vascular, Elcheck, Emoya Estate Driving Range, Forklift
+Trucks, Human Auto, Ipopeng Office Supplies, JFJ Electrical, LHP Student
+Village & Block, Mimosa Mall, NCNA, Neshora Oxygen, Rusoord Farmstay, VCS
+Cleaning Solutions and WiseRide. `client_invites` has only two accepted
+client-role rows, for Braize and CG Production House. Do not equate a seeded
+portal-access row, a folder, or an accepted invite with a verified named
+recipient/share or a working Brand Hub. The client-facing destination should
+be the exact Dynamics client portal with server-scoped category access, not a
+reused anonymous OneDrive URL. Confirm real recipient identity and approved
+client-safe finals per client, then test named read-only access and sibling
+isolation before sharing or enabling. No invitation or recipient share was
+created in this audit.
+
 **Strategy quality HOLD remains:** 60/61 active clients have a confirmed
 package in canonical `clients.package_settings`; LHP is the CA-deferred
 once-off case. October has 57 draft strategies: 10 blank objective/plan,
