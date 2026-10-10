@@ -362,17 +362,33 @@ export async function runMonthlyStrategyAutopilot(
   let failed = 0
   let blocked = 0
   const generationCandidates = new Set<string>()
+  const currentContextCandidates = new Map<string, string>()
   const note = (code: string) => { blockers[code] = (blockers[code] ?? 0) + 1 }
 
   for (const client of clients) for (const strategyMonth of months) {
     try {
-      const existing = await sb.from('monthly_client_strategies').select('id,workflow_status,version,published_version').eq('client_id', client.id).eq('strategy_month', strategyMonth).maybeSingle()
+      const existing = await sb.from('monthly_client_strategies').select('id,workflow_status,version,published_version,seed_context').eq('client_id', client.id).eq('strategy_month', strategyMonth).maybeSingle()
       if (existing.error) throw new Error(existing.error.message)
       if (existing.data) {
         existingUntouched += 1
         if (options.enqueueGeneration && strategyMonth === months[1] &&
             (existing.data as Record<string, unknown>).workflow_status === 'draft' &&
             (existing.data as Record<string, unknown>).published_version == null) generationCandidates.add(String(client.id))
+        if (options.enqueueGeneration && strategyMonth === months[0] &&
+            (existing.data as Record<string, unknown>).workflow_status === 'draft' &&
+            (existing.data as Record<string, unknown>).published_version == null) {
+          const seed = (existing.data as Record<string, unknown>).seed_context as Record<string, unknown> | null
+          if (seed?.origin === 'monthly_strategy_autopilot') {
+            const sources = seed.sources as Record<string, unknown> | undefined
+            const known = new Set(Array.isArray(sources?.approved_client_context_update_ids)
+              ? sources.approved_client_context_update_ids.filter((id): id is string => typeof id === 'string') : [])
+            const updates = await sb.from('client_context_updates').select('id').eq('client_id', client.id)
+              .eq('review_state', 'incorporated').order('created_at', { ascending: false }).limit(5)
+            if (updates.error) throw new Error('INCORPORATED_CONTEXT_READ_UNAVAILABLE')
+            const newest = (updates.data as Array<{ id: string }>).find(row => !known.has(row.id))
+            if (newest) currentContextCandidates.set(String(client.id), newest.id)
+          }
+        }
         continue
       }
       const prepared = await prepareDraft(sb, client, strategyMonth, options.today)
@@ -401,14 +417,22 @@ export async function runMonthlyStrategyAutopilot(
     }
   }
   let generationJobsRequested = 0
-  if (options.enqueueGeneration && generationCandidates.size > 0) {
-    if (generationCandidates.size > STRATEGY_GENERATION_MAX_ENQUEUES) throw new Error('STRATEGY_GENERATION_FLEET_CAP')
+  if (options.enqueueGeneration && generationCandidates.size + currentContextCandidates.size > 0) {
+    if (generationCandidates.size + currentContextCandidates.size > STRATEGY_GENERATION_MAX_ENQUEUES) throw new Error('STRATEGY_GENERATION_FLEET_CAP')
     const rows = [...generationCandidates].sort().map(clientId => ({
       job_type: 'monthly_strategy_autopilot',
       payload: { action: 'generate_next_month', clientId, strategyMonth: months[1], today: options.today },
       idempotency_key: `monthly-strategy-generate:${clientId}:${months[1]}:${options.today}`,
       max_attempts: 3,
     }))
+    for (const [clientId, contextId] of [...currentContextCandidates].sort(([a], [b]) => a.localeCompare(b))) {
+      rows.push({
+        job_type: 'monthly_strategy_autopilot',
+        payload: { action: 'revise_current_month_context', clientId, strategyMonth: months[0], today: options.today },
+        idempotency_key: `monthly-strategy-context:${clientId}:${months[0]}:${contextId}:${options.today}`,
+        max_attempts: 3,
+      })
+    }
     const enqueued = await sb.from('background_jobs').upsert(rows, { onConflict: 'idempotency_key', ignoreDuplicates: true })
     if (enqueued.error) throw new Error(`STRATEGY_GENERATION_ENQUEUE_FAILED: ${enqueued.error.message}`)
     generationJobsRequested = rows.length

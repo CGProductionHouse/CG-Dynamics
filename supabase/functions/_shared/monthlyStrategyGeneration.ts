@@ -24,7 +24,7 @@ async function revisionKey(value: string): Promise<string> {
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-4${hex.slice(13, 16)}-a${hex.slice(17, 20)}-${hex.slice(20, 32)}`
 }
 
-export async function runNextMonthStrategyGeneration(
+async function runStrategyGeneration(
   sb: StrategyAutopilotClient & AiUsageClient,
   input: { clientId: string; strategyMonth: string; today: string; systemProfileId: string },
   dependencies: {
@@ -33,9 +33,12 @@ export async function runNextMonthStrategyGeneration(
       proposal: MonthlyStrategyProposal; sourceDigest: string; provider: string
     }>
   } = {},
+  scope: 'next_month' | 'current_context' = 'next_month',
 ): Promise<Record<string, unknown>> {
-  if (strategyAutopilotMonths(input.today)[1] !== input.strategyMonth) {
-    return { ok: true, state: 'blocked', blocker: 'NOT_NEXT_MONTH' }
+  const [currentMonth, nextMonth] = strategyAutopilotMonths(input.today)
+  if ((scope === 'next_month' && nextMonth !== input.strategyMonth) ||
+      (scope === 'current_context' && currentMonth !== input.strategyMonth)) {
+    return { ok: true, state: 'blocked', blocker: scope === 'next_month' ? 'NOT_NEXT_MONTH' : 'NOT_CURRENT_MONTH' }
   }
   const [clientRead, strategyRead] = await Promise.all([
     sb.from('clients').select('id,name,active,package_settings').eq('id', input.clientId).maybeSingle(),
@@ -55,6 +58,19 @@ export async function runNextMonthStrategyGeneration(
   }
   const prepared = await prepareDraft(sb, client, input.strategyMonth, input.today)
   if (prepared.blockers.length) return { ok: true, state: 'blocked', blockers: prepared.blockers }
+  let newContextIds: string[] = []
+  if (scope === 'current_context') {
+    const known = target.seed_context?.sources as Record<string, unknown> | undefined
+    const seen = new Set(Array.isArray(known?.approved_client_context_update_ids)
+      ? known.approved_client_context_update_ids.filter((id): id is string => typeof id === 'string') : [])
+    const sourceIds = prepared.seedContext.sources.approved_client_context_update_ids
+    const currentIds = Array.isArray(sourceIds)
+      ? sourceIds.filter((id): id is string => typeof id === 'string') : []
+    newContextIds = currentIds.filter(id => !seen.has(id))
+    if (target.seed_context?.origin !== 'monthly_strategy_autopilot' || newContextIds.length === 0) {
+      return { ok: true, state: 'blocked', blocker: 'NO_NEW_INCORPORATED_CONTEXT' }
+    }
+  }
   if (!prepared.evidence.some(row => ['client_guide', 'client_context_update', 'published_report', 'published_report_post', 'published_monthly_strategy'].includes(row.authority))) {
     return { ok: true, state: 'blocked', blocker: 'EXACT_STRATEGY_EVIDENCE_UNAVAILABLE' }
   }
@@ -82,8 +98,12 @@ export async function runNextMonthStrategyGeneration(
     clientId: input.clientId, clientName: String(client.name),
     strategyMonth: input.strategyMonth, draft: preparedStrategy,
     evidence: prepared.evidence, sourceWindows: prepared.seedContext.source_windows, targetVersion: target.version,
+    generationPurpose: scope,
   })
   if (generated.sourceDigest !== sourceDigest) throw new Error('STRATEGY_SOURCE_CHANGED_DURING_GENERATION')
+  if (newContextIds.some(id => !generated.proposal.sourceIds.includes(id))) {
+    return { ok: true, state: 'blocked', blocker: 'NEW_CONTEXT_NOT_CITED' }
+  }
   // A model response can arrive after a meeting decision, guide revision or
   // package correction. The row-version RPC fences staff edits, but those
   // independent sources need their own pre-write freshness check.
@@ -129,6 +149,7 @@ export async function runNextMonthStrategyGeneration(
       sourceDigest,
       baseVersion: target.version,
       proposedSourceIds: generated.proposal.sourceIds,
+      incorporatedContextIds: newContextIds,
       proposedGoldStandard: generated.proposal.goldStandard,
       proposedActionPlan: generated.proposal.actionPlan,
       filledFields: merged.filledFields,
@@ -157,4 +178,20 @@ export async function runNextMonthStrategyGeneration(
     filledFields: merged.filledFields.length, conflicts: merged.conflicts,
     strategyId: target.id, version: (amended.data as Record<string, unknown> | null)?.version ?? null,
   }
+}
+
+export function runNextMonthStrategyGeneration(
+  sb: StrategyAutopilotClient & AiUsageClient,
+  input: Parameters<typeof runStrategyGeneration>[1],
+  dependencies: Parameters<typeof runStrategyGeneration>[2] = {},
+) {
+  return runStrategyGeneration(sb, input, dependencies)
+}
+
+export function runCurrentMonthStrategyContextRevision(
+  sb: StrategyAutopilotClient & AiUsageClient,
+  input: Parameters<typeof runStrategyGeneration>[1],
+  dependencies: Parameters<typeof runStrategyGeneration>[2] = {},
+) {
+  return runStrategyGeneration(sb, input, dependencies, 'current_context')
 }

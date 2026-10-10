@@ -240,6 +240,40 @@ test('opt-in generation does not enqueue an amended published next-month row', a
   assert.equal(fake.jobUpserts.length, 0)
 })
 
+test('current-month context revision queues only a newly incorporated exact-client note', async () => {
+  const current = { id: 'current', client_id: 'client-a', strategy_month: '2026-09-01', workflow_status: 'draft',
+    version: 4, published_version: null, seed_context: { origin: 'monthly_strategy_autopilot',
+      sources: { approved_client_context_update_ids: ['known-note'] } } }
+  const next = { id: 'next', client_id: 'client-a', strategy_month: '2026-10-01', workflow_status: 'approved', version: 2 }
+  const fake = fixture([current, next])
+  fake.tables.client_context_updates = [
+    { id: 'known-note', client_id: 'client-a', review_state: 'incorporated', created_at: '2026-09-18T08:00:00Z' },
+    { id: 'pending-note', client_id: 'client-a', review_state: 'pending', created_at: '2026-09-21T08:00:00Z' },
+    { id: 'other-client-note', client_id: 'client-b', review_state: 'incorporated', created_at: '2026-09-22T08:00:00Z' },
+  ]
+  const options = { today: '2026-09-22', systemProfileId: 'system-profile', enqueueGeneration: true }
+  assert.equal((await autopilot.runMonthlyStrategyAutopilot(fake, options)).generation_jobs_requested, 0)
+  fake.tables.client_context_updates.push({ id: 'new-note', client_id: 'client-a', review_state: 'incorporated', created_at: '2026-09-22T09:00:00Z' })
+  assert.equal((await autopilot.runMonthlyStrategyAutopilot(fake, options)).generation_jobs_requested, 1)
+  assert.deepEqual(fake.tables.background_jobs[0].payload, {
+    action: 'revise_current_month_context', clientId: 'client-a', strategyMonth: '2026-09-01', today: '2026-09-22',
+  })
+  await autopilot.runMonthlyStrategyAutopilot(fake, options)
+  assert.equal(fake.tables.background_jobs.length, 1)
+  assert.equal(current.version, 4)
+})
+
+test('reviewed or published current strategies never queue a meeting revision', async () => {
+  for (const change of [{ workflow_status: 'approved' }, { published_version: 2 }]) {
+    const current = { id: 'current', client_id: 'client-a', strategy_month: '2026-09-01', workflow_status: 'draft',
+      version: 4, published_version: null, seed_context: { origin: 'monthly_strategy_autopilot', sources: { approved_client_context_update_ids: [] } }, ...change }
+    const fake = fixture([current, { id: 'next', client_id: 'client-a', strategy_month: '2026-10-01', workflow_status: 'approved', version: 2 }])
+    fake.tables.client_context_updates = [{ id: 'new-note', client_id: 'client-a', review_state: 'incorporated', created_at: '2026-09-22T09:00:00Z' }]
+    assert.equal((await autopilot.runMonthlyStrategyAutopilot(fake, { today: '2026-09-22', systemProfileId: 'system-profile', enqueueGeneration: true })).generation_jobs_requested, 0)
+    assert.equal(fake.jobUpserts.length, 0)
+  }
+})
+
 test('knowledge retrieval excludes expired, unreviewed-industry and other-client cards before grounding', async () => {
   const fake = fixture()
   fake.tables.client_industry_profiles = [{ client_id: 'client-a', review_state: 'draft', primary_industry: 'Agriculture' }]

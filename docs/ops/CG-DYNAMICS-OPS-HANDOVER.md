@@ -1,5 +1,20 @@
 # CG Dynamics Ops Handover
 
+### 10 October — current-month meeting-note strategy revision prepared locally
+
+The guarded #731 monthly strategy worker now has a focused local change for
+newly **incorporated** exact-client context notes. When the AI flag is later
+authorised and enabled, the existing daily worker can queue one current-month
+draft revision keyed to the new note. The provider must cite that note; the
+existing source digest, row-version RPC, staff-edit merge and unpublished-draft
+gate still apply. Unreviewed notes, unchanged context, staff-origin rows and
+approved/published strategies do not enter this path. The model usage receipt
+distinguishes current-context revision from next-month generation. This is
+code preparation, not a production strategy or client-visible publication.
+The `MONTHLY_STRATEGY_AI_ENABLED` flag remains off, the guard migration remains
+unapplied, and #679 release/model-spend gates still apply. See #731 and
+`docs/ops/MONTHLY-STRATEGY-GENERATION-RUNBOOK.md` for the exact contract.
+
 ### 10 October — exact 61-client launch review sheet, no activation
 
 The read-only fleet cross-check and client-by-client decision codes are in

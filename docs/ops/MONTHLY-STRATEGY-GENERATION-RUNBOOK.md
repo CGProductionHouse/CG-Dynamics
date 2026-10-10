@@ -1,6 +1,6 @@
 # Monthly strategy generation — prepared, not activated (#731)
 
-The existing daily `monthly_strategy_autopilot` worker remains the only scheduler. It seeds current/next-month drafts. With `MONTHLY_STRATEGY_AI_ENABLED=true`, the daily pass also requests one idempotent exact-client next-month child job per eligible draft. The flag defaults off; this branch does not set it, deploy Edge code, backfill production, call a model, approve or publish a strategy.
+The existing daily `monthly_strategy_autopilot` worker remains the only scheduler. It seeds current/next-month drafts. With `MONTHLY_STRATEGY_AI_ENABLED=true`, the daily pass requests one idempotent exact-client next-month child job per eligible draft. An existing unpublished current-month autopilot draft also gets a bounded revision job **only** when a newly incorporated exact-client context note is absent from its saved source receipt. The flag defaults off; this branch does not set it, deploy Edge code, backfill production, call a model, approve or publish a strategy.
 
 ## Authority and safety
 
@@ -10,6 +10,7 @@ The existing daily `monthly_strategy_autopilot` worker remains the only schedule
 - The source digest and prompt carry the confirmed per-format monthly quantities as well as enabled formats. A positive quantity correction (for example one poster to two) is a source change even though the format remains enabled; an in-flight proposal must be discarded and regenerated. Unknown quantities stay null, not zero.
 - The proposed migration `20261009120000_guard_monthly_strategy_generation.sql` is necessary before activation. The service-role-only RPC locks the exact row, requires an unpublished `draft`, checks its version and writes an append-only revision. Approval does **not** increment version in the existing canonical RPC; using the ordinary amendment RPC here would permit an in-flight model response to revert an approved strategy. Never substitute that RPC.
 - System-authored text may refresh after a new incorporated decision only while it exactly matches its previous generated value. Staff wording, review state, internal notes and published snapshots are retained. Actual conflicts are visible to staff in the strategy editor. No automatic publication exists.
+- Current-month meeting revisions require the newly incorporated source IDs to be cited in the proposal. Unreviewed notes, unchanged context, staff-origin rows and reviewed/published strategies do not enter this path. A provider response that ignores the new decision leaves the draft intact and records a blocked job; a later retry needs a fresh eligible job/source receipt.
 
 ## Protected release gate
 
