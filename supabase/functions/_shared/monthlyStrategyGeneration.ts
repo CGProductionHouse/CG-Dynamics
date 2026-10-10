@@ -14,6 +14,7 @@ type StrategyRow = {
   version: number
   strategy_data: unknown
   seed_context: Record<string, unknown> | null
+  staff_amended_at: string | null
   internal_notes: string | null
 }
 
@@ -39,7 +40,7 @@ export async function runNextMonthStrategyGeneration(
   const [clientRead, strategyRead] = await Promise.all([
     sb.from('clients').select('id,name,active,package_settings').eq('id', input.clientId).maybeSingle(),
     sb.from('monthly_client_strategies')
-      .select('id,client_id,strategy_month,workflow_status,published_version,version,strategy_data,seed_context,internal_notes')
+      .select('id,client_id,strategy_month,workflow_status,published_version,version,strategy_data,seed_context,staff_amended_at,internal_notes')
       .eq('client_id', input.clientId).eq('strategy_month', input.strategyMonth).maybeSingle(),
   ])
   if (clientRead.error || strategyRead.error) throw new Error('STRATEGY_SOURCE_READ_UNAVAILABLE')
