@@ -57,6 +57,7 @@ import { cgManagedWebsiteForClient, hasCgWebsiteMaintenance, type CgManagedWebsi
 import { websiteReportPresentation } from '../../lib/websiteReportPresentation'
 import { PerformanceServiceStory } from '../../components/client/PerformanceServiceStory'
 import { PERFORMANCE_SERVICE_TABS } from '../../lib/performanceServiceCatalog'
+import { reportSourceAttribution } from '../../lib/reportSourceAttribution'
 
 export type ReportTabKey = 'overview' | 'facebook' | 'instagram' | 'google' | 'tiktok' | 'linkedin' | 'web' | 'email'
 export interface MonthlyStrategyPresentation {
@@ -191,8 +192,11 @@ export function ClientReportView({
   const hasGoogleAdsSource = googleAds !== null && ['data', 'no-activity'].includes(googleAdsState)
   const tabs = [...PERFORMANCE_SERVICE_TABS]
   const activeTab = tabs.some(item => item.key === tab) ? tab : 'overview'
-  const showMetaSource = hasMeta && (activeTab === 'overview' || ((activeTab === 'facebook' || activeTab === 'instagram') && reportPlatforms.includes(activeTab)))
-  const showGoogleSource = hasGoogleAdsSource && (activeTab === 'overview' || activeTab === 'google')
+  const sourceAttribution = reportSourceAttribution(activeTab, {
+    meta: hasMeta && (activeTab === 'overview' || reportPlatforms.includes(activeTab as Platform)),
+    tiktok: reportPlatforms.includes('tiktok'),
+    googleAds: hasGoogleAdsSource,
+  })
   const selectTab = (nextTab: ReportTabKey) => {
     if (onTabChange) onTabChange(nextTab)
     else setLocalTab(nextTab)
@@ -294,13 +298,9 @@ export function ClientReportView({
         <PerformanceServiceStory service={activeTab} clientName={client?.name} />
       )}
 
-      {(showMetaSource || showGoogleSource) && (
+      {sourceAttribution && (
         <p className="mx-auto mt-16 max-w-3xl border-t border-white/10 pt-6 text-center text-xs leading-relaxed text-slate-500">
-          {showMetaSource && showGoogleSource
-            ? 'Sources: Meta Business Sync and Google Ads Sync.'
-            : showGoogleSource
-              ? 'Source: Google Ads Sync.'
-              : 'Source: Meta Business Sync.'}
+          {sourceAttribution}
         </p>
       )}
       <MethodologyDisclaimer />
