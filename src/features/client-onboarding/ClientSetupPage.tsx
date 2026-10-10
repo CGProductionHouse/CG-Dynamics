@@ -80,15 +80,15 @@ function ClientBrandHub({ library, state, setupUnavailable }: { library: ClientP
         <div className="relative max-w-3xl">
           <p className="text-xs font-black uppercase tracking-[0.26em] text-[#2dd4bf]">Your brand library</p>
           <h1 className="mt-4 text-4xl font-black tracking-[-0.045em] text-white sm:text-6xl">Brand Hub</h1>
-          <p className="mt-5 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
+          {library.available && <p className="mt-5 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
             Approved brand files and final client-ready content, kept together in one clear space.
-          </p>
+          </p>}
         </div>
       </section>
 
       <ClientPortalLibrary library={library} />
 
-      {setupUnavailable && <p role="status" className="rounded-2xl border border-white/10 bg-white/[0.035] px-5 py-4 text-sm text-slate-300">
+      {library.available && setupUnavailable && <p role="status" className="rounded-2xl border border-white/10 bg-white/[0.035] px-5 py-4 text-sm text-slate-300">
         Brand foundation details are temporarily unavailable.
       </p>}
 
