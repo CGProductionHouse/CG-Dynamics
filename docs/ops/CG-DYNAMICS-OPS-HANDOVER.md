@@ -1,5 +1,27 @@
 # CG Dynamics Ops Handover
 
+### 10 October — exact-main local launch acceptance passed; production gates remain
+
+The clean managed checkout at `869209751075b47030a158f2921a39fa272236d7`
+passed the local acceptance harness: 3,806 supported tests (3,789 pass,
+17 skip, zero fail), TypeScript, an emitted Vite client bundle and ten
+read-only actual-component browser fixtures, including the client shell,
+Overview, Plan, library, report cutoff, director review and entitlements.
+`sesSetupScript.test.mjs` remains an unsupported Windows Bash fixture, not a
+pass. The receipt is the SHA-pinned local temp artifact
+`cg-local-launch-869209751075.json`; its source tree was unchanged and it
+performed zero Vercel or production writes. The first harness attempt failed
+only because OpenSSL was absent from the test process PATH; the installed Git
+OpenSSL was added to PATH for the passing rerun, with no application change.
+
+An authenticated Braize client tab still showed the mobile navigation and
+private Brand Hub placeholder. Browser input/screenshot transport then failed,
+so no full authenticated desktop/phone journey was accepted; the temporary
+phone-width override was reset. This local pass is **not** semantic strategy,
+client-role isolation, production data, deployed-head or release acceptance.
+The exact 61-client review sheet and the #731 strategy, Client Schedule, #396
+Brand Hub and #679 protected release gates below remain authoritative.
+
 ### 10 October — current-month past-date staff review queue, no date writes
 
 The Client Schedule now identifies unfinished package posts whose effective
