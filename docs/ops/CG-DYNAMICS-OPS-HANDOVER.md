@@ -1,5 +1,45 @@
 # CG Dynamics Ops Handover
 
+### 10 October — local launch work and exact remaining gates
+
+The live authenticated Braize client role was read-only checked on production
+through Overview, Plan, Performance, Approvals and Brand Hub. The September
+report includes Facebook, Instagram and TikTok with different disclosed fact
+windows and partial coverage. Plan shows October strategy **under review**,
+no published Content Guidelines and no client-visible scheduled work; the
+confirmed package shows Posters 8/month. Approvals has nothing awaiting a
+decision. Brand Hub truthfully remains prepared/unavailable while the mapping
+and sharing security gate is unresolved. This is one exact-client desktop
+acceptance, not fleet-wide or physical-phone acceptance; no client action was
+submitted. Read-only HEAD checks returned HTTP 200 for Dynamics, Piek,
+Emmanuel Funerals, All Around PVC and Red Oak. No Vercel action occurred.
+
+Live Braize revealed that a report containing TikTok credited only Meta in
+its Overview footer. PR #746 fixed active-tab report-source attribution and
+merged to main as `5af24223b47d6de35163ef8382b9b51310abbcb9`. The
+supported local serial suite passed 3,741/3,760 tests with 19 skips and zero
+failures; TypeScript/Vite build, scoped lint and diff check passed. The 12
+Bash-stub tests in `sesSetupScript.test.mjs` remain unsupported by this Windows
+shell; SNS certificate tests passed with local Git OpenSSL. The fix is **not**
+deployed; automatic Git deployment remains off and #679's serving reserve
+applies. Recheck its exact footer on the next authorised release.
+
+The safe code lanes are prepared, not business-approved: #731/PR #736 remains
+draft/OFF with model-proposal quality rejection but no production generation;
+#396/PR #745 remains draft/OFF with exact nested-root resolution but zero
+production portal mappings. The 9 October accepted queue still has 57 October
+and 57 November draft strategies, none published; only five of 61 active
+clients have October/November posting rows and none has disclosure evidence.
+LHP once-off scope remains unverified. All 61 OneDrive portal roots inherit
+anonymous view and 59 anonymous edit from the parent; owner sharing/isolation
+review and the VCS root/content decision must precede Brand Hub activation.
+Do not fill these gaps with inferred package, posting, strategy or assets.
+Next protected sequence: owner closes sharing/scope and content evidence,
+review exact-client strategy quality, then approve bounded migration/Edge/
+mapping/publication and one budgeted release packet. No production data,
+schema, provider, OneDrive permission, strategy publication or Vercel writes
+occurred in this 10 October pass.
+
 ### 9 October — confirmed package presentation follow-up merged locally
 
 PR #743 merged to main as `3783b8ef6a9bbd3c8f2b0f0c7809ab35efb965c7`.
