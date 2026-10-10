@@ -267,7 +267,7 @@ export default function ClientPortalHome() {
               <div className="relative flex items-end justify-between gap-4">
                 <div>
                   <p className="text-xs font-black uppercase tracking-[0.26em] text-[#f59e0b]">Coming up</p>
-                  <h2 className="mt-3 text-3xl font-black tracking-[-0.04em] text-white">Content in motion</h2>
+                  <h2 className="mt-3 text-3xl font-black tracking-[-0.04em] text-white">What’s next</h2>
                 </div>
                 <Link
                   to="/client/plan"
@@ -282,7 +282,7 @@ export default function ClientPortalHome() {
                   <>
                     <p className="text-6xl font-black leading-none tracking-[-0.06em] text-white">{data.schedule.scheduledCount}</p>
                     <p className="mt-3 text-sm leading-6 text-slate-300">
-                      scheduled item{data.schedule.scheduledCount === 1 ? '' : 's'} for the planning month
+                      upcoming item{data.schedule.scheduledCount === 1 ? '' : 's'} this month
                     </p>
                   </>
                 ) : (
