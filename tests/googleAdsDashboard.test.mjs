@@ -226,9 +226,9 @@ test('Google Ads uses canonical equal-window trends without entering Meta totals
 })
 
 test('source labels are exact and existing Meta report construction remains in place', () => {
-  assert.match(REPORT_VIEW_SOURCE, /'Sources: Meta Business Sync and Google Ads Sync\.'/)
-  assert.match(REPORT_VIEW_SOURCE, /'Source: Google Ads Sync\.'/)
-  assert.match(REPORT_VIEW_SOURCE, /'Source: Meta Business Sync\.'/)
+  assert.match(REPORT_VIEW_SOURCE, /reportSourceAttribution\(activeTab/)
+  assert.match(REPORT_VIEW_SOURCE, /googleAds: hasGoogleAdsSource/)
+  assert.match(REPORT_VIEW_SOURCE, /meta: hasMeta && \(activeTab === 'overview' \|\| reportPlatforms\.includes/)
   assert.match(REPORT_VIEW_SOURCE, /buildMasterReport\(statsPosts, manualMetrics, excludedContentKeys\)/)
   assert.match(REPORT_VIEW_SOURCE, /buildMetaPlatformMetrics\(view\)/)
   assert.match(REPORT_VIEW_SOURCE, /isMetaSyncedManualMetric\(view\.manual\)/)
