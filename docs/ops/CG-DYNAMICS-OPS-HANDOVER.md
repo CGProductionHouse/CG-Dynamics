@@ -1,5 +1,24 @@
 # CG Dynamics Ops Handover
 
+### 11 October — fresh read-only Microsoft/Meta production truth
+
+The latest automatic Microsoft fetch completed all six required sources with
+7,788 records, but its terminal apply was **PARTIAL** (0 applied, 1,726
+skipped, 381 conflicts, 0 remaining); the last full completed reconciliation
+is still 19 August. The 6,062 Client Schedule records were excluded from
+automatic apply. Fetch completion must not be shown as freshness PASS.
+
+Meta's current dynamic inventory is 42 active assets, 42 Facebook and 25
+Instagram routes. AV Event Life, Ehrlich Park Butchery and Zooz Lifestyle WFF
+have failed Facebook checkpoints with older successful facts retained; Red
+Oak's Facebook route has no checkpoint. Eighteen Instagram checkpoints are
+verified complete and seven verified partial. Recent Red Oak failures occur
+once per month in each hourly access-cooldown window, not every minute; no
+empty batch was seen in the four-hour sample. The fleet remains non-green.
+The exact SELECT-only receipt is on #451/#623. No handler, sync, production
+write or Vercel operation occurred. Audited Microsoft conflict review and
+owner/provider Meta access recovery remain separate gates.
+
 ### 11 October — client Plan package tab drops irrelevant month control locally
 
 The actual-component read-only Plan fixture reproduced a "Working month"
