@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
-const sql = read('../supabase/migrations/20261010163723_review_client_context_updates.sql')
+const sql = read('../supabase/migrations/20261011100320_review_client_context_updates.sql')
 const data = read('../src/lib/clientContextReview.ts')
 const panel = read('../src/components/strategy/ClientContextReview.tsx')
 const strategy = read('../src/pages/admin/MonthlyStrategyPage.tsx')
