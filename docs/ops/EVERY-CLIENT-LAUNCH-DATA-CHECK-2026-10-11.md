@@ -91,7 +91,7 @@ Codes: package **C** = confirmation marker / **H** = held; Video/Photo/Design gi
 
 ## Work left before a real client review
 
-1. Run #731's approved, budget-capped real strategy-generation pilot after its two migrations and guarded worker closure are applied. Validate actual client-specific research/meeting/report output before wider generation. Do not publish drafts automatically.
+1. #731's two migrations and guarded worker closure are now applied/read back, while generation remains OFF. PR #769's one-client pilot fence is merged but not deployed. Obtain the exact rand ceiling and separate protected Piek pilot approval before any model call; validate actual client-specific research/meeting/report output before wider generation. Do not publish drafts automatically.
 2. Staff verify the five dated deliverables, correct dates if needed and use the normal client-disclosure path. No schedule row may be invented from Planner.
 3. Resolve #396 approved-final files, named recipients, per-client/sibling isolation and exact Dynamics category/asset mappings before enabling a Brand Hub. Do not share the common parent or publish the staged logo copies by inference.
 4. After a separately budgeted #679 release, inspect actual client-role phone and desktop journeys client by client. This SQL audit cannot establish that each client's rendered account works.

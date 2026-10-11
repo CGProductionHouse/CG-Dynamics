@@ -102,6 +102,8 @@ try {
     await page.getByRole('tab',{name:'Your package'}).click()
     await page.getByRole('heading',{name:'What we create together'}).waitFor()
     await page.waitForFunction(()=>document.querySelector('[role="tab"][aria-selected="true"]')?.textContent?.trim()==='Your package')
+    assert.equal(await page.getByText('Working month',{exact:true}).count(),0,'Package has no irrelevant month control')
+    assert.equal(await page.getByRole('button',{name:'Previous month'}).count(),0,'Package has no history arrows')
     assert.equal(await page.getByText('To confirm',{exact:true}).count(),0,'Unknown package fields stay hidden')
     await page.locator('summary').filter({hasText:'Amend package'}).click()
     assert.equal(await page.getByRole('link',{name:'WhatsApp Amonique'}).getAttribute('href'),'https://wa.me/27791152339')
