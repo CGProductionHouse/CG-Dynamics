@@ -1,5 +1,19 @@
 # CG Dynamics Ops Handover
 
+### 11 October — local launch code gate passed; client acceptance still held
+
+Clean main `40515acf189438125b198a4eb5a83168bf991118` passed the
+SHA-pinned local acceptance harness: 3,791 tests passed, none failed, 17
+skipped; the Windows-only SES Bash fixture was excluded, not passed.
+TypeScript, local Vite build and 11 actual-component/disposable-SQL browser
+journeys passed. ESLint had zero errors and 17 existing warnings; the emitted
+bundle contains the client app; `git diff --check` and the worktree were clean.
+The receipt and hashes are in #668 comment 6107579462 and #381 comment
+6107581199. This completes only gate 0 of the cutline below. The harness used
+synthetic local configuration; it did not test real 61-client production
+sessions, strategy substance or a release artifact. No Vercel or protected
+production action occurred. Do not mark the launch review-only.
+
 ### 11 October — 12 October client launch cutline, no Vercel
 
 CA asked for a single executable tomorrow-launch plan rather than another
