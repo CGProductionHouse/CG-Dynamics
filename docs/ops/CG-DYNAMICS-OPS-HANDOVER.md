@@ -1,5 +1,22 @@
 # CG Dynamics Ops Handover
 
+### 11 October — current-main local launch acceptance; production gates unchanged
+
+Clean current `main` `5bcb13a203728c52168db200b3b51d7c3600528b`
+(tree `6dfbeb0bb3e064143a6ce2a91d8c94cee4716314`) passed the exact-head
+local harness: 3,808 supported tests, 3,791 pass, 17 intentional skips,
+zero failures, TypeScript, emitted Vite bundle, and all eleven actual-component
+browser fixtures. The tree remained clean; receipt
+`%TEMP%/cg-local-launch-5bcb13a20372.json` records zero Vercel operations
+and no production acceptance. A suspected Plan exact-client strategy carryover
+was tested and disproved by its existing keyed remount; no speculative change
+was kept. The read-only production freshness observer could not capture because
+its separately provisioned management read token was absent; no credential
+fallback or production SQL was attempted. This is local code acceptance only:
+#731 real-output/semantic strategy and publication, five unconfirmed past-dated
+Client Schedule rows, #396 approved assets/mappings/recipient isolation, and
+#679 budgeted release/authenticated changed-build acceptance remain open.
+
 ### 11 October — exact-client strategy review picker, local candidate
 
 The staff monthly-strategy review page retained the previous client object
