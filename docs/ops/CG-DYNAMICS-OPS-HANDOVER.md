@@ -1,5 +1,23 @@
 # CG Dynamics Ops Handover
 
+### 11 October — strategy copy guard covers rendered insight and key dates locally
+
+A SELECT-only October/November draft audit found zero published strategies:
+October has 47 nonblank objectives, ten blank objectives and four missing
+rows; November has no nonblank objective among 57 draft rows and four missing
+rows. Eleven October objectives and their audience/core-message fields still
+use the stock "verified client evidence" template. This is a heuristic audit,
+not approval of the other 36; the known templates remain unpublished.
+
+An actual source/test reproduction found the client-facing strategy quality
+gate omitted rendered Top content insight text and selected Key dates text.
+The focused local fix checks those rendered fields through the existing shared
+guard, but does not penalize unused calendar selections. It does not generate,
+rewrite, approve or publish any strategy. #731 still requires the separately
+authorized capped one-client real-output pilot and semantic review; #389,
+#396 and #679 remain independent launch gates. No Supabase write or Vercel
+operation occurred.
+
 ### 11 October — fresh read-only Microsoft/Meta production truth
 
 The latest automatic Microsoft fetch completed all six required sources with

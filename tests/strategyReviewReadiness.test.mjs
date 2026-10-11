@@ -45,6 +45,26 @@ test('internal caption and contact rules cannot pass as a client strategy', () =
   }
 })
 
+test('client-facing insight and selected calendar copy receive the same quality gate', () => {
+  const fields = [
+    data => { data.topContent.whyItWorked = ['Use the verified client evidence to infer performance.'] },
+    data => { data.topContent.whatThisTellsUs = 'Source reference: internal working note.' },
+    data => { data.topContent.contentType = 'Canonical client: internal type' },
+    data => { data.topContent.autoCaption = 'No influencer language in this caption.' },
+    data => { data.calendarSelections = [{ eventId: 'event-1', title: 'Review docs/internal-plan.md', date: '2026-10-20', use: true, note: '' }] },
+    data => { data.calendarSelections = [{ eventId: 'event-1', title: 'Client meeting', date: '2026-10-20', use: true, note: 'Use the verified client evidence.' }] },
+  ]
+  for (const change of fields) {
+    const data = completeDraft()
+    change(data)
+    assert.ok(clientFacingStrategyQualityIssues(data).length > 0)
+    assert.equal(strategyRequiredComplete(data), false)
+  }
+  const unused = completeDraft()
+  unused.calendarSelections = [{ eventId: 'event-2', title: 'Review docs/internal-plan.md', date: '2026-10-20', use: false, note: '' }]
+  assert.deepEqual(clientFacingStrategyQualityIssues(unused), [])
+})
+
 test('legacy reporting readiness cannot promote a known bad strategy with populated checkboxes', () => {
   const data = completeDraft()
   data.strategyGoingForward = 'Published-content record: posting a photo is our next-month strategy.'

@@ -247,10 +247,15 @@ function clientFacingStrategyText(data: StrategyData): string[] {
   return [
     ...data.clientDirection,
     data.clientRequestNotes,
+    data.topContent.autoCaption ?? '',
+    data.topContent.contentType,
+    ...data.topContent.whyItWorked,
+    data.topContent.whatThisTellsUs,
     ...data.strategyDrivers,
     data.strategyGoingForward,
     ...data.clientActionsRequired,
     ...Object.values(data.actionPlan).flatMap(section => [...section.items, section.notes]),
+    ...data.calendarSelections.filter(selection => selection.use).flatMap(selection => [selection.title, selection.note]),
     ...Object.values(data.goldStandard),
   ].map(value => value.trim()).filter(Boolean)
 }
