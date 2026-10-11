@@ -110,6 +110,24 @@ test('fills an exact next-month draft, preserves staff fields and keeps it unpub
   assert.deepEqual(Object.keys(fake.tables.monthly_deliverables), [])
 })
 
+test('exact-client pilot cap reaches only the one proposal request and remains unpublished', async () => {
+  const { fake, row } = fixture()
+  const pilot = { maxZarMicros: 20_000_000, grantId: '2026-10-11T11:00:00Z' }
+  const result = await runNextMonthStrategyGeneration(fake, { ...input, pilot }, {
+    sourceDigest: async () => 'digest-a',
+    generateProposal: async request => {
+      assert.equal(request.clientId, clientId)
+      assert.equal(request.strategyMonth, month)
+      assert.deepEqual(request.pilot, pilot)
+      return generated()
+    },
+  })
+  assert.equal(result.state, 'draft_filled')
+  assert.equal(row.workflow_status, 'draft')
+  assert.equal(row.published_version, null)
+  assert.equal(fake.writes.length, 1)
+})
+
 test('production-shaped untouched package placeholders are replaced once, without publishing or changing scope', async () => {
   const { fake, row } = fixture()
   fake.requireStrategyAmendmentField = true

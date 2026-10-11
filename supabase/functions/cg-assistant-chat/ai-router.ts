@@ -52,6 +52,9 @@ export interface AiRouterOptions {
   usageClient: AiUsageClient
   provider?: AiProviderName
   routeId?: string
+  /** A single-route, configured-price upper quote; never used by ordinary routing. */
+  maxEstimatedZarMicros?: number
+  costQuoteInputTokens?: number
   forceProbe?: boolean
   validateContent?: (content: string) => boolean | Promise<boolean>
   /**
@@ -186,6 +189,22 @@ export function selectRoutes(routes: AiProviderRoute[], complexity: AiComplexity
     if (a.tier !== b.tier) return a.tier === 'strong' ? -1 : 1
     return a.priority - b.priority
   })
+}
+
+export function estimatedRouteWithinCap(
+  route: AiProviderRoute,
+  maxInputTokens: number,
+  maxOutputTokens: number,
+  maxZarMicros: number,
+): number | null {
+  if (!Number.isSafeInteger(maxInputTokens) || maxInputTokens <= 0 || maxInputTokens > 128_000 ||
+      !Number.isSafeInteger(maxOutputTokens) || maxOutputTokens <= 0 ||
+      !Number.isSafeInteger(maxZarMicros) || maxZarMicros <= 0 ||
+      !Number.isSafeInteger(route.fx_zar_micros) || route.fx_zar_micros <= 0 ||
+      [route.request_cost_micros, route.input_per_million_micros, route.output_per_million_micros]
+        .some(value => value === null || !Number.isSafeInteger(value) || value < 0)) return null
+  const quote = estimateRouteCost(route, maxInputTokens, maxOutputTokens, null).zarMicros
+  return quote !== null && Number.isFinite(quote) && quote >= 0 && quote <= maxZarMicros ? quote : null
 }
 
 async function fetchWithTimeout(url: string, init: RequestInit): Promise<Response> {
@@ -370,11 +389,21 @@ export async function routeAiChat(
   const startedAt = Date.now()
   const maxOutputTokens = Math.min(Math.max(Math.floor(options.maxOutputTokens), 128), 4000)
   const maxInputTokens = Math.min(128000, Math.max(512, Math.ceil(messages.reduce((sum, message) => sum + message.content.length, 0) / 2)))
-  const routes = selectRoutes(await loadAiProviderRoutes(options.usageClient, 'text'), options.complexity)
+  let routes = selectRoutes(await loadAiProviderRoutes(options.usageClient, 'text'), options.complexity)
     .filter(route => !options.provider || route.provider === options.provider)
     .filter(route => !options.routeId || route.id === options.routeId)
     // Web-grounded requests can only be served by Gemini (Google Search grounding).
     .filter(route => !options.webSearch || route.provider === 'gemini')
+  const requestCostCap = options.maxEstimatedZarMicros
+  if (requestCostCap !== undefined) {
+    const quoteInputTokens = options.costQuoteInputTokens
+    if (!options.routeId || quoteInputTokens === undefined) throw new Error('AI_REQUEST_COST_CAP_UNAVAILABLE')
+    routes = routes.filter(route => estimatedRouteWithinCap(
+      route, quoteInputTokens, maxOutputTokens, requestCostCap,
+    ) !== null)
+    // The cap is a single provider attempt, with no fallback to another route.
+    if (routes.length !== 1) throw new Error('AI_REQUEST_COST_CAP_UNAVAILABLE')
+  }
   const reservation = await reserveAiUsage(options.usageClient, {
     idempotencyKey: options.idempotencyKey,
     fingerprint: options.fingerprint,

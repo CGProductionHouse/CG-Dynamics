@@ -8,6 +8,7 @@ import {
   type StrategyAutopilotClient,
 } from '../_shared/monthlyStrategyAutopilot.ts'
 import { runCurrentMonthStrategyContextRevision, runNextMonthStrategyGeneration } from '../_shared/monthlyStrategyGeneration.ts'
+import { authorizesMonthlyStrategyPilot, readMonthlyStrategyPilotGrant } from '../_shared/monthlyStrategyPilot.ts'
 import type { AiUsageClient } from '../_shared/aiUsage.ts'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -46,18 +47,32 @@ Deno.serve(async request => {
     const payload = await request.json().catch(() => ({})) as Record<string, unknown>
     const today = johannesburgDate()
     const generationEnabled = (Deno.env.get('MONTHLY_STRATEGY_AI_ENABLED') ?? '').trim().toLowerCase() === 'true'
-    if (payload.action === 'generate_next_month' || payload.action === 'revise_current_month_context') {
-      if (!generationEnabled) return jsonResponse({ ok: true, state: 'disabled' })
+    const pilot = payload.action === 'pilot_generate_next_month'
+    if (pilot || payload.action === 'generate_next_month' || payload.action === 'revise_current_month_context') {
+      if (!pilot && !generationEnabled) return jsonResponse({ ok: true, state: 'disabled' })
       const clientId = typeof payload.clientId === 'string' ? payload.clientId : ''
       const strategyMonth = typeof payload.strategyMonth === 'string' ? payload.strategyMonth : ''
       if (!UUID_RE.test(clientId) || !/^\d{4}-(0[1-9]|1[0-2])-01$/.test(strategyMonth)) {
         return jsonResponse({ error: 'Exact strategy generation identity required.' }, 400)
       }
+      const pilotGrant = pilot && !generationEnabled
+        ? readMonthlyStrategyPilotGrant(
+          (Deno.env.get('MONTHLY_STRATEGY_PILOT_CLIENT_ID') ?? '').trim(),
+          (Deno.env.get('MONTHLY_STRATEGY_PILOT_MAX_ZAR') ?? '').trim(),
+          (Deno.env.get('MONTHLY_STRATEGY_PILOT_EXPIRES_AT') ?? '').trim(),
+        ) : null
+      if (pilot && !authorizesMonthlyStrategyPilot(pilotGrant, clientId, generationEnabled)) {
+        return jsonResponse({ error: 'Exact-client strategy pilot is unavailable.' }, 403)
+      }
       const generate = payload.action === 'revise_current_month_context'
         ? runCurrentMonthStrategyContextRevision : runNextMonthStrategyGeneration
       const result = await generate(
         supabase as unknown as StrategyAutopilotClient & AiUsageClient,
-        { clientId, strategyMonth, today, systemProfileId },
+        { clientId, strategyMonth, today, systemProfileId,
+          ...(pilotGrant ? { pilot: {
+            maxZarMicros: pilotGrant.maxZarMicros,
+            grantId: pilotGrant.expiresAt,
+          } } : {}) },
       )
       return jsonResponse(result)
     }
