@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { assessGoldStandardStrategy, emptyStrategyData, GOLD_STANDARD_FIELDS, strategyRequiredComplete } from '../src/lib/strategyEngine.ts'
+import { assessGoldStandardStrategy, clientFacingStrategyQualityIssues, emptyStrategyData, GOLD_STANDARD_FIELDS, strategyRequiredComplete } from '../src/lib/strategyEngine.ts'
 import { EMPTY_PACKAGE_SETTINGS } from '../src/lib/packageAuthority.ts'
 
 function completeDraft() {
@@ -24,6 +24,22 @@ test('long generic prose and internal provenance cannot pass by exceeding minimu
   for (const copy of ['Increase engagement by creating engaging content every week.', 'Review docs/internal-plan.md to set the client direction.', 'Canonical client: internal identity is the strategy.']) {
     const data = completeDraft()
     data.goldStandard.coreMessage = copy
+    assert.ok(assessGoldStandardStrategy(data, pkg, true).length > 0, copy)
+    assert.equal(strategyRequiredComplete(data), false, copy)
+  }
+})
+
+test('internal caption and contact rules cannot pass as a client strategy', () => {
+  for (const copy of [
+    'No influencer language, forced humour, slang or hype.',
+    'Use natural English or Afrikaans as the brief fits.',
+    'Normal public captions should use the current approved regional footer.',
+    'Normal public We Ar Fuels captions should use the current approved regional footer.',
+    'Captions add to the artwork/video; they do not repeat it.',
+  ]) {
+    const data = completeDraft()
+    data.goldStandard.objective = copy
+    assert.ok(clientFacingStrategyQualityIssues(data).length > 0, copy)
     assert.ok(assessGoldStandardStrategy(data, pkg, true).length > 0, copy)
     assert.equal(strategyRequiredComplete(data), false, copy)
   }

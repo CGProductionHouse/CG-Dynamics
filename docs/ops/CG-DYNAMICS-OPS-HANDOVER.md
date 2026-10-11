@@ -1,5 +1,18 @@
 # CG Dynamics Ops Handover
 
+### 11 October — internal-caption rule quality gate, local candidate
+
+A fail-first regression reproduced that the client-facing strategy/approval
+gate accepted the actual We Ar Fuels-style internal voice and caption rules
+as a monthly objective when their length exceeded the structural minimum.
+The narrow shared quality gate now rejects those specific internal rules before
+client presentation, staff approval/readiness or model-proposal merge; it does
+not amend drafts, classify all strategy semantically, or publish anything.
+The 72 previously accepted exact-client amendments and 22 held templates still
+retain their earlier quality dispositions in focused tests. The 61-client
+strategy, posting, Brand Hub and protected release gates below are unchanged.
+No Vercel or production operation was performed for this local candidate.
+
 ### 10 October — exact-client Leads navigation and Braize client-role read
 
 The signed-in Braize client portal was read-only checked on the currently
