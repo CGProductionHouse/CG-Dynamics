@@ -1,5 +1,20 @@
 # CG Dynamics Ops Handover
 
+### 11 October — 12 October client launch cutline, no Vercel
+
+CA asked for a single executable tomorrow-launch plan rather than another
+Braize-focused audit. `docs/ops/CLIENT-LAUNCH-CUTLINE-2026-10-12.md` sets the
+dependency order and measurable exit criteria for all 61 active clients:
+local candidate, protected #731 real strategy pilot, confirmed Client
+Schedule dates/disclosure, #396 approved finals and recipient isolation,
+exact package/service review, per-client changed-build acceptance, then a
+separately budgeted #679 release. The current production baseline is not
+review-only or all-client launch-ready. A stale open PR #725 claimed otherwise
+while changing only Vite/Node type dependency versions; it was closed without
+merge after inspection. The cutline does not authorize Vercel or production
+writes. Current request keeps Vercel usage at zero until a later explicit
+release decision; client websites remain outside development actions.
+
 ### 11 October — full private portal item/permission check, no Vercel
 
 The post-parent-revocation OneDrive audit matched all 61 exact active clients
