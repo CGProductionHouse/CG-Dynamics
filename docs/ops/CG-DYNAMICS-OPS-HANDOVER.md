@@ -20,9 +20,14 @@ approval/publication, Vercel action or unrelated production data write
 occurred. This is infrastructure readiness, **not** a quality-reviewed
 strategy or client release. The deployed v27 cannot run a one-client pilot by
 turning the global flag on: the daily scheduler would enqueue the fleet.
-A code-only exact-client/short-expiry/configured-cost pilot fence is being
-prepared separately and is **not deployed**. Next: obtain a numerical rand
-cap and protected one-client Piek pilot approval; then inspect source
+The code-only exact-client/short-expiry/configured-cost pilot fence merged in
+PR #769 as `50684b355d1b47a6f544dba0e47d342e2dd12b47`, but is **not
+deployed**. Read-only production inspection at 11:14 UTC found no
+`monthly_strategy_autopilot` jobs created since the 10:00 UTC rollout window;
+this is not proof of future scheduler behavior or generated quality. The
+exact-head supported suite passed 3,796 tests with 0 failures and 17
+intentional skips, plus build and scoped lint. Next: obtain a numerical rand
+cap and separate protected one-client Piek pilot approval; then inspect source
 fidelity, strategic substance, staff-edit safety and budget receipt before
 considering wider activation. See #731
 and `docs/ops/MONTHLY-STRATEGY-GENERATION-RUNBOOK.md`.
