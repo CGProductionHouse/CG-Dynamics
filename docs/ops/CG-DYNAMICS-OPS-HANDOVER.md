@@ -1,5 +1,21 @@
 # CG Dynamics Ops Handover
 
+### 11 October — full private portal item/permission check, no Vercel
+
+The post-parent-revocation OneDrive audit matched all 61 exact active clients
+to their bound private A_ClientPortal_* roots. All 61 roots, 183 required
+category folders, 281 nested Video folders and 775 files returned owner-only
+effective permissions, with no anonymous or named non-owner grant and no
+connector error. The 44 staged logo files in 43 clients and 727 existing Video
+files are **not** approved final assets. Braize has two private Video filenames
+referencing Red Oak; inspect their actual content and ownership before any
+promotion. Production Dynamics still has zero Brand Hub mappings. Sharing a
+whole root would expose its historic files, so recipient grants, mapping and
+enablement remain held until exact-file curation and isolation. The 61-row
+non-sensitive counts and execution gate are in
+docs/ops/CLIENT-PORTAL-PRIVATE-ROSTER-2026-10-11.md. No OneDrive/Dynamics
+write or Vercel operation occurred. This is not client-access acceptance.
+
 ### 11 October — all 61 active clients rechecked, no Vercel
 
 A fresh SELECT-only production fleet audit checked every active client against
