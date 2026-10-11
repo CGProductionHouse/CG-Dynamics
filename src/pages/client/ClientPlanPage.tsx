@@ -80,7 +80,7 @@ export default function ClientPlanPage() {
               Strategy, calendar and content guidelines.
             </p>
           </div>
-          <div className="shrink-0 rounded-2xl border border-white/10 bg-black/20 p-2 backdrop-blur">
+          {tab !== 'package' && <div className="shrink-0 rounded-2xl border border-white/10 bg-black/20 p-2 backdrop-blur">
             <p className="px-3 pt-1 text-[0.65rem] font-black uppercase tracking-[0.2em] text-slate-500">Working month</p>
             {tab === 'strategy' ? (
               <div className="mt-2 flex items-center gap-1" aria-label="Strategy months">
@@ -95,7 +95,7 @@ export default function ClientPlanPage() {
                 <button type="button" aria-label="Next month" onClick={() => updatePlan({ month: shiftMonth(month, 1) })} className="min-h-11 min-w-11 rounded-xl text-lg text-slate-400 transition hover:bg-white/[0.07] hover:text-white">›</button>
               </div>
             )}
-          </div>
+          </div>}
         </div>
       </section>
 

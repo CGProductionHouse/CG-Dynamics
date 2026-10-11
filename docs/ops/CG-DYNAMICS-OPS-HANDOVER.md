@@ -1,5 +1,17 @@
 # CG Dynamics Ops Handover
 
+### 11 October — client Plan package tab drops irrelevant month control locally
+
+The actual-component read-only Plan fixture reproduced a "Working month"
+selector and history arrows on "Your package", although a confirmed package
+is not a month-specific Plan document. A focused local correction hides those
+controls only on the package tab; Strategy retains current/next month and
+Calendar/Guidelines retain their history navigation. The fixture now asserts
+the absence of package-month controls at 1440/375/390/430px while retaining
+package truth, exact-client transition and no-overflow checks. This is local
+code only, not a deployed or authenticated client acceptance result. The
+protected #731/#389/#396/#679 gates below remain unchanged.
+
 ### 11 October — #731 guarded runtime deployed; strategy generation still OFF
 
 CA approved the exact #731 two-migration/two-Edge-function packet after the
