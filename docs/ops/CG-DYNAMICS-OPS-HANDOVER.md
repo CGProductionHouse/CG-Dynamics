@@ -1,5 +1,26 @@
 # CG Dynamics Ops Handover
 
+### 11 October — all 61 active clients rechecked, no Vercel
+
+A fresh SELECT-only production fleet audit checked every active client against
+package markers and stored video/photo/design quantities, published reports,
+October/November strategy rows, dated/disclosed Client Schedule work, portal
+access, saved Meta assets, exact connected TikTok rows, and September/October
+metric-fact availability. The exact 61-row non-sensitive matrix is
+`docs/ops/EVERY-CLIENT-LAUNCH-DATA-CHECK-2026-10-11.md`. It confirms 60
+package markers and LHP's held once-off scope; Elcheck/JFJ each read back
+1 video, 3 photo, 3 design and VCS 1 video, 8 design with photo unknown.
+No strategy is published, no dated post has client disclosure, and no client
+has a production Brand Hub library mapping. Ten exact TikTok connections,
+42 active saved Facebook assets and 25 saved Instagram IDs are not the same
+as fresh client-visible reporting. An authenticated Braize client session
+showed October/November strategy holding states and the confirmed 8-poster
+package; a separate admin-preview URL redirected to that client session, so
+no other client UI journey was claimed. No SQL/Edge/data/share or Vercel write
+occurred. #731 real generation/semantic review, #396 approved assets and
+recipient isolation, staff posting confirmation and #679 controlled release
+remain distinct gates; this is not review-only or launch signoff.
+
 ### 11 October — current-main local launch acceptance; production gates unchanged
 
 Clean current `main` `5bcb13a203728c52168db200b3b51d7c3600528b`
