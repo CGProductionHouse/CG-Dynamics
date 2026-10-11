@@ -360,7 +360,7 @@ test('handler is worker-only and shared worker/sync ownership remains untouched'
 })
 
 test('automatic proposal RPC is service-only, draft-only and preserves staff amendment metadata', () => {
-  const source = read('../supabase/migrations/20261009120000_guard_monthly_strategy_generation.sql')
+  const source = read('../supabase/migrations/20261011100300_guard_monthly_strategy_generation.sql')
   assert.match(source, /auth\.jwt\(\)->>'role'.*<> 'service_role'/)
   assert.match(source, /v_strategy\.workflow_status <> 'draft' or v_strategy\.published_version is not null/)
   assert.match(source, /p_expected_version <> v_strategy\.version/)

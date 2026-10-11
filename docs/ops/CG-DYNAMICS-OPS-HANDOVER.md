@@ -1,5 +1,28 @@
 # CG Dynamics Ops Handover
 
+### 11 October — #731 guarded runtime deployed; strategy generation still OFF
+
+CA approved the exact #731 two-migration/two-Edge-function packet after the
+read-only preflight. Supabase project `ehtjfntukiwbgptqgbzy` now lists applied
+`20261011100300_guard_monthly_strategy_generation` and
+`20261011100320_review_client_context_updates`; the repository migration
+filenames were aligned to those generated ledger versions with SQL SHA256
+unchanged (`702BE025…E9D5291C9`, `69EA23C4…2B144`). Edge readback:
+`monthly-strategy-autopilot` ACTIVE v27/JWT true, SHA256
+`d09fe9ca09fd7ae93d1f5196f839f927ad839e2c231b3d631f9950b755f24bd9`;
+`background-worker` ACTIVE v44/JWT false unchanged, SHA256
+`94aa6ae445cb6c8ae4e5ae74a896da39f6c5e6b5553e1bec9992b267c8e968fd`.
+The runtime import closures read back matching main. SQL readback confirms the
+service-role-only generation RPC, authenticated-only review RPC and audit
+columns. Worker v44 booted; the strategy function was not invoked. The
+generation flag was not changed; no model call, backfill, strategy
+approval/publication, Vercel action or unrelated production data write
+occurred. This is infrastructure readiness, **not** a quality-reviewed
+strategy or client release. Next: obtain a numerical rand cap for one Piek
+real-output pilot; then inspect source fidelity, strategic substance, staff
+edit safety and budget receipt before considering wider activation. See #731
+and `docs/ops/MONTHLY-STRATEGY-GENERATION-RUNBOOK.md`.
+
 ### 11 October — local launch code gate passed; client acceptance still held
 
 Clean main `40515acf189438125b198a4eb5a83168bf991118` passed the
