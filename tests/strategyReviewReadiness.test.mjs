@@ -34,6 +34,7 @@ test('internal caption and contact rules cannot pass as a client strategy', () =
     'No influencer language, forced humour, slang or hype.',
     'Use natural English or Afrikaans as the brief fits.',
     'Normal public captions should use the current approved regional footer.',
+    'Normal public We Ar Fuels captions should use the current approved regional footer.',
     'Captions add to the artwork/video; they do not repeat it.',
   ]) {
     const data = completeDraft()
