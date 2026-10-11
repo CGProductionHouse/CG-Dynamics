@@ -90,6 +90,14 @@ export default function MonthlyStrategyPage() {
   useEffect(() => {
     let active = true
     if (!clientId) {
+      if (active) {
+        setClient(null)
+        setStrategy(null)
+        setDraftData(emptyStrategyData())
+        setInternalNotes('')
+        setError(null)
+        setLoadedScope(scopeKey)
+      }
       return () => { active = false }
     }
 
