@@ -18,9 +18,13 @@ columns. Worker v44 booted; the strategy function was not invoked. The
 generation flag was not changed; no model call, backfill, strategy
 approval/publication, Vercel action or unrelated production data write
 occurred. This is infrastructure readiness, **not** a quality-reviewed
-strategy or client release. Next: obtain a numerical rand cap for one Piek
-real-output pilot; then inspect source fidelity, strategic substance, staff
-edit safety and budget receipt before considering wider activation. See #731
+strategy or client release. The deployed v27 cannot run a one-client pilot by
+turning the global flag on: the daily scheduler would enqueue the fleet.
+A code-only exact-client/short-expiry/configured-cost pilot fence is being
+prepared separately and is **not deployed**. Next: obtain a numerical rand
+cap and protected one-client Piek pilot approval; then inspect source
+fidelity, strategic substance, staff-edit safety and budget receipt before
+considering wider activation. See #731
 and `docs/ops/MONTHLY-STRATEGY-GENERATION-RUNBOOK.md`.
 
 ### 11 October — local launch code gate passed; client acceptance still held

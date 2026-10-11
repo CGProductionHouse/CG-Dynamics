@@ -1,5 +1,5 @@
-import { AiDuplicateRequestError, routeAiChat } from '../cg-assistant-chat/ai-router.ts'
-import { fetchAiUsageReplay, type AiUsageClient } from './aiUsage.ts'
+import { AiDuplicateRequestError, estimatedRouteWithinCap, routeAiChat, selectRoutes } from '../cg-assistant-chat/ai-router.ts'
+import { fetchAiUsageReplay, loadAiProviderRoutes, type AiProviderRoute, type AiUsageClient } from './aiUsage.ts'
 import {
   buildMonthlyStrategyPrompt,
   parseMonthlyStrategyProposal,
@@ -10,6 +10,32 @@ import {
 import type { ActionPlanKey, StrategyData } from '../../../src/lib/strategyEngine.ts'
 
 const MAX_STRATEGY_OUTPUT_TOKENS = 2_400
+
+export function monthlyStrategyPilotPromptBytes(system: string, user: string): number {
+  return new TextEncoder().encode(system + user).length
+}
+
+export function selectMonthlyStrategyPilotRoute(
+  routes: AiProviderRoute[],
+  promptBytes: number,
+  maxZarMicros: number,
+): { routeId: string; estimatedMaxZarMicros: number; costQuoteInputTokens: number } {
+  // A UTF-8 byte ceiling plus request framing is conservative even for
+  // non-ASCII client text. Unknown pricing fails closed.
+  const maxInputTokens = promptBytes + 1_024
+  if (!Number.isSafeInteger(maxZarMicros) || maxZarMicros <= 0 ||
+      !Number.isSafeInteger(promptBytes) || promptBytes < 0 ||
+      !Number.isSafeInteger(maxInputTokens) || maxInputTokens > 128_000) {
+    throw new Error('STRATEGY_PILOT_COST_CAP_UNAVAILABLE')
+  }
+  for (const route of selectRoutes(routes, 'complex')) {
+    const quote = estimatedRouteWithinCap(route, maxInputTokens, MAX_STRATEGY_OUTPUT_TOKENS, maxZarMicros)
+    if (quote !== null) {
+      return { routeId: route.id, estimatedMaxZarMicros: quote, costQuoteInputTokens: maxInputTokens }
+    }
+  }
+  throw new Error('STRATEGY_PILOT_COST_CAP_UNAVAILABLE')
+}
 
 async function sha256(value: string): Promise<string> {
   const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))
@@ -43,6 +69,7 @@ export async function generateMonthlyStrategyProposal(input: {
   sourceWindows?: Record<string, unknown>
   targetVersion: number
   generationPurpose?: 'next_month' | 'current_context'
+  pilot?: { maxZarMicros: number; grantId: string }
 }): Promise<{ proposal: MonthlyStrategyProposal; sourceDigest: string; provider: string }> {
   // The provider may cite only evidence actually included in its bounded prompt.
   const sourceIds = new Set(selectMonthlyStrategyEvidence(input.evidence).map(row => row.source_id).filter(Boolean))
@@ -52,6 +79,12 @@ export async function generateMonthlyStrategyProposal(input: {
   const sourceDigest = await monthlyStrategySourceDigest(input)
   const fingerprint = await sha256(`${sourceDigest}:${input.targetVersion}`)
   const prompt = buildMonthlyStrategyPrompt(input)
+  const pilotRoute = input.pilot
+    ? selectMonthlyStrategyPilotRoute(
+      await loadAiProviderRoutes(input.sb, 'text'),
+      monthlyStrategyPilotPromptBytes(prompt.system, prompt.user),
+      input.pilot.maxZarMicros,
+    ) : null
   const allowed = { clientId: input.clientId, strategyMonth: input.strategyMonth, sourceIds, enabledFormats }
   let content: string
   let provider: string
@@ -61,12 +94,20 @@ export async function generateMonthlyStrategyProposal(input: {
       {
         usageClient: input.sb,
         feature: 'monthly_strategy',
-        action: input.generationPurpose === 'current_context' ? 'revise_current_month_context' : 'generate_next_month_draft',
+        action: input.pilot ? 'pilot_generate_next_month_draft'
+          : input.generationPurpose === 'current_context' ? 'revise_current_month_context' : 'generate_next_month_draft',
         actorId: input.actorId,
-        idempotencyKey: `monthly-strategy:${input.clientId}:${input.strategyMonth}:${fingerprint}`,
+        idempotencyKey: input.pilot
+          ? `monthly-strategy-pilot:${input.clientId}:${input.strategyMonth}:${input.pilot.grantId}`
+          : `monthly-strategy:${input.clientId}:${input.strategyMonth}:${fingerprint}`,
         fingerprint,
         complexity: 'complex',
         maxOutputTokens: MAX_STRATEGY_OUTPUT_TOKENS,
+        ...(pilotRoute ? {
+          routeId: pilotRoute.routeId,
+          maxEstimatedZarMicros: input.pilot?.maxZarMicros ?? 0,
+          costQuoteInputTokens: pilotRoute.costQuoteInputTokens,
+        } : {}),
         validateContent: value => parseMonthlyStrategyProposal(value, allowed) !== null,
       },
     )

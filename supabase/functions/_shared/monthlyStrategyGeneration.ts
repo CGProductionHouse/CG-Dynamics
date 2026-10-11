@@ -26,7 +26,8 @@ async function revisionKey(value: string): Promise<string> {
 
 async function runStrategyGeneration(
   sb: StrategyAutopilotClient & AiUsageClient,
-  input: { clientId: string; strategyMonth: string; today: string; systemProfileId: string },
+  input: { clientId: string; strategyMonth: string; today: string; systemProfileId: string;
+    pilot?: { maxZarMicros: number; grantId: string } },
   dependencies: {
     sourceDigest?: typeof monthlyStrategySourceDigest
     generateProposal?: (input: Parameters<typeof generateMonthlyStrategyProposal>[0]) => Promise<{
@@ -98,7 +99,7 @@ async function runStrategyGeneration(
     clientId: input.clientId, clientName: String(client.name),
     strategyMonth: input.strategyMonth, draft: preparedStrategy,
     evidence: prepared.evidence, sourceWindows: prepared.seedContext.source_windows, targetVersion: target.version,
-    generationPurpose: scope,
+    generationPurpose: scope, pilot: input.pilot,
   })
   if (generated.sourceDigest !== sourceDigest) throw new Error('STRATEGY_SOURCE_CHANGED_DURING_GENERATION')
   if (newContextIds.some(id => !generated.proposal.sourceIds.includes(id))) {
