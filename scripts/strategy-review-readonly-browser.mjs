@@ -51,8 +51,8 @@ try {
   await server.listen()
   browser = await chromium.launch({ headless: true })
   for (const width of [375, 390, 430, 1440]) {
-    for (const kind of process.argv[2] ? [process.argv[2]] : ['dirty', 'bad', 'clock', 'generated']) {
-      assert.ok(['dirty', 'bad', 'clock', 'generated'].includes(kind))
+    for (const kind of process.argv[2] ? [process.argv[2]] : ['dirty', 'bad', 'clock', 'generated', 'clear']) {
+      assert.ok(['dirty', 'bad', 'clock', 'generated', 'clear'].includes(kind))
       const page = await browser.newPage({ viewport: { width, height: 1000 }, timezoneId: 'America/Los_Angeles' })
       const errors = []
       page.on('pageerror', error => errors.push(error.message))
@@ -65,6 +65,10 @@ try {
         assert.equal(request.method(), 'GET', 'No RPC or table writes')
         if (url.pathname.endsWith('/strategy_options')) return route.fulfill({ json: [] })
         if (url.pathname.endsWith('/client_aliases')) return route.fulfill({ json: [] })
+        if (url.pathname.endsWith('/client_context_updates')) {
+          assert.equal(url.searchParams.get('client_id'), `eq.${clientId}`, 'Never request notes without the selected exact client')
+          return route.fulfill({ json: [] })
+        }
         assert.ok(url.pathname.endsWith('/clients'), `Only fixture client read permitted: ${url.pathname}`)
         const settings = {
           professional_videos_per_month: 1, reels_per_month: 0, photo_posts_per_month: 0, design_posters_per_month: 0,
@@ -93,6 +97,11 @@ try {
         await receipt.click()
         await page.getByText('Test a different local buyer question in a clear service demonstration.', { exact: false }).waitFor()
         await page.getByText('Exact monthly objective · staff wording retained', { exact: true }).waitFor()
+      } else if (kind === 'clear') {
+        await page.getByPlaceholder('Choose an active client').fill('')
+        await page.getByText('Choose a client to begin', { exact: true }).waitFor()
+        await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+        assert.equal(await page.getByPlaceholder('Choose an active client').inputValue(), '', 'Cleared client must not reappear as picker text')
       } else {
         assert.equal(await page.locator('input[type="month"]').inputValue(), '2026-10', 'Johannesburg October, not Los Angeles September')
         await page.getByText('Automated checks passed. Review the actual strategy before approval.', { exact: true }).waitFor()

@@ -72,6 +72,7 @@ export default function MonthlyStrategyPage() {
   const [reloadKey, setReloadKey] = useState(0)
   const scopeKey = clientId ? `${clientId}:${month}:${reloadKey}` : ''
   const loading = Boolean(clientId && loadedScope !== scopeKey)
+  const selectedClient = client?.id === clientId ? client : null
 
   useEffect(() => {
     if (requestedMonth === month) return
@@ -200,7 +201,7 @@ export default function MonthlyStrategyPage() {
           <span className="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-brand-primary">Exact client</span>
           <ClientPicker
             value={clientId || null}
-            label={client?.name ?? ''}
+            label={selectedClient?.name ?? ''}
             onChange={selected => updateScope(selected?.id ?? '')}
             placeholder="Choose an active client"
             showAllOnFocus
@@ -219,7 +220,7 @@ export default function MonthlyStrategyPage() {
 
       {error && <p className="mt-4 rounded-xl border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-300">{error}</p>}
       {success && <p className="mt-4 rounded-xl border border-brand-teal/25 bg-brand-teal/10 px-4 py-3 text-sm text-[#66d0c3]">{success}</p>}
-      {client && !loading && canReviewClientContext && <ClientContextReview key={clientId} clientId={clientId} />}
+      {selectedClient && !loading && canReviewClientContext && <ClientContextReview key={clientId} clientId={clientId} />}
 
       {!clientId ? (
         <section className="mt-6 rounded-3xl border border-dashed border-white/10 bg-white/[0.025] px-6 py-12 text-center">

@@ -1,5 +1,17 @@
 # CG Dynamics Ops Handover
 
+### 11 October — exact-client strategy review picker, local candidate
+
+The staff monthly-strategy review page retained the previous client object
+after the exact client was cleared. A fail-first actual-component browser case
+proved it could issue an empty-client pending-note request and leave the old
+name in the picker. The page now exposes the loaded client label/review panel
+only when its ID matches the currently selected client. The existing draft,
+publication and data contracts are unchanged; no note decision or production
+write occurred. Desktop and 375/390/430px clear-state checks pass in
+the local strategy-review browser fixture. This does not resolve #731 output
+quality, protected activation or the fleet publication/asset/release gates.
+
 ### 11 October — internal-caption rule quality gate, local candidate
 
 A fail-first regression reproduced that the client-facing strategy/approval
