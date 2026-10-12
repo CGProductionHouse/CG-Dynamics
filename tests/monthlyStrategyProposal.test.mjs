@@ -133,6 +133,21 @@ test('model output is fenced to exact client, month, sources and confirmed forma
   assert.equal(parseMonthlyStrategyProposal('{invalid', allowed), null)
 })
 
+test('a verified twelve-poster package accepts twelve distinct concepts, but no unverified thirteenth', () => {
+  const allowed = { clientId, strategyMonth, sourceIds: new Set(['report-1', 'guide-1']),
+    enabledFormats: new Set(['professional_video', 'design_poster']),
+    confirmedCapacity: { professional_video: 4, design_poster: 12 } }
+  const posters = Array.from({ length: 12 }, (_, index) =>
+    `Poster ${index + 1}: show a distinct verified customer decision with a useful next step.`)
+  const exact = { ...proposal, actionPlan: { ...proposal.actionPlan, design_poster: posters } }
+  assert.deepEqual(parseMonthlyStrategyProposal(JSON.stringify(exact), allowed), exact)
+  assert.equal(mergeMonthlyStrategyProposal(target(), exact).strategyData.actionPlan.design_poster.items.length, 12)
+  assert.equal(parseMonthlyStrategyProposal(JSON.stringify({ ...exact, actionPlan: {
+    ...exact.actionPlan, design_poster: [...posters, 'Poster 13: an unconfirmed extra deliverable.'],
+  } }), allowed), null)
+  assert.equal(parseMonthlyStrategyProposal(JSON.stringify(exact), { ...allowed, confirmedCapacity: null }), null)
+})
+
 test('provider output must cover every confirmed format and cannot recycle rule-only or repeated strategy prose', () => {
   const allowed = { clientId, strategyMonth, sourceIds: new Set(['report-1', 'guide-1']), enabledFormats: new Set(['professional_video', 'design_poster']) }
   const missingPoster = { ...proposal, actionPlan: { professional_video: proposal.actionPlan.professional_video } }

@@ -77,7 +77,8 @@ export async function generateMonthlyStrategyProposal(input: {
       new Set(configuredProviderNames('text')),
       input.pilot.routeId,
     ) : null
-  const allowed = { clientId: input.clientId, strategyMonth: input.strategyMonth, sourceIds, enabledFormats }
+  const allowed = { clientId: input.clientId, strategyMonth: input.strategyMonth, sourceIds, enabledFormats,
+    confirmedCapacity: input.sourceWindows?.confirmed_package_scope as Record<string, unknown> | null | undefined }
   let content: string
   let provider: string
   try {

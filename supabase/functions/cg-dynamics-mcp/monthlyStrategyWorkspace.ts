@@ -178,6 +178,7 @@ export async function submitMonthlyStrategyProposal(
   const proposal = parseMonthlyStrategyProposal(JSON.stringify(input.proposal), {
     clientId: input.clientId, strategyMonth: input.strategyMonth, sourceIds,
     enabledFormats: new Set(workspace.preparedFormats as ActionPlanKey[]),
+    confirmedCapacity: prepared.seedContext.source_windows?.confirmed_package_scope as Record<string, unknown> | null | undefined,
   })
   if (!proposal) return { error: 'STRATEGY_PROPOSAL_INVALID', instruction: 'Check exact client/month, cited source IDs, confirmed formats and client-facing quality.' }
   const previous = target?.seed_context?.generation as Record<string, unknown> | undefined

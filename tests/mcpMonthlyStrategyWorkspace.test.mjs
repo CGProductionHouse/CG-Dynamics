@@ -153,6 +153,24 @@ test('cited proposal saves only a version-fenced unpublished canonical draft, pr
   assert.equal(conflictingRetry.error, 'STRATEGY_IDEMPOTENCY_CONFLICT')
 })
 
+test('MCP accepts exact confirmed twelve-poster scope without widening an unknown format', async () => {
+  const db = new FakeDb()
+  const exact = { ...proposal, actionPlan: { ...proposal.actionPlan, design_poster: Array.from({ length: 12 }, (_, index) =>
+    `Poster ${index + 1}: make one verified Piek customer choice clear with a practical next step.`) } }
+  const largePackage = { ...deps(db), prepare: async () => {
+    const packet = prepared(db)
+    packet.seedContext.source_windows.confirmed_package_scope = { professional_video: 4, design_poster: 12, reels: null }
+    return packet
+  } }
+  const brief = shapeMonthlyStrategyBrief(await loadMonthlyStrategyWorkspace(db, CLIENT, MONTH, TODAY, largePackage))
+  const result = await submitMonthlyStrategyProposal(db, submitInput(brief, { proposal: exact }), largePackage)
+  assert.equal(result.state, 'draft_filled')
+  assert.equal(result.published, false)
+  assert.equal(db.tables.monthly_client_strategies[0].strategy_data.actionPlan.design_poster.items.length, 12)
+  assert.equal(db.tables.monthly_client_strategies[0].strategy_data.actionPlan.reels.enabled, false)
+  assert.equal(db.calls.length, 1)
+})
+
 test('missing canonical row seeds once through the existing exact-client RPC', async () => {
   const db = new FakeDb(false)
   const brief = shapeMonthlyStrategyBrief(await loadMonthlyStrategyWorkspace(db, CLIENT, MONTH, TODAY, deps(db)))

@@ -261,7 +261,7 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
           clientId: uuid, strategyMonth: date,
           sourceIds: { type: 'array', minItems: 1, items: { type: 'string' } },
           goldStandard: { type: 'object', additionalProperties: { type: 'string' } },
-          actionPlan: { type: 'object', additionalProperties: { type: 'array', items: { type: 'string' } } },
+          actionPlan: { type: 'object', description: 'Use only confirmed format keys. Each format accepts up to six actionable concepts by default; when a verified monthly package quantity is higher, it accepts up to that quantity, capped at 24. Do not promise extra deliverables.', additionalProperties: { type: 'array', items: { type: 'string' } } },
         },
         required: ['clientId', 'strategyMonth', 'sourceIds', 'goldStandard', 'actionPlan'],
       },
