@@ -8,7 +8,7 @@ import {
   type StrategyAutopilotClient,
 } from '../_shared/monthlyStrategyAutopilot.ts'
 import { runCurrentMonthStrategyContextRevision, runNextMonthStrategyGeneration } from '../_shared/monthlyStrategyGeneration.ts'
-import { authorizesMonthlyStrategyPilot, readMonthlyStrategyPilotGrant } from '../_shared/monthlyStrategyPilot.ts'
+import { authorizesMonthlyStrategyPilot, monthlyStrategyInvocationAuth, readMonthlyStrategyPilotGrant } from '../_shared/monthlyStrategyPilot.ts'
 import type { AiUsageClient } from '../_shared/aiUsage.ts'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -27,11 +27,17 @@ Deno.serve(async request => {
   const url = (Deno.env.get('SUPABASE_URL') ?? '').trim()
   const serviceKey = (Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '').trim()
   const workerToken = (Deno.env.get('WORKER_INTERNAL_TOKEN') ?? '').trim()
+  const pilotInvokeToken = (Deno.env.get('MONTHLY_STRATEGY_PILOT_INVOKE_TOKEN') ?? '').trim()
   const systemProfileId = (Deno.env.get('WORKER_SYSTEM_PROFILE_ID') ?? '').trim()
   const suppliedToken = request.headers.get('X-Internal-Worker-Token') ?? ''
+  const suppliedPilotToken = request.headers.get('X-Monthly-Strategy-Pilot-Token') ?? ''
   const suppliedBearer = request.headers.get('Authorization') ?? ''
   if (!url || !serviceKey) return jsonResponse({ error: 'Server configuration error.' }, 500)
-  if (workerToken.length < 32 || suppliedToken !== workerToken || suppliedBearer !== `Bearer ${serviceKey}`) {
+  const authMode = monthlyStrategyInvocationAuth({
+    serviceKey, suppliedBearer, workerToken, suppliedWorkerToken: suppliedToken,
+    pilotToken: pilotInvokeToken, suppliedPilotToken,
+  })
+  if (!authMode) {
     return jsonResponse({ error: 'Worker authentication required.' }, 401)
   }
   if (!UUID_RE.test(systemProfileId)) return jsonResponse({ error: 'Worker system profile is not configured.' }, 503)
@@ -45,6 +51,11 @@ Deno.serve(async request => {
 
   try {
     const payload = await request.json().catch(() => ({})) as Record<string, unknown>
+    // The temporary pilot credential cannot invoke the scheduler or normal
+    // generation paths; the existing worker credential remains unchanged.
+    if (authMode === 'pilot' && payload.action !== 'pilot_generate_next_month') {
+      return jsonResponse({ error: 'Worker authentication required.' }, 401)
+    }
     const today = johannesburgDate()
     const generationEnabled = (Deno.env.get('MONTHLY_STRATEGY_AI_ENABLED') ?? '').trim().toLowerCase() === 'true'
     const pilot = payload.action === 'pilot_generate_next_month'

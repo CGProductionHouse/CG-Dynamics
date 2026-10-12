@@ -1,5 +1,6 @@
 import { AiDuplicateRequestError, estimatedRouteWithinCap, routeAiChat, selectRoutes } from '../cg-assistant-chat/ai-router.ts'
 import { fetchAiUsageReplay, loadAiProviderRoutes, type AiProviderRoute, type AiUsageClient } from './aiUsage.ts'
+import { configuredProviderNames } from './providerSecrets.ts'
 import {
   buildMonthlyStrategyPrompt,
   parseMonthlyStrategyProposal,
@@ -19,6 +20,7 @@ export function selectMonthlyStrategyPilotRoute(
   routes: AiProviderRoute[],
   promptBytes: number,
   maxZarMicros: number,
+  configuredProviders: ReadonlySet<string>,
 ): { routeId: string; estimatedMaxZarMicros: number; costQuoteInputTokens: number } {
   // A UTF-8 byte ceiling plus request framing is conservative even for
   // non-ASCII client text. Unknown pricing fails closed.
@@ -28,7 +30,7 @@ export function selectMonthlyStrategyPilotRoute(
       !Number.isSafeInteger(maxInputTokens) || maxInputTokens > 128_000) {
     throw new Error('STRATEGY_PILOT_COST_CAP_UNAVAILABLE')
   }
-  for (const route of selectRoutes(routes, 'complex')) {
+  for (const route of selectRoutes(routes, 'complex').filter(route => configuredProviders.has(route.provider))) {
     const quote = estimatedRouteWithinCap(route, maxInputTokens, MAX_STRATEGY_OUTPUT_TOKENS, maxZarMicros)
     if (quote !== null) {
       return { routeId: route.id, estimatedMaxZarMicros: quote, costQuoteInputTokens: maxInputTokens }
@@ -84,6 +86,7 @@ export async function generateMonthlyStrategyProposal(input: {
       await loadAiProviderRoutes(input.sb, 'text'),
       monthlyStrategyPilotPromptBytes(prompt.system, prompt.user),
       input.pilot.maxZarMicros,
+      new Set(configuredProviderNames('text')),
     ) : null
   const allowed = { clientId: input.clientId, strategyMonth: input.strategyMonth, sourceIds, enabledFormats }
   let content: string
