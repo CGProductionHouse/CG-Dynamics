@@ -9,6 +9,8 @@ import {
   type ProposalEvidence,
 } from './monthlyStrategyProposal.ts'
 import type { ActionPlanKey, StrategyData } from '../../../src/lib/strategyEngine.ts'
+import { monthlyStrategySourceDigest } from './monthlyStrategySourceDigest.ts'
+export { monthlyStrategySourceDigest } from './monthlyStrategySourceDigest.ts'
 
 const MAX_STRATEGY_OUTPUT_TOKENS = 2_400
 
@@ -44,22 +46,6 @@ export function selectMonthlyStrategyPilotRoute(
 async function sha256(value: string): Promise<string> {
   const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))
   return Array.from(new Uint8Array(bytes), byte => byte.toString(16).padStart(2, '0')).join('')
-}
-
-export async function monthlyStrategySourceDigest(input: {
-  clientId: string
-  strategyMonth: string
-  draft: StrategyData
-  evidence: ProposalEvidence[]
-  sourceWindows?: Record<string, unknown>
-}): Promise<string> {
-  return sha256(JSON.stringify({
-    clientId: input.clientId,
-    strategyMonth: input.strategyMonth,
-    enabledFormats: Object.entries(input.draft.actionPlan).filter(([, section]) => section.enabled).map(([key]) => key),
-    evidence: input.evidence,
-    sourceWindows: input.sourceWindows ?? {},
-  }))
 }
 
 export async function generateMonthlyStrategyProposal(input: {

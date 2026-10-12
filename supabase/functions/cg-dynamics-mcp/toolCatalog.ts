@@ -1,4 +1,4 @@
-export type McpToolDependency = 'main' | '#241/#294' | '#305' | '#307' | '#313' | '#341'
+export type McpToolDependency = 'main' | '#241/#294' | '#305' | '#307' | '#313' | '#341' | '#361' | '#450'
 
 export type JsonSchema = Readonly<Record<string, unknown>>
 
@@ -229,10 +229,46 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   },
   {
     name: 'get_client_context', title: 'Get exact client context',
-    description: 'Retrieve compact task-specific context for one exact authorised client and optional exact branch/entity scope; never fall back to a sibling or national brand. Also returns recorded_client_updates: durable updates recorded from this exact client Project (#341), newest first, with provenance.',
+    description: 'Retrieve the ready exact-client guide and recorded updates; never fall back to a sibling or national brand. For a monthly strategy, use get_monthly_strategy_brief in company_admin context too: this tool alone does NOT include canonical package, report findings or draft state.',
     inputSchema: objectSchema({ client_id: uuid, task_type: { enum: ['caption','content_idea','script','image_edit','factual_lookup','strategy','general'] }, scope_key: { type: 'string' }, supplied_context: { type: 'string', maxLength: 4000 } }, ['client_id','task_type']),
     annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
     dependency: '#241/#294', canonicalContract: 'supabase/functions/get-client-context',
+  },
+  {
+    name: 'list_monthly_strategy_clients', title: 'List exact strategy clients',
+    description: 'Company-admin only. Page through active canonical clients by exact ID for a weekly strategy pass; has_more/next_after_client_id make fleet coverage explicit. This does not imply each client has enough approved evidence for a strategy.',
+    inputSchema: objectSchema({ after_client_id: uuid, limit: { type: 'integer', minimum: 1, maximum: 100 } }),
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+    dependency: 'main', canonicalContract: 'clients active exact-ID registry + #391 monthly strategy',
+  },
+  {
+    name: 'get_monthly_strategy_brief', title: 'Get monthly strategy evidence',
+    description: 'Company-admin only. Read one exact client and CURRENT or NEXT month: confirmed package, prior published findings, incorporated notes, ready client guide, approved research, dated opportunities, current draft/version, source windows and blockers. No generic substitute. Use its evidence_fingerprint and citations for submit_monthly_strategy_draft. Read-only and no model/provider call.',
+    inputSchema: objectSchema({ client_id: uuid, strategy_month: date }, ['client_id', 'strategy_month']),
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+    dependency: 'main', canonicalContract: '#391/#731 prepareDraft + monthly_client_strategies exact-client read',
+  },
+  {
+    name: 'submit_monthly_strategy_draft', title: 'Save cited monthly strategy draft',
+    description: 'Company-admin only. Validate a ChatGPT-authored proposal against the fresh exact-client/month brief, confirmed formats and cited source IDs; save ONLY an unpublished canonical draft through the existing version-fenced audited strategy RPC. Never approve/publish or overwrite staff wording. A changed source/version returns a conflict. Call after get_monthly_strategy_brief; do not promise a client-visible result.',
+    inputSchema: objectSchema({
+      client_id: uuid, strategy_month: date,
+      evidence_fingerprint: { type: 'string', pattern: '^[a-f0-9]{64}$' },
+      expected_version: { type: ['integer', 'null'], minimum: 1, description: 'Canonical draft version from brief; null only when no row exists.' },
+      proposal: {
+        type: 'object', additionalProperties: false,
+        properties: {
+          clientId: uuid, strategyMonth: date,
+          sourceIds: { type: 'array', minItems: 1, items: { type: 'string' } },
+          goldStandard: { type: 'object', additionalProperties: { type: 'string' } },
+          actionPlan: { type: 'object', additionalProperties: { type: 'array', items: { type: 'string' } } },
+        },
+        required: ['clientId', 'strategyMonth', 'sourceIds', 'goldStandard', 'actionPlan'],
+      },
+      idempotency_key: idempotencyKeySchema,
+    }, ['client_id', 'strategy_month', 'evidence_fingerprint', 'expected_version', 'proposal', 'idempotency_key']),
+    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
+    dependency: 'main', canonicalContract: '#391 seed_monthly_client_strategy / #731 propose_monthly_client_strategy_generation guarded RPC',
   },
   {
     name: 'list_assignable_staff', title: 'List assignable CG staff',
@@ -635,5 +671,5 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
 ] as const
 
 export const CG_DYNAMICS_MCP_SERVER_INSTRUCTIONS =
-  'This connector is shared by the whole CG Production House ChatGPT account. The OAuth connection is the company admin account and is NOT the staff identity. In a fresh Project chat call resolve_project_context once, then pass that exact context object on every later tool call: a staff Project acts as that exact staff member, a client Project is pinned to that exact client, and broader company-admin work must be requested explicitly. Never reuse another Project\'s context, never infer identity from chat history or the connected account, and never fuzzy-match a staff or client name. Read before write when a target is ambiguous. Use only canonical Dynamics actions and RLS. In a client Project the only writes are record_client_request, create_client_followup_task and record_client_update: they are pinned to that exact client, an assignee is the target of the work and never the caller, and say created, assigned or recorded only after the tool returns the record id. CG Hours actions require an exact staff Project and are draft-only: never submit, approve, reopen, run payroll or claim success without the durable CG Hours time-entry id. Never expose SQL, raw tables, service keys, cross-client fallbacks, or destructive actions.'
+  'This connector is shared by the whole CG Production House ChatGPT account. The OAuth connection is the company admin account and is NOT the staff identity. In a fresh Project chat call resolve_project_context once, then pass that exact context object on every later tool call: a staff Project acts as that exact staff member, a client Project is pinned to that exact client, and broader company-admin work must be requested explicitly. Never reuse another Project\'s context, never infer identity from chat history or the connected account, and never fuzzy-match a staff or client name. Read before write when a target is ambiguous. Use only canonical Dynamics actions and RLS. Company-admin monthly strategy work must page through list_monthly_strategy_clients, read each exact get_monthly_strategy_brief, use only its cited approved evidence and confirmed package, and submit only an unpublished draft with its fingerprint/version. Surface blocked clients rather than inventing facts; no tool here approves or publishes. In a client Project the only writes are record_client_request, create_client_followup_task and record_client_update: they are pinned to that exact client, an assignee is the target of the work and never the caller, and say created, assigned or recorded only after the tool returns the record id. CG Hours actions require an exact staff Project and are draft-only: never submit, approve, reopen, run payroll or claim success without the durable CG Hours time-entry id. Never expose SQL, raw tables, service keys, cross-client fallbacks, or destructive actions.'
 
