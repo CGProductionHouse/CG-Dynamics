@@ -10,6 +10,7 @@ import type {
   UploadedDriveItemReference,
 } from './types'
 import { uploadFileToGraphSession } from './upload-session'
+import type { OnboardingLinkReadiness } from '../../../supabase/functions/client-onboarding/link-readiness'
 
 type ApiResult<T> = { data: T | null; error: string | null }
 
@@ -75,7 +76,7 @@ export async function uploadOnboardingFile(
   return completeOnboardingUpload(token, session.uploadId, uploadResult.item)
 }
 
-export async function downloadOnboardingFile(uploadId: string, audience: 'client' | 'staff' = 'client', previewClientId?: string): Promise<{ data: Blob | null; error: string | null }> {
+export async function downloadOnboardingFile(uploadId: string, audience: 'client' | 'staff' = 'client'): Promise<{ data: Blob | null; error: string | null }> {
   try {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session?.access_token) return { data: null, error: 'Download failed.' }
@@ -90,7 +91,7 @@ export async function downloadOnboardingFile(uploadId: string, audience: 'client
         apikey: supabaseKey,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ action: previewClientId ? 'staff_preview_portal_download' : audience === 'staff' ? 'download_file' : 'portal_download', uploadId, ...(previewClientId ? { clientId: previewClientId } : {}) }),
+      body: JSON.stringify({ action: audience === 'staff' ? 'download_file' : 'portal_download', uploadId }),
     })
     if (!response.ok) {
       const err = await response.json().catch(() => null)
@@ -103,12 +104,16 @@ export async function downloadOnboardingFile(uploadId: string, audience: 'client
   }
 }
 
-export function loadPortalSetup(previewClientId?: string) {
-  return invoke<ClientOnboardingState>(previewClientId ? { action: 'staff_preview_portal_load', clientId: previewClientId } : { action: 'portal_load' })
+export function loadPortalSetup() {
+  return invoke<ClientOnboardingState>({ action: 'portal_load' })
 }
 
 export function listStaffOnboarding() {
   return invoke<StaffOnboardingSummary[]>({ action: 'staff_list' })
+}
+
+export function loadOnboardingLinkReadiness(clientId: string) {
+  return invoke<OnboardingLinkReadiness>({ action: 'staff_link_readiness', clientId })
 }
 
 export function loadStaffSetupPreview(clientId: string) {

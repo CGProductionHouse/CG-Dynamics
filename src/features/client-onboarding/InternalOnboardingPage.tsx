@@ -3,11 +3,12 @@ import { Link } from 'react-router-dom'
 import { ActionButton } from '../../components/ui/Buttons'
 import { EmptyState } from '../../components/ui/States'
 import { listClients, type Client } from '../../lib/db/clients'
-import { generateOnboardingLink, listStaffOnboarding, revokeOnboardingLink, updateStaffAccess } from './api'
+import { generateOnboardingLink, listStaffOnboarding, loadOnboardingLinkReadiness, revokeOnboardingLink, updateStaffAccess } from './api'
 import { OnboardingActivityFeed } from './OnboardingActivityFeed'
 import { ONBOARDING_PLATFORMS, type OnboardingPlatform, type StaffOnboardingSummary } from './types'
 import { PLATFORM_GUIDES } from './platformGuides'
 import { onboardingEmptyState } from './emptyState'
+import type { OnboardingLinkReadiness } from '../../../supabase/functions/client-onboarding/link-readiness'
 
 type StatusFilter = 'all' | 'not_started' | 'in_progress' | 'completed' | 'revoked' | 'expired'
 
@@ -20,6 +21,7 @@ export default function InternalOnboardingPage() {
   const [loading, setLoading] = useState(true)
   const [working, setWorking] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [linkReadiness, setLinkReadiness] = useState<OnboardingLinkReadiness | null>(null)
 
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
@@ -46,10 +48,19 @@ export default function InternalOnboardingPage() {
     return () => { active = false }
   }, [])
 
+  useEffect(() => {
+    if (!clientId) return
+    let active = true
+    void loadOnboardingLinkReadiness(clientId).then(result => {
+      if (active) setLinkReadiness(result.data)
+    })
+    return () => { active = false }
+  }, [clientId])
+
   const clientNames = useMemo(() => new Map(clients.map(client => [client.id, client.name])), [clients])
 
   async function generate() {
-    if (!clientId) return
+    if (!clientId || linkReadiness?.canGenerate !== true) return
     setWorking(true)
     setGeneratedLink(null)
     const result = await generateOnboardingLink(clientId, platforms)
@@ -78,6 +89,8 @@ export default function InternalOnboardingPage() {
     if (statusFilter !== 'all') {
       if (statusFilter === 'expired') {
         list = list.filter(s => s.expiresAt && new Date(s.expiresAt) < new Date() && !s.revokedAt)
+      } else if (statusFilter === 'not_started') {
+        list = list.filter(s => !s.sessionId || !s.sessionId.trim())
       } else {
         list = list.filter(s => s.status === statusFilter)
       }
@@ -91,6 +104,7 @@ export default function InternalOnboardingPage() {
     for (const s of sessions) {
       if (s.revokedAt) counts.revoked++
       else if (s.expiresAt && new Date(s.expiresAt) < now) counts.expired++
+      else if (!s.sessionId || !s.sessionId.trim()) counts.not_started++
       else counts[s.status as keyof typeof counts]++
     }
     return counts
@@ -112,14 +126,14 @@ export default function InternalOnboardingPage() {
         <h2 className="text-lg font-bold text-white">Generate onboarding link</h2>
         <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <label className="text-sm font-semibold text-brand-primary">Client
-            <select value={clientId} onChange={event => setClientId(event.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-white/10 bg-brand-bg px-4 text-white">
+            <select value={clientId} onChange={event => { setLinkReadiness(null); setGeneratedLink(null); setClientId(event.target.value) }} className="mt-2 min-h-12 w-full rounded-xl border border-white/10 bg-brand-bg px-4 text-white">
               <option value="">Select a client</option>
               {clients.map(client => <option key={client.id} value={client.id}>{client.name}</option>)}
             </select>
           </label>
-          <ActionButton className="min-h-12" disabled loading={working} onClick={() => void generate()}>Generate secure link</ActionButton>
+          <ActionButton className="min-h-12" disabled={loading || working || !clientId || linkReadiness?.canGenerate !== true} loading={working} onClick={() => void generate()}>Generate secure link</ActionButton>
         </div>
-        <p className="mt-3 text-sm text-[#e5b18d]">Link generation is disabled until the approved OneDrive upload adapter is connected. This prevents clients entering a setup they cannot complete.</p>
+        <p role="status" className="mt-3 text-sm text-brand-primary/80">{loading ? 'Checking secure-link availability…' : !clientId ? 'Select an active client to check secure-link availability.' : linkReadiness?.canGenerate === true ? 'Secure links are enabled for this client.' : linkReadiness?.state === 'admin_required' ? 'Only an admin can generate secure links.' : linkReadiness?.state === 'activation_off' ? 'Secure-link activation is still off.' : linkReadiness?.state === 'client_unavailable' ? 'This client\'s upload destinations are not ready. Link generation stays blocked.' : 'Secure-link readiness is unavailable. Link generation stays blocked until secure file transfer is ready.'}</p>
         <fieldset className="mt-5">
           <legend className="text-sm font-semibold text-white">Platforms CG manages for this client</legend>
           <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
@@ -155,6 +169,7 @@ export default function InternalOnboardingPage() {
               className="min-h-10 w-full rounded-xl border border-white/10 bg-black/20 px-4 text-sm text-white placeholder:text-report-faint sm:w-56"
             />
             <StatusPill label="All" count={statusCounts.all} active={statusFilter === 'all'} onClick={() => setStatusFilter('all')} />
+            <StatusPill label="Not started" count={statusCounts.not_started} active={statusFilter === 'not_started'} onClick={() => setStatusFilter('not_started')} />
             <StatusPill label="Active" count={statusCounts.in_progress} active={statusFilter === 'in_progress'} onClick={() => setStatusFilter('in_progress')} tone="accent" />
             <StatusPill label="Done" count={statusCounts.completed} active={statusFilter === 'completed'} onClick={() => setStatusFilter('completed')} tone="teal" />
             <StatusPill label="Expired" count={statusCounts.expired} active={statusFilter === 'expired'} onClick={() => setStatusFilter('expired')} />
@@ -170,6 +185,7 @@ export default function InternalOnboardingPage() {
           <div className="mt-4 space-y-4">
             {filteredSessions.map(session => {
               const isExpanded = expandedId === session.clientId
+              const sessionExists = Boolean(session.sessionId && session.sessionId.trim())
               return (
                 <article key={session.clientId} className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
                   <div className="flex flex-wrap items-start justify-between gap-3">
@@ -178,7 +194,7 @@ export default function InternalOnboardingPage() {
                         <h3 className="font-bold text-white hover:text-brand-teal transition-colors">{clientNames.get(session.clientId) ?? session.clientName}</h3>
                       </button>
                       <p className="mt-1 text-xs text-brand-primary/70">
-                        {session.sessionId ? (
+                        {sessionExists ? (
                           <>Started {formatDate(session.startedAt)} · Completed {formatDate(session.completedAt)} · Last activity {formatDate(session.lastActivityAt)}</>
                         ) : (
                           <span className="text-brand-primary/50">Not started</span>
@@ -187,20 +203,20 @@ export default function InternalOnboardingPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       <SessionStatusBadge status={session.status} expiresAt={session.expiresAt} revokedAt={session.revokedAt} />
-                      {session.sessionId && !session.revokedAt && session.status !== 'completed' && (
+                      {sessionExists && !session.revokedAt && session.status !== 'completed' && (
                         <ActionButton variant="secondary" className="min-h-9 text-xs" onClick={() => void revoke(session.sessionId)}>Revoke</ActionButton>
                       )}
                     </div>
                   </div>
 
                   {/* Progress bar */}
-                    <div className="mt-4">
-                      <ProgressStrip session={session} />
-                    </div>
+                  <div className="mt-4">
+                    <ProgressStrip session={session} />
+                  </div>
 
-                    <Link to={`/admin/published?client=${session.clientId}&view=setup`} className="mt-4 inline-flex min-h-11 items-center text-sm font-bold text-brand-teal hover:underline">
-                      Preview onboarding
-                    </Link>
+                  <Link to={`/admin/published?client=${session.clientId}&view=setup`} className="mt-4 inline-flex min-h-11 items-center text-sm font-bold text-brand-teal hover:underline">
+                    Preview onboarding
+                  </Link>
 
                   {/* Quick status */}
                   <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -219,7 +235,7 @@ export default function InternalOnboardingPage() {
                               <span className="font-semibold text-white">{PLATFORM_GUIDES[access.platform].label}</span>
                               <div className="flex items-center gap-2">
                                 <span className="text-brand-primary/70">{access.clientChoice ?? 'no choice'} · {access.connectionState.replaceAll('_', ' ')}</span>
-                                {access.clientChoice === 'connect_now' && !access.verifiedAt && (
+                                {sessionExists && access.clientChoice === 'connect_now' && !access.verifiedAt && (
                                   <>
                                     <button type="button" className="min-h-9 rounded-lg border border-brand-teal/30 px-3 text-xs font-bold text-brand-teal" onClick={() => void updateStaffAccess(session.sessionId, access.platform, 'verified').then(load)}>Verify</button>
                                     <button type="button" className="min-h-9 rounded-lg border border-red-400/25 px-3 text-xs font-bold text-red-300" onClick={() => void updateStaffAccess(session.sessionId, access.platform, 'failed').then(load)}>Needs follow-up</button>

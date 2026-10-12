@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
-import { loadPortalSetup } from './api'
+import { loadPortalSetup, loadStaffSetupPreview } from './api'
 import { useOptionalClientPortal } from '../../components/client/ClientPortalContext'
 import { loadClientPortalLibrary } from '../client-portal-library/api'
 import { ClientPortalLibrary } from '../client-portal-library/ClientPortalLibrary'
@@ -35,16 +35,16 @@ export default function ClientSetupPage() {
       setError(null)
       setSetupUnavailable(false)
       try {
-      const [libraryResult, setupResult] = await Promise.all([
-        loadClientPortalLibrary(previewClientId),
-        loadPortalSetup(previewClientId),
-      ])
-      if (!active) return
-      setState(setupResult.data)
-      setLibrary(libraryResult.data)
-      setError(libraryResult.error)
-      setSetupUnavailable(Boolean(setupResult.error))
-      setLoading(false)
+        const [libraryResult, setupResult] = await Promise.all([
+          loadClientPortalLibrary(previewClientId),
+          previewClientId ? loadStaffSetupPreview(previewClientId) : loadPortalSetup(),
+        ])
+        if (!active) return
+        setState(setupResult.data)
+        setLibrary(libraryResult.data)
+        setError(libraryResult.error)
+        setSetupUnavailable(Boolean(setupResult.error))
+        setLoading(false)
       } catch {
         if (!active) return
         setError('Brand Hub could not be loaded safely.')

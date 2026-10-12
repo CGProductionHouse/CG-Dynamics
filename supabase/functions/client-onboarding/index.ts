@@ -19,8 +19,10 @@ import {
   verifyPortalAccess,
   type PortalAccessPurpose,
 } from './portal-library-stream.ts'
-import { visiblePortalMonths, resolveMappedClientFolder, resolvePortalMapping, portalRootFolderName } from '../_shared/portal-visibility.ts'
-import { resolveLibraryReadScope } from './portal-preview-scope.ts'
+import { visiblePortalMonths, resolvePortalMapping, portalRootFolderName } from '../_shared/portal-visibility.ts'
+import { hasCompleteClientUploadMappings, onboardingLinkReadiness } from './link-readiness.ts'
+import { getStoredTokens } from './onedrive-token-store.ts'
+import { resolveBoundClientRoot } from './portal-client-root.ts'
 
 const PLATFORMS = new Set(['facebook', 'instagram', 'meta_business', 'linkedin', 'tiktok', 'website', 'google', 'outlook'])
 const CHOICES = new Set(['connect_now', 'do_later', 'not_needed'])
@@ -296,13 +298,13 @@ async function authorizePortalAsset(service: SupabaseClient, assetId: string): P
     && library.client_id === asset.client_id
     && library.drive_id === asset.drive_id
     && isCanonicalPortalRoot(library.root_folder_name)
-    && category?.client_id === asset.client_id
-    && category!.library_id === library.id
-    && category!.drive_id === asset.drive_id
-    && category!.folder_item_id === asset.parent_folder_item_id
-    && Boolean(category!.last_verified_at)
-    && categoryName != null
-    && PORTAL_CATEGORY_LABELS[categoryName] === category!.folder_name
+    && category !== null
+    && category.client_id === asset.client_id
+    && category.library_id === library.id
+    && category.drive_id === asset.drive_id
+    && category.folder_item_id === asset.parent_folder_item_id
+    && Boolean(category.last_verified_at)
+    && PORTAL_CATEGORY_LABELS[categoryName] === category.folder_name
     && validPeriod
   if (!exactBoundary) return null
   return { ...asset, category: categoryName } as AuthorizedPortalAsset
@@ -354,7 +356,7 @@ async function handlePortalStreamRequest(service: SupabaseClient, request: Reque
     return json({ ok: false, error: 'Streaming is unavailable for this file.' }, 409)
   }
   const requestedRange = purposeValue === 'thumbnail'
-    ? undefined
+    ? null
     : purposeValue === 'stream'
       ? request.headers.get('range') ?? 'bytes=0-'
       : request.headers.get('range')
@@ -797,22 +799,18 @@ Deno.serve(async request => {
 
   const authorized = await getAuthorizedUser(service, request)
   if (!authorized) return json({ ok: false, error: 'Authentication required.' }, 401)
-  const libraryScope = resolveLibraryReadScope(action, authorized.profile, body.clientId)
-  if (action.startsWith('staff_preview_portal_') && !libraryScope) {
-    return json({ ok: false, error: 'Manager preview access required.' }, 403)
-  }
 
-  if (action === 'portal_library_load' || libraryScope?.action === 'portal_library_load') {
-    if (!libraryScope) {
+  if (action === 'portal_library_load') {
+    if (authorized.profile.role !== 'client' || !authorized.profile.client_id) {
       return json({ ok: false, error: 'Client access required.' }, 403)
     }
-    const library = await safePortalLibrary(service, libraryScope.clientId)
+    const library = await safePortalLibrary(service, authorized.profile.client_id)
     if (!library) return json({ ok: false, error: 'Client-safe library is unavailable.' }, 503)
     return json({ ok: true, data: library })
   }
 
-  if (action === 'portal_library_month' || libraryScope?.action === 'portal_library_month') {
-    if (!libraryScope) {
+  if (action === 'portal_library_month') {
+    if (authorized.profile.role !== 'client' || !authorized.profile.client_id) {
       return json({ ok: false, error: 'Client access required.' }, 403)
     }
     const categoryName = cleanString(body.category, 30) as PortalCategory
@@ -835,7 +833,7 @@ Deno.serve(async request => {
     const { data: library } = await service
       .from('client_portal_libraries')
       .select('id, client_id, drive_id, root_folder_name, enabled, last_verified_at')
-      .eq('client_id', libraryScope.clientId)
+      .eq('client_id', authorized.profile.client_id)
       .maybeSingle()
     if (!library?.enabled || !library.last_verified_at || !isCanonicalPortalRoot(library.root_folder_name)) {
       return json({ ok: false, error: 'Client-safe library is unavailable.' }, 404)
@@ -844,7 +842,7 @@ Deno.serve(async request => {
       .from('client_portal_library_categories')
       .select('id, library_id, client_id, drive_id, folder_item_id, category, folder_name, last_verified_at')
       .eq('library_id', library.id)
-      .eq('client_id', libraryScope.clientId)
+      .eq('client_id', authorized.profile.client_id)
       .eq('category', categoryName)
       .maybeSingle()
     if (!category?.last_verified_at
@@ -858,7 +856,7 @@ Deno.serve(async request => {
       .select('id, category_id, client_id, drive_id, parent_folder_item_id, display_name, mime_type, size_bytes, deliverable_id, published_at, library_year, library_month')
       .eq('library_id', library.id)
       .eq('category_id', category.id)
-      .eq('client_id', libraryScope.clientId)
+      .eq('client_id', authorized.profile.client_id)
       .eq('drive_id', library.drive_id)
       .eq('parent_folder_item_id', category.folder_item_id)
       .eq('active', true)
@@ -875,7 +873,7 @@ Deno.serve(async request => {
     const visibleRows = pageRows.slice(0, 24)
     const deliverableIds = [...new Set(visibleRows.map(row => row.deliverable_id as string | null).filter((id): id is string => Boolean(id)))]
     const deliverables = deliverableIds.length > 0
-      ? await service.from('monthly_deliverables').select('id, client_id, title, scheduled_date').eq('client_id', libraryScope.clientId).in('id', deliverableIds)
+      ? await service.from('monthly_deliverables').select('id, client_id, title, scheduled_date').eq('client_id', authorized.profile.client_id).in('id', deliverableIds)
       : { data: [], error: null }
     if (deliverables.error) return json({ ok: false, error: 'Library files are unavailable.' }, 503)
     const deliverableById = new Map((deliverables.data ?? []).map(row => [row.id, row]))
@@ -896,15 +894,15 @@ Deno.serve(async request => {
     return json({ ok: true, data: { assets, nextOffset: pageRows.length > 24 ? offset + 24 : null } })
   }
 
-  if (action === 'portal_library_access' || libraryScope?.action === 'portal_library_access') {
-    if (!libraryScope) {
+  if (action === 'portal_library_access') {
+    if (authorized.profile.role !== 'client' || !authorized.profile.client_id) {
       return json({ ok: false, error: 'Client access required.' }, 403)
     }
     const assetId = cleanString(body.assetId, 50)
     const purpose = body.purpose
     if (!assetId || !isPortalAccessPurpose(purpose)) return json({ ok: false, error: 'Invalid file request.' }, 400)
     const asset = await authorizePortalAsset(service, assetId)
-    if (!asset || asset.client_id !== libraryScope.clientId) return json({ ok: false, error: 'File not found.' }, 404)
+    if (!asset || asset.client_id !== authorized.profile.client_id) return json({ ok: false, error: 'File not found.' }, 404)
     if (purpose === 'stream' && !/^video\/mp4$/i.test(asset.mime_type ?? '')) return json({ ok: false, error: 'Streaming is not available for this file.' }, 400)
     if (purpose === 'inline' && !isSafeInlineMimeType(asset.mime_type ?? '')) return json({ ok: false, error: 'Preview is not available for this file.' }, 400)
     if (purpose === 'thumbnail' && !/^(image\/|video\/)/i.test(asset.mime_type ?? '')) return json({ ok: false, error: 'Thumbnail is not available for this file.' }, 400)
@@ -912,8 +910,8 @@ Deno.serve(async request => {
     return json({ ok: true, data: access })
   }
 
-  if (action === 'portal_load' || libraryScope?.action === 'portal_load') {
-    if (!libraryScope) return json({ ok: false, error: 'Client access required.' }, 403)
+  if (action === 'portal_load') {
+    if (authorized.profile.role !== 'client' || !authorized.profile.client_id) return json({ ok: false, error: 'Client access required.' }, 403)
     const { data } = await service
       .from('client_onboarding_sessions')
       .select('id, client_id, status, current_step, vector_unavailable, enabled_platforms, started_at, completed_at, last_activity_at, token_expires_at, revoked_at, clients!inner(name, logo_url)')
@@ -1018,12 +1016,27 @@ Deno.serve(async request => {
     return json({ ok: true, data: sessions })
   }
 
-  if (action === 'staff_generate') {
+  if (action === 'staff_link_readiness' || action === 'staff_generate') {
+    if (!['admin', 'manager'].includes(authorized.profile.role)) return json({ ok: false, error: 'Manager access required.' }, 403)
+    const clientId = cleanString(body.clientId, 50)
+    const readiness = await onboardingLinkReadiness({
+      role: authorized.profile.role,
+      uploadsEnabled: Deno.env.get('CLIENT_ONBOARDING_UPLOADS_ENABLED') === 'true',
+      adapterConfigured: isUploadAdapterConfigured(),
+      hasStoredConsent: async () => Boolean((await getStoredTokens())?.refreshToken),
+      hasClientUploadMappings: async () => {
+        const { data: client, error: clientError } = await service.from('clients').select('id').eq('id', clientId).eq('active', true).maybeSingle()
+        if (clientError || !client) return false
+        const { data: mappings, error } = await service.from('client_onboarding_drive_mapping')
+          .select('client_id, upload_category, drive_id, folder_item_id').eq('client_id', clientId).eq('active', true)
+        return !error && hasCompleteClientUploadMappings(clientId, mappings ?? [])
+      },
+    })
+    if (action === 'staff_link_readiness') return json({ ok: true, data: readiness })
     if (authorized.profile.role !== 'admin') return json({ ok: false, error: 'Admin access required.' }, 403)
-    if (Deno.env.get('CLIENT_ONBOARDING_UPLOADS_ENABLED') !== 'true') {
+    if (!readiness.canGenerate) {
       return json({ ok: false, error: 'Onboarding links stay disabled until secure file transfer is connected.' }, 409)
     }
-    const clientId = cleanString(body.clientId, 50)
     const platforms = [...new Set(cleanStringArray(body.platforms, 8, 30).filter(platform => PLATFORMS.has(platform)))]
     const { data: client } = await service.from('clients').select('id').eq('id', clientId).eq('active', true).maybeSingle()
     if (!client) return json({ ok: false, error: 'Select an active client.' }, 400)
@@ -1096,30 +1109,28 @@ Deno.serve(async request => {
     const clientsFolder = await resolveClientsFolder()
     if (!clientsFolder) return json({ ok: false, error: 'OneDrive is not connected.' }, 503)
 
-    const { data: boundFolder, error: bindingError } = await service
+    const { data: productionMapping, error: mappingError } = await service
       .from('client_onedrive_mappings')
-      .select('drive_id,client_folder_item_id,folder_name')
+      .select('client_id, drive_id, client_folder_item_id')
       .eq('client_id', clientId)
       .maybeSingle()
-    if (bindingError || !boundFolder) return json({ ok: false, error: 'Exact client folder binding is unavailable.' }, 409)
+    if (mappingError) return json({ ok: false, error: 'Client folder mapping is unavailable.' }, 503)
 
     const clientsChildren = await listChildren(clientsFolder.driveId, clientsFolder.itemId)
     if (!clientsChildren) return json({ ok: false, error: 'Could not list OneDrive folders.' }, 503)
-    const clientFolder = resolveMappedClientFolder(clientsFolder.driveId, clientsChildren, {
-      driveId: boundFolder.drive_id,
-      itemId: boundFolder.client_folder_item_id,
-      folderName: boundFolder.folder_name,
-    })
-    if ('error' in clientFolder) return json({ ok: false, error: clientFolder.error }, clientFolder.httpStatus)
+    const clientRoot = resolveBoundClientRoot(clientId, clientsFolder.driveId, productionMapping, clientsChildren)
+    if ('error' in clientRoot) return json({ ok: false, error: clientRoot.error }, clientRoot.httpStatus)
 
-    const rootChildren = await listChildren(clientsFolder.driveId, clientFolder.id)
-    if (!rootChildren) return json({ ok: false, error: 'Could not list client portal folders.' }, 503)
+    const rootChildren = await listChildren(clientRoot.driveId, clientRoot.itemId)
+    if (!rootChildren) return json({ ok: false, error: 'Could not list OneDrive folders.' }, 503)
 
     const expectedRootName = portalRootFolderName(client.name)
     const portalRoots = rootChildren.filter(c => c.isFolder && c.name === expectedRootName)
-    if (portalRoots.length !== 1) return json({ ok: false, error: portalRoots.length ? 'Duplicate portal roots.' : `Portal folder not found: ${expectedRootName}` }, portalRoots.length ? 409 : 404)
+    if (portalRoots.length > 1) return json({ ok: false, error: 'Portal folder is ambiguous.' }, 409)
+    const portalRoot = portalRoots[0]
+    if (!portalRoot) return json({ ok: false, error: `Portal folder not found: ${expectedRootName}` }, 404)
 
-    const categoryChildren = await listChildren(clientsFolder.driveId, portalRoots[0].id)
+    const categoryChildren = await listChildren(clientsFolder.driveId, portalRoot.id)
     if (!categoryChildren) return json({ ok: false, error: 'Could not list portal categories.' }, 503)
 
     const fullMapping = resolvePortalMapping(client.name, rootChildren, categoryChildren)
@@ -1180,7 +1191,7 @@ Deno.serve(async request => {
 
   // ── Download actions (server-mediated proxy) ──────────────────────────
 
-  if (action === 'download_file' || action === 'portal_download' || libraryScope?.action === 'portal_download') {
+  if (action === 'download_file' || action === 'portal_download') {
     const authorizedUser = await getAuthorizedUser(service, request)
     if (!authorizedUser) return json({ ok: false, error: 'Authentication required.' }, 401)
 
@@ -1196,9 +1207,7 @@ Deno.serve(async request => {
     if (lookupError || !upload) return json({ ok: false, error: 'Upload not found.' }, 404)
     if (upload.upload_status !== 'received') return json({ ok: false, error: 'File is not available for download.' }, 409)
 
-    if (action === 'staff_preview_portal_download') {
-      if (!libraryScope || libraryScope.clientId !== upload.client_id) return json({ ok: false, error: 'Access denied.' }, 403)
-    } else if (action === 'portal_download') {
+    if (action === 'portal_download') {
       if (authorizedUser.profile.role !== 'client' || authorizedUser.profile.client_id !== upload.client_id) {
         return json({ ok: false, error: 'Access denied.' }, 403)
       }
