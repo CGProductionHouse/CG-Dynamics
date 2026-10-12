@@ -30,3 +30,7 @@ verify_jwt = false
 # Amazon SNS cannot send a Supabase JWT. The handler verifies the SNS message signature
 # against an AWS-hosted certificate and the configured topic ARN before trusting anything.
 verify_jwt = false
+
+[functions.piek-strategy-pilot-dispatch]
+# Temporary exact-client pilot, removed after the one bounded attempt.
+verify_jwt = true
