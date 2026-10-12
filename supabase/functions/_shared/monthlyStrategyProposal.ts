@@ -24,6 +24,10 @@ export interface ProposalEvidence {
 }
 
 const EVIDENCE_LIMIT = 25
+// A confirmed monthly package can exceed the old six-concept default (for
+// example, Piek Group has twelve design posters). Keep the payload bounded and
+// never infer a larger allowance from an unknown package quantity.
+const MAX_CONCEPTS_PER_FORMAT = 24
 const EVIDENCE_BUDGET: Array<[string, number]> = [
   ['client_context_update', 5], ['client_guide', 4],
   ['published_report', 2], ['published_report_post', 3],
@@ -75,6 +79,7 @@ export function buildMonthlyStrategyPrompt(input: {
       'Produce a concise commercial objective, customer problem, differentiated creative thesis, jobs within confirmed formats, timing, test and learning decision.',
       'Give every confirmed format at least one distinct, actionable concept. Do not repeat one sentence across the strategy fields or substitute writing rules for the business plan.',
       'Respect the exact confirmed monthly capacity for each format. A concept is not an extra promised deliverable; never infer a quantity from an unknown value.',
+      'A format may contain up to six concepts by default, or up to its verified monthly quantity when that exceeds six, with an absolute limit of twenty-four.',
       'Return ONLY a JSON object with clientId, strategyMonth, sourceIds, goldStandard (all ten string fields) and actionPlan (arrays for confirmed format keys).',
       'Cite only listed source IDs in sourceIds. Do not request publication, approval, access or data writes.',
     ].join(' '),
@@ -97,6 +102,7 @@ export function parseMonthlyStrategyProposal(raw: string, allowed: {
   strategyMonth: string
   sourceIds: Set<string>
   enabledFormats: Set<ActionPlanKey>
+  confirmedCapacity?: Record<string, unknown> | null
 }): MonthlyStrategyProposal | null {
   try {
     const trimmed = raw.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '')
@@ -116,8 +122,11 @@ export function parseMonthlyStrategyProposal(raw: string, allowed: {
       if (!Array.isArray(items) || items.length === 0) return null
     }
     for (const [key, items] of Object.entries(value.actionPlan)) {
+      const confirmed = allowed.confirmedCapacity?.[key]
+      const maxItems = typeof confirmed === 'number' && Number.isSafeInteger(confirmed) && confirmed > 6
+        ? Math.min(confirmed, MAX_CONCEPTS_PER_FORMAT) : 6
       if (!ACTION_KEYS.includes(key as ActionPlanKey) || !allowed.enabledFormats.has(key as ActionPlanKey) ||
-          !Array.isArray(items) || items.some(item => typeof item !== 'string' || clean(item).length < 12 || clean(item).length > 300) || items.length > 6) return null
+          !Array.isArray(items) || items.some(item => typeof item !== 'string' || clean(item).length < 12 || clean(item).length > 300) || items.length > maxItems) return null
     }
     if (hasClientFacingQualityIssue(value as MonthlyStrategyProposal)) return null
     return value as MonthlyStrategyProposal
@@ -267,7 +276,7 @@ export function mergeMonthlyStrategyProposal(target: ProposalTarget, proposal: M
     }
     const items = proposedItems.map(clean).filter(Boolean)
     if (items.length > 0) {
-      if (items.some(item => item.length < 12 || item.length > 300) || items.length > 6) return blocked('INVALID_ACTION_PLAN')
+      if (items.some(item => item.length < 12 || item.length > 300) || items.length > MAX_CONCEPTS_PER_FORMAT) return blocked('INVALID_ACTION_PLAN')
       merged.actionPlan[key].items = items
       filledFields.push(`actionPlan.${key}.items`)
     }

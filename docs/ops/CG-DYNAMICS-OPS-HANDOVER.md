@@ -1,6 +1,28 @@
 # CG Dynamics Ops Handover
 
-### 12 October — company ChatGPT strategy connector deployed; company OAuth acceptance blocked
+### 12 October — company ChatGPT strategy read accepted; Piek draft validator correction in progress
+
+After CA signed into Dynamics as company admin in the company Chrome profile,
+the existing company ChatGPT CG Dynamics connection was reconnected and its
+tools refreshed. Actual company ChatGPT Pro calls returned the 61-client active
+roster (`has_more=false`) and exact November strategy briefs. Piek Group and
+Daisy & Co are `ready_for_proposal`; Red Oak correctly blocks on
+`EXACT_STRATEGY_EVIDENCE_UNAVAILABLE`, and LHP Student Village & Block blocks
+on unverified package/client evidence. The shared OAuth account does not prove
+which physical human used the ChatGPT Project. The company-chat evidence and
+exact IDs are in `docs/ops/CHATGPT-MONTHLY-STRATEGY-WORKSPACE.md` and #731.
+
+The first source-cited Piek proposal had four video and twelve poster concepts
+within its confirmed package, but the draft-only submission was rejected
+before any write by the old six-items-per-format validator. The focused
+confirmed-capacity correction and regression are in progress. Do not mistake
+the generated ChatGPT proposal for a saved, approved or published strategy;
+Piek's last verified November draft remains v1/unpublished. No Vercel or
+provider-funded model action occurred. Weekly private-MCP Scheduled Tasks
+compatibility, actual saved-draft readback and staff semantic review remain
+separate acceptance gates.
+
+### 12 October — earlier connector rollout/OAuth blocker (resolved by the acceptance above)
 
 CA directed #731 toward the company ChatGPT Pro connection instead of retrying
 the exhausted Piek provider routes. A focused local MCP candidate adds an
