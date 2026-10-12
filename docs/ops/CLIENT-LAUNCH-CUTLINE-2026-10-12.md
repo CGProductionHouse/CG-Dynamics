@@ -16,7 +16,8 @@ actual changed build. No published content, date, metric, asset, entitlement,
 or recipient may be inferred from a draft, private folder, provider connection,
 old report, or local fixture. Client invitations follow individual acceptance.
 
-The 11 October baseline is **not** review-only: 0 published strategies, 0 of 5
+The 11 October fleet baseline, with a 12 October read-only recheck of strategy,
+posting and Brand Hub counts, is **not** review-only: 0 published strategies, 0 of 5
 dated October/November posts disclosed, 0 Brand Hub mappings, 0 verified
 service-entitlement rows, and only two accepted client invites. There are 57
 October and 57 November unpublished strategy rows; the November objectives are
@@ -25,14 +26,24 @@ but owner-only permission is not client access. Ten exact TikTok connections
 do not imply ten complete published TikTok reports. The all-client matrix
 records what is known for **every** client without turning unknown into zero.
 
+The common OneDrive `Clients` parent and the portal roots were already repaired
+and read back owner-only on 10–11 October. Do not repeat the anonymous-link
+cleanup. VCS's portal root was renamed in place to its canonical exact-client
+name, with its durable item ID preserved, and its `Client Received` source folder
+was moved to the internal client folder. In-browser review showed the two
+Braize videos with `REDOAK` in their filenames depict Braize; they remain
+private pending final-export/current-approval review. These corrections retire
+the older parent-link, VCS-name and cross-client-attribution checks, **not**
+the remaining approved-asset, named-recipient and sibling-isolation gates.
+
 ## Execute in dependency order
 
 | Gate | Next exact action | Owner / evidence required | Stop condition |
 | --- | --- | --- | --- |
-| 0. Local candidate | Freeze one reviewed main SHA; run the local acceptance harness, build, scoped lint and diff. Preserve `git.deploymentEnabled=false`. | Engineering; SHA-pinned receipt from `scripts/local-launch-acceptance.mjs`. | Any failing test, dirty tree, changed dependency or unresolved client isolation defect. No Vercel call. |
+| 0. Local candidate | Freeze one reviewed main SHA; run the local acceptance harness, build, scoped lint and diff. Preserve `git.deploymentEnabled=false`. | Engineering; SHA-pinned receipt from `scripts/local-launch-acceptance.mjs`. Current-main `ca82c9e9a8088646caea85b90975ae1aa62b721e` passed on 12 October: 3,797 tests passed, 17 intentional skips, TypeScript, Vite and 11 browser fixtures; receipt SHA256 `E28BC104D94792B46724FF68D03EEFA3D346DB622B8D33EA0314979300652C43`. This is local code evidence only. | Any failing test, dirty tree, changed dependency or unresolved client isolation defect. No Vercel call. |
 | 1. Strategy #731 | The two guarded migrations and Edge closures are applied/read back, but fleet generation remains OFF. Obtain an exact rand ceiling and separate approval to deploy/configure/invoke the merged, currently undeployed one-client pilot fence. Generate one genuine Piek draft with source citations, then inspect it against the approved strategy rubric before considering fleet generation. Preserve staff edits; no automatic publication. | CA approves the exact Piek model/write packet and spend ceiling; staff reviews real pilot quality. The configured-price quote is not a provider billing hard cap. | Wrong function version, unreviewed source, rule-only objective, invented result, stale/partial fact presented as current, source or row-version conflict, budget overrun. |
 | 2. Posting #389 | Confirm or correct the five past-dated `monthly_deliverables` rows for Cape Lumber, Ehrlich Park Butchery, Germoparts, Supa Quick Centurion and TBS Brokers; add only real, approved future work to the canonical Client Schedule and use its normal client-disclosure path. | Amonique/content owner confirms exact deliverable, date and send/approval evidence. | Do not copy dates from Teams Planner, package quantities or filenames; no client calendar promise without disclosure. |
-| 3. Library #396 | Review exact approved final files and current logos client by client; resolve Braize's two Red Oak-named private files and VCS's shortened root name. Segregate historic/unapproved content before any recipient share. Then create exact disabled mappings/assets and prove named read-only access with sibling denial before enabling. | Brand/content owner selects final assets and recipient identities; engineering tests exact client isolation. | Never share a whole root containing 727 unreviewed Video files, infer approval from location/name, or grant access to the common Clients parent. |
+| 3. Library #396 | Review exact approved final files and current logos client by client; keep Braize's two visually attributed videos private until final/version approval. Segregate historic/unapproved content before any recipient share. Then create exact disabled mappings/assets and prove named read-only access with sibling denial before enabling. The VCS canonical root rename and anonymous-link removals are already done. | Brand/content owner selects final assets and recipient identities; engineering tests exact client isolation. | Never share a whole root containing unreviewed historic Video files, infer approval from location/name, or grant access to the common Clients parent. |
 | 4. Package/services #389 | Review the 60 marked package records against current agreements and hold LHP's once-off scope until its meeting. Verify exact optional-service entitlements rather than mass-seeding exclusions; keep unknown offers hidden. | CA/Amonique contract decisions. Elcheck/JFJ/VCS confirmed positive format quantities stay as read back; unknown formats remain unknown. | No invented contract, recurring LHP package, missing social-account upsell, or “not included” inferred from provider absence. |
 | 5. Release staging #679 | After the content/security gates, obtain a fresh shared-team budget/reserve, exact SHA/project/rollback and CA's incremental spend ceiling. Stage one production-target artifact without moving domains. | Separate CA release approval; engineering records the staged deployment and checks that client sites remain live. | Current request is **no Vercel usage**. No build, preview, upload or budget change until this gate is explicitly opened. |
 | 6. Per-client acceptance #668 | On that staged changed build, inspect the genuine client-role phone journey and selected-client staff preview for each intended client: Overview, Plan, Performance, Approvals, Brand Hub; published-only content, exact package, mobile navigation, source cutoff, TikTok null/partial truth, file-open isolation and login. Record PASS/HOLD and the exact blocker. | CA/staff final semantic and visual review; engineering records role/route/device/time. | A fixture, seeded access row or one Braize login is not a 61-client acceptance. Do not invite a held client. |
