@@ -43,6 +43,20 @@ company-chat read-only Piek November brief after tool refresh returned the
 same draft v2/unpublished and exact 4/12 scope. No migration, secret, cron,
 provider, Vercel, approval or publication change accompanied v60.
 
+The second company-chat draft-only pilot used Daisy & Co
+`3404f726-a693-4b2d-8c13-c9d3dfd17bbc` for November. A fresh brief confirmed
+`ready_for_proposal`, unchanged evidence fingerprint, canonical unpublished
+draft `8c4cebe1-fb51-4114-bbfb-601b696b0a24` v1, no staff amendment and
+exact 1 professional video / 3 photo posts / 3 design posters. The proposal
+used a Daisy-specific gifting/recipient creative thesis with conditional
+historical product examples; the partial September sample was not described
+as sales proof. One submission and post-save readback confirmed v2,
+`workflow_status=draft`, `published_version=null`, all seven scoped concepts
+and eight new gold-standard fields. As with Piek, existing
+`formatsAndRationale` and `nextMonthGamePlan` text remained review conflicts.
+No extra formats, approval or publication. Both pilots require staff semantic
+review; they do not certify the remaining fleet or Scheduled Tasks execution.
+
 ### 12 October — earlier connector rollout/OAuth blocker (resolved by the acceptance above)
 
 CA directed #731 toward the company ChatGPT Pro connection instead of retrying
