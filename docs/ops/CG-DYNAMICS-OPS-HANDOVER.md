@@ -1,6 +1,6 @@
 # CG Dynamics Ops Handover
 
-### 12 October — November queue exposed unknown-scope readiness gap
+### 12 October — full November brief queue and unknown-scope guard accepted
 
 A read-only company-chat pass retrieved 12/12 additional exact November briefs
 after the Piek/Daisy pilots. Nine had at least one confirmed monthly content
@@ -10,10 +10,31 @@ WFF, Vrystaat Kunstefees and Local Deli were incorrectly labelled
 `null`. No proposal or package write was made for this sample. A fail-first
 MCP workspace test reproduced the mismatch; the focused guard now marks an
 all-empty confirmed format set `NO_CONFIRMED_MONTHLY_CONTENT_SCOPE` and refuses
-draft submission while preserving unknown/null quantities. See #731 and the
-company ChatGPT workspace runbook. This candidate is not yet deployed; the
-three live briefs remain misleading until exact MCP rollout/readback. Staff
-must confirm an actual monthly content scope before their plans can be saved.
+draft submission while preserving unknown/null quantities. PR #787 merged as
+`d9623029dc83d02db57021bdb009ca89d5c4048c`; only `cg-dynamics-mcp`
+deployed to v61, ACTIVE hash `d92fd7d3a758f752ab2382b1aa9592e4b3de5da72f7e9c54167f87689bd3817b`,
+`verify_jwt=false` unchanged. v60 is the rollback target. Three fresh
+company-chat reads returned the expected blocker with v1 unpublished drafts.
+
+The complete 61-client November brief-read queue is **37 ready / 24 blocked /
+0 unavailable** after five ordered cohorts and the earlier four pilot/hold
+reads. These are only structural readiness counts. Piek and Daisy alone have
+connector-filled unpublished v2 November drafts; the other 35 ready clients
+still need individual source-grounded proposals, draft save/readback and staff
+semantic review. Twelve blocked clients have no confirmed monthly content
+format, 18 lack exact strategy evidence, eight lack verified client evidence,
+and LHP's package is unverified (overlapping groups). Exact names/IDs and
+source caveats are in `docs/ops/CHATGPT-MONTHLY-STRATEGY-WORKSPACE.md` and
+#731. Do not turn this read-only queue into a publication or fleet acceptance
+claim. No Vercel operation, package change or strategy write accompanied the
+queue read; the separate Piek/Daisy draft-only writes remain as recorded below.
+
+One one-time company ChatGPT Scheduled Tasks read executed at 22:30 SAST and
+returned Zooz's exact v61 blocker and unpublished v1 draft from the connected
+CG Dynamics app under `company_admin`. This establishes private-app scheduled
+**read** access only. No recurring strategy task exists yet; scheduled draft
+write, throughput and editorial quality remain unaccepted. The task result
+link and proposed weekly workflow are in the company workspace runbook.
 
 ### 12 October — company ChatGPT strategy draft-only Piek acceptance passed
 
