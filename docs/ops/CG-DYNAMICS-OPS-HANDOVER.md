@@ -28,6 +28,21 @@ acceptance. No Vercel or provider-funded model action occurred. Weekly private-
 MCP Scheduled Tasks compatibility, conflict/staff semantic review and later
 publication remain separate gates.
 
+PR #784 merged as `6ea12999d696ccb38417d5fc9f3ce228592ba934` after 25
+focused tests, full suite (3,821 pass / 19 skip / 0 fail), build, lint and
+diff checks. It returns bounded, non-sensitive field/code diagnostics for
+future invalid proposals and advertises the existing text limits. The exact
+`cg-dynamics-mcp` function alone deployed to v60 using local bundling after
+two Supabase API-bundler HTTP 500 failures left v59 unchanged. Readback shows
+v60 active, `verify_jwt=false` unchanged, bundle hash
+`c7c9216478dcedbe6d355e1f254a7855a7b81e6d25443894a2c59735a12285eb`;
+the previous v59 hash `d191ecf721043fa1943f515f8bbd99ba3557005e3b0f79621c6d576992223e19`
+is the rollback target. Deployed source readback
+confirmed the validator, MCP response and tool description changes. A fresh
+company-chat read-only Piek November brief after tool refresh returned the
+same draft v2/unpublished and exact 4/12 scope. No migration, secret, cron,
+provider, Vercel, approval or publication change accompanied v60.
+
 ### 12 October — earlier connector rollout/OAuth blocker (resolved by the acceptance above)
 
 CA directed #731 toward the company ChatGPT Pro connection instead of retrying
