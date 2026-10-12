@@ -260,8 +260,8 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
         properties: {
           clientId: uuid, strategyMonth: date,
           sourceIds: { type: 'array', minItems: 1, items: { type: 'string' } },
-          goldStandard: { type: 'object', additionalProperties: { type: 'string' } },
-          actionPlan: { type: 'object', description: 'Use only confirmed format keys. Each format accepts up to six actionable concepts by default; when a verified monthly package quantity is higher, it accepts up to that quantity, capped at 24. Do not promise extra deliverables.', additionalProperties: { type: 'array', items: { type: 'string' } } },
+          goldStandard: { type: 'object', description: 'All ten client-facing fields are required; each must be 20–1200 cleaned characters. Put citations only in sourceIds, never internal IDs or evidence-system jargon in this copy.', additionalProperties: { type: 'string', minLength: 20, maxLength: 1200 } },
+          actionPlan: { type: 'object', description: 'Use only confirmed format keys. Each item must be 12–300 cleaned characters; keep concepts concise and actionable. Each format accepts up to six concepts by default; when a verified monthly package quantity is higher, it accepts up to that quantity, capped at 24. Do not promise extra deliverables.', additionalProperties: { type: 'array', items: { type: 'string', minLength: 12, maxLength: 300 } } },
         },
         required: ['clientId', 'strategyMonth', 'sourceIds', 'goldStandard', 'actionPlan'],
       },

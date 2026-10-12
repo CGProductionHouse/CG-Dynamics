@@ -3,7 +3,7 @@
 // It uses the same exact-client preparation, proposal gate and guarded RPC as #731.
 import { prepareDraft, strategyAutopilotMonths, type StrategyAutopilotClient } from '../_shared/monthlyStrategyAutopilot.ts'
 import { monthlyStrategySourceDigest } from '../_shared/monthlyStrategySourceDigest.ts'
-import { mergeMonthlyStrategyProposal, parseMonthlyStrategyProposal, selectMonthlyStrategyEvidence } from '../_shared/monthlyStrategyProposal.ts'
+import { mergeMonthlyStrategyProposal, selectMonthlyStrategyEvidence, validateMonthlyStrategyProposal } from '../_shared/monthlyStrategyProposal.ts'
 import { readStrategyData, type ActionPlanKey } from '../../../src/lib/strategyEngine.ts'
 
 type QueryResult = { data: unknown; error: { message: string } | null }
@@ -175,12 +175,13 @@ export async function submitMonthlyStrategyProposal(
   const { target, prepared, draft } = workspace
   if ((target?.version ?? null) !== input.expectedVersion) return { error: 'STRATEGY_VERSION_CONFLICT' }
   const sourceIds = new Set(selectMonthlyStrategyEvidence(prepared.evidence).map(row => row.source_id))
-  const proposal = parseMonthlyStrategyProposal(JSON.stringify(input.proposal), {
+  const validation = validateMonthlyStrategyProposal(JSON.stringify(input.proposal), {
     clientId: input.clientId, strategyMonth: input.strategyMonth, sourceIds,
     enabledFormats: new Set(workspace.preparedFormats as ActionPlanKey[]),
     confirmedCapacity: prepared.seedContext.source_windows?.confirmed_package_scope as Record<string, unknown> | null | undefined,
   })
-  if (!proposal) return { error: 'STRATEGY_PROPOSAL_INVALID', instruction: 'Check exact client/month, cited source IDs, confirmed formats and client-facing quality.' }
+  if (!validation.proposal) return { error: 'STRATEGY_PROPOSAL_INVALID', issues: validation.issues, instruction: 'Repair the named field without inventing a client fact, citation or package format; then fetch a fresh brief before a new submission.' }
+  const proposal = validation.proposal
   const previous = target?.seed_context?.generation as Record<string, unknown> | undefined
   const mergeTarget = target ?? {
     id: '', client_id: input.clientId, strategy_month: input.strategyMonth,

@@ -96,41 +96,59 @@ export function buildMonthlyStrategyPrompt(input: {
   }
 }
 
-/** Reject malformed, cross-client or invented citations before any mutation. */
-export function parseMonthlyStrategyProposal(raw: string, allowed: {
+export interface ProposalValidationIssue {
+  path: string
+  code: string
+}
+
+/** Return bounded, non-sensitive reasons so a rejected model draft can be repaired without guessing. */
+export function validateMonthlyStrategyProposal(raw: string, allowed: {
   clientId: string
   strategyMonth: string
   sourceIds: Set<string>
   enabledFormats: Set<ActionPlanKey>
   confirmedCapacity?: Record<string, unknown> | null
-}): MonthlyStrategyProposal | null {
+}): { proposal: MonthlyStrategyProposal | null; issues: ProposalValidationIssue[] } {
+  const invalid = (path: string, code: string) => ({ proposal: null, issues: [{ path, code }] })
   try {
     const trimmed = raw.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '')
     const value = JSON.parse(trimmed) as Partial<MonthlyStrategyProposal>
-    if (!value || value.clientId !== allowed.clientId || value.strategyMonth !== allowed.strategyMonth) return null
+    if (!value || value.clientId !== allowed.clientId || value.strategyMonth !== allowed.strategyMonth) return invalid('clientId/strategyMonth', 'EXACT_TARGET_MISMATCH')
     if (!Array.isArray(value.sourceIds) || value.sourceIds.length === 0 ||
-        value.sourceIds.some(id => typeof id !== 'string' || !allowed.sourceIds.has(id))) return null
-    if (!value.goldStandard || typeof value.goldStandard !== 'object') return null
+        value.sourceIds.some(id => typeof id !== 'string' || !allowed.sourceIds.has(id))) return invalid('sourceIds', 'UNKNOWN_OR_MISSING_CITATION')
+    if (!value.goldStandard || typeof value.goldStandard !== 'object') return invalid('goldStandard', 'MISSING_FIELDS')
     for (const { key } of GOLD_STANDARD_FIELDS) {
-      if (typeof value.goldStandard[key] !== 'string' || clean(value.goldStandard[key]).length < 20 ||
-          clean(value.goldStandard[key]).length > 1_200) return null
+      if (typeof value.goldStandard[key] !== 'string') return invalid(`goldStandard.${key}`, 'MISSING_TEXT')
+      if (clean(value.goldStandard[key]).length < 20) return invalid(`goldStandard.${key}`, 'TEXT_TOO_SHORT')
+      if (clean(value.goldStandard[key]).length > 1_200) return invalid(`goldStandard.${key}`, 'TEXT_TOO_LONG')
     }
-    if (!hasDistinctStrategicFields(value.goldStandard as GoldStandardStrategy)) return null
-    if (!value.actionPlan || typeof value.actionPlan !== 'object') return null
+    if (!hasDistinctStrategicFields(value.goldStandard as GoldStandardStrategy)) return invalid('goldStandard', 'RULE_ONLY_OR_REPEATED_STRATEGY')
+    if (!value.actionPlan || typeof value.actionPlan !== 'object') return invalid('actionPlan', 'MISSING_FORMATS')
     for (const key of allowed.enabledFormats) {
       const items = value.actionPlan[key]
-      if (!Array.isArray(items) || items.length === 0) return null
+      if (!Array.isArray(items) || items.length === 0) return invalid(`actionPlan.${key}`, 'CONFIRMED_FORMAT_EMPTY')
     }
     for (const [key, items] of Object.entries(value.actionPlan)) {
       const confirmed = allowed.confirmedCapacity?.[key]
       const maxItems = typeof confirmed === 'number' && Number.isSafeInteger(confirmed) && confirmed > 6
         ? Math.min(confirmed, MAX_CONCEPTS_PER_FORMAT) : 6
-      if (!ACTION_KEYS.includes(key as ActionPlanKey) || !allowed.enabledFormats.has(key as ActionPlanKey) ||
-          !Array.isArray(items) || items.some(item => typeof item !== 'string' || clean(item).length < 12 || clean(item).length > 300) || items.length > maxItems) return null
+      if (!ACTION_KEYS.includes(key as ActionPlanKey) || !allowed.enabledFormats.has(key as ActionPlanKey)) return invalid('actionPlan', 'FORMAT_NOT_CONFIRMED')
+      if (!Array.isArray(items)) return invalid(`actionPlan.${key}`, 'INVALID_ITEMS')
+      if (items.length > maxItems) return invalid(`actionPlan.${key}`, 'EXCEEDS_CONFIRMED_CONCEPT_LIMIT')
+      for (const [index, item] of items.entries()) {
+        if (typeof item !== 'string') return invalid(`actionPlan.${key}[${index}]`, 'INVALID_TEXT')
+        if (clean(item).length < 12) return invalid(`actionPlan.${key}[${index}]`, 'TEXT_TOO_SHORT')
+        if (clean(item).length > 300) return invalid(`actionPlan.${key}[${index}]`, 'TEXT_TOO_LONG')
+      }
     }
-    if (hasClientFacingQualityIssue(value as MonthlyStrategyProposal)) return null
-    return value as MonthlyStrategyProposal
-  } catch { return null }
+    if (hasClientFacingQualityIssue(value as MonthlyStrategyProposal)) return invalid('proposal', 'CLIENT_FACING_COPY_QUALITY')
+    return { proposal: value as MonthlyStrategyProposal, issues: [] }
+  } catch { return invalid('proposal', 'MALFORMED_JSON') }
+}
+
+/** Reject malformed, cross-client or invented citations before any mutation. */
+export function parseMonthlyStrategyProposal(raw: string, allowed: Parameters<typeof validateMonthlyStrategyProposal>[1]): MonthlyStrategyProposal | null {
+  return validateMonthlyStrategyProposal(raw, allowed).proposal
 }
 
 export interface ProposalTarget {

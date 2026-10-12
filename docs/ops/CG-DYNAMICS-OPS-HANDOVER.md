@@ -1,6 +1,6 @@
 # CG Dynamics Ops Handover
 
-### 12 October — company ChatGPT strategy read accepted; Piek draft validator correction in progress
+### 12 October — company ChatGPT strategy draft-only Piek acceptance passed
 
 After CA signed into Dynamics as company admin in the company Chrome profile,
 the existing company ChatGPT CG Dynamics connection was reconnected and its
@@ -12,15 +12,21 @@ on unverified package/client evidence. The shared OAuth account does not prove
 which physical human used the ChatGPT Project. The company-chat evidence and
 exact IDs are in `docs/ops/CHATGPT-MONTHLY-STRATEGY-WORKSPACE.md` and #731.
 
-The first source-cited Piek proposal had four video and twelve poster concepts
-within its confirmed package, but the draft-only submission was rejected
-before any write by the old six-items-per-format validator. The focused
-confirmed-capacity correction and regression are in progress. Do not mistake
-the generated ChatGPT proposal for a saved, approved or published strategy;
-Piek's last verified November draft remains v1/unpublished. No Vercel or
-provider-funded model action occurred. Weekly private-MCP Scheduled Tasks
-compatibility, actual saved-draft readback and staff semantic review remain
-separate acceptance gates.
+The first Piek submission exposed the old six-items-per-format cap. PR #783
+merged as `f84b272ec6eff8fd17c637d74880342551be55b1`; only
+`cg-dynamics-mcp` was deployed to v59 and its exact source/hash read back.
+The next attempt exposed overlong model prose and internal provenance wording;
+it failed before any write. The corrected, concise Piek November proposal was
+submitted once from the company chat and read back as canonical draft
+`cb416671-6fc7-4fc1-b7b7-33b27847a594` version **2**, `workflow_status=draft`,
+`published_version=null`, `staff_amended=false`. Eight new gold-standard fields
+and four professional-video plus twelve design-poster concepts were saved.
+Two existing fields (`formatsAndRationale`, `nextMonthGamePlan`) were preserved
+as review conflicts, not overwritten. No approval or publication occurred.
+This is one exact-client draft-only pilot, not fleet or strategy-quality launch
+acceptance. No Vercel or provider-funded model action occurred. Weekly private-
+MCP Scheduled Tasks compatibility, conflict/staff semantic review and later
+publication remain separate gates.
 
 ### 12 October — earlier connector rollout/OAuth blocker (resolved by the acceptance above)
 
