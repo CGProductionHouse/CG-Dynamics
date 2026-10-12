@@ -1,5 +1,22 @@
 # CG Dynamics Ops Handover
 
+### 12 October — company ChatGPT strategy-draft connector candidate, local only
+
+CA directed #731 toward the company ChatGPT Pro connection instead of retrying
+the exhausted Piek provider routes. A focused local MCP candidate adds an
+admin-only paged active-client roster, exact current/next-month strategy brief
+and cited draft-only submission to the existing guarded strategy RPCs. The
+brief uses the existing approved/confirmed #731 preparation sources, reports
+missing coverage, and fences source/version changes; the write preserves staff
+text and never approves/publishes. See
+`docs/ops/CHATGPT-MONTHLY-STRATEGY-WORKSPACE.md`. This is **not deployed or
+operationally accepted**. The private CG MCP app's availability from ChatGPT
+Scheduled Tasks is unverified; normal company-chat acceptance and a one-off
+scheduled invocation must precede a recurring promise. Fleet model generation
+remains OFF, Piek's failed R25 pilot unchanged, and no strategy was created by
+this local connector work. No Vercel, provider, production SQL/data or Edge
+operation occurred. Existing #731 semantic review/publication gates remain.
+
 ### 12 October — CA-capped Piek November model pilot reached provider, no strategy accepted
 
 CA authorized an exact Piek November model pilot capped at R25. The fenced

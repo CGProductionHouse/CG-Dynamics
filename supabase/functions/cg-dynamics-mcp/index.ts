@@ -102,6 +102,7 @@ import {
   type CgHoursStaffLoggerResult,
 } from './cgHoursStaffLogger.ts'
 import { canReadPlannerTask } from './taskReadPolicy.ts'
+import { loadMonthlyStrategyWorkspace, shapeMonthlyStrategyBrief, strategyMcpInputHash, submitMonthlyStrategyProposal } from './monthlyStrategyWorkspace.ts'
 
 const STAFF_ROLES = new Set(['admin', 'manager', 'staff', 'team'])
 const MCP_PROTOCOL_VERSION = '2025-03-26'
@@ -1652,6 +1653,54 @@ const handleGetClientContext: ToolHandler = async (staff, input) => {
         : 'No canonical client guide is recorded for this exact client. Do not substitute another client, a group/national record, or stale Project memory.',
     },
     errors: unavailable,
+  }
+}
+
+const handleListMonthlyStrategyClients: ToolHandler = async (staff, input) => {
+  if (staff.contextKind !== 'company_admin' || !ADMIN_CONTEXT_ROLES.has(staff.connection.role)) return { error: 'COMPANY_ADMIN_REQUIRED' }
+  const limit = Math.min(Math.max(Number(input.limit ?? 50), 1), 100)
+  if (!Number.isSafeInteger(limit)) return { error: 'INVALID_LIMIT' }
+  const after = typeof input.after_client_id === 'string' ? input.after_client_id : null
+  if (after && !isUuid(after)) return { error: 'INVALID_CURSOR' }
+  let query = staff.supabase.from('clients').select('id,name').eq('active', true).order('id', { ascending: true }).limit(limit + 1)
+  if (after) query = query.gt('id', after)
+  const { data, error } = await query
+  if (error) return { error: 'STRATEGY_CLIENT_LIST_UNAVAILABLE' }
+  const rows = data ?? []
+  const page = rows.slice(0, limit)
+  return {
+    clients: page, has_more: rows.length > limit,
+    next_after_client_id: rows.length > limit ? page[page.length - 1]?.id ?? null : null,
+    returned: page.length, coverage: 'active_clients_page',
+  }
+}
+
+const handleGetMonthlyStrategyBrief: ToolHandler = async (staff, input) => {
+  if (staff.contextKind !== 'company_admin' || !ADMIN_CONTEXT_ROLES.has(staff.connection.role)) return { error: 'COMPANY_ADMIN_REQUIRED' }
+  if (!isUuid(input.client_id)) return { error: 'EXACT_CLIENT_ID_REQUIRED' }
+  try {
+    const workspace = await loadMonthlyStrategyWorkspace(staff.supabase, String(input.client_id), String(input.strategy_month), cgDate(new Date()))
+    return shapeMonthlyStrategyBrief(workspace)
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : 'STRATEGY_BRIEF_UNAVAILABLE' }
+  }
+}
+
+const handleSubmitMonthlyStrategyDraft: ToolHandler = async (staff, input) => {
+  if (staff.contextKind !== 'company_admin' || !ADMIN_CONTEXT_ROLES.has(staff.connection.role)) return { error: 'COMPANY_ADMIN_REQUIRED' }
+  if (!isUuid(input.client_id) || typeof input.evidence_fingerprint !== 'string' || !/^[a-f0-9]{64}$/.test(input.evidence_fingerprint)) {
+    return { error: 'INVALID_EXACT_STRATEGY_INPUT' }
+  }
+  if (input.expected_version !== null && (!Number.isSafeInteger(input.expected_version) || Number(input.expected_version) < 1)) return { error: 'INVALID_EXPECTED_VERSION' }
+  try {
+    return await submitMonthlyStrategyProposal(staff.supabase, {
+      clientId: String(input.client_id), strategyMonth: String(input.strategy_month), today: cgDate(new Date()),
+      evidenceFingerprint: input.evidence_fingerprint, expectedVersion: input.expected_version as number | null,
+      proposal: input.proposal, actorProfileId: staff.connection.profileId,
+      idempotencyKey: String(input.idempotency_key),
+    })
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : 'STRATEGY_DRAFT_UNAVAILABLE' }
   }
 }
 
@@ -3366,6 +3415,7 @@ const handleGenerateContentGuidelineDrafts: ToolHandler = async (staff, input) =
 // ── Tool Router ─────────────────────────────────────────────────────────────
 
 const WRITE_TOOLS = new Set([
+  'submit_monthly_strategy_draft',
   'create_task',
   'update_task',
   'update_lead',
@@ -3395,6 +3445,7 @@ const WRITE_TOOLS = new Set([
 // These backends own the durable idempotency receipt. An identical MCP retry must reach them so
 // they can return the original record id; the generic Dynamics log stores status/audit only.
 const CANONICAL_RECEIPT_REPLAY_TOOLS = new Set([
+  'submit_monthly_strategy_draft',
   ...CLIENT_WORKSPACE_ACTIONS,
   'log_ordinary_hours',
   'log_kilometre_entry',
@@ -3408,6 +3459,9 @@ const toolHandlers: Record<string, ToolHandler> = {
   list_my_calendar: handleListMyCalendar,
   list_client_schedule: handleListClientSchedule,
   get_client_context: handleGetClientContext,
+  list_monthly_strategy_clients: handleListMonthlyStrategyClients,
+  get_monthly_strategy_brief: handleGetMonthlyStrategyBrief,
+  submit_monthly_strategy_draft: handleSubmitMonthlyStrategyDraft,
   list_my_leads: handleListMyLeads,
   get_lead: handleGetLead,
   create_task: handleCreateTask,
@@ -3548,14 +3602,15 @@ async function handleToolsCall(
   // with different input is still refused.
   let replayThroughCanonicalKey = false
   if (isWrite && canonicalIdempotencyKey) {
-    const inputHash = computeInputHash(toolInput as Record<string, unknown>)
+    const inputHash = toolName === 'submit_monthly_strategy_draft'
+      ? await strategyMcpInputHash(toolInput) : computeInputHash(toolInput)
     const existing = await checkIdempotency(staff.supabase, staff.profileId, toolName, canonicalIdempotencyKey, inputHash)
     if (existing.duplicate) {
       const conflict = (existing.result as { status?: string } | undefined)?.status === 'conflict'
       if (CANONICAL_RECEIPT_REPLAY_TOOLS.has(toolName) && !conflict) {
         replayThroughCanonicalKey = true
       } else {
-        return jsonRpcResponse(id, { content: [{ type: 'text', text: JSON.stringify({ ...(existing.result as object), _context: audit }) }], isError: CLIENT_WORKSPACE_ACTIONS.includes(toolName) && conflict })
+        return jsonRpcResponse(id, { content: [{ type: 'text', text: JSON.stringify({ ...(existing.result as object), _context: audit }) }], isError: conflict })
       }
     }
   }
@@ -3564,7 +3619,8 @@ async function handleToolsCall(
     const result = await handler(staff, toolInput)
 
     if (isWrite && canonicalIdempotencyKey && !replayThroughCanonicalKey) {
-      const inputHash = computeInputHash(toolInput as Record<string, unknown>)
+      const inputHash = toolName === 'submit_monthly_strategy_draft'
+        ? await strategyMcpInputHash(toolInput) : computeInputHash(toolInput)
       const hasError = isMcpErrorResult(result)
       await recordIdempotency(staff.supabase, staff.profileId, toolName, canonicalIdempotencyKey, inputHash, hasError ? 'error' : 'success', audit)
     }
@@ -3580,7 +3636,8 @@ async function handleToolsCall(
     })
   } catch (err) {
     if (isWrite && canonicalIdempotencyKey) {
-      const inputHash = computeInputHash(toolInput as Record<string, unknown>)
+      const inputHash = toolName === 'submit_monthly_strategy_draft'
+        ? await strategyMcpInputHash(toolInput) : computeInputHash(toolInput)
       await recordIdempotency(staff.supabase, staff.profileId, toolName, canonicalIdempotencyKey, inputHash, 'error', audit)
     }
     return jsonRpcError(id, -32603, `Tool execution failed: ${err instanceof Error ? err.message : String(err)}`)

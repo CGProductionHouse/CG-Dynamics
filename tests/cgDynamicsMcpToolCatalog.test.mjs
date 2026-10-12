@@ -49,7 +49,8 @@ test('read tools cover exact staff, task, calendar, schedule, lead, client conte
     'get_microsoft_sync_status', 'list_company_tasks', 'list_company_recurring_tasks',
     'get_provider_health', 'get_google_ads_audit', 'find_content_runs',
     'get_my_day', 'list_my_tasks', 'get_task', 'list_my_calendar',
-    'list_client_schedule', 'get_client_context', 'list_assignable_staff', 'list_my_leads', 'get_lead',
+    'list_client_schedule', 'get_client_context', 'list_monthly_strategy_clients', 'get_monthly_strategy_brief',
+    'list_assignable_staff', 'list_my_leads', 'get_lead',
     'get_my_profile', 'get_my_assistant_bootstrap', 'get_my_recurring_tasks',
     'list_content_guideline_videos', 'get_content_video_readiness',
     'get_content_run_plan', 'get_content_run_closeout', 'verify_content_run_upload',
@@ -98,13 +99,13 @@ test('server instruction states the shared-connection contract and forbids unsaf
   assert.doesNotMatch(instructions, /Project name.*identity/i)
 })
 
-test('catalog contains exactly 51 tools: 25 read + 26 write', () => {
+test('catalog contains exactly 54 tools: 27 read + 27 write', () => {
   const tools = catalog.CG_DYNAMICS_MCP_TOOLS
-  assert.equal(tools.length, 51)
+  assert.equal(tools.length, 54)
   const reads = tools.filter(t => t.annotations.readOnlyHint)
   const writes = tools.filter(t => !t.annotations.readOnlyHint)
-  assert.equal(reads.length, 25)
-  assert.equal(writes.length, 26)
+  assert.equal(reads.length, 27)
+  assert.equal(writes.length, 27)
 })
 
 test('every tool maps to a declared dependency and no tool references an unknown upstream', () => {
