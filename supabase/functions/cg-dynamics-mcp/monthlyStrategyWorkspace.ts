@@ -82,6 +82,9 @@ export async function loadMonthlyStrategyWorkspace(
   const preparedFormats = Object.entries(draft.actionPlan).filter(([, section]) => section.enabled).map(([key]) => key).sort()
   const currentFormats = Object.entries(current.actionPlan).filter(([, section]) => section.enabled).map(([key]) => key).sort()
   const blockers = [...prepared.blockers]
+  // A confirmed receipt may still leave every monthly content quantity unknown.
+  // That is not authority to draft an empty or inferred client content plan.
+  if (preparedFormats.length === 0) blockers.push('NO_CONFIRMED_MONTHLY_CONTENT_SCOPE')
   if (JSON.stringify(preparedFormats) !== JSON.stringify(currentFormats)) blockers.push('PACKAGE_STRATEGY_SCOPE_DRIFT')
   if (!prepared.evidence.some(row => EXACT_STRATEGY_AUTHORITIES.has(row.authority))) blockers.push('EXACT_STRATEGY_EVIDENCE_UNAVAILABLE')
   if (target && (target.workflow_status !== 'draft' || target.published_version !== null)) blockers.push('REVIEWED_OR_PUBLISHED_STRATEGY')

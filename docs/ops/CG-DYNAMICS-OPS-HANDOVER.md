@@ -1,5 +1,20 @@
 # CG Dynamics Ops Handover
 
+### 12 October — November queue exposed unknown-scope readiness gap
+
+A read-only company-chat pass retrieved 12/12 additional exact November briefs
+after the Piek/Daisy pilots. Nine had at least one confirmed monthly content
+format; Hino Trucks blocked on missing exact strategy evidence. Zooz Lifestyle
+WFF, Vrystaat Kunstefees and Local Deli were incorrectly labelled
+`ready_for_proposal` with `confirmed_formats=[]` and all monthly content counts
+`null`. No proposal or package write was made for this sample. A fail-first
+MCP workspace test reproduced the mismatch; the focused guard now marks an
+all-empty confirmed format set `NO_CONFIRMED_MONTHLY_CONTENT_SCOPE` and refuses
+draft submission while preserving unknown/null quantities. See #731 and the
+company ChatGPT workspace runbook. This candidate is not yet deployed; the
+three live briefs remain misleading until exact MCP rollout/readback. Staff
+must confirm an actual monthly content scope before their plans can be saved.
+
 ### 12 October — company ChatGPT strategy draft-only Piek acceptance passed
 
 After CA signed into Dynamics as company admin in the company Chrome profile,

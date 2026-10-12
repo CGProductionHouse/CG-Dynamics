@@ -215,6 +215,27 @@ test('unconfirmed package, absent exact evidence and reviewed row remain blocked
   assert.equal(db.calls.length, 0)
 })
 
+test('an otherwise confirmed package with no confirmed monthly content scope cannot accept a proposal', async () => {
+  const db = new FakeDb()
+  db.draft = emptyStrategyData()
+  db.tables.monthly_client_strategies[0].strategy_data = db.draft
+  const noMonthlyScope = { ...deps(db), prepare: async () => {
+    const packet = prepared(db)
+    packet.seedContext.source_windows.confirmed_package_scope = {
+      professional_video: null, photo_content: null, design_poster: null,
+    }
+    return packet
+  } }
+  const brief = shapeMonthlyStrategyBrief(await loadMonthlyStrategyWorkspace(db, CLIENT, MONTH, TODAY, noMonthlyScope))
+  assert.deepEqual(brief.confirmed_formats, [])
+  assert.equal(brief.state, 'blocked')
+  assert.ok(brief.blockers.includes('NO_CONFIRMED_MONTHLY_CONTENT_SCOPE'))
+  const result = await submitMonthlyStrategyProposal(db, submitInput(brief), noMonthlyScope)
+  assert.equal(result.error, 'STRATEGY_BLOCKED')
+  assert.ok(result.blockers.includes('NO_CONFIRMED_MONTHLY_CONTENT_SCOPE'))
+  assert.equal(db.calls.length, 0)
+})
+
 test('connector wiring has no approve/publish action and reuses guarded strategy RPC', () => {
   const index = readFileSync('supabase/functions/cg-dynamics-mcp/index.ts', 'utf8')
   assert.match(index, /submit_monthly_strategy_draft: handleSubmitMonthlyStrategyDraft/)
