@@ -24,6 +24,20 @@ test('fixed local plan reuses actual fixtures and excludes unsupported fixture h
   assert.throws(() => acceptancePlan([]))
 })
 
+test('client launch acceptance includes every high-risk client journey and unavailable fact case', () => {
+  for (const fixture of [
+    'client-portal-shell-readonly-browser.mjs',
+    'client-overview-schedule-browser.mjs',
+    'client-overview-fact-error-browser.mjs',
+    'client-plan-readonly-browser.mjs',
+    'report-cutoff-readonly-browser.mjs',
+    'strategy-review-readonly-browser.mjs',
+    'client-approvals-readonly-browser.mjs',
+    'client-library-readonly-browser.mjs',
+    'client-brand-hub-setup-readonly-browser.mjs',
+  ]) assert.ok(browserFixtures.includes(fixture), `Missing client acceptance: ${fixture}`)
+})
+
 test('test totals never convert skipped, cancelled or incomplete checks into passed', () => {
   const totals = '# tests 10\n# pass 8\n# fail 0\n# skipped 2\n# cancelled 0\n# todo 0\n'
   assert.deepEqual(testTotals(totals), { total: 10, pass: 8, fail: 0, skipped: 2, cancelled: 0, todo: 0 })

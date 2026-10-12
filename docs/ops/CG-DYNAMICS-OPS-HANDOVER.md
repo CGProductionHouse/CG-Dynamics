@@ -1,6 +1,6 @@
 # CG Dynamics Ops Handover
 
-### 12 October — November legacy-seed promotion is a local candidate, not a production repair
+### 12 October — November legacy-seed promotion merged, not deployed
 
 The company ChatGPT read-only Braize November brief returned a source-cited,
 commercially distinct proposal for its confirmed four photo posts and four
@@ -11,14 +11,18 @@ check found the same exact old template in **45 of 57** November rows; Piek
 and Daisy are v2 with the same text preserved as recorded connector conflicts.
 No strategy, package, schedule or provider record was written by this audit.
 
-The local #731 candidate changes only the strategy proposal merge: exact
+PR #789 merged as `65042c424f3bd3ca154f061c4d2bc578804f3043` and changes only the strategy proposal merge: exact
 untouched November autopilot v1 template text, or the same exact text in a v2
 company-connector draft with recorded conflicts for those fields, may be
 replaced by a new cited proposal. A staff amendment, staff note, different
 origin/month/version, prior generation without that conflict, or even similar
 but non-template wording still wins. The existing source-fingerprint,
 version-fenced, draft-only RPC and published-only client projection remain
-unchanged. Focused merge/MCP tests, full supported suite, local build, scoped
+unchanged. Exact PR head `68fcf555a052bf1d3d6b81ffbf54874cd490efe8`
+passed the local harness: 3,816 pass / 17 intentional skip / 0 fail,
+TypeScript, Vite, 11 standard browser fixtures, stable tree and zero Vercel
+operations (receipt SHA256 `81271C530584144CFCBC6156F1AFDE9BF39C84E08A4D47BB83DDC9D8B07B6DCF`).
+Focused merge/MCP tests, scoped
 lint and changed-file Deno check passed; the full MCP index Deno check still
 has pre-existing Supabase-client generic errors outside this change. This is
 **not deployed**: deployed MCP remains v61; the #679 Edge release/rollback

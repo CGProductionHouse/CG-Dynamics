@@ -53,8 +53,8 @@ the confirmed 4-photo/4-poster scope, September partial Facebook observations
 and its ready guide, but **did not submit** it. The actual v1 row contains two
 old package-only Gold Standard fields. A direct read-only database check found
 45 of 57 November rows with both exact old fields; Piek and Daisy are v2 with
-the same fields still present and recorded as `review_conflicts`. The local
-merge fix now has regression coverage for exact unedited v1 and v2 promotion,
+the same fields still present and recorded as `review_conflicts`. Merged PR
+#789 has regression coverage for exact unedited v1 and v2 promotion,
 while preserving staff changes and any non-template text. Deployed v61 does
 not yet contain that fix. Do not resubmit Piek/Daisy or bulk-submit the 35
 other structurally ready clients merely to erase conflicts: the #679 release
