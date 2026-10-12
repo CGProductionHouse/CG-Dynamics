@@ -1,5 +1,32 @@
 # CG Dynamics Ops Handover
 
+### 12 October — November legacy-seed promotion is a local candidate, not a production repair
+
+The company ChatGPT read-only Braize November brief returned a source-cited,
+commercially distinct proposal for its confirmed four photo posts and four
+design posters. It was **not submitted**. The canonical Braize row is v1,
+draft/unpublished, with no staff amendment. Two existing Gold Standard fields
+are package-only instructions, not a business plan. A SELECT-only production
+check found the same exact old template in **45 of 57** November rows; Piek
+and Daisy are v2 with the same text preserved as recorded connector conflicts.
+No strategy, package, schedule or provider record was written by this audit.
+
+The local #731 candidate changes only the strategy proposal merge: exact
+untouched November autopilot v1 template text, or the same exact text in a v2
+company-connector draft with recorded conflicts for those fields, may be
+replaced by a new cited proposal. A staff amendment, staff note, different
+origin/month/version, prior generation without that conflict, or even similar
+but non-template wording still wins. The existing source-fingerprint,
+version-fenced, draft-only RPC and published-only client projection remain
+unchanged. Focused merge/MCP tests, full supported suite, local build, scoped
+lint and changed-file Deno check passed; the full MCP index Deno check still
+has pre-existing Supabase-client generic errors outside this change. This is
+**not deployed**: deployed MCP remains v61; the #679 Edge release/rollback
+packet and fresh exact-client semantic/readback acceptance remain mandatory.
+No Vercel action occurred. The 37 ready / 24 blocked November brief counts,
+two saved unpublished connector drafts, 35 other ready unsaved clients and all
+#389/#396/#679 client-launch holds below remain unchanged.
+
 ### 12 October — full November brief queue and unknown-scope guard accepted
 
 A read-only company-chat pass retrieved 12/12 additional exact November briefs

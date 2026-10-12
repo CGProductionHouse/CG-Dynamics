@@ -71,6 +71,83 @@ test('replaces only the exact untouched legacy November capacity seed with resea
   assert.ok(merged.filledFields.includes('actionPlan.professional_video.notes'))
 })
 
+test('promotes the exact untouched autopilot package prose into substantive November strategy', () => {
+  const row = target()
+  row.seed_context = { origin: 'monthly_strategy_autopilot' }
+  row.staff_amended_at = null
+  row.internal_notes = null
+  row.strategy_data.goldStandard.formatsAndRationale = 'Work within Braize’s confirmed package of 4 photo posts, 4 design posters; each format still needs an evidence-backed role.'
+  row.strategy_data.goldStandard.nextMonthGamePlan = 'Sequence only the confirmed 4 photo posts, 4 design posters; do not add channels or deliverables outside package.'
+
+  const merged = mergeMonthlyStrategyProposal(row, proposal)
+  assert.equal(merged.state, 'applied')
+  assert.equal(merged.strategyData.goldStandard.formatsAndRationale, goldStandard.formatsAndRationale)
+  assert.equal(merged.strategyData.goldStandard.nextMonthGamePlan, goldStandard.nextMonthGamePlan)
+  assert.deepEqual(merged.conflicts, [])
+  assert.ok(merged.filledFields.includes('goldStandard.formatsAndRationale'))
+  assert.ok(merged.filledFields.includes('goldStandard.nextMonthGamePlan'))
+})
+
+test('a v2 draft may resolve only its recorded legacy-seed conflicts from a prior connector proposal', () => {
+  const row = target()
+  row.version = 2
+  row.seed_context = { origin: 'monthly_strategy_autopilot', generation: {
+    provider: 'chatgpt_company_admin_mcp', status: 'review_conflicts', baseVersion: 1,
+    conflicts: ['goldStandard.formatsAndRationale', 'goldStandard.nextMonthGamePlan'],
+    proposedGoldStandard: goldStandard,
+  } }
+  row.staff_amended_at = null
+  row.internal_notes = null
+  row.strategy_data.goldStandard.formatsAndRationale = 'Work within Piek Group’s confirmed package of 4 professional videos, 12 design posters; each format still needs an evidence-backed role.'
+  row.strategy_data.goldStandard.nextMonthGamePlan = 'Sequence only the confirmed 4 professional videos, 12 design posters; do not add channels or deliverables outside package.'
+  const merged = mergeMonthlyStrategyProposal(row, proposal)
+  assert.equal(merged.strategyData.goldStandard.formatsAndRationale, goldStandard.formatsAndRationale)
+  assert.equal(merged.strategyData.goldStandard.nextMonthGamePlan, goldStandard.nextMonthGamePlan)
+  assert.deepEqual(merged.conflicts, [])
+
+  for (const change of [
+    copy => { copy.version = 3 },
+    copy => { copy.seed_context.generation.status = 'draft_filled' },
+    copy => { copy.seed_context.generation.provider = 'unknown' },
+    copy => { copy.seed_context.generation.conflicts = [] },
+    copy => { copy.staff_amended_at = '2026-10-12T12:00:00Z' },
+  ]) {
+    const copy = structuredClone(row)
+    change(copy)
+    const held = mergeMonthlyStrategyProposal(copy, proposal)
+    assert.equal(held.strategyData.goldStandard.formatsAndRationale, copy.strategy_data.goldStandard.formatsAndRationale)
+    assert.ok(held.conflicts.includes('goldStandard.formatsAndRationale'))
+  }
+})
+
+test('legacy-looking prose is preserved when origin, version, staff notes or exact wording differ', () => {
+  const seed = target()
+  seed.seed_context = { origin: 'monthly_strategy_autopilot' }
+  seed.staff_amended_at = null
+  seed.internal_notes = null
+  seed.strategy_data.goldStandard.formatsAndRationale = 'Work within Braize’s confirmed package of 4 photo posts, 4 design posters; each format still needs an evidence-backed role.'
+  for (const change of [
+    row => { row.seed_context.origin = 'staff_reviewed' },
+    row => { row.seed_context.generation = { provider: 'previous_proposal' } },
+    row => { row.version = 2 },
+    row => { row.staff_amended_at = '2026-10-10T10:00:00Z' },
+    row => { row.internal_notes = 'Staff is reviewing this plan.' },
+    row => { row.strategy_data.goldStandard.formatsAndRationale = 'Work within Braize’s confirmed package, with a staff-selected service focus.' },
+  ]) {
+    const row = structuredClone(seed)
+    change(row)
+    const merged = mergeMonthlyStrategyProposal(row, proposal)
+    assert.equal(merged.strategyData.goldStandard.formatsAndRationale, row.strategy_data.goldStandard.formatsAndRationale)
+    assert.ok(merged.conflicts.includes('goldStandard.formatsAndRationale'))
+  }
+  const otherMonth = structuredClone(seed)
+  otherMonth.strategy_month = '2026-10-01'
+  const otherMonthProposal = { ...proposal, strategyMonth: '2026-10-01' }
+  const otherMonthMerge = mergeMonthlyStrategyProposal(otherMonth, otherMonthProposal)
+  assert.equal(otherMonthMerge.strategyData.goldStandard.formatsAndRationale, otherMonth.strategy_data.goldStandard.formatsAndRationale)
+  assert.ok(otherMonthMerge.conflicts.includes('goldStandard.formatsAndRationale'))
+})
+
 test('similar-looking text, changed notes or any staff amendment keeps ownership and conflicts', () => {
   const seed = target()
   seed.seed_context = { origin: 'monthly_strategy_autopilot' }
