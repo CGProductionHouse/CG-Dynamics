@@ -160,6 +160,7 @@ export interface ProposalTarget {
   strategy_data: unknown
   seed_context?: Record<string, unknown> | null
   staff_amended_at?: string | null
+  internal_notes?: string | null
 }
 
 export interface ProposalMerge {
@@ -183,6 +184,10 @@ const ACTION_KEYS: ActionPlanKey[] = [
 const clean = (value: string) => value.replace(/\s+/g, ' ').trim()
 const RULE_ONLY = /^(?:do not|don't|never|avoid|no influencer|keep captions|use natural|canonical client|approved (?:regional )?footer)\b/i
 const LEGACY_PACKAGE_NOTE = 'Scope comes from the explicitly confirmed client package; Client Schedule remains execution evidence.'
+const LEGACY_PACKAGE_GOLD: Partial<Record<keyof GoldStandardStrategy, RegExp>> = {
+  formatsAndRationale: /^Work within [^;]+ confirmed package of [^;]+; each format still needs an evidence-backed role\.$/,
+  nextMonthGamePlan: /^Sequence only the confirmed [^;]+; do not add channels or deliverables outside package\.$/,
+}
 const LEGACY_PACKAGE_ITEMS: Partial<Record<ActionPlanKey, RegExp>> = {
   professional_video: /^Prepare [1-9]\d* professional videos? from the confirmed package\.$/,
   photo_content: /^Prepare [1-9]\d* photo posts? from the confirmed package\.$/,
@@ -197,6 +202,21 @@ function isUneditedLegacyPackageSeed(target: ProposalTarget, current: StrategyDa
     target.staff_amended_at === null &&
     Boolean(pattern && section.enabled && section.items.length === 1 &&
       pattern.test(clean(section.items[0])) && clean(section.notes) === LEGACY_PACKAGE_NOTE)
+}
+
+/** The old November seeder wrote package instructions into two strategy fields.
+ * Promote only the exact untouched template, including a v2 connector draft
+ * that recorded these exact fields as conflicts; even similar staff copy wins. */
+function isUneditedLegacyGoldSeed(target: ProposalTarget, key: keyof GoldStandardStrategy, existing: string): boolean {
+  if (target.strategy_month !== '2026-11-01' || target.seed_context?.origin !== 'monthly_strategy_autopilot' ||
+      target.staff_amended_at !== null || clean(target.internal_notes ?? '') || !LEGACY_PACKAGE_GOLD[key]?.test(existing)) return false
+  const generation = target.seed_context.generation as Record<string, unknown> | undefined
+  if (target.version === 1) return !generation
+  const proposed = generation?.proposedGoldStandard as Record<string, unknown> | undefined
+  return target.version === 2 && generation?.provider === 'chatgpt_company_admin_mcp' &&
+    generation.status === 'review_conflicts' && generation.baseVersion === 1 &&
+    Array.isArray(generation.conflicts) && generation.conflicts.includes(`goldStandard.${key}`) &&
+    typeof proposed?.[key] === 'string'
 }
 
 function hasDistinctStrategicFields(gold: GoldStandardStrategy): boolean {
@@ -253,7 +273,7 @@ export function mergeMonthlyStrategyProposal(target: ProposalTarget, proposal: M
       if (existing === clean(proposed)) continue
       // A later incorporated meeting note can refresh system-authored prose.
       // Any staff change to that prose breaks this exact comparison and wins.
-      if (previous?.proposedGoldStandard?.[key] === existing) {
+      if (previous?.proposedGoldStandard?.[key] === existing || isUneditedLegacyGoldSeed(target, key, existing)) {
         merged.goldStandard[key] = clean(proposed)
         filledFields.push(`goldStandard.${key}`)
       } else conflicts.push(`goldStandard.${key}`)

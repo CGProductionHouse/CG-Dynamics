@@ -44,6 +44,23 @@ Blocker groups below overlap; never sum them as distinct clients. Each row is an
 | `PACKAGE_UNVERIFIED` (1) | LHP Student Village & Block remains a once-off/missing-package hold; the planned client meeting is not a monthly-quantity receipt. |
 
 Across the 57 ordered reads, most source coverage was package, ready guide and (where available) a prior published report. Reviewed marketing-library and incorporated client-context evidence was absent in the returned coverage for those cohorts. `ready_for_proposal` is a structural permission to write a grounded draft, not evidence of an excellent researched strategy or a promise of results. See the company ChatGPT acceptance conversation above for the individual brief tables and source windows. Re-read any brief immediately before an eventual submission; these counts are a 12 October snapshot, not a durable permission to write later.
+
+### 12 October legacy-seed conflict audit (SELECT only)
+
+Braize `6b67a2df-e2ab-418b-bcee-03aef5963d37` was read in the company
+workspace for November. ChatGPT proposed a distinct event-staffing plan from
+the confirmed 4-photo/4-poster scope, September partial Facebook observations
+and its ready guide, but **did not submit** it. The actual v1 row contains two
+old package-only Gold Standard fields. A direct read-only database check found
+45 of 57 November rows with both exact old fields; Piek and Daisy are v2 with
+the same fields still present and recorded as `review_conflicts`. The local
+merge fix now has regression coverage for exact unedited v1 and v2 promotion,
+while preserving staff changes and any non-template text. Deployed v61 does
+not yet contain that fix. Do not resubmit Piek/Daisy or bulk-submit the 35
+other structurally ready clients merely to erase conflicts: the #679 release
+packet, fresh source versions, editorial quality checks and post-save
+readbacks still apply. [Braize review-only company chat](https://chatgpt.com/g/g-p-68ac1cc2e09881918a2108bc5e53095e-cg-production-house/c/6acd4946-8d60-83e9-8cad-db53da9e60fd).
+
 - Test Red Oak, Piek, Daisy and an unconfirmed-package client in the actual company chat. Red Oak must either yield exact usable source evidence and a good draft, or a truthful blocker — never a generic, guardrail-only plan. Confirm a duplicate retry returns the original receipt, changed evidence/version refuses a write, staff edits survive, and client portal still sees only published snapshots.
 - The first actual saved draft needs human semantic review for client-specific commercial value and source fidelity. Structural validation alone cannot guarantee a brilliant plan. Missing approved research, unconfirmed packages, account permissions, scheduling support and model usage limits remain real gates.
 

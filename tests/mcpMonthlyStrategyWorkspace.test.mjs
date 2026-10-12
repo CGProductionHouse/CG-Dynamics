@@ -153,6 +153,26 @@ test('cited proposal saves only a version-fenced unpublished canonical draft, pr
   assert.equal(conflictingRetry.error, 'STRATEGY_IDEMPOTENCY_CONFLICT')
 })
 
+test('an untouched November autopilot row promotes legacy package prose through the guarded draft RPC', async () => {
+  const db = new FakeDb()
+  const row = db.tables.monthly_client_strategies[0]
+  row.internal_notes = null
+  row.strategy_data.goldStandard.formatsAndRationale = 'Work within Piek Group’s confirmed package of 1 professional video, 3 design posters; each format still needs an evidence-backed role.'
+  row.strategy_data.goldStandard.nextMonthGamePlan = 'Sequence only the confirmed 1 professional video, 3 design posters; do not add channels or deliverables outside package.'
+  const brief = shapeMonthlyStrategyBrief(await loadMonthlyStrategyWorkspace(db, CLIENT, MONTH, TODAY, deps(db)))
+  const result = await submitMonthlyStrategyProposal(db, submitInput(brief), deps(db))
+  assert.equal(result.state, 'draft_filled')
+  assert.deepEqual(result.conflicts, [])
+  assert.ok(result.filled_fields.includes('goldStandard.formatsAndRationale'))
+  assert.ok(result.filled_fields.includes('goldStandard.nextMonthGamePlan'))
+  assert.equal(row.strategy_data.goldStandard.formatsAndRationale, goldStandard.formatsAndRationale)
+  assert.equal(row.strategy_data.goldStandard.nextMonthGamePlan, goldStandard.nextMonthGamePlan)
+  assert.equal(row.version, 2)
+  assert.equal(row.workflow_status, 'draft')
+  assert.equal(row.published_version, null)
+  assert.equal(db.calls.length, 1)
+})
+
 test('MCP accepts exact confirmed twelve-poster scope without widening an unknown format', async () => {
   const db = new FakeDb()
   const exact = { ...proposal, actionPlan: { ...proposal.actionPlan, design_poster: Array.from({ length: 12 }, (_, index) =>
