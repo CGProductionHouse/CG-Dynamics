@@ -1,5 +1,34 @@
 # CG Dynamics Ops Handover
 
+### 12 October — current-main local gate passed; protected client launch remains held
+
+Clean main `ca82c9e9a8088646caea85b90975ae1aa62b721e` passed the
+SHA-pinned no-Vercel launch harness: 3,797 tests passed, zero failed, 17
+intentional skips; TypeScript, local Vite build and all 11 actual-component
+browser fixtures passed. The receipt SHA256 is
+`E28BC104D94792B46724FF68D03EEFA3D346DB622B8D33EA0314979300652C43`.
+The first run lacked OpenSSL on this Windows shell PATH and failed five SNS
+certificate fixtures; the same source passed after adding the existing Git
+OpenSSL binary to PATH. The unsupported Windows Bash SES fixture remains
+excluded, not passed. The harness forced synthetic loopback public config,
+made zero Vercel calls and did not produce an uploadable production artifact.
+
+Fresh SELECT-only production checks still found 61 active clients, zero
+published strategies, 57 blank-objective November drafts plus four missing,
+zero disclosed October/November Client Schedule rows among five dated rows,
+zero Brand Hub mappings and zero service-entitlement rows. Source inspection
+found client-supplied VCS October product/promotion workbooks as **unreviewed**
+planning candidates, not approved current offers; JFJ's private portfolio is
+not yet extractable through the text connector. No claim from an unrelated
+similarly named public business may be used. No strategy, schedule, file,
+permission, provider, Supabase or Vercel write was made. The exact Piek
+generation pilot still needs CA's numeric rand cap and separate protected
+one-client authorization; fleet generation remains OFF. The already-complete
+OneDrive parent-link cleanup, canonical VCS root rename and Braize visual
+attribution are corrected in the launch cutline; approved finals, named
+recipients and sibling isolation still gate Brand Hub. Gate 0 passes for this
+source SHA; gates 1–7 do not follow automatically.
+
 ### 11 October — strategy copy guard covers rendered insight and key dates locally
 
 A SELECT-only October/November draft audit found zero published strategies:
