@@ -104,6 +104,7 @@ test('pilot is not a scheduler action or a global generation-flag bypass', () =>
   assert.match(handler, /authorizesMonthlyStrategyPilot\(pilotGrant, clientId, generationEnabled\)/)
   assert.match(handler, /monthlyStrategyInvocationAuth\(/)
   assert.match(handler, /authMode === 'pilot' && payload\.action !== 'pilot_generate_next_month'/)
+  assert.match(handler, /monthly-strategy-pilot-auth-denied/)
   assert.doesNotMatch(worker, /pilot_generate_next_month/)
   assert.match(model, /routeId: pilotRoute\.routeId/)
   assert.match(model, /monthly-strategy-pilot:\$\{input\.clientId\}:\$\{input\.strategyMonth\}:\$\{input\.pilot\.grantId\}/)

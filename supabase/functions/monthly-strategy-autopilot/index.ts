@@ -38,6 +38,13 @@ Deno.serve(async request => {
     pilotToken: pilotInvokeToken, suppliedPilotToken,
   })
   if (!authMode) {
+    if (suppliedPilotToken.length >= 32) {
+      console.warn('monthly-strategy-pilot-auth-denied', {
+        bearerMatched: suppliedBearer === `Bearer ${serviceKey}`,
+        pilotConfigured: pilotInvokeToken.length >= 32,
+        pilotMatched: pilotInvokeToken.length >= 32 && suppliedPilotToken === pilotInvokeToken,
+      })
+    }
     return jsonResponse({ error: 'Worker authentication required.' }, 401)
   }
   if (!UUID_RE.test(systemProfileId)) return jsonResponse({ error: 'Worker system profile is not configured.' }, 503)
