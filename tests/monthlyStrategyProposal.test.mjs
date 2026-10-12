@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { emptyStrategyData } from '../src/lib/strategyEngine.ts'
-import { buildMonthlyStrategyPrompt, mergeMonthlyStrategyProposal, parseMonthlyStrategyProposal, selectMonthlyStrategyEvidence } from '../supabase/functions/_shared/monthlyStrategyProposal.ts'
+import { buildMonthlyStrategyPrompt, mergeMonthlyStrategyProposal, parseMonthlyStrategyProposal, selectMonthlyStrategyEvidence, validateMonthlyStrategyProposal } from '../supabase/functions/_shared/monthlyStrategyProposal.ts'
 
 const clientId = '11111111-1111-4111-8111-111111111111'
 const strategyMonth = '2026-11-01'
@@ -131,6 +131,30 @@ test('model output is fenced to exact client, month, sources and confirmed forma
   assert.equal(parseMonthlyStrategyProposal(JSON.stringify({ ...proposal, sourceIds: ['invented'] }), allowed), null)
   assert.equal(parseMonthlyStrategyProposal(JSON.stringify({ ...proposal, actionPlan: { ...proposal.actionPlan, reels: ['Produce a reel without contractual authority.'] } }), allowed), null)
   assert.equal(parseMonthlyStrategyProposal('{invalid', allowed), null)
+})
+
+test('validation reports only bounded field paths and codes while preserving all write fences', () => {
+  const allowed = { clientId, strategyMonth, sourceIds: new Set(['report-1', 'guide-1']),
+    enabledFormats: new Set(['professional_video', 'design_poster']), confirmedCapacity: { design_poster: 12 } }
+  assert.deepEqual(validateMonthlyStrategyProposal(JSON.stringify(proposal), allowed), { proposal, issues: [] })
+  const longPoster = { ...proposal, actionPlan: { ...proposal.actionPlan,
+    design_poster: ['A'.repeat(301)] } }
+  assert.deepEqual(validateMonthlyStrategyProposal(JSON.stringify(longPoster), allowed).issues,
+    [{ path: 'actionPlan.design_poster[0]', code: 'TEXT_TOO_LONG' }])
+  const longObjective = { ...proposal, goldStandard: { ...goldStandard, objective: 'A'.repeat(1201) } }
+  assert.deepEqual(validateMonthlyStrategyProposal(JSON.stringify(longObjective), allowed).issues,
+    [{ path: 'goldStandard.objective', code: 'TEXT_TOO_LONG' }])
+  const unknownSource = { ...proposal, sourceIds: ['private-unrecognized-value'] }
+  assert.deepEqual(validateMonthlyStrategyProposal(JSON.stringify(unknownSource), allowed).issues,
+    [{ path: 'sourceIds', code: 'UNKNOWN_OR_MISSING_CITATION' }])
+  assert.doesNotMatch(JSON.stringify(validateMonthlyStrategyProposal(JSON.stringify(unknownSource), allowed).issues), /private-unrecognized-value/)
+  const unknownFormat = { ...proposal, actionPlan: { ...proposal.actionPlan, 'private-unrecognized-key': ['Do not echo this key.'] } }
+  assert.deepEqual(validateMonthlyStrategyProposal(JSON.stringify(unknownFormat), allowed).issues,
+    [{ path: 'actionPlan', code: 'FORMAT_NOT_CONFIRMED' }])
+  assert.doesNotMatch(JSON.stringify(validateMonthlyStrategyProposal(JSON.stringify(unknownFormat), allowed).issues), /private-unrecognized-key/)
+  const forbidden = { ...proposal, goldStandard: { ...goldStandard, objective: 'Use exact-client evidence to design the next campaign.' } }
+  assert.deepEqual(validateMonthlyStrategyProposal(JSON.stringify(forbidden), allowed).issues,
+    [{ path: 'proposal', code: 'CLIENT_FACING_COPY_QUALITY' }])
 })
 
 test('a verified twelve-poster package accepts twelve distinct concepts, but no unverified thirteenth', () => {

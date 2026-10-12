@@ -188,7 +188,9 @@ test('changed guide, wrong version/client and failed source read refuse all writ
   assert.equal((await submitMonthlyStrategyProposal(db, submitInput(brief), deps(db))).error, 'STRATEGY_SOURCE_CHANGED')
   db.tables.client_guides[0].guide_markdown = 'Piek offers exact verified service lines.'
   assert.equal((await submitMonthlyStrategyProposal(db, submitInput(brief, { expectedVersion: 3 }), deps(db))).error, 'STRATEGY_VERSION_CONFLICT')
-  assert.equal((await submitMonthlyStrategyProposal(db, submitInput(brief, { proposal: { ...proposal, clientId: OTHER } }), deps(db))).error, 'STRATEGY_PROPOSAL_INVALID')
+  const invalid = await submitMonthlyStrategyProposal(db, submitInput(brief, { proposal: { ...proposal, clientId: OTHER } }), deps(db))
+  assert.equal(invalid.error, 'STRATEGY_PROPOSAL_INVALID')
+  assert.deepEqual(invalid.issues, [{ path: 'clientId/strategyMonth', code: 'EXACT_TARGET_MISMATCH' }])
   db.errors.add('client_guides')
   await assert.rejects(loadMonthlyStrategyWorkspace(db, CLIENT, MONTH, TODAY, deps(db)), /GUIDE_READ_UNAVAILABLE/)
   assert.equal(db.calls.length, 0)
