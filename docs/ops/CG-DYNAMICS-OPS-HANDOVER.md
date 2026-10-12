@@ -1,5 +1,25 @@
 # CG Dynamics Ops Handover
 
+### 12 October — CA-capped Piek November model pilot reached provider, no strategy accepted
+
+CA authorized an exact Piek November model pilot capped at R25. The fenced
+`monthly-strategy-autopilot` code was deployed on current main with fleet
+`MONTHLY_STRATEGY_AI_ENABLED` absent/OFF. Four attempts were recorded and none
+completed: random free routing selected a content-safety model and failed the
+response gate; the exact GPT-4.1 paid route returned HTTP 402 (provider credit
+unavailable); an exact Qwen free route returned 404 and was absent from the live
+model list; a live-listed Gemma 4 free route returned 429. Recorded actual
+model usage is R0, not a successful result. The exact Piek November strategy
+remains unpublished draft v1 with unchanged data MD5
+`2f5f7257bb78ee5b2b4fb037cec80dcf`. No generated proposal was applied.
+The temporary paid/free route rows are disabled; pilot grants/secrets and the
+temporary deployed dispatcher were removed. Its source/config/test were also
+removed in the focused cleanup PR to prevent accidental bulk redeployment.
+The next #731 gate is a funded/available quality route and a new bounded
+one-client generation followed by real semantic review. This does not unblock
+fleet generation, client strategy publication or launch. See
+`docs/ops/MONTHLY-STRATEGY-GENERATION-RUNBOOK.md` and #731.
+
 ### 12 October — current-main local gate passed; protected client launch remains held
 
 Clean main `ca82c9e9a8088646caea85b90975ae1aa62b721e` passed the
