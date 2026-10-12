@@ -1,6 +1,6 @@
 # CG Dynamics Ops Handover
 
-### 12 October — company ChatGPT strategy-draft connector candidate, local only
+### 12 October — company ChatGPT strategy connector deployed; company OAuth acceptance blocked
 
 CA directed #731 toward the company ChatGPT Pro connection instead of retrying
 the exhausted Piek provider routes. A focused local MCP candidate adds an
@@ -9,13 +9,40 @@ and cited draft-only submission to the existing guarded strategy RPCs. The
 brief uses the existing approved/confirmed #731 preparation sources, reports
 missing coverage, and fences source/version changes; the write preserves staff
 text and never approves/publishes. See
-`docs/ops/CHATGPT-MONTHLY-STRATEGY-WORKSPACE.md`. This is **not deployed or
-operationally accepted**. The private CG MCP app's availability from ChatGPT
+`docs/ops/CHATGPT-MONTHLY-STRATEGY-WORKSPACE.md`. PR #781 is merged as
+`af180996fb1ee02457c28c29673243a2a16fe3f9`. The exact
+`cg-dynamics-mcp` function alone was deployed to Supabase v58 on 12 October;
+readback confirmed bundle hash
+`07c3919d2663e21a09cc7c4f498218d697a4fa94f4f1eee02f3dfdc70dca6d84f4`
+and `verify_jwt=false` (the existing custom bearer-auth contract). The
+rollback target is v57, hash
+`f3badd8ada21c74045d06ff4daae31d7edaa3d4eca26bdf2bbc28a1efe1b2c58`.
+An unauthenticated MCP POST still returned HTTP 401 with a bearer challenge.
+No Vercel, migration, secret, provider, cron or strategy-data change accompanied
+the function deployment.
+
+Actual company ChatGPT acceptance is **not complete**: its existing connection
+still exposed the cached 51-tool catalogue and both read-only
+`resolve_project_context` calls failed internally. Plugin "Refresh tools"
+failed; Supabase request logs show a 401 for its MCP POST followed by a 200
+protected-resource metadata read, consistent with a stale OAuth connection.
+Supabase Auth URL Configuration was verified to have the obsolete
+`https://cg-dynamics.vercel.app` Site URL and only localhost/old-domain redirect
+allowlist entries. The first-party production
+`https://www.cgdynamics.co.za/**` redirect was added and read back; Site URL
+was set/read back as `https://www.cgdynamics.co.za`, while the old alias
+allowlist entry remains for transition. A reconnect then correctly reached
+`www.cgdynamics.co.za/oauth/consent`, but the browser was signed in as the
+Braize client (`promotions@braize.co.za`), not the company admin. That consent
+was explicitly denied. **Do not approve a client identity as the shared company
+connector.** CA/company admin must sign into Dynamics in the company Chrome
+profile, then reconnect the existing `info@cgproductionhouse.com` ChatGPT
+connection and refresh its tools. Only then run Red Oak/Piek read-only and
+draft-only acceptance. The private CG MCP app's availability from ChatGPT
 Scheduled Tasks is unverified; normal company-chat acceptance and a one-off
 scheduled invocation must precede a recurring promise. Fleet model generation
 remains OFF, Piek's failed R25 pilot unchanged, and no strategy was created by
-this local connector work. No Vercel, provider, production SQL/data or Edge
-operation occurred. Existing #731 semantic review/publication gates remain.
+this connector work. Existing #731 semantic review/publication gates remain.
 
 ### 12 October — CA-capped Piek November model pilot reached provider, no strategy accepted
 
