@@ -82,6 +82,10 @@ Deno.serve(async request => {
       if (pilot && !authorizesMonthlyStrategyPilot(pilotGrant, clientId, generationEnabled)) {
         return jsonResponse({ error: 'Exact-client strategy pilot is unavailable.' }, 403)
       }
+      const pilotRouteId = pilot ? (Deno.env.get('MONTHLY_STRATEGY_PILOT_ROUTE_ID') ?? '').trim() : ''
+      if (pilotRouteId && !UUID_RE.test(pilotRouteId)) {
+        return jsonResponse({ error: 'Exact-client strategy pilot is unavailable.' }, 403)
+      }
       const generate = payload.action === 'revise_current_month_context'
         ? runCurrentMonthStrategyContextRevision : runNextMonthStrategyGeneration
       const result = await generate(
@@ -90,6 +94,7 @@ Deno.serve(async request => {
           ...(pilotGrant ? { pilot: {
             maxZarMicros: pilotGrant.maxZarMicros,
             grantId: pilotGrant.expiresAt,
+            ...(pilotRouteId ? { routeId: pilotRouteId } : {}),
           } } : {}) },
       )
       return jsonResponse(result)

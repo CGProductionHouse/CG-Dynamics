@@ -27,7 +27,7 @@ async function revisionKey(value: string): Promise<string> {
 async function runStrategyGeneration(
   sb: StrategyAutopilotClient & AiUsageClient,
   input: { clientId: string; strategyMonth: string; today: string; systemProfileId: string;
-    pilot?: { maxZarMicros: number; grantId: string } },
+    pilot?: { maxZarMicros: number; grantId: string; routeId?: string } },
   dependencies: {
     sourceDigest?: typeof monthlyStrategySourceDigest
     generateProposal?: (input: Parameters<typeof generateMonthlyStrategyProposal>[0]) => Promise<{

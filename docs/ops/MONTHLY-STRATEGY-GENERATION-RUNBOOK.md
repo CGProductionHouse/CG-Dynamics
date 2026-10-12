@@ -14,6 +14,8 @@ The current deployed v27 cannot safely test one client by setting `MONTHLY_STRAT
 
 This is **not** a provider-billing hard limit: configured model pricing and FX can drift, so the quoted upper bound must be checked against current provider terms before use. Do not deploy this code, set those env values, or invoke the action until CA provides an exact rand ceiling and separately authorises that one Piek draft/model write. Record actual usage and remove/expire the grant immediately after the single attempt. The existing fleet flag remains OFF throughout.
 
+For a fixed-model pilot, `MONTHLY_STRATEGY_PILOT_ROUTE_ID` may pin one enabled, configured, safely priced route. The model selector and usage router both refuse an absent, unconfigured, repriced or over-cap route before a provider call. Remove the route grant and any temporary route row immediately after the attempt; do not leave a paid pilot route available to other AI actions.
+
 ## Authority and safety
 
 - One `monthly_client_strategies` row per exact client/month; the client portal still reads only the published snapshot.

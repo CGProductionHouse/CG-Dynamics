@@ -21,6 +21,7 @@ export function selectMonthlyStrategyPilotRoute(
   promptBytes: number,
   maxZarMicros: number,
   configuredProviders: ReadonlySet<string>,
+  requestedRouteId?: string,
 ): { routeId: string; estimatedMaxZarMicros: number; costQuoteInputTokens: number } {
   // A UTF-8 byte ceiling plus request framing is conservative even for
   // non-ASCII client text. Unknown pricing fails closed.
@@ -30,7 +31,8 @@ export function selectMonthlyStrategyPilotRoute(
       !Number.isSafeInteger(maxInputTokens) || maxInputTokens > 128_000) {
     throw new Error('STRATEGY_PILOT_COST_CAP_UNAVAILABLE')
   }
-  for (const route of selectRoutes(routes, 'complex').filter(route => configuredProviders.has(route.provider))) {
+  for (const route of selectRoutes(routes, 'complex').filter(route =>
+    configuredProviders.has(route.provider) && (!requestedRouteId || route.id === requestedRouteId))) {
     const quote = estimatedRouteWithinCap(route, maxInputTokens, MAX_STRATEGY_OUTPUT_TOKENS, maxZarMicros)
     if (quote !== null) {
       return { routeId: route.id, estimatedMaxZarMicros: quote, costQuoteInputTokens: maxInputTokens }
@@ -71,7 +73,7 @@ export async function generateMonthlyStrategyProposal(input: {
   sourceWindows?: Record<string, unknown>
   targetVersion: number
   generationPurpose?: 'next_month' | 'current_context'
-  pilot?: { maxZarMicros: number; grantId: string }
+  pilot?: { maxZarMicros: number; grantId: string; routeId?: string }
 }): Promise<{ proposal: MonthlyStrategyProposal; sourceDigest: string; provider: string }> {
   // The provider may cite only evidence actually included in its bounded prompt.
   const sourceIds = new Set(selectMonthlyStrategyEvidence(input.evidence).map(row => row.source_id).filter(Boolean))
@@ -87,6 +89,7 @@ export async function generateMonthlyStrategyProposal(input: {
       monthlyStrategyPilotPromptBytes(prompt.system, prompt.user),
       input.pilot.maxZarMicros,
       new Set(configuredProviderNames('text')),
+      input.pilot.routeId,
     ) : null
   const allowed = { clientId: input.clientId, strategyMonth: input.strategyMonth, sourceIds, enabledFormats }
   let content: string
