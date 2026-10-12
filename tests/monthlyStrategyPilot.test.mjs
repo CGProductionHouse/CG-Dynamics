@@ -59,17 +59,23 @@ test('one configured-price route must fit the cap before any provider reservatio
   assert.equal(monthlyStrategyPilotPromptBytes('é', '😀'), 6)
   const strong = route('strong', 'strong', { request_cost_micros: 2_000_000 })
   const cheap = route('cheap', 'cheap')
-  assert.equal(selectMonthlyStrategyPilotRoute([strong, cheap], 4_000, 50_000_000).routeId, 'strong')
-  assert.equal(selectMonthlyStrategyPilotRoute([strong, cheap], 4_000, 1_000_000).routeId, 'cheap')
-  assert.throws(() => selectMonthlyStrategyPilotRoute([strong], 4_000, 1_000_000), /COST_CAP_UNAVAILABLE/)
-  assert.throws(() => selectMonthlyStrategyPilotRoute([route('unknown', 'strong', { fx_zar_micros: null })], 4_000, 50_000_000), /COST_CAP_UNAVAILABLE/)
-  assert.throws(() => selectMonthlyStrategyPilotRoute([route('negative', 'strong', { output_per_million_micros: -1 })], 4_000, 50_000_000), /COST_CAP_UNAVAILABLE/)
-  assert.throws(() => selectMonthlyStrategyPilotRoute([cheap], 128_000, 50_000_000), /COST_CAP_UNAVAILABLE/)
-  assert.throws(() => selectMonthlyStrategyPilotRoute([cheap], -1, 50_000_000), /COST_CAP_UNAVAILABLE/)
+  const configured = new Set(['openai'])
+  assert.equal(selectMonthlyStrategyPilotRoute([strong, cheap], 4_000, 50_000_000, configured).routeId, 'strong')
+  assert.equal(selectMonthlyStrategyPilotRoute([strong, cheap], 4_000, 1_000_000, configured).routeId, 'cheap')
+  assert.equal(selectMonthlyStrategyPilotRoute([
+    route('unconfigured-strong', 'strong', { provider: 'gemini' }),
+    route('configured-cheap', 'cheap', { provider: 'openrouter' }),
+  ], 4_000, 50_000_000, new Set(['openrouter'])).routeId, 'configured-cheap')
+  assert.throws(() => selectMonthlyStrategyPilotRoute([strong], 4_000, 1_000_000, configured), /COST_CAP_UNAVAILABLE/)
+  assert.throws(() => selectMonthlyStrategyPilotRoute([strong], 4_000, 50_000_000, new Set(['openrouter'])), /COST_CAP_UNAVAILABLE/)
+  assert.throws(() => selectMonthlyStrategyPilotRoute([route('unknown', 'strong', { fx_zar_micros: null })], 4_000, 50_000_000, configured), /COST_CAP_UNAVAILABLE/)
+  assert.throws(() => selectMonthlyStrategyPilotRoute([route('negative', 'strong', { output_per_million_micros: -1 })], 4_000, 50_000_000, configured), /COST_CAP_UNAVAILABLE/)
+  assert.throws(() => selectMonthlyStrategyPilotRoute([cheap], 128_000, 50_000_000, configured), /COST_CAP_UNAVAILABLE/)
+  assert.throws(() => selectMonthlyStrategyPilotRoute([cheap], -1, 50_000_000, configured), /COST_CAP_UNAVAILABLE/)
 })
 
 test('a route repriced after the pilot quote is rejected before usage reservation or provider call', async () => {
-  const selected = selectMonthlyStrategyPilotRoute([route('one', 'strong')], 4_000, 1_000_000)
+  const selected = selectMonthlyStrategyPilotRoute([route('one', 'strong')], 4_000, 1_000_000, new Set(['openai']))
   const repriced = route('one', 'strong', { request_cost_micros: 2_000_000 })
   assert.equal(estimatedRouteWithinCap(repriced, selected.costQuoteInputTokens, 2_400, 1_000_000), null)
   const client = {

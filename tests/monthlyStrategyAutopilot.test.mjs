@@ -344,11 +344,11 @@ test('a failed canonical strategy read explicitly withholds alignment without re
   assert.match(alignment.MONTHLY_STRATEGY_ALIGNMENT_WITHHELD, /Content Guideline authority remains unchanged/)
 })
 
-test('handler is worker-only and shared worker/sync ownership remains untouched', () => {
+test('handler keeps worker auth; the pilot credential is confined to one action', () => {
   const handler = read('../supabase/functions/monthly-strategy-autopilot/index.ts')
   const guideline = read('../supabase/functions/suggest-content-videos/index.ts')
-  assert.match(handler, /workerToken\.length < 32 \|\| suppliedToken !== workerToken/)
-  assert.match(handler, /suppliedBearer !== `Bearer \$\{serviceKey\}`/)
+  assert.match(handler, /monthlyStrategyInvocationAuth\(/)
+  assert.match(handler, /authMode === 'pilot' && payload\.action !== 'pilot_generate_next_month'/)
   assert.match(handler, /MONTHLY_STRATEGY_AI_ENABLED/)
   assert.match(handler, /WORKER_SYSTEM_PROFILE_ID/)
   assert.match(handler, /runMonthlyStrategyAutopilot/)
