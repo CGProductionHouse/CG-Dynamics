@@ -30,9 +30,10 @@ after(async () => { await server.close() })
 
 // ── The sheet is sized to what the user can actually see ────────────────────
 test('collapsed mobile launcher accepts taps without making the entire dock intercept input', () => {
-  const launcher = composer.slice(composer.indexOf('{!mobileFullscreen && !open && isMobile ? ('), composer.indexOf('aria-label="Open CG Assistant"'))
+  const launcher = composer.slice(composer.indexOf('{!mobileFullscreen && !open && isMobile ? ('), composer.indexOf('aria-label="Open CG Assistant"') + 200)
   assert.match(launcher, /onClick=\{\(\) => setOpen\(true\)\}/)
-  assert.match(launcher, /className="pointer-events-auto mx-auto flex h-11 w-11/)
+  assert.match(launcher, /className="pointer-events-auto mx-auto flex h-11 min-w-\[72px\]/)
+  assert.match(launcher, /AI/)
   const dock = composer.slice(composer.indexOf('const shellClass'), composer.indexOf('const innerClass'))
   assert.match(dock, /pointer-events-none fixed/)
 })

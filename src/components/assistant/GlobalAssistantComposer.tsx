@@ -1866,6 +1866,8 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
 
   const shellClass = mobileFullscreen
     ? 'fixed inset-x-0 top-0 z-[60] flex flex-col bg-[#080b0a]'
+    : isMobile
+    ? 'pointer-events-none fixed inset-x-0 bottom-[calc(6.25rem+env(safe-area-inset-bottom)+var(--assistant-viewport-inset))] z-40 pl-[max(0.5rem,env(safe-area-inset-left))] pr-[max(0.5rem,env(safe-area-inset-right))]'
     : 'pointer-events-none fixed inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom)+var(--assistant-viewport-inset))] z-40 pl-[max(0.5rem,env(safe-area-inset-left))] pr-[max(0.5rem,env(safe-area-inset-right))] md:inset-x-auto md:right-5 md:bottom-[calc(1.25rem+var(--assistant-viewport-inset))] md:px-0'
 
   const innerClass = mobileFullscreen
@@ -2309,10 +2311,11 @@ export function GlobalAssistantComposer({ onMobileFullscreenChange }: GlobalAssi
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="pointer-events-auto mx-auto flex h-11 w-11 items-center justify-center rounded-full border border-white/12 bg-white/[0.04] text-lg font-bold text-brand-primary transition-colors hover:text-white"
+            className="pointer-events-auto mx-auto flex h-11 min-w-[72px] items-center justify-center gap-1.5 rounded-full border border-white/12 bg-white/[0.04] px-3 text-sm font-bold text-brand-primary transition-colors hover:text-white hover:bg-white/[0.08]"
             aria-label="Open CG Assistant"
           >
-            +
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-teal/15 text-[10px] font-black text-brand-teal">AI</span>
+            <span className="hidden sm:inline">Assistant</span>
           </button>
         ) : (
           <form onSubmit={handleSubmit} className={`relative flex items-end gap-1.5 rounded-2xl border border-white/12 bg-[#0c0f0e]/98 px-2 py-1.5 shadow-[0_18px_50px_-18px_rgba(0,0,0,0.9)] backdrop-blur-xl ${mobileFullscreen ? 'shrink-0' : ''}`}>
