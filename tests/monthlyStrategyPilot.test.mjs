@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { after, test } from 'node:test'
 import { createServer } from 'vite'
-import { authorizesMonthlyStrategyPilot, readMonthlyStrategyPilotGrant } from '../supabase/functions/_shared/monthlyStrategyPilot.ts'
+import { authorizesMonthlyStrategyPilot, monthlyStrategyInvocationAuth, readMonthlyStrategyPilotGrant } from '../supabase/functions/_shared/monthlyStrategyPilot.ts'
 
 const server = await createServer({
   configFile: false, server: { middlewareMode: true, hmr: false },
@@ -38,6 +38,21 @@ test('short-lived pilot grant is exact-client, positive-cap and fleet-off only',
     [clientId, '20', '2026-10-11T12:00:01Z'],
     [clientId, '20', '2026-10-11 11:00'],
   ]) assert.equal(readMonthlyStrategyPilotGrant(id, cap, expiry, now), null)
+})
+
+test('one-use pilot credential needs service role and cannot become a worker credential', () => {
+  const base = {
+    serviceKey: 'service-role-secret', suppliedBearer: 'Bearer service-role-secret',
+    workerToken: 'w'.repeat(32), suppliedWorkerToken: '',
+    pilotToken: 'p'.repeat(32), suppliedPilotToken: 'p'.repeat(32),
+  }
+  assert.equal(monthlyStrategyInvocationAuth(base), 'pilot')
+  assert.equal(monthlyStrategyInvocationAuth({ ...base, suppliedWorkerToken: base.workerToken, suppliedPilotToken: '' }), 'worker')
+  assert.equal(monthlyStrategyInvocationAuth({ ...base, suppliedBearer: 'Bearer wrong' }), null)
+  assert.equal(monthlyStrategyInvocationAuth({ ...base, suppliedPilotToken: 'wrong' }), null)
+  assert.equal(monthlyStrategyInvocationAuth({ ...base, pilotToken: 'short', suppliedPilotToken: 'short' }), null)
+  assert.equal(monthlyStrategyInvocationAuth({ ...base, pilotToken: '', suppliedPilotToken: '' }), null)
+  assert.equal(monthlyStrategyInvocationAuth({ ...base, workerToken: '', suppliedPilotToken: '' }), null)
 })
 
 test('one configured-price route must fit the cap before any provider reservation', () => {
@@ -81,6 +96,8 @@ test('pilot is not a scheduler action or a global generation-flag bypass', () =>
   const model = readFileSync(new URL('../supabase/functions/_shared/monthlyStrategyModel.ts', import.meta.url), 'utf8')
   assert.match(handler, /pilot_generate_next_month/)
   assert.match(handler, /authorizesMonthlyStrategyPilot\(pilotGrant, clientId, generationEnabled\)/)
+  assert.match(handler, /monthlyStrategyInvocationAuth\(/)
+  assert.match(handler, /authMode === 'pilot' && payload\.action !== 'pilot_generate_next_month'/)
   assert.doesNotMatch(worker, /pilot_generate_next_month/)
   assert.match(model, /routeId: pilotRoute\.routeId/)
   assert.match(model, /monthly-strategy-pilot:\$\{input\.clientId\}:\$\{input\.strategyMonth\}:\$\{input\.pilot\.grantId\}/)

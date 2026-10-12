@@ -10,6 +10,20 @@ export interface MonthlyStrategyPilotGrant {
   expiresAt: string
 }
 
+export function monthlyStrategyInvocationAuth(input: {
+  serviceKey: string
+  suppliedBearer: string
+  workerToken: string
+  suppliedWorkerToken: string
+  pilotToken: string
+  suppliedPilotToken: string
+}): 'worker' | 'pilot' | null {
+  if (!input.serviceKey || input.suppliedBearer !== `Bearer ${input.serviceKey}`) return null
+  if (input.workerToken.length >= 32 && input.suppliedWorkerToken === input.workerToken) return 'worker'
+  if (input.pilotToken.length >= 32 && input.suppliedPilotToken === input.pilotToken) return 'pilot'
+  return null
+}
+
 export function readMonthlyStrategyPilotGrant(
   clientId: string,
   maxZar: string,
