@@ -62,6 +62,8 @@ test('one configured-price route must fit the cap before any provider reservatio
   const configured = new Set(['openai'])
   assert.equal(selectMonthlyStrategyPilotRoute([strong, cheap], 4_000, 50_000_000, configured).routeId, 'strong')
   assert.equal(selectMonthlyStrategyPilotRoute([strong, cheap], 4_000, 1_000_000, configured).routeId, 'cheap')
+  assert.equal(selectMonthlyStrategyPilotRoute([strong, cheap], 4_000, 50_000_000, configured, 'cheap').routeId, 'cheap')
+  assert.throws(() => selectMonthlyStrategyPilotRoute([strong, cheap], 4_000, 50_000_000, configured, 'missing'), /COST_CAP_UNAVAILABLE/)
   assert.equal(selectMonthlyStrategyPilotRoute([
     route('unconfigured-strong', 'strong', { provider: 'gemini' }),
     route('configured-cheap', 'cheap', { provider: 'openrouter' }),
@@ -72,6 +74,19 @@ test('one configured-price route must fit the cap before any provider reservatio
   assert.throws(() => selectMonthlyStrategyPilotRoute([route('negative', 'strong', { output_per_million_micros: -1 })], 4_000, 50_000_000, configured), /COST_CAP_UNAVAILABLE/)
   assert.throws(() => selectMonthlyStrategyPilotRoute([cheap], 128_000, 50_000_000, configured), /COST_CAP_UNAVAILABLE/)
   assert.throws(() => selectMonthlyStrategyPilotRoute([cheap], -1, 50_000_000, configured), /COST_CAP_UNAVAILABLE/)
+})
+
+test('fixed OpenRouter GPT-4.1 worst-case token quote stays below the authorised R25', () => {
+  const paid = route('fixed-paid', 'cheap', {
+    provider: 'openrouter', model: 'openai/gpt-4.1',
+    input_per_million_micros: 2_000_000, output_per_million_micros: 8_000_000,
+  })
+  const selected = selectMonthlyStrategyPilotRoute(
+    [paid], 126_976, 25_000_000, new Set(['openrouter']), 'fixed-paid',
+  )
+  assert.equal(selected.routeId, 'fixed-paid')
+  assert.equal(selected.costQuoteInputTokens, 128_000)
+  assert.ok(selected.estimatedMaxZarMicros > 0 && selected.estimatedMaxZarMicros < 25_000_000)
 })
 
 test('a route repriced after the pilot quote is rejected before usage reservation or provider call', async () => {
@@ -103,6 +118,8 @@ test('pilot is not a scheduler action or a global generation-flag bypass', () =>
   assert.match(handler, /pilot_generate_next_month/)
   assert.match(handler, /authorizesMonthlyStrategyPilot\(pilotGrant, clientId, generationEnabled\)/)
   assert.match(handler, /monthlyStrategyInvocationAuth\(/)
+  assert.match(handler, /MONTHLY_STRATEGY_PILOT_ROUTE_ID/)
+  assert.match(handler, /pilotRouteId && !UUID_RE\.test\(pilotRouteId\)/)
   assert.match(handler, /authMode === 'pilot' && payload\.action !== 'pilot_generate_next_month'/)
   assert.match(handler, /monthly-strategy-pilot-auth-denied/)
   assert.doesNotMatch(worker, /pilot_generate_next_month/)
