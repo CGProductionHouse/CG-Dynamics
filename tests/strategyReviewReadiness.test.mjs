@@ -45,6 +45,20 @@ test('internal caption and contact rules cannot pass as a client strategy', () =
   }
 })
 
+test('internal publishing-contact resolution is held while a real client request remains allowed', () => {
+  const held = completeDraft()
+  held.clientActionsRequired = [
+    'Resolve the publishing-email discrepancy before adding an email address; do not silently substitute a contact.',
+  ]
+  assert.ok(clientFacingStrategyQualityIssues(held).some(issue => issue.includes('staff notes')))
+  assert.ok(assessGoldStandardStrategy(held, pkg, true).length > 0)
+  assert.equal(strategyRequiredComplete(held), false)
+
+  const safe = completeDraft()
+  safe.clientActionsRequired = ['Please confirm the email address you want customers to use for enquiries.']
+  assert.deepEqual(clientFacingStrategyQualityIssues(safe), [])
+})
+
 test('client-facing insight and selected calendar copy receive the same quality gate', () => {
   const fields = [
     data => { data.topContent.whyItWorked = ['Use the verified client evidence to infer performance.'] },

@@ -92,13 +92,18 @@ test('live blocked evidence-template prose cannot masquerade as presentation-rea
   }
 })
 
-test('presentation gate retains all 72 accepted amended payloads and holds all 22 unresolved templates', () => {
+test('presentation gate holds Piek internal contact copy while preserving the other reviewed payloads', () => {
   const plan = JSON.parse(read('../artifacts/strategy-quality-amendments/issue-513/remediation-a/canonical-quality-amendment-plan.json'))
   const accepted = plan.rows.filter(row => row.disposition === 'amendment_needed')
   const held = plan.rows.filter(row => row.disposition === 'blocked')
   assert.equal(accepted.length, 72)
   assert.equal(held.length, 22)
-  for (const row of accepted) assert.deepEqual(strategy.clientFacingStrategyQualityIssues(strategy.readStrategyData(row.proposed_strategy_data)), [], row.client_name)
+  const newlyHeld = accepted.filter(row => strategy.clientFacingStrategyQualityIssues(strategy.readStrategyData(row.proposed_strategy_data)).length > 0)
+  assert.deepEqual(newlyHeld.map(row => `${row.client_name} ${row.strategy_month}`), ['Piek Group 2026-09-01', 'Piek Group 2026-10-01'])
+  assert.ok(strategy.clientFacingStrategyQualityIssues(strategy.readStrategyData(newlyHeld[0].proposed_strategy_data)).some(issue => issue.includes('staff notes')))
+  for (const row of accepted.filter(row => row.client_name !== 'Piek Group')) {
+    assert.deepEqual(strategy.clientFacingStrategyQualityIssues(strategy.readStrategyData(row.proposed_strategy_data)), [], row.client_name)
+  }
   for (const row of held) assert.ok(strategy.clientFacingStrategyQualityIssues(strategy.readStrategyData(row.current_strategy_data)).length, row.client_name)
 })
 
