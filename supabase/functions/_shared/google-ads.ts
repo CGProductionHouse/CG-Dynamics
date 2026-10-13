@@ -74,6 +74,34 @@ function requestId(response: Response): string | null {
   return response.headers.get('request-id') ?? response.headers.get('x-request-id')
 }
 
+/** Retain only Google's enum code and a GAQL field name; never surface raw provider text. */
+export function safeGoogleAdsFailureHint(body: unknown): string | null {
+  if (!body || typeof body !== 'object') return null
+  const envelope = (body as { error?: unknown }).error
+  const detailSource = envelope && typeof envelope === 'object' ? envelope : body
+  const details = (detailSource as { details?: unknown }).details
+  if (!Array.isArray(details)) return null
+  for (const detail of details) {
+    const errors = detail && typeof detail === 'object' ? (detail as { errors?: unknown }).errors : null
+    if (!Array.isArray(errors)) continue
+    for (const entry of errors) {
+      if (!entry || typeof entry !== 'object') continue
+      const code = (entry as { errorCode?: unknown }).errorCode
+      if (!code || typeof code !== 'object') continue
+      const pair = Object.entries(code).find(([category, value]) =>
+        /^[a-zA-Z][a-zA-Z0-9]{0,50}$/.test(category)
+        && typeof value === 'string' && /^[A-Z][A-Z0-9_]{0,79}$/.test(value))
+      if (!pair) continue
+      const message = (entry as { message?: unknown }).message
+      const field = typeof message === 'string'
+        ? message.match(/\b(?:campaign_budget|campaign|customer|segments|metrics)\.[a-z][a-z0-9_]*/i)?.[0]
+        : null
+      return `${pair[0]}.${pair[1]}${field ? ` at ${field}` : ''}`
+    }
+  }
+  return null
+}
+
 function retryDelay(response: Response | null, attempt: number): number {
   const retryAfter = response?.headers.get('Retry-After')
   if (retryAfter) {
@@ -148,7 +176,8 @@ export async function searchStream(
   )
   if (!response.ok) {
     const status = response.status === 401 || response.status === 403 ? 502 : response.status
-    throw new GoogleAdsError('Google Ads rejected the request.', status, requestId(response))
+    const hint = safeGoogleAdsFailureHint(await response.json().catch(() => null))
+    throw new GoogleAdsError(`Google Ads rejected the request (HTTP ${response.status}${hint ? `; ${hint}` : ''}).`, status, requestId(response))
   }
   const batches = await response.json() as Array<{ results?: Array<Record<string, unknown>> }>
   if (!Array.isArray(batches)) throw new GoogleAdsError('Google Ads returned an invalid response.', 502, requestId(response))
