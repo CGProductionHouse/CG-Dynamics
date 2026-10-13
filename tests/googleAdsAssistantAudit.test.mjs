@@ -31,8 +31,9 @@ test('unmapped and cross-client campaign facts fail closed', () => {
   assert.equal(audit.buildGoogleAdsAudit(input, { ...rows(), campaignLinks: [link(B)] }).mapping_state, 'not_mapped')
   const result = audit.buildGoogleAdsAudit(input, { ...rows(), metrics: [metric({ client_id: B }), metric({ campaign_id: 'other-client' })] })
   assert.deepEqual(result.accounts[0].campaigns.map(campaign => campaign.campaign_id), ['campaign-a'])
-  assert.equal(result.accounts[0].campaigns[0].period_state, 'not_synced')
+  assert.equal(result.accounts[0].campaigns[0].period_state, 'no_campaign_rows')
   assert.deepEqual(result.accounts[0].campaigns[0].daily_metrics, [])
+  assert.equal(result.data_state, 'no_campaign_rows')
   assert.equal(result.client_id, A)
 })
 
@@ -57,6 +58,36 @@ test('not_synced, stale, partial and unavailable settings are distinct', () => {
   assert.equal(audit.buildGoogleAdsAudit(input, { ...data, syncRuns: [sync({ period_end: '2026-08-10' })] }).data_state, 'stale')
   assert.equal(audit.buildGoogleAdsAudit(input, { ...data, truncated: true }).data_state, 'partial')
   assert.equal(audit.buildGoogleAdsAudit(input, { ...data, metrics: [metric({ native_settings: null })] }).accounts[0].campaigns[0].current_settings, null)
+})
+
+test('covering account sync without mapped campaign rows never implies available facts or zero activity', () => {
+  const result = audit.buildGoogleAdsAudit(input, { ...rows(), metrics: [] })
+  assert.equal(result.accounts[0].freshness, 'available')
+  assert.equal(result.accounts[0].period_coverage, 'complete_sync')
+  assert.equal(result.accounts[0].campaigns[0].period_state, 'no_campaign_rows')
+  assert.deepEqual(result.accounts[0].campaigns[0].daily_metrics, [])
+  assert.equal(result.data_state, 'no_campaign_rows')
+})
+
+test('one empty mapped account does not disappear behind another account with daily facts', () => {
+  const second = { ...account(), id: 'account-b', customer_id: '1112223333' }
+  const result = audit.buildGoogleAdsAudit(input, {
+    ...rows(), accounts: [account(), second],
+    campaignLinks: [link(), { ...link(A, 'campaign-b'), google_ads_account_id: second.id, customer_id: second.customer_id }],
+    syncRuns: [sync(), { ...sync(), google_ads_account_id: second.id }],
+  })
+  assert.equal(result.accounts[0].campaigns[0].period_state, 'stored')
+  assert.equal(result.accounts[1].campaigns[0].period_state, 'no_campaign_rows')
+  assert.equal(result.data_state, 'partial')
+})
+
+test('one empty campaign within a shared account keeps the client audit partial', () => {
+  const result = audit.buildGoogleAdsAudit(input, {
+    ...rows(), campaignLinks: [link(), link(A, 'campaign-b')],
+  })
+  assert.equal(result.accounts[0].campaigns[0].period_state, 'stored')
+  assert.equal(result.accounts[0].campaigns[1].period_state, 'no_campaign_rows')
+  assert.equal(result.data_state, 'partial')
 })
 
 test('identical read is deterministic; missing audit surfaces and mutation boundary are explicit', () => {
