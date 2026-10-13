@@ -9,12 +9,13 @@ const POLICY = read('../supabase/functions/_shared/google-ads-policy.ts')
 const MIGRATION = read('../supabase/migrations/20260908181448_google_ads_v2_native_settings.sql')
 const RESULTS = read('../src/components/client/GoogleAdsResults.tsx')
 
-let server, native, dashboard, googleAds
+let server, native, dashboard, googleAds, policy
 before(async () => {
   server = await createServer({ server: { middlewareMode: true, hmr: false }, appType: 'custom' })
   native = await server.ssrLoadModule('/supabase/functions/_shared/google-ads-native.ts')
   dashboard = await server.ssrLoadModule('/src/lib/googleAdsDashboard.ts')
   googleAds = await server.ssrLoadModule('/src/lib/googleAds.ts')
+  policy = await server.ssrLoadModule('/supabase/functions/_shared/google-ads-policy.ts')
 })
 after(async () => { await server?.close() })
 
@@ -48,9 +49,16 @@ test('missing provider fields remain unavailable while explicit zero survives', 
   assert.equal(native.googleAdsNativeSnapshot({}, 'now').budget_shared, null)
 })
 
-test('sync requests and persists Google-native interactions without inventing missing zeros', () => {
-  assert.match(POLICY, /metrics\.interactions/)
-  assert.match(SYNC, /interactions: requiredMetricNumber\(values\?\.interactions/)
+test('sync uses last provider-verified metric field set while unverified details stay unavailable', () => {
+  const query = policy.googleAdsCampaignQuery('2026-10-01', '2026-10-12')
+  assert.match(query, /metrics\.impressions/)
+  assert.match(query, /metrics\.clicks/)
+  assert.match(query, /metrics\.cost_micros/)
+  assert.match(query, /metrics\.conversions_value/)
+  assert.doesNotMatch(query, /campaign_budget\.|campaign\.primary_status_reasons|metrics\.interactions/)
+  assert.match(SYNC, /previousOptional\.get\(`\$\{campaignId\}:\$\{date\}`\)/)
+  assert.match(SYNC, /native_settings: optional\?\.native_settings \?\? null/)
+  assert.match(SYNC, /interactions: optional\?\.interactions \?\? null/)
   assert.match(SYNC, /cost_micros: requiredMetricNumber/)
   assert.doesNotMatch(SYNC, /coalesce\(metric\.(?:impressions|clicks|cost_micros|conversions|conversion_value), 0\)/)
 })

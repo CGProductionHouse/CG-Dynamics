@@ -1,5 +1,4 @@
 import { requireAdminOrManager } from '../_shared/auth.ts'
-import { googleAdsNativeSnapshot } from '../_shared/google-ads-native.ts'
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import {
   googleAdsConfig,
@@ -259,9 +258,34 @@ Deno.serve(async request => {
     }
 
     try {
-      // One provider request supplies the complete raw account snapshot for this date range.
+      // Keep the metric request on the last provider-verified GAQL field set.
+      // Optional native settings must not prevent reporting metrics from refreshing.
       const rows = await searchStream(config, accessToken, customerId, googleAdsCampaignQuery(startDate, endDate))
-      const observedAt = new Date().toISOString()
+      // The replacement RPC deletes the entire requested range. Carry forward only
+      // previously verified optional facts for the same exact campaign and day.
+      const previousOptional = new Map<string, { interactions: number | string | null; native_settings: Record<string, unknown> | null }>()
+      const pageSize = 1000
+      for (let offset = 0; ; offset += pageSize) {
+        const { data: previous, error: previousError } = await supabase
+          .from('google_ads_campaign_daily_metrics')
+          .select('campaign_id,metric_date,interactions,native_settings')
+          .eq('google_ads_account_id', account.id)
+          .gte('metric_date', startDate)
+          .lte('metric_date', endDate)
+          .order('metric_date', { ascending: true })
+          .order('campaign_id', { ascending: true })
+          .range(offset, offset + pageSize - 1)
+        if (previousError || !previous) throw new Error('Could not preserve previously verified Google Ads settings.')
+        for (const item of previous) {
+          previousOptional.set(`${item.campaign_id}:${item.metric_date}`, {
+            interactions: typeof item.interactions === 'number' || typeof item.interactions === 'string'
+              ? item.interactions : null,
+            native_settings: item.native_settings && typeof item.native_settings === 'object' && !Array.isArray(item.native_settings)
+              ? item.native_settings as Record<string, unknown> : null,
+          })
+        }
+        if (previous.length < pageSize) break
+      }
       const metrics = rows.flatMap(row => {
         const campaign = row.campaign as Record<string, unknown> | undefined
         const segments = row.segments as Record<string, unknown> | undefined
@@ -269,16 +293,17 @@ Deno.serve(async request => {
         const campaignId = campaign?.id === undefined ? '' : String(campaign.id)
         const date = typeof segments?.date === 'string' ? segments.date : ''
         if (!/^\d+$/.test(campaignId) || !validGoogleAdsDate(date)) return []
+        const optional = previousOptional.get(`${campaignId}:${date}`)
         return [{
           campaign_id: campaignId,
-          native_settings: googleAdsNativeSnapshot(row, observedAt),
+          native_settings: optional?.native_settings ?? null,
           metric_date: date,
           campaign_name: typeof campaign?.name === 'string' && campaign.name ? campaign.name : `Campaign ${campaignId}`,
           campaign_status: typeof campaign?.status === 'string' ? campaign.status : null,
           campaign_type: typeof campaign?.advertisingChannelType === 'string' ? campaign.advertisingChannelType : null,
           impressions: requiredMetricNumber(values?.impressions, 'impressions'),
           clicks: requiredMetricNumber(values?.clicks, 'clicks'),
-          interactions: requiredMetricNumber(values?.interactions, 'interactions'),
+          interactions: optional?.interactions ?? null,
           cost_micros: requiredMetricNumber(values?.costMicros, 'cost'),
           conversions: requiredMetricNumber(values?.conversions, 'conversions'),
           conversion_value: requiredMetricNumber(values?.conversionsValue, 'conversion value'),
@@ -316,7 +341,10 @@ Deno.serve(async request => {
         unmappedCampaigns,
       }
     } catch (error) {
-      const safe: { error: string; requestId?: string } = error instanceof Error && error.message === 'Could not store canonical Google Ads campaign metrics.'
+      const safe: { error: string; requestId?: string } = error instanceof Error && (
+        error.message === 'Could not store canonical Google Ads campaign metrics.' ||
+        error.message === 'Could not preserve previously verified Google Ads settings.'
+      )
         ? { error: error.message }
         : safeGoogleAdsError(error)
       await supabase.from('google_ads_sync_runs').update({
