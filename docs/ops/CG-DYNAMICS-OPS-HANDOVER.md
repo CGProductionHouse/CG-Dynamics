@@ -1,5 +1,54 @@
 # CG Dynamics Ops Handover
 
+### 13 October — current-main cloud stage accepted technically, client launch still held
+
+CA renewed the instruction to finish Dynamics with minimum Vercel spend. Clean
+current main `be6343ede3b04b5f9e95fe686a435319683e12d5` passed the exact-head
+local launch harness: 3,818 pass, 17 intentional skip, zero fail, TypeScript/Vite
+and 14 actual-component browser fixtures. Receipt SHA256
+`174DCB5F88F3CDD2BB38903C6AAEA81C06274DE6C4DEBA9B2FE9480405495B80`.
+The `.vercelignore` source upload was 52.32 MB / 1,455 files. Git automatic
+deployment remains OFF.
+
+One `vercel build --prod` followed by a `--prebuilt --prod --skip-domain`
+stage created `dpl_7NiwSA8tmjbrgj1YKK1eNsTnmJLq`, but its browser boot
+failed because locally pulled Sensitive Vite env values were placeholders.
+**Reject this artifact; do not promote it or reuse the local prebuild.** One
+normal archived cloud build with production env injection then created READY
+`dpl_5vXwcM7cU23T4SNQS9DdoMJsaCcq` at
+`https://cg-dynamics-l8930vlt1-cg-dynamics-projects.vercel.app`. This is the
+only viable staged artifact; no further build/retry is justified. No secret
+value was printed or changed. The custom `www.cgdynamics.co.za` domain still
+resolves to the old READY `dpl_6diK6P2pNhRF4hpNXrcfi3iMR8y4`; it is the
+exact rollback target if a later promotion is accepted.
+
+Authenticated company-admin browser acceptance on the corrected stage reached
+Hub, Performance workspace and full read-only client portal preview. At 390px,
+Overview/Plan/Performance/Approvals mobile navigation and the More → Brand Hub
+route worked; desktop viewport was restored. Braize's confirmed package view
+showed only 8 posters/month; its October strategy was under review, October
+client calendar had no visible posts, Approvals had nothing waiting, Brand Hub
+had no verified client-safe mapping, and September TikTok reporting displayed
+partial coverage. Vrystaat Kunstefees showed Facebook/Instagram verified
+figures with a separately labelled 29 Sep platform window versus 23 Sep
+content cutoff, and an unpublished October strategy. The admin Performance
+workspace showed 61 active clients, 119 published dashboards, 153 drafts,
+0 ready to publish and 146 reports needing review/repair. These are real
+content/data gates, not evidence that the corrected stage failed to boot.
+An admin preview is **not** a genuine client-role authorization/recipient test.
+
+Shared Vercel team billing after the stage showed $20/$20 included credit,
+$7.90 on-demand charges and $8.01 current spend against the $15 pause-on cap
+(UI counters lag). The self-imposed $5 client-site reserve leaves less than
+$2 before that reserve by the larger displayed number. No cap, budget, domain,
+config, provider or production data was changed. Do not build again. Do not
+promote the staged frontend or call the app client-launch-ready until a real
+client-role staged journey, #389 exact posting/entitlement evidence, #396
+client-safe Brand Hub/recipient authorization, #731 semantic strategy review
+and the #679 uptime/headroom stop checks pass. Existing published reports
+remain accessible on the old live domain. Update #679/#668/#381 if the stage
+is later promoted, rejected or superseded; never silently switch the domain.
+
 ### 13 October — November merge guard live; frontend release still gated
 
 Release baseline main at verification was
