@@ -33,6 +33,19 @@ test('a job with every required source complete is PASS', () => {
   assert.match(r.reason, /Still perform the live Microsoft read/)
 })
 
+test('provider sync verdict follows the inner durable result, not HTTP success', () => {
+  assert.equal(ops.gradeProviderSyncResponse(true, { ok: false, status: 'failed', failedAccounts: 1 }), 'FAIL')
+  assert.equal(ops.gradeProviderSyncResponse(true, { ok: true, status: 'failed' }), 'FAIL')
+  assert.equal(ops.gradeProviderSyncResponse(true, { ok: true, status: 'partial' }), 'DEGRADED')
+  assert.equal(ops.gradeProviderSyncResponse(true, { ok: true, status: 'skipped' }), 'DEGRADED')
+  assert.equal(ops.gradeProviderSyncResponse(true, { ok: true, status: 'success' }), 'PASS')
+  assert.equal(ops.gradeProviderSyncResponse(true, { ok: true, health: 'sync_error' }), 'FAIL')
+  assert.equal(ops.gradeProviderSyncResponse(true, { ok: true, health: 'verified' }), 'PASS')
+  assert.equal(ops.gradeProviderSyncResponse(true, { ok: true }), 'FAIL')
+  assert.equal(ops.gradeProviderSyncResponse(true, null), 'FAIL')
+  assert.equal(ops.gradeProviderSyncResponse(false, { ok: true, status: 'success' }), 'FAIL')
+})
+
 test('an incomplete REQUIRED source is FAIL, never a silent pass', () => {
   const r = ops.gradeSyncRun('complete', [
     { sourceName: 'Outlook', required: true, complete: false },
