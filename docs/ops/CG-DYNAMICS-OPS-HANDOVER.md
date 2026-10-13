@@ -28,10 +28,23 @@ zero activity or available campaign facts merely because the account synced.
 
 The exact-client ChatGPT Google Ads audit exposed that last false-availability
 projection: account-level coverage promoted Germoparts, Novus and RC to
-`data_state=available` while each mapped campaign had no daily rows. The
-focused correction distinguishes `no_campaign_rows` from a missing sync and
-keeps a mixed-account result partial; see the owning PR/issue for deployment
-and readback state. No Vercel operation occurred in this recovery.
+`data_state=available` while each mapped campaign had no daily rows. PR #802
+merged as `5df60ff1`; only `cg-dynamics-mcp` was deployed as version **64**,
+preserving custom auth / `verify_jwt=false`. Its production source readback
+contains the correction. Exact-client October 1–12 connector readback now
+reports Cape `available` with stored daily facts; Germoparts, Novus and RC
+each `no_campaign_rows` with empty mapped-campaign daily facts, despite the
+shared account's complete sync coverage. A mixed-account/campaign result is
+`partial`, never green. No campaign mapping, provider setting, frontend or
+Vercel operation occurred in this recovery.
+
+This is a successful targeted refresh, **not automatic freshness**. A read-only
+13 October check of production `cron.job` found no active or inactive job name
+or command invoking `google-ads-sync`; the repository also has no Google Ads
+background-worker/cron call. Ongoing scheduled refresh needs a separately
+reviewed bounded design and protected runtime configuration; do not promise
+that the October facts will keep updating on their own. Continue to show the
+last verified dates and classify failed/no-row facts honestly.
 
 ### 13 October late — deployed connector truth and exact calendar coverage
 
