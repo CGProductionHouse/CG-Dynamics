@@ -2,7 +2,8 @@
 
 ### 13 October — November merge guard live; frontend release still gated
 
-Current main is `186b608245dddd374cbc13832d5901078359f1cf`.
+Release baseline main at verification was
+`186b608245dddd374cbc13832d5901078359f1cf`.
 The narrowly scoped #789 November legacy-seed guard is live in
 `cg-dynamics-mcp` v62 (ACTIVE, deployed 2026-10-13 09:36:48 UTC). The
 read-back helper matches current main after newline normalization; deployed
@@ -17,7 +18,7 @@ check found 57 November rows and no row updated after the deploy timestamp.
 No strategy submission, migration, data/config/secret/provider change or
 Vercel operation accompanied this release. See #731 for the receipt.
 
-PR #791 merged into this main to exclude only redundant `dist` and local
+PR #791 merged into that baseline to exclude only redundant `dist` and local
 `artifacts` from Vercel source upload. Dry-run source size fell from
 126.3 MB/1,858 files to 52.32 MB/1,455 files; all application `src`,
 `public` and imported `docs` files remain included. Exact-head local launch
