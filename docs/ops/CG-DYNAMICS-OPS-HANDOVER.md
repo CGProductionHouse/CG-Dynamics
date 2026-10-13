@@ -1,5 +1,9 @@
 # CG Dynamics Ops Handover
 
+### 14 October — client portal read-only launch inventory
+
+The fresh production receipt is `docs/ops/CLIENT-PORTAL-LAUNCH-REVIEW-2026-10-14.md`. Across 61 active clients, 46 have enabled canonical portal access and active client profiles, 39 have a published report starting on or after 1 September, only Piek Group has a published October strategy, none has a published November strategy, five have any dated October `monthly_deliverables`, and **zero** have a mapped/verified Brand Hub library or recorded service entitlements. Piek October v3 was published at 20:35 UTC on 13 October, superseding the previous approved-but-unpublished snapshot; authenticated admin preview displays it, but includes an internal publishing-email instruction under client actions, so targeted copy review and client-role acceptance remain. The exact Braize client-safe OneDrive folder exists but is not mapped; owner-only permission listing does not prove recipient/final-asset readiness. No production writes, sync, mapping, share or Vercel operation in this audit. Continue exact-client gates #389/#396/#731 rather than treating the live frontend as client launch completion.
+
 ### 13 October — Google Ads provider recovery and mapped-campaign truth
 
 PR #800 merged as `1eb0c4bd` and only `google-ads-sync` was deployed as
