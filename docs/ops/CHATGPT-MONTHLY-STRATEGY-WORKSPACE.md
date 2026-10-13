@@ -55,10 +55,12 @@ old package-only Gold Standard fields. A direct read-only database check found
 45 of 57 November rows with both exact old fields; Piek and Daisy are v2 with
 the same fields still present and recorded as `review_conflicts`. Merged PR
 #789 has regression coverage for exact unedited v1 and v2 promotion,
-while preserving staff changes and any non-template text. Deployed v61 does
-not yet contain that fix. Do not resubmit Piek/Daisy or bulk-submit the 35
-other structurally ready clients merely to erase conflicts: the #679 release
-packet, fresh source versions, editorial quality checks and post-save
+while preserving staff changes and any non-template text. The exact helper
+is live in `cg-dynamics-mcp` v62 as of 13 October; the previous v61 is the
+rollback target. Fresh Piek and Red Oak brief reads confirmed the protected
+read path, but no revised proposal was submitted. Do not resubmit Piek/Daisy
+or bulk-submit the 35 other structurally ready clients merely to erase
+conflicts: fresh source versions, editorial quality checks and post-save
 readbacks still apply. [Braize review-only company chat](https://chatgpt.com/g/g-p-68ac1cc2e09881918a2108bc5e53095e-cg-production-house/c/6acd4946-8d60-83e9-8cad-db53da9e60fd).
 
 - Test Red Oak, Piek, Daisy and an unconfirmed-package client in the actual company chat. Red Oak must either yield exact usable source evidence and a good draft, or a truthful blocker — never a generic, guardrail-only plan. Confirm a duplicate retry returns the original receipt, changed evidence/version refuses a write, staff edits survive, and client portal still sees only published snapshots.
