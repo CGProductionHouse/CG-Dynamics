@@ -12,17 +12,27 @@ working as designed; do not mislabel a draft as client-visible or auto-publish
 the 47 October drafts without semantic review of current content and a separate
 owner decision (#731/#513).
 
-The company-admin ChatGPT connector filled and read back five additional
-exact-client **unpublished** November drafts on fresh version/fingerprint
-receipts: Braize, We Ar Fuels, AV Event Life, Novus Steel and Case Bloemfontein.
-Their confirmed package formats and cited exact-client guide/report evidence
-were used; staff-edited October content was untouched. November now has seven
-nonblank objectives, **zero published**. The remaining 50 seeded rows are not
-equivalent to game plans. The latest 61-client connector sweep classified 37
-structurally ready, 24 evidence/package blocked; the four active clients with
-no November canonical row are Elcheck, JFJ Electrical, LHP Student Village &
-Block and VCS Cleaning Solutions. LHP is once-off; do not invent a recurring
-plan. Exact blocker receipts belong in #731.
+The company-admin ChatGPT connector filled and verified **35 new exact-client
+November drafts** on fresh version/fingerprint receipts, in addition to the
+earlier Piek Group and Daisy & Co drafts. Each save returned `draft_filled`,
+version 2, zero conflicts and `published=false`; confirmed package formats and
+cited exact-client evidence were used, and October staff edits were untouched.
+Read-only production receipt: November 57 canonical rows, **37 substantive
+drafts, zero published**. This exhausts the connector's 37 currently
+evidence-ready clients. The other 24/61 remain held on exact-client evidence
+and/or confirmed monthly scope, not a missing connector; #731 lists each name.
+Four active clients lack a November canonical row: Elcheck, JFJ Electrical,
+LHP Student Village & Block and VCS Cleaning Solutions. LHP is once-off;
+do not invent a recurring plan. CA's stated quantities for Elcheck/JFJ/VCS
+must not be silently treated as production-confirmed package/evidence. Source
+drift on SecuriForce and Madison required a fresh brief before saving.
+
+October remains a **real client-visibility blocker**, not a frontend bug.
+All 57 rows have null `published_version`. Of the 47 nonblank objectives,
+several are still seed-like voice-rule text in place of a commercial strategy;
+blanket promotion would expose low-quality plans. Publication requires a
+separate exact-client semantic review and owner decision (#731/#513). Do not
+turn a connector draft into a published client plan merely to make the UI green.
 
 Google Ads is connected to one shared account, but connection is not freshness.
 The only four exact active Dynamics campaign mappings are Cape Lumber,
@@ -45,7 +55,7 @@ Client Schedule or provider write was made. Resolve conflicts by durable IDs
 and ownership, then perform protected preview/acceptance before apply (#451,
 #623); decide any new posting-plan source deliberately under the Calendar Lock.
 
-This was a connector/data audit plus five audited draft saves only. No code,
+This was a connector/data audit plus 35 audited draft saves only. No code,
 schema, Edge, Vercel, Google Ads, Microsoft or publication transition was made.
 
 ### 13 October — current-main frontend promoted and live-tested
