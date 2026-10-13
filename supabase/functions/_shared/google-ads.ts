@@ -1,5 +1,4 @@
 import { normalizeCustomerId } from './google-ads-policy.ts'
-import { GOOGLE_ADS_NATIVE_FIELDS, googleAdsNativeSnapshot } from './google-ads-native.ts'
 
 export { normalizeCustomerId } from './google-ads-policy.ts'
 
@@ -29,7 +28,7 @@ export interface GoogleAdsAccount {
 }
 
 export interface GoogleAdsCampaign {
-  nativeSettings: ReturnType<typeof googleAdsNativeSnapshot>
+  nativeSettings: null
   campaignId: string
   name: string
   status: 'ENABLED' | 'PAUSED' | 'REMOVED'
@@ -244,7 +243,6 @@ export async function listAccountCampaigns(
       campaign.name,
       campaign.status,
       campaign.advertising_channel_type,
-      ${GOOGLE_ADS_NATIVE_FIELDS},
       customer.id,
       customer.descriptive_name,
       customer.currency_code,
@@ -261,7 +259,7 @@ export async function listAccountCampaigns(
     if (!/^\d+$/.test(campaignId) || !normalizedCustomerId ||
       (status !== 'ENABLED' && status !== 'PAUSED' && status !== 'REMOVED')) return []
     return [{
-      nativeSettings: googleAdsNativeSnapshot(row, new Date().toISOString()),
+      nativeSettings: null,
       campaignId,
       name: typeof campaign?.name === 'string' && campaign.name ? campaign.name : `Campaign ${campaignId}`,
       status,
