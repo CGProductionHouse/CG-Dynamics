@@ -33,3 +33,25 @@ test('failed search returns safe code and request ID without the raw error text'
     globalThis.fetch = originalFetch
   }
 })
+
+test('campaign discovery uses identity fields only and marks native settings unavailable', async () => {
+  const originalFetch = globalThis.fetch
+  let query = ''
+  globalThis.fetch = async (_url, init) => {
+    query = JSON.parse(init.body).query
+    return new Response(JSON.stringify([{ results: [{
+      campaign: { id: '23937664317', name: 'Cape Lumber', status: 'ENABLED', advertisingChannelType: 'SMART' },
+      customer: { id: '4951506884', descriptiveName: 'CG', currencyCode: 'ZAR', timeZone: 'Africa/Johannesburg' },
+    }] }]), { status: 200 })
+  }
+  try {
+    const campaigns = await api.listAccountCampaigns({ developerToken: 'test', loginCustomerId: '4951506884' }, 'test', '4951506884')
+    assert.equal(campaigns.length, 1)
+    assert.equal(campaigns[0].campaignId, '23937664317')
+    assert.equal(campaigns[0].nativeSettings, null)
+    assert.match(query, /campaign\.id/)
+    assert.doesNotMatch(query, /campaign_budget\.|campaign\.primary_status|metrics\./)
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+})
