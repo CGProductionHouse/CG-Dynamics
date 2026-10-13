@@ -1,5 +1,44 @@
 # CG Dynamics Ops Handover
 
+### 13 October — November merge guard live; frontend release still gated
+
+Current main is `186b608245dddd374cbc13832d5901078359f1cf`.
+The narrowly scoped #789 November legacy-seed guard is live in
+`cg-dynamics-mcp` v62 (ACTIVE, deployed 2026-10-13 09:36:48 UTC). The
+read-back helper matches current main after newline normalization; deployed
+bundle hash `761b1e723c012c5f11d1f14d1d88c76aacc5d614c128cec8d2d7cb21031487cc`.
+JWT mode remained `verify_jwt=false`, with the existing custom bearer-auth
+contract unchanged. The exact rollback target is v61, hash
+`d92fd7d3a758f752ab2382b1aa9592e4b3de5da72f7e9c54167f87689bd3817b`.
+An unauthenticated request returned 401; fresh authenticated November brief
+reads showed Piek ready for a cited draft (v2/unpublished) and Red Oak still
+blocked by missing exact strategy evidence (v1/unpublished). A read-only
+check found 57 November rows and no row updated after the deploy timestamp.
+No strategy submission, migration, data/config/secret/provider change or
+Vercel operation accompanied this release. See #731 for the receipt.
+
+PR #791 merged into this main to exclude only redundant `dist` and local
+`artifacts` from Vercel source upload. Dry-run source size fell from
+126.3 MB/1,858 files to 52.32 MB/1,455 files; all application `src`,
+`public` and imported `docs` files remain included. Exact-head local launch
+harness passed 3,818 tests (17 intentional skips), TypeScript/Vite and 14
+actual-component browser fixtures, with zero failures and no Vercel run.
+Receipt SHA256 `496570BE0939C2ACB831BB7F919B2FD73212EA79DF7A8A71976D0BD3ECD15F02`.
+
+The frontend on current main is **not deployed**. The live Dynamics
+deployment remains `dpl_6diK6P2pNhRF4hpNXrcfi3iMR8y4`, sourced from
+`8c2add235be4d3c94e4ea6e899e56bd1e8285526`. Authenticated browser
+transport failed during the changed-build acceptance attempt, so staging a
+cloud build without a viable client-role test would spend shared Vercel
+capacity without satisfying #679's promotion gate. Do not infer launch
+acceptance from the local harness or promote a new frontend until legitimate
+authenticated client-role acceptance and rollback checks can be completed.
+Primary Dynamics and 12 checked client/app domains returned HTTP 200 at the
+pre-release baseline; that check does not prove every client journey.
+#389 schedule/entitlement, #396 Brand Hub/recipient and #731 editorial/source
+gates remain open. No budget number needs to be requested from CA; use the
+smallest verifiable release and preserve client-site serving headroom.
+
 ### 12 October — November legacy-seed promotion merged, not deployed
 
 The company ChatGPT read-only Braize November brief returned a source-cited,
