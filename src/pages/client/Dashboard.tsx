@@ -32,6 +32,7 @@ import {
 import type { PlatformFact } from '../../lib/overviewModel'
 import { actionMonthForReport } from '../../lib/clientPortal'
 import { getClientPublishedMonthlyStrategy } from '../../lib/monthlyStrategy'
+import { readStrategyData } from '../../lib/strategyEngine'
 import type { MonthlyStrategyPresentation } from './ClientReportView'
 import { getPreviewMetrics, getPreviewReport, getPreviewStrategy, listPreviewReports } from '../../lib/clientPortalPreview'
 
@@ -192,7 +193,7 @@ export default function Dashboard() {
           setMonthlyStrategy(strategyResult.data ? {
             month: strategyResult.data.strategy_month,
             status: 'published',
-            strategyData: strategyResult.data.strategy_data,
+            strategyData: readStrategyData(strategyResult.data.strategy_data),
           } : null)
         }
       } catch (error) {

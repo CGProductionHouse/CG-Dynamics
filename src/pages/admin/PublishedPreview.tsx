@@ -35,6 +35,7 @@ import type { PlatformFact } from '../../lib/overviewModel'
 import type { ReportStatsPost } from '../../lib/reportStats'
 import { actionMonthForReport } from '../../lib/clientPortal'
 import { getMonthlyStrategy } from '../../lib/monthlyStrategy'
+import { readStrategyData } from '../../lib/strategyEngine'
 import { isStaffRole } from '../../lib/roles'
 import { loadStaffSetupPreview } from '../../features/client-onboarding/api'
 import { ClientSetupContent } from '../../features/client-onboarding/ClientSetupPage'
@@ -242,7 +243,7 @@ export default function PublishedPreview() {
           setMonthlyStrategy(strategyResult.data ? {
             month: strategyResult.data.strategy_month,
             status: strategyResult.data.workflow_status,
-            strategyData: strategyResult.data.strategy_data,
+            strategyData: readStrategyData(strategyResult.data.strategy_data),
           } : null)
         }
       } catch (error) {
