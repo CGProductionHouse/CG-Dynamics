@@ -37,6 +37,7 @@ import {
 import { buildGoogleAdsAudit, planGoogleAdsMetricReads, validateGoogleAdsAuditInput, type AuditAccount, type AuditLink, type AuditMetric, type AuditSync } from './googleAdsAudit.ts'
 import {
   classifyOneDriveReadiness,
+  gradeProviderSyncResponse,
   gradeSyncRun,
   planGuidelineVideoLinks,
   summarizeProviderHealth,
@@ -1331,7 +1332,7 @@ const handleRunProviderSync: ToolHandler = async (staff, input) => {
 
   return {
     provider,
-    verdict: res.ok ? 'PASS' : 'FAIL',
+    verdict: gradeProviderSyncResponse(res.ok, res.data),
     health: summary,
     result: res.data,
     ...(res.error ? { error: res.error } : {}),

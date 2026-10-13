@@ -9,6 +9,18 @@
 
 export type RunVerdict = 'PASS' | 'DEGRADED' | 'FAIL'
 
+/** A successful Edge HTTP response is not proof that provider work succeeded. */
+export function gradeProviderSyncResponse(
+  transportOk: boolean,
+  data: Record<string, unknown> | null,
+): RunVerdict {
+  if (!transportOk || !data || data.ok !== true) return 'FAIL'
+  if (data.status === 'failed' || data.health === 'sync_error') return 'FAIL'
+  if (data.status === 'partial' || data.status === 'skipped' || data.health === 'partial') return 'DEGRADED'
+  if (data.status === 'success' || data.health === 'verified') return 'PASS'
+  return 'FAIL'
+}
+
 export interface JobSourceState {
   sourceType?: unknown
   sourceId?: unknown

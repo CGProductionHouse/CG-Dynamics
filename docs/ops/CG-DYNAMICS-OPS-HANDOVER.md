@@ -1,5 +1,35 @@
 # CG Dynamics Ops Handover
 
+### 13 October evening — exact production follow-through
+
+CA directed active remediation, not another read-only report. The exact Piek
+Group October v3 strategy was reviewed in the authenticated admin workflow:
+four professional videos and twelve design posters matched the confirmed
+package; all ten gold-standard fields were substantive and the built-in
+client-facing checks passed. It was **approved** at 19:01 UTC. Publication
+did not complete when browser transport stalled; DB readback confirms
+`workflow_status=approved`, `published_at=null`, `published_version=null`.
+Do not report Piek October as client-visible or bulk-publish the other 56.
+
+One bounded 1 September–12 October Google Ads refresh was attempted for the
+shared account underlying Cape Lumber, Germoparts, Novus Steel and
+RC-Polypipe. The provider rejected it; durable run
+`6a2aa436-97e4-4749-88bc-dc8d1e8b8d54` is failed with request ID
+`BtlkKgYLo7uVAKp-GBj7WQ`, and October metrics remain stale. The ChatGPT
+connector incorrectly reported outer PASS from HTTP 200 while the inner sync
+reported `ok=false`. A focused code fix grades the inner result and has a
+deterministic regression; provider rejection itself is not yet resolved.
+Do not repeat the same provider call without diagnosing the exact rejection.
+
+The later automatic Microsoft run
+`f0989b27-5a1e-445a-a354-ea8642f1d133` fetched all six required sources
+but ended PARTIAL: one applied, 385 protected conflicts, no failed apply
+items. Its exact fresh source snapshot contains **33 upstream-completed
+Planner tasks with active Dynamics mirrors** (19 CG Socials, 14 To Do), all
+skipped as `existing_row_changed` conflicts; every one has a baseline hash.
+Neither these tasks nor the 155 Outlook conflicts may be force-cleared or
+title-matched. The 2025 Client Schedule source remains read-only/excluded.
+
 ### 13 October — strategy, Google Ads and Microsoft truth after live acceptance
 
 CA reported that October strategy is still unpublished and asked ChatGPT to
