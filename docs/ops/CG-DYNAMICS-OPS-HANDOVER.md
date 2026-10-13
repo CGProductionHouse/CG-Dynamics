@@ -1,5 +1,38 @@
 # CG Dynamics Ops Handover
 
+### 13 October — Google Ads provider recovery and mapped-campaign truth
+
+PR #800 merged as `1eb0c4bd` and only `google-ads-sync` was deployed as
+version **49** (`verify_jwt=true`). The sync GAQL now uses the last
+provider-verified field set; unavailable interactions/native settings remain
+null and previously verified optional facts survive exact-day replacement.
+One bounded 1 September–12 October sync for the already-mapped shared account
+succeeded (run `937d6ff9-f3f3-44c7-ab89-fe88d811516f`), replacing 69 daily
+rows. Cape Lumber's 6–12 October stored spend (ZAR843.76 rounded), 11,804
+impressions and 547 clicks match the authenticated Google Ads screen. The
+Google UI's 47 website-action conversions are not the same verified definition
+as the API's `metrics.conversions` sum; do not claim conversion parity.
+
+PR #801 merged as `87ca96c7`; only `google-ads-list-campaigns` and
+`google-ads-link-account` were deployed as version **47** each, retaining
+`verify_jwt=true`. Authenticated Dynamics campaign discovery now works on the
+shared customer. It reports Cape Lumber's mapped campaign enabled; mapped
+Germoparts campaigns paused/removed; RC-Polypipe's mapped campaign paused;
+Novus Steel's three mapped campaigns removed. A separate unmapped
+`NOVUS STEEL SEPT` campaign (`24189935204`) appears enabled in discovery but
+its first-party Google Ads detail shows **Ended 27 September 2026**. No
+mapping, campaign setting, OAuth or credential was changed. The shared-account
+sync covers provider fetch for all four clients, but October daily rows exist
+only for Cape's mapped campaign. No-row clients must not be called refreshed,
+zero activity or available campaign facts merely because the account synced.
+
+The exact-client ChatGPT Google Ads audit exposed that last false-availability
+projection: account-level coverage promoted Germoparts, Novus and RC to
+`data_state=available` while each mapped campaign had no daily rows. The
+focused correction distinguishes `no_campaign_rows` from a missing sync and
+keeps a mixed-account result partial; see the owning PR/issue for deployment
+and readback state. No Vercel operation occurred in this recovery.
+
 ### 13 October late — deployed connector truth and exact calendar coverage
 
 PR #797 merged as `73ea5bdc`; only `cg-dynamics-mcp` was deployed to

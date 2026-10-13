@@ -91,7 +91,9 @@ export function buildGoogleAdsAudit(input: GoogleAdsAuditInput, rows: {
         const latest = [...daily].filter(metric => metric.native_settings && typeof metric.native_settings.observed_at === 'string')
           .sort((a, b) => String(b.native_settings?.observed_at).localeCompare(String(a.native_settings?.observed_at)))[0]
         return { campaign_id: id, campaign_name: daily.at(-1)?.campaign_name ?? links.find(link => link.campaign_id === id)?.campaign_name ?? null,
-          period_state: daily.length ? 'stored' : 'not_synced',
+          // An account-level covering sync does not prove that this campaign
+          // produced daily facts. Keep that absence distinct from no sync.
+          period_state: daily.length ? 'stored' : covering ? 'no_campaign_rows' : 'not_synced',
           campaign_status: daily.at(-1)?.campaign_status ?? null, campaign_type: daily.at(-1)?.campaign_type ?? null,
           current_settings: latest ? { observed_at: latest.native_settings?.observed_at, values: latest.native_settings } : null,
           daily_metrics: daily.map(metric => ({ date: metric.metric_date, impressions: metric.impressions, clicks: metric.clicks,
@@ -106,7 +108,11 @@ export function buildGoogleAdsAudit(input: GoogleAdsAuditInput, rows: {
     data_state: rows.truncated ? 'partial' : !mapped.length ? 'not_mapped'
       : mapped.every(account => account.freshness === 'not_synced') ? 'not_synced'
         : mapped.some(account => account.freshness === 'stale') ? 'stale'
-          : mapped.some(account => account.period_coverage !== 'complete_sync') ? 'partial' : 'available',
+          : mapped.some(account => account.period_coverage !== 'complete_sync') ? 'partial'
+            : mapped.every(account => account.campaigns.every(campaign => campaign.daily_metrics.length === 0))
+              ? 'no_campaign_rows'
+              : mapped.some(account => account.campaigns.some(campaign => campaign.daily_metrics.length === 0))
+                ? 'partial' : 'available',
     accounts: mapped,
     conversion_facts: 'Stored campaign daily conversions and conversion_value only; conversion action/goal definitions are unavailable.',
     missing_surfaces: GOOGLE_ADS_MISSING_SURFACES,

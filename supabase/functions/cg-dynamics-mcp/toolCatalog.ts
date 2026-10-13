@@ -133,7 +133,7 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   },
   {
     name: 'get_google_ads_audit', title: 'Read exact-client Google Ads audit',
-    description: 'Company-admin only. Read canonical stored Google Ads V2 account mapping, sync freshness, campaign daily facts and timestamped observed settings for one exact Dynamics client UUID and explicit account-local date range. No live provider request or mutation. Missing audit surfaces are explicit.',
+    description: 'Company-admin only. Read canonical stored Google Ads V2 account mapping, sync freshness, campaign daily facts and timestamped observed settings for one exact Dynamics client UUID and explicit account-local date range. A covering account sync with no mapped-campaign daily rows is no_campaign_rows, not available or verified zero activity. No live provider request or mutation. Missing audit surfaces are explicit.',
     inputSchema: objectSchema({ client_id: uuid, start_date: date, end_date: date }, ['client_id', 'start_date', 'end_date']),
     annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
     dependency: 'main', canonicalContract: 'google_ads_accounts + exact dedicated/shared links + google_ads_campaign_daily_metrics + google_ads_sync_runs (#237/#435)',
