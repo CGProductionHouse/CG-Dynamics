@@ -1,5 +1,53 @@
 # CG Dynamics Ops Handover
 
+### 13 October — strategy, Google Ads and Microsoft truth after live acceptance
+
+CA reported that October strategy is still unpublished and asked ChatGPT to
+prepare November while checking Google Ads and Teams freshness. Read-only
+production reconciliation found 57 October and 57 November canonical strategy
+rows. October has 47 nonblank objectives, all staff-amended, but **zero
+published versions**. November had only the earlier Piek and Daisy substantive
+drafts before this session. The protected published-only client projection is
+working as designed; do not mislabel a draft as client-visible or auto-publish
+the 47 October drafts without semantic review of current content and a separate
+owner decision (#731/#513).
+
+The company-admin ChatGPT connector filled and read back five additional
+exact-client **unpublished** November drafts on fresh version/fingerprint
+receipts: Braize, We Ar Fuels, AV Event Life, Novus Steel and Case Bloemfontein.
+Their confirmed package formats and cited exact-client guide/report evidence
+were used; staff-edited October content was untouched. November now has seven
+nonblank objectives, **zero published**. The remaining 50 seeded rows are not
+equivalent to game plans. The latest 61-client connector sweep classified 37
+structurally ready, 24 evidence/package blocked; the four active clients with
+no November canonical row are Elcheck, JFJ Electrical, LHP Student Village &
+Block and VCS Cleaning Solutions. LHP is once-off; do not invent a recurring
+plan. Exact blocker receipts belong in #731.
+
+Google Ads is connected to one shared account, but connection is not freshness.
+The only four exact active Dynamics campaign mappings are Cape Lumber,
+Germoparts, Novus Steel and RC-Polypipe. Their October 1–13 audits are all
+`stale` / `not_synced` with no October daily metrics; the last successful
+provider sync was 8 September for a July window. Mapping does not prove a
+campaign is currently running. No provider sync or production metrics write
+was triggered in this audit.
+
+Microsoft's 13 October six-source fetch covered To Do, MASTER CLIENT TO DO,
+operational Outlook, CG Socials, Client Socials July and protected 2025
+CLIENTS SCHEDULE, but the latest run ended `partial` with **zero applied** and
+384 conflicts. A healthy fetch/source coverage is not a successful full
+reconciliation, so completed Teams tasks and cancelled meetings are not
+certified clear. A separate upstream Teams Planner board `CLIENT SOCIALS -
+OCTOBER` exists but is not one of the configured six sources and has zero
+Dynamics Planner mirrors. It must not be title-matched into Client Schedule:
+`monthly_deliverables` remains its separate posting authority. No Microsoft,
+Client Schedule or provider write was made. Resolve conflicts by durable IDs
+and ownership, then perform protected preview/acceptance before apply (#451,
+#623); decide any new posting-plan source deliberately under the Calendar Lock.
+
+This was a connector/data audit plus five audited draft saves only. No code,
+schema, Edge, Vercel, Google Ads, Microsoft or publication transition was made.
+
 ### 13 October — current-main frontend promoted and live-tested
 
 CA explicitly directed a live test and live release. The previously accepted
