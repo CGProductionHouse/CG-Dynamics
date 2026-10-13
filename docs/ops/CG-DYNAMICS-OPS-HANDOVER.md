@@ -1,5 +1,45 @@
 # CG Dynamics Ops Handover
 
+### 13 October — current-main frontend promoted and live-tested
+
+CA explicitly directed a live test and live release. The previously accepted
+production-target stage `dpl_5vXwcM7cU23T4SNQS9DdoMJsaCcq` was promoted
+to `www.cgdynamics.co.za` **without a new build**. A fresh `vercel inspect`
+resolved the live domain to that exact READY deployment. It contains app code
+`be6343ede3b04b5f9e95fe686a435319683e12d5`; documentation-only main
+`d30567e5f55ccfb6b4da575a2fecf40b7c05cd3a` does not change the app.
+The rejected local-prebuilt `dpl_7NiwSA8tmjbrgj1YKK1eNsTnmJLq` was not
+promoted. Exact rollback target remains
+`dpl_6diK6P2pNhRF4hpNXrcfi3iMR8y4` (9 October app code).
+
+Authenticated production Chrome acceptance reached the Hub with real Work and
+CG Calendar data, Client Preview, and Braize's full read-only portal Overview,
+Plan, Performance, Approvals and Brand Hub. At a 390px viewport the fixed
+mobile navigation exposed Overview/Plan/Performance/Approvals and More →
+Brand Hub; the viewport was reset afterward. Braize's September report showed
+the separate 23 Sep content cutoff and 29 Sep Facebook/Instagram platform
+window, 9,618 recorded Facebook + Instagram views (not unique people), TikTok
+partial coverage, and only the confirmed 8-posters/month package. No
+production-domain browser console errors were observed in these journeys.
+The live Integrations page loaded canonical connection/freshness states:
+Meta 42 linked clients/42 assets/67 mapped platforms, PARTIAL (1 stale, 48
+partial); TikTok 10/50 eligible connected; Microsoft 6 sources, PARTIAL with
+last full success 19 August. These are real freshness/coverage gaps, not a
+frontend boot failure. Both Dynamics hostnames and the checked Red Oak,
+Piek, Emmanuel Funerals and All Around PVC site domains returned HTTP 200
+after promotion. Shared Vercel current-spend display was $8.10/$15 with
+Pause ON; no budget setting or new build was made for the promotion.
+
+**Frontend live does not mean every client is invitation-ready.** Braize's
+October strategy remains unpublished, its October client calendar empty, its
+Brand Hub lacks a verified client-safe mapping, and Approvals has nothing
+waiting. Client-role authentication/recipient isolation was not tested by
+the staff preview. Do not fabricate or silently publish strategies, posting
+dates, assets, packages or invites to cover these gates. #389, #396 and #731
+remain the exact client-content/security owners; #668 is the launch cutline.
+The following earlier staging section is historical and its instruction not
+to promote was superseded by CA's direct release request and this acceptance.
+
 ### 13 October — current-main cloud stage accepted technically, client launch still held
 
 CA renewed the instruction to finish Dynamics with minimum Vercel spend. Clean
