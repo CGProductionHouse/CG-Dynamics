@@ -236,6 +236,7 @@ const CLIENT_FACING_STRATEGY_FORBIDDEN: Array<{ pattern: RegExp; reason: string 
   { pattern: /\b(?:github|repository|repo)\b/i, reason: 'Repository references are internal provenance, not client strategy.' },
   { pattern: /\b(?:source[_ -]?reference|source[_ -]?id|evidence[_ -]?label|confidence[_ -]?level|seed[_ -]?context)\b/i, reason: 'Evidence-system jargon must not appear in client strategy.' },
   { pattern: /\b(?:verified facts?|exact-client evidence|evidence dossier|research dossier|source pack)\b/i, reason: 'Internal evidence-workflow jargon must not appear in client strategy.' },
+  { pattern: /\b(?:publishing[- ]email discrepancy|do not silently substitute a contact)\b/i, reason: 'Internal publishing/contact resolution belongs in staff notes, not client strategy.' },
   { pattern: /\bPublished-content record:/i, reason: 'A factual publishing receipt is not a strategy.' },
   { pattern: /\bCorrect facts are only the starting point\b/i, reason: 'Generic quality commentary is not an actionable client strategy.' },
   { pattern: /\b(?:increase engagement|build (?:brand )?awareness|post consistently|grow social media|create engaging content)\b/i, reason: 'Generic marketing filler is not an exact client strategy.' },
