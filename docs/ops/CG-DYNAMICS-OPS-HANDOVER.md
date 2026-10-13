@@ -1,5 +1,37 @@
 # CG Dynamics Ops Handover
 
+### 13 October late — deployed connector truth and exact calendar coverage
+
+PR #797 merged as `73ea5bdc`; only `cg-dynamics-mcp` was deployed to
+production version **63**, preserving its existing custom-auth / `verify_jwt=false`
+contract. Deployment readback contains the new inner-result verdict helper and
+no longer contains the HTTP-only PASS line. An authenticated read-only connector
+call succeeded after deployment. PR #798 merged as `d53c52c0`; only
+`google-ads-sync` was deployed as version **48**, preserving `verify_jwt=true`.
+It now retains only safe HTTP status, structured Google Ads error enum, known
+GAQL field identifier and request ID—never raw provider messages or secrets.
+
+One post-diagnostic retry for the already-mapped shared Google Ads account
+returned **FAIL** correctly, durable run
+`3f2f2aec-011c-4d4d-9ce2-2bc91a5d0ffd`: provider HTTP 400, request ID
+`p9hMfd2GyLlnk51frqPE9Q`, no structured enum supplied, zero accounts
+completed, no metrics replaced. The exact provider rejection remains unknown.
+No further blind retry; use this request ID in the provider's support/API
+diagnostic path, then fix only the proven cause. Cape Lumber, Germoparts,
+Novus Steel and RC-Polypipe October Google Ads facts remain stale.
+
+The October client posting calendar is a separate, larger launch blocker:
+`monthly_deliverables` has only **five** non-archived October rows, all scheduled
+and all linked to the legacy `2025 CLIENTS SCHEDULE` Planner source (Cape
+Lumber, Ehrlich Park Butchery, Germoparts, Supa Quick Centurion, TBS Brokers).
+None is from the separate `CLIENT SOCIALS - OCTOBER` board. Do not represent
+the operational six-source Microsoft reconciliation as proof of client posting
+calendar coverage, nor inject the board into CG Calendar. The October board
+needs a deliberate exact-client/package-slot Client Schedule preview/review;
+unknown package slots and protected source mapping cannot be guessed or bulk
+written. The 33 upstream-completed operational task mirrors remain protected
+`existing_row_changed` conflicts, not safe deletions.
+
 ### 13 October evening — exact production follow-through
 
 CA directed active remediation, not another read-only report. The exact Piek
