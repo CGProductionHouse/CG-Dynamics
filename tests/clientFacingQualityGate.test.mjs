@@ -167,7 +167,8 @@ test('Google Ads panel inherits report loading and covers every configured-sourc
 test('calendar page has loading, error and an intentional empty-month state', () => {
   assert.match(CALENDAR, /ClientPortalLoadingState variant="calendar"/)
   assert.match(CALENDAR, /ClientPortalErrorState/)
-  assert.match(CALENDAR, /The month is ready for your plan/i)
+  assert.match(CALENDAR, /No client-visible items for this month yet/i)
+  assert.doesNotMatch(CALENDAR, /The month is ready for your plan/i)
 })
 
 // ── 10. Mobile rendering ──────────────────────────────────────────────────────
@@ -407,7 +408,8 @@ test('calendar page uses SECURITY-DEFINER RPC keyed to profile.client_id, never 
 test('calendar page has loading, error and an intentional empty-month state', () => {
   assert.match(CALENDAR, /ClientPortalLoadingState variant="calendar"/)
   assert.match(CALENDAR, /ClientPortalErrorState/)
-  assert.match(CALENDAR, /The month is ready for your plan/i)
+  assert.match(CALENDAR, /No client-visible items for this month yet/i)
+  assert.doesNotMatch(CALENDAR, /The month is ready for your plan/i)
 })
 
 test('calendar page shows type breakdown below summary cards', () => {

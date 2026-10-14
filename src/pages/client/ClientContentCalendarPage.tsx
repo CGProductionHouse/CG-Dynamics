@@ -159,8 +159,8 @@ function CalendarSurface({
         <CalendarSummary calendar={calendar} scheduledCount={scheduledPosts.length} />
       ) : (
         <div className="mt-8 flex flex-col gap-2 rounded-2xl border border-white/[0.08] bg-white/[0.035] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm font-semibold text-white">The month is ready for your plan.</p>
-          <p className="text-xs leading-5 text-report-muted">Posts, shoots, content runs and client events will appear on their dates as they are scheduled.</p>
+          <p className="text-sm font-semibold text-white">No client-visible items for this month yet.</p>
+          <p className="text-xs leading-5 text-report-muted">Confirmed dates will appear here when CG shares the plan.</p>
         </div>
       )}
 
