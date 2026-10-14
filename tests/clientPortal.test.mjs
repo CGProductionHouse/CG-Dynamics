@@ -86,7 +86,7 @@ test('one persistent client layout owns the shell while routed pages render cont
   )
 
   assert.match(clientRoutes, /<Route element=\{<RequireClient \/>\}>[\s\S]*<Route element=\{<ClientPortalLayout \/>\}>/)
-  assert.match(LAYOUT_SOURCE, /<ClientPortalShell client=\{client\}>[\s\S]*<Suspense fallback=\{<ClientPortalContentLoading \/>\}>[\s\S]*<Outlet \/>/)
+  assert.match(LAYOUT_SOURCE, /<ClientPortalShell client=\{scopedClient\}>[\s\S]*<Suspense fallback=\{<ClientPortalContentLoading \/>\}>[\s\S]*<Outlet \/>/)
   assert.match(LAYOUT_SOURCE, /getClient\(profile\.client_id\)/)
   assert.match(PORTAL_STATES_SOURCE, /motion-reduce:animate-none/)
 
