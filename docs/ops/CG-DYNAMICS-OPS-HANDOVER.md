@@ -1,5 +1,9 @@
 # CG Dynamics Ops Handover
 
+### 14 October — unverified client package presentation (local fix; protected release)
+
+Authenticated read-only admin preview reproduced an empty Agri-Secure package card headed “What we create together” although it contained no confirmed inclusions. The focused client presentation change keeps confirmed quantities unchanged, but gives an unverified/empty package a neutral short state and a discussion action to Amonique rather than implying an agreed deliverable. It changes no package authority, receipt, entitlement or production row. A deterministic regression covers null, missing, incomplete and mismatched confirmations; this remains local until the protected frontend release and does not replace exact-client package review.
+
 ### 14 October — client portal profile-switch isolation (local fix; protected release)
 
 The client layout retained its previous `client` state for one React render when `profile.client_id` changed, before its effect cleared the state. That transition could briefly send the prior client's identity to the persistent shell/context and mount the prior child view. A focused guard now matches the cached client to the current profile before any shell/context/child render and rejects an unexpected `getClient` identity. This is local frontend-only work; no auth, permission, client mapping, data or provider change. An exact A→B/missing-access regression, affected suites (17/17), full local suite, build and scoped lint pass. Real client-role acceptance and an authorised frontend release remain separate gates.
