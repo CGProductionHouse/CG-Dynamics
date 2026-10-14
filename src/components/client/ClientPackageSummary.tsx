@@ -33,12 +33,13 @@ export function ClientPackageSummary({ packageSettings }: { packageSettings: unk
     <section aria-labelledby="client-package-heading" className="mt-7 rounded-[2rem] border border-white/10 bg-[#071311] p-6 sm:p-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.22em] text-teal-300">Your CG package</p>
-          <h2 id="client-package-heading" className="mt-2 text-2xl font-black tracking-[-0.035em] text-white sm:text-3xl">What we create together</h2>
+          {cards.length > 0 && <p className="text-xs font-black uppercase tracking-[0.22em] text-teal-300">Your CG package</p>}
+          <h2 id="client-package-heading" className="mt-2 text-2xl font-black tracking-[-0.035em] text-white sm:text-3xl">{cards.length > 0 ? 'What we create together' : 'Your package'}</h2>
+          {cards.length === 0 && <p className="mt-2 text-sm text-slate-400">Package details aren’t available here yet.</p>}
         </div>
         <details className="shrink-0">
-          <summary className="inline-flex min-h-11 cursor-pointer list-none items-center rounded-full border border-teal-300/40 px-4 py-2 text-sm font-bold text-teal-200 hover:bg-teal-300/10">Amend package <span aria-hidden className="ml-2">⌄</span></summary>
-          <div className="mt-2 flex flex-wrap gap-2" aria-label="Contact Amonique to amend your package">
+          <summary className="inline-flex min-h-11 cursor-pointer list-none items-center rounded-full border border-teal-300/40 px-4 py-2 text-sm font-bold text-teal-200 hover:bg-teal-300/10">{cards.length > 0 ? 'Amend package' : 'Discuss package'} <span aria-hidden className="ml-2">⌄</span></summary>
+          <div className="mt-2 flex flex-wrap gap-2" aria-label="Contact Amonique about your package">
             <a href="https://wa.me/27791152339" target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center rounded-full border border-teal-300/40 px-4 py-2 text-sm font-bold text-teal-200 hover:bg-teal-300/10">WhatsApp Amonique</a>
             <a href="tel:+27791152339" className="inline-flex min-h-11 items-center rounded-full border border-white/20 px-4 py-2 text-sm font-bold text-white hover:bg-white/10">Call Amonique</a>
           </div>

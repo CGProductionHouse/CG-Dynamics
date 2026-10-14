@@ -40,6 +40,10 @@ test('client package renders confirmed capacity while preserving unknown/zero an
       const unavailable = render(raw)
       assert.doesNotMatch(unavailable, /To confirm|per month|Included/)
       assert.doesNotMatch(unavailable, /per month<\/dd>/)
+      assert.doesNotMatch(unavailable, /What we create together/)
+      assert.match(unavailable, /Package details aren.t available here yet/)
+      assert.match(unavailable, /Discuss package/)
+      assert.doesNotMatch(unavailable, /<dl\b/)
     }
     for (const value of [true, false]) {
       const next = { ...values, campaign_management_included: value }
