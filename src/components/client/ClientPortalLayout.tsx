@@ -2,6 +2,7 @@ import { Suspense, useEffect, useMemo, useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { getClient, type Client } from '../../lib/db/clients'
+import { exactClientForProfile } from '../../lib/clientPortalScope'
 import { ClientPortalContext } from './ClientPortalContext'
 import { ClientPortalShell } from './ClientPortalShell'
 import { ClientPortalErrorState, ClientPortalLoadingState } from './ClientPortalStates'
@@ -28,6 +29,7 @@ export function ClientPortalLayout() {
       try {
         const result = await getClient(profile.client_id)
         if (!active) return
+        if (result.data && result.data.id !== profile.client_id) throw new Error('Client identity mismatch')
         setClient(result.data)
         setError(result.error?.message ?? null)
       } catch {
@@ -41,10 +43,12 @@ export function ClientPortalLayout() {
     return () => { active = false }
   }, [profile?.client_id])
 
-  const portalContext = useMemo(() => ({ client }), [client])
+  const scopedClient = exactClientForProfile(profile?.client_id, client)
+  const scopeChanging = client !== null && scopedClient === null
+  const portalContext = useMemo(() => ({ client: scopedClient }), [scopedClient])
 
   useEffect(() => {
-    if (loading || error) return
+    if (loading || error || !scopedClient) return
     const preload = () => {
       void Promise.allSettled([
         import('../../pages/client/ClientPortalHome'),
@@ -61,14 +65,14 @@ export function ClientPortalLayout() {
     }
     const timer = window.setTimeout(preload, 250)
     return () => window.clearTimeout(timer)
-  }, [error, loading])
+  }, [error, loading, scopedClient])
 
   return (
     <ClientPortalContext.Provider value={portalContext}>
-      <ClientPortalShell client={client}>
-        {loading ? (
+      <ClientPortalShell client={scopedClient}>
+        {loading || scopeChanging ? (
           <ClientPortalContentLoading />
-        ) : error ? (
+        ) : error || !scopedClient ? (
           <ClientPortalContextError />
         ) : (
           <Suspense fallback={<ClientPortalContentLoading />}>

@@ -1,5 +1,9 @@
 # CG Dynamics Ops Handover
 
+### 14 October — client portal profile-switch isolation (local fix; protected release)
+
+The client layout retained its previous `client` state for one React render when `profile.client_id` changed, before its effect cleared the state. That transition could briefly send the prior client's identity to the persistent shell/context and mount the prior child view. A focused guard now matches the cached client to the current profile before any shell/context/child render and rejects an unexpected `getClient` identity. This is local frontend-only work; no auth, permission, client mapping, data or provider change. An exact A→B/missing-access regression, affected suites (17/17), full local suite, build and scoped lint pass. Real client-role acceptance and an authorised frontend release remain separate gates.
+
 ### 14 October — empty client calendar wording (local only)
 
 The client Plan calendar's verified-empty state said “The month is ready for your plan” even though production currently has only five dated October Client Schedule rows across the fleet. The focused local correction says no client-visible items are present yet and keeps RPC failure separate from verified emptiness. It changes no schedule data or visibility rule. Affected client Plan/quality suites pass (78/78), the full local suite exits green, and build/scoped lint pass. This wording is not live until an authorised frontend release; the missing exact-client posting plans remain a separate operational gate.
