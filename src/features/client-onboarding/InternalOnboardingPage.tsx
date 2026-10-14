@@ -56,11 +56,11 @@ export default function InternalOnboardingPage() {
 
   useEffect(() => {
     if (!clientId) {
-      setLinkReadiness(null)
+      setTimeout(() => setLinkReadiness(null), 0)
       return
     }
     let active = true
-    void loadOnboardingLinkReadiness(clientId).then(result => {
+    loadOnboardingLinkReadiness(clientId).then(result => {
       if (active) setLinkReadiness(result.data)
     })
     return () => { active = false }
