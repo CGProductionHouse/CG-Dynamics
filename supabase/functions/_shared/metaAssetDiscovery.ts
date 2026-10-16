@@ -50,7 +50,15 @@ export async function collectMetaAssets<T extends { id: string }>(
     if (typeof next !== 'string' || !next) return result('Asset discovery returned invalid pagination.')
     let nextUrl: URL
     try { nextUrl = new URL(next) } catch { return result('Asset discovery returned invalid pagination.') }
-    if (nextUrl.origin !== initial.origin || nextUrl.pathname !== initial.pathname
+    // Meta can canonicalize /me/accounts to /<numeric-user-id>/accounts.
+    // Accept only that same-version/same-edge alias; it is never fetched.
+    const originalPath = initial.pathname.split('/')
+    const nextPath = nextUrl.pathname.split('/')
+    const resolvedMe = originalPath.length === 4 && nextPath.length === 4
+      && originalPath[2] === 'me' && ['accounts', 'adaccounts'].includes(originalPath[3])
+      && nextPath[1] === originalPath[1] && /^\d+$/.test(nextPath[2])
+      && nextPath[3] === originalPath[3]
+    if (nextUrl.origin !== initial.origin || (nextUrl.pathname !== initial.pathname && !resolvedMe)
       || nextUrl.username || nextUrl.password) return result('Asset discovery returned an unsafe paging endpoint.')
     const after = page.paging?.cursors?.after ?? nextUrl.searchParams.get('after')
     if (typeof after !== 'string' || !after || after.length > 4096

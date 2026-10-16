@@ -92,6 +92,25 @@ test('provider next URL supplies only its cursor, never its token or fields', as
   assert.equal(calls[1].searchParams.get('fields'), 'id,name')
 })
 
+test('Meta may resolve me to a numeric ID without changing the fetched endpoint', async () => {
+  for (const edge of ['accounts', 'adaccounts']) {
+    const calls = []
+    const url = initialUrl.replace('/accounts?', `/${edge}?`)
+    const result = await (await optionalCollector())(url, async raw => {
+      const requested = new URL(raw)
+      calls.push(requested)
+      return Response.json(calls.length === 1 ? {
+        data: [{ id: '1' }],
+        paging: { next: `https://graph.facebook.com/v25.0/123456789/${edge}?after=two&access_token=untrusted` },
+      } : { data: [{ id: '2' }] })
+    })
+    assert.equal(result.complete, true)
+    assert.equal(result.data.length, 2)
+    assert.equal(calls[1].pathname, `/v25.0/me/${edge}`)
+    assert.equal(calls[1].searchParams.get('access_token'), 'test-user-secret')
+  }
+})
+
 test('handler discovers paged ad accounts without exposing unexpected provider fields', async () => {
   const calls = []
   const handler = loadHandler(async raw => {
