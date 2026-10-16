@@ -1,5 +1,57 @@
 # Company ChatGPT monthly strategy workspace — #731
 
+## 16 October final presentation cleanup (supersedes v3-only stage)
+
+All 37 source-ready November drafts now have zero legacy guide-note chips and
+an authored core direction instead of a capacity-only top summary. The normal
+authenticated staff editor saved exact version-fenced draft amendments; fresh
+connector readbacks confirm only those two fields changed during cleanup,
+preserving full plans, concepts, selected dates and other wording. Those saves
+are staff amendments, not new AI seeds; do not undo their metadata or overwrite
+them. Full deterministic copy/gold/package checks pass for all 37, with no
+confirmed concept-capacity gap. This is not editorial approval/publication or
+proof that any concept is scheduled, filmed or an approved asset.
+
+The exact final versions (v3–v5) are in
+`strategy-review/2026-10-16-november-presentation-cleanup.json`; the earlier
+eleven-save v3 receipt remains labelled as a historical stage. CG Production
+House's preserved proposal was completed through the normal editor at v4 after
+a fresh source comparison and exact readback. No connector failure loop or
+auth bypass; its automatic ordering fix remains unreleased in #814. The
+proposal file records that completed editor action and must not be replayed.
+
+There are still 23 source/scope holds read plus Human Auto intentionally held.
+Do not call the fleet approved or client launch-ready: dated content, exact
+library/finals/recipient acceptance, publication decisions and protected
+releases/client-role acceptance remain. No Vercel operation.
+
+## 16 October targeted November content review — final saved receipt
+
+Eleven exact-client November drafts now have verified v3/draft readbacks with
+zero conflicts and no publication: Piek Group, Daisy & Co, Madison Wear,
+SecuriForce, Germoparts, All Around PVC, The Staffordshire, TBS Brokers, Peyper
+Bonds, Bloem Action Sports and Emmanuel Funerals. See
+`strategy-review/2026-10-16-november-review-receipt.json` for the canonical
+client/draft IDs, fields actually changed and complete 61-identity structural
+inventory. These are targeted improvements, not eleven newly created plans or
+fleet-wide semantic approval. Existing system-authored text changed only where
+the guarded connector accepted it; staff edits were not overridden.
+
+The nine later reviews replace December-only sequence notes with practical
+November pacing and package-bounded roles/tests. Madison now has 8 photo/8
+poster concepts and Germoparts 12 poster concepts. The Germoparts baseline
+explicitly corrects recruitment shares mislabelled as parts-search success.
+Staffordshire uses ordinary service alternatives if a live event is unconfirmed;
+Bloem Action Sports labels its absent prior-post baseline truthfully. Financial
+and funeral copy retain compliance/sensitivity review before any publication.
+
+CG Production House remains PREPARED_NOT_APPLIED behind the ordering fix in
+#814; its failed live save was not retried in a loop or bypassed. No Vercel,
+Edge release, source/guide approval, package/asset/schedule mapping, permission,
+strategy approval or publication occurred. The 37-ready / 23-blocked-read /
+1-held structure is unchanged, and no claim is made that only owner review
+remains across the portal.
+
 ## 16 October continuation (supersedes earlier v2 pilot status)
 
 Piek and Daisy November are now read-back-verified v3 unpublished drafts. Two

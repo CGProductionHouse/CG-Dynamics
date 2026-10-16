@@ -1,5 +1,75 @@
 # CG Dynamics Ops Handover
 
+### 16 October — all 37 ready November drafts cleared of legacy presentation noise
+
+This later receipt supersedes the v3-only and CG-not-applied stages below.
+Fresh full-draft checks found 13/37 source-ready November rows still failed the
+existing client-copy gate because old guide/identity/caption/provenance notes
+remained in `strategyDrivers`. All 37 had capacity-only top summaries. Through
+the **normal authenticated version-fenced staff editor**, the old six guide-note
+chips were removed from each of the 37 drafts (222 total), and the top summary
+now reuses that client's already-authored core direction. The source guides and
+seed provenance were not deleted. Each exact identity/month/version was checked;
+no approval/publication button was used. Saves are explicitly staff-amended,
+which must not be cleared by future AI work.
+
+All 37 fresh connector readbacks confirmed that the cleanup changed only
+`strategyDrivers`/`strategyGoingForward`; their ten gold fields, concepts,
+calendar selections and other wording stayed intact. The first four summaries
+and driver removals were separate revisions; final versions range v3–v5, not
+uniform v3. The canonical per-client versions/changed fields are in
+`docs/ops/strategy-review/2026-10-16-november-presentation-cleanup.json`.
+Existing full deterministic gold-standard/copy/package checks now pass for all
+37, and every confirmed positive format has at least its monthly quantity of
+concepts. These are concepts, not dated/scheduled or published assets, and a
+deterministic pass is not semantic approval or a guaranteed business outcome.
+
+CG Production House's earlier rejected connector proposal was completed through
+that normal editor after its guide and exact evidence content were freshly
+rechecked (only calendar order differed). A separate v3→v4 draft amendment
+fills four reviewed strategy fields and eight photo concepts; exact readback
+matches the preserved proposal, with four videos/eight photos/four posters and
+no added scope. The proposal packet now records APPLIED_VIA_VERSION_FENCED_STAFF_EDITOR;
+do not replay the failed connector submission. #814's ordering fix still needs
+its separately authorized Edge release for future connector reliability.
+
+No Vercel, production SQL/schema/Edge/provider, permission, package, schedule,
+asset or mapping action occurred. All 37 remain unpublished. The 23 source/scope
+holds plus Human Auto skip/go, real dated content and Brand Hub recipient/final
+checks, publication decisions and authorized release/client-role acceptance
+still prevent a truthful fleet launch claim. No protected gate was marked passed.
+
+### 16 October — eleven November draft improvements read back, no publication
+
+The later content pass completed nine further exact-client November improvements
+after the two Piek/Daisy repairs: **Madison Wear, SecuriForce, Germoparts, All
+Around PVC, The Staffordshire, TBS Brokers, Peyper Bonds, Bloem Action Sports,
+Emmanuel Funerals**. All eleven now have matching v3/draft readbacks, zero
+conflicts and no publication. Existing unmodified fields/concepts were preserved
+through the connector's source/version/staff fences. The durable exact-ID,
+draft-ID, changed-field and 61-client structural inventory receipt is
+`docs/ops/strategy-review/2026-10-16-november-review-receipt.json`.
+
+The nine later drafts now explain November's sequence, each format's role and a
+bounded learning comparison rather than only saying to review November for
+December. Madison has eight distinct photo and eight poster concepts within its
+confirmed scope; Germoparts has twelve poster concepts. Germoparts' old claim
+that September counter content shared well was incorrect: the 24-share example
+was recruitment. Its draft now explicitly separates that job-seeker response
+from parts enquiries. Staffordshire has ordinary venue/service alternatives when
+no November event/fixture is confirmed, not invented dates. Bloem Action Sports
+starts a new baseline rather than implying missing prior-post performance.
+TBS/Peyper remain general educational content, not personalised advice;
+Emmanuel excludes condolence responses from lead-generation comparisons and
+keeps family details out of the revised plan and this receipt.
+
+No other source-ready client was blindly rewritten. Structural ten-field
+readiness is not a semantic approval of all 37 drafts. CG Production House's
+proposed improvement remains **not applied**, held by the reproduced connector
+ordering defect fixed locally in #814. No protected release or Vercel action.
+Publication, live source/folder/recipient checks, actual dated content and real
+client-role acceptance remain separate; do not claim only CA review remains.
+
 ### 16 October — November draft repairs and stable connector source fence
 
 Later than the read-only receipt below: the authorized company-admin connector

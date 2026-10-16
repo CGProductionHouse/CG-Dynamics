@@ -1,10 +1,13 @@
 {
-  "state": "PREPARED_NOT_APPLIED",
+  "state": "APPLIED_VIA_VERSION_FENCED_STAFF_EDITOR",
+  "final_version": 4,
+  "final_status": "draft_unpublished",
+  "final_receipt": "2026-10-16-november-presentation-cleanup.json",
   "reason": "Live connector rejected unchanged source rows returned in a different order. No retry loop or bypass.",
   "client_id": "c27d2185-08e4-4c49-be48-2572564ceecf",
   "strategy_month": "2026-11-01",
   "observed_version": 2,
-  "required_next_step": "After the reviewed connector ordering fix is released, fetch the exact brief, recheck source content and staff/version changes, regenerate if needed, then submit once through the guarded draft tool. Do not replay a stale fingerprint or approve/publish.",
+  "required_next_step": "No resubmission: fresh guide and exact evidence content were rechecked, then the proposal was saved through the normal version-fenced staff editor at v4 and read back exactly. Editorial approval/publication remains separate. The local connector ordering fix still needs its authorized Edge release; never replay the rejected stale request.",
   "proposal": {
     "clientId": "c27d2185-08e4-4c49-be48-2572564ceecf",
     "strategyMonth": "2026-11-01",
