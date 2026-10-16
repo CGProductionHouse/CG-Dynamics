@@ -1,5 +1,12 @@
 # Client portal launch review — 14 October 2026
 
+Later strategy-only continuation: the 16 October exact-client connector receipt
+is `strategy-review/2026-10-16-november-review-receipt.json`. Eleven November
+drafts have targeted improvements and matching v3/unpublished readbacks. It
+does not refresh this older access/report/calendar/library inventory or imply
+that those protected gates passed. Current engineering/acceptance state is at
+the top of `CG-DYNAMICS-OPS-HANDOVER.md`.
+
 This is a read-only production receipt, not a declaration that every client is ready. Source: exact-client admin preview plus SELECT-only checks of the canonical production tables on 14 October (Africa/Johannesburg). No sync, approval, publication, entitlement, portal access, OneDrive permission, mapping or hosting action was performed for this review.
 
 | Gate | Verified state | Next safe action |

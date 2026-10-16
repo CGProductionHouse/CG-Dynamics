@@ -1,5 +1,36 @@
 # CG Dynamics Ops Handover
 
+### 16 October — eleven November draft improvements read back, no publication
+
+The later content pass completed nine further exact-client November improvements
+after the two Piek/Daisy repairs: **Madison Wear, SecuriForce, Germoparts, All
+Around PVC, The Staffordshire, TBS Brokers, Peyper Bonds, Bloem Action Sports,
+Emmanuel Funerals**. All eleven now have matching v3/draft readbacks, zero
+conflicts and no publication. Existing unmodified fields/concepts were preserved
+through the connector's source/version/staff fences. The durable exact-ID,
+draft-ID, changed-field and 61-client structural inventory receipt is
+`docs/ops/strategy-review/2026-10-16-november-review-receipt.json`.
+
+The nine later drafts now explain November's sequence, each format's role and a
+bounded learning comparison rather than only saying to review November for
+December. Madison has eight distinct photo and eight poster concepts within its
+confirmed scope; Germoparts has twelve poster concepts. Germoparts' old claim
+that September counter content shared well was incorrect: the 24-share example
+was recruitment. Its draft now explicitly separates that job-seeker response
+from parts enquiries. Staffordshire has ordinary venue/service alternatives when
+no November event/fixture is confirmed, not invented dates. Bloem Action Sports
+starts a new baseline rather than implying missing prior-post performance.
+TBS/Peyper remain general educational content, not personalised advice;
+Emmanuel excludes condolence responses from lead-generation comparisons and
+keeps family details out of the revised plan and this receipt.
+
+No other source-ready client was blindly rewritten. Structural ten-field
+readiness is not a semantic approval of all 37 drafts. CG Production House's
+proposed improvement remains **not applied**, held by the reproduced connector
+ordering defect fixed locally in #814. No protected release or Vercel action.
+Publication, live source/folder/recipient checks, actual dated content and real
+client-role acceptance remain separate; do not claim only CA review remains.
+
 ### 16 October — November draft repairs and stable connector source fence
 
 Later than the read-only receipt below: the authorized company-admin connector

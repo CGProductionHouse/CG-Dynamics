@@ -1,5 +1,32 @@
 # Company ChatGPT monthly strategy workspace — #731
 
+## 16 October targeted November content review — final saved receipt
+
+Eleven exact-client November drafts now have verified v3/draft readbacks with
+zero conflicts and no publication: Piek Group, Daisy & Co, Madison Wear,
+SecuriForce, Germoparts, All Around PVC, The Staffordshire, TBS Brokers, Peyper
+Bonds, Bloem Action Sports and Emmanuel Funerals. See
+`strategy-review/2026-10-16-november-review-receipt.json` for the canonical
+client/draft IDs, fields actually changed and complete 61-identity structural
+inventory. These are targeted improvements, not eleven newly created plans or
+fleet-wide semantic approval. Existing system-authored text changed only where
+the guarded connector accepted it; staff edits were not overridden.
+
+The nine later reviews replace December-only sequence notes with practical
+November pacing and package-bounded roles/tests. Madison now has 8 photo/8
+poster concepts and Germoparts 12 poster concepts. The Germoparts baseline
+explicitly corrects recruitment shares mislabelled as parts-search success.
+Staffordshire uses ordinary service alternatives if a live event is unconfirmed;
+Bloem Action Sports labels its absent prior-post baseline truthfully. Financial
+and funeral copy retain compliance/sensitivity review before any publication.
+
+CG Production House remains PREPARED_NOT_APPLIED behind the ordering fix in
+#814; its failed live save was not retried in a loop or bypassed. No Vercel,
+Edge release, source/guide approval, package/asset/schedule mapping, permission,
+strategy approval or publication occurred. The 37-ready / 23-blocked-read /
+1-held structure is unchanged, and no claim is made that only owner review
+remains across the portal.
+
 ## 16 October continuation (supersedes earlier v2 pilot status)
 
 Piek and Daisy November are now read-back-verified v3 unpublished drafts. Two

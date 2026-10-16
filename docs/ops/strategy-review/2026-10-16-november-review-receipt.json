@@ -1,0 +1,1000 @@
+{
+  "schema": "cg-november-targeted-strategy-review/v1",
+  "observed_at": "2026-10-16T09:17:36Z",
+  "strategy_month": "2026-11-01",
+  "authority": "Existing company-admin CG Dynamics connector; guarded draft-only save and exact-client readback",
+  "vercel_operations": 0,
+  "approved": 0,
+  "published": 0,
+  "review_scope": "Targeted source/evidence review of weak format rationale, learning comparison and monthly sequence. Not approval of entire fleet, product availability, exact posting dates or complete client-role acceptance.",
+  "saved": [
+    {
+      "client": "Piek Group",
+      "clientId": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
+      "draftId": "cb416671-6fc7-4fc1-b7b7-33b27847a594",
+      "version": 3,
+      "status": "draft",
+      "published": false,
+      "conflicts": [],
+      "filledFields": [
+        "goldStandard.formatsAndRationale",
+        "goldStandard.nextMonthGamePlan"
+      ],
+      "readbackVersion": 3,
+      "goldMatches": true,
+      "actionsMatch": true
+    },
+    {
+      "client": "Daisy & Co",
+      "clientId": "3404f726-a693-4b2d-8c13-c9d3dfd17bbc",
+      "draftId": "8c4cebe1-fb51-4114-bbfb-601b696b0a24",
+      "version": 3,
+      "status": "draft",
+      "published": false,
+      "conflicts": [],
+      "filledFields": [
+        "goldStandard.formatsAndRationale",
+        "goldStandard.nextMonthGamePlan"
+      ],
+      "readbackVersion": 3,
+      "goldMatches": true,
+      "actionsMatch": true
+    },
+    {
+      "client": "Madison Wear",
+      "clientId": "7b47afb0-fa55-4916-85f6-09c57e5905b9",
+      "draftId": "27b22206-16ec-4e60-9e62-89186a10a710",
+      "version": 3,
+      "status": "draft",
+      "published": false,
+      "conflicts": [],
+      "filledFields": [
+        "goldStandard.formatsAndRationale",
+        "goldStandard.testAndChange",
+        "goldStandard.nextMonthGamePlan",
+        "actionPlan.photo_content.items",
+        "actionPlan.design_poster.items"
+      ],
+      "readbackVersion": 3,
+      "goldMatches": true,
+      "actionsMatch": true
+    },
+    {
+      "client": "SecuriForce",
+      "clientId": "917d6f7c-1c2a-4c20-82f0-daa41b9062f5",
+      "draftId": "8999cf7b-d7ff-4d57-a8f2-a4d115001584",
+      "version": 3,
+      "status": "draft",
+      "published": false,
+      "conflicts": [],
+      "filledFields": [
+        "goldStandard.formatsAndRationale",
+        "goldStandard.testAndChange",
+        "goldStandard.nextMonthGamePlan"
+      ],
+      "readbackVersion": 3,
+      "goldMatches": true,
+      "actionsMatch": true
+    },
+    {
+      "client": "Germoparts",
+      "clientId": "b6052710-417d-4b3b-8348-0f126bfea671",
+      "draftId": "43218236-05fc-43b1-ace2-759a77865b1f",
+      "version": 3,
+      "status": "draft",
+      "published": false,
+      "conflicts": [],
+      "filledFields": [
+        "goldStandard.formatsAndRationale",
+        "goldStandard.testAndChange",
+        "goldStandard.channelIntegration",
+        "goldStandard.nextMonthGamePlan",
+        "actionPlan.design_poster.items"
+      ],
+      "readbackVersion": 3,
+      "goldMatches": true,
+      "actionsMatch": true
+    },
+    {
+      "client": "All Around PVC",
+      "clientId": "fd16ebae-a50b-4920-afe0-94c2631f8f06",
+      "draftId": "b8c90019-008f-44b0-a7a3-1d1b5b67a9ac",
+      "version": 3,
+      "status": "draft",
+      "published": false,
+      "conflicts": [],
+      "filledFields": [
+        "goldStandard.formatsAndRationale",
+        "goldStandard.testAndChange",
+        "goldStandard.nextMonthGamePlan"
+      ],
+      "readbackVersion": 3,
+      "goldMatches": true,
+      "actionsMatch": true
+    },
+    {
+      "client": "The Staffordshire",
+      "clientId": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+      "draftId": "ac948143-24cd-4ed7-94b2-e9f5c3a259e2",
+      "version": 3,
+      "status": "draft",
+      "published": false,
+      "conflicts": [],
+      "filledFields": [
+        "goldStandard.formatsAndRationale",
+        "goldStandard.testAndChange",
+        "goldStandard.nextMonthGamePlan",
+        "actionPlan.professional_video.items",
+        "actionPlan.design_poster.items"
+      ],
+      "readbackVersion": 3,
+      "goldMatches": true,
+      "actionsMatch": true
+    },
+    {
+      "client": "TBS Brokers",
+      "clientId": "a36ba938-e9dc-4ecf-bb67-4853608b1c01",
+      "draftId": "723de2b2-28d7-43ec-b4c3-628354e59f27",
+      "version": 3,
+      "status": "draft",
+      "published": false,
+      "conflicts": [],
+      "filledFields": [
+        "goldStandard.formatsAndRationale",
+        "goldStandard.testAndChange",
+        "goldStandard.nextMonthGamePlan"
+      ],
+      "readbackVersion": 3,
+      "goldMatches": true,
+      "actionsMatch": true
+    },
+    {
+      "client": "Peyper Bonds",
+      "clientId": "a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b",
+      "draftId": "c18a9a68-d5a1-4289-bf69-8985135b4020",
+      "version": 3,
+      "status": "draft",
+      "published": false,
+      "conflicts": [],
+      "filledFields": [
+        "goldStandard.formatsAndRationale",
+        "goldStandard.testAndChange",
+        "goldStandard.nextMonthGamePlan"
+      ],
+      "readbackVersion": 3,
+      "goldMatches": true,
+      "actionsMatch": true
+    },
+    {
+      "client": "Bloem Action Sports",
+      "clientId": "b28af30a-3d44-490a-8290-1e56dac7b127",
+      "draftId": "9a227997-5dbd-40cf-b258-39deba05732c",
+      "version": 3,
+      "status": "draft",
+      "published": false,
+      "conflicts": [],
+      "filledFields": [
+        "goldStandard.formatsAndRationale",
+        "goldStandard.testAndChange",
+        "goldStandard.nextMonthGamePlan"
+      ],
+      "readbackVersion": 3,
+      "goldMatches": true,
+      "actionsMatch": true
+    },
+    {
+      "client": "Emmanuel Funerals",
+      "clientId": "d53d8e62-9e6a-4bb9-be3f-554f40942d45",
+      "draftId": "b910ad81-b549-4128-8eb5-e5397b6d7d2c",
+      "version": 3,
+      "status": "draft",
+      "published": false,
+      "conflicts": [],
+      "filledFields": [
+        "goldStandard.formatsAndRationale",
+        "goldStandard.testAndChange",
+        "goldStandard.nextMonthGamePlan"
+      ],
+      "readbackVersion": 3,
+      "goldMatches": true,
+      "actionsMatch": true
+    }
+  ],
+  "fleet_brief_counts": {
+    "active_identities": 61,
+    "briefs_read": 60,
+    "ready_with_ten_sections": 37,
+    "blocked_read": 23,
+    "intentionally_not_read": 1
+  },
+  "fleet": [
+    {
+      "client": "Delta Gas",
+      "id": "06b20bb1-ed4a-4aa1-9f48-8c6cb0531aba",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 3,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Case Bloemfontein",
+      "id": "079df21e-783a-4648-b3fa-0acae6e68867",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 3,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Zooz Lifestyle WFF",
+      "id": "0c01d90f-ba5e-4251-a597-bf3c83f990fa",
+      "state": "blocked",
+      "blockers": [
+        "NO_CONFIRMED_MONTHLY_CONTENT_SCOPE"
+      ],
+      "version": 1,
+      "staff": false,
+      "published": null,
+      "goldFields": 0,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Hino Trucks",
+      "id": "1007e58b-3fea-4515-88b7-ddaa85763de6",
+      "state": "blocked",
+      "blockers": [
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "version": 1,
+      "staff": false,
+      "published": null,
+      "goldFields": 2,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "LHP Student Village & Block",
+      "id": "1a6d6c62-7e5e-4e1e-93e6-21d9157f0a01",
+      "state": "blocked",
+      "blockers": [
+        "PACKAGE_UNVERIFIED",
+        "CLIENT_EVIDENCE_UNVERIFIED",
+        "NO_CONFIRMED_MONTHLY_CONTENT_SCOPE",
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "goldFields": 0,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Vrystaat Kunstefees",
+      "id": "1f0406bb-d643-4b83-bc3e-b1ebe87eeb89",
+      "state": "blocked",
+      "blockers": [
+        "NO_CONFIRMED_MONTHLY_CONTENT_SCOPE"
+      ],
+      "version": 1,
+      "staff": false,
+      "published": null,
+      "goldFields": 0,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Tobich Optics",
+      "id": "204f4f22-14c7-42ed-a956-da57af102706",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 2,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Loraclox",
+      "id": "21300630-6755-4591-9a49-e22abbaf7e3d",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 2,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Emoya Estate Driving Range",
+      "id": "217a547c-7b22-45cc-bf88-9d45a8e93dfe",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 2,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "PSG Bloemfontein",
+      "id": "29a28efd-c998-45e2-a57c-4a751e779e66",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 2,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Local Deli",
+      "id": "2a5ea019-64f5-4f8e-8a61-61a28940aa6e",
+      "state": "blocked",
+      "blockers": [
+        "NO_CONFIRMED_MONTHLY_CONTENT_SCOPE"
+      ],
+      "version": 1,
+      "staff": false,
+      "published": null,
+      "goldFields": 0,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Dulux Paint & Paper Bloemfontein",
+      "id": "2aed8a31-bd53-4ad1-a3dc-432865adfb3d",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 2,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "We Ar Fuels",
+      "id": "2b953772-e791-4dff-a278-d4dd3521f02e",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 2,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Bloem Vascular",
+      "id": "2d16262d-8450-458d-ae7e-084ef9ff662d",
+      "state": "blocked",
+      "blockers": [
+        "NO_CONFIRMED_MONTHLY_CONTENT_SCOPE"
+      ],
+      "version": 1,
+      "staff": false,
+      "published": null,
+      "goldFields": 0,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Ipopeng Office Supplies",
+      "id": "2e643855-e2ad-481f-a6c6-3d934b9f4a50",
+      "state": "blocked",
+      "blockers": [
+        "NO_CONFIRMED_MONTHLY_CONTENT_SCOPE",
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "version": 1,
+      "staff": false,
+      "published": null,
+      "goldFields": 0,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Bat Hill Royale",
+      "id": "32bd9db3-5339-4404-825b-5a615cadec6a",
+      "state": "blocked",
+      "blockers": [
+        "NO_CONFIRMED_MONTHLY_CONTENT_SCOPE"
+      ],
+      "version": 1,
+      "staff": false,
+      "published": null,
+      "goldFields": 0,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Daisy & Co",
+      "id": "3404f726-a693-4b2d-8c13-c9d3dfd17bbc",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 3,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "targeted_source_review_and_readback"
+    },
+    {
+      "client": "AV Event Life",
+      "id": "3b85973f-bcad-49eb-b8f1-c27f7c7f1aba",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 2,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Neshora Oxygen",
+      "id": "3c20fae1-8e91-41d5-98eb-1c331600e6e3",
+      "state": "blocked",
+      "blockers": [
+        "CLIENT_EVIDENCE_UNVERIFIED",
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "version": 1,
+      "staff": false,
+      "published": null,
+      "goldFields": 2,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Novus Steel",
+      "id": "4236a60a-990f-484f-8d19-13d2f92fbe3b",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 2,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Cape Lumber",
+      "id": "42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 2,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Forklift Trucks",
+      "id": "4424ed69-7270-4d30-a1ea-0b77d76912df",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 2,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "RC-Polypipe",
+      "id": "4f6106de-c437-404e-8cef-fbe848de0665",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 2,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "WiseRide",
+      "id": "504113ee-fba9-4993-807e-a86066615212",
+      "state": "blocked",
+      "blockers": [
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "version": 1,
+      "staff": false,
+      "published": null,
+      "goldFields": 2,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "HMHI",
+      "id": "572555e0-d4d0-404a-8d67-beeeeed6a1f2",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 2,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Bohemia Quick Stop",
+      "id": "5dfdf4bd-9d94-4cc6-9dee-0e480a2234cb",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 2,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Kundedienste",
+      "id": "5e4e3335-a89c-4629-9efc-b6a194bec80c",
+      "state": "blocked",
+      "blockers": [
+        "CLIENT_EVIDENCE_UNVERIFIED",
+        "NO_CONFIRMED_MONTHLY_CONTENT_SCOPE",
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "version": 1,
+      "staff": false,
+      "published": null,
+      "goldFields": 0,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Econofoods",
+      "id": "61acf81b-1011-404e-9fae-2e209be65fca",
+      "state": "blocked",
+      "blockers": [
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "version": 1,
+      "staff": false,
+      "published": null,
+      "goldFields": 2,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Central Canvas",
+      "id": "6b313cac-283e-48c4-9df6-ba43af2f7353",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 2,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Braize",
+      "id": "6b67a2df-e2ab-418b-bcee-03aef5963d37",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 2,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Madison Wear",
+      "id": "7b47afb0-fa55-4916-85f6-09c57e5905b9",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 3,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "targeted_source_review_and_readback"
+    },
+    {
+      "client": "Elcheck",
+      "id": "7b7d244f-77b4-4b2a-88f0-8ce3f7e1c202",
+      "state": "blocked",
+      "blockers": [
+        "CLIENT_EVIDENCE_UNVERIFIED",
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "goldFields": 0,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Human Auto",
+      "id": "816c7f59-d56c-46a3-ba15-f76971d83769",
+      "state": "research_held",
+      "blockers": [
+        "CA_SKIP_GO_REQUIRED"
+      ],
+      "goldFields": 0,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Agri-Secure",
+      "id": "893992a5-23cd-4ee6-b5d9-ccf7b17fe071",
+      "state": "blocked",
+      "blockers": [
+        "CLIENT_EVIDENCE_UNVERIFIED",
+        "NO_CONFIRMED_MONTHLY_CONTENT_SCOPE",
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "version": 1,
+      "staff": false,
+      "published": null,
+      "goldFields": 0,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Wiseman Group",
+      "id": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 2,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Bloem Marble & Granite",
+      "id": "89e0ad6d-e08c-4a75-8b8e-abea71af581c",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 2,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Bouwer & Coetzee Attorneys",
+      "id": "8e448cf9-1534-4ba1-89a4-93e4c8b83d2f",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 2,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "SecuriForce",
+      "id": "917d6f7c-1c2a-4c20-82f0-daa41b9062f5",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 3,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "targeted_source_review_and_readback"
+    },
+    {
+      "client": "NCNA",
+      "id": "94fe2568-3cf1-47dc-801e-d8d5396a0965",
+      "state": "blocked",
+      "blockers": [
+        "NO_CONFIRMED_MONTHLY_CONTENT_SCOPE",
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "version": 1,
+      "staff": false,
+      "published": null,
+      "goldFields": 0,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "TBS Brokers",
+      "id": "a36ba938-e9dc-4ecf-bb67-4853608b1c01",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 3,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "targeted_source_review_and_readback"
+    },
+    {
+      "client": "Jenkor",
+      "id": "a5eab798-3e00-44cc-947e-463386fdac39",
+      "state": "blocked",
+      "blockers": [
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "version": 1,
+      "staff": false,
+      "published": null,
+      "goldFields": 2,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Supa Quick BFN",
+      "id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 2,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Peyper Bonds",
+      "id": "a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 3,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "targeted_source_review_and_readback"
+    },
+    {
+      "client": "Rusoord Farmstay",
+      "id": "ac4c5e0c-c5d3-4512-8472-fe59192abeca",
+      "state": "blocked",
+      "blockers": [
+        "CLIENT_EVIDENCE_UNVERIFIED",
+        "NO_CONFIRMED_MONTHLY_CONTENT_SCOPE",
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "version": 1,
+      "staff": false,
+      "published": null,
+      "goldFields": 0,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "JFJ Electrical",
+      "id": "aece5a86-c962-4234-a1fe-7904c20f03ff",
+      "state": "blocked",
+      "blockers": [
+        "CLIENT_EVIDENCE_UNVERIFIED",
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "goldFields": 0,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "C&L Innovations",
+      "id": "afb62c53-d6d3-4ef8-9393-def88ed899d8",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 2,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Bloem Action Sports",
+      "id": "b28af30a-3d44-490a-8290-1e56dac7b127",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 3,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "targeted_source_review_and_readback"
+    },
+    {
+      "client": "Germoparts",
+      "id": "b6052710-417d-4b3b-8348-0f126bfea671",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 3,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "targeted_source_review_and_readback"
+    },
+    {
+      "client": "VCS Cleaning Solutions",
+      "id": "bbd1629e-79fb-4c41-b1e4-88a1f160bd34",
+      "state": "blocked",
+      "blockers": [
+        "CLIENT_EVIDENCE_UNVERIFIED",
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "goldFields": 0,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "CG Production House",
+      "id": "c27d2185-08e4-4c49-be48-2572564ceecf",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 2,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "First Technology Central",
+      "id": "c8d34a97-8400-4f52-8b0d-843491fe3d3b",
+      "state": "blocked",
+      "blockers": [
+        "NO_CONFIRMED_MONTHLY_CONTENT_SCOPE"
+      ],
+      "version": 1,
+      "staff": false,
+      "published": null,
+      "goldFields": 0,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Red Oak",
+      "id": "cdb11a82-339e-4b46-9b09-bde1a23efeaf",
+      "state": "blocked",
+      "blockers": [
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "version": 1,
+      "staff": false,
+      "published": null,
+      "goldFields": 2,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Emmanuel Funerals",
+      "id": "d53d8e62-9e6a-4bb9-be3f-554f40942d45",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 3,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "targeted_source_review_and_readback"
+    },
+    {
+      "client": "The Staffordshire",
+      "id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 3,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "targeted_source_review_and_readback"
+    },
+    {
+      "client": "Watch Addict",
+      "id": "e1cb958e-3f68-4a77-b5ea-b471ea62bdef",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 2,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Mimosa Mall",
+      "id": "e276f019-a580-44c5-a7ab-e43840c33a64",
+      "state": "blocked",
+      "blockers": [
+        "NO_CONFIRMED_MONTHLY_CONTENT_SCOPE",
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "version": 1,
+      "staff": false,
+      "published": null,
+      "goldFields": 0,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Supa Quick Centurion",
+      "id": "e2870110-930c-4e63-b2fe-c858030f7258",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 2,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Toyota Bloemfontein",
+      "id": "e2ad6d57-5b06-46e1-b75b-b67f017d57f1",
+      "state": "blocked",
+      "blockers": [
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "version": 1,
+      "staff": false,
+      "published": null,
+      "goldFields": 2,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Ehrlich Park Butchery",
+      "id": "ec643c75-51f5-4839-829f-3f5b7f48829a",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 2,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "not_semantically_approved"
+    },
+    {
+      "client": "Piek Group",
+      "id": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 3,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "targeted_source_review_and_readback"
+    },
+    {
+      "client": "All Around PVC",
+      "id": "fd16ebae-a50b-4920-afe0-94c2631f8f06",
+      "state": "ready_for_proposal",
+      "blockers": [],
+      "version": 3,
+      "staff": false,
+      "published": null,
+      "goldFields": 10,
+      "template": false,
+      "reviewState": "targeted_source_review_and_readback"
+    }
+  ],
+  "not_applied": [
+    {
+      "client": "CG Production House",
+      "reason": "STRATEGY_SOURCE_CHANGED on reorder-only calendar read; fix merged locally in PR #814, not released",
+      "proposal": "2026-10-16-cg-november-proposal.json"
+    }
+  ]
+}
