@@ -1,5 +1,16 @@
 # CG Dynamics Ops Handover
 
+### 16 October — Performance report selection render guard (local)
+
+A failing-first render of the actual client Dashboard reproduced August selected
+while September's loaded report still rendered before the passive loading effect
+ran. Rendering now requires the report ID to match the selected ID immediately;
+the existing loading state covers the transition. Matching reports, explicit
+loading, unavailable reads and errors retain their existing behavior. Month
+buttons expose their selected state to assistive technology and have 44px phone
+touch targets while retaining desktop sizing. No data/projection/report-period
+authority, publication or Vercel operation changes.
+
 ### 16 October — month-ahead client timezone correction (local)
 
 The Performance month-ahead module still selected its month from the device's

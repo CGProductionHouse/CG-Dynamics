@@ -248,8 +248,9 @@ export default function Dashboard() {
               <button
                 key={item.id}
                 type="button"
+                aria-pressed={selectedReportId === item.id}
                 onClick={() => setSelectedReportId(item.id)}
-                className={`rounded-full px-4 py-1.5 text-sm transition-colors ${
+                className={`min-h-11 rounded-full px-4 py-1.5 text-sm transition-colors sm:min-h-0 ${
                   selectedReportId === item.id
                     ? 'bg-report-accent/20 font-medium text-report-accent'
                     : 'text-report-faint hover:text-report-muted'
@@ -262,7 +263,8 @@ export default function Dashboard() {
         </div>
       )}
 
-      {reportLoading ? (
+      {/* Selection changes render before the loading effect clears old data. */}
+      {reportLoading || (report !== null && report.id !== selectedReportId) ? (
         <ClientPortalLoadingState variant="report" />
       ) : report ? (
         <ClientReportView
