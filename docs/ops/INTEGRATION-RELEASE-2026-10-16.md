@@ -80,15 +80,19 @@ The normal ChatGPT pass saved two real concept rows and read them back, but
 full-script updates then exposed a second defect: generic `computeInputHash`
 passed Unicode script text into Latin-1-only `btoa`. Production logs show that
 exact exception before the handler. The actual authored scripts are preserved in
-the existing chat; do not claim them saved until readback says so. New failing-first
+the existing chat. New failing-first
 tests reproduce punctuation, non-Latin text, emoji and long-script failures.
 The correction preserves every legacy Latin-1 replay fingerprint; only previously
 unexecutable Unicode input uses prefixed full UTF-8 SHA-256 through the existing
 hash helper. All three log/write callsites await it. No authored text is stripped
 or transliterated, no idempotency history is cleared, and no permission changes.
-This second correction is local/pending release at this checkpoint.
+PR #820 merged as `29aea17bac5a6b4fd327153e3f672b43f0460d6d`, source
+`47e4132797c82cc743ef57de286ffdc41ef1defe`, and was deployed as MCP v67.
+The original custom authentication/JWT false contract remains unchanged.
+Downloaded deployed index matches main after CRLF normalization, SHA-256
+`610e1ea03293b4e42d6ce3e48e138a75daed5bad32acf81f4e1be9ac690be30a`.
 
-Unicode candidate verification: 3,863 pass / 19 intentional skips / zero failures
+Final Unicode release verification: 3,863 pass / 19 intentional skips / zero failures
 in the full supported serial suite; 32 affected cases and all four fingerprint
 regressions pass, TypeScript/Vite app build, full MCP Deno and scoped lint/diff pass.
 The local browser checks below also pass with the corrected fixture. Self-review
@@ -96,9 +100,19 @@ found no blocking change; old Latin-1 keys and special strategy hash remain inta
 
 Concept IDs: `9e02c00c-b480-48f5-9bc6-571fbca5ad62` (The Job Before the Machine),
 `034eee02-73da-43ac-a6f8-25e6e6fcac05` (Husqvarna: Bring the Model, Not a Guess).
-Both remain draft/unallocated, initially `has_script=false`. Missing CASE short
-code blocks production-folder naming separately; it does not justify weakening
-script-writing permissions or inventing a production mapping.
+Normal company ChatGPT then reused its existing authored document and saved only
+`script`, `shot_breakdown` and `requirements` on these two existing rows. Its
+full-text readback confirms the original timed sections and Unicode punctuation,
+not merely concept titles or a status flag. Independent connector readback also
+confirms both complete scripts: 1,260 and 1,029 characters, with shot breakdowns
+351/326 and requirements 709/481 characters. Both now have scripts and remain
+draft/unallocated; no new video rows, filming, scheduling, approval or publication.
+Titles, objectives, hooks, CTAs, order and staff edits are preserved. The scripts
+were authored in normal ChatGPT, not Codex or a separate paid generator.
+
+Missing CASE short code blocks production-folder naming separately, not script
+writing. Do not invent production mappings or infer folder readiness from this
+successful write. All 61 active client short codes were null at this check.
 
 Applied only reviewed `20261013225255_client_strategy_gold_projection.sql`:
 future published snapshots preserve the ten allowlisted strategy fields. Self-checks

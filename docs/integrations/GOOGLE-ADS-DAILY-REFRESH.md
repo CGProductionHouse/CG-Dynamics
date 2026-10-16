@@ -1,6 +1,17 @@
 # Google Ads daily refresh — #623
 
-Prepared locally on 16 October 2026. **Not activated or deployed.**
+**Activated on 16 October 2026.** The reviewed queue constraint was applied as
+live migration `20261016104744`; `google-ads-sync` v51/JWT true and
+`background-worker` v60/JWT false were deployed, and only the non-secret
+`GOOGLE_ADS_REFRESH_ENABLED` flag was enabled. The existing worker token was
+confirmed by name only, not read or copied. No new scheduler or Vercel operation.
+
+The successful manual run `b5f7da69-70b1-4826-8faa-873fd3841ce9` covers
+11 September–15 October and saved 52 daily rows. Its identical 35-day coverage
+suppresses another daily job today. Existing worker calls returned HTTP 200;
+the first future scheduled provider call is **not yet observed**, so activation
+is not a claim of completed daily-run acceptance. See
+`../ops/INTEGRATION-RELEASE-2026-10-16.md` for release and rollback receipts.
 
 The existing background worker had no Google Ads cadence, so a successful manual
 refresh could become stale indefinitely. The new `google_ads_refresh` job uses
@@ -37,7 +48,7 @@ The only metrics write is the existing transactional
 `replace_google_ads_account_campaign_metrics` RPC. No mapping, ad setting,
 campaign, package, strategy or report publication changes.
 
-## Protected activation packet
+## Protected activation procedure (executed 16 October; do not replay)
 
 1. Review/apply only `20261016075631_google_ads_daily_refresh.sql`. This admits
    the system job type; it adds no browser write grant or cron and changes no

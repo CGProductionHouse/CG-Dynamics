@@ -1,5 +1,26 @@
 # Company ChatGPT monthly strategy workspace — #731
 
+## 16 October live connector and full-script acceptance (latest)
+
+PRs #819/#820 are merged and MCP v67 is deployed. The actor-aware guideline RPC,
+read-only creation guard, source ordering and Unicode-safe generic write hash are
+live; full actual MCP Deno checking now passes. These receipts supersede older
+local-only/pending-release wording below, not the separate content/source holds.
+
+Normal company ChatGPT reused the two existing CASE authored scripts and saved
+only script/shot-breakdown/requirements. Full canonical readback verifies both
+complete scripts and original Unicode punctuation. Independent connector reads
+confirm 1,260/1,029 script characters under draft guideline
+`85743a32-8080-4eb5-bc9e-9ca89a533c53`. No duplicate ideas, publication, approval,
+schedule allocation, folder mapping or separate paid generation. Codex repaired
+the connector; normal ChatGPT authored the content. See
+`INTEGRATION-RELEASE-2026-10-16.md` for release/security and verification details.
+
+The same normal chat is now applying only its existing 14 field-level November
+proposals across 12 clients, with fresh source/version fences and old-field
+comparison. Newer staff fields must be skipped, never overwritten. This dispatch
+is not yet a completion receipt or permission to publish strategies.
+
 ## 16 October normal-chat semantic review receipt
 
 The resumed **Write Client Strategies** conversation completed its additional
