@@ -6,15 +6,17 @@ import {
   type ClientCalendarPost,
   type ClientMonthAheadState,
 } from '../../lib/clientPortalCalendar'
-import { CLIENT_SAFE_STATUS_LABELS, monthKey, type ClientSafeStatus, type DeliverableType } from '../../lib/planner'
+import { CLIENT_SAFE_STATUS_LABELS, type ClientSafeStatus, type DeliverableType } from '../../lib/planner'
 import { EVENT_TYPE_LABELS } from '../../lib/companyCalendar'
+import { businessMonthKey, formatBusinessDate, formatBusinessTime } from '../../lib/businessTime'
+import { monthDisplayLabel } from '../../lib/reportPeriod'
 
 // Client-safe "month ahead" module for the client portal and Client Preview.
 // Renders nothing at all when there is no content to show, so client logins
 // never see an empty promise before the phase-11a read-access migration runs.
 
 const TYPE_BADGES: Partial<Record<DeliverableType, { label: string; cls: string }>> = {
-  dp: { label: 'DP', cls: 'border-[#f59e0b]/25 bg-[#f59e0b]/10 text-[#fbbf24]' },
+  dp: { label: 'Poster', cls: 'border-[#f59e0b]/25 bg-[#f59e0b]/10 text-[#fbbf24]' },
   photo: { label: 'Photo', cls: 'border-[#2dd4bf]/25 bg-[#2dd4bf]/10 text-[#2dd4bf]' },
   video: { label: 'Video', cls: 'border-[#a78bfa]/25 bg-[#a78bfa]/10 text-[#c4b5fd]' },
   reel: { label: 'Reel', cls: 'border-[#fb7185]/25 bg-[#fb7185]/10 text-[#fda4af]' },
@@ -32,20 +34,13 @@ const STATUS_TONES: Record<ClientSafeStatus, string> = {
 }
 
 function formatDay(date: string) {
-  return new Date(`${date}T00:00:00`).toLocaleDateString('en-ZA', { weekday: 'short', day: 'numeric', month: 'short' })
+  return new Date(`${date}T00:00:00Z`).toLocaleDateString('en-GB', { timeZone: 'UTC', weekday: 'short', day: 'numeric', month: 'short' })
 }
 
 function formatEventWhen(event: ClientCalendarEvent) {
-  const start = new Date(event.startAt)
-  const day = start.toLocaleDateString('en-ZA', { weekday: 'short', day: 'numeric', month: 'short' })
+  const day = formatBusinessDate(event.startAt, { weekday: 'short', day: 'numeric', month: 'short' })
   if (event.allDay) return day
-  const time = start.toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' })
-  return `${day} · ${time}`
-}
-
-function monthHeading(month: string) {
-  const [year, m] = month.split('-').map(Number)
-  return new Date(year, m - 1, 1).toLocaleDateString('en-ZA', { month: 'long', year: 'numeric' })
+  return `${day} · ${formatBusinessTime(event.startAt)} SAST`
 }
 
 export function ClientMonthAhead({ clientId }: { clientId: string }) {
@@ -54,10 +49,11 @@ export function ClientMonthAhead({ clientId }: { clientId: string }) {
 
   useEffect(() => {
     let cancelled = false
-    void fetchClientMonthAhead(clientId, monthKey(new Date())).then(result => {
+    const month = businessMonthKey()
+    void fetchClientMonthAhead(clientId, month).then(result => {
       if (!cancelled) setState({ clientId, data: result })
     }).catch(() => {
-      if (!cancelled) setState({ clientId, data: { month: monthKey(new Date()), posts: [], events: [], loadFailed: true } })
+      if (!cancelled) setState({ clientId, data: { month, posts: [], events: [], loadFailed: true } })
     })
     return () => { cancelled = true }
   }, [clientId])
@@ -74,7 +70,7 @@ export function ClientMonthAhead({ clientId }: { clientId: string }) {
       <div className="mb-5">
         <p className="text-xs font-black uppercase tracking-[0.26em] text-[#2dd4bf]">The month ahead</p>
         <h2 className="mt-2 text-2xl font-black tracking-[-0.03em] text-white sm:text-4xl">
-          Your {monthHeading(data.month)} plan with CG
+          Your {monthDisplayLabel(data.month)} plan with CG
         </h2>
       </div>
 

@@ -1,5 +1,20 @@
 # CG Dynamics Ops Handover
 
+### 16 October — month-ahead client timezone correction (local)
+
+The Performance month-ahead module still selected its month from the device's
+local clock and formatted event timestamps in that device's timezone. A Los
+Angeles browser at 22:30 UTC on 31 October therefore requested October while CG
+Plan was already in November, and displayed a 1 November CG event on 31 October.
+It now reuses the business-time helpers for month/date/time and labels timed
+events SAST. Date-only posting dates retain their agreed calendar day, and the
+client-facing DP badge now reads Poster. Two failing-first regressions reproduce
+the month/event mismatch; 77 affected tests pass, including timezone/date-only
+checks across LA, UTC and Kiritimati. The actual component in a synthetic local
+browser with LA timezone passes desktop/375/390/430 with no overflow or console
+errors. Local TS/Vite build and scoped lint pass. No schedule row, CG Calendar
+architecture or production/Vercel change; real client-role acceptance remains.
+
 ### 16 October — Google Ads automatic refresh prepared locally (#623)
 
 The missing cadence is now implemented on the existing background worker and
