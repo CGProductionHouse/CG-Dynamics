@@ -96,9 +96,21 @@ Native 15/16 October crossposted decking/Lunawood rows have matching Facebook ID
 
 Actual September staff preview shows 14,601 FB / 1,792 IG views and 7 confirmed combined posters. Its Google Ads panel is populated for **1–30 September**, last successful sync 16 October 12:43 local, 1 campaign, R2,881 spend / 38,573 impressions / 1,318 clicks / 3.42% CTR. This is the actual report UI, not a fresh independent Google Ads browser comparison or October claim. October v3/November v4 plans target product/specification/quantity-led material enquiries without assumed stock or quotations; unpublished.
 
+### 13. Case Bloemfontein — checked native totals and reel identities match
+
+Exact ID `079df21e-783a-4648-b3fa-0acae6e68867`; Facebook `1935295693158167`, Instagram `casebloemfontein`. Native Custom 1–15 October Facebook daily views [1727,363,172,87,153,88,89,64,49,52,74,434,3106,1269,596] sum **8,323**; visits 281 / follows 12 match API. Instagram **780 Instagram views /419 reach /29 interactions /36 visits /3 follows /0 link clicks** match. Native 3.5K Instagram headline includes 2,681 Facebook views; FB content interactions 55 is not API post engagements 232.
+
+Native library confirms Facebook reel IDs `1836299228298114` (16 October, no text), `1833957971865573` (14 October, no text), and `1833530938574943` (13 October Steiger) match canonical IDs/timestamps/caption availability. Null captions are legitimate no-text reels, not missing posts to delete. This is a latest visible subset, not exhaustive library acceptance. Actual September staff preview has 26,484 FB /3,264 IG views, explicit 1–29 September windows, 2 videos +12 combined posters. October/November objectives separate verified machinery/parts from Husqvarna after-sales and do not promise performance improvements before the October report exists. Previously saved full CASE scripts remain untouched; no duplicate generation or publication.
+
+### 14. Central Canvas — native Facebook totals/latest retained posts match
+
+Exact ID `6b313cac-283e-48c4-9df6-ba43af2f7353`; Facebook `726910070765312`, no mapped Instagram. MBS Custom 1–15 October daily views [407,78,32,32,145,462,360,896,438,103,177,254,1067,212,368] sum **5,031**; visits 271 / follows 5 match canonical. Native content interactions 47 is not API post engagements 61. Native October 8/13/15 post IDs `1627455959393454` / `1632634082208975` / `1634719452000438`, captions and local times match canonical records.
+
+A newer Boss's Day post `1636057611866622` is visible at 16 October 13:36 local, after the last successful app checkpoint 09:27 UTC (11:27 local). Its absence from the earlier inventory is expected pending the next scheduled refresh, not proof the earlier successful sync dropped it. Do not blindly import/delete/shift report periods. Actual September staff preview: 8,858 views /289 post engagements /4 follows /5,015 follower snapshot /508 visits, platform window 1–29 September, package 1 video +7 posters. October/November objectives use real tarp/cargo-cover/repair jobs and enquiry details; unpublished, no assumed turnaround or material performance.
+
 ## Ordered coverage ledger
 
-`Pending` means no complete independent browser comparison yet. Database inventory is not a browser pass. Checked scope through client 12 is recorded; next client is Case Bloemfontein (13). None of these partial audit rows is a whole-portal launch pass.
+`Pending` means no complete independent browser comparison yet. Database inventory is not a browser pass. Checked scope through client 14 is recorded; next client is CG Production House (15). None of these partial audit rows is a whole-portal launch pass.
 
 | # | Client | Exact Dynamics ID | Audit state |
 |---|---|---|---|
@@ -114,8 +126,8 @@ Actual September staff preview shows 14,601 FB / 1,792 IG views and 7 confirmed 
 | 10 | Braize | `6b67a2df-e2ab-418b-bcee-03aef5963d37` | Partial — checked Meta metrics/latest posts match; TikTok label fixed locally |
 | 11 | C&L Innovations | `afb62c53-d6d3-4ef8-9393-def88ed899d8` | Partial — checked FB/IG facts and October post pairs match |
 | 12 | Cape Lumber | `42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa` | Partial — checked Meta values/latest posts match; Google preview populated |
-| 13 | Case Bloemfontein | `079df21e-783a-4648-b3fa-0acae6e68867` | Pending |
-| 14 | Central Canvas | `6b313cac-283e-48c4-9df6-ba43af2f7353` | Pending |
+| 13 | Case Bloemfontein | `079df21e-783a-4648-b3fa-0acae6e68867` | Partial — checked native metrics/latest reels match |
+| 14 | Central Canvas | `6b313cac-283e-48c4-9df6-ba43af2f7353` | Partial — native FB values/retained latest posts match; newer post awaits refresh |
 | 15 | CG Production House | `c27d2185-08e4-4c49-be48-2572564ceecf` | Pending |
 | 16 | Daisy & Co | `3404f726-a693-4b2d-8c13-c9d3dfd17bbc` | Pending |
 | 17 | Delta Gas | `06b20bb1-ed4a-4aa1-9f48-8c6cb0531aba` | Pending |
@@ -169,4 +181,6 @@ Actual September staff preview shows 14,601 FB / 1,792 IG views and 7 confirmed 
 Fleet-only source inventory is saved in `strategy-review/2026-10-16-fleet-audit-inventory.json`: all 61 November briefs actually read, 37 ready_for_proposal / 24 blocked. Ready is source eligibility, NOT semantic strategy approval or publication. The 11 literal old October objective templates remain separately flagged. All 61 have canonical inventory coverage, not 61 native-browser acceptance checks. The absent Elcheck/JFJ/VCS November rows are evidence-held, not requests for CA to repeat previously confirmed package quantities; LHP remains once-off/meeting-held.
 
 Production SELECT reads and genuine authenticated staff preview/Facebook UI were used. No client-role login/mobile acceptance, content publication or full-fleet sign-off. The one local runtime change is the TikTok snapshot label with regression coverage. No model generation, paid provider generation or Vercel action. Existing open PR owners #775/#662/#618 are untouched.
+
+Final verification of this bounded source change: **3,870 pass /19 intentional skips /0 failures**, 3,889 tests in the supported serial suite. The 19 include the existing two optional local PostgreSQL tests because Docker Desktop is not running; no SQL assertion was counted as passed. Five certificate fixture failures were resolved by adding the already-installed Git OpenSSL directory only to the test subprocess PATH, without product-code or global-environment changes. The earlier seven environment failures and setup-only missing-env run remain disclosed above; no test assertion was weakened. `npm run build`, scoped ESLint, `git diff --check`, inventory uniqueness/count checks and emitted application/snapshot-label bundle checks pass. No new full mobile/client-role acceptance is claimed from these local tests.
 

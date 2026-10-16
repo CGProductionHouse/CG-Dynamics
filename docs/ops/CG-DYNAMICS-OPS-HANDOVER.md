@@ -33,7 +33,7 @@ Native 13/15 October Facebook posts prove the missing content. Its Instagram
 Historical PVC September TikTok rows have no current connection or retained
 account identity in provenance: hold identity, do not guess/reassign/delete.
 No production data/schema/provider/OAuth/mapping/permission/strategy/publication
-or Vercel action. Native comparisons through client 10 (Braize) are recorded,
+or Vercel action. Native comparisons through client 14 (Central Canvas) are recorded,
 with actual scope and holds, not blanket passes. Marble native views 11,378 FB /
 2,278 IG match, Vascular 39 FB views / zero IG activity agrees, Bohemia 314 FB
 views agrees, Bouwer approximately 2.3K /142 visits/3 follows agrees, Braize
@@ -45,9 +45,20 @@ Braize live preview reproduced a lifetime TikTok account-video snapshot labelled
 Published videos. Local pure-model correction says Account videos only when
 TikTok/video_count/aggregation=snapshot; real period counts remain unchanged.
 Failing-first actual-component assertion then 136 focused tests pass with
-isolated fixture configuration. Build/scoped lint/diff pass; full suite running.
+isolated fixture configuration. Build/scoped lint/diff pass; final supported
+suite **3,870 pass /19 intentional skips /0 failures**. Earlier seven failures
+were environment-only: two optional Docker SQL fixtures cannot run while Docker
+Desktop is stopped, five certificate fixtures needed existing Git OpenSSL on the
+test-subprocess PATH. No global setting, assertion, runtime auth or SQL changed.
+The 19 skips include the two optional Docker checks, not claimed as passes.
 No layout, values, source windows, grants or data change. Frontend release remains
 separate; do not call this wording live from a local test.
+
+Draft PR #824 holds the exact audit and bounded wording fix. Ordered next client:
+CG Production House (15). CASE native 8,323 FB /780 IG views and Central Canvas
+5,031 FB views match. Central Canvas has a newer 16 October 13:36 local post
+after its 11:27 local checkpoint; pending scheduled refresh is not a proved drop.
+Do not restart at Braize or claim all 61 native clients passed from the inventory.
 
 The Google Control Centre remains without an accessible exact tracker reference
 in current authority (previous restoration gate); do not invent a replacement
