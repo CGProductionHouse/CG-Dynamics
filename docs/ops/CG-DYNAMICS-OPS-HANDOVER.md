@@ -18,17 +18,21 @@ first100 asset-discovery cutoff, wrong-Page stored IG picker options, and Report
 source classification truncating two DB reads at1000 rows (fresh automatic
 reports falsely labelled Manual fallback). Existing ordered pagination reused;
 source-read errors remain unavailable, not manual. Actual handler/component
-regressions pass:69 Meta plus5 report-source/workspace. Build/app chunks/scoped
-lint/Deno/diff pass; full rerun pending with the two Docker-only checks explicitly
-skipped after stopped Docker caused the only two failures (3,893 tests pass).
+regressions pass:69 Meta plus5 report-source/workspace. Final full supported
+suite: **3,896 pass /19 intentional skips /0 failures** (3,915 total). Two skips
+are Docker-only checks with Docker Desktop stopped; no assertions weakened.
+Build/app chunks/Deno/diff pass; scoped lint zero errors, one pre-existing Reports
+load-dependency warning. Actual JFJ read-only preview shows1video+6combinedposters,
+no unconfirmed extras; existing phone nav/More/Plan sections work375/390/430 with
+no horizontal overflow. This is one staff preview, not all61 client-role passes.
 Exact backend release decision requested separately; deployed
 asset-list v64 uses older shared helpers. Exact packet preserves them except
 removing one identical duplicate availability key (baseline TS1117). Exact packet
 Deno check now passes; candidate/rollback hashes are in
 `strategy-review/2026-10-16-meta-asset-runtime-packet.json`. No silent helper
 replacement or deployment. Frontend remains source-only until #679 release.
-Full-suite completion/review and
-PR receipt follow; do not call either runtime fix already live.
+PR#826 carries the reviewed candidate and receipts; do not call runtime source
+fixes live merely because tests or a merge pass.
 
 See `META-LINK-REPAIRS-2026-10-16.md` for exact IDs and timestamps. Forklift remains
 absent from provider picker, not proven to be Page101/102. Four older missing-post

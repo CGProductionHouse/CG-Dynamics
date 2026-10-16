@@ -81,8 +81,21 @@ Initial full supported run:3,893 pass /17 skips /2 failures. Both failures are
 optional disposable PostgreSQL/Docker fixtures while Docker Desktop is stopped;
 the new23 tests pass. A full rerun explicitly marks those two optional checks
 skipped (`CG_RUN_LOCAL_DB=0`), preserving all assertions and production isolation.
-Final supported-suite result is recorded in the PR after completion; no claim that
-local fixtures establish production client-role or mobile acceptance.
+Final supported-suite result: **3,915 total /3,896 pass /19 intentional skips /
+0 failures /0 cancelled /0 todo**. Log:
+`C:/Users/chris/AppData/Local/Temp/cg-meta-launch-repairs-full-suite-verified.log`.
+The two unavailable Docker checks are counted as skips, not passes. Actual review
+of all11 changed files found no blocking correctness/security/scope issue; no
+claim that local fixtures establish production client-role acceptance.
+
+Additional actual production staff preview: JFJ exact client identity persists
+between Overview and Plan; current/next strategy month buttons are October and
+November. Package shows1video+6combinedposters, with no unconfirmed extras.
+Existing bottom phone navigation/More menu and Plan sections are usable at
+375/390/430px; document widths360/375/415 respectively, no horizontal overflow,
+phone navigation tap targets56px high. More exposes the exact JFJ Brand Hub link.
+Viewport reset after checks. October strategy is still under review, not silently
+published; no claim of every tab or genuine client-role acceptance for61 clients.
 
 Review: source authority remains `reports`/`posts`/`meta_content_mappings`, with
 the existing `fetchAllPages` helper; no new table, RPC, scope or dependency.
