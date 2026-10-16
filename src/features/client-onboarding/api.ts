@@ -10,6 +10,7 @@ import type {
   UploadedDriveItemReference,
 } from './types'
 import { uploadFileToGraphSession } from './upload-session'
+import type { OnboardingLinkReadiness } from '../../../supabase/functions/client-onboarding/link-readiness'
 
 type ApiResult<T> = { data: T | null; error: string | null }
 
@@ -109,6 +110,10 @@ export function loadPortalSetup(previewClientId?: string) {
 
 export function listStaffOnboarding() {
   return invoke<StaffOnboardingSummary[]>({ action: 'staff_list' })
+}
+
+export function loadOnboardingLinkReadiness(clientId: string) {
+  return invoke<OnboardingLinkReadiness>({ action: 'staff_link_readiness', clientId })
 }
 
 export function loadStaffSetupPreview(clientId: string) {
