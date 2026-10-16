@@ -57,8 +57,59 @@ entrypoints now pass Deno checking, including the previously blocked MCP index.
 Initial full attempt found three source-string test mismatches; corrected focused
 and full runs pass. No production dependency/package version change was made.
 
-MCP release/readback and authenticated acceptance are pending at this checkpoint.
-Do not claim the merged #814/#816/#817 fixes live until the later receipt says so.
+PR #819 merged as `e8ee9ed8e674ab99ea301834a50aeb1e6a2b759c` (source
+`8d9160e53ac7fe10d32d5b513db4ad952d4a2084`). Released only `cg-dynamics-mcp`
+as v66, preserving JWT false and existing custom authentication. Downloaded source
+includes the validated-actor guideline fix and shared Meta reporting classifier.
+Authenticated provider health now returns overall DEGRADED / Meta PARTIAL, not
+the reproduced false PASS; Google reports the new 16 October successful sync.
+Unauthenticated POST probes return 401 for MCP and Google sync.
+
+Actual production draft-write acceptance: fresh discovery verified CASE's existing
+31 October run `6adc6edb-7cb6-4523-a81d-540c54e9b9f7` belongs to exact client
+`079df21e-783a-4648-b3fa-0acae6e68867` and had no guideline. One idempotency-keyed
+`ensure_content_guideline` created canonical draft
+`85743a32-8080-4eb5-bc9e-9ca89a533c53`; independent `get_content_run_plan` readback
+matches client/run/month/status. It initially contains zero videos; creation is
+not a claim that the scripts are written or published. The existing normal company
+ChatGPT task has been asked to reuse its researched CASE brief and author/read back
+package-bounded scripts through the repaired connector, not a paid generator.
+No earlier run, staff wording, asset, folder mapping or approval was changed.
+
+The normal ChatGPT pass saved two real concept rows and read them back, but
+full-script updates then exposed a second defect: generic `computeInputHash`
+passed Unicode script text into Latin-1-only `btoa`. Production logs show that
+exact exception before the handler. The actual authored scripts are preserved in
+the existing chat; do not claim them saved until readback says so. New failing-first
+tests reproduce punctuation, non-Latin text, emoji and long-script failures.
+The correction preserves every legacy Latin-1 replay fingerprint; only previously
+unexecutable Unicode input uses prefixed full UTF-8 SHA-256 through the existing
+hash helper. All three log/write callsites await it. No authored text is stripped
+or transliterated, no idempotency history is cleared, and no permission changes.
+This second correction is local/pending release at this checkpoint.
+
+Unicode candidate verification: 3,863 pass / 19 intentional skips / zero failures
+in the full supported serial suite; 32 affected cases and all four fingerprint
+regressions pass, TypeScript/Vite app build, full MCP Deno and scoped lint/diff pass.
+The local browser checks below also pass with the corrected fixture. Self-review
+found no blocking change; old Latin-1 keys and special strategy hash remain intact.
+
+Concept IDs: `9e02c00c-b480-48f5-9bc6-571fbca5ad62` (The Job Before the Machine),
+`034eee02-73da-43ac-a6f8-25e6e6fcac05` (Husqvarna: Bring the Model, Not a Guess).
+Both remain draft/unallocated, initially `has_script=false`. Missing CASE short
+code blocks production-folder naming separately; it does not justify weakening
+script-writing permissions or inventing a production mapping.
+
+Applied only reviewed `20261013225255_client_strategy_gold_projection.sql`:
+future published snapshots preserve the ten allowlisted strategy fields. Self-checks
+pass; anon/authenticated direct execute stays false. All 171 existing strategy rows
+retain fingerprint `c0c1f61540df310cfe07ed705f84c7d4` before/after. Existing published
+content was not backfilled or republished. #805's frontend remains a separate release.
+
+Microsoft readback at 11:08 UTC: latest automatic reconciliation
+`eb22160d-9c2b-4b35-bba1-230ede8d3c9b` fetched all six sources, applied eight safe
+changes, zero failures and 390 retained conflicts. It is PARTIAL, not fully fresh.
+No additional manual sync or conflict override was run here.
 
 ## Actual website journey, not just old snapshot age
 
@@ -77,6 +128,30 @@ These are time-of-check observations, not frozen published reports or promises o
 complete attribution. No client report was republished or website instrumented.
 The earlier statement about partial September snapshots describes stored published
 report material, not the functioning live October traffic bridge.
+
+## Readback and local browser acceptance
+
+All deployed runtime source files compare exactly to the reviewed checkout after
+CRLF normalization: MCP 33 files, worker 16, Google sync seven. SHA-256 manifest
+receipts (ordered path + normalized file digest pairs):
+
+- MCP v66: `c2b18c7a0071139cd7cbc34ab3a0837da5cd5a00c1bd7d637a915167bc6577c0`
+- Worker v60: `1e6ed7e3978851ef5298d7a15ea312f6c709bb596ae011526192921be6368aca`
+- Google sync v51: `a080a658ec27a8ab89d1c9590f720567f1c916bb0517a1a098a55e73e263046c`
+
+Live migration ledger names/versions: `google_ads_daily_refresh` / `20261016104744`,
+`client_strategy_gold_projection` / `20261016110543`. Do not replay original
+repository timestamps or run broad migration repair.
+
+Actual-component local fixtures pass desktop/375/390/430 for the complete portal
+shell, Plan/scripts/package/calendar, report-cutoff Performance, Overview schedule,
+Approvals and Brand Hub. Exact-client/month transitions, error-vs-empty states,
+published asset links, no external network/real writes, no overflow and no browser
+runtime errors are exercised. They are synthetic tests, NOT real client-role
+production acceptance. The Plan fixture first failed because it supplied no package
+receipt while expecting confirmed capacity. Its synthetic A now has a real-shaped
+receipt, B remains unknown; the test asserts 1 video + 6 combined posters for A,
+then no leaked quantities/unknown CTA for B. Production components were not relaxed.
 
 ## Exact external/release gates
 
