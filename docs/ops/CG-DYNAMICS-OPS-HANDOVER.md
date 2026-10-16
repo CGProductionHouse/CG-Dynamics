@@ -1,5 +1,49 @@
 # CG Dynamics Ops Handover
 
+### 16 October — November draft repairs and stable connector source fence
+
+Later than the read-only receipt below: the authorized company-admin connector
+saved Piek November `cb416671-6fc7-4fc1-b7b7-33b27847a594` and Daisy November
+`8c4cebe1-fb51-4114-bbfb-601b696b0a24` from v2 to **v3**, still unpublished
+drafts, with zero conflicts. Only `formatsAndRationale` and `nextMonthGamePlan`
+changed; their eight other strategy sections and format concepts were preserved.
+Both exact-client readbacks match the saved wording/version. These are real
+draft writes through the existing audited/version-fenced connector, not SQL,
+approval, publication or a claim of client-visible launch completion.
+
+The fresh complete roster has 61 active clients. November briefs were read for
+60; Human Auto was intentionally not re-researched/re-read pending CA skip/go.
+37 are source-ready with all ten strategy sections populated and unpublished;
+23 return explicit source/scope blockers; one is the held Human Auto lane.
+These are structural counts, not a blanket semantic endorsement. Case
+Bloemfontein already has a substantive v3 plan and was left unchanged. Elcheck,
+JFJ and VCS remain source-guide holds with their quantities already confirmed.
+
+An attempted CG Production House November improvement returned
+`STRATEGY_SOURCE_CHANGED` without a write. A fresh brief had the identical
+version/content except that the same five exact calendar rows arrived in a
+different order. Two failing-first local regressions also exposed event time
+changes escaping that source fence. Preparation now orders unbounded events
+chronologically with an exact-ID tie break and deliverables by ID before
+deriving evidence; source windows retain event timestamps/types so genuine
+reschedules still invalidate old proposals. No title deduplication, source
+exclusion or removal of write/version/staff gates. The proposed four-video,
+eight-photo, four-poster CG sequence is preserved in
+`docs/ops/strategy-review/2026-10-16-cg-november-proposal.json`, **not applied**.
+The connector fix is local until a separately authorized Edge release; then
+re-read the brief before a guarded submission, never loop on the live failure.
+73 affected tests and full suite (3,861 pass / 19 skips / zero failures), local
+TS/Vite build with app chunks, scoped lint, Deno checks and diff check pass.
+
+Authenticated Madison Wear staff preview at 375px exercised Overview, Plan,
+Calendar, Content Guidelines, confirmed package, Approvals, Brand Hub and
+Performance. Bottom navigation and More → Brand Hub work without overflow;
+package shows only two videos/sixteen combined posters. The plan is unpublished,
+calendar/guidelines empty and library unmapped, not launch passes. Its partial
+TikTok figures remain explicitly labelled partial and excluded from the
+cross-channel views total. Staff preview is not true client-role acceptance.
+No Vercel, provider, permission, mapping, schedule or publication operation.
+
 ### 16 October — strategy connector input and evidence continuity
 
 The company-admin connector resolved successfully and paged the complete active
