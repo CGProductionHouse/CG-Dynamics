@@ -192,6 +192,11 @@ const SECTION_TITLES: Record<OverviewSection['key'], string> = {
 const PLATFORM_ORDER = ['facebook', 'instagram', 'tiktok']
 
 function metricLabel(fact: PlatformFact): string {
+  if (fact.platform === 'tiktok'
+      && fact.metricKey === 'video_count'
+      && fact.aggregation === 'snapshot') {
+    return 'Account videos'
+  }
   if (fact.platform === 'facebook'
       && fact.metricKey === 'content_interactions'
       && fact.sourceMetric === 'page_post_engagements') {
