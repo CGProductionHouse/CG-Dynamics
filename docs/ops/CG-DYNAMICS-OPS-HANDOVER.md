@@ -31,8 +31,12 @@ removing one identical duplicate availability key (baseline TS1117). Exact packe
 Deno check now passes; candidate/rollback hashes are in
 `strategy-review/2026-10-16-meta-asset-runtime-packet.json`. No silent helper
 replacement or deployment. Frontend remains source-only until #679 release.
-PR#826 carries the reviewed candidate and receipts; do not call runtime source
-fixes live merely because tests or a merge pass.
+PR#826 is merged as `65e91264a8be0a357d0ce1d75a8176108bab5107`, with all three
+runtime source fixes and receipts. Do not call those fixes deployed from the
+merge: existing asset-list v64 and frontend remain unchanged. The only requested
+action-time release decision in this pass is the exact backend packet; no answer
+has been received. No Vercel operation. The company Chrome strategy-chat claim
+timed out; did not loop, bypass authentication or write new strategies with Codex.
 
 See `META-LINK-REPAIRS-2026-10-16.md` for exact IDs and timestamps. Forklift remains
 absent from provider picker, not proven to be Page101/102. Four older missing-post

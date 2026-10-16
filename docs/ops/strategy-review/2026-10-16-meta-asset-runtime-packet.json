@@ -3,6 +3,7 @@
   "project_id": "ehtjfntukiwbgptqgbzy",
   "function": "meta-list-assets",
   "baseline_version": 64,
+  "source_commit": "65e91264a8be0a357d0ce1d75a8176108bab5107",
   "verify_jwt": false,
   "authentication": "Existing internal JWT and admin/manager role checks unchanged",
   "status": "PREPARED_NOT_DEPLOYED_CA_EXACT_RELEASE_DECISION_PENDING",
