@@ -103,6 +103,11 @@ Deno.serve(async (req) => {
   }
 
   const accessToken = tokens[0].encrypted_access_token
+  // Preserve the proven per-request allowance; bound retries and both
+  // collections together instead of aborting valid large Page inventories at 3s.
+  const discoveryDeadline = Date.now() + 45_000
+  const fetchAssetPage = (url: string, timeoutMs: number) =>
+    metaFetch(url, {}, timeoutMs, { deadline: discoveryDeadline })
   // ── Fetch Facebook Pages ─────────────────────────────────
   let pages: FbPage[] = []
   let pagesDiagnostic: Record<string, unknown>
@@ -113,7 +118,7 @@ Deno.serve(async (req) => {
       fields: 'id,name,category,tasks,instagram_business_account{id,username,name,profile_picture_url}',
       limit: '100',
     })
-    const collection = await collectMetaAssets<FbPage>(`${baseUrl}/me/accounts?${pageParams.toString()}`, metaFetch)
+    const collection = await collectMetaAssets<FbPage>(`${baseUrl}/me/accounts?${pageParams.toString()}`, fetchAssetPage, { deadline: discoveryDeadline })
     pages = collection.data
     pagesDiagnostic = { available: collection.complete, complete: collection.complete, count: pages.length, pagesFetched: collection.pagesFetched }
     if (collection.failedResponse) {
@@ -163,7 +168,7 @@ Deno.serve(async (req) => {
       fields: 'id,name,account_status',
       limit: '100',
     })
-    const collection = await collectMetaAssets<AdAccount>(`${baseUrl}/me/adaccounts?${adParams.toString()}`, metaFetch)
+    const collection = await collectMetaAssets<AdAccount>(`${baseUrl}/me/adaccounts?${adParams.toString()}`, fetchAssetPage, { deadline: discoveryDeadline })
     adAccounts = collection.data
     adAccountsDiagnostic = { available: collection.complete, complete: collection.complete, count: adAccounts.length, pagesFetched: collection.pagesFetched }
     if (collection.failedResponse) {

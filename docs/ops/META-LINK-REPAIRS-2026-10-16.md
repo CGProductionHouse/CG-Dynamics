@@ -1,5 +1,17 @@
 # 16 October — exact-client Meta repairs
 
+## Approved backend release follow-up
+
+CA approved the exact non-Vercel backend release. v65 had6/6 source parity and401
+intact but failed actual authenticated discovery twice: new3s request timeout
+aborted valid Page inventory. Rolled back immediately to exact5-file baseline as
+v66; provider-derived options work again. No mapping/data/permission/config change.
+Two failing-first regressions now preserve12s request allowance and verify one45s
+deadline covers both collections and all retries. Corrected packet Deno/build/diff
+pass,259 Meta tests across21files and28 direct repair tests pass. Earlier full
+3896pass/19skips is a baseline receipt, not rerun for this timeout-only change.
+Final corrected release acceptance is still pending; do not reportv65 successful.
+
 Owning issues: #668 / #451; supervisor #381. This supersedes only the mapping
 holds identified below in `CLIENT-META-AUDIT-2026-10-16.md`. That earlier audit
 remains a historical receipt, not the current integration state.

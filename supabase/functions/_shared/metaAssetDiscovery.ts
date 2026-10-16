@@ -15,7 +15,7 @@ export async function collectMetaAssets<T extends { id: string }>(
 ): Promise<MetaAssetCollection<T>> {
   const initial = new URL(initialUrl)
   const maxPages = Math.min(20, Math.max(1, options.maxPages ?? 10))
-  const deadline = options.deadline ?? Date.now() + 15_000
+  const deadline = options.deadline ?? Date.now() + 45_000
   const records = new Map<string, T>()
   const cursors = new Set<string>()
   let cursor: string | null = null
@@ -33,7 +33,7 @@ export async function collectMetaAssets<T extends { id: string }>(
     let response: Response
     try {
       pagesFetched++
-      response = await fetchPage(url.toString(), Math.min(3_000, Math.floor(remaining / 3)))
+      response = await fetchPage(url.toString(), Math.min(12_000, remaining))
     } catch {
       return result('Asset discovery could not finish the provider request.')
     }

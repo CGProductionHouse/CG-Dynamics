@@ -2,23 +2,28 @@
   "schema": "cg-meta-asset-runtime-packet/v1",
   "project_id": "ehtjfntukiwbgptqgbzy",
   "function": "meta-list-assets",
-  "baseline_version": 64,
-  "source_commit": "65e91264a8be0a357d0ce1d75a8176108bab5107",
+  "baseline_version": 66,
+  "previous_source_commit": "65e91264a8be0a357d0ce1d75a8176108bab5107",
   "verify_jwt": false,
   "authentication": "Existing internal JWT and admin/manager role checks unchanged",
-  "status": "PREPARED_NOT_DEPLOYED_CA_EXACT_RELEASE_DECISION_PENDING",
-  "local_packet": "C:/Users/chris/AppData/Local/Temp/cg-meta-asset-packet-e4abc885c114419b900222145994a2bc",
+  "status": "CA_APPROVED_TIMEOUT_CORRECTION_PREPARED_NOT_YET_DEPLOYED",
+  "local_packet": "C:/Users/chris/AppData/Local/Temp/cg-meta-asset-timeout-1053c6a2a6de4b90acc7e2e99bb63ab9",
+  "rollback_packet": "C:/Users/chris/AppData/Local/Temp/cg-meta-asset-packet-e4abc885c114419b900222145994a2bc/rollback",
+  "release_history": [
+    { "version": 65, "outcome": "ROLLED_BACK", "reason": "Authenticated discovery twice aborted valid Page requests under regressed3s timeout; source/auth parity passed but acceptance failed" },
+    { "version": 66, "outcome": "BASELINE_RESTORED", "reason": "Exact5-file v64 source restored; actual provider-derived picker options working again" }
+  ],
   "hash_convention": "SHA256 UTF-8 LF-normalized source, trimEnd plus one LF",
   "typecheck": "Exact packet Deno check --no-lock PASS after removing only second identical availability: probe.availability property from deployed meta.ts factPayload; original baseline fails TS1117",
   "files": [
-    { "name": "functions/meta-list-assets/index.ts", "candidate_sha256": "edee4a02c9a54ad11b75058ab95ac4a7e7e51da76c1e8647f0551f6789ed8d6a", "baseline_sha256": "90300bd69d42661bd66653ea8acfa174eb97725e889198c2b7e45089ff0a6ee0" },
+    { "name": "functions/meta-list-assets/index.ts", "candidate_sha256": "8450d95f9d5f628ab9b84e13f058ec0f59602d80ba911b3eae0ae6dbca20f515", "baseline_sha256": "90300bd69d42661bd66653ea8acfa174eb97725e889198c2b7e45089ff0a6ee0" },
     { "name": "functions/_shared/cors.ts", "candidate_sha256": "909f9578ddfca6a74d0df8e627433fe1000a74d51713e06f81b095744bba5d95", "baseline_sha256": "909f9578ddfca6a74d0df8e627433fe1000a74d51713e06f81b095744bba5d95" },
     { "name": "functions/_shared/meta.ts", "candidate_sha256": "9982c893210a1a2d5454cd448e717aa4adad5d62a7a30baaea9c54e702371964", "baseline_sha256": "39237ac22df2444e8bab2496f623f6f1d1361372d281c56512fd181904e8f570", "change": "Remove second identical availability property only; do not replace with unrelated current repository helper" },
     { "name": "functions/_shared/metaInsightResponse.ts", "candidate_sha256": "3c4e351a022e76cac0753f58576717bba27dcd7804cd321cd32197bdfc6d9c4b", "baseline_sha256": "3c4e351a022e76cac0753f58576717bba27dcd7804cd321cd32197bdfc6d9c4b" },
     { "name": "functions/_shared/metaUsage.ts", "candidate_sha256": "0f496f4a4661f21bcd958385c06f8a7c2f6ed41939687d1917adb837d6e2bddf", "baseline_sha256": "0f496f4a4661f21bcd958385c06f8a7c2f6ed41939687d1917adb837d6e2bddf" },
-    { "name": "functions/_shared/metaAssetDiscovery.ts", "candidate_sha256": "6af6426a04ab535421945d34a02ff693d14a5948b0fd1fcda42f33e380b0e346", "baseline_sha256": null }
+    { "name": "functions/_shared/metaAssetDiscovery.ts", "candidate_sha256": "f419e616532f677da2aa72b7484adaf1712cfd1d773b8a6d03d3830018c09f4d", "baseline_sha256": null }
   ],
-  "pre_release": ["Fresh live version/file comparison must still match v64 baseline", "Review exact packet and retain rollback source in local_packet/rollback", "Explicit CA decision for this function; no permission/config/secret/JWT setting changes"],
+  "pre_release": ["Fresh live version/file comparison must still match v66 restored baseline", "Review exact packet and retain rollback source in rollback_packet", "Explicit CA decision received for this function; no permission/config/secret/JWT setting changes"],
   "post_release": ["Read back every deployed source file and JWT setting", "Unauthenticated POST remains 401", "Authenticated admin asset inventory includes full Pages with complete/page-count metadata", "Check exact Forklift identity once; absence is not permission to guess or broaden access"],
   "vercel_operations": 0
 }

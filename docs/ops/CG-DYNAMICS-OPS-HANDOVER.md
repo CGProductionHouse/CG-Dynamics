@@ -1,5 +1,23 @@
 # CG Dynamics Ops Handover
 
+### 16 October — approved Meta discovery release: rollback and timeout correction
+
+CA explicitly approved the exact `meta-list-assets` backend release, no Vercel.
+v65 matched all6 reviewed files and preserved internal auth/401, but authenticated
+acceptance twice returned0Pages: collector reduced proven12s request allowance to
+3s. Immediately restored the exact5-file baseline asv66; verified source parity
+and actual provider-derived Elcheck option works again. Existing46 mappings and
+reports unchanged. No OAuth/permissions/config/SQL/publication/hosting action.
+
+Focused branch `codex/meta-discovery-timeout-2026-10-16` preserves12s per request
+and passes one45s deadline into Meta retry control and both collections. Two new
+actual-handler/collector regressions reproduce the failed timeout and retry
+budget before the fix;259 Meta tests across21files pass, plus28 direct repair
+tests, repository/exact-packet Deno, local build/app chunks and diff checks.
+Prior full3896pass/19skips remains baseline, not a new full-suite claim.
+Corrected same-function packet is prepared for live acceptance under CA approval;
+v66 remains live until that succeeds. Frontend release remains separate.
+
 ### 16 October — execution supersedes six Meta integration audit holds
 
 CA explicitly requested the outstanding repairs after the ordered audit. Existing
