@@ -7,6 +7,7 @@ const GOOGLE_OAUTH_TOKEN_URL = 'https://oauth2.googleapis.com/token'
 const MAX_ATTEMPTS = 4
 const REQUEST_TIMEOUT_MS = 30_000
 const MAX_RETRY_DELAY_MS = 10_000
+export type GoogleAdsRequestPolicy = { attempts: number; timeoutMs: number }
 
 export interface GoogleAdsConfig {
   clientId: string
@@ -112,17 +113,19 @@ function retryDelay(response: Response | null, attempt: number): number {
   return Math.min(500 * (2 ** attempt), MAX_RETRY_DELAY_MS)
 }
 
-async function fetchWithRetry(url: string, init: RequestInit): Promise<Response> {
+async function fetchWithRetry(url: string, init: RequestInit, policy?: GoogleAdsRequestPolicy): Promise<Response> {
+  const attempts = policy?.attempts ?? MAX_ATTEMPTS
+  const timeoutMs = policy?.timeoutMs ?? REQUEST_TIMEOUT_MS
   let lastResponse: Response | null = null
-  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
     try {
-      const response = await fetch(url, { ...init, signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) })
+      const response = await fetch(url, { ...init, signal: AbortSignal.timeout(timeoutMs) })
       lastResponse = response
       if (response.ok || (response.status !== 429 && response.status < 500)) return response
     } catch {
       lastResponse = null
     }
-    if (attempt < MAX_ATTEMPTS - 1) await sleep(retryDelay(lastResponse, attempt))
+    if (attempt < attempts - 1) await sleep(retryDelay(lastResponse, attempt))
   }
   throw new GoogleAdsError(
     lastResponse ? 'Google Ads is temporarily unavailable.' : 'Google Ads request timed out.',
@@ -131,7 +134,7 @@ async function fetchWithRetry(url: string, init: RequestInit): Promise<Response>
   )
 }
 
-export async function refreshGoogleAccessToken(config: GoogleAdsConfig): Promise<string> {
+export async function refreshGoogleAccessToken(config: GoogleAdsConfig, policy?: GoogleAdsRequestPolicy): Promise<string> {
   const response = await fetchWithRetry(GOOGLE_OAUTH_TOKEN_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -141,7 +144,7 @@ export async function refreshGoogleAccessToken(config: GoogleAdsConfig): Promise
       refresh_token: config.refreshToken,
       grant_type: 'refresh_token',
     }),
-  })
+  }, policy)
   if (!response.ok) {
     throw new GoogleAdsError('Google Ads authorization needs attention.', response.status, requestId(response))
   }
@@ -157,6 +160,7 @@ export async function searchStream(
   accessToken: string,
   customerId: string,
   query: string,
+  policy?: GoogleAdsRequestPolicy,
 ): Promise<Array<Record<string, unknown>>> {
   const normalizedId = normalizeCustomerId(customerId)
   if (!normalizedId) throw new GoogleAdsError('Invalid Google Ads customer ID.', 400)
@@ -172,6 +176,7 @@ export async function searchStream(
       },
       body: JSON.stringify({ query }),
     },
+    policy,
   )
   if (!response.ok) {
     const status = response.status === 401 || response.status === 403 ? 502 : response.status
