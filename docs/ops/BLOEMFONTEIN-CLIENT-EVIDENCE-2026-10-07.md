@@ -1,5 +1,16 @@
 # Four Bloemfontein clients: recovered evidence and concrete working plans
 
+**Current-scope correction:** the quantity holds below are the historical 7 October
+state. CA supplied the exact quantities on 9 October and they were confirmed
+through the audited package flow that day; see
+[the superseding receipt](CA-PACKAGE-AND-SOURCE-RECEIPT-2026-10-09.md).
+A read-only connector check on 16 October reconfirmed Elcheck and JFJ at
+1 video / 3 photos / 3 posters, and VCS at 1 video / 8 posters. Do not ask for
+those quantities again. Their remaining November strategy blockers are
+`CLIENT_EVIDENCE_UNVERIFIED` and `EXACT_STRATEGY_EVIDENCE_UNAVAILABLE`, with no
+ready guide or exact prior report returned. LHP remains the separately held
+once-off scope. The historical source observations below remain audit evidence.
+
 7 October 2026 · #668 / #504 / #381. **Internal review material only.** These
 are proposed decisions, not confirmed packages, approved research cards, strategy
 amendments or client publication. Existing canonical package/strategy authorities
