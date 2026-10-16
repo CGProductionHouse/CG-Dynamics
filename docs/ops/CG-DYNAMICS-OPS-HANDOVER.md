@@ -54,7 +54,7 @@ The 19 skips include the two optional Docker checks, not claimed as passes.
 No layout, values, source windows, grants or data change. Frontend release remains
 separate; do not call this wording live from a local test.
 
-Draft PR #824 holds the exact audit and bounded wording fix. Ordered next client:
+PR #824 holds the exact audit and bounded wording fix. Ordered next client:
 CG Production House (15). CASE native 8,323 FB /780 IG views and Central Canvas
 5,031 FB views match. Central Canvas has a newer 16 October 13:36 local post
 after its 11:27 local checkpoint; pending scheduled refresh is not a proved drop.
