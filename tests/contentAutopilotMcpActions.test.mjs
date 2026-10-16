@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import { after, before, test } from 'node:test'
 import { readFileSync } from 'node:fs'
 import { createServer } from 'vite'
+import ts from 'typescript'
 
 let server, actions, ap, catalog, context, serverSource
 before(async () => {
@@ -18,6 +19,70 @@ after(async () => { await server?.close() })
 const A = '42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa'
 const B = 'cdb11a82-339e-4b46-9b09-bde1a23efeaf'
 const C = '6b1f4a5e-2c3d-4e5f-9a8b-7c6d5e4f3a2b'
+
+async function runEnsureGuideline(existing, created, error = null, allowCreate = true) {
+  const start = serverSource.indexOf('async function ensureGuideline(')
+  const end = serverSource.indexOf('/** Resolve the run', start)
+  const js = ts.transpileModule(`export ${serverSource.slice(start, end)}`, {
+    compilerOptions: { target: ts.ScriptTarget.ESNext, module: ts.ModuleKind.ESNext },
+  }).outputText
+  const { ensureGuideline } = await import(`data:text/javascript;base64,${Buffer.from(js).toString('base64')}`)
+  const calls = []
+  const query = { select() { return this }, eq() { return this }, async maybeSingle() { return { data: existing, error: null } } }
+  const staff = { profileId: C, supabase: {
+    from(name) { assert.equal(name, 'content_guidelines'); return query },
+    async rpc(name, params) {
+      calls.push({ name, params })
+      // Service clients have no human auth.uid(): reproduce the actual legacy RPC refusal.
+      if (name === 'get_or_create_content_guideline') return { data: null, error: { message: 'Staff access required' } }
+      assert.equal(name, 'get_or_create_content_guideline_as_actor')
+      assert.deepEqual(params, { p_run_id: A, p_actor_profile_id: C })
+      return { data: created, error }
+    },
+  } }
+  return { result: await ensureGuideline(staff, { runId: A, clientId: B }, allowCreate), calls }
+}
+
+test('MCP guideline creation uses the existing service/validated-actor RPC, not a human-session RPC', async () => {
+  const guide = { id: C, content_run_id: A, client_id: B, status: 'draft' }
+  const { result, calls } = await runEnsureGuideline(null, guide)
+  assert.deepEqual(result, { guideline: guide, created: true })
+  assert.equal(calls.length, 1)
+  const sql = readFileSync('supabase/migrations/20260922120000_system_worker_profile.sql', 'utf8')
+    .split('create or replace function public.persist_content_autopilot_ideas')[0]
+  assert.match(sql, /auth\.role\(\) <> 'service_role'/)
+  assert.match(sql, /p\.id=p_actor_profile_id and p\.is_active/)
+  assert.match(sql, /grant execute[^;]+to service_role;/)
+})
+
+test('MCP guideline preparation preserves existing documents and refuses foreign RPC identities', async () => {
+  const existing = { id: C, content_run_id: A, client_id: B, status: 'published', title: 'Staff wording' }
+  const saved = await runEnsureGuideline(existing, null)
+  assert.deepEqual(saved.result, { guideline: existing, created: false })
+  assert.equal(saved.calls.length, 0)
+  for (const foreign of [{ ...existing, client_id: C }, { ...existing, content_run_id: C }]) {
+    assert.match((await runEnsureGuideline(null, foreign)).result.error, /exact client and Content Run/)
+    assert.match((await runEnsureGuideline(foreign, null)).result.error, /exact client and Content Run/)
+  }
+  const denied = await runEnsureGuideline(null, null, { message: 'Configured active system profile required.' })
+  assert.equal(denied.result.error, 'Configured active system profile required.')
+  assert.equal(denied.calls.length, 1, 'no alternate RPC/permission bypass after refusal')
+})
+
+test('read-only guideline tools never create a missing document', async () => {
+  const missing = await runEnsureGuideline(null, null, null, false)
+  assert.equal(missing.calls.length, 0)
+  assert.match(missing.result.error, /No canonical Content Guideline/)
+  const load = serverSource.slice(serverSource.indexOf('async function loadRunGuideline('), serverSource.indexOf('const handleEnsureContentGuideline'))
+  assert.match(load, /allowCreate = false/)
+  for (const [start, end] of [
+    ['const handleListContentGuidelineVideos', 'const handleGetContentVideoReadiness'],
+    ['const handleGetContentVideoReadiness', 'const handleAddContentGuidelineVideo'],
+  ]) {
+    const handler = serverSource.slice(serverSource.indexOf(start), serverSource.indexOf(end))
+    assert.doesNotMatch(handler, /loadRunGuideline\([^\n]+, true\)/)
+  }
+})
 
 test('every #450 action is exposed, contexted and correctly classified', () => {
   const writes = serverSource.match(/const WRITE_TOOLS = new Set\(\[([\s\S]*?)\]\)/)[1]
