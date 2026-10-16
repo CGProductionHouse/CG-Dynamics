@@ -133,8 +133,8 @@ test('no inline client_name string survives against monthly_deliverables', () =>
 })
 
 test('both handlers flatten before returning', () => {
-  assert.match(INDEX, /deliverables: flattenDeliverableClient\(scheduleResult\.data\)/)
-  assert.match(INDEX, /deliverables: flattenDeliverableClient\(data\), error: error\?\.message \?\? null/)
+  assert.match(INDEX, /deliverables: flattenDeliverableClient\(scheduleResult\.data as Record<string, unknown>\[\] \| null\)/)
+  assert.match(INDEX, /deliverables: flattenDeliverableClient\(data as Record<string, unknown>\[\] \| null\), error: error\?\.message \?\? null/)
 })
 
 // ── Client Schedule semantics unchanged ─────────────────────────────────────
@@ -156,5 +156,5 @@ test('CG Calendar remains a separate authority', () => {
   assert.match(myDay, /\.from\('monthly_deliverables'\)/)
   // Calendar events and deliverables stay in distinct result fields — never merged.
   assert.match(myDay, /calendar_events: calendarResult\.data \?\? \[\]/)
-  assert.match(myDay, /deliverables: flattenDeliverableClient\(scheduleResult\.data\)/)
+  assert.match(myDay, /deliverables: flattenDeliverableClient\(scheduleResult\.data as Record<string, unknown>\[\] \| null\)/)
 })

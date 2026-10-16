@@ -117,8 +117,8 @@ test('withSourceLinkage preserves human fields and folds raw microsoft columns i
 })
 
 test('task, calendar and Client Schedule reads all expose durable source identity', () => {
-  assert.match(INDEX, /withSourceLinkage\(data, 'planner'\)/)
-  assert.match(INDEX, /withSourceLinkage\(data, 'calendar'\)/)
+  assert.match(INDEX, /withSourceLinkage\(data as unknown as Record<string, unknown>\[\], 'planner'\)/)
+  assert.match(INDEX, /withSourceLinkage\(data as Record<string, unknown>\[\] \| null, 'calendar'\)/)
   for (const f of ['microsoft_plan_id', 'microsoft_task_id']) {
     assert.ok(msf.PLANNER_MICROSOFT_FIELDS.includes(f))
   }

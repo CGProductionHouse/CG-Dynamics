@@ -410,7 +410,7 @@ test('default staff task reads exclude terminal, archived and source-removed his
   assert.doesNotMatch(activeStates, /'done'|'completed'/, 'terminal states are not in the default active set')
   const day = slice('const handleGetMyDay', 'const handleListMyTasks')
   const tasks = slice('const handleListMyTasks', 'const handleGetTask')
-  const ownedTaskReader = slice('async function listOwnedPlannerTasks', 'const handleGetMyDay')
+  const ownedTaskReader = slice('function ownedPlannerTaskQuery', 'const handleGetMyDay')
   for (const handler of [day, tasks]) {
     assert.match(handler, /\.in\('status', ACTIVE_TASK_STATES\)/)
   }
