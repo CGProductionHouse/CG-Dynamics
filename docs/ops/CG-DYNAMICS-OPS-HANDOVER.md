@@ -1,5 +1,43 @@
 # CG Dynamics Ops Handover
 
+### 16 October — normal-chat semantic review completed; two connector fixes merged
+
+The existing **Write Client Strategies** normal company ChatGPT conversation
+completed its second pass (12m58s): **31/31 source-ready November clients after
+PSG** reviewed in canonical order; 20 held clients in that remaining cohort
+skipped; **14 field-level improvement proposals across 12 clients**, with 19
+left unchanged. This is the chat's semantic review result, not an approval or
+independent claim of sales/strategy excellence. Cursor is END_OF_ROSTER (All
+Around PVC). No canonical strategy or Content Guideline save, staff overwrite,
+approval or publication occurred in either resumed pass.
+
+The chat preserves a complete semantic-review document and structured proposals
+with exact draft IDs/versions and source references. Concrete findings cover
+We Ar Fuels (internal CG instruction in a poster concept), Supa Quick BFN
+(exact filming branch), CG Production House (video sequence mismatch), Piek
+(repeated forecourt concepts/mixed-audience test), Cape Lumber (underused
+technical-post learning), Wiseman (demonstrable group coordination), Dulux, AV
+Event Life, Forklift Trucks, Bouwer & Coetzee, Ehrlich Park Butchery and All
+Around PVC. The authored replacements remain **separate review proposals**,
+not app amendments or activated knowledge. Their source is the existing chat:
+`https://chatgpt.com/g/g-p-6aad2a324f2c8191a8d09c181b59c197-cg-builder-web-apps/c/6ace9b70-d30c-83ea-a4a0-014cf0c66381`.
+Artifact export timed out and browser reattachment failed; the full proposal
+payload was not downloaded or copied into this repository. Do not claim it was.
+The final response was visibly verified before the export failure; no auth
+bypass or repeated provider/browser retry was attempted.
+
+PR #816 (Meta reporting truth) merged as
+`1b5a65fa7dba338c1d4c8aeb30b71937f14cd91e`; PR #817 (Content Guideline
+service/actor RPC and read-only creation guard) merged as
+`acfd14a74d2b460b6d0713cca143578e03b6686b`. Final runtime supported suite:
+3,856 pass / 19 skips / zero failures, 85 focused tests, build/app chunks and
+scoped lint/diff pass. Full MCP index Deno remains blocked at 242 documented
+generic errors. These fixes remain **not deployed**; release and one exact-run
+draft save/readback are separate acceptance gates. No Vercel, production data,
+schema, provider/OAuth/mapping, permissions or strategy/asset publication action.
+No other open PR owner was duplicated. Control Centre exact access remains the
+previously documented unavailable gate; GitHub and this handover hold receipts.
+
 ### 16 October — Content Guideline service/actor RPC correction (local)
 
 The normal strategy chat's `Staff access required` refusal is reproduced by an

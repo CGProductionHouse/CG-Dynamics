@@ -1,5 +1,27 @@
 # Company ChatGPT monthly strategy workspace — #731
 
+## 16 October normal-chat semantic review receipt
+
+The resumed **Write Client Strategies** conversation completed its additional
+12m58s pass: 31/31 source-ready November drafts after PSG reviewed; 20 held
+clients in that remaining cohort skipped; 14 exact field proposals for 12 clients;
+19 left unchanged; cursor END_OF_ROSTER at All Around PVC. The complete review
+and structured version/source-linked proposals remain in the
+[existing normal company chat](https://chatgpt.com/g/g-p-6aad2a324f2c8191a8d09c181b59c197-cg-builder-web-apps/c/6ace9b70-d30c-83ea-a4a0-014cf0c66381).
+No canonical strategy/guideline write, staff overwrite, approval or publication
+occurred. The proposed corrections are not already implemented in Dynamics and
+are not newly approved research. The artifact export/browser reattachment failed
+after the visible final response, so the full proposal payload is not a repo
+artifact. Do not regenerate the same review merely because export failed.
+
+Concrete review queue: We Ar Fuels, Supa Quick BFN, CG Production House, Piek,
+Cape Lumber, Wiseman, Dulux, AV Event Life, Forklift Trucks, Bouwer & Coetzee,
+Ehrlich Park Butchery and All Around PVC. Retrieve the existing exact field
+proposals and recheck their draft versions before controlled editorial amendment;
+do not replace whole staff drafts or imply the machine quality gate approved them.
+The first resumed pass's held Zooz/Hino/Vrystaat proposals and production briefs
+also remain separate, not canonical saves. LHP/Human Auto holds are unchanged.
+
 ## Explicit authoring route — normal ChatGPT, not Work (16 October)
 
 CA's required route is normal company ChatGPT chat using the Dynamics plugin.
