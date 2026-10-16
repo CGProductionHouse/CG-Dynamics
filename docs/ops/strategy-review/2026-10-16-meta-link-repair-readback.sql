@@ -75,3 +75,21 @@ WHERE p.permalink LIKE '%1551335327010846%'
    OR p.permalink LIKE '%1751385370329586%'
    OR p.permalink LIKE '%1569849948505224%'
    OR p.permalink LIKE '%1568586765298209%';
+
+-- After v68 complete102-Page discovery, Forklift was exposed at Page101 and
+-- explicitly linked through the ordinary admin workflow (not through SQL).
+SELECT id AS mapping_id, client_id, facebook_page_id, instagram_account_id,
+       instagram_username, ad_account_id, instagram_not_applicable, is_active
+FROM meta_client_assets
+WHERE client_id = '4424ed69-7270-4d30-a1ea-0b77d76912df';
+
+SELECT platform, last_status, last_health_state, last_successful_at,
+       high_watermark_at, next_due_at, last_error_code
+FROM meta_asset_sync_checkpoints
+WHERE client_id = '4424ed69-7270-4d30-a1ea-0b77d76912df'
+ORDER BY platform;
+
+SELECT r.id, r.period_start, r.period_end, r.status, count(p.id) AS imported_posts
+FROM reports r LEFT JOIN posts p ON p.report_id = r.id
+WHERE r.client_id = '4424ed69-7270-4d30-a1ea-0b77d76912df'
+GROUP BY r.id ORDER BY r.period_start DESC;

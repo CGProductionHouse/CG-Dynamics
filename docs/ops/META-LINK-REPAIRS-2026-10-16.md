@@ -1,5 +1,44 @@
 # 16 October — exact-client Meta repairs
 
+## Approved backend release follow-up
+
+**Final: v68 accepted live.** All6 deployed files match the reviewed packet;
+authentication/role/JWT configuration preserved; anonymous POST401. Actual
+authenticated admin POST200: `available=true, complete=true, count=102,
+pagesFetched=2`,59IGaccounts. The provider-resolved numeric `/me` alias is accepted
+only for the same origin/version/collection; requests always replay the cursor
+on the original `/me` endpoint, never the provider-supplied URL or credentials.
+
+Forklift was the first previously truncated Page (Page101):
+FB`1702158976724640`, IG`17841436330142977` /`forklift_truck_ofs`. Existing admin
+Save link created mapping`8875abfe-aaf9-4c34-b9a1-e0d3bedf766e` for unchanged client
+`4424ed69-7270-4d30-a1ea-0b77d76912df`. Independent SELECT confirms exact IDs,
+active, IG-not-applicable=false, null ad account. UI47linked/14missingFB. Existing
+automatic bootstrap completed FB19:05:21UTC and IG19:05:26UTC, no errors, next+6h;
+October draft`6853e307-aabc-4fbe-8817-452154738702` has8posts and September draft
+`e5fe6a5a-6d4b-4894-80ed-aa83650ce3b8` has12posts. Neither is published.
+Page102 is The Urban Day Spa and Salon; no Dynamics client identity was assumed
+or mapping created for it. No other account/permission recovery was attempted.
+
+PR#828 runtime source`f1fad8d71c16b5e8648751cd549adfee88213d3e` has260Meta tests
+across21files and29direct repair tests passing, build/app chunks/Deno/diff pass.
+Frontend picker/report-list fixes still await separate#679 release. Screenshot:
+`C:/Users/chris/AppData/Local/Temp/cg-meta-release-v68-2026-10-16.jpg`.
+
+### Attempt history (superseded by v68 above)
+
+CA approved the exact non-Vercel backend release. v65 had6/6 source parity and401
+intact but failed actual authenticated discovery twice: new3s request timeout
+aborted valid Page inventory. Rolled back immediately to exact5-file baseline as
+v66; provider-derived options work again. No mapping/data/permission/config change.
+Two failing-first regressions now preserve12s request allowance and verify one45s
+deadline covers both collections and all retries. Corrected packet Deno/build/diff
+pass,259 Meta tests across21files and28 direct repair tests pass. Earlier full
+3896pass/19skips is a baseline receipt, not rerun for this timeout-only change.
+v67 restored100Pages but safely rejected the numeric resolved-me pagination path;
+a third failing-first regression led to v68 complete102-Page acceptance. Do not
+reportv65 successful or hide its rollback. No Vercel operation at any stage.
+
 Owning issues: #668 / #451; supervisor #381. This supersedes only the mapping
 holds identified below in `CLIENT-META-AUDIT-2026-10-16.md`. That earlier audit
 remains a historical receipt, not the current integration state.

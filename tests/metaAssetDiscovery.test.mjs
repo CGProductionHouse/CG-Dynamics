@@ -92,6 +92,25 @@ test('provider next URL supplies only its cursor, never its token or fields', as
   assert.equal(calls[1].searchParams.get('fields'), 'id,name')
 })
 
+test('Meta may resolve me to a numeric ID without changing the fetched endpoint', async () => {
+  for (const edge of ['accounts', 'adaccounts']) {
+    const calls = []
+    const url = initialUrl.replace('/accounts?', `/${edge}?`)
+    const result = await (await optionalCollector())(url, async raw => {
+      const requested = new URL(raw)
+      calls.push(requested)
+      return Response.json(calls.length === 1 ? {
+        data: [{ id: '1' }],
+        paging: { next: `https://graph.facebook.com/v25.0/123456789/${edge}?after=two&access_token=untrusted` },
+      } : { data: [{ id: '2' }] })
+    })
+    assert.equal(result.complete, true)
+    assert.equal(result.data.length, 2)
+    assert.equal(calls[1].pathname, `/v25.0/me/${edge}`)
+    assert.equal(calls[1].searchParams.get('access_token'), 'test-user-secret')
+  }
+})
+
 test('handler discovers paged ad accounts without exposing unexpected provider fields', async () => {
   const calls = []
   const handler = loadHandler(async raw => {
@@ -158,6 +177,34 @@ test('elapsed deadline prevents a provider request and raw errors never escape',
   const failed = await collect(initialUrl, async () => { throw new Error('access_token=secret') })
   assert.equal(failed.complete, false)
   assert.ok(!JSON.stringify(failed).includes('secret'))
+})
+
+test('discovery preserves the existing 12-second provider request allowance', async () => {
+  const result = await (await optionalCollector())(initialUrl, async (_url, timeoutMs) => {
+    // Deterministically model a valid collection slower than the regressed 3s
+    // timeout, without a real sleep or network request.
+    if (timeoutMs < 12_000) throw new Error('provider request aborted too early')
+    return Response.json({ data: [{ id: 'slow-valid-page' }] })
+  })
+  assert.equal(result.complete, true)
+  assert.equal(result.data.length, 1)
+})
+
+test('actual handler bounds retries and both collections with one request deadline', async () => {
+  const calls = []
+  const started = Date.now()
+  const handler = loadHandler(async (url, init, timeoutMs, control) => {
+    calls.push({ url, init, timeoutMs, control })
+    return Response.json({ data: [] })
+  }, await optionalCollector())
+  await handler(new Request('https://example.test', { method: 'POST', headers: { Authorization: 'Bearer actor' } }))
+  assert.equal(calls.length, 2)
+  for (const call of calls) {
+    assert.equal(call.timeoutMs, 12_000)
+    assert.ok(call.control?.deadline >= started + 44_000)
+    assert.ok(call.control.deadline <= Date.now() + 45_000)
+  }
+  assert.equal(calls[0].control.deadline, calls[1].control.deadline)
 })
 
 for (const data of [null, {}, { data: {} }, { data: [null] }, { data: [{ id: '' }] }]) {

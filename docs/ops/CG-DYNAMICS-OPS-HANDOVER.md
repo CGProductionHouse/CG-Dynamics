@@ -1,5 +1,49 @@
 # CG Dynamics Ops Handover
 
+### 16 October — Meta discovery v68 accepted; Forklift link recovered
+
+CA-approved exact backend release is now **v68 ACTIVE**,6/6 source files read
+back, unchanged internal JWT/admin-manager gates and verify_jwt=false; anonymous
+POST401. Authenticated actual-app POST200 returns complete102FacebookPages in
+2pages and59linkedIGaccounts. Forklift is confirmed Page101, not an OAuth hold.
+Provider next resolves `/me` to a numeric identity; collector accepts only the
+same-origin/version/edge alias and replays its cursor against the original `/me`
+endpoint/fields/token. It NEVER follows provider next URL or changes permissions.
+
+Saved exact Forklift FB1702158976724640 /IG17841436330142977 @forklift_truck_ofs
+through existing authenticated admin workflow, preserving client4424ed69-7270-
+4d30-a1ea-0b77d76912df and Hours history. Mapping8875abfe-aaf9-4c34-b9a1-e0d3bedf766e
+independently SELECT-verified; UI47linked/14missingFB. Automatic FB/IG checkpoints
+complete19:05:21/26UTC, no errors, next+6h. Real October draft8posts /September
+draft12posts. No publication. This supersedes Forklift/pending-release holds below.
+
+PR#828 contains timeout and resolved-me alias corrections, three failing-first
+regressions;260Meta tests across21files and29direct repair tests pass. Repository
+and exact deployed-helper packet Deno, local build/app chunks and diff pass.
+Prior full3896pass/19skips is baseline, not rerun. Runtime source f1fad8d7;
+manifest records exact candidate/rollback hashes and release history. No Vercel,
+SQL/schema/config/secret/provider-permission/OAuth or other function release.
+Frontend IG picker/report-source fixes remain source-only under#679. Other owners
+#775/#662/#618 untouched; no all-client launch-readiness claim.
+
+### 16 October — release attempt history: rollback and timeout correction
+
+CA explicitly approved the exact `meta-list-assets` backend release, no Vercel.
+v65 matched all6 reviewed files and preserved internal auth/401, but authenticated
+acceptance twice returned0Pages: collector reduced proven12s request allowance to
+3s. Immediately restored the exact5-file baseline asv66; verified source parity
+and actual provider-derived Elcheck option works again. Existing46 mappings and
+reports unchanged. No OAuth/permissions/config/SQL/publication/hosting action.
+
+Focused branch `codex/meta-discovery-timeout-2026-10-16` preserves12s per request
+and passes one45s deadline into Meta retry control and both collections. Two new
+actual-handler/collector regressions reproduce the failed timeout and retry
+budget before the fix;259 Meta tests across21files pass, plus28 direct repair
+tests, repository/exact-packet Deno, local build/app chunks and diff checks.
+Prior full3896pass/19skips remains baseline, not a new full-suite claim.
+This was an intermediate stage: v67 restored100Pages but rejected numeric `/me`
+alias; v68 above passed complete102-Page acceptance. Frontend release is separate.
+
 ### 16 October — execution supersedes six Meta integration audit holds
 
 CA explicitly requested the outstanding repairs after the ordered audit. Existing
