@@ -1,0 +1,338 @@
+{
+  "schema": "cg-normal-chat-strategy-amendments/v1",
+  "date": "2026-10-16",
+  "month": "2026-11-01",
+  "source_chat": "https://chatgpt.com/g/g-p-6aad2a324f2c8191a8d09c181b59c197-cg-builder-web-apps/c/6ace9b70-d30c-83ea-a4a0-014cf0c66381",
+  "runtime": {
+    "pr": 822,
+    "source_commit": "9f58d8647f1edb75ac98a39c99c70a1adef1da66",
+    "merge_commit": "f63c709a7800dfd30ed887275408c5893e0826f1",
+    "mcp_version": 68
+  },
+  "counts": {
+    "clients": 12,
+    "editorial_corrections": 14,
+    "gold_text_corrections": 3,
+    "concept_corrections": 11,
+    "canonical_field_paths": 13,
+    "remaining_batch_corrections": 0
+  },
+  "verification": "Normal company ChatGPT authored and saved the existing corrections, read complete fields back; independent SELECT-only canonical revision comparison confirms exact changed fields/positions and preserved unselected payload/provenance.",
+  "publication": "NOT_PERFORMED",
+  "fleet_launch_acceptance": "NOT_ESTABLISHED",
+  "drafts": [
+    {
+      "name": "All Around PVC",
+      "strategy_id": "b8c90019-008f-44b0-a7a3-1d1b5b67a9ac",
+      "revision_id": "cc660a91-a76a-4ad0-bdcf-2c539bdb41a6",
+      "record_version": 5,
+      "workflow_status": "draft",
+      "published_version": null,
+      "canonical_version_matches": true,
+      "changed_fields": [
+        "actionPlan.professional_video.items"
+      ],
+      "unselected_strategy_fields_unchanged": true,
+      "prior_provenance_unchanged": true,
+      "source_ids": [
+        "967837f0-f88f-4f05-a308-dfe1e01c2d65",
+        "fd16ebae-a50b-4920-afe0-94c2631f8f06"
+      ],
+      "concept_changes": [
+        {
+          "format": "professional_video",
+          "positions": [
+            1
+          ],
+          "length_unchanged": true
+        }
+      ]
+    },
+    {
+      "name": "AV Event Life",
+      "strategy_id": "c1a981ed-c0dc-4f69-861a-d6e1d86d4b77",
+      "revision_id": "539dade3-95cd-4a6d-bd53-dcc0a2b2fb75",
+      "record_version": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "canonical_version_matches": true,
+      "changed_fields": [
+        "actionPlan.photo_content.items"
+      ],
+      "unselected_strategy_fields_unchanged": true,
+      "prior_provenance_unchanged": true,
+      "source_ids": [
+        "658290a7-b2ff-4947-bc1e-0a84dc72eab8",
+        "3b85973f-bcad-49eb-b8f1-c27f7c7f1aba"
+      ],
+      "concept_changes": [
+        {
+          "format": "photo_content",
+          "positions": [
+            4
+          ],
+          "length_unchanged": true
+        }
+      ]
+    },
+    {
+      "name": "Bouwer & Coetzee Attorneys",
+      "strategy_id": "a0e52b08-1f49-4f8b-8bec-920a7e060fcb",
+      "revision_id": "2e351469-61cd-4581-9a5e-2fbe798dd8fb",
+      "record_version": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "canonical_version_matches": true,
+      "changed_fields": [
+        "actionPlan.design_poster.items"
+      ],
+      "unselected_strategy_fields_unchanged": true,
+      "prior_provenance_unchanged": true,
+      "source_ids": [
+        "a07e3b89-ea9a-4d76-9d7f-a00bfe92d402",
+        "8e448cf9-1534-4ba1-89a4-93e4c8b83d2f"
+      ],
+      "concept_changes": [
+        {
+          "format": "design_poster",
+          "positions": [
+            2
+          ],
+          "length_unchanged": true
+        }
+      ]
+    },
+    {
+      "name": "Cape Lumber",
+      "strategy_id": "c4daf0e5-9f1e-4d1c-bb2c-74b9b09ecfaa",
+      "revision_id": "05a99eeb-68d7-4e8b-b41a-1f6db223d6b1",
+      "record_version": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "canonical_version_matches": true,
+      "changed_fields": [
+        "goldStandard.testAndChange"
+      ],
+      "unselected_strategy_fields_unchanged": true,
+      "prior_provenance_unchanged": true,
+      "source_ids": [
+        "a2a332bc-ce04-4432-adc2-34b5c3405165",
+        "f255541e-f708-491e-9513-710aaf95a2dd",
+        "9023fc27-f39b-4526-a1cf-6a1be676a306"
+      ],
+      "concept_changes": null
+    },
+    {
+      "name": "CG Production House",
+      "strategy_id": "e62a6569-fc2d-474f-b74b-43fac56a736d",
+      "revision_id": "a16ad9b8-792d-421d-9964-ec2e5cf7ecf1",
+      "record_version": 5,
+      "workflow_status": "draft",
+      "published_version": null,
+      "canonical_version_matches": true,
+      "changed_fields": [
+        "actionPlan.professional_video.items"
+      ],
+      "unselected_strategy_fields_unchanged": true,
+      "prior_provenance_unchanged": true,
+      "source_ids": [
+        "aa95c0b3-1635-4eea-852e-be33a42b193b",
+        "c27d2185-08e4-4c49-be48-2572564ceecf"
+      ],
+      "concept_changes": [
+        {
+          "format": "professional_video",
+          "positions": [
+            3,
+            4
+          ],
+          "length_unchanged": true
+        }
+      ]
+    },
+    {
+      "name": "Dulux Paint & Paper Bloemfontein",
+      "strategy_id": "9167ebff-3731-42b7-89b1-c3a9d54ca78c",
+      "revision_id": "55ba918b-1ea7-40ce-aed0-0e293e0719ea",
+      "record_version": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "canonical_version_matches": true,
+      "changed_fields": [
+        "actionPlan.professional_video.items"
+      ],
+      "unselected_strategy_fields_unchanged": true,
+      "prior_provenance_unchanged": true,
+      "source_ids": [
+        "8410d079-0ac2-44ec-9579-a7efb4fb74d5",
+        "2aed8a31-bd53-4ad1-a3dc-432865adfb3d"
+      ],
+      "concept_changes": [
+        {
+          "format": "professional_video",
+          "positions": [
+            1
+          ],
+          "length_unchanged": true
+        }
+      ]
+    },
+    {
+      "name": "Ehrlich Park Butchery",
+      "strategy_id": "fbd1940e-8b28-47e9-99be-b2907f7aa5ae",
+      "revision_id": "68f4f276-072f-4022-8d14-a12eebf3a664",
+      "record_version": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "canonical_version_matches": true,
+      "changed_fields": [
+        "goldStandard.testAndChange"
+      ],
+      "unselected_strategy_fields_unchanged": true,
+      "prior_provenance_unchanged": true,
+      "source_ids": [
+        "d9c63d5e-9b58-4f6f-b90b-09f49dfbab2e",
+        "dadfbe24-b1ce-4929-ba5f-24942c731881",
+        "8361e5f1-2e15-403a-91b1-2536d4b97830"
+      ],
+      "concept_changes": null
+    },
+    {
+      "name": "Forklift Trucks",
+      "strategy_id": "1ccca509-e1db-485b-80d6-4f1d9ff6ab04",
+      "revision_id": "1bd11a2d-7dcc-4f76-afa0-9348170ff3fe",
+      "record_version": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "canonical_version_matches": true,
+      "changed_fields": [
+        "actionPlan.professional_video.items"
+      ],
+      "unselected_strategy_fields_unchanged": true,
+      "prior_provenance_unchanged": true,
+      "source_ids": [
+        "aaa3824a-42bc-4f07-a261-a0ea3838fb35",
+        "4424ed69-7270-4d30-a1ea-0b77d76912df"
+      ],
+      "concept_changes": [
+        {
+          "format": "professional_video",
+          "positions": [
+            1
+          ],
+          "length_unchanged": true
+        }
+      ]
+    },
+    {
+      "name": "Piek Group",
+      "strategy_id": "cb416671-6fc7-4fc1-b7b7-33b27847a594",
+      "revision_id": "9755cc05-c187-48d8-a01c-e4707b33d781",
+      "record_version": 5,
+      "workflow_status": "draft",
+      "published_version": null,
+      "canonical_version_matches": true,
+      "changed_fields": [
+        "goldStandard.testAndChange",
+        "actionPlan.design_poster.items"
+      ],
+      "unselected_strategy_fields_unchanged": true,
+      "prior_provenance_unchanged": true,
+      "source_ids": [
+        "d96944c7-c839-4270-93a1-cf0d40a87f34",
+        "d5aff059-f929-4431-a71f-6154869a1939",
+        "ed7aa1ae-de21-4151-a8f9-54796b234c1f"
+      ],
+      "concept_changes": [
+        {
+          "format": "design_poster",
+          "positions": [
+            8
+          ],
+          "length_unchanged": true
+        }
+      ]
+    },
+    {
+      "name": "Supa Quick BFN",
+      "strategy_id": "eba11003-11bd-429d-8004-635ceb21b928",
+      "revision_id": "2790cd2d-937d-4c3a-abc7-d893ce85dae7",
+      "record_version": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "canonical_version_matches": true,
+      "changed_fields": [
+        "actionPlan.professional_video.items"
+      ],
+      "unselected_strategy_fields_unchanged": true,
+      "prior_provenance_unchanged": true,
+      "source_ids": [
+        "0221c9f8-efa9-48f5-ae5b-c48b694106b6",
+        "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97"
+      ],
+      "concept_changes": [
+        {
+          "format": "professional_video",
+          "positions": [
+            1
+          ],
+          "length_unchanged": true
+        }
+      ]
+    },
+    {
+      "name": "We Ar Fuels",
+      "strategy_id": "ecd622bf-c8c6-42e9-aee6-b02f2abef5a8",
+      "revision_id": "c4e8349c-b58f-487a-b70d-74971623d26d",
+      "record_version": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "canonical_version_matches": true,
+      "changed_fields": [
+        "actionPlan.design_poster.items"
+      ],
+      "unselected_strategy_fields_unchanged": true,
+      "prior_provenance_unchanged": true,
+      "source_ids": [
+        "0dd16592-0e50-499b-8f22-f2847e09da61",
+        "2b953772-e791-4dff-a278-d4dd3521f02e"
+      ],
+      "concept_changes": [
+        {
+          "format": "design_poster",
+          "positions": [
+            3
+          ],
+          "length_unchanged": true
+        }
+      ]
+    },
+    {
+      "name": "Wiseman Group",
+      "strategy_id": "2220bfcd-1ad7-4924-8b2a-fddd2fde395f",
+      "revision_id": "8b2a3bc9-25ed-488d-a732-2699285ffea0",
+      "record_version": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "canonical_version_matches": true,
+      "changed_fields": [
+        "actionPlan.professional_video.items"
+      ],
+      "unselected_strategy_fields_unchanged": true,
+      "prior_provenance_unchanged": true,
+      "source_ids": [
+        "2229c151-b187-4aa8-97c9-5c5af69a5835",
+        "899c9988-8207-4e45-a8fc-a7446dfcf96b"
+      ],
+      "concept_changes": [
+        {
+          "format": "professional_video",
+          "positions": [
+            1
+          ],
+          "length_unchanged": true
+        }
+      ]
+    }
+  ]
+}

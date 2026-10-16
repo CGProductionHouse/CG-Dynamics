@@ -16,12 +16,26 @@ schedule allocation, folder mapping or separate paid generation. Codex repaired
 the connector; normal ChatGPT authored the content. See
 `INTEGRATION-RELEASE-2026-10-16.md` for release/security and verification details.
 
-The same normal chat is now applying only its existing 14 field-level November
-proposals across 12 clients, with fresh source/version fences and old-field
-comparison. Newer staff fields must be skipped, never overwritten. This dispatch
-is not yet a completion receipt or permission to publish strategies.
+An attempted application of the same 14 field-level November proposals across
+12 clients exposed the missing intentional staff amendment route: automatic gap
+filling correctly refused populated staff fields. PR #822 adds the separate
+guarded `amend_monthly_strategy_draft` action and MCP v68 is now deployed. Full
+supported suite 3,870 pass/19 skips/zero failures; existing SQL/grants unchanged.
+The normal chat initially retained old tool metadata; the exact existing plugin
+was refreshed without account/scope/permission changes; reopening that same chat
+exposed the new action and resolved the cache gate. See
+`CHATGPT-STRATEGY-FIELD-AMENDMENTS.md`. The subsequent normal-chat run completed
+**all 14 existing corrections across 12 canonical November drafts** and read full
+fields back. Independent production revision checks confirm only 11 concept
+positions plus three test fields changed; all other payload/provenance and array
+lengths are preserved. All current versions match and remain draft/unpublished.
+The four citation mismatches were reconciled to genuine current eligible sources;
+no research activation or invented authority. Exact durable receipts:
+`strategy-review/2026-10-16-normal-chat-field-amendments.json`. No remaining changes
+from this batch; do not rerun the prior proposal/review artifact. This is not fleet
+launch acceptance or approval/publication of the 37 ready November strategies.
 
-## 16 October normal-chat semantic review receipt
+## 16 October normal-chat semantic review receipt (earlier stage)
 
 The resumed **Write Client Strategies** conversation completed its additional
 12m58s pass: 31/31 source-ready November drafts after PSG reviewed; 20 held
