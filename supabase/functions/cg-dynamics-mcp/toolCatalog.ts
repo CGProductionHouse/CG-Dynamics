@@ -27,6 +27,10 @@ export const CG_DYNAMICS_MCP_SECURITY_SCHEMES = [
 
 const uuid = { type: 'string', format: 'uuid' }
 const date = { type: 'string', format: 'date' }
+const strategyMonth = {
+  type: 'string', format: 'date', pattern: '^\\d{4}-(0[1-9]|1[0-2])-01$',
+  description: 'First day of the CURRENT or NEXT Johannesburg month, YYYY-MM-01 (for example 2026-11-01). A YYYY-MM month key is not accepted.',
+}
 const idempotencyKeySchema = {
   type: 'string',
   minLength: 1,
@@ -244,7 +248,7 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   {
     name: 'get_monthly_strategy_brief', title: 'Get monthly strategy evidence',
     description: 'Company-admin only. Read one exact client and CURRENT or NEXT month: confirmed package, prior published findings, incorporated notes, ready client guide, approved research, dated opportunities, current draft/version, source windows and blockers. No generic substitute. Use its evidence_fingerprint and citations for submit_monthly_strategy_draft. Read-only and no model/provider call.',
-    inputSchema: objectSchema({ client_id: uuid, strategy_month: date }, ['client_id', 'strategy_month']),
+    inputSchema: objectSchema({ client_id: uuid, strategy_month: strategyMonth }, ['client_id', 'strategy_month']),
     annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
     dependency: 'main', canonicalContract: '#391/#731 prepareDraft + monthly_client_strategies exact-client read',
   },
@@ -252,13 +256,13 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
     name: 'submit_monthly_strategy_draft', title: 'Save cited monthly strategy draft',
     description: 'Company-admin only. Validate a ChatGPT-authored proposal against the fresh exact-client/month brief, confirmed formats and cited source IDs; save ONLY an unpublished canonical draft through the existing version-fenced audited strategy RPC. Never approve/publish or overwrite staff wording. A changed source/version returns a conflict. Call after get_monthly_strategy_brief; do not promise a client-visible result.',
     inputSchema: objectSchema({
-      client_id: uuid, strategy_month: date,
+      client_id: uuid, strategy_month: strategyMonth,
       evidence_fingerprint: { type: 'string', pattern: '^[a-f0-9]{64}$' },
       expected_version: { type: ['integer', 'null'], minimum: 1, description: 'Canonical draft version from brief; null only when no row exists.' },
       proposal: {
         type: 'object', additionalProperties: false,
         properties: {
-          clientId: uuid, strategyMonth: date,
+          clientId: uuid, strategyMonth,
           sourceIds: { type: 'array', minItems: 1, items: { type: 'string' } },
           goldStandard: { type: 'object', description: 'All ten client-facing fields are required; each must be 20–1200 cleaned characters. Put citations only in sourceIds, never internal IDs or evidence-system jargon in this copy.', additionalProperties: { type: 'string', minLength: 20, maxLength: 1200 } },
           actionPlan: { type: 'object', description: 'Use only confirmed format keys. Each item must be 12–300 cleaned characters; keep concepts concise and actionable. Each format accepts up to six concepts by default; when a verified monthly package quantity is higher, it accepts up to that quantity, capped at 24. Do not promise extra deliverables.', additionalProperties: { type: 'array', items: { type: 'string', minLength: 12, maxLength: 300 } } },

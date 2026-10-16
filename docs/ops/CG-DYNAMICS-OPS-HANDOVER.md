@@ -1,5 +1,21 @@
 # CG Dynamics Ops Handover
 
+### 16 October — strategy connector input and evidence continuity
+
+The company-admin connector resolved successfully and paged the complete active
+61-client registry (50 + 11, no remaining page). Fresh November reads confirm
+Elcheck/JFJ 1 video +3 photos +3 posters and VCS 1 video +8 posters. Do not repeat
+those package questions or confirmations: their blockers are unverified/missing
+exact-client strategy evidence, not package quantities. The old 7 October packet
+now prominently links its superseding 9 October receipt. Piek November is a
+ready-for-proposal v2 draft with no publication; this read did not amend it.
+A live brief call exposed the connector's undocumented first-of-month input
+requirement (`2026-11` was rejected; `2026-11-01` succeeded). Tool schemas now
+describe and constrain that existing format for both brief and draft proposal,
+including the nested month. Validation and authorization remain unchanged; this
+metadata change needs the later connector release. No strategy write or Vercel
+action occurred.
+
 ### 16 October — Performance report selection render guard (local)
 
 A failing-first render of the actual client Dashboard reproduced August selected
