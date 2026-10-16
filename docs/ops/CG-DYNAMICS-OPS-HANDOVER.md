@@ -1,5 +1,24 @@
 # CG Dynamics Ops Handover
 
+### 16 October — live Unicode repair and normal-ChatGPT full-script acceptance
+
+This supersedes the pending-release/script-write statements immediately below.
+PR #820 merged as `29aea17bac5a6b4fd327153e3f672b43f0460d6d` and MCP v67 is
+live with original custom auth/JWT false. Deployed index byte parity was checked
+after CRLF normalization. All 3,863 supported tests pass / 19 intentional skips;
+full MCP Deno, app build, scoped lint/diff and desktop/375/390/430 local journeys
+pass. Those synthetic journeys are not production client-role acceptance.
+
+The existing **Write Client Strategies** normal company chat reused its original
+CASE scripts, updated only script/shot-breakdown/requirements on the two existing
+video rows, and read the full text back with Unicode intact. Independent connector
+readback confirms 1,260/1,029-character scripts under canonical draft guideline
+`85743a32-8080-4eb5-bc9e-9ca89a533c53`, run
+`6adc6edb-7cb6-4523-a81d-540c54e9b9f7`. No new concept rows, staff overwrite,
+approval/publication, scheduling, folder mapping or paid generation. The CASE
+script-writing acceptance is complete; folder short-code readiness is separate.
+See `INTEGRATION-RELEASE-2026-10-16.md` for exact release/data/security receipts.
+
 ### 16 October — live authoring uncovered generic Unicode fingerprint failure
 
 Normal company ChatGPT successfully saved/read back two CASE concept rows, then
