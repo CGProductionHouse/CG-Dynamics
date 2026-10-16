@@ -168,8 +168,13 @@ export async function prepareDraft(sb: StrategyAutopilotClient, client: Record<s
     if (result.error) throw new Error(result.error.message)
   }
 
-  const ds = (deliverables.data ?? []) as Array<Record<string, unknown>>
-  const evs = (events.data ?? []) as Array<Record<string, unknown>>
+  // These unbounded reads have no database ordering contract. Stabilise them
+  // before deriving evidence, calendar choices or source fingerprints. Keep
+  // separate exact IDs even when meetings share the same title and timestamp.
+  const byId = (left: Record<string, unknown>, right: Record<string, unknown>) => String(left.id).localeCompare(String(right.id))
+  const ds = [...((deliverables.data ?? []) as Array<Record<string, unknown>>)].sort(byId)
+  const evs = [...((events.data ?? []) as Array<Record<string, unknown>>)].sort((left, right) =>
+    Date.parse(String(left.start_at)) - Date.parse(String(right.start_at)) || byId(left, right))
   const updateRows = (updates.data ?? []) as Array<Record<string, unknown>>
   const industryRow = approvedIndustryProfile(industry.data as Record<string, unknown> | null)
   const primaryIndustry = clean(industryRow?.primary_industry, 100).toLowerCase()
@@ -333,6 +338,9 @@ export async function prepareDraft(sb: StrategyAutopilotClient, client: Record<s
       source_windows: {
         previous_report_period_end: reportRow?.period_end ?? null,
         previous_strategy_month: priorRow?.strategy_month ?? null,
+        // A reschedule/type change is real source drift even if the title and
+        // exact event ID stay unchanged; evidence snippets alone lose that.
+        client_calendar_events: evs.map(row => ({ id: row.id, start_at: row.start_at, event_type: row.event_type })),
         incorporated_context_updates: updateRows.map(row => ({ id: row.id, created_at: row.created_at ?? null })),
         confirmed_package_scope: packageAuthority.settings ? {
           professional_video: packageAuthority.settings.professional_videos_per_month,

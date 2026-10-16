@@ -1,0 +1,54 @@
+{
+  "state": "PREPARED_NOT_APPLIED",
+  "reason": "Live connector rejected unchanged source rows returned in a different order. No retry loop or bypass.",
+  "client_id": "c27d2185-08e4-4c49-be48-2572564ceecf",
+  "strategy_month": "2026-11-01",
+  "observed_version": 2,
+  "required_next_step": "After the reviewed connector ordering fix is released, fetch the exact brief, recheck source content and staff/version changes, regenerate if needed, then submit once through the guarded draft tool. Do not replay a stale fingerprint or approve/publish.",
+  "proposal": {
+    "clientId": "c27d2185-08e4-4c49-be48-2572564ceecf",
+    "strategyMonth": "2026-11-01",
+    "sourceIds": [
+      "aa95c0b3-1635-4eea-852e-be33a42b193b",
+      "b22834cd-2d89-463b-9814-66cdaf6932a2",
+      "5200661a-6e0f-4d81-96a8-300e21aa3a16",
+      "c27d2185-08e4-4c49-be48-2572564ceecf"
+    ],
+    "goldStandard": {
+      "objective": "Show the useful work behind a CG Production House content run to earn qualified production and strategy enquiries in November.",
+      "audienceAndIntent": "Business owners need to see how a brief becomes usable content and what to expect from a production partner.",
+      "coreMessage": "A well-prepared shoot creates specific usable assets; demonstrate actual choices and permission-cleared outcomes.",
+      "formatsAndRationale": "Build four linked production stories within four videos, eight photos and four posters. Each video explains one decision: brief, on-set framing, edit or review. Two supporting photographs per story show the real working detail and its approved result; one poster turns that decision into a practical client question. This makes the process tangible rather than repeating an agency promise. Use only permission-cleared material; examples are concepts, not booked shoots.",
+      "testAndChange": "Compare process-led explanations with finished-work explanations on Facebook. Keep the service and observation age comparable, recording seven-day shares, substantive questions and attributable service enquiries. The selected September posts had 3–4 reactions, no comments and one recorded share on the shoot-planning example; that partial sample does not establish a winner. Note boosting and unequal exposure, and do not claim sales causation.",
+      "pillarsAndHooks": "Planning one shoot; directing a scene; editing choices; client review; using approved content across channels.",
+      "mustAvoid": "Do not expose client work, private files, staff identities, results or pricing without exact permission and current facts.",
+      "channelIntegration": "Use verified CG Production House channels and the current website contact route; check consent for each example.",
+      "successSignals": "For each story, record whether an enquiry names the service, business need, intended output and next step. Keep recorded discovery calls separate from confirmed projects. Use seven-day comments and shares as supporting attention signals only. Compare which explanation leads to a clearer brief; missing attribution or too few enquiries means the result is inconclusive.",
+      "nextMonthGamePlan": "November sequence: first show the question that turns a vague request into a usable brief; next demonstrate one framing choice on set; then reveal an editing choice with its approved finished example; finally explain a client review checkpoint. Each story uses one video, two photos and one poster: four videos, eight photos and four posters overall. Set dates through the posting calendar after consent and production checks. Review equally aged responses at month end and carry the clearest service explanation into December, without a discount or guaranteed result."
+    },
+    "actionPlan": {
+      "professional_video": [
+        "Explain one permission-cleared content run from brief to final asset.",
+        "Show a safe filming decision on approved work with consent.",
+        "Explain how a real shoot yields usable assets without promising quantities.",
+        "Show an editor explaining one permitted creative choice."
+      ],
+      "photo_content": [
+        "Photo 01 | Show a permission-cleared brief or planning detail, with private client information hidden.",
+        "Photo 02 | Pair the brief theme with an approved final frame so the business purpose is visible.",
+        "Photo 03 | Show the real camera position or framing setup used for the on-set story.",
+        "Photo 04 | Show its matching approved frame, explaining what the composition helps the viewer notice.",
+        "Photo 05 | Show a safe editing detail with private files, client names and unapproved work hidden.",
+        "Photo 06 | Pair it with the approved finished visual to explain the specific editorial decision.",
+        "Photo 07 | Show a staged, privacy-safe review checkpoint using permitted material.",
+        "Photo 08 | Show the corresponding client-ready handoff or approved final asset without exposing private folders."
+      ],
+      "design_poster": [
+        "Map a concise brief-to-delivery workflow.",
+        "List one useful planning question for a first meeting.",
+        "Clarify a client review checkpoint without exposing files.",
+        "Invite a specific service enquiry through a verified contact route."
+      ]
+    }
+  }
+}

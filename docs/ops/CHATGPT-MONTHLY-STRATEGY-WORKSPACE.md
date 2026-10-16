@@ -1,5 +1,33 @@
 # Company ChatGPT monthly strategy workspace — #731
 
+## 16 October continuation (supersedes earlier v2 pilot status)
+
+Piek and Daisy November are now read-back-verified v3 unpublished drafts. Two
+guarded submissions repaired only their old format-role and monthly-sequence
+sections, with zero conflicts; all other authored text/concepts were retained.
+No approval/publication. Fresh November reads for 60 of the 61 active clients
+find 37 source-ready ten-section drafts and 23 blocked clients. Human Auto was
+intentionally held without a new read/research; do not call this 61 successful
+brief reads or 37 semantically approved strategies. Case already has a
+substantive v3 plan and was not rewritten.
+
+CG Production House's attempted four-video/eight-photo/four-poster improvement
+was refused before writing: the same five company-calendar rows reordered
+between reads and changed the evidence fingerprint. The focused local fix
+stabilizes exact-row ordering and adds event time/type to source windows, so a
+real reschedule still fences an old proposal. It does not relax a source check.
+The authored proposal is saved in
+`strategy-review/2026-10-16-cg-november-proposal.json` (relative to this file's
+directory), labelled PREPARED_NOT_APPLIED. Release the reviewed connector fix
+only under its protected gate, then fetch/review fresh sources and submit once;
+do not repeatedly retry the live nondeterministic read or reuse its fingerprint.
+
+These later two actual draft writes supersede the earlier 16 October read-only
+GitHub receipt. Elcheck/JFJ/VCS package quantities are already confirmed; missing
+reviewed exact-client strategy sources, not a repeated quantity question, hold
+those lanes. All earlier publication, client-isolation and source-review gates
+remain in force.
+
 This is the alternative to activating Dynamics' provider-funded strategy generator. It uses the existing private CG Dynamics MCP connection and the existing `monthly_client_strategies` store. It does not call OpenRouter, alter a provider route, enable the automatic strategy flag, deploy through Vercel or publish a client strategy. The 12 October Piek provider pilot failed; it is not a strategy-quality acceptance result.
 
 ## Intended weekly company-profile workflow

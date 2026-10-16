@@ -4,6 +4,7 @@ import { test } from 'node:test'
 
 const autopilot = await import('../supabase/functions/_shared/monthlyStrategyAutopilot.ts')
 const alignment = await import('../supabase/functions/_shared/monthlyStrategyAlignment.ts')
+const { loadMonthlyStrategyWorkspace } = await import('../supabase/functions/cg-dynamics-mcp/monthlyStrategyWorkspace.ts')
 const { buildPackageFieldStates } = await import('../src/lib/packageAuthority.ts')
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
 
@@ -76,6 +77,48 @@ function fixture(existing = []) {
     client_industry_profiles: [], skill_cards: [],
   })
 }
+
+function calendarSourceFixture() {
+  const db = fixture()
+  const event = (id, start_at) => ({ id, client_id: 'client-a', title: 'Same meeting title', event_type: 'meeting', start_at, status: 'scheduled', superseded_by_event_id: null })
+  db.tables.company_calendar_events = [event('event-b', '2026-11-09T08:00:00Z'), event('event-c', '2026-11-02T08:00:00Z'), event('event-a', '2026-11-02T08:00:00Z')]
+  db.tables.monthly_deliverables = ['deliverable-b', 'deliverable-a'].map(id => ({ id, client_id: 'client-a', month: '2026-11-01', archived_at: null, deliverable_type: 'dp', title: 'Exact planned poster' }))
+  return db
+}
+
+test('real preparation and connector source fence survive unordered calendar and deliverable reads', async () => {
+  const db = calendarSourceFixture()
+  const first = await loadMonthlyStrategyWorkspace(db, 'client-a', '2026-11-01', '2026-10-16')
+  db.tables.company_calendar_events.reverse()
+  db.tables.monthly_deliverables.reverse()
+  const second = await loadMonthlyStrategyWorkspace(db, 'client-a', '2026-11-01', '2026-10-16')
+  assert.equal(first.evidenceFingerprint, second.evidenceFingerprint, 'Reordering unchanged rows is not source drift')
+  assert.deepEqual(first.prepared.evidence, second.prepared.evidence)
+  assert.deepEqual(first.prepared.draft.calendarSelections, second.prepared.draft.calendarSelections)
+  assert.deepEqual(first.prepared.seedContext.sources, second.prepared.seedContext.sources)
+  assert.deepEqual(first.prepared.seedContext.sources.client_calendar_event_ids, ['event-a', 'event-c', 'event-b'], 'Chronology then exact ID, not title deduplication')
+  assert.deepEqual(first.prepared.seedContext.sources.deliverable_ids, ['deliverable-a', 'deliverable-b'])
+})
+
+test('calendar time and type changes still invalidate the exact source fence', async () => {
+  for (const edit of [event => { event.start_at = '2026-11-09T10:00:00Z' }, event => { event.event_type = 'content_run' }, event => { event.title = 'Updated exact meeting' }]) {
+    const db = calendarSourceFixture()
+    const before = await loadMonthlyStrategyWorkspace(db, 'client-a', '2026-11-01', '2026-10-16')
+    edit(db.tables.company_calendar_events[0])
+    const after = await loadMonthlyStrategyWorkspace(db, 'client-a', '2026-11-01', '2026-10-16')
+    assert.notEqual(before.evidenceFingerprint, after.evidenceFingerprint, 'Real calendar changes must remain fenced')
+  }
+})
+
+test('source ordering does not admit foreign, cancelled or superseded events', async () => {
+  const db = calendarSourceFixture()
+  const before = await loadMonthlyStrategyWorkspace(db, 'client-a', '2026-11-01', '2026-10-16')
+  const exact = db.tables.company_calendar_events[0]
+  db.tables.company_calendar_events.push({ ...exact, id: 'foreign', client_id: 'client-b' }, { ...exact, id: 'cancelled', status: 'cancelled' }, { ...exact, id: 'replaced', superseded_by_event_id: 'event-a' })
+  const after = await loadMonthlyStrategyWorkspace(db, 'client-a', '2026-11-01', '2026-10-16')
+  assert.equal(before.evidenceFingerprint, after.evidenceFingerprint)
+  assert.equal(after.prepared.seedContext.sources.client_calendar_event_ids.length, 3)
+})
 
 test('targets the Johannesburg operating month and next month', () => {
   assert.deepEqual(autopilot.strategyAutopilotMonths('2026-12-15'), ['2026-12-01', '2027-01-01'])
