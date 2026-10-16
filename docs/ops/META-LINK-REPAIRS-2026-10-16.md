@@ -4,6 +4,12 @@ Owning issues: #668 / #451; supervisor #381. This supersedes only the mapping
 holds identified below in `CLIENT-META-AUDIT-2026-10-16.md`. That earlier audit
 remains a historical receipt, not the current integration state.
 
+Source PR#826 merged as `65e91264a8be0a357d0ce1d75a8176108bab5107` after actual
+diff review and final verification. No Vercel or Edge deployment followed that
+merge. Remaining exact backend release decision is still pending; do not infer
+an answer from a preselected option. Routine source merge authority is not
+permission for OAuth, publication, recipient exposure or hosting spend.
+
 ## Completed in the actual authenticated application
 
 CA requested execution of the repair queue after the ordered audit. Used the
