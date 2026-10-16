@@ -4,14 +4,19 @@
   "function": "meta-list-assets",
   "baseline_version": 66,
   "previous_source_commit": "65e91264a8be0a357d0ce1d75a8176108bab5107",
+  "source_commit": "f1fad8d71c16b5e8648751cd549adfee88213d3e",
+  "source_pr": 828,
+  "deployed_version": 68,
   "verify_jwt": false,
   "authentication": "Existing internal JWT and admin/manager role checks unchanged",
-  "status": "CA_APPROVED_TIMEOUT_CORRECTION_PREPARED_NOT_YET_DEPLOYED",
-  "local_packet": "C:/Users/chris/AppData/Local/Temp/cg-meta-asset-timeout-1053c6a2a6de4b90acc7e2e99bb63ab9",
+  "status": "CA_APPROVED_DEPLOYED_V68_AUTHENTICATED_COMPLETE_DISCOVERY_PASS",
+  "local_packet": "C:/Users/chris/AppData/Local/Temp/cg-meta-asset-alias-99cb9e6f2441444c8884066676bfafc4",
   "rollback_packet": "C:/Users/chris/AppData/Local/Temp/cg-meta-asset-packet-e4abc885c114419b900222145994a2bc/rollback",
   "release_history": [
     { "version": 65, "outcome": "ROLLED_BACK", "reason": "Authenticated discovery twice aborted valid Page requests under regressed3s timeout; source/auth parity passed but acceptance failed" },
-    { "version": 66, "outcome": "BASELINE_RESTORED", "reason": "Exact5-file v64 source restored; actual provider-derived picker options working again" }
+    { "version": 66, "outcome": "BASELINE_RESTORED", "reason": "Exact5-file v64 source restored; actual provider-derived picker options working again" },
+    { "version": 67, "outcome": "PARTIAL_DISCOVERY", "reason": "Timeout corrected;100Pages returned, numeric resolved-me alias safely rejected" },
+    { "version": 68, "outcome": "ACCEPTED", "reason": "Actual authenticated200, complete102Pages across2pages and59Instagram accounts;6/6 source parity, anonymous401" }
   ],
   "hash_convention": "SHA256 UTF-8 LF-normalized source, trimEnd plus one LF",
   "typecheck": "Exact packet Deno check --no-lock PASS after removing only second identical availability: probe.availability property from deployed meta.ts factPayload; original baseline fails TS1117",
@@ -21,9 +26,10 @@
     { "name": "functions/_shared/meta.ts", "candidate_sha256": "9982c893210a1a2d5454cd448e717aa4adad5d62a7a30baaea9c54e702371964", "baseline_sha256": "39237ac22df2444e8bab2496f623f6f1d1361372d281c56512fd181904e8f570", "change": "Remove second identical availability property only; do not replace with unrelated current repository helper" },
     { "name": "functions/_shared/metaInsightResponse.ts", "candidate_sha256": "3c4e351a022e76cac0753f58576717bba27dcd7804cd321cd32197bdfc6d9c4b", "baseline_sha256": "3c4e351a022e76cac0753f58576717bba27dcd7804cd321cd32197bdfc6d9c4b" },
     { "name": "functions/_shared/metaUsage.ts", "candidate_sha256": "0f496f4a4661f21bcd958385c06f8a7c2f6ed41939687d1917adb837d6e2bddf", "baseline_sha256": "0f496f4a4661f21bcd958385c06f8a7c2f6ed41939687d1917adb837d6e2bddf" },
-    { "name": "functions/_shared/metaAssetDiscovery.ts", "candidate_sha256": "f419e616532f677da2aa72b7484adaf1712cfd1d773b8a6d03d3830018c09f4d", "baseline_sha256": null }
+    { "name": "functions/_shared/metaAssetDiscovery.ts", "candidate_sha256": "88a287d5fb6d9a8bf01667a33c9d5df16e94dd9d028125b1c66e55c633d3d48d", "baseline_sha256": null }
   ],
   "pre_release": ["Fresh live version/file comparison must still match v66 restored baseline", "Review exact packet and retain rollback source in rollback_packet", "Explicit CA decision received for this function; no permission/config/secret/JWT setting changes"],
   "post_release": ["Read back every deployed source file and JWT setting", "Unauthenticated POST remains 401", "Authenticated admin asset inventory includes full Pages with complete/page-count metadata", "Check exact Forklift identity once; absence is not permission to guess or broaden access"],
+  "acceptance": { "source_files_matched": 6, "unauthenticated_status": 401, "authenticated_status": 200, "pages_complete": true, "pages": 102, "pages_fetched": 2, "instagram_accounts": 59, "forklift_mapping_verified": true, "linked_clients_after": 47 },
   "vercel_operations": 0
 }
