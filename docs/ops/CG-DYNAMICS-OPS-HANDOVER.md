@@ -1,6 +1,19 @@
 # CG Dynamics Ops Handover
 
-### 16 October — integration recovery release in progress
+### 16 October — live authoring uncovered generic Unicode fingerprint failure
+
+Normal company ChatGPT successfully saved/read back two CASE concept rows, then
+the complete-script updates failed before the handler. Production log diagnosis
+is exact: generic input fingerprint calls Latin-1 `btoa` on Unicode text. A local
+compatibility correction preserves old replay fingerprints and uses the existing
+UTF-8 SHA-256 helper for previously unexecutable Unicode inputs. Failing-first
+script punctuation/non-Latin/emoji/long-text tests now pass. Full supported suite:
+3,863 pass / 19 skipped / zero failures; 32 affected cases, build/app chunks,
+full MCP Deno and scoped lint/diff pass. Release/write acceptance is still pending.
+Do not call scripts saved from concept rows alone. See
+`INTEGRATION-RELEASE-2026-10-16.md`; no Vercel/permission/strategy-publication action.
+
+### 16 October — reporting backend recovered and connector released
 
 CA explicitly requested updating the outstanding app/reporting work now. The
 existing shared Google Ads account has successfully refreshed through 15 October
@@ -13,8 +26,21 @@ job today; first future scheduled provider execution remains to be observed.
 All three backend entrypoints now pass actual Deno checks after correcting the
 MCP client/query types and the exposed lead-owner/project-preservation omissions.
 The supported suite passes 3,859/19 skipped; 81 affected cases pass, build/app
-chunks/scoped lint/diff pass. MCP source release/acceptance is still pending at
-this checkpoint; see `INTEGRATION-RELEASE-2026-10-16.md` for exact receipts.
+chunks/scoped lint/diff pass. PR #819 merged as `e8ee9ed8e674ab99ea301834a50aeb1e6a2b759c`;
+MCP v66 is now live with its original custom auth/JWT false. Authenticated health
+returns DEGRADED/Meta PARTIAL instead of false PASS; unauthenticated MCP/Google
+POST probes return 401. The existing CASE 31 October run was freshly verified,
+and one canonical draft guideline was created/read back through the repaired
+actor RPC (`85743a32-8080-4eb5-bc9e-9ca89a533c53`, initially empty). The normal
+company ChatGPT task is authoring from its existing research; no paid generator
+or publication was invoked. See `INTEGRATION-RELEASE-2026-10-16.md` for receipts.
+
+The reviewed ten-field client-safe strategy projection migration is applied.
+Direct anon/authenticated execution remains false; all 171 strategy rows and
+their fingerprint are unchanged. This fixes future publication, not existing
+published content or the unreleased frontend. Microsoft automatically fetched
+6/6 sources and applied eight safe changes with zero failures, but 390 protected
+conflicts remain. No conflict override or Teams write occurred here.
 
 Actual authenticated October website reporting loads for all four mapped clients
 (Piek 107/255 visitors/page views, Red Oak 311/689, Emmanuel 39/83, All Around PVC

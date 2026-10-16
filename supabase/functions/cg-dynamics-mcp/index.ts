@@ -438,12 +438,18 @@ async function handleResolveProjectContext(
 
 // ── Idempotency ─────────────────────────────────────────────────────────────
 
-function computeInputHash(input: Record<string, unknown>): string {
+async function computeInputHash(input: Record<string, unknown>): Promise<string> {
   const sorted = Object.keys(input)
     .filter(k => k !== 'idempotency_key')
     .sort()
     .reduce((acc, k) => { acc[k] = input[k]; return acc }, {} as Record<string, unknown>)
-  return crypto.subtle ? btoa(JSON.stringify(sorted)) : btoa(JSON.stringify(sorted))
+  const serialized = JSON.stringify(sorted)
+  // Preserve every previously executable Latin-1 fingerprint so existing keys
+  // still replay. Non-Latin-1 text previously failed before any handler ran.
+  // Reuse the full UTF-8 SHA-256 contract for that new input domain; the prefix
+  // cannot collide with a legacy base64 value. Never alter the authored script.
+  if (!/[\u0100-\uffff]/.test(serialized)) return btoa(serialized)
+  return `utf8-sha256:${await strategyMcpInputHash(input)}`
 }
 
 async function checkIdempotency(
@@ -3631,7 +3637,7 @@ async function handleToolsCall(
   let replayThroughCanonicalKey = false
   if (isWrite && canonicalIdempotencyKey) {
     const inputHash = toolName === 'submit_monthly_strategy_draft'
-      ? await strategyMcpInputHash(toolInput) : computeInputHash(toolInput)
+      ? await strategyMcpInputHash(toolInput) : await computeInputHash(toolInput)
     const existing = await checkIdempotency(staff.supabase, staff.profileId, toolName, canonicalIdempotencyKey, inputHash)
     if (existing.duplicate) {
       const conflict = (existing.result as { status?: string } | undefined)?.status === 'conflict'
@@ -3648,7 +3654,7 @@ async function handleToolsCall(
 
     if (isWrite && canonicalIdempotencyKey && !replayThroughCanonicalKey) {
       const inputHash = toolName === 'submit_monthly_strategy_draft'
-        ? await strategyMcpInputHash(toolInput) : computeInputHash(toolInput)
+        ? await strategyMcpInputHash(toolInput) : await computeInputHash(toolInput)
       const hasError = isMcpErrorResult(result)
       await recordIdempotency(staff.supabase, staff.profileId, toolName, canonicalIdempotencyKey, inputHash, hasError ? 'error' : 'success', audit)
     }
@@ -3665,7 +3671,7 @@ async function handleToolsCall(
   } catch (err) {
     if (isWrite && canonicalIdempotencyKey) {
       const inputHash = toolName === 'submit_monthly_strategy_draft'
-        ? await strategyMcpInputHash(toolInput) : computeInputHash(toolInput)
+        ? await strategyMcpInputHash(toolInput) : await computeInputHash(toolInput)
       await recordIdempotency(staff.supabase, staff.profileId, toolName, canonicalIdempotencyKey, inputHash, 'error', audit)
     }
     return jsonRpcError(id, -32603, `Tool execution failed: ${err instanceof Error ? err.message : String(err)}`)

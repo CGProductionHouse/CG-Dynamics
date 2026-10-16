@@ -11,6 +11,21 @@ if (!process.env.CG_PLAYWRIGHT_MODULE) throw new Error('Set CG_PLAYWRIGHT_MODULE
 const { chromium } = await import(pathToFileURL(process.env.CG_PLAYWRIGHT_MODULE).href)
 const clientA = '11111111-1111-4111-8111-111111111111'
 const clientB = '22222222-2222-4222-8222-222222222222'
+// The package tab now requires the same confirmed receipt as production. Client B
+// deliberately has no receipt so both confirmed and unknown paths are exercised.
+const syntheticValues = {
+  professional_videos_per_month: 1, reels_per_month: null, photo_posts_per_month: 3,
+  design_posters_per_month: 3, animated_posters_per_month: null,
+  campaign_management_included: null, monthly_campaign_budget: null,
+  shoot_days_per_month: null, website_updates_per_month: null,
+  other_agreed_deliverables: null, package_notes: null, package_exclusions: null,
+}
+const syntheticPackage = { ...syntheticValues, verification: {
+  status: 'confirmed', version: 2, confirmed_at: '2026-10-01T12:00:00Z',
+  confirmed_by_profile_id: 'synthetic-actor', evidence_note: 'Synthetic package acceptance only',
+  source_references: ['fixture:package-confirmation'],
+  field_states: Object.fromEntries(Object.entries(syntheticValues).map(([key, value]) => [key, value === null ? 'unknown' : 'known'])),
+} }
 const fixture = {
   name: 'client-plan-readonly-fixture', enforce: 'pre',
   resolveId(id) { if (id === 'virtual:plan-fixture') return '\0virtual:plan-fixture' },
@@ -26,7 +41,7 @@ const fixture = {
       const initialClient=location.pathname.includes('standalone')?'${clientB}':'${clientA}';
       window.fixtureProfile={role:'client',client_id:initialClient};
       function App(){const[id,setId]=useState(initialClient);window.switchClient=()=>{window.fixtureProfile.client_id='${clientB}';setId('${clientB}')};
-        return React.createElement(ClientPortalContext.Provider,{value:{client:{id,name:id==='${clientA}'?'Synthetic A':'Synthetic B'},previewClientId:id}},
+        return React.createElement(ClientPortalContext.Provider,{value:{client:{id,name:id==='${clientA}'?'Synthetic A':'Synthetic B',package_settings:id==='${clientA}'?${JSON.stringify(syntheticPackage)}:null},previewClientId:id}},
           React.createElement('main',{className:'mx-auto max-w-6xl min-w-0 p-4 sm:p-8'},React.createElement(location.pathname.includes('standalone')?ClientContentCalendarPage:ClientPlanPage)));}
       createRoot(document.getElementById('root')).render(React.createElement(BrowserRouter,null,React.createElement(App)));`
   },
@@ -101,6 +116,8 @@ try {
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${width} body overflow`)
     await page.getByRole('tab',{name:'Your package'}).click()
     await page.getByRole('heading',{name:'What we create together'}).waitFor()
+    await page.getByText('1 per month',{exact:true}).waitFor()
+    await page.getByText('6 per month',{exact:true}).waitFor()
     await page.waitForFunction(()=>document.querySelector('[role="tab"][aria-selected="true"]')?.textContent?.trim()==='Your package')
     assert.equal(await page.getByText('Working month',{exact:true}).count(),0,'Package has no irrelevant month control')
     assert.equal(await page.getByRole('button',{name:'Previous month'}).count(),0,'Package has no history arrows')
@@ -118,6 +135,7 @@ try {
       assert.ok(bounds && bounds.x>=0 && bounds.x+bounds.width<=width,`${width} clipped Plan tab`)
       assert.ok(await tab.evaluate(element=>element.scrollWidth<=element.clientWidth),`${width} clipped tab text`)
     }
+    await page.waitForFunction(()=>getComputedStyle(document.querySelector('[role="tab"][aria-selected="true"]')).backgroundColor==='rgb(255, 255, 255)')
     await page.screenshot({path:join(tmpdir(),`cg-plan-${width}.png`),fullPage:true})
     hold=true
     await page.getByRole('button',{name:'Next month',exact:true}).click()
@@ -135,6 +153,12 @@ try {
     await page.waitForTimeout(100)
     hold=false; pending.splice(0).forEach(resolve=>resolve())
     await page.getByText('Complete script B 2026-11\nSecond line',{exact:true}).waitFor()
+    await page.getByRole('tab',{name:'Your package'}).click()
+    await page.getByRole('heading',{name:'Your package',exact:true}).waitFor()
+    assert.equal(await page.getByText('1 per month',{exact:true}).count(),0,'Prior client package never leaks to unknown client')
+    await page.locator('summary').filter({hasText:'Discuss package'}).waitFor()
+    await page.getByRole('tab',{name:'Content Guidelines'}).click()
+    await page.getByText('Complete script B 2026-11\nSecond line',{exact:true}).waitFor()
     scenario='malformed'
     await page.getByRole('button',{name:'Next month',exact:true}).click()
     await page.getByRole('heading',{name:'Content Guidelines could not be loaded'}).waitFor()
@@ -145,7 +169,7 @@ try {
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${width} empty layout overflow`)
     assert.equal(await page.locator('vite-error-overlay').count(),0)
     assert.deepEqual(errors,[])
-    assert.equal(reads.length,6)
+    assert.equal(reads.length,7)
     scenario='missing_script'
     await page.getByRole('button',{name:'Next month',exact:true}).click()
     await page.getByText('A script is not available for this video.',{exact:true}).waitFor()
