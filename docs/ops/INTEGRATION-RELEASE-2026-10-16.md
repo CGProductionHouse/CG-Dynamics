@@ -120,6 +120,36 @@ pass; anon/authenticated direct execute stays false. All 171 existing strategy r
 retain fingerprint `c0c1f61540df310cfe07ed705f84c7d4` before/after. Existing published
 content was not backfilled or republished. #805's frontend remains a separate release.
 
+## Explicit strategy amendments: deployed and accepted
+
+The next normal-chat pass reproduced a missing capability, not another failed
+strategy-writing model: automatic draft filling correctly preserved staff fields,
+but had no intentional editorial amendment route. PR #822 adds the separately
+guarded company-admin-only field amendment using the **existing** audited context
+RPC, with exact old text, fresh source/version, citations and complete candidate
+quality/package validation. Automatic gap-fill preservation is unchanged.
+
+Merged source `f63c709a7800dfd30ed887275408c5893e0826f1` is deployed as MCP v68,
+custom auth/JWT false unchanged. All 34 deployed files are accounted for: five
+changed/new files match the reviewed checkout, 29 equal verified v67. Anonymous
+POST remains 401. Full supported suite: **3,870 pass / 19 skips / zero failures**;
+100 focused cases, full MCP Deno, app build/chunks and scoped lint/diff pass.
+
+The existing ChatGPT plugin retained old metadata initially. Its Refresh tools
+control completed without account/OAuth/permission changes; reopening the SAME
+normal company conversation exposed the new action. That chat then saved and
+fully read back **all 14 original corrections across 12 November drafts**.
+Independent read-only revision comparison confirms 11 intended concept positions
+and three gold test fields changed, with all unselected strategy/provenance and
+concept-array lengths unchanged. CG/Piek/All Around PVC are v5; nine others v4.
+All remain drafts, unpublished. The four citation mismatches were reconciled to
+genuine current eligible sources, without source activation or fabricated IDs.
+
+See `CHATGPT-STRATEGY-FIELD-AMENDMENTS.md` and the exact JSON receipt in
+`strategy-review/2026-10-16-normal-chat-field-amendments.json`. This batch is done;
+do not replay old proposals. No additional SQL/grant/secret/provider/package/
+calendar/folder/permission/publication or Vercel operation for this release.
+
 Microsoft readback at 11:08 UTC: latest automatic reconciliation
 `eb22160d-9c2b-4b35-bba1-230ede8d3c9b` fetched all six sources, applied eight safe
 changes, zero failures and 390 retained conflicts. It is PARTIAL, not fully fresh.

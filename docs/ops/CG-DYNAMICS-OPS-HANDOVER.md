@@ -1,6 +1,6 @@
 # CG Dynamics Ops Handover
 
-### 16 October — explicit ChatGPT draft amendment capability (candidate)
+### 16 October — explicit ChatGPT draft amendment capability released
 
 A real normal-chat attempt to implement the existing 14 November field proposals
 confirmed that the automatic gap-fill tool correctly refuses populated staff
@@ -8,9 +8,37 @@ fields, but no intentional amendment tool existed. The bounded follow-up adds
 `amend_monthly_strategy_draft`, company-admin/admin-manager only, with exact old
 field comparison, fresh source/version fences, citations and the existing audited
 context-amendment RPC. No SQL/grant/permission/publication/automatic-merge change.
-Full details: `CHATGPT-STRATEGY-FIELD-AMENDMENTS.md`. This is not yet deployed or
-a claim that those 14 corrections are saved. Four proposal packets need genuine
-current-citation reconciliation; do not widen evidence authority.
+Full details: `CHATGPT-STRATEGY-FIELD-AMENDMENTS.md`. PR #822 merged as
+`f63c709a7800dfd30ed887275408c5893e0826f1`; MCP v68 is deployed, source parity
+verified (five changed/new files plus 29 unchanged), unauthenticated POST 401.
+Full supported suite 3,870 pass / 19 skips / zero failures; 100 focused cases,
+full MCP Deno/build/app chunks/scoped lint/diff pass. No Vercel operation.
+
+The existing normal chat initially retained the old tool inventory. The existing
+plugin's Refresh tools control was used without account/scope/permission changes.
+Reopening the same existing chat exposed the new action, then **all 14 existing
+editorial corrections across 12 November clients were saved and read back**.
+Independent SELECT-only revision comparison confirms current versions and all
+unselected strategy/provenance unchanged: 11 exact concept positions plus three
+gold test fields, all concept-array lengths unchanged. Four historical citation
+mismatches were reconciled to real current eligible evidence, without activation
+or invented IDs. Exact receipts are in
+`strategy-review/2026-10-16-normal-chat-field-amendments.json`.
+
+Updated clients: All Around PVC, AV Event Life, Bouwer & Coetzee, Cape Lumber,
+CG Production House, Dulux Bloemfontein, Ehrlich Park Butchery, Forklift Trucks,
+Piek Group, Supa Quick BFN, We Ar Fuels and Wiseman Group. CG/Piek/All Around PVC
+are v5; the other nine are v4. All remain unpublished drafts. This correction
+batch is DONE; do not redo the review or replay its old proposal file. Existing
+fleet/source/scope, publication, actual-client-role, recipient/asset and protected
+frontend release gates remain separate, not solved by these amendments.
+
+Additional real authenticated staff-preview checks confirm JFJ and Elcheck show
+one video/six combined posters, VCS one video/eight confirmed posters, with no
+unconfirmed extra cards. Piek's live 375px bottom navigation reaches Plan,
+Approvals and More/Brand Hub; package and route selection work without staff
+sign-out. These are staff preview/DOM checks, not actual client-role acceptance;
+the IAB mobile screenshot capture was invalid and is not retained as visual proof.
 
 ### 16 October — live Unicode repair and normal-ChatGPT full-script acceptance
 
