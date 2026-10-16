@@ -1250,6 +1250,7 @@ export default function MetaIntegrationPage() {
       .map(a => ({ value: a.id, label: a.name || a.username || a.id }))
     // Also add any linked IG entry for this page from linked assets.
     for (const link of linkedAssets) {
+      if (pageId && link.facebook_page_id !== pageId) continue
       if (link.instagram_account_id && !options.some(o => o.value === link.instagram_account_id)) {
         options.push({ value: link.instagram_account_id, label: `${link.instagram_username || link.instagram_account_id} (existing)` })
       }

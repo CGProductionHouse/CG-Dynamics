@@ -1,6 +1,7 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { metaFetch, readMetaError, redact, resolveMetaGraphConfig } from '../_shared/meta.ts'
+import { collectMetaAssets } from '../_shared/metaAssetDiscovery.ts'
 
 interface InstagramBusinessAccount {
   id: string
@@ -17,18 +18,10 @@ interface FbPage {
   instagram_business_account?: InstagramBusinessAccount
 }
 
-interface FbPageResponse {
-  data: FbPage[]
-}
-
 interface AdAccount {
   id: string
   name: string
   account_status?: number
-}
-
-interface AdAccountResponse {
-  data: AdAccount[]
 }
 
 Deno.serve(async (req) => {
@@ -120,15 +113,15 @@ Deno.serve(async (req) => {
       fields: 'id,name,category,tasks,instagram_business_account{id,username,name,profile_picture_url}',
       limit: '100',
     })
-    const pageRes = await metaFetch(`${baseUrl}/me/accounts?${pageParams.toString()}`)
-    if (pageRes.ok) {
-      const pageData: FbPageResponse = await pageRes.json()
-      pages = pageData.data ?? []
-      pagesDiagnostic = { available: true, count: pages.length }
-    } else {
-      const error = await readMetaError(pageRes, [accessToken])
+    const collection = await collectMetaAssets<FbPage>(`${baseUrl}/me/accounts?${pageParams.toString()}`, metaFetch)
+    pages = collection.data
+    pagesDiagnostic = { available: collection.complete, complete: collection.complete, count: pages.length, pagesFetched: collection.pagesFetched }
+    if (collection.failedResponse) {
+      const error = await readMetaError(collection.failedResponse, [accessToken])
       const safeMsg = [error.message, error.type ? `type ${error.type}` : null, error.code ? `code ${error.code}` : null].filter(Boolean).join(', ')
-      pagesDiagnostic = { available: false, status: safeMsg, hint: 'The connected Meta user may not have Pages management access. Verify the user has pages_show_list permission and manages the expected Facebook Pages.' }
+      pagesDiagnostic = { ...pagesDiagnostic, status: safeMsg, hint: 'Page discovery is incomplete. Verify existing Page access before changing permissions.' }
+    } else if (!collection.complete) {
+      pagesDiagnostic = { ...pagesDiagnostic, status: collection.error, hint: 'Page inventory is incomplete; an absent account is not proof of missing access.' }
     }
   } catch (err) {
     console.error('Failed to fetch Facebook Pages:', redact(err instanceof Error ? err.message : String(err), [accessToken]))
@@ -170,16 +163,17 @@ Deno.serve(async (req) => {
       fields: 'id,name,account_status',
       limit: '100',
     })
-    const adRes = await metaFetch(`${baseUrl}/me/adaccounts?${adParams.toString()}`)
-    if (adRes.ok) {
-      const adData: AdAccountResponse = await adRes.json()
-      adAccounts = adData.data ?? []
-      adAccountsDiagnostic = { available: true, count: adAccounts.length }
-    } else {
-      const error = await readMetaError(adRes, [accessToken])
+    const collection = await collectMetaAssets<AdAccount>(`${baseUrl}/me/adaccounts?${adParams.toString()}`, metaFetch)
+    adAccounts = collection.data
+    adAccountsDiagnostic = { available: collection.complete, complete: collection.complete, count: adAccounts.length, pagesFetched: collection.pagesFetched }
+    if (collection.failedResponse) {
+      const error = await readMetaError(collection.failedResponse, [accessToken])
       const safeMsg = [error.message, error.type ? `type ${error.type}` : null, error.code ? `code ${error.code}` : null].filter(Boolean).join(', ')
       adAccountsError = 'Ad account access is not available yet. The connected Meta user may lack Business Manager or ad account permissions.'
-      adAccountsDiagnostic = { available: false, status: safeMsg, hint: 'Verify the connected Meta user has Business Manager access and ad account permissions. Additional Meta app review may also be required.' }
+      adAccountsDiagnostic = { ...adAccountsDiagnostic, status: safeMsg, hint: 'Verify the connected Meta user has Business Manager access and ad account permissions. Additional Meta app review may also be required.' }
+    } else if (!collection.complete) {
+      adAccountsError = 'Ad account discovery is incomplete; existing organic reporting remains separate.'
+      adAccountsDiagnostic = { ...adAccountsDiagnostic, status: collection.error }
     }
   } catch {
     adAccountsError = 'Ad account access is not available yet. The connected Meta user may lack Business Manager or ad account permissions.'
