@@ -1,5 +1,25 @@
 # CG Dynamics Ops Handover
 
+### 16 October — Google Ads automatic refresh prepared locally (#623)
+
+The missing cadence is now implemented on the existing background worker and
+durable queue. `GOOGLE_ADS_REFRESH_ENABLED` defaults off. Eligible mapped active
+accounts receive one exact-account job per Johannesburg day (two enqueues per
+pass, three bounded queue attempts), covering the last 35 complete account-local
+days. Account/customer/time-zone identity and the date window are rechecked by
+the sync endpoint. Internal calls require both existing worker and service
+credentials; manual manager auth and the sync gateway JWT contract are retained.
+Automatic provider calls use one short attempt so retries do not multiply.
+Canonical run completion must be saved before success is returned; HTTP-only,
+partial, foreign-account and failed completion receipts cannot pass the job.
+The migration only admits the system job type and adds no browser grant or cron.
+Focused executable scheduler/HTTP/provider tests, actual migration/role checks in
+disposable PostgreSQL, Edge type checks and local build pass. No production data,
+Edge deployment, flag/secret/provider change or Vercel action occurred. See
+`docs/integrations/GOOGLE-ADS-DAILY-REFRESH.md` for the activation/rollback packet.
+This closes the local engineering gap; live automatic freshness is still unproven
+until the reviewed migration and two functions are activated and observed.
+
 ### 14 October — unverified client package presentation (local fix; protected release)
 
 Authenticated read-only admin preview reproduced an empty Agri-Secure package card headed “What we create together” although it contained no confirmed inclusions. The focused client presentation change keeps confirmed quantities unchanged, but gives an unverified/empty package a neutral short state and a discussion action to Amonique rather than implying an agreed deliverable. It changes no package authority, receipt, entitlement or production row. A deterministic regression covers null, missing, incomplete and mismatched confirmations; this remains local until the protected frontend release and does not replace exact-client package review.

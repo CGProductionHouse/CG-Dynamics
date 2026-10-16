@@ -1,4 +1,6 @@
 import { requireAdminOrManager } from '../_shared/auth.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { GOOGLE_ADS_REFRESH_ENABLED_FLAG, googleAdsRefreshWorkerAuthorized, validGoogleAdsRefreshPayload } from '../_shared/googleAdsFreshness.ts'
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import {
   googleAdsConfig,
@@ -19,6 +21,8 @@ type SyncBody = {
   clientId?: string
   accountIds?: string[]
   mappingIds?: string[]
+  expectedCustomerId?: string
+  expectedTimeZone?: string
 }
 type AccountMode = 'dedicated' | 'shared'
 type CanonicalAccount = {
@@ -27,6 +31,7 @@ type CanonicalAccount = {
   account_mode: AccountMode | null
   account_name: string
   is_active: boolean
+  time_zone: string
 }
 type DedicatedLink = { id: string; google_ads_account_id: string; client_id: string }
 type CampaignLink = { id: string; google_ads_account_id: string; client_id: string; campaign_id: string }
@@ -75,14 +80,33 @@ Deno.serve(async request => {
   if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders })
   if (request.method !== 'POST') return jsonResponse({ ok: false, error: 'Method not allowed.' }, 405)
 
-  const auth = await requireAdminOrManager(request)
-  if (!auth.ok) return jsonResponse({ ok: false, error: auth.error }, auth.status)
+  const workerRequest = request.headers.has('X-Internal-Worker-Token')
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+  const url = Deno.env.get('SUPABASE_URL') ?? ''
+  if (workerRequest && !googleAdsRefreshWorkerAuthorized({
+    serviceKey, bearer: request.headers.get('Authorization') ?? '',
+    workerToken: (Deno.env.get('WORKER_INTERNAL_TOKEN') ?? '').trim(),
+    suppliedToken: request.headers.get('X-Internal-Worker-Token') ?? '',
+  })) return jsonResponse({ ok: false, error: 'Worker authentication required.' }, 401)
+  if (workerRequest && (Deno.env.get(GOOGLE_ADS_REFRESH_ENABLED_FLAG) ?? '').trim().toLowerCase() !== 'true') {
+    return jsonResponse({ ok: false, error: 'Automatic Google Ads refresh is disabled.' }, 503)
+  }
+  const auth = workerRequest ? null : await requireAdminOrManager(request)
+  if (auth && !auth.ok) return jsonResponse({ ok: false, error: auth.error }, auth.status)
+  if (!url || !serviceKey) return jsonResponse({ ok: false, error: 'Server configuration error.' }, 500)
+  const supabase = auth?.ok ? auth.value.supabase : createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } })
 
   let body: SyncBody
   try {
     body = await request.json() as SyncBody
   } catch {
     return jsonResponse({ ok: false, error: 'Invalid JSON body.' }, 400)
+  }
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    return jsonResponse({ ok: false, error: 'JSON object body required.' }, 400)
+  }
+  if (workerRequest && !validGoogleAdsRefreshPayload(body)) {
+    return jsonResponse({ ok: false, error: 'Exact current Google Ads refresh identity and date window required.' }, 400)
   }
   const dateError = validateGoogleAdsDateRange(body.startDate, body.endDate, new Date().toISOString().slice(0, 10))
   if (dateError) return jsonResponse({ ok: false, error: dateError }, 400)
@@ -98,9 +122,8 @@ Deno.serve(async request => {
   const config = googleAdsConfig()
   if (!config) return jsonResponse({ ok: false, error: 'Google Ads is not configured.' }, 503)
 
-  const { supabase } = auth.value
   let accountQuery = supabase.from('google_ads_accounts')
-    .select('id, customer_id, account_mode, account_name, is_active')
+    .select('id, customer_id, account_mode, account_name, is_active, time_zone')
   if (requestedAccountIds) {
     accountQuery = accountQuery.in('id', requestedAccountIds)
   } else {
@@ -118,6 +141,10 @@ Deno.serve(async request => {
   }
 
   const accountRows = (accountsResult.data ?? []) as CanonicalAccount[]
+  if (workerRequest && (accountRows.length !== 1 || accountRows[0].customer_id !== body.expectedCustomerId ||
+      accountRows[0].time_zone !== body.expectedTimeZone)) {
+    return jsonResponse({ ok: false, error: 'Google Ads refresh account identity changed.' }, 409)
+  }
   const accountById = new Map(accountRows.map(account => [account.id, account]))
   const dedicatedLinks = (dedicatedResult.data ?? []) as DedicatedLink[]
   const campaignLinks = (campaignsResult.data ?? []) as CampaignLink[]
@@ -214,8 +241,10 @@ Deno.serve(async request => {
   const runIds = new Map(runs.map(run => [run.google_ads_account_id as string, run.id as string]))
 
   let accessToken: string
+  // Queue retries own automatic backoff; avoid multiplying provider retries.
+  const requestPolicy = workerRequest ? { attempts: 1, timeoutMs: 10_000 } : undefined
   try {
-    accessToken = await refreshGoogleAccessToken(config)
+    accessToken = await refreshGoogleAccessToken(config, requestPolicy)
   } catch (error) {
     const safe = safeGoogleAdsError(error)
     await supabase.from('google_ads_sync_runs').update({
@@ -260,7 +289,7 @@ Deno.serve(async request => {
     try {
       // Keep the metric request on the last provider-verified GAQL field set.
       // Optional native settings must not prevent reporting metrics from refreshing.
-      const rows = await searchStream(config, accessToken, customerId, googleAdsCampaignQuery(startDate, endDate))
+      const rows = await searchStream(config, accessToken, customerId, googleAdsCampaignQuery(startDate, endDate), requestPolicy)
       // The replacement RPC deletes the entire requested range. Carry forward only
       // previously verified optional facts for the same exact campaign and day.
       const previousOptional = new Map<string, { interactions: number | string | null; native_settings: Record<string, unknown> | null }>()
@@ -323,13 +352,14 @@ Deno.serve(async request => {
         p_metrics: metrics,
       })
       if (replaceError || typeof rowsWritten !== 'number') throw new Error('Could not store canonical Google Ads campaign metrics.')
-      await supabase.from('google_ads_sync_runs').update({
+      const { error: finishError } = await supabase.from('google_ads_sync_runs').update({
         status: 'succeeded',
         rows_upserted: rowsWritten,
         mapped_campaigns: mappedCampaigns,
         unmapped_campaigns: unmappedCampaigns,
         finished_at: new Date().toISOString(),
       }).eq('id', runId)
+      if (finishError) throw new Error('Could not complete canonical Google Ads sync run.')
       return {
         accountId: account.id,
         googleAdsAccountId: account.id,
@@ -343,7 +373,8 @@ Deno.serve(async request => {
     } catch (error) {
       const safe: { error: string; requestId?: string } = error instanceof Error && (
         error.message === 'Could not store canonical Google Ads campaign metrics.' ||
-        error.message === 'Could not preserve previously verified Google Ads settings.'
+        error.message === 'Could not preserve previously verified Google Ads settings.' ||
+        error.message === 'Could not complete canonical Google Ads sync run.'
       )
         ? { error: error.message }
         : safeGoogleAdsError(error)

@@ -9,6 +9,7 @@ import webpush from 'npm:web-push@3.6.7'
 import { dispatchMetaWorker } from '../_shared/metaWorkerDispatch.ts'
 import { currentMetaMonth, previousMetaMonth, currentMonthHasIncrementalWindow } from '../_shared/metaPeriod.ts'
 import { fetchAllRows } from '../_shared/paginatedRows.ts'
+import { GOOGLE_ADS_REFRESH_JOB_TYPE, GOOGLE_ADS_REFRESH_ENABLED_FLAG, ensureGoogleAdsFreshnessJobs, runGoogleAdsRefreshJob } from '../_shared/googleAdsFreshness.ts'
 import { META_TERMINAL_ACCESS_COOLDOWN_MS, metaTerminalAccessBlocks } from '../_shared/metaFleetTerminalBackoff.ts'
 import { GENERATION_FLAG, VIDEO_FOLDER_FLAG, recordContentAutopilotPass, runContentAutopilotPass } from '../_shared/contentAutopilotPass.ts'
 import {
@@ -75,6 +76,9 @@ Deno.serve(async () => {
   const monthlyStrategyAutopilotSchedule = await ensureDailyMonthlyStrategyAutopilotJob(supabase)
   const contentAutopilotSchedule = await ensureDailyContentAutopilotJob(supabase, monthlyStrategyAutopilotSchedule)
   const tiktokFreshnessSchedule = await ensureTiktokFreshnessJobs(supabase)
+  const googleAdsFreshnessSchedule = await ensureGoogleAdsFreshnessJobs(supabase,
+    (Deno.env.get(GOOGLE_ADS_REFRESH_ENABLED_FLAG) ?? '').trim().toLowerCase() === 'true' &&
+    (Deno.env.get('WORKER_INTERNAL_TOKEN') ?? '').trim().length >= 32)
 
   while (Date.now() < deadline && processed.length < MAX_JOBS_PER_RUN) {
     const { data: job, error } = await supabase.rpc('claim_next_background_job', { p_worker: worker })
@@ -152,7 +156,7 @@ Deno.serve(async () => {
   // state (Access/Coverage/Completeness/Freshness) independently.
   const fleetFreshness = await enqueueFleetMetaFreshness(supabase, url)
 
-  return new Response(JSON.stringify({ ok: true, worker, processed, monthlyStrategyAutopilotSchedule, contentAutopilotSchedule, tiktokFreshnessSchedule, microsoftFreshness, reaped, laneRecoveries, fleetFreshness }), { headers: { 'Content-Type': 'application/json' } })
+  return new Response(JSON.stringify({ ok: true, worker, processed, monthlyStrategyAutopilotSchedule, contentAutopilotSchedule, tiktokFreshnessSchedule, googleAdsFreshnessSchedule, microsoftFreshness, reaped, laneRecoveries, fleetFreshness }), { headers: { 'Content-Type': 'application/json' } })
 })
 
 async function ensureTiktokFreshnessJobs(
@@ -790,6 +794,13 @@ async function runJob(
   const payload = (job.payload ?? {}) as Record<string, unknown>
 
   switch (job.job_type) {
+    case GOOGLE_ADS_REFRESH_JOB_TYPE: {
+      return await runGoogleAdsRefreshJob({
+        payload, url, serviceKey,
+        workerToken: (Deno.env.get('WORKER_INTERNAL_TOKEN') ?? '').trim(),
+        enabled: (Deno.env.get(GOOGLE_ADS_REFRESH_ENABLED_FLAG) ?? '').trim().toLowerCase() === 'true',
+      })
+    }
     case 'meta_sync': {
       // REAL Meta sync, headless: drive the existing durable batch engine
       // (meta_sync_batches + meta-sync-worker). meta-sync-worker runs the full
