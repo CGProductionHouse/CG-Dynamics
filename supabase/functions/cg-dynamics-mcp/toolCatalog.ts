@@ -471,11 +471,11 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
     description: '#450. Return the ONE canonical Content Guideline for an exact Content Run, creating the draft document if it does not exist yet. Idempotent: a run always has exactly one guideline, and an existing guideline is returned untouched — never duplicated, never reset. Staff should never have to create a blank guideline by hand.',
     inputSchema: objectSchema({ content_run_id: uuid, idempotency_key: idempotencyKeySchema }, ['content_run_id', 'idempotency_key']),
     annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
-    dependency: '#450', canonicalContract: 'get_or_create_content_guideline RPC (one guideline per run)',
+    dependency: '#450', canonicalContract: 'get_or_create_content_guideline_as_actor service-only RPC with server-resolved workforce actor (one guideline per run)',
   },
   {
     name: 'list_content_guideline_videos', title: 'List content guideline videos',
-    description: '#450. Read the ordered videos of one exact Content Run guideline with their canonical "Video XX - Name", coverage month, whether each is linked to a real Client Schedule slot or still unallocated, production folder state, raw-upload evidence and edit readiness. Raw OneDrive IDs and URLs are never returned.',
+    description: '#450. Read the ordered videos of one exact Content Run guideline with their canonical "Video XX - Name", coverage month, whether each is linked to a real Client Schedule slot or still unallocated, production folder state, raw-upload evidence and edit readiness. Never creates a missing guideline; explicitly use ensure_content_guideline first if needed. Raw OneDrive IDs and URLs are never returned.',
     inputSchema: objectSchema({ content_run_id: uuid }, ['content_run_id']),
     annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
     dependency: '#450', canonicalContract: 'content_guidelines + content_guide_ideas ordered by position',
@@ -540,7 +540,7 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   },
   {
     name: 'generate_content_guideline_drafts', title: 'Generate guideline drafts',
-    description: '#450. Ask the existing AI Content Director for DRAFT ideas across the run coverage window, or develop scripts and shot plans for videos already saved. Draft only: a field a human wrote is reported as a conflict and never overwritten, saved order is preserved, and a missing provider or client context returns GENERATION_BLOCKED rather than invented content.',
+    description: '#450. Invoke the existing provider-funded AI Content Director for DRAFT ideas or script development. This is not normal ChatGPT authoring: when ChatGPT should write without a separate model API, use ensure/add/update guideline tools instead. Draft only: human wording is never overwritten, saved order is preserved, and missing provider/client context returns GENERATION_BLOCKED.',
     inputSchema: objectSchema({
       content_run_id: uuid,
       mode: { enum: ['ideas', 'develop'], description: 'ideas = plan concepts for the coverage window; develop = write scripts/shot plans for saved videos.' },

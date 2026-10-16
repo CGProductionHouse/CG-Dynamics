@@ -3102,26 +3102,40 @@ async function loadGuidelineVideos(staff: AuthenticatedStaff, guidelineId: strin
 }
 
 /** The one canonical guideline for this run, created as a draft when it is missing. */
-async function ensureGuideline(staff: AuthenticatedStaff, scope: ContentRunScope) {
+async function ensureGuideline(staff: AuthenticatedStaff, scope: ContentRunScope, allowCreate = false) {
   const existing = await staff.supabase
     .from('content_guidelines')
     .select('id, content_run_id, client_id, title, month, coverage_start, coverage_end, status')
     .eq('content_run_id', scope.runId)
     .maybeSingle()
   if (existing.error) return { error: existing.error.message }
-  if (existing.data) return { guideline: existing.data as Record<string, unknown>, created: false }
-  const { data, error } = await staff.supabase.rpc('get_or_create_content_guideline', { p_run_id: scope.runId })
+  const existingGuideline = existing.data as Record<string, unknown> | null
+  if (existingGuideline) {
+    if (existingGuideline.client_id !== scope.clientId || existingGuideline.content_run_id !== scope.runId) {
+      return { error: 'The canonical guideline does not match the exact client and Content Run.' }
+    }
+    return { guideline: existingGuideline, created: false }
+  }
+  if (!allowCreate) return { error: 'No canonical Content Guideline exists for this run. Use ensure_content_guideline to prepare a draft explicitly.' }
+  // This MCP uses a service client, not a human auth.uid() session. Reuse the
+  // existing service-only RPC with the server-resolved active workforce actor.
+  const { data, error } = await staff.supabase.rpc('get_or_create_content_guideline_as_actor', {
+    p_run_id: scope.runId, p_actor_profile_id: staff.profileId,
+  })
   if (error) return { error: error.message }
-  const guideline = Array.isArray(data) ? data[0] : data
+  const guideline = (Array.isArray(data) ? data[0] : data) as Record<string, unknown> | null
   if (!guideline) return { error: 'The canonical Content Guideline could not be prepared for that run.' }
+  if (guideline.client_id !== scope.clientId || guideline.content_run_id !== scope.runId) {
+    return { error: 'The canonical guideline does not match the exact client and Content Run.' }
+  }
   return { guideline: guideline as Record<string, unknown>, created: true }
 }
 
 /** Resolve the run's guideline and videos in one step; both actions need the pair. */
-async function loadRunGuideline(staff: AuthenticatedStaff, runId: string) {
+async function loadRunGuideline(staff: AuthenticatedStaff, runId: string, allowCreate = false) {
   const scope = await resolveContentRunScope(staff, runId)
   if ('error' in scope) return { error: scope.error }
-  const ensured = await ensureGuideline(staff, scope)
+  const ensured = await ensureGuideline(staff, scope, allowCreate)
   if ('error' in ensured) return { error: ensured.error }
   const loaded = await loadGuidelineVideos(staff, ensured.guideline.id as string, scope.clientId)
   if ('error' in loaded) return { error: loaded.error }
@@ -3129,7 +3143,7 @@ async function loadRunGuideline(staff: AuthenticatedStaff, runId: string) {
 }
 
 const handleEnsureContentGuideline: ToolHandler = async (staff, input) => {
-  const loaded = await loadRunGuideline(staff, input.content_run_id as string)
+  const loaded = await loadRunGuideline(staff, input.content_run_id as string, true)
   if ('error' in loaded) return { error: loaded.error }
   return {
     content_run_id: loaded.scope.runId,
@@ -3251,7 +3265,7 @@ const handleGetContentVideoReadiness: ToolHandler = async (staff, input) => {
 }
 
 const handleAddContentGuidelineVideo: ToolHandler = async (staff, input) => {
-  const loaded = await loadRunGuideline(staff, input.content_run_id as string)
+  const loaded = await loadRunGuideline(staff, input.content_run_id as string, true)
   if ('error' in loaded) return { error: loaded.error }
   const fields = { ...input }
   delete fields.content_run_id
@@ -3380,7 +3394,7 @@ const handleLinkContentGuidelineVideoDeliverable: ToolHandler = async (staff, in
 }
 
 const handleGenerateContentGuidelineDrafts: ToolHandler = async (staff, input) => {
-  const loaded = await loadRunGuideline(staff, input.content_run_id as string)
+  const loaded = await loadRunGuideline(staff, input.content_run_id as string, true)
   if ('error' in loaded) return { error: loaded.error }
   if (loaded.guideline.status !== 'draft') {
     return { error: 'GENERATION_BLOCKED', reason: 'GUIDELINE_APPROVED', note: 'This guideline is no longer a draft, so automatic generation will not touch it.' }

@@ -21,6 +21,14 @@ source-ready plans was requested in the same chat, without rewriting staff field
 No recurring task was created or enabled. The known Content Guideline RPC error
 is assigned to connector engineering, not another permission-bypass attempt.
 
+For ChatGPT-authored production briefs, use `ensure_content_guideline`, then
+`add_content_guideline_video` and `update_content_guideline_video` for the
+authored script/shot fields. **Do not use `generate_content_guideline_drafts`**
+for this no-separate-model route: it invokes the provider-funded Content Director.
+The local service/actor RPC correction preserves the existing role checks and
+makes list/readiness truly read-only; it still requires an authorized MCP release
+and exact-run draft readback before live write acceptance can be claimed.
+
 ## 16 October final presentation cleanup (supersedes v3-only stage)
 
 All 37 source-ready November drafts now have zero legacy guide-note chips and

@@ -1,5 +1,40 @@
 # CG Dynamics Ops Handover
 
+### 16 October — Content Guideline service/actor RPC correction (local)
+
+The normal strategy chat's `Staff access required` refusal is reproduced by an
+executable test of the actual MCP `ensureGuideline` implementation. SELECT-only
+production function-definition readback confirms both contracts already exist:
+the human RPC requires `is_staff()`/`auth.uid()`, while the existing actor-aware
+RPC requires service role plus an auth-backed active workforce actor. The MCP
+service client was incorrectly calling the human RPC. It now uses that existing
+service-only actor RPC with **server-resolved `staff.profileId`**, not a tool-input
+actor. No SQL, grants, function definition or auth/permission configuration changes.
+
+Existing documents (including staff wording/publication state) remain untouched;
+existing and returned guidelines must match the exact resolved client/run. The
+read-only video-list/readiness tools now explicitly decline to create a missing
+guideline. Only explicit ensure/add/generate write actions opt into creation;
+read/list calls and reorder do not. This avoids enabling a hidden write merely
+because the service-RPC mismatch was fixed. Refused calls have no alternate-RPC
+or permission fallback. Executable red-to-green tests cover creation, existing
+document preservation, foreign identities, role refusal and read-only absence.
+SELECT-only grant readback confirms actor-RPC execution is service=true,
+authenticated=false, anon=false. Full supported local suite: **3,856 pass /
+19 skips / zero failures**; local TypeScript/Vite build with app chunks,
+focused context/catalog/guideline tests, scoped lint and diff check pass.
+Full MCP index Deno remains at the same 242 documented generic errors, not PASS.
+No changed-code browser/mobile or production draft-write acceptance is claimed.
+
+Tool metadata also distinguishes normal ChatGPT-authored ensure/add/update from
+`generate_content_guideline_drafts`, which invokes the separate provider-funded
+Content Director. CA wants the former normal-chat route. This local code is not
+deployed and no production guideline was created or published during verification.
+An authorized MCP-only release and one exact-run draft save/readback are still
+required before telling the company chat the live error has been fixed. The
+normal strategy chat is reviewing ready plans separately; its proposal document
+is not a canonical save or editorial approval.
+
 ### 16 October — normal ChatGPT strategy handoff and Meta connector health truth
 
 CA explicitly requires **normal company ChatGPT chat + the Dynamics plugin**, not
