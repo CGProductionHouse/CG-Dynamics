@@ -127,7 +127,7 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   },
   {
     name: 'get_provider_health', title: 'Get provider health',
-    description: 'Company-admin only. Compact Morning Ops health/freshness for Meta, Google Ads and TikTok using each existing connection-status function. Read-only: no OAuth, permission, secret, account-mapping or publishing change. An unreadable provider is reported UNKNOWN, never as a confirmed empty or disconnected state.',
+    description: 'Company-admin only. Read provider connection status. Meta also grades exact mapped-platform checkpoint freshness; a connection alone cannot PASS failed/partial/stale/unavailable reporting. Google Ads and TikTok connection status alone does not verify campaign/report freshness: use exact-client evidence. Read-only: no OAuth, permission, secret, account-mapping or publishing change. Unreadable evidence is UNKNOWN, never a confirmed empty state.',
     inputSchema: objectSchema({
       providers: { type: 'array', items: { enum: ['meta', 'google_ads', 'tiktok'] } },
       client_id: { ...uuid, description: 'Optional exact client mapping to inspect. Required for a targeted TikTok health check; omit for company-wide TikTok mapping inventory.' },

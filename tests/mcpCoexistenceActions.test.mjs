@@ -273,6 +273,73 @@ test('connected and not-connected are determinate states', () => {
   assert.equal(ops.summarizeProviderHealth('meta', { error: 'token expired' }).state, 'degraded')
 })
 
+const metaNow = '2026-10-16T10:00:00.000Z'
+const metaRun = (patch = {}) => ({
+  status: 'success', health_state: 'verified',
+  created_at: '2026-10-16T08:00:00Z', last_successful_at: '2026-10-16T08:00:00Z',
+  high_watermark_at: '2026-10-16T07:00:00Z', next_due_at: '2026-10-16T14:00:00Z',
+  ...patch,
+})
+const metaResponse = (facebook, instagram = null) => ({
+  connected: true, schemaReady: true, linkedAssetsCount: 1,
+  assetHealth: [{ assetId: 'asset-a', clientId: 'client-a', facebookMapped: true,
+    instagramMapped: instagram !== null, facebook, instagram }],
+})
+
+test('Meta connector health cannot PASS while a mapped platform has a failed or partial checkpoint', () => {
+  const response = metaResponse(metaRun({ status: 'failed', health_state: 'sync_error',
+    last_error_code: 'Meta permission/access blocked. Owner access or re-consent is required.' }), metaRun())
+  const r = ops.summarizeMetaReportingHealth(response, null, metaNow)
+  assert.equal(r.state, 'degraded')
+  assert.equal(r.degraded, true)
+  assert.equal(r.reporting.verdict, 'PARTIAL')
+  assert.equal(r.reporting.platforms.length, 2)
+  assert.match(r.detail, /connection present/i)
+  assert.match(r.detail, /not complete/i)
+  assert.equal(r.reporting.platforms[0].clientId, 'client-a')
+  assert.equal(ops.summarizeMetaReportingHealth(metaResponse(metaRun({ health_state: 'verified_partial' })), null, metaNow).degraded, true)
+  // Connection-only authority used by targeted sync stays separate: a failed sync may be repaired.
+  assert.equal(ops.summarizeProviderHealth('meta', response).state, 'connected')
+})
+
+test('Meta connector uses canonical freshness for overdue, missing and unreadable checkpoints', () => {
+  const overdue = ops.summarizeMetaReportingHealth(metaResponse(metaRun({ next_due_at: metaNow })), null, metaNow)
+  assert.equal(overdue.reporting.verdict, 'STALE')
+  assert.equal(overdue.degraded, true)
+  const missing = ops.summarizeMetaReportingHealth(metaResponse(null), null, metaNow)
+  assert.equal(missing.reporting.verdict, 'STALE')
+  assert.equal(missing.reporting.platforms.length, 1)
+  const unreadable = ops.summarizeMetaReportingHealth({ connected: true, assetHealth: null }, null, metaNow)
+  assert.equal(unreadable.degraded, true)
+  assert.equal(unreadable.reporting.verdict, 'UNAVAILABLE')
+  const empty = ops.summarizeMetaReportingHealth({ connected: true, assetHealth: [] }, null, metaNow)
+  assert.equal(empty.reporting.verdict, 'UNAVAILABLE')
+  assert.equal(empty.degraded, true)
+  const truncated = ops.summarizeMetaReportingHealth({ ...metaResponse(metaRun()), linkedAssetsCount: 2 }, null, metaNow)
+  assert.equal(truncated.reporting.verdict, 'UNAVAILABLE')
+  assert.equal(truncated.degraded, true)
+  const malformed = ops.summarizeMetaReportingHealth({ connected: true, assetHealth: [null] }, null, metaNow)
+  assert.equal(malformed.reporting.verdict, 'UNAVAILABLE')
+})
+
+test('Meta healthy mapped evidence passes without requiring an unmapped Instagram account', () => {
+  const healthy = ops.summarizeMetaReportingHealth(metaResponse(metaRun()), null, metaNow)
+  assert.equal(healthy.state, 'connected')
+  assert.equal(healthy.degraded, false)
+  assert.equal(healthy.reporting.verdict, 'PASS')
+  assert.equal(healthy.reporting.platforms.length, 1)
+  assert.equal(ops.summarizeMetaReportingHealth(null, 'timeout', metaNow).state, 'unavailable')
+  assert.equal(ops.summarizeMetaReportingHealth({ connected: false }, null, metaNow).state, 'not_connected')
+})
+
+test('provider read handler grades Meta reporting but sync guard remains connection-only', () => {
+  const health = slice('const handleGetProviderHealth', 'const handleRunProviderSync')
+  assert.match(health, /summarizeMetaReportingHealth\(/)
+  const sync = slice('const handleRunProviderSync', 'const handleListCompanyTasks')
+  assert.doesNotMatch(sync, /summarizeMetaReportingHealth\(/)
+  assert.match(sync, /summarizeProviderHealth\(/)
+})
+
 test('provider actions reuse existing functions and change no authorisation', () => {
   const h = slice('const handleGetProviderHealth', 'const handleListCompanyTasks')
   for (const fn of ['meta-connection-status', 'google-ads-connection-status', 'tiktok-connection-status']) {

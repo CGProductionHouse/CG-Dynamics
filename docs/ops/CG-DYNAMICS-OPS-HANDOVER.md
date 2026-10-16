@@ -1,5 +1,48 @@
 # CG Dynamics Ops Handover
 
+### 16 October — normal ChatGPT strategy handoff and Meta connector health truth
+
+CA explicitly requires **normal company ChatGPT chat + the Dynamics plugin**, not
+ChatGPT Work, for routine strategy writing. Codex remains the app/connector
+engineering and verification lane. The existing **Write Client Strategies** chat
+was resumed, not replaced: `https://chatgpt.com/g/g-p-6aad2a324f2c8191a8d09c181b59c197-cg-builder-web-apps/c/6ace9b70-d30c-83ea-a4a0-014cf0c66381`.
+Its completed 13m40s pass reports 61 November eligibility reads, zero canonical
+strategy saves, zero guideline saves and no overwritten staff wording. It
+preserved held proposals and package-bounded production briefs separately;
+these are not implemented app strategies or activated research. A follow-up
+semantic review of the remaining ready drafts is running in that same normal
+chat, without replacing staff amendments. No recurring automation was created.
+
+The read-only provider-health connector reproduced a false overall PASS:
+Meta was connected but its own evidence included failed Facebook stages for
+AV Event Life and Zooz Lifestyle WFF. The local fix grades Meta reporting with
+the **same unchanged canonical classifier** as Integrations, extracted into
+`supabase/functions/_shared/metaFleetFreshness.ts`; the old frontend import is
+a compatibility re-export. Captured 42-asset/67-platform evidence replays as
+18 PASS, 48 PARTIAL and one STALE, not a fleet PASS. The two failed stages with
+retained prior facts remain PARTIAL under that existing rule. Unmapped platforms
+are not invented; missing/unreadable/malformed/truncated inventory cannot PASS.
+Connection-only admission for targeted repair sync is deliberately unchanged.
+Google Ads/TikTok connection status is explicitly not campaign/report freshness.
+
+Four failing-first regression cases, the existing canonical freshness tests,
+TypeScript/Vite build with real app chunks, scoped lint/diff and changed-helper
+Deno check pass. Supported full suite: **3,853 pass / 19 skips / zero failures**;
+the unsupported Windows Bash SES fixture is excluded, not passed. Docker-only
+tests are skipped because Docker is not running; OpenSSL uses the existing Git
+installation. A first ambient/concurrent test attempt and a Docker-enabled
+attempt failed/aborted; only the corrected supported serial run is the passing
+receipt. Full MCP index Deno check still fails on the documented Supabase-client
+generic mismatch (242 errors), not claimed green. No browser/device acceptance
+of changed deployed code, Meta recovery, Edge deployment or Vercel operation.
+
+The strategy chat also re-confirmed its earlier `ensure_content_guideline`
+`Staff access required` blocker and two CASE October Content Runs without saved
+guidelines. Source diagnosis finds the MCP service client calling the human
+`get_or_create_content_guideline` RPC, while an existing service/validated-actor
+contract already exists. Continue a bounded fix on that existing contract;
+do not loosen role checks, grant browser access or retry denied live writes.
+
 ### 16 October — all 37 ready November drafts cleared of legacy presentation noise
 
 This later receipt supersedes the v3-only and CG-not-applied stages below.

@@ -1,5 +1,26 @@
 # Company ChatGPT monthly strategy workspace — #731
 
+## Explicit authoring route — normal ChatGPT, not Work (16 October)
+
+CA's required route is normal company ChatGPT chat using the Dynamics plugin.
+Do not migrate routine strategy writing to ChatGPT Work or a provider-funded
+generator. The plugin supplies evidence and saves guarded drafts; the model in
+that normal chat authors them. Codex is for app/connector fixes and verification,
+not the default fleet copywriting engine. Earlier 16 October targeted amendments
+were authored in Codex; calling the plugin there did not offload writing to a
+separate ChatGPT subscription/session.
+
+The existing [Write Client Strategies conversation](https://chatgpt.com/g/g-p-6aad2a324f2c8191a8d09c181b59c197-cg-builder-web-apps/c/6ace9b70-d30c-83ea-a4a0-014cf0c66381)
+was resumed with fresh roster/brief reads and preserved staff amendments. Its
+completed 13m40s pass reports 61 November eligibility checks, **zero new canonical
+strategy or Content Guideline saves**, and held proposals/production briefs in a
+separate document. That document is not implemented/published strategy or trusted
+research. Source/scope-held clients remain held; LHP is once-off and Human Auto
+new research still requires skip/go. A further semantic review of remaining
+source-ready plans was requested in the same chat, without rewriting staff fields.
+No recurring task was created or enabled. The known Content Guideline RPC error
+is assigned to connector engineering, not another permission-bypass attempt.
+
 ## 16 October final presentation cleanup (supersedes v3-only stage)
 
 All 37 source-ready November drafts now have zero legacy guide-note chips and

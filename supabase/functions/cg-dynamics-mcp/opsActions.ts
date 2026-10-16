@@ -1,9 +1,11 @@
 // opsActions.ts — pure helpers for the #325 Morning Ops / coexistence actions.
-// Import-free so every rule here is unit-tested without Deno or a live database.
+// Pure rules are unit-tested without Deno or a live database.
 //
 // Scope discipline: this module SHAPES and CLASSIFIES. It owns no sync engine, no second
 // calendar authority and no OneDrive folder convention. Execution is delegated to the
 // existing durable Edge Functions and canonical RPCs.
+
+import { metaFleetFreshnessEvidence, type MetaCheckpointInput } from '../_shared/metaFleetFreshness.ts'
 
 // ── Microsoft reconciliation run verdict ────────────────────────────────────
 
@@ -299,4 +301,49 @@ export function summarizeProviderHealth(
     return { provider, state: 'connected', degraded: false, detail: 'Authorised connection present.' }
   }
   return { provider, state: 'unavailable', degraded: true, detail: 'Connection state could not be determined from the provider response. Treat as unknown.' }
+}
+
+/**
+ * The read-only health tool must grade mapped reporting, not just OAuth presence.
+ * Keep this separate from the connection-only targeted-sync admission guard.
+ */
+export function summarizeMetaReportingHealth(
+  response: Record<string, unknown> | null | undefined,
+  transportError?: string | null,
+  now = new Date().toISOString(),
+) {
+  const connection = summarizeProviderHealth('meta', response, transportError)
+  if (connection.state !== 'connected') return { ...connection, reporting: null }
+  const assets = (Array.isArray(response?.assetHealth) ? response.assetHealth : [])
+    .filter((row): row is Record<string, unknown> => Boolean(row && typeof row === 'object'))
+  const available = response?.schemaReady !== false && Array.isArray(response?.assetHealth)
+    && assets.length === response.assetHealth.length
+    && assets.every(asset => text(asset.clientId) && text(asset.assetId)
+      && typeof asset.facebookMapped === 'boolean' && typeof asset.instagramMapped === 'boolean')
+    && (typeof response.linkedAssetsCount !== 'number' || response.linkedAssetsCount === assets.length)
+  const inventory = assets.map(asset => ({
+    clientId: text(asset.clientId) ?? '', assetId: text(asset.assetId) ?? '',
+    facebookMapped: asset.facebookMapped === true, instagramMapped: asset.instagramMapped === true,
+  }))
+  const checkpoints: MetaCheckpointInput[] = assets.flatMap(asset =>
+    (['facebook', 'instagram'] as const).flatMap(platform => {
+      if (asset[`${platform}Mapped`] !== true) return []
+      const run = asset[platform] && typeof asset[platform] === 'object'
+        ? asset[platform] as Record<string, unknown> : {}
+      return [{
+        clientId: text(asset.clientId) ?? '', assetId: text(asset.assetId) ?? '', platform, mapped: true,
+        lastAttemptedAt: text(run.created_at), lastSuccessfulAt: text(run.last_successful_at),
+        lastSuccessfulMonth: text(run.period_month), highWatermarkAt: text(run.high_watermark_at),
+        nextDueAt: text(run.next_due_at), status: text(run.status), healthState: text(run.health_state),
+        errorCode: text(run.last_error_code), retrying: run.retrying === true,
+      }]
+    }))
+  const reporting = metaFleetFreshnessEvidence(checkpoints, now, inventory, available)
+  const degraded = reporting.verdict !== 'PASS'
+  return {
+    ...connection, state: degraded ? 'degraded' as const : 'connected' as const, degraded, reporting,
+    detail: degraded
+      ? `Authorised connection present; mapped reporting is ${reporting.verdict}, not complete. Inspect exact platform evidence before claiming client freshness.`
+      : 'Authorised connection present; all mapped platform checkpoints pass the freshness check. This does not prove unmapped client coverage.',
+  }
 }
