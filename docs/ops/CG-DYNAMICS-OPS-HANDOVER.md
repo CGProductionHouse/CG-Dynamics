@@ -1,5 +1,17 @@
 # CG Dynamics Ops Handover
 
+### 16 October — explicit ChatGPT draft amendment capability (candidate)
+
+A real normal-chat attempt to implement the existing 14 November field proposals
+confirmed that the automatic gap-fill tool correctly refuses populated staff
+fields, but no intentional amendment tool existed. The bounded follow-up adds
+`amend_monthly_strategy_draft`, company-admin/admin-manager only, with exact old
+field comparison, fresh source/version fences, citations and the existing audited
+context-amendment RPC. No SQL/grant/permission/publication/automatic-merge change.
+Full details: `CHATGPT-STRATEGY-FIELD-AMENDMENTS.md`. This is not yet deployed or
+a claim that those 14 corrections are saved. Four proposal packets need genuine
+current-citation reconciliation; do not widen evidence authority.
+
 ### 16 October — live Unicode repair and normal-ChatGPT full-script acceptance
 
 This supersedes the pending-release/script-write statements immediately below.

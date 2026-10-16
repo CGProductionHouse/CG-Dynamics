@@ -211,6 +211,14 @@ first-of-month target, optimistic version and idempotency key. The client RPC re
 only the caller's linked client's published safe snapshot; internal notes, seed context,
 actors, revision evidence and unpublished drafts are excluded.
 
+The private MCP's explicit `amend_monthly_strategy_draft` action is narrower:
+company-admin context plus admin/manager connection only, current/next month,
+existing unpublished draft, fresh source/version and exact old-field comparison.
+Only named gold-standard text and confirmed-format concept arrays can change.
+The existing actor-aware audited context-amendment RPC owns the transaction;
+the caller cannot supply an actor, approve/publish or alter scope/permissions.
+Automatic proposal filling continues to preserve populated staff fields.
+
 Draft-to-approved and approved-to-published transitions additionally require a
 currently confirmed exact-client package, matching seed provenance and the
 complete non-generic #494 gold-standard brief.
