@@ -1,10 +1,12 @@
 # CG Dynamics Ops Handover
 
-### 16 October — client-by-client native Meta audit in progress
+### 16 October — ordered client Meta audit first pass complete, with failures/holds
 
 CA requested alphabetical live comparisons, not another sync-badge summary.
-Branch `codex/client-meta-audit-2026-10-16` owns audit receipts and one bounded
-TikTok snapshot-label correction; existing
+PR #824 merged as `b6186234f00b3dbff877eabb5afb30f6475136f3`, containing the
+bounded TikTok snapshot-label correction and audit receipts through client14.
+Branch `codex/client-meta-audit-followthrough-2026-10-16` continues the ordered
+read-only audit; existing
 runtime PR owners #775/#662/#618 remain untouched. See
 `CLIENT-META-AUDIT-2026-10-16.md` and
 `strategy-review/2026-10-16-fleet-audit-inventory.json`.
@@ -33,7 +35,8 @@ Native 13/15 October Facebook posts prove the missing content. Its Instagram
 Historical PVC September TikTok rows have no current connection or retained
 account identity in provenance: hold identity, do not guess/reassign/delete.
 No production data/schema/provider/OAuth/mapping/permission/strategy/publication
-or Vercel action. Native comparisons through client 14 (Central Canvas) are recorded,
+or Vercel action. All61 entries have a scoped first-pass disposition (LHP held
+once-off; Human Auto metadata only under the standing research skip/go gate),
 with actual scope and holds, not blanket passes. Marble native views 11,378 FB /
 2,278 IG match, Vascular 39 FB views / zero IG activity agrees, Bohemia 314 FB
 views agrees, Bouwer approximately 2.3K /142 visits/3 follows agrees, Braize
@@ -54,10 +57,62 @@ The 19 skips include the two optional Docker checks, not claimed as passes.
 No layout, values, source windows, grants or data change. Frontend release remains
 separate; do not call this wording live from a local test.
 
-PR #824 holds the exact audit and bounded wording fix. Ordered next client:
-CG Production House (15). CASE native 8,323 FB /780 IG views and Central Canvas
-5,031 FB views match. Central Canvas has a newer 16 October 13:36 local post
-after its 11:27 local checkpoint; pending scheduled refresh is not a proved drop.
+PR #824 holds the bounded wording fix, not a deployed frontend release. CASE
+native 8,323 FB /780 IG views and Central Canvas 5,031 FB views match. Fresh
+CG checkpoint14:17UTC proves automatic refresh, but same-day posts after09:00
+Johannesburg remain outside the completed-Pacific-day import window through
+16Oct07:00UTC. Central Canvas's newer Boss's Day post is also outside that window.
+First completed-day eligibility is17Oct07:00UTC, not necessarily the next
+six-hour refresh. This supersedes the earlier checkpoint-only explanation.
+
+Separate genuine older post-coverage exceptions are recorded in #451: Ehrlich
+8Oct07:00local public photo1551335327010846 absent across all stored reports
+despite fresh complete checkpoint13:34UTC; HMHI12Oct08:34local public team photo
+1979003833321539 also absent despite14:33UTC checkpoint. HMHI's native detail
+permalink has a profile-shaped author ID; provider eligibility/object identity
+still needs checking. Do not call either resolved from account-total agreement,
+guess the ingestion cause, or insert fabricated rows. Read-only SQL receipts:
+`strategy-review/2026-10-16-native-meta-audit.sql`.
+
+Elcheck nativeFB1299076156631543 and Forklift nativeFB1702158976724640 plus
+IGforklift_truck_ofs are accessible and actively posting, but exact-client SELECT
+across ALL app mapping rows is empty. Actual staff previews have no reports.
+These are concrete app integration gaps, not nonexistent clients or unavailable
+browser login. No mapping/provider permissions written; confirmed Elcheck scope
+must not be asked again. November ready eligibility for Forklift does not repair
+its old October template. Daisy FB metrics/five posts match but IG is not mapped;
+Emmanuel/FirstTech/Germoparts checked native figures agree, with exact windows and
+strategy/package holds preserved in the ledger.
+
+JFJ native FB255953361428538 +IGjfj_electrical also has real October activity,
+but fresh exact-client mapping SELECT returns none, actual preview No report.
+Its3posters+3photos+1video scope was already confirmed. Kundedienste has a native
+Kundendienst Trust candidate FB807760232664576 +IGkundendienst01; exact-client
+identity/scope/evidence is still held, not authority to assign a similar name.
+Ipopeng/Jenkor searches returned no result; actual previews have no reports.
+LHP remains once-off/meeting-later. Neshora nativeFB1340961499097681 and WiseRide
+nativeFB727048853820569 are also active but unmapped in Dynamics; Novus and
+We Ar Fuels have native Instagram activity but Facebook-only app mappings.
+
+All61 ordered entries are now dispositioned in the ledger, NOT passed. Do not
+restart at Braize. SecuriForce14OctFB1751385370329586 and Vrystaat13/14OctFB
+1568586765298209 /1569849948505224 are absent despite fresh successful checkpoints,
+while IG companions are stored. These join Ehrlich/HMHI provider-object/edge
+eligibility investigations, not permission for blind inserts. Zooz/WFF native
+Facebook now opens with6,720views through15Oct, but storedFBstops3Oct and its
+4Octreel is absent; app grant recovery remains separate from browser recovery.
+Red Oak native Insights still fails. RC has a two-view, Watch a three-view and
+VrystaatIG a one-view same-window UI/API difference; preserve rather than inflate.
+Piek October strategy was actually observed in published preview; other draft
+eligibility is not publication. Tobich's new16Octpost mentions19–20November,
+outside completed-day import; verify its source details before planning dates.
+
+Next: the ledger's exact repair queue under #451/#668/#731, then distinct client-
+role/mobile/TikTok/Google/website/Teams/Brand Hub acceptance gates. The current
+audit does not authorise provider/mapping/permission/data/publication changes or
+clear any client for launch. Followthrough is documentation/SELECT/browser
+evidence only; a fresh local
+`npm run build` and diff checks pass; no new runtime code or cloud operation.
 Do not restart at Braize or claim all 61 native clients passed from the inventory.
 
 The Google Control Centre remains without an accessible exact tracker reference
