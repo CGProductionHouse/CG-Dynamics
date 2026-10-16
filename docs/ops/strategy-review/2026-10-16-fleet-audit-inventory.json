@@ -1,0 +1,1833 @@
+{
+  "observed_on": "2026-10-16",
+  "source_head": "5ad1a54d402ea8c94a482bced19b33bc913737c4",
+  "mode": "read_only_inventory_not_browser_acceptance",
+  "counts": {
+    "active_clients": 61,
+    "ready_for_proposal": 37,
+    "blocked": 24
+  },
+  "clients": [
+    {
+      "id": "893992a5-23cd-4ee6-b5d9-ccf7b17fe071",
+      "name": "Agri-Secure",
+      "meta_mapped": false,
+      "november_brief": {
+        "id": "893992a5-23cd-4ee6-b5d9-ccf7b17fe071",
+        "name": "Agri-Secure",
+        "state": "blocked",
+        "blockers": [
+          "CLIENT_EVIDENCE_UNVERIFIED",
+          "NO_CONFIRMED_MONTHLY_CONTENT_SCOPE",
+          "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+        ],
+        "version": 1
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 1,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": false,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 1,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": false,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "fd16ebae-a50b-4920-afe0-94c2631f8f06",
+      "name": "All Around PVC",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "fd16ebae-a50b-4920-afe0-94c2631f8f06",
+        "name": "All Around PVC",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 5
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 5,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "3b85973f-bcad-49eb-b8f1-c27f7c7f1aba",
+      "name": "AV Event Life",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "3b85973f-bcad-49eb-b8f1-c27f7c7f1aba",
+        "name": "AV Event Life",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 4
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 4,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "32bd9db3-5339-4404-825b-5a615cadec6a",
+      "name": "Bat Hill Royale",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "32bd9db3-5339-4404-825b-5a615cadec6a",
+        "name": "Bat Hill Royale",
+        "state": "blocked",
+        "blockers": [
+          "NO_CONFIRMED_MONTHLY_CONTENT_SCOPE"
+        ],
+        "version": 1
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 1,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": false,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "b28af30a-3d44-490a-8290-1e56dac7b127",
+      "name": "Bloem Action Sports",
+      "meta_mapped": false,
+      "november_brief": {
+        "id": "b28af30a-3d44-490a-8290-1e56dac7b127",
+        "name": "Bloem Action Sports",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 4
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 4,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 2,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": true
+        }
+      ]
+    },
+    {
+      "id": "89e0ad6d-e08c-4a75-8b8e-abea71af581c",
+      "name": "Bloem Marble & Granite",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "89e0ad6d-e08c-4a75-8b8e-abea71af581c",
+        "name": "Bloem Marble & Granite",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 3
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "2d16262d-8450-458d-ae7e-084ef9ff662d",
+      "name": "Bloem Vascular",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "2d16262d-8450-458d-ae7e-084ef9ff662d",
+        "name": "Bloem Vascular",
+        "state": "blocked",
+        "blockers": [
+          "NO_CONFIRMED_MONTHLY_CONTENT_SCOPE"
+        ],
+        "version": 1
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 1,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": false,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 1,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": false,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "5dfdf4bd-9d94-4cc6-9dee-0e480a2234cb",
+      "name": "Bohemia Quick Stop",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "5dfdf4bd-9d94-4cc6-9dee-0e480a2234cb",
+        "name": "Bohemia Quick Stop",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 3
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "8e448cf9-1534-4ba1-89a4-93e4c8b83d2f",
+      "name": "Bouwer & Coetzee Attorneys",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "8e448cf9-1534-4ba1-89a4-93e4c8b83d2f",
+        "name": "Bouwer & Coetzee Attorneys",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 4
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 4,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "6b67a2df-e2ab-418b-bcee-03aef5963d37",
+      "name": "Braize",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "6b67a2df-e2ab-418b-bcee-03aef5963d37",
+        "name": "Braize",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 3
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "afb62c53-d6d3-4ef8-9393-def88ed899d8",
+      "name": "C&L Innovations",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "afb62c53-d6d3-4ef8-9393-def88ed899d8",
+        "name": "C&L Innovations",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 3
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa",
+      "name": "Cape Lumber",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa",
+        "name": "Cape Lumber",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 4
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 4,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "079df21e-783a-4648-b3fa-0acae6e68867",
+      "name": "Case Bloemfontein",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "079df21e-783a-4648-b3fa-0acae6e68867",
+        "name": "Case Bloemfontein",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 5
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 5,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "6b313cac-283e-48c4-9df6-ba43af2f7353",
+      "name": "Central Canvas",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "6b313cac-283e-48c4-9df6-ba43af2f7353",
+        "name": "Central Canvas",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 3
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "c27d2185-08e4-4c49-be48-2572564ceecf",
+      "name": "CG Production House",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "c27d2185-08e4-4c49-be48-2572564ceecf",
+        "name": "CG Production House",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 5
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 5,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "3404f726-a693-4b2d-8c13-c9d3dfd17bbc",
+      "name": "Daisy & Co",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "3404f726-a693-4b2d-8c13-c9d3dfd17bbc",
+        "name": "Daisy & Co",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 4
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 4,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "06b20bb1-ed4a-4aa1-9f48-8c6cb0531aba",
+      "name": "Delta Gas",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "06b20bb1-ed4a-4aa1-9f48-8c6cb0531aba",
+        "name": "Delta Gas",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 5
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 5,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "2aed8a31-bd53-4ad1-a3dc-432865adfb3d",
+      "name": "Dulux Paint & Paper Bloemfontein",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "2aed8a31-bd53-4ad1-a3dc-432865adfb3d",
+        "name": "Dulux Paint & Paper Bloemfontein",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 4
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 4,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "61acf81b-1011-404e-9fae-2e209be65fca",
+      "name": "Econofoods",
+      "meta_mapped": false,
+      "november_brief": {
+        "id": "61acf81b-1011-404e-9fae-2e209be65fca",
+        "name": "Econofoods",
+        "state": "blocked",
+        "blockers": [
+          "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+        ],
+        "version": 1
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 1,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": false,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 1,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": false,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "ec643c75-51f5-4839-829f-3f5b7f48829a",
+      "name": "Ehrlich Park Butchery",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "ec643c75-51f5-4839-829f-3f5b7f48829a",
+        "name": "Ehrlich Park Butchery",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 4
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 4,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "7b7d244f-77b4-4b2a-88f0-8ce3f7e1c202",
+      "name": "Elcheck",
+      "meta_mapped": false,
+      "november_brief": {
+        "id": "7b7d244f-77b4-4b2a-88f0-8ce3f7e1c202",
+        "name": "Elcheck",
+        "state": "blocked",
+        "blockers": [
+          "CLIENT_EVIDENCE_UNVERIFIED",
+          "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+        ]
+      },
+      "strategies": []
+    },
+    {
+      "id": "d53d8e62-9e6a-4bb9-be3f-554f40942d45",
+      "name": "Emmanuel Funerals",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "d53d8e62-9e6a-4bb9-be3f-554f40942d45",
+        "name": "Emmanuel Funerals",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 4
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 4,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "217a547c-7b22-45cc-bf88-9d45a8e93dfe",
+      "name": "Emoya Estate Driving Range",
+      "meta_mapped": false,
+      "november_brief": {
+        "id": "217a547c-7b22-45cc-bf88-9d45a8e93dfe",
+        "name": "Emoya Estate Driving Range",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 4
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 4,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 2,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": true
+        }
+      ]
+    },
+    {
+      "id": "c8d34a97-8400-4f52-8b0d-843491fe3d3b",
+      "name": "First Technology Central",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "c8d34a97-8400-4f52-8b0d-843491fe3d3b",
+        "name": "First Technology Central",
+        "state": "blocked",
+        "blockers": [
+          "NO_CONFIRMED_MONTHLY_CONTENT_SCOPE"
+        ],
+        "version": 1
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 1,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": false,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 1,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": false,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "4424ed69-7270-4d30-a1ea-0b77d76912df",
+      "name": "Forklift Trucks",
+      "meta_mapped": false,
+      "november_brief": {
+        "id": "4424ed69-7270-4d30-a1ea-0b77d76912df",
+        "name": "Forklift Trucks",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 4
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 4,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 2,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": true
+        }
+      ]
+    },
+    {
+      "id": "b6052710-417d-4b3b-8348-0f126bfea671",
+      "name": "Germoparts",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "b6052710-417d-4b3b-8348-0f126bfea671",
+        "name": "Germoparts",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 4
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 4,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "1007e58b-3fea-4515-88b7-ddaa85763de6",
+      "name": "Hino Trucks",
+      "meta_mapped": false,
+      "november_brief": {
+        "id": "1007e58b-3fea-4515-88b7-ddaa85763de6",
+        "name": "Hino Trucks",
+        "state": "blocked",
+        "blockers": [
+          "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+        ],
+        "version": 1
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 1,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": false,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 2,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": true
+        }
+      ]
+    },
+    {
+      "id": "572555e0-d4d0-404a-8d67-beeeeed6a1f2",
+      "name": "HMHI",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "572555e0-d4d0-404a-8d67-beeeeed6a1f2",
+        "name": "HMHI",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 3
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "816c7f59-d56c-46a3-ba15-f76971d83769",
+      "name": "Human Auto",
+      "meta_mapped": false,
+      "november_brief": {
+        "id": "816c7f59-d56c-46a3-ba15-f76971d83769",
+        "name": "Human Auto",
+        "state": "blocked",
+        "blockers": [
+          "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+        ],
+        "version": 1
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 1,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": false,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 2,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": true
+        }
+      ]
+    },
+    {
+      "id": "2e643855-e2ad-481f-a6c6-3d934b9f4a50",
+      "name": "Ipopeng Office Supplies",
+      "meta_mapped": false,
+      "november_brief": {
+        "id": "2e643855-e2ad-481f-a6c6-3d934b9f4a50",
+        "name": "Ipopeng Office Supplies",
+        "state": "blocked",
+        "blockers": [
+          "NO_CONFIRMED_MONTHLY_CONTENT_SCOPE",
+          "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+        ],
+        "version": 1
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 1,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": false,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 1,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": false,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "a5eab798-3e00-44cc-947e-463386fdac39",
+      "name": "Jenkor",
+      "meta_mapped": false,
+      "november_brief": {
+        "id": "a5eab798-3e00-44cc-947e-463386fdac39",
+        "name": "Jenkor",
+        "state": "blocked",
+        "blockers": [
+          "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+        ],
+        "version": 1
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 1,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": false,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 2,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": true
+        }
+      ]
+    },
+    {
+      "id": "aece5a86-c962-4234-a1fe-7904c20f03ff",
+      "name": "JFJ Electrical",
+      "meta_mapped": false,
+      "november_brief": {
+        "id": "aece5a86-c962-4234-a1fe-7904c20f03ff",
+        "name": "JFJ Electrical",
+        "state": "blocked",
+        "blockers": [
+          "CLIENT_EVIDENCE_UNVERIFIED",
+          "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+        ]
+      },
+      "strategies": []
+    },
+    {
+      "id": "5e4e3335-a89c-4629-9efc-b6a194bec80c",
+      "name": "Kundedienste",
+      "meta_mapped": false,
+      "november_brief": {
+        "id": "5e4e3335-a89c-4629-9efc-b6a194bec80c",
+        "name": "Kundedienste",
+        "state": "blocked",
+        "blockers": [
+          "CLIENT_EVIDENCE_UNVERIFIED",
+          "NO_CONFIRMED_MONTHLY_CONTENT_SCOPE",
+          "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+        ],
+        "version": 1
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 1,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": false,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 1,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": false,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "1a6d6c62-7e5e-4e1e-93e6-21d9157f0a01",
+      "name": "LHP Student Village & Block",
+      "meta_mapped": false,
+      "november_brief": {
+        "id": "1a6d6c62-7e5e-4e1e-93e6-21d9157f0a01",
+        "name": "LHP Student Village & Block",
+        "state": "blocked",
+        "blockers": [
+          "PACKAGE_UNVERIFIED",
+          "CLIENT_EVIDENCE_UNVERIFIED",
+          "NO_CONFIRMED_MONTHLY_CONTENT_SCOPE",
+          "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+        ]
+      },
+      "strategies": []
+    },
+    {
+      "id": "2a5ea019-64f5-4f8e-8a61-61a28940aa6e",
+      "name": "Local Deli",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "2a5ea019-64f5-4f8e-8a61-61a28940aa6e",
+        "name": "Local Deli",
+        "state": "blocked",
+        "blockers": [
+          "NO_CONFIRMED_MONTHLY_CONTENT_SCOPE"
+        ],
+        "version": 1
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 1,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": false,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 1,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": false,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "21300630-6755-4591-9a49-e22abbaf7e3d",
+      "name": "Loraclox",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "21300630-6755-4591-9a49-e22abbaf7e3d",
+        "name": "Loraclox",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 3
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "7b47afb0-fa55-4916-85f6-09c57e5905b9",
+      "name": "Madison Wear",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "7b47afb0-fa55-4916-85f6-09c57e5905b9",
+        "name": "Madison Wear",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 4
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 4,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "e276f019-a580-44c5-a7ab-e43840c33a64",
+      "name": "Mimosa Mall",
+      "meta_mapped": false,
+      "november_brief": {
+        "id": "e276f019-a580-44c5-a7ab-e43840c33a64",
+        "name": "Mimosa Mall",
+        "state": "blocked",
+        "blockers": [
+          "NO_CONFIRMED_MONTHLY_CONTENT_SCOPE",
+          "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+        ],
+        "version": 1
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 1,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": false,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 1,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": false,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "94fe2568-3cf1-47dc-801e-d8d5396a0965",
+      "name": "NCNA",
+      "meta_mapped": false,
+      "november_brief": {
+        "id": "94fe2568-3cf1-47dc-801e-d8d5396a0965",
+        "name": "NCNA",
+        "state": "blocked",
+        "blockers": [
+          "NO_CONFIRMED_MONTHLY_CONTENT_SCOPE",
+          "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+        ],
+        "version": 1
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 1,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": false,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 1,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": false,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "3c20fae1-8e91-41d5-98eb-1c331600e6e3",
+      "name": "Neshora Oxygen",
+      "meta_mapped": false,
+      "november_brief": {
+        "id": "3c20fae1-8e91-41d5-98eb-1c331600e6e3",
+        "name": "Neshora Oxygen",
+        "state": "blocked",
+        "blockers": [
+          "CLIENT_EVIDENCE_UNVERIFIED",
+          "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+        ],
+        "version": 1
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 1,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": false,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "4236a60a-990f-484f-8d19-13d2f92fbe3b",
+      "name": "Novus Steel",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "4236a60a-990f-484f-8d19-13d2f92fbe3b",
+        "name": "Novus Steel",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 3
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b",
+      "name": "Peyper Bonds",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b",
+        "name": "Peyper Bonds",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 4
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 4,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
+      "name": "Piek Group",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
+        "name": "Piek Group",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 5
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 5,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "published",
+          "published_version": 3,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "29a28efd-c998-45e2-a57c-4a751e779e66",
+      "name": "PSG Bloemfontein",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "29a28efd-c998-45e2-a57c-4a751e779e66",
+        "name": "PSG Bloemfontein",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 3
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "4f6106de-c437-404e-8cef-fbe848de0665",
+      "name": "RC-Polypipe",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "4f6106de-c437-404e-8cef-fbe848de0665",
+        "name": "RC-Polypipe",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 3
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "cdb11a82-339e-4b46-9b09-bde1a23efeaf",
+      "name": "Red Oak",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "cdb11a82-339e-4b46-9b09-bde1a23efeaf",
+        "name": "Red Oak",
+        "state": "blocked",
+        "blockers": [
+          "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+        ],
+        "version": 1
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 1,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": false,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 2,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": true
+        }
+      ]
+    },
+    {
+      "id": "ac4c5e0c-c5d3-4512-8472-fe59192abeca",
+      "name": "Rusoord Farmstay",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "ac4c5e0c-c5d3-4512-8472-fe59192abeca",
+        "name": "Rusoord Farmstay",
+        "state": "blocked",
+        "blockers": [
+          "CLIENT_EVIDENCE_UNVERIFIED",
+          "NO_CONFIRMED_MONTHLY_CONTENT_SCOPE",
+          "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+        ],
+        "version": 1
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 1,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": false,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 1,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": false,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "917d6f7c-1c2a-4c20-82f0-daa41b9062f5",
+      "name": "SecuriForce",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "917d6f7c-1c2a-4c20-82f0-daa41b9062f5",
+        "name": "SecuriForce",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 4
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 4,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+      "name": "Supa Quick BFN",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+        "name": "Supa Quick BFN",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 4
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 4,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "e2870110-930c-4e63-b2fe-c858030f7258",
+      "name": "Supa Quick Centurion",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "e2870110-930c-4e63-b2fe-c858030f7258",
+        "name": "Supa Quick Centurion",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 3
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "a36ba938-e9dc-4ecf-bb67-4853608b1c01",
+      "name": "TBS Brokers",
+      "meta_mapped": true,
+      "november_brief": {
+        "name": "TBS Brokers",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 4
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 4,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+      "name": "The Staffordshire",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+        "name": "The Staffordshire",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 4
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 4,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "204f4f22-14c7-42ed-a956-da57af102706",
+      "name": "Tobich Optics",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "204f4f22-14c7-42ed-a956-da57af102706",
+        "name": "Tobich Optics",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 4
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 4,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "e2ad6d57-5b06-46e1-b75b-b67f017d57f1",
+      "name": "Toyota Bloemfontein",
+      "meta_mapped": false,
+      "november_brief": {
+        "id": "e2ad6d57-5b06-46e1-b75b-b67f017d57f1",
+        "name": "Toyota Bloemfontein",
+        "state": "blocked",
+        "blockers": [
+          "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+        ],
+        "version": 1
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 1,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": false,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 2,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": true
+        }
+      ]
+    },
+    {
+      "id": "bbd1629e-79fb-4c41-b1e4-88a1f160bd34",
+      "name": "VCS Cleaning Solutions",
+      "meta_mapped": false,
+      "november_brief": {
+        "id": "bbd1629e-79fb-4c41-b1e4-88a1f160bd34",
+        "name": "VCS Cleaning Solutions",
+        "state": "blocked",
+        "blockers": [
+          "CLIENT_EVIDENCE_UNVERIFIED",
+          "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+        ]
+      },
+      "strategies": []
+    },
+    {
+      "id": "1f0406bb-d643-4b83-bc3e-b1ebe87eeb89",
+      "name": "Vrystaat Kunstefees",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "1f0406bb-d643-4b83-bc3e-b1ebe87eeb89",
+        "name": "Vrystaat Kunstefees",
+        "state": "blocked",
+        "blockers": [
+          "NO_CONFIRMED_MONTHLY_CONTENT_SCOPE"
+        ],
+        "version": 1
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 1,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": false,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 2,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": true
+        }
+      ]
+    },
+    {
+      "id": "e1cb958e-3f68-4a77-b5ea-b471ea62bdef",
+      "name": "Watch Addict",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "e1cb958e-3f68-4a77-b5ea-b471ea62bdef",
+        "name": "Watch Addict",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 3
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "2b953772-e791-4dff-a278-d4dd3521f02e",
+      "name": "We Ar Fuels",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "2b953772-e791-4dff-a278-d4dd3521f02e",
+        "name": "We Ar Fuels",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 4
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 4,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
+      "name": "Wiseman Group",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
+        "name": "Wiseman Group",
+        "state": "ready_for_proposal",
+        "blockers": [],
+        "version": 4
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 4,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 3,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": false
+        }
+      ]
+    },
+    {
+      "id": "504113ee-fba9-4993-807e-a86066615212",
+      "name": "WiseRide",
+      "meta_mapped": false,
+      "november_brief": {
+        "id": "504113ee-fba9-4993-807e-a86066615212",
+        "name": "WiseRide",
+        "state": "blocked",
+        "blockers": [
+          "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+        ],
+        "version": 1
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 1,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": false,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 2,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": true
+        }
+      ]
+    },
+    {
+      "id": "0c01d90f-ba5e-4251-a597-bf3c83f990fa",
+      "name": "Zooz Lifestyle WFF",
+      "meta_mapped": true,
+      "november_brief": {
+        "id": "0c01d90f-ba5e-4251-a597-bf3c83f990fa",
+        "name": "Zooz Lifestyle WFF",
+        "state": "blocked",
+        "blockers": [
+          "NO_CONFIRMED_MONTHLY_CONTENT_SCOPE"
+        ],
+        "version": 1
+      },
+      "strategies": [
+        {
+          "month": "2026-11-01",
+          "version": 1,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": false,
+          "old_guardrail_template": false
+        },
+        {
+          "month": "2026-10-01",
+          "version": 2,
+          "status": "draft",
+          "published_version": null,
+          "objective_present": true,
+          "old_guardrail_template": true
+        }
+      ]
+    }
+  ]
+}

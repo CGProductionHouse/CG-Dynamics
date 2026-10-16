@@ -1,5 +1,59 @@
 # CG Dynamics Ops Handover
 
+### 16 October — client-by-client native Meta audit in progress
+
+CA requested alphabetical live comparisons, not another sync-badge summary.
+Branch `codex/client-meta-audit-2026-10-16` owns audit receipts and one bounded
+TikTok snapshot-label correction; existing
+runtime PR owners #775/#662/#618 remain untouched. See
+`CLIENT-META-AUDIT-2026-10-16.md` and
+`strategy-review/2026-10-16-fleet-audit-inventory.json`.
+
+All 61 active clients have SELECT-only mapping/report/strategy inventory and
+actual November brief reads (37 eligible for proposal, 24 held). This is NOT
+61 native-browser/client-role passes. Eleven October objectives still contain
+the rejected guardrail template; only Piek has a published October strategy.
+Elcheck/JFJ/VCS evidence holds must not be reported as CA needing to repeat
+already-confirmed quantities; LHP stays once-off/meeting-held.
+
+CA corrected MBS from IG-only CG login to Christie-Ann's existing managed-account
+context. Native inspection now works; this does not refresh stored app grants.
+PVC Facebook 578 views/33 visits/1 follow and Instagram 32 views/11 reach/14
+interactions match 1–15 October. Bat Hill Instagram 18,881 views/approximately
+14.3K reach/40 interactions/299 visits/13 follows also match; native crossposted
+view headlines must not be counted again as Instagram-only views. Native link
+clicks are not API profile website clicks; Facebook content interactions are not
+`page_post_engagements`.
+
+AV native Facebook now opens: 647 views through 15 October, but the stored
+Facebook facts stop at 4 October and its October report has zero FB posts.
+Native 13/15 October Facebook posts prove the missing content. Its Instagram
+110 views/24 reach/18 interactions/2 visits/1 follow match current facts.
+#451 has the exact receipt; no provider-grant recovery is claimed.
+Historical PVC September TikTok rows have no current connection or retained
+account identity in provenance: hold identity, do not guess/reassign/delete.
+No production data/schema/provider/OAuth/mapping/permission/strategy/publication
+or Vercel action. Native comparisons through client 10 (Braize) are recorded,
+with actual scope and holds, not blanket passes. Marble native views 11,378 FB /
+2,278 IG match, Vascular 39 FB views / zero IG activity agrees, Bohemia 314 FB
+views agrees, Bouwer approximately 2.3K /142 visits/3 follows agrees, Braize
+886 FB /6,152 IG views agrees. Bouwer's local-display 1 October 07:51 post is
+absent across stored reports but likely belongs to September Pacific; verify
+exact provider time before any reconciliation. Do not blindly insert into October.
+
+Braize live preview reproduced a lifetime TikTok account-video snapshot labelled
+Published videos. Local pure-model correction says Account videos only when
+TikTok/video_count/aggregation=snapshot; real period counts remain unchanged.
+Failing-first actual-component assertion then 136 focused tests pass with
+isolated fixture configuration. Build/scoped lint/diff pass; full suite running.
+No layout, values, source windows, grants or data change. Frontend release remains
+separate; do not call this wording live from a local test.
+
+The Google Control Centre remains without an accessible exact tracker reference
+in current authority (previous restoration gate); do not invent a replacement
+spreadsheet or guessed cell write. GitHub owning issues/#381 plus this handover
+retain the actual audit continuity.
+
 ### 16 October — explicit ChatGPT draft amendment capability released
 
 A real normal-chat attempt to implement the existing 14 November field proposals

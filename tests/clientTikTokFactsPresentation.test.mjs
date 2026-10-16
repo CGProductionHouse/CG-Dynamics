@@ -30,6 +30,8 @@ test('TikTok client facts retain partial/zero/null truth and distinguish account
     assert.match(html, /Partial platform coverage/)
     assert.doesNotMatch(html, /Coming soon|Current followers snapshot at the latest sync/)
     assert.match(html, /Account snapshot for this report/)
+    assert.match(html, /TikTok account videos/)
+    assert.doesNotMatch(html, /TikTok published videos/)
     assert.match(html, /TikTok comments/)
     assert.match(html, />0<\/p>/)
     assert.doesNotMatch(html, /vs last month|Unavailable from the connected Meta source/)
@@ -37,6 +39,12 @@ test('TikTok client facts retain partial/zero/null truth and distinguish account
     assert.equal(lines.find(line => line.metricKey === 'comments').value, 0)
     assert.equal(lines.find(line => line.metricKey === 'shares').hasValue, false)
     assert.equal(lines.find(line => line.metricKey === 'total_likes').isSnapshot, true)
+    assert.equal(lines.find(line => line.metricKey === 'video_count').label, 'TikTok account videos')
+    // Only the provider's lifetime account snapshot gets the account label.
+    // A genuine period-count metric must not silently acquire snapshot meaning.
+    const periodCount = buildOverviewSections([fact('video_count', 2, 'sum', 'complete')])[0].lines[0]
+    assert.equal(periodCount.label, 'TikTok published videos')
+    assert.equal(periodCount.isSnapshot, false)
     assert.ok(lines.every(line => !line.comparable))
     assert.doesNotMatch(render([fact('views', null, 'sum', 'unavailable')]), />0<\/p>/)
     assert.deepEqual(facts, before)
