@@ -5,7 +5,7 @@ import ts from 'typescript'
 
 const source = readFileSync('supabase/functions/cg-dynamics-mcp/index.ts', 'utf8')
 const ast = ts.createSourceFile('index.ts', source, ts.ScriptTarget.Latest, true)
-function handler(name) {
+function handler(name, dependencies = {}) {
   const statement = ast.statements.find(node => ts.isVariableStatement(node) &&
     node.declarationList.declarations.some(d => d.name.getText(ast) === name))
   assert.ok(statement, name)
@@ -14,7 +14,7 @@ function handler(name) {
   const js = ts.transpileModule(`${collateral.getText(ast)}\n${statement.getText(ast)}`, {
     compilerOptions: { target: ts.ScriptTarget.ESNext, module: ts.ModuleKind.ESNext },
   }).outputText
-  return new Function('tableExists', 'ADMIN_CONTEXT_ROLES', `${js}; return ${name}`)(async () => true, new Set(['admin', 'manager']))
+  return new Function('tableExists', 'ADMIN_CONTEXT_ROLES', ...Object.keys(dependencies), `${js}; return ${name}`)(async () => true, new Set(['admin', 'manager']), ...Object.values(dependencies))
 }
 function database(rows, readError = null) {
   const writes = []
@@ -67,4 +67,29 @@ test('governed default collateral has durable keys and deduplicates explicit sel
   const invalid = await compose({ ...staff, supabase: sb }, { ...input, collateral: { length: 1 } })
   assert.match(invalid.error, /array of strings/)
   assert.equal(sb.writes.length, 0)
+})
+
+test('strategy amendment handler requires explicit admin context and injects the verified actor', async () => {
+  const calls = []
+  const amend = handler('handleAmendMonthlyStrategyDraft', {
+    isUuid: value => typeof value === 'string' && /^[a-f0-9-]{36}$/.test(value),
+    cgDate: () => '2026-10-16',
+    amendMonthlyStrategyFields: async (db, input) => { calls.push({ db, input }); return { state: 'draft_amended' } },
+  })
+  const input = { client_id: '11111111-1111-4111-8111-111111111111', strategy_month: '2026-11-01',
+    evidence_fingerprint: 'a'.repeat(64), expected_version: 4, source_ids: ['guide'], changes: [],
+    actor_profile_id: 'untrusted-caller-actor', idempotency_key: 'canonical-key' }
+  for (const [contextKind, role] of [['staff', 'admin'], ['client', 'admin'], ['company_admin', 'staff'], ['company_admin', 'team'], ['company_admin', 'client']]) {
+    const denied = await amend({ contextKind, connection: { role, profileId: 'verified-actor' } }, input)
+    assert.equal(denied.error, 'COMPANY_ADMIN_REQUIRED')
+  }
+  assert.equal(calls.length, 0)
+  for (const role of ['admin', 'manager']) {
+    const result = await amend({ contextKind: 'company_admin', connection: { role, profileId: 'verified-actor' }, supabase: 'service-client' }, input)
+    assert.equal(result.state, 'draft_amended')
+    assert.equal(calls.at(-1).input.actorProfileId, 'verified-actor')
+  }
+  const count = calls.length
+  assert.equal((await amend({ contextKind: 'company_admin', connection: { role: 'admin' } }, { ...input, expected_version: null })).error, 'INVALID_EXPECTED_VERSION')
+  assert.equal(calls.length, count)
 })

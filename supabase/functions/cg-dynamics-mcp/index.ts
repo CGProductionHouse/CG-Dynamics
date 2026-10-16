@@ -105,6 +105,7 @@ import {
 } from './cgHoursStaffLogger.ts'
 import { canReadPlannerTask } from './taskReadPolicy.ts'
 import { loadMonthlyStrategyWorkspace, shapeMonthlyStrategyBrief, strategyMcpInputHash, submitMonthlyStrategyProposal } from './monthlyStrategyWorkspace.ts'
+import { amendMonthlyStrategyFields } from './monthlyStrategyAmendment.ts'
 import type { StrategyAutopilotClient } from '../_shared/monthlyStrategyAutopilot.ts'
 
 const STAFF_ROLES = new Set(['admin', 'manager', 'staff', 'team'])
@@ -1716,6 +1717,22 @@ const handleSubmitMonthlyStrategyDraft: ToolHandler = async (staff, input) => {
     })
   } catch (error) {
     return { error: error instanceof Error ? error.message : 'STRATEGY_DRAFT_UNAVAILABLE' }
+  }
+}
+
+const handleAmendMonthlyStrategyDraft: ToolHandler = async (staff, input) => {
+  if (staff.contextKind !== 'company_admin' || !ADMIN_CONTEXT_ROLES.has(staff.connection.role)) return { error: 'COMPANY_ADMIN_REQUIRED' }
+  if (!isUuid(input.client_id) || typeof input.evidence_fingerprint !== 'string' || !/^[a-f0-9]{64}$/.test(input.evidence_fingerprint)) return { error: 'INVALID_EXACT_STRATEGY_INPUT' }
+  if (!Number.isSafeInteger(input.expected_version) || Number(input.expected_version) < 1) return { error: 'INVALID_EXPECTED_VERSION' }
+  try {
+    return await amendMonthlyStrategyFields(staff.supabase as unknown as StrategyAutopilotClient, {
+      clientId: String(input.client_id), strategyMonth: String(input.strategy_month), today: cgDate(new Date()),
+      evidenceFingerprint: input.evidence_fingerprint, expectedVersion: Number(input.expected_version),
+      sourceIds: input.source_ids, changes: input.changes, actorProfileId: staff.connection.profileId,
+      idempotencyKey: String(input.idempotency_key),
+    })
+  } catch {
+    return { error: 'STRATEGY_AMENDMENT_UNAVAILABLE', instruction: 'Read the fresh brief and preserve the current draft; never bypass the failed source or write.' }
   }
 }
 
@@ -3450,6 +3467,7 @@ const handleGenerateContentGuidelineDrafts: ToolHandler = async (staff, input) =
 
 const WRITE_TOOLS = new Set([
   'submit_monthly_strategy_draft',
+  'amend_monthly_strategy_draft',
   'create_task',
   'update_task',
   'update_lead',
@@ -3480,6 +3498,7 @@ const WRITE_TOOLS = new Set([
 // they can return the original record id; the generic Dynamics log stores status/audit only.
 const CANONICAL_RECEIPT_REPLAY_TOOLS = new Set([
   'submit_monthly_strategy_draft',
+  'amend_monthly_strategy_draft',
   ...CLIENT_WORKSPACE_ACTIONS,
   'log_ordinary_hours',
   'log_kilometre_entry',
@@ -3496,6 +3515,7 @@ const toolHandlers: Record<string, ToolHandler> = {
   list_monthly_strategy_clients: handleListMonthlyStrategyClients,
   get_monthly_strategy_brief: handleGetMonthlyStrategyBrief,
   submit_monthly_strategy_draft: handleSubmitMonthlyStrategyDraft,
+  amend_monthly_strategy_draft: handleAmendMonthlyStrategyDraft,
   list_my_leads: handleListMyLeads,
   get_lead: handleGetLead,
   create_task: handleCreateTask,
@@ -3636,7 +3656,7 @@ async function handleToolsCall(
   // with different input is still refused.
   let replayThroughCanonicalKey = false
   if (isWrite && canonicalIdempotencyKey) {
-    const inputHash = toolName === 'submit_monthly_strategy_draft'
+    const inputHash = ['submit_monthly_strategy_draft', 'amend_monthly_strategy_draft'].includes(toolName)
       ? await strategyMcpInputHash(toolInput) : await computeInputHash(toolInput)
     const existing = await checkIdempotency(staff.supabase, staff.profileId, toolName, canonicalIdempotencyKey, inputHash)
     if (existing.duplicate) {
@@ -3653,7 +3673,7 @@ async function handleToolsCall(
     const result = await handler(staff, toolInput)
 
     if (isWrite && canonicalIdempotencyKey && !replayThroughCanonicalKey) {
-      const inputHash = toolName === 'submit_monthly_strategy_draft'
+      const inputHash = ['submit_monthly_strategy_draft', 'amend_monthly_strategy_draft'].includes(toolName)
         ? await strategyMcpInputHash(toolInput) : await computeInputHash(toolInput)
       const hasError = isMcpErrorResult(result)
       await recordIdempotency(staff.supabase, staff.profileId, toolName, canonicalIdempotencyKey, inputHash, hasError ? 'error' : 'success', audit)
@@ -3670,7 +3690,7 @@ async function handleToolsCall(
     })
   } catch (err) {
     if (isWrite && canonicalIdempotencyKey) {
-      const inputHash = toolName === 'submit_monthly_strategy_draft'
+      const inputHash = ['submit_monthly_strategy_draft', 'amend_monthly_strategy_draft'].includes(toolName)
         ? await strategyMcpInputHash(toolInput) : await computeInputHash(toolInput)
       await recordIdempotency(staff.supabase, staff.profileId, toolName, canonicalIdempotencyKey, inputHash, 'error', audit)
     }

@@ -247,7 +247,7 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   },
   {
     name: 'get_monthly_strategy_brief', title: 'Get monthly strategy evidence',
-    description: 'Company-admin only. Read one exact client and CURRENT or NEXT month: confirmed package, prior published findings, incorporated notes, ready client guide, approved research, dated opportunities, current draft/version, source windows and blockers. No generic substitute. Use its evidence_fingerprint and citations for submit_monthly_strategy_draft. Read-only and no model/provider call.',
+    description: 'Company-admin only. Read one exact client and CURRENT or NEXT month: confirmed package, prior published findings, incorporated notes, ready client guide, approved research, dated opportunities, current draft/version, source windows and blockers. No generic substitute. Use its evidence_fingerprint and citations for submit_monthly_strategy_draft (gap filling), or amend_monthly_strategy_draft only for explicitly requested exact-field editorial changes. Read-only and no model/provider call.',
     inputSchema: objectSchema({ client_id: uuid, strategy_month: strategyMonth }, ['client_id', 'strategy_month']),
     annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
     dependency: 'main', canonicalContract: '#391/#731 prepareDraft + monthly_client_strategies exact-client read',
@@ -273,6 +273,33 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
     }, ['client_id', 'strategy_month', 'evidence_fingerprint', 'expected_version', 'proposal', 'idempotency_key']),
     annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
     dependency: 'main', canonicalContract: '#391 seed_monthly_client_strategy / #731 propose_monthly_client_strategy_generation guarded RPC',
+  },
+  {
+    name: 'amend_monthly_strategy_draft', title: 'Amend exact reviewed strategy fields',
+    description: 'Company-admin only, on explicit staff request. Amend selected fields of an EXISTING unpublished CURRENT/NEXT month draft, comparing the exact original field values and fresh brief version/source fingerprint. Unlike automatic gap filling this is an intentional audited staff amendment. Use only existing cited research and preserve all unselected staff wording. Changed fields/sources/versions refuse the write. Never approve/publish or change scope, quantities, dates, calendar, packages or permissions. Read back changed fields after saving.',
+    inputSchema: objectSchema({
+      client_id: uuid, strategy_month: strategyMonth,
+      evidence_fingerprint: { type: 'string', pattern: '^[a-f0-9]{64}$' },
+      expected_version: { type: 'integer', minimum: 1 },
+      source_ids: { type: 'array', minItems: 1, maxItems: 25, items: { type: 'string' }, description: 'Exact source IDs from the fresh monthly strategy brief.' },
+      changes: { type: 'array', minItems: 1, maxItems: 20, items: {
+        type: 'object', additionalProperties: false,
+        properties: {
+          path: { type: 'string', enum: [
+            'goldStandard.objective', 'goldStandard.audienceAndIntent', 'goldStandard.coreMessage',
+            'goldStandard.formatsAndRationale', 'goldStandard.testAndChange', 'goldStandard.pillarsAndHooks',
+            'goldStandard.mustAvoid', 'goldStandard.channelIntegration', 'goldStandard.successSignals', 'goldStandard.nextMonthGamePlan',
+            'actionPlan.professional_video.items', 'actionPlan.reels.items', 'actionPlan.photo_content.items',
+            'actionPlan.design_poster.items', 'actionPlan.animated_poster.items', 'actionPlan.campaign_recommendation.items',
+          ] },
+          expected: { anyOf: [{ type: 'string', maxLength: 12000 }, { type: 'array', maxItems: 24, items: { type: 'string', maxLength: 3000 } }], description: 'Exact current full text or complete concept array. Never a substring or normalized paraphrase.' },
+          replacement: { anyOf: [{ type: 'string', maxLength: 12000 }, { type: 'array', maxItems: 24, items: { type: 'string', maxLength: 3000 } }], description: 'Replacement field only. Gold text must meet 20–1200 cleaned characters; concepts 12–300 each, within confirmed scope. Preserve unchanged array items.' },
+        }, required: ['path', 'expected', 'replacement'],
+      } },
+      idempotency_key: idempotencyKeySchema,
+    }, ['client_id', 'strategy_month', 'evidence_fingerprint', 'expected_version', 'source_ids', 'changes', 'idempotency_key']),
+    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
+    dependency: 'main', canonicalContract: '#731 explicit staff editorial changes through existing amend_monthly_client_strategy_with_context audited RPC',
   },
   {
     name: 'list_assignable_staff', title: 'List assignable CG staff',
