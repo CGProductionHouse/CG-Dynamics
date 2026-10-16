@@ -8,7 +8,7 @@
 // Idempotency: mcp_idempotency_log via mcp_check_idempotency / mcp_record_idempotency RPCs.
 // Canonical services: same RPCs and tables used by CG Dynamics UI and #208 CG Assistant.
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { fetchAllRows, fetchAllRowsByIdChunks } from '../_shared/paginatedRows.ts'
 import { CG_DYNAMICS_MCP_TOOLS, CG_DYNAMICS_MCP_SECURITY_SCHEMES } from './toolCatalog.ts'
 import { filterCapabilitiesByScope } from './capabilityManifest.ts'
@@ -105,6 +105,7 @@ import {
 } from './cgHoursStaffLogger.ts'
 import { canReadPlannerTask } from './taskReadPolicy.ts'
 import { loadMonthlyStrategyWorkspace, shapeMonthlyStrategyBrief, strategyMcpInputHash, submitMonthlyStrategyProposal } from './monthlyStrategyWorkspace.ts'
+import type { StrategyAutopilotClient } from '../_shared/monthlyStrategyAutopilot.ts'
 
 const STAFF_ROLES = new Set(['admin', 'manager', 'staff', 'team'])
 const MCP_PROTOCOL_VERSION = '2025-03-26'
@@ -202,7 +203,7 @@ interface ConnectionPrincipal {
 // subject (Franco in Franco's Project), never the shared OAuth principal, so existing
 // handlers act for the right person unchanged. `connection` is kept alongside for audit.
 interface AuthenticatedStaff {
-  supabase: ReturnType<typeof createClient>
+  supabase: SupabaseClient
   profileId: string
   fullName: string | null
   role: string
@@ -229,7 +230,7 @@ interface AuthChallenge {
   description: string
 }
 
-async function authenticateStaff(request: Request): Promise<{ ok: true; connection: ConnectionPrincipal; supabase: ReturnType<typeof createClient> } | { ok: false; response: Response; challenge?: AuthChallenge }> {
+async function authenticateStaff(request: Request): Promise<{ ok: true; connection: ConnectionPrincipal; supabase: SupabaseClient } | { ok: false; response: Response; challenge?: AuthChallenge }> {
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   if (!supabaseUrl || !serviceRoleKey) {
@@ -299,7 +300,7 @@ const ADMIN_CONTEXT_ROLES = new Set(['admin', 'manager'])
  * that exact client, and company_admin must be asked for explicitly.
  */
 async function resolveOperatingContext(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient,
   connection: ConnectionPrincipal,
   context: ParsedProjectContext,
 ): Promise<{ ok: true; staff: AuthenticatedStaff } | { ok: false; error: string }> {
@@ -371,7 +372,7 @@ async function resolveOperatingContext(
  * never guesses, and stores nothing server-side.
  */
 async function handleResolveProjectContext(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient,
   connection: ConnectionPrincipal,
   input: Record<string, unknown>,
 ) {
@@ -446,7 +447,7 @@ function computeInputHash(input: Record<string, unknown>): string {
 }
 
 async function checkIdempotency(
-  sb: ReturnType<typeof createClient>,
+  sb: SupabaseClient,
   callerProfileId: string,
   toolName: string,
   idempotencyKey: string,
@@ -465,7 +466,7 @@ async function checkIdempotency(
 }
 
 async function recordIdempotency(
-  sb: ReturnType<typeof createClient>,
+  sb: SupabaseClient,
   callerProfileId: string,
   toolName: string,
   idempotencyKey: string,
@@ -501,7 +502,7 @@ async function recordIdempotency(
 
 // ── Table existence check ───────────────────────────────────────────────────
 
-async function tableExists(sb: ReturnType<typeof createClient>, tableName: string): Promise<boolean> {
+async function tableExists(sb: SupabaseClient, tableName: string): Promise<boolean> {
   const { error } = await sb
     .from(tableName)
     .select('*', { count: 'exact', head: true })
@@ -534,9 +535,18 @@ async function listVerifiedPlannerTaskIds(staff: AuthenticatedStaff) {
   })
 }
 
+function ownedPlannerTaskQuery(staff: AuthenticatedStaff, taskIds: string[]) {
+  return staff.supabase
+    .from('planner_tasks_canonical')
+    .select(`id, title, assigned_to_name, due_date, status, notes, client_name, client_id, created_at, updated_at, assignment_review_state, ${PLANNER_MICROSOFT_FIELDS.join(', ')}`)
+    .in('id', taskIds)
+    .eq('assignment_review_state', 'ok')
+    .is('microsoft_source_removed_at', null)
+}
+
 async function listOwnedPlannerTasks(
   staff: AuthenticatedStaff,
-  configure: (query: ReturnType<AuthenticatedStaff['supabase']['from']>) => ReturnType<AuthenticatedStaff['supabase']['from']>,
+  configure: (query: ReturnType<typeof ownedPlannerTaskQuery>) => ReturnType<typeof ownedPlannerTaskQuery>,
 ) {
   const assignments = await listVerifiedPlannerTaskIds(staff)
   if (assignments.error || assignments.data.length === 0) {
@@ -544,12 +554,7 @@ async function listOwnedPlannerTasks(
   }
   const taskIds = assignments.data.map(row => row.task_id)
   return fetchAllRowsByIdChunks<Record<string, unknown>>(taskIds, async (taskIdChunk, from, to) => {
-    let query = staff.supabase
-      .from('planner_tasks_canonical')
-      .select(`id, title, assigned_to_name, due_date, status, notes, client_name, client_id, created_at, updated_at, assignment_review_state, ${PLANNER_MICROSOFT_FIELDS.join(', ')}`)
-      .in('id', taskIdChunk)
-      .eq('assignment_review_state', 'ok')
-      .is('microsoft_source_removed_at', null)
+    let query = ownedPlannerTaskQuery(staff, taskIdChunk)
     query = configure(query)
     const result = await query.order('due_date', { ascending: true }).order('id', { ascending: true }).range(from, to)
     return { data: result.data as Record<string, unknown>[] | null, error: result.error }
@@ -589,7 +594,7 @@ const handleGetMyDay: ToolHandler = async (staff) => {
     staff_name: staff.fullName,
     tasks: withSourceLinkage(tasksResult.data, 'planner'),
     calendar_events: calendarResult.data ?? [],
-    deliverables: flattenDeliverableClient(scheduleResult.data),
+    deliverables: flattenDeliverableClient(scheduleResult.data as Record<string, unknown>[] | null),
     errors: [tasksResult.error?.message, calendarResult.error?.message, scheduleResult.error?.message].filter(Boolean),
   }
 }
@@ -637,7 +642,7 @@ const handleListMyCalendar: ToolHandler = async (staff, input) => {
     .limit(50)
 
   // #325: durable Outlook identity + freshness for ID-based dedupe against live Outlook.
-  return { events: withSourceLinkage(data, 'calendar'), error: error?.message ?? null }
+  return { events: withSourceLinkage(data as Record<string, unknown>[] | null, 'calendar'), error: error?.message ?? null }
 }
 
 const handleListClientSchedule: ToolHandler = async (staff, input) => {
@@ -652,7 +657,7 @@ const handleListClientSchedule: ToolHandler = async (staff, input) => {
   if (input.client_id) query.eq('client_id', input.client_id)
 
   const { data, error } = await query
-  return { deliverables: flattenDeliverableClient(data), error: error?.message ?? null }
+  return { deliverables: flattenDeliverableClient(data as Record<string, unknown>[] | null), error: error?.message ?? null }
 }
 
 /**
@@ -1381,7 +1386,7 @@ const handleListCompanyTasks: ToolHandler = async (staff, input) => {
   const { data, error, count } = await query
   if (error) return { error: error.message }
 
-  const tasks = withSourceLinkage(data, 'planner')
+  const tasks = withSourceLinkage(data as unknown as Record<string, unknown>[], 'planner')
   const classification = { microsoft_backed: 0, dynamics_only: 0, microsoft_source_removed: 0 }
   for (const t of tasks) {
     const c = (t.source as { classification: keyof typeof classification }).classification
@@ -1419,7 +1424,7 @@ const handleListCompanyRecurringTasks: ToolHandler = async (staff, input) => {
   const { data, error, count } = await query
   if (error) return { error: error.message }
 
-  const templates = withSourceLinkage(data, 'planner')
+  const templates = withSourceLinkage(data as unknown as Record<string, unknown>[], 'planner')
   const dynamicsOnly = templates.filter(t => (t.source as { classification: string }).classification === 'dynamics_only')
 
   return {
@@ -1683,7 +1688,7 @@ const handleGetMonthlyStrategyBrief: ToolHandler = async (staff, input) => {
   if (staff.contextKind !== 'company_admin' || !ADMIN_CONTEXT_ROLES.has(staff.connection.role)) return { error: 'COMPANY_ADMIN_REQUIRED' }
   if (!isUuid(input.client_id)) return { error: 'EXACT_CLIENT_ID_REQUIRED' }
   try {
-    const workspace = await loadMonthlyStrategyWorkspace(staff.supabase, String(input.client_id), String(input.strategy_month), cgDate(new Date()))
+    const workspace = await loadMonthlyStrategyWorkspace(staff.supabase as unknown as StrategyAutopilotClient, String(input.client_id), String(input.strategy_month), cgDate(new Date()))
     return shapeMonthlyStrategyBrief(workspace)
   } catch (error) {
     return { error: error instanceof Error ? error.message : 'STRATEGY_BRIEF_UNAVAILABLE' }
@@ -1697,7 +1702,7 @@ const handleSubmitMonthlyStrategyDraft: ToolHandler = async (staff, input) => {
   }
   if (input.expected_version !== null && (!Number.isSafeInteger(input.expected_version) || Number(input.expected_version) < 1)) return { error: 'INVALID_EXPECTED_VERSION' }
   try {
-    return await submitMonthlyStrategyProposal(staff.supabase, {
+    return await submitMonthlyStrategyProposal(staff.supabase as unknown as StrategyAutopilotClient, {
       clientId: String(input.client_id), strategyMonth: String(input.strategy_month), today: cgDate(new Date()),
       evidenceFingerprint: input.evidence_fingerprint, expectedVersion: input.expected_version as number | null,
       proposal: input.proposal, actorProfileId: staff.connection.profileId,
@@ -1733,13 +1738,13 @@ const handleGetLead: ToolHandler = async (staff, input) => {
   const leadId = input.lead_id as string
   const { data: lead, error } = await staff.supabase
     .from('business_development_leads')
-    .select('id, company_name, website_url, industry, location, contact_name, contact_title, contact_email, contact_phone, stage, qualification, qualification_summary, last_action, last_action_at, next_action, follow_up_at, source_kind, source_url, confidence, do_not_contact, created_at, updated_at')
+    .select('id, owner_profile_id, company_name, website_url, industry, location, contact_name, contact_title, contact_email, contact_phone, stage, qualification, qualification_summary, last_action, last_action_at, next_action, follow_up_at, source_kind, source_url, confidence, do_not_contact, created_at, updated_at')
     .eq('id', leadId)
     .maybeSingle()
 
   if (error) return { error: error.message }
   if (!lead) return { error: 'Lead not found.' }
-  if (lead.owner_profile_id !== staff.profileId && staff.role === 'staff') {
+  if (lead.owner_profile_id !== staff.profileId && !ADMIN_CONTEXT_ROLES.has(staff.role)) {
     return { error: 'You can only read your own leads.' }
   }
 
@@ -1903,11 +1908,13 @@ const handleUpdateMyPreferences: ToolHandler = async (staff, input) => {
   const hasTable = await tableExists(staff.supabase, 'staff_assistant_profiles')
   if (!hasTable) return { error: 'Staff assistant workspace not yet available. Complete #305 setup first.' }
 
-  const { data: existing } = await staff.supabase
+  const { data: existing, error: readError } = await staff.supabase
     .from('staff_assistant_profiles')
-    .select('responsibilities, recurring_duties, working_preferences, output_preferences, lead_research_criteria, repeated_corrections, common_task_types')
+    .select('responsibilities, recurring_duties, working_preferences, output_preferences, lead_research_criteria, repeated_corrections, common_task_types, chatgpt_project_name, chatgpt_project_url')
     .eq('profile_id', staff.profileId)
     .maybeSingle()
+
+  if (readError) return { error: readError.message }
 
   const merged = {
     responsibilities: input.responsibilities ?? existing?.responsibilities ?? [],
@@ -2183,7 +2190,10 @@ const handleComposeMailDraft: ToolHandler = async (staff, input) => {
 
   // Build governed collateral list with resolved asset references
   const collateralRefs: Array<{ key: string; label: string; drive_asset_key: string }> = []
-  if (input.collateral?.length) {
+  if (input.collateral !== undefined && (!Array.isArray(input.collateral) || input.collateral.some(ref => typeof ref !== 'string'))) {
+    return { error: 'collateral must be an array of strings.' }
+  }
+  if (Array.isArray(input.collateral) && input.collateral.length) {
     for (const ref of input.collateral) {
       const governed = GOVERNED_COLLATERAL[ref]
       if (governed) {
@@ -2194,10 +2204,10 @@ const handleComposeMailDraft: ToolHandler = async (staff, input) => {
     }
   }
   if (input.include_business_profile && !collateralRefs.find(c => c.key === 'cg_business_profile')) {
-    collateralRefs.push(GOVERNED_COLLATERAL.cg_business_profile)
+    collateralRefs.push({ key: 'cg_business_profile', ...GOVERNED_COLLATERAL.cg_business_profile })
   }
   if (input.include_wedding_packages && !collateralRefs.find(c => c.key === 'cg_wedding_packages')) {
-    collateralRefs.push(GOVERNED_COLLATERAL.cg_wedding_packages)
+    collateralRefs.push({ key: 'cg_wedding_packages', ...GOVERNED_COLLATERAL.cg_wedding_packages })
   }
 
   // Compose the draft body with approved signature appended
@@ -3553,7 +3563,7 @@ function handleToolsList(id: string | number | null) {
 
 async function handleToolsCall(
   id: string | number | null,
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient,
   connection: ConnectionPrincipal,
   toolName: string,
   rawToolInput: Record<string, unknown>,

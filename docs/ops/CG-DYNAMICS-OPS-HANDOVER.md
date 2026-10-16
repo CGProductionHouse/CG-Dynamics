@@ -1,5 +1,31 @@
 # CG Dynamics Ops Handover
 
+### 16 October — integration recovery release in progress
+
+CA explicitly requested updating the outstanding app/reporting work now. The
+existing shared Google Ads account has successfully refreshed through 15 October
+(run `b5f7da69-70b1-4826-8faa-873fd3841ce9`, 52 daily rows). The reviewed #810
+queue constraint is applied; Google Ads sync v51/JWT true and worker v60/JWT false
+are deployed, with only the non-secret daily-refresh flag enabled. No-row clients
+remain no-row. The same-range manual refresh correctly suppresses another daily
+job today; first future scheduled provider execution remains to be observed.
+
+All three backend entrypoints now pass actual Deno checks after correcting the
+MCP client/query types and the exposed lead-owner/project-preservation omissions.
+The supported suite passes 3,859/19 skipped; 81 affected cases pass, build/app
+chunks/scoped lint/diff pass. MCP source release/acceptance is still pending at
+this checkpoint; see `INTEGRATION-RELEASE-2026-10-16.md` for exact receipts.
+
+Actual authenticated October website reporting loads for all four mapped clients
+(Piek 107/255 visitors/page views, Red Oak 311/689, Emmanuel 39/83, All Around PVC
+8/8). Old partial September stored snapshots are not the current traffic bridge.
+Unconfigured action/form measurement is still explicit. Zooz Facebook's exact
+failure is now confirmed HTTP 403 Missing Permissions. All ten connected TikTok
+accounts synced successfully today; cumulative snapshot scope remains partial.
+No website or report publication/permission/campaign/mapping change. Vercel
+billing is $9.42/$15, Pause ON; the existing $5 reserve leaves only $0.58. No
+Vercel build/deploy/promotion or budget action; six checked live hosts return 200.
+
 ### 16 October — normal-chat semantic review completed; two connector fixes merged
 
 The existing **Write Client Strategies** normal company ChatGPT conversation
