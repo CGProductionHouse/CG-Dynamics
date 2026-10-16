@@ -23,6 +23,7 @@ import { StatusBadge, SourceBadge, type SourceVariant } from '../../components/u
 import { PremiumCard } from '../../components/ui/PremiumCard'
 import { EmptyState } from '../../components/ui/States'
 import { supabase } from '../../lib/supabase'
+import { fetchAllPages } from '../../lib/paginatedQuery'
 
 type StatusFilter = 'all' | 'internal-draft' | 'ready-to-publish' | 'published' | 'incomplete-month' | 'needs-repair'
 type ReportSource = 'meta' | 'manual' | 'mixed'
@@ -88,7 +89,7 @@ function getStatusLabel(report: Report, monthComplete: boolean, ready: boolean, 
 }
 
 function getSourceVariant(report: Report, sourceById: Map<string, ReportSource>): SourceVariant {
-  const src = sourceById.get(report.id) ?? 'manual'
+  const src = sourceById.get(report.id) ?? 'none'
   return src as SourceVariant
 }
 
@@ -161,9 +162,12 @@ export default function ReportsManagement() {
   async function classifySources(reportRows: Report[]) {
     try {
       const [mapRes, postsRes] = await Promise.all([
-        supabase.from('meta_content_mappings').select('report_id, post_id'),
-        supabase.from('posts').select('id, report_id'),
+        fetchAllPages<{ report_id: string | null; post_id: string | null }>((from, to) =>
+          supabase.from('meta_content_mappings').select('report_id, post_id').order('id').range(from, to)),
+        fetchAllPages<{ id: string; report_id: string }>((from, to) =>
+          supabase.from('posts').select('id, report_id').order('id').range(from, to)),
       ])
+      if (mapRes.error || postsRes.error) throw new Error('Report source lookup is incomplete.')
 
       const metaPostsByReport = new Map<string, Set<string>>()
       for (const m of (mapRes.data ?? []) as { report_id: string | null; post_id: string | null }[]) {
@@ -235,7 +239,7 @@ export default function ReportsManagement() {
       })
     }
     if (sourceFilter !== 'all') {
-      result = result.filter(r => (sourceById.get(r.id) ?? 'manual') === sourceFilter)
+      result = result.filter(r => sourceById.get(r.id) === sourceFilter)
     }
     if (searchQuery) {
       const q = searchQuery.toLowerCase()
@@ -549,7 +553,7 @@ export default function ReportsManagement() {
                       <div className="flex flex-wrap items-center gap-2">
                         <h2 className="truncate text-base font-semibold text-white">{clientName}</h2>
                         <StatusBadge label={statusLabel} variant={statusVariant} />
-                        <SourceBadge source={sourceVariant} />
+                        <SourceBadge source={sourceVariant} customLabel={sourceVariant === 'none' ? 'Source unavailable' : undefined} />
                       </div>
                       <p className="mt-0.5 text-sm font-medium text-white/80">{monthLabel(report)}</p>
                       <p className="mt-1.5 text-xs leading-relaxed text-brand-primary">{actionText}</p>

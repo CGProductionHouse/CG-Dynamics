@@ -1,5 +1,44 @@
 # CG Dynamics Ops Handover
 
+### 16 October — execution supersedes six Meta integration audit holds
+
+CA explicitly requested the outstanding repairs after the ordered audit. Existing
+authenticated admin Save link workflow now maps Elcheck, JFJ Electrical, Neshora
+Oxygen and WiseRide, and additively adds Instagram to Novus Steel / We Ar Fuels.
+All six independently SELECT-verified; existing client IDs, Hours history and
+existing FB/ad mappings preserved. UI reload shows46 linked versus42. Unknown
+Instagram is not marked not-applicable. Automatic current-month bootstrap is
+actually completing: new-client October drafts contain5/11/5/17 posts respectively;
+same-window FBviews345/1301/574/4322 and JFJIG116 match native1–15October checks.
+NovusIG374 / WeArIG222 are now provider facts, not native-accepted in this pass.
+No report/strategy publication, raw SQL/schema/permission/OAuth change or Vercel.
+
+Bounded branch `codex/meta-launch-repairs-2026-10-16` also reproduces/fixes the
+first100 asset-discovery cutoff, wrong-Page stored IG picker options, and Reports
+source classification truncating two DB reads at1000 rows (fresh automatic
+reports falsely labelled Manual fallback). Existing ordered pagination reused;
+source-read errors remain unavailable, not manual. Actual handler/component
+regressions pass:69 Meta plus5 report-source/workspace. Final full supported
+suite: **3,896 pass /19 intentional skips /0 failures** (3,915 total). Two skips
+are Docker-only checks with Docker Desktop stopped; no assertions weakened.
+Build/app chunks/Deno/diff pass; scoped lint zero errors, one pre-existing Reports
+load-dependency warning. Actual JFJ read-only preview shows1video+6combinedposters,
+no unconfirmed extras; existing phone nav/More/Plan sections work375/390/430 with
+no horizontal overflow. This is one staff preview, not all61 client-role passes.
+Exact backend release decision requested separately; deployed
+asset-list v64 uses older shared helpers. Exact packet preserves them except
+removing one identical duplicate availability key (baseline TS1117). Exact packet
+Deno check now passes; candidate/rollback hashes are in
+`strategy-review/2026-10-16-meta-asset-runtime-packet.json`. No silent helper
+replacement or deployment. Frontend remains source-only until #679 release.
+PR#826 carries the reviewed candidate and receipts; do not call runtime source
+fixes live merely because tests or a merge pass.
+
+See `META-LINK-REPAIRS-2026-10-16.md` for exact IDs and timestamps. Forklift remains
+absent from provider picker, not proven to be Page101/102. Four older missing-post
+cases and three stored-grant cases remain. Do not restart the six repaired clients
+or claim all61 client-role/mobile passes. Other owners#775/#662/#618 untouched.
+
 ### 16 October — ordered client Meta audit first pass complete, with failures/holds
 
 CA requested alphabetical live comparisons, not another sync-badge summary.
