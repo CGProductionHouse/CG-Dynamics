@@ -41,6 +41,7 @@ import {
   gradeSyncRun,
   planGuidelineVideoLinks,
   summarizeProviderHealth,
+  summarizeMetaReportingHealth,
 } from './opsActions.ts'
 import {
   buildStaffAssistantPolicy,
@@ -1240,7 +1241,9 @@ const handleGetProviderHealth: ToolHandler = async (staff, input) => {
     if (provider !== 'tiktok') {
       const res = await invokeSiblingFunction(staff.connection, PROVIDER_STATUS_FUNCTIONS[provider], {})
       return [{
-        ...summarizeProviderHealth(provider, res.data as Record<string, unknown> | null, res.error),
+        ...(provider === 'meta'
+          ? summarizeMetaReportingHealth(res.data, res.error)
+          : summarizeProviderHealth(provider, res.data as Record<string, unknown> | null, res.error)),
         evidence: safeProviderEvidence(provider, res.data),
       }]
     }
