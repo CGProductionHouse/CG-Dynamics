@@ -1,4 +1,6 @@
 {
+  "stage": "HISTORICAL_CONNECTOR_STAGE_BEFORE_EDITOR_CLEANUP",
+  "final_versions": "2026-10-16-november-presentation-cleanup.json",
   "schema": "cg-november-targeted-strategy-review/v1",
   "observed_at": "2026-10-16T09:17:36Z",
   "strategy_month": "2026-11-01",

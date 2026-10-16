@@ -1,5 +1,30 @@
 # Company ChatGPT monthly strategy workspace — #731
 
+## 16 October final presentation cleanup (supersedes v3-only stage)
+
+All 37 source-ready November drafts now have zero legacy guide-note chips and
+an authored core direction instead of a capacity-only top summary. The normal
+authenticated staff editor saved exact version-fenced draft amendments; fresh
+connector readbacks confirm only those two fields changed during cleanup,
+preserving full plans, concepts, selected dates and other wording. Those saves
+are staff amendments, not new AI seeds; do not undo their metadata or overwrite
+them. Full deterministic copy/gold/package checks pass for all 37, with no
+confirmed concept-capacity gap. This is not editorial approval/publication or
+proof that any concept is scheduled, filmed or an approved asset.
+
+The exact final versions (v3–v5) are in
+`strategy-review/2026-10-16-november-presentation-cleanup.json`; the earlier
+eleven-save v3 receipt remains labelled as a historical stage. CG Production
+House's preserved proposal was completed through the normal editor at v4 after
+a fresh source comparison and exact readback. No connector failure loop or
+auth bypass; its automatic ordering fix remains unreleased in #814. The
+proposal file records that completed editor action and must not be replayed.
+
+There are still 23 source/scope holds read plus Human Auto intentionally held.
+Do not call the fleet approved or client launch-ready: dated content, exact
+library/finals/recipient acceptance, publication decisions and protected
+releases/client-role acceptance remain. No Vercel operation.
+
 ## 16 October targeted November content review — final saved receipt
 
 Eleven exact-client November drafts now have verified v3/draft readbacks with

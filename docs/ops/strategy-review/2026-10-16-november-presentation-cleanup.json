@@ -1,0 +1,684 @@
+{
+  "schema": "cg-november-presentation-cleanup/v1",
+  "observed_at": "2026-10-16T09:37:58Z",
+  "strategy_month": "2026-11-01",
+  "supersedes": "2026-10-16-november-review-receipt.json is the earlier 11-connector-save stage; use these final versions.",
+  "authority": "Normal version-fenced staff editor; authorized draft-only copy cleanup, no publication",
+  "clients_cleaned": 37,
+  "legacy_driver_chips_removed": 222,
+  "approved": 0,
+  "published": 0,
+  "vercel_operations": 0,
+  "verification": {
+    "fresh_connector_readbacks": 37,
+    "unexpected_cleanup_fields": 0,
+    "copy_gate_failures": 0,
+    "confirmed_concept_capacity_gaps": 0,
+    "gold_and_actions_preserved_by_cleanup": true,
+    "extra_reviewed_cg_plan": "Separate normal-editor v3→v4 amendment matches the prepared four-video/eight-photo/four-poster proposal; exact source recheck passed."
+  },
+  "rows": [
+    {
+      "client": "Delta Gas",
+      "clientId": "06b20bb1-ed4a-4aa1-9f48-8c6cb0531aba",
+      "draftId": "37e3b7a1-b792-4da2-ae3d-9477357e841a",
+      "beforeVersion": 3,
+      "afterVersion": 5,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "Case Bloemfontein",
+      "clientId": "079df21e-783a-4648-b3fa-0acae6e68867",
+      "draftId": "ea1dd4d6-89ec-4f51-8abc-f12889120f3f",
+      "beforeVersion": 3,
+      "afterVersion": 5,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "Tobich Optics",
+      "clientId": "204f4f22-14c7-42ed-a956-da57af102706",
+      "draftId": "a47e2784-0cec-4009-9cf6-77a7f26ee542",
+      "beforeVersion": 2,
+      "afterVersion": 4,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "Loraclox",
+      "clientId": "21300630-6755-4591-9a49-e22abbaf7e3d",
+      "draftId": "50e23bfe-9174-4649-9e2f-12a711453805",
+      "beforeVersion": 2,
+      "afterVersion": 3,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "Emoya Estate Driving Range",
+      "clientId": "217a547c-7b22-45cc-bf88-9d45a8e93dfe",
+      "draftId": "689bac8d-f261-4247-b15f-cb282169d8d3",
+      "beforeVersion": 2,
+      "afterVersion": 4,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "PSG Bloemfontein",
+      "clientId": "29a28efd-c998-45e2-a57c-4a751e779e66",
+      "draftId": "0a391eda-ebc2-4b89-ba40-9f906cd65963",
+      "beforeVersion": 2,
+      "afterVersion": 3,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "Dulux Paint & Paper Bloemfontein",
+      "clientId": "2aed8a31-bd53-4ad1-a3dc-432865adfb3d",
+      "draftId": "9167ebff-3731-42b7-89b1-c3a9d54ca78c",
+      "beforeVersion": 2,
+      "afterVersion": 3,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "We Ar Fuels",
+      "clientId": "2b953772-e791-4dff-a278-d4dd3521f02e",
+      "draftId": "ecd622bf-c8c6-42e9-aee6-b02f2abef5a8",
+      "beforeVersion": 2,
+      "afterVersion": 3,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "Daisy & Co",
+      "clientId": "3404f726-a693-4b2d-8c13-c9d3dfd17bbc",
+      "draftId": "8c4cebe1-fb51-4114-bbfb-601b696b0a24",
+      "beforeVersion": 3,
+      "afterVersion": 4,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "AV Event Life",
+      "clientId": "3b85973f-bcad-49eb-b8f1-c27f7c7f1aba",
+      "draftId": "c1a981ed-c0dc-4f69-861a-d6e1d86d4b77",
+      "beforeVersion": 2,
+      "afterVersion": 3,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "Novus Steel",
+      "clientId": "4236a60a-990f-484f-8d19-13d2f92fbe3b",
+      "draftId": "3770aac3-3e20-4bf2-900e-2bc092206c05",
+      "beforeVersion": 2,
+      "afterVersion": 3,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "Cape Lumber",
+      "clientId": "42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa",
+      "draftId": "c4daf0e5-9f1e-4d1c-bb2c-74b9b09ecfaa",
+      "beforeVersion": 2,
+      "afterVersion": 3,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "Forklift Trucks",
+      "clientId": "4424ed69-7270-4d30-a1ea-0b77d76912df",
+      "draftId": "1ccca509-e1db-485b-80d6-4f1d9ff6ab04",
+      "beforeVersion": 2,
+      "afterVersion": 3,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "RC-Polypipe",
+      "clientId": "4f6106de-c437-404e-8cef-fbe848de0665",
+      "draftId": "15bc8487-7fa7-4d7e-ad78-d60c48982997",
+      "beforeVersion": 2,
+      "afterVersion": 3,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "HMHI",
+      "clientId": "572555e0-d4d0-404a-8d67-beeeeed6a1f2",
+      "draftId": "7fc0391c-38a3-4b77-ad28-56fe64176289",
+      "beforeVersion": 2,
+      "afterVersion": 3,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "Bohemia Quick Stop",
+      "clientId": "5dfdf4bd-9d94-4cc6-9dee-0e480a2234cb",
+      "draftId": "2e95fa11-1f6a-4e48-b0a8-925c6f9ecfb7",
+      "beforeVersion": 2,
+      "afterVersion": 3,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "Central Canvas",
+      "clientId": "6b313cac-283e-48c4-9df6-ba43af2f7353",
+      "draftId": "382e6063-242a-4030-9454-22b90952561a",
+      "beforeVersion": 2,
+      "afterVersion": 3,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "Braize",
+      "clientId": "6b67a2df-e2ab-418b-bcee-03aef5963d37",
+      "draftId": "bf51b539-d782-4dcb-a69d-e6f5193398b6",
+      "beforeVersion": 2,
+      "afterVersion": 3,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "Madison Wear",
+      "clientId": "7b47afb0-fa55-4916-85f6-09c57e5905b9",
+      "draftId": "27b22206-16ec-4e60-9e62-89186a10a710",
+      "beforeVersion": 3,
+      "afterVersion": 4,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "Wiseman Group",
+      "clientId": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
+      "draftId": "2220bfcd-1ad7-4924-8b2a-fddd2fde395f",
+      "beforeVersion": 2,
+      "afterVersion": 3,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "Bloem Marble & Granite",
+      "clientId": "89e0ad6d-e08c-4a75-8b8e-abea71af581c",
+      "draftId": "f1d93793-228e-4078-99ce-61ce4c7ef04c",
+      "beforeVersion": 2,
+      "afterVersion": 3,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "Bouwer & Coetzee Attorneys",
+      "clientId": "8e448cf9-1534-4ba1-89a4-93e4c8b83d2f",
+      "draftId": "a0e52b08-1f49-4f8b-8bec-920a7e060fcb",
+      "beforeVersion": 2,
+      "afterVersion": 3,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "SecuriForce",
+      "clientId": "917d6f7c-1c2a-4c20-82f0-daa41b9062f5",
+      "draftId": "8999cf7b-d7ff-4d57-a8f2-a4d115001584",
+      "beforeVersion": 3,
+      "afterVersion": 4,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "TBS Brokers",
+      "clientId": "a36ba938-e9dc-4ecf-bb67-4853608b1c01",
+      "draftId": "723de2b2-28d7-43ec-b4c3-628354e59f27",
+      "beforeVersion": 3,
+      "afterVersion": 4,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "Supa Quick BFN",
+      "clientId": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+      "draftId": "eba11003-11bd-429d-8004-635ceb21b928",
+      "beforeVersion": 2,
+      "afterVersion": 3,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "Peyper Bonds",
+      "clientId": "a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b",
+      "draftId": "c18a9a68-d5a1-4289-bf69-8985135b4020",
+      "beforeVersion": 3,
+      "afterVersion": 4,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "C&L Innovations",
+      "clientId": "afb62c53-d6d3-4ef8-9393-def88ed899d8",
+      "draftId": "b7caa2c0-7fe4-49d8-b4e5-55232c3639c5",
+      "beforeVersion": 2,
+      "afterVersion": 3,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "Bloem Action Sports",
+      "clientId": "b28af30a-3d44-490a-8290-1e56dac7b127",
+      "draftId": "9a227997-5dbd-40cf-b258-39deba05732c",
+      "beforeVersion": 3,
+      "afterVersion": 4,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "Germoparts",
+      "clientId": "b6052710-417d-4b3b-8348-0f126bfea671",
+      "draftId": "43218236-05fc-43b1-ace2-759a77865b1f",
+      "beforeVersion": 3,
+      "afterVersion": 4,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "CG Production House",
+      "clientId": "c27d2185-08e4-4c49-be48-2572564ceecf",
+      "draftId": "e62a6569-fc2d-474f-b74b-43fac56a736d",
+      "beforeVersion": 2,
+      "afterVersion": 4,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true,
+      "additionalReviewedPlanUpdate": {
+        "client": "CG Production House",
+        "clientId": "c27d2185-08e4-4c49-be48-2572564ceecf",
+        "draftId": "e62a6569-fc2d-474f-b74b-43fac56a736d",
+        "beforeVersion": 3,
+        "afterVersion": 4,
+        "status": "draft",
+        "publishedVersion": null,
+        "staffAmended": true,
+        "changedKeys": [
+          "actionPlan",
+          "goldStandard"
+        ],
+        "proposalGoldActionsMatch": true,
+        "sourceComparison": "Ready guide identical; exact evidence content identical ignoring calendar ordering; normal editor version guard retained"
+      }
+    },
+    {
+      "client": "Emmanuel Funerals",
+      "clientId": "d53d8e62-9e6a-4bb9-be3f-554f40942d45",
+      "draftId": "b910ad81-b549-4128-8eb5-e5397b6d7d2c",
+      "beforeVersion": 3,
+      "afterVersion": 4,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "The Staffordshire",
+      "clientId": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+      "draftId": "ac948143-24cd-4ed7-94b2-e9f5c3a259e2",
+      "beforeVersion": 3,
+      "afterVersion": 4,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "Watch Addict",
+      "clientId": "e1cb958e-3f68-4a77-b5ea-b471ea62bdef",
+      "draftId": "b5d7d3a3-cb36-4e51-bb1a-140f80db6fca",
+      "beforeVersion": 2,
+      "afterVersion": 3,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "Supa Quick Centurion",
+      "clientId": "e2870110-930c-4e63-b2fe-c858030f7258",
+      "draftId": "acb96650-a7c5-4d2e-b6c6-09bab0a156b4",
+      "beforeVersion": 2,
+      "afterVersion": 3,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "Ehrlich Park Butchery",
+      "clientId": "ec643c75-51f5-4839-829f-3f5b7f48829a",
+      "draftId": "fbd1940e-8b28-47e9-99be-b2907f7aa5ae",
+      "beforeVersion": 2,
+      "afterVersion": 3,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "Piek Group",
+      "clientId": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
+      "draftId": "cb416671-6fc7-4fc1-b7b7-33b27847a594",
+      "beforeVersion": 3,
+      "afterVersion": 4,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    },
+    {
+      "client": "All Around PVC",
+      "clientId": "fd16ebae-a50b-4920-afe0-94c2631f8f06",
+      "draftId": "b8c90019-008f-44b0-a7a3-1d1b5b67a9ac",
+      "beforeVersion": 3,
+      "afterVersion": 4,
+      "status": "draft",
+      "publishedVersion": null,
+      "staffAmended": true,
+      "changedKeys": [
+        "strategyDrivers",
+        "strategyGoingForward"
+      ],
+      "goldAndActionsPreserved": true,
+      "remainingLegacyDrivers": 0,
+      "summaryMatchesCore": true
+    }
+  ],
+  "cg_plan_receipt": {
+    "client": "CG Production House",
+    "clientId": "c27d2185-08e4-4c49-be48-2572564ceecf",
+    "draftId": "e62a6569-fc2d-474f-b74b-43fac56a736d",
+    "beforeVersion": 3,
+    "afterVersion": 4,
+    "status": "draft",
+    "publishedVersion": null,
+    "staffAmended": true,
+    "changedKeys": [
+      "actionPlan",
+      "goldStandard"
+    ],
+    "proposalGoldActionsMatch": true,
+    "sourceComparison": "Ready guide identical; exact evidence content identical ignoring calendar ordering; normal editor version guard retained"
+  },
+  "remaining": "Editorial approval/publication, 23 read source/scope holds + Human Auto skip/go, real dated content/library/recipient gates and authorized releases/client-role acceptance. Passing deterministic checks is not a guarantee of strategy quality or business results."
+}

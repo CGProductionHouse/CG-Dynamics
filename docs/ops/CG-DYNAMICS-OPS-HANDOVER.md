@@ -1,5 +1,44 @@
 # CG Dynamics Ops Handover
 
+### 16 October — all 37 ready November drafts cleared of legacy presentation noise
+
+This later receipt supersedes the v3-only and CG-not-applied stages below.
+Fresh full-draft checks found 13/37 source-ready November rows still failed the
+existing client-copy gate because old guide/identity/caption/provenance notes
+remained in `strategyDrivers`. All 37 had capacity-only top summaries. Through
+the **normal authenticated version-fenced staff editor**, the old six guide-note
+chips were removed from each of the 37 drafts (222 total), and the top summary
+now reuses that client's already-authored core direction. The source guides and
+seed provenance were not deleted. Each exact identity/month/version was checked;
+no approval/publication button was used. Saves are explicitly staff-amended,
+which must not be cleared by future AI work.
+
+All 37 fresh connector readbacks confirmed that the cleanup changed only
+`strategyDrivers`/`strategyGoingForward`; their ten gold fields, concepts,
+calendar selections and other wording stayed intact. The first four summaries
+and driver removals were separate revisions; final versions range v3–v5, not
+uniform v3. The canonical per-client versions/changed fields are in
+`docs/ops/strategy-review/2026-10-16-november-presentation-cleanup.json`.
+Existing full deterministic gold-standard/copy/package checks now pass for all
+37, and every confirmed positive format has at least its monthly quantity of
+concepts. These are concepts, not dated/scheduled or published assets, and a
+deterministic pass is not semantic approval or a guaranteed business outcome.
+
+CG Production House's earlier rejected connector proposal was completed through
+that normal editor after its guide and exact evidence content were freshly
+rechecked (only calendar order differed). A separate v3→v4 draft amendment
+fills four reviewed strategy fields and eight photo concepts; exact readback
+matches the preserved proposal, with four videos/eight photos/four posters and
+no added scope. The proposal packet now records APPLIED_VIA_VERSION_FENCED_STAFF_EDITOR;
+do not replay the failed connector submission. #814's ordering fix still needs
+its separately authorized Edge release for future connector reliability.
+
+No Vercel, production SQL/schema/Edge/provider, permission, package, schedule,
+asset or mapping action occurred. All 37 remain unpublished. The 23 source/scope
+holds plus Human Auto skip/go, real dated content and Brand Hub recipient/final
+checks, publication decisions and authorized release/client-role acceptance
+still prevent a truthful fleet launch claim. No protected gate was marked passed.
+
 ### 16 October — eleven November draft improvements read back, no publication
 
 The later content pass completed nine further exact-client November improvements

@@ -1,5 +1,11 @@
 # Client portal launch review — 14 October 2026
 
+Latest November-only presentation result: all 37 source-ready drafts are cleaned
+and read back at exact versions in
+`strategy-review/2026-10-16-november-presentation-cleanup.json`, including CG's
+completed v4 proposal. They remain unpublished, and this does not refresh or
+pass the older access/report/calendar/library gates below.
+
 Later strategy-only continuation: the 16 October exact-client connector receipt
 is `strategy-review/2026-10-16-november-review-receipt.json`. Eleven November
 drafts have targeted improvements and matching v3/unpublished readbacks. It
