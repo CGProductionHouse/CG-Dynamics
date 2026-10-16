@@ -349,7 +349,7 @@ All 61 entries now have an explicit scoped first-pass disposition. Missing acces
 | 17 | Delta Gas | `06b20bb1-ed4a-4aa1-9f48-8c6cb0531aba` | Partial — checked native FB/IG facts/latest post pairs match |
 | 18 | Dulux Paint & Paper Bloemfontein | `2aed8a31-bd53-4ad1-a3dc-432865adfb3d` | Partial — checked native FB/IG metrics/latest pairs match |
 | 19 | Econofoods | `61acf81b-1011-404e-9fae-2e209be65fca` | Held — no mapping/report/eligible strategy source; no MBS search result |
-| 20 | Ehrlich Park Butchery | `ec643c75-51f5-4839-829f-3f5b7f48829a` | Failed — eligible public 8 October post missing despite refreshed checkpoint |
+| 20 | Ehrlich Park Butchery | `ec643c75-51f5-4839-829f-3f5b7f48829a` | Failed — native in-window public 8 October post missing despite refreshed checkpoint |
 | 21 | Elcheck | `7b7d244f-77b4-4b2a-88f0-8ce3f7e1c202` | Failed — native existing account/posting works; app mapping/report/evidence absent |
 | 22 | Emmanuel Funerals | `d53d8e62-9e6a-4bb9-be3f-554f40942d45` | Partial — checked native FB metrics/latest eligible IDs match |
 | 23 | Emoya Estate Driving Range | `217a547c-7b22-45cc-bf88-9d45a8e93dfe` | Failed — no mapping/report; October template |
@@ -401,6 +401,8 @@ All 61 entries now have an explicit scoped first-pass disposition. Missing acces
 5. **Acceptance still outstanding:** native latest-subset checks plus genuine staff previews do not establish actual client-role/mobile acceptance, complete TikTok/Google/website metrics, Teams schedule reconciliation, recipient-safe Brand Hub or approved assets. Existing protected gates/open owners remain separate. This audit is not the launch-clearance packet.
 
 ## Verification boundary
+
+Followthrough PR #825 is documentation and read-only SQL evidence only. A fresh local `npm run build` passes; `git diff --check` passes. All 61 table ordinals/names/UUIDs match the canonical alphabetical fleet, with zero Pending rows and no unknown UUIDs. All 12 executable SQL statements were checked to begin with SELECT; none was used to mutate production. No new runtime test assertion was needed or weakened. The previously completed #824 runtime verification below remains separately scoped, not a claim that a full suite was rerun for this documentation change. Existing Git hosting auto-deployment guard remains disabled; no Vercel/cloud operation occurred.
 
 Fleet-only source inventory is saved in `strategy-review/2026-10-16-fleet-audit-inventory.json`: all 61 November briefs actually read, 37 ready_for_proposal / 24 blocked. Ready is source eligibility, NOT semantic strategy approval or publication. The 11 literal old October objective templates remain separately flagged. All 61 have canonical inventory coverage, not 61 native-browser acceptance checks. The absent Elcheck/JFJ/VCS November rows are evidence-held, not requests for CA to repeat previously confirmed package quantities; LHP remains once-off/meeting-held.
 

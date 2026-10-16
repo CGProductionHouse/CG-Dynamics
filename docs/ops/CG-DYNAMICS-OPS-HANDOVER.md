@@ -5,8 +5,8 @@
 CA requested alphabetical live comparisons, not another sync-badge summary.
 PR #824 merged as `b6186234f00b3dbff877eabb5afb30f6475136f3`, containing the
 bounded TikTok snapshot-label correction and audit receipts through client14.
-Branch `codex/client-meta-audit-followthrough-2026-10-16` continues the ordered
-read-only audit; existing
+PR #825 / branch `codex/client-meta-audit-followthrough-2026-10-16` holds the
+completed ordered read-only first pass and exact repair queue; existing
 runtime PR owners #775/#662/#618 remain untouched. See
 `CLIENT-META-AUDIT-2026-10-16.md` and
 `strategy-review/2026-10-16-fleet-audit-inventory.json`.
