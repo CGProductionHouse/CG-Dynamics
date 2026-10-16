@@ -84,6 +84,22 @@ skipped (`CG_RUN_LOCAL_DB=0`), preserving all assertions and production isolatio
 Final supported-suite result is recorded in the PR after completion; no claim that
 local fixtures establish production client-role or mobile acceptance.
 
+Review: source authority remains `reports`/`posts`/`meta_content_mappings`, with
+the existing `fetchAllPages` helper; no new table, RPC, scope or dependency.
+Only two existing admin TSX components changed, with no layout/route/client shell
+changes. React review keeps the two independent paginated reads parallel and
+narrows data to IDs; errors cannot be read as manual-source evidence. Scoped lint
+has zero errors and the pre-existing ReportsManagement `load` effect-dependency
+warning. The existing large-bundle warning also remains; neither was suppressed.
+
+Fresh existing-connector provider-health read confirms46 mapped clients /74
+platforms:20PASS,53PARTIAL,1STALE. This grades metric coverage, not native-post
+completeness or launch clearance. AV/Zooz Facebook still fail and Red Oak has no
+verified checkpoint; no duplicate grant-recovery loop was triggered. Public
+permalink searches for all five older missing-photo suffixes also returned no
+stored row. Bounded exact-client/date reads preserve those omissions, rather
+than claiming the wrong native object-ID shape has already been ruled out.
+
 ### Separate runtime gates
 
 At inspection `meta-list-assets` is live **v64 / verify_jwt=false**, with its
