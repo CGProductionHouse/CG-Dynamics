@@ -1,5 +1,38 @@
 # CG Dynamics Ops Handover
 
+### 16 October — two portal-navigation defects repaired locally
+
+Focused continuation from main4ad9c39f reproduces and fixes two actual-component
+failures: Overview's desktop/mobile Calendar actions opened Strategy; Brand Hub
+year selection abandoned an in-flight month but retained its loading spinner.
+Calendar now names the displayed working month and calendar tab through the
+existing exact-client preview link adapter. Year selection resets loading while
+retaining the existing request-sequence fence against late responses. No design,
+data-source, permission or publication change. Receipt:
+`CLIENT-PORTAL-NAVIGATION-REPAIRS-2026-10-16.md`.
+
+Final supported suite3918total/3899pass/19intentional skips/0fail,48focused tests,
+all14 canonical local browser fixtures, build/app chunks/scoped lint/diff PASS.
+New browser regressions exercise the actual Overview-to-Plan Calendar destination
+in both client and staff-preview modes and delayed Brand Hub year switching at
+1440/375/390/430. Fixtures are synthetic, not live client-role acceptance. No
+Vercel, production SQL/schema/Edge/config/provider/permission/publication action.
+Existing open owners775/662/618 untouched. Frontend release remains #679-held.
+
+The existing normal company chat **Write Client Strategies** was recovered via
+the app's thread tools after one Chrome transport failure, without an auth bypass
+or retry loop. Read-back shows CA's latest assignment is Neshora's guideline and
+launch plan, not a new fleet rewrite. Continued that same idle chat with the
+existing human-authorised authoring task; no new chat, recurring task or paid
+generator. Fresh November brief for exact Neshora3c20fae1-8e91-41d5-98eb-1c331600e6e3
+is still source-held (CLIENT_EVIDENCE_UNVERIFIED/EXACT_STRATEGY_EVIDENCE_UNAVAILABLE),
+draft0018ace6-7f52-4b52-a411-ae34dbc89cb2v1. Dispatch is NOT a saved/quality/published
+result. Keep that writer's current assignment and staff edits intact. Genuine
+Forklift staff preview additionally confirms1video+6posters, October/November
+strategy selection, empty visible calendar/approval queue; no launch-clearance
+claim or client-facing publication. Control Centre access remains unavailable;
+do not invent its tracker reference.
+
 ### 16 October — Meta discovery v68 accepted; Forklift link recovered
 
 CA-approved exact backend release is now **v68 ACTIVE**,6/6 source files read

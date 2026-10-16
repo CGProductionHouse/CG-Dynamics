@@ -270,7 +270,7 @@ export default function ClientPortalHome() {
                   <h2 className="mt-3 text-3xl font-black tracking-[-0.04em] text-white">What’s next</h2>
                 </div>
                 <Link
-                  to="/client/plan"
+                  to={`/client/plan?tab=calendar&month=${workingMonth}`}
                   className="hidden shrink-0 text-sm font-bold text-[#f6a15f] transition hover:text-white sm:inline"
                 >
                   Calendar <span aria-hidden>↗</span>
@@ -296,7 +296,7 @@ export default function ClientPortalHome() {
               </div>
 
               <Link
-                to="/client/plan"
+                to={`/client/plan?tab=calendar&month=${workingMonth}`}
                 className="relative mt-8 inline-flex text-sm font-bold text-[#f6a15f] transition hover:text-white sm:hidden"
               >
                 Open calendar <span aria-hidden className="ml-1">↗</span>

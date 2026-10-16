@@ -82,6 +82,7 @@ function LibraryCategory({ summary }: { summary: ClientPortalLibraryCategorySumm
     setSelectedYear(year)
     setSelectedMonth(null)
     requestSequence.current += 1
+    setLoading(false)
     setPage(null)
     setLoadedKey(null)
     setError(null)

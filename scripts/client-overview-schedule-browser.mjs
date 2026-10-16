@@ -13,20 +13,22 @@ const fixture = {
   name: 'client-overview-schedule-fixture', enforce: 'pre',
   resolveId(id) { if (id === 'virtual:overview-schedule') return '\0virtual:overview-schedule' },
   transform(_code, id) {
-    if (id.replaceAll('\\', '/').endsWith('/contexts/AuthContext.tsx')) return `export function useAuth(){return {profile:{role:'admin',client_id:null}}}`
+    if (id.replaceAll('\\', '/').endsWith('/contexts/AuthContext.tsx')) return `const clientScope=new URLSearchParams(location.search).get('scope')==='client';export function useAuth(){return {profile:{role:clientScope?'client':'admin',client_id:clientScope?'${clientId}':null}}}`
   },
   load(id) {
     if (id !== '\0virtual:overview-schedule') return
-    return `import React from 'react';import {createRoot} from 'react-dom/client';import {BrowserRouter} from 'react-router-dom';
+    return `import React from 'react';import {createRoot} from 'react-dom/client';import {BrowserRouter,useLocation} from 'react-router-dom';
       import ClientPortalHome from '/src/pages/client/ClientPortalHome.tsx';
+      import ClientPlanPage from '/src/pages/client/ClientPlanPage.tsx';
       import {ClientPortalContext} from '/src/components/client/ClientPortalContext.ts';import '/src/index.css';
+      function Journey(){const location=useLocation();const inPlan=location.pathname==='/client/plan'||new URLSearchParams(location.search).get('area')==='plan';return React.createElement(inPlan?ClientPlanPage:ClientPortalHome)}
       createRoot(document.getElementById('root')).render(React.createElement(BrowserRouter,null,
-        React.createElement(ClientPortalContext.Provider,{value:{client:{id:'${clientId}',name:'Synthetic A'},previewClientId:'${clientId}'}},
-          React.createElement('main',{className:'mx-auto max-w-6xl min-w-0 p-4 sm:p-8'},React.createElement(ClientPortalHome)))));`
+        React.createElement(ClientPortalContext.Provider,{value:{client:{id:'${clientId}',name:'Synthetic A'},previewClientId:new URLSearchParams(location.search).get('scope')==='client'?undefined:'${clientId}'}},
+          React.createElement('main',{className:'mx-auto max-w-6xl min-w-0 p-4 sm:p-8'},React.createElement(Journey)))));`
   },
   configureServer(server) {
     server.middlewares.use((req, res, next) => {
-      if (req.url !== '/__overview-schedule') return next()
+      if (req.url?.split('?')[0] !== '/__overview-schedule') return next()
       res.setHeader('Content-Type', 'text/html')
       res.end('<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="background:#060d0c"><div id="root"></div><script type="module" src="/@id/virtual:overview-schedule"></script></body></html>')
     })
@@ -40,7 +42,7 @@ let browser
 try {
   await server.listen()
   browser = await chromium.launch({ headless: true })
-  for (const width of [1440, 375, 390, 430]) {
+  for (const [scope, width] of ['client', 'preview'].flatMap(scope => [1440, 375, 390, 430].map(width => [scope, width]))) {
     const page = await browser.newPage({ viewport: { width, height: 900 } })
     await page.clock.install({ time: new Date('2026-10-08T10:00:00+02:00') })
     const errors = []
@@ -51,6 +53,11 @@ try {
       const url = new URL(request.url())
       if (url.origin === 'http://127.0.0.1:53991') return route.continue()
       assert.equal(url.origin, 'http://127.0.0.1:1', 'No external/provider request')
+      if (url.pathname === '/rest/v1/clients') {
+        assert.equal(request.method(), 'GET')
+        assert.equal(url.searchParams.get('id'), `eq.${clientId}`)
+        return route.fulfill({ json: { id: clientId, name: 'Synthetic A' } })
+      }
       if (url.pathname === '/rest/v1/reports') {
         assert.equal(request.method(), 'GET')
         assert.equal(url.searchParams.get('client_id'), `eq.${clientId}`)
@@ -63,7 +70,9 @@ try {
       }
       assert.ok(url.pathname.startsWith('/rest/v1/rpc/'), `Only expected read RPCs: ${url.pathname}`)
       const rpc = url.pathname.split('/').at(-1)
-      assert.ok(['client_portal_visibility_contract_version', 'client_portal_month_ahead_posts_v2', 'client_portal_month_ahead_events'].includes(rpc), `No write-capable RPC: ${rpc}`)
+      assert.ok(['client_published_reports', 'client_monthly_strategy', 'client_portal_visibility_contract_version', 'client_portal_month_ahead_posts_v2', 'client_portal_month_ahead_events'].includes(rpc), `No write-capable RPC: ${rpc}`)
+      if (rpc === 'client_published_reports') return route.fulfill({ json: [] })
+      if (rpc === 'client_monthly_strategy') return route.fulfill({ json: [] })
       if (rpc === 'client_portal_visibility_contract_version') return route.fulfill({ json: 1 })
       assert.equal(request.postDataJSON().p_client_id, clientId)
       if (state === 'unavailable' && rpc === 'client_portal_month_ahead_posts_v2') return route.fulfill({ status: 503, json: { message: 'Synthetic calendar read failure' } })
@@ -79,7 +88,7 @@ try {
       ['empty', null],
     ]) {
       state = nextState
-      await page.goto('http://127.0.0.1:53991/__overview-schedule')
+      await page.goto(`http://127.0.0.1:53991/__overview-schedule?scope=${scope}`)
       if (expected) await page.getByText(expected, { exact: typeof expected === 'string' }).waitFor({ timeout: 5000 })
       else {
         await page.getByRole('link', { name: 'View the plan' }).waitFor({ timeout: 5000 })
@@ -91,8 +100,33 @@ try {
       assert.equal(await page.getByText('Schedule temporarily unavailable', { exact: true }).count(), 0)
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width}px body overflow`)
       assert.deepEqual(errors, [])
+      if (nextState === 'scheduled' || nextState === 'planning') {
+        // Inspect both rendered anchors, even when responsive CSS hides one.
+        const calendarName = /^(Calendar|Open calendar)(?:\s*↗)?$/
+        const links = page.getByRole('link', { name: calendarName, includeHidden: true })
+        assert.equal(await links.count(), 2)
+        for (const href of await links.evaluateAll(elements => elements.map(element => element.getAttribute('href')))) {
+          const target = new URL(href, 'http://127.0.0.1:53991')
+          assert.equal(target.searchParams.get('tab'), 'calendar', `${scope}/${width}: calendar must not open Strategy`)
+          assert.equal(target.searchParams.get('month'), '2026-10', 'Use the displayed working month')
+          if (scope === 'preview') {
+            assert.equal(target.pathname, '/admin/client-portal-preview')
+            assert.equal(target.searchParams.get('area'), 'plan')
+            assert.equal(target.searchParams.get('client'), clientId)
+          } else {
+            assert.equal(target.pathname, '/client/plan')
+            assert.equal(target.searchParams.get('client'), null, 'Client navigation never supplies an identity override')
+          }
+        }
+        await page.getByRole('link', { name: calendarName }).click()
+        assert.equal(new URL(page.url()).searchParams.get('tab'), 'calendar')
+        assert.equal(await page.getByRole('tab', { name: 'Calendar', exact: true }).getAttribute('aria-selected'), 'true')
+        await page.getByRole('heading', { name: 'Content calendar', exact: true }).waitFor()
+        assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width}px destination overflow`)
+        assert.deepEqual(errors, [])
+      }
     }
-    console.log(`PASS ${width}px: only real planned/scheduled work is highlighted; no body overflow or runtime errors`)
+    console.log(`PASS ${scope} ${width}px: real planned work, exact calendar navigation, no overflow/runtime errors`)
     await page.close()
   }
 } finally { if (browser) await browser.close(); await server.close() }

@@ -13,7 +13,7 @@ const fixture={name:'library-local-readonly',enforce:'pre',
   load(id){if(id!=='\0virtual:library-fixture')return
     return `import React from'react';import{createRoot}from'react-dom/client';import{BrowserRouter}from'react-router-dom';
       import{ClientPortalContext}from'/src/components/client/ClientPortalContext.ts';import{ClientPortalLibrary}from'/src/features/client-portal-library/ClientPortalLibrary.tsx';import'/src/index.css';
-      const library={clientName:'Synthetic A',clientLogoUrl:null,available:true,categories:[{category:'brand_identity',fileCount:1,years:[]},{category:'graphic_design',fileCount:1,years:[{year:2026,fileCount:1,months:[{month:10,fileCount:1}]}]}]};
+      const library={clientName:'Synthetic A',clientLogoUrl:null,available:true,categories:[{category:'brand_identity',fileCount:1,years:[]},{category:'graphic_design',fileCount:2,years:[{year:2026,fileCount:1,months:[{month:10,fileCount:1}]},{year:2025,fileCount:1,months:[{month:9,fileCount:1}]}]}]};
       window.fixtureOpened=[];HTMLAnchorElement.prototype.click=function(){window.fixtureOpened.push(this.href)};
       function Fixture(){const[show,setShow]=React.useState(true);return React.createElement(ClientPortalContext.Provider,{value:{client:{id:'${clientId}'},previewClientId:'${clientId}'}},React.createElement('main',{className:'mx-auto max-w-6xl p-4 sm:p-8'},React.createElement('button',{onClick:()=>setShow(false)},'Leave client files'),show?React.createElement(ClientPortalLibrary,{library}):React.createElement('h2',null,'Different client scope')))}
       createRoot(document.getElementById('root')).render(React.createElement(BrowserRouter,null,React.createElement(Fixture)));`
@@ -32,7 +32,7 @@ try{
   await server.listen();browser=await chromium.launch({headless:true})
   for(const width of [1440,375,390,430]){
     const page=await browser.newPage({viewport:{width,height:1000}})
-    const errors=[]; const reads=[]; let brandFailure=true;let malformed=true;let accessMode='invalid';let releaseAccess
+    const errors=[]; const reads=[]; let brandFailure=true;let malformed=true;let accessMode='invalid';let releaseAccess;let holdMonth=false;let releaseMonth
     page.on('pageerror',error=>errors.push(error.message))
     await page.route('**/*',async route=>{
       const request=route.request();const url=new URL(request.url())
@@ -50,6 +50,7 @@ try{
       assert.equal(body.action,'staff_preview_portal_library_month','Only existing read actions')
       if(body.category==='brand_identity'&&brandFailure)return route.fulfill({status:503,json:{ok:false,error:'Synthetic unavailable'}})
       if(body.category==='graphic_design'&&malformed)return route.fulfill({json:{ok:true,data:{assets:null,nextOffset:null}}})
+      if(body.category==='graphic_design'&&holdMonth)await new Promise(resolve=>{releaseMonth=resolve})
       return route.fulfill({json:{ok:true,data:{assets:[{id:'22222222-2222-4222-8222-222222222222',category:body.category,displayName:'Reviewed final PDF',mimeType:'application/pdf',sizeBytes:null,publishedAt:'2026-10-01T12:00:00Z',deliverableTitle:body.category==='graphic_design'?'Exact linked poster':null,planMonth:body.category==='graphic_design'?'2026-10':null}],nextOffset:null}}})
     })
     await page.goto('http://127.0.0.1:53987/__library')
@@ -81,6 +82,25 @@ try{
     const opened=new URL((await page.evaluate(()=>window.fixtureOpened))[0])
     assert.equal(opened.origin,'http://127.0.0.1:1');assert.equal(opened.searchParams.get('asset'),'22222222-2222-4222-8222-222222222222');assert.equal(opened.searchParams.get('purpose'),'inline')
     await page.evaluate(()=>{window.fixtureOpened=[]})
+    holdMonth=true
+    const monthRequest=page.waitForRequest(request=>request.url().includes('/functions/v1/client-onboarding')&&request.postDataJSON()?.action==='staff_preview_portal_library_month')
+    await design.getByRole('button',{name:'October (1)',exact:true}).click()
+    await monthRequest
+    // Abandon a pending 2026 read without immediately choosing a new month.
+    await design.getByRole('button',{name:'2025 (1)',exact:true}).click()
+    assert.equal(await design.getByRole('status').count(),0,'A newly selected year must not inherit the abandoned month spinner')
+    assert.equal(await design.getByText('Reviewed final PDF',{exact:true}).count(),0)
+    await design.getByRole('button',{name:'September (1)',exact:true}).waitFor()
+    const monthResponse=page.waitForResponse(response=>response.url().includes('/functions/v1/client-onboarding'))
+    assert.ok(releaseMonth,'Old month request held')
+    releaseMonth();await monthResponse
+    await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))))
+    assert.equal(await design.getByRole('status').count(),0)
+    assert.equal(await design.getByText('Reviewed final PDF',{exact:true}).count(),0,'A late response must not populate the new year')
+    holdMonth=false
+    await design.getByRole('button',{name:'2026 (1)',exact:true}).click()
+    await design.getByRole('button',{name:'October (1)',exact:true}).click()
+    await design.getByText('Reviewed final PDF',{exact:true}).waitFor()
     await page.screenshot({path:join(tmpdir(),`cg-library-${width}.png`),fullPage:true})
     accessMode='held'
     await design.getByRole('button',{name:'View',exact:true}).click()
@@ -94,9 +114,9 @@ try{
     await page.evaluate(()=>new Promise(resolve=>setTimeout(resolve,100)))
     assert.deepEqual(await page.evaluate(()=>window.fixtureOpened),[],'A departed client scope must not open a late file response')
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${width} body overflow`)
-    assert.deepEqual(errors,[]);assert.equal(await page.locator('vite-error-overlay').count(),0);assert.equal(reads.length,7)
+    assert.deepEqual(errors,[]);assert.equal(await page.locator('vite-error-overlay').count(),0);assert.equal(reads.length,9)
     await page.screenshot({path:join(tmpdir(),`cg-library-departed-${width}.png`),fullPage:true})
-    console.log(`PASS ${width}px: explicit read/access errors, exact-client Calendar link, late file response fenced after scope departure, read-only, no runtime errors/body overflow`)
+    console.log(`PASS ${width}px: explicit errors, exact Calendar link, year-switch resets pending state, late month/file responses fenced, read-only, no errors/overflow`)
     await page.close()
   }
 }finally{if(browser)await browser.close();await server.close()}
