@@ -2,6 +2,7 @@ import { supabase } from '../supabase'
 import {
   isLeadInboxUnavailableError,
   mapWebsiteLeadBreakdown,
+  mapWebsiteLeadMetrics,
   mapWebsiteLeadRow,
   normaliseLeadLifecycle,
   validateLeadLifecycle,
@@ -22,17 +23,22 @@ export type LeadLoad<T> =
  * their profile); staff must pass the selected client. The database decides.
  */
 export async function listWebsiteLeads(clientId?: string, limit = 100): Promise<LeadLoad<WebsiteLead[]>> {
-  const { data, error } = await supabase.rpc('website_lead_inbox', {
-    p_client_id: clientId ?? null,
-    p_limit: limit,
-    p_before: null,
-  })
-  if (isLeadInboxUnavailableError(error)) return { state: 'unavailable' }
-  if (error) return { state: 'error', message: 'Leads could not be loaded. Please try again shortly.' }
   try {
-    return { state: 'ready', data: ((data ?? []) as Record<string, unknown>[]).map(mapWebsiteLeadRow) }
+    const { data, error } = await supabase.rpc('website_lead_inbox', {
+      p_client_id: clientId ?? null,
+      p_limit: limit,
+      p_before: null,
+    })
+    if (isLeadInboxUnavailableError(error)) return { state: 'unavailable' }
+    if (error) return { state: 'error', message: 'Leads could not be loaded. Please try again shortly.' }
+    try {
+      if (!Array.isArray(data)) throw new Error('Inbox evidence is missing.')
+      return { state: 'ready', data: data.map(mapWebsiteLeadRow) }
+    } catch {
+      return { state: 'error', message: 'Lead data was not in the expected shape.' }
+    }
   } catch {
-    return { state: 'error', message: 'Lead data was not in the expected shape.' }
+    return { state: 'error', message: 'Leads could not be loaded. Please try again shortly.' }
   }
 }
 
@@ -53,16 +59,20 @@ export async function saveWebsiteLeadLifecycle(enquiryId: string, input: LeadLif
 }
 
 export async function getWebsiteLeadMetrics(clientId: string | null, from: string, to: string): Promise<LeadLoad<WebsiteLeadMetrics>> {
-  const { data, error } = await supabase.rpc('website_lead_metrics', {
-    p_client_id: clientId,
-    p_from: from,
-    p_to: to,
-  })
-  if (isLeadInboxUnavailableError(error)) return { state: 'unavailable' }
-  if (error || !data || typeof data !== 'object') return { state: 'error', message: 'Lead metrics could not be loaded.' }
-  const metrics = data as WebsiteLeadMetrics & { clientId?: string }
-  if (clientId && metrics.clientId !== clientId) return { state: 'error', message: 'Lead metrics identity mismatch.' }
-  return { state: 'ready', data: metrics }
+  try {
+    const { data, error } = await supabase.rpc('website_lead_metrics', {
+      p_client_id: clientId,
+      p_from: from,
+      p_to: to,
+    })
+    if (isLeadInboxUnavailableError(error)) return { state: 'unavailable' }
+    if (error || !data || typeof data !== 'object') return { state: 'error', message: 'Lead metrics could not be loaded.' }
+    const metrics = data as WebsiteLeadMetrics & { clientId?: string }
+    if (clientId && metrics.clientId !== clientId) return { state: 'error', message: 'Lead metrics identity mismatch.' }
+    return { state: 'ready', data: mapWebsiteLeadMetrics(metrics, from, to) }
+  } catch {
+    return { state: 'error', message: 'Lead metrics could not be loaded.' }
+  }
 }
 
 /** Qualified leads by landing page or source. Unapplied migration -> 'unavailable', never zeros. */
@@ -72,18 +82,22 @@ export async function getWebsiteLeadBreakdown(
   to: string,
   dimension: LeadBreakdownDimension,
 ): Promise<LeadLoad<WebsiteLeadBreakdown>> {
-  const { data, error } = await supabase.rpc('website_lead_breakdown', {
-    p_client_id: clientId,
-    p_from: from,
-    p_to: to,
-    p_dimension: dimension,
-  })
-  if (isLeadInboxUnavailableError(error)) return { state: 'unavailable' }
-  if (error) return { state: 'error', message: 'Lead sources could not be loaded.' }
-  if (clientId && (data as { clientId?: string } | null)?.clientId !== clientId) return { state: 'error', message: 'Lead breakdown identity mismatch.' }
   try {
-    return { state: 'ready', data: mapWebsiteLeadBreakdown(data, dimension) }
+    const { data, error } = await supabase.rpc('website_lead_breakdown', {
+      p_client_id: clientId,
+      p_from: from,
+      p_to: to,
+      p_dimension: dimension,
+    })
+    if (isLeadInboxUnavailableError(error)) return { state: 'unavailable' }
+    if (error) return { state: 'error', message: 'Lead sources could not be loaded.' }
+    if (clientId && (data as { clientId?: string } | null)?.clientId !== clientId) return { state: 'error', message: 'Lead breakdown identity mismatch.' }
+    try {
+      return { state: 'ready', data: mapWebsiteLeadBreakdown(data, dimension) }
+    } catch {
+      return { state: 'error', message: 'Lead breakdown was not in the expected shape.' }
+    }
   } catch {
-    return { state: 'error', message: 'Lead breakdown was not in the expected shape.' }
+    return { state: 'error', message: 'Lead sources could not be loaded.' }
   }
 }

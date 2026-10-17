@@ -1,5 +1,38 @@
 # CG Dynamics Ops Handover
 
+### 17 October — Lead Inbox read truth and saved Neshora guideline readback
+
+Focused local lane `codex/lead-read-truth-2026-10-17` fixes five failing-first
+reader groups: null inbox falsely empty, malformed identity/date admitted to UI,
+metrics cast without validation, extra fields retained, and rejected RPC reads
+escaping their load contract. Valid zero/disconnected history/four-decimal rates
+remain valid. Exact client/Johannesburg period, lifecycle/count consistency and
+allowlisted aggregate fields now gate metrics. No RPC signature, lifecycle write,
+schema or permission change. SELECT-only production function definition matches
+the committed metrics body exactly; receipt is in strategy-review.
+
+Final supported suite3924total/3905pass/19intentional skips/0fail,33focused tests,
+all15 canonical local browser fixtures, build/app chunks/scoped lint/diff PASS.
+New actual Lead Inbox fixture covers client-pinned and named staff-preview reads
+at1440/375/390/430, malformed/missing/failed results versus confirmed empty/zero.
+No Vercel, production data/schema/Edge/config/secret/provider/OAuth/publication
+change; client IDs/Hours preserved. Existing775/662/618 untouched. Frontend remains
+source-only pending#679, not an all-client launch sign-off. Detailed receipt:
+`CLIENT-LEAD-READ-TRUTH-2026-10-17.md`.
+
+Existing normal **Write Client Strategies** task is now completed/idle, not still
+running as the prior handover states. App read_thread exposes its reply as an
+unread message reference; no prose result was assumed. Fresh CG connector confirms
+Neshora's canonical draft guideline9ba79133-aace-4caa-bf4f-0b1c236f65df has two saved
+scripts (October/November ideas), both unallocated, not_shot, no final publication.
+Run0441e2b1-7170-4ba1-bbbc-49400bda083a is19October. Missing client short code blocks
+canonical folder readiness; no value guessed/set. November strategy remains
+draft0018ace6-7f52-4b52-a411-ae34dbc89cb2v1, unpublished and evidence-held. A saved
+script is NOT a ready/published full portal. No new writer dispatch or paid model.
+Fresh work Chrome inventory now identifies cgproductionhouse.com as browser3
+(IDs changed); one DOM read still hits transport failure, then stops without auth
+bypass/retry loop. Control Centre access remains unavailable, not invented.
+
 ### 16 October — two portal-navigation defects repaired locally
 
 Focused continuation from main4ad9c39f reproduces and fixes two actual-component

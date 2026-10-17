@@ -115,6 +115,33 @@ export interface WebsiteLeadMetrics {
   qualificationRate: number | null
 }
 
+const METRIC_COUNTS = ['total', 'new', 'contacted', 'qualified', 'won', 'closedLost', 'lost', 'good', 'poor', 'unreviewed'] as const
+
+/** Validate the existing exact-period RPC contract before numbers become UI state. */
+export function mapWebsiteLeadMetrics(value: unknown, from: string, to: string): WebsiteLeadMetrics {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Lead metrics are missing.')
+  const data = value as Record<string, unknown>
+  const period = data.period as Record<string, unknown> | null
+  if (!period || period.from !== from || period.to !== to || period.timezone !== 'Africa/Johannesburg'
+    || (data.state !== 'available' && data.state !== 'not_connected')
+    || !METRIC_COUNTS.every(key => typeof data[key] === 'number' && Number.isSafeInteger(data[key]) && data[key] >= 0)) {
+    throw new Error('Lead metrics are not in the expected shape.')
+  }
+  const counts = Object.fromEntries(METRIC_COUNTS.map(key => [key, data[key]])) as Pick<WebsiteLeadMetrics, typeof METRIC_COUNTS[number]>
+  // Qualified includes subsequent Won/Lost good leads; it is not a disjoint status.
+  if (counts.qualified !== counts.good || counts.unreviewed !== counts.new + counts.contacted
+    || counts.total !== counts.good + counts.poor + counts.unreviewed
+    || counts.closedLost !== counts.lost + counts.poor || counts.won + counts.lost > counts.good) {
+    throw new Error('Lead metrics counts are inconsistent.')
+  }
+  const rate = data.qualificationRate
+  if (counts.total === 0 ? rate !== null : typeof rate !== 'number' || !Number.isFinite(rate)
+    || rate < 0 || rate > 1 || Math.abs(rate - counts.good / counts.total) > 0.000051) {
+    throw new Error('Lead qualification rate is inconsistent.')
+  }
+  return { state: data.state, period: { from, to, timezone: 'Africa/Johannesburg' }, ...counts, qualificationRate: rate as number | null }
+}
+
 export type LeadBreakdownDimension = 'landing_page' | 'source'
 
 export interface WebsiteLeadBreakdownRow {
@@ -262,6 +289,11 @@ const asString = (value: unknown): string | null => typeof value === 'string' &&
 
 /** Strict row mapping: unknown lifecycle values are rejected rather than guessed. */
 export function mapWebsiteLeadRow(row: Record<string, unknown>): WebsiteLead {
+  if (!row || typeof row !== 'object' || Array.isArray(row)
+    || !['enquiry_id', 'receipt_id', 'website_editor_website_id', 'form_schema_key'].every(key => asString(row[key]))
+    || !leadTimestamp(row.accepted_at) || !Number.isSafeInteger(row.form_schema_version) || (row.form_schema_version as number) < 1) {
+    throw new Error('Lead identity or date is invalid.')
+  }
   const status = row.status as LeadStatus
   if (!LEAD_STATUSES.includes(status)) throw new Error('Lead status is not recognised.')
   const quality = (row.quality ?? null) as LeadQuality | null
@@ -294,6 +326,14 @@ export function mapWebsiteLeadRow(row: Record<string, unknown>): WebsiteLead {
     poorNote: asString(row.poor_note),
     lifecycleUpdatedAt: asString(row.lifecycle_updated_at),
   }
+}
+
+function leadTimestamp(value: unknown): value is string {
+  if (typeof value !== 'string'
+    || !/^\d{4}-\d{2}-\d{2}T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(value)
+    || !Number.isFinite(Date.parse(value))) return false
+  const date = new Date(`${value.slice(0, 10)}T00:00:00Z`)
+  return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value.slice(0, 10)
 }
 
 /**

@@ -64,7 +64,9 @@ try {
         if (url.pathname.endsWith('website_lead_metrics')) {
           const payload = request.postDataJSON()
           assert.ok([clientA, clientB].includes(payload.p_client_id), 'Lead metrics remain exact-client scoped')
-          return route.fulfill({ json: { clientId: payload.p_client_id, state: payload.p_client_id === clientA ? 'not_connected' : 'available' } })
+          return route.fulfill({ json: { clientId: payload.p_client_id, state: payload.p_client_id === clientA ? 'not_connected' : 'available',
+            period: { from: payload.p_from, to: payload.p_to, timezone: 'Africa/Johannesburg' },
+            total: 0, new: 0, contacted: 0, qualified: 0, won: 0, closedLost: 0, lost: 0, good: 0, poor: 0, unreviewed: 0, qualificationRate: null } })
         }
         if (url.pathname.endsWith('get_my_client_service_entitlements')) return route.fulfill({ status: 503, json: { message: 'Local unavailable fixture' } })
         const payload = request.postDataJSON()

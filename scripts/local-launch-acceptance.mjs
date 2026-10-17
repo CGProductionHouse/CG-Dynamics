@@ -7,6 +7,7 @@ import { pathToFileURL } from 'node:url'
 
 export const browserFixtures = Object.freeze([
   'client-portal-shell-readonly-browser.mjs', 'client-overview-schedule-browser.mjs', 'client-overview-fact-error-browser.mjs',
+  'client-leads-readonly-browser.mjs',
   'client-plan-readonly-browser.mjs', 'strategy-review-readonly-browser.mjs', 'client-approvals-readonly-browser.mjs',
   'client-library-readonly-browser.mjs', 'client-brand-hub-setup-readonly-browser.mjs', 'report-cutoff-readonly-browser.mjs',
   'director-saved-context-browser.mjs', 'director-precise-edit-browser.mjs',

@@ -29,6 +29,7 @@ test('client launch acceptance includes every high-risk client journey and unava
     'client-portal-shell-readonly-browser.mjs',
     'client-overview-schedule-browser.mjs',
     'client-overview-fact-error-browser.mjs',
+    'client-leads-readonly-browser.mjs',
     'client-plan-readonly-browser.mjs',
     'report-cutoff-readonly-browser.mjs',
     'strategy-review-readonly-browser.mjs',
