@@ -104,7 +104,15 @@ try {
         assert.equal(await page.getByRole('link', { name: 'Leads', exact: true }).count(), 0, 'Disconnected client has no irrelevant Leads navigation')
         await page.goto(`${base}?client=${clientA}&area=leads`)
       } else {
-        if (width < 640 && labels[i] === 'Brand Hub') await page.getByRole('button', { name: 'More pages' }).click()
+        if (width < 640 && labels[i] === 'Brand Hub') {
+          const more = page.getByRole('button', { name: 'More pages' })
+          await more.click()
+          await more.press('Tab')
+          assert.equal(await page.evaluate(() => document.activeElement?.textContent?.trim()), 'Brand Hub', 'Forward Tab reaches the disclosed destination')
+          await page.getByRole('navigation', { name: 'More client pages' }).getByRole('link', { name: 'Brand Hub', exact: true }).press('Escape')
+          assert.equal(await page.evaluate(() => document.activeElement?.getAttribute('aria-label')), 'More pages', 'Escape returns focus to the disclosure control')
+          await more.press('Enter')
+        }
         const nav = page.getByRole('navigation', { name: width < 640 && labels[i] === 'Brand Hub' ? 'More client pages' : width < 640 ? 'Client portal mobile' : 'Client portal' })
         await nav.getByRole('link', { name: labels[i], exact: true }).click()
       }
@@ -128,6 +136,16 @@ try {
     await page.waitForURL(url => url.searchParams.get('client') === clientB)
     if (width < 640) await page.getByRole('button', { name: 'More pages' }).click()
     await page.getByRole('link', { name: 'Leads', exact: true }).first().waitFor()
+    if (width < 640) {
+      const more = page.getByRole('button', { name: 'More pages' })
+      await more.press('Tab')
+      assert.equal(await page.evaluate(() => document.activeElement?.textContent?.trim()), 'Leads', 'Connected client menu begins with Leads')
+      const secondary = page.getByRole('navigation', { name: 'More client pages' })
+      await secondary.getByRole('link', { name: 'Leads', exact: true }).press('Tab')
+      assert.equal(await page.evaluate(() => document.activeElement?.textContent?.trim()), 'Brand Hub', 'Forward tab order includes both destinations')
+      await secondary.getByRole('link', { name: 'Brand Hub', exact: true }).press('Escape')
+      assert.equal(await page.evaluate(() => document.activeElement?.getAttribute('aria-label')), 'More pages')
+    }
     await page.waitForTimeout(150)
     assert.equal(await page.locator('header').getByText('Synthetic client A', { exact: true }).count(), 0, 'Old client header absent')
     for (const [table, area, heading] of [
@@ -158,6 +176,16 @@ try {
       await page.getByRole('heading', { name: mode === 'empty' ? 'No published report yet' : 'Performance is temporarily unavailable', exact: true }).waitFor()
       if (mode !== 'empty') assert.equal(await page.getByRole('heading', { name: 'No published report yet', exact: true }).count(), 0)
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
+    }
+    if (width < 640) {
+      const more = page.getByRole('button', { name: 'More pages' })
+      await more.click()
+      const secondary = page.getByRole('navigation', { name: 'More client pages' })
+      const firstDestination = (await secondary.getByRole('link').allTextContents())[0].trim()
+      await more.press('Tab')
+      assert.equal(await page.evaluate(() => document.activeElement?.textContent?.trim()), firstDestination, 'Normal client can Tab into the disclosed menu too')
+      await secondary.getByRole('link').first().press('Escape')
+      assert.equal(await page.evaluate(() => document.activeElement?.getAttribute('aria-label')), 'More pages')
     }
     assert.deepEqual(errors, [])
     console.log(`PASS actual full preview ${width}px: six routes, exact scope, read-only controls, unavailable/empty and role denial; local synthetic only`)
