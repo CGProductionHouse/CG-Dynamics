@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { portalPreviewPath } from '../../lib/clientPortalPreviewPolicy'
 import { ClientLogo } from '../ClientLogo'
@@ -41,6 +41,7 @@ export function ClientPortalShell({
 }) {
   const { signOut } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const mobileMoreButtonRef = useRef<HTMLButtonElement>(null)
   const [leadNav, setLeadNav] = useState<{ clientId: string; visible: boolean } | null>(null)
   const location = useLocation()
   const isPreview = previewClientId !== undefined
@@ -71,7 +72,11 @@ export function ClientPortalShell({
   useEffect(() => {
     if (!mobileMenuOpen) return
     const onEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setMobileMenuOpen(false)
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        setMobileMenuOpen(false)
+        mobileMoreButtonRef.current?.focus()
+      }
     }
     window.addEventListener('keydown', onEscape)
     return () => window.removeEventListener('keydown', onEscape)
@@ -148,6 +153,21 @@ export function ClientPortalShell({
       </main>
 
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#06110f]/95 shadow-[0_-18px_55px_-32px_rgba(0,0,0,0.95)] backdrop-blur-2xl sm:hidden">
+        <nav aria-label="Client portal mobile" className="mx-auto grid max-w-xl grid-cols-5 px-1 pb-[calc(0.3rem+env(safe-area-inset-bottom))] pt-1">
+          {[...MOBILE_PRIMARY, MOBILE_APPROVALS].map(item => <NavLink key={item.to} to={target(item.to)} end={item.end}
+            aria-current={isPreview ? (activeItem.to === item.to ? 'page' : false) : undefined}
+            onClick={() => setMobileMenuOpen(false)}
+            className={({ isActive }) => `flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl px-0.5 text-[0.65rem] font-bold leading-none transition-colors ${(isPreview ? activeItem.to === item.to : isActive) ? 'bg-[#2dd4bf]/10 text-[#6ee7d8]' : 'text-slate-400 hover:bg-white/[0.05] hover:text-white'}`}>
+            <MobileNavIcon name={item.label} />{item.label}
+          </NavLink>)}
+          <button ref={mobileMoreButtonRef} type="button" aria-label="More pages" aria-expanded={mobileMenuOpen} aria-controls="client-mobile-navigation"
+            onClick={() => setMobileMenuOpen(open => !open)}
+            className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl px-0.5 text-[0.65rem] font-bold leading-none ${moreIsActive || mobileMenuOpen ? 'bg-[#2dd4bf]/10 text-[#6ee7d8]' : 'text-slate-400'}`}>
+            <MobileNavIcon name="More" />More
+          </button>
+        </nav>
+        {/* Follow the disclosure button in DOM order so forward Tab reaches the
+            revealed destinations. Absolute positioning preserves the design. */}
         {mobileMenuOpen && <nav id="client-mobile-navigation" aria-label="More client pages" className={`absolute inset-x-3 bottom-[calc(100%+0.5rem)] grid gap-2 rounded-2xl border border-white/15 bg-[#0a1815] p-3 shadow-2xl ${visibleMobileMore.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
           {visibleMobileMore.map(item => <NavLink key={item.to} to={target(item.to)} end={item.end}
             aria-current={isPreview ? (activeItem.to === item.to ? 'page' : false) : undefined}
@@ -156,19 +176,6 @@ export function ClientPortalShell({
             {item.label}
           </NavLink>)}
         </nav>}
-        <nav aria-label="Client portal mobile" className="mx-auto grid max-w-xl grid-cols-5 px-1 pb-[calc(0.3rem+env(safe-area-inset-bottom))] pt-1">
-          {[...MOBILE_PRIMARY, MOBILE_APPROVALS].map(item => <NavLink key={item.to} to={target(item.to)} end={item.end}
-            aria-current={isPreview ? (activeItem.to === item.to ? 'page' : false) : undefined}
-            onClick={() => setMobileMenuOpen(false)}
-            className={({ isActive }) => `flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl px-0.5 text-[0.65rem] font-bold leading-none transition-colors ${(isPreview ? activeItem.to === item.to : isActive) ? 'bg-[#2dd4bf]/10 text-[#6ee7d8]' : 'text-slate-400 hover:bg-white/[0.05] hover:text-white'}`}>
-            <MobileNavIcon name={item.label} />{item.label}
-          </NavLink>)}
-          <button type="button" aria-label="More pages" aria-expanded={mobileMenuOpen} aria-controls="client-mobile-navigation"
-            onClick={() => setMobileMenuOpen(open => !open)}
-            className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl px-0.5 text-[0.65rem] font-bold leading-none ${moreIsActive || mobileMenuOpen ? 'bg-[#2dd4bf]/10 text-[#6ee7d8]' : 'text-slate-400'}`}>
-            <MobileNavIcon name="More" />More
-          </button>
-        </nav>
       </div>
     </div>
   )

@@ -1,5 +1,37 @@
 # CG Dynamics Ops Handover
 
+### 17 October — live-reproduced mobile More keyboard repair
+
+Unowned focused continuation from main38615f6d: actual authenticated Forklift
+preview at390x844 proves forwardTab skips the disclosed BrandHub link toBODY,
+and Escape from that link closes the panel but also drops focus toBODY. Viewport
+restored. ClientPortalShell now puts the same absolutely positioned menu after
+More in DOM tab order; Escape closes it and returns focus to its More button.
+Every existing design class/destination, desktop nav and read/role scope remains.
+Failing-first actual-shell browser regression failed at375px, then passes normal
+client + exact staff preview, disconnected1link/connected2links,375/390/430 and
+desktop1440. No new shell, modal, authority, dependency or architecture.
+
+Final3926total/3907pass/19intentional skips/0fail;10focused tests;all15canonical
+local browser fixtures; build/app chunks/scoped lint/diff PASS. Two optional
+workstation PostgreSQL checks skipped (Docker stopped), Windows Bash SES excluded,
+not passed. Local390px screenshot visually checked. See
+`CLIENT-MOBILE-NAV-KEYBOARD-2026-10-17.md`. Existing775admin/onboarding nav does not
+own this client component;775/662/618 untouched. No protected production mutation
+or Vercel operation in the code lane; frontend still679-held/source-only, not a
+real-device/client-role or all-client launch pass. Control Centre unavailable.
+
+Existing normal company Write Client Strategies was idle, then continued via app
+thread tools under CA's earlier explicit request, Neshora first and next unblocked
+existing fleet drafts only. No new task/automation/paid model, no Codex-authored
+strategy substitute or auto-publication. Latest author turn completed but answer
+is opaque content-reference; top-level status still active. A handoff-only receipt
+request was rejected as already responding, no second follow-up accepted/retried.
+Do not claim saved work from
+dispatch/status alone. Fresh canonical Neshora November stillv1/draft/unpublished
+CLIENT_EVIDENCE_UNVERIFIED/EXACT_STRATEGY_EVIDENCE_UNAVAILABLE. A single work-Chrome
+transport failure stopped without retry/auth bypass; IAB portal remained usable.
+
 ### 17 October — report/approval read truth; first automatic Google refresh accepted
 
 Following merged #830 (`3e068672`), the next unowned lane reproduces two reader
