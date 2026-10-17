@@ -1,6 +1,42 @@
 # Company ChatGPT monthly strategy workspace — #731
 
-## 16 October live connector and full-script acceptance (latest)
+## 17 October continuation receipts (latest)
+
+The same human-authorised normal **Write Client Strategies** writer continued
+the existing ordered queue after the independently confirmed Novus Steel pass
+(#731 comment 6233461766). From the Cape Lumber cursor it completed the next
+five eligible clients (October and November 2026) with **ten version-fenced,
+audited draft amendments saved and freshly read back**: Cape Lumber, Forklift
+Trucks, RC-Polypipe, HMHI / Hill, McHardy & Herbst and Bohemia Quick Stop.
+The writer reports every write returned `draft_amended` / `workflow_status=draft` /
+`published_version=null`; fresh brief readbacks matched the complete changed
+fields exactly and left all other strategy data identical. One preliminary
+RC-Polypipe October attempt was rejected before write
+(`STRATEGY_PROPOSAL_INVALID / TEXT_TOO_LONG`) and passed only after its video
+concept was shortened below 300 characters; RC's guide ID was not an eligible
+citation, so only eligible current report/package source IDs were submitted.
+Exact IDs, versions, changed fields and readback invariants:
+`strategy-review/2026-10-17-normal-chat-draft-amendments.json`.
+
+WiseRide's two held months were skipped with zero writes
+(`EXACT_STRATEGY_EVIDENCE_UNAVAILABLE`, owner-held evidence review); the prior
+Neshora source/short-code/clinical-consent holds and the Human Auto skip/go
+gate are unchanged. **Next exact canonical cursor: Kundedienste**
+(`5e4e3335-a89c-4629-9efc-b6a194bec80c`) — read-only checked, both months
+blocked by `CLIENT_EVIDENCE_UNVERIFIED` / `NO_CONFIRMED_MONTHLY_CONTENT_SCOPE`
+/ `EXACT_STRATEGY_EVIDENCE_UNAVAILABLE`; skip pending owner source/package
+decisions, then continue canonical order. Do not redo Novus Steel or this
+five-client batch. No approval/publication, source activation, paid
+generation, package/calendar/permission/Vercel change or new client row
+occurred. The 37-ready / 24-blocked count is a historical inventory, not a new
+fleet scan; re-read each brief's current eligibility. Separate semantic-review
+and publication gates remain in force. Supervisor independently confirmed all
+ten current canonical IDs/versions, draft status and selected test/game-plan
+content, not the writer's full before/after unchanged-field comparison. The
+same normal chat accepted the next five-eligible continuation from Kundedienste;
+that dispatch is not another saved receipt.
+
+## 16 October live connector and full-script acceptance (earlier)
 
 PRs #819/#820 are merged and MCP v67 is deployed. The actor-aware guideline RPC,
 read-only creation guard, source ordering and Unicode-safe generic write hash are
