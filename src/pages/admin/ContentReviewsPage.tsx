@@ -3,7 +3,7 @@ import { ClientPortalLink as Link } from '../../components/client/ClientPortalLi
 import { useAuth } from '../../contexts/AuthContext'
 import { ContentReviewCard } from '../../components/content/ContentReviewCard'
 import { ClientPortalEmptyState, ClientPortalErrorState, ClientPortalLoadingState } from '../../components/client/ClientPortalStates'
-import { listContentReviews, type ContentReview } from '../../lib/contentReviews'
+import { listContentReviews, projectClientReviewQueue, type ContentReview } from '../../lib/contentReviews'
 import { supabase } from '../../lib/supabase'
 import { useOptionalClientPortal } from '../../components/client/ClientPortalContext'
 import { listPreviewApprovals } from '../../lib/clientPortalPreview'
@@ -23,8 +23,9 @@ export default function ContentReviewsPage({ clientView = false }: { clientView?
       try {
       const result = await (clientView ? (previewClientId ? listPreviewApprovals(previewClientId) : supabase.rpc('client_content_review_queue')) : listContentReviews())
       if (!active) return
-      if (clientView && !result.error && !Array.isArray(result.data)) throw new Error('Invalid review queue evidence')
-      setReviews((result.data ?? []) as ContentReview[])
+      const projected = clientView ? projectClientReviewQueue(result.data) : result.data
+      if (clientView && !result.error && !projected) throw new Error('Invalid review queue evidence')
+      setReviews(result.error ? [] : (projected ?? []) as ContentReview[])
       setError(result.error?.message ?? null)
       setLoading(false)
       } catch {

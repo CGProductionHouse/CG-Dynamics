@@ -2,7 +2,7 @@ import { supabase } from './supabase'
 import { getReportWithPosts, type ClientReport, type ClientReportWithPosts, type Report } from './db/reports'
 import type { StrategyData } from './strategyEngine'
 import { reportPostToStatsPost } from './reportStats'
-import type { ContentReview } from './contentReviews'
+import { projectClientReviewQueue } from './contentReviews'
 import { listManualMetricsForClientMonth, type ReportManualMetric } from './db/manualMetrics'
 
 export { previewClientId, portalPreviewPath } from './clientPortalPreviewPolicy'
@@ -97,8 +97,9 @@ export async function listPreviewApprovals(clientId: string) {
       .eq('client_id', clientId).eq('client_approval_required', true)
       .in('state', ['client_review', 'approved']).not('internal_approved_at', 'is', null)
       .order('scheduled_at')
-    if (error || !Array.isArray(data)) throw new Error('Approval evidence unavailable')
-    return { data: data as ContentReview[], error: null }
+    const projected = projectClientReviewQueue(data)
+    if (error || !projected) throw new Error('Approval evidence unavailable')
+    return { data: projected, error: null }
   } catch {
     return { data: [], error: { message: 'Approvals could not be loaded.' } }
   }
