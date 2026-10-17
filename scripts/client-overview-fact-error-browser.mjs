@@ -10,24 +10,26 @@ if (!process.env.CG_PLAYWRIGHT_MODULE) throw new Error('Set CG_PLAYWRIGHT_MODULE
 const { chromium } = await import(pathToFileURL(process.env.CG_PLAYWRIGHT_MODULE).href)
 const clientId = '11111111-1111-4111-8111-111111111111'
 const reportId = '22222222-2222-4222-8222-222222222222'
+const report = { id: reportId, client_id: clientId, platform: null, status: 'published', period_start: '2026-09-01', period_end: '2026-09-23', published_at: '2026-09-24T10:00:00Z', report_title: 'September review', website_report: null }
 const fixture = {
   name: 'client-overview-fact-error-fixture', enforce: 'pre',
   resolveId(id) { if (id === 'virtual:overview-fact-error') return '\0virtual:overview-fact-error' },
   transform(_code, id) {
-    if (id.replaceAll('\\', '/').endsWith('/contexts/AuthContext.tsx')) return `export function useAuth(){return {profile:{role:'admin',client_id:null}}}`
+    if (id.replaceAll('\\', '/').endsWith('/contexts/AuthContext.tsx')) return `export function useAuth(){return {profile:{id:'local-profile',role:location.pathname.includes('performance')?'client':'admin',client_id:'${clientId}'}}}`
   },
   load(id) {
     if (id !== '\0virtual:overview-fact-error') return
     return `import React from 'react';import {createRoot} from 'react-dom/client';import {BrowserRouter} from 'react-router-dom';
       import ClientPortalHome from '/src/pages/client/ClientPortalHome.tsx';
+      import Dashboard from '/src/pages/client/Dashboard.tsx';
       import {ClientPortalContext} from '/src/components/client/ClientPortalContext.ts';import '/src/index.css';
       createRoot(document.getElementById('root')).render(React.createElement(BrowserRouter,null,
-        React.createElement(ClientPortalContext.Provider,{value:{client:{id:'${clientId}',name:'Synthetic A'},previewClientId:'${clientId}'}},
-          React.createElement('main',{className:'mx-auto max-w-6xl min-w-0 p-4 sm:p-8'},React.createElement(ClientPortalHome)))));`
+        React.createElement(ClientPortalContext.Provider,{value:{client:{id:'${clientId}',name:'Synthetic A'},previewClientId:location.pathname.includes('performance')?undefined:'${clientId}'}},
+          React.createElement('main',{className:'mx-auto max-w-6xl min-w-0 p-4 sm:p-8'},React.createElement(location.pathname.includes('performance')?Dashboard:ClientPortalHome)))));`
   },
   configureServer(server) {
     server.middlewares.use((req, res, next) => {
-      if (req.url !== '/__overview-fact-error') return next()
+      if (!['/__overview-fact-error', '/__performance-fact-error'].includes(req.url?.split('?')[0])) return next()
       res.setHeader('Content-Type', 'text/html')
       res.end('<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="background:#060d0c"><div id="root"></div><script type="module" src="/@id/virtual:overview-fact-error"></script></body></html>')
     })
@@ -41,9 +43,9 @@ let browser
 try {
   await server.listen()
   browser = await chromium.launch({ headless: true })
-  for (const width of [1440, 375]) {
+  for (const width of [1440, 375, 390, 430]) {
     const page = await browser.newPage({ viewport: { width, height: 900 } })
-    const errors = []; const reads = []; let factMode = 'failure'
+    const errors = []; const reads = []; let factMode = 'missing'
     page.on('pageerror', error => errors.push(error.message))
     await page.route('**/*', route => {
       const request = route.request(); const url = new URL(request.url())
@@ -53,7 +55,7 @@ try {
       if (url.pathname === '/rest/v1/reports') {
         assert.equal(request.method(), 'GET')
         assert.equal(url.searchParams.get('client_id'), `eq.${clientId}`)
-        return route.fulfill({ json: [{ id: reportId, client_id: clientId, platform: null, status: 'published', period_start: '2026-09-01', period_end: '2026-09-23', published_at: '2026-09-24T10:00:00Z', report_title: 'September review', website_report: null }] })
+        return route.fulfill({ json: [report] })
       }
       if (url.pathname === '/rest/v1/monthly_client_strategies') {
         assert.equal(request.method(), 'GET')
@@ -62,18 +64,28 @@ try {
       }
       assert.ok(url.pathname.startsWith('/rest/v1/rpc/'), `Only expected read RPCs: ${url.pathname}`)
       const rpc = url.pathname.split('/').at(-1)
-      assert.ok(['get_report_metric_facts', 'get_report_metric_fact_status', 'get_google_ads_dashboard_campaign_metrics_v2', 'get_google_ads_dashboard_status_v2', 'client_portal_month_ahead_posts_v2', 'client_portal_month_ahead_events', 'client_portal_visibility_contract_version'].includes(rpc), `No write-capable RPC: ${rpc}`)
+      assert.ok(['get_report_metric_facts', 'get_report_metric_fact_status', 'get_google_ads_dashboard_campaign_metrics_v2', 'get_google_ads_dashboard_status_v2', 'client_portal_month_ahead_posts_v2', 'client_portal_month_ahead_events', 'client_portal_visibility_contract_version', 'client_published_reports', 'client_published_report_posts', 'client_published_report_manual_metrics', 'client_monthly_strategy', 'get_my_client_service_entitlements'].includes(rpc), `No write-capable RPC: ${rpc}`)
       const body = request.postDataJSON()
+      if (rpc === 'client_published_reports') return route.fulfill({ json:[report] })
+      if (rpc === 'client_published_report_posts' || rpc === 'client_published_report_manual_metrics') {
+        assert.equal(body.p_report_id,reportId)
+        return route.fulfill({json:[]})
+      }
       if (rpc === 'get_report_metric_facts') {
         assert.equal(body.p_report_id, reportId)
         if (factMode === 'failure') return route.fulfill({ status: 503, json: { message: 'Synthetic channel read failure' } })
+        if (factMode === 'missing') return route.fulfill({ json: null })
         if (factMode === 'verified') return route.fulfill({ json: [
           ['facebook', 'brand_views', 100], ['instagram', 'brand_views', 200], ['tiktok', 'views', 300],
         ].map(([platform, metric_key, value]) => ({ platform, metric_key, value, period_month: '2026-09',
           period_start: '2026-09-01', period_end: '2026-09-23', availability: 'complete',
           aggregation: 'sum', comparable_group: `${platform}_views`, source_metric: 'synthetic_views', includes_paid: 'both' })) })
       }
-      if (rpc === 'get_report_metric_fact_status') assert.equal(body.p_report_id, reportId)
+      if (rpc === 'get_report_metric_fact_status') {
+        assert.equal(body.p_report_id, reportId)
+        if (factMode === 'missing-status') return route.fulfill({ json: null })
+        return route.fulfill({ json: [{ normalized_attempted: factMode !== 'empty', current_fact_count: factMode === 'verified' ? 3 : 0, ready_fact_count: factMode === 'verified' ? 3 : 0 }] })
+      }
       if (rpc === 'client_portal_month_ahead_posts_v2' || rpc === 'client_portal_month_ahead_events') assert.equal(body.p_client_id, clientId)
       return route.fulfill({ json: rpc === 'client_portal_visibility_contract_version' ? 1 : [] })
     })
@@ -86,6 +98,13 @@ try {
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width}px body overflow`)
     assert.deepEqual(errors, [])
     await page.screenshot({ path: join(tmpdir(), `cg-overview-fact-error-${width}.png`), fullPage: true })
+    for (const mode of ['failure', 'missing-status']) {
+      factMode = mode
+      await page.reload()
+      await page.getByText('Verified channel facts could not be loaded right now', { exact: true }).waitFor()
+      assert.equal(await page.getByText('0 verified channels', { exact: true }).count(), 0)
+      assert.deepEqual(errors, [])
+    }
     factMode = 'empty'
     await page.reload()
     await page.getByText('Published review', { exact: true }).waitFor()
@@ -98,6 +117,15 @@ try {
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width}px verified views overflow`)
     await page.screenshot({ path: join(tmpdir(), `cg-overview-recorded-views-${width}.png`), fullPage: true })
     assert.deepEqual(errors, [])
+    for (const mode of ['missing','missing-status','failure']) {
+      factMode=mode
+      await page.goto('http://127.0.0.1:53990/__performance-fact-error')
+      await page.getByRole('heading',{name:'Performance is temporarily unavailable',exact:true}).waitFor()
+      assert.equal(await page.getByRole('heading',{name:'No published report yet',exact:true}).count(),0)
+      assert.equal(await page.getByRole('tab',{name:'Facebook',exact:true}).count(),0,'Unavailable facts do not fall back to a legacy report')
+      assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth))
+      assert.deepEqual(errors,[])
+    }
     console.log(`PASS ${width}px: failed facts unavailable, successful empty distinct, same-window verified views, published report remains, no body overflow`)
     await page.close()
   }

@@ -1,0 +1,36 @@
+{
+  "schema": "cg-normal-chat-strategy-readback/v1",
+  "date": "2026-10-17",
+  "writer_receipt": "https://github.com/CGProductionHouse/CG-Dynamics/issues/731#issuecomment-6237678566",
+  "route": "Existing normal Write Client Strategies chat and private CG Dynamics connector; no paid generator/new task/automation.",
+  "writer_reported_saves": 10,
+  "distinct_changed_client_months": 9,
+  "unchanged_accepted_client_months": 1,
+  "independent_verification": "Fresh supervisor get_monthly_strategy_brief reads confirm all ten exact current canonical IDs/versions, draft/unpublished status, selected tests, November game plans and concept counts below. Full changed-field equality and unselected-field preservation remain the writer's before/after receipt, not an independent historical diff.",
+  "drafts": [
+    { "client": "Central Canvas", "client_id": "6b313cac-283e-48c4-9df6-ba43af2f7353", "month": "2026-10-01", "strategy_id": "de06935a-925e-4def-a40e-14f38944b904", "version_before": 3, "version_final": 4, "changed": true, "concepts": { "video": 1, "photo": 4, "poster": 3 } },
+    { "client": "Central Canvas", "client_id": "6b313cac-283e-48c4-9df6-ba43af2f7353", "month": "2026-11-01", "strategy_id": "382e6063-242a-4030-9454-22b90952561a", "version_before": 3, "version_final": 4, "changed": true, "concepts": { "video": 1, "photo": 4, "poster": 3 } },
+    { "client": "Braize", "client_id": "6b67a2df-e2ab-418b-bcee-03aef5963d37", "month": "2026-10-01", "strategy_id": "0d532439-99de-4283-820a-d67c89ae5d36", "version_before": 3, "version_final": 4, "changed": true, "concepts": { "video": 0, "photo": 4, "poster": 4 } },
+    { "client": "Braize", "client_id": "6b67a2df-e2ab-418b-bcee-03aef5963d37", "month": "2026-11-01", "strategy_id": "bf51b539-d782-4dcb-a69d-e6f5193398b6", "version_before": 3, "version_final": 5, "changed": true, "concepts": { "video": 0, "photo": 4, "poster": 4 }, "note": "Second guarded save corrects an extra poster allocation in the newly authored nextMonthGamePlan only; final sequence allocates exactly 4 photos/4 posters." },
+    { "client": "Madison Wear", "client_id": "7b47afb0-fa55-4916-85f6-09c57e5905b9", "month": "2026-10-01", "strategy_id": "53fee98b-3b68-46f5-9e93-f976c9413c14", "version_before": 3, "version_final": 4, "changed": true, "concepts": { "video": 2, "photo": 8, "poster": 8 } },
+    { "client": "Madison Wear", "client_id": "7b47afb0-fa55-4916-85f6-09c57e5905b9", "month": "2026-11-01", "strategy_id": "27b22206-16ec-4e60-9e62-89186a10a710", "version_before": 4, "version_final": 4, "changed": false, "concepts": { "video": 2, "photo": 8, "poster": 8 } },
+    { "client": "Wiseman Group", "client_id": "899c9988-8207-4e45-a8fc-a7446dfcf96b", "month": "2026-10-01", "strategy_id": "b3516817-6970-4b44-a465-42c8b7668815", "version_before": 3, "version_final": 4, "changed": true, "concepts": { "video": 1, "photo": 4, "poster": 4 } },
+    { "client": "Wiseman Group", "client_id": "899c9988-8207-4e45-a8fc-a7446dfcf96b", "month": "2026-11-01", "strategy_id": "2220bfcd-1ad7-4924-8b2a-fddd2fde395f", "version_before": 4, "version_final": 5, "changed": true, "concepts": { "video": 1, "photo": 4, "poster": 4 } },
+    { "client": "Bloem Marble & Granite", "client_id": "89e0ad6d-e08c-4a75-8b8e-abea71af581c", "month": "2026-10-01", "strategy_id": "12ae2002-f11c-4be9-93b0-6374e220fdfb", "version_before": 3, "version_final": 4, "changed": true, "concepts": { "video": 2, "photo": 0, "poster": 4 } },
+    { "client": "Bloem Marble & Granite", "client_id": "89e0ad6d-e08c-4a75-8b8e-abea71af581c", "month": "2026-11-01", "strategy_id": "f1d93793-228e-4078-99ce-61ce4c7ef04c", "version_before": 3, "version_final": 4, "changed": true, "concepts": { "video": 2, "photo": 0, "poster": 4 } }
+  ],
+  "all_current_workflow_status": "draft",
+  "all_published_versions": null,
+  "fact_boundary": "September observations end 23 September; tests/proposed weeks are not October sales, booked dates or guaranteed results.",
+  "copy_gate": { "method": "Actual repository clientFacingStrategyQualityIssues(readStrategyData(canonical_data))", "scope": "Twenty current Oct/Nov drafts across this batch and prior Cape/Forklift/RC/HMHI/Bohemia batch", "issues": 0, "meaning": "Known forbidden-copy check only, not substantive semantic approval/publication" },
+  "held_skipped": [
+    { "client": "Kundedienste", "client_id": "5e4e3335-a89c-4629-9efc-b6a194bec80c", "reason": "Unverified exact evidence and no confirmed monthly scope", "writes": 0 },
+    { "client": "Econofoods", "client_id": "61acf81b-1011-404e-9fae-2e209be65fca", "reason": "October package-strategy drift; both months lack exact strategy evidence; known 5-video scope unchanged", "writes": 0 },
+    { "client": "Elcheck", "client_id": "7b7d244f-77b4-4b2a-88f0-8ce3f7e1c202", "reason": "No ready exact evidence/draft IDs; confirmed 1 video/3 photos/3 posters unchanged", "writes": 0 },
+    { "client": "Human Auto", "client_id": "816c7f59-d56c-46a3-ba15-f76971d83769", "reason": "Not queried/researched; explicit CA skip/go gate", "writes": 0 },
+    { "client": "Agri-Secure", "client_id": "893992a5-23cd-4ee6-b5d9-ccf7b17fe071", "reason": "Unverified exact evidence and no confirmed monthly scope", "writes": 0 }
+  ],
+  "next_cursor": { "client": "Bouwer & Coetzee Attorneys", "client_id": "8e448cf9-1534-4ba1-89a4-93e4c8b83d2f", "october_id": "45ec2687-c74d-4d1f-803e-2b40cfec57db", "october_version": 3, "november_id": "a0e52b08-1f49-4f8b-8bec-920a7e060fcb", "november_version": 4 },
+  "continuation": "Same idle normal writer accepted the remaining existing ordered queue from this cursor, with five-client saved checkpoints requested. No outcome claimed from that new dispatch.",
+  "not_performed": [ "approval/publication", "source activation", "paid generation", "package/date/calendar changes", "permissions/provider/folder changes", "Vercel operations", "new task/automation" ]
+}
