@@ -20,6 +20,42 @@ export const REVIEW_LABELS: Record<ContentReview['state'], string> = {
   internal_review: 'Needs review', client_review: 'Client approval', approved: 'Ready to schedule',
   changes_requested: 'Changes requested', superseded: 'Previous version',
 }
+
+/** Validate the existing client queue projection, not staff-only review rows.
+ * Missing/malformed evidence is unavailable, never an empty or actionable queue.
+ * The RPC/RLS remains the ownership authority; no client override is accepted here.
+ */
+export function projectClientReviewQueue(value: unknown): ContentReview[] | null {
+  if (!Array.isArray(value)) return null
+  const rows: ContentReview[] = []
+  const ids = new Set<string>()
+  for (const entry of value) {
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) return null
+    const row = entry as Record<string, unknown>
+    if (typeof row.id !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(row.id)
+      || ids.has(row.id.toLowerCase())
+      || typeof row.title !== 'string' || !row.title.trim()
+      || typeof row.asset_path !== 'string' || !row.asset_path.trim()
+      || !['image/jpeg', 'image/png', 'image/webp', 'video/mp4'].includes(row.media_type as string)
+      || typeof row.caption !== 'string'
+      || !Array.isArray(row.channels) || row.channels.length < 1 || row.channels.length > 5
+      || !row.channels.every(channel => typeof channel === 'string' && CONTENT_CHANNELS.some(allowed => allowed === channel))
+      || (row.state !== 'client_review' && row.state !== 'approved')
+      || typeof row.scheduled_at !== 'string'
+      || !/^\d{4}-\d{2}-\d{2}T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/.test(row.scheduled_at)
+      || !Number.isFinite(Date.parse(row.scheduled_at))) return null
+    const day = row.scheduled_at.slice(0, 10)
+    const date = new Date(`${day}T00:00:00Z`)
+    if (!Number.isFinite(date.getTime()) || date.toISOString().slice(0, 10) !== day) return null
+    ids.add(row.id.toLowerCase())
+    rows.push({
+      id: row.id, title: row.title, asset_path: row.asset_path, media_type: row.media_type as string,
+      caption: row.caption, channels: [...row.channels] as string[], scheduled_at: row.scheduled_at, state: row.state,
+    })
+  }
+  return rows
+}
+
 export async function listContentReviews(deliverableId?: string) {
   const rows: ContentReview[] = []
   for (let from = 0; ; from += 200) {

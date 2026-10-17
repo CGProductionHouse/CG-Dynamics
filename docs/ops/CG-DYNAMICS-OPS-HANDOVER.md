@@ -1,5 +1,39 @@
 # CG Dynamics Ops Handover
 
+### 17 October — client approval malformed-row boundary verified locally
+
+From mainb789d971 (#834), actual normal client Approvals with `[null]` passed
+the array-only cast and failed rendering rather than presenting a safe error;
+375px failing-first regression reproduced it. Existing normal/client-preview
+queue now shares an explicit public-row projection: unique UUIDs, supported
+media/channels, real offset timestamps, public states only, no staff extras.
+Whole malformed queues are unavailable, not silently filtered to all-clear;
+true empty and approved history remain. Existing session-pinned RPC / selected-
+client predicates, design and decision/upload writes unchanged. No new authority,
+schema, dependency or production/Vercel mutation. Other775/662/618 untouched.
+16focused;3928total/3909pass/19intentional skips/0fail;15canonical local browser
+fixtures375/390/430/1440, build/app chunks/scoped lint/diff PASS. Two optional
+Docker checks skipped; Windows Bash SES excluded, not passed. Receipt:
+`CLIENT-APPROVAL-ROW-CONTRACT-2026-10-17.md`. Skill-driven read validation changes
+only, not source activation or actual-client/device launch acceptance.
+
+Fresh bounded normal-connector checks around17:24UTC: Cape16October GoogleAds
+daily rows through16Oct,51account rows/one unmapped campaign in latest successful
+sync; ten active TikTok connections (connection only, not complete metrics).
+Meta47mappedclients:46FBpartial/1FBstale (RedOak access blocked),20IGpass/9IGpartial.
+Microsoft run d6edd7b9-407f-42e2-80c4-adf7588842b1 finished14:28UTC;6/6sources
+complete,5safe applies,384protected conflicts,6103ClientSchedule candidates
+excluded, zero failed/remaining: partial/degraded, not fully reconciled. No manual
+sync/force apply. Actual ForkliftOctober Calendar loads empty; exact-client normal
+ClientSchedule1Oct–30Nov also[]/noerror. Do not invent posting dates or conflate
+the two calendars. #679 fresh exact release packet and content/finals/recipient/
+true-client acceptance gates remain. Control Centre inaccessible, not guessed.
+
+Existing normal Write Client Strategies continuation from Kundedienste is active
+at the last app check; no new saved result inferred. #834 documents the prior ten
+independently confirmed canonical draft IDs/versions and writer-attributed full
+unchanged-field comparison. No duplicate writer/automation or paid generation.
+
 ### 17 October — awaited #731 readbacks arrived; ten more fenced amendments
 
 The canonical readbacks awaited at main e2e18cc are recorded on #731. The same

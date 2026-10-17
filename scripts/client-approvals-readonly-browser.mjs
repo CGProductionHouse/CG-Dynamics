@@ -36,7 +36,7 @@ const server = await createServer({ configFile: false, plugins: [fixture, react(
 let browser
 try {
   await server.listen(); browser = await chromium.launch({ headless: true })
-  for (const width of [375, 390, 430, 1440]) for (const kind of ['approved', 'mixed', 'rejected', 'missing-queue', 'broken-media', 'decision-error']) {
+  for (const width of [375, 390, 430, 1440]) for (const kind of ['malformed-row', 'internal-state', 'empty', 'approved', 'mixed', 'rejected', 'missing-queue', 'broken-media', 'decision-error']) {
     const page = await browser.newPage({ viewport: { width, height: 1000 } })
     const errors = []; page.on('pageerror', error => errors.push(error.message))
     await page.route('**/*', route => { assert.equal(new URL(route.request().url()).origin, 'http://127.0.0.1:53995', 'No external network'); return route.continue() })
@@ -45,19 +45,30 @@ try {
       window.fixtureBrokenMedia = kind === 'broken-media'
       window.fixtureDecisionError = kind === 'decision-error'
       window.fixtureDecisionAttempts = 0
-      const row = { id:'approved',title:'Reviewed delivery video',asset_path:'synthetic-only',media_type:'video/mp4',caption:'Exact delivery process.',channels:['facebook'],scheduled_at:'2026-10-12T10:00:00Z',state:'approved' }
-      window.fixtureRows = kind !== 'approved' ? [row,{...row,id:'pending',state:'client_review',title:'Next delivery video'}] : [row]
+      const row = { id:'11111111-1111-4111-8111-111111111111',title:'Reviewed delivery video',asset_path:'synthetic-only',media_type:'video/mp4',caption:'Exact delivery process.',channels:['facebook'],scheduled_at:'2026-10-12T10:00:00Z',state:'approved' }
+      window.fixtureRows = kind !== 'approved' ? [row,{...row,id:'22222222-2222-4222-8222-222222222222',state:'client_review',title:'Next delivery video'}] : [row]
       if (kind === 'missing-queue') window.fixtureRows = null
+      if (kind === 'malformed-row') window.fixtureRows = [null]
+      if (kind === 'internal-state') window.fixtureRows = [{...row,state:'internal_review',title:'PRIVATE_INTERNAL_DRAFT'}]
+      if (kind === 'empty') window.fixtureRows = []
       if (kind === 'broken-media' || kind === 'decision-error') window.fixtureRows = window.fixtureRows.map(row => ({...row,media_type:'image/png'}))
     }, kind)
     await page.goto('http://127.0.0.1:53995/client/approvals')
-    if (kind === 'missing-queue') {
+    if (['missing-queue', 'malformed-row', 'internal-state'].includes(kind)) {
       await page.getByRole('heading', { name:'Approvals could not be loaded',exact:true }).waitFor()
-      assert.doesNotMatch(await page.locator('body').innerText(), /Nothing waiting|You’re up to date/)
+      assert.doesNotMatch(await page.locator('body').innerText(), /Nothing waiting|You’re up to date|PRIVATE_INTERNAL_DRAFT/)
       assert.deepEqual(errors, [])
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
       await page.screenshot({ path:join(tmpdir(), `cg-approvals-${kind}-${width}.png`),fullPage:true })
-      console.log(`PASS actual client approvals ${width}px missing queue is unavailable, never empty`)
+      console.log(`PASS actual client approvals ${width}px ${kind} is unavailable, never empty/actionable`)
+      await page.close(); continue
+    }
+    if (kind === 'empty') {
+      await page.getByRole('heading', { name:'You’re up to date',exact:true }).waitFor()
+      assert.equal(await page.getByText('Nothing waiting',{exact:true}).count(),1)
+      assert.equal(await page.getByRole('button',{name:'Approve',exact:true}).count(),0)
+      assert.deepEqual(errors,[])
+      console.log(`PASS actual client approvals ${width}px verified empty stays all-clear`)
       await page.close(); continue
     }
     await page.getByRole('heading', { name: 'Approvals', exact: true }).waitFor()

@@ -47,7 +47,7 @@ try {
   browser = await chromium.launch({ headless: true })
   for (const width of [1440, 375, 390, 430]) {
     const page = await browser.newPage({ viewport: { width, height: 1000 } })
-    const errors = []; const reads = []; let failing = false, missingList = null, clientReportMode = 'missing'
+    const errors = []; const reads = []; let failing = false, missingList = null, malformedApprovals = false, clientReportMode = 'missing'
     page.on('pageerror', error => errors.push(error.message))
     await page.addInitScript(() => {
       const scroll = window.scrollTo
@@ -96,6 +96,7 @@ try {
       if (url.pathname.endsWith('/clients')) return route.fulfill({ json: [{ id: clientA, name: 'Synthetic client A', active: true, logo_url: null }, { id: clientB, name: 'Synthetic client B', active: true, logo_url: null }] })
       assert.ok([`eq.${clientA}`, `eq.${clientB}`].includes(url.searchParams.get('client_id')), 'Table read must name exact client')
       if (url.pathname.endsWith(`/${missingList}`)) return route.fulfill({ json: null })
+      if (malformedApprovals && url.pathname.endsWith('/content_review_versions')) return route.fulfill({ json: [null] })
       if (failing && url.pathname.endsWith('/reports')) return route.fulfill({ status: 503, json: { message: 'Local unavailable report fixture' } })
       return route.fulfill({ json: url.pathname.endsWith('/monthly_client_strategies') ? null : [] })
     })
@@ -197,6 +198,12 @@ try {
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
     }
     missingList = null
+    malformedApprovals = true
+    await page.goto(`${base}?client=${clientB}&area=approvals`)
+    await page.getByRole('heading', { name: 'Approvals could not be loaded', exact: true }).waitFor()
+    assert.doesNotMatch(await page.locator('main').innerText(), /Nothing waiting|You’re up to date/)
+    assert.equal(await page.getByRole('button', { name: 'Approve', exact: true }).count(), 0)
+    malformedApprovals = false
     failing = true
     await page.goto(`${base}?client=${clientB}&area=overview`)
     await page.getByText('Your overview could not be loaded', { exact: true }).waitFor()
