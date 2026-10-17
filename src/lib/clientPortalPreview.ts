@@ -21,13 +21,18 @@ export function projectPreviewReport(row: Report, clientId: string): ClientRepor
 }
 
 export async function listPreviewReports(clientId: string) {
-  const { data, error } = await supabase.from('reports').select('*')
-    .eq('client_id', clientId).eq('status', 'published').is('platform', null)
-    .order('period_start', { ascending: false })
-  return { data: ((data ?? []) as Report[]).flatMap(row => {
-    const projected = projectPreviewReport(row, clientId)
-    return projected ? [projected] : []
-  }), error }
+  try {
+    const { data, error } = await supabase.from('reports').select('*')
+      .eq('client_id', clientId).eq('status', 'published').is('platform', null)
+      .order('period_start', { ascending: false })
+    if (error || !Array.isArray(data)) throw new Error('Published report evidence unavailable')
+    return { data: (data as Report[]).flatMap(row => {
+      const projected = projectPreviewReport(row, clientId)
+      return projected ? [projected] : []
+    }), error: null }
+  } catch {
+    return { data: [], error: { message: 'Published reports could not be loaded.' } }
+  }
 }
 
 export async function getPreviewReport(clientId: string, reportId: string): Promise<{ data: ClientReportWithPosts | null; error: { message: string } | null }> {
@@ -86,11 +91,16 @@ export async function getPreviewStrategy(clientId: string, month: string) {
 
 export async function listPreviewApprovals(clientId: string) {
   // Same visibility predicates and public fields as client_content_review_queue.
-  const { data, error } = await supabase.from('content_review_versions')
-    .select('id,title,asset_path,media_type,caption,channels,scheduled_at,state')
-    .eq('client_id', clientId).eq('client_approval_required', true)
-    .in('state', ['client_review', 'approved']).not('internal_approved_at', 'is', null)
-    .order('scheduled_at')
-  return { data: (data ?? []) as ContentReview[], error }
+  try {
+    const { data, error } = await supabase.from('content_review_versions')
+      .select('id,title,asset_path,media_type,caption,channels,scheduled_at,state')
+      .eq('client_id', clientId).eq('client_approval_required', true)
+      .in('state', ['client_review', 'approved']).not('internal_approved_at', 'is', null)
+      .order('scheduled_at')
+    if (error || !Array.isArray(data)) throw new Error('Approval evidence unavailable')
+    return { data: data as ContentReview[], error: null }
+  } catch {
+    return { data: [], error: { message: 'Approvals could not be loaded.' } }
+  }
 }
 

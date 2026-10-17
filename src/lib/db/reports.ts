@@ -362,30 +362,39 @@ export async function deleteReport(reportId: string) {
 }
 
 export async function listClientPublishedReports() {
-  const { data, error } = await supabase.rpc('client_published_reports')
-  return { data: (data ?? []) as ClientReport[], error }
+  try {
+    const { data, error } = await supabase.rpc('client_published_reports')
+    if (error || !Array.isArray(data)) throw new Error('Published report evidence unavailable')
+    return { data: data as ClientReport[], error: null }
+  } catch {
+    return { data: [], error: { message: 'Published reports could not be loaded.' } }
+  }
 }
 
 export async function getClientPublishedReportWithPosts(reportId: string) {
-  const reportResult = await listClientPublishedReports()
-  if (reportResult.error) return { data: null, error: reportResult.error }
-  const report = reportResult.data.find(item => item.id === reportId)
-  if (!report) return { data: null, error: { message: 'Report not found.' } }
-  const postsResult = await supabase
-    .rpc('client_published_report_posts', { p_report_id: reportId })
+  try {
+    const reportResult = await listClientPublishedReports()
+    if (reportResult.error) return { data: null, error: reportResult.error }
+    const report = reportResult.data.find(item => item.id === reportId)
+    if (!report) return { data: null, error: { message: 'Report not found.' } }
+    const postsResult = await supabase
+      .rpc('client_published_report_posts', { p_report_id: reportId })
 
-  if (postsResult.error) {
-    return { data: null, error: postsResult.error }
-  }
+    if (postsResult.error || !Array.isArray(postsResult.data)) {
+      return { data: null, error: { message: 'Published report posts could not be loaded.' } }
+    }
 
-  return {
-    data: {
-      ...report,
-      posts: ((postsResult.data ?? []) as Array<Omit<ClientReportPost, 'id'>>).map((post, index) => ({
-        ...post,
-        id: `client-post-${index}`,
-      })) as ClientReportPost[],
-    },
-    error: null,
+    return {
+      data: {
+        ...report,
+        posts: (postsResult.data as Array<Omit<ClientReportPost, 'id'>>).map((post, index) => ({
+          ...post,
+          id: `client-post-${index}`,
+        })) as ClientReportPost[],
+      },
+      error: null,
+    }
+  } catch {
+    return { data: null, error: { message: 'Published report could not be loaded.' } }
   }
 }

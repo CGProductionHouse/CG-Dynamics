@@ -15,17 +15,19 @@ const fixture = {
   name: 'portal-shell-readonly-fixture', enforce: 'pre',
   resolveId(id) { if (id === 'virtual:portal-shell') return '\0virtual:portal-shell' },
   transform(_code, id) {
-    if (id.replaceAll('\\', '/').endsWith('/contexts/AuthContext.tsx')) return `export function useAuth(){return {profile:{id:'local-staff',role:window.fixtureRole??'admin'},signOut:()=>{throw new Error('Auth writes forbidden')}}}`
+    if (id.replaceAll('\\', '/').endsWith('/contexts/AuthContext.tsx')) return `export function useAuth(){return {profile:location.pathname==='/client/performance'?{id:'local-client',role:'client',client_id:'${clientA}'}:{id:'local-staff',role:window.fixtureRole??'admin'},signOut:()=>{throw new Error('Auth writes forbidden')}}}`
   },
   load(id) {
     if (id !== '\0virtual:portal-shell') return
-    return `import React,{useState}from'react';import{createRoot}from'react-dom/client';import{BrowserRouter}from'react-router-dom';import Preview from'/src/pages/admin/ClientPortalPreview.tsx';import'/src/index.css';
+    return `import React,{useState}from'react';import{createRoot}from'react-dom/client';import{BrowserRouter}from'react-router-dom';import Preview from'/src/pages/admin/ClientPortalPreview.tsx';import Dashboard from'/src/pages/client/Dashboard.tsx';import{ClientPortalShell}from'/src/components/client/ClientPortalShell.tsx';import{ClientPortalContext}from'/src/components/client/ClientPortalContext.ts';import'/src/index.css';
       function App(){const[tick,setTick]=useState(0);window.setRole=role=>{window.fixtureRole=role;setTick(tick+1)};return React.createElement(Preview)}
-      createRoot(document.getElementById('root')).render(React.createElement(BrowserRouter,null,React.createElement(App)));`
+      const client={id:'${clientA}',name:'Synthetic client A',active:true};
+      const content=location.pathname==='/client/performance'?React.createElement(ClientPortalContext.Provider,{value:{client}},React.createElement(ClientPortalShell,{client},React.createElement(Dashboard))):React.createElement(App);
+      createRoot(document.getElementById('root')).render(React.createElement(BrowserRouter,null,content));`
   },
   configureServer(server) {
     server.middlewares.use((req, res, next) => {
-      if (!req.url?.startsWith('/admin/client-portal-preview')) return next()
+      if (!req.url?.startsWith('/admin/client-portal-preview') && !req.url?.startsWith('/client/performance')) return next()
       res.setHeader('Content-Type', 'text/html')
       res.end('<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="background:#060d0c"><div id="root"></div><script type="module" src="/@id/virtual:portal-shell"></script></body></html>')
     })
@@ -38,14 +40,14 @@ const server = await createServer({ configFile: false, plugins: [fixture, react(
 })
 const areas = ['overview', 'plan', 'performance', 'approvals', 'brand-hub', 'leads']
 const labels = ['Overview', 'Plan', 'Performance', 'Approvals', 'Brand Hub', 'Leads']
-const readRpcs = new Set(['client_portal_visibility_contract_version', 'client_portal_month_ahead_posts_v2', 'client_portal_month_ahead_events', 'get_my_client_service_entitlements', 'website_lead_inbox', 'website_lead_metrics'])
+const readRpcs = new Set(['client_published_reports', 'client_published_report_posts', 'client_portal_visibility_contract_version', 'client_portal_month_ahead_posts_v2', 'client_portal_month_ahead_events', 'get_my_client_service_entitlements', 'website_lead_inbox', 'website_lead_metrics'])
 let browser
 try {
   await server.listen()
   browser = await chromium.launch({ headless: true })
   for (const width of [1440, 375, 390, 430]) {
     const page = await browser.newPage({ viewport: { width, height: 1000 } })
-    const errors = []; const reads = []; let failing = false
+    const errors = []; const reads = []; let failing = false, missingList = null, clientReportMode = 'missing'
     page.on('pageerror', error => errors.push(error.message))
     await page.route('**/*', async route => {
       const request = route.request(); const url = new URL(request.url())
@@ -54,16 +56,21 @@ try {
       reads.push({ path: url.pathname, search: url.search, method: request.method() })
       if (url.pathname.startsWith('/rest/v1/rpc/')) {
         assert.ok(readRpcs.has(url.pathname.split('/').at(-1)), 'Only allowlisted read RPCs')
+        if (url.pathname.endsWith('client_published_reports')) return route.fulfill({ json: clientReportMode === 'missing' ? null : clientReportMode === 'empty' ? [] : [{ id: 'synthetic-report', platform: null, status: 'published', period_start: '2026-10-01', period_end: '2026-10-16' }] })
+        if (url.pathname.endsWith('client_published_report_posts')) {
+          assert.equal(request.postDataJSON().p_report_id, 'synthetic-report')
+          return route.fulfill({ json: null })
+        }
         if (url.pathname.endsWith('client_portal_visibility_contract_version')) return route.fulfill({ json: 1 })
         if (url.pathname.endsWith('website_lead_inbox')) {
           const payload = request.postDataJSON()
-          assert.ok([clientA, clientB].includes(payload.p_client_id), 'Lead inbox remains exact-client scoped')
+          assert.ok([clientA, clientB, null].includes(payload.p_client_id), 'Lead inbox remains exact preview or server-pinned client scoped')
           if (payload.p_limit === 1) return route.fulfill({ json: [] })
           return route.fulfill({ status: 404, json: { code: 'PGRST202', message: 'Local unavailable fixture' } })
         }
         if (url.pathname.endsWith('website_lead_metrics')) {
           const payload = request.postDataJSON()
-          assert.ok([clientA, clientB].includes(payload.p_client_id), 'Lead metrics remain exact-client scoped')
+          assert.ok([clientA, clientB, null].includes(payload.p_client_id), 'Lead metrics remain exact preview or server-pinned client scoped')
           return route.fulfill({ json: { clientId: payload.p_client_id, state: payload.p_client_id === clientA ? 'not_connected' : 'available',
             period: { from: payload.p_from, to: payload.p_to, timezone: 'Africa/Johannesburg' },
             total: 0, new: 0, contacted: 0, qualified: 0, won: 0, closedLost: 0, lost: 0, good: 0, poor: 0, unreviewed: 0, qualificationRate: null } })
@@ -83,6 +90,7 @@ try {
       assert.ok(['clients', 'reports', 'monthly_client_strategies', 'content_review_versions'].includes(url.pathname.split('/').at(-1)), `Only expected table reads: ${url.pathname}`)
       if (url.pathname.endsWith('/clients')) return route.fulfill({ json: [{ id: clientA, name: 'Synthetic client A', active: true, logo_url: null }, { id: clientB, name: 'Synthetic client B', active: true, logo_url: null }] })
       assert.ok([`eq.${clientA}`, `eq.${clientB}`].includes(url.searchParams.get('client_id')), 'Table read must name exact client')
+      if (url.pathname.endsWith(`/${missingList}`)) return route.fulfill({ json: null })
       if (failing && url.pathname.endsWith('/reports')) return route.fulfill({ status: 503, json: { message: 'Local unavailable report fixture' } })
       return route.fulfill({ json: url.pathname.endsWith('/monthly_client_strategies') ? null : [] })
     })
@@ -122,6 +130,17 @@ try {
     await page.getByRole('link', { name: 'Leads', exact: true }).first().waitFor()
     await page.waitForTimeout(150)
     assert.equal(await page.locator('header').getByText('Synthetic client A', { exact: true }).count(), 0, 'Old client header absent')
+    for (const [table, area, heading] of [
+      ['reports', 'performance', 'Performance is temporarily unavailable'],
+      ['content_review_versions', 'approvals', 'Approvals could not be loaded'],
+    ]) {
+      missingList = table
+      await page.goto(`${base}?client=${clientB}&area=${area}`)
+      await page.getByRole('heading', { name: heading, exact: true }).waitFor({ timeout: 8000 })
+      assert.doesNotMatch(await page.locator('main').innerText(), /No published report yet|Nothing waiting|You’re up to date/, 'Missing preview evidence is not an empty result')
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
+    }
+    missingList = null
     failing = true
     await page.goto(`${base}?client=${clientB}&area=overview`)
     await page.getByText('Your overview could not be loaded', { exact: true }).waitFor()
@@ -132,6 +151,13 @@ try {
       await page.getByText('Manager preview access required', { exact: true }).waitFor()
       await page.waitForTimeout(150)
       assert.equal(reads.length, before, 'Denied role issues no new client reads')
+    }
+    for (const mode of ['missing', 'posts-missing', 'empty']) {
+      clientReportMode = mode
+      await page.goto('http://127.0.0.1:53987/client/performance')
+      await page.getByRole('heading', { name: mode === 'empty' ? 'No published report yet' : 'Performance is temporarily unavailable', exact: true }).waitFor()
+      if (mode !== 'empty') assert.equal(await page.getByRole('heading', { name: 'No published report yet', exact: true }).count(), 0)
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
     }
     assert.deepEqual(errors, [])
     console.log(`PASS actual full preview ${width}px: six routes, exact scope, read-only controls, unavailable/empty and role denial; local synthetic only`)
