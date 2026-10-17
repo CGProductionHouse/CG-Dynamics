@@ -1,5 +1,38 @@
 # CG Dynamics Ops Handover
 
+### 17 October — bounded Client Schedule connector pages; two further strategy checkpoints
+
+From maina12c125b (#836), actual MCP handler's silent50row cap reproduced with
+117same-date rows; two regression groups failed before repair. Existing read-only
+list_client_schedule now has optional offset, stable scheduled_date/id order,
+51row sentinel query/50returned rows, explicit has_more/next_offset and unknown
+coverage on missing/failed/rejected reads. At100000 cap further rows require a
+narrower range, never false completion. Exact-client/RLS/context/date predicates
+and FK shaping unchanged; scheduled-date-only scope explicitly excludes undated/
+legacydue-only work. No new tool, schema, route, calendar merge, dates or writes.
+44focused, actual cached/no-lock Deno closure, full supported3933total/3914pass/
+19intentional skips/0fail, build/appchunks/scoped lint/diff PASS. Two optional
+Docker checks skipped; unsupported Windows Bash excluded, not passed. Frontend
+unchanged from#836's15browserfixtures, not rerun/relabelled as deployed acceptance.
+Receipt: `CLIENT-SCHEDULE-TOOL-PAGING-2026-10-17.md`. MCP remains unreleased;
+separate exact backend release approval required. ZERO Vercel/protected mutation.
+Open775/662/618 untouched. Fresh Drive search finds no exact Control Centre;
+native-sheet Control/control name filter returns[], no guessed/replacement writes.
+
+Normal Write Client Strategies saved#731checkpoints6237985383 and6238151225:
+tenclients/20currentdraftstates,13changedmonths/7acceptedNovember drafts retained.
+Fresh supervisor reads independently verify IDs/versions/unpublished status,
+tests/November plans/concept counts. Historical full unchanged-field comparisons
+remain writer-attributed. Receipt:
+`strategy-review/2026-10-17-normal-chat-remaining-checkpoints.json`.
+Same writer active, nextcursorStaffordshire dfa47255-875d-43cf-8a22-cfe1a6247fb7;
+no exhaustion inferred. Do not duplicate dispatch or redo accepted clients.
+JFJ1video/3photos/3posters and VCS1video/8posters remain known; qualifying-source
+holds are not missing package questions. HumanAuto skip/go, Neshora clinical/
+source holds and other owner-held rows unchanged. No strategy publication/source
+activation/paid generation. #679 exact release and genuine-client/device,
+content/finals/recipient/provider gates remain distinct from code/test passes.
+
 ### 17 October — missing report facts no longer imply legacy; next strategy batch verified
 
 From mainbb615312, actual Overview null-facts assertion failed first; two unit

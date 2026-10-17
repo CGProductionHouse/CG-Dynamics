@@ -134,17 +134,19 @@ test('no inline client_name string survives against monthly_deliverables', () =>
 
 test('both handlers flatten before returning', () => {
   assert.match(INDEX, /deliverables: flattenDeliverableClient\(scheduleResult\.data as Record<string, unknown>\[\] \| null\)/)
-  assert.match(INDEX, /deliverables: flattenDeliverableClient\(data as Record<string, unknown>\[\] \| null\), error: error\?\.message \?\? null/)
+  assert.match(INDEX, /deliverables: flattenDeliverableClient\(rows\.slice\(0, pageSize\)\), error: null/)
 })
 
 // ── Client Schedule semantics unchanged ─────────────────────────────────────
 
-test('date range, ordering, limit, client filter and isolation are unchanged', () => {
+test('date range and isolation stay unchanged with bounded explicit schedule pages', () => {
   const handler = INDEX.slice(INDEX.indexOf('const handleListClientSchedule'), INDEX.indexOf('const handleGetClientContext'))
   assert.match(handler, /\.gte\('scheduled_date', input\.from as string\)/)
   assert.match(handler, /\.lte\('scheduled_date', input\.to as string\)/)
   assert.match(handler, /\.order\('scheduled_date', \{ ascending: true \}\)/)
-  assert.match(handler, /\.limit\(50\)/)
+  assert.match(handler, /const pageSize = 50/)
+  assert.match(handler, /\.order\('id', \{ ascending: true \}\)/)
+  assert.match(handler, /\.range\(offset, offset \+ pageSize\)/)
   assert.match(handler, /if \(input\.client_id\) query\.eq\('client_id', input\.client_id\)/)
   // #319 client pinning still governs which client_id can reach the handler.
   assert.match(INDEX, /resolveClientScopeForInput\(staff\.contextKind, staff\.effectiveClientId/)

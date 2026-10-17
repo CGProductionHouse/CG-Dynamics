@@ -226,8 +226,8 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   },
   {
     name: 'list_client_schedule', title: 'List Client Schedule',
-    description: 'Read authorised monthly deliverables in a bounded date range from Client Schedule, which remains separate from CG Calendar.',
-    inputSchema: objectSchema({ from: date, to: date, client_id: uuid }, ['from', 'to']),
+    description: 'Read authorised Client Schedule rows by scheduled_date, separate from CG Calendar. Returns at most 50 per page: follow pagination.next_offset as offset with the same dates/client until has_more=false. Missing/failed reads have unknown coverage. Undated and legacy due-date-only work are not included; no total or full monthly plan is implied.',
+    inputSchema: objectSchema({ from: date, to: date, client_id: uuid, offset: { type: 'integer', minimum: 0, maximum: 100000, description: 'Start at 0; then use the preceding pagination.next_offset with unchanged dates/client. Narrow the date range if continuation_blocked is set.' } }, ['from', 'to']),
     annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
     dependency: 'main', canonicalContract: 'monthly_deliverables visibility/RLS',
   },

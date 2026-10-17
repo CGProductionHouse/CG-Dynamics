@@ -653,18 +653,43 @@ const handleListMyCalendar: ToolHandler = async (staff, input) => {
 }
 
 const handleListClientSchedule: ToolHandler = async (staff, input) => {
-  const query = staff.supabase
-    .from('monthly_deliverables')
-    .select(CLIENT_SCHEDULE_SELECT)
-    .gte('scheduled_date', input.from as string)
-    .lte('scheduled_date', input.to as string)
-    .order('scheduled_date', { ascending: true })
-    .limit(50)
+  const pageSize = 50
+  const offset = input.offset ?? 0
+  const pagination = { offset: typeof offset === 'number' ? offset : null, page_size: pageSize,
+    returned_count: 0, has_more: null as boolean | null, next_offset: null as number | null,
+    total_count: null, continuation_blocked: null as string | null }
+  const unavailable = { deliverables: [], error: 'Client Schedule could not be loaded safely.', pagination }
+  if (typeof offset !== 'number' || !Number.isSafeInteger(offset) || offset < 0 || offset > 100000) {
+    return { ...unavailable, error: 'Use an integer schedule offset from 0 to 100000.' }
+  }
+  try {
+    const query = staff.supabase
+      .from('monthly_deliverables')
+      .select(CLIENT_SCHEDULE_SELECT)
+      .gte('scheduled_date', input.from as string)
+      .lte('scheduled_date', input.to as string)
+      .order('scheduled_date', { ascending: true })
+      .order('id', { ascending: true })
+      // Inclusive range: one extra row proves whether another page exists.
+      .range(offset, offset + pageSize)
 
-  if (input.client_id) query.eq('client_id', input.client_id)
+    if (input.client_id) query.eq('client_id', input.client_id)
 
-  const { data, error } = await query
-  return { deliverables: flattenDeliverableClient(data as Record<string, unknown>[] | null), error: error?.message ?? null }
+    const { data, error } = await query
+    const rows: unknown = data
+    if (error || !Array.isArray(rows) || !rows.every((row: unknown): row is Record<string, unknown> =>
+      Boolean(row) && typeof row === 'object' && !Array.isArray(row))) return unavailable
+    const hasMore = rows.length > pageSize
+    const nextOffset = hasMore && offset + pageSize <= 100000 ? offset + pageSize : null
+    return {
+      deliverables: flattenDeliverableClient(rows.slice(0, pageSize)), error: null,
+      pagination: { ...pagination, returned_count: Math.min(rows.length, pageSize), has_more: hasMore,
+        next_offset: nextOffset, continuation_blocked: hasMore && nextOffset === null ? 'NARROW_DATE_RANGE' : null },
+      scope_note: 'Scheduled-date rows only; undated and legacy due-date-only work are excluded. Follow next_offset with the same date/client scope until has_more is false. This is not an atomic snapshot; restart if dates change during paging. CG Calendar remains separate.',
+    }
+  } catch {
+    return unavailable
+  }
 }
 
 /**
