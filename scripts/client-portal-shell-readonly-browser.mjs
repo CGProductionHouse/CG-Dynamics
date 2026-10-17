@@ -49,6 +49,11 @@ try {
     const page = await browser.newPage({ viewport: { width, height: 1000 } })
     const errors = []; const reads = []; let failing = false, missingList = null, clientReportMode = 'missing'
     page.on('pageerror', error => errors.push(error.message))
+    await page.addInitScript(() => {
+      const scroll = window.scrollTo
+      window.fixtureScrollCalls = []
+      window.scrollTo = function (...args) { window.fixtureScrollCalls.push(args); return scroll.apply(this, args) }
+    })
     await page.route('**/*', async route => {
       const request = route.request(); const url = new URL(request.url())
       if (url.origin === 'http://127.0.0.1:53987') return route.continue()
@@ -98,7 +103,20 @@ try {
     await page.goto(`${base}?client=${clientA}&area=overview`)
     await page.getByLabel('Selected client').selectOption(clientA)
     await page.getByRole('heading', { name: 'Synthetic client A', exact: true }).waitFor()
+    if (width < 640) {
+      // Warm both real route modules: a first lazy-loading fallback can shorten
+      // the document and accidentally mask retained scroll through clamping.
+      const mobileNav = page.getByRole('navigation', { name: 'Client portal mobile' })
+      await mobileNav.getByRole('link', { name: 'Plan', exact: true }).click()
+      await page.getByRole('heading', { name: 'Your plan', exact: true }).waitFor()
+      await mobileNav.getByRole('link', { name: 'Overview', exact: true }).click()
+      await page.getByRole('heading', { name: 'Synthetic client A', exact: true }).waitFor()
+    }
     for (let i = 0; i < areas.length; i++) {
+      if (width < 640 && areas[i] === 'plan') {
+        await page.evaluate(() => window.scrollTo(0, Math.min(200, document.documentElement.scrollHeight - innerHeight)))
+        assert.ok(await page.evaluate(() => scrollY > 0), 'Begin section navigation from a genuinely scrolled Overview')
+      }
       if (areas[i] === 'leads') {
         if (width < 640) await page.getByRole('button', { name: 'More pages' }).click()
         assert.equal(await page.getByRole('link', { name: 'Leads', exact: true }).count(), 0, 'Disconnected client has no irrelevant Leads navigation')
@@ -120,6 +138,23 @@ try {
       const ready = ['Synthetic client A', 'Your plan', 'No published report yet', 'Approvals', 'Brand Hub is not available yet', 'Leads'][i]
       await page.getByRole('heading', { name: ready, exact: true }).waitFor()
       await page.getByLabel('Loading your workspace', { exact: true }).waitFor({ state: 'hidden' })
+      if (width < 640 && areas[i] === 'plan') assert.equal(await page.evaluate(() => scrollY), 0, 'A new Plan section starts at its top, not the old page scroll offset')
+      if (width < 640 && areas[i] === 'plan') {
+        await page.evaluate(() => { window.fixtureScrollCalls = [] })
+        await page.getByRole('tab', { name: 'Calendar', exact: true }).click()
+        await page.waitForURL(url => url.searchParams.get('tab') === 'calendar')
+        assert.deepEqual(await page.evaluate(() => window.fixtureScrollCalls), [], 'In-page tab query changes do not force a section scroll reset')
+        await page.goBack()
+        await page.waitForURL(url => url.searchParams.get('area') === 'plan' && url.searchParams.get('tab') !== 'calendar')
+        await page.goBack()
+        await page.waitForURL(url => url.searchParams.get('area') === 'overview')
+        await page.getByRole('heading', { name: 'Synthetic client A', exact: true }).waitFor()
+        assert.deepEqual(await page.evaluate(() => window.fixtureScrollCalls), [], 'POP section navigation is left to native history restoration')
+        await page.getByRole('navigation', { name: 'Client portal mobile' }).getByRole('link', { name: 'Plan', exact: true }).click()
+        await page.getByRole('heading', { name: 'Your plan', exact: true }).waitFor()
+        await page.waitForFunction(() => window.fixtureScrollCalls.length > 0)
+        assert.ok((await page.evaluate(() => window.fixtureScrollCalls)).length > 0, 'PUSH section navigation resets scroll')
+      }
       assert.equal(await page.getByLabel('Selected client').inputValue(), clientA)
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width} ${areas[i]} body overflow`)
       if (width < 640) {
@@ -132,8 +167,11 @@ try {
       await page.screenshot({ path: join(tmpdir(), `cg-portal-${areas[i]}-${width}.png`), fullPage: true })
     }
     // Switch exact client inside the actual persistent shell; no auth exchange.
+    await page.evaluate(() => { window.fixtureScrollCalls = [] })
     await page.getByLabel('Selected client').selectOption(clientB)
     await page.waitForURL(url => url.searchParams.get('client') === clientB)
+    await page.waitForFunction(() => window.fixtureScrollCalls.length > 0)
+    assert.ok((await page.evaluate(() => window.fixtureScrollCalls)).length > 0, 'An explicit client switch also resets the previous section position')
     if (width < 640) await page.getByRole('button', { name: 'More pages' }).click()
     await page.getByRole('link', { name: 'Leads', exact: true }).first().waitFor()
     if (width < 640) {

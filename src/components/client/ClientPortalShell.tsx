@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { Link, NavLink, useLocation } from 'react-router-dom'
+import { Link, NavLink, useLocation, useNavigationType } from 'react-router-dom'
 import { portalPreviewPath } from '../../lib/clientPortalPreviewPolicy'
 import { ClientLogo } from '../ClientLogo'
 import BrandMark from '../BrandMark'
@@ -44,9 +44,12 @@ export function ClientPortalShell({
   const mobileMoreButtonRef = useRef<HTMLButtonElement>(null)
   const [leadNav, setLeadNav] = useState<{ clientId: string; visible: boolean } | null>(null)
   const location = useLocation()
+  const navigationType = useNavigationType()
   const isPreview = previewClientId !== undefined
   const exactClientId = client?.id ?? null
   const activePath = isPreview ? `/client/${new URLSearchParams(location.search).get('area') === 'overview' ? '' : new URLSearchParams(location.search).get('area') ?? ''}`.replace(/\/$/, '') : location.pathname
+  const sectionScope = `${exactClientId ?? ''}:${activePath}`
+  const previousSectionRef = useRef(sectionScope)
   // Preserve explicit deep-link orientation even when the ordinary menu hides
   // a disconnected service. This route remains a truthful holding state.
   const showLeads = activePath.startsWith('/client/leads') || (exactClientId !== null && leadNav?.clientId === exactClientId && leadNav.visible)
@@ -57,6 +60,14 @@ export function ClientPortalShell({
     ? activePath === item.to
     : activePath.startsWith(item.to)) ?? NAV_ITEMS[0]
   const moreIsActive = MOBILE_MORE.some(item => item.to === activeItem.to)
+
+  useEffect(() => {
+    if (previousSectionRef.current === sectionScope) return
+    previousSectionRef.current = sectionScope
+    // A new section/client starts at its beginning. Preserve native history and
+    // in-page month/tab/guide navigation rather than resetting every query edit.
+    if (navigationType !== 'POP') window.scrollTo(0, 0)
+  }, [navigationType, sectionScope])
 
   useEffect(() => {
     if (!exactClientId) return

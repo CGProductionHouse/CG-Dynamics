@@ -1,5 +1,34 @@
 # CG Dynamics Ops Handover
 
+### 17 October — section scroll reset; Novus writer saves independently confirmed
+
+Continuation from mainf0037e3b: live390px Forklift Overview→Plan retained scroll
+(144→247px). Cold-route loading can mask it by document-height clamping; warmed
+actual local375px regression failed130px vs0. Existing ClientPortalShell now resets
+only a changed exact-client/resolved-section on PUSH/REPLACE; leaves in-page query
+month/tab/guide changes and POP Back/Forward alone. No new shell/history store,
+CSS/destinations/auth/data authority. Actual-browser tests trace real scroll calls,
+including client switches, rather than mistaking browser clamping for correctness.
+10focused;final3926total/3907pass/19intentional skips/0fail;all15canonical fixtures;
+build/app chunks/scoped lint/diff PASS. Docker-only2checks skipped; Windows Bash
+SES excluded, not passed. No Vercel or protected mutation in code lane. Other
+775/662/618 untouched. Receipt: `CLIENT-SECTION-SCROLL-2026-10-17.md`.
+
+Normal Write Client Strategies completed and became idle; after that, one handoff-
+only request successfully persisted actual receipt#731comment6233461766. Independent
+CG connector readback confirms NovusOctb12c6061-5dbd-4098-a626-3d8db992ded8 and
+Nov3770aac3-3e20-4bf2-900e-2bc092206c05 bothv4/draft/unpublished, Sep23 limits and
+package-bound1video/4photo/4poster concepts. Writer reports exact selected fields
+saved/readback and others unchanged; not a separate Codex before/after diff audit.
+Neshora zero new writes in that writer pass; prior source/shortcode/clinical consent/
+slot/final/recipient decisions stay held. Cape Lumber is the next recorded cursor.
+Continued the same human-authorised writer for next five eligible existing clients,
+fresh source/version fences, no overwrite of unselected fields, source activation,
+paid API, publication, provider or Vercel changes. No new task/automation. A new
+dispatch is not another saved receipt; await owning731/current canonical readbacks.
+Control Centre remains inaccessible, not guessed; real-client/release679 gates
+remain separate, no blanket launch clearance.
+
 ### 17 October — live-reproduced mobile More keyboard repair
 
 Unowned focused continuation from main38615f6d: actual authenticated Forklift
