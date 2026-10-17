@@ -1,0 +1,97 @@
+{
+  "schema": "cg-passive-integration-readback/v1",
+  "observed_at": "2026-10-17T07:39:23Z",
+  "project_id": "ehtjfntukiwbgptqgbzy",
+  "protected_actions": "NONE: SELECT-only, no sync invocation, token retrieval or write",
+  "google_automatic": {
+    "job_id": "6a9ca5f2-4ddb-43c8-93fe-793895d36086",
+    "run_id": "be331422-fd14-4717-9b74-7c84f57b372c",
+    "status": "succeeded",
+    "attempts": 1,
+    "operating_date": "2026-10-17",
+    "period_start": "2026-09-12",
+    "period_end": "2026-10-16",
+    "rows": 51,
+    "mapped_campaigns": 1,
+    "unmapped_campaigns": 1,
+    "finished_at": "2026-10-16T22:00:14.644Z",
+    "query": "select id,status,attempts,created_at,finished_at,payload->>'operatingDate' as operating_date,payload->>'startDate' as period_start,payload->>'endDate' as period_end,result->>'rows' as rows,result->'runIds' as run_ids from public.background_jobs where job_type='google_ads_refresh' and created_at>='2026-10-16' order by created_at desc limit 8"
+  },
+  "reads": [
+    {
+      "query": "with owners as (select al.client_id,a.id as account_id,null::text as campaign_id,a.customer_id,a.account_mode from public.google_ads_accounts a join public.google_ads_account_links al on al.google_ads_account_id=a.id and al.is_active where a.is_active and a.account_mode='dedicated' union all select cl.client_id,a.id,cl.campaign_id,cl.customer_id,a.account_mode from public.google_ads_accounts a join public.google_ads_campaign_links cl on cl.google_ads_account_id=a.id and cl.is_active where a.is_active and a.account_mode='shared') select c.name,o.account_mode,count(m.id) as october_rows,max(m.metric_date) as data_through_date from owners o join public.clients c on c.id=o.client_id left join public.google_ads_campaign_daily_metrics m on m.google_ads_account_id=o.account_id and m.customer_id=o.customer_id and (o.campaign_id is null or m.campaign_id=o.campaign_id) and m.metric_date between '2026-10-01' and '2026-10-31' where c.active group by c.id,c.name,o.account_mode order by c.name",
+      "rows": [
+        {
+          "name": "Cape Lumber",
+          "account_mode": "shared",
+          "october_rows": 16,
+          "data_through_date": "2026-10-16"
+        },
+        {
+          "name": "Germoparts",
+          "account_mode": "shared",
+          "october_rows": 0,
+          "data_through_date": null
+        },
+        {
+          "name": "Novus Steel",
+          "account_mode": "shared",
+          "october_rows": 0,
+          "data_through_date": null
+        },
+        {
+          "name": "RC-Polypipe",
+          "account_mode": "shared",
+          "october_rows": 0,
+          "data_through_date": null
+        }
+      ]
+    },
+    {
+      "query": "select count(*) as active_connected,min(s.finished_at) as oldest_success,max(s.finished_at) as newest_success,count(*) filter(where s.finished_at >= now()-interval '30 hours') as within_30_hour_window from public.tiktok_connections t join public.clients c on c.id=t.client_id and c.active left join lateral (select r.finished_at from public.platform_sync_runs r where r.connection_id=t.id and r.client_id=t.client_id and r.platform='tiktok' and r.status='success' and r.health_state='verified' order by r.finished_at desc limit 1) s on true where t.status='connected'",
+      "rows": [
+        {
+          "active_connected": 10,
+          "oldest_success": "2026-10-16 08:52:04.813+00",
+          "newest_success": "2026-10-16 08:56:12.025+00",
+          "within_30_hour_window": 10
+        }
+      ]
+    },
+    {
+      "query": "select c.name,k.platform,k.last_status,k.last_health_state,k.last_successful_at,k.high_watermark_at,k.last_error_code from public.meta_asset_sync_checkpoints k join public.clients c on c.id=k.client_id where c.active and k.platform='facebook' and k.client_id in ('3b85973f-bcad-49eb-b8f1-c27f7c7f1aba','cdb11a82-339e-4b46-9b09-bde1a23efeaf','0c01d90f-ba5e-4251-a597-bf3c83f990fa') order by c.name",
+      "rows": [
+        {
+          "name": "AV Event Life",
+          "platform": "facebook",
+          "last_status": "failed",
+          "last_health_state": "sync_error",
+          "last_successful_at": "2026-10-06 02:55:13.975221+00",
+          "high_watermark_at": "2026-10-05 07:00:00+00",
+          "last_error_code": "provider_error"
+        },
+        {
+          "name": "Zooz Lifestyle WFF",
+          "platform": "facebook",
+          "last_status": "failed",
+          "last_health_state": "sync_error",
+          "last_successful_at": "2026-10-05 02:25:42.660939+00",
+          "high_watermark_at": "2026-10-04 07:00:00+00",
+          "last_error_code": "provider_error"
+        }
+      ]
+    },
+    {
+      "query": "select p.meta_post_id,p.publish_time,r.client_id,r.id as report_id from public.posts p join public.reports r on r.id=p.report_id where p.meta_post_id like '%1551335327010846%' or p.meta_post_id like '%1979003833321539%' or p.meta_post_id like '%1751385370329586%' or p.meta_post_id like '%1569849948505224%' or p.meta_post_id like '%1568586765298209%'",
+      "rows": []
+    }
+  ],
+  "limitations": [
+    "Account-scoped Google rows have null legacy client_id; exact active account/customer/campaign mappings are required, not a direct client_id join.",
+    "Zero matching campaign rows is no_campaign_rows, not zero performance.",
+    "Latest run aggregate is not all-client coverage, complete metrics or native acceptance.",
+    "TikTok fresh sync still includes cumulative/cohort facts, not full monthly account views.",
+    "Missing native post IDs remain provider-object eligibility investigations, not authorization to insert or change grants.",
+    "Red Oak returned no Facebook checkpoint in the exact three-client checkpoint query; its stored access gate is not cleared."
+  ]
+}

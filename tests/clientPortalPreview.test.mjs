@@ -10,6 +10,81 @@ const clientA = '11111111-1111-4111-8111-111111111111'
 const clientB = '22222222-2222-4222-8222-222222222222'
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
 
+test('normal client report lists and post reads also reject missing evidence rather than empty', async () => {
+  const server = await createServer({ configFile: false, server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true } })
+  try {
+    const { supabase } = await server.ssrLoadModule('/src/lib/supabase.ts')
+    const { listClientPublishedReports, getClientPublishedReportWithPosts } = await server.ssrLoadModule('/src/lib/db/reports.ts')
+    const original = supabase.rpc, calls = []
+    let reports = [], posts = [], rejected = false
+    supabase.rpc = async (name, args) => {
+      calls.push([name, args])
+      if (rejected) throw new Error('PRIVATE transport')
+      return { data: name === 'client_published_reports' ? reports : posts, error: null }
+    }
+    try {
+      for (const data of [null, undefined, {}, 'invalid', 1]) {
+        reports = data
+        assert.ok((await listClientPublishedReports()).error)
+      }
+      reports = []
+      assert.deepEqual(await listClientPublishedReports(), { data: [], error: null })
+      reports = [{ id: 'published' }]
+      for (const data of [null, undefined, {}, 'invalid', 1]) {
+        posts = data
+        const result = await getClientPublishedReportWithPosts('published')
+        assert.ok(result.error)
+        assert.equal(result.data, null)
+      }
+      posts = []
+      assert.deepEqual((await getClientPublishedReportWithPosts('published')).data.posts, [])
+      rejected = true
+      for (const read of [() => listClientPublishedReports(), () => getClientPublishedReportWithPosts('published')]) {
+        const result = await read()
+        assert.ok(result.error)
+        assert.doesNotMatch(JSON.stringify(result), /PRIVATE/)
+      }
+      assert.ok(calls.every(([name, args]) => name === 'client_published_reports' ? args === undefined : name === 'client_published_report_posts' && args.p_report_id === 'published'))
+    } finally { supabase.rpc = original }
+  } finally { await server.close() }
+})
+
+test('preview report and approval lists reject missing evidence instead of reporting verified empty', async () => {
+  const server = await createServer({ configFile: false, server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true } })
+  try {
+    const { supabase } = await server.ssrLoadModule('/src/lib/supabase.ts')
+    const { listPreviewReports, listPreviewApprovals } = await server.ssrLoadModule('/src/lib/clientPortalPreview.ts')
+    const original = supabase.from
+    let response, rejected = false
+    supabase.from = () => {
+      const chain = { then: (resolve, reject) => (rejected ? Promise.reject(new Error('PRIVATE transport')) : Promise.resolve(response)).then(resolve, reject) }
+      for (const method of ['select', 'eq', 'is', 'in', 'not', 'order']) chain[method] = () => chain
+      return chain
+    }
+    try {
+      for (const reader of [listPreviewReports, listPreviewApprovals]) {
+        for (const data of [null, undefined, {}, 'invalid', 1]) {
+          response = { data, error: null }
+          const result = await reader(clientA)
+          assert.ok(result.error, 'Absent/malformed envelope is an error, never verified empty')
+          assert.deepEqual(result.data, [])
+        }
+        response = { data: [], error: null }
+        assert.deepEqual(await reader(clientA), { data: [], error: null }, 'Real empty remains empty')
+        response = { data: [{ id: 'stale' }], error: { message: 'PRIVATE backend' } }
+        assert.deepEqual((await reader(clientA)).data, [], 'Failed reads must not retain data')
+        assert.doesNotMatch(JSON.stringify(await reader(clientA)), /PRIVATE/)
+        rejected = true
+        const result = await reader(clientA)
+        assert.ok(result.error)
+        assert.deepEqual(result.data, [])
+        assert.doesNotMatch(JSON.stringify(result), /PRIVATE/)
+        rejected = false
+      }
+    } finally { supabase.from = original }
+  } finally { await server.close() }
+})
+
 test('preview manual metrics match client exclusion of legacy unavailable placeholders without losing observed zero or null', async () => {
   const server = await createServer({ configFile: false, server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true } })
   try {

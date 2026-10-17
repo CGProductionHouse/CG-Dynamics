@@ -1,5 +1,43 @@
 # CG Dynamics Ops Handover
 
+### 17 October — report/approval read truth; first automatic Google refresh accepted
+
+Following merged #830 (`3e068672`), the next unowned lane reproduces two reader
+failures: normal client report/post lists and staff preview report/approval lists
+coalesced absent responses into verified empty. Missing/non-array/failed/rejected
+reads now return safe errors; real empty stays empty. Existing server-pinned RPCs,
+exact-client/publication/approval predicates, report allowlist and write boundaries
+are unchanged. Actual Dashboard and full preview fixtures cover normal/client
+missing reports/posts, preview approvals and verified empties at1440/375/390/430.
+Approved appearance, staff edits, client IDs/Hours and open775/662/618 untouched.
+Verification receipt: `CLIENT-REPORT-PREVIEW-READ-TRUTH-2026-10-17.md`.
+Final supported3926total/3907pass/19intentional skips/0fail;20focused tests,
+all15canonical local browser fixtures, build/app chunks/scoped lint/diff PASS.
+Two workstation Docker checks skipped; unsupported Windows Bash SES excluded,
+not passed. Local browser uses existing CGPay Playwright1243 with installed
+browser, no package/download/session change. Earlier intermediate3906pass is
+superseded by the final full rerun after normal-client expansion.
+
+Passive SELECT readback now proves the first automatic Google refresh, not merely
+an enabled flag: operating date17October job6a9ca5f2-4ddb-43c8-93fe-793895d36086
+and runbe331422-fd14-4717-9b74-7c84f57b372c succeeded on one attempt at16Oct22:00UTC,
+35-day window12Sep–16Oct,51rows. Exact active account/customer/campaign resolution
+shows Cape16daily October rows through16Oct. Other3mapped clients remain
+no_campaign_rows, notzero/inactive; one provider campaign remains unmapped.
+Account-scoped raw rows have null legacyclient_id, so do not use that direct join
+as client reporting authority. All10connected active TikToks remain within the
+existing30-hour success window; no cumulative-to-monthly metric substitution.
+Latest observed Meta runs are44FBpartial,20IGverified/9IGpartial, not fleet passes.
+AV/ZoozFBgrants and older5native-post omissions persist; RedOak returns noFB
+checkpoint in this exact lookup, not an access-clearance receipt. Safe queries:
+`strategy-review/2026-10-17-passive-integration-readback.json`.
+
+No provider/manual sync invocation, token retrieval, production data/schema/Edge/
+config/OAuth/permission/publication or Vercel operation. Frontend remains source-
+only pending#679 exact fresh packet; all-client/true-client-role acceptance remains
+separate. Control Centre still inaccessible, not guessed. Existing writer status
+and Neshora source/folder holds below remain current; no duplicate writer launched.
+
 ### 17 October — Lead Inbox read truth and saved Neshora guideline readback
 
 Focused local lane `codex/lead-read-truth-2026-10-17` fixes five failing-first
