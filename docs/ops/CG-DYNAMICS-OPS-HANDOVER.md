@@ -19,7 +19,7 @@ RC-Polypipe Oct `49fb40ec-94a9-4aef-b595-d9ec7b4ac1fc` v3→v4 and Nov
 `7fc0391c-38a3-4b77-ad28-56fe64176289` v3→v4; Bohemia Quick Stop Oct
 `7f7c46bf-6765-4694-9486-1066a5670d1b` v3→v4 and Nov
 `2e95fa11-1f6a-4e48-b0a8-925c6f9ecfb7` v3→v4 (last four pairs: testAndChange plus
-existing concept arrays / nextMonthGamePlan). Every write returned
+existing concept arrays / nextMonthGamePlan). The writer reports every write returned
 `draft_amended` with the expected canonical ID/version, `workflow_status=draft`,
 `published=false`, `published_version=null`; fresh brief readbacks returned the
 complete changed fields exactly equal and all other strategy data identical
@@ -31,6 +31,13 @@ below 300 characters and the single corrected guarded save/readback passed.
 RC's guide ID was not an eligible citation, so only eligible current
 report/package source IDs were submitted. Durable receipt:
 `strategy-review/2026-10-17-normal-chat-draft-amendments.json`.
+
+Supervisor continuation independently re-read all ten canonical briefs: exact
+IDs/current versions above, draft/unpublished status and selected test fields
+match; all five November game plans contain package-bound sequencing and retain
+the missing October-result boundary. This is independent current-state review,
+not a second complete before/after revision diff. The unchanged-field assertions
+above and in the JSON remain the writer's save/readback receipt.
 
 WiseRide `504113ee-fba9-4993-807e-a86066615212` October `445f15e8-d62a-4b15-8539-dd1e7053f220`
 v2 and November `5b4537b6-5ba0-4a0a-a134-eed76552fef6` v1 were skipped
@@ -48,6 +55,12 @@ proposals. No approval/publication, package/calendar/source activation,
 provider/OAuth/permissions, folders/short codes, Vercel, external messages,
 paid generation or new client rows. Control Centre remains inaccessible, not
 guessed; #679 release and real-client gates remain separate.
+
+The same idle normal writer accepted the next bounded five-eligible-client
+continuation from that cursor. No new chat, automation or paid generator. Await
+its next #731 saved receipt before claiming further results. The OpenCode
+receipt-only branch was inspected; no overlapping strategy implementation was
+found, and its failed GitHub Actions PR-creation/503 run is not successful CI.
 
 ### 17 October — section scroll reset; Novus writer saves independently confirmed
 

@@ -8,7 +8,7 @@ the existing ordered queue after the independently confirmed Novus Steel pass
 five eligible clients (October and November 2026) with **ten version-fenced,
 audited draft amendments saved and freshly read back**: Cape Lumber, Forklift
 Trucks, RC-Polypipe, HMHI / Hill, McHardy & Herbst and Bohemia Quick Stop.
-Every write returned `draft_amended` / `workflow_status=draft` /
+The writer reports every write returned `draft_amended` / `workflow_status=draft` /
 `published_version=null`; fresh brief readbacks matched the complete changed
 fields exactly and left all other strategy data identical. One preliminary
 RC-Polypipe October attempt was rejected before write
@@ -28,8 +28,13 @@ blocked by `CLIENT_EVIDENCE_UNVERIFIED` / `NO_CONFIRMED_MONTHLY_CONTENT_SCOPE`
 decisions, then continue canonical order. Do not redo Novus Steel or this
 five-client batch. No approval/publication, source activation, paid
 generation, package/calendar/permission/Vercel change or new client row
-occurred; the 37-ready / 24-blocked fleet structure and all separate
-semantic-review/publication gates remain in force.
+occurred. The 37-ready / 24-blocked count is a historical inventory, not a new
+fleet scan; re-read each brief's current eligibility. Separate semantic-review
+and publication gates remain in force. Supervisor independently confirmed all
+ten current canonical IDs/versions, draft status and selected test/game-plan
+content, not the writer's full before/after unchanged-field comparison. The
+same normal chat accepted the next five-eligible continuation from Kundedienste;
+that dispatch is not another saved receipt.
 
 ## 16 October live connector and full-script acceptance (earlier)
 
