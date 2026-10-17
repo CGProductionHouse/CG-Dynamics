@@ -1,5 +1,34 @@
 # CG Dynamics Ops Handover
 
+### 17 October — final-client current-state readback and protected review queue
+
+After#837, checkpoint3#731comment6238298342 was independently read: Staffordshire,
+WatchAddict,SupaQuickCenturion,Ehrlich and Piek, ten exact current IDs/versions,
+seven writer-reported changed months and three preserved (including published
+PiekOctoberv3). AllAroundPVC's currentOctober b2c7531b-a888-426f-a0aa-ede295261421v4
+andNovember b8c90019-008f-44b0-a7a3-1d1b5b67a9acv5 were independently read,
+their complete gold plans/concepts inspected, both unpublished1video/3photos/
+3posters. Canonical roster afterPiek returns onlyAllAround/has_more=false; after
+AllAround returns[]/has_more=false. Independent client cursor is thereforeEND,
+not an assertion that the still-active writer has returned its final receipt.
+No AllAround new-save attribution or writer-exhaustion receipt invented.
+Do not restart the current-state review or duplicate the active writer.
+
+Actual repository client-copy gate across32current checkpoint1/2/3/final-client
+payloads:31pass, one existing publishedPiekOctober hold (internal publishing/
+contact resolution). Its3poster concepts versus12scope also remain for protected
+editorial review, not silent published overwrite. PiekNovember's own source
+window is30September; never apply the writer's blanket23September wording to
+that payload. Source-ready/accepted draft is not approved/published content.
+Exact receipt: `strategy-review/2026-10-17-normal-chat-final-checkpoints.json`.
+Practical owner/release queue: `CLIENT-PORTAL-REVIEW-QUEUE-2026-10-17.md`.
+Retains known scope, current-provider partial/stale truth, real posting dates,
+finals/recipient isolation and legitimate-client/device acceptance gates. Old
+14October fleet counts remain dated, not freshly certified. No Vercel or protected
+mutation. Docs-only final receipt build/appchunks/JSONinvariants/diff pass;
+runtime/full-suite3933/3914pass/19skips/0fail inherited from#837, not rerun for
+prose. Other775/662/618 untouched; ControlCentre exact access still unavailable.
+
 ### 17 October — bounded Client Schedule connector pages; two further strategy checkpoints
 
 From maina12c125b (#836), actual MCP handler's silent50row cap reproduced with

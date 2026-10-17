@@ -1,5 +1,14 @@
 # Client portal launch review — 14 October 2026
 
+17October continuation and current protected next-action queue:
+`CLIENT-PORTAL-REVIEW-QUEUE-2026-10-17.md`. PR835–837 repair three reproduced
+reader/connector defects; current local3933total/3914pass/19skips/0fail and
+local build pass. Remaining strategy client cursor independently reachesEND;
+32current month states checked,31unpublished copy-gate passes and one existing
+publishedPiekOctober hold. No frontend/MCP release, strategy publication,
+recipient/finals activation or genuine-client/device acceptance is inferred.
+The older access/report/calendar/library counts below stay14October evidence.
+
 Latest November-only presentation result: all 37 source-ready drafts are cleaned
 and read back at exact versions in
 `strategy-review/2026-10-16-november-presentation-cleanup.json`, including CG's

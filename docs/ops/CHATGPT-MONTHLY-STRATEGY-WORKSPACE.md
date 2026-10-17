@@ -2,6 +2,22 @@
 
 ## 17 October continuation receipts (latest)
 
+Later checkpoint3#731comment6238298342 is independently read back for all ten
+current Staffordshire/WatchAddict/SupaQuickCenturion/Ehrlich/Piek states: seven
+changed months, three preserved, including already-publishedPiekOctober. Final
+AllAround currentOctv4/Novv5 also read and semantically inspected; both draft,
+1video/3photos/3posters. Canonical roster afterPiek contains onlyAllAround with
+has_more=false; afterAllAround returns[]/has_more=false. Independent cursorEND.
+The same writer remains marked active and its final save/exhaustion receipt is
+pending; no inferred AllAround save attribution or duplicated dispatch.
+Actual repository copy gate across32current states in this remaining cohort:
+31pass, publishedPiekOctober internal-contact-copy hold retained, not overwritten.
+Its3poster concepts/12scope also need targeted published editorial review.
+PiekNovember's own report window ends30September, not the writer checkpoint's
+blanket23September. Full before/after comparisons remain writer-attributed.
+See `strategy-review/2026-10-17-normal-chat-final-checkpoints.json` and
+`CLIENT-PORTAL-REVIEW-QUEUE-2026-10-17.md` for protected owner/release gates.
+
 Two further saved checkpoints now supersede the Bouwer dispatch below:
 #731comment6237985383 (Bouwer/SecuriForce/TBS/SupaQuickBFN/Peyper:7changed
 months/3acceptedNovember drafts preserved) and6238151225

@@ -1,0 +1,240 @@
+{
+  "schema": "cg-normal-chat-strategy-checkpoints/v1",
+  "date": "2026-10-17",
+  "writer_receipts": [
+    "https://github.com/CGProductionHouse/CG-Dynamics/issues/731#issuecomment-6238298342"
+  ],
+  "writer_reported_new_saves": 7,
+  "distinct_changed_client_months": 7,
+  "preserved_client_months": 3,
+  "independent_review": "Fresh exact briefs confirm all twelve current IDs/versions, selected test/game-plan prose and concept counts: eleven unpublished drafts and one already-published PiekOctober v3 untouched. Complete historical selected/unselected comparisons remain writer-attributed for checkpoint3; AllAround current state is independently read, no new save attribution inferred.",
+  "drafts": [
+    {
+      "client": "The Staffordshire",
+      "client_id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+      "month": "2026-10-01",
+      "strategy_id": "ec9fd062-ffee-44ca-afca-e230949da6fe",
+      "version": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "writer_reported_changed": true,
+      "concept_counts": {
+        "professional_video": 4,
+        "photo_content": 4,
+        "design_poster": 4
+      }
+    },
+    {
+      "client": "The Staffordshire",
+      "client_id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+      "month": "2026-11-01",
+      "strategy_id": "ac948143-24cd-4ed7-94b2-e9f5c3a259e2",
+      "version": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "writer_reported_changed": false,
+      "concept_counts": {
+        "professional_video": 4,
+        "photo_content": 4,
+        "design_poster": 4
+      }
+    },
+    {
+      "client": "Watch Addict",
+      "client_id": "e1cb958e-3f68-4a77-b5ea-b471ea62bdef",
+      "month": "2026-10-01",
+      "strategy_id": "51e32ba6-e2f2-45e2-932d-0e72d005690d",
+      "version": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "writer_reported_changed": true,
+      "concept_counts": {
+        "professional_video": 1,
+        "photo_content": 1,
+        "design_poster": 2
+      }
+    },
+    {
+      "client": "Watch Addict",
+      "client_id": "e1cb958e-3f68-4a77-b5ea-b471ea62bdef",
+      "month": "2026-11-01",
+      "strategy_id": "b5d7d3a3-cb36-4e51-bb1a-140f80db6fca",
+      "version": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "writer_reported_changed": true,
+      "concept_counts": {
+        "professional_video": 1,
+        "photo_content": 1,
+        "design_poster": 2
+      }
+    },
+    {
+      "client": "Supa Quick Centurion",
+      "client_id": "e2870110-930c-4e63-b2fe-c858030f7258",
+      "month": "2026-10-01",
+      "strategy_id": "c14da54d-c12e-442c-aeb2-72314fcd3eb5",
+      "version": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "writer_reported_changed": true,
+      "concept_counts": {
+        "professional_video": 1,
+        "photo_content": 0,
+        "design_poster": 3
+      }
+    },
+    {
+      "client": "Supa Quick Centurion",
+      "client_id": "e2870110-930c-4e63-b2fe-c858030f7258",
+      "month": "2026-11-01",
+      "strategy_id": "acb96650-a7c5-4d2e-b6c6-09bab0a156b4",
+      "version": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "writer_reported_changed": true,
+      "concept_counts": {
+        "professional_video": 1,
+        "photo_content": 0,
+        "design_poster": 3
+      }
+    },
+    {
+      "client": "Ehrlich Park Butchery",
+      "client_id": "ec643c75-51f5-4839-829f-3f5b7f48829a",
+      "month": "2026-10-01",
+      "strategy_id": "d79c28e1-986a-45af-b6d6-9c966098f9d6",
+      "version": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "writer_reported_changed": true,
+      "concept_counts": {
+        "professional_video": 1,
+        "photo_content": 3,
+        "design_poster": 4
+      }
+    },
+    {
+      "client": "Ehrlich Park Butchery",
+      "client_id": "ec643c75-51f5-4839-829f-3f5b7f48829a",
+      "month": "2026-11-01",
+      "strategy_id": "fbd1940e-8b28-47e9-99be-b2907f7aa5ae",
+      "version": 5,
+      "workflow_status": "draft",
+      "published_version": null,
+      "writer_reported_changed": true,
+      "concept_counts": {
+        "professional_video": 1,
+        "photo_content": 3,
+        "design_poster": 4
+      }
+    },
+    {
+      "client": "Piek Group",
+      "client_id": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
+      "month": "2026-10-01",
+      "strategy_id": "e3d7a58e-e20e-4cae-a75e-b57cd2075501",
+      "version": 3,
+      "workflow_status": "published",
+      "published_version": 3,
+      "writer_reported_changed": false,
+      "concept_counts": {
+        "professional_video": 4,
+        "photo_content": 0,
+        "design_poster": 3
+      }
+    },
+    {
+      "client": "Piek Group",
+      "client_id": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
+      "month": "2026-11-01",
+      "strategy_id": "cb416671-6fc7-4fc1-b7b7-33b27847a594",
+      "version": 5,
+      "workflow_status": "draft",
+      "published_version": null,
+      "writer_reported_changed": false,
+      "concept_counts": {
+        "professional_video": 4,
+        "photo_content": 0,
+        "design_poster": 12
+      }
+    },
+    {
+      "client": "All Around PVC",
+      "client_id": "fd16ebae-a50b-4920-afe0-94c2631f8f06",
+      "month": "2026-10-01",
+      "strategy_id": "b2c7531b-a888-426f-a0aa-ede295261421",
+      "version": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "writer_reported_changed": null,
+      "disposition": "Independently read current saved state; final writer save attribution not yet received.",
+      "concept_counts": {
+        "professional_video": 1,
+        "photo_content": 3,
+        "design_poster": 3
+      }
+    },
+    {
+      "client": "All Around PVC",
+      "client_id": "fd16ebae-a50b-4920-afe0-94c2631f8f06",
+      "month": "2026-11-01",
+      "strategy_id": "b8c90019-008f-44b0-a7a3-1d1b5b67a9ac",
+      "version": 5,
+      "workflow_status": "draft",
+      "published_version": null,
+      "writer_reported_changed": null,
+      "disposition": "Independently read current saved state; final writer save attribution not yet received.",
+      "concept_counts": {
+        "professional_video": 1,
+        "photo_content": 3,
+        "design_poster": 3
+      }
+    }
+  ],
+  "copy_gate": {
+    "actual_repository_function": "clientFacingStrategyQualityIssues(readStrategyData(strategy_data))",
+    "checked_current_client_months": 32,
+    "pass": 31,
+    "held": 1,
+    "scope": "checkpoint1/2/3 current payloads; does not count earlier twenty sampled month drafts again",
+    "held_detail": "Piek published October v3 retains internal publishing/contact resolution text. Its 3 poster concepts versus confirmed scope12 also need protected editorial review; no published overwrite or new quantity inferred.",
+    "meaning": "Known-forbidden-copy gate only, not semantic approval, fresh provider results or permission to publish."
+  },
+  "boundaries": [
+    "Piek November's own successSignals references30September; the writer checkpoint's blanket23September statement must not replace exact report windows.",
+    "All new and previously accepted unpublished drafts remain draft with published_version=null.",
+    "Published PiekOctober was preserved; no silent republishing or approval.",
+    "Concepts are not scheduled posts or new package commitments."
+  ],
+  "held_zero_write": [
+    "Mimosa Mall — no confirmed monthly content scope/exact strategy evidence",
+    "Toyota Bloemfontein — exact strategy evidence unavailable; known4video scope unchanged"
+  ],
+  "next_cursor": null,
+  "queue_exhausted": false,
+  "not_performed": [
+    "approval/publication",
+    "source activation",
+    "paid generation",
+    "new task/automation",
+    "package/date/schedule/provider/permission/folder changes",
+    "Vercel"
+  ],
+  "canonical_cursor_exhausted": {
+    "after_piek": {
+      "returned": 1,
+      "client": "All Around PVC",
+      "client_id": "fd16ebae-a50b-4920-afe0-94c2631f8f06",
+      "has_more": false,
+      "next_after_client_id": null
+    },
+    "after_all_around": {
+      "returned": 0,
+      "has_more": false,
+      "next_after_client_id": null
+    },
+    "meaning": "Independent canonical end-of-roster and final current-plan checks, not a claim that the active writer has returned its final receipt."
+  },
+  "writer_final_receipt_pending": true
+}
