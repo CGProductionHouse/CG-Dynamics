@@ -1,5 +1,40 @@
 # CG Dynamics Ops Handover
 
+### 17 October — missing report facts no longer imply legacy; next strategy batch verified
+
+From mainbb615312, actual Overview null-facts assertion failed first; two unit
+groups also reproduced missing facts/status accepted as successful empty/legacy
+and unallowlisted transport fields. Existing reportingTruth reads now validate
+public row shape/date/month/value/availability and the one-row typed aggregate
+status; genuine empty/legacy/zero/partial/null remain distinct. Rejected/failed
+reads are sanitized unavailable, never partial successful facts or silent legacy
+fallback. Existing report/session authority, metric/source arithmetic and design
+unchanged. No schema/provider/Edge/auth/write/dependency change. Actual Overview
+and normal Performance checks pass1440/375/390/430; no fake old-client/empty/zero
+claim.48focused;3930total/3911pass/19intentional skips/0fail;all15canonical local
+browser fixtures/build/appchunks/scoped lint/diff PASS. Two optional Docker checks
+skipped; Windows Bash excluded, not passed. See
+`CLIENT-REPORT-FACT-READ-CONTRACT-2026-10-17.md`. Other775/662/618 untouched.
+
+Normal writer731receipt6237678566 finished CentralCanvas/Braize/Madison/Wiseman/
+BloemMarble:9changed client-months,10guarded saves (BraizeNov same-field correction),
+MadisonNov acceptedv4 unchanged. Independent fresh10IDs/versions/status/tests/
+Novplans/conceptcounts match; full unchanged-field historical diff is writer-
+attributed. All20sampled prior/current month drafts pass actual repository known-
+forbidden-copy gate, not semantic approval/publication. Exact second batch IDs:
+`strategy-review/2026-10-17-normal-chat-second-batch.json`. Same idle normal writer
+accepted the remaining existing ordered queue from Bouwer8e448cf9-1534-4ba1-89a4-93e4c8b83d2f,
+with five-client saved checkpoints requested. Do not redo completed clients or
+infer further saves from this dispatch. Source/scope-held Kundedienste/Econofoods/
+Elcheck/AgriSecure, HumanAuto skip/go and prior Neshora gates unchanged.
+
+Normal bounded1Oct–30Nov company schedule read returns5dated rows (below existing
+50cap), allOctober6/7to_do; it excludes undated/legacydue-only work by design of
+that tool, so this is not a full monthly plan inventory or Teams reconciliation.
+No guessed dates or force cleanup. ZERO Vercel/protected mutation in code lane;
+679 exact release, genuine-client/mobile and content/finals/recipient/provider
+gates remain separate. ControlCentre unavailable, not invented.
+
 ### 17 October — client approval malformed-row boundary verified locally
 
 From mainb789d971 (#834), actual normal client Approvals with `[null]` passed

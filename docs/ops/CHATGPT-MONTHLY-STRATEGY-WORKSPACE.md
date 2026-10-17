@@ -2,6 +2,26 @@
 
 ## 17 October continuation receipts (latest)
 
+The next normal-chat batch is now saved on #731 comment6237678566: Central Canvas,
+Braize, Madison Wear, Wiseman Group and Bloem Marble & Granite. Nine distinct
+Oct/Nov drafts changed through ten guarded saves (BraizeNovember's second save
+corrected only an extra poster allocation); MadisonNovember's acceptedv4 was
+preserved. Independent supervisor brief reads confirm all ten current IDs/versions,
+unpublished status, selected tests, November game plans and package-bound concept
+counts. Full before/after unchanged-field assertions remain the writer's receipt.
+Details: `strategy-review/2026-10-17-normal-chat-second-batch.json`.
+
+Actual repository forbidden-copy gate passes all20 sampled drafts in these two
+batches; this does not establish semantic approval or permission to publish.
+Kundedienste/Econofoods/Elcheck/Agri-Secure exact evidence/scope holds and Human
+Auto skip/go retained. Elcheck's known1video/3photo/3poster scope is not missing
+information to request again. Same idle writer accepted continuation of the
+remaining existing queue from Bouwer & Coetzee Attorneys
+`8e448cf9-1534-4ba1-89a4-93e4c8b83d2f`, preserving its accepted November poster
+correction, with saved five-client checkpoints requested. Await actual receipts,
+no duplicate author/automation/paid generator or publication. The earlier next-
+Kundedienste dispatch below is now completed, not the current cursor.
+
 The same human-authorised normal **Write Client Strategies** writer continued
 the existing ordered queue after the independently confirmed Novus Steel pass
 (#731 comment 6233461766). From the Cape Lumber cursor it completed the next
