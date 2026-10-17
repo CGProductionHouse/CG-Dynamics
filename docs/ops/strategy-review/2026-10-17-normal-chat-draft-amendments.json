@@ -1,0 +1,246 @@
+{
+  "schema": "cg-normal-chat-strategy-amendments/v1",
+  "date": "2026-10-17",
+  "months": ["2026-10-01", "2026-11-01"],
+  "route": "Existing normal company ChatGPT Write Client Strategies conversation + existing private CG Dynamics connector (version-fenced guarded save path); no provider-funded generator, no new task/automation.",
+  "scope": "Continuation from the Cape Lumber cursor after the independently confirmed Novus Steel pass (#731 comment 6233461766): the next five eligible clients in canonical order, October and November 2026. WiseRide's two held months were skipped.",
+  "counts": {
+    "clients": 5,
+    "amendments_saved_and_read_back": 10,
+    "writes_rejected_before_write": 1,
+    "held_clients_skipped": 1,
+    "approvals": 0,
+    "publications": 0
+  },
+  "verification": "Each write returned state=draft_amended with the expected canonical ID/new version, workflow_status=draft and published=false. A subsequent fresh get_monthly_strategy_brief returned every complete changed field exactly equal to the submitted replacement, and the entire strategy_data identical to the pre-save payload except the specifically selected fields. Every published_version=null. Source and version fingerprints were freshly read per client/month before each save.",
+  "fact_boundaries": [
+    "September reach-ranked report observations remain labelled with their actual 23 September end date.",
+    "Missing sales and October results remain unavailable; none were invented.",
+    "Exact-client guide/source eligibility was respected; only IDs eligible in the returned brief were cited.",
+    "RC-Polypipe's guide ID was not an eligible citation in the brief, so only eligible current report/package source IDs were submitted after checking the exact guide."
+  ],
+  "rejected_before_write": [
+    {
+      "client": "RC-Polypipe",
+      "client_id": "4f6106de-c437-404e-8cef-fbe848de0665",
+      "month": "2026-10-01",
+      "error": "STRATEGY_PROPOSAL_INVALID / TEXT_TOO_LONG",
+      "resolution": "The video concept was shortened below 300 characters; the corrected single guarded save/readback then passed. No write occurred from the rejected attempt."
+    }
+  ],
+  "drafts": [
+    {
+      "client": "Cape Lumber",
+      "client_id": "42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa",
+      "month": "2026-10-01",
+      "strategy_id": "5d19b1c2-a5eb-41d1-a216-4000f1b85f73",
+      "version_before": 3,
+      "version_after": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "changed_fields": [
+        "goldStandard.testAndChange",
+        "actionPlan.photo_content.items"
+      ],
+      "notes": "Three existing photo slots amended; no slots added or removed.",
+      "unselected_strategy_data_unchanged": true
+    },
+    {
+      "client": "Cape Lumber",
+      "client_id": "42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa",
+      "month": "2026-11-01",
+      "strategy_id": "c4daf0e5-9f1e-4d1c-bb2c-74b9b09ecfaa",
+      "version_before": 4,
+      "version_after": 5,
+      "workflow_status": "draft",
+      "published_version": null,
+      "changed_fields": [
+        "goldStandard.nextMonthGamePlan"
+      ],
+      "notes": "nextMonthGamePlan only; the previously accepted November test field was preserved unchanged.",
+      "unselected_strategy_data_unchanged": true
+    },
+    {
+      "client": "Forklift Trucks",
+      "client_id": "4424ed69-7270-4d30-a1ea-0b77d76912df",
+      "month": "2026-10-01",
+      "strategy_id": "6ff52455-ea17-42b4-baf6-68953de434fd",
+      "version_before": 2,
+      "version_after": 3,
+      "workflow_status": "draft",
+      "published_version": null,
+      "changed_fields": [
+        "goldStandard (ten fields)",
+        "actionPlan.professional_video.items (1 existing concept)",
+        "actionPlan.photo_content.items (3 existing concepts)",
+        "actionPlan.design_poster.items (3 existing concepts)"
+      ],
+      "notes": "Replaces nonspecific guide instructions with the exact OFS buyer/workshop strategy across the ten goldStandard fields and the existing professional-video, photo and poster concept arrays; array lengths unchanged.",
+      "unselected_strategy_data_unchanged": true
+    },
+    {
+      "client": "Forklift Trucks",
+      "client_id": "4424ed69-7270-4d30-a1ea-0b77d76912df",
+      "month": "2026-11-01",
+      "strategy_id": "1ccca509-e1db-485b-80d6-4f1d9ff6ab04",
+      "version_before": 4,
+      "version_after": 5,
+      "workflow_status": "draft",
+      "published_version": null,
+      "changed_fields": [
+        "goldStandard.testAndChange",
+        "goldStandard.nextMonthGamePlan"
+      ],
+      "notes": "Only these two gold fields changed; the previously accepted video concept was preserved unchanged.",
+      "unselected_strategy_data_unchanged": true
+    },
+    {
+      "client": "RC-Polypipe",
+      "client_id": "4f6106de-c437-404e-8cef-fbe848de0665",
+      "month": "2026-10-01",
+      "strategy_id": "49fb40ec-94a9-4aef-b595-d9ec7b4ac1fc",
+      "version_before": 3,
+      "version_after": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "changed_fields": [
+        "goldStandard.testAndChange",
+        "actionPlan.professional_video.items (1 existing concept)",
+        "actionPlan.photo_content.items (3 existing concepts)"
+      ],
+      "notes": "Existing video and photo concept arrays amended; array lengths unchanged. One preliminary attempt was rejected before write (see rejected_before_write).",
+      "unselected_strategy_data_unchanged": true
+    },
+    {
+      "client": "RC-Polypipe",
+      "client_id": "4f6106de-c437-404e-8cef-fbe848de0665",
+      "month": "2026-11-01",
+      "strategy_id": "15bc8487-7fa7-4d7e-ad78-d60c48982997",
+      "version_before": 3,
+      "version_after": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "changed_fields": [
+        "goldStandard.testAndChange",
+        "goldStandard.nextMonthGamePlan"
+      ],
+      "unselected_strategy_data_unchanged": true
+    },
+    {
+      "client": "HMHI / Hill, McHardy & Herbst",
+      "client_id": "572555e0-d4d0-404a-8d67-beeeeed6a1f2",
+      "month": "2026-10-01",
+      "strategy_id": "f8ff3a3d-3e34-4d39-a0e8-9c447cbd1349",
+      "version_before": 3,
+      "version_after": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "changed_fields": [
+        "goldStandard.testAndChange",
+        "actionPlan.design_poster.items (3 existing concepts)"
+      ],
+      "notes": "Existing poster concept array amended; array length unchanged.",
+      "unselected_strategy_data_unchanged": true
+    },
+    {
+      "client": "HMHI / Hill, McHardy & Herbst",
+      "client_id": "572555e0-d4d0-404a-8d67-beeeeed6a1f2",
+      "month": "2026-11-01",
+      "strategy_id": "7fc0391c-38a3-4b77-ad28-56fe64176289",
+      "version_before": 3,
+      "version_after": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "changed_fields": [
+        "goldStandard.testAndChange",
+        "goldStandard.nextMonthGamePlan"
+      ],
+      "unselected_strategy_data_unchanged": true
+    },
+    {
+      "client": "Bohemia Quick Stop",
+      "client_id": "5dfdf4bd-9d94-4cc6-9dee-0e480a2234cb",
+      "month": "2026-10-01",
+      "strategy_id": "7f7c46bf-6765-4694-9486-1066a5670d1b",
+      "version_before": 3,
+      "version_after": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "changed_fields": [
+        "goldStandard.testAndChange",
+        "actionPlan.design_poster.items (2 existing concepts)"
+      ],
+      "notes": "Existing poster concept array amended; array length unchanged.",
+      "unselected_strategy_data_unchanged": true
+    },
+    {
+      "client": "Bohemia Quick Stop",
+      "client_id": "5dfdf4bd-9d94-4cc6-9dee-0e480a2234cb",
+      "month": "2026-11-01",
+      "strategy_id": "2e95fa11-1f6a-4e48-b0a8-925c6f9ecfb7",
+      "version_before": 3,
+      "version_after": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "changed_fields": [
+        "goldStandard.testAndChange",
+        "goldStandard.nextMonthGamePlan"
+      ],
+      "unselected_strategy_data_unchanged": true
+    }
+  ],
+  "held_skipped": [
+    {
+      "client": "WiseRide",
+      "client_id": "504113ee-fba9-4993-807e-a86066615212",
+      "october_draft": {
+        "strategy_id": "445f15e8-d62a-4b15-8539-dd1e7053f220",
+        "version": 2
+      },
+      "november_draft": {
+        "strategy_id": "5b4537b6-5ba0-4a0a-a134-eed76552fef6",
+        "version": 1
+      },
+      "blockers": ["EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"],
+      "writes": 0,
+      "disposition": "Exact-client strategy evidence review remains owner-held; both months skipped with zero writes."
+    }
+  ],
+  "preserved_holds": [
+    "Neshora Oxygen: prior source/short-code/clinical-consent/slot/final/recipient holds remain; no new reads, research or changes this pass.",
+    "Human Auto: CA skip/go research gate remains; no new read or research this pass."
+  ],
+  "next_cursor": {
+    "client": "Kundedienste",
+    "client_id": "5e4e3335-a89c-4629-9efc-b6a194bec80c",
+    "read_only_checked": {
+      "october": {
+        "strategy_id": "007b2879-7900-4975-8dcd-042ef7853e63",
+        "version": 1
+      },
+      "november": {
+        "strategy_id": "95e88514-2c38-451e-87c0-9b2c1775fd43",
+        "version": 1
+      },
+      "blockers": [
+        "CLIENT_EVIDENCE_UNVERIFIED",
+        "NO_CONFIRMED_MONTHLY_CONTENT_SCOPE",
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ]
+    },
+    "disposition": "Skip Kundedienste pending owner source/package decisions; then continue canonical order from the existing ordered eligible queue."
+  },
+  "not_performed": [
+    "no approval or publication",
+    "no auto-generated/provider-funded plans",
+    "no new client rows",
+    "no package, calendar/date, source activation or guideline changes",
+    "no provider/OAuth/permission changes",
+    "no folders/short codes",
+    "no Vercel operations",
+    "no external messages",
+    "no paid generation"
+  ],
+  "publication": "NOT_PERFORMED",
+  "fleet_launch_acceptance": "NOT_ESTABLISHED"
+}

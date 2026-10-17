@@ -1,5 +1,54 @@
 # CG Dynamics Ops Handover
 
+### 17 October — awaited #731 readbacks arrived; ten more fenced amendments
+
+The canonical readbacks awaited at main e2e18cc are recorded on #731. The same
+human-authorised normal Write Client Strategies writer completed the next five
+eligible clients after the Cape Lumber cursor (October and November 2026) with
+**ten version-fenced, audited draft amendments saved and freshly read back**:
+Cape Lumber Oct `5d19b1c2-a5eb-41d1-a216-4000f1b85f73` v3→v4
+(testAndChange + 3 existing photo slots) and Nov `c4daf0e5-9f1e-4d1c-bb2c-74b9b09ecfaa`
+v4→v5 (nextMonthGamePlan only, previously accepted November test preserved);
+Forklift Oct `6ff52455-ea17-42b4-baf6-68953de434fd` v2→v3 (ten gold fields plus
+existing 1 video/3 photo/3 poster concepts, exact OFS buyer/workshop strategy
+replacing nonspecific guide instructions) and Nov `1ccca509-e1db-485b-80d6-4f1d9ff6ab04`
+v4→v5 (testAndChange + nextMonthGamePlan, accepted video unchanged);
+RC-Polypipe Oct `49fb40ec-94a9-4aef-b595-d9ec7b4ac1fc` v3→v4 and Nov
+`15bc8487-7fa7-4d7e-ad78-d60c48982997` v3→v4; HMHI Oct
+`f8ff3a3d-3e34-4d39-a0e8-9c447cbd1349` v3→v4 and Nov
+`7fc0391c-38a3-4b77-ad28-56fe64176289` v3→v4; Bohemia Quick Stop Oct
+`7f7c46bf-6765-4694-9486-1066a5670d1b` v3→v4 and Nov
+`2e95fa11-1f6a-4e48-b0a8-925c6f9ecfb7` v3→v4 (last four pairs: testAndChange plus
+existing concept arrays / nextMonthGamePlan). Every write returned
+`draft_amended` with the expected canonical ID/version, `workflow_status=draft`,
+`published=false`, `published_version=null`; fresh brief readbacks returned the
+complete changed fields exactly equal and all other strategy data identical
+except the selected fields. September reach-ranked observations keep their
+actual 23 September end date; missing sales/October results stay unavailable.
+One preliminary RC October attempt was rejected before write
+(`STRATEGY_PROPOSAL_INVALID / TEXT_TOO_LONG`); the video concept was shortened
+below 300 characters and the single corrected guarded save/readback passed.
+RC's guide ID was not an eligible citation, so only eligible current
+report/package source IDs were submitted. Durable receipt:
+`strategy-review/2026-10-17-normal-chat-draft-amendments.json`.
+
+WiseRide `504113ee-fba9-4993-807e-a86066615212` October `445f15e8-d62a-4b15-8539-dd1e7053f220`
+v2 and November `5b4537b6-5ba0-4a0a-a134-eed76552fef6` v1 were skipped
+(`EXACT_STRATEGY_EVIDENCE_UNAVAILABLE`, zero writes, owner-held evidence
+review). Prior Neshora source/short-code/clinical-consent holds and the Human
+Auto skip/go gate are preserved with no new reads/research. **Next exact
+canonical cursor: Kundedienste** `5e4e3335-a89c-4629-9efc-b6a194bec80c`;
+read-only checked October `007b2879-7900-4975-8dcd-042ef7853e63` v1 and November
+`95e88514-2c38-451e-87c0-9b2c1775fd43` v1, both blocked by
+`CLIENT_EVIDENCE_UNVERIFIED` / `NO_CONFIRMED_MONTHLY_CONTENT_SCOPE` /
+`EXACT_STRATEGY_EVIDENCE_UNAVAILABLE`; skip pending owner source/package
+decisions, then continue canonical order from the existing ordered eligible
+queue. Do not redo Novus Steel, this five-client batch or the recorded
+proposals. No approval/publication, package/calendar/source activation,
+provider/OAuth/permissions, folders/short codes, Vercel, external messages,
+paid generation or new client rows. Control Centre remains inaccessible, not
+guessed; #679 release and real-client gates remain separate.
+
 ### 17 October — section scroll reset; Novus writer saves independently confirmed
 
 Continuation from mainf0037e3b: live390px Forklift Overview→Plan retained scroll
