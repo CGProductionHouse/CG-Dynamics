@@ -2,6 +2,21 @@
 
 ## 17 October continuation receipts (latest)
 
+Two further saved checkpoints now supersede the Bouwer dispatch below:
+#731comment6237985383 (Bouwer/SecuriForce/TBS/SupaQuickBFN/Peyper:7changed
+months/3acceptedNovember drafts preserved) and6238151225
+(C&L/BloemAction/Germoparts/CG/Emmanuel:6changed/4preserved). Supervisor fresh
+briefs independently confirm all20current IDs/versions, draft/unpublished status,
+selected test/game-plan prose and exact concept counts. Historical full before/
+after unchanged-field checks remain writer-attributed. Exact receipt:
+`strategy-review/2026-10-17-normal-chat-remaining-checkpoints.json`.
+The same writer remains active, current cursor The Staffordshire
+`dfa47255-875d-43cf-8a22-cfe1a6247fb7`; no final queue exhaustion claimed yet.
+Do not re-dispatch or redo those clients. Emmanuel's report ends30September,
+not23September; prior metrics remain historical, not invented October outcomes.
+JFJ/VCS known package scope is retained, not a question to ask CA again.
+Held source/permission decisions and HumanAuto skip/go remain unchanged.
+
 The next normal-chat batch is now saved on #731 comment6237678566: Central Canvas,
 Braize, Madison Wear, Wiseman Group and Bloem Marble & Granite. Nine distinct
 Oct/Nov drafts changed through ten guarded saves (BraizeNovember's second save

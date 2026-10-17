@@ -1,0 +1,343 @@
+{
+  "schema": "cg-normal-chat-strategy-checkpoints/v1",
+  "date": "2026-10-17",
+  "writer_receipts": [
+    "https://github.com/CGProductionHouse/CG-Dynamics/issues/731#issuecomment-6237985383",
+    "https://github.com/CGProductionHouse/CG-Dynamics/issues/731#issuecomment-6238151225"
+  ],
+  "writer_reported_new_saves": 13,
+  "distinct_changed_client_months": 13,
+  "preserved_client_months": 7,
+  "independent_review": "Fresh current brief reads confirm all 20 exact IDs/versions, draft/unpublished status, selected tests/game plans and concept counts. Complete before/after selected-field equality and other-field preservation remain writer-attributed, not an independent revision diff.",
+  "drafts": [
+    {
+      "client": "Bouwer & Coetzee Attorneys",
+      "client_id": "8e448cf9-1534-4ba1-89a4-93e4c8b83d2f",
+      "month": "2026-10-01",
+      "strategy_id": "45ec2687-c74d-4d1f-803e-2b40cfec57db",
+      "version": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "writer_reported_changed": true,
+      "concept_counts": {
+        "professional_video": 1,
+        "photo_content": 0,
+        "design_poster": 7
+      }
+    },
+    {
+      "client": "Bouwer & Coetzee Attorneys",
+      "client_id": "8e448cf9-1534-4ba1-89a4-93e4c8b83d2f",
+      "month": "2026-11-01",
+      "strategy_id": "a0e52b08-1f49-4f8b-8bec-920a7e060fcb",
+      "version": 5,
+      "workflow_status": "draft",
+      "published_version": null,
+      "writer_reported_changed": true,
+      "concept_counts": {
+        "professional_video": 1,
+        "photo_content": 0,
+        "design_poster": 7
+      }
+    },
+    {
+      "client": "SecuriForce",
+      "client_id": "917d6f7c-1c2a-4c20-82f0-daa41b9062f5",
+      "month": "2026-10-01",
+      "strategy_id": "5f39bd38-00ed-4060-b55b-1283065e82dd",
+      "version": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "writer_reported_changed": true,
+      "concept_counts": {
+        "professional_video": 4,
+        "photo_content": 4,
+        "design_poster": 4
+      }
+    },
+    {
+      "client": "SecuriForce",
+      "client_id": "917d6f7c-1c2a-4c20-82f0-daa41b9062f5",
+      "month": "2026-11-01",
+      "strategy_id": "8999cf7b-d7ff-4d57-a8f2-a4d115001584",
+      "version": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "writer_reported_changed": false,
+      "concept_counts": {
+        "professional_video": 4,
+        "photo_content": 4,
+        "design_poster": 4
+      }
+    },
+    {
+      "client": "TBS Brokers",
+      "client_id": "a36ba938-e9dc-4ecf-bb67-4853608b1c01",
+      "month": "2026-10-01",
+      "strategy_id": "5ecaabe0-1f6d-4a34-a932-e1e81c2c1188",
+      "version": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "writer_reported_changed": true,
+      "concept_counts": {
+        "professional_video": 0,
+        "photo_content": 4,
+        "design_poster": 4
+      }
+    },
+    {
+      "client": "TBS Brokers",
+      "client_id": "a36ba938-e9dc-4ecf-bb67-4853608b1c01",
+      "month": "2026-11-01",
+      "strategy_id": "723de2b2-28d7-43ec-b4c3-628354e59f27",
+      "version": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "writer_reported_changed": false,
+      "concept_counts": {
+        "professional_video": 0,
+        "photo_content": 4,
+        "design_poster": 4
+      }
+    },
+    {
+      "client": "Supa Quick BFN",
+      "client_id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+      "month": "2026-10-01",
+      "strategy_id": "f9648334-0284-4b8c-b6f5-d667026a9694",
+      "version": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "writer_reported_changed": true,
+      "concept_counts": {
+        "professional_video": 1,
+        "photo_content": 0,
+        "design_poster": 3
+      }
+    },
+    {
+      "client": "Supa Quick BFN",
+      "client_id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+      "month": "2026-11-01",
+      "strategy_id": "eba11003-11bd-429d-8004-635ceb21b928",
+      "version": 5,
+      "workflow_status": "draft",
+      "published_version": null,
+      "writer_reported_changed": true,
+      "concept_counts": {
+        "professional_video": 1,
+        "photo_content": 0,
+        "design_poster": 3
+      }
+    },
+    {
+      "client": "Peyper Bonds",
+      "client_id": "a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b",
+      "month": "2026-10-01",
+      "strategy_id": "2ed8b4fc-2225-4df0-8b92-194989e8fb8e",
+      "version": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "writer_reported_changed": true,
+      "concept_counts": {
+        "professional_video": 1,
+        "photo_content": 3,
+        "design_poster": 3
+      }
+    },
+    {
+      "client": "Peyper Bonds",
+      "client_id": "a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b",
+      "month": "2026-11-01",
+      "strategy_id": "c18a9a68-d5a1-4289-bf69-8985135b4020",
+      "version": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "writer_reported_changed": false,
+      "concept_counts": {
+        "professional_video": 1,
+        "photo_content": 3,
+        "design_poster": 3
+      }
+    },
+    {
+      "client": "C&L Innovations",
+      "client_id": "afb62c53-d6d3-4ef8-9393-def88ed899d8",
+      "month": "2026-10-01",
+      "strategy_id": "a99738fc-26a1-43a3-ad35-5ff2ae8eceb4",
+      "version": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "writer_reported_changed": true,
+      "concept_counts": {
+        "professional_video": 0,
+        "photo_content": 2,
+        "design_poster": 2
+      }
+    },
+    {
+      "client": "C&L Innovations",
+      "client_id": "afb62c53-d6d3-4ef8-9393-def88ed899d8",
+      "month": "2026-11-01",
+      "strategy_id": "b7caa2c0-7fe4-49d8-b4e5-55232c3639c5",
+      "version": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "writer_reported_changed": true,
+      "concept_counts": {
+        "professional_video": 0,
+        "photo_content": 2,
+        "design_poster": 2
+      }
+    },
+    {
+      "client": "Bloem Action Sports",
+      "client_id": "b28af30a-3d44-490a-8290-1e56dac7b127",
+      "month": "2026-10-01",
+      "strategy_id": "9e1e5efa-ab19-49de-942a-05523f4218b5",
+      "version": 3,
+      "workflow_status": "draft",
+      "published_version": null,
+      "writer_reported_changed": true,
+      "concept_counts": {
+        "professional_video": 1,
+        "photo_content": 4,
+        "design_poster": 4
+      }
+    },
+    {
+      "client": "Bloem Action Sports",
+      "client_id": "b28af30a-3d44-490a-8290-1e56dac7b127",
+      "month": "2026-11-01",
+      "strategy_id": "9a227997-5dbd-40cf-b258-39deba05732c",
+      "version": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "writer_reported_changed": false,
+      "concept_counts": {
+        "professional_video": 1,
+        "photo_content": 4,
+        "design_poster": 4
+      }
+    },
+    {
+      "client": "Germoparts",
+      "client_id": "b6052710-417d-4b3b-8348-0f126bfea671",
+      "month": "2026-10-01",
+      "strategy_id": "73ac8493-8746-4e67-9889-d8c27abec853",
+      "version": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "writer_reported_changed": true,
+      "concept_counts": {
+        "professional_video": 2,
+        "photo_content": 0,
+        "design_poster": 12
+      }
+    },
+    {
+      "client": "Germoparts",
+      "client_id": "b6052710-417d-4b3b-8348-0f126bfea671",
+      "month": "2026-11-01",
+      "strategy_id": "43218236-05fc-43b1-ace2-759a77865b1f",
+      "version": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "writer_reported_changed": false,
+      "concept_counts": {
+        "professional_video": 2,
+        "photo_content": 0,
+        "design_poster": 12
+      }
+    },
+    {
+      "client": "CG Production House",
+      "client_id": "c27d2185-08e4-4c49-be48-2572564ceecf",
+      "month": "2026-10-01",
+      "strategy_id": "8d166fae-9eab-4e1c-9e73-c73e730ad6d1",
+      "version": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "writer_reported_changed": true,
+      "concept_counts": {
+        "professional_video": 4,
+        "photo_content": 8,
+        "design_poster": 4
+      }
+    },
+    {
+      "client": "CG Production House",
+      "client_id": "c27d2185-08e4-4c49-be48-2572564ceecf",
+      "month": "2026-11-01",
+      "strategy_id": "e62a6569-fc2d-474f-b74b-43fac56a736d",
+      "version": 5,
+      "workflow_status": "draft",
+      "published_version": null,
+      "writer_reported_changed": false,
+      "concept_counts": {
+        "professional_video": 4,
+        "photo_content": 8,
+        "design_poster": 4
+      }
+    },
+    {
+      "client": "Emmanuel Funerals",
+      "client_id": "d53d8e62-9e6a-4bb9-be3f-554f40942d45",
+      "month": "2026-10-01",
+      "strategy_id": "0a5e39bc-cc13-44db-af9f-d4ce8c5a877a",
+      "version": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "writer_reported_changed": true,
+      "concept_counts": {
+        "professional_video": 1,
+        "photo_content": 3,
+        "design_poster": 4
+      }
+    },
+    {
+      "client": "Emmanuel Funerals",
+      "client_id": "d53d8e62-9e6a-4bb9-be3f-554f40942d45",
+      "month": "2026-11-01",
+      "strategy_id": "b910ad81-b549-4128-8eb5-e5397b6d7d2c",
+      "version": 4,
+      "workflow_status": "draft",
+      "published_version": null,
+      "writer_reported_changed": false,
+      "concept_counts": {
+        "professional_video": 1,
+        "photo_content": 3,
+        "design_poster": 4
+      }
+    }
+  ],
+  "boundaries": [
+    "Prior results keep their actual dates; Emmanuel's September report ends 30 September, others retain their own returned windows.",
+    "Concept counts are not scheduled posts, confirmed slots or publication.",
+    "Germoparts October's initial mistyped source-ID attempt was rejected before any save; fresh eligible source readback preceded its single successful fenced amendment.",
+    "Known package facts, unselected staff edits, branch identity, legal/financial/clinical/security approval boundaries and Human Auto skip/go are preserved."
+  ],
+  "held_zero_write": [
+    "NCNA — no confirmed monthly content scope/exact strategy evidence",
+    "Jenkor — exact strategy evidence unavailable",
+    "Rusoord Farmstay — unverified evidence/no confirmed monthly content scope",
+    "JFJ Electrical — no eligible source/draft row; known1video/3photo/3poster scope unchanged",
+    "VCS Cleaning Solutions — no eligible source/draft row; known1video/8poster scope unchanged",
+    "First Technology Central — no confirmed monthly content scope",
+    "Red Oak — exact strategy evidence unavailable; known8video/2photo scope unchanged"
+  ],
+  "next_cursor": {
+    "client": "The Staffordshire",
+    "client_id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+    "status": "same writer continuing; not a new dispatch"
+  },
+  "queue_exhausted": false,
+  "not_performed": [
+    "approval/publication",
+    "source activation",
+    "paid generation",
+    "new task/automation",
+    "package/date/schedule/provider/permission/folder changes",
+    "Vercel"
+  ]
+}
