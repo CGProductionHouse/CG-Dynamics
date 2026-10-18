@@ -1,3 +1,16 @@
+### 18 October — CA owner correction: real Teams/Planner tasks, privacy and Novus
+
+**MANDATORY next read for the active staff/Codex Teams-to-Dynamics implementation:** [CGPH Planner/Calendar Owner Handover, 18 Oct](CGPH-PLANNER-CALENDAR-CLEANUP-OWNER-HANDOVER-2026-10-18.md).
+This is a later direct CA operating correction that overrides older catch-all task creation and event-backfill wording. Existing Codex local lane: #381 [staff checkpoint](https://github.com/CGProductionHouse/CG-Dynamics/issues/381#issuecomment-6252213593), branch codex/teams-dynamics-readiness-20261018; local head e0c12a8a not pushed/merged/deployed. DO NOT duplicate or race that lane.
+
+- **No fake leads:** ProCompare and lead-marketplace enquiries never become CG staff tasks. Novus Steel Google Ads leads automatically forward to Novus; **CG makes zero individual lead callbacks**. Seventeen active erroneous Novus callback cards were removed from live To Do; never resurrect them from email or Dynamics mirrors. CG's actual ongoing Novus duty is **weekly Google Ads performance updates**, until Dynamics is independently proven to generate **and deliver** them.
+- **CA-only accounting:** Xero, bookkeeping, banking/payment allocations, card and subscription charges, receipts, VAT and internal reconciliation must never appear in any open staff To Do/Dynamics Work/Teams section. **Amonique may still handle client-facing invoice/statement preparation, sending, bounced recipients and quotes.** Client invoice administration is NOT bank reconciliation. Do not leak private financial material to the public repo or staff.
+- **Native recurrence unresolved:** Active XERO ADMIN (ADMIN CHECK LIST WEEKLY) and FINANCES (MONTHLY) tasks were regenerated despite deleting occurrences; stop source recurrence or protect via a genuinely CA-private path, test multiple cycles. Existing Teams connector cannot edit recurrence. Do not pretend that deleting one card solves it.
+- **Real deliverables:** Outlook shoot booking alone is not contracted editing work. Accepted quote/invoice/contract scope must establish real outputs for weddings/once-offs; no guessed dates/video counts. Existing Content Runs already own canonical Content Guidelines/monthly deliverables: no duplicate task factory. Earlier mass-created shoot follow-ups and deadlines require evidence-led reconciliation, not blind recreation/completion. Raw media is not a published final.
+- **Status:** 18 Oct live Microsoft→Dynamics sync remains PARTIAL with 382 conflicts; the Codex local preview fix reduced conflicts to 83 (299 false conflicts removed) but does not prove production apply. Preserve #325 coexistence, #327 health, #841 event guard with later owner overrides, protected monthly_deliverables and #679 hosting/release gate. All details and test acceptance criteria are in the linked focused handover.
+
+**This is docs-only continuity, NOT code/DB/data apply or a claim of production acceptance.** CA's owner instructions take precedence over old speculative lead creation workflows.
+
 # CG Dynamics Ops Handover
 
 ### 18 October — client Plan keyboard navigation, source-only
