@@ -1,5 +1,51 @@
 # CG Dynamics Ops Handover
 
+### 18 October — report-preview visibility boundary verified; writer recovery complete
+
+From main1886956a (#838), actual getPreviewReport returned visible posts when
+exclusion data was null and accepted a mismatched ownership proof. Two new unit
+groups failed first; actual375px Performance preview also failed the unavailable
+assertion. Reader now requires the exact report proof/returned identity, unique
+nonblank child IDs pinned to that report, and a typed unique exclusion list for
+those posts. A report-scoped exact count must equal returned decisions, otherwise
+the capped/missing collection is unavailable, not implicit display permission.
+Rejected reads are sanitized; missing posts in the shared staff report reader
+are unavailable, not successful[]. Real empty decisions/posts, explicit false/
+true, observed0and null metrics, aggregate arithmetic and public allowlists stay
+intact. No query scope, RLS/auth, write, schema, dependency or design changes.
+
+21focused tests PASS; supported full3935total/3916pass/19intentional skips/0fail,
+no cancelled/todo. All15canonical local actual-component browser fixtures PASS,
+including375/390/430/1440 missing/malformed/count-missing/truncated/failed decision
+reads and explicit hidden-post ranking. Local build/appchunks/scoped lint/diff
+PASS. Two optional Docker checks skipped; unsupported Windows Bash SES excluded,
+not passed. Fixture corrections (real manual_platform_metrics name, in-window
+post timestamps and exposed Content-Range header) are not production defects;
+503 fixture waits accommodate existing SDK retries. No production acceptance
+or rollout inferred. Temp logs: cg-preview-report-visibility-full-suite.log and
+cg-preview-visibility-browser-receipt.json. Original dirty auth-copy scripts
+untouched; other775/662/618 owners untouched. ZERO Vercel/protected mutation.
+
+Normal Write Client Strategies previous turn now proved systemError, not active.
+One same-chat receipt-only continuation completed, now idle. #731final6246971245
+confirms prior17October AllAroundOctoberv3→v4 save; acceptedNovemberv5 unchanged;
+ZERO new strategy writes18October. Fresh supervisor full final-client briefs
+confirm exact IDs/versions, ten gold fields,1video/3photos/3posters and unpublished
+state; independent roster after final client returns[]/has_more=false. Queue
+exhausted; no duplicate creative pass. Updated final JSON attributes8changed/
+4preserved final-cohort states; with checkpoint1/2,21changed/11preserved across
+32sampledstates. The31copy-gate passes/one publishedPiekOctober hold remain the
+17October sample, not a new18October fleet audit. Owner/source/publication gates
+unchanged; no paid generator, source activation or author rewrite.
+
+Fresh browser inventory has only the existing Dynamics staff-preview tab; actual
+Forklift calendar visibly remains empty under the staff-login-unchanged banner.
+No normal-client login, impersonation, credential copying or new physical-device
+pass claimed. No Chrome transport retry or viewport override. Fresh exact-name/
+native-sheet Drive Control Centre search returns[]; no replacement/guessed write.
+Use CLIENT-PORTAL-REVIEW-QUEUE-2026-10-17.md for remaining protected owner/release
+steps; #679 is still a separate exact release gate.
+
 ### 17 October — final-client current-state readback and protected review queue
 
 After#837, checkpoint3#731comment6238298342 was independently read: Staffordshire,

@@ -215,8 +215,8 @@ export async function getReportWithPosts(reportId: string) {
     .eq('report_id', reportId)
     .order('publish_time', { ascending: true, nullsFirst: false })
 
-  if (postsResult.error) {
-    return { data: null, error: postsResult.error }
+  if (postsResult.error || !Array.isArray(postsResult.data)) {
+    return { data: null, error: postsResult.error ?? { message: 'Report posts could not be loaded.' } }
   }
 
   let websiteReport: WebsiteReport | null = null
@@ -230,7 +230,7 @@ export async function getReportWithPosts(reportId: string) {
     data: {
       ...rawReport,
       website_report: websiteReport,
-      posts: (postsResult.data ?? []) as ReportPost[],
+      posts: postsResult.data as ReportPost[],
     },
     error: null,
   }

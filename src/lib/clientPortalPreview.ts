@@ -36,30 +36,47 @@ export async function listPreviewReports(clientId: string) {
 }
 
 export async function getPreviewReport(clientId: string, reportId: string): Promise<{ data: ClientReportWithPosts | null; error: { message: string } | null }> {
-  // Prove ownership/publication before fetching child facts or website snapshot.
-  const owned = await supabase.from('reports').select('id').eq('id', reportId)
-    .eq('client_id', clientId).eq('status', 'published').is('platform', null).maybeSingle()
-  if (owned.error || !owned.data) return { data: null, error: { message: 'Published report unavailable.' } }
-  const result = await getReportWithPosts(reportId)
-  if (result.error || !result.data) return { data: null, error: { message: 'Published report unavailable.' } }
-  const report = projectPreviewReport(result.data, clientId)
-  if (!report || result.data.posts.some(post => post.report_id !== reportId)) return { data: null, error: { message: 'Report scope changed.' } }
-  const exclusions = await supabase.from('report_content_exclusions').select('post_id,excluded')
-    .eq('report_id', reportId).eq('client_id', clientId)
-  if (exclusions.error) return { data: null, error: { message: 'Content visibility unavailable.' } }
-  return { data: { ...report, posts: result.data.posts.map(post => {
-    const stats = reportPostToStatsPost(post)
-    return {
-      id: post.id, platform: post.platform, publish_time: post.publish_time,
-      post_type: stats.post_type, caption: post.caption, permalink: post.permalink,
-      impressions: stats.impressions, reach: stats.reach, engagements: stats.engagements,
-      engagement_known_subtotal: stats.engagementKnownSubtotal,
-      engagement_definition_id: stats.engagementDefinitionId, engagement_definition_label: stats.engagementDefinitionLabel,
-      engagement_source: stats.engagementSource, engagement_observed_at: stats.engagementObservedAt,
-      engagement_coverage: stats.engagementCoverage, engagement_completeness: stats.engagementCompleteness,
-      excluded: (exclusions.data ?? []).some(item => item.post_id === post.id && item.excluded),
+  const unavailable = { data: null, error: { message: 'Published report unavailable.' } }
+  try {
+    // Prove ownership/publication before fetching child facts or website snapshot.
+    const owned = await supabase.from('reports').select('id').eq('id', reportId)
+      .eq('client_id', clientId).eq('status', 'published').is('platform', null).maybeSingle()
+    if (owned.error || owned.data?.id !== reportId) return unavailable
+    const result = await getReportWithPosts(reportId)
+    if (result.error || !result.data) return unavailable
+    const report = projectPreviewReport(result.data, clientId)
+    if (!report || report.id !== reportId || !Array.isArray(result.data.posts)
+      || result.data.posts.some(post => !post || typeof post.id !== 'string' || !post.id.trim() || post.report_id !== reportId)
+      || new Set(result.data.posts.map(post => post.id)).size !== result.data.posts.length) return unavailable
+    const exclusions = await supabase.from('report_content_exclusions').select('post_id,excluded', { count: 'exact' })
+      .eq('report_id', reportId).eq('client_id', clientId)
+    const visibilityUnavailable = { data: null, error: { message: 'Content visibility unavailable.' } }
+    // Never interpret a truncated/default-limited decision list as permission.
+    if (exclusions.error || !Array.isArray(exclusions.data)
+      || !Number.isSafeInteger(exclusions.count) || exclusions.count !== exclusions.data.length) return visibilityUnavailable
+    const postIds = new Set(result.data.posts.map(post => post.id))
+    const decisions = new Map<string, boolean>()
+    for (const row of exclusions.data) {
+      if (!row || typeof row.post_id !== 'string' || !postIds.has(row.post_id)
+        || typeof row.excluded !== 'boolean' || decisions.has(row.post_id)) return visibilityUnavailable
+      decisions.set(row.post_id, row.excluded)
     }
-  }) }, error: null }
+    return { data: { ...report, posts: result.data.posts.map(post => {
+      const stats = reportPostToStatsPost(post)
+      return {
+        id: post.id, platform: post.platform, publish_time: post.publish_time,
+        post_type: stats.post_type, caption: post.caption, permalink: post.permalink,
+        impressions: stats.impressions, reach: stats.reach, engagements: stats.engagements,
+        engagement_known_subtotal: stats.engagementKnownSubtotal,
+        engagement_definition_id: stats.engagementDefinitionId, engagement_definition_label: stats.engagementDefinitionLabel,
+        engagement_source: stats.engagementSource, engagement_observed_at: stats.engagementObservedAt,
+        engagement_coverage: stats.engagementCoverage, engagement_completeness: stats.engagementCompleteness,
+        excluded: decisions.get(post.id) ?? false,
+      }
+    }) }, error: null }
+  } catch {
+    return unavailable
+  }
 }
 
 export async function getPreviewMetrics(clientId: string, month: string) {
