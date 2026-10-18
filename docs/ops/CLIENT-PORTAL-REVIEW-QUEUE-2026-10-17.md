@@ -2,7 +2,7 @@
 
 This is the next-action queue, not a new fleet launch certificate. Keep the
 14 October access/report/library counts dated; they were not refreshed here.
-Current engineering/source authority: main after PR837. Never spend hosting
+Current engineering/source authority: main after PR839. Never spend hosting
 reserve or start a Vercel build from this document.
 
 18October continuation: final normal-writer #731 receipt6246971245 recovered
@@ -19,6 +19,17 @@ metrics preserved; no design or authority change.21focused;3935total/3916pass/
 build/appchunks/scoped lint/diff PASS. No production release or true-client/device
 acceptance inferred. Existing live tab is still staff preview with empty Forklift
 calendar, not a normal client login. Exact Control Centre search still returns[].
+
+18October Plan continuation: actual keyboard failures reproduced and repaired
+without changing the approved design or any reader/data authority. Manual arrow
+focus does not request content; Enter/Space opens the section; labelled panels,
+Tab/Shift+Tab exit, Back and client/month/deep-link context covered at
+375/390/430/1440. All15local browser fixtures/build/scoped lint pass; supported
+full3936total/3917pass/19intentional skips/0fail after existing local OpenSSL
+PATH correction and entire-suite rerun, not a dependency/code workaround.
+This is not deployment or real-device/client-role acceptance. Performance tab
+keyboard/panel semantics are the next bounded source check, not yet reproduced
+or certified; do not turn this queue into an only-owner-review-left claim.
 
 ## Work completed in this continuation
 

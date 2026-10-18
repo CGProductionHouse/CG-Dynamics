@@ -60,17 +60,32 @@ test('Plan preserves calendar/guideline history but restricts strategy to curren
 })
 
 test('Plan remounts only the read panel on exact client/month/tab transitions before stale child state can render', () => {
-  assert.match(PLAN_SOURCE, /<section key=\{`\$\{client\?\.id \?\? 'unavailable'\}:\$\{month\}:\$\{tab\}`\} role="tabpanel"/)
+  assert.match(PLAN_SOURCE, /<section key=\{`\$\{client\?\.id \?\? 'unavailable'\}:\$\{month\}:\$\{item\.key\}`\}/)
+  assert.match(PLAN_SOURCE, /hidden=\{tab !== item\.key\}/)
+  assert.match(PLAN_SOURCE, /\{tab === item\.key \? tabPanel : null\}/)
   assert.doesNotMatch(PLAN_SOURCE, /window\.location|location\.reload|AuthProvider|setSession/)
 })
 
 test('Plan month controls and tabs expose accessible button state', () => {
   assert.match(PLAN_SOURCE, /aria-label="Previous month"/)
   assert.match(PLAN_SOURCE, /aria-label="Next month"/)
-  assert.match(PLAN_SOURCE, /aria-pressed=\{tab === item\.key\}/)
+  assert.match(PLAN_SOURCE, /aria-selected=\{tab === item\.key\}/)
   assert.match(PLAN_SOURCE, /min-h-11/)
   assert.match(PLAN_SOURCE, /grid w-full grid-cols-2/)
   assert.doesNotMatch(PLAN_SOURCE, /min-w-max|overflow-x-auto/)
+})
+
+test('Plan tabs have manual keyboard navigation and labelled focusable panels without fetching on focus', () => {
+  assert.match(PLAN_SOURCE, /role="tablist" aria-label="Plan sections"/)
+  assert.match(PLAN_SOURCE, /tabIndex=\{tab === item\.key \? 0 : -1\}/)
+  assert.match(PLAN_SOURCE, /aria-controls=\{`\$\{tabsId\}-\$\{item\.key\}-panel`\}/)
+  assert.match(PLAN_SOURCE, /aria-labelledby=\{`\$\{tabsId\}-\$\{item\.key\}-tab`\}/)
+  assert.match(PLAN_SOURCE, /tabIndex=\{tab === item\.key \? 0 : undefined\}/)
+  assert.match(PLAN_SOURCE, /focus-visible:outline/)
+  const focusHandler = PLAN_SOURCE.slice(PLAN_SOURCE.indexOf('function moveTabFocus'), PLAN_SOURCE.indexOf('const tabPanel'))
+  for (const key of ['ArrowLeft', 'ArrowRight', 'Home', 'End']) assert.ok(focusHandler.includes(`'${key}'`))
+  assert.doesNotMatch(focusHandler, /updatePlan|setSearchParams|\.click\(/)
+  assert.doesNotMatch(PLAN_SOURCE, /onFocus=/)
 })
 
 test('an empty client month still renders its real calendar canvas', () => {

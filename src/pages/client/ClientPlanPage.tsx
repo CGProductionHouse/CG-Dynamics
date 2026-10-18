@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useId, useRef, type KeyboardEvent } from 'react'
 import { Navigate, useLocation, useSearchParams } from 'react-router-dom'
 import { monthDisplayLabel } from '../../lib/reportPeriod'
 import { businessMonthKey } from '../../lib/businessTime'
@@ -31,6 +31,8 @@ function shiftMonth(month: string, amount: number) {
 export default function ClientPlanPage() {
   const { client } = useClientPortal()
   const [searchParams, setSearchParams] = useSearchParams()
+  const tabsId = useId()
+  const tabButtons = useRef<Partial<Record<PlanTab, HTMLButtonElement | null>>>({})
 
   const requestedMonth = searchParams.get('month')
   const requestedTab = searchParams.get('tab')
@@ -57,6 +59,25 @@ export default function ClientPlanPage() {
       updated.set('month', nextTab === 'strategy' ? selectClientStrategyMonth(next.month ?? month) : next.month ?? month)
       return updated
     })
+  }
+
+  function moveTabFocus(event: KeyboardEvent<HTMLButtonElement>, index: number) {
+    // These panels fetch remote content. Move focus without starting another
+    // read; native button Enter/Space still deliberately opens that section.
+    if (event.altKey || event.ctrlKey || event.metaKey) return
+    if (event.key === 'Tab') {
+      // Leave from the selected tab's position in both directions, even when
+      // an arrow has focused an inactive tab on the other side of it.
+      tabButtons.current[tab]?.focus()
+      return
+    }
+    const nextIndex = event.key === 'ArrowRight' ? (index + 1) % PLAN_TABS.length
+      : event.key === 'ArrowLeft' ? (index + PLAN_TABS.length - 1) % PLAN_TABS.length
+        : event.key === 'Home' ? 0
+          : event.key === 'End' ? PLAN_TABS.length - 1 : null
+    if (nextIndex === null) return
+    event.preventDefault()
+    tabButtons.current[PLAN_TABS[nextIndex].key]?.focus()
   }
 
   const tabPanel = tab === 'calendar'
@@ -99,17 +120,21 @@ export default function ClientPlanPage() {
         </div>
       </section>
 
-      <div className="mt-6 pb-1" aria-label="Plan sections">
-        <div role="tablist" className="grid w-full grid-cols-2 gap-1 rounded-2xl border border-white/[0.08] bg-white/[0.035] p-1 sm:flex sm:w-fit sm:rounded-full">
-          {PLAN_TABS.map(item => (
+      <div className="mt-6 pb-1">
+        <div role="tablist" aria-label="Plan sections" className="grid w-full grid-cols-2 gap-1 rounded-2xl border border-white/[0.08] bg-white/[0.035] p-1 sm:flex sm:w-fit sm:rounded-full">
+          {PLAN_TABS.map((item, index) => (
             <button
               key={item.key}
+              ref={element => { tabButtons.current[item.key] = element }}
+              id={`${tabsId}-${item.key}-tab`}
               type="button"
               role="tab"
               aria-selected={tab === item.key}
-              aria-pressed={tab === item.key}
+              aria-controls={`${tabsId}-${item.key}-panel`}
+              tabIndex={tab === item.key ? 0 : -1}
+              onKeyDown={event => moveTabFocus(event, index)}
               onClick={() => updatePlan({ tab: item.key })}
-              className={`min-h-11 min-w-0 rounded-full px-2 py-2 text-xs font-bold transition sm:px-5 sm:text-sm ${tab === item.key ? 'bg-white text-[#06110f] shadow-lg' : 'text-slate-400 hover:bg-white/[0.055] hover:text-white'}`}
+              className={`min-h-11 min-w-0 rounded-full px-2 py-2 text-xs font-bold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2dd4bf] sm:px-5 sm:text-sm ${tab === item.key ? 'bg-white text-[#06110f] shadow-lg' : 'text-slate-400 hover:bg-white/[0.055] hover:text-white'}`}
             >
               {item.label}
             </button>
@@ -120,7 +145,15 @@ export default function ClientPlanPage() {
       {/* A new client/month is a new read scope, not the previous panel's state.
           Remount before effects run so old scripts/calendar/strategy cannot flash
           beneath the newly selected month. The persistent portal shell stays put. */}
-      <section key={`${client?.id ?? 'unavailable'}:${month}:${tab}`} role="tabpanel" className="mt-7">{tabPanel}</section>
+      {PLAN_TABS.map(item => (
+        <section key={`${client?.id ?? 'unavailable'}:${month}:${item.key}`}
+          id={`${tabsId}-${item.key}-panel`} role="tabpanel"
+          aria-labelledby={`${tabsId}-${item.key}-tab`} hidden={tab !== item.key}
+          tabIndex={tab === item.key ? 0 : undefined}
+          className="mt-7 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#2dd4bf]">
+          {tab === item.key ? tabPanel : null}
+        </section>
+      ))}
     </>
   )
 }
