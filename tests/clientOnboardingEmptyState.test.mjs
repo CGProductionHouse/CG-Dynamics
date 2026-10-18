@@ -18,7 +18,7 @@ test('a genuinely empty active client inventory stays truthful', () => {
   assert.deepEqual(project({ ...input, activeClients: 0 }), { title: 'No active clients', message: 'No active clients available.' })
 })
 test('filtered-out sessions remain distinct from missing sessions', () => {
-  assert.deepEqual(project({ ...input, sessions: 3 }), { title: 'No sessions found', message: 'No sessions match your filters.' })
+  assert.deepEqual(project({ ...input, sessions: 3 }), { title: 'No sessions found', message: 'No clients match your filters.' })
   assert.equal(project({ ...input, sessions: 3, filteredSessions: 1 }), null)
 })
 test('loading and failed reads never claim an empty inventory', () => {
@@ -29,5 +29,5 @@ test('page reuses the separate inventory/session projection and preserves protec
   const page = readFileSync('src/features/client-onboarding/InternalOnboardingPage.tsx', 'utf8')
   assert.match(page, /onboardingEmptyState\(\{ activeClients: clients.length, sessions: sessions.length, filteredSessions: filteredSessions.length, loading, error \}\)/)
   assert.match(page, /emptyState && <EmptyState/)
-  assert.match(page, /disabled loading=\{working\} onClick=\{\(\) => void generate\(\)\}/)
+  assert.match(page, /disabled=\{loading \|\| working \|\| !clientId \|\| linkReadiness\?\.canGenerate !== true\} loading=\{working\} onClick=\{\(\) => void generate\(\)\}/)
 })

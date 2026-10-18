@@ -19,9 +19,9 @@ export const primaryNavItems: NavItem[] = [
   // daily-work surface inside the Hub zone. Staff keep My Work only.
   { to: '/admin/command-centre', label: 'Team Work', shortLabel: 'Team', marker: 'TW', access: 'manager', activePaths: ['/admin/command-centre', '/admin/ops-hub'] },
   { to: '/admin/command-centre#morning-import', label: 'Morning List Import', shortLabel: 'Import', marker: 'MI', access: 'manager' },
+  { to: '/admin/content', label: 'Content', shortLabel: 'Content', marker: 'CT', activePaths: ['/admin/content', '/admin/content-workflow', '/admin/full-content-guide'] },
   { to: '/admin/cg-calendar', label: 'CG Calendar', shortLabel: 'Calendar', marker: 'C', activePaths: ['/admin/cg-calendar', '/admin/company-calendar'] },
   { to: '/admin/client-schedule', label: 'Client Schedule', shortLabel: 'Schedule', marker: 'S', activePaths: ['/admin/client-schedule', '/admin/monthly-planner', '/admin/master-schedule'] },
-  { to: '/admin/content', label: 'Content', shortLabel: 'Content', marker: 'CT', activePaths: ['/admin/content', '/admin/content-workflow', '/admin/full-content-guide'] },
   { to: '/admin/clients', label: 'Clients', shortLabel: 'Clients', marker: 'CL', activePaths: ['/admin/clients', '/admin/client-performance', '/admin/client-dashboard', '/admin/client-calendar'] },
   // Marketing/Knowledge is a daily destination all staff can use: they search
   // approved shared knowledge. Source administration, review and registration

@@ -31,7 +31,7 @@ interface TokenRow {
   scope: string | null
 }
 
-function encKey(): ReturnType<typeof Uint8Array.from> | null {
+function encKey(): Uint8Array | null {
   const b64 = Deno.env.get('ONEDRIVE_TOKEN_ENC_KEY') ?? ''
   if (!b64) return null
   try {
@@ -53,7 +53,7 @@ export function isTokenStoreConfigured(): boolean {
 async function importKey(): Promise<CryptoKey | null> {
   const raw = encKey()
   if (!raw) return null
-  return await crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, false, [
+  return await crypto.subtle.importKey('raw', new Uint8Array(raw), { name: 'AES-GCM' }, false, [
     'encrypt',
     'decrypt',
   ])
