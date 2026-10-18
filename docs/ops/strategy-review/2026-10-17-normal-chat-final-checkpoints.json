@@ -2,12 +2,13 @@
   "schema": "cg-normal-chat-strategy-checkpoints/v1",
   "date": "2026-10-17",
   "writer_receipts": [
-    "https://github.com/CGProductionHouse/CG-Dynamics/issues/731#issuecomment-6238298342"
+    "https://github.com/CGProductionHouse/CG-Dynamics/issues/731#issuecomment-6238298342",
+    "https://github.com/CGProductionHouse/CG-Dynamics/issues/731#issuecomment-6246971245"
   ],
-  "writer_reported_new_saves": 7,
-  "distinct_changed_client_months": 7,
-  "preserved_client_months": 3,
-  "independent_review": "Fresh exact briefs confirm all twelve current IDs/versions, selected test/game-plan prose and concept counts: eleven unpublished drafts and one already-published PiekOctober v3 untouched. Complete historical selected/unselected comparisons remain writer-attributed for checkpoint3; AllAround current state is independently read, no new save attribution inferred.",
+  "writer_reported_new_saves": 8,
+  "distinct_changed_client_months": 8,
+  "preserved_client_months": 4,
+  "independent_review": "17October exact briefs confirmed all twelve final-cohort current IDs/versions, selected prose and concept counts: eleven unpublished drafts and one already-published PiekOctober v3 untouched. Fresh18October supervisor reads again confirm AllAroundOctober v4 andNovember v5, full test/game-plan fields and1video/3photos/3posters. Historical selected/unselected preservation is writer-attributed. Final writer receipt6246971245 attributes AllAroundOctober's save to17October, November unchanged; recovery18October made zero writes.",
   "drafts": [
     {
       "client": "The Staffordshire",
@@ -167,8 +168,8 @@
       "version": 4,
       "workflow_status": "draft",
       "published_version": null,
-      "writer_reported_changed": null,
-      "disposition": "Independently read current saved state; final writer save attribution not yet received.",
+      "writer_reported_changed": true,
+      "disposition": "Final writer receipt confirms prior17October v3→v4 selected-field amendment; independently re-read18October.",
       "concept_counts": {
         "professional_video": 1,
         "photo_content": 3,
@@ -183,8 +184,8 @@
       "version": 5,
       "workflow_status": "draft",
       "published_version": null,
-      "writer_reported_changed": null,
-      "disposition": "Independently read current saved state; final writer save attribution not yet received.",
+      "writer_reported_changed": false,
+      "disposition": "Accepted Novemberv5 preserved without new amendment; independently re-read18October.",
       "concept_counts": {
         "professional_video": 1,
         "photo_content": 3,
@@ -197,9 +198,10 @@
     "checked_current_client_months": 32,
     "pass": 31,
     "held": 1,
-    "scope": "checkpoint1/2/3 current payloads; does not count earlier twenty sampled month drafts again",
+    "scope": "checkpoint1/2/3 plus final AllAround current payloads sampled17October; not a fresh fleet-wide18October scan and not counted with earlier20samples again",
     "held_detail": "Piek published October v3 retains internal publishing/contact resolution text. Its 3 poster concepts versus confirmed scope12 also need protected editorial review; no published overwrite or new quantity inferred.",
-    "meaning": "Known-forbidden-copy gate only, not semantic approval, fresh provider results or permission to publish."
+    "meaning": "Known-forbidden-copy gate only, not semantic approval, fresh provider results or permission to publish.",
+    "observed_date": "2026-10-17"
   },
   "boundaries": [
     "Piek November's own successSignals references30September; the writer checkpoint's blanket23September statement must not replace exact report windows.",
@@ -211,8 +213,8 @@
     "Mimosa Mall — no confirmed monthly content scope/exact strategy evidence",
     "Toyota Bloemfontein — exact strategy evidence unavailable; known4video scope unchanged"
   ],
-  "next_cursor": null,
-  "queue_exhausted": false,
+  "next_cursor": "END_OF_ROSTER",
+  "queue_exhausted": true,
   "not_performed": [
     "approval/publication",
     "source activation",
@@ -234,7 +236,23 @@
       "has_more": false,
       "next_after_client_id": null
     },
-    "meaning": "Independent canonical end-of-roster and final current-plan checks, not a claim that the active writer has returned its final receipt."
+    "meaning": "Final writer receipt and independent18October canonical roster read afterAllAround both confirm empty clients, has_more=false, next_after_client_id=null. No new drafting or save inferred from cursor alone."
   },
-  "writer_final_receipt_pending": true
+  "writer_final_receipt_pending": false,
+  "recovery": {
+    "date": "2026-10-18",
+    "previous_turn_status": "systemError",
+    "same_existing_chat": true,
+    "scope": "Missing final receipt only; no regenerated clients, new chat, automation or paid generation",
+    "new_strategy_writes": 0,
+    "final_client_fresh_versions": [
+      4,
+      5
+    ],
+    "independent_after_last": {
+      "returned": 0,
+      "has_more": false,
+      "next_after_client_id": null
+    }
+  }
 }

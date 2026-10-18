@@ -1,5 +1,25 @@
 # Company ChatGPT monthly strategy workspace — #731
 
+## 18 October — final writer receipt recovered; queue exhausted
+
+The previous turn was actually `systemError`, not still working. One receipt-only
+continuation in the same existing **Write Client Strategies** chat completed and
+is now idle. Final #731 comment6246971245 confirms AllAroundOctober's v3→v4 save
+occurred on17October; Novemberv5 was preserved. Recovery on18October made ZERO
+new strategy writes. Fresh supervisor briefs again confirm both exact canonical
+IDs/versions, all gold fields, 1video/3photos/3posters and draft/unpublished state;
+independent roster after the final client returns[]/has_more=false. END_OF_ROSTER
+now has both writer receipt and independent evidence; do not restart the queue.
+
+Final JSON is reconciled in
+`strategy-review/2026-10-17-normal-chat-final-checkpoints.json`: checkpoint3/final
+cohort8changedmonths/4preserved; combined with checkpoints1/2,21changedmonths/
+11preserved across32sampledstates. The31copy-gate passes/one publishedPiekOctober
+hold were measured17October, not a new18October fleet review. Full before/after
+preservation remains writer-attributed. Source/package holds, HumanAuto skip/go,
+publishedPiek editorial review and all content/recipient/provider/release gates
+remain. This supersedes historical pending/active/cursor wording below.
+
 ## 17 October continuation receipts (latest)
 
 Later checkpoint3#731comment6238298342 is independently read back for all ten

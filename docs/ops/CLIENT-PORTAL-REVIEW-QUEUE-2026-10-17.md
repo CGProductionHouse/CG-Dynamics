@@ -5,6 +5,21 @@ This is the next-action queue, not a new fleet launch certificate. Keep the
 Current engineering/source authority: main after PR837. Never spend hosting
 reserve or start a Vercel build from this document.
 
+18October continuation: final normal-writer #731 receipt6246971245 recovered
+after the prior system error. Same chat is idle; ZERO new strategy writes in
+recovery. AllAroundOctoberv4/Novemberv5 and end-of-roster freshly confirmed by
+supervisor. Draft-authoring queue is now explicitly exhausted; protected owner
+decisions below remain, not another generic writing pass.
+
+18October code continuation: report-preview hidden-post decisions now fail
+unavailable on absent/malformed/truncated evidence, with exact report/post scope
+and sanitized failures. Genuine empty, explicit decisions and observed0/null
+metrics preserved; no design or authority change.21focused;3935total/3916pass/
+19intentional skips/0fail;15canonical local browser fixtures375/390/430/1440,
+build/appchunks/scoped lint/diff PASS. No production release or true-client/device
+acceptance inferred. Existing live tab is still staff preview with empty Forklift
+calendar, not a normal client login. Exact Control Centre search still returns[].
+
 ## Work completed in this continuation
 
 - PR834 reconciles the normal company ChatGPT writer's ten earlier saved
@@ -51,7 +66,8 @@ states; seven changed months, three preserved including publishedPiekOctober).
 AllAroundPVC's currentOctv4/Novv5 were independently read and their complete gold
 plans/package-bound concepts inspected. Canonical roster afterPiek returns only
 AllAround/has_more=false; afterAllAround returns[]/has_more=false. Thus the
-independent client cursor is at end. The writer is still marked active and its
-final save/exhaustion receipt remains pending; do not invent save attribution
-or restart the completed current-state review. See
+independent client cursor is at end. Final18October receipt now confirms the
+writer's prior17October AllAroundOctoberv3→v4 save and preservedNovemberv5;
+recovery made zero new writes. Queue exhausted, no new cursor or duplicate draft
+pass. Full historical unchanged-field comparison remains writer-attributed. See
 `strategy-review/2026-10-17-normal-chat-final-checkpoints.json`.

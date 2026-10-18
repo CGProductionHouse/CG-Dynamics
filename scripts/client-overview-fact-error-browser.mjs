@@ -15,7 +15,7 @@ const fixture = {
   name: 'client-overview-fact-error-fixture', enforce: 'pre',
   resolveId(id) { if (id === 'virtual:overview-fact-error') return '\0virtual:overview-fact-error' },
   transform(_code, id) {
-    if (id.replaceAll('\\', '/').endsWith('/contexts/AuthContext.tsx')) return `export function useAuth(){return {profile:{id:'local-profile',role:location.pathname.includes('performance')?'client':'admin',client_id:'${clientId}'}}}`
+    if (id.replaceAll('\\', '/').endsWith('/contexts/AuthContext.tsx')) return `export function useAuth(){return {profile:{id:'local-profile',role:location.pathname.includes('performance')&&!location.pathname.includes('preview')?'client':'admin',client_id:'${clientId}'}}}`
   },
   load(id) {
     if (id !== '\0virtual:overview-fact-error') return
@@ -24,12 +24,12 @@ const fixture = {
       import Dashboard from '/src/pages/client/Dashboard.tsx';
       import {ClientPortalContext} from '/src/components/client/ClientPortalContext.ts';import '/src/index.css';
       createRoot(document.getElementById('root')).render(React.createElement(BrowserRouter,null,
-        React.createElement(ClientPortalContext.Provider,{value:{client:{id:'${clientId}',name:'Synthetic A'},previewClientId:location.pathname.includes('performance')?undefined:'${clientId}'}},
+        React.createElement(ClientPortalContext.Provider,{value:{client:{id:'${clientId}',name:'Synthetic A'},previewClientId:location.pathname.includes('performance')&&!location.pathname.includes('preview')?undefined:'${clientId}'}},
           React.createElement('main',{className:'mx-auto max-w-6xl min-w-0 p-4 sm:p-8'},React.createElement(location.pathname.includes('performance')?Dashboard:ClientPortalHome)))));`
   },
   configureServer(server) {
     server.middlewares.use((req, res, next) => {
-      if (!['/__overview-fact-error', '/__performance-fact-error'].includes(req.url?.split('?')[0])) return next()
+      if (!['/__overview-fact-error', '/__performance-fact-error', '/__preview-performance-exclusion'].includes(req.url?.split('?')[0])) return next()
       res.setHeader('Content-Type', 'text/html')
       res.end('<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="background:#060d0c"><div id="root"></div><script type="module" src="/@id/virtual:overview-fact-error"></script></body></html>')
     })
@@ -43,9 +43,9 @@ let browser
 try {
   await server.listen()
   browser = await chromium.launch({ headless: true })
-  for (const width of [1440, 375, 390, 430]) {
+  for (const width of [375, 390, 430, 1440]) {
     const page = await browser.newPage({ viewport: { width, height: 900 } })
-    const errors = []; const reads = []; let factMode = 'missing'
+    const errors = []; const reads = []; let factMode = 'missing', exclusionMode = 'missing', ownershipProved = false
     page.on('pageerror', error => errors.push(error.message))
     await page.route('**/*', route => {
       const request = route.request(); const url = new URL(request.url())
@@ -54,8 +54,35 @@ try {
       reads.push(url.pathname)
       if (url.pathname === '/rest/v1/reports') {
         assert.equal(request.method(), 'GET')
+        if (url.searchParams.has('id')) {
+          assert.equal(url.searchParams.get('id'),`eq.${reportId}`)
+          if (url.searchParams.get('select')==='id') {
+            assert.equal(url.searchParams.get('client_id'),`eq.${clientId}`)
+            assert.equal(url.searchParams.get('status'),'eq.published')
+            ownershipProved=true
+            return route.fulfill({json:{id:reportId}})
+          }
+          assert.ok(ownershipProved,'Child report read follows exact published ownership proof')
+          return route.fulfill({json:report})
+        }
         assert.equal(url.searchParams.get('client_id'), `eq.${clientId}`)
         return route.fulfill({ json: [report] })
+      }
+      if (url.pathname==='/rest/v1/posts' || url.pathname==='/rest/v1/report_content_exclusions') {
+        assert.equal(request.method(),'GET');assert.ok(ownershipProved)
+        assert.equal(url.searchParams.get('report_id'),`eq.${reportId}`)
+        if (url.pathname.endsWith('/posts')) return route.fulfill({json:[
+          {id:'33333333-3333-4333-8333-333333333333',report_id:reportId,platform:'facebook',caption:'Reviewed public post',publish_time:'2026-09-12T12:00:00Z',views:10,reach:5,raw:{},created_at:'2026-10-01T12:00:00Z'},
+          {id:'44444444-4444-4444-8444-444444444444',report_id:reportId,platform:'facebook',caption:'Hidden report post',publish_time:'2026-09-15T12:00:00Z',views:999,reach:999,raw:{},created_at:'2026-10-01T12:00:00Z'},
+        ]})
+        assert.equal(url.searchParams.get('client_id'),`eq.${clientId}`)
+        assert.match(request.headers().prefer,/count=exact/,'Visibility count is requested, not guessed from a capped result')
+        if (exclusionMode==='failure') return route.fulfill({status:503,json:{message:'PRIVATE backend'}})
+        return route.fulfill({headers:exclusionMode==='missing-count'?{}:{'content-range':exclusionMode==='truncated'?'0-0/2':'0-0/1','access-control-expose-headers':'Content-Range'},json:exclusionMode==='missing'?null:exclusionMode==='malformed'?[{post_id:'44444444-4444-4444-8444-444444444444',excluded:'false'}]:[{post_id:'44444444-4444-4444-8444-444444444444',excluded:true}]})
+      }
+      if (url.pathname==='/rest/v1/manual_platform_metrics') {
+        assert.equal(request.method(),'GET');assert.equal(url.searchParams.get('client_id'),`eq.${clientId}`)
+        return route.fulfill({json:[]})
       }
       if (url.pathname === '/rest/v1/monthly_client_strategies') {
         assert.equal(request.method(), 'GET')
@@ -126,6 +153,29 @@ try {
       assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth))
       assert.deepEqual(errors,[])
     }
+    factMode='empty'
+    for (const mode of ['missing','malformed','missing-count','truncated','failure']) {
+      exclusionMode=mode;ownershipProved=false
+      await page.goto('http://127.0.0.1:53990/__preview-performance-exclusion')
+      try {
+        await page.getByRole('heading',{name:'Performance is temporarily unavailable',exact:true}).waitFor({timeout:mode==='failure'?15000:1500})
+      } catch(error) {
+        console.log(JSON.stringify({exclusionMode:mode,text:await page.locator('main').innerText(),reads:reads.slice(-12)}))
+        throw error
+      }
+      assert.equal(await page.getByText('Hidden report post',{exact:true}).count(),0)
+      assert.equal(await page.getByRole('tab',{name:'Facebook',exact:true}).count(),0,'Missing display permission is not unrestricted highlights')
+      assert.doesNotMatch(await page.locator('main').innerText(),/PRIVATE/)
+      assert.deepEqual(errors,[])
+    }
+    exclusionMode='valid';ownershipProved=false
+    await page.reload()
+    await page.getByRole('tab',{name:'Facebook',exact:true}).click()
+    await page.getByText('Reviewed public post',{exact:true}).first().waitFor()
+    assert.equal(await page.getByText('Hidden report post',{exact:true}).count(),0,'Explicitly hidden post never enters client highlights')
+    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth))
+    assert.deepEqual(errors,[])
+    await page.screenshot({path:join(tmpdir(),`cg-preview-post-visibility-${width}.png`),fullPage:true})
     console.log(`PASS ${width}px: failed facts unavailable, successful empty distinct, same-window verified views, published report remains, no body overflow`)
     await page.close()
   }
