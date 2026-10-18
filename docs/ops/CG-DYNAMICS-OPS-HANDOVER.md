@@ -1,5 +1,34 @@
 # CG Dynamics Ops Handover
 
+### 18 October — client Plan keyboard navigation, source-only
+
+Continued the unowned Plan seam from main c92e7ad (#839); open775/662/618
+remain untouched. Actual-component browser regression first failed ArrowRight
+at1440px. A second failing case caught Tab returning through another tab after
+arrow focus. Plan now supports manual ArrowLeft/Right wrapping, Home/End,
+Enter/Space activation, one selected tab stop and natural Tab/Shift+Tab exit.
+Each tab controls a real labelled panel; inactive panels contain no children or
+reads. Existing approved layout, URL/client/month/deep-link context, package
+truth and client/month transition fence remain. Visible keyboard focus only;
+no new descriptions, dependencies, data readers, auth or backend changes.
+
+28focused tests, actual Plan browser375/390/430/1440, all15canonical local
+browser fixtures, build/emitted app chunks/scoped lint/diff PASS. Supported full
+3936total/3917pass/19intentional skips/0fail/cancelled/todo. Initial full run had
+five openssl ENOENT environment failures; existing Git OpenSSL was added to the
+isolated PATH, affected18tests and then the entire supported suite rerun PASS,
+with no source/dependency workaround. Two optional Docker checks skipped and
+unsupported Windows Bash SES excluded, not passed. Failed and passing logs are
+retained separately in private Temp cg-plan-keyboard-* files. No production,
+physical-phone, screen-reader or genuine-client-role acceptance inferred.
+
+ZERO Vercel/cloud/production/protected writes. Git deployment guard stays OFF.
+Normal strategy writer stays complete/idle; no duplicate drafts or publication.
+Remaining owner/release gates stay in CLIENT-PORTAL-REVIEW-QUEUE-2026-10-17.md;
+Control Centre exact reference/access remains unavailable, no guessed update.
+Next bounded source check: Performance service-tab keyboard/panel semantics;
+markup only inspected, not reproduced or repaired by this Plan change.
+
 ### 18 October — report-preview visibility boundary verified; writer recovery complete
 
 From main1886956a (#838), actual getPreviewReport returned visible posts when
