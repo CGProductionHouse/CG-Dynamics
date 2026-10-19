@@ -13,6 +13,36 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 19 October — 58 launch-client Brand Hub folders privately linked
+
+CA explicitly approved **private folder linking only** after verified OneDrive
+consent: exact-client library/category mappings, every library disabled, every
+file unpublished, no sharing/permission/Vercel changes. Executed via the real
+signed-in admin **Link verified folders** workflow, not SQL inserts or guessed
+Graph IDs. Preflight active roster61, launch58, excluding held AV Event Life/Red
+Oak and prospective Zooz. Initial library/category/asset inventory zero.
+
+All58 real admin journeys settled on **Ready · private / No files published**.
+Final independent read-only DB acceptance:58/58 libraries,174 category mappings,
+zero missing/unverified/enabled libraries, zero assets, zero wrong category
+counts/labels/scope/drive mismatches, zero cross-client root/category collisions,
+zero excluded-client libraries. Each server preparation verified the existing
+durable client binding, unique exact portal and Brand Identity/Graphic Design/
+Video sections before saving. No new OneDrive folder/file, share or permission.
+No published asset or library activation; disabled client preview remains private.
+
+Focused tests45/45 pass using canonical loopback-only fixture environment and
+serial runner; fresh TypeScript/Vite7 build with real application JS passes.
+Initial ad-hoc focused command lacked fixture env/used concurrent Vite ports and
+failed; corrected harness rerun passed, not hidden as a production defect/fix.
+No runtime source/dependency/schema/policy/secret/Edge change. Local dist is NOT
+a production release artifact. Staff last observed clean `1c8183d2`, untouched.
+Reviewer checklist used; detailed receipt `BRAND-HUB-PRIVATE-LINKING-2026-10-19.md`.
+Next separate protected scope: reviewed per-file publication/enablement plus
+genuine client-role media and recipient acceptance; do not mass-publish internal
+trees or call folder preparation a client-ready library. No Vercel operation.
+Exact Control Centre reference remains unavailable; no guessed tracker write.
+
 ### 19 October — exact OneDrive backend setup executed; owner consent verified
 
 Later CA approval explicitly authorizes ONLY the new OneDrive server settings,
