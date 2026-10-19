@@ -13,7 +13,7 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
-### 19 October — exact OneDrive backend setup authorized and executed; owner sign-in pending
+### 19 October — exact OneDrive backend setup executed; owner consent verified
 
 Later CA approval explicitly authorizes ONLY the new OneDrive server settings,
 fresh encryption/setup keys and the two reviewed OAuth functions from merged
@@ -40,12 +40,19 @@ did not consume it. Read-only row flags show access/refresh token absent, pendin
 state present; no actual token/ciphertext selected. RLS remains enabled with no
 anon/authenticated SELECT/INSERT/UPDATE/DELETE grants.
 
-Microsoft Work Chrome tab is handed to CA at **Authenticator sign-in** for the
-personal info account. CA must complete sign-in and final dedicated-app consent;
-no consent granted by agent. Pending setup expires ten minutes after start;
-never rotate encryption to restart an expired flow. Successful consent must be
-followed by token-presence-only checks and bounded exact-folder read acceptance.
-Actual client-media/recipient safety remains separate, not inferred from OAuth.
+CA personally completed Microsoft sign-in/final dedicated-app consent and reported
+OneDrive connected. Read-only flags confirm encrypted access AND refresh tokens
+present, pending state consumed, update11:45:58Z. Scope returned is
+Files.ReadWrite/openid/profile; refresh token is present, but an actual future
+renewal is not yet tested. Do not invent offline_access in returned scope. Actual signed-in
+admin management reads now verify Piek and Braize exact roots/three categories:
+both settle on their own named library and **Not linked yet / Link verified folders**,
+no503. Source review confirms this read checks actual mapped Drive children and
+unique canonical portal/categories before returning200; no prepare/write clicked.
+This proves provider read/decryption, not client-role media or recipient safety.
+Libraries remain unprepared/disabled/private, files not published. Setup receipt
+PR847 merged49e829e2; this later acceptance supersedes its pending-sign-in state.
+Never rerun provisioning/rotate encryption to restart an expired setup attempt.
 
 Existing `client-onboarding` metadata changed44→45 but full ten-file hosted
 closure still matches prior released `51fe5ff4` and original update timestamp;

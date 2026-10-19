@@ -40,8 +40,20 @@ This receipt supersedes the historical **absent/not authorized** entries below.
   RLS enabled and all anon/authenticated table privileges false. One diagnostic
   SELECT used an incorrect column name and failed read-only; corrected against
   actual token-store fields before acceptance. No schema or SQL write occurred.
-- CA's Work Chrome is at Authenticator sign-in for the personal info account.
-  CA must complete sign-in AND final app consent. No agent-granted consent.
+- CA personally completed Authenticator sign-in AND final app consent, reporting
+  OneDrive connected. No agent-granted consent. Fresh flags show encrypted access
+  and refresh tokens present, pending state absent, saved11:45:58Z. Returned scope
+  Files.ReadWrite/openid/profile; refresh token is present, actual future renewal
+  not yet tested. Do not fabricate offline_access in returned scope. No actual
+  tokens/ciphertexts read.
+  Real signed-in admin management/Piek and Braize now settle on the exact named
+  client with Not linked yet / Link verified folders, not503. The actual handler
+  verifies mapped Drive children, unique canonical portal and all three categories
+  before returning this state. No prepare/enable/publish clicked. These are genuine
+  provider reads, NOT completed client-role media/recipient acceptance.
+  The used callback tab was closed, not refreshed/replayed; no authorization code
+  copied or used by the agent. A tab inventory returned its already-used callback
+  URL; do not reproduce it in documentation or screenshots.
   Pending state expires ten minutes after start. If expired, use the existing
   configured setup gate through an approved private operator path; never rerun
   provisioning, rotate keys or copy browser/connector tokens to restart.
@@ -55,9 +67,11 @@ This receipt supersedes the historical **absent/not authorized** entries below.
 No Vercel, file/share/recipient/library activation, frontend change or staff release.
 Staff checkout last observed clean `a6a8527a`, untouched. Whole local acceptance
 below remains the unchanged runtime's evidence, not successful hosted consent or
-genuine client-role media acceptance. Next: owner sign-in/consent, token-presence-only
-check, bounded exact-folder read, then separately governed pilot publication/media
-and recipient-safety acceptance. No all-client launch certification.
+genuine client-role media acceptance. Setup receipt PR847 merged49e829e2;
+this later verified consent supersedes its pending-sign-in state. Next: separately
+governed disabled-library preparation, cleared-file publication/media and recipient
+safety acceptance. No all-client launch certification; connection alone does not
+activate the Brand Hub or expose files.
 
 ## Evidence and owner-completed registration
 
