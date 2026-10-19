@@ -64,7 +64,7 @@ try {
   for (const width of [1440,375,390,430]) {
     const page=await browser.newPage({viewport:{width,height:1000}})
     await page.clock.install({time:new Date('2026-10-09T08:00:00.000Z')})
-    const errors=[]; const reads=[]; let requestCount=0; let scenario='valid'; let hold=false; let assetScenario='valid'; const pending=[]
+    const errors=[]; const reads=[]; let requestCount=0; let strategyReads=0; let calendarReads=0; let strategyFailure=true; let calendarFailure=false; let scenario='valid'; let hold=false; let assetScenario='valid'; const pending=[]
     page.on('pageerror',error=>errors.push(error.message))
     await page.route('**/*',async route=>{
       const request=route.request(); const url=new URL(request.url())
@@ -77,6 +77,8 @@ try {
       }
       if (url.pathname==='/rest/v1/monthly_client_strategies') {
         assert.equal(request.method(),'GET','Strategy reads only')
+        strategyReads++
+        if(strategyFailure) return route.fulfill({status:400,json:{code:'XX000',message:'PRIVATE strategy read fixture'}})
         return route.fulfill({json:[]})
       }
       if (url.pathname==='/rest/v1/rpc/client_portal_visibility_contract_version') return route.fulfill({json:1})
@@ -92,6 +94,8 @@ try {
       if (hold && url.pathname.includes('month_ahead')) await new Promise(resolve=>pending.push(resolve))
       if (url.pathname==='/rest/v1/rpc/client_portal_month_ahead_posts_v2') {
         assert.equal(payload.p_client_id,clientB)
+        calendarReads++
+        if(calendarFailure) return route.fulfill({json:null})
         return route.fulfill({json:[{row_key:'post-aaaaaaaaaaaaaaaa',schedule_date:payload.p_month.slice(0,8)+'12',title:'Planned poster B',post_type:'dp',client_safe_status:'scheduled'}]})
       }
       if (url.pathname==='/rest/v1/rpc/client_portal_month_ahead_events') {
@@ -111,7 +115,14 @@ try {
     assert.equal(await page.getByRole('button',{name:'September 2026',exact:true}).count(),0,'Only current/next strategy months offered')
     await page.getByRole('button',{name:'November 2026',exact:true}).click()
     assert.equal(new URL(page.url()).searchParams.get('month'),'2026-11','Next strategy month selectable')
+    await page.getByRole('tabpanel',{name:'Strategy',exact:true}).getByText('November 2026',{exact:true}).waitFor()
+    await page.getByText('Your strategy could not be loaded right now. Please try again shortly.',{exact:true}).waitFor()
+    const strategyUrl=page.url(), strategyBeforeRetry=strategyReads
+    strategyFailure=false
+    await page.getByRole('button',{name:'Try again',exact:true}).click()
     await page.getByText('Your November 2026 strategy update will appear here once it has been reviewed and published.',{exact:true}).waitFor()
+    assert.equal(strategyReads,strategyBeforeRetry+1,'Strategy retry is one deliberate read')
+    assert.equal(page.url(),strategyUrl,'Strategy retry preserves scope without navigation')
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${width} strategy month overflow`)
     // Actual tabs must work without a pointer. Arrow navigation only moves
     // focus: opening remote content remains a deliberate Enter/Space action.
@@ -229,20 +240,44 @@ try {
     await page.getByRole('button',{name:'Next month',exact:true}).click()
     await page.getByRole('heading',{name:'Content Guidelines could not be loaded'}).waitFor()
     assert.equal(await page.getByText(/No published Content Guidelines/).count(),0,'Failure not verified empty')
+    const guideUrl=page.url(), guideReads=reads.length
+    scenario='valid'
+    await page.getByRole('button',{name:'Try again',exact:true}).click()
+    await page.getByText('Complete script B 2026-12\nSecond line',{exact:true}).waitFor()
+    assert.equal(reads.length,guideReads+1,'Guidelines retry reads only the same month once')
+    assert.equal(page.url(),guideUrl)
     scenario='empty'
     await page.getByRole('button',{name:'Next month',exact:true}).click()
     await page.getByText(/No published Content Guidelines are available for January 2027/).waitFor()
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${width} empty layout overflow`)
     assert.equal(await page.locator('vite-error-overlay').count(),0)
     assert.deepEqual(errors,[])
-    assert.equal(reads.length,7)
+    assert.equal(reads.length,8)
     scenario='missing_script'
     await page.getByRole('button',{name:'Next month',exact:true}).click()
     await page.getByText('A script is not available for this video.',{exact:true}).waitFor()
     assert.equal(await page.getByText('Complete script',{exact:true}).count(),0,'Missing script not labelled complete')
     scenario='valid'
+    calendarFailure=true
     await page.getByRole('tab',{name:'Calendar',exact:true}).click()
-    if (width<640) await page.getByRole('button',{name:'2027-02-12, 2 item(s)',exact:true}).click()
+    await page.getByRole('heading',{name:'Content calendar could not be loaded',exact:true}).waitFor()
+    const calendarUrl=page.url(), calendarBeforeRetry=calendarReads
+    calendarFailure=false
+    await page.getByRole('button',{name:'Try again',exact:true}).click()
+    await page.getByText('Confirmed dates will appear here when CG shares the plan.',{exact:true}).waitFor({state:'hidden'})
+    if(width<640) await page.getByRole('button',{name:'2027-02-12, 2 item(s)',exact:true}).waitFor()
+    else await page.getByText('Planned poster B',{exact:true}).filter({visible:true}).waitFor()
+    assert.equal(calendarReads,calendarBeforeRetry+1,'Calendar retry reads same scope once')
+    assert.equal(page.url(),calendarUrl)
+    if (width<640) {
+      const chosenDay=page.getByRole('button',{name:'2027-02-12, 2 item(s)',exact:true})
+      assert.equal(await chosenDay.getAttribute('aria-pressed'),'false',`${width} mobile calendar announces unselected date`)
+      assert.equal(await page.getByRole('button',{name:'2027-02-01',exact:true}).getAttribute('aria-pressed'),'true','First month day is selected initially')
+      await chosenDay.click()
+      assert.equal(await chosenDay.getAttribute('aria-pressed'),'true','Mobile calendar announces chosen date')
+      assert.equal(await page.getByRole('button',{name:'2027-02-01',exact:true}).getAttribute('aria-pressed'),'false','Old date selection cleared')
+      await page.getByRole('group',{name:'Choose a day',exact:true}).waitFor()
+    }
     const eventLink=page.getByRole('link',{name:'Open Content Guideline for Filming B'}).filter({visible:true})
     await eventLink.waitFor()
     await page.getByRole('button',{name:'View published files',exact:true}).filter({visible:true}).click()

@@ -42,7 +42,7 @@ try {
   browser = await chromium.launch({ headless: true })
   for (const width of [1440, 375, 390, 430]) {
     const page = await browser.newPage({ viewport: { width, height: 900 } })
-    const errors = []; const actions = []; let failSetup = true; let available = true
+    const errors = []; const actions = []; let failSetup = true; let available = true; let libraryFailure=false
     page.on('pageerror', error => errors.push(error.message))
     await page.route('**/*', route => {
       const request = route.request(); const url = new URL(request.url())
@@ -51,7 +51,7 @@ try {
       assert.equal(request.method(), 'POST')
       const body = request.postDataJSON(); actions.push(body.action)
       assert.equal(body.clientId, clientId, 'Exact selected client only')
-      if (body.action === 'staff_preview_portal_library_load') return route.fulfill({ json: { ok: true, data: { clientName: 'Synthetic A', clientLogoUrl: null, available, categories: [] } } })
+      if (body.action === 'staff_preview_portal_library_load') return route.fulfill({ json: libraryFailure ? {ok:false,error:'Synthetic library read failure'} : { ok: true, data: { clientName: 'Synthetic A', clientLogoUrl: null, available, categories: [] } } })
       assert.equal(body.action, 'staff_preview_portal_load', 'Only existing read actions')
       return route.fulfill({ json: failSetup
         ? { ok: false, error: 'Synthetic setup read failure' }
@@ -74,6 +74,17 @@ try {
     assert.equal(await page.getByText('Approved brand files and final client-ready content, kept together in one clear space.', { exact: true }).count(), 0, 'Do not promise available files while the library is disabled')
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width}px disabled-library overflow`)
     assert.deepEqual(actions.sort(), ['staff_preview_portal_library_load', 'staff_preview_portal_library_load', 'staff_preview_portal_library_load', 'staff_preview_portal_load', 'staff_preview_portal_load', 'staff_preview_portal_load'])
+    libraryFailure=true
+    await page.reload()
+    await page.getByRole('heading',{name:'Brand Hub is not available yet',exact:true}).waitFor()
+    const beforeRetry=actions.length, retryUrl=page.url()
+    await page.evaluate(()=>{window.fixtureRetryMarker='kept'})
+    libraryFailure=false;available=true;failSetup=false
+    await page.getByRole('button',{name:'Try again',exact:true}).click()
+    await page.getByRole('heading',{name:'Library',exact:true}).waitFor()
+    assert.deepEqual(actions.slice(beforeRetry).sort(),['staff_preview_portal_library_load','staff_preview_portal_load'],'Retry uses only existing exact-client read actions once')
+    assert.equal(await page.evaluate(()=>window.fixtureRetryMarker),'kept','Retry does not reload or copy a session')
+    assert.equal(page.url(),retryUrl)
     assert.deepEqual(errors, [])
     console.log(`PASS ${width}px: library remains available, failed setup explicit, successful empty setup not mislabeled, exact client and read-only`)
     await page.close()

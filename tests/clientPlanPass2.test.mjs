@@ -82,9 +82,10 @@ test('Plan tabs have manual keyboard navigation and labelled focusable panels wi
   assert.match(PLAN_SOURCE, /aria-labelledby=\{`\$\{tabsId\}-\$\{item\.key\}-tab`\}/)
   assert.match(PLAN_SOURCE, /tabIndex=\{tab === item\.key \? 0 : undefined\}/)
   assert.match(PLAN_SOURCE, /focus-visible:outline/)
-  const focusHandler = PLAN_SOURCE.slice(PLAN_SOURCE.indexOf('function moveTabFocus'), PLAN_SOURCE.indexOf('const tabPanel'))
+  const focusHandler = readSource('../src/lib/clientTabKeyboard.ts')
   for (const key of ['ArrowLeft', 'ArrowRight', 'Home', 'End']) assert.ok(focusHandler.includes(`'${key}'`))
   assert.doesNotMatch(focusHandler, /updatePlan|setSearchParams|\.click\(/)
+  assert.match(PLAN_SOURCE, /moveClientTabFocus\(event, index, tab, PLAN_TAB_KEYS, tabButtons\.current\)/)
   assert.doesNotMatch(PLAN_SOURCE, /onFocus=/)
 })
 

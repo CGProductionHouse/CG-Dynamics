@@ -21,6 +21,7 @@ export default function ClientSetupPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [setupUnavailable, setSetupUnavailable] = useState(false)
+  const [readRevision, setReadRevision] = useState(0)
 
   useEffect(() => {
     let active = true
@@ -53,11 +54,11 @@ export default function ClientSetupPage() {
     }
     void load()
     return () => { active = false }
-  }, [clientId, previewClientId])
+  }, [clientId, previewClientId, readRevision])
 
   if (loading) return <ClientPortalLoadingState />
   if (error || !library) {
-    return <ClientPortalErrorState title="Brand Hub is not available yet" message="Your CG team will make this space available once your client-safe library is ready." />
+    return <ClientPortalErrorState title="Brand Hub is not available yet" message="Your CG team will make this space available once your client-safe library is ready." onRetry={() => setReadRevision(value => value + 1)} />
   }
   return <ClientBrandHub library={library} state={state} setupUnavailable={setupUnavailable} />
 }

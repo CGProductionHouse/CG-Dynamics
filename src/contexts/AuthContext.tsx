@@ -24,6 +24,7 @@ interface AuthContextType {
   completeInvite: (password: string, fullName?: string) => Promise<{ error: AuthContextError | null; role: string | null }>
   resetPasswordForEmail: (email: string) => Promise<{ error: AuthError | null }>
   updatePassword: (password: string) => Promise<{ error: AuthError | null }>
+  retryProfile: () => Promise<void>
   signOut: () => Promise<void>
 }
 
@@ -98,12 +99,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let mounted = true
 
-    // `silent` updates user/profile without flipping the global loading flag,
-    // so the routed tree (and any in-progress admin work) is never unmounted.
-    async function applyUser(nextUser: User | null, options: { silent?: boolean } = {}) {
+    // Used only for initial resolution or an actual identity change. Same-user
+    // background events below preserve mounted work without reloading profiles.
+    async function applyUser(nextUser: User | null) {
       if (!mounted) return
       const requestId = ++authRequestRef.current
-      if (!options.silent) setLoading(true)
+      setLoading(true)
       setUser(nextUser)
       userIdRef.current = nextUser?.id ?? null
       try {
@@ -129,10 +130,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
 
+    const initialRequestId = authRequestRef.current
     void supabase.auth.getSession()
-      .then(({ data }) => applyUser(data.session?.user ?? null))
+      .then(({ data }) => {
+        if (!mounted || initialRequestId !== authRequestRef.current) return
+        return applyUser(data.session?.user ?? null)
+      })
       .catch(error => {
-        if (!mounted) return
+        if (!mounted || initialRequestId !== authRequestRef.current) return
         setProfile(null)
         setProfileError(error instanceof Error ? error.message : 'Could not load your session.')
         setLoading(false)
@@ -152,11 +157,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return
       }
 
-      // A genuine change (sign in, sign out, different user). After the first
-      // load, apply it silently so the app does not flash the loading screen
-      // and unmount the current page.
+      // A different identity must immediately lose the old profile and routed
+      // data, even while its new profile read is pending. Only the same-user
+      // refresh above may preserve mounted work. Invalidate pending profile
+      // reads before deferring SDK work outside the auth callback.
+      ++authRequestRef.current
+      setProfile(null)
+      setProfileError(null)
+      setLoading(true)
       setTimeout(() => {
-        void applyUser(nextUser, { silent: initialResolvedRef.current })
+        void applyUser(nextUser)
       }, 0)
     })
 
@@ -165,6 +175,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       subscription.unsubscribe()
     }
   }, [])
+
+  async function retryProfile() {
+    const userId = userIdRef.current
+    if (!userId || user?.id !== userId) return
+    const requestId = ++authRequestRef.current
+    setLoading(true)
+    setProfile(null)
+    setProfileError(null)
+    try {
+      const result = await fetchProfile(userId)
+      if (requestId !== authRequestRef.current || userId !== userIdRef.current) return
+      setProfile(result.profile)
+      setProfileError(result.error?.message ?? null)
+    } catch {
+      if (requestId === authRequestRef.current) setProfileError('Your profile could not be loaded.')
+    } finally {
+      if (requestId === authRequestRef.current) setLoading(false)
+    }
+  }
 
   async function signIn(identifier: string, password: string) {
     const value = identifier.trim()
@@ -294,7 +323,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, profile, profileError, loading, isPasswordRecovery, endPasswordRecovery, signIn, completeInvite, resetPasswordForEmail, updatePassword, signOut }}>
+    <AuthContext.Provider value={{ user, profile, profileError, loading, isPasswordRecovery, endPasswordRecovery, signIn, completeInvite, resetPasswordForEmail, updatePassword, retryProfile, signOut }}>
       {children}
     </AuthContext.Provider>
   )

@@ -65,7 +65,10 @@ export function LeadInbox({ clientId = null, preview = null }: { clientId?: stri
   const selected = leads.find((lead) => lead.enquiryId === selectedId) ?? null
 
   if (!load) return <ClientPortalLoadingState />
-  if (load.state === 'error') return <ClientPortalErrorState title="Your leads could not be loaded" message={load.message} />
+  if (load.state === 'error') return <ClientPortalErrorState title="Your leads could not be loaded" message={load.message} onRetry={() => {
+    setLoad(null)
+    void refresh()
+  }} />
   if (load.state === 'unavailable') {
     return <Intro preview={preview}>
       <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-400">Website lead tracking has not been switched on for your account yet. Once your website form is connected, every enquiry will appear here.</p>

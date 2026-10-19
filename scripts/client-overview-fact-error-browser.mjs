@@ -45,7 +45,7 @@ try {
   browser = await chromium.launch({ headless: true })
   for (const width of [375, 390, 430, 1440]) {
     const page = await browser.newPage({ viewport: { width, height: 900 } })
-    const errors = []; const reads = []; let factMode = 'missing', exclusionMode = 'missing', ownershipProved = false
+    const errors = []; const reads = []; let factMode = 'missing', exclusionMode = 'missing', ownershipProved = false, reportsMissing=true, reportListReads=0
     page.on('pageerror', error => errors.push(error.message))
     await page.route('**/*', route => {
       const request = route.request(); const url = new URL(request.url())
@@ -66,7 +66,8 @@ try {
           return route.fulfill({json:report})
         }
         assert.equal(url.searchParams.get('client_id'), `eq.${clientId}`)
-        return route.fulfill({ json: [report] })
+        reportListReads++
+        return route.fulfill({ json: reportsMissing ? null : [report] })
       }
       if (url.pathname==='/rest/v1/posts' || url.pathname==='/rest/v1/report_content_exclusions') {
         assert.equal(request.method(),'GET');assert.ok(ownershipProved)
@@ -93,7 +94,7 @@ try {
       const rpc = url.pathname.split('/').at(-1)
       assert.ok(['get_report_metric_facts', 'get_report_metric_fact_status', 'get_google_ads_dashboard_campaign_metrics_v2', 'get_google_ads_dashboard_status_v2', 'client_portal_month_ahead_posts_v2', 'client_portal_month_ahead_events', 'client_portal_visibility_contract_version', 'client_published_reports', 'client_published_report_posts', 'client_published_report_manual_metrics', 'client_monthly_strategy', 'get_my_client_service_entitlements'].includes(rpc), `No write-capable RPC: ${rpc}`)
       const body = request.postDataJSON()
-      if (rpc === 'client_published_reports') return route.fulfill({ json:[report] })
+      if (rpc === 'client_published_reports') {reportListReads++;return route.fulfill({ json:reportsMissing?null:[report] })}
       if (rpc === 'client_published_report_posts' || rpc === 'client_published_report_manual_metrics') {
         assert.equal(body.p_report_id,reportId)
         return route.fulfill({json:[]})
@@ -117,7 +118,15 @@ try {
       return route.fulfill({ json: rpc === 'client_portal_visibility_contract_version' ? 1 : [] })
     })
     await page.goto('http://127.0.0.1:53990/__overview-fact-error')
+    await page.getByRole('heading',{name:'Your overview could not be loaded',exact:true}).waitFor()
+    const overviewBeforeRetry=reportListReads, overviewUrl=page.url()
+    await page.evaluate(()=>{window.fixtureRetryMarker='kept'})
+    reportsMissing=false
+    await page.getByRole('button',{name:'Try again',exact:true}).click()
     await page.getByRole('heading', { name: 'Synthetic A', exact: true }).waitFor()
+    assert.equal(reportListReads,overviewBeforeRetry+1,'Overview recovery reopens its existing list once')
+    assert.equal(await page.evaluate(()=>window.fixtureRetryMarker),'kept')
+    assert.equal(page.url(),overviewUrl)
     await page.getByText('Unavailable', { exact: true }).waitFor({ timeout: 1500 })
     assert.equal(await page.getByText('0 verified channels', { exact: true }).count(), 0)
     await page.getByText('Verified channel facts could not be loaded right now', { exact: true }).waitFor()
@@ -144,6 +153,14 @@ try {
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width}px verified views overflow`)
     await page.screenshot({ path: join(tmpdir(), `cg-overview-recorded-views-${width}.png`), fullPage: true })
     assert.deepEqual(errors, [])
+    reportsMissing=true;factMode='empty'
+    await page.goto('http://127.0.0.1:53990/__performance-fact-error')
+    await page.getByRole('heading',{name:'Performance is temporarily unavailable',exact:true}).waitFor()
+    const performanceBeforeRetry=reportListReads
+    reportsMissing=false
+    await page.getByRole('button',{name:'Try again',exact:true}).click()
+    await page.getByRole('tab',{name:'Facebook',exact:true}).waitFor()
+    assert.equal(reportListReads,performanceBeforeRetry+2,'One list recovery plus the existing detail ownership recheck')
     for (const mode of ['missing','missing-status','failure']) {
       factMode=mode
       await page.goto('http://127.0.0.1:53990/__performance-fact-error')
@@ -152,6 +169,12 @@ try {
       assert.equal(await page.getByRole('tab',{name:'Facebook',exact:true}).count(),0,'Unavailable facts do not fall back to a legacy report')
       assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth))
       assert.deepEqual(errors,[])
+      const listReadsBeforeDetailRetry=reportListReads, retryUrl=page.url()
+      factMode='empty'
+      await page.getByRole('button',{name:'Try again',exact:true}).click()
+      await page.getByRole('tab',{name:'Facebook',exact:true}).waitFor()
+      assert.equal(reportListReads,listReadsBeforeDetailRetry+1,'Detail retry retains the existing ownership recheck without restarting parent list/month selection')
+      assert.equal(page.url(),retryUrl)
     }
     factMode='empty'
     for (const mode of ['missing','malformed','missing-count','truncated','failure']) {
@@ -167,6 +190,13 @@ try {
       assert.equal(await page.getByRole('tab',{name:'Facebook',exact:true}).count(),0,'Missing display permission is not unrestricted highlights')
       assert.doesNotMatch(await page.locator('main').innerText(),/PRIVATE/)
       assert.deepEqual(errors,[])
+      const listReadsBeforePreviewRetry=reportListReads, retryUrl=page.url()
+      exclusionMode='valid';ownershipProved=false
+      await page.getByRole('button',{name:'Try again',exact:true}).click()
+      await page.getByRole('tab',{name:'Facebook',exact:true}).waitFor()
+      assert.equal(reportListReads,listReadsBeforePreviewRetry,'Preview retry preserves selected report and repeats ownership proof')
+      assert.equal(page.url(),retryUrl)
+      assert.equal(await page.getByText('Hidden report post',{exact:true}).count(),0)
     }
     exclusionMode='valid';ownershipProved=false
     await page.reload()

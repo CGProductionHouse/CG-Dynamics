@@ -4,10 +4,12 @@ import {
   downloadFile,
   isUploadAdapterConfigured,
   listChildren,
+  listLibraryEntries,
   resolveClientsFolder,
   streamDriveItem,
   streamDriveThumbnail,
   verifyDriveItem,
+  verifyLibraryAsset,
 } from './onedrive-adapter.ts'
 import {
   createPortalMediaResponse,
@@ -21,6 +23,8 @@ import {
 } from './portal-library-stream.ts'
 import { visiblePortalMonths, resolveMappedClientFolder, resolvePortalMapping, portalRootFolderName } from '../_shared/portal-visibility.ts'
 import { resolveLibraryReadScope } from './portal-preview-scope.ts'
+import { manageLibrary } from './library-management.ts'
+import { libraryManagementStore } from './library-management-store.ts'
 
 const PLATFORMS = new Set(['facebook', 'instagram', 'meta_business', 'linkedin', 'tiktok', 'website', 'google', 'outlook'])
 const CHOICES = new Set(['connect_now', 'do_later', 'not_needed'])
@@ -275,7 +279,7 @@ async function authorizePortalAsset(service: SupabaseClient, assetId: string): P
   const [{ data: library }, { data: category }] = await Promise.all([
     service
       .from('client_portal_libraries')
-      .select('id, client_id, drive_id, root_folder_name, enabled, last_verified_at')
+      .select('id, client_id, drive_id, root_folder_item_id, root_folder_name, enabled, last_verified_at')
       .eq('id', asset.library_id)
       .eq('client_id', asset.client_id)
       .maybeSingle(),
@@ -305,6 +309,7 @@ async function authorizePortalAsset(service: SupabaseClient, assetId: string): P
     && PORTAL_CATEGORY_LABELS[categoryName] === category!.folder_name
     && validPeriod
   if (!exactBoundary) return null
+  if (!await verifyLibraryAsset(asset.drive_id, asset.item_id, category!.folder_item_id, library!.root_folder_item_id, asset.mime_type, asset.size_bytes == null ? null : Number(asset.size_bytes))) return null
   return { ...asset, category: categoryName } as AuthorizedPortalAsset
 }
 
@@ -550,6 +555,7 @@ Deno.serve(async request => {
 
   let body: Record<string, unknown>
   try { body = await request.json() } catch { return json({ ok: false, error: 'Invalid request.' }, 400) }
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return json({ ok: false, error: 'Invalid request.' }, 400)
   const action = cleanString(body.action, 40)
 
   if (action === 'load' || action === 'save' || action === 'complete') {
@@ -797,6 +803,10 @@ Deno.serve(async request => {
 
   const authorized = await getAuthorizedUser(service, request)
   if (!authorized) return json({ ok: false, error: 'Authentication required.' }, 401)
+  if (action.startsWith('staff_library_')) {
+    const result = await manageLibrary(body, { id: authorized.user.id, role: authorized.profile.role }, libraryManagementStore(service), { children: listLibraryEntries })
+    return json(result.body, result.status)
+  }
   const libraryScope = resolveLibraryReadScope(action, authorized.profile, body.clientId)
   if (action.startsWith('staff_preview_portal_') && !libraryScope) {
     return json({ ok: false, error: 'Manager preview access required.' }, 403)

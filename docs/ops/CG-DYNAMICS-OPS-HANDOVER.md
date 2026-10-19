@@ -13,6 +13,28 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 19 October - final client candidate, private evidence excluded
+
+CA requests the final executable local client-lane run. Same managed checkout
+now uses `codex/client-portal-reviewed-candidate-2026-10-19`, based on current
+main b77b89fb, carrying the verified runtime from local ace8f1c5 without its
+private OneDrive inventory/smoke history. Original client branch remains intact
+locally and must not be blindly pushed. One test's private-inventory dependency
+was reproduced and replaced with synthetic topology, not fake live acceptance.
+Details/current item list: `CLIENT-PORTAL-FINAL-CANDIDATE-2026-10-19.md`.
+
+Previous actual-handler/brand review receipts remain #396 comment6262692353 and
+#381 comment6262700362. All58 launch-client brand source folders checked,65files
+visually inspected; correct Emmanuel logo sources found,52client mark candidates,
+Vrystaat subbrands only/five existing brand folders empty. Exact source proof
+remains private. No mapping/assets/publication/permissions changed.
+
+Separate staff lane is cdb34404 with newer dirty work; do not race or copy it.
+Separate normal ChatGPT owns October/November strategy drafts; Human Auto GO
+resolved, CA retains password/device review. Fresh provider/Google evidence and
+frozen-candidate local verification are being reconciled, not claimed complete
+from old tests. No Vercel, push or production mutation in this run.
+
 ### 18 October — client Plan keyboard navigation, source-only
 
 Continued the unowned Plan seam from main c92e7ad (#839); open775/662/618

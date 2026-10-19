@@ -10,6 +10,7 @@ import { businessMonthKey } from '../../lib/businessTime'
 import { useOptionalClientPortal } from '../../components/client/ClientPortalContext'
 import { getPreviewStrategy } from '../../lib/clientPortalPreview'
 import { selectClientStrategyMonth } from '../../lib/clientStrategyMonths'
+import { ClientPortalRetryButton } from '../../components/client/ClientPortalStates'
 
 function currentMonth() {
   return businessMonthKey()
@@ -23,6 +24,7 @@ export default function ClientStrategyPage({ embedded = false, month }: { embedd
   const [strategy, setStrategy] = useState<StrategyData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
+  const [readRevision, setReadRevision] = useState(0)
   const strategyMonth = selectClientStrategyMonth(month ?? currentMonth())
 
   useEffect(() => {
@@ -49,7 +51,7 @@ export default function ClientStrategyPage({ embedded = false, month }: { embedd
     }
     void load()
     return () => { active = false }
-  }, [embedded, clientId, previewClientId, strategyMonth])
+  }, [embedded, clientId, previewClientId, strategyMonth, readRevision])
 
   const hasPublishedContent = useMemo(() => strategy && (hasStrategyContent(strategy)
     || strategy.calendarSelections.some(selection => selection.use))
@@ -72,8 +74,9 @@ export default function ClientStrategyPage({ embedded = false, month }: { embedd
           <p className="text-sm leading-6 text-report-muted">Loading strategy…</p>
         </div>
       ) : error ? (
-        <div className="mt-8 rounded-3xl border border-[#d8a07a]/20 bg-[#d8a07a]/[0.06] px-6 py-8 shadow-[0_24px_70px_-48px_rgba(0,0,0,0.95)]">
+        <div role="alert" className="mt-8 rounded-3xl border border-[#d8a07a]/20 bg-[#d8a07a]/[0.06] px-6 py-8 shadow-[0_24px_70px_-48px_rgba(0,0,0,0.95)]">
           <p className="text-sm leading-6 text-[#d8a07a]">Your strategy could not be loaded right now. Please try again shortly.</p>
+          <ClientPortalRetryButton onRetry={() => setReadRevision(value => value + 1)} />
         </div>
       ) : !strategy || !hasPublishedContent ? (
         <div className="relative mt-8 overflow-hidden rounded-3xl border border-white/[0.08] bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.1),transparent_40%),rgba(255,255,255,0.035)] px-6 py-8 shadow-[0_24px_70px_-48px_rgba(0,0,0,0.95)]">

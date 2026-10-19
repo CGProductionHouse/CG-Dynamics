@@ -29,6 +29,7 @@ export default function ClientPortalPreview() {
   const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(true)
   const [failed, setFailed] = useState(false)
+  const [readRevision, setReadRevision] = useState(0)
   const requested = params.get('client')
   const exactId = previewClientId(profile?.role, requested)
   const client = clients.find(row => row.id === exactId) ?? null
@@ -44,7 +45,7 @@ export default function ClientPortalPreview() {
       setLoading(false)
     }).catch(() => { if (active) { setFailed(true); setLoading(false) } })
     return () => { active = false }
-  }, [profile?.role])
+  }, [profile?.role, readRevision])
 
   if (!['admin', 'manager'].includes(profile?.role ?? '')) return <ClientPortalErrorState title="Manager preview access required" />
   const context = { client, previewClientId: exactId ?? undefined }
@@ -59,7 +60,11 @@ export default function ClientPortalPreview() {
           </select>
         </label>
       </section>
-      {loading ? <ClientPortalLoadingState /> : failed ? <ClientPortalErrorState title="Client options could not be loaded" /> : !client ? <p className="text-sm text-slate-400">Select an exact active client to preview. No other client is substituted.</p>
+      {loading ? <ClientPortalLoadingState /> : failed ? <ClientPortalErrorState title="Client options could not be loaded" onRetry={() => {
+        setLoading(true)
+        setFailed(false)
+        setReadRevision(value => value + 1)
+      }} /> : !client ? <p className="text-sm text-slate-400">Select an exact active client to preview. No other client is substituted.</p>
         : <div key={`${client.id}:${area}`}><Suspense fallback={<ClientPortalLoadingState />}>
           {area === 'overview' ? <ClientPortalHome /> : area === 'plan' ? <ClientPlanPage /> : area === 'performance' ? <Dashboard /> : area === 'approvals' ? <ContentReviewsPage clientView /> : area === 'brand-hub' ? <ClientSetupPage />
             : <LeadPreview clientId={client.id} preview={{ clientName: client.name }} />}

@@ -34,7 +34,7 @@ try {
   for (const scope of ['client', 'preview']) for (const width of [1440, 375, 390, 430]) {
     const page = await browser.newPage({ viewport: { width, height: 900 } })
     const errors = []; page.on('pageerror', error => errors.push(error.message))
-    let mode = 'missing'
+    let mode = 'missing', inboxReads=0
     await page.route('**/*', route => {
       const request = route.request(), url = new URL(request.url()), rpc = url.pathname.split('/').at(-1)
       if (url.origin === 'http://127.0.0.1:53993') return route.continue()
@@ -43,6 +43,7 @@ try {
       const args = request.postDataJSON()
       assert.equal(args.p_client_id, scope === 'preview' ? clientId : null, 'Exact preview or server-pinned client')
       if (rpc === 'website_lead_inbox') {
+        inboxReads++
         if (mode === 'transport') return route.abort('connectionfailed')
         if (mode === 'missing') return route.fulfill({ json: null })
         if (mode === 'bad-date') return route.fulfill({ json: [{ enquiry_id: 'a', receipt_id: 'r', accepted_at: 'invalid',
@@ -63,6 +64,15 @@ try {
       if (['missing', 'bad-date', 'transport'].includes(mode)) {
         await page.getByRole('heading', { name: 'Your leads could not be loaded', exact: true }).waitFor()
         assert.equal(await page.getByText('No website enquiries yet.', { exact: false }).count(), 0, 'Failure is never an empty inbox')
+        const beforeRetry=inboxReads, retryUrl=page.url()
+        await page.evaluate(()=>{window.fixtureRetryMarker='kept'})
+        mode='zero'
+        await page.getByRole('button',{name:'Try again',exact:true}).click()
+        await page.getByRole('heading',{name:'Leads',exact:true}).waitFor()
+        await page.getByText('No website enquiries were received in this period.',{exact:true}).first().waitFor()
+        assert.equal(inboxReads,beforeRetry+1,'One explicit inbox retry; no automatic polling')
+        assert.equal(await page.evaluate(()=>window.fixtureRetryMarker),'kept','Read retry does not reload the app')
+        assert.equal(page.url(),retryUrl)
       } else {
         await page.getByRole('heading', { name: 'Leads', exact: true }).waitFor()
         if (mode === 'bad-metrics') {

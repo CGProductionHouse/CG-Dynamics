@@ -10,6 +10,7 @@ import { ClientPortalLayout } from './components/client/ClientPortalLayout'
 import AdminLayout from './pages/admin/AdminLayout'
 import { RouteLoadBoundary } from './components/RouteLoadBoundary'
 import { lazyRoute } from './lib/lazyRoute'
+import { AuthProfileError } from './components/AuthProfileError'
 
 const LandingPage = lazyRoute(() => import('./pages/LandingPage'))
 const Login = lazyRoute(() => import('./pages/Login'))
@@ -22,6 +23,7 @@ const ClientPerformancePage = lazyRoute(() => import('./pages/admin/ClientPerfor
 const WebsiteLeadsPreviewPage = lazyRoute(() => import('./pages/admin/WebsiteLeadsPreviewPage'))
 const CgHubPage = lazyRoute(() => import('./pages/admin/CgHubPage'))
 const ClientsList = lazyRoute(() => import('./pages/admin/ClientsList'))
+const LibraryManagementPage = lazyRoute(() => import('./features/client-portal-library/LibraryManagementPage'))
 const ImportMetaCsv = lazyRoute(() => import('./pages/admin/ImportMetaCsv'))
 const ImportsManagement = lazyRoute(() => import('./pages/admin/ImportsManagement'))
 const ImportHub = lazyRoute(() => import('./pages/admin/ImportHub'))
@@ -74,15 +76,7 @@ function HomeRedirect() {
   if (loading) return <div className="min-h-screen bg-brand-bg" />
   if (isPasswordRecovery) return <Navigate to="/reset-password" replace />
   if (!user) return <Navigate to="/login" replace />
-  if (profileError) {
-    return (
-      <div className="min-h-screen bg-brand-bg flex items-center justify-center p-6">
-        <p className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-4 py-3">
-          Could not load your profile: {profileError}
-        </p>
-      </div>
-    )
-  }
+  if (profileError) return <AuthProfileError />
   if (!profile) return <div className="min-h-screen bg-brand-bg" />
   if (user.invited_at && profile.role === 'client' && !profile.client_id) {
     return <Navigate to="/signup" replace />
@@ -179,6 +173,7 @@ export default function App() {
 
               {/* Admin-only security/setup routes nested inside AdminLayout */}
               <Route element={<RequireAdmin />}>
+                <Route path="/admin/clients/brand-hub" element={<LibraryManagementPage />} />
                 {/* System — grouped admin diagnostics (health tools), out of
                     daily navigation. */}
                 <Route path="/admin/system" element={<SystemHubPage />} />

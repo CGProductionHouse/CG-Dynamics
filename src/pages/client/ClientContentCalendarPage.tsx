@@ -47,6 +47,7 @@ export default function ClientContentCalendarPage({ embedded = false, month: con
   const [client, setClient] = useState<Client | null>(null)
   const [calendar, setCalendar] = useState<ClientMonthAhead | null>(null)
   const [loading, setLoading] = useState(true)
+  const [readRevision, setReadRevision] = useState(0)
 
   useEffect(() => {
     let active = true
@@ -78,7 +79,7 @@ export default function ClientContentCalendarPage({ embedded = false, month: con
 
     void load()
     return () => { active = false }
-  }, [month, clientId])
+  }, [month, clientId, readRevision])
 
   function changeMonth(next: string) {
     if (controlledMonth) return
@@ -119,7 +120,7 @@ export default function ClientContentCalendarPage({ embedded = false, month: con
       {loading ? (
         <ClientPortalLoadingState variant="calendar" />
       ) : calendar?.loadFailed ? (
-        <ClientPortalErrorState title="Content calendar could not be loaded" />
+        <ClientPortalErrorState title="Content calendar could not be loaded" onRetry={() => setReadRevision(value => value + 1)} />
       ) : calendar ? (
         <CalendarSurface
           key={month}
@@ -276,7 +277,7 @@ function Agenda({
           <div key={dayName} className="py-1 text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-report-faint">{dayName}</div>
         ))}
       </div>
-      <div className="mt-1 grid grid-cols-7 gap-1">
+      <div role="group" aria-label="Choose a day" className="mt-1 grid grid-cols-7 gap-1">
         {cells.map(cell => {
           const count = posts.filter(post => post.date === cell.iso).length + events.filter(event => localDateKey(event.startAt) === cell.iso).length
           const isToday = cell.iso === today
@@ -286,6 +287,7 @@ function Agenda({
               key={cell.iso}
               type="button"
               aria-label={`${cell.iso}${count > 0 ? `, ${count} item(s)` : ''}`}
+              aria-pressed={isSelected}
               onClick={() => setSelectedDay(cell.iso)}
               className={`flex aspect-square flex-col items-center justify-center rounded-lg border text-xs font-bold transition-colors ${
                 isSelected

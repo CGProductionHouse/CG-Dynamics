@@ -35,7 +35,7 @@ test('old published snapshots normalize at both Performance read boundaries', as
   for (const source of [clientReport, staffReport]) {
     assert.match(source, /strategyData: readStrategyData\(strategyResult\.data\.strategy_data\)/)
   }
-  const server = await createServer({ configFile: false, server: { middlewareMode: true, hmr: false } })
+  const server = await createServer({ configFile: false, server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true } })
   try {
     const { readStrategyData, clientFacingStrategyQualityIssues } = await server.ssrLoadModule('/src/lib/strategyEngine.ts')
     const legacyPublished = { version: 1, strategyGoingForward: 'Show the exact branch and service.', strategyDrivers: ['Exact client direction'], clientActionsRequired: [], actionPlan: {} }
@@ -48,4 +48,37 @@ test('old published snapshots normalize at both Performance read boundaries', as
   } finally {
     await server.close()
   }
+})
+
+test('legacy published strategy cannot crash the actual Performance renderer or leak internal contact copy', async () => {
+  const server = await createServer({ configFile: false, server: { middlewareMode: true, hmr: false },
+    esbuild: { jsx: 'automatic' }, optimizeDeps: { noDiscovery: true }, define: {
+      'import.meta.env.VITE_SUPABASE_URL': JSON.stringify('http://127.0.0.1:1'),
+      'import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY': JSON.stringify('local-public-fixture'),
+    } })
+  try {
+    const { createElement } = await import('react')
+    const { renderToStaticMarkup } = await import('react-dom/server')
+    const { ClientReportView } = await server.ssrLoadModule('/src/pages/client/ClientReportView.tsx')
+    const { readStrategyData } = await server.ssrLoadModule('/src/lib/strategyEngine.ts')
+    // The live Piek Performance path threw Object.values(null/undefined) in
+    // strategyEngine on18Oct. Reproduce the legacy snapshot SHAPE, not private
+    // client content, and keep the independently protected publication untouched.
+    const internal = 'Resolve the publishing-email discrepancy before adding an email address; do not silently substitute a contact.'
+    const report = { id: 'legacy-report', client_id: 'legacy-client', status: 'published',
+      period_start: '2026-09-01', period_end: '2026-09-23', posts: [],
+      report_title: 'Legacy snapshot acceptance', summary: null }
+    for (const goldStandard of [undefined, null, {}]) {
+      const raw = { version: 1, strategyGoingForward: 'Answer the local buyer question.',
+        actionPlan: {}, clientActionsRequired: [internal], goldStandard }
+      const before = JSON.stringify(raw)
+      const html = renderToStaticMarkup(createElement(ClientReportView, {
+        report, monthlyStrategy: { month: '2026-10-01', status: 'published', strategyData: readStrategyData(raw) },
+        googleAds: null, googleAdsState: 'unmapped', googleAdsError: null,
+      }))
+      assert.match(html, /Legacy snapshot acceptance/)
+      assert.doesNotMatch(html, /publishing-email discrepancy|do not silently substitute|Refresh CG Dynamics/)
+      assert.equal(JSON.stringify(raw), before, 'Read recovery does not rewrite the published snapshot')
+    }
+  } finally { await server.close() }
 })

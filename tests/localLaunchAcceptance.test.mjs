@@ -26,6 +26,9 @@ test('fixed local plan reuses actual fixtures and excludes unsupported fixture h
 
 test('client launch acceptance includes every high-risk client journey and unavailable fact case', () => {
   for (const fixture of [
+    'client-bundle-readonly-browser.mjs',
+    'client-app-journey-browser.mjs',
+    'client-workspace-recovery-browser.mjs',
     'client-portal-shell-readonly-browser.mjs',
     'client-overview-schedule-browser.mjs',
     'client-overview-fact-error-browser.mjs',
@@ -36,6 +39,7 @@ test('client launch acceptance includes every high-risk client journey and unava
     'client-approvals-readonly-browser.mjs',
     'client-library-readonly-browser.mjs',
     'client-brand-hub-setup-readonly-browser.mjs',
+    'brand-hub-management-browser.mjs',
   ]) assert.ok(browserFixtures.includes(fixture), `Missing client acceptance: ${fixture}`)
 })
 
