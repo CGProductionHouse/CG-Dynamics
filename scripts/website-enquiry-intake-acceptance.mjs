@@ -86,7 +86,7 @@ try {
     create table public.clients(id uuid primary key, name text not null, active boolean not null default true);
     create table public.profiles(id uuid primary key references auth.users(id), full_name text, role text,
       client_id uuid references public.clients(id), is_active boolean not null default true);`)
-  for (const migration of ['20261001181932_website_enquiry_transaction.sql', '20261002085355_website_enquiry_intake_guard.sql', '20261002090000_website_lead_lifecycle.sql', '20261002110000_website_enquiry_delivery_runtime.sql']) {
+  for (const migration of ['20261001181932_website_enquiry_transaction.sql', '20261002085355_website_enquiry_intake_guard.sql', '20261002090000_website_lead_lifecycle.sql', '20261002110000_website_enquiry_delivery_runtime.sql', '20261019100000_website_form_purposes.sql', '20261019110000_cg_forms_admin.sql']) {
     sql(readFileSync(new URL(`../supabase/migrations/${migration}`, import.meta.url), 'utf8'))
   }
   sql(readFileSync(new URL('../tests/sql/624_website_enquiry_intake_fixtures.sql', import.meta.url), 'utf8'))
@@ -211,7 +211,60 @@ try {
   assert.equal((await call(body())).status, 429)
   assert.equal(sql("select bool_and(minute_start > date_trunc('minute',now()) and minute_count=11) from public.website_enquiry_intake_budgets;"), 't')
 
-  console.log('PASS: #624 intake — canonical enquiry/outbox/Inbox, replay/conflict/isolation, fail-closed boundaries, PII-free logs, RLS/grants and bounded 20-session admission')
+  // Purpose-specific forms reuse the same exact endpoint and schema validation.
+  // Applications are durably mailed but absent from sales-lead projections.
+  // Subscriptions create consent history and a subscriber row without email jobs.
+  sql(`insert into public.website_form_schemas
+    (endpoint_id, schema_key, version, purpose, consent_field_key, field_definitions, contact_name_key, contact_email_key)
+    values
+    ('62430000-0000-4000-8000-000000000001', 'career_form', 1, 'application', null,
+      '[{"key":"name","type":"text","required":true,"max_length":120},{"key":"email","type":"email","required":true,"max_length":320}]', 'name', 'email'),
+    ('62430000-0000-4000-8000-000000000001', 'newsletter_form', 1, 'subscription', 'consent',
+      '[{"key":"email","type":"email","required":true,"max_length":320},{"key":"consent","type":"checkbox","required":true}]', null, 'email');
+    update public.website_form_schemas set status='active', activated_by='62420000-0000-4000-8000-000000000001', activated_at=now()
+      where schema_key in ('career_form','newsletter_form');`)
+  const app = await submit({ p_intake_key: INTAKE_A, p_schema_key: 'career_form', p_schema_version: 1,
+    p_submission_key: 'cgph-app-purpose-0001', p_answers: { name: 'Test Applicant', email: 'applicant@example.test' }, p_attribution: {} })
+  assert.equal(app.error, null)
+  assert.equal(count('website_enquiries', "purpose='application'"), 1)
+  assert.equal(count('website_enquiry_delivery_jobs', `enquiry_id=(select id from public.website_enquiries where receipt_id='${app.data.receipt_id}')`), 1)
+  assert.equal(count('website_enquiry_events', `enquiry_id=(select id from public.website_enquiries where receipt_id='${app.data.receipt_id}')`), 0)
+  assert.equal(inbox('62401000-0000-4000-8000-000000000002'), first.body.receiptId)
+  const legacyPurposes = sql("set role service_role; select string_agg(distinct enquiry.purpose, ',') from public.claim_website_enquiry_deliveries('ses', 10, 120) job join public.website_enquiries enquiry on enquiry.receipt_id=job.enquiry_receipt_id;")
+  assert.equal(legacyPurposes, 'enquiry', 'legacy/SES worker claimed a nonlead application')
+  const withoutConsent = await submit({ p_intake_key: INTAKE_A, p_schema_key: 'newsletter_form', p_schema_version: 1,
+    p_submission_key: 'cgph-sub-purpose-0000', p_answers: { email: 'reader@example.test', consent: false }, p_attribution: {} })
+  assert.equal(withoutConsent.error?.code, '22023')
+  const optin = await submit({ p_intake_key: INTAKE_A, p_schema_key: 'newsletter_form', p_schema_version: 1,
+    p_submission_key: 'cgph-sub-purpose-0001', p_answers: { email: 'reader@example.test', consent: true }, p_attribution: {} })
+  assert.equal(optin.error, null)
+  assert.equal(count('website_subscribers', "normalized_email='reader@example.test' and status='subscribed'"), 1)
+  assert.equal(count('website_enquiries', "purpose='subscription'"), 1)
+  assert.equal(count('website_enquiry_delivery_jobs', `enquiry_id=(select id from public.website_enquiries where receipt_id='${optin.data.receipt_id}')`), 0)
+  assert.equal(count('website_enquiry_events', `enquiry_id=(select id from public.website_enquiries where receipt_id='${optin.data.receipt_id}')`), 0)
+  assert.equal(inbox('62401000-0000-4000-8000-000000000002'), first.body.receiptId)
+  const claimedPurposes = sql("set role service_role; select string_agg(distinct purpose, ',') from public.claim_website_form_deliveries('resend', 10, 120);")
+  assert.match(claimedPurposes, /application/)
+  assert.doesNotMatch(claimedPurposes, /subscription/)
+  sql(`insert into auth.users(id) values ('62420000-0000-4000-8000-000000000009');
+    insert into public.profiles(id, full_name, role, is_active)
+    values ('62420000-0000-4000-8000-000000000009','CG Forms Admin','admin',true);`)
+  const managerQuery = psql("set role authenticated; set request.jwt.claim.sub='62420000-0000-4000-8000-000000000001'; select * from public.cg_form_submissions('62400000-0000-4000-8000-000000000001',50);")
+  assert.notEqual(managerQuery.status, 0, 'manager read private applications')
+  assert.equal(sql("set role authenticated; set request.jwt.claim.sub='62420000-0000-4000-8000-000000000009'; select count(*) from public.cg_form_submissions('62400000-0000-4000-8000-000000000001',50);"), '1')
+  assert.equal(sql("set role authenticated; set request.jwt.claim.sub='62420000-0000-4000-8000-000000000009'; select count(*) from public.cg_form_subscribers('62400000-0000-4000-8000-000000000001',100);"), '1')
+  assert.equal(sql("set role authenticated; set request.jwt.claim.sub='62420000-0000-4000-8000-000000000009'; select count(*) from public.cg_form_submissions('62400000-0000-4000-8000-000000000002',50);"), '0')
+  assert.equal(sql("set role authenticated; set request.jwt.claim.sub='62420000-0000-4000-8000-000000000009'; select count(*) from public.cg_form_subscribers('62400000-0000-4000-8000-000000000002',100);"), '0')
+  assert.equal(sql("set role authenticated; set request.jwt.claim.sub='62420000-0000-4000-8000-000000000009'; select public.cg_form_unsubscribe('62400000-0000-4000-8000-000000000002','62430000-0000-4000-8000-000000000001','reader@example.test');"), 'f')
+  assert.equal(sql("set role authenticated; set request.jwt.claim.sub='62420000-0000-4000-8000-000000000009'; select public.cg_form_unsubscribe('62400000-0000-4000-8000-000000000001','62430000-0000-4000-8000-000000000001','reader@example.test');"), 't')
+  assert.equal(count('website_subscribers', "normalized_email='reader@example.test' and status='unsubscribed'"), 1)
+  sql(`do $$ begin
+    assert not has_table_privilege('anon', 'public.website_subscribers', 'select');
+    assert not has_table_privilege('authenticated', 'public.website_subscribers', 'select');
+    assert (select relrowsecurity and relforcerowsecurity from pg_class where oid='public.website_subscribers'::regclass);
+  end $$;`)
+
+  console.log('PASS: #624 intake + CG Forms purposes — enquiry/outbox, nonlead application, consent subscriber, isolation and rate limits')
 } finally {
   if (created) docker(['stop', container])
 }

@@ -4578,3 +4578,6 @@ On a fresh chat:
 8. After each consequential action, update #505, #381 and this handover.
 
 The supervisor should keep CA out of routine mechanics and bring her in only for the exact protected decisions, provider verification/2FA/document steps or human review gates that truly require her.
+### 19 October — CG Forms purpose-aware draft, source only
+
+The CG Production House owner chose `info@cgproductionhouse.com` for application and studio booking request mail, plus a CG-owned subscriber list. The draft `codex/cgph-purpose-forms` branch extends the existing #405/#624 transaction with reviewed form purpose, nonlead application/booking delivery, consent-backed subscriber storage, an admin-only CG Forms view and unsubscribe action. Enquiries alone remain lead events/Lead Inbox/metrics. Disposable PostgreSQL acceptance, focused tests and build pass. See [the focused rollout contract](CG-FORMS-PURPOSES-2026-10-19.md). No live migration, worker deployment, endpoint/schema activation, email, or production customer data change occurred. The existing Piek production email lane remains governed by #405; do not infer acceptance from a local run.

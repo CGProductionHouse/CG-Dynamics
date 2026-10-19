@@ -20,6 +20,7 @@ const PrivacyPolicyPage = lazyRoute(() => import('./pages/LegalPage').then(modul
 const TermsOfServicePage = lazyRoute(() => import('./pages/LegalPage').then(module => ({ default: module.TermsOfServicePage })))
 const ClientPerformancePage = lazyRoute(() => import('./pages/admin/ClientPerformancePage'))
 const WebsiteLeadsPreviewPage = lazyRoute(() => import('./pages/admin/WebsiteLeadsPreviewPage'))
+const CGFormsPage = lazyRoute(() => import('./pages/admin/CGFormsPage'))
 const CgHubPage = lazyRoute(() => import('./pages/admin/CgHubPage'))
 const ClientsList = lazyRoute(() => import('./pages/admin/ClientsList'))
 const ImportMetaCsv = lazyRoute(() => import('./pages/admin/ImportMetaCsv'))
@@ -179,6 +180,7 @@ export default function App() {
 
               {/* Admin-only security/setup routes nested inside AdminLayout */}
               <Route element={<RequireAdmin />}>
+                <Route path="/admin/cg-forms" element={<CGFormsPage />} />
                 {/* System — grouped admin diagnostics (health tools), out of
                     daily navigation. */}
                 <Route path="/admin/system" element={<SystemHubPage />} />

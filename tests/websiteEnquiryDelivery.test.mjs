@@ -47,6 +47,15 @@ test('From is the approved sender, visitor is Reply-To only, headers cannot be i
   assert.throws(() => composeEnquiryEmail({ ...job, recipient_email: 'bad' }, 'leads@cg.example'))
 })
 
+test('application and booking notifications use their purpose and never claim Lead Inbox delivery', () => {
+  for (const [purpose, phrase] of [['application', 'job application'], ['booking_request', 'studio booking request']]) {
+    const email = composeEnquiryEmail({ ...job, purpose }, 'leads@cg.example')
+    assert.match(email.subject, new RegExp(phrase))
+    assert.match(email.text, /stored in CG Forms/)
+    assert.doesNotMatch(email.text, /Lead Inbox/)
+  }
+})
+
 test('provider outcomes keep accepted distinct and route ambiguity to reconcile', () => {
   assert.deepEqual(classifyResendResponse({ status: 200, body: { id: 'msg-1' }, requestSent: true }), { outcome: 'accepted', providerMessageId: 'msg-1' })
   assert.equal(classifyResendResponse({ status: 200, body: {}, requestSent: true }).outcome, 'ambiguous')
