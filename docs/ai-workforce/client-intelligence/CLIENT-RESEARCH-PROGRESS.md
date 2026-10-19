@@ -1,6 +1,6 @@
 # Client Marketing Intelligence — Progress Ledger
 
-Last updated: 2026-09-08
+Last updated: 2026-10-18
 Status: Canonical client-by-client research progress for Issue #184.
 
 ## Workflow
@@ -87,11 +87,19 @@ Agents must compare mutable stored facts with the newest authoritative client so
 
 ## Exact next action
 
-Next client in the captured alphabetical directory:
+18 October update: CA explicitly answered **go** for **Human Auto video content,
+more commercial-level**. The channel-specific supplement is complete locally:
+`HUMAN-AUTO-COMMERCIAL-VIDEO-RESEARCH-2026-10-18.md`. Existing ready Dynamics guide
+was retrieved first; current official Ford/MG evidence, source-retrieval limits,
+six specific commercial treatments, production proof and measurement/handoff are
+recorded. No monthly draft, script, scope, source activation or publication write.
+This is not a full all-channel research/activation certificate. Earlier Human Auto
+skip/go statements above are historical; do not ask CA the same question again.
 
-**Human Auto**
+Next alphabetical client after this authorised scoped work: **Jenkor**.
+Do not begin new Jenkor research automatically; CA still decides skip/go.
 
-Ask CA: `Human Auto — skip or go?`
+The separate normal ChatGPT strategy author owns strategy creation/amendment.
 
 ## Remaining order after Human Auto
 

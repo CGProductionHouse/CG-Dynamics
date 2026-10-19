@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { CONTENT_REVIEW_BUCKET, REVIEW_LABELS, type ContentReview } from '../../lib/contentReviews'
+import { ClientPortalRetryButton } from '../client/ClientPortalStates'
 
 type ContentReviewCardProps = { review: ContentReview; canDecide: boolean; onChanged: () => void; staffView?: boolean }
 
@@ -15,9 +16,11 @@ function ContentReviewCardBody({ review, canDecide, onChanged, staffView = false
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [previewError, setPreviewError] = useState<string | null>(null)
+  const [assetRevision, setAssetRevision] = useState(0)
   function previewUnavailable() {
     setUrl(null)
-    setError('Content preview is unavailable. Please try again shortly.')
+    setPreviewError('Content preview is unavailable. Please try again shortly.')
   }
   useEffect(() => {
     let active = true
@@ -26,15 +29,19 @@ function ContentReviewCardBody({ review, canDecide, onChanged, staffView = false
         const result = await supabase.storage.from(CONTENT_REVIEW_BUCKET).createSignedUrl(review.asset_path, 600)
         if (!active) return
         if (result.error || !result.data?.signedUrl) {
-          setError('Content preview is unavailable. Please try again shortly.')
+          setPreviewError('Content preview is unavailable. Please try again shortly.')
           return
         }
         setUrl(result.data.signedUrl)
       } catch {
-        if (active) setError('Content preview is unavailable. Please try again shortly.')
+        if (active) setPreviewError('Content preview is unavailable. Please try again shortly.')
       }
     }
     void loadAsset()
+    return () => { active = false }
+  }, [review.asset_path, assetRevision])
+  useEffect(() => {
+    let active = true
     if (staffView) void supabase.from('content_review_events').select('action,note').eq('version_id', review.id).order('created_at').then(result => {
       if (active) setEvents(result.data ?? [])
     })
@@ -64,6 +71,11 @@ function ContentReviewCardBody({ review, canDecide, onChanged, staffView = false
       <button type="button" disabled={busy || !note.trim()} onClick={() => void decide(false)} className="min-h-11 rounded-lg border border-white/20 px-4 text-white disabled:opacity-40">Request changes</button></div>
     </div>}
     {staffView && events.length > 0 && <details><summary className="cursor-pointer text-xs text-white/60">Review history</summary><ul className="mt-2 space-y-1">{events.map((event, index) => <li key={index} className="text-xs text-white/60">{event.action.replaceAll('_', ' ')}{event.note ? `: ${event.note}` : ''}</li>)}</ul></details>}
+    {previewError && <div role="alert"><p className="text-sm text-red-300">{previewError}</p><ClientPortalRetryButton onRetry={() => {
+      setPreviewError(null)
+      setUrl(null)
+      setAssetRevision(value => value + 1)
+    }} /></div>}
     {error && <p role="alert" className="text-sm text-red-300">{error}</p>}
   </article>
 }

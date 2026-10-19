@@ -627,6 +627,7 @@ function ClientMoreActions({ client, isAdmin, onEdit, onArchive }: { client: Cli
       <summary className="flex min-h-9 cursor-pointer items-center font-bold hover:text-white">More actions</summary>
       <div className="mt-2 flex min-w-32 flex-col items-start gap-2 border-t border-white/10 pt-2">
         <ClientActionLink to={`/admin/published?client=${client.id}&view=setup`} label="Setup preview" />
+        {isAdmin && <ClientActionLink to={`/admin/clients/brand-hub?client=${client.id}`} label="Manage Brand Hub" />}
         {isAdmin && <ClientActionLink to={`/admin/integrations/meta?client=${client.id}`} label="Meta / Sync" />}
         {isAdmin && <button type="button" onClick={onEdit} className="min-h-11 px-2 text-xs font-bold hover:text-white">Edit client</button>}
         {isAdmin && <button type="button" onClick={onArchive} className="min-h-11 px-2 text-xs font-bold text-amber-200 hover:text-white">Archive client</button>}

@@ -112,9 +112,9 @@ function LibraryCategory({ summary }: { summary: ClientPortalLibraryCategorySumm
         <div className="mt-5 space-y-4">
           <div>
             <p className="text-[0.68rem] font-black uppercase tracking-[0.14em] text-slate-500">Year</p>
-            <div className="mt-2 flex flex-wrap gap-2">
+            <div role="group" aria-label="Year" className="mt-2 flex flex-wrap gap-2">
               {summary.years.map(year => (
-                <button key={year.year} type="button" onClick={() => chooseYear(year.year)} className={choiceClass(selectedYear === year.year)}>
+                <button key={year.year} type="button" aria-pressed={selectedYear === year.year} onClick={() => chooseYear(year.year)} className={choiceClass(selectedYear === year.year)}>
                   {year.year} <span className="text-slate-500">({year.fileCount})</span>
                 </button>
               ))}
@@ -123,9 +123,9 @@ function LibraryCategory({ summary }: { summary: ClientPortalLibraryCategorySumm
           {selectedYearSummary && (
             <div>
               <p className="text-[0.68rem] font-black uppercase tracking-[0.14em] text-slate-500">Month</p>
-              <div className="mt-2 flex flex-wrap gap-2">
+              <div role="group" aria-label="Month" className="mt-2 flex flex-wrap gap-2">
                 {selectedYearSummary.months.map(month => (
-                  <button key={month.month} type="button" onClick={() => void loadFiles(selectedYearSummary.year, month.month)} className={choiceClass(selectedMonth === month.month)}>
+                  <button key={month.month} type="button" aria-pressed={selectedMonth === month.month} onClick={() => void loadFiles(selectedYearSummary.year, month.month)} className={choiceClass(selectedMonth === month.month)}>
                     {monthLabel(month.month)} <span className="text-slate-500">({month.fileCount})</span>
                   </button>
                 ))}

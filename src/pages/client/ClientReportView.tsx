@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useId, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { ClientReportWithPosts, ReportWithPosts } from '../../lib/db/reports'
 import type { Client } from '../../lib/db/clients'
@@ -58,6 +58,7 @@ import { websiteReportPresentation } from '../../lib/websiteReportPresentation'
 import { PerformanceServiceStory } from '../../components/client/PerformanceServiceStory'
 import { PERFORMANCE_SERVICE_TABS } from '../../lib/performanceServiceCatalog'
 import { reportSourceAttribution } from '../../lib/reportSourceAttribution'
+import { moveClientTabFocus } from '../../lib/clientTabKeyboard'
 
 export type ReportTabKey = 'overview' | 'facebook' | 'instagram' | 'google' | 'tiktok' | 'linkedin' | 'web' | 'email'
 export interface MonthlyStrategyPresentation {
@@ -151,6 +152,7 @@ export function ClientReportView({
   onTabChange?: (tab: ReportTabKey) => void
 }) {
   const [localTab, setLocalTab] = useState<ReportTabKey>('overview')
+  const tabsId = useId()
   const tab = onTabChange ? initialTab : localTab
 
   // Verified, availability-aware Overview sections built ONLY from normalized
@@ -222,6 +224,54 @@ export function ClientReportView({
     [master, manualMetrics, month, previousMonthLabel]
   )
 
+  const activePanel = activeTab === 'overview' ? (
+    <OverviewTab
+      report={report}
+      master={master}
+      performance={performance}
+      showEmptyStrategy={showEmptyStrategy}
+      showAdminDiagnostics={showAdminDiagnostics}
+      googleAds={googleAds}
+      googleAdsState={googleAdsState}
+      googleAdsError={googleAdsError}
+      verifiedSections={verifiedSections}
+      normalizedFactsActive={normalizedFactsActive}
+      dataHealth={dataHealth}
+      contentExclusions={contentExclusions}
+      statsPosts={statsPosts}
+      onSetContentExcluded={onSetContentExcluded}
+      curationBusyId={curationBusyId}
+      monthlyStrategy={monthlyStrategy}
+      strategyReadUnavailable={strategyReadUnavailable}
+    />
+  ) : activeTab === 'google' ? (
+    <GooglePerformanceTab
+      month={month}
+      googleAds={googleAds}
+      state={googleAdsState}
+      error={googleAdsError}
+      hasGoogleAds={hasGoogleAds}
+      clientName={client?.name}
+    />
+  ) : activeTab === 'web' ? (
+    report.website_report || managedWebsite || knownWebsiteMaintenance
+      ? <PublishedWebsitePerformance report={report.website_report ?? null} managedWebsite={managedWebsite} maintenanceIncluded={knownWebsiteMaintenance} />
+      : <PerformanceServiceStory service="web" clientName={client?.name} />
+  ) : reportPlatforms.includes(activeTab as Platform) ? (
+    <PlatformTab
+      view={master.platforms.find(item => item.platform === activeTab)!}
+      previousView={null}
+      previousManual={null}
+      previousMonthLabel={previousMonthLabel}
+      monthLabel={month}
+      facts={facts.filter(fact => fact.platform === activeTab)}
+      previousFacts={previousFacts.filter(fact => fact.platform === activeTab)}
+      normalizedFactsActive={normalizedFactsActive}
+    />
+  ) : (
+    <PerformanceServiceStory service={activeTab} clientName={client?.name} />
+  )
+
   return (
     <div className="relative overflow-hidden font-sans text-slate-50">
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[#030706]" />
@@ -247,56 +297,17 @@ export function ClientReportView({
       )}
 
       {tabs.length > 1 && (
-        <ReportTabs tabs={tabs} active={activeTab} onChange={selectTab} />
+        <ReportTabs tabsId={tabsId} tabs={tabs} active={activeTab} onChange={selectTab} />
       )}
 
-      {activeTab === 'overview' ? (
-        <OverviewTab
-          report={report}
-          master={master}
-          performance={performance}
-          showEmptyStrategy={showEmptyStrategy}
-          showAdminDiagnostics={showAdminDiagnostics}
-          googleAds={googleAds}
-          googleAdsState={googleAdsState}
-          googleAdsError={googleAdsError}
-          verifiedSections={verifiedSections}
-          normalizedFactsActive={normalizedFactsActive}
-          dataHealth={dataHealth}
-          contentExclusions={contentExclusions}
-          statsPosts={statsPosts}
-          onSetContentExcluded={onSetContentExcluded}
-          curationBusyId={curationBusyId}
-          monthlyStrategy={monthlyStrategy}
-          strategyReadUnavailable={strategyReadUnavailable}
-        />
-      ) : activeTab === 'google' ? (
-        <GooglePerformanceTab
-          month={month}
-          googleAds={googleAds}
-          state={googleAdsState}
-          error={googleAdsError}
-          hasGoogleAds={hasGoogleAds}
-          clientName={client?.name}
-        />
-      ) : activeTab === 'web' ? (
-        report.website_report || managedWebsite || knownWebsiteMaintenance
-          ? <PublishedWebsitePerformance report={report.website_report ?? null} managedWebsite={managedWebsite} maintenanceIncluded={knownWebsiteMaintenance} />
-          : <PerformanceServiceStory service="web" clientName={client?.name} />
-      ) : reportPlatforms.includes(activeTab as Platform) ? (
-        <PlatformTab
-          view={master.platforms.find(item => item.platform === activeTab)!}
-          previousView={null}
-          previousManual={null}
-          previousMonthLabel={previousMonthLabel}
-          monthLabel={month}
-          facts={facts.filter(fact => fact.platform === activeTab)}
-          previousFacts={previousFacts.filter(fact => fact.platform === activeTab)}
-          normalizedFactsActive={normalizedFactsActive}
-        />
-      ) : (
-        <PerformanceServiceStory service={activeTab} clientName={client?.name} />
-      )}
+      {tabs.map(item => (
+        <div key={item.key} id={`${tabsId}-${item.key}-panel`} role="tabpanel"
+          aria-labelledby={`${tabsId}-${item.key}-tab`} hidden={activeTab !== item.key}
+          tabIndex={activeTab === item.key ? 0 : undefined}
+          className="focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#2dd4bf]">
+          {activeTab === item.key ? activePanel : null}
+        </div>
+      ))}
 
       {sourceAttribution && (
         <p className="mx-auto mt-16 max-w-3xl border-t border-white/10 pt-6 text-center text-xs leading-relaxed text-slate-500">
@@ -462,28 +473,37 @@ function HeroMiniCard({ label, value, accent }: { label: string; value: string; 
 }
 
 function ReportTabs({
+  tabsId,
   tabs,
   active,
   onChange,
 }: {
+  tabsId: string
   tabs: { key: ReportTabKey; label: string; icon: PerformanceProviderIconKey }[]
   active: ReportTabKey
   onChange: (tab: ReportTabKey) => void
 }) {
+  const tabButtons = useRef<Partial<Record<ReportTabKey, HTMLButtonElement | null>>>({})
+  const keys = tabs.map(item => item.key)
   return (
     <div role="tablist" aria-label="Performance services" className="mx-auto mb-10 flex w-fit max-w-full flex-wrap justify-center gap-1.5 rounded-[1.5rem] border border-white/10 bg-black/20 p-1.5 shadow-[0_24px_60px_-42px_rgba(0,0,0,0.95)] backdrop-blur">
-      {tabs.map(item => {
+      {tabs.map((item, index) => {
         const isActive = active === item.key
         return (
           <button
             key={item.key}
+            ref={element => { tabButtons.current[item.key] = element }}
+            id={`${tabsId}-${item.key}-tab`}
             type="button"
             role="tab"
             aria-selected={isActive}
+            aria-controls={`${tabsId}-${item.key}-panel`}
+            tabIndex={isActive ? 0 : -1}
             aria-label={item.label}
             title={item.label}
+            onKeyDown={event => moveClientTabFocus(event, index, active, keys, tabButtons.current)}
             onClick={() => onChange(item.key)}
-            className={`group relative flex min-h-14 min-w-[4.25rem] flex-col items-center justify-center gap-1 rounded-2xl border px-1 transition sm:h-12 sm:min-h-0 sm:w-12 sm:min-w-0 sm:flex-row sm:gap-0 sm:px-0 ${
+            className={`group relative flex min-h-14 min-w-[4.25rem] flex-col items-center justify-center gap-1 rounded-2xl border px-1 transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2dd4bf] sm:h-12 sm:min-h-0 sm:w-12 sm:min-w-0 sm:flex-row sm:gap-0 sm:px-0 ${
               isActive
                 ? 'border-[#2dd4bf]/55 bg-[linear-gradient(145deg,rgba(45,212,191,0.22),rgba(255,255,255,0.12))] text-white shadow-[0_14px_30px_-16px_rgba(45,212,191,0.9)]'
                 : 'border-transparent text-slate-400 hover:border-white/10 hover:bg-white/[0.06] hover:text-white'

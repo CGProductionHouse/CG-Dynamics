@@ -64,7 +64,12 @@ try{
     assert.equal(await brand.getByRole('alert').count(),0)
     const design=page.locator('article').filter({has:page.getByRole('heading',{name:'Graphic Design',exact:true})})
     await design.getByRole('button',{name:'2026 (1)',exact:true}).click()
+    assert.equal(await design.getByRole('button',{name:'2026 (1)',exact:true}).getAttribute('aria-pressed'),'true',`${width} Brand Hub announces selected year`)
+    assert.equal(await design.getByRole('button',{name:'2025 (1)',exact:true}).getAttribute('aria-pressed'),'false')
+    await design.getByRole('group',{name:'Year',exact:true}).waitFor()
     await design.getByRole('button',{name:'October (1)',exact:true}).click()
+    assert.equal(await design.getByRole('button',{name:'October (1)',exact:true}).getAttribute('aria-pressed'),'true','Brand Hub announces selected month')
+    await design.getByRole('group',{name:'Month',exact:true}).waitFor()
     await design.getByRole('alert').waitFor()
     assert.equal(await design.getByText('No files in this section yet.',{exact:true}).count(),0)
     malformed=false
@@ -88,6 +93,9 @@ try{
     await monthRequest
     // Abandon a pending 2026 read without immediately choosing a new month.
     await design.getByRole('button',{name:'2025 (1)',exact:true}).click()
+    assert.equal(await design.getByRole('button',{name:'2025 (1)',exact:true}).getAttribute('aria-pressed'),'true')
+    assert.equal(await design.getByRole('button',{name:'2026 (1)',exact:true}).getAttribute('aria-pressed'),'false')
+    assert.equal(await design.getByRole('button',{name:'September (1)',exact:true}).getAttribute('aria-pressed'),'false','Changing year clears selected month')
     assert.equal(await design.getByRole('status').count(),0,'A newly selected year must not inherit the abandoned month spinner')
     assert.equal(await design.getByText('Reviewed final PDF',{exact:true}).count(),0)
     await design.getByRole('button',{name:'September (1)',exact:true}).waitFor()

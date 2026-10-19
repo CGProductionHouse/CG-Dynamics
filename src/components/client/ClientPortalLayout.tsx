@@ -12,6 +12,7 @@ export function ClientPortalLayout() {
   const [client, setClient] = useState<Client | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [readRevision, setReadRevision] = useState(0)
 
   useEffect(() => {
     let active = true
@@ -41,7 +42,7 @@ export function ClientPortalLayout() {
 
     void loadClient()
     return () => { active = false }
-  }, [profile?.client_id])
+  }, [profile?.client_id, readRevision])
 
   const scopedClient = exactClientForProfile(profile?.client_id, client)
   const scopeChanging = client !== null && scopedClient === null
@@ -73,7 +74,8 @@ export function ClientPortalLayout() {
         {loading || scopeChanging ? (
           <ClientPortalContentLoading />
         ) : error || !scopedClient ? (
-          <ClientPortalContextError />
+          <ClientPortalErrorState title="Your client workspace could not be loaded"
+            onRetry={profile?.client_id ? () => setReadRevision(value => value + 1) : undefined} />
         ) : (
           <Suspense fallback={<ClientPortalContentLoading />}>
             <Outlet />
@@ -86,8 +88,4 @@ export function ClientPortalLayout() {
 
 export function ClientPortalContentLoading() {
   return <ClientPortalLoadingState />
-}
-
-function ClientPortalContextError() {
-  return <ClientPortalErrorState title="Your client workspace could not be loaded" />
 }

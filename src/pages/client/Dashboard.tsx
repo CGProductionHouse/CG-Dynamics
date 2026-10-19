@@ -68,6 +68,8 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [reportLoading, setReportLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [reportsRevision, setReportsRevision] = useState(0)
+  const [reportRevision, setReportRevision] = useState(0)
   const reportsRequestRef = useRef(0)
   const reportRequestRef = useRef(0)
 
@@ -125,7 +127,7 @@ export default function Dashboard() {
 
     void loadReports()
     return () => { reportsRequestRef.current += 1 }
-  }, [profile?.client_id, profile?.id, previewClientId, scopedClientId])
+  }, [profile?.client_id, profile?.id, previewClientId, scopedClientId, reportsRevision])
 
   useEffect(() => {
     const requestId = ++reportRequestRef.current
@@ -207,7 +209,7 @@ export default function Dashboard() {
 
     void loadReport()
     return () => { reportRequestRef.current += 1 }
-  }, [profile?.client_id, profile?.id, previewClientId, scopedClientId, selectedReportId])
+  }, [profile?.client_id, profile?.id, previewClientId, scopedClientId, selectedReportId, reportRevision])
 
   if (!scopedClientId) {
     return (
@@ -223,7 +225,10 @@ export default function Dashboard() {
   }
 
   if (error) {
-    return <ClientPortalErrorState title="Performance is temporarily unavailable" message="Your published reporting could not be loaded safely. Please try again shortly." />
+    return <ClientPortalErrorState title="Performance is temporarily unavailable" message="Your published reporting could not be loaded safely. Please try again shortly." onRetry={() => {
+      if (selectedReportId) setReportRevision(value => value + 1)
+      else setReportsRevision(value => value + 1)
+    }} />
   }
 
   if (months.length === 0) {

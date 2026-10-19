@@ -18,6 +18,7 @@ export default function ClientContentGuidesPage({ preview = false, embedded = fa
   const [guidelines, setGuidelines] = useState<PublishedContentGuideline[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [readRevision, setReadRevision] = useState(0)
 
   const fallbackMonth = businessMonthKey()
   const requestedMonth = searchParams.get('month')
@@ -53,7 +54,7 @@ export default function ClientContentGuidesPage({ preview = false, embedded = fa
     }
     void load()
     return () => { active = false }
-  }, [clientId, currentMonth])
+  }, [clientId, currentMonth, readRevision])
 
   const content = (
     <>
@@ -84,7 +85,7 @@ export default function ClientContentGuidesPage({ preview = false, embedded = fa
       {loading ? (
         <ClientPortalLoadingState />
       ) : error ? (
-        <ClientPortalErrorState title="Content Guidelines could not be loaded" message="Your published guidance is temporarily unavailable. Please try again shortly." />
+        <ClientPortalErrorState title="Content Guidelines could not be loaded" message="Your published guidance is temporarily unavailable. Please try again shortly." onRetry={() => setReadRevision(value => value + 1)} />
       ) : guidelines.length === 0 ? (
         <Message>No published Content Guidelines are available for {monthDisplayLabel(currentMonth)}.</Message>
       ) : (

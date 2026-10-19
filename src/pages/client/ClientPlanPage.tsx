@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, type KeyboardEvent } from 'react'
+import { useEffect, useId, useRef } from 'react'
 import { Navigate, useLocation, useSearchParams } from 'react-router-dom'
 import { monthDisplayLabel } from '../../lib/reportPeriod'
 import { businessMonthKey } from '../../lib/businessTime'
@@ -8,6 +8,7 @@ import ClientStrategyPage from './ClientStrategyPage'
 import { useClientPortal } from '../../components/client/ClientPortalContext'
 import { ClientPackageSummary } from '../../components/client/ClientPackageSummary'
 import { clientStrategyMonths, selectClientStrategyMonth } from '../../lib/clientStrategyMonths'
+import { moveClientTabFocus } from '../../lib/clientTabKeyboard'
 
 const MONTH_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/
 const PLAN_TABS = [
@@ -18,6 +19,7 @@ const PLAN_TABS = [
 ] as const
 
 type PlanTab = (typeof PLAN_TABS)[number]['key']
+const PLAN_TAB_KEYS = PLAN_TABS.map(item => item.key)
 
 function currentMonth() {
   return businessMonthKey()
@@ -59,25 +61,6 @@ export default function ClientPlanPage() {
       updated.set('month', nextTab === 'strategy' ? selectClientStrategyMonth(next.month ?? month) : next.month ?? month)
       return updated
     })
-  }
-
-  function moveTabFocus(event: KeyboardEvent<HTMLButtonElement>, index: number) {
-    // These panels fetch remote content. Move focus without starting another
-    // read; native button Enter/Space still deliberately opens that section.
-    if (event.altKey || event.ctrlKey || event.metaKey) return
-    if (event.key === 'Tab') {
-      // Leave from the selected tab's position in both directions, even when
-      // an arrow has focused an inactive tab on the other side of it.
-      tabButtons.current[tab]?.focus()
-      return
-    }
-    const nextIndex = event.key === 'ArrowRight' ? (index + 1) % PLAN_TABS.length
-      : event.key === 'ArrowLeft' ? (index + PLAN_TABS.length - 1) % PLAN_TABS.length
-        : event.key === 'Home' ? 0
-          : event.key === 'End' ? PLAN_TABS.length - 1 : null
-    if (nextIndex === null) return
-    event.preventDefault()
-    tabButtons.current[PLAN_TABS[nextIndex].key]?.focus()
   }
 
   const tabPanel = tab === 'calendar'
@@ -132,7 +115,7 @@ export default function ClientPlanPage() {
               aria-selected={tab === item.key}
               aria-controls={`${tabsId}-${item.key}-panel`}
               tabIndex={tab === item.key ? 0 : -1}
-              onKeyDown={event => moveTabFocus(event, index)}
+              onKeyDown={event => moveClientTabFocus(event, index, tab, PLAN_TAB_KEYS, tabButtons.current)}
               onClick={() => updatePlan({ tab: item.key })}
               className={`min-h-11 min-w-0 rounded-full px-2 py-2 text-xs font-bold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2dd4bf] sm:px-5 sm:text-sm ${tab === item.key ? 'bg-white text-[#06110f] shadow-lg' : 'text-slate-400 hover:bg-white/[0.055] hover:text-white'}`}
             >

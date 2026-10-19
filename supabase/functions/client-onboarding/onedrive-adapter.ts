@@ -16,6 +16,7 @@ import {
   saveTokens,
 } from './onedrive-token-store.ts'
 import { computeTokenState } from '../_shared/onedrive-canonical.ts'
+import { isAssetInsideCategory } from './library-asset-boundary.ts'
 
 const GRAPH_ROOT = 'https://graph.microsoft.com/v1.0'
 
@@ -252,6 +253,44 @@ interface GraphDriveItem {
   parentReference?: { driveId?: string; id?: string }
 }
 
+/** Staff curation metadata only; no provider URLs leave this adapter. Bounded
+ * fail-closed discovery, including every page or an explicit unavailable result. */
+export async function listLibraryEntries(driveId: string, parentId: string) {
+  const token = await getValidAccessToken()
+  if (!token) return null
+  const out: Array<{ id: string; name: string; isFolder: boolean; size: number | null; mimeType: string | null; parentId: string; driveId: string; reviewUrl: string | null }> = []
+  const deadline = Date.now() + 25_000
+  const seenPages = new Set<string>()
+  let url: string | null = `${GRAPH_ROOT}/drives/${encodeURIComponent(driveId)}/items/${encodeURIComponent(parentId)}/children?$select=id,name,folder,file,size,parentReference,webUrl&$top=200`
+  try {
+    for (let page = 0; url && page < 50; page++) {
+      // Never forward credentials to an untrusted pagination origin.
+      if (!url.startsWith(`${GRAPH_ROOT}/`) || seenPages.has(url) || Date.now() >= deadline) return null
+      seenPages.add(url)
+      const response = await fetch(url, { headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(Math.max(1, deadline - Date.now())) })
+      if (!response.ok) return null
+      const data = await response.json() as { value?: GraphDriveItem[]; '@odata.nextLink'?: string }
+      if (!Array.isArray(data.value)) return null
+      for (const item of data.value) {
+        if (!item.id || !item.name || item.parentReference?.driveId !== driveId || item.parentReference?.id !== parentId) return null
+        out.push({ id: item.id, name: item.name, isFolder: Boolean(item.folder), size: item.size ?? null,
+          mimeType: item.file?.mimeType ?? null, driveId, parentId, reviewUrl: safeStaffReviewUrl(item.webUrl) })
+      }
+      url = data['@odata.nextLink'] ?? null
+    }
+    if (url || new Set(out.map(i => i.id)).size !== out.length) return null
+    return out
+  } catch { return null }
+}
+
+function safeStaffReviewUrl(value: string | undefined): string | null {
+  try {
+    const url = new URL(value ?? '')
+    return url.protocol === 'https:' && !url.username && !url.password && !url.port
+      && (url.hostname === 'onedrive.live.com' || url.hostname === '1drv.ms' || url.hostname.endsWith('.sharepoint.com')) ? url.href : null
+  } catch { return null }
+}
+
 // ---- #225 durable folder helpers (read + create-only) ------------------------------
 
 /** Resolve the durable driveId + itemId + webUrl of the personal OneDrive `Clients` root. */
@@ -447,6 +486,13 @@ export async function verifyDriveItem(
     mimeType: item.file.mimeType ?? 'application/octet-stream',
     webUrl: item.webUrl ?? '',
   }
+}
+
+export async function verifyLibraryAsset(driveId: string, itemId: string, categoryId: string, rootId: string, mime: string | null, size: number | null) {
+  return isAssetInsideCategory(async id => {
+    const item = await graphGet<GraphDriveItem>(`/drives/${encodeURIComponent(driveId)}/items/${encodeURIComponent(id)}?$select=id,name,file,folder,size,parentReference`)
+    return item ? { id: item.id, driveId: item.parentReference?.driveId ?? '', parentId: item.parentReference?.id ?? '', file: Boolean(item.file), mime: item.file?.mimeType ?? null, size: item.size ?? null } : null
+  }, { driveId, itemId, categoryId, rootId, mime, size })
 }
 
 export async function downloadFile(

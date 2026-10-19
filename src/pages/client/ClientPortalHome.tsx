@@ -42,6 +42,7 @@ export default function ClientPortalHome() {
   const [data, setData] = useState<PortalData>(EMPTY_DATA)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
+  const [readRevision, setReadRevision] = useState(0)
 
   useEffect(() => {
     let active = true
@@ -91,7 +92,7 @@ export default function ClientPortalHome() {
 
     void load()
     return () => { active = false }
-  }, [clientId, previewClientId, workingMonth])
+  }, [clientId, previewClientId, workingMonth, readRevision])
 
   const strategy = useMemo(() => buildPublishedMonthlyStrategyPreview(data.monthlyStrategy, workingMonth), [data.monthlyStrategy, workingMonth])
   const activeOrganic = useMemo(() => activeOrganicPlatforms(data.facts), [data.facts])
@@ -112,7 +113,7 @@ export default function ClientPortalHome() {
       {loading ? (
         <ClientPortalLoadingState />
       ) : error ? (
-        <ClientPortalErrorState title="Your overview could not be loaded" />
+        <ClientPortalErrorState title="Your overview could not be loaded" onRetry={() => setReadRevision(value => value + 1)} />
       ) : (
         <>
           <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#071311] shadow-[0_35px_90px_-45px_rgba(0,0,0,0.95)]">

@@ -73,7 +73,7 @@ export function ClientApprovalsView({
   readOnly?: boolean
 }) {
   if (loading) return <ClientPortalLoadingState />
-  if (error) return <ClientPortalErrorState title="Approvals could not be loaded" message="Your review queue is temporarily unavailable. No approval status has been changed." />
+  if (error) return <ClientPortalErrorState title="Approvals could not be loaded" message="Your review queue is temporarily unavailable. No approval status has been changed." onRetry={onChanged} />
 
   const waitingCount = reviews.filter(review => review.state === 'client_review').length
 

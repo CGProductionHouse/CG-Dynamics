@@ -46,9 +46,11 @@ function SkeletonBlock({ className = '' }: { className?: string }) {
 export function ClientPortalErrorState({
   title = 'This area could not be loaded',
   message = 'Please try again shortly. Your client data remains safe.',
+  onRetry,
 }: {
   title?: string
   message?: string
+  onRetry?: () => void
 }) {
   return (
     <section role="alert" className="relative min-h-72 overflow-hidden rounded-[2rem] border border-[#f97316]/20 bg-[#f97316]/[0.055] px-6 py-10 shadow-2xl sm:px-9">
@@ -57,9 +59,18 @@ export function ClientPortalErrorState({
         <p className="text-xs font-black uppercase tracking-[0.24em] text-[#f6a15f]">Temporarily unavailable</p>
         <h1 className="mt-4 text-3xl font-black tracking-[-0.035em] text-white sm:text-4xl">{title}</h1>
         <p className="mt-4 text-sm leading-6 text-slate-400">{message}</p>
+        {onRetry && <ClientPortalRetryButton onRetry={onRetry} />}
       </div>
     </section>
   )
+}
+
+/** Explicit read recovery only; no reload, timer, write or automatic retry. */
+export function ClientPortalRetryButton({ onRetry }: { onRetry: () => void }) {
+  return <button type="button" onClick={onRetry}
+    className="mt-5 min-h-11 rounded-full border border-white/15 bg-white/[0.05] px-5 py-2 text-sm font-bold text-white transition hover:border-[#2dd4bf]/40 hover:bg-white/[0.08] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2dd4bf]">
+    Try again
+  </button>
 }
 
 export function ClientPortalEmptyState({

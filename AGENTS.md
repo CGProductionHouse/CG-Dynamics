@@ -176,7 +176,13 @@ Do not apply either without approval. Do not replay obsolete client-portal phase
 
 Read `docs/ai-workforce/client-intelligence/CLIENT-RESEARCH-PROGRESS.md` first.
 
-Complete through HMH Attorneys. Exact next client: **Human Auto**. Do not begin automatically; ask CA `Human Auto — skip or go?` and proceed only on `go`.
+Complete through HMH Attorneys, plus CA's explicitly authorised 18 October **Human
+Auto commercial-video research supplement**. Read the ledger and
+`HUMAN-AUTO-COMMERCIAL-VIDEO-RESEARCH-2026-10-18.md`; do not ask for Human Auto
+skip/go again or treat research as activated/published knowledge. The separate
+normal ChatGPT author owns monthly strategies. Exact next alphabetical client:
+**Jenkor**. Do not begin automatically; ask CA `Jenkor — skip or go?` and proceed
+only on `go`.
 
 ## Reporting
 

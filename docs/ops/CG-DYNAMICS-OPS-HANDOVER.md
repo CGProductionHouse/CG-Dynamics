@@ -13,6 +13,52 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 19 October - final client candidate, private evidence excluded
+
+CA requests the final executable local client-lane run. Same managed checkout
+now uses `codex/client-portal-reviewed-candidate-2026-10-19`, based on current
+main b77b89fb, carrying the verified runtime from local ace8f1c5 without its
+private OneDrive inventory/smoke history. Original client branch remains intact
+locally and must not be blindly pushed. One test's private-inventory dependency
+was reproduced and replaced with synthetic topology, not fake live acceptance.
+Details/current item list: `CLIENT-PORTAL-FINAL-CANDIDATE-2026-10-19.md`.
+
+Previous actual-handler/brand review receipts remain #396 comment6262692353 and
+#381 comment6262700362. All58 launch-client brand source folders checked,65files
+visually inspected; correct Emmanuel logo sources found,52client mark candidates,
+Vrystaat subbrands only/five existing brand folders empty. Exact source proof
+remains private. No mapping/assets/publication/permissions changed.
+
+Separate staff lane advanced to1dc35ce4/#381comment6263338553 with newer dirty
+work, untouched. Clean committed-head merge preview, NOT combined runtime proof.
+Normal ChatGPT owns strategy drafts; Human Auto GO resolved, CA retains password/
+device review. Final ff894eba canonical run:3979total/3962pass/17declared skips/
+0fail/cancelled/todo, all19browser journeys, TypeScript/Vite121JS chunks, scoped
+lint/Deno/diff/privacy scan PASS, source stable. First private wrapper file-URL
+failure retained; wrapper corrected and ENTIRE run repeated on unchanged source.
+
+Fresh all58Google audits: Cape through18October; three mapped no campaign rows,
+54not mapped. All58actual admin website panels settled: three metrics-visible,
+55analytics-not-connected, not zero activity. Seven managed public sites plus
+Dynamics HTTP200.116Oct/Nov strategy briefs read without writes:36source-eligible
+November draft records,22held/absent including12non-monthly/unconfirmed scopes;
+only PiekOctober published here. TikTok10unexpired mappings; concrete Meta errors
+AV/RedOak/Zooz held/prospective;17launchFB mappings lackIG mapping, not automatic
+reconnect demands. Private exact-client matrix outside repo.
+
+Finish/owner list and protected backend packet:
+`CLIENT-PORTAL-FINAL-CANDIDATE-2026-10-19.md` and
+`CLIENT-PORTAL-BACKEND-PACKET-2026-10-19.md`. Safe source integration prepared;
+release, asset activation/readback, source/content/publication, provider evidence,
+staff rollout and CA login/device review remain. No Vercel, push or production
+mutation. Not an only-review-left claim. No guessed Control Centre or replacement.
+
+Final GitHub write-back read back: #396comment6263570371,
+#731comment6263570756, #668comment6263571169 and #381comment6263582401.
+Fresh client61/staff52changed paths intersect0; staff dirty files untouched.
+Any following docs-only checkpoint does not replace frozen runtime ff894eba's
+acceptance or turn local source into an applied/hosted release.
+
 ### 18 October — client Plan keyboard navigation, source-only
 
 Continued the unowned Plan seam from main c92e7ad (#839); open775/662/618
