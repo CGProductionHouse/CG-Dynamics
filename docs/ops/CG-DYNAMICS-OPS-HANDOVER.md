@@ -15,6 +15,14 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 ### 19 October — OneDrive connection explicitly approved for preparation
 
+Source PR [#846](https://github.com/CGProductionHouse/CG-Dynamics/pull/846),
+frozen runtime/test32ec8e80. Current receipts:
+[#668](https://github.com/CGProductionHouse/CG-Dynamics/issues/668#issuecomment-6265779586),
+[#381](https://github.com/CGProductionHouse/CG-Dynamics/issues/381#issuecomment-6265780038),
+[#396](https://github.com/CGProductionHouse/CG-Dynamics/issues/396#issuecomment-6265780526).
+PR attachment attempted but app's100attachment limit refused; ordinary GitHub
+URL is authoritative. No attachment success claimed.
+
 CA approved preparing a **new app-side** Microsoft connection; new credential
 entry and final Microsoft consent remain CA-owned. Fresh authenticated secret
 metadata inspection found66names and **zero `ONEDRIVE_*` names**: configuration
