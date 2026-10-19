@@ -24,18 +24,24 @@ grants and zero account rows; hosted inventory has neither OneDrive OAuth start
 nor callback. Their source existence was not deployment proof. Exact two-function
 release/config/consent remains gated; no migration replay or staff connector reuse.
 No secret values/digests exported. Existing Teams/Claude registrations unchanged.
-Dedicated personal-only/Web registration form filled but NOT registered; Register
-accepts Platform Policies and is left for CA. No new credential/grant/file sharing.
+CA personally registered the dedicated personal-only/Web app. Exact callback,
+implicit/hybrid/public-client flows OFF verified; configured only four delegated
+requests: Files.ReadWrite/offline_access/openid/profile, no consent granted.
+Microsoft secret-creation and exact Supabase secret-name fields are prepared for
+CA; no new credential entered/created/saved by agent and no file sharing.
 Exact operator sequence: `ONEDRIVE-CONNECTION-PREPARATION-2026-10-19.md`.
 
 Local callback regression reproduced delayed/concurrent/failed consumption of
 pending PKCE state. Bounded exact-snapshot conditional consume prepared with
 actual SDK/WebCrypto regressions; not deployed. PR662's distinct importKey hunk
 must be retained, no broad onboarding takeover. No client UI change, Vercel,
-production SQL/schema/data/secrets/Edge or provider/permission/asset publication.
+production SQL/schema/data/secrets/Edge or final provider grant/asset publication.
 Staff peer remains separate. The previous live frontend/v44 receipt below is
-unchanged, not proof Brand Hub is activated. Final local verification follows
-in the preparation receipt; do not infer passing before it completes.
+unchanged, not proof Brand Hub is activated. Frozen32ec8e80 whole local acceptance
+PASS:3988total/3971pass/17skips/0fail; TypeScript/Vite121JS chunks/all19browser
+journeys, Deno/scoped lint/diff. Earlier browser-fixture retry race reproduced and
+fixed to await both responses; failed receipt retained. No client UI change.
+Code-only review approves; actual consent/genuine client media remains gated.
 
 ### 19 October — client frontend LIVE, exact OneDrive consent blocker
 
