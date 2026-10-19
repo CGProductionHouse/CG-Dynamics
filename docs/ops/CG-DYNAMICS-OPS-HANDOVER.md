@@ -13,6 +13,36 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 19 October — client frontend LIVE, exact OneDrive consent blocker
+
+Later direct CA instruction authorizes a conservative release. Source-only PR844
+merged `b357a4db` (same tree as tested9f98a938/runtimeff894eba). One verified local
+production prebuild, one2.5MB differential upload, same-deployment promotion:
+**READY/live `dpl_AQTmhDsDPVwh3AXTeTUGPCvN9Wr1`**, rollback
+`dpl_5vXwcM7cU23T4SNQS9DdoMJsaCcq`. No cloud compilation/new preview/retry or
+budget change; Git deploymentOFF preserved. Fresh signed-in preflight18Oct–18Nov
+included1.19/20USD,on-demand0/15USD,PauseON; retained5USD client-site reserve.
+No privileged credentials copied; downloaded sensitive Vite placeholders were
+not used in the artifact. Exact receipt: `CLIENT-PORTAL-LIVE-RELEASE-2026-10-19.md`.
+
+Existing client-onboarding v44 ACTIVE; all10transitive files re-read match source,
+old JWT/internal auth unchanged, v43 rollback private. No schema/config/secrets/
+permissions/assets/library data changed. Actual live Brand Hub admin read503:
+Braize exact mapping exists but library absent and **no onedrive_personal server
+consent row**. ChatGPT's separate OneDrive connector cannot authorize the app.
+Owner must complete existing gated app consent/config before curation/enabling
+and real client-media acceptance. No token copying or public-share workaround.
+Concrete issue receipt #3966264282379, not a generic missing-folder assertion.
+
+Real admin preview verified Braize Overview/Plan/package/Performance and Piek's
+previous crash now renders real reporting. Piek375/390/430 widths/navigation pass;
+emulation reset. Staged normal login boot passed but no session copied/client
+password acceptance claimed. Rapid fleet smoke intermediate captures were NOT
+accepted; no58client×alltab certification. Dynamics+7canonical managed hosts200
+before/after; no indefinite uptime promise. Strategy/content/provider gates and
+separate staff rollout remain explicit in the release receipt. Peer d7b1a592 clean
+and untouched. Exact Control Centre reference still unavailable; no guessed edit.
+
 ### 19 October - final client candidate, private evidence excluded
 
 CA requests the final executable local client-lane run. Same managed checkout
