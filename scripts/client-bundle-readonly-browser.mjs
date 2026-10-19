@@ -79,7 +79,12 @@ try{
     await navigate('Leads');await page.getByRole('heading',{name:'Leads',exact:true}).waitFor()
     await navigate('Brand Hub');await page.getByRole('heading',{name:'Brand Hub is not available yet',exact:true}).waitFor()
     const before=reads.filter(row=>row.path==='/functions/v1/client-onboarding').length
+    // The old error heading remains mounted until React starts the retry.
+    // Wait for both real SDK responses, not the already-visible old heading.
+    const retried=['portal_load','portal_library_load'].map(action=>page.waitForResponse(response=>
+      new URL(response.url()).pathname==='/functions/v1/client-onboarding'&&response.request().postDataJSON()?.action===action))
     await page.getByRole('button',{name:'Try again',exact:true}).click()
+    assert.deepEqual((await Promise.all(retried)).map(response=>response.status()),[503,503])
     await page.getByRole('heading',{name:'Brand Hub is not available yet',exact:true}).waitFor()
     assert.equal(reads.filter(row=>row.path==='/functions/v1/client-onboarding').length,before+2,'Only the two canonical library/setup reads retry')
     assert.deepEqual(errors,[]);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth))

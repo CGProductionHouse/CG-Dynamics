@@ -13,6 +13,44 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 19 October — OneDrive connection explicitly approved for preparation
+
+Source PR [#846](https://github.com/CGProductionHouse/CG-Dynamics/pull/846),
+frozen runtime/test32ec8e80. Current receipts:
+[#668](https://github.com/CGProductionHouse/CG-Dynamics/issues/668#issuecomment-6265779586),
+[#381](https://github.com/CGProductionHouse/CG-Dynamics/issues/381#issuecomment-6265780038),
+[#396](https://github.com/CGProductionHouse/CG-Dynamics/issues/396#issuecomment-6265780526).
+PR attachment attempted but app's100attachment limit refused; ordinary GitHub
+URL is authoritative. No attachment success claimed.
+
+CA approved preparing a **new app-side** Microsoft connection; new credential
+entry and final Microsoft consent remain CA-owned. Fresh authenticated secret
+metadata inspection found66names and **zero `ONEDRIVE_*` names**: configuration
+is absent as well as the previously proven missing delegated consent row.
+Fresh read-only checks confirm token-table RLS/no anon/authenticated read/write
+grants and zero account rows; hosted inventory has neither OneDrive OAuth start
+nor callback. Their source existence was not deployment proof. Exact two-function
+release/config/consent remains gated; no migration replay or staff connector reuse.
+No secret values/digests exported. Existing Teams/Claude registrations unchanged.
+CA personally registered the dedicated personal-only/Web app. Exact callback,
+implicit/hybrid/public-client flows OFF verified; configured only four delegated
+requests: Files.ReadWrite/offline_access/openid/profile, no consent granted.
+Microsoft secret-creation and exact Supabase secret-name fields are prepared for
+CA; no new credential entered/created/saved by agent and no file sharing.
+Exact operator sequence: `ONEDRIVE-CONNECTION-PREPARATION-2026-10-19.md`.
+
+Local callback regression reproduced delayed/concurrent/failed consumption of
+pending PKCE state. Bounded exact-snapshot conditional consume prepared with
+actual SDK/WebCrypto regressions; not deployed. PR662's distinct importKey hunk
+must be retained, no broad onboarding takeover. No client UI change, Vercel,
+production SQL/schema/data/secrets/Edge or final provider grant/asset publication.
+Staff peer remains separate. The previous live frontend/v44 receipt below is
+unchanged, not proof Brand Hub is activated. Frozen32ec8e80 whole local acceptance
+PASS:3988total/3971pass/17skips/0fail; TypeScript/Vite121JS chunks/all19browser
+journeys, Deno/scoped lint/diff. Earlier browser-fixture retry race reproduced and
+fixed to await both responses; failed receipt retained. No client UI change.
+Code-only review approves; actual consent/genuine client media remains gated.
+
 ### 19 October — client frontend LIVE, exact OneDrive consent blocker
 
 Later direct CA instruction authorizes a conservative release. Source-only PR844

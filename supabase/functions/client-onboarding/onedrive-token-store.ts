@@ -168,14 +168,24 @@ export async function takePendingAuth(
     pending_expires_at: string | null
   }
   if (!row.pending_state || row.pending_state !== state) return null
-  if (!row.pending_expires_at || new Date(row.pending_expires_at).getTime() < Date.now()) return null
+  const expiresAt = row.pending_expires_at ? Date.parse(row.pending_expires_at) : NaN
+  if (!Number.isFinite(expiresAt) || expiresAt <= Date.now()) return null
   const verifier = await decrypt(row.pending_verifier_enc)
-  // Clear pending regardless (single use).
-  await svc
+  if (!verifier) return null
+  // Atomically consume the exact snapshot. A delayed callback must not clear a
+  // newer sign-in, and two callbacks must not both receive the verifier. A
+  // failed/ambiguous write never authorizes the subsequent code exchange.
+  const { data: consumed, error: consumeError } = await svc
     .from('microsoft_oauth_tokens')
     .update({ pending_state: null, pending_verifier_enc: null, pending_expires_at: null })
     .eq('account_key', accountKey)
-  return verifier
+    .eq('pending_state', state)
+    .eq('pending_verifier_enc', row.pending_verifier_enc)
+    .eq('pending_expires_at', row.pending_expires_at)
+    .gt('pending_expires_at', new Date().toISOString())
+    .select('account_key')
+    .maybeSingle()
+  return !consumeError && consumed?.account_key === accountKey ? verifier : null
 }
 
 /**
