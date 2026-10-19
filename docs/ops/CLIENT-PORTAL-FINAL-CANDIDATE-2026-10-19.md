@@ -40,12 +40,93 @@ replaced wholesale; #842 and #843 retain their own content/form ownership.
 
 ## Verification record
 
-Focused synthetic management checks pass after reproducing the private-file
-dependency. Fresh TypeScript/Vite7 build, actual emitted app chunks and scoped
-lint pass. Final frozen-candidate full suite and canonical browser-run receipt
-will be recorded after execution; earlier 3962 passing tests are dated evidence,
-not a substitute for this new candidate's acceptance.
+Final frozen source `ff894ebade8c6cd3e4b230dc86bfbdffcd34c8b0`:
+**LOCAL_CODE_ACCEPTANCE_PASS**, stable tree true. 3,979 tests / 3,962 pass /
+17 declared skips / zero failure, cancelled or todo. TypeScript/Vite7 build,
+all19 canonical browser journeys and121 emitted JS chunks pass. Actual App/SDK
+journeys cover1440/375/390/430; mobile Overview/package screenshots inspected.
+All changed frontend/script/test scoped lint, Deno client-onboarding closure,
+diff and private-reference scan pass. Git runtime is identical to reviewed
+ace8f1c5. Four private receipt assertions were not carried over; two synthetic
+checks replace them. Skip counts are current, not copied from the older branch.
+
+Receipt: `C:/Users/chris/AppData/Local/Temp/cg-local-launch-ff894ebade8c.json`.
+First run passed suite/build but failed before browser execution on a Windows
+file-URL typo in the private browser wrapper. Original logs/receipt retained in
+Temp `cg-client-final-first-attempt-20261019-0831`. Corrected only that wrapper,
+proved the first browser fixture, then repeated the ENTIRE canonical run on the
+same unchanged source to PASS. No assertion/dependency/app/security workaround.
+Unsupported Windows Bash SES is explicitly excluded, not passed.
 
 The canonical local acceptance runner uses synthetic loopback config. Its dist
 must NEVER be uploaded. Final acceptance is local code acceptance only, not
 strategy approval, production client-role/RLS proof or an absolute bug guarantee.
+
+## Fresh live evidence - no data writes
+
+- Canonical roster61/61, has_more=false;58 launch clients after held AV/Red Oak
+  and prospective Zooz exclusions.
+- Meta47mapped clients: Facebook46PARTIAL/1STALE; Instagram20PASS/9PARTIAL.
+  Three concrete errors are AV/Red Oak/Zooz. Seventeen launch Facebook mappings
+  have no mapped Instagram, including Daisy/Tobich. This is linkage inventory,
+  NOT proof all17 need consent or lack contractual entitlement. No bulk remapping.
+- TikTok10 existing mappings now have unexpired tokens, nine outside held Red
+  Oak. Automatic renewal occurred since the prior expiry snapshot. This does
+  not certify future renewal or full monthly metrics.
+- All58 Google audits for1-18October read. Cape has18daily rows through18October;
+  successful sync18October22:00UTC. Novus, RC-Polypipe and Germoparts are mapped
+  but return no_campaign_rows, NOT zero activity.54not mapped. One account-level
+  campaign remains unmapped; no owner inferred. Missing audit surfaces remain
+  absent, conversions are not certified sales.
+- All58 actual signed-in admin website panels settled. Piek, All Around PVC and
+  Emmanuel show metrics;55 show analytics-not-connected, NOT55 broken contracted
+  websites. All three measured sites lack configured call/WhatsApp/button action
+  tracking; no actions inferred as zero. No website/backend config changed.
+- All seven public URLs returned by the managed-site registry, plus Dynamics,
+  return HTTP200. Three registry entries lack public URLs; none guessed. This is
+  uptime evidence, not form/commerce QA.
+- All116 October/November strategy briefs read, zero unreadable and zero writes.
+  November36source-eligible draft records/18blocked drafts/4absent. October35
+  source-eligible drafts/18blocked/4absent plus preserved published PiekOctober.
+  Eligibility is not semantic approval; only PiekOctober is published here.
+
+Ten monthly/source-held clients: Hino, Neshora, WiseRide, Econofoods, Elcheck,
+Human Auto, Jenkor, JFJ, VCS and Toyota. Elcheck/JFJ/VCS quantities already
+confirmed; do not ask again. EconoOctober also has scope drift. Twelve other
+scope/source exclusions include once-off LHP and non-monthly clients, not12
+missing recurring strategies. Bat Hill/Vrystaat scope remains unconfirmed.
+Human Auto GO is resolved, not automatic source admission. PiekOctober still
+needs its recorded exact editorial correction/publication.
+
+Minimal exact-client private readback matrix, never a public fixture:
+`C:/Users/chris/.codex/private/cg-dynamics/client-launch-20261019/final-live-readback.json`.
+
+## Remaining execution, not another generic local audit
+
+1. **Release/technical:** reviewed backend release, private library preparation,
+   cleared per-file curation and enablement, genuine client/media readback. All58
+   live libraries are NOT activated merely by finishing this workflow locally.
+2. **Content/source + existing normal ChatGPT:** admit reviewed exact evidence
+   for ten held monthly clients; fill only existing gaps; review saved plans,
+   PiekOctober and report periods, then normal approval/publication. Staff queue
+   shows151reports needing review, not151clients. Never bulk-publish to hide it.
+3. **Provider/website owners:** exact Instagram linkage and Google evidence
+   resolution without guessed mappings. Optional action tracking/absent telemetry
+   cannot be presented as measured results.
+4. **Separate staff owner:** Teams/source/calendar protected acceptance and
+   rollout. Latest1dc35ce4 plus newer dirty work untouched. Clean committed-head
+   merge preview is NOT combined runtime/production acceptance.
+5. **CA/team:** package/source/content exceptions and actual final assets; real
+   password and phone review explicitly retained by CA. LHP later/held clients
+   do not block a safe initial cohort.
+6. **Release owner:** fresh #679 budget/reserve/rollback packet and one approved
+   production-target artifact, then client-role/critical-site readback. No Vercel,
+   push, production write or permission change here; never upload fixture dist.
+
+No remaining reproduced unowned local code defect in this client run. This is
+not an only-CA-review-left or whole-app live-launch certificate. Protected backend
+scope/readback is in `CLIENT-PORTAL-BACKEND-PACKET-2026-10-19.md`.
+
+GitHub readback receipts: #396comment6263570371, #731comment6263570756,
+#668comment6263571169, #381comment6263582401. Fresh client61/staff52changed
+paths intersect0; staff dirty work untouched. Code remains local and unpublished.

@@ -29,11 +29,35 @@ visually inspected; correct Emmanuel logo sources found,52client mark candidates
 Vrystaat subbrands only/five existing brand folders empty. Exact source proof
 remains private. No mapping/assets/publication/permissions changed.
 
-Separate staff lane is cdb34404 with newer dirty work; do not race or copy it.
-Separate normal ChatGPT owns October/November strategy drafts; Human Auto GO
-resolved, CA retains password/device review. Fresh provider/Google evidence and
-frozen-candidate local verification are being reconciled, not claimed complete
-from old tests. No Vercel, push or production mutation in this run.
+Separate staff lane advanced to1dc35ce4/#381comment6263338553 with newer dirty
+work, untouched. Clean committed-head merge preview, NOT combined runtime proof.
+Normal ChatGPT owns strategy drafts; Human Auto GO resolved, CA retains password/
+device review. Final ff894eba canonical run:3979total/3962pass/17declared skips/
+0fail/cancelled/todo, all19browser journeys, TypeScript/Vite121JS chunks, scoped
+lint/Deno/diff/privacy scan PASS, source stable. First private wrapper file-URL
+failure retained; wrapper corrected and ENTIRE run repeated on unchanged source.
+
+Fresh all58Google audits: Cape through18October; three mapped no campaign rows,
+54not mapped. All58actual admin website panels settled: three metrics-visible,
+55analytics-not-connected, not zero activity. Seven managed public sites plus
+Dynamics HTTP200.116Oct/Nov strategy briefs read without writes:36source-eligible
+November draft records,22held/absent including12non-monthly/unconfirmed scopes;
+only PiekOctober published here. TikTok10unexpired mappings; concrete Meta errors
+AV/RedOak/Zooz held/prospective;17launchFB mappings lackIG mapping, not automatic
+reconnect demands. Private exact-client matrix outside repo.
+
+Finish/owner list and protected backend packet:
+`CLIENT-PORTAL-FINAL-CANDIDATE-2026-10-19.md` and
+`CLIENT-PORTAL-BACKEND-PACKET-2026-10-19.md`. Safe source integration prepared;
+release, asset activation/readback, source/content/publication, provider evidence,
+staff rollout and CA login/device review remain. No Vercel, push or production
+mutation. Not an only-review-left claim. No guessed Control Centre or replacement.
+
+Final GitHub write-back read back: #396comment6263570371,
+#731comment6263570756, #668comment6263571169 and #381comment6263582401.
+Fresh client61/staff52changed paths intersect0; staff dirty files untouched.
+Any following docs-only checkpoint does not replace frozen runtime ff894eba's
+acceptance or turn local source into an applied/hosted release.
 
 ### 18 October — client Plan keyboard navigation, source-only
 
