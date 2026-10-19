@@ -29,6 +29,7 @@ export interface ClaimedDelivery {
   contact: { name?: string; email?: string; phone?: string } | null
   fields: { label: string; value: unknown }[] | null
   landing_path: string | null
+  purpose?: 'enquiry' | 'application' | 'booking_request'
 }
 
 export type DeliveryConfig =
@@ -79,8 +80,10 @@ export function composeEnquiryEmail(job: ClaimedDelivery, from: string): Compose
   const visitorEmail = job.contact?.email?.trim()
   const replyTo = visitorEmail && EMAIL.test(visitorEmail) && !/[\r\n]/.test(visitorEmail) ? visitorEmail : undefined
   const who = singleLine(job.contact?.name ?? job.contact?.email ?? 'a website visitor', 80)
+  const purpose = job.purpose ?? 'enquiry'
+  const title = purpose === 'application' ? 'job application' : purpose === 'booking_request' ? 'studio booking request' : 'website enquiry'
   const lines = [
-    `New enquiry from your website (${singleLine(job.client_name, 120)}).`,
+    `New ${title} from your website (${singleLine(job.client_name, 120)}).`,
     '',
     ...(job.fields ?? []).flatMap((field) => {
       const value = display(field.value)
@@ -91,13 +94,13 @@ export function composeEnquiryEmail(job: ClaimedDelivery, from: string): Compose
     `Reference: ${job.enquiry_receipt_id}`,
     '',
     replyTo ? 'Reply to this email to respond directly to the enquirer.' : 'The enquirer did not supply an email address; use the contact details above.',
-    'This lead is also in your CG Dynamics Lead Inbox.',
+    purpose === 'enquiry' ? 'This lead is also in your CG Dynamics Lead Inbox.' : 'This submission is stored in CG Forms.',
   ].filter((line): line is string => line !== null)
   return {
     from,
     to: [job.recipient_email],
     ...(replyTo ? { reply_to: replyTo } : {}),
-    subject: singleLine(`New website enquiry from ${who}`, 150),
+    subject: singleLine(`New ${title} from ${who}`, 150),
     text: lines.join('\n'),
     headers: { 'X-Entity-Ref-ID': job.delivery_key },
   }

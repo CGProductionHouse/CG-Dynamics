@@ -40,7 +40,7 @@ test('worker enforces the gate before replay, before claim and per claimed job',
   assert.match(worker, /if \(!recipientAllowed\(recipients, job\.recipient_email_snapshot\)\) continue/)
   // Pre-claim hold, then claim.
   const preCheck = worker.indexOf("if (recipients.mode === 'allowlist') {")
-  const claim = worker.indexOf("admin.rpc('claim_website_enquiry_deliveries'")
+  const claim = worker.indexOf("admin.rpc('claim_website_form_deliveries'")
   assert.ok(preCheck > 0 && preCheck < claim, 'allowlist pre-check must run before the claim')
   // Per-job guard runs before any send and never calls the provider.
   const guard = worker.indexOf('if (!recipientAllowed(recipients, job.recipient_email)) {')

@@ -151,7 +151,7 @@ Deno.serve(async (req) => {
     }
   }
 
-  const { data: claimed, error: claimError } = await admin.rpc('claim_website_enquiry_deliveries', {
+  const { data: claimed, error: claimError } = await admin.rpc('claim_website_form_deliveries', {
     p_provider: config.provider, p_limit: CLAIM_LIMIT, p_lease_seconds: LEASE_SECONDS,
   })
   if (claimError) return jsonResponse({ ok: false, error: 'Claim failed' }, 500)
