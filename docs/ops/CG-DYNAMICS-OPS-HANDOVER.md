@@ -13,6 +13,48 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 19 October — exact OneDrive backend setup authorized and executed; owner sign-in pending
+
+Later CA approval explicitly authorizes ONLY the new OneDrive server settings,
+fresh encryption/setup keys and the two reviewed OAuth functions from merged
+PR846 (`5ba704b0`, frozen runtime/test `32ec8e80`). This supersedes the earlier
+preparation-only/config-absent receipt below; it does not authorize Vercel,
+migrations, client permission changes, asset publication or library activation.
+
+CA saved the Microsoft app secret privately. Names-only inventory confirmed it;
+its value was never retrieved. Added the six exact remaining `ONEDRIVE_*` names
+using environment-only CLI resolution; fresh keys never entered argv, Git,
+plaintext files, screenshots or logs. Existing client secret and unrelated
+configuration inventory preserved. Initial config command failed before writing:
+CLI2.115.0 config discovery uses actual working directory, not legacy `--workdir`.
+Names-only readback proved no partial configuration before the corrected attempt.
+Do NOT rerun provisioning or rotate the now-existing encryption key.
+
+`onedrive-oauth-start` and `onedrive-oauth-callback` deployed once each, ACTIVE,
+initial version1, platform JWT off with their private setup gate/single-use PKCE
+state preserved. Both full six-file hosted closures matched the reviewed blobs
+after newline normalization. Start missing/wrong gate403; callback missing/bad
+state400. Real setup-header request302 to exact consumer authority/app/callback/
+four scopes with S256. Pending encrypted verifier persisted; invalid-state probe
+did not consume it. Read-only row flags show access/refresh token absent, pending
+state present; no actual token/ciphertext selected. RLS remains enabled with no
+anon/authenticated SELECT/INSERT/UPDATE/DELETE grants.
+
+Microsoft Work Chrome tab is handed to CA at **Authenticator sign-in** for the
+personal info account. CA must complete sign-in and final dedicated-app consent;
+no consent granted by agent. Pending setup expires ten minutes after start;
+never rotate encryption to restart an expired flow. Successful consent must be
+followed by token-presence-only checks and bounded exact-folder read acceptance.
+Actual client-media/recipient safety remains separate, not inferred from OAuth.
+
+Existing `client-onboarding` metadata changed44→45 but full ten-file hosted
+closure still matches prior released `51fe5ff4` and original update timestamp;
+no broker redeploy/code change by this lane. Secret configuration may update
+function metadata; compare source rather than treating version alone as code.
+Staff checkout last observed clean `a6a8527a`, untouched. No Vercel operation.
+Exact Control Centre reference remains unavailable; no guessed tracker write.
+Detailed receipt: `ONEDRIVE-CONNECTION-PREPARATION-2026-10-19.md`.
+
 ### 19 October — OneDrive connection explicitly approved for preparation
 
 Source PR [#846](https://github.com/CGProductionHouse/CG-Dynamics/pull/846),

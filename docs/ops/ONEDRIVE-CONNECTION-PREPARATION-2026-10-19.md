@@ -5,6 +5,60 @@ info@cgproductionhouse.com with file read/write and background refresh, while
 client access remains read-only. New credential entry and final consent remain
 CA-owned. This is not authorization for arbitrary permission/publication changes.
 
+## Later exact setup approval and execution receipt
+
+CA personally saved `ONEDRIVE_MS_CLIENT_SECRET`, then explicitly approved:
+configure only this connection's server settings, generate its encryption/setup
+keys, deploy only PR846's two reviewed OAuth functions. No Vercel, migrations,
+file publication or client permissions; final Microsoft consent remains CA-owned.
+This receipt supersedes the historical **absent/not authorized** entries below.
+
+- Seven exact OneDrive config names now present, including preserved owner secret.
+  Six added names: `ONEDRIVE_MS_CLIENT_ID`, `ONEDRIVE_MS_REDIRECT_URI`,
+  `ONEDRIVE_MS_AUTHORITY`, `ONEDRIVE_MS_SCOPE`, `ONEDRIVE_TOKEN_ENC_KEY`,
+  `ONEDRIVE_OAUTH_SETUP_TOKEN`. Public app ID was read from the actual registered
+  app, not guessed. Authority/callback/four scopes match the reviewed packet.
+  Keys generated with32CSPRNG bytes each, environment-only CLI input. No secret
+  values in files, argv/history, Git or logs; owner secret never read/overwritten.
+  No unrelated configuration name added/removed. Do not rerun provisioning.
+- Initial command failed without config writes; names-only readback proved this.
+  Root cause: CLI2.115.0 resolves config using actual process cwd, not legacy
+  `--workdir`. Corrected invocation succeeded, then exact names were re-read.
+  Do not mistake the earlier diagnostic for the current final state.
+- `onedrive-oauth-callback`: ACTIVE, initial v1,
+  ID `6494d286-f089-49d2-a3ca-5f0538a6cf70`.
+  `onedrive-oauth-start`: ACTIVE, initial v1,
+  ID `9ee2bcb5-0772-4994-965e-6909019480cf`.
+  Deployed once each with `verify_jwt=false`, private setup/state auth intact.
+  Six-file hosted closure of EACH function read back and matched exact Git blobs
+  below (newline normalization only), including hardened pending-state consumer.
+- Hosted security checks: missing/wrong setup gate403; missing/bad callback state400.
+  Real private-header setup request302; destination/consumer authority, actual app,
+  exact callback, four scopes, response type code and S256 validated before browser
+  handoff. No setup token/verifier in URL. Pending encrypted verifier persisted.
+  Token flags after bad-state test: access/refresh absent, pending present.
+  RLS enabled and all anon/authenticated table privileges false. One diagnostic
+  SELECT used an incorrect column name and failed read-only; corrected against
+  actual token-store fields before acceptance. No schema or SQL write occurred.
+- CA's Work Chrome is at Authenticator sign-in for the personal info account.
+  CA must complete sign-in AND final app consent. No agent-granted consent.
+  Pending state expires ten minutes after start. If expired, use the existing
+  configured setup gate through an approved private operator path; never rerun
+  provisioning, rotate keys or copy browser/connector tokens to restart.
+- `client-onboarding` metadata v45 has unchanged ten-file released closure
+  (`51fe5ff4`) and original update timestamp; no broker deploy by this lane.
+  Configuration writes can update function metadata, not proof of code changes.
+- New Microsoft credential expiry/rotation responsibility remains to be recorded
+  from non-secret metadata. Recommended180-day expiry was prepared previously;
+  do not invent its actual expiry or read its one-time Value.
+
+No Vercel, file/share/recipient/library activation, frontend change or staff release.
+Staff checkout last observed clean `a6a8527a`, untouched. Whole local acceptance
+below remains the unchanged runtime's evidence, not successful hosted consent or
+genuine client-role media acceptance. Next: owner sign-in/consent, token-presence-only
+check, bounded exact-folder read, then separately governed pilot publication/media
+and recipient-safety acceptance. No all-client launch certification.
+
 ## Evidence and owner-completed registration
 
 - The authenticated Supabase CLI returned 66 secret metadata entries. Only
