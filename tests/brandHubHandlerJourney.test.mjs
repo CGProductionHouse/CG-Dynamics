@@ -12,10 +12,10 @@ test('actual Brand Hub handler: admin preparation through client listing and ran
   const admin = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', alice = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', bob = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc', staff = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd'
   const profiles = [{ id: admin, role: 'admin', client_id: null, is_active: true }, { id: alice, role: 'client', client_id: client, is_active: true }, { id: bob, role: 'client', client_id: other, is_active: true }, { id: staff, role: 'staff', client_id: null, is_active: true }]
   const db = { clients: [{ id: client, name: 'Exact Client', active: true, logo_url: null }, { id: other, name: 'Other Client', active: true, logo_url: null }], profiles,
-    client_onedrive_mappings: [{ client_id: client, drive_id: 'synthetic-drive', client_folder_item_id: 'bound' }], client_portal_libraries: [], client_portal_library_categories: [], client_portal_assets: [], monthly_deliverables: [] }
+    client_onedrive_mappings: [{ client_id: client, drive_id: 'synthetic-drive', client_folder_item_id: 'bound' }], client_portal_libraries: [], client_portal_library_categories: [], client_portal_assets: [], monthly_deliverables: [], client_onboarding_sessions: [] }
   const make = (id, name, parentId, folder = true, size = null, mimeType = null) => ({ id, name, parentId, isFolder: folder, size, mimeType, driveId: 'synthetic-drive' })
   const tree = { bound: [make('root', 'A_ClientPortal_Exact_Client', 'bound')], root: [make('brand', 'Brand Identity', 'root'), make('design', 'Graphic Design', 'root'), make('video', 'Video', 'root')], brand: [make('logo', 'Logo.png', 'brand', false, 100, 'image/png')], design: [], video: [make('film', 'Film.mp4', 'video', false, 50_000_000, 'video/mp4')] }
-  let handler, transportFailure = false, failAssetUpdate = false, concurrentAssetChange = false, concurrentLibraryChange = false
+  let handler, transportFailure = false, failAssetUpdate = false, concurrentAssetChange = false, concurrentLibraryChange = false, failSetupRead = false
   const calls = [], streams = []
   globalThis.__brandHandlerFixture = { tree, streams }
   globalThis.Deno = { env: { get: key => ({ SUPABASE_URL: 'http://127.0.0.1:1', SUPABASE_SERVICE_ROLE_KEY: 'synthetic-server-key-only' })[key] }, serve: fn => { handler = fn } }
@@ -30,6 +30,7 @@ test('actual Brand Hub handler: admin preparation through client listing and ran
     }
     assert.ok(url.pathname.startsWith('/rest/v1/'))
     const table = url.pathname.slice('/rest/v1/'.length)
+    if (table === 'client_onboarding_sessions' && failSetupRead) return Response.json({message:'synthetic private setup database failure',code:'XX000'}, {status:503})
     if (table === 'rpc/get_client_portal_library_summary') {
       const args = JSON.parse(init.body)
       const groups = new Map()
@@ -93,6 +94,26 @@ test('actual Brand Hub handler: admin preparation through client listing and ran
       return { status: response.status, body: await response.json() }
     }
     const manage = (action, fields = {}) => post({ action: `staff_library_${action}`, clientId: client, ...fields })
+    await t.test('absent optional setup is successful empty context, not a library failure', async () => {
+      const before = calls.length
+      for (const [body, actor] of [[{action:'portal_load'},alice],[{action:'staff_preview_portal_load',clientId:client},admin]]) {
+        const result = await post(body, actor)
+        assert.equal(result.status,200)
+        assert.deepEqual(result.body,{ok:true,data:null})
+      }
+      assert.ok(calls.slice(before).every(call=>call.method==='GET'),'Optional setup reads never create or publish onboarding data')
+      assert.equal((await post({action:'portal_load',clientId:client},bob)).status,403)
+      assert.equal((await post({action:'staff_preview_portal_load',clientId:client},staff)).status,403)
+    })
+    await t.test('failed optional setup read remains an explicit sanitized failure', async () => {
+      failSetupRead = true
+      try {
+        const result = await post({action:'portal_load'},alice)
+        assert.equal(result.status,503)
+        assert.equal(result.body.ok,false)
+        assert.doesNotMatch(JSON.stringify(result.body),/synthetic private|XX000/)
+      } finally { failSetupRead = false }
+    })
     await t.test('real dispatcher rejects anonymous, client, inactive and staff management', async () => {
       for (const [actor, status] of [[null, 401], [alice, 403], [staff, 403]]) assert.equal((await post({ action: 'staff_library_prepare', clientId: client }, actor)).status, status)
       profiles[0].is_active = false
