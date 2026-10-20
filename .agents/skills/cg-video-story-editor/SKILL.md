@@ -16,6 +16,7 @@ The editor remains accountable for the story and final cut. Use AI and automatio
 7. After each revision, record the specific viewer/editor feedback, change and evidence. Add only reusable client-agnostic lessons to the playbook; keep client media, private links and credentials out of GitHub.
 
 For buyer-led product films, write onscreen verbs that the chosen gestures actually show. Let one important word carry the frame, animate it with the action, and use a quieter image after a dense opening. Read the [rhythm and sound playbook](references/rhythm-sound-playbook.md) for title timing, cue selection and full-name signage in portrait edits.
+Before using a deliberate camera move as a transition, verify that the next shot completes its direction. Resolve landscape media in portrait as a considered layout, and let the ending copy and score complete the opening's promise.
 
 `python scripts/screen_sources.py <input-folder> <output-folder>` can generate triage frames and a source ledger from local originals with FFmpeg. Watch shortlisted clips in motion before selecting them.
 
