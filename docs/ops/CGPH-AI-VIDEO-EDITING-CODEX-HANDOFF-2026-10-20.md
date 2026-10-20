@@ -7,6 +7,8 @@
 
 ## Decision
 
+**Existing subscriptions (owner-confirmed):** CG operates **two distinct Adobe Creative Cloud subscriptions** under separate logins, plus CapCut Pro. This is not evidence of a shared Adobe Teams tenancy or two plugin seats. Codex must check plugin licensing and workstation entitlements separately; no private sign-in or billing details belong in this public repo.
+
 Use **released Adobe Premiere Pro** as the master editor, existing CapCut Pro for simple standalone social edits, and an evidence-ranked set of existing editing tools:
 
 1. **Search and sort:** Premiere Media Intelligence (already included). **Jumper** is the preferred additional footage-search plugin where approved, on the strength of a real independent comparison.
