@@ -319,13 +319,50 @@ export function ClientReportView({
   )
 }
 
-function PublishedWebsitePerformance({ report, managedWebsite, maintenanceIncluded }: { report: RenderableReport['website_report']; managedWebsite: CgManagedWebsite | null; maintenanceIncluded: boolean }) {
+/** Service discovery does not depend on having a published monthly report.
+ * Keep the same navigation and exact website ownership rules without fabricating
+ * an empty report, metric, provider connection or package entitlement. */
+export function ClientPerformanceWithoutReport({ client, tab, onTabChange }: {
+  client: Client | null
+  tab: ReportTabKey
+  onTabChange: (tab: ReportTabKey) => void
+}) {
+  const tabsId = useId()
+  const tabs = [...PERFORMANCE_SERVICE_TABS]
+  const activeTab = tabs.some(item => item.key === tab) ? tab : 'overview'
+  const managedWebsite = cgManagedWebsiteForClient(client?.id)
+  const maintenanceIncluded = hasCgWebsiteMaintenance(client?.id)
+  const panel = activeTab === 'overview'
+    ? <EmptyReportState title="No published report yet" message="Your monthly reports will appear here as soon as they are published by CG Production House." />
+    : activeTab === 'web' && (managedWebsite || maintenanceIncluded)
+      ? <PublishedWebsitePerformance report={null} managedWebsite={managedWebsite} maintenanceIncluded={maintenanceIncluded} withoutPublishedReport />
+      : <PerformanceServiceStory service={activeTab} clientName={client?.name} />
+
+  return (
+    <>
+      {activeTab !== 'overview' && <h1 className="sr-only">Performance</h1>}
+      <ReportTabs tabsId={tabsId} tabs={tabs} active={activeTab} onChange={onTabChange} />
+      {tabs.map(item => (
+        <section key={item.key} id={`${tabsId}-${item.key}-panel`} role="tabpanel"
+          aria-labelledby={`${tabsId}-${item.key}-tab`} hidden={activeTab !== item.key}
+          tabIndex={activeTab === item.key ? 0 : undefined}
+          className="focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#2dd4bf]">
+          {activeTab === item.key ? panel : null}
+        </section>
+      ))}
+    </>
+  )
+}
+
+function PublishedWebsitePerformance({ report, managedWebsite, maintenanceIncluded, withoutPublishedReport = false }: { report: RenderableReport['website_report']; managedWebsite: CgManagedWebsite | null; maintenanceIncluded: boolean; withoutPublishedReport?: boolean }) {
   if (!report) {
     return <ProviderAvailabilityPanel
       eyebrow="Digital experience"
       title="Website Performance"
       status="Unavailable"
-      description={managedWebsite
+      description={withoutPublishedReport
+        ? `${managedWebsite ? `CG manages ${managedWebsite.canonicalHost}.` : 'Your CG-built website is maintained by CG.'} Verified website reporting is not yet published. No figures are inferred or shown as zero.`
+        : managedWebsite
         ? `CG manages ${managedWebsite.canonicalHost}, but no approved website snapshot was published with this monthly report. Reporting setup or review is still in progress; no figures are inferred or shown as zero.`
         : maintenanceIncluded
           ? 'Your CG-built website is maintained by CG. Verified website reporting is not yet available for this month. No figures are inferred or shown as zero.'

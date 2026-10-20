@@ -41,6 +41,30 @@ const server = await createServer({ configFile: false, plugins: [fixture, react(
 const areas = ['overview', 'plan', 'performance', 'approvals', 'brand-hub', 'leads']
 const labels = ['Overview', 'Plan', 'Performance', 'Approvals', 'Brand Hub', 'Leads']
 const readRpcs = new Set(['client_published_reports', 'client_published_report_posts', 'client_portal_visibility_contract_version', 'client_portal_month_ahead_posts_v2', 'client_portal_month_ahead_events', 'get_my_client_service_entitlements', 'website_lead_inbox', 'website_lead_metrics'])
+async function checkEmptyPerformance(page, width) {
+  const services = page.getByRole('tablist', { name: 'Performance services', exact: true })
+  await services.waitFor({ timeout: 3000 })
+  const labels = ['Overview', 'Facebook', 'Instagram', 'TikTok', 'LinkedIn', 'Google', 'Website Performance', 'Email marketing']
+  assert.equal(await services.getByRole('tab').count(), labels.length, 'No report must not hide service navigation')
+  for (const name of labels) {
+    await services.getByRole('tab', { name, exact: true }).click()
+    const panel = page.getByRole('tabpanel', { name, exact: true })
+    await panel.waitFor()
+    assert.equal(await services.getByRole('tab', { name, exact: true }).getAttribute('aria-controls'), await panel.getAttribute('id'))
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width} empty ${name} overflow`)
+    if (name === 'Overview') assert.equal(await panel.getByRole('link').count(), 0, 'Empty overview is not an offer or invented result')
+    else if (name === 'Facebook' || name === 'Instagram') {
+      assert.match(await panel.innerText(), /standard in CG social packages/)
+      assert.equal(await panel.getByRole('link').count(), 0, 'Standard social access is never sold again')
+    } else {
+      const contact = panel.getByRole('link', { name: 'Discuss my package on WhatsApp ↗', exact: true })
+      assert.equal(new URL(await contact.getAttribute('href')).pathname, '/27791152339')
+      assert.equal(await contact.getAttribute('target'), '_blank')
+    }
+  }
+  await services.getByRole('tab', { name: 'Overview', exact: true }).click()
+  await page.getByRole('heading', { name: 'No published report yet', exact: true }).waitFor()
+}
 let browser
 try {
   await server.listen()
@@ -139,6 +163,7 @@ try {
       const ready = ['Synthetic client A', 'Your plan', 'No published report yet', 'Approvals', 'Brand Hub is not available yet', 'Leads'][i]
       await page.getByRole('heading', { name: ready, exact: true }).waitFor()
       await page.getByLabel('Loading your workspace', { exact: true }).waitFor({ state: 'hidden' })
+      if (areas[i] === 'performance') await checkEmptyPerformance(page, width)
       if (width < 640 && areas[i] === 'plan') assert.equal(await page.evaluate(() => scrollY), 0, 'A new Plan section starts at its top, not the old page scroll offset')
       if (width < 640 && areas[i] === 'plan') {
         await page.evaluate(() => { window.fixtureScrollCalls = [] })
@@ -220,6 +245,7 @@ try {
       await page.goto('http://127.0.0.1:53987/client/performance')
       await page.getByRole('heading', { name: mode === 'empty' ? 'No published report yet' : 'Performance is temporarily unavailable', exact: true }).waitFor()
       if (mode !== 'empty') assert.equal(await page.getByRole('heading', { name: 'No published report yet', exact: true }).count(), 0)
+      else await checkEmptyPerformance(page, width)
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
     }
     if (width < 640) {
