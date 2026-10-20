@@ -13,6 +13,33 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 20 October — approved verified-logo rollout and optional-context backend fix
+
+CA approved only current verified logos already in safe Brand Identity folders,
+with ambiguous/missing files skipped. Forty additional real admin publications
+and enablements verified; including Braize now41 enabled libraries/41 active
+assets out of58,174 categories unchanged. Independent exact40-row DB check:
+0 client/library/category/drive/parent/size/name/publisher/time errors;17 skipped
+libraries remain private with0 assets. No internal file promotion, sharing,
+permissions, schema, secrets or Vercel. Detailed cohort/skips and audit:
+BRAND-HUB-VERIFIED-LOGO-ROLLOUT-2026-10-20.md.
+
+Separately approved optional-context repair released existing client-onboarding
+v48: genuinely absent onboarding record returns success/null, real query failure
+stays sanitized503. One handler changed, nine other HOSTED files preserved; exact
+ten-file Deno/preflight/readback verified, no auth/config/dependency changes.
+Live Braize no longer shows a false foundation outage; valid anonymous request401,
+invalid HMAC403.31 focused tests, four-width actual-component journey, TS/Vite
+build, current+staged Deno/scoped lint/diff pass. Not whole-app/client-role/DB
+acceptance; previous Docker SQL limits retained, peer staff work untouched.
+No Vercel operation or frontend release. Normal ChatGPT strategies/staff calendar
+and owner-held genuine client-login checks remain separate lanes, not waived.
+Final actual admin-preview Brand Hub sweep covers all58 launch clients:40 new
+published file lists (37 loaded image thumbnails/3 PDF entries),17 expected private
+no-file states and fresh Braize canary. All matched exact selected clients with
+no false optional-context error; no unsafe file/permission fallback. This is not
+58-client password acceptance or separate actual download/media playback for all.
+
 ### 20 October — Braize logo pilot works; exact file-link backend repair released
 
 CA separately approved only Braize's reviewed BRAIZE_01.png publication/library
