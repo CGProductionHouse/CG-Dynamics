@@ -47,7 +47,10 @@ after(async () => {
   await server?.close()
 })
 
-function mockDashboardRpc({ metrics = [], status = [{ connected: true, has_mapping: true, has_successful_sync: true }], errorFor = null } = {}) {
+function mockDashboardRpc(options = {}) {
+  const metrics = Object.hasOwn(options, 'metrics') ? options.metrics : []
+  const status = Object.hasOwn(options, 'status') ? options.status : [{ connected: true, has_mapping: true, has_successful_sync: true }]
+  const errorFor = options.errorFor ?? null
   const calls = []
   supabase.rpc = async (name, args) => {
     calls.push({ name, args })
@@ -63,7 +66,7 @@ test('dashboard loader calls the report-bound RPCs with exact calendar-month arg
   const calls = mockDashboardRpc()
   const result = await loadGoogleAdsDashboard('report-123', '2026-02')
 
-  assert.equal(result.state, 'no-activity')
+  assert.equal(result.state, 'no-campaign-data')
   assert.deepEqual(calls, [
     {
       name: 'get_google_ads_dashboard_campaign_metrics_v2',
@@ -116,7 +119,7 @@ test('dashboard loader returns distinct, client-safe setup, empty, and failure s
     [{ connected: false, has_mapping: false, has_successful_sync: false }, 'disconnected'],
     [{ connected: true, has_mapping: false, has_successful_sync: false }, 'unmapped'],
     [{ connected: true, has_mapping: true, has_successful_sync: false }, 'not-synced'],
-    [{ connected: true, has_mapping: true, has_successful_sync: true }, 'no-activity'],
+    [{ connected: true, has_mapping: true, has_successful_sync: true }, 'no-campaign-data'],
   ]
 
   for (const [status, expectedState] of cases) {
@@ -134,6 +137,30 @@ test('dashboard loader returns distinct, client-safe setup, empty, and failure s
     await loadGoogleAdsDashboard('', 'not-a-month'),
     { data: null, state: 'error', error: 'Google Ads data could not be loaded.' },
   )
+})
+
+test('an account sync with no mapped campaign rows is unavailable, never verified inactivity', async () => {
+  mockDashboardRpc({ metrics: [], status: [{ connected: true, has_mapping: true, has_successful_sync: true, metric_row_count: 0, last_successful_sync: '2026-10-19T22:00:14Z' }] })
+  assert.deepEqual(await loadGoogleAdsDashboard('exact-report', '2026-10'), { data: null, state: 'no-campaign-data', error: null })
+  for (const metrics of [null, undefined, {}, { data: null }, { data: {} }]) {
+    mockDashboardRpc({ metrics })
+    assert.deepEqual(await loadGoogleAdsDashboard('exact-report', '2026-10'), { data: null, state: 'error', error: 'Google Ads data could not be loaded.' }, 'Unreadable metric result is not an empty successful read')
+  }
+  for (const status of [null, undefined, [], [null], {}, [{ connected: true }], [{ connected: true, has_mapping: true, has_successful_sync: true }, { connected: false }]]) {
+    mockDashboardRpc({ status })
+    assert.equal((await loadGoogleAdsDashboard('exact-report', '2026-10')).state, 'error', 'Missing/malformed/truncated status is not verified account coverage')
+  }
+})
+
+test('stored campaign zero remains measured zero rather than missing reporting', async () => {
+  mockDashboardRpc({ metrics: [{ campaign_id: 'observed-zero', campaign_name: 'Measured campaign', campaign_status: 'PAUSED', campaign_type: 'SEARCH', cost: 0, impressions: 0, clicks: 0, interactions: 0, conversions: 0, value: 0, currency: 'ZAR', time_zone: 'Africa/Johannesburg', first_activity: '2026-10-01', last_activity: '2026-10-19' }] })
+  const result = await loadGoogleAdsDashboard('exact-report', '2026-10')
+  assert.equal(result.state, 'data')
+  assert.equal(result.data.impressions, 0)
+  assert.equal(result.data.clicks, 0)
+  assert.equal(result.data.spendMicros, 0)
+  assert.equal(result.data.conversions, 0)
+  assert.equal(result.data.campaignCount, 1)
 })
 
 test('unnamed provider accounts receive a neutral customer-specific label', () => {

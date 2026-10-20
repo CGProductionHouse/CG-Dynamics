@@ -187,7 +187,7 @@ export function ClientReportView({
   ]))
   const hasMeta = availablePlatforms.some(view => view.platform === 'facebook' || view.platform === 'instagram')
     || facts.some(fact => fact.platform === 'facebook' || fact.platform === 'instagram')
-  const hasGoogleAds = googleAds !== null || ['data', 'not-synced', 'error', 'no-activity'].includes(googleAdsState)
+  const hasGoogleAds = googleAds !== null || ['data', 'not-synced', 'no-campaign-data', 'error', 'no-activity'].includes(googleAdsState)
   const exactWebsiteClientId = client?.id ?? ('client_id' in report ? report.client_id : null)
   const managedWebsite = cgManagedWebsiteForClient(exactWebsiteClientId)
   const knownWebsiteMaintenance = hasCgWebsiteMaintenance(exactWebsiteClientId)
@@ -1559,6 +1559,10 @@ function GoogleAdsEmptyState({
     'no-activity': {
       title: 'No Google Ads activity this month',
       message: 'The month was synced, but no campaign activity was recorded.',
+    },
+    'no-campaign-data': {
+      title: 'Google Ads campaign figures are unavailable',
+      message: 'Campaign figures are not available for this period yet. This does not mean your ads had no activity.',
     },
     data: {
       title: 'Google Ads data is available',

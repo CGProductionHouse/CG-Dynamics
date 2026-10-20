@@ -5,6 +5,7 @@ export type GoogleAdsDashboardState =
   | 'disconnected'
   | 'unmapped'
   | 'not-synced'
+  | 'no-campaign-data'
   | 'no-activity'
   | 'data'
   | 'error'
@@ -99,7 +100,7 @@ export interface GoogleAdsReportSummary {
 export type GoogleAdsDashboardData = GoogleAdsReportSummary
 
 export const GOOGLE_ADS_DASHBOARD_STATES: GoogleAdsDashboardState[] = [
-  'disconnected', 'unmapped', 'not-synced', 'no-activity', 'data', 'error',
+  'disconnected', 'unmapped', 'not-synced', 'no-campaign-data', 'no-activity', 'data', 'error',
 ]
 
 export function formatGoogleAdsSpend(
@@ -146,10 +147,10 @@ function record(value: unknown): UnknownRecord | null {
     : null
 }
 
-function rows(value: unknown): unknown[] {
+function rows(value: unknown): unknown[] | null {
   if (Array.isArray(value)) return value
   const wrapper = record(value)
-  return wrapper && Array.isArray(wrapper.data) ? wrapper.data : []
+  return wrapper && Array.isArray(wrapper.data) ? wrapper.data : null
 }
 
 function text(value: unknown): string | null {
@@ -348,23 +349,32 @@ type GoogleAdsStatusSnapshot = {
   lastSyncedAt: string | null
 }
 
-function parseStatus(value: unknown): GoogleAdsStatusSnapshot {
+function parseStatus(value: unknown): GoogleAdsStatusSnapshot | null {
+  if (Array.isArray(value) && value.length !== 1) return null
   const raw = Array.isArray(value) ? value[0] : value
-  if (typeof raw === 'string') return { state: normalizeStatus(raw), lastSyncedAt: null }
+  if (typeof raw === 'string') {
+    const state = normalizeStatus(raw)
+    return state ? { state, lastSyncedAt: null } : null
+  }
   const status = record(raw)
-  if (!status) return { state: null, lastSyncedAt: null }
+  if (!status) return null
 
   const lastSyncedAt = text(status.last_successful_sync ?? status.lastSuccessfulSync ?? status.last_synced_at)
-
-  if (status.connected === false || status.is_connected === false) return { state: 'disconnected', lastSyncedAt }
-  if (status.mapped === false || status.is_mapped === false || status.has_mapping === false) return { state: 'unmapped', lastSyncedAt }
-  if (status.synced === false || status.is_synced === false || status.has_synced === false || status.has_successful_sync === false) return { state: 'not-synced', lastSyncedAt }
-  return { state: normalizeStatus(text(status.state ?? status.status) ?? ''), lastSyncedAt }
+  const explicitState = normalizeStatus(text(status.state ?? status.status) ?? '')
+  if (explicitState) return { state: explicitState, lastSyncedAt }
+  const connected = status.connected ?? status.is_connected
+  const mapped = status.mapped ?? status.is_mapped ?? status.has_mapping
+  const synced = status.synced ?? status.is_synced ?? status.has_synced ?? status.has_successful_sync
+  if (typeof connected !== 'boolean' || typeof mapped !== 'boolean' || typeof synced !== 'boolean') return null
+  if (!connected) return { state: 'disconnected', lastSyncedAt }
+  if (!mapped) return { state: 'unmapped', lastSyncedAt }
+  if (!synced) return { state: 'not-synced', lastSyncedAt }
+  return { state: null, lastSyncedAt }
 }
 
 function normalizeStatus(value: string): Exclude<GoogleAdsDashboardState, 'no-activity' | 'data' | 'error'> | null {
   const status = value.trim().toLowerCase().replaceAll('_', '-').replaceAll(' ', '-')
-  if (status === 'disconnected' || status === 'unmapped' || status === 'not-synced') return status
+  if (status === 'disconnected' || status === 'unmapped' || status === 'not-synced' || status === 'no-campaign-data') return status
   return null
 }
 
@@ -452,7 +462,7 @@ export function parseGoogleAdsDashboardData(
 ): GoogleAdsDashboardData | null {
   if (!MONTH.test(month)) return null
   const metricRows = rows(value)
-  if (metricRows.length === 0) return null
+  if (!metricRows?.length) return null
   const campaigns = metricRows.map(parseCampaign).filter((campaign): campaign is ParsedCampaign => campaign !== null)
   if (metricRows.length !== campaigns.length) return null
   const { start, end } = calendarMonthBounds(month)
@@ -487,10 +497,14 @@ export async function loadGoogleAdsDashboard(reportId: string, month: string): P
     }
 
     const status = parseStatus(statusResult.data)
+    if (!status) return { data: null, state: 'error', error: LOAD_ERROR }
     if (status.state) return { data: null, state: status.state, error: null }
 
     const metricRows = rows(metricsResult.data)
-    if (metricRows.length === 0) return { data: null, state: 'no-activity', error: null }
+    if (!metricRows) return { data: null, state: 'error', error: LOAD_ERROR }
+    // Account-level sync success does not establish activity for this client's
+    // mapped campaigns. Only actual campaign rows can establish observed zero.
+    if (metricRows.length === 0) return { data: null, state: 'no-campaign-data', error: null }
     const data = parseGoogleAdsDashboardData(month, metricRows, status.lastSyncedAt)
     if (!data) return { data: null, state: 'error', error: LOAD_ERROR }
     return { data, state: 'data', error: null }

@@ -41,10 +41,13 @@ test('Performance keeps all service choices without inferring package or connect
     assert.match(render('google'), /Google Business Profile/)
     assert.match(render('web'), /premium CG-built website/)
     assert.match(render('linkedin'), /professional decision-makers/)
-    for (const state of ['disconnected', 'unmapped', 'not-synced', 'error', 'no-activity']) {
+    for (const state of ['disconnected', 'unmapped', 'not-synced', 'no-campaign-data', 'error', 'no-activity']) {
       assert.doesNotMatch(render('overview', state), /Google Ads|WhatsApp|connection before using|No paid campaigns/)
     }
     assert.match(render('google', 'error'), /Google Ads performance is unavailable/)
+    const absentCampaigns = render('google', 'no-campaign-data')
+    assert.match(absentCampaigns, /Google Ads campaign figures are unavailable/)
+    assert.doesNotMatch(absentCampaigns, /No Google Ads activity|The month was synced|Source: Google Ads/)
     // A Facebook source elsewhere in the report must not label an unrelated
     // service offer as Meta-synced evidence.
     for (const tab of ['google', 'web', 'linkedin', 'tiktok', 'email', 'instagram']) {
