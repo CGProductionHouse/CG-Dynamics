@@ -913,14 +913,17 @@ Deno.serve(async request => {
 
   if (action === 'portal_load' || libraryScope?.action === 'portal_load') {
     if (!libraryScope) return json({ ok: false, error: 'Client access required.' }, 403)
-    const { data } = await service
+    const { data, error: setupReadError } = await service
       .from('client_onboarding_sessions')
       .select('id, client_id, status, current_step, vector_unavailable, enabled_platforms, started_at, completed_at, last_activity_at, token_expires_at, revoked_at, clients!inner(name, logo_url)')
       .eq('client_id', libraryScope.clientId)
       .order('last_activity_at', { ascending: false })
       .limit(1)
       .maybeSingle()
-    if (!data) return json({ ok: false, error: 'Setup is not available yet.' }, 404)
+    if (setupReadError) return json({ ok: false, error: 'Setup is unavailable.' }, 503)
+    // Existing clients may have a file library without an onboarding session.
+    // This optional context being absent must not appear as a library outage.
+    if (!data) return json({ ok: true, data: null })
     const responseState = await safeState(service, data as SessionRow)
     if (!responseState) return json({ ok: false, error: 'Setup is unavailable.' }, 503)
     return json({ ok: true, data: responseState })
