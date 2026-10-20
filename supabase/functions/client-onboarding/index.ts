@@ -13,13 +13,11 @@ import {
 } from './onedrive-adapter.ts'
 import {
   createPortalMediaResponse,
+  createPortalAccessGrant,
   isPortalAccessPurpose,
   isValidPartialContent,
   normalizeRangeHeader,
-  PORTAL_STREAM_TTL_SECONDS,
-  signPortalAccess,
   verifyPortalAccess,
-  type PortalAccessPurpose,
 } from './portal-library-stream.ts'
 import { visiblePortalMonths, resolveMappedClientFolder, resolvePortalMapping, portalRootFolderName } from '../_shared/portal-visibility.ts'
 import { resolveLibraryReadScope } from './portal-preview-scope.ts'
@@ -318,15 +316,6 @@ function portalStreamSecret(serviceRoleKey: string) {
   return dedicated && dedicated.length >= 32
     ? dedicated
     : `cg-client-portal-stream-v1:${serviceRoleKey}`
-}
-
-async function portalAccessUrl(request: Request, assetId: string, purpose: PortalAccessPurpose, serviceRoleKey: string) {
-  const secret = portalStreamSecret(serviceRoleKey)
-  const expiresAt = Math.floor(Date.now() / 1000) + PORTAL_STREAM_TTL_SECONDS
-  const signature = await signPortalAccess(secret, assetId, purpose, expiresAt)
-  const url = new URL(request.url)
-  url.search = new URLSearchParams({ asset: assetId, purpose, expires: String(expiresAt), signature }).toString()
-  return { url: url.toString(), expiresAt: new Date(expiresAt * 1000).toISOString() }
 }
 
 async function handlePortalStreamRequest(service: SupabaseClient, request: Request, serviceRoleKey: string) {
@@ -918,7 +907,7 @@ Deno.serve(async request => {
     if (purpose === 'stream' && !/^video\/mp4$/i.test(asset.mime_type ?? '')) return json({ ok: false, error: 'Streaming is not available for this file.' }, 400)
     if (purpose === 'inline' && !isSafeInlineMimeType(asset.mime_type ?? '')) return json({ ok: false, error: 'Preview is not available for this file.' }, 400)
     if (purpose === 'thumbnail' && !/^(image\/|video\/)/i.test(asset.mime_type ?? '')) return json({ ok: false, error: 'Thumbnail is not available for this file.' }, 400)
-    const access = await portalAccessUrl(request, asset.id, purpose, serviceRoleKey)
+    const access = await createPortalAccessGrant(supabaseUrl, portalStreamSecret(serviceRoleKey), asset.id, purpose)
     return json({ ok: true, data: access })
   }
 
