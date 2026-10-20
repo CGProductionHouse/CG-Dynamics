@@ -1,6 +1,6 @@
 # AI Workforce — Video, Photography, Sound and Editing Craft Source Pack
 
-Last updated: 2026-07-26
+Last updated: 2026-10-20 (CGPH operational editing addendum §8.8; broader craft research dated 2026-07-26)
 Status: Research complete for human review. All candidate knowledge remains review-gated.
 
 ## Purpose
@@ -812,6 +812,25 @@ Caption workflow:
 6. Check safe zones and contrast.
 7. Export platform-appropriate burned-in and/or sidecar versions.
 8. Review on a phone with sound off.
+
+
+## 8.8 CG Production House — AI-assisted post-production operating handoff (20 October 2026)
+
+**Owner-approved direction:** Implement only released, real-editor-reviewed ways to shorten CG Production House's existing Premiere production process. The current Codex-ready workflow, source links, limitations, exact tool roles and implementation checks are maintained in:
+
+**[CGPH AI Video Editing — Codex implementation handoff](../ops/CGPH-AI-VIDEO-EDITING-CODEX-HANDOFF-2026-10-20.md)**
+
+Operational summary:
+
+- **Premiere Pro** is the final editorial source. Use stable Media Intelligence, Text-Based Editing, Paper Edit and audio cleanup already available with Adobe.
+- **Jumper** is the independently benchmarked footage-search option for finding shots. Extra seats must be licensed; search results are not creative-quality decisions.
+- **AutoEdit Creator Mode** can accelerate **spoken-footage** rough cuts but requires human review. Do not claim it produces complete commercials.
+- **BeatEdit 2** can generate music beat markers for human-chosen event/reel selects. It is not automatic narrative selection.
+- **CapCut Pro** remains a secondary standalone social editor, not a guaranteed Premiere round-trip.
+- **Exclude** Premiere AI Assistant beta for client work and **do not treat Eddie AI V3 editor tests as proof of current V4 quality**.
+- Keep the one Content Run / one Content Guideline / existing OneDrive and approval chain unchanged. No speculative folders, second task system, client-visible source media, unapproved vendor uploads or automatic approvals.
+
+This dated operational addendum supplements the general craft research. It does **not** turn unreviewed vendor promises into approved knowledge or prove that workstation installation has occurred.
 
 ---
 
