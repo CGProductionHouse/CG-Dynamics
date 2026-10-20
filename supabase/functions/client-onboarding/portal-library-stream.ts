@@ -87,6 +87,25 @@ export async function signPortalAccess(
   return hex(signature)
 }
 
+/** The Edge gateway rewrites request.url; only server configuration names the public broker. */
+export async function createPortalAccessGrant(
+  publicApiUrl: string,
+  secret: string,
+  assetId: string,
+  purpose: PortalAccessPurpose,
+  nowSeconds = Math.floor(Date.now() / 1000),
+) {
+  const base = new URL(publicApiUrl)
+  const localHttp = base.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(base.hostname)
+  if ((base.protocol !== 'https:' && !localHttp) || base.username || base.password
+    || base.pathname !== '/' || base.search || base.hash) throw new Error('Invalid public media gateway')
+  const expiresAt = nowSeconds + PORTAL_STREAM_TTL_SECONDS
+  const signature = await signPortalAccess(secret, assetId, purpose, expiresAt)
+  const url = new URL('/functions/v1/client-onboarding', base)
+  url.search = new URLSearchParams({ asset: assetId, purpose, expires: String(expiresAt), signature }).toString()
+  return { url: url.toString(), expiresAt: new Date(expiresAt * 1000).toISOString() }
+}
+
 export async function verifyPortalAccess(
   secret: string,
   assetId: string,

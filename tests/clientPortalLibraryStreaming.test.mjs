@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
+import { readFileSync } from 'node:fs'
+import * as portalStream from '../supabase/functions/client-onboarding/portal-library-stream.ts'
 import {
   MAX_PORTAL_RANGE_BYTES,
   isValidPartialContent,
@@ -69,4 +71,31 @@ test('opaque stream grants are purpose-bound, short-lived, and tamper evident', 
   assert.equal(await verifyPortalAccess(secret, 'other-asset', 'stream', expires, signature, now), false)
   assert.equal(await verifyPortalAccess(secret, 'asset-opaque-id', 'download', expires, signature, now), false)
   assert.equal(await verifyPortalAccess(secret, 'asset-opaque-id', 'stream', expires, signature, expires + 1), false)
+})
+
+test('media grants use the configured public gateway, not the rewritten internal request URL', async () => {
+  const secret = 'test-secret-with-at-least-thirty-two-characters'
+  const assetId = '22222222-2222-4222-8222-222222222222'
+  const now = 1_800_000_000
+  for (const purpose of ['inline', 'download', 'stream', 'thumbnail']) {
+    const grant = await portalStream.createPortalAccessGrant('https://example.supabase.co', secret, assetId, purpose, now)
+    const url = new URL(grant.url)
+    assert.equal(url.origin, 'https://example.supabase.co')
+    assert.equal(url.pathname, '/functions/v1/client-onboarding')
+    assert.deepEqual([...url.searchParams.keys()], ['asset', 'purpose', 'expires', 'signature'])
+    assert.equal(Date.parse(grant.expiresAt), Number(url.searchParams.get('expires')) * 1000)
+    assert.equal(await verifyPortalAccess(secret, assetId, purpose, Number(url.searchParams.get('expires')), url.searchParams.get('signature'), now), true)
+  }
+  const edge = readFileSync(new URL('../supabase/functions/client-onboarding/index.ts', import.meta.url), 'utf8')
+  assert.match(edge, /createPortalAccessGrant\(supabaseUrl, portalStreamSecret\(serviceRoleKey\), asset\.id, purpose\)/)
+  assert.doesNotMatch(edge, /async function portalAccessUrl|new URL\(request\.url\)[\s\S]{0,100}url\.search = new URLSearchParams/)
+})
+
+test('media gateway configuration fails closed; only explicit loopback HTTP is allowed for local tests', async () => {
+  const args = ['fixture-secret', '22222222-2222-4222-8222-222222222222', 'download', 1_800_000_000]
+  for (const invalid of ['', 'not-a-url', 'http://example.supabase.co', 'https://user:password@example.supabase.co', 'https://example.supabase.co/path', 'https://example.supabase.co?redirect=bad', 'https://example.supabase.co/#bad']) {
+    await assert.rejects(() => portalStream.createPortalAccessGrant(invalid, ...args))
+  }
+  const grant = await portalStream.createPortalAccessGrant('http://127.0.0.1:54321', ...args)
+  assert.equal(new URL(grant.url).origin, 'http://127.0.0.1:54321')
 })

@@ -13,6 +13,53 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 20 October — Braize logo pilot works; exact file-link backend repair released
+
+CA separately approved only Braize's reviewed BRAIZE_01.png publication/library
+enablement, then the reproduced public-media-link backend fix. Actual admin
+workflow saved exactly1 published logo/1 enabled library out of58; all other57
+remain private. No OneDrive shares/permissions/files, SQL/schema/grants or Vercel
+changes. Thumbnail, separate-tab4220x4341 PNG view and267992byte download now
+work through the real read-only admin client preview, retaining Dynamics.
+Unauthenticated asset request401, invalid signed grant403; service-only RLS and
+browser table privilege boundaries rechecked unchanged. Not genuine client-login
+or MP4/range/fleet publication acceptance.
+
+Root cause: Edge request.url is rewritten to internal HTTP /client-onboarding;
+frontend correctly rejected it. New tested helper signs URLs from existing
+server SUPABASE_URL and canonical /functions/v1/client-onboarding. Existing
+client-onboarding v46->v47 deployed once under exact approval. Full ten-file
+hosted readback matches: only index.ts/portal-library-stream.ts changed, eight
+other HOSTED files retained (including older hosted token-store, deliberately
+not silently replaced with main's pending-consent hardening). No auth/secret/
+dependency/config changes. Exact code/rollback and limits are in
+BRAND-HUB-LOGO-PILOT-2026-10-20.md. Do not replay setup or broaden publication.
+
+Real next-day OneDrive refresh passed: access expired19Oct12:45:57Z; normal
+admin read renewed20Oct07:19:53Z with access/refresh present, pending false,
+without another sign-in. Only flags/timestamps selected, no token export.
+
+Local frontend fixes preserve the portal on failed download and recover native
+video load errors with explicit Play retry, no background loop. These frontend
+changes are NOT live. Focused44pass, build/lint/Deno/diff and four-width browser
+checks pass. Frozen13fa5fcb non-DB run:3991total/3972pass/19declared skips/0fail;
+all19 canonical browser journeys, TypeScript/Vite app bundle pass, stable tree.
+Canonical earlier full attempt failed: Docker SQL fixtures unavailable and
+OpenSSL missing from PATH. Process-local installed OpenSSL fixed five failures;
+two SQL fixtures remain NOT verified (no shared Docker restart/reset). Do not
+call the reduced-scope run full local or production launch acceptance.
+
+Staff peer clean4f045c5f observed, untouched. Main's later merged PR852 changes
+two separate Microsoft files only; integrated without client overlap. Open
+onboarding/guideline owners retained. Google Control Centre exact reference
+still inaccessible, no guessed tracker. Live receipts #396comment6286208060,
+#668comment6286208047, #381comment6286208037. Remaining expanded asset publication,
+actual client-login/media, separate ChatGPT strategies and staff-calendar gates
+remain explicit; no whole-app completion or Vercel release claimed.
+Final post-integration recheck:62/62 focused+Microsoft tests, four-width library
+browser journey, fresh build/current+staged Deno/scoped lint/diff pass. Harness
+keeps portable browser defaults; installed Chrome chosen only by local wrapper.
+
 ### 19 October — 58 launch-client Brand Hub folders privately linked
 
 CA explicitly approved **private folder linking only** after verified OneDrive

@@ -187,10 +187,10 @@ export function LibraryAssetRow({ asset, compact = false }: { asset: ClientPorta
     } else {
       const anchor = document.createElement('a')
       anchor.href = result.data.url
-      if (purpose === 'inline') {
-        anchor.target = '_blank'
-        anchor.rel = 'noopener noreferrer'
-      }
+      // An expired download may return an error page instead of an attachment.
+      // Keep the portal open for both view and download destinations.
+      anchor.target = '_blank'
+      anchor.rel = 'noopener noreferrer'
       document.body.appendChild(anchor)
       anchor.click()
       document.body.removeChild(anchor)
@@ -214,7 +214,7 @@ export function LibraryAssetRow({ asset, compact = false }: { asset: ClientPorta
           <button type="button" disabled={busy !== null} onClick={() => void access('download')} className="min-h-10 rounded-xl bg-[#2dd4bf] px-3 text-xs font-black text-[#03110e] disabled:opacity-50">{busy === 'download' ? 'Preparing…' : 'Download'}</button>
         </div>
       </div>
-      {videoUrl && <div className="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-black"><video controls playsInline preload="metadata" src={videoUrl} className="aspect-video w-full" /></div>}
+      {videoUrl && <div className="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-black"><video controls playsInline preload="metadata" src={videoUrl} onError={() => { setVideoUrl(null); setError('Video could not load. Tap Play to try again.') }} className="aspect-video w-full" /></div>}
       {error && <p role="alert" className="mt-2 text-xs text-[#fb923c]">{error}</p>}
     </div>
   )

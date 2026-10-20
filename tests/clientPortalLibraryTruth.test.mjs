@@ -1,10 +1,25 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { createServer } from 'vite'
+import { createPortalAccessGrant } from '../supabase/functions/client-onboarding/portal-library-stream.ts'
 
 const clientId='11111111-1111-4111-8111-111111111111'
 const asset={id:'22222222-2222-4222-8222-222222222222',category:'video',displayName:'Reviewed final',mimeType:'video/mp4',sizeBytes:null,publishedAt:'2026-10-01T12:00:00Z',deliverableTitle:'Exact linked work',planMonth:'2026-10'}
 const summary={clientName:'Synthetic client',clientLogoUrl:null,available:true,categories:[{category:'video',fileCount:1,years:[{year:2026,fileCount:1,months:[{month:10,fileCount:1}]}]}]}
+
+test('real server grant is accepted by the strict frontend transport projection for all file purposes', async () => {
+  const server = await createServer({configFile:false,server:{middlewareMode:true,hmr:false},optimizeDeps:{noDiscovery:true}})
+  try {
+    const {projectLibraryAccess} = await server.ssrLoadModule('/src/features/client-portal-library/projection.ts')
+    const base = 'https://example.supabase.co'
+    for (const purpose of ['inline','download','stream','thumbnail']) {
+      const grant = await createPortalAccessGrant(base, 'synthetic-secret', asset.id, purpose)
+      assert.deepEqual(projectLibraryAccess(grant, asset.id, purpose, base), grant)
+      const internal = {...grant, url: grant.url.replace('https://example.supabase.co/functions/v1/', 'http://example.supabase.co/')}
+      assert.equal(projectLibraryAccess(internal, asset.id, purpose, base), null, 'the observed rewritten HTTP URL must remain rejected')
+    }
+  } finally { await server.close() }
+})
 
 async function fixture(run) {
   const server=await createServer({configFile:false,server:{middlewareMode:true,hmr:false},optimizeDeps:{noDiscovery:true}})
