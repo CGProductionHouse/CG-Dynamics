@@ -9,6 +9,7 @@ Reference: [Yu-Yen's short editing breakdown on TikTok](https://www.tiktok.com/@
 3. **Resolve the rush.** For this reference pattern, build the opening from sound effects before the main song starts: a rising cue under 6–10 distinct, very short shots; selected cut whooshes; one landing impact. Let the impact decay over a meaningful held image. Give the viewer a short quiet window to read the image before copy or music enters. The sound must build toward the release, not begin with the landing.
 4. **Enter the song once.** Start the main music with the first story beat after the hold and keep its phrase intact. A song that plays from frame one and is then ducked to fake a pause breaks the structure the editor requested. Set the song's source in point and timeline entry separately from the sound effects.
 5. **Animate from the footage.** A small keyframe zoom can sharpen an existing movement; cuts should follow hands, tools or camera direction. Reject a zoom that invents motion or hides the subject in a vertical crop.
+6. **Give the release a new reason to watch.** The held shot should contain a tactile or human action, with the first key word and the song entering together after the quiet. A strong verb that matches the next shot makes the opening rush lead into a buyer story instead of becoming an unrelated effects reel.
 
 ## Reference-to-cut method
 

@@ -15,6 +15,8 @@ The editor remains accountable for the story and final cut. Use AI and automatio
 6. Export a review version and an online editable Premiere project. Check the entire render at phone size with and without sound, decode and dimensions, text-safe area, contact details, audio balance, rights, prior use and final brand approval. A technical pass is not an editorial or release approval.
 7. After each revision, record the specific viewer/editor feedback, change and evidence. Add only reusable client-agnostic lessons to the playbook; keep client media, private links and credentials out of GitHub.
 
+For buyer-led product films, write onscreen verbs that the chosen gestures actually show. Let one important word carry the frame, animate it with the action, and use a quieter image after a dense opening. Read the [rhythm and sound playbook](references/rhythm-sound-playbook.md) for title timing, cue selection and full-name signage in portrait edits.
+
 `python scripts/screen_sources.py <input-folder> <output-folder>` can generate triage frames and a source ledger from local originals with FFmpeg. Watch shortlisted clips in motion before selecting them.
 
 Optional vendor tools and workstation licensing follow [issue #856](https://github.com/CGProductionHouse/CG-Dynamics/issues/856). Do not install or claim them from this skill alone.
