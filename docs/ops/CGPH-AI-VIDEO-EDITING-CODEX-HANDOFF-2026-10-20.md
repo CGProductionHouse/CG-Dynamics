@@ -3,6 +3,7 @@
 **Date:** 20 October 2026  
 **Scope:** CG Production House internal Premiere Pro post-production.  
 **Status:** Owner-directed implementation brief; not a claim that plugins are installed or licences purchased.
+**Implementation issue:** [#856 — CGPH AI editing Codex implementation](https://github.com/CGProductionHouse/CG-Dynamics/issues/856). The issue is ready for an assigned coding agent; no agent run or workstation installation has been claimed.
 
 ## Decision
 
