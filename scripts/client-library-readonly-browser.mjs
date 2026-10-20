@@ -29,7 +29,7 @@ const server=await createServer({configFile:false,plugins:[fixture,react()],cach
   server:{host:'127.0.0.1',port:53987,strictPort:true,hmr:false}})
 let browser
 try{
-  await server.listen();browser=await chromium.launch({headless:true,channel:'chrome'})
+  await server.listen();browser=await chromium.launch({headless:true})
   for(const width of [1440,375,390,430]){
     const page=await browser.newPage({viewport:{width,height:1000}})
     const errors=[]; const reads=[]; let brandFailure=true;let malformed=true;let accessMode='invalid';let releaseAccess;let holdMonth=false;let releaseMonth
