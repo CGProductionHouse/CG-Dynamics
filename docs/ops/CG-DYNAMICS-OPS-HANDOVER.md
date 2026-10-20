@@ -15,6 +15,10 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 ### 20 October — all58 Performance/package previews; two client fixes verified locally
 
+PR #857 reviewed and merged as d279fb5c4499de408701639b1c7d913fd37abba3.
+Managed checkout reconciled to main, clean; no deployment. Merge is byte-identical
+to reviewed f37e122a; runtime/test files remain the tested2070e2c6 versions.
+
 Client-only branch codex/client-performance-empty-services-20261020, tested
 runtime2070e2c644755c2392a6a883c2ab5946f6681710. Actual Elcheck no-report preview
 lost all service tabs; shared catalog/keyboard/story reuse now preserves all8,

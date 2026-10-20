@@ -4,6 +4,11 @@ Client lane only, #668/#623; no staff/Teams/calendar changes or Vercel operation
 This receipt records completed fixes and exact acceptance boundaries, not an
 all-client launch certificate. Normal ChatGPT still owns strategy authoring.
 
+Reviewed [PR #857](https://github.com/CGProductionHouse/CG-Dynamics/pull/857)
+merged as `d279fb5c4499de408701639b1c7d913fd37abba3`; managed checkout reconciled
+to main. No configured/reported PR CI checks; actual local evidence below is the
+verification authority. App attachment attempted, refused at existing100 limit.
+
 ## Reproduced and repaired
 
 1. **No published report removed every service destination.** Actual signed-in
