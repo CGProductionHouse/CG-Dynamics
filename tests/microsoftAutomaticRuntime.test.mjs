@@ -219,6 +219,41 @@ function database(rows = fleet()) {
   return db
 }
 
+test('automatic mirror baseline uses source descriptions, preserves staff notes and still refuses genuine target drift', async () => {
+  for (const description of ['Source-owned description', '']) {
+    const rows = fleet().slice(0, 2).map(s => ({ ...s, record_count: 1, records: [{ ...s.records[0],
+      ...(s.source_type === 'outlook_calendar' ? { cancelled: false, safeSummary: description }
+        : { percentComplete: 0, assigneeMicrosoftIds: [], description }),
+    }] }))
+    const input = automatic.assembleAutomaticSnapshot(rows, {}, now)
+    const baseline = reconcile(input, context, [], new Set(), items => items, new Map(), [], true)
+    const db = database(rows)
+    for (const item of baseline) {
+      const payload = item.proposedPayload
+      db.tables[payload.destination === 'planner' ? 'planner_tasks' : 'company_calendar_events'].push({
+        ...payload, id: 'target-' + payload.destination, updated_at: now,
+        microsoft_source_hash: item.sourceHash, microsoft_last_synced_at: now,
+        notes: description ? 'Keep staff-only amendments verbatim.' : null,
+      })
+    }
+    const result = await applyMirrors(db, input, 'job', 'system-user')
+    assert.equal(result.conflicts, 0)
+    assert.equal(result.status, 'completed')
+    assert.equal(db.mutations, 0, 'unchanged source baselines cannot become duplicate creates or edits')
+    for (const name of ['planner_tasks', 'company_calendar_events']) {
+      assert.ok(db.calls.filter(c => c.table === name && c.mode === 'read').every(c => c.columns.split(',').includes('microsoft_source_description')))
+      assert.equal(db.tables[name][0].notes, description ? 'Keep staff-only amendments verbatim.' : null)
+    }
+    const drift = database(rows)
+    drift.tables.planner_tasks.push({ ...db.tables.planner_tasks[0] })
+    drift.tables.company_calendar_events.push({ ...db.tables.company_calendar_events[0], location: 'Staff changed this location' })
+    const held = await applyMirrors(drift, input, 'job', 'system-user')
+    assert.equal(held.status, 'partial')
+    assert.equal(held.conflicts, 1)
+    assert.equal(drift.mutations, 0, 'the correction must not disable the staff-edit baseline guard')
+  }
+})
+
 test('automatic apply persists canonical exporter and approved system attribution required by production', async () => {
   const rows = fleet().map(s => ({ ...s, records: s.records.slice(0, 1), record_count: 1 }))
   const input = automatic.assembleAutomaticSnapshot(rows, {}, now)
