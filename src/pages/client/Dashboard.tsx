@@ -17,6 +17,7 @@ import {
 import { getReportMonthFromPeriod, monthDisplayLabel, previousReportMonth, selectMonthlyReports } from '../../lib/reportPeriod'
 import {
   ClientReportView,
+  ClientPerformanceWithoutReport,
   EmptyReportState,
   type ReportTabKey,
 } from './ClientReportView'
@@ -234,10 +235,7 @@ export default function Dashboard() {
   if (months.length === 0) {
     return (
       <>
-      <EmptyReportState
-        title="No published report yet"
-        message="Your monthly reports will appear here as soon as they are published by CG Production House."
-      />
+      <ClientPerformanceWithoutReport client={client} tab={requestedTab} onTabChange={handleTabChange} />
       <ClientServiceExpansion surface={requestedTab === 'overview' ? 'overview' : 'performance'} />
       </>
     )

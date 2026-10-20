@@ -41,10 +41,13 @@ test('Performance keeps all service choices without inferring package or connect
     assert.match(render('google'), /Google Business Profile/)
     assert.match(render('web'), /premium CG-built website/)
     assert.match(render('linkedin'), /professional decision-makers/)
-    for (const state of ['disconnected', 'unmapped', 'not-synced', 'error', 'no-activity']) {
+    for (const state of ['disconnected', 'unmapped', 'not-synced', 'no-campaign-data', 'error', 'no-activity']) {
       assert.doesNotMatch(render('overview', state), /Google Ads|WhatsApp|connection before using|No paid campaigns/)
     }
     assert.match(render('google', 'error'), /Google Ads performance is unavailable/)
+    const absentCampaigns = render('google', 'no-campaign-data')
+    assert.match(absentCampaigns, /Google Ads campaign figures are unavailable/)
+    assert.doesNotMatch(absentCampaigns, /No Google Ads activity|The month was synced|Source: Google Ads/)
     // A Facebook source elsewhere in the report must not label an unrelated
     // service offer as Meta-synced evidence.
     for (const tab of ['google', 'web', 'linkedin', 'tiktok', 'email', 'instagram']) {
@@ -71,6 +74,30 @@ test('Overview does not mount service upsells or empty paid-media setup cards', 
   const source = readFileSync(new URL('../src/pages/client/ClientPortalHome.tsx', import.meta.url), 'utf8')
   assert.doesNotMatch(source, /ClientServiceExpansion/)
   assert.match(source, /data\.googleAdsState === 'data' && <MetricCard/)
+})
+
+test('no-report services preserve exact owned-site maintenance without inventing reports or metrics', async () => {
+  const server = await createServer({ configFile: false, server: { middlewareMode: true, hmr: false }, esbuild: { jsx: 'automatic' }, optimizeDeps: { noDiscovery: true }, define: {
+    'import.meta.env.VITE_SUPABASE_URL': JSON.stringify('http://127.0.0.1:1'),
+    'import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY': JSON.stringify('local-public-fixture'),
+  } })
+  try {
+    const { ClientPerformanceWithoutReport } = await server.ssrLoadModule('/src/pages/client/ClientReportView.tsx')
+    const render = (client, tab = 'web') => renderToStaticMarkup(createElement(ClientPerformanceWithoutReport, { client, tab, onTabChange() {} }))
+    const jfj = { id: 'aece5a86-c962-4234-a1fe-7904c20f03ff', name: 'JFJ Electrical' }
+    const before = JSON.stringify(jfj)
+    assert.match(render(jfj), /Your CG-built website is maintained by CG/)
+    assert.doesNotMatch(render(jfj), /premium CG-built website|Discuss my package|Source:|MONTHLY PERFORMANCE REPORT|this monthly report|this month/)
+    const piek = render({ id: 'ed7aa1ae-de21-4151-a8f9-54796b234c1f', name: 'Piek Group' })
+    assert.match(piek, /CG manages www.piekgroup.co.za/)
+    assert.doesNotMatch(piek, /premium CG-built website|Discuss my package/)
+    assert.match(render({ id: 'synthetic-unrelated-client', name: 'JFJ Electrical' }), /premium CG-built website/)
+    assert.match(render(null), /premium CG-built website/)
+    const overview = render(jfj, 'overview')
+    assert.match(overview, /No published report yet/)
+    assert.doesNotMatch(overview, /wa.me|Total views|Verified channels|Source:|STATUS.*Published/)
+    assert.equal(JSON.stringify(jfj), before, 'Presentation never changes client or package facts')
+  } finally { await server.close() }
 })
 
 test('client-mode admin preview separates drafts, diagnostics and curation from actual client presentation', () => {

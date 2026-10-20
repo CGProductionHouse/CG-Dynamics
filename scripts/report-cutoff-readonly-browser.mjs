@@ -23,7 +23,8 @@ const fixture = {
         posts:[post('covered','2026-09-24T06:59:59.999Z','Covered Pacific final-day result',0),
           post('later','2026-09-24T07:00:00Z','Uncovered later result',999)]};
       const strategyData=emptyStrategyData();strategyData.strategyGoingForward='Explain the application routes so contributors can prepare the correct submission.';
-      function App(){const[status,setStatus]=useState('draft');const[client,setClient]=useState(null);const[lowSignal,setLowSignal]=useState(false);const[facts,setFacts]=useState([]);const[strategyReadUnavailable,setStrategyReadUnavailable]=useState(false);const[emptyStrategy,setEmptyStrategy]=useState(false);window.showPublishedFixture=()=>setStatus('published');
+      function App(){const[status,setStatus]=useState('draft');const[client,setClient]=useState(null);const[lowSignal,setLowSignal]=useState(false);const[facts,setFacts]=useState([]);const[googleState,setGoogleState]=useState('unmapped');const[strategyReadUnavailable,setStrategyReadUnavailable]=useState(false);const[emptyStrategy,setEmptyStrategy]=useState(false);window.showPublishedFixture=()=>setStatus('published');
+        window.showMissingGoogleCampaignFixture=()=>setGoogleState('no-campaign-data');
         window.showStrategyReadErrorFixture=()=>setStrategyReadUnavailable(true);
         window.showNoStrategyFixture=()=>{setStrategyReadUnavailable(false);setEmptyStrategy(true)};
         window.showPlatformWindowFixture=()=>setFacts([{platform:'tiktok',metricKey:'views',value:57944,availability:'partial',aggregation:'sum',comparableGroup:'tiktok-cohort',sourceMetric:'views',periodStart:'2026-09-01',periodEnd:'2026-09-30'},
@@ -33,7 +34,7 @@ const fixture = {
         window.showMaintainedSiteFixture=()=>setClient({id:'aece5a86-c962-4234-a1fe-7904c20f03ff',name:'JFJ Electrical'});
         return React.createElement('main',{className:'mx-auto max-w-6xl p-3 sm:p-8'},
           React.createElement(ClientReportView,{report:{...report,client_id:client?.id??report.client_id,
-            posts:lowSignal?report.posts.map(post=>({...post,impressions:0,reach:0,engagements:null})):report.posts},client,googleAds:null,googleAdsState:'unmapped',
+            posts:lowSignal?report.posts.map(post=>({...post,impressions:0,reach:0,engagements:null})):report.posts},client,googleAds:null,googleAdsState:googleState,
             googleAdsError:null,facts,monthlyStrategy:strategyReadUnavailable||emptyStrategy?null:{month:'2026-09-01',status,strategyData},showEmptyStrategy:strategyReadUnavailable||emptyStrategy,strategyReadUnavailable}));}
       createRoot(document.getElementById('root')).render(React.createElement(App));`
   },
@@ -170,6 +171,13 @@ try {
     await page.evaluate(() => window.showNoStrategyFixture())
     await page.getByText('The monthly strategy is still under review.', { exact: false }).waitFor()
     assert.equal(await page.getByText('Monthly strategy is temporarily unavailable.', { exact: false }).count(), 0)
+    await page.evaluate(() => window.showMissingGoogleCampaignFixture())
+    await page.getByRole('tab', { name: 'Google', exact: true }).click()
+    await page.getByText('Google Ads campaign figures are unavailable', { exact: true }).waitFor()
+    assert.doesNotMatch(await page.getByRole('tabpanel', { name: 'Google', exact: true }).innerText(), /No Google Ads activity|The month was synced|Source: Google Ads/)
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width} missing-Google-facts overflow`)
+    await page.screenshot({ path: join(tmpdir(), `cg-google-missing-campaign-facts-${width}.png`), fullPage: true })
+    assert.deepEqual(errors, [])
     await page.close()
     console.log(`PASS ${width}px: actual Overview/Facebook/held managed Website, cutoff/observed zero, no later highlight/duplicate site upsell/overflow/runtime errors; localhost GET only`)
   }

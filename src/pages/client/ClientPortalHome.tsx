@@ -361,5 +361,6 @@ function googleAdsStatusLabel(state: GoogleAdsDashboardState): { value: string; 
   if (state === 'data') return { value: 'Active', detail: 'Verified Google Ads reporting' }
   if (state === 'no-activity') return { value: 'No activity', detail: 'Connected, with no activity this period' }
   if (state === 'error') return { value: 'Unavailable', detail: 'Reporting could not be verified' }
+  if (state === 'no-campaign-data') return { value: 'Unavailable', detail: 'Campaign figures are not available for this period' }
   return { value: 'Not connected', detail: 'No verified campaign source for this period' }
 }

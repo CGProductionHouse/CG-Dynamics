@@ -13,6 +13,41 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 20 October — all58 Performance/package previews; two client fixes verified locally
+
+Client-only branch codex/client-performance-empty-services-20261020, tested
+runtime2070e2c644755c2392a6a883c2ab5946f6681710. Actual Elcheck no-report preview
+lost all service tabs; shared catalog/keyboard/story reuse now preserves all8,
+including exact owned-site maintenance, without invented reports/stats/scope.
+Actual Novus Google missing campaign rows falsely said no activity; new distinct
+no-campaign-data state preserves absent/error versus measured zero and keeps
+empty Google cards off Overview. No RPC/DB/Edge/provider/mapping changes.
+
+All58 real admin Performance previews checked:37 published with8 destinations,
+21 genuinely no report (deployed old frontend still affected),0 read errors.
+All58 Plan/package checks:current+next strategy months only, no To confirm or
+shoot/reel clutter,46 confirmed-card views/12 honest holds; all Amonique contact
+links exact. Elcheck/JFJ1video+6combined posters, VCS1video+8confirmed posters;
+no contract/data writes. Previous41 enabled logos/17 private skips unchanged.
+
+Final non-DB supported3997total/3978pass/19declared skips/0fail; TS/Vite actual
+app bundle, all19 canonical browser fixtures1440/375/390/430, scoped lint/diff
+pass. Earlier four source-location assertion failures corrected and full suite
+rerun. Private browser env file-URL import error occurred before execution;
+corrected only private path setting, retained failed receipt and revalidated
+unchanged suite/build log hashes before all19browser rerun. Final stable-tree
+receipt %TEMP%/cg-client-nondb-2070e2c64475-resumed.json. Two mandatory Docker SQL
+fixtures still unverified; bounded engine info timed out, no restart/reset.
+Do not relabel NON_DB_LOCAL_CHECKS_PASS as full DB/production acceptance or
+upload fixture dist. Detailed receipt CLIENT-PERFORMANCE-FINISH-2026-10-20.md.
+
+ZERO Vercel/production writes. Current main's two new video-doc paths integrated
+without runtime overlap. Separate clean staff965638ed and its101 paths untouched,
+0 intersection with10 client runtime/test paths. Its approved MCPv71 release is
+in #381comment6288257313, not a client deployment. Normal ChatGPT/source/editorial,
+provider gaps, real posting and retained owner login/phone/content/release gates
+remain separate. Exact Control Centre unavailable, no guessed replacement.
+
 ### 20 October — approved verified-logo rollout and optional-context backend fix
 
 CA approved only current verified logos already in safe Brand Identity folders,

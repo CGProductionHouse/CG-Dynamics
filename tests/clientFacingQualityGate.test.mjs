@@ -151,7 +151,8 @@ test('home page keeps loading/error states and sends empty strategy/report detai
 test('performance dashboard has loading, error and empty states', () => {
   assert.match(PERFORMANCE, /ClientPortalLoadingState/)
   assert.match(PERFORMANCE, /ClientPortalErrorState/)
-  assert.match(PERFORMANCE, /No published report yet/i)
+  assert.match(PERFORMANCE, /<ClientPerformanceWithoutReport client=\{client\} tab=\{requestedTab\} onTabChange=\{handleTabChange\}/)
+  assert.match(REPORT_VIEW, /No published report yet/i)
   assert.match(PERFORMANCE, /account is pending setup/i)
 })
 
@@ -336,7 +337,8 @@ test('the report view explains that reach and viewers are never added across pla
 test('performance dashboard separates load states for report list and report detail', () => {
   assert.match(PERFORMANCE, /loading/)
   assert.match(PERFORMANCE, /reportLoading/)
-  assert.match(PERFORMANCE, /No published report yet/)
+  assert.match(PERFORMANCE, /months\.length === 0[\s\S]*?<ClientPerformanceWithoutReport/)
+  assert.match(REPORT_VIEW, /No published report yet/)
   assert.match(PERFORMANCE, /Select a month/)
 })
 
@@ -360,7 +362,7 @@ test('Google Ads shares the complete state machine and gates disconnected source
   assert.match(REPORT_VIEW, /unmapped/)
   assert.match(REPORT_VIEW, /not-synced/)
   assert.match(REPORT_VIEW, /no-activity/)
-  assert.match(REPORT_VIEW, /googleAds !== null \|\| \['data', 'not-synced', 'error', 'no-activity'\]\.includes\(googleAdsState\)/)
+  assert.match(REPORT_VIEW, /googleAds !== null \|\| \['data', 'not-synced', 'no-campaign-data', 'error', 'no-activity'\]\.includes\(googleAdsState\)/)
 })
 
 // ── 19. Content Calendar completeness ─────────────────────────────────────────
