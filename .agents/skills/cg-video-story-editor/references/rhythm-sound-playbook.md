@@ -8,13 +8,18 @@ Use this with a verified brief, approved source media and a human editor. It is 
 2. Screen original footage in motion and in the intended aspect ratio. For each select, record source, time range, visible action, camera direction, crop, identity, rights, prior use, narrative purpose and whether the sound is usable. A contact sheet finds candidates; it cannot certify a moving crop or continuity.
 3. Write the viewer's story in one sentence: *whose moment → what changes → what proves the client can deliver → what the viewer should do*. Pick music for that arc, with usable accents and a section that leaves room for the payoff. Confirm its licence for the intended channels.
 
-## Build a beat-led opening
+## Choose the opening's sound architecture
+
+Decide before cutting whether the opening is led by a song's attacks or by an independent sound design cue. In a song-led opening, cut selected actions to audible accents and preserve the music phrase. In an SFX-led rush, keep the song silent during the rush, build a riser across the short shots, place a few brief whooshes at chosen cuts, resolve with one impact and its decay, then start the song with the story. Do not start a song at frame zero and duck it to manufacture a pause. The two structures need different timelines and audio maps.
+
+## Build a rhythmic opening
 
 1. In Premiere, listen to the chosen track and mark **audible** attacks or phrase changes on the timeline (M). Mark a strong beat, then subdivisions only when the footage earns faster cuts. Adobe documents timeline and source [markers](https://helpx.adobe.com/premiere/desktop/organize-media/apply-labeling/add-a-marker-to-a-clip.html) and demonstrates trimming visuals to a music waveform in its [music-led editing lesson](https://www.adobe.com/learn/premiere-pro/web/add-music-to-travel-videos).
 2. Choose a short sequence of distinct, readable actions: tool, human hand, material, result, place. Put the action or frame change on the marker. Do not fill a slot with a weak shot merely to satisfy a beat grid. A single strong shot can hold for two beats.
-3. Reserve a larger musical accent for the turn into the story. Fast flashes should create a visual sentence, then give the buyer a moment to understand the benefit. The opening may use a few bright frames, whip movement or shutter sound, but check for harsh flicker, illegible text, repeated shots and abrupt exposure changes at phone size.
-   Deliberately test a **release** after the rush: hold one meaningful human or product action without new copy, let the last effect decay, and dip or thin the music briefly before the first story line arrives. Compare that hold with a version that cuts straight through. The exact length follows the gesture and track, not a fixed preset. A pause works only if the image rewards attention. See the [cinematic rush and release masterclass example](cinematic-rush-and-release-example.md) for an exercise based on a CG editor's supplied reference.
+3. Reserve a larger sonic accent for the turn into the story. Fast shots should create a visual sentence, then give the buyer a moment to understand the benefit. Check for harsh flicker, illegible text, repeated shots and abrupt exposure changes at phone size.
+   Deliberately test a **release** after the rush: hold one meaningful human or product action without new copy and let the final effect decay. For an SFX-led rush, start the song after that hold. The exact length follows the gesture and sound design, not a fixed preset. A pause works only if the image rewards attention. See the [cinematic rush and release masterclass example](cinematic-rush-and-release-example.md) for an exercise based on a CG editor's supplied reference.
 4. Put SFX on their **own tracks**. A flash may use a brief transient and a tiny decay; a whoosh can start ahead of the next picture and resolve after it begins. Match the type and size of the sound to the visible event. Do not fill every cut with the same whoosh or drown the source action.
+   Align an effect's *audible peak*, not merely its file start, to the cut or action. Inspect the waveform and trim or time-shift its lead-in. Keep a clean decay before the song begins; check the actual rendered stem for accidental early placement.
 5. Beat markers are edit candidates. Review the actual moving cut and shift it by a few frames when the hand, tool or camera movement lands better. An algorithm or optional BeatEdit marker pass can locate candidate beats; the editor chooses which ones advance the story.
 
 ## Carry the viewer through the body
@@ -24,6 +29,11 @@ Use this with a verified brief, approved source media and a human editor. It is 
 - Mark key phrase or accent changes across the whole film and revisit cuts near them. Some cuts should ride the beat; others should wait for a gesture or meaning. Constantly fast cutting flattens the emotional payoff.
 - Lay the incoming action or ambience a few frames **before** its picture when anticipation helps; let the outgoing sound continue beyond its picture when it makes the next shot feel connected. Adobe calls these [J and L cuts](https://helpx.adobe.com/premiere/desktop/edit-projects/trim-clips/perform-j-cuts-and-l-cuts.html). Fade the source sounds against each other or room tone; an [audio crossfade](https://helpx.adobe.com/premiere/desktop/add-audio-effects/apply-audio-transitions/audio-crossfade-transitions.html) helps prevent a seam, but listen for doubled or phasey sound.
 - Keep music, dialogue, effects, genuine camera sound, ambience and brand sound identifiable on separate tracks. Do an intentional final listen on speakers and headphones, and check whether the hook still works muted.
+- For an SFX-led opening, verify the exported song stem is silent until the planned entry and continuous afterward. Verify a riser grows toward the reveal, the impact lands on the turn, and tails fade naturally. Do not sign off from RMS measurements alone; listen to the export.
+
+## Reusable sound asset catalog
+
+Use the [CG sound design catalog](sfx-library.md) to shortlist risers, whooshes and impacts. It records source links and use cases, not a bulk archive of stock files. License and download an Envato item for each specific client project when chosen, keep the project license with the edit, and do not redistribute the raw asset as a staff sample pack. The current Envato Workspace is a discovery surface. Check the actual account's team seats and sharing before claiming that all staff can open it. Adobe Creative Cloud Libraries support shared media assets in Premiere, but confirm storage quota and rights before moving any licensed files there.
 
 ## Fast, honest tool use
 
