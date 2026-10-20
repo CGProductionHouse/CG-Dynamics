@@ -163,4 +163,3 @@ existing browser fixture and two test files; continuity is this receipt and the
 ops handover. No ignored build/config/client asset or privileged value included.
 The explicitly unverified database/client-role/cohort gates above remain, not
 waived by code review. Frontend recovery changes await a separate hosting release.
-
