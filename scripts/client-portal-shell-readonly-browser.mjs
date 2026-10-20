@@ -64,6 +64,7 @@ async function checkEmptyPerformance(page, width) {
   }
   await services.getByRole('tab', { name: 'Overview', exact: true }).click()
   await page.getByRole('heading', { name: 'No published report yet', exact: true }).waitFor()
+  await page.screenshot({ path: join(tmpdir(), `cg-portal-no-report-services-${width}.png`), fullPage: true })
 }
 let browser
 try {

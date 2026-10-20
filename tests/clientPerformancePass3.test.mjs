@@ -37,7 +37,7 @@ test('legacy Campaigns deep link redirects to the Performance tab without anothe
 })
 
 test('only configured campaign sources render and missing values are not presented as zero', () => {
-  assert.match(reportView, /googleAds !== null \|\| \['data', 'not-synced', 'error', 'no-activity'\]\.includes\(googleAdsState\)/)
+  assert.match(reportView, /googleAds !== null \|\| \['data', 'not-synced', 'no-campaign-data', 'error', 'no-activity'\]\.includes\(googleAdsState\)/)
   assert.match(reportView, /PerformanceServiceStory service="google"/)
   assert.match(reportView, /googleAds !== null && \['data', 'no-activity'\]\.includes\(googleAdsState\)/)
   assert.doesNotMatch(reportView, /Meta Ads|TikTok Ads|Planned integration/)
