@@ -5,7 +5,7 @@ description: Edit or review CG Production House client videos in Premiere using 
 
 # CG video story editor
 
-The editor remains accountable for the story and final cut. Use AI and automation to find footage, test structures, mark beats and check technical details. Start with the exact client's brief, existing Content Guideline, authorised OneDrive media and relevant CG final exports. Respect the existing client content and approval authorities; this skill creates no new production task or approval state.
+The editor remains accountable for the story and final cut. Use AI and automation to find footage, test structures, mark beats and check technical details. Start with the exact client's brief, existing Content Guideline, authorised OneDrive media and relevant CG final exports. Complete the [story preproduction gate](references/story-preproduction-gate.md) before building a timeline; it requires a buyer, reason for this post, distinct hook options, prior-post comparison and a feasible source plan. Respect the existing client content and approval authorities; this skill creates no new production task or approval state.
 
 1. State the buyer, relevant moment, proof and call to action in one sentence. Screen original footage as moving portrait crops; label genuine, stock and archival material. Do not imply that separate projects or illustrative scenes are one installation.
 2. Watch relevant CG final exports with sound and record precise timecoded examples of opening, shot scale, movement, rhythm, effects, sound and outro. Copy the *decision principle* when it fits this client's story, not the edit itself.
@@ -24,3 +24,5 @@ Before using a deliberate camera move as a transition, verify that the next shot
 `python scripts/screen_sources.py <input-folder> <output-folder>` can generate triage frames and a source ledger from local originals with FFmpeg. Watch shortlisted clips in motion before selecting them.
 
 Optional vendor tools and workstation licensing follow [issue #856](https://github.com/CGProductionHouse/CG-Dynamics/issues/856). Do not install or claim them from this skill alone.
+
+When a client supplies editing references or tutorial collections, use the [reference-to-technique study](references/reference-to-technique-study.md): separate what was actually seen/heard from the creator's claims, identify the shot and sound prerequisites, then test the idea on a short Premiere sequence against a clean cut. For a Windows workstation, consult the [free Premiere tool shortlist](references/free-premiere-tools.md) before adding a plugin; a tutorial's ranking does not establish price, OS support or portability.
