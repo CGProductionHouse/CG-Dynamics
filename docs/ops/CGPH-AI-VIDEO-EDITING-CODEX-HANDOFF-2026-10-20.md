@@ -5,6 +5,14 @@
 **Status:** Owner-directed implementation brief; not a claim that plugins are installed or licences purchased.
 **Implementation issue:** [#856 — CGPH AI editing Codex implementation](https://github.com/CGProductionHouse/CG-Dynamics/issues/856). The issue is ready for an assigned coding agent; no agent run or workstation installation has been claimed.
 
+## Owner direction update — 21 October 2026 (Nolan)
+
+The owner has now approved a **progressive Nolan autonomous-editor goal**: Nolan should create increasingly complete **4K, source-linked, editable Premiere edits**; Franco and Sydney should primarily **review and correct**, with KG still preparing simpler timelines while that work is automated. Human approval, client authority, rights and publication gates remain mandatory. The earlier human-only final creative finishing instructions below describe the current demonstrated capability, **not Nolan's long-term ceiling**.
+
+**Canonical expanded system + creative quality game plan:** [Nolan autonomous 4K editing, LAN-first storage, SD ingest, Premiere handover, backups, quality learning and milestones (21 October)](./CGPH-NOLAN-AUTONOMOUS-4K-EDITING-GAME-PLAN-2026-10-21.md).
+
+This direction extends existing issue #856 and coordinates with PR #859 and #841/#450; no competing video workflow, application task registry or changes to protected OneDrive/Dynamics authorities. Nolan currently operates on the owner's MSI laptop; the already-owned powerful desktop is the planned dedicated workstation when available. **Inventory must verify actual installed parts and drives before purchases.** This is an owner plan only, not proof of a completed workstation or automation rollout.
+
 ## Decision
 
 **Existing subscriptions (owner-confirmed):** CG operates **two distinct Adobe Creative Cloud subscriptions** under separate logins, plus CapCut Pro. This is not evidence of a shared Adobe Teams tenancy or two plugin seats. Codex must check plugin licensing and workstation entitlements separately; no private sign-in or billing details belong in this public repo.
