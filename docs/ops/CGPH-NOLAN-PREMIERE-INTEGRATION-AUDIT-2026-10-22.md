@@ -2,7 +2,18 @@
 
 **Lane:** [#856](https://github.com/CGProductionHouse/CG-Dynamics/issues/856), continuing [PR #862](https://github.com/CGProductionHouse/CG-Dynamics/pull/862). [PR #859](https://github.com/CGProductionHouse/CG-Dynamics/pull/859) owns craft skills and remains untouched. Authority: [latest owner instruction](https://github.com/CGProductionHouse/CG-Dynamics/issues/856#issuecomment-6334616955), AGENTS.md and the [4K game plan](CGPH-NOLAN-AUTONOMOUS-4K-EDITING-GAME-PLAN-2026-10-21.md).
 
-**Status:** local source/file audit and duplicate GUI baseline VERIFIED; diagnostic code FILE/MOCK TESTED; native host execution BLOCKED by storage. No bridge is production verified. No third-party installation, purchase, client upload, production data change, merge or deployment.
+**Status:** local source/file audit and duplicate GUI baseline VERIFIED; diagnostic code FILE/MOCK TESTED. Storage recovered and Adobe UDT installed; native execution now awaits the human-only Premiere Developer Mode step. No bridge is production verified. No unapproved third-party installation, purchase, client upload, production data change, merge or deployment.
+
+## Later 22 October recovery checkpoint — storage resolved
+
+Owner explicitly authorised laptop cleanup, the named game/gaming-app removals and connecting the existing rclone client to the specified personal Google Drive for archive/comparison. Private receipts and inventories stay on the laptop, not Git.
+
+- Removed 13 old downloaded installers (**3,335,982,072 bytes**) and 13 duplicate ZIP downloads (**12,820,446,142 bytes**). Every file inside each removed ZIP was SHA-256 matched to its retained extracted copy; changed/missing sources abort removal. An incomplete extraction failed verification, so its archive was retained.
+- MECCHA CHAMELEON (**3,507,083,983 installed bytes**) removed through Steam. Vortex, Epic Games Launcher and Epic Online Services absent from fresh uninstall-registry readback. Initial silent Epic removal failed with admin Error 1730; approved elevated launcher uninstall subsequently completed with status 0. Its own `UninstallAllApps` action ran. No game ownership/account deletion or separate save-folder purge was performed.
+- C: observed free space rose from **208,023,552 bytes** before installer cleanup to approximately **206–207GB** after gaming cleanup and Adobe installation. This is observed disk headroom, not an independently attributed byte total for each uninstaller. No client original/project deletion was targeted. Original Emoya `.prproj` SHA-256 rechecked unchanged.
+- Approved Google Drive remote configured with **`drive.readonly,drive.file`**: read existing files, create/modify its own uploads. Browser visibly verified the requested account; 31,477 remote file metadata records indexed. Seventeen Downloads files matched remote size/MD5 (**690,267,479 bytes**) and no inspected saved Premiere project references them. **These files were not removed:** subsequent account/metadata readback hit Google's shared rclone client `rateLimitExceeded` quota. No cloud uploads/deletes or cloud-based local deletions claimed. Rclone warns this shared OAuth client is being retired in 2026; a CG-owned client is a separate future setup, not an unattended-production promise.
+- Retried the already-approved Adobe installation after cleanup. **UDT 2.3.0.5 installed successfully**, Adobe install log **10:07:03 SAST / exit 0**, executable version verified, application opened. No new third-party purchase/install.
+- UDT Playground service connects locally at port 14001, but displays **Premiere Disconnected**. Actual Premiere Plugins preferences show **Enable developer mode unchecked**, with restart required. Preferences were opened read-only; human asked to enable it and click OK because Computer Use prohibits changing in-app security settings. **No diagnostic script or native effect mutation has run in Premiere yet.** This supersedes the storage-blocked rows below; retain the original failed-install/baseline evidence as history.
 
 ## 1. Why advanced editing still depends on Computer Use
 
@@ -97,7 +108,7 @@ API shapes checked against [Adobe types at `c8f108941197c1d987f08b9916c0d18a2e25
 
 `npm run build` passed: TypeScript and Vite 7.3.6, 386 modules; existing >500kB chunk warning. Used the already-installed dependency directory via a local ignored junction after confirming identical package-lock SHA-256; no package installation. Diff checks and final focused-test receipt are recorded in PR #862. This is not authenticated app, production or native-Premiere acceptance.
 
-## 5. Measured duplicate baseline
+## 5. Measured duplicate baseline (before storage recovery)
 
 Private test **`Nolan_Duplicate_API_Test.prproj`** was copied exclusively, hash checked, opened and saved in Premiere. Original SHA-256 rechecked after this operation: unchanged. The file audit found **69 stored media references, zero missing**; prepared sequence visibly online. A project copy shares media references and is not an independent backup.
 
@@ -126,7 +137,7 @@ Use the duplicate container; create a **new 15-second 4K sequence** from authori
 7. Perform the **same operation list** by GUI and candidate API. Separate setup, creative planning, command latency, host execution and export. Record input actions/tool calls/retries, elapsed time, usage where available, native readback, quality and reviewer effort. Do not compare file-copy speed to title design.
 8. Franco/Sydney handover only with available device, matching Premiere, licensed templates/fonts/effects and verified original paths/backup. Until then second-device acceptance is UNVERIFIED.
 
-**Decision:** recover storage and run approved native discovery first. PrimCut is the documented external-Codex candidate when an available build can be approved/tested. Bounded pinned PremiereMCP **CEP** is an alternative after its install/code gate, not its broken UXP path. Compare candidates before creating a custom CG production bridge. The discovery function in this PR is a diagnostic, not a competing editing engine.
+**Decision:** storage recovery is complete. Await the human Developer Mode step, restart the duplicate and run approved native discovery first. PrimCut is the documented external-Codex candidate when an available build can be approved/tested. Bounded pinned PremiereMCP **CEP** is an alternative after its install/code gate, not its broken UXP path. Compare candidates before creating a custom CG production bridge. The discovery function in this PR is a diagnostic, not a competing editing engine.
 
 ## 7. Continuity and remaining gates
 
@@ -134,4 +145,4 @@ No third-party install/purchase authorisation has been granted. Existing approva
 
 Update #856/#862 and ops handover; checkpoint #381. Exact Google Control Centre reference remains unavailable in current continuity; no guessed spreadsheet/replacement tracker write. No new broad agent mission or overlap with #859/#841/#450.
 
-**Blockers:** storage for approved installation and 4K scratch/export; human security/developer prompt if presented; actual host/MCP execution; approved editable title asset; available second workstation and verified original backup. System remains **LOCAL PROTOTYPE / NOT PRODUCTION VERIFIED**.
+**Current blockers:** human Premiere Developer Mode enablement/restart; actual host/MCP execution; approved editable title asset; available second workstation and verified original backup. The storage/UDT installation blocker is resolved. Shared Google OAuth quota blocks final cloud duplicate readback and durable archive acceptance. System remains **LOCAL PROTOTYPE / NOT PRODUCTION VERIFIED**.
