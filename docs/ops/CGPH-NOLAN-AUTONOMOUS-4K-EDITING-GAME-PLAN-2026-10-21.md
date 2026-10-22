@@ -6,6 +6,8 @@
 
 ## 1. Outcome and non-negotiable owner direction
 
+**22 October implementation checkpoint:** [Local code audit, PrimCut/PremiereMCP/native API comparison, duplicate benchmark and verified installation blocker](CGPH-NOLAN-PREMIERE-INTEGRATION-AUDIT-2026-10-22.md). Existing builders use prepared 1080 media and FCP 7 XML; native finishing is not implemented. Adobe developer setup approved, but UDT installation failed with Error 133 (disk capacity). No native API or editable 4K acceptance yet. Continue #856 / #862; do not duplicate the craft lane.
+
 **Nolan should become CG's strongest video editor, not merely a first-cut assistant.** Nolan should eventually produce compelling, polished **real, editable Premiere Pro projects** so Franco and Sydney mostly review, correct and approve; KG may continue preparing simple timelines until that work is automated. Nolan must improve from human revisions, maintain a distinct CG-level creative standard, and handle routine social reels with minimal repeated Codex interaction.
 
 **Progressive autonomy is the goal; autonomous final client approval is not.** The earlier handoff's human-only creative finishing describes the presently proven workflow, not the long-term ceiling. Nolan should take responsibility for draft creative decisions, finishing passes and self-QA as each capability becomes demonstrably reliable. Actual release, client approval, music rights, brand claims and acceptance remain subject to existing human/CG Dynamics authority.

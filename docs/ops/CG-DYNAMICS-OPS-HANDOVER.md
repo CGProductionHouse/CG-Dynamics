@@ -1,3 +1,11 @@
+### 22 October — Nolan Premiere integration audit, existing #856 / #862 lane
+
+Read [verified code/API audit and duplicate benchmark](CGPH-NOLAN-PREMIERE-INTEGRATION-AUDIT-2026-10-22.md) before further video automation work. Bloem/PSG/JFJ/Emoya builders prepare media externally and import FCP 7 XML; current Emoya is 1080 × 1920 with rendered titles/audio stems, not native editable 4K finishing. Preserve moment/source logic; native effect/title/audio host connection is missing.
+
+Duplicate project open/identity/save verified, original hash unchanged: 191.001s orchestrated GUI wall time / 6 inputs, not a controlled title-edit benchmark. PrimCut documents direct Codex MCP but public download paused; PremiereMCP pinned-source issues include nonfunctional UXP and incorrect time-value dispatch. No candidate installed or production-certified. Read-only diagnostics and mock-tested native discovery probe continue PR #862; PR #859 craft files untouched.
+
+User approved Adobe UXP Developer Tools + Developer Mode setup. Actual UDT 2.3.0 installation failed Error 133: 1,948,273,828 bytes required, 570,576,896 available. Approval persists; storage recovery and any human-only security prompt precede retry. No native API edits/4K export/second-workstation acceptance, no media deletion/upload, third-party install/purchase, DB/Microsoft/hosting change or deployment. #679 remains locked. Exact Control Centre reference unavailable; no guessed tracker write. Continue #856/#862, not another broad lane.
+
 ### 18 October — CA owner correction: real Teams/Planner tasks, privacy and Novus
 
 **MANDATORY next read for the active staff/Codex Teams-to-Dynamics implementation:** [CGPH Planner/Calendar Owner Handover, 18 Oct](CGPH-PLANNER-CALENDAR-CLEANUP-OWNER-HANDOVER-2026-10-18.md).

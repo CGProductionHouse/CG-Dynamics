@@ -15,6 +15,8 @@ This direction extends existing issue #856 and coordinates with PR #859 and #841
 
 ## Decision
 
+**22 October verified implementation update:** [Premiere API/bridge audit and duplicate baseline](CGPH-NOLAN-PREMIERE-INTEGRATION-AUDIT-2026-10-22.md). This supersedes assumptions about current native automation: prepared-media/XML assembly works; native effects/title/audio API execution remains unverified. Approved Adobe UDT install failed for insufficient space. No third-party installation/purchase or production rollout.
+
 **Existing subscriptions (owner-confirmed):** CG operates **two distinct Adobe Creative Cloud subscriptions** under separate logins, plus CapCut Pro. This is not evidence of a shared Adobe Teams tenancy or two plugin seats. Codex must check plugin licensing and workstation entitlements separately; no private sign-in or billing details belong in this public repo.
 
 Use **released Adobe Premiere Pro** as the master editor, existing CapCut Pro for simple standalone social edits, and an evidence-ranked set of existing editing tools:
