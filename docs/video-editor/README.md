@@ -12,11 +12,14 @@ This branch deliberately sits outside Nolan's active [Premiere engineering PR #8
 6. [Five film modes, zero-shoot creative plan and client motion kits](NOLAN-NO-FOOTAGE-AND-CLIENT-MOTION-KITS.md) — **cinematic, promotional, interview, trend, motion-led**; no footage does not mean no usable archive; source CG Dynamics, private Brand Hub, Canva, approved strategy, existing package and optional Teams before proposing a genuinely branded 4K concept.
 7. [Modern free motion graphics](NOLAN-MOTION-GRAPHICS-FREE-FIRST-RESEARCH.md) — Adobe Premiere/After Effects MOGRT source + media replacement, **MIT Motion Canvas** as a code-driven fallback, Blender specialised 3D; **Remotion not free for companies of 4+ staff**, which includes CG.
 8. [South African trend radar](NOLAN-SA-TREND-RADAR-RESEARCH.md) — credible live SA/social signals → exact client relevance and strategy → short original, rights-cleared, low-backlash hook; research only, no trend watch scheduled or posts created.
-9. [Technique lab queue](NOLAN-TECHNIQUE-LAB-QUEUE.md) — **specific tutorial-derived, real-work applications** ranked by editorial value and pass/fail criteria; starts with Emoya's actual putting/text feedback.
+9. [Audio perception failure and recovery](NOLAN-AUDIO-PERCEPTION-AND-QA-RECOVERY.md) — owner-rejected Emoya 30s cut, loudness/readback vs genuine listening, free PCM/onset/beat/event analysis, human hearing acceptance; no new plugins or credit use.
+10. [Technique lab queue](NOLAN-TECHNIQUE-LAB-QUEUE.md) — **specific tutorial-derived, real-work applications** ranked by editorial value and pass/fail criteria; starts with Emoya's actual putting/text feedback.
 
 ## Owner's latest priority: no-footage videos and distinctive client branding
 
 Nolan should be able to make a **high-impact animation/stock/archive-based video without any new content run**, not by overriding missing shoots or fabricating a plan, but by using existing Dynamics month strategy/contracts, brand and post archives, carefully selected free commercial stock and an original visual mechanism. When a plan is absent, create **a reviewable draft idea**, not an invented approved Content Guideline or deliverable. Build real per-client Premiere motion branding only as the work is approved (no mass Canva export/install now). Trend research must be early and industry-fit, with licensed audio and avoiding opportunistic political/sensitive content.
+
+**Latest quality crisis:** Owner rejected Nolan's latest Emoya cut (audio a mess and graphics regressed from a better earlier version). See [blocking source-of-truth PR #862 comment](https://github.com/CGProductionHouse/CG-Dynamics/pull/862#issuecomment-6346320310). The audio diagnostic is advisory only; the active editor lane must preserve the superior baseline, actually listen to the mix or obtain human signoff, and verify staff feedback before claiming progress.
 
 ## Current research conclusion
 
