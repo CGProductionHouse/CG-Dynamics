@@ -2,10 +2,13 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
+const {repairPanel,repairTransport}=require('./premiere_session_repair.cjs');
 
 const hashes = {
   'src/tools/expanded.ts': '54ecb64b345f3c1bc8237c711f4503ae385bacfc0ab7d5e1d3d82d887f174ffb',
   'src/tools/index.ts': 'c3e3c571a5bc6eb98f045b8743f1541b1caed0457afb245899d0ee623ceee97f',
+  'src/bridge/index.ts': '29383efd059486972e2fe2e6a8a46f94a2a10aa8aad7cd1cee73ac1f11b5fd95',
+  'cep-plugin/bridge-cep.js': '8f6f1ef8b26d35ae39bfe3226874f9279da510b0edc03be96a815e2ba5c2c926',
 };
 function replaceOnce(source, before, after) {
   if (source.split(before).length !== 2) throw new Error('Pinned patch anchor changed or ambiguous');
@@ -82,13 +85,15 @@ function prepare(sourceRoot, outputRoot) {
   const changes = {
     'src/tools/expanded.ts': repairExpanded(fs.readFileSync(path.join(src, 'src/tools/expanded.ts'), 'utf8').replaceAll('\r\n', '\n')),
     'src/tools/index.ts': repairFrame(fs.readFileSync(path.join(src, 'src/tools/index.ts'), 'utf8').replaceAll('\r\n', '\n')),
+    'src/bridge/index.ts': repairTransport(fs.readFileSync(path.join(src,'src/bridge/index.ts'),'utf8').replaceAll('\r\n','\n')),
+    'cep-plugin/bridge-cep.js': repairPanel(fs.readFileSync(path.join(src,'cep-plugin/bridge-cep.js'),'utf8').replaceAll('\r\n','\n')),
   };
   fs.cpSync(src, out, { recursive: true, filter: p => !['node_modules', '.git'].includes(path.basename(p)) });
   for (const [file, contents] of Object.entries(changes)) fs.writeFileSync(path.join(out, file), contents);
   fs.symlinkSync(path.join(src, 'node_modules'), path.join(out, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');
   fs.writeFileSync(path.join(out, 'NOLAN-LOCAL-REPAIRS.json'), JSON.stringify({
     upstreamCommit: '50f534b17639aafc615a10b38325957bf73e6515', preparedAt: new Date().toISOString(),
-    sourceHashes: hashes, repairs: ['source-time-value', 'formatted-frame-time-candidate', 'quarantine-close-before-mutation', 'explicit-native-argb-color'],
+    sourceHashes: hashes, repairs: ['source-time-value', 'formatted-frame-time-candidate', 'quarantine-close-before-mutation', 'explicit-native-argb-color', 'opt-in-expiring-duplicate-reconnect', 'host-project-and-sequence-scope', 'protected-denial-propagation'],
     hostAcceptance: false, dependencyInstall: false,
   }, null, 2));
   return out;

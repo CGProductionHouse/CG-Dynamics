@@ -33,7 +33,7 @@ const result = await probePremiereReadOnly(require('premierepro'), {
 
 ## Approved MCP repair candidate
 
-`prepare_premiere_mcp_repairs.cjs` prepares a **new private copy** of the already-approved PremiereMCP 1.2.0 test source at commit `50f534b17639aafc615a10b38325957bf73e6515`. It validates the package, dependency lock and both patch-target hashes; changed/ambiguous anchors abort. Existing output is refused. It preserves the vendor pin, reuses its installed dependencies with a directory junction, and runs no installer, package download, security setting or Codex configuration change. Use trusted local source only. Build the new copy with its existing `npm run build` before testing.
+`prepare_premiere_mcp_repairs.cjs` prepares a **new private copy** of the already-approved PremiereMCP 1.2.0 test source at commit `50f534b17639aafc615a10b38325957bf73e6515`. It validates the package, dependency lock and four patch-target hashes; changed/ambiguous anchors abort. Existing output is refused. It preserves the vendor pin, reuses its installed dependencies with a directory junction, and runs no installer, package download, security setting or Codex configuration change. Use trusted local source only. Build the new copy with its existing `npm run build` before testing.
 
 The overlay uses time-aware parameter reads, a single formatted-timecode frame request, explicit native colour channels, and quarantines `close_project` **before** a host mutation. Native colour uses alpha **0/1**, RGB integer **0..255**; fractional alpha remains unaccepted. Readback mismatch is a failure with `mutated:true`, not permission to retry. Generic packed numeric colour writes are unsuitable for brand matching.
 
@@ -42,9 +42,18 @@ node scripts/video-editing/prepare_premiere_mcp_repairs.cjs 'C:\private\approved
 # Build in that candidate, then execute regression fixtures against its generated scripts:
 $env:NOLAN_MCP_REPAIR_ROOT='C:\private\new-repair-candidate'
 node --test scripts/video-editing/premiere_mcp_repairs.test.cjs
+node --test scripts/video-editing/premiere_session_repair.test.cjs
 ```
 
 Seven regression tests execute actual generated scripts against mocks, including stale sequence, invalid input, no static-getter fallback, no close side effect, exact colour and stale frame output. Without the private candidate, six host-script tests explicitly skip; that is **not a passing vendor acceptance run**. Live receipts remain separate. Formatted timecode corrected the old wrong-scene defect, but freshly modified AE graphics were absent from quick PNGs and present in full AME output: do not use frame export alone to approve graphics. See latest audit.
+
+### Bounded session recovery
+
+`premiere_session_repair.cjs` patches the existing CEP panel and transport; it adds no service, editor or manifest/security change. It uses an **optional private** `nolan-session.json` inside the existing queue: `projectPath`, `sequenceId`, `reconnect:true`, `expiresAt` (UTC, at most two hours ahead). Set this only for an explicitly verified duplicate. Do not commit account/media paths. An expired/malformed lease blocks commands. Without the lease, the vendor's existing manual connection remains available; this is **not universal production scoping or a filesystem sandbox**.
+
+On panel load, a valid lease reconnects only after a read-only host identity check. Each dispatched script also checks the exact project/active sequence before executing. Stale commands are refused at dispatch; protected denial becomes a transport error instead of a false save-success message. This does not cancel an already dispatched `evalScript`, recover Premiere from a host hang, or launch/reopen a closed project. Never retry an ambiguous timed-out write automatically. Eight generated-panel/transport fixtures cover reconnection, expiry, identity, stale commands, denial propagation and legacy compatibility; mocks do not establish host lifecycle reliability.
+
+For a fresh AE title preview, save and request an **Adobe-rendered** sequence with a unique output filename. Verify AME completion, dimensions/frame count and full decode; inspect the relevant extracted frame. The 22 October new-word test was visible in the actual 4K render. FFmpeg here extracts/inspects Adobe output; it does not replace native editing. Small technical test typography is not a client-design acceptance.
 
 ## Existing diagnostic tests
 

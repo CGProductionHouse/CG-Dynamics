@@ -9,6 +9,8 @@
 
 ## Owner direction update — 21 October 2026 (Nolan)
 
+**Later bounded owner instruction, 22 October:** stop after Run 1 recovery/reconnection/title-preview and Run 2 native-control acceptance on the protected 4K duplicate. [Focused results and Emoya decision](CGPH-NOLAN-PREMIERE-INTEGRATION-AUDIT-2026-10-22.md): ready-project scoped reconnect and actual fresh-title 4K preview passed; CEP effect insertion/transition and reliable project-only scripting recovery failed. Preserve earlier working tools. Speed ramps/Optical Flow/mask authoring remain unsupported or unverified through tested routes. **Nolan is not ready to promise autonomous Emoya creative finishing**; supervised verified native controls are usable. No new broad implementation or client edit begins automatically after this checkpoint.
+
 The owner has now approved a **progressive Nolan autonomous-editor goal**: Nolan should create increasingly complete **4K, source-linked, editable Premiere edits**; Franco and Sydney should primarily **review and correct**, with KG still preparing simpler timelines while that work is automated. Human approval, client authority, rights and publication gates remain mandatory. The earlier human-only final creative finishing instructions below describe the current demonstrated capability, **not Nolan's long-term ceiling**.
 
 **Canonical expanded system + creative quality game plan:** [Nolan autonomous 4K editing, LAN-first storage, SD ingest, Premiere handover, backups, quality learning and milestones (21 October)](./CGPH-NOLAN-AUTONOMOUS-4K-EDITING-GAME-PLAN-2026-10-21.md).
