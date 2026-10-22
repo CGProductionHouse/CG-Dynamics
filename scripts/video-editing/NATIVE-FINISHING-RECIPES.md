@@ -6,6 +6,16 @@ Engineering companion to the [audit](../../docs/ops/CGPH-NOLAN-PREMIERE-INTEGRAT
 
 ## Route to use
 
+### Creative revision guard
+
+The Emoya owner rejected a technically native redesign and preferred the earlier prepared-media typography. A requested amendment must name the exact baseline export and bind each feedback item to it. Preserve successful design/story/sound decisions; isolate an experiment rather than replacing the concept. Native tool success and 4K metadata are not creative acceptance. Retaining prepared baseline media is a compatibility choice, not proof of native text/mask/ramp editability; report that boundary.
+
+### Bounded sport punch — local output proof, reviewer acceptance pending
+
+Tested one Motion Scale pulse on an already-retimed 25fps prepared source with inPoint0: source-seconds/value `(0,100),(1.84,100),(1.88,103),(1.92,110),(1.96,117),(2.00,117),(2.04,112),(2.08,108),(2.12,105),(2.16,103),(2.20,101),(2.24,100),(4.40,100)`. Thirteen native keys read back; actual Adobe render compared against identical clean picture/type/score. Three-frame attack lands on the photographed strike; subsequent seven-frame settle avoids a sustained crop. Type stays on a separate unscaled track. This adapts the indexed three-frame zoom reference; it does not prove Transform shutter-angle blur, tracked masks or arbitrary Bezier handles. Re-time/reframe to each source's action, do not paste these client-specific seconds into another film. Keep only after reviewer acceptance.
+
+Preserved CEP export accepted the previously tested Windows-normalized `.epr` path after one slash-form path call threw an encodeSequence exception. This is one host observation, not a universal path-library fix. Verify actual job/output before any retry; do not rerun mutations.
+
 Keep the approved pinned PremiereMCP CEP repair candidate and its 19 selected tools for verified exposed AE text/font/size/colour, identity, reads, save and export. Use the existing approved Adobe UXP Developer Tools for finite duplicate-only native transactions where CEP effect insertion or QE transitions fail. Do not retry the failed CEP routes. UDT still needs GUI loading/running; this is not an unattended external UXP connection.
 
 Existing installed resources are sufficient to demonstrate a real flash transition, original-linked slow motion, Lumetri, editable title reveals and independent sound automation. Installing more plugins is not the acceptance criterion. OpenCurve remains a tested GUI option; sampled native keys can express a bounded easing curve without another plugin. Installed Film Impact Flash availability on this laptop does not prove another staff machine's entitlement.

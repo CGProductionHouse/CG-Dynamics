@@ -4,6 +4,24 @@
 
 **Status:** approved duplicate-only native UXP/CEP technical execution; **time-readback repair and editable AE font/size/exact RGB now demonstrated**, with actual 4K render. Automatic lifecycle, new-graphic frame-capture readiness, full advanced-tool coverage, creative quality and second-device acceptance remain open. No purchase, client upload, production data change, merge or deployment. This is not the final Emoya creative.
 
+## Latest creative correction — restore the owner-preferred V5
+
+**ONE MORE is rejected.** The owner preferred the earlier NEXT ROUND typography/reveals and asked for amendments to that exact export. The relevant VIDEO APPROVALS thread was read in Chrome: remove all on-screen full stops and replace the two long putting shots with a pre-contact→impact motion cut. The prior technical/native success did not satisfy those requests. The local client library now explicitly supersedes ONE MORE and binds future feedback to V5/V6.
+
+**Root causes:** feedback was detached from its baseline; an amendment became an unrequested concept/font/audio redesign; technical capability proof displaced creative continuity; the putting feedback remained unresolved; metadata/readback checks were mistaken for evidence of acceptable craft. Do not blame the footage or propose another plugin for this decision failure.
+
+**Actual correction:** protected V5 clone, original Montserrat ExtraBold/SemiBold masked baseline-rise recipes, periods removed throughout including outro; putting shortened **8.20→4.44s**. Outgoing2449 last source3.08s cuts at timeline14.00s into2446 source7.64s, with the strike approximately14.04s and one original cue crossing the cut. The same licensed V5 score runs continuously0–30 with a native1.12s gain fade. Native mix gain reduced3dB after first-render measurement. Reallocated time to existing drive/walk/venue/brand beats, without repeating an original source.
+
+**One bounded sporty experiment:** adaptation of the previously sampled Miracamp three-frame zoom reference (video7504014296779590935): native Motion Scale100→117 in three frames at the drive's contact, settling100 over seven frames, with stationary readable type. Thirteen keys read back and actual Adobe output compared with a clean4.44s version using identical copy/score. This is not the tutorial's full Transform/mask/motion-blur implementation or a staff-approved reusable style.
+
+**Honest editability boundary:** retaining the preferred V5 appearance uses its prepared picture/alpha-title recipe, with native timeline/gain/zoom finishing through the preserved CEP MCP. Lettering, masks, colour and retiming inside prepared clips remain baked. This is a **1080×1920 restoration**, not progress toward fully original-linked native4K typography. Existing native4K proofs/tools remain preserved; no custom editor or plugin added, default configuration unchanged. Do not trade away a preferred design merely to obtain a native-controls checkbox.
+
+**Second Adobe output:**30.000s/25fps/750frames,57,061,886bytes; SHA256 `dcbad120089415f2f312051ee11acfd889269ca852a1485aa1f479925763b8b3`. Full A/V decode0, no detected black segments, no missing absolute saved-media references. **−15.77LUFS/−5.87dBTP**, closely matching preferred V5's−15.73LUFS. Complete output sampled2fps, every putting-cut/sport-pulse frame plus roll/title/logo states inspected. First render led to an additional contact in-point correction and3dB mix correction. **No listening/full-motion/phone/client acceptance claim:** agent has no audio feed. Native fade readback/output RMS prove an introduction envelope, not auditory taste.
+
+Local package includes named V6 video, retained same-post cover/caption, saved V6 MASTER project, source/review receipts and baseline/root-cause notes in the client kit. Original V5 project hash unchanged. No upload/publication/live Dynamics write. One encodeSequence call failed with a slash-form preset path; a single retry using the previously successful Windows path queued/rendered. No blind mutation replay. Active project/master and exact expiring CEP scope verified; new UXP listener remains stopped.
+
+**Revision gate:** identify exact baseline and feedback source; record keep/change/one experiment; verify each amendment at the actual output time; compare with the preferred baseline; distinguish technical pass from owner acceptance. #859 shared craft files untouched. No production/runtime/security/DB/Microsoft changes or deployment; #679 retained. Control Centre target unavailable; no guessed tracker write.
+
 ## Latest approved 1.24.3 isolated test — installed, limited native MCP acceptance
 
 ### Subsequent real Emoya creative continuation
