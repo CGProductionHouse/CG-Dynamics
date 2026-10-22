@@ -5,6 +5,8 @@
 **Status:** Owner-directed implementation brief; not a claim that plugins are installed or licences purchased.
 **Implementation issue:** [#856 — CGPH AI editing Codex implementation](https://github.com/CGProductionHouse/CG-Dynamics/issues/856). The issue is ready for an assigned coding agent; no agent run or workstation installation has been claimed.
 
+**Current implementation, 22 October:** the preceding setup-only status is historical. Owner-approved Adobe developer setup and isolated PremiereMCP experiment have executed on a duplicate, including source-linked 4K export, native effects/keys/audio and exposed AE font/size/exact colour. A separate repair candidate and seven regression fixtures continue existing PR #862. Read the [latest audit](CGPH-NOLAN-PREMIERE-INTEGRATION-AUDIT-2026-10-22.md) for evidence and remaining lifecycle/readiness/advanced-tool/staff gates before continuing. No full autonomous-editor, client-final, deployment or staff-rollout acceptance.
+
 ## Owner direction update — 21 October 2026 (Nolan)
 
 The owner has now approved a **progressive Nolan autonomous-editor goal**: Nolan should create increasingly complete **4K, source-linked, editable Premiere edits**; Franco and Sydney should primarily **review and correct**, with KG still preparing simpler timelines while that work is automated. Human approval, client authority, rights and publication gates remain mandatory. The earlier human-only final creative finishing instructions below describe the current demonstrated capability, **not Nolan's long-term ceiling**.
