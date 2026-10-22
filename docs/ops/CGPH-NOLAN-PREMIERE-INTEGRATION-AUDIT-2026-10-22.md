@@ -2,7 +2,57 @@
 
 **Lane:** [#856](https://github.com/CGProductionHouse/CG-Dynamics/issues/856), continuing [PR #862](https://github.com/CGProductionHouse/CG-Dynamics/pull/862). [PR #859](https://github.com/CGProductionHouse/CG-Dynamics/pull/859) owns craft skills and remains untouched. Authority: [latest owner instruction](https://github.com/CGProductionHouse/CG-Dynamics/issues/856#issuecomment-6334616955), AGENTS.md and the [4K game plan](CGPH-NOLAN-AUTONOMOUS-4K-EDITING-GAME-PLAN-2026-10-21.md).
 
-**Status:** local source/file audit, duplicate GUI baseline and bounded **Adobe UXP host execution VERIFIED**. Human enabled Developer Mode; restarted Premiere 26.3.2 connected to UDT 2.3.0.5. Native 4K sequence/effect/keyframes/title-opacity/transition/independent audio/save/reopen/export demonstrated on the duplicate. **Branded typography, creative quality, external MCP and second-device acceptance have NOT passed.** No unapproved third-party installation, purchase, client upload, production data change, merge or deployment.
+**Status:** local audit, bounded Adobe UXP and approved **PremiereMCP CEP-to-Premiere technical pilot VERIFIED**. Real native effect/keyframe/audio and exposed AE title-text changes saved and rendered in original-linked 4K. **Branded font/size/colour, lifecycle reliability, creative quality and second-device acceptance have NOT passed.** No purchase, client upload, production data change, merge or deployment. Technical test only, not final Emoya creative.
+
+## CEP host checkpoint — actual MCP execution
+
+This supersedes earlier setup-only statements below. Vendor source/panel remain at the approved pin, without patches.
+
+Human enabled CSXS.12 String `PlayerDebugMode=1`; readback verified, normal Premiere restart performed. Computer Use did not change security settings. Duplicate load was unresponsive for several minutes and recovered unaided; no forced kill/reinstall. Helper could not target the embedded CEP browser; human clicked **Start Bridge** once. A bounded local MCP client then verified **Premiere 26.3.2**, exact duplicate path and pilot sequence GUID, and read tracks. Initial host calls took 0.17–0.34s; later busy-host reads reached 8.93s. This running chat did not acquire the new tool namespace: actual tests used MCP stdio, not a claim of hot attachment or staff rollout.
+
+### Fixed duplicate-only edit
+
+Identity checked before each mutation; pre-test project copy preserved privately.
+
+- Four exposed AE JSON text fields changed to **YOUR NEXT ROUND / STARTS HERE / EMOYA / GOLF**, preserving style-run structure; independently read back. Changed words visibly appear in the actual rendered 11s frame. Native PPro Basic Title exposes opaque Source Text through CEP: do not assign plain text or assume the AE strategy edits every title type.
+- Real Gaussian Blur Blurriness 3 → 4; readback 4. Later GUI benchmark 4 → 5, MCP restored 5 → 4 and saved.
+- Native second-clip Scale keys at source 0s / 6s read back 177.777770996094 / 181. Existing first-clip 100/104 keys retained. No arbitrary easing-quality claim.
+- Independent whoosh Level key at source 0.3s, requested −9dB, normalized readback 0.06309573352337. Existing fades retained; cue spans 7.8–8.4s across the 8s picture cut. Parameter verification, not listening approval.
+- Save passed. Fixed edit/readback/frame-request run: **10.612s**, including server startup/guards. Its frame endpoint was subsequently rejected for wrong content/time, below.
+- MCP export returned an AME job ID; no completed output was claimed from that alone. Explicitly opened already-installed AME 2026 after auto-launch did not initially produce a file; queue then completed. Actual output independently verified: **H.264/AAC, 2160×3840, 50fps, 750 video frames, 15s, 48kHz stereo, 279,673,942 bytes**. Full audio/video decode exit 0. Correct 11s frame extracted from the rendered file and viewed. Main title contrast is poor; template font/size locked: **technical output only, not client-ready**.
+
+### Reproduced defects and remaining limits
+
+1. **Time-value defect confirmed live:** stored Scale keys 100 at 0s / 104 at 4s; `get_value_at_time` returns 100 for both requested times. Dispatcher ignores time. Use exact stored-key readback until repaired and verified.
+2. **Frame-export defect confirmed:** `export_frame(time:11)` reports success and writes a valid 4K PNG, but shows first-shot content without the title. Actual rendered video at 11s shows second-shot/title content. Repeated after CTI set to 11s; still wrong. Not a missing-file issue; exact QE argument cause unconfirmed. Do not use this endpoint for QA/moment selection until cross-checked and repaired.
+3. **Typography remains a template gate:** exposed objects report `capPropFontEdit:false` and `capPropFontSizeEdit:false`. Did not override locks or install Beta. Need approved template with exposed font/size/colour/layout controls, or supported native route. Earlier exact-colour mismatch unresolved. Text-content success does not clear these gates.
+4. **Close/reopen lifecycle failed:** `close_project(confirm:true,saveFirst:true)` closed the saved duplicate to Home and removed its panel, but caller timed out at 40s without response. `open_project` was **not dispatched**. Preserved and removed the exact orphaned test close-command JSON so a later panel cannot replay it against another project. Reopened the saved duplicate through the native Open dialog. Automatic MCP reopen/readback remains unaccepted; no blind retry of timed-out mutations.
+5. Final Codex test entry exposes only **14 selected tools**, excluding faulty time/frame tools, raw scripting and destructive catalog operations. All pre-existing settings preserved. The bridge is not a filesystem sandbox and still needs project-scope enforcement for production. No whole-edit, creative, exact-colour, phone/listening or second-device handover acceptance. Original working Emoya project SHA-256 unchanged.
+
+### Comparable small-task measurement
+
+| Same native control/save task | Result | Timing scope |
+| --- | --- | --- |
+| GUI: select clip, Effect Controls, Blurriness 4 → 5, save | **163.435s / 7 inputs** | Model/tool delays, snapshots and focus checks; final value 5/save verified |
+| MCP: duplicate guard/discovery, Blurriness 5 → 4, readback/save | **19.589s / 11 requests / 0 GUI inputs** | Server startup, guards, reads/write/save/readback; includes busy-host delay |
+
+One inverse-value pair on the same running host demonstrates fewer GUI operations for this task. It is **not** human-editor speed, an entire-video benchmark or a promised speedup. One-time setup, human setting/panel start and slow project loading excluded from both rows remain material costs.
+
+Private pinned source/dependencies, bounded diagnostic, config backup, catalog, frames/render and receipts remain outside Git in the existing integration-audit workspace. **Next:** repair/quarantine time/frame/lifecycle behavior, use an approved template with editable typography/colour, then repeat actual-render and staff handover acceptance. Continue #856/#862; #859 craft remains separate.
+
+## Earlier approved setup checkpoint — superseded by host results above
+
+Owner explicitly approved **PremiereMCP 1.2.0**, pinned commit `50f534b17639aafc615a10b38325957bf73e6515`, for the duplicate-only experiment. This supersedes historical statements below that no candidate is installed. It does not approve production rollout or all catalog operations.
+
+- Exact commit archive SHA-256: `c8bc01f052c319e765ddc76544ca8d76a6aa282bcef1b5af43a80ae120f876f0`; lockfile: `78ef9a239b60a8e1079184d00c808fe5fca47aec974bb4c3820c236689f3a817`. Local `npm ci --ignore-scripts --no-audit --no-fund`, Node 24.16.0, and `npm run build` pass. No global install. All resolved lock URLs use npm; lifecycle scripts disabled.
+- Three focused vendor suites pass **31 mocked tests**: queue protocol, panel acceptance of generated scripts and QE targeting. These are not live Premiere acceptance or a full security audit.
+- Default installer inspected and **not executed**: it enables CEP debug for CSXS 9–15, overwrites a panel directory and edits Claude/Copilot config. Manually copied four hash-matched panel files into the previously absent vendor-expected per-user folder; created a separate explicit queue and new panel config. No existing extension/config replaced.
+- Added only Codex stdio entry **`nolan-premiere-isolated`**, with absolute Node/server paths and explicit `PREMIERE_TEMP_DIR`. Existing config backed up privately. CLI normalized away an existing empty `node_repl.args`; restored it and verified all pre-existing TOML entries/settings semantically identical. Other AI clients untouched. Persisted config does not prove attachment to this running chat.
+- A bounded local read-only MCP client actually exchanged initialize, initialized notification, tools/list and `get_capabilities(checkConnection:false)`. Negotiated protocol **2025-11-25**, server **1.2.0**, **283 tools / 13 resources / 10 prompts**. Latest capability request **35.17ms**, excluding host/UI: **not an editing-speed benchmark**. Live connection explicitly unchecked; no host command dispatched.
+- Queue Windows ACL observed: owner, SYSTEM and Administrators full control; CodexSandboxUsers inherited read/execute. No broad Users/Everyone write grant observed. This is not a filesystem sandbox; Node-enabled CEP/raw-script tools remain powerful. POSIX `0700` does not establish Windows isolation.
+- Read-only registry inspection: CSXS.12 exists, but no `PlayerDebugMode=1`. Computer Use prohibits changing OS/in-app security settings. Human asked to set String `PlayerDebugMode` to `1` under `HKEY_CURRENT_USER\Software\Adobe\CSXS.12`, with step-by-step help. UXP Developer Mode is separate. [Adobe's unsigned-panel guidance](https://github.com/Adobe-CEP/Getting-Started-guides/blob/master/Client-side%20Debugging/readme.md) explains the mechanism.
+
+Private source, dependencies, config backup, bounded probe, catalog and receipts remain outside Git. **Next:** human CEP setting → normal Premiere restart → start panel on explicit queue → MCP read-only duplicate path/sequence check → bounded typography/effect/keyframe/audio test with readback/reopen/render and comparable timing. Server startup, catalog size and mocked tests do not prove Premiere is connected.
 
 ## Native host checkpoint — after human Developer Mode enablement
 
