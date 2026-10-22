@@ -6,11 +6,12 @@ This branch deliberately sits outside Nolan's active [Premiere engineering PR #8
 
 1. [Research triage](NOLAN-RESEARCH-TRIAGE-2026-10-22.md) — **what is already implemented vs vendor-advertised**, Premiere/Jumper/Higgsfield/CapCut decisions, evidence and security/credit trade-offs.
 2. [Creative decision system](NOLAN-CREATIVE-DECISION-SYSTEM.md) — **how Nolan chooses the right effects**, retrieves past feedback, separates client preferences from general lessons and promotes only proven techniques.
-3. [Technique lab queue](NOLAN-TECHNIQUE-LAB-QUEUE.md) — **specific tutorial-derived, real-work applications** ranked by editorial value and pass/fail criteria; starts with Emoya's actual putting/text feedback.
+3. [Higgsfield and Adobe AI zero-credit policy](NOLAN-AI-VIDEO-ZERO-CREDIT-POLICY-2026-10-22.md) — **owner-requested exploration of the Premiere plugin, Adobe included credits and free alternatives; zero existing credits used, no generation or client footage uploaded without explicit approval**.
+4. [Technique lab queue](NOLAN-TECHNIQUE-LAB-QUEUE.md) — **specific tutorial-derived, real-work applications** ranked by editorial value and pass/fail criteria; starts with Emoya's actual putting/text feedback.
 
 ## Current research conclusion
 
-**Premiere stays the 4K master.** Do not interrupt the Emoya edit, install more tools or duplicate #859's skill. The high-value future addition is local semantic footage search via Jumper, subject to privacy/license and a small tested advantage over existing Adobe Media Intelligence. Higgsfield is optional paid/cloud shot creation and compositing, **not** the native Premiere editing MCP. CapCut Desktop may be compared on a future tightly scoped social clip; unofficial JSON/MCP tooling is not yet a safe full-editor replacement.
+**Premiere stays the 4K master.** Do not interrupt the Emoya edit, install plugins while Premiere is busy or duplicate #859's skill. The high-value future addition is local semantic footage search via Jumper, subject to privacy/license and a small tested advantage over existing Adobe Media Intelligence. Higgsfield is optional cloud shot creation/compositing, **not** the native Premiere editing MCP. The owner wants to explore the plugin, **without using even included Higgsfield or Adobe credits**; see the explicit authorization policy linked above. Free website generations are distinct from plugin usage. CapCut Desktop may be compared on a future tightly scoped social clip; unofficial JSON/MCP tooling is not yet a safe full-editor replacement.
 
 ## Knowledge maturity
 
