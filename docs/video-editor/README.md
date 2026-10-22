@@ -8,11 +8,14 @@ This branch deliberately sits outside Nolan's active [Premiere engineering PR #8
 2. [Creative decision system](NOLAN-CREATIVE-DECISION-SYSTEM.md) — **how Nolan chooses the right effects**, retrieves past feedback, separates client preferences from general lessons and promotes only proven techniques.
 3. [Higgsfield and Adobe AI zero-credit policy](NOLAN-AI-VIDEO-ZERO-CREDIT-POLICY-2026-10-22.md) — **owner-requested exploration of the Premiere plugin, Adobe included credits and free alternatives; zero existing credits used, no generation or client footage uploaded without explicit approval**.
 4. [Natural portrait retouch in Premiere](NOLAN-NATURAL-PORTRAIT-RETOUCH-RESEARCH.md) — CapCut-like subtle blemish/shine reduction; included Adobe controls vs locally processed Beauty Box 6.5, low-price Easy Face beta, Portraiture, professional alternatives; no licence purchase or installation.
-5. [Technique lab queue](NOLAN-TECHNIQUE-LAB-QUEUE.md) — **specific tutorial-derived, real-work applications** ranked by editorial value and pass/fail criteria; starts with Emoya's actual putting/text feedback.
+5. [Real-world Codex & Claude video-editing evidence](NOLAN-REAL-WORLD-AGENT-EDITING-EVIDENCE-2026-10-22.md) — filmed results and candid failures from users, a 16-workflow rendered comparison, and **which precise decisions Nolan could borrow without another MCP/plugin**.
+6. [Technique lab queue](NOLAN-TECHNIQUE-LAB-QUEUE.md) — **specific tutorial-derived, real-work applications** ranked by editorial value and pass/fail criteria; starts with Emoya's actual putting/text feedback.
 
 ## Current research conclusion
 
 **Premiere stays the 4K master.** Do not interrupt the Emoya edit, install plugins while Premiere is busy or duplicate #859's skill. The high-value future addition is local semantic footage search via Jumper, subject to privacy/license and a small tested advantage over existing Adobe Media Intelligence. Higgsfield is optional cloud shot creation/compositing, **not** the native Premiere editing MCP. The owner wants to explore the plugin, **without using even included Higgsfield or Adobe credits**; see the explicit authorization policy linked above. Free website generations are distinct from plugin usage. CapCut Desktop may be compared on a future tightly scoped social clip; unofficial JSON/MCP tooling is not yet a safe full-editor replacement.
+
+**New owner constraint:** Natural skin retouch must be **fully free and comparable to CapCut**; paid/watermarked specialists are catalogued but **not recommended for adoption**. No complete free Premiere-equivalent has been verified yet. The existing CapCut feature remains the quality/cost reference. The comparative hands-on AI-editor findings are **not** instructions to replace Nolan's existing Premiere MCP.
 
 ## Knowledge maturity
 
