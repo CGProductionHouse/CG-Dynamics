@@ -2,6 +2,8 @@
 
 See the [audit and pilot contract](../../docs/ops/CGPH-NOLAN-PREMIERE-INTEGRATION-AUDIT-2026-10-22.md). These tools do not install a bridge or create professional edits.
 
+For the later owner-authorised readiness run, use the [verified native finishing recipes](NATIVE-FINISHING-RECIPES.md): UXP Lumetri/Crop/Flash, sampled native title easing, source/timeline domain checks and separate audio. These extend accepted native controls without changing the working MCP or creating another editor. Read the recorded failures and render/listening boundaries before reuse.
+
 ## File audit
 
 Standard-library Python; inspect saved `.prproj`/FCP 7 `xmeml`, optionally copy a project without overwriting. Never rewrites Premiere internal XML. Trusted local inputs only. Reports contain private paths and must remain outside Git.

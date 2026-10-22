@@ -4,6 +4,48 @@
 
 **Status:** approved duplicate-only native UXP/CEP technical execution; **time-readback repair and editable AE font/size/exact RGB now demonstrated**, with actual 4K render. Automatic lifecycle, new-graphic frame-capture readiness, full advanced-tool coverage, creative quality and second-device acceptance remain open. No purchase, client upload, production data change, merge or deployment. This is not the final Emoya creative.
 
+## Later owner-authorised readiness run — native craft proof
+
+The owner subsequently requested one last capability/craft run toward premium video creation. **That later instruction supersedes the two-run stop scope below.** Continue the same #856/#862 lane, preserve the working tools, and still ask before a new third-party install/purchase. No new plugin was installed during this run. #859 craft files remain untouched; reusable engineering lessons are in [native finishing recipes](../../scripts/video-editing/NATIVE-FINISHING-RECIPES.md).
+
+### Native controls now demonstrated
+
+- **UXP resolves two earlier CEP limitations:** native `VideoFilterFactory.createComponent` + chain transaction appended actual Lumetri; native transition action appended Cross Dissolve. Exact old duplicate guard, save and component/transition counts passed in **851ms in-host**. The CEP/QE routes remain excluded. This is a route-specific result, not a repaired universal `apply_effect` tool.
+- Created a **new protected 12s / 25fps / 2160×3840 sequence**, eleven distinct original Emoya picture sources, seven-shot opening including a six-shot 3–6-frame detail burst, 1.12s breathing interval, half-speed swing and real drone location. It is a practice section, **not the final 30s client video**. Existing prior-use ledger excluded known posted September sources; exhaustive Instagram archive/performance verification is not claimed.
+- Native Lumetri on all eleven pictures: name-checked Exposure/Contrast/Highlights/Shadows. Portrait camera rotation and landscape-drone scale are native. Included installed Film Impact Flash creates an actual transition, visible in extracted burst frames. No external picture/title render was used.
+- Real **50→25fps project-item interpretation** on the swing source, independent native readback 25. This is native slow motion, **not a variable speed ramp**. It changes interpretation shared by instances in this duplicate; original working project unchanged.
+- Three editable existing Adobe AE MOGRTs: **SWITCH OFF / TEE OFF. / EMOYA.**, exposed Arial-BoldMT/32 and forest/cream/gold. Arial is a practice substitute, **not verified Emoya brand-font approval**. Ten native Scale keys over .36s implement cubic-out sampling. Independent MCP samples **210 / 243.141296 / 250** at source 0/.16/.36s; Opacity 0/100/100; native Crop Bottom 55/30.555555/0. These are editable properties, not baked video. Crop is not a tracked subject mask.
+- Three separate audio tracks: existing licensed Envato score, Mixkit riser, two unmodified audio excerpts from the actual swing clips with native gain/fades. Riser ends2.24s, music starts3.36s; no forced song stop/restart. Camera audio accidentally inserted by an assumed negative audio-track index was removed **only from this practice sequence** before intentional mixing. Audio encoding/gain, time-domain and wrapper/lifetime lessons recorded in recipes.
+
+### Self-review found defects and forced another render
+
+The first Adobe export proved native rendering but **failed visual/source-bound checks**: landscape template artwork was partly off-screen; two selected ranges exceeded source duration; a one-frame gap appeared in the burst. The second pass fixed wording placement/ranges, but native source-in setters also shifted clip positions. A third finite pass restored positions with relative `createMoveAction` and asserted every start/end/source-in/source-out before export. None of the earlier renders is called a client final.
+
+Third private output `Emoya_Native_Craft_Proof_4K_20261022_v3.mp4`:
+
+- **2160×3840 / 25fps / 300 frames / 12.000s**, H.264/AAC, **99,836,652 bytes**.
+- SHA-256 **`6b1f194dbb749c546105c02e925bc7316e810bb79a3bf0f67cfa9b7bb4c1cf5d`**; complete audio/video decode exit0; no segments detected by blackdetect (`d=.03`, `pix_th=.08`). This threshold is a technical black-frame check, not proof of smoothness or composition.
+- Actual output contact sheet, individual title frame and all29 burst frames inspected. Words readable; intended flash and distinct original details visible; corrected final drone remains visible. **Full-motion playback, listening and phone acceptance are still unverified.** No claim of matching/exceeding every reference, hearing all44 tutorials or mastering all techniques.
+- Mix measured **−19.1 LUFS integrated / −4.6dB true peak**, 7.1LU LRA. This is not a listening/taste approval or mandatory target. Practice lacks final client logo/CTA/cover/caption and full brand/font finishing.
+
+**Timing:** first picture/title assembly took5.334s in-host before an audio guard failed; corrective audio1.061s; title/reveal transaction .963s before a cue lookup error; later cue repair+first native render44.159s, final continuity+render13.441s. These are partial host stages, not complete edit time or a GUI comparison. Source screening, research, API corrections, UDT GUI loading, three renders and review dominated the overall run. No 20-minute client-delivery or new speedup claim.
+
+**Failures retained:** wrong cast-wrapper `getId` failed before sequence creation; async cue start lookup failed after successful title actions; negative audio-track index did not exclude camera sound; floating frame conversion left a gap; source edits moved timeline positions; transparent exposed template colours read back but did not remove rendered artwork. Corrective receipts and final range/keyframe/readback/QA receipts are private. A single global PASS flag must not erase these stages.
+
+### Additional free integration evaluated, not installed
+
+Researched the separately maintained **MIT `leancoderkavy/premiere-pro-mcp`1.24.3**, tag commit **`d07ca155ba6c99c006d0e55738b6db4a0aa59508`**. [Pinned release](https://github.com/leancoderkavy/premiere-pro-mcp/releases/tag/v1.24.3), [tools](https://premiere-pro-mcp.com/tools/), [UXP README](https://github.com/leancoderkavy/premiere-pro-mcp/blob/v1.24.3/uxp-plugin/README.md), [manifest](https://github.com/leancoderkavy/premiere-pro-mcp/blob/v1.24.3/uxp-plugin/manifest.json).
+
+It documents authenticated local WebSocket UXP effects/keyframe automation and a direct MCP route, potentially removing repeated Playground loading. Its manifest requests folder access and **network domains all**; localhost configuration does not narrow that manifest permission. It does **not** establish writable native variable ramps/Optical Flow/subject-mask authoring. Catalog totals are vendor coverage, not this laptop's acceptance. **Explicit isolated-install request is pending; no reply, package install, UXP permission action, purchase or replacement of existing tools.** Treat it as a candidate, not verified or required for every premium edit.
+
+### Readiness decision and exact next step
+
+**GO for a bounded real Emoya draft using the verified native controls**, with source/moment/brand/research and actual render review gates. Compared with the earlier technical checkpoint, real native grading, Crop, flash, sampled easing and interpreted slow motion are now usable. The proof remains a capability exercise; it is not a release recommendation.
+
+**NOT accepted:** completely autonomous premium delivery, automatic cold recovery, direct external UXP integration, native variable ramps/Optical Flow, tracked masks/behind-subject text, full-motion/listening/phone review, ~30s conversion story, staff-device handover. A premium result cannot be certified by installed tools or source-time samples alone. Next: if owner approves the isolated1.24.3 candidate, inspect/build/test without touching the working CEP entry; otherwise retain UDT for bounded native steps and use supported techniques. Do not silently start another broad plugin hunt or present this12s test as the client final.
+
+**Validation/impact:**31 existing focused tests pass, zero skips; local Dynamics TypeScript/Vite build passes with existing chunk warning. Original working Emoya SHA-256 remains **`a9c6a4be99d07ea40cbc4d07e26aba88a79f331645e268e629492a32c06b661b`**. No product runtime code, dependencies, migration/data, Supabase/RLS/role, Microsoft, deployment or web/device acceptance changes. Protected duplicate/backup/private receipts retained; 19-tool CEP configuration preserved; final queue no commands. Exact Google Control Centre target remains unverified; no guessed write.
+
 ## Focused Runs 1–2 — recovery, preview and native-control acceptance
 
 **Owner scope:** continue #862, preserve working MCP/tools, stop after these two bounded runs. No further plugin installation, purchase or competing editor. Findings below supersede the older open-ended next-test list. **Recommendation: NO-GO for promising autonomous Emoya creative delivery; GO for supervised work limited to verified controls.** A rendered technical title is not evidence of storytelling, moment selection or premium finishing.
