@@ -129,7 +129,9 @@ export async function manageLibrary(body: Record<string, unknown>, actor: { id: 
     const year = flat ? null : body.year, month = flat ? null : body.month
     if (!flat && (typeof year !== 'number' || !Number.isInteger(year) || year < 2000 || year > 2100 || typeof month !== 'number' || !Number.isInteger(month) || month < 1 || month > 12)) return fail('Select the exact delivery month.', 400)
     const displayName = typeof body.displayName === 'string' ? body.displayName.trim() : ''
+    /* eslint-disable no-control-regex */
     if (!displayName || displayName.length > 255 || /[\x00-\x1f]/.test(displayName)) return fail('Enter a clear file name.', 400)
+/* eslint-enable no-control-regex */
     const existing = await store.findAsset(binding.drive_id, file.id)
     if (existing && (existing.client_id !== clientId || existing.library_id !== library.id || existing.category_id !== category.id)) return fail('This file already belongs to a different library.')
     if (existing?.active) return ok({ published: true, unchanged: true })
