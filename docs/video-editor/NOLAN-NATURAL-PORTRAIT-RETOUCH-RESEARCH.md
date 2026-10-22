@@ -1,6 +1,16 @@
 # Nolan — natural portrait / beauty retouch in Premiere
 **Owner request:** 22 October 2026. **Research state:** NOT installed, NOT tested on the MSI, no purchase/credit usage/media upload. **Purpose:** replicate CG's frequent CapCut *subtle skin-enhancement* look inside the actual editable 4K Premiere timeline. This is a **creative skill and optional native/plugin effect**, not a reason to abandon Premiere or interrupt Nolan's Emoya session.
 
+## Owner's free-only decision — supersedes earlier paid-plugin shortlist
+
+**Latest owner correction, 22 October:** CapCut already has a **free** natural beauty/retouch feature that CG uses successfully. **Only a fully free, clean-export, commercially usable approach that is at least as good or better than CapCut may be recommended for adoption.** This overrides earlier enthusiasm for US$199 Beauty Box or US$29.90 Easy Face. Do not suggest buying them or even using a watermarked trial as though it were a free solution. Keep those vendor names below purely as historical research.
+
+**Current outcome:** No fully free, no-watermark automatic skin-retouch **Premiere** plugin with convincing hands-on Windows 4K evidence was verified. Native Adobe Texture/Sharpness and HSL skin isolation might be included but are **not the same face-aware one-slider retouch** without actual local A/B testing, and the latest Adobe controls must be confirmed on running Premiere **26.3.2** before claiming availability. Genuine free fallback is **continue using CapCut's existing tool** selectively and return the corrected clip to Premiere (separate generated media, possibly baked effect), preserving master/originals, fps, 4K crop/colour and client licence. This adds workflow cost, so don't apply automatically.
+
+A future candidate needs: a real no-watermark commercial licence at **R0**, Windows/installed Premiere compatibility, no subscription/no credits/no cloud uploading, reliable natural results on two complexions and changing light, actual 4K source-linked before/after, and an editor-controlled intensity. Otherwise **NO-GO, stick with CapCut**. See [real-world tested AI editing evidence](NOLAN-REAL-WORLD-AGENT-EDITING-EVIDENCE-2026-10-22.md).
+
+---
+
 ## Creative acceptance rule
 
 **Natural touch-up only.** Reduce distracting temporary blemishes, harsh texture and unwanted shine if appropriate to the client's brief; preserve pores, eyelashes, real skin structure, complexion, expression, skin tone, and the person's identity. Don't silently use face/thin-body reshaping, eye enlargement, complexion lightening/whitening or “de-aging.” Whitening tools may exist in products but **leave them disabled by default**. Use only where portrait retouch suits the client/content and is appropriately approved. A documentary/interview/regulated-claim shot may not warrant cosmetic modification.
