@@ -7,7 +7,8 @@ This branch deliberately sits outside Nolan's active [Premiere engineering PR #8
 1. [Research triage](NOLAN-RESEARCH-TRIAGE-2026-10-22.md) — **what is already implemented vs vendor-advertised**, Premiere/Jumper/Higgsfield/CapCut decisions, evidence and security/credit trade-offs.
 2. [Creative decision system](NOLAN-CREATIVE-DECISION-SYSTEM.md) — **how Nolan chooses the right effects**, retrieves past feedback, separates client preferences from general lessons and promotes only proven techniques.
 3. [Higgsfield and Adobe AI zero-credit policy](NOLAN-AI-VIDEO-ZERO-CREDIT-POLICY-2026-10-22.md) — **owner-requested exploration of the Premiere plugin, Adobe included credits and free alternatives; zero existing credits used, no generation or client footage uploaded without explicit approval**.
-4. [Technique lab queue](NOLAN-TECHNIQUE-LAB-QUEUE.md) — **specific tutorial-derived, real-work applications** ranked by editorial value and pass/fail criteria; starts with Emoya's actual putting/text feedback.
+4. [Natural portrait retouch in Premiere](NOLAN-NATURAL-PORTRAIT-RETOUCH-RESEARCH.md) — CapCut-like subtle blemish/shine reduction; included Adobe controls vs locally processed Beauty Box 6.5, low-price Easy Face beta, Portraiture, professional alternatives; no licence purchase or installation.
+5. [Technique lab queue](NOLAN-TECHNIQUE-LAB-QUEUE.md) — **specific tutorial-derived, real-work applications** ranked by editorial value and pass/fail criteria; starts with Emoya's actual putting/text feedback.
 
 ## Current research conclusion
 
