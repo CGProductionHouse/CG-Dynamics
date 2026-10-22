@@ -2,7 +2,43 @@
 
 **Lane:** [#856](https://github.com/CGProductionHouse/CG-Dynamics/issues/856), continuing [PR #862](https://github.com/CGProductionHouse/CG-Dynamics/pull/862). [PR #859](https://github.com/CGProductionHouse/CG-Dynamics/pull/859) owns craft skills and remains untouched. Authority: [latest owner instruction](https://github.com/CGProductionHouse/CG-Dynamics/issues/856#issuecomment-6334616955), AGENTS.md and the [4K game plan](CGPH-NOLAN-AUTONOMOUS-4K-EDITING-GAME-PLAN-2026-10-21.md).
 
-**Status:** local source/file audit and duplicate GUI baseline VERIFIED; diagnostic code FILE/MOCK TESTED. Storage recovered and Adobe UDT installed; native execution now awaits the human-only Premiere Developer Mode step. No bridge is production verified. No unapproved third-party installation, purchase, client upload, production data change, merge or deployment.
+**Status:** local source/file audit, duplicate GUI baseline and bounded **Adobe UXP host execution VERIFIED**. Human enabled Developer Mode; restarted Premiere 26.3.2 connected to UDT 2.3.0.5. Native 4K sequence/effect/keyframes/title-opacity/transition/independent audio/save/reopen/export demonstrated on the duplicate. **Branded typography, creative quality, external MCP and second-device acceptance have NOT passed.** No unapproved third-party installation, purchase, client upload, production data change, merge or deployment.
+
+## Native host checkpoint — after human Developer Mode enablement
+
+This section supersedes the earlier “await Developer Mode / not run” statements below, retained as historical checkpoints. No native test touched the working client project; its original SHA-256 remained unchanged.
+
+| Test in Premiere 26.3.2 | Verified result | Limit |
+| --- | --- | --- |
+| UDT Playground connection | Connected to actual Premiere 26.3.2 after normal restart | One-off diagnostic entry point; **not external Codex MCP** or an unattended service |
+| Read-only discovery | 106 installed video effect match names; 2 video tracks, 13/5 clips; bounded native Motion/Opacity parameter readback | **55ms host time**, excludes setup, UI dispatch and model/tool latency |
+| Original-linked 4K sequence | Two existing DJI masters, native source ranges 8s + 7s; 15s at 50fps; **2160 × 3840** | First master has **90° rotation metadata**; second is landscape. Respect orientation; raw width/height alone are insufficient |
+| Native effect | Appended discovered `AE.ADBE Gaussian Blur 2`; Blurriness set/read back as 3 | Technical parameter test, not approved creative grading |
+| Native transform | Scale keys at 0s/4s; readback 100/102/104 at 0s/2s/4s; interpolation action accepted and mode read back | Named host constants used. Midpoint alone does not prove a desirable easing curve or Bezier-handle control |
+| Native title insertion / animation | Installed Premiere Basic Title and installed AE Sports Lower Third Center inserted; native title opacity readback 0/50/100 at 0/.15/.3s, ending fade keys | **Text/font editing NOT accepted.** Controls appeared after loading/reopen, but typed text values unavailable on 26.3.2. Colour writes work, with a channel mismatch noted below |
+| Native transition | Discovered Cross Dissolve; 0.24s single-sided transition, 1 transition track item read back | Visual result/handle quality still requires inspection; not a premium-transition claim |
+| Independent sound clips | Existing project-licensed music 0–15s plus generic whoosh 7.8–8.4s on separate tracks; native gain/fade keys read back | No baked mix substituted. Level is a normalised amplitude parameter (observed unity ≈0.17782794), **not a dB number**. Listening/mix quality not accepted |
+| Save | Native `project.save()` returned true; duplicate file changed on disk | Working original hash unchanged; no second-device acceptance |
+| Reopen/persistence | Saved duplicate reopened natively; original paths, scale/effect values, title opacity keys, transition and separate audio fade keys read back | **224,047ms** API open/identity/save wall time on this host; no speedup claim |
+| Native export / decode | H.264/AAC export returned true in **15,647ms**; independent FFprobe: **2160 × 3840, 50fps, 750 frames, 15s, 48kHz stereo**, 267,039,182 bytes. Full-file video/audio decode exits 0 | Export completion event was not observed; evidence is the returned call plus actual decoded output. Technical fixture, **not client-ready** |
+| Output inspection | Native frame exports at 2s/6s/10s visually inspected; audio analysis input **−14.29 LUFS / −5.25dBTP** | Placeholder typography/initial letterboxing failed creative QA. A later native fill-crop frame removes bars; that refinement is saved in the project but not in the earlier MP4. No full motion/listening/phone approval |
+
+Private host receipts: discovery, native 4K pilot, finishing/readback and subsequent reopen/export attempt, stored outside Git. The successful continuation that applied animation/effect and inserted Basic Title recorded **651ms host execution** (effect/transform section 5ms); the separate native finishing test recorded **752ms**. These exclude the substantial diagnostic/setup/iteration overhead. They are **not** a same-task speedup against the 191.001s GUI open/inspect/save baseline. Advanced GUI comparison remains unmeasured.
+
+### Host failures corrected or still under investigation
+
+- **Exact identity guard:** Premiere reports its project path using Windows' local extended-length prefix. The read-only probe initially refused it. Normalisation now strips only the `\\?\C:\...` local-drive form; UNC/device paths and parent traversal still fail closed. Seven Node tests pass, including both cases.
+- **Action scope:** first trim mutation failed with “The script object is no longer valid.” Action construction had occurred before entering a transaction. Corrected to synchronous `project.lockedAccess(() => project.executeTransaction(...))`, constructing and consuming every action inside the callbacks, with asynchronous discovery completed beforehand. The corrected native calls succeeded. [Adobe's action-scope guidance](https://developer.adobe.com/premiere-pro/uxp/resources/fundamentals/eslint-support/) documents this contract; do not introduce async callbacks or return cached Action objects across it. No new linter package installed.
+- **Source identity:** originals already existed as project items. An unconditional import added duplicate references in the test copy; no source files were duplicated. The experiment now checks full media paths, records stable item IDs and avoids missing-only reimports. Preserve separate references to one master; never infer a unique asset from a display name alone.
+- **Playground hot reload:** replacing code while it is loaded executes the edited script. An additional manual unload/load repeated the guarded experiment. Later scripts use explicit identity/precondition checks and append history receipts; do not use a generic auto-running raw-script loop as a production editor.
+- **Reopen:** `Project.open` with forward-slash path produced an explicit “project could not be found” dialog. Dismissed it; native Windows backslashes succeeded, after a long load. Readback and actual render completed. Do not confuse a slow host open with a disconnected bridge or repeatedly dispatch the same operation.
+- **Title loading versus API version:** initial component chains had only intrinsic controls. After reopen, native `AE.ADBE Text` / `AE.ADBE Capsule` controls appeared. Re-query after asset readiness, not just insertion return. Nevertheless, `getStartValue()` exposed no usable typed text interface on this 26.3.2 host. **Earlier API research used newer types without resolving this per-method version gate:** Adobe's [type changelog](https://github.com/adobe/premierepro-types/blob/main/CHANGELOG.md) introduces `MogrtText`/`MogrtComment` in **27.0.0-beta.22**, and its [official sample](https://github.com/AdobeDocs/uxp-premiere-pro-samples/blob/main/sample-panels/premiere-api/public/index.html) groups these controls under 27.0 Beta. Do not claim 25.6+ means every latest typed title API is supported. Do not install Beta or use it for client finishing without a separate decision.
+- **Colour accuracy:** exposed AE Main/Title Color parameters accepted native `Color` writes. Requested `#0f2e1c` read back approximately `(15,46,32)/255`, not the requested blue 28/255. Cause unverified; channel conversion/quantisation must be resolved before exact-brand-colour acceptance. A successful transaction is insufficient.
+- **Framing:** the first master has 90° rotation; the second is landscape. “Create sequence from media” alone does not solve mixed orientation. Visual QA caught the landscape bars; a native Scale value ≈177.7778 removes them in a later frame. That is an intentional crop/resample of a 4K master, not recovered portrait detail or a polished client composition.
+- **Saved-project file audit:** 77 stored reference values: 76 filesystem references present, plus one numeric generated-Graphic candidate. The initial file-only scanner falsely treated that candidate as a missing camera file. It now retains the explicit candidate separately rather than declaring it offline or silently hiding it; a new regression test covers the observed `Graphic`/`Infinite` combination. This is not second-device portability proof.
+- **Final read-only recheck:** strict pilot sequence GUID, 2160×3840, three video tracks, zero mutations; advanced typed `MogrtText` and `MogrtComment` constructors both absent. Temporary Playground plugin unloaded after receipts were copied privately. Approximately 206GB remains free.
+
+**Next acceptance:** resolve stable-host editable text/font and exact colour, then test branded layout, native easing quality, motion/listening and second-device handover. PrimCut is unavailable for public download at the checked source; pinned PremiereMCP CEP is a possible alternate subject to explicit installation approval. Its default installer also enables unsigned CEP debug and edits other MCP-client configurations: inspect/customise those steps, require human-only security-setting action, and preserve existing client configuration. No generic auto-executing bridge should grow out of Playground.
 
 ## Later 22 October recovery checkpoint — storage resolved
 
@@ -100,9 +136,9 @@ Sources: [filter factory](https://developer.adobe.com/premiere-pro/uxp/ppro-refe
 New bounded diagnostics in [`scripts/video-editing`](../../scripts/video-editing/README.md), no new dependencies:
 
 - `audit_local_pipeline.py`: read-only saved-project/interchange/builder audit with hashes; optional exclusive project copy; refuses overwrite and private reports inside Git. No internal XML rewriting, render, network, install or Premiere launch.
-- `test_audit_local_pipeline.py`: **8 passing file tests**, including original integrity, overwrite refusal, nonlocal URL rejection and private-output protection.
-- `probe_premiere_readonly.cjs`: bounded discovery function for an approved UXP host context. Exact project path and optional sequence GUID guards before reads; identity recheck after asynchronous reads; effect match names/component/keyframe metadata. No transactions, save, filesystem or network writes. **Not a plugin/MCP server or deployed custom editor.**
-- `probe_premiere_readonly.test.cjs`: **5 passing mock tests**, including wrong project/sequence and mid-read sequence change. Mocks do not prove Adobe host support.
+- `test_audit_local_pipeline.py`: **9 passing file tests**, including original integrity, overwrite refusal, nonlocal URL rejection, private-output protection and explicit generated-Graphic reference handling.
+- `probe_premiere_readonly.cjs`: bounded discovery function, now executed in the approved UXP host. Exact project path and optional sequence GUID guards before reads; identity recheck after asynchronous reads; effect match names/component/keyframe metadata. The function has no transactions, save, filesystem or network writes. A local diagnostic wrapper wrote receipts to its own UXP sandbox only. **Not a plugin/MCP server or deployed custom editor.**
+- `probe_premiere_readonly.test.cjs`: **7 passing mock tests**, including wrong project/sequence, extended local Windows paths, blocked UNC/device namespaces and mid-read sequence change. Mocks remain distinct from the host receipts above.
 
 API shapes checked against [Adobe types at `c8f108941197c1d987f08b9916c0d18a2e252699`](https://github.com/adobe/premierepro-types/blob/c8f108941197c1d987f08b9916c0d18a2e252699/src/premierepro.d.ts). Missing host support produces an explicit failure, not a fabricated result.
 
@@ -116,9 +152,10 @@ Private test **`Nolan_Duplicate_API_Test.prproj`** was copied exclusively, hash 
 | --- | --- | --- |
 | File audit plus verified project copy | Passed | **0.023s**, zero host API calls. File-only operation, not an editing speed benchmark. |
 | GUI open duplicate → inspect identity → save | Passed | **191.001s wall time, 6 input actions**, one identity-guard refusal/recovery. Includes model/tool latency and focus failure; not a human-editor timing. |
-| Native discovery | Not run | UDT installation blocked by Error 133 |
-| Native title/effect/keyframe/transition/audio task | Not run | No working host transport; speedup unmeasured |
-| Original-linked 4K export/reopen/second device | Not run | Storage/host connection; second workstation unavailable |
+| Native discovery | Later passed | 55ms in-host; see current checkpoint above |
+| Native effect/keyframe/transition/audio task | Later bounded pass; typography incomplete | Native action/readback receipts above; identical advanced GUI speedup unmeasured |
+| Original-linked 4K export/reopen | Later technical pass | 224.047s API reopen/identity/save; 15.647s export call; creative QA fails described above |
+| Second device | Not run | Available licensed second workstation/linked-original access unverified |
 
 The owner-reported 30-minute text placement is feedback, **not a controlled measured baseline**. No speedup percentage or fully editable 4K success is claimed.
 
@@ -137,7 +174,7 @@ Use the duplicate container; create a **new 15-second 4K sequence** from authori
 7. Perform the **same operation list** by GUI and candidate API. Separate setup, creative planning, command latency, host execution and export. Record input actions/tool calls/retries, elapsed time, usage where available, native readback, quality and reviewer effort. Do not compare file-copy speed to title design.
 8. Franco/Sydney handover only with available device, matching Premiere, licensed templates/fonts/effects and verified original paths/backup. Until then second-device acceptance is UNVERIFIED.
 
-**Decision:** storage recovery is complete. Await the human Developer Mode step, restart the duplicate and run approved native discovery first. PrimCut is the documented external-Codex candidate when an available build can be approved/tested. Bounded pinned PremiereMCP **CEP** is an alternative after its install/code gate, not its broken UXP path. Compare candidates before creating a custom CG production bridge. The discovery function in this PR is a diagnostic, not a competing editing engine.
+**Decision:** storage, native discovery and a technical 4K save/reopen/render are complete; native editing primitives have bounded host receipts. Finish typography/colour/creative QA gates above. PrimCut is the documented external-Codex candidate when an available build can be approved/tested. Bounded pinned PremiereMCP **CEP** is an alternative after its install/code gate, not its broken UXP path. Compare candidates before creating a custom CG production bridge. The discovery function and local pilot are diagnostics, not a competing editing engine.
 
 ## 7. Continuity and remaining gates
 
@@ -145,4 +182,4 @@ No third-party install/purchase authorisation has been granted. Existing approva
 
 Update #856/#862 and ops handover; checkpoint #381. Exact Google Control Centre reference remains unavailable in current continuity; no guessed spreadsheet/replacement tracker write. No new broad agent mission or overlap with #859/#841/#450.
 
-**Current blockers:** human Premiere Developer Mode enablement/restart; actual host/MCP execution; approved editable title asset; available second workstation and verified original backup. The storage/UDT installation blocker is resolved. Shared Google OAuth quota blocks final cloud duplicate readback and durable archive acceptance. System remains **LOCAL PROTOTYPE / NOT PRODUCTION VERIFIED**.
+**Current blockers:** production external MCP transport untested/uninstalled; stable-host title text/font editing not accepted; exact colour mismatch unresolved; creative motion/listening/phone QA and identical advanced GUI comparison pending; available second workstation and verified original backup. Human Developer Mode, storage, UDT setup and technical 4K reopen/export are resolved. Shared Google OAuth quota blocks final cloud duplicate readback and durable archive acceptance. System remains **LOCAL PROTOTYPE / NOT PRODUCTION VERIFIED**.

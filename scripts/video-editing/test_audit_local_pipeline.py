@@ -44,6 +44,14 @@ class AuditTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             decode_file_url('file://unverified-share/private.mov')
 
+    def test_native_graphic_identifier_stays_visible_without_false_offline_file(self):
+        self.source.write_bytes(gzip.compress(b'<PremiereData><Media><FilePath>1196574294</FilePath><ActualMediaFilePath>1196574294</ActualMediaFilePath><Title>Graphic</Title><Infinite>true</Infinite></Media><FilePath>missing.mov</FilePath></PremiereData>'))
+        result = inspect_project(self.source)
+        self.assertEqual(2, result['media_count'])
+        self.assertEqual(1, result['filesystem_media_count'])
+        self.assertEqual(['1196574294'], result['generated_reference_candidates'])
+        self.assertEqual(['missing.mov'], result['missing_media'])
+
     def test_detects_flattened_interchange(self):
         xml = self.root / 'edit.xml'
         xml.write_text('<xmeml version="4"><sequence><name>Pilot</name><duration>375</duration><rate><timebase>25</timebase></rate><media><video><format><samplecharacteristics><width>1080</width><height>1920</height></samplecharacteristics></format><track><clipitem/></track></video><audio><track/></audio></media></sequence></xmeml>')

@@ -52,14 +52,25 @@ def inspect_project(path: Path) -> dict:
     root = ET.fromstring(raw)
     paths = sorted({e.text for e in root.iter()
                     if e.tag in ('FilePath', 'ActualMediaFilePath') and e.text})
+    # Observed native Basic Title media uses a numeric identifier in both path
+    # tags, with Title=Graphic and Infinite=true. Keep that evidence visible;
+    # a generated-media candidate is not an offline camera file or proof of
+    # portable graphics. Internal project XML is not a public schema contract.
+    generated = sorted({n.findtext('FilePath') for n in root.iter('Media')
+                        if n.findtext('Title') == 'Graphic'
+                        and n.findtext('Infinite') == 'true'
+                        and n.findtext('FilePath', '').isdecimal()
+                        and n.findtext('FilePath') == n.findtext('ActualMediaFilePath')})
     counts = Counter(e.tag for e in root.iter())
     return {'sha256': digest(path), 'bytes': path.stat().st_size,
             'xml_root': root.tag,
             'media_count': len(paths),
-            'missing_media': [p for p in paths if not Path(p).exists()],
+            'filesystem_media_count': len(set(paths) - set(generated)),
+            'generated_reference_candidates': generated,
+            'missing_media': [p for p in paths if p not in generated and not Path(p).exists()],
             'tag_counts': {k: v for k, v in counts.items()
                            if any(s in k.lower() for s in ('filter', 'component', 'keyframe', 'sequence'))},
-            'warning': 'Internal XML counts are diagnostics, not host readback or proof of editability.'}
+            'warning': 'Internal XML counts/generated-reference candidates are diagnostics, not host readback or proof of editability/portability.'}
 
 
 def decode_file_url(url: str) -> Path:

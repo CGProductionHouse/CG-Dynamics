@@ -15,7 +15,7 @@ This direction extends existing issue #856 and coordinates with PR #859 and #841
 
 ## Decision
 
-**22 October verified implementation update:** [Premiere API/bridge audit, duplicate baseline and recovery](CGPH-NOLAN-PREMIERE-INTEGRATION-AUDIT-2026-10-22.md). Prepared-media/XML assembly works; native effects/title/audio execution remains unverified. Initial storage failure resolved through owner-authorised cleanup; Adobe UDT 2.3.0.5 installed. Host discovery now awaits human Developer Mode enablement/restart. No unapproved third-party installation/purchase or production rollout.
+**22 October verified implementation update:** [Premiere API/bridge audit, duplicate baseline and native receipts](CGPH-NOLAN-PREMIERE-INTEGRATION-AUDIT-2026-10-22.md). Prepared-media/XML assembly explains old GUI dependence. After storage recovery and human Developer Mode enablement, native source-linked 4K/effect/keyframes/title-opacity/transition/audio/save/reopen/render demonstrated on the duplicate. Actual 15s/50fps 4K output fully decodes. Stable-host text/font controls, exact colour, creative QA, external MCP and second-device acceptance remain unresolved; no fully autonomous branded-editor claim. No unapproved third-party installation/purchase or production rollout.
 
 **Existing subscriptions (owner-confirmed):** CG operates **two distinct Adobe Creative Cloud subscriptions** under separate logins, plus CapCut Pro. This is not evidence of a shared Adobe Teams tenancy or two plugin seats. Codex must check plugin licensing and workstation entitlements separately; no private sign-in or billing details belong in this public repo.
 

@@ -37,11 +37,25 @@ test('mock only: exact identity, native capability/keyframe discovery, no mutati
   assert.deepEqual(r.installedVideoEffects, ['ADBE Motion']);
   assert.equal(r.tracks[0].sampled[0].components[0].params[0].keyframeCount, 2);
   assert.equal(r.mutationsExecuted, 0);
+  assert.deepEqual(r.optionalApiAvailability, { typedMogrtText: false, typedMogrtComment: false });
 });
 test('wrong active project blocks before effect enumeration', async () => {
   const f = fixture(); f.project.path = 'C:/client/Original.prproj';
   await assert.rejects(probePremiereReadOnly(f.ppro, { expectedProjectPath: path }), /does not match/);
   assert.equal(f.calls.length, 0);
+});
+test('host extended-length local drive path matches the exact duplicate', async () => {
+  const f = fixture(); f.project.path = '\\\\?\\' + path.replaceAll('/', '\\');
+  const result = await probePremiereReadOnly(f.ppro, { expectedProjectPath: path });
+  assert.equal(result.mutationsExecuted, 0);
+});
+test('UNC and device namespaces remain refused', async () => {
+  for (const unsafe of ['\\\\server\\share\\test.prproj', '\\\\?\\UNC\\server\\test.prproj',
+    '\\\\.\\C:\\test.prproj', 'C:/pilot/../Original.prproj']) {
+    const f = fixture(); f.project.path = unsafe;
+    await assert.rejects(probePremiereReadOnly(f.ppro, { expectedProjectPath: path }), /absolute local/);
+    assert.equal(f.calls.length, 0);
+  }
 });
 test('wrong sequence blocks before effect enumeration', async () => {
   const f = fixture();

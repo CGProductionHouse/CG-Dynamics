@@ -1,4 +1,4 @@
-/* Read-only UXP probe. NOT a plugin/MCP server and NOT executed in Premiere yet.
+/* Read-only UXP probe. NOT a plugin/MCP server.
  * After approved host setup: pass require('premierepro') and the exact duplicate
  * project path. No eval, file/network access, transactions, save or edit actions.
  * API shapes: adobe/premierepro-types@c8f108941197c1d987f08b9916c0d18a2e252699.
@@ -6,6 +6,9 @@
 'use strict';
 
 function localProjectPath(value) {
+  // Premiere 26.3.2 reports local paths using Windows' extended-length prefix.
+  // Strip only the local-drive form; UNC/device namespaces remain forbidden.
+  if (typeof value === 'string' && /^\\\\\?\\[A-Za-z]:\\/.test(value)) value = value.slice(4);
   if (typeof value !== 'string' || !/^[A-Za-z]:[\\/]/.test(value)
       || !/\.prproj$/i.test(value) || /(^|[\\/])\.\.?([\\/]|$)/.test(value)) {
     throw new Error('An exact absolute local Windows .prproj path is required');
@@ -71,6 +74,10 @@ async function probePremiereReadOnly(ppro, { expectedProjectPath, expectedSequen
     sequenceGuid, dimensions: [frame.width, frame.height], videoTrackCount: trackCount,
     installedVideoEffects: [...installedVideoEffects], tracks,
     samplingLimits: { tracks: 4, clipsPerTrack: 3, componentsPerClip: 12, paramsPerComponent: 24 },
+    optionalApiAvailability: {
+      typedMogrtText: typeof ppro.MogrtText === 'function',
+      typedMogrtComment: typeof ppro.MogrtComment === 'function'
+    },
     mutationsExecuted: 0,
     limitation: 'Discovery does not prove effect creation, MOGRT editing, easing, audio or 4K export.' };
 }
