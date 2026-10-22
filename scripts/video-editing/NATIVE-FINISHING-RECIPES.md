@@ -6,6 +6,21 @@ Engineering companion to the [audit](../../docs/ops/CGPH-NOLAN-PREMIERE-INTEGRAT
 
 ## Route to use
 
+### Later real-client findings: original footage and still-graphic time offsets
+
+The owner-requested We AR Fuels continuation used the preserved CEP tools on a separate saved project. Native source interpretation at25fps, original-linked cuts, Motion rotation/reframing, Motion **Crop Bottom** and Opacity title reveals, independent score/riser keys and Adobe4K export all produced actual output. A transparent word PNG is a graphic source, **not native editable text**; retain its editable specification and state that limitation. No baked picture montage or animated-title movie is needed for this route. The 4K portrait canvas does not manufacture4K detail in landscape crops or HD stock/outros.
+
+Two first-render failures are now regression checks:
+
+1. **Read every clip's real `inPoint` before authoring keys.** Imported still PNGs on this host began at source **3600s**, although insertion requested0. Keys authored at0–2s returned success and the titles disappeared in the actual render. Reauthoring at `actualInPoint + relativeTime` restored the animated words. Do not hardcode3600, assume a video and image share a time origin, or accept a key-count check alone.
+2. **Check both timeline end and source out after insertion.** Several intended six-frame shots became five frames in a floating-seconds batch, leaving single-frame black holes. A duration-only extension left source out inconsistent; adding a millisecond also made an off-grid end. On this host, writing rounded intended source `outPoint` and then the intended `duration`, with independent full tuple reads, restored contiguous integer-frame ranges. Do not blindly replay the batch or fill a known gap with repeated/frozen frames.
+
+The installed Sports Lower Third Center template accepted changed text/font JSON but its actual render retained an unsuitable sports ribbon/fixed lettering. It was rejected, not promoted as a client title preset. Exposed control/readback is not proof the template honours font editing. Existing real native text tests remain bounded to their tested templates. Also, this bridge's `set_color_value` requires opaque alpha **1**, with RGB0–255; alpha255 was explicitly refused.
+
+Keep the final client frame plan in sync with later source selections and reframes. Protect preparation scripts from overwriting a revised manifest. Check the complete logo resolve and CTA together in a fresh render: separately valid graphic positions can still overlap the logo lettering. Source timing, active native effects and generated graphic sources must be identified separately in the review notes.
+
+**Graphic appearance cache:** on this host, changing a PNG at the same path and calling `refresh_media` returned success while a fresh Adobe render retained its prior appearance. The source subsequently resisted an in-place write while Adobe held it. A fresh filename/import, removal of only the exact old graphic instance, insertion at the same range and reauthoring the native keys from the actual source inPoint produced the intended new contrast in the render. Preserve geometry/specification and verify output. Do not advertise same-path refresh as a proven automatic wording-update route or use `replace_clip`'s unimplemented preserve-effects flag.
+
 ### Creative revision guard
 
 The Emoya owner rejected a technically native redesign and preferred the earlier prepared-media typography. A requested amendment must name the exact baseline export and bind each feedback item to it. Preserve successful design/story/sound decisions; isolate an experiment rather than replacing the concept. Native tool success and 4K metadata are not creative acceptance. Retaining prepared baseline media is a compatibility choice, not proof of native text/mask/ramp editability; report that boundary.
