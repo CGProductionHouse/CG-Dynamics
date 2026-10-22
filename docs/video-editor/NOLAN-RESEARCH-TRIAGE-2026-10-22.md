@@ -44,7 +44,7 @@
 
 ## Evidence vs. claims
 
-- **Locally verified:** see [PR #862](https://github.com/CGProductionHouse/CG-Dynamics/pull/862) and its [UXP acceptance record](../scripts/video-editing/ISOLATED-UXP-1243-ACCEPTANCE.md). Those are the sole authority for Nolan's *installed* state; this research did not run the MSI.
+- **Locally verified:** see [PR #862](https://github.com/CGProductionHouse/CG-Dynamics/pull/862) and its [UXP acceptance record](../../scripts/video-editing/ISOLATED-UXP-1243-ACCEPTANCE.md). Those are the sole authority for Nolan's *installed* state; this research did not run the MSI.
 - **Primary third-party claims (not CG tests):** vendor sites for Jumper, Higgsfield and CapCut; Adobe help for Adobe features; project READMEs for unofficial CapCut/Premiere MCP. Current date 2026-10-22. Revalidate before purchase/installation.
 - **Deliberately not done:** installation, MCP config changes, plugin permissions, media reads/uploads, external payments, DAW/CapCut launch, production build/deployment, edits to #862 or #859, or dispatching Nolan.
 
