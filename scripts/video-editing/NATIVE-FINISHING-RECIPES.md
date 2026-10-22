@@ -10,7 +10,9 @@ Engineering companion to the [audit](../../docs/ops/CGPH-NOLAN-PREMIERE-INTEGRAT
 
 The Emoya owner rejected a technically native redesign and preferred the earlier prepared-media typography. A requested amendment must name the exact baseline export and bind each feedback item to it. Preserve successful design/story/sound decisions; isolate an experiment rather than replacing the concept. Native tool success and 4K metadata are not creative acceptance. Retaining prepared baseline media is a compatibility choice, not proof of native text/mask/ramp editability; report that boundary.
 
-### Bounded sport punch — local output proof, reviewer acceptance pending
+### Bounded sport punch — native proof, owner-rejected for Emoya
+
+**Later owner verdict: REJECTED for Emoya.** The owner called the hit-synchronised zoom cringe and said it did not improve the edit. V7 removes it. Keep the following as native-keyframe capability evidence and a negative creative test, not an approved sport preset or something to reapply automatically. A functioning effect is not editorial value.
 
 Tested one Motion Scale pulse on an already-retimed 25fps prepared source with inPoint0: source-seconds/value `(0,100),(1.84,100),(1.88,103),(1.92,110),(1.96,117),(2.00,117),(2.04,112),(2.08,108),(2.12,105),(2.16,103),(2.20,101),(2.24,100),(4.40,100)`. Thirteen native keys read back; actual Adobe render compared against identical clean picture/type/score. Three-frame attack lands on the photographed strike; subsequent seven-frame settle avoids a sustained crop. Type stays on a separate unscaled track. This adapts the indexed three-frame zoom reference; it does not prove Transform shutter-angle blur, tracked masks or arbitrary Bezier handles. Re-time/reframe to each source's action, do not paste these client-specific seconds into another film. Keep only after reviewer acceptance.
 
