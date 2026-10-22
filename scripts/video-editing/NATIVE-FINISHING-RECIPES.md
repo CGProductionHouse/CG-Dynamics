@@ -2,6 +2,8 @@
 
 Engineering companion to the [audit](../../docs/ops/CGPH-NOLAN-PREMIERE-INTEGRATION-AUDIT-2026-10-22.md). Continue #856/#862; #859 owns the creative skill pack. These are bounded Adobe API recipes and acceptance rules, not another editor, general script server or installation package. Client media, paths, templates and private receipts stay outside Git.
 
+**Later approved integration:** [1.24.3 installed and tested](ISOLATED-UXP-1243-ACCEPTANCE.md). Native effect insertion and key authoring now have a real external MCP route alongside CEP. Read its limits before using: timed scalar values need independent wrapper-aware verification, AE text remains on CEP, and the transition guard refused this host. The earlier pending-approval/Playground-only statements below are historical for those accepted new operations; no default/all-tools promotion.
+
 ## Route to use
 
 Keep the approved pinned PremiereMCP CEP repair candidate and its 19 selected tools for verified exposed AE text/font/size/colour, identity, reads, save and export. Use the existing approved Adobe UXP Developer Tools for finite duplicate-only native transactions where CEP effect insertion or QE transitions fail. Do not retry the failed CEP routes. UDT still needs GUI loading/running; this is not an unattended external UXP connection.

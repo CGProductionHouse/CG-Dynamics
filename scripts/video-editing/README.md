@@ -4,6 +4,8 @@ See the [audit and pilot contract](../../docs/ops/CGPH-NOLAN-PREMIERE-INTEGRATIO
 
 For the later owner-authorised readiness run, use the [verified native finishing recipes](NATIVE-FINISHING-RECIPES.md): UXP Lumetri/Crop/Flash, sampled native title easing, source/timeline domain checks and separate audio. These extend accepted native controls without changing the working MCP or creating another editor. Read the recorded failures and render/listening boundaries before reuse.
 
+The owner subsequently approved the separate 1.24.3 connector. Read its [isolated installation and host acceptance](ISOLATED-UXP-1243-ACCEPTANCE.md): native MCP effects/keys/save work within stated limits; scalar-wrapper verification, AE text, transition guards and recovery boundaries prevent default/all-tools promotion. Existing CEP and its 19 tools remain preserved.
+
 ## File audit
 
 Standard-library Python; inspect saved `.prproj`/FCP 7 `xmeml`, optionally copy a project without overwriting. Never rewrites Premiere internal XML. Trusted local inputs only. Reports contain private paths and must remain outside Git.

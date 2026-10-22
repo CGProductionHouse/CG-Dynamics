@@ -1,5 +1,7 @@
 ### 22 October — Nolan Premiere integration audit, existing #856 / #862 lane
 
+**Latest owner-approved 1.24.3 test:** the previously pending plugin is installed through Adobe UPIA, built from unpatched `d07ca155`; actual authenticated native UXP MCP cloned the protected practice sequence, added Gaussian Blur, created native keys and saved. Independent UXP/CEP reads 24/12/0 and fresh 4K render prove output. Existing CEP/v4/19 selected tools/config preserved. [Detailed acceptance and failures](../../scripts/video-editing/ISOLATED-UXP-1243-ACCEPTANCE.md). Vendor timed-value wrappers cause false-unverified key writes; compact state GUIDs are `{}`; use `inspect_project_uxp` identities. AE title text/export remain on working CEP; UXP transition guard refused this resolved host clip. Workspace, ramps/Optical Flow/masks/cold recovery/creative listening/staff gates remain open. 162 vendor tests pass after isolated private TEMP setup; two new empty task-folder ACLs hardened only. Creative Cloud−644 cleared with normal launch, no repair/reinstall. UDT stale helper processes closed, Premiere preserved. New listener stopped/panel closed, plugin retained; old CEP connected on saved clone `bc1233c8-54da-49e5-9636-0fda28d432f0` under expiring lease. **Limited experimental reuse, no default/all-tools promotion.** No #859/production/DB/Microsoft/deployment change; no guessed Control Centre write.
+
 **Later owner-authorised readiness run (supersedes prior stop):** actual UXP now appends Lumetri/Crop and native Flash; three editable AE titles have sampled cubic-out Scale, Opacity and Crop keys with independent MCP readback. New protected Emoya **12s practice section** uses eleven distinct originals, 50→25 source interpretation, separate score/riser/original action sounds, and actual 2160×3840/25fps/300-frame render. First two renders exposed off-screen template wording, out-of-source frames, a gap and source-setter placement shifts; final range assertions and third render corrected them. Complete decode/no detected black segments; contact sheets/title/all29 burst frames inspected. **Not full-motion/listening/phone/client-final approval**; practice font/logo/CTA and full30s brief still open. GO for a bounded draft with verified controls; no autonomous premium guarantee. Speed ramps/Optical Flow/subject masks and cold recovery remain unaccepted. Read [new checkpoint and recipes](CGPH-NOLAN-PREMIERE-INTEGRATION-AUDIT-2026-10-22.md#later-owner-authorised-readiness-run--native-craft-proof). Working CEP/v4/19 tools preserved, original project hash unchanged, no queued commands or new installation. Researched separate MIT `premiere-pro-mcp`1.24.3, pinned `d07ca155`; **owner isolated-install approval pending**, broad network/folder permissions disclosed, not installed.31 focused tests/local build pass. #859 untouched; no production/DB/Microsoft/deployment change; Control Centre target remains unverified.
 
 **Earlier bounded-run runtime state (superseded above):** normal Premiere exit/relaunch restored the saved duplicate and auto-connected its existing panel at 12:33:48 UTC. Actual post-restart MCP identity/title/keyframe verification passed (5.130s), with PLAY AGAIN / Arial-BoldMT / 32 retained; final Scale 100/102/104, five overlay opacity keys and five SFX keys read correctly. Premiere left responsive on protected duplicate, no queued commands. Named isolated server points to tested v4; all 19 selected tools and every other TOML setting preserved, backups retained. Automatic lifecycle remains unaccepted because recovery required minutes/loading and native UI. The stop decision here applied before the later readiness-run authorisation.
@@ -57,11 +59,11 @@ links exact. Elcheck/JFJ1video+6combined posters, VCS1video+8confirmed posters;
 no contract/data writes. Previous41 enabled logos/17 private skips unchanged.
 
 Final non-DB supported3997total/3978pass/19declared skips/0fail; TS/Vite actual
-app bundle, all19 canonical browser fixtures1440/375/390/430, scoped lint/diff
+app bundle, all 19 canonical browser fixtures1440/375/390/430, scoped lint/diff
 pass. Earlier four source-location assertion failures corrected and full suite
 rerun. Private browser env file-URL import error occurred before execution;
 corrected only private path setting, retained failed receipt and revalidated
-unchanged suite/build log hashes before all19browser rerun. Final stable-tree
+unchanged suite/build log hashes before all 19browser rerun. Final stable-tree
 receipt %TEMP%/cg-client-nondb-2070e2c64475-resumed.json. Two mandatory Docker SQL
 fixtures still unverified; bounded engine info timed out, no restart/reset.
 Do not relabel NON_DB_LOCAL_CHECKS_PASS as full DB/production acceptance or
@@ -131,7 +133,7 @@ Local frontend fixes preserve the portal on failed download and recover native
 video load errors with explicit Play retry, no background loop. These frontend
 changes are NOT live. Focused44pass, build/lint/Deno/diff and four-width browser
 checks pass. Frozen13fa5fcb non-DB run:3991total/3972pass/19declared skips/0fail;
-all19 canonical browser journeys, TypeScript/Vite app bundle pass, stable tree.
+all 19 canonical browser journeys, TypeScript/Vite app bundle pass, stable tree.
 Canonical earlier full attempt failed: Docker SQL fixtures unavailable and
 OpenSSL missing from PATH. Process-local installed OpenSSL fixed five failures;
 two SQL fixtures remain NOT verified (no shared Docker restart/reset). Do not
@@ -260,7 +262,7 @@ must be retained, no broad onboarding takeover. No client UI change, Vercel,
 production SQL/schema/data/secrets/Edge or final provider grant/asset publication.
 Staff peer remains separate. The previous live frontend/v44 receipt below is
 unchanged, not proof Brand Hub is activated. Frozen32ec8e80 whole local acceptance
-PASS:3988total/3971pass/17skips/0fail; TypeScript/Vite121JS chunks/all19browser
+PASS:3988total/3971pass/17skips/0fail; TypeScript/Vite121JS chunks/all 19browser
 journeys, Deno/scoped lint/diff. Earlier browser-fixture retry race reproduced and
 fixed to await both responses; failed receipt retained. No client UI change.
 Code-only review approves; actual consent/genuine client media remains gated.
@@ -315,7 +317,7 @@ Separate staff lane advanced to1dc35ce4/#381comment6263338553 with newer dirty
 work, untouched. Clean committed-head merge preview, NOT combined runtime proof.
 Normal ChatGPT owns strategy drafts; Human Auto GO resolved, CA retains password/
 device review. Final ff894eba canonical run:3979total/3962pass/17declared skips/
-0fail/cancelled/todo, all19browser journeys, TypeScript/Vite121JS chunks, scoped
+0fail/cancelled/todo, all 19browser journeys, TypeScript/Vite121JS chunks, scoped
 lint/Deno/diff/privacy scan PASS, source stable. First private wrapper file-URL
 failure retained; wrapper corrected and ENTIRE run repeated on unchanged source.
 
