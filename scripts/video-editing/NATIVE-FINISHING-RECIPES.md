@@ -6,6 +6,14 @@ Engineering companion to the [audit](../../docs/ops/CGPH-NOLAN-PREMIERE-INTEGRAT
 
 ## Route to use
 
+### 23 October regression: fades outside the audible clip
+
+The We AR D1 score was initially0–30s but ended at24s after a later logo-picture insertion. Its28.4–29.96s fade keys still existed. Actual exported PCM had silence24.033812–30.016s, missed by the earlier decode/loudness gate. This is a failed final mix, not an acceptable outro design. The preserved bridge itself warns that video overwrite may first overwrite an audio track before removing the linked source sound.
+
+Place intentional music/SFX after picture and graphics insertion. Independently assert source in/out, start/end/duration, and that intended fade keys lie within the audible source interval. After every late picture insertion/replacement, re-read **all deliberate audio ranges**, then inspect final PCM for per-section content and tails. A30s container and valid keys outside a24s audio clip prove nothing about the outro. The native D2 diagnostic with score0–30s and a slower gain entrance/full outro fade restores signal through the ending; this does not constitute listening or musical-taste acceptance.
+
+Season is also a preproduction input: business/crop phase, location, intended publishing month and visible scene must fit. Old archive content is allowed when requested, but a strong prior harvest post is not evidence that harvest footage is right for an October general-service film. Do not infer activity from a month folder or simply recolour winter footage. Source the missing operating context or change the story. OneDrive's approved [read-only thumbnail endpoint](https://learn.microsoft.com/en-us/graph/api/driveitem-list-thumbnails?view=graph-rest-1.0) is a cheap cross-folder triage step before downloading large originals; it is not moving-shot review. Never persist tokens/signed URLs or ship one person's OAuth session as a staff tool.
+
 ### Later real-client findings: original footage and still-graphic time offsets
 
 The owner-requested We AR Fuels continuation used the preserved CEP tools on a separate saved project. Native source interpretation at25fps, original-linked cuts, Motion rotation/reframing, Motion **Crop Bottom** and Opacity title reveals, independent score/riser keys and Adobe4K export all produced actual output. A transparent word PNG is a graphic source, **not native editable text**; retain its editable specification and state that limitation. No baked picture montage or animated-title movie is needed for this route. The 4K portrait canvas does not manufacture4K detail in landscape crops or HD stock/outros.
