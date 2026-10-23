@@ -6,6 +6,10 @@ Engineering companion to the [audit](../../docs/ops/CGPH-NOLAN-PREMIERE-INTEGRAT
 
 ## Route to use
 
+### External audio critique needs a blind control
+
+With explicit permission for the particular provider and excerpts, compare an anonymised known-defect control against the exact current export. Do not tell the model the fault, preferred winner or expected timestamp. Preserve its actual response and independently compare observations with native ranges/exported PCM. In the23October test, the model detected the old ~24s cutoff and six-second silence and preferred the continuous revision, but incorrectly located a1.88-4.44s riser at0-1s. This supports broad defect detection on that pair, not precise beat/onset timing or universal listening competence. Generic improvement suggestions do not justify changing an already-delivered mix. Keep direct runtime hearing, measured evidence, model critique and owner listening approval separate; authorisation for two music-only excerpts does not authorise later full-video/client-data uploads.
+
 ### 23 October regression: fades outside the audible clip
 
 The We AR D1 score was initially0–30s but ended at24s after a later logo-picture insertion. Its28.4–29.96s fade keys still existed. Actual exported PCM had silence24.033812–30.016s, missed by the earlier decode/loudness gate. This is a failed final mix, not an acceptable outro design. The preserved bridge itself warns that video overwrite may first overwrite an audio track before removing the linked source sound.
