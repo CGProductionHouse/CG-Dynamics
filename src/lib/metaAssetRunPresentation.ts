@@ -8,8 +8,9 @@ export interface MetaAssetRunPresentation {
   retrying?: boolean | null
 }
 
-function readableState(value: string | null | undefined, fallback: string): string {
-  const normalized = value?.trim()
+function readableState(value: unknown, fallback: string): string {
+  if (typeof value !== 'string') return fallback
+  const normalized = value.trim()
   return normalized ? normalized.replaceAll('_', ' ') : fallback
 }
 
