@@ -1,6 +1,6 @@
 # Owner's Video Editing collection — reference intake, 24 October 2026
 
-The owner shared a [TikTok collection](https://www.tiktok.com/@christieann.g/collection/Video%20Editing-7698804067698576129) containing **53 videos**. All 53 links and visible captions were indexed in the Chrome tab. **Indexed is not watched, validated or mastered.** Thirty-six linked videos have now been opened and visually sampled; the references' audio was not critically heard or assessed. Some posts are finished edits, promotions or general inspiration rather than distinct repeatable effects. Build one useful skill per *technique family* after a real proof, rather than 53 near-duplicate skill folders. No plugins, templates, audio packs or paid assets were installed or copied from these posts.
+The owner shared a [TikTok collection](https://www.tiktok.com/@christieann.g/collection/Video%20Editing-7698804067698576129) containing **53 videos**. All 53 links and visible captions were indexed in the Chrome tab. **Indexed is not watched, validated or mastered.** Forty-one linked videos have now been opened and visually sampled; the references' audio was not critically heard or assessed. Some posts are finished edits, promotions or general inspiration rather than distinct repeatable effects. Build one useful skill per *technique family* after a real proof, rather than 53 near-duplicate skill folders. No plugins, templates, audio packs or paid assets were installed or copied from these posts.
 
 The autonomous [Nolan - CG Video Editor] chat owns Premiere/client delivery. Its live queue says the PSG **November crop-insurance** revision 06, TBS and We AR Fuels were delivered to `CG Nolan Approvals` on 24 October and await feedback; Toyota Bloemfontein Video 01 is its current assembly/QA lane. This Studio lane must not edit, resend or compete with those packages. PSG #872 research here concerns source/creative gates and experimental technique, with no client edit yet.
 
@@ -26,7 +26,7 @@ The autonomous [Nolan - CG Video Editor] chat owns Premiere/client delivery. Its
 | 1 | V | Hyrox / Premiere edit | [Travis](https://www.tiktok.com/@travisdennymedia/video/7636590586220285197) |
 | 2 | V | First day learning Premiere | [Matt](https://www.tiktok.com/@datttmo/video/7522256850666949919) |
 | 3 | V | Clearer audio mix | [Nico](https://www.tiktok.com/@247.mp4/video/7600018236138081558) |
-| 4 | I | Sound design hacks | [gakuyen](https://www.tiktok.com/@gakulange/video/7366590592173837576) |
+| 4 | V | Sound design hacks | [gakuyen](https://www.tiktok.com/@gakulange/video/7366590592173837576) |
 | 5 | V | 3D text effect | [Joshua](https://www.tiktok.com/@joshua.esca/video/7563943840009178386) |
 | 6 | V | Lazy hyperlapse | [Travis](https://www.tiktok.com/@travisdennymedia/video/7660187082287107342) |
 | 7 | V | Dialogue over music | [Nico](https://www.tiktok.com/@247.mp4/video/7576683123891539222) |
@@ -38,9 +38,9 @@ The autonomous [Nolan - CG Video Editor] chat owns Premiere/client delivery. Its
 | 13 | V | RSMB plugin editing example | [Travis](https://www.tiktok.com/@travisdennymedia/video/7628490779345833229) |
 | 14 | V | Muffled audio/low pass | [Migs](https://www.tiktok.com/@migsmatias/video/7610873096626605333) |
 | 15 | V | Stop motion | [Arthur](https://www.tiktok.com/@iam_arthur7/video/7496560815676329246) |
-| 16 | I | Sound effect example | [etsh929](https://www.tiktok.com/@etsh929/video/7541766063462059272) |
+| 16 | V | Sound effect example | [etsh929](https://www.tiktok.com/@etsh929/video/7541766063462059272) |
 | 17 | V | Glasses mask zoom | [Miracamp](https://www.tiktok.com/@miracampschool/video/7507285819724500246) |
-| 18 | I | Five SFX choices | [Matt](https://www.tiktok.com/@mattashbee/video/7669377718131182870) |
+| 18 | V | Five SFX choices | [Matt](https://www.tiktok.com/@mattashbee/video/7669377718131182870) |
 | 19 | V | Radial shutter blur | [Motionpulse](https://www.tiktok.com/@themotionpulse/video/7614931666699635990) |
 | 20 | V | Cutout mask transition | [Miracamp](https://www.tiktok.com/@miracampschool/video/7619009675987520790) |
 | 21 | V | Pop-up text | [Adrian](https://www.tiktok.com/@omgadrian/video/7622560596340362509) |
@@ -51,10 +51,10 @@ The autonomous [Nolan - CG Video Editor] chat owns Premiere/client delivery. Its
 | 26 | V | Directional flash | [Sam](https://www.tiktok.com/@sam.scherr/video/7677460023420783902) |
 | 27 | V | Three-frame zoom sequence | [Miracamp](https://www.tiktok.com/@miracampschool/video/7504014296779590935) |
 | 28 | V | Motion trail clones | [Miracamp](https://www.tiktok.com/@miracampschool/video/7650495982521634080) |
-| 29 | I | Ten SFX suggestions | [Miracamp](https://www.tiktok.com/@miracampschool/video/7654618319667924256) |
+| 29 | V | Ten SFX suggestions | [Miracamp](https://www.tiktok.com/@miracampschool/video/7654618319667924256) |
 | 30 | V | Walk through text | [Miracamp](https://www.tiktok.com/@miracampschool/video/7663481654098349344) |
 | 31 | V | Flash cut | [Miracamp](https://www.tiktok.com/@miracampschool/video/7672852460502895905) |
-| 32 | I | Background songs pitch | [Miracamp](https://www.tiktok.com/@miracampschool/video/7674000105871052065) |
+| 32 | V | Background songs pitch | [Miracamp](https://www.tiktok.com/@miracampschool/video/7674000105871052065) |
 | 33 | V | Colour-invert glitch | [Miracamp](https://www.tiktok.com/@miracampschool/video/7694702680295492886) |
 | 34 | V | Whoosh/reverse-crash SFX example | [Harrison](https://www.tiktok.com/@harrisonniap/video/7638646100160728328) |
 | 35 | V | SFX breakdown | [Jay](https://www.tiktok.com/@jaybendonlifts/video/7673541655831629088) |
@@ -92,5 +92,7 @@ Seventh pass sampling notes: #23 at about 5, 17, 28 and 40 s shows a human under
 Eighth pass sampling notes: #52 is a looping 5 s CapCut-labelled scenic intro with large radial/zoom blur and no project timeline, source disclosure or native-editability proof. #34, previously indexed as a visual hook, actually displays `Sound Effects for your next video Pt. 2` with labelled `Woosh` and `Reverse Crash` waveform examples over a desk shot; no rights to those samples were established. #40 is an 8 s room/desk shot with large mixed-font `This is a Visual Hook` type, a design example rather than a tested hook claim. #22 at about 4 and 10 s shows several construction shots over a dense Premiere timeline containing multiple speed-curve shapes, adjustment layers and audio; no exact ramp settings or source rights were given. #46 at about 5 and 13 s pairs changing footage with a dense layered audio timeline; the Spanish caption says sound marks the video's rhythm, but the music/SFX was not heard, so rhythmic alignment and mix quality are unverified.
 
 Ninth pass sampling notes: #1 at about 5 and 20 s shows a Hyrox gym montage above a dense Premiere picture/audio timeline; it is an example of shot and sound layering, not a parameter tutorial. #2 at about 2 and 20 s films a laptop playing a beginner Premiere edit with effects and timeline; no transferable method is shown. #13 opens on a motion-blurred station shot and explicitly says `Using the Plug In RSMB in Premiere Pro`; plugin licensing and whether native motion blur suffices were not tested. #35 is a 17 s `sound effects BREAKDOWN` with labelled `charge w/taps` and `tap x4` elements over workout footage and a small timeline, but the components were not heard. #36 is a 12 s `SFX BREAKDOWN` showing coloured layered audio clips and labels `CHARGING`, `FLICKER`, `IMPACT`, then `SLOW MOTION`, `GRANULAR WHOOSH`, `DISTORTION`; the sound, licences and levels were not assessed. No source effect file was copied from these posts.
+
+Tenth pass sampling notes: #4's 24 s talking-head lesson shows a Premiere audio timeline with overlapping green waveforms and volume ramps; a late on-screen label says a `RISER` becomes an `IMPACT`. The practical idea is to align the rise and hit across a cut, but timing, source licence and audible quality remain untested. #16 is a 12 s finished London/clock-tower visual edit titled `Sound in Video`; it exposes no timeline or transferable sound settings. #18 is a 48 s presenter-led `Top 5 Sound Effects` clip with floating waveform graphics; sampled points at opening, middle and late sections did not reveal a verified five-item recipe or rights. #29 is a 22 s list/demo with a Premiere waveform and a visible `CAMERA CHARGE` example at about 13 s; sound and source rights were not assessed. #32 is a 27 s background-song recommendation montage, including a card labelled `HOT Cinematic Intro`; it grants no music licence for CG use. None justifies copying TikTok audio into a client or proof edit.
 
 Next viewing pass: prioritise one strong example per remaining technique family, hear the audio where it matters, and render a bounded original proof only if the technique fills a real CG story need. Do not assume a creator's claimed “viral” outcome, licence, free tier or plugin performance from a caption.
