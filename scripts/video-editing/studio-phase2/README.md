@@ -49,3 +49,5 @@ Two HyperFrames lint warnings about nested structure remained (0 errors); the mi
 ## Next precise improvement
 
 Get an actual playable owner PSG text-reference MP4/MOV and one full-speed, headphone/phone review of these local files. Match its observed trajectory and occlusion on a rights-cleared natural-background shot; compare moving A/B and test a protected revision. If this green-screen edge is rejected, a locally tested natural-footage mask is the next narrowly justified dependency. Keep the lifecycle in [`skills/depth-type/SKILL.md`](skills/depth-type/SKILL.md) at **rendered / human review pending** until a CG reviewer approves a real use.
+
+The later read-only [PSG #872 preflight](PSG-PREFLIGHT.md) reconciles the archived approved master to the local Rev5, tallies source exclusions and records the current brand/reference access gates. It does not clear a client shot or claim an owner-review edit.
