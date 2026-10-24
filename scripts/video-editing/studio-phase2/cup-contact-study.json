@@ -1,0 +1,31 @@
+{
+  "status": "isolated stock-footage sound-placement exercise; no client claim",
+  "picture": {
+    "path": "media/mixkit-818-720.mp4",
+    "sha256": "7e89890b99af3ce1d9fac49064d6754ddbc636b71c2be78e6d4c18f835b5ba58",
+    "source": "https://mixkit.co/free-stock-video/coffee-in-green-mug-818/",
+    "license": "https://mixkit.co/license/modal/videoFree/",
+    "source_start_frame": 106,
+    "frame_count": 72,
+    "contact_source_frame_estimate": 142,
+    "crop_decision": "keep 1280x720; a 9:16 centre crop cuts off the hands supporting the saucer"
+  },
+  "music": {
+    "path": "media/mixkit-cat-walk-371.mp3",
+    "sha256": "e241cba000ce12e52cadd4c9956274e391ef1f66d1e48a5dd40bfc21645aa489",
+    "source": "https://mixkit.co/free-stock-music/house/",
+    "license": "https://mixkit.co/license/modal/musicFree/",
+    "source_in_seconds": 10.425,
+    "role": "same placeholder in both variants; creative fit not approved"
+  },
+  "contact_sound": {
+    "path": "media/mixkit-2933-dish.wav",
+    "sha256": "09efda1e588e5a1dedf4900d2a5806973329fd3ba78d17e7a6717ffa42a9c798",
+    "title": "Dish placed in a wood table",
+    "source": "https://mixkit.co/free-sound-effects/restaurant/",
+    "download": "https://assets.mixkit.co/active_storage/sfx/2933/2933.wav",
+    "license": "https://mixkit.co/license/modal/sfxFree/",
+    "timeline_onset_seconds": 1.45,
+    "role": "candidate saucer/table contact; timbre not heard or approved"
+  }
+}
