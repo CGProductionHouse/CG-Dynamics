@@ -46,3 +46,5 @@ Speed changes require an actual source-frame check. High-frame-rate material can
 - Record what edit format staff can revise, where the original footage and licences live, and how to reproduce the export. Do not call a flat MP4 staff-editable.
 
 **Morning check:** one-time 09:00 Africa/Johannesburg reminder on 25 October 2026 to inspect the OneDrive `Staffy` upload. If still incomplete, inventory what exists and report the gap; the reminder does not imply the video is ready.
+
+**Read-only route check at 22:50 SAST on 24 October:** the connected personal OneDrive exposed `Clients/The Staffy/Videos/2026/2026_10_OCT/FIGHT NIGHT` (drive ID `a2ac9fe4b255f52f`, folder ID `A2AC9FE4B255F52F!s2cd5c22d5be343fe8401d6a2e396aafc`). Its immediate child list was empty at that check. This is the folder to revisit tomorrow; the similarly named `Documents/OneDrive/Clients/The Staffy` mirror and prior Staffy projects are not the new event source.
