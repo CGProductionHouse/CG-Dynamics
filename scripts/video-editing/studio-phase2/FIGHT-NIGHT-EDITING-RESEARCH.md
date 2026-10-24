@@ -1,6 +1,6 @@
 # Fight Night: impact-led edit research and morning intake
 
-**Status (24 October 2026):** reference picture sampled; event footage still uploading to OneDrive under `Staffy`; no event shots screened, timeline built, sound heard, or client output approved. This is preparation for a proposed 30-second highlight, not evidence of an edit. The owner asked for clearly landed, high-impact moments and a strong sound design. Do not describe a shot as a knockout unless the complete source supports that event and its identification is cleared.
+**Status (24 October 2026):** reference picture sampled; event footage still uploading to OneDrive under `Staffy`; no event shots screened, timeline built, sound heard, or client output approved. This is preparation for a **30-second high-power trailer for the full Fight Night film**, not a recap or evidence of a completed edit. The owner wants the strongest actually landed moments and an extreme, carefully built sound design. Do not describe a shot as a knockout unless the complete source supports that event and its identification is cleared.
 
 ## Owner references observed in the browser
 
@@ -25,12 +25,19 @@ The browser inspection sampled visible frames and player metadata, not complete 
 |---|---|---|---|---|---|---|
 | _awaiting upload_ | | | | | | |
 
-## 30-second construction to test, not a preset
+## Trailer scene map to test against actual footage
 
-- **0–3 s:** strongest readable real impact or a tension beat that immediately promises one. Establish the fighter/action, not an unrelated title or borrowed reference footage.
-- **3–8 s:** brief anticipation: footwork, guard, crowd, bell or a boxer preparing. Let the eye understand ring orientation.
-- **8–23 s:** escalating clean, distinct moments. Keep the contact frame readable; use motion-matched cuts when punch direction and screen geography genuinely align. Let a high-frame-rate shot breathe before and after the hit rather than slowing the entire sequence.
-- **23–30 s:** the strongest *verified* moment, its immediate consequence, then a concise event identity/end button. Change this structure if the actual footage suggests a better arc.
+This is a skills practice map, not a fixed edit decision. Keep the trailer dense with genuine peaks; the full film can carry context and quieter aftermath. A breath or audio drop earns its space only if it amplifies the next real hit.
+
+| Approximate window | Scene job | Editing/sound skill to prove | Source gate |
+|---|---|---|---|
+| 0–2 s | **Cold impact:** immediate, readable hit and reaction | Frame-accurate contact, very short hold, original hit versus one-cue A/B; [stock-only scene proof](FIGHT-SCENE1-IMPACT-STUDY.md) | One clearly landed event strike, not a reaction-only fake |
+| 2–5 s | **Second strike:** different moment, faster rhythm | Cut on movement without losing opponent/ring geography; continuity review at normal speed | Distinct timecoded hit, no replay masquerading as another |
+| 5–10 s | **Power run I:** two or three best shots | Escalation through punch direction, scale, camera movement and selective sound; no whoosh on every cut | Every apparent contact checked separately |
+| 10–13 s | **Pressure pocket:** a fraction of tension and near-silence | Music/ambience duck, breath/footwork, no empty filler | Real source sound or visual setup that leads into next blow |
+| 13–24 s | **Power run II:** strongest exchange | Useful high-fps slow/fast accents, clean contact frames, separated original audio/SFX/music tracks | Retain distinct fighters and true chronology within each exchange |
+| 24–28 s | **Peak:** strongest verified moment and immediate consequence | Prior short dropout, impact and reaction without artificial flash covering contact | Outcome reviewed; no unconfirmed knockout wording |
+| 28–30 s | **End button:** event identity and full-film promise | Safe-area typography and a sharp musical finish | Approved event name, logo, full-film claim and release wording |
 
 Start with a straight-cut picture-only assembly. Compare a sound-designed version at matched playback level. Natural camera/ring audio is the first candidate for glove impact, breathing, shoes, bell and crowd. Layer individually licensed SFX only when they clarify a visible moment; a bass hit or sub-drop cannot turn a near-miss into a landed punch. Leave micro-silence before a peak if it heightens the real sound. Put production sound, ambience, music and effects on separate named tracks, with a timing/gain/source manifest for any offline render. Use an approved music licence for the intended client/social distribution; a TikTok reference's soundtrack is not a licence.
 
