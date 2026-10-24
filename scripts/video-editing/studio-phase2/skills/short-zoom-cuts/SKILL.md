@@ -11,4 +11,4 @@ The tutorial shows multiple adjacent three-frame Premiere clips, Transform scale
 
 Select shots that share a subject position or an intentional directional path. Cut an original disposable sequence, try three frames at the project fps, and compare against a longer cut at phone size. Keyframe scale around the actual focal point; ease and blur should hide discontinuity without making the subject unreadable. Watch for repeated frames, warped optical flow, edge exposure and flashes. Use existing native Transform controls for editable handover, or the established FFmpeg rendering path for a non-editable study.
 
-Do not add a plugin for this effect. No original local output, precise blur comparison or sound audition has been completed.
+Do not add a plugin for this effect. The first [source screen](../../MOTION-SOURCE-SCREEN.md) rejected the available same-person coffee angles because the action jumps between wide and close frames; a faster zoom would emphasize the mismatch. No original local output, precise blur comparison or sound audition has been completed.

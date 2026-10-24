@@ -1,0 +1,13 @@
+# Motion-technique source screening: two rejected fits
+
+**Result: no motion-match or motion-trail proof promoted.** This is footage screening for the owner's speed-ramp, short-zoom and frozen-clone tutorial families. The [four-frame comparison](proof-motion-source-rejection.png) is a visual receipt, not a finished edit. Both shots are licensed Mixkit stock: [wide coffee and music #43391](https://mixkit.co/free-stock-video/coffee-and-music-in-the-morning-43391/) (SHA-256 `f35d2e3be611fde1d81b95ff84f9be81f5fad9f4d8f6d3edaef3d002bbf666d7`) and [close dancing face #43390](https://mixkit.co/free-stock-video/face-of-a-woman-listening-to-music-and-dancing-43390/) (SHA-256 `bd9cccce4e2844bf6adbc5ee93aec46ec822d41c79484495d46c0940b78aa86f`). Both are under Mixkit's [free video licence](https://mixkit.co/license/modal/videoFree/). Raw footage remains ignored by Git.
+
+## Wide → close action match
+
+The same woman and white mug appear in both 720×1280, 24000/1001 fps shots, but that does not establish a continuous gesture. Wide frame 155 shows the mug near her chin, eyes closed; close frame 130 shows the mug lower and eyes open. Wide frame 170 has the mug at her mouth; close frame 150 has it below her mouth with a different hand/cup angle and expression. A keyed zoom or speed ramp would magnify this continuity jump. **Decision:** reject this pair for motion-matched speed and three-frame zoom. Do not prescribe the tutorial's displayed 200% scale or shutter setting on these sources. A plain wide-to-close editorial cut might still be valid for a different story, but was not rendered or approved here.
+
+## Dark-backdrop cup → frozen trail
+
+A disposable still prototype used [green mug #818](https://mixkit.co/free-stock-video/coffee-in-green-mug-818/) at source frames 28, 44 and 60. It composited frozen earlier cups at 35% and 45% opacity beneath the live frame using the previous study's HSV/brightness matte and source frame 0 as a clean plate. The held positions almost completely overlap, making an unreadable dark clump; the matte also brought in table highlights/patches. It did **not** create the spatially separated, physically grounded path in the owner's basketball clone reference. The ignored `output/motion-match/trail-prototype.png` is the local rejection still. **Decision:** no trail render or promotion. Find a cleared moving subject with distinct positions and enough clean background or a verified native roto/mask before trying this again.
+
+These failures are source-selection lessons, not failures of FFmpeg or a reason to add a plugin. Preserve the plain-cut choice when a motion effect has no motivated action path. No client footage, editor process, external upload, licence purchase or audio audition was involved.
