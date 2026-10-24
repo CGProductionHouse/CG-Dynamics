@@ -1,6 +1,6 @@
 # Owner's Video Editing collection — reference intake, 24 October 2026
 
-The owner shared a [TikTok collection](https://www.tiktok.com/@christieann.g/collection/Video%20Editing-7698804067698576129) containing **53 videos**. All 53 links and visible captions were indexed in the Chrome tab. **Indexed is not watched, validated or mastered.** Forty-one linked videos have now been opened and visually sampled; the references' audio was not critically heard or assessed. Some posts are finished edits, promotions or general inspiration rather than distinct repeatable effects. Build one useful skill per *technique family* after a real proof, rather than 53 near-duplicate skill folders. No plugins, templates, audio packs or paid assets were installed or copied from these posts.
+The owner shared a [TikTok collection](https://www.tiktok.com/@christieann.g/collection/Video%20Editing-7698804067698576129) containing **53 videos**. All 53 links and visible captions were indexed in the Chrome tab. **Indexed is not watched, validated or mastered.** All 53 linked videos have now been opened and visually sampled; the references' audio was not critically heard or assessed. Some posts are finished edits, promotions or general inspiration rather than distinct repeatable effects. Build one useful skill per *technique family* after a real proof, rather than 53 near-duplicate skill folders. No plugins, templates, audio packs or paid assets were installed or copied from these posts.
 
 The autonomous [Nolan - CG Video Editor] chat owns Premiere/client delivery. Its live queue says the PSG **November crop-insurance** revision 06, TBS and We AR Fuels were delivered to `CG Nolan Approvals` on 24 October and await feedback; Toyota Bloemfontein Video 01 is its current assembly/QA lane. This Studio lane must not edit, resend or compete with those packages. PSG #872 research here concerns source/creative gates and experimental technique, with no client edit yet.
 
@@ -15,7 +15,7 @@ The autonomous [Nolan - CG Video Editor] chat owns Premiere/client delivery. Its
 | Foreground masks, motion trail and perspective | 5, 17, 19, 20, 24, 28, 30 | Existing [depth-type card](skills/depth-type/SKILL.md) is rendered, not mastered. #20 visually shows a Premiere object mask on an upper nested clip over the next shot. #28's [motion-trail card](skills/motion-trail-clones/SKILL.md) records rotoscoped frame holds on stacked layers. Anchor all isolated subjects to frame/occluder. Natural-footage roto still unproven. |
 | Captions/pop-up text and edit rhythm | 21, 23, 39, 40, 41, 42, 48 | #21 visually shows big upper-frame words timed separately on a Premiere timeline, with guides and a person below; [staggered type](skills/staggered-type/SKILL.md) has an original rendered proof but no native title or creative approval. #23 shows a Premiere caption effect-control panel with ease/fade/distribution, push position and perspective controls; whether it is native or a third-party preset was not established. #39's opening poses a viewer problem, then changes setting and uses a large WAIT emphasis. #40 is an eight-second room shot with a large self-referential `Visual Hook` title, not a demonstrated performance study. |
 | Shooting, visual hooks and finished-film inspiration | 1, 2, 12, 13, 37–45, 47–50, 52 | Reference only; extract decisions after viewing the actual film. #1 is a gym montage with a densely layered Premiere timeline, while #2 films a beginner's laptop timeline. Neither gives a repeatable setting. #41 claims automotive hook performance without evidence in the caption, so treat that claim as creator opinion. #52 is a finished five-second CapCut-labelled travel intro with radial/zoom blur; it does not expose project controls or editability. |
-| Plugin recommendations/promotions | 9, 11, 12, 13, 29, 32, 38, 43 | #13 visibly names the RSMB Premiere plugin on a motion-blurred station shot; no licence, Windows install or necessity was verified. No install or paid pack. Test a specific capability against existing free/native tools only when a client story needs it. |
+| Plugin recommendations/promotions | 9, 11, 13, 32, 50 | #13 visibly names the RSMB Premiere plugin on a motion-blurred station shot; no licence, Windows install or necessity was verified. No install or paid pack. Test a specific capability against existing free/native tools only when a client story needs it. |
 
 ## Exact collection ledger
 
@@ -31,10 +31,10 @@ The autonomous [Nolan - CG Video Editor] chat owns Premiere/client delivery. Its
 | 6 | V | Lazy hyperlapse | [Travis](https://www.tiktok.com/@travisdennymedia/video/7660187082287107342) |
 | 7 | V | Dialogue over music | [Nico](https://www.tiktok.com/@247.mp4/video/7576683123891539222) |
 | 8 | V | Speed ramp | [Travis](https://www.tiktok.com/@travisdennymedia/video/7629402531680013581) |
-| 9 | I | Premiere plugins pitch | [Sebastien](https://www.tiktok.com/@sebastienjefferies/video/7480683533485231382) |
+| 9 | V | Premiere plugins pitch | [Sebastien](https://www.tiktok.com/@sebastienjefferies/video/7480683533485231382) |
 | 10 | V | Car speed ramp | [Miracamp](https://www.tiktok.com/@miracampschool/video/7540770684838956310) |
-| 11 | I | Plugins ranked/promo | [Artzen](https://www.tiktok.com/@artzenmedia/video/7689459803403341064) |
-| 12 | I | After Effects learning | [Spacestudio](https://www.tiktok.com/@spacestudio75/video/7565321193667022135) |
+| 11 | V | Plugins ranked/promo | [Artzen](https://www.tiktok.com/@artzenmedia/video/7689459803403341064) |
+| 12 | V | After Effects learning | [Spacestudio](https://www.tiktok.com/@spacestudio75/video/7565321193667022135) |
 | 13 | V | RSMB plugin editing example | [Travis](https://www.tiktok.com/@travisdennymedia/video/7628490779345833229) |
 | 14 | V | Muffled audio/low pass | [Migs](https://www.tiktok.com/@migsmatias/video/7610873096626605333) |
 | 15 | V | Stop motion | [Arthur](https://www.tiktok.com/@iam_arthur7/video/7496560815676329246) |
@@ -59,20 +59,20 @@ The autonomous [Nolan - CG Video Editor] chat owns Premiere/client delivery. Its
 | 34 | V | Whoosh/reverse-crash SFX example | [Harrison](https://www.tiktok.com/@harrisonniap/video/7638646100160728328) |
 | 35 | V | SFX breakdown | [Jay](https://www.tiktok.com/@jaybendonlifts/video/7673541655831629088) |
 | 36 | V | Sound breakdown | [Jaime](https://www.tiktok.com/@jaimedavinci/video/7649462065593257249) |
-| 37 | I | Home-location cinematic shots | [Sony Alpha](https://www.tiktok.com/@sonyalpha/video/7460594038958263598) |
-| 38 | I | Art of editing example | [Deflatoxin](https://www.tiktok.com/@deflatoxin/video/7425987252590759173) |
+| 37 | V | Home-location cinematic shots | [Sony Alpha](https://www.tiktok.com/@sonyalpha/video/7460594038958263598) |
+| 38 | V | Art of editing example | [Deflatoxin](https://www.tiktok.com/@deflatoxin/video/7425987252590759173) |
 | 39 | V | Hook structure | [Adrian](https://www.tiktok.com/@omgadrian/video/7565322567330942222) |
 | 40 | V | Visual hooks | [Harrison](https://www.tiktok.com/@harrisonniap/video/7645324681960017170) |
 | 41 | V | Three car hooks | [Sterling](https://www.tiktok.com/@sterling_voth/video/7627277546471689486) |
-| 42 | I | Four hook ideas | [Berkem](https://www.tiktok.com/@b.erkem/video/7438666366183361824) |
-| 43 | I | Daily Cinema example | [gv.visuals](https://www.tiktok.com/@gv.visuals/video/7513899493956308246) |
-| 44 | I | Property cinematic edit | [Fotober](https://www.tiktok.com/@fotober/video/7620202358504574239) |
-| 45 | I | Filmmaker journey example | [JPS](https://www.tiktok.com/@jps.visuals/video/7430878028458183968) |
+| 42 | V | Four hook ideas | [Berkem](https://www.tiktok.com/@b.erkem/video/7438666366183361824) |
+| 43 | V | Daily Cinema example | [gv.visuals](https://www.tiktok.com/@gv.visuals/video/7513899493956308246) |
+| 44 | V | Property cinematic edit | [Fotober](https://www.tiktok.com/@fotober/video/7620202358504574239) |
+| 45 | V | Filmmaker journey example | [JPS](https://www.tiktok.com/@jps.visuals/video/7430878028458183968) |
 | 46 | V | Sound-led cut rhythm | [Camilo](https://www.tiktok.com/@milohoag/video/7661326317538774280) |
-| 47 | I | DaVinci cinematic example | [Jacky](https://www.tiktok.com/@jackycooks11/video/7676235175881198866) |
+| 47 | V | DaVinci cinematic example | [Jacky](https://www.tiktok.com/@jackycooks11/video/7676235175881198866) |
 | 48 | V | Commercial editing breakdown | [Jordan](https://www.tiktok.com/@jordanorme/video/7548901333928086815) |
-| 49 | I | Fast cuts | [Leematix](https://www.tiktok.com/@leematix/video/7489174544889122094) |
-| 50 | I | Fast pace / colour | [Junho](https://www.tiktok.com/@atjunholim/video/7633120297478016269) |
+| 49 | V | Fast cuts | [Leematix](https://www.tiktok.com/@leematix/video/7489174544889122094) |
+| 50 | V | Fast pace / colour | [Junho](https://www.tiktok.com/@atjunholim/video/7633120297478016269) |
 | 51 | V | Keyframe zoom + SFX | [Yu-Yen](https://www.tiktok.com/@yuyenwng/video/7631341066553167126) |
 | 52 | V | Five-second cinematic intro | [CapCut creator](https://www.tiktok.com/@capcut_huutuyen77/video/7653292993021054229) |
 | 53 | V | Three-location phone flash cut | [Arthur](https://www.tiktok.com/@iam_arthur7/video/7394863028220513579) |
@@ -95,4 +95,8 @@ Ninth pass sampling notes: #1 at about 5 and 20 s shows a Hyrox gym montage abov
 
 Tenth pass sampling notes: #4's 24 s talking-head lesson shows a Premiere audio timeline with overlapping green waveforms and volume ramps; a late on-screen label says a `RISER` becomes an `IMPACT`. The practical idea is to align the rise and hit across a cut, but timing, source licence and audible quality remain untested. #16 is a 12 s finished London/clock-tower visual edit titled `Sound in Video`; it exposes no timeline or transferable sound settings. #18 is a 48 s presenter-led `Top 5 Sound Effects` clip with floating waveform graphics; sampled points at opening, middle and late sections did not reveal a verified five-item recipe or rights. #29 is a 22 s list/demo with a Premiere waveform and a visible `CAMERA CHARGE` example at about 13 s; sound and source rights were not assessed. #32 is a 27 s background-song recommendation montage, including a card labelled `HOT Cinematic Intro`; it grants no music licence for CG use. None justifies copying TikTok audio into a client or proof edit.
 
-Next viewing pass: prioritise one strong example per remaining technique family, hear the audio where it matters, and render a bounded original proof only if the technique fills a real CG story need. Do not assume a creator's claimed “viral” outcome, licence, free tier or plugin performance from a caption.
+Eleventh pass sampling notes: #9 is a 32 s `3 best video editing plugins` talking-head/picture-timeline pitch; sampled middle frames show a Premiere timeline, but neither a tested necessity nor licence. #11 is a 1:07 Premiere plugin ranking with a visible `Comment 'PLUGINS' for every link` gate and short plugin UI shots; that gate was not followed. #12 is a 31 s `fastest way to learn After Effects` montage with a talking head and dramatic shattered-glass example, not a reproducible project recipe. #37 is Sony Alpha's ten-second home/location film using close-ups of a map and camera dials; its caption encourages making ordinary locations cinematic, but no edit settings are shown. #38 is a sixteen-second finished art-edit example with bold type and rapid close-up/face cuts. These are visual references, not proven tools or licensed source assets.
+
+Twelfth pass sampling notes: #42 opens with `4 cinematische Hooks` over a seated person; the sampled moving points did not establish four fully named or performance-tested patterns. #43 is a seven-second `Daily Cinema – Back to Work` macro/detail montage with very shallow focus; no project recipe. #44 is a 45 s property film, including low-angle architecture/exterior shots; no source, grade or cutting settings are exposed. #45 is a ten-second `Start creating now` film with close-ups of an eye and typewriter; it is visual inspiration. #47 films a laptop showing a layered DaVinci Resolve timeline for a Los Angeles vlog intro; no transferable parameter sequence or export proof. #49 is a seven-second rapid travel montage, including bird and train shots; no editable timeline is shown. #50 is an eight-second cinematic city/aircraft montage with a `LUTs in bio` caption; the LUT, its licence and whether it was used were not verified. None should become a plugin, LUT or music dependency without a separate rights/compatibility test.
+
+Collection viewing gate: **53/53 links opened and moving frames visually sampled.** This is an intake pass, not full-speed shot-by-shot analysis, audio listening, settings validation, source-asset licensing, native-app reproduction or client-ready signoff. Further skill work should prioritise one strong example per technique family, hear the audio where it matters, and render a bounded original proof only if the technique fills a real CG story need. Do not assume a creator's claimed “viral” outcome, licence, free tier or plugin performance from a caption.
