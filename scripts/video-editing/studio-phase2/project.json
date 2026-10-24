@@ -1,0 +1,39 @@
+{
+  "id": "echoform-depth-874",
+  "status": "illustrative-local-experiment",
+  "format": {"width": 1080, "height": 1920, "fps": 24, "seconds": 4.5},
+  "brand": {"name": "ECHOFORM", "status": "fictional", "font": "Space Grotesk variable, SIL OFL 1.1", "palette": ["#10151a", "#f2f1e8", "#c8ff55"]},
+  "picture": {
+    "path": "media/mixkit-28306-2160.mp4",
+    "sha256": "80e0bf3d84faf6e2b0efabfc9001aeadde09e1ce56d0530360ceff5b9be596a5",
+    "source": "https://mixkit.co/free-stock-video/girl-dancing-with-her-earphones-on-a-green-background-28306/",
+    "license": "https://mixkit.co/license/modal/videoFree/",
+    "source_in_seconds": 3,
+    "source_duration_seconds": 4.5
+  },
+  "music": {
+    "path": "media/mixkit-cat-walk-371.mp3",
+    "sha256": "e241cba000ce12e52cadd4c9956274e391ef1f66d1e48a5dd40bfc21645aa489",
+    "title": "Cat Walk",
+    "creator": "Arulo",
+    "source": "https://mixkit.co/free-stock-music/house/",
+    "license": "https://mixkit.co/license/modal/musicFree/",
+    "source_in_seconds": 10.425,
+    "estimated_bpm": 129.2
+  },
+  "effect": {
+    "path": "media/mixkit-cinematic-whoosh-1492.wav",
+    "sha256": "02b8cd40b3761288d54f4d6706983a2f8c110182b669ae2cdf9aab02935a4e7a",
+    "source": "https://mixkit.co/free-sound-effects/transition/",
+    "license": "https://mixkit.co/license/",
+    "timeline_in_seconds": 1.38
+  },
+  "reference": {
+    "source": "https://github.com/nateherkai/herk-edit-kit#examples",
+    "local_path": "media/herk-motion-showreel-reference.mp4",
+    "sha256": "80868dcb45ddbF342119AF400806D9ED6AB40124970B622CB472427AE7AA781D",
+    "role": "observed beat-grid and kinetic typography craft reference only; no frames or audio reused",
+    "owner_tiktok": "https://vt.tiktok.com/ZSgHdr123/",
+    "owner_tiktok_status": "not viewed: URL inaccessible with current read tools"
+  }
+}
