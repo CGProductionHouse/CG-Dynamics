@@ -7,7 +7,7 @@ description: Reproduce the isolated ECHOFORM kinetic typography and green-screen
 
 **Category:** text / compositing / sound sync. **Lifecycle:** researched → local code rendered and revised → **human motion/audio review pending** → CG use untested → mastered **NO**.
 
-Use this card when a story calls for a human crossing in front of purposeful typography and the editor has a permitted, clean green-screen take. Read the [source manifest and reproducibility notes](../../README.md) before using it. This effect is not a general person-segmentation model, not a verified replica of the inaccessible owner TikTok, and not automatically suitable for PSG.
+Use this card when a story calls for a human crossing in front of purposeful typography and the editor has a permitted, clean green-screen take. Read the [source manifest and reproducibility notes](../../README.md) before using it. This effect is not a general person-segmentation model and is distinct from the now-viewed owner TikTok, which shows footage *inside* text via an alpha track matte. It is not automatically suitable for PSG.
 
 ## Working implementation
 
@@ -23,6 +23,6 @@ Use this card when a story calls for a human crossing in front of purposeful typ
 
 ## Known failure cases and review gates
 
-The Mixkit green-screen take has visible fine hair/arm edge spill; plain real-world footage requires a separately tested natural-background mask. Large type can become unreadable when the figure covers too much of a word. Small top/bottom labels are not in conservative social UI safe areas. Chromium/GSAP/H.264 output shows pre-change raster drift when the HTML word changes (0/33 first decoded frames byte-identical, SSIM 0.994555); audio PCM is identical. This is a **precise source edit with approximate unchanged visuals**, not protected pixel identity. Human listening, full-speed phone review, 4K performance, real CG brand suitability and owner reference comparison remain open.
+The Mixkit green-screen take has visible fine hair/arm edge spill; plain real-world footage requires a separately tested natural-background mask. Large type can become unreadable when the figure covers too much of a word. Small top/bottom labels are not in conservative social UI safe areas. Chromium/GSAP/H.264 output shows pre-change raster drift when the HTML word changes (0/33 first decoded frames byte-identical, SSIM 0.994555); audio PCM is identical. This is a **precise source edit with approximate unchanged visuals**, not protected pixel identity. Human listening, full-speed phone review, 4K performance and real CG brand suitability remain open. The owner-reference comparison is complete: this is a separate effect family.
 
 Use when the occlusion advances a verified narrative and an editor can review its edges and rhythm. Avoid when claims, client identity, licence, source availability, hair matte quality or platform readability are uncertain. Promote to `mastered` only after successful work on appropriate real CG footage plus explicit CG creative approval; a successful render or installed skill alone does not qualify.
