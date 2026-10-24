@@ -32,7 +32,7 @@ This is a skills practice map, not a fixed edit decision. Keep the trailer dense
 | Approximate window | Scene job | Editing/sound skill to prove | Source gate |
 |---|---|---|---|
 | 0–2 s | **Cold impact:** immediate, readable hit and reaction | Frame-accurate contact, very short hold, original hit versus one-cue A/B; [stock-only scene proof](FIGHT-SCENE1-IMPACT-STUDY.md) | One clearly landed event strike, not a reaction-only fake |
-| 2–5 s | **Second strike:** different moment, faster rhythm | Cut on movement without losing opponent/ring geography; continuity review at normal speed | Distinct timecoded hit, no replay masquerading as another |
+| 2–5 s | **Second strike:** different moment, faster rhythm | Cut on movement without losing opponent/ring geography; [stock A/B rejects decorative blur](FIGHT-SCENE2-CUT-STUDY.md) | Distinct timecoded hit, no replay masquerading as another |
 | 5–10 s | **Power run I:** two or three best shots | Escalation through punch direction, scale, camera movement and selective sound; no whoosh on every cut | Every apparent contact checked separately |
 | 10–13 s | **Pressure pocket:** a fraction of tension and near-silence | Music/ambience duck, breath/footwork, no empty filler | Real source sound or visual setup that leads into next blow |
 | 13–24 s | **Power run II:** strongest exchange | Useful high-fps slow/fast accents, clean contact frames, separated original audio/SFX/music tracks | Retain distinct fighters and true chronology within each exchange |
