@@ -1,0 +1,16 @@
+---
+name: nolan-fight-impact-edit-research
+description: Screen combat-sports footage for genuine visible contact, build a 30-second impact-led highlight, and validate sound, pacing and factual integrity before client use.
+---
+
+# Fight-impact edit — research, event proof pending
+
+**Lifecycle:** owner's [MMA mood reference](https://www.tiktok.com/@lumaurya/video/7634259458025164054) and [motocross motion reference](https://www.tiktok.com/@josiahlebante14/video/7635639920148761876) visually sampled in a muted browser → [Fight Night research/intake](../../FIGHT-NIGHT-EDITING-RESEARCH.md) prepared → source screening, impact selects, sound A/B and export pending → mastered **NO**.
+
+Use this for an authorised fight-event highlight when the real event footage and rights are available. Screen *all* supplied footage before building a hero montage. Log every selected strike by source clip and timecode, distinguishing visible contact, likely contact, obscured contact and near-miss. Require visible contact or a defensible continuous sequence before describing a hit as landed. Reserve “knockout” for a witnessed and confirmed outcome; a fall, stumble or crowd reaction alone is insufficient. Keep opponent, direction and consequence intelligible across cuts. Do not replay one blow as multiple separate blows or add impact sounds that falsely imply contact.
+
+Make a clean straight-cut assembly first. Use short holds, match-on-action or a speed change only where they improve the viewer's ability to read the fight. On a peak, keep frames before contact, the contact frame and the response. Use slow motion from suitable source frame rates; inspect glove, face and rope edges for interpolation errors. Never let blur, exposure flashes or large titles cover the evidence of a hit. Any subject mask must anchor at a frame edge or real occluder, avoiding a floating cut edge.
+
+Design sound from camera audio outward: ring/crowd/footsteps/breath/contact, then licensed music and selective effects. Keep original and designed versions for comparison at matched loudness. A pre-impact drop or brief silence can create anticipation; a heavy SFX layer should support a visible hit, not invent one. Confirm source/use rights for every music and effect file. Audition at normal speed through headphones, speakers and a phone; LUFS, true peak and waveform timing are diagnostics, not creative approval. Keep source, music, ambience and effects separable for staff revision where the chosen editor permits it.
+
+**Practice and promotion gate:** build one 25–35 s event cut using only cleared source. Preserve moment/timecode/clearance evidence, clean-cut control, audio-layer manifest and exported file. Get a second human to review the apparent impacts against originals, then judge the finished picture and sound at full speed. Record any false contact, unlicensed sound, visual ambiguity, sound clutter, crop or performance failure. Promote to a reusable client skill only after the fixes and a staff-revisable handover are witnessed. The linked TikTok audio was muted during research, and no Fight Night clip had arrived at this stage.

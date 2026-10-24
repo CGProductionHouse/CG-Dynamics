@@ -1,6 +1,6 @@
 # Nolan Studio tutorial-skill status
 
-The owner's [53-video collection ledger](VIDEO-EDITING-COLLECTION.md) records visual samples of all 53 links. It does not claim the audio was heard, complete tutorials were watched at full speed, or every post is a teachable effect. The 14 project-local cards below group related tutorials into useful editing decisions. **No card is mastered or approved for CG client work.** A clean export is technical evidence; normal-speed picture/sound, appropriate story/source, phone view and staff editability require separate evidence.
+The owner's [53-video collection ledger](VIDEO-EDITING-COLLECTION.md) records visual samples of all 53 links. It does not claim the audio was heard, complete tutorials were watched at full speed, or every post is a teachable effect. The original 14 project-local cards group related tutorials into useful editing decisions; a fifteenth Fight Night card covers the owner's two newer sport references. **No card is mastered or approved for CG client work.** A clean export is technical evidence; normal-speed picture/sound, appropriate story/source, phone view and staff editability require separate evidence.
 
 | Technique family | Actual evidence | Next valid gate |
 |---|---|
@@ -18,5 +18,6 @@ The owner's [53-video collection ledger](VIDEO-EDITING-COLLECTION.md) records vi
 | [Stepped object motion](skills/stop-motion-object/SKILL.md) | Reference research | Original fixed-camera incremental capture; synthetic frame skipping is not equivalent |
 | [Matched multi-location cut](skills/matched-flash-cut/SKILL.md) | Reference research | Three cleared takes with the same stable anchor, then aligned plain-cut control |
 | [Visual-hook selection](skills/visual-hook-edit/SKILL.md) | Reference examples and decision card | Test against a real approved story and prior-post screen; no unsupported retention claims |
+| [Fight-impact edit](skills/fight-impact-edit/SKILL.md) | [MMA and motocross visual samples, 30 s intake plan](FIGHT-NIGHT-EDITING-RESEARCH.md); no event footage yet | Screen all Staffy source, log clearly landed moments, build clean cut and sound A/B, human full-speed/phone review |
 
-The [source-screen failures](MOTION-SOURCE-SCREEN.md) and [flash rejection](FLARE-CUT-STUDY.md) are part of progress: they prevent the next agent from forcing a tutorial effect onto unsuitable footage. Future practice should choose a source and story that warrants the edit before installing a tool or rendering an effect. The current owner direction keeps PSG and other client-video work parked while this skill lane develops.
+The [source-screen failures](MOTION-SOURCE-SCREEN.md) and [flash rejection](FLARE-CUT-STUDY.md) are part of progress: they prevent the next agent from forcing a tutorial effect onto unsuitable footage. Future practice should choose a source and story that warrants the edit before installing a tool or rendering an effect. The owner has now specifically requested a Fight Night highlight after upload; that event work needs the actual footage and its own screening. PSG remains parked.
