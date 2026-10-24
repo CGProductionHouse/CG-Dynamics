@@ -3,7 +3,7 @@ name: nolan-exposure-flash-transition-research
 description: Test a brief exposure-led flash across a motivated cut using existing editor controls, while checking detail and accessibility.
 ---
 
-# Exposure flash transition — visually sampled, untested
+# Exposure flash transition — added pulse rejected in A/B
 
 **Lifecycle:** [Miracamp reference](https://www.tiktok.com/@miracampschool/video/7672852460502895905) sampled at about 7, 20 and 33 s → one stock [flare-cut A/B](../../FLARE-CUT-STUDY.md) rendered; added pulse rejected → mastered **NO**.
 

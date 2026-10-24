@@ -3,7 +3,7 @@ name: nolan-motion-matched-speed-research
 description: Design a speed ramp or fast zoom cut around continuous subject motion when adjacent cleared shots genuinely match.
 ---
 
-# Motion-matched speed — researched, source proof pending
+# Motion-matched speed — one-shot timing rendered; cross-shot match pending
 
 **Lifecycle:** owner's [car ramp](https://www.tiktok.com/@miracampschool/video/7540770684838956310), [time-remapped building](https://www.tiktok.com/@travisdennymedia/video/7629402531680013581), [three-frame zoom](https://www.tiktok.com/@miracampschool/video/7504014296779590935) and [keyframed zoom](https://www.tiktok.com/@ihsangunyasar/video/7504667931322666258) visually sampled → one-shot [speed timing A/B](../../SPEED-RAMP-STUDY.md) rendered → cross-shot match and full-speed review pending → mastered **NO**. The tutorials' displayed 200% scale and 200-degree shutter examples are not default CG settings.
 
