@@ -13,7 +13,7 @@ from PIL import Image, ImageDraw, ImageFont
 ROOT = Path(__file__).resolve().parent
 OUT = ROOT / "output" / "staggered-type"
 W, H, FPS, DURATION = 1080, 1920, 24, 4.5
-WORDS = (("MAKE", 0.18), ("THE", 0.72), ("MOMENT", 1.26))
+WORDS = (("MAKE", 0.46), ("THE", 0.92), ("MOMENT", 1.38))
 
 
 def sha(path: Path) -> str:
@@ -78,7 +78,7 @@ def main() -> None:
         ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error", "-framerate", str(FPS),
          "-i", str(frames / "%04d.png"), "-ss", str(project["music"]["source_in_seconds"]),
          "-i", str(music), "-filter_complex",
-         "[1:a]atrim=duration=4.5,asetpts=PTS-STARTPTS,volume=0.72,"
+         "[1:a]atrim=duration=4.5,asetpts=PTS-STARTPTS,volume=1.44,"
          "afade=t=in:st=0:d=0.08,afade=t=out:st=4.1:d=0.4[a]",
          "-map", "0:v", "-map", "[a]", "-t", str(DURATION), "-c:v", "libx264",
          "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p",
