@@ -33,7 +33,7 @@ This is a skills practice map, not a fixed edit decision. Keep the trailer dense
 |---|---|---|---|
 | 0–2 s | **Cold impact:** immediate, readable hit and reaction | Frame-accurate contact, very short hold, original hit versus one-cue A/B; [stock-only scene proof](FIGHT-SCENE1-IMPACT-STUDY.md) | One clearly landed event strike, not a reaction-only fake |
 | 2–5 s | **Second strike:** different moment, faster rhythm | Cut on movement without losing opponent/ring geography; [stock A/B rejects decorative blur](FIGHT-SCENE2-CUT-STUDY.md) | Distinct timecoded hit, no replay masquerading as another |
-| 5–10 s | **Power run I:** two or three best shots | Escalation through punch direction, scale, camera movement and selective sound; no whoosh on every cut | Every apparent contact checked separately |
+| 5–10 s | **Power run I:** two or three best shots | Escalation through punch direction, scale, camera movement and selective sound; [stock contact-hold test](FIGHT-SCENE3-CONTACT-HOLD-STUDY.md) rejects a gratuitous freeze | Every apparent contact checked separately |
 | 10–13 s | **Pressure pocket:** a fraction of tension and near-silence | Music/ambience duck, breath/footwork, no empty filler | Real source sound or visual setup that leads into next blow |
 | 13–24 s | **Power run II:** strongest exchange | Useful high-fps slow/fast accents, clean contact frames, separated original audio/SFX/music tracks | Retain distinct fighters and true chronology within each exchange |
 | 24–28 s | **Peak:** strongest verified moment and immediate consequence | Prior short dropout, impact and reaction without artificial flash covering contact | Outcome reviewed; no unconfirmed knockout wording |
@@ -45,7 +45,7 @@ For a free candidate, Mixkit's current [stock music licence](https://mixkit.co/l
 
 Speed changes require an actual source-frame check. High-frame-rate material can provide clean slow motion; interpolation around fast gloves/faces can warp contact. Adobe's [frame-rate guidance](https://helpx.adobe.com/premiere/desktop/edit-projects/modify-clip-properties/change-the-frame-rate-of-a-clip.html) and [interpolation guidance](https://helpx.adobe.com/premiere/desktop/edit-projects/change-clip-speed/apply-time-interpolation-methods-to-adjust-clip-speed.html) distinguish source interpretation, sampling, blending and optical flow. The existing [local speed-ramp proof](SPEED-RAMP-STUDY.md) establishes framewise timing on stock footage only. Adobe's [Essential Sound types](https://helpx.adobe.com/uk/premiere/desktop/add-audio-effects/adjust-volume-and-levels/audio-editing-with-essential-sound-panel.html) and [ducking controls](https://helpx.adobe.com/uk/premiere/desktop/add-audio-effects/adjust-volume-and-levels/automatically-duck-audio.html) provide native options if this edit is handed to a Premiere editor; the final format stays tool-agnostic.
 
-## Acceptance before calling it a fight highlight
+## Acceptance before calling it a fight trailer
 
 - A second pass at original speed confirms each represented landed blow against its source timecode. Preserve a contact-evidence log; if unclear, label it atmosphere or omit it.
 - Review the full 30 seconds with sound on speakers and headphones, then at phone size. Confirm punch clarity, cut rhythm, music/SFX fit, no misleading repetition, title safe areas and a clean ending.
