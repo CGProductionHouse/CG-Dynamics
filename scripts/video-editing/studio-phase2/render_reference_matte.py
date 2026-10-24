@@ -67,7 +67,9 @@ def main() -> None:
         "[0:v]trim=start=3:duration=4.5,setpts=PTS-STARTPTS,crop=1215:2160:1312:0,"
         "scale=900:1600,chromakey=0x56ee00:0.13:0.09,"
         "despill=type=green:mix=0.7:expand=0.05,format=yuva420p[person];"
-        "[bg][person]overlay=x=180:y=255:format=auto,format=rgb24[scene];"
+        # Push the keyed source below the canvas so its hard lower boundary
+        # is hidden by the actual frame edge rather than floating in shot.
+        "[bg][person]overlay=x=180:y=430:format=auto,format=rgb24[scene];"
         "[1:v]format=gray[matte];[scene]format=rgba[picture];"
         "[picture][matte]alphamerge[aperture];"
         "color=c=0x06090c:s=1080x1920:r=24:d=4.5[black];"
