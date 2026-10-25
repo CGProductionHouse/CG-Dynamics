@@ -32,3 +32,9 @@ Owner priority: complete the 30-second **trailer for the full event film** befor
 6. When honestly reviewable, follow `docs/onedrive-naming-authority.md` and the exact internal WhatsApp package: MP4 document with *only* its proposed social caption, then a separate cover image without a caption. Do not publish to a client or public channel. TBS follows this trailer.
 
 The current intake is **not yet a trailer** and contains **zero verified event hits**. Do not turn a source preview or a sound measurement into an approval claim.
+
+## First real-footage timeline work
+
+- Private working cut: `C:\Users\chris\Videos\CG-AI-Editing\Fight-Night-2026\work\fight-night-real-footage-opening-v2.mp4` (1.300 s, 1080×1920, 50 fps, stereo AAC). It uses only the hash-matched camera originals above: `3Q7A9109.MP4` source 0.00–0.50 s, then `3Q7A9327.MP4` source 0.50–1.30 s. A centred 9:16 crop preserves the light and boxer. Both original camera tracks are retained with a 6 dB working reduction and 40 ms cut-edge fades. There is no stock, library hit, music or implied blow. The cut is a **potential opening fragment**, not an approval video or the promised 30-second trailer.
+- An initial 3.0 s assembly (`...\work\fight-night-real-footage-opening-v1.mp4`) held on the waiting boxer for two seconds and felt too static in the 4 fps frame review; V2 tightened the light/boxer sequence to 1.3 s. V2's 10 fps contact sheet was inspected. It full-decodes without error, and its measured integrated loudness/true peak are approximately −18.9 LUFS/−5.8 dBTP. These are technical checks, not a heard creative approval.
+- At 21:33 SAST the SharePoint raw fetch still returned `403 serviceReadOnly`. The browser's Download control for the 646 MB bout source `3Q7A9330.MP4` had again produced no complete local file. Keep editing with verified originals where possible; retry this exact source access without inventing a hit from a preview.
