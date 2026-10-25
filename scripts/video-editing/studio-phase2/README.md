@@ -16,6 +16,8 @@ Subsequent bounded proofs now include [cup-contact sound placement](CUP-CONTACT-
 
 The [stock vertical-framing A/B](FIGHT-VERTICAL-FRAMING-STUDY.md) now records a further Fight Night source gate: this 16:9 shot cannot fill a 9:16 frame without cutting away a fighter, while a full-width fit makes the action too small at phone scale. The result is a source-selection decision, not a new rendering technique.
 
+The [pressure-pocket stock A/B](FIGHT-SCENE4-PRESSURE-POCKET-STUDY.md) tests a brief measured music duck against identical picture. It uses licensed practice music but no original ring sound, and its audio has not been heard. It demonstrates a gain envelope rather than Fight Night sound design.
+
 ## Skill-development order after owner correction
 
 The separate Nolan production lane already owns client story, WhatsApp/approval, prior-post screening, source selection and Premiere delivery. Studio's contribution is to turn an observed editing technique into a *visually and audibly convincing, repeatable* operation. The rejected PSG `CHANGED?` private study showed why a technically valid render cannot promote a creative skill: its question duplicated a posted story, and its source performance was awkward. Client editing remains parked while this skill pass proceeds.
