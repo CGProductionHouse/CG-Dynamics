@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 from PIL import Image, ImageCms
 
-from picasso import approve_review, preflight, prepare_review, run
+from picasso import amend, approve_review, classify, preflight, prepare_review, run
 
 
 def sha(path: Path) -> str:
@@ -40,13 +40,21 @@ class PicassoJobTest(unittest.TestCase):
             self.assertEqual(sha(original), source_hash)
             self.assertTrue((job / "contact-sheet.jpg").exists())
 
-            data["items"][0]["classification"] = "ALTERNATE"
-            (job / "manifest.json").write_text(json.dumps(data), encoding="utf-8")
+            classify(job, "0001", "ALTERNATE", "Staff reviewer", "Near duplicate of stronger moment")
             self.assertEqual(run(source, job, None), 0)
             again = json.loads((job / "manifest.json").read_text(encoding="utf-8"))
             self.assertEqual(again["items"][0]["classification"], "ALTERNATE")
+            self.assertEqual(len(again["classification_history"]), 1)
             self.assertEqual(sha(exported), output_hash)
             self.assertEqual(sha(original), source_hash)
+
+            self.assertTrue(classify(job, "0001", "ALTERNATE", "Staff reviewer",
+                                     "Near duplicate of stronger moment")["reused"])
+            classify(job, "0001", "KEEP", "Staff reviewer", "Unique documentary moment")
+            restored = json.loads((job / "manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(restored["items"][0]["classification"], "KEEP")
+            self.assertEqual([x["decision"] for x in restored["classification_history"]],
+                             ["ALTERNATE", "KEEP"])
 
     def test_corrupt_file_is_reported_and_other_files_finish(self):
         with tempfile.TemporaryDirectory() as root:
@@ -97,13 +105,48 @@ class PicassoJobTest(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "human must approve"):
                 prepare_review(job)
             self.assertEqual(approve_review(job, "Staff reviewer", ["0001"])["approved_count"], 1)
-            self.assertEqual(prepare_review(job)["staged_count"], 1)
-            staged = job / "review-upload" / "0001_frame.jpg"
+            stage = prepare_review(job)
+            self.assertEqual(stage["staged_count"], 1)
+            staged = Path(stage["stage_folder"]) / "0001_frame.jpg"
             self.assertEqual(sha(staged), sha(job / "output" / "0001.jpg"))
+            self.assertEqual(prepare_review(job)["staged_count"], 1)
+            classify(job, "0001", "REVIEW", "Staff reviewer", "Check expression")
+            with self.assertRaisesRegex(ValueError, "human must approve"):
+                prepare_review(job)
+            approve_review(job, "Staff reviewer", ["0001"])
             self.assertEqual(prepare_review(job)["staged_count"], 1)
             (job / "output" / "0001.jpg").write_bytes(b"tampered")
             with self.assertRaisesRegex(ValueError, "changed or is missing"):
                 prepare_review(job)
+
+    def test_amendment_restarts_from_source_and_requires_new_review_approval(self):
+        with tempfile.TemporaryDirectory() as root:
+            base = Path(root)
+            source, job = base / "source", base / "job"
+            source.mkdir()
+            original = source / "frame.jpg"
+            Image.new("RGB", (40, 30), (80, 90, 100)).save(original)
+            original_hash = sha(original)
+            self.assertEqual(run(source, job, None), 0)
+            base_hash = sha(job / "output" / "0001.jpg")
+            approve_review(job, "Staff reviewer", ["0001"])
+            first_stage = Path(prepare_review(job)["stage_folder"])
+            result = amend(job, "0001", "Staff reviewer", "Lift face gently", {"exposure_ev": .1})
+            self.assertEqual(result["revision"], 1)
+            self.assertFalse(result["internal_review_approved"])
+            self.assertEqual(sha(original), original_hash)
+            self.assertEqual(sha(job / "output" / "0001.jpg"), base_hash)
+            self.assertTrue((first_stage / "0001_frame.jpg").exists())
+            with self.assertRaisesRegex(ValueError, "human must approve"):
+                prepare_review(job)
+            self.assertTrue(amend(job, "0001", "Staff reviewer", "Lift face gently",
+                                  {"exposure_ev": .1})["reused"])
+            approve_review(job, "Staff reviewer", ["0001"], latest_revisions=True)
+            new_stage = Path(prepare_review(job)["stage_folder"])
+            self.assertNotEqual(first_stage, new_stage)
+            self.assertEqual(sha(new_stage / "0001_frame.jpg"), sha(Path(result["output"])))
+            with self.assertRaisesRegex(ValueError, "exceeds"):
+                amend(job, "0001", "Staff reviewer", "Too bright", {"exposure_ev": 1.0})
 
 
 if __name__ == "__main__":

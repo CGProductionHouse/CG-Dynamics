@@ -17,7 +17,7 @@ import cv2
 import numpy as np
 from PIL import Image, ImageCms, ImageDraw, ImageOps, __version__ as pillow_version
 
-VERSION = "0.2.0"
+VERSION = "0.3.1"
 SETTINGS = {"jpeg_quality": 94, "max_ev": 0.35, "max_wb": 0.025, "max_shadow_lift": 0.07,
             "max_highlight_pull": 0.05, "max_contrast": 0.035, "max_saturation": 0.035}
 SUFFIXES = {".jpg", ".jpeg"}
@@ -267,7 +267,9 @@ def run(source: Path, job: Path, limit: int | None,
     manifest = {"picasso_version": VERSION, "source_root": str(source.resolve()), "settings": SETTINGS,
                 "runtime": {"python": sys.version.split()[0], "pillow": pillow_version, "opencv": cv2.__version__},
                 "started_at": existing["started_at"] if existing else datetime.now().isoformat(),
-                "delivery_approved": False, "internal_review_approval": None, "items": []}
+                "delivery_approved": False, "internal_review_approval": None,
+                "classification_history": existing.get("classification_history", []) if existing else [],
+                "revisions": existing.get("revisions", []) if existing else [], "items": []}
     start = time.monotonic()
     hashes = []
     resumed = set()
@@ -329,8 +331,12 @@ def run(source: Path, job: Path, limit: int | None,
         if all((ident in current and current[ident]["status"] == "complete"
                 and current[ident]["output_sha256"] == expected
                 and current[ident]["classification"] == approval["classifications"][ident])
-               for ident, expected in approval["outputs"].items()):
+               for ident, expected in approval.get("base_outputs", approval["outputs"]).items()):
             manifest["internal_review_approval"] = approval
+            try:
+                verified_review_selection(job, manifest)
+            except (ValueError, OSError):
+                manifest["internal_review_approval"] = None
     contact_sheet(job, manifest["items"])
     atomic_json(manifest_path, manifest)
     counts = {key: sum(r["classification"] == key for r in manifest["items"]) for key in ("KEEP", "REVIEW", "ALTERNATE")}
@@ -341,25 +347,30 @@ def run(source: Path, job: Path, limit: int | None,
     return 1 if any(r["status"] == "error" for r in manifest["items"]) else 0
 
 
-def verified_review_selection(job: Path, manifest: dict) -> list[dict]:
+def verified_review_selection(job: Path, manifest: dict) -> list[tuple[dict, Path]]:
     approval = manifest.get("internal_review_approval")
     if not approval or not approval.get("outputs"):
         raise ValueError("A human must approve specific image IDs for internal review first")
     rows = {row["id"]: row for row in manifest["items"]}
     selected = []
-    output_root = (job / "output").resolve()
+    job_root = job.resolve()
     for ident, expected in approval["outputs"].items():
         row = rows.get(ident)
         if not row or row["status"] != "complete" or row["classification"] != approval["classifications"][ident]:
             raise ValueError(f"Review selection changed for image {ident}; approve again")
-        output = (job / row["output"]).resolve()
-        if not output.is_relative_to(output_root) or not output.is_file() or digest(output) != expected:
+        relative = approval.get("paths", {}).get(ident, row["output"])
+        permitted = {row["output"]} | {r["output"] for r in manifest.get("revisions", [])
+                                       if r["id"] == ident and r["source_sha256"] == row["source_sha256"]}
+        if relative not in permitted:
+            raise ValueError(f"Approved export path is invalid for image {ident}; approve again")
+        output = (job / relative).resolve()
+        if not output.is_relative_to(job_root) or not output.is_file() or digest(output) != expected:
             raise ValueError(f"Approved export changed or is missing for image {ident}; approve again")
-        selected.append(row)
+        selected.append((row, output))
     return selected
 
 
-def approve_review(job: Path, reviewer: str, ids: list[str]) -> dict:
+def approve_review(job: Path, reviewer: str, ids: list[str], latest_revisions: bool = False) -> dict:
     if not reviewer.strip() or not ids or len(ids) != len(set(ids)):
         raise ValueError("Name the human reviewer and distinct image IDs")
     path = job / "manifest.json"
@@ -368,6 +379,8 @@ def approve_review(job: Path, reviewer: str, ids: list[str]) -> dict:
         raise ValueError("Resolve or explicitly exclude failed source files before review approval")
     rows = {row["id"]: row for row in manifest["items"]}
     outputs = {}
+    base_outputs = {}
+    paths = {}
     classifications = {}
     output_root = (job / "output").resolve()
     for ident in ids:
@@ -377,41 +390,148 @@ def approve_review(job: Path, reviewer: str, ids: list[str]) -> dict:
         output = (job / row["output"]).resolve()
         if not output.is_relative_to(output_root) or not output.is_file() or digest(output) != row["output_sha256"]:
             raise ValueError(f"Image {ident} output failed its hash check")
-        outputs[ident] = row["output_sha256"]
+        base_outputs[ident] = row["output_sha256"]
+        selected_path = row["output"]
+        selected_hash = row["output_sha256"]
+        if latest_revisions:
+            revisions = [r for r in manifest.get("revisions", []) if r["id"] == ident]
+            if revisions:
+                revision = revisions[-1]
+                if revision["source_sha256"] != row["source_sha256"]:
+                    raise ValueError(f"Image {ident} revision source changed; amend again")
+                selected_path = revision["output"]
+                selected_hash = revision["output_sha256"]
+                revision_file = (job / selected_path).resolve()
+                if not revision_file.is_relative_to(job.resolve()) or digest(revision_file) != selected_hash:
+                    raise ValueError(f"Image {ident} latest revision failed its hash check")
+        outputs[ident] = selected_hash
+        paths[ident] = selected_path
         classifications[ident] = row["classification"]
+    token = hashlib.sha256(json.dumps({"outputs": outputs, "paths": paths, "classifications": classifications},
+                                   sort_keys=True).encode("utf-8")).hexdigest()[:12]
     manifest["internal_review_approval"] = {"reviewer": reviewer.strip(), "approved_at": datetime.now().isoformat(),
-                                             "outputs": outputs, "classifications": classifications}
+                                             "outputs": outputs, "base_outputs": base_outputs,
+                                             "paths": paths, "classifications": classifications,
+                                             "stage_folder": f"review-upload/{token}"}
     atomic_json(path, manifest)
-    return {"approved_count": len(outputs), "scope": "internal_pixieset_review_only"}
+    return {"approved_count": len(outputs), "scope": "internal_pixieset_review_only",
+            "stage_folder": manifest["internal_review_approval"]["stage_folder"]}
 
 
 def prepare_review(job: Path) -> dict:
     manifest = json.loads((job / "manifest.json").read_text(encoding="utf-8"))
     selected = verified_review_selection(job, manifest)
-    staging = job / "review-upload"
-    if staging.is_symlink():
+    parent = job / "review-upload"
+    staging = job / manifest["internal_review_approval"]["stage_folder"]
+    if parent.is_symlink() or staging.is_symlink() or not staging.resolve().is_relative_to(job.resolve()):
         raise ValueError("Symlinked review upload folder is not supported")
-    expected_names = {f'{row["id"]}_{Path(row["source_name"]).stem}.jpg' for row in selected}
+    expected_names = {f'{row["id"]}_{Path(row["source_name"]).stem}.jpg' for row, _ in selected}
     if staging.exists() and {p.name for p in staging.iterdir()} != expected_names:
         raise ValueError("Existing review upload folder differs from approval; use a new job or resolve manually")
-    staging.mkdir(exist_ok=True)
-    for row in selected:
-        source = job / row["output"]
+    staging.mkdir(parents=True, exist_ok=True)
+    for row, source in selected:
         target = staging / f'{row["id"]}_{Path(row["source_name"]).stem}.jpg'
         if target.is_symlink():
             raise ValueError(f"Symlinked staged image {row['id']} is not supported")
         if target.exists():
-            if digest(target) != row["output_sha256"]:
+            if digest(target) != manifest["internal_review_approval"]["outputs"][row["id"]]:
                 raise ValueError(f"Staged image {row['id']} differs from approval")
             continue
         temporary = target.with_suffix(".tmp")
         shutil.copyfile(source, temporary)
-        if digest(temporary) != row["output_sha256"]:
+        if digest(temporary) != manifest["internal_review_approval"]["outputs"][row["id"]]:
             temporary.unlink()
             raise ValueError(f"Staging copy failed hash check for image {row['id']}")
         os.replace(temporary, target)
     return {"staged_count": len(selected), "scope": "internal_pixieset_review_only",
+            "stage_folder": str(staging.resolve()),
             "pixieset_published": False, "whatsapp_sent": False}
+
+
+def amend(job: Path, ident: str, reviewer: str, request: str, overrides: dict) -> dict:
+    """Render a new, bounded revision directly from the unchanged source JPEG."""
+    if not reviewer.strip() or not request.strip() or not overrides:
+        raise ValueError("Name the reviewer, the requested change, and at least one adjustment")
+    allowed = {"exposure_ev": (-.35, .35), "shadow_lift": (0, .07),
+               "highlight_pull": (0, .05), "red_blue_balance": (-.025, .025),
+               "contrast": (-.035, .035), "saturation": (-.035, .035)}
+    if any(k not in allowed or not allowed[k][0] <= v <= allowed[k][1] for k, v in overrides.items()):
+        raise ValueError("Requested adjustment exceeds conservative JPEG limits")
+    manifest_path = job / "manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    row = next((r for r in manifest["items"] if r["id"] == ident), None)
+    if not row or row["status"] != "complete":
+        raise ValueError("Amendment requires a completed image ID")
+    source = Path(manifest["source_root"]) / row["source_name"]
+    if source.is_symlink() or digest(source) != row["source_sha256"]:
+        raise ValueError("Source changed or is unavailable; create a new job")
+    revisions = manifest.setdefault("revisions", [])
+    for old in reversed(revisions):
+        if old["id"] == ident and old["reviewer"] == reviewer.strip() and old["request"] == request.strip() \
+                and old["overrides"] == overrides and old["source_sha256"] == row["source_sha256"]:
+            candidate = job / old["output"]
+            if candidate.is_file() and digest(candidate) == old["output_sha256"]:
+                return {"revision": old["revision"], "output": str(candidate.resolve()), "reused": True}
+    revision_root = job / "revisions"
+    existing_numbers = [int(p.name[1:]) for p in revision_root.iterdir()
+                        if p.is_dir() and p.name.startswith("r") and p.name[1:].isdigit()] if revision_root.exists() else []
+    number = 1 + max([r["revision"] for r in revisions] + existing_numbers, default=0)
+    directory = job / "revisions" / f"r{number:03d}"
+    if directory.is_symlink():
+        raise ValueError("Symlinked revision folder is not supported")
+    directory.mkdir(parents=True, exist_ok=False)
+    with Image.open(source) as raw:
+        if raw.format != "JPEG":
+            raise ValueError("Source is not a JPEG")
+        image, color_note = srgb_image(raw)
+    metrics = analyze(image)
+    settings = settings_for(metrics)
+    settings.update(overrides)
+    edited = finish(image, settings, metrics)
+    profile = ImageCms.ImageCmsProfile(ImageCms.createProfile("sRGB")).tobytes()
+    output = directory / f"{ident}.jpg"
+    edited.save(output, "JPEG", quality=SETTINGS["jpeg_quality"], subsampling=0, icc_profile=profile)
+    preview = directory / f"{ident}-preview.jpg"
+    make_preview(image, edited, preview)
+    record = {"revision": number, "id": ident, "reviewer": reviewer.strip(),
+              "request": request.strip(), "overrides": overrides,
+              "settings": settings, "source_sha256": row["source_sha256"],
+              "output": str(output.relative_to(job)), "output_sha256": digest(output),
+              "preview": str(preview.relative_to(job)), "color_management": color_note,
+              "created_at": datetime.now().isoformat()}
+    revisions.append(record)
+    manifest["internal_review_approval"] = None
+    atomic_json(manifest_path, manifest)
+    return {"revision": number, "output": str(output.resolve()), "reused": False,
+            "internal_review_approved": False}
+
+
+def classify(job: Path, ident: str, decision: str, reviewer: str, reason: str) -> dict:
+    """Reversibly record a human cull decision without touching image bytes."""
+    if decision not in {"KEEP", "ALTERNATE", "REVIEW"} or not reviewer.strip() or not reason.strip():
+        raise ValueError("Name a KEEP/ALTERNATE/REVIEW decision, reviewer, and reason")
+    manifest_path = job / "manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    row = next((r for r in manifest["items"] if r["id"] == ident), None)
+    if not row or row["status"] != "complete":
+        raise ValueError("Cull decision requires a completed image ID")
+    history = manifest.setdefault("classification_history", [])
+    if row["classification"] == decision and history and all(
+        history[-1].get(key) == value for key, value in
+        {"id": ident, "decision": decision, "reviewer": reviewer.strip(), "reason": reason.strip()}.items()
+    ):
+        return {"id": ident, "classification": decision, "reused": True}
+    previous = row["classification"]
+    row["classification"] = decision
+    row["review_note"] = reason.strip()
+    history.append({"id": ident, "previous": previous, "decision": decision,
+                    "reviewer": reviewer.strip(), "reason": reason.strip(),
+                    "changed_at": datetime.now().isoformat()})
+    manifest["internal_review_approval"] = None
+    contact_sheet(job, manifest["items"])
+    atomic_json(manifest_path, manifest)
+    return {"id": ident, "previous": previous, "classification": decision,
+            "reused": False, "internal_review_approved": False}
 
 
 def main() -> int:
@@ -434,8 +554,23 @@ def main() -> int:
     approve.add_argument("--job", type=Path, required=True)
     approve.add_argument("--reviewer", required=True)
     approve.add_argument("--ids", nargs="+", required=True)
+    approve.add_argument("--latest-revisions", action="store_true",
+                         help="Use latest amendment for each selected image when present")
     stage = sub.add_parser("prepare-review", help="Copy approved JPEGs once to a private Pixieset upload folder")
     stage.add_argument("--job", type=Path, required=True)
+    change = sub.add_parser("amend", help="Render a new conservative revision from the source JPEG")
+    change.add_argument("--job", type=Path, required=True)
+    change.add_argument("--id", required=True)
+    change.add_argument("--reviewer", required=True)
+    change.add_argument("--request", required=True)
+    for name in ("exposure-ev", "shadow-lift", "highlight-pull", "red-blue-balance", "contrast", "saturation"):
+        change.add_argument(f"--{name}", type=float)
+    cull = sub.add_parser("classify", help="Record a reversible human KEEP/ALTERNATE/REVIEW decision")
+    cull.add_argument("--job", type=Path, required=True)
+    cull.add_argument("--id", required=True)
+    cull.add_argument("--decision", choices=("KEEP", "ALTERNATE", "REVIEW"), required=True)
+    cull.add_argument("--reviewer", required=True)
+    cull.add_argument("--reason", required=True)
     args = parser.parse_args()
     try:
         if args.action == "run":
@@ -445,15 +580,26 @@ def main() -> int:
             print(json.dumps(result))
             return 0 if result["ready"] else 1
         if args.action == "approve-review":
-            print(json.dumps(approve_review(args.job, args.reviewer, args.ids)))
+            print(json.dumps(approve_review(args.job, args.reviewer, args.ids, args.latest_revisions)))
             return 0
         if args.action == "prepare-review":
             print(json.dumps(prepare_review(args.job)))
+            return 0
+        if args.action == "amend":
+            overrides = {key: getattr(args, key) for key in
+                         ("exposure_ev", "shadow_lift", "highlight_pull", "red_blue_balance", "contrast", "saturation")
+                         if getattr(args, key) is not None}
+            print(json.dumps(amend(args.job, args.id, args.reviewer, args.request, overrides)))
+            return 0
+        if args.action == "classify":
+            print(json.dumps(classify(args.job, args.id, args.decision, args.reviewer, args.reason)))
             return 0
         data = json.loads((args.job / "manifest.json").read_text(encoding="utf-8"))
         print(json.dumps({"version": data["picasso_version"], "total": len(data["items"]),
                           "complete": sum(x["status"] == "complete" for x in data["items"]),
                           "errors": sum(x["status"] == "error" for x in data["items"]),
+                          "revisions": len(data.get("revisions", [])),
+                          "human_cull_decisions": len(data.get("classification_history", [])),
                           "internal_review_approved": bool(data.get("internal_review_approval")),
                           "client_delivery_approved": data.get("delivery_approved", False)}))
         return 0
