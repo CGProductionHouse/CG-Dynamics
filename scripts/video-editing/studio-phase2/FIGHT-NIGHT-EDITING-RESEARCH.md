@@ -11,6 +11,8 @@
 
 The browser inspection sampled visible frames and player metadata, not complete frame-by-frame playback. Neither reference's original media or audio was copied. An already-open related [Sam George boxing sound-design post](https://www.tiktok.com/@samgeorgemedia/video/7576542878529260822) was identified in a user browser tab but was not used as heard evidence.
 
+The [timed shot/effect grammar](FIGHT-REFERENCE-SHOT-GRAMMAR.md) records a second visual pass of both exact references: glove detail to venue scale, lateral fight transition, subject separation, motocross whip and geography reset. It translates each into a source requirement rather than an automatic effect preset. It also records the sound audition sequence without pretending that either reference audio was heard.
+
 ## Footage intake when Franco's upload finishes
 
 1. Search the connected OneDrive for `Staffy` and identify the exact Fight Night folder, upload state, owner and file count. Keep source files in the approved client library; record exact OneDrive links/IDs. If a local editing copy is needed, use an approved project workspace outside Git and preserve originals.
