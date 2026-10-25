@@ -25,7 +25,7 @@ export function PerformanceServiceStory({ service, clientName }: { service: Stor
         </p>
       ) : (
         <>
-          <p className="mt-5 max-w-2xl text-sm leading-7 text-slate-400">Explore adding this service to your monthly package with Amonique. We will check your existing scope and agree the right plan and pricing before any change.</p>
+          <p className="mt-5 max-w-2xl text-sm leading-7 text-slate-400">Discuss your current package or explore adding this service with Amonique. We will check your existing scope and agree the right plan and pricing before any change.</p>
           <a href={serviceConversationUrl(title, clientName)} target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex min-h-11 items-center rounded-full bg-teal-300 px-5 py-3 text-sm font-bold text-[#06110f] hover:bg-teal-200 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-300">Discuss my package on WhatsApp ↗</a>
         </>
       )}

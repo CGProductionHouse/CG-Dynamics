@@ -13,6 +13,23 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 25 October — final client code review packet; no automatic deployment
+
+Current concise acceptance/owner queue:
+[CLIENT-PORTAL-REVIEW-2026-10-25.md](CLIENT-PORTAL-REVIEW-2026-10-25.md).
+PR882 merged7934e95f after frozen f08c9d42 full supported non-DB4196total/
+4170pass/26explicit skips/0fail and ALL20canonical browser fixtures, stable tree.
+Do not substitute this for disposable-SQL, genuine-password, physical-device or
+content/publication acceptance. Later copy-only correction fixes the real Forklift/
+Neshora historical TikTok pane implying an existing service needs adding again;
+unknown scope now discusses current package OR addition, preserving exact benefits,
+pricing check and WhatsApp.56 focused tests, actual portal shell atfour widths,
+scoped lint/build/diff verify that small follow-up. Existing ChatGPT/staff owners
+and protected production gates remain separate. No Vercel, provider/data/asset or
+staff runtime change. The packet's exact queue supersedes dated count snapshots,
+not the existing source-of-truth or owner decisions. Google Control Centre exact
+reference remains unavailable; no guessed replacement tracker.
+
 ### 25 October — client fleet acceptance and TikTok measurement-basis correction
 
 Continued client lane only after Meta PR881 merged f7d57806. Frozen f7d57806
