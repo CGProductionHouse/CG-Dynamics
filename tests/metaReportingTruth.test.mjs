@@ -350,6 +350,41 @@ test('rendered current followers are a snapshot with no percentage', () => {
   assert.doesNotMatch(html, /vs last month/)
 })
 
+test('TikTok video cohort snapshots are not compared as monthly activity even when marked complete', () => {
+  for (const [metricKey, sourceMetric] of [['views', 'view_count'], ['likes', 'like_count'], ['comments', 'comment_count'], ['shares', 'share_count']]) {
+    const current = fact({ platform: 'tiktok', metricKey, sourceMetric, comparableGroup: 'tiktok_organic', aggregation: 'sum', value: 120 })
+    const previous = previousFact({ ...current, value: 100, periodStart: '2026-05-01', periodEnd: '2026-05-31' })
+    assert.equal(ov.compareFacts(current, previous).comparable, false)
+    const line = ov.buildOverviewSections([current], [previous]).flatMap(section => section.lines)[0]
+    assert.equal(line.isVideoCohort, true)
+    assert.equal(line.comparable, false)
+    assert.equal(line.changePercent, null)
+    assert.match(line.label, /to date$/)
+  }
+})
+
+test('client TikTok cards explain the stored video cohort without replacing real zero or account snapshots', () => {
+  const views = fact({ platform: 'tiktok', metricKey: 'views', sourceMetric: 'view_count', comparableGroup: 'tiktok_organic', aggregation: 'sum', availability: 'partial', value: 0 })
+  const followers = { ...views, metricKey: 'current_followers', sourceMetric: 'follower_count', comparableGroup: 'tiktok_profile', aggregation: 'snapshot', value: 23 }
+  for (const tab of ['overview', 'tiktok']) {
+    const html = renderReport({ facts: [views, followers], initialTab: tab, onTabChange() {} })
+    assert.match(html, /TikTok video views to date/)
+    assert.match(html, />0</)
+    assert.match(html, /For videos published in this window · not monthly activity/)
+    assert.match(html, /Account snapshot for this report/)
+    assert.doesNotMatch(html, /vs last month/)
+  }
+})
+
+test('the TikTok cohort label requires the exact known provider definition', () => {
+  const cohort = fact({ platform: 'tiktok', metricKey: 'views', sourceMetric: 'view_count', comparableGroup: 'tiktok_organic', aggregation: 'sum' })
+  for (const override of [{ platform: 'facebook' }, { comparableGroup: 'future_monthly_api' }, { sourceMetric: null }, { sourceMetric: 'video_views_daily' }, { aggregation: 'snapshot' }]) {
+    const line = ov.buildOverviewSections([{ ...cohort, ...override }]).flatMap(section => section.lines)[0]
+    assert.equal(line.isVideoCohort, false)
+    assert.doesNotMatch(line.label, /to date$/)
+  }
+})
+
 test('rendered unavailable fact is hidden from client-facing cards and retained in staff diagnostics', () => {
   const unavailable = fact({ platform: 'facebook', metricKey: 'unique_viewers', value: null, availability: 'unavailable', aggregation: 'unique', sourceMetric: 'page_total_media_view_unique', comparableGroup: 'fb_media_viewers_v2' })
   const html = renderReport({ facts: [unavailable], previousFacts: [] })
