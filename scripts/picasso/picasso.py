@@ -20,7 +20,7 @@ import cv2
 import numpy as np
 from PIL import Image, ImageCms, ImageDraw, ImageOps, __version__ as pillow_version
 
-VERSION = "0.3.7"
+VERSION = "0.3.8"
 FACE_MODEL = Path(__file__).resolve().parent / "models" / "face_detection_yunet_2026may.onnx"
 FACE_MODEL_SHA256 = "ebafce4e3c118d6554634be5c27ab333b4c047a9a8c3faf1d7cf93101c22f0f0"
 SETTINGS = {"jpeg_quality": 94, "max_ev": 0.35, "max_wb": 0.025, "max_shadow_lift": 0.07,
@@ -284,6 +284,70 @@ def contact_sheet(job: Path, rows: list[dict]) -> None:
             draw.text((x + 8, y + 4), f'{row["id"]}  {row["classification"]}', fill="white")
         name = "contact-sheet.jpg" if page == 0 else f"contact-sheet-{page + 1:03d}.jpg"
         sheet.save(job / name, "JPEG", quality=88)
+
+
+def face_review(job: Path, ids: list[str]) -> dict:
+    """Make private, on-demand face crops for human expression review."""
+    if not ids or len(ids) != len(set(ids)):
+        raise ValueError("Select distinct completed image IDs")
+    manifest = json.loads((job / "manifest.json").read_text(encoding="utf-8"))
+    rows = {row["id"]: row for row in manifest["items"]}
+    destination = job / "face-review"
+    if destination.is_symlink() or not destination.resolve().is_relative_to(job.resolve()):
+        raise ValueError("Symlinked face-review folder is not supported")
+    results = []
+    for ident in ids:
+        row = rows.get(ident)
+        if not row or row["status"] != "complete":
+            raise ValueError(f"Face review requires a completed image ID: {ident}")
+        source = Path(manifest["source_root"]) / row["source_name"]
+        if source.is_symlink() or digest(source) != row["source_sha256"]:
+            raise ValueError(f"Source changed or is unavailable for image {ident}")
+        with Image.open(source) as raw:
+            if raw.format not in {"JPEG", "MPO"}:
+                raise ValueError("Source is not a JPEG-compatible image")
+            if raw.format == "MPO":
+                raw.seek(0)
+            image, _ = srgb_image(raw)
+        thumb = image.copy()
+        thumb.thumbnail((960, 960))
+        boxes, scores, detector = face_boxes(np.asarray(thumb, dtype=np.uint8))
+        if detector == "unavailable_review":
+            raise ValueError("Pinned local face detector is unavailable; inspect the full photo manually")
+        candidates = sorted(zip(boxes, scores), key=lambda part: (part[0][1], part[0][0]))[:40]
+        cell, columns, header = 220, 5, 300
+        rows_needed = (len(candidates) + columns - 1) // columns
+        sheet = Image.new("RGB", (cell * columns, header + max(1, rows_needed) * cell), "#252525")
+        draw = ImageDraw.Draw(sheet)
+        overview = image.copy()
+        overview.thumbnail((cell * columns - 20, header - 50))
+        sheet.paste(overview, ((sheet.width - overview.width) // 2, 34))
+        draw.text((10, 10), f"{ident} | Human expression and eye review | {len(boxes)} detector candidates",
+                  fill="white")
+        if not candidates:
+            draw.text((12, header + 16), "No face candidates; inspect the full image manually.", fill="white")
+        scale_x, scale_y = image.width / thumb.width, image.height / thumb.height
+        for index, (box, score) in enumerate(candidates):
+            x, y, width, height = box
+            pad = .30 * max(width, height)
+            bounds = (max(0, int((x - pad) * scale_x)), max(0, int((y - pad) * scale_y)),
+                      min(image.width, int((x + width + pad) * scale_x)),
+                      min(image.height, int((y + height + pad) * scale_y)))
+            crop = image.crop(bounds)
+            crop.thumbnail((cell - 16, cell - 40))
+            left, top = (index % columns) * cell, header + (index // columns) * cell
+            sheet.paste(crop, (left + (cell - crop.width) // 2, top + 8))
+            draw.text((left + 8, top + cell - 23), f"Candidate {index + 1} | {score:.2f}", fill="white")
+        destination.mkdir(exist_ok=True)
+        output = destination / f"{ident}.jpg"
+        if output.is_symlink():
+            raise ValueError("Symlinked face-review output is not supported")
+        temporary = output.with_suffix(".tmp")
+        sheet.save(temporary, format="JPEG", quality=90, icc_profile=export_srgb_icc())
+        os.replace(temporary, output)
+        results.append({"id": ident, "candidate_count": len(boxes),
+                        "shown_count": len(candidates), "preview": str(output.resolve())})
+    return {"files": results, "human_expression_review_required": True}
 
 
 def run(source: Path, job: Path, limit: int | None,
@@ -701,6 +765,9 @@ def main() -> int:
     cull.add_argument("--decision", choices=("KEEP", "ALTERNATE", "REVIEW"), required=True)
     cull.add_argument("--reviewer", required=True)
     cull.add_argument("--reason", required=True)
+    faces = sub.add_parser("face-review", help="Make private face-crop sheets for human expression review")
+    faces.add_argument("--job", type=Path, required=True)
+    faces.add_argument("--ids", nargs="+", required=True)
     qc = sub.add_parser("verify", help="Check source/output hashes, JPEG dimensions, sRGB profile and EXIF")
     qc.add_argument("--job", type=Path, required=True)
     qc.add_argument("--quality", action="store_true", help="Also compare bright-pixel fractions against originals")
@@ -726,6 +793,9 @@ def main() -> int:
             return 0
         if args.action == "classify":
             print(json.dumps(classify(args.job, args.id, args.decision, args.reviewer, args.reason)))
+            return 0
+        if args.action == "face-review":
+            print(json.dumps(face_review(args.job, args.ids)))
             return 0
         if args.action == "verify":
             result = verify(args.job, args.quality)

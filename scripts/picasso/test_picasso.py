@@ -9,7 +9,7 @@ from unittest.mock import patch
 import numpy as np
 from PIL import Image, ImageCms
 
-from picasso import (amend, approve_review, classify, export_srgb_icc, face_boxes,
+from picasso import (amend, approve_review, classify, export_srgb_icc, face_boxes, face_review,
                      face_model_ready, finish, preflight, prepare_review, run, verify)
 
 
@@ -115,6 +115,29 @@ class PicassoJobTest(unittest.TestCase):
             self.assertEqual(rows[1]["classification"], "REVIEW")
             self.assertEqual(rows[1]["similarity_hint"],
                              {"nearest_id": "0001", "dhash_distance": 0})
+
+    def test_face_review_is_private_human_preview_without_source_change(self):
+        with tempfile.TemporaryDirectory() as root:
+            base = Path(root)
+            source, job = base / "source", base / "job"
+            source.mkdir()
+            original = source / "group.jpg"
+            Image.new("RGB", (240, 160), (102, 89, 76)).save(original, "JPEG")
+            original_hash = sha(original)
+            self.assertEqual(run(source, job, None), 0)
+            with patch("picasso.face_boxes", return_value=([[30, 20, 40, 40]], [.91],
+                                                           "opencv_yunet_2026may")):
+                result = face_review(job, ["0001"])
+            self.assertTrue(result["human_expression_review_required"])
+            self.assertEqual(result["files"][0]["candidate_count"], 1)
+            preview = job / "face-review" / "0001.jpg"
+            with Image.open(preview) as image:
+                self.assertEqual(image.size, (1100, 520))
+                self.assertTrue(image.info.get("icc_profile"))
+                self.assertEqual(len(image.getexif()), 0)
+            self.assertEqual(sha(original), original_hash)
+            with self.assertRaisesRegex(ValueError, "distinct"):
+                face_review(job, ["0001", "0001"])
 
     def test_onedrive_preflight_refuses_placeholder_without_reading_media(self):
         with tempfile.TemporaryDirectory() as root:
