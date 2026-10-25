@@ -20,6 +20,8 @@
 5. **Controlled contrast:** grade one source shot against its untouched control at phone size. The [cool-shadow preset test](FIGHT-GRADE-STUDY.md) darkened the subject and was rejected. Retain face/glove separation and consistent skin, ring and brand colours before stylisation.
 6. **Geography reset:** after a macro or whip, show both fighters or a stable ring orientation before asking the viewer to read another strike. The [portrait crop test](FIGHT-VERTICAL-FRAMING-STUDY.md) rejected a fill that cut away one opponent.
 
+The [geography-reset source screen](FIGHT-GEOGRAPHY-RESET-SOURCE-SCREEN.md) also rejects a proposed cut from a tight portrait stock fight to a landscape wide: it cannot establish chronological continuity and fails the portrait two-fighter composition gate. An editor should not rescue that source mismatch with more effects.
+
 These are source-selection and cut decisions first, effects second. Avoid a montage of close-up gloves, generic flashes, artificial knockouts, repeated punches or masks with floating edges. The 30-second film needs a distinct shot progression and a reason for each effect. The two TikToks are inspiration, not sound licences or evidence that our existing stock footage matches them.
 
 ## Sound pass after the picture selects
