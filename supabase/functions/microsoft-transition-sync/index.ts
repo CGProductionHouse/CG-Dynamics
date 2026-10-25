@@ -5,7 +5,6 @@ import { shouldFetchPlannerTaskDetails } from './planner-details.ts'
 import {
   buildAssigneeBatchRequests,
   correlateAssigneeBatchResponses,
-  type GraphAssigneeBatchItem,
 } from './assignee-lookup.ts'
 import {
   accumulateOutlookPage,
@@ -32,7 +31,7 @@ import {
 import { applyAutomaticMicrosoftMirrors, claimAutomaticApplyContinuation } from './automatic-reconciliation.ts'
 import { automaticSourceDomain, isAutomaticMirrorSource, plannerAssigneeIds, canFinishAutomaticProtectedDetails, readAutomaticJobSnapshot } from './automatic-snapshot.ts'
 
-interface GraphBatchItem { id: string; status: number; headers?: Record<string, string>; body?: { description?: unknown } }
+interface GraphBatchItem { id: string; status: number; headers?: Record<string, string>; body?: { id?: unknown; description?: unknown } }
 
 const GRAPH_ROOT = 'https://graph.microsoft.com/v1.0'
 const GRAPH_MAX_ATTEMPTS = 5
@@ -80,24 +79,44 @@ async function fetchGraph(url: string, token: string, prefer?: string, init: Req
 
 async function graphTaskDescriptions(taskIds: string[], token: string): Promise<{ descriptions: Map<string, string | null>; complete: boolean }> {
   const descriptions = new Map<string, string | null>()
+  if (new Set(taskIds).size !== taskIds.length || taskIds.some(id => typeof id !== 'string' || !id.trim())) return { descriptions, complete: false }
   let complete = true
   const batches: string[][] = []
   for (let index = 0; index < taskIds.length; index += 20) batches.push(taskIds.slice(index, index + 20))
   await runBoundedWorkers(batches, GRAPH_DETAIL_CONCURRENCY, async batch => {
     let pending = batch
     for (let attempt = 0; pending.length > 0 && attempt < GRAPH_BATCH_MAX_ATTEMPTS; attempt += 1) {
+      // Graph correlation IDs are case-insensitive; Planner source IDs are not.
+      const sourceIdByRequestId = new Map(pending.map((taskId, index) => [`detail-${index + 1}`, taskId]))
       const response = await fetchGraph(`${GRAPH_ROOT}/$batch`, token, undefined, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ requests: pending.map(taskId => ({ id: taskId, method: 'GET', url: `/planner/tasks/${encodeURIComponent(taskId)}/details` })) }),
+        body: JSON.stringify({ requests: [...sourceIdByRequestId].map(([id, taskId]) => ({ id, method: 'GET', url: `/planner/tasks/${encodeURIComponent(taskId)}/details` })) }),
       })
       if (!response?.ok) { complete = false; break }
-      const body = await response.json() as { responses?: GraphBatchItem[] }
-      const results = new Map((body.responses ?? []).map(item => [item.id, item]))
+      let body: { responses?: GraphBatchItem[] } | null
+      try { body = await response.json() } catch { complete = false; break }
+      // A batch HTTP200 is not evidence that every exact task was read. Never
+      // let duplicate IDs silently last-win or missing properties clear source
+      // text. The existing failed-source gate will preserve the live mirror.
+      const results = new Map<string, GraphBatchItem[]>()
+      if (!Array.isArray(body?.responses)) complete = false
+      for (const item of Array.isArray(body?.responses) ? body.responses : []) {
+        const taskId = typeof item?.id === 'string' ? sourceIdByRequestId.get(item.id.toLowerCase()) : undefined
+        if (!taskId || typeof item.status !== 'number') { complete = false; continue }
+        results.set(taskId, [...(results.get(taskId) ?? []), item])
+      }
       const retry: string[] = []
       const throttled: GraphBatchItem[] = []
       for (const taskId of pending) {
-        const item = results.get(taskId)
-        if (item?.status === 200) descriptions.set(taskId, typeof item.body?.description === 'string' ? item.body.description : null)
+        const matches = results.get(taskId) ?? []
+        if (matches.length > 1) { complete = false; continue }
+        const item = matches[0]
+        if (item?.status === 200) {
+          if (item.body && !Array.isArray(item.body) && item.body.id === taskId
+            && Object.hasOwn(item.body, 'description') && (typeof item.body.description === 'string' || item.body.description === null)) {
+            descriptions.set(taskId, item.body.description)
+          } else complete = false
+        }
         else if (item && shouldRetryStatus(item.status)) { retry.push(taskId); throttled.push(item) }
         else if (!item) retry.push(taskId)
         else complete = false
@@ -126,7 +145,13 @@ async function graphPages(path: string, token: string, prefer?: string, cursor?:
       const response = await fetchGraph(url, token, prefer)
       if (!response) return null
       if (!response.ok) return { ok: false, status: response.status, body: null }
-      return { ok: true, status: response.status, body: await response.json() as { value?: Array<Record<string, unknown>>; '@odata.nextLink'?: string } }
+      try {
+        return { ok: true, status: response.status, body: await response.json() as { value?: Array<Record<string, unknown>>; '@odata.nextLink'?: string } }
+      } catch {
+        // A truncated/non-JSON success is a failed source read, never an empty
+        // collection or an uncaught provider payload in the public job error.
+        return { ok: false, status: 502, body: null }
+      }
     },
     status => (status === null ? 'Microsoft connector request failed after bounded retries.' : safeMessage(status)),
     batchSize,
@@ -173,8 +198,11 @@ async function resolveAssignees(microsoftIds: string[], token: string): Promise<
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requests }),
     })
     if (batchResult?.ok) {
-      const batchBody = await batchResult.json() as { responses?: GraphAssigneeBatchItem[] }
-      const correlated = correlateAssigneeBatchResponses(batchBody.responses ?? [], sourceIdByRequestId)
+      let batchBody: { responses?: unknown } | null
+      try { batchBody = await batchResult.json() } catch { batchBody = null }
+      // Optional identity enrichment must remain unresolved on a bad read, not
+      // fail otherwise verified task enumeration or fabricate staff metadata.
+      const correlated = correlateAssigneeBatchResponses(batchBody?.responses, sourceIdByRequestId)
       Object.assign(assigneeMap, correlated.assignees)
     }
     if (index + 20 < idList.length) await sleep(200)

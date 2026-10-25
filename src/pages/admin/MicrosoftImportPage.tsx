@@ -1,4 +1,6 @@
 import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
+import MicrosoftRunConflictReview from '../../components/admin/MicrosoftRunConflictReview'
+import { microsoftConflictCount, microsoftRunOutcome } from '../../lib/microsoftRunReview'
 import { addBusinessDays, businessDateKey } from '../../lib/businessTime'
 import {
   summarizeMicrosoftReconciliation,
@@ -171,7 +173,7 @@ function RunHistory({ runs, onSelect }: { runs: MicrosoftSyncRunSummary[]; onSel
   return <div className="space-y-2">{runs.map(run => (
     <button type="button" onClick={() => onSelect(run.id)} key={run.id} className="flex w-full flex-col gap-2 rounded-xl border border-white/10 bg-black/20 p-3 text-left transition-colors hover:bg-white/[0.04] sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0"><p className="text-sm font-black text-white">{new Date(run.createdAt).toLocaleString('en-ZA')} · {run.triggerType}</p><p className="mt-1 text-xs text-white/45">Source {new Date(run.snapshotExportedAt).toLocaleString('en-ZA')} · {run.sourceCompleteness.filter(source => source.complete).length}/{run.sourceCompleteness.length} complete</p>{run.safeError && <p className="mt-1 truncate text-xs text-red-200" title={run.safeError}>{run.safeError}</p>}</div>
-      <div className="text-left sm:text-right"><p className={`text-xs font-black uppercase ${run.status === 'failed' ? 'text-red-300' : run.status === 'partial' ? 'text-amber-200' : 'text-brand-teal'}`}>{run.status}</p><p className="mt-1 text-xs text-white/45">{run.summary.applied ?? 0} applied · {run.summary.previouslyApplied ?? 0} previous · {run.summary.failed ?? 0} failed · {(run.summary.conflict ?? 0) || (run.summary.conflictsUntouched ?? 0)} conflicts</p></div>
+      <div className="text-left sm:text-right"><p className={`text-xs font-black uppercase ${run.status === 'failed' ? 'text-red-300' : run.status === 'partial' ? 'text-amber-200' : 'text-brand-teal'}`}>{run.status}</p><p className="mt-1 text-xs text-white/45">{run.summary.applied ?? 'Unknown'} applied · {run.summary.previouslyApplied ?? 'Unknown'} previous · {run.summary.failed ?? 'Unknown'} failed · {microsoftConflictCount(run.summary) ?? 'Unknown'} conflicts</p></div>
     </button>
   ))}</div>
 }
@@ -209,6 +211,8 @@ export default function MicrosoftImportPage() {
   const [transitionStatus, setTransitionStatus] = useState<MicrosoftTransitionStatus>('active')
   const [runs, setRuns] = useState<MicrosoftSyncRunSummary[]>([])
   const [runItems, setRunItems] = useState<MicrosoftSyncRunItem[]>([])
+  const [runItemsState, setRunItemsState] = useState<'loading' | 'ready' | 'error'>('loading')
+  const runItemsRequest = useRef(0)
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null)
   const [migrationNeeded, setMigrationNeeded] = useState(false)
   const [rangeStart, setRangeStart] = useState(addBusinessDays(businessDateKey(), -31))
@@ -483,11 +487,15 @@ export default function MicrosoftImportPage() {
   }
 
   async function selectRun(runId: string) {
+    const request = ++runItemsRequest.current
     setSelectedRunId(runId)
     setRunItems([])
+    setRunItemsState('loading')
     const result = await loadMicrosoftSyncRunItems(runId)
-    if (result.error) { setError(result.error); return }
+    if (request !== runItemsRequest.current) return
+    if (result.error) { setRunItemsState('error'); setError(result.error); return }
     setRunItems(result.data)
+    setRunItemsState('ready')
   }
 
   async function prepareRunRecovery(runId: string) {
@@ -581,7 +589,7 @@ export default function MicrosoftImportPage() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-[10px] font-black uppercase tracking-wider text-white/35">Connection</p><h2 className="mt-1 text-xl font-black text-white">{connection?.connected ? 'Microsoft available' : 'Microsoft setup required'}</h2><p className="mt-1 text-sm text-white/50">{connection?.message ?? connectionError ?? 'Checking server-side connection...'}</p></div><span className={`w-fit rounded-full px-3 py-1.5 text-xs font-black ${connection?.connected ? 'bg-emerald-300/10 text-emerald-200' : 'bg-amber-300/10 text-amber-100'}`}>{connection?.connected ? 'Connected' : 'Unavailable'}</span></div>
           {connection?.sources && connection.sources.length > 0 && <div className="mt-4 flex flex-wrap gap-2">{connection.sources.map(source => <span key={`${source.type}:${source.id}`} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-white/65">{source.name}</span>)}</div>}
         </div>
-        <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-5"><p className="text-[10px] font-black uppercase tracking-wider text-white/35">Last successful sync</p><p className="mt-2 text-xl font-black text-white">{lastSuccess ? new Date(lastSuccess.finishedAt ?? lastSuccess.createdAt).toLocaleString('en-ZA') : 'Not run yet'}</p><p className="mt-1 text-xs text-white/45">{lastSuccess ? `${lastSuccess.summary.create ?? 0} created · ${lastSuccess.summary.update ?? 0} updated` : 'A reviewed run will appear here.'}</p></div>
+        <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-5"><p className="text-[10px] font-black uppercase tracking-wider text-white/35">Last recorded apply</p><p className="mt-2 text-xl font-black text-white">{lastSuccess ? new Date(lastSuccess.finishedAt ?? lastSuccess.createdAt).toLocaleString('en-ZA') : 'Not run yet'}</p><p className="mt-1 text-xs text-white/45">{lastSuccess ? microsoftRunOutcome(lastSuccess) : 'A reviewed run will appear here.'}</p></div>
       </section>
 
       {/* Apply confirmation. Sits directly ABOVE the fetch panel so that after a
@@ -712,7 +720,23 @@ export default function MicrosoftImportPage() {
         {!recovery && <section className="mt-7 rounded-2xl border border-white/10 bg-black/25 p-5"><div className="space-y-3"><label className="flex items-start gap-3 text-sm text-white/65"><input type="checkbox" checked={reviewed} onChange={event => setReviewed(event.target.checked)} className="mt-1 accent-teal-400" />I reviewed the reconciliation preview and approve the safe Microsoft-owned field changes.</label>{removalCount > 0 && <label className="flex items-start gap-3 text-sm text-orange-100/80"><input type="checkbox" checked={approveRemovals} onChange={event => setApproveRemovals(event.target.checked)} className="mt-1 accent-orange-400" />Approve {removalCount} source-removal actions from complete successful source fetches. Records are archived or cancelled, never hard-deleted.</label>}</div>{applying && <div className="mt-4"><p className="mb-3 rounded-lg border border-brand-teal/20 bg-brand-teal/[0.06] px-3 py-2 text-xs text-brand-teal">Only the reviewed executable actions are processed. Per-item audit history is retained if this tab closes.</p><div className="h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full bg-brand-teal" style={{ width: `${progress.total ? (progress.completed / progress.total) * 100 : 0}%` }} /></div><p className="mt-2 text-xs text-white/45">{progress.completed} of {progress.total}</p></div>}<div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><p className="text-xs text-white/40">{summary.conflict} conflicts will not be applied. CG-only notes and workflow fields remain untouched.</p><button type="button" disabled={!canApply} onClick={() => void applyReviewed()} className="rounded-xl bg-brand-teal px-5 py-3 text-sm font-black text-black disabled:opacity-35">{applying ? 'Applying...' : `Apply reviewed changes (${applicableCount})`}</button></div></section>}
       </>}
 
-      <section className="mt-8 rounded-2xl border border-white/10 bg-white/[0.025] p-5"><p className="text-[10px] font-black uppercase tracking-wider text-white/35">Sync history</p><h2 className="mb-4 mt-1 text-xl font-black text-white">Recent reconciliation runs</h2><RunHistory runs={runs} onSelect={runId => void selectRun(runId)} />{selectedRunId && <div className="mt-5 border-t border-white/10 pt-4">{selectedRun && (selectedRun.status === 'failed' || selectedRun.status === 'partial') && <div className="mb-4 rounded-xl border border-red-300/20 bg-red-300/[0.05] p-4"><div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-xs font-black uppercase text-red-200">{failedRunItems.length} failed reviewed actions</p><p className="mt-1 text-sm text-red-100/80">{selectedRun.safeError ?? 'Inspect the failed items below.'}</p></div><button type="button" disabled={loading || applying} onClick={() => void prepareRunRecovery(selectedRun.id)} className="rounded-lg border border-amber-300/40 bg-amber-300/10 px-4 py-2 text-xs font-black text-amber-200 disabled:opacity-35">Prepare failed-change recovery</button></div></div>}<p className="mb-3 text-xs font-black uppercase tracking-wider text-white/40">Applied, failed and not-attempted results</p><div className="max-h-96 space-y-2 overflow-y-auto">{meaningfulRunItems.map(item => <article key={item.id} className="rounded-lg border border-white/10 bg-black/20 p-3"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-bold text-white">{item.details.title ?? 'Microsoft item'}</p><p className="mt-1 text-xs text-white/40">{item.sourceName} · {item.destination}</p></div><span className={`rounded-full border px-2 py-1 text-[9px] font-black uppercase ${ACTION_TONES[item.action]}`}>{item.action} · {item.resultStatus === 'previewed' ? 'not attempted' : item.resultStatus}</span></div>{item.safeError && <p className="mt-2 text-xs text-red-200">{item.safeError}</p>}</article>)}{meaningfulRunItems.length === 0 && <p className="text-sm text-white/35">No applied, failed or not-attempted items are available for this run.</p>}</div><p className="mt-3 text-xs text-white/35">{runItems.length - meaningfulRunItems.length} unchanged, skipped or conflict items remain untouched.</p></div>}</section>
+      <section className="mt-8 rounded-2xl border border-white/10 bg-white/[0.025] p-5">
+        <p className="text-[10px] font-black uppercase tracking-wider text-white/35">Sync history</p><h2 className="mb-4 mt-1 text-xl font-black text-white">Recent reconciliation runs</h2>
+        <RunHistory runs={runs} onSelect={runId => void selectRun(runId)} />
+        {selectedRun && <MicrosoftRunConflictReview key={selectedRun.id} run={selectedRun} items={runItems} state={runItemsState} />}
+        {selectedRunId && runItemsState === 'ready' && <div className="mt-5 border-t border-white/10 pt-4">
+          {selectedRun && failedRunItems.length > 0 && (selectedRun.status === 'failed' || selectedRun.status === 'partial') && <div className="mb-4 rounded-xl border border-red-300/20 p-4">
+            <p className="text-sm text-red-100">{failedRunItems.length} failed reviewed actions. Conflicts are a separate held review, not failed-change recovery.</p>
+            <button type="button" disabled={loading || applying} onClick={() => void prepareRunRecovery(selectedRun.id)} className="mt-3 rounded-lg border border-amber-300/40 px-4 py-2 text-xs text-amber-200">Prepare failed-change recovery</button>
+          </div>}
+          <p className="mb-3 text-xs font-black uppercase tracking-wider text-white/40">Applied, failed and not-attempted results</p>
+          <div className="max-h-96 space-y-2 overflow-y-auto">{meaningfulRunItems.map(item => <article key={item.id} className="rounded-lg border border-white/10 bg-black/20 p-3">
+            <p className="text-sm font-bold text-white">{item.details.title ?? 'Microsoft item'}</p><p className="mt-1 text-xs text-white/40">{item.sourceName} · {item.destination} · {item.action} · {item.resultStatus}</p>
+            {item.safeError && <p className="mt-2 text-xs text-red-200">{item.safeError}</p>}
+          </article>)}</div>
+          <p className="mt-3 text-xs text-white/35">{runItems.length - meaningfulRunItems.length} unchanged, skipped or conflict items remain untouched. No conflict is automatically approved here.</p>
+        </div>}
+      </section>
     </div>
   )
 }
