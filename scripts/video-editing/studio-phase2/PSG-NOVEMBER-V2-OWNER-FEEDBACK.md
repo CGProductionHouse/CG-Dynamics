@@ -1,6 +1,15 @@
-# PSG November V2 — owner correction and private revision
+# PSG November V2 — withdrawn failure record
 
-25 October 2026, issue #872 / draft PR #875. This is a **private revision**, not a client-ready or approved film. V1 remains preserved in `output/psg-872/` so the failure cannot be mistaken for a successful reference.
+25 October 2026, issue #872 / draft PR #875. **OWNER REJECTED V2. WITHDRAWN FROM REVIEW.** This file records why the private render failed and must not be used as a PSG concept, approved film or music/graphics reference. V1 and V2 remain preserved in ignored `output/psg-872/` only as failure evidence. Apply the [editorial continuity gate](NOLAN-EDITORIAL-CONTINUITY-GATE.md) before any new source or story decision.
+
+## Subsequent owner verdict overrides the V2 construction notes below
+
+1. **Repeated soundtrack:** V2 used Mixkit asset 32, the same cue used in the posted October PSG film. A different source in-point did not make it new. The owner had already rejected asset 580. Neither is eligible for the redo.
+2. **Repeated visual cluster and poor moment selection:** the `0L8A0554.MP4` team insert belongs to the same recognisable April 2025 office/table session as the posted film. The private preflight had already warned against neighboring office takes. Other nearby takes contain awkward rising/reaching gestures. A different file or shorter crop does not fix a reused setting or failed performance; only a screened, contextually useful moving moment from a distinct approved source can pass.
+3. **Weak explanatory graphic:** the four-topic wheel was a crude static-looking board despite licensed imported icons. Its design and hierarchy did not meet the owner's professional-graphics requirement. Do not reuse it or present an animation/decode check as design validation.
+4. **Wrong ending:** V2 substituted a staged/static brand card for the required official PSG animated logo outro. The official animation already exists in the client package, with a proven portrait adaptation in the approved October project.
+
+The owner should not be asked to review another export until the source, concept, cue, graphic treatment and logo are screened against the established Nolan workflow. This is a correction to the earlier optimistic wording below, which is retained to show the actual failed construction.
 
 ## Owner feedback, retained as an edit constraint
 
@@ -37,6 +46,6 @@ V2 removed the rejected 580 cue. It uses **“Driving Ambition” by Ahjay Steli
 - **Audio technical only:** 48 kHz AAC; measured approximately −16.26 LUFS integrated, −4.26 dB true peak, 2.60 LU LRA; no ≥0.25 s interval below −45 dB reported by silence detection. These checks do not judge the cue's mood, loop or phrase ending. The owner already identified why that distinction matters.
 - **Unverified:** normal-speed picture and actual headphone/phone listening by an independent editor; client approval of crop-insurance wording, local number/CTA, team likeness and office take; staff-editable native handover; true freshness of team coverage; final music selection. Keep this private and PR draft, do not publish or send to PSG.
 
-## Next editorial decision
+## Historical next-decision note — superseded by owner rejection
 
-Use this V2 as a concrete private comparison, not as proof of acceptance. An independent editor should watch and hear it at full speed and on a phone, compare its team insert to the posted October film, and either approve the current branded shot or obtain a genuinely fresh moving adviser shot. Audition a new upbeat, brand-suitable licensed cue against this exact cut; **do not reuse asset 580**, and do not equate music metering with an audition. Continue to carry the owner's specific notes into every subsequent PSG cut.
+The previous text suggested V2 could be compared for possible approval. The owner has now rejected it. Restart source and story selection from the posted-content audit and live client context. Do not rework V2 merely by swapping music, hiding the office scene, or adding the logo. Record exact moving-footage in/out ranges and rejected neighbors, independently hear the final soundtrack, and use the official animated logo in any later eligible edit.
