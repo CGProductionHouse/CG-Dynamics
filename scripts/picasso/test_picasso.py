@@ -68,6 +68,21 @@ class PicassoJobTest(unittest.TestCase):
             rows = json.loads((job / "manifest.json").read_text(encoding="utf-8"))["items"]
             self.assertEqual([r["status"] for r in rows], ["error", "complete"])
 
+    def test_similarity_hint_survives_colour_review_and_resume(self):
+        with tempfile.TemporaryDirectory() as root:
+            base = Path(root)
+            source, job = base / "source", base / "job"
+            source.mkdir()
+            first = source / "a.jpg"
+            Image.new("RGB", (48, 32), (92, 82, 71)).save(first)
+            (source / "b.jpg").write_bytes(first.read_bytes())
+            self.assertEqual(run(source, job, None), 0)
+            self.assertEqual(run(source, job, None), 0)
+            rows = json.loads((job / "manifest.json").read_text(encoding="utf-8"))["items"]
+            self.assertEqual(rows[1]["classification"], "REVIEW")
+            self.assertEqual(rows[1]["similarity_hint"],
+                             {"nearest_id": "0001", "dhash_distance": 0})
+
     def test_onedrive_preflight_refuses_placeholder_without_reading_media(self):
         with tempfile.TemporaryDirectory() as root:
             base = Path(root)

@@ -19,7 +19,7 @@ import cv2
 import numpy as np
 from PIL import Image, ImageCms, ImageDraw, ImageOps, __version__ as pillow_version
 
-VERSION = "0.3.2"
+VERSION = "0.3.4"
 SETTINGS = {"jpeg_quality": 94, "max_ev": 0.35, "max_wb": 0.025, "max_shadow_lift": 0.07,
             "max_highlight_pull": 0.05, "max_contrast": 0.035, "max_saturation": 0.035}
 SUFFIXES = {".jpg", ".jpeg"}
@@ -292,8 +292,12 @@ def run(source: Path, job: Path, limit: int | None,
                 resumed.add(name)
             else:
                 with Image.open(path) as raw:
-                    if raw.format != "JPEG":
-                        raise ValueError("File is not a JPEG")
+                    if raw.format not in {"JPEG", "MPO"}:
+                        raise ValueError("File is not a JPEG-compatible image")
+                    row["source_container"] = raw.format
+                    row["source_frames"] = getattr(raw, "n_frames", 1)
+                    if raw.format == "MPO":
+                        raw.seek(0)  # Use the full-size primary JPEG, never an auxiliary frame.
                     image, color_note = srgb_image(raw)
                 metrics = analyze(image)
                 adjustments = settings_for(metrics)
@@ -313,17 +317,22 @@ def run(source: Path, job: Path, limit: int | None,
             row.update(status="error", error=f"{type(error).__name__}: {error}", classification="REVIEW")
         manifest["items"].append(row)
         atomic_json(manifest_path, manifest)
-    # Similarity is advisory. Classification edits in an existing manifest survive resume.
+    # Similarity is advisory. Keep the hint even when colour review takes precedence.
     for i, (name, row) in enumerate(hashes):
-        if name in resumed or row["classification"] != "KEEP":
+        if row["status"] != "complete":
             continue
+        row.pop("similarity_hint", None)
+        nearest = None
         for prior_name, prior in hashes[:i]:
-            if prior.get("analysis") and row.get("analysis"):
+            if prior.get("status") == "complete" and prior.get("analysis") and row.get("analysis"):
                 distance = sum(a != b for a, b in zip(row["analysis"]["dhash"], prior["analysis"]["dhash"]))
-                if distance <= 7:
-                    row["classification"] = "ALTERNATE"
-                    row["review_note"] = f"Visual similarity to {prior['id']}; keep documentary moments manually"
-                    break
+                if nearest is None or distance < nearest[0]:
+                    nearest = (distance, prior["id"])
+        if nearest and nearest[0] <= 7:
+            row["similarity_hint"] = {"nearest_id": nearest[1], "dhash_distance": nearest[0]}
+            if name not in resumed and row["classification"] == "KEEP":
+                row["classification"] = "ALTERNATE"
+                row["review_note"] = f"Visual similarity to {nearest[1]}; keep documentary moments manually"
     manifest["elapsed_seconds_last_run"] = round(time.monotonic() - start, 2)
     manifest["items"] = [next((r for n, r in hashes if n == item["source_name"]), item)
                          for item in manifest["items"]]
@@ -483,8 +492,10 @@ def amend(job: Path, ident: str, reviewer: str, request: str, overrides: dict) -
         raise ValueError("Symlinked revision folder is not supported")
     directory.mkdir(parents=True, exist_ok=False)
     with Image.open(source) as raw:
-        if raw.format != "JPEG":
-            raise ValueError("Source is not a JPEG")
+        if raw.format not in {"JPEG", "MPO"}:
+            raise ValueError("Source is not a JPEG-compatible image")
+        if raw.format == "MPO":
+            raw.seek(0)
         image, color_note = srgb_image(raw)
     metrics = analyze(image)
     settings = settings_for(metrics)
@@ -562,10 +573,15 @@ def verify(job: Path) -> dict:
             continue
         try:
             with Image.open(source) as original, Image.open(output) as export:
+                source_format = original.format
+                if source_format == "MPO":
+                    original.seek(0)
                 profile_bytes = export.info.get("icc_profile")
                 profile_name = (ImageCms.getProfileName(ImageCms.ImageCmsProfile(BytesIO(profile_bytes)))
                                 if profile_bytes else "")
-                if (original.format != "JPEG" or export.format != "JPEG"
+                if (source_format not in {"JPEG", "MPO"} or export.format != "JPEG"
+                        or (row.get("source_container") and row["source_container"] != source_format)
+                        or (row.get("source_frames") and row["source_frames"] != getattr(original, "n_frames", 1))
                         or list(ImageOps.exif_transpose(original).size) != row["dimensions"]
                         or list(export.size) != row["dimensions"]
                         or export.mode != "RGB" or len(export.getexif()) != 0

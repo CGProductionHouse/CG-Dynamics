@@ -22,7 +22,7 @@ The host audit in `docs/ops/PICASSO-LOCAL-EDITOR-2026-10-25.md` is the current b
 
 ## Quality and privacy gates
 
-- Only existing JPEGs. Preserve original bytes, dimensions and orientation; output one sRGB-tagged JPEG encode at high quality. An untagged input is **assumed** sRGB and flagged for review.
-- Exposure, face luminance, clipping, cast, and focus are heuristics. Never promise recovery of clipped JPEG data. Keep warm atmosphere and natural skin. The first pass does no automatic skin retouch and does not detect open eyes or expression.
+- Only existing JPEGs. Camera `.JPG` files identified by Pillow as two-frame MPO are accepted using the primary frame only; the manifest records the container and frame count. Preserve original bytes, primary-frame dimensions and orientation; output one sRGB-tagged JPEG encode at high quality. An untagged input is **assumed** sRGB and flagged for review.
+- Exposure, face luminance, clipping, cast, focus and similarity are heuristics. A similarity hint can accompany REVIEW without changing its classification. Never promise recovery of clipped JPEG data. Keep warm atmosphere and natural skin. The first pass does no automatic skin retouch and does not detect open eyes or expression.
 - The job manifest, previews, originals, client names, and EXIF stay in private local storage. The exported JPEGs omit source EXIF/GPS. Do not commit or paste client media or private file paths into GitHub.
 - Stop at the 25 approved-sample human quality gate. A 25-image single-scene technical run does not satisfy varied-lighting or human acceptance. Run 100 and then 1,000 only after the reviewer approves a varied 25-image batch. Report measured time, versions, errors, quality findings, and R0 incremental spend. Never claim everyday ChatGPT invocation until the skill actually runs from ChatGPT Work. The Computer Use skill prohibits automating ChatGPT's own desktop UI, so Codex cannot simulate that invocation.
