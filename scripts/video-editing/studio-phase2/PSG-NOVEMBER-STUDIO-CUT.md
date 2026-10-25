@@ -1,5 +1,7 @@
 # PSG November Studio restart — owner-review cut, 25 October 2026
 
+**REJECTED V1 — historical failure record.** The owner later rejected the music (a track they had disapproved before), solid blue/`BEFORE` opening, static pacing and thin PSG-team presence. Do not reuse this export or its soundtrack as a positive reference. The [exact correction and protected V2](PSG-NOVEMBER-V2-OWNER-FEEDBACK.md) supersede its creative recommendation. The V1 technical facts below remain evidence of what was tried, not evidence of approval.
+
 This is the **separate Nolan Studio #872 restart** in draft PR #875. It does not modify Nolan's active Premiere project, the posted October export, the CapCut lane or any source original. The rendered client media and edit script are private, ignored files at `output/psg-872/`; none is committed to Git or sent to a third-party editor.
 
 ## Brief and live approval context
