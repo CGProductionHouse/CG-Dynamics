@@ -13,6 +13,8 @@ The browser inspection sampled visible frames and player metadata, not complete 
 
 The [timed shot/effect grammar](FIGHT-REFERENCE-SHOT-GRAMMAR.md) records a second visual pass of both exact references: glove detail to venue scale, lateral fight transition, subject separation, motocross whip and geography reset. It translates each into a source requirement rather than an automatic effect preset. It also records the sound audition sequence without pretending that either reference audio was heard.
 
+The [sound source screen](FIGHT-SOUND-SOURCE-SCREEN.md) confirms every local fight-practice video is silent, records one licence-checked bag-training WAV candidate and a failed model-audio playback attempt. It does not turn that WAV into an approved impact cue or add new music. Actual event camera tracks and human listening remain the first sound gates.
+
 ## Footage intake when Franco's upload finishes
 
 1. Search the connected OneDrive for `Staffy` and identify the exact Fight Night folder, upload state, owner and file count. Keep source files in the approved client library; record exact OneDrive links/IDs. If a local editing copy is needed, use an approved project workspace outside Git and preserve originals.
