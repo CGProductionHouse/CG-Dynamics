@@ -1,7 +1,7 @@
 param(
     [ValidateSet('Check', 'Install')]
     [string]$Mode = 'Check',
-    [string]$Destination = (Join-Path $env:LOCALAPPDATA 'CGProductionHouse\PICASSO\runtime-0.3.8')
+    [string]$Destination = (Join-Path $env:LOCALAPPDATA 'CGProductionHouse\PICASSO\runtime-0.3.9')
 )
 
 $ErrorActionPreference = 'Stop'

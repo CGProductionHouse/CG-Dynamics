@@ -1,7 +1,9 @@
 import hashlib
 import json
+import shutil
 import tempfile
 import unittest
+import zipfile
 from io import BytesIO
 from pathlib import Path
 from unittest.mock import patch
@@ -9,8 +11,9 @@ from unittest.mock import patch
 import numpy as np
 from PIL import Image, ImageCms
 
-from picasso import (amend, approve_review, classify, export_srgb_icc, face_boxes, face_review,
-                     face_model_ready, finish, preflight, prepare_review, run, verify)
+from picasso import (amend, approve_review, backup_job, classify, export_srgb_icc, face_boxes,
+                     face_review, face_model_ready, finish, preflight, prepare_review,
+                     restore_job, run, verify)
 
 
 def sha(path: Path) -> str:
@@ -18,6 +21,46 @@ def sha(path: Path) -> str:
 
 
 class PicassoJobTest(unittest.TestCase):
+    def test_closed_job_survives_private_backup_and_source_relocation(self):
+        with tempfile.TemporaryDirectory() as root:
+            base = Path(root)
+            source, moved_source, job = base / "source", base / "moved-source", base / "job"
+            source.mkdir()
+            moved_source.mkdir()
+            Image.new("RGB", (180, 120), (97, 78, 61)).save(source / "sample.jpg", "JPEG")
+            self.assertEqual(run(source, job, None), 0)
+            classify(job, "0001", "KEEP", "reviewer", "approved documentary moment")
+            amend(job, "0001", "reviewer", "slightly darker", {"exposure_ev": -.1})
+            archive = base / "job-backup.zip"
+            first = backup_job(job, archive)
+            self.assertFalse(first["reused"])
+            self.assertTrue(backup_job(job, archive)["reused"])
+            tampered = base / "tampered.zip"
+            shutil.copy2(archive, tampered)
+            with zipfile.ZipFile(tampered, "a") as zipped:
+                zipped.writestr("../escape.txt", "bad")
+            with self.assertRaisesRegex(ValueError, "entries do not match"):
+                restore_job(tampered, base / "unsafe-job", source)
+            self.assertFalse((base / "escape.txt").exists())
+            (job / "revisions" / "r001" / "0001-preview.jpg").unlink()
+            with self.assertRaisesRegex(ValueError, "Missing or changed revision"):
+                backup_job(job, base / "incomplete.zip")
+            shutil.copy2(source / "sample.jpg", moved_source / "sample.jpg")
+            restored = base / "restored-job"
+            result = restore_job(archive, restored, moved_source)
+            self.assertEqual(result["verified"], 1)
+            self.assertTrue(result["source_rebound"])
+            self.assertEqual(verify(restored)["failures"], [])
+            record = json.loads((restored / "manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(record["items"][0]["classification"], "KEEP")
+            self.assertEqual(len(record["revisions"]), 1)
+            self.assertEqual(record["source_relocations"][0]["archive_sha256"], first["sha256"])
+            with self.assertRaisesRegex(ValueError, "new, empty job"):
+                restore_job(archive, restored, moved_source)
+            Image.new("RGB", (180, 120), (0, 0, 0)).save(moved_source / "sample.jpg", "JPEG")
+            with self.assertRaisesRegex(ValueError, "source bytes"):
+                restore_job(archive, base / "refused-job", moved_source)
+
     def test_pinned_local_face_model_loads_without_network(self):
         self.assertTrue(face_model_ready())
         boxes, scores, detector = face_boxes(np.zeros((320, 320, 3), dtype=np.uint8))

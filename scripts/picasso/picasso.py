@@ -8,8 +8,11 @@ import hashlib
 import json
 import os
 import shutil
+import stat
 import sys
+import tempfile
 import time
+import zipfile
 from collections import Counter
 from io import BytesIO
 from datetime import datetime
@@ -20,7 +23,7 @@ import cv2
 import numpy as np
 from PIL import Image, ImageCms, ImageDraw, ImageOps, __version__ as pillow_version
 
-VERSION = "0.3.8"
+VERSION = "0.3.9"
 FACE_MODEL = Path(__file__).resolve().parent / "models" / "face_detection_yunet_2026may.onnx"
 FACE_MODEL_SHA256 = "ebafce4e3c118d6554634be5c27ab333b4c047a9a8c3faf1d7cf93101c22f0f0"
 SETTINGS = {"jpeg_quality": 94, "max_ev": 0.35, "max_wb": 0.025, "max_shadow_lift": 0.07,
@@ -728,6 +731,149 @@ def verify(job: Path, quality: bool = False) -> dict:
     return result
 
 
+def verify_job_references(job: Path, manifest: dict) -> None:
+    """Reject missing private previews or hash-mismatched revision outputs."""
+    for row in manifest["items"]:
+        preview = (job / row["preview"]).resolve()
+        if not preview.is_relative_to((job / "previews").resolve()) or not preview.is_file():
+            raise ValueError(f"Missing or external preview for image {row['id']}")
+    for revision in manifest.get("revisions", []):
+        output = (job / revision["output"]).resolve()
+        preview = (job / revision["preview"]).resolve()
+        root = (job / "revisions").resolve()
+        if (not output.is_relative_to(root) or not preview.is_relative_to(root)
+                or not output.is_file() or not preview.is_file()
+                or digest(output) != revision["output_sha256"]):
+            raise ValueError(f"Missing or changed revision {revision['revision']}")
+    if manifest.get("internal_review_approval"):
+        verified_review_selection(job, manifest)
+
+
+def backup_job(job: Path, destination: Path) -> dict:
+    """Create a private, immutable, hash-indexed job archive without source originals."""
+    if job.is_symlink() or destination.is_symlink():
+        raise ValueError("Symlinked job or archive paths are not supported")
+    job = job.resolve()
+    destination = destination.resolve()
+    manifest = job / "manifest.json"
+    if not manifest.is_file() or destination == job or job in destination.parents:
+        raise ValueError("Use an existing job and an archive destination outside it")
+    data = json.loads(manifest.read_text(encoding="utf-8"))
+    source_root = Path(data["source_root"]).resolve()
+    if destination == source_root or source_root in destination.parents:
+        raise ValueError("Do not put a job archive in the original photo folder")
+    checked = verify(job)
+    if checked["failures"]:
+        raise ValueError("Job integrity failed; resolve verification failures before backup")
+    verify_job_references(job, data)
+    files = sorted((p for p in job.rglob("*") if p.is_file()), key=lambda p: p.relative_to(job).as_posix())
+    index = []
+    for path in files:
+        if path.is_symlink() or not path.resolve().is_relative_to(job):
+            raise ValueError("Symlinked or external job file is not supported")
+        if path.relative_to(job).as_posix() == "backup-index.json":
+            raise ValueError("Job contains a reserved backup index name")
+        index.append({"path": path.relative_to(job).as_posix(), "size": path.stat().st_size,
+                      "sha256": digest(path)})
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary = destination.with_name(destination.name + ".tmp")
+    if temporary.exists() or temporary.is_symlink():
+        raise ValueError("Backup temporary path already exists")
+    try:
+        with zipfile.ZipFile(temporary, "w", compression=zipfile.ZIP_STORED, allowZip64=True) as archive:
+            for record, path in zip(index, files):
+                entry = zipfile.ZipInfo(record["path"], date_time=(1980, 1, 1, 0, 0, 0))
+                entry.compress_type = zipfile.ZIP_STORED
+                with path.open("rb") as source, archive.open(entry, "w") as target:
+                    shutil.copyfileobj(source, target, 1024 * 1024)
+            entry = zipfile.ZipInfo("backup-index.json", date_time=(1980, 1, 1, 0, 0, 0))
+            archive.writestr(entry, json.dumps({"format": 1, "runner": VERSION, "files": index},
+                                              sort_keys=True, separators=(",", ":")))
+        archive_hash = digest(temporary)
+        if destination.exists():
+            if digest(destination) != archive_hash:
+                raise ValueError("Existing backup differs; use a new archive name")
+            return {"archive": str(destination), "sha256": archive_hash, "files": len(index), "reused": True}
+        os.replace(temporary, destination)
+        return {"archive": str(destination), "sha256": archive_hash, "files": len(index), "reused": False}
+    finally:
+        if temporary.exists():
+            temporary.unlink()
+
+
+def restore_job(archive_path: Path, job: Path, source_root: Path) -> dict:
+    """Restore a closed job to a new host after rechecking every source and archive byte."""
+    if archive_path.is_symlink() or job.is_symlink() or source_root.is_symlink():
+        raise ValueError("Symlinked archive, job or source paths are not supported")
+    archive_path, job, source_root = archive_path.resolve(), job.resolve(), source_root.resolve()
+    if not archive_path.is_file() or job.exists():
+        raise ValueError("Use an existing regular archive and a new, empty job path")
+    if not source_root.is_dir() or source_root.is_symlink():
+        raise ValueError("Approved source folder is unavailable")
+    check_paths(source_root, job)
+    if job in archive_path.parents or archive_path == source_root or source_root in archive_path.parents:
+        raise ValueError("Archive must be separate from source and destination")
+    job.parent.mkdir(parents=True, exist_ok=True)
+    archive_hash = digest(archive_path)
+    with zipfile.ZipFile(archive_path) as zipped:
+        members = zipped.infolist()
+        names = [member.filename for member in members]
+        if len(names) != len(set(names)) or names.count("backup-index.json") != 1:
+            raise ValueError("Duplicate or missing archive entries")
+        index = json.loads(zipped.read("backup-index.json"))
+        if index.get("format") != 1 or not isinstance(index.get("files"), list):
+            raise ValueError("Unsupported backup index")
+        records = {record["path"]: record for record in index["files"]}
+        if len(records) != len(index["files"]) or set(names) != set(records) | {"backup-index.json"}:
+            raise ValueError("Archive entries do not match their hash index")
+        if sum(record["size"] for record in records.values()) > shutil.disk_usage(job.parent).free:
+            raise ValueError("Not enough free space to restore the job")
+        with tempfile.TemporaryDirectory(prefix=".picasso-restore-", dir=job.parent) as temporary:
+            staging = Path(temporary).resolve()
+            for member in members:
+                name = member.filename
+                if name == "backup-index.json":
+                    continue
+                relative = Path(name)
+                if (relative.is_absolute() or "\\" in name or ".." in relative.parts or
+                        stat.S_ISLNK(member.external_attr >> 16) or member.is_dir()):
+                    raise ValueError("Unsafe archive entry")
+                target = (staging / relative).resolve()
+                if not target.is_relative_to(staging):
+                    raise ValueError("Archive entry escapes job folder")
+                target.parent.mkdir(parents=True, exist_ok=True)
+                content_hash = hashlib.sha256()
+                count = 0
+                with zipped.open(member) as stream, target.open("xb") as output:
+                    for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                        count += len(chunk)
+                        content_hash.update(chunk)
+                        output.write(chunk)
+                record = records[name]
+                if count != record["size"] or content_hash.hexdigest() != record["sha256"]:
+                    raise ValueError("Archived job file failed hash verification")
+            manifest_path = staging / "manifest.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            prior_source = manifest["source_root"]
+            for row in manifest["items"]:
+                candidate = source_root / row["source_name"]
+                if (candidate.is_symlink() or not candidate.resolve().is_relative_to(source_root)
+                        or not candidate.is_file() or digest(candidate) != row["source_sha256"]):
+                    raise ValueError(f"Approved source bytes do not match image {row['id']}")
+            manifest["source_root"] = str(source_root)
+            manifest.setdefault("source_relocations", []).append(
+                {"from": prior_source, "to": str(source_root), "at": datetime.now().isoformat(),
+                 "archive_sha256": archive_hash})
+            atomic_json(manifest_path, manifest)
+            checked = verify(staging)
+            if checked["failures"]:
+                raise ValueError("Restored job failed image verification")
+            verify_job_references(staging, manifest)
+            os.replace(staging, job)
+    return {"job": str(job), "archive_sha256": archive_hash,
+            "verified": checked["verified"], "source_rebound": prior_source != str(source_root)}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="action", required=True)
@@ -771,6 +917,13 @@ def main() -> int:
     qc = sub.add_parser("verify", help="Check source/output hashes, JPEG dimensions, sRGB profile and EXIF")
     qc.add_argument("--job", type=Path, required=True)
     qc.add_argument("--quality", action="store_true", help="Also compare bright-pixel fractions against originals")
+    backup = sub.add_parser("backup-job", help="Write a private hash-indexed archive outside the source and job")
+    backup.add_argument("--job", type=Path, required=True)
+    backup.add_argument("--destination", type=Path, required=True)
+    restore = sub.add_parser("restore-job", help="Restore to a new job path with the exact approved source bytes")
+    restore.add_argument("--archive", type=Path, required=True)
+    restore.add_argument("--job", type=Path, required=True)
+    restore.add_argument("--source", type=Path, required=True)
     args = parser.parse_args()
     try:
         if args.action == "run":
@@ -801,6 +954,12 @@ def main() -> int:
             result = verify(args.job, args.quality)
             print(json.dumps(result))
             return 0 if not result["failures"] else 1
+        if args.action == "backup-job":
+            print(json.dumps(backup_job(args.job, args.destination)))
+            return 0
+        if args.action == "restore-job":
+            print(json.dumps(restore_job(args.archive, args.job, args.source)))
+            return 0
         data = json.loads((args.job / "manifest.json").read_text(encoding="utf-8"))
         print(json.dumps({"version": data["picasso_version"], "total": len(data["items"]),
                           "complete": sum(x["status"] == "complete" for x in data["items"]),
