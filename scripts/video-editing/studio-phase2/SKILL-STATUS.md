@@ -4,7 +4,7 @@ The owner's [53-video collection ledger](VIDEO-EDITING-COLLECTION.md) records vi
 
 | Technique family | Actual evidence | Next valid gate |
 |---|---|
-| [Depth type](skills/depth-type/SKILL.md) | Moving green-screen proof and [controlled dark-backdrop cup](DARK-BACKDROP-DEPTH.md); naive black key rejected | Full-speed edge review; separately test realistic background/person mask before client use |
+| [Depth type](skills/depth-type/SKILL.md) | Moving green-screen proof and [controlled dark-backdrop cup](DARK-BACKDROP-DEPTH.md); naive black key rejected. [Natural boxing-gym screen](FIGHT-NATURAL-DEPTH-SOURCE-SCREEN.md) rejects unreadable glove/bag occlusion before moving render. | Select a shot with stable negative space; prove plain title readability before spending time on a natural foreground mask, then full-speed edge/phone review |
 | [Footage inside type](skills/footage-in-type/SKILL.md) | [Local moving matte proof](proof-reference-matte.mp4) | Judge full-speed/phone result and any native editable handover |
 | [Staggered words](skills/staggered-type/SKILL.md) | [Synthetic moving proof](proof-staggered-type.mp4) | Human timing/readability review and editable-title proof |
 | [Sound-led cuts](skills/sound-led-cuts/SKILL.md) | [Sip cue rejected](SOUND-CUT-STUDY.md); [visible cup-contact cue](CUP-CONTACT-STUDY.md) remains a candidate | Listen to dry/effect A/B at normal speed; judge surface timbre and music fit |
