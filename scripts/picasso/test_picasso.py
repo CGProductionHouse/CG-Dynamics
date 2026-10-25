@@ -84,6 +84,16 @@ class PicassoJobTest(unittest.TestCase):
         self.assertGreater(int(edited[0, 20, 0]), int(pixels[0, 20, 0]))
         self.assertEqual(int(np.count_nonzero(edited >= 253)), 0)
 
+    def test_clipped_neutral_sky_stays_white_when_background_is_toned(self):
+        pixels = np.array([[[255, 255, 255], [252, 250, 248],
+                            [240, 180, 90], [100, 80, 70]]], dtype=np.uint8)
+        settings = {"exposure_ev": -.25, "shadow_lift": 0, "highlight_pull": .025,
+                    "red_blue_balance": 0, "contrast": 0, "saturation": 0}
+        edited = np.asarray(finish(Image.fromarray(pixels, "RGB"), settings, {}))
+        self.assertEqual(edited[0, 0].tolist(), [255, 255, 255])
+        self.assertLess(int(edited[0, 2, 0]), int(pixels[0, 2, 0]))
+        self.assertLess(int(edited[0, 3, 0]), int(pixels[0, 3, 0]))
+
     def test_preserves_original_and_resumes_without_reencoding(self):
         with tempfile.TemporaryDirectory() as root:
             base = Path(root)

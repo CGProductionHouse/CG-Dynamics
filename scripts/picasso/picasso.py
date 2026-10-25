@@ -23,7 +23,7 @@ import cv2
 import numpy as np
 from PIL import Image, ImageCms, ImageDraw, ImageOps, __version__ as pillow_version
 
-VERSION = "0.3.9"
+VERSION = "0.3.10"
 FACE_MODEL = Path(__file__).resolve().parent / "models" / "face_detection_yunet_2026may.onnx"
 FACE_MODEL_SHA256 = "ebafce4e3c118d6554634be5c27ab333b4c047a9a8c3faf1d7cf93101c22f0f0"
 SETTINGS = {"jpeg_quality": 94, "max_ev": 0.35, "max_wb": 0.025, "max_shadow_lift": 0.07,
@@ -250,7 +250,13 @@ def finish(image: Image.Image, settings: dict, analysis: dict) -> Image.Image:
                        (SETTINGS["highlight_guard_end"] - SETTINGS["highlight_guard_start"]), 0, 1)
     headroom = headroom * headroom * (3 - 2 * headroom)
     delta = a - original
-    a = np.clip(original + np.minimum(delta, 0) + np.maximum(delta, 0) * headroom, 0, 1)
+    # A fully clipped neutral JPEG sky has no recoverable texture. Global
+    # darkening would turn it into a featureless grey patch, so retain those
+    # source whites while still toning the subjects and coloured background.
+    neutral_white = np.clip((original.min(axis=2, keepdims=True) - .90) / .08, 0, 1)
+    neutral_white = neutral_white * neutral_white * (3 - 2 * neutral_white)
+    a = np.clip(original + np.minimum(delta, 0) * (1 - neutral_white)
+                + np.maximum(delta, 0) * headroom, 0, 1)
     return Image.fromarray(np.uint8(np.round(a * 255)), "RGB")
 
 
