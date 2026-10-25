@@ -13,7 +13,9 @@ The browser inspection sampled visible frames and player metadata, not complete 
 
 The [timed shot/effect grammar](FIGHT-REFERENCE-SHOT-GRAMMAR.md) records a second visual pass of both exact references: glove detail to venue scale, lateral fight transition, subject separation, motocross whip and geography reset. It translates each into a source requirement rather than an automatic effect preset. It also records the sound audition sequence without pretending that either reference audio was heard.
 
-The [sound source screen](FIGHT-SOUND-SOURCE-SCREEN.md) confirms every local fight-practice video is silent, records one licence-checked bag-training WAV candidate and a failed model-audio playback attempt. It does not turn that WAV into an approved impact cue or add new music. Actual event camera tracks and human listening remain the first sound gates.
+The [sound source screen](FIGHT-SOUND-SOURCE-SCREEN.md) confirms the original six local fight-practice videos were silent, records one licence-checked bag-training WAV candidate and a failed model-audio playback attempt. It does not turn that WAV into an approved impact cue or add new music. Actual event camera tracks and independent editing-staff listening remain the first sound gates.
+
+A later [camera-sound source gate](FIGHT-CAMERA-SOUND-SOURCE-GATE.md) screened two additional audio-bearing public boxing files and rejected both for impact practice: one was already an edited promotional sequence, while the other showed shadowboxing and long near-silent stretches. An audio stream or waveform peak alone cannot stand in for original ring sound at a verified strike. Two locally tested audio models also failed known silence/tone controls; see [the local audio-review study](FIGHT-LOCAL-AUDIO-REVIEW-STUDY.md). The owner does not want routine practice audition requests; use independent editing-staff acceptance for a finished event mix.
 
 ## Footage intake when Franco's upload finishes
 
