@@ -1,5 +1,12 @@
 # Brand Hub file-window acceptance — 25 October 2026
 
+Later continuation: [Client file access acceptance](CLIENT-FILE-ACCESS-ACCEPTANCE-2026-10-25.md)
+extends this eight-client result to37 actual image Views and four explicit render
+exceptions across all41 published libraries. It also records a separately
+reproduced/fixed slow-authorisation popup defect and fresh frozen-source full local
+acceptance. This earlier receipt remains historical; do not repeat its completed
+eight-client checks or mistake its browser limitation for a global portal outage.
+
 Client lane #396/#668; supervisor #381. Continuation from clean main
 `00d2253aeec9a31a414504a6268c434ddfba8a4f`. ZERO Vercel operations.
 

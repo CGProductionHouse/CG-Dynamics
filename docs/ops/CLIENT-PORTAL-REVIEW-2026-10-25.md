@@ -1,5 +1,14 @@
 # Client portal — 25 October review packet
 
+Latest late-evening continuation: [slow file access repair and 41-library
+accounting](CLIENT-FILE-ACCESS-ACCEPTANCE-2026-10-25.md). Source ea5eaad6 fixes an
+actually reproduced six-second-authorisation/normal-popup-blocking failure; no
+accepted layout or auth change. Frozen full4184pass/24skips/0fail, all20 canonical
+browsers/build/stable tree, focused27tests and scoped lint/diff pass.37 actual
+published-image Views pass; Case/Emoya/Germoparts native PDFs and LHP URL-policy
+render checks remain unverified. No bypass, new publication or Vercel. This source
+repair is NOT deployed; existing owner/content/real-client/phone gates remain.
+
 Evening continuation: [actual Brand Hub file-window acceptance and finite
 overnight mission](BRAND-HUB-FILE-WINDOW-ACCEPTANCE-2026-10-25.md).
 Eight actual published-image Views passed; 33 additional file Views remain after

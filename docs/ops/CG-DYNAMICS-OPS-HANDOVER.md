@@ -13,6 +13,37 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 25 October late evening — slow file-window defect fixed; 37 live image Views
+
+Exact receipt: [Client file access acceptance](CLIENT-FILE-ACCESS-ACCEPTANCE-2026-10-25.md).
+Source ea5eaad6 reproduces the async authorisation/popup-blocking failure with a
+six-second grant and normal browser policy, then fixes it by reserving one isolated
+destination during the tap. No-referrer/opener protection, grant validation,
+blocked/closed-window and client-departure cleanup verified. Streaming and accepted
+portal layout unchanged; no auth/backend/dependency/production change or Vercel.
+
+Frozen ea5eaad6 canonical full acceptance:4208 total/4184 pass/24 explicit skips/
+zero failure/cancel/todo; actual-app TS/Vite, all20 canonical browser fixtures at
+1440/375/390/430 and stable source pass. Both mandatory disposable SQL fixtures
+included. Full receipt SHA256 F900C1378CF355C58EDCB22852597B21CDBEC48047C42BB24B9C3CB7B3E0881F.
+Focused27/27 and scoped lint/diff pass; whole lint0errors/17existing warnings.
+Local actual downloads verify exact synthetic bytes/filename, not production files.
+
+All41 published libraries accounted for:37 unique actual image Views loaded,
+separate windows/original client retained/no referrer. Four unverified render checks:
+Case/Emoya/Germoparts native PDFs and LHP browser URL-policy denial. No bypass or
+retry of the denied LHP window. Three initially unsettled windows were correlated
+using SELECT-only published asset IDs; two image loading frames were settled before
+acceptance. Do not repeat accepted Views or the older listing sweeps.17 original
+private libraries/new Jodrico scope remain unchanged.
+
+One fixed 19:24:40–20:24:40UTC aggregate-only provider log check: Meta worker6 HTTP200,
+runtime only Boot/Shutdown/no error-level rows; client-onboarding298 HTTP200/1 HTTP206.
+Not client metric completeness or per-item sync success. No sync/config/token/data
+writes. Existing Meta consent, #731 content, staff/Teams/calendar and real password/
+phone/release gates retained. Frontend repair is source-only, NOT live; fixture
+dist must never be uploaded. Overnight continuation still ends08:00SAST26October.
+
 ### 25 October evening — finite overnight continuation and real file-window checks
 
 CA renewed overnight client-portal work. Existing heartbeat
