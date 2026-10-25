@@ -15,6 +15,8 @@ The [timed shot/effect grammar](FIGHT-REFERENCE-SHOT-GRAMMAR.md) records a secon
 
 The [sound source screen](FIGHT-SOUND-SOURCE-SCREEN.md) confirms the original six local fight-practice videos were silent, records one licence-checked bag-training WAV candidate and a failed model-audio playback attempt. It does not turn that WAV into an approved impact cue or add new music. Actual event camera tracks and independent editing-staff listening remain the first sound gates.
 
+The [source-first sound playbook](FIGHT-SOUND-PLAYBOOK.md) now fixes the handover sequence: verified source contact and its own audio, protected dry cut, approved music candidates, removable effects, delivered-file measurements and independent full-speed listening. A [separate native-audio landing A/B](FIGHT-SOURCE-AUDIO-LEVEL-STUDY.md) found a real microphone transient whose AAC export still exceeded 0 dBTP after −3 dB gain. It demonstrates why sound has to be checked after encode; it is a skateboard example, not a Fight Night hit or approved sound design.
+
 A later [camera-sound source gate](FIGHT-CAMERA-SOUND-SOURCE-GATE.md) screened three audio-bearing public files and rejected all for impact practice: a pre-edited promotional sequence, shadowboxing with long near-silent stretches, and a boxing-labelled file that actually depicts a static night exterior. An audio stream, title or waveform peak cannot stand in for original ring sound at a verified strike. Two locally tested audio models also failed known silence/tone controls; see [the local audio-review study](FIGHT-LOCAL-AUDIO-REVIEW-STUDY.md). The owner does not want routine practice audition requests; use independent editing-staff acceptance for a finished event mix.
 
 ## Footage intake when Franco's upload finishes
