@@ -18,10 +18,10 @@ The lesson from the references is shot selection, camera movement, contrast cont
 | Reference move | Status in this lane | What a meaningful next proof needs |
 |---|---|---|
 | Graphic, almost abstract detail releasing to action | **One silent original A/B below**; clean contact retained | A real Staffy glove/body detail with enough resolution and a separate verified action shot |
-| Dirt/foreground crossing lens as an organic wipe | **Unproved**; existing boxing stock lacks a matching full-frame occluder | An event glove, rope, official or crowd member actually crossing and anchoring to a frame edge in both shots; plain-cut control |
+| Dirt/foreground crossing lens as an organic wipe | [Glove-sweep cut-timing A/B](FIGHT-GLOVE-HANDOFF-STUDY.md) tested a **partial** native foreground pass; it is not a full-frame wipe or client-safe continuity | Event glove, rope, official or crowd member crossing and anchoring to a frame edge; plain-cut control and bout/time truth |
 | Tilting FPV chase and airborne speed change | **Source-dependent and unproved** for boxing; the earlier 59.94 fps one-shot study only tests timing mechanics | Original stabilized movement/high-frame-rate event source, contact-safe cut, no synthetic roll on static ring footage |
 | MMA close impact within wider walkout/cage arc | **Unproved** for the event; stock montage was rejected | Full event coverage, approved fighter identities, timecoded landed moments, geography and aftermath |
-| Cool-shadow/warm-highlight atmosphere | **Reference look observed, not graded or approved** | Original event lighting and camera colour; protect skin, glove and contact visibility through an A/B grade |
+| Cool-shadow/warm-highlight atmosphere | [Fixed cool-shadow grade A/B](FIGHT-GRADE-STUDY.md) **rejected**: source was already cool and extra darkening offered little | Original event lighting and camera colour; protect skin, glove and contact visibility through a shot-specific A/B grade |
 | Music, camera sound, dropouts and selective impacts | **Not proved.** Owner rejected the stock drum bed; reference audio was not heard by the agent. | Actual event camera tracks plus a licensed music choice that a human can hear and approve; mix at matched level on phone/headphones |
 
 This inventory prevents a technique card from being mistaken for a finished scene. It also avoids rebuilding camera moves the source does not contain.
