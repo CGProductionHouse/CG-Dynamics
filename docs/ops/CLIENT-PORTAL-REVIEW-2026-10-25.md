@@ -1,5 +1,15 @@
 # Client portal — 25 October review packet
 
+Latest continuation:
+[provider backend rollout and Docker-enabled local acceptance](PROVIDER-BACKEND-ROLLOUT-ACCEPTANCE-2026-10-25.md).
+Google safeguard nowlive55; approved Meta readers/private key/callback deployed,
+existing connection intact, final encrypted-token acceptance awaits owner consent.
+Canonical frozen8353e75f4184pass/24skips/0fail and all20browsers/build/stable tree;
+both mandatory PostgreSQL fixtures now pass.16Instagram SQL +1registry checks
+passed separately;7optional staff PGlite groups remain. No Vercel. This dated
+override supersedes only older deployment/Docker limitations below, not provider
+coverage, publication, real-client/phone or owner gates.
+
 Later ordered local-first continuation and exact receipts/owner actions:
 [CLIENT-LAUNCH-EXECUTION-2026-10-25.md](CLIENT-LAUNCH-EXECUTION-2026-10-25.md).
 PR885 Google ingestion integrity and PR886 Meta storage-hardening source are

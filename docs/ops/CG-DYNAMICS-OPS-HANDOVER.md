@@ -13,6 +13,50 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 25 October — approved provider backend rollout; real local SQL/browser acceptance
+
+Latest exact receipt:
+[PROVIDER-BACKEND-ROLLOUT-ACCEPTANCE-2026-10-25.md](PROVIDER-BACKEND-ROLLOUT-ACCEPTANCE-2026-10-25.md).
+CA explicitly approved Google two-file safeguard and then staged Meta encryption.
+Google sync53→54 once; subsequent Meta secret-save environment revision55 retains
+identical bundle/seven hosted files/JWT=true. All five unrelated files preserved;
+seven campaign links/139metrics have identical before/after checksums. No manual
+sync, campaign/mapping or production SQL/schema/data write.
+
+All four Meta dual-format readers released/read back BEFORE dedicated random key
+and version privately saved; callback released LAST. Current worker76/manual89/
+assets72/status68/callback72. Existing auth/JWT/SDK/scopes retained; actual runtime
+source matches. Zero-runtime database interface is omitted by hosted bundling,
+not an absent executable dependency. Secret save advanced function revisions
+without source changes; callback guard verified identical bytes before continuing.
+Key values never logged/committed/copied to files or frontend.47client asset
+mappings/existing connection remain unchanged. Actual admin statusConnected/valid,
+read-only asset discovery succeeds, no suggestions saved or bulk resync.
+
+**Final Meta gate remains:** existing token1legacy raw/0encrypted. Owner renewal
+started with unchanged scopes but Facebook business-consent panel stays blank
+after one bounded reload; handoff tab left open and CA asked to complete consent.
+Do not claim encryption from configuration, hide plaintext warning, export/backfill
+old credentials, remove key, restore raw writer or rollback readers after an
+envelope exists. After consent verify actual encrypted status/row and mappings.
+
+CA started Docker. Canonical frozen8353e75f full local run4208total/4184pass/
+24declared skips/0fail/cancel/todo, actual TypeScript/Vite app and ALL20canonical
+browsers1440/375/390/430 pass; stable tree. Both previously mandatory disposable
+PostgreSQL fixtures now pass, including ownership/publication/RLS/concurrent CAS.
+Private receipt cg-local-launch-8353e75fd944.json SHA256
+7895EBB3FEA96845DC68C6FD22BEE51C5082298C0252821C31F52D289C97C7E3.
+Separately16Instagram callback SQL +1registry test pass; these do not rewrite the
+full receipt's24skips. Seven optional staff PGlite groups remain separate. Only
+test-owned disposable containers removed; shared Docker/stacks untouched.
+
+ZERO Vercel/cloud builds/deployments. Fixture dist must never be uploaded. No
+strategy/asset publication, provider scopes/mappings/permissions, staff/Teams/
+calendar changes or duplicate strategy writer. Existing source/asset/real posting
+owners and retained CA password/phone checks remain. #435comment6401264747 and
+#505comment6401265039 record the exact approved live actions. Older source-only
+and Docker-unavailable snapshots below are historical, not a reason to repeat work.
+
 ### 25 October — local provider continuation verified; exact protected queue retained
 
 Ordered CLIENT-LAUNCH-EXECUTION-2026-10-25.md is the current short execution list.

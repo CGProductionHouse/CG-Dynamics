@@ -1,5 +1,14 @@
 # Meta token storage — staged source packet, NOT production apply
 
+**Later25October status override:** CA explicitly approved and the exact staged
+backend/key rollout was executed. All four readers were verified first, dedicated
+key/version privately saved, callback released last. Final versions/readbacks and
+rollback constraints are in
+[PROVIDER-BACKEND-ROLLOUT-ACCEPTANCE-2026-10-25.md](PROVIDER-BACKEND-ROLLOUT-ACCEPTANCE-2026-10-25.md).
+Existing token remains legacy raw until owner Facebook consent completes; do not
+claim encrypted-row acceptance or repeat deployment. The preparation text below
+records the original source-only boundary, not current hosted status.
+
 Refs #505/#668. Current live warning is genuine: the legacy
 `meta_connection_tokens.encrypted_access_token` text column holds plaintext under
 server-only access. The word "encrypted" in its name is not encryption evidence.

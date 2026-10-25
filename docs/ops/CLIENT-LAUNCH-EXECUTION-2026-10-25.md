@@ -4,6 +4,16 @@ Owner: current Codex client lane, starting main `3d7616d5`. No Vercel operations
 This is an ordered execution list, not a replacement product architecture or a
 claim that protected production/content work is already complete.
 
+**Later25October execution:** CA approved the exact Google and Meta backend
+packets. Google safeguard is live55; Meta readers/key/callback are deployed in
+the reviewed order, but the existing token still needs Facebook consent before
+encrypted-row acceptance. Docker is now running; both mandatory SQL fixtures,
+all20 browsers and the canonical frozen8353e75f suite pass, with24 declared skips.
+Separately16 Instagram SQL checks and1 registry check pass;7 optional staff
+PGlite groups remain unverified. Exact release/acceptance/rollback facts:
+[PROVIDER-BACKEND-ROLLOUT-ACCEPTANCE-2026-10-25.md](PROVIDER-BACKEND-ROLLOUT-ACCEPTANCE-2026-10-25.md).
+The earlier source-only receipts below are historical, not current deploy status.
+
 | Order | Item and completion evidence | State / next action |
 | --- | --- | --- |
 | 1 | Reconcile #668/#623/#505/#435/#731/#381, current review packet and open PRs | Done. No provider-integrity PR owner found. Onboarding and guideline/video PRs remain separate. Staff/Teams and normal ChatGPT strategy owners unchanged. |
@@ -13,6 +23,8 @@ claim that protected production/content work is already complete.
 | 5 | Reconcile remaining source/asset gates into exact owner actions | Done: #731 retains admission/editorial/publication; recurring source-held Hino, Neshora, WiseRide, Econofoods, Elcheck, Human Auto, Jenkor, JFJ, VCS, Toyota. Piek October requires exact editorial republish; do not replay older Braize/CG November v5 over v6. Human Auto GO resolved but not source-admitted; new Jenkor research needs skip/go. No second writer. Brand Hub17 safe-folder skips remain private under existing logo-only approval; Jodrico requires launch-scope review. Staff owner retains real posting/disclosure and Neshora run-folder/short-code actions. No unapproved file promotion or package inference. |
 | 6 | Verify final source changes and update owning issues/#381/handover | Done for frozen7b911566:4208 total/4182 pass/26 explicit skips/0 fail, TypeScript/Vite actual app and all20 canonical browser fixtures at1440/375/390/430, stable tree. Whole lint0errors/17existingwarnings; Deno closure passes. Two SQL fixtures/device/client-role limitations retained. |
 | 7 | Close the additional Meta start/TikTok helper compile errors | Type-only follow-up: nine errors reproduced on unchanged baseline; explicit existing SDK client types fix generic unknown-schema inference. Existing auth/refresh/provider calls unchanged; emitted JS byte-identical.388 focused Meta/TikTok tests, Deno/build/scoped lint/diff pass. Earlier full receipt is not reattributed to this later source head. |
+| 8 | Run the previously blocked local PostgreSQL checks after CA starts Docker | Done. Both mandatory SQL fixtures pass; canonical frozen8353e75f4208total/4184pass/24skips/0fail, all20browsers/build/stable tree. Separately16Instagram SQL and1registry check pass;7optional staff PGlite groups remain separate. |
+| 9 | Apply only the separately CA-approved provider backend packets | Google two-file guard released/read back, no sync or mapping/data changes. Meta four readers → private dedicated key → callback deployed and read back. Existing connection/47mappings unchanged. Final encrypted-row acceptance awaits CA Facebook consent; blank provider panel is not bypassed. No Vercel. |
 
 ## Exact verification and current acceptance boundaries
 
@@ -65,12 +77,18 @@ asserted to have caused those three production gaps.
 
 ## Protected release and acceptance queue
 
+Later approved backend work is now recorded in the rollout receipt above; do
+not repeat those deployments. Only the existing-token renewal/actual encrypted
+row acceptance remains in that bounded Meta packet. All other authority below
+continues to require its exact approval.
+
 - No Vercel/cloud builds, previews, upload, promotion, hosting or spend changes.
 - No production SQL/schema/Edge/config/secrets/provider/OAuth/mapping changes.
 - No package inference, strategy approval/publication, file publication or sharing.
 - Genuine client-password and physical-phone acceptance remain CA-retained.
-- Two disposable SQL fixtures and the previously declared optional skips remain
-  unverified until an appropriate local runtime is available; do not relabel them.
+- The two mandatory disposable SQL fixtures now pass. Full-suite24skips remain
+  accurately recorded;16Instagram and1registry check passed separately, leaving
+  seven optional staff PGlite groups outside this local client acceptance.
 - Source-ready code and read-only admin preview are not whole-app launch acceptance.
 
 Current detailed prior receipts: `CLIENT-PORTAL-REVIEW-2026-10-25.md`.
