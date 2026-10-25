@@ -13,6 +13,18 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 25 October — Brand Hub validation PR869 regression coverage
+
+Continued existing OpenCode PR869; reproduced main's no-control-regex lint error.
+Its code-point check preserves the exact existing C0-control validation rather
+than relaxing publication or changing file/client scope. Added real manageLibrary
+coverage for all32 embedded ASCII controls, invalid type/blank/256-character
+names, valid255-character and Unicode names; invalid input produces zero writes.
+30/30 Brand Hub adapter/handler/management/synthetic tests pass; full ESLint has
+0 errors (existing warnings remain), TS/Vite real app build/diff pass. No hosted
+function release, content publication, OneDrive/source/permission or Vercel change.
+Meta PR868 is now merged2994e7edd414a81c444bb3834aa91630e188a9d2, source only.
+
 ### 25 October — existing Meta presentation PR868 reviewed with runtime regressions
 
 Continued existing OpenCode PR868 rather than duplicate its source fix. On current
