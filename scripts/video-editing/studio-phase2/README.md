@@ -36,6 +36,8 @@ A [three-frame natural-depth screen](FIGHT-NATURAL-DEPTH-SOURCE-SCREEN.md) tried
 
 The [one-frame colour-inversion A/B](FIGHT-COLOR-INVERT-STUDY.md) challenges tutorial #33 on a visibly contacting stock punch. Its single negative frame makes the cool, legible shot nearly white and was rejected for this source; the side-by-side video is silent and does not establish full-speed viewer comfort or an event effect.
 
+The [footage-inside-type opening A/B](MATTE-READABILITY-STUDY.md) checks the existing `MOVE` proof at 270×480 per panel. A brighter scene fill slightly clarifies the letters but does not make the person within the narrow glyphs or small opening composition compelling. It is a phone-resolution proxy, not a physical-phone/full-speed approval or a revised master.
+
 ## Skill-development order after owner correction
 
 The separate Nolan production lane already owns client story, WhatsApp/approval, prior-post screening, source selection and Premiere delivery. Studio's contribution is to turn an observed editing technique into a *visually and audibly convincing, repeatable* operation. The rejected PSG `CHANGED?` private study showed why a technically valid render cannot promote a creative skill: its question duplicated a posted story, and its source performance was awkward. Client editing remains parked while this skill pass proceeds.
