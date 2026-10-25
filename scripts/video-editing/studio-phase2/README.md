@@ -44,6 +44,8 @@ The [local audio-review control study](FIGHT-LOCAL-AUDIO-REVIEW-STUDY.md) tried 
 
 The [camera-sound source screen](FIGHT-CAMERA-SOUND-SOURCE-GATE.md) also rejected two audio-bearing boxing practice files: one is already a cut promotional film, and one shows shadowboxing with long near-silent intervals. Neither supplies a verified original glove impact. Their rights, stream facts and negative picture evidence are saved so the next sound pass does not confuse an audio stream with a usable event microphone.
 
+A [mono fold-down check](FIGHT-MONO-COMPATIBILITY-STUDY.md) now confirms the isolated practice bag cue's measured attack survives one-channel playback without clipping or obvious cancellation. It is a narrow technical positive, **not** a heard approval or a test of the future music/camera-audio mix.
+
 ## Skill-development order after owner correction
 
 The separate Nolan production lane already owns client story, WhatsApp/approval, prior-post screening, source selection and Premiere delivery. Studio's contribution is to turn an observed editing technique into a *visually and audibly convincing, repeatable* operation. The rejected PSG `CHANGED?` private study showed why a technically valid render cannot promote a creative skill: its question duplicated a posted story, and its source performance was awkward. Client editing remains parked while this skill pass proceeds.
