@@ -32,4 +32,4 @@ The visual map above does **not** establish the references' music, mix, SFX or b
 
 ## Current gate
 
-At the 09:05 SAST read-only OneDrive check the exact Staffy Fight Night video folder still contained only an empty `DRONE` child. No event impacts or sound are available for this grammar's actual edit test. This is a research map, not a trailer or a mastered skill.
+The 09:05 SAST empty-folder observation was superseded by the 25 October upload. The [live event intake](FIGHT-NIGHT-EVENT-INTAKE.md) now records 37 private, hash-verified completed originals within the connector's 100 MiB limit. Sampled visual contacts show event setting and crowd but no clearly landed blow; large bout originals remain unavailable locally. Six short camera-audio streams have technical intake measurements but have not been creatively heard. This grammar remains a research map, not a trailer or a mastered skill.
