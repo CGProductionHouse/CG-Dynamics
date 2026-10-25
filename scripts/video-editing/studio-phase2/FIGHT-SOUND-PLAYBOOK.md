@@ -4,7 +4,7 @@
 
 ## 1. Lock picture and real moments first
 
-For each chosen hit, record source filename/OneDrive ID, source in/out, bout, frame of visible contact, immediate consequence, camera audio stream and any obscured/miss ambiguity. Preserve a straight-cut picture control. Check the original at full speed with audio before moving, slowing or repeating it. Sound must not turn a miss or hidden contact into an apparent landing. A crowd response or waveform spike is not proof of a punch. If a clip is sped up/slowed, explicitly map source audio time to picture time; a copied unretimed impact track can drift from a retimed contact.
+For each chosen hit, record source filename/OneDrive ID, source in/out, bout, frame of visible contact, immediate consequence, camera audio stream and any obscured/miss ambiguity. Preserve a straight-cut picture control. Check the original at full speed with audio before moving, slowing or repeating it. Sound must not turn a miss or hidden contact into an apparent landing. A crowd response or waveform spike is not proof of a punch. If a clip is sped up/slowed, explicitly map source audio time to picture time; a copied unretimed impact track can drift from a retimed contact. The [same-picture slowed-contact A/B](FIGHT-RETIME-AUDIO-SYNC-STUDY.md) demonstrates a public landing's strong audio window at 1.81 s against an airborne frame when the original sound is left unmapped; the remapped candidate moves it near the grounded picture at 2.36 s. That is timestamp evidence, not an approved sound effect.
 
 ## 2. Inventory and protect camera sound
 
@@ -35,3 +35,16 @@ Save the clean picture/control, final preview, editor project or existing scene 
 | _fill only after event intake_ | | | | | | |
 
 **Done gate for the real trailer:** all represented hits confirmed from originals, exact audio/rights ledger complete, dry and designed cuts compared at matched level, no misleading synthetic impacts, native/stem handover opens for staff revision, full export passes technical QC and independent editor has heard the full cut on headphones/speakers/phone. Until actual footage and that listening pass exist, the reusable procedure is prepared but the event soundtrack is **not complete**.
+
+## Current sound gate ledger (25 October 2026)
+
+| Gate | Tested evidence | Event status |
+|---|---|---|
+| Stream intake, offset and clipping | [Read-only inspector](FIGHT-SOUND-QC.md) and [public source A/B](FIGHT-SOURCE-AUDIO-LEVEL-STUDY.md) measured a real 74 ms offset and an over-range camera recording. | Procedure ready; no Staffy source yet. |
+| Time mapping through slow picture | [Same-picture audio A/B](FIGHT-RETIME-AUDIO-SYNC-STUDY.md) caught an unretimed landing transient against an airborne frame and mapped it near the landing. | Procedure ready; event time map and heard timbre pending. |
+| Separable sound layers and revision | [Six-second voice/music stem proof](FIGHT-AUDIO-STEM-HANDOVER-STUDY.md) kept zero-aligned WAVs and an unchanged voice layer under music revision. | Staff project open/relink/revision pending. |
+| Stereo/mono and export safety | Full two-layer practice mix retained voice and music on measured 50/50 mono fold-down; decoded AAC true peaks stayed below the inspector's conservative threshold. | Repeat on the actual 30 s delivered picture/sound file. |
+| Contact/SFX/music creative choices | The owner rejected the integrated stock music; bag cue was timed but unheard; automated local audio models failed known controls. | Select against real footage, original sound and approved rights. No production choices made. |
+| Finished event soundtrack | No event clip or original event microphone file is accessible in the verified Staffy folder. | **Blocked by source availability**, then independent full-speed editor headphone/speaker/phone listening. |
+
+No further stock montage, generic music search or automated audio-model verdict resolves the last two rows. Continue technical work only when it answers a new failure; move directly to source-led event selects and the removable sound mix when the actual upload arrives.

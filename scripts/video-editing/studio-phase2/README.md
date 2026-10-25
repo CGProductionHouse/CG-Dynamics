@@ -54,6 +54,8 @@ A [six-second synthetic voice/music duck A/B](DIALOGUE-MUSIC-AB.md) also confirm
 
 An [aligned lossless-stem handover check](FIGHT-AUDIO-STEM-HANDOVER-STUDY.md) now proves a separate synthetic voice/music revision: two zero-aligned six-second stereo WAV layers recombine within float rounding, and reducing only music leaves the voice stem byte-identical. Both AAC proofs decode with measured headroom. This is an audio-only packaging test; nobody has yet opened the stems in an editor, and no event sound has been judged or handed over.
 
+A [same-picture original-sound retime A/B](FIGHT-RETIME-AUDIO-SYNC-STUDY.md) now tests what happens to camera sound when a contact shot is slowed. Leaving a public landing's audio unretimed puts its strongest measured window at 1.81 s while the skater is airborne in the slowed picture; remapping the matching audio segment moves that window to 2.36 s near the grounded frame. Both deliveries decode and preserve identical picture bytes, but source timbre and creative value remain unheard. This is a sync rule for the future event cut, not a Fight Night soundtrack.
+
 ## Skill-development order after owner correction
 
 The separate Nolan production lane already owns client story, WhatsApp/approval, prior-post screening, source selection and Premiere delivery. Studio's contribution is to turn an observed editing technique into a *visually and audibly convincing, repeatable* operation. The rejected PSG `CHANGED?` private study showed why a technically valid render cannot promote a creative skill: its question duplicated a posted story, and its source performance was awkward. Client editing remains parked while this skill pass proceeds.
