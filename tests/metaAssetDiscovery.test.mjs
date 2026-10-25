@@ -2,16 +2,17 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 import ts from 'typescript'
+import { encryptMetaStoredToken, readMetaStoredToken } from '../supabase/functions/_shared/metaTokenStorage.ts'
 
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8')
 
-function loadHandler(metaFetch, collectMetaAssets, role = 'admin') {
+function loadHandler(metaFetch, collectMetaAssets, role = 'admin', storedToken = 'test-user-secret', encryption = {}) {
   let handler
   const query = table => ({
     select() { return this }, eq() { return this }, order() { return this },
     async single() { return { data: { role } } },
     async limit() { return { data: table === 'meta_connections'
-      ? [{ id: 'connection' }] : [{ encrypted_access_token: 'test-user-secret' }] } },
+      ? [{ id: '11111111-1111-4111-8111-111111111111' }] : [{ encrypted_access_token: storedToken }] } },
   })
   const sb = { auth: { getUser: async () => ({ data: { user: { id: 'admin' } } }) }, from: query }
   const source = read('../supabase/functions/meta-list-assets/index.ts').replace(/^import .*$/gm, '')
@@ -19,14 +20,40 @@ function loadHandler(metaFetch, collectMetaAssets, role = 'admin') {
     compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.None },
   }).outputText
   new Function('Deno', 'createClient', 'metaFetch', 'readMetaError', 'redact',
-    'resolveMetaGraphConfig', 'jsonResponse', 'corsHeaders', 'collectMetaAssets', compiled)(
-    { serve: value => { handler = value }, env: { get: name => name } },
+    'resolveMetaGraphConfig', 'jsonResponse', 'corsHeaders', 'collectMetaAssets', 'readMetaStoredToken', compiled)(
+    { serve: value => { handler = value }, env: { get: name => encryption[name] ?? name } },
     () => sb, metaFetch, async () => ({ message: 'provider rejected request' }), value => value,
     () => ({ baseUrl: 'https://graph.facebook.com/v25.0' }),
-    (value, status = 200) => new Response(JSON.stringify(value), { status }), {}, collectMetaAssets,
+    (value, status = 200) => new Response(JSON.stringify(value), { status }), {}, collectMetaAssets, readMetaStoredToken,
   )
   return handler
 }
+
+test('actual discovery decrypts only server-side; bad key returns 503 before any Meta request', async () => {
+  const key = Buffer.alloc(32, 3).toString('base64')
+  const stored = await encryptMetaStoredToken('test-user-secret', '11111111-1111-4111-8111-111111111111', key, 'v1')
+  const encryption = { META_TOKEN_ENCRYPTION_KEY_B64: key, META_TOKEN_ENCRYPTION_KEY_VERSION: 'v1' }
+  const calls = []
+  const provider = async url => { calls.push(url); return Response.json({ data: [] }) }
+  const request = () => new Request('https://example.test', { method: 'POST', headers: { Authorization: 'Bearer actor' } })
+  const handler = loadHandler(provider, await optionalCollector(), 'admin', stored, encryption)
+  const response = await handler(request())
+  assert.equal(response.status, 200)
+  assert.equal(calls.length, 2)
+  for (const url of calls) assert.equal(new URL(url).searchParams.get('access_token'), 'test-user-secret')
+  const safeBody = await response.text()
+  assert.doesNotMatch(safeBody, /test-user-secret|cg-meta-token:|ciphertext/)
+  calls.length = 0
+  const failure = await loadHandler(provider, await optionalCollector(), 'admin', stored)(request())
+  assert.equal(failure.status, 503)
+  assert.equal(calls.length, 0)
+  assert.doesNotMatch(await failure.text(), /test-user-secret|cg-meta-token:|ciphertext/)
+  for (const role of ['client', 'staff', 'team']) {
+    const denied = await loadHandler(provider, await optionalCollector(), role, stored, encryption)(request())
+    assert.equal(denied.status, 403)
+    assert.equal(calls.length, 0)
+  }
+})
 
 test('asset discovery includes Page-linked Instagram after the first 100 Pages', async () => {
   const calls = []

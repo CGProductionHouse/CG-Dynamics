@@ -13,6 +13,38 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 25 October — Meta credential hardening prepared; remaining TikTok panels checked
+
+Google ingestion PR885 reviewed/merged `dea0d349` after89/89 focused Google tests,
+scoped lint/build/diff and actual malformed-provider preservation regressions.
+No backend release or production data change. Continuing ordered local-only plan
+CLIENT-LAUNCH-EXECUTION-2026-10-25.md, not duplicating staff/strategy owners.
+
+Meta raw-token storage warning reproduced in callback/status source. New native
+AES-GCM connection/key-version-bound envelope, four dual-format readers, preflight
+and fail-closed OAuth writer prepared. Legacy rows remain explicitly plaintext;
+key configuration is not encryption proof. Corrupt/missing-key failures stop
+before Meta requests, do not set needs_reauth and release active worker lane.
+Main's existing22 Deno worker errors independently reproduced from a Git archive;
+explicit client type and a minimal type-only shared database port resolve generic-
+schema/duplicate nominal-class errors, with two missing-asset guards. Existing
+worker JSR and legacy ESM dependencies retained; no dependency installation or
+changes to shared helper emitted runtime/auth/lease authority. All six modified
+Meta entrypoints/helper closure pass cached-only Deno type checking.
+Exact staged reader-before-writer rollout/rollback hazards are in
+META-TOKEN-STORAGE-HARDENING-2026-10-25.md. This is SOURCE ONLY: no key generation,
+server configuration, hosted dependency replacement, schema/permissions, Edge
+deployment, token rewrite/provider renewal or Vercel action. Production warning
+and partial metric coverage are not declared resolved from local tests.
+
+Remaining real read-only TikTok panels now settled: Staffordshire, Watch Addict
+and Wiseman. All nine non-held connected-client panels inspected across25October;
+two have no historical published TikTok facts, seven show partial September
+figures. Recorded zero remains zero, account snapshots remain snapshots. Old
+live wording awaits separately approved source release. Private three-client
+receipt `%TEMP%/cg-remaining-tiktok-panels-readonly-20261025.json`; no report writes.
+No unnecessary repeat59-client sweep, staff/calendar edits or strategy generation.
+
 ### 25 October — ordered local-first provider integrity continuation
 
 Current ordered execution: [CLIENT-LAUNCH-EXECUTION-2026-10-25.md](CLIENT-LAUNCH-EXECUTION-2026-10-25.md).
