@@ -1,5 +1,7 @@
 # PICASSO company ChatGPT to approvals workflow — 25 October 2026
 
+> **Current-state correction, later 25 October:** The table and chronological checkpoints below include earlier drafts. The latest verified state is in the [local editor audit](PICASSO-LOCAL-EDITOR-2026-10-25.md#company-chatgpt-project-and-real-work-test) and its [dedicated WhatsApp audit](PICASSO-LOCAL-EDITOR-2026-10-25.md#dedicated-whatsapp-number-audit-owner-confirmed-company-chatgpt-account). The 25-export QA gallery **was published** as an unlisted password-free link after owner authorization, and its link **was sent** to the existing two-person CG Picasso Approvals group. The company ChatGPT Work `@picasso` status test **did run** but could not reach the MSI because no device was connected. Human image approval and amendment round-trip remain open.
+
 Owner: [#878](https://github.com/CGProductionHouse/CG-Dynamics/issues/878). Implementation under review: [draft PR #879](https://github.com/CGProductionHouse/CG-Dynamics/pull/879). This plan extends the [local editor audit](PICASSO-LOCAL-EDITOR-2026-10-25.md). It is research and a test sequence, not a claim that the complete workflow works today. The owner's R0 additional-spend, private-media, no-new-hosting, and Nolan #862 boundaries remain in force.
 
 ## Intended staff experience
