@@ -623,6 +623,33 @@ test('occupied Client Schedule slots are non-actionable conflicts', () => {
   assert.equal(items[0].conflictCode, 'existing_deliverable_slot')
 })
 
+test('distinct Microsoft identities cannot race for an empty canonical schedule slot or produce apply patches', () => {
+  const sources = ['first', 'second'].map(sourceTaskId => plannerTask({ sourcePlanId: 'plan-july', sourcePlanName: 'Client Socials - July 2026', sourceBucketId: 'ms-acme', sourceBucketName: 'Acme', sourceTaskId, title: 'DP1 Launch', percentComplete: 100 }))
+  for (const order of [sources, [...sources].reverse()]) {
+    const snap = snapshot(order), items = buildMicrosoftReconciliation(snap, context, [], new Set())
+    assert.ok(items.every(i => i.reconciliationAction === 'conflict'), 'neither distinct source may win by array order')
+    for (const item of items) {
+      const args = buildMicrosoftApplyRpcArgs(item, snap, 'synthetic-run', 'synthetic-item', false)
+      assert.equal(args.p_should_apply, false)
+      assert.deepEqual(args.p_patch, {})
+    }
+  }
+})
+
+test('two linked source moves into one empty slot are both held, rather than accepting a partial first move', () => {
+  const ctx = { ...context, templates: [...context.templates, ...[2, 3].map(n => ({ id: `template-dp${n}`, packageId: 'package-1', code: `DP${n}`, deliverableType: 'dp', active: true }))] }
+  const oldSources = [2, 3].map(n => plannerTask({ sourcePlanId: 'plan-july', sourcePlanName: 'Client Socials - July 2026', sourceBucketName: 'Acme', sourceBucketId: 'ms-acme', sourceTaskId: `move-${n}`, title: `DP${n}`, percentComplete: 0 }))
+  const previous = buildMicrosoftReconciliation(snapshot(oldSources), ctx, [], new Set())
+  const targets = previous.map((p, n) => ({ destination: 'client_schedule', id: `existing-${n}`, updatedAt: '2026-07-18T08:00:00Z', microsoftLastSyncedAt: '2026-07-18T08:00:00Z', microsoftSourceHash: p.sourceHash, microsoftPlanId: p.sourcePlanId, microsoftTaskId: p.sourceTaskId, payload: { ...p.proposedPayload } }))
+  const oldSlots = new Set([2, 3].map(n => `package-1|template-dp${n}|${n}|2026-07-01`))
+  const incoming = oldSources.map(s => ({ ...s, title: 'DP1' }))
+  for (const order of [incoming, [...incoming].reverse()]) {
+    const snap = snapshot(order), items = buildMicrosoftReconciliation(snap, ctx, targets, oldSlots)
+    assert.ok(items.every(i => i.reconciliationAction === 'conflict'))
+    assert.ok(items.every(i => buildMicrosoftApplyRpcArgs(i, snap, 'run', 'item', false).p_should_apply === false))
+  }
+})
+
 test('idempotent rerun of same snapshot produces same actions', () => {
   const sources = [
     plannerTask({ sourceTaskId: 'todo', percentComplete: 0 }),

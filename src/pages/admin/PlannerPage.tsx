@@ -34,6 +34,9 @@ import {
   type TaskPriority,
 } from '../../lib/planner'
 import { isRecurringTemplate, materializeRecurringTasks } from '../../lib/recurrence'
+import { PlannerAlternateViews } from '../../components/planner/PlannerAlternateViews'
+import { businessDateKey, businessMonthKey, formatBusinessDate } from '../../lib/businessTime'
+import { isPlannerMonth, plannerView, PLANNER_VIEWS, type PlannerView } from '../../lib/plannerViews'
 import { isManagerRole } from '../../lib/roles'
 import { isActiveForToday, isOperationallyCompletedStatus } from '../../lib/taskLifecycle'
 
@@ -49,14 +52,11 @@ const BOARD_LABELS: Record<string, string> = {
 }
 
 function dateKey(date = new Date()) {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
+  return businessDateKey(date)
 }
 
 function formatPlannerDate(value: string) {
-  return new Date(`${value}T00:00:00`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+  return formatBusinessDate(`${value}T12:00:00+02:00`, { day: 'numeric', month: 'short' })
 }
 
 function isPlannerHistoryTask(task: PlannerTask) {
@@ -106,6 +106,8 @@ type ChecklistRow = {
   recognized: boolean
 }
 
+const CHECKLIST_COMPLETION_FIELDS = ['done', 'completed', 'is_checked', 'isChecked'] as const
+
 function checklistRows(value: unknown): ChecklistRow[] {
   if (!Array.isArray(value)) return []
   return value.map((raw, index) => {
@@ -116,12 +118,29 @@ function checklistRows(value: unknown): ChecklistRow[] {
       const item = raw as Record<string, unknown>
       const textValue = item.text ?? item.title ?? item.name
       if (typeof textValue === 'string') {
-        const doneValue = item.done ?? item.completed ?? item.is_checked
-        return { key: `item-${index}`, text: textValue, done: doneValue === true, raw, recognized: true }
+        const flags = CHECKLIST_COMPLETION_FIELDS.filter(field => Object.hasOwn(item, field)).map(field => item[field])
+        const recognized = flags.every(flag => typeof flag === 'boolean') && new Set(flags).size <= 1
+        return { key: `item-${index}`, text: recognized ? textValue : `${textValue} (completion needs review)`, done: recognized && flags[0] === true, raw, recognized }
       }
     }
     return { key: `item-${index}`, text: 'Imported checklist value', done: false, raw, recognized: false }
   })
+}
+
+function serializeChecklistRow(row: ChecklistRow): unknown {
+  if (!row.recognized) return row.raw
+  if (typeof row.raw === 'string') return !row.done && row.text === row.raw ? row.raw : { text: row.text, done: row.done }
+  if (row.raw && typeof row.raw === 'object') {
+    const raw = row.raw as Record<string, unknown>
+    const value = { ...raw }
+    const textField = ['text', 'title', 'name'].find(field => typeof raw[field] === 'string')
+    if (textField && raw[textField] !== row.text) value[textField] = row.text
+    const flags = CHECKLIST_COMPLETION_FIELDS.filter(field => Object.hasOwn(raw, field))
+    for (const field of flags) value[field] = row.done
+    if (flags.length === 0 && row.done) value.done = true
+    return value
+  }
+  return { text: row.text, done: row.done }
 }
 
 function checklistProgress(task: PlannerTask) {
@@ -129,14 +148,11 @@ function checklistProgress(task: PlannerTask) {
   return { complete: rows.filter(row => row.recognized && row.done).length, total: rows.filter(row => row.recognized).length }
 }
 
-async function fetchBoardTasks(board: PlannerBoard, shouldMaterialize: boolean) {
-  if (shouldMaterialize) {
-    const materialized = await materializeRecurringTasks()
-    if (materialized.error) return { data: null, completionEvidence: {}, error: { message: materialized.error } }
-    if (materialized.migrationNeeded) {
-      return { data: null, completionEvidence: {}, error: { message: 'Recurring tasks are not available yet.' } }
-    }
-  }
+function hasUnverifiedSourceChecklist(task: PlannerTask): boolean {
+  return Boolean(task.microsoft_task_id || task.microsoft_plan_id || task.source === 'microsoft_import')
+}
+
+async function fetchBoardTasks(board: PlannerBoard) {
   const { data, error } = await listPlannerTasks(board.id)
   if (error) return { data: null, completionEvidence: {}, error }
   const tasks = (data ?? []).filter(task => !isRecurringTemplate(task))
@@ -148,6 +164,9 @@ async function fetchBoardTasks(board: PlannerBoard, shouldMaterialize: boolean) 
 export default function PlannerPage({ embedded = false }: { embedded?: boolean }) {
   const { profile } = useAuth()
   const [routeParams, setSearchParams] = useSearchParams()
+  const selectedView = plannerView(routeParams.get('plannerView'))
+  const selectedMonth = routeParams.get('plannerMonth')
+  const calendarMonth = isPlannerMonth(selectedMonth) ? selectedMonth : businessMonthKey()
   const canManage = isManagerRole(profile?.role)
   const isAdmin = profile?.role === 'admin'
   const [boards, setBoards] = useState<PlannerBoard[]>([])
@@ -161,6 +180,7 @@ export default function PlannerPage({ embedded = false }: { embedded?: boolean }
   const [boardRetry, setBoardRetry] = useState(0)
   const [bucketsLoading, setBucketsLoading] = useState(true)
   const [tasksLoading, setTasksLoading] = useState(false)
+  const [recurrenceWarning, setRecurrenceWarning] = useState<string | null>(null)
   const [bucketError, setBucketError] = useState<string | null>(null)
   const [taskError, setTaskError] = useState<string | null>(null)
   const [completionEvidence, setCompletionEvidence] = useState<Record<string, string>>({})
@@ -230,6 +250,21 @@ export default function PlannerPage({ embedded = false }: { embedded?: boolean }
     [activeBoard, boards],
   )
 
+  // Existing work must not wait for recurrence creation or disappear when that
+  // optional pass fails. Still on-view, using the existing bounded materialiser.
+  useEffect(() => {
+    if (!canManage) return
+    let active = true
+    void materializeRecurringTasks().then(result => {
+      if (!active) return
+      setRecurrenceWarning(result.error ?? (result.migrationNeeded ? 'Recurring task creation is not available yet.' : null))
+      if (result.created > 0) setTaskRetry(current => current + 1)
+    }).catch(() => {
+      if (active) setRecurrenceWarning('Recurring task creation could not be verified. Existing work remains available.')
+    })
+    return () => { active = false }
+  }, [canManage, profile?.id])
+
   useEffect(() => {
     if (!activeBoardRecord) return
     let active = true
@@ -253,7 +288,7 @@ export default function PlannerPage({ embedded = false }: { embedded?: boolean }
     const requestId = ++taskRequestRef.current
     const timer = window.setTimeout(() => {
       setTasksLoading(true)
-      void fetchBoardTasks(activeBoardRecord, canManage).then(result => {
+      void fetchBoardTasks(activeBoardRecord).then(result => {
         if (!active || requestId !== taskRequestRef.current) return
         if (result.error) {
           setTaskError(result.error.message ?? 'Could not load Planner tasks.')
@@ -428,7 +463,7 @@ export default function PlannerPage({ embedded = false }: { embedded?: boolean }
     captureScroll()
     const board = activeBoardRecord
     const requestId = ++taskRequestRef.current
-    const result = await fetchBoardTasks(board, false)
+    const result = await fetchBoardTasks(board)
     if (requestId !== taskRequestRef.current) return null
     if (result.error) {
       setTaskError(result.error.message ?? 'Could not reload Planner tasks.')
@@ -440,7 +475,8 @@ export default function PlannerPage({ embedded = false }: { embedded?: boolean }
     setTasksBoardId(board.id)
     setCompletionEvidence(result.completionEvidence)
     const refreshed = next.find(task => task.id === taskId) ?? null
-    setDrawerTask(refreshed)
+    // A missing readback must leave the drawer's recovery/error state visible.
+    if (refreshed) setDrawerTask(refreshed)
     restoreScroll()
     return refreshed
   }
@@ -464,7 +500,7 @@ export default function PlannerPage({ embedded = false }: { embedded?: boolean }
     const board = activeBoardRecord
     const requestId = ++taskRequestRef.current
     setTasksLoading(true)
-    void fetchBoardTasks(board, false).then(result => {
+    void fetchBoardTasks(board).then(result => {
       if (requestId !== taskRequestRef.current) return
       if (result.error) {
         setTaskError(result.error.message ?? 'Could not reload Planner tasks.')
@@ -519,6 +555,20 @@ export default function PlannerPage({ embedded = false }: { embedded?: boolean }
     event.preventDefault()
   }
 
+  function changePlannerView(view: PlannerView) {
+    const next = new URLSearchParams(routeParams)
+    if (view === 'board') next.delete('plannerView')
+    else next.set('plannerView', view)
+    setSearchParams(next, { replace: true })
+  }
+
+  function changePlannerMonth(month: string) {
+    if (!isPlannerMonth(month)) return
+    const next = new URLSearchParams(routeParams)
+    next.set('plannerMonth', month)
+    setSearchParams(next, { replace: true })
+  }
+
   if (loading) return <div className="mx-auto max-w-7xl px-4 py-5"><div className="h-72 animate-pulse rounded-xl bg-white/[0.04]" /></div>
 
   if (boardError) {
@@ -551,6 +601,7 @@ export default function PlannerPage({ embedded = false }: { embedded?: boolean }
       )}
 
       {assignmentError && <div role="alert" className="mb-3 rounded-lg border border-amber-400/25 bg-amber-400/[0.06] px-3 py-2 text-xs text-amber-100">{assignmentError}</div>}
+      {recurrenceWarning && <div role="alert" className="mb-3 rounded-lg border border-amber-400/25 bg-amber-400/[0.06] px-3 py-2 text-xs text-amber-100">Recurring task creation needs attention: {recurrenceWarning} Existing saved work is still shown below.</div>}
 
       <div className="mb-3 flex flex-wrap gap-1">
         {sortedBoards.map(board => (
@@ -563,6 +614,10 @@ export default function PlannerPage({ embedded = false }: { embedded?: boolean }
       <div className="mb-3 flex w-fit rounded-lg border border-white/[0.08] bg-white/[0.03] p-1">
         <button type="button" onClick={() => setWorkView('active')} className={`rounded-md px-3 py-1.5 text-xs font-bold ${workView === 'active' ? 'bg-brand-accent text-black' : 'text-brand-primary/60'}`}>Active {activeTaskCount}</button>
         <button type="button" onClick={() => setWorkView('history')} className={`rounded-md px-3 py-1.5 text-xs font-bold ${workView === 'history' ? 'bg-white/[0.09] text-white' : 'text-brand-primary/60'}`}>History {historyTaskCount}</button>
+      </div>
+
+      <div role="group" aria-label="Planner views" className="mb-3 flex flex-wrap gap-1.5">
+        {PLANNER_VIEWS.map(view => <button key={view} type="button" aria-pressed={selectedView === view} onClick={() => changePlannerView(view)} className={`min-h-11 rounded-lg border px-4 text-xs font-bold capitalize ${selectedView === view ? 'border-brand-teal/35 bg-brand-teal/10 text-brand-teal' : 'border-white/[0.08] text-white/50 hover:text-white'}`}>{view}</button>)}
       </div>
 
       <div className="mb-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
@@ -589,7 +644,7 @@ export default function PlannerPage({ embedded = false }: { embedded?: boolean }
       ) : displayedBuckets.length === 0 && bucketlessTasks.length === 0 ? <EmptyState title="No columns configured" message="This board has no columns yet." compact centered={false} /> : (
         <>
         {taskError && <LoadError title="Planner tasks could not be loaded" message={taskError} onRetry={retryTasks} />}
-        <div ref={boardScrollRef} data-testid="planner-board-scroller" onWheel={handleBoardWheel} className="flex h-[min(68vh,46rem)] min-h-[30rem] gap-3 overflow-x-auto overscroll-x-contain rounded-xl border border-white/[0.06] bg-black/10 p-3 pb-4">
+        {selectedView !== 'board' ? tasksLoading ? <div role="status" className="h-48 animate-pulse rounded-xl bg-white/[0.04]">Loading Planner tasks</div> : taskError ? null : <PlannerAlternateViews view={selectedView} tasks={visibleTasks} buckets={displayedBuckets} month={calendarMonth} onMonthChange={changePlannerMonth} onOpenTask={openTask} /> : <div ref={boardScrollRef} data-testid="planner-board-scroller" onWheel={handleBoardWheel} className="flex h-[min(68vh,46rem)] min-h-[30rem] gap-3 overflow-x-auto overscroll-x-contain rounded-xl border border-white/[0.06] bg-black/10 p-3 pb-4">
           {displayedBuckets.map(bucket => (
             <BucketColumn
               key={bucket.id}
@@ -635,7 +690,7 @@ export default function PlannerPage({ embedded = false }: { embedded?: boolean }
               }}
             />
           )}
-        </div>
+        </div>}
         </>
       )}
 
@@ -756,13 +811,14 @@ function PlannerTaskCard({ task, completedAt, onClick }: { task: PlannerTask; co
         <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${statusTone(task.status)}`}>{PLANNER_TASK_STATUS_LABELS[task.status]}</span>
         <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] capitalize text-white/45">{task.priority.replace('_', ' ')}</span>
         {task.due_date && <span className={`rounded-full border px-2 py-0.5 text-[10px] ${overdue ? 'border-amber-400/30 bg-amber-400/10 font-bold text-amber-200' : 'border-white/10 text-white/45'}`}>{overdue ? 'Overdue ' : ''}{formatPlannerDate(task.due_date)}</span>}
-        {completed && <span className="rounded-full border border-brand-teal/20 px-2 py-0.5 text-[10px] text-brand-teal/80">{completedAt ? `Completed ${new Date(completedAt).toLocaleDateString('en-GB', { dateStyle: 'medium' })}` : 'Completion date unavailable'}</span>}
+        {completed && <span className="rounded-full border border-brand-teal/20 px-2 py-0.5 text-[10px] text-brand-teal/80">{completedAt ? `Completed ${formatBusinessDate(completedAt, { dateStyle: 'medium' })}` : 'Completion date unavailable'}</span>}
         {isPlannerHistoryTask(task) && task.source !== 'manual' && <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] text-white/40">Source: {task.source.replaceAll('_', ' ')}</span>}
         {task.status === 'blocked' && <span className="rounded-full bg-red-400/10 px-2 py-0.5 text-[10px] font-bold text-red-300">Blocked</span>}
       </div>
       <div className="mt-2 flex items-center justify-between gap-2">
         <PlannerAssigneeAvatars people={taskPeople(task)} maxVisible={3} />
-        {progress.total > 0 && <span className="text-[10px] text-white/40" aria-label={`${progress.complete} of ${progress.total} checklist items complete`}>{progress.complete}/{progress.total} checklist</span>}
+        {progress.total > 0 && <span className="text-[10px] text-white/40" aria-label={`${progress.complete} of ${progress.total} Dynamics checklist items complete`}>{progress.complete}/{progress.total} Dynamics checklist</span>}
+        {hasUnverifiedSourceChecklist(task) && <span className="text-[10px] text-amber-200/65">Source checklist unverified</span>}
       </div>
       {task.unresolved_assignee_names.length > 0 && <p className="mt-2 truncate text-[10px] text-amber-200/75" title={`Assignment review: ${task.unresolved_assignee_names.join(', ')}`}>Assignment review: {task.unresolved_assignee_names.join(', ')}</p>}
     </button>
@@ -800,22 +856,14 @@ function PlannerTaskDrawer({ task, buckets, people, currentProfileId, actorName,
   const [saveError, setSaveError] = useState<string | null>(null)
   const [confirmArchive, setConfirmArchive] = useState(false)
   const [confirmDiscard, setConfirmDiscard] = useState(false)
+  const mutationPending = useRef(false)
+  const [readbackPending, setReadbackPending] = useState(false)
   const canonicalAssignment = task.assignees.length > 0
   const normalizedActor = actorName?.trim().toLowerCase() ?? ''
   const legacyAssigned = !canonicalAssignment && Boolean(normalizedActor && [task.assigned_to_name, ...(task.helper_names ?? [])].some(name => name?.trim().toLowerCase() === normalizedActor))
   const canUpdateStatus = canManage || (canonicalAssignment ? Boolean(currentProfileId && task.assignees.some(person => person.profile_id === currentProfileId)) : legacyAssigned)
   const inputClass = 'min-h-11 w-full rounded-lg border border-white/10 bg-[#111] px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent disabled:cursor-not-allowed disabled:opacity-55'
-  const initialChecklist = checklistRows(task.checklist).map(row => {
-    if (!row.recognized) return row.raw
-    if (typeof row.raw === 'string' && !row.done && row.text === row.raw) return row.raw
-    if (row.raw && typeof row.raw === 'object') {
-      const raw = row.raw as Record<string, unknown>
-      if ('completed' in raw) return { ...raw, text: row.text, completed: row.done }
-      if ('is_checked' in raw) return { ...raw, text: row.text, is_checked: row.done }
-      return { ...raw, text: row.text, done: row.done }
-    }
-    return { text: row.text, done: row.done }
-  })
+  const initialChecklist = checklistRows(task.checklist).map(serializeChecklistRow)
   const isDirty = title !== task.title
     || clientId !== (task.client_id ?? '')
     || clientName !== (task.client_name ?? '')
@@ -830,6 +878,7 @@ function PlannerTaskDrawer({ task, buckets, people, currentProfileId, actorName,
     || newChecklistText.trim().length > 0
 
   function requestClose() {
+    if (mutationPending.current) return
     if (isDirty) setConfirmDiscard(true)
     else onClose()
   }
@@ -847,6 +896,7 @@ function PlannerTaskDrawer({ task, buckets, people, currentProfileId, actorName,
   useEffect(() => {
     function handleKey(event: KeyboardEvent) {
       if (event.key !== 'Escape') return
+      if (mutationPending.current) return
       if (isDirty) setConfirmDiscard(true)
       else onClose()
     }
@@ -855,21 +905,16 @@ function PlannerTaskDrawer({ task, buckets, people, currentProfileId, actorName,
   }, [isDirty, onClose])
 
   function serializedChecklist() {
-    return checklist.map(row => {
-      if (!row.recognized) return row.raw
-      if (typeof row.raw === 'string' && !row.done && row.text === row.raw) return row.raw
-      if (row.raw && typeof row.raw === 'object') {
-        const raw = row.raw as Record<string, unknown>
-        if ('completed' in raw) return { ...raw, text: row.text, completed: row.done }
-        if ('is_checked' in raw) return { ...raw, text: row.text, is_checked: row.done }
-        return { ...raw, text: row.text, done: row.done }
-      }
-      return { text: row.text, done: row.done }
-    })
+    return checklist.map(serializeChecklistRow)
   }
 
   async function save() {
-    if (saving || !title.trim()) return
+    if (mutationPending.current || readbackPending || !title.trim()) return
+    if (newChecklistText.trim()) {
+      setSaveError('Add or clear the pending checklist item before saving.')
+      return
+    }
+    mutationPending.current = true
     setSaving(true)
     setSaveError(null)
     setSaveMessage(null)
@@ -881,11 +926,17 @@ function PlannerTaskDrawer({ task, buckets, people, currentProfileId, actorName,
         }
         const result = await updatePlannerTaskStatus(task.id, status)
         if (result.error) { setSaveError(result.error.message); return }
+        if (result.data?.id !== task.id) {
+          setReadbackPending(true)
+          setSaveError('The save response was not confirmed. Reload this task before trying another change.')
+          return
+        }
       } else {
         if (startDate && dueDate && startDate > dueDate) {
           setSaveError('Start date cannot be after the due date.')
           return
         }
+        if (!task.updated_at) { setSaveError('Reload the task before saving.'); return }
         const result = await updatePlannerTaskWithAssignees(task.id, {
           title: title.trim(),
           bucket_id: bucketId || null,
@@ -898,9 +949,17 @@ function PlannerTaskDrawer({ task, buckets, people, currentProfileId, actorName,
           due_date: dueDate || null,
           notes: notes.trim() || null,
           checklist: serializedChecklist(),
-        })
+        }, task.updated_at)
         if (result.error) { setSaveError(`Task was not saved. ${result.error.message}`); return }
+        if (result.data?.id !== task.id) {
+          setReadbackPending(true)
+          setSaveError('The save response was not confirmed. Reload this task before trying another change.')
+          return
+        }
       }
+      // Once a mutation is acknowledged, recovery is READ ONLY. Never issue the
+      // same write again merely because the board reload was interrupted.
+      setReadbackPending(true)
       const refreshed = await onReload()
       if (!refreshed) {
         setSaveError('The task was saved, but current Planner data could not be reloaded.')
@@ -908,16 +967,53 @@ function PlannerTaskDrawer({ task, buckets, people, currentProfileId, actorName,
       }
       onClose()
     } catch {
-      setSaveError('Could not save this task.')
+      setReadbackPending(true)
+      setSaveError('The save could not be verified. Reload this task before trying another change.')
     } finally {
+      mutationPending.current = false
+      setSaving(false)
+    }
+  }
+
+  async function retryReadback() {
+    if (mutationPending.current) return
+    mutationPending.current = true
+    setSaving(true)
+    try {
+      const refreshed = await onReload()
+      if (!refreshed) {
+        setSaveError('Current Planner data is still unavailable. Retry readback; no additional write was attempted.')
+        return
+      }
+      onClose()
+    } catch {
+      setSaveError('Current Planner data is still unavailable. Retry readback; no additional write was attempted.')
+    } finally {
+      mutationPending.current = false
       setSaving(false)
     }
   }
 
   async function archive() {
-    const { data, error } = await archivePlannerTask(task.id, actorName)
-    if (error) { setSaveError(error.message ?? 'Could not remove task from active work.'); return }
-    if (data) onArchived(data as PlannerTask)
+    if (mutationPending.current || readbackPending) return
+    mutationPending.current = true
+    setSaving(true)
+    try {
+      const { data, error } = await archivePlannerTask(task.id, actorName)
+      if (error) { setSaveError(error.message ?? 'Could not remove task from active work.'); return }
+      if (data?.id !== task.id || !data.archived_at) {
+        setReadbackPending(true)
+        setSaveError('Removal was not confirmed. Reload this task before trying another change.')
+        return
+      }
+      onArchived(data as PlannerTask)
+    } catch {
+      setReadbackPending(true)
+      setSaveError('Removal could not be verified. Reload this task before trying another change.')
+    } finally {
+      mutationPending.current = false
+      setSaving(false)
+    }
   }
 
   function addChecklistItem(event: FormEvent) {
@@ -933,26 +1029,40 @@ function PlannerTaskDrawer({ task, buckets, people, currentProfileId, actorName,
       <div className="fixed inset-0 z-40 bg-black/65" onClick={requestClose} />
       <aside className="fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l border-white/10 bg-[#101010] sm:w-[32rem]" aria-label="Task details">
         <div className="flex items-center justify-between border-b border-white/10 px-5 py-4"><div><h2 className="font-bold text-white">Task details</h2>{task.original_plan_name && <p className="text-[10px] text-white/35">Imported from {task.original_plan_name}</p>}</div><button type="button" onClick={requestClose} className="min-h-11 min-w-11 rounded-lg text-xl text-white/60" aria-label="Close task details">&times;</button></div>
-        <div className="flex-1 space-y-5 overflow-y-auto px-5 py-5">
-          <div><label className="mb-1 block text-xs font-semibold text-brand-primary">Title</label><input value={title} onChange={event => setTitle(event.target.value)} disabled={!canManage} className={inputClass} /></div>
+        <div className="flex-1 overflow-y-auto px-5 py-5"><fieldset disabled={saving || readbackPending} className="space-y-5">
+          <div><label htmlFor="planner-task-title" className="mb-1 block text-xs font-semibold text-brand-primary">Title</label><input id="planner-task-title" value={title} onChange={event => setTitle(event.target.value)} disabled={!canManage} className={inputClass} /></div>
           <div className="grid grid-cols-2 gap-3">
-            <div><label className="mb-1 block text-xs font-semibold text-brand-primary">Status</label><select value={status} onChange={event => setStatus(event.target.value as PlannerTaskStatus)} disabled={!canUpdateStatus} className={inputClass}>{PLANNER_TASK_STATUSES.map(value => <option key={value} value={value}>{PLANNER_TASK_STATUS_LABELS[value]}</option>)}</select></div>
+            <div><label htmlFor="planner-task-status" className="mb-1 block text-xs font-semibold text-brand-primary">Status</label><select id="planner-task-status" value={status} onChange={event => setStatus(event.target.value as PlannerTaskStatus)} disabled={!canUpdateStatus} className={inputClass}>{PLANNER_TASK_STATUSES.map(value => <option key={value} value={value}>{PLANNER_TASK_STATUS_LABELS[value]}</option>)}</select></div>
             <div><label className="mb-1 block text-xs font-semibold text-brand-primary">Priority</label><select value={priority} onChange={event => setPriority(event.target.value as TaskPriority)} disabled={!canManage} className={inputClass}>{PRIORITIES.map(value => <option key={value} value={value}>{value.replace('_', ' ')}</option>)}</select></div>
           </div>
           <div><label className="mb-1 block text-xs font-semibold text-brand-primary">Client</label>{canManage ? <ClientPicker value={clientId} label={clientName} onChange={client => { setClientId(client?.id ?? ''); setClientName(client?.name ?? '') }} /> : <div className={`${inputClass} opacity-70`}>{clientName || 'No client'}</div>}</div>
           <div><label className="mb-1 block text-xs font-semibold text-brand-primary">Bucket</label><select value={bucketId} onChange={event => setBucketId(event.target.value)} disabled={!canManage} className={inputClass}><option value="">No bucket</option>{buckets.map(bucket => <option key={bucket.id} value={bucket.id}>{bucket.name}</option>)}</select></div>
-          <div className="grid grid-cols-2 gap-3"><div><label className="mb-1 block text-xs font-semibold text-brand-primary">Start date</label><input type="date" value={startDate} onChange={event => setStartDate(event.target.value)} disabled={!canManage} className={inputClass} /></div><div><label className="mb-1 block text-xs font-semibold text-brand-primary">Due date</label><input type="date" value={dueDate} onChange={event => setDueDate(event.target.value)} disabled={!canManage} className={inputClass} /></div></div>
+          <div className="grid grid-cols-2 gap-3"><div><label htmlFor="planner-task-start" className="mb-1 block text-xs font-semibold text-brand-primary">Start date</label><input id="planner-task-start" type="date" value={startDate} onChange={event => setStartDate(event.target.value)} disabled={!canManage} className={inputClass} /></div><div><label htmlFor="planner-task-due" className="mb-1 block text-xs font-semibold text-brand-primary">Due date</label><input id="planner-task-due" type="date" value={dueDate} onChange={event => setDueDate(event.target.value)} disabled={!canManage} className={inputClass} /></div></div>
 
           <PlannerPeoplePicker people={people} value={assigneeIds} onChange={setAssigneeIds} disabled={!canManage || assignmentDisabled} readOnly={!canManage} />
           {task.unresolved_assignee_names.length > 0 && <div className="rounded-lg border border-amber-400/20 bg-amber-400/[0.06] p-3"><p className="text-xs font-bold text-amber-100">Imported identities need manager resolution</p><p className="mt-1 text-xs text-amber-100/70">{task.unresolved_assignee_names.join(', ')}</p><p className="mt-1 text-[10px] text-amber-100/50">Choose canonical people above. Imported names remain visible separately for audit context.</p></div>}
 
-          <div><label className="mb-1 block text-xs font-semibold text-brand-primary">Notes</label><textarea value={notes} onChange={event => setNotes(event.target.value)} rows={4} disabled={!canManage} className={`${inputClass} resize-y`} /></div>
+          <div><label htmlFor="planner-task-notes" className="mb-1 block text-xs font-semibold text-brand-primary">Notes</label><textarea id="planner-task-notes" value={notes} onChange={event => setNotes(event.target.value)} rows={4} disabled={!canManage} className={`${inputClass} resize-y`} /></div>
+
+          {hasUnverifiedSourceChecklist(task) && <p role="status" className="rounded-lg border border-amber-300/20 bg-amber-300/[0.06] p-3 text-xs text-amber-100">Dynamics checklist entries are shown below. The Teams source checklist has not been verified; an empty list does not mean there are no source items. Existing staff entries are kept separate from source recovery.</p>}
 
           <section aria-labelledby="checklist-heading"><div className="mb-2 flex items-center justify-between"><h3 id="checklist-heading" className="text-xs font-black uppercase tracking-wider text-white/50">Checklist</h3><span className="text-xs text-white/35">{checklist.filter(row => row.recognized && row.done).length}/{checklist.filter(row => row.recognized).length}</span></div><div className="space-y-2">{checklist.map((row, index) => <div key={row.key} className="flex items-center gap-2 rounded-lg border border-white/[0.07] p-2">{row.recognized ? <input type="checkbox" checked={row.done} disabled={!canManage} onChange={() => setChecklist(current => current.map((item, itemIndex) => itemIndex === index ? { ...item, done: !item.done } : item))} className="h-4 w-4 accent-teal-400" /> : <span className="text-amber-300">!</span>}<span className={`min-w-0 flex-1 text-sm ${row.done ? 'text-white/35 line-through' : 'text-white/75'}`}>{row.text}</span>{canManage && <button type="button" onClick={() => setChecklist(current => current.filter((_, itemIndex) => itemIndex !== index))} className="min-h-11 min-w-11 text-white/35 sm:min-h-8 sm:min-w-8" aria-label={`Remove checklist item ${row.text}`}>&times;</button>}</div>)}</div>{canManage && <form onSubmit={addChecklistItem} className="mt-2 flex gap-2"><input value={newChecklistText} onChange={event => setNewChecklistText(event.target.value)} placeholder="Add checklist item" className={inputClass} /><button type="submit" disabled={!newChecklistText.trim()} className="min-h-11 rounded-lg border border-brand-teal/25 px-3 text-xs font-bold text-brand-teal disabled:opacity-40">Add</button></form>}</section>
 
           <section aria-labelledby="activity-heading"><h3 id="activity-heading" className="mb-2 text-xs font-black uppercase tracking-wider text-white/50">Activity</h3>{activityError && <p className="text-xs text-amber-200">{activityError}</p>}{!activityError && activity.length === 0 && <p className="text-xs text-white/35">No activity recorded yet.</p>}<div className="space-y-2">{activity.map(item => <ActivityRow key={item.id} item={item} people={people} />)}</div></section>
+        </fieldset></div>
+        <div className="border-t border-white/10 px-5 py-4">
+          {saveError && <p role="alert" className="mb-2 text-xs text-red-300">{saveError}</p>}
+          {saveMessage && <p className="mb-2 text-xs text-brand-teal">{saveMessage}</p>}
+          <div className="flex flex-wrap items-center gap-3">
+            {readbackPending
+              ? <ActionButton variant="primary" className="min-h-11" onClick={retryReadback} disabled={saving} loading={saving}>Retry readback</ActionButton>
+              : <ActionButton variant="primary" className="min-h-11" onClick={save} disabled={saving || !title.trim() || (!canManage && !canUpdateStatus) || (canManage && assignmentDisabled)} loading={saving}>Save</ActionButton>}
+            <button type="button" onClick={requestClose} disabled={saving} className="min-h-11 rounded-lg border border-white/10 px-4 py-2 text-sm text-white/60 disabled:opacity-40">Close</button>
+            {canManage && !readbackPending && (!confirmArchive
+              ? <button type="button" disabled={saving} onClick={() => setConfirmArchive(true)} className="ml-auto min-h-11 px-2 text-xs text-amber-300/70 disabled:opacity-40">Remove from active</button>
+              : <div className="ml-auto flex gap-1 text-xs"><button type="button" disabled={saving} onClick={archive} className="min-h-11 px-2 text-amber-200">Confirm remove</button><button type="button" disabled={saving} onClick={() => setConfirmArchive(false)} className="min-h-11 px-2 text-white/45">Cancel</button></div>)}
+          </div>
         </div>
-        <div className="border-t border-white/10 px-5 py-4">{saveError && <p className="mb-2 text-xs text-red-300">{saveError}</p>}{saveMessage && <p className="mb-2 text-xs text-brand-teal">{saveMessage}</p>}<div className="flex items-center gap-3"><ActionButton variant="primary" className="min-h-11" onClick={save} disabled={saving || !title.trim() || (!canManage && !canUpdateStatus) || (canManage && assignmentDisabled)} loading={saving}>Save</ActionButton><button type="button" onClick={requestClose} className="min-h-11 rounded-lg border border-white/10 px-4 py-2 text-sm text-white/60">Close</button>{canManage && (!confirmArchive ? <button type="button" onClick={() => setConfirmArchive(true)} className="ml-auto min-h-11 px-2 text-xs text-amber-300/70">Remove from active</button> : <div className="ml-auto flex gap-1 text-xs"><button type="button" onClick={archive} className="min-h-11 px-2 text-amber-200">Confirm remove</button><button type="button" onClick={() => setConfirmArchive(false)} className="min-h-11 px-2 text-white/45">Cancel</button></div>)}</div></div>
       </aside>
       {confirmDiscard && <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/75 p-4" role="alertdialog" aria-modal="true" aria-labelledby="discard-title"><div className="w-full max-w-sm rounded-xl border border-white/10 bg-[#181818] p-5 shadow-2xl"><h3 id="discard-title" className="font-bold text-white">Discard unsaved changes?</h3><p className="mt-2 text-sm text-white/55">Your changes to this task have not been saved.</p><div className="mt-5 flex justify-end gap-2"><button type="button" onClick={() => setConfirmDiscard(false)} className="rounded-lg border border-white/10 px-4 py-2 text-sm text-white/70">Stay</button><button type="button" onClick={onClose} className="rounded-lg bg-red-400 px-4 py-2 text-sm font-bold text-black">Discard changes</button></div></div></div>}
     </>
@@ -972,5 +1082,5 @@ function ActivityRow({ item, people }: { item: PlannerActivityLog; people: Plann
     : oldPeople.length || newPeople.length
       ? `${oldPeople.join(', ') || 'Unassigned'} to ${newPeople.join(', ') || 'Unassigned'}`
       : null
-  return <div className="rounded-lg border border-white/[0.06] p-2.5"><p className="text-xs text-white/70"><span className="font-semibold text-white">{item.actor_name || 'System'}</span> {item.action.replaceAll('_', ' ')}</p>{context && <p className="mt-1 text-[11px] text-brand-teal/70">{context}</p>}<time className="mt-1 block text-[10px] text-white/30" dateTime={item.created_at}>{new Date(item.created_at).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })}</time></div>
+  return <div className="rounded-lg border border-white/[0.06] p-2.5"><p className="text-xs text-white/70"><span className="font-semibold text-white">{item.actor_name || 'System'}</span> {item.action.replaceAll('_', ' ')}</p>{context && <p className="mt-1 text-[11px] text-brand-teal/70">{context}</p>}<time className="mt-1 block text-[10px] text-white/30" dateTime={item.created_at}>{formatBusinessDate(item.created_at, { dateStyle: 'medium', timeStyle: 'short' })}</time></div>
 }

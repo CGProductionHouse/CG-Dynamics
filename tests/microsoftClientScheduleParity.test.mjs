@@ -180,6 +180,44 @@ test('two source cards contesting one legacy slot both stay conflicts (no ambigu
   assert.ok(flagged.every(i => i.reconciliationAction !== 'link_existing'))
 })
 
+test('two different source IDs contesting an empty slot BOTH stay held regardless of input order', () => {
+  const items = buildMicrosoftImportPreview([task('F 1 - ACTION', 'a'), task('F1 - ACTION', 'b')], context(NUMBERED_TEMPLATES))
+  for (const order of [items, [...items].reverse()]) {
+    const flagged = flagDeliverableSlotConflicts(order, new Set())
+    assert.ok(flagged.every(i => i.previewStatus === 'conflict'), 'array order must not choose the first source as an import survivor')
+    assert.ok(flagged.every(i => i.conflictCode === 'existing_deliverable_slot'))
+    assert.deepEqual(flagged.map(i => i.sourceTaskId).sort(), ['a', 'b'])
+  }
+})
+
+test('three-way collisions hold all contenders without blocking a different slot, client package or month', () => {
+  const [base] = buildMicrosoftImportPreview([task('F1 - ACTION', 'first')], context(NUMBERED_TEMPLATES))
+  const clone = (id, patch = {}) => ({ ...base, sourceTaskId: id, proposedPayload: { ...base.proposedPayload, ...patch } })
+  const items = [clone('a'), clone('b'), clone('c'), clone('other-month', { month: '2026-08-01' }),
+    clone('other-package', { client_id: 'other-client', package_id: 'other-package' }), clone('other-slot', { instance_number: 2 })]
+  for (const order of [items, [...items].reverse()]) {
+    const result = flagDeliverableSlotConflicts(order, new Set())
+    assert.ok(result.filter(i => ['a', 'b', 'c'].includes(i.sourceTaskId)).every(i => i.previewStatus === 'conflict'))
+    assert.ok(result.filter(i => i.sourceTaskId.startsWith('other-')).every(i => i.previewStatus === 'new'))
+  }
+})
+
+test('numbered plus uniquely resolved unnumbered VIDEO cannot both claim the same template slot', () => {
+  const ctx = context([...NUMBERED_TEMPLATES, { id: 't-video1', packageId: PKG.id, code: 'Video 1', deliverableType: 'video', active: true }])
+  const items = buildMicrosoftImportPreview([task('VIDEO 1 - ACTION', 'explicit'), task('VIDEO - ACTION', 'unnumbered')], ctx)
+  assert.ok(flagDeliverableSlotConflicts(items, new Set()).every(i => i.previewStatus === 'conflict'))
+})
+
+test('known linked owner updates remain intact while a different source cannot claim its occupied slot', () => {
+  const [base] = buildMicrosoftImportPreview([task('F1 - ACTION', 'known')], context(NUMBERED_TEMPLATES))
+  const p = base.proposedPayload, key = deliverableSlotKey(p.package_id, p.template_id, p.instance_number, p.month)
+  const owner = { ...base, previewStatus: 'changed', reconciliationAction: 'update', existingTargetId: 'exact-linked-target' }
+  const contender = { ...base, sourceTaskId: 'different-source' }
+  const [known, held] = flagDeliverableSlotConflicts([owner, contender], new Set([key]))
+  assert.deepEqual(known, owner, 'durable linked ownership is not replaced by a source-order choice')
+  assert.equal(held.previewStatus, 'conflict')
+})
+
 // ── package_template_create: reviewed correction for a missing template ──────
 test('unnumbered VIDEO with no video template proposes a Video 1 template correction', () => {
   const [item] = buildMicrosoftImportPreview([task('VIDEO - ACTION', 'v1')], context(NUMBERED_TEMPLATES))

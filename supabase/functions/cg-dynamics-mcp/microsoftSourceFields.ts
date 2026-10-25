@@ -142,11 +142,11 @@ export function withSourceLinkage(
 
 // ── Sync freshness ──────────────────────────────────────────────────────────
 
-export type SyncHealthState = 'healthy' | 'stale' | 'failed' | 'in_progress' | 'never_run'
+export type SyncHealthState = 'healthy' | 'partial' | 'unverified' | 'stale' | 'failed' | 'in_progress' | 'never_run'
 
 export interface SyncHealth {
   state: SyncHealthState
-  /** True when the Assistant must flag SYNC STALE / SYNC FAILED before relying on mirrors. */
+  /** True when mirrors are not verified complete; report the exact partial/stale/failed state. */
   degraded: boolean
   age_minutes: number | null
   freshness_threshold_minutes: number
@@ -179,6 +179,9 @@ export function summarizeSyncHealth(
   if (status === 'previewed' || status === 'applying') {
     return { ...base, state: 'in_progress', degraded: true, age_minutes: null, reason: 'A reconciliation is previewed or still applying, so Dynamics mirrors are not yet settled. Prefer the live Microsoft read.' }
   }
+  if (status !== 'completed' && status !== 'partial') {
+    return { ...base, state: 'unverified', degraded: true, age_minutes: null, reason: 'The latest reconciliation status is unrecognised. A recent timestamp cannot prove successful reconciliation. Treat mirrors as unverified and prefer the live Microsoft read.' }
+  }
 
   const completedAt = str(run.finished_at) ?? str(run.applied_at)
   if (!completedAt) {
@@ -196,9 +199,9 @@ export function summarizeSyncHealth(
     return { ...base, state: 'stale', degraded: true, age_minutes: ageMinutes, reason: `The latest reconciliation completed ${ageMinutes} minutes ago, beyond the ${thresholdMinutes}-minute daily-cycle threshold. Flag SYNC STALE and prefer the live Microsoft read.` }
   }
 
-  // `partial` completed within the window is usable but still explicitly degraded.
+  // Source fetch completeness, application completeness and age are distinct.
   if (status === 'partial') {
-    return { ...base, state: 'healthy', degraded: true, age_minutes: ageMinutes, reason: `The latest reconciliation completed ${ageMinutes} minutes ago but was PARTIAL. Report degraded source coverage for any source that did not complete.` }
+    return { ...base, state: 'partial', degraded: true, age_minutes: ageMinutes, reason: `The latest reconciliation completed ${ageMinutes} minutes ago but was PARTIAL, not healthy. Inspect source completeness and apply conflicts/failures separately; complete fetching does not prove complete mirroring. Prefer the live Microsoft read.` }
   }
 
   return { ...base, state: 'healthy', degraded: false, age_minutes: ageMinutes, reason: `The latest reconciliation completed successfully ${ageMinutes} minutes ago, within the ${thresholdMinutes}-minute daily-cycle threshold. Still perform the live Microsoft read.` }

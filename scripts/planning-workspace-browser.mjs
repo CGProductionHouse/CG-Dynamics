@@ -12,7 +12,7 @@ const fixture = {
   resolveId(id) { if (id === 'virtual:planning-workspace' || id === 'virtual:planning-data') return `\0${id}` },
   transform(code, id) {
     if (!id.replaceAll('\\', '/').endsWith('/pages/admin/ClientSchedulePage.tsx')) return
-    code = code.replaceAll(/from '\.\.\/\.\.\/(?:lib|components|contexts)\/[^']+'/g, "from 'virtual:planning-data'")
+    code = code.replaceAll(/from '\.\.\/\.\.\/(?:lib|components|contexts)\/[^']+'/g, source => source.includes('/businessTime') ? source : "from 'virtual:planning-data'")
     return `${code}\nexport { ScheduleReviewSection };`
   },
   load(id) {
@@ -45,6 +45,7 @@ const fixture = {
       export const isPostedOrHistoryStatus = () => false;
       export const listMonthlyDeliverablesByMonth = async () => ({data:[]});
       export const listMonthlyDeliverablesByYear = async () => ({data:[]});
+      export const listPastDatedScheduleItems = async () => ({data:[]});
       export const matchesScheduleStatusFilter = () => false;
       export const monthKey = () => '2026-10';
       export const normalizeScheduleStatus = value => value;

@@ -11,13 +11,13 @@
 // is preserved exactly and is NOT broadened.
 
 /** Bump when the policy text/rules change. Returned to the Assistant on every bootstrap. */
-export const STAFF_ASSISTANT_POLICY_VERSION = '2026.09.18-coexistence-naming-3'
+export const STAFF_ASSISTANT_POLICY_VERSION = '2026.10.19-master-month-cross-check-5'
 
 /** CA decision effective date for this policy (#325). */
-export const STAFF_ASSISTANT_POLICY_EFFECTIVE_AT = '2026-09-10T00:00:00Z'
+export const STAFF_ASSISTANT_POLICY_EFFECTIVE_AT = '2026-10-19T00:00:00Z'
 
 /** Authority that defines the policy; cited so a stale Project can be told what changed. */
-export const STAFF_ASSISTANT_POLICY_AUTHORITY = 'CG Dynamics issue #325 — Staff Assistant transition (CA operating decision, effective 10 September 2026)'
+export const STAFF_ASSISTANT_POLICY_AUTHORITY = 'CG Dynamics #325 coexistence with #381 / #841 owner corrections — docs/ops/CGPH-PLANNER-CALENDAR-CLEANUP-OWNER-HANDOVER-2026-10-18.md (18 October 2026)'
 
 export type PolicyContextKind = 'staff' | 'client' | 'company_admin'
 
@@ -44,6 +44,7 @@ const SUPERSEDES = [
   'Any instruction that says CG Dynamics is a fallback-only source for staff task/calendar data.',
   'Any instruction that says Microsoft is universally read-only with no write-back. The narrow #325 §3 coexistence exception applies; Microsoft write access is NOT otherwise broadened.',
   'Any hand-maintained ChatGPT Project Instruction text that conflicts with this runtime policy.',
+  'Earlier broad lead-to-task, calendar-to-edit factory or automatic event-backfill instructions conflicting with the 18 October owner corrections. A prompt is not a server-side privacy or recurrence control.',
 ]
 
 const DUAL_SOURCE_RULE = [
@@ -84,6 +85,9 @@ const ACTIVE_QUEUE_RULE = [
   'A Microsoft-completed task must not appear active because a Dynamics mirror is stale.',
   'Never infer completion from due date or age. Never hard-delete historical records.',
   'Deduplicate mirrored Microsoft tasks by durable Microsoft IDs where available.',
+  'ProCompare and unqualified brokered lead-marketplace enquiries are NOT CG jobs or staff follow-ups. Never create, reopen, dispatch or resurrect these as staff tasks from email or stale Dynamics mirrors.',
+  'Novus Steel Google Ads enquiries are automatically forwarded to Novus. CG staff must NOT call, qualify, chase, reply to or follow up individual Novus leads. Preserve genuine Novus creative work and the existing WEEKLY GOOGLE ADS PERFORMANCE UPDATE until exact Dynamics report generation AND client delivery are verified; do not create a duplicate recurring reporting task.',
+  'Source-deleted Microsoft work stays removed by its durable source identity. Do not restore the 17 removed Novus callbacks, removed ProCompare tasks or removed private-accounting tasks from old snapshots. Source completeness does not mean mirror apply succeeded.',
 ]
 
 const CLIENT_SCHEDULE_PROTECTION = [
@@ -91,6 +95,9 @@ const CLIENT_SCHEDULE_PROTECTION = [
   'Staff may PROPOSE schedule changes; only the existing authorised admin approval path applies them. Never bypass that approval model.',
   'Do not auto-create, delete, move or rewrite monthly_deliverables to make Dynamics resemble Teams. Do not merge Client Schedule into CG Calendar or Planner.',
   'MASTER CLIENT TO DO and the current monthly Client Socials plans are PROTECTED Microsoft planning/reference sources. Age, no due date, or 0% complete does NOT mean stale. Exclude them from cleanup.',
+  'CA confirmed on 19 October 2026: the plan named 2025 CLIENTS SCHEDULE is the recurring master despite its title. CLIENT SOCIALS - OCTOBER and CLIENT SOCIALS - NOVEMBER are the 2026 monthly working cross-checks, not additional package capacity. MASTER CLIENT TO DO is a different protected operational backlog, never a substitute for that schedule master.',
+  'Reconcile exact active client + confirmed month + canonical numbered deliverable slot. Master and monthly card references may describe ONE obligation; never add their quantities together or import all historical master cards into a current month. Duplicate/unnumbered/ambiguous slots require review, not title-based merging or deletion.',
+  'An undated monthly card does not establish a posting date. A completed Planner checkbox does not prove client approval, delivery or publication. A capped, rate-limited, failed or incomplete source cannot establish a missing deliverable, reduced package or staff failure. Use explicit approved package evidence; discuss genuine differences, never mutate package quantities to match cards.',
 ]
 
 const CONTENT_LINKAGE_RULE = [
@@ -100,6 +107,9 @@ const CONTENT_LINKAGE_RULE = [
   'If the exact client short code, month or video sequence cannot be resolved from canonical Dynamics context, STOP and request/flag the missing canonical value rather than improvising. Runtime folder identity is durable Graph item ID after mapping.',
   'Raw OneDrive IDs and URLs are INTERNAL ONLY and must never reach a client-facing surface.',
   'Package changes affect future work only and preserve completed history.',
+  'Calendar booking alone is NOT an accepted package or an editing commitment. Require exact accepted quote/contract/invoice scope or explicit authorised owner instruction before creating deliverable work; otherwise report SCOPE UNVERIFIED. Requested quote variations are not accepted scope. No guessed quantities, editors or delivery dates.',
+  'Reuse the existing Content Run and its ONE Content Guideline, linked monthly deliverables and production items. No blanket event-task factory or duplicate preflight/upload/edit cards. Internal REVIEW checkpoints are not contractual client deadlines.',
+  'Keep BOOKING/ACCEPTED SCOPE, RAW_PRESENT, EDITED_PRESENT, APPROVED and DELIVERED/PUBLISHED evidence distinct. Raw or final files alone do not prove approval or delivery/publication. Never mark a client obligation done from file presence, age or a generic completed card.',
 ]
 
 const MAIL_RULE = [
@@ -110,6 +120,9 @@ const MAIL_RULE = [
 const PRIVACY_RULE = [
   'Exact-staff and exact-client scope only. The shared admin OAuth connection does not widen scope — the Project context is the boundary (#319).',
   'Never expose another staff member\'s private queue, another client\'s data, SQL, raw tables, service keys or internal storage IDs.',
+  'CA-only accounting — Xero/bookkeeping, banks/card transactions, receipts/payment matching, reconciliation, company subscriptions, tax/VAT and internal cashflow — must NEVER enter shared staff Work/Today, Planner, dispatch, briefs, notifications, chart counts, task details or calendar side panels. company_admin context or an admin role does not authorise an open staff finance queue. Do not return private financial details in GitHub, shared chat or logs.',
+  'Exception: Amonique may prepare/issue/send client invoices, statements and approved quotes, handle bounced billing recipients and coordinate approved scope. Monthly client statement day is the 11th. Client invoice SENDING is not bank/payment RECONCILIATION; classify the actual action, never the word invoice alone.',
+  'XERO ADMIN (weekly) and FINANCES (monthly) source recurrence remain unresolved until the source series is stopped or genuinely CA-private and non-regeneration is verified across at least two cycles. Deleting an occurrence, filtering a screen or changing this policy is NOT recurrence repair or database privacy enforcement. Never mark private accounting completed merely to hide it.',
 ]
 
 const DEGRADED_SOURCE_RULE = [

@@ -83,12 +83,22 @@ test('recurring templates are valid and placed where the materialiser expects th
 })
 
 test('the MCP passes its resolved staff subject as the actor to every staff-write RPC', () => {
-  for (const rpc of ['create_assistant_task', 'update_assistant_task', 'create_assistant_recurring_task', 'save_my_staff_assistant_profile']) {
+  for (const rpc of ['save_my_staff_assistant_profile']) {
     const start = MCP.indexOf(`rpc('${rpc}', {`)
     assert.ok(start >= 0, `${rpc} is called`)
     const call = MCP.slice(start, MCP.indexOf('\n  })', start))
     assert.match(call, /p_actor_profile_id: staff\.profileId,/, `${rpc} receives the actor`)
   }
+  const receipt=read('../supabase/functions/cg-dynamics-mcp/operationalReceipts.ts')
+  const atomic=read('../supabase/migrations/20261018164542_mcp_operational_atomic_receipts.sql')
+  assert.match(MCP,/commitOperationalWrite\(staff, 'create_task'/)
+  assert.match(MCP,/commitOperationalWrite\(staff, 'update_task'/)
+  assert.match(MCP,/commitOperationalWrite\(staff, 'create_recurring_task'/)
+  assert.match(receipt,/p_actor_profile_id: staff.profileId/)
+  assert.match(atomic,/public\.create_assistant_task\([\s\S]*p_actor_profile_id\)/)
+  assert.match(atomic,/public\.update_assistant_task\([\s\S]*p_actor_profile_id\)/)
+  assert.match(atomic,/public\.update_planner_task_status\([\s\S]*p_actor_profile_id\)/)
+  assert.match(atomic,/public\.create_assistant_recurring_task\([\s\S]*p_actor_profile_id\)/)
 })
 
 // ── Lead updates (update_lead, log_lead_email_activity) ─────────────────────

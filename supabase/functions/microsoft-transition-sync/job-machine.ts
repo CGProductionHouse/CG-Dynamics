@@ -108,8 +108,16 @@ export async function paginateGraph(
     const page = await fetchPage(url)
     if (!page) return { values, complete: false, safeError: describeFailure(null), nextCursor: null }
     if (!page.ok) return { values, complete: false, safeError: describeFailure(page.status), nextCursor: null }
-    values.push(...(page.body?.value ?? []))
-    const nextLink: string | null = page.body?.['@odata.nextLink'] ?? null
+    const body = page.body
+    const nextLink = body?.['@odata.nextLink'] ?? null
+    // HTTP200 alone is not evidence of a complete (or empty) collection. Reject
+    // the whole malformed page before admitting records or a continuation.
+    if (!body || Array.isArray(body) || !Array.isArray(body.value)
+      || body.value.some(record => !record || typeof record !== 'object' || Array.isArray(record))
+      || (nextLink !== null && (typeof nextLink !== 'string' || !nextLink.trim()))) {
+      return { values, complete: false, safeError: 'Microsoft returned an invalid collection page.', nextCursor: null }
+    }
+    values.push(...body.value)
     // A page that links to itself would otherwise be checkpointed and re-read forever.
     if (nextLink !== null && nextLink === url) {
       return { values, complete: false, safeError: 'Microsoft returned a repeating page link.', nextCursor: null }

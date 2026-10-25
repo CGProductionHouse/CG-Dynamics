@@ -24,7 +24,7 @@ export interface MicrosoftApplyRpcArgs {
   p_source_item_id: string
   p_source_name: string
   p_source_complete: boolean
-  p_details: { title: string; warnings: string[] }
+  p_details: { title: string; warnings: string[]; conflict_code?: MicrosoftImportPreviewItem['conflictCode']; conflict_reason?: string | null }
 }
 
 export function microsoftApplyPreflightError(version: unknown, error: unknown): string | null {
@@ -67,6 +67,9 @@ function buildMicrosoftApplyPatch(
   shouldApply: boolean,
   approveRemovals: boolean,
 ): Record<string, unknown> {
+  // Audit-only conflicts/skips must not carry a latent mutation payload. The
+  // SQL should_apply guard remains authoritative; this is defence in depth.
+  if (!shouldApply) return {}
   const action = item.reconciliationAction ?? 'skipped'
   const removedAt = item.requiresRemovalApproval && approveRemovals ? new Date().toISOString() : null
   let patch: Record<string, unknown> = shouldApply ? commonSyncFields(item, snapshot, runId) : {}
@@ -149,6 +152,7 @@ export function buildMicrosoftApplyRpcArgs(
     p_source_item_id: identity.source_item_id,
     p_source_name: item.sourceName,
     p_source_complete: Boolean(item.sourceComplete),
-    p_details: { title: item.title, warnings: item.warnings },
+    p_details: { title: item.title, warnings: item.warnings,
+      conflict_code: item.conflictCode, conflict_reason: item.conflictReason },
   }
 }
