@@ -13,6 +13,24 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 25 October — ordered local-first provider integrity continuation
+
+Current ordered execution: [CLIENT-LAUNCH-EXECUTION-2026-10-25.md](CLIENT-LAUNCH-EXECUTION-2026-10-25.md).
+No overlap with staff/Teams, normal ChatGPT strategy authoring, onboarding or
+guideline/video PR owners. Reconciled #435's first-party paused/removed campaign
+evidence rather than inventing replacement Google mappings or zero activity.
+Separately reproduced Google malformed-success ingestion: a malformed results
+batch was silently empty; invalid campaign/date rows could be silently dropped
+before the canonical whole-range replacement. Source repair rejects the entire
+malformed response, foreign account, out-of-window/duplicate row or malformed
+metric before replacement, preserving valid empty results, zeros and same-day
+optional settings. RED actual-adapter/handler regressions then focused GREEN;
+scoped ESLint, TS/Vite392module app and diff pass. Backend source only, NOT live,
+and NOT asserted to explain the existing three paused/removed campaign gaps.
+No Vercel or production data/config/Edge/provider/mapping/permission/content write.
+Next is Meta storage-hardening staging, bounded remaining TikTok preview checks,
+and exact owner/source/asset queue reconciliation, not another frontend rewrite.
+
 ### 25 October — final client code review packet; no automatic deployment
 
 Current concise acceptance/owner queue:

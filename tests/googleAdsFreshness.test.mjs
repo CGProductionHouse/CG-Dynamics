@@ -56,7 +56,11 @@ function database(overrides = {}, failTable = null) {
       return { data: rows[table].filter(row => filters.every(filter => filter(row))).slice(from, to + 1), error: null }
     }
     return query
-  }, rpc: async () => ({ data: 0, error: null }) }
+  }, rpc: async (name, parameters) => {
+    writes.push({ rpc: name, parameters })
+    rows.google_ads_campaign_daily_metrics = parameters.p_metrics
+    return { data: parameters.p_metrics.length, error: null }
+  } }
 }
 
 test('Google Ads participates in the existing durable daily worker', () => {
@@ -187,7 +191,7 @@ test('scheduled provider requests use one short attempt, leaving retry/backoff t
 })
 
 // Execute the actual HTTP entrypoint, substituting only external I/O.
-function syncHandler(db, enabled = true) {
+function syncHandler(db, enabled = true, providerRows = []) {
   let handler, manualCalls = 0
   const providerPolicies = []
   const source = readFileSync(new URL('../supabase/functions/google-ads-sync/index.ts', import.meta.url), 'utf8')
@@ -202,7 +206,7 @@ function syncHandler(db, enabled = true) {
     corsHeaders: {}, jsonResponse: (body, status = 200) => Response.json(body, { status }), googleAdsConfig: () => ({}),
     normalizeCustomerId, validateGoogleAdsDateRange, googleAdsCampaignQuery, validGoogleAdsDate,
     refreshGoogleAccessToken: async (_config, policy) => { providerPolicies.push(policy); return 'fixture-access' },
-    searchStream: async (_config, _token, _customer, _query, policy) => { providerPolicies.push(policy); return [] },
+    searchStream: async (_config, _token, _customer, _query, policy) => { providerPolicies.push(policy); return typeof providerRows === 'function' ? providerRows() : providerRows },
     safeGoogleAdsError: () => ({ error: 'Safe provider diagnostic.' }),
   }
   new Function(...Object.keys(args), javascript)(...Object.values(args))
@@ -246,4 +250,54 @@ test('actual sync path records exact success only after its canonical receipt; a
   assert.equal(failed.failedAccounts, 1)
   assert.equal(failedDb.rows.google_ads_sync_runs[0].status, 'failed')
   assert.doesNotMatch(JSON.stringify(failed), /private database diagnostic/)
+})
+
+test('actual sync rejects malformed, foreign, out-of-window or duplicate rows before any range replacement', async () => {
+  const currentPayload = { ...payload, ...googleAdsRefreshWindow(account.time_zone) }
+  const valid = { customer: { id: account.customer_id }, campaign: { id: link.campaign_id, name: 'Fixture' },
+    segments: { date: currentPayload.endDate }, metrics: { impressions: '0', clicks: '0', costMicros: '0', conversions: 0, conversionsValue: 0 } }
+  const request = () => new Request('https://fixture.supabase.co/functions/v1/google-ads-sync', {
+    method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer fixture-service-key', 'X-Internal-Worker-Token': token },
+    body: JSON.stringify(currentPayload),
+  })
+  for (const invalid of [null, [], {}, { ...valid, campaign: { id: 'PRIVATE' } }, { ...valid, customer: { id: '9999999999' } },
+    { ...valid, customer: undefined }, { ...valid, segments: { date: '2026-02-30' } }, { ...valid, segments: { date: '2000-01-01' } },
+    { ...valid, metrics: { ...valid.metrics, clicks: ' ' } }, { ...valid, metrics: { ...valid.metrics, impressions: undefined } }, valid]) {
+    const previous = { google_ads_account_id: account.id, campaign_id: '123', metric_date: currentPayload.endDate, interactions: 9, native_settings: { observed_at: 'prior' } }
+    const db = database({ google_ads_campaign_daily_metrics: [previous] })
+    const result = await (await syncHandler(db, true, [valid, invalid]).handler(request())).json()
+    assert.equal(result.ok, false, JSON.stringify(invalid))
+    assert.equal(result.failedAccounts, 1)
+    assert.equal(db.rows.google_ads_sync_runs[0].status, 'failed')
+    assert.equal(db.writes.filter(write => write.rpc).length, 0)
+    assert.deepEqual(db.rows.google_ads_campaign_daily_metrics, [previous])
+    assert.doesNotMatch(JSON.stringify(result), /PRIVATE|9999999999/)
+  }
+  const db = database({ google_ads_campaign_daily_metrics: [{ google_ads_account_id: account.id, campaign_id: '123', metric_date: currentPayload.endDate, interactions: 9, native_settings: { observed_at: 'prior' } }] })
+  const successful = await (await syncHandler(db, true, [valid]).handler(request())).json()
+  assert.equal(successful.ok, true)
+  assert.equal(db.writes.filter(write => write.rpc).length, 1)
+  assert.equal(db.rows.google_ads_campaign_daily_metrics[0].clicks, 0)
+  assert.equal(db.rows.google_ads_campaign_daily_metrics[0].interactions, 9)
+  assert.deepEqual(db.rows.google_ads_campaign_daily_metrics[0].native_settings, { observed_at: 'prior' })
+})
+
+test('actual HTTP sync plus real stream adapter preserves stored metrics on malformed HTTP-200 provider data', async () => {
+  const originalFetch = globalThis.fetch
+  const currentPayload = { ...payload, ...googleAdsRefreshWindow(account.time_zone) }
+  const previous = { google_ads_account_id: account.id, campaign_id: link.campaign_id, metric_date: currentPayload.endDate, clicks: 12 }
+  const db = database({ google_ads_campaign_daily_metrics: [previous] })
+  const fixture = syncHandler(db, true, () => searchStream({ developerToken: 'fixture', loginCustomerId: account.customer_id }, 'fixture', account.customer_id, 'fixture'))
+  globalThis.fetch = async () => Response.json([{ results: { private: 'PRIVATE' } }])
+  try {
+    const result = await (await fixture.handler(new Request('https://fixture.supabase.co/functions/v1/google-ads-sync', {
+      method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer fixture-service-key', 'X-Internal-Worker-Token': token },
+      body: JSON.stringify(currentPayload),
+    }))).json()
+    assert.equal(result.ok, false)
+    assert.equal(db.rows.google_ads_sync_runs[0].status, 'failed')
+    assert.equal(db.writes.filter(write => write.rpc).length, 0)
+    assert.deepEqual(db.rows.google_ads_campaign_daily_metrics, [previous])
+    assert.doesNotMatch(JSON.stringify(result), /PRIVATE/)
+  } finally { globalThis.fetch = originalFetch }
 })

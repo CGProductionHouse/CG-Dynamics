@@ -55,3 +55,36 @@ test('campaign discovery uses identity fields only and marks native settings una
     globalThis.fetch = originalFetch
   }
 })
+
+test('malformed successful streams reject the whole response instead of becoming an empty replacement', async () => {
+  const originalFetch = globalThis.fetch
+  try {
+    for (const body of [[{ results: {} }], [{ results: null }], [null], [false], [42], [[]], [{ results: [null] }], [{ results: [[]] }], [{ results: ['PRIVATE'] }],
+      [{ results: [{ campaign: { id: '1' } }] }, { results: 'PRIVATE' }]]) {
+      globalThis.fetch = async () => Response.json(body, { headers: { 'request-id': 'bad-stream' } })
+      await assert.rejects(api.searchStream({ developerToken: 'PRIVATE', loginCustomerId: '1234567890' }, 'PRIVATE', '1234567890', 'fixture-query'), error => {
+        assert.equal(error.status, 502)
+        assert.equal(error.requestId, 'bad-stream')
+        assert.equal(error.message, 'Google Ads returned an invalid response.')
+        assert.doesNotMatch(JSON.stringify(api.safeGoogleAdsError(error)), /PRIVATE/)
+        return true
+      })
+    }
+    globalThis.fetch = async () => new Response('PRIVATE malformed JSON', { headers: { 'request-id': 'bad-json' } })
+    await assert.rejects(api.searchStream({}, 'PRIVATE', '1234567890', 'fixture-query'), error =>
+      error.status === 502 && error.requestId === 'bad-json' && !error.message.includes('PRIVATE'))
+  } finally { globalThis.fetch = originalFetch }
+})
+
+test('valid empty streams, metadata-only batches, all batches and explicit zero rows survive', async () => {
+  const originalFetch = globalThis.fetch
+  try {
+    for (const body of [[], [{}], [{ fieldMask: 'campaign.id' }], [{ results: [] }]]) {
+      globalThis.fetch = async () => Response.json(body)
+      assert.deepEqual(await api.searchStream({}, 'fixture', '1234567890', 'fixture-query'), [])
+    }
+    const rows = [{ campaign: { id: '1' }, metrics: { impressions: '0' } }, { campaign: { id: '2' } }]
+    globalThis.fetch = async () => Response.json([{ results: [rows[0]] }, { results: [rows[1]] }])
+    assert.deepEqual(await api.searchStream({}, 'fixture', '1234567890', 'fixture-query'), rows)
+  } finally { globalThis.fetch = originalFetch }
+})
