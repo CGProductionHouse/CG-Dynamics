@@ -23,7 +23,7 @@ import cv2
 import numpy as np
 from PIL import Image, ImageCms, ImageDraw, ImageOps, __version__ as pillow_version
 
-VERSION = "0.3.10"
+VERSION = "0.3.11"
 FACE_MODEL = Path(__file__).resolve().parent / "models" / "face_detection_yunet_2026may.onnx"
 FACE_MODEL_SHA256 = "ebafce4e3c118d6554634be5c27ab333b4c047a9a8c3faf1d7cf93101c22f0f0"
 SETTINGS = {"jpeg_quality": 94, "max_ev": 0.35, "max_wb": 0.025, "max_shadow_lift": 0.07,
@@ -202,7 +202,7 @@ def analyze(image: Image.Image) -> dict:
             "face_confidence_hint": face_scores, "face_detector": face_detector, "dhash": phash}
 
 
-def settings_for(a: dict) -> dict:
+def settings_for(a: dict, look: str = "natural") -> dict:
     median = a["median_luma"]
     scene = a["scene"]
     ev = float(np.clip(np.log2(.46 / max(median, .08)) * .30, -.25, SETTINGS["max_ev"]))
@@ -220,11 +220,20 @@ def settings_for(a: dict) -> dict:
     wb = 0.0
     if scene != "warm_or_mixed_light_review" and abs(a["warm_channel_bias"]) > .055:
         wb = float(np.clip(-a["warm_channel_bias"] * .12, -SETTINGS["max_wb"], SETTINGS["max_wb"]))
-    return {"exposure_ev": round(ev, 4), "shadow_lift": round(shadow, 4),
+    result = {"exposure_ev": round(ev, 4), "shadow_lift": round(shadow, 4),
             "highlight_pull": round(highlight, 4), "red_blue_balance": round(wb, 4),
             "contrast": .015 if scene == "balanced_or_unknown" else 0.0,
             "saturation": .01 if scene not in ("low_light", "warm_or_mixed_light_review") else 0.0,
             "sharpen": "none_for_jpeg"}
+    if look == "cg-formal-warm":
+        # Staff-approved formal references have deeper darks and richer warm colour.
+        # Low-light scenes stay restrained to avoid noise and colour-cast amplification.
+        result["contrast"] = .055 if scene == "low_light" else .11
+        result["saturation"] = .03 if scene == "low_light" else .10
+        result["red_blue_balance"] = round(max(wb, .008 if scene == "low_light" else .018), 4)
+    elif look != "natural":
+        raise ValueError("Unknown finishing look")
+    return result
 
 
 def finish(image: Image.Image, settings: dict, analysis: dict) -> Image.Image:
@@ -360,7 +369,7 @@ def face_review(job: Path, ids: list[str]) -> dict:
 
 
 def run(source: Path, job: Path, limit: int | None,
-        onedrive_root: Path | None = None) -> int:
+        onedrive_root: Path | None = None, look: str = "natural") -> int:
     readiness = preflight(source, job, limit, onedrive_root)
     if readiness["online_only_count"]:
         raise ValueError("Selected OneDrive JPEGs are online-only; make this shoot available locally first")
@@ -378,12 +387,14 @@ def run(source: Path, job: Path, limit: int | None,
         raise ValueError("Symlinked job output folders are not supported")
     manifest_path = job / "manifest.json"
     existing = json.loads(manifest_path.read_text(encoding="utf-8")) if manifest_path.exists() else None
-    if existing and (Path(existing["source_root"]).resolve() != source.resolve() or existing["settings"] != SETTINGS):
+    if existing and (Path(existing["source_root"]).resolve() != source.resolve() or existing["settings"] != SETTINGS
+                     or existing.get("look", "natural") != look):
         raise ValueError("Existing job source or settings differ; create a new job folder")
     if existing and [r["source_name"] for r in existing["items"]] != [p.name for p in files]:
         raise ValueError("Source inventory changed; create a new job folder to avoid ambiguous outputs")
     rows = {row["source_name"]: row for row in existing["items"]} if existing else {}
     manifest = {"picasso_version": VERSION, "source_root": str(source.resolve()), "settings": SETTINGS,
+                "look": look,
                 "runtime": {"python": sys.version.split()[0], "pillow": pillow_version, "opencv": cv2.__version__},
                 "started_at": existing["started_at"] if existing else datetime.now().isoformat(),
                 "delivery_approved": False, "internal_review_approval": None,
@@ -417,7 +428,7 @@ def run(source: Path, job: Path, limit: int | None,
                         raw.seek(0)  # Use the full-size primary JPEG, never an auxiliary frame.
                     image, color_note = srgb_image(raw)
                 metrics = analyze(image)
-                adjustments = settings_for(metrics)
+                adjustments = settings_for(metrics, look)
                 edited = finish(image, adjustments, metrics)
                 # One final JPEG encode. No source EXIF, GPS, or private metadata copied.
                 temp = output.with_suffix(".tmp")
@@ -616,7 +627,7 @@ def amend(job: Path, ident: str, reviewer: str, request: str, overrides: dict) -
             raw.seek(0)
         image, color_note = srgb_image(raw)
     metrics = analyze(image)
-    settings = settings_for(metrics)
+    settings = settings_for(metrics, manifest.get("look", "natural"))
     settings.update(overrides)
     edited = finish(image, settings, metrics)
     output = directory / f"{ident}.jpg"
@@ -887,6 +898,8 @@ def main() -> int:
     launch.add_argument("--input", type=Path, required=True)
     launch.add_argument("--job", type=Path, required=True)
     launch.add_argument("--limit", type=int)
+    launch.add_argument("--look", choices=("natural", "cg-formal-warm"), default="natural",
+                        help="Named, reproducible finishing treatment; formal warmth needs visual review")
     launch.add_argument("--onedrive-root", type=Path,
                         help="Explicit sync root; refuse an input outside this root")
     inspect = sub.add_parser("preflight", help="Check JPEG count, hydration and disk space without reading pixels")
@@ -933,7 +946,7 @@ def main() -> int:
     args = parser.parse_args()
     try:
         if args.action == "run":
-            return run(args.input, args.job, args.limit, args.onedrive_root)
+            return run(args.input, args.job, args.limit, args.onedrive_root, args.look)
         if args.action == "preflight":
             result = preflight(args.input, args.job, args.limit, args.onedrive_root)
             print(json.dumps(result))

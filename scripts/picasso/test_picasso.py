@@ -21,6 +21,25 @@ def sha(path: Path) -> str:
 
 
 class PicassoJobTest(unittest.TestCase):
+    def test_formal_look_is_recorded_and_cannot_change_during_resume(self):
+        with tempfile.TemporaryDirectory() as root:
+            base = Path(root)
+            source, job = base / "source", base / "job"
+            source.mkdir()
+            Image.new("RGB", (180, 120), (180, 130, 80)).save(source / "sample.jpg", "JPEG")
+            self.assertEqual(run(source, job, None, look="cg-formal-warm"), 0)
+            first = json.loads((job / "manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(first["look"], "cg-formal-warm")
+            self.assertEqual(first["items"][0]["adjustments"]["contrast"], .11)
+            output_hash = sha(job / "output" / "0001.jpg")
+            self.assertEqual(run(source, job, None, look="cg-formal-warm"), 0)
+            self.assertEqual(sha(job / "output" / "0001.jpg"), output_hash)
+            amend(job, "0001", "reviewer", "minor exposure change", {"exposure_ev": -.05})
+            updated = json.loads((job / "manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(updated["revisions"][0]["settings"]["contrast"], .11)
+            with self.assertRaisesRegex(ValueError, "settings differ"):
+                run(source, job, None, look="natural")
+
     def test_closed_job_survives_private_backup_and_source_relocation(self):
         with tempfile.TemporaryDirectory() as root:
             base = Path(root)

@@ -1,7 +1,7 @@
 param(
     [ValidateSet('Check', 'Install')]
     [string]$Mode = 'Check',
-    [string]$Destination = (Join-Path $env:LOCALAPPDATA 'CGProductionHouse\PICASSO\runtime-0.3.9')
+    [string]$Destination = (Join-Path $env:LOCALAPPDATA 'CGProductionHouse\PICASSO\runtime-0.3.11')
 )
 
 $ErrorActionPreference = 'Stop'
@@ -22,6 +22,7 @@ if ($Mode -eq 'Install') {
     }
     New-Item -ItemType Directory -Path (Join-Path $destinationFull 'models') -Force | Out-Null
     Copy-Item -LiteralPath (Join-Path $source 'picasso.py') -Destination $destinationFull -Force
+    Copy-Item -LiteralPath (Join-Path $source 'SKILL.md') -Destination $destinationFull -Force
     Copy-Item -LiteralPath (Join-Path $source 'requirements-windows.txt') -Destination $destinationFull -Force
     Copy-Item -LiteralPath $model -Destination (Join-Path $destinationFull 'models') -Force
     Copy-Item -LiteralPath (Join-Path $source 'models\LICENSE-YuNet.txt') -Destination (Join-Path $destinationFull 'models') -Force
