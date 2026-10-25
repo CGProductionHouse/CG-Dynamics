@@ -14,6 +14,8 @@ The [current skill-status board](SKILL-STATUS.md) reconciles the original 14 tec
 
 Subsequent bounded proofs now include [cup-contact sound placement](CUP-CONTACT-STUDY.md), [controlled dark-backdrop depth type](DARK-BACKDROP-DEPTH.md), [one-shot speed timing](SPEED-RAMP-STUDY.md) and a [stage-flare A/B](FLARE-CUT-STUDY.md). The stage test **rejects** an added exposure pulse because the incoming singer is already bright. These later results do not change the reference-audio or human-review gaps above, and no skill is mastered.
 
+The [stock vertical-framing A/B](FIGHT-VERTICAL-FRAMING-STUDY.md) now records a further Fight Night source gate: this 16:9 shot cannot fill a 9:16 frame without cutting away a fighter, while a full-width fit makes the action too small at phone scale. The result is a source-selection decision, not a new rendering technique.
+
 ## Skill-development order after owner correction
 
 The separate Nolan production lane already owns client story, WhatsApp/approval, prior-post screening, source selection and Premiere delivery. Studio's contribution is to turn an observed editing technique into a *visually and audibly convincing, repeatable* operation. The rejected PSG `CHANGED?` private study showed why a technically valid render cannot promote a creative skill: its question duplicated a posted story, and its source performance was awkward. Client editing remains parked while this skill pass proceeds.
