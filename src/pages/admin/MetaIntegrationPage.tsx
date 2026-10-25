@@ -85,8 +85,8 @@ interface ConnectionInfo {
   lastConnectedAt: string | null
   metaBusinessName: string | null
   grantedScopes: string[]
-  schemaReady: boolean
-  tokenEncryptedAtRest: boolean
+  schemaReady: boolean | null
+  tokenEncryptedAtRest: boolean | null
   tokenLifecycle: {
     state: 'valid' | 'invalid' | 'unverified' | 'expired' | 'data_access_expired'
     tokenType: string | null
@@ -400,6 +400,7 @@ export default function MetaIntegrationPage() {
   const [connectState, setConnectState] = useState<ConnectState>('idle')
   const [connectMsg, setConnectMsg] = useState<string | null>(null)
   const [connectionLoading, setConnectionLoading] = useState(true)
+  const [connecting, setConnecting] = useState(false)
   const [connectionInfo, setConnectionInfo] = useState<ConnectionInfo | null>(null)
 
   // Assets
@@ -988,20 +989,20 @@ export default function MetaIntegrationPage() {
       const { data } = await supabase.functions.invoke('meta-connection-status', {
         method: 'POST',
       })
-      if (data?.ok && data?.connected) {
-        setConnectState('connected')
+      if (data?.ok) {
+        setConnectState(data.connected === true ? 'connected' : 'idle')
         setConnectionInfo({
           lastConnectedAt: data.connection?.lastConnectedAt ?? null,
           metaBusinessName: data.connection?.metaBusinessName ?? null,
           grantedScopes: Array.isArray(data.connection?.grantedScopes) ? data.connection.grantedScopes : [],
-          schemaReady: data.schemaReady === true,
-          tokenEncryptedAtRest: data.tokenSecurity?.encryptedAtRest === true,
+          schemaReady: typeof data.schemaReady === 'boolean' ? data.schemaReady : null,
+          tokenEncryptedAtRest: typeof data.tokenSecurity?.encryptedAtRest === 'boolean' ? data.tokenSecurity.encryptedAtRest : null,
           tokenLifecycle: data.tokenLifecycle ?? null,
           assetHealthAvailable: Array.isArray(data.assetHealth),
           assetHealth: Array.isArray(data.assetHealth) ? data.assetHealth : [],
           lastVerifiedInsight: data.connection?.lastVerifiedInsight ?? null,
         })
-        setConnectMsg(null)
+        setConnectMsg(data.connected === true ? null : data.message ?? 'Meta needs to be connected before report data can sync.')
       } else {
         setConnectState('idle')
         setConnectionInfo(null)
@@ -1129,7 +1130,8 @@ export default function MetaIntegrationPage() {
   }, [])
 
   async function handleConnect() {
-    setConnectState('idle')
+    if (connecting) return
+    setConnecting(true)
     setConnectMsg(null)
     try {
       const { data, error } = await supabase.functions.invoke('meta-oauth-start', {
@@ -1149,6 +1151,8 @@ export default function MetaIntegrationPage() {
     } catch {
       setConnectState('error')
       setConnectMsg('Could not reach the connection service.')
+    } finally {
+      setConnecting(false)
     }
   }
 
@@ -1660,8 +1664,22 @@ export default function MetaIntegrationPage() {
         </div>
       )}
 
+      {/* Keep recovery before the potentially long readiness and Instagram queues. */}
+      <PremiumCard className="mt-6 max-w-2xl">
+        <PremiumCardHeader
+          title="Connect Meta"
+          action={<StatusBadge label={connectionLoading ? 'Checking...' : connectState === 'connected' ? 'Connected' : 'Not connected'} variant={connectState === 'connected' ? 'published' : 'needs-strategy'} />}
+        />
+        <p className="text-sm leading-relaxed text-brand-primary">Use your Facebook account. Existing client links stay unchanged.</p>
+        <div className="mt-4">
+          <ActionButton onClick={handleConnect} disabled={connectionLoading || connecting}>
+            {connecting ? 'Connecting…' : connectState === 'connected' ? 'Reconnect Meta' : 'Connect Meta'}
+          </ActionButton>
+        </div>
+      </PremiumCard>
+
       {/* Step indicator */}
-      <div className="mt-6 inline-flex items-center overflow-hidden rounded-xl border border-brand-muted bg-brand-surface">
+      <div className="mt-6 flex w-fit max-w-full flex-wrap overflow-hidden rounded-xl border border-brand-muted bg-brand-surface">
         {STEP_LABELS.map((label, i) => (
           <div key={label} className={`flex items-center gap-2 px-4 py-3 ${i < STEP_LABELS.length - 1 ? 'border-r border-brand-muted' : ''}`}>
             <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-accent/15 text-xs font-semibold text-brand-accent">{i + 1}</span>
@@ -1723,7 +1741,7 @@ export default function MetaIntegrationPage() {
             active={readinessFilter === 'missingAdAccount'}
             onClick={() => setReadinessFilter(readinessFilter === 'missingAdAccount' ? 'none' : 'missingAdAccount')}
           />
-          <HealthTile label="Last connected" value={formatDateTime(connectionInfo?.lastConnectedAt)} />
+          <HealthTile label="Last connected" value={connectionInfo?.lastConnectedAt ? formatDateTime(connectionInfo.lastConnectedAt) : 'Not reported'} />
           <HealthTile
             label="OAuth permissions"
             value={connectionInfo?.grantedScopes.includes('read_insights') ? 'Reporting access granted' : 'Reauthorization required'}
@@ -1731,18 +1749,18 @@ export default function MetaIntegrationPage() {
           />
           <HealthTile
             label="OAuth schema"
-            value={connectionInfo?.schemaReady ? 'Ready' : 'Migration required'}
-            tone={connectionInfo?.schemaReady ? 'ok' : 'warn'}
+            value={connectionInfo?.schemaReady === true ? 'Ready' : connectionInfo?.schemaReady === false ? 'Migration required' : 'Not reported'}
+            tone={connectionInfo?.schemaReady === true ? 'ok' : connectionInfo?.schemaReady === false ? 'warn' : 'neutral'}
           />
           <HealthTile
             label="Token storage"
-            value={connectionInfo?.tokenEncryptedAtRest ? 'Encrypted at rest' : 'Server-only; encryption hardening required'}
-            tone={connectionInfo?.tokenEncryptedAtRest ? 'ok' : 'warn'}
+            value={connectionInfo?.tokenEncryptedAtRest === true ? 'Encrypted at rest' : connectionInfo?.tokenEncryptedAtRest === false ? 'Server-only; encryption hardening required' : 'Not reported'}
+            tone={connectionInfo?.tokenEncryptedAtRest === true ? 'ok' : connectionInfo?.tokenEncryptedAtRest === false ? 'warn' : 'neutral'}
           />
           <HealthTile
             label="Token validity"
             value={tokenStateLabel(connectionInfo)}
-            tone={connectionInfo?.tokenLifecycle?.state === 'valid' ? 'ok' : 'warn'}
+            tone={connectionInfo?.tokenLifecycle?.state === 'valid' ? 'ok' : connectionInfo?.tokenLifecycle ? 'warn' : 'neutral'}
           />
           <HealthTile
             label="Token/data access expiry"
@@ -1758,7 +1776,8 @@ export default function MetaIntegrationPage() {
           />
         </div>
         <p className="mt-3 text-xs leading-relaxed text-brand-primary/70">
-          Connection, permissions and schema readiness are checked server-side. Meta tokens never reach the browser. Token storage remains server-only but is not yet encrypted at rest, so encryption hardening is still required before broader production rollout.
+          Connection, permissions and schema readiness are checked server-side. Meta tokens never reach the browser.
+          {connectionInfo?.tokenEncryptedAtRest === false && ' Token storage remains server-only but is not yet encrypted at rest, so encryption hardening is still required before broader production rollout.'}
         </p>
       </PremiumCard>
 
@@ -1836,29 +1855,8 @@ export default function MetaIntegrationPage() {
         </PremiumCard>
       )}
 
-      {/* Step cards - Steps 1, 3, 4 constrained, Step 2 is full-width workspace */}
+      {/* Linking is full-width; connection recovery stays at the top. */}
       <div className="mt-6 space-y-4">
-        {/* Step 1 — Connect Meta */}
-        <PremiumCard className="max-w-2xl">
-          <PremiumCardHeader
-            title={<span className="flex items-center gap-3"><span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-accent/15 text-xs font-semibold text-brand-accent">1</span> Connect Meta</span>}
-            action={
-              <StatusBadge
-                label={connectionLoading ? 'Checking...' : connectState === 'connected' ? 'Connected' : 'Not connected'}
-                variant={connectState === 'connected' ? 'published' : 'needs-strategy'}
-              />
-            }
-          />
-          <p className="text-sm leading-relaxed text-brand-primary">
-            Authorise CG Dynamics to access your Facebook Business assets.
-          </p>
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <ActionButton variant="outline" onClick={handleConnect}>
-              {connectState === 'connected' ? 'Reconnect Meta' : 'Connect Meta'}
-            </ActionButton>
-          </div>
-        </PremiumCard>
-
         {/* Step 2 — Link assets to clients (full-width workspace) */}
         <PremiumCard className="w-full">
           <PremiumCardHeader
