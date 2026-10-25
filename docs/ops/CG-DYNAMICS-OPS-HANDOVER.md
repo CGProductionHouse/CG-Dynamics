@@ -13,6 +13,32 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 25 October evening — finite overnight continuation and real file-window checks
+
+CA renewed overnight client-portal work. Existing heartbeat
+`finish-dynamics-locally-overnight` updated (not duplicated), ACTIVE hourly until
+08:00 SAST 26 October; failed-runs-only notifications preserved. No Vercel or new
+protected production actions. Staff/Teams/calendar and #731 strategy owners remain
+separate; stop repetitive work when safe executable items are exhausted.
+
+Exact receipt: [Brand Hub file-window acceptance](BRAND-HUB-FILE-WINDOW-ACCEPTANCE-2026-10-25.md).
+Eight actual published-logo Views passed in legitimate admin preview: Piek, All
+Around PVC, Bloem Action Sports, Bloem Vascular, Bouwer & Coetzee, Braize, C&L,
+Cape Lumber. Images render, separate windows open, Dynamics retains the exact
+client and referrers are empty. This is not attachment-download/client-password
+or all-41 acceptance; 33 additional Views remain. Chrome extension UI interrupted
+automation; no retry loop or session workaround. Prior listing/thumbnail checks
+and 17 private skips/Jodrico scope are unchanged.
+
+Canonical local library fixture now actually opens both View/Download windows,
+asserting null opener, empty referrer and retained portal at 1440/375/390/430.
+Negative control removing rel fails on referrer; restored safe source passes.
+CUA's restricted opener=undefined was not an observed product defect. Runtime
+source is unchanged. Focused 27/27 tests, four-width browser, actual-app TS/Vite
+build, scoped lint and diff pass. Earlier full receipt remains frozen8353e75f,
+not reattributed. No new dependencies or production changes. Existing Meta consent,
+content/security/role/phone/release gates below remain; do not repeat backend work.
+
 ### 25 October — approved provider backend rollout; real local SQL/browser acceptance
 
 Latest exact receipt:

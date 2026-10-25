@@ -1,5 +1,14 @@
 # Client portal — 25 October review packet
 
+Evening continuation: [actual Brand Hub file-window acceptance and finite
+overnight mission](BRAND-HUB-FILE-WINDOW-ACCEPTANCE-2026-10-25.md).
+Eight actual published-image Views passed; 33 additional file Views remain after
+Chrome extension UI interrupted automation. No broad listing sweep repeated.
+Local actual View/Download isolation/referrer checks pass at all four widths;
+27 focused tests/build/scoped lint/diff pass, no runtime or production change.
+Existing heartbeat active until 08:00 SAST 26 October, no Vercel/protected writes.
+This does not replace client-password/physical-phone or owner/content acceptance.
+
 Latest continuation:
 [provider backend rollout and Docker-enabled local acceptance](PROVIDER-BACKEND-ROLLOUT-ACCEPTANCE-2026-10-25.md).
 Google safeguard nowlive55; approved Meta readers/private key/callback deployed,
