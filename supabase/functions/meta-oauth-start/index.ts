@@ -1,5 +1,5 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { resolveMetaGraphConfig } from '../_shared/meta.ts'
 
 // Scopes required for future Meta asset discovery and reporting:
@@ -29,7 +29,7 @@ async function sha256Hex(value: string): Promise<string> {
   return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, '0')).join('')
 }
 
-async function requireStaff(req: Request, sb: ReturnType<typeof createClient>) {
+async function requireStaff(req: Request, sb: SupabaseClient) {
   const authHeader = req.headers.get('Authorization') ?? ''
   const token = authHeader.replace('Bearer ', '')
   if (!token) return { userId: null, error: jsonResponse({ ok: false, error: 'Authentication required.' }, 401) }

@@ -8,10 +8,47 @@ claim that protected production/content work is already complete.
 | --- | --- | --- |
 | 1 | Reconcile #668/#623/#505/#435/#731/#381, current review packet and open PRs | Done. No provider-integrity PR owner found. Onboarding and guideline/video PRs remain separate. Staff/Teams and normal ChatGPT strategy owners unchanged. |
 | 2 | Google Ads ingestion: reproduce malformed-success handling; preserve existing data instead of accepting a partial/invalid response as an empty replacement | Source repair reviewed/merged PR885 (`dea0d349`). RED then GREEN actual adapter/HTTP regressions,89/89 Google tests, scoped lint/build/diff. Bad batches/rows reject before replacement; verified empties/zeros/optional settings survive. No provider calls, mappings or production sync. |
-| 3 | Meta token-storage warning: inspect every consumer and prepare one staged, backwards-compatible hardening packet | Source implementation complete: authenticated envelope, four dual-format readers, fail-closed writer and truthful status. Exact protected rollout in META-TOKEN-STORAGE-HARDENING-2026-10-25.md; local verification/review follows. No key/config/deployment/data changes. |
+| 3 | Meta token-storage warning: inspect every consumer and prepare one staged, backwards-compatible hardening packet | Source reviewed/merged PR886 (`d1f37226`). Authenticated envelope, four dual-format readers, fail-closed writer and truthful status;273 focused tests plus the full receipt below. Exact protected rollout in META-TOKEN-STORAGE-HARDENING-2026-10-25.md. No key/config/deployment/data changes. |
 | 4 | Finish remaining exact-client TikTok read-only panel sampling | Done25October. Staffordshire, Watch Addict and Wiseman settled panels load; combined with prior six, nine active connected-client panels inspected (held Red Oak excluded). Partial September figures/real zeros retained; old live labels await source release. Private receipt `%TEMP%/cg-remaining-tiktok-panels-readonly-20261025.json`. Not full monthly/provider completeness. |
 | 5 | Reconcile remaining source/asset gates into exact owner actions | Done: #731 retains admission/editorial/publication; recurring source-held Hino, Neshora, WiseRide, Econofoods, Elcheck, Human Auto, Jenkor, JFJ, VCS, Toyota. Piek October requires exact editorial republish; do not replay older Braize/CG November v5 over v6. Human Auto GO resolved but not source-admitted; new Jenkor research needs skip/go. No second writer. Brand Hub17 safe-folder skips remain private under existing logo-only approval; Jodrico requires launch-scope review. Staff owner retains real posting/disclosure and Neshora run-folder/short-code actions. No unapproved file promotion or package inference. |
-| 6 | Verify final source changes and update owning issues/#381/handover | Exact changed-head focused/full checks as appropriate; explicit SQL/device/client-role limitations. No repeat fleet sweep without a new defect or changed runtime. |
+| 6 | Verify final source changes and update owning issues/#381/handover | Done for frozen7b911566:4208 total/4182 pass/26 explicit skips/0 fail, TypeScript/Vite actual app and all20 canonical browser fixtures at1440/375/390/430, stable tree. Whole lint0errors/17existingwarnings; Deno closure passes. Two SQL fixtures/device/client-role limitations retained. |
+| 7 | Close the additional Meta start/TikTok helper compile errors | Type-only follow-up: nine errors reproduced on unchanged baseline; explicit existing SDK client types fix generic unknown-schema inference. Existing auth/refresh/provider calls unchanged; emitted JS byte-identical.388 focused Meta/TikTok tests, Deno/build/scoped lint/diff pass. Earlier full receipt is not reattributed to this later source head. |
+
+## Exact verification and current acceptance boundaries
+
+PR886 tested head `7b9115666b5547f907dcac45bebe4c342fe0a9f6`, private receipt
+`%TEMP%/cg-client-nondb-7b9115666b55.json`, SHA256
+`7E404279BE1191680344560011EA316AE7858D854D282CCDEDF37E516720FEFE`.
+This is supported **non-database local** acceptance, not a production launch
+certificate. Fresh bounded Docker info still cannot reach the server; no shared
+restart/reset, local-stack install or SQL/production workaround was attempted.
+Fixture-configured `dist` must NEVER be uploaded.
+
+25October read-only November connector checks reconfirm all ten recurring source
+holds above. Their package evidence is available. Six ready guides do not supply
+eligible substantive commercial evidence; Elcheck/JFJ/Neshora/VCS also lack the
+client-evidence gate. Three of those (Elcheck/JFJ/VCS) have no November row; seven
+existing v1 drafts are untouched. This is an exact source-owner queue, not a new
+manual strategy-writing task or permission to publish generic filler.
+
+Read-only hosted baseline: eight functions/65 files captured privately. Meta
+callback70/status66/assets70/manual-sync87/worker74; Google sync53, Meta start71,
+TikTok sync49. Meta JWT settings false, Google/TikTok true, all unchanged.
+Offline five-function Meta candidate has56 files and cached-only Deno closure
+passes. It preserves older hosted callback/assets helper behavior instead of
+replacing it wholesale. Callback's existing duplicate identical `availability`
+property was minimally removed in that **private candidate only** to pass Deno;
+this exception must be part of any exact release review, not silently deployed.
+Worker/manual shared helper changes are type-only with identical compiled/minified
+runtime; other hosted files are preserved. Offline Google candidate also passes
+Deno with only its two intended files changed. No hosted/config/data write.
+Private packets are preparation only: re-read current versions before release.
+The Meta offline manifest SHA256 is
+`8AAEB71086F0C59A071BD164020B0C52F9AA2EF23ECBFD157E251619A673940C`.
+
+No Vercel, production keys/SQL/schema/Edge/provider/mappings/permissions, package,
+strategy or asset publication occurred. Runtime design/navigation is unchanged.
+Staff/Teams and ChatGPT strategy lanes are not claimed completed by this pass.
 
 ## Google evidence — do not rediscover or guess replacements
 
