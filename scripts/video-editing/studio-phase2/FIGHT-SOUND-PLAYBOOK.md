@@ -40,13 +40,28 @@ Save the clean picture/control, final preview, editor project or existing scene 
 
 | Gate | Tested evidence | Event status |
 |---|---|---|
-| Stream intake, offset and clipping | [Read-only inspector](FIGHT-SOUND-QC.md) and [public source A/B](FIGHT-SOURCE-AUDIO-LEVEL-STUDY.md) measured a real 74 ms offset and an over-range camera recording. | Procedure ready; no Staffy source yet. |
+| Stream intake, offset and clipping | [Read-only inspector](FIGHT-SOUND-QC.md) and [public source A/B](FIGHT-SOURCE-AUDIO-LEVEL-STUDY.md) measured a real 74 ms offset and an over-range camera recording. Six actual Staffy short takes were measured privately on 25 October night; details below. | Six local Staffy camera streams are present; their creative sound has **not** been heard. Large bout/hit source is still unavailable. |
 | Time mapping through slow picture | [Same-picture audio A/B](FIGHT-RETIME-AUDIO-SYNC-STUDY.md) caught an unretimed landing transient against an airborne frame and mapped it near the landing. | Procedure ready; event time map and heard timbre pending. |
 | Non-impact source-audio joins | [Camera-audio splice A/B](FIGHT-SOURCE-CUT-CONTINUITY-STUDY.md) preserved every sample outside a 10 ms repair and reduced the measured join discontinuity. | Use only on truthful event ambience joins; actual click/heard match pending. |
 | Separable sound layers and revision | [Six-second voice/music stem proof](FIGHT-AUDIO-STEM-HANDOVER-STUDY.md) kept zero-aligned WAVs and an unchanged voice layer under music revision. | Staff project open/relink/revision pending. |
 | Stereo/mono and export safety | Full two-layer practice mix retained voice and music on measured 50/50 mono fold-down; decoded AAC true peaks stayed below the inspector's conservative threshold. | Repeat on the actual 30 s delivered picture/sound file. |
 | Accidental end truncation | [Hard-end/fade A/B](FIGHT-AUDIO-TAIL-CONTINUITY-STUDY.md) preserved earlier PCM and lowered one delivered last-20-ms window from −30.5 to −45.8 dBFS. | Decide the final event/music button by hearing the actual cut. |
 | Contact/SFX/music creative choices | The owner rejected the integrated stock music; bag cue was timed but unheard; automated local audio models failed known controls. | Select against real footage, original sound and approved rights. No production choices made. |
-| Finished event soundtrack | No event clip or original event microphone file is accessible in the verified Staffy folder. | **Blocked by source availability**, then independent full-speed editor headphone/speaker/phone listening. |
+| Finished event soundtrack | 27 event camera originals are local and hash-matched, but the screened short takes show **zero verified landed blows**. Six original audio streams passed local decode/intake. | **Blocked for a hit-led trailer by the missing large bout originals**, then independent full-speed editor headphone/speaker/phone listening. |
 
 No further stock montage, generic music search or automated audio-model verdict resolves the last two rows. Continue technical work only when it answers a new failure; move directly to source-led event selects and the removable sound mix when the actual upload arrives.
+
+### Actual Staffy camera-sound intake, 25 October night
+
+The unmodified local, SHA-matched originals are in the private `Fight-Night-2026/source` area; six individual JSON receipts from `inspect_audio_stream.py` are in its private `work` area. These are read-only PCM-window, stream-offset and encoded true-peak measurements. No client sound, receipt or source media was committed or uploaded to an external model. Every take has 48 kHz stereo AAC starting at video time zero. The loudest 10 ms window is a diagnostic timestamp **only**; picture screening already found no confirmed hit in these clips.
+
+| Source | Visible role, not impact evidence | Duration | RMS dBFS | Encoded true peak dBTP | Diagnostic note |
+| --- | --- | ---: | ---: | ---: | --- |
+| `3Q7A9109.MP4` | Arena light/roof | 3.44 s | −16.38 | −2.0 | Candidate opening atmosphere only; no hit. |
+| `3Q7A9327.MP4` | Lone boxer waiting | 3.48 s | −17.38 | **+0.2** | Decoded near-full-scale samples and over-zero true peak; protect original and avoid carrying this unattenuated into delivery. Not a punch cue. |
+| `3Q7A9456.MP4` | Spectator | 2.76 s | −16.64 | −2.9 | Possible room/crowd bed only after source listening. |
+| `3Q7A9515.MP4` | Spectator | 1.48 s | −17.03 | −4.0 | Very short ambience candidate; do not stretch into an invented consequence. |
+| `3Q7A9630.MP4` | Obscured ring exchange | 2.64 s | −15.98 | −0.6 | Loudest window at 1.97 s cannot be called a glove hit; visible contact is unresolved. |
+| `3Q7A9745.MP4` | Post-bout embrace | 1.48 s | −16.49 | about 0.0 | Near-zero true peak; event-emotion/room candidate only, without causal link to a selected strike. |
+
+Next sound decision depends on actual full-speed listening to these sources and the eventual **verified** blow takes. Existing V3 opening's −6 dB working camera gain is a protective working choice, not a mix setting for every source. Do not select the loudest waveform window as an impact or claim the soundtrack is complete from these measurements.
