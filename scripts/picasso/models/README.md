@@ -1,0 +1,5 @@
+# Local advisory face detector
+
+`face_detection_yunet_2026may.onnx` is the [OpenCV Zoo YuNet model](https://github.com/opencv/opencv_zoo/blob/48b10fa505aeb51fbd127fc60a5c660040e823b7/models/face_detection_yunet/README.md), from upstream commit `48b10fa505aeb51fbd127fc60a5c660040e823b7`. The model is 229,738 bytes; SHA-256 `ebafce4e3c118d6554634be5c27ab333b4c047a9a8c3faf1d7cf93101c22f0f0` matches upstream Git LFS metadata. Its adjacent `LICENSE-YuNet.txt` is the upstream MIT licence. The installed OpenCV 5.0.0 `FaceDetectorYN` runs it locally on the MSI. There is no runtime model download, hosted inference, face identification, or recognition database.
+
+The model supplies face boxes and confidence **hints** only. It does not determine identity, eye state, expression, skin tone, or photographic approval. Dark-face/bright-background combinations are flagged for review; they do not trigger automatic local face brightening. Detection can still miss small, occluded, profile or poorly lit faces. The original JPEGs and job manifests stay private.

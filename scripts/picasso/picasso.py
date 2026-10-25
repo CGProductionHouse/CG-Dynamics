@@ -13,16 +13,20 @@ import time
 from collections import Counter
 from io import BytesIO
 from datetime import datetime
+from functools import lru_cache
 from pathlib import Path
 
 import cv2
 import numpy as np
 from PIL import Image, ImageCms, ImageDraw, ImageOps, __version__ as pillow_version
 
-VERSION = "0.3.5"
+VERSION = "0.3.7"
+FACE_MODEL = Path(__file__).resolve().parent / "models" / "face_detection_yunet_2026may.onnx"
+FACE_MODEL_SHA256 = "ebafce4e3c118d6554634be5c27ab333b4c047a9a8c3faf1d7cf93101c22f0f0"
 SETTINGS = {"jpeg_quality": 94, "max_ev": 0.35, "max_wb": 0.025, "max_shadow_lift": 0.07,
             "max_highlight_pull": 0.05, "max_contrast": 0.035, "max_saturation": 0.035,
-            "highlight_guard_start": 0.8, "highlight_guard_end": 0.985}
+            "highlight_guard_start": 0.8, "highlight_guard_end": 0.985,
+            "face_detector": "opencv_yunet_2026may", "face_model_sha256": FACE_MODEL_SHA256}
 SUFFIXES = {".jpg", ".jpeg"}
 FILE_ATTRIBUTE_OFFLINE = 0x1000
 FILE_ATTRIBUTE_RECALL_ON_OPEN = 0x40000
@@ -118,14 +122,44 @@ def srgb_image(raw: Image.Image) -> tuple[Image.Image, str]:
     return rgb, "untagged_assumed_srgb_review"
 
 
-def face_boxes(small: np.ndarray) -> list[list[int]]:
-    cascade_path = Path(cv2.data.haarcascades) / "haarcascade_frontalface_default.xml"
-    if not cascade_path.is_file():
-        return []
-    detector = cv2.CascadeClassifier(str(cascade_path))
-    gray = cv2.cvtColor(small, cv2.COLOR_RGB2GRAY)
-    return [list(map(int, box)) for box in detector.detectMultiScale(gray, scaleFactor=1.12,
-            minNeighbors=5, minSize=(32, 32))]
+@lru_cache(maxsize=1)
+def export_srgb_icc() -> bytes:
+    """Return a valid built-in sRGB profile with a fixed ICC creation date."""
+    profile = bytearray(ImageCms.ImageCmsProfile(ImageCms.createProfile("sRGB")).tobytes())
+    # ICC header bytes 24:36 are the creation date. LCMS writes current time,
+    # causing otherwise identical JPEG exports to hash differently.
+    profile[24:36] = bytes.fromhex("07d000010001000000000000")  # 2000-01-01 00:00:00
+    profile[84:100] = bytes(16)  # unset profile ID, as in the built-in source
+    return bytes(profile)
+
+
+@lru_cache(maxsize=1)
+def face_model_ready() -> bool:
+    return FACE_MODEL.is_file() and digest(FACE_MODEL) == FACE_MODEL_SHA256
+
+
+def face_boxes(small: np.ndarray) -> tuple[list[list[int]], list[float], str]:
+    if not face_model_ready() or not hasattr(cv2, "FaceDetectorYN"):
+        return [], [], "unavailable_review"
+    height, width = small.shape[:2]
+    try:
+        detector = cv2.FaceDetectorYN.create(str(FACE_MODEL), "", (width, height),
+                                             score_threshold=.8, nms_threshold=.3, top_k=500)
+        _, found = detector.detect(cv2.cvtColor(small, cv2.COLOR_RGB2BGR))
+    except cv2.error:
+        return [], [], "unavailable_review"
+    if found is None:
+        return [], [], "opencv_yunet_2026may"
+    boxes = []
+    scores = []
+    for face in found:
+        x, y, w, h = (int(round(v)) for v in face[:4])
+        x, y = max(0, x), max(0, y)
+        w, h = min(w, width - x), min(h, height - y)
+        if w > 0 and h > 0:
+            boxes.append([x, y, w, h])
+            scores.append(round(float(face[-1]), 4))
+    return boxes, scores, "opencv_yunet_2026may"
 
 
 def analyze(image: Image.Image) -> dict:
@@ -135,7 +169,7 @@ def analyze(image: Image.Image) -> dict:
     f = a.astype(np.float32) / 255.0
     luma = (f @ np.array([0.2126, 0.7152, 0.0722], np.float32))
     gray = cv2.cvtColor(a, cv2.COLOR_RGB2GRAY)
-    faces = face_boxes(a)
+    faces, face_scores, face_detector = face_boxes(a)
     face_luma = [float(np.median(luma[y:y+h, x:x+w])) for x, y, w, h in faces]
     mean_channels = f.reshape(-1, 3).mean(axis=0)
     clipping = ((a <= 2).mean(axis=(0, 1)).tolist(), (a >= 253).mean(axis=(0, 1)).tolist())
@@ -148,7 +182,7 @@ def analyze(image: Image.Image) -> dict:
     shadow = float(np.mean(luma < .08))
     warm = float(mean_channels[0] - mean_channels[2])
     if face_luma and min(face_luma) < .32 and median > .38:
-        scene = "backlit_face"
+        scene = "possible_backlit_face_review"
     elif median < .27:
         scene = "low_light"
     elif warm > .09:
@@ -161,7 +195,8 @@ def analyze(image: Image.Image) -> dict:
             "highlight_fraction": round(highlight, 4), "rgb_dark_fraction": [round(x, 4) for x in clipping[0]],
             "rgb_clipped_fraction": [round(x, 4) for x in clipping[1]], "warm_channel_bias": round(warm, 4),
             "focus_hint": round(focus, 2), "face_count_hint": len(faces),
-            "face_median_luma_hint": [round(v, 4) for v in face_luma], "dhash": phash}
+            "face_median_luma_hint": [round(v, 4) for v in face_luma],
+            "face_confidence_hint": face_scores, "face_detector": face_detector, "dhash": phash}
 
 
 def settings_for(a: dict) -> dict:
@@ -175,8 +210,6 @@ def settings_for(a: dict) -> dict:
     shadow = min(SETTINGS["max_shadow_lift"], a["shadow_fraction"] * .18)
     if scene == "low_light":
         shadow *= .35
-    if scene == "backlit_face":
-        shadow = min(SETTINGS["max_shadow_lift"], shadow + .025)
     highlight = min(SETTINGS["max_highlight_pull"], a["highlight_fraction"] * .5)
     # A JPEG cannot regain clipped channels; avoid aggressive highlight tricks.
     if max(a["rgb_clipped_fraction"]) > .04:
@@ -314,13 +347,14 @@ def run(source: Path, job: Path, limit: int | None,
                 adjustments = settings_for(metrics)
                 edited = finish(image, adjustments, metrics)
                 # One final JPEG encode. No source EXIF, GPS, or private metadata copied.
-                profile = ImageCms.ImageCmsProfile(ImageCms.createProfile("sRGB")).tobytes()
                 temp = output.with_suffix(".tmp")
-                edited.save(temp, "JPEG", quality=SETTINGS["jpeg_quality"], subsampling=0, icc_profile=profile)
+                edited.save(temp, "JPEG", quality=SETTINGS["jpeg_quality"], subsampling=0,
+                            icc_profile=export_srgb_icc())
                 os.replace(temp, output)
                 make_preview(image, edited, preview)
                 row.update(status="complete", classification="REVIEW" if color_note.startswith("untagged") or
-                           metrics["scene"] == "warm_or_mixed_light_review" else "KEEP",
+                           metrics["scene"] in {"warm_or_mixed_light_review", "possible_backlit_face_review"} or
+                           metrics["face_detector"] == "unavailable_review" else "KEEP",
                            color_management=color_note, dimensions=list(image.size), analysis=metrics,
                            adjustments=adjustments, output_sha256=digest(output))
             hashes.append((name, row))
@@ -512,9 +546,9 @@ def amend(job: Path, ident: str, reviewer: str, request: str, overrides: dict) -
     settings = settings_for(metrics)
     settings.update(overrides)
     edited = finish(image, settings, metrics)
-    profile = ImageCms.ImageCmsProfile(ImageCms.createProfile("sRGB")).tobytes()
     output = directory / f"{ident}.jpg"
-    edited.save(output, "JPEG", quality=SETTINGS["jpeg_quality"], subsampling=0, icc_profile=profile)
+    edited.save(output, "JPEG", quality=SETTINGS["jpeg_quality"], subsampling=0,
+                icc_profile=export_srgb_icc())
     preview = directory / f"{ident}-preview.jpg"
     make_preview(image, edited, preview)
     record = {"revision": number, "id": ident, "reviewer": reviewer.strip(),
@@ -567,6 +601,8 @@ def verify(job: Path, quality: bool = False) -> dict:
     highlight_quality = []
     scene_counts = Counter()
     classification_counts = Counter()
+    face_candidate_images = 0
+    face_detector_unavailable_images = 0
     for row in manifest["items"]:
         ident = row["id"]
         classification_counts[row["classification"]] += 1
@@ -574,6 +610,8 @@ def verify(job: Path, quality: bool = False) -> dict:
             failures.append({"id": ident, "reason": "incomplete"})
             continue
         scene_counts[row["analysis"]["scene"]] += 1
+        face_candidate_images += row["analysis"].get("face_count_hint", 0) > 0
+        face_detector_unavailable_images += row["analysis"].get("face_detector") == "unavailable_review"
         source = (source_root / row["source_name"]).resolve()
         output = (job / row["output"]).resolve()
         if (not source.is_relative_to(source_root) or not output.is_relative_to(output_root)
@@ -614,6 +652,8 @@ def verify(job: Path, quality: bool = False) -> dict:
     result = {"version": manifest["picasso_version"], "total": len(manifest["items"]),
             "verified": len(manifest["items"]) - len(failures), "failures": failures,
             "scenes": dict(scene_counts), "classifications": dict(classification_counts),
+            "face_candidate_images": face_candidate_images,
+            "face_detector_unavailable_images": face_detector_unavailable_images,
             "multiple_scene_labels_detected": len(scene_counts) >= 2,
             "human_quality_approved": False,
             "internal_review_approved": bool(manifest.get("internal_review_approval"))}

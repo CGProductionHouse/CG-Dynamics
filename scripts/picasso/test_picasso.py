@@ -2,13 +2,15 @@ import hashlib
 import json
 import tempfile
 import unittest
+from io import BytesIO
 from pathlib import Path
 from unittest.mock import patch
 
 import numpy as np
 from PIL import Image, ImageCms
 
-from picasso import amend, approve_review, classify, finish, preflight, prepare_review, run, verify
+from picasso import (amend, approve_review, classify, export_srgb_icc, face_boxes,
+                     face_model_ready, finish, preflight, prepare_review, run, verify)
 
 
 def sha(path: Path) -> str:
@@ -16,6 +18,18 @@ def sha(path: Path) -> str:
 
 
 class PicassoJobTest(unittest.TestCase):
+    def test_pinned_local_face_model_loads_without_network(self):
+        self.assertTrue(face_model_ready())
+        boxes, scores, detector = face_boxes(np.zeros((320, 320, 3), dtype=np.uint8))
+        self.assertEqual(detector, "opencv_yunet_2026may")
+        self.assertEqual(boxes, [])
+        self.assertEqual(scores, [])
+
+    def test_export_profile_is_valid_and_stable(self):
+        profile = export_srgb_icc()
+        self.assertEqual(profile[24:36], bytes.fromhex("07d000010001000000000000"))
+        self.assertIn("srgb", ImageCms.getProfileName(ImageCms.ImageCmsProfile(BytesIO(profile))).lower())
+
     def test_bright_jpeg_detail_is_not_newly_clipped_by_exposure(self):
         gradient = np.linspace(30, 252, 223, dtype=np.uint8)
         pixels = np.repeat(gradient[np.newaxis, :, np.newaxis], 24, axis=0)
@@ -52,9 +66,13 @@ class PicassoJobTest(unittest.TestCase):
             self.assertEqual(sha(original), source_hash)
             self.assertTrue((job / "contact-sheet.jpg").exists())
             self.assertEqual(verify(job)["verified"], 1)
+            another_job = base / "another-job"
+            self.assertEqual(run(source, another_job, None), 0)
+            self.assertEqual(sha(another_job / "output" / "0001.jpg"), output_hash)
             quality = verify(job, quality=True)
             self.assertEqual(len(quality["highlight_quality"]), 1)
             self.assertEqual(quality["highlight_review_ids"], [])
+            self.assertEqual(quality["face_detector_unavailable_images"], 0)
 
             classify(job, "0001", "ALTERNATE", "Staff reviewer", "Near duplicate of stronger moment")
             self.assertEqual(run(source, job, None), 0)
