@@ -2,7 +2,7 @@
 import { buildMicrosoftReconciliation } from '../../../src/lib/microsoftSync.ts'
 import { buildMicrosoftApplyRpcArgs, microsoftRunFinalStatus } from '../../../src/lib/microsoftApply.ts'
 import { microsoftStableItemKey } from '../../../src/lib/microsoftRecovery.ts'
-import type { MicrosoftExistingTarget } from '../../../src/lib/microsoftImport.ts'
+import type { MicrosoftExistingTarget, MicrosoftImportPreviewItem } from '../../../src/lib/microsoftImport.ts'
 import type { MicrosoftPreviewMappingContext } from '../../../src/lib/microsoftImportPreview.ts'
 import type { MicrosoftSnapshot } from '../../../src/lib/microsoftSnapshot.ts'
 import { automaticApplyLeaseDeadline } from './job-machine.ts'
@@ -10,6 +10,25 @@ import { resolveMicrosoftPlanMapping } from '../../../src/lib/microsoftImportMap
 import { fetchAllRows } from '../_shared/paginatedRows.ts'
 
 type Db = { from: (table: string) => any; rpc: (name: string, args?: Record<string, unknown>) => PromiseLike<{ data: unknown; error: { message: string; code?: string } | null }> }
+
+// A missing collection is unknown, never a successfully empty authority. Keep
+// this guard local to the automatic bridge rather than changing other lanes' readers.
+async function requiredRows(fetchPage: (from: number, to: number) => any) {
+  const seen = new Set<string>()
+  return fetchAllRows<any>(async (from, to) => {
+    const result = await fetchPage(from, to)
+    if (result.error) return result
+    if (!Array.isArray(result.data) || result.data.some((row: any) => !row || typeof row !== 'object')) {
+      return { data: [], error: { message: 'Required Microsoft mirror authority returned an invalid collection.' } }
+    }
+    for (const row of result.data) {
+      const key = typeof row.id === 'string' ? row.id : JSON.stringify(row)
+      if (seen.has(key)) return { data: [], error: { message: 'Required Microsoft mirror authority repeated rows during pagination.' } }
+      seen.add(key)
+    }
+    return result
+  })
+}
 
 // Bound work per hosted invocation, not provider counts or source completeness.
 export const AUTOMATIC_APPLY_ITEMS_PER_PASS = 200
@@ -44,17 +63,19 @@ export interface AutomaticReconciliationResult {
 /** Applies only already-approved Planner and Outlook mirror domains.
  * Client Schedule is excluded categorically, and every update uses an exact
  * durable Microsoft identity plus the established optimistic-lock contract. */
-export async function applyAutomaticMicrosoftMirrors(db: Db, snapshot: MicrosoftSnapshot, previewJobId: string, systemUserId: string, existingRunId?: string, recoveryGeneration = 0): Promise<AutomaticReconciliationResult> {
+export async function previewAutomaticMicrosoftMirrors(db: Db, snapshot: MicrosoftSnapshot): Promise<{
+  items: MicrosoftImportPreviewItem[]; clientScheduleExcluded: number; error: string | null
+}> {
   const [clients, aliases, boards, buckets, planner, calendar] = await Promise.all([
-    db.from('clients').select('id,name,active').eq('active', true),
-    db.from('client_aliases').select('client_id,alias'),
-    db.from('planner_boards').select('id,slug').is('archived_at', null),
-    db.from('planner_buckets').select('id,board_id,name').is('archived_at', null),
-    fetchAllRows<any>((from, to) => db.from('planner_tasks').select('id,updated_at,microsoft_plan_id,microsoft_task_id,microsoft_last_synced_at,microsoft_source_hash,microsoft_source_removed_at,microsoft_source_description,board_id,bucket_id,title,client_id,client_name,status,priority,start_date,due_date,notes,source,original_plan_name,original_bucket_name,assigned_to_name,helper_names').not('microsoft_task_id', 'is', null).order('id').range(from, to)),
-    fetchAllRows<any>((from, to) => db.from('company_calendar_events').select('id,updated_at,microsoft_calendar_id,microsoft_event_id,microsoft_last_synced_at,microsoft_source_hash,microsoft_source_removed_at,microsoft_source_description,title,event_type,client_id,client_name,start_at,end_at,all_day,location,notes,status').order('id').range(from, to)),
+    requiredRows((from, to) => db.from('clients').select('id,name,active').eq('active', true).order('id').range(from, to)),
+    requiredRows((from, to) => db.from('client_aliases').select('client_id,alias').order('client_id').order('alias').range(from, to)),
+    requiredRows((from, to) => db.from('planner_boards').select('id,slug').is('archived_at', null).order('id').range(from, to)),
+    requiredRows((from, to) => db.from('planner_buckets').select('id,board_id,name').is('archived_at', null).order('id').range(from, to)),
+    requiredRows((from, to) => db.from('planner_tasks').select('id,updated_at,microsoft_plan_id,microsoft_task_id,microsoft_last_synced_at,microsoft_source_hash,microsoft_source_removed_at,microsoft_source_description,board_id,bucket_id,title,client_id,client_name,status,priority,start_date,due_date,notes,source,original_plan_name,original_bucket_name,assigned_to_name,helper_names').not('microsoft_task_id', 'is', null).is('superseded_by_task_id', null).order('id').range(from, to)),
+    requiredRows((from, to) => db.from('company_calendar_events').select('id,updated_at,microsoft_calendar_id,microsoft_event_id,microsoft_last_synced_at,microsoft_source_hash,microsoft_source_removed_at,microsoft_source_description,title,event_type,client_id,client_name,start_at,end_at,all_day,location,notes,status').is('superseded_by_event_id', null).order('id').range(from, to)),
   ])
   const readError = [clients, aliases, boards, buckets, planner, calendar].find(result => result.error)?.error
-  if (readError) return { status: 'failed', runId: null, applied: 0, skipped: 0, failed: 1, conflicts: 0, clientScheduleExcluded: 0, error: readError.message }
+  if (readError) return { items: [], clientScheduleExcluded: 0, error: readError.message }
   const aliasesByClient = new Map<string, string[]>()
   for (const row of aliases.data ?? []) aliasesByClient.set(row.client_id, [...(aliasesByClient.get(row.client_id) ?? []), row.alias])
   const context: MicrosoftPreviewMappingContext = {
@@ -88,6 +109,12 @@ export async function applyAutomaticMicrosoftMirrors(db: Db, snapshot: Microsoft
     : target.destination === 'cg_calendar' && source.sourceType === 'outlook_calendar' && source.sourceId === target.microsoftCalendarId))
   const preview = buildMicrosoftReconciliation(mirrorSnapshot, context, mirrorTargets, new Set(), items => items, new Map(), nativeCalendarRows, true)
   const items = preview.filter(item => item.destination === 'planner' || item.destination === 'cg_calendar')
+  return { items, clientScheduleExcluded, error: null }
+}
+
+export async function applyAutomaticMicrosoftMirrors(db: Db, snapshot: MicrosoftSnapshot, previewJobId: string, systemUserId: string, existingRunId?: string, recoveryGeneration = 0): Promise<AutomaticReconciliationResult> {
+  const { items, clientScheduleExcluded, error } = await previewAutomaticMicrosoftMirrors(db, snapshot)
+  if (error) return { status: 'failed', runId: null, applied: 0, skipped: 0, failed: 1, conflicts: 0, clientScheduleExcluded, error }
   const conflicts = items.filter(item => item.reconciliationAction === 'conflict').length
   const runResult = existingRunId
     ? { data: { id: existingRunId }, error: null }

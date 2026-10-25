@@ -13,7 +13,15 @@ runaway creation.
 **Model (migration to prepare, not yet written):** add to `planner_tasks`:
 
 - `recurrence_rule text null` — small subset of RRULE: `FREQ=DAILY|WEEKLY|MONTHLY`,
-  optional `BYDAY` (MO..SU), optional `BYMONTHDAY` (1–28), optional `INTERVAL`.
+  optional `INTERVAL` (1–12). DAILY/WEEKLY accepts `BYDAY` (MO..SU).
+  MONTHLY accepts either `BYMONTHDAY` (1–28) or one explicit ordinal weekday
+  (`BYDAY=1MO` first Monday, `BYDAY=2TH` second Thursday, `BYDAY=-1FR` last Friday;
+  positions1–5 or-1–-5). A nonexistent fifth weekday is skipped, never clamped
+  to the fourth or moved into another month. Bare monthly weekdays, combined
+  selectors, multiple ordinal weekdays, COUNT and BYSETPOS remain unsupported.
+  Ordinals are calculated from explicit rules using RFC5545 semantics:
+  https://www.rfc-editor.org/rfc/rfc5545#section-3.3.10
+  No rule/anchor is inferred from historical occurrences or undated cards.
 - `recurrence_parent_id uuid null` — instance → template link.
 - `recurrence_until date null` — optional end.
 

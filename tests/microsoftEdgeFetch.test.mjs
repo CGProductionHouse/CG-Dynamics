@@ -67,7 +67,7 @@ test('assignee Graph batch requests use safe request IDs and retain source ident
   const batch = buildAssigneeBatchRequests(sourceIds)
 
   assert.deepEqual(batch.requests.map(request => request.id), ['assignee-1', 'assignee-2'])
-  assert.equal(batch.requests[1].url, '/users/opaque_Planner-user%2Fid?$select=displayName,mail,userPrincipalName')
+  assert.equal(batch.requests[1].url, '/users/opaque_Planner-user%2Fid?$select=id,displayName,mail,userPrincipalName')
   assert.equal(batch.sourceIdByRequestId.get('assignee-1'), sourceIds[0])
   assert.equal(batch.sourceIdByRequestId.get('assignee-2'), sourceIds[1])
 })
@@ -79,6 +79,7 @@ test('assignee Graph responses map metadata back to the original Planner user ID
       id: 'assignee-1',
       status: 200,
       body: {
+        id: 'planner-user-a',
         displayName: 'Alana Example',
         mail: 'alana@example.com',
         userPrincipalName: 'alana@example.onmicrosoft.com',
