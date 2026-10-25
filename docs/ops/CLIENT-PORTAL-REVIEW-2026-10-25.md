@@ -1,5 +1,18 @@
 # Client portal — 25 October review packet
 
+Later ordered local-first continuation and exact receipts/owner actions:
+[CLIENT-LAUNCH-EXECUTION-2026-10-25.md](CLIENT-LAUNCH-EXECUTION-2026-10-25.md).
+PR885 Google ingestion integrity and PR886 Meta storage-hardening source are
+reviewed/merged; neither is deployed. Frozen7b911566 full supported non-DB4208/
+4182pass/26explicit skips/0fail plus all20canonical browser fixtures pass, stable
+tree. All nine non-held connected TikTok panels now inspected read-only; two lack
+historical published facts/seven show partial figures. Do not interpret this as
+complete monthly analytics. Current production plaintext warning remains genuine
+until separately approved reader-first/key/callback-last backend rollout.
+No Vercel, production writes or additional content publication. The historical
+receipts below remain accurately scoped; the ordered continuation supersedes
+their unfinished browser sampling and local-engineering status, not protected gates.
+
 Client lane only. Staff/Teams/calendar implementation and normal ChatGPT strategy
 authoring retain their existing owners. No Vercel build/deployment in this pass.
 

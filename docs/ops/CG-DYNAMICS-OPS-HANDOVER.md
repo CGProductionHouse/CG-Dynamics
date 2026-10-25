@@ -13,6 +13,45 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 25 October — local provider continuation verified; exact protected queue retained
+
+Ordered CLIENT-LAUNCH-EXECUTION-2026-10-25.md is the current short execution list.
+PR885 merged `dea0d349` (Google malformed-success preservation); PR886 merged
+`d1f37226` (Meta authenticated-token storage preparation). Frozen7b911566 full
+supported non-DB4208total/4182pass/26explicit skips/0fail/cancel/todo, TS/Vite392module
+actual app and ALL20canonical browser fixtures1440/375/390/430 pass, stable tree.
+Receipt `%TEMP%/cg-client-nondb-7b9115666b55.json`, SHA256
+`7E404279BE1191680344560011EA316AE7858D854D282CCDEDF37E516720FEFE`.
+Whole lint0errors/17existing warnings; source Deno closure passes. Not SQL/client-
+role/physical-device/content or production acceptance. Fresh Docker info still
+unavailable; no shared restart/reset/install or false skipped-test acceptance.
+
+Later type-only follow-up fixes nine baseline Deno errors in Meta OAuth start
+and shared TikTok SDK client parameters. Their emitted JS is byte-identical;
+388focused Meta/TikTok tests, Deno/build/scoped lint/diff pass. Do not attribute
+the earlier full-suite head to this later annotation/documentation change.
+Runtime auth, scopes, existing SDK imports, refresh semantics and providers remain
+unchanged. No frontend redesign, staff/Teams/calendar or strategy-writer overlap.
+
+Read-only eight-function/65-file hosted baseline privately captured, no keys read.
+Five-function56-file offline Meta candidate preserves unrelated hosted behavior;
+exact closure Deno checked. Callback's legacy identical duplicate availability
+property minimally removed only in the private staged packet; must be reviewed
+as part of any release. Worker/manual helper type-only changes have identical
+compiled/minified runtime. Offline Google packet also Deno checked, two-file diff.
+Exact versions/manifest hashes/rollout hazards are in the ordered execution doc
+and META-TOKEN-STORAGE-HARDENING-2026-10-25.md. These are NOT deployed artifacts.
+Never send fixture dist to production; no automatic Git deployment.
+
+All nine non-held connected TikTok panels now checked; provider coverage remains
+partial. Fresh November briefs reconfirm ten exact source-held clients with
+confirmed packages; source admission/editorial/publication remains existing #731
+owner, not duplicate generation or another quantity question. Brand Hub17 private
+safe-folder skips/Jodrico scope, real staff-owned posting/disclosure and CA-retained
+password/phone checks remain explicit. NO Vercel or production SQL/data/schema/
+Edge/config/keys/provider/mapping/permissions/content write. Exact Google Control
+Centre still unavailable; GitHub/ops continuity updated, no invented replacement.
+
 ### 25 October — Meta credential hardening prepared; remaining TikTok panels checked
 
 Google ingestion PR885 reviewed/merged `dea0d349` after89/89 focused Google tests,
