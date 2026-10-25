@@ -183,9 +183,23 @@ export async function searchStream(
     const hint = safeGoogleAdsFailureHint(await response.json().catch(() => null))
     throw new GoogleAdsError(`Google Ads rejected the request (HTTP ${response.status}${hint ? `; ${hint}` : ''}).`, status, requestId(response))
   }
-  const batches = await response.json() as Array<{ results?: Array<Record<string, unknown>> }>
-  if (!Array.isArray(batches)) throw new GoogleAdsError('Google Ads returned an invalid response.', 502, requestId(response))
-  return batches.flatMap(batch => Array.isArray(batch.results) ? batch.results : [])
+  const invalid = () => new GoogleAdsError('Google Ads returned an invalid response.', 502, requestId(response))
+  let batches: unknown
+  try { batches = await response.json() } catch { throw invalid() }
+  if (!Array.isArray(batches)) throw invalid()
+  const rows: Array<Record<string, unknown>> = []
+  for (const batch of batches) {
+    if (!batch || typeof batch !== 'object' || Array.isArray(batch)) throw invalid()
+    // Protobuf JSON may omit an empty repeated field. An explicitly malformed
+    // field is not a verified empty result: sync replaces the stored date range.
+    if (!Object.hasOwn(batch, 'results')) continue
+    if (!Array.isArray(batch.results)) throw invalid()
+    for (const row of batch.results) {
+      if (!row || typeof row !== 'object' || Array.isArray(row)) throw invalid()
+      rows.push(row)
+    }
+  }
+  return rows
 }
 
 export async function listAccessibleAccounts(
