@@ -52,3 +52,7 @@ The Adobe cloud image connector uses remote image URLs and Adobe-hosted processi
 ## R0 decision
 
 Use **ChatGPT Work + a scoped PICASSO skill + MSI OneDrive sync + Lightroom Classic/Photoshop + official Pixieset Lightroom plugin + signed-in WhatsApp Web Computer Use**. Add no hosted application, photo API, WhatsApp Business Platform subscription, gallery scraper, or speculative editor. A private workspace skill/plugin is a distribution option only if local Work proof succeeds and the workspace administrator authorizes the role and device access.
+
+## Local implementation checkpoint
+
+The isolated PR now adds `preflight` to the private runner. It counts the selected JPEGs, checks explicit OneDrive-root containment, identifies Windows online-only placeholders without hydrating them, and checks free space before reading media. `run` refuses a non-ready shoot. After the human inspects the contact sheet and names approved IDs, `approve-review` records an internal-review-only, hash-bound selection. `prepare-review` stages exact copies of only those exports in `review-upload/`; it never uploads or sends them. Resume retains approval only while the selected output hashes and classifications still match. Five local tests passed, including placeholder refusal without media reads and refusal to stage a changed export. These are local safety mechanics, **not** a proof of OneDrive account mapping, photo quality, ChatGPT Work invocation, Pixieset upload, WhatsApp posting or amendment handling.

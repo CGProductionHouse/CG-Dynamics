@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import ctypes
 import hashlib
 import json
 import os
@@ -16,10 +17,13 @@ import cv2
 import numpy as np
 from PIL import Image, ImageCms, ImageDraw, ImageOps, __version__ as pillow_version
 
-VERSION = "0.1.0"
+VERSION = "0.2.0"
 SETTINGS = {"jpeg_quality": 94, "max_ev": 0.35, "max_wb": 0.025, "max_shadow_lift": 0.07,
             "max_highlight_pull": 0.05, "max_contrast": 0.035, "max_saturation": 0.035}
 SUFFIXES = {".jpg", ".jpeg"}
+FILE_ATTRIBUTE_OFFLINE = 0x1000
+FILE_ATTRIBUTE_RECALL_ON_OPEN = 0x40000
+FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS = 0x400000
 
 
 def digest(path: Path) -> str:
@@ -39,16 +43,64 @@ def atomic_json(path: Path, value: dict) -> None:
 def check_paths(source: Path, job: Path) -> None:
     if not source.is_dir():
         raise ValueError("Input must be an existing local folder")
+    if source.is_symlink() or job.is_symlink():
+        raise ValueError("Symlinked input or job roots are not supported")
     source, job = source.resolve(), job.resolve()
     if source == job or source in job.parents or job in source.parents:
         raise ValueError("Job and source folders must be separate, with neither inside the other")
-    if source.is_symlink() or job.is_symlink():
-        raise ValueError("Symlinked input or job roots are not supported")
 
 
 def source_files(source: Path) -> list[Path]:
     return sorted((p for p in source.iterdir() if p.is_file() and not p.is_symlink()
                    and p.suffix.lower() in SUFFIXES), key=lambda p: p.name.lower())
+
+
+def online_only(path: Path) -> bool:
+    """Inspect Windows cloud-file attributes without reading or hydrating media bytes."""
+    if os.name != "nt":
+        return False
+    get_attributes = ctypes.windll.kernel32.GetFileAttributesW
+    get_attributes.argtypes = [ctypes.c_wchar_p]
+    get_attributes.restype = ctypes.c_uint32
+    attributes = get_attributes(str(path))
+    if attributes == 0xFFFFFFFF:
+        raise OSError(f"Cannot inspect local file attributes: {path.name}")
+    return bool(attributes & (FILE_ATTRIBUTE_OFFLINE | FILE_ATTRIBUTE_RECALL_ON_OPEN |
+                              FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS))
+
+
+def preflight(source: Path, job: Path | None = None, limit: int | None = None,
+              onedrive_root: Path | None = None) -> dict:
+    """Read only filesystem metadata; never hydrate a OneDrive placeholder."""
+    if not source.is_dir():
+        raise ValueError("Input must be an existing local folder")
+    if job is not None:
+        check_paths(source, job)
+    if limit is not None and limit < 1:
+        raise ValueError("Limit must be at least 1")
+    if onedrive_root is not None:
+        root = onedrive_root.resolve()
+        if not root.is_dir() or not source.resolve().is_relative_to(root):
+            raise ValueError("Input is outside the selected OneDrive sync root")
+        if source.resolve() == root:
+            raise ValueError("Select one shoot folder, not the whole OneDrive root")
+    files = source_files(source)
+    selected = files[:limit] if limit is not None else files
+    if not selected:
+        raise ValueError("No JPEG files in input folder")
+    offline = [p for p in selected if online_only(p)]
+    selected_bytes = sum(p.stat().st_size for p in selected)
+    # Output JPEGs, previews and temporary files require space beyond the source bytes.
+    required = max(1024**3, selected_bytes * 3 + 100 * 1024**2)
+    destination = job if job is not None else source
+    while not destination.exists():
+        destination = destination.parent
+    free = shutil.disk_usage(destination).free
+    return {"jpeg_count": len(files), "selected_count": len(selected),
+            "selected_bytes": selected_bytes, "online_only_count": len(offline),
+            "free_bytes": free, "required_free_bytes": required,
+            "ready": not offline and free >= required,
+            "onedrive_root_checked": onedrive_root is not None}
 
 
 def srgb_image(raw: Image.Image) -> tuple[Image.Image, str]:
@@ -188,8 +240,13 @@ def contact_sheet(job: Path, rows: list[dict]) -> None:
         sheet.save(job / name, "JPEG", quality=88)
 
 
-def run(source: Path, job: Path, limit: int | None) -> int:
-    check_paths(source, job)
+def run(source: Path, job: Path, limit: int | None,
+        onedrive_root: Path | None = None) -> int:
+    readiness = preflight(source, job, limit, onedrive_root)
+    if readiness["online_only_count"]:
+        raise ValueError("Selected OneDrive JPEGs are online-only; make this shoot available locally first")
+    if readiness["free_bytes"] < readiness["required_free_bytes"]:
+        raise ValueError("Not enough free space for a separate private job and exports")
     files = source_files(source)
     if limit is not None:
         files = files[:limit]
@@ -210,7 +267,7 @@ def run(source: Path, job: Path, limit: int | None) -> int:
     manifest = {"picasso_version": VERSION, "source_root": str(source.resolve()), "settings": SETTINGS,
                 "runtime": {"python": sys.version.split()[0], "pillow": pillow_version, "opencv": cv2.__version__},
                 "started_at": existing["started_at"] if existing else datetime.now().isoformat(),
-                "delivery_approved": False, "items": []}
+                "delivery_approved": False, "internal_review_approval": None, "items": []}
     start = time.monotonic()
     hashes = []
     resumed = set()
@@ -266,13 +323,95 @@ def run(source: Path, job: Path, limit: int | None) -> int:
     manifest["elapsed_seconds_last_run"] = round(time.monotonic() - start, 2)
     manifest["items"] = [next((r for n, r in hashes if n == item["source_name"]), item)
                          for item in manifest["items"]]
+    approval = existing.get("internal_review_approval") if existing else None
+    if approval:
+        current = {r["id"]: r for r in manifest["items"]}
+        if all((ident in current and current[ident]["status"] == "complete"
+                and current[ident]["output_sha256"] == expected
+                and current[ident]["classification"] == approval["classifications"][ident])
+               for ident, expected in approval["outputs"].items()):
+            manifest["internal_review_approval"] = approval
     contact_sheet(job, manifest["items"])
     atomic_json(manifest_path, manifest)
     counts = {key: sum(r["classification"] == key for r in manifest["items"]) for key in ("KEEP", "REVIEW", "ALTERNATE")}
     print(json.dumps({"job": str(job.resolve()), "total": len(files), "counts": counts,
                       "errors": sum(r["status"] == "error" for r in manifest["items"]),
-                      "seconds": manifest["elapsed_seconds_last_run"], "approval": False}))
+                      "seconds": manifest["elapsed_seconds_last_run"],
+                      "internal_review_approved": bool(manifest["internal_review_approval"])}))
     return 1 if any(r["status"] == "error" for r in manifest["items"]) else 0
+
+
+def verified_review_selection(job: Path, manifest: dict) -> list[dict]:
+    approval = manifest.get("internal_review_approval")
+    if not approval or not approval.get("outputs"):
+        raise ValueError("A human must approve specific image IDs for internal review first")
+    rows = {row["id"]: row for row in manifest["items"]}
+    selected = []
+    output_root = (job / "output").resolve()
+    for ident, expected in approval["outputs"].items():
+        row = rows.get(ident)
+        if not row or row["status"] != "complete" or row["classification"] != approval["classifications"][ident]:
+            raise ValueError(f"Review selection changed for image {ident}; approve again")
+        output = (job / row["output"]).resolve()
+        if not output.is_relative_to(output_root) or not output.is_file() or digest(output) != expected:
+            raise ValueError(f"Approved export changed or is missing for image {ident}; approve again")
+        selected.append(row)
+    return selected
+
+
+def approve_review(job: Path, reviewer: str, ids: list[str]) -> dict:
+    if not reviewer.strip() or not ids or len(ids) != len(set(ids)):
+        raise ValueError("Name the human reviewer and distinct image IDs")
+    path = job / "manifest.json"
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    if any(row["status"] == "error" for row in manifest["items"]):
+        raise ValueError("Resolve or explicitly exclude failed source files before review approval")
+    rows = {row["id"]: row for row in manifest["items"]}
+    outputs = {}
+    classifications = {}
+    output_root = (job / "output").resolve()
+    for ident in ids:
+        row = rows.get(ident)
+        if not row or row["status"] != "complete":
+            raise ValueError(f"Image {ident} is not a completed job item")
+        output = (job / row["output"]).resolve()
+        if not output.is_relative_to(output_root) or not output.is_file() or digest(output) != row["output_sha256"]:
+            raise ValueError(f"Image {ident} output failed its hash check")
+        outputs[ident] = row["output_sha256"]
+        classifications[ident] = row["classification"]
+    manifest["internal_review_approval"] = {"reviewer": reviewer.strip(), "approved_at": datetime.now().isoformat(),
+                                             "outputs": outputs, "classifications": classifications}
+    atomic_json(path, manifest)
+    return {"approved_count": len(outputs), "scope": "internal_pixieset_review_only"}
+
+
+def prepare_review(job: Path) -> dict:
+    manifest = json.loads((job / "manifest.json").read_text(encoding="utf-8"))
+    selected = verified_review_selection(job, manifest)
+    staging = job / "review-upload"
+    if staging.is_symlink():
+        raise ValueError("Symlinked review upload folder is not supported")
+    expected_names = {f'{row["id"]}_{Path(row["source_name"]).stem}.jpg' for row in selected}
+    if staging.exists() and {p.name for p in staging.iterdir()} != expected_names:
+        raise ValueError("Existing review upload folder differs from approval; use a new job or resolve manually")
+    staging.mkdir(exist_ok=True)
+    for row in selected:
+        source = job / row["output"]
+        target = staging / f'{row["id"]}_{Path(row["source_name"]).stem}.jpg'
+        if target.is_symlink():
+            raise ValueError(f"Symlinked staged image {row['id']} is not supported")
+        if target.exists():
+            if digest(target) != row["output_sha256"]:
+                raise ValueError(f"Staged image {row['id']} differs from approval")
+            continue
+        temporary = target.with_suffix(".tmp")
+        shutil.copyfile(source, temporary)
+        if digest(temporary) != row["output_sha256"]:
+            temporary.unlink()
+            raise ValueError(f"Staging copy failed hash check for image {row['id']}")
+        os.replace(temporary, target)
+    return {"staged_count": len(selected), "scope": "internal_pixieset_review_only",
+            "pixieset_published": False, "whatsapp_sent": False}
 
 
 def main() -> int:
@@ -282,17 +421,41 @@ def main() -> int:
     launch.add_argument("--input", type=Path, required=True)
     launch.add_argument("--job", type=Path, required=True)
     launch.add_argument("--limit", type=int)
+    launch.add_argument("--onedrive-root", type=Path,
+                        help="Explicit sync root; refuse an input outside this root")
+    inspect = sub.add_parser("preflight", help="Check JPEG count, hydration and disk space without reading pixels")
+    inspect.add_argument("--input", type=Path, required=True)
+    inspect.add_argument("--job", type=Path)
+    inspect.add_argument("--limit", type=int)
+    inspect.add_argument("--onedrive-root", type=Path)
     status = sub.add_parser("status", help="Summarize a job without displaying private filenames")
     status.add_argument("--job", type=Path, required=True)
+    approve = sub.add_parser("approve-review", help="Record explicit human approval of selected outputs for internal review")
+    approve.add_argument("--job", type=Path, required=True)
+    approve.add_argument("--reviewer", required=True)
+    approve.add_argument("--ids", nargs="+", required=True)
+    stage = sub.add_parser("prepare-review", help="Copy approved JPEGs once to a private Pixieset upload folder")
+    stage.add_argument("--job", type=Path, required=True)
     args = parser.parse_args()
     try:
         if args.action == "run":
-            return run(args.input, args.job, args.limit)
+            return run(args.input, args.job, args.limit, args.onedrive_root)
+        if args.action == "preflight":
+            result = preflight(args.input, args.job, args.limit, args.onedrive_root)
+            print(json.dumps(result))
+            return 0 if result["ready"] else 1
+        if args.action == "approve-review":
+            print(json.dumps(approve_review(args.job, args.reviewer, args.ids)))
+            return 0
+        if args.action == "prepare-review":
+            print(json.dumps(prepare_review(args.job)))
+            return 0
         data = json.loads((args.job / "manifest.json").read_text(encoding="utf-8"))
         print(json.dumps({"version": data["picasso_version"], "total": len(data["items"]),
                           "complete": sum(x["status"] == "complete" for x in data["items"]),
                           "errors": sum(x["status"] == "error" for x in data["items"]),
-                          "approval": data.get("delivery_approved", False)}))
+                          "internal_review_approved": bool(data.get("internal_review_approval")),
+                          "client_delivery_approved": data.get("delivery_approved", False)}))
         return 0
     except Exception as error:
         print(f"PICASSO: {type(error).__name__}: {error}", file=sys.stderr)
