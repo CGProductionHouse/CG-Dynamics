@@ -21,4 +21,10 @@ The source music's detected pulse was about 129.2 BPM from the chosen 4.5 s in-p
 
 ## Internal approval delivery
 
-The owner authorised the exact `CG Nolan Approvals` WhatsApp group. Requested order: **MP4 as a document with the complete proposed post caption in that document message; HD cover photo next; then one short review note signed from Nolan if needed.** Keep that group distinct from PSG's client/public channels. The signed-in Chrome WhatsApp tab reported `Debugger unattached` when this agent attempted to claim it, so delivery was not yet verified at the time of this record. Do not silently use another Chrome profile or group while another desktop agent may be active. Update this paragraph with actual sent/delivered evidence after access returns.
+The owner authorised the exact `CG Nolan Approvals` WhatsApp group. The signed-in Christie-Ann tab became available on the 18:37 SAST heartbeat and the header confirmed `CG Nolan Approvals` with Amonique, Franco, Ger-Marie, KG, Sydney and You. **Actual 25 October delivery:**
+
+1. 18:38 SAST: `PSG-NOVEMBER-STUDIO-V8-REVIEW.mp4` was sent as a **53 MB document** with the complete proposed post caption in the same message, headed `From Nolan — PSG November approval review` and explicitly marked internal only. WhatsApp later showed **Delivered**.
+2. 18:41 SAST: `PSG-NOVEMBER-V8-COVER-HD.jpg` was sent next as a **JPG document** with a `From Nolan` label; WhatsApp later showed **Delivered**. The Photos & videos picker did not expose a working file chooser through the authorised browser tool, so document delivery was used to keep the 1080×1920 JPEG intact rather than claiming an inline HD image preview. The recipient's downloaded hash was not checked.
+3. 18:42 SAST: a separate `From Nolan:` note asked the internal team to review the full-speed soundtrack/picture, PSG portrait, crop-insurance wording and branch number, and prohibited client send/public posting pending approval. WhatsApp showed **Sent** at the final check; a later Delivered state for that note was not witnessed.
+
+No PSG client/public channel was contacted. This is **internal review delivery**, not PSG or owner approval. Continue watching this exact group for concrete feedback and keep PR #875 draft.
