@@ -3,11 +3,11 @@ name: nolan-masked-zoom-transition-research
 description: Test a short transition through a real scene opening such as glasses using editor-native masks, tracking and keyframed transforms.
 ---
 
-# Masked opening zoom — visually sampled, untested
+# Masked opening zoom — tracked local proof, visual review pending
 
-**Lifecycle:** [glasses reference](https://www.tiktok.com/@miracampschool/video/7507285819724500246) and [cutout reference](https://www.tiktok.com/@miracampschool/video/7619009675987520790) visually sampled → original proof pending → mastered **NO**.
+**Lifecycle:** [glasses reference](https://www.tiktok.com/@miracampschool/video/7507285819724500246) and [cutout reference](https://www.tiktok.com/@miracampschool/video/7619009675987520790) visually sampled → [same-shot, tracked stock lens A/B](../../MASKED-LENS-ZOOM-STUDY.md) rendered → full-speed/phone and matched-second-shot gates pending → mastered **NO**.
 
-The [source suitability screen](../../MASKED-OPENING-SOURCE-SCREEN.md) rejects an opaque coffee surface as an automatic portal and identifies a moving magnifying-glass lens as a real aperture candidate. It has **not** yet produced a tracked mask or accepted transition.
+The [source suitability screen](../../MASKED-OPENING-SOURCE-SCREEN.md) rejects an opaque coffee surface as an automatic portal and identifies a moving magnifying-glass lens as a real aperture candidate. The later [local A/B](../../MASKED-LENS-ZOOM-STUDY.md) tracks that lens across 36 frames, compares an ordinary digital push, an unprotected aperture and an aperture with a separate hand foreground plate. Its first candidate duplicated the rim and was rejected; the corrected interior-only crop removes that second ring. The hand plate visibly keeps the lower finger in front around 0.65 s. A soft left-edge rim remnant and upscale softness remain, so this is a **mechanical proof**, not an accepted transition between two different shots.
 
 The glasses tutorial shows duplicate footage, a held upper frame, an Opacity Pen Tool mask around the lens opening, inversion/nesting and keyframed Transform position/scale with blur. The cutout tutorial shows Premiere Object Mask controls on an upper nested clip over the incoming shot. These are two related but distinct compositions. The visible controls support the stated mechanism; the final edge quality and audio were not critically reviewed.
 

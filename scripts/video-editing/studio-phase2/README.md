@@ -60,6 +60,8 @@ A [public camera-audio splice A/B](FIGHT-SOURCE-CUT-CONTINUITY-STUDY.md) adds a 
 
 A [separate hard-end/fade delivery A/B](FIGHT-AUDIO-TAIL-CONTINUITY-STUDY.md) tests one truncated source-audio ending. A 60 ms working-track fade leaves the earlier PCM identical and lowers the decoded AAC's last 20 ms from −30.5 to −45.8 dBFS at the same −1.1 dBTP overall true peak. Its creative use at a Fight Night end button is unproved until actual picture, music phrase and a human ear are available.
 
+A [tracked physical-opening zoom A/B](MASKED-LENS-ZOOM-STUDY.md) now tests another tutorial skill on one moving Mixkit magnifying-glass shot. The bounded OpenCV/FFmpeg source compares a plain digital push, an unprotected aperture and a hand-protected opening using the current frame's own book detail. The initial duplicated lens rim was fixed by cropping only the lens interior; the foreground plate keeps the finger in front while it exits through the frame. All three silent 36-frame files decode locally. It remains a mechanical, source-specific proof with visible softness and no second-shot, full-speed, phone or sound acceptance.
+
 ## Skill-development order after owner correction
 
 The separate Nolan production lane already owns client story, WhatsApp/approval, prior-post screening, source selection and Premiere delivery. Studio's contribution is to turn an observed editing technique into a *visually and audibly convincing, repeatable* operation. The rejected PSG `CHANGED?` private study showed why a technically valid render cannot promote a creative skill: its question duplicated a posted story, and its source performance was awkward. Client editing remains parked while this skill pass proceeds.
