@@ -1,6 +1,6 @@
 # Fight Night trailer sound: source-first staff handover
 
-**Scope:** sound workflow for the owner's 30-second trailer of the *full* Fight Night film. This is the operating sequence for the existing Python/FFmpeg build or a staff editor, not a new rendering engine or an approved soundtrack. The owner rejected the stock montage's music. Do not reuse it or infer a replacement's quality from BPM, loudness or a waveform. The source folder last checked on 25 October contained only an empty `DRONE` subfolder, so **no event mix has been made or heard**.
+**Scope:** sound workflow for the owner's 30-second trailer of the *full* Fight Night film. This is the operating sequence for the existing Python/FFmpeg build or a staff editor, not a new rendering engine or an approved soundtrack. The owner rejected the stock montage's music. Do not reuse it or infer a replacement's quality from BPM, loudness or a waveform. **Live intake update:** the Staffy folder now lists 121 MP4s; see [FIGHT-NIGHT-EVENT-INTAKE.md](FIGHT-NIGHT-EVENT-INTAKE.md) for exact source and access status. No event hit has been verified and **no event mix has been made or heard**.
 
 ## 1. Lock picture and real moments first
 
