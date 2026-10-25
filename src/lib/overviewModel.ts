@@ -73,6 +73,9 @@ export interface ComparisonResult {
 // same canonical metric, the same source definition, the same aggregation and
 // the same comparable_group, and both are definitive (complete or valid_zero).
 export function compareFacts(current: PlatformFact, previous: PlatformFact | null): ComparisonResult {
+  if (isTikTokVideoCohort(current) || (previous && isTikTokVideoCohort(previous))) {
+    return { comparable: false, changePercent: null, reason: 'Cumulative video snapshots are not monthly activity.' }
+  }
   if (!previous) return { comparable: false, changePercent: null, reason: 'No comparable previous period.' }
   if (!isDefinitive(current.availability) || !isDefinitive(previous.availability)) {
     return { comparable: false, changePercent: null, reason: 'One period is not verified (missing or unavailable data).' }
@@ -147,6 +150,7 @@ export interface OverviewLine {
   isValidZero: boolean
   reconstructed: boolean
   isSnapshot: boolean    // current_followers — never shown as period growth
+  isVideoCohort: boolean // cumulative totals on videos published in the window, not activity earned inside it
   availability: Availability
   changePercent: number | null
   comparable: boolean
@@ -191,7 +195,15 @@ const SECTION_TITLES: Record<OverviewSection['key'], string> = {
 // Platform display order is stable while keeping every provider fact separate.
 const PLATFORM_ORDER = ['facebook', 'instagram', 'tiktok']
 
+function isTikTokVideoCohort(fact: PlatformFact): boolean {
+  const sources: Record<string, string> = { views: 'view_count', likes: 'like_count', comments: 'comment_count', shares: 'share_count' }
+  return fact.platform === 'tiktok' && fact.aggregation === 'sum'
+    && fact.comparableGroup === 'tiktok_organic' && sources[fact.metricKey] !== undefined
+    && sources[fact.metricKey] === fact.sourceMetric
+}
+
 function metricLabel(fact: PlatformFact): string {
+  if (isTikTokVideoCohort(fact)) return `${METRIC_LABELS[fact.metricKey]} to date`
   if (fact.platform === 'tiktok'
       && fact.metricKey === 'video_count'
       && fact.aggregation === 'snapshot') {
@@ -225,6 +237,7 @@ function lineFor(current: PlatformFact, previous: PlatformFact | null): Overview
     isValidZero: current.availability === 'valid_zero',
     reconstructed: current.aggregation === 'reconstructed',
     isSnapshot,
+    isVideoCohort: isTikTokVideoCohort(current),
     availability: current.availability,
     changePercent: cmp.changePercent,
     comparable: cmp.comparable,

@@ -13,6 +13,52 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 25 October — client fleet acceptance and TikTok measurement-basis correction
+
+Continued client lane only after Meta PR881 merged f7d57806. Frozen f7d57806
+non-DB full supported suite:4193total/4167pass/26 declared skips/0fail; TypeScript,
+Vite392module actual-app bundle and ALL20 canonical browser fixtures pass with
+stable tree. Private receipt `%TEMP%/cg-client-nondb-f7d57806faf2.json`. This is
+NOT full disposable-SQL, genuine client-password, physical-phone or publication
+acceptance. Docker/PGlite limitations remain exactly as below; no shared restart.
+
+Fresh signed-in read-only preview: all59 non-held active clients' Overview,
+Approvals and Brand Hub journeys checked. Overview exact client heading verified;
+Approvals and Brand Hub require the selected route marker AND a settled result,
+not a generic heading that can precede the next client load. Preliminary samples
+that caught loading frames were preserved as PRELIMINARY-UNSETTLED, then replaced
+by complete settled matrices. Final:59 empty approval queues/0 read failures/0
+enabled preview approval actions;41 available Brand Hubs/18 private/0 read failures
+or optional-foundation errors.18 private means the17 known safe-folder skips plus
+new Jodrico, not an invented new launch entitlement. These are absence/visibility
+checks, not completion of staff publication or59 separate media downloads.
+Private receipts: `%TEMP%/cg-all-client-overviews-readonly-20261025.json`,
+`cg-all-client-approvals-settled-20261025.json`,
+`cg-all-client-brand-hubs-settled-20261025.json`.
+
+Actual Braize/CG/Dulux/Madison TikTok cards reproduce ambiguous generic period
+labels. Canonical tiktok-sync stores cumulative view_count/like_count/comment_count/
+share_count totals for videos published in that period, NOT engagement earned
+inside it. Focused frontend repair labels only that exact native sum/ tiktok_organic
+definition "to date", explains the cohort instead of generic comparison text,
+and forbids month-on-month comparison even if a stored cohort is marked complete.
+Account snapshots, real zeros, unknown/future definitions and other platforms
+are preserved. Official field reference:
+https://developers.tiktok.com/docs/en/tiktok-api-v2-video-object . No metric/data
+rewrite, provider request, new API, dependency, permissions or schema change.
+171 focused tests, scoped lint/TS/Vite build/diff and actual report browser at
+1440/375/390/430 pass. Full candidate verification follows its frozen commit.
+
+Fresh provider read: Meta renewed but reporting remains partial; Google account
+last sync24Oct22:00UTC; ten TikTok tokens unexpired, one belongs to held Red Oak.
+Connection is not monthly-data completeness. Live Forklift/Neshora September
+TikTok panes have no published TikTok figures and show the optional-service story;
+do not fabricate a report or infer package exclusion/connection failure from it.
+Remaining TikTok browser sampling hit bounded transport delays; not represented
+as all-nine-client analytics acceptance. No refresh/re-consent/mapping repeated.
+Existing ChatGPT editorial/source/publication, staff posting/calendar and owner
+login/phone/content gates remain owned separately. ZERO Vercel/production writes.
+
 ### 25 October — Meta renewal completed; visible reconnect recovery verified locally
 
 CA could not find Connect Meta: it was below the lengthy Instagram queue. Live
