@@ -52,6 +52,8 @@ A small [read-only sound stream inspector](FIGHT-SOUND-QC.md) now emits repeatab
 
 A [six-second synthetic voice/music duck A/B](DIALOGUE-MUSIC-AB.md) also confirms the level envelope occurred in the intended speech window, but a small local ASR transcribed its first word *worse* after ducking. The earlier owner-rejected fight track was not reused. This preserves a failed autonomous intelligibility gate and keeps perceptual/music selection with the finished event cut rather than promoting a blind EQ or ducking preset.
 
+An [aligned lossless-stem handover check](FIGHT-AUDIO-STEM-HANDOVER-STUDY.md) now proves a separate synthetic voice/music revision: two zero-aligned six-second stereo WAV layers recombine within float rounding, and reducing only music leaves the voice stem byte-identical. Both AAC proofs decode with measured headroom. This is an audio-only packaging test; nobody has yet opened the stems in an editor, and no event sound has been judged or handed over.
+
 ## Skill-development order after owner correction
 
 The separate Nolan production lane already owns client story, WhatsApp/approval, prior-post screening, source selection and Premiere delivery. Studio's contribution is to turn an observed editing technique into a *visually and audibly convincing, repeatable* operation. The rejected PSG `CHANGED?` private study showed why a technically valid render cannot promote a creative skill: its question duplicated a posted story, and its source performance was awkward. Client editing remains parked while this skill pass proceeds.

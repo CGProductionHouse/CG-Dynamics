@@ -77,3 +77,5 @@ Speed changes require an actual source-frame check. High-frame-rate material can
 **09:00 SAST read-only recheck on 25 October:** the exact Fight Night video folder now lists one immediate child, a new `DRONE` folder created around 08:17 SAST. That subfolder reports `childCount: 0`; no event video is yet accessible in the listed folder. This is upload progress, not a screened or completed batch. Continue to check actual file count and media integrity before selecting shots.
 
 **10:37 SAST read-only recheck on 25 October:** the exact video folder still lists only that empty `DRONE` child. No event clip or camera sound was accessible there. A [separate stock-only bag-sound A/B](FIGHT-BAG-SOUND-AB.md) was prepared for a human ear check; its cue is not a substitute for source audio or proof of an event hit.
+
+**12:19 SAST read-only recheck on 25 October:** the same exact folder still lists only `DRONE` with reported `childCount: 0` and size 0. No event footage or original camera audio can yet be screened. Continue independent sound workflow proofs without treating the upload as ready.
