@@ -48,6 +48,10 @@ A [mono fold-down check](FIGHT-MONO-COMPATIBILITY-STUDY.md) now confirms the iso
 
 The [source-audio level A/B](FIGHT-SOURCE-AUDIO-LEVEL-STUDY.md) uses a separate public skateboard landing with its own camera sound to test the first real-sound handling step. An unchanged-gain AAC export and a −3 dB version still reconstruct over-range; −6 dB reaches −1.1 dBTP for that file. This is a source-specific technical finding, not a prescribed gain or sound-quality judgement. The [Fight Night sound playbook](FIGHT-SOUND-PLAYBOOK.md) now states the complete source-first, removable-layer, music-rights, staff-handover and final-listening path. No event mix is complete while the event video folder remains empty.
 
+A small [read-only sound stream inspector](FIGHT-SOUND-QC.md) now emits repeatable JSON for stream timing, silence, sample peak and encoded true peak. It passed known silence, tone, silent-video, near-silent-video and existing cue controls. It does not listen, recognize a hit or select music, and it leaves every source untouched.
+
+A [six-second synthetic voice/music duck A/B](DIALOGUE-MUSIC-AB.md) also confirms the level envelope occurred in the intended speech window, but a small local ASR transcribed its first word *worse* after ducking. The earlier owner-rejected fight track was not reused. This preserves a failed autonomous intelligibility gate and keeps perceptual/music selection with the finished event cut rather than promoting a blind EQ or ducking preset.
+
 ## Skill-development order after owner correction
 
 The separate Nolan production lane already owns client story, WhatsApp/approval, prior-post screening, source selection and Premiere delivery. Studio's contribution is to turn an observed editing technique into a *visually and audibly convincing, repeatable* operation. The rejected PSG `CHANGED?` private study showed why a technically valid render cannot promote a creative skill: its question duplicated a posted story, and its source performance was awkward. Client editing remains parked while this skill pass proceeds.
