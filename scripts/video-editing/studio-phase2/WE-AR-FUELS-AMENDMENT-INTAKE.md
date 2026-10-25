@@ -1,6 +1,6 @@
 # We AR Fuels October video 02: owner amendment intake
 
-25 October 2026. Existing production identity: `2026_10_WE_AR_FUELS_VIDEO_02_BIG_WEEK_AHEAD`. The current editable source is the private `D12_MASTER.prproj`; the sent export is `REVISION_01_FINAL.mp4`. This is an amendment to that film, not a new client concept. Preserve both originals and make any edit in a separately named protected revision. No amended film has been exported or delivered by this lane yet.
+25 October 2026. Existing production identity: `2026_10_WE_AR_FUELS_VIDEO_02_BIG_WEEK_AHEAD`. The baseline editable source is the private `D12_MASTER.prproj`; the previously sent export is `REVISION_01_FINAL.mp4`. This is an amendment to that film, not a new client concept. Both originals were preserved. A protected native revision and actual Premiere export are now complete; see [the application result and failure record](WE-AR-FUELS-NATIVE-REVISION-RESULT.md). Internal delivery and approval remain separate checks.
 
 ## Exact owner direction
 
@@ -26,7 +26,7 @@ An acknowledgement was sent in the group in a separate 19:22 `From Nolan` note. 
 4. Save, close/reopen the native project, check every linked source/title/audio track, export in Premiere, watch and listen to that actual export, verify frame count, duration, sound continuity, beat relationship and safe areas. Technical measurements do not replace creative listening.
 5. Use the existing production stem with a new unique revision number. Keep the earlier export and project unchanged. Prepare caption and cover only after the picture/sound revision passes, then send a single forwardable pair to `CG Nolan Approvals` and record Sent/Delivered separately.
 
-**Status:** source and timeline audit complete; no new diesel shot chosen, no native edit made, no amended export or approval claim. The active Toyota Premiere session is a desktop boundary, not a reason to invent a successful We AR application test.
+**Historical status at intake:** source and timeline audit complete; no diesel shot or native edit yet. The owner later cleared the Toyota Premiere session for this amendment. The subsequent native results, including the first protected bridge failure and working export route, are recorded in [the result](WE-AR-FUELS-NATIVE-REVISION-RESULT.md).
 
 ## Protected title and pulse preparation
 
