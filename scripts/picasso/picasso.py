@@ -10,6 +10,8 @@ import os
 import shutil
 import sys
 import time
+from collections import Counter
+from io import BytesIO
 from datetime import datetime
 from pathlib import Path
 
@@ -17,7 +19,7 @@ import cv2
 import numpy as np
 from PIL import Image, ImageCms, ImageDraw, ImageOps, __version__ as pillow_version
 
-VERSION = "0.3.1"
+VERSION = "0.3.2"
 SETTINGS = {"jpeg_quality": 94, "max_ev": 0.35, "max_wb": 0.025, "max_shadow_lift": 0.07,
             "max_highlight_pull": 0.05, "max_contrast": 0.035, "max_saturation": 0.035}
 SUFFIXES = {".jpg", ".jpeg"}
@@ -534,6 +536,51 @@ def classify(job: Path, ident: str, decision: str, reviewer: str, reason: str) -
             "reused": False, "internal_review_approved": False}
 
 
+def verify(job: Path) -> dict:
+    """Check private job exports against their sources without writing or re-encoding."""
+    manifest = json.loads((job / "manifest.json").read_text(encoding="utf-8"))
+    source_root = Path(manifest["source_root"]).resolve()
+    output_root = (job / "output").resolve()
+    failures = []
+    scene_counts = Counter()
+    classification_counts = Counter()
+    for row in manifest["items"]:
+        ident = row["id"]
+        classification_counts[row["classification"]] += 1
+        if row["status"] != "complete":
+            failures.append({"id": ident, "reason": "incomplete"})
+            continue
+        scene_counts[row["analysis"]["scene"]] += 1
+        source = (source_root / row["source_name"]).resolve()
+        output = (job / row["output"]).resolve()
+        if (not source.is_relative_to(source_root) or not output.is_relative_to(output_root)
+                or not source.is_file() or not output.is_file()):
+            failures.append({"id": ident, "reason": "missing_or_outside_job"})
+            continue
+        if digest(source) != row["source_sha256"] or digest(output) != row["output_sha256"]:
+            failures.append({"id": ident, "reason": "hash_mismatch"})
+            continue
+        try:
+            with Image.open(source) as original, Image.open(output) as export:
+                profile_bytes = export.info.get("icc_profile")
+                profile_name = (ImageCms.getProfileName(ImageCms.ImageCmsProfile(BytesIO(profile_bytes)))
+                                if profile_bytes else "")
+                if (original.format != "JPEG" or export.format != "JPEG"
+                        or list(ImageOps.exif_transpose(original).size) != row["dimensions"]
+                        or list(export.size) != row["dimensions"]
+                        or export.mode != "RGB" or len(export.getexif()) != 0
+                        or "srgb" not in profile_name.lower()):
+                    failures.append({"id": ident, "reason": "jpeg_dimensions_profile_or_exif"})
+        except (OSError, ValueError, TypeError):
+            failures.append({"id": ident, "reason": "decode_or_profile_error"})
+    return {"version": manifest["picasso_version"], "total": len(manifest["items"]),
+            "verified": len(manifest["items"]) - len(failures), "failures": failures,
+            "scenes": dict(scene_counts), "classifications": dict(classification_counts),
+            "multiple_scene_labels_detected": len(scene_counts) >= 2,
+            "human_quality_approved": False,
+            "internal_review_approved": bool(manifest.get("internal_review_approval"))}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="action", required=True)
@@ -571,6 +618,8 @@ def main() -> int:
     cull.add_argument("--decision", choices=("KEEP", "ALTERNATE", "REVIEW"), required=True)
     cull.add_argument("--reviewer", required=True)
     cull.add_argument("--reason", required=True)
+    qc = sub.add_parser("verify", help="Check source/output hashes, JPEG dimensions, sRGB profile and EXIF")
+    qc.add_argument("--job", type=Path, required=True)
     args = parser.parse_args()
     try:
         if args.action == "run":
@@ -594,6 +643,10 @@ def main() -> int:
         if args.action == "classify":
             print(json.dumps(classify(args.job, args.id, args.decision, args.reviewer, args.reason)))
             return 0
+        if args.action == "verify":
+            result = verify(args.job)
+            print(json.dumps(result))
+            return 0 if not result["failures"] else 1
         data = json.loads((args.job / "manifest.json").read_text(encoding="utf-8"))
         print(json.dumps({"version": data["picasso_version"], "total": len(data["items"]),
                           "complete": sum(x["status"] == "complete" for x in data["items"]),

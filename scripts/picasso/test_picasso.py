@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 from PIL import Image, ImageCms
 
-from picasso import amend, approve_review, classify, preflight, prepare_review, run
+from picasso import amend, approve_review, classify, preflight, prepare_review, run, verify
 
 
 def sha(path: Path) -> str:
@@ -39,6 +39,7 @@ class PicassoJobTest(unittest.TestCase):
                 self.assertEqual(len(result.getexif()), 0)
             self.assertEqual(sha(original), source_hash)
             self.assertTrue((job / "contact-sheet.jpg").exists())
+            self.assertEqual(verify(job)["verified"], 1)
 
             classify(job, "0001", "ALTERNATE", "Staff reviewer", "Near duplicate of stronger moment")
             self.assertEqual(run(source, job, None), 0)
@@ -118,6 +119,7 @@ class PicassoJobTest(unittest.TestCase):
             (job / "output" / "0001.jpg").write_bytes(b"tampered")
             with self.assertRaisesRegex(ValueError, "changed or is missing"):
                 prepare_review(job)
+            self.assertEqual(verify(job)["failures"], [{"id": "0001", "reason": "hash_mismatch"}])
 
     def test_amendment_restarts_from_source_and_requires_new_review_approval(self):
         with tempfile.TemporaryDirectory() as root:
