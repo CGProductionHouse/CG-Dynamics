@@ -13,6 +13,50 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 25 October — Meta renewal completed; visible reconnect recovery verified locally
+
+CA could not find Connect Meta: it was below the lengthy Instagram queue. Live
+Meta data-access expiry reproduced. Existing Christie-Ann Facebook renewal used
+**previous settings unchanged** and returned to Dynamics Connected, reporting
+access granted and valid at17:17 SAST.47 linked assets preserved; no mapping,
+sync, asset publication, backend release or Vercel operation invoked. This proves
+renewed authentication, NOT completeness of all clients' metrics. The live server
+still explicitly reports encryption-at-rest hardening required; not waived.
+
+Focused frontend repair moves the existing single Connect/ Reconnect button above
+readiness/Instagram queues, disables duplicate starts, preserves schema/expiry
+metadata on disconnected successful reads and distinguishes absent boolean status
+from explicit false. Existing OAuth endpoint/scopes/permissions unchanged. Actual
+Meta page synthetic browser reproduces the buried control on main, then passes at
+1440/375/390/430, including unknown/false/true metadata, retained expiry, pending
+click suppression, error recovery, explicit OAuth redirect and no horizontal
+overflow.58 focused tests, scoped ESLint, TypeScript/Vite392module actual-app
+bundle and diff checks pass. Initial standalone reporting test lacked loopback
+env; corrected fixture configuration and complete58-test rerun passed. New fixture
+is mandatory in the canonical local acceptance plan. No production frontend
+deployment: source fixes do not magically change the live button position.
+
+Earlier reviewed PR868 and869 both merged (2994e7ed and1df1008b). Combined frozen
+e56db492 non-DB receipt:4193total/4167pass/26 explicit skips/0fail, TS/Vite actual
+app, all19 then-canonical browser fixtures passed, stable tree. Receipt
+`%TEMP%/cg-client-nondb-e56db4921fd8.json`, SHA256
+`7FED714D9A76A17CC0914997462F18373EE51B10A44FE9D242E120A4685A7506`.
+Not full SQL/production acceptance:19 existing optional/Docker skips plus7 staff
+embedded-PGlite groups without its private module. Fresh Linux Docker pipe absent;
+no shared restart/reset/install. Staff release PR880 already live, untouched.
+
+Fresh actual admin preview sweep:59 non-held active clients,37 reports/22 no-report
+states, all eight service destinations present,0 read/scope errors. Earlier58
+cohort retained; extra Jodrico Killian row is not inferred launch approval. Novus
+live Google now says missing campaign figures, not no activity; live Brand Hub
+shows its published logo View/Download. Actual375px preview Plan/package/Approvals/
+Brand Hub navigation checked without overflow; October/November only and no
+To confirm extras. These are read-only admin previews, not genuine client login/
+physical-phone acceptance.59-row private matrix remains in
+`%TEMP%/cg-client-performance-readonly-20261025.json`. ChatGPT strategy and staff
+Teams/calendar owners remain separate. Exact Control Centre reference unavailable;
+do not invent or replace it. #505 owns reconnect follow-up, #668/#381 continuity.
+
 ### 25 October — Brand Hub validation PR869 regression coverage
 
 Continued existing OpenCode PR869; reproduced main's no-control-regex lint error.
