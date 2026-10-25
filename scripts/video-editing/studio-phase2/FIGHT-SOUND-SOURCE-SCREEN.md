@@ -19,3 +19,5 @@ An attempt to send a three-second excerpt through this task's media output retur
 5. Preserve each audio asset URL, licence, exact in/out, gain, processing and export stem. Ask a human reviewer to compare final apparent impacts against their original camera sound and image.
 
 **Next independent skill task:** identify a sound-monitoring route that can actually be heard in this workspace, or obtain a human ear review of an isolated music-free cue A/B. Until then, keep the sound card at research/technical state. Once event footage arrives, the first sound decision is which *real* camera moment has the cleanest sound, not which library bass hit is loudest.
+
+**Later bounded candidate:** the [music-free bag-contact A/B](FIGHT-BAG-SOUND-AB.md) uses one isolated segment of Mixkit #2113 on a visibly contacting Pexels bag shot. Its encoded attack was measured at output 0.53 s against picture contact around 0.5 s, and its two video streams hash identically. A second media-output attempt again reported that audio input is unsupported in this task. This is an **unheard timing candidate**, not a solved sound-monitoring route or creative approval.

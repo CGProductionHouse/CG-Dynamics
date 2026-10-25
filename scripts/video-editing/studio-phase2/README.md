@@ -38,6 +38,8 @@ The [one-frame colour-inversion A/B](FIGHT-COLOR-INVERT-STUDY.md) challenges tut
 
 The [footage-inside-type opening A/B](MATTE-READABILITY-STUDY.md) checks the existing `MOVE` proof at 270×480 per panel. A brighter scene fill slightly clarifies the letters but does not make the person within the narrow glyphs or small opening composition compelling. It is a phone-resolution proxy, not a physical-phone/full-speed approval or a revised master.
 
+The [one-cue bag-contact sound A/B](FIGHT-BAG-SOUND-AB.md) starts the later sound pass without reusing the owner-rejected music. It places an isolated licensed bag recording near a verified stock bag strike on identical video frames. The encoded onset is measurable, but this task cannot hear its timbre or creative fit; it remains a human-listening candidate, not an event sound design.
+
 ## Skill-development order after owner correction
 
 The separate Nolan production lane already owns client story, WhatsApp/approval, prior-post screening, source selection and Premiere delivery. Studio's contribution is to turn an observed editing technique into a *visually and audibly convincing, repeatable* operation. The rejected PSG `CHANGED?` private study showed why a technically valid render cannot promote a creative skill: its question duplicated a posted story, and its source performance was awkward. Client editing remains parked while this skill pass proceeds.
