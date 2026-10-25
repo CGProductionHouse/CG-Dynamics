@@ -1,4 +1,6 @@
 import { supabase } from './supabase'
+import { fetchAllPages } from './paginatedQuery'
+import { isOperationallyCompletedStatus } from './taskLifecycle'
 
 // ── Types ─────────────────────────────────────────────────────
 
@@ -1038,14 +1040,6 @@ const PLANNER_TASKS_TABLE = 'planner_tasks'
 // logical task appear twice with conflicting assignees.
 const PLANNER_TASKS_CANONICAL = 'planner_tasks_canonical'
 
-const PLANNER_CALENDAR_HISTORY_STATUSES = new Set<string>([
-  'approved',
-  'scheduled',
-  'done',
-  'completed',
-  'moved_to_tomorrow',
-])
-
 function isMissingRecurrenceColumnError(error: { code?: string; message?: string } | null): boolean {
   if (!error) return false
   if (error.code === '42703') return true
@@ -1055,7 +1049,7 @@ function isMissingRecurrenceColumnError(error: { code?: string; message?: string
 
 function activeCalendarTasks(data: unknown[] | null): CalendarTaskRow[] {
   return ((data ?? []) as Array<CalendarTaskRow & { recurrence_rule?: string | null }>)
-    .filter(task => !PLANNER_CALENDAR_HISTORY_STATUSES.has(task.status))
+    .filter(task => !isOperationallyCompletedStatus(task.status))
     .filter(task => !task.recurrence_rule)
 }
 
@@ -1233,13 +1227,27 @@ export async function getPlannerTaskBoardId(taskId: string) {
 // Dated, non-archived planner tasks inside a date window — used by the CG
 // Calendar task layer so operational work appears next to events and posts.
 export async function listPlannerTasksDueBetween(startDate: string, endDateExclusive: string) {
-  const withRecurrence = await supabase
-    .from(PLANNER_TASKS_CANONICAL)
-    .select('id, title, client_name, assigned_to_name, status, priority, due_date, board_id, bucket_id, recurrence_rule')
-    .is('archived_at', null)
-    .gte('due_date', startDate)
-    .lt('due_date', endDateExclusive)
-    .order('due_date')
+  const read = (includeRecurrence: boolean) => {
+    const seen = new Set<string>()
+    return fetchAllPages<CalendarTaskRow>(async (from, to) => {
+      const table = supabase.from(PLANNER_TASKS_CANONICAL)
+      const query = includeRecurrence
+        ? table.select('id, title, client_name, assigned_to_name, status, priority, due_date, board_id, bucket_id, recurrence_rule')
+        : table.select('id, title, client_name, assigned_to_name, status, priority, due_date, board_id, bucket_id')
+      const result = await query
+        .is('archived_at', null).is('microsoft_source_removed_at', null)
+        .gte('due_date', startDate).lt('due_date', endDateExclusive)
+        .order('due_date').order('id').range(from, to)
+      if (result.error) return { data: null, error: result.error }
+      if (!Array.isArray(result.data)) return { data: null, error: { message: 'Planner calendar read unavailable, not empty.' } }
+      for (const row of result.data) {
+        if (!row || typeof row.id !== 'string' || seen.has(row.id)) return { data: null, error: { message: 'Planner calendar pagination repeated or invalidated a row.' } }
+        seen.add(row.id)
+      }
+      return { data: result.data as unknown as CalendarTaskRow[], error: null }
+    })
+  }
+  const withRecurrence = await read(true)
 
   if (!withRecurrence.error) {
     return { data: activeCalendarTasks(withRecurrence.data), error: null }
@@ -1249,13 +1257,7 @@ export async function listPlannerTasksDueBetween(startDate: string, endDateExclu
     return { data: null, error: withRecurrence.error }
   }
 
-  const fallback = await supabase
-    .from(PLANNER_TASKS_CANONICAL)
-    .select('id, title, client_name, assigned_to_name, status, priority, due_date, board_id, bucket_id')
-    .is('archived_at', null)
-    .gte('due_date', startDate)
-    .lt('due_date', endDateExclusive)
-    .order('due_date')
+  const fallback = await read(false)
 
   if (fallback.error) return { data: null, error: fallback.error }
 
@@ -1352,8 +1354,9 @@ export interface UpdatePlannerTaskWithAssigneesInput {
 export async function updatePlannerTaskWithAssignees(
   taskId: string,
   input: UpdatePlannerTaskWithAssigneesInput,
+  expectedUpdatedAt?: string,
 ) {
-  return supabase.rpc('update_planner_task_with_assignees', {
+  const args = {
     p_task_id: taskId,
     p_title: input.title.trim(),
     p_bucket_id: input.bucket_id,
@@ -1366,7 +1369,16 @@ export async function updatePlannerTaskWithAssignees(
     p_due_date: input.due_date,
     p_notes: input.notes,
     p_checklist: input.checklist,
-  })
+  }
+  if (expectedUpdatedAt !== undefined) {
+    if (!Number.isFinite(Date.parse(expectedUpdatedAt))) return { data: null, error: { message: 'Reload the task before saving.' } }
+    const result = await supabase.rpc('update_planner_task_with_assignees_guarded', { ...args, p_expected_updated_at: expectedUpdatedAt })
+    if (result.error?.code === 'PGRST202') return { ...result, error: { ...result.error, message: 'Safe Planner edit setup is required. No changes were saved.' } }
+    return result
+  }
+  // Preserve other callers' existing contract; guarded drawer must NEVER fall
+  // back to this legacy path after missing migration/query/stale-write errors.
+  return supabase.rpc('update_planner_task_with_assignees', args)
 }
 
 export async function updatePlannerTaskStatus(id: string, status: PlannerTaskStatus) {

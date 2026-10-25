@@ -60,7 +60,17 @@ test('a stale reconciliation past the daily threshold is flagged', () => {
 test('a PARTIAL run inside the window is usable but still reports degraded coverage', () => {
   const h = msf.summarizeSyncHealth({ status: 'partial', finished_at: '2026-09-10T05:45:00Z' }, '2026-09-10T06:00:00Z')
   assert.equal(h.degraded, true)
+  assert.equal(h.state, 'partial', 'recent is not successfully reconciled')
+  assert.match(h.reason, /source completeness and apply conflicts\/failures separately/i)
   assert.match(h.reason, /PARTIAL/)
+})
+
+test('unknown run status with a recent timestamp is unverified, not healthy', () => {
+  for (const status of [undefined, '', 'cancelled', 'new-provider-status']) {
+    const health = msf.summarizeSyncHealth({ status, finished_at: '2026-09-10T05:45:00Z' }, '2026-09-10T06:00:00Z')
+    assert.equal(health.state, 'unverified')
+    assert.equal(health.degraded, true)
+  }
 })
 
 test('unknown or unparseable completion time is degraded, never assumed fresh', () => {
@@ -118,7 +128,7 @@ test('withSourceLinkage preserves human fields and folds raw microsoft columns i
 
 test('task, calendar and Client Schedule reads all expose durable source identity', () => {
   assert.match(INDEX, /withSourceLinkage\(data as unknown as Record<string, unknown>\[\], 'planner'\)/)
-  assert.match(INDEX, /withSourceLinkage\(data as Record<string, unknown>\[\] \| null, 'calendar'\)/)
+  assert.match(INDEX, /withSourceLinkage\(data\.slice\(0, pageSize\), 'calendar'\)/)
   for (const f of ['microsoft_plan_id', 'microsoft_task_id']) {
     assert.ok(msf.PLANNER_MICROSOFT_FIELDS.includes(f))
   }
@@ -174,6 +184,61 @@ test('policy explicitly supersedes the stale fallback-only wording', () => {
   const s = policy.buildStaffAssistantPolicy('staff').supersedes.join(' ')
   assert.match(s, /fallback-only/)
   assert.match(s, /read-only with no write-back/)
+})
+
+test('fresh bootstrap policy preserves exact owner real-work exclusions without cancelling the reporting obligation', () => {
+  for (const kind of ['staff', 'company_admin']) {
+    const p = policy.buildStaffAssistantPolicy(kind)
+    assert.equal(p.policy_version, '2026.10.19-master-month-cross-check-5')
+    assert.match(p.authority, /#841.*CGPH-PLANNER-CALENDAR-CLEANUP-OWNER-HANDOVER-2026-10-18/)
+    assert.match(p.supersedes.join(' '), /calendar-to-edit factory/)
+    const rules = p.active_queue_rule.join(' ')
+    assert.match(rules, /ProCompare.*NOT CG jobs.*Never create, reopen, dispatch or resurrect/)
+    assert.match(rules, /Novus Steel.*automatically forwarded to Novus/)
+    assert.match(rules, /must NOT call, qualify, chase, reply to or follow up individual Novus leads/)
+    assert.match(rules, /WEEKLY GOOGLE ADS PERFORMANCE UPDATE.*generation AND client delivery.*do not create a duplicate/)
+    assert.match(rules, /Source-deleted Microsoft work stays removed by its durable source identity/)
+    assert.match(rules, /Source completeness does not mean mirror apply succeeded/)
+  }
+})
+
+test('runtime policy separates private accounting from client billing and does not claim recurrence or RLS repair', () => {
+  for (const kind of ['staff', 'company_admin']) {
+    const text = policy.buildStaffAssistantPolicy(kind).privacy_rule.join(' ')
+    assert.match(text, /CA-only accounting.*must NEVER enter shared staff Work\/Today/)
+    assert.match(text, /notifications, chart counts, task details or calendar side panels/)
+    assert.match(text, /company_admin context or an admin role does not authorise/)
+    assert.match(text, /Amonique may prepare\/issue\/send client invoices, statements and approved quotes/)
+    assert.match(text, /statement day is the 11th/)
+    assert.match(text, /SENDING is not bank\/payment RECONCILIATION/)
+    assert.match(text, /at least two cycles/)
+    assert.match(text, /NOT recurrence repair or database privacy enforcement/)
+    assert.match(text, /Never mark private accounting completed merely to hide it/)
+  }
+})
+
+test('runtime policy requires accepted scope and separates raw, edit, approval and delivery evidence', () => {
+  const text = policy.buildStaffAssistantPolicy('staff').content_linkage_rule.join(' ')
+  assert.match(text, /Calendar booking alone is NOT an accepted package/)
+  assert.match(text, /exact accepted quote\/contract\/invoice scope or explicit authorised owner instruction/)
+  assert.match(text, /SCOPE UNVERIFIED/)
+  assert.match(text, /Requested quote variations are not accepted scope/)
+  assert.match(text, /No guessed quantities, editors or delivery dates/)
+  assert.match(text, /No blanket event-task factory/)
+  assert.match(text, /Internal REVIEW checkpoints are not contractual client deadlines/)
+  assert.match(text, /RAW_PRESENT, EDITED_PRESENT, APPROVED and DELIVERED\/PUBLISHED/)
+  assert.match(text, /files alone do not prove approval or delivery\/publication/)
+})
+
+test('bootstrap distinguishes the recurring schedule master from monthly cross-checks and operational backlog', () => {
+  const text = policy.buildStaffAssistantPolicy('staff').client_schedule_protection.join(' ')
+  assert.match(text, /2025 CLIENTS SCHEDULE is the recurring master despite its title/)
+  assert.match(text, /OCTOBER.*NOVEMBER are the 2026 monthly working cross-checks, not additional package capacity/)
+  assert.match(text, /MASTER CLIENT TO DO is a different protected operational backlog/)
+  assert.match(text, /never add their quantities together or import all historical master cards/)
+  assert.match(text, /undated monthly card does not establish a posting date/)
+  assert.match(text, /completed Planner checkbox does not prove client approval, delivery or publication/)
+  assert.match(text, /incomplete source cannot establish a missing deliverable, reduced package or staff failure/)
 })
 
 test('policy keeps Microsoft freshness authority and Client Schedule protection', () => {

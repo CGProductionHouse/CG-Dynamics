@@ -214,9 +214,9 @@ test('Planner history is genuinely completed + archived only', () => {
 test('Planner history renders only durable completion evidence, never updated_at', () => {
   assert.ok(planner.includes('export function plannerCompletionEvidence'))
   assert.ok(planner.includes(".in('action', ['status_changed', 'task_updated'])"))
-  assert.match(plannerPage, /completedAt \? `Completed \$\{new Date\(completedAt\)/)
+  assert.match(plannerPage, /completedAt \? `Completed \$\{formatBusinessDate\(completedAt/)
   assert.ok(plannerPage.includes('Completion date unavailable'))
-  assert.doesNotMatch(plannerPage, /Completed \$\{new Date\(task\.updated_at\)/)
+  assert.doesNotMatch(plannerPage, /Completed \$\{(?:new Date|formatBusinessDate)\(task\.updated_at/)
   assert.match(plannerPage, /fetchBoardTasks[\s\S]*listPlannerCompletionEvidence/)
   assert.ok((plannerPage.match(/setCompletionEvidence\(result\.completionEvidence\)/g) ?? []).length >= 3,
     'initial loads, drawer reloads, and board refreshes must all refresh completion evidence')

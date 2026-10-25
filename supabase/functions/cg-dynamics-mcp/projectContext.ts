@@ -171,6 +171,7 @@ export const CLIENT_SCOPED_TOOLS: readonly string[] = [
  */
 export const COMPANY_ADMIN_TOOLS: readonly string[] = [
   'list_company_tasks',
+  'read_microsoft_schedule_source',
   'list_company_recurring_tasks',
   'list_monthly_strategy_clients', 'get_monthly_strategy_brief', 'submit_monthly_strategy_draft',
   'amend_monthly_strategy_draft',

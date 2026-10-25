@@ -9,6 +9,7 @@
 // Canonical services: same RPCs and tables used by CG Dynamics UI and #208 CG Assistant.
 
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { readMicrosoftScheduleSource } from './microsoftScheduleSource.ts'
 import { fetchAllRows, fetchAllRowsByIdChunks } from '../_shared/paginatedRows.ts'
 import { CG_DYNAMICS_MCP_TOOLS, CG_DYNAMICS_MCP_SECURITY_SCHEMES } from './toolCatalog.ts'
 import { filterCapabilitiesByScope } from './capabilityManifest.ts'
@@ -28,7 +29,7 @@ import {
   buildMcpAuthChallengeMeta,
   type McpAuthChallengeError,
 } from './oauthDiscovery.ts'
-import { cgDate, cgDatePlusDays, CG_TIMEZONE } from './cgTime.ts'
+import { cgDate, cgDatePlusDays, cgDayBounds, CG_TIMEZONE } from './cgTime.ts'
 import {
   deriveEditReadiness as deriveVideoEditReadiness,
   deriveRawEvidence as deriveVideoRawEvidence, shapeVideoForAssistant,
@@ -104,6 +105,8 @@ import {
   type CgHoursStaffLoggerResult,
 } from './cgHoursStaffLogger.ts'
 import { canReadPlannerTask } from './taskReadPolicy.ts'
+import { commitOperationalWrite, ownsOperationalReceipt, parseIdempotencyRead } from './operationalReceipts.ts'
+import { parseRecurrenceRule } from '../../../src/lib/recurrenceRule.ts'
 import { loadMonthlyStrategyWorkspace, shapeMonthlyStrategyBrief, strategyMcpInputHash, submitMonthlyStrategyProposal } from './monthlyStrategyWorkspace.ts'
 import { amendMonthlyStrategyFields } from './monthlyStrategyAmendment.ts'
 import type { StrategyAutopilotClient } from '../_shared/monthlyStrategyAutopilot.ts'
@@ -460,16 +463,13 @@ async function checkIdempotency(
   idempotencyKey: string,
   inputHash: string,
 ): Promise<{ duplicate: boolean; result?: unknown }> {
-  const { data } = await sb.rpc('mcp_check_idempotency', {
+  const { data, error } = await sb.rpc('mcp_check_idempotency', {
     p_caller_profile_id: callerProfileId,
     p_tool_name: toolName,
     p_idempotency_key: idempotencyKey,
     p_input_hash: inputHash,
   })
-  if (data?.already_executed) {
-    return { duplicate: true, result: data.existing_result }
-  }
-  return { duplicate: false }
+  return parseIdempotencyRead(data, error)
 }
 
 async function recordIdempotency(
@@ -640,16 +640,47 @@ const handleGetTask: ToolHandler = async (staff, input) => {
 }
 
 const handleListMyCalendar: ToolHandler = async (staff, input) => {
-  const { data, error } = await staff.supabase
-    .from('company_calendar_events')
-    .select(`id, title, event_type, start_at, end_at, all_day, location, notes, assigned_to_name, status, client_name, client_id, linked_deliverable_id, linked_task_id, ${CALENDAR_MICROSOFT_FIELDS.join(', ')}`)
-    .gte('start_at', input.from as string)
-    .lte('start_at', (input.to as string) + 'T23:59:59')
-    .order('start_at', { ascending: true })
-    .limit(50)
-
-  // #325: durable Outlook identity + freshness for ID-based dedupe against live Outlook.
-  return { events: withSourceLinkage(data as Record<string, unknown>[] | null, 'calendar'), error: error?.message ?? null }
+  const offset = input.offset ?? 0
+  const pageSize = 50
+  const pagination = { offset: typeof offset === 'number' ? offset : null, page_size: pageSize,
+    returned_count: 0, has_more: null as boolean | null, next_offset: null as number | null,
+    total_count: null, continuation_blocked: null as string | null }
+  const unavailable = { events: [], error: 'CG Calendar could not be loaded safely.', pagination }
+  const validDate = (value: unknown): value is string => typeof value === 'string'
+    && /^\d{4}-\d{2}-\d{2}$/.test(value) && Number.isFinite(Date.parse(`${value}T00:00:00Z`))
+    && new Date(`${value}T00:00:00Z`).toISOString().slice(0, 10) === value
+  if (!validDate(input.from) || !validDate(input.to) || input.from > input.to
+    || typeof offset !== 'number' || !Number.isSafeInteger(offset) || offset < 0 || offset > 100000) {
+    return { ...unavailable, error: 'Use ordered YYYY-MM-DD calendar dates and an integer offset from 0 to 100000.' }
+  }
+  const from = cgDayBounds(input.from).start
+  const toExclusive = cgDayBounds(cgDatePlusDays(1, new Date(`${input.to}T12:00:00+02:00`))).start
+  try {
+    const { data: rawData, error } = await staff.supabase
+      .from('company_calendar_events')
+      .select(`id, title, event_type, start_at, end_at, all_day, location, notes, assigned_to_name, status, client_name, client_id, linked_deliverable_id, linked_task_id, ${CALENDAR_MICROSOFT_FIELDS.join(', ')}`)
+      .lt('start_at', toExclusive)
+      // Same overlap rule as the canonical company Calendar reader; includes multi-day events.
+      .or(`end_at.gt.${from},and(end_at.is.null,start_at.gte.${from})`)
+      .neq('status', 'cancelled')
+      .is('superseded_by_event_id', null)
+      .is('microsoft_source_removed_at', null)
+      .order('start_at', { ascending: true }).order('id', { ascending: true })
+      .range(offset, offset + pageSize)
+    // Dynamic select fragments cannot be inferred by postgrest-js; validate the actual rows.
+    const data = rawData as unknown as Record<string, unknown>[] | null
+    if (error || !Array.isArray(data) || data.some(row => !row || typeof row.id !== 'string'
+      || typeof row.title !== 'string' || typeof row.start_at !== 'string' || !Number.isFinite(Date.parse(row.start_at)))
+      || new Set(data.map(row => row.id)).size !== data.length) return unavailable
+    const hasMore = data.length > pageSize
+    const nextOffset = hasMore && offset + pageSize <= 100000 ? offset + pageSize : null
+    return { events: withSourceLinkage(data.slice(0, pageSize), 'calendar'), error: null,
+      timezone: CG_TIMEZONE, range: { from, to_exclusive: toExclusive },
+      pagination: { ...pagination, returned_count: Math.min(data.length, pageSize), has_more: hasMore,
+        next_offset: nextOffset, continuation_blocked: hasMore && nextOffset === null ? 'NARROW_DATE_RANGE' : null },
+      scope_note: 'Operational company events overlapping Johannesburg-local dates, excluding cancelled, superseded and source-removed rows. Follow next_offset with unchanged dates; restart if the source changes during paging. Client Schedule is separate.',
+    }
+  } catch { return unavailable }
 }
 
 const handleListClientSchedule: ToolHandler = async (staff, input) => {
@@ -965,6 +996,9 @@ const CALENDAR_STATUSES = ['planned', 'confirmed', 'completed', 'cancelled']
  */
 const handleUpsertCalendarEvent: ToolHandler = async (staff, input) => {
   const action = String(input.action ?? 'create')
+  const syncIntent = input.sync_intent ?? 'coexistence'
+  if (!['coexistence', 'dynamics_only'].includes(String(syncIntent))) return { error: 'Use an explicit supported calendar sync intent.' }
+  const nativeOnly = syncIntent === 'dynamics_only'
   if (!['create', 'update', 'cancel'].includes(action)) {
     return { error: 'action must be one of: create, update, cancel.' }
   }
@@ -979,25 +1013,47 @@ const handleUpsertCalendarEvent: ToolHandler = async (staff, input) => {
   if (input.status && !CALENDAR_STATUSES.includes(String(input.status))) {
     return { error: `status must be one of: ${CALENDAR_STATUSES.join(', ')}.` }
   }
-  if (typeof input.outlook_write_succeeded !== 'boolean') {
+  if (!nativeOnly && typeof input.outlook_write_succeeded !== 'boolean') {
     return { error: 'outlook_write_succeeded must explicitly state whether the Outlook side landed. Never infer dual-write success.' }
+  }
+  const suppliedCalendarId = typeof input.microsoft_calendar_id === 'string' && input.microsoft_calendar_id.trim()
+    ? input.microsoft_calendar_id.trim() : null
+  if (nativeOnly && (microsoftEventId || suppliedCalendarId || input.outlook_write_succeeded === true)) {
+    return { error: 'Dynamics-only events cannot supply or claim Microsoft identity/freshness. Use coexistence for a linked Outlook event.' }
+  }
+  if (!eventId && microsoftEventId && !suppliedCalendarId) {
+    return { error: 'A microsoft_event_id lookup requires its exact microsoft_calendar_id. Refusing an unscoped source lookup.' }
   }
 
   // Resolve the exact existing row by durable identity only - never by title.
   let existing: Record<string, unknown> | null = null
   if (eventId) {
-    const { data } = await staff.supabase.from('company_calendar_events').select('id, client_id, microsoft_event_id, microsoft_calendar_id').eq('id', eventId).maybeSingle()
+    const { data, error } = await staff.supabase.from('company_calendar_events').select('id, updated_at, client_id, microsoft_event_id, microsoft_calendar_id, start_at, end_at, superseded_by_event_id, microsoft_source_removed_at').eq('id', eventId).maybeSingle()
+    if (error) return { error: 'Calendar identity lookup failed. No event was written; retry with the same idempotency key.' }
     existing = data as Record<string, unknown> | null
     if (!existing) return { error: 'No CG Calendar event matches that exact event_id.' }
   } else if (microsoftEventId) {
-    const { data } = await staff.supabase.from('company_calendar_events').select('id, client_id, microsoft_event_id, microsoft_calendar_id').eq('microsoft_event_id', microsoftEventId).maybeSingle()
+    const { data, error } = await staff.supabase.from('company_calendar_events').select('id, updated_at, client_id, microsoft_event_id, microsoft_calendar_id, start_at, end_at, superseded_by_event_id, microsoft_source_removed_at').eq('microsoft_event_id', microsoftEventId).eq('microsoft_calendar_id', suppliedCalendarId).maybeSingle()
+    if (error) return { error: 'Calendar identity lookup failed. No event was written; retry with the same idempotency key.' }
     existing = data as Record<string, unknown> | null
   }
 
   const existingMicrosoftEventId = typeof existing?.microsoft_event_id === 'string' ? existing.microsoft_event_id : null
   const existingMicrosoftCalendarId = typeof existing?.microsoft_calendar_id === 'string' ? existing.microsoft_calendar_id : null
-  const suppliedCalendarId = typeof input.microsoft_calendar_id === 'string' && input.microsoft_calendar_id.trim()
-    ? input.microsoft_calendar_id.trim() : null
+  if (nativeOnly && (existingMicrosoftEventId || existingMicrosoftCalendarId)) {
+    return { error: 'This is an Outlook-linked event, not Dynamics-only work. Its durable source cannot be detached or bypassed.' }
+  }
+  if (existing?.superseded_by_event_id || existing?.microsoft_source_removed_at) {
+    return { error: 'This event is superseded or source-removed. Resolve the canonical event before editing.' }
+  }
+  const startAt = input.start_at ?? existing?.start_at
+  const endAt = input.end_at !== undefined ? input.end_at : existing?.end_at
+  const validInstant = (value: unknown): value is string => typeof value === 'string'
+    && /T.*(?:Z|[+-]\d{2}:\d{2})$/.test(value) && Number.isFinite(Date.parse(value))
+  if ((startAt != null && !validInstant(startAt)) || (endAt != null && !validInstant(endAt))
+    || (startAt != null && endAt != null && Date.parse(String(endAt)) <= Date.parse(String(startAt)))) {
+    return { error: 'Use explicit-offset event timestamps, with end_at after start_at. No event was written.' }
+  }
   if (existing && microsoftEventId && existingMicrosoftEventId && microsoftEventId !== existingMicrosoftEventId) {
     return { error: 'event_id and microsoft_event_id resolve to different durable identities. Refusing to overwrite the existing Outlook identity.' }
   }
@@ -1015,10 +1071,10 @@ const handleUpsertCalendarEvent: ToolHandler = async (staff, input) => {
   if (!scope.allowed) return { error: scope.error }
 
   const nowIso = new Date().toISOString()
-  const partialSync = input.outlook_write_succeeded === false
+  const partialSync = !nativeOnly && input.outlook_write_succeeded === false
   const effectiveMicrosoftEventId = microsoftEventId ?? existingMicrosoftEventId
   const effectiveMicrosoftCalendarId = suppliedCalendarId ?? existingMicrosoftCalendarId
-  if (!partialSync && (!effectiveMicrosoftEventId || !effectiveMicrosoftCalendarId)) {
+  if (!nativeOnly && !partialSync && (!effectiveMicrosoftEventId || !effectiveMicrosoftCalendarId)) {
     return { error: 'A successful Outlook-side write requires both microsoft_event_id and microsoft_calendar_id (supplied now or already stored). Otherwise report outlook_write_succeeded=false.' }
   }
   if (microsoftEventId && !suppliedCalendarId && !existingMicrosoftCalendarId) {
@@ -1050,46 +1106,15 @@ const handleUpsertCalendarEvent: ToolHandler = async (staff, input) => {
     writable.status = input.status
   }
 
-  let resultRow: Record<string, unknown> | null
-  let writeError: string | null
-
-  if (existing) {
-    const { data, error } = await staff.supabase
-      .from('company_calendar_events')
-      .update(writable)
-      .eq('id', existing.id)
-      .select('id, title, event_type, start_at, end_at, status, client_id, client_name, microsoft_event_id, microsoft_calendar_id, microsoft_last_synced_at')
-      .maybeSingle()
-    resultRow = data as Record<string, unknown> | null
-    writeError = error?.message ?? null
-  } else {
-    if (!input.title || !input.start_at) {
-      return { error: 'Creating a CG Calendar event requires at least title and start_at.' }
-    }
-    const { data, error } = await staff.supabase
-      .from('company_calendar_events')
-      .insert({ ...writable, created_at: nowIso })
-      .select('id, title, event_type, start_at, end_at, status, client_id, client_name, microsoft_event_id, microsoft_calendar_id, microsoft_last_synced_at')
-      .maybeSingle()
-    resultRow = data as Record<string, unknown> | null
-    writeError = error?.message ?? null
-  }
-
-  if (writeError) {
-    return { verdict: 'FAIL', action, error: writeError, sync_state: 'DYNAMICS_WRITE_FAILED', note: 'The Dynamics side did not write. If the Outlook side already succeeded this is a PARTIAL SYNC - preserve the Outlook write and reconcile.' }
-  }
-
-  return {
-    verdict: partialSync ? 'PARTIAL_SYNC' : 'PASS',
-    action,
-    event: resultRow,
+  if (existing && typeof existing.updated_at !== 'string') return { error: 'Calendar revision could not be verified. No event was changed.' }
+  if (!existing && (!input.title || !input.start_at)) return { error: 'Creating a CG Calendar event requires at least title and start_at.' }
+  const payload: Record<string, unknown> = {
+    ...writable, action, event_id: existing?.id ?? null, expected_updated_at: existing?.updated_at ?? null,
     matched_by: existing ? (eventId ? 'event_id' : 'microsoft_event_id') : 'created',
-    sync_state: partialSync ? 'PARTIAL SYNC' : 'BOTH_SIDES_REPORTED_OK',
-    note: partialSync
-      ? 'The caller reported the Outlook write did NOT succeed. The Dynamics mirror was written and Microsoft freshness was deliberately NOT stamped. Report PARTIAL SYNC and queue the Outlook side; never claim both were updated.'
-      : 'CG Calendar (company_calendar_events) is the Dynamics calendar truth. Client Schedule was not touched and is never merged into CG Calendar.',
-    scope_note: 'Durable Outlook identity is used for matching; title matching is refused.',
+    sync_intent: syncIntent, outlook_write_succeeded: input.outlook_write_succeeded,
   }
+  delete payload.updated_at
+  return commitOperationalWrite(staff, 'upsert_calendar_event', input, payload, await computeInputHash(input))
 }
 
 // -- #325 coexistence actions ------------------------------------------------
@@ -1509,7 +1534,7 @@ const handleGetMicrosoftSyncStatus: ToolHandler = async (staff, input) => {
     })),
     source_completeness: latest?.source_completeness ?? null,
     operating_rule: health.degraded
-      ? 'Flag SYNC STALE / SYNC FAILED. Prefer the live Microsoft read for Microsoft-backed work and report degraded source coverage.'
+      ? `Report the exact sync state: ${health.state.toUpperCase()}. Prefer live Microsoft for Microsoft-backed work. Inspect source_completeness and apply summary separately; a partial apply does not by itself prove a source-fetch failure.`
       : 'Reconciliation is fresh. Still perform the live Microsoft read — a successful sync never replaces it.',
   }
 }
@@ -1819,40 +1844,40 @@ const handleGetLead: ToolHandler = async (staff, input) => {
 }
 
 const handleCreateTask: ToolHandler = async (staff, input) => {
-  const { data, error } = await staff.supabase.rpc('create_assistant_task', {
-    p_title: input.title,
-    p_assignee_name: input.assignee_name ?? staff.fullName,
-    p_due_date: input.due_date ?? null,
-    p_client_id: input.client_id ?? null,
-    p_client_name: input.client_name ?? null,
-    p_notes: input.notes ?? null,
-    // The service-role connection has no auth.uid(); the RPC trusts this only for the service role.
-    p_actor_profile_id: staff.profileId,
-  })
-
-  if (error) return { error: error.message }
-  return { task: data, message: 'Task created.' }
+  return commitOperationalWrite(staff, 'create_task', input, {
+    title: input.title, assignee_name: input.assignee_name ?? staff.fullName,
+    due_date: input.due_date ?? null, client_id: input.client_id ?? null,
+    client_name: input.client_name ?? null, notes: input.notes ?? null,
+  }, await computeInputHash(input))
 }
 
 const handleUpdateTask: ToolHandler = async (staff, input) => {
   const action = input.action as string
   const taskId = input.task_id as string
 
-  if (action === 'reopen') {
-    return { error: 'Task reopen is not yet supported through the MCP connector. Use the Dynamics UI or request the canonical reopen extension.' }
+  if (!['due', 'complete', 'reopen', 'start', 'block', 'comment', 'assign', 'reassign'].includes(action)) {
+    return { error: 'Unsupported task action.' }
   }
-
-  const { data, error } = await staff.supabase.rpc('update_assistant_task', {
-    p_task_id: taskId,
-    p_action: action,
-    p_due_date: input.due_date ?? null,
-    p_comment: input.note ?? null,
-    // The service-role connection has no auth.uid(); the RPC trusts this only for the service role.
-    p_actor_profile_id: staff.profileId,
-  })
-
-  if (error) return { error: error.message }
-  return { task: data, message: `Task ${action} applied.` }
+  if (['assign', 'reassign'].includes(action) && (typeof input.assignee_name !== 'string' || !input.assignee_name.trim())) {
+    return { error: 'Assignment requires one exact active staff name. This action does not silently unassign work.' }
+  }
+  const visibleTask = await handleGetTask(staff, { task_id: taskId })
+  if (!visibleTask || typeof visibleTask !== 'object' || 'error' in visibleTask) return { error: 'This exact task is not available to the acting staff context. No task was changed.' }
+  // Never mutate a stale Microsoft mirror or revive archived/source-removed history.
+  const { data: existing, error: readError } = await staff.supabase.from('planner_tasks')
+    .select('id, archived_at, superseded_by_task_id, microsoft_source_removed_at, microsoft_task_id')
+    .eq('id', taskId).maybeSingle()
+  if (readError || !existing) return { error: 'Task identity could not be verified. No task was changed.' }
+  if (existing.archived_at || existing.superseded_by_task_id || existing.microsoft_source_removed_at) {
+    return { error: 'Archived, superseded or source-removed work cannot be changed through this action.' }
+  }
+  if (existing.microsoft_task_id) {
+    return { error: 'MICROSOFT_WRITE_REQUIRED: this is a linked Planner task. During coexistence update that exact Microsoft item and reconcile; do not change only the Dynamics mirror.' }
+  }
+  return commitOperationalWrite(staff, 'update_task', input, {
+    task_id: taskId, action, assignee_name: input.assignee_name ?? null,
+    due_date: input.due_date ?? null, note: input.note ?? null,
+  }, await computeInputHash(input))
 }
 
 const handleUpdateLead: ToolHandler = async (staff, input) => {
@@ -2147,20 +2172,12 @@ const handleGetMyRecurringTasks: ToolHandler = async (staff) => {
 }
 
 const handleCreateRecurringTask: ToolHandler = async (staff, input) => {
-  const { data, error } = await staff.supabase.rpc('create_assistant_recurring_task', {
-    p_title: input.title,
-    p_recurrence_rule: input.recurrence_rule,
-    p_recurrence_until: input.recurrence_until ?? null,
-    p_assignee_name: input.assignee_name ?? staff.fullName,
-    p_client_id: input.client_id ?? null,
-    p_client_name: input.client_name ?? null,
-    p_notes: input.notes ?? null,
-    // The service-role connection has no auth.uid(); the RPC trusts this only for the service role.
-    p_actor_profile_id: staff.profileId,
-  })
-
-  if (error) return { error: error.message }
-  return { template: data, message: 'Recurring task template created. Instances will be materialised automatically within a 14-day window.' }
+  if (typeof input.recurrence_rule !== 'string' || !parseRecurrenceRule(input.recurrence_rule)) return { error: 'Unsupported recurrence rule. Use the existing DAILY/WEEKLY/MONTHLY subset; no template was created.' }
+  return commitOperationalWrite(staff, 'create_recurring_task', input, {
+    title: input.title, recurrence_rule: input.recurrence_rule, recurrence_until: input.recurrence_until ?? null,
+    assignee_name: input.assignee_name ?? staff.fullName, client_id: input.client_id ?? null,
+    client_name: input.client_name ?? null, notes: input.notes ?? null,
+  }, await computeInputHash(input))
 }
 
 // ── Mail Draft Handler (HARD DRAFT-ONLY GATE) ───────────────────────────────
@@ -3554,6 +3571,7 @@ const toolHandlers: Record<string, ToolHandler> = {
   list_company_tasks: handleListCompanyTasks,
   list_company_recurring_tasks: handleListCompanyRecurringTasks,
   get_microsoft_sync_status: handleGetMicrosoftSyncStatus,
+  read_microsoft_schedule_source: readMicrosoftScheduleSource,
   run_microsoft_sync: handleRunMicrosoftSync,
   get_provider_health: handleGetProviderHealth,
   get_google_ads_audit: handleGetGoogleAdsAudit,
@@ -3680,27 +3698,36 @@ async function handleToolsCall(
   // repeat falls through to the handler instead of answering without the record. A reused key
   // with different input is still refused.
   let replayThroughCanonicalKey = false
+  const operationalCreate = ['create_task', 'create_recurring_task', 'update_task', 'upsert_calendar_event'].includes(toolName)
   if (isWrite && canonicalIdempotencyKey) {
     const inputHash = ['submit_monthly_strategy_draft', 'amend_monthly_strategy_draft'].includes(toolName)
       ? await strategyMcpInputHash(toolInput) : await computeInputHash(toolInput)
-    const existing = await checkIdempotency(staff.supabase, staff.profileId, toolName, canonicalIdempotencyKey, inputHash)
+    let existing: { duplicate: boolean; result?: unknown }
+    try {
+      existing = await checkIdempotency(staff.supabase, staff.profileId, toolName, canonicalIdempotencyKey, inputHash)
+    } catch {
+      return jsonRpcError(id, -32603, 'Write receipt lookup unavailable. No action was attempted; retry the same idempotency key.')
+    }
     if (existing.duplicate) {
       const conflict = (existing.result as { status?: string } | undefined)?.status === 'conflict'
-      if (CANONICAL_RECEIPT_REPLAY_TOOLS.has(toolName) && !conflict) {
+      if (operationalCreate && !conflict && !ownsOperationalReceipt(toolName, existing.result, { actorId: staff.profileId, key: canonicalIdempotencyKey })) {
+        return jsonRpcError(id, -32603, 'Legacy operational receipt has no original record projection. Re-read before creating any replacement; do not retry with a new key blindly.')
+      } else if (CANONICAL_RECEIPT_REPLAY_TOOLS.has(toolName) && !conflict) {
         replayThroughCanonicalKey = true
       } else {
-        return jsonRpcResponse(id, { content: [{ type: 'text', text: JSON.stringify({ ...(existing.result as object), _context: audit }) }], isError: conflict })
+        const repeatError = conflict || (existing.result as { status?: string } | undefined)?.status === 'error' || isMcpErrorResult(existing.result)
+        return jsonRpcResponse(id, { content: [{ type: 'text', text: JSON.stringify({ ...(existing.result as object), _context: audit }) }], isError: repeatError })
       }
     }
   }
 
   try {
     const result = await handler(staff, toolInput)
+    const hasError = isMcpErrorResult(result)
 
-    if (isWrite && canonicalIdempotencyKey && !replayThroughCanonicalKey) {
+    if (isWrite && canonicalIdempotencyKey && !replayThroughCanonicalKey && !ownsOperationalReceipt(toolName, result) && !(operationalCreate && hasError)) {
       const inputHash = ['submit_monthly_strategy_draft', 'amend_monthly_strategy_draft'].includes(toolName)
         ? await strategyMcpInputHash(toolInput) : await computeInputHash(toolInput)
-      const hasError = isMcpErrorResult(result)
       await recordIdempotency(staff.supabase, staff.profileId, toolName, canonicalIdempotencyKey, inputHash, hasError ? 'error' : 'success', audit)
     }
 
@@ -3714,7 +3741,7 @@ async function handleToolsCall(
       isError: !!isError,
     })
   } catch (err) {
-    if (isWrite && canonicalIdempotencyKey) {
+    if (isWrite && canonicalIdempotencyKey && !operationalCreate) {
       const inputHash = ['submit_monthly_strategy_draft', 'amend_monthly_strategy_draft'].includes(toolName)
         ? await strategyMcpInputHash(toolInput) : await computeInputHash(toolInput)
       await recordIdempotency(staff.supabase, staff.profileId, toolName, canonicalIdempotencyKey, inputHash, 'error', audit)

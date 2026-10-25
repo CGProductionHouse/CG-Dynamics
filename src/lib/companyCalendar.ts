@@ -218,11 +218,16 @@ export async function listCompanyEventsByIds(
 
 export async function createCompanyEvent(
   payload: CompanyEventInput,
+  creationId?: string,
 ): Promise<CompanyEventResult<CompanyCalendarEvent>> {
   try {
+    if (creationId !== undefined && (typeof creationId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(creationId))) {
+      return { data: null, error: { message: 'Calendar creation identity is invalid. No event was submitted.' }, tableMissing: false }
+    }
     const { data, error } = await supabase
       .from(TABLE)
       .insert({
+        ...(creationId === undefined ? {} : { id: creationId }),
         title: payload.title,
         event_type: payload.event_type,
         client_id: payload.client_id ?? null,
@@ -254,17 +259,24 @@ export async function createCompanyEvent(
 export async function updateCompanyEvent(
   id: string,
   patch: CompanyEventPatch,
+  expectedUpdatedAt?: string,
 ): Promise<CompanyEventResult<CompanyCalendarEvent>> {
   try {
-    const { data, error } = await supabase
+    if (expectedUpdatedAt !== undefined && !Number.isFinite(Date.parse(expectedUpdatedAt))) {
+      return { data: null, error: { message: 'Reload the event before saving.' }, tableMissing: false }
+    }
+    let query = supabase
       .from(TABLE)
       .update(patch)
       .eq('id', id)
-      .select()
-      .single()
+    if (expectedUpdatedAt !== undefined) query = query.eq('updated_at', expectedUpdatedAt)
+    const { data, error } = await query.select().single()
 
     if (error) {
       if (isCompanyCalendarTableMissingError(error)) return { data: null, error: null, tableMissing: true }
+      if (expectedUpdatedAt !== undefined && error.code === 'PGRST116') {
+        return { data: null, error: { message: 'Event changed or is no longer available. Reload before saving.' }, tableMissing: false }
+      }
       return { data: null, error: handleError(error), tableMissing: false }
     }
 
