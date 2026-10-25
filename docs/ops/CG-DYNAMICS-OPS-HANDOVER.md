@@ -13,6 +13,20 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 25 October — existing Meta presentation PR868 reviewed with runtime regressions
+
+Continued existing OpenCode PR868 rather than duplicate its source fix. On current
+main, numeric run_type and health_state each reproduced TypeError from value?.trim.
+PR's unknown/non-string guard preserves explicit unavailable labels instead of
+crashing. Added actual function regressions across both platforms and nine malformed
+enum values, including object methods that must never be called; blank, failed,
+recovery, complete and stale evidence preserved.10/10 focused tests, TS/Vite7
+actual392module app build/scoped ESLint/diff pass after integrating current main.
+No provider refresh, backend/schema/config/permissions/data or Vercel action.
+This is presentation repair, not proof of complete Meta metrics or a client launch.
+Staff/Planner release PR880 is already live per #381comment6398963463; no staff
+runtime edit or replay of its approved migrations is part of the client lane.
+
 ### 20 October — all58 Performance/package previews; two client fixes verified locally
 
 PR #857 reviewed and merged as d279fb5c4499de408701639b1c7d913fd37abba3.
