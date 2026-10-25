@@ -12,7 +12,7 @@ Probe every selected take for audio stream count, sample rate, channels, **strea
 
 ## 3. Build a dry trailer before effects
 
-Use real camera sound and short room/crowd continuity from the same event. Keep cuts and ambience edits separately editable; crossfade room tone only where it avoids an accidental hole or click. Do not smear a genuine impact with a long fade. The dry export is the comparison control for every later mix. Preserve the full lead-in and tail around each best moment so that rhythm is not constructed from isolated transients alone.
+Use real camera sound and short room/crowd continuity from the same event. Keep cuts and ambience edits separately editable; crossfade room tone only where it avoids an accidental hole or click. A [public camera-audio cut A/B](FIGHT-SOURCE-CUT-CONTINUITY-STUDY.md) reduced one sampled splice jump from 0.14217 to 0.00039 with a 10 ms overlap while preserving all other samples; this is a technical repair candidate, not a universal fade length or heard approval. Do not smear a genuine impact with a long fade. The dry export is the comparison control for every later mix. Preserve the full lead-in and tail around each best moment so that rhythm is not constructed from isolated transients alone.
 
 ## 4. Select music by the actual film
 
@@ -42,6 +42,7 @@ Save the clean picture/control, final preview, editor project or existing scene 
 |---|---|---|
 | Stream intake, offset and clipping | [Read-only inspector](FIGHT-SOUND-QC.md) and [public source A/B](FIGHT-SOURCE-AUDIO-LEVEL-STUDY.md) measured a real 74 ms offset and an over-range camera recording. | Procedure ready; no Staffy source yet. |
 | Time mapping through slow picture | [Same-picture audio A/B](FIGHT-RETIME-AUDIO-SYNC-STUDY.md) caught an unretimed landing transient against an airborne frame and mapped it near the landing. | Procedure ready; event time map and heard timbre pending. |
+| Non-impact source-audio joins | [Camera-audio splice A/B](FIGHT-SOURCE-CUT-CONTINUITY-STUDY.md) preserved every sample outside a 10 ms repair and reduced the measured join discontinuity. | Use only on truthful event ambience joins; actual click/heard match pending. |
 | Separable sound layers and revision | [Six-second voice/music stem proof](FIGHT-AUDIO-STEM-HANDOVER-STUDY.md) kept zero-aligned WAVs and an unchanged voice layer under music revision. | Staff project open/relink/revision pending. |
 | Stereo/mono and export safety | Full two-layer practice mix retained voice and music on measured 50/50 mono fold-down; decoded AAC true peaks stayed below the inspector's conservative threshold. | Repeat on the actual 30 s delivered picture/sound file. |
 | Contact/SFX/music creative choices | The owner rejected the integrated stock music; bag cue was timed but unheard; automated local audio models failed known controls. | Select against real footage, original sound and approved rights. No production choices made. |
