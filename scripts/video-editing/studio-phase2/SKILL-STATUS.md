@@ -30,4 +30,6 @@ The owner's [53-video collection ledger](VIDEO-EDITING-COLLECTION.md) records vi
 
 The [cool-shadow grade A/B](FIGHT-GRADE-STUDY.md) is a recorded rejection rather than another skill card: the stock was already cool and a fixed grade darkened the subject without adding useful storytelling.
 
+The [6% impact-push A/B](FIGHT-IMPACT-PUSH-STUDY.md) is another source-specific rejection: at 270×480 it crops more of an already readable bag strike without adding enough information. Technical decode does not make the zoom a good fight effect.
+
 The [source-screen failures](MOTION-SOURCE-SCREEN.md) and [flash rejection](FLARE-CUT-STUDY.md) are part of progress: they prevent the next agent from forcing a tutorial effect onto unsuitable footage. Future practice should choose a source and story that warrants the edit before installing a tool or rendering an effect. The owner has now specifically requested a Fight Night trailer after upload; that event work needs the actual footage and its own screening. PSG remains parked.
