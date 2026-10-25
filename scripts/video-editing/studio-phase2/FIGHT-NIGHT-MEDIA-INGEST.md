@@ -48,3 +48,14 @@ event blow has been verified. The 646 MB and 822 MB candidate bout files are
 still missing locally. The large-media route is documented but **not yet
 operationally verified** on this workstation. Do not call the access gap fixed
 until a complete large original arrives and passes its remote hash.
+
+**23:20 SAST recheck:** metadata for the six initially zero-byte entries
+(`3Q7A9106`, `9107`, `9108`, `9115`, `9145`, `9488`) still reports zero bytes;
+do not ingest or count them as completed camera takes. The signed-in source
+account's normal OneDrive preview of `3Q7A9330.MP4` opened and displayed the
+23-second ring take. Its ordinary Download control was activated once during
+an unconflicted browser interval, but the page showed no completion signal and
+no hash-verified large local original resulted in this pass. Do not repeat
+blind clicks or claim that preview playback is a working 646 MB transfer.
+The intended handover remains a normal authorised source-account local copy
+or camera-card transfer followed by the inventory size/SHA check above.
