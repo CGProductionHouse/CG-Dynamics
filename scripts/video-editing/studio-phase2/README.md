@@ -30,6 +30,8 @@ The [first integrated Fight Night stock study](FIGHT-INTEGRATED-STOCK-STUDY.md) 
 
 Further visual tests include a [real foreground glove-sweep cut-timing A/B](FIGHT-GLOVE-HANDOFF-STUDY.md), which finds a more motivated stock handoff but rejects presenting unrelated bouts as one exchange, and a [cool-shadow grade A/B](FIGHT-GRADE-STUDY.md), which rejects extra darkening on an already cool-lit source. These are separate source/visual decisions, not components to stack into another stock trailer. Sound design remains after the visual-source gate; the owner already rejected the only integrated music choice.
 
+A later [warm gym grade challenge](FIGHT-GRADE-STUDY.md) also rejected a mild brightened/desaturated candidate: it did not improve contact clarity at reduced size. No fight grade preset is approved.
+
 ## Skill-development order after owner correction
 
 The separate Nolan production lane already owns client story, WhatsApp/approval, prior-post screening, source selection and Premiere delivery. Studio's contribution is to turn an observed editing technique into a *visually and audibly convincing, repeatable* operation. The rejected PSG `CHANGED?` private study showed why a technically valid render cannot promote a creative skill: its question duplicated a posted story, and its source performance was awkward. Client editing remains parked while this skill pass proceeds.
