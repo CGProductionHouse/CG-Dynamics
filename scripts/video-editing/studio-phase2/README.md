@@ -40,6 +40,8 @@ The [footage-inside-type opening A/B](MATTE-READABILITY-STUDY.md) checks the exi
 
 The [one-cue bag-contact sound A/B](FIGHT-BAG-SOUND-AB.md) starts the later sound pass without reusing the owner-rejected music. It places an isolated licensed bag recording near a verified stock bag strike on identical video frames. The encoded onset is measurable, but this task cannot hear its timbre or creative fit; it remains a human-listening candidate, not an event sound design.
 
+The [local audio-review control study](FIGHT-LOCAL-AUDIO-REVIEW-STUDY.md) tried the already installed Gemma 4 12B and a free local E4B audio variant. **Both failed known silence/tone/impact controls**, so neither may be used to claim an autonomous listening verdict. The owner explicitly declined routine practice review. Continue source-audio-first technical screening and reserve actual creative mix acceptance for an independent editor on the finished event cut; do not mistake model capability metadata for a passed listening test.
+
 ## Skill-development order after owner correction
 
 The separate Nolan production lane already owns client story, WhatsApp/approval, prior-post screening, source selection and Premiere delivery. Studio's contribution is to turn an observed editing technique into a *visually and audibly convincing, repeatable* operation. The rejected PSG `CHANGED?` private study showed why a technically valid render cannot promote a creative skill: its question duplicated a posted story, and its source performance was awkward. Client editing remains parked while this skill pass proceeds.
