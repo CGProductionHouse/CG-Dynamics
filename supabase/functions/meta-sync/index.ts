@@ -1,4 +1,5 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
+import { readMetaStoredToken } from '../_shared/metaTokenStorage.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import {
   fetchPageTokens,
@@ -410,7 +411,15 @@ async function handleRequest(req: Request): Promise<Response> {
     .eq('connection_id', metaConnectionId ?? '')
     .limit(1)
 
-  const accessToken: string | null = tokenRows?.[0]?.encrypted_access_token ?? null
+  let accessToken: string | null = null
+  if (tokenRows?.[0]?.encrypted_access_token) {
+    try {
+      ;({ accessToken } = await readMetaStoredToken(tokenRows[0].encrypted_access_token, metaConnectionId,
+        Deno.env.get('META_TOKEN_ENCRYPTION_KEY_B64'), Deno.env.get('META_TOKEN_ENCRYPTION_KEY_VERSION')))
+    } catch {
+      return safeJsonResponse({ ok: false, status: 'failed', phase: 'connection', error: 'Meta credential storage is unavailable. Contact an administrator.' }, 503)
+    }
+  }
   const { baseUrl, version: graphVersion } = graphConfig
 
   steps.push('meta token loaded')

@@ -1,6 +1,7 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { inspectMetaAccessToken } from '../_shared/metaTokenDiagnostics.ts'
+import { readMetaStoredToken } from '../_shared/metaTokenStorage.ts'
 import { resolveMetaGraphConfig } from '../_shared/meta.ts'
 import { fetchAllRows, fetchAllRowsByIdChunks } from '../_shared/paginatedRows.ts'
 import { META_TERMINAL_ACCESS_COOLDOWN_MS, metaTerminalAccessBlocks } from '../_shared/metaFleetTerminalBackoff.ts'
@@ -167,6 +168,15 @@ Deno.serve(async (req) => {
   }
 
   const tokenRow = tokenRows[0]
+  let storedCredential: { accessToken: string; encryptedAtRest: boolean }
+  try {
+    storedCredential = await readMetaStoredToken(tokenRow.encrypted_access_token, latest.id,
+      Deno.env.get('META_TOKEN_ENCRYPTION_KEY_B64'), Deno.env.get('META_TOKEN_ENCRYPTION_KEY_VERSION'))
+  } catch {
+    // A storage/key failure is not evidence of expired Facebook consent. Do not
+    // overwrite the connection or return credentials/ciphertext to the caller.
+    return jsonResponse({ ok: false, error: 'Meta credential storage is unavailable. Contact an administrator.' }, 503)
+  }
   const validationAge = tokenRow.last_validated_at ? Date.now() - new Date(tokenRow.last_validated_at).getTime() : Number.POSITIVE_INFINITY
   const appId = Deno.env.get('META_APP_ID')
   const appSecret = Deno.env.get('META_APP_SECRET')
@@ -177,7 +187,7 @@ Deno.serve(async (req) => {
         graphBaseUrl: resolveMetaGraphConfig().baseUrl,
         appId,
         appSecret,
-        accessToken: tokenRow.encrypted_access_token,
+        accessToken: storedCredential.accessToken,
       })
     } catch {
       diagnostics = {
@@ -317,8 +327,8 @@ Deno.serve(async (req) => {
     missingScopes: [],
     schemaReady,
     tokenSecurity: {
-      encryptedAtRest: false,
-      state: 'server_only_plaintext',
+      encryptedAtRest: storedCredential.encryptedAtRest,
+      state: storedCredential.encryptedAtRest ? 'server_only_encrypted' : 'server_only_plaintext',
     },
     tokenLifecycle: {
       state: tokenState,
