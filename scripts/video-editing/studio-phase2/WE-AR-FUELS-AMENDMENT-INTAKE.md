@@ -1,0 +1,28 @@
+# We AR Fuels October video 02: owner amendment intake
+
+25 October 2026. Existing production identity: `2026_10_WE_AR_FUELS_VIDEO_02_BIG_WEEK_AHEAD`. The current editable source is the private `D12_MASTER.prproj`; the sent export is `REVISION_01_FINAL.mp4`. This is an amendment to that film, not a new client concept. Preserve both originals and make any edit in a separately named protected revision. No amended film has been exported or delivered by this lane yet.
+
+## Exact owner direction
+
+The 19:13 SAST `CG Nolan Approvals` feedback asks for softer, natural text shadow; an opening of fast cuts on the song intro's beats followed by an intentional text reveal; no arbitrary music dip; a diesel-relevant replacement for the random shot after `LET'S TALK DIESEL`; beat-guided cuts through the film; and removal of the website domain from the outro. The owner says the rest is looking decent and specifically asks to do We AR first, then redo TBS from scratch.
+
+An acknowledgement was sent in the group in a separate 19:22 `From Nolan` note. Do not send another acknowledgement for the same message. The forwardable delivery format is MP4 document with only the proposed social caption, then caption-free HD cover image; any internal note is a separate third message. Check the production filename in the actual attachment preview.
+
+## Witnessed state and edit targets
+
+- `D12_MASTER.prproj` contains a 30 s native Premiere sequence with 19 V1 picture clips, six V2 title assets, five A1 music sections, and separate riser/whoosh/source-action tracks, per `d12-audio-continuity-receipt.json`. D12 fixed a 10.72–12.12 s music gap, but that receipt does not prove musical taste or beat placement.
+- The current `REVISION_01_FINAL.mp4` is 30.000 s, 1296×2304, 25 fps H.264/AAC. The local contact sheet shows the heavy text shadow, a John Deere shot under `LET'S TALK DIESEL`, an unrelated sunrise at 15.40–16.88 s, and `wearfuels.co.za` during the official-logo outro. The sunrise is the clearest filler candidate for replacement; `LET'S TALK DIESEL` itself is at 10.84–12.00 s, so inspect the complete 12.12–16.88 s moving span before finalising the owner's reference to “after the text”.
+- V1 picture around the opening: 0–1.40 nozzle lift; 1.40–2.56 fuel cap; five fast 0.32–0.36 s detail/action shots at 2.56–4.32. The existing `BIG WEEK / AHEAD?` title starts at 0.20 s, which covers the first two slower shots. A protected beat-map revision must let the music-led opening action register before the reveal. Do not change timings solely from a beat detector; compare the actual cue phrase and final audiovisual cut.
+- V2 title asset manifest: `BIG WEEK / AHEAD?` 0.20–2.32, `YOU PLAN / THE WORK` 5.76–7.16, `LET'S TALK / DIESEL` 10.84–12.00, `SEND YOUR / LOCATION + LITRES` 16.96–19.08, `PLAN YOUR / NEXT FILL` 21.20–23.76, and `ASK FOR A CURRENT QUOTE / wearfuels.co.za` 26.52–29.72. The outro domain is baked into the sixth asset; change the protected title source or replace that asset, not the branded logo animation.
+- Private D2 research records the selected Mixkit Sports Rock cue as owner-acceptable at that stage, while its entrance, blend and exit were rejected. Keep the established cue unless normal-speed review exposes a concrete reason to change it. The owner's new direction requires level continuity except for an intentional speech or visual pause.
+- The OneDrive `Clients/We Ar Fuels/Videos/2026/2026_05_MAY` inventory includes repeated January source IDs and additional `3Q7A1838/1839/1841/1842.MP4`. Folder month alone is not freshness. These additional clips have **not** yet been screened as moving footage or cleared for this replacement. Existing local July neutral clips were screened as farming machinery rather than clearly superior diesel action; `3Q7A1835.MP4` is excluded because the prior project removed a former staff member.
+
+## Protected revision checklist
+
+1. Confirm the exact current Premiere project and desktop owner before app control. A separate Toyota Premiere session was active at this intake; the isolated bridge reported a missing/expired protected session. Do not open We AR in that active process or alter its project.
+2. Screen proposed fuel-action replacements at normal speed, crop and exact in/out. Keep original media private. Record the selected source, rights, identity, prior use and rejected adjacent ranges. A fuel nozzle/tank/driver action earns the 15.40–16.88 s slot only if it advances the diesel-to-location/litres story; do not add another scenic filler or an indistinguishable repeat.
+3. From a protected copy, retime the opening to audible beats, soften the title shadow, test a purposeful reveal, replace the filler, keep music continuous, and remove the website while preserving the official logo picture. Compare against D12 at normal speed and on a phone.
+4. Save, close/reopen the native project, check every linked source/title/audio track, export in Premiere, watch and listen to that actual export, verify frame count, duration, sound continuity, beat relationship and safe areas. Technical measurements do not replace creative listening.
+5. Use the existing production stem with a new unique revision number. Keep the earlier export and project unchanged. Prepare caption and cover only after the picture/sound revision passes, then send a single forwardable pair to `CG Nolan Approvals` and record Sent/Delivered separately.
+
+**Status:** source and timeline audit complete; no new diesel shot chosen, no native edit made, no amended export or approval claim. The active Toyota Premiere session is a desktop boundary, not a reason to invent a successful We AR application test.

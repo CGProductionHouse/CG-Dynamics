@@ -45,3 +45,15 @@ The authorised signed-in Chrome WhatsApp tab disconnected during the first corre
 3. A separate 19:12 `From Nolan:` message explicitly marked the earlier cover superseded, identified the latest pair and kept it internal. WhatsApp showed **Sent** at the final check.
 
 This corrects the *handover format* and cover concept, not the creative approval gates. The old cover remains visible in the chat only as superseded history; do not forward it. No client channel or public account was contacted. Wait for PSG team/offer review and an independent full-speed picture/sound decision before any client use. Keep PR #875 draft.
+
+## Owner approval and production filename correction — 25 October, 19:21–19:22 SAST
+
+The owner then stated that they were happy with and approved the video, but the attachment's `PSG-NOVEMBER-STUDIO-V8-REVIEW.mp4` basename violated the CG production convention. This was a release-preflight failure: the edit was assessed, while the **filename in the actual WhatsApp document preview** was not checked against OneDrive/Dynamics. The rule is in `docs/onedrive-naming-authority.md`: `YYYY_MM_<CONFIGURED_CLIENT_SHORT_CODE>_VIDEO_<XX>`, with the exact code and sequence from canonical context. Nolan's existing private November PSG release folder already establishes `2026_11_PSG_VIDEO_01_YOUR_NEXT_SEASON`, and contains revisions 01–06. No November Dynamics scheduled-date row was returned in the 25 October client-scoped read; this does not prove no planned video or independently establish a Content Run identity. The existing production package supplies the stem used here. No OneDrive folder was created or renamed.
+
+The original V8 file remains untouched. Protected **byte-for-byte copies** in the private V8 folder now form the corrected package:
+
+- `2026_11_PSG_VIDEO_01_YOUR_NEXT_SEASON_REVISION_07_FINAL.mp4` · 55,522,542 bytes · SHA-256 `51138d1cc3e08c9fb5648ac1c73b787f195bc64bda6384621802e189070db4f6` (identical to V8 video)
+- `2026_11_PSG_VIDEO_01_YOUR_NEXT_SEASON_REVISION_07_COVER.jpg` · 1,794,826 bytes · SHA-256 `405822cfa1692445f6145196cb31ec94f6fd005bc43898a6d3c238035653744c` (identical to the HD source JPEG)
+- `2026_11_PSG_VIDEO_01_YOUR_NEXT_SEASON_REVISION_07_CAPTION.txt` · 345 bytes · SHA-256 `1ea2d1426679b5808bc67cdc8846592c5cfc9f1a6d25244175319e6e96651c6f`
+
+At 19:21 the newly named **MP4 document**, with only the same complete post caption, appeared in the exact `CG Nolan Approvals` group. At 19:22 the matching cover was sent separately through **Photos & videos**, with blank caption and WhatsApp **HD 1440×2560** selected. A separate `From Nolan:` message instructed the team to use the newest pair, marked prior attachments superseded and acknowledged the TBS/We AR Fuels amendments. The three new messages displayed **Sent** at the last explicit check; later Delivered state is not yet recorded here. No production PSG project/export was overwritten, no OneDrive item changed, and no PSG client or public channel was contacted. Owner creative approval and filename correction are recorded; PSG staff/offer clearance and client-publication approval are still distinct gates.
