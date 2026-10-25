@@ -1,0 +1,303 @@
+"""Private, reversible JPEG first-pass assistant. No network or original writes."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import shutil
+import sys
+import time
+from datetime import datetime
+from pathlib import Path
+
+import cv2
+import numpy as np
+from PIL import Image, ImageCms, ImageDraw, ImageOps, __version__ as pillow_version
+
+VERSION = "0.1.0"
+SETTINGS = {"jpeg_quality": 94, "max_ev": 0.35, "max_wb": 0.025, "max_shadow_lift": 0.07,
+            "max_highlight_pull": 0.05, "max_contrast": 0.035, "max_saturation": 0.035}
+SUFFIXES = {".jpg", ".jpeg"}
+
+
+def digest(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def atomic_json(path: Path, value: dict) -> None:
+    temp = path.with_suffix(path.suffix + ".tmp")
+    temp.write_text(json.dumps(value, indent=2, ensure_ascii=False), encoding="utf-8")
+    os.replace(temp, path)
+
+
+def check_paths(source: Path, job: Path) -> None:
+    if not source.is_dir():
+        raise ValueError("Input must be an existing local folder")
+    source, job = source.resolve(), job.resolve()
+    if source == job or source in job.parents or job in source.parents:
+        raise ValueError("Job and source folders must be separate, with neither inside the other")
+    if source.is_symlink() or job.is_symlink():
+        raise ValueError("Symlinked input or job roots are not supported")
+
+
+def source_files(source: Path) -> list[Path]:
+    return sorted((p for p in source.iterdir() if p.is_file() and not p.is_symlink()
+                   and p.suffix.lower() in SUFFIXES), key=lambda p: p.name.lower())
+
+
+def srgb_image(raw: Image.Image) -> tuple[Image.Image, str]:
+    oriented = ImageOps.exif_transpose(raw)
+    profile = oriented.info.get("icc_profile")
+    rgb = oriented.convert("RGB")
+    if profile:
+        from io import BytesIO
+        rgb = ImageCms.profileToProfile(rgb, ImageCms.ImageCmsProfile(BytesIO(profile)),
+                                        ImageCms.createProfile("sRGB"), outputMode="RGB")
+        return rgb, "converted_from_embedded_icc"
+    return rgb, "untagged_assumed_srgb_review"
+
+
+def face_boxes(small: np.ndarray) -> list[list[int]]:
+    cascade_path = Path(cv2.data.haarcascades) / "haarcascade_frontalface_default.xml"
+    if not cascade_path.is_file():
+        return []
+    detector = cv2.CascadeClassifier(str(cascade_path))
+    gray = cv2.cvtColor(small, cv2.COLOR_RGB2GRAY)
+    return [list(map(int, box)) for box in detector.detectMultiScale(gray, scaleFactor=1.12,
+            minNeighbors=5, minSize=(32, 32))]
+
+
+def analyze(image: Image.Image) -> dict:
+    thumb = image.copy()
+    thumb.thumbnail((960, 960))
+    a = np.asarray(thumb, dtype=np.uint8)
+    f = a.astype(np.float32) / 255.0
+    luma = (f @ np.array([0.2126, 0.7152, 0.0722], np.float32))
+    gray = cv2.cvtColor(a, cv2.COLOR_RGB2GRAY)
+    faces = face_boxes(a)
+    face_luma = [float(np.median(luma[y:y+h, x:x+w])) for x, y, w, h in faces]
+    mean_channels = f.reshape(-1, 3).mean(axis=0)
+    clipping = ((a <= 2).mean(axis=(0, 1)).tolist(), (a >= 253).mean(axis=(0, 1)).tolist())
+    # Focus metric is a weak technical hint, never an automatic rejection.
+    focus = float(cv2.Laplacian(gray, cv2.CV_64F).var())
+    tiny = cv2.resize(gray, (9, 8), interpolation=cv2.INTER_AREA).astype(np.int16)
+    phash = ''.join('1' if v else '0' for v in (tiny[:, 1:] > tiny[:, :-1]).flatten())
+    median = float(np.median(luma))
+    highlight = float(np.mean(luma > .985))
+    shadow = float(np.mean(luma < .08))
+    warm = float(mean_channels[0] - mean_channels[2])
+    if face_luma and min(face_luma) < .32 and median > .38:
+        scene = "backlit_face"
+    elif median < .27:
+        scene = "low_light"
+    elif warm > .09:
+        scene = "warm_or_mixed_light_review"
+    elif median > .63:
+        scene = "bright_daylight"
+    else:
+        scene = "balanced_or_unknown"
+    return {"scene": scene, "median_luma": round(median, 4), "shadow_fraction": round(shadow, 4),
+            "highlight_fraction": round(highlight, 4), "rgb_dark_fraction": [round(x, 4) for x in clipping[0]],
+            "rgb_clipped_fraction": [round(x, 4) for x in clipping[1]], "warm_channel_bias": round(warm, 4),
+            "focus_hint": round(focus, 2), "face_count_hint": len(faces),
+            "face_median_luma_hint": [round(v, 4) for v in face_luma], "dhash": phash}
+
+
+def settings_for(a: dict) -> dict:
+    median = a["median_luma"]
+    scene = a["scene"]
+    ev = float(np.clip(np.log2(.46 / max(median, .08)) * .30, -.25, SETTINGS["max_ev"]))
+    if scene == "low_light":
+        ev = min(ev, .22)  # preserve event atmosphere and avoid amplifying JPEG noise
+    if scene == "balanced_or_unknown" and .36 <= median <= .57:
+        ev = 0.0
+    shadow = min(SETTINGS["max_shadow_lift"], a["shadow_fraction"] * .18)
+    if scene == "low_light":
+        shadow *= .35
+    if scene == "backlit_face":
+        shadow = min(SETTINGS["max_shadow_lift"], shadow + .025)
+    highlight = min(SETTINGS["max_highlight_pull"], a["highlight_fraction"] * .5)
+    # A JPEG cannot regain clipped channels; avoid aggressive highlight tricks.
+    if max(a["rgb_clipped_fraction"]) > .04:
+        highlight = min(highlight, .025)
+    wb = 0.0
+    if scene != "warm_or_mixed_light_review" and abs(a["warm_channel_bias"]) > .055:
+        wb = float(np.clip(-a["warm_channel_bias"] * .12, -SETTINGS["max_wb"], SETTINGS["max_wb"]))
+    return {"exposure_ev": round(ev, 4), "shadow_lift": round(shadow, 4),
+            "highlight_pull": round(highlight, 4), "red_blue_balance": round(wb, 4),
+            "contrast": .015 if scene == "balanced_or_unknown" else 0.0,
+            "saturation": .01 if scene not in ("low_light", "warm_or_mixed_light_review") else 0.0,
+            "sharpen": "none_for_jpeg"}
+
+
+def finish(image: Image.Image, settings: dict, analysis: dict) -> Image.Image:
+    a = np.asarray(image, dtype=np.float32) / 255.0
+    ev = settings["exposure_ev"]
+    a *= 2 ** ev
+    luma = a @ np.array([.2126, .7152, .0722], np.float32)
+    lift = settings["shadow_lift"] * np.square(np.clip(1 - luma / .65, 0, 1))
+    pull = settings["highlight_pull"] * np.square(np.clip((luma - .65) / .35, 0, 1))
+    a = a + lift[..., None] - pull[..., None]
+    wb = settings["red_blue_balance"]
+    a[..., 0] *= (1 + wb)
+    a[..., 2] *= (1 - wb)
+    a = np.clip((a - .5) * (1 + settings["contrast"]) + .5, 0, 1)
+    gray = (a @ np.array([.2126, .7152, .0722], np.float32))[..., None]
+    a = np.clip(gray + (a - gray) * (1 + settings["saturation"]), 0, 1)
+    return Image.fromarray(np.uint8(np.round(a * 255)), "RGB")
+
+
+def make_preview(original: Image.Image, edited: Image.Image, path: Path) -> None:
+    halves = []
+    for image in (original, edited):
+        copy = image.copy()
+        copy.thumbnail((640, 640))
+        halves.append(copy)
+    canvas = Image.new("RGB", (1280, 680), "#252525")
+    draw = ImageDraw.Draw(canvas)
+    for index, im in enumerate(halves):
+        canvas.paste(im, (index * 640 + (640 - im.width) // 2, 30 + (640 - im.height) // 2))
+    draw.text((12, 8), "BEFORE", fill="white")
+    draw.text((652, 8), "PICASSO FIRST PASS", fill="white")
+    canvas.save(path, "JPEG", quality=88)
+
+
+def contact_sheet(job: Path, rows: list[dict]) -> None:
+    good = [r for r in rows if r.get("preview") and (job / r["preview"]).exists()]
+    if not good:
+        return
+    tile_w, tile_h, cols, page_size = 640, 360, 2, 50
+    for page, start in enumerate(range(0, len(good), page_size)):
+        group = good[start:start + page_size]
+        sheet = Image.new("RGB", (tile_w * cols, tile_h * ((len(group) + cols - 1) // cols)), "#252525")
+        draw = ImageDraw.Draw(sheet)
+        for idx, row in enumerate(group):
+            with Image.open(job / row["preview"]) as source:
+                im = source.copy()
+            im.thumbnail((tile_w - 12, tile_h - 44))
+            x, y = (idx % cols) * tile_w, (idx // cols) * tile_h
+            sheet.paste(im, (x + (tile_w - im.width) // 2, y + 20))
+            draw.text((x + 8, y + 4), f'{row["id"]}  {row["classification"]}', fill="white")
+        name = "contact-sheet.jpg" if page == 0 else f"contact-sheet-{page + 1:03d}.jpg"
+        sheet.save(job / name, "JPEG", quality=88)
+
+
+def run(source: Path, job: Path, limit: int | None) -> int:
+    check_paths(source, job)
+    files = source_files(source)
+    if limit is not None:
+        files = files[:limit]
+    if not files:
+        raise ValueError("No JPEG files in input folder")
+    job.mkdir(parents=True, exist_ok=True)
+    (job / "output").mkdir(exist_ok=True)
+    (job / "previews").mkdir(exist_ok=True)
+    if (job / "output").is_symlink() or (job / "previews").is_symlink():
+        raise ValueError("Symlinked job output folders are not supported")
+    manifest_path = job / "manifest.json"
+    existing = json.loads(manifest_path.read_text(encoding="utf-8")) if manifest_path.exists() else None
+    if existing and (Path(existing["source_root"]).resolve() != source.resolve() or existing["settings"] != SETTINGS):
+        raise ValueError("Existing job source or settings differ; create a new job folder")
+    if existing and [r["source_name"] for r in existing["items"]] != [p.name for p in files]:
+        raise ValueError("Source inventory changed; create a new job folder to avoid ambiguous outputs")
+    rows = {row["source_name"]: row for row in existing["items"]} if existing else {}
+    manifest = {"picasso_version": VERSION, "source_root": str(source.resolve()), "settings": SETTINGS,
+                "runtime": {"python": sys.version.split()[0], "pillow": pillow_version, "opencv": cv2.__version__},
+                "started_at": existing["started_at"] if existing else datetime.now().isoformat(),
+                "delivery_approved": False, "items": []}
+    start = time.monotonic()
+    hashes = []
+    resumed = set()
+    for index, path in enumerate(files):
+        name = path.name
+        old = rows.get(name)
+        ident = f"{index + 1:04d}"
+        output = job / "output" / f"{ident}.jpg"
+        preview = job / "previews" / f"{ident}.jpg"
+        row = {"id": ident, "source_name": name, "source_sha256": None, "classification": "REVIEW",
+               "status": "pending", "review_note": "", "output": str(output.relative_to(job)),
+               "preview": str(preview.relative_to(job))}
+        try:
+            row["source_sha256"] = digest(path)
+            if (old and old.get("source_sha256") == row["source_sha256"] and old.get("status") == "complete"
+                    and output.exists() and preview.exists() and digest(output) == old.get("output_sha256")):
+                row = old
+                resumed.add(name)
+            else:
+                with Image.open(path) as raw:
+                    if raw.format != "JPEG":
+                        raise ValueError("File is not a JPEG")
+                    image, color_note = srgb_image(raw)
+                metrics = analyze(image)
+                adjustments = settings_for(metrics)
+                edited = finish(image, adjustments, metrics)
+                # One final JPEG encode. No source EXIF, GPS, or private metadata copied.
+                profile = ImageCms.ImageCmsProfile(ImageCms.createProfile("sRGB")).tobytes()
+                temp = output.with_suffix(".tmp")
+                edited.save(temp, "JPEG", quality=SETTINGS["jpeg_quality"], subsampling=0, icc_profile=profile)
+                os.replace(temp, output)
+                make_preview(image, edited, preview)
+                row.update(status="complete", classification="REVIEW" if color_note.startswith("untagged") or
+                           metrics["scene"] == "warm_or_mixed_light_review" else "KEEP",
+                           color_management=color_note, dimensions=list(image.size), analysis=metrics,
+                           adjustments=adjustments, output_sha256=digest(output))
+            hashes.append((name, row))
+        except Exception as error:
+            row.update(status="error", error=f"{type(error).__name__}: {error}", classification="REVIEW")
+        manifest["items"].append(row)
+        atomic_json(manifest_path, manifest)
+    # Similarity is advisory. Classification edits in an existing manifest survive resume.
+    for i, (name, row) in enumerate(hashes):
+        if name in resumed or row["classification"] != "KEEP":
+            continue
+        for prior_name, prior in hashes[:i]:
+            if prior.get("analysis") and row.get("analysis"):
+                distance = sum(a != b for a, b in zip(row["analysis"]["dhash"], prior["analysis"]["dhash"]))
+                if distance <= 7:
+                    row["classification"] = "ALTERNATE"
+                    row["review_note"] = f"Visual similarity to {prior['id']}; keep documentary moments manually"
+                    break
+    manifest["elapsed_seconds_last_run"] = round(time.monotonic() - start, 2)
+    manifest["items"] = [next((r for n, r in hashes if n == item["source_name"]), item)
+                         for item in manifest["items"]]
+    contact_sheet(job, manifest["items"])
+    atomic_json(manifest_path, manifest)
+    counts = {key: sum(r["classification"] == key for r in manifest["items"]) for key in ("KEEP", "REVIEW", "ALTERNATE")}
+    print(json.dumps({"job": str(job.resolve()), "total": len(files), "counts": counts,
+                      "errors": sum(r["status"] == "error" for r in manifest["items"]),
+                      "seconds": manifest["elapsed_seconds_last_run"], "approval": False}))
+    return 1 if any(r["status"] == "error" for r in manifest["items"]) else 0
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    sub = parser.add_subparsers(dest="action", required=True)
+    launch = sub.add_parser("run", help="Analyze, first-pass edit, preview, and resume a local JPEG job")
+    launch.add_argument("--input", type=Path, required=True)
+    launch.add_argument("--job", type=Path, required=True)
+    launch.add_argument("--limit", type=int)
+    status = sub.add_parser("status", help="Summarize a job without displaying private filenames")
+    status.add_argument("--job", type=Path, required=True)
+    args = parser.parse_args()
+    try:
+        if args.action == "run":
+            return run(args.input, args.job, args.limit)
+        data = json.loads((args.job / "manifest.json").read_text(encoding="utf-8"))
+        print(json.dumps({"version": data["picasso_version"], "total": len(data["items"]),
+                          "complete": sum(x["status"] == "complete" for x in data["items"]),
+                          "errors": sum(x["status"] == "error" for x in data["items"]),
+                          "approval": data.get("delivery_approved", False)}))
+        return 0
+    except Exception as error:
+        print(f"PICASSO: {type(error).__name__}: {error}", file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

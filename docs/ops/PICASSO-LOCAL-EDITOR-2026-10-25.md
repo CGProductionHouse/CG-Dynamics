@@ -1,0 +1,42 @@
+# PICASSO local editor audit — 25 October 2026
+
+Issue owner: [#878](https://github.com/CGProductionHouse/CG-Dynamics/issues/878). This brief supersedes that issue's LightCraft-first and Codex-first order. PICASSO is a private ChatGPT Work workflow beside Nolan; PR #862 and production systems are outside this lane.
+
+## Host evidence
+
+- Host `CA-MSICYBORG15`: MSI Cyborg 15 A13VF, 32 GiB RAM, NVIDIA RTX 4060 Laptop GPU, Windows, approximately 87 GiB free on C: at audit.
+- Installed Adobe applications include Photoshop 2026 `27.11.0.26` and Creative Cloud `6.11.0.478.6`. Lightroom Classic, digiKam, darktable, ImageMagick and ExifTool were **not** found in Windows uninstall entries, usual program locations, or PATH. An existing Lightroom catalog and XMP sidecars were found, but their approved use and provenance are unverified; neither proves Lightroom Classic is installed.
+- Installed Python `3.13`, Pillow `12.2.0`, OpenCV `5.0.0`, NumPy `2.5.1`. The first-pass runner uses these already installed packages; no new service or package is required on this host.
+- ChatGPT desktop processes and the Computer Use plugin are present. This Codex chat has local filesystem and shell access, but has **not verified** that the everyday user's ChatGPT Work switcher, skill selection, local shell permission, and iOS pairing are enabled. No ChatGPT Work instruction has yet launched this job.
+
+## Pixieset account and direct delivery audit
+
+The user approved existing Pixieset libraries as example sources. In the signed-in CG Production House browser account, Client Gallery showed 69 collections and a Photo Library. Its Integrations screen exposes the official Lightroom Classic plugin download (`Pixieset-1.0.4.lrplugin.zip`) and Pixieset Photo Editor. The latter redirects to a separate OAuth authorization screen; access and included plan were **not** granted or proven. Pixieset's [Photo Editor pricing](https://pixieset.com/photo-editor/) lists paid Pro and its [editing help](https://help.pixieset.com/hc/en-us/articles/46837576251789-Editing-photos-in-Pixieset-Photo-Editor) says generative removal uses credits, so PICASSO cannot assume that route meets R0.
+
+An owner-view 27-photo event collection was selected as an approved low-light sample source. Pixieset prepared a 23 MB high-resolution ZIP through its normal gallery download UI. Chrome blocked `downloads.pixieset.com` with `ERR_BLOCKED_BY_CLIENT`; no archive reached local Downloads, and the 25-photo proof has **not** run. We did not bypass the browser block, scrape galleries, or use Pixieset's internal website request paths as an API. Also, a Pixieset gallery copy may already be edited or reduced from camera original dimensions; any later proof must state the *downloaded JPEG* resolution and cannot claim RAW or camera-original processing.
+
+Direct return delivery is supported through Pixieset's [documented browser upload](https://help.pixieset.com/hc/en-us/articles/360058713951-Getting-started-with-Client-Gallery) or its [official Lightroom Classic publishing plugin](https://help.pixieset.com/hc/en-us/articles/115003504512-How-do-I-upload-from-Lightroom). The plugin only works with Lightroom Classic, which is absent on this MSI. We found no documented public Pixieset upload API for a custom PICASSO connector. PICASSO should export a staff-approved local folder, then a human uses the existing Client Gallery uploader to create a private review collection. Actual upload, preview-only state, capacity, and no-sharing behavior remain to be tested after the 25-photo quality gate.
+
+## Supported access path
+
+The smallest supported path is a local ChatGPT Work chat on the MSI, with the PICASSO skill and local shell. A local skill can direct a scoped command line job; a custom MCP bridge would add complexity without a proved need. OpenAI's [Build skills](https://learn.chatgpt.com/docs/build-skills), [Windows app](https://learn.chatgpt.com/docs/app/windows), and [MCP](https://learn.chatgpt.com/docs/extend/mcp) documentation describe these local capabilities. ChatGPT Work Computer Use on Windows can operate allowed foreground apps; app approvals remain per app ([Computer Use](https://learn.chatgpt.com/docs/computer-use)). This is the route for optional Photoshop review, not an assumed unattended Photoshop API.
+
+For iOS, [Remote connections](https://learn.chatgpt.com/docs/remote-connections) says an eligible Work conversation can access a connected local host only when the workspace enables Local computer access with Work Cloud. Ordinary mobile remote host control may appear under Codex/Remote and does not prove the required ChatGPT Work experience. The MSI must remain awake, online and unlocked for Windows Computer Use. Pairing, workspace policy and actual phone invocation remain unverified.
+
+Official [desktop-only local MCP plugin submission](https://developers.openai.com/plugins/deploy/desktop-only) is restricted to allowlisted partners. No plugin submission or public photo server is proposed. If local Work shell tools are denied by account policy, record the exact permission failure before considering an admin-approved local MCP route.
+
+## Engine and delivery decisions
+
+- [Lightroom Classic Assisted Culling](https://helpx.adobe.com/lightroom-classic/desktop/organize-photos-in-lightroom-classic/assisted-culling.html) officially includes subject focus, eye focus, eyes-open, exposure issue review and auto stacking. These are **not** claimed on the current MSI until Lightroom Classic is installed and tested. Its [export](https://helpx.adobe.com/lightroom-classic/desktop/export-photos/exporting-photos-basic-workflow.html) supports local JPEG and colour-space selection.
+- [digiKam](https://www.digikam.org/download/) offers an official Windows build; [darktable](https://www.darktable.org/install/) offers a Windows build and `darktable-cli`. Neither is installed or quality tested. Their open-source licensing and version should be verified against downloaded official release artifacts before use. LightCraft is experimental relative to these established choices, so it was not installed.
+- [Pixieset's official Lightroom Classic plugin](https://help.pixieset.com/hc/en-us/articles/115003009832-How-do-I-install-the-Lightroom-Plugin) is a delivery option after staff approval. No Pixieset API or automatic publishing.
+
+## Current implementation and gates
+
+`scripts/picasso/picasso.py` implements local JPEG inspection, conservative scene-aware first pass, similarity/focus hints, KEEP/ALTERNATE/REVIEW, one high-quality sRGB JPEG export per changed file, private EXIF removal, resumable SHA-256 manifest, per-image previews and a contact sheet. It does **not** provide verified eyes-open, expression, semantic documentary-value selection, automatic blemish detection, or automated local face relighting. The detected frontal-face luminance is advisory. Automatic skin retouch is disabled pending a real Photoshop-supported workflow and human review.
+
+The skill was installed locally at `%CODEX_HOME%\skills\picasso\SKILL.md` with a copy of the runner. This only proves filesystem installation and skill validation. It does not prove that a ChatGPT Work chat has selected and executed it. Two synthetic tests passed: corrupt-JPEG error isolation, original-byte preservation, EXIF orientation, sRGB ICC output, EXIF removal, resumability without re-encoding and preserved manual classification. The normal CG Dynamics `npm run build` also passed using the existing main-checkout `node_modules` through a temporary worktree junction. No real photograph quality gate was claimed.
+
+The acceptance gate remains open until 25 varied JPEGs from the approved Pixieset library reach a local private folder and a ChatGPT Work user runs the skill. Then inspect quality and record actual counts, errors, timing, dimensions/orientation, profile, metadata removal, retouch decisions and owner approval. Only then benchmark 100 and 1,000. No private images, manifests or client paths belong in the PR. Incremental recurring cost: R0 for the current local implementation; existing Adobe/Pixieset subscriptions are pre-existing.
+
+No production deployment, database or Microsoft write, new hosting or spend is part of this lane. Nolan PR #862 is untouched.

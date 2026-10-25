@@ -4884,3 +4884,7 @@ On a fresh chat:
 8. After each consequential action, update #505, #381 and this handover.
 
 The supervisor should keep CA out of routine mechanics and bring her in only for the exact protected decisions, provider verification/2FA/document steps or human review gates that truly require her.
+
+# 25 October — PICASSO local photography lane (#878)
+
+The owner's ChatGPT-first, R0 brief supersedes #878's LightCraft-first/Codex-first order. Isolated PICASSO local skill and JPEG first-pass runner are under review; no production deployment, new subscription, public media endpoint, or Nolan PR #862 edit. MSI has Photoshop 2026 and local Python/OpenCV/Pillow, but no installed Lightroom Classic, digiKam or darktable. Existing Pixieset account/library is accessible; user approved its libraries as example sources. A 27-photo high-resolution owner archive was prepared, but Chrome blocked `downloads.pixieset.com` (`ERR_BLOCKED_BY_CLIENT`), so there is **no 25-photo quality proof**. Pixieset's official Lightroom publishing plugin requires Lightroom Classic; Photo Editor requires separate authorization and its Pro/credit route is unproven under R0. Everyday ChatGPT Work skill invocation and iOS Work remote host access remain unverified. See `docs/ops/PICASSO-LOCAL-EDITOR-2026-10-25.md` and owning issue #878. Do not merge or benchmark 100/1,000 as though the quality gate passed. #679 and all production gates remain unchanged.
