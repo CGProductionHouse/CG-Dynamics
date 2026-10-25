@@ -5,9 +5,10 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+import numpy as np
 from PIL import Image, ImageCms
 
-from picasso import amend, approve_review, classify, preflight, prepare_review, run, verify
+from picasso import amend, approve_review, classify, finish, preflight, prepare_review, run, verify
 
 
 def sha(path: Path) -> str:
@@ -15,6 +16,17 @@ def sha(path: Path) -> str:
 
 
 class PicassoJobTest(unittest.TestCase):
+    def test_bright_jpeg_detail_is_not_newly_clipped_by_exposure(self):
+        gradient = np.linspace(30, 252, 223, dtype=np.uint8)
+        pixels = np.repeat(gradient[np.newaxis, :, np.newaxis], 24, axis=0)
+        pixels = np.repeat(pixels, 3, axis=2)
+        source = Image.fromarray(pixels, "RGB")
+        settings = {"exposure_ev": .22, "shadow_lift": .02, "highlight_pull": 0,
+                    "red_blue_balance": 0, "contrast": 0, "saturation": 0}
+        edited = np.asarray(finish(source, settings, {}))
+        self.assertGreater(int(edited[0, 20, 0]), int(pixels[0, 20, 0]))
+        self.assertEqual(int(np.count_nonzero(edited >= 253)), 0)
+
     def test_preserves_original_and_resumes_without_reencoding(self):
         with tempfile.TemporaryDirectory() as root:
             base = Path(root)
@@ -40,6 +52,9 @@ class PicassoJobTest(unittest.TestCase):
             self.assertEqual(sha(original), source_hash)
             self.assertTrue((job / "contact-sheet.jpg").exists())
             self.assertEqual(verify(job)["verified"], 1)
+            quality = verify(job, quality=True)
+            self.assertEqual(len(quality["highlight_quality"]), 1)
+            self.assertEqual(quality["highlight_review_ids"], [])
 
             classify(job, "0001", "ALTERNATE", "Staff reviewer", "Near duplicate of stronger moment")
             self.assertEqual(run(source, job, None), 0)

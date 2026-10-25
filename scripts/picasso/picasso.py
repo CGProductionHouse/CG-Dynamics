@@ -19,9 +19,10 @@ import cv2
 import numpy as np
 from PIL import Image, ImageCms, ImageDraw, ImageOps, __version__ as pillow_version
 
-VERSION = "0.3.4"
+VERSION = "0.3.5"
 SETTINGS = {"jpeg_quality": 94, "max_ev": 0.35, "max_wb": 0.025, "max_shadow_lift": 0.07,
-            "max_highlight_pull": 0.05, "max_contrast": 0.035, "max_saturation": 0.035}
+            "max_highlight_pull": 0.05, "max_contrast": 0.035, "max_saturation": 0.035,
+            "highlight_guard_start": 0.8, "highlight_guard_end": 0.985}
 SUFFIXES = {".jpg", ".jpeg"}
 FILE_ATTRIBUTE_OFFLINE = 0x1000
 FILE_ATTRIBUTE_RECALL_ON_OPEN = 0x40000
@@ -191,7 +192,8 @@ def settings_for(a: dict) -> dict:
 
 
 def finish(image: Image.Image, settings: dict, analysis: dict) -> Image.Image:
-    a = np.asarray(image, dtype=np.float32) / 255.0
+    original = np.asarray(image, dtype=np.float32) / 255.0
+    a = original.copy()
     ev = settings["exposure_ev"]
     a *= 2 ** ev
     luma = a @ np.array([.2126, .7152, .0722], np.float32)
@@ -204,6 +206,15 @@ def finish(image: Image.Image, settings: dict, analysis: dict) -> Image.Image:
     a = np.clip((a - .5) * (1 + settings["contrast"]) + .5, 0, 1)
     gray = (a @ np.array([.2126, .7152, .0722], np.float32))[..., None]
     a = np.clip(gray + (a - gray) * (1 + settings["saturation"]), 0, 1)
+    # Taper positive changes near bright source channels. This prevents the
+    # first pass from turning JPEG highlight detail into new hard clipping.
+    # Existing clipped source channels remain unrecoverable.
+    source_peak = original.max(axis=2, keepdims=True)
+    headroom = np.clip((SETTINGS["highlight_guard_end"] - source_peak) /
+                       (SETTINGS["highlight_guard_end"] - SETTINGS["highlight_guard_start"]), 0, 1)
+    headroom = headroom * headroom * (3 - 2 * headroom)
+    delta = a - original
+    a = np.clip(original + np.minimum(delta, 0) + np.maximum(delta, 0) * headroom, 0, 1)
     return Image.fromarray(np.uint8(np.round(a * 255)), "RGB")
 
 
@@ -547,12 +558,13 @@ def classify(job: Path, ident: str, decision: str, reviewer: str, reason: str) -
             "reused": False, "internal_review_approved": False}
 
 
-def verify(job: Path) -> dict:
+def verify(job: Path, quality: bool = False) -> dict:
     """Check private job exports against their sources without writing or re-encoding."""
     manifest = json.loads((job / "manifest.json").read_text(encoding="utf-8"))
     source_root = Path(manifest["source_root"]).resolve()
     output_root = (job / "output").resolve()
     failures = []
+    highlight_quality = []
     scene_counts = Counter()
     classification_counts = Counter()
     for row in manifest["items"]:
@@ -587,14 +599,29 @@ def verify(job: Path) -> dict:
                         or export.mode != "RGB" or len(export.getexif()) != 0
                         or "srgb" not in profile_name.lower()):
                     failures.append({"id": ident, "reason": "jpeg_dimensions_profile_or_exif"})
+                elif quality:
+                    source_rgb, _ = srgb_image(original)
+                    source_pixels = np.asarray(source_rgb, dtype=np.uint8)
+                    output_pixels = np.asarray(export.convert("RGB"), dtype=np.uint8)
+                    source_fraction = float(np.mean(np.any(source_pixels >= 253, axis=2)))
+                    output_fraction = float(np.mean(np.any(output_pixels >= 253, axis=2)))
+                    highlight_quality.append({"id": ident,
+                                              "source_bright_fraction": round(source_fraction, 5),
+                                              "output_bright_fraction": round(output_fraction, 5),
+                                              "added_bright_fraction": round(max(0, output_fraction - source_fraction), 5)})
         except (OSError, ValueError, TypeError):
             failures.append({"id": ident, "reason": "decode_or_profile_error"})
-    return {"version": manifest["picasso_version"], "total": len(manifest["items"]),
+    result = {"version": manifest["picasso_version"], "total": len(manifest["items"]),
             "verified": len(manifest["items"]) - len(failures), "failures": failures,
             "scenes": dict(scene_counts), "classifications": dict(classification_counts),
             "multiple_scene_labels_detected": len(scene_counts) >= 2,
             "human_quality_approved": False,
             "internal_review_approved": bool(manifest.get("internal_review_approval"))}
+    if quality:
+        result["highlight_quality"] = highlight_quality
+        result["highlight_review_ids"] = [row["id"] for row in highlight_quality
+                                          if row["added_bright_fraction"] > .01]
+    return result
 
 
 def main() -> int:
@@ -636,6 +663,7 @@ def main() -> int:
     cull.add_argument("--reason", required=True)
     qc = sub.add_parser("verify", help="Check source/output hashes, JPEG dimensions, sRGB profile and EXIF")
     qc.add_argument("--job", type=Path, required=True)
+    qc.add_argument("--quality", action="store_true", help="Also compare bright-pixel fractions against originals")
     args = parser.parse_args()
     try:
         if args.action == "run":
@@ -660,7 +688,7 @@ def main() -> int:
             print(json.dumps(classify(args.job, args.id, args.decision, args.reviewer, args.reason)))
             return 0
         if args.action == "verify":
-            result = verify(args.job)
+            result = verify(args.job, args.quality)
             print(json.dumps(result))
             return 0 if not result["failures"] else 1
         data = json.loads((args.job / "manifest.json").read_text(encoding="utf-8"))
