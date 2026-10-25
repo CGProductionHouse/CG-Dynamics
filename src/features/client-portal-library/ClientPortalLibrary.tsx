@@ -159,13 +159,18 @@ export function LibraryAssetRow({ asset, compact = false }: { asset: ClientPorta
   const [videoUrl, setVideoUrl] = useState<string | null>(null)
   const accessGeneration = useRef(0)
   const accessPending = useRef(false)
+  const pendingFileWindow = useRef<Window | null>(null)
   const canView = Boolean(asset.mimeType && /^(image\/(?:avif|gif|jpeg|png|webp)|application\/pdf)$/i.test(asset.mimeType))
   const canPlay = /^video\/mp4$/i.test(asset.mimeType ?? '')
 
   useEffect(() => {
     accessGeneration.current += 1
     accessPending.current = false
-    return () => { accessGeneration.current += 1 }
+    return () => {
+      accessGeneration.current += 1
+      pendingFileWindow.current?.close()
+      pendingFileWindow.current = null
+    }
   }, [asset.id, previewClientId])
 
   async function access(purpose: 'inline' | 'download' | 'stream') {
@@ -174,26 +179,60 @@ export function LibraryAssetRow({ asset, compact = false }: { asset: ClientPorta
     const generation = accessGeneration.current
     setBusy(purpose)
     setError(null)
+    // Reserve the destination during the tap, before async authorisation can
+    // outlive the browser's user activation. Never open a second window later.
+    let destination: Window | null = null
+    if (purpose !== 'stream') {
+      try {
+        destination = window.open('about:blank', '_blank')
+        if (!destination) throw new Error('File window blocked')
+        destination.opener = null
+        destination.document.title = 'CG Dynamics — opening file'
+        const referrer = destination.document.createElement('meta')
+        referrer.name = 'referrer'
+        referrer.content = 'no-referrer'
+        destination.document.head.appendChild(referrer)
+        destination.document.body.textContent = 'Opening your file. You can return to CG Dynamics while it loads.'
+        pendingFileWindow.current = destination
+      } catch {
+        destination?.close()
+        accessPending.current = false
+        setBusy(null)
+        setError('Allow file windows for CG Dynamics, then try again.')
+        return
+      }
+    }
     const result = await getClientPortalAssetAccess(asset.id, purpose, previewClientId)
-    if (accessGeneration.current !== generation) return
+    if (accessGeneration.current !== generation) {
+      destination?.close()
+      return
+    }
+    pendingFileWindow.current = null
     accessPending.current = false
     if (!result.data) {
+      destination?.close()
       setError(result.error)
       setBusy(null)
       return
     }
     if (purpose === 'stream') {
       setVideoUrl(result.data.url)
-    } else {
-      const anchor = document.createElement('a')
-      anchor.href = result.data.url
-      // An expired download may return an error page instead of an attachment.
-      // Keep the portal open for both view and download destinations.
-      anchor.target = '_blank'
-      anchor.rel = 'noopener noreferrer'
-      document.body.appendChild(anchor)
-      anchor.click()
-      document.body.removeChild(anchor)
+    } else if (destination?.closed) {
+      setError('The file window was closed. Tap View or Download to try again.')
+    } else if (destination) {
+      try {
+        const anchor = document.createElement('a')
+        anchor.href = result.data.url
+        // Navigate only the reserved, isolated window, including expired grants.
+        anchor.target = '_self'
+        anchor.rel = 'noopener noreferrer'
+        destination.document.body.appendChild(anchor)
+        anchor.click()
+        anchor.remove()
+      } catch {
+        destination.close()
+        setError('File access failed. Please try again.')
+      }
     }
     setBusy(null)
   }
