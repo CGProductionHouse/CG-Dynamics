@@ -11,4 +11,6 @@ Get the real closing shot, event name, logo, release wording and destinations fi
 
 Make a low-position negative control and an inward placement with identical copy, animation and sound. Compare reduced-size frames and complete playback on a phone in the intended platform viewer. Do not claim one universal safe rectangle; app controls, captions and aspect-ratio crops vary. Check the actual target overlays and any client-approved branding guide.
 
-The linked proof shows that vertical placement materially changes phone-scale reading. It does not validate the copy, official safe areas, title motion, song ending, event footage or an editable handover.
+The [public camera-audio hard-end/fade A/B](../../FIGHT-AUDIO-TAIL-CONTINUITY-STUDY.md) separately shows that a bounded working-track fade can prevent one measured truncated tail without changing earlier PCM. It does not validate a musical end button: listen to the actual selected track's phrase, event sound, last picture and title together before choosing a hard stop, retained room tail or small fade. Do not automatically fade a genuine final hit.
+
+The linked proofs show that vertical placement affects phone-scale reading and that one audio tail can be technically repaired. They do not validate the copy, official safe areas, title motion, song ending, event footage or an editable handover.

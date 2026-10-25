@@ -58,6 +58,8 @@ A [same-picture original-sound retime A/B](FIGHT-RETIME-AUDIO-SYNC-STUDY.md) now
 
 A [public camera-audio splice A/B](FIGHT-SOURCE-CUT-CONTINUITY-STUDY.md) adds a narrow non-impact cut-repair rule: a 10 ms overlap reduced one sample discontinuity, preserved the whole timeline duration and left every sample outside the overlap unchanged. It does not establish a universal fade, one continuous real scene or an audible approval.
 
+A [separate hard-end/fade delivery A/B](FIGHT-AUDIO-TAIL-CONTINUITY-STUDY.md) tests one truncated source-audio ending. A 60 ms working-track fade leaves the earlier PCM identical and lowers the decoded AAC's last 20 ms from −30.5 to −45.8 dBFS at the same −1.1 dBTP overall true peak. Its creative use at a Fight Night end button is unproved until actual picture, music phrase and a human ear are available.
+
 ## Skill-development order after owner correction
 
 The separate Nolan production lane already owns client story, WhatsApp/approval, prior-post screening, source selection and Premiere delivery. Studio's contribution is to turn an observed editing technique into a *visually and audibly convincing, repeatable* operation. The rejected PSG `CHANGED?` private study showed why a technically valid render cannot promote a creative skill: its question duplicated a posted story, and its source performance was awkward. Client editing remains parked while this skill pass proceeds.
