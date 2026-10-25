@@ -18,6 +18,8 @@ An independent [scene-perspective typography A/B](SCENE-PERSPECTIVE-TYPE-STUDY.m
 
 The [masked-opening source screen](MASKED-OPENING-SOURCE-SCREEN.md) rejects the existing opaque coffee surface as a forced portal and identifies a moving magnifying-glass rim as a potential physical aperture. No mask transition is claimed: the incoming shot and tracked edge have not been proved.
 
+The [motion-trail mask gate](MOTION-TRAIL-MASK-GATE.md) found a real skater travel path but rejected a held natural-footage cutout whose tree bleed and broken foot-to-board edge make the subject appear detached. It records a failed single-frame prototype, not an effect video or mastered mask.
+
 Subsequent bounded proofs now include [cup-contact sound placement](CUP-CONTACT-STUDY.md), [controlled dark-backdrop depth type](DARK-BACKDROP-DEPTH.md), [one-shot speed timing](SPEED-RAMP-STUDY.md) and a [stage-flare A/B](FLARE-CUT-STUDY.md). The stage test **rejects** an added exposure pulse because the incoming singer is already bright. These later results do not change the reference-audio or human-review gaps above, and no skill is mastered.
 
 The [stock vertical-framing A/B](FIGHT-VERTICAL-FRAMING-STUDY.md) now records a further Fight Night source gate: this 16:9 shot cannot fill a 9:16 frame without cutting away a fighter, while a full-width fit makes the action too small at phone scale. The result is a source-selection decision, not a new rendering technique.
