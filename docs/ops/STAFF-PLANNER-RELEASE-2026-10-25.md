@@ -47,9 +47,11 @@ All changed-file tests passed (522), with the subsequent two narrow permission
 tests and creation/replay tests passing. The wider initial Windows run produced
 4230 tests: 4206 pass, 19 declared skips and five missing-OpenSSL failures in
 unchanged SES suites. Existing Git-bundled OpenSSL resolves those failures:
-18/18 SES tests pass without code/assertion changes. A fresh clean-checkout serial
-rerun is required for the final receipt; unsupported Windows SES Bash setup is
-explicitly excluded, not passed. Disposable SQL tests are not full production
+18/18 SES tests pass without code/assertion changes. Fresh clean-checkout serial
+rerun: **4230 total / 4211 passed / 19 declared skips / zero failures**, 461.333s.
+Unsupported Windows SES Bash setup is explicitly excluded, not passed. A Windows
+command-length issue prevented the first absolute-path invocation from starting;
+relative test paths fixed invocation only. Disposable SQL tests are not full production
 RLS/multi-session/recipient delivery certification.
 
 Local production TS/Vite build matches the existing public Supabase browser
@@ -59,6 +61,16 @@ the new Calendar and guarded Planner code. All changed-path lint/diff pass.
 Actual local Planner/Calendar/conflict-review browser fixtures cover desktop and
 mobile with synthetic adapters. Runtime Edge bundle is independently verified;
 compatibility type checks are not substituted for hosted packaging proof.
+
+Hosted MCPv71 already matches all reviewed staff files. Only unrelated OneDrive
+sources differ from the checkout; preserve those HOSTED files and do not redeploy
+MCP. Microsoft syncv76 release packet preserves11 hosted files/import map/JWT
+setting and changes only6 reviewed staff files. Exact staged runtime bundles
+72 modules successfully without sloppy imports or dependency changes.
+
+The optional captured-source paging RPC remains absent/unapplied. Its prepared
+SQL is NOT one of the two approvals above. Existing MCP's optional captured-source
+reader must report unavailable; no permission or refresh fallback is authorised.
 
 Before hosting: confirm the existing CG Dynamics project/team/domain and prior
 serving rollback, fresh billing headroom, unchanged peer and exact candidate SHA.
