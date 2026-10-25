@@ -21,6 +21,7 @@
 - Music asset 580 (previously rejected by the owner) and Mixkit 32 **Driving Ambition** (used in the posted October PSG film) are excluded from this redo. Do not mistake a new in-point for a new cue. The creative sound gate requires hearing the exact export; technical loudness and peak results cannot waive it.
 - Use the **official PSG animated logo outro** from the existing client package, with its proven portrait adaptation where suitable. A static branded end card is not equivalent. The four-topic V2 icon wheel looked generic and poorly designed; its licence and animation timing did not validate its design.
 - The private V1 and V2 Studio exports are **rejected experiments**, not review candidates. Their technical proofs and failures remain only to prevent repetition. The owner has not approved a PSG November replacement, soundtrack, graphics treatment, team shot, claims, phone number or delivery.
+- The 25 October read-only refresh of the PSG OneDrive `Videos` hierarchy found January, April and July 2026 folders, with no new October/November team shoot. See `PSG-PREFLIGHT.md`. A concurrent browser session owned the signed-in WhatsApp tab; this lane stopped that interaction and has not reconciled newer chat feedback through it.
 
 ## Source trail and lane boundaries
 
