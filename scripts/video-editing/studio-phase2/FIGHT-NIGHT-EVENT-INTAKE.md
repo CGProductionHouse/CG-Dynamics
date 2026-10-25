@@ -55,7 +55,7 @@ The initial 27 files were **not** the entire under-ceiling set. A CSV-to-local c
 | `3Q7A9735` | Spectator in red lighting gestures toward the ring | Very dark audience texture, no hit. |
 | `3Q7A9967` | Man in the audience repeatedly raises a fist | Cheering is real, but cannot be attached to an unverified knockout. |
 
-The expanded short-source screen still yields **zero clearly landed blows**. There is now no unexamined completed camera original within the connector's allowed size range. The hit-led trailer depends on larger bouts through a legitimate, complete local transfer and original-frame/audio review. Do not cut a crowd reaction against an ambiguous glove to imply contact.
+The expanded **sampled visual** short-source screen still yields **zero clearly landed blows**. There is now no unexamined completed camera original within the connector's allowed size range at the contact-sheet stage. This is not a full-speed picture-and-sound review of all 37 sources: the ten new files were sampled at 5 fps, earlier short-source sheets were also sampled, and only six camera-audio streams have technical measurements. Do not promote a sampled non-select into a verified hit or claim the original audio has been heard. The hit-led trailer depends on larger bouts through a legitimate, complete local transfer and original-frame/audio review. Do not cut a crowd reaction against an ambiguous glove to imply contact.
 
 ## First real-footage timeline work
 
