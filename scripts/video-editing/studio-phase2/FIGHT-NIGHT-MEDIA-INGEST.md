@@ -43,7 +43,8 @@ authorised OneDrive sync/local transfer into the editing workspace **before**
 the trailer deadline. The connected SharePoint tool remains valuable for
 metadata and small selects, but cannot be the sole 4K camera-original ingest.
 
-Current status: 27 hash-verified short originals are local; no clearly landed
+Current status: all 37 completed originals under the 100 MiB connector limit
+are local and hash-verified; no clearly landed
 event blow has been verified. The 646 MB and 822 MB candidate bout files are
 still missing locally. The large-media route is documented but **not yet
 operationally verified** on this workstation. Do not call the access gap fixed
@@ -59,3 +60,12 @@ no hash-verified large local original resulted in this pass. Do not repeat
 blind clicks or claim that preview playback is a working 646 MB transfer.
 The intended handover remains a normal authorised source-account local copy
 or camera-card transfer followed by the inventory size/SHA check above.
+
+At 23:51 SAST, a comparison of the remote inventory with the local source
+folder identified ten short files missed by the first pass. All ten were
+retrieved through the connector's supported under-limit route. A fresh
+size/SHA-256 audit passed for **37 of 37** completed originals at or below
+104,857,600 bytes (2,370,659,572 bytes total). Their moving-contact screen
+found audience, ring-side and result-setting footage but no clean landed blow;
+see the exact decisions in `FIGHT-NIGHT-EVENT-INTAKE.md`. There are now no
+unexamined completed files in the connector's supported size range.

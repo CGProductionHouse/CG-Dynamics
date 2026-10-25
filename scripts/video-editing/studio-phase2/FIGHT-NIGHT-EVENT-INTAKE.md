@@ -41,6 +41,22 @@ The current intake is **not yet a trailer** and contains **zero verified event h
 - The actual high-energy trailer still requires the **larger bout takes**, including `9330` and `9517`. Retry a legitimate private download path when available; then screen actual adjacent frames and camera sound before choosing blows. Continue the independent TBS redo while this access gate remains open.
 - The sustainable large-original route and the tested connector/account limitations are recorded in [FIGHT-NIGHT-MEDIA-INGEST.md](FIGHT-NIGHT-MEDIA-INGEST.md). The documented path has not yet produced a large verified file on this workstation.
 
+## 23:51 SAST completion of the under-100-MiB camera intake
+
+The initial 27 files were **not** the entire under-ceiling set. A CSV-to-local comparison exposed ten remaining completed originals smaller than the connector's 104,857,600-byte limit. All ten were fetched privately through the normal raw-file route, preserved unchanged, and individually matched the OneDrive inventory's byte length and SHA-256. A final independent pass verified **all 37 nonzero originals at or below the limit**, totalling 2,370,659,572 bytes, with no size/hash mismatch. The ten new moving sources were screened at 5 fps; contacts remain in the private `Fight-Night-2026/work` area, not Git.
+
+| Newly verified source | Actual picture | Trailer decision |
+| --- | --- | --- |
+| `3Q7A9455` | Dark audience and ring-side aisle, people moving through the frame | Atmosphere only; no visible strike. |
+| `3Q7A9461`, `9463` | Spectators; people cross the foreground | Crowd context only; no contact. |
+| `3Q7A9491`, `9492`, `9493` | Ring-side audience, filming and talking | Possible sub-second atmosphere, subject to sound/crop. No causal reaction claim. |
+| `3Q7A9494` | Two boxers and an official stand together in the ring under shifting red light | Bout/result setting only; no strike or demonstrated winner in these sampled frames. |
+| `3Q7A9594` | Spectator films and cheers | Genuine crowd energy; cannot prove a particular punch. |
+| `3Q7A9735` | Spectator in red lighting gestures toward the ring | Very dark audience texture, no hit. |
+| `3Q7A9967` | Man in the audience repeatedly raises a fist | Cheering is real, but cannot be attached to an unverified knockout. |
+
+The expanded short-source screen still yields **zero clearly landed blows**. There is now no unexamined completed camera original within the connector's allowed size range. The hit-led trailer depends on larger bouts through a legitimate, complete local transfer and original-frame/audio review. Do not cut a crowd reaction against an ambiguous glove to imply contact.
+
 ## First real-footage timeline work
 
 - Private working cut: `C:\Users\chris\Videos\CG-AI-Editing\Fight-Night-2026\work\fight-night-real-footage-opening-v2.mp4` (1.300 s, 1080×1920, 50 fps, stereo AAC). It uses only the hash-matched camera originals above: `3Q7A9109.MP4` source 0.00–0.50 s, then `3Q7A9327.MP4` source 0.50–1.30 s. A centred 9:16 crop preserves the light and boxer. Both original camera tracks are retained with a 6 dB working reduction and 40 ms cut-edge fades. There is no stock, library hit, music or implied blow. The cut is a **potential opening fragment**, not an approval video or the promised 30-second trailer.
