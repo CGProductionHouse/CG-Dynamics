@@ -6,7 +6,11 @@
 
 - Protected, saved and reopened Premiere project: `review\d13\native\2026_10_WE_AR_FUELS_VIDEO_02_BIG_WEEK_AHEAD_D16_SOUND_WORKING.prproj`, sequence `e3566716-303b-4b20-a38f-d099fe9b546b`. The final reopen reported one sequence, zero offline media, 19 contiguous V1 clips, six V2 alpha title clips, five contiguous A1 music sections and separate A2/A3 effects.
 - **Premiere UI native export**, not an FFmpeg proxy: `review\d13\2026_10_WE_AR_FUELS_VIDEO_02_BIG_WEEK_AHEAD_REVISION_03_FINAL.mp4`. Adobe displayed “Your video was exported successfully”. SHA-256 `0C69A5CCBB8092AFCEA8027641D36DCE3E829D492A893BCA0980DE008B98B8B3`. `ffprobe`: 30.000 s, 2160×3840, 25 fps H.264, stereo AAC, 226,425,202 bytes. Full `ffmpeg -f null` decode completed without error. Contact sheet: private `review\d13\final-export-contact.jpg` (generated from preceding Revision 02; picture is unchanged in Revision 03).
-- Existing D4 portrait cover and caption are the candidate forwardable pair; confirm the exact caption/phone numbers against live client authority before reuse. The owner did not ask for a new cover treatment in the We AR amendment.
+- Existing D4 portrait cover and caption were used as the forwardable pair. The complete caption was visible in the owner's quoted group message. The cover source is a 1080×1920 PNG. WhatsApp's image composer reported “This media is not HD resolution” and disabled its HD toggle; the image was still sent through Photos & videos with a blank caption. Do not claim WhatsApp's explicit HD mode was selected or that its recipient-side pixel dimensions were measured.
+
+## Internal approval delivery
+
+At 20:20 SAST on 25 October, the exact `CG Nolan Approvals` group displayed `2026_10_WE_AR_FUELS_VIDEO_02_BIG_WEEK_AHEAD_REVISION_03_FINAL.mp4` as an MP4 **document** (216 MB) with only the complete proposed post caption in its message. The matching `2026_10_WE_AR_FUELS_VIDEO_02_BIG_WEEK_AHEAD_REVISION_03_COVER.png` was sent next as a standalone image with a blank caption. The last observed WhatsApp state for **both** messages was **Sent**; neither had yet shown Delivered. No third review note or client/public message was sent. This is an internal approval request, not approval. Verify Delivered and staff picture/sound/offer review before treating the pair as forwardable to the client.
 
 ## What changed in the application
 
