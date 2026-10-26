@@ -1,0 +1,10 @@
+# Three-frame zoom cut: source screen before rendering
+
+26 October 2026. The owner's [three-frame Premiere zoom tutorial](https://www.tiktok.com/@miracampschool/video/7504014296779590935) shows adjacent short clips and Transform scale/easing. It is a timing/mechanism example, not a reason to add a zoom to any arbitrary cut. **No new zoom effect was rendered here**: two already-local stock sources failed the action/framing screen.
+
+| Source | Actual samples | Decision |
+|---|---|---|
+| Local `media/mixkit-2029-720.mp4`, SHA-256 `45C834F4CC2909AD30584CFC192077B1250290C8FD7A1D93FDBC4AD0367C9E2A`, 1280 × 720, 60000/1001 fps, 13.413 s | 0.5, 2.5, 5, 7.5, 10 and 12 s show a golfer preparing and finally putting beside the flag. The golfer and flag are horizontally separated. | A 9:16 fill crop cannot retain both action and destination; a short zoom worsens the spatial loss. Do not use this landscape source for the vertical proof. |
+| Local [Mixkit coffee machine #41865](https://mixkit.co/free-stock-video/cup-being-filled-with-coffee-in-a-coffee-machine-41865/) `media/mixkit-41865-720.mp4`, SHA-256 `883B71655E2F2448A03B02F6E318ECED58B51BAC5B74DA86C018995F3C817331`, 720 × 1280, 24000/1001 fps, 13.180 s | 1, 3, 5, 7, 9 and 11 s show nearly the same continuous pour/nozzle/cup composition. | No distinct action peak or matched second angle exists. A three-frame zoom would only manufacture energy in a static shot, so reject this source as a zoom-cut proof. |
+
+The private `golf-contact.png` and `coffee-contact.png` are under `C:\Users\chris\Videos\CG-AI-Editing\Nolan-Skill-Proofs\short-zoom-20261026`; stock originals and frames remain outside Git. This is a **sampled visual screen**, not full-speed source playback or sound review. Next valid A/B requires a portrait or deliberately protected crop, a clear source motion peak, and a second take or time-continuous scale change that keeps the subject and destination legible. Compare the plain cut with only the 3-frame zoom variable, then review motion and sound at full speed on a phone. Do not use scale/blur to hide a continuity jump.
