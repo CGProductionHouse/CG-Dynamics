@@ -37,7 +37,7 @@ def title_mask(font: ImageFont.FreeTypeFont) -> Image.Image:
     return mask
 
 
-def frame(index: int, mode: str, mask: Image.Image) -> Image.Image:
+def frame(index: int, mode: str, mask: Image.Image, title_opacity: float = 1.0) -> Image.Image:
     # A restrained synthetic stage makes the title the only changed variable.
     im = Image.new("RGB", (W, H))
     pix = im.load()
@@ -52,7 +52,11 @@ def frame(index: int, mode: str, mask: Image.Image) -> Image.Image:
     draw.text((W // 2, 632), "A MOMENT OF FOCUS", font=font_face(19),
               anchor="ma", fill=(147, 178, 173))
     base_layer = Image.new("RGB", (W, H), BASE)
-    im.paste(base_layer, (0, 0), mask)
+    if title_opacity < 1.0:
+        mask_for_frame = mask.point(lambda value: round(value * title_opacity))
+    else:
+        mask_for_frame = mask
+    im.paste(base_layer, (0, 0), mask_for_frame)
 
     if mode == "shine" and 14 <= index <= 35:
         # Narrow diagonal highlight: it only replaces pixels *inside* the glyph mask.

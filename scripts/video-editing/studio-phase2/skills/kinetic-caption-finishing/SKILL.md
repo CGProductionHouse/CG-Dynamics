@@ -5,7 +5,7 @@ description: Design and test purposeful animated captions, readability mattes an
 
 # Kinetic caption finishing
 
-**Status, 26 October 2026:** Five owner-shared Solid Coast Editing TikToks were visually sampled in the browser with audio muted. A protected local Daisy visual A/B tested staggered rise and local gradient. A separate fully synthetic steady-title versus masked-shine A/B now tests the logo sweep. Full-speed audible review and native staff reopen have not passed. This is a source-grounded construction and selection card, **not a mastered effect pack**.
+**Status, 26 October 2026:** Five owner-shared Solid Coast Editing TikToks were visually sampled in the browser with audio muted. A protected Daisy A/B tested staggered rise and local gradient. Fully synthetic steady-title controls now compare a masked shine and a restrained opacity accent. A natural foreground-over-type source was screened and rejected. Full-speed audible review and native staff reopen have not passed. This is a source-grounded construction and selection card, **not a mastered effect pack**.
 
 Choose the buyer sentence and real picture action first. Assign each title one job: interrupt with a concrete hook, clarify a choice, identify the business, or resolve the CTA. Compare a clean title with the treatment over the **same** shot, wording, duration and music. Retain only the version that reads better at normal speed and phone size. Use the client's approved font/colour and editable text layers; a technically successful raster export alone is not a staff handover.
 
@@ -34,3 +34,9 @@ The first near-white base title made the white highlight practically invisible, 
 ## Natural foreground source rejection, 26 October
 
 The [Mixkit #1252 three-frame source screen](../../NATURAL-OBJECT-MASK-20261026.md) tested a real left-to-right walking person over fictional `MOVE` type. The body reaches the lower frame edge, but the foreground covers too much of the word and the GrabCut mask includes a lower-right background wedge. The source/word placement is rejected before a moving render. This is the key editorial check for the Object Mask tutorial: a tracked outline alone does not justify an unreadable title or a pasted background edge.
+
+## Restrained opacity accent A/B, 26 October
+
+[`render_flicker_ab.py`](render_flicker_ab.py) reuses the exact fictional ECHOFORM stage and glyph mask from the shine proof. A [steady entrance](proof-flicker-steady.mp4) and [single restrained accent](proof-flicker-accent.mp4) have the same 3.000 s / 72-frame, 540 × 960 / 24 fps silent H.264 output and both fully decode. The [phone-size 12-frame contact](proof-flicker-contact.png) compares frames 11–16 for both versions. The control appears at frame 12 and holds; the variant appears at 75%, reaches full opacity, dips once to 75%, then remains at 100% for the remaining 57 frames. At the first accent frame, 7,488 changed pixels were inside the glyphs and **zero** outside the glyphs in the pre-encode raster comparison. SHA-256: steady `AC2FD755E1F2D44CFF88257AB63ADB65748AA11F8387BF86A1ED05CBDE4CDF2E`; accent `EF163298FBA9CC2E6D40023AC80ED2D297D4167AFC6CAC12C1FC12F4E48AA7C4`.
+
+An initial 25%-opacity entrance was rejected as too faint at 270 × 480, then changed to the 75% reference-sized accent. The current accent is readable at sampled phone-size frames but adds little to a static fictional title; it is **not a default client caption animation**. A real scene must justify a single emphasis against a steady reveal, with full-speed sound/phone review and client-safe typography. No perceptual flicker comfort, beat timing, native opacity keyframes or staff editability is proven by the silent raster render.
