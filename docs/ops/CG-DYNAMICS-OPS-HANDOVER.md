@@ -13,6 +13,10 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 26 October — PICASSO Staffy review withdrawn; quality gate reset (#878 / PR #879)
+
+The 203-photo Staffy internal Pixieset review collection was hidden after Amonique identified a visibly blurred walkout frame and said the overall finish appeared too close to the originals. PICASSO acknowledged this in the exact approvals WhatsApp group with a signed message; the current gallery must not be treated as accepted or sent to clients. This is a photography-lane state correction, not a CG Dynamics or Nolan deployment. The owner issue #878 records the withdrawal. PR #879 carries the reusable event gate and private crop/ledger tool; all selected frames need native-size subject review, scene-specific finishing, and a human-accepted 25-frame calibration before any new review link. Technical JPEG verification alone is insufficient. Company ChatGPT Work-to-local execution remains unproved. No spend, production deployment, or PR #862 change.
+
 ### 20 October — all58 Performance/package previews; two client fixes verified locally
 
 PR #857 reviewed and merged as d279fb5c4499de408701639b1c7d913fd37abba3.
