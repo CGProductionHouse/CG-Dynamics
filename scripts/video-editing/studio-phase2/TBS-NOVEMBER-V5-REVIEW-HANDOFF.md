@@ -21,6 +21,17 @@ An additional read-only [first-three-second screen](VISUAL-HOOK-FIRST-SECONDS-20
 
 A 27 October **whole-film still-frame screen** of the same protected export, sampled every 1.5 s and more densely from 17.0–20.2 s, confirms the checklist composite at 16.767–20.500 s reuses the table-saw picture from 0–2.500 s and coffee-machine picture from 4.767–7.000 s within this same film. The checklist adds new information (`EQUIPMENT / VALUE / USE`), but the second appearance adds no new photographed action. At a 270 × 480 proxy, the three rows finish by about 19.4 s and hold through about 20.2 s. This is an **editorial repetition and energy review gate**, not proof that the scene is wrong: staff should watch the whole section at normal speed before approving or deciding on a new V6. Private contacts are `C:\Users\chris\Videos\CG-AI-Editing\Nolan-Skill-Proofs\tbs-whole-film-screen-20261027.jpg` and `tbs-checklist-20261027.jpg`; no client picture was committed. The current delivered file was not changed or resent.
 
+**27 October sound-design level audit:** The protected `mix-v5.py` cues were decoded from their actual licensed local sources at the script's gain and timeline offsets, in mono at 48 kHz, and compared with the same-length music windows before the final limiter. RMS is a diagnostic, not a listening verdict; a short sound may be perceptible even when its window RMS is lower. The comparisons expose a concrete balance risk:
+
+| Cue and time | Cue RMS | Music RMS | Cue below music |
+| --- | ---: | ---: | ---: |
+| Saw at 0 s (first 1.5 s) | −26.6 dBFS | −31.9 dBFS | cue is 5.3 dB **above** music |
+| Keyboard at 10 s (1.5 s) | −60.5 dBFS | −31.0 dBFS | 29.5 dB |
+| Three checklist clicks at about 17.57/18.32/19.07 s (0.3 s each) | −36.3 dBFS each | −17.4/−17.9/−16.6 dBFS | 18.4–19.7 dB |
+| Slide into sign at 20.35 s (1.2 s) | −52.0 dBFS | −17.4 dBFS | 34.6 dB |
+
+The keyboard and slide also have lower **sample peaks** than the coincident music (keyboard −32.9 versus −14.8 dBFS; slide −29.4 versus −6.3 dBFS). This does not prove they are inaudible after mixing, but it undermines a claim of consistently present transition sound. Staff should specifically hear the keyboard, three list ticks and sign slide on headphones and a phone, then choose whether to rebalance or remove weak cues in a protected V6. Do not simply raise all effects by one preset amount; preserve the strong early saw, adviser intelligibility and true-peak/mono checks. The exact delivered V5 was not changed or resent.
+
 - The visible seated adviser setup matches TBS's [20 July public reel](https://www.instagram.com/reel/DbC5UQ1kXml/). The new equipment-cover story is different; exact picture/audio reuse remains unverified. Staff must compare before client forwarding. The older shot is **not** described as unused.
 - Full-speed human picture and headphone/phone sound review, creative effects/music fit, client/owner approval and native editor timeline editability are unproven. The private Python/FFmpeg recipes and source ledger support revision, but they are not a Premiere or CapCut project.
 - The WhatsApp image was a separate 1080 × 1920 photo, but the service did not offer its HD mode for this image. If the team needs the uncompressed cover, use the private original or send it as a document in a separate approved handoff; do not silently substitute that for the requested photo format.
