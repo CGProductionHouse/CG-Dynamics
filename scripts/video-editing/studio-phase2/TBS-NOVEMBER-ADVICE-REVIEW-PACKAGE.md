@@ -2,7 +2,7 @@
 
 Status: **internal Nolan approvals delivery completed 26 October 2026; staff/client approval open.** This is a new edit from June TBS originals and licensed inserts. It does not reuse the rejected November farm cut or its music.
 
-WhatsApp receipt in the exact **CG Nolan Approvals** group, Christie-Ann Business profile: document plus proposed caption sent at 07:06 SAST and observed **Delivered**; separate caption-free cover sent at 07:10 SAST with the WhatsApp **HD** badge and observed **Delivered**. A separate 07:11 message signed from Nolan explained the bounded prior-export screen and asked for public-post-history, family-photo and full-speed sound checks; last observed **Sent**. No client/public group was contacted. The cover image was rendered at 1080×1920 and sent through WhatsApp's HD image route from a 2160×3840 Lanczos presentation copy; the upsize does not create new photographic detail.
+WhatsApp receipt in the exact **CG Nolan Approvals** group, Christie-Ann Business profile: document plus proposed caption sent at 07:06 SAST and observed **Delivered**; separate caption-free cover sent at 07:10 SAST with the WhatsApp **HD** badge and observed **Delivered**. A separate 07:11 message signed from Nolan explained the bounded prior-export screen and asked for public-post-history, family-photo and full-speed sound checks; it was later observed **Delivered**. No client/public group was contacted. The cover image was rendered at 1080×1920 and sent through WhatsApp's HD image route from a 2160×3840 Lanczos presentation copy; the upsize does not create new photographic detail.
 
 ## Forwardable files and order
 
