@@ -11,15 +11,16 @@ import csv
 import hashlib
 import json
 from pathlib import Path
+import re
 import statistics
 
 import cv2
 import numpy as np
-from PIL import Image, ImageDraw, ImageFont, ImageOps
+from PIL import Image, ImageDraw, ImageOps
 
 
 MODEL = Path(__file__).parent / "models" / "face_detection_yunet_2026may.onnx"
-VERSION = "0.1.0"
+VERSION = "0.2.0"
 CELL = 500
 LABEL = 55
 ROWS_PER_SHEET = 4
@@ -60,6 +61,14 @@ def crop_tile(image: Image.Image, box: tuple[int, int, int, int]) -> Image.Image
     return tile
 
 
+def full_tile(image: Image.Image) -> Image.Image:
+    preview = image.copy()
+    preview.thumbnail((CELL, CELL), Image.Resampling.LANCZOS)
+    tile = Image.new("RGB", (CELL, CELL), (25, 25, 25))
+    tile.paste(preview, ((CELL - preview.width) // 2, (CELL - preview.height) // 2))
+    return tile
+
+
 def comparison_metrics(source: Image.Image, output: Image.Image, box: tuple[int, int, int, int]) -> tuple[float, float, float]:
     src = cv2.cvtColor(np.asarray(source.crop(box).convert("RGB")), cv2.COLOR_RGB2GRAY)
     out = np.asarray(output.resize((400, round(400 * output.height / output.width))).convert("RGB"), dtype=np.float32)
@@ -72,23 +81,30 @@ def comparison_metrics(source: Image.Image, output: Image.Image, box: tuple[int,
 
 
 def make_sheet(rows: list[dict], destination: Path) -> None:
-    sheet = Image.new("RGB", (CELL * 2, (CELL + LABEL) * len(rows)), (25, 25, 25))
+    sheet = Image.new("RGB", (CELL * 4, (CELL + LABEL) * len(rows)), (25, 25, 25))
     draw = ImageDraw.Draw(sheet)
     for index, row in enumerate(rows):
         y = index * (CELL + LABEL)
-        sheet.paste(row.pop("_source_tile"), (0, y))
-        sheet.paste(row.pop("_output_tile"), (CELL, y))
+        sheet.paste(row.pop("_source_full"), (0, y))
+        sheet.paste(row.pop("_output_full"), (CELL, y))
+        sheet.paste(row.pop("_source_tile"), (CELL * 2, y))
+        sheet.paste(row.pop("_output_tile"), (CELL * 3, y))
         title = f"{row['key']} | {row['set']} | {row['roi_type']} | focus probe {row['laplacian_var']}"
         draw.text((8, y + CELL + 5), title[:130], fill="white")
-        draw.text((8, y + CELL + 28), "ORIGINAL 100% CROP", fill="#dddddd")
-        draw.text((CELL + 8, y + CELL + 28), "EDITED SAME CROP", fill="#dddddd")
+        for column, label in enumerate(("ORIGINAL FULL SCENE", "EDITED FULL SCENE", "ORIGINAL 100% CROP", "EDITED SAME CROP")):
+            draw.text((column * CELL + 8, y + CELL + 28), label, fill="#dddddd")
     destination.parent.mkdir(parents=True, exist_ok=True)
     sheet.save(destination, "JPEG", quality=88)
 
 
+def safe_name(value: str) -> str:
+    stem = re.sub(r"[^A-Za-z0-9._-]+", "-", value).strip("-.")[:70] or "set"
+    return f"{stem}-{hashlib.sha1(value.encode('utf-8')).hexdigest()[:6]}"
+
+
 def run(manifest_path: Path, destination: Path, keys: set[str] | None) -> None:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    output_root = manifest_path.parent / "output"
+    output_root = Path(manifest.get("output_root", manifest_path.parent / "output"))
     if not MODEL.is_file():
         raise FileNotFoundError(f"Pinned local face detector missing: {MODEL}")
     detector = cv2.FaceDetectorYN.create(str(MODEL), "", (1200, 800), score_threshold=0.6)
@@ -120,17 +136,18 @@ def run(manifest_path: Path, destination: Path, keys: set[str] | None) -> None:
                    "editorial_decision": "REVIEW"}
             report.append(row)
             page = pages.setdefault(item["set"], [])
-            page.append({**row, "_source_tile": crop_tile(source, box), "_output_tile": crop_tile(result, box)})
+            page.append({**row, "_source_full": full_tile(source), "_output_full": full_tile(result),
+                         "_source_tile": crop_tile(source, box), "_output_tile": crop_tile(result, box)})
             if len(page) == ROWS_PER_SHEET:
                 page_numbers[item["set"]] = page_numbers.get(item["set"], 0) + 1
-                safe_set = item["output"].split("\\")[0].replace(" ", "-")
+                safe_set = safe_name(item["set"])
                 make_sheet(page, destination / "crops" / f"{safe_set}-p{page_numbers[item['set']]:02}.jpg")
                 pages[item["set"]] = []
         print(f"{index}/{len(selected)} {item['key']} faces={count} focus_probe={sharpness} rgb_delta={rgb_delta}", flush=True)
     for set_name, page in pages.items():
         if page:
             page_numbers[set_name] = page_numbers.get(set_name, 0) + 1
-            safe_set = next(r["output"] for r in selected if r["set"] == set_name).split("\\")[0].replace(" ", "-")
+            safe_set = safe_name(set_name)
             make_sheet(page, destination / "crops" / f"{safe_set}-p{page_numbers[set_name]:02}.jpg")
     if report:
         with (destination / "focus-and-grade-review.csv").open("w", newline="", encoding="utf-8-sig") as stream:
