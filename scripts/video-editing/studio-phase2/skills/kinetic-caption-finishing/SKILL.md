@@ -1,0 +1,26 @@
+---
+name: nolan-kinetic-caption-finishing
+description: Design and test purposeful animated captions, readability mattes and foreground type interaction for short CG client videos.
+---
+
+# Kinetic caption finishing
+
+**Status, 26 October 2026:** Five owner-shared Solid Coast Editing TikToks were visually sampled in the browser with audio muted. A protected local Daisy visual A/B of the staggered rise and local gradient has now rendered and been sampled; full-speed audible review and native staff reopen have not passed. This is a source-grounded construction and selection card, **not a mastered effect pack**.
+
+Choose the buyer sentence and real picture action first. Assign each title one job: interrupt with a concrete hook, clarify a choice, identify the business, or resolve the CTA. Compare a clean title with the treatment over the **same** shot, wording, duration and music. Retain only the version that reads better at normal speed and phone size. Use the client's approved font/colour and editable text layers; a technically successful raster export alone is not a staff handover.
+
+| Reference witnessed | Actual visible mechanism | Useful test and limit |
+| --- | --- | --- |
+| [Easy caption effect](https://www.tiktok.com/@solid.coast.editing/video/7626363213419973910) | Large word on a Premiere graphic with several closely spaced opacity keyframes; the sampled controls show a 75% opacity point. It demonstrates a brief flicker, despite the group label “scrolling text.” | Compare a single emphasis flicker with a steady word at equal duration. Avoid continuous flicker, loss of readability or exposure discomfort. No exact full keyframe recipe or sound was verified. |
+| [Animate captions in seconds](https://www.tiktok.com/@solid.coast.editing/video/7644233569895714050) | Words occupy separate staggered tracks and rise into a phrase in sequence. | Reveal one meaningful phrase in steps that follow an action or music phrase. Preserve readable hold time and avoid making every line enter identically. This extends the existing [staggered-type card](../staggered-type/SKILL.md). |
+| [Simple but effective trick](https://www.tiktok.com/@solid.coast.editing/video/7616723980984012054) | A linear black-to-transparent gradient is positioned behind captions over bright moving footage; the visible picker shows a movable midpoint. | Compare the gradient with unbacked type on the exact high-contrast shot. Keep the fade local to the text area and preserve product/person detail; do not substitute a heavy black border or blanket darkening. |
+| [Shine effect](https://www.tiktok.com/@solid.coast.editing/video/7584052900964388118) | A narrow diagonal mask crosses a graphic/logo, exposing a bright sweep. | Test one short branded resolve if its highlight has a clear destination. Do not repeat shine on every caption or claim the tutorial proves a particular plugin, licence or audio cue. |
+| [Object Mask update](https://www.tiktok.com/@solid.coast.editing/video/7552883833503534339) | Premiere's Object Mask UI is shown isolating a moving foreground subject above graphics. | Use only on a shot with a clean, grounded foreground crossing and typography that remains legible while partially covered. Inspect every matte frame, hair/hand edges and the entire word. An object-mask button is not proof that the mask tracks a particular Daisy source. |
+
+For a client film, record `shot/timecode | sentence/job | clean control | effect variant | font/colour | keyframes/mask | sound event | full-speed phone verdict | editable reopen verdict`. Keep rejected treatments and reasons. A 3D or perspective title requires a believable photographed plane and source motion; use the existing [scene-perspective-type card](../scene-perspective-type/SKILL.md) rather than forcing depth onto a flat product frame. Anchor cutout edges at the frame or a real object. Stop the treatment before it masks the offer, human expression or CTA.
+
+## Protected Daisy A/B, 26 October
+
+[`render_caption_ab.py`](render_caption_ab.py) read the untouched local `199A5420.MP4` flower-window take into two **silent, private technical proofs**, 4.000 s/96 frames at 540×960/24 fps. Both use the existing Montserrat Bold and Daisy yellow/warm white. The control reveals both words together; the variant staggers their vertical arrival and adds a feathered gradient only behind the wording. Both MP4s fully decoded. The 0.56 s A/B and eight sampled variant frames show the second phrase arriving separately and the gradient improving separation from the changing pink flower. The variant SHA-256 is `A1553C3753D228C43539417E35924F6D34B908BA3741EA6349CE73B469CABF20`; media and contact images remain in the private Daisy `qa/caption-ab` folder, outside Git.
+
+**Decision:** keep the stagger/gradient operation available, but reject this particular flower shot as the Daisy film's hook: it is largely decorative, includes bright window reflections, has no visible person or shopper action, and its posted-use history is not cleared. The placeholder Afrikaans wording is unapproved copy. These silent, half-resolution files prove neither musical sync nor whole-film energy, client readiness, native editable titles, object masks, 3D perspective, shine, or a phone/headphone viewing verdict. Do not turn this test into the November film merely because the effect renders.
