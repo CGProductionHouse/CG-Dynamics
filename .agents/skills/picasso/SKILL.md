@@ -5,6 +5,8 @@ description: Run private local JPEG photography culling and conservative first-p
 
 # PICASSO
 
+This source accompanies portable runner **0.3.12**. A project source or skill package version is not proof that the company Work session can access that runner: check the executable version on the connected Windows host before a job.
+
 Use this skill in a **local ChatGPT Work chat on a verified Windows host**, whether the MSI or office PC. Ask for the exact approved shoot folder, its OneDrive sync root, and a separate private job folder. Before a new host's first shoot, run the repository's `scripts/picasso/prepare-windows-host.ps1 -Mode Check` there; its `-Mode Install` can create a per-user, versioned runtime with the pinned free dependencies when needed. Use the installed skill's `scripts/picasso.py`, the verified runtime, or the repository's `scripts/picasso/picasso.py` when working in the checkout. GitHub distributes reviewed code, never client photos, credentials or active job state. Do not send originals or previews to a cloud image tool; only send minimal job counts/settings to ChatGPT unless the company approves specific image review. In the ChatGPT desktop app, local skills and local shell access must be enabled on each host. A local filesystem skill does not prove company-wide distribution or mobile access; verify both in the intended company Work account.
 
 ## Local workflow
