@@ -1,0 +1,20 @@
+# TBS November V4 private proof — rejected before approval handoff
+
+26 October 2026. The delivered 17.5-second equipment V3 was rejected in CG Nolan Approvals for a weak hook, basic pacing, a sideways TBS sign and insufficient visual work. **Do not resend V3.** Daisy R01 was delivered separately; its group has no substantive amendment at this checkpoint.
+
+## Actual protected work
+
+- Built `C:\Users\chris\Videos\CG-AI-Editing\TBS-Nov-2026\work\equipment-v4\TBS_EQUIPMENT_PRIVATE_V4.mp4`, with its one-off `render.py`, exact `source-ledger.json`, source and film contact sheets beside it. It is **private and rejected**, not an approval package. The original V3 and camera files were not changed.
+- The 29.25-second intended structure opens on different working businesses (carpentry, barber, cafe), asks whether equipment cover kept up, gives an add/replace/list/review ladder, then retains the original audible TBS adviser CTA and official logo picture with continued music. The licensed illustrative scenes never claim to show TBS clients. All B-roll camera audio is muted.
+- New [Mixkit Free License](https://mixkit.co/free-stock-video/) sources screened locally: [saw 39691](https://mixkit.co/free-stock-video/carpenter-slicing-a-wooden-board-in-a-close-up-shot-39691/), [barber 40128](https://mixkit.co/free-stock-video/barber-passing-the-cutting-machine-over-the-neck-of-a-40128/), and [coffee machine 41865](https://mixkit.co/free-stock-video/cup-being-filled-with-coffee-in-a-coffee-machine-41865/). The previously screened Mixkit device/office sources and genuine TBS `199A0531.MP4` supply the remainder. The three new downloaded originals are outside Git. Source in-points are in the private ledger.
+- The V3 sideways-logo cause is confirmed from the actual `199A0531.MP4`: the wall sign reads horizontally **without rotation**. Both `transpose=1` and `transpose=2` rotate the lettering sideways. V4 tests a correctly oriented landscape inset in a portrait brand field; no portrait rotation of the sign is acceptable.
+
+## Picture and technical decision
+
+The first render reused too many workshop angles and contained a nearly black printer close-up. It was self-rejected; the protected rejected MP4s remain beside the recipe. The later render substitutes a barber and cafe machine for source variety and uses stronger local text gradients, while keeping all cuts on a 0.75-second beat grid. The contact sheet shows the new opening reads, the actual sign is upright and the adviser remains upright. **The middle still falls into repetitive low-position two-line captions over generic office stock; the inset sign has too much dead brand field.** There is no persuasive visual explanation of the cover review, and no action-tied machine/transition sound yet. This would repeat the owner's "boring" V3 complaint, so it was not sent.
+
+Full FFmpeg decode passed. The private file's container is 29.331 s with 880 video frames while its audio is 29.250 s; the scene round-off requires an exact frame-duration fix before delivery. Integrated audio measured approximately **−20.6 LUFS / −1.1 dBTP**; the music feels unproven and the file has not been heard by an independent editor. These technical results cannot be called creative approval. No cover or caption was prepared for this rejected proof.
+
+## Next edit gate
+
+Keep the stronger three-business opening, replace the 6.75–20.25 s generic caption sequence with a genuinely designed, readable equipment-change checklist that advances visually on music phrases, and give the correctly oriented TBS sign a purposeful shorter identity treatment. Select separately licensed tool/action SFX and check them against the actual picture; create a brief pressure pocket before the real adviser speaks. Render exact 30 fps duration, inspect full-speed picture/phone framing and independent audio, compare adviser frames to the published July cut, then prepare a protected approval package only if the entire film earns it. Do not pad with empty office shots, more stock montage or a 3D effect without a filmed plane.
