@@ -16,7 +16,7 @@ Technical checks: 30.000 s, H.264 1296×2304/25 fps, AAC stereo 48 kHz; full FFm
 
 ## Next native edit and release gates
 
-1. When Premiere is free of the active We AR Fuels project, open a **copy** of Daisy D3, remove or mute `Daisy_Official_Outro.wav`, extend the existing music source and shape its gain through the logo to a clean musical finish. Save as a new D4 project; do not overwrite D3.
+1. The open Premiere window displays an older We AR Fuels project. The isolated bridge returned `Protected session missing or expired` on 26 October; no live editor operation was attempted. After restoring that protected connection, open a **copy** of Daisy D3, remove or mute `Daisy_Official_Outro.wav`, extend the existing music source and shape its gain through the logo to a clean musical finish. Save as a new D4 project; do not overwrite D3 or change the unrelated open project.
 2. Export natively. Compare the native D4 render with the private mix proof; inspect the full film at normal speed and phone scale, and hear the exact final export. Verify the logo's old sound is absent and the music ending is intentional.
 3. Recheck the actual posted Daisy reel history, current product availability and contact details before a client-facing send. The internal 24 October caption uses `082 705 3762`, also seen in contemporary CG design captions; an August client-intelligence pack lists an older `051 436 6230`. Do not silently substitute one for the other.
 4. Only a fully checked, uniquely named native D4 export with online project media should replace the previously sent internal review pair. Do not resend the unchanged D2 file or use this private proof as the client master.
