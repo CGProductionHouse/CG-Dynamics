@@ -130,3 +130,24 @@ First-level file bytes:
 The two-drive metadata comparison now contains 161,505 nonempty files, 18,086 size-candidate groups and 38,828 candidate files, with 1,488,051,345,222 theoretical excess bytes. Exact verified groups remain **zero pending hashes**. This is neither proof of duplicate files nor approved reclaim space. Remaining physical drives still require inventory before candidate hashing and migration decisions.
 
 References: [Microsoft CHKDSK parameters](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/chkdsk), [Microsoft repair prerequisites](https://learn.microsoft.com/en-us/troubleshoot/windows-server/backup-and-storage/troubleshoot-data-corruption-and-disk-errors).
+
+## Second 10 TB drive — 26 October 2026, 18:07 SAST
+
+The next attached drive is a different Seagate Expansion HDD: short serial `NT17Z4LA` (Windows raw serial `00000000NT17Z4LA`), unique disk ID `3E5431375A344C41`, physical size 10,000,831,348,224 bytes. Inventory identity: `CG-EXT-SEAGATE-10TB-002`. Its exFAT volume is labelled `Expansion2`, volume serial `00EC-E195`, currently E:, 10,000,434,987,008 volume bytes with 2,018,628,599,808 bytes free.
+
+It arrived Warning/Full Repair Needed and dirty. Under CA's continuing direction to resolve unhealthy volumes without a backup, `chkdsk E:` completed with exit 0 and reported no filesystem problems. Its initial status-only output included Access is denied, but verification completed. The exact serial, unique ID and physical capacity were checked again before `chkdsk E: /markclean`; that also completed with exit 0. Post-operation status is **Healthy / OK** and **NOT Dirty**. Used/free bytes are unchanged. No Disk-provider event was returned for the recent operation window. No `/f`, `/r`, format, media deletion or move occurred. These are filesystem results, not a full surface test or physical-reliability verdict.
+
+Full metadata inventory completed: **139,328 files, 1,291 directories, 7,962,889,651,107 file bytes, zero errors, no truncation and no file hashes**. Receipts are under `C:\CG-Storage-Audit\SEAGATE-3E5431375A344C41`; manifest and summaries are uploaded to the existing Google Drive audit folder and recorded in the native Google Sheet.
+
+First-level file bytes:
+
+- `ONCE - OFF`: 122,772 files / 6,954,406,984,401 bytes;
+- `CLIENTS`: 16,404 files / 980,705,805,697 bytes;
+- `CG VIDEOS`: 71 files / 15,062,457,459 bytes;
+- root files: 5 files / 7,181,908,158 bytes;
+- `YEAR`: 29 files / 5,388,201,242 bytes;
+- remaining utility/system/recycle data: about 144 MB.
+
+The `ONCE - OFF\Weddings` subtree alone contains 10,634 files / 2,585,609,133,905 bytes, with additional wedding-labelled folders outside that subtree. It cannot simply be added to the smaller StoreJet's 1,661,639,589,888 free bytes. Wedding consolidation needs cross-drive duplicate proof and a capacity plan; no target role or move was assigned from folder names alone.
+
+Three completed physical inventories now cover **300,852 files / 5,159 directories / 20,231,404,375,335 file bytes**. The comparison includes 300,830 nonempty files, 39,574 size-candidate groups, 95,333 candidate files and 4,269,971,570,925 theoretical excess bytes. All candidate excess remains unverified; exact verified groups are zero pending hashes. Local comparison: `C:\CG-Storage-Audit\COMPARISON-3DRIVES-20261026`. Its summary and unresolved-candidate list are also uploaded. Both expected 10 TB drives are now accounted for. No nominal 6 TB device has been seen; the smaller inspected device reports 4 TB.

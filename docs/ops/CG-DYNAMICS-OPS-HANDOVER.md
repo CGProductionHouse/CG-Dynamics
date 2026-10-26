@@ -13,6 +13,23 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 26 October 18:07 SAST — #894 second 10 TB inventoried; three-drive comparison
+
+Seagate Expansion2 `NT17Z4LA`, disk ID `3E5431375A344C41`, is the second actual
+10 TB drive. Initially dirty/Warning, it passed filesystem verification; under
+CA's continuing no-backup direction the exFAT `/markclean` pass cleared the flag.
+Final Healthy/OK/NOT Dirty and unchanged space. Full surface/hardware reliability
+remains unverified. Complete metadata inventory:139,328files/1,291directories/
+7,962,889,651,107bytes/zero errors/no truncation. Free space2.019TB decimal.
+
+Three inventories total300,852files/5,159directories/20.231TB file bytes. Google
+register/raw manifests/three-drive unresolved comparison uploaded.39,574size
+groups/95,333candidate files/4.270TB theoretical excess remain UNVERIFIED; zero
+exact groups pending SHA-256. Both10TB drives identified; no6TB seen (StoreJet4TB).
+Expansion2's main wedding subtree alone2.586TB exceeds StoreJet1.662TB free;
+consolidation requires actual duplicate/capacity decisions before any move.
+No media deletion/move/format, security change or production data/hosting action.
+
 ### 26 October 17:56 SAST — #894 StoreJet warning cleared and inventory completed
 
 Later direct CA direction authorised proceeding without a backup. Serial-matched
