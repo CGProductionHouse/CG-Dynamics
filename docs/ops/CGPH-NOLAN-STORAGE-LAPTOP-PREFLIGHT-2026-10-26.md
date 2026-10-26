@@ -74,3 +74,35 @@ Two USB devices were physically connected to CA's laptop, but Windows exposed on
 - A generic mass-storage/card-reader-style device previously presented as `No Media`, zero bytes. After disconnect/reconnect and a host-storage-cache refresh, Windows still exposed only the 4 TB StoreJet as real media. No 6 TB or 10 TB disk was visible.
 
 This does **not** match the expected connected 6 TB + 10 TB inventory. The current E: volume must not be repaired, formatted, relabelled, reorganised or used as the weddings destination yet. First verify its physical label and original cable/power arrangement. The expected 10 TB needs its matched power supply and a direct USB 3.x data connection checked before another read-only detection pass.
+
+## First 10 TB inventory — 26 October 2026, 17:19 SAST
+
+The first actual 10 TB drive was subsequently connected by itself and identified without relying on its temporary Windows disk number or drive letter:
+
+- CG inventory identity: `CG-EXT-SEAGATE-10TB-001`.
+- Seagate Expansion HDD, serial `NT17S7GK`, unique disk ID `3E5431375337474B`.
+- Exact physical size: `10,000,831,348,224` bytes (9.10 TiB).
+- Volume `Expansion1`, exFAT, healthy/OK and not dirty at capture time.
+- Used: `9,959,801,356,288` bytes (about 9.06 TiB). Free: `40,633,630,720` bytes (about 37.8 GiB).
+- Completed metadata inventory: 144,712 files, 2,929 directories, 9,939,981,360,176 file bytes, zero scan errors and no truncation.
+- Largest first-level areas: `Clients` 7.92 TiB (87.6%); `Once-Off` 1.00 TiB (11.1%); recovered folders about 65.3 GiB; `CG Production House` about 45.4 GiB.
+- Largest second-level client area: `Clients\Econo` at 2.44 TiB.
+- Dominant media type: 50,563 MP4 files totalling about 8.28 TiB. The drive also contains 87,285 JPG files, 1,746 CR3 files and 451 MOV files.
+
+A size-only screening pass found 13,490 candidate groups across 27,745 files and at most about 0.884 TiB of theoretical duplicate excess. This is explicitly **not duplicate proof**. No hash, copy, move, rename, repair or deletion was performed on the source drive.
+
+The full manifest, summaries and unverified candidate list were copied to the authorised Google Drive `CG Storage Audit` folder. The native Google Sheet `CG External Drive Register and Migration Tracker` records both inspected physical drives, the 10 TB content summary and the blocked migration queue. Local source receipts remain under `C:\CG-Storage-Audit\SEAGATE-3E5431375337474B`.
+
+## Duplicate and cleanup decision rule
+
+The safe process is deliberately staged:
+
+1. inventory each physical drive by serial/unique ID and capture every relative path, byte size and timestamp;
+2. compare manifests to reduce hashing to same-size candidates;
+3. hash candidate files with SHA-256 and classify an exact duplicate only when both size and verified hash match;
+4. keep edits, proxies, transcodes, exports, burst variants and visually similar media outside the exact-duplicate bucket, even when filenames are similar;
+5. decide the canonical retained copy from client/project context rather than path age alone;
+6. copy to the approved destination, verify the destination hash, prove an independent backup/restore path and test Adobe/project relinking;
+7. prepare a deletion proposal with exact paths and recoverability; delete nothing without explicit approval.
+
+`Compare-CGMediaManifests.ps1` implements the proof boundary and emits separate unverified and SHA-256-verified reports. It performs no media mutation.

@@ -13,6 +13,30 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 26 October — #894 external-drive inventory and duplicate-proof boundary
+
+CA's laptop is the current read-only intake host for issue #894; Nolan's main PC
+remains untouched while in staff use. The first actual 10 TB source is Seagate
+Expansion `NT17S7GK`, unique ID `3E5431375337474B`, healthy/OK exFAT, 9.06 TiB
+used and about 37.8 GiB free. Its complete metadata inventory contains 144,712
+files/2,929 directories/9.04 TiB with zero scan errors. The earlier StoreJet
+`V174E32A2GXW-DW` is a nominal 4 TB volume—not the expected 6 TB—and remains
+blocked because Windows reports Warning/Full Repair Needed and dirty. No repair,
+hash, file move, rename or deletion was performed on either source.
+
+The authoritative working register is the Google Sheet `CG External Drive
+Register and Migration Tracker`; raw manifests and summaries are in its sibling
+`CG Storage Audit` Drive folder. Size screening found 13,490 groups/27,745 files
+and at most 971,426,615,159 unverified reclaim bytes. Do not treat that as a
+duplicate claim. `Compare-CGMediaManifests.ps1` now emits an exact-duplicate list
+only for equal-size files with matching verified SHA-256. Current verified exact
+count is zero because candidate hashing has not started. Inventory the remaining
+expected drives first, then hash only candidates. Any later deletion still needs
+approved canonical-copy selection, destination hash verification, independent
+backup/restore evidence, Adobe/project relink acceptance and an exact-path owner
+approval packet. Detailed receipt:
+[Nolan storage laptop preflight](CGPH-NOLAN-STORAGE-LAPTOP-PREFLIGHT-2026-10-26.md).
+
 ### 25 October late evening — slow file-window defect fixed; 37 live image Views
 
 Exact receipt: [Client file access acceptance](CLIENT-FILE-ACCESS-ACCEPTANCE-2026-10-25.md).

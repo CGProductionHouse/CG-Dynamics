@@ -38,7 +38,28 @@ The manifest never treats matching filenames as duplicate proof. Only rows with 
 
 The manifest also refuses a local source volume unless Windows reports both `HealthStatus=Healthy` and `OperationalStatus=OK`. A dirty volume, repair-needed state or other warning must be reviewed before a recursive walk or hashing pass.
 
-## 3. Self-test
+## 3. Cross-drive duplicate comparison
+
+After every physical drive has its own manifest, compare them without touching source media:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\ops\storage-audit\Compare-CGMediaManifests.ps1 `
+  -ManifestPath @(
+    'C:\CG-Storage-Audit\DRIVE-001\media-manifest.csv',
+    'C:\CG-Storage-Audit\DRIVE-002\media-manifest.csv'
+  ) `
+  -OutputDirectory 'C:\CG-Storage-Audit\COMPARISON-001'
+```
+
+The comparison deliberately separates three states:
+
+- `same-size-candidates-unverified.csv` is a screening list, never deletion proof;
+- `unresolved-size-candidates.csv` still needs hashing or has different hashes despite equal size;
+- `verified-exact-duplicates.csv` contains only equal-size files with the same verified SHA-256.
+
+This script does not hash, copy, move, rename or delete media. Candidate-only hashes should be collected after all drives are inventoried, then the comparison is rerun. A verified exact duplicate is still not approval to delete it: the retained copy needs a successful destination copy, checksum verification, independent backup/restore evidence and an application relink test first.
+
+## 4. Self-test
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\ops\storage-audit\Test-CGStorageAudit.ps1

@@ -60,6 +60,60 @@ try {
     }
     if (-not $guardPassed) { throw 'Output-inside-source guard did not fail closed.' }
 
+    $comparisonInputA = Join-Path $testRoot 'comparison-a.csv'
+    $comparisonInputB = Join-Path $testRoot 'comparison-b.csv'
+    @(
+        [pscustomobject]@{ inventory_id = 'A'; item_type = 'file'; relative_path = 'exact-a.mov'; size_bytes = 10; last_write_utc = ''; extension = '.mov'; sha256 = ('a' * 64); hash_status = 'verified' }
+        [pscustomobject]@{ inventory_id = 'A'; item_type = 'file'; relative_path = 'needs-hash-a.jpg'; size_bytes = 20; last_write_utc = ''; extension = '.jpg'; sha256 = ''; hash_status = 'not_requested' }
+        [pscustomobject]@{ inventory_id = 'A'; item_type = 'file'; relative_path = 'different-a.mp4'; size_bytes = 30; last_write_utc = ''; extension = '.mp4'; sha256 = ('b' * 64); hash_status = 'verified' }
+    ) | Export-Csv -LiteralPath $comparisonInputA -NoTypeInformation -Encoding UTF8
+    @(
+        [pscustomobject]@{ inventory_id = 'B'; item_type = 'file'; relative_path = 'exact-b.mov'; size_bytes = 10; last_write_utc = ''; extension = '.mov'; sha256 = ('a' * 64); hash_status = 'verified' }
+        [pscustomobject]@{ inventory_id = 'B'; item_type = 'file'; relative_path = 'needs-hash-b.jpg'; size_bytes = 20; last_write_utc = ''; extension = '.jpg'; sha256 = ''; hash_status = 'not_requested' }
+        [pscustomobject]@{ inventory_id = 'B'; item_type = 'file'; relative_path = 'different-b.mp4'; size_bytes = 30; last_write_utc = ''; extension = '.mp4'; sha256 = ('c' * 64); hash_status = 'verified' }
+    ) | Export-Csv -LiteralPath $comparisonInputB -NoTypeInformation -Encoding UTF8
+    $comparisonOutput = Join-Path $testRoot 'comparison-output'
+    & (Join-Path $scriptRoot 'Compare-CGMediaManifests.ps1') `
+        -ManifestPath @($comparisonInputA, $comparisonInputB) `
+        -OutputDirectory $comparisonOutput | Out-Null
+    $comparisonSummary = Get-Content -LiteralPath (Join-Path $comparisonOutput 'manifest-comparison-summary.json') -Raw |
+        ConvertFrom-Json
+    if ($comparisonSummary.verified_exact_group_count -ne 1) {
+        throw 'Expected exactly one SHA-256-proven duplicate group.'
+    }
+    if ($comparisonSummary.verified_exact_reclaim_bytes -ne 10) {
+        throw 'Verified duplicate reclaim bytes were calculated incorrectly.'
+    }
+    if ($comparisonSummary.unresolved_candidate_file_count -ne 4) {
+        throw 'Same-size files without matching verified hashes were not kept unresolved.'
+    }
+    $duplicateManifestGuardPassed = $false
+    try {
+        & (Join-Path $scriptRoot 'Compare-CGMediaManifests.ps1') `
+            -ManifestPath @($comparisonInputA, $comparisonInputA) `
+            -OutputDirectory (Join-Path $testRoot 'duplicate-manifest-output') | Out-Null
+    }
+    catch {
+        $duplicateManifestGuardPassed = $_.Exception.Message -like '*supplied more than once*'
+    }
+    if (-not $duplicateManifestGuardPassed) {
+        throw 'Supplying one manifest twice did not fail closed.'
+    }
+
+    $readinessOutput = Join-Path $testRoot 'readiness'
+    & (Join-Path $scriptRoot 'Get-CGStorageHostReadiness.ps1') `
+        -OutputDirectory $readinessOutput `
+        -SkipStorageReliability | Out-Null
+    $readinessReport = Get-Content -LiteralPath (Join-Path $readinessOutput 'host-readiness.json') -Raw |
+        ConvertFrom-Json
+    $readinessSummary = Get-Content -LiteralPath (Join-Path $readinessOutput 'host-readiness.txt') -Raw
+    $expectedWarningVolumes = @($readinessReport.volumes | Where-Object {
+        $_.Size -gt 0 -and ($_.HealthStatus -ne 'Healthy' -or @($_.OperationalStatus) -notcontains 'OK')
+    }).Count
+    if ($readinessSummary -notmatch ("Warning media volumes: {0}" -f $expectedWarningVolumes)) {
+        throw 'Readiness warning-volume summary does not match the JSON receipt.'
+    }
+
     $warningVolumeGuard = 'NOT_APPLICABLE_SYNTHETIC_HEALTHY_VOLUME'
     $warningVolume = Get-Volume | Where-Object {
         $_.DriveLetter -and $_.Size -gt 0 -and
@@ -86,6 +140,9 @@ try {
         source_unchanged = $true
         files_verified = 2
         output_inside_source_guard = 'PASS'
+        duplicate_proof_guard = 'PASS'
+        duplicate_manifest_guard = 'PASS'
+        readiness_warning_count = 'PASS'
         warning_volume_guard = $warningVolumeGuard
     }
 }

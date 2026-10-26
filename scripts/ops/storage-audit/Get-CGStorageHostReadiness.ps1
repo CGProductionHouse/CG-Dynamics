@@ -2,7 +2,9 @@
 param(
     [Parameter(Mandatory = $true)]
     [ValidateNotNullOrEmpty()]
-    [string]$OutputDirectory
+    [string]$OutputDirectory,
+
+    [switch]$SkipStorageReliability
 )
 
 $ErrorActionPreference = 'Stop'
@@ -20,6 +22,36 @@ function Invoke-SafeRead {
         return @([pscustomobject]@{
             read_error = $_.Exception.Message
         })
+    }
+}
+
+function Invoke-BoundedRead {
+    param(
+        [Parameter(Mandatory = $true)]
+        [scriptblock]$Action,
+
+        [ValidateRange(1, 120)]
+        [int]$TimeoutSeconds = 15
+    )
+
+    $job = Start-Job -ScriptBlock $Action
+    try {
+        if (Wait-Job -Job $job -Timeout $TimeoutSeconds) {
+            return @(Receive-Job -Job $job -ErrorAction Stop)
+        }
+
+        Stop-Job -Job $job -ErrorAction SilentlyContinue
+        return @([pscustomobject]@{
+            read_error = "Read timed out after $TimeoutSeconds seconds."
+        })
+    }
+    catch {
+        return @([pscustomobject]@{
+            read_error = $_.Exception.Message
+        })
+    }
+    finally {
+        Remove-Job -Job $job -Force -ErrorAction SilentlyContinue
     }
 }
 
@@ -65,15 +97,22 @@ $diskDevices = Invoke-SafeRead {
         MediaType, PNPDeviceID, Status, Size
 }
 
-$storageReliability = Invoke-SafeRead {
-    Get-PhysicalDisk -ErrorAction Stop | Get-StorageReliabilityCounter -ErrorAction Stop |
-        Select-Object DeviceId, Temperature, TemperatureMax, ReadErrorsTotal, WriteErrorsTotal,
-            Wear, PowerOnHours
+$storageReliability = if ($SkipStorageReliability) {
+    @([pscustomobject]@{
+        read_error = 'Skipped by caller; live storage reliability is not needed for this self-test.'
+    })
+}
+else {
+    Invoke-BoundedRead -TimeoutSeconds 15 -Action {
+        Get-PhysicalDisk -ErrorAction Stop | Get-StorageReliabilityCounter -ErrorAction Stop |
+            Select-Object DeviceId, Temperature, TemperatureMax, ReadErrorsTotal, WriteErrorsTotal,
+                Wear, PowerOnHours
+    }
 }
 
 $volumes = Invoke-SafeRead {
     Get-Volume | Select-Object DriveLetter, FileSystemLabel, FileSystem, Size, SizeRemaining,
-        HealthStatus, DriveType, Path, UniqueId
+        HealthStatus, OperationalStatus, DriveType, Path, UniqueId
 }
 
 $partitions = Invoke-SafeRead {
@@ -158,7 +197,9 @@ $summary = @(
     "Output: $jsonPath"
     "Disks discovered: $(@($disks).Count)"
     "Volumes discovered: $(@($volumes).Count)"
-    "Warning volumes: $(@($volumes | Where-Object { $_.HealthStatus -ne 'Healthy' -or @($_.OperationalStatus) -notcontains 'OK' }).Count)"
+    "Warning media volumes: $(@($volumes | Where-Object {
+        $_.Size -gt 0 -and ($_.HealthStatus -ne 'Healthy' -or @($_.OperationalStatus) -notcontains 'OK')
+    }).Count)"
     "Active adapters: $(@($adapters | Where-Object Status -eq 'Up').Count)"
     "SMB shares visible: $(@($smbShares).Count)"
     "No security settings, shares, accounts, files, labels, drive letters or firewall rules were changed."
