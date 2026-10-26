@@ -106,3 +106,27 @@ The safe process is deliberately staged:
 7. prepare a deletion proposal with exact paths and recoverability; delete nothing without explicit approval.
 
 `Compare-CGMediaManifests.ps1` implements the proof boundary and emits separate unverified and SHA-256-verified reports. It performs no media mutation.
+
+## StoreJet filesystem warning cleared; full inventory — 26 October 2026, 17:56 SAST
+
+CA explicitly requested proceeding without a backup after the repair risk and lack of a spare destination were explained. The exact StoreJet serial `V174E32A2GXW-DW` and 4,000,787,030,016-byte physical size were revalidated before the operation. Volume serial reported by CHKDSK: `6447-B694`.
+
+1. `chkdsk E:` completed with exit code 0 and reported no filesystem problems, 16,812 files, 940 indexes and 0 KB in bad sectors. Its initial output included `Access is denied`, but the verification completed; this initial status-only run was not used as evidence that the dirty flag was cleared.
+2. Because verification found no corruption, `chkdsk E: /markclean` was used instead of a repairing `/f` or sector-reading `/r` pass. Microsoft documents `/markclean` for FAT/FAT32/exFAT when no corruption is detected. It completed with exit code 0 and the same file/index/space report.
+3. `fsutil dirty query E:` then returned **NOT Dirty**. `Get-Volume` returned **Healthy / OK**. Used/free bytes remained unchanged. No new Disk-provider events were returned for the operation's recent time window.
+
+This clears the filesystem warning. It does not establish physical hardware reliability or a full surface-read result. No damaged chain repair, media deletion, media move, format, Windows security change or backup was performed. The earlier warning state remains historical evidence, rather than the current block.
+
+The healthy-volume guard then admitted the complete metadata inventory: **16,812 files, 939 directories, 2,328,533,364,052 file bytes, zero enumeration errors, no truncation and no file hashes**. Local receipts: `C:\CG-Storage-Audit\STOREJET-V174E32A2GXW-DW`. Google Drive holds the full manifest, summary and first/second-level summaries; the shared Google register is updated.
+
+First-level file bytes:
+
+- `ONCE OFFS`: 10,858 files / 1,875,983,988,851 bytes;
+- `Clients`: 978 files / 200,432,466,268 bytes;
+- `$RECYCLE.BIN`: 156 files / 197,598,154,871 bytes; retained for explicit review;
+- `ARCHITECTURE`: 4,736 files / 54,403,022,903 bytes;
+- remaining utility/system files: under 0.13 GB.
+
+The two-drive metadata comparison now contains 161,505 nonempty files, 18,086 size-candidate groups and 38,828 candidate files, with 1,488,051,345,222 theoretical excess bytes. Exact verified groups remain **zero pending hashes**. This is neither proof of duplicate files nor approved reclaim space. Remaining physical drives still require inventory before candidate hashing and migration decisions.
+
+References: [Microsoft CHKDSK parameters](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/chkdsk), [Microsoft repair prerequisites](https://learn.microsoft.com/en-us/troubleshoot/windows-server/backup-and-storage/troubleshoot-data-corruption-and-disk-errors).

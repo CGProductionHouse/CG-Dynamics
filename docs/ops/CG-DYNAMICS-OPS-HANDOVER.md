@@ -13,6 +13,22 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 26 October 17:56 SAST — #894 StoreJet warning cleared and inventory completed
+
+Later direct CA direction authorised proceeding without a backup. Serial-matched
+StoreJet `V174E32A2GXW-DW` passed CHKDSK filesystem verification; the exFAT-specific
+`/markclean` pass then cleared the dirty state. Final Windows status is Healthy/OK
+and NOT Dirty; used/free bytes are unchanged. No `/f`, `/r`, format, media move
+or deletion occurred. Physical surface/hardware reliability remains unverified.
+
+Full metadata scan now completed:16,812files/939directories/2,328,533,364,052bytes,
+zero errors/no truncation. Shared Google register and raw manifests updated.
+StoreJet is no longer blocked for metadata inventory. About197.6GB in its Recycle
+Bin remains for explicit review; no permission to empty it is inferred. Two-drive
+comparison has18,086size-candidate groups/38,828candidate files and ZERO verified
+exact groups pending hashes. Later section supersedes the historical StoreJet
+warning below. Full receipt remains the linked laptop preflight document.
+
 ### 26 October — #894 external-drive inventory and duplicate-proof boundary
 
 CA's laptop is the current read-only intake host for issue #894; Nolan's main PC
