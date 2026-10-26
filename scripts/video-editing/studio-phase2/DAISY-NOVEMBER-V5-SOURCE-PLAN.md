@@ -1,0 +1,37 @@
+# Daisy & Co November — protected V5 source and story decision
+
+26 October 2026. **No new approval video has been sent.** D2/D3 and the failed D4 audio repair remain withdrawn. This is the pre-edit decision for the owner's requested refinement, not a substitute film.
+
+## Exact November authority and intended response
+
+The live CG Dynamics November brief for exact Daisy client `3404f726-a693-4b2d-8c13-c9d3dfd17bbc` was read on 26 October: draft v4, staff amended, **unpublished**, one professional video in the package. Its product-led “Thought of You” concept explicitly requires *currently available* goods. The owner's newer instruction is narrower and controls this edit: keep the approved Romantic 03 music, upbeat yellow/white motion language and summer energy, but replace stale product heroes and make the film useful for a November shopper without implying old products are still on shelves.
+
+**Candidate buyer and job:** A Bloemfontein shopper who wants a small, considered thank-you before the year-end rush. Show the human experience of choosing it at Daisy, rather than an old item as a current offer. Prompt an in-store visit to see what Daisy has *then*; do not promise any pictured item, fresh daily baking, gift wrap, preorder, promotion, price, delivery or opening hours. This is a candidate creative direction pending the older-footage screen.
+
+**Provisional message:** “A small thank-you can be personal; come choose it in person at Daisy & Co.” This must be tested against actual moving picture and the July store-discovery post before it becomes on-screen copy. No generic range slogan, “one stop” claim or old item montage.
+
+## Source decision as of 26 October
+
+- OneDrive `Clients/Daizy & Co/Videos/2026` has February, April, May, June, July, August, September and October folders; **no November folder** at this check. The owner explicitly instructed reuse of older folders for a new November purpose; the missing November folder is not a request for a new shoot.
+- Local September `GENERAL`: 18 checked clips, overwhelmingly old product heroes; `199A5420.MP4` is a 5.52 s flower/window move that may supply at most a short store-atmosphere beat after its full moving crop/audio and public-use check. The recognisable dog-print mug and the withdrawn range story are excluded.
+- Local October `199A2600`–`2605`: direct-to-camera Best of Bloem celebration and group reaction already belongs to a posted story; no silent presenter reuse. The prior wide group frame is not evidence of a new November customer experience.
+- June `0L8A1072.MP4` is a 1.72 s real counter interaction. The same striped-outfit woman appears in the published July store-discovery reel; exact-frame reuse is unresolved. A new occasion-led scene job could be different, but it cannot carry 30 s alone and must not be labelled unseen.
+- August previews: most present winter scarves, old items or direct address. The one possible hands-at-display take `0L8A0513` remains untransferred and unreviewed in full; it is not cleared.
+- Local official Mixkit `99909` can illustrate a busy list but cannot claim Daisy premises or a genuine shopper visit. `42746` was rejected on moving-source screen. Stock cannot fill the missing client action.
+- Existing storefront photo has a visibly dated “school is out” board and old display. A tight real sign crop may establish location briefly; the full frame cannot be a current November scene.
+
+Published-story checks already rejected the old concept: [September spring/product reel](https://www.facebook.com/reel/1633806471439213/) shows the same distinctive display family, and [July store-discovery reel](https://www.facebook.com/reel/1027712919847155/) already uses a broad “come see what you might buy” purpose. The public videos list was checked through October; this is not a complete exact-frame Instagram register. Any retained old source needs its own source-month-to-November public check and a different scene job.
+
+## Older-footage action search — owner correction
+
+The earlier source plan prematurely asked for new capture after screening too small a slice of the archive. **Withdraw that request.** The owner wants purposeful reuse of older moving B-roll: natural staff work, an interaction, store movement, a smile or a useful scene detail, selected for a new November job. Check the full take rather than dismissing a month because its original campaign was occasion-led. Avoid repackaging the old campaign, and exclude recognisable old-product heroes, direct-to-camera speaking used silently, winter wardrobe, out-of-frame action and audible crew direction.
+
+On 26 October the older OneDrive inventory was expanded: June `VIDEO_1` contains 23 files, `VIDEO 2` 11, `VIDEO 3` four, and May `VIDEO_MOTHERS_DAY` 46. Most original files exceed the SharePoint raw-fetch size limit. The first May under-limit raw fetch returned `403 serviceReadOnly`; this is a source-access failure, **not** a visual rejection of May's human shots. April's five `VIDEO_2` originals also remain unscreened in full. The current local workspace has June `0L8A1072` and `1083` only, plus limited February/August/September/October samples. Source filenames and folder themes cannot substitute for moving picture and audio review.
+
+Next source order: (1) screen June `VIDEO_1` beyond the two local samples, then June `VIDEO 2` and `VIDEO 3`; (2) screen May moving takes for action that can be separated from its Mother's Day story; (3) screen April and other older months; (4) for every candidate, check source-month through November posts and record its distinct scene job. Use normal authorised OneDrive preview or local originals when desktop access is unconflicted. Do not retry the same oversized connector transfer, change accounts/permissions or infer a source's contents from a thumbnail. A new capture is only a possible later fallback after the older footage is truly exhausted, not the current ask.
+
+## Planned edit and verification once source passes
+
+Use the owner-liked `Daisy_MUSIC_Romantic_03_754.mp3` from its proven entry, not a replacement track. Build a roughly 25–30 s progression: a concrete thank-you situation, actual Daisy arrival and human help, a brief choice/payoff, then a specific Preller Square invitation and the official logo picture. Cut to the music's *heard* phrase and attacks; the machine beat grid is only a starting guide. Keep text yellow/warm white, short, dynamically revealed and inside the central 4:5 safe region. No full stops in captions. Preserve a short burst of real store sound where it clarifies action and mute direction/chatter. Continue music over the official logo; verify the final five seconds in the exact export. Create a separate cover from a real approved Daisy shot after checking recent covers. Source ledger, crop, full-speed picture/sound and publication audit must pass before any approval-group send.
+
+**Current gate:** The expanded older archive has not yet been screened sufficiently to select the November cut. Do not call it exhausted, and do not send another generic-stock or stale-product video merely to fill the slot.
