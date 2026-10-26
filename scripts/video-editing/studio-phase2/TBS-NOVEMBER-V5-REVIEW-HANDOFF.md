@@ -17,6 +17,8 @@ V5 is 29.500 s / 885 frames / 1080 × 1920 / 30 fps / H.264 and stereo AAC, with
 
 ## Open review gates
 
+An additional read-only [first-three-second screen](VISUAL-HOOK-FIRST-SECONDS-20261026.md) found that the exact delivered V5 export's first ten seconds decode around −27 to −31 dBFS RMS per two-second window, versus roughly −19.5 dBFS at 12–16 s. This may be an intentional build, but the opening could feel quiet on a phone. No creative listening occurred. Include the opening level and sound transition in the independent full-speed review; do not silently normalize or resend the already delivered file from this measurement alone.
+
 - The visible seated adviser setup matches TBS's [20 July public reel](https://www.instagram.com/reel/DbC5UQ1kXml/). The new equipment-cover story is different; exact picture/audio reuse remains unverified. Staff must compare before client forwarding. The older shot is **not** described as unused.
 - Full-speed human picture and headphone/phone sound review, creative effects/music fit, client/owner approval and native editor timeline editability are unproven. The private Python/FFmpeg recipes and source ledger support revision, but they are not a Premiere or CapCut project.
 - The WhatsApp image was a separate 1080 × 1920 photo, but the service did not offer its HD mode for this image. If the team needs the uncompressed cover, use the private original or send it as a document in a separate approved handoff; do not silently substitute that for the requested photo format.
