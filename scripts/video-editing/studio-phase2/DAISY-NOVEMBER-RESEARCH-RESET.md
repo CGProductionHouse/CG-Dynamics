@@ -2,6 +2,8 @@
 
 26 October 2026. **The `JOU DESEMBERLYS?` D2/D3 package and D4 experiments are withdrawn from creative review. Do not forward or republish them.** Original media, the delivered D2 and native D3 master remain preserved in the private `C:\Users\chris\Videos\CG-AI-Editing\Daisy-Nov-2026` workspace. No client/public delivery is claimed.
 
+**Owner correction, 26 October:** The owner inspected the existing Premiere cut and likes its music, playful pace and overall feel. Refine that direction; the story reset below does **not** reject its song or yellow/white motion-type language. A new editor/renderer is permitted if it makes the protected revision easier. The owner also saw numerous bad/out-of-frame takes. Keep the source project as a reference, not a release base: remove or replace flawed shots, audit actual post reuse, and let the November message and stock truth determine the picture. Do not waste time trying to force a native Premiere audio repair simply to preserve the old timeline.
+
 ## Why the existing concept failed step one
 
 - The 24 October internal package is a gift/product-range montage built largely from `2026_09_SEPT/GENERAL`. Its private `research/STORY-GATE.md` compared the selected footage with *one* September presenter reel and excluded the October Best of Bloem film. It did not establish the entire September public-post history or all other uses of the same visual setup. Its `source-ledger.json` called footage “fresh” because it was shot after a July reel; this is not a publication or current-stock check.
@@ -18,6 +20,17 @@
 4. Classify every audio take before cutting: direct-to-camera speech stays audible and meaningful; silent B-roll loses production direction, crew prompts and incidental off-camera talk. Retain only sound with a clear story/action role. Listen to every selected source and the exact export at normal speed; ASR, waveform and loudness checks cannot certify the absence of distracting speech or creative fit.
 5. Only after the research ledger passes, write buyer, why November, one message, intended feeling/action, three distinct hooks, scene jobs, source evidence and a truthful CTA. Compare the story against the published July store-discovery and September product reels. Then build a **new protected** edit, native project, cover and caption. No repair of the withdrawn D2 story can substitute for this gate.
 
+### Keep / change for the protected refinement
+
+| Keep from D2/D3 | Change before any review candidate |
+| --- | --- |
+| `Daisy_MUSIC_Romantic_03_754.mp3`, which the owner explicitly likes; keep its buoyant phrase and cut to actual beats | Carry it across the official logo resolve; mute the logo source audio; check the *last five seconds*, not only whole-film LUFS |
+| Daisy yellow, warm white, concise Afrikaans and rhythmic title reveals | Replace the item/category labels and `EEN STOP. BAIE IDEES.` range promise if the new footage cannot verify current stock |
+| Fast opening, a short breath, warm store mood, clear Preller Square brand resolve | Remove the recognisable September dog-print mug/display hook and any old item used as current-stock proof; replace badly framed or out-of-frame source ranges |
+| A real Daisy store presence between broader lifestyle/season scenes | Do not use muted direct-to-camera speaking or a stock baker/customer as if filmed at Daisy; classify production chatter as silent B-roll |
+
+The first-pass D2 contact sheet shows a long middle run of isolated mugs, notebooks, ceramics and food. This is the main picture weakness as well as the claim risk. Replacing copy alone will not fix it. The current local September `GENERAL` source set is almost entirely product hero footage; the local September `TALK` set is direct-to-camera and already belongs to a posted presenter story. Neither set by itself proves the proposed experience-led November narrative.
+
 ## Read-only source triage already performed
 
 The authorised Daisy OneDrive `Videos/2026` hierarchy contains February, April, May, June, July, August, September and October folders. Folder presence and filenames alone do not establish usable November scenes. Browser previews on 26 October showed:
@@ -30,6 +43,8 @@ The authorised Daisy OneDrive `Videos/2026` hierarchy contains February, April, 
 | June `VIDEO 3/199A3078.MP4` | Woman in heavy shawl addressing camera | Exclude as silent summer B-roll: direct speech and winter wardrobe |
 
 These are preview observations, **not** full moving-source/audio screens or source-month public-post clearances. No new shot has passed the source ledger yet. Do not build around the attractive pastry still or crop the speaking people into generic silent shop ambience.
+
+The August archive has 37 camera clips, but most exceed the connected read tool's media limit. On 26 October the one under-limit candidate `0L8A0545.MP4` returned `403 serviceReadOnly` from the SharePoint raw fetch. A signed-in Chrome preview attempt then timed out; browser control was stopped rather than repeating input during a possible desktop conflict. These clips remain unreviewed and cannot be described as cleared scene options. Do not confuse folder inventory with a visual or publication audit.
 
 ## Protected audio experiment — technical failure, not a release fix
 
