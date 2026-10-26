@@ -13,6 +13,30 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 26 October — #894 laptop lane handed over to Nolan's PC
+
+CA is moving all three externals to Nolan's PC and requested a complete GitHub
+handover. Primary next read:
+[Nolan PC storage handover](CGPH-NOLAN-PC-STORAGE-HANDOVER-2026-10-26.md).
+Continue existing branch `codex/nolan-storage-audit-894` / PR#895, not a new lane.
+No further laptop source reads/jobs are active. Nolan host acceptance has not run.
+
+Private metadata/control pack uploaded to the existing Google audit folder:
+`NOLAN-PC-HANDOVER-20261026.zip`, Drive ID `1wR272eyofetcQklumh1hR6IP0sCaLQx4`,
+6,488,243bytes, SHA256
+`b3fe1f0e22fafd4b41f4fa907cb8261cb0935fc2f14766c94ac4e37f984c67eb`.
+Archive extracted locally and all31indexed files verified. It includes all three
+original manifests, original hash identity/checkpoint/enriched inventory and
+latest7-group report, global candidates, scripts and focused docs. No media or
+credentials. Google Sheet `Execution Plan` is current; old local XLSX is historical.
+
+Exact next host work: restore/verify control pack into a new internal folder;
+read-only Nolan readiness; identify all physical serials/IDs and fresh health;
+resolve Expansion2's18:24disconnect before further reads/copies; resume bounded
+hashes, then the scoped direct-drive copy/hash/Adobe-relink pilot. Existing staff
+session, Premiere tools and other AI lanes remain protected. No extra installation,
+Windows security/share change, formatting or duplicate/source deletion is implied.
+
 ### 26 October 18:24 SAST — #894 execution started; hashes saved; USB source disappeared
 
 CA requested implementing storage sorting from the currently attached drive.
