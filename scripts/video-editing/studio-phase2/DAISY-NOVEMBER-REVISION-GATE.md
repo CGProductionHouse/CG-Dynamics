@@ -1,5 +1,7 @@
 # Daisy & Co November — protected audio correction (26 October 2026)
 
+**Superseded historical experiment.** The owner rejected the underlying product-range story after a public-post and current-stock challenge; the native D4 export also rendered a near-silent final five seconds. See the [research reset](DAISY-NOVEMBER-RESEARCH-RESET.md). Do not follow the native-edit next steps below or forward any D2/D3/D4 media.
+
 ## Existing production state
 
 - The 30-second `JOU DESEMBERLYS?` film and separate cover were delivered internally to `VIDEO APPROVALS` on 24 October at 10:09–10:10 SAST and to `CG Nolan Approvals` at 11:22 SAST. Delivery is not client or publication approval. No Daisy-specific amendment was visible in the latest `VIDEO APPROVALS` messages inspected on 26 October.
