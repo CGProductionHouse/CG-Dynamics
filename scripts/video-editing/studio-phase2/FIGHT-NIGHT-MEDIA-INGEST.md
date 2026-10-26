@@ -50,6 +50,8 @@ still missing locally. The large-media route is documented but **not yet
 operationally verified** on this workstation. Do not call the access gap fixed
 until a complete large original arrives and passes its remote hash.
 
+**26 October card ingest update:** the owner connected a DJI drone card as `D:`. Nine 24 October `DJI_007` MP4s (4,269,942,734 video bytes) plus nine companion SRTs were copied read-only from the card to `C:\Users\chris\Videos\CG-AI-Editing\Fight-Night-2026\drone-card-20261024\`. Every one of the 18 local copies matches its card source in size and SHA-256 (`verified-ingest.json`). This verifies the physical-card workflow for these DJI files; it does **not** retrieve the missing ground-camera `3Q7A9330`/`3Q7A9517` bouts or resolve the SharePoint 100 MiB ceiling. The private `SELECTS.md` culls the drone clips. `0221` contains a real overhead exchange and corner pressure, but sampled frames do not prove a clean landed blow or knockout; its MP4 has no audio stream. Use the aerial for geography only until a full-speed source review and ground-camera match support a particular impact. All card files remain untouched.
+
 **23:20 SAST recheck:** metadata for the six initially zero-byte entries
 (`3Q7A9106`, `9107`, `9108`, `9115`, `9145`, `9488`) still reports zero bytes;
 do not ingest or count them as completed camera takes. The signed-in source
