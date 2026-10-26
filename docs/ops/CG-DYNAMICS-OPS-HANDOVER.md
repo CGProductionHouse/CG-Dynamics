@@ -13,6 +13,116 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 26 October — #894 laptop lane handed over to Nolan's PC
+
+CA is moving all three externals to Nolan's PC and requested a complete GitHub
+handover. Primary next read:
+[Nolan PC storage handover](CGPH-NOLAN-PC-STORAGE-HANDOVER-2026-10-26.md).
+Continue existing branch `codex/nolan-storage-audit-894` / PR#895, not a new lane.
+No further laptop source reads/jobs are active. Nolan host acceptance has not run.
+
+Private metadata/control pack uploaded to the existing Google audit folder:
+`NOLAN-PC-HANDOVER-20261026.zip`, Drive ID `1wR272eyofetcQklumh1hR6IP0sCaLQx4`,
+6,488,243bytes, SHA256
+`b3fe1f0e22fafd4b41f4fa907cb8261cb0935fc2f14766c94ac4e37f984c67eb`.
+Archive extracted locally and all31indexed files verified. It includes all three
+original manifests, original hash identity/checkpoint/enriched inventory and
+latest7-group report, global candidates, scripts and focused docs. No media or
+credentials. Google Sheet `Execution Plan` is current; old local XLSX is historical.
+
+Exact next host work: restore/verify control pack into a new internal folder;
+read-only Nolan readiness; identify all physical serials/IDs and fresh health;
+resolve Expansion2's18:24disconnect before further reads/copies; resume bounded
+hashes, then the scoped direct-drive copy/hash/Adobe-relink pilot. Existing staff
+session, Premiere tools and other AI lanes remain protected. No extra installation,
+Windows security/share change, formatting or duplicate/source deletion is implied.
+
+### 26 October 18:24 SAST — #894 execution started; hashes saved; USB source disappeared
+
+CA requested implementing storage sorting from the currently attached drive.
+New [execution plan](CGPH-EXTERNAL-STORAGE-EXECUTION-PLAN-2026-10-26.md) and Google
+Sheet `Execution Plan` tab specify direct two-external transfers: serial identify,
+scoped copy into new intake, full destination/source hash check, media/Adobe relink
+check, then review the exact source-removal batch. Proposed roles are Expansion1
+recurring clients, Expansion2 events/full wedding archive during consolidation,
+StoreJet weddings only if unique bytes fit with10%headroom. Current review set
+for the first StoreJet-to-Expansion2 transfers is642.89GB of business/architecture
+folders, which fits target2.019TB free. No media has been copied/moved/deleted.
+
+Resumable native SHA-256 tool now uses the existing PowerShell7 shell, disk unique
+ID plus stable volume GUID, source metadata checks and per-file checkpoints.
+Synthetic tests cover different equal-size content, long Adobe filenames, resume,
+changed files and wrong disks. Comparison rejects original+enriched copies of the
+same inventory, preventing artificial duplicate proofs.
+
+Actual Expansion2 progress:22completed file hashes/10,434,664,868bytes. Local
+comparison proves7exact groups/15members/4,123,916,504redundant bytes; ZERO space
+reclaimed. At18:24:16 Windows logged Disk153 and the drive disappeared mid-read.
+Hashing stopped, failed file unverified, completed evidence retained. It is still
+absent in the post-failure disk read; do not carry forward the earlier Healthy/OK
+filesystem result as current connection acceptance. Cause could be unplug or USB
+failure, not a proven physical-disk diagnosis. Reconnect Expansion2 on stable
+matched power/direct data cable, revalidate identity/health, then attach StoreJet
+alongside it. Do not retry-loop source reads if interruption repeats. Shared
+register and hash receipts record this concrete blocker.
+
+### 26 October 18:07 SAST — #894 second 10 TB inventoried; three-drive comparison
+
+Seagate Expansion2 `NT17Z4LA`, disk ID `3E5431375A344C41`, is the second actual
+10 TB drive. Initially dirty/Warning, it passed filesystem verification; under
+CA's continuing no-backup direction the exFAT `/markclean` pass cleared the flag.
+Final Healthy/OK/NOT Dirty and unchanged space. Full surface/hardware reliability
+remains unverified. Complete metadata inventory:139,328files/1,291directories/
+7,962,889,651,107bytes/zero errors/no truncation. Free space2.019TB decimal.
+
+Three inventories total300,852files/5,159directories/20.231TB file bytes. Google
+register/raw manifests/three-drive unresolved comparison uploaded.39,574size
+groups/95,333candidate files/4.270TB theoretical excess remain UNVERIFIED; zero
+exact groups pending SHA-256. Both10TB drives identified; no6TB seen (StoreJet4TB).
+Expansion2's main wedding subtree alone2.586TB exceeds StoreJet1.662TB free;
+consolidation requires actual duplicate/capacity decisions before any move.
+No media deletion/move/format, security change or production data/hosting action.
+
+### 26 October 17:56 SAST — #894 StoreJet warning cleared and inventory completed
+
+Later direct CA direction authorised proceeding without a backup. Serial-matched
+StoreJet `V174E32A2GXW-DW` passed CHKDSK filesystem verification; the exFAT-specific
+`/markclean` pass then cleared the dirty state. Final Windows status is Healthy/OK
+and NOT Dirty; used/free bytes are unchanged. No `/f`, `/r`, format, media move
+or deletion occurred. Physical surface/hardware reliability remains unverified.
+
+Full metadata scan now completed:16,812files/939directories/2,328,533,364,052bytes,
+zero errors/no truncation. Shared Google register and raw manifests updated.
+StoreJet is no longer blocked for metadata inventory. About197.6GB in its Recycle
+Bin remains for explicit review; no permission to empty it is inferred. Two-drive
+comparison has18,086size-candidate groups/38,828candidate files and ZERO verified
+exact groups pending hashes. Later section supersedes the historical StoreJet
+warning below. Full receipt remains the linked laptop preflight document.
+
+### 26 October — #894 external-drive inventory and duplicate-proof boundary
+
+CA's laptop is the current read-only intake host for issue #894; Nolan's main PC
+remains untouched while in staff use. The first actual 10 TB source is Seagate
+Expansion `NT17S7GK`, unique ID `3E5431375337474B`, healthy/OK exFAT, 9.06 TiB
+used and about 37.8 GiB free. Its complete metadata inventory contains 144,712
+files/2,929 directories/9.04 TiB with zero scan errors. The earlier StoreJet
+`V174E32A2GXW-DW` is a nominal 4 TB volume—not the expected 6 TB—and remains
+blocked because Windows reports Warning/Full Repair Needed and dirty. No repair,
+hash, file move, rename or deletion was performed on either source.
+
+The authoritative working register is the Google Sheet `CG External Drive
+Register and Migration Tracker`; raw manifests and summaries are in its sibling
+`CG Storage Audit` Drive folder. Size screening found 13,490 groups/27,745 files
+and at most 971,426,615,159 unverified reclaim bytes. Do not treat that as a
+duplicate claim. `Compare-CGMediaManifests.ps1` now emits an exact-duplicate list
+only for equal-size files with matching verified SHA-256. Current verified exact
+count is zero because candidate hashing has not started. Inventory the remaining
+expected drives first, then hash only candidates. Any later deletion still needs
+approved canonical-copy selection, destination hash verification, independent
+backup/restore evidence, Adobe/project relink acceptance and an exact-path owner
+approval packet. Detailed receipt:
+[Nolan storage laptop preflight](CGPH-NOLAN-STORAGE-LAPTOP-PREFLIGHT-2026-10-26.md).
+
 ### 25 October late evening — slow file-window defect fixed; 37 live image Views
 
 Exact receipt: [Client file access acceptance](CLIENT-FILE-ACCESS-ACCEPTANCE-2026-10-25.md).
