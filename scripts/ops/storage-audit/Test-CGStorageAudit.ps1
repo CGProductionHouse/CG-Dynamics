@@ -99,6 +99,16 @@ try {
     if (-not $duplicateManifestGuardPassed) {
         throw 'Supplying one manifest twice did not fail closed.'
     }
+    $sameInventoryCopy = Join-Path $testRoot 'same-inventory-copy.csv'
+    Copy-Item -LiteralPath $comparisonInputA -Destination $sameInventoryCopy
+    $duplicateInventoryGuardPassed = $false
+    try {
+        & (Join-Path $scriptRoot 'Compare-CGMediaManifests.ps1') `
+            -ManifestPath @($comparisonInputA, $sameInventoryCopy) `
+            -OutputDirectory (Join-Path $testRoot 'duplicate-inventory-output') | Out-Null
+    }
+    catch { $duplicateInventoryGuardPassed = $_.Exception.Message -like '*Inventory supplied more than once*' }
+    if (-not $duplicateInventoryGuardPassed) { throw 'An original plus enriched copy of one inventory was counted twice.' }
 
     $readinessOutput = Join-Path $testRoot 'readiness'
     & (Join-Path $scriptRoot 'Get-CGStorageHostReadiness.ps1') `
@@ -142,6 +152,7 @@ try {
         output_inside_source_guard = 'PASS'
         duplicate_proof_guard = 'PASS'
         duplicate_manifest_guard = 'PASS'
+        duplicate_inventory_guard = 'PASS'
         readiness_warning_count = 'PASS'
         warning_volume_guard = $warningVolumeGuard
     }

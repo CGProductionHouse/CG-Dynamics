@@ -13,6 +13,35 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 26 October 18:24 SAST — #894 execution started; hashes saved; USB source disappeared
+
+CA requested implementing storage sorting from the currently attached drive.
+New [execution plan](CGPH-EXTERNAL-STORAGE-EXECUTION-PLAN-2026-10-26.md) and Google
+Sheet `Execution Plan` tab specify direct two-external transfers: serial identify,
+scoped copy into new intake, full destination/source hash check, media/Adobe relink
+check, then review the exact source-removal batch. Proposed roles are Expansion1
+recurring clients, Expansion2 events/full wedding archive during consolidation,
+StoreJet weddings only if unique bytes fit with10%headroom. Current review set
+for the first StoreJet-to-Expansion2 transfers is642.89GB of business/architecture
+folders, which fits target2.019TB free. No media has been copied/moved/deleted.
+
+Resumable native SHA-256 tool now uses the existing PowerShell7 shell, disk unique
+ID plus stable volume GUID, source metadata checks and per-file checkpoints.
+Synthetic tests cover different equal-size content, long Adobe filenames, resume,
+changed files and wrong disks. Comparison rejects original+enriched copies of the
+same inventory, preventing artificial duplicate proofs.
+
+Actual Expansion2 progress:22completed file hashes/10,434,664,868bytes. Local
+comparison proves7exact groups/15members/4,123,916,504redundant bytes; ZERO space
+reclaimed. At18:24:16 Windows logged Disk153 and the drive disappeared mid-read.
+Hashing stopped, failed file unverified, completed evidence retained. It is still
+absent in the post-failure disk read; do not carry forward the earlier Healthy/OK
+filesystem result as current connection acceptance. Cause could be unplug or USB
+failure, not a proven physical-disk diagnosis. Reconnect Expansion2 on stable
+matched power/direct data cable, revalidate identity/health, then attach StoreJet
+alongside it. Do not retry-loop source reads if interruption repeats. Shared
+register and hash receipts record this concrete blocker.
+
 ### 26 October 18:07 SAST — #894 second 10 TB inventoried; three-drive comparison
 
 Seagate Expansion2 `NT17Z4LA`, disk ID `3E5431375A344C41`, is the second actual

@@ -16,6 +16,7 @@ New-Item -ItemType Directory -Path $outputRoot -Force | Out-Null
 
 $sizeGroups = [System.Collections.Generic.Dictionary[long, System.Collections.Generic.List[object]]]::new()
 $seenManifests = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+$inventorySources = @{}
 $fileCount = 0L
 foreach ($inputPath in $ManifestPath) {
     $resolvedManifest = (Resolve-Path -LiteralPath $inputPath).Path
@@ -25,6 +26,10 @@ foreach ($inputPath in $ManifestPath) {
     Import-Csv -LiteralPath $resolvedManifest | Where-Object {
         $_.item_type -eq 'file' -and [long]$_.size_bytes -gt 0
     } | ForEach-Object {
+        if ($inventorySources.ContainsKey($_.inventory_id) -and $inventorySources[$_.inventory_id] -ne $resolvedManifest) {
+            throw 'Inventory supplied more than once through different manifests; use the enriched OR original manifest.'
+        }
+        $inventorySources[$_.inventory_id] = $resolvedManifest
         $size = [long]$_.size_bytes
         if (-not $sizeGroups.ContainsKey($size)) {
             $sizeGroups[$size] = [System.Collections.Generic.List[object]]::new()

@@ -59,10 +59,29 @@ The comparison deliberately separates three states:
 
 This script does not hash, copy, move, rename or delete media. Candidate-only hashes should be collected after all drives are inventoried, then the comparison is rerun. A verified exact duplicate is still not approval to delete it: the retained copy needs a successful destination copy, checksum verification, independent backup/restore evidence and an application relink test first.
 
-## 4. Self-test
+## 4. Resumable candidate-only hashing
+
+Run the candidate hasher from PowerShell 7 (the existing Codex bundled shell), not Windows PowerShell 5.1. It requires modern .NET long-path support for Adobe cache/preview filenames. Use the exact connected disk unique ID. This reads media through a bound volume GUID, stores checkpoints internally and emits a separate enriched manifest for the comparison tool:
+
+```powershell
+& .\scripts\ops\storage-audit\Invoke-CGMediaCandidateHashes.ps1 `
+  -SourceRoot 'E:\' `
+  -ExpectedDiskUniqueId '3E5431375A344C41' `
+  -ManifestPath 'C:\CG-Storage-Audit\SEAGATE-3E5431375A344C41\media-manifest.csv' `
+  -CandidatePath 'C:\CG-Storage-Audit\COMPARISON-3DRIVES-20261026\unresolved-size-candidates.csv' `
+  -OutputDirectory 'C:\CG-Storage-Audit\SEAGATE-3E5431375A344C41\hash-progress' `
+  -HashBudgetBytes 5368709120 -MaximumSeconds 120
+```
+
+Each completed file is checkpointed. Reuse the same output directory to resume; wrong disk/inventory identities fail closed. The source must still match its inventory size and timestamp. Writes are denied while reading each file. Time limits are checked between files; an individual blocked USB read can exceed them. A checkpoint proves the hash when recorded, not future hardware health or permission to delete a referenced path. Revalidate retained files at removal time.
+
+Pass the enriched manifest **instead of**, not alongside, its original manifest when comparing drives, so the same physical inventory is not counted twice.
+
+## 5. Self-test
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\ops\storage-audit\Test-CGStorageAudit.ps1
+& .\scripts\ops\storage-audit\Test-CGMediaCandidateHashes.ps1
 ```
 
 The test uses disposable files under the Windows temp directory, verifies source bytes are unchanged and proves the script refuses to write its report inside the source tree.
