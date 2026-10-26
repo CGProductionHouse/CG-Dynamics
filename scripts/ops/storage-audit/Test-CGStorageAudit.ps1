@@ -60,11 +60,33 @@ try {
     }
     if (-not $guardPassed) { throw 'Output-inside-source guard did not fail closed.' }
 
+    $warningVolumeGuard = 'NOT_APPLICABLE_SYNTHETIC_HEALTHY_VOLUME'
+    $warningVolume = Get-Volume | Where-Object {
+        $_.DriveLetter -and $_.Size -gt 0 -and
+            ($_.HealthStatus -ne 'Healthy' -or @($_.OperationalStatus) -notcontains 'OK')
+    } | Select-Object -First 1
+    if ($warningVolume) {
+        $warningOutput = Join-Path $testRoot 'warning-volume-output'
+        $warningGuardPassed = $false
+        try {
+            & (Join-Path $scriptRoot 'New-CGMediaManifest.ps1') `
+                -SourceRoot ("{0}:\" -f $warningVolume.DriveLetter) `
+                -OutputDirectory $warningOutput `
+                -MaximumItems 1 | Out-Null
+        }
+        catch {
+            $warningGuardPassed = $_.Exception.Message -like '*not safe for a recursive inventory*'
+        }
+        if (-not $warningGuardPassed) { throw 'Warning-volume guard did not fail closed.' }
+        $warningVolumeGuard = 'PASS'
+    }
+
     [pscustomobject]@{
         status = 'PASS'
         source_unchanged = $true
         files_verified = 2
         output_inside_source_guard = 'PASS'
+        warning_volume_guard = $warningVolumeGuard
     }
 }
 finally {

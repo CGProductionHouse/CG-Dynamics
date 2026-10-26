@@ -36,6 +36,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\ops\storage-audit\
 
 The manifest never treats matching filenames as duplicate proof. Only rows with `hash_status=verified` have a verified SHA-256. Physical roles and CG IDs remain blank/unclassified until Sydney and the owner reconcile them.
 
+The manifest also refuses a local source volume unless Windows reports both `HealthStatus=Healthy` and `OperationalStatus=OK`. A dirty volume, repair-needed state or other warning must be reviewed before a recursive walk or hashing pass.
+
 ## 3. Self-test
 
 ```powershell

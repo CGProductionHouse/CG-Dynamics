@@ -61,3 +61,16 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\ops\storage-audit\
 Then stop and review the receipt with the owner before any security, sharing or credential change. If the external volume is healthy and Sydney is present, run the metadata-only manifest with its exact drive root and an internal `C:\CG-Storage-Audit\<physical-volume-id>` output. Do not run hashing, create the SMB pilot or assign hot/archive/wedding roles until the real volume and capacity are reviewed.
 
 The first practical fault to resolve is the laptop's 100 Mbps wired negotiation: test a known-good Cat5e/Cat6 cable and another confirmed gigabit switch port, then re-read `Get-NetAdapter`. This is a physical-link check, not permission to change router, firewall or Windows security configuration.
+
+## External-drive arrival check — 26 October 2026, 17:00 SAST
+
+Two USB devices were physically connected to CA's laptop, but Windows exposed only one real media disk:
+
+- StoreJet/Transcend, serial `V174E32A2GXW-DW`, exact size `4,000,787,030,016` bytes (nominal **4 TB**, 3.64 TiB), GPT, USB, online. Windows assigned disk number 2 initially and disk number 1 after reconnect, confirming why the serial/capacity pair—not the temporary disk number—is the safe identity.
+- Volume E: exFAT, `4,000,634,109,952` bytes total, `1,661,639,589,888` bytes free and about 2.13 TiB used.
+- Windows reports volume E as **Warning / Full Repair Needed** and `fsutil dirty query E:` confirms the volume is dirty.
+- The Windows System log contains repeated Disk 51/153 I/O retry warnings and a Disk 11 controller error on 26 October. USB bridges can obscure disk numbering across reconnects, so the events are evidence of a storage-path problem but are not attributed to a specific physical mechanism without further recovery diagnostics.
+- A read-only top-level listing succeeded and showed `ARCHITECTURE`, `Clients`, `ONCE OFFS`, utility/system folders and no weddings-only structure. No recursive walk or hash pass was started.
+- A generic mass-storage/card-reader-style device previously presented as `No Media`, zero bytes. After disconnect/reconnect and a host-storage-cache refresh, Windows still exposed only the 4 TB StoreJet as real media. No 6 TB or 10 TB disk was visible.
+
+This does **not** match the expected connected 6 TB + 10 TB inventory. The current E: volume must not be repaired, formatted, relabelled, reorganised or used as the weddings destination yet. First verify its physical label and original cable/power arrangement. The expected 10 TB needs its matched power supply and a direct USB 3.x data connection checked before another read-only detection pass.

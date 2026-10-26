@@ -158,6 +158,7 @@ $summary = @(
     "Output: $jsonPath"
     "Disks discovered: $(@($disks).Count)"
     "Volumes discovered: $(@($volumes).Count)"
+    "Warning volumes: $(@($volumes | Where-Object { $_.HealthStatus -ne 'Healthy' -or @($_.OperationalStatus) -notcontains 'OK' }).Count)"
     "Active adapters: $(@($adapters | Where-Object Status -eq 'Up').Count)"
     "SMB shares visible: $(@($smbShares).Count)"
     "No security settings, shares, accounts, files, labels, drive letters or firewall rules were changed."

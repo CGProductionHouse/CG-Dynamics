@@ -35,6 +35,17 @@ if (Test-IsWithinPath -Candidate $output -Parent $source) {
     throw 'OutputDirectory must be outside SourceRoot so the inventory never writes to the media being audited.'
 }
 
+$sourceQualifier = Split-Path -Qualifier $source
+if ($sourceQualifier -match '^[A-Za-z]:\\?$') {
+    $sourceDriveLetter = $sourceQualifier.Substring(0, 1)
+    $sourceVolume = Get-Volume -DriveLetter $sourceDriveLetter -ErrorAction Stop
+    $sourceOperationalStatus = @($sourceVolume.OperationalStatus | ForEach-Object { [string]$_ })
+    if ($sourceVolume.HealthStatus -ne 'Healthy' -or $sourceOperationalStatus -notcontains 'OK') {
+        throw ("Source volume {0}: is not safe for a recursive inventory. HealthStatus={1}; OperationalStatus={2}. Stop and review recovery/backup options before further reads." -f `
+            $sourceDriveLetter, $sourceVolume.HealthStatus, ($sourceOperationalStatus -join ', '))
+    }
+}
+
 New-Item -ItemType Directory -Path $output -Force | Out-Null
 
 $sourceItem = Get-Item -LiteralPath $source -Force
