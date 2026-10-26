@@ -18,6 +18,19 @@
 4. Classify every audio take before cutting: direct-to-camera speech stays audible and meaningful; silent B-roll loses production direction, crew prompts and incidental off-camera talk. Retain only sound with a clear story/action role. Listen to every selected source and the exact export at normal speed; ASR, waveform and loudness checks cannot certify the absence of distracting speech or creative fit.
 5. Only after the research ledger passes, write buyer, why November, one message, intended feeling/action, three distinct hooks, scene jobs, source evidence and a truthful CTA. Compare the story against the published July store-discovery and September product reels. Then build a **new protected** edit, native project, cover and caption. No repair of the withdrawn D2 story can substitute for this gate.
 
+## Read-only source triage already performed
+
+The authorised Daisy OneDrive `Videos/2026` hierarchy contains February, April, May, June, July, August, September and October folders. Folder presence and filenames alone do not establish usable November scenes. Browser previews on 26 October showed:
+
+| Source | Observed preview | November decision |
+| --- | --- | --- |
+| February `199A2871.MP4` | Red Valentine's product tags and bottles | Exclude: explicit occasion and old product stock |
+| June `VIDEO_1/0L8A1068.MP4` | Plated savoury pastries, product close-up | Unverified stock and prior use; does not prove a baking or human-experience story |
+| June `VIDEO 2/199A3066.MP4` | Man in heavy dark jacket addressing camera | Exclude as silent summer B-roll: direct speech and winter wardrobe |
+| June `VIDEO 3/199A3078.MP4` | Woman in heavy shawl addressing camera | Exclude as silent summer B-roll: direct speech and winter wardrobe |
+
+These are preview observations, **not** full moving-source/audio screens or source-month public-post clearances. No new shot has passed the source ledger yet. Do not build around the attractive pastry still or crop the speaking people into generic silent shop ambience.
+
 ## Protected audio experiment — technical failure, not a release fix
 
 - D3 ended its music at approximately 25 s and exposed the official logo animation's own sound through 30 s, contrary to the owner's picture-only-logo rule. An FFmpeg D4 private audio proxy copied D3's picture and carried a music continuation through the logo. It decoded at 30.000 s, 1296×2304/25 fps, −16.12 LUFS and −5.25 dBTP. It is **not native editable** and its creative seam was not heard/approved.

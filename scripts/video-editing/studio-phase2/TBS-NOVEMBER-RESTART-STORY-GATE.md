@@ -1,5 +1,7 @@
 # TBS November restart — story gate, 25 October 2026
 
+**Withdrawn 26 October:** the `WHICH_COVER_FITS_YOUR_LIFE` result below repeated an already-published TBS reel and left behind-camera direction audible in B-roll. Its source-month public-post gate failed. See the corrected status in [TBS November advice review package](TBS-NOVEMBER-ADVICE-REVIEW-PACKAGE.md). Do not use this page as an approved story or forward its export.
+
 **Status, 26 October: protected new review cut delivered internally; staff/client approval pending.** The owner deferred Fight Night while the large bout originals are unavailable and asked to finish TBS. The rejected `YOUR_FARM_CHANGED` film is not a sequence, soundtrack, or picture source. The new cut is an FFmpeg export with a source ledger and separated dialogue stem; it is not a native Premiere project. See the [exact WhatsApp receipt and files](TBS-NOVEMBER-ADVICE-REVIEW-PACKAGE.md).
 
 ## Purpose and viewer
