@@ -188,6 +188,20 @@ class PicassoJobTest(unittest.TestCase):
             self.assertEqual(rows[1]["similarity_hint"],
                              {"nearest_id": "0001", "dhash_distance": 0})
 
+    def test_reviewer_exclusion_blocks_review_and_is_reversible(self):
+        with tempfile.TemporaryDirectory() as root:
+            base = Path(root)
+            source, job = base / "source", base / "job"
+            source.mkdir()
+            Image.new("RGB", (48, 32), (92, 82, 71)).save(source / "frame.jpg")
+            self.assertEqual(run(source, job, None), 0)
+            classify(job, "0001", "EXCLUDE", "Staff reviewer", "Main subject blurred")
+            with self.assertRaisesRegex(ValueError, "explicitly excluded"):
+                approve_review(job, "Staff reviewer", ["0001"])
+            self.assertEqual(run(source, job, None), 0)
+            classify(job, "0001", "KEEP", "Staff reviewer", "Decision reversed after review")
+            self.assertEqual(approve_review(job, "Staff reviewer", ["0001"])["approved_count"], 1)
+
     def test_face_review_is_private_human_preview_without_source_change(self):
         with tempfile.TemporaryDirectory() as root:
             base = Path(root)

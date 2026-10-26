@@ -23,7 +23,7 @@ import cv2
 import numpy as np
 from PIL import Image, ImageCms, ImageDraw, ImageOps, __version__ as pillow_version
 
-VERSION = "0.3.11"
+VERSION = "0.3.12"
 FACE_MODEL = Path(__file__).resolve().parent / "models" / "face_detection_yunet_2026may.onnx"
 FACE_MODEL_SHA256 = "ebafce4e3c118d6554634be5c27ab333b4c047a9a8c3faf1d7cf93101c22f0f0"
 SETTINGS = {"jpeg_quality": 94, "max_ev": 0.35, "max_wb": 0.025, "max_shadow_lift": 0.07,
@@ -479,7 +479,7 @@ def run(source: Path, job: Path, limit: int | None,
                 manifest["internal_review_approval"] = None
     contact_sheet(job, manifest["items"])
     atomic_json(manifest_path, manifest)
-    counts = {key: sum(r["classification"] == key for r in manifest["items"]) for key in ("KEEP", "REVIEW", "ALTERNATE")}
+    counts = {key: sum(r["classification"] == key for r in manifest["items"]) for key in ("KEEP", "REVIEW", "ALTERNATE", "EXCLUDE")}
     print(json.dumps({"job": str(job.resolve()), "total": len(files), "counts": counts,
                       "errors": sum(r["status"] == "error" for r in manifest["items"]),
                       "seconds": manifest["elapsed_seconds_last_run"],
@@ -496,7 +496,8 @@ def verified_review_selection(job: Path, manifest: dict) -> list[tuple[dict, Pat
     job_root = job.resolve()
     for ident, expected in approval["outputs"].items():
         row = rows.get(ident)
-        if not row or row["status"] != "complete" or row["classification"] != approval["classifications"][ident]:
+        if (not row or row["status"] != "complete" or row["classification"] == "EXCLUDE"
+                or row["classification"] != approval["classifications"][ident]):
             raise ValueError(f"Review selection changed for image {ident}; approve again")
         relative = approval.get("paths", {}).get(ident, row["output"])
         permitted = {row["output"]} | {r["output"] for r in manifest.get("revisions", [])
@@ -527,6 +528,8 @@ def approve_review(job: Path, reviewer: str, ids: list[str], latest_revisions: b
         row = rows.get(ident)
         if not row or row["status"] != "complete":
             raise ValueError(f"Image {ident} is not a completed job item")
+        if row["classification"] == "EXCLUDE":
+            raise ValueError(f"Image {ident} was explicitly excluded; reclassify it before approval")
         output = (job / row["output"]).resolve()
         if not output.is_relative_to(output_root) or not output.is_file() or digest(output) != row["output_sha256"]:
             raise ValueError(f"Image {ident} output failed its hash check")
@@ -650,8 +653,8 @@ def amend(job: Path, ident: str, reviewer: str, request: str, overrides: dict) -
 
 def classify(job: Path, ident: str, decision: str, reviewer: str, reason: str) -> dict:
     """Reversibly record a human cull decision without touching image bytes."""
-    if decision not in {"KEEP", "ALTERNATE", "REVIEW"} or not reviewer.strip() or not reason.strip():
-        raise ValueError("Name a KEEP/ALTERNATE/REVIEW decision, reviewer, and reason")
+    if decision not in {"KEEP", "ALTERNATE", "REVIEW", "EXCLUDE"} or not reviewer.strip() or not reason.strip():
+        raise ValueError("Name a KEEP/ALTERNATE/REVIEW/EXCLUDE decision, reviewer, and reason")
     manifest_path = job / "manifest.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     row = next((r for r in manifest["items"] if r["id"] == ident), None)
@@ -927,7 +930,7 @@ def main() -> int:
     cull = sub.add_parser("classify", help="Record a reversible human KEEP/ALTERNATE/REVIEW decision")
     cull.add_argument("--job", type=Path, required=True)
     cull.add_argument("--id", required=True)
-    cull.add_argument("--decision", choices=("KEEP", "ALTERNATE", "REVIEW"), required=True)
+    cull.add_argument("--decision", choices=("KEEP", "ALTERNATE", "REVIEW", "EXCLUDE"), required=True)
     cull.add_argument("--reviewer", required=True)
     cull.add_argument("--reason", required=True)
     faces = sub.add_parser("face-review", help="Make private face-crop sheets for human expression review")
@@ -995,3 +998,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
