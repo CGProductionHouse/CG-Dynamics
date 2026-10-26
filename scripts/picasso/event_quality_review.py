@@ -20,7 +20,7 @@ from PIL import Image, ImageDraw, ImageOps
 
 
 MODEL = Path(__file__).parent / "models" / "face_detection_yunet_2026may.onnx"
-VERSION = "0.2.0"
+VERSION = "0.3.0"
 CELL = 500
 LABEL = 55
 ROWS_PER_SHEET = 4
@@ -34,7 +34,7 @@ def file_hash(path: Path) -> str:
     return digest.hexdigest()
 
 
-def face_roi(image: Image.Image, detector: cv2.FaceDetectorYN) -> tuple[tuple[int, int, int, int], int, str]:
+def face_roi(image: Image.Image, detector: cv2.FaceDetectorYN) -> tuple[tuple[int, int, int, int], int, str, list[tuple[int, int, int, int]]]:
     width, height = image.size
     scale = min(1.0, 1200 / width)
     small = cv2.resize(np.asarray(image), (round(width * scale), round(height * scale)))
@@ -43,13 +43,16 @@ def face_roi(image: Image.Image, detector: cv2.FaceDetectorYN) -> tuple[tuple[in
     if detections is None or len(detections) == 0:
         side = min(CELL, width, height)
         left, top = (width - side) // 2, (height - side) // 2
-        return (left, top, left + side, top + side), 0, "center fallback; subject unverified"
-    face = max(detections, key=lambda row: float(row[2] * row[3] * row[-1]))
-    x, y, w, h = (float(v) / scale for v in face[:4])
-    side = min(max(CELL, round(1.4 * max(w, h))), width, height)
-    left = max(0, min(width - side, round(x + w / 2 - side / 2)))
-    top = max(0, min(height - side, round(y + h / 2 - side / 2)))
-    return (left, top, left + side, top + side), len(detections), "face candidate; verify main subject"
+        return (left, top, left + side, top + side), 0, "center fallback; subject unverified", []
+    ranked = sorted(detections, key=lambda row: float(row[2] * row[3] * row[-1]), reverse=True)
+    boxes = []
+    for face in ranked[:3]:
+        x, y, w, h = (float(v) / scale for v in face[:4])
+        side = min(max(CELL, round(1.4 * max(w, h))), width, height)
+        left = max(0, min(width - side, round(x + w / 2 - side / 2)))
+        top = max(0, min(height - side, round(y + h / 2 - side / 2)))
+        boxes.append((left, top, left + side, top + side))
+    return boxes[0], len(detections), "face candidate 1; inspect all subjects", boxes
 
 
 def crop_tile(image: Image.Image, box: tuple[int, int, int, int]) -> Image.Image:
@@ -61,11 +64,21 @@ def crop_tile(image: Image.Image, box: tuple[int, int, int, int]) -> Image.Image
     return tile
 
 
-def full_tile(image: Image.Image) -> Image.Image:
+def full_tile(image: Image.Image, candidate_boxes: list[tuple[int, int, int, int]] | None = None) -> Image.Image:
     preview = image.copy()
     preview.thumbnail((CELL, CELL), Image.Resampling.LANCZOS)
     tile = Image.new("RGB", (CELL, CELL), (25, 25, 25))
-    tile.paste(preview, ((CELL - preview.width) // 2, (CELL - preview.height) // 2))
+    offset_x, offset_y = (CELL - preview.width) // 2, (CELL - preview.height) // 2
+    tile.paste(preview, (offset_x, offset_y))
+    if candidate_boxes:
+        draw = ImageDraw.Draw(tile)
+        scale_x, scale_y = preview.width / image.width, preview.height / image.height
+        for number, box in enumerate(candidate_boxes, 1):
+            x1, y1, x2, y2 = box
+            scaled = (round(offset_x + x1 * scale_x), round(offset_y + y1 * scale_y),
+                      round(offset_x + x2 * scale_x), round(offset_y + y2 * scale_y))
+            draw.rectangle(scaled, outline=(255, 145, 0), width=2)
+            draw.text((scaled[0] + 2, scaled[1] + 2), str(number), fill="white", stroke_width=1, stroke_fill="black")
     return tile
 
 
@@ -91,7 +104,7 @@ def make_sheet(rows: list[dict], destination: Path) -> None:
         sheet.paste(row.pop("_output_tile"), (CELL * 3, y))
         title = f"{row['key']} | {row['set']} | {row['roi_type']} | focus probe {row['laplacian_var']}"
         draw.text((8, y + CELL + 5), title[:130], fill="white")
-        for column, label in enumerate(("ORIGINAL FULL SCENE", "EDITED FULL SCENE", "ORIGINAL 100% CROP", "EDITED SAME CROP")):
+        for column, label in enumerate(("ORIGINAL FULL SCENE: FACE CANDIDATES", "EDITED FULL SCENE", "ORIGINAL 100% CROP 1", "EDITED SAME CROP")):
             draw.text((column * CELL + 8, y + CELL + 28), label, fill="#dddddd")
     destination.parent.mkdir(parents=True, exist_ok=True)
     sheet.save(destination, "JPEG", quality=88)
@@ -126,17 +139,18 @@ def run(manifest_path: Path, destination: Path, keys: set[str] | None) -> None:
             result = ImageOps.exif_transpose(edited).convert("RGB")
             if source.size != result.size:
                 raise ValueError(f"Dimensions changed for {item['key']}")
-            box, count, roi_type = face_roi(source, detector)
+            box, count, roi_type, candidate_boxes = face_roi(source, detector)
             sharpness, rgb_delta, l_delta = comparison_metrics(source, result, box)
             row = {"key": item["key"], "set": item["set"], "source": str(source_path),
                    "output": str(output_path), "face_candidates": count, "roi_type": roi_type,
                    "crop_xyxy": json.dumps(box), "laplacian_var": sharpness,
+                   "top_face_candidate_boxes_xyxy": json.dumps(candidate_boxes),
                    "mean_abs_rgb_delta": rgb_delta, "mean_l_delta": l_delta,
                    "native_subject_focus": "UNREVIEWED", "grade_vs_staff_reference": "UNREVIEWED",
                    "editorial_decision": "REVIEW"}
             report.append(row)
             page = pages.setdefault(item["set"], [])
-            page.append({**row, "_source_full": full_tile(source), "_output_full": full_tile(result),
+            page.append({**row, "_source_full": full_tile(source, candidate_boxes), "_output_full": full_tile(result),
                          "_source_tile": crop_tile(source, box), "_output_tile": crop_tile(result, box)})
             if len(page) == ROWS_PER_SHEET:
                 page_numbers[item["set"]] = page_numbers.get(item["set"], 0) + 1
