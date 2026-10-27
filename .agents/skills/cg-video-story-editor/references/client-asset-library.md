@@ -1,0 +1,14 @@
+# Client video asset library
+
+Use one folder per client. Keep it small enough that a new editor can find current assets quickly; do not mirror the whole video archive. The PSG October 2026 implementation is at `C:\Users\chris\Videos\CG-AI-Editing\Client-Libraries\PSG` and in `Clients/PSG/Video Editing Library` on the authorised `info@cgproductionhouse.com` OneDrive.
+
+For a new client, run `python scripts/new_client_library.py "Client Name" --root "C:\Users\chris\Videos\CG-AI-Editing\Client-Libraries"` from this skill. It creates the standard directories and starter indexes without overwriting existing files. Then populate each record from verified source material; the scaffold itself approves nothing.
+
+## Promote only reusable evidence
+
+- **Brand:** latest verified logo, source design link, observed font family/style, sampled or confirmed colour values, and date. Label sampled screenshot values as provisional. Keep legacy marks/styles clearly historical.
+- **Premiere:** native text, effects, and colour controls for titles. Prefer an installed, properly licensed font; do not repeatedly export Canva text glyphs. If a client approves a similar substitute, record the exact replacement, source and licence, and keep it distinct from the official font. A source-driven title generator is quicker than manual Canva exports but its rendered PNGs are still not native Premiere text; label them accurately and preserve the editable source. Put reusable brand shapes such as corner brackets in transparent overlays with a script or vector source, then use them selectively where they serve the story. A `.prproj` with local absolute media paths is a working file, not a portable staff template. Export a MOGRT or collect/relink media and test on another machine before promotion.
+- **Footage:** source path or cloud link, what the shot actually shows, exact useful in/out, crop/orientation, story role, reason for the cut, rejected adjacent performance, rights, prior use, and approval state. The presence of a select in a library does not make it the best shot for the next story or permit repeating it in the same edit.
+- **Audio:** raw licensed music/effect source, asset ID, source URL and licence, editorial fit and exclusions. A rendered timeline stem is not a clean reusable effect master. Audition cues against the new buyer and film before reuse.
+
+Keep client-specific brand and permissions out of a generic global asset pack. Maintain a separate cross-client sound catalogue only for assets whose licences and creative use genuinely allow it. When a revision changes a brand source or title style, update the library record and the editable Premiere source together. Confirm who can access the cloud folder; an owner-only OneDrive folder is not a team library merely because its link exists.
