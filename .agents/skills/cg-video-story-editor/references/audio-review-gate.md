@@ -1,6 +1,6 @@
 # Gemini audio review and feedback gate
 
-Use this before sending the next owner-review video. Continue the existing native Premiere workflow; this helper only inspects an Adobe export and records its review. Nothing uploads, sends, installs or changes Premiere automatically.
+Use this optional route only when the exact audio material and provider upload are already authorised. It complements local sound checks and an authorised normal-speed listen of the exact final export. The helper records evidence; it does not upload, send, install or alter an editor automatically. Do not treat an unavailable route as a reason to invent a listening verdict or upload client dialogue/media without explicit approval.
 
 ## Before planning: retrieve, do not rely on chat memory
 

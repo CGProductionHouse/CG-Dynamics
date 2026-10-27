@@ -1,6 +1,6 @@
 ---
 name: cg-video-story-editor
-description: Plan, assemble, and review CG Production House client videos in Premiere Pro using approved edit references, verified source footage, a buyer-focused story, and a reusable source ledger. Use for CG client video edits or editor handoffs, not generic photo/design tasks.
+description: Plan, assemble, review, and hand off CG Production House client videos using verified footage, a buyer-focused story, approved references, and a reusable source ledger. Use for Nolan Studio client edits or editor handoffs in the appropriate local editor.
 ---
 
 # CG video story editor
@@ -11,9 +11,9 @@ For music markers, beat-led openings, motion-matched cuts and sound that crosses
 For a worked opening with a rush, layered sound and a deliberate breath, read the [cinematic rush and release example](references/cinematic-rush-and-release-example.md).
 For reusable licensed cue discovery and per-project registration, read the [CG sound design catalog](references/sfx-library.md).
 For choosing the precise gesture, expression, or reveal within a longer source, read the [moment selection playbook](references/moment-selection-playbook.md).
-For client asset libraries and native Premiere brand graphics, read the [client library workflow](references/client-asset-library.md).
+For client asset libraries and native brand graphics, read the [client library workflow](references/client-asset-library.md).
 For every final social video, read the [Reel cover and Instagram audit workflow](references/reel-cover-and-instagram-audit.md). Deliver a separate 1080 × 1920 cover image with the final MP4.
-For client-ready delivery, read the [release and learning loop](references/release-and-learning-loop.md). Ship the named video, cover and caption together, with a saved online Premiere project and a measurable client-specific objective.
+For client-ready delivery, read the [release and learning loop](references/release-and-learning-loop.md). Ship the named video, cover and caption together, with a witnessed saved/reopened editable project in the chosen editor when staff handover is required, and a measurable client-specific objective.
 For client-supplied tutorials or edit references, read the [reference-to-technique study](references/reference-to-technique-study.md). It separates observed craft from creator claims and gives a short Premiere test before a technique becomes a shared rule. For optional Windows extensions, read the [free Premiere tool shortlist](references/free-premiere-tools.md); neither a TikTok ranking nor this skill establishes an installation or licence.
 For low-resolution landscape drone footage across one or more large sites, read the [scale and aerial draft case note](references/scale-and-aerial-draft-case-note.md) before choosing format, proof shots or text-in-scene treatments.
 
@@ -45,7 +45,7 @@ For low-resolution landscape drone footage across one or more large sites, read 
 
 ## Technical handoff
 
-- Prefer a frame-accurate shot manifest with source paths, in points, speed, crop, text, and role. Keep footage and caption layers separate in an editable Premiere sequence. Render a review MP4 as well.
+- Prefer a frame-accurate shot manifest with source paths, in points, speed, crop, text, and role. Keep footage and caption layers separate in a staff-editable project in the chosen editor when handover is required. Render a review MP4 as well.
 - For processed stabilization, ramps, and transitions, preserve source in/out, crop, filter settings, and original paths so an editor can recreate or retune the effect in Premiere. A baked clip is editable in the sequence but its effect parameters are not native controls.
 - Use the client's proven logo animation as picture. For Nolan's current workflow, mute its baked audio and carry the chosen music and purposeful effects through a deliberate final resolve. Verify the exact exported ending is audibly present, not merely that the timeline clip was extended; Daisy's protected native D4 displayed a music clip through 30 s but rendered a near-silent last five seconds. Verify that a horizontal logo remains legible in a vertical crop; letterbox or fit it when cropping would cut the mark.
 - Verify duration, frame rate, dimensions, title safe area, shot changes, music and brand sound, contact details, media links, and export playback. A working XML is not evidence that a saved Premiere project is online.
@@ -63,4 +63,4 @@ Before selecting a client or starting a new timeline, read the latest `CGPH TO D
 
 For every new edit/revision, read the latest private client-kit baseline and feedback before the story gate. Use `python scripts/audio_review.py context --client-kit <kit> --output <new-private-folder>` and read `READ-BEFORE-EDIT.md`; carry the relevant decisions into the existing story brief. Preserve preferred work when applying amendments: explicitly list the owner's **keep** elements (for example, an approved music cue, pace or motion language) alongside **change** elements, and do not discard the former because a story or source audit failed. Daisy November's owner-liked music and buoyant edit are a creative baseline even though its old product-range story was withdrawn. The owner may choose any suitable local editor for a protected revision; verify the actual export and an editable handover appropriate to that editor. Record evidence of actual changes, not a claim of model retraining.
 
-Before any owner-review video send, follow [Gemini audio review and feedback gate](references/audio-review-gate.md). Extract the exact final Adobe export, run local audio checks, obtain the authorised Gemini critique and resolve findings. Run `audio_review.py check` immediately before attaching the reviewed file. Changed exports/new feedback invalidate old reviews. Missing perception, quota or upload access leaves this step pending; never quietly skip it or substitute LUFS for listening. Its pass permits owner-review handoff only, not client/publication approval. Use existing Premiere tools; no new plugin/API billing or client-data upload authority is created by this skill.
+Before any owner-review video send, run local audio checks on the **exact final export** and obtain a normal-speed perceptual listen on an authorised local device/editor where available. The [optional Gemini audio workflow](references/audio-review-gate.md) applies only to explicitly authorised music/SFX-only material and a verified provider route; it never grants permission to upload client media, dialogue or private context. If a perceptual gate cannot be completed, record it as pending rather than substituting LUFS, ASR or a model guess. `audio_review.py check` applies only when that workflow was actually used and its context and export hashes are current. No review check alone makes the film client/publication approved, and no plugin/API billing or upload authority is created by this skill.
