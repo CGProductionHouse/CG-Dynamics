@@ -143,6 +143,67 @@ surfaces; the current connection and local context/handler tests do not prove
 another account's consent. PR app-attachment attempted once; existing100-item
 limit refused it. GitHub PR/issue remain the durable handoff.
 
+## Later actual normal-chat account acceptance — 27 October
+
+The earlier account-session limitation above is now superseded for **read-only
+acceptance**, not live content mutation:
+
+- Company Work Chrome, a new CA CG Assistant Project conversation in normal
+  ChatGPT: plugin found the correct existing CASE October run, read both complete
+  saved scripts/direction, distinguished other dated runs, and described narrow
+  hook/script amendment and read-back without changing links. No generation API.
+- Personal Plus Chrome, normal Chat mode: initial requests through both installed
+  Dynamics connections returned internal tool errors. Refreshing tools first also
+  failed. Legitimate existing-account Reconnect completed for CG Dynamics and
+  then CG Dynamics Personal Refresh; account permission remains Allow low-risk.
+  No credential copying, scope expansion, new app, uninstall or auth bypass.
+- A fresh personal CG Dynamics test resolved canonical Christie-Ann staff context,
+  read bootstrap and the same complete saved guide. The first full-name lookup
+  was refused; canonical profile name succeeded. Effective team/staff context
+  was retained; this is not an admin escalation.
+- A separate follow-up explicitly using only Personal Refresh also passed:
+  canonical staff resolution, two saved videos, complete scripts/shots/requirements,
+  and truthful null visual_notes. No fallback to the other app.
+- Both real accounts correctly distinguished an existing CG Calendar event from
+  unallocated Client Schedule slots. The selected guide's two videos currently
+  have no posting allocations; the tests did not fabricate dates or edit Teams.
+- No live guideline ensure/add/update/reorder/link/publish was called by these
+  read-only tests. Actual narrow save/read-back preservation remains proven by
+  the deterministic handler test, not a claimed real client amendment.
+
+Successful company/personal conversations are retained in their respective browser
+profiles. Private links/evidence summary: `%TEMP%/cg-guideline-account-acceptance-20261027.json`.
+Browser response rendering was initially delayed; settled responses were read to
+completion. A proof screenshot capture timed out; no screenshot success is claimed.
+The existing four-width design images are actual local component previews, not
+screenshots of deployed client content.
+
+Current main was merged into this branch, retaining the approved CG Hoursv74
+repair and both operational handovers. Combined guideline/Hours regression suites
+pass56/56, app TypeScript/Vite build/app chunks/scoped lint/diff pass. No new
+frontend/runtime change was invented merely because one account's connection failed.
+
+## Current client rollout boundary
+
+Public app HTML/module read returnsHTTP200 and still serves the older guideline
+component (`index-BC1puXgn.js`, `ClientContentGuidesPage-a1U1k9Dp.js`); the new
+shared branded document/copy-link module is absent. Source readiness is not a
+frontend deployment. Vercel Git deployment guard remainsOFF; no Vercel operation.
+
+Fresh SELECT-only stored-content snapshot: October56 draft/1 published monthly
+strategy, November57 drafts/0 published; October10 draft guidelines/0 published,
+no November guideline rows. These are row/publication counts, not strategy-quality
+or launch-cohort acceptance. Strategy authoring/admission/editorial remains #731.
+Brand Hub remains41 enabled/17 private libraries with41 published assets.
+Meta's old stored-consent gate has cleared: connected + valid encrypted token,
+last validated25October, data access expiry23January2027. No token value read,
+provider call, refresh or claim that every client's metrics are complete/current.
+
+Client rollout still needs deliberate review/publication of exact ready content,
+real posting allocations through the staff owner, actual client-role/password and
+phone acceptance retained by CA, and a separately approved conservative frontend
+release. Do not publish generic filler or expose drafts to turn these counts green.
+
 ## Exact approved connector release — live 27 October
 
 CA answered **Approve exact guideline connector fix** in this chat. Authority:
