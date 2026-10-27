@@ -13,6 +13,14 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 27 October — PICASSO Staffy replacement delivered for internal review; consistency gate added (#878 / PR #879)
+
+The owner approved a password-free, unlisted replacement gallery. Pixieset collection `125612394` contains 195 images across all 11 fights, including four drone stills and 14 labelled staff-posted reference examples. Downloads, social sharing and homepage listing are off. Its link was sent to **CG Picasso Approvals** signed PICASSO and WhatsApp showed Delivered at 14:24 SAST. It is **not client-approved**. The 203-image rejected collection remains hidden.
+
+Post-delivery audit exposed an actual process failure: the emergency manifest labelled 166 files `colour-checked`, hiding their specific edit route, while its selection ledger still had REVIEW decisions. Among the 195 outputs, 17 camera-derived images changed very little from source, 14 were luminance outliers within their group, and 40 had many near-white pixels needing subject-level clipping inspection. These are triage flags, not objective quality verdicts. A private full-gallery CSV/contact-sheet audit now exists. PR #879 adds a reusable read-only consistency audit and a release check requiring hash-bound per-photo decisions and an accepted varied 25-frame record before another broad upload. Do not use the delivered global grade as an approved preset or claim that the current gallery passed the new gate.
+
+The company PICASSO local Work chat on the MSI has since invoked the installed skill and performed a Lightroom edit/export proof; it has **not** completed the full 25-frame calibration, office-PC replication, or Work-originated Pixieset/WhatsApp delivery. No new spend, CG Dynamics production change or Nolan #862 change.
+
 ### 26 October — PICASSO Staffy review withdrawn; quality gate reset (#878 / PR #879)
 
 The 203-photo Staffy internal Pixieset review collection was hidden after Amonique identified a visibly blurred walkout frame and said the overall finish appeared too close to the originals. PICASSO acknowledged this in the exact approvals WhatsApp group with a signed message; the current gallery must not be treated as accepted or sent to clients. This is a photography-lane state correction, not a CG Dynamics or Nolan deployment. The owner issue #878 records the withdrawal. PR #879 carries the reusable event gate and private crop/ledger tool; all selected frames need native-size subject review, scene-specific finishing, and a human-accepted 25-frame calibration before any new review link. Technical JPEG verification alone is insufficient. Company ChatGPT Work-to-local execution remains unproved. No spend, production deployment, or PR #862 change.
