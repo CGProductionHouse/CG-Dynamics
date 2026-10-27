@@ -30,16 +30,23 @@ def frame_at(cap: cv2.VideoCapture, seconds: float) -> np.ndarray:
 def make_frame(source: np.ndarray, mode: str, index: int) -> np.ndarray:
     canvas = np.empty((H, W, 3), dtype=np.uint8)
     canvas[:] = BG
-    if mode == "plain" or index >= 29:
+    if mode == "plain" or (mode == "panels" and index >= 29):
         # Same moving wide frame, including both people and the shared table.
         canvas[438:843] = cv2.resize(source, (W, 405))
     else:
+        if mode == "slide" and index >= 29:
+            canvas[438:843] = cv2.resize(source, (W, 405))
+        progress = 0.0 if index < 29 else min(1.0, (index - 29) / 7)
+        progress = progress * progress * (3 - 2 * progress)
         # Two faces are source-synchronous, then their full shared context is revealed.
-        for left, y in ((0, 100), (640, 650)):
+        for left, start_y, travel in ((0, 100, -600), (640, 650, 630)):
+            y = round(start_y + travel * progress) if mode == "slide" else start_y
             panel = cv2.resize(source[0:444, left:left + 640], (W, 500))
-            canvas[y:y + 500] = panel
-            canvas[y:y + 4] = (245, 233, 215)
-            canvas[y + 496:y + 500] = (245, 233, 215)
+            panel[:4] = (245, 233, 215)
+            panel[-4:] = (245, 233, 215)
+            top, bottom = max(0, y), min(H, y + 500)
+            if bottom > top:
+                canvas[top:bottom] = panel[top - y:bottom - y]
     return canvas
 
 
@@ -66,8 +73,10 @@ def main() -> None:
     cap.release()
     plain = [make_frame(frame, "plain", i) for i, frame in enumerate(source)]
     panels = [make_frame(frame, "panels", i) for i, frame in enumerate(source)]
+    slide = [make_frame(frame, "slide", i) for i, frame in enumerate(source)]
     encode(OUT / "plain-context.mp4", plain)
     encode(OUT / "faces-then-context.mp4", panels)
+    encode(OUT / "faces-slide-to-context.mp4", slide)
 
     selected = (0, 12, 24, 28, 29, 30, 42, 59)
     contact = Image.new("RGB", (8 * 180, 2 * 320), "white")
@@ -79,6 +88,15 @@ def main() -> None:
             draw.text((x + 3, y + 3), f"{('plain', 'panels')[row]} {index}", fill="white", stroke_width=1, stroke_fill="black")
     contact.save(OUT / "portrait-contact.jpg", quality=92)
     Image.fromarray(panels[24]).save(OUT / "panels-full-size.png")
+
+    selected_slide = range(26, 40)
+    slide_contact = Image.new("RGB", (14 * 180, 2 * 320), "white")
+    for row, frames in enumerate((panels, slide)):
+        for col, index in enumerate(selected_slide):
+            slide_contact.paste(Image.fromarray(frames[index]).resize((180, 320)),
+                                (col * 180, row * 320))
+    slide_contact.save(OUT / "hard-versus-slide-phone.jpg", quality=92)
+    Image.fromarray(slide[32]).save(OUT / "slide-mid-full-size.png")
 
 
 if __name__ == "__main__":
