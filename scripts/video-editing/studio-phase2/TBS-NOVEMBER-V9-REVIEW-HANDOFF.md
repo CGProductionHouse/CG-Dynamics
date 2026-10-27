@@ -1,5 +1,7 @@
 # TBS November V9 — owner feedback revision and internal handoff
 
+**Superseded 27 October:** The approvals group found the final spoken `TBS Brokers` phrase cut short. [V10](TBS-NOVEMBER-V10-FINAL-LINE-HANDOFF.md) extends the original adviser picture and voice and reached the group as a new document/HD-cover pair. Do not forward V9.
+
 27 October 2026. The `CG Nolan Approvals` group feedback at 10:03 SAST said to **keep the adviser visibly speaking**, clean the audio rather than replacing him with office B-roll, make the first seconds less reading-heavy, and align the sound around 0:18 to the text reveal. Nolan acknowledged those amendments in the group at 11:45; the acknowledgement showed Delivered. V8 is superseded for internal review. This is the protected V9 response, not a new story or client/public approval.
 
 ## Exact edit
