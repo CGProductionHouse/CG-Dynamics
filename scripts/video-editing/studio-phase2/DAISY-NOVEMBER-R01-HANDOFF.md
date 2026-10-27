@@ -1,5 +1,7 @@
 # Daisy & Co November R01 — internal approval handoff
 
+**Superseded for creative review, 27 October:** The owner rejected four R01 source slots and requested stronger full-film stability/motion. R01 stays preserved as an internal review record; do not forward or resend it. Read [the exact R02 amendment and source gate](DAISY-NOVEMBER-R02-FEEDBACK-AND-SOURCE-GATE.md). No R02 package has been delivered.
+
 26 October 2026, 17:21 SAST. This is **internal CG Nolan Approvals delivery**, not client or public approval.
 
 ## What was actually delivered
