@@ -24,6 +24,8 @@ Three new commercial-free Mixkit clips were downloaded **only for source screeni
 
 The normal Chrome OneDrive path for larger June/August originals presented a sign-in or blank shared view in this profile; do not change accounts/permissions or retry blind Download clicks. The SharePoint raw connector has a 100 MiB ceiling. This is an access limit on those particular sources, not a reason to invent what they show. The screened local September `GENERAL` sources remain mostly old-item product heroes; October `Best of Bloem` is direct address and a published story. The previously posted July green-vase action is an exact old beat and remains excluded. Older posted shoots may still supply an *alternate* moment with a genuinely new November scene job after an exact public comparison.
 
+**Correction from a local Downloads check:** the complete 259,131,960-byte June `0L8A1077.MP4` was already present on this workstation, so this exact file is not access-blocked. A new one-second contact strip across its full 9.32 s shows posed/front-speaking setup through about 3 s, then the same green-vase pickup that appears in the distributed July film. No clearly different, natural November action is evident in the remaining frames; keep it rejected. This does not establish the contents of the other large June originals.
+
 ## R02 acceptance before the next group send
 
 1. Find two **distinct**, natural source actions for the two rejected woman positions and a separate upright store/location moving beat for the repeated flower positions. Inspect each complete original, audio and published use; do not imply pictured old goods are currently available.
