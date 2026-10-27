@@ -2,7 +2,8 @@
 
 CA requested a premium branded guideline, a separate client link, easy normal
 ChatGPT authoring in personal/company accounts, and the existing calendar chain.
-Branch: `codex/guideline-client-design-20261027`. No Vercel or protected writes.
+Branch: `codex/guideline-client-design-20261027`. Frontend remains local/PR.
+Later exact CA-approved connector release is recorded below; zero Vercel.
 
 ## Design and source references
 
@@ -85,10 +86,10 @@ context policy, mobile navigation and private draft preview. They do not prove
 both separate ChatGPT accounts' live consent/session state. Live write acceptance
 requires an owner-approved exact draft and read-back in each real account.
 
-The backend projection/tool-description change is SOURCE ONLY until the exact
-`cg-dynamics-mcp` release is approved and hosted files/auth/settings are reviewed.
-The frontend is likewise not deployed. No migration, live SQL/data, provider
-generation, file/share permission, publication, Microsoft or Vercel change.
+The backend projection/tool-description change was initially source-only; CA's
+later exact approval and verified v73 release are recorded below. The frontend
+is still not deployed. No migration, live SQL/data, provider generation,
+file/share permission, publication, Microsoft or Vercel change.
 
 Existing PRs #867/#866/#842 own the return-to-review button; their action is not
 duplicated here. No new dependency, schedule authority or Guideline document.
@@ -137,8 +138,47 @@ Proof remains workstation-local in `%TEMP%`: `cg-guideline-design-1440.png`,
 `cg-guideline-lint-20261027.log`. UI sample is also left open at loopback port53994.
 No screenshots, sample content or generated dist are production assets.
 
-Exact two-file backend release requested separately; not executed without CA's
-reply. Both real personal/company ChatGPT account sessions still need acceptance
-after release; current connection and local context/handler tests do not prove
+Both real personal/company ChatGPT account sessions remain distinct acceptance
+surfaces; the current connection and local context/handler tests do not prove
 another account's consent. PR app-attachment attempted once; existing100-item
 limit refused it. GitHub PR/issue remain the durable handoff.
+
+## Exact approved connector release — live 27 October
+
+CA answered **Approve exact guideline connector fix** in this chat. Authority:
+only the reviewed guideline projection and tool-description files in the existing
+MCP backend, preserving all other hosted code/auth/permissions. No Vercel or
+client-content mutation authority was added.
+
+- Verified exact Dynamics project `ehtjfntukiwbgptqgbzy` ACTIVE_HEALTHY.
+- Existing `cg-dynamics-mcp` v72:40 hosted files, JWTfalse, import-mapfalse.
+- Built from the actual hosted snapshot, NOT a wholesale main/PR deployment.
+  Only `contentGuidelineActions.ts`'s seven-line explicit script/direction
+  addition and the one `toolCatalog.ts` description changed. All other38 files
+  byte-identical; all56 tool names/schemas/annotations unchanged.
+- Hosted-derived candidate executable assertions and explicit TypeScript check
+  pass;44 focused MCP/catalog tests pass. Baseline/rollback saved privately in
+  `%TEMP%/cg-guideline-mcp-release-20261027`. No credentials were retrieved/copied.
+- Fresh pre-release guard confirmed the same version/settings/all40 source files.
+  Released ONCE as **v73**, statusACTIVE, same JWT/import settings.
+- Actual hosted read-back matches **all40 candidate files byte for byte**;
+  the other38 hosted files remain byte-identical to the original.
+- Bundle SHA256: `88df12f65b479f7cfd06654661eebfc61d02a327feda0570cffdf2a0aee7c2aa`.
+  Candidate source-array SHA256:
+  `8598fe6e8c4cba07c8ce3b2596f99297cf7eff82f0815c0632951d0a2d33f63c`.
+- Anonymous and invalid-bearer tools/list POST canaries both401.
+- Actual signed-in normal connector read of the existing CASE October run now
+  returns two complete scripts (1260/1029 characters), shots (351/326 characters),
+  requirements and visual direction. An independent canonical `get_content_run_plan`
+  read matches both scripts and shot directions exactly; no truncation/rewrite.
+  Draft/unallocated states retained; nothing saved, approved or published.
+- Bootstrap initially returned one transport Internal error. One bounded read
+  retry succeeded with the updated full-script description and explicit normal
+  ChatGPT guidance. No redeploy, auth bypass or retry loop.
+
+This establishes the released read-back repair on the connected account. It does
+not claim production draft-writing acceptance in two different account sessions,
+complete calendar/mapping reconciliation, or that the new frontend design is live.
+No SQL/data/schema/config/secret/permission/Microsoft/content change or Vercel.
+Rollback, if ever needed under incident authority, is the saved exact40-file v72
+source/settings; do not replace unrelated code from main or alter security settings.
