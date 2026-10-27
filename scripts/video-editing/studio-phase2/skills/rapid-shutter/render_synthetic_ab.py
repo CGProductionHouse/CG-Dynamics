@@ -151,6 +151,8 @@ if __name__ == "__main__":
         write_wav(args.output_dir / f"{mode}-cue.wav", cue(mode))
     mux(args.output_dir / "plain-silent.mp4", args.output_dir / "noise-cue.wav",
         args.output_dir / "plain-noise.mp4")
+    mux(args.output_dir / "shutter-silent.mp4", args.output_dir / "noise-cue.wav",
+        args.output_dir / "shutter-noise.mp4")
     mux(args.output_dir / "shutter-silent.mp4", args.output_dir / "tonal-cue.wav",
         args.output_dir / "shutter-tonal.mp4")
     contact(args.output_dir / "cut-contact.png")
