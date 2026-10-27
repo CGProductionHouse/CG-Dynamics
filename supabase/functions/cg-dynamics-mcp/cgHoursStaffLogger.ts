@@ -21,6 +21,37 @@ export interface CgHoursStaffLoggerConfig {
   secret: string
 }
 
+/** Preserve exact whole minutes expressed as decimal hours; never round real partial minutes. */
+export function cgHoursDurationMinutes(hours: unknown): number | null {
+  if (typeof hours !== 'number' || !Number.isFinite(hours) || hours <= 0 || hours > 24) return null
+  const minutes = hours * 60
+  const wholeMinutes = Math.round(minutes)
+  if (wholeMinutes < 1 || Math.abs(minutes - wholeMinutes) > 1e-9) return null
+  return wholeMinutes
+}
+
+/** Shared daily workflow, not a reminder scheduler or authority to fabricate time. */
+export function buildCgHoursLoggingPolicy(contextKind: string) {
+  if (contextKind !== 'staff') return null
+  return {
+    version: '2026.10.27-own-draft-hours-1',
+    source_of_truth: 'CG Hours',
+    workflow: [
+      'Help the staff member capture work as they describe it during the day; do not leave confirmed work only in chat. Use only this exact resolved staff Project context.',
+      'Read read_my_recent_entries for the work date before logging or reconciling a recap. Use the same from_date/to_date and the canonical CG Hours client_id/task_template_id in logging_options; Dynamics client IDs are different.',
+      'Use only the work, client, date and duration the person actually supplied or confirmed. Resolve today/yesterday in Africa/Johannesburg. Never invent hours from scheduled tasks, calendar slots, due dates, task completion or an assumed working day.',
+      'If a required detail is missing or ambiguous, ask one short combined question. Keep a stated estimate labelled as an estimate and ask for confirmation before saving it. Do not add a mandatory form or repeated approval when exact work and duration were already explicitly given for logging.',
+      'Convert an explicitly supplied duration to decimal hours (minutes / 60); whole-minute entries from 1 minute to 24 hours are supported. Do not confuse 1h30 with 1.30 hours or include unstated breaks/travel.',
+      'Use log_ordinary_hours once per distinct confirmed work segment. Retain the same idempotency key and identical input on retries of that segment. A new key is not a safe retry.',
+      'At end of day reconcile the recap against already logged records; a recap is not additional time. Ask whether matching work is a correction or a separate segment if unclear. Use correct_my_entry with the exact owned draft entry_id for corrections, not a second log.',
+      'Only say saved after a durable CG Hours receipt, then read back the day to verify client, task and duration. If a response is lost or a read fails, report unverified status; never claim no write occurred or retry with a fresh key.',
+      'Attach only explicitly supplied kilometres to an existing owned draft time entry with log_kilometre_entry. Do not invent a travel duration, reimbursement, fuel amount or a zero-hour time entry to attach kilometres.',
+      'During the existing morning briefing and end-of-day recap, check the relevant day and help close missing details without blaming staff or inventing a shortfall. Do not create or change reminder schedules from this policy.',
+      'These tools save drafts only. Staff review and submit the week manually in CG Hours. Never submit, approve, reopen a week, alter payroll or act as another staff member.',
+    ],
+  }
+}
+
 /**
  * Canonical CG Hours backend authority for Issue #361 (verified 2026-09-23).
  *
@@ -163,7 +194,7 @@ export async function invokeCgHoursStaffLogger(
         return {
           ok: false,
           error: 'CG_HOURS_REFUSED',
-          message: staffSafeMessage(payload?.error, 'CG Hours refused the request, so nothing was changed.'),
+          message: staffSafeMessage(payload?.error, 'CG Hours refused the request. No success is claimed; check the day before retrying with the same idempotency key.'),
           status: response.status,
           ...(typeof payload?.code === 'string' ? { code: payload.code } : {}),
         }
@@ -172,7 +203,7 @@ export async function invokeCgHoursStaffLogger(
         return {
           ok: false,
           error: 'CG_HOURS_REFUSED',
-          message: staffSafeMessage(payload?.message, 'CG Hours did not complete the request, so nothing was changed.'),
+          message: staffSafeMessage(payload?.message, 'CG Hours did not return a valid completion response. No success is claimed; check the day before retrying with the same idempotency key.'),
         }
       }
       return {

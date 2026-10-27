@@ -647,10 +647,10 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   // ──────────────────────────────────────────────────────────────────────────────
   {
     name: 'log_ordinary_hours', title: 'Log ordinary hours',
-    description: 'Save an ordinary-hours entry as a draft for the exact authenticated staff member through the restricted CG Hours staff logger. Use a canonical CG Hours client_id (and optional task_template_id) returned by read_my_recent_entries.logging_options. Requires an idempotency_key for duplicate-retry safety. Only says saved after CG Hours returns a durable time_entries id; staff must review and submit the week manually in CG Hours.',
+    description: 'Save explicitly supplied work and duration as a draft for the exact staff Project. Read read_my_recent_entries for that day first to reconcile already logged work; use its canonical CG Hours client_id and optional task_template_id. Convert minutes to hours (minutes / 60), minimum one whole minute. Never invent time from tasks/calendar or add an end-of-day recap as additional time. Ask one short question for missing facts. Reuse the same idempotency_key and inputs for retries. Only say saved after a durable time_entries id and verify the day read-back; staff review and submit the week manually in CG Hours.',
     inputSchema: objectSchema({
       date: { type: 'string', pattern: '^\\d{4}-\\d{2}-\\d{2}$', description: 'YYYY-MM-DD' },
-      hours: { type: 'number', minimum: 0.25, maximum: 24 },
+      hours: { type: 'number', minimum: 1 / 60, maximum: 24 },
       task_description: { type: 'string', minLength: 1, maxLength: 240 },
       notes: { type: 'string', maxLength: 240 },
       client_id: uuid,
@@ -676,7 +676,7 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   },
   {
     name: 'read_my_recent_entries', title: 'Read my recent entries',
-    description: 'Read one day of ordinary-hours and optional travel entries for the exact authenticated staff member, plus canonical active CG Hours client/task logging options. The backend contract is day-scoped, so from_date and to_date must be the same date.',
+    description: 'Read one day of ordinary-hours and optional travel entries for the exact staff Project, plus canonical active CG Hours client/task logging options. Use before logging, during daily/EOD reconciliation and after a write to verify it. A recap is not extra time: compare existing entries before adding or correcting. Resolve relative dates in Africa/Johannesburg; from_date and to_date must be the same date. A failed read is not an empty day.',
     inputSchema: objectSchema({
       from_date: { type: 'string', pattern: '^\\d{4}-\\d{2}-\\d{2}$', description: 'YYYY-MM-DD' },
       to_date: { type: 'string', pattern: '^\\d{4}-\\d{2}-\\d{2}$', description: 'YYYY-MM-DD' },
@@ -694,7 +694,7 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
       correction: {
         type: 'object',
         properties: {
-          hours: { type: 'number', minimum: 0.25, maximum: 24 },
+          hours: { type: 'number', minimum: 1 / 60, maximum: 24 },
           notes: { type: 'string', maxLength: 500 },
           distance_km: { type: 'number', minimum: 0.1, maximum: 2000 },
           origin: { type: 'string', maxLength: 120 },
