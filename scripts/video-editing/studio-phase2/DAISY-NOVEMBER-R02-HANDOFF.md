@@ -1,6 +1,6 @@
 # Daisy & Co November R02 — internal handoff
 
-27 October 2026. R02 supersedes the R01 sent on 26 October. The exact **CG Nolan Approvals** WhatsApp group received `2026_11_DAISY_VIDEO_01_SE_DANKIE_R02.mp4` as a document with only the proposed post caption in the same message at **13:16 SAST**. The caption-free `2026_11_DAISY_VIDEO_01_SE_DANKIE_R02_COVER.jpg` followed as a separate photo at **13:18**, with WhatsApp **HD quality, 1440 × 2560** selected. Both displayed **Delivered**. This is internal review, not client/public approval; do not resend unchanged media.
+27 October 2026. R02 supersedes the R01 sent on 26 October. The exact **CG Nolan Approvals** WhatsApp group received `2026_11_DAISY_VIDEO_01_SE_DANKIE_R02.mp4` as a document with only the proposed post caption in the same message at **13:16 SAST**. The caption-free `2026_11_DAISY_VIDEO_01_SE_DANKIE_R02_COVER.jpg` followed as a separate photo at **13:18**, with WhatsApp **HD quality, 1440 × 2560** selected. Both displayed **Delivered**. A separate Nolan note at **13:28**, also **Delivered**, explicitly marked R01 superseded and requested picture/sound review before any client forwarding. This is internal review, not client/public approval; do not resend unchanged media.
 
 ## Exact protected output
 
