@@ -188,6 +188,11 @@ def check_release(review_csv: Path, acceptance_json: Path, images: Path, manifes
         raise ValueError("Varied 25-frame calibration has no accepted review record")
     if len(set(acceptance["sample_keys"])) < 25 or not set(acceptance["sample_keys"]).issubset({row["key"] for row in rows}):
         raise ValueError("Acceptance sample does not match this gallery")
+    accepted_hashes = acceptance.get("sample_sha256", {})
+    reviewed_hashes = {row["key"]: row["sha256"] for row in rows}
+    if set(accepted_hashes) != set(acceptance["sample_keys"]) or any(
+            accepted_hashes[key] != reviewed_hashes[key] for key in acceptance["sample_keys"]):
+        raise ValueError("Accepted sample hashes differ from reviewed JPEGs; recalibrate")
     groups = {row["group"] for row in rows if row["key"] in acceptance["sample_keys"]}
     if len(groups) < 3:
         raise ValueError("Acceptance sample does not cover varied gallery groups")

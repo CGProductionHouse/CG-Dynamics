@@ -36,12 +36,13 @@ class DeliveryConsistencyAuditTest(unittest.TestCase):
             self.assertEqual(summary["count"], 25)
             review = output / "review.csv"
             acceptance = output / "acceptance.json"
-            acceptance.write_text(json.dumps({"status": "ACCEPTED", "reviewer": "staff", "accepted_at": "2026-10-27T15:00:00+02:00",
-                                             "sample_keys": [item["key"] for item in items]}), encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "Editorial decision incomplete"):
-                audit_tool.check_release(review, acceptance, uploads, manifest)
+                audit_tool.check_release(review, root / "missing-acceptance.json", uploads, manifest)
             with review.open(newline="", encoding="utf-8-sig") as stream:
                 rows = list(csv.DictReader(stream))
+            acceptance.write_text(json.dumps({"status": "ACCEPTED", "reviewer": "staff", "accepted_at": "2026-10-27T15:00:00+02:00",
+                                             "sample_keys": [item["key"] for item in items],
+                                             "sample_sha256": {row["key"]: row["sha256"] for row in rows}}), encoding="utf-8")
             for row in rows:
                 row.update(subject_focus="PASS", grade_vs_reference="PASS", scene_consistency="PASS",
                            editorial_decision="KEEP", reviewer="staff", reason="examined at native size")
@@ -50,6 +51,13 @@ class DeliveryConsistencyAuditTest(unittest.TestCase):
                 writer.writeheader()
                 writer.writerows(rows)
             audit_tool.check_release(review, acceptance, uploads, manifest)
+            accepted = json.loads(acceptance.read_text(encoding="utf-8"))
+            accepted["sample_sha256"]["frame:01"] = "0" * 64
+            acceptance.write_text(json.dumps(accepted), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "Accepted sample hashes differ"):
+                audit_tool.check_release(review, acceptance, uploads, manifest)
+            accepted["sample_sha256"]["frame:01"] = rows[1]["sha256"]
+            acceptance.write_text(json.dumps(accepted), encoding="utf-8")
             # An export changed after the photographic decision cannot silently pass.
             Image.new("RGB", (40, 30), (0, 0, 0)).save(uploads / "edit-01.jpg", "JPEG")
             with self.assertRaisesRegex(ValueError, "Changed JPEG"):
