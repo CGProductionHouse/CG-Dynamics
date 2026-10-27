@@ -28,14 +28,20 @@ def main() -> None:
         return cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
 
     outgoing = [frame_at(8.6 + i / FPS) for i in range(24)]
-    incoming = [frame_at(10.6 + i / FPS) for i in range(24)]
+    incoming = [frame_at(10.6 + i / FPS) for i in range(25)]
     cap.release()
-    plain = outgoing + incoming
+    plain = outgoing + incoming[:24]
     shutter = [f.copy() for f in plain]
     shutter[22] = cv2.GaussianBlur(incoming[0], (1, 19), 0)
     shutter[23] = cv2.GaussianBlur(outgoing[-1], (1, 19), 0)
+    forward = outgoing + incoming[1:]
+    # Keep the two-frame directional accent but advance monotonically from
+    # source pose to destination pose; never flash destination then return.
+    forward[22] = cv2.GaussianBlur(outgoing[22], (1, 19), 0)
+    forward[23] = cv2.GaussianBlur(incoming[0], (1, 19), 0)
 
-    for name, frames in (("dancer-plain", plain), ("dancer-shutter", shutter)):
+    for name, frames in (("dancer-plain", plain), ("dancer-shutter", shutter),
+                         ("dancer-forward-shutter", forward)):
         command = ["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24",
                    "-s", f"{W}x{H}", "-r", str(FPS), "-i", "pipe:0", "-an",
                    "-c:v", "libx264", "-crf", "19", "-pix_fmt", "yuv420p", str(OUT / f"{name}.mp4")]
@@ -47,14 +53,22 @@ def main() -> None:
         if process.wait():
             raise RuntimeError(f"Encode failed: {name}")
 
-    sheet = Image.new("RGB", (8 * 230, 2 * 155), "white")
+    sheet = Image.new("RGB", (8 * 230, 3 * 155), "white")
     draw = ImageDraw.Draw(sheet)
-    for row, frames in enumerate((plain, shutter)):
+    for row, frames in enumerate((plain, shutter, forward)):
         for column, index in enumerate(range(20, 28)):
             x, y = column * 230, row * 155
             sheet.paste(Image.fromarray(frames[index]).resize((230, 130)), (x, y))
-            draw.text((x + 3, y + 133), f"{('plain', 'shutter')[row]} {index}", fill="black")
+            draw.text((x + 3, y + 133), f"{('plain', 'return', 'forward')[row]} {index}", fill="black")
     sheet.save(OUT / "dancer-contact.jpg", quality=92)
+
+    # Preview the centre portrait crop at a small physical-phone-like size.
+    phone = Image.new("RGB", (8 * 180, 3 * 320), "white")
+    for row, frames in enumerate((plain, shutter, forward)):
+        for col, index in enumerate(range(20, 28)):
+            crop = Image.fromarray(frames[index]).crop((438, 0, 843, 720))
+            phone.paste(crop.resize((180, 320)), (col * 180, row * 320))
+    phone.save(OUT / "dancer-phone-contact.jpg", quality=92)
 
 
 if __name__ == "__main__":
