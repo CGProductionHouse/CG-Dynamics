@@ -11,7 +11,7 @@
 | 3 | Hard limiter → [peak control](skills/peak-control/SKILL.md) | P: stereo/mono overshoot proof; real-listening gate |
 | 4 | Riser into impact → [sound-led cuts](skills/sound-led-cuts/SKILL.md) | P: alignment mechanics; licensed heard mix needed |
 | 5 | 3D type/person occlusion → [scene type](skills/scene-perspective-type/SKILL.md) | P/X: projected plane tested, still looks overlaid; native depth/edge gate |
-| 6 | Filmed-screen hyperlapse → [motion speed](skills/motion-matched-speed/SKILL.md) | R: small filmed monitor gave no reliable settings; planned source sequence needed |
+| 6 | Full-clip hyperlapse lesson filmed on a monitor → [motion speed](skills/motion-matched-speed/SKILL.md) | P/R: new independent 15 s→5 s same-shot compression and corrected manual portrait reframe; exact tutorial steps remain unverified after a fresh verification-puzzle block |
 | 7 | Voice versus music → [dialogue mix](skills/dialogue-music-mix/SKILL.md) | P: 14 dB synthetic duck, no heard approval |
 | 8 | Speed ramp → [motion speed](skills/motion-matched-speed/SKILL.md) | P: one-shot 59.94 fps timing; cross-shot action/phone gate |
 | 9 | Plugin promotion | N: no necessity, licence or install established |
@@ -32,7 +32,7 @@
 | 24 | Text in 3D space → [scene type](skills/scene-perspective-type/SKILL.md) | P/X: projected board/grass tests still look graphical; tracked-plane gate |
 | 25 | [Context zoom-out](skills/context-zoom-out/SKILL.md) | P: new portrait pour plain/linear/eased A/B retains action and returns exactly to full source; normal-speed/native keyframe gate |
 | 26 | Directional flash | R: sampled adjustment controls; [exposure flash](skills/exposure-flash-transition/SKILL.md) negative is a different treatment |
-| 27 | Three-frame zoom → [short zoom](skills/short-zoom-cuts/SKILL.md) | P/X: two portrait saw examples crop action or lack an action peak |
+| 27 | Three-frame zoom → [short zoom](skills/short-zoom-cuts/SKILL.md), [graphic blur subskill](skills/graphic-transform-blur/SKILL.md) | P/X: portrait saw cuts fail action fit; new original blur/no-blur proof preserves a sharp hold but does not solve those source failures |
 | 28 | Motion trail clones → [trail card](skills/motion-trail-clones/SKILL.md) | P/X: skater path found; tree bleed and board grounding reject matte |
 | 29 | SFX suggestion list | R: cue names only; use [source-led audio](skills/sound-led-cuts/SKILL.md), not unlicensed examples |
 | 30 | Walk through text → [depth type](skills/depth-type/SKILL.md) | P/X: green-screen mechanics, natural foreground/word-readability gate |

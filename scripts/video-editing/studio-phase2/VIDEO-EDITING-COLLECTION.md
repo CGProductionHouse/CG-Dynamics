@@ -2,7 +2,9 @@
 
 The owner shared a [TikTok collection](https://www.tiktok.com/@christieann.g/collection/Video%20Editing-7698804067698576129) containing **53 videos**. All 53 links and visible captions were indexed in the Chrome tab. **Indexed is not watched, validated or mastered.** All 53 linked videos have now been opened and visually sampled; the references' audio was not critically heard or assessed. Some posts are finished edits, promotions or general inspiration rather than distinct repeatable effects. Build one useful skill per *technique family* after a real proof, rather than 53 near-duplicate skill folders. No plugins, templates, audio packs or paid assets were installed or copied from these posts.
 
-The autonomous [Nolan - CG Video Editor] chat owns Premiere/client delivery. Its live queue says the PSG **November crop-insurance** revision 06, TBS and We AR Fuels were delivered to `CG Nolan Approvals` on 24 October and await feedback; Toyota Bloemfontein Video 01 is its current assembly/QA lane. This Studio lane must not edit, resend or compete with those packages. PSG #872 research here concerns source/creative gates and experimental technique, with no client edit yet.
+**Current execution state:** Use [the per-reference board](TUTORIAL-EXECUTION-BOARD-20261027.md), [skill status](SKILL-STATUS.md) and latest README for actual proofs and failures. The skill-map prose below records the **24 October intake snapshot**; its old “research-only/no proof” labels do not override later evidence in the cards. The exact links and observed-reference notes remain source evidence.
+
+**Current ownership:** The MSI Studio lane retains draft PR #875 and active Daisy/TBS/PSG review continuity. The office-PC lane under #903 is for separately claimed new work; read the [two-PC handover](NOLAN-STUDIO-TWO-PC-HANDOVER-20261027.md) before editing. CapCut PR #870 remains separate. A historical 24 October delivery queue is not current dispatch authority.
 
 ## Skill map
 

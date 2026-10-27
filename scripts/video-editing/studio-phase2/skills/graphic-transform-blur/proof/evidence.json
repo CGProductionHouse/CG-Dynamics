@@ -1,0 +1,27 @@
+{
+  "fps": 24,
+  "frames": 48,
+  "size": [
+    540,
+    960
+  ],
+  "angles": [
+    0,
+    180,
+    300
+  ],
+  "temporal_samples": 129,
+  "hold_exact_preencode_frames": [
+    14,
+    34
+  ],
+  "hold_matches": {
+    "shutter-180": true,
+    "shutter-300": true
+  },
+  "audio": "none; original graphics only",
+  "decoded_hold_mean_absolute_rgb_error_vs_control": [
+    0.0755,
+    0.0754
+  ]
+}

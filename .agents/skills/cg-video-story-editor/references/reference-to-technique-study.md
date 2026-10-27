@@ -14,6 +14,8 @@ This reference is for studying client-supplied edits and tutorials without turni
 
 ## Techniques worth testing
 
+For transform blur on text/graphics, compare it with the exact unblurred trajectory and require the settled reading frames to recover sharply. Inspect for sparse repeated contours as well as excessive smear. The repository's `scripts/video-editing/studio-phase2/skills/graphic-transform-blur/SKILL.md` includes a portable original proof and its limits. This graphic mechanism does not establish optical-flow quality on source footage or a reason to install a motion-blur plugin.
+
 | Mechanism | What the references show | Use when | Hold back when |
 | --- | --- | --- | --- |
 | **Flash match cut** | [Arthur Cyiza](https://www.tiktok.com/@iam_arthur7/video/7394863028220513579) keeps one subject in roughly the same screen position while the location changes; the brief shots read as one thought. | Repeated product, person or action can be filmed in several authentic settings using a framing grid. | The shots lack a common anchor, or a white flash is being used to hide poor continuity. |
