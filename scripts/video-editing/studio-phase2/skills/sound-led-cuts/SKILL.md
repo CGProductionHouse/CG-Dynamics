@@ -5,6 +5,8 @@ description: Shape a cut with licensed risers, impacts and source sound when pic
 
 # Sound-led cuts — researched, listening proof pending
 
+The [27 October transport reconfirmation](../../AUDIO-INPUT-ROUTE-20261027.md) again returned unsupported audio input before a known control could be heard. Earlier cards already reported this limit. Do not spend another practice run repeating it without an actual host/model capability change; continue objective tests and preserve the independent listening gate.
+
 **Lifecycle:** owner's [riser-to-impact lesson](https://www.tiktok.com/@gakulange/video/7366590592173837576), [labelled SFX breakdown](https://www.tiktok.com/@jaimedavinci/video/7649462065593257249) and [dense sound-led timeline](https://www.tiktok.com/@milohoag/video/7661326317538774280) visually sampled → [stock-only A/B](../../proof-sound-cut-dry.mp4) / [rejected SFX revision](../../proof-sound-cut-rejected-sip.mp4) rendered → sound audition and better source action pending → mastered **NO**. The collection's other SFX examples are indexed in [the source ledger](../../VIDEO-EDITING-COLLECTION.md). Their sounds, levels and licences were not heard or verified.
 
 The follow-up [cup/saucer contact A/B](../../CUP-CONTACT-STUDY.md) uses an action visible in the source and places one licensed sound candidate within about 0.05 s of the estimated contact. It remains a **candidate**, since neither the material timbre nor the music fit has been heard. Keep the music-only control available.

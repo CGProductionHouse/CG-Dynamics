@@ -81,6 +81,8 @@
 
 ## Work order without another reminder loop
 
+Owner requirements beyond the tutorial links are also tracked: [default shot stabilization](skills/stabilization/SKILL.md) now has a protected real-shot A/B and a negative control; the [imported-vector option carousel](skills/vector-option-carousel/SKILL.md) has a portable original static/moving A/B, licensed SVG sources, settled label timing and exact cycle-return checks. These do not imply client branding, offers or native editor handover are approved.
+
 Use the exact next **distinct** proof, not the next row numerically. First fix visual families with a suitable moving source: footage-in-type action/word, natural depth edge, source-led speed/zoom, then the real filmed-screen capture when a device shoot is available. Avoid repeating known bad sources. Once the picture method holds at normal speed and phone size, fit licensed sound on separable stems and hear it in the chosen music phrase. A session should advance several concrete gates where possible and save the result to its card, this board, the owning PR and the canonical `.agents/skills/cg-video-story-editor` only if the lesson is client-agnostic. The office PC reads the same Git branch/PR until merge; the [two-PC handover](NOLAN-STUDIO-TWO-PC-HANDOVER-20261027.md) owns installation and lane separation. No heartbeat is required to make a small proof into a finished claim.
 
 The [practice capture pack](PRACTICE-CAPTURE-PACK.md) specifies the real source inputs still missing for six capture-dependent families. The optional [Tesseract readiness finding](TESSERACT-READINESS-20261027.md) records its absent runtime and unverified commercial eligibility; it was not installed or run and is not a Nolan Studio dependency.
