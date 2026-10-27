@@ -1,3 +1,7 @@
+### 27 October 2026 — Nolan master handover (Assistant + Studio + local shared media)
+
+CA requested a consolidated cross-chat handover. Durable source: [CG Nolan master continuity handover](CG-NOLAN-MASTER-HANDOVER-2026-10-27.md), covering owner-approved existing-PC architecture, actual wired internet status, laptop-led Codex option while designer uses PC, Sydney non-destructive drive/OneDrive audit, intended hot 10TB / events 10TB / wedding 6TB role assignment (subject to occupied capacity and independent backups), CG Hours/Dynamics/Brand Hub/Teams integration, Studio effects research and first PSG real test, and eventual allowlisted WhatsApp review loop. Supporting owning issues [#894](https://github.com/CGProductionHouse/CG-Dynamics/issues/894), [#874](https://github.com/CGProductionHouse/CG-Dynamics/issues/874), [#872](https://github.com/CGProductionHouse/CG-Dynamics/issues/872). First 10TB attachment, any SMB pilot, drive health/duplication, OneDrive cost/downgrade and autonomous WhatsApp send are **NOT** reported complete. Do not treat laptop Ethernet as permission to remotely take control of occupied Nolan PC. The user has **not confirmed** first Assistant Codex setup prompt sent. No cloud subscription cancellation, destructive disk operations or NAS spending authorised.
+
 ### 18 October — CA owner correction: real Teams/Planner tasks, privacy and Novus
 
 **MANDATORY next read for the active staff/Codex Teams-to-Dynamics implementation:** [CGPH Planner/Calendar Owner Handover, 18 Oct](CGPH-PLANNER-CALENDAR-CLEANUP-OWNER-HANDOVER-2026-10-18.md).
@@ -33,6 +37,27 @@ No Vercel, production data, publication or permission change. Frontend still PR/
 Personal/company account live acceptance remains distinct from local contract
 tests. Existing #867/#866/#842 return-to-review and staff/calendar owners separate.
 Final verification/source/PR state is on #896; do not infer a deployed release.
+
+### 27 October — CG Hours Assistant daily capture and live read acceptance
+
+Owner #898, focused PR #899 merged as d2915066. CA requested staff narration→CG Hours reliability; CA chat only for testing,
+no staff chat/timesheet edits. [Exact receipt](CG-HOURS-ASSISTANT-ACCEPTANCE-2026-10-27.md).
+Live CA context/day/options read succeeds; all six active staff mappings verified
+SELECT-only, including Franco. Existing v73 bootstrap has four Hours tools but
+no shared daily logging workflow. Reproduced decimal-hour rejection and 15-minute
+schema mismatch; focused source repair adds strict whole-minute conversion,
+read/reconcile/correct/read-back policy and truthful uncertain-response handling.
+No staff/Teams/calendar rewrite, automation change or invented hours.
+Final local MCP393pass/1skip; Hours120pass; final focused18pass and hosted-derived
+candidate10pass. Build/app-bundle/scoped lint/Edge pure TS/diff checks pass.
+CA explicitly approved the exact three-file release: MCPv73→74 once, ACTIVE;
+all40 hosted files byte-identical to candidate, other37 unchanged, v73 guideline
+repair retained. JWTfalse/import-mapfalse/auth preserved, anonymous/invalid401.
+Live CA bootstrap now returns11 hours rules/version2026.10.27-own-draft-hours-1;
+CA day read succeeds with74 clients/22 tasks. CA Chrome navigation timed out;
+normal ChatGPT UI and new genuine live write→read-back remain unverified.
+No Vercel, new time/km data, schema, mapping, secrets or permission writes.
+Google Control Centre exact reference still unavailable; do not invent a tracker.
 
 ### 25 October late evening — slow file-window defect fixed; 37 live image Views
 
