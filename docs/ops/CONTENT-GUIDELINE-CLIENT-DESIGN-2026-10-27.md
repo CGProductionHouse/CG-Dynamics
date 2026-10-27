@@ -26,6 +26,9 @@ only an explicit client-safe field projection of saved videos. Drafts are labell
 private and have no share button; unsaved staff edits survive preview. Existing
 publishing remains deliberate and unchanged. For an exact published link, use
 **Preview as client → Copy guideline link** on the required document.
+Published preview now follows `guideline.month`, matching the canonical RPC,
+instead of using a potentially different first shoot-coverage month. A focused
+regression pins this link correction; it does not rewrite a document's dates.
 
 Links use `/client/plan?tab=guidelines&month=…&guide=…`; client sign-in and the
 existing server-pinned own-published-content RPC remain required. This is NOT a
@@ -94,4 +97,48 @@ Security reference: [Supabase Data API security](https://supabase.com/docs/guide
 Existing grant/RLS/role/publication boundaries remain intact. Changelog Markdown
 fetch was unsupported by the web reader; no Supabase SDK/API/schema changed.
 
-Final run totals and source revision are recorded in #896/the PR after completion.
+## Local verification receipt
+
+Full-run runtime/test source: `90a282115ed8cf3fa4cc9561830baa6cb1223de3`, PR #897.
+The later document-month preview correction and its new test passed the final
+three-file38/38 focused run. Do not reattribute the earlier4210-test count to the
+later test/source revision.
+
+- New actual-component browser fixture passes **1440/375/390/430**: complete
+  script fidelity, direct video jumps, direction disclosure, no overflow/runtime
+  errors, exact client URL, denied-clipboard fallback, private staff draft preview,
+  saved-only display and retained unsaved script when returning to editing.
+- Existing actual Plan/calendar four-width fixture passes: exact client/month
+  transitions, old-response fencing, read-only network, error/empty states,
+  keyboard tabs and Calendar → exact guideline scope retained.
+- Focused nine-file suite142/142 passed, then the added actual-handler integration
+  test passed in the final15/15 MCP guideline group. Do not add these overlapping
+  counts together as distinct tests.
+- Full supported run: **4210 total /4179 pass /5 fail /26 declared skips**.
+  All five failures were the existing SNS PKI tests' `spawnSync openssl ENOENT`,
+  not guideline assertions. After adding the already-installed Git OpenSSL to
+  that process's PATH, both exact affected test files passed **18/18**, including
+  all five original failures. No remaining assertion failure was observed. This
+  is a full run plus bounded environment-corrected rerun, NOT a fictitious single
+  all-green full-suite receipt. Unsupported Windows Bash SES setup stays excluded;
+  skipped SQL groups are not relabelled passed from old receipts.
+- Initial unconfigured full attempt was stopped on missing fixture Supabase env;
+  the counts above use only the loopback/public-fixture configured run. No auth
+  files or production credentials were copied.
+- TypeScript/Vite actual app build and actual app strings/chunks verified;
+  scoped lint/diff clean. Whole lint0errors/17 pre-existing warnings outside this
+  change. Both changed backend files also pass an explicit TypeScript no-emit
+  check. Native Deno unavailable in PATH; no tool installation was attempted.
+
+Proof remains workstation-local in `%TEMP%`: `cg-guideline-design-1440.png`,
+`cg-guideline-design-375.png`, `cg-guideline-design-390.png`,
+`cg-guideline-design-430.png`, matching `cg-guideline-design-fold-*.png`,
+`cg-guideline-full-configured-20261027.log`, `cg-guideline-openssl-final-20261027.log`,
+`cg-guideline-lint-20261027.log`. UI sample is also left open at loopback port53994.
+No screenshots, sample content or generated dist are production assets.
+
+Exact two-file backend release requested separately; not executed without CA's
+reply. Both real personal/company ChatGPT account sessions still need acceptance
+after release; current connection and local context/handler tests do not prove
+another account's consent. PR app-attachment attempted once; existing100-item
+limit refused it. GitHub PR/issue remain the durable handoff.

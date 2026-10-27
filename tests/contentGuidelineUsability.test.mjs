@@ -66,6 +66,11 @@ test('publication is document-level and guarded by complete video content', () =
   assert.doesNotMatch(EDITOR, /client_published_at.*video/)
 })
 
+test('published preview follows the canonical document month, not a different shoot coverage start', () => {
+  assert.match(EDITOR, /const month = guideline\.month\?\.slice\(0, 7\)/)
+  assert.doesNotMatch(EDITOR, /const month = guideline\.coverage_start/)
+})
+
 test('client projection returns only own published documents and ordered safe videos', () => {
   const rpc = MIGRATION.slice(MIGRATION.indexOf('create or replace function public.client_portal_published_content_guidelines'))
   assert.match(rpc, /v_client_id := public\.my_client_id\(\)/)

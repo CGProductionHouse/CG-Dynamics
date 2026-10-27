@@ -515,7 +515,9 @@ export default function ContentGuidelineDocumentEditor({
                 size="sm"
                 variant="secondary"
                 onClick={() => {
-                  const month = guideline.coverage_start ? guideline.coverage_start.slice(0, 7) : guideline.month?.slice(0, 7)
+                  // The published RPC is keyed by the document month, not the
+                  // shoot's first coverage month (which may be different).
+                  const month = guideline.month?.slice(0, 7)
                   navigate(`/admin/content-guide-preview?client=${encodeURIComponent(run.client_id!)}${month ? `&month=${month}` : ''}`)
                 }}
               >
