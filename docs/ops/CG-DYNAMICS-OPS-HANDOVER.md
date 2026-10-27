@@ -13,6 +13,21 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 27 October — Content Guideline design and normal ChatGPT read-back (#896)
+
+CA redirected this lane to branded guidelines and normal ChatGPT authoring.
+Exact design/workflow/acceptance boundaries:
+[CONTENT-GUIDELINE-CLIENT-DESIGN-2026-10-27.md](CONTENT-GUIDELINE-CLIENT-DESIGN-2026-10-27.md).
+Shared client-safe document renderer and staff saved-draft layout preview; existing
+own-published client link/auth/calendar authorities preserved. Live connector read
+reproduced missing scripts despite has_script=true; narrow Assistant projection
+now returns full scripts/direction in source, with RED/GREEN regression and actual
+handler read/edit/read-back preservation/isolation test. No second paid generator.
+No Vercel/Edge deployment, production data, publication or permission change.
+Personal/company account live acceptance remains distinct from local contract
+tests. Existing #867/#866/#842 return-to-review and staff/calendar owners separate.
+Final verification/source/PR state is on #896; do not infer a deployed release.
+
 ### 25 October late evening — slow file-window defect fixed; 37 live image Views
 
 Exact receipt: [Client file access acceptance](CLIENT-FILE-ACCESS-ACCEPTANCE-2026-10-25.md).

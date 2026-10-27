@@ -11,7 +11,7 @@ const WORKFLOW_DATA = read('src/lib/contentWorkflow.ts')
 const EDITOR = read('src/pages/admin/ContentGuidelineDocumentEditor.tsx')
 const ADMIN_PAGE = read('src/pages/admin/FullContentGuidePage.tsx')
 const SCHEDULE = read('src/pages/admin/ClientSchedulePage.tsx')
-const CLIENT_PAGE = read('src/pages/client/ClientContentGuidesPage.tsx')
+const CLIENT_PAGE = read('src/pages/client/ClientContentGuidesPage.tsx') + read('src/components/client/ContentGuidelineDocument.tsx')
 const CLIENT_DATA = read('src/lib/clientContentGuides.ts')
 const CALENDAR = read('src/pages/admin/CompanyCalendarPage.tsx')
 
