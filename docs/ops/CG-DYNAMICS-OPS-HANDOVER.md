@@ -1,3 +1,7 @@
+### 27 October 2026 — Nolan master handover (Assistant + Studio + local shared media)
+
+CA requested a consolidated cross-chat handover. Durable source: [CG Nolan master continuity handover](CG-NOLAN-MASTER-HANDOVER-2026-10-27.md), covering owner-approved existing-PC architecture, actual wired internet status, laptop-led Codex option while designer uses PC, Sydney non-destructive drive/OneDrive audit, intended hot 10TB / events 10TB / wedding 6TB role assignment (subject to occupied capacity and independent backups), CG Hours/Dynamics/Brand Hub/Teams integration, Studio effects research and first PSG real test, and eventual allowlisted WhatsApp review loop. Supporting owning issues [#894](https://github.com/CGProductionHouse/CG-Dynamics/issues/894), [#874](https://github.com/CGProductionHouse/CG-Dynamics/issues/874), [#872](https://github.com/CGProductionHouse/CG-Dynamics/issues/872). First 10TB attachment, any SMB pilot, drive health/duplication, OneDrive cost/downgrade and autonomous WhatsApp send are **NOT** reported complete. Do not treat laptop Ethernet as permission to remotely take control of occupied Nolan PC. The user has **not confirmed** first Assistant Codex setup prompt sent. No cloud subscription cancellation, destructive disk operations or NAS spending authorised.
+
 ### 18 October — CA owner correction: real Teams/Planner tasks, privacy and Novus
 
 **MANDATORY next read for the active staff/Codex Teams-to-Dynamics implementation:** [CGPH Planner/Calendar Owner Handover, 18 Oct](CGPH-PLANNER-CALENDAR-CLEANUP-OWNER-HANDOVER-2026-10-18.md).
