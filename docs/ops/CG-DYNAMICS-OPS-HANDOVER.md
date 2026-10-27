@@ -17,6 +17,44 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 27 October — provider freshness and false staff diagnostic corrected
+
+Current exact-client inventory/launch sequence is in the existing
+[execution list](CLIENT-LAUNCH-EXECUTION-2026-10-25.md#27-october-providerclient-acceptance--current-override).
+47Meta assets/76checkpoints reviewed:73 successful27October; active Bohemia Page
+access error, held AV/RedOak exceptions; partial metrics remain partial. All9
+connected non-held TikTok accounts pass actual UI access/coverage/completeness/
+freshness checks. This is ingestion health, not complete current-month activity.
+One requested routine Cape/shared Google sync1–27October succeeded,27daily rows,
+independent audit read-back; other3mapped clients retain no_campaign_rows and
+prior paused/removed evidence. Automatic Google cadence was accepted17October.
+No campaign/mapping/OAuth/backend/Vercel or content publication change.
+Actual Braize October staff review reproduces a contradictory legacy “not synced”
+summary beside today's verified normalized account facts. Narrow local guard
+keeps legacy diagnostics on legacy reports only and preserves authoritative
+metric-level health/permission/partial information and client-role boundaries.
+Actual-render regressions RED2/3→GREEN3/3; combined88focused tests pass. Existing
+actual-component1440/375/390/430 browser fixture now also checks normalized
+diagnostics/client-role removal/no overflow; build/app-bundle/scoped lint/diff pass.
+No full-suite rerun or new true-client login/device acceptance is claimed. Existing
+staff/calendar and normal ChatGPT strategy owners unchanged. Pending frontend
+release, real-client/physical-phone/content/publication gates remain distinct.
+
+### 27 October — owner correction: event capture is not a scripted guideline gap
+
+CA explicitly clarified that events are captured and edited into highlights;
+they do **not** require a scripted Content Guideline. Madison Wear's shop opening,
+The Staffordshire's Halloween event and HMHI's year-end are explicit examples.
+Remove these from any missing-guideline acceptance list. Do not create empty
+guidelines or manufacture script work merely because a shoot/event is booked.
+The existing calendar/Content Run and confirmed output scope remain authoritative;
+this correction does not change production records, dates or contracted quantities.
+The six verified imported videos in the two existing canonical documents below
+remain the completed source-import work. Future genuinely scripted content runs
+still use their one canonical guideline; event highlights are not launch blockers
+for lacking one. Continue provider/client-portal acceptance under #668, keeping
+the separate staff/calendar and #731 strategy owners intact.
+
 ### 27 October — Content Guideline design and normal ChatGPT read-back (#896)
 
 Latest CA correction: the separate flat green/cream guide visual was rejected.
