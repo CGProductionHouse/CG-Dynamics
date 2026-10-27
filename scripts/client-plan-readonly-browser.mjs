@@ -218,7 +218,7 @@ try {
     await page.getByRole('button',{name:'Next month',exact:true}).click()
     // history changes before React commits; assert against the newly rendered
     // working-month label, not an intermediate URL-only navigation state.
-    await page.getByText('November 2026',{exact:true}).waitFor()
+    await page.locator('section').first().getByText('November 2026',{exact:true}).waitFor()
     assert.equal(await page.getByText('Complete script A 2026-10\nSecond line',{exact:true}).count(),0,'Old month removed before new read')
     await page.waitForTimeout(100)
     hold=false; pending.splice(0).forEach(resolve=>resolve())

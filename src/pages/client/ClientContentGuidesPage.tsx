@@ -5,7 +5,7 @@ import { ClientPortalErrorState, ClientPortalLoadingState } from '../../componen
 import { useAuth } from '../../contexts/AuthContext'
 import { fetchPublishedGuides, type PublishedContentGuideline } from '../../lib/clientContentGuides'
 import { getClient, type Client } from '../../lib/db/clients'
-import { guidelineVideoName } from '../../lib/contentGuidelineNaming'
+import { ContentGuidelineDocument } from '../../components/client/ContentGuidelineDocument'
 import { monthDisplayLabel } from '../../lib/reportPeriod'
 import { businessMonthKey } from '../../lib/businessTime'
 import { useOptionalClientPortal } from '../../components/client/ClientPortalContext'
@@ -61,9 +61,7 @@ export default function ClientContentGuidesPage({ preview = false, embedded = fa
       <section className="max-w-5xl">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-report-accent">Content production</p>
         <h2 className="mt-3 text-3xl font-black tracking-[-0.035em] text-white sm:text-5xl">Content guidelines</h2>
-        <p className="mt-4 max-w-2xl text-base leading-7 text-report-muted">
-          Published filming documents for {monthDisplayLabel(currentMonth)}, with every video name and complete script in order.
-        </p>
+        {!embedded && <p className="mt-3 text-sm text-report-muted">{monthDisplayLabel(currentMonth)}</p>}
         {!embedded && <div className="mt-5 flex items-center gap-2">
           <button
             type="button"
@@ -99,40 +97,10 @@ export default function ClientContentGuidesPage({ preview = false, embedded = fa
                   window.requestAnimationFrame(() => element.scrollIntoView({ behavior: 'smooth', block: 'start' }))
                 }
               }}
-              className={`scroll-mt-6 overflow-hidden rounded-3xl border bg-white/[0.04] shadow-[0_28px_80px_-50px_rgba(0,0,0,0.95)] ${
-                selectedGuideKey === guideline.row_key
-                  ? 'border-report-accent/45 ring-1 ring-report-accent/20'
-                  : 'border-white/[0.08]'
-              }`}
+              className="scroll-mt-6"
             >
-              <header className="border-b border-white/[0.08] bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.12),transparent_42%)] p-5 sm:p-7">
-                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-report-accent">Content Guideline</p>
-                <h2 className="mt-2 text-2xl font-semibold tracking-normal text-white">{guideline.title}</h2>
-                <p className="mt-2 text-sm text-report-muted">
-                  {guideline.run_name}{guideline.filming_date ? ` | Filming ${guideline.filming_date}` : ''}
-                </p>
-              </header>
-
-              <ol className="divide-y divide-white/[0.08]">
-                {guideline.videos.map((video, index) => (
-                  <li key={`${guideline.row_key}-${video.position}`} className="p-5 sm:p-7">
-                    <h3 className="text-xl font-semibold text-white">{guidelineVideoName(video.position ?? index + 1, video.title)}</h3>
-                    <div className="mt-5 rounded-2xl border border-white/[0.08] bg-black/15 p-4 sm:p-5">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-report-faint">{video.script?.trim() ? 'Complete script' : 'Script'}</p>
-                      <p className="mt-2 whitespace-pre-wrap text-sm leading-7 text-report-text">{video.script?.trim() ? video.script : 'A script is not available for this video.'}</p>
-                    </div>
-                    {(video.objective || video.hook || video.shot_breakdown || video.cta || video.visual_notes) && (
-                      <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                        {video.objective && <ClientGuideSection label="Objective" value={video.objective} />}
-                        {video.hook && <ClientGuideSection label="Hook" value={video.hook} />}
-                        {video.shot_breakdown && <ClientGuideSection label="Shot direction" value={video.shot_breakdown} />}
-                        {video.cta && <ClientGuideSection label="Call to action" value={video.cta} />}
-                        {video.visual_notes && <ClientGuideSection label="Visual direction" value={video.visual_notes} />}
-                      </div>
-                    )}
-                  </li>
-                ))}
-              </ol>
+              <ContentGuidelineDocument guide={guideline} client={client ?? { name: 'Your content' }} selected={selectedGuideKey === guideline.row_key}
+                clientPath={`/client/plan?tab=guidelines&month=${currentMonth}&guide=${encodeURIComponent(guideline.row_key)}`} />
             </article>
           ))}
         </div>
@@ -154,15 +122,6 @@ function Message({ children, error = false }: { children: React.ReactNode; error
   return (
     <div className={`mt-8 rounded-3xl border px-6 py-8 shadow-[0_24px_70px_-48px_rgba(0,0,0,0.95)] ${error ? 'border-[#d8a07a]/20 bg-[#d8a07a]/[0.06] text-[#d8a07a]' : 'border-white/[0.08] bg-white/[0.04] text-report-muted'}`}>
       <p className="text-sm leading-6">{children}</p>
-    </div>
-  )
-}
-
-function ClientGuideSection({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-report-faint">{label}</p>
-      <p className="mt-1.5 whitespace-pre-wrap text-sm leading-relaxed text-report-text">{value}</p>
     </div>
   )
 }

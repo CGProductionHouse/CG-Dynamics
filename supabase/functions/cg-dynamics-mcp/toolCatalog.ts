@@ -510,7 +510,7 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   },
   {
     name: 'list_content_guideline_videos', title: 'List content guideline videos',
-    description: '#450. Read the ordered videos of one exact Content Run guideline with their canonical "Video XX - Name", coverage month, whether each is linked to a real Client Schedule slot or still unallocated, production folder state, raw-upload evidence and edit readiness. Never creates a missing guideline; explicitly use ensure_content_guideline first if needed. Raw OneDrive IDs and URLs are never returned.',
+    description: '#450. Read the full saved scripts, shot breakdown, requirements and visual direction of the ordered videos in one exact Content Run guideline, plus canonical "Video XX - Name", coverage month, real Client Schedule linkage and edit readiness. Read before editing and again after add/update to verify the saved wording. For normal ChatGPT authoring use add/update, not the separately funded generator. Never creates a missing guideline; explicitly use ensure_content_guideline first if needed. Raw OneDrive IDs and URLs are never returned.',
     inputSchema: objectSchema({ content_run_id: uuid }, ['content_run_id']),
     annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
     dependency: '#450', canonicalContract: 'content_guidelines + content_guide_ideas ordered by position',

@@ -160,6 +160,60 @@ test('the Assistant projection carries no OneDrive id or URL', () => {
   assert.doesNotMatch(serialised, /drive_id|item_id|itemId|driveId|https?:\/\//)
 })
 
+test('ChatGPT can read the full saved script and direction before making a narrow edit', () => {
+  const video = { id: A, title: 'Full brief', script: 'Scene 1\nPresenter: Keep this exact line.\nScene 2\nEnd.',
+    shot_breakdown: 'Wide, then detail.', requirements: 'Two presenters.', visual_notes: 'Natural light.',
+    notes: 'STAFF-ONLY NOTE', onedrive_footage_url: 'https://private.invalid/raw', internal_notes: 'PRIVATE' }
+  const shaped = actions.shapeVideoForAssistant({ video, position: 1, folderName: null, folderState: 'blocked',
+    folderBlocked: 'BLOCKED_MISSING_SHORT_CODE', raw: 'UNVERIFIED',
+    readiness: { readiness: 'BLOCKED_NO_MAPPING', reason: 'Missing mapping', next_action: 'Map exact folder' }, finalOutputState: 'unverified' })
+  assert.equal(shaped.script, video.script)
+  assert.equal(shaped.shot_breakdown, video.shot_breakdown)
+  assert.equal(shaped.requirements, video.requirements)
+  assert.equal(shaped.visual_notes, video.visual_notes)
+  assert.doesNotMatch(JSON.stringify(shaped), /STAFF-ONLY NOTE|private.invalid|PRIVATE|onedrive_footage_url/)
+})
+
+test('actual MCP update handler preserves other fields and rejects another client before a write', async () => {
+  const project = await server.ssrLoadModule('/supabase/functions/cg-dynamics-mcp/projectContext.ts')
+  const start = serverSource.indexOf('async function resolveVideoScope(')
+  const end = serverSource.indexOf('const handleReorderContentGuidelineVideos:', start)
+  assert.ok(start > 0 && end > start)
+  const js = ts.transpileModule(serverSource.slice(start, end), { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText
+  const handler = new Function('validateVideoPatch', 'assertRecordClientMatchesContext', 'GUIDELINE_VIDEO_SELECT',
+    `${js};return handleUpdateContentGuidelineVideo`)(actions.validateVideoPatch, project.assertRecordClientMatchesContext, '*')
+  const row = { id: A, client_id: B, title: 'Keep title', position: 1, status: 'idea',
+    script: 'Original script', cta: 'Keep CTA', shot_breakdown: 'Keep shot list', notes: 'Keep staff note' }
+  let writes = 0
+  const db = { from(table) {
+    assert.equal(table, 'content_guide_ideas')
+    const filters = []; let patch
+    return { select() { return this }, eq(key, value) { filters.push([key, value]); return this },
+      update(value) { patch = value; return this },
+      async maybeSingle() { return { data: { ...row }, error: null } },
+      async single() {
+        assert.deepEqual(filters, [['id', A], ['client_id', B]])
+        Object.assign(row, patch); writes++; return { data: { ...row }, error: null }
+      } }
+  } }
+  const input = { content_guide_idea_id: A, script: 'Scene 1\nNew dialogue.\nScene 2\nComplete ending.', idempotency_key: 'fixture-explicit-edit' }
+  const before = { ...row }
+  const denied = await handler({ supabase: db, contextKind: 'client', effectiveClientId: C }, input)
+  assert.ok(denied.error)
+  assert.equal(writes, 0)
+  assert.deepEqual(row, before)
+  const result = await handler({ supabase: db, contextKind: 'client', effectiveClientId: B }, input)
+  assert.deepEqual(result.updated_fields, ['script'])
+  assert.equal(writes, 1)
+  assert.deepEqual(row, { ...before, script: input.script })
+  const readback = actions.shapeVideoForAssistant({ video: row, position: 1, folderName: null, folderState: 'blocked',
+    folderBlocked: 'BLOCKED_MISSING_SHORT_CODE', raw: 'UNVERIFIED',
+    readiness: { readiness: 'BLOCKED_NO_MAPPING', reason: 'Unmapped', next_action: 'Map' }, finalOutputState: 'unverified' })
+  assert.equal(readback.script, input.script, 'ChatGPT can verify exact persisted wording')
+  assert.equal(row.cta, before.cta)
+  assert.equal(row.notes, before.notes)
+})
+
 test('the Edge copy of the readiness rules does not drift from the app', () => {
   const folders = [
     { state: 'mapped', blocked: null },

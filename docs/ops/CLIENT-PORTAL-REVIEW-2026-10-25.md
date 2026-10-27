@@ -1,5 +1,37 @@
 # Client portal — 25 October review packet
 
+## 27 October current override — guideline design and real ChatGPT accounts
+
+[Guideline receipt](CONTENT-GUIDELINE-CLIENT-DESIGN-2026-10-27.md), #896/PR897.
+Normal ChatGPT company CA Project and personal Plus staff-context reads now pass
+for the exact saved CASE guide, including complete scripts/direction and exact
+calendar/unallocated posting distinction. Personal CG Dynamics and Personal Refresh
+connections were legitimately renewed after actual tool failures and independently
+retested. No real content or staff-chat edits, paid generator or scope expansion.
+Narrow amendment preservation is tested locally; live client editing was not faked.
+
+The new branded client/staff guideline layout passes desktop/375/390/430 fixtures;
+current-main integration passes56 combined tests/build/scoped lint/bundle checks.
+Public appHTTP200 still serves the older guideline chunk: frontend release pending.
+No Vercel operation; Git deployment remainsOFF. Client links stay own-published
+and authenticated, with no anonymous draft-sharing shortcut.
+
+Fresh stored-content counts: October56draft/1published strategies, November57
+draft/0published; October10draft guidelines/0published, noNovember guideline rows.
+These counts are not semantic approval or an all-client launch certificate.
+Strategy source/editorial owner #731 and staff posting owner retain their lanes.
+Brand Hub41enabled/17private libraries and41published assets unchanged.
+
+The former Meta consent/encryption hold below is historical: current stored state
+is connected, tokenvalid/encrypted, validated25October with data access through
+23January2027. No credential value read or provider refresh. Per-client metrics
+still require actual freshness/coverage evidence; this is not a blanket Meta pass.
+
+Remaining launch decisions: exact ready content review/publication, real posting
+allocations through the staff owner, CA-retained client-login/phone acceptance,
+then one separately approved conservative frontend release. Preserve all other
+dated role/security/file-render boundaries below; do not restart accepted sweeps.
+
 Latest late-evening continuation: [slow file access repair and 41-library
 accounting](CLIENT-FILE-ACCESS-ACCEPTANCE-2026-10-25.md). Source ea5eaad6 fixes an
 actually reproduced six-second-authorisation/normal-popup-blocking failure; no

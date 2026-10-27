@@ -17,9 +17,40 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 27 October — Content Guideline design and normal ChatGPT read-back (#896)
+
+CA redirected this lane to branded guidelines and normal ChatGPT authoring.
+Exact design/workflow/acceptance boundaries:
+[CONTENT-GUIDELINE-CLIENT-DESIGN-2026-10-27.md](CONTENT-GUIDELINE-CLIENT-DESIGN-2026-10-27.md).
+Shared client-safe document renderer and staff saved-draft layout preview; existing
+own-published client link/auth/calendar authorities preserved. Live connector read
+reproduced missing scripts despite has_script=true; narrow Assistant projection
+now returns full scripts/direction in source, with RED/GREEN regression and actual
+handler read/edit/read-back preservation/isolation test. No second paid generator.
+Later exact CA approval released only the two-file hosted-derived MCP repair,
+v72→73 once.40/40 candidate files match byte-for-byte; other38 unchanged,
+JWTfalse/import-mapfalse retained, anonymous/invalid-bearer401. Live connector
+returns complete CASE scripts/direction, matching independent canonical plan
+reads exactly.44 focused tests/hosted candidate assertions/TS check pass. One
+bootstrap transport error cleared on one bounded read retry; no auth bypass.
+No Vercel, production data, publication or permission change. Frontend still PR/local.
+Later normal-chat read-only acceptance now passes in company CA Project and
+personal Plus staff context. Personal CG Dynamics + Personal Refresh initially
+failed; legitimate existing-account reconnects fixed both, independently retested.
+No permissions/scopes expanded, credentials copied or staff chats/content changed.
+Actual client amendment writes remain local-handler proof, not a live test.
+Fresh stored publication counts: October56draft/1published strategies, November57
+drafts/0published;10October draft guidelines/0published, noNovember guidelines.
+Brand Hub41enabled/17private unchanged. Meta stored connection nowconnected,
+valid and encrypted (validated25October); old consent hold is no longer current,
+without claiming per-client metric freshness. Public appHTTP200 still serves old
+guideline UI; new design is source-only. Combined56tests/build/scopedlint pass.
+Existing #867/#866/#842 return-to-review and staff/calendar owners separate.
+Final verification/source/PR state is on #896; do not infer a deployed release.
+
 ### 27 October — CG Hours Assistant daily capture and live read acceptance
 
-Owner #898, focused PR #899, code4d3b1ab2 (open). CA requested staff narration→CG Hours reliability; CA chat only for testing,
+Owner #898, focused PR #899 merged as d2915066. CA requested staff narration→CG Hours reliability; CA chat only for testing,
 no staff chat/timesheet edits. [Exact receipt](CG-HOURS-ASSISTANT-ACCEPTANCE-2026-10-27.md).
 Live CA context/day/options read succeeds; all six active staff mappings verified
 SELECT-only, including Franco. Existing v73 bootstrap has four Hours tools but

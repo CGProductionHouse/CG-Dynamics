@@ -11,7 +11,7 @@ const WORKFLOW_DATA = read('src/lib/contentWorkflow.ts')
 const EDITOR = read('src/pages/admin/ContentGuidelineDocumentEditor.tsx')
 const ADMIN_PAGE = read('src/pages/admin/FullContentGuidePage.tsx')
 const SCHEDULE = read('src/pages/admin/ClientSchedulePage.tsx')
-const CLIENT_PAGE = read('src/pages/client/ClientContentGuidesPage.tsx')
+const CLIENT_PAGE = read('src/pages/client/ClientContentGuidesPage.tsx') + read('src/components/client/ContentGuidelineDocument.tsx')
 const CLIENT_DATA = read('src/lib/clientContentGuides.ts')
 const CALENDAR = read('src/pages/admin/CompanyCalendarPage.tsx')
 
@@ -64,6 +64,11 @@ test('publication is document-level and guarded by complete video content', () =
   assert.match(EDITOR, /Publish full guideline/)
   assert.match(EDITOR, /Unpublish document/)
   assert.doesNotMatch(EDITOR, /client_published_at.*video/)
+})
+
+test('published preview follows the canonical document month, not a different shoot coverage start', () => {
+  assert.match(EDITOR, /const month = guideline\.month\?\.slice\(0, 7\)/)
+  assert.doesNotMatch(EDITOR, /const month = guideline\.coverage_start/)
 })
 
 test('client projection returns only own published documents and ordered safe videos', () => {

@@ -28,6 +28,7 @@ import CanonicalCreativeIntelligence from './CanonicalCreativeIntelligence'
 import { directorKnowledgeReceipt } from '../../lib/contentDirectorEvidence'
 import SavedDirectorContext from './SavedDirectorContext'
 import { developmentPatch } from '../../lib/contentDirectorEdits'
+import { ContentGuidelineDocument } from '../../components/client/ContentGuidelineDocument'
 
 interface Props {
   guideline: ContentGuideline
@@ -99,6 +100,7 @@ export default function ContentGuidelineDocumentEditor({
 }: Props) {
   const navigate = useNavigate()
   const { profile } = useAuth()
+  const [clientLayout, setClientLayout] = useState(false)
   const monthOptions = [...new Set([
     ...MONTH_OPTIONS.map(option => option.value),
     guideline.month?.slice(0, 7), guideline.coverage_start?.slice(0, 7), guideline.coverage_end?.slice(0, 7),
@@ -468,6 +470,22 @@ export default function ContentGuidelineDocumentEditor({
   const coverageChanged = coverageStart !== toMonthOption(guideline.coverage_start ?? guideline.month)
     || coverageEnd !== toMonthOption(guideline.coverage_end ?? guideline.coverage_start ?? guideline.month)
 
+  if (clientLayout) return <section className="space-y-4">
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+      <div><p className="text-sm font-bold text-white">Client layout preview</p><p className="mt-1 text-xs text-white/60">Saved content only · {guideline.client_published_at ? 'Published' : 'Draft — not shared with the client'}</p></div>
+      <ActionButton variant="secondary" onClick={() => setClientLayout(false)}>Back to editing</ActionButton>
+    </div>
+    <ContentGuidelineDocument client={{ name: run.client_name ?? 'Client' }} guide={{
+      row_key: 'staff-layout-preview', title: guideline.title, month: guideline.month,
+      run_name: run.name, filming_date: run.run_date, published_at: guideline.client_published_at ?? '',
+      videos: videos.filter(video => video.status !== 'archived').map((video, index) => ({
+        position: video.position ?? index + 1, title: video.title, script: video.script,
+        objective: video.objective, hook: video.hook, shot_breakdown: video.shot_breakdown,
+        cta: video.cta, visual_notes: video.visual_notes, platform: video.platform, format: video.format,
+      })),
+    }} />
+  </section>
+
   return (
     <section className="overflow-hidden rounded-2xl border border-brand-teal/20 bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.10),transparent_42%),rgba(255,255,255,0.025)]">
       <div className="border-b border-white/10 p-4 sm:p-5">
@@ -488,6 +506,7 @@ export default function ContentGuidelineDocumentEditor({
             </p>
           </div>
           <div className="flex shrink-0 flex-wrap items-center gap-2">
+            <ActionButton size="sm" variant="secondary" onClick={() => setClientLayout(true)}>View client layout</ActionButton>
             <span className={`rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-wider ${guideline.client_published_at ? 'border-emerald-300/25 bg-emerald-300/[0.08] text-emerald-200' : 'border-white/10 text-white/45'}`}>
               {guideline.client_published_at ? 'Published' : 'Draft'}
             </span>
@@ -496,7 +515,9 @@ export default function ContentGuidelineDocumentEditor({
                 size="sm"
                 variant="secondary"
                 onClick={() => {
-                  const month = guideline.coverage_start ? guideline.coverage_start.slice(0, 7) : guideline.month?.slice(0, 7)
+                  // The published RPC is keyed by the document month, not the
+                  // shoot's first coverage month (which may be different).
+                  const month = guideline.month?.slice(0, 7)
                   navigate(`/admin/content-guide-preview?client=${encodeURIComponent(run.client_id!)}${month ? `&month=${month}` : ''}`)
                 }}
               >
