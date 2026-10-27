@@ -2,7 +2,7 @@
 
 Owner: [#898](https://github.com/CGProductionHouse/CG-Dynamics/issues/898).
 Reviewed code: [PR #899](https://github.com/CGProductionHouse/CG-Dynamics/pull/899),
-`4d3b1ab2` (open; no production release).
+`4d3b1ab2` (reviewed source; exact approved backend release verified below).
 
 ## Scope and live evidence
 
@@ -62,7 +62,7 @@ existing owned draft entry; no invented travel duration or reimbursement.
   Thus new live write→read-back and ordinary ChatGPT UI acceptance remain unverified.
   Do not fabricate a payroll-affecting test entry to remove that boundary.
 
-## Exact proposed backend release (not executed)
+## Exact approved backend release (completed)
 
 Project `ehtjfntukiwbgptqgbzy`, existing function `cg-dynamics-mcp`, baseline v73.
 Private source-only rollback/candidate packet:
@@ -76,13 +76,26 @@ read-back repair from v73. No whole-main bundle replacement. Keep all40 files,
 JWTfalse/import-mapfalse, internal OAuth, permissions and secrets unchanged.
 No new tool, dependency, table, schema, provider configuration or Vercel operation.
 
-CA approval is required before that exact production backend update. Immediately
-before release recheck version/hash; stop on drift rather than overwrite another
-owner's runtime. After approval: deploy once, verify40/40 hosted bytes/settings,
-unauthenticated rejection, live CA bootstrap policy and read-only day. Verify the
-actual ChatGPT catalogue accepts small entries; if its action snapshot is stale,
-refresh/review that existing app through its legitimate owner workflow. Never
-weaken server rules or use another staff identity to work around it.
+CA explicitly replied **Approve exact CG Hours connector fix**. Preflight v73
+remained byte-identical to all40 baseline files; reconstructed candidate matched
+the approved hash exactly. Released once: **v73→v74**, ACTIVE, same function id.
+Hosted bundle SHA256:
+`4d7c5e51fdc0ca2f0359cc164b1072263a7d96b6061fd9c89d2fe4c8f0629df4`.
+All40 hosted files match the approved candidate byte-for-byte; other37 files,
+JWTfalse/import-mapfalse and internal OAuth/auth code are preserved. Anonymous
+and deliberately invalid-bearer tools/list POSTs both return401.
+
+After resolving CA's exact staff context again, live bootstrap returns all11
+hours workflow rules/version `2026.10.27-own-draft-hours-1` and updated tool
+descriptions. Existing coexistence policy version remains unchanged. The live
+27 October day read succeeds with74 client options,22 task options, no time or
+travel entries and editable week. No timesheet data was changed.
+
+Normal ChatGPT UI/action-snapshot acceptance and a new genuine saved-entry
+read-back remain unverified. Verify the actual ChatGPT catalogue accepts small
+entries; if its action snapshot is stale, refresh/review that existing app through
+its legitimate owner workflow. Never weaken server rules or use another staff
+identity to work around it.
 
 For genuine live write acceptance use only an exact CA-confirmed work segment,
 client/date/duration and retained retry key. Check returned draft id, same-key replay

@@ -25,8 +25,11 @@ read/reconcile/correct/read-back policy and truthful uncertain-response handling
 No staff/Teams/calendar rewrite, automation change or invented hours.
 Final local MCP393pass/1skip; Hours120pass; final focused18pass and hosted-derived
 candidate10pass. Build/app-bundle/scoped lint/Edge pure TS/diff checks pass.
-Three-file hosted-derived40-file packet preserves other37 files and v73 guideline
-repair; production release NOT approved/executed. CA Chrome navigation timed out;
+CA explicitly approved the exact three-file release: MCPv73→74 once, ACTIVE;
+all40 hosted files byte-identical to candidate, other37 unchanged, v73 guideline
+repair retained. JWTfalse/import-mapfalse/auth preserved, anonymous/invalid401.
+Live CA bootstrap now returns11 hours rules/version2026.10.27-own-draft-hours-1;
+CA day read succeeds with74 clients/22 tasks. CA Chrome navigation timed out;
 normal ChatGPT UI and new genuine live write→read-back remain unverified.
 No Vercel, new time/km data, schema, mapping, secrets or permission writes.
 Google Control Centre exact reference still unavailable; do not invent a tracker.
