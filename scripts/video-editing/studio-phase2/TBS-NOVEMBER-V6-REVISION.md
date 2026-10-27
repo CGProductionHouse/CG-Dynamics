@@ -1,5 +1,7 @@
 # TBS November equipment-cover V6 — protected revision
 
+**Superseded 27 October:** The owner rejected this version's static inventory-card opening. Continue from [the protected source-led V7 opening](TBS-NOVEMBER-V7-INTRO-REVISION.md); V6 was never delivered.
+
 27 October 2026. V5 remains on hold after five specific amendments in `CG Nolan Approvals` at 06:30–06:35 SAST. The attached phone frames identify the flickering woodworking saw at the opening and its return behind the equipment/value/use checklist, plus the seated TBS adviser section. Nolan acknowledged all five amendments in the group at 06:40; WhatsApp showed Delivered.
 
 | Group amendment | V6 action | Verification and limit |
