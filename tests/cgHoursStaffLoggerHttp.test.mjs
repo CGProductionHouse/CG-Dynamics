@@ -107,6 +107,18 @@ test('backend refusal and missing durable identity never become claimed success'
   assert.equal(staffLogger.durableCgHoursRecordId(missingReceipt), null)
 })
 
+test('a malformed success response or server failure never falsely claims nothing was changed', async () => {
+  for (const [body, status] of [['invalid-json', 200], ['{}', 200], ['{}', 503]]) {
+    const result = await staffLogger.invokeCgHoursStaffLogger(
+      { endpoint: ENDPOINT, secret: SECRET }, STAFF_ID, 'add_my_time_entry', { idempotency_key: 'stable-key' },
+      { fetchImpl: async () => new Response(body, { status }) },
+    )
+    assert.equal(result.ok, false)
+    assert.doesNotMatch(result.message, /nothing was changed|nothing was logged/)
+    assert.match(result.message, /same idempotency key/)
+  }
+})
+
 test('backend authority names the merged CG Hours main endpoint and unconfigured calls fail closed without fetch', async () => {
   const authority = staffLogger.CG_HOURS_BACKEND_AUTHORITY
   assert.equal(authority.status, 'CONFIG_REQUIRED')

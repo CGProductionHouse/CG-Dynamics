@@ -98,6 +98,8 @@ import {
   type ProjectContextKind,
 } from './projectContext.ts'
 import {
+  buildCgHoursLoggingPolicy,
+  cgHoursDurationMinutes,
   durableCgHoursRecordId,
   invokeCgHoursStaffLogger,
   validateCgHoursStaffLoggerConfig,
@@ -2021,6 +2023,7 @@ const handleUpdateMyPreferences: ToolHandler = async (staff, input) => {
 
 const handleGetMyAssistantBootstrap: ToolHandler = async (staff) => {
   const staffAssistantPolicy = buildStaffAssistantPolicy(staff.contextKind)
+  const cgHoursLoggingPolicy = buildCgHoursLoggingPolicy(staff.contextKind)
   const dailyUpdateContract = buildDailyUpdateContract(staff.fullName)
   const policyMeta = {
     policy_version: STAFF_ASSISTANT_POLICY_VERSION,
@@ -2034,6 +2037,7 @@ const handleGetMyAssistantBootstrap: ToolHandler = async (staff) => {
   const hasTable = await tableExists(staff.supabase, 'staff_assistant_profiles')
   if (!hasTable) return {
     staff_assistant_policy: staffAssistantPolicy,
+    cg_hours_logging_policy: cgHoursLoggingPolicy,
     daily_update_contract: dailyUpdateContract,
     policy_meta: policyMeta,
     identity,
@@ -2049,6 +2053,7 @@ const handleGetMyAssistantBootstrap: ToolHandler = async (staff) => {
 
   if (profileError) return {
     staff_assistant_policy: staffAssistantPolicy,
+    cg_hours_logging_policy: cgHoursLoggingPolicy,
     daily_update_contract: dailyUpdateContract,
     policy_meta: policyMeta,
     identity,
@@ -2075,6 +2080,7 @@ const handleGetMyAssistantBootstrap: ToolHandler = async (staff) => {
     // #325: the canonical shared runtime policy. This OVERRIDES any stale hand-maintained
     // ChatGPT Project Instruction wording (e.g. "Dynamics is fallback-only").
     staff_assistant_policy: staffAssistantPolicy,
+    cg_hours_logging_policy: cgHoursLoggingPolicy,
     policy_meta: policyMeta,
     identity,
     assistant_profile: profile ? {
@@ -2859,8 +2865,8 @@ async function handleLogOrdinaryHours(staff: AuthenticatedStaff, input: Record<s
     task_template_id?: string
     idempotency_key: string
   }
-  const minutes = hours * 60
-  if (!Number.isInteger(minutes) || minutes < 1 || minutes > 1440) {
+  const minutes = cgHoursDurationMinutes(hours)
+  if (minutes === null) {
     return { ok: false, error: 'INVALID_DURATION', message: 'Hours must resolve to a whole number of minutes between 1 minute and 24 hours.' }
   }
   const combinedNotes = notes ? `${task_description}\n${notes}` : task_description
@@ -2993,8 +2999,8 @@ async function handleCorrectMyEntry(staff: AuthenticatedStaff, input: Record<str
     tool = 'edit_my_time_entry'
     patch = { entry_id, idempotency_key }
     if (correction.hours !== undefined) {
-      const minutes = Number(correction.hours) * 60
-      if (!Number.isInteger(minutes) || minutes < 1 || minutes > 1440) {
+      const minutes = cgHoursDurationMinutes(correction.hours)
+      if (minutes === null) {
         return { ok: false, error: 'INVALID_DURATION', message: 'Corrected hours must resolve to a whole number of minutes between 1 minute and 24 hours.' }
       }
       patch.minutes = minutes

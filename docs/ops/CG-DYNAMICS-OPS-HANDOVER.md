@@ -17,6 +17,27 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 27 October — CG Hours Assistant daily capture and live read acceptance
+
+Owner #898, focused PR #899, code4d3b1ab2 (open). CA requested staff narration→CG Hours reliability; CA chat only for testing,
+no staff chat/timesheet edits. [Exact receipt](CG-HOURS-ASSISTANT-ACCEPTANCE-2026-10-27.md).
+Live CA context/day/options read succeeds; all six active staff mappings verified
+SELECT-only, including Franco. Existing v73 bootstrap has four Hours tools but
+no shared daily logging workflow. Reproduced decimal-hour rejection and 15-minute
+schema mismatch; focused source repair adds strict whole-minute conversion,
+read/reconcile/correct/read-back policy and truthful uncertain-response handling.
+No staff/Teams/calendar rewrite, automation change or invented hours.
+Final local MCP393pass/1skip; Hours120pass; final focused18pass and hosted-derived
+candidate10pass. Build/app-bundle/scoped lint/Edge pure TS/diff checks pass.
+CA explicitly approved the exact three-file release: MCPv73→74 once, ACTIVE;
+all40 hosted files byte-identical to candidate, other37 unchanged, v73 guideline
+repair retained. JWTfalse/import-mapfalse/auth preserved, anonymous/invalid401.
+Live CA bootstrap now returns11 hours rules/version2026.10.27-own-draft-hours-1;
+CA day read succeeds with74 clients/22 tasks. CA Chrome navigation timed out;
+normal ChatGPT UI and new genuine live write→read-back remain unverified.
+No Vercel, new time/km data, schema, mapping, secrets or permission writes.
+Google Control Centre exact reference still unavailable; do not invent a tracker.
+
 ### 25 October late evening — slow file-window defect fixed; 37 live image Views
 
 Exact receipt: [Client file access acceptance](CLIENT-FILE-ACCESS-ACCEPTANCE-2026-10-25.md).
