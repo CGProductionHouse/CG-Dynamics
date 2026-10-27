@@ -3,7 +3,9 @@ name: nolan-source-led-split-screen
 description: Evaluate whether simultaneous source actions add information at phone size before using a split-screen treatment.
 ---
 
-# Source-led split screen — first real-footage candidate rejected
+# Source-led split screen — one Daisy application after a rejected candidate
+
+**Second bounded proof, Daisy R02 (27 October):** The earlier unrelated coffee-pair candidate below remains rejected. A new A/B compares simultaneous vs sequential actions from the *same* [Mixkit #41225 friendship shoot](https://mixkit.co/free-stock-video/two-young-friends-laughing-and-fooling-around-in-a-coffee-41225/) under its [Stock Video Free License](https://mixkit.co/license/modal/videoFree/). The protected renderer `daisy-november-repurpose/split_intro_ab.py` keeps the same shoot in both halves, then `render_r02.py` uses a 1.73-second simultaneous split for the November thank-you question. The private A/B and portrait contact are outside Git at `C:\Users\chris\Videos\CG-AI-Editing\Daisy-Nov-2026\private-repurpose-v2\`. Both actions and the central question were visually readable in the reduced portrait inspection. R02 sent to internal review; [handoff and remaining limits](../../DAISY-NOVEMBER-R02-HANDOFF.md). This validates one source/story fit, not general mastery or a physical-phone/full-speed signoff.
 
 **Reference:** [Three editing trends](https://www.tiktok.com/@gakulange/video/7519106258394303765) names and visually samples a split-screen treatment. The owner's broader request is for films with varied visual ideas, not repeating decorative panels. The reference sound was not heard and its exact split timing was not measured.
 

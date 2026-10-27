@@ -1,6 +1,6 @@
 # Daisy & Co November R02 — owner amendments and protected source gate
 
-27 October 2026, 10:39 SAST. R01 remains **on hold for internal review**. No R02 film or cover has been delivered. The exact CG Nolan Approvals group showed six owner amendments at 10:05–10:08. Nolan acknowledged them separately at 10:16; WhatsApp later showed **Delivered**. Do not resend R01 or mistake this acknowledgement for a revision.
+27 October 2026. R01 is superseded by the protected R02 internal handoff. The exact CG Nolan Approvals group showed six owner amendments at 10:05–10:08. Nolan acknowledged them separately at 10:16. The R02 video was delivered at 13:16 and its separate caption-free HD cover at 13:18. Read [the R02 handoff](DAISY-NOVEMBER-R02-HANDOFF.md); neither group delivery nor technical QC means client approval.
 
 ## Shot-level amendment map
 
@@ -33,4 +33,4 @@ The normal Chrome OneDrive path for larger June/August originals presented a sig
 3. Watch and hear the exact export full speed; inspect vertical phone framing, abrupt sound, music tail, official logo, title safe areas and a source-linked cover. Technical decoding or frame strips do not count as this creative gate.
 4. Only then send the correctly named MP4 as a document with its proposed post caption, followed by a separate caption-free HD cover, to the exact CG Nolan Approvals group. Verify **Delivered**. No client/public forwarding is authorised by internal delivery.
 
-**Current decision:** the photo push is a useful protected repair, and the four offending shots are mapped for removal. The available substitutes tested here do not clear the natural-action and story gates. There is no R02 approval package yet. Do not fill the holes with rejected stock or dated merchandise just to produce an export.
+**Current decision:** all four offending R01 slots were removed. R02 uses two separately licensed, screened friendship actions, a brief real store-geography shot and a visibly moving genuine storefront still. The film is 17.2 seconds because the rejected footage was not replaced with filler. Technical verification and the remaining full-speed independent review limits are recorded in the R02 handoff.
