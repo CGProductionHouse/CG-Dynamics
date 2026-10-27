@@ -700,7 +700,9 @@ function OverviewTab({
       />
 
       {/* Staff-only connector data health (never rendered on client routes) */}
-      {showAdminDiagnostics && <AdminDataHealth master={master} performance={performance} />}
+      {/* Legacy missing-total heuristics cannot diagnose normalized provider facts.
+          The availability-aware connector rows below own that reporting path. */}
+      {showAdminDiagnostics && !normalizedFactsActive && <AdminDataHealth master={master} performance={performance} />}
       {showAdminDiagnostics && dataHealth.length > 0 && <ConnectorDataHealth rows={dataHealth} />}
 
     </>
