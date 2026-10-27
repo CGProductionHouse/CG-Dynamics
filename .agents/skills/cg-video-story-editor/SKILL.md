@@ -9,6 +9,7 @@ Make an edit that gives a viewer a reason to care, then makes the client's produ
 
 For music markers, beat-led openings, motion-matched cuts and sound that crosses picture edits, read the [rhythm and sound playbook](references/rhythm-sound-playbook.md).
 For a worked opening with a rush, layered sound and a deliberate breath, read the [cinematic rush and release example](references/cinematic-rush-and-release-example.md).
+For ordinary camera selects with visible shake, consult the repository's `scripts/video-editing/studio-phase2/skills/stabilization/SKILL.md` proof and negative control before choosing correction strength; its measured settings are source-specific.
 For reusable licensed cue discovery and per-project registration, read the [CG sound design catalog](references/sfx-library.md).
 For choosing the precise gesture, expression, or reveal within a longer source, read the [moment selection playbook](references/moment-selection-playbook.md).
 For client asset libraries and native brand graphics, read the [client library workflow](references/client-asset-library.md).
