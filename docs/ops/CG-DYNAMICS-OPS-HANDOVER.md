@@ -13,6 +13,12 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 27 October — PICASSO Staffy in-place corrections and local revision snapshot (#878 / PR #879)
+
+The existing 195-photo internal Pixieset review collection `125612394` was renamed **The Staffy Fight Night | 24 October 2026**. Six identified exposure/cast outliers were revised from camera originals and replaced through Pixieset's visible **Replace photo** action; each yielded a success notification. The direct collection link did not change. The public gallery showed the new title, and a signed PICASSO update to **CG Picasso Approvals** showed Delivered. The venue signage reads `THE STAFFY`; a focused public search did not independently verify the event's marketed title. This is still an **internal review**, not Amonique's acceptance or client delivery.
+
+The private `quality-audit/gallery-revision-2026-10-27-private` snapshot now mirrors the 195 intended outputs with six revised bytes, a new hash-bound manifest, and a full consistency audit. The audit completed with 56 triage-flagged images (overlapping near-white, group luminance and low-change signals) and correctly remains `BLOCKED` for photographic release because it has no human per-photo review or accepted varied 25-frame calibration. The numbers are not automatic rejects. PR #879 adds the reusable immutable revision assembler and focused tests, and the installed local PICASSO skill now points to this replacement workflow. Lightroom Classic official docs confirm Assisted Culling, Reference View, selective batch setting sync and AI mask recomputation; none certifies the photographic outcome. No production/hosting change, new spend, client-photo commit, or Nolan #862 change.
+
 ### 27 October — PICASSO Staffy replacement delivered for internal review; consistency gate added (#878 / PR #879)
 
 The owner approved a password-free, unlisted replacement gallery. Pixieset collection `125612394` contains 195 images across all 11 fights, including four drone stills and 14 labelled staff-posted reference examples. Downloads, social sharing and homepage listing are off. Its link was sent to **CG Picasso Approvals** signed PICASSO and WhatsApp showed Delivered at 14:24 SAST. It is **not client-approved**. The 203-image rejected collection remains hidden.
