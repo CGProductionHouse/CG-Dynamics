@@ -60,7 +60,10 @@ def portrait(plate: np.ndarray) -> np.ndarray:
 def compose_phone(plate: np.ndarray, scene: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     quad, mask = quad_and_mask(plate)
     warped = warp(scene, quad, (1280, 720))
-    alpha = cv2.GaussianBlur(mask.astype(np.float32) / 255, (3, 3), .7)[:, :, None]
+    # Expand only one source pixel to remove green screen-edge spill while
+    # retaining the filmed handset rim. A wider expansion nicks that rim.
+    clean_mask = cv2.dilate(mask, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3)))
+    alpha = cv2.GaussianBlur(clean_mask.astype(np.float32) / 255, (3, 3), .7)[:, :, None]
     replaced = np.clip(plate * (1 - alpha) + warped * alpha, 0, 255).astype(np.uint8)
     factor = W / (PLATE_X1 - PLATE_X0)
     portrait_quad = quad.copy()
