@@ -26,7 +26,8 @@ client link/clipboard refusal, private saved-draft preview and retained unsaved
 edits/no overflow. Existing focused tests23/23, app build/bundle, scoped lint and
 diff pass. This is a visual-only presenter/fixture correction: no backend, API,
 auth, data, content publication, global navigation or Vercel changes.
-Visual acceptance remains CA's; do not label the revised design owner-approved.
+CA subsequently accepted this revised visual on27October: "much better thanks".
+This is visual acceptance of the local/source version, not a deployed frontend.
 
 ## Design and source references
 
@@ -266,3 +267,55 @@ complete calendar/mapping reconciliation, or that the new frontend design is liv
 No SQL/data/schema/config/secret/permission/Microsoft/content change or Vercel.
 Rollback, if ever needed under incident authority, is the saved exact40-file v72
 source/settings; do not replace unrelated code from main or alter security settings.
+
+## Client-sent WhatsApp source import — 27 October
+
+CA accepted the revised portal styling, then explicitly asked to review recent
+client-sent WhatsApp guidelines and add those still relevant to Dynamics. This
+authorises these source-backed draft content saves, not publication or hosting.
+
+Searched the signed-in business WhatsApp for guideline/content-guide/guide naming
+and reviewed October PDF matches with surrounding client messages. Downloaded the
+actual attachments, extracted text and rendered/read the content pages; repaired
+PDF text-map punctuation against the images. This is bounded current-source work,
+not an exhaustive all-time chat/export or a claim about deleted/unavailable files.
+
+| Client/source | Result |
+| --- | --- |
+| SecuriForce dated campaign PDF, sent27October12:53 | Four complete videos appended to the existing28October run/document, in source order: Alarm Systems, Armed Response, CCTV, December Do’s & Don’ts. Video coverage2026-12 retained independently of October filming. |
+| SecuriForce runner-up PDF, same client/time | One complete team/runner-up video appended in the same next existing client run as preparation. PDF itself has no filming date/month: month remains null; the source/provisional run association is explicitly recorded internally. |
+| All Around PVC amended PDF, Franco23October11:00 | One complete SPC Flooring video added to its existing26October document. Later amended version used; earlier10:30 version superseded after the client corrected the installation/preparation stage. The later finished-video message does not cause a new shoot or guessed completion status. |
+| Neshora PDF, sent16October17:08 | Both matching subjects already exist in the19October document with subsequent detailed staff refinements. Read/compared and left byte-for-byte unchanged; no duplicate or overwrite from an older PDF. |
+| Vrystaat Kunstefees PDF, sent5October13:31 | World Mental Health Day October-specific guide, later brainstorm meeting and no matching Content Run. Kept as historical source; not resurrected as new upcoming work or attached to another client's run. |
+| VCS | Search found the promise to send a guide; no sent guide attachment found in this bounded search. No invented script/import. |
+
+Exact new records:
+
+- Existing SecuriForce document `2ac554fa-d16a-43f0-99b1-2f24f37512ea`, run
+  `477763f7-90e4-48ea-94ed-4d7f8d00cead`; new video IDs
+  `c61b0f36-ea14-408f-a09a-57bfa8ef4e54`, `adbad5d7-b9ba-4be9-8cf3-8583045e3036`,
+  `d155bd84-3058-4240-8ef6-40b9df023389`, `b4791b03-9511-48e6-9dd6-df66090bae32`,
+  `99fa9513-387f-4120-aec9-f281772c76c7`.
+- Existing PVC document `ec340824-8b93-4a24-bef1-e5fd69aac731`, run
+  `b232f633-7520-476a-88d5-d9fa9645754c`; new video
+  `63c8c622-8f68-49bf-b1f1-b32c15ee2431`.
+
+**Live normal-connector write acceptance now exercised by real authorised work:**
+six idempotency-keyed add + named-field update operations succeeded. Fresh reads
+of every saved script and direction exactly match the prepared source packet;
+independent `get_content_run_plan` reads return the same six scripts in canonical
+order under the correct client/run/document. Neshora before/after equality passes.
+Actual signed-in company Chrome admin editor acceptance also passes: SecuriForce
+shows all five imported full script values (1128/1035/1118/2045/1501 characters)
+and December target months; PVC shows its full1584-character amended script.
+Both showDRAFT. Legacy document coverage fields remain untouched; deliberate
+publication review must reconcile the mixed/unknown coverage window before release.
+No document creation/reset, existing-video overwrite, reorder, approval/publication,
+Client Schedule allocation, calendar/status/date/package/OneDrive change or paid
+generator invocation. No Vercel or Edge/backend/config/schema/permission change.
+
+Confidential originals and full before/action/after receipts remain private at
+`%TEMP%/cg-guideline-import-20261027` (download originals in Downloads). Internal
+video notes retain filename/page/sender/local message timestamp/SHA256 provenance.
+No full scripts, personal testimony or WhatsApp transcripts are copied into GitHub.
+Frontend visual release remains separate from live imported draft content.

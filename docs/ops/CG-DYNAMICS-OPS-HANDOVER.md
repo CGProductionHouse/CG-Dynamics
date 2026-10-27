@@ -24,8 +24,33 @@ Follow-up `codex/guideline-portal-style-20261027` uses existing portal near-blac
 white/slate text, bright teal/orange accents and glass cards; compact header and
 actual ClientPortalShell preview. No global portal or backend change. Four-width
 browser/23focused/build/bundle/scopedlint/diff pass. New `cg-guideline-portal-*`
-images supersede rejected `cg-guideline-design-*`; owner visual approval pending.
+images supersede rejected `cg-guideline-design-*`; CA accepted the revised visual
+on 27 October ("much better thanks").
 No Vercel, data or publication change. Normal ChatGPT acceptance below is retained.
+
+Later CA explicitly requested importing still-relevant client-sent WhatsApp guides.
+This narrow content authority was exercised through normal company-admin MCP actions:
+**6 new draft videos in 2 existing canonical documents**, with complete scripts,
+shot direction and internal source-file/hash/message provenance. SecuriForce's
+28 October run now has the four dated December campaign videos plus the separate
+runner-up/team video; December coverage remains on those four videos, and runner-up
+coverage stays null. Runner-up was sent alongside the dated campaign PDF; filing
+with the next same-client run is documented as preparation, not a separately agreed
+shoot. All Around PVC's 26 October document now contains Franco's latest amended
+23 October 11:00 SPC-flooring guide, preserving the client's preparation-stage
+correction. No run/event/task/posting dates, statuses, packages or allocations changed.
+All six saved scripts/directions match the reviewed source packet exactly in both
+normal guideline reads and canonical run plans. Both documents remain unpublished.
+Neshora's two existing staff-refined videos were compared with its sent PDF and
+remain byte-for-byte unchanged. Kunstefees' World Mental Health Day guide is an
+expired October-specific campaign, with a subsequent brainstorming meeting and
+no exact Content Run; it was not made into new upcoming work. No sent VCS PDF
+was found in the searched recent-guide results. This was a bounded October
+WhatsApp search/review, not an exhaustive historical archive or deleted-media claim.
+Private PDF originals, prepared payloads and before/action/after receipts are under
+`%TEMP%/cg-guideline-import-20261027`; no client scripts/transcripts committed.
+No Vercel, backend release, SQL/schema, permission or client-publication change.
+Detailed receipt: [guideline design/import acceptance](CONTENT-GUIDELINE-CLIENT-DESIGN-2026-10-27.md#client-sent-whatsapp-source-import--27-october).
 
 CA redirected this lane to branded guidelines and normal ChatGPT authoring.
 Exact design/workflow/acceptance boundaries:
