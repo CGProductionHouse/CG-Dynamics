@@ -36,6 +36,9 @@ test('Performance keeps all service choices without inferring package or connect
       const html = render(service)
       assert.match(html, /wa.me\/27791152339/)
       assert.match(html, /check your existing scope/)
+      assert.match(html, /Discuss your current package or explore adding this service/)
+      assert.doesNotMatch(html, /Explore adding this service to your monthly package/,
+        'Absent historical reporting is not evidence that an already-connected service needs buying again')
       assert.doesNotMatch(html, /Beyond your current package|Included · connected|No tracked data/)
     }
     assert.match(render('google'), /Google Business Profile/)

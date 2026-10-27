@@ -1,5 +1,6 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
-import { createClient } from 'jsr:@supabase/supabase-js@2'
+import { readMetaStoredToken } from '../_shared/metaTokenStorage.ts'
+import { createClient, type SupabaseClient } from 'jsr:@supabase/supabase-js@2'
 import {
   META_CONNECTOR_VERSION,
   MetaFactRetryableError,
@@ -186,7 +187,7 @@ async function fetchMetaCollection(
  * minute later.
  */
 async function touchItemLease(
-  sb: ReturnType<typeof createClient>,
+  sb: SupabaseClient,
   itemId: string,
   leaseGeneration: number,
 ): Promise<void> {
@@ -198,7 +199,7 @@ async function touchItemLease(
 }
 
 async function batchIsCoolingDown(
-  sb: ReturnType<typeof createClient>,
+  sb: SupabaseClient,
   batchId: string,
 ): Promise<boolean> {
   const { data, error } = await sb
@@ -211,7 +212,7 @@ async function batchIsCoolingDown(
 }
 
 async function batchLaneSetAlreadyStarted(
-  sb: ReturnType<typeof createClient>,
+  sb: SupabaseClient,
   batchId: string,
 ): Promise<boolean> {
   const { data, error } = await sb
@@ -227,7 +228,7 @@ async function batchLaneSetAlreadyStarted(
 
 async function authorizeWorker(
   req: Request,
-  sb: ReturnType<typeof createClient>,
+  sb: SupabaseClient,
 ): Promise<{ ok: true } | { ok: false; status: number; body: unknown }> {
   // 1. Internal worker secret (preferred for cron / enqueue triggers)
   const workerSecret = Deno.env.get('META_SYNC_WORKER_SECRET') ?? ''
@@ -273,7 +274,7 @@ Deno.serve(async (req) => {
   // still hand back whatever this invocation had claimed.
   const claimedLeases = new Map<string, number>()
   const settledIds = new Set<string>()
-  let crashClient: ReturnType<typeof createClient> | null = null
+  let crashClient: SupabaseClient | null = null
   let activeLane: { batchId: string; laneId: number; generation: number } | null = null
 
   try {
@@ -398,7 +399,16 @@ Deno.serve(async (req) => {
     .eq('connection_id', metaConnectionId ?? '')
     .limit(1)
 
-  const accessToken: string | null = tokenRows?.[0]?.encrypted_access_token ?? null
+  let accessToken: string | null = null
+  if (tokenRows?.[0]?.encrypted_access_token) {
+    try {
+      ;({ accessToken } = await readMetaStoredToken(tokenRows[0].encrypted_access_token, metaConnectionId,
+        Deno.env.get('META_TOKEN_ENCRYPTION_KEY_B64'), Deno.env.get('META_TOKEN_ENCRYPTION_KEY_VERSION')))
+    } catch {
+      await releaseActiveLane()
+      return jsonResponse({ ok: false, error: 'Meta credential storage is unavailable. Contact an administrator.' }, 503)
+    }
+  }
   const { baseUrl, version: graphVersion } = graphConfig
 
   const pageTokenMap = new Map<string, string>()
@@ -769,6 +779,7 @@ Deno.serve(async (req) => {
           await savePlatformState('instagram', 'not_applicable', null)
         } else if (instagramAccountId && reportId && instagramState === 'pending') {
           try {
+            if (!asset) throw new Error('The queued Instagram asset is unavailable.')
             instagramCredential = await resolveInstagramReportingCredential({
               asset: { id: asset.id, clientId: item.client_id, instagramAccountId, instagramConnectionId: asset.instagram_connection_id ?? null, facebookPageId },
               metaConnectionId, metaBaseUrl: baseUrl, metaApiVersion: graphVersion, metaUserToken: accessToken,
@@ -920,6 +931,7 @@ Deno.serve(async (req) => {
         }
         if (instagramState === 'facts_pending' && instagramAccountId) {
           try {
+            if (!asset) throw new Error('The queued Instagram asset is unavailable.')
             instagramCredential ??= await resolveInstagramReportingCredential({
               asset: { id: asset.id, clientId: item.client_id, instagramAccountId, instagramConnectionId: asset.instagram_connection_id ?? null, facebookPageId },
               metaConnectionId, metaBaseUrl: baseUrl, metaApiVersion: graphVersion, metaUserToken: accessToken,

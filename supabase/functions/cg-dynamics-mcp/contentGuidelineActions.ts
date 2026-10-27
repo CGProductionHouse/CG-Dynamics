@@ -215,6 +215,13 @@ export function shapeVideoForAssistant(input: {
     objective: video.objective ?? null,
     hook: video.hook ?? null,
     cta: video.cta ?? null,
+    // Normal ChatGPT authors through add/update, not a second funded model.
+    // Return the complete saved brief so it can preserve wording and verify edits.
+    // Explicit fields only: never spread internal notes or raw storage references.
+    script: video.script ?? null,
+    shot_breakdown: video.shot_breakdown ?? null,
+    requirements: video.requirements ?? null,
+    visual_notes: video.visual_notes ?? null,
     has_script: typeof video.script === 'string' && video.script.trim().length > 0 && !/^script pending/i.test(video.script.trim()),
     production_status: video.production_status ?? null,
     editor: video.editor_name ?? null,

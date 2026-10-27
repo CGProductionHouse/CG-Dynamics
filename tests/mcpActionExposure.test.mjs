@@ -31,11 +31,12 @@ const listedTools = () => catalog.CG_DYNAMICS_MCP_TOOLS.map(tool => ({
 
 // ── Action exposure ─────────────────────────────────────────────────────────
 
-test('tools/list exposes exactly 55 tools including resolve_project_context', () => {
+test('tools/list exposes exactly 56 tools including resolve_project_context and captured schedule evidence', () => {
   const tools = listedTools()
-  assert.equal(tools.length, 55)
+  assert.equal(tools.length, 56)
   const names = tools.map(t => t.name)
   assert.ok(names.includes('resolve_project_context'), 'context bootstrap must be exposed')
+  assert.ok(names.includes('read_microsoft_schedule_source'), 'bounded admin-only source evidence must be exposed')
   assert.equal(names[0], 'resolve_project_context', 'bootstrap is listed first')
   assert.ok(names.includes('get_google_ads_audit'), '#435 read-only Google Ads audit must be exposed')
   assert.ok(names.includes('ensure_content_guideline'), '#450 content preparation must be exposed')
@@ -45,7 +46,7 @@ test('tools/list exposes exactly 55 tools including resolve_project_context', ()
   assert.ok(names.includes('get_monthly_strategy_brief'))
   assert.ok(names.includes('submit_monthly_strategy_draft'))
   assert.ok(names.includes('amend_monthly_strategy_draft'))
-  assert.equal(new Set(names).size, 55, 'no duplicate tool names')
+  assert.equal(new Set(names).size, 56, 'no duplicate tool names')
 })
 
 test('every listed tool advertises the OAuth securityScheme with the narrowed #318 scopes', () => {

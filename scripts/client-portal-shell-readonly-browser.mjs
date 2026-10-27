@@ -57,6 +57,8 @@ async function checkEmptyPerformance(page, width) {
       assert.match(await panel.innerText(), /standard in CG social packages/)
       assert.equal(await panel.getByRole('link').count(), 0, 'Standard social access is never sold again')
     } else {
+      assert.match(await panel.innerText(), /Discuss your current package or explore adding this service/)
+      assert.doesNotMatch(await panel.innerText(), /Explore adding this service to your monthly package/)
       const contact = panel.getByRole('link', { name: 'Discuss my package on WhatsApp ↗', exact: true })
       assert.equal(new URL(await contact.getAttribute('href')).pathname, '/27791152339')
       assert.equal(await contact.getAttribute('target'), '_blank')

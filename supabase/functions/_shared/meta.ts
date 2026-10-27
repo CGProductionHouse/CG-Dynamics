@@ -16,7 +16,7 @@ import {
   expectedMetaDailyEnds,
   metaInsightsBounds,
 } from './metaPeriod.ts'
-import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import type { MetaDatabaseClient as SupabaseClient } from './metaDatabaseClient.ts'
 
 export {
   META_INSIGHTS_TIMEZONE,
@@ -577,7 +577,7 @@ export async function syncAccountFacts(
       p_requested_bounds: { ...insightBounds, period_start: args.periodStart, period_end: args.periodEnd, timezone: META_INSIGHTS_TIMEZONE },
     })
     if (error) throw new Error(`Failed to resume ${args.platform} fact run: ${error.message} (${error.code ?? 'unknown'})`)
-    const row = Array.isArray(data) ? data[0] : data
+    const row = (Array.isArray(data) ? data[0] : data) as Record<string, unknown> | null
     if (!row?.sync_run_id) throw new Error(`Failed to resume ${args.platform} fact run: missing run id`)
     syncRunId = String(row.sync_run_id)
     for (const key of (Array.isArray(row.completed_metric_keys) ? row.completed_metric_keys : [])) completedMetricKeys.add(String(key))

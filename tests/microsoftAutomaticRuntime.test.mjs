@@ -4,14 +4,14 @@ import { performance } from 'node:perf_hooks'
 import { createServer } from 'vite'
 import { readFileSync } from 'node:fs'
 
-let server, jm, details, reconcile, automatic, applyMirrors, claimContinuation, freshness
+let server, jm, details, reconcile, automatic, applyMirrors, previewMirrors, claimContinuation, freshness
 before(async () => {
-  server = await createServer({ server: { middlewareMode: true }, appType: 'custom', logLevel: 'silent' })
+  server = await createServer({ configFile: false, server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true, include: [] }, appType: 'custom', logLevel: 'silent' })
   jm = await server.ssrLoadModule('/supabase/functions/microsoft-transition-sync/job-machine.ts')
   details = await server.ssrLoadModule('/supabase/functions/microsoft-transition-sync/planner-details.ts')
   ;({ buildMicrosoftReconciliation: reconcile } = await server.ssrLoadModule('/src/lib/microsoftSync.ts'))
   automatic = await server.ssrLoadModule('/supabase/functions/microsoft-transition-sync/automatic-snapshot.ts')
-  ;({ applyAutomaticMicrosoftMirrors: applyMirrors, claimAutomaticApplyContinuation: claimContinuation } = await server.ssrLoadModule('/supabase/functions/microsoft-transition-sync/automatic-reconciliation.ts'))
+  ;({ applyAutomaticMicrosoftMirrors: applyMirrors, previewAutomaticMicrosoftMirrors: previewMirrors, claimAutomaticApplyContinuation: claimContinuation } = await server.ssrLoadModule('/supabase/functions/microsoft-transition-sync/automatic-reconciliation.ts'))
   ;({ microsoftFreshnessEvidence: freshness } = await server.ssrLoadModule('/src/lib/dailyDynamicsFreshness.ts'))
 })
 after(async () => { await server?.close() })
@@ -178,7 +178,7 @@ function database(rows = fleet()) {
       const query = {
         select(value) { columns = value; return query }, eq(key, value) { filters.push(r => key === 'summary' ? JSON.stringify(r[key]) === value : r[key] === value); return query },
         in(key, values) { filters.push(r => values.includes(r[key])); return query },
-        is() { return query }, not() { return query }, order() { return query }, range(from, to) { range = [from, to]; return query },
+        is(key, value) { filters.push(r => (r[key] ?? null) === value); return query }, not() { return query }, order() { return query }, range(from, to) { range = [from, to]; return query },
         insert(value) { mode = 'insert'; inserted = { ...value, id: `run-${tables[table].length}` }; return query },
         update(value) { mode = 'update'; patch = value; return query },
         single() { single = true; return query }, maybeSingle() { single = true; return query }, limit() { return query },
@@ -218,6 +218,133 @@ function database(rows = fleet()) {
   }
   return db
 }
+
+test('automatic mirrors compare Microsoft descriptions, not preserved staff notes, in both domains', async () => {
+  const rows = fleet().slice(0, 2).map(s => ({ ...s, record_count: 1, records: [{ ...s.records[0],
+    ...(s.source_type === 'outlook_calendar' ? { cancelled: false, safeSummary: 'Original Outlook summary' }
+      : { percentComplete: 0, assigneeMicrosoftIds: [], description: 'Original Planner description' }),
+  }] }))
+  const input = automatic.assembleAutomaticSnapshot(rows, {}, now)
+  const baseline = reconcile(input, context, [], new Set(), items => items, new Map(), [], true)
+  const db = database(rows)
+  for (const item of baseline) {
+    const payload = item.proposedPayload
+    const table = payload.destination === 'planner' ? db.tables.planner_tasks : db.tables.company_calendar_events
+    table.push({ ...payload, id: `target-${payload.destination}`, updated_at: now,
+      microsoft_source_hash: item.sourceHash, microsoft_last_synced_at: now,
+      notes: 'Staff-only amendment: preserve this text verbatim.',
+    })
+  }
+  const result = await applyMirrors(db, input, 'job', 'system-user')
+  assert.equal(result.conflicts, 0, 'Staff notes must not replace the source baseline in automatic reads')
+  assert.equal(result.status, 'completed')
+  assert.equal(db.calls.filter(c => c.rpc && c.args.p_should_apply).length, 0)
+  for (const name of ['planner_tasks', 'company_calendar_events']) {
+    assert.ok(db.calls.filter(c => c.table === name && c.mode === 'read').every(c => c.columns.split(',').includes('microsoft_source_description')))
+    assert.equal(db.tables[name][0].notes, 'Staff-only amendment: preserve this text verbatim.')
+  }
+  // A genuine Microsoft-owned local edit must still stop. Do not disable the baseline guard.
+  const driftDb = database(rows)
+  driftDb.tables.company_calendar_events.push({ ...db.tables.company_calendar_events[0], location: 'Locally amended location' })
+  driftDb.tables.planner_tasks.push({ ...db.tables.planner_tasks[0] })
+  const changed = await applyMirrors(driftDb, input, 'job', 'system-user')
+  assert.equal(changed.status, 'partial')
+  assert.equal(changed.conflicts, 1)
+  const conflict = driftDb.calls.find(c => c.rpc && c.args.p_action === 'conflict')
+  assert.equal(conflict.args.p_should_apply, false)
+  assert.equal(conflict.args.p_details.conflict_code, 'existing_row_changed')
+  assert.match(conflict.args.p_details.conflict_reason, /edited in CG Dynamics/)
+})
+
+test('legacy description projection can count two acknowledged creates as fresh conflicts without missing journal rows', async () => {
+  // Actual handler and classifier, synthetic rows only. This reproduces a possible
+  // summary/journal drift mechanism, not proof of historical live preview membership.
+  const source = fleet()[1]
+  const rows = [{ ...source, record_count: 201, records: Array.from({ length: 201 }, (_, i) => ({
+    ...source.records[0], sourceTaskId: `continuation-${i}`, title: `Operational task ${i}`,
+    percentComplete: i < 2 ? 0 : 100, assigneeMicrosoftIds: [],
+    description: i === 0 ? 'Source-owned detail' : '',
+  })) }]
+  const input = automatic.assembleAutomaticSnapshot(rows, {}, now)
+  const db = database(rows)
+  const first = await applyMirrors(db, input, 'job', 'system-user')
+  assert.equal(first.conflicts, 0)
+  assert.equal(first.status, 'applying', '201 entries force a real 200-item continuation')
+  for (const call of db.calls.filter(c => c.rpc && c.args.p_should_apply)) {
+    db.tables.planner_tasks.push({ ...call.args.p_patch, id: `target-${call.args.p_source_item_id}`,
+      updated_at: now, notes: null })
+  }
+  assert.equal(db.tables.planner_tasks.length, 2)
+  const correct = await previewMirrors(db, input)
+  assert.equal(correct.items.filter(i => i.reconciliationAction === 'conflict').length, 0)
+  const originalFrom = db.from.bind(db)
+  const legacy = { ...db, from(table) {
+    const query = originalFrom(table), originalThen = query.then.bind(query)
+    query.then = (resolve, reject) => originalThen(result => resolve({ ...result,
+      data: table === 'planner_tasks' && Array.isArray(result.data)
+        ? result.data.map(row => ({ ...row, microsoft_source_description: row.notes })) : result.data,
+    }), reject)
+    return query
+  } }
+  const rpcCallsBefore = db.calls.filter(c => c.rpc).length
+  const resumed = await applyMirrors(legacy, input, 'job', 'system-user', first.runId)
+  assert.equal(resumed.conflicts, 2)
+  assert.equal(resumed.applied, 2)
+  assert.equal(resumed.status, 'partial')
+  assert.equal(db.tables.microsoft_sync_run_items.length, 201)
+  assert.equal(new Set(db.tables.microsoft_sync_run_items.map(r => r.item_key)).size, 201)
+  assert.equal(db.calls.filter(c => c.rpc).length, rpcCallsBefore + 1, 'Only the final unacknowledged skipped entry runs; the two creates are never reapplied')
+  assert.equal(db.tables.microsoft_sync_run_items.filter(r => r.result_status === 'applied').length, 2)
+})
+
+test('automatic context authorities page past 1000 clients, aliases, boards and buckets', async () => {
+  const rows = [fleet()[2]].map(s => ({ ...s, record_count: 1, records: [{ ...s.records[0], assigneeMicrosoftIds: [] }] }))
+  const db = database(rows)
+  db.tables.clients.unshift(...Array.from({length:1001},(_,i)=>({id:`filler-client-${i}`,name:`Unrelated Business ${i}`,active:true})))
+  db.tables.client_aliases.push(...Array.from({length:1001},(_,i)=>({client_id:'fixture-client',alias:`Exact approved alias ${i}`})))
+  db.tables.planner_boards.unshift(...Array.from({length:1001},(_,i)=>({id:`filler-board-${i}`,slug:`unrelated-board-${i}`})))
+  db.tables.planner_buckets.unshift(...Array.from({length:1001},(_,i)=>({id:`filler-bucket-${i}`,board_id:'unrelated',name:`Unrelated bucket ${i}`})))
+  rows[0].records[0].sourceBucketName='Exact approved alias 1000'
+  const result=await applyMirrors(db,automatic.assembleAutomaticSnapshot(rows,{},now),'job','system-user')
+  assert.equal(result.status,'completed')
+  const write=db.calls.find(c=>c.rpc&&c.args.p_should_apply)
+  assert.equal(write.args.p_patch.client_id,'fixture-client')
+  assert.equal(write.args.p_patch.board_id,'todo-board')
+  assert.equal(write.args.p_patch.bucket_id,'client-bucket')
+  for(const table of ['clients','client_aliases','planner_boards','planner_buckets']){
+    assert.ok(db.calls.some(c=>c.table===table&&c.mode==='read'&&c.range[0]===1000),table)
+  }
+})
+
+test('missing or repeating automatic authority pages fail before any run or mirror write',async()=>{
+  for(const kind of ['missing','repeated']){
+    const rows=fleet().map(s=>({...s,records:s.records.slice(0,1),record_count:1}))
+    const db=database(rows),original=db.from
+    db.from=table=>{
+      if(table!=='clients')return original(table)
+      const q={select(){return this},eq(){return this},order(){return this},range(){return this},then(resolve,reject){return Promise.resolve({data:kind==='missing'?null:Array.from({length:1000},()=>({id:'same',name:'Same',active:true})),error:null}).then(resolve,reject)}}
+      return q
+    }
+    const result=await applyMirrors(db,automatic.assembleAutomaticSnapshot(rows,{},now),'job','system-user')
+    assert.equal(result.status,'failed')
+    assert.equal(db.tables.microsoft_sync_runs.length,0)
+    assert.equal(db.calls.some(c=>c.rpc),false)
+  }
+})
+
+test('the actual automatic preview is zero-write and shares the apply classifier',async()=>{
+  const rows=fleet().map(s=>({...s,records:s.records.slice(0,1),record_count:1}))
+  const input=automatic.assembleAutomaticSnapshot(rows,{},now),db=database(rows)
+  const preview=await previewMirrors(db,input)
+  assert.equal(preview.error,null)
+  assert.equal(preview.clientScheduleExcluded,2)
+  assert.ok(preview.items.every(i=>['planner','cg_calendar'].includes(i.destination)))
+  assert.equal(preview.items.length,4)
+  assert.equal(db.calls.some(c=>c.rpc||c.mode!=='read'),false)
+  assert.equal(db.tables.microsoft_sync_runs.length,0)
+  const result=await applyMirrors(database(rows),input,'job','system-user')
+  assert.equal(result.conflicts,preview.items.filter(i=>i.reconciliationAction==='conflict').length)
+})
 
 test('automatic mirror baseline uses source descriptions, preserves staff notes and still refuses genuine target drift', async () => {
   for (const description of ['Source-owned description', '']) {

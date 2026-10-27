@@ -160,6 +160,18 @@ test('conflict and skipped items without targets send null rather than omitting 
   }
 })
 
+test('non-applying audit items carry no latent patch even when a full mapped payload exists', () => {
+  for (const payload of [plannerPayload(), schedulePayload(), calendarPayload()]) {
+    for (const action of ['conflict', 'skipped', 'failed', 'unchanged', 'package_template_create']) {
+      const item = previewItem(payload, { destination: payload.destination, reconciliationAction: action })
+      const args = buildMicrosoftApplyRpcArgs(item, snapshot, 'run-1', `audit-${action}`, false)
+      assert.equal(args.p_should_apply, false)
+      assert.deepEqual(args.p_patch, {})
+      assert.equal(args.p_action, action, 'audit classification is preserved')
+    }
+  }
+})
+
 test('existing update sends its real expected updated_at timestamp', () => {
   const expected = '2026-07-22T08:30:00Z'
   const item = previewItem(plannerPayload(), { reconciliationAction: 'update', existingTargetId: '77777777-7777-4777-8777-777777777777', expectedTargetUpdatedAt: expected })

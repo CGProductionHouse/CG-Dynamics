@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react'
 import { pathToFileURL } from 'node:url'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
+import { readFile } from 'node:fs/promises'
 
 if (!process.env.CG_PLAYWRIGHT_MODULE) throw new Error('Set CG_PLAYWRIGHT_MODULE to the existing approved Playwright package')
 const { chromium } = await import(pathToFileURL(process.env.CG_PLAYWRIGHT_MODULE).href)
@@ -29,23 +30,31 @@ const server=await createServer({configFile:false,plugins:[fixture,react()],cach
   server:{host:'127.0.0.1',port:53987,strictPort:true,hmr:false}})
 let browser
 try{
-  await server.listen();browser=await chromium.launch({headless:true})
+  await server.listen();browser=await chromium.launch({headless:true,ignoreDefaultArgs:['--disable-popup-blocking']})
   for(const width of [1440,375,390,430]){
     const page=await browser.newPage({viewport:{width,height:1000}})
-    const errors=[]; const reads=[]; let brandFailure=true;let malformed=true;let accessMode='invalid';let releaseAccess;let holdMonth=false;let releaseMonth
+    const errors=[]; const reads=[]; let brandFailure=true;let malformed=true;let accessMode='invalid';let releaseAccess;let holdMonth=false;let releaseMonth;let successfulAttachment=false
+    const attachmentBytes=Buffer.from('%PDF-1.4\n% Synthetic client-safe download fixture\n%%EOF\n')
     page.on('pageerror',error=>errors.push(error.message))
     await page.context().route('**/*',async route=>{
       const request=route.request();const url=new URL(request.url())
       if(url.origin==='http://127.0.0.1:53987')return route.continue()
       assert.equal(url.origin,'http://127.0.0.1:53988','No external or write-capable route')
       assert.equal(url.pathname,'/functions/v1/client-onboarding')
-      if(request.method()==='GET')return route.fulfill({status:410,contentType:'text/plain',body:'Synthetic expired media grant'})
+      if(request.method()==='GET'){
+        if(successfulAttachment&&url.searchParams.get('purpose')==='download'){
+          assert.equal(request.headers().referer,undefined,'The real attachment request must not disclose the portal URL')
+          return route.fulfill({status:200,contentType:'application/pdf',headers:{'content-disposition':'attachment; filename="reviewed-final.pdf"'},body:attachmentBytes})
+        }
+        return route.fulfill({status:410,contentType:'text/plain',body:'Synthetic expired media grant'})
+      }
       const body=request.postDataJSON();reads.push(body)
       assert.equal(body.clientId,clientId)
       if(body.action==='staff_preview_portal_library_access'){
         if(body.purpose==='thumbnail')return route.fulfill({json:{ok:false,error:'Synthetic thumbnail unavailable'}})
         assert.ok(['inline','download','stream'].includes(body.purpose))
         if(accessMode==='invalid')return route.fulfill({json:{ok:true,data:{url:'https://foreign.example/private',expiresAt:new Date(Date.now()+300000).toISOString()}}})
+        if(accessMode==='slow')await new Promise(resolve=>setTimeout(resolve,6000))
         if(accessMode==='held')await new Promise(resolve=>{releaseAccess=resolve})
         const expires=Math.floor(Date.now()/1000)+300
         return route.fulfill({json:{ok:true,data:{url:`http://127.0.0.1:53988/functions/v1/client-onboarding?asset=${body.assetId}&purpose=${body.purpose}&expires=${expires}&signature=${'a'.repeat(64)}`,expiresAt:new Date(expires*1000).toISOString()}}})
@@ -85,14 +94,32 @@ try{
     await design.getByRole('button',{name:'View',exact:true}).click()
     await design.getByRole('alert').waitFor()
     assert.deepEqual(await page.evaluate(()=>window.fixtureOpened),[],'Malformed access must never open a file')
-    accessMode='valid'
+    assert.equal(page.context().pages().length,1,'Malformed grants close the reserved blank window')
+    const readsBeforeBlocked=reads.length
+    await page.evaluate(()=>{window.fixtureNativeOpen=window.open;window.open=()=>null})
     await design.getByRole('button',{name:'View',exact:true}).click()
+    await design.getByText('Allow file windows for CG Dynamics, then try again.',{exact:true}).waitFor()
+    assert.equal(reads.length,readsBeforeBlocked,'A blocked window must not request an unused grant')
+    assert.equal(page.context().pages().length,1)
+    await page.evaluate(()=>{window.open=window.fixtureNativeOpen;delete window.fixtureNativeOpen})
+    accessMode='slow'
+    await page.evaluate(()=>{window.fixtureNavigate=true})
+    const [viewTab]=await Promise.all([page.context().waitForEvent('page',{timeout:10000}),design.getByRole('button',{name:'View',exact:true}).click()])
+    assert.equal(await viewTab.evaluate(()=>window.opener===null),true,'Reserved windows detach the opener before authorisation completes')
+    assert.equal(await viewTab.locator('meta[name="referrer"]').getAttribute('content'),'no-referrer')
+    await viewTab.getByText('Synthetic expired media grant',{exact:true}).waitFor()
+    assert.equal(await viewTab.evaluate(()=>window.opener===null),true,'View must isolate the file window from the authenticated portal')
+    assert.equal(await viewTab.evaluate(()=>document.referrer),'','View must not send the client portal URL as a referrer')
+    assert.equal(page.url(),'http://127.0.0.1:53987/__library','View keeps the exact portal window open')
+    await viewTab.close()
+    accessMode='valid'
     await page.waitForFunction(()=>window.fixtureOpened.length===1)
     const opened=new URL((await page.evaluate(()=>window.fixtureOpened))[0])
     assert.equal(opened.origin,'http://127.0.0.1:53988');assert.equal(opened.searchParams.get('asset'),'22222222-2222-4222-8222-222222222222');assert.equal(opened.searchParams.get('purpose'),'inline')
-    await page.evaluate(()=>{window.fixtureNavigate=true})
     const [downloadTab]=await Promise.all([page.context().waitForEvent('page'),design.getByRole('button',{name:'Download',exact:true}).click()])
     await downloadTab.getByText('Synthetic expired media grant',{exact:true}).waitFor()
+    assert.equal(await downloadTab.evaluate(()=>window.opener===null),true,'Download errors must not retain access to the authenticated portal window')
+    assert.equal(await downloadTab.evaluate(()=>document.referrer),'','Download must not send the client portal URL as a referrer')
     assert.equal(page.url(),'http://127.0.0.1:53987/__library','Expired download never replaces the portal')
     await downloadTab.close()
     await page.evaluate(()=>{window.fixtureNavigate=false})
@@ -101,7 +128,17 @@ try{
     assert.equal(download.searchParams.get('purpose'),'download')
     const downloadAttributes=(await page.evaluate(()=>window.fixtureOpenedAttributes))[1]
     const accessFailures=[]
-    if(downloadAttributes.target!=='_blank'||downloadAttributes.rel!=='noopener noreferrer')accessFailures.push('Download can replace the portal instead of opening safely in a separate tab')
+    if(downloadAttributes.target!=='_self'||downloadAttributes.rel!=='noopener noreferrer')accessFailures.push('Download must navigate only its reserved window without a referrer')
+    successfulAttachment=true;accessMode='slow'
+    await page.evaluate(()=>{window.fixtureNavigate=true})
+    const [attachmentTab]=await Promise.all([page.context().waitForEvent('page'),design.getByRole('button',{name:'Download',exact:true}).click()])
+    const attachment=await attachmentTab.waitForEvent('download',{timeout:15000})
+    assert.equal(attachment.suggestedFilename(),'reviewed-final.pdf')
+    assert.deepEqual(await readFile(await attachment.path()),attachmentBytes,'A real browser download preserves the exact fixture bytes')
+    assert.equal(page.url(),'http://127.0.0.1:53987/__library','Successful attachment download keeps the portal open')
+    await attachmentTab.close()
+    successfulAttachment=false;accessMode='valid'
+    await page.evaluate(()=>{window.fixtureNavigate=false})
     const video=page.locator('article').filter({has:page.getByRole('heading',{name:'Video',exact:true})})
     await video.getByRole('button',{name:'2026 (1)',exact:true}).click()
     await video.getByRole('button',{name:'October (1)',exact:true}).click()
@@ -119,6 +156,16 @@ try{
     await retryFailure
     await video.getByRole('alert').waitFor()
     assert.equal(reads.filter(r=>r.action==='staff_preview_portal_library_access'&&r.purpose==='stream').length,streamCount+1,'Only an explicit Play retries the grant')
+    accessMode='held';releaseAccess=undefined
+    const [closedTab]=await Promise.all([page.context().waitForEvent('page'),design.getByRole('button',{name:'View',exact:true}).click()])
+    for(let tick=0;!releaseAccess&&tick<100;tick++)await new Promise(resolve=>setTimeout(resolve,10))
+    assert.ok(releaseAccess,'Closed-window request held')
+    await closedTab.close()
+    const closedResponse=page.waitForResponse(response=>response.url().includes('/functions/v1/client-onboarding'))
+    releaseAccess();await closedResponse
+    await design.getByText('The file window was closed. Tap View or Download to try again.',{exact:true}).waitFor()
+    assert.equal(page.context().pages().length,1,'Closing a pending window must not trigger a replacement popup')
+    accessMode='valid';releaseAccess=undefined
     await page.evaluate(()=>{window.fixtureOpened=[]})
     holdMonth=true
     const monthRequest=page.waitForRequest(request=>request.url().includes('/functions/v1/client-onboarding')&&request.postDataJSON()?.action==='staff_preview_portal_library_month')
@@ -150,14 +197,15 @@ try{
     assert.ok(releaseAccess,'Access request held')
     await page.getByRole('button',{name:'Leave client files',exact:true}).click()
     await page.getByRole('heading',{name:'Different client scope',exact:true}).waitFor()
+    assert.equal(page.context().pages().length,1,'Leaving the client closes its pending file window')
     const completed=page.waitForResponse(response=>response.url().includes('127.0.0.1:53988/functions/v1/client-onboarding'))
     releaseAccess();await completed
     await page.evaluate(()=>new Promise(resolve=>setTimeout(resolve,100)))
     assert.deepEqual(await page.evaluate(()=>window.fixtureOpened),[],'A departed client scope must not open a late file response')
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${width} body overflow`)
-    assert.deepEqual(errors,[]);assert.equal(await page.locator('vite-error-overlay').count(),0);assert.equal(reads.length,14,'Nine original reads plus download, video listing, thumbnail and two explicit stream grants')
+    assert.deepEqual(errors,[]);assert.equal(await page.locator('vite-error-overlay').count(),0);assert.equal(reads.length,16,'Existing14 reads plus successful attachment and manually closed pending-window requests; blocked windows add none')
     await page.screenshot({path:join(tmpdir(),`cg-library-departed-${width}.png`),fullPage:true})
-    console.log(`PASS ${width}px: safe download target, failed-video recovery/manual retry, exact Calendar link, year-switch resets pending state, late month/file responses fenced, read-only, no errors/overflow`)
+    console.log(`PASS ${width}px: slow View/Download survives normal popup blocking, actual attachment bytes/filename, isolated no-referrer windows, blocked/closed/abandoned-window recovery, portal retained, video retry, exact Calendar link, stale-response fences, read-only, no errors/overflow`)
     await page.close()
   }
 }finally{if(browser)await browser.close();await server.close()}

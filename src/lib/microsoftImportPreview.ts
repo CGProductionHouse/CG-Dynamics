@@ -1,11 +1,11 @@
-import { matchClient, type ClientDirectoryEntry } from './clientMatcher'
+import { matchClient, type ClientDirectoryEntry } from './clientMatcher.ts'
 import {
   inferMicrosoftEventType,
   microsoftOutlookSourceKey,
   microsoftPlannerSourceKey,
   resolveMicrosoftBucketMapping,
   resolveMicrosoftPlanMapping,
-} from './microsoftImportMap'
+} from './microsoftImportMap.ts'
 import type {
   MicrosoftClientSchedulePayload,
   MicrosoftConflictCode,
@@ -152,7 +152,7 @@ const RESTRICTED_PLANNER_CONTENT = [
   /\bprivate hr\b/i,
 ]
 
-function containsRestrictedPlannerContent(source: MicrosoftPlannerTaskSource): boolean {
+export function containsRestrictedPlannerContent(source: Pick<MicrosoftPlannerTaskSource, 'title' | 'description'>): boolean {
   const searchable = `${source.title}\n${source.description ?? ''}`
   return RESTRICTED_PLANNER_CONTENT.some(pattern => pattern.test(searchable))
 }
@@ -704,18 +704,30 @@ export function flagDeliverableSlotConflicts(
   const cardsPerSlot = new Map<string, number>()
   for (const item of items) {
     const p = item.proposedPayload
-    if (item.previewStatus !== 'new' || p?.destination !== 'client_schedule') continue
+    if (p?.destination !== 'client_schedule') continue
     const key = deliverableSlotKey(p.package_id, p.template_id, p.instance_number, p.month)
-    if (key) cardsPerSlot.set(key, (cardsPerSlot.get(key) ?? 0) + 1)
+    if (key && (item.previewStatus === 'new' || (item.previewStatus === 'changed' && !existingSlotKeys.has(key)))) {
+      cardsPerSlot.set(key, (cardsPerSlot.get(key) ?? 0) + 1)
+    }
   }
 
   const linkedInPreview = new Set<string>()
-  const seenInPreview = new Set<string>()
   return items.map(item => {
     const payload = item.proposedPayload
-    if (item.previewStatus !== 'new' || payload?.destination !== 'client_schedule') return item
+    if (!['new', 'changed'].includes(item.previewStatus) || payload?.destination !== 'client_schedule') return item
     const key = deliverableSlotKey(payload.package_id, payload.template_id, payload.instance_number, payload.month)
     if (!key) return item
+    // A known linked owner updating its already occupied slot is not a new
+    // contender. Moves INTO occupied slots are guarded during reconciliation.
+    if (item.previewStatus === 'changed' && existingSlotKeys.has(key)) return item
+
+    // Distinct Microsoft identities do not establish which card owns a slot.
+    // Hold ALL contenders, even for an empty slot; input order must never pick
+    // an arbitrary survivor or permit a partial first-card import.
+    if ((cardsPerSlot.get(key) ?? 0) > 1) {
+      return { ...item, previewStatus: 'conflict', reconciliationAction: 'conflict', conflictCode: 'existing_deliverable_slot', conflictReason: 'Multiple source cards target this package/template/instance/month slot. Review their exact identities; no card is selected by source order.' }
+    }
+    if (item.previewStatus === 'changed') return item
 
     if (existingSlotKeys.has(key)) {
       const legacy = unlinkedSlotRows.get(key) ?? []
@@ -737,10 +749,6 @@ export function flagDeliverableSlotConflicts(
       }
       return { ...item, previewStatus: 'conflict', reconciliationAction: 'conflict', conflictCode: legacy.length > 1 ? 'existing_deliverable_slot' : 'existing_deliverable_slot', conflictReason: legacy.length > 1 ? 'More than one CG Dynamics deliverable occupies this slot; link the correct one manually.' : 'A CG Dynamics deliverable already occupies this package/template/instance/month slot. Link or resolve it manually instead of importing a duplicate.' }
     }
-    if (seenInPreview.has(key)) {
-      return { ...item, previewStatus: 'conflict', reconciliationAction: 'conflict', conflictCode: 'existing_deliverable_slot', conflictReason: 'Another card in this snapshot already fills this package/template/instance/month slot.' }
-    }
-    seenInPreview.add(key)
     return item
   })
 }

@@ -1,6 +1,7 @@
 import { corsHeaders } from '../_shared/cors.ts'
 import { metaFetch, readMetaError, redact, resolveMetaGraphConfig } from '../_shared/meta.ts'
 import { inspectMetaAccessToken } from '../_shared/metaTokenDiagnostics.ts'
+import { encryptMetaStoredToken, validateMetaTokenEncryptionConfig } from '../_shared/metaTokenStorage.ts'
 
 // Server-side Supabase client using the service_role key.
 // This bypasses RLS — only Edge Functions should ever use this.
@@ -109,6 +110,14 @@ Deno.serve(async (req) => {
   if (!code) {
     console.error('Meta OAuth callback missing code param')
     return redirect(`${appUrl}/admin/integrations/meta?meta=error`)
+  }
+
+  // Fail before consuming state, exchanging a code or changing connection
+  // metadata if the protected storage rollout has not been configured.
+  try {
+    await validateMetaTokenEncryptionConfig(Deno.env.get('META_TOKEN_ENCRYPTION_KEY_B64'), Deno.env.get('META_TOKEN_ENCRYPTION_KEY_VERSION'))
+  } catch {
+    return redirect(`${appUrl}/admin/integrations/meta?meta=config_error`)
   }
 
   const stateHash = await sha256Hex(state)
@@ -236,15 +245,21 @@ Deno.serve(async (req) => {
     return redirect(`${appUrl}/admin/integrations/meta?meta=error`)
   }
 
-  // Store the token in the server-only tokens table.
-  // IMPORTANT: This legacy column still stores the raw Meta token. It is
-  // protected by RLS/no frontend policies and service_role-only access, but
-  // production-ready encryption is still required before Meta app review.
+  // All readers must be upgraded before this writer is released. The existing
+  // server-only column now holds an authenticated, connection-bound envelope.
+  let storedToken: string
+  try {
+    storedToken = await encryptMetaStoredToken(accessToken, connectionId,
+      Deno.env.get('META_TOKEN_ENCRYPTION_KEY_B64'), Deno.env.get('META_TOKEN_ENCRYPTION_KEY_VERSION'))
+  } catch {
+    console.error('Meta credential encryption is unavailable; existing token was not replaced.')
+    return redirect(`${appUrl}/admin/integrations/meta?meta=error`)
+  }
   const { error: tokenError } = await sb
     .from('meta_connection_tokens')
     .upsert({
       connection_id: connectionId,
-      encrypted_access_token: accessToken,
+      encrypted_access_token: storedToken,
       token_type: tokenDiagnostics.tokenType,
       token_expires_at: tokenDiagnostics.expiresAt ?? (tokenData.expires_in
         ? new Date(Date.now() + tokenData.expires_in * 1000).toISOString()

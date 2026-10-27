@@ -89,6 +89,13 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
     annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
     dependency: 'main', canonicalContract: 'microsoft_sync_runs canonical reconciliation history (#325)',
   },
+    {
+      name: 'read_microsoft_schedule_source', title: 'Read captured Microsoft schedule evidence (admin)',
+      description: 'Company-admin-only read of an exact finished run\'s existing captured Client Schedule source. No Graph refresh or job stamp. Returns at most50 privacy-safe, exact-active-client numbered slot references per page; historical/unresolved entries are held, never current work. Follow next_offset with BOTH returned source_revision and directory_revision, unchanged run_id/source_id. Page-only coverage; no package/date/publication inference, no sync/apply.',
+      inputSchema: objectSchema({ run_id: uuid, source_id: { type: 'string', minLength: 1, maxLength: 512 }, offset: { type: 'integer', minimum: 0, maximum: 100000 }, source_revision: { type: 'string', pattern: '^[a-f0-9]{32}$' }, directory_revision: { type: 'string', pattern: '^[a-f0-9]{64}$' } }, ['run_id', 'source_id']),
+      annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+      dependency: 'main', canonicalContract: 'Existing run.preview_job_id -> captured microsoft_sync_job_sources; prepared service-only read RPC required (#325)',
+    },
   {
     name: 'list_company_tasks', title: 'List company-wide tasks (admin audit)',
     description: 'Company-wide read-only Planner task inventory for reconciliation audit. Requires an explicit company_admin Project context. Returns active/completed/archived/source-removed states, assigned staff, and durable Microsoft plan/task identity plus sync freshness so mirrors are reconciled by ID, never by title. Performs no cleanup.',
@@ -180,9 +187,10 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   },
   {
     name: 'upsert_calendar_event', title: 'Create/update/cancel a CG Calendar event',
-    description: 'Dynamics side of coexistence dual-write for a normal operational meeting/event the staff member explicitly asked to create, reschedule or cancel. Matches an existing row by exact event_id or durable Outlook microsoft_event_id, never by title. Set outlook_write_succeeded=false to record PARTIAL SYNC: the Dynamics mirror is written and Microsoft freshness is deliberately not stamped. company_calendar_events stays CG Calendar truth; Client Schedule is never written here and never merged into CG Calendar.',
+    description: 'Create, update or cancel the exact requested operational CG Calendar event. For intentionally Dynamics-native work set sync_intent=dynamics_only: no Microsoft identity/write/freshness is claimed. This cannot detach or edit an Outlook-linked event. Default coexistence preserves the existing dual-write outcome contract: explicit outlook_write_succeeded=false means PARTIAL SYNC. Match existing records by exact event_id or complete Outlook calendar/event identity, never title. Client Schedule is separate and never written here.',
     inputSchema: objectSchema({
       action: { enum: ['create', 'update', 'cancel'] },
+      sync_intent: { enum: ['coexistence', 'dynamics_only'], description: 'Default coexistence requires explicit Outlook outcome. Dynamics-only is explicit native work, not a global cutover or fallback for a linked Outlook item.' },
       event_id: uuid,
       microsoft_event_id: { type: 'string' }, microsoft_calendar_id: { type: 'string' },
       title: { type: 'string' },
@@ -191,9 +199,9 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
       location: { type: 'string' }, notes: { type: 'string' }, assigned_to_name: { type: 'string' },
       client_id: uuid, client_name: { type: 'string' },
       status: { enum: ['planned', 'confirmed', 'completed', 'cancelled'] },
-      outlook_write_succeeded: { type: 'boolean', description: 'Required explicit evidence from the caller. False records PARTIAL SYNC; true requires a complete durable Outlook calendar/event identity.' },
+      outlook_write_succeeded: { type: 'boolean', description: 'Required for coexistence; omit for explicit Dynamics-only work. False records PARTIAL SYNC; true requires a complete durable Outlook calendar/event identity.' },
       idempotency_key: idempotencyKeySchema,
-    }, ['action', 'outlook_write_succeeded', 'idempotency_key']),
+    }, ['action', 'idempotency_key']),
     annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
     dependency: 'main', canonicalContract: 'company_calendar_events CG Calendar truth + durable Outlook identity (#325)',
   },
@@ -219,8 +227,8 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   },
   {
     name: 'list_my_calendar', title: 'List my calendar',
-    description: 'Read relevant CG Calendar events in a bounded date range. This never includes Client Schedule deliverables by implication.',
-    inputSchema: objectSchema({ from: date, to: date }, ['from', 'to']),
+    description: 'Read operational CG Calendar events overlapping inclusive Johannesburg-local dates. Excludes cancelled, superseded and source-removed rows. At most 50 events per page: follow pagination.next_offset as offset with unchanged dates until has_more=false. Failed reads have unknown coverage. Never includes Client Schedule.',
+    inputSchema: objectSchema({ from: date, to: date, offset: { type: 'integer', minimum: 0, maximum: 100000 } }, ['from', 'to']),
     annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
     dependency: 'main', canonicalContract: 'src/lib/companyCalendar.ts',
   },
@@ -390,10 +398,10 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   },
   {
     name: 'update_task', title: 'Update task',
-    description: 'Apply one reversible, permission-checked task action through the audited CG Assistant contract. Read the exact task first when identity is ambiguous.',
-    inputSchema: objectSchema({ task_id: uuid, action: { enum: ['due','complete','reopen','block','comment'] }, due_date: date, note: { type: 'string', maxLength: 4000 }, idempotency_key: idempotencyKeySchema }, ['task_id','action','idempotency_key']),
+    description: 'Update one exact Dynamics-native task through existing audited actor/assignment RPCs: start, complete, reopen, block, comment, due date or assign/reassign. Assignment requires one exact active assignee_name and manager authority. Archived/removed work is refused. Linked Microsoft tasks require the exact Microsoft change and reconciliation during coexistence; never change only the mirror.',
+    inputSchema: objectSchema({ task_id: uuid, action: { enum: ['due','complete','reopen','start','block','comment','assign','reassign'] }, assignee_name: { type: 'string', minLength: 1, maxLength: 200 }, due_date: date, note: { type: 'string', maxLength: 4000 }, idempotency_key: idempotencyKeySchema }, ['task_id','action','idempotency_key']),
     annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
-    dependency: 'main', canonicalContract: 'update_assistant_task RPC (reopen requires shared-contract extension)',
+    dependency: 'main', canonicalContract: 'update_assistant_task + update_planner_task_status audited explicit-actor RPCs',
   },
   {
     name: 'update_lead', title: 'Update lead',
@@ -451,7 +459,7 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
     description: 'Create a recurring Dynamics task template with a recurrence rule. Instances are materialised automatically within a 14-day window. The template is assigned to you unless assignee_name names another active staff member, which only a manager may do. Repeated calls require a caller-scoped idempotency key.',
     inputSchema: objectSchema({
       title: { type: 'string', minLength: 1, maxLength: 240 },
-      recurrence_rule: { type: 'string', minLength: 1, maxLength: 100, description: 'RRULE subset: FREQ=DAILY|WEEKLY|MONTHLY, optional INTERVAL, BYDAY (MO..SU), BYMONTHDAY (1-28).' },
+      recurrence_rule: { type: 'string', minLength: 1, maxLength: 100, description: 'RRULE subset: FREQ=DAILY|WEEKLY|MONTHLY, optional INTERVAL (1-12). DAILY/WEEKLY BYDAY=MO..SU; MONTHLY BYMONTHDAY=1..28 OR one explicit ordinal BYDAY=1MO..5SU or -1MO..-5SU (for example first Monday or last Friday). Do not infer a rule from dates, combine selectors or convert a Microsoft series without reviewed authority.' },
       recurrence_until: date,
       assignee_name: { type: 'string' },
       client_id: uuid,
@@ -502,7 +510,7 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   },
   {
     name: 'list_content_guideline_videos', title: 'List content guideline videos',
-    description: '#450. Read the ordered videos of one exact Content Run guideline with their canonical "Video XX - Name", coverage month, whether each is linked to a real Client Schedule slot or still unallocated, production folder state, raw-upload evidence and edit readiness. Never creates a missing guideline; explicitly use ensure_content_guideline first if needed. Raw OneDrive IDs and URLs are never returned.',
+    description: '#450. Read the full saved scripts, shot breakdown, requirements and visual direction of the ordered videos in one exact Content Run guideline, plus canonical "Video XX - Name", coverage month, real Client Schedule linkage and edit readiness. Read before editing and again after add/update to verify the saved wording. For normal ChatGPT authoring use add/update, not the separately funded generator. Never creates a missing guideline; explicitly use ensure_content_guideline first if needed. Raw OneDrive IDs and URLs are never returned.',
     inputSchema: objectSchema({ content_run_id: uuid }, ['content_run_id']),
     annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
     dependency: '#450', canonicalContract: 'content_guidelines + content_guide_ideas ordered by position',
@@ -639,10 +647,10 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   // ──────────────────────────────────────────────────────────────────────────────
   {
     name: 'log_ordinary_hours', title: 'Log ordinary hours',
-    description: 'Save an ordinary-hours entry as a draft for the exact authenticated staff member through the restricted CG Hours staff logger. Use a canonical CG Hours client_id (and optional task_template_id) returned by read_my_recent_entries.logging_options. Requires an idempotency_key for duplicate-retry safety. Only says saved after CG Hours returns a durable time_entries id; staff must review and submit the week manually in CG Hours.',
+    description: 'Save explicitly supplied work and duration as a draft for the exact staff Project. Read read_my_recent_entries for that day first to reconcile already logged work; use its canonical CG Hours client_id and optional task_template_id. Convert minutes to hours (minutes / 60), minimum one whole minute. Never invent time from tasks/calendar or add an end-of-day recap as additional time. Ask one short question for missing facts. Reuse the same idempotency_key and inputs for retries. Only say saved after a durable time_entries id and verify the day read-back; staff review and submit the week manually in CG Hours.',
     inputSchema: objectSchema({
       date: { type: 'string', pattern: '^\\d{4}-\\d{2}-\\d{2}$', description: 'YYYY-MM-DD' },
-      hours: { type: 'number', minimum: 0.25, maximum: 24 },
+      hours: { type: 'number', minimum: 1 / 60, maximum: 24 },
       task_description: { type: 'string', minLength: 1, maxLength: 240 },
       notes: { type: 'string', maxLength: 240 },
       client_id: uuid,
@@ -668,7 +676,7 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   },
   {
     name: 'read_my_recent_entries', title: 'Read my recent entries',
-    description: 'Read one day of ordinary-hours and optional travel entries for the exact authenticated staff member, plus canonical active CG Hours client/task logging options. The backend contract is day-scoped, so from_date and to_date must be the same date.',
+    description: 'Read one day of ordinary-hours and optional travel entries for the exact staff Project, plus canonical active CG Hours client/task logging options. Use before logging, during daily/EOD reconciliation and after a write to verify it. A recap is not extra time: compare existing entries before adding or correcting. Resolve relative dates in Africa/Johannesburg; from_date and to_date must be the same date. A failed read is not an empty day.',
     inputSchema: objectSchema({
       from_date: { type: 'string', pattern: '^\\d{4}-\\d{2}-\\d{2}$', description: 'YYYY-MM-DD' },
       to_date: { type: 'string', pattern: '^\\d{4}-\\d{2}-\\d{2}$', description: 'YYYY-MM-DD' },
@@ -686,7 +694,7 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
       correction: {
         type: 'object',
         properties: {
-          hours: { type: 'number', minimum: 0.25, maximum: 24 },
+          hours: { type: 'number', minimum: 1 / 60, maximum: 24 },
           notes: { type: 'string', maxLength: 500 },
           distance_km: { type: 'number', minimum: 0.1, maximum: 2000 },
           origin: { type: 'string', maxLength: 120 },

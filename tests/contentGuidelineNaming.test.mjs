@@ -54,7 +54,9 @@ test('an empty name still shows the number', () => {
 test('the editor, Shoot Mode and client portal all use the shared name', async () => {
   const editor = await readFile(new URL('../src/pages/admin/ContentGuidelineDocumentEditor.tsx', import.meta.url), 'utf8')
   const guideline = await readFile(new URL('../src/pages/admin/contentGuideline.tsx', import.meta.url), 'utf8')
-  const portal = await readFile(new URL('../src/pages/client/ClientContentGuidesPage.tsx', import.meta.url), 'utf8')
+  const portal = await readFile(new URL('../src/components/client/ContentGuidelineDocument.tsx', import.meta.url), 'utf8')
+  const portalPage = await readFile(new URL('../src/pages/client/ClientContentGuidesPage.tsx', import.meta.url), 'utf8')
+  assert.match(portalPage, /<ContentGuidelineDocument guide=\{guideline\}/, 'portal uses the shared document renderer')
   for (const [label, source] of [['editor', editor], ['shoot mode', guideline], ['client portal', portal]]) {
     assert.match(source, /guidelineVideoName\(/, `${label} renders the shared name`)
   }

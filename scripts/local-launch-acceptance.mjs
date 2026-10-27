@@ -17,6 +17,7 @@ export const browserFixtures = Object.freeze([
   'director-saved-context-browser.mjs', 'director-precise-edit-browser.mjs',
   'skill-card-review-browser.mjs', 'client-service-expansion-browser.mjs',
   'entitlement-resolution-browser.mjs',
+  'meta-connection-readiness-browser.mjs',
 ])
 
 export function assertLocalContract(vercel, packageJson) {

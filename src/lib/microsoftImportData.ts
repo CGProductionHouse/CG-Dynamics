@@ -350,6 +350,7 @@ export interface MicrosoftSyncRunSummary {
     failed?: number
     notAttempted?: number
     conflictsUntouched?: number
+    conflicts?: number
     uncertain?: number
   }
   sourceCompleteness: Array<{ sourceName: string; complete: boolean; safeError: string | null }>
@@ -376,7 +377,7 @@ export interface MicrosoftSyncRunItem {
   action: MicrosoftReconciliationAction
   resultStatus: 'previewed' | 'applied' | 'skipped' | 'failed'
   sourceComplete: boolean
-  details: { title?: string; warnings?: string[] }
+  details: { title?: string; warnings?: string[]; conflict_code?: unknown }
   safeError: string | null
   itemKey: string
   sourceType: MicrosoftImportPreviewItem['sourceType']
@@ -385,13 +386,30 @@ export interface MicrosoftSyncRunItem {
 }
 
 export async function loadMicrosoftSyncRunItems(runId: string): Promise<{ data: MicrosoftSyncRunItem[]; error: string | null }> {
-  const { data, error } = await fetchAllPages((from, to) => supabase
+  const unavailable = { data: [], error: 'Exact run journal unavailable or changed. No complete conflict list can be certified.' }
+  try {
+  const before = await supabase.from('microsoft_sync_run_items').select('id', { count: 'exact', head: true }).eq('run_id', runId)
+  if (before.error || !Number.isSafeInteger(before.count) || before.count === null || before.count < 0 || before.count > 100000) return unavailable
+  const { data, error } = await fetchAllPages(async (from, to) => {
+    const result = await supabase
     .from('microsoft_sync_run_items')
-    .select('id, item_key, source_type, source_container_id, source_item_id, source_name, destination, destination_id, action, result_status, source_complete, details, safe_error')
+    .select('id, run_id, item_key, source_type, source_container_id, source_item_id, source_name, destination, destination_id, action, result_status, source_complete, details, safe_error')
     .eq('run_id', runId)
-    .order('created_at')
-    .range(from, to))
-  if (error) return { data: [], error: error.message }
+    .order('created_at').order('id')
+    .range(from, to)
+    return result.error || !Array.isArray(result.data) ? { data: [], error: { message: unavailable.error } } : result
+  })
+  if (error || data.length !== before.count || new Set(data.map(row => row.id)).size !== data.length
+    || new Set(data.map(row => row.item_key)).size !== data.length
+    || data.some(row => row.run_id !== runId || typeof row.id !== 'string' || !row.id || typeof row.item_key !== 'string' || !row.item_key
+      || !['create','update','unchanged','complete','reopen','move','cancel','archive','source_removed','conflict','skipped','failed','link_existing','package_template_create'].includes(row.action)
+      || !['planner','client_schedule','cg_calendar','review'].includes(row.destination)
+      || !['planner_task', 'outlook_event'].includes(row.source_type) || typeof row.source_container_id !== 'string' || !row.source_container_id
+      || typeof row.source_item_id !== 'string' || !row.source_item_id || typeof row.source_name !== 'string'
+      || typeof row.source_complete !== 'boolean' || !['previewed', 'applied', 'skipped', 'failed'].includes(row.result_status)
+      || !row.details || typeof row.details !== 'object' || Array.isArray(row.details))) return unavailable
+  const after = await supabase.from('microsoft_sync_run_items').select('id', { count: 'exact', head: true }).eq('run_id', runId)
+  if (after.error || after.count !== before.count) return unavailable
   return { data: (data ?? []).map(row => ({
     id: row.id as string,
     sourceName: row.source_name as string,
@@ -407,6 +425,7 @@ export async function loadMicrosoftSyncRunItems(runId: string): Promise<{ data: 
     sourceContainerId: row.source_container_id as string,
     sourceItemId: row.source_item_id as string,
   })), error: null }
+  } catch { return unavailable }
 }
 
 export async function loadMicrosoftSyncState(): Promise<MicrosoftSyncStateResult> {

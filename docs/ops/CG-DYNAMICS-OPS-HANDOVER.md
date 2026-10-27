@@ -1,3 +1,7 @@
+### 27 October 2026 — Nolan master handover (Assistant + Studio + local shared media)
+
+CA requested a consolidated cross-chat handover. Durable source: [CG Nolan master continuity handover](CG-NOLAN-MASTER-HANDOVER-2026-10-27.md), covering owner-approved existing-PC architecture, actual wired internet status, laptop-led Codex option while designer uses PC, Sydney non-destructive drive/OneDrive audit, intended hot 10TB / events 10TB / wedding 6TB role assignment (subject to occupied capacity and independent backups), CG Hours/Dynamics/Brand Hub/Teams integration, Studio effects research and first PSG real test, and eventual allowlisted WhatsApp review loop. Supporting owning issues [#894](https://github.com/CGProductionHouse/CG-Dynamics/issues/894), [#874](https://github.com/CGProductionHouse/CG-Dynamics/issues/874), [#872](https://github.com/CGProductionHouse/CG-Dynamics/issues/872). First 10TB attachment, any SMB pilot, drive health/duplication, OneDrive cost/downgrade and autonomous WhatsApp send are **NOT** reported complete. Do not treat laptop Ethernet as permission to remotely take control of occupied Nolan PC. The user has **not confirmed** first Assistant Codex setup prompt sent. No cloud subscription cancellation, destructive disk operations or NAS spending authorised.
+
 ### 18 October — CA owner correction: real Teams/Planner tasks, privacy and Novus
 
 **MANDATORY next read for the active staff/Codex Teams-to-Dynamics implementation:** [CGPH Planner/Calendar Owner Handover, 18 Oct](CGPH-PLANNER-CALENDAR-CLEANUP-OWNER-HANDOVER-2026-10-18.md).
@@ -17,19 +21,390 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 The existing 195-photo internal Pixieset review collection `125612394` was renamed **The Staffy Fight Night | 24 October 2026**. Six identified exposure/cast outliers were revised from camera originals and replaced through Pixieset's visible **Replace photo** action; each yielded a success notification. The direct collection link did not change. The public gallery showed the new title, and a signed PICASSO update to **CG Picasso Approvals** showed Delivered. The venue signage reads `THE STAFFY`; a focused public search did not independently verify the event's marketed title. This is still an **internal review**, not Amonique's acceptance or client delivery.
 
-The private `quality-audit/gallery-revision-2026-10-27-private` snapshot now mirrors the 195 intended outputs with six revised bytes, a new hash-bound manifest, and a full consistency audit. The audit completed with 56 triage-flagged images (overlapping near-white, group luminance and low-change signals) and correctly remains `BLOCKED` for photographic release because it has no human per-photo review or accepted varied 25-frame calibration. The numbers are not automatic rejects. PR #879 adds the reusable immutable revision assembler and focused tests, and the installed local PICASSO skill now points to this replacement workflow. Lightroom Classic official docs confirm Assisted Culling, Reference View, selective batch setting sync and AI mask recomputation; none certifies the photographic outcome. No production/hosting change, new spend, client-photo commit, or Nolan #862 change.
+The private `quality-audit/gallery-revision-2026-10-27-private` snapshot now mirrors the 195 intended outputs with six revised bytes, a new hash-bound manifest, and a full consistency audit. The audit completed with 56 triage-flagged images (overlapping near-white, group luminance and low-change signals) and remains `BLOCKED` for photographic release because it has no human per-photo review or accepted varied 25-frame calibration. The numbers are not automatic rejects. PR #879 adds the reusable immutable revision assembler and focused tests, and the installed local PICASSO skill points to this replacement workflow. Official Lightroom Classic docs confirm Assisted Culling, Reference View, selective batch setting sync and AI mask recomputation; none certifies the photographic outcome. The company PICASSO local Work chat on the MSI has invoked the installed skill and performed a Lightroom edit/export proof, but has not completed the full 25-frame calibration, office-PC replication, or Work-originated Pixieset/WhatsApp delivery. No production/hosting change, new spend, client-photo commit, or Nolan #862 change.
 
-### 27 October — PICASSO Staffy replacement delivered for internal review; consistency gate added (#878 / PR #879)
+### 27 October — PICASSO Staffy replacement delivered for internal review
 
-The owner approved a password-free, unlisted replacement gallery. Pixieset collection `125612394` contains 195 images across all 11 fights, including four drone stills and 14 labelled staff-posted reference examples. Downloads, social sharing and homepage listing are off. Its link was sent to **CG Picasso Approvals** signed PICASSO and WhatsApp showed Delivered at 14:24 SAST. It is **not client-approved**. The 203-image rejected collection remains hidden.
+The owner approved a password-free, unlisted replacement gallery. Collection `125612394` contains 195 images across all 11 fights, including four drone stills and 14 labelled staff-posted reference examples. Downloads, social sharing and homepage listing are off. Its link was sent to **CG Picasso Approvals** signed PICASSO and WhatsApp showed Delivered at 14:24 SAST. It is **not client-approved**. The 203-image rejected collection remains hidden. A post-delivery audit found an emergency manifest with 166 files labelled only `colour-checked`, while its selection ledger still had REVIEW decisions; 17 camera-derived images changed very little from source, 14 were luminance outliers within their group, and 40 had many near-white pixels needing subject-level inspection. These are triage flags, not quality verdicts. Do not use the global grade as an approved preset.
 
-Post-delivery audit exposed an actual process failure: the emergency manifest labelled 166 files `colour-checked`, hiding their specific edit route, while its selection ledger still had REVIEW decisions. Among the 195 outputs, 17 camera-derived images changed very little from source, 14 were luminance outliers within their group, and 40 had many near-white pixels needing subject-level clipping inspection. These are triage flags, not objective quality verdicts. A private full-gallery CSV/contact-sheet audit now exists. PR #879 adds a reusable read-only consistency audit and a release check requiring hash-bound per-photo decisions and an accepted varied 25-frame record before another broad upload. Do not use the delivered global grade as an approved preset or claim that the current gallery passed the new gate.
+### 26 October — PICASSO Staffy review withdrawn; quality gate reset
 
-The company PICASSO local Work chat on the MSI has since invoked the installed skill and performed a Lightroom edit/export proof; it has **not** completed the full 25-frame calibration, office-PC replication, or Work-originated Pixieset/WhatsApp delivery. No new spend, CG Dynamics production change or Nolan #862 change.
+The 203-photo Staffy internal Pixieset collection was hidden after Amonique identified a visibly blurred walkout frame and said the overall finish appeared too close to the originals. PICASSO acknowledged this in the approvals group. All selected frames need native-size subject review, scene-specific finishing and a human-accepted varied 25-frame calibration before client delivery; technical JPEG verification alone is insufficient. This did not change Dynamics production or Nolan #862.
 
-### 26 October — PICASSO Staffy review withdrawn; quality gate reset (#878 / PR #879)
+### 27 October — Content Guideline design and normal ChatGPT read-back (#896)
 
-The 203-photo Staffy internal Pixieset review collection was hidden after Amonique identified a visibly blurred walkout frame and said the overall finish appeared too close to the originals. PICASSO acknowledged this in the exact approvals WhatsApp group with a signed message; the current gallery must not be treated as accepted or sent to clients. This is a photography-lane state correction, not a CG Dynamics or Nolan deployment. The owner issue #878 records the withdrawal. PR #879 carries the reusable event gate and private crop/ledger tool; all selected frames need native-size subject review, scene-specific finishing, and a human-accepted 25-frame calibration before any new review link. Technical JPEG verification alone is insufficient. Company ChatGPT Work-to-local execution remains unproved. No spend, production deployment, or PR #862 change.
+CA redirected this lane to branded guidelines and normal ChatGPT authoring.
+Exact design/workflow/acceptance boundaries:
+[CONTENT-GUIDELINE-CLIENT-DESIGN-2026-10-27.md](CONTENT-GUIDELINE-CLIENT-DESIGN-2026-10-27.md).
+Shared client-safe document renderer and staff saved-draft layout preview; existing
+own-published client link/auth/calendar authorities preserved. Live connector read
+reproduced missing scripts despite has_script=true; narrow Assistant projection
+now returns full scripts/direction in source, with RED/GREEN regression and actual
+handler read/edit/read-back preservation/isolation test. No second paid generator.
+Later exact CA approval released only the two-file hosted-derived MCP repair,
+v72→73 once.40/40 candidate files match byte-for-byte; other38 unchanged,
+JWTfalse/import-mapfalse retained, anonymous/invalid-bearer401. Live connector
+returns complete CASE scripts/direction, matching independent canonical plan
+reads exactly.44 focused tests/hosted candidate assertions/TS check pass. One
+bootstrap transport error cleared on one bounded read retry; no auth bypass.
+No Vercel, production data, publication or permission change. Frontend still PR/local.
+Later normal-chat read-only acceptance now passes in company CA Project and
+personal Plus staff context. Personal CG Dynamics + Personal Refresh initially
+failed; legitimate existing-account reconnects fixed both, independently retested.
+No permissions/scopes expanded, credentials copied or staff chats/content changed.
+Actual client amendment writes remain local-handler proof, not a live test.
+Fresh stored publication counts: October56draft/1published strategies, November57
+drafts/0published;10October draft guidelines/0published, noNovember guidelines.
+Brand Hub41enabled/17private unchanged. Meta stored connection nowconnected,
+valid and encrypted (validated25October); old consent hold is no longer current,
+without claiming per-client metric freshness. Public appHTTP200 still serves old
+guideline UI; new design is source-only. Combined56tests/build/scopedlint pass.
+Existing #867/#866/#842 return-to-review and staff/calendar owners separate.
+Final verification/source/PR state is on #896; do not infer a deployed release.
+
+### 27 October — CG Hours Assistant daily capture and live read acceptance
+
+Owner #898, focused PR #899 merged as d2915066. CA requested staff narration→CG Hours reliability; CA chat only for testing,
+no staff chat/timesheet edits. [Exact receipt](CG-HOURS-ASSISTANT-ACCEPTANCE-2026-10-27.md).
+Live CA context/day/options read succeeds; all six active staff mappings verified
+SELECT-only, including Franco. Existing v73 bootstrap has four Hours tools but
+no shared daily logging workflow. Reproduced decimal-hour rejection and 15-minute
+schema mismatch; focused source repair adds strict whole-minute conversion,
+read/reconcile/correct/read-back policy and truthful uncertain-response handling.
+No staff/Teams/calendar rewrite, automation change or invented hours.
+Final local MCP393pass/1skip; Hours120pass; final focused18pass and hosted-derived
+candidate10pass. Build/app-bundle/scoped lint/Edge pure TS/diff checks pass.
+CA explicitly approved the exact three-file release: MCPv73→74 once, ACTIVE;
+all40 hosted files byte-identical to candidate, other37 unchanged, v73 guideline
+repair retained. JWTfalse/import-mapfalse/auth preserved, anonymous/invalid401.
+Live CA bootstrap now returns11 hours rules/version2026.10.27-own-draft-hours-1;
+CA day read succeeds with74 clients/22 tasks. CA Chrome navigation timed out;
+normal ChatGPT UI and new genuine live write→read-back remain unverified.
+No Vercel, new time/km data, schema, mapping, secrets or permission writes.
+Google Control Centre exact reference still unavailable; do not invent a tracker.
+
+### 25 October late evening — slow file-window defect fixed; 37 live image Views
+
+Exact receipt: [Client file access acceptance](CLIENT-FILE-ACCESS-ACCEPTANCE-2026-10-25.md).
+Source ea5eaad6 reproduces the async authorisation/popup-blocking failure with a
+six-second grant and normal browser policy, then fixes it by reserving one isolated
+destination during the tap. No-referrer/opener protection, grant validation,
+blocked/closed-window and client-departure cleanup verified. Streaming and accepted
+portal layout unchanged; no auth/backend/dependency/production change or Vercel.
+
+Frozen ea5eaad6 canonical full acceptance:4208 total/4184 pass/24 explicit skips/
+zero failure/cancel/todo; actual-app TS/Vite, all20 canonical browser fixtures at
+1440/375/390/430 and stable source pass. Both mandatory disposable SQL fixtures
+included. Full receipt SHA256 F900C1378CF355C58EDCB22852597B21CDBEC48047C42BB24B9C3CB7B3E0881F.
+Focused27/27 and scoped lint/diff pass; whole lint0errors/17existing warnings.
+Local actual downloads verify exact synthetic bytes/filename, not production files.
+
+All41 published libraries accounted for:37 unique actual image Views loaded,
+separate windows/original client retained/no referrer. Four unverified render checks:
+Case/Emoya/Germoparts native PDFs and LHP browser URL-policy denial. No bypass or
+retry of the denied LHP window. Three initially unsettled windows were correlated
+using SELECT-only published asset IDs; two image loading frames were settled before
+acceptance. Do not repeat accepted Views or the older listing sweeps.17 original
+private libraries/new Jodrico scope remain unchanged.
+
+One fixed 19:24:40–20:24:40UTC aggregate-only provider log check: Meta worker6 HTTP200,
+runtime only Boot/Shutdown/no error-level rows; client-onboarding298 HTTP200/1 HTTP206.
+Not client metric completeness or per-item sync success. No sync/config/token/data
+writes. Existing Meta consent, #731 content, staff/Teams/calendar and real password/
+phone/release gates retained. Frontend repair is source-only, NOT live; fixture
+dist must never be uploaded. Overnight continuation still ends08:00SAST26October.
+
+### 25 October evening — finite overnight continuation and real file-window checks
+
+CA renewed overnight client-portal work. Existing heartbeat
+`finish-dynamics-locally-overnight` updated (not duplicated), ACTIVE hourly until
+08:00 SAST 26 October; failed-runs-only notifications preserved. No Vercel or new
+protected production actions. Staff/Teams/calendar and #731 strategy owners remain
+separate; stop repetitive work when safe executable items are exhausted.
+
+Exact receipt: [Brand Hub file-window acceptance](BRAND-HUB-FILE-WINDOW-ACCEPTANCE-2026-10-25.md).
+Eight actual published-logo Views passed in legitimate admin preview: Piek, All
+Around PVC, Bloem Action Sports, Bloem Vascular, Bouwer & Coetzee, Braize, C&L,
+Cape Lumber. Images render, separate windows open, Dynamics retains the exact
+client and referrers are empty. This is not attachment-download/client-password
+or all-41 acceptance; 33 additional Views remain. Chrome extension UI interrupted
+automation; no retry loop or session workaround. Prior listing/thumbnail checks
+and 17 private skips/Jodrico scope are unchanged.
+
+Canonical local library fixture now actually opens both View/Download windows,
+asserting null opener, empty referrer and retained portal at 1440/375/390/430.
+Negative control removing rel fails on referrer; restored safe source passes.
+CUA's restricted opener=undefined was not an observed product defect. Runtime
+source is unchanged. Focused 27/27 tests, four-width browser, actual-app TS/Vite
+build, scoped lint and diff pass. Earlier full receipt remains frozen8353e75f,
+not reattributed. No new dependencies or production changes. Existing Meta consent,
+content/security/role/phone/release gates below remain; do not repeat backend work.
+
+### 25 October — approved provider backend rollout; real local SQL/browser acceptance
+
+Latest exact receipt:
+[PROVIDER-BACKEND-ROLLOUT-ACCEPTANCE-2026-10-25.md](PROVIDER-BACKEND-ROLLOUT-ACCEPTANCE-2026-10-25.md).
+CA explicitly approved Google two-file safeguard and then staged Meta encryption.
+Google sync53→54 once; subsequent Meta secret-save environment revision55 retains
+identical bundle/seven hosted files/JWT=true. All five unrelated files preserved;
+seven campaign links/139metrics have identical before/after checksums. No manual
+sync, campaign/mapping or production SQL/schema/data write.
+
+All four Meta dual-format readers released/read back BEFORE dedicated random key
+and version privately saved; callback released LAST. Current worker76/manual89/
+assets72/status68/callback72. Existing auth/JWT/SDK/scopes retained; actual runtime
+source matches. Zero-runtime database interface is omitted by hosted bundling,
+not an absent executable dependency. Secret save advanced function revisions
+without source changes; callback guard verified identical bytes before continuing.
+Key values never logged/committed/copied to files or frontend.47client asset
+mappings/existing connection remain unchanged. Actual admin statusConnected/valid,
+read-only asset discovery succeeds, no suggestions saved or bulk resync.
+
+**Final Meta gate remains:** existing token1legacy raw/0encrypted. Owner renewal
+started with unchanged scopes but Facebook business-consent panel stays blank
+after one bounded reload; handoff tab left open and CA asked to complete consent.
+Do not claim encryption from configuration, hide plaintext warning, export/backfill
+old credentials, remove key, restore raw writer or rollback readers after an
+envelope exists. After consent verify actual encrypted status/row and mappings.
+
+CA started Docker. Canonical frozen8353e75f full local run4208total/4184pass/
+24declared skips/0fail/cancel/todo, actual TypeScript/Vite app and ALL20canonical
+browsers1440/375/390/430 pass; stable tree. Both previously mandatory disposable
+PostgreSQL fixtures now pass, including ownership/publication/RLS/concurrent CAS.
+Private receipt cg-local-launch-8353e75fd944.json SHA256
+7895EBB3FEA96845DC68C6FD22BEE51C5082298C0252821C31F52D289C97C7E3.
+Separately16Instagram callback SQL +1registry test pass; these do not rewrite the
+full receipt's24skips. Seven optional staff PGlite groups remain separate. Only
+test-owned disposable containers removed; shared Docker/stacks untouched.
+
+ZERO Vercel/cloud builds/deployments. Fixture dist must never be uploaded. No
+strategy/asset publication, provider scopes/mappings/permissions, staff/Teams/
+calendar changes or duplicate strategy writer. Existing source/asset/real posting
+owners and retained CA password/phone checks remain. #435comment6401264747 and
+#505comment6401265039 record the exact approved live actions. Older source-only
+and Docker-unavailable snapshots below are historical, not a reason to repeat work.
+
+### 25 October — local provider continuation verified; exact protected queue retained
+
+Ordered CLIENT-LAUNCH-EXECUTION-2026-10-25.md is the current short execution list.
+PR885 merged `dea0d349` (Google malformed-success preservation); PR886 merged
+`d1f37226` (Meta authenticated-token storage preparation). Frozen7b911566 full
+supported non-DB4208total/4182pass/26explicit skips/0fail/cancel/todo, TS/Vite392module
+actual app and ALL20canonical browser fixtures1440/375/390/430 pass, stable tree.
+Receipt `%TEMP%/cg-client-nondb-7b9115666b55.json`, SHA256
+`7E404279BE1191680344560011EA316AE7858D854D282CCDEDF37E516720FEFE`.
+Whole lint0errors/17existing warnings; source Deno closure passes. Not SQL/client-
+role/physical-device/content or production acceptance. Fresh Docker info still
+unavailable; no shared restart/reset/install or false skipped-test acceptance.
+
+Later type-only follow-up fixes nine baseline Deno errors in Meta OAuth start
+and shared TikTok SDK client parameters. Their emitted JS is byte-identical;
+388focused Meta/TikTok tests, Deno/build/scoped lint/diff pass. Do not attribute
+the earlier full-suite head to this later annotation/documentation change.
+Runtime auth, scopes, existing SDK imports, refresh semantics and providers remain
+unchanged. No frontend redesign, staff/Teams/calendar or strategy-writer overlap.
+
+Read-only eight-function/65-file hosted baseline privately captured, no keys read.
+Five-function56-file offline Meta candidate preserves unrelated hosted behavior;
+exact closure Deno checked. Callback's legacy identical duplicate availability
+property minimally removed only in the private staged packet; must be reviewed
+as part of any release. Worker/manual helper type-only changes have identical
+compiled/minified runtime. Offline Google packet also Deno checked, two-file diff.
+Exact versions/manifest hashes/rollout hazards are in the ordered execution doc
+and META-TOKEN-STORAGE-HARDENING-2026-10-25.md. These are NOT deployed artifacts.
+Never send fixture dist to production; no automatic Git deployment.
+
+All nine non-held connected TikTok panels now checked; provider coverage remains
+partial. Fresh November briefs reconfirm ten exact source-held clients with
+confirmed packages; source admission/editorial/publication remains existing #731
+owner, not duplicate generation or another quantity question. Brand Hub17 private
+safe-folder skips/Jodrico scope, real staff-owned posting/disclosure and CA-retained
+password/phone checks remain explicit. NO Vercel or production SQL/data/schema/
+Edge/config/keys/provider/mapping/permissions/content write. Exact Google Control
+Centre still unavailable; GitHub/ops continuity updated, no invented replacement.
+
+### 25 October — Meta credential hardening prepared; remaining TikTok panels checked
+
+Google ingestion PR885 reviewed/merged `dea0d349` after89/89 focused Google tests,
+scoped lint/build/diff and actual malformed-provider preservation regressions.
+No backend release or production data change. Continuing ordered local-only plan
+CLIENT-LAUNCH-EXECUTION-2026-10-25.md, not duplicating staff/strategy owners.
+
+Meta raw-token storage warning reproduced in callback/status source. New native
+AES-GCM connection/key-version-bound envelope, four dual-format readers, preflight
+and fail-closed OAuth writer prepared. Legacy rows remain explicitly plaintext;
+key configuration is not encryption proof. Corrupt/missing-key failures stop
+before Meta requests, do not set needs_reauth and release active worker lane.
+Main's existing22 Deno worker errors independently reproduced from a Git archive;
+explicit client type and a minimal type-only shared database port resolve generic-
+schema/duplicate nominal-class errors, with two missing-asset guards. Existing
+worker JSR and legacy ESM dependencies retained; no dependency installation or
+changes to shared helper emitted runtime/auth/lease authority. All six modified
+Meta entrypoints/helper closure pass cached-only Deno type checking.
+Exact staged reader-before-writer rollout/rollback hazards are in
+META-TOKEN-STORAGE-HARDENING-2026-10-25.md. This is SOURCE ONLY: no key generation,
+server configuration, hosted dependency replacement, schema/permissions, Edge
+deployment, token rewrite/provider renewal or Vercel action. Production warning
+and partial metric coverage are not declared resolved from local tests.
+
+Remaining real read-only TikTok panels now settled: Staffordshire, Watch Addict
+and Wiseman. All nine non-held connected-client panels inspected across25October;
+two have no historical published TikTok facts, seven show partial September
+figures. Recorded zero remains zero, account snapshots remain snapshots. Old
+live wording awaits separately approved source release. Private three-client
+receipt `%TEMP%/cg-remaining-tiktok-panels-readonly-20261025.json`; no report writes.
+No unnecessary repeat59-client sweep, staff/calendar edits or strategy generation.
+
+### 25 October — ordered local-first provider integrity continuation
+
+Current ordered execution: [CLIENT-LAUNCH-EXECUTION-2026-10-25.md](CLIENT-LAUNCH-EXECUTION-2026-10-25.md).
+No overlap with staff/Teams, normal ChatGPT strategy authoring, onboarding or
+guideline/video PR owners. Reconciled #435's first-party paused/removed campaign
+evidence rather than inventing replacement Google mappings or zero activity.
+Separately reproduced Google malformed-success ingestion: a malformed results
+batch was silently empty; invalid campaign/date rows could be silently dropped
+before the canonical whole-range replacement. Source repair rejects the entire
+malformed response, foreign account, out-of-window/duplicate row or malformed
+metric before replacement, preserving valid empty results, zeros and same-day
+optional settings. RED actual-adapter/handler regressions then focused GREEN;
+scoped ESLint, TS/Vite392module app and diff pass. Backend source only, NOT live,
+and NOT asserted to explain the existing three paused/removed campaign gaps.
+No Vercel or production data/config/Edge/provider/mapping/permission/content write.
+Next is Meta storage-hardening staging, bounded remaining TikTok preview checks,
+and exact owner/source/asset queue reconciliation, not another frontend rewrite.
+
+### 25 October — final client code review packet; no automatic deployment
+
+Current concise acceptance/owner queue:
+[CLIENT-PORTAL-REVIEW-2026-10-25.md](CLIENT-PORTAL-REVIEW-2026-10-25.md).
+PR882 merged7934e95f after frozen f08c9d42 full supported non-DB4196total/
+4170pass/26explicit skips/0fail and ALL20canonical browser fixtures, stable tree.
+Do not substitute this for disposable-SQL, genuine-password, physical-device or
+content/publication acceptance. Later copy-only correction fixes the real Forklift/
+Neshora historical TikTok pane implying an existing service needs adding again;
+unknown scope now discusses current package OR addition, preserving exact benefits,
+pricing check and WhatsApp.56 focused tests, actual portal shell atfour widths,
+scoped lint/build/diff verify that small follow-up. Existing ChatGPT/staff owners
+and protected production gates remain separate. No Vercel, provider/data/asset or
+staff runtime change. The packet's exact queue supersedes dated count snapshots,
+not the existing source-of-truth or owner decisions. Google Control Centre exact
+reference remains unavailable; no guessed replacement tracker.
+
+### 25 October — client fleet acceptance and TikTok measurement-basis correction
+
+Continued client lane only after Meta PR881 merged f7d57806. Frozen f7d57806
+non-DB full supported suite:4193total/4167pass/26 declared skips/0fail; TypeScript,
+Vite392module actual-app bundle and ALL20 canonical browser fixtures pass with
+stable tree. Private receipt `%TEMP%/cg-client-nondb-f7d57806faf2.json`. This is
+NOT full disposable-SQL, genuine client-password, physical-phone or publication
+acceptance. Docker/PGlite limitations remain exactly as below; no shared restart.
+
+Fresh signed-in read-only preview: all59 non-held active clients' Overview,
+Approvals and Brand Hub journeys checked. Overview exact client heading verified;
+Approvals and Brand Hub require the selected route marker AND a settled result,
+not a generic heading that can precede the next client load. Preliminary samples
+that caught loading frames were preserved as PRELIMINARY-UNSETTLED, then replaced
+by complete settled matrices. Final:59 empty approval queues/0 read failures/0
+enabled preview approval actions;41 available Brand Hubs/18 private/0 read failures
+or optional-foundation errors.18 private means the17 known safe-folder skips plus
+new Jodrico, not an invented new launch entitlement. These are absence/visibility
+checks, not completion of staff publication or59 separate media downloads.
+Private receipts: `%TEMP%/cg-all-client-overviews-readonly-20261025.json`,
+`cg-all-client-approvals-settled-20261025.json`,
+`cg-all-client-brand-hubs-settled-20261025.json`.
+
+Actual Braize/CG/Dulux/Madison TikTok cards reproduce ambiguous generic period
+labels. Canonical tiktok-sync stores cumulative view_count/like_count/comment_count/
+share_count totals for videos published in that period, NOT engagement earned
+inside it. Focused frontend repair labels only that exact native sum/ tiktok_organic
+definition "to date", explains the cohort instead of generic comparison text,
+and forbids month-on-month comparison even if a stored cohort is marked complete.
+Account snapshots, real zeros, unknown/future definitions and other platforms
+are preserved. Official field reference:
+https://developers.tiktok.com/docs/en/tiktok-api-v2-video-object . No metric/data
+rewrite, provider request, new API, dependency, permissions or schema change.
+171 focused tests, scoped lint/TS/Vite build/diff and actual report browser at
+1440/375/390/430 pass. Full candidate verification follows its frozen commit.
+
+Fresh provider read: Meta renewed but reporting remains partial; Google account
+last sync24Oct22:00UTC; ten TikTok tokens unexpired, one belongs to held Red Oak.
+Connection is not monthly-data completeness. Live Forklift/Neshora September
+TikTok panes have no published TikTok figures and show the optional-service story;
+do not fabricate a report or infer package exclusion/connection failure from it.
+Remaining TikTok browser sampling hit bounded transport delays; not represented
+as all-nine-client analytics acceptance. No refresh/re-consent/mapping repeated.
+Existing ChatGPT editorial/source/publication, staff posting/calendar and owner
+login/phone/content gates remain owned separately. ZERO Vercel/production writes.
+
+### 25 October — Meta renewal completed; visible reconnect recovery verified locally
+
+CA could not find Connect Meta: it was below the lengthy Instagram queue. Live
+Meta data-access expiry reproduced. Existing Christie-Ann Facebook renewal used
+**previous settings unchanged** and returned to Dynamics Connected, reporting
+access granted and valid at17:17 SAST.47 linked assets preserved; no mapping,
+sync, asset publication, backend release or Vercel operation invoked. This proves
+renewed authentication, NOT completeness of all clients' metrics. The live server
+still explicitly reports encryption-at-rest hardening required; not waived.
+
+Focused frontend repair moves the existing single Connect/ Reconnect button above
+readiness/Instagram queues, disables duplicate starts, preserves schema/expiry
+metadata on disconnected successful reads and distinguishes absent boolean status
+from explicit false. Existing OAuth endpoint/scopes/permissions unchanged. Actual
+Meta page synthetic browser reproduces the buried control on main, then passes at
+1440/375/390/430, including unknown/false/true metadata, retained expiry, pending
+click suppression, error recovery, explicit OAuth redirect and no horizontal
+overflow.58 focused tests, scoped ESLint, TypeScript/Vite392module actual-app
+bundle and diff checks pass. Initial standalone reporting test lacked loopback
+env; corrected fixture configuration and complete58-test rerun passed. New fixture
+is mandatory in the canonical local acceptance plan. No production frontend
+deployment: source fixes do not magically change the live button position.
+
+Earlier reviewed PR868 and869 both merged (2994e7ed and1df1008b). Combined frozen
+e56db492 non-DB receipt:4193total/4167pass/26 explicit skips/0fail, TS/Vite actual
+app, all19 then-canonical browser fixtures passed, stable tree. Receipt
+`%TEMP%/cg-client-nondb-e56db4921fd8.json`, SHA256
+`7FED714D9A76A17CC0914997462F18373EE51B10A44FE9D242E120A4685A7506`.
+Not full SQL/production acceptance:19 existing optional/Docker skips plus7 staff
+embedded-PGlite groups without its private module. Fresh Linux Docker pipe absent;
+no shared restart/reset/install. Staff release PR880 already live, untouched.
+
+Fresh actual admin preview sweep:59 non-held active clients,37 reports/22 no-report
+states, all eight service destinations present,0 read/scope errors. Earlier58
+cohort retained; extra Jodrico Killian row is not inferred launch approval. Novus
+live Google now says missing campaign figures, not no activity; live Brand Hub
+shows its published logo View/Download. Actual375px preview Plan/package/Approvals/
+Brand Hub navigation checked without overflow; October/November only and no
+To confirm extras. These are read-only admin previews, not genuine client login/
+physical-phone acceptance.59-row private matrix remains in
+`%TEMP%/cg-client-performance-readonly-20261025.json`. ChatGPT strategy and staff
+Teams/calendar owners remain separate. Exact Control Centre reference unavailable;
+do not invent or replace it. #505 owns reconnect follow-up, #668/#381 continuity.
+
+### 25 October — Brand Hub validation PR869 regression coverage
+
+Continued existing OpenCode PR869; reproduced main's no-control-regex lint error.
+Its code-point check preserves the exact existing C0-control validation rather
+than relaxing publication or changing file/client scope. Added real manageLibrary
+coverage for all32 embedded ASCII controls, invalid type/blank/256-character
+names, valid255-character and Unicode names; invalid input produces zero writes.
+30/30 Brand Hub adapter/handler/management/synthetic tests pass; full ESLint has
+0 errors (existing warnings remain), TS/Vite real app build/diff pass. No hosted
+function release, content publication, OneDrive/source/permission or Vercel change.
+Meta PR868 is now merged2994e7edd414a81c444bb3834aa91630e188a9d2, source only.
+
+### 25 October — existing Meta presentation PR868 reviewed with runtime regressions
+
+Continued existing OpenCode PR868 rather than duplicate its source fix. On current
+main, numeric run_type and health_state each reproduced TypeError from value?.trim.
+PR's unknown/non-string guard preserves explicit unavailable labels instead of
+crashing. Added actual function regressions across both platforms and nine malformed
+enum values, including object methods that must never be called; blank, failed,
+recovery, complete and stale evidence preserved.10/10 focused tests, TS/Vite7
+actual392module app build/scoped ESLint/diff pass after integrating current main.
+No provider refresh, backend/schema/config/permissions/data or Vercel action.
+This is presentation repair, not proof of complete Meta metrics or a client launch.
+Staff/Planner release PR880 is already live per #381comment6398963463; no staff
+runtime edit or replay of its approved migrations is part of the client lane.
 
 ### 20 October — all58 Performance/package previews; two client fixes verified locally
 
@@ -4902,65 +5277,3 @@ On a fresh chat:
 8. After each consequential action, update #505, #381 and this handover.
 
 The supervisor should keep CA out of routine mechanics and bring her in only for the exact protected decisions, provider verification/2FA/document steps or human review gates that truly require her.
-
-# 25 October — PICASSO local photography lane (#878)
-
-The owner's ChatGPT-first, R0 brief supersedes #878's LightCraft-first/Codex-first order. Isolated PICASSO local skill and JPEG first-pass runner are under review; no production deployment, new subscription, public media endpoint, or Nolan PR #862 edit. MSI has Photoshop 2026 and local Python/OpenCV/Pillow, but no installed Lightroom Classic, digiKam or darktable. Existing Pixieset account/library is accessible; user approved its libraries as example sources. A 27-photo high-resolution owner archive was prepared, but Chrome blocked `downloads.pixieset.com` (`ERR_BLOCKED_BY_CLIENT`), so there is **no 25-photo quality proof**. Pixieset's official Lightroom publishing plugin requires Lightroom Classic; Photo Editor requires separate authorization and its Pro/credit route is unproven under R0. Everyday ChatGPT Work skill invocation and iOS Work remote host access remain unverified. See `docs/ops/PICASSO-LOCAL-EDITOR-2026-10-25.md` and owning issue #878. Do not merge or benchmark 100/1,000 as though the quality gate passed. #679 and all production gates remain unchanged.
-
-Owner expanded the intended company ChatGPT flow: select a scoped OneDrive shoot, edit on MSI, put quality-approved photos into a private Pixieset internal review collection, send its link to the existing **Picasso approvals** WhatsApp group, then process specific amendment requests from non-destructive sources. See `docs/ops/PICASSO-END-TO-END-GAME-PLAN-2026-10-25.md` for the staged, source-backed path and gates. An Adobe-signed Lightroom Classic bootstrap installer was downloaded from the included Adobe plan with ~94 GB free, but Lightroom Classic remained absent at the last installation check. The connected OneDrive metadata tool currently sees one personal drive; MSI has multiple personal/company OneDrive sync roots, so source identity must be matched before hydration. The available plugin search found no WhatsApp or Pixieset plugin. The existing Pixieset Lightroom plugin uploads/republishes but does not import Pixieset photos and leaves new uploads in Preview until deliberate dashboard publication. Internal group review does not authorize final client release. None of the OneDrive-to-WhatsApp path has been accepted end to end.
-
-PICASSO's draft local runner now has a read-only OneDrive shoot preflight, refuses online-only JPEGs and inadequate free space, and can stage only a human-approved, hash-verified subset for an internal Pixieset review upload. This stages files locally; it does not publish a collection or message WhatsApp. The 25-real-photo and everyday ChatGPT Work gates remain open.
-
-Later MSI verification found Adobe-signed **Lightroom Classic 15.6** installed at `C:\Program Files\Adobe\Adobe Lightroom Classic\Lightroom.exe` with a running process. The earlier absence reports above are historical snapshots. Activation, Assisted Culling, Pixieset plugin setup and actual photo quality remain unverified.
-
-PICASSO continuation: Lightroom Classic 15.6 opened to an empty catalog with the Assisted Culling panel visible. Pixieset's official plugin asset download was blocked at `assets.pixieset.com` by Chrome (`ERR_BLOCKED_BY_CLIENT`); the account also says a password is needed for plugin use. The `Business2` CG OneDrive root has an in-house 33-JPEG studio folder, but the selected 25 are online-only; pinning did not hydrate and a normal copy failed because the cloud file provider exited unexpectedly. No photo pixels were acquired. Runner `0.3.0` now records bounded source-based amendment revisions and requires a fresh internal approval before staging revised JPEGs in a distinct private folder. Six synthetic tests pass; real photo, company ChatGPT Work, Pixieset review link and WhatsApp handoff remain unproved. Keep PR #879 draft and Nolan #862 untouched.
-
-Further 25 October access audit: a normal Pixieset owner download from a 27-image approved gallery was blocked at its CloudFront host; none of that gallery's filenames matched already-local Downloads JPEGs. The signed-in CGPH WhatsApp Business browser account found no chat for “Picasso approvals” or “Picasso”; no message was sent. The company OneDrive browser and delegated SharePoint tool did not establish a source identity matching the stale `Business2` local CONTENT folder. Browser ChatGPT showed ChatGPT/Codex choices, not a Work choice; that is not a desktop Work test. Official OpenAI skill documentation supports a standalone `@picasso` desktop skill. Mobile-to-MSI Work requires owner-enabled Work Cloud local access and a new eligible task; neither has been tested. All these are current acceptance blockers, with no private media moved to a new cloud system and no new spend.
-
-PICASSO runner `0.3.1` adds `classify` for named, reasoned and reversible KEEP/ALTERNATE/REVIEW decisions; its audit history survives resume and decision changes invalidate internal upload approval. The installed user skill/runner match PR #879. Six synthetic tests and the repository build passed; no real approved photo was processed. Next: restore one authorized 25-JPEG source through normal OneDrive sync or Pixieset owner download, verify desktop Work `@picasso`, then run the quality gate before any gallery publishing or group post.
-
-PICASSO later 25 October: The signed-in CGPH OneDrive drive is separate from the MSI's local personal and Business sync roots. The existing Microsoft SharePoint connector fetched the exact 27 JPEGs matching the approved Econofoods Fight Night Pixieset library into a private MSI folder; all 27 local sizes and SHA-256 hashes matched source metadata. The runner processed 25 in 57.34 seconds without errors. Runner `0.3.2` `verify` checked 25/25 source/output hashes, JPEGs, orientation-adjusted dimensions, RGB sRGB ICC and empty output EXIF. This gallery was already curated and all 25 were labeled low light, so varied lighting, uncurated burst culling, eyes/expression, retouch and human quality acceptance remain unproven. No 100/1,000 benchmark or Pixieset upload. `CG Picasso Approvals` is now visible in the signed-in WhatsApp Business account after owner addition, with two members shown; no link/message has been sent and reviewer audience remains to verify. Everyday ChatGPT Work invocation is still unverified: the Computer Use skill bars Codex from automating ChatGPT's own desktop UI, and the owner declined manual setup. Keep PR #879 draft and #862 untouched. Next: acquire verified varied-lighting approved source files, obtain photography quality review, and establish a supported Work invocation without conflating Codex execution with Work.
-
-Follow-up Lightroom check: its private-sample “Choose Source Folder” Windows dialog rendered blank and became “Not Responding”; no import, Assisted Culling or Develop output occurred. The unresponsive process was closed. Approved Pixieset daylight and mixed-light galleries were located, but their copied filenames did not match the accessible corresponding OneDrive folders, so no speculative source transfer was made. Resolve the Lightroom folder chooser and gallery/source mapping before claiming those gates.
-
-PICASSO continuation: exact approved Pixieset/OneDrive matches were found for ten `ECONOFOODS TROLLEY DASH` indoor files and five `Vrystaat Landbou Golf Dag` rainy outdoor files; the latter's first full-resolution frame was visually matched to its gallery thumbnail. All 15 local downloads matched source sizes and SHA-256. With ten Fight Night files, a separate private 25-image source and provenance record were assembled. A first run safely rejected 15 camera `.JPG` files identified by Pillow as two-frame MPO; runner `0.3.4` now selects only their primary image and records container/frame count. A fresh 25-image run finished in 59.42 seconds, zero errors, and `verify` passed all 25 hashes/JPEGs/dimensions/sRGB/EXIF. Scene labels: 12 low light, 11 balanced/unknown, 2 warm/mixed review; 15 untagged MPO sources remain REVIEW and one near-duplicate REVIEW pair has an advisory hint. Contact sheet and representative before/after previews were inspected locally; no photography human approval or automatic skin retouch. The required backlit/already-good scene, everyday Work entrypoint, Lightroom culling, private Pixieset/WhatsApp review and 100/1,000 gates remain open. Keep PR #879 draft, R0 and Nolan #862 untouched.
-
-PICASSO output QC continuation: full-resolution comparison found runner `0.3.4` had added substantial near-clipped highlight pixels in the mixed batch. Runner `0.3.5` protects positive changes near bright source channels and offers `verify --quality` for read-only per-image bright-pixel checks. A separate 25-image render finished in 83.9 seconds with zero errors; integrity verification passed 25/25, and no image exceeded the 1-percentage-point added-bright-pixel review threshold. The older job is preserved for comparison. All 25 real images still returned zero face detections, so face/backlit, eyes, expression and skin assessments remain unsupported by this runner. Lightroom native app control was unavailable for retest. Human photography approval and all external review/Work gates remain open; no Pixieset/WhatsApp/client release, 100/1,000 benchmark, new spend, production change, or #862 overlap.
-
-PICASSO face/reproducibility continuation: the installed OpenCV 5.0.0 supports the official MIT-licensed YuNet face model. Runner `0.3.7` bundles its SHA-pinned 229,738-byte ONNX file, without runtime network or new package. On the varied approved 25 images it found advisory face candidates in 18 images and flagged three possible backlit-face cases for human review; it does not automatically brighten faces or infer eyes, expression, identity or retouch. The export sRGB ICC creation date is fixed so repeat jobs can yield identical JPEG hashes. A fresh 25-image run finished in 82.04 seconds, zero errors, 25/25 integrity passes and no highlight review flags. A second real-photo job matched its sample output hash exactly. The private contact sheet awaits human photography approval; everyday ChatGPT Work, Lightroom culling, Pixieset and WhatsApp acceptance remain open. PR #879 stays draft, R0 and Nolan #862 untouched.
-
-PICASSO Pixieset draft continuation: the signed-in owner account created a separate `PICASSO Internal QA - Mixed 25 - 2026-10-25` collection in **DRAFT** and uploaded all 25 verified `0.3.7` JPEG exports through its normal browser uploader. Pixieset reported 25 uploaded and displayed `Highlights (25)` with expected thumbnails. The draft is hidden from the homepage; social sharing and photo/video downloads are off. The exact `CG Picasso Approvals` WhatsApp group shows Amonique and the signed-in user. **No gallery link or WhatsApp message was sent.** The collection has no password; Computer Use policy requires a user handoff to set one. Hiding from homepage is insufficient to secure a direct link, so do not publish until password and signed-out visitor test are complete. This proves scoped existing-Pixieset upload, not human photographic approval, everyday Work invocation, protected link delivery, client release or amendment round-trip. No new hosting/spend, production deployment or #862 change.
-
-A later delegated OneDrive metadata search identified `Clients/ECONO/Once-Off/2026_FIGHT NIGHT`: all 27 filenames match the approved Pixieset collection, and the signed-in OneDrive web UI showed its 27 thumbnails. Its normal bulk Download action yielded no local file; Chrome policy denied an internal downloads-page inspection, so that route was stopped. The folder is absent from the local personal OneDrive sync path. This exact 27-JPEG folder is the preferred source for the 25-photo gate once normal sync or owner download works; no connector raw-photo fetch was used.
-
-PICASSO link-only internal review continuation: the owner explicitly refused passwords and, after being told that anyone with a direct link can view an unlisted gallery, approved publishing the 25-export QA collection and sending its link to the exact two-person `CG Picasso Approvals` group. Pixieset confirmed publication; a separate visitor browser profile opened the numbered photo grid without sign-in. WhatsApp showed the review request and link with `Sent` status at 16:49. Gallery: `https://gallery.cgproductionhouse.com/picassointernalqamixed2520261025/`; homepage visibility, downloads, social sharing and Store are off. This is **link-only access, not authenticated privacy**. Do not forward or reuse it for clients. The 25-photo human photographic quality gate, amendments, Lightroom Assisted Culling, and everyday ChatGPT Work invocation are still open; do not benchmark 100/1,000 or claim final delivery. PR #879 remains draft, R0 and Nolan #862 untouched.
-
-PICASSO company-ChatGPT continuation: the distinct `cgproductionhouse.com` Chrome profile is signed into `info@cgproductionhouse.com`, but ChatGPT labels its current area `cgph Personal account`; the `CG Production House` workspace is deactivated. A PICASSO project was created there with operating instructions and SKILL.md source, and the reviewed skill/runner/model ZIP was installed through ChatGPT Skills. The account's Work composer now resolves `@picasso`. In actual company Work, SharePoint metadata access succeeded for the exact approved ECONO fight-night folder (27 JPEGs; no downloads), while a local-job status request stopped accurately because Remote Desktop Commander reported zero connected devices. No MSI execution occurred from ChatGPT. The company-email Remote Desktop Commander account is on its 0-cost 10,000-call tier but remains unpaired; its full shell/file scope is wider than PICASSO's minimal tool requirement. Prefer native ChatGPT desktop Work Local under the same account if permitted, then test `@picasso status` and the complete approved job from that entrypoint. Web Work alone cannot reach MSI files. See `docs/ops/PICASSO-LOCAL-EDITOR-2026-10-25.md`; keep PR #879 draft, no new spend/hosting, Nolan #862 untouched.
-
-PICASSO WhatsApp audit: owner confirmed `info@cgproductionhouse.com` is the intended ChatGPT account, corrected that the existing signed-in WhatsApp Business session is in **personal Chrome**, and has **no dedicated editorial number yet**. The old two-person CG Picasso Approvals group and sent QA link remain in that personal-profile WhatsApp account. Exact `WhatsApp` plugin search returned no available connector. Company ChatGPT in company Chrome cannot inherit the personal Chrome WhatsApp session. A normal attempt to add the company ChatGPT account in personal Chrome reached a Google password challenge; owner said **no password ever**, so no password was entered and the challenge was closed. Official WhatsApp Web in company Chrome showed an unlinked QR login and was closed after the correction. OpenAI's ChatGPT Chrome extension is the supported candidate when both sessions can be available in the same profile; no real company Work read/send test has passed. For a future number, favor the official WhatsApp Business phone app plus linked WhatsApp Web under R0; cloud Work browser has a separate login. Meta Business Platform message billing and app/group eligibility make Cloud API/MCP unsuitable to assume as a zero-cost group bot. No API, hosted receiver, payment method or new WhatsApp access was configured. Full evidence and links: `docs/ops/PICASSO-LOCAL-EDITOR-2026-10-25.md`.
-
-The subsequent **real company PICASSO Work read-only browser test** found one connected Chrome extension instance and no WhatsApp tab in its inventory; Work reported that it could not access the existing personal-profile WhatsApp tab. No chats were read or actions sent. See the linked Work test in the PICASSO audit. Company ChatGPT-to-WhatsApp remains unverified for read/send and blocked on a shared, authorized browser session; do not call the already-sent link a ChatGPT-originated send.
-
-PICASSO 25 October later correction: the company Chrome profile gained an authorized signed-in official WhatsApp Business session. In the company PICASSO ChatGPT Work conversation, Work created its own WhatsApp Web tab and **read** the exact `CG Picasso Approvals` group. The group review says 010 is too bright, 006 is a poor expression/moment choice, and asks for a small natural formal portrait test. This supersedes the prior no-tab read finding; it does not prove Work-originated sending or Work-to-MSI local execution. The local job recorded 0006 as reversible ALTERNATE and produced a separate, unapproved r001 darker revision for 0010. Delegated OneDrive metadata located `Once Off/2026_10_OCT_FORMAL SHOOT` with RAW, EDITED and FINAL folders; formal pixels were not yet tested. Existing 25-photo Pixieset QA gallery remains link-only and unchanged. Human quality gate stays open; no scale benchmark, client release, new spend, production deployment, or Nolan #862 overlap. Details: `docs/ops/PICASSO-LOCAL-EDITOR-2026-10-25.md` and issue #878.
-
-PICASSO formal-source follow-up: the signed-in owner OneDrive browser downloaded an exact `199A8159.JPG`/`EDITED/199A8159.jpg` pair into separate MSI private folders. Both local SHA-256 hashes and sizes matched exact OneDrive metadata. A private one-photo runner 0.3.7 job completed in 5.0 seconds, one REVIEW, zero errors, `verify --quality` pass, preserved display orientation, sRGB output and stripped source EXIF. The approved CG edit is visibly warmer/darker/more contrasty than PICASSO's restrained first pass. No localised skin retouch or publication was performed. Full resolution portrait-quality review, safe retouch and Work-to-MSI path remain open; do not treat the one-photo test as 25-photo quality acceptance.
-
-PICASSO group-cull follow-up: runner 0.3.8 adds an on-demand private `face-review` sheet for chosen image IDs. It hash-checks the unchanged source and enlarges local YuNet face candidates for human expression/eye inspection, without auto-classification, recognition, cloud upload or publication. Real sheets for 006/007 contained 23/25 candidates and visibly support 007 as the stronger camera-facing, celebratory moment. 006 remains ALTERNATE, 007 remains REVIEW pending human selection. Eleven local tests pass, repeated 007 sheet has the same hash, and the existing 0.3.7 25-photo job still verifies 25/25. Local installed SKILL.md/runner and the existing company ChatGPT account skill were refreshed. The company skill was saved in its editor and downloaded back; its ZIP contains runner `0.3.8` and the `face-review` instructions (SHA-256 `B2A0B5820FAAD1F896703291BCC0BEF38DEED3BD749409177EED57C928F83ECF`). This proves account skill installation, not company-wide distribution or Work-to-MSI execution. No photo or sheet is in GitHub; PR #879 draft, R0 and #862 boundaries remain.
-
-PICASSO two-host follow-up: owner wants the office PC as another local editor so the MSI is not a single dependency. Private GitHub PR #879 now contains a pinned Windows Python requirements file and a per-user host readiness/setup script. Read-only `-Mode Check` passed on the MSI (Python 3.13.14, NumPy 2.5.1, `cv2` 5.0.0, Pillow 12.2.0, pinned YuNet hash/runner startup); `-Mode Install` and the office PC remain untested. The account-installed company `@picasso` skill was saved with host-neutral instructions. GitHub carries code only; client media and live jobs remain private on one active host at a time. Official remote/local Work access requires a separately connected, online signed-in host and eligible account/workspace policy. Remote Desktop Commander still reports zero devices; neither PC is verified as a company Work local execution host. Office OneDrive, Adobe and browser access are unknown. No hosted app, GitHub photo artifact, paid service, production change or Nolan overlap.
-
-PICASSO latest company Work/amendment acceptance: `@picasso` in the actual company PICASSO Work chat opened its own signed-in Chrome WhatsApp tab, found no new `CG Picasso Approvals` messages after 17:03, and then stopped at Remote Desktop Commander `list_devices` reporting zero connected devices. It did not run local status/verify, edit 0010 or 006/007, inspect formal source, publish, upload or send. Local CLI confirms the original 25 job still has 25 complete, zero errors, one reversible cull decision, one separate revision and no internal approval. The office PC setup is deferred at owner's direction. Runner 0.3.9 adds immutable hash-indexed `backup-job` and verified `restore-job` for closed jobs. A real 56-file private archive (SHA-256 `389CA757B08D9E86750849EBC37D8CF82566CF5915BEAF3BEF289842C45971FE`) restored to a separate MSI job and verified 25/25; twelve Python tests pass including malicious archive-entry and missing-revision refusal. The account-installed company skill was updated to 0.3.9 and downloaded back for inspection (ZIP SHA-256 `001625586477D52D8440B1BFB3EA56B4E35F82435E4A0348F90470BAFBC34A66`). Archive remains on MSI only, so off-device recovery and office host acceptance are **not** proved. No client bytes in GitHub or new spend; PR #879 draft, #878 owning issue, #862 untouched.
-
-PICASSO same-link QA update (25 October, 18:35 SAST): owner-requested 0010 darker r001, 0007 alternative group frame and one formal 199A8159 warm/contrast tone test were hash-staged and uploaded by normal owner Pixieset UI into a new three-photo set inside the existing published internal QA link. An independent visitor view showed all three. Formal skin retouch was not applied or claimed. A signed `— PICASSO | CG Production House` update with the exact review-set link was sent to `CG Picasso Approvals` and WhatsApp showed Sent. The reusable SKILL.md now requires this signature for all PICASSO outbound messages. Codex performed the local CLI and browser steps because company Work still has zero connected devices; Work-originated full-circle editing and send remain unproved. Human quality acceptance, skin retouch, 100/1,000 benchmarks, office host, and off-device archive remain open. No client release, new spend, production change or Nolan #862 overlap.
-
-PICASSO direct company Work acceptance rerun (25 October): at owner's request, the actual company PICASSO Work chat invoked `@picasso`, read the signed 18:35 WhatsApp review update, and independently verified that the existing Pixieset review set visibly contains 0010, 0007 and one formal 199A8159 tone-only sample. It signed its reply. Remote Desktop Commander `list_devices` still returned **No Desktop Commander devices are connected yet**, so Work could not run MSI `status`/`verify --quality` or edit photos. No Work-originated upload, publish or WhatsApp send occurred. The browser/read lane is demonstrated; local execution and full-circle delivery are not. Next R0 gate: connect a verified Windows host to this company Work account using the supported Add Device flow, then rerun the actual Work test. Office PC remains deferred. No new spend, production change or #862 overlap.
-
-PICASSO formal-20 QA follow-up (25 October): company Work read the owner's new group request for 20 best formal photographs and improved bright backgrounds, but still had no connected local editor device. The Codex/local fallback obtained all 182 approved formal-shoot JPEGs through the normal owner OneDrive browser, verified every file against delegated OneDrive size/SHA-256 metadata, reviewed eight private contact sheets and selected 20. Runner 0.3.9's first pass exposed flat-grey clipping in a white sky; runner 0.3.10 protects already clipped neutral whites without claiming lost detail recovery. The separate 0.3.10 job completed 20/20 in 52.2 seconds, zero errors, and `verify --quality` passed 20/20. These are tone-only candidates: no skin retouch or human quality acceptance. Twenty hash-staged exports were uploaded to a new Pixieset draft, hidden from the homepage with downloads and social sharing off. After the owner's explicit approval of the password-free link exposure, the collection was published; a separate visitor view showed filenames 0001–0020 at `https://gallery.cgproductionhouse.com/picassointernalqaformal2020261025/`. A PICASSO-signed message with that link was visibly **Sent** at 19:20 to `CG Picasso Approvals`, asking for image-numbered review and stating the unperformed retouch and clipped-JPEG limits. Company Work local execution, formal human review, 100/1,000 benchmarks and off-device recovery remain open. Existing mixed QA gallery, Nolan #862 and production are unchanged. Full detail: `docs/ops/PICASSO-LOCAL-EDITOR-2026-10-25.md` and #878.
-
-PICASSO formal-20 company Work acceptance: the actual account `@picasso` chat independently read the signed 19:20 group update and confirmed the published visitor gallery has image entries 0001–0020. Remote Desktop Commander again returned zero connected devices; no local `status`, `verify`, edit, upload, publish or send happened from Work. The MSI installed runner is 0.3.10; the last verified account skill package still contains 0.3.9 because the browser skill-editor update attempt did not complete. Do not call this a Work-originated edit. Next gate: refresh and verify the account skill, pair an approved Windows host, then run a real Work-originated local command; office-PC setup remains deferred. Human quality approval and skin retouch remain open.
-
-PICASSO owner feedback follow-up (25 October, 19:24–19:27): the selection/couple balance was praised; the owner requested a warmer, more dramatic but restrained finish, cleanup of sweat stains, and a better first couple frame. The published `LANDBOU FORMAL` Pixieset gallery was viewed normally as a reference. Five exact OneDrive `EDITED` staff-reference JPEGs were downloaded privately and SHA-256 verified; no Pixieset gallery was scraped. Runner 0.3.11 adds a manifest-recorded `cg-formal-warm` look and keeps `natural` as default. A new private 20-photo v5 batch replaces weak 0001 with a better same-couple frame and applies the named look; 20/20 rendered in 52.92 seconds, zero errors, and read-only quality verification passed 20/20 with no bright-pixel review flag. Full-size inspection found a small remaining dress stain. Automated/manual-mask brightness and OpenCV inpainting trials produced visible artifacts, so those experimental revisions stayed private and the retouch command was **not** shipped. Photoshop-quality cleanup and human acceptance remain required. The v5 set was not uploaded or sent. The skill source is now tracked in GitHub at `scripts/picasso/SKILL.md` and MSI local copies are 0.3.11; the company account package was last proven 0.3.9. Work-to-local access, off-device restore and 100/1,000 benchmarking remain open. Details: PICASSO ops note and #878. No new spend, production change or #862 overlap.
-
-PICASSO revised formal publication hold: the owner explicitly chose **wait for stain cleanup** before another Pixieset review set or signed WhatsApp update. More source frames and another private colour-correction trial still left visible fabric staining/artifacts, so no revised photo was uploaded. Keep the existing published QA set available and the new v5 set private. The Adobe connector requires Creative Cloud asset staging and is not the approved local cleanup route. Next is supervised local Photoshop-quality retouch on a duplicate with full-size seam/texture review, then re-verify a distinct review export and obtain action-time permission for password-free link publication. The company Work check again found no connected Windows device.
-
-PICASSO revised formal draft publication (25 October, 20:04 SAST): the owner superseded the hold and explicitly confirmed uploading all 20 verified v5 JPEGs despite the remaining 0001 dress mark and password-free link exposure. Normal Pixieset owner UI added them as a separate 20-photo set inside the existing published formal QA collection. A custom-domain visitor view opened `https://gallery.cgproductionhouse.com/picassointernalqaformal2020261025/picassowarmformalrevisionv520/` with the draft note and replacement 0001. A signed `— PICASSO | CG Production House` message with the exact link and caveat was visibly **Delivered** to `CG Picasso Approvals` at 20:04. This is internal draft review, not client delivery. Codex/local fallback performed rendering, upload and send; company Work still lacks a connected Windows device and did not run the batch. Next: absorb image-numbered group feedback, resolve the dress mark with verified local Photoshop retouch if needed, and connect an approved Windows host to company Work. Human quality acceptance, Work full-circle execution, 100/1,000 benchmarking and off-device restore remain open. No new spend, production change or Nolan #862 edit.

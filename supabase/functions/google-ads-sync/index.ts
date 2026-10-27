@@ -53,7 +53,7 @@ const MAX_ACCOUNTS_PER_RUN = 10
 
 function requiredMetricNumber(value: unknown, field: string): number {
   if (typeof value === 'number' && Number.isFinite(value)) return value
-  if (typeof value === 'string' && value !== '' && Number.isFinite(Number(value))) return Number(value)
+  if (typeof value === 'string' && /^[+-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?$/.test(value) && Number.isFinite(Number(value))) return Number(value)
   throw new Error(`Google Ads returned an incomplete ${field} metric.`)
 }
 
@@ -315,15 +315,24 @@ Deno.serve(async request => {
         }
         if (previous.length < pageSize) break
       }
-      const metrics = rows.flatMap(row => {
+      const seenMetrics = new Set<string>()
+      const metrics = rows.map(row => {
+        if (!row || typeof row !== 'object' || Array.isArray(row)) throw new Error('Google Ads returned an invalid campaign metric row.')
+        const customer = row.customer as Record<string, unknown> | undefined
         const campaign = row.campaign as Record<string, unknown> | undefined
         const segments = row.segments as Record<string, unknown> | undefined
         const values = row.metrics as Record<string, unknown> | undefined
         const campaignId = campaign?.id === undefined ? '' : String(campaign.id)
         const date = typeof segments?.date === 'string' ? segments.date : ''
-        if (!/^\d+$/.test(campaignId) || !validGoogleAdsDate(date)) return []
+        if (normalizeCustomerId(customer?.id) !== customerId || !/^\d+$/.test(campaignId) ||
+            !validGoogleAdsDate(date) || date < startDate || date > endDate) {
+          throw new Error('Google Ads returned an invalid campaign metric row.')
+        }
+        const identity = `${campaignId}:${date}`
+        if (seenMetrics.has(identity)) throw new Error('Google Ads returned a duplicate campaign metric row.')
+        seenMetrics.add(identity)
         const optional = previousOptional.get(`${campaignId}:${date}`)
-        return [{
+        return {
           campaign_id: campaignId,
           native_settings: optional?.native_settings ?? null,
           metric_date: date,
@@ -336,7 +345,7 @@ Deno.serve(async request => {
           cost_micros: requiredMetricNumber(values?.costMicros, 'cost'),
           conversions: requiredMetricNumber(values?.conversions, 'conversions'),
           conversion_value: requiredMetricNumber(values?.conversionsValue, 'conversion value'),
-        }]
+        }
       })
       const distinctCampaigns = new Set(metrics.map(metric => metric.campaign_id))
       const configuredCampaigns = account.account_mode === 'shared'

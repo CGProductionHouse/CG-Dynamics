@@ -2,6 +2,7 @@ import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { metaFetch, readMetaError, redact, resolveMetaGraphConfig } from '../_shared/meta.ts'
 import { collectMetaAssets } from '../_shared/metaAssetDiscovery.ts'
+import { readMetaStoredToken } from '../_shared/metaTokenStorage.ts'
 
 interface InstagramBusinessAccount {
   id: string
@@ -102,7 +103,13 @@ Deno.serve(async (req) => {
     })
   }
 
-  const accessToken = tokens[0].encrypted_access_token
+  let accessToken: string
+  try {
+    ;({ accessToken } = await readMetaStoredToken(tokens[0].encrypted_access_token, connections[0].id,
+      Deno.env.get('META_TOKEN_ENCRYPTION_KEY_B64'), Deno.env.get('META_TOKEN_ENCRYPTION_KEY_VERSION')))
+  } catch {
+    return jsonResponse({ ok: false, error: 'Meta credential storage is unavailable. Contact an administrator.' }, 503)
+  }
   // Preserve the proven per-request allowance; bound retries and both
   // collections together instead of aborting valid large Page inventories at 3s.
   const discoveryDeadline = Date.now() + 45_000

@@ -1,4 +1,4 @@
-import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import type { MetaDatabaseClient as SupabaseClient } from './metaDatabaseClient.ts'
 
 type Platform = 'facebook' | 'instagram'
 
@@ -45,7 +45,7 @@ export async function upsertMetaReportPost(
   if (error) {
     throw new Error(`Could not atomically reconcile ${args.payload.platform} report post: ${error.message} (${error.code ?? 'unknown'})`)
   }
-  const result = Array.isArray(data) ? data[0] : data
+  const result = (Array.isArray(data) ? data[0] : data) as Record<string, unknown> | null
   if (!result?.post_id) throw new Error(`Could not atomically reconcile ${args.payload.platform} report post: missing post id`)
   return {
     postId: String(result.post_id),

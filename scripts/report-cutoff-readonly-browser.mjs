@@ -27,8 +27,8 @@ const fixture = {
         window.showMissingGoogleCampaignFixture=()=>setGoogleState('no-campaign-data');
         window.showStrategyReadErrorFixture=()=>setStrategyReadUnavailable(true);
         window.showNoStrategyFixture=()=>{setStrategyReadUnavailable(false);setEmptyStrategy(true)};
-        window.showPlatformWindowFixture=()=>setFacts([{platform:'tiktok',metricKey:'views',value:57944,availability:'partial',aggregation:'sum',comparableGroup:'tiktok-cohort',sourceMetric:'views',periodStart:'2026-09-01',periodEnd:'2026-09-30'},
-          {platform:'tiktok',metricKey:'comments',value:0,availability:'partial',aggregation:'sum',comparableGroup:'tiktok-cohort',sourceMetric:'comments',periodStart:'2026-09-01',periodEnd:'2026-09-23'},
+        window.showPlatformWindowFixture=()=>setFacts([{platform:'tiktok',metricKey:'views',value:57944,availability:'partial',aggregation:'sum',comparableGroup:'tiktok_organic',sourceMetric:'view_count',periodStart:'2026-09-01',periodEnd:'2026-09-30'},
+          {platform:'tiktok',metricKey:'comments',value:0,availability:'partial',aggregation:'sum',comparableGroup:'tiktok_organic',sourceMetric:'comment_count',periodStart:'2026-09-01',periodEnd:'2026-09-23'},
           {platform:'tiktok',metricKey:'total_likes',value:52555,availability:'partial',aggregation:'snapshot',comparableGroup:null,sourceMetric:'total_likes',periodStart:null,periodEnd:null}]);
         window.showLowSignalFixture=()=>setLowSignal(true);
         window.showMaintainedSiteFixture=()=>setClient({id:'aece5a86-c962-4234-a1fe-7904c20f03ff',name:'JFJ Electrical'});
@@ -156,6 +156,9 @@ try {
       assert.match(body, /Recorded platform window: 1 September 2026 – 23 September 2026/)
       assert.match(body, /Platform window unavailable/)
       assert.match(body, /57,944/)
+      assert.match(body, /TikTok video views to date/i)
+      assert.match(body, /TikTok comments to date/i)
+      assert.match(body, /For videos published in this window · not monthly activity/)
       assert.match(body, /Account snapshot for this report/)
       assert.doesNotMatch(body, /latest verified evidence|latest sync|vs last month/)
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width} fact-window overflow`)

@@ -80,6 +80,24 @@ test('exact-client lifecycle, exclusions, recovery and explicit per-file curatio
       const duplicate = await call(f, 'publish', { ...input, confirmed: true })
       assert.equal(duplicate.body.data.unchanged, true); assert.equal(f.assets.length, 1); assert.equal(f.assets[0].published_at, at)
     })
+    await t.test('display names reject every embedded ASCII control before publication without blocking Unicode', async () => {
+      const f = await prepared(), count = f.writes.length
+      const input = { category: 'brand_identity', itemId: 'logo', confirmed: true }
+      for (let code = 0; code < 32; code++) {
+        const result = await call(f, 'publish', { ...input, displayName: `Logo${String.fromCharCode(code)}pack` })
+        assert.equal(result.status, 400, `ASCII control ${code} rejected`)
+        assert.equal(f.writes.length, count, 'Invalid name cannot publish, enable or mutate library')
+      }
+      for (const displayName of ['', '  ', 'x'.repeat(256), null, 4, {}]) {
+        assert.equal((await call(f, 'publish', { ...input, displayName })).status, 400)
+        assert.equal(f.writes.length, count)
+      }
+      for (const displayName of ['x'.repeat(255), 'Élan — logo 🎨', '品牌標誌', 'A\u007fB']) {
+        const valid = await prepared()
+        assert.equal((await call(valid, 'publish', { ...input, displayName })).status, 200)
+        assert.equal(valid.assets[0].display_name, displayName, 'Keep the existing Unicode/DEL boundary; no extra content policy')
+      }
+    })
     await t.test('nested media require the complete exact section path and explicit month', async () => {
       const f = await prepared()
       const input = { category: 'graphic_design', folderPath: ['year', 'month'], itemId: 'poster', displayName: 'October poster', confirmed: true }

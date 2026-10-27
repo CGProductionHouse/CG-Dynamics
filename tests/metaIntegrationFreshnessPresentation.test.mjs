@@ -42,3 +42,20 @@ test('invalid timestamps and missing enum fields fail closed without throwing', 
   }, new Date('2026-09-23T08:00:00.000Z').getTime())
   assert.match(label, /sync kind unavailable · health unavailable · stale/)
 })
+
+test('non-string provider enum values cannot crash Meta status presentation or become trusted labels', () => {
+  const now = Date.parse('2026-10-25T11:00:00Z')
+  const base = { finished_at: '2026-10-25T10:00:00Z', run_type: 'scheduled', health_state: 'verified_partial', status: 'success' }
+  for (const value of [undefined, null, false, 0, 7, {}, [], ['verified'], { trim() { throw new Error('Never call provider methods') } }]) {
+    for (const platform of ['Facebook', 'Instagram']) {
+      assert.match(metaAssetRunLabel(platform, { ...base, run_type: value }, now), /sync kind unavailable · verified partial · current/)
+      assert.match(metaAssetRunLabel(platform, { ...base, health_state: value }, now), /incremental · health unavailable · current/)
+    }
+  }
+})
+
+test('blank enum strings remain unavailable and real failure/recovery state is preserved', () => {
+  const base = { finished_at: '2026-10-25T10:00:00Z', run_type: '  ', health_state: '\t', status: 'failed', retrying: true }
+  assert.match(metaAssetRunLabel('Facebook', base, Date.parse('2026-10-25T11:00:00Z')), /sync kind unavailable · health unavailable · needs attention/)
+  assert.match(metaAssetRunLabel('Instagram', { ...base, run_type: ' targeted_backfill ', health_state: ' permission_blocked ' }), /targeted backfill · permission blocked · needs attention/)
+})

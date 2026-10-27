@@ -778,6 +778,8 @@ function VerifiedMetricCard({ line }: { line: VerifiedLine }) {
         )}
         {unavailableMessage ? (
           <span className="text-slate-500">{unavailableMessage}</span>
+        ) : line.isVideoCohort ? (
+          <span className="text-slate-500">For videos published in this window · not monthly activity</span>
         ) : line.isSnapshot ? (
           <span className="text-slate-500">Account snapshot for this report · not monthly growth</span>
         ) : showMovement ? (

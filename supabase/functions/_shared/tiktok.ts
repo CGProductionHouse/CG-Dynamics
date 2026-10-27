@@ -19,7 +19,7 @@
 //   - Content Posting API: queryTiktokCreatorInfo(), initTiktokDirectPost(), getTiktokPublishStatus()
 // ============================================================================
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 // ── Config resolution ──────────────────────────────────────────────────────
 
@@ -187,7 +187,7 @@ export async function tiktokFetch(
 // ── Token management ───────────────────────────────────────────────────────
 
 export async function getTiktokAccessToken(
-  sb: ReturnType<typeof createClient>,
+  sb: SupabaseClient,
   connectionId: string,
 ): Promise<{ accessToken: string; expiresAt: string | null } | null> {
   const { data } = await sb
@@ -215,7 +215,7 @@ export async function getTiktokAccessToken(
  *     { access_token, expires_in, open_id, refresh_expires_in, refresh_token, scope, token_type }
  */
 export async function refreshTiktokToken(
-  sb: ReturnType<typeof createClient>,
+  sb: SupabaseClient,
   connectionId: string,
   refreshToken: string,
   expectedOpenId?: string,
@@ -291,7 +291,7 @@ export async function refreshTiktokToken(
  * This prevents Client A's sync/publish from using Client B's TikTok account.
  */
 export async function resolveTiktokConnectionForClient(
-  sb: ReturnType<typeof createClient>,
+  sb: SupabaseClient,
   clientId: string,
 ): Promise<{ connectionId: string | null; error: string | null }> {
   if (!clientId) return { connectionId: null, error: 'clientId is required.' }

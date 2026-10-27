@@ -7,8 +7,8 @@ import { useAuth } from '../../contexts/AuthContext'
 import {
   listCompanyEvents,
   createCompanyEvent,
+  getCompanyEvent,
   updateCompanyEvent,
-  deleteCompanyEvent,
   supersedeNativeCompanyEvent,
   setCompanyEventClientVisibility,
   EVENT_TYPES,
@@ -18,7 +18,6 @@ import {
   type CompanyEventType,
   type CompanyEventStatus,
   type CompanyEventInput,
-  type CompanyEventPatch,
 } from '../../lib/companyCalendar'
 import {
   PLANNER_TASK_STATUS_LABELS,
@@ -30,6 +29,9 @@ import { addBusinessDays, businessDateKey, businessDayBoundaryIso, businessMonth
 import { isManagerRole } from '../../lib/roles'
 import { useVisualViewportBottomInset } from '../../lib/mobileViewport'
 import { reconcileCalendarLogicalItems } from '../../lib/calendarIdentity'
+import { isOperationallyCompletedStatus } from '../../lib/taskLifecycle'
+import { shiftPlannerMonth } from '../../lib/plannerViews'
+import { changedCompanyEventFields } from '../../lib/companyCalendarDraft'
 
 type EventFilter = 'all' | 'cancelled' | CompanyEventType
 type CalendarViewMode = 'calendar' | 'agenda'
@@ -112,8 +114,7 @@ function localDateTimeInputToIso(value: string): string {
 }
 
 function shiftMonth(key: string, amount: number) {
-  const [year, month] = key.split('-').map(Number)
-  return monthKey(new Date(year, month - 1 + amount, 1))
+  return shiftPlannerMonth(key, amount)
 }
 
 function formatMonthHeading(key: string) {
@@ -173,6 +174,8 @@ export default function CompanyCalendarPage() {
   const [drawerEvent, setDrawerEvent] = useState<CompanyCalendarEvent | null>(null)
   const [layers, setLayers] = useState<CalendarLayers>({ events: true, tasks: false })
   const [monthTasks, setMonthTasks] = useState<CalendarTaskRow[]>([])
+  const [tasksLoadedFor, setTasksLoadedFor] = useState<string | null>(null)
+  const [taskLayerRetry, setTaskLayerRetry] = useState(0)
   const [dayPanel, setDayPanel] = useState<DayPanelData | null>(null)
   const [layerErrors, setLayerErrors] = useState<{ tasks: string | null; recurrence: string | null }>({ tasks: null, recurrence: null })
   const [recurrenceMigrationNeeded, setRecurrenceMigrationNeeded] = useState(false)
@@ -224,6 +227,21 @@ export default function CompanyCalendarPage() {
     return () => window.clearTimeout(timer)
   }, [selectedMonth])
 
+  // Optional instance creation must never block the saved operational layer.
+  useEffect(() => {
+    if (!canManage || !layers.tasks) return
+    let cancelled = false
+    void materializeRecurringTasks().then(result => {
+      if (cancelled) return
+      setRecurrenceMigrationNeeded(result.migrationNeeded)
+      setLayerErrors(prev => ({ ...prev, recurrence: result.error }))
+      if (result.created > 0) setTaskLayerRetry(value => value + 1)
+    }).catch(() => {
+      if (!cancelled) setLayerErrors(prev => ({ ...prev, recurrence: 'Recurring task creation could not be verified. Existing saved work remains available.' }))
+    })
+    return () => { cancelled = true }
+  }, [canManage, layers.tasks, profile?.id])
+
   // Task layer reloads per month. Best-effort and independent: a failure in
   // tasks (or events) never blanks the other layer — errors surface as diagnostics.
   useEffect(() => {
@@ -232,20 +250,19 @@ export default function CompanyCalendarPage() {
       const monthStart = `${selectedMonth}-01`
       if (!layers.tasks) {
         setMonthTasks([])
+        setTasksLoadedFor(null)
         return
       }
       setMonthTasks([])
-      if (canManage) {
-        const recurrenceResult = await materializeRecurringTasks()
-        if (cancelled) return
-        if (recurrenceResult.migrationNeeded) {
-          setRecurrenceMigrationNeeded(true)
-        } else if (recurrenceResult.error) {
-          setLayerErrors(prev => ({ ...prev, recurrence: recurrenceResult.error ?? null }))
-        }
+      setTasksLoadedFor(null)
+      let taskResult
+      try {
+        taskResult = await listPlannerTasksDueBetween(monthStart, nextMonthStart(selectedMonth))
+      } catch {
+        taskResult = { data: null, error: { message: 'Dated task read could not be verified.' } }
       }
-      const taskResult = await listPlannerTasksDueBetween(monthStart, nextMonthStart(selectedMonth))
       if (cancelled) return
+      setTasksLoadedFor(selectedMonth)
       setLayerErrors(prev => ({
         ...prev,
         tasks: taskResult.error?.message ?? null,
@@ -253,24 +270,16 @@ export default function CompanyCalendarPage() {
       if (taskResult.error) {
         setMonthTasks([])
       } else {
-        // History (completed/approved) does not clutter the active task layer.
-        setMonthTasks(((taskResult.data ?? []) as CalendarTaskRow[]).filter(task => task.status !== 'approved'))
+        // Approved/scheduled work is still active. Use the shared completion authority.
+        setMonthTasks(((taskResult.data ?? []) as CalendarTaskRow[]).filter(task => !isOperationallyCompletedStatus(task.status)))
       }
     }
     const timer = window.setTimeout(() => {
-      setLayerErrors({ tasks: null, recurrence: null })
-      setRecurrenceMigrationNeeded(false)
+      setLayerErrors(prev => ({ ...prev, tasks: null }))
       void loadLayers()
     }, 0)
     return () => { cancelled = true; window.clearTimeout(timer) }
-  }, [canManage, layers.tasks, selectedMonth])
-
-  useEffect(() => {
-    if (!drawerEvent) return
-    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') setDrawerEvent(null) }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [drawerEvent])
+  }, [layers.tasks, selectedMonth, taskLayerRetry])
 
   const calendarAuthority = useMemo(() => reconcileCalendarLogicalItems(events, []), [events])
   const canonicalEvents = calendarAuthority.events
@@ -288,8 +297,10 @@ export default function CompanyCalendarPage() {
 
   const visibleItems = useMemo(() => reconcileCalendarLogicalItems(
     layers.events ? monthEvents : [],
-    layers.tasks ? monthTasks : [],
-  ), [layers.events, layers.tasks, monthEvents, monthTasks])
+    layers.tasks && tasksLoadedFor === selectedMonth ? monthTasks : [],
+  ), [layers.events, layers.tasks, monthEvents, monthTasks, tasksLoadedFor, selectedMonth])
+  const taskLayerPending = layers.tasks && tasksLoadedFor !== selectedMonth
+  const taskCount = !layers.tasks || taskLayerPending || layerErrors.tasks ? null : monthTasks.length
   const visibleTasks = visibleItems.tasks
   const visibleEvents = visibleItems.events
 
@@ -418,7 +429,7 @@ export default function CompanyCalendarPage() {
         </label>
         <label className="flex cursor-pointer items-center gap-2 text-xs font-bold text-amber-200">
           <input type="checkbox" checked={layers.tasks} onChange={event => setLayers(prev => ({ ...prev, tasks: event.target.checked }))} className="h-3.5 w-3.5 accent-amber-400" />
-          Planner tasks ({monthTasks.length})
+          Planner tasks ({!layers.tasks ? 'off' : taskLayerPending ? 'Loading…' : layerErrors.tasks ? 'Unavailable' : monthTasks.length})
         </label>
         <label className="flex w-full items-center gap-2 text-xs text-brand-primary/65 sm:ml-auto sm:w-auto">
           <span className="shrink-0">Event type</span>
@@ -511,8 +522,8 @@ export default function CompanyCalendarPage() {
       {(tableMissing || error || layerErrors.tasks || layerErrors.recurrence || recurrenceMigrationNeeded || (allMonthEvents.length + monthTasks.length === 0)) && (
         <CalendarDiagnostics
           month={selectedMonth}
-          eventCount={allMonthEvents.length}
-          taskCount={monthTasks.length}
+          eventCount={error || tableMissing ? null : allMonthEvents.length}
+          taskCount={taskCount}
           tableMissing={tableMissing}
           eventError={error}
           taskError={layerErrors.tasks}
@@ -531,7 +542,10 @@ export default function CompanyCalendarPage() {
           onAdd={handleCreateEvent}
           onOpen={setDrawerEvent}
           onOpenDay={setDayPanel}
+          coveragePending={taskLayerPending || Boolean(tableMissing || error || layerErrors.tasks)}
         />
+      ) : grouped.length === 0 && (taskLayerPending || tableMissing || error || layerErrors.tasks) ? (
+        <p role="status" className="py-5 text-sm text-brand-primary/65">{taskLayerPending ? 'Reading saved Planner tasks…' : 'Calendar coverage is incomplete. Check the source diagnostics above.'}</p>
       ) : grouped.length === 0 ? (
         <EmptyState title={`Nothing in ${formatMonthHeading(selectedMonth)}`} message="No events or dated tasks." action={canManage ? <ActionButton variant="outline" size="sm" onClick={() => handleCreateEvent()}>+ Add Event</ActionButton> : undefined} compact />
       ) : (
@@ -594,8 +608,8 @@ function CalendarDiagnostics({
   recurrenceMigrationNeeded,
 }: {
   month: string
-  eventCount: number
-  taskCount: number
+  eventCount: number | null
+  taskCount: number | null
   tableMissing: boolean
   eventError: string | null
   taskError: string | null
@@ -611,11 +625,11 @@ function CalendarDiagnostics({
         </div>
         <div className="grid grid-cols-2 gap-2 text-center sm:min-w-[240px]">
           <div className="rounded-xl border border-sky-400/15 bg-sky-400/[0.05] px-3 py-2">
-            <p className="text-lg font-black text-white">{eventCount}</p>
+            <p className="text-lg font-black text-white">{eventCount ?? '—'}</p>
             <p className="text-[10px] font-bold uppercase tracking-wide text-sky-200/70">Events</p>
           </div>
           <div className="rounded-xl border border-amber-300/15 bg-amber-300/[0.05] px-3 py-2">
-            <p className="text-lg font-black text-white">{taskCount}</p>
+            <p className="text-lg font-black text-white">{taskCount ?? '—'}</p>
             <p className="text-[10px] font-bold uppercase tracking-wide text-amber-100/70">Tasks</p>
           </div>
         </div>
@@ -642,6 +656,7 @@ function CgCalendarGrid({
   onAdd,
   onOpen,
   onOpenDay,
+  coveragePending,
 }: {
   month: string
   events: CompanyCalendarEvent[]
@@ -651,6 +666,7 @@ function CgCalendarGrid({
   onAdd: (date?: string) => void
   onOpen: (event: CompanyCalendarEvent) => void
   onOpenDay: (data: DayPanelData) => void
+  coveragePending: boolean
 }) {
   const [year, m] = month.split('-').map(Number)
   const firstDay = new Date(year, m - 1, 1).getDay()
@@ -749,7 +765,7 @@ function CgCalendarGrid({
             )
           })}
         </div>
-        {groups.length === 0 && <EmptyState className="mt-4" title={`Nothing in ${formatMonthHeading(month)}`} message="No events or dated tasks." action={canManage ? <ActionButton variant="outline" size="sm" onClick={() => onAdd()}>+ Add Event</ActionButton> : undefined} compact centered={false} />}
+        {groups.length === 0 && !coveragePending && <EmptyState className="mt-4" title={`Nothing in ${formatMonthHeading(month)}`} message="No events or dated tasks." action={canManage ? <ActionButton variant="outline" size="sm" onClick={() => onAdd()}>+ Add Event</ActionButton> : undefined} compact centered={false} />}
       </div>
     </div>
   )
@@ -760,7 +776,7 @@ function CgCalendarGrid({
 function TaskRowLink({ task }: { task: CalendarTaskRow }) {
   return (
     <Link
-      to="/admin/work?tab=board"
+      to={`/admin/work?tab=board&id=${encodeURIComponent(task.id)}`}
       className={`flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs transition-colors hover:border-amber-300/50 ${TASK_CHIP_CLS}`}
     >
       <span className="shrink-0 rounded bg-amber-300/15 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide">Task</span>
@@ -885,9 +901,35 @@ function EventDrawer({ event, canManage, events, onClose, onSaved }: {
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const keyboardInset = useVisualViewportBottomInset()
-  const [confirmDelete, setConfirmDelete] = useState(false)
-  const [deleting, setDeleting] = useState(false)
+  const [confirmCancellation, setConfirmCancellation] = useState(false)
+  const [cancelling, setCancelling] = useState(false)
   const [visibilitySaving, setVisibilitySaving] = useState(false)
+  const [confirmDiscard, setConfirmDiscard] = useState(false)
+  const mutationPending = useRef(false)
+  const creationAttempt = useRef<{ id: string; clientId: string | null } | null>(null)
+  const [creationReadbackPending, setCreationReadbackPending] = useState(false)
+
+  const hasUnsavedChanges = title !== event.title || eventType !== event.event_type
+    || clientId !== (event.client_id ?? '') || clientName !== (event.client_name ?? '')
+    || startAt !== isoToLocalDateTimeInput(event.start_at) || endAt !== isoToLocalDateTimeInput(event.end_at)
+    || allDay !== event.all_day || location !== (event.location ?? '') || notes !== (event.notes ?? '')
+    || assignedName !== (event.assigned_to_name ?? '') || status !== event.status
+
+  function requestClose() {
+    if (mutationPending.current) return
+    if (creationReadbackPending || hasUnsavedChanges) setConfirmDiscard(true)
+    else onClose()
+  }
+
+  useEffect(() => {
+    function handleKey(keyEvent: KeyboardEvent) {
+      if (keyEvent.key !== 'Escape' || mutationPending.current) return
+      if (creationReadbackPending || hasUnsavedChanges) setConfirmDiscard(true)
+      else onClose()
+    }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [creationReadbackPending, hasUnsavedChanges, onClose])
 
   const inputCls = 'w-full rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-accent'
 
@@ -906,16 +948,20 @@ function EventDrawer({ event, canManage, events, onClose, onSaved }: {
   }, [allDay, endAt, event.id, events, startAt])
 
   async function handleSave() {
-    if (saving || !title.trim() || !canManage) return
+    if (mutationPending.current || creationReadbackPending || (isNew && creationAttempt.current) || saving || cancelling || visibilitySaving || !title.trim() || !canManage) return
+    mutationPending.current = true
     setSaving(true)
     setSaveError(null)
     try {
       if (!startAt) { setSaveError('Choose a start date and time.'); return }
       const startDate = startAt.slice(0, 10)
-      const startIso = allDay
+      const startChanged = startAt !== isoToLocalDateTimeInput(event.start_at)
+      const endChanged = endAt !== isoToLocalDateTimeInput(event.end_at)
+      const allDayChanged = allDay !== event.all_day
+      const startIso = !isNew && !startChanged && !allDayChanged ? event.start_at : allDay
         ? new Date(`${startDate}T00:00:00+02:00`).toISOString()
         : localDateTimeInputToIso(startAt)
-      const endIso = allDay
+      const endIso = !isNew && !endChanged && !allDayChanged ? event.end_at : allDay
         ? new Date(`${(endAt ? endAt.slice(0, 10) : addBusinessDays(startDate, 1))}T00:00:00+02:00`).toISOString()
         : endAt ? localDateTimeInputToIso(endAt) : null
       if (endIso && Date.parse(endIso) <= Date.parse(startIso)) {
@@ -936,14 +982,20 @@ function EventDrawer({ event, canManage, events, onClose, onSaved }: {
           assigned_to_name: assignedName.trim() || null,
           status,
         }
-        const result = await createCompanyEvent(input)
+        creationAttempt.current = { id: crypto.randomUUID(), clientId: input.client_id ?? null }
+        const result = await createCompanyEvent(input, creationAttempt.current.id)
+        setCreationReadbackPending(true)
         if (result.tableMissing) {
           setSaveError('CG Calendar setup is required before events can be saved.')
           return
         }
         if (result.error) { setSaveError(result.error.message); return }
+        if (!result.data || result.data.id !== creationAttempt.current.id || result.data.client_id !== creationAttempt.current.clientId) {
+          setSaveError('Creation could not be verified. Retry readback; no additional event will be submitted.')
+          return
+        }
       } else {
-        const patch: CompanyEventPatch = {
+        const patch = changedCompanyEventFields(event, {
           title: title.trim(),
           event_type: eventType,
           client_id: clientId || null,
@@ -955,40 +1007,81 @@ function EventDrawer({ event, canManage, events, onClose, onSaved }: {
           notes: notes.trim() || null,
           assigned_to_name: assignedName.trim() || null,
           status,
-        }
-        const result = await updateCompanyEvent(event.id, patch)
+        }, {
+          title: title !== event.title, event_type: eventType !== event.event_type,
+          client_id: clientId !== (event.client_id ?? ''), client_name: clientName !== (event.client_name ?? ''),
+          start_at: startChanged || allDayChanged, end_at: endChanged || allDayChanged, all_day: allDayChanged,
+          location: location !== (event.location ?? ''), notes: notes !== (event.notes ?? ''),
+          assigned_to_name: assignedName !== (event.assigned_to_name ?? ''), status: status !== event.status,
+        })
+        if (Object.keys(patch).length === 0) { onClose(); return }
+        if (!event.updated_at) { setSaveError('Reload the event before saving.'); return }
+        const result = await updateCompanyEvent(event.id, patch, event.updated_at)
         if (result.tableMissing) {
           setSaveError('CG Calendar setup is required before events can be saved.')
           return
         }
         if (result.error) { setSaveError(result.error.message); return }
+        if (!result.data || result.data.id !== event.id) { setSaveError('Save could not be verified. Check the calendar before trying again.'); return }
       }
       onSaved()
     } catch {
-      setSaveError('Could not save event.')
+      if (isNew && creationAttempt.current) setCreationReadbackPending(true)
+      setSaveError(isNew && creationAttempt.current ? 'Creation could not be verified. Retry readback; no additional event will be submitted.' : 'Could not save event.')
     } finally {
+      mutationPending.current = false
       setSaving(false)
     }
   }
 
-  async function handleDelete() {
-    if (deleting || !canManage) return
-    setDeleting(true)
+  async function retryCreationReadback() {
+    const attempt = creationAttempt.current
+    if (mutationPending.current || !attempt || !creationReadbackPending) return
+    mutationPending.current = true
+    setSaving(true)
+    setSaveError(null)
     try {
-      const result = await deleteCompanyEvent(event.id)
-      if (result.tableMissing) {
-        setSaveError('CG Calendar setup is required before events can be removed.')
-        setDeleting(false)
-        return
-      }
-      if (result.error) {
-        setSaveError(result.error.message)
-        setDeleting(false)
+      const result = await getCompanyEvent(attempt.id)
+      if (result.tableMissing || result.error || !result.data || result.data.id !== attempt.id || result.data.client_id !== attempt.clientId) {
+        setSaveError('The exact event is still unverified. Retry readback or check the calendar; no additional event was submitted.')
         return
       }
       onSaved()
     } catch {
-      setDeleting(false)
+      setSaveError('Readback is unavailable. No additional event was submitted.')
+    } finally {
+      mutationPending.current = false
+      setSaving(false)
+    }
+  }
+
+  async function handleCancelEvent() {
+    if (mutationPending.current || cancelling || saving || visibilitySaving || !canManage || isNew || event.status === 'cancelled') return
+    if (hasUnsavedChanges) { setSaveError('Save your changes or close and reopen before cancelling this event.'); return }
+    if (!event.updated_at) { setSaveError('Reload the event before cancelling.'); return }
+    mutationPending.current = true
+    setCancelling(true)
+    setSaveError(null)
+    try {
+      const result = await updateCompanyEvent(event.id, { status: 'cancelled' }, event.updated_at)
+      if (result.tableMissing) {
+        setSaveError('CG Calendar setup is required before events can be cancelled.')
+        return
+      }
+      if (result.error) {
+        setSaveError(result.error.message)
+        return
+      }
+      if (!result.data || result.data.id !== event.id || result.data.status !== 'cancelled') {
+        setSaveError('Cancellation could not be verified. Check the calendar before trying again.')
+        return
+      }
+      onSaved()
+    } catch {
+      setSaveError('Could not cancel event. Check the calendar before trying again.')
+    } finally {
+      mutationPending.current = false
+      setCancelling(false)
     }
   }
 
@@ -1000,24 +1093,32 @@ function EventDrawer({ event, canManage, events, onClose, onSaved }: {
   )
 
   async function handleClientVisibility() {
-    if (isNew || !canManage || visibilitySaving) return
+    if (mutationPending.current || isNew || !canManage || visibilitySaving || saving || cancelling) return
     const nextVisible = !event.client_visible
     if (nextVisible && !canPublishToClient) return
+    if (hasUnsavedChanges) { setSaveError('Save your changes before updating client visibility.'); return }
 
+    mutationPending.current = true
     setVisibilitySaving(true)
     setSaveError(null)
-    const result = await setCompanyEventClientVisibility(event.id, nextVisible)
-    setVisibilitySaving(false)
-    if (result.error) {
+    try {
+      const result = await setCompanyEventClientVisibility(event.id, nextVisible)
+      if (result.error) {
+        setSaveError('Could not update client visibility.')
+        return
+      }
+      onSaved()
+    } catch {
       setSaveError('Could not update client visibility.')
-      return
+    } finally {
+      mutationPending.current = false
+      setVisibilitySaving(false)
     }
-    onSaved()
   }
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black/60" onClick={onClose} />
+      <div className="fixed inset-0 z-40 bg-black/60" data-testid="company-event-backdrop" onClick={requestClose} />
       <div className="fixed inset-y-0 right-0 z-50 flex w-full flex-col bg-[#111111] sm:w-[480px] border-l border-white/[0.08]">
         <div className="flex items-center justify-between border-b border-white/[0.08] px-5 py-4">
           <h2 className="text-base font-semibold text-white">
@@ -1026,14 +1127,18 @@ function EventDrawer({ event, canManage, events, onClose, onSaved }: {
           {event.microsoft_source_type === 'outlook_event' && <p className="text-[10px] font-bold uppercase tracking-wider text-blue-200">Outlook import</p>}
           <button
             type="button"
-            onClick={onClose}
+            onClick={requestClose}
+            disabled={saving || cancelling || visibilitySaving}
+            aria-label="Close event details"
             className="rounded-lg p-1.5 text-brand-primary hover:text-white transition-colors"
           >
             ✕
           </button>
         </div>
 
-        <fieldset disabled={!canManage} className="flex-1 space-y-4 overflow-y-auto px-5 py-5 disabled:opacity-75">
+        <fieldset disabled={!canManage || saving || cancelling || visibilitySaving || creationReadbackPending} className="flex-1 space-y-4 overflow-y-auto px-5 py-5 disabled:opacity-75">
+          {eventType === 'meeting' && <p className="rounded-lg border border-sky-300/20 bg-sky-300/[0.06] p-3 text-xs text-sky-100">This is an internal CG Calendar record. Assigned staff are not meeting invitees. Saving here does not send invitations, reminders or Outlook updates.</p>}
+          {event.microsoft_event_id && <p className="text-xs text-amber-200/80">Microsoft-backed event: Outlook remains the source for meeting time, attendees and cancellation. Changes here affect Dynamics only.</p>}
           {!canManage && <p className="rounded-lg border border-white/10 bg-white/[0.035] px-3 py-2 text-xs text-brand-primary/70">Calendar events are read-only for staff. Ask a manager to make changes.</p>}
           <div>
             <label className="mb-1.5 block text-xs font-medium text-brand-primary">Title</label>
@@ -1126,7 +1231,7 @@ function EventDrawer({ event, canManage, events, onClose, onSaved }: {
               <button
                 type="button"
                 onClick={() => void handleClientVisibility()}
-                disabled={visibilitySaving || (!event.client_visible && !canPublishToClient)}
+                disabled={visibilitySaving || saving || cancelling || (!event.client_visible && !canPublishToClient)}
                 className={`min-h-10 rounded-full border px-4 text-xs font-bold transition disabled:cursor-not-allowed disabled:opacity-45 ${
                   event.client_visible
                     ? 'border-brand-teal/30 bg-brand-teal/10 text-[#2dd4bf]'
@@ -1153,54 +1258,73 @@ function EventDrawer({ event, canManage, events, onClose, onSaved }: {
             </Link>
           )}
           {saveError && <p className="mb-2 text-xs text-red-400">{saveError}</p>}
-          <div className="flex items-center gap-3">
-            {canManage && <ActionButton
+          <div className="flex flex-wrap items-center gap-3">
+            {canManage && creationReadbackPending ? <ActionButton variant="primary" onClick={retryCreationReadback} disabled={saving} loading={saving}>Retry readback</ActionButton> : canManage && <ActionButton
               variant="primary"
               onClick={handleSave}
-              disabled={saving || !title.trim()}
+              disabled={saving || cancelling || visibilitySaving || !title.trim()}
               loading={saving}
             >
               {isNew ? 'Create Event' : 'Save'}
             </ActionButton>}
             <button
               type="button"
-              onClick={onClose}
+              onClick={requestClose}
+              disabled={saving || cancelling || visibilitySaving}
               className="rounded-lg border border-white/10 px-4 py-2 text-sm text-brand-primary hover:text-white transition-colors"
             >
               Close
             </button>
-            {!isNew && canManage && !confirmDelete && (
+            {!isNew && canManage && event.status !== 'cancelled' && !confirmCancellation && (
               <button
                 type="button"
-                onClick={() => setConfirmDelete(true)}
-                className="ml-auto text-xs text-red-400/70 hover:text-red-400 transition-colors"
+                onClick={() => setConfirmCancellation(true)}
+                disabled={saving || cancelling || visibilitySaving}
+                className="ml-auto min-h-11 px-2 text-xs text-red-400/70 hover:text-red-400 disabled:opacity-60 transition-colors"
               >
-                Delete
+                Cancel this event
               </button>
             )}
-            {!isNew && canManage && confirmDelete && (
-              <div className="ml-auto flex items-center gap-2">
-                <span className="text-xs text-brand-primary">Sure?</span>
+            {!isNew && canManage && event.status !== 'cancelled' && confirmCancellation && (
+              <div className="flex w-full flex-wrap items-center gap-2">
+                <span className="w-full text-xs text-brand-primary">Keep this record in Cancelled. No invitations or Outlook cancellation will be sent.</span>
                 <button
                   type="button"
-                  onClick={handleDelete}
-                  disabled={deleting}
-                  className="text-xs text-red-400 hover:text-red-300 disabled:opacity-60"
+                  onClick={handleCancelEvent}
+                  disabled={cancelling || saving || visibilitySaving}
+                  className="min-h-11 rounded-lg border border-red-400/20 px-3 text-xs text-red-400 hover:text-red-300 disabled:opacity-60"
                 >
-                  {deleting ? 'Removing...' : 'Yes, delete'}
+                  {cancelling ? 'Cancelling...' : 'Confirm cancellation'}
                 </button>
                 <button
                   type="button"
-                  onClick={() => setConfirmDelete(false)}
-                  className="text-xs text-brand-primary hover:text-white"
+                  onClick={() => setConfirmCancellation(false)}
+                  disabled={cancelling}
+                  className="min-h-11 rounded-lg border border-white/10 px-3 text-xs text-brand-primary hover:text-white disabled:opacity-60"
                 >
-                  Cancel
+                  Keep event
                 </button>
               </div>
             )}
           </div>
         </div>
       </div>
+      {confirmDiscard && <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/75 p-4" role="alertdialog" aria-modal="true" aria-labelledby="calendar-discard-title" onKeyDown={keyEvent => {
+        if (keyEvent.key !== 'Tab') return
+        const buttons = keyEvent.currentTarget.querySelectorAll<HTMLButtonElement>('button')
+        const first = buttons[0], last = buttons[buttons.length - 1]
+        if (keyEvent.shiftKey && document.activeElement === first) { keyEvent.preventDefault(); last?.focus() }
+        else if (!keyEvent.shiftKey && document.activeElement === last) { keyEvent.preventDefault(); first?.focus() }
+      }}>
+        <div className="w-full max-w-sm rounded-xl border border-white/10 bg-[#181818] p-5 shadow-2xl">
+          <h3 id="calendar-discard-title" className="font-bold text-white">{creationReadbackPending ? 'Leave unverified calendar save?' : 'Discard unsaved calendar changes?'}</h3>
+          <p className="mt-2 text-sm text-white/55">{creationReadbackPending ? 'The event may already exist. Closing does not cancel it. Check the calendar before creating another event.' : 'Your changes to this calendar record have not been saved.'}</p>
+          <div className="mt-5 flex justify-end gap-2">
+            <button type="button" autoFocus onClick={() => setConfirmDiscard(false)} className="min-h-11 rounded-lg border border-white/10 px-4 text-sm text-white/70">Stay</button>
+            <button type="button" onClick={() => { if (!mutationPending.current) onClose() }} className="min-h-11 rounded-lg bg-red-400 px-4 text-sm font-bold text-black">{creationReadbackPending ? 'Close and check calendar' : 'Discard changes'}</button>
+          </div>
+        </div>
+      </div>}
     </>
   )
 }

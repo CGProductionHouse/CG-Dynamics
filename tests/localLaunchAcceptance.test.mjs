@@ -40,6 +40,7 @@ test('client launch acceptance includes every high-risk client journey and unava
     'client-library-readonly-browser.mjs',
     'client-brand-hub-setup-readonly-browser.mjs',
     'brand-hub-management-browser.mjs',
+    'meta-connection-readiness-browser.mjs',
   ]) assert.ok(browserFixtures.includes(fixture), `Missing client acceptance: ${fixture}`)
 })
 
