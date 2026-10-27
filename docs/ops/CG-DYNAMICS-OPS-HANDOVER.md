@@ -19,6 +19,14 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 ### 27 October — Content Guideline design and normal ChatGPT read-back (#896)
 
+Latest CA correction: the separate flat green/cream guide visual was rejected.
+Follow-up `codex/guideline-portal-style-20261027` uses existing portal near-black,
+white/slate text, bright teal/orange accents and glass cards; compact header and
+actual ClientPortalShell preview. No global portal or backend change. Four-width
+browser/23focused/build/bundle/scopedlint/diff pass. New `cg-guideline-portal-*`
+images supersede rejected `cg-guideline-design-*`; owner visual approval pending.
+No Vercel, data or publication change. Normal ChatGPT acceptance below is retained.
+
 CA redirected this lane to branded guidelines and normal ChatGPT authoring.
 Exact design/workflow/acceptance boundaries:
 [CONTENT-GUIDELINE-CLIENT-DESIGN-2026-10-27.md](CONTENT-GUIDELINE-CLIENT-DESIGN-2026-10-27.md).

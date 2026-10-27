@@ -5,6 +5,29 @@ ChatGPT authoring in personal/company accounts, and the existing calendar chain.
 Branch: `codex/guideline-client-design-20261027`. Frontend remains local/PR.
 Later exact CA-approved connector release is recorded below; zero Vercel.
 
+## Latest owner visual correction — portal styling
+
+CA rejected the separate flat green/cream presentation. That earlier visual is
+**not accepted**. Follow-up branch `codex/guideline-portal-style-20261027` matches
+the existing client portal: near-black panel, white/slate typography, existing
+bright teal/orange accent line and restrained corner light, white pill action,
+subtle outlined cards. Removed the separate green/cream script treatment and
+extra cover labels; reduced the cover size. No global client portal restyling.
+
+The actual shared presenter is now previewed inside the actual ClientPortalShell,
+including the real desktop navigation and mobile bottom navigation. Only local
+fixture identity/lead reads are stubbed. New images are
+`%TEMP%/cg-guideline-portal-fold-1440.png` and `cg-guideline-portal-fold-390.png`
+(also full-page/all375/390/430). Prior `cg-guideline-design-*` images remain
+historical rejected references. The local review URL is unchanged.
+
+All four browser widths pass script fidelity, video jumps, direction disclosure,
+client link/clipboard refusal, private saved-draft preview and retained unsaved
+edits/no overflow. Existing focused tests23/23, app build/bundle, scoped lint and
+diff pass. This is a visual-only presenter/fixture correction: no backend, API,
+auth, data, content publication, global navigation or Vercel changes.
+Visual acceptance remains CA's; do not label the revised design owner-approved.
+
 ## Design and source references
 
 Read the existing OneDrive **Toyota Content Guide.pdf** (23 September) and

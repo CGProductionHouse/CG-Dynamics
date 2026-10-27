@@ -28,13 +28,15 @@ const fixture = {
   name: 'guideline-design-fixture', enforce: 'pre',
   resolveId(id) { if (id === 'virtual:guideline-design') return '\0virtual:guideline-design' },
   transform(_code, id) {
-    if (id.replaceAll('\\', '/').endsWith('/contexts/AuthContext.tsx')) return 'export function useAuth(){return {profile:{role:"admin",id:"fixture-admin"}}}'
+    if (id.replaceAll('\\', '/').endsWith('/contexts/AuthContext.tsx')) return 'export function useAuth(){return {profile:{role:"admin",id:"fixture-admin"},signOut:async()=>{}}}'
+    if (id.replaceAll('\\', '/').endsWith('/lib/clientLeadsNavigation.ts')) return 'export async function hasClientLeadsDestination(){return false}'
   },
   load(id) {
     if (id !== '\0virtual:guideline-design') return
     return `import React from 'react'; import {createRoot} from 'react-dom/client';
       import {ContentGuidelineDocument} from '/src/components/client/ContentGuidelineDocument.tsx'; import '/src/index.css';
       import ContentGuidelineDocumentEditor from '/src/pages/admin/ContentGuidelineDocumentEditor.tsx';
+      import {ClientPortalShell} from '/src/components/client/ClientPortalShell.tsx';
       import {MemoryRouter} from 'react-router-dom';
       window.sampleGuide=${JSON.stringify(sample)};
       const guide=window.sampleGuide;
@@ -42,15 +44,17 @@ const fixture = {
         guideline:{id:'11111111-1111-4111-8111-111111111111',client_id:'22222222-2222-4222-8222-222222222222',title:guide.title,month:guide.month,status:'draft',client_published_at:null,coverage_start:guide.month,coverage_end:guide.month},
         run:{name:'Fixture shoot',client_name:'Wiseman Group',run_date:guide.filming_date},
         videos:guide.videos.map((video,index)=>({...video,id:'video-'+index,status:'idea',production_status:'not_shot',month:guide.month,updated_at:'2026-10-27T08:00:00Z',notes:'PRIVATE NEVER RENDER',production_note:'PRIVATE NEVER RENDER'})),onChanged:()=>{}}));
-      createRoot(document.getElementById('root')).render(React.createElement('main',{className:'mx-auto max-w-6xl p-3 sm:p-8'},
-        React.createElement('p',{className:'mb-4 text-xs text-slate-400'},'DESIGN PREVIEW · SAMPLE CONTENT · NOT PUBLISHED'),
-        location.search.includes('editor')?editor:React.createElement(ContentGuidelineDocument,{guide,client:{name:'Wiseman Group'},clientPath:'/client/plan?tab=guidelines&month=2026-11&guide=sample-guide'})));`
+      const document=React.createElement(MemoryRouter,{initialEntries:['/client/plan?tab=guidelines&month=2026-11']},
+        React.createElement(ClientPortalShell,{client:{id:'22222222-2222-4222-8222-222222222222',name:'Wiseman Group'}},
+          React.createElement('p',{className:'mb-4 text-xs text-slate-400'},'DESIGN PREVIEW · SAMPLE CONTENT · NOT PUBLISHED'),
+          React.createElement(ContentGuidelineDocument,{guide,client:{name:'Wiseman Group'},clientPath:'/client/plan?tab=guidelines&month=2026-11&guide=sample-guide'})));
+      createRoot(window.document.getElementById('root')).render(location.search.includes('editor')?React.createElement('main',{className:'mx-auto max-w-6xl p-3 sm:p-8'},editor):document);`
   },
   configureServer(server) {
     server.middlewares.use((req, res, next) => {
       if (!req.url?.startsWith('/__guideline-design')) return next()
       res.setHeader('Content-Type', 'text/html')
-      res.end('<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="background:#050d0b"><div id="root"></div><script type="module" src="/@id/virtual:guideline-design"></script></body></html>')
+      res.end('<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="background:#030706"><div id="root"></div><script type="module" src="/@id/virtual:guideline-design"></script></body></html>')
     })
   },
 }
@@ -78,7 +82,7 @@ try {
     })
     await page.goto('http://127.0.0.1:53994/__guideline-design')
     await page.getByRole('heading', { name: 'Video 01 - The office chair test drive' }).waitFor()
-    await page.getByAltText('Wiseman Group logo').evaluate(img => img.decode())
+    await page.getByAltText('Wiseman Group logo').first().evaluate(img => img.decode())
     assert.equal(await page.getByText(sample.videos[0].script, { exact: true }).textContent(), sample.videos[0].script, 'Complete script preserved byte for byte')
     assert.equal(await page.getByText('Complete script', { exact: true }).count(), 2)
     assert.doesNotMatch(await page.locator('body').innerText(), /PRIVATE NEVER RENDER|private.invalid|Internal run name/)
@@ -97,8 +101,8 @@ try {
     await page.getByText('Filming & visual direction', { exact: true }).click()
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width}px overflow`)
     await page.evaluate(() => window.scrollTo(0, 0))
-    await page.screenshot({ path: join(tmpdir(), `cg-guideline-design-${width}.png`), fullPage: true })
-    await page.screenshot({ path: join(tmpdir(), `cg-guideline-design-fold-${width}.png`) })
+    await page.screenshot({ path: join(tmpdir(), `cg-guideline-portal-${width}.png`), fullPage: true })
+    await page.screenshot({ path: join(tmpdir(), `cg-guideline-portal-fold-${width}.png`) })
     await page.goto('http://127.0.0.1:53994/__guideline-design?editor')
     await page.getByRole('textbox', { name: 'Complete script', exact: true }).first().fill('Unsaved staff wording — keep this draft.')
     await page.getByRole('button', { name: 'View client layout', exact: true }).click()
