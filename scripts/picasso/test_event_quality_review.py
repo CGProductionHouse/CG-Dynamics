@@ -1,5 +1,6 @@
 """Safety checks for the private event review sheet builder."""
 
+import csv
 import hashlib
 import importlib.util
 import json
@@ -47,6 +48,11 @@ class EventQualityReviewTest(unittest.TestCase):
             self.assertEqual(digest(source), source_hash)
             self.assertEqual(digest(edited), output_hash)
             self.assertIn("UNREVIEWED", (result / "summary.json").read_text())
+            with (result / "focus-and-grade-review.csv").open(newline="", encoding="utf-8-sig") as stream:
+                row = next(csv.DictReader(stream))
+            self.assertEqual(row["source_crop_median_luma"], "74.0")
+            self.assertEqual(row["output_crop_nearwhite_any_channel_pct"], "0.0")
+            self.assertEqual(row["editorial_decision"], "REVIEW")
 
             edited.write_bytes(b"tampered")
             with self.assertRaisesRegex(ValueError, "hash mismatch"):
@@ -78,6 +84,16 @@ class EventQualityReviewTest(unittest.TestCase):
                 review.run(manifest, root / "bad-box", {"card1:001"}, {"card1:001": [100, 100, 900, 500]})
             with self.assertRaisesRegex(ValueError, "Missing camera keys"):
                 review.run(manifest, root / "missing", {"card1:002"})
+
+    def test_crop_tone_metrics_separates_channel_clipping_from_white(self):
+        image = Image.new("RGB", (200, 200), (255, 25, 20))
+        values = review.crop_tone_metrics(image, (0, 0, 200, 200))
+        self.assertEqual(values["nearwhite_any_channel_pct"], 100.0)
+        self.assertEqual(values["nearwhite_all_channels_pct"], 0.0)
+        blue = review.crop_tone_metrics(Image.new("RGB", (200, 200), (20, 25, 255)), (0, 0, 200, 200))
+        yellow = review.crop_tone_metrics(Image.new("RGB", (200, 200), (255, 240, 20)), (0, 0, 200, 200))
+        self.assertLess(blue["median_lab_b"], 0)
+        self.assertGreater(yellow["median_lab_b"], 0)
 
 
 if __name__ == "__main__":

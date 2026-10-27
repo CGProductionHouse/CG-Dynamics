@@ -164,7 +164,7 @@ def audit(manifest_path: Path, images: Path, destination: Path, *, sheets: bool 
         if item.get("route") in {None, "", "colour-checked"}:
             flags.append("editing route not specific")
         if row["rgb_change"] != "" and row["rgb_change"] < 3 and not item["key"].startswith(("drone:", "staff-reference:")):
-            flags.append("little visible change against reference")
+            flags.append("little visible change from camera source")
         if row["bright_pixel_percent"] > 5:
             flags.append("many near-white pixels; inspect clipping")
         row["flags"] = "; ".join(flags)

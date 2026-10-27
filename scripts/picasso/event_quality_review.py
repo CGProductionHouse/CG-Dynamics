@@ -20,7 +20,7 @@ from PIL import Image, ImageDraw, ImageOps
 
 
 MODEL = Path(__file__).parent / "models" / "face_detection_yunet_2026may.onnx"
-VERSION = "0.3.2"
+VERSION = "0.3.3"
 CELL = 500
 LABEL = 55
 ROWS_PER_SHEET = 4
@@ -93,6 +93,23 @@ def comparison_metrics(source: Image.Image, output: Image.Image, box: tuple[int,
     return round(sharpness, 2), round(rgb_delta, 2), round(l_delta, 2)
 
 
+def crop_tone_metrics(image: Image.Image, box: tuple[int, int, int, int]) -> dict[str, float]:
+    """Describe the same native crop without assuming it is skin or the main subject."""
+    crop = image.crop(box)
+    crop.thumbnail((512, 512), Image.Resampling.LANCZOS)
+    pixels = np.asarray(crop.convert("RGB"), dtype=np.uint8)
+    lab = cv2.cvtColor(pixels, cv2.COLOR_RGB2LAB)
+    hsv = cv2.cvtColor(pixels, cv2.COLOR_RGB2HSV)
+    return {
+        "median_luma": round(float(np.median(lab[:, :, 0])), 1),
+        "p99_luma": round(float(np.percentile(lab[:, :, 0], 99)), 1),
+        "nearwhite_any_channel_pct": round(float(np.mean(np.max(pixels, axis=2) >= 253) * 100), 2),
+        "nearwhite_all_channels_pct": round(float(np.mean(np.min(pixels, axis=2) >= 253) * 100), 2),
+        "median_saturation": round(float(np.median(hsv[:, :, 1])), 1),
+        "median_lab_b": round(float(np.median(lab[:, :, 2]) - 128), 1),
+    }
+
+
 def make_sheet(rows: list[dict], destination: Path) -> None:
     sheet = Image.new("RGB", (CELL * 4, (CELL + LABEL) * len(rows)), (25, 25, 25))
     draw = ImageDraw.Draw(sheet)
@@ -102,7 +119,9 @@ def make_sheet(rows: list[dict], destination: Path) -> None:
         sheet.paste(row.pop("_output_full"), (CELL, y))
         sheet.paste(row.pop("_source_tile"), (CELL * 2, y))
         sheet.paste(row.pop("_output_tile"), (CELL * 3, y))
-        title = f"{row['key']} | {row['set']} | {row['roi_type']} | focus probe {row['laplacian_var']}"
+        title = (f"{row['key']} | {row['set']} | {row['roi_type']} | "
+                 f"focus probe {row['laplacian_var']} | output crop L50 {row['output_crop_median_luma']} "
+                 f"near-white {row['output_crop_nearwhite_any_channel_pct']}%")
         draw.text((8, y + CELL + 5), title[:130], fill="white")
         for column, label in enumerate(("ORIGINAL FULL SCENE: FACE CANDIDATES", "EDITED FULL SCENE", "ORIGINAL 100% CROP 1", "EDITED SAME CROP")):
             draw.text((column * CELL + 8, y + CELL + 28), label, fill="#dddddd")
@@ -185,11 +204,15 @@ def run(manifest_path: Path, destination: Path, keys: set[str] | None,
                 roi_type = "reviewer-selected subject box; inspect full scene"
                 candidate_boxes = [box]
             sharpness, rgb_delta, l_delta = comparison_metrics(source, result, box)
+            source_tone = crop_tone_metrics(source, box)
+            output_tone = crop_tone_metrics(result, box)
             row = {"key": item["key"], "set": item["set"], "source": str(source_path),
                    "output": str(output_path), "face_candidates": count, "roi_type": roi_type,
                    "crop_xyxy": json.dumps(box), "laplacian_var": sharpness,
                    "top_face_candidate_boxes_xyxy": json.dumps(candidate_boxes),
                    "mean_abs_rgb_delta": rgb_delta, "mean_l_delta": l_delta,
+                   **{f"source_crop_{key}": value for key, value in source_tone.items()},
+                   **{f"output_crop_{key}": value for key, value in output_tone.items()},
                    "native_subject_focus": "UNREVIEWED", "grade_vs_staff_reference": "UNREVIEWED",
                    "editorial_decision": "REVIEW"}
             report.append(row)
@@ -215,7 +238,7 @@ def run(manifest_path: Path, destination: Path, keys: set[str] | None,
     summary = {"tool_version": VERSION, "manifest": str(manifest_path), "camera_images": len(report),
                "no_face_candidates": sum(row["face_candidates"] == 0 for row in report),
                "median_mean_abs_rgb_delta": statistics.median(row["mean_abs_rgb_delta"] for row in report) if report else None,
-               "review_state": "UNREVIEWED; measurements are triage only"}
+               "review_state": "UNREVIEWED; detected crops may be the wrong person or a light; tone and focus measurements are triage only"}
     (destination / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
     print(json.dumps(summary, indent=2))
 
