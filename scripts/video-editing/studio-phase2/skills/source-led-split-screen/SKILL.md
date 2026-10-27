@@ -1,0 +1,18 @@
+---
+name: nolan-source-led-split-screen
+description: Evaluate whether simultaneous source actions add information at phone size before using a split-screen treatment.
+---
+
+# Source-led split screen — first real-footage candidate rejected
+
+**Reference:** [Three editing trends](https://www.tiktok.com/@gakulange/video/7519106258394303765) names and visually samples a split-screen treatment. The owner's broader request is for films with varied visual ideas, not repeating decorative panels. The reference sound was not heard and its exact split timing was not measured.
+
+**Decision before editing:** Identify what two simultaneous views tell the audience that a sequential cut cannot. The two sides need independently legible action, a true relation, consistent time/place claims and enough image area after the portrait crop. Do not combine unrelated client moments into a false single event. Labels must still read in the final phone frame.
+
+**Bounded test:** Existing local, hash-verified practice files were [Mixkit coffee-machine pour #41865](https://mixkit.co/free-stock-video/cup-being-filled-with-coffee-in-a-coffee-machine-41865/) and [Mixkit coffee-and-music #43391](https://mixkit.co/free-stock-video/coffee-and-music-in-the-morning-43391/) under Mixkit's [Stock Video Free License](https://mixkit.co/license/modal/videoFree/). The first is `883b7165…d331` and the second `f35d2e3b…666d7`, matching prior source records. Both are silent stock video; no direct-to-camera speech or crew direction was put in the proof. Source moments: pour 1.0–4.0 s and woman with cup 1.9–4.9 s. The first sampled contact sheet rejected the **closer** `#43390` view because her mouth/face dominate and she appears to address the camera; the wider `#43391` reaction was used for the render instead.
+
+`py render_practice.py PRIVATE_OUTPUT_DIRECTORY` makes a 3.000 s 540×960 sequential control and a same-source simultaneous split, plus a 270×480 contact sheet. The render is outside Git at `C:\Users\chris\Videos\CG-AI-Editing\Nolan-Skill-Proofs\split-screen-20261027\`. Both files fully decode. They are mute on purpose; this test is picture readability, not a sound-design pass. No stock original or derivative render is committed.
+
+**Finding:** At the phone contact scale, the split leaves each action about half-width. The pour, face and cup remain visible, but the side-by-side version divides attention without providing a stronger story than the plain pour-to-reaction cut. The two stock shoots are unrelated; `MAKE / ENJOY` risks implying this specific pour leads to this woman's cup. **Reject the split for this pair.** This is a source/story failure, not a reason to add blur, borders or more motion. Do not reuse this as a generic coffee panel in a client film.
+
+**Next valid test:** Find two views from one cleared shoot that reveal complementary facts at the same moment, or a genuinely explicit comparison whose relationship is stated honestly. Check both halves at full-speed and physical phone scale, then test an editable native split with separate audio and title layers. Preserve an unembellished cut as the baseline. The skill remains unmastered and no client treatment is approved.
