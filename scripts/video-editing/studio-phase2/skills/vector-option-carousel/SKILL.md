@@ -13,6 +13,8 @@ Choose the message before the wheel: use sequential emphasis only when one optio
 
 The three imported [Lucide](https://github.com/lucide-icons/lucide) SVGs are `house`, `briefcase-business` and `car`, pinned to commit `2ca268e74888d3506b3319fb8f94aaaaf70ceca9`. For these icons the upstream notice is **ISC**, not an assumed MIT licence; [the full upstream licence](assets/LUCIDE-LICENSE.txt) and [SHA-256 manifest](assets/SOURCE-MANIFEST.json) are committed with the original vectors. Space Grotesk is already present under SIL OFL 1.1. The practice uses fictional navy/cream/lime styling, with no client footage, logo, generated icon, stock scene or audio.
 
+The asset-local `.gitattributes` preserves SVG/licence bytes so Windows line-ending conversion cannot invalidate those hashes. A fresh `checkout-index` export with `core.autocrlf=true` passed all four pinned source-file hashes. This tests checkout portability; it is not a witnessed office installation or editor import.
+
 `python render_ab.py` verifies asset hashes and uses the **already installed Inkscape CLI** to rasterize styled copies, without altering the original SVGs or installing a package. It then creates [a static three-option control](proof/static-options.mp4) and [the rotating candidate](proof/orbital-options.mp4), both 540×960, 24 fps, 4.500 s and silent. SVGs, labels, script, [per-frame motion values](proof/motion-keyframes.json), [evidence](proof/evidence.json), [phone contact](proof/phone-contact.jpg) and [actual decoded settled frame](proof/encoded-business.png) are in Git for the office editor. The rasterizer path is Windows-specific and must be checked on another machine; no office runtime is claimed.
 
 ## Actual proof result
