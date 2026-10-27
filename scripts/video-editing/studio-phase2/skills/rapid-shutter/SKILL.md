@@ -1,0 +1,16 @@
+---
+name: nolan-rapid-shutter-cut
+description: Test a brief shutter cut across source-matched action, with an original tonal-versus-noise sound control and a plain-cut fallback.
+---
+
+# Rapid shutter cut — synthetic timing proof, not mastered
+
+**Reference:** [Dani's Rapid Shutter tutorial](https://www.tiktok.com/@justdodani/video/7445684422860377366) visually shows staggered short clips and a 90-degree directional-blur control. The displayed frames do not establish a universal clip length or prove that the effect suits a client. [Multiply Sound's comparison](https://www.tiktok.com/@multiply.sound/video/7597296358311103758) motivates a separate tonal-versus-noise sound experiment; its actual sound was not heard.
+
+**Use:** Only if outgoing/incoming subjects, direction, scale and story relation remain intelligible. Find the plain cut first, align the action peak to the chosen music event, then add brief alternate glimpses on a protected duplicate. Retain the existing grade and title legibility. Make any directional blur short enough to settle before the next shot's action. Flashing unrelated shots is a failure, however exciting the timeline looks.
+
+**Original proof:** `py render_synthetic_ab.py proof` makes [plain cut with noise](proof/plain-noise.mp4), [rapid shutter with tonal rise](proof/shutter-tonal.mp4), individual silent picture versions and cue WAVs. Both are 540×960, 30 fps, four seconds. All assets are generated from code. The [nine-frame contact sheet](proof/cut-contact.png) compares frames 55–64 around the cut. The first render made the circular subject teleport across the frame; it was **rejected and corrected** by starting room two at the outgoing x-position. The second render keeps direction and position consistent at the cut. Selected incoming frames receive a narrow vertical blur, and the shutter pattern settles after frame 62. This tests mechanics only; the design is deliberately schematic.
+
+**Measured sound control:** The two original mono cues share the same A drone and 2.000-second accent. Only the 1.72–2.00-second rise changes: deterministic noise versus a rising 220–440 Hz harmonic. WAV peaks both measure −15.0 dBFS; whole-file RMS −34.24 dBFS noise and −34.16 dBFS tonal. Similar overall RMS does not mean equal perceived loudness or musical fit. The proof's synthetic tones are not a reusable licensed sound library or a chosen client music bed.
+
+**Verification:** Both MP4s fully decode with H.264 video and AAC mono sound; `ffprobe` reports 4.000 seconds and 30 fps. The contact sheet was inspected at original size; its first, incorrect subject-position render was discarded. No normal-speed perceptual playback, sound listening, physical phone check, viewer-comfort check or native editor reopen has been done. **Do not apply the seven-frame alternation blindly to client footage; it may be too intense.** For a real edit, compare a shorter one- or two-glimpse version with the plain cut, inspect every frame for accidental occlusion/flicker and ask an independent editor to hear the full sequence. Maintain source sound and removable SFX stems. No plugin or purchase is required for the practice proof.
