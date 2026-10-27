@@ -94,7 +94,7 @@ def comparison_metrics(source: Image.Image, output: Image.Image, box: tuple[int,
 
 
 def crop_tone_metrics(image: Image.Image, box: tuple[int, int, int, int]) -> dict[str, float]:
-    """Describe the same native crop without assuming it is skin or the main subject."""
+    """Sample one source-coordinate crop without assuming it is skin or the main subject."""
     crop = image.crop(box)
     crop.thumbnail((512, 512), Image.Resampling.LANCZOS)
     pixels = np.asarray(crop.convert("RGB"), dtype=np.uint8)
