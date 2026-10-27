@@ -15,7 +15,7 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 ### 27 October — CG Hours Assistant daily capture and live read acceptance
 
-CA requested staff narration→CG Hours reliability; CA chat only for testing,
+Owner #898, focused PR #899, code4d3b1ab2 (open). CA requested staff narration→CG Hours reliability; CA chat only for testing,
 no staff chat/timesheet edits. [Exact receipt](CG-HOURS-ASSISTANT-ACCEPTANCE-2026-10-27.md).
 Live CA context/day/options read succeeds; all six active staff mappings verified
 SELECT-only, including Franco. Existing v73 bootstrap has four Hours tools but
@@ -23,7 +23,7 @@ no shared daily logging workflow. Reproduced decimal-hour rejection and 15-minut
 schema mismatch; focused source repair adds strict whole-minute conversion,
 read/reconcile/correct/read-back policy and truthful uncertain-response handling.
 No staff/Teams/calendar rewrite, automation change or invented hours.
-Local MCP392pass/1skip; Hours120pass; final focused18pass and hosted-derived
+Final local MCP393pass/1skip; Hours120pass; final focused18pass and hosted-derived
 candidate10pass. Build/app-bundle/scoped lint/Edge pure TS/diff checks pass.
 Three-file hosted-derived40-file packet preserves other37 files and v73 guideline
 repair; production release NOT approved/executed. CA Chrome navigation timed out;

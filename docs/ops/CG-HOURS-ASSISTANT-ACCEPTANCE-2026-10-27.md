@@ -1,5 +1,9 @@
 # CG Hours through the CG Dynamics Assistant — 27 October 2026
 
+Owner: [#898](https://github.com/CGProductionHouse/CG-Dynamics/issues/898).
+Reviewed code: [PR #899](https://github.com/CGProductionHouse/CG-Dynamics/pull/899),
+`4d3b1ab2` (open; no production release).
+
 ## Scope and live evidence
 
 CA requested normal ChatGPT staff work narration → canonical CG Hours logging,
@@ -46,8 +50,8 @@ existing owned draft entry; no invented travel duration or reimbursement.
 ## Verification and limits
 
 - Initial regressions reproduced duration/schema/workflow failures before repair.
-- Dynamics MCP/CG Hours suites: 393 total /392 pass /1 explicit skip /0 failure
-  before the final uncertain-response assertion; final focused suites 18/18.
+- Final Dynamics MCP/CG Hours suites: 394 total /393 pass /1 explicit skip /
+  0 failure; focused handler/transport suites18/18.
 - Existing CG Hours canonical staff-logger suite: 120/120 (local fixtures). Covers
   ownership, inactive/missing identity mappings, locked/approved weeks, audit,
   duplicate retries, correction and km boundaries. That repository was not edited.
