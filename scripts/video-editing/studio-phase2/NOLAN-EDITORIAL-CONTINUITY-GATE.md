@@ -2,6 +2,8 @@
 
 25 October 2026. Applies to the separate Studio lane and every later client edit. This records the owner's corrections alongside Nolan's existing production queue and the installed `cg-video-story-editor` story and moment-selection playbooks. It is a preflight decision record, not a new rendering system or a claim that any client video is approved.
 
+**Production execution correction, 27 October:** The owner explicitly cancelled the `nolan-studio-editing-skills` 30-minute heartbeat after repeated short status turns interrupted unfinished edits. It was deleted. Do not recreate a recurring edit-work reminder as a substitute for a sustained active production session. For an assigned film, continue through source screening, protected edit, export, cover/caption, technical checks, normal-speed review where genuinely available, and a verified internal handoff in the same working turn. A tool or desktop conflict should redirect to distinct useful work, not trigger a status-only reply. A later, narrowly scoped feedback monitor may be proposed only if the owner asks for one; routine unchanged checks must not message the owner.
+
 ## Authority before a new cut
 
 1. Read the active job, current client kit, current approval/revision messages and staff ownership. Nolan's `production-queue/2026-10-23-video-queue.md` is a continuity source, but its time-stamped state must be checked against current feedback. Keep the paused Nolan production automation paused.
