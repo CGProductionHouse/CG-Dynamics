@@ -52,6 +52,33 @@ class EventQualityReviewTest(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "hash mismatch"):
                 review.run(manifest, root / "tampered-review", None)
 
+    def test_flat_gallery_revision_builds_original_and_output_comparison(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            images = root / "images"
+            images.mkdir()
+            source = root / "camera.jpg"
+            edited = images / "fight-01.jpg"
+            Image.new("RGB", (800, 600), (60, 70, 90)).save(source, quality=95)
+            Image.new("RGB", (800, 600), (75, 75, 75)).save(edited, quality=95)
+            manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"count": 1, "items": [{
+                "key": "card1:001", "group": "Fight 01", "source": str(source),
+                "source_sha256": digest(source), "file": edited.name,
+                "output_sha256": digest(edited), "route": "stage-monochrome-v1",
+            }]}), encoding="utf-8")
+            result = root / "review"
+            review.run(manifest, result, {"card1:001"})
+            self.assertEqual(len(list((result / "crops").glob("Fight-01-*-p01.jpg"))), 1)
+            self.assertIn("card1:001", (result / "focus-and-grade-review.csv").read_text(encoding="utf-8-sig"))
+            manual = root / "manual"
+            review.run(manifest, manual, {"card1:001"}, {"card1:001": [100, 100, 500, 500]})
+            self.assertIn("reviewer-selected subject box", (manual / "focus-and-grade-review.csv").read_text(encoding="utf-8-sig"))
+            with self.assertRaisesRegex(ValueError, "outside original"):
+                review.run(manifest, root / "bad-box", {"card1:001"}, {"card1:001": [100, 100, 900, 500]})
+            with self.assertRaisesRegex(ValueError, "Missing camera keys"):
+                review.run(manifest, root / "missing", {"card1:002"})
+
 
 if __name__ == "__main__":
     unittest.main()

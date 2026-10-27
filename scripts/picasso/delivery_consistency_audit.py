@@ -21,7 +21,7 @@ import cv2
 import numpy as np
 from PIL import Image, ImageCms, ImageDraw, ImageOps
 
-VERSION = "0.1.0"
+VERSION = "0.2.0"
 FIELDS = ["key", "group", "file", "sha256", "source_sha256", "route", "width", "height",
           "median_luma", "p99_luma", "bright_pixel_percent", "mean_saturation", "rgb_change",
           "flags", "subject_focus", "grade_vs_reference", "scene_consistency",
@@ -103,7 +103,22 @@ def contact_pages(rows: list[dict], images: Path, destination: Path) -> None:
             sheet.save(contacts / f"{safe}-{start // 20 + 1:02}.jpg", quality=86)
 
 
-def audit(manifest_path: Path, images: Path, destination: Path, *, sheets: bool = True) -> dict:
+def reusable_rows(path: Path | None) -> dict[tuple[str, str], dict]:
+    if path is None:
+        return {}
+    with path.open(newline="", encoding="utf-8-sig") as stream:
+        reader = csv.DictReader(stream)
+        if not set(FIELDS).issubset(reader.fieldnames or []):
+            raise ValueError("Prior review CSV lacks required audit fields")
+        rows = list(reader)
+    by_key = {(row["key"], row["file"]): row for row in rows}
+    if len(by_key) != len(rows):
+        raise ValueError("Prior review CSV has duplicate key/file pairs")
+    return by_key
+
+
+def audit(manifest_path: Path, images: Path, destination: Path, *, sheets: bool = True,
+          reuse_review: Path | None = None) -> dict:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     items = manifest["items"]
     if manifest.get("count") != len(items):
@@ -114,18 +129,33 @@ def audit(manifest_path: Path, images: Path, destination: Path, *, sheets: bool 
     expected = {item["file"] for item in items}
     if actual != expected:
         raise ValueError(f"Image/manifest mismatch: missing={sorted(expected-actual)}, extra={sorted(actual-expected)}")
+    prior = reusable_rows(reuse_review)
     rows = []
+    reused = 0
     for item in items:
         name = item["file"]
         if Path(name).name != name:
             raise ValueError(f"Unsafe output file name: {name}")
         source = Path(item["source"]) if item.get("source") else None
-        values = metrics(images / name, source)
         output_hash = digest(images / name)
-        if item.get("source_sha256") and item["source_sha256"] != values["source_sha256"]:
+        source_hash = digest(source) if source is not None else ""
+        if item.get("source_sha256") and item["source_sha256"] != source_hash:
             raise ValueError(f"Camera source hash differs from manifest: {name}")
         if item.get("output_sha256") and item["output_sha256"] != output_hash:
             raise ValueError(f"Export hash differs from manifest: {name}")
+        previous = prior.get((item["key"], name))
+        if previous and previous["sha256"] == output_hash and previous["source_sha256"] == source_hash:
+            values = {field: previous[field] for field in ("width", "height", "median_luma", "p99_luma",
+                      "bright_pixel_percent", "mean_saturation", "rgb_change", "source_sha256")}
+            values["width"], values["height"] = int(values["width"]), int(values["height"])
+            for field in ("median_luma", "p99_luma", "bright_pixel_percent", "mean_saturation"):
+                values[field] = float(values[field])
+            values["rgb_change"] = float(values["rgb_change"]) if values["rgb_change"] else ""
+            reused += 1
+        else:
+            values = metrics(images / name, source)
+        if item.get("dimensions") and [values["width"], values["height"]] != item["dimensions"]:
+            raise ValueError(f"Export dimensions differ from manifest: {name}")
         row = {"key": item["key"], "group": item["group"], "file": name,
                "sha256": output_hash, "route": item.get("route", "UNRECORDED"), **values,
                "flags": "", "subject_focus": "UNREVIEWED", "grade_vs_reference": "UNREVIEWED",
@@ -154,7 +184,7 @@ def audit(manifest_path: Path, images: Path, destination: Path, *, sheets: bool 
         writer.writerows(rows)
     if sheets:
         contact_pages(rows, images, destination)
-    summary = {"version": VERSION, "count": len(rows),
+    summary = {"version": VERSION, "count": len(rows), "reused_metrics": reused,
                "groups": dict(Counter(row["group"] for row in rows)),
                "flagged": sum(bool(row["flags"]) for row in rows),
                "flags": dict(Counter(flag.strip() for row in rows for flag in row["flags"].split(";") if flag.strip())),
@@ -204,6 +234,7 @@ def main() -> None:
     parser.add_argument("--images", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--no-sheets", action="store_true")
+    parser.add_argument("--reuse-review", type=Path, help="Prior hash-bound audit CSV; unchanged JPEG measurements are reused")
     parser.add_argument("--check-release", action="store_true")
     parser.add_argument("--review", type=Path, help="Completed review CSV for --check-release")
     parser.add_argument("--acceptance", type=Path, help="Human accepted 25-frame record")
@@ -215,7 +246,8 @@ def main() -> None:
             check_release(args.review, args.acceptance, args.images, args.manifest)
             print("Release gate PASS")
         else:
-            summary = audit(args.manifest, args.images, args.out, sheets=not args.no_sheets)
+            summary = audit(args.manifest, args.images, args.out, sheets=not args.no_sheets,
+                            reuse_review=args.reuse_review)
             print(json.dumps(summary, indent=2))
     except (ValueError, FileNotFoundError, KeyError) as exc:
         print(f"Release gate BLOCKED: {exc}" if args.check_release else f"Audit failed: {exc}", file=sys.stderr)

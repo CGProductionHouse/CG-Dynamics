@@ -20,7 +20,7 @@ from PIL import Image, ImageDraw, ImageOps
 
 
 MODEL = Path(__file__).parent / "models" / "face_detection_yunet_2026may.onnx"
-VERSION = "0.3.0"
+VERSION = "0.3.2"
 CELL = 500
 LABEL = 55
 ROWS_PER_SHEET = 4
@@ -115,16 +115,48 @@ def safe_name(value: str) -> str:
     return f"{stem}-{hashlib.sha1(value.encode('utf-8')).hexdigest()[:6]}"
 
 
-def run(manifest_path: Path, destination: Path, keys: set[str] | None) -> None:
+def selected_rows(manifest: dict, manifest_path: Path, keys: set[str] | None) -> tuple[Path, list[dict]]:
+    """Normalize the original event manifest and immutable flat gallery revisions."""
+    if "rows" in manifest:
+        output_root = Path(manifest.get("output_root", manifest_path.parent / "output"))
+        selected = [row for row in manifest["rows"] if row.get("upload") and row.get("mode") in {"color", "mono"}]
+    elif "items" in manifest:
+        output_root = Path(manifest_path.parent / "images")
+        if manifest.get("count") != len(manifest["items"]):
+            raise ValueError("Flat gallery manifest count differs from items")
+        selected = []
+        for item in manifest["items"]:
+            name = item["file"]
+            if Path(name).name != name:
+                raise ValueError(f"Unsafe flat gallery filename: {name}")
+            selected.append({
+                "key": item["key"], "set": item["group"], "source": item["source"],
+                "source_sha256": item["source_sha256"], "output": name,
+                "output_sha256": item["output_sha256"], "upload": True,
+                "mode": "mono" if any(token in item.get("route", "").lower() for token in ("mono", "black-and-white")) else "color",
+            })
+    else:
+        raise ValueError("Manifest has neither event rows nor flat gallery items")
+    if len({row["key"] for row in selected}) != len(selected):
+        raise ValueError("Selected camera keys are not unique")
+    if keys is not None:
+        selected = [row for row in selected if row["key"] in keys]
+        if len(selected) != len(keys):
+            raise ValueError(f"Missing camera keys: {sorted(keys - {row['key'] for row in selected})}")
+    return output_root, selected
+
+
+def run(manifest_path: Path, destination: Path, keys: set[str] | None,
+        subject_boxes: dict[str, list[int]] | None = None) -> None:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    output_root = Path(manifest.get("output_root", manifest_path.parent / "output"))
+    output_root, selected = selected_rows(manifest, manifest_path, keys)
+    subject_boxes = subject_boxes or {}
+    unknown = set(subject_boxes) - {row["key"] for row in selected}
+    if unknown:
+        raise ValueError(f"Subject boxes name unselected camera keys: {sorted(unknown)}")
     if not MODEL.is_file():
         raise FileNotFoundError(f"Pinned local face detector missing: {MODEL}")
     detector = cv2.FaceDetectorYN.create(str(MODEL), "", (1200, 800), score_threshold=0.6)
-    selected = [r for r in manifest["rows"] if r.get("upload") and r.get("mode") in {"color", "mono"}
-                and (keys is None or r["key"] in keys)]
-    if keys and len(selected) != len(keys):
-        raise ValueError(f"Missing camera keys: {sorted(keys - {r['key'] for r in selected})}")
     destination.mkdir(parents=True, exist_ok=True)
     report: list[dict] = []
     pages: dict[str, list[dict]] = {}
@@ -140,6 +172,18 @@ def run(manifest_path: Path, destination: Path, keys: set[str] | None) -> None:
             if source.size != result.size:
                 raise ValueError(f"Dimensions changed for {item['key']}")
             box, count, roi_type, candidate_boxes = face_roi(source, detector)
+            if item["key"] in subject_boxes:
+                proposed = subject_boxes[item["key"]]
+                if (not isinstance(proposed, list) or len(proposed) != 4
+                    or any(not isinstance(value, int) or isinstance(value, bool) for value in proposed)):
+                    raise ValueError(f"Invalid subject box for {item['key']}")
+                x1, y1, x2, y2 = proposed
+                if not (0 <= x1 < x2 <= source.width and 0 <= y1 < y2 <= source.height
+                        and x2 - x1 >= 100 and y2 - y1 >= 100):
+                    raise ValueError(f"Subject box outside original or too small for {item['key']}")
+                box = (x1, y1, x2, y2)
+                roi_type = "reviewer-selected subject box; inspect full scene"
+                candidate_boxes = [box]
             sharpness, rgb_delta, l_delta = comparison_metrics(source, result, box)
             row = {"key": item["key"], "set": item["set"], "source": str(source_path),
                    "output": str(output_path), "face_candidates": count, "roi_type": roi_type,
@@ -181,8 +225,11 @@ def main() -> None:
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--keys", nargs="*", help="Optional camera keys for a focused proof")
+    parser.add_argument("--subject-boxes", type=Path,
+                        help="Private JSON mapping camera keys to native source [x1,y1,x2,y2] subject crops")
     args = parser.parse_args()
-    run(args.manifest, args.out, set(args.keys) if args.keys else None)
+    boxes = json.loads(args.subject_boxes.read_text(encoding="utf-8")) if args.subject_boxes else None
+    run(args.manifest, args.out, set(args.keys) if args.keys else None, boxes)
 
 
 if __name__ == "__main__":
