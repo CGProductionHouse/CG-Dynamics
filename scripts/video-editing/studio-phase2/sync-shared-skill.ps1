@@ -37,7 +37,9 @@ if ((Test-Path -LiteralPath $destination) -and -not $Force) {
     throw "Existing skill differs. Review it; rerun with -Install -Force to back it up and install the repository copy."
 }
 if (Test-Path -LiteralPath $destination) {
-    $backup = "$destination.backup-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
+    $backupRoot = Join-Path $codexRoot 'skill-backups'
+    New-Item -ItemType Directory -Force -Path $backupRoot | Out-Null
+    $backup = Join-Path $backupRoot "cg-video-story-editor-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
     Move-Item -LiteralPath $destination -Destination $backup
     Write-Output "BACKUP: $backup"
 }
