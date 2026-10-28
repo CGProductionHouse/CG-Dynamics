@@ -2,6 +2,8 @@
 
 Complete this gate for **every** new client video. A client name, monthly slot, archive folder, and attractive footage are inputs; they are not yet a story. Do not start assembling a timeline until the one-page brief below has a defensible answer for each question. If a key fact is missing, record the gap and gather the source or revise the concept.
 
+Read the [production standard](production-standard.md) for the cross-client owner rules and keep/change/reject checkpoint. Older posted shoots may supply genuinely different moments for a new story job; the prohibition is lifting a previously published beat/story as-is, not a blanket exclusion of a whole shoot. Treat material uncertainty honestly and resolve it before declaring a select fresh.
+
 ## Evidence before concept
 
 1. Resolve the exact client and month. Read the current client guide, monthly strategy, package, content guideline, recent client corrections, current logo/brand kit, and latest published covers and poster designs (including Canva when that is where the client keeps them). Keep draft strategies distinct from approved instructions.

@@ -1,5 +1,7 @@
 # Nolan Studio tutorial-skill status
 
+**28 October production baseline:** The shared [production standard](../../../.agents/skills/cg-video-story-editor/references/production-standard.md) is mandatory across all technique choices. The new [exposure/colour workflow](../../../.agents/skills/cg-video-story-editor/references/exposure-colour-matching.md) requires per-shot correction, neighbour matching and an appropriate final look; it is a production requirement, not a newly mastered/tested grade. [Feedback audit](OWNER-FEEDBACK-SYSTEM-AUDIT-20261028.md) records gaps/conflicts and office propagation limits. Existing technique proof states below are unchanged by this rules audit.
+
 Use the [per-reference execution board](TUTORIAL-EXECUTION-BOARD-20261027.md) to route every item in the 53-video collection and later owner sets to its proof, rejection or remaining distinct gate. It prevents a visually sampled tutorial from being counted as implemented.
 
 Seven later owner references have a [27 October intake](NEW-REFERENCE-INTAKE-20261027.md): freeze/grow/split, layered panels/burns, a filmed last-frame screen reveal, rapid shutter, regular/tonal sound, a previously indexed SFX breakdown and a cinematic travel edit. One [synthetic rapid-shutter/sound A/B](skills/rapid-shutter/SKILL.md) tests cut position, alternate glimpses and a generated tonal-versus-noise rise. It remains unmastered and unheard.
