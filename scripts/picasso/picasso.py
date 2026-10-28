@@ -23,13 +23,14 @@ import cv2
 import numpy as np
 from PIL import Image, ImageCms, ImageDraw, ImageOps, __version__ as pillow_version
 
-VERSION = "0.3.12"
+VERSION = "0.3.13"
 FACE_MODEL = Path(__file__).resolve().parent / "models" / "face_detection_yunet_2026may.onnx"
 FACE_MODEL_SHA256 = "ebafce4e3c118d6554634be5c27ab333b4c047a9a8c3faf1d7cf93101c22f0f0"
 SETTINGS = {"jpeg_quality": 94, "max_ev": 0.35, "max_wb": 0.025, "max_shadow_lift": 0.07,
             "max_highlight_pull": 0.05, "max_contrast": 0.035, "max_saturation": 0.035,
             "highlight_guard_start": 0.8, "highlight_guard_end": 0.985,
             "face_detector": "opencv_yunet_2026may", "face_model_sha256": FACE_MODEL_SHA256}
+CHECKPOINT_EVERY = 25
 SUFFIXES = {".jpg", ".jpeg"}
 FILE_ATTRIBUTE_OFFLINE = 0x1000
 FILE_ATTRIBUTE_RECALL_ON_OPEN = 0x40000
@@ -237,36 +238,38 @@ def settings_for(a: dict, look: str = "natural") -> dict:
 
 
 def finish(image: Image.Image, settings: dict, analysis: dict) -> Image.Image:
-    original = np.asarray(image, dtype=np.float32) / 255.0
-    a = original.copy()
-    ev = settings["exposure_ev"]
-    a *= 2 ** ev
-    luma = a @ np.array([.2126, .7152, .0722], np.float32)
-    lift = settings["shadow_lift"] * np.square(np.clip(1 - luma / .65, 0, 1))
-    pull = settings["highlight_pull"] * np.square(np.clip((luma - .65) / .35, 0, 1))
-    a = a + lift[..., None] - pull[..., None]
-    wb = settings["red_blue_balance"]
-    a[..., 0] *= (1 + wb)
-    a[..., 2] *= (1 - wb)
-    a = np.clip((a - .5) * (1 + settings["contrast"]) + .5, 0, 1)
-    gray = (a @ np.array([.2126, .7152, .0722], np.float32))[..., None]
-    a = np.clip(gray + (a - gray) * (1 + settings["saturation"]), 0, 1)
-    # Taper positive changes near bright source channels. This prevents the
-    # first pass from turning JPEG highlight detail into new hard clipping.
-    # Existing clipped source channels remain unrecoverable.
-    source_peak = original.max(axis=2, keepdims=True)
-    headroom = np.clip((SETTINGS["highlight_guard_end"] - source_peak) /
-                       (SETTINGS["highlight_guard_end"] - SETTINGS["highlight_guard_start"]), 0, 1)
-    headroom = headroom * headroom * (3 - 2 * headroom)
-    delta = a - original
-    # A fully clipped neutral JPEG sky has no recoverable texture. Global
-    # darkening would turn it into a featureless grey patch, so retain those
-    # source whites while still toning the subjects and coloured background.
-    neutral_white = np.clip((original.min(axis=2, keepdims=True) - .90) / .08, 0, 1)
-    neutral_white = neutral_white * neutral_white * (3 - 2 * neutral_white)
-    a = np.clip(original + np.minimum(delta, 0) * (1 - neutral_white)
-                + np.maximum(delta, 0) * headroom, 0, 1)
-    return Image.fromarray(np.uint8(np.round(a * 255)), "RGB")
+    # Every adjustment is pixel-local. Process strips so a 6000x4000 JPEG does
+    # not require several full-frame float arrays at once on a Windows host.
+    result = Image.new("RGB", image.size)
+    for top in range(0, image.height, 256):
+        bottom = min(image.height, top + 256)
+        original = np.asarray(image.crop((0, top, image.width, bottom)), dtype=np.float32) / 255.0
+        a = original.copy()
+        ev = settings["exposure_ev"]
+        a *= 2 ** ev
+        luma = a @ np.array([.2126, .7152, .0722], np.float32)
+        lift = settings["shadow_lift"] * np.square(np.clip(1 - luma / .65, 0, 1))
+        pull = settings["highlight_pull"] * np.square(np.clip((luma - .65) / .35, 0, 1))
+        a = a + lift[..., None] - pull[..., None]
+        wb = settings["red_blue_balance"]
+        a[..., 0] *= (1 + wb)
+        a[..., 2] *= (1 - wb)
+        a = np.clip((a - .5) * (1 + settings["contrast"]) + .5, 0, 1)
+        gray = (a @ np.array([.2126, .7152, .0722], np.float32))[..., None]
+        a = np.clip(gray + (a - gray) * (1 + settings["saturation"]), 0, 1)
+        # Taper positive changes near bright source channels. Existing clipped
+        # JPEG channels remain unrecoverable.
+        source_peak = original.max(axis=2, keepdims=True)
+        headroom = np.clip((SETTINGS["highlight_guard_end"] - source_peak) /
+                           (SETTINGS["highlight_guard_end"] - SETTINGS["highlight_guard_start"]), 0, 1)
+        headroom = headroom * headroom * (3 - 2 * headroom)
+        delta = a - original
+        neutral_white = np.clip((original.min(axis=2, keepdims=True) - .90) / .08, 0, 1)
+        neutral_white = neutral_white * neutral_white * (3 - 2 * neutral_white)
+        a = np.clip(original + np.minimum(delta, 0) * (1 - neutral_white)
+                    + np.maximum(delta, 0) * headroom, 0, 1)
+        result.paste(Image.fromarray(np.uint8(np.round(a * 255)), "RGB"), (0, top))
+    return result
 
 
 def make_preview(original: Image.Image, edited: Image.Image, path: Path) -> None:
@@ -390,10 +393,15 @@ def run(source: Path, job: Path, limit: int | None,
     if existing and (Path(existing["source_root"]).resolve() != source.resolve() or existing["settings"] != SETTINGS
                      or existing.get("look", "natural") != look):
         raise ValueError("Existing job source or settings differ; create a new job folder")
-    if existing and [r["source_name"] for r in existing["items"]] != [p.name for p in files]:
-        raise ValueError("Source inventory changed; create a new job folder to avoid ambiguous outputs")
+    names = [path.name for path in files]
+    if existing:
+        recorded = existing.get("source_inventory")
+        prior_names = [row["source_name"] for row in existing["items"]]
+        if (recorded is not None and recorded != names) or prior_names != names[:len(prior_names)]:
+            raise ValueError("Source inventory changed; create a new job folder to avoid ambiguous outputs")
     rows = {row["source_name"]: row for row in existing["items"]} if existing else {}
-    manifest = {"picasso_version": VERSION, "source_root": str(source.resolve()), "settings": SETTINGS,
+    manifest = {"picasso_version": VERSION, "source_root": str(source.resolve()),
+                "source_inventory": names, "settings": SETTINGS,
                 "look": look,
                 "runtime": {"python": sys.version.split()[0], "pillow": pillow_version, "opencv": cv2.__version__},
                 "started_at": existing["started_at"] if existing else datetime.now().isoformat(),
@@ -403,6 +411,8 @@ def run(source: Path, job: Path, limit: int | None,
     start = time.monotonic()
     hashes = []
     resumed = set()
+    if existing is None:
+        atomic_json(manifest_path, manifest)
     for index, path in enumerate(files):
         name = path.name
         old = rows.get(name)
@@ -445,14 +455,15 @@ def run(source: Path, job: Path, limit: int | None,
         except Exception as error:
             row.update(status="error", error=f"{type(error).__name__}: {error}", classification="REVIEW")
         manifest["items"].append(row)
-        atomic_json(manifest_path, manifest)
+        if len(manifest["items"]) % CHECKPOINT_EVERY == 0 or row["status"] == "error":
+            atomic_json(manifest_path, manifest)
     # Similarity is advisory. Keep the hint even when colour review takes precedence.
     for i, (name, row) in enumerate(hashes):
         if row["status"] != "complete":
             continue
         row.pop("similarity_hint", None)
         nearest = None
-        for prior_name, prior in hashes[:i]:
+        for prior_name, prior in hashes[max(0, i - 25):i]:
             if prior.get("status") == "complete" and prior.get("analysis") and row.get("analysis"):
                 distance = sum(a != b for a, b in zip(row["analysis"]["dhash"], prior["analysis"]["dhash"]))
                 if nearest is None or distance < nearest[0]:
@@ -463,8 +474,8 @@ def run(source: Path, job: Path, limit: int | None,
                 row["classification"] = "ALTERNATE"
                 row["review_note"] = f"Visual similarity to {nearest[1]}; keep documentary moments manually"
     manifest["elapsed_seconds_last_run"] = round(time.monotonic() - start, 2)
-    manifest["items"] = [next((r for n, r in hashes if n == item["source_name"]), item)
-                         for item in manifest["items"]]
+    by_name = dict(hashes)
+    manifest["items"] = [by_name.get(item["source_name"], item) for item in manifest["items"]]
     approval = existing.get("internal_review_approval") if existing else None
     if approval:
         current = {r["id"]: r for r in manifest["items"]}

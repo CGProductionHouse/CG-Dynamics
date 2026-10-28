@@ -21,6 +21,35 @@ def sha(path: Path) -> str:
 
 
 class PicassoJobTest(unittest.TestCase):
+    def test_strip_renderer_preserves_prior_pixel_result(self):
+        pixels = np.random.default_rng(2).integers(0, 256, (360, 600, 3), dtype=np.uint8)
+        settings = {"exposure_ev": .22, "shadow_lift": .04, "highlight_pull": .02,
+                    "red_blue_balance": .01, "contrast": .015, "saturation": .01}
+        output = finish(Image.fromarray(pixels, "RGB"), settings, {})
+        self.assertEqual(hashlib.sha256(output.tobytes()).hexdigest(),
+                         "a82ccae24250561267edc6f2b67822b120ab187dc67deedcfa8ee2c5ebe2caa6")
+
+    def test_partial_checkpoint_resumes_without_reencoding_completed_frame(self):
+        with tempfile.TemporaryDirectory() as root:
+            base = Path(root)
+            source, job = base / "source", base / "job"
+            source.mkdir()
+            Image.new("RGB", (180, 120), (80, 60, 40)).save(source / "a.jpg", "JPEG")
+            Image.new("RGB", (180, 120), (90, 65, 45)).save(source / "b.jpg", "JPEG")
+            self.assertEqual(run(source, job, None), 0)
+            manifest_path = job / "manifest.json"
+            full = json.loads(manifest_path.read_text(encoding="utf-8"))
+            first_hash = sha(job / "output" / "0001.jpg")
+            partial = {**full, "items": full["items"][:1]}
+            manifest_path.write_text(json.dumps(partial), encoding="utf-8")
+            (job / "output" / "0002.jpg").unlink()
+            (job / "previews" / "0002.jpg").unlink()
+            self.assertEqual(run(source, job, None), 0)
+            resumed = json.loads(manifest_path.read_text(encoding="utf-8"))
+            self.assertEqual(len(resumed["items"]), 2)
+            self.assertEqual(sha(job / "output" / "0001.jpg"), first_hash)
+            self.assertEqual(resumed["source_inventory"], ["a.jpg", "b.jpg"])
+
     def test_formal_look_is_recorded_and_cannot_change_during_resume(self):
         with tempfile.TemporaryDirectory() as root:
             base = Path(root)

@@ -1,7 +1,7 @@
 param(
     [ValidateSet('Check', 'Install')]
     [string]$Mode = 'Check',
-    [string]$Destination = (Join-Path $env:LOCALAPPDATA 'CGProductionHouse\PICASSO\runtime-0.3.11')
+    [string]$Destination = (Join-Path $env:LOCALAPPDATA 'CGProductionHouse\PICASSO\runtime-0.3.13')
 )
 
 $ErrorActionPreference = 'Stop'
@@ -22,6 +22,7 @@ if ($Mode -eq 'Install') {
     }
     New-Item -ItemType Directory -Path (Join-Path $destinationFull 'models') -Force | Out-Null
     Copy-Item -LiteralPath (Join-Path $source 'picasso.py') -Destination $destinationFull -Force
+    Copy-Item -LiteralPath (Join-Path $source 'shoot_index.py') -Destination $destinationFull -Force
     Copy-Item -LiteralPath (Join-Path $source 'SKILL.md') -Destination $destinationFull -Force
     Copy-Item -LiteralPath (Join-Path $source 'requirements-windows.txt') -Destination $destinationFull -Force
     Copy-Item -LiteralPath $model -Destination (Join-Path $destinationFull 'models') -Force
@@ -34,12 +35,14 @@ if ($Mode -eq 'Install') {
     & $venvPython -m pip install --disable-pip-version-check -r (Join-Path $destinationFull 'requirements-windows.txt')
     if ($LASTEXITCODE -ne 0) { throw 'PICASSO free Python dependency installation failed.' }
     $runner = Join-Path $destinationFull 'picasso.py'
+    $indexer = Join-Path $destinationFull 'shoot_index.py'
     $model = Join-Path $destinationFull 'models\face_detection_yunet_2026may.onnx'
 } else {
     $pythonCommand = Get-Command python -ErrorAction SilentlyContinue
     if (-not $pythonCommand) { throw 'Python is not available on this Windows host.' }
     $venvPython = $pythonCommand.Source
     $runner = Join-Path $source 'picasso.py'
+    $indexer = Join-Path $source 'shoot_index.py'
 }
 
 $probe = @'
@@ -59,6 +62,8 @@ $runtime = $probe | & $venvPython -
 if ($LASTEXITCODE -ne 0) { throw 'PICASSO host runtime check failed.' }
 & $venvPython $runner --help | Out-Null
 if ($LASTEXITCODE -ne 0) { throw 'PICASSO runner cannot start.' }
+& $venvPython $indexer --help | Out-Null
+if ($LASTEXITCODE -ne 0) { throw 'PICASSO large-shoot indexer cannot start.' }
 if ((Get-FileHash -LiteralPath $model -Algorithm SHA256).Hash -ne $expectedModelHash) {
     throw 'Installed PICASSO model hash differs from reviewed source.'
 }
