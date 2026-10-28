@@ -8,6 +8,13 @@ $ErrorActionPreference = 'Stop'
 $source = $PSScriptRoot
 $model = Join-Path $source 'models\face_detection_yunet_2026may.onnx'
 $expectedModelHash = 'EBAFCE4E3C118D6554634BE5C27AB333B4C047A9A8C3FAF1D7CF93101C22F0F0'
+$portableFiles = @(
+    'picasso.py', 'shoot_index.py', 'assemble_gallery_revision.py',
+    'delivery_consistency_audit.py', 'event_quality_review.py', 'sanitize_editor_jpeg.py',
+    'verify_gallery_download.py', 'SKILL.md', 'requirements-windows.txt',
+    'references\event-quality-gate.md', 'references\large-shoot.md',
+    'models\face_detection_yunet_2026may.onnx', 'models\LICENSE-YuNet.txt'
+)
 if (-not (Test-Path -LiteralPath $model -PathType Leaf)) { throw 'PICASSO model is missing from the checkout.' }
 if ((Get-FileHash -LiteralPath $model -Algorithm SHA256).Hash -ne $expectedModelHash) {
     throw 'PICASSO model hash does not match the reviewed source.'
@@ -76,6 +83,33 @@ if ($LASTEXITCODE -ne 0) { throw 'PICASSO large-shoot indexer cannot start.' }
 if ($LASTEXITCODE -ne 0) { throw 'PICASSO gallery download verifier cannot start.' }
 if ((Get-FileHash -LiteralPath $model -Algorithm SHA256).Hash -ne $expectedModelHash) {
     throw 'Installed PICASSO model hash differs from reviewed source.'
+}
+if ($Mode -eq 'Install') {
+    $runtimeDetails = $runtime | ConvertFrom-Json
+    $runtimeManifest = [ordered]@{
+        schema_version = 1
+        runtime_version = '0.3.13'
+        python = $runtimeDetails.python
+        opencv = $runtimeDetails.opencv
+        numpy = $runtimeDetails.numpy
+        pillow = $runtimeDetails.pillow
+        architecture = $runtimeDetails.architecture
+        files = @($portableFiles | ForEach-Object {
+            $installedFile = Join-Path $destinationFull $_
+            if (-not (Test-Path -LiteralPath $installedFile -PathType Leaf)) {
+                throw "Installed PICASSO runtime is missing $_"
+            }
+            [ordered]@{
+                path = $_.Replace('\', '/')
+                sha256 = (Get-FileHash -LiteralPath $installedFile -Algorithm SHA256).Hash.ToLowerInvariant()
+            }
+        })
+    }
+    $manifestJson = $runtimeManifest | ConvertTo-Json -Depth 4
+    $manifestPath = Join-Path $destinationFull 'runtime-manifest.json'
+    [System.IO.File]::WriteAllText($manifestPath, $manifestJson + [Environment]::NewLine,
+        [System.Text.UTF8Encoding]::new($false))
+    Write-Output "Runtime manifest: $manifestPath"
 }
 Write-Output $runtime
 Write-Output "PICASSO host $Mode passed; runner=$runner"
