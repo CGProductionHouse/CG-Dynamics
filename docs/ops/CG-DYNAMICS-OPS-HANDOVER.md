@@ -11,6 +11,8 @@
 
 [Native Transform blur continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-TRANSFORM-BLUR-STUDY-20261028.md) verifies actual0/180/90-degree effect controls and180 native reopen/export72/72 decoded parity. Native fast-entry repeated edges/layout remain rejected as production defaults; parameter-only revision has only2/48 encoded hold frames equal. No mastered/native-every-family claim. Next distinct existing mechanism: native footage-in-type alpha matte/solid-stroke reveal;45families unchanged.
 
+[Native footage-in-type continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-FOOTAGE-TYPE-STUDY-20261028.md) adds plain/title controls, actual editable alpha-matte/vector reveal and protected24→18 timing revision. Both native saved/reopened versions48/48 decoded equal;18/18 revision opening equal, tail0/6 exact. Dark/withheld-action limitations retained; six exports,45families unchanged. Next distinct native context zoom-out/easing gate. Actual23:08 scheduled wake queued while editing continued, no duplicate worker or client/storage change.
+
 Owner explicitly requested office PC primary execution because MSI is unreliable.
 [Takeover brief](../../scripts/video-editing/studio-phase2/OFFICE-RESEARCH-TAKEOVER-20261028.md)
 in existing draft875 records the45-family library, four private Drive archives

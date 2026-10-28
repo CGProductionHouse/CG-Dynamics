@@ -1,5 +1,8 @@
 # Nolan Studio tutorial execution board
 
+**Office native aperture continuation28October:** [native footage-in-type study](OFFICE-NATIVE-FOOTAGE-TYPE-STUDY-20261028.md): plain/title controls, actual native alpha-matte/vector reveal and earlier timing revision; six48-frame exports decode. Both R02/R03 save/close/reopen/re-export48/48 decoded parity. Revision opening18/18 identical; tail0/6 equal. Dark/fragmented fill and delayed craft proof remain creative limitations.45families unchanged; next distinct native context zoom-out/easing gate.
+
+
 **Office native blur continuation28October:** [native Transform study](OFFICE-NATIVE-TRANSFORM-BLUR-STUDY-20261028.md): actual native0°/180°/90° controls/revision over the protected coffee selection,180 saved/closed/reopened/exported72/72 decoded frames equal. Fast180 entry shows repeated edges;90 reduces smear, no production-default approval. Native parameter revision is protected; only2/48 encoded hold frames identical.45families unchanged; phone/heard/creative/second-PC gates remain.
 
 
@@ -47,7 +50,7 @@
 | 24 | Text in 3D space → [scene type](skills/scene-perspective-type/SKILL.md) | P/X: bounded natural wood track/control/revision and actual seam-placement repair now in office study; general depth/native/creative gates remain |
 | 25 | [Context zoom-out](skills/context-zoom-out/SKILL.md) | P: new portrait pour plain/linear/eased A/B retains action and returns exactly to full source; normal-speed/native keyframe gate |
 | 26 | Directional flash | R: sampled adjustment controls; [exposure flash](skills/exposure-flash-transition/SKILL.md) negative is a different treatment |
-| 27 | Three-frame zoom → [short zoom](skills/short-zoom-cuts/SKILL.md), [graphic blur subskill](skills/graphic-transform-blur/SKILL.md) | P/X: portrait saw cuts fail action fit; new original blur/no-blur proof preserves a sharp hold but does not solve those source failures |
+| 27 | Three-frame zoom → [short zoom](skills/short-zoom-cuts/SKILL.md), [graphic blur subskill](skills/graphic-transform-blur/SKILL.md) | P/X: portrait saw cuts fail action fit; original blur/no-blur sharp hold plus actual office native Transform/reopen72/72 parity; stepped native entry/layout and saw source failures remain |
 | 28 | Motion trail clones → [trail card](skills/motion-trail-clones/SKILL.md) | P/X: skater path found; tree bleed and board grounding reject matte |
 | 29 | SFX suggestion list | R: cue names only; use [source-led audio](skills/sound-led-cuts/SKILL.md), not unlicensed examples |
 | 30 | Walk through text → [depth type](skills/depth-type/SKILL.md) | P/X: green-screen mechanics, natural foreground/word-readability gate |
