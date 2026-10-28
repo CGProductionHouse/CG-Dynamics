@@ -21,6 +21,8 @@
 
 [Native icon continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-VECTOR-STUDY-20261029.md) adds seven108-frame native outputs, three108/108reopen pairs,72-framecopy/19-framepath revision protection. SVG rejection and straight-path collision retained; perimeter repair separates icons108/108frames. Imported AI art is rasterized; active labels/easing/loop/phone/heard/second-PC/creative gates remain.45families unchanged; next existing stabilization native gate.
 
+[Native stabilization continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-STABILIZATION-STUDY-20261029.md) adds six72-frame nativecontrols/revision, both72/72actualreopen pairs and49/49protected prefix. New uprightlandscapespan preserveswalker;default50crowdsheadroom/worsensmetric,PSR5reducesdiagnostic22.8%. Source/portrait/phone/heard/second-PC/creativeboundariesremain.45families; next existing native muffled-perspective gate.
+
 Owner explicitly requested office PC primary execution because MSI is unreliable.
 [Takeover brief](../../scripts/video-editing/studio-phase2/OFFICE-RESEARCH-TAKEOVER-20261028.md)
 in existing draft875 records the45-family library, four private Drive archives
