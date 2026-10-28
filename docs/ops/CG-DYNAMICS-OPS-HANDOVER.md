@@ -9,6 +9,8 @@
 
 [Natural unkeyed plane continuation](../../scripts/video-editing/studio-phase2/OFFICE-UNKEYED-PLANE-STUDY-20261028.md) adds five96-frame native-HD wood/control/revision exports. Refreshed wood-only features plus independent rectified texture support attachment;48/48 opening frames equal. R02 seam-crossing placement rejected and R03 moved to one continuous plank. General depth/native/phone/heard/creative gates remain. Next distinct item5 kinetic type/remaining board mechanism;45families unchanged. Actual22:08 scheduled wake pending while this work proceeds, no duplicate editing worker.
 
+[Native Transform blur continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-TRANSFORM-BLUR-STUDY-20261028.md) verifies actual0/180/90-degree effect controls and180 native reopen/export72/72 decoded parity. Native fast-entry repeated edges/layout remain rejected as production defaults; parameter-only revision has only2/48 encoded hold frames equal. No mastered/native-every-family claim. Next distinct existing mechanism: native footage-in-type alpha matte/solid-stroke reveal;45families unchanged.
+
 Owner explicitly requested office PC primary execution because MSI is unreliable.
 [Takeover brief](../../scripts/video-editing/studio-phase2/OFFICE-RESEARCH-TAKEOVER-20261028.md)
 in existing draft875 records the45-family library, four private Drive archives

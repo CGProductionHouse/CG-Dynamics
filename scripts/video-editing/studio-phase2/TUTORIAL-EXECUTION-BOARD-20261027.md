@@ -1,5 +1,8 @@
 # Nolan Studio tutorial execution board
 
+**Office native blur continuation28October:** [native Transform study](OFFICE-NATIVE-TRANSFORM-BLUR-STUDY-20261028.md): actual native0°/180°/90° controls/revision over the protected coffee selection,180 saved/closed/reopened/exported72/72 decoded frames equal. Fast180 entry shows repeated edges;90 reduces smear, no production-default approval. Native parameter revision is protected; only2/48 encoded hold frames identical.45families unchanged; phone/heard/creative/second-PC gates remain.
+
+
 **Office natural-plane continuation28October:** [unkeyed wood study](OFFICE-UNKEYED-PLANE-STUDY-20261028.md): five native-HD96-frame controls/revision, wood-only feature-refreshed homography and independent rectified-texture check;48/48 decoded opening frames protected. Fixed camera-space type slides. Seam-crossing R02 rejected; R03 moves ink onto one continuous plank. General depth remains unproved; no native/phone/heard/creative mastery.45families unchanged.
 
 
@@ -41,7 +44,7 @@
 | 21 | Pop-up words → [staggered type](skills/staggered-type/SKILL.md) | P/R: synthetic timing plus [actual office native layered title/save/reopen/copy-revision/export](OFFICE-NATIVE-TYPE-STUDY-20261028.md); physical-phone/heard/creative and second-editor gates remain |
 | 22 | Construction speed montage → [motion speed](skills/motion-matched-speed/SKILL.md) | P/R: individual ramp proof, no multi-shot construction continuity proof |
 | 23 | Caption controls → [kinetic caption](skills/kinetic-caption-finishing/SKILL.md) | R/P: native-vs-third-party origin unresolved; bounded local caption tests exist |
-| 24 | Text in 3D space → [scene type](skills/scene-perspective-type/SKILL.md) | P/X: projected board/grass tests still look graphical; tracked-plane gate |
+| 24 | Text in 3D space → [scene type](skills/scene-perspective-type/SKILL.md) | P/X: bounded natural wood track/control/revision and actual seam-placement repair now in office study; general depth/native/creative gates remain |
 | 25 | [Context zoom-out](skills/context-zoom-out/SKILL.md) | P: new portrait pour plain/linear/eased A/B retains action and returns exactly to full source; normal-speed/native keyframe gate |
 | 26 | Directional flash | R: sampled adjustment controls; [exposure flash](skills/exposure-flash-transition/SKILL.md) negative is a different treatment |
 | 27 | Three-frame zoom → [short zoom](skills/short-zoom-cuts/SKILL.md), [graphic blur subskill](skills/graphic-transform-blur/SKILL.md) | P/X: portrait saw cuts fail action fit; new original blur/no-blur proof preserves a sharp hold but does not solve those source failures |

@@ -1,5 +1,8 @@
 # Nolan Studio tutorial-skill status
 
+**Office native blur continuation28October:** [native Transform study](OFFICE-NATIVE-TRANSFORM-BLUR-STUDY-20261028.md): actual native0°/180°/90° controls/revision over the protected coffee selection,180 saved/closed/reopened/exported72/72 decoded frames equal. Fast180 entry shows repeated edges;90 reduces smear, no production-default approval. Native parameter revision is protected; only2/48 encoded hold frames identical.45families unchanged; phone/heard/creative/second-PC gates remain.
+
+
 **Office natural-plane continuation28October:** [unkeyed wood study](OFFICE-UNKEYED-PLANE-STUDY-20261028.md): five native-HD96-frame controls/revision, wood-only feature-refreshed homography and independent rectified-texture check;48/48 decoded opening frames protected. Fixed camera-space type slides. Seam-crossing R02 rejected; R03 moves ink onto one continuous plank. General depth remains unproved; no native/phone/heard/creative mastery.45families unchanged.
 
 

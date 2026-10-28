@@ -1,5 +1,8 @@
 # Nolan Studio — categorised skill progress,28 October2026
 
+**Office native blur continuation28October:** [native Transform study](OFFICE-NATIVE-TRANSFORM-BLUR-STUDY-20261028.md): actual native0°/180°/90° controls/revision over the protected coffee selection,180 saved/closed/reopened/exported72/72 decoded frames equal. Fast180 entry shows repeated edges;90 reduces smear, no production-default approval. Native parameter revision is protected; only2/48 encoded hold frames identical.45families unchanged; phone/heard/creative/second-PC gates remain.
+
+
 **Office natural-plane continuation28October:** [unkeyed wood study](OFFICE-UNKEYED-PLANE-STUDY-20261028.md): five native-HD96-frame controls/revision, wood-only feature-refreshed homography and independent rectified-texture check;48/48 decoded opening frames protected. Fixed camera-space type slides. Seam-crossing R02 rejected; R03 moves ink onto one continuous plank. General depth remains unproved; no native/phone/heard/creative mastery.45families unchanged.
 
 
@@ -127,7 +130,7 @@ Useful ordered work (finish any WIP before advancing):
 2. Natural foreground — bounded native park proof now passes technical selection/tracking/save/reopen/revision above; fine hair, wider scenes, phone/heard/second-editor acceptance remain. Next distinct work is item3; do not re-export this same selection to inflate progress.
 3. Genuine different-shot forward handoff now has bounded source-derived reframe/control/revision proof above. Retime-only mismatch and actual filmed sideways-whip gate remain. Next distinct item4 natural unkeyed plane; do not repeat identical exports.
 4. Natural unkeyed moving wood plane now has a bounded96-frame source/control/revision proof above. Recessed seam depth, arbitrary planes and native editability remain open. Advance to item5; do not repeat the identical selection.
-5. Deeper source-led kinetic type and remaining distinct unfinished board mechanisms. Capture-dependent same-object/physical stop-motion/device transition stay source-gated where genuine cleared captures are absent.
+5. Native graphic Transform blur/control/reopen/shutter revision now has a bounded receipt above; stepped entry/layout remain rejected as production defaults. Next distinct mechanism: native footage-in-type alpha-matte/solid-stroke reveal with a useful source and plain opening. Continue remaining distinct unfinished board mechanisms. Capture-dependent same-object/physical stop-motion/device transition stay source-gated where genuine cleared captures are absent.
 6. Match purposeful licensed sound when a verified audition is possible; never promote measured-but-unheard audio.
 
 Morning report must distinguish45 families, existing implementations, new office proofs, rejected/source-gated mechanisms and human/native/heard acceptance. Do not convert counts into45 mastered, 6 completed/39 unbuilt, or undocumented tutorials left.
