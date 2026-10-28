@@ -1,5 +1,25 @@
 # Client launch execution — local-first continuation
 
+## 28 October live-release override
+
+The client frontend is **LIVE** on www.cgdynamics.co.za at source `7eb0473f`,
+deployment `dpl_7LxXqAEsdZhGVCdtWHjYSz8JfV3w`. CA explicitly authorised this
+release. [Exact receipt, verification and remaining owner gates](CLIENT-PORTAL-LIVE-RELEASE-2026-10-28.md).
+One local prebuild/one 2.5 MB differential prebuilt upload/same-deployment promotion,
+zero cloud compilation; no further Vercel operation for this handoff. Full frozen
+acceptance 4,201 pass/24 skips/zero failures, all 20 browser fixtures; bounded actual
+live client preview/mobile/package/guideline/PNG acceptance passed. Billing read
+after release: $7.36/$20 included, $0/$15 on-demand, Pause ON; counters lag.
+
+Next is exact-client review/approved-content rollout, preserving the existing
+ordered list below and #731 authoring ownership. **Meta owner re-consent remains:**
+new UI and metadata confirm one legacy/zero encrypted token envelopes; approved
+encryption implementation is live, but an old credential is not migrated by a
+frontend release. Visible Reconnect Meta is now accessible; never backfill/copy
+the token or suppress its warning. Bohemia Page access, actual owner password/
+physical-phone and native-PDF recipient exceptions remain as recorded. No client
+content, package, strategy, asset or permission was published/changed by release.
+
 ## 27 October provider/client acceptance — current override
 
 CA clarified that event capture and shop-opening highlights do not require scripted

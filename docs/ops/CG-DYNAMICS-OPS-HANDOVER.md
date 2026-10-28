@@ -1,3 +1,25 @@
+### 28 October — client frontend LIVE; no repeat deployment
+
+CA explicitly authorised the final conservative live push. Exact main `7eb0473f`
+is now production `dpl_7LxXqAEsdZhGVCdtWHjYSz8JfV3w`, www.cgdynamics.co.za.
+Full exact-tree acceptance: 4,201 pass / 24 skips / zero failures; all 20 local
+browser fixtures and actual live phone-width navigation/guideline/package/PNG
+new-window checks pass. One local prebuild, one 2.5 MB differential staged upload,
+same-deployment promotion; zero cloud compilation. Seven exact hosts HTTP 200
+before/after. Billing $7.36/$20 included, $0/$15 on-demand, Pause ON; counters lag.
+Git deployment OFF; no docs-only upload or repeated cloud checks. Rollback kept.
+Authoritative [release receipt and manual review boundaries](CLIENT-PORTAL-LIVE-RELEASE-2026-10-28.md).
+
+**Meta storage correction:** actual new UI and bounded SELECT-only metadata now
+agree: one legacy token, zero encrypted envelopes. Approved readers/writer/key
+remain live; owner Facebook re-consent via visible Reconnect Meta is still needed
+for encrypted-at-rest acceptance. Supersedes earlier conflicting encrypted-state
+interpretations. No token copied/backfilled, key rotated or backend redeployed.
+Bohemia Page-access hold remains. Client passwords/physical phones, native-PDF
+recipient exceptions, exact content publication/#731 and separate staff/calendar
+acceptance remain distinct. No blanket all-client launch-content completion.
+Earlier source-only frontend checkpoints below are historical after this release.
+
 ### 27 October 2026 — Nolan master handover (Assistant + Studio + local shared media)
 
 CA requested a consolidated cross-chat handover. Durable source: [CG Nolan master continuity handover](CG-NOLAN-MASTER-HANDOVER-2026-10-27.md), covering owner-approved existing-PC architecture, actual wired internet status, laptop-led Codex option while designer uses PC, Sydney non-destructive drive/OneDrive audit, intended hot 10TB / events 10TB / wedding 6TB role assignment (subject to occupied capacity and independent backups), CG Hours/Dynamics/Brand Hub/Teams integration, Studio effects research and first PSG real test, and eventual allowlisted WhatsApp review loop. Supporting owning issues [#894](https://github.com/CGProductionHouse/CG-Dynamics/issues/894), [#874](https://github.com/CGProductionHouse/CG-Dynamics/issues/874), [#872](https://github.com/CGProductionHouse/CG-Dynamics/issues/872). First 10TB attachment, any SMB pilot, drive health/duplication, OneDrive cost/downgrade and autonomous WhatsApp send are **NOT** reported complete. Do not treat laptop Ethernet as permission to remotely take control of occupied Nolan PC. The user has **not confirmed** first Assistant Codex setup prompt sent. No cloud subscription cancellation, destructive disk operations or NAS spending authorised.
