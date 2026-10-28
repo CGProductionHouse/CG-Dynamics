@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "media/mixkit-28306-2160.mp4"
 SOURCE_SHA = "80e0bf3d84faf6e2b0efabfc9001aeadde09e1ce56d0530360ceff5b9be596a5"
 W, H, FPS, COUNT, CUT = 540, 960, 30, 72, 36
-FW, FH = 400, 710
+FW, FH = 540, 710
 
 
 def encode(path: Path, frames: list[np.ndarray]) -> None:
@@ -43,17 +43,19 @@ def stage(i: int, incoming: bool) -> np.ndarray:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument("--source", type=Path, default=SOURCE, help="Local authorised original; SHA-256 remains mandatory")
     args = parser.parse_args()
-    if hashlib.sha256(SOURCE.read_bytes()).hexdigest() != SOURCE_SHA:
+    if hashlib.sha256(args.source.read_bytes()).hexdigest() != SOURCE_SHA:
         raise RuntimeError("Missing/changed licensed source; do not substitute silently")
     args.output_dir.mkdir(parents=True, exist_ok=True)
     raw = subprocess.check_output([
-        "ffmpeg", "-v", "error", "-ss", "3", "-i", str(SOURCE), "-t", "1.2",
-        "-vf", f"crop=1215:2160:1312:0,scale={FW}:{FH},fps={FPS},"
+        "ffmpeg", "-v", "error", "-ss", "3", "-i", str(args.source), "-t", "1.2",
+        "-vf", f"crop=1642:2160:1312:0,scale={FW}:{FH},fps={FPS},"
                "chromakey=0x56ee00:0.13:0.09,despill=type=green:mix=0.7:expand=0.05,format=rgba",
         "-frames:v", "36", "-pix_fmt", "rgba", "-f", "rawvideo", "-",
     ])
     subject = np.frombuffer(raw, np.uint8).reshape(36, FH, FW, 4)
+    assert np.max(subject[:,:5,:,3]) == 0, "Top crop must remain transparent inside the frame"
     plain, effect, changed = [], [], []
     for i in range(COUNT):
         a = stage(i, i >= CUT)
@@ -99,7 +101,8 @@ def main() -> None:
     contact.resize((1080, 960)).save(args.output_dir / "contact.jpg", quality=92)
     receipt = {"source_sha256": SOURCE_SHA, "source_in": 3, "fps": FPS, "frames": COUNT,
                "cut_frame": CUT, "preencode_changed_frames": changed, "matte_origin": [0, H-FH],
-               "grounding": "cropped left hand at frame-left; body at frame-bottom",
+               "grounding": "source expanded; horizontal crop edges at frame edges, body at frame-bottom",
+               "foreground_extent": [0,H-FH,FW,FH], "horizontal_layer_edges_are_frame_edges": FW==W,
                "sound": "original noise accent; measured construction only, unheard",
                "outputs": {p.name: hashlib.sha256(p.read_bytes()).hexdigest()
                            for p in args.output_dir.glob("*.mp4")}}

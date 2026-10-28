@@ -5,6 +5,14 @@ description: Reproduce the isolated ECHOFORM kinetic typography and green-screen
 
 # Depth typography on moving human footage — rendered, not mastered
 
+## 28 October extension: split-tone changing words and full-motion edge repair
+
+`python render_split_tone_ab.py --output-dir PRIVATE_DIR` adds a90-frame/3s540×960 front-versus-behind layer-order control inspired by Wanderlust frames125–209. It reuses the existing licensed Mixkit28306 dancer, source3–6s, SHA256 `80e0bf3d84faf6e2b0efabfc9001aeadde09e1ce56d0530360ceff5b9be596a5`, existing Space Grotesk OFL font and original seeded texture. FIND/YOUR/FLOW change each second; restrained blue/gold split material is separate from the gold-bevel proof. It is fictional practice, not a new client palette.
+
+**First version rejected:** a400px-wide foreground layer pasted into a540px canvas cut the moving arm at its internal right edge. The source reaches that edge on frames13–89. Anchoring left/bottom alone was insufficient; sparse early frames missed it. Preserve private `rejected-internal-right-edge-*` outputs. Repair expands the permitted original crop to1642×2160 at x1312, scales to540×710 and places it at(0,250). Both horizontal crop edges now coincide with frame edges, torso meets frame-bottom, and the internal top edge is transparent throughout the source interval. No painted/fabricated extension.
+
+The repaired front/behind exports fully decode90 frames. Full/reduced contacts including late frames45/60/75/89 were inspected; opaque foreground stays in front, with minimum91.42% glyph visibility across this particular word/path combination. Behind SHA256 `ead6ed2a5c14444f2abafbca592347e5e963f9bde6b1f374808818ab4e17874d`. Private outputs and JSON: `C:\Users\chris\Videos\CG-AI-Editing\Nolan-Skill-Practice\wanderlust-diaries\proofs\split-tone-depth`. Green-screen hair/spill limitations remain. This does not establish natural segmentation, kinetic fragmentation from the reference, full-speed/physical-phone approval, heard sound or native editable handoff. Audit **every internal layer boundary through the whole motion**, not only the opening pose.
+
 **Category:** text / compositing / sound sync. **Lifecycle:** researched → local code rendered and revised → **human motion/audio review pending** → CG use untested → mastered **NO**.
 
 Use this card when a story calls for a human crossing in front of purposeful typography and the editor has a permitted, clean green-screen take. Read the [source manifest and reproducibility notes](../../README.md) before using it. This effect is not a general person-segmentation model and is distinct from the now-viewed owner TikTok, which shows footage *inside* text via an alpha track matte. It is not automatically suitable for PSG.
@@ -30,3 +38,5 @@ A later [dark-backdrop mug proof](../../DARK-BACKDROP-DEPTH.md) adds one real-ca
 A [natural boxing-gym source screen](../../FIGHT-NATURAL-DEPTH-SOURCE-SCREEN.md) tried a narrow GrabCut glove/forearm foreground at three action phases. The body stayed anchored at the frame edge, but the bag and glove obscured nearly all of `HIT`; only fragments remained. **Reject the shot/word placement before refining the mask.** A technically plausible foreground layer does not rescue unreadable typography.
 
 Use when the occlusion advances a verified narrative and an editor can review its edges and rhythm. Avoid when claims, client identity, licence, source availability, hair matte quality or platform readability are uncertain. Promote to `mastered` only after successful work on appropriate real CG footage plus explicit CG creative approval; a successful render or installed skill alone does not qualify.
+
+Portability: pass `--source ABSOLUTE_LOCAL_ORIGINAL` on another PC instead of copying the MSI directory layout. The exact recorded SHA-256 remains mandatory. Use a private output directory; reacquire only the permitted source, never client/reference media from an external service.
