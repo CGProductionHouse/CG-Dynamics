@@ -1,5 +1,7 @@
 # Nolan Studio tutorial execution board
 
+**Office natural foreground continuation28October:** [native Object Mask/depth study](OFFICE-NATURAL-MASK-STUDY-20261028.md) adds a90-frame natural park/hair selection, isolated diagnostic, front/behind controls, repaired word layout and native copy revision. Eight exports decode; saved R02/reopened export90/90 decoded frames equal. External Masks folder is a handover dependency. One source, landscape/silent; fine-hair softness, phone/heard/second-PC/creative gates remain.45 families unchanged.
+
 **Office native text continuation28October:** [native type study](OFFICE-NATIVE-TYPE-STUDY-20261028.md): actual Premiere save/reopen/copy revision/export on licensed moving footage; four72-frame exports decode, reopened R02 matches72/72 decoded frames. One existing family advances;45 families unchanged. Physical-phone, heard sound, second-editor relink and creative/mastery gates remain open.
 
 **Office controlled-surface continuation:** [full251-frame phone insert/revision study](OFFICE-PHONE-SURFACE-STUDY-20261028.md) extends scene-surface/display mechanics with actual negative controls. General natural masking and the physically captured screen transition remain separate, unproved gates.

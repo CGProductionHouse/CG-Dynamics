@@ -1,5 +1,7 @@
 # Nolan Studio — categorised skill progress,28 October2026
 
+**Office natural foreground continuation28October:** [native Object Mask/depth study](OFFICE-NATURAL-MASK-STUDY-20261028.md) adds a90-frame natural park/hair selection, isolated diagnostic, front/behind controls, repaired word layout and native copy revision. Eight exports decode; saved R02/reopened export90/90 decoded frames equal. External Masks folder is a handover dependency. One source, landscape/silent; fine-hair softness, phone/heard/second-PC/creative gates remain.45 families unchanged.
+
 **Office native text continuation28October:** [native type study](OFFICE-NATIVE-TYPE-STUDY-20261028.md): actual Premiere save/reopen/copy revision/export on licensed moving footage; four72-frame exports decode, reopened R02 matches72/72 decoded frames. One existing family advances;45 families unchanged. Physical-phone, heard sound, second-editor relink and creative/mastery gates remain open.
 
 **Office full-shot continuation28October:** [phone-surface study](OFFICE-PHONE-SURFACE-STUDY-20261028.md): five251-frame native-fps outputs and a bounded text revision; fixed geometry and drifting/anchored feature tracks retained as controls. Notch wedges, unrelated key pixels and fringe were repaired. Controlled display only;45 families unchanged, no physical/native/heard/mastery promotion.
@@ -20,7 +22,7 @@ Previous batch added lens/inset controls and split-tone depth, and repaired the 
 
 | Skill | Implemented / tested / rejected | Still to do |
 |---|---|---|
-| [Depth type](skills/depth-type/SKILL.md) | Green-screen/dark-backdrop proofs; naive black key and unreadable boxing mask rejected. New90-frame split-tone front/behind control preserves foreground and at least91.42% glyph visibility; late arm crop repaired from expanded source. | Natural scene matte, reference word fragmentation, normal-speed edge/phone review, heard sound and native editable handover |
+| [Depth type](skills/depth-type/SKILL.md) | Green-screen/dark-backdrop proofs; naive black key and unreadable boxing mask rejected. New90-frame split-tone front/behind control preserves foreground and at least91.42% glyph visibility; late arm crop repaired from expanded source. | Broader natural matte/source coverage, reference word fragmentation, independent normal-speed/phone review, heard sound and second-editor/PC relink; bounded native park proof now exists |
 | [Footage inside type](skills/footage-in-type/SKILL.md) | [Local moving matte proof](proof-reference-matte.mp4); brighter fill and larger `MOVE` size still leave a fragmented dancer. A new same-source `CUT` plain-title/aperture A/B uses a licensed moving saw shot, fixes a first-frame affine crop error and proves legible word plus continuous solid-stroke reveal in a 2 s mute 540×960 export. The plain title shows the action sooner. | Story reason for withholding action, matched licensed sound, full-speed physical-phone review and native editable text/matte handover; do not promote a decode or contact sheet as a finished client hook. |
 | [Staggered words](skills/staggered-type/SKILL.md) | [Synthetic moving proof](proof-staggered-type.mp4) | Human timing/readability review and editable-title proof |
 | [Kinetic caption finishing](skills/kinetic-caption-finishing/SKILL.md) | Five owner-shared Solid Coast Editing tutorials visually sampled. The Daisy staggered/gradient A/B decoded but its source was rejected. A fictional-title steady-vs-shine A/B shows a glyph-confined sweep. A [natural foreground-over-type screen](NATURAL-OBJECT-MASK-20261026.md) rejected Mixkit #1252 for obscured type/background bleed. A new steady-vs-75%-opacity-accent A/B decodes and confines changes to glyphs; its first 25%-opacity variant was rejected as too faint. | Test a motivated treatment on cleared action-led picture against a clean control, then full-speed sound/phone and native text/mask handover. Synthetic shine/flicker, natural object masking and 3D are not client-approved or proven editable. |
@@ -117,10 +119,12 @@ Deadline29October07:30SAST: finish safe checkpoint; pause only this named task a
 
 Useful ordered work (finish any WIP before advancing):
 1. Native editable text/save/reopen/export — bounded one-PC receipt now passes above; second-PC/creative acceptance remains.
-2. Natural foreground via verified installed on-device Object Mask or cleared clean plate; inspect whole moving boundaries and compare plain/control/revision. Do not reuse failed GrabCut sources.
+2. Natural foreground — bounded native park proof now passes technical selection/tracking/save/reopen/revision above; fine hair, wider scenes, phone/heard/second-editor acceptance remain. Next distinct work is item3; do not re-export this same selection to inflate progress.
 3. Genuinely different-shot directional handoff with source-motion motivation; do not repeat a same-take time cut.
 4. Natural unkeyed moving plane with sufficient features and negative space; controlled green display is not acceptance.
 5. Deeper source-led kinetic type and remaining distinct unfinished board mechanisms. Capture-dependent same-object/physical stop-motion/device transition stay source-gated where genuine cleared captures are absent.
 6. Match purposeful licensed sound when a verified audition is possible; never promote measured-but-unheard audio.
 
 Morning report must distinguish45 families, existing implementations, new office proofs, rejected/source-gated mechanisms and human/native/heard acceptance. Do not convert counts into45 mastered, 6 completed/39 unbuilt, or undocumented tutorials left.
+
+Actual automatic21:08SAST native wake queued this research chat while the natural mask was being edited. Work continued uninterrupted; next queued turn must acknowledge that pending wake once before advancing. This extends the earlier manual dispatcher test with an observed scheduled run.
