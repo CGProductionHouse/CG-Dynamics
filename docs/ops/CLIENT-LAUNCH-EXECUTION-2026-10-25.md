@@ -1,5 +1,160 @@
 # Client launch execution — local-first continuation
 
+## 27 October provider/client acceptance — current override
+
+CA clarified that event capture and shop-opening highlights do not require scripted
+Content Guidelines. Madison Wear, The Staffordshire and HMHI must not be queued as
+missing-guideline launch blockers. Existing source-import receipt remains complete;
+no calendar, Content Run, scope, dates or production statuses were changed.
+
+This pass used the normal company-admin connector and the legitimate signed-in
+company Chrome admin interface. It did not repeat the completed all-client
+Overview/Approvals/Brand Hub sweep or enter any staff account.
+
+- **Meta:** 47 mapped clients/assets, 76 platform checkpoints.44 Facebook and
+  29 Instagram successful checkpoints are dated27October.20 Instagram checkpoints
+  PASS;44 Facebook +9 Instagram retain partial metric coverage. These are current
+  refreshes, not a full-metric fleet pass. Active **Bohemia Quick Stop** has a Page
+  permission/access error after an earlier successful27October run; do not retry
+  away the permission gate. AV's failed Facebook checkpoint and Red Oak's absent
+  checkpoint remain held-client exceptions. No new mappings or OAuth changes.
+- **TikTok:** actual exact-account integration health inspected for all9 connected
+  non-held clients: Braize, CG Production House, Dulux Paint & Paper Bloemfontein,
+  Forklift Trucks, Madison Wear, Neshora Oxygen, The Staffordshire, Watch Addict
+  and Wiseman Group. Each shows connected / complete coverage / complete
+  completeness / fresh. This describes successful ingestion, **not** complete
+  October activity analytics. Braize's actual October draft shows today's
+  TikTok success but partial current-month facts, real cohort zeros and separate
+  account snapshots. Red Oak remains held.40 additional queue entries lack a
+  connected account; recurring social scope alone does not prove a TikTok exists.
+  No reconnect, manual bulk sync or fabricated account mapping.
+- **Google Ads:** all7 existing campaign mappings across Cape Lumber, Germoparts,
+  Novus Steel and RC-Polypipe were audited for1–26October. One requested routine
+  Cape/shared-account refresh1–27October succeeded:
+  run `ea0785ed-5275-4896-9903-2b8617bbc798`, finished18:31:44UTC,
+  one account/27 daily rows/zero failures. Independent exact-client audit confirms
+ 27 October days and complete requested-range sync. Today is still provisional.
+  No campaign, budget or mapping changed. The other3 clients' existing mapped
+  campaigns have no rows; #435's first-party paused/removed/ended evidence remains
+  the explanation, not zero activity or permission to substitute another campaign.
+  The17October handover already proves automatic nightly Google refresh; the older
+ 13October “no cadence” receipt is historical.
+- **Actual report review:** Braize's October report remains a private draft;
+  Client View refuses to expose it. Staff review renders current FB/IG platform
+  windows through26October, today's verified probes and partial TikTok facts.
+  Facebook unique viewers are unavailable, while5 other Facebook metrics and
+  all8 Instagram metrics are definitive. No unavailable metric was coerced to0.
+  Current stored facts do not imply a published October report.
+- **Reproduced and fixed locally:** staff Overview simultaneously rendered verified
+  account figures and a legacy “account total not synced” summary. The legacy
+  diagnostic now appears only for legacy reports. Normalized reports retain the
+  metric-level ConnectorDataHealth table, including missing/permission/partial
+  states; client routes still display no staff diagnostics. Three actual-render
+  regressions first failed2/3 then pass3/3. Combined88 focused tests pass.
+  Actual component browser checks at1440/375/390/430 additionally verify the
+  normalized-health table, absence of legacy contradictions, client-role removal
+  and no page overflow/runtime errors. Existing cutoff/keyboard/website/Google
+  checks remain green. TypeScript/Vite build and actual app-bundle check,
+  scoped lint and diff check pass. No full-suite rerun is attributed to this
+  narrow staff-diagnostic change. Build uses local fixture public configuration;
+  its dist must never be uploaded. Private logs: %TEMP%/cg-provider27-*.log.
+- The live older Meta screen still displays a storage-hardening warning; pending
+  source70f255c5 already distinguishes unknown status and removes unconditional
+  plaintext copy. Do not treat that old UI text as a new decrypted-token audit or
+  repeat the already approved backend rollout. No token value was read.
+
+### Exact-client provider inventory observed27October
+
+“Current / partial metrics” means a successful same-day checkpoint with incomplete
+metric coverage. “No mapping” is an inventory fact, not a claim that the client
+requires that service. TikTok Connected below is connection inventory; only the9
+non-held accounts listed above received the additional actual UI health check.
+AV/Red Oak remain held; Zooz excluded; LHP later/once-off; Jodrico's cohort decision
+remains owner-held. The table does not grant any client launch acceptance.
+
+| Client | Meta checkpoints | TikTok connection |
+| --- | --- | --- |
+| Agri-Secure | No mapping | — |
+| All Around PVC | FB: current / partial metrics; IG: current / partial metrics | — |
+| AV Event Life | FB: access hold; IG: current | — |
+| Bat Hill Royale | FB: current / partial metrics; IG: current | — |
+| Bloem Action Sports | No mapping | — |
+| Bloem Marble & Granite | FB: current / partial metrics; IG: current | — |
+| Bloem Vascular | FB: current / partial metrics; IG: current / partial metrics | — |
+| Bohemia Quick Stop | FB: access hold | — |
+| Bouwer & Coetzee Attorneys | FB: current / partial metrics | — |
+| Braize | FB: current / partial metrics; IG: current | Connected |
+| C&L Innovations | FB: current / partial metrics; IG: current / partial metrics | — |
+| Cape Lumber | FB: current / partial metrics; IG: current | — |
+| Case Bloemfontein | FB: current / partial metrics; IG: current | — |
+| Central Canvas | FB: current / partial metrics | — |
+| CG Production House | FB: current / partial metrics; IG: current | Connected |
+| Daisy & Co | FB: current / partial metrics | — |
+| Delta Gas | FB: current / partial metrics; IG: current / partial metrics | — |
+| Dulux Paint & Paper Bloemfontein | FB: current / partial metrics; IG: current | Connected |
+| Econofoods | No mapping | — |
+| Ehrlich Park Butchery | FB: current / partial metrics | — |
+| Elcheck | FB: current / partial metrics | — |
+| Emmanuel Funerals | FB: current / partial metrics | — |
+| Emoya Estate Driving Range | No mapping | — |
+| First Technology Central | FB: current / partial metrics | — |
+| Forklift Trucks | FB: current / partial metrics; IG: current / partial metrics | Connected |
+| Germoparts | FB: current / partial metrics; IG: current | — |
+| Hino Trucks | No mapping | — |
+| HMHI | FB: current / partial metrics | — |
+| Human Auto | No mapping | — |
+| Ipopeng Office Supplies | No mapping | — |
+| Jenkor | No mapping | — |
+| JFJ Electrical | FB: current / partial metrics; IG: current / partial metrics | — |
+| Jodrico Killian | No mapping | — |
+| Kundedienste | No mapping | — |
+| LHP Student Village & Block | No mapping | — |
+| Local Deli | FB: current / partial metrics; IG: current / partial metrics | — |
+| Loraclox | FB: current / partial metrics; IG: current / partial metrics | — |
+| Madison Wear | FB: current / partial metrics; IG: current | Connected |
+| Mimosa Mall | No mapping | — |
+| NCNA | No mapping | — |
+| Neshora Oxygen | FB: current / partial metrics | Connected |
+| Novus Steel | FB: current / partial metrics; IG: current | — |
+| Peyper Bonds | FB: current / partial metrics; IG: current / partial metrics | — |
+| Piek Group | FB: current / partial metrics | — |
+| PSG Bloemfontein | FB: current / partial metrics | — |
+| RC-Polypipe | FB: current / partial metrics; IG: current | — |
+| Red Oak | FB: access hold | Connected |
+| Rusoord Farmstay | FB: current / partial metrics; IG: current | — |
+| SecuriForce | FB: current / partial metrics; IG: current | — |
+| Supa Quick BFN | FB: current / partial metrics | — |
+| Supa Quick Centurion | FB: current / partial metrics | — |
+| TBS Brokers | FB: current / partial metrics; IG: current | — |
+| The Staffordshire | FB: current / partial metrics | Connected |
+| Tobich Optics | FB: current / partial metrics | — |
+| Toyota Bloemfontein | No mapping | — |
+| VCS Cleaning Solutions | No mapping | — |
+| Vrystaat Kunstefees | FB: current / partial metrics; IG: current | — |
+| Watch Addict | FB: current / partial metrics; IG: current | Connected |
+| We Ar Fuels | FB: current / partial metrics; IG: current | — |
+| Wiseman Group | FB: current / partial metrics; IG: current | Connected |
+| WiseRide | FB: current / partial metrics | — |
+| Zooz Lifestyle WFF | FB: current / partial metrics; IG: current | — |
+
+### Continue the existing launch sequence
+
+1. Keep #731's strategy/content review and publication separate from provider
+   freshness. The new branded guideline source and this diagnostic repair are
+   local/source releases until the approved frontend packet is executed.
+2. Resolve **Bohemia's Page access** through the legitimate owner/provider path;
+   preserve useful previously verified figures and their dates meanwhile.
+   Do not block the other clients on held AV/Red Oak.
+3. Review each launch candidate's already existing confirmed package, published
+   strategy/report/guide, safe Brand Hub and staff-owned real posting allocations.
+   Missing optional services must stay hidden; no empty content or extra scope.
+4. CA's own client login and physical-phone check is the final owner acceptance.
+   Admin previews and local fixtures do not replace it.
+5. Only then prepare the single exact #679 release packet for the combined
+   verified frontend source, smoke-test the released client journey and roll out
+   client logins in reviewed groups. No invite messages or Vercel operation were
+   performed in this pass.
+
 Owner: current Codex client lane, starting main `3d7616d5`. No Vercel operations.
 This is an ordered execution list, not a replacement product architecture or a
 claim that protected production/content work is already complete.

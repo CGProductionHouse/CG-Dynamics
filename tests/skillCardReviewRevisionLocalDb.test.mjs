@@ -13,7 +13,9 @@ test('revision review authority executes real migration, RPC, trigger, concurren
   try {
     let ready = false
     for (let i = 0; i < 60; i++) {
-      if (docker(['exec', id, 'pg_isready', '-U', 'postgres']).status === 0) { ready = true; break }
+      // The image's temporary bootstrap server listens only on its Unix socket.
+      // Wait for the final TCP listener, as the client post-assets fixture does.
+      if (docker(['exec', id, 'pg_isready', '-h', '127.0.0.1', '-U', 'postgres']).status === 0) { ready = true; break }
       Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 250)
     }
     assert.ok(ready)

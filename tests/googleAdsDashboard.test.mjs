@@ -193,7 +193,7 @@ test('admin Client View passes Google Ads while diagnostics remain role-gated', 
   assert.match(PREVIEW_SOURCE, /googleAds=\{googleAds\}/)
   assert.doesNotMatch(PREVIEW_SOURCE, /previousGoogleAds/)
   assert.match(PREVIEW_SOURCE, /showAdminDiagnostics=\{mode === 'staff' && isStaff\}/)
-  assert.match(REPORT_VIEW_SOURCE, /\{showAdminDiagnostics && <AdminDataHealth/)
+  assert.match(REPORT_VIEW_SOURCE, /\{showAdminDiagnostics && !normalizedFactsActive && <AdminDataHealth/)
 })
 
 test('dashboard and integration surfaces have no manual report loader or diagnostic client default', () => {

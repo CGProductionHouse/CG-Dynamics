@@ -30,8 +30,78 @@ The owner approved a password-free, unlisted replacement gallery. Collection `12
 ### 26 October — PICASSO Staffy review withdrawn; quality gate reset
 
 The 203-photo Staffy internal Pixieset collection was hidden after Amonique identified a visibly blurred walkout frame and said the overall finish appeared too close to the originals. PICASSO acknowledged this in the approvals group. All selected frames need native-size subject review, scene-specific finishing and a human-accepted varied 25-frame calibration before client delivery; technical JPEG verification alone is insufficient. This did not change Dynamics production or Nolan #862.
+### 27 October — provider freshness and false staff diagnostic corrected
+
+Current exact-client inventory/launch sequence is in the existing
+[execution list](CLIENT-LAUNCH-EXECUTION-2026-10-25.md#27-october-providerclient-acceptance--current-override).
+47Meta assets/76checkpoints reviewed:73 successful27October; active Bohemia Page
+access error, held AV/RedOak exceptions; partial metrics remain partial. All9
+connected non-held TikTok accounts pass actual UI access/coverage/completeness/
+freshness checks. This is ingestion health, not complete current-month activity.
+One requested routine Cape/shared Google sync1–27October succeeded,27daily rows,
+independent audit read-back; other3mapped clients retain no_campaign_rows and
+prior paused/removed evidence. Automatic Google cadence was accepted17October.
+No campaign/mapping/OAuth/backend/Vercel or content publication change.
+Actual Braize October staff review reproduces a contradictory legacy “not synced”
+summary beside today's verified normalized account facts. Narrow local guard
+keeps legacy diagnostics on legacy reports only and preserves authoritative
+metric-level health/permission/partial information and client-role boundaries.
+Actual-render regressions RED2/3→GREEN3/3; combined88focused tests pass. Existing
+actual-component1440/375/390/430 browser fixture now also checks normalized
+diagnostics/client-role removal/no overflow; build/app-bundle/scoped lint/diff pass.
+No full-suite rerun or new true-client login/device acceptance is claimed. Existing
+staff/calendar and normal ChatGPT strategy owners unchanged. Pending frontend
+release, real-client/physical-phone/content/publication gates remain distinct.
+
+### 27 October — owner correction: event capture is not a scripted guideline gap
+
+CA explicitly clarified that events are captured and edited into highlights;
+they do **not** require a scripted Content Guideline. Madison Wear's shop opening,
+The Staffordshire's Halloween event and HMHI's year-end are explicit examples.
+Remove these from any missing-guideline acceptance list. Do not create empty
+guidelines or manufacture script work merely because a shoot/event is booked.
+The existing calendar/Content Run and confirmed output scope remain authoritative;
+this correction does not change production records, dates or contracted quantities.
+The six verified imported videos in the two existing canonical documents below
+remain the completed source-import work. Future genuinely scripted content runs
+still use their one canonical guideline; event highlights are not launch blockers
+for lacking one. Continue provider/client-portal acceptance under #668, keeping
+the separate staff/calendar and #731 strategy owners intact.
 
 ### 27 October — Content Guideline design and normal ChatGPT read-back (#896)
+
+Latest CA correction: the separate flat green/cream guide visual was rejected.
+Follow-up `codex/guideline-portal-style-20261027` uses existing portal near-black,
+white/slate text, bright teal/orange accents and glass cards; compact header and
+actual ClientPortalShell preview. No global portal or backend change. Four-width
+browser/23focused/build/bundle/scopedlint/diff pass. New `cg-guideline-portal-*`
+images supersede rejected `cg-guideline-design-*`; CA accepted the revised visual
+on 27 October ("much better thanks").
+No Vercel, data or publication change. Normal ChatGPT acceptance below is retained.
+
+Later CA explicitly requested importing still-relevant client-sent WhatsApp guides.
+This narrow content authority was exercised through normal company-admin MCP actions:
+**6 new draft videos in 2 existing canonical documents**, with complete scripts,
+shot direction and internal source-file/hash/message provenance. SecuriForce's
+28 October run now has the four dated December campaign videos plus the separate
+runner-up/team video; December coverage remains on those four videos, and runner-up
+coverage stays null. Runner-up was sent alongside the dated campaign PDF; filing
+with the next same-client run is documented as preparation, not a separately agreed
+shoot. All Around PVC's 26 October document now contains Franco's latest amended
+23 October 11:00 SPC-flooring guide, preserving the client's preparation-stage
+correction. No run/event/task/posting dates, statuses, packages or allocations changed.
+All six saved scripts/directions match the reviewed source packet exactly in both
+normal guideline reads and canonical run plans. Both documents remain unpublished.
+Neshora's two existing staff-refined videos were compared with its sent PDF and
+remain byte-for-byte unchanged. Kunstefees' World Mental Health Day guide is an
+expired October-specific campaign, with a subsequent brainstorming meeting and
+no exact Content Run; it was not made into new upcoming work. No sent VCS PDF
+was found in the searched recent-guide results. This was a bounded October
+WhatsApp search/review, not an exhaustive historical archive or deleted-media claim.
+Private PDF originals, prepared payloads and before/action/after receipts are under
+`%TEMP%/cg-guideline-import-20261027`; no client scripts/transcripts committed.
+No Vercel, backend release, SQL/schema, permission or client-publication change.
+Detailed receipt: [guideline design/import acceptance](CONTENT-GUIDELINE-CLIENT-DESIGN-2026-10-27.md#client-sent-whatsapp-source-import--27-october).
 
 CA redirected this lane to branded guidelines and normal ChatGPT authoring.
 Exact design/workflow/acceptance boundaries:

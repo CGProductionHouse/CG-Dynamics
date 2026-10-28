@@ -23,7 +23,9 @@ const fixture = {
         posts:[post('covered','2026-09-24T06:59:59.999Z','Covered Pacific final-day result',0),
           post('later','2026-09-24T07:00:00Z','Uncovered later result',999)]};
       const strategyData=emptyStrategyData();strategyData.strategyGoingForward='Explain the application routes so contributors can prepare the correct submission.';
-      function App(){const[status,setStatus]=useState('draft');const[client,setClient]=useState(null);const[lowSignal,setLowSignal]=useState(false);const[facts,setFacts]=useState([]);const[googleState,setGoogleState]=useState('unmapped');const[strategyReadUnavailable,setStrategyReadUnavailable]=useState(false);const[emptyStrategy,setEmptyStrategy]=useState(false);window.showPublishedFixture=()=>setStatus('published');
+      function App(){const[status,setStatus]=useState('draft');const[client,setClient]=useState(null);const[lowSignal,setLowSignal]=useState(false);const[facts,setFacts]=useState([]);const[googleState,setGoogleState]=useState('unmapped');const[strategyReadUnavailable,setStrategyReadUnavailable]=useState(false);const[emptyStrategy,setEmptyStrategy]=useState(false);const[staff,setStaff]=useState(false);const[health,setHealth]=useState([]);window.showPublishedFixture=()=>setStatus('published');
+        window.showNormalizedDiagnosticsFixture=()=>{setStaff(true);setFacts([{platform:'facebook',metricKey:'brand_views',value:1474,availability:'complete',aggregation:'sum',comparableGroup:null,sourceMetric:'page_media_view',periodStart:'2026-09-01',periodEnd:'2026-09-23'}]);setHealth([{platform:'facebook',period_month:'2026-09',metric_key:'brand_views',source_metric:'page_media_view',fact_availability:'complete',latest_run_status:'partial',latest_health_state:'verified_partial',ready_for_client_reporting:true}])};
+        window.showClientDiagnosticsFixture=()=>setStaff(false);
         window.showMissingGoogleCampaignFixture=()=>setGoogleState('no-campaign-data');
         window.showStrategyReadErrorFixture=()=>setStrategyReadUnavailable(true);
         window.showNoStrategyFixture=()=>{setStrategyReadUnavailable(false);setEmptyStrategy(true)};
@@ -35,7 +37,7 @@ const fixture = {
         return React.createElement('main',{className:'mx-auto max-w-6xl p-3 sm:p-8'},
           React.createElement(ClientReportView,{report:{...report,client_id:client?.id??report.client_id,
             posts:lowSignal?report.posts.map(post=>({...post,impressions:0,reach:0,engagements:null})):report.posts},client,googleAds:null,googleAdsState:googleState,
-            googleAdsError:null,facts,monthlyStrategy:strategyReadUnavailable||emptyStrategy?null:{month:'2026-09-01',status,strategyData},showEmptyStrategy:strategyReadUnavailable||emptyStrategy,strategyReadUnavailable}));}
+            googleAdsError:null,facts,showAdminDiagnostics:staff,dataHealth:health,monthlyStrategy:strategyReadUnavailable||emptyStrategy?null:{month:'2026-09-01',status,strategyData},showEmptyStrategy:strategyReadUnavailable||emptyStrategy,strategyReadUnavailable}));}
       createRoot(document.getElementById('root')).render(React.createElement(App));`
   },
   configureServer(server) {
@@ -180,6 +182,15 @@ try {
     assert.doesNotMatch(await page.getByRole('tabpanel', { name: 'Google', exact: true }).innerText(), /No Google Ads activity|The month was synced|Source: Google Ads/)
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width} missing-Google-facts overflow`)
     await page.screenshot({ path: join(tmpdir(), `cg-google-missing-campaign-facts-${width}.png`), fullPage: true })
+    await page.evaluate(() => window.showNormalizedDiagnosticsFixture())
+    await overviewTab.click()
+    await page.getByText('Staff only · connector health', { exact: true }).waitFor()
+    assert.match(await page.locator('table').innerText(), /page_media_view/)
+    assert.doesNotMatch(await page.locator('main').innerText(), /Not synced this month|account total not synced|All account-level metrics synced/)
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width} normalized-health overflow`)
+    await page.evaluate(() => window.showClientDiagnosticsFixture())
+    await page.getByText('Staff only · connector health', { exact: true }).waitFor({ state: 'detached' })
+    assert.equal(await page.locator('table').count(), 0, 'Client view excludes connector diagnostics')
     assert.deepEqual(errors, [])
     await page.close()
     console.log(`PASS ${width}px: actual Overview/Facebook/held managed Website, cutoff/observed zero, no later highlight/duplicate site upsell/overflow/runtime errors; localhost GET only`)
