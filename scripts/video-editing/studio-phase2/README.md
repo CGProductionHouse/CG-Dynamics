@@ -1,5 +1,7 @@
 # Nolan Studio — skill library and production continuity
 
+**Research ownership transferred to office PC,28 October:** [Takeover brief, private backup pack and exact next work](OFFICE-RESEARCH-TAKEOVER-20261028.md). MSI parks research; office must complete intake/hash/rerender acceptance in903, then continue874 in one separate stacked PR. Existing client amendments remain with MSI. The45-family evidence state below is unchanged by handing it over.
+
 **28 October next batch:** [Subject-band resolve](skills/subject-band-resolve/SKILL.md) adds source-isolated clothing displacement and stepped pale fill, with a face-tearing first pass rejected/repaired and a removable original cue. [Negative controls](skills/color-invert-glitch/SKILL.md) distinguish global inversion from skin-preserving background-only inversion; neither is promoted as a default. [Film transport](skills/bounded-burn/SKILL.md) replaces the rejected decorative rounded-card hypothesis; five-sample ghosting was repaired with31 spatial samples. These are bounded mechanisms, not client/native/heard approval. The [categorised list](SKILL-PROGRESS-20261028.md) now covers45 families.
 
 

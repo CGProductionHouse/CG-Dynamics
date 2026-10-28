@@ -1,3 +1,19 @@
+### 28 October — Nolan research/skills transferred to office PC
+
+Owner explicitly requested office PC primary execution because MSI is unreliable.
+[Takeover brief](../../scripts/video-editing/studio-phase2/OFFICE-RESEARCH-TAKEOVER-20261028.md)
+in existing draft875 records the45-family library, four private Drive archives
+(371 practice-evidence files/eight licensed inputs), checksum-only verifier,
+separate stacked research PR and unfinished queue. Office owns new874 research
+through903; MSI parks research and retains Daisy/TBS/PSG/Fight amendments.
+Central Canvas904 stays office-owned separately. Read newer shared rules909.
+Office download/install/rerender receipt is pending; preparation is not activation.
+GitHub/903/874/Supervisor381 and the existing Google handover are continuity routes.
+Exact Control Centre tracker remains unavailable after a scoped Drive name search;
+no guessed tracker write or replacement. No client media, credentials, permissions,
+paid credits, deployment, DB or active desktop/project changes. Only permitted
+practice assets uploaded; client/creator references and runtimes excluded.
+
 ### 28 October — shared Nolan editorial feedback audit (MSI / office)
 
 Owner requested reconciliation of all prior editing feedback after office Central Canvas.
