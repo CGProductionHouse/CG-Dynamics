@@ -7,6 +7,8 @@
 
 [Two-shot forward continuation](../../scripts/video-editing/studio-phase2/OFFICE-FORWARD-HANDOFF-STUDY-20261028.md) adds seven96-frame controls, rejects retime-only direction mismatch and bounds an incoming reframe; encoded vector gap6.228→0.308px/frame,48/48 outgoing revision frames equal. Not a filmed sideways whip, continuous place or mastery. Next distinct item is natural unkeyed plane;45families/client/acceptance boundaries unchanged.
 
+[Natural unkeyed plane continuation](../../scripts/video-editing/studio-phase2/OFFICE-UNKEYED-PLANE-STUDY-20261028.md) adds five96-frame native-HD wood/control/revision exports. Refreshed wood-only features plus independent rectified texture support attachment;48/48 opening frames equal. R02 seam-crossing placement rejected and R03 moved to one continuous plank. General depth/native/phone/heard/creative gates remain. Next distinct item5 kinetic type/remaining board mechanism;45families unchanged. Actual22:08 scheduled wake pending while this work proceeds, no duplicate editing worker.
+
 Owner explicitly requested office PC primary execution because MSI is unreliable.
 [Takeover brief](../../scripts/video-editing/studio-phase2/OFFICE-RESEARCH-TAKEOVER-20261028.md)
 in existing draft875 records the45-family library, four private Drive archives
