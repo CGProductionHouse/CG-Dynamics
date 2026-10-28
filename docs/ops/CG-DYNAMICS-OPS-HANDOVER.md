@@ -25,6 +25,8 @@
 
 [Native EQ continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-EQ-STUDY-20261029.md): sixnativeAV/fouracceptedPCM, threeactualreopenpairs, R04PCM96105sample protectedprefix. NativeAAC1024sample delay measured; PCM-based dry/R02/R04muxes zero measuredlag. WrongDPX/constantPCM and changed R03project gates retained, not repaired by title/settings alone.45families, noheard/phone/creative/crossPCpass; next distinct existing native peak-control.
 
+[Native peak continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-PEAK-STUDY-20261029.md): sevennativeAV/twoPCM, twoactualreopenpairs72/72picture/144144samplesexact. Hot+12REJECTED; nativeR02−4.0dBTPstereo/−1.1dBTPactualencodedmono. Exact protectedopening FAILSAACandPCM; nativekeys/reopenarenotpreservationproof.45families, noheard/phone/creative/crossPCpass; next existing registered-slanted-panels nativegate.
+
 Owner explicitly requested office PC primary execution because MSI is unreliable.
 [Takeover brief](../../scripts/video-editing/studio-phase2/OFFICE-RESEARCH-TAKEOVER-20261028.md)
 in existing draft875 records the45-family library, four private Drive archives

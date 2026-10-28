@@ -24,3 +24,7 @@ An initial `limit=0.75` candidate measured −2.49 dBTP in stereo but still prod
 ## Before using on an actual edit
 
 Confirm the transient is a genuine intended event, listen to unprocessed and limited versions at matched playback level, and inspect whether limiting dulls the hit or pumps nearby voice/music. Test the actual codec, export path, stereo channels and mono fold-down; check the final five seconds and phone playback. The agent could measure these synthetic files but could not hear them, and no native editable limiter handover or actual Fight Night/client mix was tested. No client media, external upload, purchase, plugin or AI credit was used.
+
+## Office native extension —29October2026
+
+[Native peak-control study](../../OFFICE-NATIVE-PEAK-STUDY-20261029.md) tests licensed musical peaks with new Premiere project/sequence, linked original/plain/hot/gain/nativeHardLimiter controls and MaximumAmplitude keyframe revision. SevenAV/twoPCM exports; both actual native reopen pairs72/72picture/all144144stereo samples exact. Hot+12dB fails; R02TruePeak−4dB/7mslookahead/100msrelease yields−4.0dBTPstereo but−1.1dBTPafteractualFFmpegmonoAACencode. These are measured source-specific settings, not a preset or pumping/intelligibility approval. Exact protected opening FAILS both AAC/PCM despite bounded nativekeys; preserve that failure separately from successful reopen proof. Keep original/gain/effect independently editable, verify real mono output and hear the complete mix before client use. No phone/second-PC/creative mastery.
