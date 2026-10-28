@@ -1,0 +1,341 @@
+import hashlib
+import json
+import shutil
+import tempfile
+import unittest
+import zipfile
+from io import BytesIO
+from pathlib import Path
+from unittest.mock import patch
+
+import numpy as np
+from PIL import Image, ImageCms
+
+from picasso import (amend, approve_review, backup_job, classify, export_srgb_icc, face_boxes,
+                     face_review, face_model_ready, finish, preflight, prepare_review,
+                     restore_job, run, verify)
+
+
+def sha(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+class PicassoJobTest(unittest.TestCase):
+    def test_strip_renderer_preserves_prior_pixel_result(self):
+        pixels = np.random.default_rng(2).integers(0, 256, (360, 600, 3), dtype=np.uint8)
+        settings = {"exposure_ev": .22, "shadow_lift": .04, "highlight_pull": .02,
+                    "red_blue_balance": .01, "contrast": .015, "saturation": .01}
+        output = finish(Image.fromarray(pixels, "RGB"), settings, {})
+        self.assertEqual(hashlib.sha256(output.tobytes()).hexdigest(),
+                         "a82ccae24250561267edc6f2b67822b120ab187dc67deedcfa8ee2c5ebe2caa6")
+
+    def test_partial_checkpoint_resumes_without_reencoding_completed_frame(self):
+        with tempfile.TemporaryDirectory() as root:
+            base = Path(root)
+            source, job = base / "source", base / "job"
+            source.mkdir()
+            Image.new("RGB", (180, 120), (80, 60, 40)).save(source / "a.jpg", "JPEG")
+            Image.new("RGB", (180, 120), (90, 65, 45)).save(source / "b.jpg", "JPEG")
+            self.assertEqual(run(source, job, None), 0)
+            manifest_path = job / "manifest.json"
+            full = json.loads(manifest_path.read_text(encoding="utf-8"))
+            first_hash = sha(job / "output" / "0001.jpg")
+            partial = {**full, "items": full["items"][:1]}
+            manifest_path.write_text(json.dumps(partial), encoding="utf-8")
+            (job / "output" / "0002.jpg").unlink()
+            (job / "previews" / "0002.jpg").unlink()
+            self.assertEqual(run(source, job, None), 0)
+            resumed = json.loads(manifest_path.read_text(encoding="utf-8"))
+            self.assertEqual(len(resumed["items"]), 2)
+            self.assertEqual(sha(job / "output" / "0001.jpg"), first_hash)
+            self.assertEqual(resumed["source_inventory"], ["a.jpg", "b.jpg"])
+
+    def test_formal_look_is_recorded_and_cannot_change_during_resume(self):
+        with tempfile.TemporaryDirectory() as root:
+            base = Path(root)
+            source, job = base / "source", base / "job"
+            source.mkdir()
+            Image.new("RGB", (180, 120), (180, 130, 80)).save(source / "sample.jpg", "JPEG")
+            self.assertEqual(run(source, job, None, look="cg-formal-warm"), 0)
+            first = json.loads((job / "manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(first["look"], "cg-formal-warm")
+            self.assertEqual(first["items"][0]["adjustments"]["contrast"], .11)
+            output_hash = sha(job / "output" / "0001.jpg")
+            self.assertEqual(run(source, job, None, look="cg-formal-warm"), 0)
+            self.assertEqual(sha(job / "output" / "0001.jpg"), output_hash)
+            amend(job, "0001", "reviewer", "minor exposure change", {"exposure_ev": -.05})
+            updated = json.loads((job / "manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(updated["revisions"][0]["settings"]["contrast"], .11)
+            with self.assertRaisesRegex(ValueError, "settings differ"):
+                run(source, job, None, look="natural")
+
+    def test_closed_job_survives_private_backup_and_source_relocation(self):
+        with tempfile.TemporaryDirectory() as root:
+            base = Path(root)
+            source, moved_source, job = base / "source", base / "moved-source", base / "job"
+            source.mkdir()
+            moved_source.mkdir()
+            Image.new("RGB", (180, 120), (97, 78, 61)).save(source / "sample.jpg", "JPEG")
+            self.assertEqual(run(source, job, None), 0)
+            classify(job, "0001", "KEEP", "reviewer", "approved documentary moment")
+            amend(job, "0001", "reviewer", "slightly darker", {"exposure_ev": -.1})
+            archive = base / "job-backup.zip"
+            first = backup_job(job, archive)
+            self.assertFalse(first["reused"])
+            self.assertTrue(backup_job(job, archive)["reused"])
+            tampered = base / "tampered.zip"
+            shutil.copy2(archive, tampered)
+            with zipfile.ZipFile(tampered, "a") as zipped:
+                zipped.writestr("../escape.txt", "bad")
+            with self.assertRaisesRegex(ValueError, "entries do not match"):
+                restore_job(tampered, base / "unsafe-job", source)
+            self.assertFalse((base / "escape.txt").exists())
+            (job / "revisions" / "r001" / "0001-preview.jpg").unlink()
+            with self.assertRaisesRegex(ValueError, "Missing or changed revision"):
+                backup_job(job, base / "incomplete.zip")
+            shutil.copy2(source / "sample.jpg", moved_source / "sample.jpg")
+            restored = base / "restored-job"
+            result = restore_job(archive, restored, moved_source)
+            self.assertEqual(result["verified"], 1)
+            self.assertTrue(result["source_rebound"])
+            self.assertEqual(verify(restored)["failures"], [])
+            record = json.loads((restored / "manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(record["items"][0]["classification"], "KEEP")
+            self.assertEqual(len(record["revisions"]), 1)
+            self.assertEqual(record["source_relocations"][0]["archive_sha256"], first["sha256"])
+            with self.assertRaisesRegex(ValueError, "new, empty job"):
+                restore_job(archive, restored, moved_source)
+            Image.new("RGB", (180, 120), (0, 0, 0)).save(moved_source / "sample.jpg", "JPEG")
+            with self.assertRaisesRegex(ValueError, "source bytes"):
+                restore_job(archive, base / "refused-job", moved_source)
+
+    def test_pinned_local_face_model_loads_without_network(self):
+        self.assertTrue(face_model_ready())
+        boxes, scores, detector = face_boxes(np.zeros((320, 320, 3), dtype=np.uint8))
+        self.assertEqual(detector, "opencv_yunet_2026may")
+        self.assertEqual(boxes, [])
+        self.assertEqual(scores, [])
+
+    def test_export_profile_is_valid_and_stable(self):
+        profile = export_srgb_icc()
+        self.assertEqual(profile[24:36], bytes.fromhex("07d000010001000000000000"))
+        self.assertIn("srgb", ImageCms.getProfileName(ImageCms.ImageCmsProfile(BytesIO(profile))).lower())
+
+    def test_bright_jpeg_detail_is_not_newly_clipped_by_exposure(self):
+        gradient = np.linspace(30, 252, 223, dtype=np.uint8)
+        pixels = np.repeat(gradient[np.newaxis, :, np.newaxis], 24, axis=0)
+        pixels = np.repeat(pixels, 3, axis=2)
+        source = Image.fromarray(pixels, "RGB")
+        settings = {"exposure_ev": .22, "shadow_lift": .02, "highlight_pull": 0,
+                    "red_blue_balance": 0, "contrast": 0, "saturation": 0}
+        edited = np.asarray(finish(source, settings, {}))
+        self.assertGreater(int(edited[0, 20, 0]), int(pixels[0, 20, 0]))
+        self.assertEqual(int(np.count_nonzero(edited >= 253)), 0)
+
+    def test_clipped_neutral_sky_stays_white_when_background_is_toned(self):
+        pixels = np.array([[[255, 255, 255], [252, 250, 248],
+                            [240, 180, 90], [100, 80, 70]]], dtype=np.uint8)
+        settings = {"exposure_ev": -.25, "shadow_lift": 0, "highlight_pull": .025,
+                    "red_blue_balance": 0, "contrast": 0, "saturation": 0}
+        edited = np.asarray(finish(Image.fromarray(pixels, "RGB"), settings, {}))
+        self.assertEqual(edited[0, 0].tolist(), [255, 255, 255])
+        self.assertLess(int(edited[0, 2, 0]), int(pixels[0, 2, 0]))
+        self.assertLess(int(edited[0, 3, 0]), int(pixels[0, 3, 0]))
+
+    def test_preserves_original_and_resumes_without_reencoding(self):
+        with tempfile.TemporaryDirectory() as root:
+            base = Path(root)
+            source, job = base / "source", base / "job"
+            source.mkdir()
+            image = Image.new("RGB", (113, 71), (84, 72, 64))
+            exif = Image.Exif()
+            exif[274] = 6  # display rotated 90 degrees
+            exif[271] = "Private camera name"
+            original = source / "frame.jpg"
+            image.save(original, "JPEG", quality=96, exif=exif)
+            source_hash = sha(original)
+
+            self.assertEqual(run(source, job, None), 0)
+            data = json.loads((job / "manifest.json").read_text(encoding="utf-8"))
+            row = data["items"][0]
+            exported = job / row["output"]
+            output_hash = sha(exported)
+            with Image.open(exported) as result:
+                self.assertEqual(result.size, (71, 113))
+                self.assertTrue(result.info.get("icc_profile"))
+                self.assertEqual(len(result.getexif()), 0)
+            self.assertEqual(sha(original), source_hash)
+            self.assertTrue((job / "contact-sheet.jpg").exists())
+            self.assertEqual(verify(job)["verified"], 1)
+            another_job = base / "another-job"
+            self.assertEqual(run(source, another_job, None), 0)
+            self.assertEqual(sha(another_job / "output" / "0001.jpg"), output_hash)
+            quality = verify(job, quality=True)
+            self.assertEqual(len(quality["highlight_quality"]), 1)
+            self.assertEqual(quality["highlight_review_ids"], [])
+            self.assertEqual(quality["face_detector_unavailable_images"], 0)
+
+            classify(job, "0001", "ALTERNATE", "Staff reviewer", "Near duplicate of stronger moment")
+            self.assertEqual(run(source, job, None), 0)
+            again = json.loads((job / "manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(again["items"][0]["classification"], "ALTERNATE")
+            self.assertEqual(len(again["classification_history"]), 1)
+            self.assertEqual(sha(exported), output_hash)
+            self.assertEqual(sha(original), source_hash)
+
+            self.assertTrue(classify(job, "0001", "ALTERNATE", "Staff reviewer",
+                                     "Near duplicate of stronger moment")["reused"])
+            classify(job, "0001", "KEEP", "Staff reviewer", "Unique documentary moment")
+            restored = json.loads((job / "manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(restored["items"][0]["classification"], "KEEP")
+            self.assertEqual([x["decision"] for x in restored["classification_history"]],
+                             ["ALTERNATE", "KEEP"])
+
+    def test_corrupt_file_is_reported_and_other_files_finish(self):
+        with tempfile.TemporaryDirectory() as root:
+            base = Path(root)
+            source, job = base / "source", base / "job"
+            source.mkdir()
+            (source / "a.jpg").write_bytes(b"not a JPEG")
+            Image.new("RGB", (32, 32), (10, 15, 20)).save(source / "b.jpg")
+            self.assertEqual(run(source, job, None), 1)
+            rows = json.loads((job / "manifest.json").read_text(encoding="utf-8"))["items"]
+            self.assertEqual([r["status"] for r in rows], ["error", "complete"])
+
+    def test_similarity_hint_survives_colour_review_and_resume(self):
+        with tempfile.TemporaryDirectory() as root:
+            base = Path(root)
+            source, job = base / "source", base / "job"
+            source.mkdir()
+            first = source / "a.jpg"
+            Image.new("RGB", (48, 32), (92, 82, 71)).save(first)
+            (source / "b.jpg").write_bytes(first.read_bytes())
+            self.assertEqual(run(source, job, None), 0)
+            self.assertEqual(run(source, job, None), 0)
+            rows = json.loads((job / "manifest.json").read_text(encoding="utf-8"))["items"]
+            self.assertEqual(rows[1]["classification"], "REVIEW")
+            self.assertEqual(rows[1]["similarity_hint"],
+                             {"nearest_id": "0001", "dhash_distance": 0})
+
+    def test_reviewer_exclusion_blocks_review_and_is_reversible(self):
+        with tempfile.TemporaryDirectory() as root:
+            base = Path(root)
+            source, job = base / "source", base / "job"
+            source.mkdir()
+            Image.new("RGB", (48, 32), (92, 82, 71)).save(source / "frame.jpg")
+            self.assertEqual(run(source, job, None), 0)
+            classify(job, "0001", "EXCLUDE", "Staff reviewer", "Main subject blurred")
+            with self.assertRaisesRegex(ValueError, "explicitly excluded"):
+                approve_review(job, "Staff reviewer", ["0001"])
+            self.assertEqual(run(source, job, None), 0)
+            classify(job, "0001", "KEEP", "Staff reviewer", "Decision reversed after review")
+            self.assertEqual(approve_review(job, "Staff reviewer", ["0001"])["approved_count"], 1)
+
+    def test_face_review_is_private_human_preview_without_source_change(self):
+        with tempfile.TemporaryDirectory() as root:
+            base = Path(root)
+            source, job = base / "source", base / "job"
+            source.mkdir()
+            original = source / "group.jpg"
+            Image.new("RGB", (240, 160), (102, 89, 76)).save(original, "JPEG")
+            original_hash = sha(original)
+            self.assertEqual(run(source, job, None), 0)
+            with patch("picasso.face_boxes", return_value=([[30, 20, 40, 40]], [.91],
+                                                           "opencv_yunet_2026may")):
+                result = face_review(job, ["0001"])
+            self.assertTrue(result["human_expression_review_required"])
+            self.assertEqual(result["files"][0]["candidate_count"], 1)
+            preview = job / "face-review" / "0001.jpg"
+            with Image.open(preview) as image:
+                self.assertEqual(image.size, (1100, 520))
+                self.assertTrue(image.info.get("icc_profile"))
+                self.assertEqual(len(image.getexif()), 0)
+            self.assertEqual(sha(original), original_hash)
+            with self.assertRaisesRegex(ValueError, "distinct"):
+                face_review(job, ["0001", "0001"])
+
+    def test_onedrive_preflight_refuses_placeholder_without_reading_media(self):
+        with tempfile.TemporaryDirectory() as root:
+            base = Path(root)
+            drive, shoot, job = base / "OneDrive", base / "OneDrive" / "shoot", base / "job"
+            shoot.mkdir(parents=True)
+            (shoot / "frame.jpg").write_bytes(b"placeholder")
+            with patch("picasso.online_only", return_value=True), patch("picasso.digest") as digest_mock:
+                report = preflight(shoot, job, onedrive_root=drive)
+                self.assertEqual(report["online_only_count"], 1)
+                self.assertFalse(report["ready"])
+                with self.assertRaisesRegex(ValueError, "online-only"):
+                    run(shoot, job, None, drive)
+                digest_mock.assert_not_called()
+            self.assertFalse(job.exists())
+
+    def test_onedrive_preflight_requires_specific_folder_within_root(self):
+        with tempfile.TemporaryDirectory() as root:
+            base = Path(root)
+            drive, outside = base / "OneDrive", base / "elsewhere"
+            drive.mkdir()
+            outside.mkdir()
+            (outside / "frame.jpg").write_bytes(b"x")
+            with self.assertRaisesRegex(ValueError, "outside"):
+                preflight(outside, onedrive_root=drive)
+            (drive / "frame.jpg").write_bytes(b"x")
+            with self.assertRaisesRegex(ValueError, "one shoot folder"):
+                preflight(drive, onedrive_root=drive)
+
+    def test_internal_review_staging_requires_human_selection_and_valid_hashes(self):
+        with tempfile.TemporaryDirectory() as root:
+            base = Path(root)
+            source, job = base / "source", base / "job"
+            source.mkdir()
+            Image.new("RGB", (40, 30), (80, 90, 100)).save(source / "frame.jpg")
+            self.assertEqual(run(source, job, None), 0)
+            with self.assertRaisesRegex(ValueError, "human must approve"):
+                prepare_review(job)
+            self.assertEqual(approve_review(job, "Staff reviewer", ["0001"])["approved_count"], 1)
+            stage = prepare_review(job)
+            self.assertEqual(stage["staged_count"], 1)
+            staged = Path(stage["stage_folder"]) / "0001_frame.jpg"
+            self.assertEqual(sha(staged), sha(job / "output" / "0001.jpg"))
+            self.assertEqual(prepare_review(job)["staged_count"], 1)
+            classify(job, "0001", "REVIEW", "Staff reviewer", "Check expression")
+            with self.assertRaisesRegex(ValueError, "human must approve"):
+                prepare_review(job)
+            approve_review(job, "Staff reviewer", ["0001"])
+            self.assertEqual(prepare_review(job)["staged_count"], 1)
+            (job / "output" / "0001.jpg").write_bytes(b"tampered")
+            with self.assertRaisesRegex(ValueError, "changed or is missing"):
+                prepare_review(job)
+            self.assertEqual(verify(job)["failures"], [{"id": "0001", "reason": "hash_mismatch"}])
+
+    def test_amendment_restarts_from_source_and_requires_new_review_approval(self):
+        with tempfile.TemporaryDirectory() as root:
+            base = Path(root)
+            source, job = base / "source", base / "job"
+            source.mkdir()
+            original = source / "frame.jpg"
+            Image.new("RGB", (40, 30), (80, 90, 100)).save(original)
+            original_hash = sha(original)
+            self.assertEqual(run(source, job, None), 0)
+            base_hash = sha(job / "output" / "0001.jpg")
+            approve_review(job, "Staff reviewer", ["0001"])
+            first_stage = Path(prepare_review(job)["stage_folder"])
+            result = amend(job, "0001", "Staff reviewer", "Lift face gently", {"exposure_ev": .1})
+            self.assertEqual(result["revision"], 1)
+            self.assertFalse(result["internal_review_approved"])
+            self.assertEqual(sha(original), original_hash)
+            self.assertEqual(sha(job / "output" / "0001.jpg"), base_hash)
+            self.assertTrue((first_stage / "0001_frame.jpg").exists())
+            with self.assertRaisesRegex(ValueError, "human must approve"):
+                prepare_review(job)
+            self.assertTrue(amend(job, "0001", "Staff reviewer", "Lift face gently",
+                                  {"exposure_ev": .1})["reused"])
+            approve_review(job, "Staff reviewer", ["0001"], latest_revisions=True)
+            new_stage = Path(prepare_review(job)["stage_folder"])
+            self.assertNotEqual(first_stage, new_stage)
+            self.assertEqual(sha(new_stage / "0001_frame.jpg"), sha(Path(result["output"])))
+            with self.assertRaisesRegex(ValueError, "exceeds"):
+                amend(job, "0001", "Staff reviewer", "Too bright", {"exposure_ev": 1.0})
+
+
+if __name__ == "__main__":
+    unittest.main()

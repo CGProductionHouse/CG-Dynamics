@@ -39,6 +39,23 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 28 October — PICASSO next-shoot culling hardening (#878 / PR #879)
+
+The private Staffy 1,237-photo index is still entirely REVIEW with 444/444 bursts unreviewed. A new read-only adjacent-frame comparison command (`shoot_index.py` 0.3.0) was proven on 16 actual camera JPEGs, revealing weak subject/action choices in two prior calibration selections. The MSI skill and company ChatGPT account skill now include this index version; a company browser Work `@picasso` check read the updated source, but could not execute the MSI job. The code-only account update reported an unexpected skill-icon replacement, with no photo or credential exposure. The 195-photo internal Pixieset gallery still fails the editorial release gate; the varied 25-frame look has not been accepted. No client delivery, new spend, hosting change, production change or Nolan #862 change. Details and measured proof: [PICASSO large-shoot hardening](PICASSO-LARGE-SHOOT-HARDENING-2026-10-28.md).
+
+### 27 October — PICASSO Staffy in-place corrections and local revision snapshot (#878 / PR #879)
+
+The existing 195-photo internal Pixieset review collection `125612394` was renamed **The Staffy Fight Night | 24 October 2026**. Six identified exposure/cast outliers were revised from camera originals and replaced through Pixieset's visible **Replace photo** action; each yielded a success notification. The direct collection link did not change. The public gallery showed the new title, and a signed PICASSO update to **CG Picasso Approvals** showed Delivered. The venue signage reads `THE STAFFY`; a focused public search did not independently verify the event's marketed title. This is still an **internal review**, not Amonique's acceptance or client delivery.
+
+The private `quality-audit/gallery-revision-2026-10-27-private` snapshot now mirrors the 195 intended outputs with six revised bytes, a new hash-bound manifest, and a full consistency audit. The audit completed with 56 triage-flagged images (overlapping near-white, group luminance and low-change signals) and remains `BLOCKED` for photographic release because it has no human per-photo review or accepted varied 25-frame calibration. The numbers are not automatic rejects. PR #879 adds the reusable immutable revision assembler and focused tests, and the installed local PICASSO skill points to this replacement workflow. Official Lightroom Classic docs confirm Assisted Culling, Reference View, selective batch setting sync and AI mask recomputation; none certifies the photographic outcome. The company PICASSO local Work chat on the MSI has invoked the installed skill and performed a Lightroom edit/export proof, but has not completed the full 25-frame calibration, office-PC replication, or Work-originated Pixieset/WhatsApp delivery. No production/hosting change, new spend, client-photo commit, or Nolan #862 change.
+
+### 27 October — PICASSO Staffy replacement delivered for internal review
+
+The owner approved a password-free, unlisted replacement gallery. Collection `125612394` contains 195 images across all 11 fights, including four drone stills and 14 labelled staff-posted reference examples. Downloads, social sharing and homepage listing are off. Its link was sent to **CG Picasso Approvals** signed PICASSO and WhatsApp showed Delivered at 14:24 SAST. It is **not client-approved**. The 203-image rejected collection remains hidden. A post-delivery audit found an emergency manifest with 166 files labelled only `colour-checked`, while its selection ledger still had REVIEW decisions; 17 camera-derived images changed very little from source, 14 were luminance outliers within their group, and 40 had many near-white pixels needing subject-level inspection. These are triage flags, not quality verdicts. Do not use the global grade as an approved preset.
+
+### 26 October — PICASSO Staffy review withdrawn; quality gate reset
+
+The 203-photo Staffy internal Pixieset collection was hidden after Amonique identified a visibly blurred walkout frame and said the overall finish appeared too close to the originals. PICASSO acknowledged this in the approvals group. All selected frames need native-size subject review, scene-specific finishing and a human-accepted varied 25-frame calibration before client delivery; technical JPEG verification alone is insufficient. This did not change Dynamics production or Nolan #862.
 ### 27 October — provider freshness and false staff diagnostic corrected
 
 Current exact-client inventory/launch sequence is in the existing
