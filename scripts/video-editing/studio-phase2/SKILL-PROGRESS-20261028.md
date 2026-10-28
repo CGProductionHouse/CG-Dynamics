@@ -1,5 +1,7 @@
 # Nolan Studio — categorised skill progress,28 October2026
 
+**Office cross-shot continuation28October:** [forward-handoff study](OFFICE-FORWARD-HANDOFF-STUDY-20261028.md): two genuinely different licensed woodland shots, seven96-frame controls/revision. Retime alone fails full direction match; bounded incoming reframe reduces encoded vector gap6.228→0.308px/frame;48/48 outgoing frames protected by encoded cache. Not filmed sideways whip, same place/action or native/creative mastery.45families unchanged.
+
 **Office natural foreground continuation28October:** [native Object Mask/depth study](OFFICE-NATURAL-MASK-STUDY-20261028.md) adds a90-frame natural park/hair selection, isolated diagnostic, front/behind controls, repaired word layout and native copy revision. Eight exports decode; saved R02/reopened export90/90 decoded frames equal. External Masks folder is a handover dependency. One source, landscape/silent; fine-hair softness, phone/heard/second-PC/creative gates remain.45 families unchanged.
 
 **Office native text continuation28October:** [native type study](OFFICE-NATIVE-TYPE-STUDY-20261028.md): actual Premiere save/reopen/copy revision/export on licensed moving footage; four72-frame exports decode, reopened R02 matches72/72 decoded frames. One existing family advances;45 families unchanged. Physical-phone, heard sound, second-editor relink and creative/mastery gates remain open.
@@ -120,7 +122,7 @@ Deadline29October07:30SAST: finish safe checkpoint; pause only this named task a
 Useful ordered work (finish any WIP before advancing):
 1. Native editable text/save/reopen/export — bounded one-PC receipt now passes above; second-PC/creative acceptance remains.
 2. Natural foreground — bounded native park proof now passes technical selection/tracking/save/reopen/revision above; fine hair, wider scenes, phone/heard/second-editor acceptance remain. Next distinct work is item3; do not re-export this same selection to inflate progress.
-3. Genuinely different-shot directional handoff with source-motion motivation; do not repeat a same-take time cut.
+3. Genuine different-shot forward handoff now has bounded source-derived reframe/control/revision proof above. Retime-only mismatch and actual filmed sideways-whip gate remain. Next distinct item4 natural unkeyed plane; do not repeat identical exports.
 4. Natural unkeyed moving plane with sufficient features and negative space; controlled green display is not acceptance.
 5. Deeper source-led kinetic type and remaining distinct unfinished board mechanisms. Capture-dependent same-object/physical stop-motion/device transition stay source-gated where genuine cleared captures are absent.
 6. Match purposeful licensed sound when a verified audition is possible; never promote measured-but-unheard audio.

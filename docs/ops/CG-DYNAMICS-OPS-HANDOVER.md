@@ -5,6 +5,8 @@
 
 [Natural foreground continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATURAL-MASK-STUDY-20261028.md) now verifies one90-frame native Object Mask selection/control/revision,90/90 decoded frames equal after R02 reopen. Dedicated Masks folder must accompany native project. Fine-hair/landscape/silent/source coverage limits and second-PC/creative gates remain;45 families unchanged. Actual21:08 scheduled wake queued while editing without interrupting; next distinct queue item is cross-shot handoff.
 
+[Two-shot forward continuation](../../scripts/video-editing/studio-phase2/OFFICE-FORWARD-HANDOFF-STUDY-20261028.md) adds seven96-frame controls, rejects retime-only direction mismatch and bounds an incoming reframe; encoded vector gap6.228→0.308px/frame,48/48 outgoing revision frames equal. Not a filmed sideways whip, continuous place or mastery. Next distinct item is natural unkeyed plane;45families/client/acceptance boundaries unchanged.
+
 Owner explicitly requested office PC primary execution because MSI is unreliable.
 [Takeover brief](../../scripts/video-editing/studio-phase2/OFFICE-RESEARCH-TAKEOVER-20261028.md)
 in existing draft875 records the45-family library, four private Drive archives
