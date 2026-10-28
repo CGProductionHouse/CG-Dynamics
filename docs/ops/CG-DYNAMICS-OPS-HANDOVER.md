@@ -23,6 +23,8 @@
 
 [Native stabilization continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-STABILIZATION-STUDY-20261029.md) adds six72-frame nativecontrols/revision, both72/72actualreopen pairs and49/49protected prefix. New uprightlandscapespan preserveswalker;default50crowdsheadroom/worsensmetric,PSR5reducesdiagnostic22.8%. Source/portrait/phone/heard/second-PC/creativeboundariesremain.45families; next existing native muffled-perspective gate.
 
+[Native EQ continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-EQ-STUDY-20261029.md): sixnativeAV/fouracceptedPCM, threeactualreopenpairs, R04PCM96105sample protectedprefix. NativeAAC1024sample delay measured; PCM-based dry/R02/R04muxes zero measuredlag. WrongDPX/constantPCM and changed R03project gates retained, not repaired by title/settings alone.45families, noheard/phone/creative/crossPCpass; next distinct existing native peak-control.
+
 Owner explicitly requested office PC primary execution because MSI is unreliable.
 [Takeover brief](../../scripts/video-editing/studio-phase2/OFFICE-RESEARCH-TAKEOVER-20261028.md)
 in existing draft875 records the45-family library, four private Drive archives
