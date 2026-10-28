@@ -1,3 +1,13 @@
+### 28 October 2026 — shared Nolan Studio owner corrections
+
+PC and MSI must read [shared editing rules](NOLAN-STUDIO-SHARED-EDIT-RULES-2026-10-28.md)
+alongside the canonical skill/status board. They record the owner's required logo
+animation, beat-based cuts, three-shot horizontal stacks, music/colour/source
+review, grid/full-screen cover and playable-HD handoff rules. Office identity is
+Nolan Studio PC, not BC. Scope is editorial continuity only: #903/#904 own office
+new work; existing MSI jobs and PR #875 remain MSI-owned. No deployment, new
+monitor, storage/network or account/security change is authorised by this update.
+
 ### 28 October — client frontend LIVE; no repeat deployment
 
 CA explicitly authorised the final conservative live push. Exact main `7eb0473f`
