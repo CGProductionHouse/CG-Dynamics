@@ -21,8 +21,14 @@ if ($Mode -eq 'Install') {
         throw 'Install destination must be below this Windows user LocalAppData folder.'
     }
     New-Item -ItemType Directory -Path (Join-Path $destinationFull 'models') -Force | Out-Null
-    Copy-Item -LiteralPath (Join-Path $source 'picasso.py') -Destination $destinationFull -Force
-    Copy-Item -LiteralPath (Join-Path $source 'shoot_index.py') -Destination $destinationFull -Force
+    foreach ($helper in @('picasso.py', 'shoot_index.py', 'assemble_gallery_revision.py',
+        'delivery_consistency_audit.py', 'event_quality_review.py', 'sanitize_editor_jpeg.py',
+        'verify_gallery_download.py')) {
+        Copy-Item -LiteralPath (Join-Path $source $helper) -Destination $destinationFull -Force
+    }
+    New-Item -ItemType Directory -Path (Join-Path $destinationFull 'references') -Force | Out-Null
+    Copy-Item -LiteralPath (Join-Path $source 'references\event-quality-gate.md') -Destination (Join-Path $destinationFull 'references') -Force
+    Copy-Item -LiteralPath (Join-Path $source 'references\large-shoot.md') -Destination (Join-Path $destinationFull 'references') -Force
     Copy-Item -LiteralPath (Join-Path $source 'SKILL.md') -Destination $destinationFull -Force
     Copy-Item -LiteralPath (Join-Path $source 'requirements-windows.txt') -Destination $destinationFull -Force
     Copy-Item -LiteralPath $model -Destination (Join-Path $destinationFull 'models') -Force
@@ -36,6 +42,7 @@ if ($Mode -eq 'Install') {
     if ($LASTEXITCODE -ne 0) { throw 'PICASSO free Python dependency installation failed.' }
     $runner = Join-Path $destinationFull 'picasso.py'
     $indexer = Join-Path $destinationFull 'shoot_index.py'
+    $downloadVerifier = Join-Path $destinationFull 'verify_gallery_download.py'
     $model = Join-Path $destinationFull 'models\face_detection_yunet_2026may.onnx'
 } else {
     $pythonCommand = Get-Command python -ErrorAction SilentlyContinue
@@ -43,6 +50,7 @@ if ($Mode -eq 'Install') {
     $venvPython = $pythonCommand.Source
     $runner = Join-Path $source 'picasso.py'
     $indexer = Join-Path $source 'shoot_index.py'
+    $downloadVerifier = Join-Path $source 'verify_gallery_download.py'
 }
 
 $probe = @'
@@ -64,6 +72,8 @@ if ($LASTEXITCODE -ne 0) { throw 'PICASSO host runtime check failed.' }
 if ($LASTEXITCODE -ne 0) { throw 'PICASSO runner cannot start.' }
 & $venvPython $indexer --help | Out-Null
 if ($LASTEXITCODE -ne 0) { throw 'PICASSO large-shoot indexer cannot start.' }
+& $venvPython $downloadVerifier --help | Out-Null
+if ($LASTEXITCODE -ne 0) { throw 'PICASSO gallery download verifier cannot start.' }
 if ((Get-FileHash -LiteralPath $model -Algorithm SHA256).Hash -ne $expectedModelHash) {
     throw 'Installed PICASSO model hash differs from reviewed source.'
 }
