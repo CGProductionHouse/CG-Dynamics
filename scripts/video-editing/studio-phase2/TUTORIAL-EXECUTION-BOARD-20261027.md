@@ -1,5 +1,7 @@
 # Nolan Studio tutorial execution board
 
+**Office native text continuation28October:** [native type study](OFFICE-NATIVE-TYPE-STUDY-20261028.md): actual Premiere save/reopen/copy revision/export on licensed moving footage; four72-frame exports decode, reopened R02 matches72/72 decoded frames. One existing family advances;45 families unchanged. Physical-phone, heard sound, second-editor relink and creative/mastery gates remain open.
+
 **Office controlled-surface continuation:** [full251-frame phone insert/revision study](OFFICE-PHONE-SURFACE-STUDY-20261028.md) extends scene-surface/display mechanics with actual negative controls. General natural masking and the physically captured screen transition remain separate, unproved gates.
 **28 October additions:** The [Wanderlust ledger](WANDERLUST-DIARIES-STUDY-20261028.md) maps all732 frames and14 observed families. Dated reconstruction batches now include material, prelap, panels, split-tone depth, lens/inset, global-versus-masked negatives, subject bands and an original film-strip interpretation. Source/strength failures remain `X` alongside bounded `P` mechanics. Marketed-template access is not a prerequisite. Reference sound, normal-speed/physical-phone and native editing are still unverified. The [45-family categorised list](SKILL-PROGRESS-20261028.md) links every current card; it is not a completed-tutorial/mastery count.
 
@@ -29,7 +31,7 @@
 | 18 | Five SFX choices | R: use [sound-led card](skills/sound-led-cuts/SKILL.md); no pack rights or heard samples |
 | 19 | Radial shutter blur | P/R: [office rotational shutter controls](OFFICE-ROTATION-HANDOFF-STUDY-20261028.md) use31 angular samples on real rotating footage; exact tutorial controls, normal-speed/phone and native acceptance unverified. [Rapid shutter](skills/rapid-shutter/SKILL.md) remains a distinct directional test |
 | 20 | Cutout mask transition → [masked aperture](skills/masked-zoom-transition/SKILL.md) | P/X: moving foreground tests expose matte limits; clean natural edge/native mask needed |
-| 21 | Pop-up words → [staggered type](skills/staggered-type/SKILL.md) | P: synthetic word timing; phone/human/native title gate |
+| 21 | Pop-up words → [staggered type](skills/staggered-type/SKILL.md) | P/R: synthetic timing plus [actual office native layered title/save/reopen/copy-revision/export](OFFICE-NATIVE-TYPE-STUDY-20261028.md); physical-phone/heard/creative and second-editor gates remain |
 | 22 | Construction speed montage → [motion speed](skills/motion-matched-speed/SKILL.md) | P/R: individual ramp proof, no multi-shot construction continuity proof |
 | 23 | Caption controls → [kinetic caption](skills/kinetic-caption-finishing/SKILL.md) | R/P: native-vs-third-party origin unresolved; bounded local caption tests exist |
 | 24 | Text in 3D space → [scene type](skills/scene-perspective-type/SKILL.md) | P/X: projected board/grass tests still look graphical; tracked-plane gate |

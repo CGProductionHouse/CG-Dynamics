@@ -1,5 +1,8 @@
 ### 28 October — Nolan research/skills transferred to office PC
 
+**Evening owner authority:** CA freed the office PC and requested no-spend overnight sequential skills work. [Native type receipt](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-TYPE-STUDY-20261028.md) proves one-PC Premiere native layers/save/reopen/copy revision/export,72/72 decoded frames equal after second reopen. Existing45 families remain; no mastery/staff/phone/heard promotion. A narrowly authorized local native task **Nolan PC overnight continuation**, every30minutes/failure-only notifications, queues the same research chat without interrupting it, one pending wake maximum. Actual queue/manual-run duplicate suppression and own pause/resume verified. Finish WIP before next family; stop at safe29Oct07:30SAST checkpoint and pause only this task. Existing board holds ordered work. This supersedes older staff-busy/no-new-scheduler wording only for this research continuation, not WhatsApp/MSI monitors. MSI amendments, Central Canvas and storage remain protected.
+
+
 Owner explicitly requested office PC primary execution because MSI is unreliable.
 [Takeover brief](../../scripts/video-editing/studio-phase2/OFFICE-RESEARCH-TAKEOVER-20261028.md)
 in existing draft875 records the45-family library, four private Drive archives

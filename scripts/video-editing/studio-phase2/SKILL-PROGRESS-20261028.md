@@ -1,5 +1,7 @@
 # Nolan Studio — categorised skill progress,28 October2026
 
+**Office native text continuation28October:** [native type study](OFFICE-NATIVE-TYPE-STUDY-20261028.md): actual Premiere save/reopen/copy revision/export on licensed moving footage; four72-frame exports decode, reopened R02 matches72/72 decoded frames. One existing family advances;45 families unchanged. Physical-phone, heard sound, second-editor relink and creative/mastery gates remain open.
+
 **Office full-shot continuation28October:** [phone-surface study](OFFICE-PHONE-SURFACE-STUDY-20261028.md): five251-frame native-fps outputs and a bounded text revision; fixed geometry and drifting/anchored feature tracks retained as controls. Notch wedges, unrelated key pixels and fringe were repaired. Controlled display only;45 families unchanged, no physical/native/heard/mastery promotion.
 **Office continuation28October:** [Intake accepted](OFFICE-RESEARCH-ACCEPTANCE-20261028.md), separate draft[PR910](https://github.com/CGProductionHouse/CG-Dynamics/pull/910). [Rotational optics and registered roll-cut study](OFFICE-ROTATION-HANDOFF-STUDY-20261028.md): seven corrected current source-based exports, two existing families, no new family/mastery count. MSI client amendments and Central Canvas preserved.
 This is a dated reader-friendly projection of [skill status](SKILL-STATUS.md), not another task authority.45 technique families cover the53-video collection plus later Solid Coast, Fight, seven October27 links and Wanderlust reference. A tutorial may contain several mechanisms; multiple tutorials may share one family. Counts are not completed tutorials or a mastery percentage. Detailed cards/receipts and the [per-reference board](TUTORIAL-EXECUTION-BOARD-20261027.md) remain authority.
@@ -106,3 +108,19 @@ The shared [production standard](../../../.agents/skills/cg-video-story-editor/r
 ## Same library on MSI and office PC
 
 Canonical Git skill: `.agents/skills/cg-video-story-editor/`; detailed45-family cards and recipes: `scripts/video-editing/studio-phase2/skills/`. Continue existing draft [PR875](https://github.com/CGProductionHouse/CG-Dynamics/pull/875), not a forked brain. At a safe assignment boundary use the [hash-check/install script](sync-shared-skill.ps1) and [two-PC handover](NOLAN-STUDIO-TWO-PC-HANDOVER-20261027.md). Do not interrupt Central Canvas or overwrite local work. The Google handover mirrors the checkpoint; GitHub is authority. Licensed practice camera files/reference media remain private; recipes contain exact source URLs/hashes and may require authorised reacquisition. Only wholly original portable proofs are committed. Office adoption of this batch is pending its own hash/usage receipt.
+
+## CA-authorized overnight continuation —28→29October2026
+
+CA freed the PC and explicitly requested autonomous sequential research without spending. This narrowly supersedes the earlier occupied-desktop/no-new-scheduler state. Existing45-family cards/per-reference board remain the list; this section is its execution order, not a second tracker. Native scheduled task **Nolan PC overnight continuation** runs locally every30minutes, notifications on failures only, dispatcher stays in its own same chat. It uses documented `codex queue` to queue the existing research chat after its current turn, never `steer`, a new editing worker or status-only request. Private helper atomically permits at most one pending wake; the resumed research turn acknowledges it, finishes WIP/active render first, then advances. Native pilot queued successfully while the root continued; actual Run now returned already_pending and made no duplicate. Manual own-task pause/resume verified. This is a tested local dispatch path, not a guarantee the sleeping/offline app will work.
+
+Deadline29October07:30SAST: finish safe checkpoint; pause only this named task and verify; leave morning evidence/counts. Local STOP suppresses later dispatch. No WhatsApp/MSI monitor, API credits, global worker/configuration change, model override, client send or publishing. If a human returns, yield desktop.
+
+Useful ordered work (finish any WIP before advancing):
+1. Native editable text/save/reopen/export — bounded one-PC receipt now passes above; second-PC/creative acceptance remains.
+2. Natural foreground via verified installed on-device Object Mask or cleared clean plate; inspect whole moving boundaries and compare plain/control/revision. Do not reuse failed GrabCut sources.
+3. Genuinely different-shot directional handoff with source-motion motivation; do not repeat a same-take time cut.
+4. Natural unkeyed moving plane with sufficient features and negative space; controlled green display is not acceptance.
+5. Deeper source-led kinetic type and remaining distinct unfinished board mechanisms. Capture-dependent same-object/physical stop-motion/device transition stay source-gated where genuine cleared captures are absent.
+6. Match purposeful licensed sound when a verified audition is possible; never promote measured-but-unheard audio.
+
+Morning report must distinguish45 families, existing implementations, new office proofs, rejected/source-gated mechanisms and human/native/heard acceptance. Do not convert counts into45 mastered, 6 completed/39 unbuilt, or undocumented tutorials left.
