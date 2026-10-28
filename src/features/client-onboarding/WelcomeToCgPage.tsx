@@ -19,12 +19,13 @@ type UploadQueueItem = {
   error?: string
 }
 
-export default function WelcomeToCgPage() {
+export default function WelcomeToCgPage({ previewClientName }: { previewClientName?: {} } = {}) {
   const [token] = useState(() => {
     const fragmentToken = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : ''
     const historyToken = typeof window.history.state?.onboardingToken === 'string' ? window.history.state.onboardingToken : ''
     return fragmentToken || historyToken
   })
+  const isPreview = !token && !!previewClientName
   const [state, setState] = useState<ClientOnboardingState | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -180,6 +181,19 @@ export default function WelcomeToCgPage() {
   }
 
   if (loading) return <OnboardingShell><p className="text-sm text-report-muted">Opening your welcome link...</p></OnboardingShell>
+  if (isPreview) {
+    return (
+      <OnboardingShell>
+        <div className="py-6 sm:py-12">
+          <p className="text-xs font-bold uppercase tracking-[0.22em] text-report-accent">About 5 minutes</p>
+          <h1 className="mt-4 text-4xl font-black tracking-tight text-white sm:text-6xl">Welcome to CG, {previewClientName?.name ?? 'Client'}</h1>
+          <p className="mt-5 max-w-xl text-base leading-relaxed text-report-muted sm:text-lg">Send what you have. We'll take it from there.</p>
+          <VideoWalkthrough videoUrl={WALKTHROUGH_VIDEO_URL} />
+          <ActionButton size="lg" className="mt-8 min-h-14 w-full sm:w-auto" onClick={() => void 0} loading={saving} disabled>{'Start'}</ActionButton>
+        </div>
+      </OnboardingShell>
+    )
+  }
   if (!state) return <OnboardingShell><Message title="This link is unavailable" body={error ?? 'Ask CG for a fresh welcome link.'} /></OnboardingShell>
 
   const step = state.currentStep
@@ -193,7 +207,7 @@ export default function WelcomeToCgPage() {
           <h1 className="mt-4 text-4xl font-black tracking-tight text-white sm:text-6xl">Welcome to CG, {state.clientName}</h1>
           <p className="mt-5 max-w-xl text-base leading-relaxed text-report-muted sm:text-lg">Send what you have. We'll take it from there.</p>
           <VideoWalkthrough videoUrl={WALKTHROUGH_VIDEO_URL} />
-          <ActionButton size="lg" className="mt-8 min-h-14 w-full sm:w-auto" onClick={() => void save({ currentStep: 1 })} loading={saving}>Start</ActionButton>
+          <ActionButton size="lg" className="mt-8 min-h-14 w-full sm:w-auto" onClick={() => void 0} loading={saving} disabled>{'Start'}</ActionButton>
         </div>
       )}
 
