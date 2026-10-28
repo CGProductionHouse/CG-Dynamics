@@ -11,10 +11,24 @@ import unittest
 
 from PIL import Image
 
-from shoot_index import classify, connect, group_bursts, review_bursts, run_index, stage_selected, status
+from shoot_index import burst_sheets, classify, connect, group_bursts, review_bursts, run_index, stage_selected, status
 
 
 class ShootIndexTest(unittest.TestCase):
+    def test_calibration_cannot_stage_unbounded_selection(self):
+        with tempfile.TemporaryDirectory() as temp:
+            job = Path(temp)
+            connection = connect(job)
+            connection.executemany(
+                "INSERT INTO photos (id,root,relative,source,bytes,mtime_ns,source_sha256,status,decision,reviewer,reason) "
+                "VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                ((f"p{n}", 1, f"p{n}.jpg", f"X:/p{n}.jpg", 1, 1, "0" * 64,
+                  "indexed", "KEEP", "Reviewer", "pilot") for n in range(26)))
+            connection.commit()
+            connection.close()
+            with self.assertRaisesRegex(ValueError, "limited to 25"):
+                stage_selected(job, calibration=True)
+
     def test_six_thousand_rows_group_without_auto_selecting(self):
         with tempfile.TemporaryDirectory() as temp:
             job = Path(temp)
@@ -59,6 +73,15 @@ class ShootIndexTest(unittest.TestCase):
             self.assertEqual(rows[0]["burst"], rows[1]["burst"])
             self.assertNotEqual(rows[1]["burst"], rows[2]["burst"])
             self.assertEqual(rows[1]["near_duplicate_of"], rows[0]["id"])
+
+            comparison = burst_sheets(job, [rows[0]["burst"]], (0.1, 0.1, 0.8, 0.8))
+            self.assertEqual((comparison["frames"], len(comparison["pages"])), (2, 1))
+            with Image.open(comparison["pages"][0]) as sheet:
+                self.assertEqual(sheet.size, (2000, 1440))
+            with self.assertRaisesRegex(ValueError, "Crop"):
+                burst_sheets(job, [rows[0]["burst"]], (0.8, 0.1, 0.5, 0.5))
+            with self.assertRaisesRegex(ValueError, "Unknown"):
+                burst_sheets(job, ["B99999"])
 
             self.assertEqual(run_index([source], job, sheets=False)["reused"], 3)
             classify(job, [rows[0]["id"]], "KEEP", "Reviewer", "strong opening moment")

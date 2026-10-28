@@ -17,12 +17,12 @@ from pathlib import Path
 
 import cv2
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw
 
 from picasso import analyze, digest, online_only, srgb_image
 
 
-VERSION = "0.2.0"
+VERSION = "0.3.0"
 SUFFIXES = {".jpg", ".jpeg"}
 DECISIONS = {"KEEP", "ALTERNATE", "REVIEW", "EXCLUDE"}
 FIELDS = ["id", "root", "relative", "source", "source_sha256", "bytes", "capture_time",
@@ -385,6 +385,8 @@ def stage_selected(job: Path, *, calibration: bool = False) -> dict:
     connection.close()
     if not rows or any(not row["reviewer"] or not row["reason"] for row in rows):
         raise ValueError("No human-reviewed KEEP originals are available to stage")
+    if calibration and len(rows) > 25:
+        raise ValueError("Calibration staging is limited to 25 reviewed KEEP originals")
     scope = "calibration" if calibration else "full"
     token = scope + "-" + hashlib.sha256(json.dumps([(row["id"], row["source_sha256"]) for row in rows]).encode()).hexdigest()[:16]
     parent = job / "selected-originals"
@@ -418,6 +420,64 @@ def stage_selected(job: Path, *, calibration: bool = False) -> dict:
     return {"folder": str(destination), "count": len(expected), "scope": scope, "reused": False}
 
 
+def burst_sheets(job: Path, bursts: list[str], crop: tuple[float, float, float, float] | None = None) -> dict:
+    """Make private full-frame and same-area comparisons for adjacent camera frames."""
+    if not (job / "index.sqlite3").is_file() or not bursts or len(bursts) != len(set(bursts)):
+        raise ValueError("An existing index and distinct burst IDs are required")
+    if crop is not None and (len(crop) != 4 or any(not 0 <= value <= 1 for value in crop)
+                             or crop[2] <= 0 or crop[3] <= 0 or crop[0] + crop[2] > 1
+                             or crop[1] + crop[3] > 1):
+        raise ValueError("Crop must be normalized x y width height within the frame")
+    connection = connect(job)
+    rows = connection.execute(
+        f"SELECT id,relative,source,source_sha256,burst,decision,thumb FROM photos "
+        f"WHERE burst IN ({','.join('?' for _ in bursts)}) AND status='indexed' "
+        "ORDER BY burst,capture_time,relative", bursts).fetchall()
+    connection.close()
+    if {row["burst"] for row in rows} != set(bursts):
+        raise ValueError("Unknown or unindexed burst ID")
+    output = job / "burst-sheets"
+    output.mkdir(exist_ok=True)
+    pages = []
+    for burst in bursts:
+        members = [row for row in rows if row["burst"] == burst]
+        for start in range(0, len(members), 8):
+            current = members[start:start + 8]
+            sheet = Image.new("RGB", (2000, 1440), (22, 22, 22))
+            draw = ImageDraw.Draw(sheet)
+            for position, row in enumerate(current):
+                source = Path(row["source"])
+                if not source.is_file() or online_only(source) or digest(source) != row["source_sha256"]:
+                    raise ValueError(f"Camera source changed: {row['id']}")
+                with Image.open(source) as raw:
+                    raw.draft("RGB", (2400, 2400))
+                    photo, _ = srgb_image(raw)
+                full = photo.copy()
+                full.thumbnail((480, 315), Image.Resampling.LANCZOS)
+                area = crop or (0.25, 0.15, 0.5, 0.6)
+                left = int(area[0] * photo.width)
+                top = int(area[1] * photo.height)
+                right = max(left + 1, int((area[0] + area[2]) * photo.width))
+                bottom = max(top + 1, int((area[1] + area[3]) * photo.height))
+                detail = photo.crop((left, top, right, bottom))
+                detail.thumbnail((480, 315), Image.Resampling.LANCZOS)
+                x = (position % 4) * 500
+                y = (position // 4) * 720
+                sheet.paste(full, (x + (500 - full.width) // 2, y))
+                sheet.paste(detail, (x + (500 - detail.width) // 2, y + 320))
+                draw.text((x + 8, y + 642), f"{row['relative']}  {row['decision']}", fill="white")
+                draw.text((x + 8, y + 663), row["id"], fill="#cccccc")
+                draw.text((x + 8, y + 685), "Full frame above / same-area detail below", fill="#aaaaaa")
+            target = output / f"{burst}-{start // 8 + 1:02d}.jpg"
+            temporary = target.with_suffix(".tmp")
+            sheet.save(temporary, "JPEG", quality=87)
+            os.replace(temporary, target)
+            pages.append(str(target))
+    return {"bursts": len(bursts), "frames": len(rows), "pages": pages,
+            "crop": list(crop or (0.25, 0.15, 0.5, 0.6)),
+            "note": "Comparison proxy only; inspect each subject in the original at 100% before KEEP"}
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
@@ -442,6 +502,11 @@ def main() -> None:
     stage = commands.add_parser("stage-selected", help="Hash-check and copy human KEEP originals for local Lightroom")
     stage.add_argument("--job", type=Path, required=True)
     stage.add_argument("--calibration", action="store_true", help="Stage a limited pilot before full burst coverage")
+    compare = commands.add_parser("burst-sheet", help="Private adjacent-frame comparison with the same-area detail")
+    compare.add_argument("--job", type=Path, required=True)
+    compare.add_argument("--bursts", nargs="+", required=True)
+    compare.add_argument("--crop", nargs=4, type=float, metavar=("X", "Y", "W", "H"),
+                         help="Optional normalized detail rectangle shared across all burst frames")
     args = parser.parse_args()
     try:
         if args.command == "index":
@@ -452,6 +517,8 @@ def main() -> None:
             result = review_bursts(args.job, args.bursts, args.reviewer, args.note)
         elif args.command == "stage-selected":
             result = stage_selected(args.job, calibration=args.calibration)
+        elif args.command == "burst-sheet":
+            result = burst_sheets(args.job, args.bursts, tuple(args.crop) if args.crop else None)
         else:
             if not (args.job / "index.sqlite3").is_file():
                 raise ValueError("No PICASSO index job at that path")
