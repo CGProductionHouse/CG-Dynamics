@@ -15,6 +15,8 @@
 
 [Native context continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-CONTEXT-ZOOM-STUDY-20261028.md) adds six72-frame controls/easing/revision/two-reopen exports, both72/72decoded equal,13/13 protected opening. Native endpoint influence also changes and later settle is harder; no creative/phone/heard/second-PC promotion. Existing45families; next distinct native motion-remap bag-contact gate.
 
+[Native speed continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-SPEED-STUDY-20261028.md) adds six valid controls/revision/reopen exports, two rejected leading-gap outputs; R03/R04reopen148/148 and149/149decoded equal,88/88protected prefix. Reacquired dancer original hash matches; bag remains source-gated. Endpoint/Bezier/creative/phone/heard/second-PC limits retained. Existing45families; next distinct native three-shot stack.
+
 Owner explicitly requested office PC primary execution because MSI is unreliable.
 [Takeover brief](../../scripts/video-editing/studio-phase2/OFFICE-RESEARCH-TAKEOVER-20261028.md)
 in existing draft875 records the45-family library, four private Drive archives

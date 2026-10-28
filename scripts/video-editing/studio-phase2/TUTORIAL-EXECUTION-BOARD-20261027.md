@@ -1,5 +1,8 @@
 # Nolan Studio tutorial execution board
 
+**Office native remap continuation28October:** [native speed study](OFFICE-NATIVE-SPEED-STUDY-20261028.md): six valid native controls/revision/reopen exports plus two rejected leading-gap files. R03/R04reopen148/148 and149/149decoded parity,88/88protected opening. Actual source identity maps strictly forward/no repeats; endpoint539→538 failure and Bezier/phone/heard/cross-shot/creative gates retained.45families unchanged; next native three-shot stack.
+
+
 **Office native context continuation28October:** [native pullback study](OFFICE-NATIVE-CONTEXT-ZOOM-STUDY-20261028.md): six72-frame plain/linear/eased/revision/reopen exports; both reopen pairs72/72decoded equal, protected opening13/13. Later endpoint also changes influence and settles harder; softened enlarged source/ongoing-action/phone/heard/creative/second-PC limits retained.45families unchanged. Next distinct native motion-remap bag-contact gate.
 
 
@@ -48,7 +51,7 @@
 | 19 | Radial shutter blur | P/R: [office rotational shutter controls](OFFICE-ROTATION-HANDOFF-STUDY-20261028.md) use31 angular samples on real rotating footage; exact tutorial controls, normal-speed/phone and native acceptance unverified. [Rapid shutter](skills/rapid-shutter/SKILL.md) remains a distinct directional test |
 | 20 | Cutout mask transition → [masked aperture](skills/masked-zoom-transition/SKILL.md) | P/X: moving foreground tests expose matte limits; clean natural edge/native mask needed |
 | 21 | Pop-up words → [staggered type](skills/staggered-type/SKILL.md) | P/R: synthetic timing plus [actual office native layered title/save/reopen/copy-revision/export](OFFICE-NATIVE-TYPE-STUDY-20261028.md); physical-phone/heard/creative and second-editor gates remain |
-| 22 | Construction speed montage → [motion speed](skills/motion-matched-speed/SKILL.md) | P/R: individual ramp proof, no multi-shot construction continuity proof |
+| 22 | Construction speed montage → [motion speed](skills/motion-matched-speed/SKILL.md) | P/R/X: actual native ramp/revision/two-reopen and88frameprotected prefix; leading-gap version rejected and exact endpoint fails, no multi-shot construction continuity proof |
 | 23 | Caption controls → [kinetic caption](skills/kinetic-caption-finishing/SKILL.md) | R/P: native-vs-third-party origin unresolved; bounded local caption tests exist |
 | 24 | Text in 3D space → [scene type](skills/scene-perspective-type/SKILL.md) | P/X: bounded natural wood track/control/revision and actual seam-placement repair now in office study; general depth/native/creative gates remain |
 | 25 | [Context zoom-out](skills/context-zoom-out/SKILL.md) | P: earlier raster controls plus actual native controls/easing/revision, both reopen pairs72/72decoded parity; influence/settle failure retained, phone/heard/creative/second-PC gate |

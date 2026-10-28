@@ -151,3 +151,7 @@ Designate the native text graphic as an alpha matte for the footage, and animate
 ## Check interpolation after an endpoint revision
 
 A native added endpoint can preserve zero terminal velocity while changing its influence. The [office native pullback](https://github.com/CGProductionHouse/CG-Dynamics/blob/codex/nolan-office-research-874/scripts/video-editing/studio-phase2/OFFICE-NATIVE-CONTEXT-ZOOM-STUDY-20261028.md) verifies both saved/reopened curves72/72 decoded parity and protects13 opening frames, but the later settle takes a larger final step. Inspect native handles and encoded geometry; do not assume a longer move is smoother or a parameter-preserved tail is decoded-identical. Keep action/contact inside the crop and disclose enlargement softness, phone/heard/creative and second-PC gates.
+
+## Native speed changes need source-frame and gap audits
+
+The [office native remap](https://github.com/CGProductionHouse/CG-Dynamics/blob/codex/nolan-office-research-874/scripts/video-editing/studio-phase2/OFFICE-NATIVE-SPEED-STUDY-20261028.md) caught a six-frame leading gap after a missed handle drag. Save/reopen parity alone would repeat that mistake. Verify timelinezero and actual original-frame order/endpoints after each split-key edit; the corrected outgoing revision protects88 decoded opening frames but rounds to a different final sourceframe. Native linked keys do not establish exact Bezier shape, heard beats, cross-shot continuity or creative acceptance.
