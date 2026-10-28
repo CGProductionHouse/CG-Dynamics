@@ -34,7 +34,7 @@ Office PC: start a separate worktree from latest `main` for **newly assigned** N
 
 ## Current boundaries and known failures
 
-- TBS Brokers is owner-approved after an internal November revision; the MSI lane owns any follow-up feedback. Daisy R04 was delivered internally on 27 October and has another one-clip amendment pending on WhatsApp, which remains MSI-owned. Neither state authorizes a new office revision.
+- TBS Brokers is owner-approved after an internal November revision; the MSI lane owns any follow-up feedback. Daisy R05 corrected one inverted shot and was delivered internally on 27 October; it is not client/public approval. Any Daisy amendment remains MSI-owned. Neither state authorizes a new office revision.
 - The Fight Night high-power trailer depends on complete original bout footage and verified landed-contact selections. Small downloaded atmosphere clips and a 1.3-second opening never proved a trailer. The old SharePoint connector returned a hard 100 MiB limit for large originals; do not call a preview or an incomplete transfer a source master.
 - Two local Gemma audio model variants failed silence/tone/impact controls. Measurements, ASR and model critique cannot replace creative full-speed listening. Earlier generic stock montage/music and weak visual effects were rejected; do not reuse them as a ready formula.
 - Not every skill card is mastered. Read the card's stated state and negative result. Client-specific style, posted-use decisions, consent, product availability and licence never transfer automatically to a different client.

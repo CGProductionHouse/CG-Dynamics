@@ -74,6 +74,7 @@ Each row identifies an actual owner correction, the prior coverage/gap and its d
 3. Complete sound classification added to the main editorial decision, matching the existing moment-selection warning.
 4. Tool-agnostic native acceptance replaces a universal Premiere-only release instruction.
 5. Two-PC handover no longer says second-PC setup is wholly unwitnessed; scope is anchored to actual #903 receipt and native/phone limits remain open.
+   Its stale Daisy R04/pending-amendment line is also reconciled to the witnessed R05 handoff; the Google mirror already had the later state. Internal delivery still does not establish client/public approval.
 6. New feedback does not erase keep elements or become a global brand/style rule. Historical client notes remain history and must yield to the current client checkpoint.
 7. New colour requirement is a documented baseline **not a new tested look/mastery claim**. It must be applied and evidenced on actual projects.
 
