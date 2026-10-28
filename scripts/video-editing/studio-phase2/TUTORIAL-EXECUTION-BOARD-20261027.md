@@ -1,5 +1,7 @@
 # Nolan Studio tutorial execution board
 
+**Office native vector continuation29October:** [native icon study](OFFICE-NATIVE-VECTOR-STUDY-20261029.md): SVG import rejected; actual Illustrator-derived assets and independent native Premiere icon transforms/text now tested. Seven108-frame outputs; three actual reopen pairs108/108decoded equal. Copy revision protects72/72frames; path repair protects19/19 and restores three separate icons108/108 vs82/108failed straight-path frames. Only three native Position objects change in the repair. Active-only labels/easing/loop/phone/heard/second-PC/creative gates remain;45families unchanged. Next distinct existing native stabilization gate.
+
 **Office native stack continuation29October:** [three-shot study](OFFICE-NATIVE-THREE-SHOT-STACK-STUDY-20261029.md): six72-frame native controls/revision/reopen, both reopen72/72decoded parity and12/12protected opening. Three distinct sources fill1080×1920 as three640-high bands; actual reveals0/6/12 and0/6/18. Longer empty-third wait rejected; middle-source one-frame offset and colour/phone/heard/creative/second-PC limits remain.45families unchanged; next native vector-option-carousel.
 
 
@@ -108,7 +110,7 @@
 
 ## Work order without another reminder loop
 
-Owner requirements beyond the tutorial links are also tracked: [default shot stabilization](skills/stabilization/SKILL.md) now has a protected real-shot A/B and a negative control; the [imported-vector option carousel](skills/vector-option-carousel/SKILL.md) has a portable original static/moving A/B, licensed SVG sources, settled label timing and exact cycle-return checks. These do not imply client branding, offers or native editor handover are approved.
+Owner requirements beyond the tutorial links are also tracked: [default shot stabilization](skills/stabilization/SKILL.md) now has a protected real-shot A/B and a negative control; the [imported-vector option carousel](skills/vector-option-carousel/SKILL.md) has a portable original static/moving A/B, licensed SVG sources, settled label timing and exact cycle-return checks. [Office native extension](OFFICE-NATIVE-VECTOR-STUDY-20261029.md) now proves three local save/reopen/export pairs, protected copy/path revisions and repairs straight-path collisions. Client brand/offer, active-only labels, easing, physical-phone/heard and second-PC gates remain.
 
 Use the exact next **distinct** proof, not the next row numerically. First fix visual families with a suitable moving source: footage-in-type action/word, natural depth edge, source-led speed/zoom, then the real filmed-screen capture when a device shoot is available. Avoid repeating known bad sources. Once the picture method holds at normal speed and phone size, fit licensed sound on separable stems and hear it in the chosen music phrase. A session should advance several concrete gates where possible and save the result to its card, this board, the owning PR and the canonical `.agents/skills/cg-video-story-editor` only if the lesson is client-agnostic. The office PC reads the same Git branch/PR until merge; the [two-PC handover](NOLAN-STUDIO-TWO-PC-HANDOVER-20261027.md) owns installation and lane separation. No heartbeat is required to make a small proof into a finished claim.
 
