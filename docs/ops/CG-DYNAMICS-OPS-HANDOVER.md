@@ -14,6 +14,10 @@ and source-checked subject-band rerender inspected. [Exact receipt](../../script
 add seven corrected90-frame outputs to two existing families. Rejected sign/precision
 controls retained; no phone/heard/native or mastery claim. Staff desktop active;
 further research is file-based. MSI amendments and Central Canvas remain protected.
+[Full-shot display continuation](../../scripts/video-editing/studio-phase2/OFFICE-PHONE-SURFACE-STUDY-20261028.md)
+adds five251-frame native-fps controls/revision; notch/key/fringe failures repaired,
+feature/anchor drift retained. Controlled-display proof only; physical/natural/native
+and heard/phone gates remain open. No new family or client change.
 GitHub/903/874/Supervisor381 and the existing Google handover are continuity routes.
 Exact Control Centre tracker remains unavailable after a scoped Drive name search;
 no guessed tracker write or replacement. No client media, credentials, permissions,

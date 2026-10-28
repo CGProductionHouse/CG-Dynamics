@@ -6,6 +6,9 @@ This reference is for studying client-supplied edits and tutorials without turni
 
 ## Transfer method
 
+For a filmed display with a notch, fit the outer surface separately from the visible-content alpha. A concave notch can pull a fitted edge inward; a broad colour key can also catch unrelated scene pixels. The [full-shot phone study](https://github.com/CGProductionHouse/CG-Dynamics/blob/codex/nolan-office-research-874/scripts/video-editing/studio-phase2/OFFICE-PHONE-SURFACE-STUDY-20261028.md) tests connected-region isolation and full-span controls. A controlled green display does not establish arbitrary natural-plane or person-matte capability.
+
+
 For source-motivated rotation, verify the actual camera direction before choosing the transform sign: inverse sampling maps rotate the displayed image in the opposite direction. The [office rotational study](https://github.com/CGProductionHouse/CG-Dynamics/blob/codex/nolan-office-research-874/scripts/video-editing/studio-phase2/OFFICE-ROTATION-HANDOFF-STUDY-20261028.md) retains a wrong-direction control and separates plain, zoom, rotation and shutter. A registered cut across omitted time can improve spatial alignment without proving continuous action, a different-shot whip or seamless geometry. Keep the residual/source-time limits explicit.
 
 
