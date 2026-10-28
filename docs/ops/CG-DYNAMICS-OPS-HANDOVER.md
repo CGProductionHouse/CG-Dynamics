@@ -13,6 +13,8 @@
 
 [Native footage-in-type continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-FOOTAGE-TYPE-STUDY-20261028.md) adds plain/title controls, actual editable alpha-matte/vector reveal and protected24→18 timing revision. Both native saved/reopened versions48/48 decoded equal;18/18 revision opening equal, tail0/6 exact. Dark/withheld-action limitations retained; six exports,45families unchanged. Next distinct native context zoom-out/easing gate. Actual23:08 scheduled wake queued while editing continued, no duplicate worker or client/storage change.
 
+[Native context continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-CONTEXT-ZOOM-STUDY-20261028.md) adds six72-frame controls/easing/revision/two-reopen exports, both72/72decoded equal,13/13 protected opening. Native endpoint influence also changes and later settle is harder; no creative/phone/heard/second-PC promotion. Existing45families; next distinct native motion-remap bag-contact gate.
+
 Owner explicitly requested office PC primary execution because MSI is unreliable.
 [Takeover brief](../../scripts/video-editing/studio-phase2/OFFICE-RESEARCH-TAKEOVER-20261028.md)
 in existing draft875 records the45-family library, four private Drive archives

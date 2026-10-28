@@ -1,5 +1,8 @@
 # Nolan Studio tutorial execution board
 
+**Office native context continuation28October:** [native pullback study](OFFICE-NATIVE-CONTEXT-ZOOM-STUDY-20261028.md): six72-frame plain/linear/eased/revision/reopen exports; both reopen pairs72/72decoded equal, protected opening13/13. Later endpoint also changes influence and settles harder; softened enlarged source/ongoing-action/phone/heard/creative/second-PC limits retained.45families unchanged. Next distinct native motion-remap bag-contact gate.
+
+
 **Office native aperture continuation28October:** [native footage-in-type study](OFFICE-NATIVE-FOOTAGE-TYPE-STUDY-20261028.md): plain/title controls, actual native alpha-matte/vector reveal and earlier timing revision; six48-frame exports decode. Both R02/R03 save/close/reopen/re-export48/48 decoded parity. Revision opening18/18 identical; tail0/6 equal. Dark/fragmented fill and delayed craft proof remain creative limitations.45families unchanged; next distinct native context zoom-out/easing gate.
 
 
@@ -48,7 +51,7 @@
 | 22 | Construction speed montage → [motion speed](skills/motion-matched-speed/SKILL.md) | P/R: individual ramp proof, no multi-shot construction continuity proof |
 | 23 | Caption controls → [kinetic caption](skills/kinetic-caption-finishing/SKILL.md) | R/P: native-vs-third-party origin unresolved; bounded local caption tests exist |
 | 24 | Text in 3D space → [scene type](skills/scene-perspective-type/SKILL.md) | P/X: bounded natural wood track/control/revision and actual seam-placement repair now in office study; general depth/native/creative gates remain |
-| 25 | [Context zoom-out](skills/context-zoom-out/SKILL.md) | P: new portrait pour plain/linear/eased A/B retains action and returns exactly to full source; normal-speed/native keyframe gate |
+| 25 | [Context zoom-out](skills/context-zoom-out/SKILL.md) | P: earlier raster controls plus actual native controls/easing/revision, both reopen pairs72/72decoded parity; influence/settle failure retained, phone/heard/creative/second-PC gate |
 | 26 | Directional flash | R: sampled adjustment controls; [exposure flash](skills/exposure-flash-transition/SKILL.md) negative is a different treatment |
 | 27 | Three-frame zoom → [short zoom](skills/short-zoom-cuts/SKILL.md), [graphic blur subskill](skills/graphic-transform-blur/SKILL.md) | P/X: portrait saw cuts fail action fit; original blur/no-blur sharp hold plus actual office native Transform/reopen72/72 parity; stepped native entry/layout and saw source failures remain |
 | 28 | Motion trail clones → [trail card](skills/motion-trail-clones/SKILL.md) | P/X: skater path found; tree bleed and board grounding reject matte |
