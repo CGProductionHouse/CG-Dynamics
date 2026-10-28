@@ -1,6 +1,6 @@
 # Nolan Studio tutorial execution board
 
-**28 October addition:** The owner's [Wanderlust Diaries reference](WANDERLUST-DIARIES-STUDY-20261028.md) is separate from the collection/seven-reference set below. Its complete732-frame interval map routes14 families individually. New silhouette-prelap, registered-panel and revised gold-material proofs are `P`; template access, other family reconstructions, reference sound and native/normal-speed/phone acceptance remain open. Do not count a frame inventory or three reconstructions as completion of the whole template.
+**28 October additions:** The [Wanderlust ledger](WANDERLUST-DIARIES-STUDY-20261028.md) maps all732 frames and14 observed families. Dated reconstruction batches now include material, prelap, panels, split-tone depth, lens/inset, global-versus-masked negatives, subject bands and an original film-strip interpretation. Source/strength failures remain `X` alongside bounded `P` mechanics. Marketed-template access is not a prerequisite. Reference sound, normal-speed/physical-phone and native editing are still unverified. The [45-family categorised list](SKILL-PROGRESS-20261028.md) links every current card; it is not a completed-tutorial/mastery count.
 
 27 October 2026. This is the **per-reference routing board** for the owner's [53-video collection](VIDEO-EDITING-COLLECTION.md), [seven newer references](NEW-REFERENCE-INTAKE-20261027.md), [five Solid Coast captions/masks](skills/kinetic-caption-finishing/SKILL.md) and [two Fight Night references](FIGHT-NIGHT-EDITING-RESEARCH.md). Those source files contain the exact links and observed frames. This board tells an MSI or office editor what has actually been built, what failed, and which distinct gate remains. It does **not** claim the reference audio was heard or that a render is a mastered skill.
 
@@ -40,7 +40,7 @@
 | 30 | Walk through text → [depth type](skills/depth-type/SKILL.md) | P/X: green-screen mechanics, natural foreground/word-readability gate |
 | 31 | Levels/Transform flash → [exposure flash](skills/exposure-flash-transition/SKILL.md) | P/X: stage source's natural light already wins; no universal flash preset |
 | 32 | Background music pitch | N: no CG licence or approved track established |
-| 33 | Colour inversion → [inversion card](skills/color-invert-glitch/SKILL.md) | P/X: one-frame boxer negative overwhelms face/glove; comfort gate |
+| 33 | Colour inversion → [inversion card](skills/color-invert-glitch/SKILL.md) | P/X: boxer negative rejected; new global/background-only controls isolate subject colour and large brightness jump; story/comfort/native gate |
 | 34 | Whoosh/reverse-crash | R: [sound-led card](skills/sound-led-cuts/SKILL.md); original examples not acquired/heard |
 | 35 | Charging/taps breakdown → [sound-led card](skills/sound-led-cuts/SKILL.md) | P: individual cue alignment tests; no heard pack/client signoff |
 | 36 | Charging/flicker/impact/slow-motion layers → [sound-led card](skills/sound-led-cuts/SKILL.md) | P/R: separate-stem timing proven, reference layers not heard |
@@ -67,7 +67,7 @@
 | Reference | Mechanism and route | Evidence / next gate |
 |---|---|---|
 | New visual 1 | [freeze](skills/grounded-freeze-frame/SKILL.md), [window grow](skills/window-grow/SKILL.md), [split](skills/source-led-split-screen/SKILL.md) | Synthetic grow works; natural freeze mask rejected; same-shoot split used in an internal Daisy revision. Physical screen and mask gates open. |
-| New visual 2 | [reaction panels](skills/stacked-reaction-panels/SKILL.md), [burn](skills/bounded-burn/SKILL.md) | Same-source panel direct reveal is a candidate; sliding exit duplicates people and was rejected. Procedural and real spotlight burns were rejected. |
+| New visual 2 | [reaction panels](skills/stacked-reaction-panels/SKILL.md), [burn](skills/bounded-burn/SKILL.md) | Same-source panel direct reveal is a candidate; sliding exit duplicates people and was rejected. Procedural/spotlight burns and rounded-card gate rejected. New six-frame film-strip interpretation has repaired shutter integration; physical burn, full-speed/phone, heard sound and native layers unproved. |
 | New visual 3 | [filmed last frame](skills/filmed-last-frame/SKILL.md) | Real green-screen handset insert proved tracking, but digital grow floats; actual camera lens-cover capture absent. |
 | New sound 1 | #35 duplicate → [sound-led cuts](skills/sound-led-cuts/SKILL.md) | No new pack, same heard/licence gate. |
 | New sound 2 | Tonal versus noise → [rapid shutter sound card](skills/rapid-shutter/SKILL.md) | Synthetic equal-peak A/B exists; selected music and real listening absent. |
