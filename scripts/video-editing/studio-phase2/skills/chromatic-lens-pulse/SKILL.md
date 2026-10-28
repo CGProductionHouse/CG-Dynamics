@@ -16,3 +16,7 @@ Full peak frames and reduced four-way contacts inspected. **Reject strong on thi
 All four actual exports fully decode with90 frames. SHA256 mild `aa883782bdee0c713232dd66fce7505e3186a90fd3a80d7da270c1d87c0b974e`; strong `f2ca0bb62488bdf6cc3f96754f23567c4649efeb274de7bd46efd06a9f1692ff`. Parameters, source anchors and remaining hashes are in `evidence.json`. Silent; no audio verdict. Normal-speed comfort, physical-phone viewing, source-motivated two-shot use and native editable controls/reopen remain unverified. **Bounded mechanics, not creative mastery.**
 
 Portability: pass `--source ABSOLUTE_LOCAL_ORIGINAL` on another PC instead of copying the MSI directory layout. The exact recorded SHA-256 remains mandatory. Use a private output directory; reacquire only the permitted source, never client/reference media from an external service.
+
+## Office extension: real rotating source
+
+[28October office study](../../OFFICE-ROTATION-HANDOFF-STUDY-20261028.md) adds `render_rotation_ab.py --source LOCAL_561 --output-dir PRIVATE_DIR`: source-checked upward tree roll, plain/zoom/rotation/shutter controls, protected centre and no out-of-source samples. Initial precision and inverse-sign failures retained/repaired. Four corrected90-frame exports decode; full encoded peak/reduced contacts inspected. Outer trunk distortion/soft branches remain visible; not an exact reference, native/phone/normal-speed or mastery claim. Rotation is now bounded mechanically tested; a genuine two-shot directional handoff remains open.

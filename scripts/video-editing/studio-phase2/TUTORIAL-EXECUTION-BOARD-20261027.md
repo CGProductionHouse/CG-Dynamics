@@ -26,7 +26,7 @@
 | 16 | Finished sound example | E: no exposed timeline or rights-verified recipe |
 | 17 | Glasses mask zoom → [masked aperture](skills/masked-zoom-transition/SKILL.md) | P/X: tracked same-shot lens works mechanically; soft exit/two-shot gate |
 | 18 | Five SFX choices | R: use [sound-led card](skills/sound-led-cuts/SKILL.md); no pack rights or heard samples |
-| 19 | Radial shutter blur | R: exact radial controls unverified; [rapid shutter](skills/rapid-shutter/SKILL.md) is a different directional test |
+| 19 | Radial shutter blur | P/R: [office rotational shutter controls](OFFICE-ROTATION-HANDOFF-STUDY-20261028.md) use31 angular samples on real rotating footage; exact tutorial controls, normal-speed/phone and native acceptance unverified. [Rapid shutter](skills/rapid-shutter/SKILL.md) remains a distinct directional test |
 | 20 | Cutout mask transition → [masked aperture](skills/masked-zoom-transition/SKILL.md) | P/X: moving foreground tests expose matte limits; clean natural edge/native mask needed |
 | 21 | Pop-up words → [staggered type](skills/staggered-type/SKILL.md) | P: synthetic word timing; phone/human/native title gate |
 | 22 | Construction speed montage → [motion speed](skills/motion-matched-speed/SKILL.md) | P/R: individual ramp proof, no multi-shot construction continuity proof |

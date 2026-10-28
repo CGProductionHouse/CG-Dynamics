@@ -7,7 +7,13 @@ in existing draft875 records the45-family library, four private Drive archives
 separate stacked research PR and unfinished queue. Office owns new874 research
 through903; MSI parks research and retains Daisy/TBS/PSG/Fight amendments.
 Central Canvas904 stays office-owned separately. Read newer shared rules909.
-Office download/install/rerender receipt is pending; preparation is not activation.
+Office intake is now accepted in separate stacked draft[PR910](https://github.com/CGProductionHouse/CG-Dynamics/pull/910):
+all4 downloaded archives/379 members hash/size verified, single shared skill CURRENT,
+and source-checked subject-band rerender inspected. [Exact receipt](../../scripts/video-editing/studio-phase2/OFFICE-RESEARCH-ACCEPTANCE-20261028.md).
+[New rotation/registered-roll studies](../../scripts/video-editing/studio-phase2/OFFICE-ROTATION-HANDOFF-STUDY-20261028.md)
+add seven corrected90-frame outputs to two existing families. Rejected sign/precision
+controls retained; no phone/heard/native or mastery claim. Staff desktop active;
+further research is file-based. MSI amendments and Central Canvas remain protected.
 GitHub/903/874/Supervisor381 and the existing Google handover are continuity routes.
 Exact Control Centre tracker remains unavailable after a scoped Drive name search;
 no guessed tracker write or replacement. No client media, credentials, permissions,
