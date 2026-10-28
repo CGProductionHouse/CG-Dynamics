@@ -17,6 +17,10 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+### 28 October — PICASSO next-shoot culling hardening (#878 / PR #879)
+
+The private Staffy 1,237-photo index is still entirely REVIEW with 444/444 bursts unreviewed. A new read-only adjacent-frame comparison command (`shoot_index.py` 0.3.0) was proven on 16 actual camera JPEGs, revealing weak subject/action choices in two prior calibration selections. The MSI skill and company ChatGPT account skill now include this index version; a company browser Work `@picasso` check read the updated source, but could not execute the MSI job. The code-only account update reported an unexpected skill-icon replacement, with no photo or credential exposure. The 195-photo internal Pixieset gallery still fails the editorial release gate; the varied 25-frame look has not been accepted. No client delivery, new spend, hosting change, production change or Nolan #862 change. Details and measured proof: [PICASSO large-shoot hardening](PICASSO-LARGE-SHOOT-HARDENING-2026-10-28.md).
+
 ### 27 October — PICASSO Staffy in-place corrections and local revision snapshot (#878 / PR #879)
 
 The existing 195-photo internal Pixieset review collection `125612394` was renamed **The Staffy Fight Night | 24 October 2026**. Six identified exposure/cast outliers were revised from camera originals and replaced through Pixieset's visible **Replace photo** action; each yielded a success notification. The direct collection link did not change. The public gallery showed the new title, and a signed PICASSO update to **CG Picasso Approvals** showed Delivered. The venue signage reads `THE STAFFY`; a focused public search did not independently verify the event's marketed title. This is still an **internal review**, not Amonique's acceptance or client delivery.
