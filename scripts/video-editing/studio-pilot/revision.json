@@ -1,0 +1,10 @@
+{
+  "revision_id": "r1-owner-simulation",
+  "base_project": "project.json",
+  "feedback": "At the person scene, make the proposition human rather than moment-led. Shorten the following turn by half a second. Preserve opener, detail, resolution and end card.",
+  "changes": [
+    {"scene_id": "s03_person", "field": "title", "from": ["MADE FOR", "MOMENTS"], "to": ["MADE FOR", "PEOPLE"]},
+    {"scene_id": "s04_turn", "field": "frames", "from": 72, "to": 60}
+  ],
+  "protected_scene_ids": ["s01_line", "s02_detail", "s05_glow", "s06_end"]
+}
