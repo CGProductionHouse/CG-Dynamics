@@ -17,6 +17,8 @@
 
 [Native speed continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-SPEED-STUDY-20261028.md) adds six valid controls/revision/reopen exports, two rejected leading-gap outputs; R03/R04reopen148/148 and149/149decoded equal,88/88protected prefix. Reacquired dancer original hash matches; bag remains source-gated. Endpoint/Bezier/creative/phone/heard/second-PC limits retained. Existing45families; next distinct native three-shot stack.
 
+[Native three-shot stack continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-THREE-SHOT-STACK-STUDY-20261029.md) adds six72-frame controls/revision/two-reopen exports, both72/72decoded equal,12/12protected opening. Distinct linked woodland originals fill portraitbands; long empty-third wait rejected, middle-source rate offset/colour limits retained.45families unchanged; next native vector-option-carousel import/layer gate. Actual00:08wake queued while editing, no duplicateworker.
+
 Owner explicitly requested office PC primary execution because MSI is unreliable.
 [Takeover brief](../../scripts/video-editing/studio-phase2/OFFICE-RESEARCH-TAKEOVER-20261028.md)
 in existing draft875 records the45-family library, four private Drive archives

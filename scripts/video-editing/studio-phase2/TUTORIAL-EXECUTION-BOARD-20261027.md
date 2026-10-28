@@ -1,5 +1,8 @@
 # Nolan Studio tutorial execution board
 
+**Office native stack continuation29October:** [three-shot study](OFFICE-NATIVE-THREE-SHOT-STACK-STUDY-20261029.md): six72-frame native controls/revision/reopen, both reopen72/72decoded parity and12/12protected opening. Three distinct sources fill1080×1920 as three640-high bands; actual reveals0/6/12 and0/6/18. Longer empty-third wait rejected; middle-source one-frame offset and colour/phone/heard/creative/second-PC limits remain.45families unchanged; next native vector-option-carousel.
+
+
 **Office native remap continuation28October:** [native speed study](OFFICE-NATIVE-SPEED-STUDY-20261028.md): six valid native controls/revision/reopen exports plus two rejected leading-gap files. R03/R04reopen148/148 and149/149decoded parity,88/88protected opening. Actual source identity maps strictly forward/no repeats; endpoint539→538 failure and Bezier/phone/heard/cross-shot/creative gates retained.45families unchanged; next native three-shot stack.
 
 

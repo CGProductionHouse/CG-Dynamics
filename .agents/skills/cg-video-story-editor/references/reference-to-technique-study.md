@@ -155,3 +155,7 @@ A native added endpoint can preserve zero terminal velocity while changing its i
 ## Native speed changes need source-frame and gap audits
 
 The [office native remap](https://github.com/CGProductionHouse/CG-Dynamics/blob/codex/nolan-office-research-874/scripts/video-editing/studio-phase2/OFFICE-NATIVE-SPEED-STUDY-20261028.md) caught a six-frame leading gap after a missed handle drag. Save/reopen parity alone would repeat that mistake. Verify timelinezero and actual original-frame order/endpoints after each split-key edit; the corrected outgoing revision protects88 decoded opening frames but rounds to a different final sourceframe. Native linked keys do not establish exact Bezier shape, heard beats, cross-shot continuity or creative acceptance.
+
+## Distinguish reaction crops from a three-shot stack
+
+The [office native stack](https://github.com/CGProductionHouse/CG-Dynamics/blob/codex/nolan-office-research-874/scripts/video-editing/studio-phase2/OFFICE-NATIVE-THREE-SHOT-STACK-STUDY-20261029.md) keeps three genuine linked originals in contiguous portrait bands, with plain/all-at-once/reveal controls. Same-time reaction crops can be useful but are not three distinct shots. Verify actual source frames when mixing rates, full-height seams and intended empty-band intervals; native marks produced a one-frame source-start offset. A longer final reveal preserved twelve encoded opening frames yet added no demonstrated payoff. Native reopen parity does not approve unmatched colour, heard rhythm or phone comfort.

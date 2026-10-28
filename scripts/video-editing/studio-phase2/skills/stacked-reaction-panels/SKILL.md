@@ -1,6 +1,6 @@
 ---
 name: nolan-stacked-reaction-panels
-description: Compare one shared wide action with larger synchronous reaction panels in a vertical frame, then return to context.
+description: Arrange related scene or reaction views as adjustable horizontal panels in a vertical frame, with a plain control and a source-specific reveal.
 ---
 
 # Stacked reaction panels — real-footage visual candidate
@@ -20,3 +20,7 @@ description: Compare one shared wide action with larger synchronous reaction pan
 `render_ab.py` now retains the original plain and hard-reveal exports and adds a third, 2.500-second `faces-slide-to-context.mp4` candidate. Its two synchronous face panels slide out through the frame edges over seven frames while the same moving wide is uncovered beneath them. The new mute export fully decoded at 720×1280/24 fps. A 14-frame 180×320 comparison and full-size midpoint were inspected; all practice renders stay outside Git.
 
 **Reject the slide.** Mid-transition, the top face, lower face and underlying wide show the same people multiple times at once. The small phone frame becomes busy, and the center wide's story information is harder to parse than in the direct reveal. The simple hard switch restores the shared table/gesture without a duplicated-person interval. The same-source temporal sync makes the slide mechanically valid but does not make the composition useful. Keep the hard reveal as the *source-specific visual candidate*; it still needs normal-speed picture and heard music/SFX review, physical-phone viewing and a native editable layer handover before client use. Do not add a panel exit merely because it animates.
+
+## Native three-distinct-shot full-height extension
+
+[Office native stack](../../OFFICE-NATIVE-THREE-SHOT-STACK-STUDY-20261029.md) compares single-wide/simultaneous three-source bands/staggered reveal and bottom-only timing revision. Native1080×1920, three1080×640bands; first visible0/6/12 versus0/6/18. Both actual reopen pairs72/72decoded equal, revision opening12/12equal. Encoded original-frame checks expose middle-source cross-rate offset420→419; longer empty-third wait rejected as default. Keep source identity/relative brightness/motion, phone/heard/human and second-PC gates explicit. This is separate from cropping two reactions in one synchronous shot; never call three copies of a single shot three distinct videos.
