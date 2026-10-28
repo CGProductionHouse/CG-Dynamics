@@ -1,4 +1,14 @@
 # CG Production House — Nolan master continuity handover
+
+> **28 October owner correction for both Studio PCs:** read the mandatory
+> [shared editing rules](NOLAN-STUDIO-SHARED-EDIT-RULES-2026-10-28.md) before an
+> edit/revision. Approved logo animation, beat-based cuts, full-height three-shot
+> horizontal stacks, contextual music, source-specific colour matching and
+> directly playable HD review media are required. Office signature: Nolan Studio
+> PC, not BC. Current office ownership/delivery receipts are #903/#904; MSI's
+> existing jobs and PR #875 stay MSI-owned. Older connection/setup states below
+> remain historical, not current proof or a reason to duplicate either lane.
+
 **As at Tuesday 27 October 2026 (Africa/Johannesburg).** Owner-approved direction and actually verified progress. This is a handover for the NEXT ChatGPT conversation and for authorised Codex staff/Studio lanes, not proof that all steps below are implemented.
 
 ## 1. First read and authorities
