@@ -1,0 +1,12 @@
+{
+  "library": "Lucide",
+  "commit": "2ca268e74888d3506b3319fb8f94aaaaf70ceca9",
+  "repository": "https://github.com/lucide-icons/lucide",
+  "license": "ISC for these three icons; full upstream notice retained",
+  "files": {
+    "house.svg": "28216c479005731ef5e382e7d8627eda2b129b019eb1f3d9de9f5915576d448e",
+    "briefcase-business.svg": "98388a2bf7b9d102d77772d125d26f59ea3bed0d8573a5fc8907003099ae9a54",
+    "car.svg": "6d70bc146ca53b9c140a859319df471616c1ee6758bfb31a346d549d1fe92211",
+    "LUCIDE-LICENSE.txt": "b495047bd93a9b06913511076f504daba17d5bbeb3e0650f3bb53a4220329c57"
+  }
+}

@@ -1,0 +1,125 @@
+{
+  "schema": 1,
+  "code_checkpoint": "0b4bca53fc9d1670df9810973b1815e79de7fcae",
+  "date": "2026-10-28",
+  "purpose": "Private internal office-PC research handover, not a client/public asset pack",
+  "sources": [
+    {
+      "path": "repo/scripts/video-editing/studio-phase2/media/mixkit-28306-2160.mp4",
+      "sha256": "80e0bf3d84faf6e2b0efabfc9001aeadde09e1ce56d0530360ceff5b9be596a5",
+      "source_url": "https://mixkit.co/free-stock-video/girl-dancing-with-her-earphones-on-a-green-background-28306/",
+      "rights_record": "https://mixkit.co/license/modal/videoFree/",
+      "archive": "core-licensed-inputs.zip"
+    },
+    {
+      "path": "repo/scripts/video-editing/studio-phase2/media/mixkit-cat-walk-371.mp3",
+      "sha256": "e241cba000ce12e52cadd4c9956274e391ef1f66d1e48a5dd40bfc21645aa489",
+      "source_url": "https://mixkit.co/free-stock-music/house/",
+      "rights_record": "https://mixkit.co/license/modal/musicFree/",
+      "archive": "additional-licensed-inputs.zip"
+    },
+    {
+      "path": "repo/scripts/video-editing/studio-phase2/media/mixkit-cinematic-whoosh-1492.wav",
+      "sha256": "02b8cd40b3761288d54f4d6706983a2f8c110182b669ae2cdf9aab02935a4e7a",
+      "source_url": "https://mixkit.co/free-sound-effects/transition/",
+      "rights_record": "https://mixkit.co/license/",
+      "archive": "additional-licensed-inputs.zip"
+    },
+    {
+      "path": "repo/scripts/video-editing/studio-phase2/media/mixkit-41865-720.mp4",
+      "sha256": "883b71655e2f2448a03b02f6e318eced58b51bac5b74da86c018995f3c817331",
+      "source_url": "https://mixkit.co/free-stock-video/cup-being-filled-with-coffee-in-a-coffee-machine-41865/",
+      "rights_record": "Mixkit Stock Video Free License; context-zoom-out card",
+      "archive": "core-licensed-inputs.zip"
+    },
+    {
+      "path": "user/Videos/CG-AI-Editing/Nolan-Skill-Proofs/cinematic-travel-20261027/mixkit-134-720.mp4",
+      "sha256": "de17d355543cda1f396361d2e217ae115c9be5eb60efe22cce0fc6a3d517d54d",
+      "source_url": "https://mixkit.co/free-stock-video/a-man-being-followed-walking-in-a-city-134/",
+      "rights_record": "Mixkit Stock Video Free License; motion-matched-speed card",
+      "archive": "additional-licensed-inputs.zip"
+    },
+    {
+      "path": "user/Videos/CG-AI-Editing/Nolan-Skill-Proofs/filmed-screen-20261027/mixkit-42630-720.mp4",
+      "sha256": "0b1f1ec15a30b59fa06240b03adad50e3f6cef38ec6a3a8d8587d983644a7418",
+      "source_url": "https://mixkit.co/free-stock-video/copying-from-a-cell-phone-to-the-computer-42630/",
+      "rights_record": "Use exact42630 provenance in filmed-last-frame card; recorded commercial-source review",
+      "archive": "additional-licensed-inputs.zip"
+    },
+    {
+      "path": "licensed-inputs/mixkit-carpenter-saw-39691.mp4",
+      "sha256": "186bc1eb994695af1d7c2312d3f8ea6aac0a4e23767d24727471066e7cceb618",
+      "source_url": "https://mixkit.co/free-stock-video/carpenter-slicing-a-wooden-board-in-a-close-up-shot-39691/",
+      "rights_record": "Mixkit Stock Video Free License; rapid-shutter card. Public stock only, no TBS footage copied",
+      "archive": "additional-licensed-inputs.zip"
+    },
+    {
+      "path": "user/Videos/CG-AI-Editing/Nolan-Skill-Proofs/freeze-frame-refined-20261027/mixkit-1038-720.mp4",
+      "sha256": "0678de048ee448ed7c363b41ed80ccc67f42975a2afadf167f5042946de2fd17",
+      "source_url": "https://mixkit.co/free-stock-video/dancer-in-the-dark-back-view-1038/",
+      "rights_record": "Mixkit Stock Video Free License; grounded-freeze-frame and bounded-burn cards",
+      "archive": "additional-licensed-inputs.zip"
+    }
+  ],
+  "archives": [
+    {
+      "name": "legacy-proof-evidence.zip",
+      "bytes": 74525429,
+      "sha256": "8f1bd0c023e88036224afc4f79f0c684678d1a5498227ba8d4f4880845f3f4a6",
+      "md5": "6e6c146ede244aefd5a54879e9854c7b",
+      "file_count": 274,
+      "uncompressed_bytes": 79344621,
+      "drive_file_id": "1PzWeCajozTIsnk58T9ZTVvwOlvJn5TEh",
+      "drive_url": "https://drive.google.com/file/d/1PzWeCajozTIsnk58T9ZTVvwOlvJn5TEh/view",
+      "remote_byte_size_read_back": 74525429,
+      "remote_private_owner_only_metadata": true
+    },
+    {
+      "name": "wanderlust-proof-evidence.zip",
+      "bytes": 25428517,
+      "sha256": "396b78ad18f3c2a8985652f55d9e7dadae4f5039e54b97e862b05128338202bc",
+      "md5": "65c06a6e9276c7348f5169c51e677b5d",
+      "file_count": 97,
+      "uncompressed_bytes": 26439741,
+      "drive_file_id": "1N_slLaa3OVYxcql2k_WPgau7nw5i6h0i",
+      "drive_url": "https://drive.google.com/file/d/1N_slLaa3OVYxcql2k_WPgau7nw5i6h0i/view",
+      "remote_byte_size_read_back": 25428517,
+      "remote_private_owner_only_metadata": true
+    },
+    {
+      "name": "core-licensed-inputs.zip",
+      "bytes": 70417496,
+      "sha256": "d76253c6b4f7cf0f0570146f84ea42d536e55c7f308732ca3d0b9a005b63302a",
+      "md5": "ef1dcc067d2312eb20792dc204b8645e",
+      "file_count": 2,
+      "uncompressed_bytes": 70401857,
+      "drive_file_id": "1tIM2xvRcip9WH4mgL1uGeMfEeVCGbFel",
+      "drive_url": "https://drive.google.com/file/d/1tIM2xvRcip9WH4mgL1uGeMfEeVCGbFel/view",
+      "remote_byte_size_read_back": 70417496,
+      "remote_private_owner_only_metadata": true
+    },
+    {
+      "name": "additional-licensed-inputs.zip",
+      "bytes": 28233608,
+      "sha256": "4a166881fb25884174fb47b720a46280dcec4256e4e2f36e2ec6c1086c27bd0c",
+      "md5": "11080cecee30028a9629878dc7be47f8",
+      "file_count": 6,
+      "uncompressed_bytes": 28442633,
+      "drive_file_id": "1koSvJFe52QGzfQ9htfGk_BQ3ZvlLCF6Y",
+      "drive_url": "https://drive.google.com/file/d/1koSvJFe52QGzfQ9htfGk_BQ3ZvlLCF6Y/view",
+      "remote_byte_size_read_back": 28233608,
+      "remote_private_owner_only_metadata": true
+    }
+  ],
+  "excluded": [
+    "All production/client folders and the whole stabilization-20261027 folder containing Daisy derivatives",
+    "Creator TikTok/Herk reference videos, audio, frame contacts and info metadata",
+    "Browser profiles, credentials, virtualenvs, node_modules and caches",
+    "Tesseract runtime ZIP and unreviewed installable binaries; reacquire only from approved tool route",
+    "Other legacy raw stock not explicitly hash/provenance-allowlisted; use card/source record to reacquire",
+    "No client working kit or unpublished camera originals; MSI retains existing amendments"
+  ],
+  "restore": "Extract each ZIP to a NEW isolated staging folder; verify every file hash. repo/ maps to a separate research checkout; user/ maps to the office user profile only after inspection; licensed-inputs/ stays in staging for explicit --source or a path-only legacy recipe adaptation. Do not overwrite existing files or restore anything to a client production folder.",
+  "drive_folder_url": "https://drive.google.com/drive/folders/1UEVGLcAkRuFUriFuycYJ_HmcL9SzB8Aj",
+  "remote_hash_note": "Server digests unavailable in connector metadata. Office download hash verification pending."
+}

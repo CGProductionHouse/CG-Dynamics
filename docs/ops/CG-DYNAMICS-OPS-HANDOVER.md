@@ -1,3 +1,42 @@
+### 28 October — Nolan research/skills transferred to office PC
+
+Owner explicitly requested office PC primary execution because MSI is unreliable.
+[Takeover brief](../../scripts/video-editing/studio-phase2/OFFICE-RESEARCH-TAKEOVER-20261028.md)
+in existing draft875 records the45-family library, four private Drive archives
+(371 practice-evidence files/eight licensed inputs), checksum-only verifier,
+separate stacked research PR and unfinished queue. Office owns new874 research
+through903; MSI parks research and retains Daisy/TBS/PSG/Fight amendments.
+Central Canvas904 stays office-owned separately. Read newer shared rules909.
+Office download/install/rerender receipt is pending; preparation is not activation.
+GitHub/903/874/Supervisor381 and the existing Google handover are continuity routes.
+Exact Control Centre tracker remains unavailable after a scoped Drive name search;
+no guessed tracker write or replacement. No client media, credentials, permissions,
+paid credits, deployment, DB or active desktop/project changes. Only permitted
+practice assets uploaded; client/creator references and runtimes excluded.
+
+### 28 October — shared Nolan editorial feedback audit (MSI / office)
+
+Owner requested reconciliation of all prior editing feedback after office Central Canvas.
+[Traceability audit](../../scripts/video-editing/studio-phase2/OWNER-FEEDBACK-SYSTEM-AUDIT-20261028.md)
+and canonical `.agents/skills/cg-video-story-editor/references/production-standard.md`
+now require per-job evidence for research/public reuse, actual selected moments,
+brand/type, beat-led rhythm, source-audio classification, stabilisation, exposure/
+colour matching, cover/naming, exact-export review and handoff. Beat and optional
+logo-audio conflicts corrected; new colour baseline is correct/match/look, not a
+universal LUT or mastery claim. Existing client-specific keep/change/reject survives.
+
+Office #903 installed prior library 1c23da63; #904 owns Central Canvas R02 and its
+witnessed internal handoff. MSI changes shared instructions only, no active office
+project/session or deployment. Office receipt/application of this later audit is
+still required; hash sync does not prove compliance. PR875 stays draft; no runtime,
+DB, media, permissions, providers, spending, monitors or public/client sends changed.
+Google Drive handover is a mirror; GitHub remains authority. Control Centre exact
+tracker has not been identified; do not invent a replacement or claim a tracker write.
+
+### 27 October 2026 — Nolan master handover (Assistant + Studio + local shared media)
+
+CA requested a consolidated cross-chat handover. Durable source: [CG Nolan master continuity handover](CG-NOLAN-MASTER-HANDOVER-2026-10-27.md), covering owner-approved existing-PC architecture, actual wired internet status, laptop-led Codex option while designer uses PC, Sydney non-destructive drive/OneDrive audit, intended hot 10TB / events 10TB / wedding 6TB role assignment (subject to occupied capacity and independent backups), CG Hours/Dynamics/Brand Hub/Teams integration, Studio effects research and first PSG real test, and eventual allowlisted WhatsApp review loop. Supporting owning issues [#894](https://github.com/CGProductionHouse/CG-Dynamics/issues/894), [#874](https://github.com/CGProductionHouse/CG-Dynamics/issues/874), [#872](https://github.com/CGProductionHouse/CG-Dynamics/issues/872). First 10TB attachment, any SMB pilot, drive health/duplication, OneDrive cost/downgrade and autonomous WhatsApp send are **NOT** reported complete. Do not treat laptop Ethernet as permission to remotely take control of occupied Nolan PC. The user has **not confirmed** first Assistant Codex setup prompt sent. No cloud subscription cancellation, destructive disk operations or NAS spending authorised.
+
 ### 18 October — CA owner correction: real Teams/Planner tasks, privacy and Novus
 
 **MANDATORY next read for the active staff/Codex Teams-to-Dynamics implementation:** [CGPH Planner/Calendar Owner Handover, 18 Oct](CGPH-PLANNER-CALENDAR-CLEANUP-OWNER-HANDOVER-2026-10-18.md).
@@ -12,6 +51,452 @@ This is a later direct CA operating correction that overrides older catch-all ta
 **This is docs-only continuity, NOT code/DB/data apply or a claim of production acceptance.** CA's owner instructions take precedence over old speculative lead creation workflows.
 
 # CG Dynamics Ops Handover
+
+### 27 October — provider freshness and false staff diagnostic corrected
+
+Current exact-client inventory/launch sequence is in the existing
+[execution list](CLIENT-LAUNCH-EXECUTION-2026-10-25.md#27-october-providerclient-acceptance--current-override).
+47Meta assets/76checkpoints reviewed:73 successful27October; active Bohemia Page
+access error, held AV/RedOak exceptions; partial metrics remain partial. All9
+connected non-held TikTok accounts pass actual UI access/coverage/completeness/
+freshness checks. This is ingestion health, not complete current-month activity.
+One requested routine Cape/shared Google sync1–27October succeeded,27daily rows,
+independent audit read-back; other3mapped clients retain no_campaign_rows and
+prior paused/removed evidence. Automatic Google cadence was accepted17October.
+No campaign/mapping/OAuth/backend/Vercel or content publication change.
+Actual Braize October staff review reproduces a contradictory legacy “not synced”
+summary beside today's verified normalized account facts. Narrow local guard
+keeps legacy diagnostics on legacy reports only and preserves authoritative
+metric-level health/permission/partial information and client-role boundaries.
+Actual-render regressions RED2/3→GREEN3/3; combined88focused tests pass. Existing
+actual-component1440/375/390/430 browser fixture now also checks normalized
+diagnostics/client-role removal/no overflow; build/app-bundle/scoped lint/diff pass.
+No full-suite rerun or new true-client login/device acceptance is claimed. Existing
+staff/calendar and normal ChatGPT strategy owners unchanged. Pending frontend
+release, real-client/physical-phone/content/publication gates remain distinct.
+
+### 27 October — owner correction: event capture is not a scripted guideline gap
+
+CA explicitly clarified that events are captured and edited into highlights;
+they do **not** require a scripted Content Guideline. Madison Wear's shop opening,
+The Staffordshire's Halloween event and HMHI's year-end are explicit examples.
+Remove these from any missing-guideline acceptance list. Do not create empty
+guidelines or manufacture script work merely because a shoot/event is booked.
+The existing calendar/Content Run and confirmed output scope remain authoritative;
+this correction does not change production records, dates or contracted quantities.
+The six verified imported videos in the two existing canonical documents below
+remain the completed source-import work. Future genuinely scripted content runs
+still use their one canonical guideline; event highlights are not launch blockers
+for lacking one. Continue provider/client-portal acceptance under #668, keeping
+the separate staff/calendar and #731 strategy owners intact.
+
+### 27 October — Content Guideline design and normal ChatGPT read-back (#896)
+
+Latest CA correction: the separate flat green/cream guide visual was rejected.
+Follow-up `codex/guideline-portal-style-20261027` uses existing portal near-black,
+white/slate text, bright teal/orange accents and glass cards; compact header and
+actual ClientPortalShell preview. No global portal or backend change. Four-width
+browser/23focused/build/bundle/scopedlint/diff pass. New `cg-guideline-portal-*`
+images supersede rejected `cg-guideline-design-*`; CA accepted the revised visual
+on 27 October ("much better thanks").
+No Vercel, data or publication change. Normal ChatGPT acceptance below is retained.
+
+Later CA explicitly requested importing still-relevant client-sent WhatsApp guides.
+This narrow content authority was exercised through normal company-admin MCP actions:
+**6 new draft videos in 2 existing canonical documents**, with complete scripts,
+shot direction and internal source-file/hash/message provenance. SecuriForce's
+28 October run now has the four dated December campaign videos plus the separate
+runner-up/team video; December coverage remains on those four videos, and runner-up
+coverage stays null. Runner-up was sent alongside the dated campaign PDF; filing
+with the next same-client run is documented as preparation, not a separately agreed
+shoot. All Around PVC's 26 October document now contains Franco's latest amended
+23 October 11:00 SPC-flooring guide, preserving the client's preparation-stage
+correction. No run/event/task/posting dates, statuses, packages or allocations changed.
+All six saved scripts/directions match the reviewed source packet exactly in both
+normal guideline reads and canonical run plans. Both documents remain unpublished.
+Neshora's two existing staff-refined videos were compared with its sent PDF and
+remain byte-for-byte unchanged. Kunstefees' World Mental Health Day guide is an
+expired October-specific campaign, with a subsequent brainstorming meeting and
+no exact Content Run; it was not made into new upcoming work. No sent VCS PDF
+was found in the searched recent-guide results. This was a bounded October
+WhatsApp search/review, not an exhaustive historical archive or deleted-media claim.
+Private PDF originals, prepared payloads and before/action/after receipts are under
+`%TEMP%/cg-guideline-import-20261027`; no client scripts/transcripts committed.
+No Vercel, backend release, SQL/schema, permission or client-publication change.
+Detailed receipt: [guideline design/import acceptance](CONTENT-GUIDELINE-CLIENT-DESIGN-2026-10-27.md#client-sent-whatsapp-source-import--27-october).
+
+CA redirected this lane to branded guidelines and normal ChatGPT authoring.
+Exact design/workflow/acceptance boundaries:
+[CONTENT-GUIDELINE-CLIENT-DESIGN-2026-10-27.md](CONTENT-GUIDELINE-CLIENT-DESIGN-2026-10-27.md).
+Shared client-safe document renderer and staff saved-draft layout preview; existing
+own-published client link/auth/calendar authorities preserved. Live connector read
+reproduced missing scripts despite has_script=true; narrow Assistant projection
+now returns full scripts/direction in source, with RED/GREEN regression and actual
+handler read/edit/read-back preservation/isolation test. No second paid generator.
+Later exact CA approval released only the two-file hosted-derived MCP repair,
+v72→73 once.40/40 candidate files match byte-for-byte; other38 unchanged,
+JWTfalse/import-mapfalse retained, anonymous/invalid-bearer401. Live connector
+returns complete CASE scripts/direction, matching independent canonical plan
+reads exactly.44 focused tests/hosted candidate assertions/TS check pass. One
+bootstrap transport error cleared on one bounded read retry; no auth bypass.
+No Vercel, production data, publication or permission change. Frontend still PR/local.
+Later normal-chat read-only acceptance now passes in company CA Project and
+personal Plus staff context. Personal CG Dynamics + Personal Refresh initially
+failed; legitimate existing-account reconnects fixed both, independently retested.
+No permissions/scopes expanded, credentials copied or staff chats/content changed.
+Actual client amendment writes remain local-handler proof, not a live test.
+Fresh stored publication counts: October56draft/1published strategies, November57
+drafts/0published;10October draft guidelines/0published, noNovember guidelines.
+Brand Hub41enabled/17private unchanged. Meta stored connection nowconnected,
+valid and encrypted (validated25October); old consent hold is no longer current,
+without claiming per-client metric freshness. Public appHTTP200 still serves old
+guideline UI; new design is source-only. Combined56tests/build/scopedlint pass.
+Existing #867/#866/#842 return-to-review and staff/calendar owners separate.
+Final verification/source/PR state is on #896; do not infer a deployed release.
+
+### 27 October — CG Hours Assistant daily capture and live read acceptance
+
+Owner #898, focused PR #899 merged as d2915066. CA requested staff narration→CG Hours reliability; CA chat only for testing,
+no staff chat/timesheet edits. [Exact receipt](CG-HOURS-ASSISTANT-ACCEPTANCE-2026-10-27.md).
+Live CA context/day/options read succeeds; all six active staff mappings verified
+SELECT-only, including Franco. Existing v73 bootstrap has four Hours tools but
+no shared daily logging workflow. Reproduced decimal-hour rejection and 15-minute
+schema mismatch; focused source repair adds strict whole-minute conversion,
+read/reconcile/correct/read-back policy and truthful uncertain-response handling.
+No staff/Teams/calendar rewrite, automation change or invented hours.
+Final local MCP393pass/1skip; Hours120pass; final focused18pass and hosted-derived
+candidate10pass. Build/app-bundle/scoped lint/Edge pure TS/diff checks pass.
+CA explicitly approved the exact three-file release: MCPv73→74 once, ACTIVE;
+all40 hosted files byte-identical to candidate, other37 unchanged, v73 guideline
+repair retained. JWTfalse/import-mapfalse/auth preserved, anonymous/invalid401.
+Live CA bootstrap now returns11 hours rules/version2026.10.27-own-draft-hours-1;
+CA day read succeeds with74 clients/22 tasks. CA Chrome navigation timed out;
+normal ChatGPT UI and new genuine live write→read-back remain unverified.
+No Vercel, new time/km data, schema, mapping, secrets or permission writes.
+Google Control Centre exact reference still unavailable; do not invent a tracker.
+
+### 25 October late evening — slow file-window defect fixed; 37 live image Views
+
+Exact receipt: [Client file access acceptance](CLIENT-FILE-ACCESS-ACCEPTANCE-2026-10-25.md).
+Source ea5eaad6 reproduces the async authorisation/popup-blocking failure with a
+six-second grant and normal browser policy, then fixes it by reserving one isolated
+destination during the tap. No-referrer/opener protection, grant validation,
+blocked/closed-window and client-departure cleanup verified. Streaming and accepted
+portal layout unchanged; no auth/backend/dependency/production change or Vercel.
+
+Frozen ea5eaad6 canonical full acceptance:4208 total/4184 pass/24 explicit skips/
+zero failure/cancel/todo; actual-app TS/Vite, all20 canonical browser fixtures at
+1440/375/390/430 and stable source pass. Both mandatory disposable SQL fixtures
+included. Full receipt SHA256 F900C1378CF355C58EDCB22852597B21CDBEC48047C42BB24B9C3CB7B3E0881F.
+Focused27/27 and scoped lint/diff pass; whole lint0errors/17existing warnings.
+Local actual downloads verify exact synthetic bytes/filename, not production files.
+
+All41 published libraries accounted for:37 unique actual image Views loaded,
+separate windows/original client retained/no referrer. Four unverified render checks:
+Case/Emoya/Germoparts native PDFs and LHP browser URL-policy denial. No bypass or
+retry of the denied LHP window. Three initially unsettled windows were correlated
+using SELECT-only published asset IDs; two image loading frames were settled before
+acceptance. Do not repeat accepted Views or the older listing sweeps.17 original
+private libraries/new Jodrico scope remain unchanged.
+
+One fixed 19:24:40–20:24:40UTC aggregate-only provider log check: Meta worker6 HTTP200,
+runtime only Boot/Shutdown/no error-level rows; client-onboarding298 HTTP200/1 HTTP206.
+Not client metric completeness or per-item sync success. No sync/config/token/data
+writes. Existing Meta consent, #731 content, staff/Teams/calendar and real password/
+phone/release gates retained. Frontend repair is source-only, NOT live; fixture
+dist must never be uploaded. Overnight continuation still ends08:00SAST26October.
+
+### 25 October evening — finite overnight continuation and real file-window checks
+
+CA renewed overnight client-portal work. Existing heartbeat
+`finish-dynamics-locally-overnight` updated (not duplicated), ACTIVE hourly until
+08:00 SAST 26 October; failed-runs-only notifications preserved. No Vercel or new
+protected production actions. Staff/Teams/calendar and #731 strategy owners remain
+separate; stop repetitive work when safe executable items are exhausted.
+
+Exact receipt: [Brand Hub file-window acceptance](BRAND-HUB-FILE-WINDOW-ACCEPTANCE-2026-10-25.md).
+Eight actual published-logo Views passed in legitimate admin preview: Piek, All
+Around PVC, Bloem Action Sports, Bloem Vascular, Bouwer & Coetzee, Braize, C&L,
+Cape Lumber. Images render, separate windows open, Dynamics retains the exact
+client and referrers are empty. This is not attachment-download/client-password
+or all-41 acceptance; 33 additional Views remain. Chrome extension UI interrupted
+automation; no retry loop or session workaround. Prior listing/thumbnail checks
+and 17 private skips/Jodrico scope are unchanged.
+
+Canonical local library fixture now actually opens both View/Download windows,
+asserting null opener, empty referrer and retained portal at 1440/375/390/430.
+Negative control removing rel fails on referrer; restored safe source passes.
+CUA's restricted opener=undefined was not an observed product defect. Runtime
+source is unchanged. Focused 27/27 tests, four-width browser, actual-app TS/Vite
+build, scoped lint and diff pass. Earlier full receipt remains frozen8353e75f,
+not reattributed. No new dependencies or production changes. Existing Meta consent,
+content/security/role/phone/release gates below remain; do not repeat backend work.
+
+### 25 October — approved provider backend rollout; real local SQL/browser acceptance
+
+Latest exact receipt:
+[PROVIDER-BACKEND-ROLLOUT-ACCEPTANCE-2026-10-25.md](PROVIDER-BACKEND-ROLLOUT-ACCEPTANCE-2026-10-25.md).
+CA explicitly approved Google two-file safeguard and then staged Meta encryption.
+Google sync53→54 once; subsequent Meta secret-save environment revision55 retains
+identical bundle/seven hosted files/JWT=true. All five unrelated files preserved;
+seven campaign links/139metrics have identical before/after checksums. No manual
+sync, campaign/mapping or production SQL/schema/data write.
+
+All four Meta dual-format readers released/read back BEFORE dedicated random key
+and version privately saved; callback released LAST. Current worker76/manual89/
+assets72/status68/callback72. Existing auth/JWT/SDK/scopes retained; actual runtime
+source matches. Zero-runtime database interface is omitted by hosted bundling,
+not an absent executable dependency. Secret save advanced function revisions
+without source changes; callback guard verified identical bytes before continuing.
+Key values never logged/committed/copied to files or frontend.47client asset
+mappings/existing connection remain unchanged. Actual admin statusConnected/valid,
+read-only asset discovery succeeds, no suggestions saved or bulk resync.
+
+**Final Meta gate remains:** existing token1legacy raw/0encrypted. Owner renewal
+started with unchanged scopes but Facebook business-consent panel stays blank
+after one bounded reload; handoff tab left open and CA asked to complete consent.
+Do not claim encryption from configuration, hide plaintext warning, export/backfill
+old credentials, remove key, restore raw writer or rollback readers after an
+envelope exists. After consent verify actual encrypted status/row and mappings.
+
+CA started Docker. Canonical frozen8353e75f full local run4208total/4184pass/
+24declared skips/0fail/cancel/todo, actual TypeScript/Vite app and ALL20canonical
+browsers1440/375/390/430 pass; stable tree. Both previously mandatory disposable
+PostgreSQL fixtures now pass, including ownership/publication/RLS/concurrent CAS.
+Private receipt cg-local-launch-8353e75fd944.json SHA256
+7895EBB3FEA96845DC68C6FD22BEE51C5082298C0252821C31F52D289C97C7E3.
+Separately16Instagram callback SQL +1registry test pass; these do not rewrite the
+full receipt's24skips. Seven optional staff PGlite groups remain separate. Only
+test-owned disposable containers removed; shared Docker/stacks untouched.
+
+ZERO Vercel/cloud builds/deployments. Fixture dist must never be uploaded. No
+strategy/asset publication, provider scopes/mappings/permissions, staff/Teams/
+calendar changes or duplicate strategy writer. Existing source/asset/real posting
+owners and retained CA password/phone checks remain. #435comment6401264747 and
+#505comment6401265039 record the exact approved live actions. Older source-only
+and Docker-unavailable snapshots below are historical, not a reason to repeat work.
+
+### 25 October — local provider continuation verified; exact protected queue retained
+
+Ordered CLIENT-LAUNCH-EXECUTION-2026-10-25.md is the current short execution list.
+PR885 merged `dea0d349` (Google malformed-success preservation); PR886 merged
+`d1f37226` (Meta authenticated-token storage preparation). Frozen7b911566 full
+supported non-DB4208total/4182pass/26explicit skips/0fail/cancel/todo, TS/Vite392module
+actual app and ALL20canonical browser fixtures1440/375/390/430 pass, stable tree.
+Receipt `%TEMP%/cg-client-nondb-7b9115666b55.json`, SHA256
+`7E404279BE1191680344560011EA316AE7858D854D282CCDEDF37E516720FEFE`.
+Whole lint0errors/17existing warnings; source Deno closure passes. Not SQL/client-
+role/physical-device/content or production acceptance. Fresh Docker info still
+unavailable; no shared restart/reset/install or false skipped-test acceptance.
+
+Later type-only follow-up fixes nine baseline Deno errors in Meta OAuth start
+and shared TikTok SDK client parameters. Their emitted JS is byte-identical;
+388focused Meta/TikTok tests, Deno/build/scoped lint/diff pass. Do not attribute
+the earlier full-suite head to this later annotation/documentation change.
+Runtime auth, scopes, existing SDK imports, refresh semantics and providers remain
+unchanged. No frontend redesign, staff/Teams/calendar or strategy-writer overlap.
+
+Read-only eight-function/65-file hosted baseline privately captured, no keys read.
+Five-function56-file offline Meta candidate preserves unrelated hosted behavior;
+exact closure Deno checked. Callback's legacy identical duplicate availability
+property minimally removed only in the private staged packet; must be reviewed
+as part of any release. Worker/manual helper type-only changes have identical
+compiled/minified runtime. Offline Google packet also Deno checked, two-file diff.
+Exact versions/manifest hashes/rollout hazards are in the ordered execution doc
+and META-TOKEN-STORAGE-HARDENING-2026-10-25.md. These are NOT deployed artifacts.
+Never send fixture dist to production; no automatic Git deployment.
+
+All nine non-held connected TikTok panels now checked; provider coverage remains
+partial. Fresh November briefs reconfirm ten exact source-held clients with
+confirmed packages; source admission/editorial/publication remains existing #731
+owner, not duplicate generation or another quantity question. Brand Hub17 private
+safe-folder skips/Jodrico scope, real staff-owned posting/disclosure and CA-retained
+password/phone checks remain explicit. NO Vercel or production SQL/data/schema/
+Edge/config/keys/provider/mapping/permissions/content write. Exact Google Control
+Centre still unavailable; GitHub/ops continuity updated, no invented replacement.
+
+### 25 October — Meta credential hardening prepared; remaining TikTok panels checked
+
+Google ingestion PR885 reviewed/merged `dea0d349` after89/89 focused Google tests,
+scoped lint/build/diff and actual malformed-provider preservation regressions.
+No backend release or production data change. Continuing ordered local-only plan
+CLIENT-LAUNCH-EXECUTION-2026-10-25.md, not duplicating staff/strategy owners.
+
+Meta raw-token storage warning reproduced in callback/status source. New native
+AES-GCM connection/key-version-bound envelope, four dual-format readers, preflight
+and fail-closed OAuth writer prepared. Legacy rows remain explicitly plaintext;
+key configuration is not encryption proof. Corrupt/missing-key failures stop
+before Meta requests, do not set needs_reauth and release active worker lane.
+Main's existing22 Deno worker errors independently reproduced from a Git archive;
+explicit client type and a minimal type-only shared database port resolve generic-
+schema/duplicate nominal-class errors, with two missing-asset guards. Existing
+worker JSR and legacy ESM dependencies retained; no dependency installation or
+changes to shared helper emitted runtime/auth/lease authority. All six modified
+Meta entrypoints/helper closure pass cached-only Deno type checking.
+Exact staged reader-before-writer rollout/rollback hazards are in
+META-TOKEN-STORAGE-HARDENING-2026-10-25.md. This is SOURCE ONLY: no key generation,
+server configuration, hosted dependency replacement, schema/permissions, Edge
+deployment, token rewrite/provider renewal or Vercel action. Production warning
+and partial metric coverage are not declared resolved from local tests.
+
+Remaining real read-only TikTok panels now settled: Staffordshire, Watch Addict
+and Wiseman. All nine non-held connected-client panels inspected across25October;
+two have no historical published TikTok facts, seven show partial September
+figures. Recorded zero remains zero, account snapshots remain snapshots. Old
+live wording awaits separately approved source release. Private three-client
+receipt `%TEMP%/cg-remaining-tiktok-panels-readonly-20261025.json`; no report writes.
+No unnecessary repeat59-client sweep, staff/calendar edits or strategy generation.
+
+### 25 October — ordered local-first provider integrity continuation
+
+Current ordered execution: [CLIENT-LAUNCH-EXECUTION-2026-10-25.md](CLIENT-LAUNCH-EXECUTION-2026-10-25.md).
+No overlap with staff/Teams, normal ChatGPT strategy authoring, onboarding or
+guideline/video PR owners. Reconciled #435's first-party paused/removed campaign
+evidence rather than inventing replacement Google mappings or zero activity.
+Separately reproduced Google malformed-success ingestion: a malformed results
+batch was silently empty; invalid campaign/date rows could be silently dropped
+before the canonical whole-range replacement. Source repair rejects the entire
+malformed response, foreign account, out-of-window/duplicate row or malformed
+metric before replacement, preserving valid empty results, zeros and same-day
+optional settings. RED actual-adapter/handler regressions then focused GREEN;
+scoped ESLint, TS/Vite392module app and diff pass. Backend source only, NOT live,
+and NOT asserted to explain the existing three paused/removed campaign gaps.
+No Vercel or production data/config/Edge/provider/mapping/permission/content write.
+Next is Meta storage-hardening staging, bounded remaining TikTok preview checks,
+and exact owner/source/asset queue reconciliation, not another frontend rewrite.
+
+### 25 October — final client code review packet; no automatic deployment
+
+Current concise acceptance/owner queue:
+[CLIENT-PORTAL-REVIEW-2026-10-25.md](CLIENT-PORTAL-REVIEW-2026-10-25.md).
+PR882 merged7934e95f after frozen f08c9d42 full supported non-DB4196total/
+4170pass/26explicit skips/0fail and ALL20canonical browser fixtures, stable tree.
+Do not substitute this for disposable-SQL, genuine-password, physical-device or
+content/publication acceptance. Later copy-only correction fixes the real Forklift/
+Neshora historical TikTok pane implying an existing service needs adding again;
+unknown scope now discusses current package OR addition, preserving exact benefits,
+pricing check and WhatsApp.56 focused tests, actual portal shell atfour widths,
+scoped lint/build/diff verify that small follow-up. Existing ChatGPT/staff owners
+and protected production gates remain separate. No Vercel, provider/data/asset or
+staff runtime change. The packet's exact queue supersedes dated count snapshots,
+not the existing source-of-truth or owner decisions. Google Control Centre exact
+reference remains unavailable; no guessed replacement tracker.
+
+### 25 October — client fleet acceptance and TikTok measurement-basis correction
+
+Continued client lane only after Meta PR881 merged f7d57806. Frozen f7d57806
+non-DB full supported suite:4193total/4167pass/26 declared skips/0fail; TypeScript,
+Vite392module actual-app bundle and ALL20 canonical browser fixtures pass with
+stable tree. Private receipt `%TEMP%/cg-client-nondb-f7d57806faf2.json`. This is
+NOT full disposable-SQL, genuine client-password, physical-phone or publication
+acceptance. Docker/PGlite limitations remain exactly as below; no shared restart.
+
+Fresh signed-in read-only preview: all59 non-held active clients' Overview,
+Approvals and Brand Hub journeys checked. Overview exact client heading verified;
+Approvals and Brand Hub require the selected route marker AND a settled result,
+not a generic heading that can precede the next client load. Preliminary samples
+that caught loading frames were preserved as PRELIMINARY-UNSETTLED, then replaced
+by complete settled matrices. Final:59 empty approval queues/0 read failures/0
+enabled preview approval actions;41 available Brand Hubs/18 private/0 read failures
+or optional-foundation errors.18 private means the17 known safe-folder skips plus
+new Jodrico, not an invented new launch entitlement. These are absence/visibility
+checks, not completion of staff publication or59 separate media downloads.
+Private receipts: `%TEMP%/cg-all-client-overviews-readonly-20261025.json`,
+`cg-all-client-approvals-settled-20261025.json`,
+`cg-all-client-brand-hubs-settled-20261025.json`.
+
+Actual Braize/CG/Dulux/Madison TikTok cards reproduce ambiguous generic period
+labels. Canonical tiktok-sync stores cumulative view_count/like_count/comment_count/
+share_count totals for videos published in that period, NOT engagement earned
+inside it. Focused frontend repair labels only that exact native sum/ tiktok_organic
+definition "to date", explains the cohort instead of generic comparison text,
+and forbids month-on-month comparison even if a stored cohort is marked complete.
+Account snapshots, real zeros, unknown/future definitions and other platforms
+are preserved. Official field reference:
+https://developers.tiktok.com/docs/en/tiktok-api-v2-video-object . No metric/data
+rewrite, provider request, new API, dependency, permissions or schema change.
+171 focused tests, scoped lint/TS/Vite build/diff and actual report browser at
+1440/375/390/430 pass. Full candidate verification follows its frozen commit.
+
+Fresh provider read: Meta renewed but reporting remains partial; Google account
+last sync24Oct22:00UTC; ten TikTok tokens unexpired, one belongs to held Red Oak.
+Connection is not monthly-data completeness. Live Forklift/Neshora September
+TikTok panes have no published TikTok figures and show the optional-service story;
+do not fabricate a report or infer package exclusion/connection failure from it.
+Remaining TikTok browser sampling hit bounded transport delays; not represented
+as all-nine-client analytics acceptance. No refresh/re-consent/mapping repeated.
+Existing ChatGPT editorial/source/publication, staff posting/calendar and owner
+login/phone/content gates remain owned separately. ZERO Vercel/production writes.
+
+### 25 October — Meta renewal completed; visible reconnect recovery verified locally
+
+CA could not find Connect Meta: it was below the lengthy Instagram queue. Live
+Meta data-access expiry reproduced. Existing Christie-Ann Facebook renewal used
+**previous settings unchanged** and returned to Dynamics Connected, reporting
+access granted and valid at17:17 SAST.47 linked assets preserved; no mapping,
+sync, asset publication, backend release or Vercel operation invoked. This proves
+renewed authentication, NOT completeness of all clients' metrics. The live server
+still explicitly reports encryption-at-rest hardening required; not waived.
+
+Focused frontend repair moves the existing single Connect/ Reconnect button above
+readiness/Instagram queues, disables duplicate starts, preserves schema/expiry
+metadata on disconnected successful reads and distinguishes absent boolean status
+from explicit false. Existing OAuth endpoint/scopes/permissions unchanged. Actual
+Meta page synthetic browser reproduces the buried control on main, then passes at
+1440/375/390/430, including unknown/false/true metadata, retained expiry, pending
+click suppression, error recovery, explicit OAuth redirect and no horizontal
+overflow.58 focused tests, scoped ESLint, TypeScript/Vite392module actual-app
+bundle and diff checks pass. Initial standalone reporting test lacked loopback
+env; corrected fixture configuration and complete58-test rerun passed. New fixture
+is mandatory in the canonical local acceptance plan. No production frontend
+deployment: source fixes do not magically change the live button position.
+
+Earlier reviewed PR868 and869 both merged (2994e7ed and1df1008b). Combined frozen
+e56db492 non-DB receipt:4193total/4167pass/26 explicit skips/0fail, TS/Vite actual
+app, all19 then-canonical browser fixtures passed, stable tree. Receipt
+`%TEMP%/cg-client-nondb-e56db4921fd8.json`, SHA256
+`7FED714D9A76A17CC0914997462F18373EE51B10A44FE9D242E120A4685A7506`.
+Not full SQL/production acceptance:19 existing optional/Docker skips plus7 staff
+embedded-PGlite groups without its private module. Fresh Linux Docker pipe absent;
+no shared restart/reset/install. Staff release PR880 already live, untouched.
+
+Fresh actual admin preview sweep:59 non-held active clients,37 reports/22 no-report
+states, all eight service destinations present,0 read/scope errors. Earlier58
+cohort retained; extra Jodrico Killian row is not inferred launch approval. Novus
+live Google now says missing campaign figures, not no activity; live Brand Hub
+shows its published logo View/Download. Actual375px preview Plan/package/Approvals/
+Brand Hub navigation checked without overflow; October/November only and no
+To confirm extras. These are read-only admin previews, not genuine client login/
+physical-phone acceptance.59-row private matrix remains in
+`%TEMP%/cg-client-performance-readonly-20261025.json`. ChatGPT strategy and staff
+Teams/calendar owners remain separate. Exact Control Centre reference unavailable;
+do not invent or replace it. #505 owns reconnect follow-up, #668/#381 continuity.
+
+### 25 October — Brand Hub validation PR869 regression coverage
+
+Continued existing OpenCode PR869; reproduced main's no-control-regex lint error.
+Its code-point check preserves the exact existing C0-control validation rather
+than relaxing publication or changing file/client scope. Added real manageLibrary
+coverage for all32 embedded ASCII controls, invalid type/blank/256-character
+names, valid255-character and Unicode names; invalid input produces zero writes.
+30/30 Brand Hub adapter/handler/management/synthetic tests pass; full ESLint has
+0 errors (existing warnings remain), TS/Vite real app build/diff pass. No hosted
+function release, content publication, OneDrive/source/permission or Vercel change.
+Meta PR868 is now merged2994e7edd414a81c444bb3834aa91630e188a9d2, source only.
+
+### 25 October — existing Meta presentation PR868 reviewed with runtime regressions
+
+Continued existing OpenCode PR868 rather than duplicate its source fix. On current
+main, numeric run_type and health_state each reproduced TypeError from value?.trim.
+PR's unknown/non-string guard preserves explicit unavailable labels instead of
+crashing. Added actual function regressions across both platforms and nine malformed
+enum values, including object methods that must never be called; blank, failed,
+recovery, complete and stale evidence preserved.10/10 focused tests, TS/Vite7
+actual392module app build/scoped ESLint/diff pass after integrating current main.
+No provider refresh, backend/schema/config/permissions/data or Vercel action.
+This is presentation repair, not proof of complete Meta metrics or a client launch.
+Staff/Planner release PR880 is already live per #381comment6398963463; no staff
+runtime edit or replay of its approved migrations is part of the client lane.
 
 ### 20 October — all58 Performance/package previews; two client fixes verified locally
 

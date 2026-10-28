@@ -1,0 +1,14 @@
+# First-three-second hook screen on current internal-review films
+
+26 October 2026. **Read-only editorial screen, not an approval or comparative performance test.** The owner's visual-hook tutorials emphasize a specific opening image and proposition. This check asks whether the currently delivered Daisy R01 and TBS V5 openings actually put those on screen. It does not revise or resend either film.
+
+The exact delivered files were read from their private review folders outside Git. Daisy R01 SHA-256 is `4308D33CC541298BE2546E1400DBA3BA90C175F381671874DF33F41625B8282C`; TBS V5 SHA-256 is `CA136C7E09E1538E8D0811E87A67CD505AE94B8F2F96E21ACF610BC876079471`. Their 0, 0.5, 1, 1.5, 2, 2.5 and 3 s frames were screened at a 270×480 centre-cropped phone proxy; the private contact is `C:\Users\chris\Videos\CG-AI-Editing\Nolan-Skill-Proofs\delivered-hook-contact-20261026.jpg`.
+
+| Film | Picture and copy observed | What this establishes |
+|---|---|---|
+| Daisy R01 | The first 1.73 s show illustrative stock friendship/action; the Afrikaans question `WIE HET JOU JAAR LIGTER GEMAAK` appears by the first half-second, then the list-writing shot begins. | The picture supports a thank-you prompt rather than an old product-stock claim. The first shot is **not** Daisy staff/customers; the location/client becomes clear later. No viewer-response result is known. |
+| TBS V5 | A working table saw opens the equipment story; `NEW EQUIPMENT` assembles within roughly the first second. The barber-tool shot replaces it at 2.5 s with `ALREADY AT WORK`. | The opening names the equipment topic earlier than the rejected V3 hook. Sampled stills understate the saw motion; source-only decoded-frame changes confirm motion, but pixel-change metrics cannot say whether it *feels* exciting at normal speed. |
+
+Both exact MP4s have audio in the opening. Decoded first-two-second stereo RMS/sample peak: Daisy **−15.75/−4.32 dBFS**, TBS **−27.33/−10.93 dBFS**. TBS's two-second RMS stays about −30 dBFS through 10 s, then reaches about −19.5 dBFS during 12–16 s. Its whole-file integrated loudness is about −20.3 LUFS / −1.71 dBTP. That is a measurable early-to-middle dynamic gap; it is **not** proof the music choice, transition sound or opening loudness is wrong. No tool in this lane can hear the exported mix, and the two clients' different tracks are not a creative level standard for one another. An independent editor should listen to the TBS first 10 s on a phone, at normal speed and normal playback volume, before forwarding it to a client.
+
+This screen cannot establish retention, conversion, prior-post clearance, client approval, a full-speed creative verdict, or native staff editability. A frame contact can show the proposition and scene change but cannot replace watching and hearing the whole opening. Keep both internal-review packages unchanged until substantive approval-group feedback or a properly witnessed sound decision supports a protected revision.

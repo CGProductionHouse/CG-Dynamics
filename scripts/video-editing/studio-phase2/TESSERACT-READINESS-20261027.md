@@ -1,0 +1,9 @@
+# Optional native motion tool — readiness finding
+
+27 October 2026. This is an optional tool investigation during tutorial-skill work, not a new Nolan Studio dependency.
+
+The available Tesseract motion skill points to CLI version **0.4.0**. Neither `%LOCALAPPDATA%\Tesseract\bin\tsrct.cmd` nor a `tsrct` command on PATH exists on this MSI. The [official release](https://github.com/mirage-hq/tesseract/releases/tag/v0.4.0) supplies a Windows x86-64 bundle. Its 118,378,198-byte ZIP and matching checksum were downloaded into the private practice-tool review directory; SHA-256 verified as `a5673f2a246e72ca108e5fd852a4c5c109a24763653216e9b8e88757817fcdf6`. Only the installer text and bundled `TERMS.md` were inspected. **No runtime installation or execution, project creation, rendering, account change or client media input occurred.**
+
+The bundled terms, dated 21 September 2026, permit commercial use subject to section 2.2.3. That section requires a separate written agreement for a for-profit business with preceding-twelve-month worldwide gross revenue of at least US$1,000,000, aggregated across controlled entities. Its commercial-use definition includes internal development, testing and evaluation. CG eligibility has not been established in this lane, so the runtime route is parked. The Windows distribution is unsigned; no SmartScreen/security bypass is authorised. Do not assume that an installed instructional plugin establishes runtime eligibility or that a ChatGPT subscription grants it.
+
+Existing Python/FFmpeg/HyperFrames methods remain the working proof route. Native editor save/reopen/export is still a separate witnessed gate. Revisit this tool only with established eligibility and a concrete editable-motion need; no need to download another version or install alternatives during routine skill work.
