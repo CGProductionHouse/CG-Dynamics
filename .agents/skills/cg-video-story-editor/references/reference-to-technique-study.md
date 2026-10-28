@@ -6,6 +6,8 @@ This reference is for studying client-supplied edits and tutorials without turni
 
 ## Transfer method
 
+For the owner's 28 October Sundawave reference, use the repository's [Wanderlust frame/technique ledger](https://github.com/CGProductionHouse/CG-Dynamics/blob/codex/nolan-studio-874/scripts/video-editing/studio-phase2/WANDERLUST-DIARIES-STUDY-20261028.md). It separates a complete732-frame visual inventory from three bounded original reconstructions and the still-unverified editable CapCut template/sound layers. A template label or subscription does not prove access to underlying controls. Keep creator footage/audio/assets private for study; promote original recipes and properly licensed assets, not a paid template pack. Browser seek labels can describe a different frame from the image currently painted; prefer permitted local decoded frame numbers for precise timings, and state when only visual samples were possible.
+
 1. Write the source's opening as a timecoded sequence: first image, first motion, first sound if audible, first clear subject, first promise, first release. Record the actual moment where attention changes. A creator's “viral” or “best” claim is a hypothesis, not performance evidence.
 2. Name the mechanism rather than the surface effect: anticipation through a J-cut, recognition through a repeated anchor, acceleration into a reveal, a visual question, tactile proof, or a spatial journey. Then state what the viewer learns and why this business can answer it.
 3. Check prerequisites before borrowing it: genuine footage, enough frames for a ramp, repeatable camera framing, motion direction, subject isolation, sound rights, brand tolerance, product visibility in 9:16, and a shot after the effect that rewards the attention.

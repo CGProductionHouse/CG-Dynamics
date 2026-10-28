@@ -1,5 +1,7 @@
 # Seven owner references — visual variety and sound-to-picture
 
+Later owner addition,28October: [Sundawave Wanderlust Diaries](WANDERLUST-DIARIES-STUDY-20261028.md) has its own exact-link, template-access and complete decoded-frame ledger. It is not silently folded into these seven references or treated as another successful CapCut timeline test.
+
 27 October 2026. Opened the owner's seven exact TikTok links in an isolated Chrome reference session. Short links resolved to the canonical posts below. The player was muted and visual states were sampled at several positions; **none of the reference sound was heard**. A caption, visible effect or timeline label does not establish a full tutorial, licence, ideal setting or client suitability. No reference media was copied into this repository.
 
 | Owner link | Direct evidence | Nolan Studio decision / proof gap |
