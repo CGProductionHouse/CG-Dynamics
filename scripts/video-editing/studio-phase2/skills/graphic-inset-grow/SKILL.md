@@ -5,6 +5,8 @@ description: Grow a deliberately graphic moving-picture card into the same full-
 
 # Graphic inset grow — separate from a filmed phone
 
+The [29 October runner source screen](../../RUNNER-GRAPHIC-INSET-GROW-SCREEN-20261029.md) tests the same deliberately graphic mechanism with a real person crossing a landscape frame. A fixed 9:16 center crop loses the runner at both ends and is rejected. A recorded manual source-following crop retains her in inspected moving output frames; its plain full-frame control and two inset timings decode. The faster R02 protects the first19 encoded frames of R01 and reaches full frame six frames sooner, but the plain tracked view communicates the runner sooner at reduced size. Use this as evidence to reject decorative small openings when action readability is the job. It is not a filmed device, native tracking, heard/phone approval or a client edit.
+
 28 October 2026. [Wanderlust frames298–306](../../WANDERLUST-DIARIES-STUDY-20261028.md) show graphic inset growth. This proof covers scaling/easing and sound-envelope construction; pale-picture alternation is not included. It does **not** clear the failed [physical window-grow](../window-grow/SKILL.md) or [filmed last-frame](../filmed-last-frame/SKILL.md) examples. There is no fake phone, holder or tracking claim.
 
 `python render_ab.py --output-dir PRIVATE_DIR` uses existing Python/OpenCV/NumPy/Pillow and FFmpeg. Same licensed [Mixkit #134 source and hash](../chromatic-lens-pulse/SKILL.md),9–12s, with existing manual portrait crop anchors. Private proof directory: `C:\Users\chris\Videos\CG-AI-Editing\Nolan-Skill-Practice\wanderlust-diaries\proofs\graphic-inset`. No new engine or dependency.
