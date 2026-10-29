@@ -37,6 +37,8 @@
 
 [Native chromatic continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-LENS-STUDY-20261029.md): eightNEW72-frame exports/two72/72reopenpairs/25protectedframes. Strongfringes rejected; reducedROIchange32.24%lower. Unnamed8301alsochanges/zero0-72/offpulse0-61/tail1-36parityfailures retained.45families; next kinetic-caption-finishing nativeglyph shine gate. No client/storage/spend changes.
 
+[Native caption continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-SHINE-STUDY-20261029.md):10NEW72-frame exports/four72-72reopenpairs,hard21/soft20protectedframes/onlyOpacity117changes. Hardstripe rejected/LegacyCropFeather24+35%gentler. Twoframesoneoutsidepixelthresholdfail/tail1-30parity retained;PSwording/PRemiererasterimportscopeexplicit.45families;nextnative subject-silhouette-prelap source/matte gate. No client/storage/spend change.
+
 Owner explicitly requested office PC primary execution because MSI is unreliable.
 [Takeover brief](../../scripts/video-editing/studio-phase2/OFFICE-RESEARCH-TAKEOVER-20261028.md)
 in existing draft875 records the45-family library, four private Drive archives
