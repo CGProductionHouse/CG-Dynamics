@@ -189,3 +189,7 @@ The [office native peak study](https://github.com/CGProductionHouse/CG-Dynamics/
 ## Native apertures must share a source-time canvas
 
 The [office native panel study](https://github.com/CGProductionHouse/CG-Dynamics/blob/codex/nolan-office-research-874/scripts/video-editing/studio-phase2/OFFICE-NATIVE-PANELS-STUDY-20261029.md) verifies separate editable Pen Masks against the same-instant plain original and actual reopen exports. Retain common in/out/transform, test native outputs, and reveal the whole product before gaps hide its proof too long. Earlier full reveal preserves the opening but its compressed tail still differs; parameter equality is not decoded-pixel equality. Do not infer the full creator composition, phone judgement or creative mastery from registration.
+
+## A frozen source is not necessarily a frozen native matte
+
+The [office native silhouette study](https://github.com/CGProductionHouse/CG-Dynamics/blob/codex/nolan-office-research-874/scripts/video-editing/studio-phase2/OFFICE-NATIVE-PRELAP-STUDY-20261029.md) finds Object Mask boundary drift despite Frame Hold/Hold Filters. Nesting the completed transparent treatment and holding the outer nest repairs the tested five-frame shape. Compare isolated encoded masks, the moving background, the cut and actual return to motion; preserve failed controls and native mask dependencies. Native reopen equality and a protected opening do not establish unchanged encoded tails, fine-hair quality, comfort or a story reason for a white flash.

@@ -39,6 +39,8 @@
 
 [Native caption continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-SHINE-STUDY-20261029.md):10NEW72-frame exports/four72-72reopenpairs,hard21/soft20protectedframes/onlyOpacity117changes. Hardstripe rejected/LegacyCropFeather24+35%gentler. Twoframesoneoutsidepixelthresholdfail/tail1-30parity retained;PSwording/PRemiererasterimportscopeexplicit.45families;nextnative subject-silhouette-prelap source/matte gate. No client/storage/spend change.
 
+**Office native silhouette continuation, 29 October:** [actual prelap study](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-PRELAP-STUDY-20261029.md) adds two cleared real shots, plain/colour/white/timing/nested-repair controls, 12 NEW native 119-frame exports and four actual 119/119 reopen pairs. Hold Filters leaves Object Mask boundary drift (5636 pixels at threshold 128); holding the completed nest repairs threshold-shape stability across five frames. Repaired short revision protects 25 opening frames; tail 2/89 exact fails. Fine-hair/flash/phone/heard/story/second-PC gates remain. 45 families unchanged; next distinct existing native scene-perspective-type gate.
+
 Owner explicitly requested office PC primary execution because MSI is unreliable.
 [Takeover brief](../../scripts/video-editing/studio-phase2/OFFICE-RESEARCH-TAKEOVER-20261028.md)
 in existing draft875 records the45-family library, four private Drive archives
