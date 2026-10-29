@@ -31,3 +31,8 @@ This establishes an actionable source/word choice and a mechanically continuous,
 ## Office native continuation — 28 October
 
 [Native Track Matte Key study](../../OFFICE-NATIVE-FOOTAGE-TYPE-STUDY-20261028.md) uses the same cleared saw's native frames48–95, plain and title controls, editable CUT/Video2 alpha matte and graphic Vector Motion around a solid T stem; underlying source stays unzoomed. Earlier reveal24→18 is an actual key-time revision. Six48-frame exports decode; both saved R02/R03 closed/reopened/re-exported48/48 decoded frames equal.18/18 revision opening frames equal;0/6 final frames exact despite preserved endpoints. Dark fragmented fill/withheld craft proof still favour the plain opening for immediate clarity. One-PC native mechanism is demonstrated; useful client hook, native cross-PC relink/phone/heard/human gates remain. Never claim a six-frame earlier full reveal: encoded full bright-source coverage only moves40→39.
+
+
+## Office natural-runner screen —29October2026
+
+[Five-control moving-footage study](../../RUNNER-FOOTAGE-IN-TYPE-SCREEN-20261029.md) tests a licensed unkeyed park runner through a short `RUN` alpha matte. R01/R02/R03 protect16/16 decoded opening frames. The earlier pure push R02 enlarges a `U` counter into a large dark region that hides the runner; a3×push plus matte dissolve R03 removes the hard blackout, but this is a hybrid reveal, not the pure reference aperture. R02/R03 first full encoded frame differs from plain (35/36 exact tail from36); later24/24 match. Plain shows the whole runner immediately and remains preferred on this source. No full-speed/phone/heard/client/second-PC acceptance.
