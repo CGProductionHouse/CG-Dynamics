@@ -5,6 +5,10 @@ description: Plan a layered subject trail from original movement footage and ver
 
 # Subject motion trail — visually sampled, untested
 
+## 29 October real runner screen
+
+The [office static-park runner study](../../MOTION-TRAIL-RUNNER-SCREEN-20261029.md) uses exact commercially cleared Mixkit #4831, three truly separated positions and a same-shot empty opening. The first three natural masks sever shoes/legs and are rejected; source-specific definite-foreground shoe repairs keep path contact in full-size overlays. Plain, hard-mask, feathered and earlier-second-reveal outputs each fully decode 72 frames; all protect the same 32-frame opening. R03 protects 44 decoded frames relative to R02 and shows three legible landscape positions at frame 48. **Do not promote to Reel or mastery:** an actual 9:16 crop clips figures, held shadows/hair remain uncertain, and no full-speed/phone/heard/native editability check occurred. The earlier dog source rejection remains valid.
+
 ## 29 October source gate
 
 The exact rights-cleared [Mixkit #1555 dog/log](https://mixkit.co/free-stock-video/dog-standing-on-a-log-1555/) was screened at source frames 300, 312, 324, 336, 348, 360, 372 and 384. Standing positions overlap, then the dog turns behind the log and disappears. Its empty plate helps a freeze test but cannot make three clearly separated, grounded trail positions. **Reject before motion-trail render.** The [portrait shutter screen](../../PORTRAIT-SHUTTER-DOG-SCREEN-20261029.md) records the frame selection and keeps this source-specific rejection distinct from a successful clone proof.
