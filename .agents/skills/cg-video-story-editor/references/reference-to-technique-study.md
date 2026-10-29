@@ -6,6 +6,8 @@ This reference is for studying client-supplied edits and tutorials without turni
 
 ## Transfer method
 
+A layered source asset may remain editable in its authoring app while the editor imports a rasterized result. Record both sides separately and test actual save/close/reopen/export. The [native metallic study](https://github.com/CGProductionHouse/CG-Dynamics/blob/codex/nolan-office-research-874/scripts/video-editing/studio-phase2/OFFICE-NATIVE-METAL-STUDY-20261029.md) retains Photoshop text/styles but merged Premiere PSD imports; the removed Bevel Alpha effect is not restored. Compare flat readability before accepting dimensional material, and preserve even a one-level reopen parity failure.
+
 For a filmed display with a notch, fit the outer surface separately from the visible-content alpha. A concave notch can pull a fitted edge inward; a broad colour key can also catch unrelated scene pixels. The [full-shot phone study](https://github.com/CGProductionHouse/CG-Dynamics/blob/codex/nolan-office-research-874/scripts/video-editing/studio-phase2/OFFICE-PHONE-SURFACE-STUDY-20261028.md) tests connected-region isolation and full-span controls. A controlled green display does not establish arbitrary natural-plane or person-matte capability.
 
 
