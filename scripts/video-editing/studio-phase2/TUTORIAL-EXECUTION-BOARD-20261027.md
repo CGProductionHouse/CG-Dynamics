@@ -1,6 +1,9 @@
 # Nolan Studio tutorial execution board
 
 
+**Office background portrait-prelap continuation, 29 October:** [licensed two-source portrait suitability screen](SILHOUETTE-PORTRAIT-SUITABILITY-SCREEN-20261029.md) advances the existing silhouette family with three119-frame full-height moving controls. The white prelap takes83.12% of the cut frame and clips the head; a protected two-frame revision retains that failure, so plain is preferred. Working pixels protect27opening/91tail frames, encoded exact equality only1/27and89/91. 152 new unique outputs across39 distinct existing families; all45 retain open gates.
+
+
 **Office background muffled-voice continuation, 29 October:** [moving-phone/synthetic-voice AV screen](MUFFLED-PHONE-VOICE-AV-SCREEN-20261029.md) advances the existing perspective family with three new120-frame picture-identical private outputs, actual decoded AAC/spectral and sampled motion inspection. The600Hz filter is too severe as a reusable voice setting; the restrained1600Hz remains technical only. Encoded AAC prefix differs before the1.35s PCM boundary. The field-note screen does not show an audio action, so both fail picture-motivated story use. 149 new unique outputs across38 distinct existing families; all45 have open gates.
 
 **Office background dialogue/music continuation, 29 October:** [synthetic-voice/licensed-music lead-in AV](DIALOGUE-MUSIC-LEAD-IN-AV-SCREEN-20261029.md) advances an existing sound family with three144-frame picture-identical outputs. Protected R02 moves the duck before voice activity and lowers measured music at the first word; float opening21,600samples exact, stereo/mono AAC exact-prefix gates fail and mono headroom remains limited. No hearing/ASR/client approval. 146 new unique outputs across37 distinct existing families; all45 retain open gates.
