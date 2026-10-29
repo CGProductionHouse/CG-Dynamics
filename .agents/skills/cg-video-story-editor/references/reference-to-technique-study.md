@@ -6,6 +6,8 @@ This reference is for studying client-supplied edits and tutorials without turni
 
 ## Transfer method
 
+Distinguish the one named control intentionally changed from every field the application actually saves. The [native RGB pulse study](https://github.com/CGProductionHouse/CG-Dynamics/blob/codex/nolan-office-research-874/scripts/video-editing/studio-phase2/OFFICE-NATIVE-LENS-STUDY-20261029.md) retains an additional undocumented parameter change and a failed zero-strength encoded identity check. Native reopen parity does not clear either gate, and a chromatic depth split is not proof of geometric lens distortion.
+
 After moving or inserting a Bézier key, inspect the protected interval before it: equal endpoint values can still bow when an incoming tangent survives. The [native inset study](https://github.com/CGProductionHouse/CG-Dynamics/blob/codex/nolan-office-research-874/scripts/video-editing/studio-phase2/OFFICE-NATIVE-INSET-STUDY-20261029.md) retains the shrink failure and native tangent repair. Integer-rounded rectangle bounds can also misidentify adjacent source frames during fractional scaling; preserve that failed matcher and verify actual sampling geometry before claiming a time repeat.
 
 A successful native timing test can still fail the source/story test. The [native inversion study](https://github.com/CGProductionHouse/CG-Dynamics/blob/codex/nolan-office-research-874/scripts/video-editing/studio-phase2/OFFICE-NATIVE-INVERT-STUDY-20261029.md) verifies exact pulse frames and a protected revision while rejecting pale inverted coffee/large brightness jumps. Decode actual streams: a silent source can export an unwanted zero-valued AAC track. Reopen parity, neutral-effect parity, protected revision and creative fit are separate findings.

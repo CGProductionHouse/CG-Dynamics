@@ -20,3 +20,8 @@ Portability: pass `--source ABSOLUTE_LOCAL_ORIGINAL` on another PC instead of co
 ## Office extension: real rotating source
 
 [28October office study](../../OFFICE-ROTATION-HANDOFF-STUDY-20261028.md) adds `render_rotation_ab.py --source LOCAL_561 --output-dir PRIVATE_DIR`: source-checked upward tree roll, plain/zoom/rotation/shutter controls, protected centre and no out-of-source samples. Initial precision and inverse-sign failures retained/repaired. Four corrected90-frame exports decode; full encoded peak/reduced contacts inspected. Outer trunk distortion/soft branches remain visible; not an exact reference, native/phone/normal-speed or mastery claim. Rotation is now bounded mechanically tested; a genuine two-shot directional handoff remains open.
+
+
+##29October native RGB/zoom extension
+
+[Native RGB study](../../OFFICE-NATIVE-LENS-STUDY-20261029.md) uses already installed PremiereRGBSplit and Motion on cleared cityoriginal336–407landscape. Eight NEW72-frame native outputs/two72/72actual reopenpairs/25protectedframes. StrongH1/D2fringes rejected; reducedH.125/D.5fixed headhoodROIchange vszoom is32.24%lower than mildH.25/D.5. NamedH202 ANDundocumented8301change: strictsingle-stored-object gatefails, roleunknown. Constantzero0/72exact,offpulse0/61,tail1/36parity failures retained. Not native geometricLensDistortion/rotation/shutter/referencepreset parity or a face/phone/comfort/heard/creative/secondPC pass. One-PC native RGBcontrols/save-reopen now bounded demonstrated;45familiesunchanged.
