@@ -5,6 +5,10 @@ description: Design a speed ramp or fast zoom cut around continuous subject moti
 
 # Motion-matched speed — one-shot timing rendered; cross-shot match pending
 
+## 29 October exact-source runner map
+
+The [office runner speed screen](../../RUNNER-SPEED-MAP-SCREEN-20261029.md) adds a rights-cleared 23.976 fps static-park crossing. It reuses an identical 72-frame normal control and renders three new 48-frame hard/smooth/repaired remaps. The first 12 decoded frames are exact across four controls; R02/R03 protect 30 decoded frames. R02 integer rounding introduces one three-source-frame gap and is rejected on that mechanical gate. R03 redistributes it: all 47 source gaps are 1–2, no repeats/reversal, final source 183. This repairs only the portable map; the previous native Premiere 539→538 endpoint failure, cross-shot match, heard/phone and normal-speed gait gates remain open.
+
 **Lifecycle:** owner's [car ramp](https://www.tiktok.com/@miracampschool/video/7540770684838956310), [time-remapped building](https://www.tiktok.com/@travisdennymedia/video/7629402531680013581), [three-frame zoom](https://www.tiktok.com/@miracampschool/video/7504014296779590935) and [keyframed zoom](https://www.tiktok.com/@ihsangunyasar/video/7504667931322666258) visually sampled → one-shot [speed timing A/B](../../SPEED-RAMP-STUDY.md) rendered → cross-shot match and full-speed review pending → mastered **NO**. The tutorials' displayed 200% scale and 200-degree shutter examples are not default CG settings.
 
 Mark a recognizable movement in the outgoing shot and a matching movement in the incoming shot: direction, screen position, scale and velocity. Cut at the overlap in *action*, then test the plain cut. If the action warrants acceleration, keep a readable lead-in and landing before adding a speed curve; leave enough actual source frames to avoid freezes or smeared interpolation. Try a keyed zoom only when it strengthens the focal handoff. Inspect every boundary frame for exposed canvas, subject jumps, stutter and motion blur that erases the product or face. The fastest three-frame pattern is an optional comparison, not a target duration.
