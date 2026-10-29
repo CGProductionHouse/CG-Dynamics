@@ -1,6 +1,9 @@
 # Nolan Studio tutorial execution board
 
 
+**Office background peak-control repair continuation, 29 October:** [earlier bounded licensed-music AV revision](PEAK-EARLY-BOUND-REPAIR-SCREEN-20261029.md) adds one72-frame moving picture-identical R03 to the prior plain/hot/gain/R02 controls. Delivered stereo dBTP improves−4.74→−6.68 and encoded mono−2.34→−4.80; the working PCM tail43,344samples is exact, but AAC tail matches only128samples, a failed strict gate. No listening/pumping/native/phone approval. 153 new unique outputs across39 existing families; all45 gates open.
+
+
 **Office background portrait-prelap continuation, 29 October:** [licensed two-source portrait suitability screen](SILHOUETTE-PORTRAIT-SUITABILITY-SCREEN-20261029.md) advances the existing silhouette family with three119-frame full-height moving controls. The white prelap takes83.12% of the cut frame and clips the head; a protected two-frame revision retains that failure, so plain is preferred. Working pixels protect27opening/91tail frames, encoded exact equality only1/27and89/91. 152 new unique outputs across39 distinct existing families; all45 retain open gates.
 
 

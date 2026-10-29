@@ -33,3 +33,7 @@ Confirm the transient is a genuine intended event, listen to unprocessed and lim
 ##29October bounded licensed-music AV screen
 
 [Office background AV comparison](../../PEAK-BOUNDED-MUSIC-AV-SCREEN-20261029.md) uses the same licensed city picture and Cat Walk music in five72-frame outputs. Picture is72/72decoded exact across variants. Deliberate hot+12dB exceeds1 in63stereo/52encoded-mono samples and is rejected. An original neighbourhood-envelope construction controls this short test without claiming Adobe limiter equivalence. R02 lowers late decoded peaks but not overall dBTP; its float PCM first96,000samples are exact while stereo/mono AAC first differs at95,232 (16ms before the key boundary), so strict encoded prefix fails. Mono remains hotter than stereo. Hearing/timbre/pumping/full layered mix, phone and second-editor/native gates stay open; no preset or mastered claim.
+
+##29October earlier-bound peak revision
+
+[Earlier-bound AV study](../../PEAK-EARLY-BOUND-REPAIR-SCREEN-20261029.md) reuses the same licensed picture/music and prior R02 control. One new72-frame picture-identical R03 lowers delivered stereo true peak from−4.74to−6.68dBTP and separately encoded mono from−2.34to−4.80dBTP. Float tail43,344samples stays exact, while only128/43,344decoded AAC samples match in stereo and mono; encoded-tail protection fails. Integrated loudness also drops, so no perceived quality or client target is inferred. Keep prior hot and late-only failure controls, native mismatch, human listening/phone/full-mix and staff editability gates open.
