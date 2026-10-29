@@ -1,5 +1,7 @@
 # Nolan Studio tutorial execution board
 
+**Office background espresso-exposure continuation, 29 October:** [three-source coffee middle-band screen](COFFEE-MIDDLE-BAND-EXPOSURE-SCREEN-20261029.md) adds two60-frame silent decoded variants against the existing no-label plain. Gamma0.60 makes the machine wall flat; reject. Restrained gamma0.82 helps stream visibility in five sampled moments but is only a bounded comparison. All60 pre-encode top/bottom bands are exact; independently encoded untouched regions differ about2.1–2.3RGB levels, so strict delivered spatial parity fails. No colour/creative/phone/heard/native approval. **164** new unique private outputs across **40** existing families; all45 retain open gates. The three-take matched-cut gate remains open after a same-person city source search yielded only two likely angles.
+
 
 **Office background caption-placement continuation, 29 October:** [three-source coffee action-label screen](COFFEE-ACTION-CAPTION-PLACEMENT-SCREEN-20261029.md) advances existing kinetic-caption finishing with three60-frame silent decodes. Center cards cover espresso and pour; upper-left later labels reduce measured central action-region disturbance while retaining the same wording/timing and first20working frames. Independently encoded prefix0/20exact (MAD0.449), failed strict gate. Short reading time, sound/beat, phone, brand/native/creative gates remain. 162 unique new private outputs across40 distinct existing families; all45 open.
 
