@@ -25,3 +25,8 @@ The current 41.7 ms full-frame negative altered the contact image from dark/cool
 ##29October native controls extension
 
 [Native Invert study](../../OFFICE-NATIVE-INVERT-STUDY-20261029.md) uses actual Premiere RGB/BlendWithOriginal keys over licensed coffee48–119. Six new72-frame native exports plus reused plain; two72/72actual reopen pairs,30/30protected revision prefix, ONLYBlend97 changes. Constant100 control equals plain72/72. Actual pulses24/25+30/31 or24/25+42/43 match saved keys; offpulseMSE≤1.018. Inverted pale coffee/152.739gray-level jump are rejected as this product's style. Silent AAC track was unintentionally exported, every decoded sample is zero; one-stream QA gate fails and remains recorded. Tail convergence only1/28exact. Native one-PC controls now demonstrated; purposeful source action, independently heard/phone/comfort/creative and second-PC relink remain open. No natural-subject/background mask claim.
+
+
+##29October real studio-flash source screen
+
+[Licensed photo-flash cut A/B](../../PHOTO-FLASH-INVERSION-SCREEN-20261029.md) reuses a plain photographer→model cut with an actual outgoing exposure flash. Three new76-frame one-frame variants decode; R01/R02/R03 protect36 opening frames, and only the intended altered frame differs from the plain encoded control. Strong preflash inversion makes the photographer cyan-white;35% preflash/flash blends turn skin and flash grey/washed out. All three rejected in sampled full/reduced frames; the natural flash tells the cut clearly. Measured Y jump is not comfort approval. No normal-speed/phone/heard/client/second-PC acceptance.
