@@ -33,6 +33,8 @@
 
 [Native inversion continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-INVERT-STUDY-20261029.md): six new72-frame native exports+reusedplain, two72/72actual reopen pairs,30/30protected prefix/onlyBlend97changes. Product-colour/152.74grayjump rejected; zeroAAC export and1/28tailparity retained.45families; next native graphic-inset-grow gate. No client/storage/spend changes.
 
+[Native inset continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-INSET-STUDY-20261029.md): eightNEW72-frame native exports+reusedplain/three72/72reopenpairs. R04tangent/shrink/protected-prefix1 rejected; R05repair19/19protected/onlyScale97changes. Fractional source map72/72corrects rounded-bound ambiguity;tail0/30exact retained.45families; next native chromatic-lens-pulse capability/source gate. No client/storage/spend changes.
+
 Owner explicitly requested office PC primary execution because MSI is unreliable.
 [Takeover brief](../../scripts/video-editing/studio-phase2/OFFICE-RESEARCH-TAKEOVER-20261028.md)
 in existing draft875 records the45-family library, four private Drive archives
