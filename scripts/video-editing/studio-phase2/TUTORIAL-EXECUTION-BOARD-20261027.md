@@ -1,5 +1,7 @@
 # Nolan Studio tutorial execution board
 
+**Office background visual-hook continuation, 29 October:** [coffee full-frame opening screen](COFFEE-FULL-FRAME-HOOK-SCREEN-20261029.md) adds two60-frame silent portrait outputs to the existing three-source plain. Pinned original espresso full view shows nozzle/streams/whole cup before changing to three bands; a protected revision moves the change from frame36 to24 and keeps24 working frames exact. All outputs decode and sampled motion/picture was inspected; encoded prefix0/24exact fails. The hard layout beat is conspicuous (30–31RGB-level adjacent change), with no heard music/full-speed/phone/client approval. **166** unique private outputs across **40** distinct existing families; all45 retain open gates.
+
 **Office background espresso-exposure continuation, 29 October:** [three-source coffee middle-band screen](COFFEE-MIDDLE-BAND-EXPOSURE-SCREEN-20261029.md) adds two60-frame silent decoded variants against the existing no-label plain. Gamma0.60 makes the machine wall flat; reject. Restrained gamma0.82 helps stream visibility in five sampled moments but is only a bounded comparison. All60 pre-encode top/bottom bands are exact; independently encoded untouched regions differ about2.1–2.3RGB levels, so strict delivered spatial parity fails. No colour/creative/phone/heard/native approval. **164** new unique private outputs across **40** existing families; all45 retain open gates. The three-take matched-cut gate remains open after a same-person city source search yielded only two likely angles.
 
 
