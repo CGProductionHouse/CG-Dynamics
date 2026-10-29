@@ -22,3 +22,8 @@ For a staff recreation, use one linked source clip and native scale keyframes at
 ## Native context pullback and protected endpoint revision
 
 The [office native study](../../OFFICE-NATIVE-CONTEXT-ZOOM-STUDY-20261028.md) keeps a linked portrait pour, plain/linear/native EaseOut/EaseIn controls and later endpoint revision. Six72-frame exports; both actual save/close/reopen pairs72/72 decoded equal, revision opening13/13 equal. A six-frame later key also changed native influence, producing a larger final step; do not call an endpoint edit timing-only without checking handles and encoded motion. Keep streams/contact in every crop, retain enlargement softness and ongoing-action limits; native proof is not creative/phone/heard/second-editor approval.
+
+
+## Office background photographer screen —29October2026
+
+The [licensed real-motion screen](../../PHOTOGRAPHER-CONTEXT-PULLBACK-SCREEN-20261029.md) compares one continuous #50635 photographer shot as plain, linear, eased and protected earlier-end versions. Four96-frame outputs decode; R02 protects16/16 opening frames and reveals the full view eight frames sooner. Strict decoded tail parity fails immediately after the endpoint (31/34exact after62), although26/26 later frames match the plain output. Sampled full and reduced views retain the lens/hand, yet the plain frame already says photographer; this pullback adds little new context and is rejected on this source. Normal-speed/phone/heard/client/second-PC gates remain.
