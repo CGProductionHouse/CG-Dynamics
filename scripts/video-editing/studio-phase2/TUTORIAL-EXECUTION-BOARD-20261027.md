@@ -1,6 +1,9 @@
 # Nolan Studio tutorial execution board
 
 
+**Office background caption-placement continuation, 29 October:** [three-source coffee action-label screen](COFFEE-ACTION-CAPTION-PLACEMENT-SCREEN-20261029.md) advances existing kinetic-caption finishing with three60-frame silent decodes. Center cards cover espresso and pour; upper-left later labels reduce measured central action-region disturbance while retaining the same wording/timing and first20working frames. Independently encoded prefix0/20exact (MAD0.449), failed strict gate. Short reading time, sound/beat, phone, brand/native/creative gates remain. 162 unique new private outputs across40 distinct existing families; all45 open.
+
+
 **Office background archival fight-source continuation, 29 October:** [CC BY historical bout source screen](ARCHIVAL-FIGHT-SOURCE-SELECTION-SCREEN-20261029.md) advances the existing fight-impact family with continuous plain, interview-skip and protected later-return controls: three30-second original-audio750-frame decodes. Neither edit has an accepted landed-blow contact/reaction beat; both cuts are rejected, and Finnish commentary is not verified ring sound. R01→R02 decoded prefix248/250picture and478,208/480,000AACsamples exact, strict gate failed. Separate audio-bearing shadowboxing source rejected for pressure-pocket use. 159 unique new private outputs across40 distinct existing families; all45 gates remain open.
 
 
