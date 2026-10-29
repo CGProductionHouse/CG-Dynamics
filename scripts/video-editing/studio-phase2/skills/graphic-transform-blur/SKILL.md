@@ -5,6 +5,10 @@ description: Add bounded motion blur to animated text or graphics while preservi
 
 # Graphic transform blur — portable original proof
 
+## 29 October office background runner screen
+
+[Licensed runner/title comparison](../../RUNNER-GRAPHIC-BLUR-SCREEN-20261029.md) applies the same short `RUN` trajectory to a real left-to-right source, comparing sharp, 180° and a protected 90° revision. All three 72-frame exports decode; the first12 frames are exact. Full-size moving frames show 180° smears the letters more than the 90° candidate, while a sampled settled hold returns near the sharp control (small encoded drift remains). The title stays ahead of the runner in inspected frames and fades before she reaches it. This is a silent, landscape, code-rendered source screen; no native Premiere shutter-equivalence, heard beat, physical-phone readability, CG use or universal 90° setting is proved.
+
 The owner's [three-frame zoom reference #27](https://www.tiktok.com/@miracampschool/video/7504014296779590935) shows Transform shutter-angle blur, including a visible 200-degree example. This card tests the underlying **moving-graphic** mechanism, independently of the source-selection failures in the zoom-cut card. It does not reproduce the reference's exact parameters or establish that native blur replaces RSMB on real footage.
 
 **Use:** Choose the actual position/scale animation first. Compare no blur with restrained blur on the same trajectory and timing. Confine blur to movement, provide a fully sharp reading hold, and check fast entry/exit frames at full and phone scale. A large shutter angle can erase a short word before the audience has a chance to read it. Native editor/composition and layer blur controls must both be verified where applicable. Do not blur an entire caption track to hide poor easing or missed beats.
