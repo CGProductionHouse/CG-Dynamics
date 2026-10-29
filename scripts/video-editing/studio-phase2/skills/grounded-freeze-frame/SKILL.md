@@ -1,5 +1,9 @@
 # Grounded moving-background freeze — source-specific rejection
 
+## 29 October office clean-plate screen
+
+The [dog/log A/B study](../../GROUNDED-FREEZE-DOG-STUDY-20261029.md) used a commercially cleared real shot with an actually empty frame from the same locked camera. It produced a continuous control, whole-frame hold, binary cutout and protected feathered revision, with four decoded outputs and full-size frame inspection. Paws remain connected to the log and no duplicate dog appears, but the background barely changes: all 23 internal hold pairs have mean decoded pixel difference below 1. **Reject the cutout as a moving-background freeze demonstration.** Use the whole-frame hold if this shot merely needs a pause. The next source still needs independently moving background and a clean plate, then full-size edge/contact, normal-speed phone and native editability checks. Do not treat a rights-cleared plate alone as creative acceptance.
+
 27 October 2026. The owner's [freeze-frame reference](https://www.tiktok.com/@gakulange/video/7519106258394303765) shows an actor held while the surrounding scene continues. The actor must keep a believable frame/floor connection. This card records a **failed real-footage A/B**, not a mastered effect or client-ready preset.
 
 ## Source and bounded test
