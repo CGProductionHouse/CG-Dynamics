@@ -1,0 +1,22 @@
+# Fight second-moment source screen — office background study, 29 October 2026
+
+This advances the existing [fight second-strike card](skills/fight-trailer-second-strike/SKILL.md) in draft PR #910. It is a silent **stock-source ethics and cut-readability test**, not a Fight Night amendment, a confirmed second landed strike or a client trailer sequence. No visible desktop editor, client media, paid service or storage worker was used.
+
+## Sources, rights and selection
+
+The previously licensed [Mixkit #40974, two men boxing](https://mixkit.co/free-stock-video/two-men-on-a-ring-fighting-in-a-boxing-match-40974/) and [Mixkit #40999, two women in a cage](https://mixkit.co/free-stock-video/martial-arts-combat-between-two-women-40999/) are labelled Stock Video Free License for commercial/personal use on their item pages, as recorded in the [portrait source screen](FIGHT-PORTRAIT-FRAMING-SCREEN-20261029.md). The actual upright 720×1280 originals are 5,394,202 bytes / SHA-256 `938bba8c5c586d700be40e2cabf628713dcc440caefb931d8229d1e99f1ce634` and 5,098,759 bytes / `ecc63d9a986e263662a2d660a52f84987f33126881fcffaac205eec4d09043bc`. #40974 is 336 frames at 24000/1001 fps; #40999 is 320 frames at 24 fps. Full-source every-eighth-frame contacts were inspected. #40999 contains separate black intervals around frames 72–80, 136–144 and 216; those are outside the chosen span.
+
+The test chooses #40974 frames 128–175 and #40999 frames 160–207. Each is a 48-frame continuous moving selection. The first boxer pair and the second cage pair are plainly different settings/performers, and the second is a different combat discipline. Source B shows an extended arm reaching a raised guard and later kick movement; sampled frames do not prove a landed strike or a reaction caused by it. The selection is useful for testing whether a second *moment* is distinct, not for certifying a second *hit*. The B source's 24 fps frames are conformed at 24000/1001 fps without repeats/drops, slowing its 48-frame span by about 0.1%; this is a lab choice, not a native event-speed claim.
+
+## Plain cut and protected separator revision
+
+Private scripts, originals, contacts, decoded full-size frames and outputs are under `work/research-continue/fight-second/`. Three 540×960, 24000/1001 fps, silent H.264 outputs fully decode. An ordered contact covers output frames 0/24/44–50/53–55/60/65–66/72/95, and full-size decoded hard-cut frame48, separator frame48 and revised incoming frame66 were inspected. Source frames advance in order on each side; the output luma minimum is 36.77 for the hard cut and 19.5 for the dark separator, with no unintended black source frame.
+
+| Private MP4 | SHA-256 | Finding |
+|---|---|---|
+| `hard.mp4`, 96 frames | `de3739205a39404d267aa0a1d5173647ff55d1e691143c9206ae45d1ad29c34a` | Plain cut after 48 frames; incoming guard/extended arm visible immediately. The 61.73-level adjacent MAD marks a hard picture change, not its creative quality. Different setting is evident, but no event chronology or second hit is proven. |
+| `separator-06.mp4`, 102 frames | `7f6778cd23cc2ae17a4b1b939d06c903861c2468506bb5c6a8550a7a97e5932f` | Six-frame (0.25 s) explicit research slate “SEPARATE STOCK SOURCES”. Its small subline is too much to expect a viewer to read in that time; reject as a client-style handoff. |
+| `separator-18-r02.mp4`, 114 frames | `4e3178c0f2540c150c18f99191f107f40c59a13794ca5991e2d4549ebef81546` | Protected revision: first 54/54 decoded frames equal the six-frame control, then holds the same slate 12 more frames. First 48/48 also equal the hard cut. The label is legible in a sampled full-size frame, but the 0.75 s intertitle stops action and is a **research disclosure**, not an approved trailer device. |
+
+The card does not repair missing event truth, and the plain hard cut does not establish that these bouts share a location or chronology. Do not use the tested slate wording in a client film; it exists to expose this source mismatch. The earlier four-frame blurred-entry rejection is retained rather than repeated. A future legitimate test needs two independently verified event moments with actual visible contacts, distinct fighters/geography, original sound and rights, then plain versus motivated handoff at normal speed. Physical-phone/comfortable viewing, heard music and effects, native Premiere save/reopen/export, second-editor relink and creative approval remain open. Three outputs advance one existing family; none is mastered.
+
