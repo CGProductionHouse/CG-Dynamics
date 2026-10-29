@@ -28,3 +28,8 @@ Confirm the transient is a genuine intended event, listen to unprocessed and lim
 ## Office native extension —29October2026
 
 [Native peak-control study](../../OFFICE-NATIVE-PEAK-STUDY-20261029.md) tests licensed musical peaks with new Premiere project/sequence, linked original/plain/hot/gain/nativeHardLimiter controls and MaximumAmplitude keyframe revision. SevenAV/twoPCM exports; both actual native reopen pairs72/72picture/all144144stereo samples exact. Hot+12dB fails; R02TruePeak−4dB/7mslookahead/100msrelease yields−4.0dBTPstereo but−1.1dBTPafteractualFFmpegmonoAACencode. These are measured source-specific settings, not a preset or pumping/intelligibility approval. Exact protected opening FAILS both AAC/PCM despite bounded nativekeys; preserve that failure separately from successful reopen proof. Keep original/gain/effect independently editable, verify real mono output and hear the complete mix before client use. No phone/second-PC/creative mastery.
+
+
+##29October bounded licensed-music AV screen
+
+[Office background AV comparison](../../PEAK-BOUNDED-MUSIC-AV-SCREEN-20261029.md) uses the same licensed city picture and Cat Walk music in five72-frame outputs. Picture is72/72decoded exact across variants. Deliberate hot+12dB exceeds1 in63stereo/52encoded-mono samples and is rejected. An original neighbourhood-envelope construction controls this short test without claiming Adobe limiter equivalence. R02 lowers late decoded peaks but not overall dBTP; its float PCM first96,000samples are exact while stereo/mono AAC first differs at95,232 (16ms before the key boundary), so strict encoded prefix fails. Mono remains hotter than stereo. Hearing/timbre/pumping/full layered mix, phone and second-editor/native gates stay open; no preset or mastered claim.
