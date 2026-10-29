@@ -23,10 +23,10 @@ function scheduleWhenIdle(callback: () => void) {
     cancelIdleCallback?: (id: number) => void
   }
   if (idleWindow.requestIdleCallback) {
-    const id = idleWindow.requestIdleCallback(callback, { timeout: 1_500 })
+    const id = idleWindow.requestIdleCallback(callback, { timeout: 8_000 })
     return () => idleWindow.cancelIdleCallback?.(id)
   }
-  const id = window.setTimeout(callback, 250)
+  const id = window.setTimeout(callback, 5_000)
   return () => window.clearTimeout(id)
 }
 
