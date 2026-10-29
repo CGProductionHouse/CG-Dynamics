@@ -1,6 +1,9 @@
 # Nolan Studio tutorial execution board
 
 
+**Office background three-distinct-source continuation, 29 October:** [coffee source-band screen](THREE-DISTINCT-COFFEE-BANDS-SCREEN-20261029.md) adds three genuine Free-License originals in contiguous portrait thirds, with plain/staged/protected earlier-final-emphasis controls (three60-frame decodes). All bands move and no row is black. Dimmed opening obscures dark espresso; plain preferred. Working first18frames match in the timing revision, encoded0/18exact (MAD0.244), a failed strict gate. 156 unique new private outputs across39 distinct existing families; all45 have open acceptance gates.
+
+
 **Office background peak-control repair continuation, 29 October:** [earlier bounded licensed-music AV revision](PEAK-EARLY-BOUND-REPAIR-SCREEN-20261029.md) adds one72-frame moving picture-identical R03 to the prior plain/hot/gain/R02 controls. Delivered stereo dBTP improves−4.74→−6.68 and encoded mono−2.34→−4.80; the working PCM tail43,344samples is exact, but AAC tail matches only128samples, a failed strict gate. No listening/pumping/native/phone approval. 153 new unique outputs across39 existing families; all45 gates open.
 
 
