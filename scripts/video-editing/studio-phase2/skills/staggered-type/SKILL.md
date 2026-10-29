@@ -5,6 +5,10 @@ description: Plan readable word-by-word kinetic titles that reinforce an approve
 
 # Staggered pop-up words — rendered technique proof
 
+## 29 October office background source screen
+
+[Licensed portrait saw study](../../SAW-STAGGERED-TYPE-SCREEN-20261029.md) compares plain, all-at-once and two staggered timings on the exact same 96 moving frames. The three-word stack remains readable above the blade in sampled decoded frames; advancing only the third word protects 42 decoded opening frames exactly. **Creative timing gate fails:** this slow-motion cut lacks three visible beats, while the static control communicates the phrase immediately. Keep R01/R02 as bounded controls, not a recommended title preset. Sound, full-speed/physical-phone judgement, approved copy and second-editor native handover remain open.
+
 **Lifecycle:** [owner's Adrian reference](https://www.tiktok.com/@omgadrian/video/7622560596340362509) sampled at about 6, 20, 27, 35 and 61 s → [original synthetic MP4](../../proof-staggered-type.mp4) and [six-frame contact](../../proof-staggered-type-contact.png) rendered → native editable title and human review pending → mastered **NO**.
 
 The Premiere tutorial visibly places short text items on separate timeline segments, times each word to pop up, and uses guides to hold oversized yellow type in the upper picture area while a speaker remains visible below. It later shows a much more elaborate graphic treatment. The sampled points do not prove the exact easing, font, sound or full-speed readability.
