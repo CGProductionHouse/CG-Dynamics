@@ -1,0 +1,26 @@
+# Photo-lens two-shot aperture screen — office background study, 29 October 2026
+
+This advances the existing [masked-zoom-transition card](skills/masked-zoom-transition/SKILL.md) in draft PR #910. It is a silent stock practice comparison, not a client edit or a claim that the two people were filmed together. No visible desktop editor, paid service, client media or storage worker was used.
+
+## Source and physical opening
+
+The [Mixkit #50635 photographer/lens clip](https://mixkit.co/free-stock-video/view-of-a-camera-lens-held-by-a-photographer-50635/) and [#50627 studio-model clip](https://mixkit.co/free-stock-video/model-poses-as-camera-lights-flash-in-a-studio-50627/) each show the Stock Video Free License for commercial/personal use. The actual private 720-tier files have SHA-256 `CF83E51E7B8E0C0F2F1A19752F6C13B3A15C479D3C511494FA920E5332EB79B3` and `DCE6CF2BC9F4E4FDA7B1FA286C5EE4C2B6343AED5D4D52087B3`, both upright 1280×720 at 24000/1001 fps, video-only. Their full-source contacts and exact frames around the photographed lens were inspected during the [exposure-cut screen](PHOTO-STUDIO-EXPOSURE-CUT-SCREEN-20261029.md). #50635 has a central dark camera-lens interior near output coordinate (445,180) after resizing to 960×540. The photographer's hand and face visibly surround it. This is an optical opening but not a physically captured view of the separately licensed model shot.
+
+The experiment uses photographer source frames 100–141 and model source frames 54–105. Output frames 0–41 have the outgoing picture in the plain control; frames 42–75 have model source frames 72–105. In aperture variants, the incoming model advances from source 60 at output30 through source71 at41 before continuing at72 on42. R03 begins earlier, using source54 at output24. No source frame is repeated or reversed, and every encoded output has zero identical adjacent frames. The earlier photographed strobe peaks at photographer143/model59 are avoided in the ordinary R01/R02/R04 window, although R03's earlier prelap includes the model's flash at its output29.
+
+## Controls, protected revisions and inspection
+
+Five 960×540, 24000/1001 fps, 76-frame silent H.264 outputs fully decode. Their ordered encoded contact covers frames0/18/23–24/28–31/33/35/37/39/41–43/48/60/75; full-size encoded frames30/33/37/41/42 were inspected. Private scripts, originals, QA JSON, contacts and outputs are under `work/research-continue/masked-photo/`; no media is in Git. Constant-QP all-intra encoding is used only to compare these decoded frames exactly.
+
+| Private MP4 | SHA-256 | Picture result |
+|---|---|---|
+| `plain.mp4` | `e6d7dc3d6b69a9ffc28688e43cd741dcefca21b7ae0b709bad3adbac48344b0c` | Hard-cut baseline at frame42; the full-picture adjacent MAD is 64.42 levels. The two studio shots are visually related but not continuity-verified. |
+| `hard-r01.mp4` | `f5e2df82882c3d4172c7f8f545f6fce132455126d7c61d9a629c8ada1c5c7554` | Circle grows from within the lens to full screen across frames30–41. **Reject:** it replaces the photographed hand/face with a floating circular studio view. |
+| `soft-r02.mp4` | `d59ad44e54a81d3e03a62f20c65632d7400e6cbd6615c3fcf6752cce994051ab` | Protected 10-pixel edge-feather revision; first30/30 decoded frames equal R01. **Reject:** softening does not repair the disappearing real foreground. |
+| `early-soft-r03.mp4` | `deb23565abf6262c36e9aaf1d3897d387447d2dc0314ffef8bca0fb9028b4158` | Begins at24; first24/24 equal plain. **Reject:** model flash appears during expansion, with a 94.07-level frame29→30 jump, and the circle still erases the hand. |
+| `contained-r04.mp4` | `ba9115e53d91562fa82ce21207b1a2a72c4745104205497bb9629d9315044672` | Reframes the model face into a 70–95px radius lens-contained prelap over frames30–41, then cuts to full model at42. First30/30 equal plain; final34/34 equal plain. It protects the photographed hand/face and visibly previews the incoming face. **Bounded mechanical candidate only:** the small-to-wide scale/position jump is still abrupt. |
+
+For output frames30–41, the maximum encoded mean-absolute difference **outside a 120px lens-radius diagnostic** versus plain is 66.267 levels in each expanding-circle variant, but only 0.120 in R04. This supports the narrow observation that R04 leaves surrounding picture nearly intact; it does not prove a perfect tracked matte or a natural camera view. The fixed circle is manually registered to this short selected span, not tracked through arbitrary source motion. R04's adjacent MAD at the full cut is 63.68, almost the plain cut's 64.42, confirming that the hand-protecting repair does not solve the final discontinuity. All variants share 34/34 exact decoded tail frames with plain.
+
+The photographed lens provides a real opening, but a circle that grows beyond it fails physical foreground order. A bounded lens-contained preview is cleaner in sampled frames and still lacks a motivated, continuous shot pair. A future client use needs verified related footage, registered inner boundary and foreground matte, native editable layers, normal-speed/physical-phone and heard-cue review. No native Premiere save/reopen/export, second-PC relink, client story fit, creative approval or mastery is claimed. Five outputs advance one existing family; all 45 family gates remain open.
+
