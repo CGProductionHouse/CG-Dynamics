@@ -197,4 +197,3 @@ The [office native scene-plane study](https://github.com/CGProductionHouse/CG-Dy
 ## A frozen source is not necessarily a frozen native matte
 
 The [office native silhouette study](https://github.com/CGProductionHouse/CG-Dynamics/blob/codex/nolan-office-research-874/scripts/video-editing/studio-phase2/OFFICE-NATIVE-PRELAP-STUDY-20261029.md) finds Object Mask boundary drift despite Frame Hold/Hold Filters. Nesting the completed transparent treatment and holding the outer nest repairs the tested five-frame shape. Compare isolated encoded masks, the moving background, the cut and actual return to motion; preserve failed controls and native mask dependencies. Native reopen equality and a protected opening do not establish unchanged encoded tails, fine-hair quality, comfort or a story reason for a white flash.
-
