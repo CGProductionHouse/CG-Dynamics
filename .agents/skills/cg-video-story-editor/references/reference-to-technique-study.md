@@ -175,3 +175,7 @@ The [office native EQ study](https://github.com/CGProductionHouse/CG-Dynamics/bl
 ## A limiter ceiling and a protected revision are separate gates
 
 The [office native peak study](https://github.com/CGProductionHouse/CG-Dynamics/blob/codex/nolan-office-research-874/scripts/video-editing/studio-phase2/OFFICE-NATIVE-PEAK-STUDY-20261029.md) compares actual native source/gain/limiter controls and exported monoAAC. Mono peaks materially exceed stereo peaks; measure the actual downmix after encoding. Native save/reopen repeats exactly, yet a later amplitude-keyframe revision fails exact early audio protection in AAC AND PCM. Neither native key timing nor successful reopen establishes sample-identical revision protection. Preserve that failure and keep independent listening/phone/full-mix gates open.
+
+## Native apertures must share a source-time canvas
+
+The [office native panel study](https://github.com/CGProductionHouse/CG-Dynamics/blob/codex/nolan-office-research-874/scripts/video-editing/studio-phase2/OFFICE-NATIVE-PANELS-STUDY-20261029.md) verifies separate editable Pen Masks against the same-instant plain original and actual reopen exports. Retain common in/out/transform, test native outputs, and reveal the whole product before gaps hide its proof too long. Earlier full reveal preserves the opening but its compressed tail still differs; parameter equality is not decoded-pixel equality. Do not infer the full creator composition, phone judgement or creative mastery from registration.

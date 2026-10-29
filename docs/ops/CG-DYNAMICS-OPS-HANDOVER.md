@@ -27,6 +27,8 @@
 
 [Native peak continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-PEAK-STUDY-20261029.md): sevennativeAV/twoPCM, twoactualreopenpairs72/72picture/144144samplesexact. Hot+12REJECTED; nativeR02−4.0dBTPstereo/−1.1dBTPactualencodedmono. Exact protectedopening FAILSAACandPCM; nativekeys/reopenarenotpreservationproof.45families, noheard/phone/creative/crossPCpass; next existing registered-slanted-panels nativegate.
 
+[Native panel continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-PANELS-STUDY-20261029.md): six72frame outputs/two72/72actualreopenpairs,36/36protectedopening, onlyV4Opacity changes. Three nativeapertures share verifiedcoffee48–119canvas/time; interiorMSE<0.974againstplain. Earlierfullrevealreduceshiddenpour; encodedtail0/24andcreative/phone/heard/crossPCgatesremain.45families;next existing metallic-type-material nativegate.
+
 Owner explicitly requested office PC primary execution because MSI is unreliable.
 [Takeover brief](../../scripts/video-editing/studio-phase2/OFFICE-RESEARCH-TAKEOVER-20261028.md)
 in existing draft875 records the45-family library, four private Drive archives
