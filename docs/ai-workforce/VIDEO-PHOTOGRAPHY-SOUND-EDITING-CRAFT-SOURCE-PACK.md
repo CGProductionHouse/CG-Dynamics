@@ -832,6 +832,8 @@ Operational summary:
 
 This dated operational addendum supplements the general craft research. It does **not** turn unreviewed vendor promises into approved knowledge or prove that workstation installation has occurred.
 
+The reusable hands-on [CG video story editor skill](../../.agents/skills/cg-video-story-editor/SKILL.md) adds a [rhythm and sound playbook](../../.agents/skills/cg-video-story-editor/references/rhythm-sound-playbook.md) for music markers, meaningful flash openings, motion-matched cuts, independent sound prelaps/tails and revision evidence. A practical edit exposed a useful failure mode: rapid shots can still feel flat when the soundtrack's opening fade hides the accents. Verify the *audible* beat before changing picture timing. These craft notes do not expand #856's tool approval or client release scope.
+
 ---
 
 # 9. Platform adaptation
