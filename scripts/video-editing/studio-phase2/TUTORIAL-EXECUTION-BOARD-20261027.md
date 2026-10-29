@@ -1,5 +1,7 @@
 # Nolan Studio tutorial execution board
 
+**Office background same-frame split continuation,29October:** [saw detail screen](SAW-SAME-FRAME-DETAIL-SPLIT-20261029.md) advances source-led split with one licensed continuous original, four96-frame decoded controls/revisions,62/62protected R01→R02 opening and21/21R02→plain exact tail. Right detail is the same source frame, explicitly labelled. Persistent panel hides offcut; protected return-wide restores it.45families/open gates remain; phone, native, heard, client and JFJ-example gates unchanged.
+
 **Office background process-caption continuation,29October:** [saw study](SAW-PROCESS-CAPTION-SCREEN-20261029.md) advances existing kinetic-caption gate with one Free-Licence original, five120-frame decoded controls/treatments, a40/40protected later-stage timing revision and an independent clean-card repair. Long pointer/late label fail; immediate word plus short card underline reads more clearly in sampled frames.45families/open gates remain; normal-speed, phone, native, heard and full JFJ-reference gates still open.
 
 **Office background carousel continuation, 29 October:** [coffee process screen](COFFEE-PROCESS-CAROUSEL-SCREEN-20261029.md) advances active-only labels using licensed moving footage, five96-frame decoded controls/revisions and exact32/32protected opening in both revisions. Dim fade entrance rejected; immediate label/icon pulse survives sampled-frame inspection. Original drawn marks are not imported vector-path proof. 45families/open gates remain; full JFJ WhatsApp example is still unread in background-only mode.
@@ -141,5 +143,6 @@ Owner requirements beyond the tutorial links are also tracked: [default shot sta
 Use the exact next **distinct** proof, not the next row numerically. First fix visual families with a suitable moving source: footage-in-type action/word, natural depth edge, source-led speed/zoom, then the real filmed-screen capture when a device shoot is available. Avoid repeating known bad sources. Once the picture method holds at normal speed and phone size, fit licensed sound on separable stems and hear it in the chosen music phrase. A session should advance several concrete gates where possible and save the result to its card, this board, the owning PR and the canonical `.agents/skills/cg-video-story-editor` only if the lesson is client-agnostic. The office PC reads the same Git branch/PR until merge; the [two-PC handover](NOLAN-STUDIO-TWO-PC-HANDOVER-20261027.md) owns installation and lane separation. No heartbeat is required to make a small proof into a finished claim.
 
 The [practice capture pack](PRACTICE-CAPTURE-PACK.md) specifies the real source inputs still missing for six capture-dependent families. The optional [Tesseract readiness finding](TESSERACT-READINESS-20261027.md) records its absent runtime and unverified commercial eligibility; it was not installed or run and is not a Nolan Studio dependency.
+
 
 
