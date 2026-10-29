@@ -28,3 +28,8 @@ Add sound only to supported motion events and the actual music phrase. A settled
 ## Office native extension —29October2026
 
 See the [actual office icon study](../../OFFICE-NATIVE-VECTOR-STUDY-20261029.md). SVG import fails in Premiere26.5; Illustrator-derived separate assets import, with native independent Position/Scale and editable legend. Three actual save/close/reopen/export pairs match108/108decoded frames; copy revision protects72frames, path repair19. Straight paths merge icons in26frames; added perimeter positions restore three separate icon components108/108. Retain the failed control. These imported Illustrator assets are rasterized in Premiere, not editable vector paths. Active-only labels, smooth interpolation, exact loop, client fit, phone/heard/second-PC and creative acceptance remain open.
+
+## Office background active-label screen —29October2026
+
+The [coffee process screen](../../COFFEE-PROCESS-CAROUSEL-SCREEN-20261029.md) compares a licensed real three-stage montage with plain/all-label/active-only variants. Five actual96-frame MP4s decode, both active revisions protect the first32encoded frames. A fade-in label is rejected because it weakens the information at the scene cut; an icon-circle pulse keeps the label immediate in sampled frames. The icons here are original drawn geometry for hierarchy testing, **not** imported editable vectors. Landscape practice size, panel occlusion, normal-speed/phone readability, sound, native editing and client brand/offer acceptance remain open.
+
