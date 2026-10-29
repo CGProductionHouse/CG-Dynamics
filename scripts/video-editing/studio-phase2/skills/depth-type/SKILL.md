@@ -5,6 +5,10 @@ description: Build and compare foreground-over-type experiments on cleared movin
 
 # Depth typography on moving human footage — rendered, not mastered
 
+## 29 October office background screen: runner across fixed word
+
+[Licensed natural-runner screen](../../RUNNER-DEPTH-TYPE-SCREEN-20261029.md) compares an identical silent 72-frame shot with no title, type in front, and type behind a moving human. The first 24 decoded frames stay pixel-identical. R02's feathered GrabCut matte **fails** on source frames 148–151 because a connected path strip is pulled in front of the word. R03 repairs those four mattes and retains the protected opening; decoded contacts at five crossing phases and full-size frames 36/40 show readable text and the runner above it. This is one source-specific landscape/code-rendered mechanism, not generic natural segmentation, native editability, physical-phone judgement or client approval. Preserve the failed R02 and full-motion/hair/feet checks before adapting to a story.
+
 ## 28 October extension: split-tone changing words and full-motion edge repair
 
 `python render_split_tone_ab.py --output-dir PRIVATE_DIR` adds a90-frame/3s540×960 front-versus-behind layer-order control inspired by Wanderlust frames125–209. It reuses the existing licensed Mixkit28306 dancer, source3–6s, SHA256 `80e0bf3d84faf6e2b0efabfc9001aeadde09e1ce56d0530360ceff5b9be596a5`, existing Space Grotesk OFL font and original seeded texture. FIND/YOUR/FLOW change each second; restrained blue/gold split material is separate from the gold-bevel proof. It is fictional practice, not a new client palette.
