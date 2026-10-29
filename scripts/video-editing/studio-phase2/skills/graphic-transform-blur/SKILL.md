@@ -5,6 +5,10 @@ description: Add bounded motion blur to animated text or graphics while preservi
 
 # Graphic transform blur — portable original proof
 
+## Portrait moving-title source screen — 29 October 2026
+
+[The basketball title comparison](../../PORTRAIT-BASKETBALL-GRAPHIC-BLUR-SCREEN-20261029.md) pins an upright commercially cleared dribble source and tests no-title plain, sharp entry,180° and protected90° graphic-only motion accumulation across four72-frame outputs. All fully decode; first12 and final48 frames of the blur-strength revision are exact, with only title-entry frames12–23 changing. At frame16 the title-band difference from sharp falls10.691→5.114RGB levels with the shorter exposure, while the ball region remains decoded-identical to no-title plain. Strong blur delays reading; restrained entry is clearer but `DRIBBLE` is redundant and low in the portrait frame. Prefer plain for this shot. No native equivalence, heard rhythm, physical-phone safe-area or creative/client approval follows.
+
 ## 29 October office background runner screen
 
 [Licensed runner/title comparison](../../RUNNER-GRAPHIC-BLUR-SCREEN-20261029.md) applies the same short `RUN` trajectory to a real left-to-right source, comparing sharp, 180° and a protected 90° revision. All three 72-frame exports decode; the first12 frames are exact. Full-size moving frames show 180° smears the letters more than the 90° candidate, while a sampled settled hold returns near the sharp control (small encoded drift remains). The title stays ahead of the runner in inspected frames and fades before she reaches it. This is a silent, landscape, code-rendered source screen; no native Premiere shutter-equivalence, heard beat, physical-phone readability, CG use or universal 90° setting is proved.
