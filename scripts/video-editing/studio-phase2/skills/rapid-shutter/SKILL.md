@@ -5,6 +5,10 @@ description: Test a brief shutter cut across source-matched action, with an orig
 
 # Rapid shutter cut — synthetic timing proof, not mastered
 
+## 29 October portrait source screen
+
+The [office dog/log A/B](../../PORTRAIT-SHUTTER-DOG-SCREEN-20261029.md) clears the earlier landscape fixed-crop problem with an upright commercially licensed source. Four real-footage 48-frame controls and a protected blur-strength revision fully decode; 22 frames match across all four, and R02/R03 protect 23 frames. R01's destination/source/destination return is visibly wrong. Forward-only R02/R03 repair time order but do not improve the plain dog cut enough to claim creative acceptance. Silent source, no beat/normal-speed/physical-phone/heard sound/native reopen. Do not use portrait framing alone as an approval signal.
+
 **Reference:** [Dani's Rapid Shutter tutorial](https://www.tiktok.com/@justdodani/video/7445684422860377366) visually shows staggered short clips and a 90-degree directional-blur control. The displayed frames do not establish a universal clip length or prove that the effect suits a client. [Multiply Sound's comparison](https://www.tiktok.com/@multiply.sound/video/7597296358311103758) motivates a separate tonal-versus-noise sound experiment; its actual sound was not heard.
 
 **Use:** Only if outgoing/incoming subjects, direction, scale and story relation remain intelligible. Find the plain cut first, align the action peak to the chosen music event, then add brief alternate glimpses on a protected duplicate. Retain the existing grade and title legibility. Make any directional blur short enough to settle before the next shot's action. Flashing unrelated shots is a failure, however exciting the timeline looks.

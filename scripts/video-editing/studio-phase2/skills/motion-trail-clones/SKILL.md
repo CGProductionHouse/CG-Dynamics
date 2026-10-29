@@ -5,6 +5,10 @@ description: Plan a layered subject trail from original movement footage and ver
 
 # Subject motion trail — visually sampled, untested
 
+## 29 October source gate
+
+The exact rights-cleared [Mixkit #1555 dog/log](https://mixkit.co/free-stock-video/dog-standing-on-a-log-1555/) was screened at source frames 300, 312, 324, 336, 348, 360, 372 and 384. Standing positions overlap, then the dog turns behind the log and disappears. Its empty plate helps a freeze test but cannot make three clearly separated, grounded trail positions. **Reject before motion-trail render.** The [portrait shutter screen](../../PORTRAIT-SHUTTER-DOG-SCREEN-20261029.md) records the frame selection and keeps this source-specific rejection distinct from a successful clone proof.
+
 **Lifecycle:** [owner's Miracamp reference](https://www.tiktok.com/@miracampschool/video/7650495982521634080) sampled at about 2, 15 and 24 s → original masked proof pending → mastered **NO**.
 
 The visible example repeats a basketball player across a jump. Premiere shows `Add Frame Hold` and multiple stepped upper layers. The caption describes duplicating a rotoscoped subject, freezing successive positions and keeping the live subject on the top layer. This is an editing plan, not evidence that natural-footage rotoscoping is automated or that every overlap is clean.
