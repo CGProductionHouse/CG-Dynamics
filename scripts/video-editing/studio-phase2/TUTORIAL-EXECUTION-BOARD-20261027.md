@@ -1,6 +1,9 @@
 # Nolan Studio tutorial execution board
 
 
+**Office background archival fight-source continuation, 29 October:** [CC BY historical bout source screen](ARCHIVAL-FIGHT-SOURCE-SELECTION-SCREEN-20261029.md) advances the existing fight-impact family with continuous plain, interview-skip and protected later-return controls: three30-second original-audio750-frame decodes. Neither edit has an accepted landed-blow contact/reaction beat; both cuts are rejected, and Finnish commentary is not verified ring sound. R01→R02 decoded prefix248/250picture and478,208/480,000AACsamples exact, strict gate failed. Separate audio-bearing shadowboxing source rejected for pressure-pocket use. 159 unique new private outputs across40 distinct existing families; all45 gates remain open.
+
+
 **Office background three-distinct-source continuation, 29 October:** [coffee source-band screen](THREE-DISTINCT-COFFEE-BANDS-SCREEN-20261029.md) adds three genuine Free-License originals in contiguous portrait thirds, with plain/staged/protected earlier-final-emphasis controls (three60-frame decodes). All bands move and no row is black. Dimmed opening obscures dark espresso; plain preferred. Working first18frames match in the timing revision, encoded0/18exact (MAD0.244), a failed strict gate. 156 unique new private outputs across39 distinct existing families; all45 have open acceptance gates.
 
 
