@@ -22,3 +22,8 @@ Negative control: an already smooth, commercially licensed [Mixkit #134 city fol
 ## Office native extension —29October2026
 
 [Actual Warp Stabilizer study](../../OFFICE-NATIVE-STABILIZATION-STUDY-20261029.md) uses new licensed city336–407landscape frames, not the rejected portrait select or MSI Daisy source. Native plain/default50/PSR5/revision controls; six72-frame exports, both actual native reopen pairs72/72decoded equal and49/49protected revision. Default50crowds headroom and worsens side-band velocity-change;PSR5/104.3%autoscale lowers it22.8% for this span. Only nativeAdditionalScale changes for a small closing reframe. Retain plain/default controls and source/analysis dependencies. Fullspeed independent judgement, portrait/phone/heard/second-PC and creative acceptance remain unproved; no universal smoothing preset.
+
+## Office background fight-motion screen —29October2026
+
+[Boxing camera study](../../BOXING-CAMERA-STABILIZATION-SCREEN-20261029.md) first verifies the new source's upright landscape orientation, then compares five72-frame plain/mild/strong/selective correction outputs. All decode; the R01→R02 selective return protects48/48opening encoded frames and matches plain for final16/16. Mild reduces one confounded side-band motion signal, while strong worsens it and crowds the moving guard/face; hard/soft return variants remain unapproved because of reframing/ghosting risks. This is not an MSI Fight client edit, source-audio/hit verification, universal sporting-shake exception or native editability proof. Normal-speed, phone, original sound and creative gates stay open.
+
