@@ -45,3 +45,8 @@ An initial 25%-opacity entrance was rejected as too faint at 270 × 480, then ch
 ##29October native glyph-sweep extension
 
 [Native caption study](../../OFFICE-NATIVE-SHINE-STUDY-20261029.md): real cleared coffee/steadygold, PhotoshopnativeWhiteTEXTasset(identicalalpha/save-reopenPNGexact), Premierecrop-onlyhard/softsweeps. TenNEW72-frame exports/four72/72reopenpairs; hard21/soft20protectedframes/ONLYOpacity117changes. Hardstripe rejected; LegacyCropEdgeFeather24/Opacity35is gentler, not exactdiagonaltutorial. Featherwidensactivity20–41vs hard21–39; resetbuttondidNOTclearMotionkeys, actualstopwatchclearcorrected. Outside5pxglyphbufferMSE<.909;Soft35hasone>12levelpixelat45and47,strictzeros spillfails. Tail1/30exact. PSDimports rasterized: wordingeditablePhotoshop/cropOpacitynativePremiere, notPRemierefonts. Phone/heard/independentcontinuoushuman/brand/secondPC/masteryopen. No mandatoryshine/Glintplugin or source-grade approval.
+
+##29October background process-caption screen
+
+[Actual saw study](../../SAW-PROCESS-CAPTION-SCREEN-20261029.md): one cleared moving source across visible board alignment, cut and separation; five120-frame plain/steady/long-rise/short-rise/clean-card outputs fully decode. The shortened R02 entrance preserves40/40opening decoded frames, but its long pointer crosses action and fails moving-offcut registration. The clean R03 removes that pointer and keeps stage text immediate; it is an independent composition, not a protected revision. The study supports source-led caption timing and rejecting false callout precision. It proves no approved portrait style, native text editability, phone/heard/continuous creative review or JFJ reference match.
+
