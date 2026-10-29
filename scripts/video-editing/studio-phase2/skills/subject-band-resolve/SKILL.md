@@ -5,6 +5,10 @@ description: Construct a short source-isolated horizontal band displacement foll
 
 # Subject bands into pale silhouette — bounded reconstruction
 
+## 29 October natural-scene screen
+
+The [office dog/log screen](../../NATURAL-SUBJECT-BAND-SCREEN-20261029.md) adds a licensed real subject and same-shot empty plate, continuous/hold/band controls and four increasingly constrained band versions. All six 80-frame outputs decode; the opening 24 frames are identical. Full-size inspection rejects the face-cutting R01, rectangular pale R02, hard-seam R03 and subtler but elastic R04. The latter protects the paws/log and removes the box, yet the source has no moving-background or story-cut motivation. This does **not** clear the natural-scene or creative gate. Seek a causally related two-shot source before more effect polishing; retain physical-phone, heard sound and native editability gates.
+
 28 October2026. Direct inspection of Wanderlust frames312–320 shows several mechanisms: horizontal subject fragments, a pale upper-body region at315 and a fuller pale silhouette at317–319. It is not merely RGB separation or a full-picture glitch. The [reference ledger](../../WANDERLUST-DIARIES-STUDY-20261028.md) separates these observations from unverified native controls.
 
 Run `python render_ab.py --source LOCAL_ORIGINAL --output-dir PRIVATE_DIR`. It reuses the existing prelap encoder/stage recipe and commercially licensed [Mixkit green-screen28306](https://mixkit.co/free-stock-video/girl-dancing-with-her-earphones-on-a-green-background-28306/), source3–6s, SHA256 `80e0bf3d84faf6e2b0efabfc9001aeadde09e1ce56d0530360ceff5b9be596a5`; licence manifest in `../../project.json`. Existing Python/OpenCV/NumPy/Pillow/FFmpeg only. No natural segmentation, creator footage or plugin.

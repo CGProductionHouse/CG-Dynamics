@@ -1,5 +1,48 @@
 ### 28 October — Nolan research/skills transferred to office PC
 
+**Office native plane continuation, 29 October:** [actual scene-plane study](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-PLANE-STUDY-20261029.md) adds four native 96-frame controls, one actual saved/closed/reopened 96/96 identical export and 48 exact protected opening frames. Manual five-keyframe Corner Pin follows one licensed moving wood plane; merged Photoshop PSD art is Premiere-rasterized. Person depth/contact, creative, phone, heard and cross-PC gates remain; 45 families unchanged.
+
+**Evening owner authority:** CA freed the office PC and requested no-spend overnight sequential skills work. [Native type receipt](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-TYPE-STUDY-20261028.md) proves one-PC Premiere native layers/save/reopen/copy revision/export,72/72 decoded frames equal after second reopen. Existing45 families remain; no mastery/staff/phone/heard promotion. A narrowly authorized local native task **Nolan PC overnight continuation**, every30minutes/failure-only notifications, queues the same research chat without interrupting it, one pending wake maximum. Actual queue/manual-run duplicate suppression and own pause/resume verified. Finish WIP before next family; stop at safe29Oct07:30SAST checkpoint and pause only this task. Existing board holds ordered work. This supersedes older staff-busy/no-new-scheduler wording only for this research continuation, not WhatsApp/MSI monitors. MSI amendments, Central Canvas and storage remain protected.
+
+
+[Natural foreground continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATURAL-MASK-STUDY-20261028.md) now verifies one90-frame native Object Mask selection/control/revision,90/90 decoded frames equal after R02 reopen. Dedicated Masks folder must accompany native project. Fine-hair/landscape/silent/source coverage limits and second-PC/creative gates remain;45 families unchanged. Actual21:08 scheduled wake queued while editing without interrupting; next distinct queue item is cross-shot handoff.
+
+[Two-shot forward continuation](../../scripts/video-editing/studio-phase2/OFFICE-FORWARD-HANDOFF-STUDY-20261028.md) adds seven96-frame controls, rejects retime-only direction mismatch and bounds an incoming reframe; encoded vector gap6.228→0.308px/frame,48/48 outgoing revision frames equal. Not a filmed sideways whip, continuous place or mastery. Next distinct item is natural unkeyed plane;45families/client/acceptance boundaries unchanged.
+
+[Natural unkeyed plane continuation](../../scripts/video-editing/studio-phase2/OFFICE-UNKEYED-PLANE-STUDY-20261028.md) adds five96-frame native-HD wood/control/revision exports. Refreshed wood-only features plus independent rectified texture support attachment;48/48 opening frames equal. R02 seam-crossing placement rejected and R03 moved to one continuous plank. General depth/native/phone/heard/creative gates remain. Next distinct item5 kinetic type/remaining board mechanism;45families unchanged. Actual22:08 scheduled wake pending while this work proceeds, no duplicate editing worker.
+
+[Native Transform blur continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-TRANSFORM-BLUR-STUDY-20261028.md) verifies actual0/180/90-degree effect controls and180 native reopen/export72/72 decoded parity. Native fast-entry repeated edges/layout remain rejected as production defaults; parameter-only revision has only2/48 encoded hold frames equal. No mastered/native-every-family claim. Next distinct existing mechanism: native footage-in-type alpha matte/solid-stroke reveal;45families unchanged.
+
+[Native footage-in-type continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-FOOTAGE-TYPE-STUDY-20261028.md) adds plain/title controls, actual editable alpha-matte/vector reveal and protected24→18 timing revision. Both native saved/reopened versions48/48 decoded equal;18/18 revision opening equal, tail0/6 exact. Dark/withheld-action limitations retained; six exports,45families unchanged. Next distinct native context zoom-out/easing gate. Actual23:08 scheduled wake queued while editing continued, no duplicate worker or client/storage change.
+
+[Native context continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-CONTEXT-ZOOM-STUDY-20261028.md) adds six72-frame controls/easing/revision/two-reopen exports, both72/72decoded equal,13/13 protected opening. Native endpoint influence also changes and later settle is harder; no creative/phone/heard/second-PC promotion. Existing45families; next distinct native motion-remap bag-contact gate.
+
+[Native speed continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-SPEED-STUDY-20261028.md) adds six valid controls/revision/reopen exports, two rejected leading-gap outputs; R03/R04reopen148/148 and149/149decoded equal,88/88protected prefix. Reacquired dancer original hash matches; bag remains source-gated. Endpoint/Bezier/creative/phone/heard/second-PC limits retained. Existing45families; next distinct native three-shot stack.
+
+[Native three-shot stack continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-THREE-SHOT-STACK-STUDY-20261029.md) adds six72-frame controls/revision/two-reopen exports, both72/72decoded equal,12/12protected opening. Distinct linked woodland originals fill portraitbands; long empty-third wait rejected, middle-source rate offset/colour limits retained.45families unchanged; next native vector-option-carousel import/layer gate. Actual00:08wake queued while editing, no duplicateworker.
+
+[Native icon continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-VECTOR-STUDY-20261029.md) adds seven108-frame native outputs, three108/108reopen pairs,72-framecopy/19-framepath revision protection. SVG rejection and straight-path collision retained; perimeter repair separates icons108/108frames. Imported AI art is rasterized; active labels/easing/loop/phone/heard/second-PC/creative gates remain.45families unchanged; next existing stabilization native gate.
+
+[Native stabilization continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-STABILIZATION-STUDY-20261029.md) adds six72-frame nativecontrols/revision, both72/72actualreopen pairs and49/49protected prefix. New uprightlandscapespan preserveswalker;default50crowdsheadroom/worsensmetric,PSR5reducesdiagnostic22.8%. Source/portrait/phone/heard/second-PC/creativeboundariesremain.45families; next existing native muffled-perspective gate.
+
+[Native EQ continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-EQ-STUDY-20261029.md): sixnativeAV/fouracceptedPCM, threeactualreopenpairs, R04PCM96105sample protectedprefix. NativeAAC1024sample delay measured; PCM-based dry/R02/R04muxes zero measuredlag. WrongDPX/constantPCM and changed R03project gates retained, not repaired by title/settings alone.45families, noheard/phone/creative/crossPCpass; next distinct existing native peak-control.
+
+[Native peak continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-PEAK-STUDY-20261029.md): sevennativeAV/twoPCM, twoactualreopenpairs72/72picture/144144samplesexact. Hot+12REJECTED; nativeR02−4.0dBTPstereo/−1.1dBTPactualencodedmono. Exact protectedopening FAILSAACandPCM; nativekeys/reopenarenotpreservationproof.45families, noheard/phone/creative/crossPCpass; next existing registered-slanted-panels nativegate.
+
+[Native panel continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-PANELS-STUDY-20261029.md): six72frame outputs/two72/72actualreopenpairs,36/36protectedopening, onlyV4Opacity changes. Three nativeapertures share verifiedcoffee48–119canvas/time; interiorMSE<0.974againstplain. Earlierfullrevealreduceshiddenpour; encodedtail0/24andcreative/phone/heard/crossPCgatesremain.45families;next existing metallic-type-material nativegate.
+
+[Native metallic continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-METAL-STUDY-20261029.md): Photoshop editable PSD text/styles, seven72-frame native Premiere outputs/two72/72actual reopen pairs,48/48protected copy prefix. Heavy12px rejected/3px cleaner/flat clearest. Bevel Alpha removed; merged PSDs rasterized in Premiere. Initial Copy PNG1RGBlevel mismatch retained, second reopen stable.45families; next native color-invert-glitch control/pulse gate. No client/storage/spend change.
+
+[Native inversion continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-INVERT-STUDY-20261029.md): six new72-frame native exports+reusedplain, two72/72actual reopen pairs,30/30protected prefix/onlyBlend97changes. Product-colour/152.74grayjump rejected; zeroAAC export and1/28tailparity retained.45families; next native graphic-inset-grow gate. No client/storage/spend changes.
+
+[Native inset continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-INSET-STUDY-20261029.md): eightNEW72-frame native exports+reusedplain/three72/72reopenpairs. R04tangent/shrink/protected-prefix1 rejected; R05repair19/19protected/onlyScale97changes. Fractional source map72/72corrects rounded-bound ambiguity;tail0/30exact retained.45families; next native chromatic-lens-pulse capability/source gate. No client/storage/spend changes.
+
+[Native chromatic continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-LENS-STUDY-20261029.md): eightNEW72-frame exports/two72/72reopenpairs/25protectedframes. Strongfringes rejected; reducedROIchange32.24%lower. Unnamed8301alsochanges/zero0-72/offpulse0-61/tail1-36parityfailures retained.45families; next kinetic-caption-finishing nativeglyph shine gate. No client/storage/spend changes.
+
+[Native caption continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-SHINE-STUDY-20261029.md):10NEW72-frame exports/four72-72reopenpairs,hard21/soft20protectedframes/onlyOpacity117changes. Hardstripe rejected/LegacyCropFeather24+35%gentler. Twoframesoneoutsidepixelthresholdfail/tail1-30parity retained;PSwording/PRemiererasterimportscopeexplicit.45families;nextnative subject-silhouette-prelap source/matte gate. No client/storage/spend change.
+
+**Office native silhouette continuation, 29 October:** [actual prelap study](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-PRELAP-STUDY-20261029.md) adds two cleared real shots, plain/colour/white/timing/nested-repair controls, 12 NEW native 119-frame exports and four actual 119/119 reopen pairs. Hold Filters leaves Object Mask boundary drift (5636 pixels at threshold 128); holding the completed nest repairs threshold-shape stability across five frames. Repaired short revision protects 25 opening frames; tail 2/89 exact fails. Fine-hair/flash/phone/heard/story/second-PC gates remain. 45 families unchanged; next distinct existing native scene-perspective-type gate.
+
 Owner explicitly requested office PC primary execution because MSI is unreliable.
 [Takeover brief](../../scripts/video-editing/studio-phase2/OFFICE-RESEARCH-TAKEOVER-20261028.md)
 in existing draft875 records the45-family library, four private Drive archives
@@ -7,7 +50,17 @@ in existing draft875 records the45-family library, four private Drive archives
 separate stacked research PR and unfinished queue. Office owns new874 research
 through903; MSI parks research and retains Daisy/TBS/PSG/Fight amendments.
 Central Canvas904 stays office-owned separately. Read newer shared rules909.
-Office download/install/rerender receipt is pending; preparation is not activation.
+Office intake is now accepted in separate stacked draft[PR910](https://github.com/CGProductionHouse/CG-Dynamics/pull/910):
+all4 downloaded archives/379 members hash/size verified, single shared skill CURRENT,
+and source-checked subject-band rerender inspected. [Exact receipt](../../scripts/video-editing/studio-phase2/OFFICE-RESEARCH-ACCEPTANCE-20261028.md).
+[New rotation/registered-roll studies](../../scripts/video-editing/studio-phase2/OFFICE-ROTATION-HANDOFF-STUDY-20261028.md)
+add seven corrected90-frame outputs to two existing families. Rejected sign/precision
+controls retained; no phone/heard/native or mastery claim. Staff desktop active;
+further research is file-based. MSI amendments and Central Canvas remain protected.
+[Full-shot display continuation](../../scripts/video-editing/studio-phase2/OFFICE-PHONE-SURFACE-STUDY-20261028.md)
+adds five251-frame native-fps controls/revision; notch/key/fringe failures repaired,
+feature/anchor drift retained. Controlled-display proof only; physical/natural/native
+and heard/phone gates remain open. No new family or client change.
 GitHub/903/874/Supervisor381 and the existing Google handover are continuity routes.
 Exact Control Centre tracker remains unavailable after a scoped Drive name search;
 no guessed tracker write or replacement. No client media, credentials, permissions,

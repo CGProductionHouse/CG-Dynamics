@@ -1,0 +1,21 @@
+# Office native scene-plane typography — 29 October 2026
+
+This advances the existing scene-perspective-type family. It is a bounded one-shot Premiere construction, not proof of a general tracker, person occlusion, native Premiere font editing, client approval or creative mastery.
+
+## Source and rights
+
+The original [Mixkit smartphone-and-book 1790](https://mixkit.co/free-stock-video/smartphone-and-book-1790/) publisher page was rechecked on 29 October and explicitly offers its Free Stock Video License for commercial/personal use. The locally read original `mixkit-1790-720.mp4` has SHA256 `5d6ec13c437538c886b3a254eeaaed2a050f81907af1c224fac1f44696b5b859`, 1280×720, 24000/1001 fps, 275 frames. The selected original frames 0–95 are upright moving camera footage across book/wood/phone and were freshly played. No client assignment or use of the phone display is inferred. A prior [natural-wood screen and tracked geometry ledger](OFFICE-UNKEYED-PLANE-STUDY-20261028.md) supplies source-specific board quadrilaterals; it does not make native Premiere auto tracking.
+
+## Actual native construction
+
+Premiere Pro 26.5, own isolated `Nolan-PC-Plane-*` private projects. The plain control puts original source 0–95 on V1; actual export is 96 frames/4.004 s. Photoshop 27.11 created linked transparent 1280×720 PSD titles with live text layers: `Ink.psd` says **UNWIND**, `Copy.psd` says **UNPLUG**. They saved/reopened in Photoshop. Premiere imported each with *Merge All Layers*, so Premiere sees rasterised linked PSD footage; typography is editable in the original Photoshop PSD, while Corner Pin/timing/source replacement are editable in Premiere.
+
+The fixed negative control places Ink on V2 for exactly 96 frames, with native Corner Pin at source frame 0: upper left (600,615), upper right (920,532), lower left (710,705), lower right (1050,605). Its black word stays stationary on screen while the board travels. The moving version enables four native Corner Pin stopwatches and sets all corners at frames 0,24,48,72,95 from the existing source-specific wood ledger, rounded to integer pixels. The revision splits *only* V2 at frame 48 and uses native **Replace With Clip > From Bin** to change the right half to Copy PSD while retaining the split clip's Corner Pin keys. V1 and first-half Ink remain untouched. This is a later wording revision, not a substitute for a scene story brief.
+
+## Output and inspection
+
+Four H.264 native outputs—plain, fixed, moving and revision—each decode to 96 frames at 1280×720. The full 0–95 frame sequence was decoded; a 10-timepoint contact (0,12,24,36,47,48,60,72,84,95) and full-size Premiere monitors at 0,24,48,95 were visually inspected. Text-minus-plain boxes at frame 0 match between fixed and moving, [639,554,991,673]. By frame 95 fixed still sits there; moving is [400,478,745,593], consistent with the wood movement. The moving word stays inside the bounded board in the inspected samples. This box metric alone is not independent plane attachment proof; the prior rectified natural-texture ledger is source-specific corroboration.
+
+The revision versus moving has **zero decoded RGB delta for all first 48 frames** and changed content on all later 48. The revision project was saved, closed from Premiere, reopened from its `.prproj`, and exported again: **96/96 decoded frames exactly equal** to the first revision export, despite different MP4 file hashes. Native project save/reopen/export passes for this one-PC construction. The `Copy.psd` text is legible in the inspected later frames, but the black lettering still reads as a designed overlay rather than convincing physical printing; contact/shadow/occlusion and a story-specific creative choice remain open. The shot is silent; no sound was heard or approved. No physical-phone, cross-PC relink or human/client creative review occurred. General moving planes, people and filmed-phone transitions remain separate gates.
+
+Private reproducibility artifacts are under `work/research-continue/native-plane/` in the office workspace: four `.prproj` variants, linked PSD/PNG sources, four MP4 outputs plus reopened export, `qa.py`, `qa.json`, contacts and UI proof screenshots. No source media or private project was committed to Git.
