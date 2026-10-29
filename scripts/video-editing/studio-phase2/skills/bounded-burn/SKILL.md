@@ -1,4 +1,6 @@
-# Burn overlay — bounded synthetic A/B rejected
+# Burn overlay and film transport — bounded source A/Bs
+
+**29 October office two-shot extension:** [city bridge to beach source study](../../FILM-TRANSPORT-TWO-SHOT-STUDY-20261029.md) applies the existing strip construction across two distinct licensed locations. Plain/transport/leak-R01/protected weaker-leak-R02 are actual90-frame silent outputs, all decoded;42 opening frames match exactly, while encoded tail identity still fails. The full-size strip is readable as a chapter move but makes picture detail inaccessible for six frames. No normal-speed/phone/heard/native creative acceptance; the plain cut remains the clearer default.
 
 ## 28 October: separate film-gate and transport construction
 
