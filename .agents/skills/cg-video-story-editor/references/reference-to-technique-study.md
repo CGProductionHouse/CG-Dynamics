@@ -190,6 +190,11 @@ The [office native peak study](https://github.com/CGProductionHouse/CG-Dynamics/
 
 The [office native panel study](https://github.com/CGProductionHouse/CG-Dynamics/blob/codex/nolan-office-research-874/scripts/video-editing/studio-phase2/OFFICE-NATIVE-PANELS-STUDY-20261029.md) verifies separate editable Pen Masks against the same-instant plain original and actual reopen exports. Retain common in/out/transform, test native outputs, and reveal the whole product before gaps hide its proof too long. Earlier full reveal preserves the opening but its compressed tail still differs; parameter equality is not decoded-pixel equality. Do not infer the full creator composition, phone judgement or creative mastery from registration.
 
+## Native scene planes still need grounding
+
+The [office native scene-plane study](https://github.com/CGProductionHouse/CG-Dynamics/blob/codex/nolan-office-research-874/scripts/video-editing/studio-phase2/OFFICE-NATIVE-PLANE-STUDY-20261029.md) uses a cleared moving wood shot and editable native Corner Pin keys. Compare plain/fixed/moving exports before treating an on-screen graphic as attached to the moving surface. A native split and Photoshop-PSD source replacement can protect an exact decoded opening, but merged PSD footage is not Premiere-editable typography. One saved/closed/reopened project reproduces its 96 frames; independent creative grounding, person occlusion, phone and second-PC proof remain open.
+
 ## A frozen source is not necessarily a frozen native matte
 
 The [office native silhouette study](https://github.com/CGProductionHouse/CG-Dynamics/blob/codex/nolan-office-research-874/scripts/video-editing/studio-phase2/OFFICE-NATIVE-PRELAP-STUDY-20261029.md) finds Object Mask boundary drift despite Frame Hold/Hold Filters. Nesting the completed transparent treatment and holding the outer nest repairs the tested five-frame shape. Compare isolated encoded masks, the moving background, the cut and actual return to motion; preserve failed controls and native mask dependencies. Native reopen equality and a protected opening do not establish unchanged encoded tails, fine-hair quality, comfort or a story reason for a white flash.
+
