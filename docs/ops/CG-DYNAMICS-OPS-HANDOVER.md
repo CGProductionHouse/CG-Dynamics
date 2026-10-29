@@ -31,6 +31,8 @@
 
 [Native metallic continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-METAL-STUDY-20261029.md): Photoshop editable PSD text/styles, seven72-frame native Premiere outputs/two72/72actual reopen pairs,48/48protected copy prefix. Heavy12px rejected/3px cleaner/flat clearest. Bevel Alpha removed; merged PSDs rasterized in Premiere. Initial Copy PNG1RGBlevel mismatch retained, second reopen stable.45families; next native color-invert-glitch control/pulse gate. No client/storage/spend change.
 
+[Native inversion continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-INVERT-STUDY-20261029.md): six new72-frame native exports+reusedplain, two72/72actual reopen pairs,30/30protected prefix/onlyBlend97changes. Product-colour/152.74grayjump rejected; zeroAAC export and1/28tailparity retained.45families; next native graphic-inset-grow gate. No client/storage/spend changes.
+
 Owner explicitly requested office PC primary execution because MSI is unreliable.
 [Takeover brief](../../scripts/video-editing/studio-phase2/OFFICE-RESEARCH-TAKEOVER-20261028.md)
 in existing draft875 records the45-family library, four private Drive archives
