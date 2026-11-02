@@ -1,8 +1,24 @@
 # Cape Lumber launch acceptance — 2 November 2026
 
+## Normal ChatGPT strategy catch-up — latest verified content state
+
+The existing normal company ChatGPT author used the installed Dynamics connector to
+incorporate Cape's published October evidence into November
+`c4daf0e5-9f1e-4d1c-bb2c-74b9b09ecfaa` **v6** and December
+`50088b8b-ac9d-446b-a353-7b346aeac1b3` **v3**. Only the test-and-change field was
+amended with source/version fences; the author verified other fields/action plans
+preserved. Independent connector reads confirm both versions/full new field; both
+remain draft/unpublished. This supersedes v5/v2 references in earlier dated receipts.
+[Exact author evidence/save receipt](https://github.com/CGProductionHouse/CG-Dynamics/issues/731#issuecomment-6575066951).
+
+Native weekly task `6ae868361b6c81918b6b333508a47a50` is enabled in that same normal
+Chat, Monday08:00SAST, next9November. Immediate scheduled acceptance returned to that
+Chat and began research. The failed standalone Work task is paused. Scheduling and
+start are not a full-fleet strategy completion claim; follow #731 for final run results.
+
 ## Visual post-gallery candidate — 2 November, source only
 
-CA requested a more visual Facebook content section. Actual local report page now
+PR924/main5e1907ac implements the more visual Facebook content section. Actual local report page now
 shows Cape's real 26/27/6 October post images with verified 95/83/69 interactions,
 one card per post, imported Lucide icons, compact metrics/exact expandable definition,
 expandable captions, image enlargement and safe new-window original-post links.

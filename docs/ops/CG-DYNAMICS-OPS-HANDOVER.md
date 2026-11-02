@@ -1,32 +1,44 @@
-### 2 November — weekly company ChatGPT strategy task restored
+### 2 November — normal Chat authoring works; native weekly Chat task verified
 
-The old `December Strategy Rollout` task `6ad4bddd3950819193bdcce4a4b3e0c9`
-was a completed one-off with disabled schedule controls, not active weekly automation.
-Created and independently read back one active company ChatGPT Scheduled task:
-**CG Dynamics — Weekly Client Strategies**, ID `6ae862ef803081908fe734ac6035a4cd`,
-Mondays **08:00 Africa/Johannesburg**, no end date, next scheduled run 9 November.
-[Task settings/history](https://chatgpt.com/scheduled?automationId=6ae862ef803081908fe734ac6035a4cd&automationSource=cloud).
-Used its normal **Run now** action for immediate catch-up;
-[actual running chat](https://chatgpt.com/c/6ae86397-f288-83e9-af0a-023fb9801fca)
-shows responding/reviewing strategy briefs. This proves scheduling/start, not completed
-client saves or publication; inspect the resulting readback receipts in #731.
+The old December task `6ad4bddd3950819193bdcce4a4b3e0c9` was completed/one-off.
+Standalone task `6ae862ef803081908fe734ac6035a4cd` was saved but FAILED first-run
+acceptance: Scheduled routed it into Work/Codex and the author correctly refused
+CA's normal-Chat-only requirement. It is now **PAUSED**, independently verified in
+the UI; do not resume it or mistake its initial saved schedule for working authoring.
 
-Saved instructions use dynamic current/next Johannesburg months, complete canonical
-roster, published findings/real posts, latest client research/Drive/meeting context,
-active primary-source research, substantive package-matched plans, guarded draft saves/
-selected amendments and exact ID/version/content readbacks. Preserve staff edits,
-published snapshots, held/once-off scope and source/security boundaries. Continue other
-eligible clients when one is blocked; no audit-only success or repeated package asks.
-The new task uses existing company ChatGPT/Dynamics tools, not paid API generation or
-a duplicate Codex author. No automatic approval/publication, fabricated dates/metrics,
-Microsoft/provider/permission/secret/Vercel actions or client communications. Other
-staff tasks, industry research and the old completed task were preserved. No Codex
-overnight automation was revived. #731 retains source/authoring ownership.
+Resumed the existing [ordinary company ChatGPT conversation](https://chatgpt.com/c/6ae83742-bff8-83e9-8aaa-7756976836d7).
+Normal ChatGPT successfully used the existing connector under company_admin and
+made two guarded Cape amendments from newly published October evidence: November
+`c4daf0e5-9f1e-4d1c-bb2c-74b9b09ecfaa` **v5→v6**, December
+`50088b8b-ac9d-446b-a353-7b346aeac1b3` **v2→v3**, both still draft/unpublished.
+Only `goldStandard.testAndChange` changed; the normal author verified all other fields/
+action plans unchanged. Independent connector readbacks confirm both versions and the
+full sourced new field. No API-funded generator or Codex-authored client plan.
+[Exact normal-author save and scheduling receipt](https://github.com/CGProductionHouse/CG-Dynamics/issues/731#issuecomment-6575066951).
+
+The normal author created/read back ONE native **CG Dynamics Weekly Strategies — Chat**
+task `6ae868361b6c81918b6b333508a47a50`, enabled, attached to that SAME ordinary Chat,
+Monday **08:00 Africa/Johannesburg**, next9November/no end date. Independently opened
+its settings: Repeat ON/Weekly/Monday/08:00/no end and active Pause action. Leave its
+model inherited from Chat; do not replace it with a Work/Codex model. Used Run now
+for scheduled execution acceptance: it returned to the SAME normal Chat URL with
+Ask ChatGPT and began live roster/brief/Drive/web research. A bulk orchestration limit
+was handled by switching to smaller exact-client batches, not claiming missing reads
+were complete. This proves routing/start and prior direct connector writes, not fleet
+completion or automatic publication; follow the run's #731 save receipts.
+
+Saved prompt requires dynamic current/next months, full exact roster, published findings,
+real posts and meeting/research/Drive evidence, active primary-source research, substantive
+package-matched plans, actual guarded draft saves/selected amendments/readbacks, staff-edit
+preservation and durable progress. No repeated package asks, audit-only success, invented
+facts/dates, automatic approval/publication, Microsoft/provider/permission/secret/Vercel
+changes or client communications. Other staff/research tasks and the completed old task
+are preserved. No Codex overnight automation revived; #731 remains author/source owner.
 
 ### 2 November — visual post cards verified locally; not deployed
 
 CA requested less text, actual post images and imported icons in client Performance.
-Focused branch `codex/client-visual-post-cards` under #668 replaces duplicate hero/
+PR924 merged as main `5e1907ac` under #668; the source replaces duplicate hero/
 ranked captions with one media card per post, compact metrics with expandable exact
 definitions, expandable captions, keyboard-safe image enlargement and provider-matched
 original-post links. Overview reuses the same component; staff curation and published
