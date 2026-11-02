@@ -1,5 +1,17 @@
 # Client launch execution — local-first continuation
 
+## 2 November — real weekly strategy automation enabled
+
+Company ChatGPT task `6ae862ef803081908fe734ac6035a4cd` is active as
+**CG Dynamics — Weekly Client Strategies**, Mondays08:00 SAST, next9November.
+The older December task was a completed one-off; its locked schedule was not
+recurring. The new saved task researches and writes eligible dynamic current/next
+month strategies using existing connected tools and guarded save/readback paths,
+preserving staff edits and scope/source/publication boundaries. **Run now** started
+[the immediate catch-up](https://chatgpt.com/c/6ae86397-f288-83e9-af0a-023fb9801fca).
+Started/working is not a successful-save claim; #731 owns the resulting receipts.
+No paid generator, Vercel, revived Codex heartbeat or staff/calendar changes.
+
 ## 2 November — visual post gallery (local candidate only)
 
 CA's Cape Facebook screenshot exposed a text-only, duplicate winning-post presentation.

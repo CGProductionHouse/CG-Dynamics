@@ -1,3 +1,28 @@
+### 2 November — weekly company ChatGPT strategy task restored
+
+The old `December Strategy Rollout` task `6ad4bddd3950819193bdcce4a4b3e0c9`
+was a completed one-off with disabled schedule controls, not active weekly automation.
+Created and independently read back one active company ChatGPT Scheduled task:
+**CG Dynamics — Weekly Client Strategies**, ID `6ae862ef803081908fe734ac6035a4cd`,
+Mondays **08:00 Africa/Johannesburg**, no end date, next scheduled run 9 November.
+[Task settings/history](https://chatgpt.com/scheduled?automationId=6ae862ef803081908fe734ac6035a4cd&automationSource=cloud).
+Used its normal **Run now** action for immediate catch-up;
+[actual running chat](https://chatgpt.com/c/6ae86397-f288-83e9-af0a-023fb9801fca)
+shows responding/reviewing strategy briefs. This proves scheduling/start, not completed
+client saves or publication; inspect the resulting readback receipts in #731.
+
+Saved instructions use dynamic current/next Johannesburg months, complete canonical
+roster, published findings/real posts, latest client research/Drive/meeting context,
+active primary-source research, substantive package-matched plans, guarded draft saves/
+selected amendments and exact ID/version/content readbacks. Preserve staff edits,
+published snapshots, held/once-off scope and source/security boundaries. Continue other
+eligible clients when one is blocked; no audit-only success or repeated package asks.
+The new task uses existing company ChatGPT/Dynamics tools, not paid API generation or
+a duplicate Codex author. No automatic approval/publication, fabricated dates/metrics,
+Microsoft/provider/permission/secret/Vercel actions or client communications. Other
+staff tasks, industry research and the old completed task were preserved. No Codex
+overnight automation was revived. #731 retains source/authoring ownership.
+
 ### 2 November — visual post cards verified locally; not deployed
 
 CA requested less text, actual post images and imported icons in client Performance.

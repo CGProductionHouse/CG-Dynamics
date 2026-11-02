@@ -60,13 +60,25 @@ test('preview report needs complete typed exclusion evidence, not missing data i
 
 test('preview includes only the public provider thumbnail, never raw context or internal file URLs',()=>fixture(async(read,state)=>{
   const url='https://scontent.fbcdn.net/approved-public-post.jpg'
-  state.posts=[{...post,raw:{source:'meta_sync',full_picture:url,private_notes:'PRIVATE staff context'}}]
+  const publicPost={...post,publish_time:'2026-10-01T12:00:00Z',raw:{source:'meta_sync',full_picture:url,private_notes:'PRIVATE staff context'}}
+  state.posts=[publicPost]
   let result=await read(clientId,reportId)
   assert.equal(result.data.posts[0].image_url,url)
   assert.doesNotMatch(JSON.stringify(result.data),/PRIVATE|private_notes|\"raw\"/)
   state.posts=[{...post,raw:{source:'meta_sync',full_picture:'https://internal.sharepoint.com/private.jpg'}}]
   result=await read(clientId,reportId)
   assert.equal(result.data.posts[0].image_url,null)
+  for(const candidate of [
+    {...publicPost,publish_time:'2026-10-17T07:00:00Z'},
+    {...publicPost,publish_time:null},
+    {...publicPost,platform:'tiktok'},
+    {...publicPost,raw:{full_picture:url}},
+  ]){
+    state.posts=[candidate]
+    assert.equal((await read(clientId,reportId)).data.posts[0].image_url,null,'Preview must match the real client image boundary')
+  }
+  state.posts=[publicPost];state.exclusions=[{post_id:postId,excluded:true}]
+  assert.equal((await read(clientId,reportId)).data.posts[0].image_url,null,'Excluded post image is withheld')
 }))
 
 test('preview report rejects missing ownership, mismatched child identity and rejected reads without leaking transport details',()=>fixture(async(read,state,calls)=>{
