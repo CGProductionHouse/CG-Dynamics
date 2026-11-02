@@ -1,21 +1,26 @@
 # Client launch execution — local-first continuation
 
-## 2 November — real weekly strategy automation enabled
+## 2 November — normal Chat writer and native weekly task verified
 
-Company ChatGPT task `6ae862ef803081908fe734ac6035a4cd` is active as
-**CG Dynamics — Weekly Client Strategies**, Mondays08:00 SAST, next9November.
-The older December task was a completed one-off; its locked schedule was not
-recurring. The new saved task researches and writes eligible dynamic current/next
-month strategies using existing connected tools and guarded save/readback paths,
-preserving staff edits and scope/source/publication boundaries. **Run now** started
-[the immediate catch-up](https://chatgpt.com/c/6ae86397-f288-83e9-af0a-023fb9801fca).
-Started/working is not a successful-save claim; #731 owns the resulting receipts.
-No paid generator, Vercel, revived Codex heartbeat or staff/calendar changes.
+Standalone Work-routed task `6ae862ef803081908fe734ac6035a4cd` failed execution
+acceptance and is **PAUSED**. The normal company Chat author has now saved/read back
+Cape November **v6** and December **v3**, changing only the sourced test-and-change
+field while preserving staff decisions and complete plans; both remain drafts.
+[Exact receipt](https://github.com/CGProductionHouse/CG-Dynamics/issues/731#issuecomment-6575066951).
+
+The working normal author created native task `6ae868361b6c81918b6b333508a47a50`,
+**CG Dynamics Weekly Strategies — Chat**, Monday08:00SAST/next9November/no end,
+attached to [that same ordinary Chat](https://chatgpt.com/c/6ae83742-bff8-83e9-8aaa-7756976836d7).
+UI schedule/active readback pass. Its Run now returned to that SAME normal chat
+and started live exact-client research/briefs, recovering a bulk orchestration limit
+with smaller batches. Follow #731 for completed save receipts; this is not fleet
+completion or strategy publication. No paid generator, Vercel, revived Codex heartbeat
+or staff/calendar changes. The older December one-off remains historical/completed.
 
 ## 2 November — visual post gallery (local candidate only)
 
 CA's Cape Facebook screenshot exposed a text-only, duplicate winning-post presentation.
-#668 now owns the focused imported-icon/media-card candidate: each ranked post once,
+PR924/main5e1907ac completes the #668 imported-icon/media-card source: each ranked post once,
 compact exact-definition metrics, expandable captions and image preview, safe original
 post links, same accepted portal palette. Overview shares the card; staff curation is
 preserved. 231 relevant tests, disposable PostgreSQL media/role isolation, actual
