@@ -1,3 +1,20 @@
+### 2 November — publication confirmation repair (local candidate)
+
+CA rejected the manual Publish handoff and explicitly requested an app fix.
+The client lane replaces blocking native JavaScript confirmations in the report
+editor and canonical monthly strategy workspace with an explicit in-app dialog.
+Exact client/month, report admin authority, strategy version/quality/dirty gates,
+existing typed writes and private staff notes are preserved. Scope/role changes
+invalidate pending consent; cancellation writes nothing; duplicate clicks cannot
+submit twice; failed status read-back does not claim successful publication.
+The actual-page regression reproduced the native-confirmation failure and now
+covers desktop/375/390/430, failure/retry and scope/role/edit boundaries. It is
+included in canonical local acceptance. This source checkpoint does not publish
+content or establish a live release. #668 owns the focused fix; staff/Teams and
+#731 strategy authoring remain separate. Complete the exact verified local
+candidate/release packet before one conservative prebuilt release, then perform
+Cape's already-authorised ordinary publication in the repaired application.
+
 ### 2 November — Cape Lumber first-client launch acceptance
 
 CA selected Cape Lumber first. [Exact acceptance and remaining normal UI actions](CAPE-LUMBER-LAUNCH-REVIEW-2026-11-02.md).

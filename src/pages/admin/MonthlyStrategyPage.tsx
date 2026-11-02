@@ -5,6 +5,8 @@ import { GuidedStrategyEditor, type StrategyContext } from '../../components/str
 import { ClientContextReview } from '../../components/strategy/ClientContextReview'
 import { StatusBadge } from '../../components/ui/Badges'
 import { ActionButton } from '../../components/ui/Buttons'
+import { PublicationConfirmation } from '../../components/ui/PublicationConfirmation'
+import { isStaffRole } from '../../lib/roles'
 import { useAuth } from '../../contexts/AuthContext'
 import { getMonthEvents } from '../../lib/contentCalendar'
 import { getClient, readPackageAuthority, type Client } from '../../lib/db/clients'
@@ -70,9 +72,17 @@ export default function MonthlyStrategyPage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [reloadKey, setReloadKey] = useState(0)
+  const [publication, setPublication] = useState<{ clientId: string; month: string; strategyId: string; version: number } | null>(null)
   const scopeKey = clientId ? `${clientId}:${month}:${reloadKey}` : ''
   const loading = Boolean(clientId && loadedScope !== scopeKey)
   const selectedClient = client?.id === clientId ? client : null
+
+  const scope = `${clientId}:${month}:${strategy?.id}:${strategy?.version}:${profile?.role}`
+  const [publicationScope, setPublicationScope] = useState(scope)
+  if (publicationScope !== scope) {
+    setPublicationScope(scope)
+    setPublication(null)
+  }
 
   useEffect(() => {
     if (requestedMonth === month) return
@@ -145,8 +155,10 @@ export default function MonthlyStrategyPage() {
       if (result.error) throw new Error(result.error.message)
       setSuccess(successMessage)
       setReloadKey(value => value + 1)
+      return true
     } catch (actionError) {
       setError(actionError instanceof Error ? actionError.message : 'The strategy action could not be completed.')
+      return false
     } finally {
       setBusy(null)
     }
@@ -383,10 +395,9 @@ export default function MonthlyStrategyPage() {
               {strategy.workflow_status === 'approved' && (
                 <ActionButton
                   loading={busy === 'publish'}
-                  disabled={dirty || qualityIssues.length > 0}
+                  disabled={dirty || qualityIssues.length > 0 || !isStaffRole(profile?.role)}
                   onClick={() => {
-                    if (!window.confirm(`Publish ${client?.name ?? 'this client'}’s ${monthDisplayLabel(month)} strategy to the client portal?`)) return
-                    void runAction('publish', () => transitionMonthlyStrategy({ clientId, month, expectedVersion: strategy.version, targetStatus: 'published', actorProfileId: profile?.id, idempotencyKey: crypto.randomUUID() }), 'Strategy published to the exact client-month portal view.')
+                    setPublication({ clientId, month, strategyId: strategy.id, version: strategy.version })
                   }}
                 >
                   Publish to client
@@ -395,6 +406,18 @@ export default function MonthlyStrategyPage() {
             </div>
           </section>
         </>
+      )}
+      {publication && strategy && !loading && !dirty && (!busy || busy === 'publish') && qualityIssues.length === 0
+        && isStaffRole(profile?.role) && strategy.workflow_status === 'approved'
+        && publication.clientId === clientId && publication.month === month
+        && publication.strategyId === strategy.id && publication.version === strategy.version && (
+        <PublicationConfirmation
+          title={`Publish ${selectedClient?.name ?? 'this client'}’s ${monthDisplayLabel(month)} strategy?`}
+          description="The reviewed strategy will become available in this client’s portal. Internal notes remain private."
+          confirmLabel="Confirm publication"
+          onCancel={() => setPublication(null)}
+          onConfirm={() => runAction('publish', () => transitionMonthlyStrategy({ clientId, month, expectedVersion: publication.version, targetStatus: 'published', actorProfileId: profile?.id, idempotencyKey: crypto.randomUUID() }), 'Strategy published to the exact client-month portal view.')}
+        />
       )}
     </div>
   )
