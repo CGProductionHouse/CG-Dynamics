@@ -10,6 +10,7 @@ import json
 import sys
 from collections import Counter
 from pathlib import Path
+from load_client_library import verify as verify_client_library
 
 
 REQUIRED_TEXT = (
@@ -94,6 +95,16 @@ def main():
         print(f"Cannot read plan: {exc}", file=sys.stderr)
         return 2
     errors = validate(plan)
+    if plan.get('research_only') is not True:
+        if not plan.get('client_id') or not plan.get('client_context_snapshot'):
+            errors.append('CG production requires exact client_id and the current loaded client_context_snapshot; load the existing library first')
+        else:
+            try:
+                context=verify_client_library(plan['client_context_snapshot'])
+                if context['client_id']!=plan['client_id']:errors.append('Story client does not match loaded client library')
+                if not context['brand_ready']:errors.append('Saved brand baseline has specifically unresolved fields; resolve those fields from the saved source, not a generic substitute')
+            except (ValueError,KeyError,FileNotFoundError) as exc:
+                errors.append('Client library load invalid: '+str(exc))
     if errors:
         print("STORY PREFLIGHT FAILED")
         for error in errors:

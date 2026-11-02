@@ -1,5 +1,7 @@
 # Story preproduction gate
 
+**Established-client rule:** first load the saved exact-client library and current keep/change/reject decisions using `scripts/load_client_library.py`. Reuse the approved brand assets/reference films already located there. Do not repeat a general brand-guideline/Canva hunt for an ordinary new video. The work below concerns the new story, new instructions, actual selected-source history and current mutable facts. Refresh a brand asset only for a specifically changed/missing version or an explicit new direction; an unrelated amendment does not reset an established creative standard.
+
 Complete this gate for **every** new client video. A client name, monthly slot, archive folder, and attractive footage are inputs; they are not yet a story. Do not start assembling a timeline until the one-page brief below has a defensible answer for each question. If a key fact is missing, record the gap and gather the source or revise the concept.
 
 Read the [production standard](production-standard.md) for the cross-client owner rules and keep/change/reject checkpoint. Older posted shoots may supply genuinely different moments for a new story job; the prohibition is lifting a previously published beat/story as-is, not a blanket exclusion of a whole shoot. Treat material uncertainty honestly and resolve it before declaring a select fresh.

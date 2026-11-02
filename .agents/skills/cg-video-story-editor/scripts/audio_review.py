@@ -56,7 +56,8 @@ def context_files(kit):
     kit = Path(kit).resolve(strict=True)
     paths = set()
     for pattern in ("LATEST-EDIT.*", "*feedback*.json", "*FEEDBACK*.md", "REVISION-BASELINE*.md",
-                    "brand/BRAND_REFERENCE.md", "audio/AUDIO_INDEX.md"):
+                    "CLIENT_CONTEXT.json", "OWNER-DECISIONS.json", "CURRENT-ASSIGNMENT.md",
+                    "brand/CREATIVE-BASELINE.md", "brand/BRAND_REFERENCE.md", "audio/AUDIO_INDEX.md"):
         paths.update(p for p in kit.glob(pattern) if p.is_file())
     return sorted(paths)
 

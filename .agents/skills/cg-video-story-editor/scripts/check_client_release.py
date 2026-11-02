@@ -1,0 +1,67 @@
+"""Check an evidenced client release record; never certify artistic taste from metadata.
+
+This is a local gate around the existing context/audio/story workflow, not an editor.
+The JSON points to actual files and review records kept in the private job folder.
+"""
+from pathlib import Path
+import argparse,json,re,sys
+from load_client_library import read,sha,verify
+from audio_review import gate as audio_gate
+
+AREAS=('approved_reference_comparison','source_and_rights','orientation_and_stabilisation','colour_match',
+       'brand_typography_motion','rendered_spelling_and_copy','picture_at_normal_speed','sound_and_sync',
+       'cover_and_small_grid','cross_client_distinctness','portrait_outro')
+def check(record):
+    errors=[];result={'status':'BLOCKED','errors':errors,'creative_approval_inferred':False}
+    if record.get('resend_blocked') or record.get('creative_status')!='creative_review_passed':errors.append('Owner-rejected or uncleared creative work cannot be sent')
+    context=None
+    try:
+        context=verify(record['client_context_snapshot'])
+        if context['client_id']!=record['client_id']:errors.append('Release belongs to a different client')
+        if not context['brand_ready']:errors.append('Established brand has unresolved saved fields; generic substitution is blocked')
+    except (KeyError,ValueError,OSError) as e:errors.append('Current client library evidence missing/invalid: '+str(e))
+    for field in ['video','cover','caption_path']:
+        try:
+            p=Path(record[field])
+            if not p.is_file():raise ValueError('missing '+field)
+            key='caption_sha256' if field=='caption_path' else field+'_sha256'
+            if sha(p)!=record[key]:errors.append('Exact '+field+' changed after review')
+        except (KeyError,ValueError,OSError) as e:errors.append('Missing exact '+field+' identity: '+str(e))
+    try:
+        caption=Path(record['caption_path']).read_text(encoding='utf-8-sig')
+        if re.search(r'^\s*(Music:|Source:|Licence:|License:|From Nolan|SHA.?256|QA:)',caption,re.M|re.I) or re.search(r'creativecommons\.org|CC BY|incompetech\.com',caption,re.I):
+            errors.append('Forwardable caption contains internal/licensing prose; replace the cue or establish compatible lawful credit placement, never strip required credit silently')
+    except (KeyError,OSError):pass
+    try:
+        identity=record['production_identity'];prefix=f"{int(identity['year']):04d}_{int(identity['month']):02d}_{identity['client_short_code']}_VIDEO_{int(identity['video_number']):02d}"
+        if not identity.get('verified') or not re.fullmatch(r'[A-Z0-9]+',identity['client_short_code']):raise ValueError('unverified canonical code/sequence')
+        proof=Path(identity['source_evidence'])
+        if not proof.is_file() or sha(proof)!=identity['source_evidence_sha256']:raise ValueError('identity source record missing/changed')
+        if not Path(record['video']).stem.startswith(prefix):raise ValueError('actual video basename differs from canonical identity')
+        if Path(record['video']).suffix.lower()!='.mp4':raise ValueError('review/original video must be the required MP4')
+        if not Path(record['cover']).stem.startswith(prefix):raise ValueError('cover production identity does not match video')
+    except (KeyError,ValueError,OSError,TypeError) as e:errors.append('Production naming blocked: '+str(e))
+    try:
+        proof=Path(record['exact_export_creative_review_evidence']);review=read(proof)
+        if review.get('video_sha256')!=record['video_sha256'] or review.get('cover_sha256')!=record['cover_sha256']:errors.append('Creative review belongs to different picture/cover bytes')
+        if not review.get('reviewer') or not review.get('reviewed_at'):errors.append('Actual creative reviewer/method/date missing')
+        for area in AREAS:
+            entry=review.get('areas',{}).get(area,{})
+            if entry.get('status')!='pass' or not entry.get('method') or not entry.get('finding'):errors.append('Unresolved actual review: '+area)
+            evidence=entry.get('evidence_file')
+            if not evidence or not Path(evidence).is_file():errors.append('Missing actual review artifact: '+area)
+        if review.get('picture_review_muted') and review.get('sound_review_complete') is not True:errors.append('Muted picture playback cannot clear sound')
+    except (KeyError,ValueError,OSError) as e:errors.append('Exact creative review evidence missing/invalid: '+str(e))
+    try:
+        a=audio_gate(record['audio_packet'],record['audio_review'])
+        if a['video_sha256']!=record['video_sha256']:errors.append('Audio review belongs to a different export')
+        errors.extend('Audio: '+x for x in a['errors'])
+    except (KeyError,ValueError,OSError,TypeError) as e:errors.append('Exact-export perceptual audio gate missing/invalid: '+str(e))
+    if not errors:result['status']='EVIDENCED_INTERNAL_REVIEW_READY'
+    return result
+def main():
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('release_record');a=p.parse_args()
+    try:result=check(read(a.release_record))
+    except (OSError,ValueError) as e:result={'status':'BLOCKED','errors':[str(e)]}
+    print(json.dumps(result,indent=2,ensure_ascii=False));return int(result['status']=='BLOCKED')
+if __name__=='__main__':raise SystemExit(main())
