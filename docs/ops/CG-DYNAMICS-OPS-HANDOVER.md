@@ -1,3 +1,25 @@
+### 2 November — Cape Lumber first-client launch acceptance
+
+CA selected Cape Lumber first. [Exact acceptance and remaining normal UI actions](CAPE-LUMBER-LAUNCH-REVIEW-2026-11-02.md).
+Actual native Google campaign October spend/impressions/clicks match stored
+31-day facts and the client Google panel; scheduled refresh covers 1 November.
+Conversions are not definition-equivalent to Smart website actions and are not
+shown in the compact client panel. Cape Brand Hub PNG View + actual downloaded
+file identity pass. Package is seven combined posters, no unknown extras.
+One targeted Cape/October Meta sync reused the master report and synced 37posts;
+actual metric windows now extend through31October. No other-client bulk sync,
+mapping/campaign/budget/permission or Vercel change.
+
+October report publication was attempted normally but Chrome stalled accepting
+the native confirmation. Independent final SELECT still proves draft/null
+published_at. No privileged publication bypass or success claim. November v5 and
+December v2 strategies remain unpublished; existing #731 owner retains refresh
+from newly published findings. No dated November/December Client Schedule rows;
+staff owner must confirm dates, not infer from operational events. Actual client
+password/physical phone and Meta re-consent remain separate gates. Browser lost
+tab attachment after confirmation attempts; final explicit temporary viewport/
+tab cleanup could not be confirmed. No native credential use or external send.
+
 ### 28 October — client frontend LIVE; no repeat deployment
 
 CA explicitly authorised the final conservative live push. Exact main `7eb0473f`
