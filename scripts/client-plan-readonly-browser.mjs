@@ -15,10 +15,10 @@ const clientB = '22222222-2222-4222-8222-222222222222'
 // deliberately has no receipt so both confirmed and unknown paths are exercised.
 const syntheticValues = {
   professional_videos_per_month: 1, reels_per_month: null, photo_posts_per_month: 3,
-  design_posters_per_month: 3, animated_posters_per_month: null,
-  campaign_management_included: null, monthly_campaign_budget: null,
+  design_posters_per_month: 4, animated_posters_per_month: null,
+  campaign_management_included: true, monthly_campaign_budget: null,
   shoot_days_per_month: null, website_updates_per_month: null,
-  other_agreed_deliverables: null, package_notes: null, package_exclusions: null,
+  other_agreed_deliverables: 'Social media management\nContent guide\nGoogle Ads', package_notes: null, package_exclusions: null,
 }
 const syntheticPackage = { ...syntheticValues, verification: {
   status: 'confirmed', version: 2, confirmed_at: '2026-10-01T12:00:00Z',
@@ -64,7 +64,7 @@ try {
   for (const width of [1440,375,390,430]) {
     const page=await browser.newPage({viewport:{width,height:1000}})
     await page.clock.install({time:new Date('2026-10-09T08:00:00.000Z')})
-    const errors=[]; const reads=[]; let requestCount=0; let strategyReads=0; let calendarReads=0; let strategyFailure=true; let calendarFailure=false; let scenario='valid'; let hold=false; let assetScenario='valid'; const pending=[]
+    const errors=[]; const reads=[]; let requestCount=0; let strategyReads=0; let calendarReads=0; let strategyFailure=true; let calendarFailure=false; let calendarScenario='valid'; let scenario='valid'; let hold=false; let assetScenario='valid'; const pending=[]
     page.on('pageerror',error=>errors.push(error.message))
     await page.route('**/*',async route=>{
       const request=route.request(); const url=new URL(request.url())
@@ -96,11 +96,11 @@ try {
         assert.equal(payload.p_client_id,clientB)
         calendarReads++
         if(calendarFailure) return route.fulfill({json:null})
-        return route.fulfill({json:[{row_key:'post-aaaaaaaaaaaaaaaa',schedule_date:payload.p_month.slice(0,8)+'12',title:'Planned poster B',post_type:'dp',client_safe_status:'scheduled'}]})
+        return route.fulfill({json:calendarScenario==='empty'?[]:[{row_key:'post-aaaaaaaaaaaaaaaa',schedule_date:calendarScenario==='undated'?null:payload.p_month.slice(0,8)+'12',title:'Planned poster B',post_type:'dp',client_safe_status:calendarScenario==='undated'?'approved':'scheduled'}]})
       }
       if (url.pathname==='/rest/v1/rpc/client_portal_month_ahead_events') {
         assert.equal(payload.p_client_id,clientB)
-        return route.fulfill({json:[{row_key:'synthetic-event',title:'Filming B',event_type:'content_run',start_time:payload.p_month.slice(0,8)+'12T08:00:00Z',end_time:null,all_day:false,location:null,guideline_row_key:'synthetic-guide'}]})
+        return route.fulfill({json:calendarScenario!=='valid'?[]:[{row_key:'synthetic-event',title:'Filming B',event_type:'content_run',start_time:payload.p_month.slice(0,8)+'12T08:00:00Z',end_time:null,all_day:false,location:null,guideline_row_key:'synthetic-guide'}]})
       }
       assert.equal(url.pathname,'/rest/v1/rpc/client_portal_published_content_guidelines','Only canonical client read RPCs')
       reads.push(payload)
@@ -194,7 +194,7 @@ try {
     await page.getByRole('tab',{name:'Your package'}).click()
     await page.getByRole('heading',{name:'What we create together'}).waitFor()
     await page.getByText('1 per month',{exact:true}).waitFor()
-    await page.getByText('6 per month',{exact:true}).waitFor()
+    await page.getByText('7 per month',{exact:true}).waitFor()
     await page.waitForFunction(()=>document.querySelector('[role="tab"][aria-selected="true"]')?.textContent?.trim()==='Your package')
     assert.equal(await page.getByText('Working month',{exact:true}).count(),0,'Package has no irrelevant month control')
     assert.equal(await page.getByRole('button',{name:'Previous month'}).count(),0,'Package has no history arrows')
@@ -204,6 +204,8 @@ try {
     assert.equal(await page.getByRole('link',{name:'Call Amonique'}).getAttribute('href'),'tel:+27791152339')
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${width} package overflow`)
     await page.waitForTimeout(200)
+    for(const label of ['Social media management','Content guide','Google Ads','7 per month']) await page.getByText(label,{exact:true}).waitFor()
+    assert.equal(await page.getByText('Included',{exact:true}).count(),3)
     await page.screenshot({path:join(tmpdir(),`cg-plan-package-${width}.png`),fullPage:true})
     await page.getByRole('tab',{name:'Content Guidelines'}).click()
     await page.getByText('Complete script A 2026-10\nSecond line',{exact:true}).waitFor()
@@ -264,7 +266,7 @@ try {
     const calendarUrl=page.url(), calendarBeforeRetry=calendarReads
     calendarFailure=false
     await page.getByRole('button',{name:'Try again',exact:true}).click()
-    await page.getByText('Confirmed dates will appear here when CG shares the plan.',{exact:true}).waitFor({state:'hidden'})
+    await page.getByText('No dates shared yet',{exact:true}).waitFor({state:'hidden'})
     if(width<640) await page.getByRole('button',{name:'2027-02-12, 2 item(s)',exact:true}).waitFor()
     else await page.getByText('Planned poster B',{exact:true}).filter({visible:true}).waitFor()
     assert.equal(calendarReads,calendarBeforeRetry+1,'Calendar retry reads same scope once')
@@ -306,12 +308,28 @@ try {
     await page.getByText('No published file is linked to this post yet.',{exact:true}).filter({visible:true}).waitFor()
     hold=true
     await page.getByRole('button',{name:'Next',exact:true}).click()
-    await page.getByText('Upcoming deliverables and client-facing schedule details for March 2027.',{exact:true}).waitFor()
+    await page.getByText('March 2027',{exact:true}).filter({visible:true}).waitFor()
     assert.equal(await page.getByText('Planned poster B',{exact:true}).filter({visible:true}).count(),0,'Standalone calendar must not display old posts under a new month')
     await page.waitForTimeout(100)
     hold=false;pending.splice(0).forEach(resolve=>resolve())
     if(width<640) await page.getByRole('button',{name:'2027-03-12, 2 item(s)',exact:true}).click()
     await page.getByText('Planned poster B',{exact:true}).filter({visible:true}).waitFor()
+    // Undated disclosed content remains visible without inventing a date. Empty
+    // disclosure must never be confused with a failed read or missing workload.
+    calendarScenario='undated'
+    await page.getByRole('button',{name:'Next',exact:true}).click()
+    await page.getByText('Date being finalised',{exact:true}).waitFor()
+    await page.getByText('Planned poster B',{exact:true}).filter({visible:true}).waitFor()
+    assert.equal(await page.getByRole('group',{name:'Choose a day'}).isVisible(),false)
+    calendarScenario='empty'
+    await page.getByRole('button',{name:'Next',exact:true}).click()
+    await page.getByText('No dates shared yet',{exact:true}).waitFor()
+    assert.equal(await page.getByText('Planned poster B',{exact:true}).count(),0)
+    assert.equal(await page.getByRole('group',{name:'Choose a day'}).isVisible(),false)
+    await page.locator('summary').filter({hasText:'View month'}).click()
+    if(width<640) await page.getByRole('button',{name:'2027-05-12',exact:true}).click()
+    else assert.equal(await page.getByRole('region',{name:'May 2027 content calendar'}).isVisible(),true)
+    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${width} empty calendar overflow`)
     assert.deepEqual(errors,[])
     console.log(`PASS ${width}px: complete scripts, exact month/client transition fence, unavailable vs empty, visible tabs, calendar-to-guide exact scope, read-only network, no body overflow/runtime errors; screenshot ${join(tmpdir(),`cg-plan-${width}.png`)}`)
     await page.close()

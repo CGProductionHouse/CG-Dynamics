@@ -1,5 +1,27 @@
 # Client launch execution — local-first continuation
 
+## 2 November — invoice package corrected; real November Teams work identified
+
+Owner invoices and explicit instruction supersede Cape's wrong no-video exclusion.
+Normal guarded UI saved1video/month+7combinedposters/photos(existing4DP/3F retained),
+socialmanagement,Contentguide,GoogleAds; audited GoogleAds entitlement included/rev1.
+Independent canonical readbacks and live preview verify. No guessed shoot/other quota,
+campaign budget or financial commitment; no SQL/provider/other-client write.
+
+Cape DOES have8NovemberTeams tasks, but0Novembermonthly_deliverables. Earlier dated
+projection did not prove absence. Novemberplan is omitted from current sync allowlist,
+automatic apply excludes ClientSchedule, and the real name lacks manual-parser year.
+All8undated;5completion flags are not posted evidence. Existing staff #325 owns reviewed
+source-month admission/import/disclosure; exact source/task handoff6575792092. Do not
+claim Teams/calendars fully integrated or invent source dates to make a grid look full.
+
+Local client package/calendar visual source is tested175/175 plus actual-component
+and compiled real-App/SDK desktop375/390/430 journeys, build/bundle/lint/diff. Imported
+icons and exact confirmed service lines only; no extra API work/dependency or private
+receipt output. New frontend and PR924 image projection remain release-gated, noVercel.
+[Current Cape receipt](CAPE-LUMBER-LAUNCH-REVIEW-2026-11-02.md). #731 normal Chat author
+has updated package evidence6575989662; no competing writer or interrupted active task.
+
 ## 2 November — normal Chat writer and native weekly task verified
 
 Standalone Work-routed task `6ae862ef803081908fe734ac6035a4cd` failed execution

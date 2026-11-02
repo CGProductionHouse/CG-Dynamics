@@ -168,7 +168,7 @@ test('Google Ads panel inherits report loading and covers every configured-sourc
 test('calendar page has loading, error and an intentional empty-month state', () => {
   assert.match(CALENDAR, /ClientPortalLoadingState variant="calendar"/)
   assert.match(CALENDAR, /ClientPortalErrorState/)
-  assert.match(CALENDAR, /No client-visible items for this month yet/i)
+  assert.match(CALENDAR, /No dates shared yet/i)
   assert.doesNotMatch(CALENDAR, /The month is ready for your plan/i)
 })
 
@@ -389,8 +389,8 @@ test('calendar page has desktop MonthGrid and mobile Agenda views', () => {
 test('calendar page shows summary cards for item counts', () => {
   assert.match(CALENDAR, /CalendarSummary/)
   assert.match(CALENDAR, /SummaryCard/)
-  assert.match(CALENDAR, /Visible items/)
-  assert.match(CALENDAR, /Scheduled/)
+  assert.match(CALENDAR, /Posts/)
+  assert.match(CALENDAR, /Dates set/)
 })
 
 test('calendar page shows unscheduled posts in a separate section', () => {
@@ -410,7 +410,7 @@ test('calendar page uses SECURITY-DEFINER RPC keyed to profile.client_id, never 
 test('calendar page has loading, error and an intentional empty-month state', () => {
   assert.match(CALENDAR, /ClientPortalLoadingState variant="calendar"/)
   assert.match(CALENDAR, /ClientPortalErrorState/)
-  assert.match(CALENDAR, /No client-visible items for this month yet/i)
+  assert.match(CALENDAR, /No dates shared yet/i)
   assert.doesNotMatch(CALENDAR, /The month is ready for your plan/i)
 })
 
