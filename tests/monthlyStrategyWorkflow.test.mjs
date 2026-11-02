@@ -33,9 +33,11 @@ test('seeding is explicit, idempotent and never auto-publishes', () => {
 test('save, approve and publish remain separate reviewed actions', () => {
   assert.match(page, /amendMonthlyStrategy\(\{ clientId, month, expectedVersion: strategy\.version/)
   assert.match(page, /targetStatus: 'approved'/)
-  assert.match(page, /window\.confirm/)
+  assert.match(page, /<PublicationConfirmation/)
+  assert.match(page, /expectedVersion: publication\.version/)
+  assert.doesNotMatch(page, /window\.confirm/)
   assert.match(page, /targetStatus: 'published'/)
-  assert.match(page, /disabled=\{dirty \|\| qualityIssues\.length > 0\}/)
+  assert.match(page, /disabled=\{dirty \|\| qualityIssues\.length > 0/)
   assert.match(page, /It is not client-visible until published/)
 })
 

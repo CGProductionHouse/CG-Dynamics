@@ -13,7 +13,8 @@ import {
   listManualMetricsForClientMonth,
   type ManualPlatformMetric,
 } from '../../lib/db/manualMetrics'
-import { getReportMonthFromPeriod, monthDisplayLabel, previousReportMonth, selectMonthlyReports } from '../../lib/reportPeriod'
+import { getReportMonthFromPeriod, isMonthComplete, monthDisplayLabel, previousReportMonth, selectMonthlyReports } from '../../lib/reportPeriod'
+import { PublicationConfirmation } from '../../components/ui/PublicationConfirmation'
 import { ClientDashboardShell, ClientReportView, type MonthlyStrategyPresentation } from '../client/ClientReportView'
 import { ClientMonthAhead } from '../../components/client/ClientMonthAhead'
 import { ClientPackageSummary } from '../../components/client/ClientPackageSummary'
@@ -51,6 +52,7 @@ function reportLabel(report: Report) {
 
 type DashboardMode = 'client' | 'staff' | 'editor'
 type PreviewSurface = 'dashboard' | 'setup'
+type ReportPublication = { reportId: string; clientId: string; month: string; previousStatus: Report['status']; status: Report['status'] }
 
 function statusLabel(status: Report['status']) {
   return status === 'published' ? 'Published' : 'Draft'
@@ -95,6 +97,15 @@ export default function PublishedPreview() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [publication, setPublication] = useState<ReportPublication | null>(null)
+  const currentReportScope = useRef('')
+  useEffect(() => { currentReportScope.current = `${selectedClientId}:${selectedReportId}` }, [selectedClientId, selectedReportId])
+  const scope = `${selectedClientId}:${selectedReportId}:${mode}:${surface}:${profile?.role}`
+  const [publicationScope, setPublicationScope] = useState(scope)
+  if (publicationScope !== scope) {
+    setPublicationScope(scope)
+    setPublication(null)
+  }
 
   // The "View as client" dropdown mirrors what a client can actually see: one
   // report per completed calendar month, deduped. Partial/current-month and
@@ -350,32 +361,50 @@ export default function PublishedPreview() {
     }
   }
 
-  async function handleStatusChange(status: Report['status']) {
-    if (!report) return
-    const confirmed = window.confirm(
-      status === 'published'
-        ? 'Publish this dashboard for the client?'
-        : 'Unpublish this dashboard? The client will no longer see it.'
-    )
-    if (!confirmed) return
+  function requestStatusChange(status: Report['status']) {
+    if (!isAdmin || !report || reportLoading || busy || report.client_id !== selectedClientId || report.id !== selectedReportId) return
+    const month = getReportMonthFromPeriod(report)
+    if (status === 'published' && !isMonthComplete(month)) {
+      setError('This month is still in progress. Publish the dashboard after month-end.')
+      return
+    }
+    setError(null)
+    setSuccess(null)
+    setPublication({ reportId: report.id, clientId: report.client_id, month, previousStatus: report.status, status })
+  }
+
+  async function handleStatusChange(action: ReportPublication): Promise<boolean> {
+    const { status, reportId, clientId } = action
+    if (!isAdmin || busy || reportLoading || mode !== 'editor' || surface !== 'dashboard'
+      || !report || report.id !== reportId || report.client_id !== clientId
+      || selectedClientId !== clientId || selectedReportId !== reportId || report.status !== action.previousStatus
+      || (status === 'published' && !isMonthComplete(action.month))) return false
 
     setBusy(true)
     setError(null)
     setSuccess(null)
     try {
-      const { error } = await updateReportStatus(report.id, status)
+      const { error } = await updateReportStatus(reportId, status)
       if (error) {
         setError(status === 'published' ? 'Could not publish this dashboard.' : 'Could not unpublish this dashboard.')
-        return
+        return false
       }
-      setSuccess(status === 'published' ? 'Dashboard published.' : 'Dashboard unpublished.')
-      const { data } = await getReportWithPosts(report.id)
-      setReport(data)
+      const { data, error: readError } = await getReportWithPosts(reportId)
+      if (readError || !data || data.id !== reportId || data.client_id !== clientId || data.status !== status) {
+        if (currentReportScope.current === `${clientId}:${reportId}`) setError('Could not confirm the saved dashboard status. Refresh before trying again.')
+        return false
+      }
+      if (currentReportScope.current === `${clientId}:${reportId}`) {
+        setSuccess(status === 'published' ? 'Dashboard published.' : 'Dashboard unpublished.')
+        setReport(data)
+      }
       if (data) {
         setReports(current => current.map(item => item.id === data.id ? data : item))
       }
+      return true
     } catch (error) {
       setError(errorMessage(error, status === 'published' ? 'Could not publish this dashboard.' : 'Could not unpublish this dashboard.'))
+      return false
     } finally {
       setBusy(false)
     }
@@ -475,8 +504,8 @@ export default function PublishedPreview() {
           isAdmin={isAdmin}
           busy={busy}
           onEdit={() => navigate(`/admin/reports/${report.id}/edit`)}
-          onPublish={() => void handleStatusChange('published')}
-          onUnpublish={() => void handleStatusChange('draft')}
+          onPublish={() => requestStatusChange('published')}
+          onUnpublish={() => requestStatusChange('draft')}
         />
       ) : report && (mode === 'staff' || report.status === 'published') ? (
         <div className="overflow-hidden rounded-xl border border-brand-muted">
@@ -518,6 +547,16 @@ export default function PublishedPreview() {
           All reports
         </Link>
       </div>
+      {publication && isAdmin && mode === 'editor' && surface === 'dashboard' && !reportLoading
+        && publication.reportId === report?.id && publication.clientId === selectedClientId && (
+        <PublicationConfirmation
+          title={`${publication.status === 'published' ? 'Publish' : 'Unpublish'} ${selectedClient?.name ?? 'this client'}’s ${monthDisplayLabel(publication.month)} dashboard?`}
+          description={publication.status === 'published' ? 'This dashboard will become available in this client’s portal.' : 'This dashboard will no longer be visible in this client’s portal.'}
+          confirmLabel={publication.status === 'published' ? 'Confirm publication' : 'Confirm unpublish'}
+          onConfirm={() => handleStatusChange(publication)}
+          onCancel={() => setPublication(null)}
+        />
+      )}
     </div>
   )
 }
