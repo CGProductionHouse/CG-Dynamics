@@ -12,8 +12,14 @@ readback independently corroborated by UI schedule-rule/timezone/active/same-cha
 checks. Scheduler initially retained old prompt without batch clause; corrected UI
 save+reload verifies complete7067-character rendered prompt matches exactly, budget
 section present. No competing author/paid generator; quiet changed-source mode after
-actual weekly source review completes, no implied guaranteed throughput. A first
-bounded Run now is responding, not yet a completed research batch/save. Do not duplicate.
+actual weekly source review completes, no implied guaranteed throughput. First bounded
+run finished Delta Gas; author receipt #7316580862805 independently read back. Novv5 /
+Decv2 unchanged,0saves. Actual public/Teams/guide checks improved on the bulk triage,
+but Canva was metadata-only and OneDrive final artifacts/WhatsApp approvals/live-post
+origin remain unverified. Classify this as reviewed-with-gaps, NOT full source completion.
+Next run should finish the missing Delta Canva-content/final-folder checks using the
+existing receipt, without redoing research; Case follows once adequately checked.
+No duplicate run started. Coverage definitions must distinguish discovery from inspection.
 Architecture/prompt/workspace updated; no code/production/schema/provider/Vercel change.
 
 ### 2 November — autonomous research policy and CG-only creative attribution

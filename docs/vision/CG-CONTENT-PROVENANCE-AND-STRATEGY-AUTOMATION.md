@@ -125,6 +125,16 @@ Once the weekly source cycle is complete, continuation runs check actionable cha
 and otherwise exit quietly. Actual throughput and degraded-source coverage are
 measured; twenty weekly wakes do not guarantee a completed fleet or justify paid overflow.
 
+Coverage receipts must distinguish **discovered metadata**, **content inspected**,
+**verified unavailable/empty**, **stale** and **not attempted** for each required source.
+Canva design titles or an OneDrive root discovery do not count as inspection of the
+current artwork/final folder. A reviewed-with-gaps strategy is not a fully researched
+client. The first Delta pilot6580862805 exposed exactly this remaining gap: existing
+drafts sensibly preserved, public/Teams research performed, but artwork/finals not
+inspected. Continue those missing checks without repeating the whole pass. The proposed
+runtime coverage validator must reject metadata-only “complete” claims, independently
+of an assistant's prose or confident completion label.
+
 The weekly author must page the canonical roster to completion, with a durable cursor
 and per-client/current-month/next-month coverage. Continue unfinished clients before
 repeating Cape or another easy client. A hard timeout or unavailable page is recorded as

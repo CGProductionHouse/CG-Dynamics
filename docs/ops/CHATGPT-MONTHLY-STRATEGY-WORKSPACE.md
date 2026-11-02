@@ -18,8 +18,14 @@ ONE eligible client end-to-end per run, second only if budget permits; reserve5c
 for save/readback/checkpoint. No broad brief-first audit; distinguish source review
 from prefilled fields and resume earliest source-unreviewed eligible client. Quiet
 changed-source mode after actual weekly source coverage completes. No guaranteed
-weekly throughput or paid overflow. One first bounded Run now is responding; no
-completed source batch/new save claimed until independent receipt. Do not duplicate it.
+weekly throughput or paid overflow. First bounded run completed its Delta Gas review;
+author checkpoint6580862805 independently read. Novv5/Decv2 retained,0saves; existing
+drafts were not rewritten merely for activity. Real public/Teams/guide research done,
+but Canva content was NOT inspected (metadata only), OneDrive final artifacts/WhatsApp
+approvals/live-post attribution unknown. This is reviewed-with-gaps, not complete source
+research. Resume missing Delta Canva page-content/final-folder inspection using this
+receipt; do not repeat the whole public pass or advance a false completed-source cursor
+to Case. Then continue Case. Explicit unavailable-source state is not completed evidence.
 
 ## 2 November — every-client research/progress and strict CG creative credit
 
