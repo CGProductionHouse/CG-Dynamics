@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
+import { ClientActionPlan, ClientStrategyBrief } from './ClientStrategyBrief'
 import type { Platform } from '../../lib/reportStats'
 import { PLATFORM_LABELS, displayContentType, formatNumber } from '../../lib/reportStats'
 import type { PackageSettings } from '../../lib/db/clients'
@@ -16,7 +17,6 @@ import {
 import {
   ACTION_PLAN_LABELS,
   CONTENT_TYPES,
-  GOLD_STANDARD_FIELDS,
   generateActionPlan,
   generateStrategyGoingForward,
   type ActionPlanKey,
@@ -704,9 +704,6 @@ export function GuidedStrategyView({
   const activePlans = (Object.keys(ACTION_PLAN_LABELS) as ActionPlanKey[])
     .map(key => ({ key, section: data.actionPlan[key] }))
     .filter(({ section }) => section.enabled && (section.items.length > 0 || section.notes.trim() !== ''))
-  const goldStandardFields = GOLD_STANDARD_FIELDS
-    .map(field => ({ ...field, value: data.goldStandard[field.key].trim() }))
-    .filter(field => field.value)
 
   const report = variant === 'report'
   const body = 'text-white'
@@ -715,14 +712,7 @@ export function GuidedStrategyView({
 
   return (
     <div className="grid min-w-0 gap-6 [overflow-wrap:anywhere] lg:grid-cols-2 lg:gap-8">
-      {data.strategyGoingForward.trim() && (
-        <ViewCard title="Strategy going forward" variant={variant} wide>
-          <details open className="group">
-            <summary className="min-h-11 cursor-pointer py-2 text-sm font-semibold text-teal-300 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-300">Read the direction for this month</summary>
-            <p className={`mt-4 max-w-4xl text-lg leading-relaxed whitespace-pre-line ${body}`}>{data.strategyGoingForward}</p>
-          </details>
-        </ViewCard>
-      )}
+      <ClientStrategyBrief data={data} />
 
       {(data.clientDirection.length > 0 || data.clientRequestNotes.trim()) && (
         <ViewCard title="What the client wanted" variant={variant}>
@@ -736,22 +726,6 @@ export function GuidedStrategyView({
       {data.strategyDrivers.length > 0 && (
         <ViewCard title="Strategic drivers" variant={variant}>
           <ChipRow items={data.strategyDrivers} variant={variant} />
-        </ViewCard>
-      )}
-
-      {goldStandardFields.length > 0 && (
-        <ViewCard title="Monthly strategy" variant={variant} wide>
-          <p className="mb-5 text-sm leading-relaxed text-slate-400">Explore each part of the plan. Expand a heading to read the full direction.</p>
-          <div className="divide-y divide-white/10">
-            {goldStandardFields.map((field, index) => (
-              <details key={field.key} open={index === 0} className="group py-3">
-                <summary className="min-h-11 cursor-pointer py-3 text-base font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-300">
-                  <span className="mr-3 text-xs font-bold tabular-nums text-teal-300">{String(index + 1).padStart(2, '0')}</span>{field.label}
-                </summary>
-                <p className={`max-w-4xl pb-4 pt-2 whitespace-pre-line text-base leading-7 ${body}`}>{field.value}</p>
-              </details>
-            ))}
-          </div>
         </ViewCard>
       )}
 
@@ -787,33 +761,7 @@ export function GuidedStrategyView({
         </ViewCard>
       )}
 
-      {activePlans.length > 0 && (
-        <ViewCard title="Action plan" variant={variant} wide>
-          <p className="mb-5 text-sm leading-relaxed text-slate-400">Choose a format to explore its planned work. Only enabled formats with an existing plan are shown.</p>
-          <div className="grid items-start gap-4 sm:grid-cols-2">
-            {activePlans.map(({ key, section }, planIndex) => (
-              <details key={key} open={planIndex === 0} className="min-w-0 rounded-2xl border border-white/10 bg-[#06110f] p-5">
-                <summary className="min-h-11 cursor-pointer py-2 text-lg font-bold text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-300">
-                  <span className="mr-3 text-xs font-bold tabular-nums text-orange-400">{String(planIndex + 1).padStart(2, '0')}</span>{ACTION_PLAN_LABELS[key]}
-                </summary>
-                {section.items.length > 0 && (
-                  <ul className="mt-2 space-y-1.5">
-                    {section.items.map((item, index) => (
-                      <li key={index} className={`flex gap-2 text-sm ${body}`}>
-                        <span className={accent}>•</span>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                {section.notes.trim() && (
-                  <p className={`mt-2 text-sm leading-relaxed whitespace-pre-line ${sub}`}>{section.notes}</p>
-                )}
-              </details>
-            ))}
-          </div>
-        </ViewCard>
-      )}
+      <ClientActionPlan plans={activePlans} />
 
       {data.clientActionsRequired.length > 0 && (
         <ViewCard title="What we need from you" variant={variant}>

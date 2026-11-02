@@ -1,3 +1,33 @@
+### 2 November — visual strategy reader and Cape source-progress check
+
+Focused client-only branch replaces the shared Plan/Performance read presentation:
+Goal/Message cards, optional Strategy details, format tabs and two-line idea previews
+with full original brief on activation. Existing imported ISC Lucide assets reused;
+no invented icons/images, generated summaries, new dependency or content mutations.
+Source text, notes, quality/publication gates and exact-month reads unchanged. No staff
+Calendar/Teams/editor ownership overlap. Live Performance refreshed and independently
+shows November's corrected zero-video plan; the supplied screenshot predated refresh.
+
+CA explicitly directed personal Chrome for WhatsApp. Actual Cape Marketing history:
+27Oct10:18 four quote/specification/procurement image captions shared; Denis28Oct12:03
+responded positively. Reconnected Canva master DAGVuJURh6I,225pages,modified27Oct13:32:29UTC
+contains timber-list/spec/quantity quote artwork, plus older contradictory June/DIY/2025
+copy and old contacts. Page order is not chronology. Do not promote old copy/claims or
+call these concepts wholly new. OneDrive exact Cape parent has reusable Products/Services
+photos and seven June exports; client-safe Graphic Design folder empty. Bounded listings
+do not prove November completion/publication. Source receipt #731 comment6579922275.
+
+Local verification:93 focused render/client/quality/isolation tests pass; final10 reader/
+harness tests pass after changes (overlap retained, not103distinct). TS/Vite production
+build and app-code bundle, scoped ESLint and diff checks pass. Actual synthetic browser
+reader375/390/430/1440 checks full-copy expansion, physical2/3-line heights, nested disclosure,
+keyboard tabs, disabled video omission and client-scope reset; additional actual published
+Cape-text visual run at all4sizes. Source-only screenshots are not new client-role auth.
+No Vercel, production data/schema/Edge/provider/permissions/secret/strategy publication.
+New browser fixture registered in existing local acceptance; previous full suite remains
+historical, not rerun/claimed for this presentation patch. Control Centre exact target
+unavailable. See current Cape acceptance for source and release boundaries.
+
 ### 2 November — latest owner correction: Cape posts and ads only, NO video
 
 Supersedes the earlier invoice-based 1-video/8-date receipts below. CA explicitly

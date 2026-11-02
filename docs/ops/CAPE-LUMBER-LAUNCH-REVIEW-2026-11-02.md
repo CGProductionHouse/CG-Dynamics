@@ -1,5 +1,47 @@
 # Cape Lumber launch acceptance — 2 November 2026
 
+## Visual strategy and actual progress cross-check — source ready, not deployed
+
+CA requested a short, visual strategy/action reader and actual progress comparison.
+Shared Plan/Performance reader now uses Goal/Message cards, optional strategy detail,
+format tabs with idea counts and compact expandable brief cards. Exact published text
+is retained, including conditions; no generated summary or invented production status.
+Only existing imported ISC Lucide icons, existing palette, no extra runtime dependency.
+
+Actual read-only sources checked:
+
+- WhatsApp personal Chrome (explicit CA direction), exact Cape Lumber Marketing group:
+  27 October10:18 four image/caption briefs on buyer/material details, species/sizes/
+  treatment/destination and sheet product/thickness/quantity. Denis responded positively
+  28 October12:03. These were already shared; they are not evidence of November posting.
+- Reconnected Canva master `DAGVuJURh6I`,225pages,last modified27Oct13:32:29UTC. Inspected
+  extracted full text, including timber-list, required sizes/quantity/treatment and
+  quote-readiness artwork. First/last page samples show page order is not chronology;
+  old June/DIY/2025 copy and old telephone artwork coexist. Those do not override the
+  current guide, contact facts or latest zero-video owner scope. No designs changed.
+- OneDrive canonical `/Clients/Cape Lumber`: immediate current parent, Graphic Design,
+  Posters, Photos, Photos/Sent and client-safe Graphic Design listings inspected. Seven
+  June15 exports and reusable Products/Services photographs exist; client-safe Graphic
+  Design is empty. No confirmed November exports in these bounded listings. No folders,
+  files, permissions, mappings or publication changed; not an exhaustive archive audit.
+
+Conclusion: specification-rich enquiries are consistent with already-shared work.
+The normal ChatGPT author should build on/test/refine it, rather than treat this as
+an entirely new topic. Evidence/progress distinction sent to existing #731 author lane
+in comment6579922275; no duplicate strategy authoring or published narrative mutation.
+Current actual refreshed Performance view already omits the cancelled video; no new
+data workaround was needed for the older supplied screenshot.
+
+Verification:93 focused read/quality/preview/isolation tests pass; final10 reader/harness
+tests pass (overlapping4, not103distinct). Build, app bundle content, scoped ESLint and
+diff pass. Synthetic actual-component browser acceptance375/390/430/1440 verifies text
+preservation, physical clipping heights, full expansion, nested disclosure, all format
+panels, keyboard selection, disabled video and scope fallback; published Cape-text visual
+run additionally passes all4widths. Initial computed-clamp-only test missed a display
+override; physical-height regressions now prevent that failure. Final screenshots inspected.
+No new full-suite, real client-password or physical-phone pass claimed. No Vercel used;
+this presentation revision is local/source ready and requires a later governed release.
+
 ## Latest owner correction — posts and ads only
 
 The latest CA instruction removes the video and supersedes the historical invoice
