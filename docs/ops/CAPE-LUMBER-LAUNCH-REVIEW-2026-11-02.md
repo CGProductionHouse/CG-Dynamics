@@ -1,5 +1,91 @@
 # Cape Lumber launch acceptance — 2 November 2026
 
+## Current completion — Publish repaired, released and used successfully
+
+Supersedes the initial native-popup handoff recorded below. CA explicitly
+requested the app fix. PR [#922](https://github.com/CGProductionHouse/CG-Dynamics/pull/922)
+replaces the blocking browser-native confirmation in PublishedPreview and the
+canonical monthly strategy workspace with exact-client/month in-app consent.
+Cancellation, role/scope changes, dirty/version/quality gates, single-flight
+submission and uncertain read-back are covered; existing typed writes and backend
+permissions remain. No parallel authoring/calendar system or dependency added.
+
+**Cape October is now published.** Used the normal legitimate company Chrome
+admin session: Editor → Publish → the new “Publish Cape Lumber’s October 2026
+dashboard?” dialog → Confirm publication. The app reports “Dashboard published”.
+Independent SELECT-only read-back confirms report
+`93d58684-7913-4c57-9d4e-b2168e2a9a03`, exact Cape client, 1–31 October,
+`status=published`, `published_at=2026-11-02 08:41:50.423+00` (10:41 SAST).
+Only the normal status/publication timestamp write occurred; no report/post
+recreation, privileged SQL publication or other-client publication.
+
+Actual post-publication admin client preview now selects October. Overview
+shows **20,241 recorded Facebook + Instagram views** for 1–31 October, with
+the non-unique-people qualification retained. Performance shows Published,
+the complete October content window and platform-specific recorded windows.
+Google Ads retains **ZAR 2,199.24 / 40,497 impressions / 1,337 clicks / 3.30% CTR**,
+one campaign, last successful sync 2 November 00:00 SAST. Native/API conversion
+definition mismatch remains excluded from that compact panel, not forced equal.
+
+Actual company Chrome preview at 375/390/430: document width equals viewport,
+visible bottom destinations Overview/Plan/Performance/Approvals/More; More opens
+Brand Hub. An initial check inspected the intentionally hidden desktop nav and
+is not the mobile-navigation result. Temporary viewport override was cleared;
+desktop width 1536 confirmed. Actual client password and physical phone remain
+the retained owner acceptance, not passed by staff preview or synthetic fixtures.
+Local screenshot proof saved outside the repository and the final Cape review
+tab left as a deliverable.
+
+### Exact code release receipt
+
+- Serving: `dpl_ARCpGYJm5BHHgYvgR71UZBhifREC`,
+  https://cg-dynamics-p87l4ei9e-cg-dynamics-projects.vercel.app;
+  https://www.cgdynamics.co.za serves the same artifact after promotion.
+- Source main `3c58c8989f91d882efa24f6144dfcfb9c32fe99a`; tree
+  `d2cb8d47ea6a2fc1e9ef993de7b875e76fd62d97` equals frozen tested
+  `71e7362b6e0feba9e51f652fc3cb9edd9ed3eaa2`.
+- Full frozen acceptance: **4,225 total / 4,201 pass / 24 explicit existing skips /
+  zero failures, cancellations or todo**. Mandatory disposable PostgreSQL,
+  TypeScript/Vite actual bundle and **all 21 canonical browser fixtures** pass;
+  stable source verdict PASS. Focused 20 tests, scoped lint and diff also pass.
+  Existing unsupported Windows Bash test excluded, not passed. Receipt SHA256
+  `7671a7d8556f127e611d574e459939e65e0e3922f95c1826b6651f5fafc4a355`.
+- One LOCAL production prebuild; ONE **2.5 MB differential prebuilt upload** with
+  `--prod --skip-domain`; ten staged critical chunk hashes match. Old custom-host
+  artifact remained serving during staging. Promoted the SAME deployment using
+  the connected Vercel tool; no second deployment, cloud compilation, retry,
+  preview, hosting/DNS/budget change or documentation deployment. Initial immediate
+  post-request read still saw the old entry; subsequent settled read at 08:41 UTC
+  matches the new entry and hash. Seven exact checked hosts remain HTTP 200.
+- Static artifact: 176 files / 123 JS chunks / 41,450,669 bytes, no Functions/crons.
+  Manifest SHA256 `9230bc056a5567b3c9bd0f100a0fb74878893e4c21e7d19a150757583822e45a`.
+  Entry `/assets/index-BJ1tJ3Rh.js`, SHA256
+  `87125c52d28438ee5bf29613d7dac1e5550c4c510c477f5bd666b0240d7ea17c`.
+- Fresh signed-in pre-upload billing: 18 October–18 November, **$9.81/$20 included,
+  $0/$15 on-demand, Pause ON**; existing $5 serving reserve and stricter $1
+  incremental-release stop retained under delegated minimization. Counters lag;
+  this is not a per-release cost attribution or uptime guarantee. Public browser
+  Supabase configuration/auth200 unchanged. CLI-only optional dev-peer lock
+  pruning was checked/restored; installed app/build dependency versions and frozen
+  lock match. No backend/schema/secrets/permissions/provider/mapping release.
+- Rollback retained: `dpl_7LxXqAEsdZhGVCdtWHjYSz8JfV3w`. Git automatic deployment
+  remains OFF. [Exact release packet](https://github.com/CGProductionHouse/CG-Dynamics/issues/679#issuecomment-6572740548).
+
+### Still separate from this completed repair/publication
+
+Existing November v5 / December v2 strategies remain private drafts with staff
+edits preserved; normal ChatGPT/#731 authoring owns incorporating newly published
+October findings. The existing company author chat loaded but displayed busy
+Stop/response-loading failures; no interrupt, duplicate writer or new prompt was
+sent, and no successful refresh is claimed. Staff/calendar owner still settles
+actual posting dates; none were fabricated. Meta owner re-consent/storage,
+physical-phone/password acceptance and other clients' file exceptions retain
+their existing scope. No client invitation or external communication was sent.
+Google Control Centre exact reference remains unavailable; no tracker update is
+claimed. This continuity update must not trigger another Vercel release.
+
+## Initial acceptance before the publication repair (historical)
+
 CA selected Cape Lumber as the first client to launch and authorised a thorough
 client journey check, especially Google Ads. Exact client:
 `42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa`. Existing #668 launch list/#435 Google/#505

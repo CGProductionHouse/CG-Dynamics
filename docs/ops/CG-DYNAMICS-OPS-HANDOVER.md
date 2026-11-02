@@ -1,4 +1,29 @@
-### 2 November — publication confirmation repair (local candidate)
+### 2 November — publication repair LIVE; Cape October PUBLISHED
+
+PR922/source `3c58c898` is live as `dpl_ARCpGYJm5BHHgYvgR71UZBhifREC`.
+The blocking native prompt was replaced with exact-client/month in-app consent
+in report preview and monthly strategy. Full frozen acceptance: 4,201 pass / 24
+explicit skips / zero failures; mandatory SQL, build, all 21 browser fixtures,
+scoped lint and diff pass. One local prebuild, one 2.5 MB prebuilt upload, ten
+staged hashes, same-deployment promotion; seven checked hosts HTTP 200. No cloud
+compilation or hosting/budget/backend/permission/provider change. Pre-upload
+billing: $9.81/$20 included, $0/$15 on-demand, Pause ON; reserve retained. Old
+deployment kept for rollback.
+
+Used the repaired normal UI to publish Cape October report
+`93d58684-7913-4c57-9d4e-b2168e2a9a03`; independent read-back confirms published
+at 2 November 08:41:50 UTC, 1–31 October. Actual client preview now selects October
+with 20,241 recorded social views; Google panel matches verified native traffic/
+cost. Actual 375/390/430 labelled bottom navigation, More → Brand Hub and no
+overflow pass; viewport reset to 1536 confirmed. No true client-password or
+physical-phone claim.
+[Exact current receipt and remaining source/owner boundaries](CAPE-LUMBER-LAUNCH-REVIEW-2026-11-02.md).
+November v5 / December v2 drafts remain under existing #731 author; no duplicate plan
+or staff/calendar write. Owner consent/physical-phone/password gates remain;
+do not confuse this completed repair/publication with every-client content signoff.
+No further Vercel operation for this handoff; documentation is source-only.
+
+### 2 November — publication confirmation repair (historical local candidate)
 
 CA rejected the manual Publish handoff and explicitly requested an app fix.
 The client lane replaces blocking native JavaScript confirmations in the report
