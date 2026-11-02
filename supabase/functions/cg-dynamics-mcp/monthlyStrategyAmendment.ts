@@ -11,6 +11,14 @@ const FORMATS = ['professional_video', 'reels', 'photo_content', 'design_poster'
 const ACTION_PATHS = new Set(FORMATS.map(key => `actionPlan.${key}.items`))
 
 function same(a: unknown, b: unknown): boolean { return JSON.stringify(a) === JSON.stringify(b) }
+function verifiedSourceContext(prepared: Awaited<ReturnType<typeof loadMonthlyStrategyWorkspace>>['prepared']) {
+  return {
+    sources: prepared.seedContext.sources,
+    intelligence_evidence: prepared.seedContext.intelligence_evidence,
+    source_coverage: prepared.seedContext.source_coverage,
+    source_windows: prepared.seedContext.source_windows ?? null,
+  }
+}
 function field(root: Record<string, unknown>, path: string): unknown {
   let current: unknown = root
   for (const key of path.split('.')) {
@@ -63,7 +71,9 @@ export async function amendMonthlyStrategyFields(
     const context = receipt.after_seed_context as Record<string, unknown> | undefined
     const amendment = context?.editorial_amendment as Record<string, unknown> | undefined
     if (row.actor_profile_id !== input.actorProfileId || amendment?.requestFingerprint !== requestFingerprint) return { error: 'STRATEGY_IDEMPOTENCY_CONFLICT' }
-    return { state: 'replayed', strategy_id: receipt.strategy_id, version: receipt.version, changed_fields: changes.map(change => change.path), published: false }
+    return { state: 'replayed', strategy_id: receipt.strategy_id, version: receipt.version,
+      changed_fields: Array.isArray(amendment?.changedFields) ? amendment.changedFields : changes.map(change => change.path),
+      context_refreshed: amendment?.contextRefreshed === true, published: false }
   }
 
   const workspace = await loadMonthlyStrategyWorkspace(sb, input.clientId, input.strategyMonth, input.today, dependencies)
@@ -96,19 +106,28 @@ export async function amendMonthlyStrategyFields(
     confirmedCapacity: prepared.seedContext.source_windows?.confirmed_package_scope as Record<string, unknown> | null | undefined,
   })
   if (!validation.proposal) return { error: 'STRATEGY_PROPOSAL_INVALID', issues: validation.issues }
-  if (same(raw, candidate)) return { state: 'unchanged', strategy_id: target.id, version: target.version, published: false }
+  // An amendment verified against today's package must not retain an obsolete
+  // receipt that would correctly fail the existing approval trigger afterward.
+  // Refresh only canonical source metadata, preserving unrelated seed history.
+  const sourceContext = verifiedSourceContext(prepared)
+  const sourceContextHash = await strategyMcpInputHash(sourceContext)
+  const previousSourceContext = Object.fromEntries(Object.keys(sourceContext).map(key => [key, target.seed_context?.[key] ?? null]))
+  const contextRefreshed = await strategyMcpInputHash(previousSourceContext) !== sourceContextHash
+  const changedFields = changes.filter(change => !same(change.expected, change.replacement)).map(change => change.path)
+  if (same(raw, candidate) && !contextRefreshed) return { state: 'unchanged', strategy_id: target.id, version: target.version, published: false }
   const fresh = await loadMonthlyStrategyWorkspace(sb, input.clientId, input.strategyMonth, input.today, dependencies)
   if (fresh.blockers.length || fresh.evidenceFingerprint !== input.evidenceFingerprint || fresh.target?.version !== input.expectedVersion ||
-      !same(fresh.target.strategy_data, raw) || !same(fresh.target.seed_context, target.seed_context) || fresh.target.internal_notes !== target.internal_notes) {
+      !same(fresh.target.strategy_data, raw) || !same(fresh.target.seed_context, target.seed_context) || fresh.target.internal_notes !== target.internal_notes ||
+      await strategyMcpInputHash(verifiedSourceContext(fresh.prepared)) !== sourceContextHash) {
     return { error: 'STRATEGY_SOURCE_OR_VERSION_CHANGED' }
   }
   const result = await sb.rpc('amend_monthly_client_strategy_with_context', {
     p_client_id: input.clientId, p_strategy_month: input.strategyMonth,
     p_expected_version: input.expectedVersion, p_strategy_data: candidate,
-    p_seed_context: { ...target.seed_context, editorial_amendment: {
+    p_seed_context: { ...target.seed_context, ...sourceContext, editorial_amendment: {
       provider: 'chatgpt_company_admin_mcp', requestFingerprint,
       evidenceFingerprint: input.evidenceFingerprint, sourceIds: input.sourceIds,
-      changedFields: changes.map(change => change.path), baseVersion: target.version,
+      changedFields, contextRefreshed, baseVersion: target.version,
     } },
     p_internal_notes: target.internal_notes, p_actor_profile_id: input.actorProfileId,
     p_idempotency_key: input.idempotencyKey,
@@ -119,5 +138,5 @@ export async function amendMonthlyStrategyFields(
       receipt.version !== input.expectedVersion + 1 || receipt.workflow_status !== 'draft') return { error: 'STRATEGY_AMENDMENT_UNCONFIRMED', instruction: 'Read the exact draft and canonical revision before retrying the same key; do not claim this save completed.' }
   return { state: 'draft_amended', client_id: input.clientId, strategy_month: input.strategyMonth,
     strategy_id: receipt.strategy_id, version: receipt.version, workflow_status: receipt.workflow_status,
-    changed_fields: changes.map(change => change.path), published: false }
+    changed_fields: changedFields, context_refreshed: contextRefreshed, published: false }
 }

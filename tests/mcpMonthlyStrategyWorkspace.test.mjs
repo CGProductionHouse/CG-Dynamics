@@ -69,6 +69,7 @@ class FakeDb {
       if (row.version !== args.p_expected_version || row.workflow_status !== 'draft') return { data: null, error: { message: 'Strategy version conflict' } }
       row.version += 1
       row.strategy_data = args.p_strategy_data
+      row.seed_context = args.p_seed_context
       if (name === 'amend_monthly_client_strategy_with_context') row.staff_amended_at = '2026-10-16T12:00:00Z'
     } else if (name === 'seed_monthly_client_strategy') {
       if (row) return { data: { created: false, strategy_id: row.id }, error: null }
@@ -273,6 +274,12 @@ async function amendmentFixture() {
   row.strategy_data.calendarSelections = [{ eventId: 'keep', title: 'Staff selected', date: null, use: false, note: 'Preserve.' }]
   row.strategy_data.futureExtension = { keep: true }
   row.seed_context = { ...row.seed_context, client_id: CLIENT, strategy_month: MONTH, generation: { provider: 'old-provider' } }
+  Object.assign(row.seed_context, {
+    sources: prepared(db).seedContext.sources,
+    intelligence_evidence: prepared(db).seedContext.intelligence_evidence,
+    source_coverage: prepared(db).seedContext.source_coverage,
+    source_windows: prepared(db).seedContext.source_windows,
+  })
   row.staff_amended_at = '2026-10-15T12:00:00Z'
   const brief = shapeMonthlyStrategyBrief(await loadMonthlyStrategyWorkspace(db, CLIENT, MONTH, TODAY, deps(db)))
   const input = {
@@ -307,6 +314,49 @@ test('explicit strategy amendment changes only the compared field through the au
   assert.equal(changedRetry.error, 'STRATEGY_IDEMPOTENCY_CONFLICT')
   const otherActor = await amendMonthlyStrategyFields(db, { ...input, actorProfileId: OTHER }, deps(db))
   assert.equal(otherActor.error, 'STRATEGY_IDEMPOTENCY_CONFLICT')
+})
+
+test('editorial amendments refresh verified source receipts without rewriting unrelated seed history', async () => {
+  const { db, row, input } = await amendmentFixture()
+  row.seed_context.sources = { package_verification_confirmed_at: 'old-receipt', client_guide_id: 'old-guide' }
+  row.seed_context.staffExtension = { preserve: 'staff history' }
+  const result = await amendMonthlyStrategyFields(db, input, deps(db))
+  assert.equal(result.state, 'draft_amended')
+  assert.deepEqual(db.calls[0].args.p_seed_context.sources, prepared(db).seedContext.sources)
+  assert.deepEqual(db.calls[0].args.p_seed_context.source_windows, prepared(db).seedContext.source_windows)
+  assert.deepEqual(db.calls[0].args.p_seed_context.staffExtension, { preserve: 'staff history' })
+  assert.deepEqual(db.calls[0].args.p_seed_context.generation, { provider: 'old-provider' })
+})
+
+test('explicit provenance-only refresh preserves every approved narrative field and reports zero text changes', async () => {
+  const { db, row, input } = await amendmentFixture()
+  row.seed_context.sources = { package_verification_confirmed_at: 'old-receipt' }
+  const before = structuredClone(row.strategy_data)
+  const refreshInput = { ...input, changes: [{ ...input.changes[0], replacement: input.changes[0].expected }] }
+  const result = await amendMonthlyStrategyFields(db, refreshInput, deps(db))
+  assert.equal(result.state, 'draft_amended')
+  assert.equal(result.context_refreshed, true)
+  assert.deepEqual(result.changed_fields, [])
+  assert.deepEqual(row.strategy_data, before)
+  assert.deepEqual(db.calls[0].args.p_seed_context.sources, prepared(db).seedContext.sources)
+  const replay = await amendMonthlyStrategyFields(db, refreshInput, deps(db))
+  assert.equal(replay.state, 'replayed')
+  assert.equal(replay.context_refreshed, true)
+  assert.deepEqual(replay.changed_fields, [])
+  assert.equal(db.calls.length, 1)
+})
+
+test('receipt-only source race refuses the write even when the prior source fingerprint is unchanged', async () => {
+  const { db, input } = await amendmentFixture()
+  let reads = 0
+  const dependency = { ...deps(db), prepare: async () => {
+    const value = prepared(db)
+    value.seedContext.sources.package_verification_confirmed_at = ++reads === 1 ? '2026-11-02T10:00:00Z' : '2026-11-02T10:01:00Z'
+    return value
+  } }
+  const result = await amendMonthlyStrategyFields(db, input, dependency)
+  assert.equal(result.error, 'STRATEGY_SOURCE_OR_VERSION_CHANGED')
+  assert.equal(db.calls.length, 0)
 })
 
 test('amendment never overrides a newer field, version, source or reviewed/publication state', async () => {
