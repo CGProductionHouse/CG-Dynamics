@@ -1,3 +1,32 @@
+### 2 November — autonomous research policy and CG-only creative attribution
+
+Latest CA standing direction: source/progress research for EVERY eligible strategy,
+short visual dashboard for every client, and ONLY actual CG-created work in creative
+rankings. Managing/posting a client's third-party content is not CG creative credit.
+Existing reports default to ranking non-excluded posts; positive authorship verification
+is missing, not live. Page-wide metrics stay distinct and must not be recast as CG impact.
+
+Existing normal company Chat task **CG Dynamics Weekly Strategies — Chat** updated;
+5463-character instruction independently reopened after page reload and matched exactly
+after whitespace normalisation. Repeat enabled, Monday08:00 South Africa Time, original
+normal Chat routing and failed Work writer paused. Requires actual source availability,
+whole-roster/current-next coverage/cursor, source/progress reconciliation, strict CG
+claims, concise authoring, guarded draft writes/readbacks and truthful unavailable states.
+No new competing Codex author or paid generation. Obsolete26Oct overnight heartbeat
+finish-dynamics-locally-overnight deleted; no stale overnight work resumes.
+One normal task Run now catch-up visibly started under the new policy (responding/
+Stop); no completed author run or new strategy saves claimed. Do not duplicate it.
+
+[One automatic asset→post→result→strategy design](../vision/CG-CONTENT-PROVENANCE-AND-STRATEGY-AUTOMATION.md)
+extends existing library, approval, schedule and post authorities. No routine staff tags,
+post-link copying or second checklist. Strict origin+post match allowlist, ambiguous
+quarantine, incremental cursors, known false-positive controls, client-safe read/author
+evidence parity, bounded costs and exact production acceptance specified. WhatsApp
+group unattended access remains a capability to VERIFY, not a promise from a logged-in
+Chrome tab. No new production data/schema/Edge/permissions/provider/cloud operation.
+PR931 shared visual reader is source ready globally, not yet deployed. Source policy
+and architecture docs only; no runtime build repetition. Exact Control Centre unknown.
+
 ### 2 November — visual strategy reader and Cape source-progress check
 
 Focused client-only branch replaces the shared Plan/Performance read presentation:

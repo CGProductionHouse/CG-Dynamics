@@ -1,5 +1,31 @@
 # Company ChatGPT monthly strategy workspace — #731
 
+## 2 November — every-client research/progress and strict CG creative credit
+
+CA requires Cape-level source/progress checking for every eligible client's current/
+next strategy without repeat requests. Existing NORMAL company Chat task instructions
+were updated and independently reopened after reload: full5463-character instruction
+matched exactly after whitespace normalisation. Repeat remains enabled, weekly Monday
+08:00 South Africa Time; failed Work writer remains paused. No competing Codex author.
+The expired26October overnight Codex heartbeat was deleted, not revived.
+
+The task now checks actual OneDrive/Canva/WhatsApp/meeting/production context alongside
+guides, packages, research and real period-correct results; paginated coverage/resume
+cursor prevents repeatedly doing Cape. Source outages are explicit, never falsely
+claimed browser access. Known confirmed scope and staff decisions remain authoritative.
+Only positively verified CG-created work supports CG creative rankings/claims; page
+totals and third-party/client content remain separately labelled context. Actual audited
+draft saves/readbacks remain required; no automatic strategy publication or source
+admission. This prompt update is not proof of successful future scheduled execution.
+
+[Exact saved instruction](../automation/CG-STRATEGY-RESEARCH-TASK-PROMPT.md) and
+[OneDrive final → post → result implementation contract](../vision/CG-CONTENT-PROVENANCE-AND-STRATEGY-AUTOMATION.md).
+The current app lacks a positive authorship match; this document does not claim the
+proposed matcher/server CG-only ranking filter is implemented or deployed.
+One normal task **Run now** catch-up was started under the saved new instruction;
+actual conversation showed “ChatGPT is responding” and Stop. That is an execution
+start receipt only, not completion, saved client drafts or full-roster coverage.
+
 ## 18 October — final writer receipt recovered; queue exhausted
 
 The previous turn was actually `systemError`, not still working. One receipt-only
