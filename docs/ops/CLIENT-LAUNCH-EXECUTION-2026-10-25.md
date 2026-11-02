@@ -1,5 +1,22 @@
 # Client launch execution — local-first continuation
 
+## 2 November — Cape consolidated changes are LIVE
+
+Frontend85b107a3,dpl_DvWScLPuXvGDUvptz9DcmnWeZYPL:one local production prebuild,
+one2.5MBprebuilt upload,14hashes then same-deployment promotion. Full exact frontend
+4212pass/24explicit skips/all23browsers; no cloud npm/Vite compile or extra deployment.
+Image/calendar migrations exact-approved and live. Normal UI shared ONLY8real Cape
+Novemberdates; independent source/status/approval fields unchanged,otherclients0shared.
+Both owner-approved strategies now published normally:Novemberv9/Decemberv6,after a
+real normal-Chat zero-text-change provenance repair through exact-approved MCPv75.
+No weakened approval guard. Actual preview shows both plans,8dates,confirmedpackage,
+20,241recordedviews,correctGoogleAds,real post images,truthfulApprovals and safe logo.
+Phone375/390/430 anddesktop1440checked,nativeviewportreset. [Exact current release and
+acceptance](CAPE-LUMBER-LAUNCH-REVIEW-2026-11-02.md). #679packet6578078321;
+#731author6577811280/publication6578102958. Primary.co.za andCapeofficialsiteHTTP200;
+.comTLSchecks unresolved, noDNSchange. Password/physicalphone andglobalMetaowner gates
+remain separately retained; no whole-fleet certificate. DOCS ONLY: do not redeploy this.
+
 ## 2 November — actual dated Cape import completed; remaining publication separated
 
 The prior monthly-working-board-only source inference is superseded: existing recurring

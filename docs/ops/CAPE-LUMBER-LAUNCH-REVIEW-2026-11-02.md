@@ -1,5 +1,101 @@
 # Cape Lumber launch acceptance — 2 November 2026
 
+## LIVE — consolidated visual/calendar release and authorised strategy publication
+
+Supersedes the source-only and draft-only statuses below. Cape's legitimate staff
+client preview now displays the complete reviewed path at https://www.cgdynamics.co.za.
+This is exact-Cape acceptance, not certification of the other clients or a password login.
+
+| Completed item | Independent evidence |
+| --- | --- |
+| Visual post cards | Actual3Facebook images load (720/413/720px);95/83/69 interactions preserved. Imported icons, clamped captions, metric details, image enlargement/close and original-post links. Actual1440 and390 visual proof. |
+| Confirmed package |1professionalvideo+7combinedposters/photos; socialmedia management,Contentguide,GoogleAds included. No unknown extras in package cards. |
+| November calendar |8real master Planner dates2/4/9/11/16/18/23/25November. Existing normal reviewed import, then exact owner-approved sharing through the new normal Client Schedule control. Client labels are Planned, not content approval/posting. |
+| November strategy |Exactc4daf0e5-9f1e-4d1c-bb2c-74b9b09ecfaa/version9/published_version9, published13:12:40.543466UTC via normal UI. |
+| December strategy |Exact50088b8b-ac9d-446b-a353-7b346aeac1b3/version6/published_version6, published13:06:26.212763UTC via normal UI. |
+| Overview |20,241recordedFB+IGviews,1–31October, explicitly not unique people;8upcoming items and current published objective. |
+| Google Ads |Actual client Google/Overview panels preserveR2,199.24/40,497impressions/1,337clicks/3.30%CTR;October1–31,lastsync2November00:00SAST. No campaign/spend change. |
+| Approvals/Brand Hub |Planned dates do not appear as awaiting approval. One published Cape logo,62.2KB,View/Download controls; no internal/raw files. Existing earlier actual View/new-window/download receipt retained; no duplicate download this run. |
+
+### Exact production changes
+
+- Owner-approved optional public post-image projection applied; previous metric/auth
+  expressions, owner/searchpath and authenticated/service ACL preserved; advisor baseline
+  counts unchanged. No report/post data rewrite.
+- Owner-approved `20261102120810_client_plan_date_sharing.sql` applied; new metadata
+  initially private for all rows, existing projection ACL unchanged. Normal manager UI
+  shared ONLY eight exact Cape rows at13:22:21UTC. Full independent field comparison
+  confirms original types/dates/Microsoft IDs/run/status and sent/approved/posted values
+  unchanged. Other-client shared count0. No privileged SQL impersonation/publication.
+- PR928 fixes the reproduced editorial metadata defect: fresh source checks previously
+  saved an old package receipt, so approval correctly failed. Exact approved MCPv74→v75
+  rollout changes ONLY `monthlyStrategyAmendment.ts` and `toolCatalog.ts`; other38hosted
+  files byte-identical, all40read back, custom auth/JWTfalse/permissions/secrets unchanged.
+  The approval trigger was not weakened. Normal company ChatGPT then exercised the real
+  provenance-only tool: Novv8→v9/Decv5→v6,context_refreshedtrue,changed_fields[]. Complete
+  data/notes equality against the exact owner-approved content verified independently;
+  package receipt time/actor/references match. Both were then approved/published normally.
+  [Author receipt](https://github.com/CGProductionHouse/CG-Dynamics/issues/731#issuecomment-6577811280)
+  · [publication receipt](https://github.com/CGProductionHouse/CG-Dynamics/issues/731#issuecomment-6578102958).
+
+### One conservative frontend release
+
+- Serving`dpl_DvWScLPuXvGDUvptz9DcmnWeZYPL`,
+  https://cg-dynamics-475kl0nqe-cg-dynamics-projects.vercel.app.
+  Frontend source85b107a3ff72f9e421d32eeb4fdb3fedf2243aba/tree777d140bafe636e1c4fabeca8a463a955cb41a6c.
+  Backend-only main4577b383 changes no frontend/source/public/package/Vite/Vercel file.
+- One LOCAL production-target prebuild; ONE2.5MB differential prebuilt staging upload.
+  All14critical staged hashes matched (884,007bytes). Old custom-host entry was still
+  serving during staging; promoted that SAME deployment, no second upload/rebuild/preview.
+  Actual server events say “Using prebuilt build artifacts from .vercel/output”, not
+  npm/Vite cloud compilation. Existing project alias was assigned at staging; custom
+  domains remained old until promotion. No budget/DNS/hosting/add-on change.
+- New public entry`/assets/index-Czbx1-b_.js`, SHA256
+  `d2a9b91ea3134658f3ffe0f9f31ec43936eb90e704caab430e8af8da6694fd40` matches actual
+  custom host.178staticfiles/125JS/41,465,191bytes; noFunctions/crons; manifestSHA256
+  `a8cafc0e4cced3476190e1dcb982dbc4abe316ba54cd6a769489f6f853359683`.
+  Public production config matches the previous serving app; fixture/privileged markers
+  absent. CLI removed only13optionaldev-peer lock entries; verified remaining entries and
+  installed root versions, restored frozen lock. No production dependency change.
+- Fresh billing18Oct–18Nov:beforeupload$10.34/$20included,$0/$15on-demand,PauseON;
+  postrelease read$10.35/$20,$0/$15,PauseON. Delayed counters are not attribution of one
+  cent to this release or an uptime/cost guarantee. Existing$5serving reserve and stricter
+  $1incremental-release stop preserved. Rollbackdpl_ARCpGYJm5BHHgYvgR71UZBhifREC retained;
+  git.deploymentEnabled=false. [Release packet](https://github.com/CGProductionHouse/CG-Dynamics/issues/679#issuecomment-6578078321).
+
+### Verification and retained boundaries
+
+Frozen399906c5 exact frontend tree:4236total/4212pass/24explicit existing skips,
+zero fail/cancel/todo; mandatory disposable PostgreSQL,actual TypeScript/Vite app and
+ALL23canonical browser fixtures,stable-tree PASS. ReceiptSHA256
+`72f5fe4897c3462e0a6eb9874058af8b940da0690226832d9e496127c8bfbb6e`.
+Separate backend follow-up:156focused tests/zero skips,standalone backend TypeScript,
+app build/scopedlint/diff pass. No extrapolated full-suite total for that later patch;
+local Deno CLI unavailable, actual approved server bundling/source readback succeeded.
+
+Actual company Chrome admin preview exercised Overview, both published strategy months,
+package, calendar, Facebook gallery/modal, Google, Approvals, mobileMore→BrandHub/file
+list. Actual viewport375/390/430 and1440 have scrollWidth=clientWidth (desktop scrollbar
+accounts for15px difference from innerWidth). All3real post images loaded. Native
+viewport restored and Cape preview left open. The console contained3generic browser
+message-channel errors; no first-party source was identified, so no clean-console claim.
+They did not prevent the completed journeys; no unsupported extension repair attempted.
+
+Primarycgdynamics.co.za/www, cg-dynamics.vercel.app, cg-hours.vercel.app and Cape's
+officialcapelumbermarketing.co.za returnedHTTP200. BOTH .com aliases failed TLS checks
+in Node and PowerShell; no HTTP result obtained, no certificate bypass/DNS change and
+no all-domain healthy claim. Use the verified .co.za client URL. This is a separate
+alias investigation, not proof that the .co.za app or Cape website is down.
+
+Owner-retained checks remain actual client-password login and physical phone review.
+Global Meta owner re-consent/encrypted-token gate and other-client source/content/file
+exceptions retain existing ownership; they were not rechecked without new evidence or
+declared solved by cached Cape figures. No fleet launch/invitation/communication or
+automatic strategy publication added. Staff/Teams engine/calendar remain separate;
+the scoped capped-master import does not certify a full upstream sync. Exact Google
+ControlCentre target unavailable; no guessed tracker write. This receipt is DOCS ONLY
+and must not cause a further Vercel deployment.
+
 ## Latest correction — dated master imported; explicit planned-date sharing prepared
 
 The master Planner board, not just the undated monthly working board, contains Cape's
