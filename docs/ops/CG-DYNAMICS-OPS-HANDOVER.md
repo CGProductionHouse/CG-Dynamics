@@ -1,3 +1,21 @@
+### 2 November — latest research task: bounded end-to-end continuation
+
+Supersedes Monday-only configuration below. First normal task exhausted its call
+budget:34briefs/17clients/0external source checks/0saves; #7316580576482. Triage is
+not completed research. New execution policy: ONE eligible client end-to-end, second
+only with remaining budget, reserve5calls for saves/readbacks/checkpoint; separate
+brief-read/source-reviewed/saved states and resume earliest source-unreviewed client.
+
+Same taskID6ae868361b6c81918b6b333508a47a50 renamed **CG Dynamics — Research & Strategy**,
+enabled weekdays08/11/14/17 Africa/Johannesburg, same NORMAL Chat. Actual scheduler
+readback independently corroborated by UI schedule-rule/timezone/active/same-chat
+checks. Scheduler initially retained old prompt without batch clause; corrected UI
+save+reload verifies complete7067-character rendered prompt matches exactly, budget
+section present. No competing author/paid generator; quiet changed-source mode after
+actual weekly source review completes, no implied guaranteed throughput. A first
+bounded Run now is responding, not yet a completed research batch/save. Do not duplicate.
+Architecture/prompt/workspace updated; no code/production/schema/provider/Vercel change.
+
 ### 2 November — autonomous research policy and CG-only creative attribution
 
 Latest CA standing direction: source/progress research for EVERY eligible strategy,
