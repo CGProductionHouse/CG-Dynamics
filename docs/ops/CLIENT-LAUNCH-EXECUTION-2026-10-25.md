@@ -8,14 +8,24 @@ sync covers1November. Cape-only completed October Meta refresh succeeded, reused
 one report and synced37posts; actual FB/IG windows now1–31October. Logo View and
 actual download identity pass; confirmed package seven combined posters.
 
-Publication is NOT complete: native confirmation control stalled; October master
-`93d58684-7913-4c57-9d4e-b2168e2a9a03` remains draft/null published_at on read-back.
-Use normal UI publication when browser control/owner interaction is available,
-then refresh/review/publish the existing #731 strategy without overwriting staff
-edits. November v5/December v2 remain drafts; no new ChatGPT run was sent. Dated
+**October publication is now COMPLETE.** PR922 repaired the native confirmation
+with an in-app exact-client/month dialog and was released once conservatively
+as source `3c58c898` / deployment `dpl_ARCpGYJm5BHHgYvgR71UZBhifREC`. Normal UI
+publication and independent read-back confirm report
+`93d58684-7913-4c57-9d4e-b2168e2a9a03` published 2 November 08:41:50 UTC, full
+1–31 October. Actual client preview selects October; Google traffic/cost matches
+native, 20,241 recorded social views, actual 375/390/430 navigation/no overflow
+pass. Full 4,201 pass / 24 skips / all 21 browser fixtures; one local prebuild,
+one 2.5 MB prebuilt upload, ten staged hashes, same-deployment promotion. No cloud
+compilation or backend/config/permission change. See the exact Cape receipt above.
+
+Next normal ChatGPT/#731 author refreshes/reviews the existing strategy against
+published October findings, preserving staff edits. November v5/December v2
+remain drafts; busy/failed-loading existing author chat was not interrupted and
+no duplicate writer/new prompt/successful run is claimed. Dated
 November/December schedule read has zero rows; separate staff owner settles real
 posting dates/visibility. Client password/physical phone/Meta consent gates remain.
-No Vercel or campaign/permission/strategy/calendar publication changes this pass.
+No campaign/permission/strategy/calendar publication changes. No docs-only deploy.
 
 ## 28 October live-release override
 
