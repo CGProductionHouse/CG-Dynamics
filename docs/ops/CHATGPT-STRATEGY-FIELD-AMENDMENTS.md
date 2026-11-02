@@ -2,6 +2,18 @@
 
 ## 2 November — verified source receipt refresh
 
+PR928 merged4577b383; owner approved exact two-file rollout. MCPv75 ACTIVE readback:
+all40files match expected bundle, only amendment module/catalog changed, other38byte-
+identical, custom auth/JWTfalse/permissions/secrets unchanged.156focused tests/0skips,
+standalone backend TypeScript,appbuild/lint/diff pass; no localDeno claim. Actual server
+bundle succeeded. Normal company ChatGPT exercised provenance-only amendment with
+changed_fields[]/context_refreshedtrue, Novemberv8→v9/Decemberv5→v6. Independent complete
+strategy_data/notes equality and receipt time/actor/reference match verified. Existing
+guard then accepted normal owner-approved UI approval/publication; published9/6.
+[Author readback](https://github.com/CGProductionHouse/CG-Dynamics/issues/731#issuecomment-6577811280)
+· [publication readback](https://github.com/CGProductionHouse/CG-Dynamics/issues/731#issuecomment-6578102958).
+No narrative authoring in Codex, no repeated package confirmation or SQL gate bypass.
+
 Cape's successful normal-Chat narrative amendment exposed a real publication failure:
 the editorial action checked fresh package/evidence but retained the old seed receipt.
 The unchanged approval trigger correctly refused “Strategy provenance does not match

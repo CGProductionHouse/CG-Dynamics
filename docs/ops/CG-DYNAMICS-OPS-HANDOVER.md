@@ -1,3 +1,43 @@
+### 2 November — Cape client updates LIVE; dates and both strategies published
+
+Current frontend85b107a3/tree777d140b is LIVE on .co.za via ONE2.5MBprebuilt upload,
+14critical staged hashes, then promotion of SAMEdpl_DvWScLPuXvGDUvptz9DcmnWeZYPL.
+No remote npm/Vite compilation/extra preview/retry/DNS/budget change. Public entry
+index-Czbx1-b_.js SHA256d2a9b91ea3134658f3ffe0f9f31ec43936eb90e704caab430e8af8da6694fd40.
+RollbackAR...REC retained; Git automaticdeployOFF. Frozen exact frontend acceptance
+4236total/4212pass/24existing skips/0fail and ALL23browsers,actual mandatoryPG/build.
+Fresh billingbefore$10.34/20included,after$10.35/20,$0/15on-demand,PauseON; delayed
+counters not release attribution. Existing$5serving reserve/$1release stop retained.
+
+Exact-approved image/calendar migrations LIVE. Normal Client Schedule manager sharing
+published ONLY8CapeNovdates at13:22:21UTC; independent full field comparison preserves
+source/type/date/Microsoft IDs/status and all approval/posting fields. Otherclientshared0.
+Actual client calendar and overview now show8planned items, NOT awaiting approval.
+Package1video+7posters plus exact socialmanagement/Contentguide/GoogleAds included.
+Overview20,241recordedFB+IGviews; actual GoogleOctR2,199.24/40,497/1,337/3.30%,unchanged.
+
+PR928/main4577b383 exact-approved MCPv75 is LIVE: ONLY monthlyStrategyAmendment/toolCatalog
+changed, other38hosted files byte-identical, all40readback, custom auth/JWTfalse/secrets/
+permissions unchanged.156focused cases/zero skips,standaloneTS/appbuild/lint/diff pass.
+Actual normal ChatGPT provenance-only refresh verified full content/notes unchanged;
+Novv9/Decv6 receipt timestamp/actor/references match current canonical package. Owner
+explicitly approved BOTH narratives. Normal UI approval+publication succeeded, independently
+read back: Novemberc4daf0e5...published13:12:40UTC/version9,December50088b8b...13:06:26UTC/
+version6. Existing package/provenance guard retained, no backdoor SQL publication.
+#7316577811280/6578102958 hold author/publication receipts. Weekly normal Chat task unchanged.
+
+Actual Chrome staff preview: Overview,both month strategies,package,8datecalendar,
+Facebook real images/modal,Google,Approvals,More→BrandHub correct logo/file controls;
+375/390/430+1440no horizontal overflow, nativeviewport restored. Password/physicalphone
+remain owner's retained check, not passed by preview.3generic browser message-channel
+errors not attributed to first-party source; no clean-console claim. Primary.co.za,
+cg-dynamics.vercel.app,cg-hours.vercel.app,CapeofficialsiteHTTP200. Both.comaliases failed
+TLS fromNode/PowerShell; separate unresolved alias investigation,noDNS/security change.
+Global Meta re-consent/encryption and other-client gates unchanged; not a fleet pass.
+No new staff/source engine,provider/campaign,asset permissions or external communication.
+Exact ControlCentre reference unavailable. [Full current Cape acceptance and release](CAPE-LUMBER-LAUNCH-REVIEW-2026-11-02.md).
+This handover update is DOCS ONLY; no further Vercel deployment is needed.
+
 ### 2 November — planned-date code accepted; final strategy provenance defect reproduced
 
 PR927 merged85b107a3, exact frozen399906c5 tree777d140b:4236total/4212pass/24explicit
