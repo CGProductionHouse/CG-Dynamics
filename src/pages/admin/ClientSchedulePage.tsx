@@ -1,4 +1,5 @@
 import { ContentProductionPanel } from '../../components/content/ContentProductionPanel'
+import { ClientSchedulePlanSharing } from '../../components/client/ClientSchedulePlanSharing'
 import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
@@ -437,6 +438,7 @@ export default function ClientSchedulePage() {
           Some dates were imported from Teams and still need review.
         </p>
       )}
+      {isManagerRole(profile?.role) && clientId && selectedClient && view !== 'year' && <ClientSchedulePlanSharing key={`${clientId}:${selectedMonth}:${deliverables.filter(row => row.client_id === clientId).map(row => row.updated_at).join(',')}`} clientId={clientId} clientName={selectedClient.name} month={selectedMonth} />}
       <ScheduleReviewSection canReview={isManagerRole(profile?.role)} onApplied={load} />
 
       {!loading && !error && pastDateItems.length > 0 && view !== 'year' && (

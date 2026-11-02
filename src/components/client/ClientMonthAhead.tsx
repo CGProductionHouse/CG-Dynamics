@@ -77,7 +77,7 @@ export function ClientMonthAhead({ clientId }: { clientId: string }) {
       <div className={`grid gap-4 ${data.events.length > 0 && data.posts.length > 0 ? 'lg:grid-cols-[1.25fr_0.75fr]' : ''}`}>
         {data.posts.length > 0 && (
           <article className="rounded-[2rem] border border-white/[0.08] bg-[#071311] p-6 shadow-[0_35px_90px_-48px_rgba(0,0,0,0.95)] sm:p-8">
-            <p className="text-xs font-black uppercase tracking-[0.22em] text-slate-500">Content going live</p>
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-slate-500">Posting plan</p>
             <ul className="mt-4 divide-y divide-white/[0.06]">
               {dated.map(post => <PostRow key={post.id} post={post} />)}
             </ul>
@@ -101,7 +101,7 @@ export function ClientMonthAhead({ clientId }: { clientId: string }) {
       </div>
 
       <p className="mt-4 text-xs leading-relaxed text-slate-500">
-        Live view of the CG production schedule — dates update automatically as the plan is refined.
+        Shared posting dates and confirmed client events.
       </p>
     </section>
   )

@@ -1,5 +1,23 @@
 # Client launch execution — local-first continuation
 
+## 2 November — actual dated Cape import completed; remaining publication separated
+
+The prior monthly-working-board-only source inference is superseded: existing recurring
+master contains8real dated Cape November items. Normal reviewed import run
+`3b8b24f1-022d-420f-8d42-28cd240673f0` applied exactly8/0fail/0conflict at12:05:16UTC,
+no removals/config/Microsoft writes. Capped100-task source is not fleet completeness.
+Client planned-date disclosure is a reproduced product gap, now a narrow manager-only
+existing Client Schedule source fix with exact revision/auth/audit/isolation controls.
+New date-sharing migration and actual sharing await exact approval; no fake content
+approval/publication. #3256576732122 owns source correction and client-lane boundary.
+
+Approved post-image RPC change is live, metrics/auth/ACL/advisor baseline unchanged;
+frontend visuals remain release-gated. Baselinef53 full frozen local acceptance all22
+browsers passed; new candidate must earn its own receipt. No Vercel operations here.
+Normal Chat author package amendment is blocked by existing draft format reconciliation,
+not missing invoice confirmation; v6/v3 preserved, #7316576397097. Continue existing
+authority without competing strategy writer. [Detailed Cape receipt](CAPE-LUMBER-LAUNCH-REVIEW-2026-11-02.md).
+
 ## 2 November — invoice package corrected; real November Teams work identified
 
 Owner invoices and explicit instruction supersede Cape's wrong no-video exclusion.
