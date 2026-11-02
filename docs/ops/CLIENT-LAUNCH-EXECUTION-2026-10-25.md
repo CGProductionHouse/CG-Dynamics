@@ -1,5 +1,22 @@
 # Client launch execution — local-first continuation
 
+## 2 November — Cape Lumber is the first launch client
+
+Continue this exact client before the fleet list below. [Cape acceptance receipt](CAPE-LUMBER-LAUNCH-REVIEW-2026-11-02.md).
+Google October traffic/cost match native UI and the actual client panel; nightly
+sync covers1November. Cape-only completed October Meta refresh succeeded, reused
+one report and synced37posts; actual FB/IG windows now1–31October. Logo View and
+actual download identity pass; confirmed package seven combined posters.
+
+Publication is NOT complete: native confirmation control stalled; October master
+`93d58684-7913-4c57-9d4e-b2168e2a9a03` remains draft/null published_at on read-back.
+Use normal UI publication when browser control/owner interaction is available,
+then refresh/review/publish the existing #731 strategy without overwriting staff
+edits. November v5/December v2 remain drafts; no new ChatGPT run was sent. Dated
+November/December schedule read has zero rows; separate staff owner settles real
+posting dates/visibility. Client password/physical phone/Meta consent gates remain.
+No Vercel or campaign/permission/strategy/calendar publication changes this pass.
+
 ## 28 October live-release override
 
 The client frontend is **LIVE** on www.cgdynamics.co.za at source `7eb0473f`,
