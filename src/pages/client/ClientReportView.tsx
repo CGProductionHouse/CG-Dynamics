@@ -14,7 +14,6 @@ import {
   PLATFORM_LABELS,
   buildMasterReport,
   compareNullable,
-  displayContentType,
   formatDate,
   formatNumber,
   formatPercent,
@@ -22,9 +21,9 @@ import {
   reportPostToStatsPost,
   contentEvidenceKey,
   shortCaption,
+  rankPostsByStrength,
 } from '../../lib/reportStats'
 import {
-  buildMetaContentMetrics,
   buildMetaPlatformMetrics,
 } from '../../lib/metaMetrics'
 import {
@@ -59,6 +58,7 @@ import { PerformanceServiceStory } from '../../components/client/PerformanceServ
 import { PERFORMANCE_SERVICE_TABS } from '../../lib/performanceServiceCatalog'
 import { reportSourceAttribution } from '../../lib/reportSourceAttribution'
 import { moveClientTabFocus } from '../../lib/clientTabKeyboard'
+import { ReportPostCard } from '../../components/client/ReportPostCard'
 
 export type ReportTabKey = 'overview' | 'facebook' | 'instagram' | 'google' | 'tiktok' | 'linkedin' | 'web' | 'email'
 export interface MonthlyStrategyPresentation {
@@ -1182,29 +1182,7 @@ function ContentSection({
 
   const caption = best ? shortCaption(best.caption) : null
   const coverImage = (best?.imageUrl || (strategyMatchesBest ? tc.coverImageUrl?.trim() || tc.autoImageUrl?.trim() : '') || '').trim()
-  const contentType = (best?.post_type ? displayContentType(best.post_type) : null) || (strategyMatchesBest ? tc.contentType.trim() : null)
-  const platformLabel = topContent?.platformLabel ?? null
-
   const tone = topContent?.tone ?? 'baseline'
-  const bestPost = topContent?.post ?? null
-  const rankingMetric = topContent?.rankingMetricLabel ?? null
-
-  // Pick the strongest metric to showcase (views > reach > interactions).
-  const heroMetric: { value: number; label: string } | null =
-    rankingMetric === 'views' && typeof bestPost?.impressions === 'number'
-      ? { value: bestPost.impressions, label: 'views' }
-      : rankingMetric === 'reach' && typeof bestPost?.reach === 'number'
-        ? { value: bestPost.reach, label: 'reach' }
-        : typeof topContent?.interactions === 'number'
-          ? { value: topContent.interactions, label: bestPost?.engagementDefinitionLabel ?? 'defined interactions' }
-          : null
-
-  const allMetrics: { label: string; value: string }[] = []
-  if (typeof bestPost?.impressions === 'number') allMetrics.push({ label: 'views', value: formatNumber(bestPost.impressions) })
-  if (typeof bestPost?.reach === 'number') allMetrics.push({ label: 'reach', value: formatNumber(bestPost.reach) })
-  if (bestPost && typeof bestPost.engagements === 'number') allMetrics.push({ label: bestPost.engagementDefinitionLabel ?? 'defined interactions', value: formatNumber(bestPost.engagements) })
-  const metricRow = allMetrics.map(m => `${m.value} ${m.label}`).join(' · ')
-
   const cgInsight = strategyMatchesBest ? tc.whatThisTellsUs.trim() : ''
   const whyItWorked = strategyMatchesBest ? tc.whyItWorked : []
   const hasCG = whyItWorked.length > 0 || cgInsight.length > 0
@@ -1238,108 +1216,17 @@ function ContentSection({
         </div>
       )}
 
-      {best && (
-
-      <div className="overflow-hidden rounded-[2rem] border border-white/[0.08] bg-[#071311] shadow-[0_35px_90px_-48px_rgba(0,0,0,0.95)]">
-        <div className={`grid ${tone === 'top' ? 'lg:grid-cols-[0.95fr_1.05fr]' : 'lg:grid-cols-[0.55fr_1.45fr]'}`}>
-          <div className={`relative overflow-hidden bg-[#030706] ${tone === 'top' ? 'min-h-[18rem]' : 'min-h-[12rem]'}`}>
-            {coverImage ? (
-              <img
-                src={coverImage}
-                alt="Highest activity content"
-                className="h-full max-h-[28rem] w-full object-cover"
-                onError={e => {
-                  ;(e.currentTarget as HTMLImageElement).style.display = 'none'
-                }}
-              />
-            ) : (
-              <DesignedPlaceholder contentType={contentType ?? heading.title} />
-            )}
-          </div>
-
-          <div className="relative overflow-hidden p-7 sm:p-9">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(249,115,22,0.10),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(45,212,191,0.12),transparent_36%)]" />
-            <div className="relative">
-              <div className="flex flex-wrap gap-2">
-                {contentType && <Pill tone="teal">{contentType}</Pill>}
-                {platformLabel && <Pill>{platformLabel}</Pill>}
-                {rankingMetric && tone === 'top' && <Pill tone="teal">Top content by {rankingMetric}</Pill>}
-                {tone === 'top' && <Pill tone="teal">Top overall performer</Pill>}
-                {tone === 'learning' && <Pill tone="amber">Highest activity post this month</Pill>}
-                {tone === 'baseline' && <Pill tone="neutral">Content baseline</Pill>}
-              </div>
-
-              {caption && (
-                <h3
-                  className={`mt-5 font-black leading-tight tracking-[-0.035em] text-white ${
-                    tone === 'top' ? 'text-2xl sm:text-3xl' : 'text-xl sm:text-2xl'
-                  }`}
-                >
-                  {caption}
-                </h3>
-              )}
-
-              {heroMetric ? (
-                <div className="mt-7">
-                  <div className="inline-flex items-end gap-3 rounded-2xl border border-white/10 bg-white/[0.05] px-5 py-4">
-                    <span className="text-4xl font-black leading-none tracking-[-0.04em] text-white">
-                      {formatNumber(heroMetric.value)}
-                    </span>
-                    <span className="pb-1 text-sm font-bold text-slate-400">{heroMetric.label}</span>
-                  </div>
-                  {metricRow && (
-                    <p className="mt-3 text-sm text-slate-400">{metricRow}</p>
-                  )}
-                </div>
-              ) : null}
-
-              {whyItWorked.length > 0 && (
-                <div className="mt-7">
-                  <p className="text-xs font-black uppercase tracking-[0.22em] text-slate-500">Why it worked</p>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {whyItWorked.map((item, index) => (
-                      <Pill key={index} tone="amber">
-                        {item}
-                      </Pill>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {insight && (
-                <p className="mt-7 whitespace-pre-line text-[0.95rem] leading-relaxed text-slate-300">{insight}</p>
-              )}
-              {onSetContentExcluded && best.metaObjectId && (
-                <button type="button" disabled={curationBusyId === best.metaObjectId} onClick={() => void onSetContentExcluded(best, true)} className="mt-7 rounded-lg border border-amber-300/25 bg-amber-300/10 px-3 py-2 text-xs font-semibold text-amber-200 disabled:opacity-50">
-                  Skip from report
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-      )}
+      {best && <div>
+        <ReportPostCard featured key={`${best.id}:${best.publish_time}:${best.permalink}`} post={{ ...best, imageUrl: coverImage }} rank={1} rankingMetric={rankPostsByStrength([best]).metric}>
+          {whyItWorked.length > 0 && <div className="mt-5">
+            <p className="text-xs font-bold text-slate-400">Why it worked</p>
+            <div className="mt-2 flex flex-wrap gap-2">{whyItWorked.map((item, index) => <Pill key={index} tone="amber">{item}</Pill>)}</div>
+          </div>}
+          {insight && <p className="mt-5 whitespace-pre-line text-sm leading-relaxed text-slate-300">{insight}</p>}
+          {onSetContentExcluded && best.metaObjectId && <button type="button" disabled={curationBusyId === best.metaObjectId} onClick={() => void onSetContentExcluded(best, true)} className="mt-5 rounded-lg border border-amber-300/25 bg-amber-300/10 px-3 py-2 text-xs font-semibold text-amber-200 disabled:opacity-50">Skip from report</button>}
+        </ReportPostCard>
+      </div>}
     </section>
-  )
-}
-
-function DesignedPlaceholder({ contentType }: { contentType: string }) {
-  return (
-    <div className="relative flex h-full min-h-[18rem] items-center justify-center overflow-hidden p-8">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(45,212,191,0.38),transparent_36%),radial-gradient(circle_at_80%_90%,rgba(249,115,22,0.32),transparent_34%),linear-gradient(135deg,#06110f,#030706)]" />
-      <div className="absolute -left-8 top-8 h-40 w-40 rounded-full border border-white/10" />
-      <div className="absolute bottom-6 right-6 text-7xl font-black tracking-[-0.08em] text-white/[0.05]">
-        CG
-      </div>
-      <div className="relative text-center">
-        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl border border-white/10 bg-white/[0.06] text-[#2dd4bf] shadow-2xl">
-          <svg className="h-9 w-9" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 7h16M4 17h16M7 4v16M17 4v16" />
-          </svg>
-        </div>
-        <p className="mt-4 text-xs font-black uppercase tracking-[0.26em] text-slate-400">{contentType}</p>
-      </div>
-    </div>
   )
 }
 
@@ -1783,109 +1670,19 @@ function MomentumCard({ metric }: { metric: PerformanceMetric }) {
 }
 
 function PlatformContent({ performance, view }: { performance: PlatformPerformance; view: PlatformView }) {
-  const tc = performance.topContent
-  if (!tc) return null
-
-  const best = tc.post
-  const tone = tc.tone
-  const heading =
-    tone === 'top'
-      ? { eyebrow: 'Top content', title: 'Top performing content' }
-      : tone === 'learning'
-        ? { eyebrow: 'Content', title: 'Content learning' }
-        : { eyebrow: 'Content', title: 'Content baseline' }
-
-  const metrics = buildMetaContentMetrics(best)
-  // Hero metric: first available from views → reach → interactions
-  const heroMetric = metrics.length > 0 ? metrics[0] : null
-  const metricRowStr = metrics.map(m => `${formatNumber(m.value)} ${m.label.toLowerCase()}`).join(' · ')
-
+  const top = performance.topContent
+  if (!top) return null
+  const heading = top.tone === 'top' ? 'Top performing content'
+    : top.tone === 'learning' ? 'Content learning' : 'Content baseline'
+  const posts = view.topPosts.length ? view.topPosts : [top.post]
+  const ranking = rankPostsByStrength(posts).metric
   return (
     <section className="mb-12">
-      <SectionHeading eyebrow={heading.eyebrow} title={heading.title} />
-      <div className="rounded-[2rem] border border-white/[0.08] bg-[#071311] p-7 shadow-[0_35px_90px_-48px_rgba(0,0,0,0.95)] sm:p-9">
-        <div className="flex flex-wrap gap-2">
-          {best.post_type && <Pill tone="teal">{displayContentType(best.post_type) ?? best.post_type}</Pill>}
-          <Pill>{formatDate(best.publish_time)}</Pill>
-          {tone !== 'top' && <Pill tone="amber">Highest activity post</Pill>}
-        </div>
-
-        <h3 className="mt-5 text-2xl font-black leading-tight tracking-[-0.035em] text-white sm:text-3xl">
-          {shortCaption(best.caption)}
-        </h3>
-
-        {heroMetric ? (
-          <div className="mt-7">
-            <div className="inline-flex items-end gap-3 rounded-2xl border border-white/10 bg-white/[0.05] px-5 py-4">
-              <span className="text-4xl font-black leading-none tracking-[-0.04em] text-white">
-                {formatNumber(heroMetric.value)}
-              </span>
-              <span className="pb-1 text-sm font-bold text-slate-400">{heroMetric.label.toLowerCase()}</span>
-            </div>
-            {metricRowStr && (
-              <p className="mt-3 text-sm text-slate-400">{metricRowStr}</p>
-            )}
-          </div>
-        ) : null}
-
-        {metrics.length > 0 && !heroMetric && (
-          <div className="mt-7 grid gap-3 sm:grid-cols-3">
-            {metrics.map(item => (
-              <MiniMetric key={item.key} label={item.label} value={formatNumber(item.value)} />
-            ))}
-          </div>
-        )}
-
+      <SectionHeading eyebrow={top.tone === 'top' ? 'Top content' : 'Content'} title={heading} />
+      <div className="grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {posts.map((post, index) => <ReportPostCard key={`${post.id}:${post.publish_time}:${post.permalink}`} post={post} rank={index + 1} rankingMetric={ranking} />)}
       </div>
-
-      {view.topPosts.length > 0 && (
-        <div className="mt-6">
-          <p className="mb-4 text-xs font-black uppercase tracking-[0.22em] text-slate-500">
-            {tone === 'top' ? `Top ${performance.label} posts` : `Recent ${performance.label} content`}
-          </p>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {view.topPosts.map((post, index) => (
-              <PlatformPostCard key={post.id} post={post} index={index} />
-            ))}
-          </div>
-        </div>
-      )}
     </section>
-  )
-}
-
-function rankingReason(post: ReportStatsPost, index: number): string {
-  if (typeof post.impressions === 'number' && post.impressions > 0) return `#${index + 1} by views`
-  if (typeof post.reach === 'number' && post.reach > 0) return `#${index + 1} by reach`
-  return `#${index + 1} by interactions`
-}
-
-function PlatformPostCard({ post, index }: { post: ReportStatsPost; index: number }) {
-  const parts: string[] = []
-  if (typeof post.impressions === 'number') parts.push(`${formatNumber(post.impressions)} views`)
-  if (typeof post.reach === 'number') parts.push(`${formatNumber(post.reach)} reach`)
-  if (typeof post.engagements === 'number') {
-    parts.push(`${formatNumber(post.engagements)} ${post.engagementDefinitionLabel?.toLowerCase() ?? 'defined interactions'}`)
-  } else if (post.engagementKnownSubtotal !== null) {
-    parts.push(`${formatNumber(post.engagementKnownSubtotal)} known subtotal (${post.engagementCoverage?.observed ?? 0}/${post.engagementCoverage?.required ?? 0} fields)`)
-  } else {
-    parts.push('Interaction data unavailable')
-  }
-
-  return (
-    <article className="rounded-3xl border border-white/[0.08] bg-white/[0.045] p-5 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.95)]">
-      <div className="flex items-center justify-between">
-        <span className="text-2xl font-black text-[#2dd4bf]">{rankingReason(post, index)}</span>
-        <span className="text-xs text-slate-500">{formatDate(post.publish_time)}</span>
-      </div>
-      <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-white">{shortCaption(post.caption, 'Post')}</p>
-      {post.post_type && (
-        <p className="mt-3 text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
-          {displayContentType(post.post_type) ?? post.post_type}
-        </p>
-      )}
-      <p className="mt-4 text-sm font-bold text-slate-300">{parts.join(' · ')}</p>
-    </article>
   )
 }
 
@@ -1916,15 +1713,6 @@ function PlatformNotes({ view }: { view: PlatformView }) {
         </article>
       ))}
     </section>
-  )
-}
-
-function MiniMetric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl border border-white/[0.08] bg-white/[0.05] p-4">
-      <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">{label}</p>
-      <p className="mt-2 text-xl font-black text-white">{value}</p>
-    </div>
   )
 }
 

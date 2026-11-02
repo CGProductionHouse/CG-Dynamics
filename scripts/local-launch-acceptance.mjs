@@ -19,6 +19,7 @@ export const browserFixtures = Object.freeze([
   'entitlement-resolution-browser.mjs',
   'meta-connection-readiness-browser.mjs',
   'client-publication-confirmation-browser.mjs',
+  'client-post-gallery-browser.mjs',
 ])
 
 export function assertLocalContract(vercel, packageJson) {

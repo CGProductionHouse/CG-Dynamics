@@ -83,6 +83,8 @@ export interface ClientReportPost {
   post_type: string | null
   caption: string | null
   permalink: string | null
+  /** Public provider thumbnail only; absent on older safe-projection deployments. */
+  image_url?: string | null
   impressions: number | null
   reach: number | null
   engagements: number | null

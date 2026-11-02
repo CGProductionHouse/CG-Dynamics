@@ -1,6 +1,7 @@
 import type { ImportedMetaPost } from './db/importedMetaPosts'
 import type { ClientReportPost, ReportPost } from './db/reports'
 import type { ReportManualMetric } from './db/manualMetrics'
+import { reportPostImageUrl } from './reportPostMedia'
 import { projectMetaPostEngagement } from '../../supabase/functions/_shared/metaPostEngagement.ts'
 
 import type { Platform } from '../types/reportPlatform'
@@ -112,7 +113,7 @@ export function reportPostToStatsPost(post: ReportPost | ClientReportPost): Repo
       engagementCompleteness: post.engagement_completeness,
       post_type: post.post_type,
       platform: post.platform,
-      imageUrl: null,
+      imageUrl: reportPostImageUrl(post.image_url),
       metaObjectId: post.id,
     }
   }
@@ -169,7 +170,7 @@ export function reportPostToStatsPost(post: ReportPost | ClientReportPost): Repo
     engagementCompleteness: engagement.completeness,
     post_type: raw.content_type ?? post.meta_post_type,
     platform: post.platform,
-    imageUrl: raw.full_picture ?? raw.thumbnail_url ?? raw.media_url ?? null,
+    imageUrl: [raw.full_picture, raw.thumbnail_url, raw.media_url].map(reportPostImageUrl).find(Boolean) ?? null,
     metaObjectId: post.meta_post_id,
   }
 }

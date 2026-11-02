@@ -1,5 +1,21 @@
 # Client launch execution — local-first continuation
 
+## 2 November — visual post gallery (local candidate only)
+
+CA's Cape Facebook screenshot exposed a text-only, duplicate winning-post presentation.
+#668 now owns the focused imported-icon/media-card candidate: each ranked post once,
+compact exact-definition metrics, expandable captions and image preview, safe original
+post links, same accepted portal palette. Overview shares the card; staff curation is
+preserved. 231 relevant tests, disposable PostgreSQL media/role isolation, actual
+gallery/cutoff/full-preview desktop/375/390/430 browsers, build/app-bundle/lint/diff pass.
+Real Cape public images were visually checked in local desktop/390 screenshots.
+
+The additive existing-RPC public `image_url` migration is prepared, NOT applied.
+Frontend and migration must receive their appropriate release gates together; no
+Vercel or production changes occurred. Existing published report and live release below
+are unchanged. Do not claim that source-only visual proof is deployed client acceptance
+or repeat the completed October publication/provider sync.
+
 ## 2 November — Cape Lumber is the first launch client
 
 Continue this exact client before the fleet list below. [Cape acceptance receipt](CAPE-LUMBER-LAUNCH-REVIEW-2026-11-02.md).

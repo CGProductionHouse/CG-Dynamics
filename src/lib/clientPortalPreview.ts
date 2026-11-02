@@ -66,6 +66,7 @@ export async function getPreviewReport(clientId: string, reportId: string): Prom
       return {
         id: post.id, platform: post.platform, publish_time: post.publish_time,
         post_type: stats.post_type, caption: post.caption, permalink: post.permalink,
+        image_url: stats.imageUrl,
         impressions: stats.impressions, reach: stats.reach, engagements: stats.engagements,
         engagement_known_subtotal: stats.engagementKnownSubtotal,
         engagement_definition_id: stats.engagementDefinitionId, engagement_definition_label: stats.engagementDefinitionLabel,

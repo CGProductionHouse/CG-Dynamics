@@ -418,7 +418,8 @@ test('rendered exclusions promote the next eligible post and expose admin contro
   })
   assert.match(html, /Second performer/)
   assert.doesNotMatch(html, /First performer/)
-  assert.match(html, /Top overall performer/)
+  assert.match(html, /Top performing content/)
+  assert.match(html.replace(/<!--.*?-->/g,''), /#1 · By views/)
   assert.match(html, /Skip from report/)
   assert.match(html, /Review skipped posts/)
 })
@@ -666,7 +667,8 @@ test('Meta token lifecycle is validated server-side without exposing credentials
 
 test('rendered report includes methodology and curation controls without CG-generated wording', () => {
   assert.match(CLIENT_VIEW, /Reporting methodology &amp; disclaimer/)
-  assert.match(CLIENT_VIEW, /Top overall performer/)
+  assert.match(CLIENT_VIEW, /Top performing content/)
+  assert.match(CLIENT_VIEW, /<ReportPostCard featured/)
   assert.match(CLIENT_VIEW, /Skip from report/)
   assert.match(CLIENT_VIEW, /Undo skip/)
   assert.match(CLIENT_VIEW, /Review skipped posts/)

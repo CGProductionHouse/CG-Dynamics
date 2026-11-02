@@ -58,6 +58,17 @@ test('preview report needs complete typed exclusion evidence, not missing data i
   assert.ok(!calls.some(([method])=>['insert','update','upsert','delete'].includes(method)))
 }))
 
+test('preview includes only the public provider thumbnail, never raw context or internal file URLs',()=>fixture(async(read,state)=>{
+  const url='https://scontent.fbcdn.net/approved-public-post.jpg'
+  state.posts=[{...post,raw:{source:'meta_sync',full_picture:url,private_notes:'PRIVATE staff context'}}]
+  let result=await read(clientId,reportId)
+  assert.equal(result.data.posts[0].image_url,url)
+  assert.doesNotMatch(JSON.stringify(result.data),/PRIVATE|private_notes|\"raw\"/)
+  state.posts=[{...post,raw:{source:'meta_sync',full_picture:'https://internal.sharepoint.com/private.jpg'}}]
+  result=await read(clientId,reportId)
+  assert.equal(result.data.posts[0].image_url,null)
+}))
+
 test('preview report rejects missing ownership, mismatched child identity and rejected reads without leaking transport details',()=>fixture(async(read,state,calls)=>{
   state.owned={id:'another-report'}
   assert.equal((await read(clientId,reportId)).data,null)

@@ -1,3 +1,32 @@
+### 2 November — visual post cards verified locally; not deployed
+
+CA requested less text, actual post images and imported icons in client Performance.
+Focused branch `codex/client-visual-post-cards` under #668 replaces duplicate hero/
+ranked captions with one media card per post, compact metrics with expandable exact
+definitions, expandable captions, keyboard-safe image enlargement and provider-matched
+original-post links. Overview reuses the same component; staff curation and published
+commentary remain. Nine unchanged Lucide 0.468.0 SVG imports with upstream ISC license;
+no package change, custom icon paths, autoplay, embeds or new media proxy. Images load
+lazily from the provider without a portal Referer and fall back when absent/expired.
+
+The existing client projection omitted available synced public images. Optional
+`image_url` is prepared end-to-end; migration `20261102113000_client_report_public_post_images.sql`
+adds only that return column to the existing authenticated exact-client published-report
+RPC. Metric expressions remain identical. Internal/token-bearing URLs, excluded posts,
+uncovered Pacific dates and non-Meta media are withheld. This migration is SOURCE ONLY:
+no production SQL/schema/provider/content/auth/permission write or Vercel operation.
+An exact approved migration rollout and the separate reviewed frontend release remain
+necessary for real-client image display. Older backends retain the clean fallback.
+
+Local verification: 231 relevant tests pass, zero skips/failures, including actual
+disposable PostgreSQL role/ownership/publication/cutoff/media checks; actual gallery,
+cutoff and full portal preview fixtures pass at desktop/375/390/430. TypeScript/Vite
+actual app bundle, scoped lint and diff checks pass. This focused receipt does not
+reattribute the earlier full 4,201-test release run to new source. Actual Cape public
+images/95/83/69 figures were used for local desktop/390 visual proof, not synthetic
+creative or a live deployment. #731 authoring and staff/Teams/calendar remain separate.
+No guessed Google Control Centre update; exact reference remains unavailable.
+
 ### 2 November — publication repair LIVE; Cape October PUBLISHED
 
 PR922/source `3c58c898` is live as `dpl_ARCpGYJm5BHHgYvgR71UZBhifREC`.
