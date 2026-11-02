@@ -1,5 +1,40 @@
 # Cape Lumber launch acceptance — 2 November 2026
 
+## Invoice correction and actual Teams source — supersedes earlier package/schedule assumptions
+
+Both owner-supplied PDFs INV-CLM2609/2610 were extracted and visually inspected.
+Combo Essentials includes7combined advertising posters/photos,1professional4K video
+(20–30seconds), social media management/captions, Content Guide and as-needed capture.
+Separate GoogleAds lines plus CA's explicit2November confirmation establish GoogleAds
+scope. Billed ad amount is NOT treated as provider spend or a new campaign budget.
+
+Normal admin UI confirmed Cape's corrected canonical package at11:13:30.979166UTC;
+independent SELECT-only readback proves1video, combined7(existing4DP/3F retained),
+campaignmanagementtrue and three explicit agreed service lines. Wrong no-video exclusion
+removed; unmentioned values remainnull. Normal audited service scope UI also verified
+only GoogleAds included/revision1 at11:24:55UTC. Actual live client preview now shows
+1video+7posters. New service-card renderer is source-ready, not yet deployed.
+No financial/bank details or PDFs committed/uploaded; no SQL/campaign/provider writes.
+
+Live Teams read found NovemberCape8tasks in plan`RtQsmg8tGUOGDlEdPPLi-GUAGwaZ`,
+bucket`tJqiBqbDGUeDvS7zEuosZ2UAFIe6`:4DP/3F/1video. All no start/due;5completed,
+3notstarted. Dynamics November has0monthly_deliverables. Prior dated-window read
+alone did NOT prove no work exists. Latest PARTIAL sync's allowlist omits November
+and automatic apply categorically excludes Client Schedule; manual parser additionally
+requires a year absent from the actual plan name. This remains an integration defect.
+[Exact task IDs and staff source-lane handoff](https://github.com/CGProductionHouse/CG-Dynamics/issues/325#issuecomment-6575792092).
+No second importer, made-up dates, completion-to-posted inference, Microsoft write or
+disclosure bypass. Proper reviewed import THEN explicit client sharing is still needed.
+
+Local client presentation uses imported unchanged Lucide icons, compact phone service
+cards and calendar summaries, explicit shared-date empty state/optional month canvas,
+and visible disclosed undated work. No new API read/write or dependency; private fields
+remain hidden.175focused tests/zero skips; Plan and compiled real-App/SDK browser
+journeys at1440/375/390/430 plus TS/Vite/actualbundle/lint/diff pass. Synthetic local
+calendar data is NOT claimed to be Cape's actual posting plan. Current live Google/
+Meta/report observations below are unchanged; no new Vercel operation. #731 author
+[notified to reread corrected package](https://github.com/CGProductionHouse/CG-Dynamics/issues/731#issuecomment-6575989662).
+
 ## Normal ChatGPT strategy catch-up — latest verified content state
 
 The existing normal company ChatGPT author used the installed Dynamics connector to

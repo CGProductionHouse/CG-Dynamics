@@ -95,6 +95,6 @@ test('an empty client month still renders its real calendar canvas', () => {
   assert.match(CALENDAR_SOURCE, /<MonthGrid month=\{month\} posts=\{scheduledPosts\} events=\{calendar\.events\}/)
   assert.match(CALENDAR_SOURCE, /<Agenda month=\{month\} posts=\{scheduledPosts\} events=\{calendar\.events\}/)
   assert.doesNotMatch(CALENDAR_SOURCE, /calendar && \(calendar\.posts\.length > 0/)
-  assert.match(CALENDAR_SOURCE, /No client-visible items for this month yet/)
-  assert.match(CALENDAR_SOURCE, /Confirmed dates will appear here when CG shares the plan/)
+  assert.match(CALENDAR_SOURCE, /No dates shared yet/)
+  assert.match(CALENDAR_SOURCE, /Your shared posts and shoot dates will appear here/)
 })

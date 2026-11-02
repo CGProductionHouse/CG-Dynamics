@@ -1,3 +1,46 @@
+### 2 November — Cape invoice correction LIVE; November Teams source gap reproduced
+
+CA supplied September/October invoices INV-CLM2609/2610 and explicitly asked the
+current Cape package to match them. Both PDFs extracted AND rendered/inspected.
+Normal signed-in admin confirmation saved exact Cape42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa
+at11:13:30.979166UTC: **1professional video/month**, **7combined posters/photos**,
+social media management, Content guide and Google Ads. Existing internal4DP+3F
+allocation retained; invoices establish combined7, not the split. Removed the
+incorrect no-recurring-video exclusion. Other unstated quantities/budget remainnull;
+shoots are as-needed, not a new quota. Guarded normal service-verification UI saved
+only GoogleAds included/revision1 at11:24:55UTC. Independent SELECT-only readbacks and
+actual live preview confirm the changes. No SQL write, campaign/budget/provider change,
+other-client amendment or private invoice upload. #731 source owner notified to reread
+the changed package/fingerprint before its next guarded strategy amendment.
+
+Earlier dated-only empty schedule evidence was incomplete: live Teams November plan
+`RtQsmg8tGUOGDlEdPPLi-GUAGwaZ`, exact Cape bucket`tJqiBqbDGUeDvS7zEuosZ2UAFIe6`
+has8items(4DP/3F/1video), none imported to November monthly_deliverables. All8 have
+no start/due dates;5completed does not prove posted or client-approved. Latest sync
+d86d52be-e769-4b03-b414-294b83db5a5e is PARTIAL; configured sources omit November,
+automatic reconciliation excludes Client Schedule, and the actual November plan name
+omits the year required by the manual parser. Exact source/task IDs and required
+reviewed source/month admission are handed to EXISTING #325 staff lane in
+[6575792092](https://github.com/CGProductionHouse/CG-Dynamics/issues/325#issuecomment-6575792092).
+This is an OPEN upstream integration gap, not a finished sync or missing client work.
+No parallel importer/calendar source, guessed date/status, collector configuration,
+Microsoft write or client-disclosure bypass was introduced.
+
+Client source branch`codex/cape-package-calendar-20261102` adds compact imported-icon
+confirmed package service cards and a quieter responsive calendar. Only exact whole
+agreed service lines from a fully confirmed canonical receipt are displayed; no
+private notes/receipts, incidental mentions or unconfirmed extras. Unknown and explicit
+zero stay distinct. Disclosed undated content remains visible; failed reads remain
+errors. Empty shared months say no dates shared, with an optional real month canvas,
+not a giant blank grid or a claim no upstream work exists. Accepted Plan navigation,
+calendar-to-guide/file links and exact-client read-only projection remain.
+175 focused tests/zero skips; actual Plan/component and compiled App/SDK journeys at
+1440/375/390/430, local build/app-bundle/scoped lint/diff verified. Local fixtures
+do not prove actual Teams ingestion, true password/phone or fleet acceptance. New
+visuals and earlier PR924 post-image source remain NOT DEPLOYED; image RPC migration
+still NOT APPLIED. No Vercel operation/dependency/schema/permission/secret change.
+Exact Google Control Centre target remains unavailable; no guessed tracker write.
+
 ### 2 November — normal Chat authoring works; native weekly Chat task verified
 
 The old December task `6ad4bddd3950819193bdcce4a4b3e0c9` was completed/one-off.

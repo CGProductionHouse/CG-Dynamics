@@ -25,6 +25,19 @@ test('client package renders confirmed capacity while preserving unknown/zero an
     } }
     const before = JSON.stringify(confirmed)
     const render = raw => renderToStaticMarkup(createElement(ClientPackageSummary, { packageSettings: raw }))
+    const invoiceValues = { ...values, photo_posts_per_month: 3, design_posters_per_month: 4,
+      campaign_management_included: true,
+      other_agreed_deliverables: 'Social media management\nContent guide\nGoogle Ads' }
+    const invoiceRow = { ...confirmed, ...invoiceValues, verification: { ...confirmed.verification, field_states: buildPackageFieldStates(invoiceValues) } }
+    const invoiceHtml = render(invoiceRow)
+    for (const label of ['Social media management', 'Content guide', 'Google Ads', '7 per month', '1 per month']) assert.ok(invoiceHtml.includes(label), label)
+    assert.equal((invoiceHtml.match(/>Included</g) ?? []).length, 3)
+    assert.doesNotMatch(invoiceHtml, /PRIVATE|Campaign budget|Shoot days|To confirm|campaign_management_included/)
+    for (const text of ['No Google Ads', 'Google Ads not included', 'Content guide pending', 'Discuss social media management', 'PRIVATE: Google Ads']) {
+      const unknown = { ...invoiceValues, campaign_management_included: null, other_agreed_deliverables: text }
+      const row = { ...confirmed, ...unknown, verification: { ...confirmed.verification, field_states: buildPackageFieldStates(unknown) } }
+      assert.doesNotMatch(render(row), />Included</, text)
+    }
     const html = render(confirmed)
     assert.match(html, /1 per month/)
     assert.match(html, /4 per month/)

@@ -18,6 +18,15 @@ import { CALENDAR_HEADERS, monthGridCells } from '../../lib/scheduleCalendar'
 import { businessDateKey, businessMonthKey } from '../../lib/businessTime'
 import { useOptionalClientPortal } from '../../components/client/ClientPortalContext'
 import { ClientCalendarPostFiles } from '../../features/client-portal-library/ClientCalendarPostFiles'
+import calendarIcon from '../../assets/lucide/calendar-days.svg'
+import clockIcon from '../../assets/lucide/clock.svg'
+import imageIcon from '../../assets/lucide/image.svg'
+import videoIcon from '../../assets/lucide/video.svg'
+import chevronIcon from '../../assets/lucide/chevron-down.svg'
+
+function CalendarIcon({ src, className = 'h-5 w-5' }: { src: string; className?: string }) {
+  return <img src={src} alt="" aria-hidden="true" className={`${className} shrink-0 brightness-0 invert opacity-80`} />
+}
 
 const MONTH_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/
 
@@ -95,9 +104,7 @@ export default function ClientContentCalendarPage({ embedded = false, month: con
         <div className="max-w-3xl">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-report-accent">Content planning</p>
           <h2 className="mt-3 text-3xl font-black tracking-[-0.035em] text-white sm:text-5xl">Content calendar</h2>
-          <p className="mt-4 text-base leading-7 text-report-muted">
-            Upcoming deliverables and client-facing schedule details for {monthDisplayLabel(month)}.
-          </p>
+          <p className="mt-3 text-sm text-report-muted">{monthDisplayLabel(month)}</p>
         </div>
         {!embedded && <div className="flex items-center gap-2">
           <button
@@ -133,9 +140,6 @@ export default function ClientContentCalendarPage({ embedded = false, month: con
         <CalendarMessage message="Your content calendar is not available right now." />
       )}
 
-      <p className="mt-8 max-w-3xl text-xs leading-5 text-report-faint">
-        Schedule details reflect the client-visible plan currently available in CG Dynamics and may be refined as production progresses.
-      </p>
     </>
   )
   return embedded ? content : <ClientPortalShell client={client}>{content}</ClientPortalShell>
@@ -153,24 +157,25 @@ function CalendarSurface({
   unscheduledPosts: ClientCalendarPost[]
 }) {
   const hasVisibleItems = calendar.posts.length > 0 || calendar.events.length > 0
+  const hasDates = scheduledPosts.length > 0 || calendar.events.length > 0
+
+  const dates = <>
+    <div className="mt-6 hidden sm:block"><MonthGrid month={month} posts={scheduledPosts} events={calendar.events} /></div>
+    <div className="mt-6 sm:hidden"><Agenda month={month} posts={scheduledPosts} events={calendar.events} /></div>
+  </>
 
   return (
     <>
       {hasVisibleItems ? (
         <CalendarSummary calendar={calendar} scheduledCount={scheduledPosts.length} />
       ) : (
-        <div className="mt-8 flex flex-col gap-2 rounded-2xl border border-white/[0.08] bg-white/[0.035] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm font-semibold text-white">No client-visible items for this month yet.</p>
-          <p className="text-xs leading-5 text-report-muted">Confirmed dates will appear here when CG shares the plan.</p>
+        <div className="mt-6 flex items-center gap-5 rounded-3xl border border-white/[0.08] bg-[radial-gradient(ellipse_at_top_left,rgba(45,212,191,0.08),transparent_75%)] p-6 sm:p-8">
+          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04]"><CalendarIcon src={calendarIcon} className="h-7 w-7" /></span>
+          <div><p className="text-lg font-bold text-white">No dates shared yet</p><p className="mt-1 text-sm leading-6 text-report-muted">Your shared posts and shoot dates will appear here.</p></div>
         </div>
       )}
 
-      <div className="mt-6 hidden sm:block">
-        <MonthGrid month={month} posts={scheduledPosts} events={calendar.events} />
-      </div>
-      <div className="mt-6 sm:hidden">
-        <Agenda month={month} posts={scheduledPosts} events={calendar.events} />
-      </div>
+      {hasDates ? dates : <details className="mt-4"><summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-report-muted hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-report-accent"><CalendarIcon src={calendarIcon} className="h-4 w-4" />View month<CalendarIcon src={chevronIcon} className="h-4 w-4" /></summary>{dates}</details>}
       {unscheduledPosts.length > 0 && <Unscheduled posts={unscheduledPosts} month={month} />}
     </>
   )
@@ -187,12 +192,12 @@ function CalendarSummary({ calendar, scheduledCount }: { calendar: ClientMonthAh
   }, [calendar.posts])
 
   return (
-    <section className="mt-8 grid gap-3 sm:grid-cols-3">
-      <SummaryCard label="Visible items" value={String(calendar.posts.length)} />
-      <SummaryCard label="Scheduled" value={String(scheduledCount)} />
-      <SummaryCard label="Client events" value={String(calendar.events.length)} />
+    <section className="mt-6 grid grid-cols-3 gap-2 sm:gap-3">
+      <SummaryCard label="Posts" value={String(calendar.posts.length)} icon={imageIcon} />
+      <SummaryCard label="Dates set" value={String(scheduledCount)} icon={calendarIcon} />
+      <SummaryCard label="Shoots & events" value={String(calendar.events.length)} icon={videoIcon} />
       {typeCounts.length > 0 && (
-        <div className="sm:col-span-3 flex flex-wrap gap-2 pt-1">
+        <div className="col-span-3 flex flex-wrap gap-2 pt-1">
           {typeCounts.map(([label, count]) => (
             <span key={label} className="rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs text-report-muted">
               {label}: {count}
@@ -325,7 +330,7 @@ function Agenda({
 function Unscheduled({ posts, month }: { posts: ClientCalendarPost[]; month: string }) {
   return (
     <section className="mt-8">
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-report-faint">Date being finalised</p>
+      <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-report-faint"><CalendarIcon src={clockIcon} className="h-4 w-4" />Date being finalised</p>
       <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {posts.map(post => <PostChip key={post.id} post={post} month={month} />)}
       </div>
@@ -335,7 +340,8 @@ function Unscheduled({ posts, month }: { posts: ClientCalendarPost[]; month: str
 
 function PostChip({ post, month }: { post: ClientCalendarPost; month: string }) {
   return (
-    <div className="rounded-md border border-report-accent/15 bg-report-accent/[0.07] px-2.5 py-2">
+    <div className="rounded-xl border border-report-accent/15 bg-[linear-gradient(135deg,rgba(45,212,191,0.1),rgba(255,255,255,0.025))] px-3 py-3">
+      <div className="mb-2 flex items-center justify-between gap-2"><CalendarIcon src={post.type === 'video' || post.type === 'reel' ? videoIcon : imageIcon} className="h-4 w-4" /><span className="h-1.5 w-1.5 rounded-full bg-report-accent" aria-hidden="true" /></div>
       <p className="line-clamp-2 text-xs font-medium leading-4 text-white">{post.title}</p>
       <p className="mt-1 text-[0.68rem] leading-4 text-report-muted">
         {PACKAGE_DELIVERABLE_LABELS[post.type] ?? post.type} / {CLIENT_SAFE_STATUS_LABELS[post.status] ?? post.status}
@@ -357,7 +363,7 @@ function EventChip({ event }: { event: ClientCalendarEvent }) {
       )}
     </>
   )
-  const className = "block rounded-md border border-[#c17a49]/20 bg-[#c17a49]/[0.07] px-2.5 py-2 text-left transition hover:border-report-accent/35"
+  const className = "block rounded-xl border border-[#c17a49]/20 bg-[#c17a49]/[0.07] px-3 py-3 text-left transition hover:border-report-accent/35"
   return event.guidelineKey ? (
     <Link
       className={className}
@@ -371,11 +377,11 @@ function EventChip({ event }: { event: ClientCalendarEvent }) {
   )
 }
 
-function SummaryCard({ label, value }: { label: string; value: string }) {
+function SummaryCard({ label, value, icon }: { label: string; value: string; icon: string }) {
   return (
-    <div className="rounded-2xl border border-white/[0.08] bg-[linear-gradient(145deg,rgba(255,255,255,0.05),rgba(45,212,191,0.025))] p-5 shadow-[0_18px_55px_-42px_rgba(0,0,0,0.95)]">
-      <p className="text-xs text-report-faint">{label}</p>
-      <p className="mt-2 text-3xl font-black tracking-[-0.04em] text-white">{value}</p>
+    <div className="min-w-0 rounded-2xl border border-white/[0.08] bg-[linear-gradient(145deg,rgba(255,255,255,0.05),rgba(45,212,191,0.025))] p-3 shadow-[0_18px_55px_-42px_rgba(0,0,0,0.95)] sm:p-5">
+      <div className="flex flex-col-reverse items-start justify-between gap-2 sm:flex-row sm:items-center"><p className="text-[0.65rem] leading-4 text-report-muted sm:text-xs">{label}</p><CalendarIcon src={icon} className="h-4 w-4 sm:h-5 sm:w-5" /></div>
+      <p className="mt-2 text-2xl font-black tracking-[-0.04em] text-white sm:text-3xl">{value}</p>
     </div>
   )
 }
