@@ -1,5 +1,36 @@
 # Cape Lumber launch acceptance — 2 November 2026
 
+## Latest owner correction — posts and ads only
+
+The latest CA instruction removes the video and supersedes the historical invoice
+allowance and earlier 8-date/version9/version6 acceptance below. Changes are LIVE
+business data; no Vercel deployment, runtime code, schema or provider change.
+
+- Normal admin package save: explicit zero professional videos, 3 photos + 4 design
+  posters; social media management, Content Guide and Google Ads unchanged. Receipt
+  2026-11-02T14:00:33.527135+00:00. Unknown allowances/budget remain null.
+- Exact video template 24b5fdf5-8a85-4fbd-b7e4-0775f6a56eb7 deactivated; exact Nov25
+  video c0ac02d5-6fb7-42e5-8616-23c418085792 soft archived at14:04:55.287184UTC.
+  Microsoft ID weS0JsZdt0-9huS5fgT2WWUAJ0_H, source/date/status and unapproved/unposted
+  history retained. No hard deletion or upstream Microsoft write. Staff source lane
+  must not reintroduce this cancelled item from the old task.
+- Narrow owner-authorised admin transaction fenced package receipt, row versions and
+  complete strategy/context hashes. Activity logs and append-only amended revisions
+  honestly identify admin transport, retaining before/after data/context. Only video
+  section and four narrative fields changed per strategy; posts/Ads/staff notes kept.
+  Existing published snapshots remained until normal UI approval/publication.
+- November strategy c4daf0e5-9f1e-4d1c-bb2c-74b9b09ecfaa now published v10 at
+  14:07:06.190622UTC; December 50088b8b-ac9d-446b-a353-7b346aeac1b3 published v7 at
+  14:08:03.002494UTC. Independent published-snapshot readback: no enabled/video ideas,
+  3 photo + 4 poster ideas and Google Ads retained. Fresh canonical package provenance.
+- Actual Chrome staff client preview: package7posters, included social management /
+  Content Guide / Google Ads and no video. November calendar7posts/7dates/0shoots,
+  dates2/4/9/11/16/18/23; Nov25 has no video. This remains staff preview, not a new
+  password/client-role or physical-phone test. Historical performance unchanged.
+
+Data-only verification: independent production reads and actual client UI; no new
+runtime tests/build required. Docs diff checked. Control Centre target unavailable.
+
 ## LIVE — consolidated visual/calendar release and authorised strategy publication
 
 Supersedes the source-only and draft-only statuses below. Cape's legitimate staff

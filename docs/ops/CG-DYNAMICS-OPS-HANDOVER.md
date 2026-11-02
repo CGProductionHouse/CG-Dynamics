@@ -1,3 +1,26 @@
+### 2 November — latest owner correction: Cape posts and ads only, NO video
+
+Supersedes the earlier invoice-based 1-video/8-date receipts below. CA explicitly
+removed Cape's video in this chat. Normal admin package save confirms explicit zero
+videos at 14:00:33.527135UTC; 3 photos + 4 posters, social management, Content Guide
+and Google Ads remain unchanged. Unknown quantities and campaign budget stay null.
+Exact recurring video template 24b5fdf5-8a85-4fbd-b7e4-0775f6a56eb7 is inactive.
+Unapproved/unposted November25 video c0ac02d5-6fb7-42e5-8616-23c418085792 is soft
+archived, preserving source ID weS0JsZdt0-9huS5fgT2WWUAJ0_H and audit history.
+Staff/#325: do not reintroduce this superseded video via source import. No Microsoft write.
+
+Owner-authorised, compare-fenced admin transaction recorded template/slot activity and
+append-only strategy amendment receipts, refreshing actual package provenance; it did
+not publish via SQL or impersonate a staff session. Normal UI subsequently approved and
+published November v10 at14:07:06.190622UTC and December v7 at14:08:03.002494UTC.
+Independent readback confirms published video sections disabled/empty, all seven post
+ideas and Google Ads retained. Actual signed-in staff client preview shows package
+7 posters + included services, and calendar7posts/7dates/0shoots (2/4/9/11/16/18/23).
+No runtime/schema/auth/permission/provider/campaign/secret or Vercel change. Data-only
+acceptance used independent reads and actual client preview; no duplicate build/suite.
+Google Control Centre exact target remains unavailable; no guessed write.
+See [Cape correction receipt](CAPE-LUMBER-LAUNCH-REVIEW-2026-11-02.md).
+
 ### 2 November — Cape client updates LIVE; dates and both strategies published
 
 Current frontend85b107a3/tree777d140b is LIVE on .co.za via ONE2.5MBprebuilt upload,
