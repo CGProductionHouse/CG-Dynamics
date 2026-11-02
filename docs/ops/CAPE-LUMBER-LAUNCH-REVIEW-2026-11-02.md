@@ -1,5 +1,34 @@
 # Cape Lumber launch acceptance — 2 November 2026
 
+## Latest correction — dated master imported; explicit planned-date sharing prepared
+
+The master Planner board, not just the undated monthly working board, contains Cape's
+November dates. Exact8 items were reviewed/applied via the existing normal Microsoft
+Import UI, run`3b8b24f1-022d-420f-8d42-28cd240673f0`:8success/0failure/0conflict,
+finished12:05:16UTC. Dates2/4/9/11/16/18/23/25November;4DP/3F/1video. Independent
+SELECT verifies source IDs/client/month and no sent/approved/posted timestamps.
+Masterplan`1ZjZPTY4W02yLFfq1V7cYmUAAitG`, bucket`6MgkcGQPLUW7ogvIqcHdiGUAO_eU`.
+Its100-task response was capped: this scoped import does NOT certify whole-source sync.
+No duplicate undated working copies, removals, templates or Microsoft/config changes.
+
+Reproduced portal gap: imported planned dates cannot be shown without falsely sending
+content for approval. New source adds explicit manager sharing in existing Client
+Schedule, with optimistic revisions, atomic exact-client/month scope, real dates only,
+private default, safe format labels, retained audit and reversible hiding. A changed
+date needs fresh disclosure. Content/source/status fields remain unchanged. Migration
+`20261102120810_client_plan_date_sharing.sql` and actual Cape sharing are NOT APPLIED;
+separate exact approval required. Component phone/desktop, actual PostgreSQL and focused
+regressions pass; full final-candidate release verification remains required.
+
+Exact-approved post-image RPC migration IS LIVE. Previous metrics/auth/ACL are unchanged;
+advisor counts unchanged. New visual frontend has NOT yet been deployed. Baselinef53
+full frozen local acceptance passed all22browser fixtures; that is not new date-sharing
+candidate acceptance. No Vercel operations in this continuation.
+
+Normal Chat author attempted video/paid-search refinements but scope-drift guard refused
+the old no-video drafts; v6/v3 preserved. #7316576397097 contains exact author receipt.
+Do not treat an authoring attempt or saved weekly schedule as completed client strategy.
+
 ## Invoice correction and actual Teams source — supersedes earlier package/schedule assumptions
 
 Both owner-supplied PDFs INV-CLM2609/2610 were extracted and visually inspected.

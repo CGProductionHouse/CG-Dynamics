@@ -90,7 +90,7 @@ type ClientPortalRpcResult = { data: unknown; error: unknown }
 type ClientPortalRpc = (functionName: string, args?: Record<string, unknown>) => Promise<ClientPortalRpcResult>
 
 const CLIENT_PORTAL_POST_TYPES = new Set(['dp', 'photo', 'video', 'reel'])
-const CLIENT_PORTAL_POST_STATUSES = new Set(['awaiting_approval', 'approved', 'scheduled', 'posted'])
+const CLIENT_PORTAL_POST_STATUSES = new Set(['planned', 'awaiting_approval', 'approved', 'scheduled', 'posted'])
 const CLIENT_PORTAL_EVENT_TYPES = new Set(['shoot', 'content_run', 'client_event'])
 
 export async function fetchClientMonthAheadWithRpc(

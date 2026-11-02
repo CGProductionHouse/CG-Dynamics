@@ -1,3 +1,40 @@
+### 2 November — Cape dated master import completed; post-image backend LIVE
+
+Supersedes the working-November-board-only inference below. Exact recurring master
+`1ZjZPTY4W02yLFfq1V7cYmUAAitG` / Cape bucket`6MgkcGQPLUW7ogvIqcHdiGUAO_eU`
+contains real dated November tasks. Its100-row response is CAPPED, not complete source
+coverage. Existing normal Microsoft Import UI reviewed ONLY eight exact source IDs:
+4DP/3F/1video dated2/4/9/11/16/18/23/25November. Run
+`3b8b24f1-022d-420f-8d42-28cd240673f0` finished12:05:16UTC:8applied/0failed/0conflicts,
+no removals/new templates/source configuration/Microsoft writes. Independent SELECT
+verifies exact client/month/dates/master IDs and all approval/posting timestampsnull.
+Undated monthly working copies were NOT duplicated. #325 receipt6576732122 records
+the correction and narrow client-lane ownership; global partial sync remains separate.
+
+CA's exact post-image migration approval was executed: existing
+`client_published_report_posts(uuid)` now has optional safe public`image_url`.
+Normalized source SHA256`dd9426346c067fef78f2ce3b20d1facb18df2609d8107d4c5881549dd49305d9`;
+existing metric/auth body, owner, SECURITYDEFINER/searchpath and authenticated/service
+ACL preserved. Security advisor counts unchanged. No report/client content mutation.
+This backend completion does NOT deploy the new frontend or prove real-client login.
+
+One focused client source branch adds a manager-only “Share planned dates” action in
+EXISTING Client Schedule, with a dedicated dated/audited disclosure and exact row-version
+fence. No false sent/approved/posted evidence, staff titles, due-date fallback, second
+calendar or provider writes. A moved date hides until freshly reviewed/shared; hidden
+history cannot transfer clients/months. Defaults stay private. SOURCE ONLY: new
+`20261102120810_client_plan_date_sharing.sql` and actual Cape sharing need separate exact
+approval. Local PostgreSQL isolation/revision/atomicity/history checks and real component
+desktop375/390/430 acceptance pass. Final frozen full acceptance remains required.
+
+Normal ChatGPT author attempted package-correct Cape November/December amendments;
+`PACKAGE_STRATEGY_SCOPE_DRIFT` correctly refused both, preserving v6/v3 drafts. Source
+owner receipt6576397097; resolve existing canonical format reconciliation, not duplicate
+Codex authoring or package reconfirmation. Weekly normal-Chat task stays unchanged.
+No Vercel upload/build/promotion has occurred during this continuation. Fresh read-only
+billing showed18Oct–18Nov cycle,$10.18/$20included,$0/$15on-demand,PauseON; refresh
+before an exact #679 release packet. Google Control Centre target unavailable; no guess.
+
 ### 2 November — Cape invoice correction LIVE; November Teams source gap reproduced
 
 CA supplied September/October invoices INV-CLM2609/2610 and explicitly asked the
