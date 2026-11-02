@@ -5,7 +5,7 @@ export function reportPostImageUrl(value: unknown): string | null {
   try {
     const url = new URL(value)
     if (url.protocol !== 'https:' || url.username || url.password || url.port
-      || /(?:access_token|authorization|api_key|secret)|[?&][^=&]*%/i.test(url.search)) return null
+      || /(?:token|authorization|api[_-]?key|secret)|[?&][^=&]*%/i.test(url.search)) return null
     return ['fbcdn.net', 'cdninstagram.com', 'tiktokcdn.com', 'tiktokcdn-us.com', 'tiktokcdn-eu.com']
       .some(host => url.hostname === host || url.hostname.endsWith(`.${host}`)) ? url.href : null
   } catch { return null }
@@ -18,7 +18,7 @@ export function reportPostPermalink(value: unknown, platform: string | null): st
   try {
     const url = new URL(value)
     if (url.protocol !== 'https:' || url.username || url.password || url.port
-      || /(?:access_token|authorization|api_key|secret)|[?&][^=&]*%/i.test(url.search)) return null
+      || /(?:token|authorization|api[_-]?key|secret)|[?&][^=&]*%/i.test(url.search)) return null
     return hosts.some(host => url.hostname === host || url.hostname.endsWith(`.${host}`)) ? url.href : null
   } catch { return null }
 }

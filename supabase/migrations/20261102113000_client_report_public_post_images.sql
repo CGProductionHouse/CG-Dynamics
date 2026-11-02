@@ -94,7 +94,7 @@ begin
     then (select candidate from unnest(array[p.raw ->> 'full_picture', p.raw ->> 'thumbnail_url', p.raw ->> 'media_url'])
       with ordinality as media(candidate, position)
       where candidate ~ '^https://([a-zA-Z0-9-]+\.)*(fbcdn\.net|cdninstagram\.com)/[^[:space:]]+$'
-        and candidate !~* '(access_token|authorization|api_key|secret)|[?&][^=&]*%'
+        and candidate !~* '(token|authorization|api[_-]?key|secret)|[?&][^=&]*%'
       order by position limit 1)
     end
   from public.posts p join public.reports r on r.id = p.report_id

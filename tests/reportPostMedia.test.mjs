@@ -20,7 +20,8 @@ test('only public provider images and platform-matched HTTPS permalinks are elig
   assert.equal(media.reportPostImageUrl('https://scontent.cdninstagram.com/post.jpg'),'https://scontent.cdninstagram.com/post.jpg')
   for(const url of [null,{},'data:image/svg+xml,x','javascript:alert(1)','/internal.png','https://internal.sharepoint.com/raw.png',
     'http://scontent.fbcdn.net/a','https://fbcdn.net.evil.test/a','https://fbcdn.net@evil.test/a','https://user:password@fbcdn.net/a',
-    'https://fbcdn.net:8080/a','https://fbcdn.net/a?access_token=PRIVATE','https://fbcdn.net/a?access%5Ftoken=PRIVATE']) assert.equal(media.reportPostImageUrl(url),null)
+    'https://fbcdn.net:8080/a','https://fbcdn.net/a?access_token=PRIVATE','https://fbcdn.net/a?access%5Ftoken=PRIVATE',
+    'https://fbcdn.net/a?refresh_token=PRIVATE','https://fbcdn.net/a?api-key=PRIVATE']) assert.equal(media.reportPostImageUrl(url),null)
   assert.equal(media.reportPostPermalink('https://www.facebook.com/reel/123','facebook'),'https://www.facebook.com/reel/123')
   for(const url of ['javascript:alert(1)','https://evil.test/post','https://facebook.com.evil.test/post','https://www.instagram.com/p/123']) assert.equal(media.reportPostPermalink(url,'facebook'),null)
 })
