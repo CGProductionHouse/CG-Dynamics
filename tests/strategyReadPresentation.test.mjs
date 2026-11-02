@@ -29,7 +29,11 @@ test('actual strategy reader preserves exact content while using accessible prog
       const html = renderToStaticMarkup(createElement(GuidedStrategyView, { data, variant }))
       for (const field of GOLD_STANDARD_FIELDS) assert.ok(html.includes(`Exact ${field.key} direction`))
       for (const value of ['Preserve client request', 'Preserve priority', 'Confirm the real decision', 'Exact shoot date', '2026-10-12', 'Approved timing', 'One professional video with the actual approved scope', 'Three product photos', 'Exact production note', 'Actual photo requirements']) assert.ok(html.includes(value), value)
-      assert.match(html, /<details open=""/)
+      assert.doesNotMatch(html, /<details open=""/, 'Briefs start compact; full text remains one activation away')
+      assert.match(html, /line-clamp-2 group-open\/idea:line-clamp-none/)
+      assert.match(html, /role="tablist" aria-label="Content formats"/)
+      assert.match(html, /Photo posts/)
+      assert.doesNotMatch(html, /Choose a format to explore|Explore each part of the plan/)
       assert.ok((html.match(/<summary/g) ?? []).length >= 13)
       assert.doesNotMatch(html, /DISABLED PLAN|UNSELECTED DATE|private-event-id|<form|<textarea|bg-report-surface|bg-brand-surface/)
       assert.match(html, /<h3[^>]*>Monthly strategy/)
@@ -38,6 +42,31 @@ test('actual strategy reader preserves exact content while using accessible prog
       const hidden = renderToStaticMarkup(createElement(GuidedStrategyView, { data, variant, hideTopContent: true }))
       assert.doesNotMatch(hidden, /Actual content observation/)
     }
+  } finally { await server.close() }
+})
+
+test('concise reader does not duplicate the same direction or invent completed work', async () => {
+  const server = await createServer({ configFile: false, server: { middlewareMode: true, hmr: false }, esbuild: { jsx: 'automatic' }, optimizeDeps: { noDiscovery: true } })
+  try {
+    const { ClientStrategyBrief, ClientActionPlan } = await server.ssrLoadModule('/src/components/strategy/ClientStrategyBrief.tsx')
+    const { emptyStrategyData } = await server.ssrLoadModule('/src/lib/strategyEngine.ts')
+    const data = emptyStrategyData()
+    data.goldStandard.objective = 'Exact objective that stays intact.'
+    data.goldStandard.coreMessage = 'The exact shared direction.'
+    data.strategyGoingForward = data.goldStandard.coreMessage
+    const before = JSON.stringify(data)
+    const html = renderToStaticMarkup(createElement(ClientStrategyBrief, { data }))
+    assert.equal(html.split('The exact shared direction.').length - 1, 1)
+    assert.doesNotMatch(html, /Strategy details|Our direction/)
+    const actionHtml = renderToStaticMarkup(createElement(ClientActionPlan, { plans: [
+      { key: 'photo_content', section: { enabled: true, items: ['Exact idea with a condition; do not imply stock availability.'], notes: '' } },
+      { key: 'campaign_recommendation', section: { enabled: true, items: [], notes: 'Exact campaign note without invented budget.' } },
+    ] }))
+    assert.match(actionHtml, /1 idea/)
+    assert.match(actionHtml, /Exact campaign note without invented budget/)
+    assert.doesNotMatch(actionHtml, /per month|completed|approved|posted|<svg/)
+    assert.equal(renderToStaticMarkup(createElement(ClientActionPlan, { plans: [] })), '')
+    assert.equal(JSON.stringify(data), before)
   } finally { await server.close() }
 })
 
