@@ -1,3 +1,57 @@
+### 2 November — weekly company ChatGPT strategy task restored
+
+The old `December Strategy Rollout` task `6ad4bddd3950819193bdcce4a4b3e0c9`
+was a completed one-off with disabled schedule controls, not active weekly automation.
+Created and independently read back one active company ChatGPT Scheduled task:
+**CG Dynamics — Weekly Client Strategies**, ID `6ae862ef803081908fe734ac6035a4cd`,
+Mondays **08:00 Africa/Johannesburg**, no end date, next scheduled run 9 November.
+[Task settings/history](https://chatgpt.com/scheduled?automationId=6ae862ef803081908fe734ac6035a4cd&automationSource=cloud).
+Used its normal **Run now** action for immediate catch-up;
+[actual running chat](https://chatgpt.com/c/6ae86397-f288-83e9-af0a-023fb9801fca)
+shows responding/reviewing strategy briefs. This proves scheduling/start, not completed
+client saves or publication; inspect the resulting readback receipts in #731.
+
+Saved instructions use dynamic current/next Johannesburg months, complete canonical
+roster, published findings/real posts, latest client research/Drive/meeting context,
+active primary-source research, substantive package-matched plans, guarded draft saves/
+selected amendments and exact ID/version/content readbacks. Preserve staff edits,
+published snapshots, held/once-off scope and source/security boundaries. Continue other
+eligible clients when one is blocked; no audit-only success or repeated package asks.
+The new task uses existing company ChatGPT/Dynamics tools, not paid API generation or
+a duplicate Codex author. No automatic approval/publication, fabricated dates/metrics,
+Microsoft/provider/permission/secret/Vercel actions or client communications. Other
+staff tasks, industry research and the old completed task were preserved. No Codex
+overnight automation was revived. #731 retains source/authoring ownership.
+
+### 2 November — visual post cards verified locally; not deployed
+
+CA requested less text, actual post images and imported icons in client Performance.
+Focused branch `codex/client-visual-post-cards` under #668 replaces duplicate hero/
+ranked captions with one media card per post, compact metrics with expandable exact
+definitions, expandable captions, keyboard-safe image enlargement and provider-matched
+original-post links. Overview reuses the same component; staff curation and published
+commentary remain. Nine unchanged Lucide 0.468.0 SVG imports with upstream ISC license;
+no package change, custom icon paths, autoplay, embeds or new media proxy. Images load
+lazily from the provider without a portal Referer and fall back when absent/expired.
+
+The existing client projection omitted available synced public images. Optional
+`image_url` is prepared end-to-end; migration `20261102113000_client_report_public_post_images.sql`
+adds only that return column to the existing authenticated exact-client published-report
+RPC. Metric expressions remain identical. Internal/token-bearing URLs, excluded posts,
+uncovered Pacific dates and non-Meta media are withheld. This migration is SOURCE ONLY:
+no production SQL/schema/provider/content/auth/permission write or Vercel operation.
+An exact approved migration rollout and the separate reviewed frontend release remain
+necessary for real-client image display. Older backends retain the clean fallback.
+
+Local verification: 231 relevant tests pass, zero skips/failures, including actual
+disposable PostgreSQL role/ownership/publication/cutoff/media checks; actual gallery,
+cutoff and full portal preview fixtures pass at desktop/375/390/430. TypeScript/Vite
+actual app bundle, scoped lint and diff checks pass. This focused receipt does not
+reattribute the earlier full 4,201-test release run to new source. Actual Cape public
+images/95/83/69 figures were used for local desktop/390 visual proof, not synthetic
+creative or a live deployment. #731 authoring and staff/Teams/calendar remain separate.
+No guessed Google Control Centre update; exact reference remains unavailable.
+
 ### 2 November — publication repair LIVE; Cape October PUBLISHED
 
 PR922/source `3c58c898` is live as `dpl_ARCpGYJm5BHHgYvgR71UZBhifREC`.

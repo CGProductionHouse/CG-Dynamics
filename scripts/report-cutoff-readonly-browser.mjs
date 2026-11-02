@@ -117,7 +117,7 @@ try {
       assert.equal(await page.locator('[role="tabpanel"]').evaluateAll((panels,id)=>panels.filter(panel=>panel.id===id).length,target),1,'Each service controls one existing panel')
     }
     assert.equal(await page.getByText('Best platform', { exact: true }).count(), 1, `${width} observed reach keeps its headline`)
-    assert.equal(await page.getByText('Top overall performer', { exact: true }).count(), 1, `${width} strong observed content keeps its badge`)
+    assert.equal(await page.getByRole('heading', { name: 'Top performing content', exact: true }).count(), 1, `${width} strong observed content keeps its top-content presentation`)
     assert.equal(await page.getByText('Uncovered later result', { exact: true }).count(), 0)
     assert.doesNotMatch(await page.locator('body').innerText(), /recommended weekly rhythm|Build posting consistency|compounding visibility|Where to focus next/)
     assert.ok((await page.locator('body').innerText()).includes('23 September 2026'))

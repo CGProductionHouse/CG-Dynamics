@@ -4,6 +4,7 @@ import type { StrategyData } from './strategyEngine'
 import { reportPostToStatsPost } from './reportStats'
 import { projectClientReviewQueue } from './contentReviews'
 import { listManualMetricsForClientMonth, type ReportManualMetric } from './db/manualMetrics'
+import { isWithinMetaProviderPeriod } from '../../supabase/functions/_shared/metaPeriod'
 
 export { previewClientId, portalPreviewPath } from './clientPortalPreviewPolicy'
 
@@ -63,15 +64,23 @@ export async function getPreviewReport(clientId: string, reportId: string): Prom
     }
     return { data: { ...report, posts: result.data.posts.map(post => {
       const stats = reportPostToStatsPost(post)
+      const excluded = decisions.get(post.id) ?? false
+      const raw = post.raw ?? {}
+      // Mirror client_published_report_posts, not the staff raw-media authority.
+      const imageAllowed = !excluded && (post.platform === 'facebook' || post.platform === 'instagram')
+        && (raw.source === 'meta_sync' || 'synced_at' in raw)
+        && typeof post.publish_time === 'string'
+        && isWithinMetaProviderPeriod(post.publish_time, report.period_start, report.period_end)
       return {
         id: post.id, platform: post.platform, publish_time: post.publish_time,
         post_type: stats.post_type, caption: post.caption, permalink: post.permalink,
+        image_url: imageAllowed ? stats.imageUrl : null,
         impressions: stats.impressions, reach: stats.reach, engagements: stats.engagements,
         engagement_known_subtotal: stats.engagementKnownSubtotal,
         engagement_definition_id: stats.engagementDefinitionId, engagement_definition_label: stats.engagementDefinitionLabel,
         engagement_source: stats.engagementSource, engagement_observed_at: stats.engagementObservedAt,
         engagement_coverage: stats.engagementCoverage, engagement_completeness: stats.engagementCompleteness,
-        excluded: decisions.get(post.id) ?? false,
+        excluded,
       }
     }) }, error: null }
   } catch {

@@ -1,5 +1,27 @@
 # Cape Lumber launch acceptance — 2 November 2026
 
+## Visual post-gallery candidate — 2 November, source only
+
+CA requested a more visual Facebook content section. Actual local report page now
+shows Cape's real 26/27/6 October post images with verified 95/83/69 interactions,
+one card per post, imported Lucide icons, compact metrics/exact expandable definition,
+expandable captions, image enlargement and safe new-window original-post links.
+No invented artwork, figures, playback or client content changes. Actual desktop/390
+visuals are local proof, not production screenshots of the new feature.
+
+231 relevant tests pass with no skips; real disposable PostgreSQL checks enforce
+client/role/publication/exclusion/Pacific-cutoff/public-media isolation. Actual gallery,
+report-cutoff and full portal preview browser fixtures pass desktop/375/390/430.
+Build/actual app bundle/scoped lint/diff pass. Existing full-release receipt below is
+historical and is not claimed for this changed candidate. No Vercel was used.
+
+Prepared migration `20261102113000_client_report_public_post_images.sql` adds only
+an optional public-provider image URL to the existing safe report-post projection.
+Existing columns and metric expressions are retained. Production application needs
+exact approval; frontend release remains separately gated. Neither occurred. Current
+live October publication, Google/Meta observations and client review boundaries below
+are unchanged.
+
 ## Current completion — Publish repaired, released and used successfully
 
 Supersedes the initial native-popup handoff recorded below. CA explicitly

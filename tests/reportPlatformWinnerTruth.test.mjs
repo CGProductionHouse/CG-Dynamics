@@ -52,8 +52,8 @@ test('platform ranking requires observed finite reach, preserving zero and stabl
     assert.match(render([], { normalizedFactsAttempted: true, showAdminDiagnostics: true }), /Verified platform figures are unavailable for this month/)
     const lowSignal = render([post('facebook', 0)])
     assert.match(lowSignal, /Content learning/)
-    assert.doesNotMatch(lowSignal, /Top overall performer/)
+    assert.doesNotMatch(lowSignal, /Top performing content/)
     assert.doesNotMatch(lowSignal, />TOP<\/div>/)
-    assert.match(render([post('facebook', 100)]), /Top overall performer/)
+    assert.match(render([post('facebook', 100)]), /Top performing content/)
   } finally { await server.close() }
 })
