@@ -1,3 +1,24 @@
+### 2 November — planned-date code accepted; final strategy provenance defect reproduced
+
+PR927 merged85b107a3, exact frozen399906c5 tree777d140b:4236total/4212pass/24explicit
+skips/0fail/cancel/todo; mandatory disposable PostgreSQL, actual app build and ALL23
+browser fixtures pass with stable source. Exact owner-approved calendar migration is
+LIVE; existing projection ACL preserved, new sharing fields all private/0shared. Actual
+Cape8date sharing awaits the one consolidated frontend release, not SQL impersonation.
+
+Normal ChatGPT author completed/read back Cape Novemberv8/Decemberv5 (source receipt
+#7316577307639), only five selected fields each; independent full diffs confirm all other
+narrative/notes/ideas preserved. CA explicitly approved publication of BOTH exact drafts.
+First normal December approval correctly refused an old package provenance receipt.
+Neither strategy was published or overwritten. Editorial connector verifies fresh sources
+but persists old seed context. Focused unowned #731 engineering branch repairs this
+specific defect and enables explicit zero-text-change provenance refresh through EXISTING
+audited RPC. Existing approval guard remains; no package/permission/schema bypass.
+Two backend files only need exact reviewed MCP release approval; other38hosted files,
+custom auth/JWTfalse and all secrets stay unchanged. Hostedbaselinev74/40files read and
+the two targets match source. No new Vercel operation; final source/production receipts
+will supersede these prepared-state entries.
+
 ### 2 November — Cape dated master import completed; post-image backend LIVE
 
 Supersedes the working-November-board-only inference below. Exact recurring master

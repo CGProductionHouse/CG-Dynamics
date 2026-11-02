@@ -1,5 +1,23 @@
 # Explicit ChatGPT strategy field amendments — #731
 
+## 2 November — verified source receipt refresh
+
+Cape's successful normal-Chat narrative amendment exposed a real publication failure:
+the editorial action checked fresh package/evidence but retained the old seed receipt.
+The unchanged approval trigger correctly refused “Strategy provenance does not match
+the current confirmed package receipt”. Do not bypass it or reconfirm the package.
+
+The focused fix refreshes only canonical sources, intelligence evidence, coverage and
+source windows from the verified preparation. It preserves narrative, notes, unknown
+seed extensions and historical generation provenance. A second source-metadata hash
+fence refuses a receipt-only race even when the earlier content fingerprint matches.
+An explicitly requested provenance-only refresh may compare one exact current field
+with an identical replacement; it reports zero changed text fields and context_refreshed.
+If both text and provenance already match, no write occurs. Canonical revision replay
+retains the original zero-change receipt. Approval/publication remain separate, unchanged
+guards. The source patch changes no SQL, permissions, actor resolution or credentials.
+Normal ChatGPT still authors actual strategies; Codex supplies no replacement client plan.
+
 The normal company ChatGPT acceptance exposed a real capability gap: automatic
 `submit_monthly_strategy_draft` correctly preserves populated staff fields. It
 cannot implement a requested editorial correction to those same fields. Do not
