@@ -1,5 +1,26 @@
 # Company ChatGPT monthly strategy workspace — #731
 
+## 2 November — latest: tool-budget-safe end-to-end batches
+
+Supersedes Monday-only scheduling below. Actual first run #731comment6580576482
+reached its tool-call limit after34/124briefs,17/62clients:20prefilled states,
+14held states,0new saves and0completed external source checks. Those17clients are
+TRIAGE ONLY, not fully researched; AV is not automatically the research-complete cursor.
+
+Same task6ae868361b6c81918b6b333508a47a50 now named **CG Dynamics — Research & Strategy**,
+enabled weekdays08:00/11:00/14:00/17:00 Africa/Johannesburg, same normal Chat. Actual
+scheduling-tool update/readback corroborated by independent UI rule/timezone/enabled/
+same-chat readback. Initial scheduling update preserved the earlier prompt and omitted
+the new batch clause; this was caught and repaired. After another save+page reload,
+the complete7067-character rendered prompt matches exactly with EXECUTION BUDGET present.
+
+ONE eligible client end-to-end per run, second only if budget permits; reserve5calls
+for save/readback/checkpoint. No broad brief-first audit; distinguish source review
+from prefilled fields and resume earliest source-unreviewed eligible client. Quiet
+changed-source mode after actual weekly source coverage completes. No guaranteed
+weekly throughput or paid overflow. One first bounded Run now is responding; no
+completed source batch/new save claimed until independent receipt. Do not duplicate it.
+
 ## 2 November — every-client research/progress and strict CG creative credit
 
 CA requires Cape-level source/progress checking for every eligible client's current/

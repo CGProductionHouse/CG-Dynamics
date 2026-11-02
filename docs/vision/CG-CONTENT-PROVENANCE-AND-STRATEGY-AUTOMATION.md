@@ -17,8 +17,8 @@ page's reach, views, leads or sales as the result of CG-made content.
 
 ## Verified starting point
 
-- The existing normal company ChatGPT task is **CG Dynamics Weekly Strategies — Chat**,
-  Monday08:00 Africa/Johannesburg. Keep it as the author; do not add a Codex/paid-API
+- The existing normal company ChatGPT task is now **CG Dynamics — Research & Strategy**,
+  weekdays08:00/11:00/14:00/17:00 Africa/Johannesburg, same chat. Keep it as the author; do not add a Codex/paid-API
   author or reactivate the failed Work task. Source/connector availability is tested
   at execution; changing its prompt is not a successful unattended run.
 - The current report statistics rank all eligible posts except explicit exclusions.
@@ -113,6 +113,18 @@ report/content approvals remain intact; no silent rewrite of approved narrative.
 
 ## Research and strategy loop for every client
 
+Actual first-run constraint: the Monday-only task exhausted its tool budget after
+34brief reads across17clients, with zero external checks/new saves. That is triage,
+not completed research. One giant fleet pass is not a viable execution design.
+The same task now runs bounded workday continuations: finish ONE eligible client
+end to end per run, start a second only with sufficient budget, reserve at least
+five calls for any save/readback/checkpoint. Do not bulk-scan briefs first. Track
+brief-read separately from source-checked, strategy-reviewed and saved. Resume the
+earliest eligible client missing its source review, not the last merely opened brief.
+Once the weekly source cycle is complete, continuation runs check actionable changes
+and otherwise exit quietly. Actual throughput and degraded-source coverage are
+measured; twenty weekly wakes do not guarantee a completed fleet or justify paid overflow.
+
 The weekly author must page the canonical roster to completion, with a durable cursor
 and per-client/current-month/next-month coverage. Continue unfinished clients before
 repeating Cape or another easy client. A hard timeout or unavailable page is recorded as
@@ -176,8 +188,8 @@ account consent may be required; no routine manual copying/tagging should be des
 
 ## Ordered implementation inside the existing launch mission
 
-1. **Standing author policy:** strengthen the existing company Chat task; retain its
-   Monday08:00 schedule, normal Chat route and no-paid-generation rule. Read back saved
+1. **Standing author policy:** strengthen the existing company Chat task; use bounded
+   weekday08/11/14/17 continuation batches, normal Chat route and no-paid-generation rule. Read back saved
    settings. No new competing author. Retire the expired26Oct Codex overnight heartbeat.
 2. **Strict attribution contract locally:** create deterministic regression fixtures
    for unknown-vs-verified origin and shared ranking/strategy filtering. Prepare the
