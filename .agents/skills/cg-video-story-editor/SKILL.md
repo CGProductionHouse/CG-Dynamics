@@ -5,6 +5,8 @@ description: Plan, assemble, review, and hand off CG Production House client vid
 
 # CG video story editor
 
+**3 November end-of-day rejection:** read [the actual failure and takeover](references/owner-rejection-20261103.md) before resuming any rejected-batch edit. CA requires roughly30seconds, a specific useful hook/purpose and meaningful brand-specific visual craft. The13second Action R08B was sent and rejected; its prior creative/release PASS is revoked. No resends. Read the actual file duration; technical passes, an Organic PNG and a title reveal do not establish a successful hook, story or effects treatment.
+
 **Before any client edit:** load the existing exact-client library using [the required client-library load](references/client-asset-library.md#load-the-established-client-do-not-research-it-from-zero) and `scripts/load_client_library.py`. Reuse saved approved assets and keep/change/reject decisions. Refresh only changed/missing assets and current task-scoped Dynamics facts; do not restart client branding. Production story preflight requires the resulting client-context snapshot. Apply the current [owner-rule register](references/owner-rule-register.json), including system-first correction and one-video-at-a-time execution.
 
 **Mandatory before client-review delivery:** read the [2 November creative release checkpoint](references/creative-release-checkpoint.md). Owner-approved references, actual motion and heard musical fit, rendered-copy review, distinct batch covers and correctly named forwardable packages are separate gates. Technical checks and permission to send do not clear missing creative evidence. Rejected candidates stay blocked from resend.
