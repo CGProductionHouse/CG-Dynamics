@@ -39,13 +39,13 @@ The creative-review JSON attributes `reviewer_kind` as `author_editorial` or `in
 
 `scripts/test_edit_contract.py` is a complete **synthetic schema/integration example**, not a client story/music template. It runs the portable operators, encodes actual outputs and calls the existing release entry point. Its external identity/audio gates are stubbed only for fixture isolation, and its silent WAV is not accepted creative music.
 
-## Two portable implementations now available
+## Four portable implementations now available
 
-`scripts/visual_treatments.py` extracts two tested image operations from the existing library. Import it into the existing renderer; it does not encode, choose a brand, select music or become another editor. Pillow and NumPy were already in the proof stack. Callers provide the approved font and colours explicitly; no fallback font is substituted.
+`scripts/visual_treatments.py` extracts four tested image operations from the existing library. Import it into the existing renderer; it does not encode, choose a brand, select music or become another editor. Pillow and NumPy were already in the proof stack. Callers provide the approved font and colours explicitly; no fallback font is substituted. Caller-authored glyph masks/RGBA artwork also support the client's existing exact Canva-rendered type when no local font binary is licensed.
 
 ```python
 from PIL import Image, ImageFont
-from visual_treatments import type_reveal, registered_panels
+from visual_treatments import type_reveal, registered_panels, text_aperture, glyph_shine
 
 font = ImageFont.truetype(approved_font_path, approved_size)
 layer = type_reveal(frame.size, [(word, approved_rgb)], font,
@@ -59,6 +59,16 @@ frame = registered_panels(outgoing, incoming, time=transition_seconds,
                           arrivals=arrivals, centres=centres,
                           half_width=half_width, shear=shear,
                           resolve_at=resolve_at)
+
+# glyph_mask is the actual same-canvas approved type alpha, mode L.
+# Keep the same advancing source time before, inside and after the reveal.
+frame = text_aperture(current_source_frame, glyph_mask, approved_background_rgb,
+                      scale=planned_scale, pivot=inside_filled_letter_stroke)
+
+# Preserve the RGBA title's original alpha; illuminate only its visible glyphs.
+title_layer = glyph_shine(approved_title_layer, centre=planned_centre,
+                         width=planned_width, shear=planned_shear,
+                         strength=planned_strength, highlight_rgb=approved_highlight)
 ```
 
-Type provides a clipped, staggered vertical resolve with graphic-only shutter integration and a sharp hold; keep the actual approved font/colour, meaningful words, legibility and safe areas. Panels provide registered incoming-picture apertures rather than separately fitted repeated images; select timing/geometry around the source action. The default has no white flash. Neither operation is automatically an improvement; either may lose to the plain cut. Their linked cards retain source-specific failures. These code-rendered layers are rasterized in the export, **not native editable text**. Staff handover needs the recipe/source/fonts or a separately witnessed native implementation. The other43 families remain card/recipe/native-proof dependent, not newly converted portable APIs or creative mastery.
+Type provides a clipped, staggered vertical resolve with graphic-only shutter integration and a sharp hold; keep the actual approved font/colour, meaningful words, legibility and safe areas. Panels provide registered incoming-picture apertures rather than separately fitted repeated images; select timing/geometry around the source action. The default has no white flash. The aperture scales about an opaque stroke, rejects a letter-counter pivot and resolves to the unchanged current source image. Shine is a soft glyph-confined highlight with unchanged alpha, not a moving white rectangle over footage. None is automatically an improvement; each may lose to its plain control. Their linked cards retain source-specific failures. These code-rendered layers are rasterized in the export, **not native editable text**. Staff handover needs the recipe/source/fonts or a separately witnessed native implementation. The other41 families remain card/recipe/native-proof dependent, not newly converted portable APIs or creative mastery. The new [licensed-source integration controls](../../../../scripts/video-editing/studio-phase2/PORTABLE-TYPE-OPERATORS-20261103.md) record dark-aperture and reading limitations rather than promoting them as client hooks.

@@ -5,6 +5,8 @@ description: Design and test purposeful animated captions, readability mattes an
 
 # Kinetic caption finishing
 
+**Production integration3November:** shared `cg-video-story-editor/scripts/visual_treatments.py::glyph_shine` accepts the actual approved RGBA word layer, soft highlight trajectory and explicit brand highlight. It keeps alpha unchanged and cannot paint outside its glyphs before encoding. [Real licensed-source controls and limitations](../../PORTABLE-TYPE-OPERATORS-20261103.md) include the flat-title control; lossy edge changes, actual reading comfort, source/story fit, native text and heard timing still require their separate checks. This does not qualify flicker, person occlusion or all five tutorial treatments as mastered.
+
 **Status, 26 October 2026:** Five owner-shared Solid Coast Editing TikToks were visually sampled in the browser with audio muted. A protected Daisy A/B tested staggered rise and local gradient. Fully synthetic steady-title controls now compare a masked shine and a restrained opacity accent. A natural foreground-over-type source was screened and rejected. Full-speed audible review and native staff reopen have not passed. This is a source-grounded construction and selection card, **not a mastered effect pack**.
 
 Choose the buyer sentence and real picture action first. Assign each title one job: interrupt with a concrete hook, clarify a choice, identify the business, or resolve the CTA. Compare a clean title with the treatment over the **same** shot, wording, duration and music. Retain only the version that reads better at normal speed and phone size. Use the client's approved font/colour and editable text layers; a technically successful raster export alone is not a staff handover.

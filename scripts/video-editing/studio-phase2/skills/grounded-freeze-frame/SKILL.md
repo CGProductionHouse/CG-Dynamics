@@ -1,3 +1,8 @@
+---
+name: nolan-grounded-freeze-frame
+description: Test a grounded subject hold against a continuing real background, rejecting cut edges, duplicate anatomy or absent background motion rather than claiming a successful freeze.
+---
+
 # Grounded moving-background freeze — source-specific rejection
 
 ## 29 October office clean-plate screen

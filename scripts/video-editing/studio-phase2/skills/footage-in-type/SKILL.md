@@ -5,6 +5,8 @@ description: Build and review a short moving-footage reveal through editable typ
 
 # Footage inside type — rendered, not mastered
 
+**Production integration3November:** shared `cg-video-story-editor/scripts/visual_treatments.py::text_aperture` accepts caller-approved glyph alpha and the same advancing source frame. It rejects a counter/hole pivot and can resolve exactly to full picture. The [licensed-source controls](../../PORTABLE-TYPE-OPERATORS-20261103.md) run this operation, not a copied practice renderer. The thin/dark `POUR` hold remains a rejected opening treatment; correct geometry is not useful storytelling. Native text/editability, source suitability, sound and physical-phone gates remain.
+
 **Lifecycle:** owner reference visually studied → original local proof rendered → **human motion/audio review pending** → client use untested → mastered **NO**.
 
 The owner's [Solid Coast reference](https://www.tiktok.com/@solid.coast.editing/video/7558410119273549079) visibly uses a text-track alpha matte to reveal cyclist footage inside `INSIDE`, then keyframed type scale/position to push into full-frame footage. Its sound was not reviewed. The later [Miracamp walk-through-text tutorial](https://www.tiktok.com/@miracampschool/video/7663481654098349344) is a distinct subject-in-front-of-text composition; do not conflate its foreground mask with this text aperture.

@@ -16,7 +16,7 @@ from PIL import Image, ImageDraw, ImageFont
 from edit_contract import sha, check_render, validate_edit, picture_hashes
 from preflight_story import validate, REQUIRED_TEXT
 import check_client_release as release
-from visual_treatments import type_reveal, registered_panels
+from visual_treatments import type_reveal, registered_panels, text_aperture, glyph_shine
 
 REPO = Path(__file__).resolve().parents[4]
 SCRIPTS = Path(__file__).resolve().parent
@@ -49,19 +49,30 @@ class EditContract(unittest.TestCase):
                 shot_index=next(j for j,s in enumerate(render['shots']) if s['timeline_in_frame']<=i<s['timeline_out_frame'])
                 image = Image.new('RGB',(128,224),[(12,25,40),(25,40,15),(40,15,25)][shot_index])
                 ImageDraw.Draw(image).ellipse((i%90,120,i%90+20,140),fill=(130,140,150))
-                for choice in render['skill_applications'] if effect else []:
+                for choice in render['skill_applications']:
                     a,b=choice['frames'];p=choice['parameters']
                     if not a<=i<b:continue
-                    if choice['role']=='type':
+                    operator=choice['operator']
+                    if operator=='glyph_shine':
+                        title=type_reveal(image.size,[(p['text'],tuple(p['rgb']))],cls.font,tuple(p['position']),9,0,shutter=0)
+                        if effect:title=glyph_shine(title,p['centre'],p['width'],p['shear'],p['strength'],tuple(p['highlight_rgb']))
+                        image=Image.alpha_composite(image.convert('RGBA'),title).convert('RGB')
+                    elif not effect:continue
+                    elif operator=='type_reveal':
                         font=ImageFont.truetype(str(REPO/'scripts/video-editing/studio-phase2/scene/assets'/p['font']),p['size'])
                         layer=type_reveal(image.size,list(zip(p['text'],map(tuple,p['rgb']))),font,tuple(p['position']),
                             (i-a)/render['fps'],p['start'],stagger=p['stagger'],entrance=p['entrance'],shutter=p['shutter'],fps=render['fps'])
                         image=Image.alpha_composite(image.convert('RGBA'),layer).convert('RGB')
-                    elif choice['role']=='composition':
+                    elif operator=='registered_panels':
                         incoming=image
                         outgoing=Image.new('RGB',image.size,tuple(p['outgoing_rgb']))
                         ImageDraw.Draw(outgoing).ellipse((i%90,120,i%90+20,140),fill=(130,140,150))
                         image=registered_panels(outgoing,incoming,(i-a)/render['fps'],p['arrivals'],p['centres'],p['half_width'],p['shear'],p['resolve_at'])
+                    elif operator=='text_aperture':
+                        title=type_reveal(image.size,[(p['text'],tuple(p['rgb']))],cls.font,tuple(p['position']),9,0,shutter=0)
+                        mask=title.getchannel('A')
+                        point=next((x,y) for y in range(image.height) for x in range(image.width) if mask.getpixel((x,y))==255)
+                        image=text_aperture(image,mask,tuple(p['background']),p['scale'],point)
                 process.stdin.write(image.tobytes())
             process.stdin.close()
             if process.wait():raise RuntimeError('Fixture encode failed')
@@ -83,11 +94,15 @@ class EditContract(unittest.TestCase):
         plan['skill_applications']=[]
         for shot in plan['shots']:
             shot['intent']=dict(visible_action='Synthetic moving circle',viewer_inference=shot['story_role'],graphic_job='Reveal or clean picture as planned',sound_job='Silent fixture; not a sound proof')
-        for id,skill,role,frames in [('hook-type','graphic-transform-blur','type',[0,75]),('body-panels','registered-slanted-panels','composition',[300,325])]:
+        for id,skill,role,frames,operator in [('hook-type','graphic-transform-blur','type',[0,75],'type_reveal'),('body-panels','registered-slanted-panels','composition',[300,325],'registered_panels'),('body-aperture','footage-in-type','composition',[400,425],'text_aperture'),('body-shine','kinetic-caption-finishing','type',[550,575],'glyph_shine')]:
             card=Path(plan['skill_library_root'])/skill/'SKILL.md'
-            parameters=({'text':['SEE','WHY'],'rgb':[[255,255,255],[40,190,220]],'font':'SpaceGrotesk.ttf','size':16,'position':[8,30],'start':.1,'stagger':.08,'entrance':.35,'shutter':180}
-                if role=='type' else {'outgoing_rgb':[12,25,40],'arrivals':[0,.16,.32],'centres':[20,64,108],'half_width':18,'shear':.05,'resolve_at':.8})
-            plan['skill_applications'].append(dict(id=id,skill_id=skill,card_sha256=sha(card),implementation=self.bind(SCRIPTS/'visual_treatments.py'),purpose='Show this story proof',mechanism=id,role=role,frames=frames,parameters=parameters))
+            parameters={
+                'type_reveal':{'text':['SEE','WHY'],'rgb':[[255,255,255],[40,190,220]],'font':'SpaceGrotesk.ttf','size':16,'position':[8,30],'start':.1,'stagger':.08,'entrance':.35,'shutter':180},
+                'registered_panels':{'outgoing_rgb':[12,25,40],'arrivals':[0,.16,.32],'centres':[20,64,108],'half_width':18,'shear':.05,'resolve_at':.8},
+                'text_aperture':{'background':[10,20,28],'scale':3,'text':'WHY','rgb':[255,255,255],'position':[8,30],'pivot':'first fully opaque glyph pixel'},
+                'glyph_shine':{'centre':30,'width':18,'shear':.2,'strength':.6,'highlight_rgb':[230,245,250],'text':'WHY','rgb':[50,110,130],'position':[8,30]}
+            }[operator]
+            plan['skill_applications'].append(dict(id=id,skill_id=skill,card_sha256=sha(card),implementation=self.bind(SCRIPTS/'visual_treatments.py'),purpose='Show this story proof',mechanism=id,role=role,frames=frames,parameters=parameters,operator=operator))
         return plan
 
     def record(self,plan=None):

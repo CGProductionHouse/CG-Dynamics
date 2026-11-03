@@ -1,3 +1,35 @@
+### Later3November — Nolan skills reconciliation and Action Sports game plan
+
+CA now explicitly authorises MSI to reconcile/install the shared office skill work,
+advance unfinished tutorial work and research a hands-on Action Sports game plan
+before execution. Existing draft PR910/#903/#874 own the shared work; #914 retains
+the production queue. Other rejected films stay stopped; no resend/reminder restart.
+All45 cards and39 original card recipes are present; two missing discovery headers
+repaired, all45 validate with UTF8. Four source-independent operations now have
+actual plan/operator/export coverage;44 tests pass. Eight allowlisted practice
+originals restored/hash-verified in isolated private MSI staging. Native project,
+all cloud-payload and office install acceptance are not inferred from Git presence.
+See [the complete map](../../scripts/video-editing/studio-phase2/SKILL-INTEGRATION-MAP-20261103.md).
+
+Native signed-in WhatsApp recovered exact CG Nolan Approvals brief, Franco2Nov11:36:
+Action uses March/June/nestedJuly2026 general footage, no camera-directed speech.
+All three folders listed:216MP4 entries,118under100MiB. Five actual originals are
+private/size-checked/locally hashed/decoded and visually sampled; a sixth transfer
+failed and is retained separately, never cleared. No published-freshness or heard
+sound claim. Canonical Graph fetch succeeded after legacy web resolution failures;
+no scope/account/permission changes or connector-limit bypass. Exact-client live
+guide/Novemberv4draft, saved brand/type and rejection/music records were read.
+See [the game-plan proposal](../../scripts/video-editing/studio-phase2/ACTION-SPORTS-GAME-PLAN-20261103.md).
+It is planning only: owner goal, complete story coverage, prior use/participants,
+heard music and exact final selections remain to resolve before a new timeline.
+Current verification:44 tests, canonical and45 technique validators, changed-code
+compile, diff/link checks and local TypeScript/Vite build pass. All new links
+resolve;10 inherited missing ops references remain outside scope. MSI shared
+skill backed up/installed/hash CURRENT; office pull/install not witnessed.
+No DB/migration/role/security changes, hosting/cloud build, public/client post
+or client-media upload. The exact Control Centre remains undiscovered; Google
+handover is only a mirror, never a guessed replacement tracker.
+
 ### 3 November — owner-requested Nolan foundation audit/repair
 
 CA asked MSI to diagnose why the shared skills and repeated editorial rules were
