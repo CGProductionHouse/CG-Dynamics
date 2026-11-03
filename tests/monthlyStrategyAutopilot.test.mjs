@@ -362,7 +362,7 @@ test('next-month grounding reads the prior published snapshot, never an unpublis
   assert.equal(next.p_seed_context.sources.previous_monthly_strategy_id, 'published-prior')
 })
 
-test('published post evidence carries its fact window and observed metrics without filling missing facts as zero', async () => {
+test('unverified published page posts cannot seed CG strategy evidence; original report window remains', async () => {
   const fake = fixture()
   fake.tables.reports = [{ id: 'report-a', client_id: 'client-a', status: 'published', platform: null, period_end: '2026-09-30', performance_comments: null }]
   fake.tables.posts = [
@@ -371,10 +371,11 @@ test('published post evidence carries its fact window and observed metrics witho
   ]
   const prepared = await autopilot.prepareDraft(fake, fake.tables.clients[0], '2026-11-01', '2026-10-09')
   const postEvidence = prepared.evidence.filter(item => item.authority === 'published_report_post')
-  assert.equal(postEvidence.length, 2)
-  assert.match(postEvidence[0].excerpt, /Published report ended 2026-09-30/)
-  assert.match(postEvidence[0].excerpt, /reach 120, reactions 0, shares 2/)
-  assert.doesNotMatch(postEvidence[0].excerpt, /views 0|comments 0|clicks 0/)
+  assert.deepEqual(postEvidence, [])
+  assert.equal(prepared.draft.topContent.autoCaption, null)
+  assert.equal(prepared.draft.topContent.autoMetricValue, null)
+  assert.equal(prepared.seedContext.source_coverage.verified_cg_creatives, 'unavailable')
+  assert.doesNotMatch(JSON.stringify(prepared.evidence), /Actual delivery demonstration|Another buyer question/)
   assert.equal(prepared.seedContext.source_windows.previous_report_period_end, '2026-09-30')
 })
 

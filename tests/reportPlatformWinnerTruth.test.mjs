@@ -37,7 +37,7 @@ test('platform ranking requires observed finite reach, preserving zero and stabl
     assert.deepEqual(missingPosts, before)
     const report = { id: 'fixture-report', client_id: 'fixture-client', status: 'published', period_start: '2026-09-01', period_end: '2026-09-30', report_title: 'Local report', posts: [] }
     const render = (posts, props = {}) => renderToStaticMarkup(createElement(ClientReportView, { report: { ...report, posts }, client: null,
-      googleAds: null, googleAdsState: 'unmapped', googleAdsError: null, ...props }))
+      googleAds: null, googleAdsState: 'unmapped', googleAdsError: null, verifiedCgPostIds: new Set(posts.map(post => post.id)), ...props }))
     assert.doesNotMatch(render([]), /Best platform/)
     assert.doesNotMatch(render(missingPosts), /Best platform/)
     assert.match(render([post('instagram', 0)]), /Best platform/)
