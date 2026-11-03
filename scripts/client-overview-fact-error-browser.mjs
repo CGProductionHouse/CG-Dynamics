@@ -201,7 +201,11 @@ try {
     exclusionMode='valid';ownershipProved=false
     await page.reload()
     await page.getByRole('tab',{name:'Facebook',exact:true}).click()
-    await page.getByText('Reviewed public post',{exact:true}).first().waitFor()
+    // Successful visibility recovery does not establish CG creative origin.
+    // Both posts stay in page totals; neither is an eligible CG highlight.
+    await page.getByText('1,009',{exact:true}).first().waitFor()
+    assert.equal(await page.getByText('Reviewed public post',{exact:true}).count(),0,'Not excluded is not positive CG authorship')
+    assert.equal(await page.getByRole('heading',{name:'Top performing content',exact:true}).count(),0)
     assert.equal(await page.getByText('Hidden report post',{exact:true}).count(),0,'Explicitly hidden post never enters client highlights')
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth))
     assert.deepEqual(errors,[])
