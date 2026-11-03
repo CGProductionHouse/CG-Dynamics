@@ -44,7 +44,7 @@ the internal `due_date` is never projected. A deliverable with disclosure or
 posting history cannot be reassigned to another client without explicit
 reconciliation, and its evidence is never silently cleared or transferred.
 
-#### Explicit shared-date source following (#941, source only until approved)
+#### Explicit shared-date source following (#941, exact-approved live 3 November)
 
 The existing manager-only `set_client_schedule_plan_visibility` action may grant
 date following only for explicitly shared current/next-month rows whose exact
@@ -57,8 +57,10 @@ It changes only `scheduled_date` and the already-shared date snapshot. Staff dat
 overrides, missing/ambiguous/stale source, private/archived rows and posted history
 are held; a source month move changes calendar placement, never package capacity.
 Client RPCs remain own-client-only and reveal no source IDs, notes or assignees.
-No new Microsoft permission or write-back is introduced. This migration and its
-controlled Cape activation require separate exact production approval.
+No new Microsoft permission or write-back is introduced. CA's exact-approved
+migration/backend activation is live; only Cape's8verified already-shared rows
+were enabled in place by approved management SQL with optimistic snapshot/source
+checks and clearly attributed management audits. Other clients default off.
 
 ### company_calendar_events
 
