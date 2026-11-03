@@ -1,5 +1,25 @@
 # Client launch execution — local-first continuation
 
+## 3 November — reporting safeguards source verified; repost label live
+
+Exact-approved PR937 SQL is LIVE; actual Cape client preview says Video repost25Nov,
+8planned dates. All8direct Teams dates currently match, but future automatic source
+refresh remains staff#325. No posting/client approval inferred from completed tasks.
+
+Client CG highlights now fail closed in SOURCE without independent creation+post proof;
+unknown posts omitted, page totals retained, top2bounded, no raw/provider origin claims.
+Normal strategy preparation stops seeding unknown page winners. The automatic proof
+producer/matcher remains future work; do not describe it as deployed. The exact one-day
+Meta unique-viewer parser bug is fixed locally while monthly no-summing stays intact.
+
+4222supported tests pass/24existing skips/0fail, mandatory PostgreSQL, build/app bundle,
+backendTS/scopedlint/diff and all24canonical browser fixtures. The one fixture-only
+correction and stale own preview-port cleanup are transparently reconciled against
+unchanged runtime84b0e929; detailed receipt in ops handover/Cape acceptance. Four exact
+backend helper updates are prepared, approval PENDING; frontend guard+PR931 reader
+await one governed release. Zero Vercel. No new schema/dependency/strategy/publication.
+RedOak's held consent issue and deferred MetaAds/TikTokAds#936 do not block Cape.
+
 ## 3 November — current Cape correction and exact remaining release gates
 
 Owner clarified Monique's25November item is an existing-video REPOST. Restored the
