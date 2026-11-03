@@ -1,5 +1,51 @@
 # Cape Lumber launch acceptance — 2 November 2026
 
+### 3 November — client frontend release completed
+
+PR #931's concise visual strategy reader and PR #938's CG-only creative guard are
+LIVE from source `626bd308a890c6563a92342af17aff17657673b1`.
+One local production prebuild, one **2.6 MB differential prebuilt upload**:
+`dpl_HMKqEahvYRDx6fVuNDbmn1oAfiq5`. Fifteen staged critical hashes matched before
+promoting the same deployment; old custom-domain entry stayed live during staging.
+Fifteen public hashes then matched. Current entry `/assets/index-D7qCW55q.js`,
+SHA256 `0ceaa89e27ad7492ea60450fd5e27a9a1675fadc97eb478bcc99c9cc7e5256b7`.
+Server events explicitly confirm prebuilt artifacts, no remote npm/Vite compilation.
+No second deployment, preview, retry, hosting/DNS/budget/config or backend change.
+
+Fresh cycle 18 October–18 November: included usage was $10.43 before, $10.63 after;
+on-demand remains $0/$15, Pause ON. Counters are delayed and the observed difference
+is not a per-release fee attribution. Prior $1 incremental stop and $5 serving
+reserve are preserved. Five exact affected/critical URLs returned HTTP 200 before
+and after: www.cgdynamics.co.za, cgdynamics.co.za, cg-dynamics.vercel.app,
+cg-hours.vercel.app and capelumbermarketing.co.za. No unrelated-domain health claim.
+Rollback `dpl_DvWScLPuXvGDUvptz9DcmnWeZYPL` retained; Git auto deploy stays OFF.
+
+Local runtime/tests remain the verified PR #938 tree: 4,222 passing supported tests,
+24 existing skips, mandatory PostgreSQL, build/bundle and all 24 browser fixtures
+with the already-disclosed reconciliation. New production prebuild passed; CLI
+pruned only 13 optional/dev/peer lock entries, all retained entries unchanged, and
+the exact tracked lock was restored. Manifest SHA256
+`75ee61654f2de7c6d3cde81209e2e8cf001b250c86c8ec893f6280a9253cc9f0`.
+Static output has 178 files, no functions/crons and no fixture/privileged sentinels.
+Receipts: `%TEMP%/cg-client-release-626bd308-{manifest,staged-receipt,public-receipt}.json`.
+
+Actual signed-in admin preview now exercises the released Plan at 375/390/430 and
+1440 pixels: no horizontal overflow, current/next month, format tabs, confirmed
+7 posters plus social management/guide/Google Ads, and mobile date selection
+showing the 25 November Video repost. Mobile More opens Brand Hub; its sole
+published logo loads as a real 1080×1350 image in a separate window while Dynamics
+stays open. Approvals truthfully shows nothing waiting. All temporary device
+overrides were cleared. These are actual preview tests, not password/physical-phone
+client acceptance. Public October Google Ads remains R2,199.24 / 40,497 impressions /
+1,337 clicks / 3.30%; source/report periods are not conflated.
+
+Live screenshots:
+`C:/Users/chris/.codex/visualizations/2026/09/20/01a0bd6e-b8d9-7693-b55a-30f926814341/cape-action-plan-live-1440-20261103.png`
+and `cape-action-plan-live-375-20261103.png` in that directory.
+This supersedes frontend-pending notes below. Automatic Client Schedule source
+refresh and owner-retained actual password/phone checks remain. The positive
+creative proof producer is unfinished; until then unknown CG highlights are hidden.
+
 ### 3 November — reporting backend rollout completed
 
 Exact-approved PR #938 helpers are live: MCP 76, monthly preparation 49, Meta manual

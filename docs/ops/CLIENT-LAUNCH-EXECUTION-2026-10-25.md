@@ -1,5 +1,17 @@
 # Client launch execution — local-first continuation
 
+## 3 November — visual client frontend live
+
+The single governed prebuilt release is complete: source `626bd308`,
+deployment `dpl_HMKqEahvYRDx6fVuNDbmn1oAfiq5`, entry `index-D7qCW55q.js`.
+One 2.6 MB differential upload; 15 staged and 15 public hashes verified; same-deployment
+promotion, five relevant URLs HTTP 200, no remote compilation or second deploy.
+Actual Cape preview checked at 375/390/430/1440: visual strategy formats, November/
+December, package, mobile calendar and Brand Hub/new-window logo. No physical-phone
+or password acceptance inferred. Included usage $10.43→$10.63, on-demand $0/$15,
+Pause ON; delayed counters are not per-release attribution. Full receipt is in the
+Cape acceptance document. Automatic source refresh remains; no new code/data changes.
+
 ## 3 November — exact reporting backend approval completed
 
 PR #938's four helpers are live: MCP 76, monthly preparation 49, Meta manual sync 90
