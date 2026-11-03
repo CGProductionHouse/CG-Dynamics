@@ -1,43 +1,73 @@
-## 3 November — full client UI pass complete; exact TikTok repair LIVE
+## 3 November — full client portal UI review completed
 
-CA requested the full list: all62canonicaldirectory records now have actual desktop
-journeys (61new plus Cape prior), and all62have390px Overview/Plan/Calendar/Package
-journeys.1,016new desktop panels+248mobile panels+four375/430secondarymenu checks.
-No unresolved page reads/overflow/package"To confirm" placeholders. PiekCalendar
-recovered through normal navigation; original read failures preserved, not hidden.
-Actual selected-tab/Nov-Dec/heading checks pass; viewport override restored.
-The single existing execution matrix now records report publication and per-client
-provider/content/scope gates. UI pass is NOT fleetlaunch-ready or clientpassword/phone
-acceptance. Private receipts: `%TEMP%/cg-client-fleet-ui-v3-20261103.json`, mobile
-`cg-client-fleet-mobile-20261103.json`, Piek`cg-client-fleet-ui-recovered-20261103.json`,
-secondarymenu`cg-client-fleet-mobile-extra-20261103.json`. v1 remainsINVALID; validv2
-completed records imported into checkpointedv3. No duplicate whole-fleet UI sweep.
+All 62 canonical directory records have desktop journeys recorded (61 new plus Cape's
+prior live acceptance), and all 62 have 390px Overview, Plan, Calendar and Package
+journeys. There are 1,016 new desktop panels, 248 mobile panels, four supplementary
+375/430px menu checks and two Piek Leads checks. No unresolved reads, horizontal
+overflow or “To confirm” package placeholders remain in those receipts. Piek's Calendar
+read recovered through normal navigation; the original failures are preserved.
+All 1,240 measured mobile navigation controls were visible and at least 56px high.
+68 confirmed package-quantity comparisons matched the actual UI. The viewport was reset.
 
-Latest source16:38UTC: onlyCape November/Decemberpublished; onlyCape8November
-canonical posting rows. #731author/#325staffcalendar retain admission/publication/
-initial allocation; no competing strategy, broad task import or Microsoft write.
-41librariesenabled/17privateholds/fourunmapped;46existingexactportalaccounts,
-16unprovisioned.22records have no published report, with project/non-recurring scopes
-retained separately. AV/RedOakheld, Zoozexcluded, LHPonce-offlater, Jodricocohortowner.
+These are signed-in admin previews, not real client-password, physical-phone or
+all-file download acceptance. The single existing execution matrix records each
+client's scope, report publication, plans, dates, library, account and provider gates.
+Do not repeat the whole fleet sweep or equate a completed UI journey with launch-ready
+content. AV/Red Oak remain held, Zooz excluded, LHP once-off/later and Jodrico owner-held.
+Private receipts: `%TEMP%/cg-client-fleet-ui-v3-20261103.json`,
+`cg-client-fleet-mobile-20261103.json`, `cg-client-fleet-ui-recovered-20261103.json`,
+`cg-client-fleet-mobile-extra-20261103.json` and `cg-client-fleet-leads-20261103.json`.
+v1 remains invalid; valid v2 records were imported into checkpointed v3.
 
-Fresh Meta47clients/76platformcheckpoints:20PASS/55PARTIAL/1STALE. Germoparts,
-Emmanuel and heldAV Facebookaccessfailed; heldRedOakstale. TikTok10connectedclients
-have Novemberfacts verified2Nov21UTC, preserving partialcohort/snapshot semantics.
-GoogleCape33rows1Oct–2Nov verified by account+customer+campaign IDs. New Germoparts
-campaign24413585918 has4rows30Oct–2Nov but no clientmapping; twooldGermoparts,
-threeNovus and RC-Polypipe mappings have noOctober-or-newer rows. First naïve direct
-nullableclient_idjoin was corrected, not used to claim Capeabsent. #435owns exact
-campaign/serving verification and any separatelyapprovedmapping repair. No resync,
-campaign, mapping, permission or hosting change.
+Final readback at 17:40 UTC still has only Cape's November/December strategies published
+and only Cape's eight November canonical posting rows. #731 retains strategy/source/
+editorial/publication; #325 retains initial Teams allocation and disclosure. No competing
+plans, guessed imports or Microsoft writes. There are 41 enabled libraries, 17 private
+holds, four unmapped held/excluded/cohort records, 46 existing exact-client accounts
+and 16 unprovisioned accounts. 22 records have no published report; project and
+non-recurring scopes stay separate.
 
-Final selected-TikTok inspection found the all-withheldfacts blankpanel. Focused
-local reader fix reuses the existing unavailable state based on actual hasValue,
-not sectionmetadata; preserves observedzero and partialvalues. Red-before-green
-SSR +65focusedchecks and localbuild pass. Full exact-source/browser acceptance and
-review receipt follow in PR#944. This frontenddelta is source-only; NO Vercel.
-Initial focused multi-file run omitted required publicfixtureenv; corrected using
-loopbackdummyenv and serialtests. Two wrong installedPlaywrightversions had missing
-browser binaries; existing CGPay1243module reused, no installation or authcopy.
+Fresh Meta evidence: 47 clients / 76 platform checkpoints, 20 PASS, 55 PARTIAL, one STALE.
+Germoparts, Emmanuel and held AV have Facebook access failures; held Red Oak is stale.
+Ten TikTok connections have November facts verified on 2 November around 21:00 UTC;
+partial video-cohort and account snapshots retain their correct meaning.
+Actual Google Ads company-account UI confirms Cape active and October R2,199.24
+matching stored data. Old Germoparts, Novus and RC-Polypipe campaigns are paused or
+removed; absent October rows alone were not treated as a sync failure.
+
+Two exact missing Google links are prepared in normal Dynamics UI and remain UNSAVED
+pending separate CA approvals: Germoparts 24413585918 (“GERMOPARTS 2026”, active,
+actual brand creative, four stored daily rows) and Novus 24189935204 (“NOVUS STEEL
+SEPT”, paused/ended 27 September, actual brand creative, 30 stored rows). September
+Novus source matches 12,231 impressions, 658 clicks, R2,221.91; Germoparts October
+matches 1,647 impressions, 65 clicks, R184.09. Seven existing mappings are preserved.
+No campaign, spend, permission, mapping or resync change has been made. #435 has the
+source evidence; private receipt `%TEMP%/cg-client-fleet-google-source-ui-20261103.json`.
+The initial direct nullable daily.client_id join was corrected to the real account +
+customer + campaign identity; it was never used to claim Cape lacked data.
+
+PR #944 fixes the concrete all-withheld-platform blank panel by checking actual hasValue
+lines, reusing the existing unavailable state and preserving genuine zero/partial
+values. The production TikTok quarantine below is already live; this reader delta
+remains SOURCE ONLY until a separate governed frontend release. Zero Vercel operations.
+Red-before-green SSR regression, 65 focused checks, local build/app bundle/scoped lint
+and actual-component browser proof at 375/390/430/1440 pass. Frozen candidate
+`8c678308219ef17e640cd856594a8d67a5c2da0b` passed all 27 canonical local steps:
+4,253 total tests / 4,229 pass / 24 existing skips / zero failures, mandatory local
+PostgreSQL fixtures, TypeScript/Vite, emitted app bundle and all 24 browser fixtures.
+Clean stable tree; receipt `%TEMP%/cg-local-launch-8c678308219e.json`, completed
+17:39:31 UTC, SHA256 `c0e96a196a4f8dce9fdc2c9092f7f999c3e0a064b29554810c7ed4cb95a9c6f3`.
+Final handover edits after that proof are documentation only. This is synthetic local
+code acceptance plus real admin-preview evidence, not client-password acceptance.
+
+Fixture setup failures are retained honestly: missing dummy public environment and
+parallel SSR-port collisions were corrected with loopback configuration and serial
+tests; two mismatched installed Playwright versions were replaced by the existing
+CG Pay 1243 module without installation. The first full attempt passed 4,224 tests,
+with five OpenSSL PATH failures and 24 existing skips. Its receipt/log were preserved
+before rerunning with existing Git OpenSSL on the process-local PATH. No credentials
+were read/copied and no system or production configuration changed.
+
 
 **Exact-approved PR#943 quarantine is LIVE:** AllAroundPVC's8September TikTok facts
 came from a run pointing to WisemanGroup's connection. Complete historical mismatch
