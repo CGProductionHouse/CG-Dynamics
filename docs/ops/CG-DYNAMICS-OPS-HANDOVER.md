@@ -1,3 +1,39 @@
+## 3 November — full client-by-client double-check IN PROGRESS; exact TikTok repair prepared
+
+CA asked to continue past Cape through the full client list. The existing execution
+matrix now has all62canonical active records: confirmed scope/holds, Nov/Dec draft
+states, canonical dates, safe library counts and account enablement. These read-only
+inventory facts are NOT actual UI acceptance. Valid v2 receipts cover AllAroundPVC,
+Agri-Secure, heldAV and BatHill; Cape retains prior acceptance. Remaining actual
+journeys continue. AV/RedOak holds, excludedZooz, LHPonce-off/later and Jodrico cohort
+decision remain; no recurring-social scope is invented for project-only clients.
+Normal ChatGPT #731 and staff/Teams #325 work remain separate.
+
+**Reproduced defect:** AllAroundPVC's publishedSeptember report shows8TikTok facts
+from sync_run `644ccb60-c294-4512-8e4c-c7d1b577a04b`; its connection belongs to
+canonicalWisemanGroup, not AllAround. Full historical fact/run/connection mismatch
+inventory finds ONLYthese8facts/oneclient/onerun. Exact quarantine migration
+`20261103145536_quarantine_legacy_tiktok_client_mismatch.sql` is prepared:
+wrong-client public numbers→NULL/unavailable, originals retained in staff-only
+provenance, every other fact/identity/period/mapping untouched. RLS already restricts
+the base fact table to staff; clients receive the explicit report RPC projection.
+No schema/table/permission/Edge update or data deletion. Current hosted tiktok-sync
+v50 has exact-client/token-connection guards; do not redeploy or bulk resync it.
+
+97focused tests pass, including realPostgreSQL original/private/public-RPC/foreign-
+provider/replay/changed-owner/value/partialset rollback checks. Local TS/Vite actual
+appbundle, scopedlint and diff pass. Fixture setup failures (missing public fixture
+environment and a missing copied-DDL terminator) were corrected, not product defects.
+No new full-suite claim: runtime app code is unchanged from frozen1ef93208.
+Production8-row quarantine still needs exact CA approval. No Vercel operation.
+
+Cape's first natural post-release date continuation is now genuinely observed:
+automatic run `6e79c07b-42b7-449f-8de8-a81d59e59328`, source14:01:07UTC:
+**checked8 / changed0 / held0 / boundedfalse**. General operational mirror remains
+partial separately. This closes the earlier “next natural cycle unobserved” note.
+Existing execution matrix is the single resume authority; no duplicate checklist.
+Exact Google Control Centre target unavailable; no guessed tracker write.
+
 ## 3 November — #941 exact-approved date-follow fix LIVE
 
 Migration applied and five function bodies/ACL/RLS read back. Existing Teams backend
