@@ -1,3 +1,16 @@
+### Later 3 November — Action Sports hook proposals withdrawn
+
+CA rejected the proposed headings as a substitute for visual/sound construction.
+[Actual reference research](../../scripts/video-editing/studio-phase2/ACTION-SPORTS-HOOK-RESEARCH-20261103.md)
+now records the hash-matched28October client public reel, NBA film and three
+Premier League portfolio media examples, with timed observed mechanisms. Shared
+story skill/preproduction guidance now routes to the findings. Complete ordered
+visual samples and dense openings are not normal-speed/heard audio reviews;
+broader client history remains incomplete. No new film/song/send or mastery claim.
+Existing draft PR910/903/874 own this work;914 queue stays protected. Rejected
+creative proposals are withdrawn. Next: actual source-bound opening proof and
+owner-guided goal/story lock, not another headline-only plan. Reminders stay off.
+
 ### Later3November — Nolan skills reconciliation and Action Sports game plan
 
 CA now explicitly authorises MSI to reconcile/install the shared office skill work,

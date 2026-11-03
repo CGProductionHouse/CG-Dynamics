@@ -1,5 +1,9 @@
 # Bloem Action Sports — researched game-plan proposal, 3 November 2026
 
+**WITHDRAWN PENDING REFERENCE RESEARCH — later 3 November:** CA rejected the proposed openings and the subsequent chat-only `JUST A FRIENDLY GAME` pitch. The latter was not grounded in the actual posted client's layered sports style and must not be implemented or revived. Earlier tactical wording is also not an accepted hook. The sections below preserve the source/brief research and rejected proposal history only. Study the actual published films and visual/sound construction before another creative proposal; a slogan, unproved effects list or generic action description does not establish a hook. The owner's illustrative dancer/breath/pause description was explicitly an example of the kind of sensory construction meant, not a requested shot or script.
+
+[Actual client/NBA/Premier League opening research](ACTION-SPORTS-HOOK-RESEARCH-20261103.md) now records inspected picture construction, failed access routes and unheard-sound limits. This supersedes the creative proposals below; it does not approve a replacement hook.
+
 **Planning only.** CA now wants a clear goal and hands-on direction before execution. No new client cut, approval package or send has been made. R08B remains rejected. This proposal does not pretend the source or music is already cleared.
 
 ## Brief recovered from the actual group
