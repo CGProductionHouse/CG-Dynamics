@@ -1,7 +1,7 @@
 """Classifier regressions from actual public control scores; no listening claims."""
 import math
 import unittest
-from local_audio_evidence import classify
+from local_audio_evidence import classify, gpu_budget
 
 
 class AcousticHierarchy(unittest.TestCase):
@@ -21,6 +21,13 @@ class AcousticHierarchy(unittest.TestCase):
         for scores in ([0.0] * 10, [math.nan] + [0.0] * 10):
             with self.assertRaises(ValueError):
                 classify(scores)
+
+    def test_windows_graphics_usage_is_not_hidden_by_cuda_free_memory(self):
+        self.assertEqual(gpu_budget(15 * 1024 ** 3, "7003\n"), 7003 * 1024 ** 2)
+        self.assertEqual(gpu_budget(3 * 1024 ** 3, "7003\n"), 3 * 1024 ** 3)
+        for value in ("N/A", "", "-1", "0", "7003\n4000"):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                gpu_budget(15 * 1024 ** 3, value)
 
 
 if __name__ == "__main__":

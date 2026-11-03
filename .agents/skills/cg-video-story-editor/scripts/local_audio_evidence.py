@@ -11,6 +11,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import subprocess
 
 LABELS = ["A person speaking without music.", "Instrumental music without any speech.",
           "Electronic beeping tones.", "White noise or hissing.",
@@ -22,6 +23,17 @@ LABELS = ["A person speaking without music.", "Instrumental music without any sp
           "Playful comedy music with bouncy cartoon character.",
           "Children music with playful nursery rhyme character."]
 GROUPS = {"speech": [0], "music": [1, 5, 6, 7, 8, 9, 10], "tones": [2], "noise": [3], "mixed": [4]}
+
+
+def gpu_budget(torch_free, driver_free_mib):
+    """WDDM CUDA free can omit graphics allocations; use the smaller reading."""
+    try:
+        driver = int(driver_free_mib.strip()) * 1024 ** 2
+    except (ValueError, AttributeError) as exc:
+        raise ValueError("Cannot verify physical GPU headroom") from exc
+    if driver <= 0 or torch_free <= 0:
+        raise ValueError("Invalid GPU headroom")
+    return min(int(torch_free), driver)
 
 
 def digest(path):
@@ -62,7 +74,12 @@ def acoustic(args):
     weights = model_dir / "model.safetensors"
     if not args.weights_sha256 or digest(weights) != args.weights_sha256:
         raise ValueError("Restricted-conversion safetensors hash is missing or changed")
-    if not torch.cuda.is_available() or torch.cuda.mem_get_info()[0] < 4 * 1024 ** 3:
+    if not torch.cuda.is_available():
+        raise ValueError("No local CUDA device; acoustic probe not started")
+    driver = subprocess.run(["nvidia-smi", "--id=0", "--query-gpu=memory.free",
+                             "--format=csv,noheader,nounits"], capture_output=True,
+                            text=True, check=True, timeout=10)
+    if gpu_budget(torch.cuda.mem_get_info()[0], driver.stdout) < 4 * 1024 ** 3:
         raise ValueError("Preserve staff GPU headroom; acoustic probe not started")
     torch.cuda.set_per_process_memory_fraction(.20)
     model = ClapModel.from_pretrained(str(model_dir), local_files_only=True, trust_remote_code=False,

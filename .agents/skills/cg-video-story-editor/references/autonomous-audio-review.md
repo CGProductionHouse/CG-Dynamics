@@ -88,3 +88,32 @@ assertions. Do not manufacture a passing result, use unit fixtures as calibratio
 assign a music tag to all five areas, or retroactively promote a failed method.
 Historical records without qualification are not newly recertified by this repair.
 Full creative qualification remains unfinished at this checkpoint.
+
+## Follow-up findings, 3 November daytime
+
+The same speech control and prompt were tested with the existing MOSS checkpoint
+without language quantisation, using bounded GPU/CPU dispatch. All901checkpoint
+tensor names/shapes matched the architecture. The unquantised diagnostic still
+called pure speech mixed sound and contradicted itself about voice presence.
+Compression was not the sole cause; do not run another prompt/model lottery or
+promote this route. Retain the failed precision comparison.
+
+On Windows, CUDA's reported free memory can differ substantially from the driver
+reading when staff graphics applications are active. The local acoustic helper
+now uses the smaller CUDA/nvidia-smi value and refuses unknown driver headroom.
+Thread and per-process memory caps remain in place.
+
+Use the exact client's approved sound references without assuming they share one
+genre. PSG's two pinned approved exports have different actual acoustic profiles;
+their reusable observations are saved in that client's existing audio library.
+Similarity to one approved film is descriptive, not permission to copy its music
+or proof that a new cue fits. Metadata such as a track title cannot supply the
+expected genre for a purported blind test.
+
+Measure a designed cue against the bed around its actual event, not just the whole
+film's LUFS or the cue's peak. PSG's existing paper accent peaked exactly at the
+current frame200transition but its100ms RMS was28.31dB below the bed. A protected
+single-cue16dB increase retained the music and encoded picture, measured-18.03LUFS/
+-3.14dBTP, and protected the source PCM24prefix/tail. This remains an unheard local
+repair, not an audibility/creative release verdict. Those gain values are specific
+to that cue; do not turn them into a blanket SFX preset.
