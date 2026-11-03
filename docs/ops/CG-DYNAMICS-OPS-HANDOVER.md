@@ -1,18 +1,43 @@
-## 3 November — full client double-check IN PROGRESS; exact TikTok repair LIVE
+## 3 November — full client UI pass complete; exact TikTok repair LIVE
 
-CA requested continuing through the full list. The single existing execution matrix
-covers62canonical active records, confirmed scope/holds, Nov/Dec strategy states,
-canonical dates, safe library counts and portal accounts. SQL inventory is not UI
-acceptance. Latest durable v3 checkpoint: **32 client records complete**, including
-Cape's prior acceptance;31new actual desktop journeys, no unresolved reads/overflow.
-Through JFJ Electrical; Jodrico Killian is next. Private per-panel receipt:
-`%TEMP%/cg-client-fleet-ui-v3-20261103.json`. v1 is INVALID bookkeeping evidence;
-v2 completed records were valid and imported. A60s control timeout/kernel reset was
-recovered using a fresh documented company-browser tab; incomplete visit rechecked.
-Use the checkpointed v3 harness, not long uncheckpointed multi-client calls.
-Mobile client-by-client sampling is still pending; no password/physical-phone claim.
-AV/RedOak holds, excludedZooz, LHPonce-off/later, Jodrico cohort and non-recurring-
-social scopes stay separate. #731 author and #325 staff/calendar ownership retained.
+CA requested the full list: all62canonicaldirectory records now have actual desktop
+journeys (61new plus Cape prior), and all62have390px Overview/Plan/Calendar/Package
+journeys.1,016new desktop panels+248mobile panels+four375/430secondarymenu checks.
+No unresolved page reads/overflow/package"To confirm" placeholders. PiekCalendar
+recovered through normal navigation; original read failures preserved, not hidden.
+Actual selected-tab/Nov-Dec/heading checks pass; viewport override restored.
+The single existing execution matrix now records report publication and per-client
+provider/content/scope gates. UI pass is NOT fleetlaunch-ready or clientpassword/phone
+acceptance. Private receipts: `%TEMP%/cg-client-fleet-ui-v3-20261103.json`, mobile
+`cg-client-fleet-mobile-20261103.json`, Piek`cg-client-fleet-ui-recovered-20261103.json`,
+secondarymenu`cg-client-fleet-mobile-extra-20261103.json`. v1 remainsINVALID; validv2
+completed records imported into checkpointedv3. No duplicate whole-fleet UI sweep.
+
+Latest source16:38UTC: onlyCape November/Decemberpublished; onlyCape8November
+canonical posting rows. #731author/#325staffcalendar retain admission/publication/
+initial allocation; no competing strategy, broad task import or Microsoft write.
+41librariesenabled/17privateholds/fourunmapped;46existingexactportalaccounts,
+16unprovisioned.22records have no published report, with project/non-recurring scopes
+retained separately. AV/RedOakheld, Zoozexcluded, LHPonce-offlater, Jodricocohortowner.
+
+Fresh Meta47clients/76platformcheckpoints:20PASS/55PARTIAL/1STALE. Germoparts,
+Emmanuel and heldAV Facebookaccessfailed; heldRedOakstale. TikTok10connectedclients
+have Novemberfacts verified2Nov21UTC, preserving partialcohort/snapshot semantics.
+GoogleCape33rows1Oct–2Nov verified by account+customer+campaign IDs. New Germoparts
+campaign24413585918 has4rows30Oct–2Nov but no clientmapping; twooldGermoparts,
+threeNovus and RC-Polypipe mappings have noOctober-or-newer rows. First naïve direct
+nullableclient_idjoin was corrected, not used to claim Capeabsent. #435owns exact
+campaign/serving verification and any separatelyapprovedmapping repair. No resync,
+campaign, mapping, permission or hosting change.
+
+Final selected-TikTok inspection found the all-withheldfacts blankpanel. Focused
+local reader fix reuses the existing unavailable state based on actual hasValue,
+not sectionmetadata; preserves observedzero and partialvalues. Red-before-green
+SSR +65focusedchecks and localbuild pass. Full exact-source/browser acceptance and
+review receipt follow in PR#944. This frontenddelta is source-only; NO Vercel.
+Initial focused multi-file run omitted required publicfixtureenv; corrected using
+loopbackdummyenv and serialtests. Two wrong installedPlaywrightversions had missing
+browser binaries; existing CGPay1243module reused, no installation or authcopy.
 
 **Exact-approved PR#943 quarantine is LIVE:** AllAroundPVC's8September TikTok facts
 came from a run pointing to WisemanGroup's connection. Complete historical mismatch

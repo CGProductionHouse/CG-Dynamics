@@ -1583,7 +1583,9 @@ function PlatformTab({
     return (
       <>
         <SectionHeading eyebrow={performance.label} title={`${performance.label} performance`} />
-        {sections.length > 0 ? <VerifiedOverview sections={sections} /> : <VerifiedFactsUnavailable />}
+        {sections.some(section => section.lines.some(line => line.hasValue))
+          ? <VerifiedOverview sections={sections} />
+          : <VerifiedFactsUnavailable />}
         <PlatformContent performance={performance} view={view} />
         <PlatformNotes view={view} />
       </>
