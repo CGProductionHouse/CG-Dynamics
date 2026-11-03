@@ -85,8 +85,63 @@ class ReviewContract(unittest.TestCase):
         review["model"] = "TEST FIXTURE model"
         review["audio_received"] = True
         review["human_listening"] = "not_recorded"
+        self.assertEqual(self.check_review(review)["status"], "BLOCKED")
+        review = self.model_fixture()
         self.assertEqual(self.check_review(review)["status"], "AUDIO_CHECKED_FOR_OWNER_REVIEW")
         review["audio_received"] = False
+        self.assertEqual(self.check_review(review)["status"], "BLOCKED")
+
+    def model_fixture(self):
+        review = copy.deepcopy(self.review)
+        review.update(review_method="model", model="TEST FIXTURE pipeline version1", audio_received=True,
+                      human_listening="not_recorded")
+        self.declaration = self.root / "calibration-declaration.json"
+        self.result = self.root / "calibration-result.json"
+        input_binding = {"path": str(self.mix), "sha256": audio.digest(self.mix)}
+        raw_binding = {"path": str(self.response), "sha256": audio.digest(self.response)}
+        self.declared = {"reviewer": review["model"], "required_controls": [
+            {"id": "original-fixture", "held_out": False, "input": input_binding, "areas": list(audio.AREAS)},
+            {"id": "heldout-fixture", "held_out": True, "input": input_binding, "areas": list(audio.AREAS)}]}
+        self.observed = {"reviewer": review["model"], "status": "passed", "observations": [
+            {"id": key, "passed": True, "raw_observation": raw_binding} for key in ("original-fixture", "heldout-fixture")]}
+        self.declaration.write_text(json.dumps(self.declared));self.result.write_text(json.dumps(self.observed))
+        review["qualification"] = {"declaration": {"path": str(self.declaration), "sha256": audio.digest(self.declaration)},
+                                   "result": {"path": str(self.result), "sha256": audio.digest(self.result)}}
+        return review
+
+    def test_failed_wrong_identity_and_missing_controls_block_model(self):
+        for mutation in ("failed", "identity", "omitted", "unpassed", "duplicate"):
+            with self.subTest(mutation=mutation):
+                review = self.model_fixture()
+                if mutation == "failed":self.observed["status"] = "failed"
+                if mutation == "identity":self.observed["reviewer"] = "another model"
+                if mutation == "omitted":self.observed["observations"].pop()
+                if mutation == "unpassed":self.observed["observations"][0]["passed"] = False
+                if mutation == "duplicate":self.observed["observations"][1]["id"] = "original-fixture"
+                self.result.write_text(json.dumps(self.observed))
+                review["qualification"]["result"]["sha256"] = audio.digest(self.result)
+                self.assertEqual(self.check_review(review)["status"], "BLOCKED")
+
+    def test_component_only_scope_and_stale_calibration_block(self):
+        review = self.model_fixture()
+        self.declared["required_controls"][0]["areas"] = ["mood"]
+        self.declared["required_controls"][1]["areas"] = ["mood"]
+        self.declaration.write_text(json.dumps(self.declared))
+        review["qualification"]["declaration"]["sha256"] = audio.digest(self.declaration)
+        self.assertEqual(self.check_review(review)["status"], "BLOCKED")
+        review = self.model_fixture();self.result.write_text("changed calibration")
+        self.assertEqual(self.check_review(review)["status"], "BLOCKED")
+
+    def test_missing_raw_evidence_and_no_holdout_block(self):
+        review = self.model_fixture()
+        self.observed["observations"][0]["raw_observation"]["sha256"] = "wrong"
+        self.result.write_text(json.dumps(self.observed))
+        review["qualification"]["result"]["sha256"] = audio.digest(self.result)
+        self.assertEqual(self.check_review(review)["status"], "BLOCKED")
+        review = self.model_fixture()
+        self.declared["required_controls"][1]["held_out"] = False
+        self.declaration.write_text(json.dumps(self.declared))
+        review["qualification"]["declaration"]["sha256"] = audio.digest(self.declaration)
         self.assertEqual(self.check_review(review)["status"], "BLOCKED")
 
     def test_unknown_method_cannot_be_a_fallback(self):

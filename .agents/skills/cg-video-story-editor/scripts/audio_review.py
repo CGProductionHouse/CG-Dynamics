@@ -223,6 +223,7 @@ def gate(packet_path, review_path):
             errors.append("Model did not consume the actual audio")
         if not isinstance(review.get("model"), str) or not review["model"].strip():
             errors.append("Missing review model")
+        errors.extend(qualification_errors(review, review_path))
     elif method == "local_human":
         listening = review.get("human_listening")
         if not isinstance(listening, dict):
@@ -254,6 +255,74 @@ def gate(packet_path, review_path):
     return {"status": "BLOCKED" if errors else "AUDIO_CHECKED_FOR_OWNER_REVIEW",
             "errors": errors, "review_method": method, "human_listening": review.get("human_listening", "not_recorded"),
             "client_or_publication_approval": False, "checked_at": utc_now(), "video_sha256": packet["video_sha256"]}
+
+
+def qualification_errors(review, review_path):
+    """Bind a model's demonstrated scope, including original and held-out controls.
+
+    This validates evidence integrity, not truth by assertion. Store actual raw
+    observations privately; never use fixture evidence to qualify a real model.
+    A component classifier cannot qualify an entire creative review by itself.
+    """
+    errors = []
+    qualification = review.get("qualification")
+    if not isinstance(qualification, dict):
+        return ["Model review lacks a hash-bound calibration record"]
+    base = Path(review_path).resolve().parent
+
+    def bound_file(record):
+        if not isinstance(record, dict) or not record.get("path") or not record.get("sha256"):
+            raise ValueError("Missing calibration artifact binding")
+        path = Path(record["path"])
+        if not path.is_absolute():
+            path = base / path
+        if not path.is_file() or digest(path) != record["sha256"]:
+            raise ValueError("Calibration artifact missing or changed")
+        return path
+
+    try:
+        declared_path = bound_file(qualification.get("declaration"))
+        result_path = bound_file(qualification.get("result"))
+        declared, result = read_json(declared_path), read_json(result_path)
+        if not isinstance(declared, dict) or not isinstance(result, dict):
+            return ["Calibration declaration/result must be objects"]
+        identity = review.get("model")
+        if not identity or declared.get("reviewer") != identity or result.get("reviewer") != identity:
+            errors.append("Calibration belongs to another reviewer/pipeline version")
+        if result.get("status") != "passed":
+            errors.append("Model calibration is failed, pending or incomplete")
+        required = declared.get("required_controls")
+        observations = result.get("observations")
+        if not isinstance(required, list) or not required or not isinstance(observations, list):
+            return errors + ["Calibration needs original and held-out observations"]
+        identifiers = [c.get("id") for c in required if isinstance(c, dict)]
+        actual = [c.get("id") for c in observations if isinstance(c, dict)]
+        if len(identifiers) != len(required) or len(set(identifiers)) != len(identifiers) or not all(identifiers):
+            errors.append("Invalid or duplicate declared calibration controls")
+        if len(actual) != len(observations) or len(set(actual)) != len(actual) or set(actual) != set(identifiers):
+            errors.append("Calibration controls omitted, duplicated or substituted")
+        if not any(isinstance(c, dict) and c.get("held_out") is True for c in required) or not any(isinstance(c, dict) and c.get("held_out") is False for c in required):
+            errors.append("Calibration needs both original and held-out controls")
+        observed = {c.get("id"): c for c in observations if isinstance(c, dict)}
+        coverage = set()
+        for control in required:
+            if not isinstance(control, dict):
+                continue
+            current = observed.get(control.get("id"), {})
+            if current.get("passed") is not True:
+                errors.append(f"Unpassed calibration control: {control.get('id')}")
+            bound_file(control.get("input"))
+            bound_file(current.get("raw_observation"))
+            areas = control.get("areas", [])
+            if not isinstance(areas, list) or any(a not in AREAS for a in areas):
+                errors.append("Invalid calibration scope")
+            else:
+                coverage.update(areas)
+        if coverage != set(AREAS):
+            errors.append("Calibration does not cover all five audio-review areas")
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        errors.append(f"Invalid model qualification: {exc}")
+    return errors
 
 
 def main():
