@@ -41,7 +41,12 @@ export function parseMetaInsight(
     return unknown('missing_numeric_total', 'total_value')
   }
   if (Array.isArray(row.values) && row.values.length) {
-    if (!allowDailySum) return unknown('daily_unique_series_not_summable', 'time_series')
+    // One observed bucket can describe one exactly requested day without any
+    // cross-day deduplication. A monthly/missing range or multiple buckets must
+    // still fail closed for unique audiences. All coverage/shape checks follow.
+    if (!allowDailySum && (expectedDailyEnds?.length !== 1 || row.values.length !== 1)) {
+      return unknown('daily_unique_series_not_summable', 'time_series')
+    }
     if (valueKey) return unknown('missing_breakdown', 'time_series')
     if (row.period !== 'day') return unknown('unexpected_series_period', 'time_series')
     const ends = row.values.map((entry: { end_time?: string }) => Date.parse(entry.end_time ?? ''))

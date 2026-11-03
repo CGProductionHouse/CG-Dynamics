@@ -37,6 +37,7 @@ const fixture = {
         return React.createElement('main',{className:'mx-auto max-w-6xl p-3 sm:p-8'},
           React.createElement(ClientReportView,{report:{...report,client_id:client?.id??report.client_id,
             posts:lowSignal?report.posts.map(post=>({...post,impressions:0,reach:0,engagements:null})):report.posts},client,googleAds:null,googleAdsState:googleState,
+            verifiedCgPostIds:new Set(['covered','later']),
             googleAdsError:null,facts,showAdminDiagnostics:staff,dataHealth:health,monthlyStrategy:strategyReadUnavailable||emptyStrategy?null:{month:'2026-09-01',status,strategyData},showEmptyStrategy:strategyReadUnavailable||emptyStrategy,strategyReadUnavailable}));}
       createRoot(document.getElementById('root')).render(React.createElement(App));`
   },
