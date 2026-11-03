@@ -1,37 +1,97 @@
-## 3 November — full client-by-client double-check IN PROGRESS; exact TikTok repair prepared
+## 3 November — full client portal UI review completed
 
-CA asked to continue past Cape through the full client list. The existing execution
-matrix now has all62canonical active records: confirmed scope/holds, Nov/Dec draft
-states, canonical dates, safe library counts and account enablement. These read-only
-inventory facts are NOT actual UI acceptance. Valid v2 receipts cover AllAroundPVC,
-Agri-Secure, heldAV and BatHill; Cape retains prior acceptance. Remaining actual
-journeys continue. AV/RedOak holds, excludedZooz, LHPonce-off/later and Jodrico cohort
-decision remain; no recurring-social scope is invented for project-only clients.
-Normal ChatGPT #731 and staff/Teams #325 work remain separate.
+All 62 canonical directory records have desktop journeys recorded (61 new plus Cape's
+prior live acceptance), and all 62 have 390px Overview, Plan, Calendar and Package
+journeys. There are 1,016 new desktop panels, 248 mobile panels, four supplementary
+375/430px menu checks and two Piek Leads checks. No unresolved reads, horizontal
+overflow or “To confirm” package placeholders remain in those receipts. Piek's Calendar
+read recovered through normal navigation; the original failures are preserved.
+All 1,240 measured mobile navigation controls were visible and at least 56px high.
+68 confirmed package-quantity comparisons matched the actual UI. The viewport was reset.
 
-**Reproduced defect:** AllAroundPVC's publishedSeptember report shows8TikTok facts
-from sync_run `644ccb60-c294-4512-8e4c-c7d1b577a04b`; its connection belongs to
-canonicalWisemanGroup, not AllAround. Full historical fact/run/connection mismatch
-inventory finds ONLYthese8facts/oneclient/onerun. Exact quarantine migration
-`20261103145536_quarantine_legacy_tiktok_client_mismatch.sql` is prepared:
-wrong-client public numbers→NULL/unavailable, originals retained in staff-only
-provenance, every other fact/identity/period/mapping untouched. RLS already restricts
-the base fact table to staff; clients receive the explicit report RPC projection.
-No schema/table/permission/Edge update or data deletion. Current hosted tiktok-sync
-v50 has exact-client/token-connection guards; do not redeploy or bulk resync it.
+These are signed-in admin previews, not real client-password, physical-phone or
+all-file download acceptance. The single existing execution matrix records each
+client's scope, report publication, plans, dates, library, account and provider gates.
+Do not repeat the whole fleet sweep or equate a completed UI journey with launch-ready
+content. AV/Red Oak remain held, Zooz excluded, LHP once-off/later and Jodrico owner-held.
+Private receipts: `%TEMP%/cg-client-fleet-ui-v3-20261103.json`,
+`cg-client-fleet-mobile-20261103.json`, `cg-client-fleet-ui-recovered-20261103.json`,
+`cg-client-fleet-mobile-extra-20261103.json` and `cg-client-fleet-leads-20261103.json`.
+v1 remains invalid; valid v2 records were imported into checkpointed v3.
 
-97focused tests pass, including realPostgreSQL original/private/public-RPC/foreign-
-provider/replay/changed-owner/value/partialset rollback checks. Local TS/Vite actual
-appbundle, scopedlint and diff pass. Fixture setup failures (missing public fixture
-environment and a missing copied-DDL terminator) were corrected, not product defects.
-No new full-suite claim: runtime app code is unchanged from frozen1ef93208.
-Production8-row quarantine still needs exact CA approval. No Vercel operation.
+Final readback at 17:40 UTC still has only Cape's November/December strategies published
+and only Cape's eight November canonical posting rows. #731 retains strategy/source/
+editorial/publication; #325 retains initial Teams allocation and disclosure. No competing
+plans, guessed imports or Microsoft writes. There are 41 enabled libraries, 17 private
+holds, four unmapped held/excluded/cohort records, 46 existing exact-client accounts
+and 16 unprovisioned accounts. 22 records have no published report; project and
+non-recurring scopes stay separate.
 
-Cape's first natural post-release date continuation is now genuinely observed:
-automatic run `6e79c07b-42b7-449f-8de8-a81d59e59328`, source14:01:07UTC:
-**checked8 / changed0 / held0 / boundedfalse**. General operational mirror remains
-partial separately. This closes the earlier “next natural cycle unobserved” note.
-Existing execution matrix is the single resume authority; no duplicate checklist.
+Fresh Meta evidence: 47 clients / 76 platform checkpoints, 20 PASS, 55 PARTIAL, one STALE.
+Germoparts, Emmanuel and held AV have Facebook access failures; held Red Oak is stale.
+Ten TikTok connections have November facts verified on 2 November around 21:00 UTC;
+partial video-cohort and account snapshots retain their correct meaning.
+Actual Google Ads company-account UI confirms Cape active and October R2,199.24
+matching stored data. Old Germoparts, Novus and RC-Polypipe campaigns are paused or
+removed; absent October rows alone were not treated as a sync failure.
+
+Two exact missing Google links are prepared in normal Dynamics UI and remain UNSAVED
+pending separate CA approvals: Germoparts 24413585918 (“GERMOPARTS 2026”, active,
+actual brand creative, four stored daily rows) and Novus 24189935204 (“NOVUS STEEL
+SEPT”, paused/ended 27 September, actual brand creative, 30 stored rows). September
+Novus source matches 12,231 impressions, 658 clicks, R2,221.91; Germoparts October
+matches 1,647 impressions, 65 clicks, R184.09. Seven existing mappings are preserved.
+No campaign, spend, permission, mapping or resync change has been made. #435 has the
+source evidence; private receipt `%TEMP%/cg-client-fleet-google-source-ui-20261103.json`.
+The initial direct nullable daily.client_id join was corrected to the real account +
+customer + campaign identity; it was never used to claim Cape lacked data.
+
+PR #944 fixes the concrete all-withheld-platform blank panel by checking actual hasValue
+lines, reusing the existing unavailable state and preserving genuine zero/partial
+values. The production TikTok quarantine below is already live; this reader delta
+remains SOURCE ONLY until a separate governed frontend release. Zero Vercel operations.
+Red-before-green SSR regression, 65 focused checks, local build/app bundle/scoped lint
+and actual-component browser proof at 375/390/430/1440 pass. Frozen candidate
+`8c678308219ef17e640cd856594a8d67a5c2da0b` passed all 27 canonical local steps:
+4,253 total tests / 4,229 pass / 24 existing skips / zero failures, mandatory local
+PostgreSQL fixtures, TypeScript/Vite, emitted app bundle and all 24 browser fixtures.
+Clean stable tree; receipt `%TEMP%/cg-local-launch-8c678308219e.json`, completed
+17:39:31 UTC, SHA256 `c0e96a196a4f8dce9fdc2c9092f7f999c3e0a064b29554810c7ed4cb95a9c6f3`.
+Final handover edits after that proof are documentation only. This is synthetic local
+code acceptance plus real admin-preview evidence, not client-password acceptance.
+
+Fixture setup failures are retained honestly: missing dummy public environment and
+parallel SSR-port collisions were corrected with loopback configuration and serial
+tests; two mismatched installed Playwright versions were replaced by the existing
+CG Pay 1243 module without installation. The first full attempt passed 4,224 tests,
+with five OpenSSL PATH failures and 24 existing skips. Its receipt/log were preserved
+before rerunning with existing Git OpenSSL on the process-local PATH. No credentials
+were read/copied and no system or production configuration changed.
+
+
+**Exact-approved PR#943 quarantine is LIVE:** AllAroundPVC's8September TikTok facts
+came from a run pointing to WisemanGroup's connection. Complete historical mismatch
+inventory found only those8/oneclient/onerun. Public numbers are now NULL/unavailable;
+all8original values/availability retained in existing staff-only provenance. RLS
+blocks client base-table reads; report RPC does not expose that private provenance.
+Fresh8row/owner/value guards,22Facebook/Instagram/Wiseman control-fact readbacks and
+account identity readback pass. Actual client preview no longer shows wrong TikTok
+numbers. Current hosted writer50 retains exact-client/token-connection guards.
+No schema/permission/Edge/Vercel/provider-resync/content-publication change.
+MigrationLF SHA256 `38b9d99051a0bab18e9794e8f76803008b8b1741d64b9df1fbfee69e3def60d6`.
+Private production receipt `%TEMP%/cg-allaround-tiktok-quarantine-receipt-20261103.json`,
+SHA256 `84173ce32c175cd4fd998c59261d42d34bf0689015dc9189eac47c2918c66cc7`.
+97focused tests incl realPostgres roles/public-projection/rollback/replay, local
+TS/Vite actual appbundle/scopedlint/diff pass. App runtime unchanged from1ef93208;
+no reattributed full-suite claim. Initial fixture setup errors corrected, not product
+failures. #505/#668/#731 have the exact live data/evidence note.
+
+Cape's natural14:01UTC source run `6e79c07b-42b7-449f-8de8-a81d59e59328` now
+genuinely proves **checked8/changed0/held0/boundedfalse**; staff mirror partial remains
+separate. Full source checks also find zero asset-linked Meta client mismatches,
+zero Google campaign-link/client mismatches, zero published asset library/category/
+deliverable-client mismatches. This is scoped integrity evidence, not a claim of
+complete coverage, unpublished content approval or fleet launch readiness.
 Exact Google Control Centre target unavailable; no guessed tracker write.
 
 ## 3 November — #941 exact-approved date-follow fix LIVE

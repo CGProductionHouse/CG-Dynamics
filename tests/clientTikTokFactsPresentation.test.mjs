@@ -46,7 +46,16 @@ test('TikTok client facts retain partial/zero/null truth and distinguish account
     assert.equal(periodCount.label, 'TikTok published videos')
     assert.equal(periodCount.isSnapshot, false)
     assert.ok(lines.every(line => !line.comparable))
-    assert.doesNotMatch(render([fact('views', null, 'sum', 'unavailable')]), />0<\/p>/)
+    const unavailable = render([fact('views', null, 'sum', 'unavailable')])
+    assert.doesNotMatch(unavailable, />0<\/p>/)
+    assert.match(unavailable, /Verified platform figures are unavailable for this month/)
+    // Quarantined rows still establish that this report has a TikTok section,
+    // but no value may be rendered or resurrected from the previous month.
+    const quarantined = render([fact('current_followers', 284, 'snapshot', 'unavailable'),
+      fact('total_likes', null, 'snapshot', 'unavailable')])
+    assert.match(quarantined, /Verified platform figures are unavailable for this month/)
+    assert.doesNotMatch(quarantined, />284<|same reporting window/)
+    assert.doesNotMatch(render([fact('comments', 0)]), /Verified platform figures are unavailable/)
     assert.deepEqual(facts, before)
 
     const cutoffHtml = renderToStaticMarkup(createElement(ClientReportView, {

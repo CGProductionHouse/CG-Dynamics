@@ -284,7 +284,7 @@ Overview/Approvals/Brand Hub sweep or enter any staff account.
   plaintext copy. Do not treat that old UI text as a new decrypted-token audit or
   repeat the already approved backend rollout. No token value was read.
 
-### Exact-client launch double-check — 3 November, IN PROGRESS
+### Exact-client launch double-check — 3 November, FULL UI PASS RECORDED
 
 Canonical62active-directory rows individually inventoried through read-only queries.
 This replaces the27October provider-only table; it is not another checklist.
@@ -295,77 +295,140 @@ not a claim that the normal ChatGPT source owner has not reviewed it. #731 owns
 content/source/editorial; nothing below auto-approves or publishes. Disabled/missing
 optional services on non-recurring/project clients are not manufactured launch defects.
 
-Actual desktop UI receipts are recorded separately from SQL inventory; all pending
-rows still require actual journeys. Private authoritative receipt:
-`%TEMP%/cg-client-fleet-ui-v2-20261103.json`. The earlier v1 closure-associated
+All62directory records now have actual desktop journeys (61new plus Cape's prior
+live acceptance), and all62have390px Overview/Plan/Calendar/Package journeys.
+1,016new desktop panels,248mobile panels and four375/430secondary-navigation
+checks and two supplementary Piek Leads views are recorded. No unresolved page reads or horizontal overflow. Piek's Calendar
+read recovered by direct normal navigation; original timeouts remain in the receipt.
+Strict heading/selected-tab/current-next-month evidence checks also pass.
+These are admin previews, not all-client content readiness or password acceptance. Private authoritative per-page receipt:
+`%TEMP%/cg-client-fleet-ui-v3-20261103.json` (imports the valid v2 completed records). The earlier v1 closure-associated
 artifact is INVALID and never counts toward acceptance. One60s browser control
-timeout interrupted BloemActionSports; its partial visit is not counted.
+timeout interrupted an earlier BloemActionSports visit; it was subsequently fully
+rechecked. v3 saves after each panel and bounds each browser call; no partial visit
+is counted as a completed client.
 No customer-password/physical-phone acceptance is inferred from admin previews.
+Mobile receipt `%TEMP%/cg-client-fleet-mobile-20261103.json`; supplementary Piek
+read `%TEMP%/cg-client-fleet-ui-recovered-20261103.json`;375/430menu receipt
+`%TEMP%/cg-client-fleet-mobile-extra-20261103.json`. Viewport override restored.
+No "To confirm" package placeholders were found in the completed UI snapshots.
+Elcheck/JFJ show6combinedphoto/poster assets+1video; VCS8posters+1video.
 
-| Client | Confirmed scope / hold | Nov / Dec strategy | Nov / Dec client dates | Brand Hub | Portal account | Actual UI evidence |
-| --- | --- | --- | --- | --- | --- | --- |
-| Agri-Secure | No recurring social | draft / Absent | 0 canonical rows / 0 canonical rows | Private / 0 assets | Not provisioned | 16 desktop panels; 0 control errors |
-| All Around PVC | V1 / F3 / DP3 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; 0 control errors |
-| AV Event Life | Owner hold | draft / draft | 0 canonical rows / 0 canonical rows | No mapping | Enabled | 16 desktop panels; 0 control errors |
-| Bat Hill Royale | Flexible / confirmed fields only | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | 16 desktop panels; 0 control errors |
-| Bloem Action Sports | V1 / F4 / DP4 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| Bloem Marble & Granite | V2 / DP4 | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | Pending actual UI |
-| Bloem Vascular | No recurring social | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | Pending actual UI |
-| Bohemia Quick Stop | DP2 | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | Pending actual UI |
-| Bouwer & Coetzee Attorneys | V1 / DP7 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| Braize | F4 / DP4 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| C&L Innovations | F2 / DP2 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| Cape Lumber | F3 / DP4 | published / published | 8 shared / 8 rows / 0 canonical rows | Enabled / 1 assets | Enabled | Prior live acceptance + natural8/0/0 |
-| Case Bloemfontein | V2 / DP12 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| Central Canvas | V1 / F4 / DP3 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| CG Production House | V4 / F8 / DP4 | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | Pending actual UI |
-| Daisy & Co | V1 / F3 / DP3 | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | Pending actual UI |
-| Delta Gas | V1 / F3 / DP3 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| Dulux Paint & Paper Bloemfontein | V2 / F4 / DP4 | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | Pending actual UI |
-| Econofoods | V5 | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | Pending actual UI |
-| Ehrlich Park Butchery | V1 / F3 / DP4 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| Elcheck | V1 / F3 / DP3 | Absent / Absent | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | Pending actual UI |
-| Emmanuel Funerals | V1 / F3 / DP4 | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | Pending actual UI |
-| Emoya Estate Driving Range | V1 / F4 / DP4 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | Pending actual UI |
-| First Technology Central | No recurring social | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| Forklift Trucks | V1 / F3 / DP3 | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Not provisioned | Pending actual UI |
-| Germoparts | V2 / DP12 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| Hino Trucks | V2 | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | Pending actual UI |
-| HMHI | DP3 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| Human Auto | V3 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | Pending actual UI |
-| Ipopeng Office Supplies | No recurring social | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Not provisioned | Pending actual UI |
-| Jenkor | V1 / DP3 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| JFJ Electrical | V1 / F3 / DP3 | Absent / Absent | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | Pending actual UI |
-| Jodrico Killian | Owner cohort decision | Absent / Absent | 0 canonical rows / 0 canonical rows | No mapping | Not provisioned | Pending actual UI |
-| Kundedienste | No recurring social | draft / Absent | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| LHP Student Village & Block | Once-off / later | Absent / Absent | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | Pending actual UI |
-| Local Deli | No recurring social | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| Loraclox | F3 / DP3 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| Madison Wear | V2 / F8 / DP8 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| Mimosa Mall | No recurring social | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Not provisioned | Pending actual UI |
-| NCNA | No recurring social | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | Pending actual UI |
-| Neshora Oxygen | V1 / F4 / DP4 | draft / Absent | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | Pending actual UI |
-| Novus Steel | V1 / F4 / DP4 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| Peyper Bonds | V1 / F3 / DP3 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| Piek Group | V4 / DP12 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| PSG Bloemfontein | V1 / DP3 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| RC-Polypipe | V1 / F3 / DP4 | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | Pending actual UI |
-| Red Oak | Owner hold | draft / draft | 0 canonical rows / 0 canonical rows | No mapping | Enabled | Pending actual UI |
-| Rusoord Farmstay | No recurring social | draft / Absent | 0 canonical rows / 0 canonical rows | Private / 0 assets | Not provisioned | Pending actual UI |
-| SecuriForce | V4 / F4 / DP4 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| Supa Quick BFN | V1 / DP3 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| Supa Quick Centurion | V1 / DP3 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| TBS Brokers | F4 / DP4 | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | Pending actual UI |
-| The Staffordshire | V4 / F4 / DP4 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| Tobich Optics | F4 / DP4 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| Toyota Bloemfontein | V4 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| VCS Cleaning Solutions | V1 / DP8 | Absent / Absent | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | Pending actual UI |
-| Vrystaat Kunstefees | Flexible / confirmed fields only | draft / Absent | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | Pending actual UI |
-| Watch Addict | V1 / F1 / DP2 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| We Ar Fuels | V1 / F4 / DP3 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| Wiseman Group | V1 / F4 / DP4 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| WiseRide | F2 / DP2 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | Pending actual UI |
-| Zooz Lifestyle WFF | Not active for launch | draft / draft | 0 canonical rows / 0 canonical rows | No mapping | Enabled | Pending actual UI |
+Final source readback at17:40UTC still has only Cape published for November/December
+and only Cape's8November canonical posting rows. That is not absence of Teams work.
+There are41enabled libraries; the remaining21include17private holds and fourunmapped
+held/excluded/cohort records.46existingexact-clientportal accounts;16unprovisioned.
+22records have no published report; some are project/non-recurring clients. The table
+records scope and publication, rather than automatically inventing launch blockers.
+
+Provider readbacks: Meta47mappedclients/76platformcheckpoints:20PASS,55PARTIAL,
+1STALE. Facebookaccessfailures Germoparts/Emmanuel/heldAV; heldRedOak stale.
+TikTok10connectedclients have Novemberfacts lastverified2Nov21UTC; partial
+cohort/account measures stay distinct. Exact Googleaccount/customer/campaign join
+confirms Cape33dailyrows1Oct–2Nov. Germoparts' newer24413585918("GERMOPARTS2026")
+has4rows30Oct–2Nov but is unassigned; oldGermoparts mappings, threeNovus mappings
+and RC-Polypipe have0October-or-newer rows. No live settings/ownership inference,
+new mapping, campaign edit or resync was made. #435 retains exact provider review.
+The first directdaily.client_id join returned0because that legacynullablefield is
+NULL; it was corrected to the real account+customer+campaign projection identity,
+not misreported as Cape having no data.
+
+Final quarantine acceptance exposed an empty selected TikTok panel after all figures
+were withheld. A focused local reader fix now gates on actual hasValue lines instead
+of non-empty section metadata, reuses the existing unavailable state and preserves
+genuinezero/partial figures. Red-before-green SSR regression and65focusedchecks pass;
+four-width local browser proof/full exact-candidate acceptance are recorded in the
+PR handover. Production quarantine is already live; this tiny UI fix is source-only
+until a separately governed frontend release. No Vercel operation in this audit.
+
+Final local acceptance of frozen candidate `8c678308219e` is PASS: 4,253 total /
+4,229 pass / 24 existing skips / zero failures, mandatory PostgreSQL fixtures,
+TypeScript/Vite, actual app bundle and all24browser fixtures (27steps, stable clean
+source). Receipt `%TEMP%/cg-local-launch-8c678308219e.json`, SHA256
+`c0e96a196a4f8dce9fdc2c9092f7f999c3e0a064b29554810c7ed4cb95a9c6f3`.
+First full run's five missing-OpenSSL PATH failures and original logs are preserved;
+corrected with the existing process-local Git OpenSSL, no source/config changes.
+68 confirmed package-quantity comparisons matched actual UI; 1,240 mobile navigation
+measurements were visible, minimum56pxhigh. Piek's entitled Leads view also passed
+actual desktop/mobile More navigation; private supplemental receipt
+`%TEMP%/cg-client-fleet-leads-20261103.json`.
+
+Actual company Google Ads UI subsequently verified all9campaign statuses and business
+creative. Cape is active; native October R2,199.24 matches stored data. Old Germoparts,
+Novus and RC-Polypipe campaigns are paused/removed. Two missing links are prepared
+but UNSAVED pending separate CA approval: activeGermoparts24413585918 and historical
+paused/endedNovus24189935204. Novus has30stored29Aug–27Sep rows; nativeSeptember
+12,231impressions/658clicks/R2,221.91 match. GermopartsOctober native1,647/65/R184.09
+match two stored days. No campaigns/budgets/permissions/resync changed; existing
+seven mappings preserved. Source receipt `%TEMP%/cg-client-fleet-google-source-ui-20261103.json`.
+Do not silently save both when approval covers only one; normal UI has both selected
+locally, so deselect the unapproved row before any save. #435 owns this narrow gate.
+
+
+| Client | Confirmed scope / hold | Nov / Dec strategy | Latest published report | Nov / Dec client dates | Brand Hub | Portal account | Actual UI evidence |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Agri-Secure | No recurring social | draft / Absent | None published | 0 canonical rows / 0 canonical rows | Private / 0 assets | Not provisioned | 16 desktop panels; mobile 390px: 4 views; no overflow |
+| All Around PVC | V1 / F3 / DP3 | draft / draft | 2026-09-30 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow; TikTok 8-row repair live |
+| AV Event Life | Owner hold | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | No mapping | Enabled | 16 desktop panels; mobile 390px: 4 views; no overflow; Facebook access gate |
+| Bat Hill Royale | Flexible / confirmed fields only | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | 16 desktop panels; mobile 390px: 4 views; no overflow |
+| Bloem Action Sports | V1 / F4 / DP4 | draft / draft | None published | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| Bloem Marble & Granite | V2 / DP4 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | 16 desktop panels; mobile 390px: 4 views; no overflow |
+| Bloem Vascular | No recurring social | draft / draft | None published | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| Bohemia Quick Stop | DP2 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | 16 desktop panels; mobile 390px: 4 views; no overflow |
+| Bouwer & Coetzee Attorneys | V1 / DP7 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| Braize | F4 / DP4 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| C&L Innovations | F2 / DP2 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| Cape Lumber | F3 / DP4 | published / published | 2026-10-31 | 8 shared / 8 rows / 0 canonical rows | Enabled / 1 assets | Enabled | Prior live acceptance + natural8/0/0; mobile 390px: 4 views; no overflow |
+| Case Bloemfontein | V2 / DP12 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| Central Canvas | V1 / F4 / DP3 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| CG Production House | V4 / F8 / DP4 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | 16 desktop panels; mobile 390px: 4 views; no overflow |
+| Daisy & Co | V1 / F3 / DP3 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | 16 desktop panels; mobile 390px: 4 views; no overflow |
+| Delta Gas | V1 / F3 / DP3 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| Dulux Paint & Paper Bloemfontein | V2 / F4 / DP4 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | 16 desktop panels; mobile 390px: 4 views; no overflow |
+| Econofoods | V5 | draft / draft | None published | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | 16 desktop panels; mobile 390px: 4 views; no overflow |
+| Ehrlich Park Butchery | V1 / F3 / DP4 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| Elcheck | V1 / F3 / DP3 | Absent / Absent | None published | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| Emmanuel Funerals | V1 / F3 / DP4 | draft / draft | 2026-09-30 | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | 16 desktop panels; mobile 390px: 4 views; no overflow; Facebook access gate |
+| Emoya Estate Driving Range | V1 / F4 / DP4 | draft / draft | None published | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| First Technology Central | No recurring social | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| Forklift Trucks | V1 / F3 / DP3 | draft / draft | None published | 0 canonical rows / 0 canonical rows | Private / 0 assets | Not provisioned | 16 desktop panels; mobile 390px: 4 views; no overflow |
+| Germoparts | V2 / DP12 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow; Facebook access gate; Google link approval pending |
+| Hino Trucks | V2 | draft / draft | None published | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | 16 desktop panels; mobile 390px: 4 views; no overflow |
+| HMHI | DP3 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| Human Auto | V3 | draft / draft | None published | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| Ipopeng Office Supplies | No recurring social | draft / draft | None published | 0 canonical rows / 0 canonical rows | Private / 0 assets | Not provisioned | 16 desktop panels; mobile 390px: 4 views; no overflow |
+| Jenkor | V1 / DP3 | draft / draft | None published | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| JFJ Electrical | V1 / F3 / DP3 | Absent / Absent | None published | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| Jodrico Killian | Owner cohort decision | Absent / Absent | None published | 0 canonical rows / 0 canonical rows | No mapping | Not provisioned | 16 desktop panels; mobile 390px: 4 views; no overflow |
+| Kundedienste | No recurring social | draft / Absent | None published | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| LHP Student Village & Block | Once-off / later | Absent / Absent | None published | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| Local Deli | No recurring social | draft / draft | 2026-07-31 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| Loraclox | F3 / DP3 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| Madison Wear | V2 / F8 / DP8 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| Mimosa Mall | No recurring social | draft / draft | None published | 0 canonical rows / 0 canonical rows | Private / 0 assets | Not provisioned | 16 desktop panels; mobile 390px: 4 views; no overflow |
+| NCNA | No recurring social | draft / draft | None published | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| Neshora Oxygen | V1 / F4 / DP4 | draft / Absent | None published | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| Novus Steel | V1 / F4 / DP4 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow; Google historical source checked |
+| Peyper Bonds | V1 / F3 / DP3 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| Piek Group | V4 / DP12 | draft / draft | 2026-09-30 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow; Calendar read recovered |
+| PSG Bloemfontein | V1 / DP3 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| RC-Polypipe | V1 / F3 / DP4 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | 16 desktop panels; mobile 390px: 4 views; no overflow; Google historical source checked |
+| Red Oak | Owner hold | draft / draft | 2026-09-30 | 0 canonical rows / 0 canonical rows | No mapping | Enabled | 16 desktop panels; mobile 390px: 4 views; no overflow |
+| Rusoord Farmstay | No recurring social | draft / Absent | None published | 0 canonical rows / 0 canonical rows | Private / 0 assets | Not provisioned | 16 desktop panels; mobile 390px: 4 views; no overflow |
+| SecuriForce | V4 / F4 / DP4 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| Supa Quick BFN | V1 / DP3 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| Supa Quick Centurion | V1 / DP3 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| TBS Brokers | F4 / DP4 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | 16 desktop panels; mobile 390px: 4 views; no overflow |
+| The Staffordshire | V4 / F4 / DP4 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| Tobich Optics | F4 / DP4 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| Toyota Bloemfontein | V4 | draft / draft | None published | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| VCS Cleaning Solutions | V1 / DP8 | Absent / Absent | None published | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| Vrystaat Kunstefees | Flexible / confirmed fields only | draft / Absent | 2026-09-23 | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | 16 desktop panels; mobile 390px: 4 views; no overflow |
+| Watch Addict | V1 / F1 / DP2 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| We Ar Fuels | V1 / F4 / DP3 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| Wiseman Group | V1 / F4 / DP4 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| WiseRide | F2 / DP2 | draft / draft | None published | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | 17 desktop panels; mobile 390px: 4 views; no overflow |
+| Zooz Lifestyle WFF | Not active for launch | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | No mapping | Enabled | 16 desktop panels; mobile 390px: 4 views; no overflow |
 
 ### Continue the existing launch sequence
 
@@ -400,7 +463,7 @@ PGlite groups remain unverified. Exact release/acceptance/rollback facts:
 The earlier source-only receipts below are historical, not current deploy status.
 
 | Order | Item and completion evidence | State / next action |
-| --- | --- | --- |
+| --- | --- | --- | --- |
 | 1 | Reconcile #668/#623/#505/#435/#731/#381, current review packet and open PRs | Done. No provider-integrity PR owner found. Onboarding and guideline/video PRs remain separate. Staff/Teams and normal ChatGPT strategy owners unchanged. |
 | 2 | Google Ads ingestion: reproduce malformed-success handling; preserve existing data instead of accepting a partial/invalid response as an empty replacement | Source repair reviewed/merged PR885 (`dea0d349`). RED then GREEN actual adapter/HTTP regressions,89/89 Google tests, scoped lint/build/diff. Bad batches/rows reject before replacement; verified empties/zeros/optional settings survive. No provider calls, mappings or production sync. |
 | 3 | Meta token-storage warning: inspect every consumer and prepare one staged, backwards-compatible hardening packet | Source reviewed/merged PR886 (`d1f37226`). Authenticated envelope, four dual-format readers, fail-closed writer and truthful status;273 focused tests plus the full receipt below. Exact protected rollout in META-TOKEN-STORAGE-HARDENING-2026-10-25.md. No key/config/deployment/data changes. |

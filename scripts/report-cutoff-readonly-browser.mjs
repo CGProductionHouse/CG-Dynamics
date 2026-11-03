@@ -26,6 +26,8 @@ const fixture = {
       function App(){const[status,setStatus]=useState('draft');const[client,setClient]=useState(null);const[lowSignal,setLowSignal]=useState(false);const[facts,setFacts]=useState([]);const[googleState,setGoogleState]=useState('unmapped');const[strategyReadUnavailable,setStrategyReadUnavailable]=useState(false);const[emptyStrategy,setEmptyStrategy]=useState(false);const[staff,setStaff]=useState(false);const[health,setHealth]=useState([]);window.showPublishedFixture=()=>setStatus('published');
         window.showNormalizedDiagnosticsFixture=()=>{setStaff(true);setFacts([{platform:'facebook',metricKey:'brand_views',value:1474,availability:'complete',aggregation:'sum',comparableGroup:null,sourceMetric:'page_media_view',periodStart:'2026-09-01',periodEnd:'2026-09-23'}]);setHealth([{platform:'facebook',period_month:'2026-09',metric_key:'brand_views',source_metric:'page_media_view',fact_availability:'complete',latest_run_status:'partial',latest_health_state:'verified_partial',ready_for_client_reporting:true}])};
         window.showClientDiagnosticsFixture=()=>setStaff(false);
+        window.showUnavailablePlatformFixture=()=>setFacts([{platform:'tiktok',metricKey:'current_followers',value:284,availability:'unavailable',aggregation:'snapshot',comparableGroup:null,sourceMetric:'follower_count',periodStart:'2026-09-01',periodEnd:'2026-09-30'}]);
+        window.showValidZeroPlatformFixture=()=>setFacts([{platform:'tiktok',metricKey:'comments',value:0,availability:'valid_zero',aggregation:'sum',comparableGroup:'tiktok_organic',sourceMetric:'comment_count',periodStart:'2026-09-01',periodEnd:'2026-09-30'}]);
         window.showMissingGoogleCampaignFixture=()=>setGoogleState('no-campaign-data');
         window.showStrategyReadErrorFixture=()=>setStrategyReadUnavailable(true);
         window.showNoStrategyFixture=()=>{setStrategyReadUnavailable(false);setEmptyStrategy(true)};
@@ -192,6 +194,17 @@ try {
     await page.evaluate(() => window.showClientDiagnosticsFixture())
     await page.getByText('Staff only · connector health', { exact: true }).waitFor({ state: 'detached' })
     assert.equal(await page.locator('table').count(), 0, 'Client view excludes connector diagnostics')
+    await page.evaluate(() => window.showUnavailablePlatformFixture())
+    await page.getByRole('tab', { name: 'TikTok', exact: true }).click()
+    const tiktokPanel = page.getByRole('tabpanel', { name: 'TikTok', exact: true })
+    await tiktokPanel.getByText('Verified platform figures are unavailable for this month', { exact: true }).waitFor()
+    assert.doesNotMatch(await tiktokPanel.innerText(), /284|same reporting window|TikTok current followers/)
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width} unavailable-platform overflow`)
+    await page.screenshot({ path: join(tmpdir(), `cg-platform-unavailable-${width}.png`), fullPage: true })
+    await page.evaluate(() => window.showValidZeroPlatformFixture())
+    await tiktokPanel.getByText('TikTok comments to date', { exact: true }).waitFor()
+    assert.equal(await tiktokPanel.getByText('0', { exact: true }).count(), 1, 'Genuine zero remains visible')
+    assert.equal(await tiktokPanel.getByText('Verified platform figures are unavailable for this month', { exact: true }).count(), 0)
     assert.deepEqual(errors, [])
     await page.close()
     console.log(`PASS ${width}px: actual Overview/Facebook/held managed Website, cutoff/observed zero, no later highlight/duplicate site upsell/overflow/runtime errors; localhost GET only`)
