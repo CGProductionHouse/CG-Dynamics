@@ -1,3 +1,27 @@
+### 3 November — owner-requested Nolan foundation audit/repair
+
+CA asked MSI to diagnose why the shared skills and repeated editorial rules were
+not reaching client films. Scoped system repair continues in existing office
+draft PR910/#903/#914; no client production, sends or reminders were resumed.
+The actual baseline release helper did not consume the story plan or prove any
+selected technique was rendered. A synthetic30s blank export reached its READY
+state with self-authored PASS labels (identity/audio fixture gates stubbed only
+to isolate that fault); the repaired entry point blocks the same missing plan.
+Shared preflight/release now bind the frame plan, scene jobs, declared cut
+anchors, selected implementation/parameters and exact decoded output/control.
+Two existing technique mechanisms are callable image operations for the proven
+renderer; no new engine. Machine success means candidate, never creative approval.
+See [the audit](../../scripts/video-editing/studio-phase2/PRODUCTION-FOUNDATION-AUDIT-20261103.md).
+Office production remains stopped; older MSI approvals do not clear the rejected
+seven-film PC batch. Office pull/install and real-client application remain
+distinct from publishing this shared repair. Existing #914 owns any later
+client resumption; do not restart it from superseded overnight authority.
+Verification:40 Python contracts, shared-skill validation, compile/diff and
+TypeScript/Vite build pass. MSI canonical skill installed/hash CURRENT with
+backup; office pull/install is not witnessed. The existing Google handover is
+the mirror; exact Control Centre name search still returns no result, so no
+guessed tracker mutation. No DB/migration/security, client media or desktop work.
+
 ### 3 November09:34 SAST — Nolan sound dependency repair
 
 CA explicitly requested fixing the blocked sound-review dependency and delivering

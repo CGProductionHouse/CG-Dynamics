@@ -5,6 +5,8 @@ description: Add bounded motion blur to animated text or graphics while preservi
 
 # Graphic transform blur — portable original proof
 
+**Production use,3November:** the shared `cg-video-story-editor/scripts/visual_treatments.py::type_reveal` now exposes a source-independent clipped/staggered vertical reveal with graphic shutter integration. Supply the actual approved font/colours and bind its layout/timing parameters; no system-font fallback. Follow [the connected production path](../../../../../.agents/skills/cg-video-story-editor/references/production-execution.md). Synthetic encoded integration verifies use/resolve, not that this treatment improves a client shot, native editability or heard rhythm. Existing failed controls below remain relevant.
+
 ## Portrait moving-title source screen — 29 October 2026
 
 [The basketball title comparison](../../PORTRAIT-BASKETBALL-GRAPHIC-BLUR-SCREEN-20261029.md) pins an upright commercially cleared dribble source and tests no-title plain, sharp entry,180° and protected90° graphic-only motion accumulation across four72-frame outputs. All fully decode; first12 and final48 frames of the blur-strength revision are exact, with only title-entry frames12–23 changing. At frame16 the title-band difference from sharp falls10.691→5.114RGB levels with the shorter exposure, while the ball region remains decoded-identical to no-title plain. Strong blur delays reading; restrained entry is clearer but `DRIBBLE` is redundant and low in the portrait frame. Prefer plain for this shot. No native equivalence, heard rhythm, physical-phone safe-area or creative/client approval follows.

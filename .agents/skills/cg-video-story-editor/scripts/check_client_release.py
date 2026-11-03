@@ -7,10 +7,13 @@ from pathlib import Path
 import argparse,json,re,sys,math,shutil,subprocess
 from load_client_library import read,sha,verify
 from audio_review import gate as audio_gate
+from preflight_story import validate as validate_story
+from edit_contract import check_render, sha as bound_sha
 
 AREAS=('approved_reference_comparison','source_and_rights','orientation_and_stabilisation','colour_match',
        'brand_typography_motion','rendered_spelling_and_copy','picture_at_normal_speed','sound_and_sync',
-       'cover_and_small_grid','cross_client_distinctness','portrait_outro')
+       'cover_and_small_grid','cross_client_distinctness','portrait_outro',
+       'hook_and_story','skill_application','beat_timing')
 
 def duration_gate(video,ffprobe='ffprobe'):
     """CA3Nov: roughly30s. Read actual bytes, never a self-authored duration reason."""
@@ -46,6 +49,8 @@ def check(record):
     errors=[];result={'status':'BLOCKED','errors':errors,'creative_approval_inferred':False}
     try:result['actual_duration_seconds']=duration_gate(record['video'],record.get('ffprobe_path','ffprobe'))
     except (KeyError,ValueError,OSError,subprocess.SubprocessError) as e:errors.append('Duration blocked: '+str(e))
+    if 'actual_duration_seconds' in result:
+        errors.extend(check_render(record,result['actual_duration_seconds'],validate_story))
     if record.get('resend_blocked') or record.get('creative_status')!='creative_review_passed':errors.append('Owner-rejected or uncleared creative work cannot be sent')
     context=None
     try:
@@ -77,11 +82,14 @@ def check(record):
         proof=Path(record['exact_export_creative_review_evidence']);review=read(proof)
         if review.get('video_sha256')!=record['video_sha256'] or review.get('cover_sha256')!=record['cover_sha256']:errors.append('Creative review belongs to different picture/cover bytes')
         if not review.get('reviewer') or not review.get('reviewed_at'):errors.append('Actual creative reviewer/method/date missing')
+        if review.get('reviewer_kind') not in ('author_editorial','independent_editor'):
+            errors.append('Attribute the real editorial reviewer; model/metadata checks are not independent creative acceptance')
         for area in AREAS:
             entry=review.get('areas',{}).get(area,{})
             if entry.get('status')!='pass' or not entry.get('method') or not entry.get('finding'):errors.append('Unresolved actual review: '+area)
             evidence=entry.get('evidence_file')
             if not evidence or not Path(evidence).is_file():errors.append('Missing actual review artifact: '+area)
+            elif entry.get('evidence_sha256')!=bound_sha(evidence):errors.append('Changed/unbound review artifact: '+area)
         if review.get('picture_review_muted') and review.get('sound_review_complete') is not True:errors.append('Muted picture playback cannot clear sound')
     except (KeyError,ValueError,OSError) as e:errors.append('Exact creative review evidence missing/invalid: '+str(e))
     try:
@@ -89,7 +97,8 @@ def check(record):
         if a['video_sha256']!=record['video_sha256']:errors.append('Audio review belongs to a different export')
         errors.extend('Audio: '+x for x in a['errors'])
     except (KeyError,ValueError,OSError,TypeError) as e:errors.append('Exact-export perceptual audio gate missing/invalid: '+str(e))
-    if not errors:result['status']='EVIDENCED_INTERNAL_REVIEW_READY'
+    if not errors:result['status']='CANDIDATE_FOR_INTERNAL_REVIEW'
+    result['state_limit']='Implementation/timing/identity evidence only. This command cannot approve the story, taste or music; author editorial judgment is not independent approval.'
     return result
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('release_record');a=p.parse_args()
