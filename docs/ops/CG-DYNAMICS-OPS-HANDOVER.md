@@ -1,16 +1,26 @@
-## 3 November — #941 date-follow fix verified; exact production approval pending
+## 3 November — #941 exact-approved date-follow fix LIVE
 
-PR #941 adds a bounded date-only continuation after the existing Teams automatic
-mirror. Explicitly shared, exact-source-verified dates can follow future source
-moves; private rows, staff overrides, posted history and approvals stay protected.
-No new calendar/task authority or Microsoft write. Runtime `1ef93208` earned a
-clean frozen receipt: **4,228 pass / 24 skips**, mandatory PostgreSQL, build/bundle
-and **all 24 browser journeys**. Source merge is not production activation.
-One reviewed migration + two hosted files + Cape's eight opt-in grants need exact
-approval. Existing periodic cadence, no immediate-sync guarantee or forced resync.
-Frontend already live from `626bd308`; ZERO further Vercel for this change.
-Full boundaries, hashes and actual account/UI evidence:
+Migration applied and five function bodies/ACL/RLS read back. Existing Teams backend
+**v78→79**: reviewed index+new helper, all18files verified,16others byte-identical,
+JWT/import map retained; unauthenticated401. Cape8already-shared source-verified
+date-follow grants enabled in place through approved optimistic management SQL;
+8truthful management audits,0other-client grants, all previous dates/content/
+approvals/posting fields unchanged. Existing UI cannot re-share already-shared dates;
+no hide/re-share, auth impersonation or Microsoft write. Actual preview8dates and
+Video repost verified. Google October31daily rows exactly match displayed
+R2,199.24/40,497impressions/1,337clicks/3.30%.
+No Vercel or forced provider/system cycle. Next natural cycle unobserved; roughly3h
+cadence, general staff mirror83conflicts remains separate. Connector bounded read
+retries recovered after transient failures. Real password/phone/download acceptance
+remains owner-held; unknown-CG highlights stay hidden. Full receipt and boundaries:
 [Cape acceptance](CAPE-LUMBER-LAUNCH-REVIEW-2026-11-02.md).
+
+Current fleet exception from the same read-only provider check: Facebook access is
+blocked for **Germoparts, AV Event Life and Emmanuel Funerals**. Source identity was
+resolved against canonical client IDs, not guessed. This is not Cape's checkpoint;
+its FB sync succeeds/PARTIAL and IG is PASS. AV remains owner-held as previously
+instructed. Germoparts/Emmanuel need exact provider-access review before their own
+launch, not a fabricated green state or a bulk re-consent/resync. Owning #435/#505.
 
 ## 3 November — visual client frontend live
 

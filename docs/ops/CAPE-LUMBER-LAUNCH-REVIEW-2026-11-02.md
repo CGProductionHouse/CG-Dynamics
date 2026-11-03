@@ -1,62 +1,64 @@
-### 3 November — shared Teams posting-date continuation (#941; source only)
+## 3 November — approved Teams date-follow activation LIVE (#941)
 
-Reproduced: the existing automatic Microsoft mirror excludes protected Client Schedule
-payloads, so previously shared dates cannot follow Monique's later source moves.
-Narrow continuation claimed in #325 comment 6600964127; no overlapping Microsoft/
-schedule PR or active local source edit was found. General staff/Planner/CG Calendar
-ownership remains separate. No second collector, task/calendar table or Microsoft write.
+CA approved the exact packet in chat: “Approved. Get the app done.”
+Migration `client_plan_source_date_following` is applied; all five function bodies
+match reviewed source. Existing owner/ACL/search paths and table RLS are retained;
+private validator is postgres-only, automatic refresh is service-role-only, and
+sharing remains manager/admin-only. All three new policy/audit columns have the
+reviewed defaults/constraint. Existing security-advisor categories/counts unchanged.
 
-Runtime/test freeze: `1ef93208e54157371a95ec4b85312794fba1c9c3`.
-One default-off audit policy on canonical `monthly_deliverables`: a manager's explicit
-Share planned dates delegates following only when a fresh complete job proves the
-same exact task, plan, bucket and current date. Unshare stops following. Date-only
-refresh runs after the existing completed/partial automatic mirror; source job,
-active actor/client, full enumeration, durable identities and last shared date must
-agree. Staff date overrides, changed identities/buckets, posted history, private/
-archived rows, stale/malformed/ambiguous/missing source are held. Explicit source
-null unschedules; a later observed date may restore that same delegated row.
-Cross-month dates appear in their actual calendar month without moving package
-capacity. Approvals, posting status, content, notes, assignees, client/month and
-full-sync stamps are preserved. Automatic audits never impersonate a human edit.
+Existing `microsoft-transition-sync` is **ACTIVE v79** (from78): all18hosted files
+read back exactly; only the reviewed index changes and new helper were introduced,
+**16 other files byte-identical**, JWT/import map unchanged. Unauthenticated GET401.
+No Vercel operation, Microsoft write, provider resync, secret/config change or new
+post/strategy/asset publication.
 
-Security: private validator has no API execute grant; the sharing RPC stays active-
-manager-only; refresh is service-role-only and exact-run/idempotency fenced, bounded
-to 1,000 already delegated rows. Held/blocked/bounded/failed work is not green success.
-Migration `20261103102248_client_plan_source_date_following.sql`, SHA256
+Cape's **eight already-shared November items now follow verified source dates**.
+Fresh exact-source task/bucket/date proof matched8/8. Activation used one approved
+management SQL transaction with full-row optimistic checks and the private reviewed
+source validator, changing only three following/audit fields plus updated_at.
+The existing UI disables re-sharing dates already shared; activation therefore
+preserved their visibility in place instead of hiding/re-sharing or bypassing auth
+with a fabricated JWT. Eight separate audit records explicitly name management
+activation and have actor_user_id NULL; existing manager remains the delegation owner.
+Independent read-back: all8grants present, **0 other-client grants**, all prior dates,
+sharing evidence, approvals, posting/content/source identity fields unchanged.
+
+Actual signed-in admin preview: all8calendar entries and25November **Video repost**
+remain visible. Public October report remains Published; concise strategy/actions
+remain live. Exact31daily Google Ads records independently sum to **R2,199.24,
+40,497impressions,1,337clicks,3.30%**, matching the client UI.
+First concurrent connector health calls had transport/internal failures; bounded
+sequential read retries recovered. No connector redeploy, credential change or
+claim of uninterrupted availability. Current Cape IGcheckpointPASS; FBcheckpoint
+success/PARTIAL; TikTok not connected and no fabricated coverage. General Microsoft
+mirror remains PARTIAL (83conflicts, complete6sources); that staff lane is separate
+from this narrowly verified client date continuation.
+
+The next natural automatic source cycle has not yet been observed: normal cadence
+is periodic (roughly3hours), not instantaneous. No forced system cycle or bulk
+reconciliation was run. Staff overrides and stale/missing/ambiguous source stay held.
+Real customer-password, physical-phone and actual download-completion checks remain
+owner-retained; fixture/preview checks do not replace those. Unknown-CG highlights
+stay omitted while positive creative evidence production remains a separate backlog.
+This is Cape-specific rollout evidence, not certification of every client's content.
+
+Frozen source/runtime test proof unchanged: `1ef93208`, **4,228pass/24existing skips**,
+mandatory PostgreSQL, TypeScript/Vite/appbundle and all24browser journeys pass.
+Only continuity documents changed afterward. LF migrationSHA256
 `79e24411992f31eadb7449fce588ff68603002444a6a1418ea967d12f26fe6d0`.
-
-Production read-only preflight: existing backend v78 index matches source baseline.
-Candidate changes that index plus one new helper, preserving 16 other hosted files,
-JWT and import-map settings. Cape's eight already shared November rows each match
-one exact task, bucket and date in the latest complete source. `capelumber` account
-is enabled, active, client-role and mapped to Cape; no password read/reset/login.
-Existing periodic cadence remains (roughly three hours), not instant synchronization.
-Next natural hosted refresh is not yet observed and must not be claimed.
-
-**Production approval still required:** one migration, the surgical two-file existing
-backend update and source-follow grants for only Cape's eight reviewed shared rows.
-Future explicit source-verified Share actions enable the same following policy.
-No production SQL/data/Edge activation, Microsoft write, Vercel operation, new post,
-strategy publication or credential/config change is included in the source merge.
-The earlier frontend release is already live; do not deploy again for this backend
-or these docs. Owner-retained real password/physical-phone acceptance and positive
-creative evidence production remain separate. Unknown CG highlights stay hidden.
+Receipt `%TEMP%/cg-shared-date-941-production-20261103.json`, SHA256
+`6635a56fc813235c1517c882be9a4d55fd48d9dc7f75d7176f12bf96b215b228`.
+Actual calendar screenshot:
+`C:/Users/chris/.codex/visualizations/2026/09/20/01a0bd6e-b8d9-7693-b55a-30f926814341/cape-calendar-date-follow-live-20261103.png`.
 Exact Google Control Centre target unavailable; no guessed tracker write.
 
-Validation: frozen clean-tree receipt `%TEMP%/cg-local-launch-1ef93208e541.json`
-is **LOCAL_CODE_ACCEPTANCE_PASS**, SHA256
-`07480fae314967b02a72dbc4dd7eb5cbd8c8f883add7401cac4971993dde6d82`.
-4,252 supported tests: **4,228 pass / 24 existing skips / 0 fail**; mandatory real
-PostgreSQL fixtures, TypeScript/Vite/app bundle, scoped lint/diff, separate actual
-Edge type compatibility and **all 24 browser journeys** pass. Local synthetic
-6,500-source-record/8-date proof took 27ms PostgreSQL wall time; not hosted CPU proof.
-Runtime/tests unchanged by the subsequent continuity-only commit.
-
-Bounded additional live acceptance: Cape Brand Hub's sole published logo View
-loaded correctly in a separate window. Download clicked and retained Dynamics
-without an app error, but the opener's download-event wait timed out because the
-handoff uses another window; Chrome's download-manager inspection was policy-blocked.
-No retry/bypass or completion claim. Physical-device download remains owner review.
+Current fleet exception from the same read-only provider check: Facebook access is
+blocked for **Germoparts, AV Event Life and Emmanuel Funerals**. Source identity was
+resolved against canonical client IDs, not guessed. This is not Cape's checkpoint;
+its FB sync succeeds/PARTIAL and IG is PASS. AV remains owner-held as previously
+instructed. Germoparts/Emmanuel need exact provider-access review before their own
+launch, not a fabricated green state or a bulk re-consent/resync. Owning #435/#505.
 
 # Cape Lumber launch acceptance — 2 November 2026
 

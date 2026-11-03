@@ -1,5 +1,22 @@
 # Provider backend rollout and local acceptance — 25 October 2026
 
+### 3 November — exact-approved Teams shared-date backend LIVE (#941)
+
+CA approved migration plus existing backend plus Cape8date-follow grants. All five
+SQL function bodies match reviewed source; ACL/owners/search paths/RLS retained,
+security-advisor categories/counts unchanged. Microsoft transition sync v78→**79**,
+ACTIVE/JWT/importmap retained:18files read back, reviewed index+new helper only,
+**16 other files byte-identical**. Unauthenticated request401.
+Cape8grants enabled in-place by exact-approved optimistic management SQL with the
+private reviewed source validator; UI already-shared dates cannot be re-shared.
+No hide/re-share or auth impersonation. Independent readback confirms0other-client
+grants and all prior sharing/content/approval/posting/source fields unchanged.
+Eight audits explicitly identify management activation with no fabricated user actor.
+Actual preview still shows8dates and Video repost. No Microsoft writes, resync or
+Vercel. Natural automatic date continuation not yet observed; periodic cadence stays.
+Full hash, receipt, actual Google/source and owner-retained role/device boundaries:
+[Cape acceptance](CAPE-LUMBER-LAUNCH-REVIEW-2026-11-02.md).
+
 ### 3 November — approved reporting backend rollout complete
 
 CA explicitly approved PR #938's exact four-function reporting release in this chat.
