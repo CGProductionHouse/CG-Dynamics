@@ -1,5 +1,53 @@
 # Provider backend rollout and local acceptance — 25 October 2026
 
+## 3 November — exact reporting helper release packet (approval pending)
+
+This is a release proposal, not a rollout receipt. PR #937's calendar repost projection
+is separately approved and live; do not reapply it. Tested runtime `84b0e929` and
+fixture-only `b67e191c` have 4,222 passing supported tests, 24 existing skips and no
+failures, mandatory PostgreSQL, build/bundle, backend TypeScript, scoped lint and diff.
+All 24 canonical browser fixtures passed. The handover records the transparent
+27-step reconciliation; the interrupted stock runner is not relabelled as successful.
+
+| Existing function | Baseline | Only file to change | Other files retained |
+| --- | --- | --- | --- |
+| cg-dynamics-mcp | 75 / JWT false | `supabase/functions/_shared/monthlyStrategyAutopilot.ts` | 39 |
+| monthly-strategy-autopilot | 48 / JWT true | Same helper, surgical hosted-48 variant only | 15 |
+| meta-sync | 89 / JWT false | `functions/_shared/metaInsightResponse.ts` | 11 |
+| meta-sync-worker | 76 / JWT false | Same parser | 16 |
+
+The strategy guard removes automatic winners and citations for unverified page posts,
+and reports `verified_cg_creatives: unavailable`. Original published findings, staff
+wording, windows, canonical writes/approvals and normal ChatGPT ownership remain.
+There is no automatic matcher or proof registry; the separately governed frontend
+guard omits unknown CG highlights.
+
+The Meta parser accepts a unique value only for one explicitly expected day and one
+exact matching numeric bucket. Existing shape, breakdown and coverage checks remain.
+Multi-day unique audiences cannot be summed. This fixes the observed single-day
+78-viewer case; it does not recover unavailable monthly uniques or alter campaigns.
+
+Before release, re-fetch every target's version, authentication/import metadata and
+full file list/content. Stop on baseline drift. Preserve all 81 other files exactly.
+The legacy-48 helper has unrelated source drift: never replace it wholesale with main.
+Its private actual 16-file hosted-bundle proof and receipt are at
+`%TEMP%/cg-hosted-monthly-proof-YPO4ug/`.
+Original helper SHA256:
+`7a02efe8bf5aeaed9a900797ce2a3c0b1522980d1f32957bfd038014e68841b8`.
+Surgical candidate SHA256:
+`b6013a74fede20d5153b479439639ef0d73431ec346d7d575d8ba2e83d0b4b0c`.
+The baseline reproduces the unknown winner; the candidate omits it with all other
+draft/evidence/window fields equal and zero writes. No private bundle is committed.
+
+After exact approval, deploy only these four helper copies. Preserve entrypoints,
+imports, JWT/custom authentication, roles, permissions, secrets and cadence.
+Independently read back all 85 files: four changed and 81 unchanged, plus settings
+and versions. Read the normal MCP brief to verify unavailable creative coverage
+and no unverified creative citations. Do not save, approve or publish strategies,
+trigger generation, wake a worker or bulk-resync providers. Scheduled cadence can
+exercise the parser. No SQL, new function, migration, OAuth, key, mapping, campaign,
+permission, dependency or Vercel change is part of this packet.
+
 Client lane only, source `8353e75fd944dc038fbe7403a0013e9c1219b328`.
 CA explicitly approved the exact Google safeguard and then the staged Meta
 encryption rollout in this chat. These are Supabase-only authorisations, not a

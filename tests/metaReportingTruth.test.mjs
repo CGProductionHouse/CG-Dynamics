@@ -328,6 +328,9 @@ function renderReport(overrides = {}) {
     previousGoogleAds: null,
     googleAdsState: 'disconnected',
     googleAdsError: null,
+    // These legacy metric/cutoff fixtures explicitly supply independent CG evidence.
+    // Unknown-origin defaults are exercised separately in cgCreativeRanking.test.mjs.
+    verifiedCgPostIds: new Set((overrides.report ?? baseReport).posts.map(post => post.id)),
     ...overrides,
   }))
 }

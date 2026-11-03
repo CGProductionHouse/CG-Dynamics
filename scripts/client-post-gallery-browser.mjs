@@ -29,7 +29,7 @@ const fixture = {
       const report={id:'synthetic-report',report_title:'Local visual acceptance',platform:null,status:'published',period_start:'2026-10-01',period_end:'2026-10-31',
         posts:${example ? JSON.stringify(example.map((item,index)=>({...item,id:'example-'+index,platform:'facebook',impressions:null,reach:null,engagement_known_subtotal:item.engagements,engagement_definition_id:'facebook_direct_reactions_comments_shares_v1',engagement_definition_label:'Facebook direct reactions + comments + shares',engagement_coverage:{observed:3,required:3},engagement_completeness:'complete',excluded:false}))) : "[post('one',95),post('two',83),post('three',69)]"}};
       createRoot(document.getElementById('root')).render(React.createElement('main',{className:'mx-auto max-w-6xl p-4 sm:p-8'},React.createElement(ClientReportView,
-        {report,client:{name:'Visual acceptance fixture'},googleAds:null,googleAdsState:'unmapped'})));`
+        {report,client:{name:'Visual acceptance fixture'},googleAds:null,googleAdsState:'unmapped',verifiedCgPostIds:${example ? 'new Set()' : "location.search.includes('unverified')?new Set():new Set(['one','two','three'])"}})));`
   },
   configureServer(server) {
     server.middlewares.use((req, res, next) => {
@@ -59,11 +59,9 @@ try {
       })
       await page.goto(origin+'/__gallery')
       await page.getByRole('tab',{name:'Facebook',exact:true}).click()
-      const section=page.locator('section').filter({has:page.getByRole('heading',{name:'Top performing content',exact:true})})
-      await section.scrollIntoViewIfNeeded()
-      await page.waitForFunction(()=>[...document.querySelectorAll('img[data-post-media]')].every(img=>img.complete),null,{timeout:15000})
-      console.log(JSON.stringify({visual:'local Cape public-post preview',width,visibleImages:await section.locator('img[data-post-media]').count()}))
-      await section.screenshot({path:join(directory,`cape-visual-posts-${width}.png`)})
+      assert.equal(await page.getByRole('heading',{name:'Top performing content',exact:true}).count(),0)
+      assert.equal(await page.locator('img[data-post-media]').count(),0,'Actual unverified public posts are omitted')
+      await page.screenshot({path:join(directory,`cape-unverified-omitted-${width}.png`),fullPage:true})
       await page.close()
     }
   } else {
@@ -83,9 +81,9 @@ try {
     await page.goto(origin+'/__gallery')
     await page.getByRole('tab',{name:'Facebook',exact:true}).click()
     const section = page.locator('section').filter({has:page.getByRole('heading',{name:'Top performing content',exact:true})})
-    assert.equal(await section.locator('img[data-post-media]').count(),3,'Real post media must reach the report gallery')
-    assert.equal(await section.locator('article').count(),3,'Each ranked post appears once')
-    assert.equal(await section.getByRole('button',{name:'Read caption',exact:true}).count(),3)
+    assert.equal(await section.locator('img[data-post-media]').count(),2,'Real post media must reach the report gallery')
+    assert.equal(await section.locator('article').count(),2,'Each ranked post appears once')
+    assert.equal(await section.getByRole('button',{name:'Read caption',exact:true}).count(),2)
     const first = section.locator('article').first()
     const enlarge=first.getByRole('button',{name:'Enlarge post image',exact:true})
     await enlarge.click()
@@ -114,11 +112,18 @@ try {
     await page.getByRole('tab',{name:'Facebook',exact:true}).click()
     await page.getByText('Preview unavailable',{exact:true}).first().waitFor()
     assert.equal(await page.locator('img[data-post-media]').count(),0,'Expired provider image falls back, never a broken box')
-    assert.equal(await page.getByRole('link',{name:'View on Facebook',exact:true}).count(),3,'Original post remains accessible')
+    assert.equal(await page.getByRole('link',{name:'View on Facebook',exact:true}).count(),2,'Original post remains accessible')
     await page.goto(origin+'/__gallery?missing')
     await page.getByRole('tab',{name:'Facebook',exact:true}).click()
     assert.equal(await page.locator('img[data-post-media]').count(),0)
     assert.ok(await page.getByText('Preview unavailable',{exact:true}).count()>0)
+    await page.goto(origin+'/__gallery?unverified')
+    await page.getByRole('tab',{name:'Facebook',exact:true}).click()
+    assert.equal(await page.getByRole('heading',{name:'Top performing content',exact:true}).count(),0,'Unverified page posts are not CG highlights')
+    assert.equal(await page.locator('img[data-post-media]').count(),0)
+    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),width+' unverified report overflow')
+    await page.getByRole('tab',{name:'Overview',exact:true}).click()
+    assert.equal(await page.locator('img[data-post-media]').count(),0,'Overview does not fall back to unverified creative')
     assert.deepEqual(errors,[])
     await page.close()
   }

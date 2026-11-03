@@ -113,6 +113,7 @@ export function ClientReportView({
   normalizedFactsAttempted = false,
   dataHealth = [],
   contentExclusions = [],
+  verifiedCgPostIds,
   onSetContentExcluded,
   curationBusyId = null,
   monthlyStrategy = null,
@@ -141,6 +142,8 @@ export function ClientReportView({
   dataHealth?: ReportFactHealth[]
   /** Report-bound safe exclusion flags. They affect highlights, never totals. */
   contentExclusions?: ReportContentExclusion[]
+  /** Separate report-bound CG origin + asset/post evidence; never populate from provider/raw fields. */
+  verifiedCgPostIds?: ReadonlySet<string>
   /** Staff-only explicit curation action. Omitted on client routes. */
   onSetContentExcluded?: (post: ReportStatsPost, excluded: boolean) => void | Promise<void>
   curationBusyId?: string | null
@@ -174,8 +177,11 @@ export function ClientReportView({
     return new Set(keys)
   }, [contentExclusions, report.posts])
   const master = useMemo(
-    () => buildMasterReport(statsPosts, manualMetrics, excludedContentKeys),
-    [excludedContentKeys, manualMetrics, statsPosts],
+    // Current provider and exclusion projections do not establish CG creation.
+    // Fail closed until a separately verified origin + asset/post authority is
+    // available; never derive its allowlist from raw flags, captions or page access.
+    () => buildMasterReport(statsPosts, manualMetrics, excludedContentKeys, { requireVerifiedCg: true, verifiedCgPostIds }),
+    [excludedContentKeys, manualMetrics, statsPosts, verifiedCgPostIds],
   )
 
   const availablePlatforms = master.platforms.filter(view => view.source !== 'none')
@@ -821,7 +827,7 @@ function MethodologyDisclaimer() {
           <p>Platform data may be delayed, incomplete or later revised by the platform.</p>
           <p>Figures come from connected first-party sources (e.g. Meta, Google Ads). Different platforms may define similar-sounding metrics differently, so they are shown separately.</p>
           <p>Unique audiences such as reach and viewers are not added together across platforms.</p>
-          <p>Featured content prioritises CG-created or CG-managed work; client-created posts may remain in totals while being excluded from CG creative analysis.</p>
+          <p>Page totals include all observed content. Creative highlights require verified CG creation and a verified match to the published post.</p>
           <p>AI may assist with analysis. CG reviews all client-facing strategy. Recommendations do not guarantee sales.</p>
         </div>
       )}

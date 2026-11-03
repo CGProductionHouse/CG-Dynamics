@@ -256,7 +256,7 @@ test('source labels are exact and existing Meta report construction remains in p
   assert.match(REPORT_VIEW_SOURCE, /reportSourceAttribution\(activeTab/)
   assert.match(REPORT_VIEW_SOURCE, /googleAds: hasGoogleAdsSource/)
   assert.match(REPORT_VIEW_SOURCE, /meta: hasMeta && \(activeTab === 'overview' \|\| reportPlatforms\.includes/)
-  assert.match(REPORT_VIEW_SOURCE, /buildMasterReport\(statsPosts, manualMetrics, excludedContentKeys\)/)
+  assert.match(REPORT_VIEW_SOURCE, /buildMasterReport\(statsPosts, manualMetrics, excludedContentKeys, \{ requireVerifiedCg: true, verifiedCgPostIds \}\)/)
   assert.match(REPORT_VIEW_SOURCE, /buildMetaPlatformMetrics\(view\)/)
   assert.match(REPORT_VIEW_SOURCE, /isMetaSyncedManualMetric\(view\.manual\)/)
 })

@@ -17,11 +17,20 @@ page's reach, views, leads or sales as the result of CG-made content.
 
 ## Verified starting point
 
+3 November source safeguard: client rankings require independent, exact-post CG
+evidence, default empty, with exclusions preserved and at most two highlights.
+Provider/raw flags and non-exclusion never establish origin. Strategy preparation
+no longer automatically cites unknown page winners; page totals and approved
+narratives persist. This is source verified, not deployed, and not an automatic
+matcher, server provenance registry or proof producer. Unknown highlights are
+omitted until that authority exists. Continue steps 1–5; no manual tagging queue.
+
 - The existing normal company ChatGPT task is now **CG Dynamics — Research & Strategy**,
   weekdays08:00/11:00/14:00/17:00 Africa/Johannesburg, same chat. Keep it as the author; do not add a Codex/paid-API
   author or reactivate the failed Work task. Source/connector availability is tested
   at execution; changing its prompt is not a successful unattended run.
-- The current report statistics rank all eligible posts except explicit exclusions.
+- The currently serving report ranks eligible posts except explicit exclusions;
+  the new source guard above is not deployed yet.
   `report_content_exclusions` is an exclusion mechanism, not positive creative origin.
   Current methodology's “CG-created or CG-managed” wording is too broad for this rule.
 - Existing `client_portal_assets` / library/category/client mappings identify final

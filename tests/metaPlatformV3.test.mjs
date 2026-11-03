@@ -43,6 +43,25 @@ test('daily unique viewers cannot become a monthly audience by addition', () => 
   ] }], 'page_total_media_view_unique', false).reason, 'daily_unique_series_not_summable')
 })
 
+test('one exactly covered requested provider day retains its unique viewers without summing days', () => {
+  const metric = 'page_total_media_view_unique'
+  const bounds = metaInsightsBounds('2026-11-01', '2026-11-01')
+  const ends = expectedMetaDailyEnds(bounds.since, bounds.until)
+  assert.deepEqual(ends, [Date.parse('2026-11-02T08:00:00Z')], 'Pacific DST end is part of exact coverage')
+  const data = value => [{ name: metric, period: 'day', values: [{ value, end_time: '2026-11-02T08:00:00+0000' }] }]
+  assert.deepEqual(parseMetaInsight(data(78), metric, false, undefined, ends), { value: 78, responseShape: 'time_series', reason: null })
+  assert.equal(parseMetaInsight(data(0), metric, false, undefined, ends).value, 0)
+  for (const expected of [undefined, [], [...ends, ends[0] + 86400000]]) {
+    assert.equal(parseMetaInsight(data(78), metric, false, undefined, expected).value, null)
+  }
+  assert.equal(parseMetaInsight(data(78), metric, false, undefined, [ends[0] + 86400000]).value, null)
+  assert.equal(parseMetaInsight(data(null), metric, false, undefined, ends).value, null)
+  assert.equal(parseMetaInsight(data(78), metric, false, 'follows', ends).value, null)
+  const two = [{ name: metric, period: 'day', values: [...data(78)[0].values, { value: 90, end_time: '2026-11-03T08:00:00Z' }] }]
+  assert.equal(parseMetaInsight(two, metric, false, undefined, ends).value, null)
+  assert.equal(parseMetaInsight(two, metric, false, undefined, [...ends, ends[0] + 86400000]).value, null)
+})
+
 test('a numeric series must cover exactly the requested calendar days', () => {
   const ends = ['2026-08-02T07:00:00Z', '2026-08-03T07:00:00Z'].map(Date.parse)
   const parse = values => parseMetaInsight([{ name: 'views', period: 'day', values }], 'views', true, undefined, ends)

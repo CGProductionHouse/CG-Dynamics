@@ -1,5 +1,62 @@
 # Cape Lumber launch acceptance — 2 November 2026
 
+### 3 November — reporting safeguards verified; repost label live
+
+PR #937's approved calendar-label migration is live. The function definition changed
+from MD5 `035621a816bd6bd30c08c2cbff8d5041` to
+`93269824c67f28287ffff09b7d6e12dc`; owner, ACL and empty search path are unchanged.
+Cape's row, date and approval/posting fields are unchanged. Its signed-in admin
+preview now shows **Video repost** on 25 November. The actual screenshot is saved at
+`C:/Users/chris/.codex/visualizations/2026/09/20/01a0bd6e-b8d9-7693-b55a-30f926814341/cape-client-video-repost-live-20261103.png`.
+All eight Planner task IDs were read directly: 2/4/9/11/16/18/23/25 November match.
+The first six tasks are complete; this does not establish posting or client approval.
+Staff owner #325 retains automatic Client Schedule refresh (handoff 6598839501).
+
+The client report now requires independent, exact-post CG creative evidence before
+showing a highlight. It defaults to none, ignores raw/provider origin flags, honours
+exclusions and caps highlights at two. Page totals and ordinary staff analytics stay
+unchanged. No production proof producer exists yet: this guard hides unknown work;
+it is not an automatic matcher, provenance registry or manual tagging workflow.
+Normal strategy preparation also stops seeding arbitrary page winners as CG evidence.
+Published report findings remain separately cited; staff text and publication are untouched.
+
+Cape's one-day Meta defect was reproduced: the exact Pacific bucket ending
+2 November 08:00 UTC contained 78 unique viewers, but the parser discarded it.
+The fix accepts one exactly covered requested day, including an observed zero.
+Multi-day, unknown, wrong-day, duplicate, missing and breakdown cases remain unavailable.
+Daily unique audiences are never summed into monthly totals. The earlier 76-platform
+inventory's only permission-blocked asset is held Red Oak, not Cape (#435, 6598839993).
+
+Runtime `84b0e929`: 4,246 supported tests, **4,222 passed / 24 existing skips / 0 failures**,
+including mandatory disposable PostgreSQL. TypeScript, Vite app build and bundle pass.
+All 24 canonical browser fixtures pass, including desktop and 375/390/430 journeys.
+The acceptance record is explicitly reconciled: an earlier attempt had a stale source
+assertion and five OpenSSL PATH failures; existing Git OpenSSL resolved the environment.
+After the full suite passed, fixture-only `b67e191c` corrected an expectation that
+non-excluded posts deserved CG credit. Runtime, unit tests, packages and config are
+byte-identical to the tested runtime. The prior passed suite/build/five browser steps
+were reused and the remaining 19 completed. One final fixture needed only our verified
+stale preview helper stopped; no other agent process was touched. Receipt:
+`%TEMP%/cg-client-browser-resume-b67e191c01f5.json`, SHA256
+`d7999a0a4cea2fa729b6b62e6080ef2d44839135f78fc43adaeda1b843f6b9c3`.
+This is not a literal completed stock-runner receipt at the final fixture head.
+Backend TypeScript, scoped lint and diff pass. Real password and physical-phone
+acceptance remain owner-held; fixtures do not certify the live fleet.
+
+Four backend helpers are prepared, **not released**: MCP 75, monthly preparation 48,
+Meta manual sync 89 and worker 76. The legacy preparation helper uses a surgical
+hosted-source patch, not wholesale main replacement. Its actual 16-file dependency
+bundle reproduces the original unknown winner; the candidate removes it while
+preserving all other draft/evidence/window fields, with zero writes. Across the
+four updates, 81 other hosted files and settings must remain identical. Exact release
+approval is still required; the packet is in the provider rollout acceptance document.
+No worker wake, paid generation, bulk resync, keys, scopes, permissions, config,
+campaign or Vercel change occurred. Frontend guard and PR #931 visual reader still
+await one governed #679 release. Automatic source refresh and owner password/phone
+acceptance also remain; the automatic creative matcher is separate unfinished work.
+The Google Control Centre target was unavailable; no tracker write was guessed.
+
+
 ### 3 November — Cape existing-video repost, automatic-sync gap and launch scope
 
 CA clarified that Monique intentionally retained a **repost of existing video**,

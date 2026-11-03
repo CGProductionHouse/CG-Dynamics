@@ -273,31 +273,10 @@ export async function prepareDraft(sb: StrategyAutopilotClient, client: Record<s
   }
 
   const reportRow = report.data as Record<string, unknown> | null
-  if (reportRow?.id) {
-    const postResult = await sb.from('posts').select('id,caption,platform,reach,views,reactions,comments,shares,total_clicks,raw').eq('report_id', reportRow.id).order('reach', { ascending: false }).limit(5)
-    if (postResult.error) throw new Error(postResult.error.message)
-    const publishedPosts = (postResult.data ?? []) as Array<Record<string, unknown>>
-    const topPost = publishedPosts[0]
-    if (topPost) {
-      const reach = typeof topPost.reach === 'number' && Number.isFinite(topPost.reach) && topPost.reach >= 0 ? topPost.reach : null
-      draft.topContent.autoCaption = clean(topPost.caption, 500) || null
-      draft.topContent.autoPlatform = clean(topPost.platform, 30) || null
-      draft.topContent.autoMetricLabel = reach == null ? null : 'Reach'
-      draft.topContent.autoMetricValue = reach
-      for (const [index, post] of publishedPosts.slice(0, 3).entries()) {
-        const metrics = ([
-          ['reach', post.reach], ['views', post.views], ['reactions', post.reactions],
-          ['comments', post.comments], ['shares', post.shares], ['clicks', post.total_clicks],
-        ] as Array<[string, unknown]>)
-          .filter(([, value]) => typeof value === 'number' && Number.isFinite(value) && value >= 0)
-          .map(([label, value]) => `${label} ${value}`)
-        evidence.push({
-          authority: 'published_report_post', source_id: String(post.id), field: 'topContent',
-          excerpt: clean(`Published report ended ${clean(reportRow.period_end, 10) || 'unknown date'}; observed post ${index + 1} by reach on ${clean(post.platform, 30) || 'unknown platform'}: ${clean(post.caption, 110) || 'caption unavailable'}; ${metrics.length ? metrics.join(', ') : 'metrics unavailable'}.`, 320),
-        })
-      }
-    }
-  }
+  // A managed page, synced post or non-exclusion is not positive CG authorship.
+  // Until the verified origin + final-asset/post authority is available, do not
+  // seed a winner or promote arbitrary page posts into creative strategy evidence.
+  // Published report findings below remain their original, separately cited source.
   const performance = clean(reportRow?.performance_comments)
   if (performance) {
     draft.topContent.whatThisTellsUs = performance
@@ -330,6 +309,7 @@ export async function prepareDraft(sb: StrategyAutopilotClient, client: Record<s
       intelligence_evidence: evidence,
       blockers,
       source_coverage: {
+        verified_cg_creatives: 'unavailable',
         previous_monthly_strategy: prior.data ? 'available' : 'none', previous_published_report: report.data ? 'available' : 'none',
         monthly_deliverables: ds.length ? 'available' : 'none', client_package: packageAuthority.settings ? 'available' : 'none',
         company_calendar: evs.length ? 'available' : 'none', approved_client_context: updateRows.length ? 'available' : 'none',

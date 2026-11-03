@@ -363,10 +363,17 @@ export function buildMasterReport(
   posts: ReportStatsPost[],
   manualMetrics: ReportManualMetric[],
   excludedContentKeys: ReadonlySet<string> = new Set(),
+  creativeEvidence: {
+    requireVerifiedCg: boolean
+    /** Independently verified report-post identities, never provider/raw flags or exclusions. */
+    verifiedCgPostIds?: ReadonlySet<string>
+  } = { requireVerifiedCg: false },
 ): MasterReportData {
+  const eligibleCreative = (post: ReportStatsPost) => !excludedContentKeys.has(contentEvidenceKey(post))
+    && (!creativeEvidence.requireVerifiedCg || creativeEvidence.verifiedCgPostIds?.has(post.id) === true)
   const platforms: PlatformView[] = PLATFORMS.map(platform => {
     const platformPosts = posts.filter(post => post.platform === platform)
-    const evidencePosts = platformPosts.filter(post => !excludedContentKeys.has(contentEvidenceKey(post)))
+    const evidencePosts = platformPosts.filter(eligibleCreative)
     const manual = manualMetrics.find(metric => metric.platform === platform) ?? null
 
     if (platformPosts.length > 0) {
@@ -389,7 +396,7 @@ export function buildMasterReport(
         engagementObservedAt: engagementsAvailable ? null : stats.engagementObservedAt,
         postCount: stats.postCount,
         bestPost: stats.bestPost,
-        topPosts: stats.topPosts,
+        topPosts: creativeEvidence.requireVerifiedCg ? stats.topPosts.slice(0, 2) : stats.topPosts,
         manual,
       }
     }
@@ -460,7 +467,7 @@ export function buildMasterReport(
     totalEngagements: null,
     bestPlatform,
     bestPostOverall: posts.length > 0
-      ? calculateReportStats(posts, posts.filter(post => !excludedContentKeys.has(contentEvidenceKey(post)))).bestPost
+      ? calculateReportStats(posts, posts.filter(eligibleCreative)).bestPost
       : null,
   }
 }
