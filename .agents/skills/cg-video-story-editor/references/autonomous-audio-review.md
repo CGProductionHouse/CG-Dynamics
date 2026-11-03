@@ -173,3 +173,19 @@ An unavailable monthly report or partial sync does not mean there are no posted
 films. Retrieve the exact mapped post, verify its identity, inspect actual moving
 content and save the useful reference in the existing client library. Reuse that
 evidence on later jobs rather than rediscovering branding or guessing freshness.
+
+### Reassess changed context without repeating unchanged perception
+
+Keep signal/voice/character observations bound to the actual decoded input. An
+added publication-history asset can invalidate a broad context snapshot while
+leaving the soundtrack unchanged. Refresh and compare the context explicitly:
+prove existing feedback, baseline, source brief and assets unchanged; identify
+the exact added record; recheck video/audio/input hashes; then read and reassess
+the retained observations and all five audio judgments. Save a new dated context
+assessment and packet, preserving the old records. Do not call this a new listen,
+new model review, cleared source story or full-film approval. If relevant feedback,
+music rights/exclusions, intent, media or the actual sound changes, reconsider the
+affected judgments rather than mechanically carrying them forward. WiseRide's
+actual additive-history refresh preserved its sound assessment while retaining
+the whole-film source/story hold. This prevents unrelated asset registration from
+triggering repeated model inference or brand research.
