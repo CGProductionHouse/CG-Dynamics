@@ -44,6 +44,22 @@ the internal `due_date` is never projected. A deliverable with disclosure or
 posting history cannot be reassigned to another client without explicit
 reconciliation, and its evidence is never silently cleared or transferred.
 
+#### Explicit shared-date source following (#941, source only until approved)
+
+The existing manager-only `set_client_schedule_plan_visibility` action may grant
+date following only for explicitly shared current/next-month rows whose exact
+Microsoft task, plan, bucket and date are proven by a fresh complete source.
+The policy/audit columns default off; ordinary table writes cannot grant it.
+Unsharing stops it. The private source validator has no API-role execution grant.
+Only the service-role `refresh_shared_client_schedule_source_dates` RPC may perform
+the bounded, idempotent automatic transaction for an exact completed automatic run.
+It changes only `scheduled_date` and the already-shared date snapshot. Staff date
+overrides, missing/ambiguous/stale source, private/archived rows and posted history
+are held; a source month move changes calendar placement, never package capacity.
+Client RPCs remain own-client-only and reveal no source IDs, notes or assignees.
+No new Microsoft permission or write-back is introduced. This migration and its
+controlled Cape activation require separate exact production approval.
+
 ### company_calendar_events
 
 All staff may read active company events. Client portal visibility is separate

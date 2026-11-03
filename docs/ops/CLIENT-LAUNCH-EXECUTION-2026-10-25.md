@@ -1,5 +1,19 @@
 # Client launch execution — local-first continuation
 
+## 3 November — #941 date-follow fix verified; exact production approval pending
+
+PR #941 adds a bounded date-only continuation after the existing Teams automatic
+mirror. Explicitly shared, exact-source-verified dates can follow future source
+moves; private rows, staff overrides, posted history and approvals stay protected.
+No new calendar/task authority or Microsoft write. Runtime `1ef93208` earned a
+clean frozen receipt: **4,228 pass / 24 skips**, mandatory PostgreSQL, build/bundle
+and **all 24 browser journeys**. Source merge is not production activation.
+One reviewed migration + two hosted files + Cape's eight opt-in grants need exact
+approval. Existing periodic cadence, no immediate-sync guarantee or forced resync.
+Frontend already live from `626bd308`; ZERO further Vercel for this change.
+Full boundaries, hashes and actual account/UI evidence:
+[Cape acceptance](CAPE-LUMBER-LAUNCH-REVIEW-2026-11-02.md).
+
 ## 3 November — visual client frontend live
 
 The single governed prebuilt release is complete: source `626bd308`,
