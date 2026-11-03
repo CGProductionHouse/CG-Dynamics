@@ -1,3 +1,63 @@
+### 3 November — shared Teams posting-date continuation (#941; source only)
+
+Reproduced: the existing automatic Microsoft mirror excludes protected Client Schedule
+payloads, so previously shared dates cannot follow Monique's later source moves.
+Narrow continuation claimed in #325 comment 6600964127; no overlapping Microsoft/
+schedule PR or active local source edit was found. General staff/Planner/CG Calendar
+ownership remains separate. No second collector, task/calendar table or Microsoft write.
+
+Runtime/test freeze: `1ef93208e54157371a95ec4b85312794fba1c9c3`.
+One default-off audit policy on canonical `monthly_deliverables`: a manager's explicit
+Share planned dates delegates following only when a fresh complete job proves the
+same exact task, plan, bucket and current date. Unshare stops following. Date-only
+refresh runs after the existing completed/partial automatic mirror; source job,
+active actor/client, full enumeration, durable identities and last shared date must
+agree. Staff date overrides, changed identities/buckets, posted history, private/
+archived rows, stale/malformed/ambiguous/missing source are held. Explicit source
+null unschedules; a later observed date may restore that same delegated row.
+Cross-month dates appear in their actual calendar month without moving package
+capacity. Approvals, posting status, content, notes, assignees, client/month and
+full-sync stamps are preserved. Automatic audits never impersonate a human edit.
+
+Security: private validator has no API execute grant; the sharing RPC stays active-
+manager-only; refresh is service-role-only and exact-run/idempotency fenced, bounded
+to 1,000 already delegated rows. Held/blocked/bounded/failed work is not green success.
+Migration `20261103102248_client_plan_source_date_following.sql`, SHA256
+`79e24411992f31eadb7449fce588ff68603002444a6a1418ea967d12f26fe6d0`.
+
+Production read-only preflight: existing backend v78 index matches source baseline.
+Candidate changes that index plus one new helper, preserving 16 other hosted files,
+JWT and import-map settings. Cape's eight already shared November rows each match
+one exact task, bucket and date in the latest complete source. `capelumber` account
+is enabled, active, client-role and mapped to Cape; no password read/reset/login.
+Existing periodic cadence remains (roughly three hours), not instant synchronization.
+Next natural hosted refresh is not yet observed and must not be claimed.
+
+**Production approval still required:** one migration, the surgical two-file existing
+backend update and source-follow grants for only Cape's eight reviewed shared rows.
+Future explicit source-verified Share actions enable the same following policy.
+No production SQL/data/Edge activation, Microsoft write, Vercel operation, new post,
+strategy publication or credential/config change is included in the source merge.
+The earlier frontend release is already live; do not deploy again for this backend
+or these docs. Owner-retained real password/physical-phone acceptance and positive
+creative evidence production remain separate. Unknown CG highlights stay hidden.
+Exact Google Control Centre target unavailable; no guessed tracker write.
+
+Validation: frozen clean-tree receipt `%TEMP%/cg-local-launch-1ef93208e541.json`
+is **LOCAL_CODE_ACCEPTANCE_PASS**, SHA256
+`07480fae314967b02a72dbc4dd7eb5cbd8c8f883add7401cac4971993dde6d82`.
+4,252 supported tests: **4,228 pass / 24 existing skips / 0 fail**; mandatory real
+PostgreSQL fixtures, TypeScript/Vite/app bundle, scoped lint/diff, separate actual
+Edge type compatibility and **all 24 browser journeys** pass. Local synthetic
+6,500-source-record/8-date proof took 27ms PostgreSQL wall time; not hosted CPU proof.
+Runtime/tests unchanged by the subsequent continuity-only commit.
+
+Bounded additional live acceptance: Cape Brand Hub's sole published logo View
+loaded correctly in a separate window. Download clicked and retained Dynamics
+without an app error, but the opener's download-event wait timed out because the
+handoff uses another window; Chrome's download-manager inspection was policy-blocked.
+No retry/bypass or completion claim. Physical-device download remains owner review.
+
 # Cape Lumber launch acceptance — 2 November 2026
 
 ### 3 November — client frontend release completed
