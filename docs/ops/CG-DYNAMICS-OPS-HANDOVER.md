@@ -3,9 +3,9 @@
 CA requested continuing through the full list. The single existing execution matrix
 covers62canonical active records, confirmed scope/holds, Nov/Dec strategy states,
 canonical dates, safe library counts and portal accounts. SQL inventory is not UI
-acceptance. Latest durable v3 checkpoint: **13 client records complete**, including
-Cape's prior acceptance;12new actual desktop journeys, no unresolved reads/overflow.
-CentralCanvas is in progress. Private per-panel receipt:
+acceptance. Latest durable v3 checkpoint: **32 client records complete**, including
+Cape's prior acceptance;31new actual desktop journeys, no unresolved reads/overflow.
+Through JFJ Electrical; Jodrico Killian is next. Private per-panel receipt:
 `%TEMP%/cg-client-fleet-ui-v3-20261103.json`. v1 is INVALID bookkeeping evidence;
 v2 completed records were valid and imported. A60s control timeout/kernel reset was
 recovered using a fresh documented company-browser tab; incomplete visit rechecked.

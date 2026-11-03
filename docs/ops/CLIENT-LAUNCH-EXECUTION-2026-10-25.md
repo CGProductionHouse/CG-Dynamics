@@ -319,25 +319,25 @@ No customer-password/physical-phone acceptance is inferred from admin previews.
 | C&L Innovations | F2 / DP2 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 actual desktop panels; 0 unresolved reads |
 | Cape Lumber | F3 / DP4 | published / published | 8 shared / 8 rows / 0 canonical rows | Enabled / 1 assets | Enabled | Prior live acceptance + natural8/0/0 |
 | Case Bloemfontein | V2 / DP12 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 actual desktop panels; 0 unresolved reads |
-| Central Canvas | V1 / F4 / DP3 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | In progress (12 panels) |
-| CG Production House | V4 / F8 / DP4 | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | Pending actual UI |
-| Daisy & Co | V1 / F3 / DP3 | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | Pending actual UI |
-| Delta Gas | V1 / F3 / DP3 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| Dulux Paint & Paper Bloemfontein | V2 / F4 / DP4 | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | Pending actual UI |
-| Econofoods | V5 | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | Pending actual UI |
-| Ehrlich Park Butchery | V1 / F3 / DP4 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| Elcheck | V1 / F3 / DP3 | Absent / Absent | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | Pending actual UI |
-| Emmanuel Funerals | V1 / F3 / DP4 | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | Pending actual UI |
-| Emoya Estate Driving Range | V1 / F4 / DP4 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | Pending actual UI |
-| First Technology Central | No recurring social | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| Forklift Trucks | V1 / F3 / DP3 | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Not provisioned | Pending actual UI |
-| Germoparts | V2 / DP12 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| Hino Trucks | V2 | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | Pending actual UI |
-| HMHI | DP3 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| Human Auto | V3 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | Pending actual UI |
-| Ipopeng Office Supplies | No recurring social | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Not provisioned | Pending actual UI |
-| Jenkor | V1 / DP3 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| JFJ Electrical | V1 / F3 / DP3 | Absent / Absent | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | Pending actual UI |
+| Central Canvas | V1 / F4 / DP3 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 actual desktop panels; 0 unresolved reads |
+| CG Production House | V4 / F8 / DP4 | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | 16 actual desktop panels; 0 unresolved reads |
+| Daisy & Co | V1 / F3 / DP3 | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | 16 actual desktop panels; 0 unresolved reads |
+| Delta Gas | V1 / F3 / DP3 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 actual desktop panels; 0 unresolved reads |
+| Dulux Paint & Paper Bloemfontein | V2 / F4 / DP4 | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | 16 actual desktop panels; 0 unresolved reads |
+| Econofoods | V5 | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | 16 actual desktop panels; 0 unresolved reads |
+| Ehrlich Park Butchery | V1 / F3 / DP4 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 actual desktop panels; 0 unresolved reads |
+| Elcheck | V1 / F3 / DP3 | Absent / Absent | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | 17 actual desktop panels; 0 unresolved reads |
+| Emmanuel Funerals | V1 / F3 / DP4 | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | 16 actual desktop panels; 0 unresolved reads |
+| Emoya Estate Driving Range | V1 / F4 / DP4 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | 17 actual desktop panels; 0 unresolved reads |
+| First Technology Central | No recurring social | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 actual desktop panels; 0 unresolved reads |
+| Forklift Trucks | V1 / F3 / DP3 | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Not provisioned | 16 actual desktop panels; 0 unresolved reads |
+| Germoparts | V2 / DP12 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 actual desktop panels; 0 unresolved reads |
+| Hino Trucks | V2 | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | 16 actual desktop panels; 0 unresolved reads |
+| HMHI | DP3 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 actual desktop panels; 0 unresolved reads |
+| Human Auto | V3 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | 17 actual desktop panels; 0 unresolved reads |
+| Ipopeng Office Supplies | No recurring social | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Not provisioned | 16 actual desktop panels; 0 unresolved reads |
+| Jenkor | V1 / DP3 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 actual desktop panels; 0 unresolved reads |
+| JFJ Electrical | V1 / F3 / DP3 | Absent / Absent | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | 17 actual desktop panels; 0 unresolved reads |
 | Jodrico Killian | Owner cohort decision | Absent / Absent | 0 canonical rows / 0 canonical rows | No mapping | Not provisioned | Pending actual UI |
 | Kundedienste | No recurring social | draft / Absent | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
 | LHP Student Village & Block | Once-off / later | Absent / Absent | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | Pending actual UI |
