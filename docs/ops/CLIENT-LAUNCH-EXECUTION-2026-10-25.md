@@ -1,5 +1,20 @@
 # Client launch execution — local-first continuation
 
+## 3 November — exact reporting backend approval completed
+
+PR #938's four helpers are live: MCP 76, monthly preparation 49, Meta manual sync 90
+and worker 77. All 85 hosted files read back: four changed, 81 otherwise identical;
+entrypoints/imports/authentication unchanged. Normal authenticated Cape November
+brief returns unavailable CG creative coverage and no unverified post seed citations;
+published strategy version 10 and immutable-strategy gate are preserved. Returned
+live Meta parser passes the exact single-day and adversarial proof locally. No bulk
+resync, strategy/data/schema/config/secret/campaign change or Vercel usage.
+
+Receipt and observed runtime limits are in the existing provider acceptance/handover.
+This supersedes pending-backend status below. Frontend guard/PR #931 reader, positive
+creative matcher, staff-owned automatic schedule refresh and owner password/phone
+acceptance remain separately tracked; this is not a fleet launch declaration.
+
 ## 3 November — reporting safeguards source verified; repost label live
 
 Exact-approved PR937 SQL is LIVE; actual Cape client preview says Video repost25Nov,

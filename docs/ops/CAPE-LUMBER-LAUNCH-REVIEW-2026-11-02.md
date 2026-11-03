@@ -1,5 +1,20 @@
 # Cape Lumber launch acceptance — 2 November 2026
 
+### 3 November — reporting backend rollout completed
+
+Exact-approved PR #938 helpers are live: MCP 76, monthly preparation 49, Meta manual
+sync 90 and worker 77. Four helper copies changed; all 81 other hosted files and
+auth/import/entrypoint settings were preserved and read back. Cape's authenticated
+November brief returns unavailable CG creative coverage with no unverified post seed
+citations; published version 10 and its immutable-strategy gate remain unchanged.
+The returned Meta parser passes the single-day/adversarial proof locally; no provider
+resync or strategy publication was triggered. Full receipt and hashes are in the
+existing provider rollout acceptance document. No Vercel.
+
+This supersedes pending-backend status below. Frontend release, automatic positive
+creative proof, staff-owned source refresh and owner password/phone review remain
+separately tracked. Cape's earlier live Video repost calendar proof is unchanged.
+
 ### 3 November — reporting safeguards verified; repost label live
 
 PR #937's approved calendar-label migration is live. The function definition changed
