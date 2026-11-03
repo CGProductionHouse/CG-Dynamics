@@ -12,6 +12,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 
 LABELS = ["A person speaking without music.", "Instrumental music without any speech.",
           "Electronic beeping tones.", "White noise or hissing.",
@@ -123,12 +124,100 @@ def voice(args):
             "speech_detected": bool(credible), "meaning": "Words/voice evidence only. No timestamps, singing absence, full audio quality, or creative approval."}
 
 
+def character_qualification(path):
+    record = json.loads(Path(path).read_text(encoding="utf-8"))
+    if record.get("role") != "music_character" or record.get("status") != "passed":
+        raise ValueError("Missing passed music-character qualification; broad reviewer failures cannot qualify it")
+    if hashlib.sha256(record.get("prompt", "").encode()).hexdigest() != record.get("prompt_sha256"):
+        raise ValueError("Music-character prompt changed")
+    bindings = [record.get("declaration")]
+    observations = record.get("observations", [])
+    if len(observations) < 2 or len({r.get("id") for r in observations}) != len(observations):
+        raise ValueError("Missing distinct music-character controls")
+    for row in observations:
+        if row.get("passed") is not True:
+            raise ValueError("Unpassed music-character control")
+        bindings.extend([row.get("input"), row.get("raw_observation")])
+    for binding in bindings:
+        if not isinstance(binding, dict) or not binding.get("path") or digest(binding["path"]) != binding.get("sha256"):
+            raise ValueError("Music-character calibration artifact changed")
+    return record
+
+
+def character(args):
+    """One qualified perceptual role, never a full-review fallback."""
+    import numpy as np
+    import soundfile as sf
+    import torch
+    from scipy.signal import resample_poly
+    from transformers import BitsAndBytesConfig
+    if not args.qualification or not args.source_audit or not args.guards:
+        raise ValueError("Character review needs qualification, audited source and exact passed input guards")
+    qualification = character_qualification(args.qualification)
+    guards = json.loads(Path(args.guards).read_text(encoding="utf-8"))
+    if guards.get("status") != "REVIEWABLE_INSTRUMENTAL_MIX" or guards.get("analysis_sha256") != digest(args.audio):
+        raise ValueError("Music critic cannot receive a failed, unknown or different mix")
+    torch.set_num_threads(4)
+    torch.set_num_interop_threads(1)
+    driver = subprocess.run(["nvidia-smi", "--id=0", "--query-gpu=memory.free", "--format=csv,noheader,nounits"],
+                            capture_output=True, text=True, check=True, timeout=10)
+    if gpu_budget(torch.cuda.mem_get_info()[0], driver.stdout) < 9 * 1024 ** 3:
+        raise ValueError("Insufficient staff GPU headroom for the existing local music critic")
+    torch.cuda.set_per_process_memory_fraction(.45)
+    source = Path(args.source_audit).resolve(strict=True)
+    commit = json.loads((source / "source-commit.json").read_text())["sha"]
+    if commit != qualification.get("source_commit"):
+        raise ValueError("Music critic source version changed")
+    for entry in qualification["source_files"]:
+        if digest(source / entry["path"]) != entry["sha256"]:
+            raise ValueError("Audited local music-critic source changed")
+    weights = Path(args.model).resolve(strict=True)
+    manifest = json.loads((weights.parent / "moss-download-receipt.json").read_text())
+    if manifest.get("complete") is not True or manifest.get("revision") != qualification.get("model_revision"):
+        raise ValueError("Music critic checkpoint differs from calibration")
+    for entry in manifest["files"]:
+        if digest(weights / entry["name"]) != entry["sha256"]:
+            raise ValueError("Pinned music-critic weights changed")
+    sys.path.insert(0, str(source))
+    from src.modeling_moss_audio import MossAudioModel
+    from src.processing_moss_audio import MossAudioProcessor
+    if os.name == "nt":
+        import ctypes
+        ctypes.windll.kernel32.SetPriorityClass(ctypes.windll.kernel32.GetCurrentProcess(), 0x4000)
+    audio, sr = sf.read(args.audio, dtype="float32", always_2d=True)
+    if not 0 < len(audio) / sr <= 30.1:
+        raise ValueError("Bounded critic supports up to30s; never truncate longer input")
+    import math
+    divisor = math.gcd(sr, 16000)
+    audio = resample_poly(audio.mean(axis=1), 16000 // divisor, sr // divisor).astype("float32")
+    quant = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type="nf4", bnb_4bit_compute_dtype=torch.bfloat16,
+                              llm_int8_skip_modules=["audio_encoder", "audio_adapter", "deepstack_audio_merger_list"])
+    model = MossAudioModel.from_pretrained(str(weights), local_files_only=True, trust_remote_code=False,
+            use_safetensors=True, torch_dtype=torch.bfloat16, quantization_config=quant,
+            device_map={"": 0}, attn_implementation="sdpa").eval()
+    processor = MossAudioProcessor.from_pretrained(str(weights), local_files_only=True, enable_time_marker=True)
+    inp = processor(text=qualification["prompt"], audios=[audio], return_tensors="pt").to("cuda")
+    inp["audio_data"] = inp["audio_data"].to(model.dtype)
+    inp["audio_input_mask"] = inp["input_ids"] == processor.audio_token_id
+    with torch.inference_mode():
+        generated = model.generate(**inp, max_new_tokens=320, do_sample=False, num_beams=1, use_cache=True)
+    response = processor.decode(generated[0, inp["input_ids"].shape[1]:], skip_special_tokens=True)
+    return {"role": "music_character", "response": response, "audio_received": True,
+            "input_samples_16k": len(audio), "model_revision": manifest["revision"], "source_commit": commit,
+            "qualification_sha256": digest(args.qualification), "guards_sha256": digest(args.guards),
+            "prompt_sha256": qualification["prompt_sha256"],
+            "scope": "Texture/drive/emotional character only. Editor must compare actual observations against buyer/pictures and rejected music. Timing, speech, transition/sound-source and final release are separate roles."}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("role", choices=("acoustic", "voice"))
+    parser.add_argument("role", choices=("acoustic", "voice", "character"))
     parser.add_argument("--audio", required=True)
     parser.add_argument("--model", required=True)
     parser.add_argument("--weights-sha256")
+    parser.add_argument("--qualification")
+    parser.add_argument("--source-audit")
+    parser.add_argument("--guards")
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
     target = Path(args.output).resolve()
@@ -137,7 +226,7 @@ def main():
     original = digest(args.audio)
     os.environ.update(HF_HUB_OFFLINE="1", TRANSFORMERS_OFFLINE="1", HF_HUB_DISABLE_TELEMETRY="1",
                       TOKENIZERS_PARALLELISM="false", OMP_NUM_THREADS="4")
-    result = acoustic(args) if args.role == "acoustic" else voice(args)
+    result = {"acoustic": acoustic, "voice": voice, "character": character}[args.role](args)
     if digest(args.audio) != original:
         raise ValueError("Input changed during review")
     result.update(audio=str(Path(args.audio).resolve()), audio_sha256=original,

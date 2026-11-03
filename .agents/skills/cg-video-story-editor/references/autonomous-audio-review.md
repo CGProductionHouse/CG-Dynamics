@@ -87,7 +87,8 @@ Hash/schema checks establish integrity and coverage, not the truth of someone's
 assertions. Do not manufacture a passing result, use unit fixtures as calibration,
 assign a music tag to all five areas, or retroactively promote a failed method.
 Historical records without qualification are not newly recertified by this repair.
-Full creative qualification remains unfinished at this checkpoint.
+Full creative qualification was unfinished at this checkpoint; the later composed
+instrumental workflow below supersedes that state within its explicit scope.
 
 ## Follow-up findings, 3 November daytime
 
@@ -117,3 +118,58 @@ single-cue16dB increase retained the music and encoded picture, measured-18.03LU
 -3.14dBTP, and protected the source PCM24prefix/tail. This remains an unheard local
 repair, not an audibility/creative release verdict. Those gain values are specific
 to that cue; do not turn them into a blanket SFX preset.
+
+## Composed instrumental review repair — 3 November afternoon
+
+Qualify each tool for the role it actually performs. A generative music critic
+that fails event counting, silence timing or speech detection must not own those
+tasks. Its broad failed results remain failed. This does not automatically
+disqualify a separately tested narrow music-character role.
+
+The existing local workflow now composes these roles, in order:
+
+1. Exact-export FFmpeg/DSP signal checks reject gaps, clipping, blank material
+   and early endings before any music assessment.
+2. Independent local ASR rejects speech and mixed speech before the music critic.
+3. Acoustic windows require continuous coverage and actual music. Uncertain or
+   nonmusic windows need exact source/master provenance explaining purposeful
+   effects or decay; an unsupported noise window blocks review.
+4. A pinned local MOSS critic assesses texture, drive and emotional character
+   only after those guards pass. Fresh equal-RMS sustained and percussive controls
+   qualify this narrow role. The exact qualified prompt, inputs, raw responses,
+   source tree and checkpoint hashes are retained. Genre, physical instruments,
+   melody, stereo placement, event counts and timestamps are outside this proof.
+5. Nolan records an attributed model-assisted editorial assessment against actual
+   pictures, source rights, cut timing and all five existing review areas. A music
+   description is evidence for that assessment, not automatic creative approval.
+
+`audio_review.py instrumental-guard --packet ... --voice ... --acoustic ...
+--provenance ... --output ...` returns `REVIEWABLE_INSTRUMENTAL_MIX` only. It does
+not grant creative release. `local_audio_evidence.py character` additionally
+requires the hash-bound character qualification, source audit and passing exact
+guards. It uses the complete input up to the supported 30.1-second limit, not a
+random excerpt. Inspect help for required artifact paths. Never reuse a review
+after the decoded mix changes; unchanged PCM can preserve sound observations,
+but new picture/sound relationships need a fresh editorial assessment.
+
+Actual composed calibration passed 16 observations: fourteen original/held-out
+routing and signal cases plus two fresh music-character controls. Fresh random
+tone/gap DSP observations were saved before opening their hidden truth. Twenty-
+five contract tests pass, separately from that empirical calibration. Unit tests
+are not listening. Earlier full Qwen/MOSS/Gemini failures remain excluded.
+
+The exact WiseRide R05 mix passed this bounded model-assisted sound gate. The
+critic's forward-driving pulse/energy assessment was combined with independent
+signal, speech, acoustic, source and picture evidence. Its disputed genre/melody
+claims were not promoted. Human listening remains unrecorded. A direct host audio
+transport test explicitly reported unsupported audio input; no native hearing is
+claimed. This qualification is instrumental-only, not universal audio perception,
+human taste, phone playback, client approval or creative mastery.
+
+Sound clearance did not clear WiseRide's film: comparison with an actual recent
+public reel then revealed overlapping story and shots. That draft remains held.
+Use the client's saved canonical social mapping before repeating public searches.
+An unavailable monthly report or partial sync does not mean there are no posted
+films. Retrieve the exact mapped post, verify its identity, inspect actual moving
+content and save the useful reference in the existing client library. Reuse that
+evidence on later jobs rather than rediscovering branding or guessing freshness.

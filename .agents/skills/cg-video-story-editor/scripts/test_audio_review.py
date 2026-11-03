@@ -5,6 +5,7 @@ from pathlib import Path
 import tempfile
 import unittest
 import audio_review as audio
+from local_audio_evidence import character_qualification
 
 
 class ReviewContract(unittest.TestCase):
@@ -148,6 +149,72 @@ class ReviewContract(unittest.TestCase):
         review = copy.deepcopy(self.review)
         review["review_method"] = "skip"
         self.assertEqual(self.check_review(review)["status"], "BLOCKED")
+
+    def routing_fixture(self, speech=False, windows=None):
+        self.packet["signal"]["duration"] = 8
+        analysis = self.root / "local-analysis.wav"
+        analysis.write_text("Routing-contract fixture only; not audio or listening")
+        packet, voice, acoustic = [self.root / name for name in ("route-packet.json", "voice.json", "acoustic.json")]
+        packet.write_text(json.dumps(self.packet))
+        voice.write_text(json.dumps({"role": "speech_guard", "audio_sha256": audio.digest(analysis), "speech_detected": speech}))
+        acoustic.write_text(json.dumps({"role": "acoustic_grounding", "audio_sha256": audio.digest(analysis),
+                                        "windows": windows if windows is not None else [{"start": 0, "end": 8, "kind": "music"}]}))
+        return packet, voice, acoustic
+
+    def test_routing_success_is_not_creative_approval(self):
+        result = audio.instrumental_guard(*self.routing_fixture())
+        self.assertEqual(result["status"], "REVIEWABLE_INSTRUMENTAL_MIX")
+        self.assertFalse(result["creative_release"])
+
+    def test_signal_fault_stops_before_any_model_evidence_read(self):
+        paths = self.routing_fixture()
+        self.packet["signal"]["failures"] = ["actual signal fault fixture"]
+        paths[0].write_text(json.dumps(self.packet));paths[1].unlink();paths[2].unlink()
+        result = audio.instrumental_guard(*paths)
+        self.assertEqual(result["status"], "BLOCKED")
+        self.assertEqual(result["stopped_before"], "speech/acoustic/music models")
+
+    def test_voice_blocks_even_if_music_model_would_have_called_it_music(self):
+        for state in (True, None):
+            paths = self.routing_fixture(speech=state);paths[2].unlink()
+            result = audio.instrumental_guard(*paths)
+            self.assertEqual(result["status"], "BLOCKED")
+            self.assertEqual(result["stopped_before"], "acoustic/music models")
+
+    def test_nonmusic_or_incomplete_coverage_does_not_reach_music_critic(self):
+        for windows in ([{"start": 0, "end": 8, "kind": "noise"}],
+                        [{"start": 0, "end": 6, "kind": "music"}],
+                        [{"start": 0, "end": 4, "kind": "music"}, {"start": 4, "end": 8, "kind": "uncertain"}]):
+            self.assertEqual(audio.instrumental_guard(*self.routing_fixture(windows=windows))["status"], "BLOCKED")
+
+    def test_source_provenance_cannot_explain_a_different_mix(self):
+        paths = self.routing_fixture(windows=[{"start": 0, "end": 4, "kind": "music"}, {"start": 4, "end": 8, "kind": "noise"}])
+        provenance = self.root / "provenance.json"
+        provenance.write_text(json.dumps({"video_sha256": "wrong", "analysis_sha256": "wrong", "source_files": [],
+                                          "explained_nonmusic": [{"start": 4, "end": 8, "reason": "fixture"}]}))
+        self.assertEqual(audio.instrumental_guard(*paths, provenance)["status"], "BLOCKED")
+
+    def test_broad_reviewer_pass_cannot_qualify_the_character_role(self):
+        path = self.root / "wrong-role.json"
+        path.write_text(json.dumps({"role": "full_review", "status": "passed"}))
+        with self.assertRaises(ValueError):
+            character_qualification(path)
+
+    def test_character_role_binds_actual_raw_controls_and_prompt(self):
+        import hashlib
+        declaration = self.root / "character-declaration.json"
+        declaration.write_text("TEST FIXTURE ONLY; not actual calibration")
+        def binding(path):return {"path": str(path), "sha256": audio.digest(path)}
+        prompt = "TEST FIXTURE"
+        record = {"role": "music_character", "status": "passed", "prompt": prompt,
+                  "prompt_sha256": hashlib.sha256(prompt.encode()).hexdigest(), "declaration": binding(declaration),
+                  "observations": [{"id": str(i), "passed": True, "input": binding(self.mix),
+                                    "raw_observation": binding(self.response)} for i in range(2)]}
+        path = self.root / "character-role.json";path.write_text(json.dumps(record))
+        self.assertEqual(character_qualification(path)["role"], "music_character")
+        self.response.write_text("changed original control feedback")
+        with self.assertRaises(ValueError):
+            character_qualification(path)
 
 
 if __name__ == "__main__":

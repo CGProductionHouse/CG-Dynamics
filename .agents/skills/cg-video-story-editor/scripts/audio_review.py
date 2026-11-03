@@ -325,6 +325,74 @@ def qualification_errors(review, review_path):
     return errors
 
 
+def instrumental_guard(packet_path, voice_path, acoustic_path, provenance_path=None):
+    """Route exact instrumentals to a qualified character critic, never approve them.
+
+    Speech/timing/type are separate roles. A failed broad audio model cannot
+    bypass these guards. Verified music+designed-effects provenance can explain
+    an acoustic classifier's non-music tail; unexplained regions stay blocked.
+    """
+    packet = read_json(packet_path)
+    analysis = Path(packet_path).resolve().parent / "local-analysis.wav"
+    errors = []
+    for field in ("video", "audio"):
+        if not Path(packet[field]).is_file() or digest(packet[field]) != packet[field + "_sha256"]:
+            errors.append(f"Stale exact {field}")
+    errors.extend(context_errors(packet["context"]))
+    errors.extend(packet["signal"]["failures"])
+    if errors:
+        return {"status": "BLOCKED", "errors": errors, "video_sha256": packet["video_sha256"],
+                "creative_release": False, "stopped_before": "speech/acoustic/music models"}
+    voice = read_json(voice_path)
+    pcm_hash = digest(analysis)
+    if voice.get("role") != "speech_guard" or voice.get("audio_sha256") != pcm_hash:
+        errors.append("Missing or different exact speech_guard input")
+    if voice.get("speech_detected") is not False:
+        errors.append("Speech or unknown voice state blocks an instrumental music critic")
+    if errors:
+        return {"status": "BLOCKED", "errors": errors, "video_sha256": packet["video_sha256"],
+                "analysis_sha256": pcm_hash, "creative_release": False, "stopped_before": "acoustic/music models"}
+    acoustic = read_json(acoustic_path)
+    if acoustic.get("role") != "acoustic_grounding" or acoustic.get("audio_sha256") != pcm_hash:
+        errors.append("Missing or different exact acoustic_grounding input")
+    windows = acoustic.get("windows", [])
+    if not windows or not any(w.get("kind") == "music" for w in windows):
+        errors.append("No actual music evidence; do not ask a music critic to describe non-music")
+    cursor = 0.0
+    uncertain = []
+    for window in windows:
+        start, end = float(window["start"]), float(window["end"])
+        if abs(start - cursor) > .03 or end <= start:
+            errors.append("Acoustic evidence has missing/overlapping windows")
+        cursor = end
+        if window.get("kind") != "music":
+            uncertain.append([start, end])
+    if abs(cursor - packet["signal"]["duration"]) > .08:
+        errors.append("Acoustic evidence does not cover the complete soundtrack")
+    provenance = None
+    if provenance_path:
+        provenance = read_json(provenance_path)
+        if provenance.get("video_sha256") != packet["video_sha256"] or provenance.get("analysis_sha256") != pcm_hash:
+            errors.append("Provenance belongs to another export")
+        if provenance.get("exact_video_pcm_matches_analysis") is not True or provenance.get("source_match_pass") is not True:
+            errors.append("Actual source/decoded-output comparison has not passed")
+        for entry in provenance.get("source_files", []):
+            if not Path(entry["path"]).is_file() or digest(entry["path"]) != entry["sha256"]:
+                errors.append("Source-backed soundtrack provenance changed")
+        if not provenance.get("source_files"):
+            errors.append("No original source bindings in provenance")
+    for start, end in uncertain:
+        spans = provenance.get("explained_nonmusic", []) if provenance else []
+        if not any(float(s["start"]) <= start and float(s["end"]) >= end and s.get("reason") for s in spans):
+            errors.append(f"Unexplained acoustic uncertainty/non-music at {start:.2f}-{end:.2f}s")
+    return {"status": "BLOCKED" if errors else "REVIEWABLE_INSTRUMENTAL_MIX", "errors": errors,
+            "video_sha256": packet["video_sha256"], "analysis_sha256": pcm_hash,
+            "voice_evidence_sha256": digest(voice_path), "acoustic_evidence_sha256": digest(acoustic_path),
+            "provenance_sha256": digest(provenance_path) if provenance_path else None,
+            "explained_nonmusic_windows": uncertain, "human_listening": "not_recorded",
+            "creative_release": False, "meaning": "Input routing only; the critic and editor must still assess actual music character and fit."}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -337,12 +405,26 @@ def main():
     check = sub.add_parser("check", help="Refuse stale/incomplete/failed review before owner handoff")
     check.add_argument("--packet", required=True)
     check.add_argument("--review", required=True)
+    guard = sub.add_parser("instrumental-guard", help="Block faults/voices/non-music before a qualified music-character role")
+    guard.add_argument("--packet", required=True)
+    guard.add_argument("--voice", required=True)
+    guard.add_argument("--acoustic", required=True)
+    guard.add_argument("--provenance")
+    guard.add_argument("--output", required=True)
     args = parser.parse_args()
     try:
         if args.command == "context":
             print(snapshot_context(args.client_kit, args.output))
         elif args.command == "prepare":
             print(prepare(args.video, args.intent, args.context, args.output))
+        elif args.command == "instrumental-guard":
+            result = instrumental_guard(args.packet, args.voice, args.acoustic, args.provenance)
+            output = Path(args.output).resolve()
+            if output.exists() or any((p / ".git").exists() for p in (output.parent, *output.parents)):
+                raise ValueError("Choose a new private guard output outside Git")
+            write_json(output, result)
+            print(json.dumps(result, indent=2))
+            return 1 if result["errors"] else 0
         else:
             result = gate(args.packet, args.review)
             print(json.dumps(result, indent=2))
