@@ -1,3 +1,52 @@
+### 3 November — Cape existing-video repost, automatic-sync gap and launch scope
+
+CA clarified that Monique intentionally retained a **repost of existing video**,
+not new production. Live exact Teams task `weS0JsZdt0-9huS5fgT2WWUAJ0_H` now says
+`REPOST VIDEO - CAPE LUMBER`, start/due25Nov10:00UTC, original master plan.
+Restored exact archived slot `c0ac02d5-6fb7-42e5-8616-23c418085792` in place,
+title/notes explicitly reuse, compare-fenced row/package/actor and honest activity.
+Source IDs/date/status/shared-date metadata and unapproved/unposted history kept.
+Package stays0NEWprofessionalvideos,3photos+4posters+GoogleAds; recurring new-video
+template stays INACTIVE. No Microsoft write, strategy text/republication or Vercel.
+This narrowly SUPERSEDES yesterday's "do not reintroduce" instruction: no new shoot
+or professional-video concept. Normal author#731 informed6596119733.
+
+Actual client preview shows8planned dates/0shoots; schedule drawer shows REPOST VIDEO.
+Client projection still emits genericVideo1. New migration
+`20261103051651_client_calendar_repost_label.sql` emits ONLY fixed Video repost /
+Reel repost for explicit anchored same-type REPOST instructions. Private task suffixes
+remain hidden; existing approved/sent titles, status/date/visibility/role checks and
+ACL/owner/searchpath remain unchanged. Local62/62focused tests, including actual
+disposable PostgreSQL and pre-fix reproduction, pass. Real Plan/browser fixtures
+1440/375/390/430, TypeScript/Vite actual-app build, scoped lint/diff checked.
+Migration is REVIEWED SOURCE ONLY, NOT APPLIED; exact owner release approval pending.
+No new frontend change/build/upload is necessary for this projection label.
+
+Current Teams health is NOT automatic Client Schedule parity: run
+`f9de01cb-6fd5-4225-b1af-c436d2b28959`, snapshot03:46:08UTC/finish03:54:09UTC3Nov,
+partial/applied0/skipped1727/conflicts83/clientScheduleExcluded6205. Source fetches
+complete, but automatic code deliberately excludes posting schedule sources.
+76minold against60minthreshold at05:10UTC; recent jobs roughly3h25apart. Staff#325
+owns existing durable-ID schedule refresh, conflicts and client-date disclosure;
+handoff6596119365. No competing Microsoft collector/parser/engine patch from client lane.
+
+Cape GoogleAds exact Nov1–2 audit complete:2029impressions,40clicks,R231.15;
+scheduled account sync finished2Nov22:00:13UTC (3Nov00:00SAST), covers2Nov.
+No manual resync/campaign/budget/mapping change. Fresh provider health confirms Meta
+authorised; Cape scheduled3Nov01:23UTC succeeds, IGverified/FBverified_partial,
+watermark2Nov08:00UTC. Unsupported/partial metrics are not a total success claim.
+Cape TikTok has no authorised connection; do not show invented zeros/connected claims.
+This does not certify all other-client provider mappings. Old global Meta owner-gate
+notes are historical; today's exact connection/read evidence supersedes those for Cape.
+
+MetaAds/TikTokAds are deferred backend-only #936, explicitly OUT of this client release.
+Launch still needs the real automatic Client Schedule acceptance in staff#325, positive
+CG-origin/post matching or fail-closed removal of unverified CG rankings in#668, the
+already-source-ready PR931 visual-reader release with exact#679packet, and owner-retained
+real client-password/physical-phone checks. Cape October report and Novv10/Decv7 plans
+already published; do not redo publication. Other-client launch content remains per-client.
+Exact GoogleControlCentre target unavailable; no guessed write.
+
 ### 2 November — latest research task: bounded end-to-end continuation
 
 Supersedes Monday-only configuration below. First normal task exhausted its call

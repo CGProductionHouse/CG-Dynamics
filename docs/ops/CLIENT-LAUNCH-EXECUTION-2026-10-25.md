@@ -1,5 +1,25 @@
 # Client launch execution — local-first continuation
 
+## 3 November — current Cape correction and exact remaining release gates
+
+Owner clarified Monique's25November item is an existing-video REPOST. Restored the
+same source-linked row, with explicit internal reuse title/notes; package remains
+zero NEW videos,3photos+4posters+GoogleAds and recurring video template inactive.
+Actual preview8planned dates/0shoots, normal editor shows REPOST VIDEO. Narrow static
+repost-label projection is tested locally, production application awaits exact approval.
+No Vercel use. [Current receipt](CAPE-LUMBER-LAUNCH-REVIEW-2026-11-02.md).
+
+GoogleAds complete through2November from existing scheduled sync; no manual refresh.
+Cape Meta connection authorised/last scheduled sync successful, IGverified/FBpartial;
+not all metrics complete. TikTok not connected for Cape; no fabricated coverage.
+Automatic Microsoft run still EXCLUDES ClientSchedule (6205source rows), staff#325
+owns the durable-ID/freshness resolution; do not claim automatic posting-date parity.
+Remaining launch work: that source acceptance, strict CG-only ranking/provenance or
+fail-closed removal of unverified rankings, then source-ready PR931 visual reader's
+single governed release and owner password/physical-phone check. Cape report and both
+strategies are already published. MetaAds/TikTokAds deferred backend-only#936, not a
+client launch blocker. Existing normal Chat author remains#731; no competing plan.
+
 ## 2 November — Cape consolidated changes are LIVE
 
 Frontend85b107a3,dpl_DvWScLPuXvGDUvptz9DcmnWeZYPL:one local production prebuild,

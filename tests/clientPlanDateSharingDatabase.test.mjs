@@ -4,6 +4,17 @@ import { randomUUID } from 'node:crypto'
 import { spawnSync } from 'node:child_process'
 import { test } from 'node:test'
 
+test('repost migration changes only fixed planned labels, preserving the existing projection contract', () => {
+  const oldMigration = readFileSync(new URL('../supabase/migrations/20261102120810_client_plan_date_sharing.sql', import.meta.url), 'utf8')
+  const oldProjection = oldMigration.slice(oldMigration.indexOf('create or replace function public.client_portal_month_ahead_posts_v2')).trim()
+  const nextMigration = readFileSync(new URL('../supabase/migrations/20261103051651_client_calendar_repost_label.sql', import.meta.url), 'utf8')
+  const nextProjection = nextMigration.slice(nextMigration.indexOf('create or replace function public.client_portal_month_ahead_posts_v2')).trim()
+  const labelStart = nextProjection.indexOf('      -- A recognised scheduling instruction')
+  const labelEnd = nextProjection.indexOf('      else (case deliverable.deliverable_type::text', labelStart)
+  assert.ok(labelStart > 0 && labelEnd > labelStart)
+  assert.equal(nextProjection.slice(0, labelStart) + nextProjection.slice(labelEnd), oldProjection)
+})
+
 test('planned-date sharing executes role, revision, disclosure and history boundaries in PostgreSQL', { skip: process.env.CG_RUN_LOCAL_DB !== '1' }, () => {
   const docker = (args, input) => spawnSync('docker', args, { input, encoding: 'utf8', timeout: 60000, maxBuffer: 4 * 1024 * 1024 })
   const created = docker(['run', '--pull=never', '--detach', '--name', `cg-plan-sharing-${randomUUID()}`, '--network', 'none', '--tmpfs', '/var/lib/postgresql/data', '-e', 'POSTGRES_HOST_AUTH_METHOD=trust', 'postgres:17-alpine'])
@@ -17,6 +28,7 @@ test('planned-date sharing executes role, revision, disclosure and history bound
     }
     assert.ok(ready)
     const migration = readFileSync(new URL('../supabase/migrations/20261102120810_client_plan_date_sharing.sql', import.meta.url), 'utf8')
+    const repostMigration = readFileSync(new URL('../supabase/migrations/20261103051651_client_calendar_repost_label.sql', import.meta.url), 'utf8')
     const original = readFileSync(new URL('../supabase/migrations/20260809130000_client_portal_visibility_contract.sql', import.meta.url), 'utf8')
     const projection = original.slice(original.indexOf('create function public.client_portal_month_ahead_posts_v2'), original.indexOf('-- Migration-first compatibility'))
     const setup = `
@@ -49,6 +61,7 @@ test('planned-date sharing executes role, revision, disclosure and history bound
       create function fixture_expected(variadic numbers int[]) returns jsonb language sql security definer set search_path='' as $$
         select jsonb_agg(jsonb_build_object('id',id,'updated_at',updated_at) order by id) from public.monthly_deliverables where instance_number=any(numbers)$$;
       ${projection}
+      revoke all on function client_portal_month_ahead_posts_v2(uuid,date) from public,anon;
       grant execute on function client_portal_month_ahead_posts_v2(uuid,date) to authenticated;
       set role authenticated;select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222',false);
       do $$begin if exists(select 1 from client_portal_month_ahead_posts_v2('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','2026-11-01')) then raise exception 'Unshared planned date leaked before migration';end if;end$$;
@@ -107,9 +120,53 @@ test('planned-date sharing executes role, revision, disclosure and history bound
       do $$begin begin perform set_client_schedule_plan_visibility('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','2026-11-01',true,'[]');raise exception 'Anonymous allowed';exception when insufficient_privilege then null;end;end$$;
       reset role;select 'PLAN DATE SHARING PASS';
     `
-    const result = docker(['exec', '-i', id, 'psql', '-h', '127.0.0.1', '-U', 'postgres', '-v', 'ON_ERROR_STOP=1'], setup + migration + acceptance)
+    const repostFixture = `
+      reset role;
+      insert into monthly_deliverables(id,client_id,month,deliverable_type,instance_number,title,scheduled_date,client_plan_shared_date,client_plan_shared_at,client_plan_shared_by_profile_id)
+        select ('cccccccc-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid,'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','2026-11-01',
+          case when n=26 then 'dp' when n=27 then 'reel' else 'video' end,n,
+          case n when 20 then 'REPOST VIDEO - PRIVATE CLIENT'
+            when 21 then 'REPOST VIDEO for PRIVATE CLIENT'
+            when 22 then 'VIDEO - PRIVATE CLIENT'
+            when 23 then 'Discuss REPOST VIDEO tomorrow - PRIVATE CLIENT'
+            when 24 then 'REPOST VIDEOGRAPHY - PRIVATE CLIENT'
+            when 25 then 'REPOST VIDEO - HIDDEN PRIVATE CLIENT'
+            when 26 then 'REPOST VIDEO - POSTER PRIVATE CLIENT'
+            else 'REPOST REEL - PRIVATE CLIENT' end,
+          '2026-11-25',case when n=25 then null else '2026-11-25'::date end,now(),'11111111-1111-4111-8111-111111111111'
+        from generate_series(20,27) n;
+      set role authenticated;select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222',false);
+      do $$begin
+        if not exists(select 1 from client_portal_month_ahead_posts_v2('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','2026-11-01') where title='Video 20') then raise exception 'Baseline repost defect not reproduced';end if;
+      end$$;
+      reset role;
+    `
+    const repostAcceptance = `
+      set role authenticated;select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222',false);
+      do $$declare r jsonb;begin
+        select jsonb_agg(to_jsonb(p)) into r from client_portal_month_ahead_posts_v2('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','2026-11-01') p;
+        if (select count(*) from jsonb_array_elements(r) x where x->>'title'='Video repost' and x->>'post_type'='video' and x->>'client_safe_status'='planned')<>2 then raise exception 'Repost label missing';end if;
+        if not exists(select 1 from jsonb_array_elements(r) x where x->>'title'='Reel repost' and x->>'post_type'='reel') then raise exception 'Reel repost missing';end if;
+        if exists(select 1 from jsonb_array_elements(r) x where x->>'title' like '%PRIVATE CLIENT%') then raise exception 'Private planned title leaked';end if;
+        if not exists(select 1 from jsonb_array_elements(r) x where x->>'title'='Video 22')
+          or not exists(select 1 from jsonb_array_elements(r) x where x->>'title'='Video 23')
+          or not exists(select 1 from jsonb_array_elements(r) x where x->>'title'='Video 24')
+          or not exists(select 1 from jsonb_array_elements(r) x where x->>'title'='Poster 26') then raise exception 'Unrelated titles reclassified';end if;
+        if exists(select 1 from jsonb_array_elements(r) x where x->>'title'='Video 25') then raise exception 'Unshared repost leaked';end if;
+        begin perform * from client_portal_month_ahead_posts_v2('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb','2026-11-01');raise exception 'Foreign client allowed after replacement';exception when insufficient_privilege then null;end;
+        if exists(select 1 from monthly_deliverables) then raise exception 'Base data access expanded';end if;
+        if not exists(select 1 from jsonb_array_elements(r) x where x->>'title'='PRIVATE STAFF TITLE' and x->>'client_safe_status'='scheduled') then raise exception 'Existing approved title changed';end if;
+      end$$;
+      reset role;
+      do $$begin if exists(select 1 from monthly_deliverables where instance_number>=20 and (sent_to_client_at is not null or client_approved_at is not null or posted_at is not null)) then raise exception 'Label changed content approval';end if;end$$;
+      set role anon;
+      do $$begin begin perform * from client_portal_month_ahead_posts_v2('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','2026-11-01');raise exception 'Anonymous access expanded';exception when insufficient_privilege then null;end;end$$;
+      reset role;select 'REPOST LABEL PASS';
+    `
+    const result = docker(['exec', '-i', id, 'psql', '-h', '127.0.0.1', '-U', 'postgres', '-v', 'ON_ERROR_STOP=1'], setup + migration + acceptance + repostFixture + repostMigration + repostAcceptance)
     assert.equal(result.status, 0, result.stdout + '\n' + result.stderr)
     assert.match(result.stdout, /PLAN DATE SHARING PASS/)
+    assert.match(result.stdout, /REPOST LABEL PASS/)
   } finally {
     const removed = docker(['rm', '--force', id]); assert.equal(removed.status, 0, removed.stderr)
   }
