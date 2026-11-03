@@ -13,10 +13,16 @@ still gate handoff. Seven contract tests pass; actual pending WiseRide still blo
 The listening route must be qualified before scoring/finishing a batch. Local
 Qwen full-clip, short-window and preserved-encoder-precision controls failed;
 installation/sound-class recognition did not establish temporal reliability.
-A pinned time-aware model is being evaluated against the same original blind
-controls; its download/probe is not a successful review. Existing #914 remains
-the production queue; failures and actual outcomes belong there. No new editor,
-service, paid credits, private uploads or MSI/storage/account changes.
+A pinned time-aware MOSS model also failed the same original mute/tone controls
+and made unsupported stereo claims about mono inputs. Both local models remain
+excluded; no further blind model trials. The exact24second WiseRide local human
+check and pending form are prepared; no actual listener is recorded. The filename
+guard now mirrors the existing canonical helper, including word separators and
+complete sequence boundaries; seven audio and four naming contract tests pass.
+Observed archive codes are not newly configured values or allocated slots.
+Existing #914 remains the production queue; failures and actual outcomes belong
+there. No new editor, service, paid credits, private uploads or MSI/storage/account
+changes. Native overnight continuation remains paused; staff desktop untouched.
 
 ### 3 November — Nolan production assembly lesson
 

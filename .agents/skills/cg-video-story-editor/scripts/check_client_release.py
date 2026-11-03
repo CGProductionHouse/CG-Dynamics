@@ -11,6 +11,27 @@ from audio_review import gate as audio_gate
 AREAS=('approved_reference_comparison','source_and_rights','orientation_and_stabilisation','colour_match',
        'brand_typography_motion','rendered_spelling_and_copy','picture_at_normal_speed','sound_and_sync',
        'cover_and_small_grid','cross_client_distinctness','portrait_outro')
+
+def production_prefix(identity):
+    code=identity['client_short_code']
+    if identity.get('verified') is not True or not isinstance(code,str):
+        raise ValueError('unverified canonical code/sequence')
+    # Mirror src/lib/onedriveCanonical.ts, the CA-locked naming authority.
+    code=code.strip().upper()
+    if not re.fullmatch(r'[A-Z0-9][A-Z0-9_-]{0,31}',code):raise ValueError('invalid configured client code')
+    values=[identity[k] for k in ['year','month','video_number']]
+    try:year,month,number=[int(v) for v in values]
+    except (TypeError,ValueError,OverflowError) as error:raise ValueError('invalid production date/sequence') from error
+    if any(isinstance(v,bool) or float(v)!=n for v,n in zip(values,[year,month,number])):
+        raise ValueError('production date/sequence must be whole numbers')
+    if not 2000<=year<=2100 or not 1<=month<=12 or not 1<=number<=99:
+        raise ValueError('production date/sequence outside canonical bounds')
+    return f"{year:04d}_{month:02d}_{code}_VIDEO_{number:02d}"
+
+def named_for_prefix(path,prefix):
+    stem=Path(path).stem
+    return stem==prefix or stem.startswith(prefix+'_')
+
 def check(record):
     errors=[];result={'status':'BLOCKED','errors':errors,'creative_approval_inferred':False}
     if record.get('resend_blocked') or record.get('creative_status')!='creative_review_passed':errors.append('Owner-rejected or uncleared creative work cannot be sent')
@@ -33,13 +54,12 @@ def check(record):
             errors.append('Forwardable caption contains internal/licensing prose; replace the cue or establish compatible lawful credit placement, never strip required credit silently')
     except (KeyError,OSError):pass
     try:
-        identity=record['production_identity'];prefix=f"{int(identity['year']):04d}_{int(identity['month']):02d}_{identity['client_short_code']}_VIDEO_{int(identity['video_number']):02d}"
-        if not identity.get('verified') or not re.fullmatch(r'[A-Z0-9]+',identity['client_short_code']):raise ValueError('unverified canonical code/sequence')
+        identity=record['production_identity'];prefix=production_prefix(identity)
         proof=Path(identity['source_evidence'])
         if not proof.is_file() or sha(proof)!=identity['source_evidence_sha256']:raise ValueError('identity source record missing/changed')
-        if not Path(record['video']).stem.startswith(prefix):raise ValueError('actual video basename differs from canonical identity')
+        if not named_for_prefix(record['video'],prefix):raise ValueError('actual video basename differs from canonical identity')
         if Path(record['video']).suffix.lower()!='.mp4':raise ValueError('review/original video must be the required MP4')
-        if not Path(record['cover']).stem.startswith(prefix):raise ValueError('cover production identity does not match video')
+        if not named_for_prefix(record['cover'],prefix):raise ValueError('cover production identity does not match video')
     except (KeyError,ValueError,OSError,TypeError) as e:errors.append('Production naming blocked: '+str(e))
     try:
         proof=Path(record['exact_export_creative_review_evidence']);review=read(proof)
