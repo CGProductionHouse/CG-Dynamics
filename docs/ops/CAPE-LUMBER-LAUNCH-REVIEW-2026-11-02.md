@@ -58,7 +58,7 @@ blocked for **Germoparts, AV Event Life and Emmanuel Funerals**. Source identity
 resolved against canonical client IDs, not guessed. This is not Cape's checkpoint;
 its FB sync succeeds/PARTIAL and IG is PASS. AV remains owner-held as previously
 instructed. Germoparts/Emmanuel need exact provider-access review before their own
-launch, not a fabricated green state or a bulk re-consent/resync. Owning #435/#505.
+launch, not a fabricated green state or a bulk re-consent/resync. Owning #505.
 
 # Cape Lumber launch acceptance — 2 November 2026
 
