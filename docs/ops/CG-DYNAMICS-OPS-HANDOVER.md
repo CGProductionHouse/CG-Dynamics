@@ -1,3 +1,38 @@
+### 3 November09:34 SAST — Nolan sound dependency repair
+
+CA explicitly requested fixing the blocked sound-review dependency and delivering
+only completed films. The native Nolan PC overnight continuation task was paused
+at07:30:53SAST and verified; it remains paused. Work after08:00 is background only
+while staff use the desktop. Seven revised private pictures/seven cover candidates
+and ten unlistened controls remain; no new completed film or send is claimed.
+
+The same shared audio helper now accepts an evidenced authorised local human
+listen without inventing a model identity. Exact export/feedback/context hashes,
+full normal-speed listener details, all five sound checks and unresolved findings
+still gate handoff. Seven contract tests pass; actual pending WiseRide still blocks.
+The listening route must be qualified before scoring/finishing a batch. Local
+Qwen full-clip, short-window and preserved-encoder-precision controls failed;
+installation/sound-class recognition did not establish temporal reliability.
+A pinned time-aware model is being evaluated against the same original blind
+controls; its download/probe is not a successful review. Existing #914 remains
+the production queue; failures and actual outcomes belong there. No new editor,
+service, paid credits, private uploads or MSI/storage/account changes.
+
+### 3 November — Nolan production assembly lesson
+
+CA's overnight seven-film correction remains in the existing #914 queue, not a
+new research mission. Four actual mixed-range outro defects were corrected in
+private TBS/Action/Watch/Ehrlich pictures; protected prefixes, exact affected tails,
+moving inspection and failed diagnostics are recorded in
+[the owning checkpoint](https://github.com/CGProductionHouse/CG-Dynamics/issues/914#issuecomment-6596052146).
+The same shared skill's exposure/colour reference now checks component colour
+interpretation, actual frame counts and same-geometry comparison after assembly.
+Seven private pictures/seven covers/ten unlistened controls; zero newly completed
+or sent replacements. Sound, identity, history and creative gates remain honest.
+No new engine, spend, deployment, storage/MSI change or mastery promotion.
+The renewed native continuation must be paused and verified at3Nov07:30SAST;
+this paragraph does not itself claim that pause has happened.
+
 ### 28 October — Nolan research/skills transferred to office PC
 
 **Office native plane continuation, 29 October:** [actual scene-plane study](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-PLANE-STUDY-20261029.md) adds four native 96-frame controls, one actual saved/closed/reopened 96/96 identical export and 48 exact protected opening frames. Manual five-keyframe Corner Pin follows one licensed moving wood plane; merged Photoshop PSD art is Premiere-rasterized. Person depth/contact, creative, phone, heard and cross-PC gates remain; 45 families unchanged.

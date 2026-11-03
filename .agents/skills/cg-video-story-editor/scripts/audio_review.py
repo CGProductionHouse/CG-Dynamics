@@ -197,7 +197,7 @@ Do not browse. First describe what you actually hear, then compare it with this 
 """ + json.dumps({k: intent[k] for k in ("buyer", "message", "music_fit", "opening_design", "ending_design")}, indent=2)
     (target / "gemini-prompt.txt").write_text(prompt + "\n", encoding="utf-8")
     write_json(target / "review.json", {"audio_sha256": packet["audio_sha256"], "provider": "Google AI Studio",
-        "model": "", "audio_received": False, "response_path": "gemini-response.txt", "response_sha256": "",
+        "review_method": "model", "model": "", "audio_received": False, "response_path": "gemini-response.txt", "response_sha256": "",
         "verdict": "pending", "reviewed_at": "", "editor": "", "checks": {
             area: {"status": "pending", "evidence": ""} for area in AREAS},
         "findings": [], "human_listening": "not_recorded"})
@@ -215,25 +215,44 @@ def gate(packet_path, review_path):
     errors.extend(packet["signal"]["failures"])
     if review.get("audio_sha256") != packet["audio_sha256"]:
         errors.append("Review belongs to a different mix")
-    if review.get("audio_received") is not True or review.get("verdict") != "no_blocking_issue":
-        errors.append("Gemini review missing, unable to review, or needs work")
-    for key in ("model", "reviewed_at", "editor"):
+    method = review.get("review_method", "model")
+    if review.get("verdict") != "no_blocking_issue":
+        errors.append("Perceptual audio review missing, unable to review, or needs work")
+    if method == "model":
+        if review.get("audio_received") is not True:
+            errors.append("Model did not consume the actual audio")
+        if not isinstance(review.get("model"), str) or not review["model"].strip():
+            errors.append("Missing review model")
+    elif method == "local_human":
+        listening = review.get("human_listening")
+        if not isinstance(listening, dict):
+            listening = {}
+        for key in ("listener", "method", "feedback_source"):
+            if not isinstance(listening.get(key), str) or not listening[key].strip():
+                errors.append(f"Missing actual human listening {key}")
+        if listening.get("status") != "recorded" or listening.get("complete_export") is not True or listening.get("normal_speed") is not True:
+            errors.append("Actual full normal-speed human listen not recorded")
+        if listening.get("video_sha256") != packet["video_sha256"]:
+            errors.append("Human listen belongs to a different export")
+    else:
+        errors.append("Unknown perceptual review method")
+    for key in ("reviewed_at", "editor"):
         if not isinstance(review.get(key), str) or not review[key].strip():
             errors.append(f"Missing review {key}")
     response = Path(review.get("response_path") or "__missing__")
     if not response.is_absolute():
         response = Path(review_path).resolve().parent / response
     if not response.is_file() or not response.stat().st_size or digest(response) != review.get("response_sha256"):
-        errors.append("Original model response missing or changed")
+        errors.append("Original perceptual review record missing or changed")
     for area in AREAS:
         check = review.get("checks", {}).get(area, {})
         if check.get("status") != "pass" or not check.get("evidence", "").strip():
             errors.append(f"Unresolved editor audio check: {area}")
     for item in review.get("findings", []):
         if item.get("disposition") not in ("fixed_and_rechecked", "not_reproduced", "intentional") or not item.get("evidence", "").strip():
-            errors.append("Unresolved model finding")
+            errors.append("Unresolved audio review finding")
     return {"status": "BLOCKED" if errors else "AUDIO_CHECKED_FOR_OWNER_REVIEW",
-            "errors": errors, "human_listening": review.get("human_listening", "not_recorded"),
+            "errors": errors, "review_method": method, "human_listening": review.get("human_listening", "not_recorded"),
             "client_or_publication_approval": False, "checked_at": utc_now(), "video_sha256": packet["video_sha256"]}
 
 
