@@ -1,3 +1,23 @@
+### 3 November — exact-approved reporting backend fixes live
+
+PR #938's approved rollout is complete: MCP **76**, monthly preparation **49**,
+Meta manual sync **90**, worker **77**. Fresh drift gates and all 85 hosted files
+were checked: exactly four helper copies changed, 81 other files byte-identical;
+entrypoints, import settings and JWT/custom-auth code unchanged. The legacy-48
+helper received only its tested surgical patch. No Vercel or extra production writes.
+
+Normal authenticated Cape November brief succeeds, reports CG creative coverage
+unavailable and zero unverified post citations, and preserves published version 10
+and its immutable-strategy gate. The returned live Meta parser passes the bounded
+single-day/adversarial proof locally. MCP 76 logged eight HTTP 200 responses and no
+observed errors through 09:14 UTC; the other functions' next cadence was not forced.
+
+Exact receipt, hashes and limits: `PROVIDER-BACKEND-ROLLOUT-ACCEPTANCE-2026-10-25.md`.
+This supersedes pending-backend status below. Frontend guard/PR #931 reader still
+await #679 release; the positive creative matcher is unfinished, automatic schedule
+refresh remains staff #325, and password/physical-phone checks remain owner-held.
+No whole-app/fleet launch certificate is inferred.
+
 ### 3 November — reporting safeguards verified; repost label live
 
 PR #937's approved calendar-label migration is live. The function definition changed

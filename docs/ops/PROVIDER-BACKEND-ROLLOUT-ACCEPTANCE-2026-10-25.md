@@ -1,8 +1,52 @@
 # Provider backend rollout and local acceptance — 25 October 2026
 
-## 3 November — exact reporting helper release packet (approval pending)
+### 3 November — approved reporting backend rollout complete
 
-This is a release proposal, not a rollout receipt. PR #937's calendar repost projection
+CA explicitly approved PR #938's exact four-function reporting release in this chat.
+Fresh preflight found no hosted drift. All four functions are ACTIVE and independently
+read back with exactly four changed helpers and **81 other files byte-identical**:
+
+| Existing function | Version | Changed helper | Retained files |
+| --- | --- | --- | --- |
+| cg-dynamics-mcp | 75 → 76 | monthlyStrategyAutopilot.ts | 39 |
+| monthly-strategy-autopilot | 48 → 49 | surgical legacy monthlyStrategyAutopilot.ts | 15 |
+| meta-sync | 89 → 90 | metaInsightResponse.ts | 11 |
+| meta-sync-worker | 76 → 77 | metaInsightResponse.ts | 16 |
+
+Entrypoints, import settings, JWT/custom-auth code, identity and all other hosted
+contents match their baselines. No secrets, schedules, permissions, scopes, mappings,
+campaigns, strategies or database/schema were changed. No generation, worker wake,
+manual/bulk resync or Vercel operation was performed.
+
+The connector's initial pre-release connection failure recovered on the bounded
+post-release retry without auth changes. Its normal authenticated read-only Cape
+November brief now returns `verified_cg_creatives: unavailable` and zero
+`published_report_post` seed citations. Cape's reviewed/published version 10 remains
+version 10; its immutable-strategy gate is preserved. This does not delete or rewrite
+approved staff strategy text.
+
+The returned live Meta helper was executed locally: exact single-day 78 and observed
+zero pass; unknown/multiple/wrong-day/duplicate/null/breakdown/wrong-period cases reject.
+The newly deployed MCP 76 logged eight HTTP 200 responses and no runtime errors in
+the bounded observation through 09:14 UTC. Other three functions were not invoked by
+this release; their next normal cadence is not falsely claimed as observed acceptance.
+No new provider figures were produced or old report facts replaced.
+
+Receipt `%TEMP%/cg-reporting-backend-rollout-938-20261103.json`, SHA256
+`33e4c942c9220af072009bf942a837c266b243540995e809f52bec04fe442b07`.
+All 85 hosted files were compared. The tested source/runtime remains PR #938,
+`f768c490b2873a8c8e1918c1c05db2059d08f2a8`; no further runtime edit.
+
+This completes the exact backend approval and supersedes the pending-backend status
+below. Client frontend guard and PR #931 visual reader still await the separate #679
+release; automatic positive creative proof/matching is unfinished. Staff #325 retains
+automatic schedule refresh. Real-password and physical-phone acceptance remain
+owner-held. This backend receipt is not a whole-app/fleet launch certificate.
+
+## 3 November — reviewed packet retained as release history
+
+The packet below is the reviewed proposal; the completed rollout receipt above is
+current authority. PR #937's calendar repost projection
 is separately approved and live; do not reapply it. Tested runtime `84b0e929` and
 fixture-only `b67e191c` have 4,222 passing supported tests, 24 existing skips and no
 failures, mandatory PostgreSQL, build/bundle, backend TypeScript, scoped lint and diff.

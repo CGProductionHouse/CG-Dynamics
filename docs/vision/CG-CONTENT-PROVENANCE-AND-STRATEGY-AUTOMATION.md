@@ -21,9 +21,12 @@ page's reach, views, leads or sales as the result of CG-made content.
 evidence, default empty, with exclusions preserved and at most two highlights.
 Provider/raw flags and non-exclusion never establish origin. Strategy preparation
 no longer automatically cites unknown page winners; page totals and approved
-narratives persist. This is source verified, not deployed, and not an automatic
-matcher, server provenance registry or proof producer. Unknown highlights are
-omitted until that authority exists. Continue steps 1–5; no manual tagging queue.
+narratives persist. The exact-approved backend guard is live in MCP 76 and monthly
+preparation 49, with normal authenticated brief read-back verified. The frontend
+guard is source-only and awaits the separate release. Neither change implements an
+automatic matcher, server provenance registry or proof producer. Unknown highlights
+are omitted by that source guard until the authority exists. Continue steps 1–5;
+no manual tagging queue.
 
 - The existing normal company ChatGPT task is now **CG Dynamics — Research & Strategy**,
   weekdays08:00/11:00/14:00/17:00 Africa/Johannesburg, same chat. Keep it as the author; do not add a Codex/paid-API
