@@ -1,6 +1,6 @@
 # Complete shared-technique integration map — 3 November 2026
 
-This is the index for the existing45 families, not a new library, new framework or a mastery certificate. The current checkout includes all office-published cards/studies at0d4ab16f; remote branch comparison found no later unpublished-to-this-checkout code. Canonical shared skill is installed with the existing sync helper; technique cards remain in this Git checkout and are reached through that skill. Do not create45 duplicate global skills.
+This is the index for the original45-family reconciliation, not a new library, new framework or a mastery certificate. The current checkout includes those office-published cards/studies at0d4ab16f, plus the later bounded [depth-map flash reconstruction](skills/depth-map-flash/SKILL.md) from the owner's three3November sports references. That makes46 documented families, not46 mastered or universally callable production operations. Canonical shared skill is installed with the existing sync helper; technique cards remain in this Git checkout and are reached through that skill. Do not create duplicate global skills.
 
 ## Verified availability versus readiness
 
@@ -42,6 +42,7 @@ This is the index for the existing45 families, not a new library, new framework 
 | [bounded-burn](skills/bounded-burn/SKILL.md) | Four source recipes; repaired discovery header | Rejected stripe/haze/gates retained; real purpose/comfort |
 | [chromatic-lens-pulse](skills/chromatic-lens-pulse/SKILL.md) | Source recipes + native RGB study | Reduced fringe still needs meaningful source/brand/comfort |
 | [color-invert-glitch](skills/color-invert-glitch/SKILL.md) | Source recipe + native study | Wrong product/skin colours and brightness jump remain rejection risks |
+| [depth-map-flash](skills/depth-map-flash/SKILL.md) | Isolated local licensed model + plain/luminance/flat-mask/depth controls; decoded two-frame isolation verified | Normal-speed/phone comfort, heard creative sound, sports-source suitability, native reproduction; model-derived relative depth is not an alpha matte |
 | [exposure-flash-transition](skills/exposure-flash-transition/SKILL.md) | Card/source negative control | Actual tutorial directional mechanism/source fit not universal flash |
 | [filmed-last-frame](skills/filmed-last-frame/SKILL.md) | Real-phone prerequisite recipe | Needs actual lens-cover footage; digital grow remains rejected |
 | [graphic-inset-grow](skills/graphic-inset-grow/SKILL.md) | Source recipe + native easing study | Framing/reading and no scale/tangent return defect |

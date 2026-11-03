@@ -205,6 +205,9 @@
 | Solid Coast mask 5 | [natural object mask](skills/kinetic-caption-finishing/SKILL.md) | Mixkit #1252 rejected for obscured type and bleed; better source/matte needed. |
 | Fight reference 1 | [MMA story arc](skills/fight-trailer-sequencing/SKILL.md) | Source-led arc mapped; event contact/audio still required. |
 | Fight reference 2 | [motocross motion grammar](skills/fight-trailer-cold-open/SKILL.md) | Isolated visual timing proofs; cannot substitute for verified event hits. |
+| 3 November sports example 1: David Zamut | [exact three-video study](SPORTS-REFERENCES-20261103.md) | Exact post identified; public media request403. No movie or sound inspected. Requires normal playable source before any effect ledger. |
+| 3 November sports example 2: DLSU/UP basketball | [exact three-video study](SPORTS-REFERENCES-20261103.md), [hook mechanisms](../../../.agents/skills/cg-video-story-editor/references/hook-mechanisms.md) | Complete reference visually sampled through66.4s: human preparation, social gesture, black-picture break, game action and team finish. Sound stream decoded but never heard; event/SFX and musical-fit ledger still open. |
+| 3 November sports example 3: rainy rugby | [exact three-video study](SPORTS-REFERENCES-20261103.md), [depth-map flash](skills/depth-map-flash/SKILL.md) | All36 opening frames inspected: polarity/detail/radial/depth-like burst settles to readable huddle. Original local depth-control reconstruction passes two-frame decoded isolation after rejecting CRF spill and long cue. Creator method, normal-speed/phone comfort and heard sound remain open. |
 
 ## Work order without another reminder loop
 
