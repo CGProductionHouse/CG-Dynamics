@@ -23,7 +23,8 @@ Provider/raw flags and non-exclusion never establish origin. Strategy preparatio
 no longer automatically cites unknown page winners; page totals and approved
 narratives persist. The exact-approved backend guard is live in MCP 76 and monthly
 preparation 49, with normal authenticated brief read-back verified. The frontend
-guard is source-only and awaits the separate release. Neither change implements an
+guard and PR #931 visual reader are now live from source 626bd308, one verified
+prebuilt release on 3 November. Neither change implements an
 automatic matcher, server provenance registry or proof producer. Unknown highlights
 are omitted by that source guard until the authority exists. Continue steps 1–5;
 no manual tagging queue.
@@ -32,15 +33,15 @@ no manual tagging queue.
   weekdays08:00/11:00/14:00/17:00 Africa/Johannesburg, same chat. Keep it as the author; do not add a Codex/paid-API
   author or reactivate the failed Work task. Source/connector availability is tested
   at execution; changing its prompt is not a successful unattended run.
-- The currently serving report ranks eligible posts except explicit exclusions;
-  the new source guard above is not deployed yet.
+- The currently serving client report requires positive exact-post CG evidence;
+  unknown highlights are omitted. Whole-page statistics remain separately labelled.
   `report_content_exclusions` is an exclusion mechanism, not positive creative origin.
-  Current methodology's “CG-created or CG-managed” wording is too broad for this rule.
+  Live methodology now distinguishes page totals from verified CG creative highlights.
 - Existing `client_portal_assets` / library/category/client mappings identify final
   assets. `monthly_deliverables` remains schedule truth; `content_review_versions`
   remains approval/version truth; `posts` and provider IDs remain publication truth.
   Extend these relationships, not a parallel calendar, work board or asset store.
-- PR931's shared Plan/Performance reader is merged/source ready, not deployed. Its
+- PR931's shared Plan/Performance reader is live in the 3 November release. Its
   visual interface already applies to every client; no per-client redesign is needed.
 
 ## The automatic evidence chain
