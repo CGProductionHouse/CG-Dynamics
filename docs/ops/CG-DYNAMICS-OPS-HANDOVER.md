@@ -1,37 +1,42 @@
-## 3 November — full client-by-client double-check IN PROGRESS; exact TikTok repair prepared
+## 3 November — full client double-check IN PROGRESS; exact TikTok repair LIVE
 
-CA asked to continue past Cape through the full client list. The existing execution
-matrix now has all62canonical active records: confirmed scope/holds, Nov/Dec draft
-states, canonical dates, safe library counts and account enablement. These read-only
-inventory facts are NOT actual UI acceptance. Valid v2 receipts cover AllAroundPVC,
-Agri-Secure, heldAV and BatHill; Cape retains prior acceptance. Remaining actual
-journeys continue. AV/RedOak holds, excludedZooz, LHPonce-off/later and Jodrico cohort
-decision remain; no recurring-social scope is invented for project-only clients.
-Normal ChatGPT #731 and staff/Teams #325 work remain separate.
+CA requested continuing through the full list. The single existing execution matrix
+covers62canonical active records, confirmed scope/holds, Nov/Dec strategy states,
+canonical dates, safe library counts and portal accounts. SQL inventory is not UI
+acceptance. Latest durable v3 checkpoint: **13 client records complete**, including
+Cape's prior acceptance;12new actual desktop journeys, no unresolved reads/overflow.
+CentralCanvas is in progress. Private per-panel receipt:
+`%TEMP%/cg-client-fleet-ui-v3-20261103.json`. v1 is INVALID bookkeeping evidence;
+v2 completed records were valid and imported. A60s control timeout/kernel reset was
+recovered using a fresh documented company-browser tab; incomplete visit rechecked.
+Use the checkpointed v3 harness, not long uncheckpointed multi-client calls.
+Mobile client-by-client sampling is still pending; no password/physical-phone claim.
+AV/RedOak holds, excludedZooz, LHPonce-off/later, Jodrico cohort and non-recurring-
+social scopes stay separate. #731 author and #325 staff/calendar ownership retained.
 
-**Reproduced defect:** AllAroundPVC's publishedSeptember report shows8TikTok facts
-from sync_run `644ccb60-c294-4512-8e4c-c7d1b577a04b`; its connection belongs to
-canonicalWisemanGroup, not AllAround. Full historical fact/run/connection mismatch
-inventory finds ONLYthese8facts/oneclient/onerun. Exact quarantine migration
-`20261103145536_quarantine_legacy_tiktok_client_mismatch.sql` is prepared:
-wrong-client public numbers→NULL/unavailable, originals retained in staff-only
-provenance, every other fact/identity/period/mapping untouched. RLS already restricts
-the base fact table to staff; clients receive the explicit report RPC projection.
-No schema/table/permission/Edge update or data deletion. Current hosted tiktok-sync
-v50 has exact-client/token-connection guards; do not redeploy or bulk resync it.
+**Exact-approved PR#943 quarantine is LIVE:** AllAroundPVC's8September TikTok facts
+came from a run pointing to WisemanGroup's connection. Complete historical mismatch
+inventory found only those8/oneclient/onerun. Public numbers are now NULL/unavailable;
+all8original values/availability retained in existing staff-only provenance. RLS
+blocks client base-table reads; report RPC does not expose that private provenance.
+Fresh8row/owner/value guards,22Facebook/Instagram/Wiseman control-fact readbacks and
+account identity readback pass. Actual client preview no longer shows wrong TikTok
+numbers. Current hosted writer50 retains exact-client/token-connection guards.
+No schema/permission/Edge/Vercel/provider-resync/content-publication change.
+MigrationLF SHA256 `38b9d99051a0bab18e9794e8f76803008b8b1741d64b9df1fbfee69e3def60d6`.
+Private production receipt `%TEMP%/cg-allaround-tiktok-quarantine-receipt-20261103.json`,
+SHA256 `84173ce32c175cd4fd998c59261d42d34bf0689015dc9189eac47c2918c66cc7`.
+97focused tests incl realPostgres roles/public-projection/rollback/replay, local
+TS/Vite actual appbundle/scopedlint/diff pass. App runtime unchanged from1ef93208;
+no reattributed full-suite claim. Initial fixture setup errors corrected, not product
+failures. #505/#668/#731 have the exact live data/evidence note.
 
-97focused tests pass, including realPostgreSQL original/private/public-RPC/foreign-
-provider/replay/changed-owner/value/partialset rollback checks. Local TS/Vite actual
-appbundle, scopedlint and diff pass. Fixture setup failures (missing public fixture
-environment and a missing copied-DDL terminator) were corrected, not product defects.
-No new full-suite claim: runtime app code is unchanged from frozen1ef93208.
-Production8-row quarantine still needs exact CA approval. No Vercel operation.
-
-Cape's first natural post-release date continuation is now genuinely observed:
-automatic run `6e79c07b-42b7-449f-8de8-a81d59e59328`, source14:01:07UTC:
-**checked8 / changed0 / held0 / boundedfalse**. General operational mirror remains
-partial separately. This closes the earlier “next natural cycle unobserved” note.
-Existing execution matrix is the single resume authority; no duplicate checklist.
+Cape's natural14:01UTC source run `6e79c07b-42b7-449f-8de8-a81d59e59328` now
+genuinely proves **checked8/changed0/held0/boundedfalse**; staff mirror partial remains
+separate. Full source checks also find zero asset-linked Meta client mismatches,
+zero Google campaign-link/client mismatches, zero published asset library/category/
+deliverable-client mismatches. This is scoped integrity evidence, not a claim of
+complete coverage, unpublished content approval or fleet launch readiness.
 Exact Google Control Centre target unavailable; no guessed tracker write.
 
 ## 3 November — #941 exact-approved date-follow fix LIVE

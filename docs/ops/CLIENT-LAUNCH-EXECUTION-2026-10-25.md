@@ -296,28 +296,30 @@ content/source/editorial; nothing below auto-approves or publishes. Disabled/mis
 optional services on non-recurring/project clients are not manufactured launch defects.
 
 Actual desktop UI receipts are recorded separately from SQL inventory; all pending
-rows still require actual journeys. Private authoritative receipt:
-`%TEMP%/cg-client-fleet-ui-v2-20261103.json`. The earlier v1 closure-associated
+rows still require actual journeys. Private authoritative per-page receipt:
+`%TEMP%/cg-client-fleet-ui-v3-20261103.json` (imports the valid v2 completed records). The earlier v1 closure-associated
 artifact is INVALID and never counts toward acceptance. One60s browser control
-timeout interrupted BloemActionSports; its partial visit is not counted.
+timeout interrupted an earlier BloemActionSports visit; it was subsequently fully
+rechecked. v3 saves after each panel and bounds each browser call; no partial visit
+is counted as a completed client.
 No customer-password/physical-phone acceptance is inferred from admin previews.
 
 | Client | Confirmed scope / hold | Nov / Dec strategy | Nov / Dec client dates | Brand Hub | Portal account | Actual UI evidence |
 | --- | --- | --- | --- | --- | --- | --- |
-| Agri-Secure | No recurring social | draft / Absent | 0 canonical rows / 0 canonical rows | Private / 0 assets | Not provisioned | 16 desktop panels; 0 control errors |
-| All Around PVC | V1 / F3 / DP3 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; 0 control errors |
-| AV Event Life | Owner hold | draft / draft | 0 canonical rows / 0 canonical rows | No mapping | Enabled | 16 desktop panels; 0 control errors |
-| Bat Hill Royale | Flexible / confirmed fields only | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | 16 desktop panels; 0 control errors |
-| Bloem Action Sports | V1 / F4 / DP4 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| Bloem Marble & Granite | V2 / DP4 | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | Pending actual UI |
-| Bloem Vascular | No recurring social | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | Pending actual UI |
-| Bohemia Quick Stop | DP2 | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | Pending actual UI |
-| Bouwer & Coetzee Attorneys | V1 / DP7 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| Braize | F4 / DP4 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| C&L Innovations | F2 / DP2 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
+| Agri-Secure | No recurring social | draft / Absent | 0 canonical rows / 0 canonical rows | Private / 0 assets | Not provisioned | 16 actual desktop panels; 0 unresolved reads |
+| All Around PVC | V1 / F3 / DP3 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 actual desktop panels; 0 unresolved reads; TikTok identity corrected live |
+| AV Event Life | Owner hold | draft / draft | 0 canonical rows / 0 canonical rows | No mapping | Enabled | 16 actual desktop panels; 0 unresolved reads |
+| Bat Hill Royale | Flexible / confirmed fields only | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | 16 actual desktop panels; 0 unresolved reads |
+| Bloem Action Sports | V1 / F4 / DP4 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 actual desktop panels; 0 unresolved reads |
+| Bloem Marble & Granite | V2 / DP4 | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | 16 actual desktop panels; 0 unresolved reads |
+| Bloem Vascular | No recurring social | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | 17 actual desktop panels; 0 unresolved reads |
+| Bohemia Quick Stop | DP2 | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | 16 actual desktop panels; 0 unresolved reads |
+| Bouwer & Coetzee Attorneys | V1 / DP7 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 actual desktop panels; 0 unresolved reads |
+| Braize | F4 / DP4 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 actual desktop panels; 0 unresolved reads |
+| C&L Innovations | F2 / DP2 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 actual desktop panels; 0 unresolved reads |
 | Cape Lumber | F3 / DP4 | published / published | 8 shared / 8 rows / 0 canonical rows | Enabled / 1 assets | Enabled | Prior live acceptance + natural8/0/0 |
-| Case Bloemfontein | V2 / DP12 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
-| Central Canvas | V1 / F4 / DP3 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
+| Case Bloemfontein | V2 / DP12 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 actual desktop panels; 0 unresolved reads |
+| Central Canvas | V1 / F4 / DP3 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | In progress (12 panels) |
 | CG Production House | V4 / F8 / DP4 | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | Pending actual UI |
 | Daisy & Co | V1 / F3 / DP3 | draft / draft | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | Pending actual UI |
 | Delta Gas | V1 / F3 / DP3 | draft / draft | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | Pending actual UI |
