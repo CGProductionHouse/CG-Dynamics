@@ -29,6 +29,7 @@ import {
   automaticSystemRange,
 } from './job-machine.ts'
 import { applyAutomaticMicrosoftMirrors, claimAutomaticApplyContinuation } from './automatic-reconciliation.ts'
+import { finishSharedScheduleDateRefresh } from './shared-schedule-dates.ts'
 import { automaticSourceDomain, isAutomaticMirrorSource, plannerAssigneeIds, canFinishAutomaticProtectedDetails, readAutomaticJobSnapshot } from './automatic-snapshot.ts'
 
 interface GraphBatchItem { id: string; status: number; headers?: Record<string, string>; body?: { id?: unknown; description?: unknown } }
@@ -592,7 +593,8 @@ async function automaticallyApplyJob(sb: SupabaseClient, jobId: string) {
   catch { return { status: 'failed' as const, runId: null, applied: 0, skipped: 0, failed: 1, conflicts: 0, clientScheduleExcluded: 0, error: 'Required Microsoft sources or automatic mirror payloads are incomplete.' } }
   const snapshot = prepared.snapshot
   if (prepared.needsExportTimestamp) await sb.from('microsoft_sync_jobs').update({ exported_at: snapshot.exportedAt, status: 'complete', updated_at: snapshot.exportedAt }).eq('id', jobId)
-  return applyAutomaticMicrosoftMirrors(sb, snapshot, jobId, Deno.env.get('MICROSOFT_SYNC_SYSTEM_USER_ID') ?? '', recoveryRunId, recoveryGeneration)
+  const mirror = await applyAutomaticMicrosoftMirrors(sb, snapshot, jobId, Deno.env.get('MICROSOFT_SYNC_SYSTEM_USER_ID') ?? '', recoveryRunId, recoveryGeneration)
+  return finishSharedScheduleDateRefresh(sb, mirror)
 }
 
 async function mergeAssignees(
