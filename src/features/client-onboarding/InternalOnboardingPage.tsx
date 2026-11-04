@@ -25,6 +25,19 @@ export default function InternalOnboardingPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
+  const [previewing, setPreviewing] = useState(false)
+  const [previewClientName, setPreviewClientName] = useState('')
+
+  const clientNames = useMemo(() => new Map(clients.map(client => [client.id, client.name])), [clients])
+
+  const clientSessionsMap = useMemo(() => {
+    const map = new Map<string, StaffOnboardingSummary>()
+    for (const session of sessions) {
+      map.set(session.clientId, session)
+    }
+    return map
+  }, [sessions])
+
   async function load() {
     setLoading(true)
     const [clientsResult, sessionsResult] = await Promise.all([listClients(), listStaffOnboarding()])
@@ -58,6 +71,11 @@ export default function InternalOnboardingPage() {
       await load()
     } else setError(result.error)
     setWorking(false)
+  }
+
+  function handlePreview() {
+    setPreviewing(true)
+    setPreviewClientName(clients.length > 0 ? clients[0].name : 'Client')
   }
 
   async function revoke(sessionId: string) {
@@ -144,6 +162,9 @@ export default function InternalOnboardingPage() {
 
       {/* Onboarding status */}
       <section className="mt-6">
+        {previewing && (
+          <WelcomeToCgPage previewClientName={previewClientName} />
+        )}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-lg font-bold text-white">Onboarding status</h2>
           <div className="flex flex-wrap gap-2">
@@ -165,7 +186,24 @@ export default function InternalOnboardingPage() {
         {loading ? (
           <p className="mt-4 text-sm text-brand-primary">Loading onboarding status...</p>
         ) : filteredSessions.length === 0 ? (
-          emptyState && <EmptyState className="mt-4" title={emptyState.title} message={emptyState.message} />
+          emptyState && (
+            <EmptyState
+              className="mt-4"
+              title={emptyState.title}
+              message={emptyState.message}
+              action={
+                clients.length > 0 && !previewing && (
+                  <ActionButton
+                    variant="secondary"
+                    className="w-full"
+                    onClick={() => handlePreview()}
+                  >
+                    Preview onboarding
+                  </ActionButton>
+                )
+              }
+            />
+          )
         ) : (
           <div className="mt-4 space-y-4">
             {filteredSessions.map(session => {
