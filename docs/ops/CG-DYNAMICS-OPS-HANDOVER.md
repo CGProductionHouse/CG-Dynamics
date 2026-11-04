@@ -1,3 +1,7 @@
+### 4 November 10:01 SAST — Action Sports R15 amendment in internal review
+
+CA's three screenshot amendments to Action Sports R14 were applied in a protected R15: the stretched opener was replaced by five real portrait action cuts; the cloned end of `MAKE IT COUNT` was rebuilt from moving 50 fps original footage; the black and white play behind `MOVE TOGETHER` gained contrast; one purposeful graphic transition and a low original spectator-audio layer were added. The correctly named MP4 document with proposed caption was sent at 09:59 to exact CG Nolan Approvals. The separate caption-free HD-selected cover and separate Nolan note followed at 10:01. **All three were observed Delivered**. [Exact private source, hash, QC and remaining gates](../../scripts/video-editing/studio-phase2/ACTION-SPORTS-R15-AMENDMENT-20261104.md). This is internal review only; creative listening, full-speed phone review, participant/public-use clearance and native staff editability remain open. PR910 stays draft; no client/public send, deployment, DB/security or permission change.
+
 ### 4 November 08:32 SAST — Action Sports R14 internal review handoff
 
 CA's new five sport-effect references and edit feedback led to a protected MSI R14 netball revision. Its 26.43-second MP4 document and caption plus separate HD cover were observed delivered to exact CG Nolan Approvals at 08:30–08:32; yesterday's R12 is superseded. [Exact local-file hashes, reference-to-edit study and open gates](../../scripts/video-editing/studio-phase2/ACTION-SPORTS-R14-EFFECT-STUDY-20261104.md). The shared skill status, stepped-motion/flash cards and a new experimental slide-shake card route the tested mechanics to the office PC after branch sync. Private client media, source references, Canva thumbnails and exports are outside Git. This is **internal review only**: independent creative sound/full-speed phone review, published-picture/participant clearance and staff-editable handover remain open. PR910 stays draft; #914 remains open. No deployment, DB, permission or account change.
@@ -5542,3 +5546,4 @@ On a fresh chat:
 8. After each consequential action, update #505, #381 and this handover.
 
 The supervisor should keep CA out of routine mechanics and bring her in only for the exact protected decisions, provider verification/2FA/document steps or human review gates that truly require her.
+\n
