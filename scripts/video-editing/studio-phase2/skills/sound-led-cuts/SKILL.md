@@ -5,6 +5,8 @@ description: Shape a cut with licensed risers, impacts and source sound when pic
 
 # Sound-led cuts — researched, listening proof pending
 
+**4 November sports-slide peak check:** The R14 transition recipe retained only the first 0.45 s of a licensed whoosh whose strong source peak is at about 1.07 s. At its programmed gain, the strongest retained 10 ms window is nominally about −54.8 dBFS. A private picture-matched control trims the later 0.80–1.25 s section and starts it early enough that its **measured added-cue peak** lands on the actual frame-419 cut; the 1.2 s candidate mix decodes and peaks at −3.1 dBTP. [Exact evidence](../../SPORTS-SLIDE-CUE-PEAK-STUDY-20261104.md). Inspect the useful part of the *source waveform*, not only the file start or a timeline block, then hear the full mix. This candidate remains unheard and is not a production gain/timing preset.
+
 The [29 October coffee music-cut timing screen](../../COFFEE-MUSIC-CUT-TIMING-SCREEN-20261029.md) advances the owner's beat-cut baseline with cleared moving stock and the same licensed music in a plain control and protected revision. The first measured cut accidentally exposed a machine shot inside the filter action and was rejected; R02 repairs the source range. Its second cut is 7.1 ms from one measured music attack versus 159.7 ms in the control, with exactly equal decoded music and the first 32 picture frames protected. This establishes a reproducible **candidate marker and source-screening method**, not a heard beat, better pacing, a suitable track, event sound or completed sound-led mix. Keep the clean control for normal-speed human listening and never force a cut that breaks visible action merely to hit a detector peak.
 
 ## Two-original-shot city timing — 29 October 2026
