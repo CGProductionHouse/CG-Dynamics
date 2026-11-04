@@ -5351,3 +5351,9 @@ On a fresh chat:
 8. After each consequential action, update #505, #381 and this handover.
 
 The supervisor should keep CA out of routine mechanics and bring her in only for the exact protected decisions, provider verification/2FA/document steps or human review gates that truly require her.
+
+## 13. PICASSO #878/#879 — headless local MCP core added 4 November 2026
+
+PICASSO runner 0.3.14 and its skill now treat whole-desktop Computer Use as an exceptional editor fallback, not the core architecture. `scripts/picasso/picasso_mcp.py` 0.1.0 exposes exactly six local STDIO tools for approved-root inspection, indexing/analysis, preview discovery, conservative first-pass rendering, verified human-approved local export staging, and status. There is no shell/delete/upload/publish/messaging/credential tool. Paths are confined by `PICASSO_ALLOWED_ROOTS`; originals stay read-only.
+
+The MSI per-user runtime and shared ChatGPT desktop MCP configuration now contain `picasso-local`. Direct protocol/tool-list and real private-job status calls passed without UI control; the full PICASSO Python suite reports 41 passing tests and skill validation passes. A fresh company ChatGPT Work `/mcp` invocation is still required after desktop restart before claiming everyday-entrypoint acceptance. The same reviewed install command is the office-PC rollout path. GitHub carries code only, never client photos or live jobs. No production deployment, new hosting, paid API/subscription, Pixieset/WhatsApp action, Adobe catalogue mutation or Nolan #862 change occurred. PR #879 remains the isolated implementation lane and issue #878 remains operating authority.

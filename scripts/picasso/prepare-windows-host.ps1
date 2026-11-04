@@ -1,7 +1,9 @@
 param(
     [ValidateSet('Check', 'Install')]
     [string]$Mode = 'Check',
-    [string]$Destination = (Join-Path $env:LOCALAPPDATA 'CGProductionHouse\PICASSO\runtime-0.3.13')
+    [string]$Destination = (Join-Path $env:LOCALAPPDATA 'CGProductionHouse\PICASSO\runtime-0.3.14'),
+    [switch]$RegisterMcp,
+    [string[]]$AllowedRoots = @((Join-Path $env:USERPROFILE 'Pictures'))
 )
 
 $ErrorActionPreference = 'Stop'
@@ -10,6 +12,7 @@ $model = Join-Path $source 'models\face_detection_yunet_2026may.onnx'
 $expectedModelHash = 'EBAFCE4E3C118D6554634BE5C27AB333B4C047A9A8C3FAF1D7CF93101C22F0F0'
 $portableFiles = @(
     'picasso.py', 'shoot_index.py', 'assemble_gallery_revision.py',
+    'picasso_mcp.py',
     'delivery_consistency_audit.py', 'event_quality_review.py', 'sanitize_editor_jpeg.py',
     'verify_gallery_download.py', 'SKILL.md', 'requirements-windows.txt',
     'references\event-quality-gate.md', 'references\large-shoot.md',
@@ -28,7 +31,7 @@ if ($Mode -eq 'Install') {
         throw 'Install destination must be below this Windows user LocalAppData folder.'
     }
     New-Item -ItemType Directory -Path (Join-Path $destinationFull 'models') -Force | Out-Null
-    foreach ($helper in @('picasso.py', 'shoot_index.py', 'assemble_gallery_revision.py',
+    foreach ($helper in @('picasso.py', 'shoot_index.py', 'picasso_mcp.py', 'assemble_gallery_revision.py',
         'delivery_consistency_audit.py', 'event_quality_review.py', 'sanitize_editor_jpeg.py',
         'verify_gallery_download.py')) {
         Copy-Item -LiteralPath (Join-Path $source $helper) -Destination $destinationFull -Force
@@ -50,6 +53,7 @@ if ($Mode -eq 'Install') {
     $runner = Join-Path $destinationFull 'picasso.py'
     $indexer = Join-Path $destinationFull 'shoot_index.py'
     $downloadVerifier = Join-Path $destinationFull 'verify_gallery_download.py'
+    $mcpServer = Join-Path $destinationFull 'picasso_mcp.py'
     $model = Join-Path $destinationFull 'models\face_detection_yunet_2026may.onnx'
 } else {
     $pythonCommand = Get-Command python -ErrorAction SilentlyContinue
@@ -58,6 +62,7 @@ if ($Mode -eq 'Install') {
     $runner = Join-Path $source 'picasso.py'
     $indexer = Join-Path $source 'shoot_index.py'
     $downloadVerifier = Join-Path $source 'verify_gallery_download.py'
+    $mcpServer = Join-Path $source 'picasso_mcp.py'
 }
 
 $probe = @'
@@ -81,6 +86,10 @@ if ($LASTEXITCODE -ne 0) { throw 'PICASSO runner cannot start.' }
 if ($LASTEXITCODE -ne 0) { throw 'PICASSO large-shoot indexer cannot start.' }
 & $venvPython $downloadVerifier --help | Out-Null
 if ($LASTEXITCODE -ne 0) { throw 'PICASSO gallery download verifier cannot start.' }
+$mcpProbe = @('{"jsonrpc":"2.0","id":1,"method":"tools/list"}') | & $venvPython $mcpServer
+if ($LASTEXITCODE -ne 0 -or -not ($mcpProbe -match 'picasso_inspect_folder')) {
+    throw 'PICASSO local MCP server cannot start.'
+}
 if ((Get-FileHash -LiteralPath $model -Algorithm SHA256).Hash -ne $expectedModelHash) {
     throw 'Installed PICASSO model hash differs from reviewed source.'
 }
@@ -88,7 +97,7 @@ if ($Mode -eq 'Install') {
     $runtimeDetails = $runtime | ConvertFrom-Json
     $runtimeManifest = [ordered]@{
         schema_version = 1
-        runtime_version = '0.3.13'
+        runtime_version = '0.3.14'
         python = $runtimeDetails.python
         opencv = $runtimeDetails.opencv
         numpy = $runtimeDetails.numpy
@@ -110,6 +119,28 @@ if ($Mode -eq 'Install') {
     [System.IO.File]::WriteAllText($manifestPath, $manifestJson + [Environment]::NewLine,
         [System.Text.UTF8Encoding]::new($false))
     Write-Output "Runtime manifest: $manifestPath"
+}
+if ($RegisterMcp) {
+    if ($Mode -ne 'Install') { throw '-RegisterMcp requires -Mode Install.' }
+    $codex = Get-Command codex -ErrorAction SilentlyContinue
+    if (-not $codex) { throw 'Codex CLI is required to register the shared ChatGPT desktop MCP configuration.' }
+    $resolvedRoots = @($AllowedRoots | ForEach-Object {
+        $root = [System.IO.Path]::GetFullPath($_)
+        if (-not (Test-Path -LiteralPath $root -PathType Container)) {
+            throw "Allowed root does not exist: $root"
+        }
+        $root
+    })
+    & $codex.Source mcp get picasso-local *> $null
+    if ($LASTEXITCODE -eq 0) {
+        & $codex.Source mcp remove picasso-local | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw 'Existing PICASSO MCP registration could not be removed.' }
+    }
+    $rootValue = $resolvedRoots -join [System.IO.Path]::PathSeparator
+    & $codex.Source mcp add picasso-local --env "PICASSO_ALLOWED_ROOTS=$rootValue" -- $venvPython $mcpServer
+    if ($LASTEXITCODE -ne 0) { throw 'PICASSO MCP registration failed.' }
+    Write-Output "Registered picasso-local for ChatGPT desktop; allowed roots=$rootValue"
+    Write-Output 'Restart ChatGPT desktop, type /mcp, and confirm picasso-local exposes exactly six tools.'
 }
 Write-Output $runtime
 Write-Output "PICASSO host $Mode passed; runner=$runner"
