@@ -1,7 +1,12 @@
 """Classifier regressions from actual public control scores; no listening claims."""
 import math
+from pathlib import Path
+import tempfile
 import unittest
-from local_audio_evidence import classify, gpu_budget
+from types import SimpleNamespace
+from unittest.mock import patch
+import wave
+from local_audio_evidence import classify, gpu_budget, voice
 
 
 class AcousticHierarchy(unittest.TestCase):
@@ -28,6 +33,27 @@ class AcousticHierarchy(unittest.TestCase):
         for value in ("N/A", "", "-1", "0", "7003\n4000"):
             with self.subTest(value=value), self.assertRaises(ValueError):
                 gpu_budget(15 * 1024 ** 3, value)
+
+    def test_voice_uses_decoded_pcm_instead_of_incompatible_pyav_file_open(self):
+        import numpy as np
+        with tempfile.TemporaryDirectory() as folder:
+            wav = Path(folder) / "control.wav"
+            with wave.open(str(wav), "wb") as sink:
+                sink.setnchannels(2)
+                sink.setsampwidth(2)
+                sink.setframerate(32000)
+                sink.writeframes(bytes(3200 * 2 * 2))
+            def transcribe(samples, **kwargs):
+                self.assertIsInstance(samples, np.ndarray)
+                self.assertEqual(samples.dtype, np.float32)
+                self.assertEqual(len(samples), 1600)
+                self.assertFalse(isinstance(samples, str))
+                return ([SimpleNamespace(text=" three spoken words", avg_logprob=-.1,
+                                         no_speech_prob=.01)], None)
+            with patch("faster_whisper.WhisperModel") as model:
+                model.return_value.transcribe.side_effect = transcribe
+                result = voice(SimpleNamespace(audio=str(wav), model=folder))
+            self.assertTrue(result["speech_detected"])
 
 
 if __name__ == "__main__":

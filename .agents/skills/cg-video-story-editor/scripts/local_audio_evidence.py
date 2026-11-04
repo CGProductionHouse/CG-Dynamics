@@ -113,10 +113,23 @@ def acoustic(args):
 
 
 def voice(args):
+    import numpy as np
     from faster_whisper import WhisperModel
     model = WhisperModel(str(Path(args.model).resolve(strict=True)), device="cpu", compute_type="int8",
                          cpu_threads=4, num_workers=1, local_files_only=True)
-    segments, _ = model.transcribe(args.audio, beam_size=1, language="en", vad_filter=True,
+    # Supply decoded PCM directly. The installed PyAV and faster-whisper versions
+    # disagree on av.open(metadata_errors=...), so passing a path fails before
+    # inference. FFmpeg is already required by the shared workflow; its explicit
+    # decode avoids adding soundfile/scipy to the separate voice environment.
+    decoded = subprocess.run(
+        ["ffmpeg", "-nostdin", "-v", "error", "-i", args.audio, "-vn", "-ac", "1",
+         "-ar", "16000", "-f", "f32le", "pipe:1"],
+        capture_output=True, check=True, timeout=180,
+    )
+    mono_16k = np.frombuffer(decoded.stdout, dtype="<f4").copy()
+    if not len(mono_16k):
+        raise ValueError("Voice guard decoded no audio samples")
+    segments, _ = model.transcribe(mono_16k, beam_size=1, language="en", vad_filter=True,
                                    condition_on_previous_text=False)
     rows = [{"text": s.text, "avg_logprob": s.avg_logprob, "no_speech_prob": s.no_speech_prob} for s in segments]
     credible = [s for s in rows if len(s["text"].split()) >= 3 and s["avg_logprob"] > -.8 and s["no_speech_prob"] < .5]

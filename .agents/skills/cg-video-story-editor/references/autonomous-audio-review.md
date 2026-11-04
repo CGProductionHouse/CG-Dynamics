@@ -34,6 +34,23 @@ the completed restricted safetensors conversion receipt. They perform no downloa
 installation, playback, upload or send. Their output explicitly remains evidence,
 not release approval. Preserve the staff workstation's resource headroom.
 
+### MSI Windows voice compatibility, 4 November 2026
+
+The shared voice helper previously passed a pathname to faster-whisper. On the
+MSI's faster-whisper 1.2.1 / PyAV 19.0.2 combination that raised
+`TypeError: av.open() got an unexpected keyword argument 'metadata_errors'`
+before inference. The helper now uses the already-required local FFmpeg to
+decode mono 16 kHz float32 PCM and passes that array directly to Whisper. This
+avoids additional dependencies in the voice environment. A regression checks
+the array path and 32 kHz stereo conversion. The real local controls detected
+the complete SAPI spoken sentence alone and over a percussion bed, and returned
+no credible speech for a
+sustained instrumental pad or a percussive instrumental track. On the actual
+Action Sports R14 extracted mix it returned `speech_detected: false`, but also
+emitted a low-confidence one-word `you` segment. Treat that as a weak negative
+speech guard, not proof that every vocal sound is absent. Voice timestamps and
+creative music fit remain outside this component's qualification.
+
 ## Observed failures and fixes
 
 - General generative reviewers missed a known dropout and invented events. A
