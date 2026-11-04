@@ -4,6 +4,8 @@ This is the index for the original45-family reconciliation, not a new library, n
 
 **4 November addendum:** [sports-slide-shake](skills/sports-slide-shake/SKILL.md) was added after this 3 November inventory, making **47 cards** in the current checkout. Its [contained-border](SPORTS-SLIDE-CONTAINED-BORDER-STUDY-20261104.md) and [cue-peak](SPORTS-SLIDE-CUE-PEAK-STUDY-20261104.md) gates refine an existing R14 application, not creative mastery or another globally installed production operator. The original 45-family table below remains its historical reconciliation baseline.
 
+The [4 November footage-in-type contrast control](FOOTAGE-TYPE-CONTRAST-20261104.md) advances an existing card: changing the matte makes a dark source word readable but does not make the withheld action a better hook. The shared aperture operator and 47-card count are unchanged. Do not repeat the same coffee source with cosmetic tweaks.
+
 ## Verified availability versus readiness
 
 -45 cards present; all45 validate with explicit UTF8. Two previously missing frontmatter headers (bounded-burn, grounded-freeze-frame) were repaired.39 original card-directory Python recipes parse; one additional licensed-source integration recipe is now present. Parsing is not execution.

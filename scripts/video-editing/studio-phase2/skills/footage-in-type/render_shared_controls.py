@@ -25,7 +25,11 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--source',required=True,type=Path)
     p.add_argument('--output',required=True,type=Path)
+    p.add_argument('--background-hex',default='0A141C',help='Six-digit RGB matte colour for aperture control')
     args=p.parse_args()
+    if len(args.background_hex)!=6 or any(c not in '0123456789abcdefABCDEF' for c in args.background_hex):
+        raise ValueError('Background must be six hex RGB digits')
+    background=tuple(bytes.fromhex(args.background_hex))
     with args.source.open('rb') as stream:
         if hashlib.file_digest(stream,'sha256').hexdigest()!=SHA:raise ValueError('Wrong/unverified practice original')
     if args.output.exists():raise ValueError('Use a NEW protected output folder')
@@ -51,7 +55,7 @@ def main():
             crop_w=round(frame.height*W/H);left=(frame.width-crop_w)//2
             frame=frame.crop((left,0,left+crop_w,frame.height)).resize((W,H),Image.Resampling.LANCZOS)
             u=np.clip((i-23)/40,0,1);scale=1+119*(u*u*(3-2*u))
-            aperture=text_aperture(frame,mask,(10,20,28),scale,pivot)
+            aperture=text_aperture(frame,mask,background,scale,pivot)
             if aperture.tobytes()==frame.tobytes():full_mask_frames.append(i)
             centre=-100+740*np.clip((i-16)/25,0,1)
             shining=title if not 16<=i<=41 else glyph_shine(title,centre,32,.2,.45,(230,245,250))
@@ -76,7 +80,7 @@ def main():
     contacts.save(args.output/'comparison.png')
     report={'source_sha256':SHA,'source_url':'https://mixkit.co/free-stock-video/cup-being-filled-with-coffee-in-a-coffee-machine-41865/',
         'rights':'Existing Mixkit Stock Video Free License record; unchanged practice original',
-        'source_span_seconds':[1,1+N/FPS],'frames':N,'fps':FPS,'canvas':[W,H],'pivot':pivot,
+        'source_span_seconds':[1,1+N/FPS],'frames':N,'fps':FPS,'canvas':[W,H],'pivot':pivot,'background_rgb':background,
         'first_exact_full_picture_frame':min(full_mask_frames),'shine_preencode_outside_alpha_max':preencode_spill,
         'limit':'Silent compositing diagnostic. No creative, native-text, physical-phone or music approval. Lossy decoded edges require separate inspection.'}
     for mode in modes:

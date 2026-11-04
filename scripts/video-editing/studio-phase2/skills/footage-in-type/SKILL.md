@@ -5,6 +5,8 @@ description: Build and review a short moving-footage reveal through editable typ
 
 # Footage inside type — rendered, not mastered
 
+**4 November contrast control:** The same coffee `POUR` aperture was rerendered with explicit pale ivory and mid-warm mattes. Both make the word readable at 270×480 where the original dark matte failed, but still withhold the nozzle/stream/cup for the first second and leave a large light field during the push. The unchanged plain output has the same SHA-256 as the prior run, isolating matte choice. [Full result and rejection](../../FOOTAGE-TYPE-CONTRAST-20261104.md). The recipe now exposes `--background-hex` (default remains `0A141C`) to test contrast deliberately; this is **not** a license to call a readable word an effective hook. Choose a different source/action before testing this family again.
+
 **Production integration3November:** shared `cg-video-story-editor/scripts/visual_treatments.py::text_aperture` accepts caller-approved glyph alpha and the same advancing source frame. It rejects a counter/hole pivot and can resolve exactly to full picture. The [licensed-source controls](../../PORTABLE-TYPE-OPERATORS-20261103.md) run this operation, not a copied practice renderer. The thin/dark `POUR` hold remains a rejected opening treatment; correct geometry is not useful storytelling. Native text/editability, source suitability, sound and physical-phone gates remain.
 
 **Lifecycle:** owner reference visually studied → original local proof rendered → **human motion/audio review pending** → client use untested → mastered **NO**.
