@@ -23,6 +23,11 @@
       "evidence_source": "CA2Nov2026 PSG correction; approved PSG October/November records"
     },
     {
+      "id": "FEEDBACK-01",
+      "requirement": "Map every screenshot or quoted-clip amendment to the exact sent revision, visible title/subject and output time/frame before editing. Verify the requested change on the new encoded target and its adjacent frames; a similar later scene does not clear the note.",
+      "evidence_source": "CA4Nov2026 Action Sports R15 missed held-ball B&W screenshot; protected R16 correction"
+    },
+    {
       "id": "STORY-01",
       "requirement": "Define one buyer, useful message, three source-supported hooks, proof, payoff and CTA with relevant South African timing; do not build a generic montage first.",
       "evidence_source": "story-preproduction-gate.md; production-standard3"
@@ -61,6 +66,11 @@
       "id": "PICTURE-03",
       "requirement": "Central Canvas horizontal treatment uses three genuinely different moving clips filling the portrait bands with purposeful sequential reveals. No lone padded landscape shot or duplicated clip disguised as three.",
       "evidence_source": "CA28Oct explicit lapa correction; shared rule909"
+    },
+    {
+      "id": "PICTURE-04",
+      "requirement": "Portrait crops and motivated transitions preserve source geometry unless deliberate distortion is approved. Audit clone/pad frames in action shots; a hold must read as intentional, otherwise use continuing source motion or recut. Inspect the exact exported opener and ending span.",
+      "evidence_source": "CA4Nov2026 Action Sports R14 stretched feet crop and cloned MAKE IT COUNT tail; R15 corrected both"
     },
     {
       "id": "BRAND-01",

@@ -1,5 +1,7 @@
 # Action Sports R15 amendment — 4 November 2026
 
+**Superseded at 11:02 SAST by [R16](ACTION-SPORTS-R16-FEEDBACK-CORRECTION-20261104.md).** The owner's 10:57 reply clarified that the black-and-white request targeted the `ONE SECOND TO DECIDE` held-ball shot at about 2 seconds. R15 had changed the later `MOVE TOGETHER` passage and therefore missed that specific screenshot amendment. Preserve this failure; do not use R15's earlier “delivered” state as approval.
+
 Status: **delivered to CG Nolan Approvals for internal review**, not client or public approval. R15 supersedes the R14 document and cover sent earlier on 4 November. Private client footage, reference clips, recipe, cue stems, QC contacts and export remain outside Git at `C:\Users\chris\Videos\CG-AI-Editing\Bloem-Action-Sports-Planning-20261103\r15` on the MSI workstation.
 
 ## Owner's exact amendment and correction
