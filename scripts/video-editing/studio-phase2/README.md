@@ -1,6 +1,7 @@
 # Nolan Studio — skill library and production continuity
 
 **4 November MSI production queue:** [Four-client source and story preflight](NOLAN-MSI-NOVEMBER-QUEUE-PREFLIGHT.md) records the exact `CG Nolan Approvals` assignment, canonical OneDrive source folders, initial inventories and the one-film-at-a-time execution gate. [Ehrlich November game plan](EHRLICH-NOVEMBER-MSI-GAME-PLAN.md) now records the owner-directed fire hook, source/brand evidence, story and sound map, logo trim and open clearance gates. It is preproduction, not a cleared film. MSI prepares Ehrlich Park, TBS Brokers, PSG and WiseRide; office PC retains Central Canvas and Watch Addict.
+**4 November queue update:** [Selective byte-verified TBS, PSG and WiseRide media cache](NOVEMBER-QUEUE-MEDIA-CACHE-20261104.md) pre-stages one original per later client without calling any shot editorially cleared. [Additional CapCut-labelled travel reference](NEW-REFERENCE-INTAKE-20261104.md) is now on the shared skill board, with its actual template-access and audio limits recorded.
 
 **Research ownership transferred to office PC,28 October:** [Takeover brief, private backup pack and exact next work](OFFICE-RESEARCH-TAKEOVER-20261028.md). MSI parks research; office must complete intake/hash/rerender acceptance in903, then continue874 in one separate stacked PR. Existing client amendments remain with MSI. The45-family evidence state below is unchanged by handing it over.
 

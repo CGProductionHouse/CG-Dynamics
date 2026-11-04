@@ -64,6 +64,8 @@
 
 ## Later owner references
 
+**4 November additional CapCut-labelled travel recap:** [source and visual/sound/template-access intake](NEW-REFERENCE-INTAKE-20261104.md). Observed three-panel scene relay, horizon split and title hierarchy. TikTok sound was muted; the CapCut badge opened an empty web editor, not the creator's editable project. Four bounded skill tests are queued. This addition is separate from the original 53-video ledger and not claimed as implemented.
+
 | Reference | Mechanism and route | Evidence / next gate |
 |---|---|---|
 | New visual 1 | [freeze](skills/grounded-freeze-frame/SKILL.md), [window grow](skills/window-grow/SKILL.md), [split](skills/source-led-split-screen/SKILL.md) | Synthetic grow works; natural freeze mask rejected; same-shoot split used in an internal Daisy revision. Physical screen and mask gates open. |

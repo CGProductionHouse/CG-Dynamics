@@ -34,4 +34,6 @@ First acquisition attempt: the 50,501,496-byte March file `0L8A4475.MP4` is belo
 
 ## Shared skill state
 
+4 November follow-up: one complete, byte-matched original for **each** later client is privately pre-staged; see `NOVEMBER-QUEUE-MEDIA-CACHE-20261104.md` for exact paths, hashes and the ~5 GB local-space ceiling. These are source-access proofs, not selected or published-use-cleared clips. Additional source files are downloaded only after story-specific triage so Ehrlich's active edit retains disk space.
+
 Use the repository's `.agents/skills/cg-video-story-editor` and `references/production-standard.md`, the [newer shared rule addendum](https://github.com/CGProductionHouse/CG-Dynamics/blob/209fcca647d7383a04d633861fff6350118d398e/docs/ops/NOLAN-STUDIO-SHARED-EDIT-RULES-2026-10-28.md), and the technique cards/status board. An installed skill is access to instructions; each selected film must complete the standard's 13 evidence rows with actual source/timecode, edit, sound and export evidence. Office research changes in PR #910 are not silently assumed installed on MSI; reconcile them before adopting a new card. No new editor, engine, plugin, AI credit or client-media upload is needed for this preparation.
