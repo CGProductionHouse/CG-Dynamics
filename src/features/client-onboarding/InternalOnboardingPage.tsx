@@ -24,6 +24,8 @@ export default function InternalOnboardingPage() {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [previewing, setPreviewing] = useState(false)
+  const [previewClientName, setPreviewClientName] = useState('')
 
   async function load() {
     setLoading(true)
@@ -48,6 +50,14 @@ export default function InternalOnboardingPage() {
 
   const clientNames = useMemo(() => new Map(clients.map(client => [client.id, client.name])), [clients])
 
+  const clientSessionsMap = useMemo(() => {
+    const map = new Map<string, StaffOnboardingSummary>()
+    for (const session of sessions) {
+      map.set(session.clientId, session)
+    }
+    return map
+  }, [sessions])
+
   async function generate() {
     if (!clientId) return
     setWorking(true)
@@ -64,6 +74,11 @@ export default function InternalOnboardingPage() {
     const result = await revokeOnboardingLink(sessionId)
     if (result.error) setError(result.error)
     else await load()
+  }
+
+  function handlePreview() {
+    setPreviewing(true)
+    setPreviewClientName(clients.length > 0 ? clients[0].name : 'Client')
   }
 
   const filteredSessions = useMemo(() => {
@@ -164,8 +179,27 @@ export default function InternalOnboardingPage() {
 
         {loading ? (
           <p className="mt-4 text-sm text-brand-primary">Loading onboarding status...</p>
+        ) : previewing ? (
+          <WelcomeToCgPage previewClientName={previewClientName} />
         ) : filteredSessions.length === 0 ? (
-          emptyState && <EmptyState className="mt-4" title={emptyState.title} message={emptyState.message} />
+          emptyState && (
+            <EmptyState
+              className="mt-4"
+              title={emptyState.title}
+              message={emptyState.message}
+              action={
+                clients.length > 0 && !previewing && (
+                  <ActionButton
+                    variant="secondary"
+                    className="w-full"
+                    onClick={() => handlePreview()}
+                  >
+                    Preview onboarding
+                  </ActionButton>
+                )
+              }
+            />
+          )
         ) : (
           <div className="mt-4 space-y-4">
             {filteredSessions.map(session => {
