@@ -8,6 +8,7 @@ import { OnboardingActivityFeed } from './OnboardingActivityFeed'
 import { ONBOARDING_PLATFORMS, type OnboardingPlatform, type StaffOnboardingSummary } from './types'
 import { PLATFORM_GUIDES } from './platformGuides'
 import { onboardingEmptyState } from './emptyState'
+import { WelcomeToCgPage } from './WelcomeToCgPage'
 
 type StatusFilter = 'all' | 'not_started' | 'in_progress' | 'completed' | 'revoked' | 'expired'
 
@@ -20,6 +21,8 @@ export default function InternalOnboardingPage() {
   const [loading, setLoading] = useState(true)
   const [working, setWorking] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [previewing, setPreviewing] = useState(false)
+  const [previewClientName, setPreviewClientName] = useState<string | null>(null)
 
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
@@ -47,6 +50,13 @@ export default function InternalOnboardingPage() {
   }, [])
 
   const clientNames = useMemo(() => new Map(clients.map(client => [client.id, client.name])), [clients])
+  const clientSessionsMap = useMemo(() => {
+    const map = new Map<string, StaffOnboardingSummary>()
+    for (const session of sessions) {
+      map.set(session.clientId, session)
+    }
+    return map
+  }, [sessions])
 
   async function generate() {
     if (!clientId) return
@@ -64,6 +74,14 @@ export default function InternalOnboardingPage() {
     const result = await revokeOnboardingLink(sessionId)
     if (result.error) setError(result.error)
     else await load()
+  }
+
+  function handlePreview() {
+    const firstClient = clients.find(c => c.active)
+    if (firstClient) {
+      setPreviewClientName(firstClient.name)
+      setPreviewing(true)
+    }
   }
 
   const filteredSessions = useMemo(() => {
@@ -97,6 +115,14 @@ export default function InternalOnboardingPage() {
   }, [sessions])
 
   const emptyState = onboardingEmptyState({ activeClients: clients.length, sessions: sessions.length, filteredSessions: filteredSessions.length, loading, error })
+
+  if (previewing) {
+    return (
+      <div className="w-full max-w-7xl p-4 sm:p-6 lg:p-8">
+        <WelcomeToCgPage previewClientName={{ name: previewClientName ?? '' }} />
+      </div>
+    )
+  }
 
   return (
     <div className="w-full max-w-7xl p-4 sm:p-6 lg:p-8">
@@ -164,8 +190,18 @@ export default function InternalOnboardingPage() {
 
         {loading ? (
           <p className="mt-4 text-sm text-brand-primary">Loading onboarding status...</p>
+        ) : previewing ? (
+          <p className="mt-4 text-sm text-brand-primary">Previewing onboarding...</p>
         ) : filteredSessions.length === 0 ? (
-          emptyState && <EmptyState className="mt-4" title={emptyState.title} message={emptyState.message} />
+          clients.length > 0 && !previewing ? (
+            <EmptyState
+              className="mt-4"
+              title="Preview onboarding"
+              message="Generate a welcome link for a client to preview the onboarding flow"
+            />
+          ) : (
+            emptyState && <EmptyState className="mt-4" title={emptyState.title} message={emptyState.message} />
+          )
         ) : (
           <div className="mt-4 space-y-4">
             {filteredSessions.map(session => {
@@ -198,7 +234,7 @@ export default function InternalOnboardingPage() {
                       <ProgressStrip session={session} />
                     </div>
 
-                    <Link to={`/admin/published?client=${session.clientId}&view=setup`} className="mt-4 inline-flex min-h-11 items-center text-sm font-bold text-brand-teal hover:underline">
+                    <Link to={`/admin/published?client=${session.clientId}&view=setup`} className="mt-4 inline-flex min-h-11 items-center text-sm font-bold text-brand-teal hover:underline" onClick={() => handlePreview()}>
                       Preview onboarding
                     </Link>
 
