@@ -356,6 +356,16 @@ export default function ContentGuidelineDocumentEditor({
     await onChanged()
   }
 
+  async function returnVideoToReview(video: ContentGuidelineVideo) {
+    if (!window.confirm(`Return "${video.title}" to review? This moves it back to the review queue.`)) return
+    setBusy(`return-review-${video.id}`)
+    setError(null)
+    const result = await runGuideAction(video.id, 'return_to_review')
+    setBusy(null)
+    if (result.error) { setError(result.error); return }
+    await onChanged()
+  }
+
   // ── Step 1: plan ordered, client-specific ideas (drafts — nothing is written) ──
   async function planIdeas() {
     if (!guideline.client_id || !coverageStart || !coverageEnd) {
@@ -740,6 +750,7 @@ export default function ContentGuidelineDocumentEditor({
                       <button type="button" title="Move video up" disabled={index === 0 || busy === 'reorder'} onClick={() => void moveVideo(index, -1)} className="h-8 w-8 rounded-lg border border-white/10 text-white/55 hover:text-white disabled:opacity-25">&#8593;</button>
                       <button type="button" title="Move video down" disabled={index === videos.length - 1 || busy === 'reorder'} onClick={() => void moveVideo(index, 1)} className="h-8 w-8 rounded-lg border border-white/10 text-white/55 hover:text-white disabled:opacity-25">&#8595;</button>
                       <button type="button" title="Archive video" disabled={busy?.startsWith('archive-')} onClick={() => void archiveVideo(video)} className="h-8 w-8 rounded-lg border border-amber-300/25 text-amber-200 hover:bg-amber-300/10 disabled:opacity-25" aria-label="Archive video">&#9745;</button>
+                  <button type="button" title="Return to review" disabled={busy} onClick={() => void returnVideoToReview(video)} className="h-8 w-8 rounded-lg border border-emerald-300/25 text-emerald-200 hover:bg-emerald-300/10 disabled:opacity-25" aria-label="Return to review">&#8635;</button>
                     </div>
                   </div>
                   <div className="mt-3 flex flex-wrap items-start gap-2">
