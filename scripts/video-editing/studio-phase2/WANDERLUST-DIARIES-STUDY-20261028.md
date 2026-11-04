@@ -1,5 +1,6 @@
 # Wanderlust Diaries — frame inventory, template access and original proofs
 
+**Office continuation28October:** [rotational optics and registered roll-cut study](OFFICE-ROTATION-HANDOFF-STUDY-20261028.md) adds bounded558–567-inspired mechanics after verified intake. Separate same-take rotational time cut is not603–612 horizontal-whip replication. No fresh office creator-video/sound viewing or exact-template claim.
 ## Third reconstruction batch — negative, subject bands and film transport
 
 Reinspected exact private reference81–82/85–86 and312–320. The former is whole-picture inversion; the latter combines fragmented picture, stepped pale upper-body fill and fuller silhouette. These are separate mechanisms, not one generic RGB glitch. New original/licensed-source tests:

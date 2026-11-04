@@ -56,7 +56,8 @@ def context_files(kit):
     kit = Path(kit).resolve(strict=True)
     paths = set()
     for pattern in ("LATEST-EDIT.*", "*feedback*.json", "*FEEDBACK*.md", "REVISION-BASELINE*.md",
-                    "brand/BRAND_REFERENCE.md", "audio/AUDIO_INDEX.md"):
+                    "CLIENT_CONTEXT.json", "OWNER-DECISIONS.json", "CURRENT-ASSIGNMENT.md",
+                    "brand/CREATIVE-BASELINE.md", "brand/BRAND_REFERENCE.md", "audio/AUDIO_INDEX.md"):
         paths.update(p for p in kit.glob(pattern) if p.is_file())
     return sorted(paths)
 
@@ -196,7 +197,7 @@ Do not browse. First describe what you actually hear, then compare it with this 
 """ + json.dumps({k: intent[k] for k in ("buyer", "message", "music_fit", "opening_design", "ending_design")}, indent=2)
     (target / "gemini-prompt.txt").write_text(prompt + "\n", encoding="utf-8")
     write_json(target / "review.json", {"audio_sha256": packet["audio_sha256"], "provider": "Google AI Studio",
-        "model": "", "audio_received": False, "response_path": "gemini-response.txt", "response_sha256": "",
+        "review_method": "model", "model": "", "audio_received": False, "response_path": "gemini-response.txt", "response_sha256": "",
         "verdict": "pending", "reviewed_at": "", "editor": "", "checks": {
             area: {"status": "pending", "evidence": ""} for area in AREAS},
         "findings": [], "human_listening": "not_recorded"})
@@ -214,26 +215,182 @@ def gate(packet_path, review_path):
     errors.extend(packet["signal"]["failures"])
     if review.get("audio_sha256") != packet["audio_sha256"]:
         errors.append("Review belongs to a different mix")
-    if review.get("audio_received") is not True or review.get("verdict") != "no_blocking_issue":
-        errors.append("Gemini review missing, unable to review, or needs work")
-    for key in ("model", "reviewed_at", "editor"):
+    method = review.get("review_method", "model")
+    if review.get("verdict") != "no_blocking_issue":
+        errors.append("Perceptual audio review missing, unable to review, or needs work")
+    if method == "model":
+        if review.get("audio_received") is not True:
+            errors.append("Model did not consume the actual audio")
+        if not isinstance(review.get("model"), str) or not review["model"].strip():
+            errors.append("Missing review model")
+        errors.extend(qualification_errors(review, review_path))
+    elif method == "local_human":
+        listening = review.get("human_listening")
+        if not isinstance(listening, dict):
+            listening = {}
+        for key in ("listener", "method", "feedback_source"):
+            if not isinstance(listening.get(key), str) or not listening[key].strip():
+                errors.append(f"Missing actual human listening {key}")
+        if listening.get("status") != "recorded" or listening.get("complete_export") is not True or listening.get("normal_speed") is not True:
+            errors.append("Actual full normal-speed human listen not recorded")
+        if listening.get("video_sha256") != packet["video_sha256"]:
+            errors.append("Human listen belongs to a different export")
+    else:
+        errors.append("Unknown perceptual review method")
+    for key in ("reviewed_at", "editor"):
         if not isinstance(review.get(key), str) or not review[key].strip():
             errors.append(f"Missing review {key}")
     response = Path(review.get("response_path") or "__missing__")
     if not response.is_absolute():
         response = Path(review_path).resolve().parent / response
     if not response.is_file() or not response.stat().st_size or digest(response) != review.get("response_sha256"):
-        errors.append("Original model response missing or changed")
+        errors.append("Original perceptual review record missing or changed")
     for area in AREAS:
         check = review.get("checks", {}).get(area, {})
         if check.get("status") != "pass" or not check.get("evidence", "").strip():
             errors.append(f"Unresolved editor audio check: {area}")
     for item in review.get("findings", []):
         if item.get("disposition") not in ("fixed_and_rechecked", "not_reproduced", "intentional") or not item.get("evidence", "").strip():
-            errors.append("Unresolved model finding")
+            errors.append("Unresolved audio review finding")
     return {"status": "BLOCKED" if errors else "AUDIO_CHECKED_FOR_OWNER_REVIEW",
-            "errors": errors, "human_listening": review.get("human_listening", "not_recorded"),
+            "errors": errors, "review_method": method, "human_listening": review.get("human_listening", "not_recorded"),
             "client_or_publication_approval": False, "checked_at": utc_now(), "video_sha256": packet["video_sha256"]}
+
+
+def qualification_errors(review, review_path):
+    """Bind a model's demonstrated scope, including original and held-out controls.
+
+    This validates evidence integrity, not truth by assertion. Store actual raw
+    observations privately; never use fixture evidence to qualify a real model.
+    A component classifier cannot qualify an entire creative review by itself.
+    """
+    errors = []
+    qualification = review.get("qualification")
+    if not isinstance(qualification, dict):
+        return ["Model review lacks a hash-bound calibration record"]
+    base = Path(review_path).resolve().parent
+
+    def bound_file(record):
+        if not isinstance(record, dict) or not record.get("path") or not record.get("sha256"):
+            raise ValueError("Missing calibration artifact binding")
+        path = Path(record["path"])
+        if not path.is_absolute():
+            path = base / path
+        if not path.is_file() or digest(path) != record["sha256"]:
+            raise ValueError("Calibration artifact missing or changed")
+        return path
+
+    try:
+        declared_path = bound_file(qualification.get("declaration"))
+        result_path = bound_file(qualification.get("result"))
+        declared, result = read_json(declared_path), read_json(result_path)
+        if not isinstance(declared, dict) or not isinstance(result, dict):
+            return ["Calibration declaration/result must be objects"]
+        identity = review.get("model")
+        if not identity or declared.get("reviewer") != identity or result.get("reviewer") != identity:
+            errors.append("Calibration belongs to another reviewer/pipeline version")
+        if result.get("status") != "passed":
+            errors.append("Model calibration is failed, pending or incomplete")
+        required = declared.get("required_controls")
+        observations = result.get("observations")
+        if not isinstance(required, list) or not required or not isinstance(observations, list):
+            return errors + ["Calibration needs original and held-out observations"]
+        identifiers = [c.get("id") for c in required if isinstance(c, dict)]
+        actual = [c.get("id") for c in observations if isinstance(c, dict)]
+        if len(identifiers) != len(required) or len(set(identifiers)) != len(identifiers) or not all(identifiers):
+            errors.append("Invalid or duplicate declared calibration controls")
+        if len(actual) != len(observations) or len(set(actual)) != len(actual) or set(actual) != set(identifiers):
+            errors.append("Calibration controls omitted, duplicated or substituted")
+        if not any(isinstance(c, dict) and c.get("held_out") is True for c in required) or not any(isinstance(c, dict) and c.get("held_out") is False for c in required):
+            errors.append("Calibration needs both original and held-out controls")
+        observed = {c.get("id"): c for c in observations if isinstance(c, dict)}
+        coverage = set()
+        for control in required:
+            if not isinstance(control, dict):
+                continue
+            current = observed.get(control.get("id"), {})
+            if current.get("passed") is not True:
+                errors.append(f"Unpassed calibration control: {control.get('id')}")
+            bound_file(control.get("input"))
+            bound_file(current.get("raw_observation"))
+            areas = control.get("areas", [])
+            if not isinstance(areas, list) or any(a not in AREAS for a in areas):
+                errors.append("Invalid calibration scope")
+            else:
+                coverage.update(areas)
+        if coverage != set(AREAS):
+            errors.append("Calibration does not cover all five audio-review areas")
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        errors.append(f"Invalid model qualification: {exc}")
+    return errors
+
+
+def instrumental_guard(packet_path, voice_path, acoustic_path, provenance_path=None):
+    """Route exact instrumentals to a qualified character critic, never approve them.
+
+    Speech/timing/type are separate roles. A failed broad audio model cannot
+    bypass these guards. Verified music+designed-effects provenance can explain
+    an acoustic classifier's non-music tail; unexplained regions stay blocked.
+    """
+    packet = read_json(packet_path)
+    analysis = Path(packet_path).resolve().parent / "local-analysis.wav"
+    errors = []
+    for field in ("video", "audio"):
+        if not Path(packet[field]).is_file() or digest(packet[field]) != packet[field + "_sha256"]:
+            errors.append(f"Stale exact {field}")
+    errors.extend(context_errors(packet["context"]))
+    errors.extend(packet["signal"]["failures"])
+    if errors:
+        return {"status": "BLOCKED", "errors": errors, "video_sha256": packet["video_sha256"],
+                "creative_release": False, "stopped_before": "speech/acoustic/music models"}
+    voice = read_json(voice_path)
+    pcm_hash = digest(analysis)
+    if voice.get("role") != "speech_guard" or voice.get("audio_sha256") != pcm_hash:
+        errors.append("Missing or different exact speech_guard input")
+    if voice.get("speech_detected") is not False:
+        errors.append("Speech or unknown voice state blocks an instrumental music critic")
+    if errors:
+        return {"status": "BLOCKED", "errors": errors, "video_sha256": packet["video_sha256"],
+                "analysis_sha256": pcm_hash, "creative_release": False, "stopped_before": "acoustic/music models"}
+    acoustic = read_json(acoustic_path)
+    if acoustic.get("role") != "acoustic_grounding" or acoustic.get("audio_sha256") != pcm_hash:
+        errors.append("Missing or different exact acoustic_grounding input")
+    windows = acoustic.get("windows", [])
+    if not windows or not any(w.get("kind") == "music" for w in windows):
+        errors.append("No actual music evidence; do not ask a music critic to describe non-music")
+    cursor = 0.0
+    uncertain = []
+    for window in windows:
+        start, end = float(window["start"]), float(window["end"])
+        if abs(start - cursor) > .03 or end <= start:
+            errors.append("Acoustic evidence has missing/overlapping windows")
+        cursor = end
+        if window.get("kind") != "music":
+            uncertain.append([start, end])
+    if abs(cursor - packet["signal"]["duration"]) > .08:
+        errors.append("Acoustic evidence does not cover the complete soundtrack")
+    provenance = None
+    if provenance_path:
+        provenance = read_json(provenance_path)
+        if provenance.get("video_sha256") != packet["video_sha256"] or provenance.get("analysis_sha256") != pcm_hash:
+            errors.append("Provenance belongs to another export")
+        if provenance.get("exact_video_pcm_matches_analysis") is not True or provenance.get("source_match_pass") is not True:
+            errors.append("Actual source/decoded-output comparison has not passed")
+        for entry in provenance.get("source_files", []):
+            if not Path(entry["path"]).is_file() or digest(entry["path"]) != entry["sha256"]:
+                errors.append("Source-backed soundtrack provenance changed")
+        if not provenance.get("source_files"):
+            errors.append("No original source bindings in provenance")
+    for start, end in uncertain:
+        spans = provenance.get("explained_nonmusic", []) if provenance else []
+        if not any(float(s["start"]) <= start and float(s["end"]) >= end and s.get("reason") for s in spans):
+            errors.append(f"Unexplained acoustic uncertainty/non-music at {start:.2f}-{end:.2f}s")
+    return {"status": "BLOCKED" if errors else "REVIEWABLE_INSTRUMENTAL_MIX", "errors": errors,
+            "video_sha256": packet["video_sha256"], "analysis_sha256": pcm_hash,
+            "voice_evidence_sha256": digest(voice_path), "acoustic_evidence_sha256": digest(acoustic_path),
+            "provenance_sha256": digest(provenance_path) if provenance_path else None,
+            "explained_nonmusic_windows": uncertain, "human_listening": "not_recorded",
+            "creative_release": False, "meaning": "Input routing only; the critic and editor must still assess actual music character and fit."}
 
 
 def main():
@@ -248,12 +405,26 @@ def main():
     check = sub.add_parser("check", help="Refuse stale/incomplete/failed review before owner handoff")
     check.add_argument("--packet", required=True)
     check.add_argument("--review", required=True)
+    guard = sub.add_parser("instrumental-guard", help="Block faults/voices/non-music before a qualified music-character role")
+    guard.add_argument("--packet", required=True)
+    guard.add_argument("--voice", required=True)
+    guard.add_argument("--acoustic", required=True)
+    guard.add_argument("--provenance")
+    guard.add_argument("--output", required=True)
     args = parser.parse_args()
     try:
         if args.command == "context":
             print(snapshot_context(args.client_kit, args.output))
         elif args.command == "prepare":
             print(prepare(args.video, args.intent, args.context, args.output))
+        elif args.command == "instrumental-guard":
+            result = instrumental_guard(args.packet, args.voice, args.acoustic, args.provenance)
+            output = Path(args.output).resolve()
+            if output.exists() or any((p / ".git").exists() for p in (output.parent, *output.parents)):
+                raise ValueError("Choose a new private guard output outside Git")
+            write_json(output, result)
+            print(json.dumps(result, indent=2))
+            return 1 if result["errors"] else 0
         else:
             result = gate(args.packet, args.review)
             print(json.dumps(result, indent=2))

@@ -8,8 +8,10 @@ phone-size review of the moving cut.
 
 import json
 import sys
-from collections import Counter
 from pathlib import Path
+import math
+from load_client_library import verify as verify_client_library
+from edit_contract import validate_edit
 
 
 REQUIRED_TEXT = (
@@ -34,6 +36,8 @@ REQUIRED_TEXT = (
 
 def validate(plan):
     errors = []
+    if not isinstance(plan, dict):
+        return ['story plan must be an object']
     if plan.get("status") != "ready_for_edit":
         errors.append("status must be ready_for_edit before timeline assembly")
     for field in REQUIRED_TEXT:
@@ -51,7 +55,10 @@ def validate(plan):
         for field in ("id", "first_frame", "first_3_seconds", "sound", "why_viewer_stops"):
             if not isinstance(hook.get(field), str) or not hook[field].strip():
                 errors.append(f"hook {i} missing {field}")
-    ids = [h.get("id") for h in hooks if isinstance(h, dict)]
+    ids = [h.get("id") for h in hooks if isinstance(h, dict) and isinstance(h.get('id'), str)]
+    signatures = [(str(h.get('first_frame','')).strip().casefold(),str(h.get('first_3_seconds','')).strip().casefold()) for h in hooks if isinstance(h,dict)]
+    if len(set(ids)) != len(ids) or len(set(signatures)) != len(signatures):
+        errors.append('hook candidates must be distinct concepts, not copies with different IDs')
     if plan.get("chosen_hook_id") not in ids:
         errors.append("chosen_hook_id must select one documented candidate")
 
@@ -59,7 +66,7 @@ def validate(plan):
     if not isinstance(shots, list) or not shots:
         errors.append("provide a selected-shot ledger")
         shots = []
-    sources, clusters = [], []
+    selected = []
     for i, shot in enumerate(shots, 1):
         if not isinstance(shot, dict):
             errors.append(f"shot {i} must be an object")
@@ -68,19 +75,22 @@ def validate(plan):
             value = shot.get(field)
             if value is None or (isinstance(value, str) and not value.strip()):
                 errors.append(f"shot {i} missing {field}")
-        if shot.get("source"):
-            sources.append(shot["source"].casefold())
-        if shot.get("visual_cluster"):
-            clusters.append(shot["visual_cluster"].casefold())
-        if isinstance(shot.get("in"), (int, float)) and isinstance(shot.get("out"), (int, float)):
-            if shot["out"] <= shot["in"]:
-                errors.append(f"shot {i} has nonpositive duration")
-    for source, count in Counter(sources).items():
-        if count > 1:
-            errors.append(f"source clip reused {count} times: {source}")
-    for cluster, count in Counter(clusters).items():
-        if count > 1:
-            errors.append(f"visual cluster repeated {count} times: {cluster}")
+        a, b = shot.get('in'), shot.get('out')
+        if any(isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) for v in (a,b)) or b <= a or a < 0:
+            errors.append(f"shot {i} needs positive, finite source in/out seconds")
+            continue
+        if not isinstance(shot.get('source'), str) or not isinstance(shot.get('visual_cluster'), str):
+            errors.append(f"shot {i} needs explicit source/cluster strings")
+            continue
+        for previous in selected:
+            same = previous['source'].casefold() == shot['source'].casefold()
+            if same and max(previous['in'], a) < min(previous['out'], b):
+                errors.append(f"shot {i} repeats an overlapping source moment")
+            if previous['visual_cluster'].casefold() == shot['visual_cluster'].casefold() and previous.get('story_role') == shot.get('story_role'):
+                errors.append(f"shot {i} repeats a visual cluster with the same story job")
+        selected.append(shot)
+    if plan.get('research_only') is not True:
+        errors.extend(validate_edit(plan))
     return errors
 
 
@@ -94,12 +104,22 @@ def main():
         print(f"Cannot read plan: {exc}", file=sys.stderr)
         return 2
     errors = validate(plan)
+    if isinstance(plan, dict) and plan.get('research_only') is not True:
+        if not plan.get('client_id') or not plan.get('client_context_snapshot'):
+            errors.append('CG production requires exact client_id and the current loaded client_context_snapshot; load the existing library first')
+        else:
+            try:
+                context=verify_client_library(plan['client_context_snapshot'])
+                if context['client_id']!=plan['client_id']:errors.append('Story client does not match loaded client library')
+                if not context['brand_ready']:errors.append('Saved brand baseline has specifically unresolved fields; resolve those fields from the saved source, not a generic substitute')
+            except (ValueError,KeyError,FileNotFoundError) as exc:
+                errors.append('Client library load invalid: '+str(exc))
     if errors:
         print("STORY PREFLIGHT FAILED")
         for error in errors:
             print(f"- {error}")
         return 1
-    print("Story preflight passed; still screen moving footage and review at phone size.")
+    print("PLAN_INPUTS_COMPLETE — not creative approval. Render the selected treatments and bind their real output before release.")
     return 0
 
 

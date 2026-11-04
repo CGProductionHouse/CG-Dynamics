@@ -1,9 +1,13 @@
 ---
 name: nolan-depth-type-experimental
-description: Reproduce the isolated ECHOFORM kinetic typography and green-screen human foreground proof for issue 874; use only for rights-cleared local experiments until a CG reviewer approves it.
+description: Build and compare foreground-over-type experiments on cleared moving footage using the tested keyed-code or native on-device mask route; keep human and client acceptance separate.
 ---
 
 # Depth typography on moving human footage — rendered, not mastered
+
+## 29 October office background screen: runner across fixed word
+
+[Licensed natural-runner screen](../../RUNNER-DEPTH-TYPE-SCREEN-20261029.md) compares an identical silent 72-frame shot with no title, type in front, and type behind a moving human. The first 24 decoded frames stay pixel-identical. R02's feathered GrabCut matte **fails** on source frames 148–151 because a connected path strip is pulled in front of the word. R03 repairs those four mattes and retains the protected opening; decoded contacts at five crossing phases and full-size frames 36/40 show readable text and the runner above it. This is one source-specific landscape/code-rendered mechanism, not generic natural segmentation, native editability, physical-phone judgement or client approval. Preserve the failed R02 and full-motion/hair/feet checks before adapting to a story.
 
 ## 28 October extension: split-tone changing words and full-motion edge repair
 
@@ -15,7 +19,7 @@ The repaired front/behind exports fully decode90 frames. Full/reduced contacts i
 
 **Category:** text / compositing / sound sync. **Lifecycle:** researched → local code rendered and revised → **human motion/audio review pending** → CG use untested → mastered **NO**.
 
-Use this card when a story calls for a human crossing in front of purposeful typography and the editor has a permitted, clean green-screen take. Read the [source manifest and reproducibility notes](../../README.md) before using it. This effect is not a general person-segmentation model and is distinct from the now-viewed owner TikTok, which shows footage *inside* text via an alpha track matte. It is not automatically suitable for PSG.
+Use this card when a story calls for a human crossing in front of purposeful typography and the editor has cleared footage with a verified usable matte. The independent code below assumes a clean green-screen take; the native on-device route below has one bounded natural-scene proof. Read the [source manifest and reproducibility notes](../../README.md) before using it. This effect is not a general person-segmentation model and is distinct from the now-viewed owner TikTok, which shows footage *inside* text via an alpha track matte. It is not automatically suitable for PSG.
 
 ## Working implementation
 
@@ -40,3 +44,9 @@ A [natural boxing-gym source screen](../../FIGHT-NATURAL-DEPTH-SOURCE-SCREEN.md)
 Use when the occlusion advances a verified narrative and an editor can review its edges and rhythm. Avoid when claims, client identity, licence, source availability, hair matte quality or platform readability are uncertain. Promote to `mastered` only after successful work on appropriate real CG footage plus explicit CG creative approval; a successful render or installed skill alone does not qualify.
 
 Portability: pass `--source ABSOLUTE_LOCAL_ORIGINAL` on another PC instead of copying the MSI directory layout. The exact recorded SHA-256 remains mandatory. Use a private output directory; reacquire only the permitted source, never client/reference media from an external service.
+
+## Office natural foreground / native alternative28October2026
+
+[Actual90-frame natural-mask study](../../OFFICE-NATURAL-MASK-STUDY-20261028.md) uses cleared Mixkit4825 on installed Premiere26.5 Object Mask, not a green screen. Track the selected subject, drag the Unassigned Mask to Opacity, keep original pictureV1/native titleV2/masked duplicateV3. Compare exact title in front versus behind and inspect the whole moving mask separately over black. The latter diagnostic MP4 is not alpha media. OUTSIDE lost too much wording and was rejected; MAKE/SPACE opens away from the subject with editable position/opacity keys. Natural hair retains some fuzz/softness; no arbitrary matte mastery.
+
+Actual saved native R02 close/reopen/export90/90 decoded frames equal. SPACE→TIME native revision exports with keys preserved; encoded protected regions are not pixel-identical. **Handover must include the untouched corresponding `[project name] Masks` folder (`.prmf`), `.prproj`, original media and fonts.** Native Save As created separate version folders here; second-PC relocation/staff relink remains a required test. The full study has source/output hashes, exact title controls, GPU/observed tracking indicator, UI failure/recovery and inspection limits. This landscape silent proof does not clear vertical platform layout, hearing, physical phone or creative/client acceptance.

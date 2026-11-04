@@ -11,6 +11,37 @@ Owner direction, 28 October 2026: ordinary footage needs a deliberate exposure/c
 5. Apply the film's coherent, restrained look **after** correction/matching, using approved brand/reference direction. “Cinematic” does not mandate teal/orange, a fixed LUT, vignette, grain, bars or reduced saturation. A clean natural treatment can be the right look for a bright shop or a product. Keep logos/graphic brand colours intact; don't bake an artistic camera grade indiscriminately over title/logo layers. Compare before/after and remove a look that hides the client's offering.
 6. Inspect the exact export, including cover photo, at full resolution and phone size. Check first/middle/last frames, bright/dark transitions, faces, product/white detail, clipping, banding and perceived consistency. Watch the whole sequence at normal speed. Local scopes and clipping counts support review; they do not certify a pleasing grade or actual phone display behaviour.
 
+## Check colour interpretation after assembly
+
+Before stream-copy concatenation, compare the actual components' colour range,
+matrix, transfer and primaries, including the supplied outro and generated fills.
+Camera derivatives and logo movies can have different interpretation even when
+their dimensions, frame rate and pixel format match. A concat file can inherit
+the first component's interpretation across later components. Resolve mixed or
+unknown interpretation before assembly; changing tags alone does not convert
+sample values. Preserve the originals and compare independently decoded source
+frames with the same instants in the assembled export.
+
+Check an unobscured region at the correct scale and placement. Extra typography,
+a fitted landscape animation, intentional lines and opaque overlays invalidate
+a whole-frame equality comparison. Inspect actual paired frames before calling
+a numerical difference a colour defect. Confirm final opacity before repairing
+an intermediate that cannot appear in the export.
+
+Count the actual decoded component frames and verify the source map through its
+ending. A requested frame count is not proof that the source contains that many
+moving frames. Record terminal holds explicitly; do not restore rejected lead-in
+frames or silently invent motion to meet a planned duration.
+
+The [3 November production receipt](https://github.com/CGProductionHouse/CG-Dynamics/issues/914#issuecomment-6596052146)
+records four visible mixed-range outro repairs. Protected RGB prefixes were
+preserved while the affected tails were rebuilt from independently decoded
+components. A WiseRide intermediate mismatch was fully covered by all100 opaque
+ending frames, so its final stayed unchanged. PSG's first two diagnostics wrongly
+included mismatched geometry and a deliberate graphic line; those failed checks
+were retained. These are bounded picture findings, not creative, audio, phone or
+client approval. Recheck the final delivery encode as well as a private master.
+
 ## Record beside the existing shot manifest
 
 `shot/source in-out | source/timeline/output transform | reference shot | correction values or preset + overrides | match judgement/evidence | look strength | retained-detail/source limits | exported frame/cut checked`

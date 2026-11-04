@@ -1,5 +1,19 @@
 # Client video asset library
 
+## Load the established client; do not research it from zero
+
+For every CG production job, first resolve its exact canonical client ID and load the existing `CLIENT_CONTEXT.json` through `scripts/load_client_library.py`. The metadata-only router is `CG Production House/Video Editing System/CLIENT-ASSET-LIBRARIES.json` in the authorised OneDrive. It points to each client's `Video Editing Library`; it is not a replacement for the CG Dynamics client guide. Do not run the new-library scaffold or keyword-search Canva when the existing binding already locates the asset.
+
+Call CG Dynamics `get_client_context` for the exact current task, wrap that returned packet with `client_id` and its actual `retrieved_at`, then run:
+
+`python scripts/load_client_library.py --registry "<existing OneDrive router>" --client-id "<exact ID>" --live-context "<fresh task packet.json>" --output "<private job/startup>"`
+
+Read the emitted `READ-BEFORE-EDIT.md`. It combines the saved brand baseline, approved examples, exact keep/change/reject decisions, assignment and current owner-rule register. Use the current Dynamics packet for mutable contacts/claims; do not promote historical Canva notes or saved packet snapshots to live authority. `preflight_story.py` now requires the exact client ID and this `client_context_snapshot` for production; only explicitly labelled non-client research may use `research_only:true`.
+
+Before release, `load_client_library.py --verify "<job/startup/client-context.json>"` detects changed feedback, rule versions or asset hashes. Finish an active render safely before reloading; do not interrupt it or duplicate the work. Refresh only the exact changed/missing field or asset. A new client instruction changing brand direction justifies a bounded update; an ordinary new video does not justify rediscovering an approved client standard.
+
+Keep `OWNER-DECISIONS.json` and `brand/CREATIVE-BASELINE.md` in the one client library. Preserve superseded records and rejected examples, but make the current status unambiguous. Approved work remains a baseline, not a licence to reuse the same story/clip/music. Save the corrected decision after each substantive amendment so the next job inherits it.
+
 Use one folder per client. Keep it small enough that a new editor can find current assets quickly; do not mirror the whole video archive. The PSG October 2026 implementation is at `C:\Users\chris\Videos\CG-AI-Editing\Client-Libraries\PSG` and in `Clients/PSG/Video Editing Library` on the authorised `info@cgproductionhouse.com` OneDrive.
 
 For a new client, run `python scripts/new_client_library.py "Client Name" --root "C:\Users\chris\Videos\CG-AI-Editing\Client-Libraries"` from this skill. It creates the standard directories and starter indexes without overwriting existing files. Then populate each record from verified source material; the scaffold itself approves nothing.

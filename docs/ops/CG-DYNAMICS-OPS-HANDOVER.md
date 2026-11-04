@@ -1,4 +1,175 @@
+### 4 November 11:03 SAST — Action Sports R16 corrected screenshot target
+
+The owner praised R15's other changes but clarified at 10:57 that the B&W screenshot referred to the `ONE SECOND TO DECIDE` athlete at about 2 seconds, not the later `MOVE TOGETHER` passage. Protected R16 corrects frames46–83, preserves the R15 AAC bitstream exactly and retains the other R15 improvements. Correctly named R16 MP4+caption and separate HD cover were both observed Delivered to exact CG Nolan Approvals at 11:02; a separate 11:03 Nolan note marks R15 superseded. [Exact evidence and open gates](../../scripts/video-editing/studio-phase2/ACTION-SPORTS-R16-FEEDBACK-CORRECTION-20261104.md). The shared skill and owner-rule register now require screenshot/quoted-clip feedback to be bound to an exact sent version, visible title and output frames before closing an amendment, plus geometry and unintended-clone checks. This remains internal review only; independent creative listening/phone review, participant/public-use clearance and staff-editable handover remain open. PR910 remains draft; no deployment, database, security or client/public send.
+
+### 4 November 10:01 SAST — Action Sports R15 amendment in internal review (superseded)
+
+CA's three screenshot amendments to Action Sports R14 were applied in a protected R15: the stretched opener was replaced by five real portrait action cuts; the cloned end of `MAKE IT COUNT` was rebuilt from moving 50 fps original footage; the black and white play behind `MOVE TOGETHER` gained contrast; one purposeful graphic transition and a low original spectator-audio layer were added. The correctly named MP4 document with proposed caption was sent at 09:59 to exact CG Nolan Approvals. The separate caption-free HD-selected cover and separate Nolan note followed at 10:01. **All three were observed Delivered**. [Exact private source, hash, QC and remaining gates](../../scripts/video-editing/studio-phase2/ACTION-SPORTS-R15-AMENDMENT-20261104.md). This is internal review only; creative listening, full-speed phone review, participant/public-use clearance and native staff editability remain open. PR910 stays draft; no client/public send, deployment, DB/security or permission change.
+
+### 4 November 08:32 SAST — Action Sports R14 internal review handoff
+
+CA's new five sport-effect references and edit feedback led to a protected MSI R14 netball revision. Its 26.43-second MP4 document and caption plus separate HD cover were observed delivered to exact CG Nolan Approvals at 08:30–08:32; yesterday's R12 is superseded. [Exact local-file hashes, reference-to-edit study and open gates](../../scripts/video-editing/studio-phase2/ACTION-SPORTS-R14-EFFECT-STUDY-20261104.md). The shared skill status, stepped-motion/flash cards and a new experimental slide-shake card route the tested mechanics to the office PC after branch sync. Private client media, source references, Canva thumbnails and exports are outside Git. This is **internal review only**: independent creative sound/full-speed phone review, published-picture/participant clearance and staff-editable handover remain open. PR910 stays draft; #914 remains open. No deployment, DB, permission or account change.
+
+### 3 November 22:03 SAST — Action Sports internal review delivery
+
+CA authorised an approximately 30-second Action Sports revision for morning WhatsApp review. A netball-only 29.266667-second R12 MP4 document with its proposed caption and a separate caption-free, HD-selected photo-led cover were sent to exact CG Nolan Approvals; both displayed two delivery ticks. This replaces the previously rejected 12.96-second R08B. [Exact handoff, hashes, source/timecodes and open gates](../../scripts/video-editing/studio-phase2/ACTION-SPORTS-NETBALL-R12-HANDOFF-20261103.md). It is **not** client/public/owner approval. Exact-file perceptual sound/phone review, broader published-picture and participant clearance, and cover-grid comparison remain open. Private media/scripts are outside Git. Existing draft PR910/#914 own follow-up; no reminder, deployment, DB/security or other client lane changed.
+
+### Later 3 November — Action Sports hook proposals withdrawn
+
+The owner supplied three more exact sports examples and explicitly rejected headline-only hook thinking. Scoped Nolan Studio skill research continues on existing draft PR910/#903/#874, with #914 production queue still stopped. Two exact TikTok films were obtained as private study references: a66.4s basketball film and25.099s rainy rugby film. Their ordered picture/boundary studies and a new hook-mechanism guide are recorded in `scripts/video-editing/studio-phase2/SPORTS-REFERENCES-20261103.md`. The first exact film's sole published media URL returned403; metadata is not visual evidence. Audio decoded and temporal attacks were measured, but no legitimate hearing route was available, so no sound-event, music or creative-fit claim is cleared. One distinct local Apache-2.0 Depth Anything V2 Small reconstruction has plain/luminance/flat-mask/depth controls and a short licensed cue; revision03 isolates all decoded picture changes to the intended two frames and cue versions decode identically. It remains a bounded visual mechanism, not creator-method, sport-source, normal-speed/phone or client acceptance. Private model/reference inputs and outputs are outside Git; no client media uploaded, editor plugin/account/permission changed or rejected film resumed. Canonical shared skill and status/board route to the evidence; office pull/install remains unwitnessed.
+
+CA rejected the proposed headings as a substitute for visual/sound construction.
+[Actual reference research](../../scripts/video-editing/studio-phase2/ACTION-SPORTS-HOOK-RESEARCH-20261103.md)
+now records the hash-matched28October client public reel, NBA film and three
+Premier League portfolio media examples, with timed observed mechanisms. Shared
+story skill/preproduction guidance now routes to the findings. Complete ordered
+visual samples and dense openings are not normal-speed/heard audio reviews;
+broader client history remains incomplete. No new film/song/send or mastery claim.
+Existing draft PR910/903/874 own this work;914 queue stays protected. Rejected
+creative proposals are withdrawn. Next: actual source-bound opening proof and
+owner-guided goal/story lock, not another headline-only plan. Reminders stay off.
+
+### Later3November — Nolan skills reconciliation and Action Sports game plan
+
+CA now explicitly authorises MSI to reconcile/install the shared office skill work,
+advance unfinished tutorial work and research a hands-on Action Sports game plan
+before execution. Existing draft PR910/#903/#874 own the shared work; #914 retains
+the production queue. Other rejected films stay stopped; no resend/reminder restart.
+All45 cards and39 original card recipes are present; two missing discovery headers
+repaired, all45 validate with UTF8. Four source-independent operations now have
+actual plan/operator/export coverage;44 tests pass. Eight allowlisted practice
+originals restored/hash-verified in isolated private MSI staging. Native project,
+all cloud-payload and office install acceptance are not inferred from Git presence.
+See [the complete map](../../scripts/video-editing/studio-phase2/SKILL-INTEGRATION-MAP-20261103.md).
+
+Native signed-in WhatsApp recovered exact CG Nolan Approvals brief, Franco2Nov11:36:
+Action uses March/June/nestedJuly2026 general footage, no camera-directed speech.
+All three folders listed:216MP4 entries,118under100MiB. Five actual originals are
+private/size-checked/locally hashed/decoded and visually sampled; a sixth transfer
+failed and is retained separately, never cleared. No published-freshness or heard
+sound claim. Canonical Graph fetch succeeded after legacy web resolution failures;
+no scope/account/permission changes or connector-limit bypass. Exact-client live
+guide/Novemberv4draft, saved brand/type and rejection/music records were read.
+See [the game-plan proposal](../../scripts/video-editing/studio-phase2/ACTION-SPORTS-GAME-PLAN-20261103.md).
+It is planning only: owner goal, complete story coverage, prior use/participants,
+heard music and exact final selections remain to resolve before a new timeline.
+Current verification:44 tests, canonical and45 technique validators, changed-code
+compile, diff/link checks and local TypeScript/Vite build pass. All new links
+resolve;10 inherited missing ops references remain outside scope. MSI shared
+skill backed up/installed/hash CURRENT; office pull/install not witnessed.
+No DB/migration/role/security changes, hosting/cloud build, public/client post
+or client-media upload. The exact Control Centre remains undiscovered; Google
+handover is only a mirror, never a guessed replacement tracker.
+
+### 3 November — owner-requested Nolan foundation audit/repair
+
+CA asked MSI to diagnose why the shared skills and repeated editorial rules were
+not reaching client films. Scoped system repair continues in existing office
+draft PR910/#903/#914; no client production, sends or reminders were resumed.
+The actual baseline release helper did not consume the story plan or prove any
+selected technique was rendered. A synthetic30s blank export reached its READY
+state with self-authored PASS labels (identity/audio fixture gates stubbed only
+to isolate that fault); the repaired entry point blocks the same missing plan.
+Shared preflight/release now bind the frame plan, scene jobs, declared cut
+anchors, selected implementation/parameters and exact decoded output/control.
+Two existing technique mechanisms are callable image operations for the proven
+renderer; no new engine. Machine success means candidate, never creative approval.
+See [the audit](../../scripts/video-editing/studio-phase2/PRODUCTION-FOUNDATION-AUDIT-20261103.md).
+Office production remains stopped; older MSI approvals do not clear the rejected
+seven-film PC batch. Office pull/install and real-client application remain
+distinct from publishing this shared repair. Existing #914 owns any later
+client resumption; do not restart it from superseded overnight authority.
+Verification:40 Python contracts, shared-skill validation, compile/diff and
+TypeScript/Vite build pass. MSI canonical skill installed/hash CURRENT with
+backup; office pull/install is not witnessed. The existing Google handover is
+the mirror; exact Control Centre name search still returns no result, so no
+guessed tracker mutation. No DB/migration/security, client media or desktop work.
+
+### 3 November09:34 SAST — Nolan sound dependency repair
+
+CA explicitly requested fixing the blocked sound-review dependency and delivering
+only completed films. The native Nolan PC overnight continuation task was paused
+at07:30:53SAST and verified; it remains paused. Work after08:00 is background only
+while staff use the desktop. Seven revised private pictures/seven cover candidates
+and ten unlistened controls remain; no new completed film or send is claimed.
+
+The same shared audio helper now accepts an evidenced authorised local human
+listen without inventing a model identity. Exact export/feedback/context hashes,
+full normal-speed listener details, all five sound checks and unresolved findings
+still gate handoff. Seven contract tests pass; actual pending WiseRide still blocks.
+The listening route must be qualified before scoring/finishing a batch. Local
+Qwen full-clip, short-window and preserved-encoder-precision controls failed;
+installation/sound-class recognition did not establish temporal reliability.
+A pinned time-aware MOSS model also failed the same original mute/tone controls
+and made unsupported stereo claims about mono inputs. Both local models remain
+excluded; no further blind model trials. The exact24second WiseRide local human
+check and pending form are prepared; no actual listener is recorded. The filename
+guard now mirrors the existing canonical helper, including word separators and
+complete sequence boundaries; seven audio and four naming contract tests pass.
+Observed archive codes are not newly configured values or allocated slots.
+Existing #914 remains the production queue; failures and actual outcomes belong
+there. No new editor, service, paid credits, private uploads or MSI/storage/account
+changes. Native overnight continuation remains paused; staff desktop untouched.
+
+### 3 November — Nolan production assembly lesson
+
+CA's overnight seven-film correction remains in the existing #914 queue, not a
+new research mission. Four actual mixed-range outro defects were corrected in
+private TBS/Action/Watch/Ehrlich pictures; protected prefixes, exact affected tails,
+moving inspection and failed diagnostics are recorded in
+[the owning checkpoint](https://github.com/CGProductionHouse/CG-Dynamics/issues/914#issuecomment-6596052146).
+The same shared skill's exposure/colour reference now checks component colour
+interpretation, actual frame counts and same-geometry comparison after assembly.
+Seven private pictures/seven covers/ten unlistened controls; zero newly completed
+or sent replacements. Sound, identity, history and creative gates remain honest.
+No new engine, spend, deployment, storage/MSI change or mastery promotion.
+The renewed native continuation must be paused and verified at3Nov07:30SAST;
+this paragraph does not itself claim that pause has happened.
+
 ### 28 October — Nolan research/skills transferred to office PC
+
+**Office native plane continuation, 29 October:** [actual scene-plane study](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-PLANE-STUDY-20261029.md) adds four native 96-frame controls, one actual saved/closed/reopened 96/96 identical export and 48 exact protected opening frames. Manual five-keyframe Corner Pin follows one licensed moving wood plane; merged Photoshop PSD art is Premiere-rasterized. Person depth/contact, creative, phone, heard and cross-PC gates remain; 45 families unchanged.
+
+**Evening owner authority:** CA freed the office PC and requested no-spend overnight sequential skills work. [Native type receipt](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-TYPE-STUDY-20261028.md) proves one-PC Premiere native layers/save/reopen/copy revision/export,72/72 decoded frames equal after second reopen. Existing45 families remain; no mastery/staff/phone/heard promotion. A narrowly authorized local native task **Nolan PC overnight continuation**, every30minutes/failure-only notifications, queues the same research chat without interrupting it, one pending wake maximum. Actual queue/manual-run duplicate suppression and own pause/resume verified. Finish WIP before next family; stop at safe29Oct07:30SAST checkpoint and pause only this task. Existing board holds ordered work. This supersedes older staff-busy/no-new-scheduler wording only for this research continuation, not WhatsApp/MSI monitors. MSI amendments, Central Canvas and storage remain protected.
+
+
+[Natural foreground continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATURAL-MASK-STUDY-20261028.md) now verifies one90-frame native Object Mask selection/control/revision,90/90 decoded frames equal after R02 reopen. Dedicated Masks folder must accompany native project. Fine-hair/landscape/silent/source coverage limits and second-PC/creative gates remain;45 families unchanged. Actual21:08 scheduled wake queued while editing without interrupting; next distinct queue item is cross-shot handoff.
+
+[Two-shot forward continuation](../../scripts/video-editing/studio-phase2/OFFICE-FORWARD-HANDOFF-STUDY-20261028.md) adds seven96-frame controls, rejects retime-only direction mismatch and bounds an incoming reframe; encoded vector gap6.228→0.308px/frame,48/48 outgoing revision frames equal. Not a filmed sideways whip, continuous place or mastery. Next distinct item is natural unkeyed plane;45families/client/acceptance boundaries unchanged.
+
+[Natural unkeyed plane continuation](../../scripts/video-editing/studio-phase2/OFFICE-UNKEYED-PLANE-STUDY-20261028.md) adds five96-frame native-HD wood/control/revision exports. Refreshed wood-only features plus independent rectified texture support attachment;48/48 opening frames equal. R02 seam-crossing placement rejected and R03 moved to one continuous plank. General depth/native/phone/heard/creative gates remain. Next distinct item5 kinetic type/remaining board mechanism;45families unchanged. Actual22:08 scheduled wake pending while this work proceeds, no duplicate editing worker.
+
+[Native Transform blur continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-TRANSFORM-BLUR-STUDY-20261028.md) verifies actual0/180/90-degree effect controls and180 native reopen/export72/72 decoded parity. Native fast-entry repeated edges/layout remain rejected as production defaults; parameter-only revision has only2/48 encoded hold frames equal. No mastered/native-every-family claim. Next distinct existing mechanism: native footage-in-type alpha matte/solid-stroke reveal;45families unchanged.
+
+[Native footage-in-type continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-FOOTAGE-TYPE-STUDY-20261028.md) adds plain/title controls, actual editable alpha-matte/vector reveal and protected24→18 timing revision. Both native saved/reopened versions48/48 decoded equal;18/18 revision opening equal, tail0/6 exact. Dark/withheld-action limitations retained; six exports,45families unchanged. Next distinct native context zoom-out/easing gate. Actual23:08 scheduled wake queued while editing continued, no duplicate worker or client/storage change.
+
+[Native context continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-CONTEXT-ZOOM-STUDY-20261028.md) adds six72-frame controls/easing/revision/two-reopen exports, both72/72decoded equal,13/13 protected opening. Native endpoint influence also changes and later settle is harder; no creative/phone/heard/second-PC promotion. Existing45families; next distinct native motion-remap bag-contact gate.
+
+[Native speed continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-SPEED-STUDY-20261028.md) adds six valid controls/revision/reopen exports, two rejected leading-gap outputs; R03/R04reopen148/148 and149/149decoded equal,88/88protected prefix. Reacquired dancer original hash matches; bag remains source-gated. Endpoint/Bezier/creative/phone/heard/second-PC limits retained. Existing45families; next distinct native three-shot stack.
+
+[Native three-shot stack continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-THREE-SHOT-STACK-STUDY-20261029.md) adds six72-frame controls/revision/two-reopen exports, both72/72decoded equal,12/12protected opening. Distinct linked woodland originals fill portraitbands; long empty-third wait rejected, middle-source rate offset/colour limits retained.45families unchanged; next native vector-option-carousel import/layer gate. Actual00:08wake queued while editing, no duplicateworker.
+
+[Native icon continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-VECTOR-STUDY-20261029.md) adds seven108-frame native outputs, three108/108reopen pairs,72-framecopy/19-framepath revision protection. SVG rejection and straight-path collision retained; perimeter repair separates icons108/108frames. Imported AI art is rasterized; active labels/easing/loop/phone/heard/second-PC/creative gates remain.45families unchanged; next existing stabilization native gate.
+
+[Native stabilization continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-STABILIZATION-STUDY-20261029.md) adds six72-frame nativecontrols/revision, both72/72actualreopen pairs and49/49protected prefix. New uprightlandscapespan preserveswalker;default50crowdsheadroom/worsensmetric,PSR5reducesdiagnostic22.8%. Source/portrait/phone/heard/second-PC/creativeboundariesremain.45families; next existing native muffled-perspective gate.
+
+[Native EQ continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-EQ-STUDY-20261029.md): sixnativeAV/fouracceptedPCM, threeactualreopenpairs, R04PCM96105sample protectedprefix. NativeAAC1024sample delay measured; PCM-based dry/R02/R04muxes zero measuredlag. WrongDPX/constantPCM and changed R03project gates retained, not repaired by title/settings alone.45families, noheard/phone/creative/crossPCpass; next distinct existing native peak-control.
+
+[Native peak continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-PEAK-STUDY-20261029.md): sevennativeAV/twoPCM, twoactualreopenpairs72/72picture/144144samplesexact. Hot+12REJECTED; nativeR02−4.0dBTPstereo/−1.1dBTPactualencodedmono. Exact protectedopening FAILSAACandPCM; nativekeys/reopenarenotpreservationproof.45families, noheard/phone/creative/crossPCpass; next existing registered-slanted-panels nativegate.
+
+[Native panel continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-PANELS-STUDY-20261029.md): six72frame outputs/two72/72actualreopenpairs,36/36protectedopening, onlyV4Opacity changes. Three nativeapertures share verifiedcoffee48–119canvas/time; interiorMSE<0.974againstplain. Earlierfullrevealreduceshiddenpour; encodedtail0/24andcreative/phone/heard/crossPCgatesremain.45families;next existing metallic-type-material nativegate.
+
+[Native metallic continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-METAL-STUDY-20261029.md): Photoshop editable PSD text/styles, seven72-frame native Premiere outputs/two72/72actual reopen pairs,48/48protected copy prefix. Heavy12px rejected/3px cleaner/flat clearest. Bevel Alpha removed; merged PSDs rasterized in Premiere. Initial Copy PNG1RGBlevel mismatch retained, second reopen stable.45families; next native color-invert-glitch control/pulse gate. No client/storage/spend change.
+
+[Native inversion continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-INVERT-STUDY-20261029.md): six new72-frame native exports+reusedplain, two72/72actual reopen pairs,30/30protected prefix/onlyBlend97changes. Product-colour/152.74grayjump rejected; zeroAAC export and1/28tailparity retained.45families; next native graphic-inset-grow gate. No client/storage/spend changes.
+
+[Native inset continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-INSET-STUDY-20261029.md): eightNEW72-frame native exports+reusedplain/three72/72reopenpairs. R04tangent/shrink/protected-prefix1 rejected; R05repair19/19protected/onlyScale97changes. Fractional source map72/72corrects rounded-bound ambiguity;tail0/30exact retained.45families; next native chromatic-lens-pulse capability/source gate. No client/storage/spend changes.
+
+[Native chromatic continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-LENS-STUDY-20261029.md): eightNEW72-frame exports/two72/72reopenpairs/25protectedframes. Strongfringes rejected; reducedROIchange32.24%lower. Unnamed8301alsochanges/zero0-72/offpulse0-61/tail1-36parityfailures retained.45families; next kinetic-caption-finishing nativeglyph shine gate. No client/storage/spend changes.
+
+[Native caption continuation](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-SHINE-STUDY-20261029.md):10NEW72-frame exports/four72-72reopenpairs,hard21/soft20protectedframes/onlyOpacity117changes. Hardstripe rejected/LegacyCropFeather24+35%gentler. Twoframesoneoutsidepixelthresholdfail/tail1-30parity retained;PSwording/PRemiererasterimportscopeexplicit.45families;nextnative subject-silhouette-prelap source/matte gate. No client/storage/spend change.
+
+**Office native silhouette continuation, 29 October:** [actual prelap study](../../scripts/video-editing/studio-phase2/OFFICE-NATIVE-PRELAP-STUDY-20261029.md) adds two cleared real shots, plain/colour/white/timing/nested-repair controls, 12 NEW native 119-frame exports and four actual 119/119 reopen pairs. Hold Filters leaves Object Mask boundary drift (5636 pixels at threshold 128); holding the completed nest repairs threshold-shape stability across five frames. Repaired short revision protects 25 opening frames; tail 2/89 exact fails. Fine-hair/flash/phone/heard/story/second-PC gates remain. 45 families unchanged; next distinct existing native scene-perspective-type gate.
 
 Owner explicitly requested office PC primary execution because MSI is unreliable.
 [Takeover brief](../../scripts/video-editing/studio-phase2/OFFICE-RESEARCH-TAKEOVER-20261028.md)
@@ -7,7 +178,17 @@ in existing draft875 records the45-family library, four private Drive archives
 separate stacked research PR and unfinished queue. Office owns new874 research
 through903; MSI parks research and retains Daisy/TBS/PSG/Fight amendments.
 Central Canvas904 stays office-owned separately. Read newer shared rules909.
-Office download/install/rerender receipt is pending; preparation is not activation.
+Office intake is now accepted in separate stacked draft[PR910](https://github.com/CGProductionHouse/CG-Dynamics/pull/910):
+all4 downloaded archives/379 members hash/size verified, single shared skill CURRENT,
+and source-checked subject-band rerender inspected. [Exact receipt](../../scripts/video-editing/studio-phase2/OFFICE-RESEARCH-ACCEPTANCE-20261028.md).
+[New rotation/registered-roll studies](../../scripts/video-editing/studio-phase2/OFFICE-ROTATION-HANDOFF-STUDY-20261028.md)
+add seven corrected90-frame outputs to two existing families. Rejected sign/precision
+controls retained; no phone/heard/native or mastery claim. Staff desktop active;
+further research is file-based. MSI amendments and Central Canvas remain protected.
+[Full-shot display continuation](../../scripts/video-editing/studio-phase2/OFFICE-PHONE-SURFACE-STUDY-20261028.md)
+adds five251-frame native-fps controls/revision; notch/key/fringe failures repaired,
+feature/anchor drift retained. Controlled-display proof only; physical/natural/native
+and heard/phone gates remain open. No new family or client change.
 GitHub/903/874/Supervisor381 and the existing Google handover are continuity routes.
 Exact Control Centre tracker remains unavailable after a scoped Drive name search;
 no guessed tracker write or replacement. No client media, credentials, permissions,
@@ -5369,3 +5550,4 @@ On a fresh chat:
 8. After each consequential action, update #505, #381 and this handover.
 
 The supervisor should keep CA out of routine mechanics and bring her in only for the exact protected decisions, provider verification/2FA/document steps or human review gates that truly require her.
+\n

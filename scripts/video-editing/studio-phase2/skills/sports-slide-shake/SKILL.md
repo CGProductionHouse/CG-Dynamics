@@ -1,0 +1,14 @@
+---
+name: nolan-sports-slide-shake-experimental
+description: Build a short directionally motivated slide shake across a sports action cut with a separately licensed synchronized cue; verify the edges and subject readability.
+---
+
+# Sports slide shake — bounded R14 application
+
+The owner's [slide shake tutorial](https://vt.tiktok.com/ZSp8vo67X/) shows a transform layer across a clip junction, alternating horizontal displacement while scale grows, then reverses on the incoming clip. The visible control example uses about two frames per keyframe step and shutter angle near 150. This is a reference mechanism, not a universal preset.
+
+The private Bloem R14 study applies six output frames around a **real wide-to-runner cut** at 30 fps: scale 1.07 → 1.12 → 1.16 on the outgoing shot and 1.16 → 1.12 → 1.07 on the incoming shot; horizontal offsets -28, -61, -102, +102, +61, +28 pixels in a 1080×1920 frame. Reflected-edge sampling and mild horizontal blur prevent black triangles. A separately licensed Mixkit whoosh begins near the movement. [The picture/sound ledger](../../ACTION-SPORTS-R14-EFFECT-STUDY-20261104.md) identifies the source and limits.
+
+To reuse: find a cut with a plausible directional motion or camera energy, preserve the actual action and ring geography, test a clean-cut control, then keyframe a brief transform/blur across the join in the existing editor or protected FFmpeg copy. Keep the peak displacement short enough that the incoming subject is visible immediately. Render and inspect every frame for mirrored body/ball artifacts, exposed borders and accidental frame duplication. Listen to the actual cue against music; check phone-size comprehension. The R14 implementation verifies frame construction only and remains **experimental** until those perceptual gates pass. Never add a whoosh solely because the preset exists.
+
+**4 November contained-border refinement:** A protected 36-frame plain/slide A/B on the exact R14 wide-to-runner source tested a six-frame move at output frames 416–421. The original R14 peak used 1.16× scale with a 102 px horizontal offset: its nominal crop margin is 86.4 px, so about 15.6 px can require reflected pixels. The contained candidate uses scales `1.07, 1.13, 1.20, 1.20, 1.13, 1.07` and offsets `−25, −60, −90, +90, +60, +25` px. The smallest horizontal reserve is 10.2 px, allowing constant-border rendering without invented edge picture. All 36 frames decode; fixed-QP all-intra comparison changes **only** 416–421. Full-size peak frames and a 216×384 contact of 415–422 were inspected. The title remains readable and no exposed black edge appears in those samples. [Exact A/B and limits](../../SPORTS-SLIDE-CONTAINED-BORDER-STUDY-20261104.md). This proves a safer crop calculation for this source, **not** that the slide improves the story or that the existing client film should be revised. Normal-speed comfort, sound fit and phone playback remain open.

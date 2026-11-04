@@ -1,0 +1,11 @@
+# Sports openings: construct the scene before its heading
+
+Use when a sports client needs an attention-grabbing opening or the owner rejects a slogan/effects-list proposal. Read the [actual Bloem/NBA/Premier League study](../../../../scripts/video-editing/studio-phase2/ACTION-SPORTS-HOOK-RESEARCH-20261103.md) for observed timings, source identities and review limits.
+
+The3November failure was editorial: `JUST A FRIENDLY GAME` and earlier tactical headlines were proposed without an adequate observed/client-specific opening. A populated hook field or list of installed effects did not make them hooks. Do not revive them, convert the owner's illustrative dancer example into a shot request, or respond with another heading-only pitch.
+
+Describe the first image, physical anticipation, visible change/payoff, graphics/foreground choreography, sound entry/pocket/accent, and exit into the viewer's reason to care. Bind each to actual suitable source moments. A headline can amplify that construction; it cannot replace it. Intimacy/contrast can work as well as fast action: the inspected NBA film begins with backlight and expressive face details. The inspected client reel begins immediately in sport and changes scale/activity; its ghosted transition resolves back to a readable player. Premier League examples coordinate footage, translucent panels, bold type and identity around shared movement. These are different mechanisms, not one universal template.
+
+For sports visual layers, choose based on the moment: directional registered panels for an earned transition, masked depth when foreground separation actually survives motion, or a detail/wide reveal that preserves geography. Do not copy league crests/fonts, fabricate a score, cover ball/contact with text, or use effect counts as quality. Existing toolkit/card availability is not evidence that a treatment improves the client scene.
+
+Separate observed picture, reported creator technique and unverified inference. Decoded contact frames can establish layer layout and flag source defects; they cannot establish normal-speed flow, heard musical fit or retention. Keep private reference media outside Git. A public film is not automatically a reusable licensed asset. Study enough actual client posts to support style/prior-use claims; one verified reel is not the entire history.

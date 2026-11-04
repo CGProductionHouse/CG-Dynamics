@@ -1,0 +1,201 @@
+{
+  "schema": 1,
+  "purpose": "Requirements index for the existing production standard, not another tracker or client-fact store. Each job loads the current list and records actual evidence in its existing release record.",
+  "rules": [
+    {
+      "id": "CTX-01",
+      "requirement": "Load the exact client's existing asset library and approval/feedback decisions before footage, graphics or music. Reuse the established standard; no fresh broad brand search when the known asset exists.",
+      "evidence_source": "CA2Nov2026 process correction; client-asset-library.md"
+    },
+    {
+      "id": "CTX-02",
+      "requirement": "Refresh only new instructions, changed/missing asset versions and task-scoped mutable facts. Current CG Dynamics exact-client packet governs contacts/claims; do not freeze live business facts into an asset library.",
+      "evidence_source": "CG Dynamics client-context-and-content skill; CA2Nov2026"
+    },
+    {
+      "id": "CTX-03",
+      "requirement": "Preserve exact keep/change/reject decisions, earlier approvals, people exclusions and MSI ownership. Never reset an unrelated approved element or amend another lane's project.",
+      "evidence_source": "production-standard.md authority1–2; CA handover903/874"
+    },
+    {
+      "id": "CTX-04",
+      "requirement": "Owner-approved prior films are the client-specific comparison baseline. A new code recipe or technically passing export cannot silently replace that design standard. PSG's two approved films remain pinned reusable references.",
+      "evidence_source": "CA2Nov2026 PSG correction; approved PSG October/November records"
+    },
+    {
+      "id": "FEEDBACK-01",
+      "requirement": "Map every screenshot or quoted-clip amendment to the exact sent revision, visible title/subject and output time/frame before editing. Verify the requested change on the new encoded target and its adjacent frames; a similar later scene does not clear the note.",
+      "evidence_source": "CA4Nov2026 Action Sports R15 missed held-ball B&W screenshot; protected R16 correction"
+    },
+    {
+      "id": "STORY-01",
+      "requirement": "Define one buyer, useful message, three source-supported hooks, proof, payoff and CTA with relevant South African timing; do not build a generic montage first.",
+      "evidence_source": "story-preproduction-gate.md; production-standard3"
+    },
+    {
+      "id": "SOURCE-01",
+      "requirement": "Use the exact authorised folders and source permissions. Screen full files and actual selected motion; do not use filenames, dates, hashes or contact sheets as a creative verdict.",
+      "evidence_source": "CA2Nov exact folder brief; production-standard4–8"
+    },
+    {
+      "id": "SOURCE-02",
+      "requirement": "Check actual source-month and later posted material through release. Old archives are allowed where suitable; do not repeat a published story or claim unused footage from partial checks.",
+      "evidence_source": "CA archive authorisation; TBS/Daisy prior-use failures; production-standard4–5"
+    },
+    {
+      "id": "SOURCE-03",
+      "requirement": "Reject blur, focus/rack resets, camera jolts, empty pans, awkward performance and unwanted people. Preserve action setup/contact/payoff; do not shorten the same rejected moment and call it new.",
+      "evidence_source": "CA Watch Addict amendments; production-standard6"
+    },
+    {
+      "id": "SOURCE-04",
+      "requirement": "Ehrlich and Action general films exclude camera-directed speaking; source chatter and crew direction are muted. Stock is illustrative, never represented as a client's people, premises, customers or results.",
+      "evidence_source": "CA/Franco2Nov source brief; production-standard7–8"
+    },
+    {
+      "id": "PICTURE-01",
+      "requirement": "Verify each file's upright orientation before source-specific stabilisation. Stabilise ordinary camera footage by default; review original/corrected spans and final motion for crop/warp/subject loss.",
+      "evidence_source": "CA lapa/Watch amendments; production-standard9"
+    },
+    {
+      "id": "PICTURE-02",
+      "requirement": "Correct per-shot exposure and white balance, match adjacent shots, then style coherently. No blanket dark filter or claimed recovery of clipped highlights.",
+      "evidence_source": "CA lapa exposure corrections; exposure-colour-matching.md"
+    },
+    {
+      "id": "PICTURE-03",
+      "requirement": "Central Canvas horizontal treatment uses three genuinely different moving clips filling the portrait bands with purposeful sequential reveals. No lone padded landscape shot or duplicated clip disguised as three.",
+      "evidence_source": "CA28Oct explicit lapa correction; shared rule909"
+    },
+    {
+      "id": "PICTURE-04",
+      "requirement": "Portrait crops and motivated transitions preserve source geometry unless deliberate distortion is approved. Audit clone/pad frames in action shots; a hold must read as intentional, otherwise use continuing source motion or recut. Inspect the exact exported opener and ending span.",
+      "evidence_source": "CA4Nov2026 Action Sports R14 stretched feet crop and cloned MAKE IT COUNT tail; R15 corrected both"
+    },
+    {
+      "id": "BRAND-01",
+      "requirement": "Use the client's evidenced font/weight/substitute, colours, shapes and assets. Do not substitute convenient system fonts or infer a family from visual similarity. Approved substitutions stay explicit.",
+      "evidence_source": "production-standard11; CA2Nov brand-assets correction"
+    },
+    {
+      "id": "BRAND-02",
+      "requirement": "Design purposeful type reveals/animation and visual craft throughout the film, tied to actual content. Static PNGs, a delayed appearance or the logo animation alone do not demonstrate motion-design skill.",
+      "evidence_source": "production-standard12–14; CA2Nov WiseRide/PSG rejection"
+    },
+    {
+      "id": "BRAND-03",
+      "requirement": "Each client's film has its own pace, motion language, sound and visual hierarchy. Compare the whole batch for repetition; different font filenames/music titles alone are not distinct direction.",
+      "evidence_source": "CA full-list unique-edit request; CA2Nov cover/type rejection"
+    },
+    {
+      "id": "BRAND-04",
+      "requirement": "Apply useful existing skill-library mechanisms with a plain control and protected revision; inspect actual exports/motion. Do not add an arbitrary effect quota or claim mastery from a mechanism proof.",
+      "evidence_source": "874/PR910 existing45-family board; production-standard12–14/23"
+    },
+    {
+      "id": "COPY-01",
+      "requirement": "Audit every rendered word, spelling, number, label, contact and crop against the approved copy inventory; inspect actual frames at phone size. Marketing screen text has no terminal full stops by default, with documented exact-text exceptions.",
+      "evidence_source": "production-standard11; CA2Nov spelling rejection"
+    },
+    {
+      "id": "AUDIO-01",
+      "requirement": "Select music with the story, audition the actual phrase/ending and verify commercial/platform rights. Catalogue mood/BPM, waveform, LUFS and muted playback are not musical-fit approval.",
+      "evidence_source": "production-standard15/19; CA music rejections"
+    },
+    {
+      "id": "AUDIO-02",
+      "requirement": "Consult the single shared used/rejected/reserved music ledger before a selection. Reject Cat Walk371, Gimme That Groove872 and exact rejected PSG cues; WiseRide Funkorama and Action Cipher are owner-rejected. Do not recycle another client's recent cue.",
+      "evidence_source": "CA Watch/lapa/PSG history and2Nov WiseRide/Action rejection"
+    },
+    {
+      "id": "AUDIO-03",
+      "requirement": "Automotive and sporty/hyped sound must actually fit those brands. Playground/comedy/elevator-like choices are rejected. Do not claim TikTok trending or copyright-free status without exact discovery and commercial/platform licence proof.",
+      "evidence_source": "CA Watch music direction and2Nov WiseRide/Action sound rejection"
+    },
+    {
+      "id": "AUDIO-04",
+      "requirement": "Music-led cuts land on audible beats or deliberately skipped beats across the film. Register any action/dialogue/SFX-led exceptions and recheck after picture or music revisions.",
+      "evidence_source": "CA28Oct beat rule; production-standard16"
+    },
+    {
+      "id": "AUDIO-05",
+      "requirement": "Build purposeful source-sound/music/SFX layers with separable stems and visible action sync. No unrelated foley, indiscriminate whooshes, crew chatter or source-logo sting. Review final tail, voice, mono and dynamics with actual sound.",
+      "evidence_source": "production-standard8/17–19; existing sound-playbook studies"
+    },
+    {
+      "id": "OUTRO-01",
+      "requirement": "Use the approved client logo animation, preserve its meaningful reveal/full mark, and mute its baked audio. WiseRide may use the explicitly authorised clean Wiseman Group animation. Do not use a watermarked or fabricated replacement.",
+      "evidence_source": "CA lapa mandatory outro; CA2Nov WiseRide fallback"
+    },
+    {
+      "id": "OUTRO-02",
+      "requirement": "Design the outro for the portrait film using actual approved brand assets; simply dropping a small horizontal animation into empty padding is not sufficient creative effort. Never stretch/crop the official mark or invent a new logo.",
+      "evidence_source": "CA2Nov latest portrait-outro correction; production-standard18"
+    },
+    {
+      "id": "COVER-01",
+      "requirement": "Use the actual client Canva cover collection and approved artwork; new covers require relevant full-frame9:16 photography, exposure correction and legible product/title/logo in small centred3:4/4:5/square crops. No blurred bands or repeated generic scrim/title layout across clients.",
+      "evidence_source": "CA R01 cover rejection; reel-cover-and-instagram-audit.md; CA2Nov repeated-cover rejection"
+    },
+    {
+      "id": "CAPTION-01",
+      "requirement": "Forwardable file message contains only the complete proposed post caption, in the exact-client voice and current approved contact/footer contract. No QA, revision notes, source URLs or licensing prose appended. Keep internal notes separate.",
+      "evidence_source": "standing delivery format; CA2Nov caption-only correction; CG Dynamics output contract"
+    },
+    {
+      "id": "RIGHTS-01",
+      "requirement": "Do not remove legally required music attribution while retaining the cue. Select commercially suitable music whose terms fit clean forwarding, or establish an explicitly permitted alternative credit arrangement; retain private licence proof.",
+      "evidence_source": "CA2Nov caption correction reconciled with actual licence obligations"
+    },
+    {
+      "id": "IDENTITY-01",
+      "requirement": "Resolve the exact configured production code, year/month and zero-padded video sequence. Verify the actual attachment filename and matching cover/caption stem; no CANDIDATE/descriptive basename presented as a production-ready forwardable file, invented code, overwritten final or duplicate production folder.",
+      "evidence_source": "onedrive-naming-authority.md; PSG25Oct filename correction repeated2Nov"
+    },
+    {
+      "id": "REVIEW-01",
+      "requirement": "Review the entire exact export's picture, sound, typography, cover and spelling at normal speed and phone size through actual available review routes. Metering/decoding/muted browser completion are separate technical evidence. No invented hearing/phone/artistic approval.",
+      "evidence_source": "production-standard19–21; CA2Nov entire batch rejection"
+    },
+    {
+      "id": "DELIVERY-01",
+      "requirement": "Verify exact CG Nolan Approvals recipient; provide original MP4+caption and playable HD review media as required, separate caption-free HD image cover, then a separate signed Nolan Studio PC note. Witness HD and Sent/Delivered; preserve supersession and avoid unchanged duplicate media.",
+      "evidence_source": "CA phone-review correction and standing WhatsApp handoff"
+    },
+    {
+      "id": "DELIVERY-02",
+      "requirement": "Owner/internal review, client approval and publication are separate states. Preserve rejected files and sent evidence, block their resend, and never count delivery as approval. A generic send instruction does not silently waive missing creative evidence.",
+      "evidence_source": "production-standard22–24; CA2Nov rejected batch"
+    },
+    {
+      "id": "HANDOVER-01",
+      "requirement": "Preserve source/selection/effect recipes and separable assets. Native or cross-PC editability requires actual save/reopen/relink/export proof. Do not rebuild the engine or call baked graphics native text.",
+      "evidence_source": "AGENTS.md; production-standard23; 874 existing research gates"
+    },
+    {
+      "id": "WORK-01",
+      "requirement": "Finish current WIP safely and continue the assigned queue without duplicate renders or reminders replacing work. System repair first after this rejection, then one client/video at a time; no parallel batch rebuilds.",
+      "evidence_source": "CA continuation instructions and latest2Nov system-first correction"
+    },
+    {
+      "id": "WORK-02",
+      "requirement": "Yield desktop control to humans and use file-based work while occupied. Keep WhatsApp closed after authorised interactions; no WhatsApp feedback monitor, new copied brain, unrelated sends or changed storage/account/security/hosting settings.",
+      "evidence_source": "CA office operation and latest WhatsApp preference; AGENTS.md"
+    },
+    {
+      "id": "COST-01",
+      "requirement": "No spending, paid/API credits or external private-client-media uploads. Respect679 and current storage workers; internal SSD is cache/edit/render, originals remain in established OneDrive/external locations.",
+      "evidence_source": "CA repeated no-spend authority; AGENTS.md/679/storage runbook"
+    },
+    {
+      "id": "DURATION-01",
+      "requirement": "CA3Nov requires roughly30seconds for this batch. Check actual duration before delivery; no agent-created compact-cut exception, padded logo/holds or13second substitute.",
+      "evidence_source": "CA3Nov explicit rejection; owner-rejection-20261103.md"
+    },
+    {
+      "id": "HOOK-CRAFT-01",
+      "requirement": "Concrete viewer hook/useful purpose and meaningful brand-specific moving visual treatment required. NETBALL/BRINGYOURTEAM13sR08B is rejected. Asset provenance, title entrance,25tests and technical/model gates do not certify creative quality.",
+      "evidence_source": "CA3Nov purpose/hook/VFX rejection; prior creativePASS revoked"
+    }
+  ]
+}

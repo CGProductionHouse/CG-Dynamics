@@ -1,9 +1,11 @@
 ---
 name: nolan-stacked-reaction-panels
-description: Compare one shared wide action with larger synchronous reaction panels in a vertical frame, then return to context.
+description: Arrange related scene or reaction views as adjustable horizontal panels in a vertical frame, with a plain control and a source-specific reveal.
 ---
 
 # Stacked reaction panels — real-footage visual candidate
+
+The [29 October coffee three-band screen](../../COFFEE-THREE-BAND-PROCESS-SCREEN-20261029.md) tests an information use of this layout with **three different moving shots inside one cleared stock sequence**. Each landscape shot fills a whole 720×405 band in a 720×1280 portrait frame. A plain simultaneous control and four staged variants decode. Black future bands leave most of the opening empty and were rejected; a protected filled-frame revision keeps unrevealed stages moving but subdued, then brightens the second and third stages. R03→R04 preserves the first12 decoded frames and reveals the pour four frames earlier. At a 180×320 contact the labels remain small, and the 1.668 s screen may be too brief to understand. This is a bounded information-hierarchy and moving-panel exercise, not three separate source files, a heard/phone-approved video, the unseen JFJ reference, or a native editable client layout.
 
 **Owner reference:** The [panel example in the newer tutorial intake](../../NEW-REFERENCE-INTAKE-20261027.md) shows separate scenes arranged in glowing panels. Its exact geometry, timings and sound were not established from the muted reference. This bounded adaptation solves a specific CG editing problem: a horizontal two-person exchange becomes too small in a vertical phone frame. It uses restrained framed crops; no bought panel preset, synthetic glow or copied tutorial asset is involved.
 
@@ -20,3 +22,15 @@ description: Compare one shared wide action with larger synchronous reaction pan
 `render_ab.py` now retains the original plain and hard-reveal exports and adds a third, 2.500-second `faces-slide-to-context.mp4` candidate. Its two synchronous face panels slide out through the frame edges over seven frames while the same moving wide is uncovered beneath them. The new mute export fully decoded at 720×1280/24 fps. A 14-frame 180×320 comparison and full-size midpoint were inspected; all practice renders stay outside Git.
 
 **Reject the slide.** Mid-transition, the top face, lower face and underlying wide show the same people multiple times at once. The small phone frame becomes busy, and the center wide's story information is harder to parse than in the direct reveal. The simple hard switch restores the shared table/gesture without a duplicated-person interval. The same-source temporal sync makes the slide mechanically valid but does not make the composition useful. Keep the hard reveal as the *source-specific visual candidate*; it still needs normal-speed picture and heard music/SFX review, physical-phone viewing and a native editable layer handover before client use. Do not add a panel exit merely because it animates.
+
+## Native three-distinct-shot full-height extension
+
+[Office native stack](../../OFFICE-NATIVE-THREE-SHOT-STACK-STUDY-20261029.md) compares single-wide/simultaneous three-source bands/staggered reveal and bottom-only timing revision. Native1080×1920, three1080×640bands; first visible0/6/12 versus0/6/18. Both actual reopen pairs72/72decoded equal, revision opening12/12equal. Encoded original-frame checks expose middle-source cross-rate offset420→419; longer empty-third wait rejected as default. Keep source identity/relative brightness/motion, phone/heard/human and second-PC gates explicit. This is separate from cropping two reactions in one synchronous shot; never call three copies of a single shot three distinct videos.
+
+## Three separate coffee originals in complete portrait bands —29October2026
+
+[The distinct-file screen](../../THREE-DISTINCT-COFFEE-BANDS-SCREEN-20261029.md) pins Mixkit4989beans,41865espresso and43941cup pour: three separate Free-License source files,60synchronous moving frames each. Three720×1280 outputs compare immediate full-brightness plain, filled but dimmed staged R01 and a protected earlier bottom-emphasis R02. Full-height rows have no black gutter; all bands move. The staged opening makes already dark espresso hard to read; plain is preferred for this source. R01→R02 first18working frames are exact but0/18decoded encoded frames are exact (mean MAD0.244), a failed strict protection gate. These are distinct coffee moments, not one process or client premises. Human normal-speed/phone, sound/beat, colour match and native linked layers for this specific assembly remain open.
+
+## One-band exposure correction — 29 October 2026
+
+[The espresso-band comparison](../../COFFEE-MIDDLE-BAND-EXPOSURE-SCREEN-20261029.md) keeps the same three cleared source views and no-label plain control. A gamma0.60 lift of only middle rows427–852 visibly washes the machine background, so reject it. Gamma0.82 makes the stream more visible and stays a bounded comparison, not an approved grade. Both60-frame revisions decode; top/bottom working pixels are exact for all60, but H.264 re-encoding changes those delivered regions by roughly2.1–2.3 average RGB levels. Keep the untouched plain, strong rejection and restrained candidate together. Test a real client scene and independent full-speed/phone judgement before claiming colour match or client readiness.

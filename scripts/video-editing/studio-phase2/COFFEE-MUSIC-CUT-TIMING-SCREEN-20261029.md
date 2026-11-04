@@ -1,0 +1,25 @@
+# Coffee music-cut timing — office background screen, 29 October 2026
+
+This is a **measured cut-placement exercise** for the existing sound-led-cuts family and the owner’s beat-cut baseline, not a client edit, a heard music decision or a completed sound-effects gate. It used command-line tools only while the desktop was in use. No MSI amendment, Central Canvas source, client media, paid/API credit, new engine or WhatsApp action was involved.
+
+## Source, rights and picture truth
+
+The upright 1280×720, 24000/1001 fps [Mixkit coffee preparation sequence #4989](https://mixkit.co/free-stock-video/video-sequence-of-the-coffee-preparation-process-4989/) is marked Free License on its publisher page. Its 720-tier original is 5,503,308 bytes, SHA-256 `407c95f695dca9c8b25fb586b3a2eae8736747bf7a4b021f1c1b179101601a50`. The publisher lists [Cat Walk by Arulo](https://mixkit.co/free-stock-music/house/) under its [Music Free License](https://mixkit.co/license/modal/musicFree/), which permits music within audiovisual social/educational work subject to its exclusions. The pinned local MP3’s SHA-256 is `e241cba000ce12e52cadd4c9956274e391ef1f66d1e48a5dd40bfc21645aa489`. Neither a claim about client suitability nor standalone music distribution follows from the licence.
+
+The actual moving source was inspected at the selected and adjacent frames. Beans 80–111 show the grinder, filter 170–197 shows grounds entering the paper, and pour 336–375 shows coffee entering the cup. The parent file has its own editorial transitions: a dissolve starts after the bean span, and a machine shot begins at source frame 199. The initial measured R01 mistakenly included source frames 199–201; the ordered output contact caught the machine shot immediately before the intended pour. **R01 rejected.** R02 shifts the filter in-point earlier and ends at 197, preserving one coherent action before the cup cut. The stock picture has an incidental product mark in the setting; no client endorsement is inferred.
+
+## Plain control and protected revision
+
+Both accepted 96-frame, 960×540, 24000/1001 fps H.264/AAC files use the identical Cat Walk excerpt from MP3 in-point 0.5 s at 0.45 linear gain and no camera sound. The plain music control takes source spans `80–111 / 174–197 / 336–375`, with cuts before output frames 32 and 56. R02 takes `80–111 / 170–197 / 336–371`, with cuts before frames 32 and 60. Both show the same three real process stages and preserve output frames 0–31 byte-for-byte after decoding. The later cut retime and source-window change alter 64 decoded picture frames; no picture respeed, graphic or SFX is applied.
+
+A spectral-flux probe of the actual music excerpt produced candidate attacks at original-MP3 times 1.834376 and 2.995374 s. Because the file begins at MP3 time 0.5 s, cuts at output frames 32 and 60 land about **0.3 and 7.1 ms** from those candidate attacks on the video frame grid. The control’s second cut at frame 56 lands about **159.7 ms** from its candidate attack. These are waveform measurements, **not proof of a heard downbeat, bar position or musical feel**. The song and gain are unchanged between accepted versions, so timing is the isolated variable at the second cut. The short excerpt ends without a crafted musical resolve.
+
+Both accepted MP4s fully decode to 96 frames and 192192 stereo samples at 48 kHz. Their decoded stereo arrays are exactly equal; sample peak is 0.22593. The R02 delivered AAC stream measures −28.8 LUFS integrated and −12.9 dBFS true peak by FFmpeg ebur128. A quiet lab level here is not a production mix target. The full ordered decoded output contact was inspected, including frames 31/32 and 55/56/59/60 and the final pour. No source/shot intrusion remains in R02’s selected frame range. Still-frame and numeric checks do not establish normal-speed picture rhythm, human listening, phone presentation, a native editable project or client approval.
+
+| Private output | SHA-256 | Decision |
+|---|---|---|
+| `plain-music.mp4` | `451ee5b99eb3a770b66d965cea85a38a53391ce581c088cb6e2bb2ccd95eb9a6` | Accepted timing control. |
+| `measured-cut-r01.mp4` | `50d675fe5b9f5752c42ea63ba774e07a9382f48a4220adfbddca201d85cefc50` | Rejected: embedded machine shot at output frame 59. |
+| `measured-cut-r02.mp4` | `89b23ce85d5130d36e39260547c260541678bb815989be7cc2086f331c707620` | Accepted technical revision for a later human A/B. |
+
+Private source, beat-probe, render/QA scripts, outputs, hashes and contacts are in `work/research-continue/sound-beat`; no media or diagnostic audio is committed. The source has no verified original production sound, so this exercise does not meet the card’s riser/event-sound or source-first listening gate. A future actual story needs an approved track, moving-picture rhythm review, normal-speed listening, sensible intro/outro phrase, matched event sound where justified, editable stems and phone/second-editor checks. Keep waveform attacks as candidate markers and allow longer holds when the picture needs them. All 45 existing families retain open acceptance gates.
