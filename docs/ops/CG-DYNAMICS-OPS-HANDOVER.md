@@ -1,3 +1,7 @@
+### 4 November — Nolan MSI four-client production preparation
+
+CA assigned MSI Ehrlich Park, TBS Brokers, PSG and WiseRide via the exact CG Nolan Approvals group; the office PC retains Central Canvas and Watch Addict. The [MSI preflight](../../scripts/video-editing/studio-phase2/NOLAN-MSI-NOVEMBER-QUEUE-PREFLIGHT.md) in draft PR #875 records exact source folders, inventory, prior-use/story checks and a one-film-at-a-time gate. It does not clear shot ranges or claim a new edit. Office research/skill ownership and its separate PR remain unchanged. The exact Google Control Centre tracker is still unidentified; no replacement tracker or guessed write was made.
+
 ### 28 October — Nolan research/skills transferred to office PC
 
 Owner explicitly requested office PC primary execution because MSI is unreliable.
