@@ -75,18 +75,24 @@ def acoustic(args):
     weights = model_dir / "model.safetensors"
     if not args.weights_sha256 or digest(weights) != args.weights_sha256:
         raise ValueError("Restricted-conversion safetensors hash is missing or changed")
-    if not torch.cuda.is_available():
-        raise ValueError("No local CUDA device; acoustic probe not started")
-    driver = subprocess.run(["nvidia-smi", "--id=0", "--query-gpu=memory.free",
-                             "--format=csv,noheader,nounits"], capture_output=True,
-                            text=True, check=True, timeout=10)
-    if gpu_budget(torch.cuda.mem_get_info()[0], driver.stdout) < 4 * 1024 ** 3:
-        raise ValueError("Preserve staff GPU headroom; acoustic probe not started")
-    torch.cuda.set_per_process_memory_fraction(.20)
+    device = args.device
+    if device == "cuda":
+        if not torch.cuda.is_available():
+            raise ValueError("No local CUDA device; acoustic probe not started")
+        driver = subprocess.run(["nvidia-smi", "--id=0", "--query-gpu=memory.free",
+                                 "--format=csv,noheader,nounits"], capture_output=True,
+                                text=True, check=True, timeout=10)
+        if gpu_budget(torch.cuda.mem_get_info()[0], driver.stdout) < 4 * 1024 ** 3:
+            raise ValueError("Preserve staff GPU headroom; acoustic probe not started")
+        torch.cuda.set_per_process_memory_fraction(.20)
+    elif device != "cpu":
+        raise ValueError("Unsupported acoustic device")
     model = ClapModel.from_pretrained(str(model_dir), local_files_only=True, trust_remote_code=False,
-                                      use_safetensors=True).to("cuda").eval()
+                                      use_safetensors=True).to(device).eval()
     processor = ClapProcessor.from_pretrained(str(model_dir), local_files_only=True, trust_remote_code=False)
     audio, sr = sf.read(args.audio, dtype="float32", always_2d=True)
+    if device == "cpu" and len(audio) / sr > 60:
+        raise ValueError("CPU acoustic proof is limited to 60 seconds per input")
     audio = audio.mean(axis=1)
     rows = []
     for first in range(0, len(audio), 4 * sr):
@@ -100,7 +106,7 @@ def acoustic(args):
             samples = resample_poly(chunk, 48000, sr).astype("float32")
             assert len(samples) <= 4 * 48000  # Never the processor's random long-input truncation.
             inp = processor(text=LABELS, audio=[samples], sampling_rate=48000,
-                            padding=True, return_tensors="pt").to("cuda")
+                            padding=True, return_tensors="pt").to(device)
             with torch.inference_mode():
                 output = model(**inp)
             cosines = (output.audio_embeds @ output.text_embeds.T)[0].float().cpu().tolist()
@@ -108,7 +114,7 @@ def acoustic(args):
         rows.append(row)
     return {"role": "acoustic_grounding", "model_revision": receipt.get("revision"),
             "weights_sha256": digest(weights), "labels": LABELS, "groups": GROUPS,
-            "duration": len(audio) / sr, "windows": rows,
+            "duration": len(audio) / sr, "device": device, "windows": rows,
             "qualification": "Bounded evidence only; mixed-speech failure is retained. ASR must independently guard speech. No music-fit approval from tags."}
 
 
@@ -228,6 +234,8 @@ def main():
     parser.add_argument("--audio", required=True)
     parser.add_argument("--model", required=True)
     parser.add_argument("--weights-sha256")
+    parser.add_argument("--device", choices=("cuda", "cpu"), default="cuda",
+                        help="Acoustic role only; CPU is explicit and bounded, CUDA remains the default")
     parser.add_argument("--qualification")
     parser.add_argument("--source-audit")
     parser.add_argument("--guards")

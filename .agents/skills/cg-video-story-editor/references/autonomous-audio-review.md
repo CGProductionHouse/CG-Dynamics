@@ -44,12 +44,90 @@ decode mono 16 kHz float32 PCM and passes that array directly to Whisper. This
 avoids additional dependencies in the voice environment. A regression checks
 the array path and 32 kHz stereo conversion. The real local controls detected
 the complete SAPI spoken sentence alone and over a percussion bed, and returned
-no credible speech for a
-sustained instrumental pad or a percussive instrumental track. On the actual
+no credible speech for a sustained instrumental pad or a percussive
+instrumental track. On the actual
 Action Sports R14 extracted mix it returned `speech_detected: false`, but also
 emitted a low-confidence one-word `you` segment. Treat that as a weak negative
 speech guard, not proof that every vocal sound is absent. Voice timestamps and
 creative music fit remain outside this component's qualification.
+
+### MSI music critic negative control, 4 November 2026
+
+The MSI has an RTX 4060 Laptop GPU with 8,188 MiB total/7,956 MiB free when
+idle. The office MOSS character role explicitly requires at least 9 GiB free,
+so its qualification cannot simply be copied to this machine. We tested the
+official MIT-licensed Microsoft Phi-4 multimodal ONNX int4 build, revision
+`295df4cddf8c3740df7cd66e5d05f06a872fcaf5`, with DirectML in a private
+Windows virtual environment; every downloaded large weight was checked against
+its published LFS SHA-256. The official example loaded and consumed local WAVs.
+With the same neutral prompt, however, it called a 12-second smooth sustained
+synthetic pad a "pulsating beat" and "energized". It gave almost the same
+description to the truly percussive control. The pad's SHA-256 was
+`906ffe1188f87ac889fde6e30b88dc9319aa67e2b7adc114363349be708ef841`;
+the percussive control's was
+`37e5bf900897120f6e88c23e6de011d0b4405123d4c4b3b8b5637576b08d78a4`.
+This route **fails music-character qualification** on the MSI. Loading, MIT
+licensing and local processing are not enough; do not use its generic prose as
+a creative listen or repeat prompt variants until one answer sounds plausible.
+No client audio was supplied to this candidate.
+
+An independent, audio-specific **research-only** candidate was then tested:
+Liquid AI LFM3-Audio-2B GGUF Q4_K_M plus matching projector at revision
+`39670cb5c42e9c4bfe046519ba7ffbe47f9552ad`, with pinned official SHA-256
+weights and the official llama.cpp Windows CPU binary `b12099`. The identical
+prompt described the smooth pad as a machine running at constant speed and the
+percussion as rhythmic clicking. It consumed the files and detected a texture
+contrast, but did not identify either musical character reliably. It is **not
+qualified** as Nolan's music listener. No client audio was processed. Its LFM
+Open License v1.0 also conditions free commercial use on annual company revenue
+below US$10 million; do not put it into production without verifying that term.
+
+The Apache-licensed MOSS-Audio-4B GGUF route would have reused the office
+model family on the MSI CPU. Its third-party quantized checkpoint and official
+CrispASR Windows release were inspected; the `v0.8.50` CPU release archive
+matched GitHub's published SHA-256. Windows Application Control then blocked
+`crispasr.exe` **before its help command ran**. The 4.11 GB model transfer was
+cancelled; no client audio was processed. Do not bypass workstation application
+control or present this as a working CPU listener. Reconsider only through an
+approved, normally executable runtime or policy-authorised installation.
+
+### MSI acoustic role now runs locally on CPU
+
+`local_audio_evidence.py acoustic` retains the office PC's CUDA default and
+minimum GPU headroom. `--device cpu` is an explicit MSI fallback capped at 60 s
+per input and four Torch threads. It keeps the same model-source hash checks,
+full-file four-second windows and `creative_release: false` result. The MSI's
+isolated environment has Torch 2.9.1+cpu, Transformers 4.57.3, SciPy 1.18.0
+and SoundFile 0.14.0. The pinned Apache-2.0 LAION
+`clap-htsat-unfused` revision is
+`8fa0f1c6d0433df6e97c127f64b2a1d6c0dcda8a`; its original
+`pytorch_model.bin` SHA-256 is
+`1cd3c601bc4afe0fa87be3de4c13dd2cfadd249fac1e29acf74a9b296c3219bb`.
+It was loaded with `torch.load(..., weights_only=True)`, checked as a
+tensor-only state dict and converted locally to `model.safetensors` SHA-256
+`784ef9b12da43186801ffe47bf8df6e5742bef2b59f94256bb84a9a1ba30a14a`.
+The pinned source/converted files and a `download-receipt.json` remain private
+outside Git. The production helper refuses changed weights or an incomplete
+receipt and performs no download itself.
+
+Actual MSI controls: isolated speech classified `speech`; synthetic sustained
+triad classified `tones` in all three windows; synthetic kick/snare/bass
+classified `uncertain`, `uncertain`, then `music`; speech over percussion was
+classified `music` throughout, retaining the known CLAP mixed-speech failure.
+The independent Whisper guard detected that mixed speech. The 26.331 s decoded
+Action Sports R14 audio stream classified `music` in all seven full-coverage
+windows, with margins 0.12–0.43. Its MP4 picture runs 26.433 s; this acoustic
+finding does not account for the final 0.102 s of picture or judge musical fit.
+The fused CLAP control was also tested and was not promoted because it called
+the synthetic pad a machine hum and missed mixed speech. None of these tags
+establish an audible creative verdict, beat appeal, cue taste or phone playback.
+
+On the MSI, run the local voice helper on the exact decoded mix, then the
+acoustic helper with the pinned private unfused model and `--device cpu`.
+Retain the office PC's separate 9 GiB MOSS character route for qualified music
+texture/drive review there. No model in this MSI trial passed the equivalent
+music-character controls; route that assessment to a qualified workstation
+instead of claiming the MSI heard or approved the soundtrack.
 
 ## Observed failures and fixes
 
