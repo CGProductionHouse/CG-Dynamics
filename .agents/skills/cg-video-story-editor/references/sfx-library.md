@@ -1,5 +1,11 @@
 # CG sound design catalog
 
+## Office-visible sound inventory rule
+
+This file is a **candidate and rights register**, shared through Git with Nolan Studio PC. It is not a folder of reusable raw stock files. For every production cue, record the chosen item URL, exact licence, original filename/hash, film name, timeline action/time and gain in the private project manifest; store the licensed media with that end product. Company-owned field recordings can be promoted to a shared binary library only after their origin, consent, clean content and team reuse rights are verified. Never transfer another client's identifiable ambience into a different client's film as if it were recorded there. The shared music-use tracker is `CG Production House/Video Editing System/NOLAN-MUSIC-USE-AND-REJECTIONS.csv` in OneDrive; search it before selection and add the actual chosen cue once selected. A candidate is not a reservation or approved mix.
+
+For the November Ehrlich heat film, discovery candidates are [Mixkit fire sounds](https://mixkit.co/free-sound-effects/fire/) (a short fire whoosh/crackle only where flame is visible) and [Mixkit whooshes](https://mixkit.co/free-sound-effects/whoosh/) (one directional move only if picture supports it). The [Mixkit SFX Free License](https://mixkit.co/license/modal/sfxFree/) permits commercial end-product use but forbids redistribution of a raw sound as a stock item or template. Preview and choose a specific effect before download; do not bulk-download a pack or label it heard/approved here. A real camera ignition, grill sizzle or knife hit is preferable when clean and contextually correct.
+
 Starter discovery collection: [Envato “sound effects” Workspace](https://app.envato.com/workspaces/ee3716e1-b8c5-4c31-85f6-7029555903d1). Four cues were added on 20 October 2026 to the three drones already saved there. Saving an item to the Workspace only bookmarks it; it does not clear that item for every client project.
 
 | Editorial job | Saved Envato candidate | Length | Try it for |
