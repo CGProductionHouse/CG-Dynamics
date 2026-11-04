@@ -5,6 +5,8 @@ description: Test a brief exposure-led flash across a motivated cut using existi
 
 # Exposure flash transition — added pulse rejected in A/B
 
+**4 November new bounded variant:** The owner supplied a [three-frame brightness/contrast tutorial](https://vt.tiktok.com/ZSp8vso8g/). The private Bloem R14 revision tests two restrained exposure frames immediately before a colour-to-monochrome sports passage, with a separate licensed click. [Application and remaining gates](../../ACTION-SPORTS-R14-EFFECT-STUDY-20261104.md). This does not overturn the earlier *rejected* stage-light A/B: the sports source has a different cut purpose and must still pass full-speed flash comfort, highlight detail and sound-fit review. Do not copy tutorial audio or prescribe its 82–100% brightness setting to every scene.
+
 **Lifecycle:** [Miracamp reference](https://www.tiktok.com/@miracampschool/video/7672852460502895905) sampled at about 7, 20 and 33 s → one stock [flare-cut A/B](../../FLARE-CUT-STUDY.md) rendered; added pulse rejected → mastered **NO**.
 
 The Premiere tutorial shows a nested upper clip crossing a cut, `Levels` and keyframed Transform/Levels settings; the displayed Transform shutter-angle value reaches 200 degrees. This is a short exposure/motion treatment. It is **different from** a matched flash cut built around one repeated object across locations. The exact keyframe curve, output quality and audio were not verified.

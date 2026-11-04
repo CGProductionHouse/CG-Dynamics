@@ -5,6 +5,8 @@ description: Plan stepped object movement using repeatable original captures and
 
 # Stepped object motion — synthetic and filmed timing proofs, physical capture pending
 
+**4 November sport variant:** The owner's [posterized stop-motion tutorial](https://vt.tiktok.com/ZSp8vhsD4/) uses a nested filmed sequence at about 4–5 fps with a film-like cue. A private Bloem Action Sports R14 study samples an actual held-ball athlete at 5 fps for 38 output frames and adds seven separately licensed, low-level clicks at pose changes. See [the exact application ledger](../../ACTION-SPORTS-R14-EFFECT-STUDY-20261104.md). This is stepped footage, **not** a photographed object moving between takes; do not present it as physical stop motion. Keep sound events locked to pose changes, then verify the exact exported mix by listening before production use. The two mechanisms share timing ideas but retain different capture and physical-grounding requirements.
+
 **Lifecycle:** [owner's Arthur reference](https://www.tiktok.com/@iam_arthur7/video/7496560815676329246) sampled at several points → original *synthetic timing* A/B rendered on 26 October → [real-footage Lego plain/two-frame/protected four-frame A/B](../../STEPPED-REAL-FOOTAGE-STUDY-20261029.md) on 29 October → physical capture, full-speed creative and sound review pending → mastered **NO**.
 
 The tutorial shows a camera on a tripod while an object is moved a little between takes. Its caption recommends trimming the takes into roughly four-frame-or-longer pieces, optionally smoothing with a short dissolve, nesting and adding speed changes and sound. That interval is the creator's suggestion, not a measured universal setting; source fps and perceived movement distance determine the real timing.
