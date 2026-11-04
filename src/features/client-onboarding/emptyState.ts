@@ -9,5 +9,5 @@ export function onboardingEmptyState({ activeClients, sessions, filteredSessions
   if (loading || error || filteredSessions > 0) return null
   if (activeClients === 0) return { title: 'No active clients', message: 'No active clients available.' }
   if (sessions === 0) return { title: 'No onboarding sessions yet', message: 'Active clients are available, but no onboarding sessions have been created.' }
-  return { title: 'No sessions found', message: 'No sessions match your filters.' }
+  return { title: 'No sessions found', message: 'No clients match your filters.' }
 }

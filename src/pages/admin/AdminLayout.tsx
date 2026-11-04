@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useEffectEvent, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { MyDayContextStoreProvider } from '../../contexts/MyDayContextStore'
@@ -23,10 +23,10 @@ function scheduleWhenIdle(callback: () => void) {
     cancelIdleCallback?: (id: number) => void
   }
   if (idleWindow.requestIdleCallback) {
-    const id = idleWindow.requestIdleCallback(callback, { timeout: 1_500 })
+    const id = idleWindow.requestIdleCallback(callback, { timeout: 8_000 })
     return () => idleWindow.cancelIdleCallback?.(id)
   }
-  const id = window.setTimeout(callback, 250)
+  const id = window.setTimeout(callback, 5_000)
   return () => window.clearTimeout(id)
 }
 
@@ -153,9 +153,11 @@ export default function AdminLayout() {
     window.localStorage.setItem(ZONE_STORAGE_KEY, zone)
   }, [zone])
 
-  async function refreshNotifications(showLoading = false) {
+  async function refreshNotifications(showLoading = false, skipAssistantRefresh = false) {
     if (showLoading) setNotificationsLoading(true)
-    await refreshAssistantDayNotifications().catch(() => null)
+    if (!skipAssistantRefresh) {
+      await refreshAssistantDayNotifications().catch(() => null)
+    }
     const [listResult, countResult] = await Promise.all([listMyNotifications(), unreadNotificationCount()])
     const error = listResult.error ?? countResult.error
     if (error) {
@@ -168,19 +170,17 @@ export default function AdminLayout() {
     setNotificationsLoading(false)
   }
 
-  const pollNotifications = useEffectEvent(() => {
-    void refreshNotifications()
-  })
-
   useEffect(() => {
     let poll: number | null = null
     const cancelIdle = scheduleWhenIdle(() => {
       setBackgroundReady(true)
-      pollNotifications()
-      poll = window.setInterval(pollNotifications, NOTIFICATION_POLL_MS)
+      // Initial load: skip assistant refresh to avoid competing with Hub load
+      refreshNotifications(false, true)
+      // Subsequent polls: include assistant refresh
+      poll = window.setInterval(() => refreshNotifications(false, false), NOTIFICATION_POLL_MS)
     })
     const refreshWhenVisible = () => {
-      if (poll !== null && document.visibilityState === 'visible') pollNotifications()
+      if (poll !== null && document.visibilityState === 'visible') refreshNotifications(false, false)
     }
     window.addEventListener('focus', refreshWhenVisible)
     document.addEventListener('visibilitychange', refreshWhenVisible)
