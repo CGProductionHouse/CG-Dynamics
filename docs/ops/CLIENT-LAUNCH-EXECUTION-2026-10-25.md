@@ -1,5 +1,40 @@
 # Client launch execution — local-first continuation
 
+## 4 November — both exact-approved Google campaign links are live
+
+CA approved Germoparts campaign 24413585918 and historical Novus campaign 24189935204.
+Exactly two mappings were inserted for the existing shared account 495-150-6884;
+independent read-back confirms nine total mappings and all seven original rows
+byte-for-byte unchanged. Both client identities were checked against active canonical
+records. The Novus mapping is active for historical reporting; its Google campaign
+remains paused/ended. No campaign, budget, permission, schema, Edge, resync or Vercel
+change occurred.
+
+The normal company-browser save stalled at its native confirmation while Chrome was
+minimised; tab focus and dialog recovery also failed. Independent database checks
+confirmed no save occurred before fallback. The exact approved links were then saved
+with one guarded administrative INSERT: shared-account/customer/client/evidence and
+original-seven-row checks, conflict/partial-state rejection and replay-safe no-op.
+created_by is NULL to record administrative execution without app-user impersonation.
+The inaccessible agent confirmation tab was not used as success evidence.
+
+Normal Dynamics company-admin read-only connector now returns each intended campaign
+under its exact client. Germoparts October: 1,647 impressions, 65 clicks, R184.09 from
+two stored days. Novus September: 12,231 impressions, 658 clicks, R2,221.91 from 27
+stored days (30 across the whole 29 August–27 September campaign). These match the
+previously verified Google UI. The account summaries remain PARTIAL because unrelated
+historical mappings lack period rows; that state was not relabelled complete. Real
+client-role/password acceptance remains separate; no new browser acceptance is claimed.
+
+Private SQL `%TEMP%/cg-approved-google-links-20261104.sql`, SHA256
+`0b56234a3fa10fe25680f66215218cc185368debddbe61bc8335322f5d014ff7`.
+Private read-back `%TEMP%/cg-approved-google-links-receipt-20261104.json`, SHA256
+`5814041f26eed225fe7d6312d9ad267db4707ebd0411099b62e3d41011284b4c`.
+This supersedes the two pending mapping approvals in the 3 November review. #435 owns
+provider follow-up; strategy/content/calendar/Meta access gates are unchanged. This
+handover change is documentation only; no repeated application build or whole-fleet
+sweep is needed. The exact Google Control Centre reference is still unavailable.
+
 ## 3 November — #941 exact-approved date-follow fix LIVE
 
 Migration applied and five function bodies/ACL/RLS read back. Existing Teams backend
@@ -326,7 +361,7 @@ Provider readbacks: Meta47mappedclients/76platformcheckpoints:20PASS,55PARTIAL,
 TikTok10connectedclients have Novemberfacts lastverified2Nov21UTC; partial
 cohort/account measures stay distinct. Exact Googleaccount/customer/campaign join
 confirms Cape33dailyrows1Oct–2Nov. Germoparts' newer24413585918("GERMOPARTS2026")
-has4rows30Oct–2Nov but is unassigned; oldGermoparts mappings, threeNovus mappings
+had4rows30Oct–2Nov and was unassigned at that readback (linked4Nov); oldGermoparts mappings, threeNovus mappings
 and RC-Polypipe have0October-or-newer rows. No live settings/ownership inference,
 new mapping, campaign edit or resync was made. #435 retains exact provider review.
 The first directdaily.client_id join returned0because that legacynullablefield is
@@ -355,14 +390,13 @@ actual desktop/mobile More navigation; private supplemental receipt
 
 Actual company Google Ads UI subsequently verified all9campaign statuses and business
 creative. Cape is active; native October R2,199.24 matches stored data. Old Germoparts,
-Novus and RC-Polypipe campaigns are paused/removed. Two missing links are prepared
-but UNSAVED pending separate CA approval: activeGermoparts24413585918 and historical
-paused/endedNovus24189935204. Novus has30stored29Aug–27Sep rows; nativeSeptember
-12,231impressions/658clicks/R2,221.91 match. GermopartsOctober native1,647/65/R184.09
-match two stored days. No campaigns/budgets/permissions/resync changed; existing
-seven mappings preserved. Source receipt `%TEMP%/cg-client-fleet-google-source-ui-20261103.json`.
-Do not silently save both when approval covers only one; normal UI has both selected
-locally, so deselect the unapproved row before any save. #435 owns this narrow gate.
+Novus and RC-Polypipe campaigns are paused/removed. Both exact missing links were approved and saved on4November: activeGermoparts
+24413585918 and historicalpaused/endedNovus24189935204. Normal connector read-back
+matches the already verified source totals; nine mappings total, seven originals
+byte-identical. The 4November receipt above records the guarded administrative
+fallback after browser confirmation failed. No campaign/budget/resync change. #435
+retains provider ownership. This supersedes the earlier pending-approval state.
+
 
 
 | Client | Confirmed scope / hold | Nov / Dec strategy | Latest published report | Nov / Dec client dates | Brand Hub | Portal account | Actual UI evidence |
@@ -392,7 +426,7 @@ locally, so deselect the unapproved row before any save. #435 owns this narrow g
 | Emoya Estate Driving Range | V1 / F4 / DP4 | draft / draft | None published | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | 17 desktop panels; mobile 390px: 4 views; no overflow |
 | First Technology Central | No recurring social | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow |
 | Forklift Trucks | V1 / F3 / DP3 | draft / draft | None published | 0 canonical rows / 0 canonical rows | Private / 0 assets | Not provisioned | 16 desktop panels; mobile 390px: 4 views; no overflow |
-| Germoparts | V2 / DP12 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow; Facebook access gate; Google link approval pending |
+| Germoparts | V2 / DP12 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow; Facebook access gate; approved Google link live |
 | Hino Trucks | V2 | draft / draft | None published | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | 16 desktop panels; mobile 390px: 4 views; no overflow |
 | HMHI | DP3 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow |
 | Human Auto | V3 | draft / draft | None published | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | 17 desktop panels; mobile 390px: 4 views; no overflow |
@@ -408,11 +442,11 @@ locally, so deselect the unapproved row before any save. #435 owns this narrow g
 | Mimosa Mall | No recurring social | draft / draft | None published | 0 canonical rows / 0 canonical rows | Private / 0 assets | Not provisioned | 16 desktop panels; mobile 390px: 4 views; no overflow |
 | NCNA | No recurring social | draft / draft | None published | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | 17 desktop panels; mobile 390px: 4 views; no overflow |
 | Neshora Oxygen | V1 / F4 / DP4 | draft / Absent | None published | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Not provisioned | 17 desktop panels; mobile 390px: 4 views; no overflow |
-| Novus Steel | V1 / F4 / DP4 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow; Google historical source checked |
+| Novus Steel | V1 / F4 / DP4 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow; approved historical Google link live |
 | Peyper Bonds | V1 / F3 / DP3 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow |
 | Piek Group | V4 / DP12 | draft / draft | 2026-09-30 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow; Calendar read recovered |
 | PSG Bloemfontein | V1 / DP3 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow |
-| RC-Polypipe | V1 / F3 / DP4 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | 16 desktop panels; mobile 390px: 4 views; no overflow; Google historical source checked |
+| RC-Polypipe | V1 / F3 / DP4 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Private / 0 assets | Enabled | 16 desktop panels; mobile 390px: 4 views; no overflow; approved historical Google link live |
 | Red Oak | Owner hold | draft / draft | 2026-09-30 | 0 canonical rows / 0 canonical rows | No mapping | Enabled | 16 desktop panels; mobile 390px: 4 views; no overflow |
 | Rusoord Farmstay | No recurring social | draft / Absent | None published | 0 canonical rows / 0 canonical rows | Private / 0 assets | Not provisioned | 16 desktop panels; mobile 390px: 4 views; no overflow |
 | SecuriForce | V4 / F4 / DP4 | draft / draft | 2026-09-23 | 0 canonical rows / 0 canonical rows | Enabled / 1 assets | Enabled | 17 desktop panels; mobile 390px: 4 views; no overflow |

@@ -1,3 +1,38 @@
+## 4 November — both exact-approved Google campaign links are live
+
+CA approved Germoparts campaign 24413585918 and historical Novus campaign 24189935204.
+Exactly two mappings were inserted for the existing shared account 495-150-6884;
+independent read-back confirms nine total mappings and all seven original rows
+byte-for-byte unchanged. Both client identities were checked against active canonical
+records. The Novus mapping is active for historical reporting; its Google campaign
+remains paused/ended. No campaign, budget, permission, schema, Edge, resync or Vercel
+change occurred.
+
+The normal company-browser save stalled at its native confirmation while Chrome was
+minimised; tab focus and dialog recovery also failed. Independent database checks
+confirmed no save occurred before fallback. The exact approved links were then saved
+with one guarded administrative INSERT: shared-account/customer/client/evidence and
+original-seven-row checks, conflict/partial-state rejection and replay-safe no-op.
+created_by is NULL to record administrative execution without app-user impersonation.
+The inaccessible agent confirmation tab was not used as success evidence.
+
+Normal Dynamics company-admin read-only connector now returns each intended campaign
+under its exact client. Germoparts October: 1,647 impressions, 65 clicks, R184.09 from
+two stored days. Novus September: 12,231 impressions, 658 clicks, R2,221.91 from 27
+stored days (30 across the whole 29 August–27 September campaign). These match the
+previously verified Google UI. The account summaries remain PARTIAL because unrelated
+historical mappings lack period rows; that state was not relabelled complete. Real
+client-role/password acceptance remains separate; no new browser acceptance is claimed.
+
+Private SQL `%TEMP%/cg-approved-google-links-20261104.sql`, SHA256
+`0b56234a3fa10fe25680f66215218cc185368debddbe61bc8335322f5d014ff7`.
+Private read-back `%TEMP%/cg-approved-google-links-receipt-20261104.json`, SHA256
+`5814041f26eed225fe7d6312d9ad267db4707ebd0411099b62e3d41011284b4c`.
+This supersedes the two pending mapping approvals in the 3 November review. #435 owns
+provider follow-up; strategy/content/calendar/Meta access gates are unchanged. This
+handover change is documentation only; no repeated application build or whole-fleet
+sweep is needed. The exact Google Control Centre reference is still unavailable.
+
 ## 3 November — full client portal UI review completed
 
 All 62 canonical directory records have desktop journeys recorded (61 new plus Cape's
