@@ -1,6 +1,16 @@
 # WiseRide November — MSI story and source plan
 
-Status: **preproduction, not an approved script or cleared edit**. Owner assigned MSI to WiseRide on 5 November; Nolan PC owns PSG. This plan uses the exact 4 November 13:55 SAST CG Nolan Approvals brief and the owner's November/December travel direction. No media is approved for an edit solely by appearing in the folder.
+Status: **preproduction, not an approved script or cleared edit**. Owner assigned MSI to WiseRide on 5 November; Nolan PC owns PSG. This plan uses the exact 4 November 13:55 SAST CG Nolan Approvals brief and the owner's November/December travel direction. The owner's later Afrikaans `skoonma` valet idea supersedes the earlier generic preferred hook below, subject to moving-source and tone tests. No media is approved for an edit solely by appearing in the folder.
+
+## 5 November owner creative steer — the skoonma test
+
+`Skoonma` means mother-in-law (`stiefma` means stepmother). The owner's joke is an **option**, not an instruction to force a comedy script over weak footage. Test the natural Afrikaans question **“Gaan jou kar die skoonma-toets slaag?”** against a moving car reveal. Avoid the mixed-language `skoonma-proof` unless an Afrikaans reviewer actually prefers it. The film's actual subject remains WiseRide's *general valet/detailing service*, not tyres, mechanical roadworthiness, tint or accident cover.
+
+**Preferred opening A/B:** Start with the sharpest real WiseRide surface/detail action, then cut to a moving wide car shot. Set the question in the kit's Tomorrow Bold Italic. If the car crosses enough of the words cleanly, split the shot into background/type/foreground vehicle layers so the vehicle **passes in front of the type**. Preserve grounded wheels/body, windscreen and mirror edges; check every masked frame at full and phone size. The old trolley-through-type treatment is a construction reference, not permission to use an automatic poor cutout. Plain moving-picture/type is the fallback if the vehicle matte fails. Cue one precise door/wipe/contact transient and a brief musical pocket under the question, then bring the beat in with a real valet action. No canned sitcom voice or stock `skoonma` character.
+
+**Payoff and possible copy, pending footage:** Turn the humorous question into a visible inside/outside valet result. One concise end line could be **“Maak jou kar reg vir Desember. Vra WiseRide oor 'n valet.”** Check the exact offer and Afrikaans with a fluent reviewer before final export. A locally recorded, approved voiceover is optional; subtitles/type must carry the story without it. The earlier `BEFORE THE LONG DRIVE`/`READY FOR THE KILOMETRES` hook table is now fallback research only. Do not assemble a repeated rinse-to-cabin sequence from the 26 October posted reel to service this new headline.
+
+**Camera-language instruction:** Screen Franco's full source motion for a rotation, pan or wipe gesture that can lead into the next shot's matching direction. Align movement at the cut and land it on a heard beat; use speed changes only where they preserve the gesture. Stabilise shots intended to be focused/still, but do not erase deliberate travel. Compare normal-speed A/B in portrait and reject a transition that twists the car or loses the service action.
 
 ## Step one: the real proposition
 
