@@ -13,6 +13,14 @@
 
 **Viewer question:** “Your deliveries are moving. Has your cover kept up?” This is a candidate, not approved copy. It connects a visible dispatch action to a relevant seasonal risk and a specific broker conversation. The first three seconds need a real action and sound event: goods secured, door closed, vehicle pulling away or equivalent local footage, then a short pressure pocket before a road movement shot. Do **not** open on a generic service label or an abstract title card.
 
+| First-three-second hook candidate | First moving frame and sound | Why this buyer might stop | Status |
+| --- | --- | --- | --- |
+| **Dispatch / departure** | A secured load or shutter in motion, its real mechanical sound beginning before picture, then a vehicle departure and the question “Your deliveries are moving…” | Shows the exact moment the business hands goods to the road; pressure is concrete without staging an accident | Preferred story mechanism, but no cleared source pair yet |
+| **Road-pressure cut** | A legitimate local road/truck movement, one brief traffic-density/sound pocket, then cut back to the goods being loaded | Links festive travel conditions to commercial dispatch rather than a generic insurance category | Hold until actual local picture is verified; foreign road footage cannot be labelled N1 |
+| **Loading-to-broker match** | Pallet/box crosses frame, motion match to a real TBS worker opening a file or walking into the office, with sound crossing the cut | Immediately connects the physical business journey to a real Bloemfontein adviser | Hold until suitable natural TBS working footage and prior-public-use clearance exist |
+
+The rejected opening “PACKED / SENT / COVERED?” is only a service label over generic boxing stock; it did not establish a local buyer tension or compelling visual event. No hook above is approved merely because it reads well on paper.
+
 | Time target | Picture job | Text / sound job | Source gate |
 | --- | --- | --- | --- |
 | 0–3 s | Dispatch action with an immediate change in motion | Buyer-facing question; source action prelap, score establishes pulse | Moving footage with a clean portrait crop; verify origin and licence |
