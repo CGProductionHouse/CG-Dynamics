@@ -6,6 +6,19 @@ import { validateMonthPlan } from '../scripts/poster-studio/month-plan.mjs'
 
 const root = resolve(import.meta.dirname, '..', 'docs', 'ai-workforce', 'graphic-designer', 'piek-january-2027')
 
+test('execution windows reject impossible dates, missing coverage and accidental scheduling', () => {
+  const plan = JSON.parse(readFileSync(resolve(root, 'january-strategy.proposal.json'), 'utf8'))
+  const brandPack = JSON.parse(readFileSync(resolve(root, 'brand-pack-index.json'), 'utf8'))
+  plan.creativeWindows[0].end = '2027-01-32'
+  plan.creativeWindows[1].scheduled_date = '2027-01-03'
+  plan.creativeWindows.pop()
+  const report = validateMonthPlan(plan, brandPack)
+  assert.equal(report.valid, false)
+  assert.ok(report.errors.some((error) => error.includes('one proposed creative window')))
+  assert.ok(report.errors.some((error) => error.includes('real date')))
+  assert.ok(report.errors.some((error) => error.includes('cannot create a schedule assignment')))
+})
+
 test('Piek January proposal has 12 complete, scope-balanced and mechanism-distinct briefs', () => {
   const plan = JSON.parse(readFileSync(resolve(root, 'january-strategy.proposal.json'), 'utf8'))
   const brandPack = JSON.parse(readFileSync(resolve(root, 'brand-pack-index.json'), 'utf8'))

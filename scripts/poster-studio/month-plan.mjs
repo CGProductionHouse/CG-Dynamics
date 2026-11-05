@@ -56,6 +56,24 @@ export function validateMonthPlan(plan, brandPack) {
   const ids = new Set()
   const mechanisms = new Set()
   const headlines = []
+  const windows = plan.creativeWindows ?? []
+  if (plan.productionLane && windows.length !== (plan.briefs?.length ?? 0)) errors.push('execution requires one proposed creative window per brief')
+  const windowIds = new Set()
+  for (const window of windows) {
+    if (windowIds.has(window.provisionalId)) errors.push(`${window.provisionalId}: duplicate creative window`)
+    windowIds.add(window.provisionalId)
+    if (!plan.briefs?.some((brief) => brief.provisionalId === window.provisionalId)) errors.push(`${window.provisionalId}: creative window has no brief`)
+    for (const field of ['start', 'end']) {
+      const value = window[field]
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(value ?? '') || !Number.isFinite(Date.parse(value))
+        || new Date(value).toISOString().slice(0, 10) !== value || value.slice(0, 7) !== plan.month?.slice(0, 7)) {
+        errors.push(`${window.provisionalId}: ${field} must be a real date within the planned month`)
+      }
+    }
+    if (window.start > window.end) errors.push(`${window.provisionalId}: creative window ends before it starts`)
+    if (!present(window.occasion) || !present(window.evidenceType)) errors.push(`${window.provisionalId}: occasion and evidenceType are required`)
+    if (window.scheduled_date || window.monthlyDeliverableId) errors.push(`${window.provisionalId}: a creative window cannot create a schedule assignment`)
+  }
 
   for (const [index, brief] of (plan.briefs ?? []).entries()) {
     const label = brief.provisionalId || `brief[${index}]`

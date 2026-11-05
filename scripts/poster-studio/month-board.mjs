@@ -26,6 +26,7 @@ export function renderMonthBoard(plan) {
       <h2>${escapeHtml(brief.headlineCandidates[0])}</h2>
       <p class="reason">${escapeHtml(brief.whyItExists)}</p>
       <dl>
+        <div><dt>Proposed creative window · not scheduled</dt><dd>${escapeHtml((plan.creativeWindows ?? []).filter((window) => window.provisionalId === brief.provisionalId).map((window) => `${window.start} – ${window.end}: ${window.occasion}`).join('') || 'Not yet proposed')}</dd></div>
         <div><dt>Objective</dt><dd>${escapeHtml(brief.businessObjective)}</dd></div>
         <div><dt>Audience tension</dt><dd>${escapeHtml(brief.audienceTension)}</dd></div>
         <div><dt>Proposition</dt><dd>${escapeHtml(brief.proposition)}</dd></div>

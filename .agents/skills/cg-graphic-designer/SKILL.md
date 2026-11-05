@@ -24,6 +24,7 @@ Produce professional, individually art-directed work from exact client evidence.
 4. Run the global creative ledger against source hashes/pHash, shoot/capture evidence, reviewer-supplied visible-person tags, products/services, branches, concepts, headlines and layout mechanisms. Never create face embeddings or a biometric identity database.
 5. Write the strategic job before source selection: audience/moment, objective, tension, proposition, proof, desired response/action, current relevance, source need, distinctive mechanism, exclusions and one-sentence reason to exist.
 6. Review the month as a grid. Balance scope/location, people/product/service/place, light/dark, density, type behaviour and mechanism. A different photograph does not make a repeated concept fresh.
+7. Research the actual target month's season, local events, holidays and audience routines from current first-party sources. Give each brief a proposed creative window and distinguish calendar facts from audience hypotheses. Opening-week creative must fit that week's context. Recheck time-sensitive stock, offers, hours and events near release. Avoid forcing a seasonal theme onto every poster.
 
 For Piek January 2027, read issue #955 and:
 

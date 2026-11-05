@@ -11,7 +11,8 @@ test('month board renders every proposal and production gate', () => {
   assert.equal((html.match(/<article class="card/g) ?? []).length, 12)
   for (const brief of plan.briefs) {
     assert.match(html, new RegExp(brief.provisionalId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
-    assert.match(html, new RegExp(brief.headlineCandidates[0].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
+    const decoded = html.replaceAll('&#039;', "'").replaceAll('&quot;', '"').replaceAll('&gt;', '>').replaceAll('&lt;', '<').replaceAll('&amp;', '&')
+    assert.ok(decoded.includes(brief.headlineCandidates[0]))
   }
   assert.match(html, /Planning evidence only/)
   assert.match(html, /blocked/i)
