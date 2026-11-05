@@ -1,4 +1,26 @@
-## 5 November — Cape ready graphics published; exact calendar-link approval pending
+## 5 November — approved Cape calendar file repair LIVE
+
+CA approved the exact six-row packet from #958. Fresh main/ownership/source-hash
+and production SELECT preflight matched; applied the unchanged reviewed SQL once.
+Independent readback confirms exact published image links for2/4/9/11/16/18November,
+with scheduled/shared dates and production states unchanged. No schema/backend/
+permission/Teams/strategy/other-client/Vercel operation. Older “awaiting approval”
+entries are historical; do not replay the packet on their basis.
+
+Real Cape client-role acceptance: all six calendar dates → View published files
+return their exact named artwork; November18 Photo3's empty-file defect is closed.
+Calendar Download for16November succeeded:858,580bytes, SHA256 identical to the
+reviewed source. Direct18November View renders2047×2560 in one separate window
+with an empty referrer.390px/no-overflow check and original-portal retention pass.
+Private proof: `%TEMP%/cape-calendar-linked-20261105.png`.
+The previous23 focused tests/local PostgreSQL atomic-rollback cases/build remain
+valid for the unchanged packet/runtime; this closure changes documentation only.
+
+November23 ready artwork and exact25November repost source remain unverified,
+not fabricated or rescheduled. Full source/acceptance receipt remains in the
+existing Cape review; #396/#668/#381 retain continuity. No all-client launch claim.
+
+## 5 November — pre-approval receipt: Cape ready graphics published
 
 CA's real phone test found empty planned-post files and logo-only Brand Hub.
 Recovered seven approved image/caption pairs from the actual Cape Marketing

@@ -1,4 +1,38 @@
-## 5 November — ready Cape artwork recovered and published; six calendar links awaiting approval
+## 5 November — approved six Cape calendar file links LIVE
+
+CA explicitly approved “Approve exact six Cape file links.” Rechecked clean main,
+current PR ownership, the reviewed packet and live six-row state before applying.
+Executed only the approved `cape-ready-post-asset-links-20261105.sql` transaction
+from #958. LF-normalised source SHA256 matches the tested
+`FA9B52CACF13E1FBDC10A5F8A6B01E369409C67DEFC1EFC4BF1D3A8B4825B024`.
+The transaction completed; independent SELECT confirms all six exact asset/
+deliverable pairs on2/4/9/11/16/18November. Existing shared dates and production
+statuses remain unchanged. No migration, schema, function, permission, Teams,
+strategy, campaign, other-client or Vercel operation.
+
+Actual **Cape client-role** acceptance through the retained normal client session:
+all six day buttons → View published files return the expected single named
+same-date artwork, with none of the previous empty-file messages. November18
+“Photo3” specifically now returns “18 November · Bulk project quantities”.
+Normal calendar Download for16November produced
+`Downloads/2026_11_16.jpeg`,858,580bytes, SHA256
+`3DD2005A2D0EAF5077B830F00ABF208EF7A4CEAC4F493DD5739B50D901009B1A`,
+identical to the reviewed WhatsApp source.390px viewport has375px document client/
+scroll width (browser scrollbar), with no horizontal overflow. The original
+portal remains open when using image View. This closes the six approved calendar
+associations; it is not a new all-client/provider/strategy launch verdict.
+
+Direct18November calendar View rendered the expected2047×2560 image in exactly
+one separate window with an empty referrer. Saved the real client mobile result:
+`%TEMP%/cape-calendar-linked-20261105.png`. No synthetic preview or session copying.
+
+The original pre-approval receipt and immutable reviewed SQL packet below remain
+audit evidence. Their pending wording is historical, superseded by this LIVE
+receipt. **Do not replay the packet merely because the older receipt says pending.**
+November23's missing finished artwork and25November's unverified repost source
+remain the same content holds; no placeholder asset or posting promise was invented.
+
+## 5 November — pre-approval receipt: ready Cape artwork recovered and published
 
 CA's phone test reproduced an empty calendar-file association and a logo-only
 Brand Hub. Continued the existing #396/#668 lane from clean main `bb436682`;
