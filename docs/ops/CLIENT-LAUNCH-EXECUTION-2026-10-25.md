@@ -1,5 +1,84 @@
 # Client launch execution — local-first continuation
 
+## 5 November — research-to-product application: website event truth
+
+Continues this execution matrix and #433; no second launch checklist. Entry main
+`d95a4132`; focused branch `codex/research-client-measurement-truth`. Open PR inspection
+found no competing owner for this client-report change. Staff/Teams/calendar, strategies
+(#731), and the future Insights feature (#737) retain their existing authorities.
+
+### Source and review boundaries
+
+Latest saved research found and actually read:
+
+- [4 November Search Reporting, Discovery & Corrections](https://docs.google.com/document/d/1NBdj1Cp5_q9LkYNAmG9PtaEIeogp-z-ConhFzebHPfc/edit),
+  run `DIR261104A_0840_SearchMeasurementCorrections`.
+- [Structured 70-record evidence](https://docs.google.com/document/d/1OG5AG2ja2m1Y3BLMIpv22wc3BucsoWbQplSLz1f8wqs/edit)
+  and [continuation](https://docs.google.com/document/d/1Nk3LCIdRNPX2UtSXLN0FQTlYbLxFHGLlwqMwluUuwDs/edit).
+- Compared the [2 November release](https://docs.google.com/document/d/1JaKgYzG0SsobRxm10FoxqOEzQ01kr2BB9qkYiud6mng/edit)
+  and current #433/#737/#893/#731. A bounded newer-research search returned no records;
+  this is not a claim that all research or client accounts have been exhausted.
+
+The November release has 24 sources, seven findings/seven implementation cards and
+30 coverage families. Its records are `needs_review`, `activation_allowed:false`.
+The September root release pointer remains unchanged. No research card was silently
+activated, imported as trusted company guidance or published to clients. Historical
+October source-persistence gaps stay with the research lane.
+
+| Finding | Application / exact limit |
+| --- | --- |
+| AI-search visibility, traffic and business outcomes are different measures | Fixed the existing website event-to-enquiry mislabelling below. No AI-lead/sales attribution is inferred. |
+| Search-origin social/video discovery differs from native views | Confirmed [Google's property-specific guide](https://developers.google.com/search/docs/monitor-debug/analyze-social-video-content). No new Search Console integration or native-view summation; exact property access/data is not established. |
+| Generative-AI Search Console impressions are visibility evidence | Confirmed the [dated Google report announcement](https://developers.google.com/search/blog/2026/06/gen-ai-performance-reports). No additional impressions added to existing totals, no assumed API/account access. |
+| DSA correction must supersede the older generic timeline | Independently read [Google's June 11 update](https://blog.google/products/ads-commerce/dsa-upgrade-to-ai-max-2026/): DSA starts February 2027; ACA and campaign broad match retain September 2026. Preserved as a sourced review correction; no campaign or budget writes. |
+| Draft legal guidance, API sunsets and research claims need applicability/method checks | No legal claim promoted to enacted law, LinkedIn dependency assumed, or foreign/vendor finding presented as guaranteed South African sales. These remain research/owner review items, not new application features. |
+
+### Reproduced defect and focused correction
+
+The published client website panel called `conversions.byType.enquiry_submit`
+**Submitted enquiries**. The existing staff dashboard and its regression establish
+that received/qualified/won enquiries come only from canonical #405 lead metrics,
+not provider action aggregates. A real `ClientReportView` SSR regression first failed
+against that old label using nine tracked actions, including seven form events.
+
+The same existing snapshot panel now uses **Website activity / Contact actions**,
+**Form submissions**, and one concise line: clicks/form events do not confirm enquiries
+or sales. The helper is named `formSubmissions`; absent, malformed and duplicate event
+aggregates stay unavailable, preserving a valid zero. It neither sums duplicates nor
+substitutes total actions for forms. The immutable published snapshot, original counts,
+client-safe RPC boundary and canonical lead system are unchanged.
+
+Verification actually performed for this delta:
+
+- 30/30 focused tests: rendered report, missing/invalid/duplicate/zero events, canonical
+  lead separation, published snapshot boundary, source attribution, client isolation and
+  stale-selection render recovery. No skips. Initial red regression retained privately.
+- Existing read-only report browser fixture extended, not a second harness:
+  1440/375/390/430px pass, correct count/label, no private IDs, horizontal overflow or
+  runtime errors. Requests restricted to loopback GETs; no real session/credential used.
+- `npm run build` (TypeScript + Vite 7), actual emitted application route/text verification,
+  scoped ESLint and `git diff --check` pass. Existing Browserslist-age/chunk-size advisories
+  remain; no package installation or dependency change. This does not rerun or supersede
+  the separately recorded whole-suite, native-account or physical-phone acceptance.
+- Private visual receipts: `%TEMP%/cg-website-form-events-{1440,375,390,430}.png`.
+  These are clearly synthetic examples, not live website figures.
+
+### Future news section — preserve #737 ownership
+
+CA reiterated that a small industry/social update section is a **future** addition,
+after current launch work. Add this product preference to existing #737: concise visual
+cards with what changed, why it matters, CG's actual response/status, source and date;
+industry/client relevance and corrections/expiry must remain visible. Reuse governed
+research intake, exact-revision editorial approval and immutable client-safe publication.
+Keep common industry updates separate from private client-specific applications. Never
+claim research is already deployed/applied, automatically approve research or expose raw
+staff evidence. No route/schema/news implementation is introduced by this change.
+
+Release status: source only; no Vercel, Supabase/backend, provider, campaign, permission,
+mapping, package, strategy or asset changes. This does not close the separate client
+publication/password/physical-phone/content gates. Exact Control Centre document/range
+is still unverified; no speculative tracker mutation.
+
 ## 5 November — exact-approved MCP reporting-health release completed
 
 The source fix in merged PR #951 (`297abb0c`) is now LIVE as MCP **77**, after

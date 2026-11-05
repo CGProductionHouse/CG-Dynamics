@@ -23,7 +23,7 @@ const fixture = {
         posts:[post('covered','2026-09-24T06:59:59.999Z','Covered Pacific final-day result',0),
           post('later','2026-09-24T07:00:00Z','Uncovered later result',999)]};
       const strategyData=emptyStrategyData();strategyData.strategyGoingForward='Explain the application routes so contributors can prepare the correct submission.';
-      function App(){const[status,setStatus]=useState('draft');const[client,setClient]=useState(null);const[lowSignal,setLowSignal]=useState(false);const[facts,setFacts]=useState([]);const[googleState,setGoogleState]=useState('unmapped');const[strategyReadUnavailable,setStrategyReadUnavailable]=useState(false);const[emptyStrategy,setEmptyStrategy]=useState(false);const[staff,setStaff]=useState(false);const[health,setHealth]=useState([]);window.showPublishedFixture=()=>setStatus('published');
+      function App(){const[status,setStatus]=useState('draft');const[client,setClient]=useState(null);const[lowSignal,setLowSignal]=useState(false);const[facts,setFacts]=useState([]);const[googleState,setGoogleState]=useState('unmapped');const[strategyReadUnavailable,setStrategyReadUnavailable]=useState(false);const[emptyStrategy,setEmptyStrategy]=useState(false);const[staff,setStaff]=useState(false);const[health,setHealth]=useState([]);const[website,setWebsite]=useState(null);window.showPublishedFixture=()=>setStatus('published');
         window.showNormalizedDiagnosticsFixture=()=>{setStaff(true);setFacts([{platform:'facebook',metricKey:'brand_views',value:1474,availability:'complete',aggregation:'sum',comparableGroup:null,sourceMetric:'page_media_view',periodStart:'2026-09-01',periodEnd:'2026-09-23'}]);setHealth([{platform:'facebook',period_month:'2026-09',metric_key:'brand_views',source_metric:'page_media_view',fact_availability:'complete',latest_run_status:'partial',latest_health_state:'verified_partial',ready_for_client_reporting:true}])};
         window.showClientDiagnosticsFixture=()=>setStaff(false);
         window.showUnavailablePlatformFixture=()=>setFacts([{platform:'tiktok',metricKey:'current_followers',value:284,availability:'unavailable',aggregation:'snapshot',comparableGroup:null,sourceMetric:'follower_count',periodStart:'2026-09-01',periodEnd:'2026-09-30'}]);
@@ -36,8 +36,15 @@ const fixture = {
           {platform:'tiktok',metricKey:'total_likes',value:52555,availability:'partial',aggregation:'snapshot',comparableGroup:null,sourceMetric:'total_likes',periodStart:null,periodEnd:null}]);
         window.showLowSignalFixture=()=>setLowSignal(true);
         window.showMaintainedSiteFixture=()=>setClient({id:'aece5a86-c962-4234-a1fe-7904c20f03ff',name:'JFJ Electrical'});
+        window.showWebsiteSnapshotFixture=()=>setWebsite({version:1,websiteId:1,generatedAt:'2026-10-01T12:00:00Z',
+          identity:{dynamicsClientId:client?.id??report.client_id,canonicalHost:'fixture.example',environment:'production'},
+          period:{from:'2026-09-01',to:'2026-10-01',timezone:'Africa/Johannesburg',coverageFrom:'2026-09-01'},
+          traffic:{visitors:22,pageviews:500,topPages:[],sources:[]},
+          conversions:{total:9,byType:[{type:'enquiry_submit',count:7},{type:'whatsapp_click',count:2}]},commerce:null,
+          dataQuality:{state:'available',sourceReadAt:'2026-10-01T12:00:00Z',trafficProvider:'vercel',gaps:[]}});
+        window.clearWebsiteSnapshotFixture=()=>setWebsite(null);
         return React.createElement('main',{className:'mx-auto max-w-6xl p-3 sm:p-8'},
-          React.createElement(ClientReportView,{report:{...report,client_id:client?.id??report.client_id,
+          React.createElement(ClientReportView,{report:{...report,client_id:client?.id??report.client_id,website_report:website,
             posts:lowSignal?report.posts.map(post=>({...post,impressions:0,reach:0,engagements:null})):report.posts},client,googleAds:null,googleAdsState:googleState,
             verifiedCgPostIds:new Set(['covered','later']),
             googleAdsError:null,facts,showAdminDiagnostics:staff,dataHealth:health,monthlyStrategy:strategyReadUnavailable||emptyStrategy?null:{month:'2026-09-01',status,strategyData},showEmptyStrategy:strategyReadUnavailable||emptyStrategy,strategyReadUnavailable}));}
@@ -141,6 +148,16 @@ try {
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width} maintained-site overflow`)
     assert.deepEqual(errors, [])
     await page.screenshot({ path: join(tmpdir(), `cg-maintained-site-${width}.png`), fullPage: true })
+    await page.evaluate(() => window.showWebsiteSnapshotFixture())
+    await page.getByText('Form submissions', { exact: true }).waitFor()
+    const websitePanel = page.getByRole('tabpanel', { name: 'Website Performance', exact: true })
+    assert.match(await websitePanel.innerText(), /Clicks and form events do not confirm enquiries or sales/)
+    assert.doesNotMatch(await websitePanel.innerText(), /Submitted enquiries|Qualified leads|AI leads|synthetic-client|aece5a86/)
+    assert.equal(await websitePanel.getByText('7', { exact: true }).count(), 1, 'Form-event count is preserved')
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width} form-events overflow`)
+    assert.deepEqual(errors, [])
+    await websitePanel.screenshot({ path: join(tmpdir(), `cg-website-form-events-${width}.png`) })
+    await page.evaluate(() => window.clearWebsiteSnapshotFixture())
     await page.evaluate(() => window.showLowSignalFixture())
     await page.getByRole('tab', { name: 'Overview', exact: true }).click()
     await page.getByText('Content learning', { exact: true }).waitFor()
@@ -207,7 +224,7 @@ try {
     assert.equal(await tiktokPanel.getByText('Verified platform figures are unavailable for this month', { exact: true }).count(), 0)
     assert.deepEqual(errors, [])
     await page.close()
-    console.log(`PASS ${width}px: actual Overview/Facebook/held managed Website, cutoff/observed zero, no later highlight/duplicate site upsell/overflow/runtime errors; localhost GET only`)
+    console.log(`PASS ${width}px: actual Overview/Facebook/held managed Website, website form-event truth, cutoff/observed zero, no later highlight/duplicate site upsell/overflow/runtime errors; localhost GET only`)
   }
 } finally {
   if (browser) await browser.close()

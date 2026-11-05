@@ -400,13 +400,13 @@ function PublishedWebsitePerformance({ report, managedWebsite, maintenanceInclud
       </div>
       <p className="mt-3 text-sm leading-relaxed text-slate-400">Visitors measures your website audience; page views counts the pages they viewed. These are separate measures, not numbers to add together.</p>
       <div className="mt-6 rounded-2xl border border-white/10 bg-[#071311] p-5 sm:p-6">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-teal-300">From visits to enquiries</p>
-        <h3 className="mt-2 text-xl font-bold text-white">Contact journey</h3>
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-teal-300">Website activity</p>
+        <h3 className="mt-2 text-xl font-bold text-white">Contact actions</h3>
         <div className="mt-4 grid gap-5 sm:grid-cols-2">
           <div><p className="text-sm text-slate-300">Tracked contact actions</p><p className="mt-1 font-bold text-white">{report.conversions.total === null ? 'Measurement unavailable' : formatNumber(report.conversions.total)}</p></div>
-          <div><p className="text-sm text-slate-300">Submitted enquiries</p><p className="mt-1 font-bold text-white">{presentation.enquiries === null ? 'Measurement unavailable' : formatNumber(presentation.enquiries)}</p></div>
+          <div><p className="text-sm text-slate-300">Form submissions</p><p className="mt-1 font-bold text-white">{presentation.formSubmissions === null ? 'Measurement unavailable' : formatNumber(presentation.formSubmissions)}</p></div>
         </div>
-        {(report.conversions.total === null || presentation.enquiries === null) && <p className="mt-4 text-sm leading-relaxed text-slate-400">This snapshot cannot establish the missing contact or enquiry figures. Unavailable means unknown—not that nobody contacted your business.</p>}
+        <p className="mt-4 text-sm leading-relaxed text-slate-400">Clicks and form events do not confirm enquiries or sales.{(report.conversions.total === null || presentation.formSubmissions === null) && ' Missing figures are unknown, not zero.'}</p>
       </div>
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
         <WebsiteBreakdown title="Top pages" rows={report.traffic.topPages.map(item => [item.label, item.pageviews])} />
