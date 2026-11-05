@@ -15,6 +15,40 @@ from edit_contract import validate_edit
 from ui_motion import validate_ui_plan
 
 
+def validate_source_reuse(shots):
+    """CA5Nov: different ranges/crops/encodes do not make another recording.
+
+    A continuous composite may use one source in several layers. Its later use
+    in another story shot is prohibited. Content review still owns aliases whose
+    original identity is absent from the ledger.
+    """
+    seen = {}
+    errors = []
+    for index, shot in enumerate(shots, 1):
+        if not isinstance(shot, dict):
+            continue
+        identities = set()
+        sources = [shot, *shot.get('additional_sources', [])]
+        for source in sources:
+            if not isinstance(source, dict):
+                continue
+            recording = source.get('original_source_id')
+            digest = source.get('original_source_sha256') or source.get('source_sha256') or source.get('sha256')
+            path = source.get('original_source') or source.get('source') or source.get('path')
+            if recording:
+                identities.add(('recording', str(recording)))
+            if digest:
+                identities.add(('sha256', str(digest).casefold()))
+            if path:
+                identities.add(('path', str(path).replace('\\', '/').casefold()))
+        previous = sorted({seen[key] for key in identities if key in seen})
+        if previous:
+            errors.append(f'shot {index} reuses the same original recording as shot {previous[0]}; different source ranges, crops or encodes are not distinct clips')
+        for key in identities:
+            seen.setdefault(key, index)
+    return errors
+
+
 REQUIRED_TEXT = (
     "client",
     "month",
@@ -90,6 +124,7 @@ def validate(plan):
             if previous['visual_cluster'].casefold() == shot['visual_cluster'].casefold() and previous.get('story_role') == shot.get('story_role'):
                 errors.append(f"shot {i} repeats a visual cluster with the same story job")
         selected.append(shot)
+    errors.extend(validate_source_reuse(shots))
     if plan.get('research_only') is not True:
         errors.extend(validate_edit(plan))
     return errors
