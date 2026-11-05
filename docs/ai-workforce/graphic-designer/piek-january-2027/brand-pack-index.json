@@ -6,6 +6,15 @@
   },
   "observedAt": "2026-11-05",
   "status": "bootstrap-in-progress",
+  "activeCanvaProduction": {
+    "designId": "DAHaD4mJnGY",
+    "title": "PIEK GROUP OF COMPANIES | ACTIVE FROM 05 NOV 2026 | JAN 2027",
+    "ownerAuthorisedAt": "2026-11-05",
+    "purpose": "active dated continuation with copied reusable assets and unfinished work",
+    "legacyReadOnlyDesignId": "DAGcXGWhDhI",
+    "legacyPurpose": "existing Drafts/Posted/Scheduled exports and anti-repetition history; retain original schedule",
+    "copiedLegacyGuideMeaning": "reference-only; disputed historical claims do not override current verified intelligence"
+  },
   "canvaBrandKitInspection": {
     "observedAt": "2026-11-05",
     "method": "read-only inspection of the signed-in Canva editor Brand panel, followed by direct Canva connector verification",

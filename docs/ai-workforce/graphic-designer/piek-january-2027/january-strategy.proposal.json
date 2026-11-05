@@ -27,12 +27,13 @@
   "productionLane": {
     "authorisedAt": "2026-11-05",
     "state": "internal-preproduction-started",
-    "workingCanvaDesignId": "DAHaDQgOO1M",
-    "masterDesignId": "DAGcXGWhDhI",
+    "workingCanvaDesignId": "DAHaD4mJnGY",
+    "masterDesignId": "DAHaD4mJnGY",
+    "legacyReadOnlyDesignId": "DAGcXGWhDhI",
     "scheduleMeaning": "Proposed creative windows only; no scheduled_date or database assignment has been created.",
     "openingWeekDirection": "Start with a restrained Piek New Year welcome and a useful Engen summer-return-travel story. Add an appetite-led Get Together summer meal early in the month after exact branch/product/source checks. Avoid a generic calendar greeting in all four scopes.",
     "sourceAuditState": "Bounded Grape Valley and Get Together samples inspected; historical source matching and exact branch evidence remain incomplete. No source is certified unused.",
-    "workingCopyState": "Two template pages copied to a separate Canva design. Native text/photo/logo layer data read successfully; no January artwork saved yet. Inherited captions and source images must be replaced before review."
+    "workingCopyState": "Owner-authorised dated official continuation created with reusable assets and unfinished work, plus saved summer candidate in To Be Approved. Original scheduled/posted artwork remains in legacy file. Native summer photo/logo/text layers and copied text verified. Candidate notes still stale; final production and normal ChatGPT acceptance unresolved."
   },
   "creativeWindows": [
     { "provisionalId": "2027_01_PIEK_DP_01", "start": "2027-01-01", "end": "2027-01-03", "occasion": "New Year welcome and real network destinations", "evidenceType": "calendar-fact-plus-creative-hypothesis" },

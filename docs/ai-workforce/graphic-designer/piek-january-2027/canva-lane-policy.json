@@ -1,35 +1,47 @@
 {
   "schemaVersion": 1,
   "clientId": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
-  "masterDesignId": "DAGcXGWhDhI",
+  "masterDesignId": "DAHaD4mJnGY",
+  "masterTitle": "PIEK GROUP OF COMPANIES | ACTIVE FROM 05 NOV 2026 | JAN 2027",
+  "legacyReadOnlyDesignIds": ["DAGcXGWhDhI"],
+  "continuation": {
+    "ownerAuthorisedAt": "2026-11-05",
+    "sourceDesignId": "DAGcXGWhDhI",
+    "copiedSourcePages": { "from": 1, "to": 51 },
+    "existingDraftOrScheduledArtworkCopied": false,
+    "originalFileMutated": false,
+    "scheduleCutoffDate": null,
+    "scheduleCutoffStatus": "unverified-no-dated-Dynamics-rows-November-through-January; original-Canva-schedule-retained",
+    "copiedTextIntegrity": "first-49-pages-normalised-text-identical-12018-characters"
+  },
   "observedAt": "2026-11-05",
-  "observedPageCount": 352,
+  "observedPageCount": 53,
   "pageCapacity": {
     "documentedMaxPages": 350,
     "source": "https://www.canva.com/en_gb/help/manage-pages/",
     "verifiedAt": "2026-11-05",
     "observedInsertFailure": "NOT_PERMITTED: Page limit reached",
-    "resolution": "owner-capacity-decision-required-no-automatic-archive-or-deletion"
+    "resolution": "owner-authorised-dated-continuation-created-original-schedule-preserved"
   },
   "headers": {
     "inProgressTemplates": {
-      "pageId": "PB5v10xvzDs8vq42",
+      "pageId": "PBtYpVD48tvYwH2r",
       "observedPageIndex": 23,
       "writePolicy": "new-work-zone-after-header"
     },
     "toBeApproved": {
-      "pageId": "PBz6Ds1Q01l3g6ty",
-      "observedPageIndex": 41,
+      "pageId": "PBTCQnG0kLyNvn1c",
+      "observedPageIndex": 42,
       "writePolicy": "new-work-zone-after-header"
     },
     "drafts": {
-      "pageId": "PBmHYBRmM7PnqThR",
-      "observedPageIndex": 50,
+      "pageId": "PBkggJvPWJCB8Kl5",
+      "observedPageIndex": 52,
       "writePolicy": "protected-read-only"
     },
     "postedScheduled": {
-      "pageId": "PB9pTccX3djfrLpj",
-      "observedPageIndex": 51,
+      "pageId": "PBhXtZzkLlTlfdWK",
+      "observedPageIndex": 53,
       "writePolicy": "protected-read-only"
     }
   },
@@ -46,15 +58,15 @@
   "workingRules": {
     "separateWorkingDesignRequired": false,
     "officialClientDesignCount": 1,
-    "officialDesignId": "DAGcXGWhDhI",
-    "editablePageIds": [],
+    "officialDesignId": "DAHaD4mJnGY",
+    "editablePageIds": ["PB7GXQY2FRY4SmZL", "PBFhjhnLG7KsvSkM"],
     "temporaryCopy": {
       "designId": "DAHaDQgOO1M",
       "purpose": "optional disposable testing only",
-      "cleanup": "transfer useful finished designs to the official file, verify the transferred layers, then remove the temporary copy",
+      "cleanup": "summer candidate transferred and layers verified in new official continuation; temporary file remains marked TEMP, removal unavailable through current connector",
       "containsCompletedJanuaryArtwork": true,
       "savedCandidatePageId": "PBchP5dl0NZ3cp1l",
-      "state": "owner-approved-save-internal-candidate-transfer-blocked-by-master-capacity"
+      "state": "transferred-and-verified-in-official-continuation"
     },
     "sourceMasterPagesRemainUnchanged": true,
     "copySelectedPagesAllowed": true,
@@ -62,6 +74,8 @@
     "toBeApprovedBoundaryStatus": "verified-by-thumbnail-and-page-id-2026-11-05"
   },
   "notes": [
+    "Owner explicitly authorised a dated official continuation after the old file reached capacity. DAHaD4mJnGY is the active production file; DAGcXGWhDhI retains existing Drafts/Posted/Scheduled and historical anti-repetition evidence.",
+    "Copied brand/prompt guide pages preserve legacy material for reference, not verified current offers, contact details, branch services or publication claims.",
     "Page indexes can shift when new pages are inserted. Re-resolve all header page IDs immediately before every merge.",
     "Drafts and Posted / Scheduled are Amonique-controlled operational lanes. They may be read for anti-repetition evidence but never edited, moved or deleted by the agent.",
     "Copying a prior page is a working-file operation only. It does not authorise reuse of its photograph, person, wording, concept or layout mechanism."

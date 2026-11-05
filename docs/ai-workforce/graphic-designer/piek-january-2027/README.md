@@ -9,7 +9,7 @@ This directory is the versioned proposal and evidence gate for issue #955. It do
 - January 2027 Client Schedule query returned no rows. Every proposed poster therefore uses a provisional ID and `monthlyDeliverableId: null`.
 - Four separate Canva Brand Kits were verified for Piek Group, Get Together, Engen and Sasol. They must never be blended into one generic Piek style.
 - The authorised Canva connector can list those four kits and read the 352-page Piek history design directly from company ChatGPT. Routine brand/reference retrieval therefore does not require browser or desktop takeover; final creation, isolated amendment and export still require an end-to-end connector proof.
-- One official Canva file per client: new production pages are edited directly inside verified In Progress/Templates or To Be Approved lanes. Temporary test copies must be consolidated back into the official file and removed after transfer verification. The guard checks registered page IDs and current lane positions; Drafts and Posted / Scheduled remain read-only.
+- One active official Canva file per client. The owner explicitly authorised a dated continuation after the previous file reached capacity. Active Piek production now uses `DAHaD4mJnGY`; legacy `DAGcXGWhDhI` retains existing Drafts/Posted/Scheduled and history. The guard checks active-file identity, registered page IDs and current lane positions. Legacy history remains read-only.
 - Existing OneDrive `CG Creative Assistant` folders remain the media/history authority. This work records locators rather than duplicating client assets in Git.
 
 ## Files
@@ -31,7 +31,21 @@ The owner reviewed the Get Together summer candidate and explicitly authorised s
 
 The authorised transfer of only that page before Drafts in `DAGcXGWhDhI` failed: `NOT_PERMITTED — Page limit reached`. The main file still reports 352 pages. [Canva documents a 350-page maximum](https://www.canva.com/en_gb/help/manage-pages/). Read-only inspection of working pages 24–49 found existing artwork/reference boards rather than a blank page. The To Be Approved divider is now verified at page ID `PBz6Ds1Q01l3g6ty` (observed index 41) and protected by the guard.
 
-Do not retry an insert, delete protected history, overwrite another designer's work or create a second official project to bypass capacity. Retain the saved temporary file until an owner-approved capacity decision enables verified transfer. Its inherited presenter notes are still stale and must be corrected before production handoff; the current connector exposes notes read-only. Normal company ChatGPT creation/amend/export remains unverified.
+The owner subsequently authorised a dated official continuation. This resolves the capacity decision without deleting protected history or overwriting another designer's work. The inherited presenter notes are still stale and must be corrected before production handoff; the current connector exposes notes read-only. Normal company ChatGPT creation/amend/export remains unverified.
+
+## Active official continuation — 5 November
+
+`DAHaD4mJnGY` is named **PIEK GROUP OF COMPANIES | ACTIVE FROM 05 NOV 2026 | JAN 2027**. It was created with 52 pages and now contains 53 after adding a new Engen working page. Source pages 1–51 were copied: brand/logo/guide assets, In Progress/Templates, To Be Approved unfinished work and the two empty Drafts/Posted dividers. Existing scheduled/posted artwork after the legacy divider was not copied. The saved Get Together summer poster was added before Drafts (now page 51). The copied first 49 pages had identical normalised text (12,018 characters) before the subsequent insertion, and the summer poster retains all three text and four image/logo elements with exact asset IDs, positions and dimensions. A private receipt maps every copied source page ID to its new page ID.
+
+Current section IDs: In Progress `PBtYpVD48tvYwH2r` (23), To Be Approved `PBTCQnG0kLyNvn1c` (42), Drafts `PBkggJvPWJCB8Kl5` (52), Posted/Scheduled `PBhXtZzkLlTlfdWK` (53). Always refresh positions before edits. Copied legacy prompt guides preserve reference material, including disputed contact/service claims; they do not override current verified client intelligence.
+
+The old file is retained for Amonique's existing scheduled/posted exports. A read-only Dynamics query for 1 November 2026–31 January 2027 returned no scheduled-date rows. It excludes undated/legacy due-date-only work, so **the existing schedule's calendar cutoff remains unverified**. No schedule status or date was inferred or rewritten. The old temporary test file remains marked TEMP; deleting designs is unavailable through the current connector. It is not the active production file.
+
+## Second layered proof — Engen Grape Valley
+
+New In Progress page `PBFhjhnLG7KsvSkM` (observed index 41) contains a summer return-travel composition using exact OneDrive source `3Q7A0483.JPG`, a real Grape Valley roadside sign/mountain photograph. Local preparation preserves the original, applies restrained contrast/saturation/sharpening, embeds sRGB and strips private metadata. A separate blue shade, exact native footer/logo assets and three native text elements remain independently addressable. No generative processing or JPEG clipping recovery is claimed. A 352-preview history audit completed with no errors or verified matches, with the usual no-match limitations.
+
+Changing `HEADING HOME?` to `THE ROAD AHEAD` changed exactly one text element and left photo/shade/footer/logo records identical; final wording was restored. The candidate is **unsaved pending explicit preview approval** in transaction `8413245340408441155`. Presenter notes still contain inherited template copy and must be corrected before handoff. Width-only text resizing works; specifying a text height is rejected. Native effects/font-family changes and note editing are not exposed by the current connector.
 
 ## Remaining production gates
 
@@ -41,7 +55,7 @@ Before treating a saved proof as a production deliverable:
 2. resolve each selected scope's exact logo variant, font family/weights and licensed local availability, colour values, and reference publication status;
 3. choose exact rights-cleared OneDrive source photographs and run the creative ledger against historical work;
 4. confirm branch/product/service facts and any people/vehicle/forecourt usage constraints;
-5. retain the completed layered summer proof and isolated-amendment evidence, correct inherited notes, resolve main-file capacity and verify transferred layers;
+5. retain the completed layered summer proof and isolated-amendment evidence, correct inherited notes and preserve verified transferred layers in the active continuation;
 6. prove normal company ChatGPT invocation and final export, then obtain human creative approval before scaling the month.
 
 Desktop takeover is not part of the production workflow. Normal work should use company ChatGPT connectors plus headless local commands. A GUI editor may be opened only for a bounded compatibility or final human finishing check.
