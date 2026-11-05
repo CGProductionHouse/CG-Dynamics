@@ -43,6 +43,8 @@ node scripts/poster-studio/month-board.mjs docs/ai-workforce/graphic-designer/pi
 
 Use `scripts/poster-studio/creative-ledger.mjs` for deterministic checks. Its JSON entries can describe human or AI-assisted posters, so Ger-Marie work and AI work share one memory.
 
+For cropped-photo matching against Canva history previews, use `scripts/poster-studio/source-history-audit.py` on privately downloaded previews and selected originals. Inspect any geometrically supported matches. A negative result is limited to the supplied previews; tiny, heavily overlaid, missing or same-shoot images still require review. Do not mistake random texture correspondences for source reuse or use this tool to identify people.
+
 ```powershell
 node scripts/poster-studio/creative-ledger.mjs fingerprint <image>
 node scripts/poster-studio/creative-ledger.mjs check <ledger.json> <candidate.json> --out <receipt.json>

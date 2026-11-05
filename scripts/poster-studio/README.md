@@ -14,6 +14,7 @@ The companion headless tools are:
 - `creative-ledger.mjs` — image fingerprints plus source/shoot/person/product/service/branch/concept/headline/mechanism repetition checks for both human and AI work;
 - `month-plan.mjs` — validates a proposed monthly strategy board against package, Brand Pack and future-schedule safety gates;
 - `month-board.mjs` — renders the complete proposal as a responsive, printable local review board.
+- `source-history-audit.py` — compares selected exact photo sources against local Canva poster previews using SIFT features and geometric verification. Requires the existing OpenCV runtime; it creates no face identities. Matches require visual review, and negative results never certify that a source is unused.
 
 They are designed for a future normal-company-ChatGPT tool wrapper and do not require routine desktop takeover.
 
@@ -31,7 +32,10 @@ node scripts/poster-studio/creative-ledger.mjs fingerprint <image>
 node scripts/poster-studio/creative-ledger.mjs check <ledger.json> <candidate.json> --out <receipt.json>
 node scripts/poster-studio/month-plan.mjs <month-plan.json> <brand-pack-index.json>
 node scripts/poster-studio/month-board.mjs <month-plan.json> <private-output.html>
+python scripts/poster-studio/source-history-audit.py --source <original.jpg> --history <private-thumbnail-directory> --out <private-report.json>
 ```
+
+The history matcher records every preview hash and decode error. Its controlled test places a resized source inside a poster and checks that an unrelated texture is rejected. Small, heavily overlaid, edited, same-shoot or missing historical content still needs visual/history review; do not promote a candidate automatically from this report.
 
 ## Privacy and provenance
 
