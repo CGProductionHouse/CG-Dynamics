@@ -1,0 +1,15 @@
+# Controlled dark-backdrop depth typography study
+
+**Status: rendered experimental proof, not a mastered skill.** This is a 6 s stock-only source-specific edit of Mixkit [Coffee in green mug #818](https://mixkit.co/free-stock-video/coffee-in-green-mug-818/) under its [free stock video licence](https://mixkit.co/license/modal/videoFree/). The original file is ignored by Git; its SHA-256 is pinned in `render_dark_backdrop_depth.py`. The committed [proof](proof-dark-backdrop-depth.mp4) and [nine-frame contact](proof-dark-backdrop-depth-contact.png) are silent, 1280×720, 24 fps. They do not represent a PSG or CG client edit.
+
+## What was tested
+
+The green mug, saucer and hands move downward in front of the word `MOMENT`. Hands enter from the top frame edge and the saucer comes to rest on the table, so the foreground has a visible source and support. This is **ordinary camera footage**, not the green-screen dancer used in the earlier depth proof. The simple FFmpeg black `colorkey` trial failed: letters leaked through the dark green cup. Its still remains in ignored `output/cup-contact/depth-test.png` as a local negative reference. Do not reuse that key.
+
+The revised test uses already-installed OpenCV to threshold saturation and brightness for this take's hands/crockery against its nearly black backdrop. It closes gaps, fills sufficiently large contours, feathers the mask by 5 px and composites the untouched foreground over the title. It fades the title as the saucer reaches the letter line, then leaves the original shot. The 2.33 s frame shows saucer-over-letter ordering; the 2.5 s contact shows the title gone. The nine sampled frames were inspected, including a full-resolution 2.33 s frame. Output fully decoded with 144 frames/6.000 s. SHA-256: `ae5d52cf9ceaaee63f4c07fa5e4d862a867668f8abeb095a31252086a78a24ea`.
+
+This demonstrates a **controlled-background masking tactic**, not robust person segmentation. The mask threshold is tuned to this source; dark objects, similarly colored backgrounds, motion blur, hair, reflected table edges and shadows can fail. The title fades before sustained full occlusion because later remaining glyph fragments looked awkward. This shot is landscape and silent. No full-speed perceptual review, phone safe-area check, tracked/perspective type, staff editability test, or client suitability review was performed. Do not infer any of those from a successful encode.
+
+## Reproduce or adapt
+
+Place the licensed Mixkit #818 file at ignored `media/mixkit-818-720.mp4`; the script refuses a hash mismatch. Run `python render_dark_backdrop_depth.py` from this folder. Outputs and per-frame PNGs go to ignored `output/dark-backdrop-depth/`. Only use a new shot after inspecting the full moving mask and matching its subject/background; retune or hand-correct the mask as needed. For a real production edit, prefer a clean native editor matte, isolated foreground plate, or reliable tracked mask where available. Do not claim that a black-key or this HSV rule generalizes to ordinary office footage.

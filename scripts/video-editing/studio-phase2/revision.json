@@ -1,0 +1,7 @@
+{
+  "id": "r1-third-word-only",
+  "feedback": "Change only the last large word from BASS. to BEAT.; keep the earlier typography, performer timing, palette and audio exactly the same.",
+  "target": "word-three",
+  "from": "BASS.",
+  "to": "BEAT."
+}

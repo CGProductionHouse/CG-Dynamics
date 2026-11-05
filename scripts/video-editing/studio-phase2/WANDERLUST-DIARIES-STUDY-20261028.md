@@ -1,0 +1,112 @@
+# Wanderlust Diaries — frame inventory, template access and original proofs
+
+## Third reconstruction batch — negative, subject bands and film transport
+
+Reinspected exact private reference81–82/85–86 and312–320. The former is whole-picture inversion; the latter combines fragmented picture, stepped pale upper-body fill and fuller silhouette. These are separate mechanisms, not one generic RGB glitch. New original/licensed-source tests:
+
+- [Global/background negative](skills/color-invert-glitch/SKILL.md): four pulse frames isolated. Global cyan face is rejected for identity preservation. Background-only keeps opaque subject colour pre-encode but still produces a large brightness jump and is not the reference’s full inversion or a default client treatment.
+- [Subject bands and pale resolve](skills/subject-band-resolve/SKILL.md): eye-tearing first attempt rejected; clothing bands protect the face in displacement-only. Original RGB/alpha move together over a clean stage; outer80px remain fixed so cropped limbs do not float. An original removable three-attack noise stem is picture-identical and placement/peak checked, unheard.
+- [Film gate/transport](skills/bounded-burn/SKILL.md): decorative rounded-card/glow pass rejected as a match. New original strip/aperture/perforation movement crosses an explicit same-take time cut in six frames. First five-position shutter integration exposed discrete ghost copies;31 samples repair the sampled blur. This is an interpreted film-strip graphic, not the creator’s exact preset or a filmed physical burn.
+
+Private proof folders: `negative-pulse`, `subject-band`, `gate-leak` (rejected hypothesis) and `film-transport`, under the existing Wanderlust proofs directory. Previous rejected face-band/five-sample versions are retained.13 current exports are checked separately from those historical rejects:90frames each,540×960/30fps. Full/reduced samples are visual inspection, not full-speed playback/heard sound/native mastery. The library now has45 families; adding this one new card does not make all reference effects complete.
+
+
+**Owner clarification,28 October:** marketed templates are not equivalent to this video. Reconstruct the visible mechanisms directly and continue the other tutorials; **exact template access is no longer a prerequisite or an active owner request**. Historical access failures below remain useful evidence. Six reference families now have bounded original/licensed-source reconstructions: gold material, silhouette prelap, slanted panels, focal lens pulse, graphic inset growth and split-tone foreground type. These are six families, not six mastered skills or an exact copy of the whole video.
+
+## Second reconstruction batch and correction
+
+- [Chromatic lens pulse](skills/chromatic-lens-pulse/SKILL.md): plain/zoom-only/mild/strong isolates optics. Strong obscures the head and is rejected; mild remains a source-specific candidate. No rotational/cross-shot claim.
+- [Graphic inset growth](skills/graphic-inset-grow/SKILL.md): hard/linear/quintic control keeps the same moving picture continuous. Original removable noise cue follows scale velocity; encoded10ms RMS/velocity correlation0.99727, peak−18.72dBFS. Sound is measured, not heard. This is a graphic card, not the failed physical-phone effect.
+- [Split-tone depth extension](skills/depth-type/SKILL.md): FIND/YOUR/FLOW with restrained two-tone texture, front/behind control. Minimum91.42% glyph remains visible for this particular path. Not kinetic fragmentation or natural segmentation.
+- **Caught and repaired a prior proof defect:** both depth and prelap initially cropped the moving arm at an internal right layer edge. Source frames13 onward exposed it. Expanded real source coverage to frame width, retained top transparency and inspected late poses. Prior rejected derivatives remain private. Shared moment-selection guidance now demands the entire moving boundary, not only early contacts.
+
+All13 active outputs in this batch fully decode:3 prelap at72 frames,2 depth/4 optics/4 inset at90 frames, all540×960/30fps. Both sound variants preserve decoded picture identity. Full-size late mask frames and reduced comparison contacts inspected. Normal-speed perceptual/physical-phone/native editing and heard sound remain unverified. Private evidence: `C:\Users\chris\Videos\CG-AI-Editing\Nolan-Skill-Practice\wanderlust-diaries\proofs\batch-qc-20261028.json`.
+
+28 October2026. Owner reference: https://vt.tiktok.com/ZSggA6BBy/ → [Sundawave7690986277780409607](https://www.tiktok.com/@sundawave/video/7690986277780409607). This is a **CapCut / CapCut Pioneer** reference, not a verified Canva template. The owner wants every visual mechanism and its sound relationship learned, starting at the opening. This document is a complete decoded-frame inventory plus the dated reconstruction batches, **not completion/mastery of all effects**.
+
+## Actual access and boundary
+
+- Browser played the exact24-second post. Its anchor was a general CapCut desktop-editor landing page, with no exact template ID. The public creator bio named `sundawv.studio`; its own `robisarindi.taplink.bio` link led to an official CapCut profile. The profile exposed eight recent projects and an Open CapCut button, but not this older title. Open CapCut launched the installed9.6 application/HomeWindow; no exact template timeline or existing draft was opened/edited by this lane.
+- At that point native screenshots showed an actively changing Chrome CapCut template search for this exact title which this lane had not performed. **Stop desktop/browser interaction on that conflict**, rather than competing with another session. No further UI actions were taken. The creator's LUT store was not used; no purchase, credits, plugin, permission, client upload or account change.
+- Browser seek labels/currentTime did not reliably identify the displayed painted frame. Use decoded local frame numbers for the ledger below, not a screenshot paired with a possibly stale player timer. The browser's24.54s duration also differs from this selected24.400s stream.
+- The browser's normal media download reported unsupported blob download. A new **private isolated** Python venv acquired yt-dlp2026.10.26 from PyPI; its first unauthenticated extraction failed with an unexpected response. Adding the documented curl-cffi0.17.0 optional dependency allowed ordinary public extraction without exporting browser cookies/credentials. Dependencies are local utility-only, not production dependencies or plugins. A complete public reference was downloaded only for private study; no creator footage/audio/artwork enters Git or a client film.
+- Exact private reference: `C:\Users\chris\Videos\CG-AI-Editing\Nolan-Skill-Practice\wanderlust-diaries\reference\wanderlust-reference.mp4`, SHA256 `0119df247e869fc7caca0c4acf247e8241ed16aebfad8727f19474bcd7e6714e`,2,459,107bytes,1280×720 HEVC/30fps,732frames/24.400s, stereoAAC. Full decode succeeded. All732 decoded frames were inspected as13 labelled60-frame contact pages; dense opening/whole-film overviews supplement them. This is frame inspection, not normal-speed perceptual playback/listening or an editable-template test. Source provenance of the reference's individual travel shots is unknown.
+- A direct **Use template** link was requested asynchronously before the owner clarified that the marketed templates are not equivalent; that request is superseded. Exact project, effect settings, keyframes, editable layer count, media-slot restrictions and native export are still unverified. Existing subscription access does not establish those facts.
+
+## Complete visual interval map
+
+Frame intervals are inclusive at native30fps. Exact settings and source-speed curves cannot be recovered from a flat export alone. “Prelap” below means a visible incoming silhouette/image appears over the outgoing shot; it does not mean an audio cue was heard. The creator's exact copy is not transcribed/reused.
+
+| Frames / seconds | Observed picture mechanism | Reconstruction / next gate |
+| --- | --- | --- |
+| 0–10 /0.000–0.333 | Photographer, compact gold two-line editorial title, small supporting labels; immediate real action | Material separated from layout; new gold A/B below. Do not copy the tiny decorative paragraph into phone client captions |
+| 11–17 /0.367–0.567 | Photographer alternates solid pale silhouette and visible/washed subject over retained background | Distinguish subject matte fill from global exposure. Repeated burst comfort unverified |
+| 18–22 /0.600–0.733 | Beach subject begins white, resolves; incoming hands' silhouette appears before next shot | Incoming-subject matte prelap, now isolated in new proof |
+| 23–27 /0.767–0.900 | Hands on black resolve from pale fill to blue/orange lit picture; next floating figure prelaps | Same timing family, different source identity; source matte and edge checks needed |
+| 28–37 /0.933–1.233 | Underwater figure then sea-stack person; incoming white body carried across cuts | Matte carry with brief source/white alternation; do not infer contact/geographic continuity |
+| 38–47 /1.267–1.567 | Two women/poses, repeated white body fills and restores; larger pale foreground shape leads onward | Source-isolated silhouette, not motion-trail clones |
+| 48–57 /1.600–1.900 | Eye close-up, small incoming eagle silhouette, eagle sky, backpacker silhouette | Extreme scale change plus incoming subject prelap; no evidence of exact preset |
+| 58–65 /1.933–2.167 | Backpacker resolves; film-gate rectangle, warm edge leak, near-white frame and incoming tram | Film-transport overlay family. Existing rejected burn proofs are not validated by this reference |
+| 66–91 /2.200–3.033 | Tram action with two short negative-like pulses at81–82 and85–86, returning to normal | Needs exact global-versus-masked inversion inspection/settings; don't cover readable action or repeat as universal style |
+| 92–124 /3.067–4.133 | Clock tower, flock, birds/clouds with blurred/chromatically split edges and distorted scale | Source-footage lens/zoom/chroma family; graphic text blur is not this proof. Original source and native settings pending |
+| 125–209 /4.167–6.967 | Large distressed blue/gold words change/fragment behind a moving man; figure remains in front | Split-tone material + animated word timing + foreground matte are separate layers/gates. Gold opening material does not prove this treatment |
+| 210–253 /7.000–8.433 | Slanted pale panels enter successively; mountain picture fills panels; small subject treatment; then full scene | New registered-panel proof isolates common picture/time coordinates; foreground/typography composition still separate |
+| 254–280 /8.467–9.333 | Wider mountain/backpacker hold after density | Purposeful release/context; not an effect to replace with more flashes |
+| 281–297 /9.367–9.900 | Mountain landscape context hold | Source-led scale/story change; no false same-route claim for unrelated stock |
+| 298–306 /9.933–10.200 | Centered incoming backpacker inset alternates pale fill/picture, increases size | Graphic inset/grow, **not a filmed phone**. Existing physical-screen/window-grow failures remain failures |
+| 307–333 /10.233–11.100 | Full backpacker picture; horizontal displaced strips/white subject glitches around313–319, then stable | Separate band-displacement/subject matte test still pending |
+| 334–352 /11.133–11.733 | Bird scene to beach woman; edge blur/chromatic warp on arrival | Lens/zoom treatment candidate, not proof of a particular retime curve |
+| 353–365 /11.767–12.167 | Short pale diagonal smear leads into birds over island | Directional smear/whip; verify direction and actual audible cue when timeline is accessible |
+| 366–398 /12.200–13.267 | Bird enlarges/flies across sun and sky, then holds readable wing shape | Camera/source movement plus framing; cannot establish from flat picture whether physically continuous, composited or retimed |
+| 399–423 /13.300–14.100 | Photographer foreground prelap, pale whole frame at402, then full photographer; short blurred settling | Matte/flash/blur stack, not one undifferentiated transition |
+| 424–453 /14.133–15.100 | Film-gate/light-leak montage: flock, motorcycle, clock tower, helicopter, rail, surf, bridge | Several4-frame slots under continuous gate texture; map all events instead of one whoosh per cut |
+| 454–483 /15.133–16.100 | Woman in forest holds, then eye blink close-up | Human/eye action and a clean hold; no need to add effects automatically |
+| 484–518 /16.133–17.267 | City traffic, passing train, flag/city, bus; negative-like alternates and brief blurred arrivals | Split global/masked negative from source motion before reconstruction; preserve subject/brand legibility |
+| 519–542 /17.300–18.067 | Hands prelap over bus, hands on black, floating figure, sea-stack person, next woman silhouette | Repeated incoming-subject transition grammar with different poses/scales |
+| 543–557 /18.100–18.567 | Woman front view resolves; blurred/chromatic turn | Actual source movement vs applied blur/orbit needs native/source comparison |
+| 558–567 /18.600–18.900 | Upward trees rotate/distort with edge chroma/blur | Rotational lens distortion, not the earlier linear graphic shutter proof |
+| 568–602 /18.933–20.067 | Motorcycle, rail, treetops, helicopter, train; brief distinct context cuts | Source/time/geography remain separate; montage is not documentary same-event proof |
+| 603–612 /20.100–20.400 | Horizontal train smear/dark gap into car at night | Outgoing directional blur/whip and incoming readable release; native layer/timing unverified |
+| 613–630 /20.433–21.000 | Gate/leak/white transition night-car to day-car, then blurred clock tower | Film-transport family and shot-change grammar; exact assets/rights unknown |
+| 631–659 /21.033–21.967 | Sky/clouds to breaking waves; pale negative-like wave frame at658–659 | One short exposure/inversion punctuation; no unsupported interpretation of physical action |
+| 660–689 /22.000–22.967 | Birds to daytime bridge; blur/zoom then similar bridge geometry at night | Geometric day/night match. Not evidence of a genuine continuous time-lapse |
+| 690–731 /23.000–24.367 | Night bridge settles, fades to dark; small creator mark remains | Deliberate closing hold/fade. Creator logo/mark is not reusable artwork |
+
+## Technique ledger — separate observed, rebuilt and unproved
+
+| Mechanism | Current proof / remaining gate |
+| --- | --- |
+| Gold display material | **New revised original flat/material A/B rendered**, cleaner pitting after rejected dirty first pass; [card](skills/metallic-type-material/SKILL.md) |
+| Incoming white-subject prelap | **New licensed-source plain/effect + original sound-accent proof rendered**, grounded edges; [card](skills/subject-silhouette-prelap/SKILL.md). Natural segmentation/template controls and heard sound pending |
+| Repeated white pulse cadence | Mapped every opening event; deliberately not copied wholesale into a default. Normal-speed/comfort/story test pending |
+| Registered slanted panels | **New same-canvas/time-map A/B rendered**; [card](skills/registered-slanted-panels/SKILL.md). Native editable masks/composition and full-speed review pending |
+| Foreground depth type | Existing [depth-type](skills/depth-type/SKILL.md) green-screen/dark-backdrop proofs; natural masks rejected on earlier sources. This reference does not clear natural-background extraction |
+| Distressed split-tone changing words | New [front/behind changing-word proof](skills/depth-type/SKILL.md) tests split-tone texture and occlusion, with late crop-edge repair. Reference fragmentation and natural matte remain unproved |
+| Negative pulses | New [plain/global/background-only control](skills/color-invert-glitch/SKILL.md) reproduces four-frame cadence. Global identity colours rejected; background-only alternative preserves subject but is not a default or exact reference match. Comfort/story/native gate remains |
+| Film gate/light leaks | New [original film-strip transport](skills/bounded-burn/SKILL.md) follows rejected rounded-card and five-sample hypotheses; repaired blur is a bounded interpretation. Exact reference assets/native controls and heard sound unverified; older stripe/bloom failures unchanged |
+| Source-footage lens/chroma/radial warp | New [four-way lens pulse](skills/chromatic-lens-pulse/SKILL.md): strong rejected, mild bounded candidate. Rotation, motivated two-shot use and native controls still pending |
+| Graphic inset grow | New [hard/linear/quintic A/B and velocity-shaped cue](skills/graphic-inset-grow/SKILL.md). Reference pale/picture alternation, heard sound and native editable reopening remain open; no filmed-phone claim |
+| Horizontal subject/band glitch | New [subject-isolated bands/pale resolve](skills/subject-band-resolve/SKILL.md), first face tear rejected then clothing-region repair. Natural scene matte, full-speed/phone/heard/native gate remains |
+| Whip/directional smear | Existing motion grammar helps; exact outgoing/incoming directions and parameter curves require actual native or original source comparison |
+| Match/retime/grade | Existing [motion speed](skills/motion-matched-speed/SKILL.md), [travel continuity](skills/cinematic-travel-continuity/SKILL.md) and colour baseline apply. No exact speed curve/LUT, source authenticity or one-location claim inferred |
+| Sound layers and music relationship | Whole reference AAC extracted/measured, but exact music, cue identities, separable layers and perceptual sound verdict are **not established** |
+
+## Sound evidence and next gate
+
+The original reference audio remains private and is not reused/licensed for a CG client. Technical whole-file measurements:−13.5LUFS integrated,4.6LU loudness range,−1.4dBTP; stereo channel RMS−14.59/−14.37dBFS, L/R correlation0.9324, mono RMS−14.63dBFS. These say nothing about which sound is a shutter, impact, riser, ambience or musical accent. No lyric/music identification or creative listening verdict is invented. Earlier failed local audio-model controls were not rerun.
+
+The new silhouette proof adds **one original90ms noise accent** as a removable stem. Its encoded onset/peak/tail is measured against the visible matte; the dry/designed decoded picture is identical. This proves sound placement/export isolation, not matching the reference's sonic quality. For any legitimately available separable source, inspect solo music, each cue and source sound at normal speed; log source/licence, onset/peak/tail and relationship to every visual event, then rebuild with separately licensed/original cues. Do not extract a copyrighted mixed soundtrack and call it a reusable SFX library.
+
+## Template compatibility findings — test the actual item
+
+Official CapCut documentation is inconsistent: [Use templates](https://www.capcut.com/help/use-template) describes desktop editing, while [Use/export](https://www.capcut.com/help/use-and-export-templates-in-capcut) limits desktop discovery, and [downloaded-template issues](https://www.capcut.com/help/download-tempalte-problem) warns of mobile-only render elements/static desktop placeholders. None establishes that this particular project exposes every effect/keyframe/SFX. Subscription, region and platform differences must be checked in the real application. Do not install an emulator, change region/account, force a draft schema or disturb existing projects to make access appear successful.
+
+Optional future exact-template evaluation, only if the actual item becomes available without blocking direct reconstruction: direct template link → protected new study copy → confirm actual editable media/text/mask/effect/audio layers and their controls → reconstruct each mapped family from the opening → normal-speed sound/picture/phone comparison → native save/reopen/export and portable recipe. If only replaceable media slots are exposed, record that limitation and request a creator-authorised editable project rather than claiming an inspectable timeline. Reusable original recipes may be shared; do not redistribute a paid template or creator assets as CG's library.
+
+Seven initial/revised proof outputs fully decoded before the gold repair; the repaired gold pair was then decoded/inspected separately. All active outputs are30fps,2.4s/72frames or3s/90frames. The template remains inaccessible and desktop conflict remains a UI boundary. Continue independent mechanism work from this ledger, not another generic montage or a claim all tutorials are mastered.
+
+Validation receipt: three renderers compile;32 visual intervals cover frames0–731 with no gaps/overlap;335 local links across the changed intake/status/skill documents resolve. Full-size encoded samples at silhouette34/37, panels53/54 and gold30 were inspected alongside reduced contacts. Rerendering after receipt-only changes preserved the documented active output hashes. `npm run build` passes TypeScript/Vite7.3.6 with the existing large-chunk warning; diff check passes. This does not establish application/desktop/template, normal-speed listening, native editability or client acceptance. Only original synthetic gold proof media is included in Git; reference/stock derivatives, local tools and private measurements remain outside it.
+
+Second-batch validation: four changed/new recipes compile and rerun with explicit `--source` paths while preserving all13 active file hashes; two new cards pass skill validation; all44 cards appear once in the six-category progress projection;519 local links resolve; diff check and TypeScript/Vite build pass (existing chunk-size warning). Shared canonical skill installs/hash-checks CURRENT on MSI. Office installation/application of this batch still needs its own receipt.
+
+Third-batch validation:13 current outputs fully decode90 frames at540×960/30fps (three are the retained rejected rounded-card controls); four new recipes compile and rerun with explicit local source paths preserving all current hashes. Subject-band card validates;45 card rows match exactly between status and categorised projection;599 local links and diff check pass. TypeScript/Vite build passes with existing chunk-size warning. Canonical shared reference installs/hash-checks CURRENT on MSI; office adoption remains unverified. No dependency, production data, client export, permission or active-editor changes.

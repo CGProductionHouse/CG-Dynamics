@@ -1,0 +1,13 @@
+{
+  "fps": 24,
+  "frames": 108,
+  "size": [
+    540,
+    960
+  ],
+  "asset_commit": "2ca268e74888d3506b3319fb8f94aaaaf70ceca9",
+  "circle_bounds_checked_all_frames": true,
+  "labels_only_when_settled": true,
+  "first_last_preencode_pixels_equal": true,
+  "audio": "none"
+}

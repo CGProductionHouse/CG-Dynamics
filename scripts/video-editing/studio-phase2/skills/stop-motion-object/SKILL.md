@@ -1,0 +1,20 @@
+---
+name: nolan-stop-motion-object-experimental
+description: Plan stepped object movement using repeatable original captures and short cuts, then verify the motion and physical grounding.
+---
+
+# Stepped object motion — synthetic timing proof, physical capture pending
+
+**Lifecycle:** [owner's Arthur reference](https://www.tiktok.com/@iam_arthur7/video/7496560815676329246) sampled at several points → original *synthetic timing* A/B rendered on 26 October → physical capture, full-speed creative and sound review pending → mastered **NO**.
+
+The tutorial shows a camera on a tripod while an object is moved a little between takes. Its caption recommends trimming the takes into roughly four-frame-or-longer pieces, optionally smoothing with a short dissolve, nesting and adding speed changes and sound. That interval is the creator's suggestion, not a measured universal setting; source fps and perceived movement distance determine the real timing.
+
+For a CG proof, pick one safe tabletop object and a simple destination. Lock exposure, focus, white balance, framing and tripod. Mark the object's positions and capture enough frames to make movement read as intentional. Assemble with ordinary cuts in the existing editor; change one variable at a time if testing dissolve or speed. Inspect actual 9:16 playback for jumps, flicker and unsupported floating edges. Keep object contact/shadow plausible and enter/exit at a frame edge or real surface.
+
+## Bounded timing test
+
+[`render_stepped_timing.py`](render_stepped_timing.py) draws a fictional paper card on a fixed synthetic tabletop, complete with a contact shadow. It enters through the left frame edge and travels along the **same** 72-frame path in all versions. Only the temporal sampling changes: [continuous](synthetic-card-continuous.mp4) moves every frame, [two-frame holds](synthetic-card-two-frame.mp4) use 36 poses over 2.4 s, and [four-frame holds](synthetic-card-four-frame.mp4) use 18 poses. Run `python render_stepped_timing.py OUTPUT_DIR` from this folder; existing Pillow and FFmpeg tools suffice. The files are 540×960, 30 fps, 2.400 s, H.264 with no audio, and each fully decoded.
+
+On the decoded files, using mean absolute RGB frame difference ≥0.5 to classify visible motion, the continuous version had 68 changed frame pairs, the two-frame version 35, and the four-frame version 17. The two stepped outputs had respectively 36 and 54 nearly identical adjacent pairs. Compression produces tiny differences even on held input frames, so raw pixel identity is the wrong test. Midpoint and end-frame inspection shows the card and its shadow remain on the illustrated surface; it is not a cutout floating over an unrelated background. These facts verify timing and rough visual grounding only. The outputs' SHA-256 values are: continuous `69B80C141DDFC64F0262F3DD556B66FDFDEB06ADA0086905C7965D81FA06F374`, two-frame `7161B31B9F0F559D41FC7DE49A0A6A7A15528E1E14B354954D8AE39F30FC0E41`, four-frame `9A52A9B5D8C7FB040222BA52AC3F75D5214D7143F043891E2705FBEE0BACDBB7`.
+
+**Limit:** the card positions are drawn by code; no tripod, real object, lens, changing reflections, hand removal, captured stills, or native-editor assembly was tested. This is a frame-hold timing surrogate, **not** a reproduced stop-motion photograph. No full-speed perceptual viewing, sound design or phone test establishes that four frames looks better than two. Before using the skill in a client film, capture a genuine fixed-camera series of a suitable object, preserve physical contact/shadows, compare actual holds at source fps, and have an editor review the result with the intended soundtrack. Do not use the creator's footage, music or claimed views as evidence or assets.

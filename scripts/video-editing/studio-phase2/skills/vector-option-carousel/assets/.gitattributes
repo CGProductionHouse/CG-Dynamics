@@ -1,0 +1,4 @@
+# Preserve upstream bytes for the pinned source hashes on Windows checkouts.
+*.svg -text
+LUCIDE-LICENSE.txt -text
+SOURCE-MANIFEST.json text eol=lf
