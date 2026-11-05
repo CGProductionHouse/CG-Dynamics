@@ -20,7 +20,7 @@ Chrome is used headlessly for the local preview. Set `CHROME_PATH` only if Chrom
 
 ## Privacy and provenance
 
-Scene files and client assets stay outside Git. Image layers link to exact local files; the manifest records their path, size and digest. The engine never mutates a source asset.
+Scene files and client assets stay outside Git. Image layers embed the exact source bytes as data URLs so the SVG remains portable across Affinity, browsers and another workstation; the manifest records each original path, size and digest. The engine never mutates a source asset.
 
 ## Supported layer types
 

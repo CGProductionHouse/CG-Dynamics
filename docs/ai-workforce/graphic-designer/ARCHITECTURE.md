@@ -14,7 +14,7 @@ Issue #948 is the implementation authority. This directory records the smallest 
 
 The initial engine under `scripts/poster-studio/` accepts a private JSON scene outside Git. Stable layer IDs represent source images, exact logos, editable text, shapes, masks/effects and groups. It emits an editable SVG, a PNG review rendition, and a SHA-256 manifest. A second scene can be compared with the first to prove an isolated amendment.
 
-The portable SVG is explicitly an interim editable document. It is not an editable PSD. Photoshop 2026 and UXP Developer Tools are installed on the MSI and are the preferred professional PSD finishing route, but PSD claims remain blocked until an actual local UXP round trip is opened, inspected and saved successfully.
+The portable SVG is explicitly an interim editable document. It is not an editable PSD. Image bytes are embedded in the SVG while their original paths and SHA-256 digests remain in the manifest, so another approved workstation does not silently lose linked photo/logo layers. A real Affinity 3.3.1 round trip opened the complete document and saved native `.af` v1/v2 files. Photoshop 2026 and UXP Developer Tools are installed on the MSI and remain the preferred professional PSD finishing route, but the installed Photoshop currently stops at an Adobe device-authentication dialog. PSD claims remain blocked until an authorised account completes that sign-in and an actual local UXP round trip is opened, inspected and saved successfully.
 
 ## Minimal eventual ChatGPT contract
 

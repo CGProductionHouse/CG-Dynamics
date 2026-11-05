@@ -38,6 +38,9 @@ test('Poster Studio renders provenance and proves an isolated text amendment', (
   assert.equal(manifest.outputs.png, null)
   assert.match(svg, /preserveAspectRatio="xMidYMid slice"/)
   assert.doesNotMatch(svg, /preserve-aspect-ratio=/)
+  assert.match(svg, /href="data:image\/svg\+xml;base64,/)
+  assert.match(svg, /data-source-sha256="[a-f0-9]{64}"/)
+  assert.doesNotMatch(svg, /file:\/\//)
 
   const compare = spawnSync(process.execPath, [engine, 'compare', v1, v2, '--out', receipt], { encoding: 'utf8' })
   assert.equal(compare.status, 0, compare.stderr)

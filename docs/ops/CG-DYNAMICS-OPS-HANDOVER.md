@@ -6079,8 +6079,10 @@ Verified local proof state on 2026-11-05:
 - real Red Oak OneDrive photography and exact logo originals are staged only under the private local proof root, outside Git;
 - a deterministic scene-graph renderer now emits editable SVG, PNG review, asset/layer/output hashes and an amendment receipt;
 - the v1/v2 Red Oak proof records 15 layers and two exact source assets; changing the fictional price modifies only `offer-price`, leaving 14 layers unchanged;
+- the engine now embeds exact image bytes in the portable SVG after a real Affinity import exposed broken external file links; deterministic tests reject `file://` image references and both v1/v2 manifests retain identical photo/logo hashes;
+- Affinity 3.3.1 opened the complete regenerated SVG and saved native `.af` v1/v2 documents locally. This verifies the no-cost editable fallback but is not a PSD claim;
 - exact Canva typography was verified as `Zuume Rough Bold` (title) and `Rustic Printed Stamp` (subtitle), but neither is locally installed or available through the checked OneDrive/Adobe Fonts paths, so the present proof discloses mechanical substitutes and is not yet brand-exact typography;
-- Photoshop 2026 and UXP Developer Tools are installed; a narrow user-selected-job-folder `.psjs` renderer is prepared, but real PSD support remains unverified until an actual Photoshop round trip and Layers-panel inspection pass;
+- Photoshop 2026 and UXP Developer Tools are installed; a narrow user-selected-job-folder `.psjs` renderer is prepared, but Photoshop currently stops at an Adobe device-authentication dialog. Real PSD support remains unverified until authorised interactive sign-in plus an actual Photoshop round trip and Layers-panel inspection pass;
 - no deployment, production migration, hosted app, purchase, paid API call, public upload or client publication occurred.
 
 The exact Google Control Centre write-back could not be grounded: connected Drive searches for `CG Control Centre`, `Control Centre` and `Supervisor 381` returned no accessible canonical tracker, matching the existing handover warning. No replacement sheet, guessed file or guessed cell write was made. GitHub #948, #381 and this handover carry the current receipts.

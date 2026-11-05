@@ -77,6 +77,26 @@ function normalizeAssetPath(scenePath, assetPath) {
   return resolve(dirname(scenePath), assetPath)
 }
 
+function imageMimeType(assetPath) {
+  const extension = extname(assetPath).toLowerCase()
+  const types = {
+    '.gif': 'image/gif',
+    '.jpeg': 'image/jpeg',
+    '.jpg': 'image/jpeg',
+    '.png': 'image/png',
+    '.svg': 'image/svg+xml',
+    '.webp': 'image/webp',
+  }
+  const mimeType = types[extension]
+  if (!mimeType) throw new Error(`Unsupported image asset type: ${extension || '<none>'}`)
+  return mimeType
+}
+
+function embeddedImageHref(assetPath) {
+  const bytes = readFileSync(assetPath)
+  return `data:${imageMimeType(assetPath)};base64,${bytes.toString('base64')}`
+}
+
 function renderLayer(layer, scenePath) {
   const common = { id: layer.id, 'data-layer-name': layer.name ?? layer.id, ...styleAttrs(layer) }
   if (layer.type === 'rect') {
@@ -91,7 +111,7 @@ function renderLayer(layer, scenePath) {
   if (layer.type === 'image') {
     const assetPath = normalizeAssetPath(scenePath, layer.asset)
     if (!existsSync(assetPath)) throw new Error(`Missing image asset for ${layer.id}: ${assetPath}`)
-    return `<image ${attrs({ ...common, href: pathToFileURL(assetPath).href, x: layer.x, y: layer.y, width: layer.width, height: layer.height, preserveAspectRatio: layer.preserveAspectRatio ?? 'xMidYMid slice', clipPath: layer.clipPath ? `url(#${layer.clipPath})` : undefined })}/>`
+    return `<image ${attrs({ ...common, href: embeddedImageHref(assetPath), 'data-source-sha256': sha256File(assetPath), x: layer.x, y: layer.y, width: layer.width, height: layer.height, preserveAspectRatio: layer.preserveAspectRatio ?? 'xMidYMid slice', clipPath: layer.clipPath ? `url(#${layer.clipPath})` : undefined })}/>`
   }
   if (layer.type === 'text') {
     const lines = Array.isArray(layer.lines) ? layer.lines : [layer.text ?? '']
