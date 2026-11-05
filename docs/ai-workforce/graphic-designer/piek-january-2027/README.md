@@ -8,6 +8,7 @@ This directory is the versioned proposal and evidence gate for issue #955. It do
 - Latest observed package baseline: 12 designed posters and 4 professional videos.
 - January 2027 Client Schedule query returned no rows. Every proposed poster therefore uses a provisional ID and `monthlyDeliverableId: null`.
 - Four separate Canva Brand Kits were verified for Piek Group, Get Together, Engen and Sasol. They must never be blended into one generic Piek style.
+- The authorised Canva connector can list those four kits and read the 352-page Piek history design directly from company ChatGPT. Routine brand/reference retrieval therefore does not require browser or desktop takeover; final creation, isolated amendment and export still require an end-to-end connector proof.
 - Existing OneDrive `CG Creative Assistant` folders remain the media/history authority. This work records locators rather than duplicating client assets in Git.
 
 ## Files

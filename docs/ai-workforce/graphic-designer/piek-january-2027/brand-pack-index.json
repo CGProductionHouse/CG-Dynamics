@@ -8,10 +8,22 @@
   "status": "bootstrap-in-progress",
   "canvaBrandKitInspection": {
     "observedAt": "2026-11-05",
-    "method": "read-only inspection of the signed-in Canva editor Brand panel",
+    "method": "read-only inspection of the signed-in Canva editor Brand panel, followed by direct Canva connector verification",
     "contentChanged": false,
     "scope": "exact kit font labels and colour-palette tokens only",
     "warning": "A Canva font label proves kit configuration, not local font-file availability, licence portability or successful headless rendering."
+  },
+  "canvaConnectorVerification": {
+    "observedAt": "2026-11-05",
+    "companyChatGptPathVerified": true,
+    "brandKitListingVerified": true,
+    "historicalDesignMetadataVerified": true,
+    "selectedReferenceTextReadVerified": true,
+    "designId": "DAGcXGWhDhI",
+    "observedTitle": "PIEK GROUP OF COMPANIES",
+    "observedPageCount": 352,
+    "contentChanged": false,
+    "productionMeaning": "Brand discovery and reference retrieval can run through the authorised Canva connector without routine browser or desktop takeover. This does not yet prove final design creation, editable amendment or export."
   },
   "localFontAudit": {
     "observedAt": "2026-11-05",
@@ -19,6 +31,21 @@
     "searchedLabels": ["Lastica", "Barlow", "Red Hat Display", "Horizon", "HORIZON", "Inter", "Anton", "Univers", "Tall"],
     "installedMatches": [],
     "productionImpact": "Headless text rendering remains blocked until each selected font has a verified local file and usable licence, or an explicitly approved metric-compatible substitution is documented."
+  },
+  "fontAssetEvidence": {
+    "observedAt": "2026-11-05",
+    "companyOneDriveSearch": true,
+    "verifiedAssets": [
+      {
+        "font": "Anton",
+        "filename": "Anton-Regular.ttf",
+        "licenceFilename": "Anton-OFL.txt",
+        "licence": "SIL Open Font License 1.1",
+        "sourceFolder": "Clients/Ehlrich Park Slaghuis/Video Editing Library/brand/fonts",
+        "availabilityMeaning": "A company-held, explicitly OFL-licensed file exists and may support the Get Together scope after renderer-level font identity and output testing. It is not installed on the MSI and does not clear the other Get Together fonts."
+      }
+    ],
+    "unresolvedFonts": ["Lastica", "Barlow", "Red Hat Display", "Horizon", "HORIZON", "Inter", "Univers", "Tall"]
   },
   "oneDrive": {
     "root": "Clients/Piek Group/",
