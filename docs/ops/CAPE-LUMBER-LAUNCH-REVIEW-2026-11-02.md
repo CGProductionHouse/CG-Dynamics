@@ -1,3 +1,18 @@
+## 5 November — normal Cape client-password sign-in accepted
+
+At CA's request for phone-test details, verified Cape's existing Active account in
+normal admin Client Access, then signed in once through the real `/login` form in
+a separate, initially signed-out in-app browser. Redirect to `/client` succeeded;
+Cape Lumber branding, client-only navigation, published October report and November
+overview were visible. No credential reset/provision, admin-auth copying, fabricated
+JWT, provider/content/permission/backend or Vercel operation. No password is included
+in this committed receipt. Private screenshot:
+`%TEMP%/cape-client-login-verified-20261105.jpg`.
+
+This supersedes only Cape's previously unverified normal-password login gate, not
+physical-phone acceptance, all-file downloads, other clients or the separate release
+gate. CA is now testing on their own phone. Documentation only; no cloud build.
+
 ## 3 November — approved Teams date-follow activation LIVE (#941)
 
 CA approved the exact packet in chat: “Approved. Get the app done.”

@@ -1,3 +1,16 @@
+## 5 November — Cape real client-password sign-in verified
+
+CA requested Cape's login for a phone test. The normal signed-in Users → Client
+Access screen confirms Cape's existing account is Active. One normal existing-
+credential sign-in in a separate, initially signed-out in-app browser succeeded
+at `/login` → `/client`, visibly showing Cape Lumber and its client-only navigation,
+published October report and November overview. No admin-session copying, fabricated
+session, reset/provision, permission, content, SQL/backend or Vercel change. Credentials
+were not saved in source/receipts. This closes the untested normal-password step for
+Cape only; CA's actual physical-phone review and other clients' login checks remain.
+Private screenshot: `%TEMP%/cape-client-login-verified-20261105.jpg`. This docs-only
+receipt must not trigger deployment; latest frontend source-release gate is unchanged.
+
 ## 5 November — research applied to client website measurement labels (source only)
 
 Reviewed the latest saved 4 November research release `DIR261104A_0840_SearchMeasurementCorrections`
