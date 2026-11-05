@@ -22,16 +22,26 @@
     }
   },
   "masterRules": {
-    "contentEditsAllowed": false,
+    "contentEditsAllowed": true,
+    "contentEditScope": "registered-new-work-pages-in-verified-working-lanes",
     "moveExistingPagesAllowed": false,
     "deleteExistingPagesAllowed": false,
     "readProtectedHistoryAllowed": true,
-    "onlyAllowedMutation": "insert-new-working-design-pages-before-drafts",
+    "allowedMutations": ["edit-registered-working-pages", "insert-new-pages-before-drafts"],
     "freshBoundaryReadRequired": true,
     "explicitApprovalRequiredPerMerge": true
   },
   "workingRules": {
-    "separateWorkingDesignRequired": true,
+    "separateWorkingDesignRequired": false,
+    "officialClientDesignCount": 1,
+    "officialDesignId": "DAGcXGWhDhI",
+    "editablePageIds": [],
+    "temporaryCopy": {
+      "designId": "DAHaDQgOO1M",
+      "purpose": "optional disposable testing only",
+      "cleanup": "transfer useful finished designs to the official file, verify the transferred layers, then remove the temporary copy",
+      "containsCompletedJanuaryArtwork": false
+    },
     "sourceMasterPagesRemainUnchanged": true,
     "copySelectedPagesAllowed": true,
     "allowedDestinations": ["IN_PROGRESS_TEMPLATES", "TO_BE_APPROVED"],

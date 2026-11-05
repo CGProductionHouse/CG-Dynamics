@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {
-  assertMasterContentEditForbidden,
+  assertMasterContentEditAllowed,
   classifyMasterPage,
   planApprovedInsert,
   resolveBoundaries,
@@ -16,12 +16,14 @@ const policy = {
     postedScheduled: { pageId: 'posted' },
   },
   masterRules: {
-    contentEditsAllowed: false,
+    contentEditsAllowed: true,
+    contentEditScope: 'registered-new-work-pages-in-verified-working-lanes',
     moveExistingPagesAllowed: false,
     deleteExistingPagesAllowed: false,
     freshBoundaryReadRequired: true,
     explicitApprovalRequiredPerMerge: true,
   },
+  workingRules: { editablePageIds: ['page-24'] },
 }
 
 function snapshot() {
@@ -32,7 +34,7 @@ function snapshot() {
   return { designId: 'DAGcXGWhDhI', pages }
 }
 
-test('resolves the observed writable window without treating master pages as editable', () => {
+test('permits registered new work inside the official file while protecting history', () => {
   const boundaries = resolveBoundaries(policy, snapshot())
   assert.deepEqual(boundaries, {
     inProgressHeader: 23,
@@ -42,9 +44,15 @@ test('resolves the observed writable window without treating master pages as edi
     postedScheduledHeader: 51,
     protectedStart: 50,
   })
-  assert.equal(classifyMasterPage(policy, snapshot(), 24), 'existing-working-page-read-only')
+  assert.equal(classifyMasterPage(policy, snapshot(), 24), 'in-progress-templates')
   assert.equal(classifyMasterPage(policy, snapshot(), 50), 'protected-drafts-posted-scheduled')
-  assert.throws(() => assertMasterContentEditForbidden(policy, snapshot(), 24), /Direct master content edits are forbidden/)
+  assert.equal(assertMasterContentEditAllowed(policy, snapshot(), ['page-24']).allowed, true)
+  assert.throws(() => assertMasterContentEditAllowed(policy, snapshot(), ['page-25']), /not registered/)
+  assert.throws(() => assertMasterContentEditAllowed(policy, snapshot(), ['page-52']), /outside the verified working lane/)
+  assert.throws(() => assertMasterContentEditAllowed(policy, snapshot(), ['drafts']), /outside the verified working lane/)
+  const moved = snapshot()
+  moved.pages.find((page) => page.id === 'page-24').index = 52
+  assert.throws(() => assertMasterContentEditAllowed(policy, moved, ['page-24']), /outside the verified working lane/)
 })
 
 test('plans only an approved insert from a separate working design before Drafts', () => {

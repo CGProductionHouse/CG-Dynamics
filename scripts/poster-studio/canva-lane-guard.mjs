@@ -20,10 +20,11 @@ export function validatePolicy(policy) {
   for (const key of ['inProgressTemplates', 'drafts', 'postedScheduled']) {
     requiredString(policy.headers?.[key]?.pageId, `headers.${key}.pageId`)
   }
-  if (policy.masterRules?.contentEditsAllowed !== false
+  if (policy.masterRules?.contentEditsAllowed !== true
+    || policy.masterRules?.contentEditScope !== 'registered-new-work-pages-in-verified-working-lanes'
     || policy.masterRules?.moveExistingPagesAllowed !== false
     || policy.masterRules?.deleteExistingPagesAllowed !== false) {
-    throw new Error('Master content edits, existing-page moves and deletion must remain disabled')
+    throw new Error('Content edits must be scoped to registered working pages; existing-page moves and deletion remain disabled')
   }
   if (policy.masterRules?.freshBoundaryReadRequired !== true
     || policy.masterRules?.explicitApprovalRequiredPerMerge !== true) {
@@ -65,14 +66,24 @@ export function classifyMasterPage(policy, snapshot, pageIndex) {
   const index = requiredIndex(pageIndex, 'pageIndex')
   const boundaries = resolveBoundaries(policy, snapshot)
   if (index === boundaries.inProgressHeader) return 'workflow-header-read-only'
-  if (index >= boundaries.writableStart && index <= boundaries.writableEnd) return 'existing-working-page-read-only'
+  if (index >= boundaries.writableStart && index <= boundaries.writableEnd) return 'in-progress-templates'
   if (index >= boundaries.protectedStart) return 'protected-drafts-posted-scheduled'
   return 'unresolved-master-zone-read-only'
 }
 
-export function assertMasterContentEditForbidden(policy, snapshot, pageIndex) {
-  const classification = classifyMasterPage(policy, snapshot, pageIndex)
-  throw new Error(`Direct master content edits are forbidden (${classification}); copy to a separate working design first`)
+export function assertMasterContentEditAllowed(policy, snapshot, pageIds) {
+  if (!Array.isArray(pageIds) || !pageIds.length) throw new Error('Exact target page IDs are required')
+  const boundaries = resolveBoundaries(policy, snapshot)
+  const allowed = new Set(policy.workingRules?.editablePageIds ?? [])
+  for (const pageId of pageIds) {
+    const page = snapshot.pages.find((entry) => entry.id === pageId)
+    if (!page) throw new Error('Target page ID is absent from the current snapshot')
+    if (page.index < boundaries.writableStart || page.index > boundaries.writableEnd) {
+      throw new Error('Target is outside the verified working lane; protected history and headers are read-only')
+    }
+    if (!allowed.has(pageId)) throw new Error('Target is not registered as new work for this production job')
+  }
+  return { allowed: true, designId: policy.masterDesignId, pageIds: [...new Set(pageIds)] }
 }
 
 export function planApprovedInsert(policy, snapshot, request) {
@@ -107,7 +118,7 @@ export function planApprovedInsert(policy, snapshot, request) {
         source: { type: 'design', design_id: sourceDesignId, page_numbers: pageNumbers },
       }],
     },
-    forbiddenOperations: ['replace_text_on_master', 'update_fill_on_master', 'move_pages', 'delete_pages'],
+    forbiddenOperations: ['edit_protected_history', 'edit_unregistered_pages', 'move_pages', 'delete_pages'],
     approval,
   }
 }

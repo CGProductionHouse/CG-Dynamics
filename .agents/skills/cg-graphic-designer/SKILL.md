@@ -57,11 +57,11 @@ Original media remains in canonical OneDrive `Photos`. The `CG Creative Assistan
 
 For the Piek master `DAGcXGWhDhI`, re-read the page list before every write and validate it with `scripts/poster-studio/canva-lane-guard.mjs`. The verified 5 November 2026 boundary IDs are versioned in `canva-lane-policy.json`; page numbers are observations only and may shift.
 
-- Never run content-edit transactions against the 352-page master. Read all lanes for brand/usage evidence only.
-- Copy selected template/reference pages into a **separate working design**. Edit only that copy. Copying a page does not authorise reuse of its photo, person, wording, concept or mechanism.
+- Maintain one official client Canva file. Create and edit new production pages directly in its verified working lanes. Register new job page IDs in the lane policy and validate every content-edit target against the current page list; a page moved into Drafts/Posted/Scheduled immediately loses edit eligibility.
+- A separate working copy is optional for disposable tests only. Transfer useful finished work into the official file, verify the transferred editable layers, then remove the temporary copy. It must never become a second official client project. Copying a page does not authorise reuse of its photo, person, wording, concept or mechanism.
 - `IN PROGRESS / TEMPLATES` and a separately verified `TO BE APPROVED` lane are the only permitted destinations for new work. The current `TO BE APPROVED` boundary is unresolved, so fail closed until its exact header page ID is verified.
-- Moving, deleting or rewriting existing master pages is always forbidden. `DRAFTS` and `POSTED / SCHEDULED` are Amonique-controlled and read-only.
-- The only permitted master mutation is inserting approved pages from a separate working design immediately before the verified `DRAFTS` header. Re-resolve header IDs immediately beforehand and obtain exact per-merge approval. A stale snapshot or changed boundary aborts the operation.
+- Do not overwrite other designers' existing work or alter workflow divider pages. `DRAFTS` and `POSTED / SCHEDULED` are Amonique-controlled: never edit, move or delete their pages.
+- New pages may be added in the verified working lane. For connector page-merge operations, re-resolve header IDs immediately beforehand and follow the tool's exact-operation approval requirement. This is a connector requirement, not a requirement to seek approval for every routine new-work content edit.
 - Canva position is not Dynamics approval, Meta draft, scheduling or posting proof.
 
 ## Source-photo preparation
