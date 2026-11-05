@@ -1,4 +1,6 @@
-# Ehrlich Park November R15 — one-shot final correction
+# Ehrlich Park November R15 — withdrawn internal attempt
+
+**Withdrawn after delivery. Use R16.** A dense 17-frame face-motion check after the 10:55–10:56 handoff showed the butcher's mouth moving toward camera during this muted B-roll select. This conflicts with the no-muted-direct-speech rule. The selected source is re-cropped below the face in R16. R15 must not be forwarded to a client.
 
 5 November 2026. The owner accepted R14's music, pacing, effects, type and cover, and identified one poor, unstabilised fridge/staff shot in CG Nolan Approvals at 10:40 SAST: “Replace with different video please. Also, stabilisation was missed anyways.” The screenshot matched R14 timeline **14.40–15.53 s**, February `0L8A4456.MP4` at source 0.15–1.29 s. That complete performance was removed. No other creative part of R14 was changed.
 
