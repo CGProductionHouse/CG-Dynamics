@@ -12,6 +12,18 @@ Status: **preproduction, not an approved script or cleared edit**. Owner assigne
 
 **Camera-language instruction:** Screen Franco's full source motion for a rotation, pan or wipe gesture that can lead into the next shot's matching direction. Align movement at the cut and land it on a heard beat; use speed changes only where they preserve the gesture. Stabilise shots intended to be focused/still, but do not erase deliberate travel. Compare normal-speed A/B in portrait and reject a transition that twists the car or loses the service action.
 
+### Working 30-second comic-to-craft spine (source-dependent)
+
+| Time | Actual viewer beat | Picture and sound construction |
+| --- | --- | --- |
+| 0–3 s | **“Gaan jou kar die skoonma-toets slaag?”** | A crisp actual-detail gesture, then a moving vehicle/worker crosses the large title if its natural edge supports a clean occlusion. One physical contact cue and a held musical breath make the question land; do not open on a static card or an artificial mother-in-law gag. |
+| 3–9 s | The car gets a second look | One wider real WiseRide setup gives the process geography; a detail check/mirror/reflection can be the visual wink only if genuinely filmed. A camera-direction match carries into the next service stage on the beat. |
+| 9–20 s | The team earns the answer | Distinct cleaning/detailing actions and real before-to-result progression, selected from different moments than the published October montage. Layer short true-to-action wipe, water, cloth or door transients across cuts; mute production chatter. No list of unverified products. |
+| 20–26 s | The answer is visible | Resolve on the same vehicle or a plainly non-comparative detail payoff. Optional short line: **“Nou kan sy maar kyk.”** Test whether this reads naturally in Afrikaans and serves the actual picture; omit if it feels forced. |
+| 26–30 s | Invite a practical next step | **“Vra WiseRide oor 'n valet.”** Use the existing full logo or approved clean Group fallback as picture, with chosen music continuing through the reveal. No invented pricing or availability. |
+
+The voiceover version would use a fluent, human-approved Afrikaans read of only the hook and perhaps the payoff, recorded and licensed for this client. The silent-text version must work on its own. Compare both against normal-speed footage and score before selecting one. The humour is a *story entry*, not a replacement for showing the WiseRide team's work.
+
 ## Step one: the real proposition
 
 - **Audience:** Bloemfontein drivers who expect a longer December drive and are preparing the vehicle in November. One primary audience; do not add a tyre or generic roadworthiness service that belongs to another Wiseman business.
