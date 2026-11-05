@@ -49,6 +49,14 @@ Changing `HEADING HOME?` to `THE ROAD AHEAD` changed exactly one text element an
 
 ## Remaining production gates
 
+### Owner feedback refinement — 5 November
+
+Owner rated the Engen direction positively but rejected the weak photo finish, requested the actual sign overlapping the headline, and identified incomplete footer bleed. A new local derivative applies a documented luminance curve, restrained saturation, a local sign lift and sharpening from the original; no source reconstruction or clipped-data recovery. An independent seeded-GrabCut sign cutout uses those same finished pixels. The first cutout was rejected internally after Canva changed the background crop on image replacement. Final registration was measured against the actual updated background: 577 inliers from 622 matches, median 0.11 and 95th-percentile 0.53 preview-pixel reprojection error.
+
+The live headline was positioned for a small, legible sign overlap. The original logo/footer assets remain intact. A separate exact `#134094` bleed extension covers transparent native-raster edge padding; the 480×600 Canva preview's complete bottom row is exact brand blue and footer side-edge channels differ by no more than one level. This is thumbnail and native-geometry verification, not full-resolution export acceptance. All non-target page text/image records and the target wording remain unchanged.
+
+**Revision is unsaved pending preview approval**, transaction `8646306621875119084`. The previously saved version remains the current committed page. Private source/grade/mask/registration/before-after receipts remain outside Git. General finishing, depth-opportunity and rendered-bleed checks are now part of the reusable skill.
+
 Before treating a saved proof as a production deliverable:
 
 1. verify January package and schedule authority;

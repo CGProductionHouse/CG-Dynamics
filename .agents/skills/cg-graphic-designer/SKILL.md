@@ -72,6 +72,8 @@ For the active Piek master `DAHaD4mJnGY`, re-read the page list before every wri
 
 Use Picasso's private local MCP/runner architecture for deterministic inspection, scene grouping, previews, conservative first-pass finishing and verification. Do not upload private source photos to a cloud batch editor. For poster-selected photos, create a separate derivative from the original, preserve dimensions/profile where appropriate, strip private metadata on review/export copies, and keep the original hash. Lightroom Classic remains the preferred professional finishing surface when a selected image needs scene-aware colour, masking or detailed correction; Photoshop is reserved for subtle temporary blemishes or difficult local cleanup on a duplicate. Automated grades and face/quality hints are review aids, never release approval.
 
+Compare the original, finished photograph and final placement visually. A small global adjustment does not by itself establish professional finishing. Evaluate subject definition, tonal separation, colour, texture and local light at the actual poster crop; retain realistic scene atmosphere and source identity. Save versioned settings and before/after evidence. Treat owner feedback as a quality standard for subsequent work, without applying one identical grade or effect to every scene.
+
 ## Composition and amendments
 
 - Preserve exact photos, people, food, products, venues and logos as deterministic source layers. Never generatively reconstruct them unless the owner explicitly requests that change.
@@ -80,6 +82,9 @@ Use Picasso's private local MCP/runner architecture for deterministic inspection
 - The scene JSON is versioned authority. Render locally to an editable SVG, review PNG and hash manifest. Call a PSD editable only after Photoshop reopens it and independent image/text/logo/mask layers pass inspection.
 - For a price/date/headline amendment, change only the named layer and produce a comparison receipt. Preserve the prior version.
 - Production fixes adjust exact type/logo/spacing/colour without regeneration. Source fixes return to the original photo. Creative failures restart only the failed poster from original sources and the approved brief.
+- Consider genuine subject/typography overlap where it strengthens depth and legibility. Duplicate exact finished photo pixels into an independent transparent mask rather than reconstructing a sign, person or product. Preserve variety across the month; a cutout is an art-direction choice, not a mandatory template.
+- Finish the background asset and crop before measuring foreground registration. Canva may change internal crop on asset replacement even when native element dimensions stay identical. Re-measure against the new background preview, then insert the aligned cutout; reject doubled edges and halos before review.
+- Verify footer/background bleed in the rendered image, not only element dimensions. Raster assets can contain transparent padding. Extend the exact background colour without distorting logos or covering lettering; inspect both side edges and the complete bottom row. Disclose thumbnail-only verification when a full-resolution export is unavailable.
 
 ## Quality gate
 
