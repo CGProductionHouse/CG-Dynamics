@@ -1,0 +1,23 @@
+# Ehrlich Park November R13 — owner-amended internal review
+
+5 November 2026. R12 remains the owner's acceptable **baseline for amendment**, not a rejected concept. R13 is a protected revision made with `ehrlich-november/render_r13.py` and `make_cover_r13.py`. No client media or licensed stock is committed to Git.
+
+## Owner direction and effect references
+
+Keep the butcher-to-meal direction. Remove the low-quality stock at roughly 16 and 18 seconds, correct sideways phone viewing, make fire a motivated transition rather than unrelated flame cutaways, replace the still ending, make text less generic, use music with a stronger pulse, and prelap/tail the sizzle around its cooking image. Use a clean real EHP cover with a grid-safe logo, no forced braai headline. The two new owner links point to film-burn and fast-flicker effect families. Their public page metadata was accessible, but the actual TikTok frames were not reliably viewable or downloadable. R13 is an original implementation of the requested mechanisms, **not** a verified frame-for-frame tutorial recreation.
+
+## Edit and source decisions
+
+The root orientation fault was in R12's camera interpretation: EHP originals `199A1365`, `1386`, `1387` and `1394` are 3840×2160 files with no rotation metadata, but their physical picture is portrait. Comparison frames showed that 90° counterclockwise makes the hands, saw and packaging upright. R13 applies that rotation before portrait framing to every selected EHP shot and the opening panels. The pan (`adobe-free-385373316.mov`) and Coverr grill are cooking illustration, never EHP premises or current inventory. Both poor cooking selects and the April still ending were removed. The closing moving picture returns to real July EHP packing.
+
+The opening uses a brief fire glimpse. A twelve-frame luminance-guided heat wipe connects the actual EHP display to the pan. A six-frame contrast/blade flicker punctuates a cutting-action change. The original motion continues through both treatments. Dense full-frame contact sheets were inspected at each effect. Titles use the existing Anton treatment with short sliding phrases and a brand-red rule: `GOOD FOOD STARTS HERE`, `CUT WITH CARE`, `PACKED FOR YOU`, `BRING THE HEAT`, `EHRLICH PARK BLOEMFONTEIN`.
+
+The cover uses a genuine EHP `199A1387.MP4` frame at 3.5 seconds, rotated upright, with only the official round logo. The private 1440×2560 file and centered square, 3:4 and 4:5 crop contacts were visually checked. The proposed caption speaks broadly to meals without promising current inventory, price or offer.
+
+Mixkit `On Parole` (#1188) by Michael Ramir C replaces `Complicated` **for this film**; the earlier track remains an option elsewhere. The candidate's measured pulse is about 105.5 BPM; most cuts last one or two beat spans. A licensed sizzle runs continuously from 10.58 seconds for 4.6 seconds, with a 0.65-second lead fade and 0.75-second exit fade over adjacent shots. Quiet whooshes coincide with flicker and heat; fire crackle supports the opening only. Camera sound is muted because crew direction has not been cleared. The exact encoded mix has **not** been perceptually heard by this agent. Loudness, waveform and beat estimates cannot certify musical fit. Shared music-use-history clearance also remains open.
+
+## Verification and handoff
+
+The protected export is 22.900 seconds, 1080×1920, 30 fps H.264/AAC stereo, 23,550,576 bytes, SHA-256 `941727058E35CFA05B995FF8BC3D0786B1A996EA840FDBE558A4A8328BB5FB10`. Full FFmpeg decode passed. Measured integrated loudness is −15.7 LUFS and true peak −2.3 dBFS. Full-size orientation, sampled title/effect frames and cover crop contacts were visually checked. These are not a full-speed phone picture or independent headphone/speaker review. May cutting footage has a different exact motion from the prior published beat, but its recognisable setup/public-use overlap needs staff judgement before client forwarding.
+
+**Internal delivery witnessed:** at 08:12 SAST `2026_11_EHRLICH_PARK_VIDEO_01_GOOD_FOOD_R13_REVIEW.mp4` went to the exact **CG Nolan Approvals** group as a document with only the proposed post caption in its message; WhatsApp showed **Delivered**. At 08:13 the separate caption-free cover was sent as an HD photo; the selector showed **803 kB · 1440×2560**, and its row showed **Delivered**. A separate `From Nolan` note at 08:14 marked R12 superseded and requested music/sound review before client forwarding; it was initially pending in the observed state. This is internal review, **not** owner, client or public approval. Do not forward R12 or call R13 final until the open gates and feedback are resolved.
