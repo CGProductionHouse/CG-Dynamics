@@ -33,6 +33,7 @@ Run the validator before treating the proposal as usable:
 
 ```powershell
 node scripts/poster-studio/month-plan.mjs docs/ai-workforce/graphic-designer/piek-january-2027/january-strategy.proposal.json docs/ai-workforce/graphic-designer/piek-january-2027/brand-pack-index.json
+node scripts/poster-studio/month-board.mjs docs/ai-workforce/graphic-designer/piek-january-2027/january-strategy.proposal.json <private-output.html>
 ```
 
 ## Source and repetition checks

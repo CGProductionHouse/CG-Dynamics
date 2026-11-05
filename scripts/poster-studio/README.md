@@ -12,7 +12,8 @@ It deliberately does not upload assets, call a paid API or flatten an image and 
 The companion headless tools are:
 
 - `creative-ledger.mjs` — image fingerprints plus source/shoot/person/product/service/branch/concept/headline/mechanism repetition checks for both human and AI work;
-- `month-plan.mjs` — validates a proposed monthly strategy board against package, Brand Pack and future-schedule safety gates.
+- `month-plan.mjs` — validates a proposed monthly strategy board against package, Brand Pack and future-schedule safety gates;
+- `month-board.mjs` — renders the complete proposal as a responsive, printable local review board.
 
 They are designed for a future normal-company-ChatGPT tool wrapper and do not require routine desktop takeover.
 
@@ -29,6 +30,7 @@ Chrome is used headlessly for the local preview. Set `CHROME_PATH` only if Chrom
 node scripts/poster-studio/creative-ledger.mjs fingerprint <image>
 node scripts/poster-studio/creative-ledger.mjs check <ledger.json> <candidate.json> --out <receipt.json>
 node scripts/poster-studio/month-plan.mjs <month-plan.json> <brand-pack-index.json>
+node scripts/poster-studio/month-board.mjs <month-plan.json> <private-output.html>
 ```
 
 ## Privacy and provenance

@@ -13,7 +13,15 @@
     "graphicDesign2026FolderId": "A2AC9FE4B255F52F!s62aaa9133c4d4e5b9d9268d8cb12dd00",
     "creativeAssistantFolderId": "A2AC9FE4B255F52F!s4456b0de5bed4279b92968e00fe722a6",
     "styleReferencesFolderId": "A2AC9FE4B255F52F!s3cfe97f6bb2c44c4b6c0f2d5c1a1a8a1",
-    "historyFolderId": "A2AC9FE4B255F52F!s2a190d6fa299456da024e3f0af9489ba"
+    "historyFolderId": "A2AC9FE4B255F52F!s2a190d6fa299456da024e3f0af9489ba",
+    "connectorReadState": {
+      "observedAt": "2026-11-05",
+      "assetLibraryFolders": ["BLOCKED_DO_NOT_USE", "READY_UNUSED", "USED_REFERENCE"],
+      "assetLibraryFoldersCurrentlyEmpty": true,
+      "historyFolderCurrentlyEmpty": true,
+      "styleReferenceState": "ENGEN contains one index file; PIEK_GROUP, SASOL and GET_TOGETHER are empty",
+      "textFetchBlocker": "The OneDrive connector listed files but returned serviceReadOnly/Database Is Read Only when fetching text content."
+    }
   },
   "canvaHistory": {
     "designId": "DAGcXGWhDhI",
@@ -88,14 +96,28 @@
       "canvaBrandKitId": "kAGn0NB0i8s",
       "canvaBrandKitName": "Piek Group",
       "brandKitVerified": true,
-      "exactLogoStatus": "group-logo-folder-observed-hash-pending",
+      "exactLogoStatus": "two-raster-variants-hashed-source-selection-pending",
+      "logoCandidates": [
+        {
+          "itemId": "A2AC9FE4B255F52F!sdf0d04eb9fee463e8232f5a6588ae0d7",
+          "filename": "Logo.png",
+          "sha256": "a3d2b6d0aaf893ab6222db19e46b929b0a44cf6995d5ef716d68fa074f4a08ea",
+          "selectionState": "unresolved"
+        },
+        {
+          "itemId": "A2AC9FE4B255F52F!sc4567d197b1c4bce83b651425d0ca735",
+          "filename": "PIEK GROUP OF COMPANIES.png",
+          "sha256": "d78617f6bae802804402c6523661296c14e2ab7b4cdab9c3a05d1183ae02c991",
+          "selectionState": "unresolved"
+        }
+      ],
       "fontStatus": "requires-current-source-verification",
       "historicalFontEvidence": ["Sora headings", "Inter body"],
       "colourStatus": "requires-current-source-verification",
       "historicalPaletteDirection": ["warm off-white/cream", "navy", "champagne-gold", "warm stone"],
       "productionBlocked": true,
       "observedVisualGrammar": ["deep navy/cream restraint", "fine linework and borders", "large geometric type", "architectural/translucent panels", "signature line-art motif", "photo-led asymmetry"],
-      "blockers": ["exact current font files/licence not verified", "exact colour values not verified", "sample publication/approval states unresolved"]
+      "blockers": ["correct logo variant for the selected composition is unresolved", "exact current font files/licence not verified", "exact colour values not verified", "sample publication/approval states unresolved"]
     },
     {
       "key": "ENGEN",
