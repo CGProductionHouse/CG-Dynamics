@@ -1,4 +1,6 @@
 # Nolan Studio — skill library and production continuity
+**WiseRide latest: R03 private, NOT SENT.** Owner's 19:09–19:10 feedback supersedes the R02 finishing verdict: replace bright doorway CTA/cover, stronger controlled contrast/colour, trim engine start and remove logo hold. Protected R03 and new official-white-logo wheel-action cover are complete; exact decode/frames checked. Company attachment route detached and another editor occupies desktop; handoff waits for unconflicted Nolan company WhatsApp. [Exact feedback, source bindings and next send](WISERIDE-NOVEMBER-MSI-GAME-PLAN.md).
+
 
 **5 November WiseRide R02 sent for internal review, 19:06–19:07 SAST:** Owner liked R01 and requested tighter type, softer shadows, more text motion, exposure/colour matching and the correct Group outro. R02 is 29.16 seconds and is now sent from Nolan's company WhatsApp as the named MP4 document with proposed caption plus separate caption-free HD cover. MP4, HD cover and revision note all explicitly showed Delivered. R02 supersedes R01. See [current amendment/handoff evidence](WISERIDE-NOVEMBER-MSI-GAME-PLAN.md).
 
