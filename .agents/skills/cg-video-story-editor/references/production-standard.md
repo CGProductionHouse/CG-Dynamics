@@ -72,3 +72,6 @@ Keep this in the existing private release record, not a second task database. Fo
 Skill sync is access to instructions, not proof they were followed. The next agent must supply project evidence for these rows; copying the checklist or stating “all passed” is insufficient.
 
 For a machine-readable release record, `python scripts/video-editing/studio-phase2/scripts/check_review_gate.py RELEASE.json` fails when any required evidence row is absent or pending. This is a **missing-evidence stop**, not a visual or listening approval: a human must still inspect each cited source and the exact export. The record stays with the private media, outside Git when it contains client-specific evidence.
+
+## 5 November typography finishing feedback
+Owner preference: compact multiline groups with optically checked leading; do not scatter a single phrase across large vertical gaps. Avoid hard black outlines and offset hard shadows on normal brand titles. Use a restrained soft shadow only where contrast requires it. Inspect the exact rendered text at phone scale, including entrance and settle; make reveals and accent movement serve the words while preserving reading time. Check clip/cue accents by listening and timing evidence; a nominal BPM grid alone does not prove the edit feels on beat.
