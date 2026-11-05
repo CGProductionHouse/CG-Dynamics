@@ -1,6 +1,12 @@
 # CG Graphic Designer / Poster Studio — proof architecture
 
-Issue #948 is the implementation authority. This directory records the smallest tested architecture; it does not claim production readiness.
+Issue #948 is the parent implementation authority. Issue #955 is the Piek Group January 2027 full-month acceptance authority. This directory records the smallest tested architecture; it does not claim production readiness.
+
+## Current acceptance target
+
+Piek Group January 2027 replaces Red Oak as the first complete monthly pilot. Red Oak remains a technical source-provenance/amendment fixture, but owner review rejected its visual direction as off-brand; it is not a creative-quality success or a reusable style template.
+
+January currently has no dated Piek Client Schedule rows. The latest verified package baseline is 12 designed posters and four professional videos; the checked-in January grid is a proposal with null deliverable IDs until the actual January package/schedule exists.
 
 ## Authority boundaries
 
@@ -13,6 +19,8 @@ Issue #948 is the implementation authority. This directory records the smallest 
 ## Composition contract
 
 The initial engine under `scripts/poster-studio/` accepts a private JSON scene outside Git. Stable layer IDs represent source images, exact logos, editable text, shapes, masks/effects and groups. It emits an editable SVG, a PNG review rendition, and a SHA-256 manifest. A second scene can be compared with the first to prove an isolated amendment.
+
+`creative-ledger.mjs` adds exact source hashing, perceptual image hashing, same-shoot evidence, reviewer-supplied non-biometric visible-person tags, product/service/branch/concept/headline/mechanism comparison and publication-state memory. `month-plan.mjs` validates scope coverage, strategy completeness, distinct mechanisms, brand-pack gates and the absence of invented future schedule IDs. These commands run headlessly and are the production direction; desktop control is not the operator workflow.
 
 The portable SVG is explicitly an interim editable document. It is not an editable PSD. Image bytes are embedded in the SVG while their original paths and SHA-256 digests remain in the manifest, so another approved workstation does not silently lose linked photo/logo layers. A real Affinity 3.3.1 round trip opened the complete document and saved native `.af` v1/v2 files. Photoshop 2026 and UXP Developer Tools are installed on the MSI and remain the preferred professional PSD finishing route, but the installed Photoshop currently stops at an Adobe device-authentication dialog. PSD claims remain blocked until an authorised account completes that sign-in and an actual local UXP round trip is opened, inspected and saved successfully.
 

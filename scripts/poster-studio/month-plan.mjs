@@ -1,0 +1,93 @@
+#!/usr/bin/env node
+
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { pathToFileURL } from 'node:url'
+
+const REQUIRED_BRIEF_FIELDS = [
+  'provisionalId', 'brandScope', 'businessObjective', 'buyingSituation', 'audience',
+  'audienceTension', 'proposition', 'proof', 'emotion', 'nextAction', 'januaryRelevance',
+  'headlineCandidates', 'mechanism', 'sourceRequirement', 'sourceStatus', 'avoid',
+  'whyItExists', 'qaState',
+]
+
+function present(value) {
+  return Array.isArray(value) ? value.length > 0 : value !== null && value !== undefined && String(value).trim() !== ''
+}
+
+function words(value) {
+  return String(value).toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter((word) => word.length > 2)
+}
+
+function jaccard(left, right) {
+  const a = new Set(left)
+  const b = new Set(right)
+  let intersection = 0
+  for (const word of a) if (b.has(word)) intersection += 1
+  return a.size && b.size ? intersection / (a.size + b.size - intersection) : 0
+}
+
+export function validateMonthPlan(plan, brandPack) {
+  const errors = []
+  const warnings = []
+  if (plan.schemaVersion !== 1) errors.push('plan.schemaVersion must be 1')
+  if (!/^\d{4}-\d{2}-01$/.test(plan.month ?? '')) errors.push('plan.month must be YYYY-MM-01')
+  if (!Array.isArray(plan.briefs) || !plan.briefs.length) errors.push('plan.briefs must not be empty')
+  if (plan.briefs?.length > (plan.packageBaseline?.designPosters ?? 0)) errors.push('brief count exceeds verified package baseline')
+  const scopeMap = new Map((brandPack.scopes ?? []).map((scope) => [scope.key, scope]))
+  const ids = new Set()
+  const mechanisms = new Set()
+  const headlines = []
+
+  for (const [index, brief] of (plan.briefs ?? []).entries()) {
+    const label = brief.provisionalId || `brief[${index}]`
+    for (const field of REQUIRED_BRIEF_FIELDS) if (!present(brief[field])) errors.push(`${label}: missing ${field}`)
+    if (ids.has(brief.provisionalId)) errors.push(`${label}: duplicate provisionalId`)
+    ids.add(brief.provisionalId)
+    const scope = scopeMap.get(brief.brandScope)
+    if (!scope) errors.push(`${label}: unknown brandScope ${brief.brandScope}`)
+    if (scope?.productionBlocked && !String(brief.qaState).startsWith('blocked')) errors.push(`${label}: cannot pass QA while brand pack is blocked`)
+    const mechanism = String(brief.mechanism ?? '').toLowerCase()
+    if (mechanisms.has(mechanism)) errors.push(`${label}: duplicate creative mechanism`)
+    mechanisms.add(mechanism)
+    if (plan.status === 'proposal-unmatched-to-schedule' && brief.monthlyDeliverableId) {
+      errors.push(`${label}: proposal must not invent monthlyDeliverableId`)
+    }
+    for (const headline of brief.headlineCandidates ?? []) {
+      for (const prior of headlines) {
+        const similarity = jaccard(words(headline), words(prior.headline))
+        if (similarity >= 0.72) warnings.push(`${label}: headline resembles ${prior.id} (${similarity.toFixed(2)})`)
+      }
+      headlines.push({ id: label, headline })
+    }
+  }
+
+  const countsByScope = Object.fromEntries([...scopeMap.keys()].map((key) => [key, plan.briefs?.filter((brief) => brief.brandScope === key).length ?? 0]))
+  if (Object.values(countsByScope).some((count) => count === 0)) warnings.push('At least one verified brand scope has no proposed poster')
+  return {
+    valid: errors.length === 0,
+    status: plan.status,
+    briefCount: plan.briefs?.length ?? 0,
+    countsByScope,
+    uniqueMechanismCount: mechanisms.size,
+    errors,
+    warnings,
+  }
+}
+
+function main() {
+  const [planPath, brandPackPath] = process.argv.slice(2)
+  if (!planPath || !brandPackPath) {
+    console.error('Usage: node month-plan.mjs <month-plan.json> <brand-pack-index.json>')
+    process.exitCode = 2
+    return
+  }
+  const report = validateMonthPlan(
+    JSON.parse(readFileSync(resolve(planPath), 'utf8')),
+    JSON.parse(readFileSync(resolve(brandPackPath), 'utf8')),
+  )
+  process.stdout.write(`${JSON.stringify(report, null, 2)}\n`)
+  if (!report.valid) process.exitCode = 1
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) main()

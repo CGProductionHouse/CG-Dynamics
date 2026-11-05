@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "client": {
+    "id": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
+    "name": "Piek Group"
+  },
+  "observedAt": "2026-11-05",
+  "status": "bootstrap-in-progress",
+  "oneDrive": {
+    "root": "Clients/Piek Group/",
+    "brandIdentityFolderId": "A2AC9FE4B255F52F!sa43c41ac83074a4284c29f4d6f5ea5ec",
+    "groupLogoFolderId": "A2AC9FE4B255F52F!sc520fb572fbd4a71aef377ab99334820",
+    "graphicDesign2026FolderId": "A2AC9FE4B255F52F!s62aaa9133c4d4e5b9d9268d8cb12dd00",
+    "creativeAssistantFolderId": "A2AC9FE4B255F52F!s4456b0de5bed4279b92968e00fe722a6",
+    "styleReferencesFolderId": "A2AC9FE4B255F52F!s3cfe97f6bb2c44c4b6c0f2d5c1a1a8a1",
+    "historyFolderId": "A2AC9FE4B255F52F!s2a190d6fa299456da024e3f0af9489ba"
+  },
+  "canvaHistory": {
+    "designId": "DAGcXGWhDhI",
+    "title": "PIEK GROUP OF COMPANIES",
+    "pageCount": 352,
+    "sampledPageInventory": { "from": 329, "to": 352 },
+    "visualAnnotationStatus": "representative-private-headless-sample-complete",
+    "sampleContactSheet": "private-local-only: piek-january-2027/canva-sample/contact-sheet-pages-329-340.jpg",
+    "sampledReferences": [
+      {
+        "page": 329,
+        "pageId": "PBm8Hz18vFXjNm8x",
+        "scope": "SASOL",
+        "publicationState": "unresolved",
+        "observedGrammar": ["white and ice-blue field", "oversized condensed display type", "fuel-nozzle cutouts", "liquid splash depth", "exact Sasol mark positioned independently"]
+      },
+      {
+        "page": 330,
+        "pageId": "PBNcmzFSYTvyrfWj",
+        "scope": "SASOL",
+        "publicationState": "unresolved",
+        "observedGrammar": ["technical fact card", "organic white information panel", "light-blue repeated type texture", "water/splash foreground"]
+      },
+      {
+        "page": 331,
+        "pageId": "PByCr3XLxqhFMfly",
+        "scope": "ENGEN",
+        "publicationState": "unresolved",
+        "observedGrammar": ["hard product cutouts", "oversized product-name typography behind subject", "price block", "blue Engen footer", "layered food props and shadows"]
+      },
+      {
+        "page": 332,
+        "pageId": "PBB4mND8FqsfdsxW",
+        "scope": "GET_TOGETHER",
+        "publicationState": "unresolved",
+        "observedGrammar": ["warm venue photography", "translucent dark overlay", "editorial serif/italic headline", "thin divider rules", "restrained footer identity"]
+      },
+      {
+        "page": 334,
+        "pageId": "PBn0lfhlP533zLxG",
+        "scope": "GET_TOGETHER",
+        "publicationState": "unresolved",
+        "observedGrammar": ["diagonal pastel colour fields", "food cutouts crossing panels", "outlined display headline", "layered fruit/graphic decoration", "clear price hierarchy"]
+      },
+      {
+        "page": 336,
+        "pageId": "PB7nh9pCzjnWMLxM",
+        "scope": "PIEK_GROUP",
+        "publicationState": "unresolved",
+        "observedGrammar": ["deep blue/cyan gradient", "blurred real branch background", "rounded translucent information panel", "geometric narrow display type", "tag-like skill pills"]
+      },
+      {
+        "page": 338,
+        "pageId": "PB1z9Pj52YyFH4p0",
+        "scope": "PIEK_GROUP",
+        "publicationState": "unresolved",
+        "observedGrammar": ["navy and cream split composition", "large geometric sans type", "fine line framework", "food photography integrated into an editorial crop", "signature line-art brand motif"]
+      },
+      {
+        "page": 340,
+        "pageId": "PBGXL0PL4cXqxFW2",
+        "scope": "PIEK_GROUP",
+        "publicationState": "unresolved",
+        "observedGrammar": ["deep navy minimal field", "thin cream border", "large exact product photograph", "fine-line signature motif", "high negative space"]
+      }
+    ],
+    "warning": "A page inventory is not publication proof. Classify approved, scheduled, posted, draft and discarded states before adding ledger history."
+  },
+  "scopes": [
+    {
+      "key": "PIEK_GROUP",
+      "canvaBrandKitId": "kAGn0NB0i8s",
+      "canvaBrandKitName": "Piek Group",
+      "brandKitVerified": true,
+      "exactLogoStatus": "group-logo-folder-observed-hash-pending",
+      "fontStatus": "requires-current-source-verification",
+      "historicalFontEvidence": ["Sora headings", "Inter body"],
+      "colourStatus": "requires-current-source-verification",
+      "historicalPaletteDirection": ["warm off-white/cream", "navy", "champagne-gold", "warm stone"],
+      "productionBlocked": true,
+      "observedVisualGrammar": ["deep navy/cream restraint", "fine linework and borders", "large geometric type", "architectural/translucent panels", "signature line-art motif", "photo-led asymmetry"],
+      "blockers": ["exact current font files/licence not verified", "exact colour values not verified", "sample publication/approval states unresolved"]
+    },
+    {
+      "key": "ENGEN",
+      "canvaBrandKitId": "kAGn0G7VXUE",
+      "canvaBrandKitName": "Engen",
+      "brandKitVerified": true,
+      "exactLogoStatus": "required-not-yet-hashed",
+      "fontStatus": "required-not-yet-extracted",
+      "colourStatus": "required-not-yet-extracted",
+      "productionBlocked": true,
+      "observedVisualGrammar": ["product cutouts with realistic shadows", "oversized type behind products", "strong blue footer/offer band", "clear price hierarchy", "energetic layered food props"],
+      "blockers": ["exact logo variant/hash required", "fonts and colour tokens require source verification", "sample publication/approval states unresolved"]
+    },
+    {
+      "key": "SASOL",
+      "canvaBrandKitId": "kAGn0F8Qe9Q",
+      "canvaBrandKitName": "Sasol",
+      "brandKitVerified": true,
+      "exactLogoStatus": "required-not-yet-hashed",
+      "fontStatus": "required-not-yet-extracted",
+      "colourStatus": "required-not-yet-extracted",
+      "productionBlocked": true,
+      "observedVisualGrammar": ["white and ice-blue technical cleanliness", "liquid/splash movement", "condensed display typography", "organic information shapes", "independent exact logo placement"],
+      "blockers": ["exact logo variant/hash required", "fonts and colour tokens require source verification", "sample publication/approval states unresolved"]
+    },
+    {
+      "key": "GET_TOGETHER",
+      "canvaBrandKitId": "kAGn0JYDZ04",
+      "canvaBrandKitName": "Get Together",
+      "brandKitVerified": true,
+      "exactLogoStatus": "required-not-yet-hashed",
+      "fontStatus": "required-not-yet-extracted",
+      "colourStatus": "required-not-yet-extracted",
+      "productionBlocked": true,
+      "observedVisualGrammar": ["warm editorial hospitality photography", "serif/italic accent type", "soft translucent overlays", "playful diagonal colour fields for product offers", "food cutouts crossing depth planes"],
+      "blockers": ["exact logo variant/hash required", "fonts and colour tokens require source verification", "sample publication/approval states unresolved"]
+    }
+  ]
+}

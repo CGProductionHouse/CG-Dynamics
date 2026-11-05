@@ -6074,6 +6074,8 @@ Post-launch / next milestone candidates, re-read live issue before acting:
 
 CA explicitly started the Graphic Designer takeover with Red Oak as the first pilot. Issue #948 is the master authority. Work is isolated on `codex/graphic-designer-948`; it must not touch Nolan (#871/#874), Picasso (#878), their PRs, production services, client publication or protected Client Portal Library writes.
 
+Owner update 5 November: issue #955 makes Piek Group January 2027 the first complete monthly acceptance pilot. Red Oak remains a technical rapid-amendment fixture, but owner review rejected its visual direction as off-brand; do not present it as a creative success or use it as a style template. Routine design must run through headless connectors/local commands, not desktop takeover.
+
 Verified local proof state on 2026-11-05:
 
 - real Red Oak OneDrive photography and exact logo originals are staged only under the private local proof root, outside Git;
@@ -6084,6 +6086,14 @@ Verified local proof state on 2026-11-05:
 - exact Canva typography was verified as `Zuume Rough Bold` (title) and `Rustic Printed Stamp` (subtitle), but neither is locally installed or available through the checked OneDrive/Adobe Fonts paths, so the present proof discloses mechanical substitutes and is not yet brand-exact typography;
 - Photoshop 2026 and UXP Developer Tools are installed; a narrow user-selected-job-folder `.psjs` renderer is prepared, but Photoshop currently stops at an Adobe device-authentication dialog. Real PSD support remains unverified until authorised interactive sign-in plus an actual Photoshop round trip and Layers-panel inspection pass;
 - no deployment, production migration, hosted app, purchase, paid API call, public upload or client publication occurred.
+
+Piek January implementation on the same branch now includes:
+
+- read-only confirmation that the latest package baseline remains 12 design posters + 4 professional videos, while the January dated Client Schedule query returns zero rows; all 12 planning IDs remain provisional with null deliverable IDs;
+- four independently gated Brand Pack scopes for Piek Group, Engen, Sasol and Get Together with the exact Canva Brand Kit IDs verified and production blocked until exact logos/fonts/colours/reference annotations are complete;
+- a 12-row January proposal (three per scope), 12 distinct creative mechanisms, exact New Year/school-calendar facts and explicit source/fact/consent blockers;
+- a headless creative ledger with SHA-256, pHash, shoot, visible-person tag, product/service/branch/concept/headline/mechanism and publication-state checks. It rejects biometric vector fields and supports human as well as AI-created work;
+- a validated `.agents/skills/cg-graphic-designer/SKILL.md` reusable workflow. This is not proof of normal company ChatGPT invocation yet.
 
 The exact Google Control Centre write-back could not be grounded: connected Drive searches for `CG Control Centre`, `Control Centre` and `Supervisor 381` returned no accessible canonical tracker, matching the existing handover warning. No replacement sheet, guessed file or guessed cell write was made. GitHub #948, #381 and this handover carry the current receipts.
 

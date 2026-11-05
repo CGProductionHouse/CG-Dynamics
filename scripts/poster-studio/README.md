@@ -9,6 +9,13 @@ This local-only engine renders a versioned JSON scene graph to:
 
 It deliberately does not upload assets, call a paid API or flatten an image and call it editable. The SVG is the portable interim production document. Photoshop/UXP is the preferred PSD finishing path once its local round trip is verified.
 
+The companion headless tools are:
+
+- `creative-ledger.mjs` — image fingerprints plus source/shoot/person/product/service/branch/concept/headline/mechanism repetition checks for both human and AI work;
+- `month-plan.mjs` — validates a proposed monthly strategy board against package, Brand Pack and future-schedule safety gates.
+
+They are designed for a future normal-company-ChatGPT tool wrapper and do not require routine desktop takeover.
+
 ## Commands
 
 ```powershell
@@ -17,6 +24,12 @@ node scripts/poster-studio/poster-studio.mjs compare C:\private\job\scene-v1.jso
 ```
 
 Chrome is used headlessly for the local preview. Set `CHROME_PATH` only if Chrome is not installed in its normal Windows location. `--no-preview` emits SVG and the manifest without PNG rendering.
+
+```powershell
+node scripts/poster-studio/creative-ledger.mjs fingerprint <image>
+node scripts/poster-studio/creative-ledger.mjs check <ledger.json> <candidate.json> --out <receipt.json>
+node scripts/poster-studio/month-plan.mjs <month-plan.json> <brand-pack-index.json>
+```
 
 ## Privacy and provenance
 
