@@ -196,6 +196,16 @@
       "id": "HOOK-CRAFT-01",
       "requirement": "Concrete viewer hook/useful purpose and meaningful brand-specific moving visual treatment required. NETBALL/BRINGYOURTEAM13sR08B is rejected. Asset provenance, title entrance,25tests and technical/model gates do not certify creative quality.",
       "evidence_source": "CA3Nov purpose/hook/VFX rejection; prior creativePASS revoked"
+    },
+    {
+      "id": "UI-01",
+      "requirement": "CA5Nov requires UI animation in every video. Design and actually execute a brand-appropriate information interaction (focus, selection, progression, annotation or genuine UI state) with a visible story purpose; bind frames/components/operator/evidence. Never imply an invented client app or repeat the same dashboard across brands.",
+      "evidence_source": "CA5Nov2026 current motion-design/UI reference instruction; CA-MOTION-VOICE-UI-20261105.md"
+    },
+    {
+      "id": "VO-01",
+      "requirement": "For narrated films, develop a distinct South African brand voice as each brand is tackled. Reuse its approved profile/source after acceptance; retain rights/consent, locale, actual audio/script hashes and pronunciation/performance evidence. US engineering voices, ASR text or locale metadata alone are not South African voice approval.",
+      "evidence_source": "CA5Nov2026 brand voice instruction; skills/brand-voice-overlay/SKILL.md"
     }
   ]
 }

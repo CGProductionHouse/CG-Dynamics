@@ -12,6 +12,7 @@ from pathlib import Path
 import math
 from load_client_library import verify as verify_client_library
 from edit_contract import validate_edit
+from ui_motion import validate_ui_plan
 
 
 REQUIRED_TEXT = (
@@ -112,6 +113,8 @@ def main():
                 context=verify_client_library(plan['client_context_snapshot'])
                 if context['client_id']!=plan['client_id']:errors.append('Story client does not match loaded client library')
                 if not context['brand_ready']:errors.append('Saved brand baseline has specifically unresolved fields; resolve those fields from the saved source, not a generic substitute')
+                if any(rule.get('id')=='UI-01' for rule in context.get('owner_rules',[])):
+                    errors.extend(validate_ui_plan(plan))
             except (ValueError,KeyError,FileNotFoundError) as exc:
                 errors.append('Client library load invalid: '+str(exc))
     if errors:

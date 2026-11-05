@@ -103,7 +103,7 @@ def validate_edit(plan):
             if not 0 <= a < b <= cursor:
                 raise ValueError('technique range outside the planned picture')
         # Logo, stabilisation or audio alone cannot stand in for the requested visual craft.
-        if not any(c.get('role') in ('type', 'composition', 'transition', 'scene_depth', 'motivated_motion')
+        if not any(c.get('role') in ('type', 'composition', 'transition', 'scene_depth', 'motivated_motion', 'ui')
                    and frame(c['frames'][0]) < beats['payoff']['frames'][0] for c in choices):
             raise ValueError('no intended visual craft in the story body/opening; logo/basic correction alone is insufficient')
     except (KeyError, TypeError, ValueError, AttributeError, IndexError, OverflowError, OSError, subprocess.SubprocessError) as exc:
