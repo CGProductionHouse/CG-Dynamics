@@ -84,3 +84,30 @@ test('fails closed on missing approval, master-as-source or boundary drift', () 
   drifted.pages[50].id = 'moved-posted'
   assert.throws(() => resolveBoundaries(policy, drifted), /boundary drift/)
 })
+
+test('protects the verified To Be Approved divider and classifies its working pages', () => {
+  const scoped = structuredClone(policy)
+  scoped.headers.toBeApproved = { pageId: 'page-41' }
+  scoped.workingRules.editablePageIds.push('page-41', 'page-42')
+  assert.equal(classifyMasterPage(scoped, snapshot(), 41), 'workflow-header-read-only')
+  assert.equal(classifyMasterPage(scoped, snapshot(), 42), 'to-be-approved')
+  assert.throws(() => assertMasterContentEditAllowed(scoped, snapshot(), ['page-41']), /headers are read-only/)
+  assert.equal(assertMasterContentEditAllowed(scoped, snapshot(), ['page-42']).allowed, true)
+  scoped.headers.toBeApproved.pageId = 'page-52'
+  assert.throws(() => resolveBoundaries(scoped, snapshot()), /outside the working lane/)
+})
+
+test('checks Canva capacity before proposing an insert, including existing over-limit files', () => {
+  const scoped = { ...policy, pageCapacity: { documentedMaxPages: 350 } }
+  const request = {
+    sourceDesignId: 'DWORKING123', pageNumbers: [2],
+    approval: { approved: true, approvedBy: 'CA', approvedAt: '2026-11-05', operation: 'insert-new-pages-before-drafts' },
+  }
+  const at349 = snapshot()
+  at349.pages = at349.pages.slice(0, 349)
+  assert.equal(planApprovedInsert(scoped, at349, request).mergeDesignsArgs.operations[0].after_page_number, 49)
+  const at350 = snapshot()
+  at350.pages = at350.pages.slice(0, 350)
+  assert.throws(() => planApprovedInsert(scoped, at350, request), /page capacity exceeded/)
+  assert.throws(() => planApprovedInsert(scoped, snapshot(), request), /352 current/)
+})

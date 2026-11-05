@@ -43,11 +43,16 @@ export function resolveBoundaries(policy, snapshot) {
   const inProgressHeader = byId.get(policy.headers.inProgressTemplates.pageId)
   const draftsHeader = byId.get(policy.headers.drafts.pageId)
   const postedScheduledHeader = byId.get(policy.headers.postedScheduled.pageId)
+  const toBeApprovedId = policy.headers.toBeApproved?.pageId
+  const toBeApprovedHeader = toBeApprovedId ? byId.get(toBeApprovedId) : undefined
   if (!inProgressHeader || !draftsHeader || !postedScheduledHeader) {
     throw new Error('Canva workflow boundary drift: one or more protected header page IDs are missing')
   }
   if (!(inProgressHeader < draftsHeader && draftsHeader < postedScheduledHeader)) {
     throw new Error('Canva workflow boundary order is unsafe')
+  }
+  if (toBeApprovedId && (!toBeApprovedHeader || !(inProgressHeader < toBeApprovedHeader && toBeApprovedHeader < draftsHeader))) {
+    throw new Error('Canva To Be Approved boundary is missing or outside the working lane')
   }
   if (postedScheduledHeader !== draftsHeader + 1) {
     throw new Error('Drafts and Posted / Scheduled headers are no longer adjacent; human review is required')
@@ -59,13 +64,15 @@ export function resolveBoundaries(policy, snapshot) {
     draftsHeader,
     postedScheduledHeader,
     protectedStart: draftsHeader,
+    ...(toBeApprovedHeader ? { toBeApprovedHeader } : {}),
   }
 }
 
 export function classifyMasterPage(policy, snapshot, pageIndex) {
   const index = requiredIndex(pageIndex, 'pageIndex')
   const boundaries = resolveBoundaries(policy, snapshot)
-  if (index === boundaries.inProgressHeader) return 'workflow-header-read-only'
+  if (index === boundaries.inProgressHeader || index === boundaries.toBeApprovedHeader) return 'workflow-header-read-only'
+  if (boundaries.toBeApprovedHeader && index > boundaries.toBeApprovedHeader && index < boundaries.draftsHeader) return 'to-be-approved'
   if (index >= boundaries.writableStart && index <= boundaries.writableEnd) return 'in-progress-templates'
   if (index >= boundaries.protectedStart) return 'protected-drafts-posted-scheduled'
   return 'unresolved-master-zone-read-only'
@@ -78,6 +85,7 @@ export function assertMasterContentEditAllowed(policy, snapshot, pageIds) {
   for (const pageId of pageIds) {
     const page = snapshot.pages.find((entry) => entry.id === pageId)
     if (!page) throw new Error('Target page ID is absent from the current snapshot')
+    if (page.index === boundaries.toBeApprovedHeader) throw new Error('Workflow headers are read-only, even when registered')
     if (page.index < boundaries.writableStart || page.index > boundaries.writableEnd) {
       throw new Error('Target is outside the verified working lane; protected history and headers are read-only')
     }
@@ -92,6 +100,13 @@ export function planApprovedInsert(policy, snapshot, request) {
   if (sourceDesignId === policy.masterDesignId) throw new Error('Source must be a separate working design, never the protected master')
   if (!Array.isArray(request.pageNumbers) || !request.pageNumbers.length) throw new Error('request.pageNumbers[] is required')
   const pageNumbers = [...new Set(request.pageNumbers.map((page) => requiredIndex(page, 'request.pageNumbers[]')))]
+  const maxPages = policy.pageCapacity?.documentedMaxPages
+  if (maxPages !== undefined) {
+    requiredIndex(maxPages, 'pageCapacity.documentedMaxPages')
+    if (snapshot.pages.length + pageNumbers.length > maxPages) {
+      throw new Error(`Canva page capacity exceeded: ${snapshot.pages.length} current + ${pageNumbers.length} new > ${maxPages}. Preserve existing work; obtain an explicit capacity decision before retrying.`)
+    }
+  }
   const approval = request.approval
   if (approval?.approved !== true
     || requiredString(approval.approvedBy, 'approval.approvedBy').length < 1

@@ -61,9 +61,10 @@ For the Piek master `DAGcXGWhDhI`, re-read the page list before every write and 
 
 - Maintain one official client Canva file. Create and edit new production pages directly in its verified working lanes. Register new job page IDs in the lane policy and validate every content-edit target against the current page list; a page moved into Drafts/Posted/Scheduled immediately loses edit eligibility.
 - A separate working copy is optional for disposable tests only. Transfer useful finished work into the official file, verify the transferred editable layers, then remove the temporary copy. It must never become a second official client project. Copying a page does not authorise reuse of its photo, person, wording, concept or mechanism.
-- `IN PROGRESS / TEMPLATES` and a separately verified `TO BE APPROVED` lane are the only permitted destinations for new work. The current `TO BE APPROVED` boundary is unresolved, so fail closed until its exact header page ID is verified.
+- `IN PROGRESS / TEMPLATES` and `TO BE APPROVED` are the only permitted destinations for new work. Both header IDs are now verified in the Piek lane policy. Divider pages remain read-only even if mistakenly registered as editable.
 - Do not overwrite other designers' existing work or alter workflow divider pages. `DRAFTS` and `POSTED / SCHEDULED` are Amonique-controlled: never edit, move or delete their pages.
 - New pages may be added in the verified working lane. For connector page-merge operations, re-resolve header IDs immediately beforehand and follow the tool's exact-operation approval requirement. This is a connector requirement, not a requirement to seek approval for every routine new-work content edit.
+- Check page capacity before planning an insert. Canva's documented maximum is 350 pages; the Piek master currently reports 352 and an actual approved insert failed with `Page limit reached`. Keep the saved temporary candidate until transfer succeeds. Never resolve capacity by silently deleting, moving or overwriting existing work, creating a second official file, or repeatedly retrying the rejected operation. Obtain an owner decision on capacity first.
 - Canva position is not Dynamics approval, Meta draft, scheduling or posting proof.
 
 ## Source-photo preparation
