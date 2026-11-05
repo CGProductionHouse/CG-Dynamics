@@ -1,3 +1,19 @@
+## 5 November — exact-approved reporting-health connector fix LIVE
+
+PR #951 merged at `297abb0c`. CA explicitly approved its three-file backend release;
+fresh hosted-v76 drift checks passed and MCP is now **77**. Independent read-back
+matches all 40 reviewed files: only index/opsActions/toolCatalog changed, 37 otherwise
+byte-identical, existing custom authentication, JWT setting and import-map preserved.
+Unauthenticated tools/list still returns 401 with an authentication challenge.
+Normal authenticated read-only checks for all ten TikTok clients now return
+DEGRADED/PARTIAL with refreshPending=true and exact last-success evidence, rather
+than the old false PASS. Their existing automatic refresh path is untouched; no
+forced provider refresh, secrets, permissions, mappings, content or Vercel change.
+Receipt `%TEMP%/cg-reporting-truth-live-receipt-20261105.json`, SHA256
+`4f337fc0f37876fcbc5f1568813f62cc450e122fae51895741450f116778d294`.
+This supersedes the source-only MCP approval gate below. It does not supersede the
+separate #944 frontend release gate or exact-client content/access/owner acceptance.
+
 ## 5 November — native Meta parity checked; TikTok connector health fix prepared
 
 Continue the existing client execution matrix; do not repeat the complete 62-client UI
