@@ -225,3 +225,9 @@ The [practice capture pack](PRACTICE-CAPTURE-PACK.md) specifies the real source 
 
 
 
+
+
+**MSI5November reconciliation:** Read [latest source-led hook/reset](TBS-FESTIVE-TRANSIT-STORY-RESET-20261105.md) and [two reference mechanisms](EHRLICH-TWO-CAPCUT-REFERENCE-STUDIES-20261104.md). New moving-panel-release, heat-lens-push and source-led-fire-flicker cards imported from MSI875d12b380b; current combined library53cards, not mastery. PC50-card/voice/UI work retained; MSI client timelines untouched.
+
+
+PSG5November [actual film application and failures](PSG-EXCESS-SHARED-APPLICATION-20261105.md): foreground/outline typography, semantic term focus, projective camera, realPSGpeople and boundedstockstabilisation;733frame29.32s localR04, exact composed sound checked, no hearing/native/phone/client/mastery claim.53shared cards retained. Canonical new-video identity unresolved; no WhatsApp send.

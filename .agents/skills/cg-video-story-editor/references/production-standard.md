@@ -65,3 +65,23 @@ Keep this in the existing private release record, not a second task database. Fo
 | Delivery / learning | Exact recipient/type/status or unsent, supersession, approval state, next owned work, reusable lesson |
 
 Skill sync is access to instructions, not proof they were followed. The next agent must supply project evidence for these rows; copying the checklist or stating “all passed” is insufficient.
+
+
+## MSI5November review lessons, reconciled for PC
+
+3a. Before a preview is called review-ready, read the cut as a buyer without the editor's explanation: identify the person addressed, their specific risk or desire, why that matters **now and here**, what the client can actually do, and the next action. Cite the client's own current service/brand source and an appropriate source for seasonal or local claims. If a film could swap in ten different client names, restart the story. Do not turn a past festive crash count into an unverified claim that this season has the highest accidents, or imply an insurance policy covers a specific loss without checking its terms.
+
+11a. Inspect the client's actual brand kit, recent approved Canva/Adobe designs and published covers before choosing type or motion graphics. Record asset/design IDs, font names, colour values, logo source and approved exceptions in the client kit. An earlier edit using a typeface is evidence of that edit, not proof the typeface belongs to the brand. If brand evidence is unavailable or contradictory, keep the treatment private and resolve it before review delivery. Use designed/licensed editable assets rather than drawing generic UI panels and calling them motion design.
+
+13a. Choose the delivery ratio before source selection. For portrait, inspect the entire **moving** 9:16 crop of each landscape candidate and keep the action and subject legible at phone size. Repeated horizontal strips over a blurred copy of themselves are a failed portrait treatment, not a vertical edit. If essential action truly needs width, make a deliberately composed landscape film instead. Do not rotate a horizontal shot sideways for a vertical deliverable.
+
+13b. A frozen photograph with a caption is not a video scene. Use a genuinely moving select or a deliberately designed, visibly dimensional photo animation with subject/background separation and credible edges, and check that treatment through its entire duration at normal speed. A tiny zoom on a frozen talking head is insufficient. Do not splice an unrelated house, sign, person or industry shot solely to fill time; each must advance the same story and lead naturally to the next scene.
+
+| Format / motion / story transitions | Chosen ratio, actual moving crop, no blurred wide filler or static photo-card, shot-to-shot causal link |
+
+For a machine-readable release record, `python scripts/video-editing/studio-phase2/scripts/check_review_gate.py RELEASE.json` fails when any required evidence row is absent or pending. This is a **missing-evidence stop**, not a visual or listening approval: a human must still inspect each cited source and the exact export. The record stays with the private media, outside Git when it contains client-specific evidence.
+
+
+## PSG5November source-bound application
+
+[Actual PSG application and failures](../../../../scripts/video-editing/studio-phase2/PSG-EXCESS-SHARED-APPLICATION-20261105.md) records foreground/outline title, semantic focus, planar camera and source-specific stabilisation. Check decoded audio duration, not only timestamps: dynamic normalisation lost80ms, repaired by constant gain. Anchor photo layers past canvas edges throughout scale and inspect real cover crop views. These bounded observations are not mastery, hearing, native editability or client approval.
