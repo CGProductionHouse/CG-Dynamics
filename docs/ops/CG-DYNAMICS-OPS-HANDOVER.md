@@ -6083,6 +6083,8 @@ Verified local proof state on 2026-11-05:
 - Photoshop 2026 and UXP Developer Tools are installed; a narrow user-selected-job-folder `.psjs` renderer is prepared, but real PSD support remains unverified until an actual Photoshop round trip and Layers-panel inspection pass;
 - no deployment, production migration, hosted app, purchase, paid API call, public upload or client publication occurred.
 
+The exact Google Control Centre write-back could not be grounded: connected Drive searches for `CG Control Centre`, `Control Centre` and `Supervisor 381` returned no accessible canonical tracker, matching the existing handover warning. No replacement sheet, guessed file or guessed cell write was made. GitHub #948, #381 and this handover carry the current receipts.
+
 Before merge advice, review the actual private preview and the draft PR, require human creative approval, and keep the font-licensing gap explicit. The intended company ChatGPT surface remains a future narrow CG Dynamics/local-bridge contract; it has not yet passed end-to-end normal-ChatGPT invocation and must not be described as live.
 
 Do not start one of these merely because it is open if #505/#513 launch closure is still the priority.
