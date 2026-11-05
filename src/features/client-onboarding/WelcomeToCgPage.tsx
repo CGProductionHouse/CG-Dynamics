@@ -19,12 +19,13 @@ type UploadQueueItem = {
   error?: string
 }
 
-export default function WelcomeToCgPage() {
+export default function WelcomeToCgPage({ previewClientName }: { previewClientName?: {} } = {}) {
   const [token] = useState(() => {
     const fragmentToken = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : ''
     const historyToken = typeof window.history.state?.onboardingToken === 'string' ? window.history.state.onboardingToken : ''
     return fragmentToken || historyToken
   })
+  const isPreview = !token && !!previewClientName
   const [state, setState] = useState<ClientOnboardingState | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -46,12 +47,22 @@ export default function WelcomeToCgPage() {
     meta.setAttribute('name', 'referrer')
     meta.setAttribute('content', 'no-referrer')
     if (!meta.parentNode) document.head.appendChild(meta)
-    if (token) window.history.replaceState({ ...window.history.state, onboardingToken: token }, '', '/welcome')
-  }, [token])
+    if (token && !isPreview) window.history.replaceState({ ...window.history.state, onboardingToken: token }, '', '/welcome')
+  }, [token, isPreview])
 
   useEffect(() => {
     let active = true
     async function load() {
+      if (isPreview) {
+        setState({
+          status: 'preview',
+          clientName: previewClientName ? String(previewClientName) : 'Client',
+          currentStep: 0,
+        } as ClientOnboardingState)
+        setLoading(false)
+        loadedRef.current = true
+        return
+      }
       if (!token) {
         setError('This welcome link is no longer available. Ask CG for a new link.')
         setLoading(false)
@@ -66,7 +77,7 @@ export default function WelcomeToCgPage() {
     }
     void load()
     return () => { active = false }
-  }, [token])
+  }, [token, isPreview, previewClientName])
 
   useEffect(() => {
     if (!loadedRef.current || onboardingStatus === 'completed') return
@@ -179,6 +190,19 @@ export default function WelcomeToCgPage() {
     setSaving(false)
   }
 
+  if (isPreview) {
+    return (
+      <OnboardingShell>
+        <div className="py-6 sm:py-12">
+          <p className="text-xs font-bold uppercase tracking-[0.22em] text-report-accent">Preview mode</p>
+          <h1 className="mt-4 text-4xl font-black tracking-tight text-white sm:text-6xl">Welcome to CG, {state?.clientName ?? 'Client'}</h1>
+          <p className="mt-5 max-w-xl text-base leading-relaxed text-report-muted sm:text-lg">This is a read-only preview. No changes will be saved.</p>
+          <VideoWalkthrough videoUrl={WALKTHROUGH_VIDEO_URL} />
+          <ActionButton size="lg" className="mt-8 min-h-14 w-full sm:w-auto" disabled>Start</ActionButton>
+        </div>
+      </OnboardingShell>
+    )
+  }
   if (loading) return <OnboardingShell><p className="text-sm text-report-muted">Opening your welcome link...</p></OnboardingShell>
   if (!state) return <OnboardingShell><Message title="This link is unavailable" body={error ?? 'Ask CG for a fresh welcome link.'} /></OnboardingShell>
 
