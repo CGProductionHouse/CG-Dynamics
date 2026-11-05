@@ -20,8 +20,10 @@ refusal/atomic-rollback cases pass;23 existing focused library/calendar tests
 (including real local ownership/RLS SQL), build124app chunks and diff pass.
 Real Cape client session at390px shows six November files/thumbnails and a
 working separate-window image View with empty referrer. Screenshot:
-`%TEMP%/cape-brand-hub-ready-20261105.png`. Final calendar clicks/download
-acceptance follow the approved repair; no all-file download claim.
+`%TEMP%/cape-brand-hub-ready-20261105.png`. Actual18November Download also passed:
+1,123,592bytes, SHA256 identical to the reviewed original. The download-event
+watcher timed out, but the actual file was independently verified without retry.
+Final calendar clicks follow the approved repair; no all-file download claim.
 
 November23 finished artwork and the exact November25 repost video selection are
 not established by this ready batch. Do not invent/move content or rewrite the

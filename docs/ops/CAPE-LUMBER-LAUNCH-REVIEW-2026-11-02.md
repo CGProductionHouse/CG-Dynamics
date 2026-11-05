@@ -75,6 +75,12 @@ unchanged states true. SHA256:
   thumbnails and source image View work. View opens a separate window; returned
   image is2047×2560 and the image page has an empty referrer. Original portal
   stays open. This is not an all-file download or final calendar-link acceptance.
+- Actual18November client Download also succeeded: saved
+  `Downloads/2026_11_18.jpeg`,1,123,592bytes, SHA256
+  `DC06ECD742850524890E8EF0F77BF0DB26F82973C3CAF5EE21BF4C12EB3D1CC9`,
+  identical to the reviewed WhatsApp original. The browser download-event watcher
+  timed out; independently checking the actual file prevents a false failure or
+  unsafe duplicate retry. This closes that one file's download check only.
 - Private phone-sized screenshot:
   `%TEMP%/cape-brand-hub-ready-20261105.png`.
 - Exact SQL packet executed only against isolated local PostgreSQL:
