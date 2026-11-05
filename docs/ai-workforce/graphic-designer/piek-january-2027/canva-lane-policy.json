@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "clientId": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
+  "masterDesignId": "DAGcXGWhDhI",
+  "observedAt": "2026-11-05",
+  "observedPageCount": 352,
+  "headers": {
+    "inProgressTemplates": {
+      "pageId": "PB5v10xvzDs8vq42",
+      "observedPageIndex": 23,
+      "writePolicy": "new-work-zone-after-header"
+    },
+    "drafts": {
+      "pageId": "PBmHYBRmM7PnqThR",
+      "observedPageIndex": 50,
+      "writePolicy": "protected-read-only"
+    },
+    "postedScheduled": {
+      "pageId": "PB9pTccX3djfrLpj",
+      "observedPageIndex": 51,
+      "writePolicy": "protected-read-only"
+    }
+  },
+  "masterRules": {
+    "contentEditsAllowed": false,
+    "moveExistingPagesAllowed": false,
+    "deleteExistingPagesAllowed": false,
+    "readProtectedHistoryAllowed": true,
+    "onlyAllowedMutation": "insert-new-working-design-pages-before-drafts",
+    "freshBoundaryReadRequired": true,
+    "explicitApprovalRequiredPerMerge": true
+  },
+  "workingRules": {
+    "separateWorkingDesignRequired": true,
+    "sourceMasterPagesRemainUnchanged": true,
+    "copySelectedPagesAllowed": true,
+    "allowedDestinations": ["IN_PROGRESS_TEMPLATES", "TO_BE_APPROVED"],
+    "toBeApprovedBoundaryStatus": "unresolved-do-not-target-until-verified"
+  },
+  "notes": [
+    "Page indexes can shift when new pages are inserted. Re-resolve all header page IDs immediately before every merge.",
+    "Drafts and Posted / Scheduled are Amonique-controlled operational lanes. They may be read for anti-repetition evidence but never edited, moved or deleted by the agent.",
+    "Copying a prior page is a working-file operation only. It does not authorise reuse of its photograph, person, wording, concept or layout mechanism."
+  ]
+}

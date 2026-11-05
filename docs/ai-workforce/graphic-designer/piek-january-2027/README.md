@@ -9,6 +9,7 @@ This directory is the versioned proposal and evidence gate for issue #955. It do
 - January 2027 Client Schedule query returned no rows. Every proposed poster therefore uses a provisional ID and `monthlyDeliverableId: null`.
 - Four separate Canva Brand Kits were verified for Piek Group, Get Together, Engen and Sasol. They must never be blended into one generic Piek style.
 - The authorised Canva connector can list those four kits and read the 352-page Piek history design directly from company ChatGPT. Routine brand/reference retrieval therefore does not require browser or desktop takeover; final creation, isolated amendment and export still require an end-to-end connector proof.
+- Canva master protection is fail-closed: the agent reads all lanes for history, edits only a separate copied working design, and may insert newly approved pages only before the freshly re-verified `DRAFTS` boundary. Existing Drafts and Posted / Scheduled pages are never edited, moved or deleted.
 - Existing OneDrive `CG Creative Assistant` folders remain the media/history authority. This work records locators rather than duplicating client assets in Git.
 
 ## Files
