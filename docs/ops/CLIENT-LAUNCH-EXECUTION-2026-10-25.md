@@ -1,5 +1,23 @@
 # Client launch execution — local-first continuation
 
+## 5 November — exact-approved MCP reporting-health release completed
+
+The source fix in merged PR #951 (`297abb0c`) is now LIVE as MCP **77**, after
+CA's explicit exact three-file approval. Fresh pre-release read-back matched hosted
+76; independent post-release read-back matches all 40 candidate files, with only
+index/opsActions/toolCatalog changed and 37 files byte-identical. Existing custom
+authentication/JWT/import settings remain unchanged; unauthenticated tools/list
+returns 401 plus WWW-Authenticate. Normal authenticated connector fleet check:
+10/10 exact TikTok clients return PARTIAL/refreshPending, overall DEGRADED, with
+the correct last-success timestamps. The prior false-PASS defect is closed live.
+No forced resync, provider/OAuth/secret/permission/mapping/data/content change or
+Vercel usage. This does not grant or claim every client's final launch acceptance.
+Private live receipt `%TEMP%/cg-reporting-truth-live-receipt-20261105.json`, SHA256
+`4f337fc0f37876fcbc5f1568813f62cc450e122fae51895741450f116778d294`.
+The source-only approval status in the detailed pre-release evidence below is now
+historical. #944 frontend delta, exact-client publication, Emmanuel access and
+owner login/physical-phone acceptance stay separately gated in this matrix.
+
 ## 5 November — native Meta comparison and connector truth fix
 
 Read-only continuation of the existing launch matrix, not a second fleet checklist.
