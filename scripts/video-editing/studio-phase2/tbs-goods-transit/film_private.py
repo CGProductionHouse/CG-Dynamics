@@ -7,13 +7,12 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
 import subprocess
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
-from intro_proof import FPS, H, OLIVE, TAUPE, W, WHITE, ff, scene, type_art
+from intro_proof import FPS, OLIVE, TAUPE, WHITE, ff, scene, type_art
 
 FONT = Path(r"C:\Windows\Fonts\bahnschrift.ttf")
 SW, SH = 540, 960
@@ -47,12 +46,11 @@ def ui_video(path: Path, seconds: float, mode: str) -> None:
             d.text((48, 202), "still matters", font=big, fill=WHITE)
             ys = (385, 510, 635)
             labels = ("PACKED", "IN TRANSIT", "DELIVERED")
-            stage = min(2, int(t / 1.65))
             d.line((120, ys[0], 120, ys[-1]), fill=(90, 96, 84), width=8)
             progress = min(1, max(0, (t - .3) / (seconds - .8)))
             d.line((120, ys[0], 120, int(ys[0] + (ys[-1]-ys[0])*progress)), fill=OLIVE, width=10)
             for k, (y, label) in enumerate(zip(ys, labels)):
-                active = t >= .3 + k*1.55
+                active = t >= .25 + k*(seconds - .5)/3
                 d.ellipse((103, y-17, 137, y+17), fill=OLIVE if active else (91, 97, 91))
                 d.text((175, y-22), label, font=med, fill=WHITE if active else (154, 159, 153))
             d.rounded_rectangle((40, 763, 500, 855), radius=13, fill=(116, 102, 80))
@@ -109,19 +107,37 @@ def main() -> None:
     scene(out / "03-seal.mp4", a.source_dir / "pixabay-8686-box-taper.mp4", 2.0, 2.3,
           "inset:445", [(p, .55)])
 
-    ui_video(out / "04-route.mp4", 6.8, "route")
+    ui_video(out / "04-route.mp4", 3.5, "route")
+    p = art / "moving.png"
+    type_art(p, "WHILE IT MOVES", y=1400, colour=WHITE, size=110, panel=True)
+    scene(out / "05-moving.mp4", a.source_dir / "adobe-free-520299893.mov", 16.3, 3.3,
+          "inset:440", [(p, .40)])
     p = art / "local.png"
     type_art(p, "LET'S TALK COVER", y=1390, colour=WHITE, size=101, panel=True)
-    scene(out / "05-premises.mp4", a.tbs_dir / "199A0525.MP4", 0, 2.2,
+    scene(out / "06-premises.mp4", a.tbs_dir / "199A0525.MP4", 0, 2.2,
           "inset:440", [(p, .45)])
     p = art / "broker.png"
     type_art(p, "TBS BROKERS", y=1400, colour=WHITE, size=114, panel=True)
-    scene(out / "06-sign.mp4", a.tbs_dir / "199A0531.MP4", .2, 2.3,
+    scene(out / "07-sign.mp4", a.tbs_dir / "199A0531.MP4", .2, 2.3,
           "inset:440", [(p, .45)])
-    ui_video(out / "07-review.mp4", 4.3, "cta")
-    # 2.4 + 2.3 + 2.3 + 6.8 + 2.2 + 2.3 + 4.3 + 3.2 = 25.8 s.
+    # The adviser is a deliberately frozen portrait, not muted direct-to-camera
+    # speech pretending to be B-roll about this service.
+    portrait = art / "adviser-portrait.jpg"
+    ff("-ss", "0.2", "-i", a.tbs_dir / "199A0467.MP4", "-frames:v", 1,
+       "-vf", "transpose=2", portrait)
+    portrait_motion = art / "adviser-portrait-motion.mp4"
+    ff("-loop", "1", "-framerate", FPS, "-i", portrait,
+       "-vf", "zoompan=z='min(zoom+0.0004,1.05)':d=1:s=1080x1920:fps=30",
+       "-frames:v", 60, "-an", "-c:v", "libx264", "-preset", "fast", "-crf", 18,
+       "-pix_fmt", "yuv420p", portrait_motion)
+    p = art / "adviser-title.png"
+    type_art(p, "SPEAK TO A BROKER", y=1450, colour=WHITE, size=95, panel=True)
+    scene(out / "08-adviser.mp4", portrait_motion, 0, 2.0,
+          "scale=1080:1920", [(p, .25)])
+    ui_video(out / "09-review.mp4", 2.3, "cta")
+    # 2.4 + 2.3 + 2.3 + 3.5 + 3.3 + 2.2 + 2.3 + 2.0 + 2.3 + 3.2 = 25.8 s.
     parts = [out / f"{i:02d}-{name}.mp4" for i, name in enumerate(
-        ("pack", "stock", "seal", "route", "premises", "sign", "review"), 1)]
+        ("pack", "stock", "seal", "route", "moving", "premises", "sign", "adviser", "review"), 1)]
     parts.append(a.outro)
     concat = out / "concat.txt"
     concat.write_text("".join(f"file '{p.as_posix()}'\n" for p in parts), encoding="utf-8")
@@ -148,11 +164,11 @@ def main() -> None:
        "-c:a", "pcm_s24le", out / "candidate-mix.wav")
     ff("-i", out / "picture.mp4", "-i", out / "candidate-mix.wav", "-map", "0:v",
        "-map", "1:a", "-c:v", "copy", "-c:a", "aac", "-b:a", "256k",
-       "-shortest", out / "TBS_GOODS_TRANSIT_R01_PRIVATE_REVIEW.mp4")
+       "-shortest", out / "TBS_GOODS_TRANSIT_R03_PRIVATE_REVIEW.mp4")
     (out / "manifest.json").write_text(json.dumps({
         "status": "private_review_not_approved", "duration_target": duration,
-        "source_roles": {"stock": ["Mixkit 42131", "Mixkit 4705", "Pixabay 8686"],
-                         "client": ["199A0525.MP4 premises", "199A0531.MP4 wall sign"],
+        "source_roles": {"stock": ["Mixkit 42131", "Mixkit 4705", "Pixabay 8686", "Adobe Stock free-tier 520299893"],
+                         "client": ["199A0525.MP4 premises", "199A0531.MP4 wall sign", "199A0467.MP4 extracted still portrait"],
                          "graphic": "illustrated route and cover-review CTA"},
         "pending": ["independent normal-speed picture/sound", "public picture match",
                     "music originality and creative fit", "phone review"],
