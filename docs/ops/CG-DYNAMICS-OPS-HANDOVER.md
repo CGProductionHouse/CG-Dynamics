@@ -1,3 +1,24 @@
+## 5 November — research applied to client website measurement labels (source only)
+
+Reviewed the latest saved 4 November research release `DIR261104A_0840_SearchMeasurementCorrections`
+and its structured evidence/continuation under #433. Reproduced a client report defect:
+provider `enquiry_submit` event counts were called “Submitted enquiries”, despite
+canonical #405 lead truth being separate. The existing published-snapshot panel now
+says “Form submissions” / “Contact actions” and explicitly distinguishes events from
+confirmed enquiries or sales. Missing/malformed/duplicate event aggregates stay unknown;
+real zero remains zero. No new provider, snapshot mutation, lead inference or role query.
+30 focused reporting/isolation tests, build/emitted app code, scoped lint/diff and
+1440/375/390/430px isolated read-only browser checks pass. This is source-only work;
+no Vercel or Supabase/data/config/publication changes. Existing release/owner gates remain.
+
+Research findings remain review candidates, not activated knowledge. Dated Google DSA
+correction was independently checked: February 2027 for DSA; the September 2026 timeline
+remains for ACA/campaign broad match. No campaign changes. CA's future compact industry/
+social news section belongs to existing #737; do not create a parallel news/library system
+or delay launch for it. Detailed source/application record is in the existing execution
+document. Strategies remain with #731; staff/calendar ownership is untouched. Exact Google
+Control Centre reference remains unavailable, so no guessed tracker write was made.
+
 ## 5 November — exact-approved reporting-health connector fix LIVE
 
 PR #951 merged at `297abb0c`. CA explicitly approved its three-file backend release;

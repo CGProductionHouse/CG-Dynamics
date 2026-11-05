@@ -23,7 +23,11 @@ export function websiteReportPresentation(report: WebsiteReport) {
   }
   const stale = !validPeriod || observedDay === null || observedDay < end!
   const partial = report.dataQuality.state === 'partial' || (validCoverage && coverage! > start!)
-  const enquiry = report.conversions.byType.find(row => row.type === 'enquiry_submit')?.count
+  // Provider form events are not canonical received enquiries (#405).
+  // Duplicate event aggregates are ambiguous; never pick the first or add them.
+  const formEvents = Array.isArray(report.conversions?.byType)
+    ? report.conversions.byType.filter(row => row?.type === 'enquiry_submit') : []
+  const formSubmissions = formEvents.length === 1 ? formEvents[0].count : null
   return {
     periodEnd: validPeriod ? new Date(end! - 86400000).toISOString().slice(0, 10) : null,
     coverageFrom: validCoverage ? report.period.coverageFrom : null,
@@ -31,7 +35,7 @@ export function websiteReportPresentation(report: WebsiteReport) {
     partial,
     stateLabel: partial ? (stale ? 'Partial coverage · older snapshot' : 'Partial coverage')
       : stale ? 'Older snapshot' : report.dataQuality.state === 'available' ? 'Verified snapshot' : 'Measurement incomplete',
-    enquiries: typeof enquiry === 'number' && Number.isSafeInteger(enquiry) && enquiry >= 0 ? enquiry : null,
+    formSubmissions: typeof formSubmissions === 'number' && Number.isSafeInteger(formSubmissions) && formSubmissions >= 0 ? formSubmissions : null,
     sourceLabel: report.dataQuality.trafficProvider === 'vercel' ? 'Source: published website snapshot · Vercel traffic analytics.' : 'Source: published website snapshot · traffic provider unavailable.',
   }
 }
