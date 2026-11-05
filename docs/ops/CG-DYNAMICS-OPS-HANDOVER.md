@@ -1,3 +1,27 @@
+## 5 November — native Meta parity checked; TikTok connector health fix prepared
+
+Continue the existing client execution matrix; do not repeat the complete 62-client UI
+sweep. Actual Meta/Dynamics comparison passes Cape Facebook/Instagram October and
+the stored 1–30 October additive Facebook windows for Germoparts/Emmanuel. Cape's
+Instagram-only views are 1,716; Meta's combined 11,154 headline includes Facebook and
+must not be imported as Instagram-only. Unique viewers are never daily-summed.
+Fresh identity inventory finds zero numeric Meta/TikTok cross-client mismatches.
+Germoparts Facebook access recovered naturally; Emmanuel and held AV still fail,
+held Red Oak remains stale. Google naturally synced 4 Nov 22:00 UTC; Cape October
+40,497 impressions / 1,337 clicks / R2,199.24 remains available. No forced sync.
+
+Concrete MCP bug reproduced: ten TikTok responses say PASS/connected despite pending
+token refresh. Source fix grades the existing exact-account reporting health and
+timestamp, preserving automatic refresh and connection-only sync admission. 141 focused
+checks and final 68-helper/recovery checks, strict helper TS, lint/diff, app build and
+real emitted bundle pass. Actual hosted 40-file packet changes only index/opsActions/
+toolCatalog; 37 others and authentication preserved. SOURCE ONLY, MCP still 76; exact
+production approval and fresh drift check remain. No Vercel or production mutations.
+The existing execution document records exact source totals, receipt hashes, bounded
+browser failures, primary-source Sprout/Buffer/Agorapulse analysis and remaining gates.
+Password/physical-phone, editorial/publication, initial Teams allocation and recipient
+acceptance remain separately owned. Exact Control Centre reference still unavailable.
+
 ## 4 November — both exact-approved Google campaign links are live
 
 CA approved Germoparts campaign 24413585918 and historical Novus campaign 24189935204.

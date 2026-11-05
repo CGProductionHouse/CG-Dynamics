@@ -1,5 +1,100 @@
 # Client launch execution — local-first continuation
 
+## 5 November — native Meta comparison and connector truth fix
+
+Read-only continuation of the existing launch matrix, not a second fleet checklist.
+Current main at entry: `680dabb5`. No Vercel, production data, provider refresh,
+OAuth, permission, campaign, budget, content or strategy publication changes.
+
+Actual company Chrome Meta Results and the live Dynamics client preview were checked.
+Meta's date picker was visibly set to 1–31 October in Pacific Time. The first custom
+textbox edit did not persist; it was rejected as evidence and replaced with Meta's
+Last month preset. Native daily chart rows, dates and complete DOM observations are
+preserved privately in `%TEMP%/cg-meta-native-comparison-20261105.json` (SHA256
+`567fced6baef9e460fca3a2e1495b068706096e1829cda47c2e8c55d59ddb5f8`).
+
+| Exact comparison | Native source | Dynamics stored/displayed | Result |
+| --- | --- | --- | --- |
+| Cape Facebook, 1–31 Oct | Views 18,525; visits 285; daily follows 6 | 18,525 / 285 / 6; published October client preview | Exact match |
+| Cape Instagram, 1–31 Oct | Instagram-only views 1,716; reach 348; interactions 95; visits 26; follows 12 | Same five values in published October client preview | Exact match |
+| Germoparts Facebook, 1–30 Oct | First 30 native daily rows: views 19,344; visits 933; follows 13 | Same three values; stored window explicitly ends 30 Oct | Exact match for recorded window; not a full-month certification |
+| Emmanuel Facebook, 1–30 Oct | First 30 native daily rows: views 90,731; visits 4,694; follows 29 | Same three stored values | Exact match for recorded window; October report remains unpublished |
+
+Important definitions: Cape's Meta Instagram headline is 11,154 combined views,
+including 9,438 Facebook views and 1,716 Instagram views. Dynamics correctly uses
+1,716 for Instagram; importing the combined headline would double-count Facebook.
+Facebook `page_post_engagements` (Cape 995) is a different, broader API metric from
+Meta's Content interactions (908). The portal labels it **post engagements**, not
+content interactions. Native daily viewer sums were inspected but NEVER used as
+monthly unique viewers. Native follows chart sums can also differ from its headline;
+the stored source is explicitly `page_daily_follows`, not net growth.
+
+Emmanuel's actual client preview currently opens its published September report,
+truthfully showing 1–29 September platform windows. No unpublished October figures
+were represented as client-visible. Later Germoparts Instagram browser interaction
+hit debugger/focus transport failures; bounded recovery read the page but did not
+complete an exact 1–30 October comparison. No auth bypass or repeated consent retry.
+This is targeted native parity evidence, not a new 62-client/physical-phone certificate.
+
+Fresh all-provider read-back: Meta 47 mapped clients / 76 platform checkpoints,
+20 PASS / 55 PARTIAL / one STALE. Germoparts Facebook access has recovered naturally;
+remaining Facebook failures are Emmanuel and held AV, plus held Red Oak stale.
+PARTIAL still means incomplete metric coverage, not fabricated zero. Complete stored
+monthly-fact identity joins find zero numeric Meta/TikTok cross-client mismatches
+and zero numeric rows marked unavailable. This does not prove every metric exists.
+Google's natural 4 November 22:00 UTC sync succeeded. Cape October remains available:
+31 dates / 40,497 impressions / 1,337 clicks / R2,199.24, matching prior native acceptance.
+Both exact-approved Germoparts/Novus mappings remain live; no re-save or forced resync.
+
+Concrete new defect: the normal connector returns TikTok `overall=PASS`,
+`state=connected`, `degraded=false` while its own evidence says `needs_refresh`
+and `token_expired=true`. All ten connections currently have this shape. Their last
+successful exact-account jobs were 4 November 03:07–03:11 UTC, within the existing
+30-hour threshold at this check. This is refresh pending, not evidence of revoked
+access or a demand for manual reconnection. The existing scheduler deliberately
+queues only after that threshold; no job/schedule change is proposed.
+
+Source fix adds a read-only TikTok reporting projection to the existing MCP handler:
+canonical access/coverage/completeness/freshness plus timestamp validation and pending
+refresh now determine its verdict. Missing/unreadable evidence stays UNAVAILABLE;
+partial/stale is never PASS. Connection-only sync admission and automatic recovery
+are unchanged. Only whitelisted health fields are returned; no raw run summaries,
+tokens, provider IDs or private diagnostic payloads are added. This is SOURCE ONLY
+until exact production approval; the live MCP remains version 76.
+
+Verification: live-shaped red test reproduced `connected` versus expected degraded.
+141 focused reporting checks passed after correcting the dummy publishable-key fixture
+environment; the final changed-helper/recovery set passes 68 tests with zero skips.
+Strict helper TypeScript, scoped lint, diff, app build and actual 124-file emitted
+app-bundle check pass. The first strict TS invocation needed TypeScript 6's
+`--ignoreConfig`; the corrected command passes. Existing full 4,253-test/24-browser
+acceptance remains historical and was not re-run or attributed to this backend change.
+No client design, RLS, permissions or write path changed; self-review found no blocking
+scope/security issue. No independent agent review or new client-password test claimed.
+
+Exact prepared backend packet: `%TEMP%/cg-reporting-truth-release-20261105.json`,
+SHA256 `0d5959f53232622e9258ac561c119df84eb289d73a7cbe1a9893e440fa049ff1`.
+It surgically patches hosted MCP 76's index, opsActions and toolCatalog only,
+preserving all 37 other hosted files and entrypoint/JWT/import settings. The actual
+hosted candidate helper passes a local SSR behavior check. No new dependency or
+TikTok status/sync function deployment is needed (hosted status 48 already returns
+the canonical health evidence). Fresh hosted drift check is mandatory before release.
+
+### Proven reporting-app patterns reviewed for this exact problem
+
+| Product / primary source | How its reporting works | Dynamics application |
+| --- | --- | --- |
+| [Sprout Social discrepancy guide](https://support.sproutsocial.com/hc/en-us/articles/38269086191757-Troubleshooting-Metric-Discrepancies-Between-Sprout-Social-and-Native-Network-Reports) and [time zones](https://support.sproutsocial.com/hc/en-us/articles/360053912232-Reporting-Time-Zones) | Separates lifetime post performance from activity during the period; documents network/API limits, collection frequency and Pacific profile reporting. | Compare exact source/aggregation/timezone/window, not similar labels. Retain existing per-fact windows, snapshot labels, comparison eligibility and non-additive unique reach rules. |
+| [Buffer analytics discrepancies](https://support.buffer.com/articles/why-your-data-in-buffer-insights-might-look-different-from-native-analytics-CryTKTdV0u) | Missing daily data stays a gap, distinct from observed zero; limited historical backfill and “as of” evidence are explicit; refreshes preserve connection history. | Preserve NULL/unavailable and genuine zero. Keep the #944 unavailable-panel source fix and explicit windows; never disconnect/reconnect blindly or replace partial data with zero. |
+| [Agorapulse reporting FAQ](https://support.agorapulse.com/en/articles/11066949-reports-frequently-asked-questions-faqs) | Audience activity and lifetime performance of posts published in the period are separate; API reporting is delayed and valid access is necessary. Paid detail requires the relevant ad-account connection. | Keep account totals separate from CG-attributed creative performance; retain cohort/lifetime TikTok labels. New connector health fix distinguishes OAuth presence from usable reporting. Paid Meta/TikTok backbone remains separately held, not invented from organic stats. |
+
+These are documented behavioral patterns, not access to proprietary implementation.
+They validate the current architecture; no broad rewrite, paid subscription, manual
+tagging process or second reporting system was introduced. Remaining launch gates
+stay in this existing matrix: exact-client content/publication, #325 initial schedule
+allocation, #396 recipient/download acceptance, Emmanuel provider access and owner
+password/physical-phone acceptance. Held/excluded clients remain held/excluded.
+
 ## 4 November — both exact-approved Google campaign links are live
 
 CA approved Germoparts campaign 24413585918 and historical Novus campaign 24189935204.
