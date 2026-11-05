@@ -5,6 +5,8 @@ description: Plan, assemble, review, and hand off CG Production House client vid
 
 # CG video story editor
 
+CA's5November effects assignment: prioritise [planar3D camera for MSI's TBS edit](../../../scripts/video-editing/studio-phase2/skills/planar-3d-camera/SKILL.md) and its [tested module/sound handoff](../../../scripts/video-editing/studio-phase2/TBS-3D-CAMERA-HANDOFF-20261105.md). Reuse the established TBS kit and MSI's active timeline. A technique audition is not a final film or an auditioned final mix. This assignment authorises shared skill work, not resuming the rejected PC production queue.
+
 For opening concepts, read [hook mechanisms](references/hook-mechanisms.md): action, anticipation, camera, sound, human detail, graphic construction and text are different choices. The [three new sports references](../../../scripts/video-editing/studio-phase2/SPORTS-REFERENCES-20261103.md) retain actual frame studies, a new depth-flash reconstruction and unfinished source/listening gates. Do not present the earlier Fight Night preparation as completed reference-sound mastery.
 
 For sporty openings, read [sports opening construction](references/sports-opening-construction.md). CA rejected the3November slogan/effects-list proposals: design the actual picture/graphics/sound event and its payoff from screened sources before proposing its heading. A filled hook field or installed effect does not establish an effective opening.
