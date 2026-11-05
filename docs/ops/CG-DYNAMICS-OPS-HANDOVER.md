@@ -6070,6 +6070,21 @@ Post-launch / next milestone candidates, re-read live issue before acting:
 - #396 Client Portal Library/Brand Hub
 - #404 CG Hours client bridge
 
+### #948 Graphic Designer / Poster Studio — isolated development lane
+
+CA explicitly started the Graphic Designer takeover with Red Oak as the first pilot. Issue #948 is the master authority. Work is isolated on `codex/graphic-designer-948`; it must not touch Nolan (#871/#874), Picasso (#878), their PRs, production services, client publication or protected Client Portal Library writes.
+
+Verified local proof state on 2026-11-05:
+
+- real Red Oak OneDrive photography and exact logo originals are staged only under the private local proof root, outside Git;
+- a deterministic scene-graph renderer now emits editable SVG, PNG review, asset/layer/output hashes and an amendment receipt;
+- the v1/v2 Red Oak proof records 15 layers and two exact source assets; changing the fictional price modifies only `offer-price`, leaving 14 layers unchanged;
+- exact Canva typography was verified as `Zuume Rough Bold` (title) and `Rustic Printed Stamp` (subtitle), but neither is locally installed or available through the checked OneDrive/Adobe Fonts paths, so the present proof discloses mechanical substitutes and is not yet brand-exact typography;
+- Photoshop 2026 and UXP Developer Tools are installed; a narrow user-selected-job-folder `.psjs` renderer is prepared, but real PSD support remains unverified until an actual Photoshop round trip and Layers-panel inspection pass;
+- no deployment, production migration, hosted app, purchase, paid API call, public upload or client publication occurred.
+
+Before merge advice, review the actual private preview and the draft PR, require human creative approval, and keep the font-licensing gap explicit. The intended company ChatGPT surface remains a future narrow CG Dynamics/local-bridge contract; it has not yet passed end-to-end normal-ChatGPT invocation and must not be described as live.
+
 Do not start one of these merely because it is open if #505/#513 launch closure is still the priority.
 
 ## 12. Exact next supervisor action

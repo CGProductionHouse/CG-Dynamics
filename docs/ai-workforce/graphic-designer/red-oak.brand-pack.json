@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "client": {
+    "clientId": "cdb11a82-339e-4b46-9b09-bde1a23efeaf",
+    "name": "Red Oak"
+  },
+  "authority": {
+    "identity": "CG Dynamics exact-client context",
+    "files": "OneDrive",
+    "approvedFinals": "CG Dynamics Client Portal Library",
+    "discoveryOnly": ["Canva Brand Kit", "Canva approved design references"]
+  },
+  "assets": {
+    "oneDriveRoot": {
+      "provider": "OneDrive",
+      "path": "Clients/Red Oak",
+      "itemId": null,
+      "access": "read-only"
+    },
+    "logos": [
+      {
+        "provider": "OneDrive",
+        "path": "Clients/Red Oak/Brand Identity/",
+        "itemId": "A2AC9FE4B255F52F!s3b12e7b8d28e4c62a1fc39716e466ecc",
+        "access": "read-only",
+        "role": "Exact approved logo originals and variants",
+        "format": "AI/PDF/PNG"
+      }
+    ],
+    "photography": {
+      "provider": "OneDrive",
+      "path": "Clients/Red Oak/Photos/",
+      "itemId": "A2AC9FE4B255F52F!sa1c96ecb6acb40b493fdf4bdb669ab27",
+      "access": "read-only"
+    },
+    "graphicDesign": {
+      "provider": "OneDrive",
+      "path": "Clients/Red Oak/Graphic Design/",
+      "itemId": "A2AC9FE4B255F52F!87277",
+      "access": "read-only"
+    }
+  },
+  "typography": [
+    {
+      "role": "title",
+      "family": "Zuume Rough Bold",
+      "style": "Bold",
+      "availability": "licensed-file-required",
+      "source": "Canva Brand Kit kAFrnsMLMm8 verified 2026-11-05; absent from MSI font locations, Red Oak OneDrive search and exact Adobe Fonts search",
+      "fallback": "Impact (mechanical proof only; never label as brand-exact)"
+    },
+    {
+      "role": "subtitle",
+      "family": "Rustic Printed Stamp",
+      "style": null,
+      "availability": "licensed-file-required",
+      "source": "Canva Brand Kit kAFrnsMLMm8 verified 2026-11-05; absent from MSI font locations, Red Oak OneDrive search and exact Adobe Fonts search",
+      "fallback": "Arial Narrow Bold (mechanical proof only; never label as brand-exact)"
+    }
+  ],
+  "colours": [
+    {
+      "name": "Red Oak charcoal",
+      "value": "#231F20",
+      "source": "Original OneDrive Illustrator logo vector colour"
+    },
+    {
+      "name": "Red Oak red",
+      "value": "#ED1C24",
+      "source": "Original OneDrive Illustrator logo vector colour"
+    }
+  ],
+  "creativeRules": [
+    "Preserve genuine Red Oak food, people, venue and product photography; do not generatively reconstruct source subjects.",
+    "Use exact approved logo artwork without redrawing it.",
+    "Use photo-led layouts, bold condensed display hierarchy, charcoal/black grounding, vivid red accents and warm oak texture.",
+    "Use rough or hand-drawn accent graphics sparingly; keep product photography dominant and legible at mobile size.",
+    "Do not invent prices, dates, menu claims, sponsors or event details.",
+    "Canva is a discovery and optional editing/output surface, not the permanent brand database."
+  ],
+  "approvedClaims": [
+    "Where the Good Times Grow",
+    "Est. 2018"
+  ],
+  "referenceDesigns": [
+    {
+      "provider": "Canva",
+      "path": "NEW RED OAK ADS 2025",
+      "designId": "DAGIHwSQsls",
+      "access": "discovery-only"
+    },
+    {
+      "provider": "Canva",
+      "path": "NEW RED OAK STORY ADS",
+      "designId": "DAF-K8WExvs",
+      "access": "discovery-only"
+    }
+  ],
+  "limitations": [
+    "The Canva title and subtitle fonts are not currently available as licensed local files on the MSI; portable/PSD proofs must disclose substitutions until CG supplies or licenses them.",
+    "The Canva connector cannot start an editing transaction on the 444-page NEW RED OAK ADS 2025 design; use representative read-only inspection, a small copied design, or independent composition instead.",
+    "No offer is approved by this pack. All proof offers must be clearly fictional and internal."
+  ]
+}
