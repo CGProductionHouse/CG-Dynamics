@@ -149,9 +149,9 @@ class EditContract(unittest.TestCase):
         r=self.record(p);d=json.loads(Path(r['edit_manifest']['path']).read_text());d['fps']=30;Path(r['edit_manifest']['path']).write_text(json.dumps(d));r['edit_manifest']=self.bind(Path(r['edit_manifest']['path']))
         self.assertIn('frame clock/count',' '.join(check_render(r,30,validate)))
 
-    def test_distinct_same_file_moments_are_not_blanket_banned(self):
+    def test_same_original_is_banned_even_for_nonoverlapping_moments(self):
         p=self.plan();p['shots'][1].update(source='source-0',visual_cluster='cluster-0',**{'in':13,'out':21})
-        self.assertEqual(validate(p),[])
+        self.assertIn('same original recording',' '.join(validate(p)))
         p['shots'][1].update(**{'in':5,'out':15})
         self.assertIn('overlapping',' '.join(validate(p)))
 
