@@ -25,3 +25,16 @@ test('proposal validator refuses fabricated schedule IDs', () => {
   assert.equal(report.valid, false)
   assert.ok(report.errors.some((error) => error.includes('must not invent monthlyDeliverableId')))
 })
+
+test('proposal validator refuses an incomplete or falsely cleared Brand Pack', () => {
+  const plan = JSON.parse(readFileSync(resolve(root, 'january-strategy.proposal.json'), 'utf8'))
+  const brandPack = JSON.parse(readFileSync(resolve(root, 'brand-pack-index.json'), 'utf8'))
+  const incomplete = structuredClone(brandPack)
+  incomplete.scopes[0].colours = []
+  incomplete.scopes[0].productionBlocked = false
+  const result = validateMonthPlan(plan, incomplete)
+  assert.equal(result.valid, false)
+  assert.ok(result.errors.some((error) => error.includes('exact Brand Kit colours')))
+  assert.ok(result.errors.some((error) => error.includes('local font rendering')))
+  assert.ok(result.errors.some((error) => error.includes('exact verified logo')))
+})

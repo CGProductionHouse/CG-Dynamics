@@ -35,6 +35,24 @@ export function validateMonthPlan(plan, brandPack) {
   if (!Array.isArray(plan.briefs) || !plan.briefs.length) errors.push('plan.briefs must not be empty')
   if (plan.briefs?.length > (plan.packageBaseline?.designPosters ?? 0)) errors.push('brief count exceeds verified package baseline')
   const scopeMap = new Map((brandPack.scopes ?? []).map((scope) => [scope.key, scope]))
+  const brandKitIds = new Set()
+  for (const scope of brandPack.scopes ?? []) {
+    if (!present(scope.key)) errors.push('brand scope key is required')
+    if (!present(scope.canvaBrandKitId)) errors.push(`${scope.key}: Canva Brand Kit ID is required`)
+    if (brandKitIds.has(scope.canvaBrandKitId)) errors.push(`${scope.key}: duplicate Canva Brand Kit ID`)
+    brandKitIds.add(scope.canvaBrandKitId)
+    if (!Array.isArray(scope.fonts) || scope.fonts.length === 0) errors.push(`${scope.key}: exact Brand Kit font labels are required`)
+    if (!Array.isArray(scope.colours) || scope.colours.length === 0) errors.push(`${scope.key}: exact Brand Kit colours are required`)
+    for (const colour of scope.colours ?? []) {
+      if (!/^#[A-F0-9]{6}$/i.test(colour)) errors.push(`${scope.key}: invalid colour token ${colour}`)
+    }
+    if (scope.productionBlocked === false && scope.fontStatus !== 'local-render-verified') {
+      errors.push(`${scope.key}: production cannot clear until local font rendering is verified`)
+    }
+    if (scope.productionBlocked === false && !String(scope.exactLogoStatus ?? '').includes('verified')) {
+      errors.push(`${scope.key}: production cannot clear without an exact verified logo`)
+    }
+  }
   const ids = new Set()
   const mechanisms = new Set()
   const headlines = []

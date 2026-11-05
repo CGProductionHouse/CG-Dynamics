@@ -6,6 +6,20 @@
   },
   "observedAt": "2026-11-05",
   "status": "bootstrap-in-progress",
+  "canvaBrandKitInspection": {
+    "observedAt": "2026-11-05",
+    "method": "read-only inspection of the signed-in Canva editor Brand panel",
+    "contentChanged": false,
+    "scope": "exact kit font labels and colour-palette tokens only",
+    "warning": "A Canva font label proves kit configuration, not local font-file availability, licence portability or successful headless rendering."
+  },
+  "localFontAudit": {
+    "observedAt": "2026-11-05",
+    "locations": ["C:/Windows/Fonts", "C:/Users/chris/AppData/Local/Microsoft/Windows/Fonts"],
+    "searchedLabels": ["Lastica", "Barlow", "Red Hat Display", "Horizon", "HORIZON", "Inter", "Anton", "Univers", "Tall"],
+    "installedMatches": [],
+    "productionImpact": "Headless text rendering remains blocked until each selected font has a verified local file and usable licence, or an explicitly approved metric-compatible substitution is documented."
+  },
   "oneDrive": {
     "root": "Clients/Piek Group/",
     "brandIdentityFolderId": "A2AC9FE4B255F52F!sa43c41ac83074a4284c29f4d6f5ea5ec",
@@ -111,13 +125,21 @@
           "selectionState": "unresolved"
         }
       ],
-      "fontStatus": "requires-current-source-verification",
-      "historicalFontEvidence": ["Sora headings", "Inter body"],
-      "colourStatus": "requires-current-source-verification",
-      "historicalPaletteDirection": ["warm off-white/cream", "navy", "champagne-gold", "warm stone"],
+      "fontStatus": "exact-canva-kit-labels-verified-local-availability-pending",
+      "fonts": ["Lastica", "Barlow"],
+      "referenceSpecificFonts": [
+        {
+          "font": "Red Hat Display",
+          "page": 336,
+          "usage": "recruitment headline and body",
+          "promotionToCoreKit": false
+        }
+      ],
+      "colourStatus": "exact-canva-kit-values-verified",
+      "colours": ["#FFFFFF", "#25334E"],
       "productionBlocked": true,
       "observedVisualGrammar": ["deep navy/cream restraint", "fine linework and borders", "large geometric type", "architectural/translucent panels", "signature line-art motif", "photo-led asymmetry"],
-      "blockers": ["correct logo variant for the selected composition is unresolved", "exact current font files/licence not verified", "exact colour values not verified", "sample publication/approval states unresolved"]
+      "blockers": ["correct logo variant for the selected composition is unresolved", "Canva font labels are verified but local font files/licence and render fidelity are not", "sample publication/approval states unresolved"]
     },
     {
       "key": "ENGEN",
@@ -125,11 +147,13 @@
       "canvaBrandKitName": "Engen",
       "brandKitVerified": true,
       "exactLogoStatus": "required-not-yet-hashed",
-      "fontStatus": "required-not-yet-extracted",
-      "colourStatus": "required-not-yet-extracted",
+      "fontStatus": "exact-canva-kit-labels-verified-local-availability-pending",
+      "fonts": ["Horizon", "HORIZON", "Inter"],
+      "colourStatus": "exact-canva-kit-values-verified",
+      "colours": ["#E3000F", "#134094", "#AFC9ED", "#FFFFFF"],
       "productionBlocked": true,
       "observedVisualGrammar": ["product cutouts with realistic shadows", "oversized type behind products", "strong blue footer/offer band", "clear price hierarchy", "energetic layered food props"],
-      "blockers": ["exact logo variant/hash required", "fonts and colour tokens require source verification", "sample publication/approval states unresolved"]
+      "blockers": ["exact logo variant/hash required", "Canva font labels are verified but local font files/licence and render fidelity are not", "sample publication/approval states unresolved"]
     },
     {
       "key": "SASOL",
@@ -137,11 +161,13 @@
       "canvaBrandKitName": "Sasol",
       "brandKitVerified": true,
       "exactLogoStatus": "required-not-yet-hashed",
-      "fontStatus": "required-not-yet-extracted",
-      "colourStatus": "required-not-yet-extracted",
+      "fontStatus": "exact-canva-kit-labels-verified-local-availability-pending",
+      "fonts": ["Barlow", "Tall"],
+      "colourStatus": "exact-canva-kit-values-verified",
+      "colours": ["#D0D9E5", "#263760", "#2D355E", "#FFFFFF"],
       "productionBlocked": true,
       "observedVisualGrammar": ["white and ice-blue technical cleanliness", "liquid/splash movement", "condensed display typography", "organic information shapes", "independent exact logo placement"],
-      "blockers": ["exact logo variant/hash required", "fonts and colour tokens require source verification", "sample publication/approval states unresolved"]
+      "blockers": ["exact logo variant/hash required", "Canva font labels are verified but local font files/licence and render fidelity are not", "sample publication/approval states unresolved"]
     },
     {
       "key": "GET_TOGETHER",
@@ -149,11 +175,13 @@
       "canvaBrandKitName": "Get Together",
       "brandKitVerified": true,
       "exactLogoStatus": "required-not-yet-hashed",
-      "fontStatus": "required-not-yet-extracted",
-      "colourStatus": "required-not-yet-extracted",
+      "fontStatus": "exact-canva-kit-labels-verified-local-availability-pending",
+      "fonts": ["Anton", "Barlow", "Univers"],
+      "colourStatus": "exact-canva-kit-values-verified",
+      "colours": ["#8095C9", "#0B1629"],
       "productionBlocked": true,
       "observedVisualGrammar": ["warm editorial hospitality photography", "serif/italic accent type", "soft translucent overlays", "playful diagonal colour fields for product offers", "food cutouts crossing depth planes"],
-      "blockers": ["exact logo variant/hash required", "fonts and colour tokens require source verification", "sample publication/approval states unresolved"]
+      "blockers": ["exact logo variant/hash required", "Canva font labels are verified but local font files/licence and render fidelity are not", "sample publication/approval states unresolved"]
     }
   ]
 }
