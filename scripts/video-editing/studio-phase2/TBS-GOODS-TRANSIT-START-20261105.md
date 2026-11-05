@@ -1,0 +1,44 @@
+# TBS Brokers — distinct goods-in-transit film start (5 November 2026)
+
+**Status:** private 7.000 s opening study rendered and inspected. No 30-second film, approval package, public-use clearance, authentic voice, or client delivery is claimed. This is the MSI production lane in draft PR #875; the office PC's 3D camera, last-frame, flicker, invert, text and motion/UI tutorial research remains its own lane in draft PR #910.
+
+## Buyer and claim
+
+- **Viewer:** a local business owner who packs and sends stock.
+- **Useful action:** ask TBS Brokers to review whether goods in transit needs to be part of their commercial cover. TBS's [own commercial services page](https://www.tbsbrokers.co.za/short-term-insurance-commercial) expressly lists “Goods in Transit.” This is a service-category claim only; eligibility, exclusions, insurers and the customer's current cover are unknown.
+- **Film question:** “Packed. Sent. Covered?” It should move from a visible packing action to a simple route graphic, then to a recognisable TBS office moment and a specific review invitation. The previous approved November V11 asks about *new equipment* and the published June adviser story is broader advice. Neither is this film's storyline.
+- **Do not claim:** that goods become covered automatically, that the stock in licensed footage belongs to TBS or its clients, or that a stock foreign road is in South Africa.
+
+## Actual source screen and licence decision
+
+| Source | Finding | Decision |
+| --- | --- | --- |
+| TBS 2025 July VIDEO 1 | The signed-in source folder shows an outdoor swing setup with sideways takes, not business dispatch. | Exclude. |
+| TBS 2025 February VIDEO 1 | Visible thumbnails show agricultural equipment, truck and direct-to-camera speakers. | Exclude from goods-in-transit story; no silent speech. |
+| TBS 2024 October VIDEO 1 | Field/farm conversation, visually unrelated. | Exclude. |
+| `199A0531.MP4` (3.36 s) | Real upright TBS Brokers wall sign; locally decoded. SHA-256 `83459A90C384BBAB177F38701B59E07BF8514DC11AF3BDE5BBB2F64AAE7FC706`. | Identity beat only at 0.2–2.5 s source. Exact posted-picture match still needs checking before film delivery. |
+| [Mixkit #42131](https://mixkit.co/free-stock-video/closing-a-box-with-duct-tape-42131/) | Close packing action. Individual page says Free commercial licence. 720p landscape, so it remains a full-width inset over its blurred duplicate rather than being stretched into a soft portrait crop. SHA-256 `B694347DFFA2E32682E094384D10D932888F4006CE0F6ABABD792CBEA69C82FA`. | Selected for opening test, 4.7–7.1 s source. Not TBS premises. |
+| [Mixkit #4705](https://mixkit.co/free-stock-video/young-worker-doing-inventory-4705/) | Worker checks stock in a warehouse. Individual page says Free commercial licence. 1080p original acquired after 720p was rejected for the portrait crop. SHA-256 `A9E46FC414F11237C30D4CDE3E3B023018906AAE213B079A1673F073E3EF57CA`. | Selected for opening test, 1.2–3.5 s source. Not TBS premises. |
+| [Mixkit #31346](https://mixkit.co/free-stock-video/courier-worker-preparing-boxes-on-a-loading-truck-31346/) | The downloaded original is a residential driveway courier setup. | Reject for the intended business-dispatch film despite its Free commercial licence. |
+| [Mixkit #42132](https://mixkit.co/free-stock-video/young-man-filling-a-stuffing-box-for-packing-42132/) | Abrupt purple-lit box-fill POV, inconsistent with the TBS look. | Reject. |
+| [Mixkit #52430](https://mixkit.co/free-stock-video/trucks-move-along-the-concrete-highway-amidst-and-arid-landscape-52430/) | Aerial highway with road geometry/signage that does not read as local South Africa. | Reject for final; not a truthful local visual. |
+| Mixkit freight/warehouse #23011, #28787 and #45848 | Their low-resolution free download is **personal-use only** under the Restricted License; commercial version is premium. | Exclude. Category/search headlines saying “free” are insufficient; read each item's licence. |
+| Pexels #6170600 | The page describes a useful vertical warehouse-loading shot and marks it free, but normal Chrome download returned `ERR_BLOCKED_BY_CLIENT`. | No complete original; do not use or bypass the block. |
+
+All stock media and the protected TBS camera original remain outside Git. The official [Mixkit Video Free License](https://mixkit.co/license/modal/videoFree/) permits commercial social videos; the [Music Free License](https://mixkit.co/license/modal/musicFree/) permits social marketing use with restrictions. Individual item licences were checked before selection.
+
+## Private opening study
+
+Recipe: [`tbs-goods-transit/intro_proof.py`](tbs-goods-transit/intro_proof.py). Private export: `C:\Users\chris\Videos\CG-AI-Editing\Nolan-Studio-Private\TBS-Nov-2026-Goods-Transit\opening-study\TBS_GOODS_TRANSIT_PRIVATE_OPENING_STUDY.mp4`, SHA-256 `2EA133B286DB807A0AF45B83F4E66EADC273AA2C1C9D61FD930A27E6BDC79EB4`.
+
+The **first A** used flat taupe top/bottom bands and a faint caption against the inventory picture. Full-frame and phone-size contact inspection found it too plain. **The revised B** uses an intentionally blurred duplicate behind the inset, a TBS-taupe caption field, a three-stage route card and a stronger inventory caption panel. This is a source-driven transition from pack to stock check to client sign, not the assigned office-PC tutorial implementation. Sampled frames at 540×960 and 270×480 show all critical words inside the phone frame and the TBS wall sign legible; these frames cannot prove normal-speed comfort.
+
+The licensed [Mixkit “Close Up” #1167](https://mixkit.co/free-stock-music/corporate-music/) by Michael Ramir C. is a **new candidate**, SHA-256 `A7F05A29D07A84D38072CCD2B35204BCA812DB86E75B2A837E71CC144D3E739B`. No reuse was found in this repo/private editorial ledgers, which does not prove it was never posted elsewhere. The music onset/beat estimate was 103.36 BPM, with beats near 0.116, 0.697, 1.254, 1.834, 2.392, 4.690 and 6.966 s. The picture cuts were set to 2.400 and 4.700 s, within 0.01 s of those estimated beats. Two previously licensed Mixkit interface clicks #2577 were aligned to 0.697 and 1.834 s. All picture-source sound is muted. The final 7.000 s H.264/AAC export decoded end-to-end at 1080×1920/30 fps; measured integrated level is −16.9 LUFS and true peak −2.9 dBFS. The score, cue timbre and overall creative fit have **not been perceptually heard** in this MSI lane. Do not present measured timing or level as a listening verdict.
+
+## Next film gates
+
+1. Acquire or identify a commercially cleared, visually suitable *moving goods/loading/transit* shot, ideally plausibly local, so the middle of the film does not loop the two selected stock actions. Read the individual licence and inspect the complete original. If none exists, use a transparent route/map graphic and state the scenario as an illustration, with the TBS office material as the client link.
+2. Check the exact selected TBS wall-sign segment against published TBS posts. Reuse of a different moment in a new story is allowed; do not reproduce a prior published beat as-is. Confirm that “goods in transit” is not already a recent identical campaign.
+3. Build the remaining 20–23 seconds as an action-led route story: moving goods, one specific coverage-review question, a brief broker identity beat, practical CTA, official picture-only logo with continuous new music. Avoid a static sign/graphic stretch and empty-office filler. Keep on-screen copy asking for a review rather than promising cover.
+4. Authentic South African-accent TTS is **research, not a working voice**. Local Piper's published voice inventory has no `en_ZA` voice. Microsoft documents `en-ZA` neural voices, but using Azure may require metered service setup; no activation, spend, permissions change or client-media upload is authorized. Do not substitute an American/UK voice and call it South African. This film can work with restrained text/music if no qualified voice is available.
+5. Finish picture, score and separately licensed action sound on named stems; inspect actual full-speed export, first/last second, phone view, music originality and source/post-use. Create a correctly named cover/caption only after the film passes. Send to CG Nolan Approvals only when genuinely ready, with MP4 document plus caption, then caption-free HD cover. The 7-second study must never be sent as the film.
