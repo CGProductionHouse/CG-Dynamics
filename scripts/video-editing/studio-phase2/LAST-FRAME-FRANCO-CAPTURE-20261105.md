@@ -1,0 +1,19 @@
+# Franco capture brief — physical last-frame screen reveal
+
+Use this during **content-guideline planning**, before booking the shoot or choosing unrelated archive shots. Show Franco the actual [Arthur reference](https://vt.tiktok.com/ZSpFoyDbT/) first; stable link: https://www.tiktok.com/@iam_arthur7/video/7620855331031141662. PC inspected the public playback and written tutorial on5November; no private client media uploaded and no sound-hearing claim.
+
+The reference uses two shots: an outgoing scene and a second scene beginning on a real device that fills the lens view. An exported tail of the first clip plays on that device; the physical reveal establishes the next location. The editor matches the displayed moving frame at the join. A digital floating rectangle is a different effect and cannot replace the required capture.
+
+## Put these fields in the client's content guideline
+
+- **Story connection:** what does shotA establish, and what useful new fact/action does shotB reveal? Name both locations/products and the visible payoff. Do not book a transition without a reason to change scenes.
+- **Outgoing shotA:** record a clean, correctly exposed action with at least2seconds of usable handles either side of the intended join. Keep the important product/face readable at the matching moment. Record a clean alternative cut too.
+- **Handoff before shotB:** editor exports the selected tail as a local phone/computer playback file at the agreed orientation/rate, with filename and timecode. Keep this exact source; a screenshot of a different frame will not match moving action.
+- **Incoming shotB:** stage the actual next scene. Start with the real display image covering the entire camera view, then pull the device back/out or move the camera smoothly to reveal the scene. Maintain a readable continuous frame; record at least1second before the pull and2seconds after the reveal. Take slow, medium and clean-cut alternatives. A slider is optional, not a paid equipment prerequisite.
+- **Camera/display test:** agree resolution, orientation and frame rate with the editor; record an actual test before the full take. Lock exposure/white balance and control focus so the display is legible and the revealed subject resolves cleanly. Avoid reflections, clipped screen whites, visible playback controls/notifications, borders at the match and unstable hand movement. Check flicker/banding with the actual display, shutter and lighting; do not assume one shutter fixes every screen. Preserve screen detail instead of hiding it with flash.
+- **Sound:** record separate location ambience and the genuine action in both scenes, with clean handles. Mark pull/reveal timing. Add a restrained whoosh only if it improves the physical move; do not fake a machinery/product sound from an unrelated source. Plan music phrase/beat at the matched cut and allow enough footage to land there.
+- **On-site acceptance:** review the real screen-filling start, matching frame, complete reveal, focus/exposure and end hold before leaving. Keep originals, display-playback file, test take, chosen take and alternate. Share the exact filenames/timecodes with the editor.
+
+Suggested guideline line, completed for the actual client: “Watch the linked last-frame example. ShotA: [action/location]. We will supply [tail filename]. At [shotB location], begin on that clip playing full-frame on [device], then [physical reveal movement] to show [payoff]. Capture the test and all handles above; also film a normal clean-cut option.”
+
+**Still open:** no new two-location lens-cover/reveal capture was made on PC. The earlier green-phone insert and failed digital-grow remain insufficient. This brief is ready for planning; the filmed transition is not claimed captured, mastered or production-approved. Do not ask Franco to recreate another creator's exact scene or assume the reference's soundtrack is licensed.

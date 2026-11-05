@@ -5,6 +5,8 @@ description: Plan and verify a physical screen-to-location transition whose disp
 
 # Filmed last-frame transition — capture plan, no application proof yet
 
+**CA5November priority:** read the [Franco content-guideline capture brief](../../LAST-FRAME-FRANCO-CAPTURE-20261105.md), which includes the original owner-supplied TikTok link, shotA tail-file handoff, real screen-filling start, reveal/handles/focus/exposure/sound tests and on-site acceptance. The exact public Arthur tutorial was inspected; it plays an exported tail, not necessarily a still screenshot. Plan this before the shoot. The physical two-location capture gate remains open; the older digital-grow failure is not a substitute.
+
 **Reference:** [Arthur's three-step filmed transition](https://www.tiktok.com/@iam_arthur7/video/7620855331031141662) explicitly describes playing the tail of shot A on a phone/computer, filming shot B as that screen covers the lens, pulling the screen back, and aligning the displayed frame to the cut. The viewed sample shows a physical phone in front of the next location. Its reference sound was not heard.
 
 This depends on **capture**, not just a transition effect in post. The separate [digital window-grow proof](../window-grow/SKILL.md) is not evidence that the physical trick works.

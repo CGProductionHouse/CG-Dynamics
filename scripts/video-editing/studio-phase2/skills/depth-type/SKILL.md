@@ -5,6 +5,8 @@ description: Build and compare foreground-over-type experiments on cleared movin
 
 # Depth typography on moving human footage — rendered, not mastered
 
+**5November CA outline reference:** [Jihad Konda](https://vt.tiktok.com/ZSpFoKLF1/) demonstrates bottom source / solid Text+ / isolated moving foreground / outline Text+ on top. This is now implemented as shared `scripts/subject_treatments.py::outline_depth`, with real runner controls and a stroke-only revision. [Exact execution/evidence](../../CA-FIVE-EFFECTS-EXECUTION-20261105.md) records the24–48frame overlap scope, all47unchanged decoded frames, source rights and mask limits. Preserve contour/spacing between title copies; use the actual approved client font and readable stroke at reduced phone size. This mechanism belongs in a real story plan, not an unused tutorial list.
+
 ## 29 October office background screen: runner across fixed word
 
 [Licensed natural-runner screen](../../RUNNER-DEPTH-TYPE-SCREEN-20261029.md) compares an identical silent 72-frame shot with no title, type in front, and type behind a moving human. The first 24 decoded frames stay pixel-identical. R02's feathered GrabCut matte **fails** on source frames 148–151 because a connected path strip is pulled in front of the word. R03 repairs those four mattes and retains the protected opening; decoded contacts at five crossing phases and full-size frames 36/40 show readable text and the runner above it. This is one source-specific landscape/code-rendered mechanism, not generic natural segmentation, native editability, physical-phone judgement or client approval. Preserve the failed R02 and full-motion/hair/feet checks before adapting to a story.
