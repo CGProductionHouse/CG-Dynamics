@@ -2,6 +2,8 @@
 
 Owner feedback consolidated 28 October 2026. Read this **before selecting footage**, then record evidence against it in the existing private story/source/release record. Applies on MSI and office PC, in any suitable editor. It does not grant uploads, purchases, sends or installation permissions. A checklist does not certify what nobody watched or heard.
 
+**Direct client correction gate:** Before every revision, reload the client's direct corrections and exact Nolan Approvals feedback. Convert prohibited wording, people, offers and treatments into active-scene checks where possible; inspect the encoded picture and caption as well. A past client correction remains binding on new films. TBS Brokers specifically barred authored `TBS` alone on 27 October 2026 because it belongs to another company. All authored name copy must say `TBS Brokers`. The 5 November festive-transit R03 reused “ASK TBS” despite the recorded correction; a document note without a render gate failed.
+
 ## Authority and scope
 
 1. Check the owning issue/PR, current assignment and latest authorised review messages. Record the shared-library commit and current client-feedback checkpoint. Reconcile office changes before editing common files; never take over another lane's timeline. Refresh the library before a new assignment and after a shared-rule update, not halfway through an active render.
