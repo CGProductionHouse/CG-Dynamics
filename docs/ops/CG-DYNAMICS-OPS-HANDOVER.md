@@ -1,3 +1,37 @@
+## 5 November — Cape ready graphics published; exact calendar-link approval pending
+
+CA's real phone test found empty planned-post files and logo-only Brand Hub.
+Recovered seven approved image/caption pairs from the actual Cape Marketing
+WhatsApp conversation, matched Canva master pages29–35 and their browser page
+titles, after bounded duplicate checks in current/older OneDrive client folders.
+Uploaded seven exact date-named JPEGs and verbatim same-date caption text sidecars
+to Cape's existing safe Graphic Design folder. Published only the seven reviewed
+images through normal admin controls; text sidecars remain unpublished. Six are
+November2/4/9/11/16/18; one is October28, preserved in its true month and excluded
+by the existing current/next client projection. Logo unchanged. No dates,
+statuses, Teams, strategies, permissions, backend or Vercel changes.
+
+The existing publisher has no deliverable-ID link control. The six calendar
+post/file associations remain missing. Review-only packet
+`scripts/ops/cape-ready-post-asset-links-20261105.sql` awaits CA's explicit
+production-SQL approval; do not claim it applied. Live SELECT preflight matches
+six unique ready assets/posts. Local PostgreSQL success/idempotence and six
+refusal/atomic-rollback cases pass;23 existing focused library/calendar tests
+(including real local ownership/RLS SQL), build124app chunks and diff pass.
+Real Cape client session at390px shows six November files/thumbnails and a
+working separate-window image View with empty referrer. Screenshot:
+`%TEMP%/cape-brand-hub-ready-20261105.png`. Actual18November Download also passed:
+1,123,592bytes, SHA256 identical to the reviewed original. The download-event
+watcher timed out, but the actual file was independently verified without retry.
+Final calendar clicks follow the approved repair; no all-file download claim.
+
+November23 finished artwork and the exact November25 repost video selection are
+not established by this ready batch. Do not invent/move content or rewrite the
+DP/F slot classifications. #396/#668 own the links; #731 strategies and the
+staff/calendar/Piek Graphic Designer lanes remain separate. Full receipt is in
+the existing Cape launch review. Google Control Centre reference remains
+unavailable; no guessed tracker write.
+
 ## 5 November — Cape real client-password sign-in verified
 
 CA requested Cape's login for a phone test. The normal signed-in Users → Client

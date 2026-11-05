@@ -1,3 +1,111 @@
+## 5 November — ready Cape artwork recovered and published; six calendar links awaiting approval
+
+CA's phone test reproduced an empty calendar-file association and a logo-only
+Brand Hub. Continued the existing #396/#668 lane from clean main `bb436682`;
+open PR #956 remains the separate Piek Graphic Designer owner.
+
+### Exact source checks and completed content operations
+
+- Read Cape's existing OneDrive client root, client-safe categories, internal
+  Graphic Design/2025, Posters, Photos/Sent and the two older mirrored client
+  roots. Safe Graphic Design was empty. Seven loose internal PNGs were June
+  exports; the eleven Graphic Design/2025 month folders and older mirror content
+  had zero bytes. No verified duplicate of this ready batch was found in those
+  bounded reads. A folder-search response returned unrelated drive-wide results,
+  so it was not used as proof of scoped absence.
+- Read the actual Cape Lumber Marketing conversation in personal Chrome, as CA
+  previously authorised. Amonique sent seven image/caption pairs on 27 October
+  at 10:18, followed by “Hello Denis. Here is the designs I spoke about yesterday”
+  at 10:20. Denis replied “All good thank you.” on 28 October at 12:03.
+  No messages/reactions were sent.
+- Independently matched those exact captions to Canva master `DAGVuJURh6I`
+  pages29–35 and read their actual page titles in the browser. Page order is
+  **not** chronology. Six files are November; the seventh is 28 October.
+- Downloaded each approved WhatsApp image normally and visually inspected all
+  seven. Uploaded one copy of each into the existing exact client-safe Graphic
+  Design folder, preserving Canva's date stem as the filename. Original internal
+  files and Canva designs are unchanged; name-conflict behaviour was fail.
+- Saved the seven **verbatim** captions as same-date `.txt` sidecars in that
+  folder. These remain unpublished internal-format files in Dynamics; no claim
+  of inline client caption display. The image files alone were individually
+  reviewed/published through the normal admin Brand Hub controls.
+- Independent production SELECT confirms seven active image assets, plus the
+  pre-existing logo. The actual Cape client account displays six November
+  graphics; October remains outside the existing current/next-month projection.
+  No invented November23 file or unverified video selection was published.
+
+| Canva page | Source title / exported image | Exact existing November post | Client-facing name |
+| --- | --- | --- | --- |
+|34|2026_11_02.jpeg|DP1 · 2 November|Timber quotation|
+|33|2026_11_04.jpeg|F1 · 4 November|Project-ready timber|
+|32|2026_11_09.jpeg|DP2 · 9 November|Sheet material requirements|
+|31|2026_11_11.jpeg|F2 · 11 November|Send the specification|
+|30|2026_11_16.jpeg|DP3 · 16 November|Order preparation|
+|29|2026_11_18.jpeg|F3 · 18 November|Bulk project quantities|
+|35|2026_10_28.jpeg|No matching current November post; do not move it|H2 treated pine|
+
+The dated Canva artworks and the existing DP/F slot classifications are not
+interchangeable evidence: no type, count or posting-date rewrite was performed.
+The six proposed links use the independently matching exact Canva date and
+existing shared schedule date, not WhatsApp send order or a title-only match.
+
+### Existing calendar association gap and reviewed repair
+
+The existing library publisher does not accept/persist `deliverable_id`; its
+admin UI also has no post selector. The calendar already reads only exact
+published asset-to-deliverable IDs and correctly returns empty for the missing
+links. No broad filename fallback or privacy bypass was introduced.
+
+`scripts/ops/cape-ready-post-asset-links-20261105.sql` is a **review-only,
+not-applied** six-row data repair, not a migration. It binds only the six already
+published November images to the existing same-client/same-date posts. Strict
+library/category/drive/folder/publication/date/null-link checks abort the entire
+transaction on drift. It changes only `deliverable_id` (plus any existing
+database-managed timestamp); no dates, calendar/Teams status, approval,
+strategy, library enablement or permission changes. Exact CA SQL approval was
+requested after all authorised normal publication work was completed.
+
+Read-only live preflight: six unique assets, six unique posts, all expected
+unchanged states true. SHA256:
+`FA9B52CACF13E1FBDC10A5F8A6B01E369409C67DEFC1EFC4BF1D3A8B4825B024`.
+
+### Verification and precise remaining work
+
+- Actual normal Cape client session,390px viewport: six-file November list,
+  thumbnails and source image View work. View opens a separate window; returned
+  image is2047×2560 and the image page has an empty referrer. Original portal
+  stays open. This is not an all-file download or final calendar-link acceptance.
+- Actual18November client Download also succeeded: saved
+  `Downloads/2026_11_18.jpeg`,1,123,592bytes, SHA256
+  `DC06ECD742850524890E8EF0F77BF0DB26F82973C3CAF5EE21BF4C12EB3D1CC9`,
+  identical to the reviewed WhatsApp original. The browser download-event watcher
+  timed out; independently checking the actual file prevents a false failure or
+  unsafe duplicate retry. This closes that one file's download check only.
+- Private phone-sized screenshot:
+  `%TEMP%/cape-brand-hub-ready-20261105.png`.
+- Exact SQL packet executed only against isolated local PostgreSQL:
+  six correct links, idempotent repeat, and six refusal/atomic rollback cases
+  (changed last date, cross-client last post, null MIME, disabled library,
+  changed filename, existing different link) pass.
+-23 focused calendar/library tests pass, including actual disposable PostgreSQL
+  ownership/publication/RLS acceptance; zero skips. Initial direct test launch
+  lacked the synthetic environment; reran successfully through the existing
+  isolated `fixtureEnvironment`. No production credential copying.
+- Local TypeScript/Vite build passes;124 emitted JS chunks contain actual client
+  library/calendar UI. No runtime application code changed; no extra full fleet
+  sweep or repeated full suite.
+- Remaining: CA approval/application of the six-link packet, then actual
+  client calendar clicks/View/Download and final recipient-safe acceptance.
+  November23 has no verified finished artwork in the ready batch. November25
+  is the preserved repost slot; the exact reused source video is not established
+  by this evidence. Neither was invented, deleted or rescheduled.
+
+No Vercel/cloud build/deploy/upload/promotion, backend/config/secret/schema,
+OneDrive sharing/permission, campaign, Teams, strategy or other-client write.
+Existing staff/calendar ownership and #731 strategy authoring remain unchanged.
+All production SQL during this run was SELECT-only. Exact Google Control Centre
+target remains unavailable; no guessed tracker write.
+
 ## 5 November — normal Cape client-password sign-in accepted
 
 At CA's request for phone-test details, verified Cape's existing Active account in
