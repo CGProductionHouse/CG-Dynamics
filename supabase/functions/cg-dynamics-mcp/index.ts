@@ -43,6 +43,7 @@ import {
   planGuidelineVideoLinks,
   summarizeProviderHealth,
   summarizeMetaReportingHealth,
+  summarizeTiktokReportingHealth,
 } from './opsActions.ts'
 import {
   buildStaffAssistantPolicy,
@@ -1328,7 +1329,7 @@ const handleGetProviderHealth: ToolHandler = async (staff, input) => {
     return Promise.all(clientIds.map(async clientId => {
       const res = await invokeSiblingFunction(staff.connection, PROVIDER_STATUS_FUNCTIONS.tiktok, { clientId })
       return {
-        ...summarizeProviderHealth('tiktok', res.data as Record<string, unknown> | null, res.error),
+        ...summarizeTiktokReportingHealth(res.data, res.error),
         client_id: clientId,
         evidence: safeProviderEvidence('tiktok', res.data),
       }

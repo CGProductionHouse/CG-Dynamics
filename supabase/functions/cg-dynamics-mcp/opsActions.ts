@@ -303,6 +303,63 @@ export function summarizeProviderHealth(
   return { provider, state: 'unavailable', degraded: true, detail: 'Connection state could not be determined from the provider response. Treat as unknown.' }
 }
 
+/** Read-only reporting verdict; automatic token refresh stays in the existing sync path. */
+export function summarizeTiktokReportingHealth(
+  response: Record<string, unknown> | null | undefined,
+  transportError?: string | null,
+  now = new Date().toISOString(),
+) {
+  const connection = summarizeProviderHealth('tiktok', response, transportError)
+  if (connection.state !== 'connected') return { ...connection, reporting: null }
+  const raw = response?.health
+  const health = raw && typeof raw === 'object' && !Array.isArray(raw)
+    ? raw as Record<string, unknown> : null
+  const observedConnection = response?.connection
+  const tokenExpired = observedConnection && typeof observedConnection === 'object'
+    && !Array.isArray(observedConnection)
+    && (observedConnection as Record<string, unknown>).tokenExpired === true
+  const access = text(health?.access)
+  const freshness = text(health?.freshness)
+  const coverage = text(health?.coverage)
+  const completeness = text(health?.completeness)
+  const lastSuccessfulAt = text(health?.lastSuccessfulAt)
+  const elapsed = Date.parse(now) - Date.parse(lastSuccessfulAt ?? '')
+  const staleAfterHours = health?.staleAfterHours
+  const readable = response?.ok !== false && response?.schemaReady === true
+    && ['connected', 'reconnect_required', 'permission_required', 'provider_error', 'unavailable'].includes(access ?? '')
+    && ['fresh', 'stale', 'never'].includes(freshness ?? '')
+    && ['complete', 'partial', 'unavailable'].includes(coverage ?? '')
+    && ['complete', 'partial', 'unavailable'].includes(completeness ?? '')
+    && typeof staleAfterHours === 'number' && Number.isFinite(staleAfterHours) && staleAfterHours > 0
+  const timestampKnown = Number.isFinite(elapsed) && elapsed >= 0
+  const verdict = !readable || !timestampKnown || freshness === 'never'
+    ? 'UNAVAILABLE'
+    : freshness === 'stale' || elapsed > (staleAfterHours as number) * 3_600_000
+      ? 'STALE'
+      : access !== 'connected' || coverage !== 'complete' || completeness !== 'complete'
+        || tokenExpired || response?.status !== 'connected'
+        ? 'PARTIAL'
+        : 'PASS'
+  const degraded = verdict !== 'PASS'
+  const refreshPending = tokenExpired || response?.status === 'needs_refresh'
+  return {
+    ...connection, state: verdict === 'UNAVAILABLE' ? 'unavailable' as const
+      : degraded ? 'degraded' as const : 'connected' as const,
+    degraded,
+    reporting: {
+      verdict, access, freshness, coverage, completeness, lastSuccessfulAt,
+      lastAttemptedAt: text(health?.lastAttemptedAt), refreshPending,
+    },
+    detail: verdict === 'UNAVAILABLE'
+      ? 'TikTok reporting health could not be verified for this exact account. Treat it as unknown, not as zero or disconnected.'
+      : refreshPending
+        ? `TikTok reporting is ${verdict}; token refresh is pending in the existing automatic sync path. Connection presence is not proof of fresh analytics.`
+        : degraded
+          ? `TikTok reporting is ${verdict}; inspect exact-account access, coverage and the last verified refresh before relying on current figures.`
+          : 'TikTok has fresh, complete exact-account refresh evidence. This does not prove every metric is a monthly total.',
+  }
+}
+
 /**
  * The read-only health tool must grade mapped reporting, not just OAuth presence.
  * Keep this separate from the connection-only targeted-sync admission guard.
