@@ -5,6 +5,8 @@ description: Plan, assemble, review, and hand off CG Production House client vid
 
 # CG video story editor
 
+**MSI/PC reconciliation, 6 November:** carry [MSI's exact review lessons](references/msi-finishing-and-client-copy.md) into the current foundation. This adds actual client-copy restriction checks, compact type/soft-shadow finishing, source-frame matte checks and per-shot stabilisation decisions. The shared library remains PR910; MSI production history remains PR875. Load the reconciled library at a safe job boundary, never replace an active timeline or infer that Git publication installs another device.
+
 **6November foundation — start here for a new assignment:** use [load-once planning](references/edit-foundation.md) before source selection. It reuses dated SouthAfrican monthly context, the exact Dynamics game plan and an evidenced approved-client baseline, inventories the actual shared skill cards and connects explicit type/motion/transition/UI/sound decisions to the existing story plan. Approval raises the design floor; later criticism still overrides a specific element. PSGR08 typography is a baseline, but CA6November explicitly rejects its poster-like opening as the next hook. Do not reset fonts/assets or repeat brand research. New owner rule `FOUNDATION-01` enforces the connected inputs; structural passes do not establish creative quality.
 
 For CA's5November CapCut travel-vlog reference and its actual30s Watch Addict application, read [the focused frame study and production repairs](references/watch-signature-capcut-20261105.md). It covers anchor/burst/hold rhythm, per-recording upright correction before stabilization, animated tracking bounds and registered diagonal entrances; no new engine or mastery claim.

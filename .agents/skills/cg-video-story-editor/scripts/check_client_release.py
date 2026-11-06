@@ -9,6 +9,7 @@ from load_client_library import read,sha,verify
 from audio_review import gate as audio_gate
 from preflight_story import validate as validate_story
 from edit_contract import check_render, sha as bound_sha
+from client_copy import validate as validate_client_copy
 
 AREAS=('approved_reference_comparison','source_and_rights','orientation_and_stabilisation','colour_match',
        'brand_typography_motion','rendered_spelling_and_copy','picture_at_normal_speed','sound_and_sync',
@@ -67,6 +68,12 @@ def check(record):
         except (KeyError,ValueError,OSError) as e:errors.append('Missing exact '+field+' identity: '+str(e))
     try:
         caption=Path(record['caption_path']).read_text(encoding='utf-8-sig')
+        if context is not None:
+            try:
+                plan=read(record['story_plan']['path'])
+                errors.extend(validate_client_copy(plan,context,caption))
+            except (KeyError,ValueError,OSError,TypeError) as e:
+                errors.append('Client copy inventory missing/invalid: '+str(e))
         if re.search(r'^\s*(Music:|Source:|Licence:|License:|From Nolan|SHA.?256|QA:)',caption,re.M|re.I) or re.search(r'creativecommons\.org|CC BY|incompetech\.com',caption,re.I):
             errors.append('Forwardable caption contains internal/licensing prose; replace the cue or establish compatible lawful credit placement, never strip required credit silently')
     except (KeyError,OSError):pass

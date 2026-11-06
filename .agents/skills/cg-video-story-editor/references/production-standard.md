@@ -2,6 +2,8 @@
 
 Owner feedback consolidated 28 October 2026. Read this **before selecting footage**, then record evidence against it in the existing private story/source/release record. Applies on MSI and office PC, in any suitable editor. It does not grant uploads, purchases, sends or installation permissions. A checklist does not certify what nobody watched or heard.
 
+**6 November MSI reconciliation:** apply the [client-copy and finishing lessons](msi-finishing-and-client-copy.md). Direct client wording corrections persist across films and are checked against selected artwork, cover and caption, then the exact encoded picture. Every ordinary/focused shot needs an explicit stabilisation decision. Inspect muted B-roll mouth motion and source-frame cutout boundaries throughout the chosen interval. Keep type groups compact and use soft rather than hard shadows where the client's approved style permits. These complement the current office foundation; technical tests do not establish taste or hearing.
+
 ## Authority and scope
 
 1. Load the exact client's existing library through `scripts/load_client_library.py`, then check the owning issue/PR, current assignment and latest authorised review messages. Reuse established brand assets and approved examples instead of rediscovering the brand. Refresh only new feedback, specifically changed/missing asset versions and the exact task's live facts. Record the shared-library commit and current client-feedback checkpoint. Reconcile office changes before editing common files; never take over another lane's timeline. Refresh the library before a new assignment and after a shared-rule update, not halfway through an active render.

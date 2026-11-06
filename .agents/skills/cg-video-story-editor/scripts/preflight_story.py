@@ -14,6 +14,7 @@ from load_client_library import verify as verify_client_library
 from edit_contract import validate_edit
 from ui_motion import validate_ui_plan
 from edit_foundation import validate as validate_foundation
+from client_copy import validate as validate_client_copy
 
 
 def validate_source_reuse(shots):
@@ -156,6 +157,7 @@ def main():
                 context=verify_client_library(plan['client_context_snapshot'])
                 if context['client_id']!=plan['client_id']:errors.append('Story client does not match loaded client library')
                 if not context['brand_ready']:errors.append('Saved brand baseline has specifically unresolved fields; resolve those fields from the saved source, not a generic substitute')
+                errors.extend(validate_client_copy(plan,context))
                 if any(rule.get('id')=='UI-01' for rule in context.get('owner_rules',[])):
                     errors.extend(validate_ui_plan(plan))
             except (ValueError,KeyError,FileNotFoundError) as exc:

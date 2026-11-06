@@ -54,7 +54,7 @@
     },
     {
       "id": "PICTURE-01",
-      "requirement": "Verify each file's upright orientation before source-specific stabilisation. Stabilise ordinary camera footage by default; review original/corrected spans and final motion for crop/warp/subject loss.",
+      "requirement": "Verify each file's upright orientation before source-specific stabilisation. Every ordinary/focused shot records applied settings/comparison, a witnessed already-stable original or a justified intentional-motion exception. Preserve smooth captured movement; inspect exact final motion for crop/warp/subject loss. Foreground limb motion is not proof of camera shake.",
       "evidence_source": "CA lapa/Watch amendments; production-standard9"
     },
     {
@@ -211,6 +211,16 @@
       "id": "VO-01",
       "requirement": "For narrated films, develop a distinct South African brand voice as each brand is tackled. Reuse its approved profile/source after acceptance; retain rights/consent, locale, actual audio/script hashes and pronunciation/performance evidence. US engineering voices, ASR text or locale metadata alone are not South African voice approval.",
       "evidence_source": "CA5Nov2026 brand voice instruction; skills/brand-voice-overlay/SKILL.md"
+    },
+    {
+      "id": "COPY-02",
+      "requirement": "Carry exact direct-client wording corrections into the client's existing copy_constraints. Inventory actual selected picture/cover/caption text in the story plan; preflight/release check it against the loaded decisions and actual caption, then inspect all encoded artwork. TBS Brokers' full-name correction must not be lost across films. A text guard is not OCR or creative approval.",
+      "evidence_source": "CA5November repeated TBS Brokers direct-client naming correction; MSI6November reconciliation; msi-finishing-and-client-copy.md"
+    },
+    {
+      "id": "TYPE-01",
+      "requirement": "Use compact optically checked multiline leading and common glyph baselines, with purposeful readable reveals. Avoid hard black outlines/offset shadows for ordinary brand titles; prefer restrained soft shadow where contrast needs it unless current approved brand direction requires otherwise.",
+      "evidence_source": "CA5November WiseRide line-gap, animation and hard-border feedback; PSG baseline correction; msi-finishing-and-client-copy.md"
     },
     {
       "id": "FILING-01",

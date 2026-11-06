@@ -203,6 +203,22 @@ class EditContract(unittest.TestCase):
         self.assertEqual(out['status'],'CANDIDATE_FOR_INTERNAL_REVIEW')
         self.assertFalse(out['creative_approval_inferred'])
 
+    def test_current_client_copy_correction_blocks_the_existing_release_path(self):
+        r=self.full_release()
+        context={'client_id':'fixture','brand_ready':True,'owner_rules':[{'id':'COPY-02'}],
+            'owner_decisions':{'copy_constraints':[{'id':'full-brand','kind':'full_name','short':'TBS','full':'TBS Brokers','evidence':'Direct client instruction'}]}}
+        with patch.object(release,'verify',return_value=context),patch.object(release,'audio_gate',return_value={'video_sha256':r['video_sha256'],'errors':[]}):
+            out=release.check(r)
+        self.assertEqual(out['status'],'BLOCKED')
+        self.assertIn('Client copy: inventory',' '.join(out['errors']))
+        # The actual selected plan, not a stale old title inventory, is checked.
+        p=json.loads(Path(r['story_plan']['path']).read_text())
+        p['authored_copy']=[dict(surface=s,text='ASK TBS' if s=='picture' else self.caption.read_text(),source='selected fixture layer')for s in ('picture','cover','caption')]
+        Path(r['story_plan']['path']).write_text(json.dumps(p));r['story_plan']=self.bind(Path(r['story_plan']['path']))
+        with patch.object(release,'verify',return_value=context),patch.object(release,'audio_gate',return_value={'video_sha256':r['video_sha256'],'errors':[]}):
+            out=release.check(r)
+        self.assertIn('full-brand violated on picture',' '.join(out['errors']))
+
     def test_portable_type_has_real_resolve_and_no_font_fallback(self):
         args=((128,224),[('WHY',(255,255,255))],self.font,(8,30))
         empty=type_reveal(*args,time=-1,start=0,shutter=0)
