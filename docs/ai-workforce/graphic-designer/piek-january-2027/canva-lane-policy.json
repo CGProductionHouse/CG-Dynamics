@@ -20,7 +20,7 @@
     "copiedTextIntegrity": "first-49-pages-normalised-text-identical-12018-characters"
   },
   "observedAt": "2026-11-06",
-  "observedPageCount": 74,
+  "observedPageCount": 81,
   "pageCapacity": {
     "documentedMaxPages": 350,
     "source": "https://www.canva.com/en_gb/help/manage-pages/",
@@ -41,12 +41,12 @@
     },
     "drafts": {
       "pageId": "PBkggJvPWJCB8Kl5",
-      "observedPageIndex": 73,
+      "observedPageIndex": 80,
       "writePolicy": "protected-read-only"
     },
     "postedScheduled": {
       "pageId": "PBhXtZzkLlTlfdWK",
-      "observedPageIndex": 74,
+      "observedPageIndex": 81,
       "writePolicy": "protected-read-only"
     }
   },
@@ -70,16 +70,17 @@
     "editablePageIds": [
       "PB7GXQY2FRY4SmZL",
       "PBFhjhnLG7KsvSkM",
-      "PBnxVnyFjbtxrQQS",
       "PBNrnXkWqDPH8kw2",
       "PBbMwKqRZZ9xNlp8",
       "PB2PhvZXtvxYrrVK",
       "PB3wrbPz4RJCBg0j",
-      "PBFfytYXc5sg8b51",
-      "PBgBkkQgbCGQVSbY",
-      "PBSt5DpJ47zCKmvK",
-      "PBpjXgmRn7CTzmcX",
-      "PBclyWNc6S0tnFxr"
+      "PBwfxsV9wDzlFlM4",
+      "PBb9gNS6Tz5yGFfy",
+      "PBhcBPR3DRxFzDNY",
+      "PBlqwc7fkVWyz7GP",
+      "PBhRR4d4pdXWyyBs",
+      "PBHhvnLglcYJHLG4",
+      "PBDGzt6lwvxz9s2y"
     ],
     "supersededAgentDrafts": {
       "observedAt": "2026-11-06",
@@ -94,7 +95,13 @@
         "PBf4gQNK11W9Mnmy",
         "PB5ptGHb90d8ZXjs",
         "PBP4JGdy6nLRjlTR",
-        "PB2W6cFZ0Z7pJ9mD"
+        "PB2W6cFZ0Z7pJ9mD",
+        "PBnxVnyFjbtxrQQS",
+        "PBFfytYXc5sg8b51",
+        "PBgBkkQgbCGQVSbY",
+        "PBSt5DpJ47zCKmvK",
+        "PBpjXgmRn7CTzmcX",
+        "PBclyWNc6S0tnFxr"
       ],
       "disposition": "Preserved in In Progress, visibly labelled SUPERSEDED DRAFT; excluded from current candidate IDs and export selection. No page deletion or protected/staff edits.",
       "replacements": {
@@ -122,6 +129,21 @@
           "DAHaJ4gEWWc"
         ],
         "state": "saved-native-readback-verified; internal quality review, not approved"
+      },
+      "varietyRound3": {
+        "newPageIds": [
+          "PBwfxsV9wDzlFlM4",
+          "PBb9gNS6Tz5yGFfy",
+          "PBhcBPR3DRxFzDNY",
+          "PBlqwc7fkVWyz7GP",
+          "PBhRR4d4pdXWyyBs",
+          "PBHhvnLglcYJHLG4",
+          "PBDGzt6lwvxz9s2y"
+        ],
+        "observedRange": "73-79",
+        "disposition": "Six replaced own drafts receive one warning image only; all older content/history preserved. Four current candidates amended in place; no page deletion/reordering.",
+        "temporaryTransferDesignId": "DAHaKEbz4KE",
+        "extraPost": "EXTRA01 is owner-requested car-wash proposal; not a change to monthly package or invented schedule row."
       }
     },
     "scaffoldReplacement": {
@@ -155,6 +177,6 @@
     "Page indexes can shift when new pages are inserted. Re-resolve all header page IDs immediately before every merge.",
     "Drafts and Posted / Scheduled are Amonique-controlled operational lanes. They may be read for anti-repetition evidence but never edited, moved or deleted by the agent.",
     "Copying a prior page is a working-file operation only. It does not authorise reuse of its photograph, person, wording, concept or layout mechanism.",
-    "Owner rejected continued flatness/white logo plates. Nine independent graphic-depth revisions now occupy 64-72. Heading Home 41, Reset 44, Summer 61 unchanged."
+    "Current variety round supersedes the nine-page graphic-depth checkpoint:12 monthly candidates plus1 owner-requested extra; current pages41,61,64-67,73-79. Protected headers80/81. Exact IDs govern edits."
   ]
 }

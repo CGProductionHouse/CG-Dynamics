@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
   "observedAt": "2026-11-06",
-  "state": "owner-flatness-feedback-nine-graphic-depth-reworks-saved-internal-review",
+  "state": "owner-variety-feedback-ten-revisions-plus-extra-saved-internal-review",
   "clientId": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
   "month": "2027-01-01",
   "officialCanva": {
     "designId": "DAHaD4mJnGY",
     "title": "PIEK GROUP OF COMPANIES | ACTIVE FROM 05 NOV 2026 | JAN 2027",
-    "pageCount": 74,
+    "pageCount": 81,
     "legacyReadOnlyDesignId": "DAGcXGWhDhI",
     "workingHeaders": {
       "inProgress": {
@@ -20,11 +20,11 @@
       },
       "drafts": {
         "pageId": "PBkggJvPWJCB8Kl5",
-        "index": 73
+        "index": 80
       },
       "postedScheduled": {
         "pageId": "PBhXtZzkLlTlfdWK",
-        "index": 74
+        "index": 81
       }
     }
   },
@@ -33,34 +33,40 @@
       "provisionalId": "2027_01_PIEK_DP_01",
       "brandScope": "PIEK_GROUP",
       "concept": "New Year",
-      "canvaPageId": "PBpjXgmRn7CTzmcX",
-      "observedPageIndex": 71,
+      "canvaPageId": "PBDGzt6lwvxz9s2y",
+      "observedPageIndex": 79,
       "monthlyDeliverableId": null,
-      "state": "graphic-depth-r2-saved-human-approval-pending",
-      "executionRevision": "Large live year with exact aerial canopy overlap, navy contour field and source-faithful panorama.",
-      "previousOwnDraftPageId": "PBw695H0fKFBpM7k"
+      "state": "variety-r3-saved-human-approval-pending",
+      "executionRevision": "White-led real Sasol aerial, live year behind exact canopy; parent logo bottom left.",
+      "previousOwnDraftPageId": "PBw695H0fKFBpM7k",
+      "primaryLogoZone": "bottom-left",
+      "previousGraphicDepthPageId": "PBpjXgmRn7CTzmcX"
     },
     {
       "provisionalId": "2027_01_PIEK_DP_02",
       "brandScope": "PIEK_GROUP",
       "concept": "People",
-      "canvaPageId": "PBSt5DpJ47zCKmvK",
-      "observedPageIndex": 70,
+      "canvaPageId": "PBHhvnLglcYJHLG4",
+      "observedPageIndex": 78,
       "monthlyDeliverableId": null,
-      "state": "graphic-depth-r2-saved-human-approval-pending",
-      "executionRevision": "Actual smiling worker/car cutout, matching subdued station environment, halftone and continuous sculpted fields.",
-      "previousOwnDraftPageId": "PBhSXtvYjyX4j2dl"
+      "state": "variety-r3-saved-human-approval-pending",
+      "executionRevision": "Warm photographic editorial with actual smiling Engen worker, bottom Barlow hierarchy; parent mark upper left.",
+      "previousOwnDraftPageId": "PBhSXtvYjyX4j2dl",
+      "primaryLogoZone": "top-left",
+      "previousGraphicDepthPageId": "PBSt5DpJ47zCKmvK"
     },
     {
       "provisionalId": "2027_01_PIEK_DP_03",
       "brandScope": "PIEK_GROUP",
       "concept": "Coffee routine",
-      "canvaPageId": "PBgBkkQgbCGQVSbY",
-      "observedPageIndex": 69,
+      "canvaPageId": "PBhRR4d4pdXWyyBs",
+      "observedPageIndex": 77,
       "monthlyDeliverableId": null,
-      "state": "graphic-depth-r2-saved-human-approval-pending",
-      "executionRevision": "Exact College Brew flag isolated over its own soft environment; enlarged Lastica hierarchy and contour texture.",
-      "previousOwnDraftPageId": "PB5r675n7lrFm7JZ"
+      "state": "variety-r3-saved-human-approval-pending",
+      "executionRevision": "Bright asymmetric College Brew editorial with exact flag against softened own context; small navy signature lower right.",
+      "previousOwnDraftPageId": "PB5r675n7lrFm7JZ",
+      "primaryLogoZone": "bottom-right",
+      "previousGraphicDepthPageId": "PBgBkkQgbCGQVSbY"
     },
     {
       "provisionalId": "2027_01_PIEK_DP_04",
@@ -69,18 +75,22 @@
       "canvaPageId": "PBFhjhnLG7KsvSkM",
       "observedPageIndex": 41,
       "monthlyDeliverableId": null,
-      "state": "retained-owner-supported-direction-not-release-approved"
+      "state": "variety-r3-saved-human-approval-pending",
+      "executionRevision": "Preserved actual sign/photo/type registration; added restrained independent route/halftone pattern and source-alpha contact shadow.",
+      "primaryLogoZone": "bottom-right"
     },
     {
       "provisionalId": "2027_01_PIEK_DP_05",
       "brandScope": "ENGEN",
       "concept": "School return",
-      "canvaPageId": "PBFfytYXc5sg8b51",
-      "observedPageIndex": 68,
+      "canvaPageId": "PBlqwc7fkVWyz7GP",
+      "observedPageIndex": 76,
       "monthlyDeliverableId": null,
-      "state": "graphic-depth-r2-saved-human-approval-pending",
+      "state": "variety-r3-saved-human-approval-pending",
       "previousOwnDraftPageId": "PBxrsDTFfRXMtbhH",
-      "executionRevision": "Real chip rack, blue/red graphic sweeps, halftone and prominent 13 January public-school date; no invented offer."
+      "executionRevision": "Complete white-led replacement for rejected blue-heavy poster; contained red date card, real rack, light grid and full-aspect top Engen masthead.",
+      "primaryLogoZone": "top-right",
+      "previousGraphicDepthPageId": "PBFfytYXc5sg8b51"
     },
     {
       "provisionalId": "2027_01_PIEK_DP_06",
@@ -89,20 +99,23 @@
       "canvaPageId": "PB3wrbPz4RJCBg0j",
       "observedPageIndex": 67,
       "monthlyDeliverableId": null,
-      "state": "graphic-depth-r2-saved-human-approval-pending",
+      "state": "variety-r3-saved-human-approval-pending",
       "supersededAgentPageId": "PBxRLPB4JKBHd91b",
-      "executionRevision": "Correctly colour-managed actual restocking worker cutout, softly separated shop context, blue fields/halftone; complete exact-aspect footer.",
-      "previousOwnDraftPageId": "PBQXNX2K6Fr3hkz8"
+      "executionRevision": "Original scene/copy retained; independent exact-source Engen mark lower left, parent mark lower right, continuous blue footer.",
+      "previousOwnDraftPageId": "PBQXNX2K6Fr3hkz8",
+      "primaryLogoZone": "bottom-left"
     },
     {
       "provisionalId": "2027_01_PIEK_DP_07",
       "brandScope": "SASOL",
       "concept": "Car wash reset",
-      "canvaPageId": "PBnxVnyFjbtxrQQS",
-      "observedPageIndex": 44,
+      "canvaPageId": "PBhcBPR3DRxFzDNY",
+      "observedPageIndex": 75,
       "monthlyDeliverableId": null,
-      "state": "retained-owner-supported-direction-not-release-approved",
-      "executionRevision": "Removed arbitrary oval and splash; real worker/car background-removal silhouette, readable live Tall type and independent exact footer/logos."
+      "state": "variety-r3-saved-human-approval-pending",
+      "executionRevision": "Rebuilt pale motion/halftone field below real wash-worker silhouette, Tall overlap; primary Sasol top left.",
+      "primaryLogoZone": "top-left",
+      "previousGraphicDepthPageId": "PBnxVnyFjbtxrQQS"
     },
     {
       "provisionalId": "2027_01_PIEK_DP_08",
@@ -111,20 +124,23 @@
       "canvaPageId": "PB2PhvZXtvxYrrVK",
       "observedPageIndex": 66,
       "monthlyDeliverableId": null,
-      "state": "graphic-depth-r2-saved-human-approval-pending",
+      "state": "retained-direction-human-approval-pending",
       "previousOwnDraftPageId": "PBf4gQNK11W9Mnmy",
-      "executionRevision": "Exact night canopy crosses live Tall headline; independent sky/ground gradients and contours; verified forecourt-hours copy."
+      "executionRevision": "Retained graphic-depth R2 after-hours real night canopy direction.",
+      "primaryLogoZone": "top-right"
     },
     {
       "provisionalId": "2027_01_PIEK_DP_09",
       "brandScope": "SASOL",
       "concept": "Kroonstad everyday",
-      "canvaPageId": "PBclyWNc6S0tnFxr",
-      "observedPageIndex": 72,
+      "canvaPageId": "PBb9gNS6Tz5yGFfy",
+      "observedPageIndex": 74,
       "monthlyDeliverableId": null,
-      "state": "graphic-depth-r2-saved-human-approval-pending",
+      "state": "variety-r3-saved-human-approval-pending",
       "previousOwnDraftPageId": "PB5ptGHb90d8ZXjs",
-      "executionRevision": "Real attendant isolated against ice-blue paper/orbit graphic with large live Tall type and continuous navy footer."
+      "executionRevision": "New genuine smiling Kroonstad attendant cleaning a windscreen; source-faithful local face lift, right headline and primary logo left.",
+      "primaryLogoZone": "middle-left",
+      "previousGraphicDepthPageId": "PBclyWNc6S0tnFxr"
     },
     {
       "provisionalId": "2027_01_PIEK_DP_10",
@@ -133,9 +149,10 @@
       "canvaPageId": "PBbMwKqRZZ9xNlp8",
       "observedPageIndex": 65,
       "monthlyDeliverableId": null,
-      "state": "graphic-depth-r2-saved-human-approval-pending",
+      "state": "variety-r3-saved-human-approval-pending",
       "previousOwnDraftPageId": "PBP4JGdy6nLRjlTR",
-      "executionRevision": "Whole real lunch plate, pie/chips/gravy cutout, independent contact shadow, curved navy base, halftone/contours and transparent exact logo."
+      "executionRevision": "Whole actual lunch plate and craft retained; main logo upper centre, invitation lower right and parent mark lower left.",
+      "primaryLogoZone": "top-centre"
     },
     {
       "provisionalId": "2027_01_PIEK_DP_11",
@@ -144,7 +161,9 @@
       "canvaPageId": "PB7GXQY2FRY4SmZL",
       "observedPageIndex": 61,
       "monthlyDeliverableId": null,
-      "state": "retained-owner-supported-direction-not-release-approved"
+      "state": "retained-direction-human-approval-pending",
+      "executionRevision": "Retained owner-supported Summer photographic direction.",
+      "primaryLogoZone": "top-right"
     },
     {
       "provisionalId": "2027_01_PIEK_DP_12",
@@ -153,10 +172,11 @@
       "canvaPageId": "PBNrnXkWqDPH8kw2",
       "observedPageIndex": 64,
       "monthlyDeliverableId": null,
-      "state": "graphic-depth-r2-saved-human-approval-pending",
+      "state": "variety-r3-saved-human-approval-pending",
       "supersededAgentPageId": "PB4VJSCb8LY6TTnD",
-      "executionRevision": "One actual canap\u00e9 isolated above its own macro context; sculpted brand colour field, texture, shadow and transparent exact logo.",
-      "previousOwnDraftPageId": "PB2W6cFZ0Z7pJ9mD"
+      "executionRevision": "Actual canapé/photo/craft retained; primary mark top left, season top right, right-aligned BRING YOUR PEOPLE.",
+      "previousOwnDraftPageId": "PB2W6cFZ0Z7pJ9mD",
+      "primaryLogoZone": "top-left"
     }
   ],
   "proof": {
@@ -387,17 +407,126 @@
         "actualNativeBindings": true,
         "fullBuild": "passed tsc -b and Vite 7.3.6; existing Browserslist/chunk warnings"
       }
+    },
+    "varietyRound3": {
+      "ownerFeedback": "Less dominant navy and repetitive logo/type placement; greater depth for Heading Home/Reset; active positive source for Back to It; rebuild messy 13 January Engen poster; additional Langenhoven Park wash concept.",
+      "revisedMonthlyPosterNumbers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        9,
+        10,
+        12
+      ],
+      "retainedMonthlyPosterNumbers": [
+        8,
+        11
+      ],
+      "newSavedPages": 7,
+      "newObservedRange": "73-79",
+      "currentExportRange": "41,61,64-67,73-79",
+      "monthlyCandidates": 12,
+      "additionalOwnerRequestedConcepts": 1,
+      "packageOrScheduleModified": false,
+      "nativeBindingVerifierPassed": true,
+      "finalReadOnlyVerification": "5550081988920824354",
+      "finalSavedNativeRecordsIdentical": true,
+      "readOnlyTransactionCancelled": true,
+      "lateEngenMarkCommit": "3121515890652751282",
+      "lateEngenPageReexported": 67,
+      "dateAmendment": {
+        "test": "13 -> 14 -> 13",
+        "dateRestoredBeforeCommitAndExport": true,
+        "allNonTargetNativeRecordsIdentical": true,
+        "textBoxContainedByDateCard": true
+      },
+      "historyProtection": {
+        "unmodifiedOldPages": 64,
+        "allUnmodifiedTextAndImageRecordsMatched": true,
+        "supersededOwnPagesWithOnlyOneWarningAdded": 6,
+        "inPlaceCurrentPageAmendments": 4,
+        "all74OldIdsInSameRelativeOrder": true,
+        "pagesMovedOrDeleted": false
+      },
+      "newSourceAudit": {
+        "sources": 2,
+        "historicalPreviews": 352,
+        "decodeErrors": 0,
+        "supportedReuseMatches": 0,
+        "unusedCertified": false,
+        "rejectedAlternative": "Local Langenhoven Park exterior had supported matches on historical pages192 and264; not used.",
+        "manualPersonShootReviewRequired": true
+      },
+      "sourceFidelity": {
+        "backToIt": "Real active smiling attendant; no reconstructed face/expression. Separate derivative with colour evidence and conservative local face luminance lift.",
+        "extraWash": "Real alternate daylight venue context, not proof of actual car-wash action. Forecourt24h never translated into wash hours.",
+        "generatedDecoration": "One independent soap-bubble/foam asset through built-in ChatGPT image generation. No client photo input, paid API, credits or additional subscription. Full prompt/provenance retained privately.",
+        "sourceHashesUnchanged": true
+      },
+      "primaryLogoZones": {
+        "DP01": "bottom-left",
+        "DP02": "top-left",
+        "DP03": "bottom-right",
+        "DP04": "bottom-right",
+        "DP05": "top-right",
+        "DP06": "bottom-left",
+        "DP07": "top-left",
+        "DP08": "top-right",
+        "DP09": "middle-left",
+        "DP10": "top-centre",
+        "DP11": "top-right",
+        "DP12": "top-left"
+      },
+      "actualCurrentHdExports": 13,
+      "hdDimensions": [
+        2160,
+        2700
+      ],
+      "reviewPixelsPreservedDuringMetadataCleaning": true,
+      "newWhatsAppSends": 0,
+      "portalFinalUploads": 0,
+      "humanCreativeApproval": false,
+      "privateEvidence": "variety-rework-20261106: final scene/native binding receipts, saved-integrity.json, photo-preparation.json, fresh-source-history.json, actual-HD-export-receipt.json, actual-HD-thirteen-variety-board.jpg, bubble-generation-provenance.json; source and raw exports retained.",
+      "knownToolLimits": "Native connector cannot change page titles/notes/effects/font family or restore arbitrary stacking. Source order reversed during merge; resolved by actual IDs/text/assets. Cached page-list thumbnails rejected. True HD export still needs signed-in background browser.",
+      "validation": {
+        "focusedNodeTests": 25,
+        "pythonColourTests": 5,
+        "monthPlanValidator": true,
+        "skillValidator": true,
+        "laneBoundaryAudit": true,
+        "actualNativeBindings": true,
+        "savedReadbackIntegrity": true,
+        "fullBuild": "passed tsc -b and Vite7.3.6; existing Browserslist/chunk warnings"
+      },
+      "currentLedgerReview": {
+        "candidateCount": 12,
+        "extras": 1,
+        "historyEntries": 1,
+        "blockerCount": 0,
+        "findingsByCode": {
+          "subject-repeat": 46,
+          "service-repeat": 20,
+          "branch-repeat": 11,
+          "concept-repeat": 2,
+          "same-shoot-review": 1
+        },
+        "meaning": "Review warnings retained, not auto-approval or complete historical/person coverage."
+      }
     }
   },
   "delivery": {
-    "captionDraftsPrepared": 12,
+    "captionDraftsPrepared": 13,
     "captionHashtagLimit": 5,
     "signature": "PICASSO",
     "requestedWhatsappSender": "Nolan WhatsApp account",
     "requestedGroup": "Picasso approvals",
     "senderAndExactGroupVerified": true,
     "whatsappSends": 7,
-    "hdExportsVerified": 12,
+    "hdExportsVerified": 13,
     "publicClientAssetsPublished": 0,
     "portalFinalFilesUploaded": 0,
     "localBrowserBlocker": null,
@@ -409,8 +538,8 @@
       2160,
       2700
     ],
-    "latestExportState": "Twelve current candidates at genuine Canva 2160x2700 PNG High. Four exact brand-frame corrections separately re-exported; internal quality review only.",
-    "latestExportPageRange": "41,44,61,64-72",
+    "latestExportState": "Twelve monthly candidates plus one owner-requested extra at genuine Canva2160x2700 PNG High; late independent Engen mark separately re-exported. Internal review only.",
+    "latestExportPageRange": "41,61,64-67,73-79",
     "furtherSendsHeld": true,
     "holdReason": "Owner explicitly stopped the rejected batch and requested execution rework. No further WhatsApp sends during this rework."
   },
@@ -445,5 +574,24 @@
     "posterStudioSkillInstalledInCompanyWork": false,
     "createAmendExportRoundTripVerified": false,
     "meaning": "Normal-company-ChatGPT read access works. Do not describe a complete everyday designer as live."
-  }
+  },
+  "extraCandidates": [
+    {
+      "provisionalId": "2027_01_PIEK_EXTRA01",
+      "brandScope": "SASOL",
+      "concept": "Fresh start car wash",
+      "branch": "Sasol Langenhoven Park",
+      "canvaPageId": "PBwfxsV9wDzlFlM4",
+      "observedPageIndex": 73,
+      "monthlyDeliverableId": null,
+      "packageIdentity": null,
+      "state": "owner-requested-extra-internal-proposal-not-scheduled",
+      "factSource": "https://www.piekgroup.co.za/locations/sasol-langenhoven-park",
+      "source": "Alternate real current-site daylight venue photograph, not the night After Hours source",
+      "generatedAsset": "Separate transparent soap-bubble decoration only; venue/person/logo/type not generated",
+      "executionRevision": "Tall staggered FRESH START, light ring pattern, actual venue with modest decorative bubbles and primary mark bottom right.",
+      "primaryLogoZone": "bottom-right",
+      "noPriceOfferOrCarWashHoursClaimed": true
+    }
+  ]
 }
