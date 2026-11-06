@@ -1,5 +1,48 @@
 # MSI review lessons carried into the shared foundation
 
+## 6November afternoon — component purpose and moving stability
+
+Read PR875 comments6685488231/6685832481/6686093106/6686360332/6687061289
+and PR910 comments6685488892/6686360779/6687061884. PC inspected actual private
+R06 sound manifest/qualification/runtime source and R09 Canva provenance,
+editorial review and handoff. PC did not independently replay/requalify MSI's
+film/sound or modify its client work.
+
+- **Preserve the role of supplied content.** Owner recordings belonged inside
+  phones, with advertising copy outside. R07 made them full-frame and was rejected
+  despite render/audio passes. Content replacement does not authorise removal of
+  its accepted parent composition. R07 was withdrawn under explicit owner authority.
+- **Inspect motion, not only stills.** R08 restored filmed phones but the owner
+  rejected jittery inserts. Per-frame contour redetection can oscillate while a
+  midpoint looks aligned. Inspect moving bezel/crop/occlusion over the complete
+  encoded span at normal speed; confine keying to the display, away from nails,
+  hands and desks. Codec and sampled-frame passes cannot establish clean tracking.
+- **Use a stable native fallback when appropriate.** R09 uses Canva template
+  EAHCPG1Rd4o in protected [design DAHaJZX0zHw](https://www.canva.com/design/DAHaJZX0zHw/edit),
+  actual frame Replace for separate homepage/cart pages, muted source and native
+  2160x3840/60fps export. Final uses one fixed crop, no per-frame key/tracker.
+  This is a source-specific alternative, not a general tracking ban or a screenshot
+  substituted for an editable template. Source showed Only you can access;
+  a saved URL is not PC permission or second-device/native-final proof.
+- **Keep graphic and camera provenance honest.** Repeated template hand/device
+  artwork is an intentional graphic component, not two distinct filmed originals.
+  The camera-original no-repeat rule remains unchanged.
+- **Keep the evidence bounded.** MSI reports0px upper-bezel displacement across62
+  opening and101 settled closing frames. This is a positional patch test, not
+  complete image/human/phone acceptance. R09 was delivered internally16:19SAST;
+  revised owner/client approval remains unproven. Failed raw MOV400 and weak
+  gutter/contrast attempts remain failed; normal native upload/Replace/export
+  is the successful route.
+- **Carry accepted work forward.** Watches, fonts, words, clock, music and
+  supplied outro stayed. Existing unchanged HD cover was not resent. Unchanged
+  PCM preserves only hash-bound sound observations, with fresh current-context/
+  picture assessment. It cannot clear rejected composition or claim a new listen.
+
+The [dated two-PC reconciliation](../../../../scripts/video-editing/studio-phase2/MSI-FOUNDATION-RECONCILIATION-20261106.md)
+routes PC's current operators and MSI's actual evidence. Use PR910 for the shared
+library and PR875 for production history; never install PR875's older skill tree
+over this reconciled library.
+
 6 November reconciliation: preserve the office foundation and its 53 documented
 cards. The MSI branch contains newer EHP, TBS Brokers and WiseRide review lessons;
 do not replace PC's planning, sound qualification or effect implementations with

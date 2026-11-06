@@ -1,5 +1,43 @@
 # Autonomous sound review — component repair, 3 November 2026
 
+## 6November MSI recovery — documented, not installed on PC
+
+MSI's PR910 comment6685488892 and PR875 comment6685488231 report a working
+bounded GPU route. PC read the actual private `MSI-GPU-REUSE.md`, staged trial,
+final-review source, qualification and sound manifest in the R06 evidence pack.
+The8,082,479byte ZIP matches cloud quickXor; local SHA256 is
+`5c25d912b47c5d92c0dae9839ad7f70fa28c62ab41d05352e3eb15d516a994e5`.
+Cloud SHA256 was not supplied. Private pack remains in Watch Addict's established
+working library; no paths, recordings, raw observations or model binaries are
+copied into Git. Its Markdown uses Windows1252; decode explicitly if UTF-8 fails,
+retain original bytes and do not rewrite the source archive.
+
+Tested MSI environment: RTX4060Laptop8GB, isolated torch/torchaudio2.9.1+cu128,
+Transformers4.57.3, bitsandbytes0.48.2. Ordinary GPU load OOM/CPU-offload failures
+remain failures. Working runtime stages only oversized151936x2560 output-head
+NF4 quantisation in1,048,576-element CPU blocks, then transfers packed weights;
+ordinary matrices retain the vendor CUDA operator. The process-local method is
+not an installed vendor-source change. Read the actual pinned audit before use.
+
+Reported guards: driver-free>=7168MiB, process fraction0.72,2CPU threads,
+3GiB free system RAM before start/1.5GiB floor,15minute cap; measured peak5.30GiB
+for30s. **Do not lower PC's existing9GiB route guard or blindly run MSI scripts.**
+They use private absolute paths and read-only dependencies from another isolated
+runtime; this is not a portable installation. Target-device inputs, manifests,
+dependencies, resource guard and fresh original/held-out calibration must be
+verified before using that different route. No GPU/model execution occurred in
+this PC reconciliation.
+
+Five actual new controls and19 composed observations support only texture,
+pulse/drive and energy. Genre/instrument/melody/stereo/timestamps, human hearing
+and taste remain outside the qualification. Preserve signal -> independent ASR
+-> acoustic coverage/provenance -> qualified narrow critic -> attributed five-area
+picture/sound assessment. R06 consumed full30.016s plus opening4s/tail4.016s;
+an acoustic near-tie was retained and explained by actual master provenance,
+not a relaxed threshold. Its exact PCM could support R09 only after equality
+and a fresh context/picture assessment. It does not clear PC's unheard tutorial
+cue or any changed mix. Older broad-model failures remain excluded.
+
 CA explicitly rejected making a staff listener the dependency for finishing an
 autonomous edit. A real human route remains optional; do not repeatedly ask staff
 to complete the system's work. Repair the actual failed capability. This does not

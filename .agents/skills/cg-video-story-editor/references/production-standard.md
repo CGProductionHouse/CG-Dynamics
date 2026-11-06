@@ -13,6 +13,14 @@ Owner feedback consolidated 28 October 2026. Read this **before selecting footag
 
 ## Source and freshness gate
 
+**6November component amendment:** preserve what supplied replacement media is
+meant to replace. A phone-screen recording belongs inside the accepted handset
+when that is the owner instruction; do not make it a full-frame replacement for
+the composition. Inspect dense moving bezel/crop/matte boundaries, not merely a
+few aligned stills. If a filmed plate remains unstable, choose a properly edited
+native frame/template and verify its actual export. Keep original-source and
+intentional UI-graphic reuse distinct. See [the evidenced MSI lesson](msi-finishing-and-client-copy.md).
+
 4. Search the authorised client library, including older folders. Check actual public source-month **and subsequent** Facebook/Instagram videos through the intended release; watch whole posts, including late montages. Record URLs/dates and exact proposed source ranges. Filenames, shoot dates, a partial export archive, adjacent takes, crops and music changes cannot establish unused picture.
 5. Older posted shoots may supply **genuinely different moments for a new story job**. Compare old versus new purpose and recognisable action. Never lift a published beat/story as-is; do not blanket-ban a whole shoot or ask for new capture by default. Mark unknown prior use honestly, never reassure the owner that it is unused without evidence. An unresolved material overlap must be resolved or the select replaced before delivery.
 6. Watch complete originals and the chosen span in motion. Log useful setup/onset/payoff/exit and rejected adjacent ranges. Exclude fumbles, awkward poses, cue resets, unwanted people and a camera drifting away; shortening the same rejected performance is not a replacement. Keep actual contact and consequence in sport/tool/action shots after retiming. Never infer a landed blow or knockout from reaction or camera shake.

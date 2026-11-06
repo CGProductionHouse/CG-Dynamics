@@ -5,6 +5,15 @@ description: Reveal a continuing scene by growing its framed view into the full 
 
 # Window-grow reveal — synthetic mechanism proof
 
+**6November phone-component correction:** [MSI's actual R07–R09 lesson](../../../../../.agents/skills/cg-video-story-editor/references/msi-finishing-and-client-copy.md)
+distinguishes supplied screen content from its enclosing phone composition.
+Keep the former inside the latter when that is the owner request; do not expand
+it full-frame merely because this family supports growth. Dense moving bezel/
+crop inspection must catch jitter that isolated stills miss. A native Canva
+screen frame with real Replace/export can be a stable alternative to an unsuitable
+filmed plate; it does not prove the physically filmed last-frame/lens handoff.
+No current owner/client acceptance or PC native-design access is inferred.
+
 **Reference:** [Gakulange's three-trend post](https://www.tiktok.com/@gakulange/video/7519106258394303765) names a `Grow Effect` and visually samples a small framed view becoming the surrounding picture. That post also names freeze frame and split screen; they need separate source and story tests. The player was muted, and exact reference keyframes/easing were not available.
 
 **Scene prerequisite:** A real framed surface or camera composition must have a reason to become the next scene. Use the *same underlying moving shot* inside and after expansion. Keep its time moving continuously; matching only a still at the join leaves a visible action jump. The growing rectangle must start exactly over the screen/window edges and end over the entire delivery frame. If it covers a client's face, CTA or brand message halfway through, move the effect or retain the plain cut.

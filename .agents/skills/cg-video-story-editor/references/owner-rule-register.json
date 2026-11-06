@@ -54,8 +54,8 @@
     },
     {
       "id": "PICTURE-01",
-      "requirement": "Verify each file's upright orientation before source-specific stabilisation. Every ordinary/focused shot records applied settings/comparison, a witnessed already-stable original or a justified intentional-motion exception. Preserve smooth captured movement; inspect exact final motion for crop/warp/subject loss. Foreground limb motion is not proof of camera shake.",
-      "evidence_source": "CA lapa/Watch amendments; production-standard9"
+      "requirement": "Verify each file's upright orientation before source-specific stabilisation. Every ordinary/focused shot records applied settings/comparison, a witnessed already-stable original or a justified intentional-motion exception. Preserve smooth captured movement; inspect exact final motion for crop/warp/subject loss. Foreground limb motion is not proof of camera shake. Screen inserts require dense moving bezel/matte/crop review over the full encoded span; still-frame alignment cannot clear jitter. Use an actual stable native frame/template when the filmed plate fails, without claiming captured lens handoff or device access.",
+      "evidence_source": "CA lapa/Watch amendments; production-standard9; MSI6Nov Watch Addict R07 composition rejection/R08 jitter rejection/R09 native Canva correction, PR875/910 and msi-finishing-and-client-copy.md"
     },
     {
       "id": "PICTURE-02",
@@ -199,8 +199,8 @@
     },
     {
       "id": "UI-01",
-      "requirement": "CA5Nov requires UI animation in every video. Design and actually execute a brand-appropriate information interaction (focus, selection, progression, annotation or genuine UI state) with a visible story purpose; bind frames/components/operator/evidence. Never imply an invented client app or repeat the same dashboard across brands.",
-      "evidence_source": "CA5Nov2026 current motion-design/UI reference instruction; CA-MOTION-VOICE-UI-20261105.md"
+      "requirement": "CA5Nov requires UI animation in every video. Design and actually execute a brand-appropriate information interaction (focus, selection, progression, annotation or genuine UI state) with a visible story purpose; bind frames/components/operator/evidence. Never imply an invented client app or repeat the same dashboard across brands. Preserve the intended role of owner-supplied replacement media inside its accepted component: phone-screen content is not permission to remove the handset or place marketing copy over the display.",
+      "evidence_source": "CA5Nov2026 current motion-design/UI reference instruction; CA-MOTION-VOICE-UI-20261105.md; MSI6Nov Watch Addict R07 composition rejection/R08 jitter rejection/R09 native Canva correction, PR875/910 and msi-finishing-and-client-copy.md"
     },
     {
       "id": "FOUNDATION-01",
