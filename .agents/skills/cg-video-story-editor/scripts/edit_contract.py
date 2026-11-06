@@ -34,6 +34,34 @@ def frame(value):
     return int(value)
 
 
+def duration_bounds(plan):
+    """Keep the30s default; bind a genuinely different owner brief per client.
+
+    This checks recorded evidence, not whether its author granted permission.
+    The editor must retain the actual owner's format instruction and scope.
+    """
+    contract = plan.get('duration_contract')
+    if contract is None:
+        return 27.0, 33.0
+    if not isinstance(contract, dict) or contract.get('kind') != 'owner_assigned_format':
+        raise ValueError('duration change needs an owner-assigned format contract')
+    if not plan.get('client_id') or contract.get('client_id') != plan['client_id']:
+        raise ValueError('duration authority belongs to another or unknown client')
+    evidence = binding(contract.get('evidence'))
+    excerpt = contract.get('instruction_excerpt')
+    if not isinstance(excerpt, str) or not excerpt.strip() or excerpt not in evidence.read_text(encoding='utf-8-sig'):
+        raise ValueError('duration authority excerpt missing from the bound owner brief')
+    if not contract.get('authority'):
+        raise ValueError('duration contract needs its actual owner/message authority')
+    bounds = [contract.get('minimum_seconds'), contract.get('maximum_seconds')]
+    if any(isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) for v in bounds):
+        raise ValueError('duration bounds must be finite numeric seconds')
+    minimum, maximum = map(float, bounds)
+    if not 0 < minimum <= maximum <= 600:
+        raise ValueError('owner format duration bounds must be positive, ordered and bounded')
+    return minimum, maximum
+
+
 def validate_edit(plan):
     """Pre-render feasibility, with no pretend creative verdict."""
     errors = []
@@ -55,8 +83,11 @@ def validate_edit(plan):
             if any(not isinstance(intent.get(k), str) or not intent[k].strip()
                    for k in ('visible_action', 'viewer_inference', 'graphic_job', 'sound_job')):
                 raise ValueError('every shot needs visible action, viewer inference, graphic and sound jobs')
-        if not 27 <= cursor/fps <= 33:
-            raise ValueError('planned picture must develop roughly30s (27–33s), before rendering')
+        minimum, maximum = duration_bounds(plan)
+        if not minimum <= cursor/fps <= maximum:
+            if plan.get('duration_contract') is None:
+                raise ValueError('planned picture must develop roughly30s (27–33s), before rendering')
+            raise ValueError(f'planned picture must meet its recorded duration ({minimum:g}–{maximum:g}s), before rendering')
         beats = plan['story_beats']
         previous = 0
         for role in ('hook', 'development', 'payoff'):

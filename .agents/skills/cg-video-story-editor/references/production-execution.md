@@ -1,5 +1,17 @@
 # From shared technique to an actual client edit
 
+**Exact owner formats,6 November:** the roughly30second default remains27–33s.
+When the actual assignment explicitly changes the format, bind a per-client
+`duration_contract` with `kind: owner_assigned_format`, matching `client_id`,
+numeric `minimum_seconds`/`maximum_seconds`, actual `authority`, a file/SHA-256
+`evidence` binding and an `instruction_excerpt` present in that file. Retain the
+original message when available; label a contemporaneous summary honestly.
+The bounds express this job's design target under that instruction, not a new
+global standard. Different-client, changed-file, missing-excerpt and invalid
+bounds fail. Recording a contract does not manufacture owner authority or waive
+story, source, picture, sound or release gates. Owner-preview routing also follows
+the latest instruction: an owner-first review is not permission to send to staff.
+
 3 November 2026. This replaces the disconnected plan/release path, not the existing editor or renderer. Read alongside the client library, production standard and latest owner feedback. System repair does not lift the office production stop.
 
 ## One continuous production path
