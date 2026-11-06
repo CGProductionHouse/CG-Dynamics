@@ -20,7 +20,7 @@
     "copiedTextIntegrity": "first-49-pages-normalised-text-identical-12018-characters"
   },
   "observedAt": "2026-11-06",
-  "observedPageCount": 81,
+  "observedPageCount": 83,
   "pageCapacity": {
     "documentedMaxPages": 350,
     "source": "https://www.canva.com/en_gb/help/manage-pages/",
@@ -41,12 +41,12 @@
     },
     "drafts": {
       "pageId": "PBkggJvPWJCB8Kl5",
-      "observedPageIndex": 80,
+      "observedPageIndex": 82,
       "writePolicy": "protected-read-only"
     },
     "postedScheduled": {
       "pageId": "PBhXtZzkLlTlfdWK",
-      "observedPageIndex": 81,
+      "observedPageIndex": 83,
       "writePolicy": "protected-read-only"
     }
   },
@@ -74,13 +74,13 @@
       "PBbMwKqRZZ9xNlp8",
       "PB2PhvZXtvxYrrVK",
       "PB3wrbPz4RJCBg0j",
-      "PBwfxsV9wDzlFlM4",
       "PBb9gNS6Tz5yGFfy",
       "PBhcBPR3DRxFzDNY",
-      "PBlqwc7fkVWyz7GP",
       "PBhRR4d4pdXWyyBs",
       "PBHhvnLglcYJHLG4",
-      "PBDGzt6lwvxz9s2y"
+      "PBDGzt6lwvxz9s2y",
+      "PB7wNQkrQFvYcVGG",
+      "PB9nWtgdrjBJ1vgY"
     ],
     "supersededAgentDrafts": {
       "observedAt": "2026-11-06",
@@ -101,7 +101,9 @@
         "PBgBkkQgbCGQVSbY",
         "PBSt5DpJ47zCKmvK",
         "PBpjXgmRn7CTzmcX",
-        "PBclyWNc6S0tnFxr"
+        "PBclyWNc6S0tnFxr",
+        "PBwfxsV9wDzlFlM4",
+        "PBlqwc7fkVWyz7GP"
       ],
       "disposition": "Preserved in In Progress, visibly labelled SUPERSEDED DRAFT; excluded from current candidate IDs and export selection. No page deletion or protected/staff edits.",
       "replacements": {
@@ -144,6 +146,19 @@
         "disposition": "Six replaced own drafts receive one warning image only; all older content/history preserved. Four current candidates amended in place; no page deletion/reordering.",
         "temporaryTransferDesignId": "DAHaKEbz4KE",
         "extraPost": "EXTRA01 is owner-requested car-wash proposal; not a change to monthly package or invented schedule row."
+      },
+      "craftRound4": {
+        "newPageIds": [
+          "PB7wNQkrQFvYcVGG",
+          "PB9nWtgdrjBJ1vgY"
+        ],
+        "observedRange": "80-81",
+        "temporaryTransferDesignIds": [
+          "DAHaKYQguxs",
+          "DAHaKtj4Qis"
+        ],
+        "disposition": "Only school and extra wash replaced. Prior rejected pages73/76 retain old content plus one warning each. Back to It74 only loses January label. No other existing native records changed.",
+        "state": "native-saved-and-readback-verified; internal review not approved"
       }
     },
     "scaffoldReplacement": {
@@ -177,6 +192,6 @@
     "Page indexes can shift when new pages are inserted. Re-resolve all header page IDs immediately before every merge.",
     "Drafts and Posted / Scheduled are Amonique-controlled operational lanes. They may be read for anti-repetition evidence but never edited, moved or deleted by the agent.",
     "Copying a prior page is a working-file operation only. It does not authorise reuse of its photograph, person, wording, concept or layout mechanism.",
-    "Current variety round supersedes the nine-page graphic-depth checkpoint:12 monthly candidates plus1 owner-requested extra; current pages41,61,64-67,73-79. Protected headers80/81. Exact IDs govern edits."
+    "R4 supersedes rejected school/wash R3: current12+extra selection41,61,64-67,74-75,77-81. Back to It74 only loses January. Protected headers82/83; durable IDs govern edits."
   ]
 }

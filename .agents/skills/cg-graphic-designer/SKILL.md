@@ -45,6 +45,8 @@ Use `scripts/poster-studio/creative-ledger.mjs` for deterministic checks. Its JS
 
 For cropped-photo matching against Canva history previews, use `scripts/poster-studio/source-history-audit.py` on privately downloaded previews and selected originals. Inspect any geometrically supported matches. A negative result is limited to the supplied previews; tiny, heavily overlaid, missing or same-shoot images still require review. Do not mistake random texture correspondences for source reuse or use this tool to identify people.
 
+Run this check before expensive native masking or design assembly. In the wash revision, an attractive candidate matched a historical poster and had to be excluded; it must not remain in the current artwork merely because it was already uploaded or extracted.
+
 ```powershell
 node scripts/poster-studio/creative-ledger.mjs fingerprint <image>
 node scripts/poster-studio/creative-ledger.mjs check <ledger.json> <candidate.json> --out <receipt.json>
@@ -102,6 +104,10 @@ Owner rejected the next revision for continued flatness, logo plates and unused 
 - If an approved lockup fixes a mark in one corner, use an exact approved independent mark or a source-faithful crop with a private provenance receipt to vary placement. Preserve complete geometry, aspect and legibility; do not redraw or generate the logo. Keep historical versions intact.
 - Generated decorative assets may be useful when the owner authorises them. Keep the asset separate from real photo/logo/text layers and record the tool, prompt, source inputs and cost. Do not submit private client photos to generation or invent people, products, venues, signage or factual service depictions. The Piek bubble graphic is decoration, not evidence of an actual wash bay.
 - An extra owner-requested concept is separate from the confirmed package. Verify exact branch spelling/service from the current first-party site; distinguish forecourt hours from car-wash hours. Never invent an offer, wash opening time, schedule row or package increase. Run the same photo/branch/shoot/concept checks on extras and retain unresolved repetitions for review.
+- Match the photograph's actual focal subject to the service. A branch having a car wash does not make a KAUAI-led facade a successful car-wash photograph. Inspect source candidates before downloading large videos. Prefer genuine wash action, equipment or a confirmed wash-area view; label a service-detail crop honestly and leave a missing wider bay view unresolved. Do not turn a tyre-pressure or unrelated forecourt scene into car-wash evidence.
+- Reduced navy and more whitespace must not strip out the client's graphic craft. A flat split photograph and date block is not an adequate replacement for rejected work. Use source-faithful silhouettes, contact shadows, purposeful fields/textures and a legible CTA together; inspect how the layers actually relate. Keep complete source edges at page bleed or mask them deliberately rather than leaving a hard floating source-frame boundary.
+- Evaluate visible ink spacing and information flow, not only text-box geometry. Tight headlines may need independently positioned live words when display-font metrics create excessive leading. Service, branch and address need one coherent reading path. Make required decorative foam/bubbles visibly serve that concept at phone size; an almost-off-canvas asset does not satisfy the brief.
+- Preserve an owner-supported composition when the request is bounded: Back to It required only removal of the stray January label after the photo change. Compare all non-target native records, rather than unnecessarily redesigning accepted elements. Record explicit owner rejection separately from successful renders and source/layer tests.
 
 ### Native Canva path without desktop takeover
 

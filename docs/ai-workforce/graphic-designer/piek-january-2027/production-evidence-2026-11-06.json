@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
   "observedAt": "2026-11-06",
-  "state": "owner-variety-feedback-ten-revisions-plus-extra-saved-internal-review",
+  "state": "owner-school-and-wash-rejection-r4-replacements-saved-hd-verified",
   "clientId": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
   "month": "2027-01-01",
   "officialCanva": {
     "designId": "DAHaD4mJnGY",
     "title": "PIEK GROUP OF COMPANIES | ACTIVE FROM 05 NOV 2026 | JAN 2027",
-    "pageCount": 81,
+    "pageCount": 83,
     "legacyReadOnlyDesignId": "DAGcXGWhDhI",
     "workingHeaders": {
       "inProgress": {
@@ -20,11 +20,11 @@
       },
       "drafts": {
         "pageId": "PBkggJvPWJCB8Kl5",
-        "index": 80
+        "index": 82
       },
       "postedScheduled": {
         "pageId": "PBhXtZzkLlTlfdWK",
-        "index": 81
+        "index": 83
       }
     }
   },
@@ -83,14 +83,16 @@
       "provisionalId": "2027_01_PIEK_DP_05",
       "brandScope": "ENGEN",
       "concept": "School return",
-      "canvaPageId": "PBlqwc7fkVWyz7GP",
-      "observedPageIndex": 76,
+      "canvaPageId": "PB7wNQkrQFvYcVGG",
+      "observedPageIndex": 80,
       "monthlyDeliverableId": null,
-      "state": "variety-r3-saved-human-approval-pending",
+      "state": "craft-r4-internal-review-not-approved",
       "previousOwnDraftPageId": "PBxrsDTFfRXMtbhH",
-      "executionRevision": "Complete white-led replacement for rejected blue-heavy poster; contained red date card, real rack, light grid and full-aspect top Engen masthead.",
-      "primaryLogoZone": "top-right",
-      "previousGraphicDepthPageId": "PBFfytYXc5sg8b51"
+      "executionRevision": "Actual source rack silhouette with independent alpha-derived shadow, calendar paper/contact shadow, live contained13 January date, branded field/halftone, curved blue base and native school-run CTA.",
+      "primaryLogoZone": "bottom-centre",
+      "previousGraphicDepthPageId": "PBFfytYXc5sg8b51",
+      "previousVarietyPageId": "PBlqwc7fkVWyz7GP",
+      "ownerReview": "Previous white split/date-card R3 poster explicitly rejected for insufficient craft/depth; replaced, not counted as approval."
     },
     {
       "provisionalId": "2027_01_PIEK_DP_06",
@@ -138,9 +140,10 @@
       "monthlyDeliverableId": null,
       "state": "variety-r3-saved-human-approval-pending",
       "previousOwnDraftPageId": "PB5ptGHb90d8ZXjs",
-      "executionRevision": "New genuine smiling Kroonstad attendant cleaning a windscreen; source-faithful local face lift, right headline and primary logo left.",
+      "executionRevision": "Retained real active smiling Kroonstad attendant and all other layout; removed only the stray January label.",
       "primaryLogoZone": "middle-left",
-      "previousGraphicDepthPageId": "PBclyWNc6S0tnFxr"
+      "previousGraphicDepthPageId": "PBclyWNc6S0tnFxr",
+      "ownerReview": "Owner happy enough with current subject/layout; requested removal of stray January only. That removal is saved and non-target records match. Final amended version not yet reviewed."
     },
     {
       "provisionalId": "2027_01_PIEK_DP_10",
@@ -516,6 +519,112 @@
         },
         "meaning": "Review warnings retained, not auto-approval or complete historical/person coverage."
       }
+    },
+    "craftRound4": {
+      "ownerFeedback": "Back to It accepted enough except January label; Fresh Start KAUAI facade, oversized leading and scattered copy rejected; Routine Returns rejected as flat/insufficient craft.",
+      "saved": {
+        "backToIt": 74,
+        "school": 80,
+        "extraWash": 81
+      },
+      "finalNativeReadOnlyTransaction": "3521210359764865931",
+      "readOnlyTransactionCancelled": true,
+      "backToItOnlyRequestedLabelRemoved": true,
+      "allOtherBackToItRecordsIdentical": true,
+      "schoolAndWashSeparateLiveTypeAndAssets": true,
+      "finalNativeBindingsPassed": true,
+      "historyIntegrity": {
+        "oldPageCount": 81,
+        "currentPageCount": 83,
+        "unmodifiedOldPages": 78,
+        "allUnmodifiedRecordsMatch": true,
+        "failures": [],
+        "supersededOwnDrafts": [
+          {
+            "page": 73,
+            "onlyWarningAdded": true
+          },
+          {
+            "page": 76,
+            "onlyWarningAdded": true
+          }
+        ],
+        "backToItOnlyJanuaryRemoved": true,
+        "all81OldIdsInSameRelativeOrder": true,
+        "newPages": [
+          {
+            "page_id": "PB7wNQkrQFvYcVGG",
+            "page_number": 80
+          },
+          {
+            "page_id": "PB9nWtgdrjBJ1vgY",
+            "page_number": 81
+          }
+        ],
+        "protectedHeaders": [
+          82,
+          83
+        ],
+        "creativeApproval": false
+      },
+      "sourceResearch": {
+        "originalSasolLhpFolderInspected": true,
+        "onedriveRawFetch": "403 serviceReadOnly / Database Is Read Only; browser signed-in company account used only for source retrieval.",
+        "sourceFolderScopeSearch": "Scoped DJI search returned unrelated client results; ignored. No cross-client source used.",
+        "sourceRejected": "0L8A3583 matched historical page221 with76 RANSAC inliers; not placed in new artwork.",
+        "droneAndVideoInspection": "Read-only metadata and bounded original clips inspected; retrieved angles showed forecourt/shop, not a confirmed wash bay. Not used as wash hero.",
+        "selected": "0L8A3607.JPG from actual SasolLHP source folder; original bytes verified, strict sRGB preparation, deliberate face-excluding detail crop.",
+        "historyPreviewCount": 352,
+        "historyDecodeErrors": 0,
+        "detectedReuseMatchesForSelectedSource": 0,
+        "unusedCertified": false,
+        "sameShootServiceReviewRemains": true,
+        "widerWashBayViewResolved": false
+      },
+      "caughtDefects": [
+        "Floating hard upper rack-source edge: carried source to page bleed.",
+        "Sasol navy lettering on navy base: moved intact mark to clean light field.",
+        "Width+height preserve-aspect resize rejected due native rounding: inspected partial results, uniformly resized parent mark by width only.",
+        "OneDrive browser download timeout did not prove transfer failure: actual files arrived later. Verified exact source size before further use; duplicate download recorded as an efficiency failure."
+      ],
+      "newGeneratedAssets": 0,
+      "existingGeneratedBubbleAssetReused": "Independent existing transparent decorative layer; no client photo reconstruction.",
+      "newWhatsAppSends": 0,
+      "portalFinalUploads": 0,
+      "creativeApproval": false,
+      "privateEvidence": "wash-school-rework-20261106: final-craft-scenes.json/html/manifest, source receipts/history, saved integrity/native binding receipts, actual-HD-export-receipt.json, actual-HD-three-revisions.jpg and current13 board. Raw/private evidence retained off Git.",
+      "validation": {
+        "focusedNodeTests": 25,
+        "pythonColourTests": 5,
+        "monthPlanValidator": true,
+        "skillValidator": true,
+        "nativeBindings": true,
+        "protectedHistoryIntegrity": true,
+        "fullBuild": "passed tsc -b and Vite 7.3.6; existing Browserslist/chunk warnings",
+        "finalLaneGuard": true,
+        "currentLedgerDeterministicBlockers": 0,
+        "currentLedgerReviewFindings": {
+          "subject-repeat": 38,
+          "service-repeat": 20,
+          "branch-repeat": 11,
+          "concept-repeat": 2,
+          "same-shoot-review": 4
+        }
+      },
+      "actualLatestHdExports": 3,
+      "latestHdExportSelection": "74,80-81",
+      "allCurrentHdCandidateCount": 13,
+      "hdDimensions": [
+        2160,
+        2700
+      ],
+      "reviewPixelsPreservedDuringMetadataCleaning": true,
+      "backToItPixelProof": {
+        "backToItChangedPixelsOutsideJanuaryBox": 0,
+        "changedPixelsTotal": 3729,
+        "nativeNonTargetRecordsMatch": true
+      },
+      "evidenceDocument": "CRAFT-REWORK-2026-11-06.md"
     }
   },
   "delivery": {
@@ -538,8 +647,8 @@
       2160,
       2700
     ],
-    "latestExportState": "Twelve monthly candidates plus one owner-requested extra at genuine Canva2160x2700 PNG High; late independent Engen mark separately re-exported. Internal review only.",
-    "latestExportPageRange": "41,61,64-67,73-79",
+    "latestExportState": "Current13:12 monthly candidates plus1 owner-requested extra. Three latest R4/label versions re-exported at2160x2700 PNG High. Internal review; no new send.",
+    "latestExportPageRange": "41,61,64-67,74-75,77-81",
     "furtherSendsHeld": true,
     "holdReason": "Owner explicitly stopped the rejected batch and requested execution rework. No further WhatsApp sends during this rework."
   },
@@ -581,17 +690,20 @@
       "brandScope": "SASOL",
       "concept": "Fresh start car wash",
       "branch": "Sasol Langenhoven Park",
-      "canvaPageId": "PBwfxsV9wDzlFlM4",
-      "observedPageIndex": 73,
+      "canvaPageId": "PB9nWtgdrjBJ1vgY",
+      "observedPageIndex": 81,
       "monthlyDeliverableId": null,
       "packageIdentity": null,
-      "state": "owner-requested-extra-internal-proposal-not-scheduled",
+      "state": "wash-r4-internal-review-not-approved",
       "factSource": "https://www.piekgroup.co.za/locations/sasol-langenhoven-park",
-      "source": "Alternate real current-site daylight venue photograph, not the night After Hours source",
+      "source": "Actual LHP source0L8A3607 gloved hands/sponge and foamy windscreen, with identifiable face excluded from the service crop.",
       "generatedAsset": "Separate transparent soap-bubble decoration only; venue/person/logo/type not generated",
-      "executionRevision": "Tall staggered FRESH START, light ring pattern, actual venue with modest decorative bubbles and primary mark bottom right.",
-      "primaryLogoZone": "bottom-right",
-      "noPriceOfferOrCarWashHoursClaimed": true
+      "executionRevision": "Tight independently editable FRESH/START words, real registered car/hands alpha over source context, prominent independent soap bubbles/foam, curved navy information base, coherent service/CTA/branch/address hierarchy.",
+      "primaryLogoZone": "top-right",
+      "noPriceOfferOrCarWashHoursClaimed": true,
+      "previousVarietyPageId": "PBwfxsV9wDzlFlM4",
+      "ownerReview": "Previous KAUAI-led facade and loose/flat typography explicitly rejected. Real wash-action detail replaces it; wider wash-bay view still unresolved.",
+      "sourceScope": "service-detail-not-wide-bay-view"
     }
   ]
 }
