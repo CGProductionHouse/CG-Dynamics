@@ -1,5 +1,7 @@
 # Complete shared-technique integration map — 3 November 2026
 
+6November: [real-footage camera tutorial application](FOOTAGE-CAMERA-APPLICATION-20261106.md) extends the existing camera family with source-bound preparation and four120frame controls/revision;76protected opening frames, whole-path title margins repaired. Existing camera/type APIs unchanged. Normal-speed muted comparison checked; optional original SFX remains unheard and cannot become a client default. Source-specific meaningful reveal/actual brand/native/phone/sound gates stay explicit;53families unchanged.
+
 6November: [authored depth-plane composition](LAYERED-CAMERA-FINISHING-20261106.md) adds render_depth_layers/depth_layer_rect in existing camera_plane.py. Four current controls/revision inspected; source-specific margin/edge/protected-prefix gates repaired. Four earlier files rejected. Original artwork/OFL font, no inferred person depth or native/phone/sound/client claim.53families unchanged.
 
 6November: [mixed-weight finishing](RICH-TYPE-FINISHING-20261106.md) adds measured baseline/ink-gap layout and explicit per-run reveal to the existing type family/operator module. Caller supplies verified fonts; three actual silent controls/revision inspected,37/37 protected opening decoded frames equal. No new family or mastery count; source/client/normal-speed/phone/native/sound acceptance remains separate.

@@ -23,4 +23,12 @@ For separately authored photo/type/graphic planes, use the [6November layered-ca
 
 ## Current bounded proof and MSI handoff
 
+[6November moving-footage application](../../FOOTAGE-CAMERA-APPLICATION-20261106.md)
+adds source-hash-bound preparation, fixed/single-plane/depth controls and a
+protected camera revision on actual continuous coffee footage. Use its
+`render_footage_camera_study.py` / `inspect_footage_camera_study.py` recipes for
+practice and full-path margins; it is not a client preset. The separate original
+sound audition remains unheard. Subtle parallax has no automatic creative
+advantage; compare the simpler move first. No native/face/phone/mastery claim.
+
 [5November handoff](../../TBS-3D-CAMERA-HANDOFF-20261105.md) records source hashes, current R03/R04, static/linear controls, rejected R01/R02, sound markers and limitations. MP4 is a rasterized insert; Python+JSON+linked artwork are reproducible layers/parameters, not a native Premiere/AE project. Read exact output evidence before applying to the current film. No final/client/native/hearing/second-PC approval is implied.
