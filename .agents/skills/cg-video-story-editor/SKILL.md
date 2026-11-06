@@ -5,6 +5,8 @@ description: Plan, assemble, review, and hand off CG Production House client vid
 
 # CG video story editor
 
+**6November layered composition:** [authored depth-plane finishing](../../../scripts/video-editing/studio-phase2/LAYERED-CAMERA-FINISHING-20261106.md) extends the existing camera family with independently moving rigid image/type planes and premultiplied-alpha compositing. Corrected controls retain full-path ink margins/overscan; original failures stay rejected. This is authored graphic depth, not photographic reconstruction, face-mask or native-editability proof. Use a specific story and existing brand assets before a client application.
+
 **6November approved-edit closeout:** [today's process and retained standards](references/approved-edit-closeout-20261106.md) distinguish Jenkor's approved R02 baseline from RC's delivered R04 amendment. Carry field-level keep/change/reject into the existing client kit, reconcile structured current state after delivery, verify actual portal files and use real schedule rows. The linked mixed-weight typography study extends the existing finishing card; no new brand font/default style or mastery claim.
 
 **MSI/PC reconciliation, 6 November:** carry [MSI's exact review lessons](references/msi-finishing-and-client-copy.md) into the current foundation. This adds actual client-copy restriction checks, compact type/soft-shadow finishing, source-frame matte checks and per-shot stabilisation decisions. The shared library remains PR910; MSI production history remains PR875. Load the reconciled library at a safe job boundary, never replace an active timeline or infer that Git publication installs another device.

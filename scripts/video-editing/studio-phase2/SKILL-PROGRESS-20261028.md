@@ -1,5 +1,7 @@
 # Nolan Studio — categorised skill progress,28 October2026
 
+**6November authored depth planes:** [layered camera study](LAYERED-CAMERA-FINISHING-20261106.md) advances existing planar-3d-camera,53families unchanged. Four current100frame silent controls/revision inspected,65/65 opening frames protected; title ink38.94px minimum and empty-edge repair verified. Four earlier files remain rejected (19.02px title margin/2040 dark edge pixels).10camera tests/2validators pass. Parallel planes preserve aspect, reject tilt/stretch/crossing; premultiplied alpha prevents dark fringes. Real-photo/face/native/phone/independent normal-speed/sound/client application remain open. Next actual source/brand/story audition, not cosmetic diagram rerender.
+
 **6November approved edits and finishing:** [process closeout](../../../.agents/skills/cg-video-story-editor/references/approved-edit-closeout-20261106.md) retains Jenkor CA-approved R02 and RC delivered R04 distinctly. [Mixed-weight type study](RICH-TYPE-FINISHING-20261106.md) advances existing kinetic-caption-finishing: three100frame silent outputs, five geometry/protection tests,37/37 decoded protected opening frames; no new family/mastery. Immediate control reads earlier; normal-speed independent/phone/native/sound/actual-client application stays open. Next apply only to a real assigned story with verified client font/art, not another decorative rerender.
 
 

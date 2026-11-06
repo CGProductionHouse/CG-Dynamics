@@ -1,5 +1,7 @@
 # Complete shared-technique integration map — 3 November 2026
 
+6November: [authored depth-plane composition](LAYERED-CAMERA-FINISHING-20261106.md) adds render_depth_layers/depth_layer_rect in existing camera_plane.py. Four current controls/revision inspected; source-specific margin/edge/protected-prefix gates repaired. Four earlier files rejected. Original artwork/OFL font, no inferred person depth or native/phone/sound/client claim.53families unchanged.
+
 6November: [mixed-weight finishing](RICH-TYPE-FINISHING-20261106.md) adds measured baseline/ink-gap layout and explicit per-run reveal to the existing type family/operator module. Caller supplies verified fonts; three actual silent controls/revision inspected,37/37 protected opening decoded frames equal. No new family or mastery count; source/client/normal-speed/phone/native/sound acceptance remains separate.
 
 **5November second CA assignment:** [motion/story/voice/UI study](CA-MOTION-VOICE-UI-20261105.md) adds [stateful UI](skills/stateful-ui-motion/SKILL.md) and [brand voice overlay](skills/brand-voice-overlay/SKILL.md), making **50current cards**. UI IDs/reflow/focus and actual narration placement/ducking have executable operators. South African production voice source, accent/performance, exact mix and PSG creative acceptance remain open; no50-mastered count. UI-01/VO-01 in the existing owner register bind the standing instruction. Existing first-assignment48-card figures below remain dated checkpoints.

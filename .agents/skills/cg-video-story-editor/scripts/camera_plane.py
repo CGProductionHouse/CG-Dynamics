@@ -57,6 +57,65 @@ def render_camera(artwork, size, keys, time, fps=25, shutter=90, samples=33,
     return Image.fromarray(np.rint(accum/len(poses)).astype('uint8'))
 
 
+def depth_layer_rect(layer, size, pose, focal=1000):
+    """Parallel image planes: uniform scale/translation, no face keystone/mesh.
+
+    Explicit centre=(x,y,z), world_size=(w,h); camera looks straight down -Z.
+    This is authored 2.5D graphic depth, not recovered scene/person depth.
+    """
+    cx,cy,cz,tx,ty,tz,roll=map(float,pose)
+    if not np.isfinite([*pose,focal]).all() or focal<=0:
+        raise ValueError('Finite explicit camera and positive focal length required')
+    if abs(cx-tx)>1e-6 or abs(cy-ty)>1e-6 or tz>=cz or abs(roll)>1e-6:
+        raise ValueError('Parallel depth layers require straight camera/no roll; do not warp photos')
+    x,y,z=layer['centre'];ww,wh=layer['world_size'];im=layer['image']
+    if not np.isfinite([x,y,z,ww,wh]).all() or min(ww,wh)<=0 or cz-z<=1:
+        raise ValueError('Layer must have positive finite geometry in front of camera')
+    if abs(ww/wh-im.width/im.height)>1e-6:
+        raise ValueError('Preserve source aspect ratio; no stretching a photographic layer')
+    scale=focal/(cz-z);w,h=size
+    left=w/2+(x-cx-ww/2)*scale;top=h/2-(y-cy+wh/2)*scale
+    return (left,top,left+ww*scale,top+wh*scale)
+
+
+def render_depth_layers(layers,size,keys,time,focal=1000,fps=25,shutter=90,samples=17,
+                        background=(18,24,28)):
+    """Composite authored parallel RGBA planes far-to-near with temporal sampling.
+
+    Warp premultiplied RGB+alpha together to avoid dark colour fringes. Shadows
+    should be designed in the same plane/group as their card, not falsely labelled
+    physical contact shadows. Supplied artwork/pose keys stay separately revisable.
+    """
+    if (not layers or fps<=0 or not 0<=shutter<=360 or samples<1 or
+            not math.isfinite(time) or not np.isfinite([fps,shutter]).all()):
+        raise ValueError('Explicit layers and finite temporal sampling required')
+    ids=[l.get('id') for l in layers]
+    if any(not isinstance(x,str) or not x for x in ids) or len(ids)!=len(set(ids)):
+        raise ValueError('Persistent unique layer IDs required')
+    ordered=sorted(layers,key=lambda l:l['centre'][2])
+    exposure=shutter/360/fps
+    times=np.linspace(time-exposure/2,time+exposure/2,samples) if shutter else [time]
+    poses=[camera_pose(keys,t) for t in times]
+    if all(np.array_equal(poses[0],p) for p in poses[1:]):poses=poses[:1]
+    prepared=[]
+    for l in ordered:
+        a=np.asarray(l['image'].convert('RGBA'),np.float32)/255
+        a[:,:,:3]*=a[:,:,3:4]
+        prepared.append((l,a))
+    accum=np.zeros((size[1],size[0],3),np.float32)
+    for pose in poses:
+        frame=np.empty_like(accum);frame[:]=np.asarray(background)/255
+        for l,a in prepared:
+            left,top,right,bottom=depth_layer_rect(l,size,pose,focal)
+            sx=(right-left)/l['image'].width;sy=(bottom-top)/l['image'].height
+            matrix=np.float32([[sx,0,left],[0,sy,top]])
+            projected=cv2.warpAffine(a,matrix,size,flags=cv2.INTER_LINEAR,
+                                      borderMode=cv2.BORDER_CONSTANT,borderValue=0)
+            frame=projected[:,:,:3]+frame*(1-projected[:,:,3:4])
+        accum+=frame
+    return Image.fromarray(np.rint(np.clip(accum/len(poses),0,1)*255).astype('uint8'))
+
+
 if __name__=='__main__':
     import argparse,json,subprocess
     from pathlib import Path

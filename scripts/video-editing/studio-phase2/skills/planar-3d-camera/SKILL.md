@@ -13,6 +13,8 @@ For After Effects: precompose the approved design, enable its3D layer switch, ad
 
 ## Application and sound
 
+For separately authored photo/type/graphic planes, use the [6November layered-camera extension](../../LAYERED-CAMERA-FINISHING-20261106.md): `depth_layer_rect` / `render_depth_layers` in the SAME camera module. This route permits uniform scale/translation only, checks source aspect ratio and rejects tilt/roll/camera crossings. It gives explicit design planes different parallax without claiming inferred photographic depth or face-mask success. Premultiplied-alpha interpolation prevents dark fringes. Check full-path ink margins and overscan; earlier decoded controls failed those visual gates. Keep current brand assets and real source/face review requirements.
+
 - Choose a move because it connects actual information: detail to context, one service to the next, or a product reveal. Establish readable holds. The move itself is not the hook/purpose of a finished film.
 - Arrange each view to fill the intended phone frame. A far overview of a wide board becomes a tiny landscape strip: reject it when labels/product cannot be read.
 - Fast travel needs sufficient shutter samples. Five samples at180 degrees produced distinct repeated edges; the tested33-sample90-degree treatment reduces that stepping. Keep source text sharp on settles.
