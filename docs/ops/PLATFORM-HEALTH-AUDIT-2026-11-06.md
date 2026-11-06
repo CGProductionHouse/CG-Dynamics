@@ -44,10 +44,14 @@ Read-only enumeration of all 25 visible repositories found:
   keep accumulating even when no new workflow runs. Current Wiseman main has no
   `.github/workflows` directory; do not invent an ongoing uploader on main.
 
-**Pending CA confirmation:** permanently delete only those 93 old screenshot
-artifacts, preserving the latest two, code, releases, workflow logs and sites.
-No deletion is claimed performed. The exact ID/size/timestamp manifest is private
-`%TEMP%/cg-github-artifact-cleanup-20261106.json`.
+**Completed after CA's explicit “Delete please” approval:** refreshed all 95
+artifact IDs/names/sizes/timestamps against the exact manifest, deleted only the
+93 approved older reports, then independently enumerated the repository again.
+Exactly the two preserved IDs remain, totaling **176,683,708 bytes**. Removed
+**3,123,202,352 bytes** (3.12 decimal GB / 2.91 GiB); no failed deletes. Code,
+releases, workflow logs, caches and live websites were untouched. Private exact
+manifest: `%TEMP%/cg-github-artifact-cleanup-20261106.json`; executed-ID/readback
+receipt: `%TEMP%/cg-github-artifact-deletion-receipt-20261106.json`.
 
 Deleting artifacts stops further accumulation for those files; it does not erase
 storage usage already accrued this month. Do not promise an immediate quota reset
@@ -274,9 +278,9 @@ sync was forced.
 
 ## 6. Completion boundaries and exact next actions
 
-1. Get CA's answer to the exact 93-artifact deletion question; on approval refresh
-   the manifest, delete only those IDs, then independently recount. Preserve two
-   newest reports; no paid upgrade or billing-limit removal.
+1. **DONE:** CA approved and the exact 93 artifacts were deleted; independent
+   readback confirms only the two newest reports remain. Billing refresh and
+   accrued-usage behavior remain separate; no paid upgrade or limit removal.
 2. Resolve JFJ and Imbewu exact web-record routing under the existing DNS/launch
    approval gate. Do not disturb mail/MX/TXT or buy/claim Dynamics .com.
 3. Review deployment/function storage per project with rollback requirements before
