@@ -60,6 +60,12 @@ For low-resolution landscape drone footage across one or more large sites, read 
 
 ## Editorial decisions
 
+**CA6November approved-final filing:** after exact-version owner clearance, finish
+the OneDrive client-portal package and existing Dynamics schedule association as
+part of the job. The [release loop](references/release-and-learning-loop.md#owner-cleared-filing--ca-6-november-2026)
+records CA's no-outstanding-feedback clearance rule, latest-thread check,
+duplicate protection and separate cloud/library/calendar/client-approval states.
+
 1. Identify the intended buyer, their immediate desire or problem, the emotional payoff, the product proof, and one specific action. Write that arc in one sentence before choosing shots.
 2. Screen each source as moving footage. Record what is visibly shown, project identity, rights, prior use, intended role, and the strongest in/out points. Contact sheets help triage; they do not replace watching the clip.
    For a local folder of originals, `python scripts/screen_sources.py <input-folder> <output-folder>` creates early/middle/late wide and 9:16 contact frames plus a CSV ledger with the review fields. Requires FFmpeg; inspect promising clips in motion afterward.

@@ -30,6 +30,33 @@ A later explicit assignment-specific request for directly playable HD video over
 
 ## Dynamics and publication
 
+### Owner-cleared filing — CA 6 November 2026
+
+After an exact film is cleared, complete its filing without waiting for another
+reminder: put the exact approved MP4, cover and clean caption in that client's
+verified OneDrive client-portal delivery folder and associate the durable cloud
+items with the actual existing Dynamics calendar/Client Schedule deliverable.
+Reuse the established folder hierarchy and approved filenames; never allocate a
+missing production code/sequence or invent a posting date to make a link possible.
+
+Review the actual latest **VIDEO APPROVALS** and/or **CG Nolan Approvals** thread
+for the exact filename/revision, approval reaction/message and any later changes.
+CA explicitly says a sent version with no feedback is proceeding to the client:
+after a successful current-thread check confirms no outstanding amendment, record
+that as **owner workflow clearance for client delivery**, not client approval.
+An unreadable group, partial history or a stale local snapshot cannot establish
+the absence of feedback. Keep superseded/rejected versions out of final folders.
+
+Check durable item IDs for existing files before copying; do not duplicate or
+overwrite another final. Read back cloud sizes and hashes where supplied, preserve
+the clearance source and exact bytes, then read back the Dynamics association.
+Cloud-folder upload, Dynamics client-context note, selected client-library asset,
+calendar association, client approval and public posting are distinct outcomes.
+Report each accurately. If a matching schedule row is absent, retain the verified
+cloud link and exact unresolved linkage in the client record; do not mark the
+calendar complete. File-by-file progress belongs in the existing client kit/job
+record and owning GitHub, not a new monitor or copied tracker.
+
 Record client-specific final direction and the test in that client's authorised CG Dynamics context with the OneDrive destination and source notes. This is an append-only client update; it does not rewrite the canonical Content Guideline. Only change a Content Run guideline in its authorised staff context. Link an existing scheduled deliverable when its durable ID is actually known; never invent a client or schedule ID.
 
 Before publishing, have the team confirm original-footage permissions, prior-use decisions, client/brand approval and the real Instagram cover preview. Record actual posting date, platform, final caption and cover. Do not call a local technical export a published/approved asset.

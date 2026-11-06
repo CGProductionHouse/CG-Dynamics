@@ -211,6 +211,11 @@
       "id": "VO-01",
       "requirement": "For narrated films, develop a distinct South African brand voice as each brand is tackled. Reuse its approved profile/source after acceptance; retain rights/consent, locale, actual audio/script hashes and pronunciation/performance evidence. US engineering voices, ASR text or locale metadata alone are not South African voice approval.",
       "evidence_source": "CA5Nov2026 brand voice instruction; skills/brand-voice-overlay/SKILL.md"
+    },
+    {
+      "id": "FILING-01",
+      "requirement": "After exact-version owner clearance, file approved MP4, cover and clean caption in the verified client OneDrive portal and link durable items to the actual existing Dynamics calendar/schedule deliverable. CA6Nov says a sent revision with no outstanding feedback proceeds to client: establish this through a successful current-thread check, never unreadable/partial/stale history. Record owner workflow clearance separately from client approval/public posting; no duplicate/overwrite, invented production identity/date or false app/calendar completion.",
+      "evidence_source": "CA6November approved-video portal filing request; release-and-learning-loop.md"
     }
   ]
 }
