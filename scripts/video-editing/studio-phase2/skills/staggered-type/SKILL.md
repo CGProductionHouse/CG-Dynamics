@@ -30,4 +30,3 @@ This card does not authorize the reference footage, creator's graphics or music.
 ## Office native continuation28October2026
 
 [Actual Premiere study](../../OFFICE-NATIVE-TYPE-STUDY-20261028.md) adds a licensed moving-coffee control, two native Arial Bold text layers with separate position/opacity keys, a DETAILS→RITUALS revision after reopening, and a second reopen/export. All four72-frame outputs decode; R02/reopened export72/72 decoded frames match. One-PC native editing is demonstrated for this proof; its modest linear entrances, silent timing and high top word do not establish reference recreation, platform-safe/human acceptance, sound, second-PC relink or mastery. The study records actual settings, source/output hashes and UI failures.
-

@@ -128,4 +128,3 @@ Before any owner-review video send, run local audio checks on the **exact final 
 ## MSI5November review lessons, reconciled for PC
 
 **Review-draft stop gate (5 November owner correction):** a technically exported video is still a private study until the viewer, local and seasonal reason, client service, brand evidence, aspect-ratio treatment, first-three-second hook, source roles, motion throughout and exact-export review have all been recorded against the actual cut. If the editor can see an invented font/colour, flat scripted UI, repeated generic boxes, a blurred wide-video filler, a frozen photo with text, or a sequence that needs an explanation to connect its shots, rebuild before sending it to the owner or approval group. See [production standard](references/production-standard.md) and [story gate](references/story-preproduction-gate.md). This is a human-visible gate; a codec check cannot pass it.
-

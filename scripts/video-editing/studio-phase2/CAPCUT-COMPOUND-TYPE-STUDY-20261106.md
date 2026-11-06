@@ -30,4 +30,3 @@ All150 R01 and150 R02 encoded frames were inspected in10 ordered contact sheets;
 **Exact equality FAILS:** reopened R01 only6/150 decoded RGB frames equal; maximum frame MSE3.500372, MAE0.438930/255, maximum channel difference25. Encoding-only causation is **unproved**. R02 native settings before frame60 are unchanged, but only6/61 encoded prefix frames match (max MSE3.247042); tail0/89 exact. Small error is diagnostic, not a protected-pixel/deterministic-export pass.
 
 Next: consume actual moving tutorial; reliable native ease-out against linear; meaningful late copy revision; separately solve encoded protection where required; removable purposeful cue/dry audition; actual second-PC font/source/project reopen/export. No mastery promotion or identical-control rerenders to inflate counts.
-

@@ -144,4 +144,3 @@ The [source-screen failures](MOTION-SOURCE-SCREEN.md) and [flash rejection](FLAR
 
 
 PSG5November [actual film application and failures](PSG-EXCESS-SHARED-APPLICATION-20261105.md): foreground/outline typography, semantic term focus, projective camera, realPSGpeople and boundedstockstabilisation;733frame29.32s localR04, exact composed sound checked, no hearing/native/phone/client/mastery claim.53shared cards retained. Canonical new-video identity unresolved; no WhatsApp send.
-
