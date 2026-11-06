@@ -117,7 +117,7 @@ export function buildNativeCanvaPackage(document, jobDirectory, { maxBytes = LIM
       records.push(record)
       if (layer.type === 'text') {
         if (!scope.fonts.includes(layer.fontFamily) || !/^[a-zA-Z0-9 _-]+$/.test(layer.fontFamily)) throw new Error(`Unverified font ${layer.fontFamily}`)
-        const lines = layer.lines ?? [required(layer.text, 'text')]
+        const lines = layer.lines ?? required(layer.text, 'text').split(/\r\n|\r|\n/)
         if (!Array.isArray(lines) || !lines.length || lines.some((line) => typeof line !== 'string')) throw new Error('Text lines must be strings')
         const fontSize = number(layer.fontSize, 'fontSize', 1, 1000)
         const lineHeight = number(layer.lineHeight ?? 1.1, 'lineHeight', 0.5, 3)

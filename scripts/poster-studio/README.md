@@ -16,6 +16,7 @@ The companion headless tools are:
 - `month-board.mjs` — renders the complete proposal as a responsive, printable local review board.
 - `source-history-audit.py` — compares selected exact photo sources against local Canva poster previews using SIFT features and geometric verification. Requires the existing OpenCV runtime; it creates no face identities. Matches require visual review, and negative results never certify that a source is unused.
 - `canva-native-package.mjs` — packages a private structured scene as metadata-clean, self-contained HTML plus a layer/asset-hash manifest for Canva's native import connector. It performs no upload, auth, export, publication or desktop interaction. Exact kit font rendering and real native elements were checked in the Piek pilot; everyday company-ChatGPT authoring/export remains a separate acceptance gate.
+- `photo_colour.py` — local Pillow/LittleCMS colour preflight and conversion before finishing. Recognises embedded ICC, EXIF sRGB and DCF R03 Adobe RGB; unknown/conflicting profiles fail instead of being silently tagged sRGB. Writes a new oriented, metadata-clean PNG and source/output-hash receipt. The real Piek restocking JPEG required this correction. Existing Pillow 12.2.0 and the installed Adobe RGB (1998) ICC were exercised on Windows; no profile file, photo or new runtime dependency is distributed.
 
 They are designed for a future normal-company-ChatGPT tool wrapper and do not require routine desktop takeover.
 

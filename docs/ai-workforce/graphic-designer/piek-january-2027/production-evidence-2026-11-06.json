@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
   "observedAt": "2026-11-06",
-  "state": "twelve-saved-internal-candidates-delivery-blocked",
+  "state": "owner-rejected-prior-execution-six-revisions-saved-internal-quality-review",
   "clientId": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
   "month": "2027-01-01",
   "officialCanva": {
     "designId": "DAHaD4mJnGY",
     "title": "PIEK GROUP OF COMPANIES | ACTIVE FROM 05 NOV 2026 | JAN 2027",
-    "pageCount": 63,
+    "pageCount": 65,
     "legacyReadOnlyDesignId": "DAGcXGWhDhI",
     "workingHeaders": {
       "inProgress": {
@@ -20,11 +20,11 @@
       },
       "drafts": {
         "pageId": "PBkggJvPWJCB8Kl5",
-        "index": 62
+        "index": 64
       },
       "postedScheduled": {
         "pageId": "PBhXtZzkLlTlfdWK",
-        "index": 63
+        "index": 65
       }
     }
   },
@@ -36,7 +36,8 @@
       "canvaPageId": "PBw695H0fKFBpM7k",
       "observedPageIndex": 42,
       "monthlyDeliverableId": null,
-      "state": "internal-candidate-not-scheduled-or-final-approved"
+      "state": "revised-internal-human-approval-pending",
+      "executionRevision": "Removed projectively warped photo/paper plane; real uniformly scaled drone scene, separate measured canopy silhouette and live year."
     },
     {
       "provisionalId": "2027_01_PIEK_DP_02",
@@ -45,7 +46,8 @@
       "canvaPageId": "PBhSXtvYjyX4j2dl",
       "observedPageIndex": 43,
       "monthlyDeliverableId": null,
-      "state": "internal-candidate-not-scheduled-or-final-approved"
+      "state": "revised-internal-human-approval-pending",
+      "executionRevision": "Larger exact Lastica headline improves phone hierarchy; original smiling staff/source and logo retained."
     },
     {
       "provisionalId": "2027_01_PIEK_DP_03",
@@ -54,7 +56,8 @@
       "canvaPageId": "PB5r675n7lrFm7JZ",
       "observedPageIndex": 46,
       "monthlyDeliverableId": null,
-      "state": "internal-candidate-not-scheduled-or-final-approved"
+      "state": "revised-internal-human-approval-pending",
+      "executionRevision": "Replaced weak dark counter with a genuine College Brew daylight exterior photograph; exact type and logo retained, no invented address/hours."
     },
     {
       "provisionalId": "2027_01_PIEK_DP_04",
@@ -63,7 +66,7 @@
       "canvaPageId": "PBFhjhnLG7KsvSkM",
       "observedPageIndex": 41,
       "monthlyDeliverableId": null,
-      "state": "internal-candidate-not-scheduled-or-final-approved"
+      "state": "retained-internal-human-approval-pending"
     },
     {
       "provisionalId": "2027_01_PIEK_DP_05",
@@ -72,16 +75,18 @@
       "canvaPageId": "PBxrsDTFfRXMtbhH",
       "observedPageIndex": 47,
       "monthlyDeliverableId": null,
-      "state": "internal-candidate-not-scheduled-or-final-approved"
+      "state": "retained-internal-human-approval-pending"
     },
     {
       "provisionalId": "2027_01_PIEK_DP_06",
       "brandScope": "ENGEN",
       "concept": "Convenience",
-      "canvaPageId": "PBxRLPB4JKBHd91b",
-      "observedPageIndex": 48,
+      "canvaPageId": "PBQXNX2K6Fr3hkz8",
+      "observedPageIndex": 63,
       "monthlyDeliverableId": null,
-      "state": "internal-candidate-not-scheduled-or-final-approved"
+      "state": "revised-internal-human-approval-pending",
+      "supersededAgentPageId": "PBxRLPB4JKBHd91b",
+      "executionRevision": "Clean native rebuild removes inaccessible tilted panels and redundant vertical READY. Natural photo mount, independent soft shadow, corrected fluorescent cast, exact logos."
     },
     {
       "provisionalId": "2027_01_PIEK_DP_07",
@@ -90,7 +95,8 @@
       "canvaPageId": "PBnxVnyFjbtxrQQS",
       "observedPageIndex": 44,
       "monthlyDeliverableId": null,
-      "state": "internal-candidate-not-scheduled-or-final-approved"
+      "state": "revised-internal-human-approval-pending",
+      "executionRevision": "Removed arbitrary oval and splash; real worker/car background-removal silhouette, readable live Tall type and independent exact footer/logos."
     },
     {
       "provisionalId": "2027_01_PIEK_DP_08",
@@ -99,7 +105,7 @@
       "canvaPageId": "PBf4gQNK11W9Mnmy",
       "observedPageIndex": 49,
       "monthlyDeliverableId": null,
-      "state": "internal-candidate-not-scheduled-or-final-approved"
+      "state": "retained-internal-human-approval-pending"
     },
     {
       "provisionalId": "2027_01_PIEK_DP_09",
@@ -108,7 +114,7 @@
       "canvaPageId": "PB5ptGHb90d8ZXjs",
       "observedPageIndex": 45,
       "monthlyDeliverableId": null,
-      "state": "internal-candidate-not-scheduled-or-final-approved"
+      "state": "retained-internal-human-approval-pending"
     },
     {
       "provisionalId": "2027_01_PIEK_DP_10",
@@ -117,7 +123,7 @@
       "canvaPageId": "PBP4JGdy6nLRjlTR",
       "observedPageIndex": 51,
       "monthlyDeliverableId": null,
-      "state": "internal-candidate-not-scheduled-or-final-approved"
+      "state": "retained-internal-human-approval-pending"
     },
     {
       "provisionalId": "2027_01_PIEK_DP_11",
@@ -126,16 +132,18 @@
       "canvaPageId": "PB7GXQY2FRY4SmZL",
       "observedPageIndex": 61,
       "monthlyDeliverableId": null,
-      "state": "internal-candidate-not-scheduled-or-final-approved"
+      "state": "retained-internal-human-approval-pending"
     },
     {
       "provisionalId": "2027_01_PIEK_DP_12",
       "brandScope": "GET_TOGETHER",
       "concept": "Summer gatherings",
-      "canvaPageId": "PB4VJSCb8LY6TTnD",
-      "observedPageIndex": 50,
+      "canvaPageId": "PB2W6cFZ0Z7pJ9mD",
+      "observedPageIndex": 62,
       "monthlyDeliverableId": null,
-      "state": "internal-candidate-not-scheduled-or-final-approved"
+      "state": "revised-internal-human-approval-pending",
+      "supersededAgentPageId": "PB4VJSCb8LY6TTnD",
+      "executionRevision": "Clean native rebuild removes tilted panel and crop; full real food hero, photographic tonal separation, live Anton/Barlow type and exact logos."
     }
   ],
   "proof": {
@@ -210,6 +218,77 @@
       "allOtherTextAndImageRecordsIdentical": true,
       "reason": "Removed repeated pause concept; actual live headline now BACK TO THE COFFEE RUN.",
       "readOnlyVerificationClosed": true
+    },
+    "qualityRework": {
+      "ownerFeedback": "Concepts acceptable; execution below standard. Warped photographs and random cuts rejected. Applies across the entire set.",
+      "revisedProvisionalIds": [
+        "2027_01_PIEK_DP_01",
+        "2027_01_PIEK_DP_02",
+        "2027_01_PIEK_DP_03",
+        "2027_01_PIEK_DP_06",
+        "2027_01_PIEK_DP_07",
+        "2027_01_PIEK_DP_12"
+      ],
+      "nativeReferenceStudy": {
+        "legacyPages": [
+          311,
+          313,
+          323,
+          325,
+          329,
+          330,
+          331,
+          334,
+          336,
+          338,
+          340
+        ],
+        "temporaryDesignId": "DAHaJSpo5lo",
+        "title": "TEMP | PIEK LAYER STUDY | 06 NOV 2026 | NOT FOR SCHEDULING",
+        "legacyContentChanged": false,
+        "purpose": "Actual native text/image/texture/gradient/shadow inspection; no historical source photo reuse."
+      },
+      "inPlaceCommit": "8453777828151117182",
+      "cleanTransferDesignId": "DAHaJZO801I",
+      "cleanTransferCommit": "5729100053558576810",
+      "supersededLabelCommit": "2769109198734012261",
+      "peopleAndCoffeeCommit": "6946197859869805186",
+      "finalReadOnlyVerification": "170532218786736223",
+      "finalReadOnlyTransactionCancelled": true,
+      "oldPagesPreservedInRelativeOrder": true,
+      "pageDeletion": false,
+      "supersededAgentPagesVisiblyLabelled": true,
+      "nativeBindingVerifierPassed": true,
+      "headlineOnlyAmendment": {
+        "target": "DP12 headline",
+        "test": "PEOPLE. -> FRIENDS. -> PEOPLE.",
+        "changedTextRecords": 1,
+        "allOtherPageTextAndImageRecordsUnchanged": true
+      },
+      "pageListThumbnailCacheRejected": true,
+      "transferOrderResolvedByActualPageIds": true,
+      "newRevisionsHumanApproved": false,
+      "newRevisionsSent": false,
+      "photographReconstruction": false,
+      "fullResolutionEvidence": "Private quality-rework-20261106/actual-HD-rework-export-receipt.json",
+      "colourManagementCorrection": {
+        "source": "DP06 North Ridge restocking",
+        "observedExifColourSpace": 65535,
+        "observedInteroperabilityIndex": "R03",
+        "earlierFailure": "Source RGB was incorrectly treated as sRGB before finishing.",
+        "fixedWith": "New shared photo_colour.py, Pillow 12.2.0 / LittleCMS, actual installed Adobe RGB (1998) ICC -> sRGB before crop/grade.",
+        "sourceOriginalHashUnchanged": true,
+        "currentNativeAssetId": "MAHaJhadIEk",
+        "committedTransaction": "3137278476250635727",
+        "allOtherTextImageAndFrameRecordsUnchanged": true,
+        "isolatedCurrentHdExportVerified": true,
+        "unknownSourceProfileFails": true,
+        "syntheticRegressionTestsPassed": 5,
+        "licensedIccFileCommitted": false,
+        "readOnlyVerificationTransaction": "2066547660941591623",
+        "readOnlyVerificationCancelled": true,
+        "currentNativeBindingVerifierPassed": true
+      }
     }
   },
   "delivery": {
@@ -218,14 +297,24 @@
     "signature": "PICASSO",
     "requestedWhatsappSender": "Nolan WhatsApp account",
     "requestedGroup": "Picasso approvals",
-    "senderAndExactGroupVerified": false,
-    "whatsappSends": 0,
-    "hdExportsVerified": 0,
+    "senderAndExactGroupVerified": true,
+    "whatsappSends": 7,
+    "hdExportsVerified": 12,
     "publicClientAssetsPublished": 0,
     "portalFinalFilesUploaded": 0,
-    "localBrowserBlocker": "Local browser use is disabled in Work settings",
-    "connectorLimitation": "Current Canva tools expose previews and editing/import operations, but no actual export endpoint; no WhatsApp send connector is exposed.",
-    "ownerPromptedToEnableBrowser": true
+    "localBrowserBlocker": null,
+    "connectorLimitation": "Canva connector supports native editing/import, but true HD export still uses the existing signed-in browser File > Download path; no WhatsApp send connector.",
+    "ownerPromptedToEnableBrowser": false,
+    "whatsappSendsMeaning": "Seven corrected HD image+caption messages were sent before owner stopped/rejected the batch. One additional early uncaptioned preview and a signed correction are recorded separately, not silently erased.",
+    "earlyUncaptionedPreviewCount": 1,
+    "hdDimensions": [
+      2160,
+      2700
+    ],
+    "latestExportState": "Twelve current versions exported at actual Canva 2x for private quality review, not sent or client approved.",
+    "latestExportPageRange": "41-47,49,51,61-63",
+    "furtherSendsHeld": true,
+    "holdReason": "Owner explicitly stopped the rejected batch and requested execution rework. No further WhatsApp sends during this rework."
   },
   "finalDestination": {
     "relativePath": "Clients/Piek Group/A_ClientPortal_Piek_Group/Graphic Design/2027/2027_01_JAN",
@@ -237,12 +326,11 @@
     "publicationAndDeliverableLinkState": "No final asset or January deliverable association created."
   },
   "acceptanceGates": [
-    "Confirm January package/allocation and real schedule identities when available; December package refresh still confirms 12 designed posters and four professional videos.",
-    "Verify Amonique's exact Canva page/export naming via current workflow evidence.",
-    "Obtain and inspect true HD Canva exports; do not upscale thumbnails.",
-    "Verify Nolan sender account and exact Picasso approvals group, then send each HD image with its caption in one message and retain actual send evidence.",
-    "Obtain internal creative approval before client-safe final promotion; use the existing same-client portal asset flow and real deliverable IDs only.",
-    "Normal company ChatGPT create/amend/export invocation remains unverified."
+    "January package/allocation, actual schedule IDs and Amonique exact page/export naming remain unverified; do not invent them.",
+    "Complete human creative/brand approval of the revised twelve-poster grid and at-resolution masks/crops. Native layers and HD export are not creative approval.",
+    "Recheck photo/person/shoot/concept/branch repetition with bounded-history limitations and actual current sources.",
+    "Install/expose the reusable Poster Studio skill in the company Work environment and prove a normal-company-ChatGPT isolated edit and true export; read-only test alone is insufficient.",
+    "Only after internal approval, send current HD artwork+caption through the authorised Nolan sender to CG Picasso Approvals, then promote approved finals via the canonical same-client portal path and real deliverable IDs."
   ],
   "cost": {
     "incrementalRand": 0,
@@ -251,5 +339,13 @@
     "newHosting": false,
     "newProductionDependencies": false
   },
-  "privateEvidenceLocation": "MSI private CG-Graphic-Designer-private/piek-january-2027; no client media or fonts in Git."
+  "privateEvidenceLocation": "MSI private CG-Graphic-Designer-private/piek-january-2027; no client media or fonts in Git.",
+  "normalCompanyChatgpt": {
+    "readInvocationVerified": true,
+    "conversationUrl": "https://chatgpt.com/g/g-p-68adb8e88c2481918d8f2f02dd955947-piek-group/c/6aedbe02-ac40-83ea-9eea-df28565b720e",
+    "verifiedScope": "Actual connected Canva inspection of the exact saved College Brew page: fresh headline, notes, three live text and two image records; read transaction cancelled.",
+    "posterStudioSkillInstalledInCompanyWork": false,
+    "createAmendExportRoundTripVerified": false,
+    "meaning": "Normal-company-ChatGPT read access works. Do not describe a complete everyday designer as live."
+  }
 }

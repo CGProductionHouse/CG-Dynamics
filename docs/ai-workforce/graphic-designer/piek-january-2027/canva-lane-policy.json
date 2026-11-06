@@ -15,7 +15,7 @@
     "copiedTextIntegrity": "first-49-pages-normalised-text-identical-12018-characters"
   },
   "observedAt": "2026-11-06",
-  "observedPageCount": 63,
+  "observedPageCount": 65,
   "pageCapacity": {
     "documentedMaxPages": 350,
     "source": "https://www.canva.com/en_gb/help/manage-pages/",
@@ -36,12 +36,12 @@
     },
     "drafts": {
       "pageId": "PBkggJvPWJCB8Kl5",
-      "observedPageIndex": 62,
+      "observedPageIndex": 64,
       "writePolicy": "protected-read-only"
     },
     "postedScheduled": {
       "pageId": "PBhXtZzkLlTlfdWK",
-      "observedPageIndex": 63,
+      "observedPageIndex": 65,
       "writePolicy": "protected-read-only"
     }
   },
@@ -59,7 +59,15 @@
     "separateWorkingDesignRequired": false,
     "officialClientDesignCount": 1,
     "officialDesignId": "DAHaD4mJnGY",
-    "editablePageIds": ["PB7GXQY2FRY4SmZL", "PBFhjhnLG7KsvSkM", "PBw695H0fKFBpM7k", "PBhSXtvYjyX4j2dl", "PBnxVnyFjbtxrQQS", "PB5ptGHb90d8ZXjs", "PB5r675n7lrFm7JZ", "PBxrsDTFfRXMtbhH", "PBxRLPB4JKBHd91b", "PBf4gQNK11W9Mnmy", "PB4VJSCb8LY6TTnD", "PBP4JGdy6nLRjlTR"],
+    "editablePageIds": ["PB7GXQY2FRY4SmZL", "PBFhjhnLG7KsvSkM", "PBw695H0fKFBpM7k", "PBhSXtvYjyX4j2dl", "PBnxVnyFjbtxrQQS", "PB5ptGHb90d8ZXjs", "PB5r675n7lrFm7JZ", "PBxrsDTFfRXMtbhH", "PBQXNX2K6Fr3hkz8", "PBf4gQNK11W9Mnmy", "PB2W6cFZ0Z7pJ9mD", "PBP4JGdy6nLRjlTR"],
+    "supersededAgentDrafts": {
+      "observedAt": "2026-11-06",
+      "pageIds": ["PBxRLPB4JKBHd91b", "PB4VJSCb8LY6TTnD"],
+      "disposition": "Preserved in In Progress, visibly labelled SUPERSEDED DRAFT; excluded from current candidate IDs and export selection. No page deletion or protected/staff edits.",
+      "replacements": {"DP06": "PBQXNX2K6Fr3hkz8", "DP12": "PB2W6cFZ0Z7pJ9mD"},
+      "temporaryTransferDesignId": "DAHaJZO801I",
+      "transferState": "committed-and-native-layer-readback-verified; source remains TEMP because connector design deletion is unavailable"
+    },
     "scaffoldReplacement": {
       "sourceDesignId": "DAHaIW00t7M",
       "pageIds": ["PBFl866NzXhR28NN"],

@@ -53,6 +53,15 @@ test('private packaging rejects path escapes, remote files, mismatched bytes and
   assert.throws(() => buildNativeCanvaPackage(scene, root), /hash changed/)
 })
 
+test('multiline text survives HTML whitespace collapse as deliberate native line breaks', () => {
+  const { root, scene } = fixture()
+  scene.pages[0].layers[1].text = 'BRING\r\nYOUR\nPEOPLE.'
+  const { html, manifest } = buildNativeCanvaPackage(scene, root)
+  assert.ok(html.includes('BRING<br>YOUR<br>PEOPLE.'))
+  assert.equal(manifest.pages[0].layers[1].text, 'BRING\nYOUR\nPEOPLE.')
+  assert.equal(manifest.pages[0].layers[1].fontFamily, 'Anton')
+})
+
 test('unverified brand tokens, unsupported layers and oversized imports fail rather than flatten', () => {
   const { root, scene } = fixture()
   const font = structuredClone(scene); font.pages[0].layers[1].fontFamily = 'Arial'
