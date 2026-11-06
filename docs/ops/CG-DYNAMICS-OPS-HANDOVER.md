@@ -1,3 +1,104 @@
+## 6 November — platform health / GitHub storage audit
+
+Read `PLATFORM-HEALTH-AUDIT-2026-11-06.md` before claiming the fleet healthy or
+uncapped. Read-only audit:22 Vercel projects READY,51/55 initial root/alias probes
+HTTP200,36 sampled JS assets and41 additional routes200; critical .co.za app and
+Rugby endpoints serve. No Vercel production5xx in24h metrics; four Supabase MCP5xx
+remain an intermittent error history, not hidden as success. No deploy/build/DNS/
+budget/security/provider/data/permission change or auth-copy workaround.
+
+Actual alert is GitHub Actions100% included storage, not website media:95 Wiseman
+screenshot artifacts3,299,886,060bytes. Exact93-old-artifact removal candidate is
+3,123,202,352bytes, keep latest two176,683,708bytes. CA subsequently approved
+“Delete please”: all93 exact artifacts deleted after drift preflight, independent
+readback confirms only the exact two newest remain. No code/release/cache/site
+change. Private executed-ID receipt: %TEMP%/cg-github-artifact-deletion-receipt-20261106.json.
+Accrued billing usage is not erased; no instant quota-reset claim.
+GitHub email reset1December. Current Vercel budget15USD/on-demand0/PauseON,
+cycleends18November08:00UTC; finite shared cap remains an outage risk, not removed.
+
+JFJ custom domains serve Afrihost parking; Imbewu www.com works but apex.com is old
+GoDaddy/LaunchingSoon and .co.za has no A/CNAME. Dynamics .com goes to HugeDomains,
+not the working .co.za app. Vercel domain verification did not prove live DNS.
+Scoped DNS/ownership gates remain; no nameserver/mail changes authorized.
+
+Both visible Supabase projects ACTIVE_HEALTHY: Dynamics~1.11GB,20/60connections;
+Hours~56MB,19/60. Security/performance warnings remain for exact review. Org usage
+meters and Rugby's separate Supabase project are not verified by this connection.
+Meta20PASS/55PARTIAL/1STALE(held AV), TikTok10refreshPASS, GoogleAds latestsync
+5November22:00UTC succeeded, Microsoft latestPARTIAL/83conflicts. Existing lane
+owners retained. Computer Use safety-stopped on uncertain Chrome URL; no new UI/
+phone/login acceptance claimed. Exact Control Centre target remains unavailable.
+
+## 5 November — approved Cape calendar file repair LIVE
+
+CA approved the exact six-row packet from #958. Fresh main/ownership/source-hash
+and production SELECT preflight matched; applied the unchanged reviewed SQL once.
+Independent readback confirms exact published image links for2/4/9/11/16/18November,
+with scheduled/shared dates and production states unchanged. No schema/backend/
+permission/Teams/strategy/other-client/Vercel operation. Older “awaiting approval”
+entries are historical; do not replay the packet on their basis.
+
+Real Cape client-role acceptance: all six calendar dates → View published files
+return their exact named artwork; November18 Photo3's empty-file defect is closed.
+Calendar Download for16November succeeded:858,580bytes, SHA256 identical to the
+reviewed source. Direct18November View renders2047×2560 in one separate window
+with an empty referrer.390px/no-overflow check and original-portal retention pass.
+Private proof: `%TEMP%/cape-calendar-linked-20261105.png`.
+The previous23 focused tests/local PostgreSQL atomic-rollback cases/build remain
+valid for the unchanged packet/runtime; this closure changes documentation only.
+
+November23 ready artwork and exact25November repost source remain unverified,
+not fabricated or rescheduled. Full source/acceptance receipt remains in the
+existing Cape review; #396/#668/#381 retain continuity. No all-client launch claim.
+
+## 5 November — pre-approval receipt: Cape ready graphics published
+
+CA's real phone test found empty planned-post files and logo-only Brand Hub.
+Recovered seven approved image/caption pairs from the actual Cape Marketing
+WhatsApp conversation, matched Canva master pages29–35 and their browser page
+titles, after bounded duplicate checks in current/older OneDrive client folders.
+Uploaded seven exact date-named JPEGs and verbatim same-date caption text sidecars
+to Cape's existing safe Graphic Design folder. Published only the seven reviewed
+images through normal admin controls; text sidecars remain unpublished. Six are
+November2/4/9/11/16/18; one is October28, preserved in its true month and excluded
+by the existing current/next client projection. Logo unchanged. No dates,
+statuses, Teams, strategies, permissions, backend or Vercel changes.
+
+The existing publisher has no deliverable-ID link control. The six calendar
+post/file associations remain missing. Review-only packet
+`scripts/ops/cape-ready-post-asset-links-20261105.sql` awaits CA's explicit
+production-SQL approval; do not claim it applied. Live SELECT preflight matches
+six unique ready assets/posts. Local PostgreSQL success/idempotence and six
+refusal/atomic-rollback cases pass;23 existing focused library/calendar tests
+(including real local ownership/RLS SQL), build124app chunks and diff pass.
+Real Cape client session at390px shows six November files/thumbnails and a
+working separate-window image View with empty referrer. Screenshot:
+`%TEMP%/cape-brand-hub-ready-20261105.png`. Actual18November Download also passed:
+1,123,592bytes, SHA256 identical to the reviewed original. The download-event
+watcher timed out, but the actual file was independently verified without retry.
+Final calendar clicks follow the approved repair; no all-file download claim.
+
+November23 finished artwork and the exact November25 repost video selection are
+not established by this ready batch. Do not invent/move content or rewrite the
+DP/F slot classifications. #396/#668 own the links; #731 strategies and the
+staff/calendar/Piek Graphic Designer lanes remain separate. Full receipt is in
+the existing Cape launch review. Google Control Centre reference remains
+unavailable; no guessed tracker write.
+
+## 5 November — Cape real client-password sign-in verified
+
+CA requested Cape's login for a phone test. The normal signed-in Users → Client
+Access screen confirms Cape's existing account is Active. One normal existing-
+credential sign-in in a separate, initially signed-out in-app browser succeeded
+at `/login` → `/client`, visibly showing Cape Lumber and its client-only navigation,
+published October report and November overview. No admin-session copying, fabricated
+session, reset/provision, permission, content, SQL/backend or Vercel change. Credentials
+were not saved in source/receipts. This closes the untested normal-password step for
+Cape only; CA's actual physical-phone review and other clients' login checks remain.
+Private screenshot: `%TEMP%/cape-client-login-verified-20261105.jpg`. This docs-only
+receipt must not trigger deployment; latest frontend source-release gate is unchanged.
+
 ## 5 November — research applied to client website measurement labels (source only)
 
 Reviewed the latest saved 4 November research release `DIR261104A_0840_SearchMeasurementCorrections`
