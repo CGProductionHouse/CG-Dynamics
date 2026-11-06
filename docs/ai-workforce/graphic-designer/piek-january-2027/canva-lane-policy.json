@@ -3,11 +3,16 @@
   "clientId": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
   "masterDesignId": "DAHaD4mJnGY",
   "masterTitle": "PIEK GROUP OF COMPANIES | ACTIVE FROM 05 NOV 2026 | JAN 2027",
-  "legacyReadOnlyDesignIds": ["DAGcXGWhDhI"],
+  "legacyReadOnlyDesignIds": [
+    "DAGcXGWhDhI"
+  ],
   "continuation": {
     "ownerAuthorisedAt": "2026-11-05",
     "sourceDesignId": "DAGcXGWhDhI",
-    "copiedSourcePages": { "from": 1, "to": 51 },
+    "copiedSourcePages": {
+      "from": 1,
+      "to": 51
+    },
     "existingDraftOrScheduledArtworkCopied": false,
     "originalFileMutated": false,
     "scheduleCutoffDate": null,
@@ -15,7 +20,7 @@
     "copiedTextIntegrity": "first-49-pages-normalised-text-identical-12018-characters"
   },
   "observedAt": "2026-11-06",
-  "observedPageCount": 65,
+  "observedPageCount": 74,
   "pageCapacity": {
     "documentedMaxPages": 350,
     "source": "https://www.canva.com/en_gb/help/manage-pages/",
@@ -36,12 +41,12 @@
     },
     "drafts": {
       "pageId": "PBkggJvPWJCB8Kl5",
-      "observedPageIndex": 64,
+      "observedPageIndex": 73,
       "writePolicy": "protected-read-only"
     },
     "postedScheduled": {
       "pageId": "PBhXtZzkLlTlfdWK",
-      "observedPageIndex": 65,
+      "observedPageIndex": 74,
       "writePolicy": "protected-read-only"
     }
   },
@@ -51,7 +56,10 @@
     "moveExistingPagesAllowed": false,
     "deleteExistingPagesAllowed": false,
     "readProtectedHistoryAllowed": true,
-    "allowedMutations": ["edit-registered-working-pages", "insert-new-pages-before-drafts"],
+    "allowedMutations": [
+      "edit-registered-working-pages",
+      "insert-new-pages-before-drafts"
+    ],
     "freshBoundaryReadRequired": true,
     "explicitApprovalRequiredPerMerge": true
   },
@@ -59,18 +67,68 @@
     "separateWorkingDesignRequired": false,
     "officialClientDesignCount": 1,
     "officialDesignId": "DAHaD4mJnGY",
-    "editablePageIds": ["PB7GXQY2FRY4SmZL", "PBFhjhnLG7KsvSkM", "PBw695H0fKFBpM7k", "PBhSXtvYjyX4j2dl", "PBnxVnyFjbtxrQQS", "PB5ptGHb90d8ZXjs", "PB5r675n7lrFm7JZ", "PBxrsDTFfRXMtbhH", "PBQXNX2K6Fr3hkz8", "PBf4gQNK11W9Mnmy", "PB2W6cFZ0Z7pJ9mD", "PBP4JGdy6nLRjlTR"],
+    "editablePageIds": [
+      "PB7GXQY2FRY4SmZL",
+      "PBFhjhnLG7KsvSkM",
+      "PBnxVnyFjbtxrQQS",
+      "PBNrnXkWqDPH8kw2",
+      "PBbMwKqRZZ9xNlp8",
+      "PB2PhvZXtvxYrrVK",
+      "PB3wrbPz4RJCBg0j",
+      "PBFfytYXc5sg8b51",
+      "PBgBkkQgbCGQVSbY",
+      "PBSt5DpJ47zCKmvK",
+      "PBpjXgmRn7CTzmcX",
+      "PBclyWNc6S0tnFxr"
+    ],
     "supersededAgentDrafts": {
       "observedAt": "2026-11-06",
-      "pageIds": ["PBxRLPB4JKBHd91b", "PB4VJSCb8LY6TTnD"],
+      "pageIds": [
+        "PBxRLPB4JKBHd91b",
+        "PB4VJSCb8LY6TTnD",
+        "PBw695H0fKFBpM7k",
+        "PBhSXtvYjyX4j2dl",
+        "PB5r675n7lrFm7JZ",
+        "PBxrsDTFfRXMtbhH",
+        "PBQXNX2K6Fr3hkz8",
+        "PBf4gQNK11W9Mnmy",
+        "PB5ptGHb90d8ZXjs",
+        "PBP4JGdy6nLRjlTR",
+        "PB2W6cFZ0Z7pJ9mD"
+      ],
       "disposition": "Preserved in In Progress, visibly labelled SUPERSEDED DRAFT; excluded from current candidate IDs and export selection. No page deletion or protected/staff edits.",
-      "replacements": {"DP06": "PBQXNX2K6Fr3hkz8", "DP12": "PB2W6cFZ0Z7pJ9mD"},
+      "replacements": {
+        "DP06": "PBQXNX2K6Fr3hkz8",
+        "DP12": "PB2W6cFZ0Z7pJ9mD"
+      },
       "temporaryTransferDesignId": "DAHaJZO801I",
-      "transferState": "committed-and-native-layer-readback-verified; source remains TEMP because connector design deletion is unavailable"
+      "transferState": "committed-and-native-layer-readback-verified; source remains TEMP because connector design deletion is unavailable",
+      "graphicDepthRound2": {
+        "newPageIds": [
+          "PBNrnXkWqDPH8kw2",
+          "PBbMwKqRZZ9xNlp8",
+          "PB2PhvZXtvxYrrVK",
+          "PB3wrbPz4RJCBg0j",
+          "PBFfytYXc5sg8b51",
+          "PBgBkkQgbCGQVSbY",
+          "PBSt5DpJ47zCKmvK",
+          "PBpjXgmRn7CTzmcX",
+          "PBclyWNc6S0tnFxr"
+        ],
+        "observedRange": "64-72",
+        "oldNineDisposition": "Original artwork untouched except one clear SUPERSEDED DRAFT warning image each; no export/edit eligibility. No deletion or reordering.",
+        "transferDesignIds": [
+          "DAHaJxDYo3s",
+          "DAHaJ4gEWWc"
+        ],
+        "state": "saved-native-readback-verified; internal quality review, not approved"
+      }
     },
     "scaffoldReplacement": {
       "sourceDesignId": "DAHaIW00t7M",
-      "pageIds": ["PBFl866NzXhR28NN"],
+      "pageIds": [
+        "PBFl866NzXhR28NN"
+      ],
       "state": "completed-and-readback-verified-2026-11-06",
       "replacementPageId": "PBf4gQNK11W9Mnmy",
       "meaning": "Historical receipt only: own unverified-branch burger candidate was replaced by the current-site after-hours concept at the same position. All other text/image records match exactly. The removed page ID is no longer editable or present; this record grants no future deletion authority."
@@ -85,7 +143,10 @@
     },
     "sourceMasterPagesRemainUnchanged": true,
     "copySelectedPagesAllowed": true,
-    "allowedDestinations": ["IN_PROGRESS_TEMPLATES", "TO_BE_APPROVED"],
+    "allowedDestinations": [
+      "IN_PROGRESS_TEMPLATES",
+      "TO_BE_APPROVED"
+    ],
     "toBeApprovedBoundaryStatus": "verified-by-thumbnail-and-page-id-2026-11-05"
   },
   "notes": [
@@ -93,6 +154,7 @@
     "Copied brand/prompt guide pages preserve legacy material for reference, not verified current offers, contact details, branch services or publication claims.",
     "Page indexes can shift when new pages are inserted. Re-resolve all header page IDs immediately before every merge.",
     "Drafts and Posted / Scheduled are Amonique-controlled operational lanes. They may be read for anti-repetition evidence but never edited, moved or deleted by the agent.",
-    "Copying a prior page is a working-file operation only. It does not authorise reuse of its photograph, person, wording, concept or layout mechanism."
+    "Copying a prior page is a working-file operation only. It does not authorise reuse of its photograph, person, wording, concept or layout mechanism.",
+    "Owner rejected continued flatness/white logo plates. Nine independent graphic-depth revisions now occupy 64-72. Heading Home 41, Reset 44, Summer 61 unchanged."
   ]
 }

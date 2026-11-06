@@ -30,6 +30,19 @@ function colour(value, scope) {
 function geometry(layer) {
   return `position:absolute;left:${number(layer.x, 'x')}px;top:${number(layer.y, 'y')}px;width:${number(layer.width, 'width', 0.01)}px;height:${number(layer.height, 'height', 0.01)}px;opacity:${number(layer.opacity ?? 1, 'opacity', 0, 1)};transform:rotate(${number(layer.rotation ?? 0, 'rotation', -360, 360)}deg);`
 }
+function proportionalSource(layer) {
+  // Verified native-media dimensions declare an uncropped placement. A
+  // mismatched Canva frame crops a logo even when it reaches both page edges.
+  if (layer.sourceDimensions === undefined) return undefined
+  const width = number(layer.sourceDimensions.width, 'sourceDimensions.width', 1)
+  const height = number(layer.sourceDimensions.height, 'sourceDimensions.height', 1)
+  const relativeError = Math.abs((layer.width / layer.height) / (width / height) - 1)
+  // Native import rounds both frame axes by up to half a design pixel.
+  const tolerance = 0.005 + 0.51 / layer.width + 0.51 / layer.height
+  if (relativeError > tolerance) throw new Error(`Source aspect mismatch for ${layer.id}; use verified native dimensions and a proportional frame`)
+  return { width, height }
+}
+
 function assertReviewMetadata(bytes, mime) {
   const deny = () => { throw new Error('Private EXIF/XMP/IPTC/text metadata found; prepare a clean review derivative first') }
   if (mime === 'image/png') {
@@ -152,7 +165,8 @@ export function buildNativeCanvaPackage(document, jobDirectory, { maxBytes = LIM
         const assetId = required(layer.assetId, 'native assetId')
         if (!/^MA[a-zA-Z0-9_-]+$/.test(assetId)) throw new Error('Expected a verified native Canva asset ID')
         if (!['replace-frame', 'delete-and-insert'].includes(layer.bindingMode)) throw new Error('Declare raster replacement or vector insertion explicitly')
-        Object.assign(record, { nativeAssetId: assetId, bindingMode: layer.bindingMode, bindingRequired: true })
+        const sourceDimensions = proportionalSource(layer)
+        Object.assign(record, { nativeAssetId: assetId, bindingMode: layer.bindingMode, bindingRequired: true, ...(sourceDimensions ? { sourceDimensions } : {}) })
         return `<img data-layer-id="${label}" alt="UNBOUND NATIVE ASSET ${assetId} | ${label}" src="${TRANSPARENT_PIXEL}" style="${box}">`
       }
       throw new Error(`Unsupported layer type ${layer.type}; do not flatten silently`)

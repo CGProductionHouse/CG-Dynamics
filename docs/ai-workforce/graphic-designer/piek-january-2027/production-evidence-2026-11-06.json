@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
   "observedAt": "2026-11-06",
-  "state": "owner-rejected-prior-execution-six-revisions-saved-internal-quality-review",
+  "state": "owner-flatness-feedback-nine-graphic-depth-reworks-saved-internal-review",
   "clientId": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
   "month": "2027-01-01",
   "officialCanva": {
     "designId": "DAHaD4mJnGY",
     "title": "PIEK GROUP OF COMPANIES | ACTIVE FROM 05 NOV 2026 | JAN 2027",
-    "pageCount": 65,
+    "pageCount": 74,
     "legacyReadOnlyDesignId": "DAGcXGWhDhI",
     "workingHeaders": {
       "inProgress": {
@@ -20,11 +20,11 @@
       },
       "drafts": {
         "pageId": "PBkggJvPWJCB8Kl5",
-        "index": 64
+        "index": 73
       },
       "postedScheduled": {
         "pageId": "PBhXtZzkLlTlfdWK",
-        "index": 65
+        "index": 74
       }
     }
   },
@@ -33,31 +33,34 @@
       "provisionalId": "2027_01_PIEK_DP_01",
       "brandScope": "PIEK_GROUP",
       "concept": "New Year",
-      "canvaPageId": "PBw695H0fKFBpM7k",
-      "observedPageIndex": 42,
+      "canvaPageId": "PBpjXgmRn7CTzmcX",
+      "observedPageIndex": 71,
       "monthlyDeliverableId": null,
-      "state": "revised-internal-human-approval-pending",
-      "executionRevision": "Removed projectively warped photo/paper plane; real uniformly scaled drone scene, separate measured canopy silhouette and live year."
+      "state": "graphic-depth-r2-saved-human-approval-pending",
+      "executionRevision": "Large live year with exact aerial canopy overlap, navy contour field and source-faithful panorama.",
+      "previousOwnDraftPageId": "PBw695H0fKFBpM7k"
     },
     {
       "provisionalId": "2027_01_PIEK_DP_02",
       "brandScope": "PIEK_GROUP",
       "concept": "People",
-      "canvaPageId": "PBhSXtvYjyX4j2dl",
-      "observedPageIndex": 43,
+      "canvaPageId": "PBSt5DpJ47zCKmvK",
+      "observedPageIndex": 70,
       "monthlyDeliverableId": null,
-      "state": "revised-internal-human-approval-pending",
-      "executionRevision": "Larger exact Lastica headline improves phone hierarchy; original smiling staff/source and logo retained."
+      "state": "graphic-depth-r2-saved-human-approval-pending",
+      "executionRevision": "Actual smiling worker/car cutout, matching subdued station environment, halftone and continuous sculpted fields.",
+      "previousOwnDraftPageId": "PBhSXtvYjyX4j2dl"
     },
     {
       "provisionalId": "2027_01_PIEK_DP_03",
       "brandScope": "PIEK_GROUP",
       "concept": "Coffee routine",
-      "canvaPageId": "PB5r675n7lrFm7JZ",
-      "observedPageIndex": 46,
+      "canvaPageId": "PBgBkkQgbCGQVSbY",
+      "observedPageIndex": 69,
       "monthlyDeliverableId": null,
-      "state": "revised-internal-human-approval-pending",
-      "executionRevision": "Replaced weak dark counter with a genuine College Brew daylight exterior photograph; exact type and logo retained, no invented address/hours."
+      "state": "graphic-depth-r2-saved-human-approval-pending",
+      "executionRevision": "Exact College Brew flag isolated over its own soft environment; enlarged Lastica hierarchy and contour texture.",
+      "previousOwnDraftPageId": "PB5r675n7lrFm7JZ"
     },
     {
       "provisionalId": "2027_01_PIEK_DP_04",
@@ -66,27 +69,30 @@
       "canvaPageId": "PBFhjhnLG7KsvSkM",
       "observedPageIndex": 41,
       "monthlyDeliverableId": null,
-      "state": "retained-internal-human-approval-pending"
+      "state": "retained-owner-supported-direction-not-release-approved"
     },
     {
       "provisionalId": "2027_01_PIEK_DP_05",
       "brandScope": "ENGEN",
       "concept": "School return",
-      "canvaPageId": "PBxrsDTFfRXMtbhH",
-      "observedPageIndex": 47,
+      "canvaPageId": "PBFfytYXc5sg8b51",
+      "observedPageIndex": 68,
       "monthlyDeliverableId": null,
-      "state": "retained-internal-human-approval-pending"
+      "state": "graphic-depth-r2-saved-human-approval-pending",
+      "previousOwnDraftPageId": "PBxrsDTFfRXMtbhH",
+      "executionRevision": "Real chip rack, blue/red graphic sweeps, halftone and prominent 13 January public-school date; no invented offer."
     },
     {
       "provisionalId": "2027_01_PIEK_DP_06",
       "brandScope": "ENGEN",
       "concept": "Convenience",
-      "canvaPageId": "PBQXNX2K6Fr3hkz8",
-      "observedPageIndex": 63,
+      "canvaPageId": "PB3wrbPz4RJCBg0j",
+      "observedPageIndex": 67,
       "monthlyDeliverableId": null,
-      "state": "revised-internal-human-approval-pending",
+      "state": "graphic-depth-r2-saved-human-approval-pending",
       "supersededAgentPageId": "PBxRLPB4JKBHd91b",
-      "executionRevision": "Clean native rebuild removes inaccessible tilted panels and redundant vertical READY. Natural photo mount, independent soft shadow, corrected fluorescent cast, exact logos."
+      "executionRevision": "Correctly colour-managed actual restocking worker cutout, softly separated shop context, blue fields/halftone; complete exact-aspect footer.",
+      "previousOwnDraftPageId": "PBQXNX2K6Fr3hkz8"
     },
     {
       "provisionalId": "2027_01_PIEK_DP_07",
@@ -95,35 +101,41 @@
       "canvaPageId": "PBnxVnyFjbtxrQQS",
       "observedPageIndex": 44,
       "monthlyDeliverableId": null,
-      "state": "revised-internal-human-approval-pending",
+      "state": "retained-owner-supported-direction-not-release-approved",
       "executionRevision": "Removed arbitrary oval and splash; real worker/car background-removal silhouette, readable live Tall type and independent exact footer/logos."
     },
     {
       "provisionalId": "2027_01_PIEK_DP_08",
       "brandScope": "SASOL",
       "concept": "After-hours forecourt",
-      "canvaPageId": "PBf4gQNK11W9Mnmy",
-      "observedPageIndex": 49,
+      "canvaPageId": "PB2PhvZXtvxYrrVK",
+      "observedPageIndex": 66,
       "monthlyDeliverableId": null,
-      "state": "retained-internal-human-approval-pending"
+      "state": "graphic-depth-r2-saved-human-approval-pending",
+      "previousOwnDraftPageId": "PBf4gQNK11W9Mnmy",
+      "executionRevision": "Exact night canopy crosses live Tall headline; independent sky/ground gradients and contours; verified forecourt-hours copy."
     },
     {
       "provisionalId": "2027_01_PIEK_DP_09",
       "brandScope": "SASOL",
       "concept": "Kroonstad everyday",
-      "canvaPageId": "PB5ptGHb90d8ZXjs",
-      "observedPageIndex": 45,
+      "canvaPageId": "PBclyWNc6S0tnFxr",
+      "observedPageIndex": 72,
       "monthlyDeliverableId": null,
-      "state": "retained-internal-human-approval-pending"
+      "state": "graphic-depth-r2-saved-human-approval-pending",
+      "previousOwnDraftPageId": "PB5ptGHb90d8ZXjs",
+      "executionRevision": "Real attendant isolated against ice-blue paper/orbit graphic with large live Tall type and continuous navy footer."
     },
     {
       "provisionalId": "2027_01_PIEK_DP_10",
       "brandScope": "GET_TOGETHER",
       "concept": "Lunch break",
-      "canvaPageId": "PBP4JGdy6nLRjlTR",
-      "observedPageIndex": 51,
+      "canvaPageId": "PBbMwKqRZZ9xNlp8",
+      "observedPageIndex": 65,
       "monthlyDeliverableId": null,
-      "state": "retained-internal-human-approval-pending"
+      "state": "graphic-depth-r2-saved-human-approval-pending",
+      "previousOwnDraftPageId": "PBP4JGdy6nLRjlTR",
+      "executionRevision": "Whole real lunch plate, pie/chips/gravy cutout, independent contact shadow, curved navy base, halftone/contours and transparent exact logo."
     },
     {
       "provisionalId": "2027_01_PIEK_DP_11",
@@ -132,18 +144,19 @@
       "canvaPageId": "PB7GXQY2FRY4SmZL",
       "observedPageIndex": 61,
       "monthlyDeliverableId": null,
-      "state": "retained-internal-human-approval-pending"
+      "state": "retained-owner-supported-direction-not-release-approved"
     },
     {
       "provisionalId": "2027_01_PIEK_DP_12",
       "brandScope": "GET_TOGETHER",
       "concept": "Summer gatherings",
-      "canvaPageId": "PB2W6cFZ0Z7pJ9mD",
-      "observedPageIndex": 62,
+      "canvaPageId": "PBNrnXkWqDPH8kw2",
+      "observedPageIndex": 64,
       "monthlyDeliverableId": null,
-      "state": "revised-internal-human-approval-pending",
+      "state": "graphic-depth-r2-saved-human-approval-pending",
       "supersededAgentPageId": "PB4VJSCb8LY6TTnD",
-      "executionRevision": "Clean native rebuild removes tilted panel and crop; full real food hero, photographic tonal separation, live Anton/Barlow type and exact logos."
+      "executionRevision": "One actual canap\u00e9 isolated above its own macro context; sculpted brand colour field, texture, shadow and transparent exact logo.",
+      "previousOwnDraftPageId": "PB2W6cFZ0Z7pJ9mD"
     }
   ],
   "proof": {
@@ -289,6 +302,91 @@
         "readOnlyVerificationCancelled": true,
         "currentNativeBindingVerifierPassed": true
       }
+    },
+    "graphicDepthRound2": {
+      "ownerFeedback": "Still flat. No default white logo plates or random empty space. Use the actual graphic brand language: source cutouts, gradients, textures, forms and depth. Heading Home, Reset and Summer are stronger directions.",
+      "nineRevisedPosterNumbers": [
+        1,
+        2,
+        3,
+        5,
+        6,
+        8,
+        9,
+        10,
+        12
+      ],
+      "retainedPosterNumbers": [
+        4,
+        7,
+        11
+      ],
+      "newPagesRange": "64-72",
+      "newPageCount": 9,
+      "liveTextRecords": 27,
+      "independentPhotoMaskLogoGraphicRecords": 68,
+      "photographReconstruction": false,
+      "gradientTextureFormLayers": "Independent raster assets, not editable vector paths or PSD effects. Live text, original image/mask and logos remain separate.",
+      "nativeCanvaMasking": {
+        "successfulRealSubjectExtractions": 6,
+        "transparentOriginalLogoExtraction": 1,
+        "schoolRackExtraction": "Failed: no clear subject. Used actual scene with deliberate graphic treatment instead.",
+        "kroonstadConflict": "One transient 409; one retry succeeded."
+      },
+      "reversibleHistory": {
+        "unmodifiedExistingPages": 56,
+        "allUnmodifiedNativeRecordsMatched": true,
+        "nineSupersededDrafts": "Only one visible warning image each; all pre-existing native records preserved.",
+        "all65PriorPageIdsInSameRelativeOrder": true,
+        "pageDeletionOrReordering": false
+      },
+      "amendment": {
+        "pageId": "PBbMwKqRZZ9xNlp8",
+        "test": "Just for lunch. -> A little lunch break. -> Just for lunch.",
+        "nonTargetNativeRecordsIdentical": true
+      },
+      "verifiedSourceDimensions": {
+        "engenFooter": [
+          1728,
+          155
+        ],
+        "sasolLogo": [
+          806,
+          345
+        ],
+        "piekLogo": [
+          800,
+          342
+        ],
+        "getTogetherLogo": [
+          1218,
+          659
+        ]
+      },
+      "footerCropCorrection": "HD revealed cropped Engen mark in 1080x116 frame. Corrected to full source aspect 1080x96.875; both Engen and both Sasol brand-frame pages re-exported at 2x. Shared sourceDimensions guard and regression test added.",
+      "actualCurrentHdExports": 12,
+      "hdDimensions": [
+        2160,
+        2700
+      ],
+      "exportSelection": "41,44,61,64-72",
+      "correctedBrandFrameReExport": "66-68,72",
+      "reviewPixelValuesPreservedDuringMetadataCleaning": true,
+      "nativeBindingVerifierPassed": true,
+      "finalReadOnlyTransactionCancelled": true,
+      "humanCreativeApproval": false,
+      "whatsappSends": 0,
+      "portalFinalUploads": 0,
+      "privateReceipts": "graphic-depth-20261106: saved-integrity-receipt.json, final-native-binding-receipt.json, actual-HD-export-receipt.json, final-graphic-scenes.json, actual-HD-twelve-graphic-depth-board.jpg; originals and raw exports retained.",
+      "validation": {
+        "focusedNodeTests": 25,
+        "pythonColourTests": 5,
+        "monthPlanValidator": true,
+        "skillValidator": true,
+        "laneBoundaryAudit": true,
+        "actualNativeBindings": true,
+        "fullBuild": "passed tsc -b and Vite 7.3.6; existing Browserslist/chunk warnings"
+      }
     }
   },
   "delivery": {
@@ -311,8 +409,8 @@
       2160,
       2700
     ],
-    "latestExportState": "Twelve current versions exported at actual Canva 2x for private quality review, not sent or client approved.",
-    "latestExportPageRange": "41-47,49,51,61-63",
+    "latestExportState": "Twelve current candidates at genuine Canva 2160x2700 PNG High. Four exact brand-frame corrections separately re-exported; internal quality review only.",
+    "latestExportPageRange": "41,44,61,64-72",
     "furtherSendsHeld": true,
     "holdReason": "Owner explicitly stopped the rejected batch and requested execution rework. No further WhatsApp sends during this rework."
   },

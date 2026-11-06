@@ -99,3 +99,21 @@ test('native logo binding requires exact scope, asset and position with no remai
   assert.equal(verifyNativeBindings(manifest, { fills: [{ ...fill, containerElement: { position: { left: 800, top: 1199.86 }, dimension: { width: 200, height: 100.269 } } }] }).passed, true)
   assert.equal(verifyNativeBindings(manifest, { fills: [{ ...fill, containerElement: { position: { left: 800, top: 1200 }, dimension: { width: 230, height: 100 } } }] }).passed, false)
 })
+
+test('verified native source aspect prevents the real full-bleed footer crop failure', () => {
+  const { root, scene } = fixture()
+  const footer = scene.pages[0].layers[2]
+  Object.assign(footer, { id: 'approved-footer', x: 0, y: 1234, width: 1080, height: 116, sourceDimensions: { width: 1728, height: 155 } })
+  assert.throws(() => buildNativeCanvaPackage(scene, root), /Source aspect mismatch/)
+  Object.assign(footer, { y: 1253.125, height: 96.875 })
+  const { manifest } = buildNativeCanvaPackage(scene, root)
+  assert.deepEqual(manifest.pages[0].layers[2].sourceDimensions, { width: 1728, height: 155 })
+  const fill = { page_index: 1, asset_id: footer.assetId, containerElement: { position: { left: 0, top: footer.y }, dimension: { width: 1080, height: 96.875 } } }
+  assert.equal(verifyNativeBindings(manifest, { fills: [fill] }).passed, true)
+  fill.containerElement.dimension.height = 116
+  assert.equal(verifyNativeBindings(manifest, { fills: [fill] }).passed, false)
+  footer.sourceDimensions.height = 0
+  assert.throws(() => buildNativeCanvaPackage(scene, root), /sourceDimensions.height/)
+  Object.assign(footer, { width: 195, height: 84, sourceDimensions: { width: 800, height: 342 } })
+  assert.doesNotThrow(() => buildNativeCanvaPackage(scene, root))
+})

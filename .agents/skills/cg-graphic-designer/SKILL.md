@@ -82,6 +82,17 @@ Owner rejected the 6 November Piek execution despite valid native layers and suc
 
 ## Composition and amendments
 
+### Graphic execution standard from the Piek rework
+
+Owner rejected the next revision for continued flatness, logo plates and unused space. A clean photo with a header and footer is not this client's full graphic language. Study the actual brand's native layer relationships: sculpted colour fields, selective gradients, halftone/paper texture, large live typography, real foreground cutouts and contact shadows. State the purpose of each device; do not copy historical photographs/offers or add the same decorative mechanism to every post. Preserve owner-supported directions rather than rebuilding the whole month indiscriminately.
+
+- Inspect transparent logos on the actual intended background. Remove an unwanted source background only when the original mark, enclosed white lettering and coloured geometry remain intact. Integrate contrast into the composition; do not default to a small white rectangle behind each logo.
+- Keep actual subject masks independent. Background removal can fail on a rack or choose only one canapé; inspect what was really extracted. Use a deliberate photographic composition when no useful subject can be separated. Do not claim successful extraction from a failed operation.
+- A source-edge cut through a car, arm or pump must either reach the page bleed, be masked deliberately or be hidden by an intentional foreground graphic. Inspect every visible edge. Moving a full-canvas graphic upwards can reveal a hard bottom boundary; prepare continuous bleed rather than adding another arbitrary card.
+- Read original native asset dimensions before placement. The real 1728×155 Engen footer was cropped in a 1080×116 frame despite apparently covering both page edges. Use a 1080×96.875 proportional frame and the existing brand background for bleed. Declare `sourceDimensions` on uncropped native assets; the packager checks source aspect with native half-pixel rounding tolerance. Thumbnail dimensions are not exact source dimensions.
+- Re-inserting a vector/image puts it above existing layers. This can hide a logo or caption even if the same coordinates are used. If the API cannot restore the intended stacking, rebuild that one scene with the correct ordering; inspect the new preview before transfer.
+- Check the full grid at phone size, then inspect real 2× exports for logo clipping, unreadable/occluded copy, bright halos and distorted masks. Successful native record checks do not establish creative approval. Keep old own drafts clearly superseded and excluded from the current export/delivery selection.
+
 ### Native Canva path without desktop takeover
 
 The private HTML import path is now exercised with actual Piek drafts. Use `scripts/poster-studio/canva-native-package.mjs` to package a private structured scene: exact kit fonts/colours, clean source derivatives, independent images, live text, rectangles and explicitly bound native logo assets. Import through the authorised Canva connector's `design_file` field. This is a native composition import, not image-to-design guessing or a flattened-poster upload. Keep accurate `data-speaker-notes` and page labels in the package; the editing connector cannot fix inherited notes or set font families afterwards.

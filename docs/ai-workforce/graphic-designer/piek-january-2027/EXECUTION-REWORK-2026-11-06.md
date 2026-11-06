@@ -45,3 +45,8 @@ The earlier browser-disabled/no-export/no-send receipt is superseded. Before the
 A real normal-company-ChatGPT Piek Project conversation successfully inspected exact saved Canva headline, fresh notes and native layer counts. That proves connected **read access only**. Poster Studio is not yet installed/discovered as a company Work skill, and a normal-company-ChatGPT create/amend/export round trip remains unverified. Codex-side production tests do not close that gate.
 
 Next: use the real HD set for final composition/source scrutiny and human creative feedback, then prove an isolated amendment/export through the normal company ChatGPT entrypoint. Resume approval-group delivery only with the revised current versions after that quality check. No deployment, migration, production-service change, new subscription, API charge or hosting; incremental cost remains **R0**. PR #956 / issues #948 and #955 retain this lane.
+
+
+## Subsequent owner graphic-depth feedback
+
+The six-revision creative checkpoint above was superseded after owner rejected continued flatness and white logo plates. See [the nine-revision graphic-depth record](GRAPHIC-DEPTH-REWORK-2026-11-06.md) and current production evidence for the actual 74-page state, 12 current candidates and new export mapping. Older trial page numbers and six-revision acceptance language are historical only.
