@@ -1,5 +1,7 @@
 # Nolan Studio tutorial execution board
 
+**6November overnight:** [native CapCut type/compound-camera](CAPCUT-COMPOUND-TYPE-STUDY-20261106.md) belongs to existing pop-up/staggered-type row21. Four150-frame exports/control/reopen/revision and actual encoded inspection; exact parity/easing remain failed, sound silent. Located MattLoui moving tutorial is not yet watched/heard. No new family or mastery promotion.
+
 **3November production integration:** [complete45-family route/work map](SKILL-INTEGRATION-MAP-20261103.md) makes each card's actual implementation and unfinished gate explicit. The new shared [aperture/shine controls](PORTABLE-TYPE-OPERATORS-20261103.md) advance existing footage-in-type and kinetic-caption routes, not new family/mastery counts. Four shared functions are exercised by actual plan-to-encoded-output tests;44 contracts pass. The dark aperture hold fails as a hook and remains rejected. Actual-camera capture gates and research-only26/42/52 are still open; do not fabricate their settings or start another stock-montage loop. Current Action Sports assignment is [research/game plan before owner-guided execution](ACTION-SPORTS-GAME-PLAN-20261103.md).
 
 **Office background portrait graphic-blur continuation, 29 October:** [basketball moving-title screen](PORTRAIT-BASKETBALL-GRAPHIC-BLUR-SCREEN-20261029.md) adds four72-frame silent portrait outputs: no-title plain, sharp title,180° and protected90° motion accumulation. All decode/move; at frame16 title-region difference from sharp falls10.691→5.114RGB levels, ball region0.000vs plain. Revision protects12/12 opening and48/48tail decoded frames; only entry12–23 changes. Strong blur delays reading, restrained blur is clearer but the word repeats the action and sits low near platform UI. Prefer plain; phone/heard/brand/native/creative gates open. **180** unique private outputs across **40** existing families; all45 retain open gates.
@@ -231,3 +233,4 @@ The [practice capture pack](PRACTICE-CAPTURE-PACK.md) specifies the real source 
 
 
 PSG5November [actual film application and failures](PSG-EXCESS-SHARED-APPLICATION-20261105.md): foreground/outline typography, semantic term focus, projective camera, realPSGpeople and boundedstockstabilisation;733frame29.32s localR04, exact composed sound checked, no hearing/native/phone/client/mastery claim.53shared cards retained. Canonical new-video identity unresolved; no WhatsApp send.
+

@@ -1,5 +1,7 @@
 # Nolan Studio tutorial-skill status
 
+**6November overnight CapCut:** [native stagger/compound study](CAPCUT-COMPOUND-TYPE-STUDY-20261106.md): four150-frame local exports, actual close/reopen/export, separate editable words and linked camera; nested assets protected in endpoint revision. Exact decoded reopen6/150 and prefix6/61 **fail**, curves remain linear, AAC silent. All300 R01/R02 frames inspected;93px minimum ink margin. Existing53 families, no mastery or client-hook promotion.
+
 **6 November MSI reconciliation:** [Actual audit/install receipt](MSI-FOUNDATION-RECONCILIATION-20261106.md) carries MSI's missing finishing/client-copy lessons into the existing PC foundation. 92 tests and all 53 UTF-8 card validators pass; MSI's installed canonical tree hashes CURRENT. 53 cards/42 recipes are documented mechanisms, not mastery. No tutorial repeated or client cut changed; PC installation of this delta is pending.
 
 **6 November foundation:** [shared planning and actual typography proof](EDIT-FOUNDATION-20261106.md) connects the current 53 documented cards, exact approved client baselines, dated South African context and live Dynamics strategy to the existing production plan. Twelve foundation regressions pass; current production context requires explicit skill decisions and a source-bound, visibly changing first-three-second hook. PSG R08 brand approval is preserved, while its poster-like opening is excluded as a future hook precedent. The silent moving-type protected revision verifies 21/21 encoded opening frames; no new family, creative mastery, sound or MSI installation claim.
@@ -142,3 +144,4 @@ The [source-screen failures](MOTION-SOURCE-SCREEN.md) and [flash rejection](FLAR
 
 
 PSG5November [actual film application and failures](PSG-EXCESS-SHARED-APPLICATION-20261105.md): foreground/outline typography, semantic term focus, projective camera, realPSGpeople and boundedstockstabilisation;733frame29.32s localR04, exact composed sound checked, no hearing/native/phone/client/mastery claim.53shared cards retained. Canonical new-video identity unresolved; no WhatsApp send.
+

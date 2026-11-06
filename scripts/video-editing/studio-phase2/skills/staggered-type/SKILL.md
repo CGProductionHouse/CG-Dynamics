@@ -5,6 +5,10 @@ description: Plan readable word-by-word kinetic titles that reinforce an approve
 
 # Staggered pop-up words — rendered technique proof
 
+## 6 November native CapCut compound study
+
+[Actual CapCut study](../../CAPCUT-COMPOUND-TYPE-STUDY-20261106.md): separate native Montserrat Bold words, position/opacity entrances, editable compound and later linked camera. Four150-frame exports decode; actual close/reopen/export witnessed. Endpoint revision preserves nested typography/assets. Exact equality **fails**: reopen6/150, opening6/61. Both words Bold, curves linear, audio silent; blank/fading opening rejected as client hook. UI units require actual encoded-placement checks. Moving tutorial, native ease-out/copy revision, purposeful heard cue, phone and second-PC gates remain; no mastery.
+
 ## 6 November mixed-weight baseline and actual encoded protection
 
 Use [render_baseline_ab.py](render_baseline_ab.py) with an explicit licensed source/font and their SHA256 values. The [foundation study](../../EDIT-FOUNDATION-20261106.md) records actual44pxRegular/76pxBold common-baseline type, masked rises and a MORE→LAST revision on existing moving coffee. First full-GOP renders protected21/21 frames before encoding but0/21 after encoding; that claim failed. `--protected` reuses one encoded opening segment, then separate changed tails: actual21/21 encoded prefix frames match. Three125frame silent controls and two protected finals decode; final1×muted playback125f/0dropped, contacts/fullsize inspected. Source is an ongoingpour, not an accepted new hook; no hearing/phone/native/mastery claim. Keep plain footage and actual story/source gates.
@@ -26,3 +30,4 @@ This card does not authorize the reference footage, creator's graphics or music.
 ## Office native continuation28October2026
 
 [Actual Premiere study](../../OFFICE-NATIVE-TYPE-STUDY-20261028.md) adds a licensed moving-coffee control, two native Arial Bold text layers with separate position/opacity keys, a DETAILS→RITUALS revision after reopening, and a second reopen/export. All four72-frame outputs decode; R02/reopened export72/72 decoded frames match. One-PC native editing is demonstrated for this proof; its modest linear entrances, silent timing and high top word do not establish reference recreation, platform-safe/human acceptance, sound, second-PC relink or mastery. The study records actual settings, source/output hashes and UI failures.
+

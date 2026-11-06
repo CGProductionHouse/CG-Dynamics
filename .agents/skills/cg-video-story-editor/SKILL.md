@@ -5,6 +5,8 @@ description: Plan, assemble, review, and hand off CG Production House client vid
 
 # CG video story editor
 
+**6November overnight CapCut practice:** [native editable type/compound camera](../../../scripts/video-editing/studio-phase2/CAPCUT-COMPOUND-TYPE-STUDY-20261106.md) extends the existing staggered-type family with actual controls/save/reopen/export. Retain static comparison, endpoint revision and failed encoded-parity/easing gates. Actual font is Bold; no mixed-weight, heard cue, client-hook, second-PC or mastery promotion. Same shared library only.
+
 **6November two-PC day reconciliation:** [MSI's component/stability lessons](references/msi-finishing-and-client-copy.md) now include withdrawn R07, rejected jittery R08 and the actual native Canva R09 fallback. Preserve supplied media's intended role and inspect moving attachments. [MSI's bounded GPU sound recovery](references/autonomous-audio-review.md#6november-msi-recovery--documented-not-installed-on-pc) is documented from actual private records, not installed/qualified on PC. [The existing day reconciliation](../../../scripts/video-editing/studio-phase2/MSI-FOUNDATION-RECONCILIATION-20261106.md) routes all PC/MSI deltas and access limits; use shared PR910, never overwrite it with an older production-branch skill copy.
 
 **6November camera tutorial on actual moving footage:** [source-bound application](../../../scripts/video-editing/studio-phase2/FOOTAGE-CAMERA-APPLICATION-20261106.md) adds fixed/single-plane/depth controls, protected revision, full-path type-margin repair and a separate unheard cue audition. Use the existing camera/type operators and verified brand/source inputs. Modest parallax is a design choice, not automatic quality; no native, face, phone, hearing or mastery promotion.
@@ -126,3 +128,4 @@ Before any owner-review video send, run local audio checks on the **exact final 
 ## MSI5November review lessons, reconciled for PC
 
 **Review-draft stop gate (5 November owner correction):** a technically exported video is still a private study until the viewer, local and seasonal reason, client service, brand evidence, aspect-ratio treatment, first-three-second hook, source roles, motion throughout and exact-export review have all been recorded against the actual cut. If the editor can see an invented font/colour, flat scripted UI, repeated generic boxes, a blurred wide-video filler, a frozen photo with text, or a sequence that needs an explanation to connect its shots, rebuild before sending it to the owner or approval group. See [production standard](references/production-standard.md) and [story gate](references/story-preproduction-gate.md). This is a human-visible gate; a codec check cannot pass it.
+
