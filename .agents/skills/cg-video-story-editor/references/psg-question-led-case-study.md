@@ -89,3 +89,23 @@ The PSG client kit now holds the source logo, visual references, a licensed musi
 The kit lives locally under `C:\Users\chris\Videos\CG-AI-Editing\Client-Libraries\PSG` and on the authorised personal OneDrive under `Clients/PSG/Video Editing Library`. That OneDrive folder currently has owner-only permissions, so team access has not been proven. The source-driven title route reduces repetitive production but does not fulfil the native Premiere graphics goal yet; keep that distinction visible in every handoff.
 
 **Reusable lesson:** install and validate the client's actual font once when available, or record the approved substitute and its licence. Build native Premiere text styles/MOGRTs for future edits; a source-driven graphic generator is a useful interim route if native automation is unavailable, provided its editability is described accurately. Keep brand shapes as reusable transparent overlays and only use them where they frame a meaningful beat. Do not build a new Canva text atlas for every line. Keep an asset's source, rights, exact in/out and approval state beside it so the next editor can use judgment rather than rediscovering the archive.
+# 6 November 2026 — current logo correction takes precedence
+
+CA confirmed Amonique's exact CG Nolan Approvals08:17 correction: authored PSG
+logos throughout a film and its cover must match the **modern fleur/PSG mark in
+the actual official outro**. Historical oval Insure/Donald Murray Team graphics
+are not the current identity. The established client kit now binds
+`brand/graphics/PSG-Official-Outro-Mark-White.png` to its exact existing outro
+source, and keeps old files as superseded history outside the active asset list.
+Read that current kit; do not select a familiar historical PNG from its filename.
+
+R09 is a protected logo-only amendment of owner-approved R08, not another hook,
+font, song or source reset. Retain the accepted Montserrat Regular/Bold hierarchy,
+32.72s timing, dry selection button, exact music and full official seven-second
+outro. Actual lossless comparison preserves all643 body frames outside the logo
+rectangles and all175 outro frames; exact final decoded PCM equals R08. This
+proves bounded protection, not fresh hearing, a better hook or native editability.
+The historical photographs' backdrop/clothing remain photographic evidence,
+not silently retouched branding. Future new films still need an effective
+source-bound opening; this logo correction does not repair the criticised opener.
+
