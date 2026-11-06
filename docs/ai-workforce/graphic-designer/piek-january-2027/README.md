@@ -8,9 +8,25 @@ This directory is the versioned proposal and evidence gate for issue #955. It do
 - Latest observed package baseline: 12 designed posters and 4 professional videos.
 - January 2027 Client Schedule query returned no rows. Every proposed poster therefore uses a provisional ID and `monthlyDeliverableId: null`.
 - Four separate Canva Brand Kits were verified for Piek Group, Get Together, Engen and Sasol. They must never be blended into one generic Piek style.
-- The authorised Canva connector can list those four kits and read the 352-page Piek history design directly from company ChatGPT. Routine brand/reference retrieval therefore does not require browser or desktop takeover; final creation, isolated amendment and export still require an end-to-end connector proof.
+- The authorised Canva connector can list the kits and read history from company ChatGPT. Native creation/amendment is now proved through this development task; the everyday company-ChatGPT creation/amendment/export loop and true HD export remain unverified.
 - One active official Canva file per client. The owner explicitly authorised a dated continuation after the previous file reached capacity. Active Piek production now uses `DAHaD4mJnGY`; legacy `DAGcXGWhDhI` retains existing Drafts/Posted/Scheduled and history. The guard checks active-file identity, registered page IDs and current lane positions. Legacy history remains read-only.
-- Existing OneDrive `CG Creative Assistant` folders remain the media/history authority. This work records locators rather than duplicating client assets in Git.
+- OneDrive `Photos` and `Brand Identity` retain original media authority. `CG Creative Assistant` provides curated helper views; `READY_UNUSED` is not a global unused certificate. No private client media is committed to Git.
+
+## 6 November saved monthly candidates — current snapshot
+
+The active official file has **63 pages**. Twelve January artwork candidates are saved: existing Engen return-travel proof at 41, ten new drafts at 42–51 and the summer Get Together proof at 61. In Progress remains 23; To Be Approved 52; Drafts 62; Posted/Scheduled 63. See [the exact candidate/page and proof receipt](production-evidence-2026-11-06.json). These are internal candidates, not scheduled or approved final deliverables. Three candidates per scope remain a provisional allocation.
+
+Owner explicitly authorised continued saves, requested stronger contrast/crispness, caption-plus-HD-image delivery to Picasso approvals using Nolan's WhatsApp, and final storage only in the client portal. Ten revised photo derivatives preserve originals and private metadata boundaries. An initial contrast trial was rejected because it introduced clipping; the accepted luminance/detail pass adds no measured RGB clipping. Every new text/photo/logo record was read back after saving and transfer. All 101 non-target text and 169 non-target image records remained identical during the ten-page replacement; only unchanged agent-created scaffolds were removed.
+
+An uncertain-branch burger concept was replaced with a genuine current-site Sasol Langenhoven Park night photograph and verified 24-hour **forecourt** fact. The actual shared native-package CLI produced the replacement; its three live text and three independent image/logo records, accurate notes and exact native-logo binding passed inspection. Every other page record remained unchanged. The repeated Langenhoven Park branch in wash/after-hours concepts is explicitly flagged for human monthly review; different services/photos do not erase that repetition signal.
+
+A real 12-candidate ledger run fingerprinted 13 source files in 3.456 seconds (12 candidates plus one identified historical source). No exact-source, pHash, headline or brand-scope blockers were detected. It retained broad service/subject overlap, two known candidate branch pairs, one daily-routine concept pair and a same-shoot warning: the DP07 source was captured 52 seconds / 40 frame numbers from the human-history photo in pages 94/241. Negative duplicate checks are not creative approval; unresolved visible-person identities and Get Together photo branches remain explicit. DP03 was amended from a second pause concept to **BACK TO THE COFFEE RUN.** Two text records changed; every other text and image record matched after commit and read-back. A current private 12-up review board includes that amendment and the night replacement.
+
+The owner confirmed the live Piek website as the current location/service authority. A fresh Dynamics caption guide confirms differentiated voices and at most five relevant hashtags. Twelve private caption drafts are prepared, signed PICASSO; historical notes are never reused blindly. The two older proofs still have inherited read-only notes and need final caption/naming reconciliation before delivery.
+
+No HD export, WhatsApp send or client-final upload is claimed. All browser routes currently return **`Local browser use is disabled in Work settings`**, including the internal browser, while the Canva editing connector works. Its present tool catalogue has no export endpoint and no WhatsApp sender is exposed. An explicit request to enable the browser is pending; do not ask again for routine saving. Never upscale a preview and call it HD or use an unverified Nolan sender/group.
+
+Canonical empty final folders are prepared at `Clients/Piek Group/A_ClientPortal_Piek_Group/Graphic Design/2027/2027_01_JAN`, using the existing year/month builders. No artwork, captions, source files or drafts were uploaded there and no asset was published. Exact Amonique file/page naming, January real schedule IDs and final asset associations remain unverified; do not invent a short code, posting date or link. Temporary transfer/test designs are marked TEMP and are not alternate official client files; design deletion remains unavailable through the connector.
 
 ## Files
 
@@ -55,7 +71,7 @@ Owner rated the Engen direction positively but rejected the weak photo finish, r
 
 The live headline was positioned for a small, legible sign overlap. The original logo/footer assets remain intact. A separate exact `#134094` bleed extension covers transparent native-raster edge padding; the 480×600 Canva preview's complete bottom row is exact brand blue and footer side-edge channels differ by no more than one level. This is thumbnail and native-geometry verification, not full-resolution export acceptance. All non-target page text/image records and the target wording remain unchanged.
 
-**Revision is unsaved pending preview approval**, transaction `8646306621875119084`. The previously saved version remains the current committed page. Private source/grade/mask/registration/before-after receipts remain outside Git. General finishing, depth-opportunity and rendered-bleed checks are now part of the reusable skill.
+This feedback revision was subsequently **committed** under the owner's continuing save authority. Read-only transfer checks on 6 November preserved all six independent image and three text records on page 41 exactly. Private source/grade/mask/registration/before-after receipts remain outside Git. General finishing, depth-opportunity and rendered-bleed checks are part of the reusable skill.
 
 Before treating a saved proof as a production deliverable:
 

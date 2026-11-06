@@ -138,6 +138,40 @@ export function planApprovedInsert(policy, snapshot, request) {
   }
 }
 
+// A narrow cleanup exception for agent-created, registered, superseded scaffolds.
+// It cannot delete staff work, workflow headers, saved proofs or legacy history.
+// Each returned operation still needs the connector's exact-operation approval.
+export function planApprovedScaffoldReplacement(policy, snapshot, request) {
+  const boundaries = resolveBoundaries(policy, snapshot)
+  const cleanup = policy.workingRules?.scaffoldReplacement
+  if (cleanup?.state?.startsWith('completed')) throw new Error('Completed scaffold replacement is a historical receipt, not new deletion authority')
+  if (!cleanup?.pageIds?.length || cleanup.sourceDesignId !== request.sourceDesignId) throw new Error('No exact scaffold replacement is registered')
+  const expected = [...cleanup.pageIds].sort()
+  const requested = [...new Set(request.pageIds ?? [])].sort()
+  if (JSON.stringify(expected) !== JSON.stringify(requested)) throw new Error('Cleanup must match the exact registered scaffold page IDs')
+  assertMasterContentEditAllowed(policy, snapshot, requested)
+  const approval = request.approval
+  if (approval?.approved !== true || approval.operation !== 'replace-own-superseded-scaffolds'
+    || !approval.approvedBy?.trim() || !approval.approvedAt?.trim()
+    || JSON.stringify([...(approval.pageIds ?? [])].sort()) !== JSON.stringify(expected)) throw new Error('Explicit approval for the exact scaffold deletion and replacement is required')
+  if (request.sourceDesignId === policy.masterDesignId || !request.pageNumbers?.length) throw new Error('Use exact completed pages from the separate reviewed transfer design')
+  const numbers = request.pageNumbers.map((value) => requiredIndex(value, 'pageNumbers[]'))
+  if (new Set(numbers).size !== numbers.length || numbers.length !== requested.length) throw new Error('Replacement must have exactly one source page for each scaffold')
+  const indices = requested.map((pageId) => snapshot.pages.find((page) => page.id === pageId).index).sort((a, b) => a - b)
+  if (indices.some((index, offset) => index !== indices[0] + offset)) throw new Error('Replace one contiguous own-scaffold block at a time')
+  if (boundaries.toBeApprovedHeader && indices.some((index) => index >= boundaries.toBeApprovedHeader)) throw new Error('Cleanup is restricted to own In Progress scaffolds')
+  return {
+    designId: policy.masterDesignId,
+    deletedPageIds: requested,
+    deleteArgs: { type: 'modify_existing_design', design_id: policy.masterDesignId, operations: [{ type: 'delete_pages', page_numbers: indices }] },
+    insertAfterPageId: snapshot.pages.find((page) => page.index === indices[0] - 1)?.id,
+    insertBeforeHeaderPageId: policy.headers.toBeApproved?.pageId ?? policy.headers.drafts.pageId,
+    source: { type: 'design', design_id: request.sourceDesignId, page_numbers: numbers },
+    freshReadRequiredAfterDelete: true,
+    warning: 'Do not reuse pre-delete numeric positions. Resolve the insertion header again before the separately approved insert call.',
+  }
+}
+
 function readJson(path) {
   return JSON.parse(readFileSync(resolve(path), 'utf8'))
 }

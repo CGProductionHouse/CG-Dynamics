@@ -53,6 +53,8 @@ node scripts/poster-studio/creative-ledger.mjs record <ledger.json> <entry.json>
 
 Preserve `approved`, `scheduled`, `posted`, `draft`, `discarded`, `internal-pilot-only` and `unresolved` states. Unknown history stays unresolved; never promise that an image is unused without adequate evidence. A flagged repeat can proceed only with an explicit, defensible campaign-continuity justification and human review.
 
+For a verified parent-brand post using an actual subsidiary photograph, pass `--brand-pack <trusted-brand-pack-index.json>`. Only an exact-client reviewed `sourceScopeRules` entry permits that scope; a candidate cannot declare its own exemption, and sibling kits remain separate. Preserve unknown branch and person identities as unresolved instead of supplying a generic brand as a branch or assigning a different identity per image. Use the actual headline for headline comparison, not every caption/support line concatenated together.
+
 Original media remains in canonical OneDrive `Photos`. The `CG Creative Assistant` folders are curated helper views only: `READY_UNUSED` is not proof of global non-use, `USED_REFERENCE` is recent/important visual evidence, and `BLOCKED_DO_NOT_USE` is a reversible exclusion signal rather than deletion authority. Poster-ready derivatives belong under the authorised month `01_SOURCE_EDITED` folder and retain original OneDrive item ID, hash and edit receipt. Apply the ledger equally to staff-created and AI-created Canva pages.
 
 ## Canva working-lane guard
@@ -75,6 +77,30 @@ Use Picasso's private local MCP/runner architecture for deterministic inspection
 Compare the original, finished photograph and final placement visually. A small global adjustment does not by itself establish professional finishing. Evaluate subject definition, tonal separation, colour, texture and local light at the actual poster crop; retain realistic scene atmosphere and source identity. Save versioned settings and before/after evidence. Treat owner feedback as a quality standard for subsequent work, without applying one identical grade or effect to every scene.
 
 ## Composition and amendments
+
+### Native Canva path without desktop takeover
+
+The private HTML import path is now exercised with actual Piek drafts. Use `scripts/poster-studio/canva-native-package.mjs` to package a private structured scene: exact kit fonts/colours, clean source derivatives, independent images, live text, rectangles and explicitly bound native logo assets. Import through the authorised Canva connector's `design_file` field. This is a native composition import, not image-to-design guessing or a flattened-poster upload. Keep accurate `data-speaker-notes` and page labels in the package; the editing connector cannot fix inherited notes or set font families afterwards.
+
+- Use prepared, metadata-clean review images; the packager rejects private EXIF/XMP/IPTC/text chunks, path escapes, remote image references, unverified fonts/colours and oversized input. ICC profiles stay intact. No public file hosting is needed or permitted.
+- The observed import ceiling is 10 MiB. The shared packager leaves headroom at 9.5 MB; split pages or deliberately prepare image derivatives. Never flatten a poster, quietly destroy detail or repeatedly retry an over-limit file.
+- Bind every native asset and check each operation's result. Vector assets cannot replace imported image frames: delete only the declared placeholder and insert the exact native vector asset. Raster logo replacement is supported. Recheck actual aspect, placement and contrast. Native import rounds fractional frame geometry by up to half a design pixel; identity/page scope remain exact and ambiguous matches fail.
+- Explicit line breaks and `white-space:nowrap` avoid unwanted pre-import fallback-font wrapping. Retain the scene's font size/line height for amendments. Replacing text can recalculate its bounding box even when the restored pixels are unchanged; compare the target render and all non-target records rather than claiming full geometry identity.
+- Existing template outline/shadow/font effects are not editable through this connector. Reject an unsuitable source instead of preserving it because the tool call succeeded. Required logos and brand devices may repeat; photo/person/shoot/concept repetition is assessed separately.
+- Save authorised work at short checkpoints, read it back and retain a private source/asset/element receipt. An overnight transaction expired in the real pilot; local scenes/recipes preserved recovery. Avoid keeping the only finished work in a long-lived unsaved transaction.
+- Follow the owner's existing save authority; do not ask repeatedly for routine internal saves. Page restructuring still needs grounded exact-operation authority. `planApprovedScaffoldReplacement` permits only an explicitly approved contiguous block of registered, superseded agent pages, with a fresh boundary read after deletion; it cannot remove staff work, headers, saved proofs or protected history.
+
+### Finishing and delivery lessons
+
+Owner feedback about washed-out images applies across the set. Evaluate actual source, derivative and final crop. A simple linear contrast pass increased clipping and was rejected; the accepted private pass uses endpoint-anchored luminance contrast and restrained detail within each source pixel's RGB headroom. Check clipping before upload, avoid crushed shadows/halos and keep already-good images natural. Never apply a uniform aggressive grade or describe existing JPEG clipping as recovered detail.
+
+For mutable Piek branch facts, the owner explicitly confirms the current live `piekgroup.co.za` site as the authority; use current Get Together site facts for its venues. Unknown photo provenance is not solved by a plausible branch guess. The pilot replaced an uncertain burger source with a current-site night photograph and verified forecourt-hours claim. Keep detected repeated branches visible to monthly human review even when the photos/services differ.
+
+Prepare captions from the current exact-client Dynamics guide: add to the artwork, use distinct scope voices, default to at most five relevant hashtags, and sign PICASSO when the owner requests it. For approval delivery, verify the requested sender and exact group, send the true HD poster and its caption in one message, then retain actual message evidence to avoid duplicate retries. A thumbnail is not an HD export. If the browser reports disabled and the connector has no export/send tool, record that exact blocker; never claim delivery or use a different account.
+
+Approved finals belong only in the existing client-safe `A_ClientPortal_<ClientSlug>/Graphic Design/YYYY/YYYY_MM_MON` path, using `onedriveCanonical.ts` year/month builders and the existing staff-approved filename rule. Canva page naming is separate. Do not guess a client short code or posting date. Keep source/editable files and drafts internal. Promote only reviewed finals through the existing same-client portal asset workflow; link real January deliverable IDs when present, never fabricate one or imply a file upload created a Dynamics association.
+
+### Layer contract
 
 - Preserve exact photos, people, food, products, venues and logos as deterministic source layers. Never generatively reconstruct them unless the owner explicitly requests that change.
 - Keep headline, support text, prices/dates, logo, photos, masks, vectors, textures, overlays and effects independently addressable with stable layer IDs.

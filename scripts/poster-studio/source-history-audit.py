@@ -63,6 +63,10 @@ def compare(source, poster):
 
 
 def audit(sources, history):
+    # OpenCV's machine-wide thread default retained ~9 GB during a real multi-source
+    # pass on the shared MSI. Bound this process without changing match thresholds.
+    if cv2.getNumThreads() <= 0 or cv2.getNumThreads() > 2:
+        cv2.setNumThreads(2)
     detector = cv2.SIFT_create(nfeatures=2400)
     cached = [(path, features(path, detector), digest(path)) for path in sources]
     rows, errors = [], []
@@ -84,6 +88,7 @@ def audit(sources, history):
         "schemaVersion": 1,
         "method": "SIFT local photo features + ratio matching + RANSAC geometry",
         "opencvVersion": cv2.__version__,
+        "opencvThreads": cv2.getNumThreads(),
         "faceRecognitionUsed": False,
         "previewCount": len(previews),
         "reviewedCount": len(rows),

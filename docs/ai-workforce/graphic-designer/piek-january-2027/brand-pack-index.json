@@ -5,7 +5,31 @@
     "name": "Piek Group"
   },
   "observedAt": "2026-11-05",
-  "status": "bootstrap-in-progress",
+  "status": "native-canva-candidates-saved-release-gates-open",
+  "currentEvidence": "production-evidence-2026-11-06.json",
+  "sourceScopeRules": [
+    {
+      "clientId": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
+      "parentScope": "PIEK_GROUP",
+      "allowedSourceScopes": ["PIEK_GROUP", "ENGEN", "SASOL", "GET_TOGETHER", "COLLEGE_BREW"],
+      "evidenceUrl": "https://www.piekgroup.co.za/brands",
+      "meaning": "Umbrella-only real subsidiary/partner photography, grounded in the current exact-client guide and owner-confirmed live site. Does not authorise sibling-brand logos, false branch attribution or a generic merged kit."
+    }
+  ],
+  "ownerWebsiteAuthority": {
+    "confirmedAt": "2026-11-06",
+    "primary": "https://www.piekgroup.co.za/",
+    "hospitality": "https://www.gettogethercs.co.za/",
+    "meaning": "Owner confirms current CG-built website locations/services as accurate authority over conflicting historical captions or guides. Recheck mutable claims near release."
+  },
+  "nativeImportProof": {
+    "observedAt": "2026-11-06",
+    "method": "Private HTML import into actual Canva native compositions, declared exact kit font families, visual specimen checks and API-observable text/image readback",
+    "fontsChecked": ["Lastica", "Barlow", "Horizon", "Inter", "Tall", "Anton"],
+    "fontFamilyReadableOrEditableThroughConnector": false,
+    "proof": "Twelve saved internal candidates; shared CLI creates the verified DP08 replacement with live text and independently bound exact logos.",
+    "limits": "Native visual/structure evidence is not local font-file licensing, editable PSD, final export, human creative approval or normal-company-ChatGPT end-to-end acceptance."
+  },
   "activeCanvaProduction": {
     "designId": "DAHaD4mJnGY",
     "title": "PIEK GROUP OF COMPANIES | ACTIVE FROM 05 NOV 2026 | JAN 2027",
@@ -39,7 +63,7 @@
     "locations": ["C:/Windows/Fonts", "C:/Users/chris/AppData/Local/Microsoft/Windows/Fonts"],
     "searchedLabels": ["Lastica", "Barlow", "Red Hat Display", "Horizon", "HORIZON", "Inter", "Anton", "Univers", "Tall"],
     "installedMatches": [],
-    "productionImpact": "Headless text rendering remains blocked until each selected font has a verified local file and usable licence, or an explicitly approved metric-compatible substitution is documented."
+    "productionImpact": "Local SVG/PSD font rendering remains blocked for missing exact files/licences. Headless native Canva import now provides checked kit typography without installing/substituting those fonts. It does not grant local font portability."
   },
   "fontAssetEvidence": {
     "observedAt": "2026-11-05",

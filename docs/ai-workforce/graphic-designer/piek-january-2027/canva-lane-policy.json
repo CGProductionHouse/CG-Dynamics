@@ -14,8 +14,8 @@
     "scheduleCutoffStatus": "unverified-no-dated-Dynamics-rows-November-through-January; original-Canva-schedule-retained",
     "copiedTextIntegrity": "first-49-pages-normalised-text-identical-12018-characters"
   },
-  "observedAt": "2026-11-05",
-  "observedPageCount": 53,
+  "observedAt": "2026-11-06",
+  "observedPageCount": 63,
   "pageCapacity": {
     "documentedMaxPages": 350,
     "source": "https://www.canva.com/en_gb/help/manage-pages/",
@@ -31,17 +31,17 @@
     },
     "toBeApproved": {
       "pageId": "PBTCQnG0kLyNvn1c",
-      "observedPageIndex": 42,
+      "observedPageIndex": 52,
       "writePolicy": "new-work-zone-after-header"
     },
     "drafts": {
       "pageId": "PBkggJvPWJCB8Kl5",
-      "observedPageIndex": 52,
+      "observedPageIndex": 62,
       "writePolicy": "protected-read-only"
     },
     "postedScheduled": {
       "pageId": "PBhXtZzkLlTlfdWK",
-      "observedPageIndex": 53,
+      "observedPageIndex": 63,
       "writePolicy": "protected-read-only"
     }
   },
@@ -59,7 +59,14 @@
     "separateWorkingDesignRequired": false,
     "officialClientDesignCount": 1,
     "officialDesignId": "DAHaD4mJnGY",
-    "editablePageIds": ["PB7GXQY2FRY4SmZL", "PBFhjhnLG7KsvSkM"],
+    "editablePageIds": ["PB7GXQY2FRY4SmZL", "PBFhjhnLG7KsvSkM", "PBw695H0fKFBpM7k", "PBhSXtvYjyX4j2dl", "PBnxVnyFjbtxrQQS", "PB5ptGHb90d8ZXjs", "PB5r675n7lrFm7JZ", "PBxrsDTFfRXMtbhH", "PBxRLPB4JKBHd91b", "PBf4gQNK11W9Mnmy", "PB4VJSCb8LY6TTnD", "PBP4JGdy6nLRjlTR"],
+    "scaffoldReplacement": {
+      "sourceDesignId": "DAHaIW00t7M",
+      "pageIds": ["PBFl866NzXhR28NN"],
+      "state": "completed-and-readback-verified-2026-11-06",
+      "replacementPageId": "PBf4gQNK11W9Mnmy",
+      "meaning": "Historical receipt only: own unverified-branch burger candidate was replaced by the current-site after-hours concept at the same position. All other text/image records match exactly. The removed page ID is no longer editable or present; this record grants no future deletion authority."
+    },
     "temporaryCopy": {
       "designId": "DAHaDQgOO1M",
       "purpose": "optional disposable testing only",

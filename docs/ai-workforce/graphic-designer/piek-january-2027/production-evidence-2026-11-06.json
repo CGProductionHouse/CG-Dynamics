@@ -1,0 +1,255 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-11-06",
+  "state": "twelve-saved-internal-candidates-delivery-blocked",
+  "clientId": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
+  "month": "2027-01-01",
+  "officialCanva": {
+    "designId": "DAHaD4mJnGY",
+    "title": "PIEK GROUP OF COMPANIES | ACTIVE FROM 05 NOV 2026 | JAN 2027",
+    "pageCount": 63,
+    "legacyReadOnlyDesignId": "DAGcXGWhDhI",
+    "workingHeaders": {
+      "inProgress": {
+        "pageId": "PBtYpVD48tvYwH2r",
+        "index": 23
+      },
+      "toBeApproved": {
+        "pageId": "PBTCQnG0kLyNvn1c",
+        "index": 52
+      },
+      "drafts": {
+        "pageId": "PBkggJvPWJCB8Kl5",
+        "index": 62
+      },
+      "postedScheduled": {
+        "pageId": "PBhXtZzkLlTlfdWK",
+        "index": 63
+      }
+    }
+  },
+  "candidates": [
+    {
+      "provisionalId": "2027_01_PIEK_DP_01",
+      "brandScope": "PIEK_GROUP",
+      "concept": "New Year",
+      "canvaPageId": "PBw695H0fKFBpM7k",
+      "observedPageIndex": 42,
+      "monthlyDeliverableId": null,
+      "state": "internal-candidate-not-scheduled-or-final-approved"
+    },
+    {
+      "provisionalId": "2027_01_PIEK_DP_02",
+      "brandScope": "PIEK_GROUP",
+      "concept": "People",
+      "canvaPageId": "PBhSXtvYjyX4j2dl",
+      "observedPageIndex": 43,
+      "monthlyDeliverableId": null,
+      "state": "internal-candidate-not-scheduled-or-final-approved"
+    },
+    {
+      "provisionalId": "2027_01_PIEK_DP_03",
+      "brandScope": "PIEK_GROUP",
+      "concept": "Coffee routine",
+      "canvaPageId": "PB5r675n7lrFm7JZ",
+      "observedPageIndex": 46,
+      "monthlyDeliverableId": null,
+      "state": "internal-candidate-not-scheduled-or-final-approved"
+    },
+    {
+      "provisionalId": "2027_01_PIEK_DP_04",
+      "brandScope": "ENGEN",
+      "concept": "Summer return travel",
+      "canvaPageId": "PBFhjhnLG7KsvSkM",
+      "observedPageIndex": 41,
+      "monthlyDeliverableId": null,
+      "state": "internal-candidate-not-scheduled-or-final-approved"
+    },
+    {
+      "provisionalId": "2027_01_PIEK_DP_05",
+      "brandScope": "ENGEN",
+      "concept": "School return",
+      "canvaPageId": "PBxrsDTFfRXMtbhH",
+      "observedPageIndex": 47,
+      "monthlyDeliverableId": null,
+      "state": "internal-candidate-not-scheduled-or-final-approved"
+    },
+    {
+      "provisionalId": "2027_01_PIEK_DP_06",
+      "brandScope": "ENGEN",
+      "concept": "Convenience",
+      "canvaPageId": "PBxRLPB4JKBHd91b",
+      "observedPageIndex": 48,
+      "monthlyDeliverableId": null,
+      "state": "internal-candidate-not-scheduled-or-final-approved"
+    },
+    {
+      "provisionalId": "2027_01_PIEK_DP_07",
+      "brandScope": "SASOL",
+      "concept": "Car wash reset",
+      "canvaPageId": "PBnxVnyFjbtxrQQS",
+      "observedPageIndex": 44,
+      "monthlyDeliverableId": null,
+      "state": "internal-candidate-not-scheduled-or-final-approved"
+    },
+    {
+      "provisionalId": "2027_01_PIEK_DP_08",
+      "brandScope": "SASOL",
+      "concept": "After-hours forecourt",
+      "canvaPageId": "PBf4gQNK11W9Mnmy",
+      "observedPageIndex": 49,
+      "monthlyDeliverableId": null,
+      "state": "internal-candidate-not-scheduled-or-final-approved"
+    },
+    {
+      "provisionalId": "2027_01_PIEK_DP_09",
+      "brandScope": "SASOL",
+      "concept": "Kroonstad everyday",
+      "canvaPageId": "PB5ptGHb90d8ZXjs",
+      "observedPageIndex": 45,
+      "monthlyDeliverableId": null,
+      "state": "internal-candidate-not-scheduled-or-final-approved"
+    },
+    {
+      "provisionalId": "2027_01_PIEK_DP_10",
+      "brandScope": "GET_TOGETHER",
+      "concept": "Lunch break",
+      "canvaPageId": "PBP4JGdy6nLRjlTR",
+      "observedPageIndex": 51,
+      "monthlyDeliverableId": null,
+      "state": "internal-candidate-not-scheduled-or-final-approved"
+    },
+    {
+      "provisionalId": "2027_01_PIEK_DP_11",
+      "brandScope": "GET_TOGETHER",
+      "concept": "Summer drinks",
+      "canvaPageId": "PB7GXQY2FRY4SmZL",
+      "observedPageIndex": 61,
+      "monthlyDeliverableId": null,
+      "state": "internal-candidate-not-scheduled-or-final-approved"
+    },
+    {
+      "provisionalId": "2027_01_PIEK_DP_12",
+      "brandScope": "GET_TOGETHER",
+      "concept": "Summer gatherings",
+      "canvaPageId": "PB4VJSCb8LY6TTnD",
+      "observedPageIndex": 50,
+      "monthlyDeliverableId": null,
+      "state": "internal-candidate-not-scheduled-or-final-approved"
+    }
+  ],
+  "proof": {
+    "tenDraftsCommittedTransaction": "5858578523823392672",
+    "tenDraftsReadback": {
+      "editableTextRecords": 30,
+      "independentImageRecords": 36,
+      "sourceAndTransferredRecordsIdentical": true,
+      "nonTargetTextRecords": 101,
+      "nonTargetImageRecords": 169,
+      "nonTargetRecordsIdentical": true
+    },
+    "sourceCorrection": {
+      "provisionalId": "2027_01_PIEK_DP_08",
+      "removedOwnCandidatePageId": "PBFl866NzXhR28NN",
+      "replacementPageId": "PBf4gQNK11W9Mnmy",
+      "nativePackagingTool": "scripts/poster-studio/canva-native-package.mjs",
+      "privatePackageBytes": 1462279,
+      "nativeTextRecords": 3,
+      "nativeImageRecords": 3,
+      "exactNativeBindingVerified": true,
+      "allOtherTextAndImageRecordsIdentical": true,
+      "source": "https://www.piekgroup.co.za/images/locations/sasol-langenhoven-park/sasol-langenhoven-park-01-exterior.webp",
+      "factSource": "https://www.piekgroup.co.za/locations/sasol-langenhoven-park",
+      "branchRepeatFlag": "DP07 and DP08 both use Langenhoven Park; distinct service, shoot evidence, lighting and proposed week. Keep flag for human monthly review."
+    },
+    "amendment": {
+      "changedTextElementCount": 1,
+      "unchangedOtherTextElements": 29,
+      "unchangedImageRecords": 36,
+      "restoredRenderedHeaderMeanAbsoluteDifference": 0,
+      "limitation": "Canva recalculated only target text-box height from 283.5 to 302.25; all non-target records unchanged. Header comparison is 480px preview evidence, not full-resolution export."
+    },
+    "photoRefinement": {
+      "completedNewCandidatePhotoDerivatives": 10,
+      "rejectedTrial": "Linear contrast/sharpening increased clipping and was rejected before upload.",
+      "accepted": "Endpoint-anchored luminance contrast and small-radius detail bounded by existing per-pixel RGB headroom; zero added highlight/shadow clipping in the ten measured derivatives.",
+      "originalsChanged": false,
+      "privateExifCopied": false,
+      "generativeProcessing": false
+    },
+    "historyAudit": {
+      "suppliedPreviewCount": 352,
+      "decodeErrors": 0,
+      "noMatchMeaning": "Bounded source matching only; not global unused/consent certification.",
+      "runtimeThreadCap": 2,
+      "thousandsOfImagesBenchmarkProven": false
+    },
+    "monthLedger": {
+      "candidateCount": 12,
+      "sourceFilesFingerprinted": 13,
+      "runtimeSeconds": 3.456,
+      "blockerCount": 0,
+      "findingsByCode": {
+        "subject-repeat": 38,
+        "service-repeat": 17,
+        "branch-repeat": 6,
+        "concept-repeat": 2,
+        "same-shoot-review": 1
+      },
+      "branchRepeatMeaning": "Two known candidate pairs: Engen North Ridge DP05/06 and Sasol Langenhoven Park DP07/08. Get Together exact photo branches remain unknown, not counted as one branch.",
+      "sameShootMeaning": "DP07 original and the human-history source from previews 94/241 share a camera, capture timestamps 52 seconds apart and sequence gap 40; retained as same-shoot review.",
+      "personIdentityMeaning": "Unknown; no face recognition or fake per-photo identity tags. Manual cross-source/history review required.",
+      "semanticMeaning": "Human tags flag broad themes; they do not prove novel concepts. DP03 pause overlap was amended to coffee routine; DP06/09 daily-routine overlap retained for review.",
+      "historyCoverage": "352-preview geometric matcher separately; only one known source added to this ledger, not complete global history."
+    },
+    "coffeeAmendment": {
+      "canvaPageId": "PB5r675n7lrFm7JZ",
+      "committedTransaction": "4129196274741186159",
+      "readbackTransaction": "7539547092081771960",
+      "changedTextRecords": 2,
+      "allOtherTextAndImageRecordsIdentical": true,
+      "reason": "Removed repeated pause concept; actual live headline now BACK TO THE COFFEE RUN.",
+      "readOnlyVerificationClosed": true
+    }
+  },
+  "delivery": {
+    "captionDraftsPrepared": 12,
+    "captionHashtagLimit": 5,
+    "signature": "PICASSO",
+    "requestedWhatsappSender": "Nolan WhatsApp account",
+    "requestedGroup": "Picasso approvals",
+    "senderAndExactGroupVerified": false,
+    "whatsappSends": 0,
+    "hdExportsVerified": 0,
+    "publicClientAssetsPublished": 0,
+    "portalFinalFilesUploaded": 0,
+    "localBrowserBlocker": "Local browser use is disabled in Work settings",
+    "connectorLimitation": "Current Canva tools expose previews and editing/import operations, but no actual export endpoint; no WhatsApp send connector is exposed.",
+    "ownerPromptedToEnableBrowser": true
+  },
+  "finalDestination": {
+    "relativePath": "Clients/Piek Group/A_ClientPortal_Piek_Group/Graphic Design/2027/2027_01_JAN",
+    "canonicalYearMonthBuilders": "src/lib/onedriveCanonical.ts",
+    "preparedEmptyFolders": true,
+    "finalFilenameConventionVerified": false,
+    "staffCanvaPageNamingVerified": false,
+    "noShortCodeOrPostingDateGuessed": true,
+    "publicationAndDeliverableLinkState": "No final asset or January deliverable association created."
+  },
+  "acceptanceGates": [
+    "Confirm January package/allocation and real schedule identities when available; December package refresh still confirms 12 designed posters and four professional videos.",
+    "Verify Amonique's exact Canva page/export naming via current workflow evidence.",
+    "Obtain and inspect true HD Canva exports; do not upscale thumbnails.",
+    "Verify Nolan sender account and exact Picasso approvals group, then send each HD image with its caption in one message and retain actual send evidence.",
+    "Obtain internal creative approval before client-safe final promotion; use the existing same-client portal asset flow and real deliverable IDs only.",
+    "Normal company ChatGPT create/amend/export invocation remains unverified."
+  ],
+  "cost": {
+    "incrementalRand": 0,
+    "newSubscriptions": false,
+    "paidApiOrGenerationCredits": false,
+    "newHosting": false,
+    "newProductionDependencies": false
+  },
+  "privateEvidenceLocation": "MSI private CG-Graphic-Designer-private/piek-january-2027; no client media or fonts in Git."
+}

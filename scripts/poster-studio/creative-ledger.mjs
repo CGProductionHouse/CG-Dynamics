@@ -16,7 +16,7 @@ const FORBIDDEN_BIOMETRIC_KEYS = new Set([
 
 function usage() {
   console.error('Usage: node creative-ledger.mjs fingerprint <image> [--out <receipt.json>]')
-  console.error('       node creative-ledger.mjs check <ledger.json> <candidate.json> [--out <receipt.json>]')
+  console.error('       node creative-ledger.mjs check <ledger.json> <candidate.json> [--brand-pack <trusted-brand-pack.json>] [--out <receipt.json>]')
   console.error('       node creative-ledger.mjs record <ledger.json> <entry.json> --out <updated-ledger.json>')
   process.exitCode = 2
 }
@@ -181,7 +181,7 @@ export function checkCandidate(ledger, rawCandidate, options = {}) {
   if (ledger.schemaVersion !== 1 || !Array.isArray(ledger.entries)) throw new Error('Ledger schemaVersion 1 with entries[] is required')
   assertNoBiometrics(ledger)
   const candidate = normalizeEntry(rawCandidate)
-  const thresholds = { perceptualDistance: 8, headlineSimilarity: 0.66, ...options }
+  const thresholds = { perceptualDistance: options.perceptualDistance ?? 8, headlineSimilarity: options.headlineSimilarity ?? 0.66 }
   const findings = []
   const add = (severity, code, prior, evidence) => findings.push({ severity, code, priorEntryId: prior?.id ?? null, evidence })
 
@@ -219,7 +219,14 @@ export function checkCandidate(ledger, rawCandidate, options = {}) {
     }
   }
 
-  if (candidate.source?.brandScope && candidate.source.brandScope.toUpperCase() !== candidate.brandScope) {
+  // An exact-client reviewed umbrella rule may permit a real subsidiary photo.
+  // The caller must load these rules from the trusted Brand Pack, never from
+  // a candidate's self-declared permission. Sibling-brand mixing stays blocked.
+  const sourceScope = candidate.source?.brandScope?.toUpperCase()
+  const umbrellaRule = (options.brandPackSourceRules ?? []).find((rule) => rule.clientId === candidate.clientId
+    && rule.parentScope === candidate.brandScope && rule.allowedSourceScopes?.includes(sourceScope)
+    && typeof rule.evidenceUrl === 'string' && rule.evidenceUrl.trim())
+  if (sourceScope && sourceScope !== candidate.brandScope && !umbrellaRule) {
     add('blocker', 'source-brand-scope-mismatch', null, {
       candidateBrandScope: candidate.brandScope,
       sourceBrandScope: candidate.source.brandScope.toUpperCase(),
@@ -236,6 +243,7 @@ export function checkCandidate(ledger, rawCandidate, options = {}) {
     thresholds,
     findings: deduplicated,
     biometricIdentityDataUsed: false,
+    verifiedUmbrellaSourceRule: umbrellaRule ? { parentScope: umbrellaRule.parentScope, sourceScope, evidenceUrl: umbrellaRule.evidenceUrl } : null,
   }
 }
 
@@ -262,7 +270,11 @@ function main() {
     return
   }
   if (command === 'check' && args[0] && args[1]) {
-    writeResult(checkCandidate(readJson(args[0]), readJson(args[1])), outPath)
+    const brandPackIndex = args.indexOf('--brand-pack')
+    if (brandPackIndex >= 0 && (!args[brandPackIndex + 1] || args[brandPackIndex + 1].startsWith('--'))) throw new Error('--brand-pack requires a trusted Brand Pack path')
+    const pack = brandPackIndex >= 0 ? readJson(args[brandPackIndex + 1]) : null
+    if (pack && !Array.isArray(pack.sourceScopeRules)) throw new Error('Trusted Brand Pack must declare sourceScopeRules[]')
+    writeResult(checkCandidate(readJson(args[0]), readJson(args[1]), { brandPackSourceRules: pack?.sourceScopeRules }), outPath)
     return
   }
   if (command === 'record' && args[0] && args[1] && outPath) {

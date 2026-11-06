@@ -3,6 +3,8 @@
   "clientId": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
   "month": "2027-01-01",
   "status": "proposal-unmatched-to-schedule",
+  "productionEvidencePath": "production-evidence-2026-11-06.json",
+  "executionMeaning": "The briefs below preserve the original proposed strategic grid. Twelve saved artwork candidates, actual composition/source changes and remaining release gates are recorded in productionEvidencePath; neither document creates a calendar assignment or final approval.",
   "packageBaseline": {
     "designPosters": 12,
     "professionalVideos": 4,

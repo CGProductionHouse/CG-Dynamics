@@ -83,3 +83,17 @@ test('biometric identity fields are rejected', () => {
   const candidate = entry({ id: 'candidate-3', faceEmbedding: [0.1, 0.2] })
   assert.throws(() => checkCandidate({ schemaVersion: 1, entries: [] }, candidate), /Biometric identity field is forbidden/)
 })
+
+test('only an exact-client trusted parent-brand rule permits subsidiary photos', () => {
+  const candidate = entry({ id: 'parent-candidate', brandScope: 'PIEK_GROUP', publicationState: 'internal-pilot-only' })
+  const empty = { schemaVersion: 1, entries: [] }
+  assert.equal(checkCandidate(empty, candidate).verdict, 'blocked')
+  const rules = [{ clientId: 'piek', parentScope: 'PIEK_GROUP', allowedSourceScopes: ['ENGEN', 'SASOL'], evidenceUrl: 'https://www.piekgroup.co.za/brands' }]
+  const accepted = checkCandidate(empty, candidate, { brandPackSourceRules: rules })
+  assert.equal(accepted.verdict, 'clear')
+  assert.equal(accepted.verifiedUmbrellaSourceRule.sourceScope, 'ENGEN')
+  assert.equal(checkCandidate(empty, { ...candidate, clientId: 'another-client' }, { brandPackSourceRules: rules }).verdict, 'blocked')
+  assert.equal(checkCandidate(empty, { ...candidate, brandScope: 'SASOL' }, { brandPackSourceRules: rules }).verdict, 'blocked')
+  assert.equal(checkCandidate(empty, candidate, { brandPackSourceRules: [{ ...rules[0], evidenceUrl: '' }] }).verdict, 'blocked')
+  assert.equal(checkCandidate(empty, { ...candidate, allowedSourceScopes: ['ENGEN'] }).verdict, 'blocked')
+})

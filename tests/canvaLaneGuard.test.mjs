@@ -4,6 +4,7 @@ import {
   assertMasterContentEditAllowed,
   classifyMasterPage,
   planApprovedInsert,
+  planApprovedScaffoldReplacement,
   resolveBoundaries,
 } from '../scripts/poster-studio/canva-lane-guard.mjs'
 
@@ -33,6 +34,29 @@ function snapshot() {
   pages[50].id = 'posted'
   return { designId: 'DAGcXGWhDhI', pages }
 }
+
+test('only exact approved agent scaffolds can be replaced; protected pages and other work cannot', () => {
+  const scoped = structuredClone(policy)
+  scoped.workingRules.scaffoldReplacement = { sourceDesignId: 'Dreviewed', pageIds: ['page-24'] }
+  const request = { sourceDesignId: 'Dreviewed', pageIds: ['page-24'], pageNumbers: [1], approval: { approved: true, approvedBy: 'synthetic owner', approvedAt: '2026-11-05', operation: 'replace-own-superseded-scaffolds', pageIds: ['page-24'] } }
+  const planned = planApprovedScaffoldReplacement(scoped, snapshot(), request)
+  assert.deepEqual(planned.deleteArgs.operations, [{ type: 'delete_pages', page_numbers: [24] }])
+  assert.equal(planned.freshReadRequiredAfterDelete, true)
+  assert.equal(planned.insertBeforeHeaderPageId, 'drafts')
+  assert.equal(planned.insertAfterPageId, 'in-progress')
+  assert.throws(() => planApprovedScaffoldReplacement(scoped, snapshot(), { ...request, approval: undefined }), /Explicit approval/)
+  assert.throws(() => planApprovedScaffoldReplacement(scoped, snapshot(), { ...request, pageIds: ['page-25'] }), /exact registered/)
+  assert.throws(() => planApprovedScaffoldReplacement(scoped, snapshot(), { ...request, sourceDesignId: scoped.masterDesignId }), /No exact scaffold/)
+  const completed = structuredClone(scoped)
+  completed.workingRules.scaffoldReplacement.state = 'completed-and-verified'
+  assert.throws(() => planApprovedScaffoldReplacement(completed, snapshot(), request), /historical receipt/)
+  for (const target of ['in-progress', 'drafts', 'posted', 'page-1']) {
+    const unsafe = structuredClone(scoped)
+    unsafe.workingRules.editablePageIds.push(target)
+    unsafe.workingRules.scaffoldReplacement.pageIds = [target]
+    assert.throws(() => planApprovedScaffoldReplacement(unsafe, snapshot(), { ...request, pageIds: [target], approval: { ...request.approval, pageIds: [target] } }), /outside the verified working lane/)
+  }
+})
 
 test('permits registered new work inside the official file while protecting history', () => {
   const boundaries = resolveBoundaries(policy, snapshot())
