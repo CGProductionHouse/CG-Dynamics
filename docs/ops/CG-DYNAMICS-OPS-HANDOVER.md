@@ -9,8 +9,11 @@ budget/security/provider/data/permission change or auth-copy workaround.
 
 Actual alert is GitHub Actions100% included storage, not website media:95 Wiseman
 screenshot artifacts3,299,886,060bytes. Exact93-old-artifact removal candidate is
-3,123,202,352bytes, keep latest two176,683,708bytes. Awaiting CA's explicit permanent-
-deletion answer; no cleanup claimed. Accrued usage will not be erased by deletion.
+3,123,202,352bytes, keep latest two176,683,708bytes. CA subsequently approved
+“Delete please”: all93 exact artifacts deleted after drift preflight, independent
+readback confirms only the exact two newest remain. No code/release/cache/site
+change. Private executed-ID receipt: %TEMP%/cg-github-artifact-deletion-receipt-20261106.json.
+Accrued billing usage is not erased; no instant quota-reset claim.
 GitHub email reset1December. Current Vercel budget15USD/on-demand0/PauseON,
 cycleends18November08:00UTC; finite shared cap remains an outage risk, not removed.
 
