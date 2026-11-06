@@ -14,6 +14,8 @@ Before release, `load_client_library.py --verify "<job/startup/client-context.js
 
 Keep `OWNER-DECISIONS.json` and `brand/CREATIVE-BASELINE.md` in the one client library. Preserve superseded records and rejected examples, but make the current status unambiguous. Approved work remains a baseline, not a licence to reuse the same story/clip/music. Save the corrected decision after each substantive amendment so the next job inherits it.
 
+After approval reconcile the structured records too: `current_candidate_state`, active/rejected asset roles and optional `baseline_file` must agree with the latest owner notes. A relative-path `brand/CURRENT-APPROVED-BASELINE.json` binds exact font/weights, palette/assets/outro, reference hash, approval scope and later exceptions. `load_client_library.py` verifies its files and includes its hash in the context fingerprint. No stale rejected graphic may remain labelled an active approved choice. See [edit foundation](edit-foundation.md).
+
 Use one folder per client. Keep it small enough that a new editor can find current assets quickly; do not mirror the whole video archive. The PSG October 2026 implementation is at `C:\Users\chris\Videos\CG-AI-Editing\Client-Libraries\PSG` and in `Clients/PSG/Video Editing Library` on the authorised `info@cgproductionhouse.com` OneDrive.
 
 For a new client, run `python scripts/new_client_library.py "Client Name" --root "C:\Users\chris\Videos\CG-AI-Editing\Client-Libraries"` from this skill. It creates the standard directories and starter indexes without overwriting existing files. Then populate each record from verified source material; the scaffold itself approves nothing.

@@ -13,6 +13,7 @@ import math
 from load_client_library import verify as verify_client_library
 from edit_contract import validate_edit
 from ui_motion import validate_ui_plan
+from edit_foundation import validate as validate_foundation
 
 
 def validate_source_reuse(shots):
@@ -125,6 +126,13 @@ def validate(plan):
                 errors.append(f"shot {i} repeats a visual cluster with the same story job")
         selected.append(shot)
     errors.extend(validate_source_reuse(shots))
+    if 'foundation' in plan:errors.extend(validate_foundation(plan))
+    elif plan.get('research_only') is not True and plan.get('client_context_snapshot'):
+        try:
+            snapshot=json.loads(Path(plan['client_context_snapshot']).read_text(encoding='utf-8-sig'))
+            if any(r.get('id')=='FOUNDATION-01'for r in snapshot.get('owner_rules',[])):
+                errors.append('Current owner foundation requires dated month research, existing approved baseline, Dynamics game plan and explicit craft/opener decisions')
+        except (OSError,ValueError,TypeError):pass # Main client-library verification reports invalid snapshots.
     if plan.get('research_only') is not True:
         errors.extend(validate_edit(plan))
     return errors

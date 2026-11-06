@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "country": "ZA",
+  "month": "2026-11",
+  "compiled_at": "2026-11-06T07:40:00+02:00",
+  "review_by": "2026-11-30",
+  "purpose": "Shared dated editorial research, not a client strategy, promotion or live forecast. Refresh changed facts only; choose a relevant angle or deliberate evergreen.",
+  "sources": [
+    {"id":"election","url":"https://www.thepresidency.gov.za/president-ramaphosa-declares-election-day-4-november-2026-public-holiday","published":"2026-09-15","observed":"2026-11-06","fact":"The Presidency designated4November2026 Local Government Election Day and a public holiday. This does not establish results/turnout or any party endorsement."},
+    {"id":"school","url":"https://www.westerncape.gov.za/education/school-calendar","observed":"2026-11-06","fact":"2026public-school term4 ends9December for learners,11December for educators; private-school/employer dates may differ."},
+    {"id":"holidays","url":"https://www.gov.za/about-sa/public-holidays","observed":"2026-11-06","fact":"December statutory holidays include16December Reconciliation,25December Christmas and26December Goodwill. Public holiday dates do not establish client trading/closure dates."},
+    {"id":"outlook","url":"https://www.sadc.int/latest-news/sadc-outlook-favours-drier-conditions-across-much-southern-africa-during-202627-rainy","published":"2026-08-27","observed":"2026-11-06","fact":"Regional OND2026 outlook favours below-normal rainfall across much of SouthAfrica. Probabilistic regional seasonal outlook, not a daily/local guarantee; no assumption everyprovince is dry."},
+    {"id":"calendar","url":"https://www.education.gov.za/LinkClick.aspx?fileticket=kkKw2OYXcng%3D&forcedownload=true&mid=13822&portalid=0&tabid=93","observed":"2026-11-06","fact":"Official2026calendar verifies27November is Friday. Existing Dynamics November content calendar identifies27November asBlackFriday. Retailer search corroboration: https://business.makro.co.za/black-friday ; livepage isJS-only, no current sale/price inferred."},
+    {"id":"budget-background","url":"https://www.ncr.org.za/documents/Black%20Friday%20and%20Festive%20spending.pdf","published":"2017-11","observed":"2026-11-06","fact":"Historical NCR guidance recommends budgeting and avoiding impulse/credit-led festive spending. PDF itself is2017, despite recent search crawl. Background principle ONLY, not2026news/statistics/advice or a client product claim."}
+  ],
+  "opportunities": [
+    {"id":"election-day","use_from":"2026-10-28","use_until":"2026-11-04","sources":["election"],"state":"Past opportunity at compilation","angle":"Local civic participation, only when genuinely appropriate before electionday.","avoid":"Do not publish vote-today copy on6November, invent results or force partisan relevance into client work."},
+    {"id":"summer-gathering-build-up","use_from":"2026-11-06","use_until":"2026-11-30","sources":["school","holidays","outlook"],"state":"Editorial inference","angle":"Anticipation of a break, hosting, braais, outdoor living and time with people; use real region-appropriate summer/late-spring footage.","sectors":["home/outdoor","food","hospitality","retail"],"avoid":"Not everyone is already on leave; no blanket sunny-weather promise or invented availability/December closure."},
+    {"id":"before-the-holiday-rush","use_from":"2026-11-06","use_until":"2026-11-30","sources":["school","holidays"],"state":"Editorial inference","angle":"One practical preparation task before end-year travel/visits; connect to exact evidenced service.","sectors":["professional services","vehicle care","home/outdoor"],"avoid":"No automatic insurance cover/claim acceptance, guaranteed safety, booking urgency or company deadline without exactclient evidence."},
+    {"id":"black-friday-planning","use_from":"2026-11-06","use_until":"2026-11-27","sources":["calendar","budget-background"],"state":"Calendar opportunity; offer requires client authority","angle":"Discernment, product comparison, meaningful gifting or budgeting rather than automatic sale graphics.","sectors":["retail","professional education"],"avoid":"No invented discount/price/stock, no suggestion PSG has a BlackFridayoffer; its current strategy does not select this event."},
+    {"id":"school-break-preview","use_from":"2026-11-16","use_until":"2026-11-30","sources":["school"],"state":"Verified public-school calendar; audience use is inference","angle":"Planning family time and activities before public-school learner term ends9December.","sectors":["sport","family services","hospitality"],"avoid":"Do not say schoolholidays have begun inNovember or assume private-school dates."},
+    {"id":"reconciliation-day-preview","use_from":"2026-11-23","use_until":"2026-11-30","sources":["holidays"],"state":"Verified future calendar; no client campaign approval","angle":"Prepare relevant16December community/hosting/trading content in advance.","avoid":"Date is not itself a story; never invent openinghours or planned celebrations."}
+  ],
+  "refresh_rules": {
+    "once_per_month":"Carry verified calendar and durable context across jobs; roll over to a new dated pack inDecember.",
+    "on_assignment":"Check exactindustry/client gameplan, recent feedback/publication, actualoffer/stock/contacts and capture suitability; keep authority/status/date with each fact.",
+    "before_sensitive_copy":"Refresh current news/results, rates, compliance, event cancellation, local weather and trading/booking deadlines at the source. Do not reuse a forecast as a guarantee.",
+    "voice":"Audience fatigue/holiday anticipation is an editorial hypothesis, not a claim about all SouthAfricans. Match language/region/client personality. No generic Dezemba copy across everybrand."
+  }
+}

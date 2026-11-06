@@ -179,8 +179,8 @@
     },
     {
       "id": "WORK-02",
-      "requirement": "Yield desktop control to humans and use file-based work while occupied. Keep WhatsApp closed after authorised interactions; no WhatsApp feedback monitor, new copied brain, unrelated sends or changed storage/account/security/hosting settings.",
-      "evidence_source": "CA office operation and latest WhatsApp preference; AGENTS.md"
+      "requirement": "Yield desktop control to humans and use file-based work while occupied. Leave Nolan's own0606307647 WhatsApp connected/open after authorised interactions; the old close instruction applied only to CA's personal account. Never restart/close the host ChatGPT app during active work. No WhatsApp feedback monitor, copied brain, unrelated sends or changed storage/account/security/hosting settings.",
+      "evidence_source": "CA5November explicit Nolan-own-account correction and host-app restart failure; AGENTS.md"
     },
     {
       "id": "COST-01",
@@ -201,6 +201,11 @@
       "id": "UI-01",
       "requirement": "CA5Nov requires UI animation in every video. Design and actually execute a brand-appropriate information interaction (focus, selection, progression, annotation or genuine UI state) with a visible story purpose; bind frames/components/operator/evidence. Never imply an invented client app or repeat the same dashboard across brands.",
       "evidence_source": "CA5Nov2026 current motion-design/UI reference instruction; CA-MOTION-VOICE-UI-20261105.md"
+    },
+    {
+      "id": "FOUNDATION-01",
+      "requirement": "For new production load reusable dated SouthAfrican monthly context, exact existing client approved baseline and actual Dynamics gameplan/state. Make explicit typography, composition/motion, transition, UI and sound decisions, carry selected mechanisms into the same story plan, and design an observable0–3s event/payoff rather than a poster. Approval updates both structured current records and readable notes; preserve later element-specific criticism. Do not reopen old approved films or reset brands.",
+      "evidence_source": "CA6November foundation request; edit-foundation.md; scripts/edit_foundation.py"
     },
     {
       "id": "VO-01",

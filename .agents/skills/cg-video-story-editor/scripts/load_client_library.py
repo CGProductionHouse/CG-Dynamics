@@ -36,6 +36,16 @@ def load(library,client_id,live_context):
     if decisions.get('client_id')!=client_id:raise ValueError('Feedback belongs to a different client')
     if not rules.get('rules') or not all(x.get('id') and x.get('requirement') and x.get('evidence_source') for x in rules['rules']):
         raise ValueError('Owner-rule catalogue is incomplete')
+    baseline=None
+    if m.get('baseline_file'):
+        baseline_path=resolve(root,m['baseline_file']);value=read(baseline_path)
+        if value.get('client_id')!=client_id:raise ValueError('Approved creative baseline belongs to a different client')
+        for a in value.get('assets',[]):
+            p=resolve(root,a['path'])
+            if not p.is_file()or sha(p)!=a['sha256']or a.get('status')=='rejected':raise ValueError('Current baseline asset changed/missing/rejected: '+a['key'])
+        if not value.get('assets')or not value.get('typography'):raise ValueError('Current creative baseline is incomplete')
+        baseline={'path':str(baseline_path),'sha256':sha(baseline_path)}
+        paths['creative_baseline']=baseline_path
     assets=[]
     for a in m.get('assets',[]):
         p=resolve(root,a['path'])
@@ -50,7 +60,7 @@ def load(library,client_id,live_context):
     fingerprint=hashlib.sha256(('CLIENT_CONTEXT='+sha(index)+'\n'+'\n'.join(key+'='+sha(p) for key,p in paths.items())).encode()).hexdigest()
     return dict(client_id=client_id,client_name=m['client_name'],library=str(root),context_fingerprint=fingerprint,
         reuse_state='LOADED_EXISTING_LIBRARY',brand_ready=bool(m.get('brand_ready')),assets=assets,canva_sources=m['canva_sources'],
-        approved_references=m.get('approved_references',[]),owner_decisions=decisions,
+        approved_references=m.get('approved_references',[]),owner_decisions=decisions,creative_baseline=baseline,
         owner_rules=rules['rules'],brand_decisions=paths['brand_decisions'].read_text(encoding='utf-8-sig'),
         source_brief=paths['source_brief'].read_text(encoding='utf-8-sig'),
         music_ledger=paths['music_ledger'].read_text(encoding='utf-8-sig'),

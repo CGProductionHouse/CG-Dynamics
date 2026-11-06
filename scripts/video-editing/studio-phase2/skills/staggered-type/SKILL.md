@@ -5,6 +5,10 @@ description: Plan readable word-by-word kinetic titles that reinforce an approve
 
 # Staggered pop-up words — rendered technique proof
 
+## 6 November mixed-weight baseline and actual encoded protection
+
+Use [render_baseline_ab.py](render_baseline_ab.py) with an explicit licensed source/font and their SHA256 values. The [foundation study](../../EDIT-FOUNDATION-20261106.md) records actual44pxRegular/76pxBold common-baseline type, masked rises and a MORE→LAST revision on existing moving coffee. First full-GOP renders protected21/21 frames before encoding but0/21 after encoding; that claim failed. `--protected` reuses one encoded opening segment, then separate changed tails: actual21/21 encoded prefix frames match. Three125frame silent controls and two protected finals decode; final1×muted playback125f/0dropped, contacts/fullsize inspected. Source is an ongoingpour, not an accepted new hook; no hearing/phone/native/mastery claim. Keep plain footage and actual story/source gates.
+
 ## 29 October office background source screen
 
 [Licensed portrait saw study](../../SAW-STAGGERED-TYPE-SCREEN-20261029.md) compares plain, all-at-once and two staggered timings on the exact same 96 moving frames. The three-word stack remains readable above the blade in sampled decoded frames; advancing only the third word protects 42 decoded opening frames exactly. **Creative timing gate fails:** this slow-motion cut lacks three visible beats, while the static control communicates the phrase immediately. Keep R01/R02 as bounded controls, not a recommended title preset. Sound, full-speed/physical-phone judgement, approved copy and second-editor native handover remain open.

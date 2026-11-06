@@ -5,6 +5,8 @@ description: Plan, assemble, review, and hand off CG Production House client vid
 
 # CG video story editor
 
+**6November foundation — start here for a new assignment:** use [load-once planning](references/edit-foundation.md) before source selection. It reuses dated SouthAfrican monthly context, the exact Dynamics game plan and an evidenced approved-client baseline, inventories the actual shared skill cards and connects explicit type/motion/transition/UI/sound decisions to the existing story plan. Approval raises the design floor; later criticism still overrides a specific element. PSGR08 typography is a baseline, but CA6November explicitly rejects its poster-like opening as the next hook. Do not reset fonts/assets or repeat brand research. New owner rule `FOUNDATION-01` enforces the connected inputs; structural passes do not establish creative quality.
+
 For CA's5November CapCut travel-vlog reference and its actual30s Watch Addict application, read [the focused frame study and production repairs](references/watch-signature-capcut-20261105.md). It covers anchor/burst/hold rhythm, per-recording upright correction before stabilization, animated tracking bounds and registered diagonal entrances; no new engine or mastery claim.
 
 **CA5November hard amendment:** never repeat one original footage recording in separate shots of a film, even using different ranges/crops/retimes/re-encodes. Bind original identity and check actual content, including nested montage sources. Do not warp photographic faces; use uniform slow zoom and inspected graphics behind people. Read [the specific shared amendment](references/owner-amendments-20261105.md); exact-client newer Canva feedback supersedes older font assumptions.
