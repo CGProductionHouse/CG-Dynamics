@@ -9,6 +9,84 @@ from PIL import Image, ImageDraw
 import numpy as np
 
 
+def layout_type_runs(lines, position, max_width, line_gap=10, word_gap=None):
+    """Measure explicit (text, font, RGB) runs on shared per-line baselines.
+
+    Fonts are supplied by the caller, never guessed/substituted. Explicit lines
+    preserve editorial phrasing; oversized copy fails instead of silently shrinking.
+    Compact leading is measured between visible ink, including accents/descenders.
+    Returns positioned ink rectangles for reveal, clearance and revision inspection.
+    """
+    import math
+    if (not lines or max_width <= 0 or line_gap < 0 or
+            not all(math.isfinite(v) for v in [*position, max_width, line_gap]) or
+            (word_gap is not None and (not math.isfinite(word_gap) or word_gap < 0))):
+        raise ValueError('Explicit nonempty lines and finite positive type bounds required')
+    x0, top = position
+    if min(x0, top) < 0:
+        raise ValueError('Type origin must remain inside the frame')
+    result = []
+    for line_index, runs in enumerate(lines):
+        if not runs or any(not isinstance(r[0], str) or not r[0].strip() for r in runs):
+            raise ValueError('Every line needs nonempty explicit text runs')
+        boxes = [font.getbbox(text, anchor='ls') for text, font, colour in runs]
+        ink_top = min(b[1] for b in boxes)
+        ink_bottom = max(b[3] for b in boxes)
+        baseline = top - ink_top
+        pen = x0 - min(0, boxes[0][0])
+        row = []
+        for (text, font, colour), box in zip(runs, boxes):
+            rect = (round(pen + box[0]), round(baseline + box[1]),
+                    round(pen + box[2]), round(baseline + box[3]))
+            row.append(dict(text=text, font=font, colour=colour, baseline=baseline,
+                            origin=(pen, baseline), rect=rect, line=line_index))
+            gap = font.getlength(' ') if word_gap is None else word_gap
+            pen += font.getlength(text) + gap
+        if min(r['rect'][0] for r in row) < x0 or max(r['rect'][2] for r in row) > x0 + max_width:
+            raise ValueError('Copy exceeds its explicit line width; revise phrasing or approved layout')
+        result.extend(row)
+        top = baseline + ink_bottom + line_gap
+    return result
+
+
+def rich_type_reveal(size, layout, time, starts, entrance=.3, shutter=90, fps=25):
+    """Reveal mixed-weight runs inside measured glyph bounds; no moving footage.
+
+    Baselines and ink spacing come from layout_type_runs. Starts are explicit per
+    run, so a later wording change need not retime the untouched opening. Returned
+    RGBA is raster motion, not a native application text object.
+    """
+    import math
+    if (not layout or len(starts) != len(layout) or entrance <= 0 or fps <= 0 or
+            not 0 <= shutter <= 360 or
+            not all(math.isfinite(v) for v in [time, entrance, fps, shutter, *starts])):
+        raise ValueError('Explicit finite reveal timing required for every run')
+    w, h = size
+    out = Image.new('RGBA', size)
+    exposure = shutter / 360 / fps
+    stamps = np.linspace(time - exposure/2, time + exposure/2, 129) if shutter else [time]
+    for item, start in zip(layout, starts):
+        x, y, right, bottom = item['rect']
+        if x < 0 or y < 0 or right > w or bottom > h or right <= x or bottom <= y:
+            raise ValueError('Measured type escapes canvas; revise the explicit layout')
+        glyph = Image.new('L', (right-x, bottom-y))
+        ox, baseline = item['origin']
+        ImageDraw.Draw(glyph).text((ox-x, baseline-y), item['text'],
+                                  font=item['font'], fill=255, anchor='ls')
+        a = np.asarray(glyph, dtype=np.float32)
+        coverage = np.zeros_like(a)
+        offsets, counts = np.unique([
+            round((1 - max(0., min(1., (t-start)/entrance)))**3 * (glyph.height+1))
+            for t in stamps], return_counts=True)
+        for offset, count in zip(offsets, counts):
+            if offset < glyph.height:
+                coverage[offset:] += a[:glyph.height-offset] * count / len(stamps)
+        layer = Image.new('RGBA', glyph.size, (*item['colour'], 0))
+        layer.putalpha(Image.fromarray(np.rint(coverage).astype(np.uint8)))
+        out.alpha_composite(layer, (x, y))
+    return out
+
+
 def type_reveal(size, runs, font, position, time, start, stagger=.08, entrance=.35, shutter=180, fps=25):
     """Word-staggered clipped vertical resolve with spatial shutter integration.
 

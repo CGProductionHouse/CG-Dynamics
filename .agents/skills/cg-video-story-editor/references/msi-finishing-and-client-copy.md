@@ -45,6 +45,24 @@ kit/snapshot was reconciled. A fixture passing is not a repaired client film.
 
 ## Finishing choices inherited by the next film
 
+CA6November Jenkor refinement reinforces compact spacing as the default for all
+future films. Treat a heading and its supporting sentence as one designed group:
+set the gap from actual visible glyph bounds, not unrelated text-box top anchors.
+Keep it optically tight without touching accents, descenders or other graphics;
+retain a larger gap only for a deliberate change of information group. Record
+the actual gap and inspect the encoded full-size and small preview. Preserving
+the accepted font while leaving the old large line gap does not apply feedback.
+
+Measure text/graphics clearance from the delivered frame edges through the whole
+entrance, reflow and camera move, not just the settled title. Use the assigned
+aspect ratio and inspect the full landscape image with contain/fitted playback;
+a phone viewer's cropped preview is not proof that the encoded source is cropped.
+Never change a16:9 brief to portrait merely to hide a player-preview problem.
+Match the nearby service claim to the visible action/product: an ambiguous stack
+or masonry detail does not clearly prove paving. Prefer actual paver laying,
+compaction or an unmistakably paved surface. Keep exact footage/claim decisions
+in the existing client kit, not another brand search or tracker.
+
 - **Typography:** keep multiline phrases compact with optically checked leading
   and common baselines. WiseRide's owner rejected hard black borders/offset hard
   shadows; use a restrained soft shadow when contrast needs it, unless the exact

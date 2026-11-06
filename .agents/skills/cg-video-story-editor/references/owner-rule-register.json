@@ -219,8 +219,8 @@
     },
     {
       "id": "TYPE-01",
-      "requirement": "Use compact optically checked multiline leading and common glyph baselines, with purposeful readable reveals. Avoid hard black outlines/offset shadows for ordinary brand titles; prefer restrained soft shadow where contrast needs it unless current approved brand direction requires otherwise.",
-      "evidence_source": "CA5November WiseRide line-gap, animation and hard-border feedback; PSG baseline correction; msi-finishing-and-client-copy.md"
+      "requirement": "Compact line spacing is the default: group heading/support copy using actual visible glyph bounds and common baselines, not unrelated text-box anchors. Keep readable purposeful reveals and measured frame-edge/graphic clearance through the entire animation/camera move; inspect full-size and small fitted previews in the assigned aspect ratio. A phone player's crop does not establish an encoded crop. Avoid hard black outlines/offset shadows for ordinary titles; prefer restrained soft shadow unless current brand direction requires otherwise.",
+      "evidence_source": "CA6November Jenkor R01 margin/compact-line-spacing refinement; CA5November WiseRide line-gap, animation/hard-border feedback and PSG baseline correction; msi-finishing-and-client-copy.md"
     },
     {
       "id": "FILING-01",

@@ -1,5 +1,7 @@
 # Complete shared-technique integration map — 3 November 2026
 
+6November: [mixed-weight finishing](RICH-TYPE-FINISHING-20261106.md) adds measured baseline/ink-gap layout and explicit per-run reveal to the existing type family/operator module. Caller supplies verified fonts; three actual silent controls/revision inspected,37/37 protected opening decoded frames equal. No new family or mastery count; source/client/normal-speed/phone/native/sound acceptance remains separate.
+
 **5November second CA assignment:** [motion/story/voice/UI study](CA-MOTION-VOICE-UI-20261105.md) adds [stateful UI](skills/stateful-ui-motion/SKILL.md) and [brand voice overlay](skills/brand-voice-overlay/SKILL.md), making **50current cards**. UI IDs/reflow/focus and actual narration placement/ducking have executable operators. South African production voice source, accent/performance, exact mix and PSG creative acceptance remain open; no50-mastered count. UI-01/VO-01 in the existing owner register bind the standing instruction. Existing first-assignment48-card figures below remain dated checkpoints.
 
 **5November execution follow-through:** [all five CA effects](CA-FIVE-EFFECTS-EXECUTION-20261105.md) now route to the exact camera, physical last-frame capture, incoming tonal prelap, invert-extract and outlined depth-type mechanisms. Four new callable operators extend the existing four;13focused operator tests pass. Natural-source controls/revisions and three current normal-speed comparisons are recorded. Invert inverse-colour R01/R02 are rejected; current R03/R04 are grayscale. No native/creative/heard/client/second-PC mastery promotion. [Franco brief](LAST-FRAME-FRANCO-CAPTURE-20261105.md) belongs in pre-shoot content guidelines, not an after-the-fact edit request.
@@ -111,4 +113,3 @@ The [4 November footage-in-type contrast control](FOOTAGE-TYPE-CONTRAST-20261104
 4. Carry native editability, source portability, real phone/full-speed picture and qualified sound gates forward separately. Do not reset completed office studies merely to manufacture a new test count. A useful plain cut can win; never force an effect quota or call decoded output creative approval.
 
 Update each existing card and this same board when its evidence changes. Publish the canonical shared skill/code through draft PR910, run the sync helper on the target machine and verify CURRENT. Git publication alone does not prove the office PC pulled or installed a new checkpoint.
-

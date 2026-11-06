@@ -21,6 +21,10 @@ Choose the buyer sentence and real picture action first. Assign each title one j
 
 For a client film, record `shot/timecode | sentence/job | clean control | effect variant | font/colour | keyframes/mask | sound event | full-speed phone verdict | editable reopen verdict`. Keep rejected treatments and reasons. A 3D or perspective title requires a believable photographed plane and source motion; use the existing [scene-perspective-type card](../scene-perspective-type/SKILL.md) rather than forcing depth onto a flat product frame. Anchor cutout edges at the frame or a real object. Stop the treatment before it masks the offer, human expression or CTA.
 
+##6November mixed-weight baseline and wording revision
+
+[New executed study](../../RICH-TYPE-FINISHING-20261106.md) adds measured mixed-size/weight baselines and compact visible-ink leading to the existing visual operators. Three100frame silent outputs and five geometry/protection tests pass; IDEAS→STORIES revision preserves37/37 encoded opening frames. Caller supplies actual verified fonts; no automatic brand substitution or shrinking. Explicit starts preserve unchanged early content. Immediate plain copy is readable earlier: a staggered reveal is not automatically a hook. Native/independent continuous/phone/sound/client gates remain open.
+
 ## Protected Daisy A/B, 26 October
 
 [`render_caption_ab.py`](render_caption_ab.py) read the untouched local `199A5420.MP4` flower-window take into two **silent, private technical proofs**, 4.000 s/96 frames at 540×960/24 fps. Both use the existing Montserrat Bold and Daisy yellow/warm white. The control reveals both words together; the variant staggers their vertical arrival and adds a feathered gradient only behind the wording. Both MP4s fully decoded. The 0.56 s A/B and eight sampled variant frames show the second phrase arriving separately and the gradient improving separation from the changing pink flower. The variant SHA-256 is `A1553C3753D228C43539417E35924F6D34B908BA3741EA6349CE73B469CABF20`; media and contact images remain in the private Daisy `qa/caption-ab` folder, outside Git.

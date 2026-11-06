@@ -1,5 +1,8 @@
 # Nolan Studio — categorised skill progress,28 October2026
 
+**6November approved edits and finishing:** [process closeout](../../../.agents/skills/cg-video-story-editor/references/approved-edit-closeout-20261106.md) retains Jenkor CA-approved R02 and RC delivered R04 distinctly. [Mixed-weight type study](RICH-TYPE-FINISHING-20261106.md) advances existing kinetic-caption-finishing: three100frame silent outputs, five geometry/protection tests,37/37 decoded protected opening frames; no new family/mastery. Immediate control reads earlier; normal-speed independent/phone/native/sound/actual-client application stays open. Next apply only to a real assigned story with verified client font/art, not another decorative rerender.
+
+
 **5November motion/narration/UI:** [new exact-reference study](CA-MOTION-VOICE-UI-20261105.md), second story priority.50cards after two new families; no mastery promotion. Actual6s UI controls/reflow/revision,30s private PSG excess-story motion application, four real engineering WAV phrases and ducking tests. First PSG raw-render dimensions failed despiteFFmpeg0; repaired export fits actual outro and asserts every frame. SAPI source isUS only and production gate rejects it; final CTA ASR mismatch stays open. SouthAfrican voice rights/performance and creative/native/phone gates remain unproved. Existing PSG kit/two approved references reused, no brand hunt or client send.
 
 **5November exact-reference follow-through:** [execution record](CA-FIVE-EFFECTS-EXECUTION-20261105.md) adds actual outline-depth, two-frame tonal incoming prelap and grayscale invert-extract operators/controls/revisions. Current library48families,8portable mechanisms; no claim all48 are callable/mastered. Outline revision47/47outside decoded equal; prelap71/71; corrected invert71/71. Three current comparisons72frames each play1x to ended/0dropped. Earlier inverse-colour invert is a retained failure. Physical last-frame footage and heard/native/client gates remain explicit. [Franco capture guidance](LAST-FRAME-FRANCO-CAPTURE-20261105.md) ready for guideline planning.
@@ -171,12 +174,3 @@ Useful ordered work (finish any WIP before advancing):
 Morning report must distinguish45 families, existing implementations, new office proofs, rejected/source-gated mechanisms and human/native/heard acceptance. Do not convert counts into45 mastered, 6 completed/39 unbuilt, or undocumented tutorials left.
 
 Actual automatic21:08SAST native wake queued this research chat while the natural mask was being edited. Work continued uninterrupted; next queued turn must acknowledge that pending wake once before advancing. This extends the earlier manual dispatcher test with an observed scheduled run.
-
-
-
-
-
-
-
-
-
