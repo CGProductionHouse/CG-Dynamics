@@ -1,3 +1,32 @@
+## 6 November — platform health / GitHub storage audit
+
+Read `PLATFORM-HEALTH-AUDIT-2026-11-06.md` before claiming the fleet healthy or
+uncapped. Read-only audit:22 Vercel projects READY,51/55 initial root/alias probes
+HTTP200,36 sampled JS assets and41 additional routes200; critical .co.za app and
+Rugby endpoints serve. No Vercel production5xx in24h metrics; four Supabase MCP5xx
+remain an intermittent error history, not hidden as success. No deploy/build/DNS/
+budget/security/provider/data/permission change or auth-copy workaround.
+
+Actual alert is GitHub Actions100% included storage, not website media:95 Wiseman
+screenshot artifacts3,299,886,060bytes. Exact93-old-artifact removal candidate is
+3,123,202,352bytes, keep latest two176,683,708bytes. Awaiting CA's explicit permanent-
+deletion answer; no cleanup claimed. Accrued usage will not be erased by deletion.
+GitHub email reset1December. Current Vercel budget15USD/on-demand0/PauseON,
+cycleends18November08:00UTC; finite shared cap remains an outage risk, not removed.
+
+JFJ custom domains serve Afrihost parking; Imbewu www.com works but apex.com is old
+GoDaddy/LaunchingSoon and .co.za has no A/CNAME. Dynamics .com goes to HugeDomains,
+not the working .co.za app. Vercel domain verification did not prove live DNS.
+Scoped DNS/ownership gates remain; no nameserver/mail changes authorized.
+
+Both visible Supabase projects ACTIVE_HEALTHY: Dynamics~1.11GB,20/60connections;
+Hours~56MB,19/60. Security/performance warnings remain for exact review. Org usage
+meters and Rugby's separate Supabase project are not verified by this connection.
+Meta20PASS/55PARTIAL/1STALE(held AV), TikTok10refreshPASS, GoogleAds latestsync
+5November22:00UTC succeeded, Microsoft latestPARTIAL/83conflicts. Existing lane
+owners retained. Computer Use safety-stopped on uncertain Chrome URL; no new UI/
+phone/login acceptance claimed. Exact Control Centre target remains unavailable.
+
 ## 5 November — approved Cape calendar file repair LIVE
 
 CA approved the exact six-row packet from #958. Fresh main/ownership/source-hash
