@@ -2479,7 +2479,7 @@ async function handleGetContentRunPlan(staff: AuthenticatedStaff, input: Record<
   if (guideline) {
     const { data, error } = await staff.supabase
       .from('content_guide_ideas')
-      .select('id, content_guideline_id, client_id, title, objective, platform, format, hook, script, shot_breakdown, requirements, position, status')
+      .select('id, content_guideline_id, client_id, title, objective, platform, format, hook, script, shot_breakdown, requirements, inspiration_url, inspiration_note, position, status')
       .eq('content_guideline_id', guideline.id)
       .eq('client_id', run.client_id)
       .neq('status', 'archived')
@@ -2505,6 +2505,8 @@ async function handleGetContentRunPlan(staff: AuthenticatedStaff, input: Record<
       objective: video?.objective ?? null,
       hook: video?.hook ?? null,
       script: video?.script ?? null,
+      inspiration_url: video?.inspiration_url ?? null,
+      inspiration_note: video?.inspiration_note ?? null,
       shot_breakdown: video?.shot_breakdown ?? null,
       shot_notes: item.shot_notes,
       requirements: item.requirements ?? video?.requirements ?? null,
@@ -2525,6 +2527,8 @@ async function handleGetContentRunPlan(staff: AuthenticatedStaff, input: Record<
       objective: video.objective ?? null,
       hook: video.hook ?? null,
       script: video.script ?? null,
+      inspiration_url: video.inspiration_url ?? null,
+      inspiration_note: video.inspiration_note ?? null,
       shot_breakdown: video.shot_breakdown ?? null,
       shot_notes: null,
       requirements: video.requirements ?? null,
@@ -3196,7 +3200,7 @@ async function resolveContentRunScope(
 }
 
 const GUIDELINE_VIDEO_SELECT =
-  'id, content_guideline_id, client_id, title, objective, hook, cta, month, script, shot_breakdown, requirements, visual_notes, notes, deliverable_id, position, status, production_status, editor_name'
+  'id, content_guideline_id, client_id, title, objective, hook, cta, month, script, shot_breakdown, requirements, visual_notes, inspiration_url, inspiration_note, notes, deliverable_id, position, status, production_status, editor_name'
 
 async function loadGuidelineVideos(staff: AuthenticatedStaff, guidelineId: string, clientId: string) {
   const { data, error } = await staff.supabase

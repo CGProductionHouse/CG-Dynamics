@@ -1,5 +1,11 @@
 # Per-video client guideline review — 9 November 2026
 
+Later optional social-inspiration requirements supersede this candidate's3-file
+release packet; read GUIDELINE-INSPIRATION-LINKS-2026-11-09.md before release.
+Existing verification remains valid. Germoparts subsequently became unpublished
+at12:01:57UTC; newer receipt records exact unchanged-content comparison and the
+separate restoration approval boundary.
+
 Owner #896/#450, supervision #381. CA requested verification of the public
 client-only presentation plus separate approval, amendment, decline and comment
 tracking for each video. Existing public delivery/message previews stay intact.

@@ -9,7 +9,8 @@ const { chromium } = await import(pathToFileURL(process.env.CG_PLAYWRIGHT_MODULE
 const token = 'a'.repeat(64), slug = 'example-client-content-guideline'
 const version = '2026-11-09T10:24:27.044422+00:00'
 const sample = { client: { name: 'Example Client' }, guide: { row_key: 'shared', title: 'Example Client · November 2026', month: '2026-11-01', filming_date: '2026-11-10', run_name: 'PRIVATE INTERNAL RUN', published_at: version,
-  videos: [1, 2].map(position => ({ position, title: position === 1 ? 'The counter countdown' : 'The workshop voice note', script: `SCENE 01\nVerbatim sample script ${position}.\n\nSCENE 02\nEvery line stays exactly as authored.`, objective: 'A clear, memorable story about your business.', hook: 'Start with a familiar moment.', shot_breakdown: 'Wide shot, detail, reaction.', cta: 'Start a conversation with your team.', visual_notes: 'Natural light and a confident, conversational delivery.', platform: 'Facebook · Instagram', format: 'Short-form video' })) } }
+  videos: [1, 2].map(position => ({ position, title: position === 1 ? 'The counter countdown' : 'The workshop voice note', script: `SCENE 01\nVerbatim sample script ${position}.\n\nSCENE 02\nEvery line stays exactly as authored.`, objective: 'A clear, memorable story about your business.', hook: 'Start with a familiar moment.', shot_breakdown: 'Wide shot, detail, reaction.', cta: 'Start a conversation with your team.', visual_notes: 'Natural light and a confident, conversational delivery.', platform: 'Facebook · Instagram', format: 'Short-form video',
+    inspiration_url: position === 1 ? 'https://www.tiktok.com/@example/video/123456' : null, inspiration_note: position === 1 ? 'Take the playful countdown and quick reactions, then make it our own with your team and real products.' : null })) } }
 const plugin = { name: 'public-review-fixture',
   resolveId(id) { if (id === 'virtual:public-review') return '\0virtual:public-review' },
   load(id) { if (id === '\0virtual:public-review') return `import React from 'react';import {createRoot} from 'react-dom/client';import {MemoryRouter,Routes,Route} from 'react-router-dom';import Page from '/src/pages/PublicContentGuidelinePage.tsx';import {GuidelineClientResponses} from '/src/components/content/GuidelineClientResponses.tsx';import '/src/index.css';createRoot(document.getElementById('root')).render(location.search.includes('staff')?React.createElement('main',{className:'mx-auto max-w-4xl p-5'},React.createElement(GuidelineClientResponses,{runId:'30000000-0000-4000-8000-000000000001'})):React.createElement(MemoryRouter,{initialEntries:['/guidelines/${slug}/${token}']},React.createElement(Routes,null,React.createElement(Route,{path:'/guidelines/:slug/:token',element:React.createElement(Page)}))));` },
@@ -53,6 +54,14 @@ try {
     const account = page.getByRole('link', { name: 'Sign in to your CG Dynamics account' })
     assert.equal(await account.getAttribute('href'), '/login'); assert.equal(await account.getAttribute('target'), '_blank'); assert.match(await account.getAttribute('rel'), /noreferrer/)
     assert.equal(await page.locator('a[href*="/admin"]').count(), 0)
+    const inspiration = page.getByRole('region', { name: 'Video inspiration', exact: true })
+    assert.equal(await inspiration.count(), 1, 'Original script has no empty reference section')
+    const example = inspiration.getByRole('link', { name: 'Watch example on TikTok' })
+    assert.equal(await example.getAttribute('href'), sample.guide.videos[0].inspiration_url)
+    assert.equal(await example.getAttribute('target'), '_blank'); assert.match(await example.getAttribute('rel'), /noreferrer/)
+    assert.equal(await example.getAttribute('referrerpolicy'), 'no-referrer')
+    assert.equal(await page.locator('iframe,video,audio').count(), 0, 'No social embeds, autoplay or third-party media requests')
+    await inspiration.screenshot({ path: join(tmpdir(), `cg-guideline-inspiration-${width}.png`) })
     const first = page.getByRole('region', { name: 'Review video 1', exact: true }), second = page.getByRole('region', { name: 'Review video 2', exact: true })
     await first.getByRole('button', { name: 'Approve idea', exact: true }).click()
     await first.getByRole('textbox', { name: 'Your name', exact: true }).fill('Client reviewer')

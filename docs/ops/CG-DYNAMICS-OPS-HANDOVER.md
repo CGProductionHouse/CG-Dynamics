@@ -1,3 +1,23 @@
+## 9 November — optional video inspiration / combined release candidate
+
+Owner #896/#450. CA added optional trend/example links and a short vision per
+video. Focused codex/guideline-inspiration-links uses two nullable canonical
+fields, safe public-social links, existing Lucide icon, same branded renderer and
+normal ChatGPT add/edit/read. Hidden when blank; no embed/autoplay/fetch.
+Source verified, NOT LIVE. Read GUIDELINE-INSPIRATION-LINKS-2026-11-09.md for the
+superseding combined packet: two exact migrations (including pending #975), three
+existing MCP files plus pure helper (v81/40 ->41, other37 preserved), one local
+prebuilt stage/promotion after CA approval. Full4268pass/30skip, final27focused,
+PG roles/version/isolation/concurrency, public/editor1440/375/390/430,
+build/bundle/Deno/lint/diff/prebuild/packaging pass. No live write/cloud upload.
+
+Important12:01:57UTC change: Germoparts now ready/unpublished, so public link
+correctly unavailable. Exact document/run/date and every public field of all four
+videos still match original snapshot; hashes/video updated_at unchanged. This run
+made no production write. Actor/cause unproven; do not silently override. Final
+combined approval should cover restoring only this unchanged publication too.
+Existing MCPv81/current deployment and other owners remain; no fake approvals.
+
 ## 9 November — per-video public guideline review follow-up
 
 Owner #896/#450. CA requested guideline-only public presentation and individual

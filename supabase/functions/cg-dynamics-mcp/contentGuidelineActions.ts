@@ -1,14 +1,18 @@
 // #450 — Assistant content actions: pure validation and shaping.
 //
-// Import-free by design (no Deno, no Supabase, no app imports) so the same rules are
+// Pure by design (no Deno, Supabase or IO); social-link rules are shared with the app.
+// These rules are
 // unit-tested directly. The readiness derivation mirrors src/lib/contentAutopilot.ts
 // and a drift-guard test pins the two together.
 //
 // Hard rules encoded here:
-//   * no raw Graph id, item id, drive id or URL ever reaches staff/client text;
+//   * no raw Graph/storage identifiers or URLs reach staff/client text;
+//     explicitly supplied public social inspiration is a separate safe field;
 //   * a video is addressed by exact id — never by loose title, never across clients;
 //   * `monthly_deliverables` is never written: a video only links to one;
 //   * position is changed only through the canonical reorder authority.
+
+import { guidelineInspiration } from '../../../src/lib/guidelineInspiration.ts'
 
 export const CONTENT_GUIDELINE_TOOLS = [
   'ensure_content_guideline',
@@ -27,7 +31,7 @@ export type ContentGuidelineTool = typeof CONTENT_GUIDELINE_TOOLS[number]
 /** Fields an Assistant may write on a saved video. Everything else is refused. */
 export const EDITABLE_VIDEO_FIELDS = [
   'title', 'objective', 'hook', 'cta', 'script', 'shot_breakdown',
-  'requirements', 'visual_notes', 'notes', 'month',
+  'requirements', 'visual_notes', 'notes', 'month', 'inspiration_url', 'inspiration_note',
 ] as const
 
 export type EditableVideoField = typeof EDITABLE_VIDEO_FIELDS[number]
@@ -35,6 +39,7 @@ export type EditableVideoField = typeof EDITABLE_VIDEO_FIELDS[number]
 const MAX_LENGTHS: Record<EditableVideoField, number> = {
   title: 200, objective: 1000, hook: 500, cta: 500, script: 20000,
   shot_breakdown: 8000, requirements: 4000, visual_notes: 4000, notes: 4000, month: 10,
+  inspiration_url: 2048, inspiration_note: 1000,
 }
 
 const MONTH = /^\d{4}-\d{2}(-\d{2})?$/
@@ -187,6 +192,12 @@ export function validateVideoPatch(input: Record<string, unknown>): Validated<Re
     const value = raw.trim()
     if (value.length > MAX_LENGTHS[field]) return { ok: false, error: `${field} is longer than ${MAX_LENGTHS[field]} characters.` }
     if (field === 'title' && !value) return { ok: false, error: 'A video must keep a title.' }
+    if (field === 'inspiration_url') {
+      const example = guidelineInspiration(value)
+      if (value && !example) return { ok: false, error: 'Use an HTTPS TikTok, Instagram, Facebook or YouTube link.' }
+      patch[field] = example?.url ?? null
+      continue
+    }
     if (field === 'month') {
       if (value && !MONTH.test(value)) return { ok: false, error: 'month must be YYYY-MM or YYYY-MM-DD.' }
       patch[field] = value ? normaliseMonth(value) : null
@@ -331,6 +342,8 @@ export function shapeVideoForAssistant(input: {
     shot_breakdown: video.shot_breakdown ?? null,
     requirements: video.requirements ?? null,
     visual_notes: video.visual_notes ?? null,
+    inspiration_url: guidelineInspiration(video.inspiration_url)?.url ?? null,
+    inspiration_note: video.inspiration_note ?? null,
     has_script: typeof video.script === 'string' && video.script.trim().length > 0 && !/^script pending/i.test(video.script.trim()),
     production_status: video.production_status ?? null,
     editor: video.editor_name ?? null,
