@@ -1,4 +1,30 @@
-## 9 November — optional video inspiration / combined release candidate
+## 9 November — combined guideline release LIVE, acceptance complete
+
+Owner #896/#450. CA's exact combined approval executed: #977/main25657501 includes
+#975 per-video approve/change/decline/comment controls plus optional social
+inspiration/vision in the existing branded renderer/editor/ChatGPT actions.
+Read GUIDELINE-INSPIRATION-LINKS-2026-11-09.md current production receipt first.
+Two exact migrations applied once (hosted ledger20261109154159/20261109154213).
+Existing MCP ACTIVEv82, all41 files verified/other37 unchanged, auth/secrets intact.
+One2.6MB prebuilt stage dpl_12ysTroZHgsSJMHrPxUqp8AetiRz verified and the SAME
+deployment promoted once; www production READY, zero remote app compilation.
+Git deployment OFF; no further docs build/deploy. Rollback previous
+dpl_EJr74MFsLf1uqmveHTZCqPQTyHFE/privatev81 bundle, retain additive review history.
+
+Germoparts had already been republished externally12:44:11UTC with every public
+field/four original scripts unchanged. Preserved it, no duplicate publication.
+Anonymous reader/built GET/HEAD200, capability/client isolation and table/
+management denial pass. Both connected company/personal accounts return complete
+scripts, null inspiration, verified empty response history and same named public
+link. Live native desktop/375/390/430px branding/scripts/actions/layout verified;
+desktop/390px amendment form opened/cancelled without sending. Final response
+count0. No sample references/fake approvals/content/provider/Teams/calendar/other-
+client writes. Supported4268pass/30skip plus real PG roles/version/concurrency,
+public/editor fixtures/build/bundle/Deno/lint/diff remain the verified source
+baseline. No physical-phone/real-client decision or all-app launch claim inferred.
+Protected gates/other owners unchanged; no guessed Control Centre write.
+
+## Historical 9 November — optional video inspiration / combined release candidate
 
 Owner #896/#450. CA added optional trend/example links and a short vision per
 video. Focused codex/guideline-inspiration-links uses two nullable canonical
