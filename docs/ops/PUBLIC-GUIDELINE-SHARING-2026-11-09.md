@@ -37,8 +37,8 @@ supersedes the earlier staff-only-link outcome, not unrelated publication gates.
 
 ## Release boundaries and packet
 
-Reviewed branch codex/public-guideline-sharing, based on main0a80a069. Exact final
-commit/deployment identifiers and hosted readback belong in acceptance below.
+Reviewed #970, feature commit33972850, merged main46a38c39. The prebuilt tree
+matches merged main exactly. Exact deployment/readback identifiers follow below.
 Supabase target ehtjfntukiwbgptqgbzy. Migration
 20261109093718_public_content_guideline_shares adds only the private snapshot
 registry and three narrowly granted RPCs. MCP baseline ACTIVEv79/40files;
@@ -72,13 +72,63 @@ No new guide, approval, message, other-client content or schedule mutation.
 Do not commit the public bearer capability to source or GitHub; return it only
 to CA and retain private acceptance evidence locally.
 
-## Acceptance
+## Live acceptance
 
-Pending this release: schema/grants readback, exact40-file hosted acceptance,
-same-artifact production promotion, real connector publication/get-link and
-anonymous client page including full four scripts. Browser adapter reports
-disabled despite visually enabled Chrome settings; native app UI remains usable.
-No final normal ChatGPT/phone pass is claimed until actually observed.
+- Migration applied; independent readback confirms registry RLS enabled, anon/
+  authenticated table SELECT denied, anonymous management denied, authenticated
+  actor-injection RPC denied, authenticated narrow wrapper allowed. Only the
+  exact read-only public snapshot RPC is executable anonymously.
+- Existing MCP **ACTIVEv80**, runtime bundle
+  `0c164dd8f28128b8e1b639b4dc47e1ab216b51c337b3108db0e8224f75676691`.
+  Fresh v79 preflight exact; final40-file readback exact,35other files preserved,
+  verify_jwt=false/import_map=false and existing authentication unchanged.
+- Production **dpl_ArdGYhaAcEh9kbAP2r8skWV8HNCS**; one2.5MB differential prebuilt
+  upload then promotion of that same deployment. Zero cloud compilation.
+  Protected staging verified with existing Vercel CLI identity; no protection
+  setting changed. Staged HTML/new-page chunk SHA256 match the local artifact.
+  Production root/login/new route/chunk HTTP200; new chunk exact and
+  noindex/no-referrer/private-no-store headers independently verified live.
+- Normal **company ChatGPT Chat mode** performed resolve/read/publish/get-share
+  and returned the named no-login link. Independent audit SELECT confirms exactly
+  one successful publish receipt for the exact client/run/guide. Source guideline
+  now published; all four script hashes/video IDs/order/idea states unchanged.
+  Exactly one share exists; no other client was published.
+- Normal **personal ChatGPT Plus Chat mode** retrieved the identical verified
+  no-login link and four-video count in a read-only test. Both existing personal
+  app entries were refreshed through their normal settings UI; both point to the
+  same production endpoint. The alternate Personal Refresh app's misleading
+  read-only-acceptance description was corrected to its actual staff/content/
+  client-review-sharing capabilities. No OAuth scope or permission was expanded.
+  Company settings tools were refreshed too; no laptop handoff was needed.
+- Independent anonymous HTTP RPC (publishable key, no user session) returns all
+  four exact original scripts. Wrong token/foreign slug return null. Anonymous
+  table read and management both401. Snapshot has only allowlisted fields.
+- Native Chrome public page displays Germoparts branding and all four complete
+  scripts without login.375/390/430px responsive UI checks show readable wrapped
+  content; video04 anchor navigation, copy-link/no-sign-in feedback and expandable
+  filming direction pass. DevTools closed afterward. Responsive browser acceptance
+  does not mean a real iPhone test was performed.
+- CUA browser adapter still reports disabled despite visibly enabled settings/
+  installed extension. Native app controls provided the verified path; no
+  credentials were copied or authentication bypassed.
+
+Private live proof: `%TEMP%/cg-public-guideline-live-acceptance.json`;
+artifact185files/41,569,096bytes manifest `%TEMP%/cg-public-guideline-artifact.json`;
+staged/live inspection and final prebuild logs retained alongside them. Own
+disposable PostgreSQL container stopped; other Docker workloads untouched.
+
+Five reviewed hosted file LF SHA256 values:
+
+| File | SHA256 |
+| --- | --- |
+| index.ts | 743e6f8bedce93f2ed0738f2ab0e31eeac6f06ee83c055cce86f917832cfb713 |
+| contentGuidelineActions.ts | 79d3a0fa38f48c7689be92b0104e9328ed0e724274e565c7171a18b59c2fb826 |
+| toolCatalog.ts | 5dc7a743138a9034e0330c039682cc9d5352e7d9a0289b334a014ff1d065cf63 |
+| projectContext.ts | 179bb11113ec8a4d6817fe16d2dcb4e7c100c23d1f7ac61b79132f53667e9a66 |
+| capabilityManifest.ts | 84f5c78004bdfa7e45bc53b5af82672d34f817a85478cca133401db7873aae5b |
 
 This lane does not certify all-client/provider launch readiness. Existing
 strategy, provider, recipient-safety, client-role and real-phone gates remain.
+Final connected Google Drive discovery did not expose the exact Control Centre
+file (bounded keyword and exact-title-filter searches). No substitute tracker or
+guessed-cell update; owning issues/#381 and this handover retain the live receipt.

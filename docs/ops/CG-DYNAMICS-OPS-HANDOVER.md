@@ -9,10 +9,23 @@ Three MCP actions publish/get/revoke; stale global no-publication instructions
 are narrowed to monthly strategies. No client approval or calendar/Teams change.
 Read PUBLIC-GUIDELINE-SHARING-2026-11-09.md for tests, security and exact release
 packet. Local supported full suite4,247pass/30skip/0fail; real PostgreSQL security/
-snapshot/revocation fixtures, build/app chunks/Deno/scopedlint/diff pass. Current
-production remains MCPv79 until release readback is recorded below; migration and
-frontend publication are not inferred from these local checks. Browser settings
-visually enabled; stale adapter remains separate from native app UI availability.
+snapshot/revocation fixtures, build/app chunks/Deno/scopedlint/diff pass.
+Production is MCPv80 and frontend dpl_ArdGYhaAcEh9kbAP2r8skWV8HNCS, reviewed
+#970/main46a38c39. Exact40-file hosted readback passes (35preserved), migration/
+RLS/grants independently verified. One2.5MB prebuilt upload/same-deployment
+promotion, zero cloud compilation. Normal company ChatGPT Chat mode published
+the existing Germoparts guide and returned its named no-login link; one exact
+successful audit receipt. Four script hashes/IDs/idea states unchanged, exactly
+one public share. Anonymous read/full scripts, wrong-token/client denial,
+management/table401 and live privacy headers pass. Native Chrome desktop and
+375/390/430px navigation/copy/full-script/direction checks pass; no real-phone
+acceptance inferred. Browser settings visually enabled; stale CUA browser adapter
+worked around using legitimate native app UI, never credentials/auth bypass.
+Normal personal ChatGPT Plus Chat mode also retrieved the same verified public
+link/four-video count read-only. Both personal app tool catalogs refreshed;
+alternate app's stale read-only wording corrected, scopes/permissions unchanged.
+Bounded fresh Drive discovery still cannot identify the exact Control Centre;
+no alternate tracker/guessed write. Existing other-client/provider gates remain.
 
 ## 9 November — ChatGPT guideline links/retry fixes LIVE v79
 
