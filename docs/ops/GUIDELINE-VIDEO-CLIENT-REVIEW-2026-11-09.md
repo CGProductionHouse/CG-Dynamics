@@ -68,6 +68,16 @@ tool/scope or public staff-history endpoint.
 review schema/backend/frontend release. Existing live MCPv81 and deployment
 `dpl_EJr74MFsLf1uqmveHTZCqPQTyHFE` remain the rollback/serving baseline.
 
+Reviewed #975/f6287a0527cff8b0065ce9c3c8cecdae274d746d is merged as
+`f0a3447d0d2765e5c695bc6ad29f879af5ff9536`; final application/backend/script tree
+matches the verified feature tree exactly. Final production-target LOCAL prebuild
+and46-resource self-contained packaging pass; isolated built GET/HEAD also passes
+actual Germoparts metadata/month/four-video count/logo, exact app shell and no
+private scripts in initial HTML. No staged upload/promotion was performed. The
+local installer pruned only optional peer lock entries; restored the unchanged
+source lockfile, with no dependency change committed. CA's single exact release
+approval question is pending; no laptop access or real-client test response needed.
+
 Supabase project `ehtjfntukiwbgptqgbzy`: apply only
 `20261109112347_guideline_video_client_review.sql` (one private table, two indexes,
 five narrowly granted functions). No existing reader/publisher or client content
