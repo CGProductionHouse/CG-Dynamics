@@ -5,11 +5,12 @@ import { guidelineVideoName } from '../../lib/contentGuidelineNaming'
 import { monthDisplayLabel } from '../../lib/reportPeriod'
 
 /** Presentation only. Callers must supply the existing client-safe projection. */
-export function ContentGuidelineDocument({ guide, client, selected = false, clientPath }: {
+export function ContentGuidelineDocument({ guide, client, selected = false, clientPath, linkAccess = 'signed_in' }: {
   guide: PublishedContentGuideline
   client: ClientLogoClient
   selected?: boolean
   clientPath?: string
+  linkAccess?: 'signed_in' | 'public'
 }) {
   const documentId = useId()
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle')
@@ -35,7 +36,7 @@ export function ContentGuidelineDocument({ guide, client, selected = false, clie
           <p className="text-[0.68rem] font-black uppercase tracking-[0.26em] text-[#2dd4bf]">CG Production House</p>
           {clientPath && <button type="button" onClick={() => void copyLink()} className="min-h-11 rounded-full bg-white px-5 py-2.5 text-xs font-bold text-[#06110f] shadow-lg transition hover:bg-[#dffcf6] focus-visible:outline-2 focus-visible:outline-[#2dd4bf]">{copyState === 'copied' ? 'Link copied' : 'Copy guideline link'} <span aria-hidden="true">↗</span></button>}
         </div>
-        <div role="status" className="text-xs text-slate-400">{copyState === 'failed' ? 'Select and copy the client link below. Client sign-in is required.' : copyState === 'copied' ? 'Opens this published guide. Client sign-in is required.' : null}</div>
+        <div role="status" className="text-xs text-slate-400">{copyState !== 'idle' ? `${copyState === 'failed' ? 'Select and copy the client link below.' : 'Opens this published guide.'} ${linkAccess === 'public' ? 'No sign-in is needed.' : 'Client sign-in is required.'}` : null}</div>
         {copyState === 'failed' && <input aria-label="Client guideline link" readOnly value={manualLink} onFocus={event => event.currentTarget.select()} className="mt-3 min-h-11 w-full rounded-xl border border-white/20 bg-black/20 px-3 text-sm text-white" />}
         <div className="mt-6 flex items-center gap-4">
           <ClientLogo client={client} boxClassName="h-12 w-12 rounded-2xl sm:h-14 sm:w-14" frameClassName="border border-white/10 bg-white/[0.07]" />

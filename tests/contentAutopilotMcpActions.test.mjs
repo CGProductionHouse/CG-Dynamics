@@ -86,7 +86,7 @@ test('read-only guideline tools never create a missing document', async () => {
 
 test('every #450 action is exposed, contexted and correctly classified', () => {
   const writes = serverSource.match(/const WRITE_TOOLS = new Set\(\[([\s\S]*?)\]\)/)[1]
-  const readOnly = new Set(['list_content_guideline_videos', 'get_content_video_readiness'])
+  const readOnly = new Set(['list_content_guideline_videos', 'get_content_video_readiness', 'get_content_guideline_share'])
   for (const tool of actions.CONTENT_GUIDELINE_TOOLS) {
     assert.ok(catalog.includes(`name: '${tool}'`), `${tool} is in the catalog`)
     assert.ok(context.includes(`'${tool}'`), `${tool} is classified for Project context`)

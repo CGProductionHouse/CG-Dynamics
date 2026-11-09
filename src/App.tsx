@@ -13,6 +13,7 @@ import { lazyRoute } from './lib/lazyRoute'
 import { AuthProfileError } from './components/AuthProfileError'
 
 const LandingPage = lazyRoute(() => import('./pages/LandingPage'))
+const PublicContentGuidelinePage = lazyRoute(() => import('./pages/PublicContentGuidelinePage'))
 const Login = lazyRoute(() => import('./pages/Login'))
 const Signup = lazyRoute(() => import('./pages/Signup'))
 const ForgotPassword = lazyRoute(() => import('./pages/ForgotPassword'))
@@ -94,6 +95,7 @@ export default function App() {
             <Routes>
           <Route path="/" element={<HomeRedirect />} />
           <Route path="/landing" element={<LandingPage />} />
+          <Route path="/guidelines/:slug/:token" element={<PublicContentGuidelinePage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />

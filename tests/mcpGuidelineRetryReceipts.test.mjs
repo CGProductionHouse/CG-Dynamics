@@ -76,7 +76,8 @@ test('receipt storage failure returns a truthful recovery error without a second
 
 test('every guideline mutation replays its original receipt with both audit principals', async () => {
   for (const tool of ['ensure_content_guideline', 'add_content_guideline_video', 'update_content_guideline_video',
-    'reorder_content_guideline_videos', 'link_content_guideline_video_deliverable', 'generate_content_guideline_drafts']) {
+    'reorder_content_guideline_videos', 'link_content_guideline_video_deliverable', 'generate_content_guideline_drafts',
+    'publish_content_guideline', 'revoke_content_guideline_share']) {
     const f = fixture({ tool })
     const input = { content_run_id: run, idempotency_key: `exact-${tool}` }
     const first = await f.dispatch(input, tool), repeat = await f.dispatch(input, tool)

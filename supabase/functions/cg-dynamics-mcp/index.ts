@@ -34,6 +34,7 @@ import {
   deriveEditReadiness as deriveVideoEditReadiness,
   deriveRawEvidence as deriveVideoRawEvidence, shapeVideoForAssistant, buildGuidelineNavigation,
   GUIDELINE_WRITE_TOOLS, withGuidelineWriteReceipt, ownsGuidelineWriteReceipt,
+  shapeGuidelineShare,
   validateDeliverableLink, validateNewVideo, validateReorder, validateVideoPatch,
 } from './contentGuidelineActions.ts'
 import { buildGoogleAdsAudit, planGoogleAdsMetricReads, validateGoogleAdsAuditInput, type AuditAccount, type AuditLink, type AuditMetric, type AuditSync } from './googleAdsAudit.ts'
@@ -3547,6 +3548,19 @@ const handleGenerateContentGuidelineDrafts: ToolHandler = async (staff, input) =
   }
 }
 
+async function manageGuidelineShare(staff: AuthenticatedStaff, input: Record<string, unknown>, action: 'publish' | 'get' | 'revoke') {
+  const scope = await resolveContentRunScope(staff, input.content_run_id as string)
+  if ('error' in scope) return { error: scope.error }
+  const { data, error } = await staff.supabase.rpc('manage_content_guideline_share_as_actor', {
+    p_run_id: scope.runId, p_actor_profile_id: staff.profileId, p_action: action,
+  })
+  if (error) return { error: 'GUIDELINE_SHARING_FAILED', message: error.message }
+  return shapeGuidelineShare(data, scope)
+}
+const handlePublishContentGuideline: ToolHandler = (staff, input) => manageGuidelineShare(staff, input, 'publish')
+const handleGetContentGuidelineShare: ToolHandler = (staff, input) => manageGuidelineShare(staff, input, 'get')
+const handleRevokeContentGuidelineShare: ToolHandler = (staff, input) => manageGuidelineShare(staff, input, 'revoke')
+
 // ── Tool Router ─────────────────────────────────────────────────────────────
 
 const WRITE_TOOLS = new Set([
@@ -3576,6 +3590,7 @@ const WRITE_TOOLS = new Set([
   'reorder_content_guideline_videos',
   'link_content_guideline_video_deliverable',
   'generate_content_guideline_drafts',
+  'publish_content_guideline', 'revoke_content_guideline_share',
 ])
 
 // These backends own the durable idempotency receipt. An identical MCP retry must reach them so
@@ -3590,6 +3605,9 @@ const CANONICAL_RECEIPT_REPLAY_TOOLS = new Set([
 ])
 
 const toolHandlers: Record<string, ToolHandler> = {
+  publish_content_guideline: handlePublishContentGuideline,
+  get_content_guideline_share: handleGetContentGuidelineShare,
+  revoke_content_guideline_share: handleRevokeContentGuidelineShare,
   get_my_day: handleGetMyDay,
   list_my_tasks: handleListMyTasks,
   get_task: handleGetTask,

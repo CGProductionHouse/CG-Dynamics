@@ -1,3 +1,19 @@
+## 9 November — requested no-login client guideline sharing
+
+Owner #896/#450. CA explicitly rejected private staff links as the final outcome
+and requested that ChatGPT publish the existing Germoparts guide for client review
+and return a client-named public link. Focused branch codex/public-guideline-sharing
+adds that delivery workflow using the accepted renderer, exact-client/run actor
+checks, a private RLS snapshot registry and256-bit revocable capabilities.
+Three MCP actions publish/get/revoke; stale global no-publication instructions
+are narrowed to monthly strategies. No client approval or calendar/Teams change.
+Read PUBLIC-GUIDELINE-SHARING-2026-11-09.md for tests, security and exact release
+packet. Local supported full suite4,247pass/30skip/0fail; real PostgreSQL security/
+snapshot/revocation fixtures, build/app chunks/Deno/scopedlint/diff pass. Current
+production remains MCPv79 until release readback is recorded below; migration and
+frontend publication are not inferred from these local checks. Browser settings
+visually enabled; stale adapter remains separate from native app UI availability.
+
 ## 9 November — ChatGPT guideline links/retry fixes LIVE v79
 
 Owner #896/#450. Reproduced company ChatGPT's Germoparts failure: correct draft

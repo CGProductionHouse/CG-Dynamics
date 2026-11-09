@@ -27,8 +27,11 @@ test('tool names are unique, focused and carry closed schemas plus safety annota
 })
 
 test('catalog exposes no infrastructure or arbitrary data tool', () => {
-  const names = catalog.CG_DYNAMICS_MCP_TOOLS.map(tool => tool.name).join(' ')
+  const names = catalog.CG_DYNAMICS_MCP_TOOLS.map(tool => tool.name).filter(name => name !== 'publish_content_guideline').join(' ')
   assert.doesNotMatch(names, /sql|query_table|supabase|database|delete|publish|send/i)
+  const publish = catalog.CG_DYNAMICS_MCP_TOOLS.find(tool => tool.name === 'publish_content_guideline')
+  assert.match(publish.description, /exact Content Run/)
+  assert.equal(publish.dependency, '#450')
 })
 
 test('catalog exposes no send_email or send_draft action — staff email is draft-only', () => {
@@ -55,6 +58,7 @@ test('read tools cover exact staff, task, calendar, schedule, lead, client conte
     'list_content_guideline_videos', 'get_content_video_readiness',
     'get_content_run_plan', 'get_content_run_closeout', 'verify_content_run_upload',
     'read_my_recent_entries',
+    'get_content_guideline_share',
   ])
 })
 
@@ -99,13 +103,13 @@ test('server instruction states the shared-connection contract and forbids unsaf
   assert.doesNotMatch(instructions, /Project name.*identity/i)
 })
 
-test('catalog contains exactly 56 tools: 28 read + 28 write', () => {
+test('catalog contains exactly 59 tools: 29 read + 30 write', () => {
   const tools = catalog.CG_DYNAMICS_MCP_TOOLS
-  assert.equal(tools.length, 56)
+  assert.equal(tools.length, 59)
   const reads = tools.filter(t => t.annotations.readOnlyHint)
   const writes = tools.filter(t => !t.annotations.readOnlyHint)
-  assert.equal(reads.length, 28)
-  assert.equal(writes.length, 28)
+  assert.equal(reads.length, 29)
+  assert.equal(writes.length, 30)
 })
 
 test('every tool maps to a declared dependency and no tool references an unknown upstream', () => {

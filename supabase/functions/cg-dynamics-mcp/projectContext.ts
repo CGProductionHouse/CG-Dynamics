@@ -162,6 +162,7 @@ export const CLIENT_SCOPED_TOOLS: readonly string[] = [
   'update_content_guideline_video', 'reorder_content_guideline_videos',
   'link_content_guideline_video_deliverable', 'generate_content_guideline_drafts',
   'get_content_video_readiness',
+  'publish_content_guideline', 'get_content_guideline_share', 'revoke_content_guideline_share',
 ]
 
 /**

@@ -19,6 +19,7 @@ export const CONTENT_GUIDELINE_TOOLS = [
   'link_content_guideline_video_deliverable',
   'generate_content_guideline_drafts',
   'get_content_video_readiness',
+  'publish_content_guideline', 'get_content_guideline_share', 'revoke_content_guideline_share',
 ] as const
 
 export type ContentGuidelineTool = typeof CONTENT_GUIDELINE_TOOLS[number]
@@ -69,7 +70,38 @@ export const GUIDELINE_WRITE_TOOLS = new Set([
   'ensure_content_guideline', 'add_content_guideline_video', 'update_content_guideline_video',
   'reorder_content_guideline_videos', 'link_content_guideline_video_deliverable',
   'generate_content_guideline_drafts',
+  'publish_content_guideline', 'revoke_content_guideline_share',
 ])
+
+/** Only the trusted exact-run RPC may issue a public capability URL. */
+export function shapeGuidelineShare(value: unknown, scope: { runId: string; clientId: string }) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return { error: 'Guideline sharing did not return a verified result.' }
+  const row = value as Record<string, unknown>
+  if (row.content_run_id !== scope.runId || row.client_id !== scope.clientId || !isUuid(row.guideline_id)
+    || typeof row.client_name !== 'string' || !['published_for_review','not_shared','revoked'].includes(String(row.state))) {
+    return { error: 'Guideline sharing result does not match this exact client and Content Run.' }
+  }
+  const published = row.state === 'published_for_review'
+  if (published && (typeof row.public_slug !== 'string' || row.public_slug.length > 180
+    || !/^[a-z0-9]+(-[a-z0-9]+)*-content-guideline$/.test(row.public_slug)
+    || typeof row.share_token !== 'string' || !/^[a-f0-9]{64}$/.test(row.share_token)
+    || typeof row.published_at !== 'string' || !Number.isFinite(Date.parse(row.published_at))
+    || !Number.isSafeInteger(row.video_count) || Number(row.video_count) < 1)) {
+    return { error: 'The client guideline link could not be verified.' }
+  }
+  return {
+    ...buildGuidelineNavigation(row.guideline_id, scope.clientId, scope.runId),
+    guideline_id: row.guideline_id, content_run_id: scope.runId, client_name: row.client_name,
+    state: row.state, video_count: published ? row.video_count : null,
+    client_share_url: published ? `https://www.cgdynamics.co.za/guidelines/${row.public_slug}/${row.share_token}` : null,
+    published_at: published ? row.published_at : null,
+    link_access: published ? 'anyone_with_link' : 'not_shared',
+    note: published
+      ? 'Ready for client review. Send client_share_url: it opens without a login and shows only this published guideline. Publication is not client approval. Publish again to update the version shown at this link.'
+      : row.state === 'revoked' ? 'The public client link is revoked. No videos, approvals or scheduled posts were changed.'
+      : 'No active client link exists. On a request to make this guideline client-ready, use publish_content_guideline; do not send the staff/admin URL to a client.',
+  }
+}
 
 function isCanonicalGuidelineLink(value: unknown): boolean {
   if (typeof value !== 'string') return false
