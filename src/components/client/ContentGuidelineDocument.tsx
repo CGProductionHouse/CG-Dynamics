@@ -1,16 +1,18 @@
-import { useId, useState } from 'react'
+import { useId, useState, type ReactNode } from 'react'
 import { ClientLogo, type ClientLogoClient } from '../ClientLogo'
 import type { PublishedContentGuideline } from '../../lib/clientContentGuides'
 import { guidelineVideoName } from '../../lib/contentGuidelineNaming'
 import { monthDisplayLabel } from '../../lib/reportPeriod'
 
 /** Presentation only. Callers must supply the existing client-safe projection. */
-export function ContentGuidelineDocument({ guide, client, selected = false, clientPath, linkAccess = 'signed_in' }: {
+export function ContentGuidelineDocument({ guide, client, selected = false, clientPath, linkAccess = 'signed_in', renderVideoReview, reviewSummary }: {
   guide: PublishedContentGuideline
   client: ClientLogoClient
   selected?: boolean
   clientPath?: string
   linkAccess?: 'signed_in' | 'public'
+  renderVideoReview?: (position: number) => ReactNode
+  reviewSummary?: ReactNode
 }) {
   const documentId = useId()
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle')
@@ -49,6 +51,7 @@ export function ContentGuidelineDocument({ guide, client, selected = false, clie
           {date && <Meta label="Filming" value={date} />}
           <Meta label="In this guide" value={`${guide.videos.length} video${guide.videos.length === 1 ? '' : 's'}`} />
         </div>
+        {reviewSummary}
       </header>
       <div className="grid min-w-0 lg:grid-cols-[235px_minmax(0,1fr)]">
         <nav aria-label="Videos in this guideline" className="border-b border-white/10 p-5 sm:p-7 lg:border-b-0 lg:border-r">
@@ -75,6 +78,7 @@ export function ContentGuidelineDocument({ guide, client, selected = false, clie
               <div className="space-y-5 px-5 pb-5">{video.shot_breakdown && <Direction label="Shot direction" value={video.shot_breakdown} />}{video.visual_notes && <Direction label="Visual direction" value={video.visual_notes} />}</div>
             </details>}
             {video.cta && <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.035] p-5"><Direction label="The next step" value={video.cta} /></div>}
+            {renderVideoReview?.(video.position)}
           </li>
         ))}</ol>
       </div>

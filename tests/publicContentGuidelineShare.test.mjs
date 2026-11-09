@@ -60,7 +60,7 @@ test('public route requires no session, uses isolated anonymous reads and preser
   const app=readFileSync('src/App.tsx','utf8'),page=readFileSync('src/pages/PublicContentGuidelinePage.tsx','utf8')
   assert.ok(app.indexOf('path="/guidelines/:slug/:token"')<app.indexOf('element={<RequireStaff'))
   assert.doesNotMatch(page,/useAuth|navigate\(.\/login|profile\.client_id/)
-  assert.match(page,/ContentGuidelineDocument/)
+  assert.match(page,/PublicGuidelineReview/)
   assert.match(page,/resolvedKey !== requestKey/)
   const apiSource=readFileSync('src/lib/publicContentGuidelines.ts','utf8')
   assert.match(apiSource,/persistSession: false, autoRefreshToken: false, detectSessionInUrl: false/)

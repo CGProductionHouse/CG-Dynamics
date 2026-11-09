@@ -26,6 +26,17 @@ source edits require explicit republishing to change the shared snapshot.
 Republishing a revoked link rotates the token; the old link cannot revive.
 All existing client portal and internal-table ownership gates remain in force.
 
+Per-video client review adds only capability-scoped read/append RPCs and the
+private `content_guideline_client_responses` evidence ledger (RLS, no browser
+table grants). It records approve/request-changes/decline/comment independently
+for each published video/version. Names are self-reported; comments/decisions
+are visible to holders of that one link, as disclosed before submission. Exact
+revision conflicts fail closed; retries are idempotent; republishing resets
+visible decisions and retains staff history. Active-staff exact-run history is
+available through the authenticated wrapper/service actor RPC, never through
+anonymous history enumeration. This does not approve finished assets, alter
+idea editorial/production states, write Client Schedule or grant posting rights.
+
 ### command_centre_tasks
 
 | Operation | Admin | Manager | Staff/Team | Client |

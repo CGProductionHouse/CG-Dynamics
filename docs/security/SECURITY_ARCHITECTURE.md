@@ -80,6 +80,17 @@ logo metadata enter initial HTML; no scripts/contacts/internal fields. No sessio
 or privileged key is forwarded. Each request rechecks publication; unavailable
 capabilities do not retain another client's metadata. All inserted text is escaped.
 
+Per-video shared-link responses use a separate private RLS ledger with no anon/
+authenticated table grants or update/delete API. A narrow write RPC validates the
+same existing capability, active publication, exact publication timestamp/video,
+required self-reported name/comment, bounded payload, idempotency key and expected
+latest response. It locks the share row, rate-limits responses and appends the
+published video snapshot. Only that snapshot's current-version responses enter
+public review reads. Staff-only exact-run reads retain earlier versions and flag
+changed authored wording. No editorial/production/schedule/final-asset approval
+is inferred or mutated. No-login reviewer names are explicitly self-reported;
+anyone with the link can see/respond, not access other account or backend data.
+
 ## Third-party integrations (providers)
 
 - Meta: OAuth flow through Edge Functions, tokens stored server-side.
