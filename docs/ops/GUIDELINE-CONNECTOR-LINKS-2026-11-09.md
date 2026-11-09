@@ -58,7 +58,27 @@ API, instructions replacement or paid generation is required.
   source and regression tests. The exact live connector response after release
   remains a required acceptance gate.
 
-## Exact release packet — NOT DEPLOYED
+## Exact link release — LIVE v78
+
+CA authorized finishing the connector and pushing live after #967 was merged.
+Fresh preflight matched all40 v77 files; released only the three reviewed files
+once. Independent hosted readback: **ACTIVE v78**, all40 candidate files exact,
+37 preserved, authentication/settings unchanged. No Vercel operation.
+
+Live company connector acceptance: list/readiness/Content Run plan/discovery all
+return the same exact Germoparts staff guideline link. Draft status and all four
+complete video projections remain byte-equivalent to the pre-release response.
+The second connected account returns that same document too. Cape client scope
+cannot read Germoparts' run. No client document was created/edited/published.
+
+Additional legitimate read-only workflow checks passed: ready exact Germoparts
+client context (zero coverage errors), Cape November strategy brief, Cape's eight
+scheduled items with complete pagination, company daily view (zero source errors),
+bootstrap/runtime policy and Christie-Ann's exact canonical staff CG Hours daily
+read with logging options/travel. Staff identity was resolved from the actual
+directory, not inferred from the communal administrator. No timesheet write.
+
+## Link release packet (retained evidence; do not replay)
 
 Baseline: Dynamics `ehtjfntukiwbgptqgbzy`, `cg-dynamics-mcp` **ACTIVE v77**,
 40 hosted files, `verify_jwt=false`, no import map. Preserve its custom auth and
@@ -89,3 +109,52 @@ those checks pass. Do not republish or rewrite the four videos to test links.
 
 Germoparts' existing missing OneDrive short-code readiness warning is separate;
 it does not prevent staff opening this saved guideline. No mapping was guessed.
+
+## Follow-up: original saved results on guideline retries
+
+Read-only production audit found39 successful ensure/add/update operations whose
+generic idempotency ledger stored status only, with no result payload. Reproduced
+with the actual dispatcher: a repeated successful add lost its original video ID
+and URL; an old success was presented as though an original result was returned.
+
+The existing private `mcp_idempotency_log.result_payload` column, current service
+privileges and deployed `mcp_check_idempotency` replay contract were verified
+read-only. No schema/RPC/permission change is needed. For only the six guideline
+mutation tools, the backend now inserts the original response and both audit
+principals together into that existing ledger. A receipt binds actor/tool/key
+and the fixed-origin canonical document link. Confirmed retries return the same
+saved IDs/links without repeating the mutation. Other lanes retain their existing
+atomic/canonical replay paths; no staff/Teams/CG Hours write logic was replaced.
+
+Historical status-only rows are not rewritten or guessed. They return an explicit
+verification-required result and the next read action, without rerunning content
+changes. A failed receipt save reports that work may already have completed;
+the catch path no longer attempts a second receipt insert or loses the recovery
+response when audit storage also fails. No raw database error detail is exposed
+by the new receipt failure message.
+
+Five new actual-dispatcher regression tests cover lost responses, all six tools,
+legacy receipts, changed inputs, forged actor/key/tool/link and failed storage.
+All three initial regressions failed before the fix. Broader MCP/content suite:
+**382 pass, one unrelated optional PostgreSQL fixture skipped, zero fail**.
+Supported full app suite: **4,242 pass / 30 optional skips / zero fail**, 4,272
+total. Used loopback fixture environment and the existing Git OpenSSL binary.
+The first unrestricted run's17 failures were local harness prerequisites: wrong
+fixture origin, missing OpenSSL and Windows WSL Bash, not these backend changes.
+The exact library fixture passes6/6 with its canonical loopback origin. Twelve
+tests in the unrelated Unix SES-setup CLI-mock file were excluded from the final
+supported run; its Windows Git-Bash retry did not complete in the bounded check
+and only this agent's exact test-process tree was stopped. No SES/AWS production
+setup or pass is claimed. Docker is stopped; optional local SQL fixtures skipped.
+Build/emitted app chunks, repository Deno check with validation-only Vite ambient
+types, scoped lint and diff pass. This does not make a business mutation and its
+receipt a single DB transaction: uncertain/unacknowledged writes still require
+reading existing state before any new mutation. No concurrency/atomicity claim.
+
+Exact follow-up packet: v78 baseline40 files, replace only `index.ts` and
+`contentGuidelineActions.ts`, preserve the other38 files byte-for-byte. Candidate
+LF SHA256: index `ac53518081397be0f1ea8fadd09dddfd43154396732e7c67cc798357430b381f`;
+helper `c819f1cf9d8ca7942db4903dbcebf1479ffbc60266c222f25e7f8b2c204160be`.
+CA's current instruction authorizes this reviewed connector repair and live
+release. Preflight drift and verify post-release before claiming it live. No
+SQL/schema/config/secret/permission/provider/client-content/Vercel changes.

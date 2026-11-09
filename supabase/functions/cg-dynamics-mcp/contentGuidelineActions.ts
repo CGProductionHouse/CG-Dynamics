@@ -63,6 +63,39 @@ export function buildGuidelineNavigation(guidelineId: unknown, clientId: unknown
   }
 }
 
+// Only these content tools use the existing private result_payload column. Other
+// lanes retain their own atomic/backend receipts and must not be reimplemented.
+export const GUIDELINE_WRITE_TOOLS = new Set([
+  'ensure_content_guideline', 'add_content_guideline_video', 'update_content_guideline_video',
+  'reorder_content_guideline_videos', 'link_content_guideline_video_deliverable',
+  'generate_content_guideline_drafts',
+])
+
+function isCanonicalGuidelineLink(value: unknown): boolean {
+  if (typeof value !== 'string') return false
+  try {
+    const url = new URL(value)
+    return value === buildGuidelineNavigation(url.searchParams.get('guideline'), url.searchParams.get('client')).guideline_url
+  } catch { return false }
+}
+
+export function withGuidelineWriteReceipt(result: unknown, tool: string, actorId: string, key: string) {
+  if (!result || typeof result !== 'object' || Array.isArray(result)
+    || !isCanonicalGuidelineLink((result as Record<string, unknown>).guideline_url)) {
+    throw new Error('Guideline work may have completed, but its saved-document receipt is invalid. Read the existing guideline before any new write.')
+  }
+  return { ...result, receipt: { contract: 'mcp_guideline_result_v1', tool_name: tool, actor_profile_id: actorId, idempotency_key: key } }
+}
+
+export function ownsGuidelineWriteReceipt(result: unknown, tool: string, actorId: string, key: string): boolean {
+  if (!result || typeof result !== 'object' || Array.isArray(result)) return false
+  const value = result as Record<string, unknown>
+  const receipt = value.receipt as Record<string, unknown> | undefined
+  return receipt?.contract === 'mcp_guideline_result_v1' && receipt.tool_name === tool
+    && receipt.actor_profile_id === actorId && receipt.idempotency_key === key
+    && isCanonicalGuidelineLink(value.guideline_url)
+}
+
 /** Normalise a month to the canonical first-of-month date. */
 export function normaliseMonth(value: string): string {
   return `${value.slice(0, 7)}-01`
