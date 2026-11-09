@@ -93,7 +93,7 @@ export function shapeGuidelineShare(value: unknown, scope: { runId: string; clie
     ...buildGuidelineNavigation(row.guideline_id, scope.clientId, scope.runId),
     guideline_id: row.guideline_id, content_run_id: scope.runId, client_name: row.client_name,
     state: row.state, video_count: published ? row.video_count : null,
-    client_share_url: published ? `https://www.cgdynamics.co.za/guidelines/${row.public_slug}/${row.share_token}` : null,
+    client_share_url: published ? `https://www.cgdynamics.co.za/guidelines/${row.public_slug}/${row.share_token}?v=cg2-${Date.parse(row.published_at as string)}` : null,
     published_at: published ? row.published_at : null,
     link_access: published ? 'anyone_with_link' : 'not_shared',
     note: published

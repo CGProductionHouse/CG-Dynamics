@@ -16,7 +16,7 @@ after(async()=>{await server?.close()})
 
 test('connector returns a named no-login client URL and retains the separate staff link',()=>{
   const result=shapeGuidelineShare(saved,scope)
-  assert.equal(result.client_share_url,`https://www.cgdynamics.co.za/guidelines/germoparts-content-guideline/${token}`)
+  assert.equal(result.client_share_url,`https://www.cgdynamics.co.za/guidelines/germoparts-content-guideline/${token}?v=cg2-${Date.parse(saved.published_at)}`)
   assert.equal(result.link_access,'anyone_with_link')
   assert.match(result.note,/not client approval/)
   assert.match(result.guideline_url,/\/admin\/content\?/)
