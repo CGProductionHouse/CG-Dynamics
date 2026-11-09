@@ -18,7 +18,8 @@ const sample = {
       hook: 'An office chair. A very serious test drive.', platform: 'Facebook · Instagram', format: 'Short-form video',
       script: 'SCENE 01 — THE TEST DRIVE\nA colleague pushes off in an office chair. It veers gently to one side.\n\nCOLLEAGUE\n“Pulling left.”\n\nDRIVER\n“It’s an office chair.”\n\nSCENE 02 — THE REALISATION\nA pause. They look down at the wheels. Then back at each other.\n\nEND FRAME\nYou notice it here. Notice it on the road, too.',
       shot_breakdown: '01 / Wide office shot.\n02 / Close detail of the chair wheels.\n03 / Hold the reaction, then cut to the end frame.',
-      visual_notes: 'Natural light. Understated delivery. Keep the movement controlled.', cta: 'Start a conversation about the small things you notice behind the wheel.' },
+      visual_notes: 'Natural light. Understated delivery. Keep the movement controlled.', cta: 'Start a conversation about the small things you notice behind the wheel.',
+      inspiration_url: 'https://www.instagram.com/reel/Example/', inspiration_note: 'Use this pace and playful tone, adapted to our own setting.' },
     { position: 2, title: 'A small sound. A bigger story.', objective: null, hook: null,
       script: 'SCENE 01\nA quiet workshop. A familiar sound interrupts.\n\nPRESENTER\n“Your car is trying to tell you something.”\n\nSCENE 02\nCut to the team listening, looking and asking the right questions.\n\nEND FRAME\nThe details make the difference.',
       shot_breakdown: null, visual_notes: null, platform: null, format: null, cta: null },
@@ -61,12 +62,14 @@ const fixture = {
 const server = await createServer({ configFile: false, plugins: [fixture, react()], cacheDir: join(tmpdir(), 'cg-guideline-design-cache'),
   define: { 'import.meta.env.VITE_SUPABASE_URL': JSON.stringify('http://127.0.0.1:1'), 'import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY': JSON.stringify('local-public-fixture') },
   optimizeDeps: { noDiscovery: true, include: ['react', 'react-dom/client', 'react/jsx-dev-runtime', 'react-router-dom'] },
-  server: { host: '127.0.0.1', port: 53994, strictPort: true, hmr: false } })
+  server: { host: '127.0.0.1', port: 0, hmr: false } })
 let browser
+let origin
 const serve = process.argv.includes('--serve')
 try {
   await server.listen()
-  browser = await chromium.launch({ headless: true })
+  origin = `http://127.0.0.1:${server.httpServer.address().port}`
+  browser = await chromium.launch({ headless: true, channel: 'chrome' })
   for (const width of [1440, 375, 390, 430]) {
     const context = await browser.newContext({ viewport: { width, height: 1050 }, permissions: ['clipboard-read', 'clipboard-write'], reducedMotion: 'reduce' })
     const page = await context.newPage()
@@ -78,13 +81,14 @@ try {
         assert.equal(route.request().method(), 'GET', 'Editor preview never writes or generates')
         return route.fulfill({ json: [] })
       }
-      assert.equal(url.origin, 'http://127.0.0.1:53994', 'No external requests'); return route.continue()
+      assert.equal(url.origin, origin, 'No external requests'); return route.continue()
     })
-    await page.goto('http://127.0.0.1:53994/__guideline-design')
+    await page.goto(`${origin}/__guideline-design`)
     await page.getByRole('heading', { name: 'Video 01 - The office chair test drive' }).waitFor()
     await page.getByAltText('Wiseman Group logo').first().evaluate(img => img.decode())
     assert.equal(await page.getByText(sample.videos[0].script, { exact: true }).textContent(), sample.videos[0].script, 'Complete script preserved byte for byte')
     assert.equal(await page.getByText('Complete script', { exact: true }).count(), 2)
+    assert.equal(await page.getByRole('region', { name: 'Video inspiration', exact: true }).count(), 1)
     assert.doesNotMatch(await page.locator('body').innerText(), /PRIVATE NEVER RENDER|private.invalid|Internal run name/)
     await page.getByRole('button', { name: 'Copy guideline link' }).click()
     const copied = new URL(await page.evaluate(() => navigator.clipboard.readText()))
@@ -103,19 +107,27 @@ try {
     await page.evaluate(() => window.scrollTo(0, 0))
     await page.screenshot({ path: join(tmpdir(), `cg-guideline-portal-${width}.png`), fullPage: true })
     await page.screenshot({ path: join(tmpdir(), `cg-guideline-portal-fold-${width}.png`) })
-    await page.goto('http://127.0.0.1:53994/__guideline-design?editor')
+    await page.goto(`${origin}/__guideline-design?editor`)
+    const inspirationUrl = page.getByRole('textbox', { name: 'Example video link', exact: true }).first()
+    const inspirationNote = page.getByRole('textbox', { name: 'Our vision for this video', exact: true }).first()
+    assert.equal(await inspirationUrl.inputValue(), sample.videos[0].inspiration_url)
+    await inspirationUrl.fill('https://youtu.be/newExample')
+    await inspirationNote.fill('Unsaved reference vision — preserve this.')
     await page.getByRole('textbox', { name: 'Complete script', exact: true }).first().fill('Unsaved staff wording — keep this draft.')
     await page.getByRole('button', { name: 'View client layout', exact: true }).click()
     await page.getByText('Saved content only · Draft — not shared with the client', { exact: true }).waitFor()
     assert.equal(await page.getByRole('button', { name: 'Copy guideline link' }).count(), 0, 'Unpublished draft cannot be shared')
     assert.doesNotMatch(await page.locator('body').innerText(), /PRIVATE NEVER RENDER/)
     assert.ok(await page.getByText(sample.videos[0].script, { exact: true }).isVisible())
+    assert.equal(await page.getByRole('link', { name: 'Watch example on Instagram' }).getAttribute('href'), sample.videos[0].inspiration_url, 'Preview uses saved inspiration, never unsaved staff changes')
     await page.getByRole('button', { name: 'Back to editing', exact: true }).click()
     assert.equal(await page.getByRole('textbox', { name: 'Content Guideline title', exact: true }).inputValue(), sample.title)
     assert.equal(await page.getByRole('textbox', { name: 'Complete script', exact: true }).first().inputValue(), 'Unsaved staff wording — keep this draft.', 'Preview preserves unsaved staff edits')
+    assert.equal(await inspirationUrl.inputValue(), 'https://youtu.be/newExample')
+    assert.equal(await inspirationNote.inputValue(), 'Unsaved reference vision — preserve this.')
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width}px editor overflow`)
     await page.addInitScript(() => { Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async () => { throw Error('Fixture clipboard denied') } } }) })
-    await page.goto('http://127.0.0.1:53994/__guideline-design')
+    await page.goto(`${origin}/__guideline-design`)
     await page.getByRole('button', { name: 'Copy guideline link' }).click()
     assert.equal(new URL(await page.getByRole('textbox', { name: 'Client guideline link' }).inputValue()).pathname, '/client/plan', 'Copy failure exposes the client link, never an admin URL')
     assert.deepEqual(errors, [])
@@ -123,4 +135,4 @@ try {
     console.log(`PASS ${width}px: actual branded document, scripts, safe link, video jump, direction and no overflow`)
   }
 } finally { if (browser) await browser.close(); if (!serve) await server.close() }
-if (serve) console.log('LOCAL VISUAL PREVIEW http://127.0.0.1:53994/__guideline-design')
+if (serve) console.log(`LOCAL VISUAL PREVIEW ${origin}/__guideline-design`)

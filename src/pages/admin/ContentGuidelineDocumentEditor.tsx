@@ -31,6 +31,7 @@ import { developmentPatch } from '../../lib/contentDirectorEdits'
 import { ContentGuidelineDocument } from '../../components/client/ContentGuidelineDocument'
 import { manageGuidelineShare } from '../../lib/publicContentGuidelines'
 import { GuidelineClientResponses } from '../../components/content/GuidelineClientResponses'
+import { inspirationInputError } from '../../lib/guidelineInspiration'
 
 interface Props {
   guideline: ContentGuideline
@@ -48,6 +49,8 @@ interface VideoDraft {
   shotBreakdown: string
   requirements: string
   visualNotes: string
+  inspirationUrl: string
+  inspirationNote: string
   cta: string
   platform: string
   format: string
@@ -58,6 +61,7 @@ function savedVideoDraft(video: ContentGuidelineVideo): VideoDraft {
   return { title: video.title, script: video.script ?? '', targetMonth: video.month?.slice(0, 7) ?? '',
     deliverableId: video.deliverable_id ?? '', shotBreakdown: video.shot_breakdown ?? '',
     requirements: video.requirements ?? '', visualNotes: video.visual_notes ?? '', cta: video.cta ?? '',
+    inspirationUrl: video.inspiration_url ?? '', inspirationNote: video.inspiration_note ?? '',
     platform: video.platform ?? '', format: video.format ?? '', baseUpdatedAt: video.updated_at }
 }
 
@@ -292,6 +296,8 @@ export default function ContentGuidelineDocumentEditor({
       setError('Every video needs a name and complete script.')
       return
     }
+    const inspirationError = inspirationInputError(draft.inspirationUrl, draft.inspirationNote)
+    if (inspirationError) { setError(inspirationError); return }
     setBusy(video.id)
     setError(null)
     const result = await updateGuidelineVideo(video.id, {
@@ -302,6 +308,8 @@ export default function ContentGuidelineDocumentEditor({
       shot_breakdown: draft.shotBreakdown.trim() || null,
       requirements: draft.requirements.trim() || null,
       visual_notes: draft.visualNotes.trim() || null,
+      inspiration_url: draft.inspirationUrl.trim() || null,
+      inspiration_note: draft.inspirationNote.trim() || null,
       cta: draft.cta.trim() || null,
       platform: draft.platform.trim() || null,
       format: draft.format.trim() || null,
@@ -498,6 +506,7 @@ export default function ContentGuidelineDocumentEditor({
         position: video.position ?? index + 1, title: video.title, script: video.script,
         objective: video.objective, hook: video.hook, shot_breakdown: video.shot_breakdown,
         cta: video.cta, visual_notes: video.visual_notes, platform: video.platform, format: video.format,
+        inspiration_url: video.inspiration_url, inspiration_note: video.inspiration_note,
       })),
     }} />
   </section>
@@ -806,6 +815,14 @@ export default function ContentGuidelineDocumentEditor({
                     />
                   </label>
                   <SavedDirectorContext objective={video.objective} hook={video.hook} notes={video.notes} />
+                  <details open={Boolean(draft.inspirationUrl || draft.inspirationNote)} className="mt-4 rounded-xl border border-brand-teal/20 bg-brand-teal/[0.035] p-4">
+                    <summary className="min-h-11 cursor-pointer text-sm font-semibold text-brand-teal">Inspiration · optional</summary>
+                    <p className="mb-3 text-xs leading-6 text-white/50">Add a trend or reference when it helps explain the idea. Empty fields stay hidden from the client.</p>
+                    <label className="block space-y-1.5"><span className={LABEL_CLS}>Example video link</span><input type="url" inputMode="url" maxLength={2048} className={INPUT_CLS} value={draft.inspirationUrl} placeholder="TikTok, Instagram, Facebook or YouTube"
+                      onChange={event => setDrafts(current => ({ ...current, [video.id]: { ...draft, inspirationUrl: event.target.value } }))} /></label>
+                    <label className="mt-3 block space-y-1.5"><span className={LABEL_CLS}>Our vision for this video</span><textarea rows={3} maxLength={1000} className={`${INPUT_CLS} resize-y leading-relaxed`} value={draft.inspirationNote} placeholder="What we like about the example and how we’ll make it our own."
+                      onChange={event => setDrafts(current => ({ ...current, [video.id]: { ...draft, inspirationNote: event.target.value } }))} /></label>
+                  </details>
                   <div className="mt-3 grid gap-3 sm:grid-cols-2">
                     {([['platform', 'Placement / platform'], ['format', 'Delivery mode / format']] as const).map(([field, label]) => (
                       <label key={field} className="block space-y-1.5"><span className={LABEL_CLS}>{label}</span>

@@ -91,6 +91,13 @@ changed authored wording. No editorial/production/schedule/final-asset approval
 is inferred or mutated. No-login reviewer names are explicitly self-reported;
 anyone with the link can see/respond, not access other account or backend data.
 
+Optional inspiration is limited to validated public-social HTTPS links plus a
+short client-facing vision. Links open separately without referrer/opener; the
+app never fetches, embeds or ingests their content. Private storage and arbitrary
+hosts are refused. An explicit snapshot helper includes only client-safe fields;
+reference changes participate in exact-version review comparison. Missing legacy
+optional fields mean null, never a fabricated reference or a lost old review.
+
 ## Third-party integrations (providers)
 
 - Meta: OAuth flow through Edge Functions, tokens stored server-side.

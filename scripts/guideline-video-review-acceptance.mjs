@@ -20,6 +20,15 @@ try {
     if (output.includes('GUIDELINE VIDEO REVIEW ACCEPTANCE PASSED')) console.log('PASS real PostgreSQL: per-video decisions/comments, idempotency, stale versions, revocation, roles, isolation and rate limits')
   }
   const psql = ['exec', '-i', container, 'psql', '-U', 'postgres', '-v', 'ON_ERROR_STOP=1', '-X', '-At']
+  if (process.argv.includes('--inspiration')) {
+    docker(psql, `alter table content_guidelines add column created_at timestamptz default now();
+      create function public.is_staff() returns boolean language sql stable as $$select exists(select 1 from public.profiles where id=auth.uid() and is_active and role in ('admin','manager','staff','team'))$$;
+      create function public.my_client_id() returns uuid language sql stable as $$select nullif(current_setting('qa.client',true),'')::uuid$$;`)
+    for (const file of ['supabase/migrations/20261109115055_guideline_inspiration_links.sql','tests/sql/guideline_inspiration_acceptance.sql']) {
+      const output=docker(psql,readFileSync(file,'utf8'))
+      if(output.includes('GUIDELINE INSPIRATION ACCEPTANCE PASSED')) console.log('PASS real PostgreSQL: optional inspiration, URL constraints, immutable publication, own-client/month projection, exact approval-version comparison and clear/republish')
+    }
+  }
   const scope = JSON.parse(docker(psql, "select json_build_object('slug',public_slug,'token',share_token,'version',published_at) from content_guideline_public_shares where client_id='20000000-0000-4000-8000-000000000002';").trim())
   const concurrent = id => new Promise(resolve => {
     const child = spawn('docker', psql, { windowsHide: true }); let output = ''

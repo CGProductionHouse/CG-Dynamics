@@ -1,6 +1,7 @@
 import { supabase } from './supabase'
 import { directorKnowledgeReceipt, type DirectorKnowledgeReference } from './contentDirectorEvidence'
 import { validSavedRevision, type DirectorEditField } from './contentDirectorEdits'
+import { guidelineInspiration, inspirationInputError } from './guidelineInspiration'
 import {
   guideActionTarget,
   isMicrosoftOwnedEvent,
@@ -42,6 +43,8 @@ export interface ContentGuideIdea {
   hook: string | null
   cta: string | null
   visual_notes: string | null
+  inspiration_url?: string | null
+  inspiration_note?: string | null
   owner_user_id: string | null
   owner_name: string | null
   proposed_post_date: string | null
@@ -492,6 +495,8 @@ export interface GuidelineVideoInput {
   shot_breakdown?: string | null
   requirements?: string | null
   visual_notes?: string | null
+  inspiration_url?: string | null
+  inspiration_note?: string | null
   notes?: string | null
 }
 
@@ -499,6 +504,8 @@ export async function addGuidelineVideo(
   guideline: ContentGuideline,
   input: GuidelineVideoInput,
 ): Promise<QueryResult<ContentGuidelineVideo | null>> {
+  const inspirationError = inspirationInputError(input.inspiration_url, input.inspiration_note)
+  if (inspirationError) return { data: null, error: inspirationError, migrationNeeded: false }
   const { data, error } = await supabase
     .from('content_guide_ideas')
     .insert({
@@ -518,6 +525,8 @@ export async function addGuidelineVideo(
       shot_breakdown: input.shot_breakdown ?? null,
       requirements: input.requirements ?? null,
       visual_notes: input.visual_notes ?? null,
+      inspiration_url: guidelineInspiration(input.inspiration_url)?.url ?? null,
+      inspiration_note: input.inspiration_note?.trim() || null,
       notes: input.notes ?? null,
     })
     .select('*')
@@ -599,10 +608,14 @@ export async function updateGuidelineVideo(
   patch: Partial<ContentGuidelineVideo>,
   expectedUpdatedAt?: string,
 ): Promise<QueryResult<ContentGuidelineVideo | null>> {
+  const inspirationError = inspirationInputError(patch.inspiration_url, patch.inspiration_note)
+  if (inspirationError) return { data: null, error: inspirationError, migrationNeeded: false }
   const normalizedPatch = patch.month === undefined
     ? patch
     : { ...patch, month: normalizeGuidelineVideoMonth(patch.month) }
-  return updateGuideIdea(id, normalizedPatch, expectedUpdatedAt)
+  return updateGuideIdea(id, Object.hasOwn(patch, 'inspiration_url')
+    ? { ...normalizedPatch, inspiration_url: guidelineInspiration(patch.inspiration_url)?.url ?? null }
+    : normalizedPatch, expectedUpdatedAt)
 }
 
 export async function reorderGuidelineVideos(

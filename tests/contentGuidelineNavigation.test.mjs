@@ -2,12 +2,9 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 import ts from 'typescript'
+import { buildGuidelineNavigation, shapeGuidelineClientReviews } from '../supabase/functions/cg-dynamics-mcp/contentGuidelineActions.ts'
 
 const source = readFileSync('supabase/functions/cg-dynamics-mcp/index.ts', 'utf8')
-const helperCode = ts.transpileModule(readFileSync('supabase/functions/cg-dynamics-mcp/contentGuidelineActions.ts', 'utf8'), {
-  compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
-}).outputText
-const { buildGuidelineNavigation, shapeGuidelineClientReviews } = new Function('exports', `${helperCode};return exports`)({})
 const GUIDE = 'e4a541a8-e730-478c-812e-feb043d0ed71'
 const CLIENT = 'b6052710-417d-4b3b-8348-0f126bfea671'
 const RUN = '72624865-e13d-4d98-af5d-211f6c837d21'

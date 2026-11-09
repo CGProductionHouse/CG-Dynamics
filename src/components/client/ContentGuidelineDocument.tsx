@@ -3,6 +3,8 @@ import { ClientLogo, type ClientLogoClient } from '../ClientLogo'
 import type { PublishedContentGuideline } from '../../lib/clientContentGuides'
 import { guidelineVideoName } from '../../lib/contentGuidelineNaming'
 import { monthDisplayLabel } from '../../lib/reportPeriod'
+import { guidelineInspiration } from '../../lib/guidelineInspiration'
+import externalLink from '../../assets/lucide/external-link.svg'
 
 /** Presentation only. Callers must supply the existing client-safe projection. */
 export function ContentGuidelineDocument({ guide, client, selected = false, clientPath, linkAccess = 'signed_in', renderVideoReview, reviewSummary }: {
@@ -68,6 +70,7 @@ export function ContentGuidelineDocument({ guide, client, selected = false, clie
             </div>
             <h3 className="break-words text-2xl font-bold leading-tight tracking-tight text-white sm:text-3xl">{guidelineVideoName(video.position ?? index + 1, video.title)}</h3>
             {video.objective && <p className="mt-4 whitespace-pre-wrap break-words text-sm leading-7 text-slate-400">{video.objective}</p>}
+            <Inspiration url={video.inspiration_url} note={video.inspiration_note} />
             {video.hook && <div className="mt-5 border-l-2 border-[#2dd4bf] pl-4"><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#2dd4bf]">The opening</p><p className="mt-2 whitespace-pre-wrap break-words text-base leading-7 text-white">{video.hook}</p></div>}
             <section aria-label={`Script for ${video.title}`} className="mt-6 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.035] text-slate-200">
               <div className="flex items-center justify-between gap-3 border-b border-white/[0.08] px-5 py-4 sm:px-7"><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">{video.script?.trim() ? 'Complete script' : 'Script'}</p><span aria-hidden="true" className="font-mono text-xs text-slate-500">{String(video.position).padStart(2, '0')} / CG</span></div>
@@ -85,6 +88,16 @@ export function ContentGuidelineDocument({ guide, client, selected = false, clie
       <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 px-5 py-5 text-[10px] font-semibold tracking-wide text-slate-500 sm:px-8"><span>CG PRODUCTION HOUSE</span><span>CREATE. CONNECT. GROW.</span></footer>
     </article>
   )
+}
+
+function Inspiration({ url, note }: { url?: string | null; note?: string | null }) {
+  const example = guidelineInspiration(url)
+  if (!example && !note?.trim()) return null
+  return <section aria-label="Video inspiration" className="mt-5 rounded-2xl border border-[#2dd4bf]/20 bg-gradient-to-br from-[#2dd4bf]/[0.07] to-transparent p-5 sm:p-6">
+    <div className="flex flex-wrap items-center justify-between gap-3"><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#2dd4bf]">The inspiration</p>{example && <span className="rounded-full border border-white/15 px-3 py-1 text-[11px] font-semibold text-slate-300">{example.platform}</span>}</div>
+    {note?.trim() && <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-7 text-slate-200">{note}</p>}
+    {example && <a href={example.url} target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer" className="mt-4 inline-flex min-h-11 items-center gap-3 rounded-full bg-white px-5 py-3 text-xs font-bold text-[#06110f] transition hover:bg-[#dffcf6] focus-visible:outline-2 focus-visible:outline-[#2dd4bf]">Watch example on {example.platform}<img src={externalLink} alt="" aria-hidden="true" className="h-4 w-4" /></a>}
+  </section>
 }
 
 function Meta({ label, value }: { label: string; value: string }) {
