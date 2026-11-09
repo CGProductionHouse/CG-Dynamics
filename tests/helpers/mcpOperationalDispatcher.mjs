@@ -3,6 +3,7 @@
 import { readFileSync } from 'node:fs'
 import ts from 'typescript'
 import * as context from '../../supabase/functions/cg-dynamics-mcp/projectContext.ts'
+import { GUIDELINE_WRITE_TOOLS, withGuidelineWriteReceipt, ownsGuidelineWriteReceipt } from '../../supabase/functions/cg-dynamics-mcp/contentGuidelineActions.ts'
 import { commitOperationalWrite, parseIdempotencyRead, ownsOperationalReceipt } from '../../supabase/functions/cg-dynamics-mcp/operationalReceipts.ts'
 
 const source=readFileSync('supabase/functions/cg-dynamics-mcp/index.ts','utf8')
@@ -12,14 +13,14 @@ function compile(start,end,names,deps={}){
   const js=ts.transpileModule(source.slice(a,b),{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText
   return new Function(...Object.keys(deps),`${js};return {${names.join(',')}}`)(...Object.values(deps))
 }
-const hashes=compile('async function computeInputHash','// ── Table existence check',['computeInputHash','checkIdempotency','recordIdempotency'],{parseIdempotencyRead,strategyMcpInputHash:async()=>{throw Error('Unicode hash is covered by its own suite')}})
+const hashes=compile('async function computeInputHash','// ── Table existence check',['computeInputHash','checkIdempotency','recordIdempotency'],{parseIdempotencyRead,GUIDELINE_WRITE_TOOLS,strategyMcpInputHash:async()=>{throw Error('Unicode hash is covered by its own suite')}})
 const {handleCreateTask}=compile('const handleCreateTask:','const handleUpdateTask:',['handleCreateTask'],{commitOperationalWrite,computeInputHash:hashes.computeInputHash})
 const responses=compile('function jsonRpcResponse','// ── Auth ──',['jsonRpcResponse','jsonRpcError'],{corsHeaders:{}})
 const {CANONICAL_RECEIPT_REPLAY_TOOLS}=compile('const CANONICAL_RECEIPT_REPLAY_TOOLS','const toolHandlers:',['CANONICAL_RECEIPT_REPLAY_TOOLS'],context)
 
 export function actualOperationalDispatcher(staff,handlers={create_task:handleCreateTask},writeTools=new Set(Object.keys(handlers))){
   const {handleToolsCall}=compile('async function handleToolsCall','// ── HTTP Handler',['handleToolsCall'],{
-    ...context,...hashes,...responses,ownsOperationalReceipt,
+    ...context,...hashes,...responses,ownsOperationalReceipt,GUIDELINE_WRITE_TOOLS,withGuidelineWriteReceipt,ownsGuidelineWriteReceipt,
     resolveOperatingContext:async()=>({ok:true,staff}),
     handleResolveProjectContext:async()=>{throw Error('Not a bootstrap test')},
     isMcpErrorResult:result=>Boolean(result&&typeof result.error==='string'),

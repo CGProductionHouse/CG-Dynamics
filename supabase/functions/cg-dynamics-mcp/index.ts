@@ -33,6 +33,7 @@ import { cgDate, cgDatePlusDays, cgDayBounds, CG_TIMEZONE } from './cgTime.ts'
 import {
   deriveEditReadiness as deriveVideoEditReadiness,
   deriveRawEvidence as deriveVideoRawEvidence, shapeVideoForAssistant, buildGuidelineNavigation,
+  GUIDELINE_WRITE_TOOLS, withGuidelineWriteReceipt, ownsGuidelineWriteReceipt,
   validateDeliverableLink, validateNewVideo, validateReorder, validateVideoPatch,
 } from './contentGuidelineActions.ts'
 import { buildGoogleAdsAudit, planGoogleAdsMetricReads, validateGoogleAdsAuditInput, type AuditAccount, type AuditLink, type AuditMetric, type AuditSync } from './googleAdsAudit.ts'
@@ -483,7 +484,26 @@ async function recordIdempotency(
   inputHash: string,
   status: string,
   audit?: ContextAuditEnvelope,
+  result?: unknown,
 ) {
+  if (GUIDELINE_WRITE_TOOLS.has(toolName)) {
+    // The deployed private audit table already has result_payload and its read
+    // RPC replays it. Insert the original result + dual-principal audit together;
+    // never rewrite historical status-only rows or downgrade to a status receipt.
+    const { error } = await sb.from('mcp_idempotency_log').insert({
+      caller_profile_id: callerProfileId, tool_name: toolName,
+      idempotency_key: idempotencyKey, input_hash: inputHash,
+      result_status: status, result_payload: result,
+      ...(audit ? {
+        connection_principal_user_id: audit.connection_principal_user_id,
+        effective_context_kind: audit.effective_context_kind,
+        effective_staff_profile_id: audit.effective_staff_profile_id,
+        effective_client_id: audit.effective_client_id,
+      } : {}),
+    })
+    if (error) throw new Error('Guideline work may have been saved, but its retry receipt could not be confirmed. Read the existing guideline before any new write; do not create a replacement blindly.')
+    return
+  }
   // Preferred: record the dual principal (#319) — communal connection principal AND the
   // effective Project context. Falls back to the original signature so an environment that
   // has not yet applied the context columns still records the write.
@@ -3732,6 +3752,18 @@ async function handleToolsCall(
     }
     if (existing.duplicate) {
       const conflict = (existing.result as { status?: string } | undefined)?.status === 'conflict'
+      const previousError = (existing.result as { status?: string } | undefined)?.status === 'error' || isMcpErrorResult(existing.result)
+      if (GUIDELINE_WRITE_TOOLS.has(toolName) && !conflict && !previousError
+        && !ownsGuidelineWriteReceipt(existing.result, toolName, staff.profileId, canonicalIdempotencyKey)) {
+        const nextRead = typeof toolInput.content_run_id === 'string'
+          ? { tool: 'list_content_guideline_videos', arguments: { content_run_id: toolInput.content_run_id } }
+          : { tool: 'find_content_runs', arguments: staff.effectiveClientId ? { client_id: staff.effectiveClientId } : {} }
+        return jsonRpcResponse(id, { content: [{ type: 'text', text: JSON.stringify({
+          error: 'GUIDELINE_RECEIPT_UNVERIFIED',
+          message: 'This request was recorded previously, but its old receipt has no verified original record. No change was repeated. Read the saved guideline before any new write; do not create a replacement blindly.',
+          next_read: nextRead, _context: audit,
+        }) }], isError: true })
+      }
       if (operationalCreate && !conflict && !ownsOperationalReceipt(toolName, existing.result, { actorId: staff.profileId, key: canonicalIdempotencyKey })) {
         return jsonRpcError(id, -32603, 'Legacy operational receipt has no original record projection. Re-read before creating any replacement; do not retry with a new key blindly.')
       } else if (CANONICAL_RECEIPT_REPLAY_TOOLS.has(toolName) && !conflict) {
@@ -3743,14 +3775,19 @@ async function handleToolsCall(
     }
   }
 
+  let handlerCompleted = false
   try {
-    const result = await handler(staff, toolInput)
+    let result = await handler(staff, toolInput)
+    handlerCompleted = true
     const hasError = isMcpErrorResult(result)
+    if (isWrite && canonicalIdempotencyKey && GUIDELINE_WRITE_TOOLS.has(toolName) && !hasError) {
+      result = withGuidelineWriteReceipt(result, toolName, staff.profileId, canonicalIdempotencyKey)
+    }
 
     if (isWrite && canonicalIdempotencyKey && !replayThroughCanonicalKey && !ownsOperationalReceipt(toolName, result) && !(operationalCreate && hasError)) {
       const inputHash = ['submit_monthly_strategy_draft', 'amend_monthly_strategy_draft'].includes(toolName)
         ? await strategyMcpInputHash(toolInput) : await computeInputHash(toolInput)
-      await recordIdempotency(staff.supabase, staff.profileId, toolName, canonicalIdempotencyKey, inputHash, hasError ? 'error' : 'success', audit)
+      await recordIdempotency(staff.supabase, staff.profileId, toolName, canonicalIdempotencyKey, inputHash, hasError ? 'error' : 'success', audit, result)
     }
 
     const isError = isMcpErrorResult(result)
@@ -3763,10 +3800,12 @@ async function handleToolsCall(
       isError: !!isError,
     })
   } catch (err) {
-    if (isWrite && canonicalIdempotencyKey && !operationalCreate) {
+    if (isWrite && canonicalIdempotencyKey && !operationalCreate && !handlerCompleted) {
       const inputHash = ['submit_monthly_strategy_draft', 'amend_monthly_strategy_draft'].includes(toolName)
         ? await strategyMcpInputHash(toolInput) : await computeInputHash(toolInput)
-      await recordIdempotency(staff.supabase, staff.profileId, toolName, canonicalIdempotencyKey, inputHash, 'error', audit)
+      try {
+        await recordIdempotency(staff.supabase, staff.profileId, toolName, canonicalIdempotencyKey, inputHash, 'error', audit, { error: 'Tool execution failed. Read saved state before any new write.' })
+      } catch { /* Preserve the MCP recovery response even if audit storage is unavailable. */ }
     }
     return jsonRpcError(id, -32603, `Tool execution failed: ${err instanceof Error ? err.message : String(err)}`)
   }

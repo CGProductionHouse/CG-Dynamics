@@ -1,4 +1,4 @@
-## 9 November — exact ChatGPT guideline links prepared, release pending
+## 9 November — ChatGPT guideline links LIVE v78; retry hardening in progress
 
 Owner #896/#450. Reproduced company ChatGPT's Germoparts failure: correct draft
 and four complete scripts returned, but no direct app link. Three existing MCP
@@ -7,14 +7,24 @@ read/edit/discovery receipts, refuse cross-client discovery and explain staff
 sign-in versus client publication. Client content/auth/permissions are unchanged.
 
 Read `GUIDELINE-CONNECTOR-LINKS-2026-11-09.md` for the exact draft link, tests,
-three candidate hashes and v77/40-file release packet. **NOT DEPLOYED**; exact
-CA approval is still required. Other37 hosted files are preserved byte-for-byte.
+three candidate hashes and v77/40-file release packet. CA subsequently instructed
+finishing and pushing live: **ACTIVE v78**, all40 candidate files independently
+verified; other37 preserved byte-for-byte. Live company/second connection return
+the exact link, unchanged four scripts and draft status. Cross-client read denied.
 377 broader MCP/content tests pass, one optional unrelated PostgreSQL fixture
 skipped;122 focused pass. Build/app chunks/scoped lint/diff and repository MCP
 Deno check with validation-only Vite ambient types pass. No new authenticated
 browser/phone acceptance or isolated hosted full-type-check pass is claimed.
-After approval, preflight drift, deploy only the packet and verify the company
-connector's exact URL/four-script/draft readback. No SQL/content/calendar/Teams/
+Additional read-only bootstrap/client context/strategy/calendar/CA Hours checks
+pass as detailed in the receipt. No timesheet/client content changes. A second
+reproduced defect is being hardened in the same lane:39 historical successful
+guideline calls stored status only, losing original IDs on retry. New exact
+result receipts use the existing private ledger column; old rows are not guessed
+or rerun. Two-file packet,38 hosted files preserved,382 focused pass/one optional
+skip; no new schema/RPC/permissions. Final release/readback still in progress.
+Supported full app verification4,242pass/30optional skips/0fail; unrelated12-test
+Unix SES shell-mock group excluded on Windows, documented in the receipt.
+No SQL/content/calendar/Teams/
 OneDrive/Vercel operation. Exact Google Control Centre remains unavailable; no
 guessed write. Other owners and prior production gates remain unchanged.
 
