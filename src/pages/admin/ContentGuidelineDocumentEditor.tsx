@@ -29,6 +29,7 @@ import { directorKnowledgeReceipt } from '../../lib/contentDirectorEvidence'
 import SavedDirectorContext from './SavedDirectorContext'
 import { developmentPatch } from '../../lib/contentDirectorEdits'
 import { ContentGuidelineDocument } from '../../components/client/ContentGuidelineDocument'
+import { manageGuidelineShare } from '../../lib/publicContentGuidelines'
 
 interface Props {
   guideline: ContentGuideline
@@ -107,6 +108,16 @@ export default function ContentGuidelineDocumentEditor({
     ...videos.map(video => video.month?.slice(0, 7)),
   ].filter((value): value is string => Boolean(value)))].sort().map(value => ({ value, label: monthDisplayLabel(value) }))
   const [documentTitle, setDocumentTitle] = useState(guideline.title)
+  const [clientShare, setClientShare] = useState({ runId: '', url: '' })
+  const clientShareUrl = clientShare.runId === run.id && guideline.client_published_at ? clientShare.url : ''
+  const [shareCopied, setShareCopied] = useState(false)
+  useEffect(() => {
+    let active = true
+    if (guideline.client_published_at) void manageGuidelineShare(run.id, 'get').then(result => {
+      if (active && result.data?.url) setClientShare({ runId: run.id, url: result.data.url })
+    })
+    return () => { active = false }
+  }, [run.id, guideline.client_published_at])
   const [coverageStart, setCoverageStart] = useState(toMonthOption(guideline.coverage_start ?? guideline.month))
   const [coverageEnd, setCoverageEnd] = useState(toMonthOption(guideline.coverage_end ?? guideline.coverage_start ?? guideline.month))
   const [drafts, setDrafts] = useState<Record<string, VideoDraft>>({})
@@ -318,8 +329,8 @@ export default function ContentGuidelineDocumentEditor({
     await onChanged()
   }
 
-  async function togglePublication() {
-    const publish = !guideline.client_published_at
+  async function togglePublication(forcePublish?: boolean) {
+    const publish = forcePublish ?? !guideline.client_published_at
     if (publish) {
       if (videos.some(video => {
         const draft = drafts[video.id]
@@ -340,9 +351,13 @@ export default function ContentGuidelineDocumentEditor({
     }
     setBusy('publish')
     setError(null)
-    const result = await setGuidelinePublication(guideline.id, publish)
+    const result = publish ? await manageGuidelineShare(run.id, 'publish') : await setGuidelinePublication(guideline.id, false)
     setBusy(null)
     if (result.error) { setError(result.error); return }
+    if (publish && result.data && 'url' in result.data && typeof result.data.url === 'string') {
+      setClientShare({ runId: run.id, url: result.data.url })
+      try { await navigator.clipboard.writeText(result.data.url); setShareCopied(true) } catch { setShareCopied(false) }
+    } else { setClientShare({ runId: '', url: '' }); setShareCopied(false) }
     await onChanged()
   }
 
@@ -530,10 +545,18 @@ export default function ContentGuidelineDocumentEditor({
               loading={busy === 'publish'}
               onClick={() => void togglePublication()}
             >
-              {guideline.client_published_at ? 'Unpublish document' : 'Publish full guideline'}
+              {guideline.client_published_at ? 'Unpublish document' : 'Publish client guideline'}
             </ActionButton>
+            {guideline.client_published_at && <ActionButton size="sm" variant="primary" loading={busy === 'publish'} onClick={() => void togglePublication(true)}>Publish latest version</ActionButton>}
           </div>
         </div>
+        {clientShareUrl && <div className="mt-4 rounded-xl border border-brand-teal/25 bg-brand-teal/5 p-3">
+          <p className="text-xs font-semibold text-brand-teal">Client review link · No login needed</p>
+          <div className="mt-2 flex flex-wrap gap-2"><input aria-label="Public client guideline link" readOnly value={clientShareUrl} onFocus={event => event.currentTarget.select()} className="min-h-11 min-w-0 flex-1 rounded-lg border border-white/10 bg-black/20 px-3 text-xs text-white" />
+            <ActionButton size="sm" variant="secondary" onClick={() => void navigator.clipboard.writeText(clientShareUrl).then(() => setShareCopied(true)).catch(() => setShareCopied(false))}>{shareCopied ? 'Link copied' : 'Copy link'}</ActionButton>
+            <a href={clientShareUrl} target="_blank" rel="noopener noreferrer" className="flex min-h-11 items-center rounded-lg border border-white/10 px-3 text-xs font-semibold text-white">Open client view ↗</a>
+          </div>
+        </div>}
         {/* Coverage window */}
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <label className="block space-y-1">

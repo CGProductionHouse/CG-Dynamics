@@ -68,6 +68,30 @@ const objectSchema = (properties: JsonSchema, required: string[] = []): JsonSche
   additionalProperties: false,
 })
 
+const GUIDELINE_SHARING_TOOLS: readonly CgDynamicsMcpTool[] = [
+  {
+    name: 'publish_content_guideline', title: 'Publish guideline and get client review link',
+    description: 'When staff asks to publish a saved Content Guideline, make it client-ready, or produce the official link to send the client, use this action for its exact Content Run. Validates every saved script, publishes a client-safe snapshot and returns client_share_url with the client name. The client opens it without signing in. Later draft edits do not change the shared snapshot until published again. This is publication FOR REVIEW, not client approval, and never sends a message or changes posts/calendar. Return client_share_url, never an /admin/ link. Read get_content_guideline_share to verify the current link.',
+    inputSchema: objectSchema({ content_run_id: uuid, idempotency_key: idempotencyKeySchema }, ['content_run_id','idempotency_key']),
+    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
+    dependency: '#450', canonicalContract: 'manage_content_guideline_share_as_actor: exact-client publication snapshot and revocable public link',
+  },
+  {
+    name: 'get_content_guideline_share', title: 'Get the client guideline link',
+    description: 'Read the active client_share_url for one exact Content Run guideline. This is the client-facing, no-login review link, distinct from staff guideline_url. Missing/revoked links are explicit. If staff requested a client-ready link and none exists, use publish_content_guideline; do not send an admin URL or tell staff to publish manually. No client approval is implied.',
+    inputSchema: objectSchema({ content_run_id: uuid }, ['content_run_id']),
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+    dependency: '#450', canonicalContract: 'manage_content_guideline_share_as_actor get: read-only exact-client share state',
+  },
+  {
+    name: 'revoke_content_guideline_share', title: 'Revoke the public guideline link',
+    description: 'On explicit staff request, revoke the no-login client review link for one exact Content Run. Preserves videos, client approvals, Client Schedule and the signed-in portal. A later publication issues a new link; the revoked link stays unusable.',
+    inputSchema: objectSchema({ content_run_id: uuid, idempotency_key: idempotencyKeySchema }, ['content_run_id','idempotency_key']),
+    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
+    dependency: '#450', canonicalContract: 'manage_content_guideline_share_as_actor revoke: retained audit and source content',
+  },
+]
+
 export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   {
     name: 'resolve_project_context', title: 'Resolve this Project\'s context',
@@ -707,8 +731,9 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
     annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
     dependency: '#361', canonicalContract: 'CG Hours main (b301e13967862e348da96b1483303739b66f273d) POST /api/staff-logger/invoke → edit_my_time_entry / edit_my_travel_km with canonical ownership and draft-only enforcement',
   },
+  ...GUIDELINE_SHARING_TOOLS,
 ] as const
 
 export const CG_DYNAMICS_MCP_SERVER_INSTRUCTIONS =
-  'This connector is shared by the whole CG Production House ChatGPT account. The OAuth connection is the company admin account and is NOT the staff identity. In a fresh Project chat call resolve_project_context once, then pass that exact context object on every later tool call: a staff Project acts as that exact staff member, a client Project is pinned to that exact client, and broader company-admin work must be requested explicitly. Never reuse another Project\'s context, never infer identity from chat history or the connected account, and never fuzzy-match a staff or client name. Read before write when a target is ambiguous. Use only canonical Dynamics actions and RLS. Company-admin monthly strategy work must page through list_monthly_strategy_clients, read each exact get_monthly_strategy_brief, use only its cited approved evidence and confirmed package, and submit only an unpublished draft with its fingerprint/version. Surface blocked clients rather than inventing facts; no tool here approves or publishes. In a client Project the only writes are record_client_request, create_client_followup_task and record_client_update: they are pinned to that exact client, an assignee is the target of the work and never the caller, and say created, assigned or recorded only after the tool returns the record id. CG Hours actions require an exact staff Project and are draft-only: never submit, approve, reopen, run payroll or claim success without the durable CG Hours time-entry id. Never expose SQL, raw tables, service keys, cross-client fallbacks, or destructive actions.'
+  'This connector is shared by the whole CG Production House ChatGPT account. The OAuth connection is the company admin account and is NOT the staff identity. In a fresh Project chat call resolve_project_context once, then pass that exact context object on every later tool call: a staff Project acts as that exact staff member, a client Project is pinned to that exact client, and broader company-admin work must be requested explicitly. Never reuse another Project\'s context, never infer identity from chat history or the connected account, and never fuzzy-match a staff or client name. Read before write when a target is ambiguous. Use only canonical Dynamics actions and RLS. Company-admin monthly strategy work must page through list_monthly_strategy_clients, read each exact get_monthly_strategy_brief, use only its cited approved evidence and confirmed package, and submit only an unpublished draft with its fingerprint/version. Surface blocked clients rather than inventing facts; monthly strategy tools do not approve or publish strategies. In a client Project, workspace updates use record_client_request, create_client_followup_task and record_client_update, pinned to that exact client; an assignee is the target of work, never the caller. Exact-client Content Guideline creation/editing and sharing tools are also available. When staff asks for a client-ready guideline or a link to send the client, use publish_content_guideline and return its client_share_url: this named public review link requires NO login, is distinct from staff guideline_url, and publishes only the saved client-safe snapshot. Use get_content_guideline_share to verify current sharing, and revoke_content_guideline_share when explicitly asked. Do not send /admin/ links to clients or ask staff to publish manually when this action is available. Publication for review is not client approval. Say created, assigned, published or recorded only after the action confirms the saved record. CG Hours actions require an exact staff Project and are draft-only: never submit, approve, reopen, run payroll or claim success without the durable CG Hours time-entry id. Never expose SQL, raw tables, service keys, cross-client fallbacks, or destructive actions.'
 

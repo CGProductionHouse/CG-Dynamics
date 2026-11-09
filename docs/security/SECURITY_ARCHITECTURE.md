@@ -63,6 +63,20 @@ Every exposed table has RLS enabled. Policies follow least-privilege:
 
 ## Third-party integrations
 
+### Public guideline review links
+
+Explicit staff publication can issue a client-named, no-login review link scoped
+to one client-safe snapshot. A private RLS-enabled registry stores cryptographically
+random 256-bit capabilities; no anonymous registry enumeration is granted. Only
+the narrow public read RPC can resolve a valid token/slug for an active client and
+still-published same-client document. Revocation/unpublication stops public reads;
+revoked tokens rotate on republish. Staff/assignees/internal notes/raw OneDrive
+fields are excluded by the server projection. The frontend uses isolated anonymous
+reads, no session fallback or login redirect, React text rendering, no-index headers,
+no-referrer and no-store. This does not expose admin, account or other-client data.
+
+## Third-party integrations (providers)
+
 - Meta: OAuth flow through Edge Functions, tokens stored server-side.
 - Google Ads: OAuth flow through Edge Functions, tokens stored server-side.
 - Microsoft: Edge Function with isolated service-role access, no client exposure.

@@ -38,10 +38,10 @@ function validDate(value: unknown): value is string {
 
 // Defence in depth for the existing ownership/publication-bound RPC. Extra
 // transport fields never become client state; malformed data is not an empty plan.
-function projectGuide(value: unknown, month: string): PublishedContentGuideline | null {
+export function projectGuide(value: unknown, month?: string): PublishedContentGuideline | null {
   if (!record(value) || typeof value.row_key !== 'string' || !value.row_key
     || typeof value.title !== 'string' || typeof value.run_name !== 'string'
-    || value.month !== `${month}-01`
+    || (month ? value.month !== `${month}-01` : !(value.month === null || (typeof value.month === 'string' && validDate(value.month) && value.month.endsWith('-01'))))
     || !(value.filming_date === null || validDate(value.filming_date))
     || typeof value.published_at !== 'string' || !validDate(value.published_at.slice(0, 10))
     || !/^\d{4}-\d{2}-\d{2}T/.test(value.published_at) || !Number.isFinite(Date.parse(value.published_at))
@@ -57,7 +57,7 @@ function projectGuide(value: unknown, month: string): PublishedContentGuideline 
     })
   }
   return {
-    row_key: value.row_key, title: value.title, month: value.month,
+    row_key: value.row_key, title: value.title, month: value.month as string | null,
     run_name: value.run_name, filming_date: value.filming_date,
     published_at: value.published_at, videos,
   }

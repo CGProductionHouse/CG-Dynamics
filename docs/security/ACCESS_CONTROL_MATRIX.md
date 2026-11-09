@@ -11,6 +11,21 @@
 
 ## Table access
 
+### Explicit public Content Guideline review links (9 November)
+
+`content_guideline_public_shares` is a private delivery snapshot/capability registry,
+not a second guideline authoring source. RLS is enabled; anon/authenticated have
+no table grants. Active staff may explicitly publish/get/revoke a link via the
+staff RPC; the MCP's service-only variant receives its server-resolved staff actor
+and rechecks the exact Content Run/client. Publication does not approve videos or
+write Client Schedule. The public read RPC accepts one unguessable 256-bit token
+and its client-named slug and returns only that explicit client-safe snapshot.
+No login is required for that read. Wrong/revoked tokens, inactive clients,
+unpublished/archived documents and changed ownership return no document. Later
+source edits require explicit republishing to change the shared snapshot.
+Republishing a revoked link rotates the token; the old link cannot revive.
+All existing client portal and internal-table ownership gates remain in force.
+
 ### command_centre_tasks
 
 | Operation | Admin | Manager | Staff/Team | Client |
