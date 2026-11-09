@@ -97,6 +97,11 @@ Closing copy belongs before it. Check the actual final five seconds audibly.
 
 ## Sound, final review and handoff
 
+For voice-note feedback use the shared skill's `references/whatsapp-voice-notes.md`
+and `scripts/transcribe_voice_note.py`: save the original normally, transcribe
+locally with an existing multilingual model, retain timestamps/source identity,
+then check uncertain instructions. No external bot, cloud upload or subscription.
+
 Follow `references/autonomous-audio-review.md`. Local qualified signal/ASR/acoustic/
 character roles plus attributed editorial judgment are documented; MSI's bounded
 GPU recovery is not automatically installed or calibrated on a new device. Voice

@@ -5,6 +5,12 @@ description: Plan, assemble, review, and hand off CG Production House client vid
 
 # CG video story editor
 
+**WhatsApp audio feedback:** use [the small offline voice-note intake](references/whatsapp-voice-notes.md)
+and `scripts/transcribe_voice_note.py` for saved original notes. Preserve source/
+sender/chat/time identity, timestamped draft text and uncertain words before
+turning feedback into edit decisions. Local transcription needs no bot/cloud
+upload; it is separate from musical listening and another device's qualification.
+
 **Current multi-device entry point:** read repository-root `NOLAN-START-HERE.md`
 from the live shared PR910 head for MSI, Office PC/BC or a new laptop. October's
 Premiere-first brief is historical; use a proven editor/renderer suited to the

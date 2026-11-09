@@ -1,5 +1,11 @@
 # Nolan Studio tutorial-skill status
 
+**9November voice-note intake:** shared skill now routes saved WhatsApp audio to
+local multilingual transcription with timestamps/source identity. Real-speech
+Ogg/Opus and silence controls tested; padding timestamp failure caught/bounded.
+Actual WhatsApp note download and Afrikaans/code-switch accuracy still open.
+This is feedback intake, not a new visual family or musical hearing/mastery claim.
+
 **9November new-device repair:** start at repository-root `NOLAN-START-HERE.md`.
 MSI reconciled Office contributions through `c05c43c0` (CapCut compound type,
 offline voice preview/hold ducking, rigid photographic depth) before this update.

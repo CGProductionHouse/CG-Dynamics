@@ -1,5 +1,16 @@
 ### 9 November — Nolan multi-device handover repair
 
+Later9November owner requested simple WhatsApp voice-note transcription. Shared
+`transcribe_voice_note.py` uses existing local multilingual faster-whisper and
+FFmpeg, CPUint8, timestamped TXT/SRT/JSON and source/model hashes; no new service,
+dependency, login, external upload or auto-send. Actual5.24s real-speech Opus
+control transcribed correctly in about3s;3s silence yielded no speech. ASR padded
+end6.91s was caught: raw times retained, output bounded to source5.24s and flagged.
+Company chat read had no selected downloadable note in its synced history, so
+WhatsApp-download end-to-end and real Afrikaans/code-switch accuracy remain
+unverified.116 shared regressions pass; no artistic-hearing qualification inferred.
+Read the shared skill's `references/whatsapp-voice-notes.md` before audio feedback.
+
 CA reported a new laptop discovering an October24/Premiere-first handover.
 Confirmed: main still exposes the October20 implementation brief while the live
 shared library is draft PR910 (`codex/nolan-office-research-874`); Google/OneDrive
