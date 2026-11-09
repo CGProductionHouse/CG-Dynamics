@@ -1,3 +1,14 @@
+## 9 November — client-named message previews follow-up
+
+Owner #896/#450. CA's WhatsApp card showed generic CG branding. Reproduced the
+initial-HTML title/no-OG defect; focused branch codex/guideline-client-preview
+adds verified per-client metadata to the same SPA shell through one small Node
+function, using the existing anonymous public snapshot reader. Copied/connector
+share links get a publication-version query to refresh preview caches. No content
+or data/schema/auth/permissions change. Read GUIDELINE-CLIENT-PREVIEWS-2026-11-09.md
+for boundaries/local tests and the exact conservative staged release packet.
+Not inferred live until readback/WhatsApp acceptance is recorded.
+
 ## 9 November — requested no-login client guideline sharing
 
 Owner #896/#450. CA explicitly rejected private staff links as the final outcome

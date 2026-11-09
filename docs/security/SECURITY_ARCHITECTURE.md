@@ -74,6 +74,11 @@ revoked tokens rotate on republish. Staff/assignees/internal notes/raw OneDrive
 fields are excluded by the server projection. The frontend uses isolated anonymous
 reads, no session fallback or login redirect, React text rendering, no-index headers,
 no-referrer and no-store. This does not expose admin, account or other-client data.
+The public guideline HTML preview uses the same anonymous, capability-validated
+snapshot read. Only verified client name/month/video count and existing public
+logo metadata enter initial HTML; no scripts/contacts/internal fields. No session
+or privileged key is forwarded. Each request rechecks publication; unavailable
+capabilities do not retain another client's metadata. All inserted text is escaped.
 
 ## Third-party integrations (providers)
 

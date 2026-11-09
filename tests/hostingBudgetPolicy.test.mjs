@@ -2,10 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-test('all automatic Git deployments remain disabled without changing SPA routing', () => {
+test('automatic Git deployments remain disabled with one explicit guideline preview and the existing SPA fallback', () => {
   const config = JSON.parse(readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'));
   assert.equal(config.git.deploymentEnabled, false);
-  assert.deepEqual(config.rewrites, [{ source: '/(.*)', destination: '/index.html' }]);
+  assert.deepEqual(config.rewrites, [
+    { source: '/guidelines/:slug/:token', destination: '/api/guideline-preview?slug=:slug&token=:token' },
+    { source: '/(.*)', destination: '/index.html' },
+  ]);
 });
 
 test('source upload excludes generated output and local evidence, not app inputs', () => {

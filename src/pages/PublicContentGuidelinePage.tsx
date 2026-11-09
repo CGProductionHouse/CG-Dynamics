@@ -31,7 +31,7 @@ export default function PublicContentGuidelinePage() {
     <div className="mx-auto max-w-6xl">
       {loading || resolvedKey !== requestKey ? <div role="status" className="rounded-3xl border border-white/10 p-8 text-slate-300">Opening your content guideline…</div>
         : visibleData ? <><h1 className="sr-only">{visibleData.client.name} content guideline</h1><p className="mb-4 px-2 text-xs font-medium text-slate-400">Prepared for {visibleData.client.name} · Ready for your review</p>
-          <ContentGuidelineDocument guide={visibleData.guide} client={visibleData.client} selected clientPath={`/guidelines/${slug}/${token}`} linkAccess="public" />
+          <ContentGuidelineDocument guide={visibleData.guide} client={visibleData.client} selected clientPath={`/guidelines/${slug}/${token}?v=cg2-${Date.parse(visibleData.guide.published_at)}`} linkAccess="public" />
         </> : <section className="mx-auto mt-12 max-w-lg rounded-3xl border border-white/10 bg-white/[0.035] p-7 sm:p-10">
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#2dd4bf]">CG Production House</p>
           <h1 className="mt-5 text-3xl font-bold">{error ? 'Let’s try that again' : 'This link is unavailable'}</h1>

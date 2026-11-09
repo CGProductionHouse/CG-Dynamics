@@ -42,7 +42,8 @@ export async function manageGuidelineShare(runId: string, action: 'get' | 'publi
       return { data: null, error: 'The client guideline link could not be verified.' }
     }
     const slug = String(row.public_slug ?? ''), token = String(row.share_token ?? '')
-    if (row.state === 'published_for_review' && !validGuidelineSharePath(slug, token)) return { data: null, error: 'The client guideline link could not be verified.' }
-    return { data: { state: String(row.state), url: row.state === 'published_for_review' ? `https://www.cgdynamics.co.za/guidelines/${slug}/${token}` : null }, error: null }
+    const published = typeof row.published_at === 'string' ? Date.parse(row.published_at) : NaN
+    if (row.state === 'published_for_review' && (!validGuidelineSharePath(slug, token) || !Number.isFinite(published))) return { data: null, error: 'The client guideline link could not be verified.' }
+    return { data: { state: String(row.state), url: row.state === 'published_for_review' ? `https://www.cgdynamics.co.za/guidelines/${slug}/${token}?v=cg2-${published}` : null }, error: null }
   } catch { return { data: null, error: 'The client guideline link could not be loaded. Please try again.' } }
 }
