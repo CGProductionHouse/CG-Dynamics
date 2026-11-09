@@ -193,5 +193,18 @@
     "Drafts and Posted / Scheduled are Amonique-controlled operational lanes. They may be read for anti-repetition evidence but never edited, moved or deleted by the agent.",
     "Copying a prior page is a working-file operation only. It does not authorise reuse of its photograph, person, wording, concept or layout mechanism.",
     "R4 supersedes rejected school/wash R3: current12+extra selection41,61,64-67,74-75,77-81. Back to It74 only loses January. Protected headers82/83; durable IDs govern edits."
-  ]
+  ],
+  "fullSetCraftRound5": {
+    "observedAt": "2026-11-06",
+    "pageCount": 83,
+    "allCurrentCandidatesRevisedInPlace": 13,
+    "all83IdsOrderPreserved": true,
+    "nonTargetPagesNativeRecordsMatch": 70,
+    "currentExportSelection": "41,61,64-67,74-75,77-81",
+    "protectedHeadersObservedAt": [
+      82,
+      83
+    ],
+    "noStaffHistoryEdits": true
+  }
 }
