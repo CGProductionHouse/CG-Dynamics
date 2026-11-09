@@ -77,3 +77,15 @@ Official implementation references: [Vite functions](https://vercel.com/docs/fra
 
 Pending exact source/runtime release readback and WhatsApp unsent-draft visual.
 No external client/staff message is authorized or sent by this repair.
+
+First prebuilt stage dpl_8L6LUPxxAyfZhVYATx77QhUhc8qZ failed ingestion before
+promotion: Vercel's generated filePathMap referenced source dist/index.html,
+correctly excluded by .vercelignore. No cloud application compilation or live
+alias/backend change occurred. Do not repeat that artifact. A reviewed local
+packaging helper materializes only the exact HTML/public-logo references inside
+the .func directory and removes external references, following Build Output API.
+Run after the final local vercel build and before upload:
+`node scripts/materialize-guideline-preview-bundle.mjs`. Two deterministic
+self-containment/path-refusal tests cover the reproduced error. Keep dist ignored;
+do not enable source upload or change hosting protections. One corrected bounded
+retry remains under the same1USD/reserve stopping condition; no blind retries.
