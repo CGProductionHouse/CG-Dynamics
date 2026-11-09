@@ -40,4 +40,27 @@ class UIVoice(unittest.TestCase):
  def test_ducking_is_causal_and_recovers_without_changing_voice(self):
   voice=np.zeros((3000,2));voice[1000:1500]=.2;old=voice.copy();gain=ducking_envelope(voice,1000,reduction_db=9)
   np.testing.assert_array_equal(voice,old);self.assertTrue((gain[:1000]==1).all());self.assertLess(gain[1450],.36);self.assertGreater(gain[-1],.99)
+ def test_offline_anticipation_protects_word_onset_without_moving_speech(self):
+  voice=np.zeros((3000,2));voice[1000:1400]=.2;before=voice.copy()
+  causal=ducking_envelope(voice,1000);preview=ducking_envelope(voice,1000,lookahead=.08,hold=.12)
+  np.testing.assert_array_equal(voice,before)
+  self.assertTrue((preview[:920]==1).all());self.assertLess(preview[1000],.39);self.assertGreater(causal[1000],.9)
+  self.assertGreater(preview[-1],.99)
+ def test_hold_bridges_word_gap_but_releases_between_phrases(self):
+  voice=np.zeros(2500);voice[500:800]=.2;voice[900:1200]=.2
+  causal=ducking_envelope(voice,1000);held=ducking_envelope(voice,1000,hold=.12)
+  self.assertGreater(causal[895],.5);self.assertLess(held[895],.36);self.assertGreater(held[2499],.99)
+ def test_hold_revision_protects_prearrival_and_default_control(self):
+  voice=np.zeros(3000);voice[1000:1500]=.2
+  a=ducking_envelope(voice,1000,lookahead=.08,hold=.12);b=ducking_envelope(voice,1000,lookahead=.08,hold=.2)
+  np.testing.assert_array_equal(a[:1500],b[:1500]);self.assertLess(b[1650],a[1650])
+  np.testing.assert_array_equal(ducking_envelope(voice,1000),ducking_envelope(voice,1000,lookahead=0,hold=0))
+ def test_offline_duck_silence_empty_edges_and_invalid_timing(self):
+  np.testing.assert_array_equal(ducking_envelope(np.zeros(100),1000,lookahead=.08,hold=.12),np.ones(100))
+  self.assertEqual(len(ducking_envelope(np.zeros(0),1000,lookahead=.08,hold=.12)),0)
+  g=ducking_envelope(np.ones(100)*.2,1000,lookahead=.08,hold=.12);self.assertTrue(np.isfinite(g).all());self.assertGreaterEqual(g.min(),10**(-9/20))
+  for kwargs in [dict(lookahead=-.1),dict(hold=float('nan')),dict(attack=float('inf'))]:
+   with self.assertRaises(ValueError):ducking_envelope(np.zeros(100),1000,**kwargs)
+  for bad in [np.array([np.nan]),np.zeros((10,3)),np.zeros((2,3,4))]:
+   with self.assertRaises(ValueError):ducking_envelope(bad,1000)
 if __name__=='__main__':unittest.main()
