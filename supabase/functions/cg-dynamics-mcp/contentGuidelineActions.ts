@@ -103,6 +103,30 @@ export function shapeGuidelineShare(value: unknown, scope: { runId: string; clie
   }
 }
 
+/** Shared-link names are self-reported. Never treat an older/different script's
+ * response as current approval, or a concept approval as permission to post. */
+export function shapeGuidelineClientReviews(value: unknown, runId: string, guidelineId: unknown) {
+  const unavailable = { state: 'unavailable', note: 'Client idea responses could not be verified. Do not infer approval.' }
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return unavailable
+  const result = value as Record<string, unknown>
+  if (result.content_run_id !== runId || result.guideline_id !== guidelineId || !Array.isArray(result.responses) || result.responses.length > 100) return unavailable
+  const responses: Record<string, unknown>[] = []
+  for (const raw of result.responses) {
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return unavailable
+    const row = raw as Record<string, unknown>
+    if (!isUuid(row.id) || !Number.isSafeInteger(row.position) || Number(row.position) < 1 || typeof row.title !== 'string'
+      || !['approved','changes_requested','declined','comment'].includes(String(row.action))
+      || typeof row.reviewer_name !== 'string' || !row.reviewer_name.trim() || row.reviewer_name.length > 80
+      || typeof row.message !== 'string' || row.message.length > 3000
+      || typeof row.created_at !== 'string' || !Number.isFinite(Date.parse(row.created_at))
+      || typeof row.published_at !== 'string' || !Number.isFinite(Date.parse(row.published_at))
+      || typeof row.current_publication !== 'boolean' || typeof row.matches_current_video !== 'boolean') return unavailable
+    responses.push(Object.fromEntries(['id','position','title','action','reviewer_name','message','created_at','published_at','current_publication','matches_current_video'].map(key => [key,row[key]])))
+  }
+  return { state: 'verified', identity: 'self_reported_shared_link', responses,
+    note: 'Responses apply only to their exact published version. Check current_publication AND matches_current_video before describing current idea approval. Names are self-reported, not verified logins. A comment does not change a decision; latest non-comment per video/version wins. No final-asset, Client Schedule or posting approval is granted.' }
+}
+
 function isCanonicalGuidelineLink(value: unknown): boolean {
   if (typeof value !== 'string') return false
   try {

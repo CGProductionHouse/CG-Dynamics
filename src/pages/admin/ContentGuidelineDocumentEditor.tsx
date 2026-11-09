@@ -30,6 +30,7 @@ import SavedDirectorContext from './SavedDirectorContext'
 import { developmentPatch } from '../../lib/contentDirectorEdits'
 import { ContentGuidelineDocument } from '../../components/client/ContentGuidelineDocument'
 import { manageGuidelineShare } from '../../lib/publicContentGuidelines'
+import { GuidelineClientResponses } from '../../components/content/GuidelineClientResponses'
 
 interface Props {
   guideline: ContentGuideline
@@ -591,6 +592,7 @@ export default function ContentGuidelineDocumentEditor({
       </div>
 
       <div className="space-y-4 p-4 sm:p-5">
+        <GuidelineClientResponses runId={run.id} />
         {error && <p className="rounded-lg border border-red-400/25 bg-red-400/10 px-3 py-2 text-sm text-red-200">{error}</p>}
         {importMessage && <p className="rounded-lg border border-emerald-300/25 bg-emerald-300/[0.07] px-3 py-2 text-sm text-emerald-100">{importMessage}</p>}
 

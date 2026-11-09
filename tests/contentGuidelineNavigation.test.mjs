@@ -7,7 +7,7 @@ const source = readFileSync('supabase/functions/cg-dynamics-mcp/index.ts', 'utf8
 const helperCode = ts.transpileModule(readFileSync('supabase/functions/cg-dynamics-mcp/contentGuidelineActions.ts', 'utf8'), {
   compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
 }).outputText
-const { buildGuidelineNavigation } = new Function('exports', `${helperCode};return exports`)({})
+const { buildGuidelineNavigation, shapeGuidelineClientReviews } = new Function('exports', `${helperCode};return exports`)({})
 const GUIDE = 'e4a541a8-e730-478c-812e-feb043d0ed71'
 const CLIENT = 'b6052710-417d-4b3b-8348-0f126bfea671'
 const RUN = '72624865-e13d-4d98-af5d-211f6c837d21'
@@ -28,13 +28,21 @@ test('existing guideline read returns its exact authenticated editor link, witho
     loadRunGuideline: async (_staff, id, allowCreate) => { assert.equal(id, RUN); assert.notEqual(allowCreate, true); return loaded },
     loadVideoEvidence: async () => ({}),
     shapeRunVideos: (_scope, videos) => videos,
-    buildGuidelineNavigation,
+    buildGuidelineNavigation, shapeGuidelineClientReviews,
   })
-  const result = await list({}, { content_run_id: RUN })
+  const result = await list({ profileId: 'canonical-actor', supabase: { async rpc(name, args) {
+    assert.equal(name, 'get_guideline_client_reviews_as_actor')
+    assert.deepEqual(args, { p_run_id: RUN, p_actor_profile_id: 'canonical-actor' })
+    return { error: null, data: { content_run_id: RUN, guideline_id: GUIDE, responses: [] } }
+  } } }, { content_run_id: RUN, actor_profile_id: 'untrusted-actor' })
   assert.equal(result.guideline_url, `https://www.cgdynamics.co.za/admin/content?tab=guidelines&client=${CLIENT}&guideline=${GUIDE}`)
   assert.equal(result.link_access, 'staff_sign_in_required')
   assert.deepEqual(result.videos, loaded.videos)
   assert.equal(result.guideline_status, 'draft')
+  assert.equal(result.client_idea_responses.state, 'verified')
+  const unavailable = await list({ supabase: { rpc: async () => { throw Error('Unavailable response transport') } } }, { content_run_id: RUN })
+  assert.deepEqual(unavailable.videos, loaded.videos, 'Response transport failure never hides full saved scripts')
+  assert.equal(unavailable.client_idea_responses.state, 'unavailable')
 })
 
 test('draft ensure and subsequent reads return the same document and Content Run links', async () => {

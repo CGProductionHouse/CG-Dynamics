@@ -34,7 +34,7 @@ import {
   deriveEditReadiness as deriveVideoEditReadiness,
   deriveRawEvidence as deriveVideoRawEvidence, shapeVideoForAssistant, buildGuidelineNavigation,
   GUIDELINE_WRITE_TOOLS, withGuidelineWriteReceipt, ownsGuidelineWriteReceipt,
-  shapeGuidelineShare,
+  shapeGuidelineShare, shapeGuidelineClientReviews,
   validateDeliverableLink, validateNewVideo, validateReorder, validateVideoPatch,
 } from './contentGuidelineActions.ts'
 import { buildGoogleAdsAudit, planGoogleAdsMetricReads, validateGoogleAdsAuditInput, type AuditAccount, type AuditLink, type AuditMetric, type AuditSync } from './googleAdsAudit.ts'
@@ -3342,6 +3342,13 @@ const handleListContentGuidelineVideos: ToolHandler = async (staff, input) => {
   if ('error' in loaded) return { error: loaded.error }
   const evidence = await loadVideoEvidence(staff, loaded.scope)
   const videos = shapeRunVideos(loaded.scope, loaded.videos, evidence)
+  let clientReviews: unknown = null
+  try {
+    const result = await staff.supabase.rpc('get_guideline_client_reviews_as_actor', {
+      p_run_id: loaded.scope.runId, p_actor_profile_id: staff.profileId,
+    })
+    if (!result.error) clientReviews = result.data
+  } catch { /* Keep full scripts readable; response availability stays explicit. */ }
   return {
     ...buildGuidelineNavigation(loaded.guideline.id, loaded.scope.clientId, loaded.scope.runId),
     content_run_id: loaded.scope.runId,
@@ -3351,6 +3358,7 @@ const handleListContentGuidelineVideos: ToolHandler = async (staff, input) => {
     coverage_start: loaded.guideline.coverage_start ?? null,
     coverage_end: loaded.guideline.coverage_end ?? null,
     videos,
+    client_idea_responses: shapeGuidelineClientReviews(clientReviews, loaded.scope.runId, loaded.guideline.id),
     unallocated_count: videos.filter(video => !video.allocated).length,
     note: 'Order is canonical: "Video XX" comes from the saved position, never from the title.',
   }
