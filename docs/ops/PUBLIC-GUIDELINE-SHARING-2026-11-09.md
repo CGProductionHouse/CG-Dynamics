@@ -1,5 +1,9 @@
 # Public client Content Guideline delivery — 9 November 2026
 
+Later client-named WhatsApp-preview acceptance is recorded in
+GUIDELINE-CLIENT-PREVIEWS-2026-11-09.md (MCPv81/current frontend). This receipt
+preserves the initial sharing rollout evidence; do not redeploy its older packet.
+
 Owner #896 / #450; supervision #381. CA explicitly requested publishing the
 existing Germoparts four-video guideline for client review and a client-named,
 no-login link returned directly by normal company/personal ChatGPT. This

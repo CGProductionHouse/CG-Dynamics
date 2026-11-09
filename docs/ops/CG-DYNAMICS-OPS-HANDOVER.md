@@ -6,8 +6,18 @@ adds verified per-client metadata to the same SPA shell through one small Node
 function, using the existing anonymous public snapshot reader. Copied/connector
 share links get a publication-version query to refresh preview caches. No content
 or data/schema/auth/permissions change. Read GUIDELINE-CLIENT-PREVIEWS-2026-11-09.md
-for boundaries/local tests and the exact conservative staged release packet.
-Not inferred live until readback/WhatsApp acceptance is recorded.
+for boundaries/tests and the exact release receipt. Now LIVE: #972/mainf8d99e8f
+plus #973/main133b8701 packaging repair. First prebuilt stage failed before any
+promotion on external filePathMap/dist reference; corrected self-contained stage
+dpl_EJr74MFsLf1uqmveHTZCqPQTyHFE verified then same-deployment promoted. One2.6MB
+attempt plus315byte deduplicated corrected upload; zero remote app compilation.
+MCPv81 exact40-file readback, other39/settings/auth preserved. Both connector
+accounts return the same versioned client link. Personal WhatsApp Business actual
+unsent card shows Germoparts name/content guideline/November/four videos/client
+logo. Both test drafts cleared, no messages sent. Company Web's generic fallback
+also affects Wikipedia; personal rendered acceptance passes. Full4256pass/30skip,
+17focused plus2packaging, JS/TS lint/Deno/build/runtime/security/diff pass. Four
+scripts unchanged; no republish/schema/data/permissions/other-client changes.
 
 ## 9 November — requested no-login client guideline sharing
 
@@ -21,7 +31,7 @@ are narrowed to monthly strategies. No client approval or calendar/Teams change.
 Read PUBLIC-GUIDELINE-SHARING-2026-11-09.md for tests, security and exact release
 packet. Local supported full suite4,247pass/30skip/0fail; real PostgreSQL security/
 snapshot/revocation fixtures, build/app chunks/Deno/scopedlint/diff pass.
-Production is MCPv80 and frontend dpl_ArdGYhaAcEh9kbAP2r8skWV8HNCS, reviewed
+Initial sharing release was MCPv80/frontend dpl_ArdGYhaAcEh9kbAP2r8skWV8HNCS, reviewed
 #970/main46a38c39. Exact40-file hosted readback passes (35preserved), migration/
 RLS/grants independently verified. One2.5MB prebuilt upload/same-deployment
 promotion, zero cloud compilation. Normal company ChatGPT Chat mode published
