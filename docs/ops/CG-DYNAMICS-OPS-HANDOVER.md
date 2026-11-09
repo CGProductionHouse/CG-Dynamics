@@ -7,7 +7,10 @@ Focused codex/guideline-video-client-review adds optional same-renderer review
 panels, separate account link, private snapshot/version-bound response ledger,
 idempotency/conflict/rate guards, staff history and existing MCP read-back.
 NOT LIVE: exact production schema/three-file MCP/frontend packet pending CA
-approval; read GUIDELINE-VIDEO-CLIENT-REVIEW-2026-11-09.md. Full4263pass/30skip,
+approval; #975/f6287a05 merged as mainf0a3447d. Read
+GUIDELINE-VIDEO-CLIENT-REVIEW-2026-11-09.md. Final local production-target prebuild,
+self-contained packaging and isolated built GET/HEAD pass; no cloud upload.
+Full4263pass/30skip,
 final18focused, real PostgreSQL roles/isolation/revision/concurrency and actual
 public/staff1440/375/390/430px fixtures pass; build/bundle/Deno/lint/diff pass.
 No fake client approval, publication/source/provider/Teams/calendar write or
