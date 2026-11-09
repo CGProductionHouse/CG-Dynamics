@@ -137,6 +137,8 @@ Prepare captions from the current exact-client Dynamics guide: add to the artwor
 
 Approved finals belong only in the existing client-safe `A_ClientPortal_<ClientSlug>/Graphic Design/YYYY/YYYY_MM_MON` path, using `onedriveCanonical.ts` year/month builders and the existing staff-approved filename rule. Canva page naming is separate. Do not guess a client short code or posting date. Keep source/editable files and drafts internal. Promote only reviewed finals through the existing same-client portal asset workflow; link real January deliverable IDs when present, never fabricate one or imply a file upload created a Dynamics association.
 
+For the proven WhatsApp photo route, upload one true-HD file through the browser file chooser, select Photo quality → HD for that attachment, and verify the selected HD option's reported dimensions before sending. The 2160×2700 Canva originals were sent as WhatsApp HD2048×2560, not original-byte documents. Keep its exact caption in the attachment's caption field. Record a submitted state immediately after Send, then witness the new photo+caption row, actual message ID and Sent/Delivered/Read state before continuing. Persist each receipt so interruption does not cause duplicate retries. Discover the current browser by company profile plus extension identity, not a stale numeric browser ID; never mistake missing connection metadata for a laptop being off or steal another task's active WhatsApp lease.
+
 ### Layer contract
 
 - Preserve exact photos, people, food, products, venues and logos as deterministic source layers. Never generatively reconstruct them unless the owner explicitly requests that change.

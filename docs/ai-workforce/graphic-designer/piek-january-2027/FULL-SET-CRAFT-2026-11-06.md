@@ -53,3 +53,13 @@ Historical 6 November delivery attempt: the company browser recovered under a ne
 **9 November recovery:** fresh read-only Canva inspection matches the saved final face-clear state exactly. The corrected DP09 HD export completed through the signed-in background IAB. The laptop and WhatsApp are running, but browser inventory shows no connected Chrome profiles, including after owner reconnection confirmation; only IAB and MCP Apps are available. No WhatsApp send was attempted or claimed. This is the exact current delivery blocker, not a laptop-off or continuing-Nolan-lease assumption. A private 13-HD/13-caption pack is ready; no new permissions, account substitution or native desktop takeover was used.
 
 Human creative acceptance, exact January allocation/schedule/naming, broader person/shoot review and normal-company-ChatGPT skill/create/amend/true-export acceptance remain open. No client-facing publication, portal finals, deployment, DB/service changes, new dependencies, hosting, subscription or spend: **R0 incremental cost**. Existing #948/#955/draft #956 only. Canonical Google Control Centre reference remains inaccessible; no guessed write.
+
+## 9 November delivery closure
+
+Owner renewed the direct instruction to send. Fresh discovery now exposes the company Chrome profile with the same extension identity. The signed-in sender was independently verified as **Nolan** and the destination as **CG Picasso Approvals**. No competing tab lease was taken.
+
+**All 13 current R5 HD posters were sent**, each with its full caption in that same photo message, signed PICASSO, plus one signed introduction identifying this as the revised internal review set. Every upload explicitly selected HD; WhatsApp reports **2048×2560**, distinct from the **2160×2700** source exports. All 13 unique new message IDs, source hashes, same-message captions and send states were witnessed and retained privately. At each send witness, one poster was Delivered and twelve Sent; this does not claim all recipients have read them.
+
+The browser-only file-chooser path completed without desktop takeover, a new account, new permission or spend. Per-item durable receipts prevent blindly retrying a successful send after interruption. Current private delivery plan and production evidence are reconciled. Proof: `whatsapp-r5-sent-proof-20261109.png` and `whatsapp-r5-send-receipt-20261109.json` in the private R5 evidence folder. The earlier connection/lease blockers above are historical and now cleared.
+
+Next: incorporate actual CG Picasso Approvals feedback into the bounded source/layer amendments and the whole-set quality standard. No January scheduling, client publication, final portal upload or human creative approval is inferred from the send.
