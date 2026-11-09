@@ -75,8 +75,44 @@ Official implementation references: [Vite functions](https://vercel.com/docs/fra
 
 ## Acceptance
 
-Pending exact source/runtime release readback and WhatsApp unsent-draft visual.
-No external client/staff message is authorized or sent by this repair.
+**LIVE** — #972/f1fcf4bc (main f8d99e8f) plus packaging #973/7b9c8327
+(main133b8701). Final source app/API tree matches the locally built runtime.
+
+- Vercel production **dpl_EJr74MFsLf1uqmveHTZCqPQTyHFE** on the existing domain.
+  Corrected self-contained stage READY; existing-identity protected staging GET
+  returns exact Germoparts metadata, logo, current month/count, original app shell
+  and privacy headers. Wrong capability404 reveals no client metadata. Verified
+  previous alias unchanged, then promoted this SAME deployment; no recompilation.
+  First attempted upload2.6MB; corrected artifact deduplicated upload only315bytes.
+- Existing MCP **ACTIVEv81**, runtime SHA256
+  `0e531104c52faf01b50f69bb01425864dfacc815c732463b56ee274121b2960d`.
+  Fresh v80 preflight exact; final40-file readback exact, other39preserved and
+  verify_jwt=false/import_map=false/authentication unchanged. Both connected
+  company/second-account get-share reads return the same new publication-version
+  URL, correct client and four-video count. No tool registration change required.
+- Independent live WhatsApp-user-agent GET verifies200, client title/logo/month/
+  count, exact public path and no-referrer; root/login200. Separate anonymous
+  snapshot check confirms all four original scripts unchanged, foreign slug and
+  wrong token denied, registry/management401. No content was republished.
+- **Actual personal WhatsApp Business unsent-draft preview PASS:** Germoparts ·
+  Content Guideline; November2026 ·4videos. Ready for your review; client logo.
+  This is the account corresponding to CA's screenshot. The older sent message
+  remains its cached generic card; no external message was sent or edited.
+  Cleared both company/personal test composers and independently observed empty.
+- The company Web session returned fallback domain cards even for the independent
+  Wikipedia control URL, with no additional Dynamics function request. It does
+  not prove a Dynamics metadata failure; the real personal-account card above
+  supplies the actual rendered acceptance. No WhatsApp privacy setting changed.
+
+Final local evidence:4256 full-suite pass/30optional skips/0fail;17focused pass,
+separate2packaging pass; scoped JS/TS lint, Deno, built app chunks, exact traced
+resources, isolated built GET/HEAD and diff pass. No physical iPhone test claimed.
+Private prebuild/runtime/stage/production receipts are `%TEMP%/cg-guideline-preview-*`.
+Public bearer capabilities stay out of GitHub/source. No SQL/schema/data/secret/
+OAuth/permission/approval/Teams/calendar or other-client publication change.
+Exact Control Centre target remains unavailable from this chat's bounded Drive
+discovery; no guessed tracker write. Update existing owning issues/#381/handover.
+This documentation closure requires no additional deployment.
 
 First prebuilt stage dpl_8L6LUPxxAyfZhVYATx77QhUhc8qZ failed ingestion before
 promotion: Vercel's generated filePathMap referenced source dist/index.html,
