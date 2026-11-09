@@ -1,3 +1,26 @@
+### 9 November — Nolan multi-device handover repair
+
+CA reported a new laptop discovering an October24/Premiere-first handover.
+Confirmed: main still exposes the October20 implementation brief while the live
+shared library is draft PR910 (`codex/nolan-office-research-874`); Google/OneDrive
+also retain dated packages. [One maintained entry point](../../NOLAN-START-HERE.md)
+now routes MSI, Office PC/BC and new laptops to current ownership, tool-agnostic
+editing,53 family cards and real device acceptance. Older entry points explicitly
+redirect without erasing historical failure evidence. MSI fast-forwarded four
+Office commits through c05c43c0, preserving CapCut/voice/depth limitations. One
+obsolete missing-plan diagnostic assertion was updated and a separate missing-
+manifest regression added;112 tests pass. A reproducible text/code-only package
+has per-file hashes and tamper verification; no client media/secrets/models.
+
+Current PR910 owns the repair; PR875 remains MSI production history. No broad
+merge, production reassignment, reminder, new editor engine, DB/security or cloud
+deployment is authorised here. Main-only startup is insufficient until the shared
+branch merges; live issue/cloud redirects must point explicitly to PR910. Another
+device's installation, private assets, native project and sound qualification
+require that device's actual receipt. Google Control Centre remains undiscovered;
+do not invent a new tracker. Piek R16 was directly owner-approved9Nov and exact
+MP4/HDcover/caption cloud hashes verified in the December client folder.
+
 ### 6 November — MSI shared-foundation reconciliation
 
 CA asked MSI to reconcile its learned rules with PC's current foundation without duplicating PC work. Existing draft PR910/903/874 retain the shared lane; PR875 remains MSI production history. [Audit and installation receipt](../../scripts/video-editing/studio-phase2/MSI-FOUNDATION-RECONCILIATION-20261106.md) records actual branch drift, 53 cards/42 recipes, missing finishing lessons and a new exact-client copy guard in existing preflight/release. 92 tests, canonical/all53 UTF-8 validators and local TypeScript/Vite build pass. MSI installed/hash CURRENT with backup; PC installation of this delta and private TBS restriction migration remain unverified. Company WhatsApp access was safety-blocked before reading messages; Sydney's new list is not claimed received. No assignment, client film, scheduler, DB/security or deployment changed. Google Control Centre remains undiscovered; do not invent a replacement tracker.

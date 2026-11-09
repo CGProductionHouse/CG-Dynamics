@@ -1,5 +1,10 @@
 # React + TypeScript + Vite
 
+For **Nolan Studio video editing or a new workstation**, start at
+[NOLAN-START-HERE.md](NOLAN-START-HERE.md) on the live shared
+[PR910 branch](https://github.com/CGProductionHouse/CG-Dynamics/pull/910).
+The October Premiere implementation brief is historical, not the current setup.
+
 ## CG Assistant setup
 
 CG Assistant is a staff-facing assistant inside the existing CG Dynamics admin

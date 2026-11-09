@@ -1,5 +1,9 @@
 # Nolan Studio — skill library and production continuity
 
+**Current startup for every device:** [NOLAN-START-HERE.md](../../../NOLAN-START-HERE.md)
+on the live PR910 head. Use this before any dated checkpoint below. Premiere is
+optional; shared rules, private assets and device acceptance are separate.
+
 **6 November MSI/shared foundation reconciliation:** MSI now uses the current office shared library rather than its older production-branch skill copy. [Audit, feedback map, tests and installation receipt](MSI-FOUNDATION-RECONCILIATION-20261106.md). Added exact-client copy checks to existing preflight/release and carried compact type/soft shadow, moving-mouth/matte, stabilisation and finishing lessons into the standard. PC's current planning/sound/operator work and both client lanes remain intact. PC installation of this delta and Sydney's list are unverified.
 
 **4 November 08:32 SAST Action Sports R14 internal handoff:** The owner-amended 26.43-second netball film now uses a held-ball decision hook, stepped picture/clicks, six rapid inserts, `MAKE IT COUNT` release, angular green sports graphics, cooler event grade, a flash-bracketed monochrome passage, a sound-led slide return and selective intended-still stabilization. [Exact reference and export evidence](ACTION-SPORTS-R14-EFFECT-STUDY-20261104.md). The correctly named MP4 document with proposed caption and separate HD caption-free cover showed delivery ticks in CG Nolan Approvals. R12 is superseded. This is **not** creative sound, owner, participant, client or public approval; the private media remains outside Git and PR910 stays draft.

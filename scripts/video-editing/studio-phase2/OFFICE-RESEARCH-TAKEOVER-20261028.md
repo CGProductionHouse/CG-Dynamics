@@ -1,4 +1,5 @@
 # Office PC takes over Nolan Studio research and skills
+> **HISTORICAL CHECKPOINT.** Current device setup and editor policy: [NOLAN-START-HERE.md](../../../NOLAN-START-HERE.md) on the [live shared PR910 branch](https://github.com/CGProductionHouse/CG-Dynamics/pull/910). Later owner instructions supersede dated ownership, stop, installation and audio status below.
 
 Owner instruction28 October2026: make the office PC the primary research/skill-building workstation because the MSI is unreliable. This is an **ownership transfer**, not a request to duplicate the research. Existing client amendments continue with the MSI chat unless the owner separately transfers a particular edit. Owning research issue: [874](https://github.com/CGProductionHouse/CG-Dynamics/issues/874); office setup/receipt: [903](https://github.com/CGProductionHouse/CG-Dynamics/issues/903).
 

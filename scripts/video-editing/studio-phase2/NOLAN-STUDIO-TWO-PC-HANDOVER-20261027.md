@@ -1,4 +1,5 @@
 # Nolan Studio: two-PC handover and shared skill library
+> **HISTORICAL CHECKPOINT.** Current device setup and editor policy: [NOLAN-START-HERE.md](../../../NOLAN-START-HERE.md) on the [live shared PR910 branch](https://github.com/CGProductionHouse/CG-Dynamics/pull/910). Later owner instructions supersede dated ownership, stop, installation and audio status below.
 
 **28 October research takeover — latest ownership override:** Office PC is now primary for new research/skill development; MSI parks that lane after this handoff and retains existing client amendments. Read the [complete takeover and private asset pack](OFFICE-RESEARCH-TAKEOVER-20261028.md). Research continues in a separate office PR stacked on the verified875 handover head, not a main-only checkout missing the library. No office commits to MSI875 or duplicate research lane. Office intake/rerender receipt is pending. Read newer [shared rules PR909](https://github.com/CGProductionHouse/CG-Dynamics/pull/909) too. This override supersedes the main-only research instructions below; production lanes remain separately owned.
 

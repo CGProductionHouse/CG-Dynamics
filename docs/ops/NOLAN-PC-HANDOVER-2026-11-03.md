@@ -1,5 +1,9 @@
 # Nolan Studio PC — STOPPED; rejected-batch handover, 3 November 2026
 
+> **Historical rejected-batch checkpoint, not current device setup or a live stop.**
+> Read [NOLAN-START-HERE.md](../../NOLAN-START-HERE.md) on the live shared PR910
+> branch. Preserve the failures below without reviving their dated queue/state.
+
 ## Latest owner instruction overrides every earlier continuation
 
 CA ordered production stopped at end of day and the final five minutes used ONLY for a proper handover to another device. No more renders, music/model experiments, sends or desktop takeover. Native Codex task `Nolan PC overnight continuation` was last witnessed paused07:30:53 and was not resumed. Windows Task Scheduler is a different registry; a missing Windows task is not new proof of the Codex task state. No automatic WhatsApp monitor or new engine is authorised. No spending/paid API/private-media third-party uploads.

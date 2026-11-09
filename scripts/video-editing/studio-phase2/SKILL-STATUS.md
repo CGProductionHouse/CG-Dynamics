@@ -1,5 +1,12 @@
 # Nolan Studio tutorial-skill status
 
+**9November new-device repair:** start at repository-root `NOLAN-START-HERE.md`.
+MSI reconciled Office contributions through `c05c43c0` (CapCut compound type,
+offline voice preview/hold ducking, rigid photographic depth) before this update.
+All53 family cards remain individually qualified, not mastered by publication.
+Use the live PR910 library and per-device install/control/sound receipts; dated
+Premiere-first handovers are historical. Current code regressions:112 pass.
+
 **6November overnight CapCut:** [native stagger/compound study](CAPCUT-COMPOUND-TYPE-STUDY-20261106.md): four150-frame local exports, actual close/reopen/export, separate editable words and linked camera; nested assets protected in endpoint revision. Exact decoded reopen6/150 and prefix6/61 **fail**, curves remain linear, AAC silent. All300 R01/R02 frames inspected;93px minimum ink margin. Existing53 families, no mastery or client-hook promotion.
 
 **6 November MSI reconciliation:** [Actual audit/install receipt](MSI-FOUNDATION-RECONCILIATION-20261106.md) carries MSI's missing finishing/client-copy lessons into the existing PC foundation. 92 tests and all 53 UTF-8 card validators pass; MSI's installed canonical tree hashes CURRENT. 53 cards/42 recipes are documented mechanisms, not mastery. No tutorial repeated or client cut changed; PC installation of this delta is pending.

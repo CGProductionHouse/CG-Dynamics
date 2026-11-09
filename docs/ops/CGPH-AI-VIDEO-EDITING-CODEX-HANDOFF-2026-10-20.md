@@ -1,5 +1,11 @@
 # CG Production House — AI video-editing implementation handoff
 
+> **HISTORICAL — superseded for Nolan workstation setup.** Read
+> [NOLAN-START-HERE.md](../../NOLAN-START-HERE.md) on the live
+> [shared PR910 branch](https://github.com/CGProductionHouse/CG-Dynamics/pull/910).
+> Premiere is no longer the mandatory master editor. The tool/licensing research
+> below is retained as dated context, not an installation or execution order.
+
 **Date:** 20 October 2026  
 **Scope:** CG Production House internal Premiere Pro post-production.  
 **Status:** Owner-directed implementation brief; not a claim that plugins are installed or licences purchased.

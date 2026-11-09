@@ -5,6 +5,12 @@ description: Plan, assemble, review, and hand off CG Production House client vid
 
 # CG video story editor
 
+**Current multi-device entry point:** read repository-root `NOLAN-START-HERE.md`
+from the live shared PR910 head for MSI, Office PC/BC or a new laptop. October's
+Premiere-first brief is historical; use a proven editor/renderer suited to the
+job. Git publication, skill installation, private media access and device sound/
+native acceptance are separate receipts. Reconcile at a safe job boundary.
+
 **9November photographic camera application:** [rigid actual portrait controls](../../../scripts/video-editing/studio-phase2/PHOTOGRAPHIC-DEPTH-STUDY-20261109.md) exercise existing authored depth planes without face deformation. Keep the plain/flat controls, original aspect and full-path type/decoration separation. One static licensed frame is not moving-footage stabilisation, a cutout or recovered person depth; native/phone/sound/client gates remain open. Latest CA priority is existing film amendments, before additional research or a new Emoya film.
 
 **6November overnight CapCut practice:** [native editable type/compound camera](../../../scripts/video-editing/studio-phase2/CAPCUT-COMPOUND-TYPE-STUDY-20261106.md) extends the existing staggered-type family with actual controls/save/reopen/export. Retain static comparison, endpoint revision and failed encoded-parity/easing gates. Actual font is Bold; no mixed-weight, heard cue, client-hook, second-PC or mastery promotion. Same shared library only.

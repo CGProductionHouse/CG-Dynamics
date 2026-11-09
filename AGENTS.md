@@ -1,5 +1,10 @@
 # AGENTS.md — CG Dynamics agent instructions
 
+For Nolan Studio video work or workstation setup, read `NOLAN-START-HERE.md` from
+the live shared PR910 branch in addition to the continuity reads below. Its editor
+policy supersedes the October Premiere-first implementation brief. Do not infer
+current editing instructions from a main-only checkout missing the shared library.
+
 Shared operating instructions for Codex, Claude Code, OpenCode and any other coding agent working in this repo. Read this before making changes.
 
 ## Mandatory continuity reads

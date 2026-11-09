@@ -193,6 +193,15 @@ class EditContract(unittest.TestCase):
         with patch.object(release,'verify',return_value={'client_id':'fixture','brand_ready':True}),patch.object(release,'audio_gate',return_value={'video_sha256':r['video_sha256'],'errors':[]}):
             out=release.check(r)
         self.assertEqual(out['status'],'BLOCKED')
+        # The newer actual-duration gate rejects missing plan authority first.
+        self.assertIn('story_plan',' '.join(out['errors']))
+        self.assertFalse(out['creative_approval_inferred'])
+
+    def test_existing_release_entry_point_requires_render_manifest_with_valid_plan(self):
+        r=self.full_release();r.pop('edit_manifest')
+        with patch.object(release,'verify',return_value={'client_id':'fixture','brand_ready':True}),patch.object(release,'audio_gate',return_value={'video_sha256':r['video_sha256'],'errors':[]}):
+            out=release.check(r)
+        self.assertEqual(out['status'],'BLOCKED')
         self.assertIn('Plan-to-render',' '.join(out['errors']))
 
     def test_full_contract_is_candidate_only_never_automatic_creative_pass(self):

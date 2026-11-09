@@ -1,5 +1,9 @@
 # Continue CG Dynamics Here
 
+**Nolan Studio / new-device setup:** use [the maintained Nolan entry point](NOLAN-START-HERE.md)
+and live [shared PR910](https://github.com/CGProductionHouse/CG-Dynamics/pull/910).
+Do not bootstrap the editing lane from an October Premiere-first archive.
+
 Read `docs/ai-workforce/MASTER-AI-TOOLS-AND-WORKFLOW.md` first for cross-project AI/tool/workflow grounding, then `AGENTS.md` and `docs/vision/PROJECT-CONTINUITY-HANDOFF-2026-08-13.md`, followed by the page constitution, current product game plan, current milestone, client research ledger, current `main`, and open PRs/issues.
 
 Use `docs/ai-workforce/AI-TOOLING-MODEL-ROUTING.md` as the detailed provider/model appendix when changing OpenCode/provider configuration.
