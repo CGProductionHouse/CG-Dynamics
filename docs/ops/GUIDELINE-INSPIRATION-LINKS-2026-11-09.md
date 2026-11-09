@@ -1,5 +1,63 @@
 # Optional guideline inspiration — 9 November 2026
 
+## Current production acceptance — LIVE, do not replay the candidate packet
+
+CA explicitly approved the combined release: "Yes, approved. You can do it."
+Reviewed #977/source3b154834 is merged as main25657501, including #975's per-video
+reviews. The application/backend/script tree matches the reviewed source. This
+section supersedes the historical unpublished observation and pending packet below.
+
+- Applied only the two approved migrations, in order. Hosted ledger receipts:
+  `20261109154159 guideline_video_client_review` and
+  `20261109154213 guideline_inspiration_links`. Filename timestamps remain source
+  identifiers, not invented hosted ledger versions. Private response table RLS,
+  exact anonymous RPC grants and private helper denials independently verified;
+  no anonymous table SELECT or authenticated direct INSERT/staff-actor access.
+- Existing `cg-dynamics-mcp` is ACTIVE **v82**, all **41 hosted files** match the
+  approved candidate; other37 preserved byte-for-byte. Bundle SHA256
+  `f8148288a18c4989a37a795b74f92f782b403760bc247cf9bcd4cc0106475338`.
+  Authentication, permissions, secrets, JWT/import-map/settings unchanged.
+- Production **READY**, same approved prebuilt deployment
+  `dpl_12ysTroZHgsSJMHrPxUqp8AetiRz`, then promoted once to www.cgdynamics.co.za.
+  One2.6MB staged upload; build logs confirm existing prebuilt outputs, zero remote
+  app compilation. Staged metadata/app-shell/header checks and exact application
+  chunk hash pass before promotion. Domain independently resolves to this release.
+  Rollback is `dpl_EJr74MFsLf1uqmveHTZCqPQTyHFE` plus the private v81 MCP baseline;
+  retain additive schema/history. Git deployment remains OFF. No docs redeployment.
+- Fresh pre-release current-cycle effective estimate27.96243USD including
+  Pro14.83871USD; approximately6.87628USD included service credit remained,
+  effectively zero billed overage. Preserved5USD serving reserve; no budget,
+  protection, DNS, hosting-plan or dependency changes.
+- Germoparts was **already republished externally at12:44:11.201476UTC**, before
+  this release. Full public document/video fields and original four script hashes
+  match. Preserved that publication; executed **no duplicate publish/restoration**.
+  Current anonymous public reader and isolated built GET/HEAD200 pass; foreign
+  slug/wrong capability denied and registry/management401. Share capability stays
+  private and is returned only through the existing authenticated connector.
+- Both existing company/personal connector accounts resolve the exact Germoparts
+  client/run and return all four complete unchanged scripts, optional inspiration
+  fields null, verified empty response evidence, and the same active client-named
+  no-login link. This is live connector readback, not a new normal-ChatGPT UI write
+  or invented client reference. Backend catalog/new inputs match reviewed source.
+- Actual native Chrome live desktop and responsive375/390/430px checks pass:
+  Germoparts branding/month/filming date, full scripts, lineup, per-video actions,
+  readable contained layouts and separate account footer. Request-changes form
+  opens on desktop/390px, with name/comment/disclosure and Send/Cancel; cancelled
+  without submission. Inspiration stays hidden because this client's fields are
+  genuinely blank. Synthetic reference/editor/write flows are covered by the
+  deterministic local fixtures below. No third-party embed or autoplay.
+- Final production response count remains **0**: no fake client decision, sample
+  inspiration, publication/content/strategy/package/calendar/Teams/provider or
+  other-client write. Only the agent-created browser tab closed; original tabs
+  preserved. No credential copying, impersonation or security-setting change.
+
+Client approval remains self-reported by anyone holding the link, exact to the
+published version; idea approval does not authorise finished-media posting.
+Physical-phone acceptance and an actual client's decision were not fabricated.
+No claim that all other application/client launch gates are complete. Owning
+#896/#450/#381 updated; exact Google Control Centre target remains unavailable
+from earlier bounded discovery, so no guessed tracker write.
+
 Owner #896/#450; supervision #381. CA requested optional social examples and a
 short vision per video. This extends the canonical guideline/editor/renderer and
 normal ChatGPT authoring. It supersedes the earlier pending3-file release packet.
@@ -44,7 +102,7 @@ missing optional fields normalize to null for exact-version comparison.
   Builder's optional-peer lock pruning restored to source baseline, no dependency
   change committed.13 existing metadata/packaging/hosting regressions pass.
 
-## Live publication observation — do not mistake this for a code failure
+## Historical pre-approval publication observation — superseded above
 
 Germoparts guideline changed to `ready`, `client_published_at=null` at
 **12:01:57UTC /14:01:57SAST**. Registry remains unrevoked. Public RPC correctly
@@ -62,9 +120,9 @@ Client b6052710-417d-4b3b-8348-0f126bfea671; run
 72624865-e13d-4d98-af5d-211f6c837d21; guide
 e4a541a8-e730-478c-812e-feb043d0ed71. Bearer capability stays private.
 
-## Combined pending production packet
+## Historical combined production packet — completed above, do not replay
 
-**NOT LIVE.** Existing MCP ACTIVEv81/40files and deployment
+**Pre-approval snapshot; completed by the live receipt above.** MCP ACTIVEv81/40files and deployment
 `dpl_EJr74MFsLf1uqmveHTZCqPQTyHFE` remain. Source base ad11e534 includes reviewed
 #975/mainf0a3447d per-video responses. Supabase project ehtjfntukiwbgptqgbzy:
 

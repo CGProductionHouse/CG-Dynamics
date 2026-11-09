@@ -1,5 +1,13 @@
 # Per-video client guideline review — 9 November 2026
 
+**Now LIVE as part of the approved combined #977/main25657501 release.** Read
+GUIDELINE-INSPIRATION-LINKS-2026-11-09.md's current production acceptance first:
+both exact migrations applied, MCPv82/41 files verified, one prebuilt deployment
+promoted, live desktop/375/390/430px and both account readbacks pass. Germoparts
+was already republished unchanged externally; no duplicate publish or fake client
+response executed. The packet/12:01UTC observation below is historical: do not
+reapply, redeploy or restore again. Final actual response count0.
+
 Later optional social-inspiration requirements supersede this candidate's3-file
 release packet; read GUIDELINE-INSPIRATION-LINKS-2026-11-09.md before release.
 Existing verification remains valid. Germoparts subsequently became unpublished
@@ -68,9 +76,9 @@ tool/scope or public staff-history endpoint.
 - Official Supabase changelog/current function/RLS docs checked; no dependency,
   CLI or platform upgrade. CLI remains2.115.0; no migration version invented.
 
-## Exact pending production packet
+## Historical exact production packet — completed in combined release
 
-**NOT LIVE.** Source/verification only until CA approves this exact additive
+**Pre-approval snapshot; completed in the combined release above.** Source/verification only until CA approves this exact additive
 review schema/backend/frontend release. Existing live MCPv81 and deployment
 `dpl_EJr74MFsLf1uqmveHTZCqPQTyHFE` remain the rollback/serving baseline.
 
