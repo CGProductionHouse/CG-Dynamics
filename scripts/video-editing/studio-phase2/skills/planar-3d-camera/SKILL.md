@@ -5,6 +5,8 @@ description: Move a perspective camera across an approved flat composition with 
 
 # Planar 3D camera
 
+[9November real-photograph controls](../../PHOTOGRAPHIC-DEPTH-STUDY-20261109.md) extend the existing authored-plane route to one actual licensed portrait crop. Four125frame silent controls/late copy revision,75/75protected opening, independent locked-hold source-crop comparisons and full-path ink/decoration separation. Use `render_portrait_depth_study.py` as a source-bound practice recipe, not a client preset. A rectangular photograph moves rigidly; this does not prove cutout/person-depth, native CapCut easing, normal-speed phone or sound. Earlier13px margin/line-over-type previews are rejected. Exact-client fonts, proper brand design and creative comparison remain required.
+
 CA's [3D camera reference](https://vt.tiktok.com/ZSpFoJYVG/) resolves to [Josh Hoffman7418660690837261575](https://www.tiktok.com/@_joshhoffman/video/7418660690837261575). Actual muted player frames show precomposition, new camera and camera position/point-of-interest controls. The creator describes speed curves, motion blur and SFX. This is a camera viewing a flat precomp, not generated depth, a real 3D room or automatic subject parallax.
 
 Use the existing shared [camera operator](../../../../../.agents/skills/cg-video-story-editor/scripts/camera_plane.py): `render_camera(artwork, size, keys, time, fps=25, shutter=90, samples=33)`. Keys are `(seconds, camera_xyz, target_xyz, roll_degrees)`; artwork pixels are world units on a centred z=0 plane. FOV is vertical. Position and target interpolate with quintic easing; actual time samples integrate the shutter. A fixed pose stays sharp. Reuse the actual brand type/assets; keep the linked source and JSON keys editable.
