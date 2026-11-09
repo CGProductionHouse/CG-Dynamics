@@ -1,4 +1,4 @@
-## 9 November — ChatGPT guideline links LIVE v78; retry hardening in progress
+## 9 November — ChatGPT guideline links/retry fixes LIVE v79
 
 Owner #896/#450. Reproduced company ChatGPT's Germoparts failure: correct draft
 and four complete scripts returned, but no direct app link. Three existing MCP
@@ -21,10 +21,17 @@ reproduced defect is being hardened in the same lane:39 historical successful
 guideline calls stored status only, losing original IDs on retry. New exact
 result receipts use the existing private ledger column; old rows are not guessed
 or rerun. Two-file packet,38 hosted files preserved,382 focused pass/one optional
-skip; no new schema/RPC/permissions. Final release/readback still in progress.
+skip; no new schema/RPC/permissions. #968 /2179b10d is now **LIVE ACTIVE v79**:
+fresh v78 preflight matched, only two reviewed files replaced, other38 preserved;
+all40 hosted files and existing settings independently read back exact.
+Live ensure of the existing Germoparts document returned created=false, draft,
+same four videos and verified staff link. Identical retry returned semantically
+identical original result/receipt; SQL SELECT confirms exactly one audit receipt.
+No document/video was created or edited. The private audit receipt is the only
+acceptance write. All four scripts and draft status read back unchanged.
 Supported full app verification4,242pass/30optional skips/0fail; unrelated12-test
 Unix SES shell-mock group excluded on Windows, documented in the receipt.
-No SQL/content/calendar/Teams/
+No SQL mutation/content/calendar/Teams/
 OneDrive/Vercel operation. Exact Google Control Centre remains unavailable; no
 guessed write. Other owners and prior production gates remain unchanged.
 

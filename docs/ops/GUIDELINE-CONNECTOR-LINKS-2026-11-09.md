@@ -110,7 +110,7 @@ those checks pass. Do not republish or rewrite the four videos to test links.
 Germoparts' existing missing OneDrive short-code readiness warning is separate;
 it does not prevent staff opening this saved guideline. No mapping was guessed.
 
-## Follow-up: original saved results on guideline retries
+## Follow-up LIVE v79: original saved results on guideline retries
 
 Read-only production audit found39 successful ensure/add/update operations whose
 generic idempotency ledger stored status only, with no result payload. Reproduced
@@ -155,6 +155,27 @@ Exact follow-up packet: v78 baseline40 files, replace only `index.ts` and
 `contentGuidelineActions.ts`, preserve the other38 files byte-for-byte. Candidate
 LF SHA256: index `ac53518081397be0f1ea8fadd09dddfd43154396732e7c67cc798357430b381f`;
 helper `c819f1cf9d8ca7942db4903dbcebf1479ffbc60266c222f25e7f8b2c204160be`.
-CA's current instruction authorizes this reviewed connector repair and live
-release. Preflight drift and verify post-release before claiming it live. No
-SQL/schema/config/secret/permission/provider/client-content/Vercel changes.
+CA's current instruction authorized this reviewed connector repair and live
+release. #968 /2179b10d merged after review and local verification. Fresh v78
+preflight matched every hosted file; released the two-file packet once. Final
+independent readback: **ACTIVE v79**, all40 files match the candidate, other38
+preserved byte-for-byte, verify_jwt=false/import_map=false unchanged. Runtime
+bundle SHA256 `f25fd077a5b4f1084e1fde0360fbac1d9b4aef510f1d11a00536a18b6a13e434`.
+
+Legitimate live company connector acceptance used `ensure_content_guideline`
+only on the already-verified existing Germoparts document, with one unique
+verification key. Returned created=false, the correct existing guideline/run,
+draft status, four videos, canonical staff links and original saved-result
+receipt. Repeated exactly the same request once: semantically identical result
+and receipt, no handler rerun/document/video creation. PostgreSQL JSONB changes
+key order, so compare values, not raw serialization order. Independent SELECT
+confirms exactly **one** matching audit row with its original result projection.
+Final read matches all four pre-test scripts and draft status exactly.
+
+The normal connector's private audit receipt is the only acceptance write; no
+SQL mutation/schema/config/secret/permission/provider/client-content/Teams/
+timesheet/Vercel changes. Historical39 status-only successes were not rewritten.
+No new authenticated phone/browser or client-publication pass is claimed. This
+closes the two reproduced connector faults, not every unrelated provider/content
+or client-launch gate. Exact Google Control Centre target remains unavailable;
+do not guess a write or claim it was updated.
