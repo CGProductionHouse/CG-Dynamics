@@ -32,7 +32,7 @@ import {
 import { cgDate, cgDatePlusDays, cgDayBounds, CG_TIMEZONE } from './cgTime.ts'
 import {
   deriveEditReadiness as deriveVideoEditReadiness,
-  deriveRawEvidence as deriveVideoRawEvidence, shapeVideoForAssistant,
+  deriveRawEvidence as deriveVideoRawEvidence, shapeVideoForAssistant, buildGuidelineNavigation,
   validateDeliverableLink, validateNewVideo, validateReorder, validateVideoPatch,
 } from './contentGuidelineActions.ts'
 import { buildGoogleAdsAudit, planGoogleAdsMetricReads, validateGoogleAdsAuditInput, type AuditAccount, type AuditLink, type AuditMetric, type AuditSync } from './googleAdsAudit.ts'
@@ -796,6 +796,12 @@ const handleFindContentRuns: ToolHandler = async (staff, input) => {
     }
 
     const guideline = guidelineRes.data as Record<string, unknown> | null
+    if (guideline && guideline.client_id !== run.client_id) {
+      return {
+        content_run: { id: runId, client: { id: run.client_id, name: run.client_name }, run_date: run.run_date },
+        error: 'The linked guideline belongs to a different client. Document navigation was refused.',
+      }
+    }
     let videos: Array<Record<string, unknown>> = []
     if (guideline?.id) {
       const { data: ideaRows, error: ideaRowsError } = await staff.supabase
@@ -824,7 +830,8 @@ const handleFindContentRuns: ToolHandler = async (staff, input) => {
         calendar_event_id: run.calendar_event_id,
       },
       content_guideline: guideline
-        ? { id: guideline.id, title: guideline.title, month: guideline.month, status: guideline.status }
+        ? { id: guideline.id, title: guideline.title, month: guideline.month, status: guideline.status,
+            ...buildGuidelineNavigation(guideline.id, guideline.client_id, runId) }
         : null,
       videos: videos.map(v => ({
         id: v.id, title: v.title, position: v.position, status: v.status,
@@ -2508,7 +2515,7 @@ async function handleGetContentRunPlan(staff: AuthenticatedStaff, input: Record<
 
   return {
     content_run: run,
-    content_guideline: guideline ?? null,
+    content_guideline: guideline ? { ...guideline, ...buildGuidelineNavigation(guideline.id, guideline.client_id, run.id) } : null,
     planned_items: plannedItems,
     source: 'canonical Dynamics Content Run and Content Guideline records',
   }
@@ -3228,6 +3235,7 @@ const handleEnsureContentGuideline: ToolHandler = async (staff, input) => {
   const loaded = await loadRunGuideline(staff, input.content_run_id as string, true)
   if ('error' in loaded) return { error: loaded.error }
   return {
+    ...buildGuidelineNavigation(loaded.guideline.id, loaded.scope.clientId, loaded.scope.runId),
     content_run_id: loaded.scope.runId,
     client_name: loaded.scope.clientName,
     guideline_id: loaded.guideline.id,
@@ -3314,6 +3322,7 @@ const handleListContentGuidelineVideos: ToolHandler = async (staff, input) => {
   const evidence = await loadVideoEvidence(staff, loaded.scope)
   const videos = shapeRunVideos(loaded.scope, loaded.videos, evidence)
   return {
+    ...buildGuidelineNavigation(loaded.guideline.id, loaded.scope.clientId, loaded.scope.runId),
     content_run_id: loaded.scope.runId,
     client_name: loaded.scope.clientName,
     guideline_id: loaded.guideline.id,
@@ -3335,6 +3344,7 @@ const handleGetContentVideoReadiness: ToolHandler = async (staff, input) => {
   if (!loaded.scope.shortCode) blockers.push('BLOCKED_MISSING_SHORT_CODE')
   if (!evidence.foldersReadable) blockers.push('PRODUCTION_FOLDER_STATE_UNREADABLE')
   return {
+    ...buildGuidelineNavigation(loaded.guideline.id, loaded.scope.clientId, loaded.scope.runId),
     content_run_id: loaded.scope.runId,
     client_name: loaded.scope.clientName,
     run_date: loaded.scope.runDate,
@@ -3370,6 +3380,7 @@ const handleAddContentGuidelineVideo: ToolHandler = async (staff, input) => {
     .single()
   if (error) return { error: error.message }
   return {
+    ...buildGuidelineNavigation(loaded.guideline.id, loaded.scope.clientId, loaded.scope.runId),
     content_guide_idea_id: data.id,
     name: `Video ${String(position).padStart(2, '0')} - ${data.title}`,
     position,
@@ -3409,6 +3420,7 @@ const handleUpdateContentGuidelineVideo: ToolHandler = async (staff, input) => {
     .single()
   if (error) return { error: error.message }
   return {
+    ...buildGuidelineNavigation(resolved.video.content_guideline_id, resolved.video.client_id),
     content_guide_idea_id: data.id,
     updated_fields: Object.keys(validated.value),
     name: `Video ${String(data.position ?? 0).padStart(2, '0')} - ${data.title}`,
@@ -3429,6 +3441,7 @@ const handleReorderContentGuidelineVideos: ToolHandler = async (staff, input) =>
   const reloaded = await loadGuidelineVideos(staff, loaded.guideline.id as string, loaded.scope.clientId)
   if ('error' in reloaded) return { error: reloaded.error }
   return {
+    ...buildGuidelineNavigation(loaded.guideline.id, loaded.scope.clientId, loaded.scope.runId),
     content_run_id: loaded.scope.runId,
     order: reloaded.videos.map((video, index) => ({
       content_guide_idea_id: video.id,
@@ -3466,6 +3479,7 @@ const handleLinkContentGuidelineVideoDeliverable: ToolHandler = async (staff, in
     .eq('client_id', resolved.video.client_id)
   if (error) return { error: error.message }
   return {
+    ...buildGuidelineNavigation(resolved.video.content_guideline_id, resolved.video.client_id),
     content_guide_idea_id: resolved.video.id,
     allocated: !unlink,
     deliverable_id: unlink ? null : deliverable!.id,
@@ -3488,7 +3502,7 @@ const handleGenerateContentGuidelineDrafts: ToolHandler = async (staff, input) =
       : loaded.videos.filter(video => !String(video.script ?? '').trim()))
     : []
   if (mode === 'develop' && !targets.length) {
-    return { content_run_id: loaded.scope.runId, mode, generated: 0, note: 'Every saved video already has a script. Nothing was regenerated.' }
+    return { ...buildGuidelineNavigation(loaded.guideline.id, loaded.scope.clientId, loaded.scope.runId), content_run_id: loaded.scope.runId, mode, generated: 0, note: 'Every saved video already has a script. Nothing was regenerated.' }
   }
   const result = await invokeSiblingFunction(staff.connection, 'suggest-content-videos', {
     mode,
@@ -3505,6 +3519,7 @@ const handleGenerateContentGuidelineDrafts: ToolHandler = async (staff, input) =
     }
   }
   return {
+    ...buildGuidelineNavigation(loaded.guideline.id, loaded.scope.clientId, loaded.scope.runId),
     content_run_id: loaded.scope.runId,
     mode,
     result: result.data,

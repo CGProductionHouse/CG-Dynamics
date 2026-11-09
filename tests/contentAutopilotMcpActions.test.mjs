@@ -180,8 +180,8 @@ test('actual MCP update handler preserves other fields and rejects another clien
   const end = serverSource.indexOf('const handleReorderContentGuidelineVideos:', start)
   assert.ok(start > 0 && end > start)
   const js = ts.transpileModule(serverSource.slice(start, end), { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText
-  const handler = new Function('validateVideoPatch', 'assertRecordClientMatchesContext', 'GUIDELINE_VIDEO_SELECT',
-    `${js};return handleUpdateContentGuidelineVideo`)(actions.validateVideoPatch, project.assertRecordClientMatchesContext, '*')
+  const handler = new Function('validateVideoPatch', 'assertRecordClientMatchesContext', 'GUIDELINE_VIDEO_SELECT', 'buildGuidelineNavigation',
+    `${js};return handleUpdateContentGuidelineVideo`)(actions.validateVideoPatch, project.assertRecordClientMatchesContext, '*', actions.buildGuidelineNavigation)
   const row = { id: A, client_id: B, title: 'Keep title', position: 1, status: 'idea',
     script: 'Original script', cta: 'Keep CTA', shot_breakdown: 'Keep shot list', notes: 'Keep staff note' }
   let writes = 0
