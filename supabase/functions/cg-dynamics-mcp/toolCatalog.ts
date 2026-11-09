@@ -165,7 +165,7 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   },
   {
     name: 'find_content_runs', title: 'Find Content Runs',
-    description: 'Find exact Content Runs by date, date range, client, CG Calendar event or monthly deliverable, and return the linked canonical Content Guideline, ordered videos, Client Schedule linkage counts, OneDrive readiness and upload status. Lets Morning Ops and Franco EOD work without guessing a Content Run ID. Read-only; raw OneDrive drive/item identifiers and URLs are never returned.',
+    description: 'Find exact Content Runs by date, date range, client, CG Calendar event or monthly deliverable, and return the linked canonical Content Guideline, ordered videos, Client Schedule linkage counts, OneDrive readiness and upload status. Lets Morning Ops and Franco EOD work without guessing a Content Run ID. Read-only; raw OneDrive drive/item identifiers and URLs are never returned. Returns guideline_url for the exact saved document and, when resolved, content_run_url. When asked for the Dynamics link, return guideline_url as a clickable staff review link (staff sign-in required); never invent URLs or present a draft as client-published. Read list_content_guideline_videos after edits to verify saved content.',
     inputSchema: objectSchema({
       client_id: uuid, run_date: date, from: date, to: date,
       calendar_event_id: uuid, deliverable_id: uuid,
@@ -503,21 +503,21 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   },
   {
     name: 'ensure_content_guideline', title: 'Ensure content guideline',
-    description: '#450. Return the ONE canonical Content Guideline for an exact Content Run, creating the draft document if it does not exist yet. Idempotent: a run always has exactly one guideline, and an existing guideline is returned untouched — never duplicated, never reset. Staff should never have to create a blank guideline by hand.',
+    description: '#450. Return the ONE canonical Content Guideline for an exact Content Run, creating the draft document if it does not exist yet. Idempotent: a run always has exactly one guideline, and an existing guideline is returned untouched — never duplicated, never reset. Staff should never have to create a blank guideline by hand. Returns guideline_url for the exact saved document and, when resolved, content_run_url. When asked for the Dynamics link, return guideline_url as a clickable staff review link (staff sign-in required); never invent URLs or present a draft as client-published. Read list_content_guideline_videos after edits to verify saved content.',
     inputSchema: objectSchema({ content_run_id: uuid, idempotency_key: idempotencyKeySchema }, ['content_run_id', 'idempotency_key']),
     annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
     dependency: '#450', canonicalContract: 'get_or_create_content_guideline_as_actor service-only RPC with server-resolved workforce actor (one guideline per run)',
   },
   {
     name: 'list_content_guideline_videos', title: 'List content guideline videos',
-    description: '#450. Read the full saved scripts, shot breakdown, requirements and visual direction of the ordered videos in one exact Content Run guideline, plus canonical "Video XX - Name", coverage month, real Client Schedule linkage and edit readiness. Read before editing and again after add/update to verify the saved wording. For normal ChatGPT authoring use add/update, not the separately funded generator. Never creates a missing guideline; explicitly use ensure_content_guideline first if needed. Raw OneDrive IDs and URLs are never returned.',
+    description: '#450. Read the full saved scripts, shot breakdown, requirements and visual direction of the ordered videos in one exact Content Run guideline, plus canonical "Video XX - Name", coverage month, real Client Schedule linkage and edit readiness. Read before editing and again after add/update to verify the saved wording. For normal ChatGPT authoring use add/update, not the separately funded generator. Never creates a missing guideline; explicitly use ensure_content_guideline first if needed. Raw OneDrive IDs and URLs are never returned. Returns guideline_url for the exact saved document and, when resolved, content_run_url. When asked for the Dynamics link, return guideline_url as a clickable staff review link (staff sign-in required); never invent URLs or present a draft as client-published. Read list_content_guideline_videos after edits to verify saved content.',
     inputSchema: objectSchema({ content_run_id: uuid }, ['content_run_id']),
     annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
     dependency: '#450', canonicalContract: 'content_guidelines + content_guide_ideas ordered by position',
   },
   {
     name: 'add_content_guideline_video', title: 'Add draft guideline video',
-    description: '#450. Append ONE new DRAFT video to the exact run guideline. Draft only: it is never published, never approved and never written into monthly_deliverables. A future video with no Client Schedule slot yet is legitimate and stays unallocated until a real slot exists.',
+    description: '#450. Append ONE new DRAFT video to the exact run guideline. Draft only: it is never published, never approved and never written into monthly_deliverables. A future video with no Client Schedule slot yet is legitimate and stays unallocated until a real slot exists. Returns guideline_url for the exact saved document and, when resolved, content_run_url. When asked for the Dynamics link, return guideline_url as a clickable staff review link (staff sign-in required); never invent URLs or present a draft as client-published. Read list_content_guideline_videos after edits to verify saved content.',
     inputSchema: objectSchema({
       content_run_id: uuid,
       title: { type: 'string', maxLength: 200, description: 'Descriptive name only — never include a "Video 01 -" prefix; numbering comes from the saved order.' },
@@ -532,7 +532,7 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   },
   {
     name: 'update_content_guideline_video', title: 'Update guideline video',
-    description: '#450. Update named fields of ONE exact saved video by id. Position, client, deliverable link, status and canonical name cannot be set here — use the reorder and link actions. Only the fields supplied are changed; nothing else on the video is touched.',
+    description: '#450. Update named fields of ONE exact saved video by id. Position, client, deliverable link, status and canonical name cannot be set here — use the reorder and link actions. Only the fields supplied are changed; nothing else on the video is touched. Returns guideline_url for the exact saved document and, when resolved, content_run_url. When asked for the Dynamics link, return guideline_url as a clickable staff review link (staff sign-in required); never invent URLs or present a draft as client-published. Read list_content_guideline_videos after edits to verify saved content.',
     inputSchema: objectSchema({
       content_guide_idea_id: uuid,
       title: { type: 'string', maxLength: 200 },
@@ -552,7 +552,7 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   },
   {
     name: 'reorder_content_guideline_videos', title: 'Reorder guideline videos',
-    description: '#450. Set the canonical order of an exact guideline through the existing reorder authority, which rewrites position and video_number as 1..n. Every video in the guideline must appear exactly once; a video from another guideline is refused. Renumbering is what changes each "Video XX - Name".',
+    description: '#450. Set the canonical order of an exact guideline through the existing reorder authority, which rewrites position and video_number as 1..n. Every video in the guideline must appear exactly once; a video from another guideline is refused. Renumbering is what changes each "Video XX - Name". Returns guideline_url for the exact saved document and, when resolved, content_run_url. When asked for the Dynamics link, return guideline_url as a clickable staff review link (staff sign-in required); never invent URLs or present a draft as client-published. Read list_content_guideline_videos after edits to verify saved content.',
     inputSchema: objectSchema({
       content_run_id: uuid,
       video_ids: { type: 'array', items: uuid, description: 'Every video id of this guideline, in the exact new order.' },
@@ -563,7 +563,7 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   },
   {
     name: 'link_content_guideline_video_deliverable', title: 'Link video to schedule slot',
-    description: '#450. Link ONE exact video to ONE real Client Schedule video/reel slot of the SAME client, or unlink it. The Client Schedule is never created or rewritten here: an unallocated video stays unallocated until a real slot exists. Cross-client linkage is refused.',
+    description: '#450. Link ONE exact video to ONE real Client Schedule video/reel slot of the SAME client, or unlink it. The Client Schedule is never created or rewritten here: an unallocated video stays unallocated until a real slot exists. Cross-client linkage is refused. Returns guideline_url for the exact saved document and, when resolved, content_run_url. When asked for the Dynamics link, return guideline_url as a clickable staff review link (staff sign-in required); never invent URLs or present a draft as client-published. Read list_content_guideline_videos after edits to verify saved content.',
     inputSchema: objectSchema({
       content_guide_idea_id: uuid,
       deliverable_id: { ...uuid, description: 'Exact monthly_deliverables id of the same client. Omit with unlink=true to clear the link.' },
@@ -587,14 +587,14 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   },
   {
     name: 'get_content_video_readiness', title: 'Get content video readiness',
-    description: '#450. One truthful answer per video for an exact run: canonical production folder state, raw-upload evidence (UNVERIFIED/MISSING/PARTIAL/VERIFIED), derived edit readiness with its reason and exact next action, editor, and whether a client-safe final output is published. Unreadable or unmapped evidence is reported as UNVERIFIED — never as "no files". No OneDrive IDs or URLs are returned.',
+    description: '#450. One truthful answer per video for an exact run: canonical production folder state, raw-upload evidence (UNVERIFIED/MISSING/PARTIAL/VERIFIED), derived edit readiness with its reason and exact next action, editor, and whether a client-safe final output is published. Unreadable or unmapped evidence is reported as UNVERIFIED — never as "no files". No OneDrive IDs or URLs are returned. Returns guideline_url for the exact saved document and, when resolved, content_run_url. When asked for the Dynamics link, return guideline_url as a clickable staff review link (staff sign-in required); never invent URLs or present a draft as client-published. Read list_content_guideline_videos after edits to verify saved content.',
     inputSchema: objectSchema({ content_run_id: uuid }, ['content_run_id']),
     annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
     dependency: '#450', canonicalContract: 'content_guide_video_onedrive_folders + content_run_closeouts + client_portal_assets',
   },
   {
     name: 'get_content_run_plan', title: 'Get content run plan',
-    description: 'Read the canonical planned shot list for one exact content run and client. Derives the plan from existing Content Run items and its Content Guideline videos; never asks staff to recreate the plan or falls back to another client.',
+    description: 'Read the canonical planned shot list for one exact content run and client. Derives the plan from existing Content Run items and its Content Guideline videos; never asks staff to recreate the plan or falls back to another client. Returns guideline_url for the exact saved document and, when resolved, content_run_url. When asked for the Dynamics link, return guideline_url as a clickable staff review link (staff sign-in required); never invent URLs or present a draft as client-published. Read list_content_guideline_videos after edits to verify saved content.',
     inputSchema: objectSchema({ content_run_id: uuid }, ['content_run_id']),
     annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
     dependency: '#313', canonicalContract: 'content_runs + content_run_items + content_guidelines + content_guide_ideas',

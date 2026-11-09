@@ -43,6 +43,26 @@ export function isUuid(value: unknown): value is string {
   return typeof value === 'string' && UUID.test(value)
 }
 
+/** App navigation only, after the handler proves exact-client ownership.
+ * These existing staff routes require normal sign-in; they are not public
+ * sharing grants. Never accept an origin, storage URL or title from the caller.
+ */
+export function buildGuidelineNavigation(guidelineId: unknown, clientId: unknown, contentRunId?: unknown) {
+  const valid = isUuid(guidelineId) && isUuid(clientId)
+  const guidelineParams = valid
+    ? new URLSearchParams({ tab: 'guidelines', client: clientId, guideline: guidelineId })
+    : null
+  const runParams = valid && isUuid(contentRunId)
+    ? new URLSearchParams({ tab: 'runs', run: contentRunId })
+    : null
+  return {
+    guideline_url: guidelineParams ? `https://www.cgdynamics.co.za/admin/content?${guidelineParams}` : null,
+    content_run_url: runParams ? `https://www.cgdynamics.co.za/admin/content?${runParams}` : null,
+    link_access: 'staff_sign_in_required' as const,
+    link_note: 'Use guideline_url to open this exact saved document after staff sign-in. This is a staff review link, not a public client link or proof of publication.',
+  }
+}
+
 /** Normalise a month to the canonical first-of-month date. */
 export function normaliseMonth(value: string): string {
   return `${value.slice(0, 7)}-01`
