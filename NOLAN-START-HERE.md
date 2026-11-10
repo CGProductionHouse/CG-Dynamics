@@ -1,6 +1,8 @@
 # Nolan Studio — current start here
 
-Maintained entry point for MSI, Office PC/BC and any new laptop. Updated 9 November 2026.
+Maintained entry point for MSI, Office PC/BC and any new laptop. Updated 10 November 2026.
+
+**Normal ChatGPT coordination, 10 November:** Read the [Desktop PC / cross-device handover](docs/ops/NOLAN-CHATGPT-CROSS-DEVICE-HANDOVER-2026-11-10.md) for actual ChatGPT-rendered Jenkor R06/R07 evidence, device/sound/Canva/client-kit limits, a reusable user-video-link-to-skill workflow, the optional-versus-needed Codex decision and the reserved Katana continuation slot. Google Docs mirror: https://docs.google.com/document/d/1zg4lnVC8JzZgdvNq9X9UJsqkZPw1BU0jR3-qKu3FBTM/edit . This addendum does not grant send/approval authority or change device ownership.
 
 ## Recover the current library, not an old dated brief
 
