@@ -1,0 +1,58 @@
+{
+  "purpose": "technical_proof",
+  "state": "TECHNICAL_PROOF_RENDERED_NOT_CREATIVE_APPROVAL",
+  "source_sha256": "93a29cd236037365d49c3b4070bc88df14d7a4b66013a2343c359ec95f537993",
+  "runtime_dependencies_in_html": 0,
+  "page_errors": [],
+  "external_requests": [],
+  "tests": {
+    "metadata_and_existing_seek_contract": true,
+    "out_of_order_seek_pixel_identical": true,
+    "late_copy_revision_preserves_early_frames": true,
+    "invalid_time_is_rejected": true,
+    "timeline_clamps_at_boundaries": true,
+    "missing_seek_negative_control_detected": true,
+    "all_540_main_title_bounds": true,
+    "play_pause_control_advances": true,
+    "no_external_requests_or_page_errors": true,
+    "native_1080p_540_frame_export_and_full_decode": true
+  },
+  "creative_approval": false,
+  "sound": "SILENT_VISUAL_STUDY",
+  "browser": "144.0.7559.96",
+  "scene_metadata": {
+    "version": "1.0.0",
+    "duration": 18,
+    "fps": 30,
+    "width": 1920,
+    "height": 1080,
+    "kind": "technical_motion_study",
+    "runtimeDependencies": 0,
+    "renderBackend": "Canvas2D authored perspective geometry",
+    "renderContract": "window.seek(seconds)",
+    "sound": "silent_visual_study"
+  },
+  "seek_hashes": [
+    "565c1e63bd9469ae00d80ddf00d0ff1947ec4f2eced59057a953c076493c38cd",
+    "41dae06ac4cfcc1de04c21130b268a62cc76a656280ff1f6dcca84e359e33429",
+    "565c1e63bd9469ae00d80ddf00d0ff1947ec4f2eced59057a953c076493c38cd"
+  ],
+  "geometry_errors": [],
+  "output_sha256": "f41f0aee37dd1c3e7dd2dc0911147ae0f3fc4c40bd8faa33e5a82e9918138149",
+  "output_bytes": 6594007,
+  "full_decode_passed": true,
+  "decoded_frame_checks": {
+    "frames": 540,
+    "fully_black_frames": [],
+    "exact_duplicate_consecutive_frames": [],
+    "sampled_encoded_frames": [0,48,147,267,381,501,539],
+    "source_sha256": "f41f0aee37dd1c3e7dd2dc0911147ae0f3fc4c40bd8faa33e5a82e9918138149"
+  },
+  "known_failed_experiments": [
+    "WebGL unavailable in sandbox; no policy change, used Canvas2D",
+    "Initial title alignment and mesh backface visibility fixed during visual review",
+    "Initial global META redeclaration during document replacement rejected; closure-scope fix tested"
+  ],
+  "target_machine_bc_adapter_render": "NOT_RUN",
+  "native_editability": "HTML and JavaScript only, not AE/Premiere/CapCut native project"
+}
