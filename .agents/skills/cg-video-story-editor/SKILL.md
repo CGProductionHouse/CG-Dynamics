@@ -5,6 +5,8 @@ description: Plan, assemble, review, and hand off CG Production House client vid
 
 # CG video story editor
 
+**CG Osmo motion-rig implementation — 10 November 2026:** The shared `scripts/cg_motion_graphics.py` now has tested image-backed branded motion-compositing operators linked to the existing `camera_plane.depth_layer_rect` perspective/parallel-depth geometry. The real CG Osmo R08 candidate executed the source-bound frame treatment on actual moving footage; 90-frame control/effect test, seven isolated geometry/operator tests and full 585-frame/30fps review-export checks passed. **Owner motion-design and sound approval are outstanding.** Do not mistake moving masks/cards for a proven premium creative result, repeat a rejected template or force graphics onto source footage. Read the [actual implementation and rejection boundaries](../../../scripts/video-editing/studio-phase2/CG-OSMO-MOTION-RIG-20261110.md). No new technique family, subscription, editor or model was installed for this exercise.
+
 **WhatsApp audio feedback:** use [the small offline voice-note intake](references/whatsapp-voice-notes.md)
 and `scripts/transcribe_voice_note.py` for saved original notes. Preserve source/
 sender/chat/time identity, timestamped draft text and uncertain words before
