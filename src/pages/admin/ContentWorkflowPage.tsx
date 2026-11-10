@@ -408,6 +408,7 @@ export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defau
       if (value !== 'runs') next.delete('runId')
       next.delete('guide')
       if (value !== 'guidelines') next.delete('guideline')
+      if (value !== 'pipeline') next.delete('video')
       return next
     })
   }
@@ -518,7 +519,7 @@ export default function ContentWorkflowPage({ defaultTab = 'overview' }: { defau
       ) : tab === 'guidelines' ? (
         <FullContentGuidePage embedded />
       ) : tab === 'pipeline' ? (
-        <VideoPipelineTab clients={clients} staff={staff} />
+        <VideoPipelineTab clients={clients} staff={staff} documents={documents} />
       ) : (
         <div className="mx-auto mt-6 w-full max-w-3xl space-y-3">
           {/* Mobile: Filters behind a disclosure, New run always visible */}

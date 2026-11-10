@@ -6,6 +6,7 @@ import CommandCentrePage from './CommandCentrePage'
 import PlannerPage from './PlannerPage'
 import { listPipelineVideos, listRuns, type ContentGuideIdea, type ContentRun } from '../../lib/contentWorkflow'
 import { runInvolvesUser } from '../../lib/contentWorkflowRules'
+import { videoPipelinePath } from '../../lib/nolanHandoff'
 import { editorQueueMatch, internalReviewMatch, VIDEO_STATUS_LABELS } from '../../lib/videoPipelineRules'
 import { isManagerRole } from '../../lib/roles'
 import { listPlannerWorkloadSummary, listPlannerWorkloadTasks, type PlannerWorkloadSummary, type PlannerWorkloadTask } from '../../lib/planner'
@@ -48,7 +49,7 @@ function MyVideoQueue() {
         <ul className="grid gap-2 sm:grid-cols-2">
           {videos.map(video => (
             <li key={video.id}>
-              <Link to="/admin/content?tab=pipeline" className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.025] px-3 py-2 transition-colors hover:border-brand-teal/40">
+              <Link to={videoPipelinePath(video.id)} className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.025] px-3 py-2 transition-colors hover:border-brand-teal/40">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-bold text-white">{video.title}</p>
                   <p className="truncate font-mono text-[11px] text-white/45">{video.canonical_name ?? '—'}</p>

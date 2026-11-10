@@ -9,12 +9,51 @@ import { createServer } from 'vite'
 
 let server
 let r
+let buildNolanHandoff
 
 before(async () => {
   server = await createServer({ root: process.cwd(), logLevel: 'error', server: { middlewareMode: true }, appType: 'custom' })
   r = await server.ssrLoadModule('/src/lib/videoPipelineRules.ts')
+  const handoff = await server.ssrLoadModule('/src/lib/nolanHandoff.ts')
+  buildNolanHandoff = handoff.buildNolanHandoff
 })
 after(async () => { await server?.close() })
+
+test('Nolan handoff contains the exact staff job and leaves source material in its existing systems', () => {
+  const video = {
+    id: 'video-a', client_id: 'client-a', content_guideline_id: 'guide-a',
+    title: 'Untrusted brief text', script: 'Private script',
+    onedrive_footage_url: 'https://private.invalid/raw',
+  }
+  const document = {
+    guideline: { id: 'guide-a', client_id: 'client-a', content_run_id: 'run-a' },
+    run: { id: 'run-a', client_id: 'client-a' },
+    videos: [video],
+  }
+  const text = buildNolanHandoff(video, [document], 'https://www.cgdynamics.co.za')
+  assert.match(text, /https:\/\/www\.cgdynamics\.co\.za\/admin\/content\?tab=pipeline&video=video-a/)
+  assert.match(text, /Client ID: client-a \| Content Run ID: run-a \| Video ID: video-a/)
+  assert.doesNotMatch(text, /Untrusted brief text|Private script|private\.invalid/)
+})
+
+test('Nolan handoff fails closed when the video, run or client cannot be matched', () => {
+  const video = { id: 'video-a', client_id: 'client-a', content_guideline_id: 'guide-a' }
+  const document = {
+    guideline: { id: 'guide-a', client_id: 'client-a', content_run_id: 'run-a' },
+    run: { id: 'run-a', client_id: 'client-a' },
+    videos: [video],
+  }
+  for (const documents of [
+    [],
+    [{ ...document, run: { ...document.run, client_id: 'client-b' } }],
+    [{ ...document, run: { ...document.run, id: 'run-b' } }],
+    [{ ...document, run: { ...document.run, status: 'cancelled' } }],
+    [{ ...document, guideline: { ...document.guideline, status: 'archived' } }],
+    [{ ...document, videos: [{ ...video, id: 'video-b' }] }],
+  ]) {
+    assert.equal(buildNolanHandoff(video, documents, 'https://www.cgdynamics.co.za'), null)
+  }
+})
 
 // ── 1–4 canonical name + sanitisation + client codes ──────────────────────────
 

@@ -1,3 +1,11 @@
+## 10 November — Nolan and the existing Video Pipeline
+
+See [Nolan editing handoff](NOLAN-DYNAMICS-HANDOFF.md) for the staff entry point
+and the motion workflow taken from CA's Claude example. My Video Queue opens the
+exact video in the existing Pipeline, where the staff handoff uses the saved
+Content Run. This source change is pending the frontend release gate. PR #910
+remains the editing library lane. Client kits and feedback stay in OneDrive.
+
 ## 9 November — combined guideline release LIVE, acceptance complete
 
 Owner #896/#450. CA's exact combined approval executed: #977/main25657501 includes
