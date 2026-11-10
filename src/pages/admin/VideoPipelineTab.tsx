@@ -1,4 +1,5 @@
 import { useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { ActionButton } from '../../components/ui/Buttons'
 import { Pill } from '../../components/ui/Badges'
 import { EmptyState, LoadingState } from '../../components/ui/States'
@@ -9,9 +10,12 @@ import {
   transitionVideo,
   updateGuideIdea,
   type ContentGuideIdea,
+  type ContentGuidelineDocument,
   type DeliverableLabel,
   type StaffProfileOption,
 } from '../../lib/contentWorkflow'
+import { copyProjectInstructions } from '../../lib/clientGuides'
+import { buildNolanHandoff, NOLAN_START_GUIDE } from '../../lib/nolanHandoff'
 import {
   VIDEO_PRODUCTION_PHASES,
   VIDEO_STATUS_LABELS,
@@ -270,9 +274,42 @@ function BoardCard({ idea, clients, deliverableLabel, selected, onOpen }: { idea
   )
 }
 
-// ── Main tab ──────────────────────────────────────────────────────────────────
+function NolanHandoff({ text }: { text: string | null }) {
+  const [copyStatus, setCopyStatus] = useState('')
 
-export default function VideoPipelineTab({ clients, staff }: { clients: ClientOption[]; staff: StaffProfileOption[] }) {
+  return (
+    <details className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+      <summary className="cursor-pointer text-sm font-bold text-white">Nolan editing handoff</summary>
+      <p className="text-sm text-white/65">
+        Start with the saved brief, the client’s brand kit and the latest feedback. Paste the handoff into the company’s Nolan editing chat.
+      </p>
+      <a
+        className="inline-block text-sm font-bold text-brand-teal underline"
+        href={NOLAN_START_GUIDE}
+        target="_blank"
+        rel="noopener noreferrer"
+      >Open the Nolan editing guide</a>
+      {text ? (
+        <>
+          <textarea aria-label="Nolan editing handoff" className={`${INPUT_CLS} min-h-40`} readOnly value={text} />
+          <div className="flex flex-wrap items-center gap-3">
+            <ActionButton size="sm" variant="secondary" onClick={async () => {
+              setCopyStatus(await copyProjectInstructions(text) ? 'Handoff copied.' : 'Select and copy the handoff text above.')
+            }}>Copy handoff</ActionButton>
+            <span role="status" className="text-sm text-white/65">{copyStatus}</span>
+          </div>
+        </>
+      ) : <p className="text-sm text-white/65">Check that this video belongs to the right client and a current Content Run and guideline.</p>}
+    </details>
+  )
+}
+
+export default function VideoPipelineTab({ clients, staff, documents }: {
+  clients: ClientOption[]
+  staff: StaffProfileOption[]
+  documents: ContentGuidelineDocument[]
+}) {
+  const [searchParams, setSearchParams] = useSearchParams()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [migrationNeeded, setMigrationNeeded] = useState(false)
@@ -285,8 +322,8 @@ export default function VideoPipelineTab({ clients, staff }: { clients: ClientOp
   const [phaseFilter, setPhaseFilter] = useState<VideoProductionPhase | 'all'>('all')
   const [search, setSearch] = useState('')
 
-  const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [editing, setEditing] = useState(false)
+  const selectedId = searchParams.get('video')
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [busy, setBusy] = useState(false)
   const [actionError, setActionError] = useState<string | null>(null)
@@ -311,6 +348,7 @@ export default function VideoPipelineTab({ clients, staff }: { clients: ClientOp
   }, [])
 
   const selected = videos.find(video => video.id === selectedId) ?? null
+  const nolanHandoff = selected ? buildNolanHandoff(selected, documents, window.location.origin) : null
   const selectedDeliverable = selected?.deliverable_id ? labels.get(selected.deliverable_id) : undefined
   const selectedDeliverableNumber = selectedDeliverable ? videoNumberFromInstance(selectedDeliverable.instance_number) : null
 
@@ -342,7 +380,7 @@ export default function VideoPipelineTab({ clients, staff }: { clients: ClientOp
     setSaving(false)
     if (result.error) { setActionError(result.error); return }
     await load()
-    setEditing(false)
+    setEditingId(null)
   }
 
   async function runAction(action: VideoAction) {
@@ -357,6 +395,17 @@ export default function VideoPipelineTab({ clients, staff }: { clients: ClientOp
     setBusy(false)
     if (result.error) { setActionError(result.error); return }
     await load()
+  }
+
+  function openVideo(id: string | null) {
+    setEditingId(null)
+    setActionError(null)
+    setSearchParams(current => {
+      const next = new URLSearchParams(current)
+      if (id) next.set('video', id)
+      else next.delete('video')
+      return next
+    })
   }
 
   if (migrationNeeded) {
@@ -393,17 +442,20 @@ export default function VideoPipelineTab({ clients, staff }: { clients: ClientOp
         </select>
       </div>
 
-      {selected ? (
+      {selectedId && !selected ? (
+        <EmptyState title="Video unavailable" message="This video may have been archived or may be outside your access." action={<ActionButton variant="secondary" onClick={() => openVideo(null)}>Back to board</ActionButton>} />
+      ) : selected ? (
         <div className="grid gap-4 lg:grid-cols-[minmax(0,0.7fr)_minmax(0,1.5fr)]">
           <section className="space-y-2">
-            <ActionButton size="sm" variant="ghost" onClick={() => { setSelectedId(null); setEditing(false) }}>← Back to board</ActionButton>
+            <ActionButton size="sm" variant="ghost" onClick={() => openVideo(null)}>← Back to board</ActionButton>
             {filtered.map(video => (
-              <BoardCard key={video.id} idea={video} clients={clients} deliverableLabel={deliverableLabelText(video.deliverable_id ? labels.get(video.deliverable_id) : undefined)} selected={video.id === selectedId} onOpen={() => { setSelectedId(video.id); setEditing(false); setActionError(null) }} />
+              <BoardCard key={video.id} idea={video} clients={clients} deliverableLabel={deliverableLabelText(video.deliverable_id ? labels.get(video.deliverable_id) : undefined)} selected={video.id === selectedId} onOpen={() => openVideo(video.id)} />
             ))}
           </section>
           <section className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-5">
-            {editing ? (
+            {editingId === selected.id ? (
               <VideoEditForm
+                key={selected.id}
                 idea={selected}
                 clients={clients}
                 staff={staff}
@@ -411,7 +463,7 @@ export default function VideoPipelineTab({ clients, staff }: { clients: ClientOp
                 deliverableLinked={Boolean(selected.deliverable_id)}
                 saving={saving}
                 error={actionError}
-                onCancel={() => setEditing(false)}
+                onCancel={() => setEditingId(null)}
                 onSave={saveVideo}
               />
             ) : (
@@ -419,8 +471,11 @@ export default function VideoPipelineTab({ clients, staff }: { clients: ClientOp
                 idea={selected}
                 clients={clients}
                 deliverableLabel={deliverableLabelText(selectedDeliverable)}
-                onEdit={() => { setEditing(true); setActionError(null) }}
-                footer={<ProductionActions idea={selected} busy={busy} actionError={actionError} onAction={runAction} />}
+                onEdit={() => { setEditingId(selected.id); setActionError(null) }}
+                footer={<>
+                  <NolanHandoff key={selected.id} text={nolanHandoff} />
+                  <ProductionActions idea={selected} busy={busy} actionError={actionError} onAction={runAction} />
+                </>}
               />
             )}
           </section>
@@ -439,7 +494,7 @@ export default function VideoPipelineTab({ clients, staff }: { clients: ClientOp
                 </div>
                 <div className="space-y-2">
                   {items.map(video => (
-                    <BoardCard key={video.id} idea={video} clients={clients} deliverableLabel={deliverableLabelText(video.deliverable_id ? labels.get(video.deliverable_id) : undefined)} selected={false} onOpen={() => { setSelectedId(video.id); setEditing(false); setActionError(null) }} />
+                    <BoardCard key={video.id} idea={video} clients={clients} deliverableLabel={deliverableLabelText(video.deliverable_id ? labels.get(video.deliverable_id) : undefined)} selected={false} onOpen={() => openVideo(video.id)} />
                   ))}
                   {items.length === 0 && <p className="rounded-lg border border-dashed border-white/10 px-2 py-3 text-center text-[11px] text-white/25">—</p>}
                 </div>
