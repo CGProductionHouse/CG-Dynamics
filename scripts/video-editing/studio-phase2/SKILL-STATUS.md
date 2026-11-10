@@ -1,5 +1,7 @@
 # Nolan Studio tutorial-skill status
 
+**10November CG Osmo source-bound graphic execution:** `cg_motion_graphics.py` (same 53-family catalogue, extending existing camera/composition operators) is now actually invoked on real CG Osmo moving footage via the existing rigid `camera_plane.depth_layer_rect`, not merely named in a script. Seven synthetic tests pass; 90-frame plain/designed original-footage controls and a 585-frame/1080x1920 R08 internal owner candidate fully decode. The exact music bitstream is retained from R07, whose creative fit remains unapproved; no native project, phone/heard test or owner creative acceptance is claimed. Read [CG motion rig/negative controls](CG-OSMO-MOTION-RIG-20261110.md). This extends existing technique implementation, **not** a new mastered family and **not** a lifting of other production holds.
+
 **9November voice-note intake:** shared skill now routes saved WhatsApp audio to
 local multilingual transcription with timestamps/source identity. Real-speech
 Ogg/Opus and silence controls tested; padding timestamp failure caught/bounded.
