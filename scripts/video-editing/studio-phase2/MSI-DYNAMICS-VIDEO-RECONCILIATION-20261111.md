@@ -1,5 +1,21 @@
 # MSI video history reconciliation — 11 November 2026
 
+## Completion receipt — live current-film backfill
+
+PR985/main4af41304 is live on deployment
+`dpl_DZ5RJ8F6gbRsSSvFtsHHhVXS3744`, promoted only after CA sign-in and staged
+authenticated acceptance. Seven missing current films saved through the normal
+Video Pipeline form, exact hash/editor/evidence read back and all cards observed
+again after a full reload: Piek December R16, Daisy November R05, TBS Brokers
+equipment V11 and festive transit R04, Ehrlich Park R16, WiseRide releaseR03/
+buildR22, PSG November crop REVISION07/V8. Existing Watch December and Action
+Sports MSI records retained, PC/staff films untouched. Same-Piek registration
+was explicitly refused by the live duplicate guard with no overwrite/insert.
+No new shoot, schedule slot, posting or client approval was fabricated. Sixteen
+saved histories below retain older uncertain/rejected/source-only evidence.
+Current board gap below is HISTORICAL, superseded by this receipt. Company
+tracker remains ongoing for future maintenance. MSI safely paused at CA request.
+
 CA requested that every MSI-edited client film be tracked in Dynamics to prevent
 repeat work. Sixteen exact-client append-only updates were saved through the
 governed connector and independently retrieved from `get_client_context`.

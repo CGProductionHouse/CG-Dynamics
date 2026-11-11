@@ -1,4 +1,39 @@
-### 11 November — registration repair merged; staged acceptance awaits sign-in
+### 11 November — registration LIVE, seven missing films reconciled; MSI paused
+
+CA requested safe pause for laptop shutdown. Resume tomorrow from this receipt,
+not from the superseded sign-in gate below. #985/main4af41304 is LIVE on the SAME
+verified stage `dpl_DZ5RJ8F6gbRsSSvFtsHHhVXS3744`; CA signed in, authenticated
+Pipeline/form/named-editor controls passed, then normal CLI promotion succeeded.
+Production www.cgdynamics.co.za and cg-dynamics.vercel.app returned200; actual
+authenticated live Pipeline was used throughout. No new build on promotion.
+
+Seven real current films were registered through the normal UI and their exact
+hash/editor/evidence read back: Piek December R16, Daisy November R05, TBS Brokers
+equipment V11 and distinct transit R04, Ehrlich Park R16, WiseRide release R03/
+private buildR22, PSG November crop REVISION07/privateV8. A separate full reload
+showed all seven plus existing Watch December and Action Sports records. Live
+attempt to register the SAME Piek film was explicitly refused as matching history;
+nothing inserted/overwritten. Named MSI filter shows5 internal-review and4
+client-review-phase cards; Ready for client remains OWNER approval, not client
+approval. No invented shoot/run/schedule/posting link or public send. Older
+uncertain/rejected/source-only work remains in the16 saved client histories.
+
+Private proof root: Nolan-Studio-Private/Dynamics-Reconciliation-20261111 under
+the MSI Videos/CG-AI-Editing folder. See REGISTRATION-SAVE-PROOFS.json,
+PIPELINE-FINAL-RELOAD.txt, LIVE-DUPLICATE-REFUSED.txt and live screenshot. Keep
+the ongoing company tracker task7f413d31-17cd-4761-b2e9-a031c1343444 in progress:
+retrospective current-film backfill is done, ongoing maintenance continues.
+Next session: confirm saved receipt, process only new actual amendments/edits,
+do not repeat registration or deploy unchanged code. No further cloud attempt
+authorised; Git deploys remain OFF. Last prepromotion service estimate14.09USD,
+included remainder5.91USD,5USD serving reserve retained; billing delayed.
+
+Separate domain observation: cgdynamics.com redirects to a HugeDomains sale
+page; its followed403 is NOT evidence the Dynamics app failed. The canonical
+.co.za site works. No DNS/domain/hosting/security/budget change made. Google
+Control Centre still undiscovered; no replacement tracker invented.
+
+### Historical 11 November — staged acceptance awaited sign-in
 
 Tracking owner #900, product repair #985 merged as main
 `4af41304363b4f479febc8ba1c21278bf940b907`. Existing-film registration, full
