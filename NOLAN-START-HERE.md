@@ -1,6 +1,8 @@
 # Nolan Studio — current start here
 
-Maintained entry point for MSI, Office PC/BC and any new laptop. Updated 10 November 2026.
+Maintained entry point for MSI, Office PC/BC and any new laptop. Updated 11 November 2026.
+
+**11 November morning consolidation:** Read the [ChatGPT findings and overnight reconciliation](docs/ops/NOLAN-CHATGPT-FINDINGS-RECONCILIATION-2026-11-11.md) alongside the existing cross-device handover. It registers the isolated native-JavaScript study in [draft PR982](https://github.com/CGProductionHouse/CG-Dynamics/pull/982), durable OneDrive HTML/MP4/skill/test artifacts, exact reference-access limits and its fit with the overnight Nolan milestones. Continue the existing `NOLAN-DEVELOPMENT-QUEUE.json` at its live cursor; the observed cursor was M07, with M05/M06 blocked. Do not reset the queue, create a parallel renderer/registry, merge or force-install the draft, or treat a silent code proof as a client-ready advert. Desktop/Katana/MSI ownership and prior feedback remain separate.
 
 **Normal ChatGPT coordination, 10 November:** Read the [Desktop PC / cross-device handover](docs/ops/NOLAN-CHATGPT-CROSS-DEVICE-HANDOVER-2026-11-10.md) for actual ChatGPT-rendered Jenkor R06/R07 evidence, device/sound/Canva/client-kit limits, a reusable user-video-link-to-skill workflow, the optional-versus-needed Codex decision and the reserved Katana continuation slot. Google Docs mirror: https://docs.google.com/document/d/1zg4lnVC8JzZgdvNq9X9UJsqkZPw1BU0jR3-qKu3FBTM/edit . This addendum does not grant send/approval authority or change device ownership.
 
