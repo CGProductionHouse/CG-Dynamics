@@ -2,7 +2,7 @@ import { supabase } from '../supabase'
 import type { BrandColour, BrandRuleCategory, BrandRulePriority, ClientBrandRule } from '../brandRules'
 
 // Staff-only client brand profiles and brand rules for video editors.
-// Tables come from supabase/migrations/20261111090000_client_brand_profiles_and_rules.sql.
+// Tables come from supabase/migrations/20261111064719_client_brand_profiles_and_rules.sql.
 // Until that migration is applied every read reports `tableMissing` and the
 // UI explains it instead of failing.
 

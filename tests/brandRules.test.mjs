@@ -8,7 +8,7 @@ import { createServer } from 'vite'
 
 let server
 let r
-const MIGRATION = readFileSync('supabase/migrations/20261111090000_client_brand_profiles_and_rules.sql', 'utf8')
+const MIGRATION = readFileSync('supabase/migrations/20261111064719_client_brand_profiles_and_rules.sql', 'utf8')
 
 before(async () => {
   server = await createServer({ root: process.cwd(), logLevel: 'error', server: { middlewareMode: true }, appType: 'custom' })
@@ -93,5 +93,5 @@ test('migration limits writes: managers for profiles and house rules, retire-onl
   assert.match(MIGRATION, /"brand rule staff insert"[^;]*created_by = auth\.uid\(\)[^;]*client_id is not null or public\.is_manager\(\)/)
   assert.match(MIGRATION, /"brand rule manager retire"[^;]*is_manager\(\)/)
   assert.match(MIGRATION, /Brand rules cannot be edited/)
-  assert.match(MIGRATION, /PREPARED, NOT APPLIED/)
+  assert.match(MIGRATION, /APPLIED to production/)
 })

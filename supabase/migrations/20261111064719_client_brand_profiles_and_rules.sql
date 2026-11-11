@@ -1,6 +1,6 @@
 -- Client brand profiles and brand rules for video editors (staff-only).
 --
--- PREPARED, NOT APPLIED. Apply only with explicit CA approval (AGENTS.md).
+-- APPLIED to production 11 November 2026 with CA approval (ledger version 20261111064719).
 -- Supersedes the never-applied supabase/phase-8a-client-brand-workflow.sql,
 -- whose read policy would have exposed brand notes to client-role logins.
 --

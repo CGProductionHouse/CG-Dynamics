@@ -285,11 +285,11 @@ through RLS or the `admin_set_package_classification` RPC.
 
 The browser considers push active only when permission is granted, a browser subscription exists, and the same endpoint is active server-side for the signed-in user.
 
-### client_brand_profiles, client_brand_rules (prepared 11 November, not applied)
+### client_brand_profiles, client_brand_rules (live 11 November 2026)
 
 Staff-only brand facts and must/should rules that video editors read beside a
 video in Content → Video Pipeline. Migration
-`20261111090000_client_brand_profiles_and_rules.sql` is **prepared, not applied**;
+`20261111064719_client_brand_profiles_and_rules.sql` was applied to production on 11 November 2026 with CA approval;
 it supersedes the never-applied `phase-8a-client-brand-workflow.sql`, whose read
 policy would have exposed brand notes to client-role logins.
 

@@ -98,7 +98,7 @@ export function ClientBrandPanel({ clientId, clientName }: { clientId: string | 
 
       {status === 'loading' && <p className="mt-4 text-sm text-white/45">Loading brand rules…</p>}
       {status === 'missing' && (
-        <p className="mt-4 text-sm leading-relaxed text-white/60">Brand rules aren't switched on yet. The database migration <code className="rounded bg-black/40 px-1.5 py-0.5 text-xs text-amber-100">20261111090000_client_brand_profiles_and_rules.sql</code> needs approval and applying first.</p>
+        <p className="mt-4 text-sm leading-relaxed text-white/60">Brand rules aren't switched on yet. The database migration <code className="rounded bg-black/40 px-1.5 py-0.5 text-xs text-amber-100">20261111064719_client_brand_profiles_and_rules.sql</code> needs approval and applying first.</p>
       )}
       {status === 'error' && (
         <div className="mt-4 space-y-2">
