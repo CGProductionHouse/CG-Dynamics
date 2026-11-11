@@ -10,6 +10,20 @@ the client portal OneDrive, linked in Dynamics. Read
 `docs/ops/VIDEO-EDITING-SYSTEM-OF-RECORD.md`. Nolan lanes unchanged; their trackers
 migrate into this layout. PR #984 app code is unmerged/undeployed (#679 gate).
 
+## 11 November — existing-film registration repair, local candidate only
+
+CA asked MSI to finish all possible video tracking reconciliation. Sixteen
+exact-client histories were saved/read back in Dynamics and indexed in existing
+task `7f413d31-17cd-4761-b2e9-a031c1343444`; several actual films remain absent from
+the live Pipeline. A bounded frontend repair on `codex/nolan-video-registration`
+adds explicit historical-film registration in the existing table without fake
+runs/slots, duplicate/retry readback protection and name-only editor preservation.
+[Workflow, evidence and release limits](EXISTING-VIDEO-REGISTRATION.md).
+No production DB/schema/deployment, approval promotion or staff assignment was
+performed. #900 owns tracking; #981 exact handoffs and #984 brand panel remain
+separate/additive. Shared editorial library remains PR910. Hosting #679 release
+gate remains; this candidate is not a claim of completed live-board backfill.
+
 ## 9 November — combined guideline release LIVE, acceptance complete
 
 Owner #896/#450. CA's exact combined approval executed: #977/main25657501 includes

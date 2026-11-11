@@ -2,12 +2,16 @@ import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import { ActionButton } from '../../components/ui/Buttons'
 import { Pill } from '../../components/ui/Badges'
 import { EmptyState, LoadingState } from '../../components/ui/States'
+import { useAuth } from '../../contexts/AuthContext'
+import ExistingVideoRegistration from './ExistingVideoRegistration'
+import { canonicalForVideoEdit, matchesVideoEditor, selectedEditorPatch } from '../../lib/existingVideoRegistration'
 import type { ClientOption } from '../../lib/commandCentre'
 import {
   listDeliverableLabels,
   listPipelineVideos,
   transitionVideo,
   updateGuideIdea,
+  registerExistingVideo,
   type ContentGuideIdea,
   type DeliverableLabel,
   type StaffProfileOption,
@@ -87,7 +91,7 @@ function toForm(idea: ContentGuideIdea, defaultVideoNumber: number | null): Vide
     requirements: idea.requirements ?? '',
     visual_notes: idea.visual_notes ?? '',
     notes: idea.notes ?? '',
-    editor_user_id: idea.editor_user_id ?? '',
+    editor_user_id: '__keep__',
     onedrive_footage_url: idea.onedrive_footage_url ?? '',
     onedrive_internal_review_url: idea.onedrive_internal_review_url ?? '',
     onedrive_client_approval_url: idea.onedrive_client_approval_url ?? '',
@@ -114,12 +118,12 @@ function VideoEditForm({
 
   const effectiveCode = (form.folder_client_code.trim() || deriveClientCode(clientName(clients, idea.client_id)))
   const effectiveNumber = form.video_number.trim() ? Number(form.video_number) : deliverableNumber
-  const canonical = buildCanonicalName({
+  const canonical = canonicalForVideoEdit(idea, form, buildCanonicalName({
     month: idea.month,
     clientCode: effectiveCode,
     videoNumber: Number.isFinite(effectiveNumber as number) ? (effectiveNumber as number) : null,
     conceptTitle: form.title,
-  })
+  }), deliverableNumber) ?? ''
   const canonicalChanged = Boolean(idea.onedrive_footage_url) && canonical !== (idea.canonical_name ?? '')
 
   const urlFields: Array<[keyof VideoFormState, string]> = [
@@ -132,7 +136,6 @@ function VideoEditForm({
 
   function submit() {
     if (invalidUrl) return
-    const editor = staff.find(person => person.id === form.editor_user_id) ?? null
     const num = form.video_number.trim() ? Number(form.video_number) : null
     onSave({
       title: form.title.trim(),
@@ -147,8 +150,7 @@ function VideoEditForm({
       requirements: form.requirements.trim() || null,
       visual_notes: form.visual_notes.trim() || null,
       notes: form.notes.trim() || null,
-      editor_user_id: form.editor_user_id || null,
-      editor_name: editor?.full_name ?? null,
+      ...selectedEditorPatch(form.editor_user_id, staff),
       onedrive_footage_url: form.onedrive_footage_url.trim() || null,
       onedrive_internal_review_url: form.onedrive_internal_review_url.trim() || null,
       onedrive_client_approval_url: form.onedrive_client_approval_url.trim() || null,
@@ -191,6 +193,7 @@ function VideoEditForm({
         <label className="block space-y-1.5">
           <span className={LABEL_CLS}>Editor</span>
           <select className={INPUT_CLS} value={form.editor_user_id} onChange={event => set('editor_user_id', event.target.value)}>
+            <option value="__keep__">Keep current: {idea.editor_name ?? staff.find(person => person.id === idea.editor_user_id)?.full_name ?? (idea.editor_user_id ? 'Saved editor' : 'Unassigned')}</option>
             <option value="">Unassigned</option>
             {staff.filter(person => person.full_name).map(person => <option key={person.id} value={person.id}>{person.full_name}</option>)}
           </select>
@@ -274,6 +277,7 @@ function BoardCard({ idea, clients, deliverableLabel, selected, onOpen }: { idea
 // ── Main tab ──────────────────────────────────────────────────────────────────
 
 export default function VideoPipelineTab({ clients, staff }: { clients: ClientOption[]; staff: StaffProfileOption[] }) {
+  const { profile } = useAuth()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [migrationNeeded, setMigrationNeeded] = useState(false)
@@ -320,10 +324,10 @@ export default function VideoPipelineTab({ clients, staff }: { clients: ClientOp
     return videos.filter(video => {
       if (clientFilter && video.client_id !== clientFilter) return false
       if (monthFilter && (video.month ?? '').slice(0, 7) !== monthFilter) return false
-      if (editorFilter && video.editor_user_id !== editorFilter) return false
+      if (!matchesVideoEditor(editorFilter, video)) return false
       if (phaseFilter !== 'all' && videoPhaseForStatus(video.production_status) !== phaseFilter) return false
       if (!query) return true
-      return [video.title, video.canonical_name ?? '', clientName(clients, video.client_id)].some(field => field.toLowerCase().includes(query))
+      return [video.title, video.canonical_name ?? '', clientName(clients, video.client_id), video.editor_name ?? ''].some(field => field.toLowerCase().includes(query))
     })
   }, [videos, clientFilter, monthFilter, editorFilter, phaseFilter, search, clients])
 
@@ -335,11 +339,12 @@ export default function VideoPipelineTab({ clients, staff }: { clients: ClientOp
   }, [filtered])
 
   const months = useMemo(() => [...new Set(videos.map(video => (video.month ?? '').slice(0, 7)).filter(Boolean))].sort(), [videos])
+  const externalEditors = useMemo(() => [...new Set(videos.filter(video => !video.editor_user_id && video.editor_name).map(video => video.editor_name!))].sort(), [videos])
 
   async function saveVideo(patch: Partial<ContentGuideIdea>) {
     if (!selected) return
     setSaving(true); setActionError(null)
-    const result = await updateGuideIdea(selected.id, patch)
+    const result = await updateGuideIdea(selected.id, patch, selected.updated_at)
     setSaving(false)
     if (result.error) { setActionError(result.error); return }
     await load()
@@ -374,6 +379,12 @@ export default function VideoPipelineTab({ clients, staff }: { clients: ClientOp
 
   return (
     <div className="mt-6 space-y-4">
+      {profile?.is_active !== false && ['admin', 'manager'].includes(profile?.role ?? '') && <ExistingVideoRegistration
+        clients={clients}
+        onRegister={input => registerExistingVideo(input, profile!.id)}
+        onOpen={async id => { await load(); setSelectedId(id); setEditing(false); setActionError(null) }}
+        onSaved={async id => { await load(); setSelectedId(id); setEditing(false) }}
+      />}
       <div className="flex flex-wrap gap-2">
         <input className={`${INPUT_CLS} w-auto flex-1`} placeholder="Search canonical name or concept" value={search} onChange={event => setSearch(event.target.value)} />
         <select className={`${INPUT_CLS} w-auto`} value={clientFilter} onChange={event => setClientFilter(event.target.value)}>
@@ -387,6 +398,7 @@ export default function VideoPipelineTab({ clients, staff }: { clients: ClientOp
         <select className={`${INPUT_CLS} w-auto`} value={editorFilter} onChange={event => setEditorFilter(event.target.value)}>
           <option value="">All editors</option>
           {staff.filter(person => person.full_name).map(person => <option key={person.id} value={person.id}>{person.full_name}</option>)}
+          {externalEditors.map(name => <option key={`name:${name}`} value={`name:${name}`}>{name} (named editor)</option>)}
         </select>
         <select className={`${INPUT_CLS} w-auto`} value={phaseFilter} onChange={event => setPhaseFilter(event.target.value as VideoProductionPhase | 'all')}>
           <option value="all">All progress phases</option>
