@@ -1,0 +1,24 @@
+{
+  "schema": "nolan-studio-synthetic-pilot-v1",
+  "job_id": "studio-871-synthetic-arc",
+  "brand": {
+    "name": "ARC / FORM",
+    "status": "illustrative",
+    "description": "Fictional object-design label for a technical editing proof; no real offer, location or product claim",
+    "palette": {"ink": "#111D2C", "cream": "#F4F0E7", "coral": "#EF725D", "ice": "#82D1D3"},
+    "font": {"family": "Arial", "source": "%WINDIR%/Fonts/arialbd.ttf", "licence": "Microsoft Windows supplied proprietary font; rendered locally, font file not redistributed"}
+  },
+  "format": {"width": 2160, "height": 3840, "fps": 24, "audio_hz": 48000},
+  "source_policy": "All picture and audio assets are generated deterministically from this manifest and render.py; no stock or client sources",
+  "provenance_status": "illustrative",
+  "scenes": [
+    {"id": "s01_line", "frames": 60, "kind": "line", "title": ["A LINE", "BECOMES LIGHT"], "role": "An unfinished stroke creates visual tension rather than a logo-first intro", "protected": true},
+    {"id": "s02_detail", "frames": 72, "kind": "detail", "title": ["EVERY ANGLE", "HAS A REASON"], "role": "Move closer to the invented object's geometry", "protected": true},
+    {"id": "s03_person", "frames": 84, "kind": "person", "title": ["MADE FOR", "MOMENTS"], "role": "Transparent synthetic figure crosses in front of type", "protected": false},
+    {"id": "s04_turn", "frames": 72, "kind": "turn", "title": ["SHIFT THE", "PERSPECTIVE"], "role": "Brief structural turn in the visual story", "protected": false},
+    {"id": "s05_glow", "frames": 72, "kind": "glow", "title": ["FORM WITH", "FEELING"], "role": "Resolve the arc into a luminous abstract object", "protected": true},
+    {"id": "s06_end", "frames": 72, "kind": "end", "title": ["ARC / FORM", "EXPLORE THE CONCEPT"], "role": "Fictional brand and explicit conceptual CTA", "protected": true}
+  ],
+  "audio": {"score": "Generated sine/chord pulse per scene; original synthetic", "effects": "Generated accent pulse at scene starts; original synthetic", "licence": "CG generated for this test; no third-party audio"},
+  "job_contract_design_only": ["create_video_job", "get_status", "request_revision", "get_review_asset"]
+}
