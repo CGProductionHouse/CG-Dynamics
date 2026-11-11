@@ -24,7 +24,8 @@ export default function InternalOnboardingPage() {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [expandedId, setExpandedId] = useState<string | null>(null)
-
+  const [previewing, setPreviewing] = useState(false)
+  const [previewClientName, setPreviewClientName] = useState<''
   async function load() {
     setLoading(true)
     const [clientsResult, sessionsResult] = await Promise.all([listClients(), listStaffOnboarding()])
@@ -47,6 +48,22 @@ export default function InternalOnboardingPage() {
   }, [])
 
   const clientNames = useMemo(() => new Map(clients.map(client => [client.id, client.name])), [clients])
+
+  const clientSessionsMap = useMemo(() => {
+    const map = new Map<string, StaffOnboardingSummary[]>()
+    for (const session of sessions) {
+      const existing = map.get(session.clientId) ?? []
+      map.set(session.clientId, [...existing, session])
+    }
+    return map
+  }, [sessions])
+
+  async function handlePreview() {
+    const firstActiveClient = clients.find(c => c.active)
+    if (!firstActiveClient) return
+    setPreviewing(true)
+    setPreviewClientName(firstActiveClient.name)
+  }
 
   async function generate() {
     if (!clientId) return
@@ -96,7 +113,15 @@ export default function InternalOnboardingPage() {
     return counts
   }, [sessions])
 
-  const emptyState = onboardingEmptyState({ activeClients: clients.length, sessions: sessions.length, filteredSessions: filteredSessions.length, loading, error })
+  const emptyState = onboardingEmptyState({ activeClients: clients.length, sessions: sessions.length, filteredSessions: filteredSessions.length, loading, error, previewing })
+
+  if (previewing) {
+    return (
+      <div className="w-full max-w-7xl p-4 sm:p-6 lg:p-8">
+        <WelcomeToCgPage previewClientName={{ name: previewClientName }} />
+      </div>
+    )
+  }
 
   return (
     <div className="w-full max-w-7xl p-4 sm:p-6 lg:p-8">
@@ -165,7 +190,7 @@ export default function InternalOnboardingPage() {
         {loading ? (
           <p className="mt-4 text-sm text-brand-primary">Loading onboarding status...</p>
         ) : filteredSessions.length === 0 ? (
-          emptyState && <EmptyState className="mt-4" title={emptyState.title} message={emptyState.message} />
+          emptyState && <EmptyState className="mt-4" title={emptyState.title} message={emptyState.message} action={clients.length > 0 && !previewing ? <ActionButton variant="secondary" onClick={() => void handlePreview()}>Preview onboarding</ActionButton> : null} />
         ) : (
           <div className="mt-4 space-y-4">
             {filteredSessions.map(session => {
