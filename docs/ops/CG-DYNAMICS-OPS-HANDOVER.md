@@ -1,4 +1,42 @@
-### 11 November — MSI video histories persisted; pipeline backfill gap open
+### 11 November — registration repair merged; staged acceptance awaits sign-in
+
+Tracking owner #900, product repair #985 merged as main
+`4af41304363b4f479febc8ba1c21278bf940b907`. Existing-film registration, full
+history scan/duplicate guards and named-editor preservation are implemented and
+locally verified; they are **not yet live**. Sixteen client-history receipts
+remain saved. Four additional exact-client updates now link five complete,
+size/SHA-verified private review films (Daisy, two TBS Brokers films, Ehrlich
+Park, WiseRide), independently retrieved through Dynamics. These cloud copies
+are operational history, not client/public approval.
+
+The first authorised staging upload failed packaging before promotion; existing
+materialisation helper corrected it. The second was READY but browser acceptance
+caught redacted public Supabase configuration in the downloaded build env. No
+promotion occurred. Existing exact-production anonymous configuration was reused
+locally, not changed remotely; rebuilt entry values verified, 23 focused checks
+pass and real local login renders without browser errors.
+
+CA explicitly authorised the further corrected upload. Final staged deployment
+`dpl_DZ5RJ8F6gbRsSSvFtsHHhVXS3744` is READY, target production, same main SHA,
+project `prj_jHVsExoStNjI7ikqlJyXZx26Ahuu`, no aliases assigned. Normal app sign-in
+on its separate staging origin is pending with CA; no session/token transfer or
+protection weakening. Only promote this SAME artifact after authenticated
+acceptance. Current production remains `dpl_12ysTroZHgsSJMHrPxUqp8AetiRz`, public
+HEAD200 and existing authenticated Pipeline working. Git deployment remains OFF.
+Preserve the approved 1USD included-credit ceiling, 5USD serving reserve and
+zero new paid overage; any further upload needs fresh authority under #679.
+
+Seven missing-current-film inputs are prepared privately, not inserted: Piek
+December, Daisy November, TBS Brokers equipment/transit, EHP, WiseRide and PSG
+crop. Inspect existing archived/live history before normal form saves, verify
+readback, retain unknown approvals and never invent shoots/slots. Existing
+Watch December MSI record and Action Sports MSI/client-review row remain intact;
+preserve concurrent PC/staff work. Company task
+`7f413d31-17cd-4761-b2e9-a031c1343444` stays in progress with exact release receipts.
+Do not tell dispatch the board backfill is complete. Google Control Centre still
+undiscovered; no guessed replacement write. Shared editorial PR910 stays draft.
+
+### Historical 11 November — MSI video histories persisted; pipeline gap open
 
 CA requested all MSI-edited films be tracked in Dynamics to prevent duplicates.
 Sixteen exact-client updates were saved and independently read back, covering
