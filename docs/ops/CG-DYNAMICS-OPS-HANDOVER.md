@@ -1,3 +1,25 @@
+### 11 November — MSI video histories persisted; pipeline backfill gap open
+
+CA requested all MSI-edited films be tracked in Dynamics to prevent duplicates.
+Sixteen exact-client updates were saved and independently read back, covering
+sixteen film attempts across fourteen clients plus two preparation lanes. The
+existing company task `7f413d31-17cd-4761-b2e9-a031c1343444` received three bounded,
+read-back reconciliation comments and remains in progress. [Receipt index and
+limitations](../../scripts/video-editing/studio-phase2/MSI-DYNAMICS-VIDEO-RECONCILIATION-20261111.md).
+Piek December R16 owner approval/cloud filing, distinct TBS/PSG stories, latest
+WiseRide/EHP revisions, withdrawn studies and PC ownership are distinguished.
+
+The live pipeline omits several actual MSI films. Existing connector/UI cannot
+register a standalone historical archive film without a verified Content Run;
+no fabricated run or schedule linkage was made. External editor names also risk
+being cleared by the current edit form's Unassigned value. Product follow-up must
+stay in the existing content workflow. Until repaired, dispatch must read exact
+client updates plus the company reconciliation task alongside pipeline. Client
+histories are saved; full board population is NOT claimed. No status promotion,
+public/client send, raw SQL, schema, deployment or other editor assignment change.
+Shared PR910/production PR875 own continuity. Google Control Centre remains
+undiscovered; no replacement tracker is invented.
+
 ### 9 November — Nolan multi-device handover repair
 
 Later9November owner requested simple WhatsApp voice-note transcription. Shared

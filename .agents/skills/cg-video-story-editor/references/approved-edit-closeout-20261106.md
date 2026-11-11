@@ -54,6 +54,27 @@ The existing client kit needs all of these reconciled at the same checkpoint:
 5. Owning GitHub checkpoint: evidence locations and actual unresolved gates,
    without private media or claims that another device has installed the update.
 
+### Dynamics duplicate-work check — 11 November reconciliation
+
+Before commissioning, editing or reusing a film, read its exact-client Dynamics
+`recorded_client_updates`, the existing company video reconciliation task
+`7f413d31-17cd-4761-b2e9-a031c1343444`, the current pipeline and ownership.
+A missing board card is not evidence the film was never edited. Match client,
+intended release month, buyer story, filename/hash and revision; do not merge two
+different stories or count every protected render as a new film.
+
+After an actual revision, send, approval, withdrawal or cloud closeout, update
+the same supported production record and persist missing evidence through
+`record_client_update` in the exact client context. Read it back before claiming
+saved. Preserve uncertainty and earlier approved baselines. This does not replace
+the pipeline, permit raw SQL, or create a new schedule/board. Company-wide tasks
+cannot be attached as client-specific follow-up IDs; reference them in prose.
+
+The live pipeline cannot currently register standalone archive films through its
+exposed workflow. Record this gap rather than fabricating a Content Run, promoting
+a draft, changing an unrelated monthly slot or silently dropping the film.
+See [the verified MSI reconciliation](../../../../scripts/video-editing/studio-phase2/MSI-DYNAMICS-VIDEO-RECONCILIATION-20261111.md).
+
 Today's exact receipts remain in the existing private Jenkor/RC client libraries
 and outputs/Nolan-November-Review-Delivery-20261106. Jenkor is the approved
 rendered baseline; RC R04 is the delivered amendment. Do not resend either blindly.
