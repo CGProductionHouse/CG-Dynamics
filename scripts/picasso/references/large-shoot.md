@@ -1,0 +1,28 @@
+# Large JPEG shoot: index, cull, then edit
+
+Use this route when a shoot contains hundreds or thousands of camera JPEGs. `picasso.py run` renders every source; do **not** point it at a 5,000–6,000-image camera dump. Keep each copied card or approved OneDrive shoot in a private local folder, with originals read-only. Use one separate index job on the same verified Windows host. GitHub holds code and instructions, never the index database, thumbnails, camera files or review CSV.
+
+```powershell
+python scripts/picasso/shoot_index.py index --input "<approved card 1 folder>" --input "<approved card 2 folder>" --job "<private index folder>" --mode fast
+python scripts/picasso/shoot_index.py status --job "<private index folder>"
+```
+
+The repeatable index uses SQLite checkpoints, SHA-256 for each camera file, reduced private thumbnails, timestamp-based burst groups (up to 2 seconds and 40 frames), adjacent dHash similarity hints, and numbered contact sheets. The source folder list, inventory and mode must remain identical on resume. If a file changes, disappears or is added, use a fresh index job and reconcile provenance. Online-only OneDrive files and linked source directories are refused. The fast mode reports whole-frame focus, luminance and similarity hints; it does **not** evaluate eyes, identify the main subject, or make a final photographic choice. `detailed` adds local face/scene hints but takes longer and still requires visual review. If EXIF capture time is missing, file modification time is used and burst grouping may be inaccurate after a copy. All images begin as REVIEW; nothing is deleted or uploaded.
+
+Review every burst in the private `contact-sheets/` and inspect candidate originals at 100% in Lightroom Classic. Adobe's [Assisted Culling](https://helpx.adobe.com/lightroom-classic/desktop/organize-photos-in-lightroom-classic/assisted-culling.html) supplies subject-focus, eye-focus and eyes-open suggestions when it detects eyes; use its Auto Stack and reversible flags or ratings, and inspect all faces and documentary moments. Do not invoke its permanent Delete action. Record human Keep/Alternate/Review/Exclude choices in the private ledger, for example:
+
+```powershell
+python scripts/picasso/shoot_index.py burst-sheet --job "<private index folder>" --bursts B00001
+python scripts/picasso/shoot_index.py burst-sheet --job "<private index folder>" --bursts B00001 --crop 0.15 0.20 0.65 0.60
+python scripts/picasso/shoot_index.py classify --job "<private index folder>" --ids <image-id> --decision KEEP --reviewer "<name>" --reason "<why this moment and focus pass>"
+python scripts/picasso/shoot_index.py review-bursts --job "<private index folder>" --bursts <burst-id> --reviewer "<name>" --note "<what was inspected, including adjacent frames>"
+python scripts/picasso/shoot_index.py stage-selected --job "<private index folder>"
+```
+
+`burst-sheet` hashes the source bytes and creates private, eight-frame pages with each full frame and the same normalized detail area below it. Use `--crop X Y W H` to put both subjects' heads or the key action inside the detail area across the burst; a fixed center crop can miss the subject. These are comparison proxies, not 100% focus proof. Inspect candidate source frames at native detail in Lightroom before marking KEEP. The Staffy pilot showed why: the selected Fight 05 punch frame had a partly hidden face and magenta skin, while its seven adjacent frames showed different expression and timing; Fight 06 had a soft opponent in the selected frame. Compare neighboring bursts as well when all eight frames are weak.
+
+`stage-selected` requires a recorded review of **every burst** and copies only human-marked KEEP originals into a hash-verified, private, repeatable folder. For an early 25-frame calibration, `stage-selected --calibration` allows at most 25 reviewed KEEP originals in a clearly labelled pilot before whole-shoot burst coverage; never treat its folder as a full cull. These camera JPEG copies still contain their original EXIF and are **Lightroom intake only**, never Pixieset upload files. Import with **Add** into a separate Lightroom Classic catalog. Do not render the entire camera dump merely to decide what to keep. Build a 25-frame lighting-varied calibration with exact approved references, accept each look and inspect People-mask overlays before synchronizing to a same-light group. Then export selected edits once at original dimensions, high-quality sRGB JPEG, with minimal metadata; sanitize and verify any local detail-editor output. Run the event photographic gate on every intended gallery image. Staff approval is required before Pixieset review or any client delivery.
+
+## Verified capacity and limits, 28 October 2026
+
+On the MSI, fast mode indexed 311 real 6000×4000 Staffy camera JPEGs in **82.99 seconds**, with zero errors; a no-change resume and seven contact sheets took **1.01 seconds**. A 6,000-row synthetic database grouping test passed in under one second as part of the test suite. Neither test proves 6,000 real JPEGs can be indexed within a particular time, that an automatic cull will choose the best story, or that a batch grade is accepted. The detailed pass across 1,237 real Staffy originals is a separate benchmark. Check storage for each new shoot: the MSI C: drive had about 27 GB free at this audit, while 6,000 JPEGs at the observed Staffy average size would require roughly 38 GB for source copies alone. Use an already approved private volume or another verified workstation when the exact preflight says this host lacks space; never put client media in GitHub or a public folder.
