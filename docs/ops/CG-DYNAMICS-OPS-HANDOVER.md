@@ -1,3 +1,15 @@
+## 11 November — video editing system of record + brand rules panel
+
+CA set one system for every editor/agent: CG Dynamics is the video tracker
+(Video Pipeline status, assignment, review) and holds client brand rules
+(PR #984; tables applied with CA approval, ledger 20261111064719; CG Production
+House profile + 4 CG rules + 6 house rules seeded). Working files, feedback rounds
+and handovers live in company Google Drive `m.productions.cg@gmail.com` →
+**CG Video Editing System** (read its 00_START_HERE). Approved finals only go to
+the client portal OneDrive, linked in Dynamics. Read
+`docs/ops/VIDEO-EDITING-SYSTEM-OF-RECORD.md`. Nolan lanes unchanged; their trackers
+migrate into this layout. PR #984 app code is unmerged/undeployed (#679 gate).
+
 ## 11 November — existing-film registration repair, local candidate only
 
 CA asked MSI to finish all possible video tracking reconciliation. Sixteen

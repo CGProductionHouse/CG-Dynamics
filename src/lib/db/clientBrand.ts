@@ -1,94 +1,116 @@
 import { supabase } from '../supabase'
+import type { BrandColour, BrandRuleCategory, BrandRulePriority, ClientBrandRule } from '../brandRules'
 
-const BRAND_TABLE = 'client_brand_profiles'
-const LOG_TABLE = 'client_brand_logs'
+// Staff-only client brand profiles and brand rules for video editors.
+// Tables come from supabase/migrations/20261111064719_client_brand_profiles_and_rules.sql.
+// Until that migration is applied every read reports `tableMissing` and the
+// UI explains it instead of failing.
+
+const PROFILE_TABLE = 'client_brand_profiles'
+const RULE_TABLE = 'client_brand_rules'
 
 export interface ClientBrandProfile {
-  id: string
   client_id: string
-  brand_notes: string | null
+  canva_brand_kit_id: string | null
+  colours: BrandColour[]
+  fonts: string[]
   tone_voice: string | null
   visual_direction: string | null
-  colours_fonts: string | null
-  do_notes: string | null
-  dont_notes: string | null
-  asset_notes: string | null
-  onedrive_url: string | null
+  logo_notes: string | null
+  source: 'manual' | 'canva'
+  source_synced_at: string | null
+  updated_at: string
 }
 
-export interface ClientBrandLog {
-  id: string
-  client_id: string
-  log_date: string
-  title: string
-  note: string | null
-  changed_by_name: string | null
-  created_at: string
-}
+export type ClientBrandProfilePatch = Pick<
+  ClientBrandProfile,
+  'canva_brand_kit_id' | 'colours' | 'fonts' | 'tone_voice' | 'visual_direction' | 'logo_notes'
+>
 
-function isTableMissingError(error: unknown): boolean {
-  if (!error || typeof error !== 'object') return false
-  const e = error as { code?: string }
-  return e.code === '42P01'
-}
-
-export async function getBrandProfile(clientId: string): Promise<{
-  data: ClientBrandProfile | null
-  error: unknown
+interface Result<T> {
+  data: T
+  error: string | null
   tableMissing: boolean
-}> {
+}
+
+function isTableMissing(error: unknown): boolean {
+  const code = (error as { code?: string } | null)?.code
+  return code === '42P01' || code === 'PGRST205'
+}
+
+function message(error: unknown, fallback: string): string {
+  const text = (error as { message?: string } | null)?.message
+  if ((error as { code?: string } | null)?.code === '42501') return 'You do not have permission to change brand rules. Ask a manager.'
+  return text || fallback
+}
+
+export async function getBrandProfile(clientId: string): Promise<Result<ClientBrandProfile | null>> {
   const { data, error } = await supabase
-    .from(BRAND_TABLE)
-    .select('*')
+    .from(PROFILE_TABLE)
+    .select('client_id, canva_brand_kit_id, colours, fonts, tone_voice, visual_direction, logo_notes, source, source_synced_at, updated_at')
     .eq('client_id', clientId)
     .maybeSingle()
-  if (error && isTableMissingError(error)) return { data: null, error: null, tableMissing: true }
-  return { data: data as ClientBrandProfile | null, error, tableMissing: false }
+  if (error && isTableMissing(error)) return { data: null, error: null, tableMissing: true }
+  if (error) return { data: null, error: message(error, 'Could not load the brand profile'), tableMissing: false }
+  return { data: data as ClientBrandProfile | null, error: null, tableMissing: false }
 }
 
-export async function upsertBrandProfile(
-  clientId: string,
-  patch: Partial<Omit<ClientBrandProfile, 'id' | 'client_id'>>,
-): Promise<{ data: ClientBrandProfile | null; error: unknown; tableMissing: boolean }> {
+// Managers only (enforced by RLS). Written on an explicit save, never inferred.
+export async function saveBrandProfile(clientId: string, patch: ClientBrandProfilePatch): Promise<Result<ClientBrandProfile | null>> {
   const { data, error } = await supabase
-    .from(BRAND_TABLE)
-    .upsert({ ...patch, client_id: clientId }, { onConflict: 'client_id' })
-    .select()
+    .from(PROFILE_TABLE)
+    .upsert({ ...patch, client_id: clientId, source: 'manual' }, { onConflict: 'client_id' })
+    .select('client_id, canva_brand_kit_id, colours, fonts, tone_voice, visual_direction, logo_notes, source, source_synced_at, updated_at')
     .single()
-  if (error && isTableMissingError(error)) return { data: null, error: null, tableMissing: true }
-  return { data: data as ClientBrandProfile | null, error, tableMissing: false }
+  if (error && isTableMissing(error)) return { data: null, error: null, tableMissing: true }
+  if (error) return { data: null, error: message(error, 'Could not save the brand profile'), tableMissing: false }
+  return { data: data as ClientBrandProfile, error: null, tableMissing: false }
 }
 
-export async function listBrandLogs(clientId: string): Promise<{
-  data: ClientBrandLog[]
-  error: unknown
-  tableMissing: boolean
-}> {
+// Active rules for one client plus active house rules (client_id is null).
+export async function listActiveBrandRules(clientId: string): Promise<Result<ClientBrandRule[]>> {
+  // The id is interpolated into a PostgREST filter, so accept only a UUID.
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(clientId)) {
+    return { data: [], error: 'Unknown client', tableMissing: false }
+  }
   const { data, error } = await supabase
-    .from(LOG_TABLE)
-    .select('*')
-    .eq('client_id', clientId)
-    .order('log_date', { ascending: false })
-    .order('created_at', { ascending: false })
-  if (error && isTableMissingError(error)) return { data: [], error: null, tableMissing: true }
-  return { data: (data ?? []) as ClientBrandLog[], error, tableMissing: false }
+    .from(RULE_TABLE)
+    .select('id, client_id, priority, category, rule, source, created_at, retired_at')
+    .is('retired_at', null)
+    .or(`client_id.eq.${clientId},client_id.is.null`)
+    .order('created_at', { ascending: true })
+  if (error && isTableMissing(error)) return { data: [], error: null, tableMissing: true }
+  if (error) return { data: [], error: message(error, 'Could not load brand rules'), tableMissing: false }
+  return { data: (data ?? []) as ClientBrandRule[], error: null, tableMissing: false }
 }
 
-export async function addBrandLog(
-  clientId: string,
-  title: string,
-  note: string | null,
-  changedByName: string | null,
-) {
-  return supabase
-    .from(LOG_TABLE)
-    .insert({
-      client_id: clientId,
-      title,
-      note,
-      changed_by_name: changedByName,
-      log_date: new Date().toISOString().slice(0, 10),
-    })
-    .select()
-    .single()
+export async function addBrandRule(input: {
+  clientId: string | null
+  priority: BrandRulePriority
+  category: BrandRuleCategory
+  rule: string
+  source: string | null
+}): Promise<{ error: string | null }> {
+  const { data: userData } = await supabase.auth.getUser()
+  const userId = userData.user?.id
+  if (!userId) return { error: 'Sign in again to add a rule' }
+  const { error } = await supabase.from(RULE_TABLE).insert({
+    client_id: input.clientId,
+    priority: input.priority,
+    category: input.category,
+    rule: input.rule.trim(),
+    source: input.source?.trim() || null,
+    created_by: userId,
+  })
+  return { error: error ? message(error, 'Could not add the rule') : null }
+}
+
+// Managers only. Retiring keeps the rule in history; rules are never edited.
+export async function retireBrandRule(ruleId: string): Promise<{ error: string | null }> {
+  const { error } = await supabase
+    .from(RULE_TABLE)
+    .update({ retired_at: new Date().toISOString() })
+    .eq('id', ruleId)
+    .is('retired_at', null)
+  return { error: error ? message(error, 'Could not retire the rule') : null }
 }
