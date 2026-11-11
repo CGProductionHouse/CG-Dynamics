@@ -34,7 +34,7 @@ export const primaryNavItems: NavItem[] = [
 export const performanceNavItems: NavItem[] = [
   { to: '/admin/client-performance', label: 'Performance Dashboard', shortLabel: 'Performance', marker: 'PD', activePaths: ['/admin/client-performance'] },
   { to: '/admin/clients', label: 'Clients', shortLabel: 'Clients', marker: 'CL', activePaths: ['/admin/clients', '/admin/client-dashboard'] },
-  { to: '/admin/client-onboarding', label: 'Client Onboarding', shortLabel: 'Onboarding', marker: 'ON', access: 'manager' },
+  { to: '/admin/client-onboarding', label: 'Client Onboarding', shortLabel: 'Onboarding', marker: 'ON' },
   { to: '/admin/reports', label: 'Reports', shortLabel: 'Reports', marker: 'R', activePaths: ['/admin/reports', '/admin/reports/new'] },
   { to: '/admin/published', label: 'Client Preview', shortLabel: 'Preview', marker: 'CP', activePaths: ['/admin/published', '/admin/client-preview'] },
   { to: '/admin/integrations', label: 'Integrations', shortLabel: 'Integrations', marker: 'IN', access: 'manager', activePaths: ['/admin/integrations'] },
