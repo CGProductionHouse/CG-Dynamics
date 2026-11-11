@@ -27,6 +27,14 @@ listed migrations that have since been applied).
   Microsoft, provider keys) belongs in an Edge Function.
 - Never expose, log, commit or return secrets.
 
+## Prepared, not yet applied
+
+- `20261111090000_client_brand_profiles_and_rules.sql` — staff-only client brand
+  profiles and brand rules for the Video Pipeline brand panel (11 November 2026).
+  Needs CA approval. Additive; depends only on `is_manager()` and
+  `is_active_content_staff()`, both live. Supersedes the never-applied
+  `phase-8a-client-brand-workflow.sql` (do not run that file).
+
 ## 3. Adding a new production migration
 
 1. Create a timestamped file:
