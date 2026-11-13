@@ -1,5 +1,10 @@
 # Piek January — actual feedback amendments, 13 November 2026
 
+The later afternoon targeted round is recorded in
+[TARGETED-FEEDBACK-2026-11-13.md](TARGETED-FEEDBACK-2026-11-13.md): five affected
+posters plus three live follow-ups, all sent in HD with clean captions. The R6
+full-set delivery below remains historical; do not repeat it.
+
 Existing #948/#955/draft #956 lane. Current main was fetched and merged into the
 existing worktree; no competing branch, worker or deployment. Owner requested
 reading Nolan's company WhatsApp feedback and amending posters **without replying**,

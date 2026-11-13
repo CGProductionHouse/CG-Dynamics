@@ -1,3 +1,27 @@
+## 13 November afternoon — targeted Piek review amendments delivered
+
+Existing #948/#955/draft #956 only. Five new review notes mapped to the exact
+posters; only66/79/80/82/83 changed, all85 page identities/order and80 non-target
+pages retained. Five actual HD photo+clean-caption messages delivered through
+Nolan to CG Picasso Approvals. Three live follow-ups then corrected the floating
+cup, incomplete nozzle context and insufficient school imagery; only79/80/82
+changed and three further HD messages delivered. Eight sends across five affected
+posters, no full-set resend, no agent signatures or generic replies. Current
+five-message mapping and older receipts remain private/versioned. Positive
+reactions on individual posters are not full creative approval.
+
+Owner explicitly approved generic licensed ceramic-cup and school-uniform stock;
+both showed Pro included with existing Canva Teams, R0 incremental cost. Actual
+client source photographs, exact marks and live type retained. Fresh saved-state
+and native margin checks pass45text/23reviewed marks at64px; school mark IDs
+rebound after exact-asset restacking. Footer occlusion caught before saving;
+functional source context and contact/edge grounding added to the designer skill.
+See [targeted evidence](../ai-workforce/graphic-designer/piek-january-2027/TARGETED-FEEDBACK-2026-11-13.md).
+No other agent lane, client release, portal final, production/deployment, dependency
+or spend change. Company-ChatGPT create/amend/true-export and package/schedule
+acceptance remain open. Exact Control Centre target unavailable; no guessed write.
+Next: specific new review amendments only; no unchanged full-set resend.
+
 ## 13 November — Piek feedback revised and clean-caption HD review delivered
 
 Existing #948/#955/draft #956 only; main reconciled, no competing lane. All15
