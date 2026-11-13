@@ -19,8 +19,8 @@
     "scheduleCutoffStatus": "unverified-no-dated-Dynamics-rows-November-through-January; original-Canva-schedule-retained",
     "copiedTextIntegrity": "first-49-pages-normalised-text-identical-12018-characters"
   },
-  "observedAt": "2026-11-06",
-  "observedPageCount": 83,
+  "observedAt": "2026-11-13",
+  "observedPageCount": 85,
   "pageCapacity": {
     "documentedMaxPages": 350,
     "source": "https://www.canva.com/en_gb/help/manage-pages/",
@@ -31,22 +31,22 @@
   "headers": {
     "inProgressTemplates": {
       "pageId": "PBtYpVD48tvYwH2r",
-      "observedPageIndex": 23,
+      "observedPageIndex": 25,
       "writePolicy": "new-work-zone-after-header"
     },
     "toBeApproved": {
       "pageId": "PBTCQnG0kLyNvn1c",
-      "observedPageIndex": 52,
+      "observedPageIndex": 54,
       "writePolicy": "new-work-zone-after-header"
     },
     "drafts": {
       "pageId": "PBkggJvPWJCB8Kl5",
-      "observedPageIndex": 82,
+      "observedPageIndex": 84,
       "writePolicy": "protected-read-only"
     },
     "postedScheduled": {
       "pageId": "PBhXtZzkLlTlfdWK",
-      "observedPageIndex": 83,
+      "observedPageIndex": 85,
       "writePolicy": "protected-read-only"
     }
   },
@@ -206,5 +206,26 @@
       83
     ],
     "noStaffHistoryEdits": true
+  },
+  "feedbackRound6": {
+    "observedAt": "2026-11-13",
+    "pageCount": 85,
+    "creativeAmendments": 10,
+    "safeMarginCandidates": 13,
+    "importantInsetPx": 64,
+    "measuredTextFrames": 45,
+    "reviewedLogoFrames": 23,
+    "beforeMarginFindings": 34,
+    "savedMarginFindings": 0,
+    "allIdsOrderPreserved": true,
+    "nonTargetPagesUnchanged": 72,
+    "currentSelection": "43,63,66-69,76-77,79-83",
+    "protectedHeaders": [
+      84,
+      85
+    ],
+    "freshHdExportVerified": false,
+    "whatsappSends": 0,
+    "ownerSaysNoReplies": true
   }
 }

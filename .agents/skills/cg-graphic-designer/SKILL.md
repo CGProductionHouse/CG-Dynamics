@@ -153,6 +153,16 @@ For the proven WhatsApp photo route, upload one true-HD file through the browser
 
 ## Quality gate
 
+### Implementing review feedback
+
+Match each quoted review to the exact poster and stable page ID; keep a private amendment matrix. Read all feedback before concluding that only the example needs attention. Apply general alignment, source-quality and spacing lessons across the current set while preserving liked concepts. A request to read and amend is not permission to reply or resend. Keep historical delivery receipts distinct from the newly revised artwork.
+
+For the Piek January pilot, the owner requires important text and logos safely inside the page. Use a **64px inset on the 1080×1350 canvas**, with an explicit inventory of every logo, including unnamed image elements and branding baked into a footer strip. Backgrounds and deliberate photo bleed remain edge-to-edge. A successful render is insufficient: re-read native text height after formatting/wrapping and run `node scripts/poster-studio/native-safe-area.mjs <native-state.json> <private-specification.json> --out <private-receipt.json>`. Its specification contains `pageIds`, reviewed `logoElementIds` and `insetPx`. It measures conservative frame bounds, not actual glyphs/alpha, logo discovery, overlap or creative quality. Inspect the previews for those separately. Moving a footer mark up can collide with its caption; reflow the caption instead of accepting a margin-only pass.
+
+When a cutout is unsuccessful, consider the intact source photograph and its environment rather than another arbitrary crop. Keep the full headline readable; adding more effects or larger bubbles does not establish depth. Source replacements must also reconcile their captions and branch/service facts. Before masking/upload, reject supported historical-source matches; the 13 November audit excluded a smiling wash candidate already used in two older previews.
+
+Canva's proportional-resize flag preserves the **existing frame**, which may have a different aspect from the replacement photograph. For an intentional frame correction, use the verified source ratio and inspect the actual crop; never stretch the photograph. Inspect every operation result and repair only the failed operation, since other operations in that same call may already have succeeded. Editing responses can contain the whole design but only one thumbnail: do not index that thumbnail list by global page number or call it an HD export.
+
 Check at phone size and as a full grid:
 
 - exact brand scope, logo, fonts and colours;

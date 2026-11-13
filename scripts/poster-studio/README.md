@@ -35,6 +35,7 @@ node scripts/poster-studio/creative-ledger.mjs check <ledger.json> <candidate.js
 node scripts/poster-studio/month-plan.mjs <month-plan.json> <brand-pack-index.json>
 node scripts/poster-studio/month-board.mjs <month-plan.json> <private-output.html>
 python scripts/poster-studio/source-history-audit.py --source <original.jpg> --history <private-thumbnail-directory> --out <private-report.json>
+node scripts/poster-studio/native-safe-area.mjs <native-state.json> <private-specification.json> --out <private-receipt.json>
 node scripts/poster-studio/canva-native-package.mjs <private-native-scene.json> <private-output.html>
 ```
 
@@ -45,6 +46,15 @@ For verified parent-brand use of a subsidiary photograph, add `--brand-pack <tru
 The matcher now caps OpenCV worker threads at two unless already lower. The uncapped real multi-source pass consumed roughly 9 GB; bounded follow-ups preserved matching settings and completed with much lower observed memory. This is not a 6,000-photo throughput benchmark. Run one feature audit at a time on the MSI and keep receipts for rejected matches and resource limits.
 
 ## Native Canva scene contract
+
+`native-safe-area.mjs` checks important native frames against a specified inset.
+Its private specification supplies exact `pageIds`, a visually reviewed inventory
+of `logoElementIds`, and `insetPx`. All nonempty native text on those pages is
+included. Full-bleed backgrounds and unrelated history stay outside this check.
+It fails closed on stale IDs/invalid frames and refuses to overwrite its inputs.
+This measures frame geometry, not glyphs, image alpha, overlap or creative quality;
+fresh previews/export review remain necessary. The Piek feedback pass reproduced
+34 failed frames and cleared45 text plus23 logo frames at64px on1080×1350.
 
 Use `schemaVersion: 1`, `status: "internal-draft"`, `title`, `canvas`, verified `brandScopes` and individually composed `pages`. Each page has a stable `id`, exact `brandScope`, `label`, accurate internal `notes`, verified `background` and ordered `layers`. Supported layers are `text`, `image`, `rect` and declared `nativeAsset`; unknown types fail instead of flattening silently. Each layer needs stable `id`, `x`, `y`, `width` and `height`.
 

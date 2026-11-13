@@ -1,3 +1,29 @@
+## 13 November — Piek feedback amended and important margins verified
+
+Existing #948/#955/draft #956 only; latest main reconciled. Read the actual
+CG Picasso Approvals feedback through the verified Nolan account in company
+Chrome. Owner explicitly says read/amend, no replies: zero new WhatsApp sends.
+Ten creative revisions saved, then owner-requested safe-margin pass on all13.
+Official Canva DAHaD4mJnGY has85 pages (two additions pre-existed); IDs/order
+unchanged, all72 non-target pages intact, protected Drafts/Posted now84/85.
+Current candidate selection43,63,66-69,76-77,79-83. Fresh saved native readback
+matches reviewed draft. Existing22 independent exact marks retained; old baked
+Engen strip replaced with blue bleed plus independent exact approved mark.
+New tested safe-area checker reproduces34 bad frames before and clears all45
+text/23 explicitly reviewed logo frames at64px; frame geometry is not taste,
+glyph/alpha detection or overlap approval. Source/history/hash receipts private.
+One wash source matched two historical posters and was excluded; no biometric DB.
+See [full evidence/limits](../ai-workforce/graphic-designer/piek-january-2027/FEEDBACK-REWORK-2026-11-13.md).
+
+Saved internal revisions, not creative approval. This round has native previews,
+not fresh HD exports: remembered CG Canva browser sign-in remained loading;
+connected editing/readback works. OldR5 HD files/messages remain historical.
+No portal finals, client publication, production DB/service/deployment, new
+dependencies/spend or Nolan/Picasso source changes. January authority/naming and
+ordinary company-ChatGPT create/amend/true-export acceptance remain open. Finish
+fresh HD/crop review when the existing session resumes; preserve no-reply hold.
+Exact Control Centre target unavailable; no guessed tracker write.
+
 ## 11 November — existing-film registration repair, local candidate only
 
 CA asked MSI to finish all possible video tracking reconciliation. Sixteen
