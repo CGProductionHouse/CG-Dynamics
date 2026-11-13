@@ -35,6 +35,7 @@ export const CG_CAPABILITY_MANIFEST: readonly CgCapability[] = [
       'Retrieving exact-client intelligence when a task requires it',
       'Maintaining your durable working-style preferences and corrections',
       'Creating and managing recurring task templates',
+      'Creating and refining Content Guidelines, publishing saved client-safe versions and returning named no-login client review links',
       'In a client Project: recording that client\'s requests, assigning same-client follow-ups to exact staff and saving client direction',
     ],
     exampleActions: [
@@ -43,6 +44,7 @@ export const CG_CAPABILITY_MANIFEST: readonly CgCapability[] = [
       'Move this follow-up to Friday.',
       'Show my leads in the research stage.',
       'Create a weekly Monday content-check task.',
+      'Publish this saved guideline for client review and give me its client link.',
     ],
     operatingStandards: [
       'During Microsoft coexistence, always cross-reference live Planner/Outlook freshness with CG Dynamics; Dynamics-only work remains legitimate.',

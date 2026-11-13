@@ -1,15 +1,20 @@
-import { useId, useState } from 'react'
+import { useId, useState, type ReactNode } from 'react'
 import { ClientLogo, type ClientLogoClient } from '../ClientLogo'
 import type { PublishedContentGuideline } from '../../lib/clientContentGuides'
 import { guidelineVideoName } from '../../lib/contentGuidelineNaming'
 import { monthDisplayLabel } from '../../lib/reportPeriod'
+import { guidelineInspiration } from '../../lib/guidelineInspiration'
+import externalLink from '../../assets/lucide/external-link.svg'
 
 /** Presentation only. Callers must supply the existing client-safe projection. */
-export function ContentGuidelineDocument({ guide, client, selected = false, clientPath }: {
+export function ContentGuidelineDocument({ guide, client, selected = false, clientPath, linkAccess = 'signed_in', renderVideoReview, reviewSummary }: {
   guide: PublishedContentGuideline
   client: ClientLogoClient
   selected?: boolean
   clientPath?: string
+  linkAccess?: 'signed_in' | 'public'
+  renderVideoReview?: (position: number) => ReactNode
+  reviewSummary?: ReactNode
 }) {
   const documentId = useId()
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle')
@@ -35,7 +40,7 @@ export function ContentGuidelineDocument({ guide, client, selected = false, clie
           <p className="text-[0.68rem] font-black uppercase tracking-[0.26em] text-[#2dd4bf]">CG Production House</p>
           {clientPath && <button type="button" onClick={() => void copyLink()} className="min-h-11 rounded-full bg-white px-5 py-2.5 text-xs font-bold text-[#06110f] shadow-lg transition hover:bg-[#dffcf6] focus-visible:outline-2 focus-visible:outline-[#2dd4bf]">{copyState === 'copied' ? 'Link copied' : 'Copy guideline link'} <span aria-hidden="true">↗</span></button>}
         </div>
-        <div role="status" className="text-xs text-slate-400">{copyState === 'failed' ? 'Select and copy the client link below. Client sign-in is required.' : copyState === 'copied' ? 'Opens this published guide. Client sign-in is required.' : null}</div>
+        <div role="status" className="text-xs text-slate-400">{copyState !== 'idle' ? `${copyState === 'failed' ? 'Select and copy the client link below.' : 'Opens this published guide.'} ${linkAccess === 'public' ? 'No sign-in is needed.' : 'Client sign-in is required.'}` : null}</div>
         {copyState === 'failed' && <input aria-label="Client guideline link" readOnly value={manualLink} onFocus={event => event.currentTarget.select()} className="mt-3 min-h-11 w-full rounded-xl border border-white/20 bg-black/20 px-3 text-sm text-white" />}
         <div className="mt-6 flex items-center gap-4">
           <ClientLogo client={client} boxClassName="h-12 w-12 rounded-2xl sm:h-14 sm:w-14" frameClassName="border border-white/10 bg-white/[0.07]" />
@@ -48,6 +53,7 @@ export function ContentGuidelineDocument({ guide, client, selected = false, clie
           {date && <Meta label="Filming" value={date} />}
           <Meta label="In this guide" value={`${guide.videos.length} video${guide.videos.length === 1 ? '' : 's'}`} />
         </div>
+        {reviewSummary}
       </header>
       <div className="grid min-w-0 lg:grid-cols-[235px_minmax(0,1fr)]">
         <nav aria-label="Videos in this guideline" className="border-b border-white/10 p-5 sm:p-7 lg:border-b-0 lg:border-r">
@@ -64,6 +70,7 @@ export function ContentGuidelineDocument({ guide, client, selected = false, clie
             </div>
             <h3 className="break-words text-2xl font-bold leading-tight tracking-tight text-white sm:text-3xl">{guidelineVideoName(video.position ?? index + 1, video.title)}</h3>
             {video.objective && <p className="mt-4 whitespace-pre-wrap break-words text-sm leading-7 text-slate-400">{video.objective}</p>}
+            <Inspiration url={video.inspiration_url} note={video.inspiration_note} />
             {video.hook && <div className="mt-5 border-l-2 border-[#2dd4bf] pl-4"><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#2dd4bf]">The opening</p><p className="mt-2 whitespace-pre-wrap break-words text-base leading-7 text-white">{video.hook}</p></div>}
             <section aria-label={`Script for ${video.title}`} className="mt-6 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.035] text-slate-200">
               <div className="flex items-center justify-between gap-3 border-b border-white/[0.08] px-5 py-4 sm:px-7"><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">{video.script?.trim() ? 'Complete script' : 'Script'}</p><span aria-hidden="true" className="font-mono text-xs text-slate-500">{String(video.position).padStart(2, '0')} / CG</span></div>
@@ -74,12 +81,23 @@ export function ContentGuidelineDocument({ guide, client, selected = false, clie
               <div className="space-y-5 px-5 pb-5">{video.shot_breakdown && <Direction label="Shot direction" value={video.shot_breakdown} />}{video.visual_notes && <Direction label="Visual direction" value={video.visual_notes} />}</div>
             </details>}
             {video.cta && <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.035] p-5"><Direction label="The next step" value={video.cta} /></div>}
+            {renderVideoReview?.(video.position)}
           </li>
         ))}</ol>
       </div>
       <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 px-5 py-5 text-[10px] font-semibold tracking-wide text-slate-500 sm:px-8"><span>CG PRODUCTION HOUSE</span><span>CREATE. CONNECT. GROW.</span></footer>
     </article>
   )
+}
+
+function Inspiration({ url, note }: { url?: string | null; note?: string | null }) {
+  const example = guidelineInspiration(url)
+  if (!example && !note?.trim()) return null
+  return <section aria-label="Video inspiration" className="mt-5 rounded-2xl border border-[#2dd4bf]/20 bg-gradient-to-br from-[#2dd4bf]/[0.07] to-transparent p-5 sm:p-6">
+    <div className="flex flex-wrap items-center justify-between gap-3"><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#2dd4bf]">The inspiration</p>{example && <span className="rounded-full border border-white/15 px-3 py-1 text-[11px] font-semibold text-slate-300">{example.platform}</span>}</div>
+    {note?.trim() && <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-7 text-slate-200">{note}</p>}
+    {example && <a href={example.url} target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer" className="mt-4 inline-flex min-h-11 items-center gap-3 rounded-full bg-white px-5 py-3 text-xs font-bold text-[#06110f] transition hover:bg-[#dffcf6] focus-visible:outline-2 focus-visible:outline-[#2dd4bf]">Watch example on {example.platform}<img src={externalLink} alt="" aria-hidden="true" className="h-4 w-4" /></a>}
+  </section>
 }
 
 function Meta({ label, value }: { label: string; value: string }) {

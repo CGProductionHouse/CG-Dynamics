@@ -86,7 +86,7 @@ test('read-only guideline tools never create a missing document', async () => {
 
 test('every #450 action is exposed, contexted and correctly classified', () => {
   const writes = serverSource.match(/const WRITE_TOOLS = new Set\(\[([\s\S]*?)\]\)/)[1]
-  const readOnly = new Set(['list_content_guideline_videos', 'get_content_video_readiness'])
+  const readOnly = new Set(['list_content_guideline_videos', 'get_content_video_readiness', 'get_content_guideline_share'])
   for (const tool of actions.CONTENT_GUIDELINE_TOOLS) {
     assert.ok(catalog.includes(`name: '${tool}'`), `${tool} is in the catalog`)
     assert.ok(context.includes(`'${tool}'`), `${tool} is classified for Project context`)
@@ -180,8 +180,8 @@ test('actual MCP update handler preserves other fields and rejects another clien
   const end = serverSource.indexOf('const handleReorderContentGuidelineVideos:', start)
   assert.ok(start > 0 && end > start)
   const js = ts.transpileModule(serverSource.slice(start, end), { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText
-  const handler = new Function('validateVideoPatch', 'assertRecordClientMatchesContext', 'GUIDELINE_VIDEO_SELECT',
-    `${js};return handleUpdateContentGuidelineVideo`)(actions.validateVideoPatch, project.assertRecordClientMatchesContext, '*')
+  const handler = new Function('validateVideoPatch', 'assertRecordClientMatchesContext', 'GUIDELINE_VIDEO_SELECT', 'buildGuidelineNavigation',
+    `${js};return handleUpdateContentGuidelineVideo`)(actions.validateVideoPatch, project.assertRecordClientMatchesContext, '*', actions.buildGuidelineNavigation)
   const row = { id: A, client_id: B, title: 'Keep title', position: 1, status: 'idea',
     script: 'Original script', cta: 'Keep CTA', shot_breakdown: 'Keep shot list', notes: 'Keep staff note' }
   let writes = 0

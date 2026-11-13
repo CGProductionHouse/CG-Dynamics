@@ -1,6 +1,7 @@
 import { supabase } from './supabase'
 import { directorKnowledgeReceipt, type DirectorKnowledgeReference } from './contentDirectorEvidence'
 import { validSavedRevision, type DirectorEditField } from './contentDirectorEdits'
+import { guidelineInspiration, inspirationInputError } from './guidelineInspiration'
 import {
   guideActionTarget,
   isMicrosoftOwnedEvent,
@@ -22,6 +23,8 @@ import {
   type VideoTransitionContext,
 } from './videoPipelineRules'
 import type { MonthlyDeliverable } from './planner'
+import { fetchAllPages } from './paginatedQuery'
+import { registerExistingVideoWith, type ExistingVideoInput } from './existingVideoRegistration'
 
 // â”€â”€ Content Workflow data access â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 //
@@ -42,6 +45,8 @@ export interface ContentGuideIdea {
   hook: string | null
   cta: string | null
   visual_notes: string | null
+  inspiration_url?: string | null
+  inspiration_note?: string | null
   owner_user_id: string | null
   owner_name: string | null
   proposed_post_date: string | null
@@ -358,18 +363,40 @@ export async function transitionVideo(
     patch.editor_user_id = ctx.editorUserId
     patch.editor_name = ctx.editorName ?? null
   }
-  return updateGuideIdea(idea.id, patch)
+  return updateGuideIdea(idea.id, patch, idea.updated_at)
 }
 
 // Non-archived video records (guides that link to a deliverable are tracked
 // videos). Used by the Video Pipeline board and Hub counts.
 export async function listPipelineVideos(): Promise<QueryResult<ContentGuideIdea[]>> {
-  const { data, error } = await supabase
+  const { data, error } = await fetchAllPages<ContentGuideIdea>((from, to) => supabase
     .from('content_guide_ideas')
     .select('*')
     .neq('status', 'archived')
-    .order('updated_at', { ascending: false })
+    .order('updated_at', { ascending: false }).order('id').range(from, to))
   return wrap((data ?? []) as ContentGuideIdea[], error, [])
+}
+
+// Explicit staff registration of an existing film. Same table/RLS, no new run,
+// deliverable, publishing action, schema or privileged credential. The caller
+// supplies the signed-in profile; this does not replace database authorization.
+export async function registerExistingVideo(input: ExistingVideoInput, actorId: string) {
+  return registerExistingVideoWith(input, actorId, {
+    listClient: async clientId => {
+      const result = await fetchAllPages<ContentGuideIdea>((from, to) => supabase
+        .from('content_guide_ideas').select('*').eq('client_id', clientId)
+        .order('id').range(from, to))
+      return { data: result.data, error: result.error?.message ?? null }
+    },
+    insert: async row => {
+      const { data, error } = await supabase.from('content_guide_ideas').insert(row).select('*').single()
+      return { data: data as ContentGuideIdea | null, error: error?.message ?? null }
+    },
+    get: async id => {
+      const { data, error } = await supabase.from('content_guide_ideas').select('*').eq('id', id).maybeSingle()
+      return { data: data as ContentGuideIdea | null, error: error?.message ?? null }
+    },
+  })
 }
 
 export interface DeliverableLabel {
@@ -492,6 +519,8 @@ export interface GuidelineVideoInput {
   shot_breakdown?: string | null
   requirements?: string | null
   visual_notes?: string | null
+  inspiration_url?: string | null
+  inspiration_note?: string | null
   notes?: string | null
 }
 
@@ -499,6 +528,8 @@ export async function addGuidelineVideo(
   guideline: ContentGuideline,
   input: GuidelineVideoInput,
 ): Promise<QueryResult<ContentGuidelineVideo | null>> {
+  const inspirationError = inspirationInputError(input.inspiration_url, input.inspiration_note)
+  if (inspirationError) return { data: null, error: inspirationError, migrationNeeded: false }
   const { data, error } = await supabase
     .from('content_guide_ideas')
     .insert({
@@ -518,6 +549,8 @@ export async function addGuidelineVideo(
       shot_breakdown: input.shot_breakdown ?? null,
       requirements: input.requirements ?? null,
       visual_notes: input.visual_notes ?? null,
+      inspiration_url: guidelineInspiration(input.inspiration_url)?.url ?? null,
+      inspiration_note: input.inspiration_note?.trim() || null,
       notes: input.notes ?? null,
     })
     .select('*')
@@ -599,10 +632,14 @@ export async function updateGuidelineVideo(
   patch: Partial<ContentGuidelineVideo>,
   expectedUpdatedAt?: string,
 ): Promise<QueryResult<ContentGuidelineVideo | null>> {
+  const inspirationError = inspirationInputError(patch.inspiration_url, patch.inspiration_note)
+  if (inspirationError) return { data: null, error: inspirationError, migrationNeeded: false }
   const normalizedPatch = patch.month === undefined
     ? patch
     : { ...patch, month: normalizeGuidelineVideoMonth(patch.month) }
-  return updateGuideIdea(id, normalizedPatch, expectedUpdatedAt)
+  return updateGuideIdea(id, Object.hasOwn(patch, 'inspiration_url')
+    ? { ...normalizedPatch, inspiration_url: guidelineInspiration(patch.inspiration_url)?.url ?? null }
+    : normalizedPatch, expectedUpdatedAt)
 }
 
 export async function reorderGuidelineVideos(

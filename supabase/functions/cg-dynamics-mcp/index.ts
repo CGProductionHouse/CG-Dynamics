@@ -32,7 +32,9 @@ import {
 import { cgDate, cgDatePlusDays, cgDayBounds, CG_TIMEZONE } from './cgTime.ts'
 import {
   deriveEditReadiness as deriveVideoEditReadiness,
-  deriveRawEvidence as deriveVideoRawEvidence, shapeVideoForAssistant,
+  deriveRawEvidence as deriveVideoRawEvidence, shapeVideoForAssistant, buildGuidelineNavigation,
+  GUIDELINE_WRITE_TOOLS, withGuidelineWriteReceipt, ownsGuidelineWriteReceipt,
+  shapeGuidelineShare, shapeGuidelineClientReviews,
   validateDeliverableLink, validateNewVideo, validateReorder, validateVideoPatch,
 } from './contentGuidelineActions.ts'
 import { buildGoogleAdsAudit, planGoogleAdsMetricReads, validateGoogleAdsAuditInput, type AuditAccount, type AuditLink, type AuditMetric, type AuditSync } from './googleAdsAudit.ts'
@@ -483,7 +485,26 @@ async function recordIdempotency(
   inputHash: string,
   status: string,
   audit?: ContextAuditEnvelope,
+  result?: unknown,
 ) {
+  if (GUIDELINE_WRITE_TOOLS.has(toolName)) {
+    // The deployed private audit table already has result_payload and its read
+    // RPC replays it. Insert the original result + dual-principal audit together;
+    // never rewrite historical status-only rows or downgrade to a status receipt.
+    const { error } = await sb.from('mcp_idempotency_log').insert({
+      caller_profile_id: callerProfileId, tool_name: toolName,
+      idempotency_key: idempotencyKey, input_hash: inputHash,
+      result_status: status, result_payload: result,
+      ...(audit ? {
+        connection_principal_user_id: audit.connection_principal_user_id,
+        effective_context_kind: audit.effective_context_kind,
+        effective_staff_profile_id: audit.effective_staff_profile_id,
+        effective_client_id: audit.effective_client_id,
+      } : {}),
+    })
+    if (error) throw new Error('Guideline work may have been saved, but its retry receipt could not be confirmed. Read the existing guideline before any new write; do not create a replacement blindly.')
+    return
+  }
   // Preferred: record the dual principal (#319) — communal connection principal AND the
   // effective Project context. Falls back to the original signature so an environment that
   // has not yet applied the context columns still records the write.
@@ -796,6 +817,12 @@ const handleFindContentRuns: ToolHandler = async (staff, input) => {
     }
 
     const guideline = guidelineRes.data as Record<string, unknown> | null
+    if (guideline && guideline.client_id !== run.client_id) {
+      return {
+        content_run: { id: runId, client: { id: run.client_id, name: run.client_name }, run_date: run.run_date },
+        error: 'The linked guideline belongs to a different client. Document navigation was refused.',
+      }
+    }
     let videos: Array<Record<string, unknown>> = []
     if (guideline?.id) {
       const { data: ideaRows, error: ideaRowsError } = await staff.supabase
@@ -824,7 +851,8 @@ const handleFindContentRuns: ToolHandler = async (staff, input) => {
         calendar_event_id: run.calendar_event_id,
       },
       content_guideline: guideline
-        ? { id: guideline.id, title: guideline.title, month: guideline.month, status: guideline.status }
+        ? { id: guideline.id, title: guideline.title, month: guideline.month, status: guideline.status,
+            ...buildGuidelineNavigation(guideline.id, guideline.client_id, runId) }
         : null,
       videos: videos.map(v => ({
         id: v.id, title: v.title, position: v.position, status: v.status,
@@ -2451,7 +2479,7 @@ async function handleGetContentRunPlan(staff: AuthenticatedStaff, input: Record<
   if (guideline) {
     const { data, error } = await staff.supabase
       .from('content_guide_ideas')
-      .select('id, content_guideline_id, client_id, title, objective, platform, format, hook, script, shot_breakdown, requirements, position, status')
+      .select('id, content_guideline_id, client_id, title, objective, platform, format, hook, script, shot_breakdown, requirements, inspiration_url, inspiration_note, position, status')
       .eq('content_guideline_id', guideline.id)
       .eq('client_id', run.client_id)
       .neq('status', 'archived')
@@ -2477,6 +2505,8 @@ async function handleGetContentRunPlan(staff: AuthenticatedStaff, input: Record<
       objective: video?.objective ?? null,
       hook: video?.hook ?? null,
       script: video?.script ?? null,
+      inspiration_url: video?.inspiration_url ?? null,
+      inspiration_note: video?.inspiration_note ?? null,
       shot_breakdown: video?.shot_breakdown ?? null,
       shot_notes: item.shot_notes,
       requirements: item.requirements ?? video?.requirements ?? null,
@@ -2497,6 +2527,8 @@ async function handleGetContentRunPlan(staff: AuthenticatedStaff, input: Record<
       objective: video.objective ?? null,
       hook: video.hook ?? null,
       script: video.script ?? null,
+      inspiration_url: video.inspiration_url ?? null,
+      inspiration_note: video.inspiration_note ?? null,
       shot_breakdown: video.shot_breakdown ?? null,
       shot_notes: null,
       requirements: video.requirements ?? null,
@@ -2508,7 +2540,7 @@ async function handleGetContentRunPlan(staff: AuthenticatedStaff, input: Record<
 
   return {
     content_run: run,
-    content_guideline: guideline ?? null,
+    content_guideline: guideline ? { ...guideline, ...buildGuidelineNavigation(guideline.id, guideline.client_id, run.id) } : null,
     planned_items: plannedItems,
     source: 'canonical Dynamics Content Run and Content Guideline records',
   }
@@ -3168,7 +3200,7 @@ async function resolveContentRunScope(
 }
 
 const GUIDELINE_VIDEO_SELECT =
-  'id, content_guideline_id, client_id, title, objective, hook, cta, month, script, shot_breakdown, requirements, visual_notes, notes, deliverable_id, position, status, production_status, editor_name'
+  'id, content_guideline_id, client_id, title, objective, hook, cta, month, script, shot_breakdown, requirements, visual_notes, inspiration_url, inspiration_note, notes, deliverable_id, position, status, production_status, editor_name'
 
 async function loadGuidelineVideos(staff: AuthenticatedStaff, guidelineId: string, clientId: string) {
   const { data, error } = await staff.supabase
@@ -3228,6 +3260,7 @@ const handleEnsureContentGuideline: ToolHandler = async (staff, input) => {
   const loaded = await loadRunGuideline(staff, input.content_run_id as string, true)
   if ('error' in loaded) return { error: loaded.error }
   return {
+    ...buildGuidelineNavigation(loaded.guideline.id, loaded.scope.clientId, loaded.scope.runId),
     content_run_id: loaded.scope.runId,
     client_name: loaded.scope.clientName,
     guideline_id: loaded.guideline.id,
@@ -3313,7 +3346,15 @@ const handleListContentGuidelineVideos: ToolHandler = async (staff, input) => {
   if ('error' in loaded) return { error: loaded.error }
   const evidence = await loadVideoEvidence(staff, loaded.scope)
   const videos = shapeRunVideos(loaded.scope, loaded.videos, evidence)
+  let clientReviews: unknown = null
+  try {
+    const result = await staff.supabase.rpc('get_guideline_client_reviews_as_actor', {
+      p_run_id: loaded.scope.runId, p_actor_profile_id: staff.profileId,
+    })
+    if (!result.error) clientReviews = result.data
+  } catch { /* Keep full scripts readable; response availability stays explicit. */ }
   return {
+    ...buildGuidelineNavigation(loaded.guideline.id, loaded.scope.clientId, loaded.scope.runId),
     content_run_id: loaded.scope.runId,
     client_name: loaded.scope.clientName,
     guideline_id: loaded.guideline.id,
@@ -3321,6 +3362,7 @@ const handleListContentGuidelineVideos: ToolHandler = async (staff, input) => {
     coverage_start: loaded.guideline.coverage_start ?? null,
     coverage_end: loaded.guideline.coverage_end ?? null,
     videos,
+    client_idea_responses: shapeGuidelineClientReviews(clientReviews, loaded.scope.runId, loaded.guideline.id),
     unallocated_count: videos.filter(video => !video.allocated).length,
     note: 'Order is canonical: "Video XX" comes from the saved position, never from the title.',
   }
@@ -3335,6 +3377,7 @@ const handleGetContentVideoReadiness: ToolHandler = async (staff, input) => {
   if (!loaded.scope.shortCode) blockers.push('BLOCKED_MISSING_SHORT_CODE')
   if (!evidence.foldersReadable) blockers.push('PRODUCTION_FOLDER_STATE_UNREADABLE')
   return {
+    ...buildGuidelineNavigation(loaded.guideline.id, loaded.scope.clientId, loaded.scope.runId),
     content_run_id: loaded.scope.runId,
     client_name: loaded.scope.clientName,
     run_date: loaded.scope.runDate,
@@ -3370,6 +3413,7 @@ const handleAddContentGuidelineVideo: ToolHandler = async (staff, input) => {
     .single()
   if (error) return { error: error.message }
   return {
+    ...buildGuidelineNavigation(loaded.guideline.id, loaded.scope.clientId, loaded.scope.runId),
     content_guide_idea_id: data.id,
     name: `Video ${String(position).padStart(2, '0')} - ${data.title}`,
     position,
@@ -3409,6 +3453,7 @@ const handleUpdateContentGuidelineVideo: ToolHandler = async (staff, input) => {
     .single()
   if (error) return { error: error.message }
   return {
+    ...buildGuidelineNavigation(resolved.video.content_guideline_id, resolved.video.client_id),
     content_guide_idea_id: data.id,
     updated_fields: Object.keys(validated.value),
     name: `Video ${String(data.position ?? 0).padStart(2, '0')} - ${data.title}`,
@@ -3429,6 +3474,7 @@ const handleReorderContentGuidelineVideos: ToolHandler = async (staff, input) =>
   const reloaded = await loadGuidelineVideos(staff, loaded.guideline.id as string, loaded.scope.clientId)
   if ('error' in reloaded) return { error: reloaded.error }
   return {
+    ...buildGuidelineNavigation(loaded.guideline.id, loaded.scope.clientId, loaded.scope.runId),
     content_run_id: loaded.scope.runId,
     order: reloaded.videos.map((video, index) => ({
       content_guide_idea_id: video.id,
@@ -3466,6 +3512,7 @@ const handleLinkContentGuidelineVideoDeliverable: ToolHandler = async (staff, in
     .eq('client_id', resolved.video.client_id)
   if (error) return { error: error.message }
   return {
+    ...buildGuidelineNavigation(resolved.video.content_guideline_id, resolved.video.client_id),
     content_guide_idea_id: resolved.video.id,
     allocated: !unlink,
     deliverable_id: unlink ? null : deliverable!.id,
@@ -3488,7 +3535,7 @@ const handleGenerateContentGuidelineDrafts: ToolHandler = async (staff, input) =
       : loaded.videos.filter(video => !String(video.script ?? '').trim()))
     : []
   if (mode === 'develop' && !targets.length) {
-    return { content_run_id: loaded.scope.runId, mode, generated: 0, note: 'Every saved video already has a script. Nothing was regenerated.' }
+    return { ...buildGuidelineNavigation(loaded.guideline.id, loaded.scope.clientId, loaded.scope.runId), content_run_id: loaded.scope.runId, mode, generated: 0, note: 'Every saved video already has a script. Nothing was regenerated.' }
   }
   const result = await invokeSiblingFunction(staff.connection, 'suggest-content-videos', {
     mode,
@@ -3505,12 +3552,26 @@ const handleGenerateContentGuidelineDrafts: ToolHandler = async (staff, input) =
     }
   }
   return {
+    ...buildGuidelineNavigation(loaded.guideline.id, loaded.scope.clientId, loaded.scope.runId),
     content_run_id: loaded.scope.runId,
     mode,
     result: result.data,
     note: 'Draft only. Review each draft before it is saved; a field a human wrote is never overwritten.',
   }
 }
+
+async function manageGuidelineShare(staff: AuthenticatedStaff, input: Record<string, unknown>, action: 'publish' | 'get' | 'revoke') {
+  const scope = await resolveContentRunScope(staff, input.content_run_id as string)
+  if ('error' in scope) return { error: scope.error }
+  const { data, error } = await staff.supabase.rpc('manage_content_guideline_share_as_actor', {
+    p_run_id: scope.runId, p_actor_profile_id: staff.profileId, p_action: action,
+  })
+  if (error) return { error: 'GUIDELINE_SHARING_FAILED', message: error.message }
+  return shapeGuidelineShare(data, scope)
+}
+const handlePublishContentGuideline: ToolHandler = (staff, input) => manageGuidelineShare(staff, input, 'publish')
+const handleGetContentGuidelineShare: ToolHandler = (staff, input) => manageGuidelineShare(staff, input, 'get')
+const handleRevokeContentGuidelineShare: ToolHandler = (staff, input) => manageGuidelineShare(staff, input, 'revoke')
 
 // ── Tool Router ─────────────────────────────────────────────────────────────
 
@@ -3541,6 +3602,7 @@ const WRITE_TOOLS = new Set([
   'reorder_content_guideline_videos',
   'link_content_guideline_video_deliverable',
   'generate_content_guideline_drafts',
+  'publish_content_guideline', 'revoke_content_guideline_share',
 ])
 
 // These backends own the durable idempotency receipt. An identical MCP retry must reach them so
@@ -3555,6 +3617,9 @@ const CANONICAL_RECEIPT_REPLAY_TOOLS = new Set([
 ])
 
 const toolHandlers: Record<string, ToolHandler> = {
+  publish_content_guideline: handlePublishContentGuideline,
+  get_content_guideline_share: handleGetContentGuidelineShare,
+  revoke_content_guideline_share: handleRevokeContentGuidelineShare,
   get_my_day: handleGetMyDay,
   list_my_tasks: handleListMyTasks,
   get_task: handleGetTask,
@@ -3717,6 +3782,18 @@ async function handleToolsCall(
     }
     if (existing.duplicate) {
       const conflict = (existing.result as { status?: string } | undefined)?.status === 'conflict'
+      const previousError = (existing.result as { status?: string } | undefined)?.status === 'error' || isMcpErrorResult(existing.result)
+      if (GUIDELINE_WRITE_TOOLS.has(toolName) && !conflict && !previousError
+        && !ownsGuidelineWriteReceipt(existing.result, toolName, staff.profileId, canonicalIdempotencyKey)) {
+        const nextRead = typeof toolInput.content_run_id === 'string'
+          ? { tool: 'list_content_guideline_videos', arguments: { content_run_id: toolInput.content_run_id } }
+          : { tool: 'find_content_runs', arguments: staff.effectiveClientId ? { client_id: staff.effectiveClientId } : {} }
+        return jsonRpcResponse(id, { content: [{ type: 'text', text: JSON.stringify({
+          error: 'GUIDELINE_RECEIPT_UNVERIFIED',
+          message: 'This request was recorded previously, but its old receipt has no verified original record. No change was repeated. Read the saved guideline before any new write; do not create a replacement blindly.',
+          next_read: nextRead, _context: audit,
+        }) }], isError: true })
+      }
       if (operationalCreate && !conflict && !ownsOperationalReceipt(toolName, existing.result, { actorId: staff.profileId, key: canonicalIdempotencyKey })) {
         return jsonRpcError(id, -32603, 'Legacy operational receipt has no original record projection. Re-read before creating any replacement; do not retry with a new key blindly.')
       } else if (CANONICAL_RECEIPT_REPLAY_TOOLS.has(toolName) && !conflict) {
@@ -3728,14 +3805,19 @@ async function handleToolsCall(
     }
   }
 
+  let handlerCompleted = false
   try {
-    const result = await handler(staff, toolInput)
+    let result = await handler(staff, toolInput)
+    handlerCompleted = true
     const hasError = isMcpErrorResult(result)
+    if (isWrite && canonicalIdempotencyKey && GUIDELINE_WRITE_TOOLS.has(toolName) && !hasError) {
+      result = withGuidelineWriteReceipt(result, toolName, staff.profileId, canonicalIdempotencyKey)
+    }
 
     if (isWrite && canonicalIdempotencyKey && !replayThroughCanonicalKey && !ownsOperationalReceipt(toolName, result) && !(operationalCreate && hasError)) {
       const inputHash = ['submit_monthly_strategy_draft', 'amend_monthly_strategy_draft'].includes(toolName)
         ? await strategyMcpInputHash(toolInput) : await computeInputHash(toolInput)
-      await recordIdempotency(staff.supabase, staff.profileId, toolName, canonicalIdempotencyKey, inputHash, hasError ? 'error' : 'success', audit)
+      await recordIdempotency(staff.supabase, staff.profileId, toolName, canonicalIdempotencyKey, inputHash, hasError ? 'error' : 'success', audit, result)
     }
 
     const isError = isMcpErrorResult(result)
@@ -3748,10 +3830,12 @@ async function handleToolsCall(
       isError: !!isError,
     })
   } catch (err) {
-    if (isWrite && canonicalIdempotencyKey && !operationalCreate) {
+    if (isWrite && canonicalIdempotencyKey && !operationalCreate && !handlerCompleted) {
       const inputHash = ['submit_monthly_strategy_draft', 'amend_monthly_strategy_draft'].includes(toolName)
         ? await strategyMcpInputHash(toolInput) : await computeInputHash(toolInput)
-      await recordIdempotency(staff.supabase, staff.profileId, toolName, canonicalIdempotencyKey, inputHash, 'error', audit)
+      try {
+        await recordIdempotency(staff.supabase, staff.profileId, toolName, canonicalIdempotencyKey, inputHash, 'error', audit, { error: 'Tool execution failed. Read saved state before any new write.' })
+      } catch { /* Preserve the MCP recovery response even if audit storage is unavailable. */ }
     }
     return jsonRpcError(id, -32603, `Tool execution failed: ${err instanceof Error ? err.message : String(err)}`)
   }

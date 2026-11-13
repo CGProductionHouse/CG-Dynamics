@@ -63,6 +63,43 @@ Every exposed table has RLS enabled. Policies follow least-privilege:
 
 ## Third-party integrations
 
+### Public guideline review links
+
+Explicit staff publication can issue a client-named, no-login review link scoped
+to one client-safe snapshot. A private RLS-enabled registry stores cryptographically
+random 256-bit capabilities; no anonymous registry enumeration is granted. Only
+the narrow public read RPC can resolve a valid token/slug for an active client and
+still-published same-client document. Revocation/unpublication stops public reads;
+revoked tokens rotate on republish. Staff/assignees/internal notes/raw OneDrive
+fields are excluded by the server projection. The frontend uses isolated anonymous
+reads, no session fallback or login redirect, React text rendering, no-index headers,
+no-referrer and no-store. This does not expose admin, account or other-client data.
+The public guideline HTML preview uses the same anonymous, capability-validated
+snapshot read. Only verified client name/month/video count and existing public
+logo metadata enter initial HTML; no scripts/contacts/internal fields. No session
+or privileged key is forwarded. Each request rechecks publication; unavailable
+capabilities do not retain another client's metadata. All inserted text is escaped.
+
+Per-video shared-link responses use a separate private RLS ledger with no anon/
+authenticated table grants or update/delete API. A narrow write RPC validates the
+same existing capability, active publication, exact publication timestamp/video,
+required self-reported name/comment, bounded payload, idempotency key and expected
+latest response. It locks the share row, rate-limits responses and appends the
+published video snapshot. Only that snapshot's current-version responses enter
+public review reads. Staff-only exact-run reads retain earlier versions and flag
+changed authored wording. No editorial/production/schedule/final-asset approval
+is inferred or mutated. No-login reviewer names are explicitly self-reported;
+anyone with the link can see/respond, not access other account or backend data.
+
+Optional inspiration is limited to validated public-social HTTPS links plus a
+short client-facing vision. Links open separately without referrer/opener; the
+app never fetches, embeds or ingests their content. Private storage and arbitrary
+hosts are refused. An explicit snapshot helper includes only client-safe fields;
+reference changes participate in exact-version review comparison. Missing legacy
+optional fields mean null, never a fabricated reference or a lost old review.
+
+## Third-party integrations (providers)
+
 - Meta: OAuth flow through Edge Functions, tokens stored server-side.
 - Google Ads: OAuth flow through Edge Functions, tokens stored server-side.
 - Microsoft: Edge Function with isolated service-role access, no client exposure.

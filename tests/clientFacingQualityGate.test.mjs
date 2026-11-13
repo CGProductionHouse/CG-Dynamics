@@ -450,7 +450,8 @@ test('content guideline RPC is client-safe and read-only', () => {
 
 test('admin full content guide page publishes and unpublishes the whole document', () => {
   assert.match(FULL_GUIDE_PAGE, /ContentGuidelineDocumentEditor/)
-  assert.match(GUIDE_EDITOR, /Publish full guideline/)
+  assert.match(GUIDE_EDITOR, /Publish client guideline/)
+  assert.match(GUIDE_EDITOR, /manageGuidelineShare\(run\.id, 'publish'\)/)
   assert.match(GUIDE_EDITOR, /Unpublish document/)
   assert.match(GUIDE_EDITOR, /setGuidelinePublication/)
 })

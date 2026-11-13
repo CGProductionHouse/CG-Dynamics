@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { guidelineInspiration } from './guidelineInspiration'
 
 export interface PublishedGuidelineVideo {
   position: number
@@ -11,6 +12,8 @@ export interface PublishedGuidelineVideo {
   visual_notes: string | null
   platform: string | null
   format: string | null
+  inspiration_url?: string | null
+  inspiration_note?: string | null
 }
 
 export interface PublishedContentGuideline {
@@ -38,10 +41,10 @@ function validDate(value: unknown): value is string {
 
 // Defence in depth for the existing ownership/publication-bound RPC. Extra
 // transport fields never become client state; malformed data is not an empty plan.
-function projectGuide(value: unknown, month: string): PublishedContentGuideline | null {
+export function projectGuide(value: unknown, month?: string): PublishedContentGuideline | null {
   if (!record(value) || typeof value.row_key !== 'string' || !value.row_key
     || typeof value.title !== 'string' || typeof value.run_name !== 'string'
-    || value.month !== `${month}-01`
+    || (month ? value.month !== `${month}-01` : !(value.month === null || (typeof value.month === 'string' && validDate(value.month) && value.month.endsWith('-01'))))
     || !(value.filming_date === null || validDate(value.filming_date))
     || typeof value.published_at !== 'string' || !validDate(value.published_at.slice(0, 10))
     || !/^\d{4}-\d{2}-\d{2}T/.test(value.published_at) || !Number.isFinite(Date.parse(value.published_at))
@@ -50,14 +53,18 @@ function projectGuide(value: unknown, month: string): PublishedContentGuideline 
   const videos: PublishedGuidelineVideo[] = []
   for (const video of value.videos) {
     if (!record(video) || typeof video.position !== 'number' || !Number.isSafeInteger(video.position) || video.position < 1
-      || typeof video.title !== 'string' || !VIDEO_TEXT_FIELDS.every(field => nullableText(video[field]))) return null
+      || typeof video.title !== 'string' || !VIDEO_TEXT_FIELDS.every(field => nullableText(video[field]))
+      || !(video.inspiration_url == null || (typeof video.inspiration_url === 'string' && guidelineInspiration(video.inspiration_url)))
+      || !(video.inspiration_note == null || (typeof video.inspiration_note === 'string' && video.inspiration_note.length <= 1000))) return null
     videos.push({
       position: video.position, title: video.title,
       ...Object.fromEntries(VIDEO_TEXT_FIELDS.map(field => [field, video[field]])) as Pick<PublishedGuidelineVideo, typeof VIDEO_TEXT_FIELDS[number]>,
+      inspiration_url: guidelineInspiration(video.inspiration_url)?.url ?? null,
+      inspiration_note: typeof video.inspiration_note === 'string' ? video.inspiration_note : null,
     })
   }
   return {
-    row_key: value.row_key, title: value.title, month: value.month,
+    row_key: value.row_key, title: value.title, month: value.month as string | null,
     run_name: value.run_name, filming_date: value.filming_date,
     published_at: value.published_at, videos,
   }

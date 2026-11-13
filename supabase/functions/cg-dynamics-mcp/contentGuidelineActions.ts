@@ -1,14 +1,18 @@
 // #450 — Assistant content actions: pure validation and shaping.
 //
-// Import-free by design (no Deno, no Supabase, no app imports) so the same rules are
+// Pure by design (no Deno, Supabase or IO); social-link rules are shared with the app.
+// These rules are
 // unit-tested directly. The readiness derivation mirrors src/lib/contentAutopilot.ts
 // and a drift-guard test pins the two together.
 //
 // Hard rules encoded here:
-//   * no raw Graph id, item id, drive id or URL ever reaches staff/client text;
+//   * no raw Graph/storage identifiers or URLs reach staff/client text;
+//     explicitly supplied public social inspiration is a separate safe field;
 //   * a video is addressed by exact id — never by loose title, never across clients;
 //   * `monthly_deliverables` is never written: a video only links to one;
 //   * position is changed only through the canonical reorder authority.
+
+import { guidelineInspiration } from '../../../src/lib/guidelineInspiration.ts'
 
 export const CONTENT_GUIDELINE_TOOLS = [
   'ensure_content_guideline',
@@ -19,6 +23,7 @@ export const CONTENT_GUIDELINE_TOOLS = [
   'link_content_guideline_video_deliverable',
   'generate_content_guideline_drafts',
   'get_content_video_readiness',
+  'publish_content_guideline', 'get_content_guideline_share', 'revoke_content_guideline_share',
 ] as const
 
 export type ContentGuidelineTool = typeof CONTENT_GUIDELINE_TOOLS[number]
@@ -26,7 +31,7 @@ export type ContentGuidelineTool = typeof CONTENT_GUIDELINE_TOOLS[number]
 /** Fields an Assistant may write on a saved video. Everything else is refused. */
 export const EDITABLE_VIDEO_FIELDS = [
   'title', 'objective', 'hook', 'cta', 'script', 'shot_breakdown',
-  'requirements', 'visual_notes', 'notes', 'month',
+  'requirements', 'visual_notes', 'notes', 'month', 'inspiration_url', 'inspiration_note',
 ] as const
 
 export type EditableVideoField = typeof EDITABLE_VIDEO_FIELDS[number]
@@ -34,6 +39,7 @@ export type EditableVideoField = typeof EDITABLE_VIDEO_FIELDS[number]
 const MAX_LENGTHS: Record<EditableVideoField, number> = {
   title: 200, objective: 1000, hook: 500, cta: 500, script: 20000,
   shot_breakdown: 8000, requirements: 4000, visual_notes: 4000, notes: 4000, month: 10,
+  inspiration_url: 2048, inspiration_note: 1000,
 }
 
 const MONTH = /^\d{4}-\d{2}(-\d{2})?$/
@@ -41,6 +47,114 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-
 
 export function isUuid(value: unknown): value is string {
   return typeof value === 'string' && UUID.test(value)
+}
+
+/** App navigation only, after the handler proves exact-client ownership.
+ * These existing staff routes require normal sign-in; they are not public
+ * sharing grants. Never accept an origin, storage URL or title from the caller.
+ */
+export function buildGuidelineNavigation(guidelineId: unknown, clientId: unknown, contentRunId?: unknown) {
+  const valid = isUuid(guidelineId) && isUuid(clientId)
+  const guidelineParams = valid
+    ? new URLSearchParams({ tab: 'guidelines', client: clientId, guideline: guidelineId })
+    : null
+  const runParams = valid && isUuid(contentRunId)
+    ? new URLSearchParams({ tab: 'runs', run: contentRunId })
+    : null
+  return {
+    guideline_url: guidelineParams ? `https://www.cgdynamics.co.za/admin/content?${guidelineParams}` : null,
+    content_run_url: runParams ? `https://www.cgdynamics.co.za/admin/content?${runParams}` : null,
+    link_access: 'staff_sign_in_required' as const,
+    link_note: 'Use guideline_url to open this exact saved document after staff sign-in. This is a staff review link, not a public client link or proof of publication.',
+  }
+}
+
+// Only these content tools use the existing private result_payload column. Other
+// lanes retain their own atomic/backend receipts and must not be reimplemented.
+export const GUIDELINE_WRITE_TOOLS = new Set([
+  'ensure_content_guideline', 'add_content_guideline_video', 'update_content_guideline_video',
+  'reorder_content_guideline_videos', 'link_content_guideline_video_deliverable',
+  'generate_content_guideline_drafts',
+  'publish_content_guideline', 'revoke_content_guideline_share',
+])
+
+/** Only the trusted exact-run RPC may issue a public capability URL. */
+export function shapeGuidelineShare(value: unknown, scope: { runId: string; clientId: string }) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return { error: 'Guideline sharing did not return a verified result.' }
+  const row = value as Record<string, unknown>
+  if (row.content_run_id !== scope.runId || row.client_id !== scope.clientId || !isUuid(row.guideline_id)
+    || typeof row.client_name !== 'string' || !['published_for_review','not_shared','revoked'].includes(String(row.state))) {
+    return { error: 'Guideline sharing result does not match this exact client and Content Run.' }
+  }
+  const published = row.state === 'published_for_review'
+  if (published && (typeof row.public_slug !== 'string' || row.public_slug.length > 180
+    || !/^[a-z0-9]+(-[a-z0-9]+)*-content-guideline$/.test(row.public_slug)
+    || typeof row.share_token !== 'string' || !/^[a-f0-9]{64}$/.test(row.share_token)
+    || typeof row.published_at !== 'string' || !Number.isFinite(Date.parse(row.published_at))
+    || !Number.isSafeInteger(row.video_count) || Number(row.video_count) < 1)) {
+    return { error: 'The client guideline link could not be verified.' }
+  }
+  return {
+    ...buildGuidelineNavigation(row.guideline_id, scope.clientId, scope.runId),
+    guideline_id: row.guideline_id, content_run_id: scope.runId, client_name: row.client_name,
+    state: row.state, video_count: published ? row.video_count : null,
+    client_share_url: published ? `https://www.cgdynamics.co.za/guidelines/${row.public_slug}/${row.share_token}?v=cg2-${Date.parse(row.published_at as string)}` : null,
+    published_at: published ? row.published_at : null,
+    link_access: published ? 'anyone_with_link' : 'not_shared',
+    note: published
+      ? 'Ready for client review. Send client_share_url: it opens without a login and shows only this published guideline. Publication is not client approval. Publish again to update the version shown at this link.'
+      : row.state === 'revoked' ? 'The public client link is revoked. No videos, approvals or scheduled posts were changed.'
+      : 'No active client link exists. On a request to make this guideline client-ready, use publish_content_guideline; do not send the staff/admin URL to a client.',
+  }
+}
+
+/** Shared-link names are self-reported. Never treat an older/different script's
+ * response as current approval, or a concept approval as permission to post. */
+export function shapeGuidelineClientReviews(value: unknown, runId: string, guidelineId: unknown) {
+  const unavailable = { state: 'unavailable', note: 'Client idea responses could not be verified. Do not infer approval.' }
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return unavailable
+  const result = value as Record<string, unknown>
+  if (result.content_run_id !== runId || result.guideline_id !== guidelineId || !Array.isArray(result.responses) || result.responses.length > 100) return unavailable
+  const responses: Record<string, unknown>[] = []
+  for (const raw of result.responses) {
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return unavailable
+    const row = raw as Record<string, unknown>
+    if (!isUuid(row.id) || !Number.isSafeInteger(row.position) || Number(row.position) < 1 || typeof row.title !== 'string'
+      || !['approved','changes_requested','declined','comment'].includes(String(row.action))
+      || typeof row.reviewer_name !== 'string' || !row.reviewer_name.trim() || row.reviewer_name.length > 80
+      || typeof row.message !== 'string' || row.message.length > 3000
+      || typeof row.created_at !== 'string' || !Number.isFinite(Date.parse(row.created_at))
+      || typeof row.published_at !== 'string' || !Number.isFinite(Date.parse(row.published_at))
+      || typeof row.current_publication !== 'boolean' || typeof row.matches_current_video !== 'boolean') return unavailable
+    responses.push(Object.fromEntries(['id','position','title','action','reviewer_name','message','created_at','published_at','current_publication','matches_current_video'].map(key => [key,row[key]])))
+  }
+  return { state: 'verified', identity: 'self_reported_shared_link', responses,
+    note: 'Responses apply only to their exact published version. Check current_publication AND matches_current_video before describing current idea approval. Names are self-reported, not verified logins. A comment does not change a decision; latest non-comment per video/version wins. No final-asset, Client Schedule or posting approval is granted.' }
+}
+
+function isCanonicalGuidelineLink(value: unknown): boolean {
+  if (typeof value !== 'string') return false
+  try {
+    const url = new URL(value)
+    return value === buildGuidelineNavigation(url.searchParams.get('guideline'), url.searchParams.get('client')).guideline_url
+  } catch { return false }
+}
+
+export function withGuidelineWriteReceipt(result: unknown, tool: string, actorId: string, key: string) {
+  if (!result || typeof result !== 'object' || Array.isArray(result)
+    || !isCanonicalGuidelineLink((result as Record<string, unknown>).guideline_url)) {
+    throw new Error('Guideline work may have completed, but its saved-document receipt is invalid. Read the existing guideline before any new write.')
+  }
+  return { ...result, receipt: { contract: 'mcp_guideline_result_v1', tool_name: tool, actor_profile_id: actorId, idempotency_key: key } }
+}
+
+export function ownsGuidelineWriteReceipt(result: unknown, tool: string, actorId: string, key: string): boolean {
+  if (!result || typeof result !== 'object' || Array.isArray(result)) return false
+  const value = result as Record<string, unknown>
+  const receipt = value.receipt as Record<string, unknown> | undefined
+  return receipt?.contract === 'mcp_guideline_result_v1' && receipt.tool_name === tool
+    && receipt.actor_profile_id === actorId && receipt.idempotency_key === key
+    && isCanonicalGuidelineLink(value.guideline_url)
 }
 
 /** Normalise a month to the canonical first-of-month date. */
@@ -78,6 +192,12 @@ export function validateVideoPatch(input: Record<string, unknown>): Validated<Re
     const value = raw.trim()
     if (value.length > MAX_LENGTHS[field]) return { ok: false, error: `${field} is longer than ${MAX_LENGTHS[field]} characters.` }
     if (field === 'title' && !value) return { ok: false, error: 'A video must keep a title.' }
+    if (field === 'inspiration_url') {
+      const example = guidelineInspiration(value)
+      if (value && !example) return { ok: false, error: 'Use an HTTPS TikTok, Instagram, Facebook or YouTube link.' }
+      patch[field] = example?.url ?? null
+      continue
+    }
     if (field === 'month') {
       if (value && !MONTH.test(value)) return { ok: false, error: 'month must be YYYY-MM or YYYY-MM-DD.' }
       patch[field] = value ? normaliseMonth(value) : null
@@ -222,6 +342,8 @@ export function shapeVideoForAssistant(input: {
     shot_breakdown: video.shot_breakdown ?? null,
     requirements: video.requirements ?? null,
     visual_notes: video.visual_notes ?? null,
+    inspiration_url: guidelineInspiration(video.inspiration_url)?.url ?? null,
+    inspiration_note: video.inspiration_note ?? null,
     has_script: typeof video.script === 'string' && video.script.trim().length > 0 && !/^script pending/i.test(video.script.trim()),
     production_status: video.production_status ?? null,
     editor: video.editor_name ?? null,

@@ -1,6 +1,13 @@
 {
   "git": { "deploymentEnabled": false },
+  "functions": { "api/guideline-preview.js": { "includeFiles": "{dist/index.html,public/client-logos/**}", "maxDuration": 15 } },
+  "headers": [{ "source": "/guidelines/(.*)", "headers": [
+    { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" },
+    { "key": "Referrer-Policy", "value": "no-referrer" },
+    { "key": "Cache-Control", "value": "private, no-store" }
+  ] }],
   "rewrites": [
+    { "source": "/guidelines/:slug/:token", "destination": "/api/guideline-preview?slug=:slug&token=:token" },
     {
       "source": "/(.*)",
       "destination": "/index.html"

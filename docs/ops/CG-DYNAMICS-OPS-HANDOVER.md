@@ -1,3 +1,168 @@
+## 11 November — existing-film registration repair, local candidate only
+
+CA asked MSI to finish all possible video tracking reconciliation. Sixteen
+exact-client histories were saved/read back in Dynamics and indexed in existing
+task `7f413d31-17cd-4761-b2e9-a031c1343444`; several actual films remain absent from
+the live Pipeline. A bounded frontend repair on `codex/nolan-video-registration`
+adds explicit historical-film registration in the existing table without fake
+runs/slots, duplicate/retry readback protection and name-only editor preservation.
+[Workflow, evidence and release limits](EXISTING-VIDEO-REGISTRATION.md).
+No production DB/schema/deployment, approval promotion or staff assignment was
+performed. #900 owns tracking; #981 exact handoffs and #984 brand panel remain
+separate/additive. Shared editorial library remains PR910. Hosting #679 release
+gate remains; this candidate is not a claim of completed live-board backfill.
+
+## 9 November — combined guideline release LIVE, acceptance complete
+
+Owner #896/#450. CA's exact combined approval executed: #977/main25657501 includes
+#975 per-video approve/change/decline/comment controls plus optional social
+inspiration/vision in the existing branded renderer/editor/ChatGPT actions.
+Read GUIDELINE-INSPIRATION-LINKS-2026-11-09.md current production receipt first.
+Two exact migrations applied once (hosted ledger20261109154159/20261109154213).
+Existing MCP ACTIVEv82, all41 files verified/other37 unchanged, auth/secrets intact.
+One2.6MB prebuilt stage dpl_12ysTroZHgsSJMHrPxUqp8AetiRz verified and the SAME
+deployment promoted once; www production READY, zero remote app compilation.
+Git deployment OFF; no further docs build/deploy. Rollback previous
+dpl_EJr74MFsLf1uqmveHTZCqPQTyHFE/privatev81 bundle, retain additive review history.
+
+Germoparts had already been republished externally12:44:11UTC with every public
+field/four original scripts unchanged. Preserved it, no duplicate publication.
+Anonymous reader/built GET/HEAD200, capability/client isolation and table/
+management denial pass. Both connected company/personal accounts return complete
+scripts, null inspiration, verified empty response history and same named public
+link. Live native desktop/375/390/430px branding/scripts/actions/layout verified;
+desktop/390px amendment form opened/cancelled without sending. Final response
+count0. No sample references/fake approvals/content/provider/Teams/calendar/other-
+client writes. Supported4268pass/30skip plus real PG roles/version/concurrency,
+public/editor fixtures/build/bundle/Deno/lint/diff remain the verified source
+baseline. No physical-phone/real-client decision or all-app launch claim inferred.
+Protected gates/other owners unchanged; no guessed Control Centre write.
+
+## Historical 9 November — optional video inspiration / combined release candidate
+
+Owner #896/#450. CA added optional trend/example links and a short vision per
+video. Focused codex/guideline-inspiration-links uses two nullable canonical
+fields, safe public-social links, existing Lucide icon, same branded renderer and
+normal ChatGPT add/edit/read. Hidden when blank; no embed/autoplay/fetch.
+Source verified, NOT LIVE. Read GUIDELINE-INSPIRATION-LINKS-2026-11-09.md for the
+superseding combined packet: two exact migrations (including pending #975), three
+existing MCP files plus pure helper (v81/40 ->41, other37 preserved), one local
+prebuilt stage/promotion after CA approval. Full4268pass/30skip, final27focused,
+PG roles/version/isolation/concurrency, public/editor1440/375/390/430,
+build/bundle/Deno/lint/diff/prebuild/packaging pass. No live write/cloud upload.
+
+Important12:01:57UTC change: Germoparts now ready/unpublished, so public link
+correctly unavailable. Exact document/run/date and every public field of all four
+videos still match original snapshot; hashes/video updated_at unchanged. This run
+made no production write. Actor/cause unproven; do not silently override. Final
+combined approval should cover restoring only this unchanged publication too.
+Existing MCPv81/current deployment and other owners remain; no fake approvals.
+
+## 9 November — per-video public guideline review follow-up
+
+Owner #896/#450. CA requested guideline-only public presentation and individual
+video approve/change/decline/comment tracking. Real native Chrome verifies the
+live Germoparts view is client-only; missing feedback controls reproduced.
+Focused codex/guideline-video-client-review adds optional same-renderer review
+panels, separate account link, private snapshot/version-bound response ledger,
+idempotency/conflict/rate guards, staff history and existing MCP read-back.
+NOT LIVE: exact production schema/three-file MCP/frontend packet pending CA
+approval; #975/f6287a05 merged as mainf0a3447d. Read
+GUIDELINE-VIDEO-CLIENT-REVIEW-2026-11-09.md. Final local production-target prebuild,
+self-contained packaging and isolated built GET/HEAD pass; no cloud upload.
+Full4263pass/30skip,
+final18focused, real PostgreSQL roles/isolation/revision/concurrency and actual
+public/staff1440/375/390/430px fixtures pass; build/bundle/Deno/lint/diff pass.
+No fake client approval, publication/source/provider/Teams/calendar write or
+Vercel upload. Existing MCPv81/current production and other owners preserved.
+
+## 9 November — client-named message previews follow-up
+
+Owner #896/#450. CA's WhatsApp card showed generic CG branding. Reproduced the
+initial-HTML title/no-OG defect; focused branch codex/guideline-client-preview
+adds verified per-client metadata to the same SPA shell through one small Node
+function, using the existing anonymous public snapshot reader. Copied/connector
+share links get a publication-version query to refresh preview caches. No content
+or data/schema/auth/permissions change. Read GUIDELINE-CLIENT-PREVIEWS-2026-11-09.md
+for boundaries/tests and the exact release receipt. Now LIVE: #972/mainf8d99e8f
+plus #973/main133b8701 packaging repair. First prebuilt stage failed before any
+promotion on external filePathMap/dist reference; corrected self-contained stage
+dpl_EJr74MFsLf1uqmveHTZCqPQTyHFE verified then same-deployment promoted. One2.6MB
+attempt plus315byte deduplicated corrected upload; zero remote app compilation.
+MCPv81 exact40-file readback, other39/settings/auth preserved. Both connector
+accounts return the same versioned client link. Personal WhatsApp Business actual
+unsent card shows Germoparts name/content guideline/November/four videos/client
+logo. Both test drafts cleared, no messages sent. Company Web's generic fallback
+also affects Wikipedia; personal rendered acceptance passes. Full4256pass/30skip,
+17focused plus2packaging, JS/TS lint/Deno/build/runtime/security/diff pass. Four
+scripts unchanged; no republish/schema/data/permissions/other-client changes.
+
+## 9 November — requested no-login client guideline sharing
+
+Owner #896/#450. CA explicitly rejected private staff links as the final outcome
+and requested that ChatGPT publish the existing Germoparts guide for client review
+and return a client-named public link. Focused branch codex/public-guideline-sharing
+adds that delivery workflow using the accepted renderer, exact-client/run actor
+checks, a private RLS snapshot registry and256-bit revocable capabilities.
+Three MCP actions publish/get/revoke; stale global no-publication instructions
+are narrowed to monthly strategies. No client approval or calendar/Teams change.
+Read PUBLIC-GUIDELINE-SHARING-2026-11-09.md for tests, security and exact release
+packet. Local supported full suite4,247pass/30skip/0fail; real PostgreSQL security/
+snapshot/revocation fixtures, build/app chunks/Deno/scopedlint/diff pass.
+Initial sharing release was MCPv80/frontend dpl_ArdGYhaAcEh9kbAP2r8skWV8HNCS, reviewed
+#970/main46a38c39. Exact40-file hosted readback passes (35preserved), migration/
+RLS/grants independently verified. One2.5MB prebuilt upload/same-deployment
+promotion, zero cloud compilation. Normal company ChatGPT Chat mode published
+the existing Germoparts guide and returned its named no-login link; one exact
+successful audit receipt. Four script hashes/IDs/idea states unchanged, exactly
+one public share. Anonymous read/full scripts, wrong-token/client denial,
+management/table401 and live privacy headers pass. Native Chrome desktop and
+375/390/430px navigation/copy/full-script/direction checks pass; no real-phone
+acceptance inferred. Browser settings visually enabled; stale CUA browser adapter
+worked around using legitimate native app UI, never credentials/auth bypass.
+Normal personal ChatGPT Plus Chat mode also retrieved the same verified public
+link/four-video count read-only. Both personal app tool catalogs refreshed;
+alternate app's stale read-only wording corrected, scopes/permissions unchanged.
+Bounded fresh Drive discovery still cannot identify the exact Control Centre;
+no alternate tracker/guessed write. Existing other-client/provider gates remain.
+
+## 9 November — ChatGPT guideline links/retry fixes LIVE v79
+
+Owner #896/#450. Reproduced company ChatGPT's Germoparts failure: correct draft
+and four complete scripts returned, but no direct app link. Three existing MCP
+files now add UUID-validated staff guideline/run navigation to successful
+read/edit/discovery receipts, refuse cross-client discovery and explain staff
+sign-in versus client publication. Client content/auth/permissions are unchanged.
+
+Read `GUIDELINE-CONNECTOR-LINKS-2026-11-09.md` for the exact draft link, tests,
+three candidate hashes and v77/40-file release packet. CA subsequently instructed
+finishing and pushing live: **ACTIVE v78**, all40 candidate files independently
+verified; other37 preserved byte-for-byte. Live company/second connection return
+the exact link, unchanged four scripts and draft status. Cross-client read denied.
+377 broader MCP/content tests pass, one optional unrelated PostgreSQL fixture
+skipped;122 focused pass. Build/app chunks/scoped lint/diff and repository MCP
+Deno check with validation-only Vite ambient types pass. No new authenticated
+browser/phone acceptance or isolated hosted full-type-check pass is claimed.
+Additional read-only bootstrap/client context/strategy/calendar/CA Hours checks
+pass as detailed in the receipt. No timesheet/client content changes. A second
+reproduced defect is being hardened in the same lane:39 historical successful
+guideline calls stored status only, losing original IDs on retry. New exact
+result receipts use the existing private ledger column; old rows are not guessed
+or rerun. Two-file packet,38 hosted files preserved,382 focused pass/one optional
+skip; no new schema/RPC/permissions. #968 /2179b10d is now **LIVE ACTIVE v79**:
+fresh v78 preflight matched, only two reviewed files replaced, other38 preserved;
+all40 hosted files and existing settings independently read back exact.
+Live ensure of the existing Germoparts document returned created=false, draft,
+same four videos and verified staff link. Identical retry returned semantically
+identical original result/receipt; SQL SELECT confirms exactly one audit receipt.
+No document/video was created or edited. The private audit receipt is the only
+acceptance write. All four scripts and draft status read back unchanged.
+Supported full app verification4,242pass/30optional skips/0fail; unrelated12-test
+Unix SES shell-mock group excluded on Windows, documented in the receipt.
+No SQL mutation/content/calendar/Teams/
+OneDrive/Vercel operation. Exact Google Control Centre remains unavailable; no
+guessed write. Other owners and prior production gates remain unchanged.
+
 ## 6 November — platform health / GitHub storage audit
 
 Read `PLATFORM-HEALTH-AUDIT-2026-11-06.md` before claiming the fleet healthy or
