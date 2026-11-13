@@ -9,6 +9,39 @@ The company Chrome profile and Nolan site identity were verified independently.
 Read the full current review thread in CG Picasso Approvals, including quoted
 poster captions. Private snapshot and bounded amendment matrix remain on the MSI.
 No WhatsApp replies, reactions, new poster sends or client publication this round.
+The owner subsequently explicitly authorised this agent to send the revised HD
+posters with their allocated captions through Nolan to CG Picasso Approvals.
+That supersedes the earlier no-reply hold; export verification still comes first.
+
+## Delivery follow-up and visual-depth check
+
+Re-read the virtualised WhatsApp thread across multiple viewports, including the
+opening request and latest reply. The private coverage receipt now contains all
+**15/15** mapped review notes, with none missing. A single viewport snapshot was
+incomplete; it must never substitute for the full review capture.
+
+Reassessed all thirteen native previews for source context, useful overlap,
+hierarchy and restrained graphic treatment. Existing registered canopy/sign
+overlaps and liked food/drink compositions remain. Rejected floating cutouts
+were replaced with intact real shop/service scenes; obscuring a headline or
+adding oversized bubbles is not an improvement in depth. All candidates retain
+independent native photo/mark fills and live typography. Layer counts are not a
+creative score, and some lighting planes remain baked source derivatives rather
+than individually editable effects. Human creative approval remains pending.
+
+The private R6 send packet now normalises **both** twelve monthly `items` and the
+separate `extraItems` entry. The extra had stale R5 export/send metadata despite
+its saved R6 artwork. Historical receipts were preserved separately and current
+export/message fields cleared. All thirteen captions have valid Unicode, actual
+paragraph breaks and PICASSO signatures; the fuel-service caption matches its
+replacement source. No stale export may be sent as the new revision.
+
+Company Chrome's returning Google sign-in hangs for both remembered company
+accounts. The existing info account's password-free email-code option works,
+but the email connector withholds authentication codes. No password requested,
+reset, new grant or personal-profile substitution. The existing Canva sign-in
+is preserved for completion; no fresh HD exports or new sends yet. Connected
+native editing/readback continues to work. Delivery is authorised, not completed.
 
 ## Saved artwork
 
@@ -76,8 +109,10 @@ delivery. No new actual HD export is claimed.** Browser export reached a remembe
 CG Canva account's returning-sign-in loading state; no password, personal-profile
 substitution or desktop takeover. Connected Canva tools still saved/read back correctly.
 Native thumbnails are labelled previews; R5's genuine HD files remain historical.
-Finish fresh HD export/crop review once the existing browser session resumes, then
-apply subsequent internal feedback. Owner currently says read/amend without replies.
+Finish fresh HD export/crop review once the existing browser session resumes,
+then send each current poster with its allocated caption as one HD photo message
+through Nolan to CG Picasso Approvals, signed PICASSO. Record each fresh message
+ID and delivery state; preserve earlier receipts to prevent duplicate sends.
 
 OneDrive metadata discovery worked; a raw-file fetch returned403 `serviceReadOnly` /
 `Database Is Read Only`. Existing approved local originals sufficed; no permission

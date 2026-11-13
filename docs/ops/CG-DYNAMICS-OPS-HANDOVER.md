@@ -2,7 +2,11 @@
 
 Existing #948/#955/draft #956 only; latest main reconciled. Read the actual
 CG Picasso Approvals feedback through the verified Nolan account in company
-Chrome. Owner explicitly says read/amend, no replies: zero new WhatsApp sends.
+Chrome. Initial read/amend/no-reply hold was superseded by the owner's explicit
+request to send revised HD posters/captions through Nolan to that exact group.
+All15 review notes now captured across successive virtualised chat viewports;
+zero new WhatsApp sends so far. All13 private send entries, including the extra,
+normalised to current R6 pages; stale R5 export/send fields retained as history.
 Ten creative revisions saved, then owner-requested safe-margin pass on all13.
 Official Canva DAHaD4mJnGY has85 pages (two additions pre-existed); IDs/order
 unchanged, all72 non-target pages intact, protected Drafts/Posted now84/85.
@@ -21,7 +25,10 @@ connected editing/readback works. OldR5 HD files/messages remain historical.
 No portal finals, client publication, production DB/service/deployment, new
 dependencies/spend or Nolan/Picasso source changes. January authority/naming and
 ordinary company-ChatGPT create/amend/true-export acceptance remain open. Finish
-fresh HD/crop review when the existing session resumes; preserve no-reply hold.
+fresh HD/crop review when the existing session resumes, then authorised HD
+photo+caption messages signed PICASSO. Returning Google sign-in hangs; existing
+company Canva email-code login is waiting, and the email connector withholds
+authentication codes. No password/reset/new access grant or personal Chrome.
 Exact Control Centre target unavailable; no guessed tracker write.
 
 ## 11 November — existing-film registration repair, local candidate only

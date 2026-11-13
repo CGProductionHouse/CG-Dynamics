@@ -962,7 +962,7 @@
     ],
     "freshHdExportVerified": false,
     "whatsappSends": 0,
-    "ownerSaysNoReplies": true,
+    "ownerSaysNoReplies": false,
     "evidence": "FEEDBACK-REWORK-2026-11-13.md",
     "readbackVerified": true,
     "sourcePreserving": true,
@@ -979,6 +979,12 @@
       "pythonOverlayTests": 6,
       "localBuild": "tsc -b and Vite7.3.6 passed13November",
       "skillValidator": true
-    }
+    },
+    "latestSendAuthority": "Owner explicitly requests revised HD posters plus allocated captions through Nolan to CG Picasso Approvals; previous no-reply hold superseded.",
+    "reviewMessagesCapturedAcrossViewports": 15,
+    "captureCoverageMissing": 0,
+    "deliveryPacketIncludesExtra": true,
+    "depthAndLayerPreviewReview": true,
+    "browserExportBlocker": "Returning Google sign-in hangs; existing company Canva email-code login pending; email connector withholds authentication codes. No password or new grant."
   }
 }
