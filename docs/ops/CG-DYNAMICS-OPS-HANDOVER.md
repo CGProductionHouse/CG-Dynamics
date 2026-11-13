@@ -1,35 +1,34 @@
-## 13 November — Piek feedback amended and important margins verified
+## 13 November — Piek feedback revised and clean-caption HD review delivered
 
-Existing #948/#955/draft #956 only; latest main reconciled. Read the actual
-CG Picasso Approvals feedback through the verified Nolan account in company
-Chrome. Initial read/amend/no-reply hold was superseded by the owner's explicit
-request to send revised HD posters/captions through Nolan to that exact group.
-All15 review notes now captured across successive virtualised chat viewports;
-zero new WhatsApp sends so far. All13 private send entries, including the extra,
-normalised to current R6 pages; stale R5 export/send fields retained as history.
-Ten creative revisions saved, then owner-requested safe-margin pass on all13.
-Official Canva DAHaD4mJnGY has85 pages (two additions pre-existed); IDs/order
-unchanged, all72 non-target pages intact, protected Drafts/Posted now84/85.
-Current candidate selection43,63,66-69,76-77,79-83. Fresh saved native readback
-matches reviewed draft. Existing22 independent exact marks retained; old baked
-Engen strip replaced with blue bleed plus independent exact approved mark.
-New tested safe-area checker reproduces34 bad frames before and clears all45
-text/23 explicitly reviewed logo frames at64px; frame geometry is not taste,
-glyph/alpha detection or overlap approval. Source/history/hash receipts private.
-One wash source matched two historical posters and was excluded; no biometric DB.
-See [full evidence/limits](../ai-workforce/graphic-designer/piek-january-2027/FEEDBACK-REWORK-2026-11-13.md).
+Existing #948/#955/draft #956 only; main reconciled, no competing lane. All15
+original review notes captured across successive virtualised WhatsApp viewports;
+two subsequent owner notes requested preserving the New Year year/canopy overlap.
+Ten creative revisions and13-page margin pass saved. Official Canva DAHaD4mJnGY
+has85 pages, current selection43,63,66-69,76-77,79-83; Drafts/Posted84/85 protected,
+all72 non-target pages intact. Then moved only live year80px to restore accepted
+depth while keeping the photo-gap fix. Fresh saved readback: exactly one text
+position changed, all other native records retained. Latest frame checks:
+45text/23reviewed logos,64px inset,0findings; this is not creative approval.
 
-Saved internal revisions, not creative approval. This round has native previews,
-not fresh HD exports: remembered CG Canva browser sign-in remained loading;
-connected editing/readback works. OldR5 HD files/messages remain historical.
-No portal finals, client publication, production DB/service/deployment, new
-dependencies/spend or Nolan/Picasso source changes. January authority/naming and
-ordinary company-ChatGPT create/amend/true-export acceptance remain open. Finish
-fresh HD/crop review when the existing session resumes, then authorised HD
-photo+caption messages signed PICASSO. Returning Google sign-in hangs; existing
-company Canva email-code login is waiting, and the email connector withholds
-authentication codes. No password/reset/new access grant or personal Chrome.
-Exact Control Centre target unavailable; no guessed tracker write.
+Owner explicitly authorised internal delivery through Nolan to CG Picasso
+Approvals, then **prohibited agent signatures in forwardable poster captions**.
+All13 current true-HD2160x2700 exports inspected;13 individual HD photo+caption
+messages verified by unique IDs, actual HD badges and Sent/Delivered state.
+Eight previously signed captions edited and exactly verified clean. One
+accidental standard-quality College Brew duplicate deleted for everyone after
+owner confirmation; HD copy remains. The distinct earlier New Year revision is
+review history. No generic group reply/introduction or client publication.
+
+Company Chrome retained; Canva site account must be m.productions.cg@gmail.com,
+not the browser-profile info account. Existing Google sign-in required owner
+completion; no passwords/reset/new permissions. Export events/choosers and caption
+contenteditable were unreliable; private receipts prevented blind Send retries.
+See [evidence and reusable lessons](../ai-workforce/graphic-designer/piek-january-2027/FEEDBACK-REWORK-2026-11-13.md).
+Await actual review feedback; no repeated sends or approval inferred. No portal
+finals, production DB/service/deployment, new dependencies/spend or Nolan/Picasso
+source changes. January package/naming/IDs and ordinary company-ChatGPT
+create/amend/true-export acceptance remain open. Exact Control Centre target
+unavailable; no guessed tracker write.
 
 ## 11 November — existing-film registration repair, local candidate only
 

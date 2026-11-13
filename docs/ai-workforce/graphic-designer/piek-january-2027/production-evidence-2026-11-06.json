@@ -852,7 +852,7 @@
   "delivery": {
     "captionDraftsPrepared": 13,
     "captionHashtagLimit": 5,
-    "signature": "PICASSO",
+    "signature": null,
     "requestedWhatsappSender": "Nolan WhatsApp account",
     "requestedGroup": "Picasso approvals",
     "senderAndExactGroupVerified": true,
@@ -869,20 +869,25 @@
       2160,
       2700
     ],
-    "latestExportState": "R6 native previews and saved readback only; fresh actual HD export pending. R5 actual HD exports remain historical.",
+    "latestExportState": "Thirteen actual Canva PNG2x High exports2160x2700 inspected; isolated New Year overlap revision also freshly exported and delivered.",
     "latestExportPageRange": "43,63,66-69,76-77,79-83",
     "furtherSendsHeld": true,
-    "holdReason": "Owner asked to read feedback and amend without replying or resending.",
-    "latestRoundWhatsAppSends": 0,
-    "pendingDeliveryReason": "No resend requested: latest owner instruction is read/amend without replies.",
-    "ownerSendAuthority": "13 November owner: read feedback and amend; no replies or resends. Prior R5 send authority is historical.",
-    "latestRoundAttemptedSends": 0,
+    "holdReason": "Current thirteen delivered; await actual new review feedback rather than duplicate sends.",
+    "latestRoundWhatsAppSends": 13,
+    "pendingDeliveryReason": null,
+    "ownerSendAuthority": "Owner explicitly authorised revised HD photo+allocated-caption internal delivery through Nolan to CG Picasso Approvals; no agent signatures.",
+    "latestRoundAttemptedSends": 15,
     "latestRoundSignedIntroMessages": 0,
-    "latestRoundHdSelectedForEveryPhoto": null,
-    "latestRoundCaptionAndPhotoSameMessage": null,
-    "latestRoundAwaitingHumanFeedback": false,
-    "latestRoundHdExportsVerified": 0,
-    "hdExportsVerifiedMeaning": "Historical R5 actual HD count; no fresh R6 exports."
+    "latestRoundHdSelectedForEveryPhoto": true,
+    "latestRoundCaptionAndPhotoSameMessage": true,
+    "latestRoundAwaitingHumanFeedback": true,
+    "latestRoundHdExportsVerified": 13,
+    "hdExportsVerifiedMeaning": "13 current genuine exports including the later isolated New Year replacement; earlier versions retained privately.",
+    "captionSignaturePolicy": "13November owner: no agent signatures in forwardable poster captions; supersedes earlier signature instruction.",
+    "latestRoundCaptionEditsVerified": 8,
+    "latestRoundStandardDuplicateDeletedForEveryone": true,
+    "latestRoundSupersededDistinctNewYearRevisionRetained": true,
+    "canvaSiteIdentity": "Owner-confirmed company m.productions account; Chrome profile identity is separate."
   },
   "finalDestination": {
     "relativePath": "Clients/Piek Group/A_ClientPortal_Piek_Group/Graphic Design/2027/2027_01_JAN",
@@ -898,7 +903,7 @@
     "Complete human creative/brand approval of the revised twelve-poster grid and at-resolution masks/crops. Native layers and HD export are not creative approval.",
     "Recheck photo/person/shoot/concept/branch repetition with bounded-history limitations and actual current sources.",
     "Install/expose the reusable Poster Studio skill in the company Work environment and prove a normal-company-ChatGPT isolated edit and true export; read-only test alone is insufficient.",
-    "Only after internal approval, send current HD artwork+caption through the authorised Nolan sender to CG Picasso Approvals, then promote approved finals via the canonical same-client portal path and real deliverable IDs."
+    "Current internal HD review delivery is complete; only after actual creative approval promote finals via the canonical same-client portal path and real deliverable IDs."
   ],
   "cost": {
     "incrementalRand": 0,
@@ -960,8 +965,8 @@
       84,
       85
     ],
-    "freshHdExportVerified": false,
-    "whatsappSends": 0,
+    "freshHdExportVerified": true,
+    "whatsappSends": 13,
     "ownerSaysNoReplies": false,
     "evidence": "FEEDBACK-REWORK-2026-11-13.md",
     "readbackVerified": true,
@@ -985,6 +990,23 @@
     "captureCoverageMissing": 0,
     "deliveryPacketIncludesExtra": true,
     "depthAndLayerPreviewReview": true,
-    "browserExportBlocker": "Returning Google sign-in hangs; existing company Canva email-code login pending; email connector withholds authentication codes. No password or new grant."
+    "browserExportBlocker": null,
+    "newOwnerDepthNotesCaptured": 2,
+    "allCurrentCaptionsSignatureFree": true,
+    "priorCaptionEditsExactlyVerified": 8,
+    "accidentalStandardDuplicateDeletedForEveryone": true,
+    "latestOwnerSignatureRule": "No agent signatures in forwardable poster captions.",
+    "depthCorrection": {
+      "page": 81,
+      "elementId": "PBDGzt6lwvxz9s2y-LByqNYNbQzC8sXDd",
+      "topBefore": 465,
+      "topAfter": 545,
+      "leftUnchanged": 64,
+      "exactlyOneNativeRecordChanged": true,
+      "savedReadbackVerified": true,
+      "freshActualHdExport": true,
+      "correctedHdMessageDelivered": true,
+      "marginFindings": 0
+    }
   }
 }
