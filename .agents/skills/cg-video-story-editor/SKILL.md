@@ -5,6 +5,16 @@ description: Plan, assemble, review, and hand off CG Production House client vid
 
 # CG video story editor
 
+## Mandatory source-transfer gate — CA, 13 November 2026
+
+Before any source-byte read, inventory only the exact client's brief-relevant folders using metadata, then screen available OneDrive thumbnails/streaming previews or already-local proxies. Metadata is not visual review. Record an explicit shortlist (item ID/path, preview evidence, reason, useful interval when known, local availability and expected bytes) in the existing project/source record and link from Dynamics.
+
+Download/hydrate only those selected clips and required verified brand assets using an exact allowlist. Never recursively hydrate a client/year/archive or run ffprobe, hashing, decode/contact-sheet scripts across cloud-only placeholders: those reads download originals. Existing local files are reusable, not a reason to duplicate them. Check selected bytes and current destination headroom first; use the verified secondary work drive rather than filling C:.
+
+Unavailable previews are an explicit blocker, not permission to bulk-download. Continue with existing local material or obtain a specifically bounded alternative before downloading unreviewed sources. Preserve completed/partial files and other staff jobs; no deletion, dehydration or blanket sync cancellation. Log inventory, previewed, selected and transferred counts separately. A transfer completion is not source-screening completion. Probe/decode verification applies to selected complete originals before editing.
+
+Full maintained procedure: [CG Video Editing System, section 4](https://docs.google.com/document/d/1V57HP_aPxkWrVgndsOPwJR5xx8IRHsCibLl5JKebUQQ/edit?tab=t.z9k066550hur). This documentation does not claim a hard runtime enforcement or installation on another device.
+
 **CG Osmo motion-rig implementation — 10 November 2026:** The shared `scripts/cg_motion_graphics.py` now has tested image-backed branded motion-compositing operators linked to the existing `camera_plane.depth_layer_rect` perspective/parallel-depth geometry. The real CG Osmo R08 candidate executed the source-bound frame treatment on actual moving footage; 90-frame control/effect test, seven isolated geometry/operator tests and full 585-frame/30fps review-export checks passed. **Owner motion-design and sound approval are outstanding.** Do not mistake moving masks/cards for a proven premium creative result, repeat a rejected template or force graphics onto source footage. Read the [actual implementation and rejection boundaries](../../../scripts/video-editing/studio-phase2/CG-OSMO-MOTION-RIG-20261110.md). No new technique family, subscription, editor or model was installed for this exercise.
 
 **11 November Dynamics history gate:** before a new edit or reuse, read the exact
@@ -103,7 +113,7 @@ duplicate protection and separate cloud/library/calendar/client-approval states.
 
 1. Identify the intended buyer, their immediate desire or problem, the emotional payoff, the product proof, and one specific action. Write that arc in one sentence before choosing shots.
 2. Screen each source as moving footage. Record what is visibly shown, project identity, rights, prior use, intended role, and the strongest in/out points. Contact sheets help triage; they do not replace watching the clip.
-   For a local folder of originals, `python scripts/screen_sources.py <input-folder> <output-folder>` creates early/middle/late wide and 9:16 contact frames plus a CSV ledger with the review fields. Requires FFmpeg; inspect promising clips in motion afterward.
+   For a verified already-local or allowlisted selected folder of originals (never a cloud-placeholder archive), `python scripts/screen_sources.py <input-folder> <output-folder>` creates early/middle/late wide and 9:16 contact frames plus a CSV ledger with the review fields. Requires FFmpeg; inspect promising clips in motion afterward.
 3. Select for meaning and continuity before image quality. Reject footage that suggests a different product or setting. Do not imply that stock lifestyle scenes, workshop footage, and finished worktops show one installation unless identity is verified.
 4. Start with an observable action, question, or visual tension. Develop it through a change in scale or perspective: human use, material detail, and a real finished result. End with a specific invitation and the client's approved brand treatment.
 5. Show hands, people, food, and ordinary use when the brief calls for a lived-in home; balance illustrative lifestyle stock with clear, genuine client product footage. Keep stock licensing and origin explicit in the source ledger.
