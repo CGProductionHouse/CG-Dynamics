@@ -1,4 +1,56 @@
-# Owner correction14November — first eight rejected; rebuild, do not send
+# 15November — eight rebuilt and HD checked; delivery held
+
+This is the current checkpoint. All eight replacements are native Canva drafts
+with inspected2160x2700 exports and exact clean caption/hash pairs. First-pass work
+below remains rejected, not current or approved.
+
+| Slot | Current workbench | Actual revision |
+| --- | --- | --- |
+| DP01 | `DAHa7Hy-_Xs` | Natural smiling real portrait, specific wheel balancing; right-aligned type, separate steering motif, bottom-right logo.8text/4media records. |
+| DP02 | `DAHa7HhAotA` | Errand concept retained; independent sculptural road prop on light material, live offset type, bottom-left logo.7text/3media records. |
+| DP03 | `DAHa6dj_8iU` | Original vehicle/photo records and all13IDs retained; tightly centred headline, top-right logo and right-aligned footer. |
+| DP04 | `DAHa640Ndpc` | Actual brake work, specific brake check, registered type/subject depth, curved orange service field.9text/6media records. |
+| F01 | `DAHa7YJ_9fI` | Natural Midas portrait holding an actual multimeter/hacksaw; supersedes office image and unused Preller alternate. |
+| F02 | `DAHa7YmDyOo` | Actual Centurion tyre-changing work; intact tyre/hands, not wheel balancing. |
+| F03 | `DAHa7bctOhQ` | Actual Midas fire-extinguisher display, not guessed cleaning products. |
+| F04 | `DAHa7YKwO1E` | Actual Dunlop hands-on tyre detail and intact working pose. |
+
+Photo posts each have independent photo/logo records, individual sRGB/WB/contrast
+recipes and varied logo corners. No generated client photo, reshaping or smoothing.
+Two sources have obsolete price numeral fields softly blurred. The zero-outside-mask
+comparison is on graded RGB before JPEG encoding, not original/export bitwise equality.
+Originals stay read-only. DP02's single built-in generated decorative asset is separate
+from exact logos/live text; no generated branch, client person or product.
+
+Five selected full originals completed4,185 comparisons against837 retained actual
+artworks. Four flags were visibly different photos sharing retail background/equipment;
+raw findings retained, thresholds unchanged. Prior vehicle/brake checks remain separate.
+Evidence is bounded:386Canva previews,442Group published covers and9queued artworks,
+excluding missing history/carousel/video interiors. DP03/F03 share an EXIF capture date;
+possible shared shoot/day stays a human-review flag. No global non-use certification
+or biometric matching/database.
+
+**No Wiseman sends or human creative approval.** Latest WhatsApp refresh is blocked:
+old company tab says active elsewhere, active-window focus/read fails and another tab
+reports debugger unattached. Do not force a switch or send concurrently. Some Canva
+save/read calls timed out; actual fresh editor/HD output proved the saved corrections,
+not blind commit retries. F04 folder move is unconfirmed. Official master replacement
+remains unresolved because native editing rejects its101pages; all93 prior pages stay
+preserved, old owned candidates remain in In Progress. No second official master.
+
+Private selector: `production-r2/current-rebuild.json`; actual HD board:
+`production-r2/WG-JAN2027-actual-HD-rebuild-grid-r2.jpg`. All eight caption guards pass.
+A108-entry current working ZIP is locally CRC-checked and uploaded to the existing
+internal OneDrive helper:99,864,838bytes, exact item/name/size read back, sharing
+unchanged. No remote SHA256 comparison claimed. Earlier DP04 backup remains verified.
+No client-portal finals, publication or dates assigned. Exact native Impact/Mokoto
+picker evidence is verified; portable local font/runtime and normal-company-ChatGPT
+acceptance remain blocked. Month-plan validation passes with production blocks retained.
+R0 additional spend; no deployment, production data or Nolan/Picasso source changes.
+Current TypeScript/Vite7.3.6 build, revised month-plan validation, skill validation
+and diff whitespace checks pass. Existing Browserslist/chunk warnings unchanged.
+
+# Historical owner correction14November — first eight rejected
 
 **This supersedes the older progress snapshot below.** Owner inspected the HD grid
 and rejected all four photo posts and the poster execution. No Wiseman message has
@@ -17,12 +69,13 @@ been sent. The record is a failed creative checkpoint, not an approved monthly s
 
 New unsent DP04 rebuild `DAHa640Ndpc` / `PBy3kczyp68tqm9B` uses a selected actual
 Supa Quick October brake-work original, existing approved monochrome logo, native
-Impact plus angular Mokoto-looking type, registered source overlap and a distinct
+Impact plus actual native Mokoto type, registered source overlap and a distinct
 orange service field/right website button. Specific message: next stop school;
 first, brake check. Official Supa Quick brake-check guidance supports the service;
 no free/price/safety guarantee is claimed.9 live text +6 independent image/graphic
-records. Actual native and initial HD inspected; tighter leading/source-registration
-refinement saved, final amended HD/font-picker/human approval pending. Source checks
+records. Actual final tightened2160x2700 export inspected; actual Canva font picker
+shows Mokoto, alongside the previously verified Impact. Human creative approval
+remains pending. Source checks
 against442 covers,386 historical Canva pages and9 queued artworks returned0
 supported matches/0 errors, still bounded non-use evidence. All other rebuilds and
 all4 new photo selections remain unfinished. No sends.
@@ -49,7 +102,10 @@ but transferred HD/readback verification remains incomplete.
 New caption transport guard passes7 meaningful tests and all8 allocated caption
 files. It prevents signatures/encoding corruption/stale copy; it does not turn rejected
 artwork into sendable work. The internal OneDrive `ChatGPT/Graphic Designer Working`
-folder was created successfully; no files have yet been uploaded there. Finals remain
+folder now holds a verified9,070,411-byte working recovery ZIP with the DP04 scene,
+referenced assets, clean caption, settings and actual HD proof. Its item metadata was
+read back after upload; sharing was unchanged. This is unapproved working material,
+not a client-portal final. Finals remain
 reserved for the authorised client portal after approval. No schedule, client release,
 production deployment, new hosting, new paid API/subscription or spend.
 

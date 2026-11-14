@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "clientId": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
   "month": "2027-01-01",
-  "status": "owner-rejected-execution-rebrief-required",
+  "status": "rebuild-native-HD-inspected-internal-review-pending",
   "ownerMonthConfirmedAt": "2026-11-14",
   "packageBaseline": {
     "designPosters": 4,
@@ -11,7 +11,7 @@
     "videoExcludedFromThisTask": true
   },
   "productionLane": {
-    "state": "all-eight-first-pass-rejected-no-sends",
+    "state": "eight-rebuilt-HD-inspected-held-latest-approval-history",
     "masterDesignId": "DAHEfeuQzP4",
     "scheduleMeaning": "Creative windows only; no dated rows, UUIDs, scheduling or publication created. DP numbering is not authoritative posting order.",
     "excludedPackages": [
@@ -70,28 +70,30 @@
       "provisionalId": "2027_01_WISEMAN_DP01",
       "monthlyDeliverableId": null,
       "brandScope": "WISEMAN_GROUP",
-      "businessObjective": "Move a vague car-related task towards an appropriate actual business.",
+      "businessObjective": "Direct wheel-balancing enquiries to Auto Wheel & Tyre, an actual listed Group business.",
       "buyingSituation": "The first ordinary errands after the holidays.",
       "audience": "People choosing practical car-related help from the Group businesses.",
       "audienceTension": "The car task stays on the list while school and work routines restart.",
-      "proposition": "A practical first step without promising every service from the Group office.",
+      "proposition": "Ask the relevant team about wheel balancing; no remote diagnosis or guarantee.",
       "proof": "Ready exact-client guide and current official Group directory; primary government calendar only where relevant.",
       "emotion": "Recognised and informed; local wit without an invented claim.",
       "nextAction": "Use the verified Group website to find the appropriate business.",
       "januaryRelevance": "The first ordinary errands after the holidays. This is a proposed creative window, not a schedule.",
       "headlineCandidates": [
-        "JANUARY'S TO-DO LIST CALLED."
+        "SHAKE UP YOUR YEAR. NOT YOUR STEERING."
       ],
-      "mechanism": "original office portrait with a registered hair/type overlap and a phone-call headline",
-      "sourceRequirement": "Genuine Group office source, exact brand logo, clean original-pixel hair mask.",
-      "sourceStatus": "native-R2-HD-inspected",
+      "mechanism": "original smiling portrait against a textured tyre-wave field; separate sculptural steering motif, right-aligned live typography and bottom-right exact logo",
+      "sourceRequirement": "Actual authorised Dunlop library portrait, intact original-pixel face/body; no generative reconstruction.",
+      "sourceStatus": "native-saved-actual-HD-inspected",
       "avoid": [
         "No named current staff role; no automatic clipped-data recovery or skin smoothing.",
         "Reused people/photographs, near-frame substitutes, generic footer templates and unverified offers."
       ],
-      "whyItExists": "Move a vague car-related task towards an appropriate actual business. The car task stays on the list while school and work routines restart.",
-      "qaState": "native-R2-HD-inspected",
-      "workingCanvaDesignId": "DAHa50-3QfY"
+      "whyItExists": "Give one real Group business and wheel-balancing enquiry a clear new-year hook, using a natural smiling workshop portrait rather than the rejected office photograph.",
+      "qaState": "blocked-production-local-font-runtime-and-human-approval",
+      "workingCanvaDesignId": "DAHa7Hy-_Xs",
+      "supersededWorkingDesignId": "DAHa50-3QfY",
+      "nativeDraftQualityState": "Actual Canva native fonts and2160x2700 output inspected; internal candidate, not human creative approval."
     },
     {
       "provisionalId": "2027_01_WISEMAN_DP02",
@@ -109,16 +111,18 @@
       "headlineCandidates": [
         "DON'T MAKE AN ERRAND A ROAD TRIP."
       ],
-      "mechanism": "directional pegboard with separate task markers, material depth and varied live-type placement",
-      "sourceRequirement": "Verified current directory and independently composed original graphics; no fake branch map, unknown hours or universal-service claim.",
-      "sourceStatus": "blocked-source-and-execution",
+      "mechanism": "independent sculptural asphalt detour asset on a light material field, live offset headline, bottom-left exact monochrome logo and separated right CTA",
+      "sourceRequirement": "Generated decorative road prop only, never a real branch map or client photograph. Exact logo and all text independent.",
+      "sourceStatus": "native-saved-actual-HD-inspected",
       "avoid": [
         "Avoid the old relationship/therapist concept, sound-effects decoding and another office-portrait template.",
         "Reused people/photographs, near-frame substitutes, generic footer templates and unverified offers."
       ],
       "whyItExists": "Make the current Group business directory useful, rather than listing unrelated offers. An unclear destination can turn a simple task into extra stops.",
-      "qaState": "blocked-source-and-execution",
-      "workingCanvaDesignId": null
+      "qaState": "blocked-production-local-font-runtime-and-human-approval",
+      "workingCanvaDesignId": "DAHa7HhAotA",
+      "supersededWorkingDesignId": null,
+      "nativeDraftQualityState": "Actual Canva native fonts and2160x2700 output inspected; internal candidate, not human creative approval."
     },
     {
       "provisionalId": "2027_01_WISEMAN_DP03",
@@ -134,45 +138,49 @@
       "nextAction": "Use the verified Group website to find the appropriate business.",
       "januaryRelevance": "Returning to ordinary driving after a longer summer journey. This is a proposed creative window, not a schedule.",
       "headlineCandidates": [
-        "THE HOLIDAY IS OVER. THE KILOMETRES STAY."
+        "THE HOLIDAY’S OVER. THE KILOMETRES STAY."
       ],
-      "mechanism": "diagonal tread-to-journey composition with source-faithful work detail and independent typography",
-      "sourceRequirement": "Select an unused genuine original. Any listed-business image needs exact parent-awareness scope verification first; no franchise photo-slot filler.",
-      "sourceStatus": "blocked-source-and-execution",
+      "mechanism": "actual Group vehicle with registered roof/type overlap, large tightly stacked centred live headline, top-right logo and right-aligned footer",
+      "sourceRequirement": "Retain the original owned candidate photograph; historical vehicle-wrap marks are documentary, not current Hi-Q promotion.",
+      "sourceStatus": "native-saved-actual-HD-inspected",
       "avoid": [
         "Avoid duplicating the current tyre-clues/fitment artwork, an existing source, or asserting that every car needs the same work.",
         "Reused people/photographs, near-frame substitutes, generic footer templates and unverified offers."
       ],
       "whyItExists": "Encourage a useful vehicle-care next step through the correct business. Finishing a trip does not remove the wear accumulated on it.",
-      "qaState": "blocked-source-and-execution",
-      "workingCanvaDesignId": null
+      "qaState": "blocked-production-local-font-runtime-and-human-approval",
+      "workingCanvaDesignId": "DAHa6dj_8iU",
+      "supersededWorkingDesignId": null,
+      "nativeDraftQualityState": "Actual Canva native fonts and2160x2700 output inspected; internal candidate, not human creative approval."
     },
     {
       "provisionalId": "2027_01_WISEMAN_DP04",
       "monthlyDeliverableId": null,
       "brandScope": "WISEMAN_GROUP",
-      "businessObjective": "Place the car among the practical preparations for daily school journeys.",
+      "businessObjective": "Encourage a specific brake-check enquiry before school-run routines restart.",
       "buyingSituation": "Preparation before public-school learners return13January.",
       "audience": "People choosing practical car-related help from the Group businesses.",
       "audienceTension": "Bags and lifts are organised while the vehicle can be overlooked.",
-      "proposition": "Find the right business for the checks the vehicle needs; no safety guarantee or invented package.",
+      "proposition": "Book or ask about a brake check through the relevant Group business; no free offer or safety guarantee.",
       "proof": "Ready exact-client guide and current official Group directory; primary government calendar only where relevant.",
       "emotion": "Recognised and informed; local wit without an invented claim.",
       "nextAction": "Use the verified Group website to find the appropriate business.",
       "januaryRelevance": "Preparation before public-school learners return13January. This is a proposed creative window, not a schedule.",
       "headlineCandidates": [
-        "SMALL PASSENGERS. BIG PRIORITIES."
+        "NEXT STOP: SCHOOL. FIRST: BRAKE CHECK."
       ],
-      "mechanism": "tactile school prop on a grounded plane behind independent priority typography",
-      "sourceRequirement": "Generic unbranded decorative backpack only; exact original Group logo and live text, not a generated client product.",
-      "sourceStatus": "native-proof-HD-pending",
+      "mechanism": "actual brake-work photograph and registered subject/type depth against a curved orange service field, top-left exact logo and separate black right website button",
+      "sourceRequirement": "Actual authorised Supa Quick brake/hub-work original and exact logo; no generated client people or products.",
+      "sourceStatus": "native-saved-actual-HD-inspected",
       "avoid": [
         "No generated children, reconstructed client photograph, school endorsement, price, opening-hours or blanket service claim.",
         "Reused people/photographs, near-frame substitutes, generic footer templates and unverified offers."
       ],
-      "whyItExists": "Place the car among the practical preparations for daily school journeys. Bags and lifts are organised while the vehicle can be overlooked.",
-      "qaState": "native-proof-HD-pending",
-      "workingCanvaDesignId": "DAHa6EwI0Mk"
+      "whyItExists": "Make brake-check enquiries a specific practical preparation before school-run routines resume, without a blanket safety promise.",
+      "qaState": "blocked-production-local-font-runtime-and-human-approval",
+      "workingCanvaDesignId": "DAHa640Ndpc",
+      "supersededWorkingDesignId": "DAHa6EwI0Mk",
+      "nativeDraftQualityState": "Actual Canva native fonts and2160x2700 output inspected; internal candidate, not human creative approval."
     }
   ],
   "photoPosts": [
@@ -181,47 +189,51 @@
       "clientId": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
       "brandScope": "WISEMAN_GROUP",
       "monthlyDeliverableId": null,
-      "title": "Real conversation",
-      "workingCanvaDesignId": "DAHa6Lv7Ksk",
-      "pageId": "PB30jKSgLZ834Xqk",
-      "sourceQualification": "Original Group office portrait, exact separate logo; archive/current-role and cycle review still required.",
-      "state": "native-candidate-HD-cycle-history-gates-open"
+      "title": "Midas tools in real hands",
+      "workingCanvaDesignId": "DAHa7YJ_9fI",
+      "pageId": "PBHmlNl4Rk5hkJNv",
+      "sourceQualification": "Owner-authorised actual subsidiary original supporting a Group post. Individual sRGB finish, source/product context inspected, exact independent Group logo; bounded source/shoot/history checks and creative approval remain explicit.",
+      "state": "native-saved-actual-HD-inspected-internal-review-pending",
+      "supersededWorkingDesignId": "DAHa6Lv7Ksk"
     },
     {
       "provisionalId": "2027_01_WISEMAN_F02",
       "clientId": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
       "brandScope": "WISEMAN_GROUP",
       "monthlyDeliverableId": null,
-      "title": "At work, not on autopilot",
-      "workingCanvaDesignId": "DAHa6EVnEAo",
-      "pageId": "PBntCNTWxzCM8tzm",
-      "sourceQualification": "Original Group office action image with background colleague and private papers softened; preserve real foreground texture.",
-      "state": "native-candidate-HD-cycle-history-gates-open"
+      "title": "Supa Quick Centurion tyre fitting",
+      "workingCanvaDesignId": "DAHa7YmDyOo",
+      "pageId": "PBLNqfLMcnTCvpp2",
+      "sourceQualification": "Owner-authorised actual subsidiary original supporting a Group post. Individual sRGB finish, source/product context inspected, exact independent Group logo; bounded source/shoot/history checks and creative approval remain explicit.",
+      "state": "native-saved-actual-HD-inspected-internal-review-pending",
+      "supersededWorkingDesignId": "DAHa6EVnEAo"
     },
     {
       "provisionalId": "2027_01_WISEMAN_F03",
       "clientId": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
       "brandScope": "WISEMAN_GROUP",
       "monthlyDeliverableId": null,
-      "title": "The desk-side shift",
-      "workingCanvaDesignId": "DAHa6NlVXhI",
-      "pageId": "PBDn60c0s6kLTB6T",
-      "sourceQualification": "Actual Group office process detail, faces excluded; private fields softened. Actual uniform/document marks retained, not a franchise product post.",
-      "state": "native-candidate-HD-cycle-history-gates-open"
+      "title": "Midas fire-extinguisher enquiries",
+      "workingCanvaDesignId": "DAHa7bctOhQ",
+      "pageId": "PBjZBB0xBsQHYM5W",
+      "sourceQualification": "Owner-authorised actual subsidiary original supporting a Group post. Individual sRGB finish, source/product context inspected, exact independent Group logo; bounded source/shoot/history checks and creative approval remain explicit.",
+      "state": "native-saved-actual-HD-inspected-internal-review-pending",
+      "supersededWorkingDesignId": "DAHa6NlVXhI"
     },
     {
       "provisionalId": "2027_01_WISEMAN_F04",
       "clientId": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
       "brandScope": "WISEMAN_GROUP",
       "monthlyDeliverableId": null,
-      "title": "The badge, up close",
-      "workingCanvaDesignId": "DAHa6EVnEAo",
-      "pageId": "PBSVGXXbgVhv35G2",
-      "sourceQualification": "Exact original embroidered Group badge; no identifiable face or invented new person identity. No second overlaid logo.",
-      "state": "native-candidate-HD-cycle-history-gates-open"
+      "title": "Dunlop hands-on tyre detail",
+      "workingCanvaDesignId": "DAHa7YKwO1E",
+      "pageId": "PBNTCHJtpytjcvm7",
+      "sourceQualification": "Owner-authorised actual subsidiary original supporting a Group post. Individual sRGB finish, source/product context inspected, exact independent Group logo; bounded source/shoot/history checks and creative approval remain explicit.",
+      "state": "native-saved-actual-HD-inspected-internal-review-pending",
+      "supersededWorkingDesignId": "DAHa6EVnEAo"
     }
   ],
-  "releaseStatus": "held; native candidate creation is not approval, final delivery or schedule authority",
+  "releaseStatus": "Five full originals compared with837retained artworks; raw flags visually reviewed. No Wiseman sends: latest approval-window access unavailable. Human creative/source-cycle review, supported official-master replacement and authoritative January dates remain separate gates.",
   "ownerCreativeCorrection": {
     "sourcePermission": "Suitable actual Supa Quick, Wise Ride, Midas and Dunlop Zone sources allowed for Group content; Hi-Q excluded.",
     "photoPosts": "All four rejected; reselect attractive natural active/product/service images, not awkward portraits or uniform/paper closeups.",

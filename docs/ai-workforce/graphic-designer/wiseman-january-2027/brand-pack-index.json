@@ -5,22 +5,23 @@
     "name": "Wiseman Group"
   },
   "observedAt": "2026-11-14",
-  "status": "owner-rejected-first-eight-rebuild-required",
+  "status": "verified-kit-rebuilt-internal-candidates-unapproved",
   "sourceAuthority": "CG Dynamics exact-client guide v1 plus owner month/tone instructions; OneDrive remains media authority",
   "scopes": [
     {
       "key": "WISEMAN_GROUP",
       "canvaBrandKitId": "kAFRuQsd8N8",
       "fonts": [
-        "Impact"
+        "Impact",
+        "Mokoto"
       ],
       "kitFontLabels": [
         "Impact",
         "Mokoto",
         "Monsterrat"
       ],
-      "fontStatus": "local-render-verified",
-      "fontLimits": "Only Impact locally rendered. Actual Canva UI showed Impact on14November. Other literal kit labels do not prove portable font availability/licensing; no font bytes redistributed.",
+      "fontStatus": "native-canva-picker-verified",
+      "fontLimits": "Impact and Mokoto actually shown in Canva native font picker on14November. Literal Monsterrat label remains unverified. No font files redistributed or portable licence inferred.",
       "colours": [
         "#FA5C0F",
         "#FEE500",
@@ -29,7 +30,8 @@
         "#F10000"
       ],
       "exactLogoStatus": "OneDrive-original-hash-verified; transparent PNG and actual native placement inspected",
-      "productionBlocked": false
+      "productionBlocked": true,
+      "productionBlockReason": "Native Canva font picker proves Impact/Mokoto for the reviewed drafts. Portable local rendering of every exact kit font and normal-company-ChatGPT end-to-end remain unverified; do not relabel native font evidence as a local-font pass. Human creative approval also pending."
     }
   ],
   "sourceScopeRules": [

@@ -87,6 +87,39 @@ None of these local tools proves normal company ChatGPT invocation, master-page
 transfer, human approval, schedule assignment or delivery. Keep those gates separate.
 # Proven November14 corrections
 
+- Native formatting may auto-fit both width and left position. After a font-size
+  change, restore the intended frame width, then explicitly reapply its position.
+  Actual DP03 export proved the final centred/tight hierarchy; record geometry
+  alone did not reveal the first unintended left shift.
+- A commit timeout is an unknown response, not proof of failed saving. Do not
+  blindly retry. Fresh saved-editor output and genuine HD verified DP03/F03 while
+  page-list thumbnails/AX labels could be stale. Record the timeout and actual
+  final-file evidence separately; never relabel a cached thumbnail as current HD.
+- Verify the full source before assigning product copy. Actual selected originals
+  showed a multimeter/hacksaw and fire extinguishers, not guessed oils/cleaners.
+  Blur obsolete temporary price numerals only when needed; retain source and mask
+  rectangles. Zero change outside that mask is a pre-encoding graded-RGB test,
+  not bitwise equality after JPEG encoding or the overall colour finish.
+- A negative thumbnail match is selection evidence only. The full-original pass
+  found additional equipment/background flags; inspect actual historical art and
+  retain raw results/visual decisions. EXIF-date overlap is a source-family review
+  flag, not a biometric identity or automatic exemption. The private feature-cache
+  experiment is not a proven reusable production cache or like-for-like benchmark.
+- If WhatsApp says active elsewhere, inspect the existing company window instead
+  of clicking Use here and disrupting another sender. If actual latest-history
+  coverage cannot be refreshed, stage exact files/captions with a hold receipt.
+  Do not call that delivery or infer that the laptop is switched off.
+
+- A transparent PNG can cover the full page for hit-testing even where its pixels
+  are clear. Clicking visible text beneath it selected the graphic instead. Use
+  Canva Position > Layers to select the actual text before a font readback; the
+  DP04 BRAKE layer then showed actual Mokoto in the native font picker. Selection
+  alone is read-only; do not infer font fidelity from a similar-looking preview.
+- Keep bounded working recovery packs in the existing internal OneDrive helper
+  folder. The real DP04 recovery ZIP was uploaded and exact name/size/item ID read
+  back; do not confuse creating a folder with backing up any files. Preserve source
+  locators and mark unapproved working packs clearly; no public sharing or portal
+  final status follows from that backup.
 - Inspect the original task before selecting service copy. An October workshop
   thumbnail initially suggested wheel alignment; the actual original showed brake/
   hub equipment. Rebrief from that source and current service evidence instead of

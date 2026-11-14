@@ -26,7 +26,7 @@ Owner steering14November2026; same #948 / draft#956 lane, no new agent or branch
    appropriate internal draft delivery. No client publication authority inferred.
    Actual progress, sources and exclusions are in `wiseman-january-2027/README.md`.
    **Owner rejected the first eight candidates after seeing the HD grid. Do not
-   send them.** All four photo posts require new sources; technical passes do not
+   send them.** All four photo posts required new sources; technical passes do not
    override creative rejection. Four posters must be substantially recomposed:
    replace DP01's awkward portrait, retain only DP02's concept, tighten DP03's
    typography/reposition its logo, and make DP04 sell a specific verified service.
@@ -36,7 +36,15 @@ Owner steering14November2026; same #948 / draft#956 lane, no new agent or branch
    Eight owner-approved inserts are in official In Progress, pages39–46; all original
    93 IDs/order preserved. Canva native editing now rejects the101-page master;
    retain source workbenches for amendments rather than deleting the only supported
-   native-edit path. No Wiseman sends or January schedule assignment.
+   native-edit path. On15November all four posters and four source replacements
+   are saved natively and actual2160x2700 output inspected. Exact caption guards
+   pass. Five full originals against837artworks completed with four visually
+   different-photo background/equipment flags retained; possible same-day DP03/F03
+   shoot overlap stays a review flag. No Wiseman sends: latest company WhatsApp
+   refresh is blocked by another active window/tool access failure. Do not force
+   a session switch or send old art. Current private selector/HD board and exact
+   workbench IDs are in the Wiseman README. Human approval, supported official
+   replacement, latest history and January schedule assignment remain gates.
 
 Red Oak research remains retained. Nolan's video and Picasso's photo-library
 lanes remain separate. Existing Drafts/Posted/Scheduled and human work stay

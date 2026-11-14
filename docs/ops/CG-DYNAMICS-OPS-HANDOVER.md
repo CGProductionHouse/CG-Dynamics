@@ -1,3 +1,39 @@
+## 15November — Wiseman eight rebuilt; HD checked, delivery held
+
+Same #948/draft#956 worktree/owner, no competing agent. All four poster revisions
+and four replacement photo posts are saved natively; all eight actual2160x2700
+exports inspected. First-pass art remains rejected/do-not-send. Current IDs and
+changes are in the Wiseman README/proposal. Native Impact/Mokoto picker evidence
+is verified; portable local font coverage and normal-company-ChatGPT end-to-end
+are not. Production blocks remain explicit, not silently cleared.
+
+Five full originals completed4,185 comparisons against837 retained artworks;
+four flags were visually different photos with shared background/equipment.
+Raw findings retained, thresholds unchanged, no biometric matching. DP03/F03 share
+an EXIF capture date: possible shoot/day overlap stays a human-review flag. Bounded
+386Canva/442published-cover/9queued evidence is not global non-use or taste approval.
+
+**No Wiseman sends.** Latest WhatsApp refresh is blocked: old company tab says
+active elsewhere, active-window focus/read fails, another tab reports debugger
+unattached. Do not force Use here, declare the laptop offline or send concurrently.
+Some Canva save/read calls timed out; actual fresh editor/HD proved DP03/F03 saved
+corrections, not blind retries. F04 folder-move readback remains unresolved. Official
+101-page master still contains old owned eight in In Progress; all93 original pages
+remain untouched. No protected-history deletion or new official master.
+
+Earlier9,070,411-byte DP04 OneDrive backup was uploaded/read back. New108-entry
+all-eight99,864,838-byte recovery ZIP is CRC-checked locally and uploaded to the
+existing internal helper; exact item/name/size read back, sharing unchanged. This
+is metadata verification, not remote SHA256 comparison. Eight clean caption guards pass; caption/photo pairs
+staged but held. Human approval, latest-history refresh, supported official-file
+replacement and authoritative January schedule remain gates. R0 new spend; no portal
+finals, client publication, production data/deployment or Nolan/Picasso code changes.
+Google Control Centre exact edit target remains unavailable; do not invent a row.
+Current TypeScript/Vite7.3.6 build passes with2GB Node heap; existing Browserslist/
+chunk warnings unchanged. Revised month-plan validation and skill validation pass
+with production blocks retained. Six safe documentation/plan files changed; private
+media/fonts/model/credentials remain outside Git.
+
 ## 14November — Wiseman first eight rejected; service-specific rebuild active
 
 Same #948/draft#956 branch/worktree. Owner rejected the first eight candidates after
