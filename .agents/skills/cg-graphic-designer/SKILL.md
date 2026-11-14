@@ -63,6 +63,20 @@ Original media remains in canonical OneDrive `Photos`. The `CG Creative Assistan
 
 ## Canva working-lane guard
 
+Select and verify the exact client's Brand Kit before reading font or palette
+labels: the editor can retain another client's kit between designs. Inspect the
+master before proposing a new month; an existing human January candidate is not
+available to duplicate or overwrite. Check anniversary/date-specific logo variants
+for the target month rather than copying the current page footer automatically.
+
+Distinguish connector editing limits from Canva document capacity. Central Canvas's
+222-page master could be read and all previews retrieved, but its native editing
+transaction was rejected as unsupported. No transaction opened. Record that exact
+capability gap; do not infer a Canva page maximum or silently create another
+official file. Workflow header order also differs between clients: the existing
+Piek guard cannot represent a master with To Be Approved before New Designs.
+Never supply fabricated boundaries or weaken a guard to force a pass.
+
 For the active Piek master `DAHaD4mJnGY`, re-read the page list before every write and validate it with `scripts/poster-studio/canva-lane-guard.mjs`. The verified 5 November 2026 boundary IDs are versioned in `canva-lane-policy.json`; page numbers are observations only and may shift. Owner explicitly authorised this dated continuation after legacy `DAGcXGWhDhI` reached capacity. The legacy file remains read-only scheduled/posted history; do not redirect its existing export/schedule work or assume its calendar cutoff.
 
 - Maintain one active official client Canva file. An owner-authorised dated continuation may coexist with its read-only legacy schedule/history file. Create and edit new production pages directly in the active file's verified working lanes. Register new job page IDs in the lane policy and validate every content-edit target against the current page list; a page moved into Drafts/Posted/Scheduled immediately loses edit eligibility.
