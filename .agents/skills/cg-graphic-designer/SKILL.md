@@ -18,6 +18,14 @@ Produce professional, individually art-directed work from exact client evidence.
 
 ## Before design
 
+Owner rejection invalidates a candidate's creative/send readiness even when its
+tests, source audit, margins and HD export pass. Record the rejection in the current
+version registry and owning issue before another delivery; do not mistake an approved
+internal page insertion for creative approval. Apply general feedback across the set.
+Check source expression/task, a specific evidenced product/service, tight intentional
+type spacing and genuinely different composition/CTA/logo mechanisms before scaling
+a month's exports. More layers or background removal alone do not establish depth.
+
 1. Read the owning GitHub issue and current exact-client/month authority.
 2. Fail closed if the exact logo, font licence/file, colour values, branch, product/service fact or source rights are unresolved.
 3. Build or refresh the compact Brand Pack for the exact `client_id + brand_scope`; do not borrow a sibling brand kit.
@@ -76,6 +84,13 @@ capability gap; do not infer a Canva page maximum or silently create another
 official file. Workflow header order also differs between clients: the existing
 Piek guard cannot represent a master with To Be Approved before New Designs.
 Never supply fabricated boundaries or weaken a guard to force a pass.
+
+Preflight the target's native editing capability before a structural transfer, as
+well as page capacity. Wiseman's owner-approved eight inserts preserved all93 prior
+IDs/order but the resulting101-page master rejected native editing. This is an actual
+connector limitation, not a proven universal100-page limit. Keep the supported source
+workbenches while resolving amendments; do not delete history or create another
+official client file to hide the limitation.
 
 For the active Piek master `DAHaD4mJnGY`, re-read the page list before every write and validate it with `scripts/poster-studio/canva-lane-guard.mjs`. The verified 5 November 2026 boundary IDs are versioned in `canva-lane-policy.json`; page numbers are observations only and may shift. Owner explicitly authorised this dated continuation after legacy `DAGcXGWhDhI` reached capacity. The legacy file remains read-only scheduled/posted history; do not redirect its existing export/schedule work or assume its calendar cutoff.
 

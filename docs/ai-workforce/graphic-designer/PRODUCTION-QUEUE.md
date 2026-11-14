@@ -25,10 +25,18 @@ Owner steering14November2026; same #948 / draft#956 lane, no new agent or branch
    the deliberately stopped bulk hydration**. Inspect genuine Canva output before
    appropriate internal draft delivery. No client publication authority inferred.
    Actual progress, sources and exclusions are in `wiseman-january-2027/README.md`.
-   Two native poster proofs and four native photo candidates exist. DP01 R2 has a
-   genuine HD inspection; DP04 passes an isolated text-amendment preview test.
-   DP02/DP03, remaining HD/cycle/history gates and delivery are unfinished. No
-   Wiseman sends. This is not completion of the eight posts.
+   **Owner rejected the first eight candidates after seeing the HD grid. Do not
+   send them.** All four photo posts require new sources; technical passes do not
+   override creative rejection. Four posters must be substantially recomposed:
+   replace DP01's awkward portrait, retain only DP02's concept, tighten DP03's
+   typography/reposition its logo, and make DP04 sell a specific verified service.
+   No repeated footer mechanism or excessive leading. Owner now explicitly permits
+   suitable Supa Quick, Wise Ride, Midas and Dunlop Zone photography for Group posts;
+   Hi-Q is taken down and excluded. Child packages still cannot count as Group slots.
+   Eight owner-approved inserts are in official In Progress, pages39–46; all original
+   93 IDs/order preserved. Canva native editing now rejects the101-page master;
+   retain source workbenches for amendments rather than deleting the only supported
+   native-edit path. No Wiseman sends or January schedule assignment.
 
 Red Oak research remains retained. Nolan's video and Picasso's photo-library
 lanes remain separate. Existing Drafts/Posted/Scheduled and human work stay

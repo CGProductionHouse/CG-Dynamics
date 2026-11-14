@@ -85,3 +85,20 @@ and hash locally. Do not report a failed export solely from its event timeout.
 
 None of these local tools proves normal company ChatGPT invocation, master-page
 transfer, human approval, schedule assignment or delivery. Keep those gates separate.
+# Proven November14 corrections
+
+- Inspect the original task before selecting service copy. An October workshop
+  thumbnail initially suggested wheel alignment; the actual original showed brake/
+  hub equipment. Rebrief from that source and current service evidence instead of
+  making the image fit a prewritten claim. A person looking down while doing clear
+  hands-on work differs from an awkward posed portrait; judge the actual image.
+- Canva download panels can rerender during field entry. A real `Size` fill pasted
+  a stray2 onto an owned working page. Stop when the displayed dimensions disagree,
+  undo exactly that change, and compare saved native records. The verified recovery
+  restored all14 records. Wait for settled controls, verify2160x2700/size2 before
+  Download, and never accept `Preparing` as completion. Native download-event waits
+  can time out even when the exact file arrived; check that file before retrying.
+- Use `scripts/poster-studio/caption-guard.mjs` with the explicit canonical UTF-8/LF
+  SHA-256 and a new receipt path. It rejects malformed Unicode, common mojibake,
+  stale text and standalone agent signatures; it neither rewrites nor sends copy.
+  Windows CRLF is normalised only for comparison. Caption notes are not authority.

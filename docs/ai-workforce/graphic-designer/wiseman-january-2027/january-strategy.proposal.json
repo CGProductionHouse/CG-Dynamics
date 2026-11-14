@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "clientId": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
   "month": "2027-01-01",
-  "status": "proposal-unmatched-to-schedule",
+  "status": "owner-rejected-execution-rebrief-required",
   "ownerMonthConfirmedAt": "2026-11-14",
   "packageBaseline": {
     "designPosters": 4,
@@ -11,7 +11,7 @@
     "videoExcludedFromThisTask": true
   },
   "productionLane": {
-    "state": "native-candidates-in-progress-history-held",
+    "state": "all-eight-first-pass-rejected-no-sends",
     "masterDesignId": "DAHEfeuQzP4",
     "scheduleMeaning": "Creative windows only; no dated rows, UUIDs, scheduling or publication created. DP numbering is not authoritative posting order.",
     "excludedPackages": [
@@ -221,5 +221,15 @@
       "state": "native-candidate-HD-cycle-history-gates-open"
     }
   ],
-  "releaseStatus": "held; native candidate creation is not approval, final delivery or schedule authority"
+  "releaseStatus": "held; native candidate creation is not approval, final delivery or schedule authority",
+  "ownerCreativeCorrection": {
+    "sourcePermission": "Suitable actual Supa Quick, Wise Ride, Midas and Dunlop Zone sources allowed for Group content; Hi-Q excluded.",
+    "photoPosts": "All four rejected; reselect attractive natural active/product/service images, not awkward portraits or uniform/paper closeups.",
+    "typography": "Tight deliberate line spacing and real alignment; vary hierarchy, logo corner and CTA treatment.",
+    "DP01": "Reject source and awkward person entirely.",
+    "DP02": "Concept retained only; rebuild solid-yellow flat execution with meaningful graphics/material depth.",
+    "DP03": "Recompose type; move logo; tighten line spacing.",
+    "DP04": "Sell a specific verified service instead of vague car-care direction.",
+    "release": "Do not send rejected artwork, even though all technical tests passed."
+  }
 }

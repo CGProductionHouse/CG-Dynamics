@@ -5,7 +5,7 @@
     "name": "Wiseman Group"
   },
   "observedAt": "2026-11-14",
-  "status": "verified-brand-production-release-gates-open",
+  "status": "owner-rejected-first-eight-rebuild-required",
   "sourceAuthority": "CG Dynamics exact-client guide v1 plus owner month/tone instructions; OneDrive remains media authority",
   "scopes": [
     {
@@ -20,7 +20,7 @@
         "Monsterrat"
       ],
       "fontStatus": "local-render-verified",
-      "fontLimits": "Only Impact is locally rendered and used. Other literal kit labels do not prove portable font files/licences. Canva connector cannot read font family; no font bytes redistributed.",
+      "fontLimits": "Only Impact locally rendered. Actual Canva UI showed Impact on14November. Other literal kit labels do not prove portable font availability/licensing; no font bytes redistributed.",
       "colours": [
         "#FA5C0F",
         "#FEE500",
@@ -32,17 +32,43 @@
       "productionBlocked": false
     }
   ],
-  "sourceScopeRules": [],
-  "sourceScopeWarning": "No blanket sibling-photo exemption. Four photo posts must be genuine Group sources. Any parent-awareness use of a named listed business needs separate exact source/scope verification, never a substitute child package.",
+  "sourceScopeRules": [
+    {
+      "clientId": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
+      "parentScope": "WISEMAN_GROUP",
+      "allowedSourceScopes": [
+        "WISEMAN_GROUP",
+        "SUPA_QUICK",
+        "WISE_RIDE",
+        "MIDAS",
+        "DUNLOP_ZONE"
+      ],
+      "evidenceUrl": "https://wisemangroup.co.za/business-divisions/",
+      "meaning": "Owner explicitly expanded Group-source permission on14November2026 to suitable actual store photos, including Supa Quick, Wise Ride, Midas and Dunlop Zone. Hi-Q explicitly excluded by owner as taken down, overriding the older website listing. Keep Group kit/logo, exact source provenance and actual service attribution; do not count child package deliveries as Group slots."
+    }
+  ],
+  "sourceScopeWarning": "Group posts may use owner-authorised suitable store originals. Separate franchise package quantities remain excluded. No Hi-Q promotion; no invented local branch/ownership/service claim or assumed social-photo licence.",
   "authorities": [
     "https://wisemangroup.co.za/contact-us/",
     "https://wisemangroup.co.za/business-divisions/"
   ],
   "officialCanva": {
     "id": "DAHEfeuQzP4",
-    "observedPages": 93,
-    "unchanged": true,
-    "legacyReadOnlyId": "DAFvepOOYcM"
+    "observedPages": 101,
+    "unchanged": false,
+    "legacyReadOnlyId": "DAFvepOOYcM",
+    "original93PagesPreserved": true,
+    "ownedJanuaryWorkingPages": [
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46
+    ],
+    "nativeEditingConnector": "Actual start-editing request rejected at101pages; no transaction opened. Keep source workbenches until a supported amendment/transfer route is verified."
   },
   "releaseGates": [
     "Actual relevant social and approval artwork coverage",
@@ -51,5 +77,11 @@
     "Human creative approval",
     "Authoritative Client Schedule assignments before scheduling"
   ],
-  "privateMediaMeaning": "Originals, hashes, captions, derivatives, signed URLs and detailed evidence stay in the private job, not this repository."
+  "privateMediaMeaning": "Originals, hashes, captions, derivatives, signed URLs and detailed evidence stay in the private job, not this repository.",
+  "ownerExclusions": [
+    {
+      "scope": "HI_Q",
+      "reason": "Owner says taken down on14November2026; do not promote, regardless of stale website listing."
+    }
+  ]
 }

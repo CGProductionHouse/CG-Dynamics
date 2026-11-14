@@ -1,3 +1,58 @@
+# Owner correction14November — first eight rejected; rebuild, do not send
+
+**This supersedes the older progress snapshot below.** Owner inspected the HD grid
+and rejected all four photo posts and the poster execution. No Wiseman message has
+been sent. The record is a failed creative checkpoint, not an approved monthly set.
+
+- DP01: reject awkward office person/source entirely; new source required.
+- DP02: concept may remain; full-yellow flat execution is rejected. Build meaningful
+  graphic depth, a more sophisticated material composition and stronger art direction.
+- DP03: reposition the logo, align wording and substantially tighten line spacing.
+- DP04: sell a specific verified service, not vague car-care guidance.
+- All: no repeated footer/type/logo positions, awkward people or perfunctory layer
+  counts. Generalise the previous Piek feedback; do not call technical validity quality.
+- Owner explicitly allows suitable actual Supa Quick, Wise Ride, Midas and Dunlop
+  Zone photos for Group content. **Hi-Q is taken down and excluded**, overriding its
+  older website listing. Separate business packages still do not fill this Group batch.
+
+New unsent DP04 rebuild `DAHa640Ndpc` / `PBy3kczyp68tqm9B` uses a selected actual
+Supa Quick October brake-work original, existing approved monochrome logo, native
+Impact plus angular Mokoto-looking type, registered source overlap and a distinct
+orange service field/right website button. Specific message: next stop school;
+first, brake check. Official Supa Quick brake-check guidance supports the service;
+no free/price/safety guarantee is claimed.9 live text +6 independent image/graphic
+records. Actual native and initial HD inspected; tighter leading/source-registration
+refinement saved, final amended HD/font-picker/human approval pending. Source checks
+against442 covers,386 historical Canva pages and9 queued artworks returned0
+supported matches/0 errors, still bounded non-use evidence. All other rebuilds and
+all4 new photo selections remain unfinished. No sends.
+
+All8 had actual2160x2700 Canva exports inspected. A mask-only DP03 refinement
+retained all13 IDs/non-target records/geometry, with0 HD changed pixels outside its
+source-photo region. These are technical proofs only; owner rejection overrides them.
+The actual Canva UI showed Impact.442 published Instagram covers retained/decoded,
+all11 boards inspected;386 Canva history pages and9 actual queued approval artworks
+retained. Eight sources/crops against442 covers yielded4 vehicle-wrap/logo matches,
+visually different photographs; correspondence diagrams retained.9 queued artworks
+yielded0 supported source matches. These bounded checks exclude carousel/video
+interiors and phone-only older history, and do not certify global non-use or taste.
+
+After exact owner approval, eight single-page insert calls added only the owned
+working pages to official `DAHEfeuQzP4`: DP01–DP04/F01–F04 at39–46. All93 original
+IDs and their order remain intact; protected Drafts/Posted dividers are now47/48.
+Native editing readback then actually failed: Canva's connector rejects101-page
+designs. No transaction opened. Retain the source workbenches until a supported
+official-file amendment route is established; do not silently delete old pages or
+create a second official master. Existing native records/source HD proof are retained,
+but transferred HD/readback verification remains incomplete.
+
+New caption transport guard passes7 meaningful tests and all8 allocated caption
+files. It prevents signatures/encoding corruption/stale copy; it does not turn rejected
+artwork into sendable work. The internal OneDrive `ChatGPT/Graphic Designer Working`
+folder was created successfully; no files have yet been uploaded there. Finals remain
+reserved for the authorised client portal after approval. No schedule, client release,
+production deployment, new hosting, new paid API/subscription or spend.
+
 # Wiseman Group — January2027 production lane
 
 Owner confirmed January2027 on14November. Continue #948 / draft#956 after the

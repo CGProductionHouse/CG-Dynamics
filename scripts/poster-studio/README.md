@@ -96,6 +96,14 @@ The actual shared CLI generated the 1,462,279-byte Sasol night candidate, import
 
 ## Privacy and provenance
 
+For allocated forwardable captions, run `node scripts/poster-studio/caption-guard.mjs
+<caption.txt> <canonical-utf8-lf-sha256> --out <new-receipt.json>`. It rejects malformed
+UTF-8, common punctuation corruption, stale copy, controls and standalone agent
+signatures. Windows CRLF compares with canonical LF; other content is not trimmed,
+normalised or rewritten. Seven regression tests cover actual transport failures.
+This does not verify claims, image correspondence, approval or posting order and
+cannot authorise a send. Never recover captions from appended production notes.
+
 For an offline source-preserving alpha mask, use `local-cutout.py` with an explicit
 reviewed U2-Net model path. The runner never downloads or hosts anything and pins
 the exact model hash; Pillow/NumPy/ONNX Runtime are optional local tooling only.

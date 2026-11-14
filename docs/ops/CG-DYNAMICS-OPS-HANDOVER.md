@@ -1,3 +1,35 @@
+## 14November — Wiseman first eight rejected; service-specific rebuild active
+
+Same #948/draft#956 branch/worktree. Owner rejected the first eight candidates after
+the HD grid, particularly all4 photo posts, awkward subjects, flat yellow DP02,
+wide type leading, repetitive footers/logo placement and DP04's vague service copy.
+**No Wiseman artwork sent. All first-pass versions are do-not-send.** Technical
+passes/source audit are not creative approval. Owner explicitly expands Group photo
+sources to suitable Supa Quick, Wise Ride, Midas and Dunlop Zone; Hi-Q taken down,
+excluded despite the older website listing. Separate package quantities stay separate.
+
+Before rejection, exact owner-approved eight inserts added only owned In Progress
+pages39–46 to officialDAHEfeuQzP4, preserving all93 prior IDs/order; Drafts/Posted
+dividers now47/48. Actual native editing then rejected101-page master; no transaction
+opened. Retain source workbenches pending a supported amendment/transfer route. No
+silent protected-page deletion or new official client master. Transferred HD readback
+is not complete and the rejected set must not be delivered.
+
+New DP04 rebuild proofDAHa640Ndpc/pagePBy3kczyp68tqm9B uses selected hash-verified
+Supa Quick October original3Q7A0701.JPG, actual brake/hub work, exact existing approved
+monochrome logo,9 live type records including native Mokoto-looking service type,
+6 independent photo/mask/graphic/logo records. Actual native preview inspected and
+fit and leading corrected; actual font picker/final amended HD/human approval still
+pending. Source against442 published covers +9 queued artworks +386 Canva history
+pages:0 supported matches,0 decode errors. Others still need rebuilding. No normal-company-ChatGPT execution acceptance.
+
+Caption transport guard7new tests pass;26focused JavaScript checks pass. Earlier18
+Python checks remain unchanged. Current TypeScript/Vite7.3.6 build passes with a2GB
+Node heap; existing Browserslist/chunk warnings remain. Private
+source/media/fonts/model not committed. An internal OneDrive working folder exists,
+but backup upload has not occurred. R0 incremental spend; no deployment, production
+data, portal final release, schedule or client publication. Nolan/Picasso untouched.
+
 ## 14November18:44 — Wiseman January active; offline cutout and native amendment proof
 
 Same authorised #948/draft#956 branch/worktree, no new agent. Owner confirmed
