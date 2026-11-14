@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "client": {
+    "id": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
+    "name": "Wiseman Group"
+  },
+  "observedAt": "2026-11-14",
+  "status": "verified-brand-production-release-gates-open",
+  "sourceAuthority": "CG Dynamics exact-client guide v1 plus owner month/tone instructions; OneDrive remains media authority",
+  "scopes": [
+    {
+      "key": "WISEMAN_GROUP",
+      "canvaBrandKitId": "kAFRuQsd8N8",
+      "fonts": [
+        "Impact"
+      ],
+      "kitFontLabels": [
+        "Impact",
+        "Mokoto",
+        "Monsterrat"
+      ],
+      "fontStatus": "local-render-verified",
+      "fontLimits": "Only Impact is locally rendered and used. Other literal kit labels do not prove portable font files/licences. Canva connector cannot read font family; no font bytes redistributed.",
+      "colours": [
+        "#FA5C0F",
+        "#FEE500",
+        "#FFFFFF",
+        "#000000",
+        "#F10000"
+      ],
+      "exactLogoStatus": "OneDrive-original-hash-verified; transparent PNG and actual native placement inspected",
+      "productionBlocked": false
+    }
+  ],
+  "sourceScopeRules": [],
+  "sourceScopeWarning": "No blanket sibling-photo exemption. Four photo posts must be genuine Group sources. Any parent-awareness use of a named listed business needs separate exact source/scope verification, never a substitute child package.",
+  "authorities": [
+    "https://wisemangroup.co.za/contact-us/",
+    "https://wisemangroup.co.za/business-divisions/"
+  ],
+  "officialCanva": {
+    "id": "DAHEfeuQzP4",
+    "observedPages": 93,
+    "unchanged": true,
+    "legacyReadOnlyId": "DAFvepOOYcM"
+  },
+  "releaseGates": [
+    "Actual relevant social and approval artwork coverage",
+    "Source/shoot/cycle review without biometrics",
+    "Genuine final-resolution output and margins",
+    "Human creative approval",
+    "Authoritative Client Schedule assignments before scheduling"
+  ],
+  "privateMediaMeaning": "Originals, hashes, captions, derivatives, signed URLs and detailed evidence stay in the private job, not this repository."
+}

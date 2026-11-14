@@ -90,6 +90,27 @@ For the active Piek master `DAHaD4mJnGY`, re-read the page list before every wri
 
 ## Source-photo preparation
 
+For selected-photo retrieval without bulk hydration, offline source-preserving
+alpha masks, and the observed Canva amendment/download gaps, read
+[local-production.md](references/local-production.md). The pinned U2-Net runner
+has actual Windows CPU evidence; it is not a generative retoucher or release gate.
+
+Canva's page-index thumbnail cache can lag a page insertion: a fresh listing
+returned new stable page IDs while its thumbnails still showed the former Drafts
+and Posted dividers at those indices. A content read can also combine requested
+pages in a different order. Inspect the live official pages and their genuine
+selected-page export before assigning artwork identities or claiming transfer
+quality. Do not edit or delete a divider to fix a stale thumbnail.
+
+When a Canon CR3 has a full camera-rendered JPEG but no JPEG EXIF, verify that the
+exact JPEG bytes are contained in the hash-verified original and read orientation
+and colour evidence from the original CMT1/CMT2 metadata. Central's samples had
+orientation8 and ColourSpace1. Extracting that camera JPEG is not RAW development
+or clipped-data recovery. Retain the original, contained-byte/hash receipt,
+metadata evidence and separate sRGB derivative; stop on unknown/conflicting
+metadata. Never infer all CR3 files share this sample's metadata or search a
+different client's media to fill a source gap.
+
 Resolve colour evidence before grading with `scripts/poster-studio/photo_colour.py`. Embedded ICC takes precedence. EXIF ColourSpace 1 identifies sRGB; uncalibrated 65535 alone identifies no usable profile. DCF InteroperabilityIndex R03 plus 65535 requires an actual Adobe RGB (1998) to sRGB conversion using the existing local Adobe ICC file. Do not mistake Pillow `.convert('RGB')` or attaching an sRGB profile for colour conversion. The Piek restocking JPEG exposed this real failure. Unknown/conflicting evidence must stop for review rather than silently gaining an sRGB tag. Keep the source, conversion receipt and versioned derivative; never redistribute the installed Adobe ICC file. Use actual colour conversion before exposure/WB/masking, not as a final retagging step.
 
 Use Picasso's private local MCP/runner architecture for deterministic inspection, scene grouping, previews, conservative first-pass finishing and verification. Do not upload private source photos to a cloud batch editor. For poster-selected photos, create a separate derivative from the original, preserve dimensions/profile where appropriate, strip private metadata on review/export copies, and keep the original hash. Lightroom Classic remains the preferred professional finishing surface when a selected image needs scene-aware colour, masking or detailed correction; Photoshop is reserved for subtle temporary blemishes or difficult local cleanup on a duplicate. Automated grades and face/quality hints are review aids, never release approval.

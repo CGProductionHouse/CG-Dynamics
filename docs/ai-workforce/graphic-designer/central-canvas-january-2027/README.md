@@ -237,3 +237,136 @@ January package/allocation, fresh remaining sources, bounded master insertion,
 human creative approval and ordinary company-ChatGPT end-to-end remain open.
 No Central WhatsApp send, portal final, client release, scheduling, production,
 deployment or spend. Nolan video unchanged.
+
+## 14November — owner-feedback R2 and approved official-master insertion
+
+The first two native studies were not creatively accepted. Owner called DP02
+boring, requested stronger creative differentiation, useful depth/materials/type
+and rejected its downward-looking inspection photograph. DP03's action photograph
+was liked; owner requested the20-year logo above the lower service wording and
+clean edge treatment. These are general quality rules, not a licence to add
+unrelated decoration or reconstruct client photographs.
+
+Rebuilt two individually composed drafts in temporary source **DAHa5a75OE0**, in
+existing CENTRAL CANVAS folder **FAFGzOsSrxQ**. DP02 uses a larger NEXT/LOAD live-type
+hierarchy, separately rendered restrained shadows, a folded canvas logo corner
+and a full-bleed orange material sweep. The owner then requested a better source:
+replaced199A9343 with the genuine two-person job-check beside a completed tarp,
+from the contained camera JPEG in **3Q7A6366.CR3**. Source proportions retained;
+crop/readability adjusted to keep both faces and paperwork clear. DP03 retains
+the actual tool/hand overlap and now places the exact20-year logo on an asymmetric
+stitched canvas label above the service text, with a stronger TARPS response.
+It is not a repeated generic rectangular footer. No generated person, product,
+vehicle, logo or client-photo reconstruction. The optional orange PVC corner is
+a separately generated decorative asset under the existing subscription.
+
+Native R2 before the photo replacement:13 live text/13 image records. All13 text
+and both reviewed logo frames pass64px safe-area measurements. Actual Canva PNGs
+were2160x2700; complete art, type shadows, lower edges and tool/face join inspected.
+One apparent dark fragment above the cap is the original sunglasses arm, verified
+against the camera JPEG; do not erase real source details as a mask repair.
+DP02's subsequent replacement preserves every exposed DP03 text/image record
+exactly. Latest replacement export still needs its actual full-resolution check.
+
+Two previously unaccounted master pages51/52 were inspected through the live UI:
+existing staff work/photo of a floor measurement and a branded white vehicle.
+Preserved both. Master was224 pages before our insert. Owner explicitly approved
+the exact R2 two-page insertion after NEW DESIGNS/TEMPLATES53, conditional on the
+photo replacement; replacement completed and insert succeeded. Official master
+**DAGGISDPrDU** now reports226 pages. New IDs **PBCvnPgF5fHf2KBV** and
+**PBR2M5RkvMT8wP46** are observed at54/55; Drafts **PBXSGzJ0MMb84Pk6** and
+Posted/Scheduled **PBnzGy21hMwrY7P0** remain in their original relative order at
+56/57. Existing human New Year candidate remains unchanged. Do not trust current
+index thumbnails to assign DP02/DP03 order: the first fresh listing returned old
+Drafts/Posted artwork alongside the new IDs. Verify live pages/export instead.
+
+Reuse evidence expanded to all222 retained master previews, actual two additional
+queued pages, six distinct recent public social artworks and actual relevant
+approval artwork. The replacement has0 supported matches/0 decode errors against
+222 previews and six social artworks, OpenCV5.0.0/two threads. It shares a source
+shoot with DP03, with different visible foreground people/interaction; retain
+that review flag. No biometric identification or global-unused certification.
+The existing human New Year was actually handed to Graphic Design Approvals on
+29October; delivery is not formal approval/scheduling. Preserve, do not resend.
+
+Four bounded CR3 originals total120.76MB were hash verified; their full6000x4000
+camera JPEGs are contained byte-for-byte. Original CMT1 orientation1/8 as recorded and CMT2 sRGB
+evidence read before separate derivatives; no RAW engine or installation needed.
+Six further small supplied product candidates total1.44MB and match OneDrive
+hashes; rejected for relevance/quality rather than forcing them into this poster.
+Do not mistake a supplied screenshot of a retail listing for an original product
+photograph. Folder-scoped search/list limits still apply; no bulk hydration.
+
+Sender/session reconciliation: browser numeric IDs changed again. Fresh inventory
+distinguishes company `cgproductionhouse.com` and its existing extension identity
+from personal Chrome. Correct company WhatsApp profile reads **Nolan**; no new
+sign-in needed. Existing tabs that reported unattached were not evidence of an
+offline laptop. Fresh tabs in the same verified company browser work. No Central
+message sent at this checkpoint; actual HD send witnesses remain required.
+
+Private evidence under `month-candidates-v2/`: versioned source scene/assets,
+native records, isolated DP03 preservation, true HD exports/details, margin/source
+receipts and official insertion receipt. Earlier amendment test changes only the
+CTA; preview pixels outside it remain unchanged and restored wording reproduces
+the preview exactly. Canva recalculated the target frame on replacement, so the
+test transaction was cancelled rather than falsely calling native geometry exact.
+
+R0 incremental. January package/posting dates remain unverified; no fabricated
+deliverable IDs, portal final, client release, scheduling, production change,
+deployment or Nolan/Picasso source mutation. Wiseman Group's separate4DP/4photo
+batch is queued in [the production queue](../PRODUCTION-QUEUE.md), after Central.
+
+### Official transfer and export readback
+
+Actual live UI confirms **DP03=PBCvnPgF5fHf2KBV/page54** and
+**DP02=PBR2M5RkvMT8wP46/page55**. Merge reversed the requested source1/2 order;
+map captions by actual artwork and stable page identity, never assumed position.
+Both expose separate live text, photo, logo, mask and material layers in the
+official master. A loading export panel caused a browser fill to paste an
+unintended2 onto owned DP03. Inspected the exact extra text, undid that one paste,
+verified removal and Undo-disabled state before exporting. Explicitly focus and
+read back export controls before typing through a loading panel.
+
+The official master selected-page export now contains only pages54/55, each
+2160x2700. Actual complete outputs and source joins inspected. DP03 is pixel-identical
+to the earlier accepted R2 full-resolution export after transfer and paste undo.
+DP02 shows the new two-person job-check photo with both faces and paperwork clear.
+All13 text/two logo frames pass64px safety after replacement. Review PNG copies
+preserve every official-export pixel and ICC only; private metadata is stripped.
+
+First DP02 attachment prepared in Nolan/company WhatsApp, HD2048x2560/632kB selected
+and actual checkmark inspected, exact clean caption verified. Send explicitly
+failed. Retried the same failed message once; it failed again. Receipt retains
+the exact message identity and pending state. No duplicate new attachment or
+delivery-success claim. Refreshing the existing session before another action;
+DP03 remains prepared, unsent. Never blindly resend a submitted message.
+
+### Central review delivery completed14November16:12
+
+The official226-page master was live-inspected and only current DP03/page54 and
+DP02/page55 exported at2160x2700. DP03 matches its accepted R2 source export pixel
+for pixel; final DP02 replacement inspected at actual export quality. Every
+important text/logo frame passes64px. Clean review derivatives retain source
+pixels/ICC only; no private EXIF copied.
+
+Both changed posters were delivered through verified **Nolan/company Chrome** to
+**CG Picasso Approvals**, one actual **HD2048x2560 photo plus exact clean caption**
+per message: DP02 at16:09, DP03 at16:12. Full rendered photo dimensions, exact
+caption from outgoing image alt, actual Delivered state and unique DOM message
+IDs retained privately. Do not resend. Existing human New Year and Piek were not
+resent. These are internal review drafts, not client publication, formal creative
+approval, a confirmed January package or Client Schedule updates.
+
+The first PNG failed explicitly, including original-message retries/session
+refresh. A conventional high-quality JPEG fallback then succeeded; do not assert
+PNG itself caused the failure. JPEGs are2160x2700, quality98/subsampling0 with
+ICC only; PSNR against official PNG is50.21dB/55.08dB. Official original PNGs remain
+unchanged. The16:00 failed/pending PNG is recorded separately and must **never be
+retried**, avoiding duplicate delivery. No failure or successful post was deleted.
+
+Current private receipt: `month-candidates-v2/send-plan.json`; final screenshot
+`central-pair-delivered.png`. Versioned source now reconciles actual native
+geometry and declared typography in `current-native-repro-scene.json`; packaging
+validator accepts two13-layer pages (no new upload). Actual source/brand history
+coverage and same-shoot limits remain in receipts. Wiseman Group now proceeds in
+the same lane, separate four-designed/four-photo scope, selection-first.

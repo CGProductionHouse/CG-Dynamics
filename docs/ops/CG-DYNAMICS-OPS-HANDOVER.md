@@ -1,3 +1,106 @@
+## 14November18:44 — Wiseman January active; offline cutout and native amendment proof
+
+Same authorised #948/draft#956 branch/worktree, no new agent. Owner confirmed
+**Wiseman Group January2027,4designed+4photo**; separate franchise packages excluded.
+Exact guide/kit/logo/current public contacts reconciled; no January schedule rows
+or immutable deliverable IDs assigned. Stopped bulk hydration remains stopped.
+
+Actual progress: DP01 R2 native13-layer proof with2160x2700 export/clean hair join;
+DP04 native14-layer school-return proof with a separate generic decorative bag,
+exact logo and live text. DP04 support-line-only test retains every element ID,
+changes only the target record and0 preview pixels outside its frame; test canceled,
+original wording retained. Four genuine Group-office photo candidates saved as
+native TEMP workbenches with privacy/texture preserved; their HD/cycle/history
+gates remain open. DP02/DP03 are unfinished. **No Wiseman WhatsApp sends, official
+master insertion, portal final release, client publication or scheduling.**
+
+Reuse audit caught an exact old portrait in two historical posters; excluded and
+superseded. Another machine flag was visibly a different building photo; retain
+both finding and actual visual dismissal.386Canva+12social artworks retained;
+uncaptioned/older approval coverage still limited. No global unused certification
+or biometric identity database. Keep all protected master93pages untouched.
+
+New local-only pinned U2-Net helper uses existing ONNX Runtime1.31.0 CPU,
+Apache2 checkpoint retained privately,0.590s sample inference/1.934s command,
+prepared RGB equality true. Seven invariants pass; total37focused JS/Python checks
+and TypeScript/Vite7.3.6 build pass. No new production dependency, paid API, hosting
+or service. Model/photos/fonts stay outside Git. R0 incremental cost. Existing
+Canva background-removal connector also works; preview proof is not full-resolution
+RGB equality or normal-company-ChatGPT integration acceptance.
+
+Central Canvas pair remains delivered16:09/16:12; both messages later show thumbs-up
+reactions. Do not resend or infer client approval/schedule authority from reactions.
+Nolan/Picasso production code unchanged. Control Centre exact target unavailable;
+no guessed write. Continue current Wiseman designs and actual HD/history checks.
+See `docs/ai-workforce/graphic-designer/wiseman-january-2027/README.md`.
+
+## 14November16:12 — Central review pair delivered; Wiseman next
+
+Same #948/draft#956 lane. Both owner-revised Central Canvas posters now live as
+editable working pages in official master DAGGISDPrDU: DP03/page54 stable ID
+PBCvnPgF5fHf2KBV; DP02/page55 ID PBR2M5RkvMT8wP46. Protected dividers/history and
+existing human New Year preserved. Actual selected-page2160x2700 exports checked;
+DP03 pixel-identical after transfer, new DP02 photo/source joins inspected, all
+important native text/logo frames pass64px.
+
+Actual verified Nolan/company-Chrome delivery to CG Picasso Approvals: DP02 at
+16:09 and DP03 at16:12, each HD2048x2560 with exact clean caption, no signature.
+Unique message IDs, actual image dimensions/captions and Delivered state retained
+privately in month-candidates-v2/send-plan.json. DO NOT RESEND. The16:00 PNG
+explicitly failed and must NEVER be retried; JPEG fallback succeeded. No causal
+claim that PNG caused the error. Official source PNGs retained. No posts deleted.
+
+Internal draft delivery is not client publication, formal creative approval,
+confirmed January package or schedule. Bounded source/history checks and same-shoot
+review flag remain recorded. R0, no production/deploy/hosting/portal final/Nolan
+video/Picasso source change. Latest proof: central-canvas-january-2027/README.md.
+
+Wiseman Group now next: exact4designed+4photo for Group itself, franchise packages
+excluded. Confirm month/guide/kit/contact conflict, recover old unapproved workbench,
+select-first and do NOT restart stopped bulk hydration. Production queue records
+owner scope. No new branch/agent. Control Centre exact target unavailable.
+
+## 14November — Central official revisions; delivery recovery; Wiseman queued
+
+Same #948/draft#956 lane, no new agent/branch. Owner required stronger Central
+execution, a better DP02 photo and lower DP03 anniversary-logo placement.
+Two distinct source-faithful layered drafts are now in official master
+**DAGGISDPrDU** after the exact owner-approved insert. Current226pages:
+**DP03=PBCvnPgF5fHf2KBV/page54**, **DP02=PBR2M5RkvMT8wP46/page55**.
+Protected Drafts/Posted IDs retain relative order at56/57; existing human photo
+pages51/52 and New Year candidate unchanged. Merge reversed source page order;
+index thumbnails initially returned stale dividers. Actual live pages, editable
+records and selected-page HD export verified instead.
+
+DP02 replacement uses the exact camera JPEG contained in3Q7A6366.CR3: real
+two-person job check beside the tarp, source proportions and skin retained.
+DP03 photo/foreground and accepted type remain intact; official2160x2700 export
+is pixel-identical to its accepted R2 source export. Every important text/logo
+frame passes64px. A browser export-field race pasted2 onto owned DP03; the exact
+paste was undone and removal verified before export. No protected page targeted.
+
+Reuse evidence:222 retained Canva previews, two additional live human pages,
+six unique recent social artworks and relevant actual approval history. New
+source has0 supported matches/0 decode errors; same source shoot as DP03 remains
+an explicit review flag, not a global-unused/person-identity claim. No biometrics.
+January package/dates remain unverified; baseline3DP/4photo/1video only.
+
+Fresh inventory resolves swapped numeric browser IDs: company
+cgproductionhouse.com/original extension, actual site profile **Nolan** works.
+DP02 HD photo+exact clean caption was submitted to **CG Picasso Approvals**, but
+WhatsApp explicitly failed it, including one retry of the same failed message.
+Private receipt preserves its ID/state; session recovery in progress. **No Central
+delivery-success claim yet; DP03 unsent.** Do not duplicate the failed message.
+Piek13 already delivered to Graphic Design Approvals earlier; do not resend.
+
+Wiseman Group is next after Central, **four posters+four photo posts for Group
+itself**, franchise packages excluded. Verify month/package/guide/kit/contact
+conflict, recover prior unapproved workbench, select originals before download;
+**do not restart stopped bulk hydration**.
+[Production queue](../ai-workforce/graphic-designer/PRODUCTION-QUEUE.md).
+R0, no production data/deploy/hosting/portal final/client release. Nolan video and
+Picasso source unchanged. Control Centre exact target unavailable; no guessed write.
+
 ## 14 November14:15 — Piek13 sent; Central Canvas native proof saved
 
 Same #948/#955/draft#956 lane. On the owner's renewed direct instruction, sent

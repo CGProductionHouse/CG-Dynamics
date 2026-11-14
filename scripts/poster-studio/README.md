@@ -96,6 +96,13 @@ The actual shared CLI generated the 1,462,279-byte Sasol night candidate, import
 
 ## Privacy and provenance
 
+For an offline source-preserving alpha mask, use `local-cutout.py` with an explicit
+reviewed U2-Net model path. The runner never downloads or hosts anything and pins
+the exact model hash; Pillow/NumPy/ONNX Runtime are optional local tooling only.
+See the designer skill's `references/local-production.md` for actual Windows
+measurements, model/licence provenance and the required light/dark/HD inspection.
+Source-preserving RGB and a usable subject mask are separate checks.
+
 Scene files and client assets stay outside Git. Image layers embed the exact source bytes as data URLs so the SVG remains portable across Affinity, browsers and another workstation; the manifest records each original path, size and digest. The engine never mutates a source asset.
 
 ## Supported layer types
