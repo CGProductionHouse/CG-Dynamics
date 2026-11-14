@@ -25,6 +25,14 @@
         "access": "read-only",
         "role": "Inspected original candidate; current production variant not yet selected",
         "format": "PNG"
+      },
+      {
+        "provider": "OneDrive",
+        "path": "Clients/Central Canvas/Brand Identity/Logo/png-03.png",
+        "itemId": "A2AC9FE4B255F52F!36955",
+        "access": "read-only",
+        "role": "Exact standard white variant used in private study; January variant approval pending",
+        "format": "PNG"
       }
     ],
     "photography": {
@@ -42,11 +50,11 @@
   },
   "typography": [
     {
-      "role": "Kit family; page-specific role and weight unresolved",
+      "role": "Kit family; Regular exercised in the private composition study; original page-specific roles remain unresolved",
       "family": "Bebas Neue",
-      "style": null,
-      "availability": "canva-only",
-      "source": "Read-only exact CENTRAL CANVAS kit kAGX9eNfJ7Y Fonts panel, 2026-11-14; two labels observed",
+      "style": "Regular",
+      "availability": "job-local-licensed",
+      "source": "Exact kit kAGX9eNfJ7Y; private unmodified Google Fonts BebasNeue-Regular.ttf SHA256 08e4623805102d819f58601e46e345648846075e363b2ceb23313c2d1c83ec73, OFL1.1 retained and embedded. https://github.com/google/fonts/blob/main/ofl/bebasneue/OFL.txt ; no OS font installation",
       "fallback": null
     },
     {
@@ -91,7 +99,7 @@
   ],
   "limitations": [
     "Discovery pack, not production clearance. January package, dates and final claims are unconfirmed.",
-    "Canva-only describes verified kit availability; no local-font installation or portable font-file licence is asserted.",
+    "Bernoru and Araboto remain Canva-only. Bebas Neue Regular is privately available with its original OFL1.1 notice; actual exported glyph bounds match the exact file. No OS font installation or licensed-font commit.",
     "Current logo variant and January suitability of anniversary marks remain unresolved.",
     "Native editing transaction rejected the 222-page master. No transaction or content change occurred.",
     "Piek's lane guard cannot represent this master's reversed working-header order; do not force it to pass.",

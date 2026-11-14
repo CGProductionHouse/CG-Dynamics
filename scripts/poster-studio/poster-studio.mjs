@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto'
 import { existsSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { mkdir } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { basename, dirname, extname, resolve } from 'node:path'
+import { basename, dirname, extname, isAbsolute, relative, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { spawnSync } from 'node:child_process'
 
@@ -12,7 +12,7 @@ const SVG_NS = 'http://www.w3.org/2000/svg'
 const XLINK_NS = 'http://www.w3.org/1999/xlink'
 
 function usage() {
-  console.error('Usage: node poster-studio.mjs render <scene.json> [--out <directory>] [--no-preview]')
+  console.error('Usage: node poster-studio.mjs render <scene.json> [--out <directory>] [--scale 1..4] [--no-preview]')
   console.error('       node poster-studio.mjs compare <before.json> <after.json> [--out <receipt.json>]')
   process.exitCode = 2
 }
@@ -95,6 +95,59 @@ function imageMimeType(assetPath) {
 function embeddedImageHref(assetPath) {
   const bytes = readFileSync(assetPath)
   return `data:${imageMimeType(assetPath)};base64,${bytes.toString('base64')}`
+}
+
+function prepareFonts(scene, scenePath) {
+  const jobPath = (value) => {
+    if (typeof value !== 'string' || !value || /^(?:https?|file|data):/i.test(value)) throw new Error('Fonts and notices require job-local file paths')
+    const path = resolve(dirname(scenePath), value)
+    const within = relative(dirname(scenePath), path)
+    if (within === '..' || within.startsWith('../') || within.startsWith('..\\') || isAbsolute(within)) throw new Error('Font assets and notices must stay inside the scene job directory')
+    return path
+  }
+  const types = {
+    '.ttf': ['font/ttf', 'truetype', '00010000'],
+    '.otf': ['font/otf', 'opentype', '4f54544f'],
+    '.woff': ['font/woff', 'woff', '774f4646'],
+    '.woff2': ['font/woff2', 'woff2', '774f4632'],
+  }
+  if (scene.fonts !== undefined && !Array.isArray(scene.fonts)) throw new Error('scene.fonts must be an array')
+  const seen = new Set()
+  const fonts = (scene.fonts ?? []).map((font) => {
+    if (typeof font.family !== 'string' || !font.family.trim()) throw new Error('Font family is required')
+    const weight = font.weight ?? 400
+    const style = font.style ?? 'normal'
+    if (!Number.isInteger(weight) || weight < 1 || weight > 1000) throw new Error('Font weight must be an integer from 1 to 1000')
+    if (!['normal', 'italic', 'oblique'].includes(style)) throw new Error('Unsupported font style')
+    const key = `${font.family}:${weight}:${style}`
+    if (seen.has(key)) throw new Error(`Duplicate font face: ${key}`)
+    seen.add(key)
+    const path = jobPath(font.asset)
+    const type = types[extname(path).toLowerCase()]
+    if (!type) throw new Error('Fonts require local TTF, OTF, WOFF or WOFF2 assets')
+    const bytes = readFileSync(path)
+    if (bytes.length < 12 || bytes.length > 32 * 1024 * 1024 || bytes.subarray(0, 4).toString('hex') !== type[2]) {
+      throw new Error(`Invalid font container: ${basename(path)}`)
+    }
+    const hash = sha256Buffer(bytes)
+    if (font.expectedSha256 !== undefined && font.expectedSha256 !== hash) throw new Error(`Font hash mismatch: ${font.family}`)
+    if (typeof font.licenceAsset !== 'string' || !font.licenceAsset) throw new Error('A font licenceAsset is required for portable embedding')
+    const licencePath = jobPath(font.licenceAsset)
+    const licence = readFileSync(licencePath, 'utf8')
+    if (!licence.trim() || Buffer.byteLength(licence) > 512 * 1024) throw new Error('Font licence must be nonempty text below 512 KiB')
+    return {
+      family: font.family, weight, style,
+      sourcePath: path, filename: basename(path), bytes: bytes.length, sha256: hash,
+      licence: { sourcePath: licencePath, sha256: sha256File(licencePath) },
+      css: `@font-face{font-family:${JSON.stringify(font.family)};src:url("data:${type[0]};base64,${bytes.toString('base64')}") format("${type[1]}");font-weight:${weight};font-style:${style};font-display:block;}`,
+      licenceText: licence,
+    }
+  })
+  return {
+    style: fonts.length ? `<style>${escapeXml(fonts.map((font) => font.css).join('\n'))}</style>` : '',
+    metadata: fonts.length ? `<metadata id="embedded-font-licences">${escapeXml(fonts.map((font) => `${font.family}\n${font.licenceText}`).join('\n\n'))}</metadata>` : '',
+    manifest: fonts.map(({ css, licenceText, ...font }) => font),
+  }
 }
 
 function renderLayer(layer, scenePath) {
@@ -195,7 +248,7 @@ function flattenLayers(layers, parent = null, output = []) {
   return output
 }
 
-function makeManifest(scene, scenePath, svgPath, pngPath) {
+function makeManifest(scene, scenePath, svgPath, pngPath, fonts, previewScale) {
   const flat = flattenLayers(scene.layers)
   return {
     schemaVersion: 1,
@@ -205,6 +258,8 @@ function makeManifest(scene, scenePath, svgPath, pngPath) {
     colourSpace: scene.colourSpace ?? 'sRGB',
     sourceScene: { path: resolve(scenePath), sha256: sha256File(scenePath) },
     assets: collectAssets(scene, scenePath),
+    fonts,
+    previewScale,
     layers: flat.map((layer, index) => ({
       id: layer.id,
       name: layer.name ?? layer.id,
@@ -231,7 +286,7 @@ function findChrome() {
   return candidates.find(existsSync)
 }
 
-function renderPreview(svgPath, pngPath, width, height) {
+function renderPreview(svgPath, pngPath, width, height, scale) {
   const chrome = findChrome()
   if (!chrome) throw new Error('Chrome was not found; set CHROME_PATH or use --no-preview')
   const profile = mkdtempSync(resolve(tmpdir(), 'cg-poster-studio-'))
@@ -241,6 +296,7 @@ function renderPreview(svgPath, pngPath, width, height) {
       '--disable-gpu',
       '--hide-scrollbars',
       '--allow-file-access-from-files',
+      `--force-device-scale-factor=${scale}`,
       `--user-data-dir=${profile}`,
       `--window-size=${width},${height}`,
       `--screenshot=${pngPath}`,
@@ -258,17 +314,20 @@ async function render(sceneArg, args) {
   const scenePath = resolve(sceneArg)
   const scene = JSON.parse(readFileSync(scenePath, 'utf8'))
   validateScene(scene)
+  const fonts = prepareFonts(scene, scenePath)
+  const previewScale = Number(option(args, '--scale') ?? 1)
+  if (!Number.isInteger(previewScale) || previewScale < 1 || previewScale > 4) throw new Error('--scale must be an integer from 1 to 4')
   const requestedOut = option(args, '--out')
   const outDir = resolve(requestedOut ?? dirname(scenePath), scene.document.id)
   await mkdir(outDir, { recursive: true })
   const defs = (scene.definitions ?? []).map(renderDefinition).join('')
   const body = scene.layers.map((layer) => renderLayer(layer, scenePath)).join('')
-  const svg = `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="${SVG_NS}" xmlns:xlink="${XLINK_NS}" width="${scene.canvas.width}" height="${scene.canvas.height}" viewBox="0 0 ${scene.canvas.width} ${scene.canvas.height}" role="img" aria-labelledby="title description"><title id="title">${escapeXml(scene.document.title ?? scene.document.id)}</title><desc id="description">${escapeXml(scene.document.description ?? '')}</desc><defs>${defs}</defs>${body}</svg>\n`
+  const svg = `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="${SVG_NS}" xmlns:xlink="${XLINK_NS}" width="${scene.canvas.width}" height="${scene.canvas.height}" viewBox="0 0 ${scene.canvas.width} ${scene.canvas.height}" role="img" aria-labelledby="title description"><title id="title">${escapeXml(scene.document.title ?? scene.document.id)}</title><desc id="description">${escapeXml(scene.document.description ?? '')}</desc>${fonts.metadata}<defs>${fonts.style}${defs}</defs>${body}</svg>\n`
   const svgPath = resolve(outDir, `${scene.document.id}.svg`)
   const pngPath = resolve(outDir, `${scene.document.id}.png`)
   writeFileSync(svgPath, svg, 'utf8')
-  if (!args.includes('--no-preview')) renderPreview(svgPath, pngPath, scene.canvas.width, scene.canvas.height)
-  const manifest = makeManifest(scene, scenePath, svgPath, args.includes('--no-preview') ? null : pngPath)
+  if (!args.includes('--no-preview')) renderPreview(svgPath, pngPath, scene.canvas.width, scene.canvas.height, previewScale)
+  const manifest = makeManifest(scene, scenePath, svgPath, args.includes('--no-preview') ? null : pngPath, fonts.manifest, previewScale)
   const manifestPath = resolve(outDir, `${scene.document.id}.manifest.json`)
   writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8')
   console.log(JSON.stringify({ status: 'ok', svgPath, pngPath: manifest.outputs.png?.path ?? null, manifestPath, layerCount: manifest.layers.length, assetCount: manifest.assets.length }, null, 2))
@@ -306,6 +365,7 @@ function compare(beforeArg, afterArg, args) {
     unchangedLayerCount: allIds.length - changes.length,
     changedLayerCount: changes.length,
     changes,
+    changedResourceGroups: ['fonts', 'definitions', 'canvas'].filter((key) => canonical(before[key] ?? null) !== canonical(after[key] ?? null)),
   }
   const out = option(args, '--out')
   if (out) {

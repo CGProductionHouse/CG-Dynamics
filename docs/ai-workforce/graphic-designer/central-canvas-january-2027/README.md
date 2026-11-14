@@ -117,5 +117,60 @@ school reopening is audience context, not a forced school concept for this clien
 Keep final claims/contact
 footers freshness-gated. No Central Canvas poster has been sent or published.
 
+## 14 November continuation — real editable local study
+
+Built and inspected a private **2160x2700** repair composition, preserving the real
+client photograph and original standard white logo. Exact Bebas Neue Regular was
+retrieved from the official Google Fonts repository with its original
+[OFL1.1 notice](https://github.com/google/fonts/blob/main/ofl/bebasneue/OFL.txt).
+It stays job-local, embedded with the licence in the SVG; no OS font installation.
+Actual exported headline ink bounds agree with the exact face's FreeType render
+within one pixel, rather than merely trusting a declared family string.
+
+There are17 independent layers:6 live text records,3 photo/mask/logo image records,
+separate lighting gradients, shapes and graphics. The source remains unchanged;
+colour/orientation preflight resolves EXIF sRGB/R98 and produces a metadata-clean
+PNG derivative. Finishing is conservative; no synthetic person, reconstructed
+truck, skin reshaping or clipped-data recovery claim. Only transparent outer
+padding was trimmed from the exact logo. This is portable editable SVG, not PSD
+or a native Canva composition.
+
+Inspected full render and actual HD arm/type detail. Rejected face-obscuring type,
+manual-mask background wedge, reduced-resolution stair steps and an automatic-mask
+background patch. Final source outline uses the same photographed lighting field
+as its base, eliminating the bright cropped-fragment join. Previous studies remain
+private and versioned. Technical success does not establish creative approval.
+
+Isolated amendment: changed only the live CTA from one phrase to another. Both
+actual PNGs measured2160x2700; comparison reports one changed text layer,16 retained
+layers and no font/definition/canvas declaration changes. Saved image/font resource
+hashes are identical; actual pixel differences are confined to the CTA area, with
+zero changes elsewhere. Important glyph/logo bounds pass the64px inset check at
+1080 coordinates; this is local FreeType/visual evidence, not Canva frame evidence.
+
+Private current study: `repair-study/scene-v10.json`,
+`repair-study/renders-hd/central-canvas-repair-study-v10/` and
+`repair-study/qa-v9-v10.json` beneath the private evidence root above.
+
+**Delivery remains held.** The study's alternate inspection frame is closely
+related to a historical used frame; it is not certified fresh or a completed
+January deliverable. Six additional 2025 samples have matching source hashes;
+the second222-preview comparison flags three further source candidates. Do not
+market the technical study as an unused-photo final.
+
+Fresh caption-context retrieval supplies the approved footer, corroborated by the
+live official website. Browser read also confirms current service categories.
+Retained actual10November dam-liner approval artwork and one distinct social lapa
+artwork. The social download batch timed out; two downloads were duplicates of
+one image, not broader history coverage. Public, queued and same-shoot history
+coverage remains incomplete. No group message, reply, reaction or forward sent.
+
+Piek fresh recorded updates and the available Graphic Design Approvals searches
+still do not establish January order. December posts are not its January schedule.
+The13-item verified forward registry remains unsubmitted; no guessed ordering.
+Central master222-page native limit, January package/allocation, new-source
+clearance, human creative approval and normal-company-ChatGPT end-to-end remain
+open. No master page, existing human candidate or Nolan video changed.
+
 R0 incremental cost. No new dependency, deployment, production data, client portal
 final, scheduling, client publication or Nolan/Picasso source change.

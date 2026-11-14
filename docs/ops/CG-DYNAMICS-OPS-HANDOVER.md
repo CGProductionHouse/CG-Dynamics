@@ -1,3 +1,31 @@
+## 14 November13:15 — Central Canvas local layered proof; release holds retained
+
+Same #948/draft#956 lane. Implemented small local Poster Studio support for exact
+job-local font embedding with required licence notices/hash provenance and1..4x
+PNG scaling; no new dependency, account, hosted app or OS font installation.
+Central private study has17 layers/6 live text, exact real photo/standard white
+logo, independent source mask/light fields and actual2160x2700 PNGs. CTA-only
+amendment preserves16 other layers/resource hashes and changes zero pixels outside
+the CTA. Embedded Bebas Neue Regular raster ink bounds match the exact licensed
+face within1px. Actual full/HD inspection caught and corrected mask/lighting joins
+and face-obscuring type; no human creative approval claim.
+
+This remains an unreleased study, **not a fresh-source January final**: alternate
+inspection image is closely related to a used frame; same-shoot/social/approval
+coverage is incomplete. Six more source samples hash-match OneDrive; second222
+preview pass flags three further candidates. Live website services and approved
+caption-context footer retrieved. Actual dam-liner approval artwork and one unique
+social lapa artwork retained; timed-out social batch yielded duplicate downloads,
+not complete coverage. No WhatsApp send/forward/reply, Canva edit, portal final,
+schedule/production/data/deployment or spend change. Nolan Studio PC untouched.
+
+Fresh Piek client updates and available group searches still expose no January
+order. Verified13-item forwarding registry remains unsubmitted; December review
+posts are not January schedule authority. Owner clarification is still pending.
+Central's222-page native editing limit, source clearance and January allocations
+remain open. [Proof and limits](../ai-workforce/graphic-designer/central-canvas-january-2027/README.md).
+No new branch/agent. Control Centre exact target unavailable; no guessed write.
+
 ## 14 November12:37 — Piek ordered handoff prepared; Central Canvas preflight
 
 Owner now asks for Piek to Graphic Design Approvals in posting order, then Central

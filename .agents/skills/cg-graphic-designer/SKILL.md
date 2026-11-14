@@ -161,6 +161,20 @@ For the proven WhatsApp photo route, upload one true-HD file through the browser
 
 ### Layer contract
 
+- Portable local proofs must carry their exact licensed font bytes and required
+  notices, rather than depending on workstation font installation. Poster Studio
+  supports job-local `fonts` plus licence assets and2x previews; compare actual
+  rendered glyphs with the exact face. Kit labels or a successful SVG render alone
+  do not rule out fallback. Font/definition/canvas declaration changes are separate
+  from layer changes; compare saved resource hashes and actual pixel differences
+  when proving an isolated amendment.
+- Inspect source-overlap edges in the actual HD output. A hand outline can retain
+  background wedges, automatic refinement can retain another patch, and a cropped
+  bright foreground can expose its fragment boundary against a shaded base. Keep
+  the source mask independent and match its photographic light field to the base
+  before compositing over type. Do not accept geometry, layer count or a small
+  thumbnail as proof that these joins are clean. Keep failed variants historically.
+
 - Preserve exact photos, people, food, products, venues and logos as deterministic source layers. Never generatively reconstruct them unless the owner explicitly requests that change.
 - Keep headline, support text, prices/dates, logo, photos, masks, vectors, textures, overlays and effects independently addressable with stable layer IDs.
 - Use generation only for optional non-factual decorative assets or ideation, never as the sole poster composition engine.

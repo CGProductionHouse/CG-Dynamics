@@ -48,7 +48,7 @@
           "role": { "type": "string" },
           "family": { "type": "string" },
           "style": { "type": ["string", "null"] },
-          "availability": { "enum": ["installed", "canva-only", "licensed-file-required", "unverified"] },
+          "availability": { "enum": ["installed", "job-local-licensed", "canva-only", "licensed-file-required", "unverified"] },
           "source": { "type": "string" },
           "fallback": { "type": ["string", "null"] }
         }

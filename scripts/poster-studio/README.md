@@ -24,10 +24,31 @@ They are designed for a future normal-company-ChatGPT tool wrapper and do not re
 
 ```powershell
 node scripts/poster-studio/poster-studio.mjs render C:\private\job\scene-v1.json --out C:\private\job\output
+node scripts/poster-studio/poster-studio.mjs render C:\private\job\scene-v1.json --out C:\private\job\output-hd --scale 2
 node scripts/poster-studio/poster-studio.mjs compare C:\private\job\scene-v1.json C:\private\job\scene-v2.json --out C:\private\job\amendment.json
 ```
 
 Chrome is used headlessly for the local preview. Set `CHROME_PATH` only if Chrome is not installed in its normal Windows location. `--no-preview` emits SVG and the manifest without PNG rendering.
+
+For a portable licensed face, add a scene `fonts` array, for example
+`{ "family": "Bebas Neue", "asset": "assets/BebasNeue-Regular.ttf", "licenceAsset": "assets/OFL.txt", "weight": 400, "style": "normal", "expectedSha256": "<verified-lowercase-file-hash>" }`.
+The renderer embeds exact local TTF/OTF/WOFF/WOFF2 bytes and the supplied licence
+notice in the SVG, retaining both hashes in the manifest. Missing notices,
+unsupported container prefixes, duplicate faces and mismatched supplied hashes
+fail. This checks transport/provenance, not legal entitlement or a font's complete
+validity; inspect the actual licence, family/style and real rendered glyphs first.
+No remote font request, OS font installation or new runtime dependency is needed.
+Keep private/licensed font files out of Git. For standalone redistribution, retain
+any other notices required by the exact licence as well.
+
+`--scale 2` leaves the editable SVG's design coordinates intact and produces a
+2x raster using a private headless Chrome profile. Scales1..4 are supported. The
+Central Canvas proof measured actual2160x2700 PNGs from a1080x1350 scene. Compare
+receipts now flag changes to declared `fonts`, `definitions` or `canvas` separately
+from layers; compare saved manifests for actual asset/font byte preservation.
+The real CTA amendment changed one live text layer and zero pixels outside its
+region, preserving16 other layers, photo/logo/mask and font resources. These are
+local SVG/PNG results, not native Canva, PSD or everyday ChatGPT integration proof.
 
 ```powershell
 node scripts/poster-studio/creative-ledger.mjs fingerprint <image>
