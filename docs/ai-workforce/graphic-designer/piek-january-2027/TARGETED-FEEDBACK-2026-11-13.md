@@ -1,5 +1,59 @@
 # Piek targeted feedback — 13–14 November 2026
 
+## 14 November — annotated lower-right DP03 revision prepared, not sent
+
+Owner's 10:11–10:12 review rejected the R8 placement and supplied an annotated
+lower-right region plus a specific behind-blue-gradient instruction. Continued
+only the same DP03/stable page PBhRR4d4pdXWyyBs, observed page79. Enlarged the
+existing ceramic cup to720×480 at470,710, removed only its obsolete upper-counter
+shadow and moved the cup below the original gradient, above the original shop
+photo. The cup, gradient, genuine photo, exact parent logo and live type remain
+separate. No new generated asset, client photo substitution, stock purchase or
+other poster revision.
+
+The connector handled geometry; its missing reorder operation required a bounded
+browser Position/Layers adjustment. Saved readback proves all85 page IDs/order/
+notes, all richtext records, all84 non-target fill lists and the original DP03
+photo/gradient/logo records unchanged. Only the cup record/stacking and removed
+obsolete shadow differ. DP03's4 text and1 reviewed logo frames pass64px inset,
+0 findings. This is conservative frame QA, not creative approval.
+
+Inspected the actual2160×2700 final export and enlarged cup/gradient/logo detail.
+The cup is intentionally cropped at the right edge and fades behind the original
+blue foreground; logo and copy remain clear. Retained raw export and a private
+review-clean PNG with identical decoded pixels and no metadata. Allocated299-
+character caption is exact and signature-free. Official composition remains
+native/editable; no portable PSD claim. The inherited cup alt text still describes
+R8's old counter position and is explicitly excluded as current-placement proof.
+
+Mandatory reuse evidence is **partial, delivery held**:
+
+- Verified current `piekgroup` profile against its client-site link and prior
+  first-party handle evidence. Retained35 actual post images from the181-post
+  profile, locators/captions and a visual board. Source-specific SIFT/RANSAC
+  comparison found no supported exact photo/cup match in this bounded sample.
+- Revalidated all352 retained Canva history preview hashes and unchanged original
+  source hash against the previous source-specific analysis; no supported match.
+  This reuses reproducible evidence, not a new full-social audit.
+- Read9 recent Piek results in Graphic Design Approvals, plus the exact Picasso
+  correction. Four viewer captures contain only3 visually distinct artworks
+  (Christmas, cookies, Sasol); captions advanced ahead of rendered pictures. The
+  fourth Engen caption has no verified corresponding full image in this sample.
+  Kept the mismatch and partial coverage explicit. No supported source match in
+  the captured images; no global unused or approval certificate.
+- Older posts/carousel slides/reel interiors, Facebook and complete queued/
+  approved/scheduled artwork history remain uncovered. Same-shoot/partial-person
+  review remains unresolved. Current-month ledger retains broad place-overlap
+  warnings and a review verdict. No biometric identification.
+
+Prepared the private R9 review image, unchanged caption, hash/integrity receipt and
+Nolan handoff under `feedback-rework-r9-20261114/`. **Zero sends/forwards/replies**,
+no outbound attachment. Owner requested preparation here for Nolan's serialized
+coordination; receipt does not authorise delivery. Reuse hold must clear first.
+Graphic Design Approvals forwarding still requires all current posts approved
+and authoritative January posting order verified. No portal/client release,
+production/data/deployment or spend. Existing #948/#955/draft#956 lane only.
+
 ## 14 November — College Brew contact revision sent
 
 The latest new review note, dated 13 November at 15:37, rejected the R7.1 cup as still

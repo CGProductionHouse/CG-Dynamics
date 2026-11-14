@@ -1150,5 +1150,60 @@
       "safeMarginFindings": 0,
       "newImplementationTests": 0
     }
+  },
+  "feedbackRound9": {
+    "observedAt": "2026-11-14",
+    "state": "prepared-not-sent-reuse-hold",
+    "canvaDesignId": "DAHaD4mJnGY",
+    "changedPageId": "PBhRR4d4pdXWyyBs",
+    "observedPageIndex": 79,
+    "ownerFeedback": "14November10:11-10:12 actual annotation: larger lower-right cup behind original blue gradient",
+    "changedPageCount": 1,
+    "nonTargetPagesUnchanged": 84,
+    "allPageIdsOrderNotesAndRichtextsExact": true,
+    "sourcePhotoGradientLogoRecordsExact": true,
+    "layersIndependent": true,
+    "actualHDExportInspected": true,
+    "exportDimensions": [
+      2160,
+      2700
+    ],
+    "cleanReviewPixelsMatchRaw": true,
+    "captionExactSignatureFree": true,
+    "safeArea": {
+      "insetPx": 64,
+      "textCount": 4,
+      "reviewedLogoCount": 1,
+      "findings": 0
+    },
+    "reuse": {
+      "state": "insufficient-coverage-hold",
+      "actualInstagramPostsRetained": 35,
+      "profilePostCountObserved": 181,
+      "retainedCanvaPreviewHashesRevalidated": 352,
+      "piekApprovalSearchCaptionsObserved": 9,
+      "approvalScreenshotsCaptured": 4,
+      "distinctApprovalArtworksVisuallyVerified": 3,
+      "supportedSourceMatchFoundInBoundedSamples": false,
+      "unusedCertified": false,
+      "completeCoverage": false,
+      "remainingGaps": [
+        "older/carousel/reel-interior/social history",
+        "Facebook",
+        "complete queued/approved/scheduled history",
+        "same-shoot/partial-person uncertainty"
+      ]
+    },
+    "delivery": {
+      "sendCount": 0,
+      "forwardCount": 0,
+      "state": "prepare-here-first-for-Nolan-serialized-coordination",
+      "sendPermitted": false
+    },
+    "creativeApproval": "pending",
+    "incrementalCostZAR": 0,
+    "privateProofDirectory": "feedback-rework-r9-20261114",
+    "notesPath": "TARGETED-FEEDBACK-2026-11-13.md",
+    "productionRelease": false
   }
 }
