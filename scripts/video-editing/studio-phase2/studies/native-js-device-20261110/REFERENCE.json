@@ -1,0 +1,16 @@
+{
+  "submitted_url": "https://vt.tiktok.com/ZSpPVsLPf/",
+  "canonical_url": "https://www.tiktok.com/@motionlovee/video/7693519537072901398",
+  "creator": "motionlovee",
+  "public_description": "Do you want a tutorial? ⬇️ #motiondesign #claude #aftereffectstutorial",
+  "duration_reported_seconds": 15,
+  "dimensions_reported": [576, 1024],
+  "retrieved_utc": "2026-11-10T19:46:37.856694+00:00",
+  "media_access": "HTTP 403 Forbidden; one ordinary direct-media attempt, not bypassed",
+  "visual_evidence": "Two user-supplied screenshots; one shows dark laptop, reflective surface, metallic LINEAR typography",
+  "motion_review": "NOT_OBSERVED_FROM_THE_FULL_VIDEO",
+  "audio_review": "NOT_HEARD",
+  "implementation_claim": "Screenshot comments assert JavaScript without extra MCP/plugin; not independently verified creator workflow",
+  "study_scope": "Original same-class procedural device motion example; not a reconstruction claim",
+  "reference_rights": "Study only; no creator footage, sound, logos or artwork copied into the demo"
+}
