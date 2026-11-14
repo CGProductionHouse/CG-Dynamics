@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "observedAt": "2026-11-13",
-  "state": "targeted-r7-and-live-followups-hd-delivered-creative-review-pending",
+  "state": "single-r8-coffee-contact-revision-sent-creative-review-pending",
   "clientId": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
   "month": "2027-01-01",
   "officialCanva": {
@@ -70,12 +70,12 @@
       "canvaPageId": "PBhRR4d4pdXWyyBs",
       "observedPageIndex": 79,
       "monthlyDeliverableId": null,
-      "state": "r7.1-hd-delivered-internal-review",
-      "executionRevision": "Real counter reframed left; owner-authorised licensed ceramic latte, intentional right-edge crop and contact shadow.",
+      "state": "r8-single-coffee-contact-hd-sent-internal-review",
+      "executionRevision": "Lower-angle included ceramic stock cup placed on actual original wood surface, aligned contact shadow; real shop image/crop, live copy and exact logo unchanged.",
       "previousOwnDraftPageId": "PB5r675n7lrFm7JZ",
       "primaryLogoZone": "bottom-right",
       "previousGraphicDepthPageId": "PBgBkkQgbCGQVSbY",
-      "latestExecutionRevision": "r7.1-targeted-owner-feedback",
+      "latestExecutionRevision": "r8-20261114-physical-countertop-contact",
       "latestRoundSent": true,
       "previousExecutionRevisionBeforeR5": "Bright asymmetric College Brew editorial with exact flag against softened own context; small navy signature lower right.",
       "previousExecutionRevisionBeforeR6": "Graphic coffee editorial adds a tactile plane and purposeful illustration, preserving the genuine flag."
@@ -869,28 +869,29 @@
       2160,
       2700
     ],
-    "latestExportState": "Five genuine2160x2700 targeted PNGs followed by three independently verified2160x2700 live-feedback replacements. All eight sends witnessed with HD badges and exact clean captions.",
-    "latestExportPageRange": "79-80,82 (three live follow-ups); initial targeted range66,79-80,82-83",
+    "latestExportState": "Final genuine2160x2700 coffee PNG/contact close-up inspected; one HD message with exact clean caption and Sent witness. One intermediate trial export was not sent.",
+    "latestExportPageRange": "79",
     "furtherSendsHeld": true,
-    "holdReason": "Five affected posters delivered, including three live follow-ups. Await new specific review notes; do not resend unchanged posters.",
-    "latestRoundWhatsAppSends": 8,
+    "holdReason": "Single new coffee review note addressed; wait for new specific feedback rather than resend unchanged posters.",
+    "latestRoundWhatsAppSends": 1,
     "pendingDeliveryReason": null,
     "ownerSendAuthority": "Owner explicitly authorised revised HD photo+allocated-caption internal delivery through Nolan to CG Picasso Approvals; no agent signatures.",
-    "latestRoundAttemptedSends": 8,
+    "latestRoundAttemptedSends": 1,
     "latestRoundSignedIntroMessages": 0,
     "latestRoundHdSelectedForEveryPhoto": true,
     "latestRoundCaptionAndPhotoSameMessage": true,
     "latestRoundAwaitingHumanFeedback": true,
-    "latestRoundHdExportsVerified": 8,
+    "latestRoundHdExportsVerified": 1,
     "hdExportsVerifiedMeaning": "13 current genuine exports including the later isolated New Year replacement; earlier versions retained privately.",
     "captionSignaturePolicy": "13November owner: no agent signatures in forwardable poster captions; supersedes earlier signature instruction.",
     "latestRoundCaptionEditsVerified": 0,
     "latestRoundStandardDuplicateDeletedForEveryone": false,
     "latestRoundSupersededDistinctNewYearRevisionRetained": true,
     "canvaSiteIdentity": "Owner-confirmed company m.productions account; Chrome profile identity is separate.",
-    "latestRoundAffectedPosters": 5,
-    "latestRoundLiveFollowups": 3,
-    "latestRoundReceipt": "Private feedback-rework-r7-20261113/delivery-plan-r7.json and delivery-plan-r7_1.json; prior R6 correction/deletion receipts remain historical."
+    "latestRoundAffectedPosters": 1,
+    "latestRoundLiveFollowups": 0,
+    "latestRoundReceipt": "Private feedback-rework-r8-20261114/delivery-plan-r8.json; all earlier R7/R7.1 receipts retained.",
+    "latestRoundPhotoMessageState": "Sent; no recipient-read or creative-approval claim"
   },
   "finalDestination": {
     "relativePath": "Clients/Piek Group/A_ClientPortal_Piek_Group/Graphic Design/2027/2027_01_JAN",
@@ -951,7 +952,7 @@
       "previousGeneratedAsset": "Separate transparent soap-bubble decoration only; venue/person/logo/type not generated"
     }
   ],
-  "lastVerifiedAt": "2026-11-13",
+  "lastVerifiedAt": "2026-11-14",
   "feedbackRound6": {
     "observedAt": "2026-11-13",
     "pageCount": 85,
@@ -1087,6 +1088,66 @@
       "privateEightMessageDeliveryAudit": true,
       "savedDraftEquality": true,
       "current45Text23Logo64pxMarginFindings": 0,
+      "newImplementationTests": 0
+    }
+  },
+  "feedbackRound8": {
+    "observedAt": "2026-11-14",
+    "newNoteDated": "2026-11-13 15:37 SAST",
+    "newReviewNotes": 1,
+    "affectedPoster": "DP03",
+    "pageId": "PBhRR4d4pdXWyyBs",
+    "pageIndexObserved": 79,
+    "onlyChangedPage": [
+      79
+    ],
+    "nonTargetPagesUnchanged": 84,
+    "all85PageIdsOrderNotesUnchanged": true,
+    "allLiveTextUnchanged": true,
+    "clientPhotoFieldAndLogoRecordsUnchanged": true,
+    "cupAndContactShadowIndependentlyEditable": true,
+    "savedReadbackExactlyMatchesReviewedDraft": true,
+    "physicalCountertopContactCheckedInActualHd": true,
+    "sourceViewpointMatchedToCounter": true,
+    "stockCupIncludedWithExistingCanvaTeams": true,
+    "newClientPhotographyGenerated": false,
+    "sourceFileDimensions": [
+      2160,
+      2700
+    ],
+    "actualFinalExportInspected": true,
+    "intermediateTrialExportsNotSent": 1,
+    "actualSendCount": 1,
+    "hdOptionDimensionsDisplayed": [
+      2048,
+      2560
+    ],
+    "actualOutgoingHdBadge": true,
+    "captionExactlyVerifiedSignatureFree": true,
+    "messageStateWitnessed": "Sent",
+    "recipientReadOrCreativeApproval": false,
+    "safeArea": {
+      "textFrames": 45,
+      "logoFrames": 23,
+      "insetPx": 64,
+      "findings": 0
+    },
+    "caughtBeforeSend": [
+      "Replacement asset inherited an inappropriate internal crop; reset only the cup media frame.",
+      "HD base was too close to counter front edge; moved cup12px back onto wood and aligned shadow.",
+      "Single-file download event timed out while actual verified PNG arrived; no blind retry."
+    ],
+    "privateEvidenceFolder": "feedback-rework-r8-20261114",
+    "incrementalCostZAR": 0,
+    "normalCompanyChatgptFullRoundTripStillOpen": true,
+    "newDependenciesDeploymentsPortalFinalsOrProductionDataChanges": false,
+    "validation": {
+      "freshLocalBuild": "passed TypeScript and Vite7.3.6 on14November; existing Browserslist/chunk warnings",
+      "skillValidator": true,
+      "gitDiffCheck": true,
+      "savedDraftEquality": true,
+      "privateOneMessageAndFinalExportHashAudit": true,
+      "safeMarginFindings": 0,
       "newImplementationTests": 0
     }
   }

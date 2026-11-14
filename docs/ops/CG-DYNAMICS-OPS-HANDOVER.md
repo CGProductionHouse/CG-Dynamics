@@ -1,3 +1,23 @@
+## 14 November — single College Brew contact revision sent
+
+Existing #948/#955/draft #956 lane only. Latest review rejected the R7.1 cup as
+still floating; school revision has a positive reaction. Changed only College
+Brew DP03/page 79: lower-angle included ceramic stock cup physically on the real
+wooden counter, with independent aligned contact shadow. Actual client photo,
+lighting field, live copy and exact mark retained; all 85 IDs/order/notes and 84
+non-target pages unchanged. Fresh saved readback and 64px frame checks pass.
+
+Caught inherited media-crop corruption and a front-edge placement issue before
+sending. Inspected the final actual 2160×2700 export/contact close-up; only one
+HD photo+clean-caption message sent through Nolan to CG Picasso Approvals.
+Outgoing HD badge, exact caption/new ID and Sent state witnessed; not read/creative
+approval. No signature, generic reply, unchanged-poster resend or deletion. R0,
+no new subscriptions, production/portal/client release, deployment or other lane
+changes. See [targeted evidence](../ai-workforce/graphic-designer/piek-january-2027/TARGETED-FEEDBACK-2026-11-13.md).
+Next: new specific review only; normal-company-ChatGPT create/amend/true-export
+and package/schedule acceptance remain open. Exact Control Centre target is still
+unavailable; no guessed tracker write.
+
 ## 13 November afternoon — targeted Piek review amendments delivered
 
 Existing #948/#955/draft #956 only. Five new review notes mapped to the exact

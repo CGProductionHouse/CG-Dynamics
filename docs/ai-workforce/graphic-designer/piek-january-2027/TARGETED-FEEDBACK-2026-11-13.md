@@ -1,4 +1,48 @@
-# Piek targeted feedback — 13 November 2026
+# Piek targeted feedback — 13–14 November 2026
+
+## 14 November — College Brew contact revision sent
+
+The latest new review note, dated 13 November at 15:37, rejected the R7.1 cup as still
+floating. The school revision also has a positive reaction. This round therefore
+changed and resent **only DP03 / stable page PBhRR4d4pdXWyyBs**, observed page 79.
+The larger edge crop/contact shadow from R7.1 was not a successful grounding fix.
+
+Replaced only the decorative cup with an included, unbranded lower-angle ceramic
+stock cup and positioned its base on the **actual photographed wooden counter**.
+Kept the original real shop image/crop, lighting field, all live text, exact parent
+mark and every other page unchanged. The cup and its contact shadow remain
+independently editable. Canva Details displayed Pro Content included with existing
+Canva Teams; creator, asset IDs and licence observation remain private. No new
+subscription, generated client photograph, offer or product-origin claim.
+
+An inherited internal crop initially magnified the replacement into a rectangle;
+caught in preview and repaired by resetting only the cup media frame. The first
+HD export put its base too near the counter front edge. Moved it 12px back onto the
+wood and aligned the independent shadow, then exported/inspected the real final
+2160×2700 PNG and contact close-up before the single send. The intermediate
+export was not sent. Thumbnail alpha coordinates alone did not establish the rendered
+base/contact position.
+
+Fresh saved readback matches the reviewed final draft. Exactly one of 85 pages
+changed; 84 non-target pages, all live text and all page IDs/order/notes retained.
+Current 45 text / 23 reviewed logo frames still pass 64px inset with 0 findings.
+Declared overlay-alpha checking is limited to supplied raster/region bounds;
+actual support contact and letter clearance were visually checked in the HD file.
+
+One actual photo+allocated-caption message sent through verified Nolan/company
+Chrome to CG Picasso Approvals. Selected HD option reported 2048×2560; actual new
+message ID, outgoing HD badge, exact clean caption and **Sent** state witnessed.
+No signatures, generic reply, other-poster resend or deletion. Await creative
+feedback; Sent is not recipient-read proof or human approval. Private evidence:
+`feedback-rework-r8-20261114/` under the existing private Piek job root.
+
+Local build/skill/diff and private final-asset/delivery checks are recorded in
+`production-evidence-2026-11-06.json` under `feedbackRound8`. No production,
+portal/client release, deployment, dependency, paid API, hosting or new spend.
+Existing #948/#955/draft #956 lane only; everyday company-ChatGPT author/amend/HD
+export acceptance and January schedule/package gates remain open.
+
+## 13 November — five affected posters and live follow-ups
 
 Existing #948/#955/draft #956 lane. This follows the earlier R6 full-set delivery;
 it does not replace its historical receipts or reopen the other eight posters.
