@@ -30,6 +30,13 @@ node scripts/poster-studio/poster-studio.mjs compare C:\private\job\scene-v1.jso
 
 Chrome is used headlessly for the local preview. Set `CHROME_PATH` only if Chrome is not installed in its normal Windows location. `--no-preview` emits SVG and the manifest without PNG rendering.
 
+For an independent decorative path/mask asset, add `--transparent-background`.
+Chrome otherwise mattes unpainted SVG pixels onto white. That matte can hide the
+whole photograph when the graphic is imported as a separate Canva layer; a
+successful native import is not a visual check. The flag preserves the PNG alpha
+channel and records the requested mode in the manifest. It does not remove an
+explicitly painted background. Default poster rendering remains unchanged.
+
 For a portable licensed face, add a scene `fonts` array, for example
 `{ "family": "Bebas Neue", "asset": "assets/BebasNeue-Regular.ttf", "licenceAsset": "assets/OFL.txt", "weight": 400, "style": "normal", "expectedSha256": "<verified-lowercase-file-hash>" }`.
 The renderer embeds exact local TTF/OTF/WOFF/WOFF2 bytes and the supplied licence

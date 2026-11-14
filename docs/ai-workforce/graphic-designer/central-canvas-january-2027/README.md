@@ -1,8 +1,9 @@
 # Central Canvas January 2027 — production preflight
 
 Observed 14 November 2026. Existing Graphic Designer #948 / draft PR #956 lane;
-no new branch, production service or video dispatch. This is preparation, not a
-completed poster, monthly approval, schedule or client release.
+no new branch, production service or video dispatch. A bounded native Canva
+working proof is saved and HD-exported; it is not monthly approval, a cleared
+fresh-source final, a schedule or client release.
 
 ## Current authority
 
@@ -58,9 +59,9 @@ cut-to-fit, strong stitching, dispatch, lapa enclosure, accessories, load-bearin
 tarps and measuring before the first cut. Changing a headline does not make the
 same concept or photograph fresh.
 
-Existing artwork prominently uses a 20-year mark. Its suitability for January
-2027 needs verification; do not automatically carry a dated anniversary variant
-forward, redraw it or alter its number.
+Existing artwork prominently uses a20-year mark. The owner's14November direction
+explicitly requires this exact variant for January. Preserve the real mark;
+do not redraw, recolour or alter its number.
 
 ## Source screening actually run
 
@@ -106,7 +107,7 @@ this master has the opposite header order. Its current policy cannot safely
 represent this master. Do not forge boundaries or weaken the guard to force a pass.
 
 Next: reconcile the existing New Year page and exact January package/schedule;
-finish current source/social/approval coverage; verify a standard logo and exact
+finish current source/social/approval coverage; retain the owner-selected20-year logo and exact
 font roles; prepare two distinct service-specific briefs alongside the existing
 candidate. Prove a bounded editable composition and a supported insertion path
 before claiming production in the official master. A private three-slot proposal
@@ -117,7 +118,7 @@ school reopening is audience context, not a forced school concept for this clien
 Keep final claims/contact
 footers freshness-gated. No Central Canvas poster has been sent or published.
 
-## 14 November continuation — real editable local study
+## 14 November13:15 — historical editable local study
 
 Built and inspected a private **2160x2700** repair composition, preserving the real
 client photograph and original standard white logo. Exact Bebas Neue Regular was
@@ -165,12 +166,74 @@ artwork. The social download batch timed out; two downloads were duplicates of
 one image, not broader history coverage. Public, queued and same-shoot history
 coverage remains incomplete. No group message, reply, reaction or forward sent.
 
-Piek fresh recorded updates and the available Graphic Design Approvals searches
-still do not establish January order. December posts are not its January schedule.
-The13-item verified forward registry remains unsubmitted; no guessed ordering.
+At this earlier checkpoint Piek's13-item registry was held. The later direct owner
+instruction and actual serialized send below supersede that delivery state;
+December posts still do not establish January schedule authority.
 Central master222-page native limit, January package/allocation, new-source
 clearance, human creative approval and normal-company-ChatGPT end-to-end remain
 open. No master page, existing human candidate or Nolan video changed.
 
 R0 incremental cost. No new dependency, deployment, production data, client portal
 final, scheduling, client publication or Nolan/Picasso source change.
+
+## 14 November14:15 — saved native Canva proof and actual HD inspection
+
+All13 current Piek artworks were actually sent through Nolan to Graphic Design
+Approvals in the saved creative sequence, extra last, with exact clean captions
+and witnessed HD outgoing rows. Owner requested immediate transmission; no actual
+posting dates, formal approvals or package rows were invented.
+
+Central proof **DAHa40G8t38** is saved in existing **CENTRAL CANVAS** folder
+**FAFGzOsSrxQ**. [Open the temporary working proof](https://www.canva.com/d/J5wxOGDLHpWoDvv).
+Official222-page master **DAGGISDPrDU**, existing human New Year candidate and
+protected history remain untouched. A copied logo reference is labelled TEMP
+REFERENCE ONLY, not another official client master. No master insertion claimed.
+
+Actual native readback confirms six live text and nine separate image records:
+real source photo, registered source cutout, exact20-year logo, two lighting fields
+and four decorative devices. Three independent shape fields complete the18-layer
+source composition. The connector does not expose every filled-shape record; do
+not claim an exhaustive native shape inventory. Kit Bebas Neue type and actual
+render inspected; portable SVG retains its exact local licensed face and notice.
+No flattened poster is called editable.
+
+New finish starts with the original oriented sRGB photo: luminance curve within
+RGB headroom and restrained detail. Black reading fields replace gray veiling.
+Foreground RGB is re-registered from the same finished base/light fields. Exact
+anniversary-logo pixels are cropped only to remove outer white padding and placed
+on a deliberate full-width white footing. No logo recolour, generated reconstruction,
+skin reshaping or clipped-JPEG recovery claim.
+
+First native preview exposed opaque decorative white mattes hiding the photo.
+Four transparent replacements were corrected and inspected before commit. New
+opt-in `--transparent-background` local rendering prevents this upstream: actual
+2160x2700 graphic alpha spans0..217 with a fully transparent corner; default
+rendering remains opaque. No new dependency.
+
+Native CTA amendment TALK TO OUR TEAM → ASK OUR TEAM preserved every other exposed
+text/image/page record. Actual480x600 preview differences occupy only
+`[39,527,133,538]`, zero pixels outside CTA. Restoring wording reproduces the
+preview exactly. Post-commit readback confirms six text/nine image records.
+Genuine Canva PNG export measured **2160x2700**; full output and HD arm/letter detail
+inspected. Download completed despite browser-event timeout; actual file recovered
+and verified instead of blindly exporting twice. These checks are not human approval.
+
+Private current evidence: `repair-study/scene-v11.json`, `native-scene-v11.json`,
+`canva-v11-proof-receipt.json`, `canva-v11-HD-actual.png`,
+`canva-v11-HD-arm-detail.png`, native saved/readback and amendment records.
+HD PNG SHA256 `04c1d967240b941dd9e9c67679c6e9f2e5ba61e468972ce2c8c4d5232da8a337`.
+Ten further client-supplied service photos have matching OneDrive hashes (2.46MB).
+All222 history previews compared with zero decode errors and two OpenCV threads.
+Nine positive comparisons identify four sources, visually confirmed: red truck,
+canvas organiser, covered bakkie and UFS cart. Keep these excluded; negatives are
+not unused-source certificates. No pool-cover image inferred from folder names.
+A folder-scoped OneDrive keyword search returned unrelated paths outside this
+client. Reject those results rather than trusting the requested scope or fetching
+other clients' photos; that search does not prove a pool photo is absent.
+
+Remaining: this inspection frame is closely related to a used photo; social,
+approval and same-shoot coverage is incomplete. Keep internal/source-hold status.
+January package/allocation, fresh remaining sources, bounded master insertion,
+human creative approval and ordinary company-ChatGPT end-to-end remain open.
+No Central WhatsApp send, portal final, client release, scheduling, production,
+deployment or spend. Nolan video unchanged.

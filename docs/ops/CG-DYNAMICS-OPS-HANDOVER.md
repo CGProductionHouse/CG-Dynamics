@@ -1,3 +1,36 @@
+## 14 November14:15 — Piek13 sent; Central Canvas native proof saved
+
+Same #948/#955/draft#956 lane. On the owner's renewed direct instruction, sent
+all13 current Piek posters freshly through verified Nolan/company Chrome to
+**GRAPHIC DESIGN APPROVALS**, one HD photo plus its exact signature-free caption
+per message. Serialized saved creative sequence: DP01, DP04, DP11, DP07, DP05,
+DP10, DP02, DP08, DP06, DP09, latest DP03 R9, DP12, EXTRA01. Every outgoing row,
+unique message ID, completed HD image/badge and exact caption witnessed privately.
+Do not resend this set. Latest private `send-plan-owner-directed.json` supersedes
+earlier held registries. Transmission does not create posting dates, change
+package/schedule rows or certify every design approved. Actual January posting
+order remains unverified; owner directed the saved creative sequence now.
+
+Owner explicitly requires Central Canvas's20-year logo, superseding the earlier
+anniversary-suitability question. Exact OneDrive logo, kit typography and stronger
+source-preserving photo finish form a **saved native Canva one-page working proof**,
+`DAHa40G8t38`, in existing CENTRAL CANVAS folder `FAFGzOsSrxQ`. Six live text/nine
+separate image records read back after commit. Actual Canva2160x2700 export and
+arm/type detail inspected. CTA-only test preserves every other exposed native
+record; zero preview pixels change outside CTA and restoration is pixel-identical.
+This is an internal technical proof with a same-shoot reuse hold, not a cleared
+January final or PSD. Official222-page master, human New Year candidate and all
+protected history remain untouched. A copied logo inspection is clearly TEMP
+REFERENCE ONLY, not a second official file. Master connector limit remains.
+
+Four decorative graphics initially imported opaque white mattes; corrected before
+commit. New opt-in headless transparent PNG rendering is exercised on actual alpha
+pixels; default rendering unchanged. No Central send, portal final, client release,
+schedule/production/deployment or spend change. Nolan Studio PC November lapa R07
+untouched. Control Centre exact target unavailable; no guessed write. Next: clear
+fresh sources/history and January allocations, then an authorised bounded master
+operation. Do not force Piek's incompatible lane guard.
+
 ## 14 November13:15 — Central Canvas local layered proof; release holds retained
 
 Same #948/draft#956 lane. Implemented small local Poster Studio support for exact

@@ -145,6 +145,28 @@ The private HTML import path is now exercised with actual Piek drafts. Use `scri
 
 ### Finishing and delivery lessons
 
+An independently rendered SVG graphic is not necessarily a transparent PNG:
+headless Chrome's default screenshot mattes it onto white. In Central's native
+import this hid the photograph even though every layer imported successfully.
+Use Poster Studio's opt-in `--transparent-background` for standalone decorative
+assets; inspect actual PNG alpha and the composed native preview. It does not
+erase explicitly painted backgrounds. Default poster rendering stays unchanged.
+Never treat all white pixels in a client photograph or logo as expendable.
+The bounded correction retained real photo/live type/logo and replaced only four
+independent decorative fills.
+
+After a download/event-wait interruption, inspect actual Downloads before another
+export. Central's2160x2700 PNG existed despite the event timeout; recover and
+verify dimensions/hash/content. Retain saved native state and actual HD evidence.
+A lost debugger handle does not prove the laptop is off: a fresh tab in the same
+verified company profile can work. Never switch to personal Chrome for recovery.
+
+Validate each OneDrive search result's actual parent path against the exact client
+root before fetching. A Central folder-scoped keyword query returned unrelated
+drive paths; the requested folder argument alone did not enforce scope. Reject
+those results, retain the coverage limitation and use exact canonical child IDs.
+Do not infer a source is missing from an incorrectly scoped search.
+
 Owner feedback about washed-out images applies across the set. Evaluate actual source, derivative and final crop. A simple linear contrast pass increased clipping and was rejected; the accepted private pass uses endpoint-anchored luminance contrast and restrained detail within each source pixel's RGB headroom. Check clipping before upload, avoid crushed shadows/halos and keep already-good images natural. Never apply a uniform aggressive grade or describe existing JPEG clipping as recovered detail.
 
 For mutable Piek branch facts, the owner explicitly confirms the current live `piekgroup.co.za` site as the authority; use current Get Together site facts for its venues. Unknown photo provenance is not solved by a plausible branch guess. The pilot replaced an uncertain burger source with a current-site night photograph and verified forecourt-hours claim. Keep detected repeated branches visible to monthly human review even when the photos/services differ.

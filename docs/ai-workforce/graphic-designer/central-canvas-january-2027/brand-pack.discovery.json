@@ -31,7 +31,15 @@
         "path": "Clients/Central Canvas/Brand Identity/Logo/png-03.png",
         "itemId": "A2AC9FE4B255F52F!36955",
         "access": "read-only",
-        "role": "Exact standard white variant used in private study; January variant approval pending",
+        "role": "Historical white variant in local v10 study; owner-selected20-year mark supersedes it for current January proof",
+        "format": "PNG"
+      },
+      {
+        "provider": "OneDrive",
+        "path": "Clients/Central Canvas/Brand Identity/Logo/Central Canvas20.png",
+        "itemId": "A2AC9FE4B255F52F!sab5fda068d1547c3a67f2a97544aa2e3",
+        "access": "read-only",
+        "role": "Exact20-year mark expressly required by owner14November2026; original pixels on full-width white footing in saved native proof",
         "format": "PNG"
       }
     ],
@@ -86,6 +94,8 @@
   "creativeRules": [
     "Charcoal and orange are primary; green is an accent, per exact-client later style correction.",
     "Preserve real products, vehicles, stitching, materials, branding, proportions and people.",
+    "Use the exact20-year logo per explicit14November owner direction; preserve geometry and colours.",
+    "Inspect source, grade and actual Canva HD output; improve contrast/detail without gray veiling or mismatched foreground lighting.",
     "Use purposeful source overlap, actual material texture and varied hierarchy; do not repeat a template or logo position across the grid.",
     "Copy stays practical, local and product-specific; captions add context instead of repeating artwork. No em dashes; maximum five relevant hashtags.",
     "Preserve all other designers' existing work and all Drafts/Posted/Scheduled history.",
@@ -100,8 +110,8 @@
   "limitations": [
     "Discovery pack, not production clearance. January package, dates and final claims are unconfirmed.",
     "Bernoru and Araboto remain Canva-only. Bebas Neue Regular is privately available with its original OFL1.1 notice; actual exported glyph bounds match the exact file. No OS font installation or licensed-font commit.",
-    "Current logo variant and January suitability of anniversary marks remain unresolved.",
-    "Native editing transaction rejected the 222-page master. No transaction or content change occurred.",
+    "Owner explicitly selected20-year mark; source freshness and creative approval remain unresolved.",
+    "Native editing rejected222-page master. Temporary one-page native proof saved in exact folderFAFGzOsSrxQ; master insertion remains unperformed.",
     "Piek's lane guard cannot represent this master's reversed working-header order; do not force it to pass.",
     "Private source samples and history comparisons are bounded; no unused-source certificate or biometric database."
   ]

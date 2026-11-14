@@ -248,7 +248,7 @@ function flattenLayers(layers, parent = null, output = []) {
   return output
 }
 
-function makeManifest(scene, scenePath, svgPath, pngPath, fonts, previewScale) {
+function makeManifest(scene, scenePath, svgPath, pngPath, fonts, previewScale, transparentBackground) {
   const flat = flattenLayers(scene.layers)
   return {
     schemaVersion: 1,
@@ -260,6 +260,7 @@ function makeManifest(scene, scenePath, svgPath, pngPath, fonts, previewScale) {
     assets: collectAssets(scene, scenePath),
     fonts,
     previewScale,
+    transparentBackground,
     layers: flat.map((layer, index) => ({
       id: layer.id,
       name: layer.name ?? layer.id,
@@ -286,7 +287,7 @@ function findChrome() {
   return candidates.find(existsSync)
 }
 
-function renderPreview(svgPath, pngPath, width, height, scale) {
+function renderPreview(svgPath, pngPath, width, height, scale, transparentBackground) {
   const chrome = findChrome()
   if (!chrome) throw new Error('Chrome was not found; set CHROME_PATH or use --no-preview')
   const profile = mkdtempSync(resolve(tmpdir(), 'cg-poster-studio-'))
@@ -296,6 +297,7 @@ function renderPreview(svgPath, pngPath, width, height, scale) {
       '--disable-gpu',
       '--hide-scrollbars',
       '--allow-file-access-from-files',
+      ...(transparentBackground ? ['--default-background-color=00000000'] : []),
       `--force-device-scale-factor=${scale}`,
       `--user-data-dir=${profile}`,
       `--window-size=${width},${height}`,
@@ -316,6 +318,7 @@ async function render(sceneArg, args) {
   validateScene(scene)
   const fonts = prepareFonts(scene, scenePath)
   const previewScale = Number(option(args, '--scale') ?? 1)
+  const transparentBackground = args.includes('--transparent-background')
   if (!Number.isInteger(previewScale) || previewScale < 1 || previewScale > 4) throw new Error('--scale must be an integer from 1 to 4')
   const requestedOut = option(args, '--out')
   const outDir = resolve(requestedOut ?? dirname(scenePath), scene.document.id)
@@ -326,8 +329,8 @@ async function render(sceneArg, args) {
   const svgPath = resolve(outDir, `${scene.document.id}.svg`)
   const pngPath = resolve(outDir, `${scene.document.id}.png`)
   writeFileSync(svgPath, svg, 'utf8')
-  if (!args.includes('--no-preview')) renderPreview(svgPath, pngPath, scene.canvas.width, scene.canvas.height, previewScale)
-  const manifest = makeManifest(scene, scenePath, svgPath, args.includes('--no-preview') ? null : pngPath, fonts.manifest, previewScale)
+  if (!args.includes('--no-preview')) renderPreview(svgPath, pngPath, scene.canvas.width, scene.canvas.height, previewScale, transparentBackground)
+  const manifest = makeManifest(scene, scenePath, svgPath, args.includes('--no-preview') ? null : pngPath, fonts.manifest, previewScale, transparentBackground)
   const manifestPath = resolve(outDir, `${scene.document.id}.manifest.json`)
   writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8')
   console.log(JSON.stringify({ status: 'ok', svgPath, pngPath: manifest.outputs.png?.path ?? null, manifestPath, layerCount: manifest.layers.length, assetCount: manifest.assets.length }, null, 2))
