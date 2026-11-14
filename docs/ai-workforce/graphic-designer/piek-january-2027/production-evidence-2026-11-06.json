@@ -1153,7 +1153,7 @@
   },
   "feedbackRound9": {
     "observedAt": "2026-11-14",
-    "state": "prepared-not-sent-reuse-hold",
+    "state": "single-internal-review-delivered-owner-directed-exception",
     "canvaDesignId": "DAHaD4mJnGY",
     "changedPageId": "PBhRR4d4pdXWyyBs",
     "observedPageIndex": 79,
@@ -1195,10 +1195,20 @@
       ]
     },
     "delivery": {
-      "sendCount": 0,
+      "sendCount": 1,
       "forwardCount": 0,
-      "state": "prepare-here-first-for-Nolan-serialized-coordination",
-      "sendPermitted": false
+      "state": "delivered-hd-photo-and-exact-signature-free-caption",
+      "senderVerified": "Nolan",
+      "destinationVerified": "CG Picasso Approvals",
+      "ownerDirection": "Subsequent Send it please after incomplete reuse coverage disclosed",
+      "reuseClearanceGranted": false,
+      "internalReviewException": true,
+      "hdBadgeWitnessed": true,
+      "outgoingCaptionTextContentExact": true,
+      "transportDimensionsReported": null,
+      "completedImageWitnessed": true,
+      "deliveryStateWitnessed": "Delivered",
+      "deliveredAtObserved": "2026-11-14T12:07:00+02:00"
     },
     "creativeApproval": "pending",
     "incrementalCostZAR": 0,

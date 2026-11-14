@@ -1,5 +1,26 @@
 # Piek targeted feedback — 13–14 November 2026
 
+## 14 November12:07 — subsequent explicit single-review send
+
+Owner said "Send it please" after the R9 preview and incomplete reuse coverage
+were disclosed. That subsequent instruction authorised only this internal review
+delivery despite the documented gaps; it does not certify unused media or authorise
+client publication/full-set forwarding. Preserved preparation evidence separately.
+
+Sent exactly one prepared DP03 R9 HD image through verified Nolan to CG Picasso
+Approvals, with allocated299-character caption intact and no signature. Selected
+HD checkmark and actual outgoing HD badge witnessed; the quality menu did not
+report dimensions, so no transport dimensions are invented. New message ID,
+completed image and Delivered state retained privately. Outgoing caption DOM
+textContent exactly matches prepared copy; layout-derived innerText exaggerates
+paragraph spacing and is not used for this equality check.
+
+No duplicate retry, unchanged poster, generic reply, deletion, concurrent delivery
+or Graphic Design Approvals forward. Reuse coverage remains incomplete; human
+creative approval and authoritative January order are separate gates. Artwork
+unchanged from the inspected R9 export. R0; no production/portal/client release.
+Latest private status: `feedback-rework-r9-20261114/delivery-plan-r9.json`.
+
 ## 14 November — annotated lower-right DP03 revision prepared, not sent
 
 Owner's 10:11–10:12 review rejected the R8 placement and supplied an annotated

@@ -1,3 +1,19 @@
+## 14 November12:07 — owner-directed single DP03 review delivered
+
+After the incomplete reuse coverage was disclosed, owner explicitly said "Send
+it please". Sent only the prepared R9 DP03 through verified Nolan/company Chrome
+to CG Picasso Approvals as one HD photo with unchanged signature-free caption.
+Actual unique new message ID, HD badge, exact outgoing caption textContent,
+completed image and Delivered state witnessed privately. No concurrent send,
+duplicate, other-poster resend, generic reply or full-set forward. Preparation
+receipt retained historically; latest private delivery-plan-r9.json is current.
+
+This is an explicit owner-directed internal review exception, **not** reuse
+clearance, full creative approval, client/portal release or schedule authority.
+Reuse gaps remain documented. Graphic Design Approvals forwarding still needs
+all current posters approved and authoritative January posting order. No artwork,
+production/data/deployment, other agent lane or spend change in this send step.
+
 ## 14 November — annotated DP03 prepared; reuse and delivery held
 
 Existing #948/#955/draft#956 lane only. Followed owner's actual10:11–10:12
