@@ -1,0 +1,225 @@
+{
+  "schemaVersion": 1,
+  "clientId": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
+  "month": "2027-01-01",
+  "status": "proposal-unmatched-to-schedule",
+  "ownerMonthConfirmedAt": "2026-11-14",
+  "packageBaseline": {
+    "designPosters": 4,
+    "photoPosts": 4,
+    "source": "Exact confirmed current package + owner explicit 4DP/4photo Group scope",
+    "videoExcludedFromThisTask": true
+  },
+  "productionLane": {
+    "state": "native-candidates-in-progress-history-held",
+    "masterDesignId": "DAHEfeuQzP4",
+    "scheduleMeaning": "Creative windows only; no dated rows, UUIDs, scheduling or publication created. DP numbering is not authoritative posting order.",
+    "excludedPackages": [
+      "Supa Quick",
+      "Wiseman Midas",
+      "WiseRide"
+    ],
+    "bulkHydrationRestarted": false
+  },
+  "seasonalEvidence": [
+    {
+      "fact": "Public-school learners return13January2027; teacher administration11-12January.",
+      "authority": "https://www.gov.za/about-sa/school-calendar"
+    },
+    {
+      "fact": "1January2027 is a public holiday; no branch-hours inference.",
+      "authority": "https://www.gov.za/about-sa/public-holidays"
+    },
+    {
+      "fact": "South African summer and return-to-routine are planning contexts, not evidence of offers, demand, operating hours or a specific customer journey.",
+      "authority": "strategic-hypothesis"
+    }
+  ],
+  "creativeWindows": [
+    {
+      "provisionalId": "2027_01_WISEMAN_DP01",
+      "start": "2027-01-01",
+      "end": "2027-01-07",
+      "occasion": "The first ordinary errands after the holidays.",
+      "evidenceType": "audience-hypothesis"
+    },
+    {
+      "provisionalId": "2027_01_WISEMAN_DP02",
+      "start": "2027-01-15",
+      "end": "2027-01-21",
+      "occasion": "A customer deciding where to go before leaving home.",
+      "evidenceType": "audience-hypothesis"
+    },
+    {
+      "provisionalId": "2027_01_WISEMAN_DP03",
+      "start": "2027-01-22",
+      "end": "2027-01-31",
+      "occasion": "Returning to ordinary driving after a longer summer journey.",
+      "evidenceType": "audience-hypothesis"
+    },
+    {
+      "provisionalId": "2027_01_WISEMAN_DP04",
+      "start": "2027-01-08",
+      "end": "2027-01-12",
+      "occasion": "Preparation before public-school learners return13January.",
+      "evidenceType": "calendar-fact-plus-audience-hypothesis"
+    }
+  ],
+  "briefs": [
+    {
+      "provisionalId": "2027_01_WISEMAN_DP01",
+      "monthlyDeliverableId": null,
+      "brandScope": "WISEMAN_GROUP",
+      "businessObjective": "Move a vague car-related task towards an appropriate actual business.",
+      "buyingSituation": "The first ordinary errands after the holidays.",
+      "audience": "People choosing practical car-related help from the Group businesses.",
+      "audienceTension": "The car task stays on the list while school and work routines restart.",
+      "proposition": "A practical first step without promising every service from the Group office.",
+      "proof": "Ready exact-client guide and current official Group directory; primary government calendar only where relevant.",
+      "emotion": "Recognised and informed; local wit without an invented claim.",
+      "nextAction": "Use the verified Group website to find the appropriate business.",
+      "januaryRelevance": "The first ordinary errands after the holidays. This is a proposed creative window, not a schedule.",
+      "headlineCandidates": [
+        "JANUARY'S TO-DO LIST CALLED."
+      ],
+      "mechanism": "original office portrait with a registered hair/type overlap and a phone-call headline",
+      "sourceRequirement": "Genuine Group office source, exact brand logo, clean original-pixel hair mask.",
+      "sourceStatus": "native-R2-HD-inspected",
+      "avoid": [
+        "No named current staff role; no automatic clipped-data recovery or skin smoothing.",
+        "Reused people/photographs, near-frame substitutes, generic footer templates and unverified offers."
+      ],
+      "whyItExists": "Move a vague car-related task towards an appropriate actual business. The car task stays on the list while school and work routines restart.",
+      "qaState": "native-R2-HD-inspected",
+      "workingCanvaDesignId": "DAHa50-3QfY"
+    },
+    {
+      "provisionalId": "2027_01_WISEMAN_DP02",
+      "monthlyDeliverableId": null,
+      "brandScope": "WISEMAN_GROUP",
+      "businessObjective": "Make the current Group business directory useful, rather than listing unrelated offers.",
+      "buyingSituation": "A customer deciding where to go before leaving home.",
+      "audience": "People choosing practical car-related help from the Group businesses.",
+      "audienceTension": "An unclear destination can turn a simple task into extra stops.",
+      "proposition": "Explore the appropriate listed business before setting out; no routing-speed guarantee.",
+      "proof": "Ready exact-client guide and current official Group directory; primary government calendar only where relevant.",
+      "emotion": "Recognised and informed; local wit without an invented claim.",
+      "nextAction": "Use the verified Group website to find the appropriate business.",
+      "januaryRelevance": "A customer deciding where to go before leaving home. This is a proposed creative window, not a schedule.",
+      "headlineCandidates": [
+        "DON'T MAKE AN ERRAND A ROAD TRIP."
+      ],
+      "mechanism": "directional pegboard with separate task markers, material depth and varied live-type placement",
+      "sourceRequirement": "Verified current directory and independently composed original graphics; no fake branch map, unknown hours or universal-service claim.",
+      "sourceStatus": "blocked-source-and-execution",
+      "avoid": [
+        "Avoid the old relationship/therapist concept, sound-effects decoding and another office-portrait template.",
+        "Reused people/photographs, near-frame substitutes, generic footer templates and unverified offers."
+      ],
+      "whyItExists": "Make the current Group business directory useful, rather than listing unrelated offers. An unclear destination can turn a simple task into extra stops.",
+      "qaState": "blocked-source-and-execution",
+      "workingCanvaDesignId": null
+    },
+    {
+      "provisionalId": "2027_01_WISEMAN_DP03",
+      "monthlyDeliverableId": null,
+      "brandScope": "WISEMAN_GROUP",
+      "businessObjective": "Encourage a useful vehicle-care next step through the correct business.",
+      "buyingSituation": "Returning to ordinary driving after a longer summer journey.",
+      "audience": "People choosing practical car-related help from the Group businesses.",
+      "audienceTension": "Finishing a trip does not remove the wear accumulated on it.",
+      "proposition": "Consider appropriate checks after travel; no diagnosis, fixed maintenance interval or universal service/warranty.",
+      "proof": "Ready exact-client guide and current official Group directory; primary government calendar only where relevant.",
+      "emotion": "Recognised and informed; local wit without an invented claim.",
+      "nextAction": "Use the verified Group website to find the appropriate business.",
+      "januaryRelevance": "Returning to ordinary driving after a longer summer journey. This is a proposed creative window, not a schedule.",
+      "headlineCandidates": [
+        "THE HOLIDAY IS OVER. THE KILOMETRES STAY."
+      ],
+      "mechanism": "diagonal tread-to-journey composition with source-faithful work detail and independent typography",
+      "sourceRequirement": "Select an unused genuine original. Any listed-business image needs exact parent-awareness scope verification first; no franchise photo-slot filler.",
+      "sourceStatus": "blocked-source-and-execution",
+      "avoid": [
+        "Avoid duplicating the current tyre-clues/fitment artwork, an existing source, or asserting that every car needs the same work.",
+        "Reused people/photographs, near-frame substitutes, generic footer templates and unverified offers."
+      ],
+      "whyItExists": "Encourage a useful vehicle-care next step through the correct business. Finishing a trip does not remove the wear accumulated on it.",
+      "qaState": "blocked-source-and-execution",
+      "workingCanvaDesignId": null
+    },
+    {
+      "provisionalId": "2027_01_WISEMAN_DP04",
+      "monthlyDeliverableId": null,
+      "brandScope": "WISEMAN_GROUP",
+      "businessObjective": "Place the car among the practical preparations for daily school journeys.",
+      "buyingSituation": "Preparation before public-school learners return13January.",
+      "audience": "People choosing practical car-related help from the Group businesses.",
+      "audienceTension": "Bags and lifts are organised while the vehicle can be overlooked.",
+      "proposition": "Find the right business for the checks the vehicle needs; no safety guarantee or invented package.",
+      "proof": "Ready exact-client guide and current official Group directory; primary government calendar only where relevant.",
+      "emotion": "Recognised and informed; local wit without an invented claim.",
+      "nextAction": "Use the verified Group website to find the appropriate business.",
+      "januaryRelevance": "Preparation before public-school learners return13January. This is a proposed creative window, not a schedule.",
+      "headlineCandidates": [
+        "SMALL PASSENGERS. BIG PRIORITIES."
+      ],
+      "mechanism": "tactile school prop on a grounded plane behind independent priority typography",
+      "sourceRequirement": "Generic unbranded decorative backpack only; exact original Group logo and live text, not a generated client product.",
+      "sourceStatus": "native-proof-HD-pending",
+      "avoid": [
+        "No generated children, reconstructed client photograph, school endorsement, price, opening-hours or blanket service claim.",
+        "Reused people/photographs, near-frame substitutes, generic footer templates and unverified offers."
+      ],
+      "whyItExists": "Place the car among the practical preparations for daily school journeys. Bags and lifts are organised while the vehicle can be overlooked.",
+      "qaState": "native-proof-HD-pending",
+      "workingCanvaDesignId": "DAHa6EwI0Mk"
+    }
+  ],
+  "photoPosts": [
+    {
+      "provisionalId": "2027_01_WISEMAN_F01",
+      "clientId": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
+      "brandScope": "WISEMAN_GROUP",
+      "monthlyDeliverableId": null,
+      "title": "Real conversation",
+      "workingCanvaDesignId": "DAHa6Lv7Ksk",
+      "pageId": "PB30jKSgLZ834Xqk",
+      "sourceQualification": "Original Group office portrait, exact separate logo; archive/current-role and cycle review still required.",
+      "state": "native-candidate-HD-cycle-history-gates-open"
+    },
+    {
+      "provisionalId": "2027_01_WISEMAN_F02",
+      "clientId": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
+      "brandScope": "WISEMAN_GROUP",
+      "monthlyDeliverableId": null,
+      "title": "At work, not on autopilot",
+      "workingCanvaDesignId": "DAHa6EVnEAo",
+      "pageId": "PBntCNTWxzCM8tzm",
+      "sourceQualification": "Original Group office action image with background colleague and private papers softened; preserve real foreground texture.",
+      "state": "native-candidate-HD-cycle-history-gates-open"
+    },
+    {
+      "provisionalId": "2027_01_WISEMAN_F03",
+      "clientId": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
+      "brandScope": "WISEMAN_GROUP",
+      "monthlyDeliverableId": null,
+      "title": "The desk-side shift",
+      "workingCanvaDesignId": "DAHa6NlVXhI",
+      "pageId": "PBDn60c0s6kLTB6T",
+      "sourceQualification": "Actual Group office process detail, faces excluded; private fields softened. Actual uniform/document marks retained, not a franchise product post.",
+      "state": "native-candidate-HD-cycle-history-gates-open"
+    },
+    {
+      "provisionalId": "2027_01_WISEMAN_F04",
+      "clientId": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
+      "brandScope": "WISEMAN_GROUP",
+      "monthlyDeliverableId": null,
+      "title": "The badge, up close",
+      "workingCanvaDesignId": "DAHa6EVnEAo",
+      "pageId": "PBSVGXXbgVhv35G2",
+      "sourceQualification": "Exact original embroidered Group badge; no identifiable face or invented new person identity. No second overlaid logo.",
+      "state": "native-candidate-HD-cycle-history-gates-open"
+    }
+  ],
+  "releaseStatus": "held; native candidate creation is not approval, final delivery or schedule authority"
+}

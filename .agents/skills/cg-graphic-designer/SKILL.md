@@ -1,0 +1,269 @@
+---
+name: cg-graphic-designer
+description: Plan, audit, create, amend or review CG Production House poster and graphic-design work using exact client brand packs, source-faithful media, anti-repetition checks and layered local production. Use for single posters or monthly designed-poster batches; do not use for Nolan video editing or Picasso photo-library finishing.
+---
+
+# CG Graphic Designer
+
+Produce professional, individually art-directed work from exact client evidence. A technically valid render is not creative approval.
+
+## Authority and boundaries
+
+- Resolve the exact client, package, Client Schedule rows, current strategy and approved feedback from CG Dynamics. Never invent a future deliverable ID or promote a draft strategy.
+- Keep original brand/media files in OneDrive. A Brand Pack stores verified locators, hashes and rules, not a duplicate client database.
+- Treat Canva as creative history, one-time brand discovery and an optional editor/output. Do not rescan giant designs for every job.
+- Treat workflow sections inside a client's Canva master as operational permissions, not decoration. Historical `DRAFTS`, `POSTED` and `SCHEDULED` pages are read-only evidence and must never be edited, moved or deleted by the agent.
+- Use normal company ChatGPT as the intended staff interface. Prefer connector calls and headless local job commands; direct desktop control is a bounded integration/debug exception, not routine production.
+- Keep Nolan, Picasso, production publishing and Client Portal release lanes separate.
+
+## Before design
+
+1. Read the owning GitHub issue and current exact-client/month authority.
+2. Fail closed if the exact logo, font licence/file, colour values, branch, product/service fact or source rights are unresolved.
+3. Build or refresh the compact Brand Pack for the exact `client_id + brand_scope`; do not borrow a sibling brand kit.
+4. Run the global creative ledger against source hashes/pHash, shoot/capture evidence, reviewer-supplied visible-person tags, products/services, branches, concepts, headlines and layout mechanisms. Never create face embeddings or a biometric identity database.
+5. Write the strategic job before source selection: audience/moment, objective, tension, proposition, proof, desired response/action, current relevance, source need, distinctive mechanism, exclusions and one-sentence reason to exist.
+6. Review the month as a grid. Balance scope/location, people/product/service/place, light/dark, density, type behaviour and mechanism. A different photograph does not make a repeated concept fresh.
+7. Research the actual target month's season, local events, holidays and audience routines from current first-party sources. Give each brief a proposed creative window and distinguish calendar facts from audience hypotheses. Opening-week creative must fit that week's context. Recheck time-sensitive stock, offers, hours and events near release. Avoid forcing a seasonal theme onto every poster.
+
+For Piek January 2027, read issue #955 and:
+
+- `docs/ai-workforce/graphic-designer/piek-january-2027/brand-pack-index.json`
+- `docs/ai-workforce/graphic-designer/piek-january-2027/january-strategy.proposal.json`
+- `docs/ai-workforce/graphic-designer/piek-january-2027/canva-lane-policy.json`
+
+Run the validator before treating the proposal as usable:
+
+```powershell
+node scripts/poster-studio/month-plan.mjs docs/ai-workforce/graphic-designer/piek-january-2027/january-strategy.proposal.json docs/ai-workforce/graphic-designer/piek-january-2027/brand-pack-index.json
+node scripts/poster-studio/month-board.mjs docs/ai-workforce/graphic-designer/piek-january-2027/january-strategy.proposal.json <private-output.html>
+```
+
+## Source and repetition checks
+
+Use `scripts/poster-studio/creative-ledger.mjs` for deterministic checks. Its JSON entries can describe human or AI-assisted posters, so Ger-Marie work and AI work share one memory.
+
+For cropped-photo matching against Canva history previews, use `scripts/poster-studio/source-history-audit.py` on privately downloaded previews and selected originals. Inspect any geometrically supported matches. A negative result is limited to the supplied previews; tiny, heavily overlaid, missing or same-shoot images still require review. Do not mistake random texture correspondences for source reuse or use this tool to identify people.
+
+Run this check before expensive native masking or design assembly. In the wash revision, an attractive candidate matched a historical poster and had to be excluded; it must not remain in the current artwork merely because it was already uploaded or extracted.
+
+```powershell
+node scripts/poster-studio/creative-ledger.mjs fingerprint <image>
+node scripts/poster-studio/creative-ledger.mjs check <ledger.json> <candidate.json> --out <receipt.json>
+node scripts/poster-studio/creative-ledger.mjs record <ledger.json> <entry.json> --out <updated-ledger.json>
+```
+
+Preserve `approved`, `scheduled`, `posted`, `draft`, `discarded`, `internal-pilot-only` and `unresolved` states. Unknown history stays unresolved; never promise that an image is unused without adequate evidence. A flagged repeat can proceed only with an explicit, defensible campaign-continuity justification and human review.
+
+Before **any internal draft send**, check the actual relevant brand's social artwork and approval history, alongside the ledger and Canva references. Retain source/post locators, observed dates or explicit date gaps, actual image evidence, source hashes, comparison results and coverage limits. Captions alone cannot establish which photograph was used: a live Piek coffee-stop caption accompanied wine-pouring artwork. A successful negative match against a bounded preview sample is not global reuse clearance. Hold delivery when relevant social, queued/approved artwork, same-shoot or source-history coverage is insufficient; prepare a versioned file/receipt without sending it. An approvals-group message is not automatically approved, scheduled or posted. Preserve iteration history and distinguish the same DP's revisions from separate new uses.
+
+For a verified parent-brand post using an actual subsidiary photograph, pass `--brand-pack <trusted-brand-pack-index.json>`. Only an exact-client reviewed `sourceScopeRules` entry permits that scope; a candidate cannot declare its own exemption, and sibling kits remain separate. Preserve unknown branch and person identities as unresolved instead of supplying a generic brand as a branch or assigning a different identity per image. Use the actual headline for headline comparison, not every caption/support line concatenated together.
+
+Original media remains in canonical OneDrive `Photos`. The `CG Creative Assistant` folders are curated helper views only: `READY_UNUSED` is not proof of global non-use, `USED_REFERENCE` is recent/important visual evidence, and `BLOCKED_DO_NOT_USE` is a reversible exclusion signal rather than deletion authority. Poster-ready derivatives belong under the authorised month `01_SOURCE_EDITED` folder and retain original OneDrive item ID, hash and edit receipt. Apply the ledger equally to staff-created and AI-created Canva pages.
+
+## Canva working-lane guard
+
+Select and verify the exact client's Brand Kit before reading font or palette
+labels: the editor can retain another client's kit between designs. Inspect the
+master before proposing a new month; an existing human January candidate is not
+available to duplicate or overwrite. Check anniversary/date-specific logo variants
+for the target month rather than copying the current page footer automatically.
+
+Distinguish connector editing limits from Canva document capacity. Central Canvas's
+222-page master could be read and all previews retrieved, but its native editing
+transaction was rejected as unsupported. No transaction opened. Record that exact
+capability gap; do not infer a Canva page maximum or silently create another
+official file. Workflow header order also differs between clients: the existing
+Piek guard cannot represent a master with To Be Approved before New Designs.
+Never supply fabricated boundaries or weaken a guard to force a pass.
+
+For the active Piek master `DAHaD4mJnGY`, re-read the page list before every write and validate it with `scripts/poster-studio/canva-lane-guard.mjs`. The verified 5 November 2026 boundary IDs are versioned in `canva-lane-policy.json`; page numbers are observations only and may shift. Owner explicitly authorised this dated continuation after legacy `DAGcXGWhDhI` reached capacity. The legacy file remains read-only scheduled/posted history; do not redirect its existing export/schedule work or assume its calendar cutoff.
+
+- Maintain one active official client Canva file. An owner-authorised dated continuation may coexist with its read-only legacy schedule/history file. Create and edit new production pages directly in the active file's verified working lanes. Register new job page IDs in the lane policy and validate every content-edit target against the current page list; a page moved into Drafts/Posted/Scheduled immediately loses edit eligibility.
+- A separate working copy is optional for disposable tests only. Transfer useful finished work into the official file, verify the transferred editable layers, then remove the temporary copy. It must never become a second official client project. Copying a page does not authorise reuse of its photo, person, wording, concept or mechanism.
+- `IN PROGRESS / TEMPLATES` and `TO BE APPROVED` are the only permitted destinations for new work. Both header IDs are now verified in the Piek lane policy. Divider pages remain read-only even if mistakenly registered as editable.
+- Do not overwrite other designers' existing work or alter workflow divider pages. `DRAFTS` and `POSTED / SCHEDULED` are Amonique-controlled: never edit, move or delete their pages.
+- New pages may be added in the verified working lane. For connector page-merge operations, re-resolve header IDs immediately beforehand and follow the tool's exact-operation approval requirement. This is a connector requirement, not a requirement to seek approval for every routine new-work content edit.
+- Check page capacity before planning an insert. Canva's documented maximum is 350 pages; the legacy Piek file reports 352 and an actual approved insert failed with `Page limit reached`. The owner-authorised continuation was created below that limit. Never resolve capacity by silently deleting, moving or overwriting existing work or repeatedly retrying a rejected operation. Obtain an owner capacity decision before changing the official-file arrangement. Current merge tooling accepts only one operation per call despite its array schema; verify every result and page IDs before the next operation.
+- For native text, resize width only and let Canva calculate height; text-height changes are rejected. Inspect every operation result, not only the top-level tool status. Preserve source element IDs and all non-target layers when correcting a partial failure. The current connector cannot edit presenter notes, font families, shadows or native effects; inherited notes must never be treated as final captions.
+- Canva position is not Dynamics approval, Meta draft, scheduling or posting proof.
+
+## Source-photo preparation
+
+For selected-photo retrieval without bulk hydration, offline source-preserving
+alpha masks, and the observed Canva amendment/download gaps, read
+[local-production.md](references/local-production.md). The pinned U2-Net runner
+has actual Windows CPU evidence; it is not a generative retoucher or release gate.
+
+Canva's page-index thumbnail cache can lag a page insertion: a fresh listing
+returned new stable page IDs while its thumbnails still showed the former Drafts
+and Posted dividers at those indices. A content read can also combine requested
+pages in a different order. Inspect the live official pages and their genuine
+selected-page export before assigning artwork identities or claiming transfer
+quality. Do not edit or delete a divider to fix a stale thumbnail.
+
+When a Canon CR3 has a full camera-rendered JPEG but no JPEG EXIF, verify that the
+exact JPEG bytes are contained in the hash-verified original and read orientation
+and colour evidence from the original CMT1/CMT2 metadata. Central's samples had
+orientation8 and ColourSpace1. Extracting that camera JPEG is not RAW development
+or clipped-data recovery. Retain the original, contained-byte/hash receipt,
+metadata evidence and separate sRGB derivative; stop on unknown/conflicting
+metadata. Never infer all CR3 files share this sample's metadata or search a
+different client's media to fill a source gap.
+
+Resolve colour evidence before grading with `scripts/poster-studio/photo_colour.py`. Embedded ICC takes precedence. EXIF ColourSpace 1 identifies sRGB; uncalibrated 65535 alone identifies no usable profile. DCF InteroperabilityIndex R03 plus 65535 requires an actual Adobe RGB (1998) to sRGB conversion using the existing local Adobe ICC file. Do not mistake Pillow `.convert('RGB')` or attaching an sRGB profile for colour conversion. The Piek restocking JPEG exposed this real failure. Unknown/conflicting evidence must stop for review rather than silently gaining an sRGB tag. Keep the source, conversion receipt and versioned derivative; never redistribute the installed Adobe ICC file. Use actual colour conversion before exposure/WB/masking, not as a final retagging step.
+
+Use Picasso's private local MCP/runner architecture for deterministic inspection, scene grouping, previews, conservative first-pass finishing and verification. Do not upload private source photos to a cloud batch editor. For poster-selected photos, create a separate derivative from the original, preserve dimensions/profile where appropriate, strip private metadata on review/export copies, and keep the original hash. Lightroom Classic remains the preferred professional finishing surface when a selected image needs scene-aware colour, masking or detailed correction; Photoshop is reserved for subtle temporary blemishes or difficult local cleanup on a duplicate. Automated grades and face/quality hints are review aids, never release approval.
+
+Compare the original, finished photograph and final placement visually. A small global adjustment does not by itself establish professional finishing. Evaluate subject definition, tonal separation, colour, texture and local light at the actual poster crop; retain realistic scene atmosphere and source identity. Save versioned settings and before/after evidence. Treat owner feedback as a quality standard for subsequent work, without applying one identical grade or effect to every scene.
+
+Owner rejected the 6 November Piek execution despite valid native layers and successful exports. Never repeat the warped-photo paper-plane treatment, arbitrary oval subject crop or tilted photo card as a substitute for art direction. Preserve photographic proportions with uniform scaling and deliberate cropping. Keep a person, product or venue's defining features intact. Use actual source silhouettes for subject/type overlap; review the mask at both placement size and HD. Shadows must explain a surface or contact, and texture must support that exact brand rather than conceal a weak photograph. Compare each revision against a specific native reference's hierarchy, tonal separation and layer relationships, not merely its layer count. Weak source selection requires a stronger verified source, not more effects.
+
+## Composition and amendments
+
+### Graphic execution standard from the Piek rework
+
+Owner rejected the next revision for continued flatness, logo plates and unused space. A clean photo with a header and footer is not this client's full graphic language. Study the actual brand's native layer relationships: sculpted colour fields, selective gradients, halftone/paper texture, large live typography, real foreground cutouts and contact shadows. State the purpose of each device; do not copy historical photographs/offers or add the same decorative mechanism to every post. Preserve owner-supported directions rather than rebuilding the whole month indiscriminately.
+
+- Inspect transparent logos on the actual intended background. Remove an unwanted source background only when the original mark, enclosed white lettering and coloured geometry remain intact. Integrate contrast into the composition; do not default to a small white rectangle behind each logo.
+- Keep actual subject masks independent. Background removal can fail on a rack or choose only one canapé; inspect what was really extracted. Use a deliberate photographic composition when no useful subject can be separated. Do not claim successful extraction from a failed operation.
+- A source-edge cut through a car, arm or pump must either reach the page bleed, be masked deliberately or be hidden by an intentional foreground graphic. Inspect every visible edge. Moving a full-canvas graphic upwards can reveal a hard bottom boundary; prepare continuous bleed rather than adding another arbitrary card.
+- Read original native asset dimensions before placement. The real 1728×155 Engen footer was cropped in a 1080×116 frame despite apparently covering both page edges. Use a 1080×96.875 proportional frame and the existing brand background for bleed. Declare `sourceDimensions` on uncropped native assets; the packager checks source aspect with native half-pixel rounding tolerance. Thumbnail dimensions are not exact source dimensions.
+- Re-inserting a vector/image puts it above existing layers. This can hide a logo or caption even if the same coordinates are used. If the API cannot restore the intended stacking, rebuild that one scene with the correct ordering; inspect the new preview before transfer.
+- Before adding a foreground graphic, run `python scripts/poster-studio/overlay_preflight.py <private-overlay-manifest.json> --out <private-receipt.json>`. Declare exact page IDs, protected live-text/logo rectangles and actual image frames; use `above-existing-content` or `background-plane` explicitly. It checks raster alpha coverage of those boxes, not glyphs or native z-order. Blocking overlap requires moving the graphic underneath the live content or a specific documented intentional source/type-occlusion review. Background-plane assertions are reported as unchecked, never automatically verified. The full-month R5 pass reproduced six real occlusion/tinting blockers and cleared them before export; five synthetic regression cases exercise opacity, scaling, page isolation and review exceptions.
+- An inserted information panel can cover live text even when every native operation succeeds. Prefer revising a known existing background graphic below the text; do not punch raster letter holes, rasterise the caption or call a covered text layer editable in practice. Replacing a fill can also retain inherited opacity as well as crop: a red waypoint merged into an old translucent shade became washed out. Keep the original shade and use a separate open graphic clear of the real sign, then check the rendered pixels. Avoid translucent foreground panes across white type, which dull its contrast.
+- Improve the month with distinct mechanisms, not a row of identical rounded buttons. Compare the current whole grid with the actual historical references, assign a purpose to every new layer and preserve accepted photographs/compositions. Re-export every changed current candidate, keep prior revisions and verify source-photo/cutout geometry and exact marks separately from editable graphic changes.
+- Protect source features as well as text: thin decorative curves crossed the real Back to It attendant's face despite the text-region preflight passing. Use temporary job-local manually reviewed face/hand/sign/food-feature rectangles with `strictClearance: true` for new decorative assets, and inspect the HD source crop. Even a thin visible graphic intersection blocks strict clearance. This is positional graphic QA, not person identification; never promote these boxes into a biometric identity database. The actual failing curve and corrected clear graphic have separate retained receipts. Native source-asset/geometry identity does not prove exported RGB pixels are identical; the late export differed slightly and is not given a false pixel-match certificate.
+- Check the full grid at phone size, then inspect real 2× exports for logo clipping, unreadable/occluded copy, bright halos and distorted masks. Successful native record checks do not establish creative approval. Keep old own drafts clearly superseded and excluded from the current export/delivery selection.
+
+### Variety, expression and service-fact checks from the next Piek review
+
+- Review each brand as its own contact sheet before the combined month. Record primary-logo zone, headline zone, photographic subject, light/dark balance and layout mechanism. Repeated corner signatures may remain, but the primary mark and headline must not occupy the same arrangement throughout a brand's batch. A different photo or colour alone does not fix a repeated template. Inspect the rendered grid; tags alone cannot judge similarity.
+- Piek parent posts must represent the actual group mix with verified subsidiary sources, while keeping the parent kit. Do not apply a navy wash to every scene. Preserve natural photographic colour and use light, photographic and editorial compositions where the idea supports them. Do not solve variety with an invented logo colour or a white logo plate.
+- Judge expression and action in the actual crop. For an upbeat service brief, reject a passive/down-looking source when a verified positive, active alternative exists. Inspect eyes, mouth, hands, tool and interaction at HD. Do not invent smiles or infer a person's identity or mood from automated face scores. Human review remains required.
+- Put date/price/type bounding boxes fully inside their intended colour fields, including native text height after import. Preview the real export. A geometric check does not replace checking the rendered glyphs and reading order.
+- If an approved lockup fixes a mark in one corner, use an exact approved independent mark or a source-faithful crop with a private provenance receipt to vary placement. Preserve complete geometry, aspect and legibility; do not redraw or generate the logo. Keep historical versions intact.
+- Generated decorative assets may be useful when the owner authorises them. Keep the asset separate from real photo/logo/text layers and record the tool, prompt, source inputs and cost. Do not submit private client photos to generation or invent people, products, venues, signage or factual service depictions. The Piek bubble graphic is decoration, not evidence of an actual wash bay.
+- An extra owner-requested concept is separate from the confirmed package. Verify exact branch spelling/service from the current first-party site; distinguish forecourt hours from car-wash hours. Never invent an offer, wash opening time, schedule row or package increase. Run the same photo/branch/shoot/concept checks on extras and retain unresolved repetitions for review.
+- Match the photograph's actual focal subject to the service. A branch having a car wash does not make a KAUAI-led facade a successful car-wash photograph. Inspect source candidates before downloading large videos. Prefer genuine wash action, equipment or a confirmed wash-area view; label a service-detail crop honestly and leave a missing wider bay view unresolved. Do not turn a tyre-pressure or unrelated forecourt scene into car-wash evidence.
+- Reduced navy and more whitespace must not strip out the client's graphic craft. A flat split photograph and date block is not an adequate replacement for rejected work. Use source-faithful silhouettes, contact shadows, purposeful fields/textures and a legible CTA together; inspect how the layers actually relate. Keep complete source edges at page bleed or mask them deliberately rather than leaving a hard floating source-frame boundary.
+- Evaluate visible ink spacing and information flow, not only text-box geometry. Tight headlines may need independently positioned live words when display-font metrics create excessive leading. Service, branch and address need one coherent reading path. Make required decorative foam/bubbles visibly serve that concept at phone size; an almost-off-canvas asset does not satisfy the brief.
+- Preserve an owner-supported composition when the request is bounded: Back to It required only removal of the stray January label after the photo change. Compare all non-target native records, rather than unnecessarily redesigning accepted elements. Record explicit owner rejection separately from successful renders and source/layer tests.
+
+### Native Canva path without desktop takeover
+
+The private HTML import path is now exercised with actual Piek drafts. Use `scripts/poster-studio/canva-native-package.mjs` to package a private structured scene: exact kit fonts/colours, clean source derivatives, independent images, live text, rectangles and explicitly bound native logo assets. Import through the authorised Canva connector's `design_file` field. This is a native composition import, not image-to-design guessing or a flattened-poster upload. Keep accurate `data-speaker-notes` and page labels in the package; the editing connector cannot fix inherited notes or set font families afterwards.
+
+- Use prepared, metadata-clean review images; the packager rejects private EXIF/XMP/IPTC/text chunks, path escapes, remote image references, unverified fonts/colours and oversized input. ICC profiles stay intact. No public file hosting is needed or permitted.
+- The observed import ceiling is 10 MiB. The shared packager leaves headroom at 9.5 MB; split pages or deliberately prepare image derivatives. Never flatten a poster, quietly destroy detail or repeatedly retry an over-limit file.
+- Bind every native asset and check each operation's result. Vector assets cannot replace imported image frames: delete only the declared placeholder and insert the exact native vector asset. Raster logo replacement is supported. Recheck actual aspect, placement and contrast. Native import rounds fractional frame geometry by up to half a design pixel; identity/page scope remain exact and ambiguous matches fail.
+- Explicit line breaks and `white-space:nowrap` avoid unwanted pre-import fallback-font wrapping. Retain the scene's font size/line height for amendments. Replacing text can recalculate its bounding box even when the restored pixels are unchanged; compare the target render and all non-target records rather than claiming full geometry identity.
+- Existing template outline/shadow/font effects are not editable through this connector. Reject an unsuitable source instead of preserving it because the tool call succeeded. Required logos and brand devices may repeat; photo/person/shoot/concept repetition is assessed separately.
+- Native filled vector panels may be visible in the rendered poster but absent from the connector's editable text/image list. A successful photo replacement therefore does not prove the old tilted frame/panel disappeared. Inspect the rendered page. If required shapes cannot be edited, cancel the trial and rebuild a clean native composition; never cover the defect with another arbitrary crop or call it fixed. Transfer only into the permitted working lane and clearly distinguish superseded agent drafts from current candidates. Do not delete protected or staff pages.
+- Save authorised work at short checkpoints, read it back and retain a private source/asset/element receipt. An overnight transaction expired in the real pilot; local scenes/recipes preserved recovery. Avoid keeping the only finished work in a long-lived unsaved transaction.
+- After a page merge, resolve actual page IDs and headline/asset records rather than assuming the requested source order was retained. In the real two-page transfer, returned pages appeared in reverse order. Page-list thumbnails also showed stale pre-insert artwork, including workflow headers under new page IDs. Use fresh transaction thumbnails for changed/transferred pages and compare semantic native records before claiming a saved design was verified. Reject a contact sheet made from mismatched cached previews.
+- Follow the owner's existing save authority; do not ask repeatedly for routine internal saves. Page restructuring still needs grounded exact-operation authority. `planApprovedScaffoldReplacement` permits only an explicitly approved contiguous block of registered, superseded agent pages, with a fresh boundary read after deletion; it cannot remove staff work, headers, saved proofs or protected history.
+
+### Finishing and delivery lessons
+
+An independently rendered SVG graphic is not necessarily a transparent PNG:
+headless Chrome's default screenshot mattes it onto white. In Central's native
+import this hid the photograph even though every layer imported successfully.
+Use Poster Studio's opt-in `--transparent-background` for standalone decorative
+assets; inspect actual PNG alpha and the composed native preview. It does not
+erase explicitly painted backgrounds. Default poster rendering stays unchanged.
+Never treat all white pixels in a client photograph or logo as expendable.
+The bounded correction retained real photo/live type/logo and replaced only four
+independent decorative fills.
+
+After a download/event-wait interruption, inspect actual Downloads before another
+export. Central's2160x2700 PNG existed despite the event timeout; recover and
+verify dimensions/hash/content. Retain saved native state and actual HD evidence.
+A lost debugger handle does not prove the laptop is off: a fresh tab in the same
+verified company profile can work. Never switch to personal Chrome for recovery.
+
+Validate each OneDrive search result's actual parent path against the exact client
+root before fetching. A Central folder-scoped keyword query returned unrelated
+drive paths; the requested folder argument alone did not enforce scope. Reject
+those results, retain the coverage limitation and use exact canonical child IDs.
+Do not infer a source is missing from an incorrectly scoped search.
+
+Owner feedback about washed-out images applies across the set. Evaluate actual source, derivative and final crop. A simple linear contrast pass increased clipping and was rejected; the accepted private pass uses endpoint-anchored luminance contrast and restrained detail within each source pixel's RGB headroom. Check clipping before upload, avoid crushed shadows/halos and keep already-good images natural. Never apply a uniform aggressive grade or describe existing JPEG clipping as recovered detail.
+
+For mutable Piek branch facts, the owner explicitly confirms the current live `piekgroup.co.za` site as the authority; use current Get Together site facts for its venues. Unknown photo provenance is not solved by a plausible branch guess. The pilot replaced an uncertain burger source with a current-site night photograph and verified forecourt-hours claim. Keep detected repeated branches visible to monthly human review even when the photos/services differ.
+
+Prepare captions from the current exact-client Dynamics guide: add to the artwork, use distinct scope voices and default to at most five relevant hashtags. **Owner correction13November: no PICASSO/Nolan/agent signature in poster captions**, including internal approval copies, because staff must be able to forward the same photo+caption to clients. This supersedes the earlier signature instruction; operational status notes are separate from the forwardable caption. Verify the requested sender and exact group, send the true HD poster and its clean caption in one message, then retain actual message evidence to avoid duplicate retries. A thumbnail is not an HD export. If the browser reports disabled and the connector has no export/send tool, record that exact blocker; never claim delivery or use a different account.
+
+Use the existing company Chrome profile for CG work, but verify each site's own identity separately: the owner-confirmed Canva account is `m.productions.cg@gmail.com`, not the Chrome profile's info address. Do not request design access for another account or broaden sharing to solve a sign-in mismatch. Browser sign-in may still require the owner when the existing Google continuation hangs; never request a password or extract authentication material from browser storage. A successful connector transaction is not proof the browser is authenticated.
+
+WhatsApp quality labels change after processing (for example, `HD quality` gains size/dimensions). Resolve its observed stable control, select HD, reopen and witness its checkmark, then verify the actual outgoing HD badge and exact same-message caption. Do not use Enter on toolbar buttons while a caption is active: the real pilot unexpectedly submitted one standard-quality copy, which required a verified HD correction and owner-confirmed deletion of only that duplicate. Catch file-chooser promise failures and inspect state before retrying; never retry an ambiguous Send. Editing a rich-text caption can append instead of replace: explicitly clear it through the editable control, compare its complete prepared text, save, then compare the actual saved caption exactly. A virtualised message placeholder with the right ID is not a rendered message or a valid witness.
+
+Approved finals belong only in the existing client-safe `A_ClientPortal_<ClientSlug>/Graphic Design/YYYY/YYYY_MM_MON` path, using `onedriveCanonical.ts` year/month builders and the existing staff-approved filename rule. Canva page naming is separate. Do not guess a client short code or posting date. Keep source/editable files and drafts internal. Promote only reviewed finals through the existing same-client portal asset workflow; link real January deliverable IDs when present, never fabricate one or imply a file upload created a Dynamics association.
+
+For the proven WhatsApp photo route, upload one true-HD file through the browser file chooser, select Photo quality → HD for that attachment, and verify the selected HD option's reported dimensions before sending. The 2160×2700 Canva originals were sent as WhatsApp HD2048×2560, not original-byte documents. Keep its exact caption in the attachment's caption field. Record a submitted state immediately after Send, then witness the new photo+caption row, actual message ID and Sent/Delivered/Read state before continuing. Persist each receipt so interruption does not cause duplicate retries. Discover the current browser by company profile plus extension identity, not a stale numeric browser ID; never mistake missing connection metadata for a laptop being off or steal another task's active WhatsApp lease.
+
+### Layer contract
+
+- Portable local proofs must carry their exact licensed font bytes and required
+  notices, rather than depending on workstation font installation. Poster Studio
+  supports job-local `fonts` plus licence assets and2x previews; compare actual
+  rendered glyphs with the exact face. Kit labels or a successful SVG render alone
+  do not rule out fallback. Font/definition/canvas declaration changes are separate
+  from layer changes; compare saved resource hashes and actual pixel differences
+  when proving an isolated amendment.
+- Inspect source-overlap edges in the actual HD output. A hand outline can retain
+  background wedges, automatic refinement can retain another patch, and a cropped
+  bright foreground can expose its fragment boundary against a shaded base. Keep
+  the source mask independent and match its photographic light field to the base
+  before compositing over type. Do not accept geometry, layer count or a small
+  thumbnail as proof that these joins are clean. Keep failed variants historically.
+
+- Preserve exact photos, people, food, products, venues and logos as deterministic source layers. Never generatively reconstruct them unless the owner explicitly requests that change.
+- Keep headline, support text, prices/dates, logo, photos, masks, vectors, textures, overlays and effects independently addressable with stable layer IDs.
+- Use generation only for optional non-factual decorative assets or ideation, never as the sole poster composition engine.
+- The scene JSON is versioned authority. Render locally to an editable SVG, review PNG and hash manifest. Call a PSD editable only after Photoshop reopens it and independent image/text/logo/mask layers pass inspection.
+- For a price/date/headline amendment, change only the named layer and produce a comparison receipt. Preserve the prior version.
+- Production fixes adjust exact type/logo/spacing/colour without regeneration. Source fixes return to the original photo. Creative failures restart only the failed poster from original sources and the approved brief.
+- Consider genuine subject/typography overlap where it strengthens depth and legibility. Duplicate exact finished photo pixels into an independent transparent mask rather than reconstructing a sign, person or product. Preserve variety across the month; a cutout is an art-direction choice, not a mandatory template.
+- Finish the background asset and crop before measuring foreground registration. Canva may change internal crop on asset replacement even when native element dimensions stay identical. Re-measure against the new background preview, then insert the aligned cutout; reject doubled edges and halos before review.
+- Verify footer/background bleed in the rendered image, not only element dimensions. Raster assets can contain transparent padding. Extend the exact background colour without distorting logos or covering lettering; inspect both side edges and the complete bottom row. Disclose thumbnail-only verification when a full-resolution export is unavailable.
+
+## Quality gate
+
+### Implementing review feedback
+
+For targeted amendment rounds, resend only the affected posters. Capture new live feedback before another correction, preserve accepted revisions and keep separate delivery receipts for each version. Do not resend the full month or treat review-history messages as accidental duplicates. Forwardable poster captions must contain no agent signature.
+
+Follow the owner's actual visual annotation before substituting a new compositing interpretation. The 14 November DP03 correction asked for a large lower-right cup **behind the existing blue gradient**, superseding the earlier countertop placement. Keep the cup and gradient independent, verify their real stacking and inspect the final HD output. The connector does not expose layer reordering; a bounded browser Position/Layers adjustment was required, without desktop takeover. Keep all non-target native records exact. When delivery is assigned to Nolan for serialized coordination, prepare the exact file, unchanged caption and explicit hold/send state here; do not open an outbound attachment or send concurrently.
+
+WhatsApp's media viewer can advance its caption before the displayed photograph. Compare every retained screenshot with the actual artwork; duplicate/stale frames do not increase history coverage. Record the mismatch instead of attaching the new caption's identity to the old image. After a browser runtime reset, discover the company profile/extension identity afresh before restoring a binding: numeric IDs swapped between personal and company Chrome during the real export recovery.
+
+Ground foreground subjects in a convincing source surface, deliberate frame crop or designed plane. A contact shadow must agree with that relationship; a floating product with a token shadow remains a composition failure. Inspect the complete functional silhouette: automatic person masks may omit a fuel spout or other held equipment, and restoring the object without its physical context can create another floating cutout. Preserve original source pixels and registration when repairing it. Match foreground food scale to the final background crop, not a convenient inherited frame.
+
+For a realistic object-on-surface composite, match the source viewpoint and place the visible object base inside the photographed support plane. The Piek cup still floated after an edge crop and a nominal shadow; its correction required a lower-angle cup physically resting on the real wood. Inspect the actual HD base/contact, not just thumbnail alpha bounds or declared frames: Canva's fitted/cropped media can differ from the thumbnail transform. Replacing an existing asset may retain an inappropriate internal crop; reset only that media frame when the rendered result exposes it. Keep the exact client photograph, live copy and other posters unchanged for this kind of narrow repair.
+
+When the owner authorises stock, record the exact asset, creator and licence included in the existing subscription. Distinguish generic stock models/products from actual client customers, local identities or branded products. After restacking foregrounds/footers, inspect every live text line and logo in the actual render: a correctly bounded frame can still be covered by a later image. Rebind changed logo element IDs after an exact-asset restack; preserve the asset and geometry. See the [targeted Piek evidence](../../../docs/ai-workforce/graphic-designer/piek-january-2027/TARGETED-FEEDBACK-2026-11-13.md) for the observed failures and corrected layering.
+
+Match each quoted review to the exact poster and stable page ID; keep a private amendment matrix. Read all feedback before concluding that only the example needs attention. Apply general alignment, source-quality and spacing lessons across the current set while preserving liked concepts. A request to read and amend is not permission to reply or resend. Keep historical delivery receipts distinct from the newly revised artwork.
+
+WhatsApp review history is virtualised: save the relevant successive viewports and verify every matrix quote against the combined capture, including the opening and latest-review boundaries. A single DOM snapshot can silently omit earlier feedback. Before a resend, resolve both normal monthly items and separately stored extras against current stable page IDs; remove stale current-export/current-message fields while preserving historical receipts. Check caption Unicode, paragraph breaks and replacement-photo facts. Useful depth comes from registered source overlap, context, hierarchy and deliberate graphic treatment; neither extra layer count nor more decoration establishes quality. Inspect genuine final-resolution exports before delivery.
+
+For the Piek January pilot, the owner requires important text and logos safely inside the page. Use a **64px inset on the 1080×1350 canvas**, with an explicit inventory of every logo, including unnamed image elements and branding baked into a footer strip. Backgrounds and deliberate photo bleed remain edge-to-edge. A successful render is insufficient: re-read native text height after formatting/wrapping and run `node scripts/poster-studio/native-safe-area.mjs <native-state.json> <private-specification.json> --out <private-receipt.json>`. Its specification contains `pageIds`, reviewed `logoElementIds` and `insetPx`. It measures conservative frame bounds, not actual glyphs/alpha, logo discovery, overlap or creative quality. Inspect the previews for those separately. Moving a footer mark up can collide with its caption; reflow the caption instead of accepting a margin-only pass.
+
+When a cutout is unsuccessful, consider the intact source photograph and its environment rather than another arbitrary crop. Keep the full headline readable; adding more effects or larger bubbles does not establish depth. Source replacements must also reconcile their captions and branch/service facts. Before masking/upload, reject supported historical-source matches; the 13 November audit excluded a smiling wash candidate already used in two older previews.
+
+Preserve owner-supported depth relationships while correcting margins or bleed. An unchanged cutout asset/position does not prove that its overlap with resized typography survives. The January2027 R6 margin pass lost the year/canopy overlap; owner feedback required moving only the live year down80px, retaining the photo-gap fix and every other native record. Review the actual final export against the earlier successful mechanism and inspect the amount of intentional occlusion. A margin-only pass cannot certify this, and an extra layer count is not an enhancement.
+
+Canva's proportional-resize flag preserves the **existing frame**, which may have a different aspect from the replacement photograph. For an intentional frame correction, use the verified source ratio and inspect the actual crop; never stretch the photograph. Inspect every operation result and repair only the failed operation, since other operations in that same call may already have succeeded. Editing responses can contain the whole design but only one thumbnail: do not index that thumbnail list by global page number or call it an HD export.
+
+Check at phone size and as a full grid:
+
+- exact brand scope, logo, fonts and colours;
+- source identity and rights;
+- branch/product/service facts and UK English;
+- hierarchy, legibility, depth, masking, gradients, texture and visual sophistication;
+- no repeated person/source/shoot/concept/headline/mechanism without reviewed justification;
+- no generic AI filler or flat slide/template appearance;
+- isolated amendment integrity and version history.
+
+Machine tests prove structure and provenance, not taste. Human CG creative approval is required before scaling a pilot or publishing. Never publish, schedule, send to a client, upload private source media to an external model, buy a tool or deploy a bridge without the relevant explicit authority.

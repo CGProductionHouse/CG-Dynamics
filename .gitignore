@@ -148,3 +148,4 @@ scripts/generated/
 .vercel
 .worktrees/
 artifacts/
+scripts/poster-studio/__pycache__/

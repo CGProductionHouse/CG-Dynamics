@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cgdynamics.co.za/schemas/brand-pack.v1.json",
+  "title": "CG Graphic Designer Brand Pack",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "client", "authority", "assets", "typography", "colours", "creativeRules"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "client": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["clientId", "name"],
+      "properties": {
+        "clientId": { "type": "string", "format": "uuid" },
+        "name": { "type": "string", "minLength": 1 }
+      }
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["identity", "files", "approvedFinals"],
+      "properties": {
+        "identity": { "const": "CG Dynamics exact-client context" },
+        "files": { "const": "OneDrive" },
+        "approvedFinals": { "const": "CG Dynamics Client Portal Library" },
+        "discoveryOnly": { "type": "array", "items": { "enum": ["Canva Brand Kit", "Canva approved design references"] } }
+      }
+    },
+    "assets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["oneDriveRoot", "logos", "photography", "graphicDesign"],
+      "properties": {
+        "oneDriveRoot": { "$ref": "#/$defs/locator" },
+        "logos": { "type": "array", "items": { "$ref": "#/$defs/asset" } },
+        "photography": { "$ref": "#/$defs/locator" },
+        "graphicDesign": { "$ref": "#/$defs/locator" }
+      }
+    },
+    "typography": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["role", "family", "availability", "source"],
+        "properties": {
+          "role": { "type": "string" },
+          "family": { "type": "string" },
+          "style": { "type": ["string", "null"] },
+          "availability": { "enum": ["installed", "job-local-licensed", "canva-only", "licensed-file-required", "unverified"] },
+          "source": { "type": "string" },
+          "fallback": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "colours": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "value", "source"],
+        "properties": {
+          "name": { "type": "string" },
+          "value": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+          "source": { "type": "string" }
+        }
+      }
+    },
+    "creativeRules": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "approvedClaims": { "type": "array", "items": { "type": "string" } },
+    "referenceDesigns": { "type": "array", "items": { "$ref": "#/$defs/locator" } },
+    "limitations": { "type": "array", "items": { "type": "string" } }
+  },
+  "$defs": {
+    "locator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "path"],
+      "properties": {
+        "provider": { "enum": ["OneDrive", "Canva", "CG Dynamics"] },
+        "path": { "type": "string" },
+        "itemId": { "type": ["string", "null"] },
+        "designId": { "type": ["string", "null"] },
+        "access": { "enum": ["read-only", "approved-final-write", "discovery-only"] }
+      }
+    },
+    "asset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "path", "role", "format"],
+      "properties": {
+        "provider": { "enum": ["OneDrive", "Canva", "CG Dynamics"] },
+        "path": { "type": "string" },
+        "itemId": { "type": ["string", "null"] },
+        "designId": { "type": ["string", "null"] },
+        "access": { "enum": ["read-only", "approved-final-write", "discovery-only"] },
+        "role": { "type": "string" },
+        "format": { "type": "string" }
+      }
+    }
+  }
+}

@@ -1,0 +1,199 @@
+
+const { app, action, constants, core } = require('photoshop')
+const { storage } = require('uxp')
+
+const localFileSystem = storage.localFileSystem
+
+function solidColor(hex) {
+  const value = String(hex || '#000000').replace('#', '')
+  const normalized = value.length === 3 ? value.split('').map((character) => `${character}${character}`).join('') : value
+  const color = new app.SolidColor()
+  color.rgb.red = Number.parseInt(normalized.slice(0, 2), 16)
+  color.rgb.green = Number.parseInt(normalized.slice(2, 4), 16)
+  color.rgb.blue = Number.parseInt(normalized.slice(4, 6), 16)
+  return color
+}
+
+function numeric(value) {
+  if (typeof value === 'number') return value
+  if (value && typeof value.value === 'number') return value.value
+  if (value && typeof value._value === 'number') return value._value
+  return Number(value)
+}
+
+function fontPostScriptName(layer) {
+  const family = String(layer.fontFamily || '')
+  if (family.includes('Impact')) return 'Impact'
+  if (family.includes('Arial Narrow')) return 'ArialNarrow-Bold'
+  return 'ArialMT'
+}
+
+function flatten(layers, output = []) {
+  for (const layer of layers || []) {
+    output.push(layer)
+    if (layer.type === 'group') flatten(layer.layers, output)
+  }
+  return output
+}
+
+async function ensureFolder(parent, name) {
+  try {
+    const existing = await parent.getEntry(name)
+    if (!existing.isFolder) throw new Error(`${name} exists but is not a folder`)
+    return existing
+  } catch (error) {
+    if (String(error).includes('not a folder')) throw error
+    return parent.createFolder(name)
+  }
+}
+
+async function resolveEntry(root, relativePath) {
+  const cleaned = String(relativePath).replace(/^\.\//, '').replaceAll('\\', '/')
+  if (cleaned.includes('..')) throw new Error(`Parent path traversal is not allowed: ${relativePath}`)
+  return root.getEntry(cleaned)
+}
+
+async function placeSmartObject(doc, jobFolder, layer) {
+  const asset = await resolveEntry(jobFolder, layer.asset)
+  const token = localFileSystem.createSessionToken(asset)
+  await action.batchPlay([{
+    _obj: 'placeEvent',
+    null: { _path: token, _kind: 'local' },
+    freeTransformCenterState: { _enum: 'quadCenterState', _value: 'QCSAverage' },
+    offset: {
+      _obj: 'offset',
+      horizontal: { _unit: 'pixelsUnit', _value: 0 },
+      vertical: { _unit: 'pixelsUnit', _value: 0 },
+    },
+    _options: { dialogOptions: 'dontDisplay' },
+  }], {})
+  const placed = doc.activeLayers[0]
+  placed.name = layer.name || layer.id
+  placed.opacity = Math.round((layer.opacity ?? 1) * 100)
+  const bounds = placed.boundsNoEffects || placed.bounds
+  const currentWidth = numeric(bounds.right) - numeric(bounds.left)
+  const currentHeight = numeric(bounds.bottom) - numeric(bounds.top)
+  const targetWidth = layer.width || currentWidth
+  const targetHeight = layer.height || currentHeight
+  const cover = String(layer.preserveAspectRatio || '').includes('slice')
+  const scale = cover
+    ? Math.max(targetWidth / currentWidth, targetHeight / currentHeight)
+    : Math.min(targetWidth / currentWidth, targetHeight / currentHeight)
+  await placed.scale(scale * 100, scale * 100, constants.AnchorPosition.MIDDLECENTER)
+  const resized = placed.boundsNoEffects || placed.bounds
+  const currentCenterX = (numeric(resized.left) + numeric(resized.right)) / 2
+  const currentCenterY = (numeric(resized.top) + numeric(resized.bottom)) / 2
+  const targetCenterX = (layer.x || 0) + targetWidth / 2
+  const targetCenterY = (layer.y || 0) + targetHeight / 2
+  await placed.translate(targetCenterX - currentCenterX, targetCenterY - currentCenterY)
+  return placed
+}
+
+async function createRectangle(doc, layer) {
+  const created = await doc.createPixelLayer({ name: layer.name || layer.id, opacity: Math.round((layer.opacity ?? 1) * 100) })
+  await doc.selection.selectRectangle({
+    top: layer.y,
+    left: layer.x,
+    bottom: layer.y + layer.height,
+    right: layer.x + layer.width,
+  })
+  app.foregroundColor = solidColor(String(layer.fill || '').startsWith('#') ? layer.fill : '#231F20')
+  await action.batchPlay([{
+    _obj: 'fill',
+    using: { _enum: 'fillContents', _value: 'foregroundColor' },
+    opacity: { _unit: 'percentUnit', _value: 100 },
+    mode: { _enum: 'blendMode', _value: 'normal' },
+    _options: { dialogOptions: 'dontDisplay' },
+  }], {})
+  await doc.selection.deselect()
+  return created
+}
+
+async function createText(doc, layer) {
+  const text = Array.isArray(layer.lines) ? layer.lines.join('\r') : String(layer.text || '')
+  const created = await doc.createTextLayer({
+    name: layer.name || layer.id,
+    contents: text,
+    fontName: fontPostScriptName(layer),
+    fontSize: layer.fontSize || 24,
+    position: { x: layer.x || 0, y: layer.y || 0 },
+    textColor: solidColor(layer.fill || '#FFFFFF'),
+    opacity: Math.round((layer.opacity ?? 1) * 100),
+  })
+  created.textItem.characterStyle.tracking = Math.round(Number(layer.letterSpacing || 0) * 50)
+  return created
+}
+
+async function createLayer(doc, jobFolder, layer, warnings) {
+  if (layer.visible === false) return null
+  if (layer.type === 'image') return placeSmartObject(doc, jobFolder, layer)
+  if (layer.type === 'rect') return createRectangle(doc, layer)
+  if (layer.type === 'text') return createText(doc, layer)
+  if (layer.type === 'group') {
+    const group = await doc.createLayerGroup({ name: layer.name || layer.id, opacity: Math.round((layer.opacity ?? 1) * 100) })
+    for (const child of layer.layers || []) {
+      const created = await createLayer(doc, jobFolder, child, warnings)
+      if (created) created.move(group, constants.ElementPlacement.PLACEINSIDE)
+    }
+    return group
+  }
+  warnings.push(`PSD beta skipped unsupported ${layer.type} layer ${layer.id}`)
+  return null
+}
+
+async function build() {
+  const jobFolder = await localFileSystem.getFolder()
+  if (!jobFolder) return
+  const sceneFile = await jobFolder.getEntry('scene-v1.json')
+  const scene = JSON.parse(await sceneFile.read())
+  if (scene.schemaVersion !== 1) throw new Error('Only Poster Studio scene schema version 1 is supported')
+  const allLayers = flatten(scene.layers)
+  const missingIds = allLayers.filter((layer) => !layer.id)
+  if (missingIds.length) throw new Error('Every scene layer must have a stable ID')
+  const warnings = []
+  const installedFonts = new Set()
+  for (let index = 0; index < app.fonts.length; index += 1) installedFonts.add(app.fonts[index].postScriptName)
+  for (const layer of allLayers.filter((candidate) => candidate.type === 'text')) {
+    const requested = fontPostScriptName(layer)
+    if (!installedFonts.has(requested)) warnings.push(`Font ${requested} is unavailable for layer ${layer.id}; Photoshop may substitute it`)
+  }
+
+  await core.executeAsModal(async () => {
+    const doc = await app.createDocument({
+      name: scene.document.id,
+      width: scene.canvas.width,
+      height: scene.canvas.height,
+      resolution: 72,
+      mode: 'RGBColorMode',
+      fill: 'transparent',
+      profile: 'sRGB IEC61966-2.1',
+    })
+    for (const layer of scene.layers) await createLayer(doc, jobFolder, layer, warnings)
+    const outputFolder = await ensureFolder(jobFolder, 'output')
+    const psd = await outputFolder.createFile(`${scene.document.id}.psd`, { overwrite: true })
+    const preview = await outputFolder.createFile(`${scene.document.id}-photoshop-preview.png`, { overwrite: true })
+    await doc.saveAs.psd(psd, { embedColorProfile: true }, false)
+    await doc.saveAs.png(preview, {}, true)
+  }, { commandName: 'Build Poster Studio layered PSD' })
+
+  const outputFolder = await ensureFolder(jobFolder, 'output')
+  const receipt = await outputFolder.createFile(`${scene.document.id}-photoshop-receipt.json`, { overwrite: true })
+  await receipt.write(JSON.stringify({
+    schemaVersion: 1,
+    generatedAt: new Date().toISOString(),
+    documentId: scene.document.id,
+    sourceScene: sceneFile.nativePath,
+    outputPsd: `${scene.document.id}.psd`,
+    outputPreview: `${scene.document.id}-photoshop-preview.png`,
+    warnings,
+    supportedLayerTypes: ['image-smart-object', 'live-text', 'pixel-rectangle', 'group'],
+    unsupportedLayerTypes: ['path', 'ellipse', 'gradient', 'filter', 'clip-path'],
+  }, null, 2))
+  await core.showAlert(`Poster Studio PSD created.\n\n${warnings.length ? warnings.join('\n') : 'No renderer warnings.'}`)
+}
+
+build().catch(async (error) => {
+  console.error(error)
+  await core.showAlert(`Poster Studio PSD failed: ${error.message}`)
+  throw error
+})

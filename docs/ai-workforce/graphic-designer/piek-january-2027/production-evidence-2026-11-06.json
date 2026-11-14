@@ -1,0 +1,1219 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-11-13",
+  "state": "single-r8-coffee-contact-revision-sent-creative-review-pending",
+  "clientId": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
+  "month": "2027-01-01",
+  "officialCanva": {
+    "designId": "DAHaD4mJnGY",
+    "title": "PIEK GROUP OF COMPANIES | ACTIVE FROM 05 NOV 2026 | JAN 2027",
+    "pageCount": 85,
+    "legacyReadOnlyDesignId": "DAGcXGWhDhI",
+    "workingHeaders": {
+      "inProgress": {
+        "pageId": "PBtYpVD48tvYwH2r",
+        "index": 25
+      },
+      "toBeApproved": {
+        "pageId": "PBTCQnG0kLyNvn1c",
+        "index": 54
+      },
+      "drafts": {
+        "pageId": "PBkggJvPWJCB8Kl5",
+        "index": 84
+      },
+      "postedScheduled": {
+        "pageId": "PBhXtZzkLlTlfdWK",
+        "index": 85
+      }
+    }
+  },
+  "candidates": [
+    {
+      "provisionalId": "2027_01_PIEK_DP_01",
+      "brandScope": "PIEK_GROUP",
+      "concept": "New Year",
+      "canvaPageId": "PBDGzt6lwvxz9s2y",
+      "observedPageIndex": 81,
+      "monthlyDeliverableId": null,
+      "state": "r6-hd-delivered-internal-review-not-resent-in-r7",
+      "executionRevision": "Applied same bottom-gap correction; retained liked idea.",
+      "previousOwnDraftPageId": "PBw695H0fKFBpM7k",
+      "primaryLogoZone": "bottom-left",
+      "previousGraphicDepthPageId": "PBpjXgmRn7CTzmcX",
+      "latestExecutionRevision": "feedback-and-safe-margin-r6",
+      "latestRoundSent": true,
+      "previousExecutionRevisionBeforeR5": "White-led real Sasol aerial, live year behind exact canopy; parent logo bottom left.",
+      "previousExecutionRevisionBeforeR6": "Architectural layering around the real canopy/year, light parent-brand treatment."
+    },
+    {
+      "provisionalId": "2027_01_PIEK_DP_02",
+      "brandScope": "PIEK_GROUP",
+      "concept": "People",
+      "canvaPageId": "PBHhvnLglcYJHLG4",
+      "observedPageIndex": 80,
+      "monthlyDeliverableId": null,
+      "state": "r7.1-hd-delivered-internal-review",
+      "executionRevision": "Stronger photographic depth; complete real nozzle/spout and tank context restored from original pixels.",
+      "previousOwnDraftPageId": "PBhSXtvYjyX4j2dl",
+      "primaryLogoZone": "top-left",
+      "previousGraphicDepthPageId": "PBSt5DpJ47zCKmvK",
+      "latestExecutionRevision": "r7.1-targeted-owner-feedback",
+      "latestRoundSent": true,
+      "previousExecutionRevisionBeforeR5": "Warm photographic editorial with actual smiling Engen worker, bottom Barlow hierarchy; parent mark upper left.",
+      "previousExecutionRevisionBeforeR6": "Warm photographic editorial with tactile paper separation, rather than repeating the parent navy layout."
+    },
+    {
+      "provisionalId": "2027_01_PIEK_DP_03",
+      "brandScope": "PIEK_GROUP",
+      "concept": "Coffee routine",
+      "canvaPageId": "PBhRR4d4pdXWyyBs",
+      "observedPageIndex": 79,
+      "monthlyDeliverableId": null,
+      "state": "r8-single-coffee-contact-hd-sent-internal-review",
+      "executionRevision": "Lower-angle included ceramic stock cup placed on actual original wood surface, aligned contact shadow; real shop image/crop, live copy and exact logo unchanged.",
+      "previousOwnDraftPageId": "PB5r675n7lrFm7JZ",
+      "primaryLogoZone": "bottom-right",
+      "previousGraphicDepthPageId": "PBgBkkQgbCGQVSbY",
+      "latestExecutionRevision": "r8-20261114-physical-countertop-contact",
+      "latestRoundSent": true,
+      "previousExecutionRevisionBeforeR5": "Bright asymmetric College Brew editorial with exact flag against softened own context; small navy signature lower right.",
+      "previousExecutionRevisionBeforeR6": "Graphic coffee editorial adds a tactile plane and purposeful illustration, preserving the genuine flag."
+    },
+    {
+      "provisionalId": "2027_01_PIEK_DP_04",
+      "brandScope": "ENGEN",
+      "concept": "Summer return travel",
+      "canvaPageId": "PBFhjhnLG7KsvSkM",
+      "observedPageIndex": 43,
+      "monthlyDeliverableId": null,
+      "state": "r6-hd-delivered-internal-review-not-resent-in-r7",
+      "executionRevision": "Liked creative retained; important text and mark frames safely inset.",
+      "primaryLogoZone": "bottom-right",
+      "latestExecutionRevision": "feedback-and-safe-margin-r6",
+      "latestRoundSent": true,
+      "previousExecutionRevisionBeforeR5": "Preserved actual sign/photo/type registration; added restrained independent route/halftone pattern and source-alpha contact shadow.",
+      "previousExecutionRevisionBeforeR6": "Stronger Engen travel art direction and branch hierarchy without changing the actual forecourt."
+    },
+    {
+      "provisionalId": "2027_01_PIEK_DP_05",
+      "brandScope": "ENGEN",
+      "concept": "School return",
+      "canvaPageId": "PB7wNQkrQFvYcVGG",
+      "observedPageIndex": 82,
+      "monthlyDeliverableId": null,
+      "state": "r7.1-hd-delivered-internal-review",
+      "previousOwnDraftPageId": "PBxrsDTFfRXMtbhH",
+      "executionRevision": "Clashing shapes removed; owner-requested licensed smiling uniformed child grounded behind footer; live branch label retained.",
+      "primaryLogoZone": "bottom-centre",
+      "previousGraphicDepthPageId": "PBFfytYXc5sg8b51",
+      "previousVarietyPageId": "PBlqwc7fkVWyz7GP",
+      "ownerReview": "Previous white split/date-card R3 poster explicitly rejected for insufficient craft/depth; replaced, not counted as approval.",
+      "latestExecutionRevision": "r7.1-targeted-owner-feedback",
+      "latestRoundSent": true,
+      "previousExecutionRevisionBeforeR5": "Actual source rack silhouette with independent alpha-derived shadow, calendar paper/contact shadow, live contained13 January date, branded field/halftone, curved blue base and native school-run CTA.",
+      "previousExecutionRevisionBeforeR6": "Craft finish on the rebuilt rack/calendar scene; no new offer or changed school fact."
+    },
+    {
+      "provisionalId": "2027_01_PIEK_DP_06",
+      "brandScope": "ENGEN",
+      "concept": "Convenience",
+      "canvaPageId": "PB3wrbPz4RJCBg0j",
+      "observedPageIndex": 69,
+      "monthlyDeliverableId": null,
+      "state": "r6-hd-delivered-internal-review-not-resent-in-r7",
+      "supersededAgentPageId": "PBxRLPB4JKBHd91b",
+      "executionRevision": "Real full restocking environment replaces floating silhouette; new graphic hierarchy.",
+      "previousOwnDraftPageId": "PBQXNX2K6Fr3hkz8",
+      "primaryLogoZone": "bottom-left",
+      "latestExecutionRevision": "feedback-and-safe-margin-r6",
+      "latestRoundSent": true,
+      "previousExecutionRevisionBeforeR5": "Original scene/copy retained; independent exact-source Engen mark lower left, parent mark lower right, continuous blue footer.",
+      "previousExecutionRevisionBeforeR6": "Stronger source/background separation and an intentional lower information plane."
+    },
+    {
+      "provisionalId": "2027_01_PIEK_DP_07",
+      "brandScope": "SASOL",
+      "concept": "Car wash reset",
+      "canvaPageId": "PBhcBPR3DRxFzDNY",
+      "observedPageIndex": 77,
+      "monthlyDeliverableId": null,
+      "state": "r6-hd-delivered-internal-review-not-resent-in-r7",
+      "executionRevision": "Heading isolated from occluding foreground; real environment fills empty region.",
+      "primaryLogoZone": "top-left",
+      "previousGraphicDepthPageId": "PBnxVnyFjbtxrQQS",
+      "latestExecutionRevision": "feedback-and-safe-margin-r6",
+      "latestRoundSent": true,
+      "previousExecutionRevisionBeforeR5": "Rebuilt pale motion/halftone field below real wash-worker silhouette, Tall overlap; primary Sasol top left.",
+      "previousExecutionRevisionBeforeR6": "More dimensional wash movement and a clear invitation, distinct from the extra bubble-led detail."
+    },
+    {
+      "provisionalId": "2027_01_PIEK_DP_08",
+      "brandScope": "SASOL",
+      "concept": "After-hours forecourt",
+      "canvaPageId": "PB2PhvZXtvxYrrVK",
+      "observedPageIndex": 68,
+      "monthlyDeliverableId": null,
+      "state": "r6-hd-delivered-internal-review-not-resent-in-r7",
+      "previousOwnDraftPageId": "PBf4gQNK11W9Mnmy",
+      "executionRevision": "Applied owner-confirmed64px safe area to all13 posters, not just this example.",
+      "primaryLogoZone": "top-right",
+      "latestExecutionRevision": "feedback-and-safe-margin-r6",
+      "latestRoundSent": true,
+      "previousExecutionRevisionBeforeR5": "Retained graphic-depth R2 after-hours real night canopy direction.",
+      "previousExecutionRevisionBeforeR6": "Graphic technical night language with separate luminous information, retaining actual source-light atmosphere."
+    },
+    {
+      "provisionalId": "2027_01_PIEK_DP_09",
+      "brandScope": "SASOL",
+      "concept": "Kroonstad everyday",
+      "canvaPageId": "PBb9gNS6Tz5yGFfy",
+      "observedPageIndex": 76,
+      "monthlyDeliverableId": null,
+      "state": "r6-hd-delivered-internal-review-not-resent-in-r7",
+      "previousOwnDraftPageId": "PB5ptGHb90d8ZXjs",
+      "executionRevision": "Consistent heading column; all important frames inset.",
+      "primaryLogoZone": "middle-left",
+      "previousGraphicDepthPageId": "PBclyWNc6S0tnFxr",
+      "ownerReview": "Owner happy enough with current subject/layout; requested removal of stray January only. That removal is saved and non-target records match. Final amended version not yet reviewed.",
+      "latestExecutionRevision": "feedback-and-safe-margin-r6",
+      "latestRoundSent": true,
+      "previousExecutionRevisionBeforeR5": "Retained real active smiling Kroonstad attendant and all other layout; removed only the stray January label.",
+      "previousExecutionRevisionBeforeR6": "Face-clear bounded finish: original photograph/headline/logos preserved; under-text support plane and far-edge alignment only."
+    },
+    {
+      "provisionalId": "2027_01_PIEK_DP_10",
+      "brandScope": "GET_TOGETHER",
+      "concept": "Lunch break",
+      "canvaPageId": "PBbMwKqRZZ9xNlp8",
+      "observedPageIndex": 67,
+      "monthlyDeliverableId": null,
+      "state": "r6-hd-delivered-internal-review-not-resent-in-r7",
+      "previousOwnDraftPageId": "PBP4JGdy6nLRjlTR",
+      "executionRevision": "Liked creative retained; important text and mark frames safely inset.",
+      "primaryLogoZone": "top-centre",
+      "latestExecutionRevision": "feedback-and-safe-margin-r6",
+      "latestRoundSent": true,
+      "previousExecutionRevisionBeforeR5": "Whole actual lunch plate and craft retained; main logo upper centre, invitation lower right and parent mark lower left.",
+      "previousExecutionRevisionBeforeR6": "Layered dining illustration and restrained invitation give the real plated hero a deliberate setting."
+    },
+    {
+      "provisionalId": "2027_01_PIEK_DP_11",
+      "brandScope": "GET_TOGETHER",
+      "concept": "Summer drinks",
+      "canvaPageId": "PB7GXQY2FRY4SmZL",
+      "observedPageIndex": 63,
+      "monthlyDeliverableId": null,
+      "state": "r6-hd-delivered-internal-review-not-resent-in-r7",
+      "executionRevision": "Liked creative retained; important text and mark frames safely inset.",
+      "primaryLogoZone": "top-right",
+      "latestExecutionRevision": "feedback-and-safe-margin-r6",
+      "latestRoundSent": true,
+      "previousExecutionRevisionBeforeR5": "Retained owner-supported Summer photographic direction.",
+      "previousExecutionRevisionBeforeR6": "Refined summer depth without replacing the owner-supported genuine drink scene or adding generated garnish."
+    },
+    {
+      "provisionalId": "2027_01_PIEK_DP_12",
+      "brandScope": "GET_TOGETHER",
+      "concept": "Summer gatherings",
+      "canvaPageId": "PBNrnXkWqDPH8kw2",
+      "observedPageIndex": 66,
+      "monthlyDeliverableId": null,
+      "state": "r7-hd-delivered-internal-review",
+      "supersededAgentPageId": "PB4VJSCb8LY6TTnD",
+      "executionRevision": "Exact food mask registered to background source scale/crop; displaced synthetic shadow removed.",
+      "previousOwnDraftPageId": "PB2W6cFZ0Z7pJ9mD",
+      "primaryLogoZone": "top-left",
+      "latestExecutionRevision": "r7-targeted-owner-feedback",
+      "latestRoundSent": true,
+      "previousExecutionRevisionBeforeR5": "Actual canapé/photo/craft retained; primary mark top left, season top right, right-aligned BRING YOUR PEOPLE.",
+      "previousExecutionRevisionBeforeR6": "Tactile upper wave and clear invitation enrich the real canape scene without another generic ring template."
+    }
+  ],
+  "proof": {
+    "tenDraftsCommittedTransaction": "5858578523823392672",
+    "tenDraftsReadback": {
+      "editableTextRecords": 30,
+      "independentImageRecords": 36,
+      "sourceAndTransferredRecordsIdentical": true,
+      "nonTargetTextRecords": 101,
+      "nonTargetImageRecords": 169,
+      "nonTargetRecordsIdentical": true
+    },
+    "sourceCorrection": {
+      "provisionalId": "2027_01_PIEK_DP_08",
+      "removedOwnCandidatePageId": "PBFl866NzXhR28NN",
+      "replacementPageId": "PBf4gQNK11W9Mnmy",
+      "nativePackagingTool": "scripts/poster-studio/canva-native-package.mjs",
+      "privatePackageBytes": 1462279,
+      "nativeTextRecords": 3,
+      "nativeImageRecords": 3,
+      "exactNativeBindingVerified": true,
+      "allOtherTextAndImageRecordsIdentical": true,
+      "source": "https://www.piekgroup.co.za/images/locations/sasol-langenhoven-park/sasol-langenhoven-park-01-exterior.webp",
+      "factSource": "https://www.piekgroup.co.za/locations/sasol-langenhoven-park",
+      "branchRepeatFlag": "DP07 and DP08 both use Langenhoven Park; distinct service, shoot evidence, lighting and proposed week. Keep flag for human monthly review."
+    },
+    "amendment": {
+      "changedTextElementCount": 1,
+      "unchangedOtherTextElements": 29,
+      "unchangedImageRecords": 36,
+      "restoredRenderedHeaderMeanAbsoluteDifference": 0,
+      "limitation": "Canva recalculated only target text-box height from 283.5 to 302.25; all non-target records unchanged. Header comparison is 480px preview evidence, not full-resolution export."
+    },
+    "photoRefinement": {
+      "completedNewCandidatePhotoDerivatives": 10,
+      "rejectedTrial": "Linear contrast/sharpening increased clipping and was rejected before upload.",
+      "accepted": "Endpoint-anchored luminance contrast and small-radius detail bounded by existing per-pixel RGB headroom; zero added highlight/shadow clipping in the ten measured derivatives.",
+      "originalsChanged": false,
+      "privateExifCopied": false,
+      "generativeProcessing": false
+    },
+    "historyAudit": {
+      "suppliedPreviewCount": 352,
+      "decodeErrors": 0,
+      "noMatchMeaning": "Bounded source matching only; not global unused/consent certification.",
+      "runtimeThreadCap": 2,
+      "thousandsOfImagesBenchmarkProven": false
+    },
+    "monthLedger": {
+      "candidateCount": 12,
+      "sourceFilesFingerprinted": 13,
+      "runtimeSeconds": 3.456,
+      "blockerCount": 0,
+      "findingsByCode": {
+        "subject-repeat": 38,
+        "service-repeat": 17,
+        "branch-repeat": 6,
+        "concept-repeat": 2,
+        "same-shoot-review": 1
+      },
+      "branchRepeatMeaning": "Two known candidate pairs: Engen North Ridge DP05/06 and Sasol Langenhoven Park DP07/08. Get Together exact photo branches remain unknown, not counted as one branch.",
+      "sameShootMeaning": "DP07 original and the human-history source from previews 94/241 share a camera, capture timestamps 52 seconds apart and sequence gap 40; retained as same-shoot review.",
+      "personIdentityMeaning": "Unknown; no face recognition or fake per-photo identity tags. Manual cross-source/history review required.",
+      "semanticMeaning": "Human tags flag broad themes; they do not prove novel concepts. DP03 pause overlap was amended to coffee routine; DP06/09 daily-routine overlap retained for review.",
+      "historyCoverage": "352-preview geometric matcher separately; only one known source added to this ledger, not complete global history."
+    },
+    "coffeeAmendment": {
+      "canvaPageId": "PB5r675n7lrFm7JZ",
+      "committedTransaction": "4129196274741186159",
+      "readbackTransaction": "7539547092081771960",
+      "changedTextRecords": 2,
+      "allOtherTextAndImageRecordsIdentical": true,
+      "reason": "Removed repeated pause concept; actual live headline now BACK TO THE COFFEE RUN.",
+      "readOnlyVerificationClosed": true
+    },
+    "qualityRework": {
+      "ownerFeedback": "Concepts acceptable; execution below standard. Warped photographs and random cuts rejected. Applies across the entire set.",
+      "revisedProvisionalIds": [
+        "2027_01_PIEK_DP_01",
+        "2027_01_PIEK_DP_02",
+        "2027_01_PIEK_DP_03",
+        "2027_01_PIEK_DP_06",
+        "2027_01_PIEK_DP_07",
+        "2027_01_PIEK_DP_12"
+      ],
+      "nativeReferenceStudy": {
+        "legacyPages": [
+          311,
+          313,
+          323,
+          325,
+          329,
+          330,
+          331,
+          334,
+          336,
+          338,
+          340
+        ],
+        "temporaryDesignId": "DAHaJSpo5lo",
+        "title": "TEMP | PIEK LAYER STUDY | 06 NOV 2026 | NOT FOR SCHEDULING",
+        "legacyContentChanged": false,
+        "purpose": "Actual native text/image/texture/gradient/shadow inspection; no historical source photo reuse."
+      },
+      "inPlaceCommit": "8453777828151117182",
+      "cleanTransferDesignId": "DAHaJZO801I",
+      "cleanTransferCommit": "5729100053558576810",
+      "supersededLabelCommit": "2769109198734012261",
+      "peopleAndCoffeeCommit": "6946197859869805186",
+      "finalReadOnlyVerification": "170532218786736223",
+      "finalReadOnlyTransactionCancelled": true,
+      "oldPagesPreservedInRelativeOrder": true,
+      "pageDeletion": false,
+      "supersededAgentPagesVisiblyLabelled": true,
+      "nativeBindingVerifierPassed": true,
+      "headlineOnlyAmendment": {
+        "target": "DP12 headline",
+        "test": "PEOPLE. -> FRIENDS. -> PEOPLE.",
+        "changedTextRecords": 1,
+        "allOtherPageTextAndImageRecordsUnchanged": true
+      },
+      "pageListThumbnailCacheRejected": true,
+      "transferOrderResolvedByActualPageIds": true,
+      "newRevisionsHumanApproved": false,
+      "newRevisionsSent": false,
+      "photographReconstruction": false,
+      "fullResolutionEvidence": "Private quality-rework-20261106/actual-HD-rework-export-receipt.json",
+      "colourManagementCorrection": {
+        "source": "DP06 North Ridge restocking",
+        "observedExifColourSpace": 65535,
+        "observedInteroperabilityIndex": "R03",
+        "earlierFailure": "Source RGB was incorrectly treated as sRGB before finishing.",
+        "fixedWith": "New shared photo_colour.py, Pillow 12.2.0 / LittleCMS, actual installed Adobe RGB (1998) ICC -> sRGB before crop/grade.",
+        "sourceOriginalHashUnchanged": true,
+        "currentNativeAssetId": "MAHaJhadIEk",
+        "committedTransaction": "3137278476250635727",
+        "allOtherTextImageAndFrameRecordsUnchanged": true,
+        "isolatedCurrentHdExportVerified": true,
+        "unknownSourceProfileFails": true,
+        "syntheticRegressionTestsPassed": 5,
+        "licensedIccFileCommitted": false,
+        "readOnlyVerificationTransaction": "2066547660941591623",
+        "readOnlyVerificationCancelled": true,
+        "currentNativeBindingVerifierPassed": true
+      }
+    },
+    "graphicDepthRound2": {
+      "ownerFeedback": "Still flat. No default white logo plates or random empty space. Use the actual graphic brand language: source cutouts, gradients, textures, forms and depth. Heading Home, Reset and Summer are stronger directions.",
+      "nineRevisedPosterNumbers": [
+        1,
+        2,
+        3,
+        5,
+        6,
+        8,
+        9,
+        10,
+        12
+      ],
+      "retainedPosterNumbers": [
+        4,
+        7,
+        11
+      ],
+      "newPagesRange": "64-72",
+      "newPageCount": 9,
+      "liveTextRecords": 27,
+      "independentPhotoMaskLogoGraphicRecords": 68,
+      "photographReconstruction": false,
+      "gradientTextureFormLayers": "Independent raster assets, not editable vector paths or PSD effects. Live text, original image/mask and logos remain separate.",
+      "nativeCanvaMasking": {
+        "successfulRealSubjectExtractions": 6,
+        "transparentOriginalLogoExtraction": 1,
+        "schoolRackExtraction": "Failed: no clear subject. Used actual scene with deliberate graphic treatment instead.",
+        "kroonstadConflict": "One transient 409; one retry succeeded."
+      },
+      "reversibleHistory": {
+        "unmodifiedExistingPages": 56,
+        "allUnmodifiedNativeRecordsMatched": true,
+        "nineSupersededDrafts": "Only one visible warning image each; all pre-existing native records preserved.",
+        "all65PriorPageIdsInSameRelativeOrder": true,
+        "pageDeletionOrReordering": false
+      },
+      "amendment": {
+        "pageId": "PBbMwKqRZZ9xNlp8",
+        "test": "Just for lunch. -> A little lunch break. -> Just for lunch.",
+        "nonTargetNativeRecordsIdentical": true
+      },
+      "verifiedSourceDimensions": {
+        "engenFooter": [
+          1728,
+          155
+        ],
+        "sasolLogo": [
+          806,
+          345
+        ],
+        "piekLogo": [
+          800,
+          342
+        ],
+        "getTogetherLogo": [
+          1218,
+          659
+        ]
+      },
+      "footerCropCorrection": "HD revealed cropped Engen mark in 1080x116 frame. Corrected to full source aspect 1080x96.875; both Engen and both Sasol brand-frame pages re-exported at 2x. Shared sourceDimensions guard and regression test added.",
+      "actualCurrentHdExports": 12,
+      "hdDimensions": [
+        2160,
+        2700
+      ],
+      "exportSelection": "41,44,61,64-72",
+      "correctedBrandFrameReExport": "66-68,72",
+      "reviewPixelValuesPreservedDuringMetadataCleaning": true,
+      "nativeBindingVerifierPassed": true,
+      "finalReadOnlyTransactionCancelled": true,
+      "humanCreativeApproval": false,
+      "whatsappSends": 0,
+      "portalFinalUploads": 0,
+      "privateReceipts": "graphic-depth-20261106: saved-integrity-receipt.json, final-native-binding-receipt.json, actual-HD-export-receipt.json, final-graphic-scenes.json, actual-HD-twelve-graphic-depth-board.jpg; originals and raw exports retained.",
+      "validation": {
+        "focusedNodeTests": 25,
+        "pythonColourTests": 5,
+        "monthPlanValidator": true,
+        "skillValidator": true,
+        "laneBoundaryAudit": true,
+        "actualNativeBindings": true,
+        "fullBuild": "passed tsc -b and Vite 7.3.6; existing Browserslist/chunk warnings"
+      }
+    },
+    "varietyRound3": {
+      "ownerFeedback": "Less dominant navy and repetitive logo/type placement; greater depth for Heading Home/Reset; active positive source for Back to It; rebuild messy 13 January Engen poster; additional Langenhoven Park wash concept.",
+      "revisedMonthlyPosterNumbers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        9,
+        10,
+        12
+      ],
+      "retainedMonthlyPosterNumbers": [
+        8,
+        11
+      ],
+      "newSavedPages": 7,
+      "newObservedRange": "73-79",
+      "currentExportRange": "41,61,64-67,73-79",
+      "monthlyCandidates": 12,
+      "additionalOwnerRequestedConcepts": 1,
+      "packageOrScheduleModified": false,
+      "nativeBindingVerifierPassed": true,
+      "finalReadOnlyVerification": "5550081988920824354",
+      "finalSavedNativeRecordsIdentical": true,
+      "readOnlyTransactionCancelled": true,
+      "lateEngenMarkCommit": "3121515890652751282",
+      "lateEngenPageReexported": 67,
+      "dateAmendment": {
+        "test": "13 -> 14 -> 13",
+        "dateRestoredBeforeCommitAndExport": true,
+        "allNonTargetNativeRecordsIdentical": true,
+        "textBoxContainedByDateCard": true
+      },
+      "historyProtection": {
+        "unmodifiedOldPages": 64,
+        "allUnmodifiedTextAndImageRecordsMatched": true,
+        "supersededOwnPagesWithOnlyOneWarningAdded": 6,
+        "inPlaceCurrentPageAmendments": 4,
+        "all74OldIdsInSameRelativeOrder": true,
+        "pagesMovedOrDeleted": false
+      },
+      "newSourceAudit": {
+        "sources": 2,
+        "historicalPreviews": 352,
+        "decodeErrors": 0,
+        "supportedReuseMatches": 0,
+        "unusedCertified": false,
+        "rejectedAlternative": "Local Langenhoven Park exterior had supported matches on historical pages192 and264; not used.",
+        "manualPersonShootReviewRequired": true
+      },
+      "sourceFidelity": {
+        "backToIt": "Real active smiling attendant; no reconstructed face/expression. Separate derivative with colour evidence and conservative local face luminance lift.",
+        "extraWash": "Real alternate daylight venue context, not proof of actual car-wash action. Forecourt24h never translated into wash hours.",
+        "generatedDecoration": "One independent soap-bubble/foam asset through built-in ChatGPT image generation. No client photo input, paid API, credits or additional subscription. Full prompt/provenance retained privately.",
+        "sourceHashesUnchanged": true
+      },
+      "primaryLogoZones": {
+        "DP01": "bottom-left",
+        "DP02": "top-left",
+        "DP03": "bottom-right",
+        "DP04": "bottom-right",
+        "DP05": "top-right",
+        "DP06": "bottom-left",
+        "DP07": "top-left",
+        "DP08": "top-right",
+        "DP09": "middle-left",
+        "DP10": "top-centre",
+        "DP11": "top-right",
+        "DP12": "top-left"
+      },
+      "actualCurrentHdExports": 13,
+      "hdDimensions": [
+        2160,
+        2700
+      ],
+      "reviewPixelsPreservedDuringMetadataCleaning": true,
+      "newWhatsAppSends": 0,
+      "portalFinalUploads": 0,
+      "humanCreativeApproval": false,
+      "privateEvidence": "variety-rework-20261106: final scene/native binding receipts, saved-integrity.json, photo-preparation.json, fresh-source-history.json, actual-HD-export-receipt.json, actual-HD-thirteen-variety-board.jpg, bubble-generation-provenance.json; source and raw exports retained.",
+      "knownToolLimits": "Native connector cannot change page titles/notes/effects/font family or restore arbitrary stacking. Source order reversed during merge; resolved by actual IDs/text/assets. Cached page-list thumbnails rejected. True HD export still needs signed-in background browser.",
+      "validation": {
+        "focusedNodeTests": 25,
+        "pythonColourTests": 5,
+        "monthPlanValidator": true,
+        "skillValidator": true,
+        "laneBoundaryAudit": true,
+        "actualNativeBindings": true,
+        "savedReadbackIntegrity": true,
+        "fullBuild": "passed tsc -b and Vite7.3.6; existing Browserslist/chunk warnings"
+      },
+      "currentLedgerReview": {
+        "candidateCount": 12,
+        "extras": 1,
+        "historyEntries": 1,
+        "blockerCount": 0,
+        "findingsByCode": {
+          "subject-repeat": 46,
+          "service-repeat": 20,
+          "branch-repeat": 11,
+          "concept-repeat": 2,
+          "same-shoot-review": 1
+        },
+        "meaning": "Review warnings retained, not auto-approval or complete historical/person coverage."
+      }
+    },
+    "craftRound4": {
+      "ownerFeedback": "Back to It accepted enough except January label; Fresh Start KAUAI facade, oversized leading and scattered copy rejected; Routine Returns rejected as flat/insufficient craft.",
+      "saved": {
+        "backToIt": 74,
+        "school": 80,
+        "extraWash": 81
+      },
+      "finalNativeReadOnlyTransaction": "3521210359764865931",
+      "readOnlyTransactionCancelled": true,
+      "backToItOnlyRequestedLabelRemoved": true,
+      "allOtherBackToItRecordsIdentical": true,
+      "schoolAndWashSeparateLiveTypeAndAssets": true,
+      "finalNativeBindingsPassed": true,
+      "historyIntegrity": {
+        "oldPageCount": 81,
+        "currentPageCount": 83,
+        "unmodifiedOldPages": 78,
+        "allUnmodifiedRecordsMatch": true,
+        "failures": [],
+        "supersededOwnDrafts": [
+          {
+            "page": 73,
+            "onlyWarningAdded": true
+          },
+          {
+            "page": 76,
+            "onlyWarningAdded": true
+          }
+        ],
+        "backToItOnlyJanuaryRemoved": true,
+        "all81OldIdsInSameRelativeOrder": true,
+        "newPages": [
+          {
+            "page_id": "PB7wNQkrQFvYcVGG",
+            "page_number": 80
+          },
+          {
+            "page_id": "PB9nWtgdrjBJ1vgY",
+            "page_number": 81
+          }
+        ],
+        "protectedHeaders": [
+          82,
+          83
+        ],
+        "creativeApproval": false
+      },
+      "sourceResearch": {
+        "originalSasolLhpFolderInspected": true,
+        "onedriveRawFetch": "403 serviceReadOnly / Database Is Read Only; browser signed-in company account used only for source retrieval.",
+        "sourceFolderScopeSearch": "Scoped DJI search returned unrelated client results; ignored. No cross-client source used.",
+        "sourceRejected": "0L8A3583 matched historical page221 with76 RANSAC inliers; not placed in new artwork.",
+        "droneAndVideoInspection": "Read-only metadata and bounded original clips inspected; retrieved angles showed forecourt/shop, not a confirmed wash bay. Not used as wash hero.",
+        "selected": "0L8A3607.JPG from actual SasolLHP source folder; original bytes verified, strict sRGB preparation, deliberate face-excluding detail crop.",
+        "historyPreviewCount": 352,
+        "historyDecodeErrors": 0,
+        "detectedReuseMatchesForSelectedSource": 0,
+        "unusedCertified": false,
+        "sameShootServiceReviewRemains": true,
+        "widerWashBayViewResolved": false
+      },
+      "caughtDefects": [
+        "Floating hard upper rack-source edge: carried source to page bleed.",
+        "Sasol navy lettering on navy base: moved intact mark to clean light field.",
+        "Width+height preserve-aspect resize rejected due native rounding: inspected partial results, uniformly resized parent mark by width only.",
+        "OneDrive browser download timeout did not prove transfer failure: actual files arrived later. Verified exact source size before further use; duplicate download recorded as an efficiency failure."
+      ],
+      "newGeneratedAssets": 0,
+      "existingGeneratedBubbleAssetReused": "Independent existing transparent decorative layer; no client photo reconstruction.",
+      "newWhatsAppSends": 0,
+      "portalFinalUploads": 0,
+      "creativeApproval": false,
+      "privateEvidence": "wash-school-rework-20261106: final-craft-scenes.json/html/manifest, source receipts/history, saved integrity/native binding receipts, actual-HD-export-receipt.json, actual-HD-three-revisions.jpg and current13 board. Raw/private evidence retained off Git.",
+      "validation": {
+        "focusedNodeTests": 25,
+        "pythonColourTests": 5,
+        "monthPlanValidator": true,
+        "skillValidator": true,
+        "nativeBindings": true,
+        "protectedHistoryIntegrity": true,
+        "fullBuild": "passed tsc -b and Vite 7.3.6; existing Browserslist/chunk warnings",
+        "finalLaneGuard": true,
+        "currentLedgerDeterministicBlockers": 0,
+        "currentLedgerReviewFindings": {
+          "subject-repeat": 38,
+          "service-repeat": 20,
+          "branch-repeat": 11,
+          "concept-repeat": 2,
+          "same-shoot-review": 4
+        }
+      },
+      "actualLatestHdExports": 3,
+      "latestHdExportSelection": "74,80-81",
+      "allCurrentHdCandidateCount": 13,
+      "hdDimensions": [
+        2160,
+        2700
+      ],
+      "reviewPixelsPreservedDuringMetadataCleaning": true,
+      "backToItPixelProof": {
+        "backToItChangedPixelsOutsideJanuaryBox": 0,
+        "changedPixelsTotal": 3729,
+        "nativeNonTargetRecordsMatch": true
+      },
+      "evidenceDocument": "CRAFT-REWORK-2026-11-06.md"
+    },
+    "fullSetCraftRound5": {
+      "ownerAuthority": "Latest explicit improve every current design, save, and send HD image+caption to Picasso approvals. Supersedes previous internal-send hold; no client publication.",
+      "nativeTransaction": "3521210358973710543",
+      "savedVerificationTransaction": "3980577524946418901",
+      "savedVerificationClosed": true,
+      "candidateCount": 13,
+      "monthlyCandidates": 12,
+      "separatelyTrackedExtras": 1,
+      "officialPageCount": 83,
+      "currentExportSelection": "41,61,64-67,74-75,77-81",
+      "protectedHeaders": [
+        82,
+        83
+      ],
+      "perPageChanges": [
+        {
+          "page": 79,
+          "reason": "Architectural layering around the real canopy/year, light parent-brand treatment."
+        },
+        {
+          "page": 78,
+          "reason": "Warm photographic editorial with tactile paper separation, rather than repeating the parent navy layout."
+        },
+        {
+          "page": 77,
+          "reason": "Graphic coffee editorial adds a tactile plane and purposeful illustration, preserving the genuine flag."
+        },
+        {
+          "page": 41,
+          "reason": "Stronger Engen travel art direction and branch hierarchy without changing the actual forecourt."
+        },
+        {
+          "page": 80,
+          "reason": "Craft finish on the rebuilt rack/calendar scene; no new offer or changed school fact."
+        },
+        {
+          "page": 67,
+          "reason": "Stronger source/background separation and an intentional lower information plane."
+        },
+        {
+          "page": 75,
+          "reason": "More dimensional wash movement and a clear invitation, distinct from the extra bubble-led detail."
+        },
+        {
+          "page": 66,
+          "reason": "Graphic technical night language with separate luminous information, retaining actual source-light atmosphere."
+        },
+        {
+          "page": 74,
+          "reason": "Face-clear bounded finish: original photograph/headline/logos preserved; under-text support plane and far-edge alignment only."
+        },
+        {
+          "page": 65,
+          "reason": "Layered dining illustration and restrained invitation give the real plated hero a deliberate setting."
+        },
+        {
+          "page": 61,
+          "reason": "Refined summer depth without replacing the owner-supported genuine drink scene or adding generated garnish."
+        },
+        {
+          "page": 64,
+          "reason": "Tactile upper wave and clear invitation enrich the real canape scene without another generic ring template."
+        },
+        {
+          "page": 81,
+          "reason": "Polish the actual wash action with a sculpted clean edge and stronger invitation; retain tight live title and visible separate bubbles."
+        }
+      ],
+      "savedIntegrity": {
+        "all83PageIdsOrderUnchanged": true,
+        "nonTargetPagesIdentical": 70,
+        "allLiveWordingUnchanged": true,
+        "newGraphicFills": 10,
+        "all13CurrentCandidatesChanged": true,
+        "failures": []
+      },
+      "sourceAndMarkPreservation": {
+        "preservedRealPhotoCutouts": 21,
+        "preservedExactMarkRecords": 22,
+        "photoAssetIdsAndGeometryMatch": true,
+        "markRecordsMatch": true,
+        "containerTypeChanges": [
+          {
+            "page": 79,
+            "assetId": "MAHaJ-4KGfc",
+            "before": "SHAPE",
+            "after": "RECT",
+            "meaning": "Exact source/geometry preserved; native image container changes when restacked."
+          }
+        ]
+      },
+      "trueHdExports": 13,
+      "hdDimensions": [
+        2160,
+        2700
+      ],
+      "allCurrentExportsChangedFromR4": true,
+      "metadataCleanCopiesPreserveDecodedPixels": true,
+      "overlayPreflight": {
+        "initialBlockers": 6,
+        "finalBlockers": 0,
+        "finalReviewFindings": 0,
+        "measuredPairs": 37,
+        "declaredBackgroundPlanesNotChecked": 11,
+        "meaning": "Declared front-layer alpha coverage of region boxes only. No glyph, native z-order, font, taste, factual accuracy or human creative approval claim.",
+        "newPythonRegressions": 6,
+        "additionalFailedFaceClearanceBlockers": 1,
+        "finalStrictFaceClearanceBlockers": 0,
+        "temporaryFeatureBoxesAreNotIdentityData": true
+      },
+      "nativeLimitations": [
+        "Inserted fills appear above existing live content; opacity/crop may be inherited on replacement.",
+        "Background plane order is not API-readable; rendered checking remains necessary.",
+        "Raster graphic planes are independently editable assets, not native vector paths or PSD effects."
+      ],
+      "privateEvidenceFolder": "full-craft-rework-20261106",
+      "evidenceDocument": "FULL-SET-CRAFT-2026-11-06.md",
+      "validation": {
+        "focusedNodeTests": 25,
+        "pythonColourTests": 5,
+        "pythonOverlayTests": 6,
+        "skillValidator": true,
+        "monthValidator": true,
+        "fullBuild": "passed fresh9November tsc -b and Vite7.3.6; existing Browserslist/chunk warnings"
+      },
+      "normalCompanyChatgptAuthorAmendExportVerified": false,
+      "newPhotoSources": false,
+      "newGeneration": false,
+      "desktopTakeover": false,
+      "incrementalCostZAR": 0,
+      "latestRoundWhatsAppSends": 13,
+      "deliveryBlocker": null,
+      "finalFaceClearAmendment": {
+        "transaction": "7135349062903102811",
+        "verificationTransaction": "2353652159070713634",
+        "changedNativeRecords": 1,
+        "allOtherRecordsMatch": true,
+        "sameStateReverifiedAt": "2026-11-09",
+        "latestRawExportDimensions": [
+          2160,
+          2700
+        ],
+        "sourcePhotoAssetAndGeometryUnchanged": true,
+        "exportedFacePixelMatchToR4": false,
+        "meaning": "A decorative curve crossing the face was removed. Native source/geometry identity is verified; exported RGB identity is not claimed."
+      },
+      "verifiedFinalHdAt": "2026-11-09",
+      "readyToSendHdCaptionItems": 13,
+      "newMessagesSent": 13,
+      "deliveryReceipt": {
+        "observedAt": "2026-11-09",
+        "sender": "Nolan",
+        "group": "CG Picasso Approvals",
+        "photoCaptionMessages": 13,
+        "signedIntroductionMessages": 1,
+        "uniqueNewMessageIds": 13,
+        "everyPhotoHasItsOwnCaption": true,
+        "everyPhotoHdSelected": true,
+        "sourceDimensions": [
+          2160,
+          2700
+        ],
+        "whatsappHdDimensions": [
+          2048,
+          2560
+        ],
+        "witnessStates": {
+          "delivered": 1,
+          "sent": 12
+        },
+        "receiptLocation": "private full-craft-rework-20261106/whatsapp-r5-send-receipt-20261109.json",
+        "meaning": "Actual photo+caption messages and new message IDs witnessed; not human creative approval or proof every recipient read them."
+      }
+    }
+  },
+  "delivery": {
+    "captionDraftsPrepared": 13,
+    "captionHashtagLimit": 5,
+    "signature": null,
+    "requestedWhatsappSender": "Nolan WhatsApp account",
+    "requestedGroup": "Picasso approvals",
+    "senderAndExactGroupVerified": true,
+    "whatsappSends": 20,
+    "hdExportsVerified": 13,
+    "publicClientAssetsPublished": 0,
+    "portalFinalFilesUploaded": 0,
+    "localBrowserBlocker": null,
+    "connectorLimitation": "Canva connector supports native editing/import, but true HD export still uses the existing signed-in browser File > Download path; no WhatsApp send connector.",
+    "ownerPromptedToEnableBrowser": false,
+    "whatsappSendsMeaning": "Historical R5-only counter: seven prior rejected-version sends plus13 R5 review messages. Not a cumulative total including R6/R7; consult versioned round receipts.",
+    "earlyUncaptionedPreviewCount": 1,
+    "hdDimensions": [
+      2160,
+      2700
+    ],
+    "latestExportState": "Final genuine2160x2700 coffee PNG/contact close-up inspected; one HD message with exact clean caption and Sent witness. One intermediate trial export was not sent.",
+    "latestExportPageRange": "79",
+    "furtherSendsHeld": true,
+    "holdReason": "Single new coffee review note addressed; wait for new specific feedback rather than resend unchanged posters.",
+    "latestRoundWhatsAppSends": 1,
+    "pendingDeliveryReason": null,
+    "ownerSendAuthority": "Owner explicitly authorised revised HD photo+allocated-caption internal delivery through Nolan to CG Picasso Approvals; no agent signatures.",
+    "latestRoundAttemptedSends": 1,
+    "latestRoundSignedIntroMessages": 0,
+    "latestRoundHdSelectedForEveryPhoto": true,
+    "latestRoundCaptionAndPhotoSameMessage": true,
+    "latestRoundAwaitingHumanFeedback": true,
+    "latestRoundHdExportsVerified": 1,
+    "hdExportsVerifiedMeaning": "13 current genuine exports including the later isolated New Year replacement; earlier versions retained privately.",
+    "captionSignaturePolicy": "13November owner: no agent signatures in forwardable poster captions; supersedes earlier signature instruction.",
+    "latestRoundCaptionEditsVerified": 0,
+    "latestRoundStandardDuplicateDeletedForEveryone": false,
+    "latestRoundSupersededDistinctNewYearRevisionRetained": true,
+    "canvaSiteIdentity": "Owner-confirmed company m.productions account; Chrome profile identity is separate.",
+    "latestRoundAffectedPosters": 1,
+    "latestRoundLiveFollowups": 0,
+    "latestRoundReceipt": "Private feedback-rework-r8-20261114/delivery-plan-r8.json; all earlier R7/R7.1 receipts retained.",
+    "latestRoundPhotoMessageState": "Sent; no recipient-read or creative-approval claim"
+  },
+  "finalDestination": {
+    "relativePath": "Clients/Piek Group/A_ClientPortal_Piek_Group/Graphic Design/2027/2027_01_JAN",
+    "canonicalYearMonthBuilders": "src/lib/onedriveCanonical.ts",
+    "preparedEmptyFolders": true,
+    "finalFilenameConventionVerified": false,
+    "staffCanvaPageNamingVerified": false,
+    "noShortCodeOrPostingDateGuessed": true,
+    "publicationAndDeliverableLinkState": "No final asset or January deliverable association created."
+  },
+  "acceptanceGates": [
+    "January package/allocation, actual schedule IDs and Amonique exact page/export naming remain unverified; do not invent them.",
+    "Complete human creative/brand approval of the revised twelve-poster grid and at-resolution masks/crops. Native layers and HD export are not creative approval.",
+    "Recheck photo/person/shoot/concept/branch repetition with bounded-history limitations and actual current sources.",
+    "Install/expose the reusable Poster Studio skill in the company Work environment and prove a normal-company-ChatGPT isolated edit and true export; read-only test alone is insufficient.",
+    "Current internal HD review delivery is complete; only after actual creative approval promote finals via the canonical same-client portal path and real deliverable IDs."
+  ],
+  "cost": {
+    "incrementalRand": 0,
+    "newSubscriptions": false,
+    "paidApiOrGenerationCredits": false,
+    "newHosting": false,
+    "newProductionDependencies": false
+  },
+  "privateEvidenceLocation": "MSI private CG-Graphic-Designer-private/piek-january-2027; no client media or fonts in Git.",
+  "normalCompanyChatgpt": {
+    "readInvocationVerified": true,
+    "conversationUrl": "https://chatgpt.com/g/g-p-68adb8e88c2481918d8f2f02dd955947-piek-group/c/6aedbe02-ac40-83ea-9eea-df28565b720e",
+    "verifiedScope": "Actual connected Canva inspection of the exact saved College Brew page: fresh headline, notes, three live text and two image records; read transaction cancelled.",
+    "posterStudioSkillInstalledInCompanyWork": false,
+    "createAmendExportRoundTripVerified": false,
+    "meaning": "Normal-company-ChatGPT read access works. Do not describe a complete everyday designer as live."
+  },
+  "extraCandidates": [
+    {
+      "provisionalId": "2027_01_PIEK_EXTRA01",
+      "brandScope": "SASOL",
+      "concept": "Fresh start car wash",
+      "branch": "Sasol Langenhoven Park",
+      "canvaPageId": "PB9nWtgdrjBJ1vgY",
+      "observedPageIndex": 83,
+      "monthlyDeliverableId": null,
+      "packageIdentity": null,
+      "state": "r7-hd-delivered-internal-review",
+      "factSource": "https://www.piekgroup.co.za/locations/sasol-langenhoven-park",
+      "source": "Actual LHP source0L8A3607 gloved hands/sponge and foamy windscreen, with identifiable face excluded from the service crop.",
+      "generatedAsset": null,
+      "executionRevision": "Only independent decorative bubbles removed; genuine wash foam/action and other layers retained.",
+      "primaryLogoZone": "top-right",
+      "noPriceOfferOrCarWashHoursClaimed": true,
+      "previousVarietyPageId": "PBwfxsV9wDzlFlM4",
+      "ownerReview": "Previous KAUAI-led facade and loose/flat typography explicitly rejected. Real wash-action detail replaces it; wider wash-bay view still unresolved.",
+      "sourceScope": "service-detail-not-wide-bay-view",
+      "latestExecutionRevision": "r7-targeted-owner-feedback",
+      "latestRoundSent": true,
+      "previousExecutionRevisionBeforeR5": "Tight independently editable FRESH/START words, real registered car/hands alpha over source context, prominent independent soap bubbles/foam, curved navy information base, coherent service/CTA/branch/address hierarchy.",
+      "previousExecutionRevisionBeforeR6": "Polish the actual wash action with a sculpted clean edge and stronger invitation; retain tight live title and visible separate bubbles.",
+      "previousGeneratedAsset": "Separate transparent soap-bubble decoration only; venue/person/logo/type not generated"
+    }
+  ],
+  "lastVerifiedAt": "2026-11-14",
+  "feedbackRound6": {
+    "observedAt": "2026-11-13",
+    "pageCount": 85,
+    "creativeAmendments": 10,
+    "safeMarginCandidates": 13,
+    "importantInsetPx": 64,
+    "measuredTextFrames": 45,
+    "reviewedLogoFrames": 23,
+    "beforeMarginFindings": 34,
+    "savedMarginFindings": 0,
+    "allIdsOrderPreserved": true,
+    "nonTargetPagesUnchanged": 72,
+    "currentSelection": "43,63,66-69,76-77,79-83",
+    "protectedHeaders": [
+      84,
+      85
+    ],
+    "freshHdExportVerified": true,
+    "whatsappSends": 13,
+    "ownerSaysNoReplies": false,
+    "evidence": "FEEDBACK-REWORK-2026-11-13.md",
+    "readbackVerified": true,
+    "sourcePreserving": true,
+    "humanCreativeApproval": false,
+    "priorR5Delivery": {
+      "date": "2026-11-09",
+      "postersSent": 13,
+      "state": "historical-group-review-delivery"
+    },
+    "reviewMessagesMapped": 15,
+    "validation": {
+      "nodeTests": 27,
+      "pythonColourTests": 5,
+      "pythonOverlayTests": 6,
+      "localBuild": "tsc -b and Vite7.3.6 passed13November",
+      "skillValidator": true
+    },
+    "latestSendAuthority": "Owner explicitly requests revised HD posters plus allocated captions through Nolan to CG Picasso Approvals; previous no-reply hold superseded.",
+    "reviewMessagesCapturedAcrossViewports": 15,
+    "captureCoverageMissing": 0,
+    "deliveryPacketIncludesExtra": true,
+    "depthAndLayerPreviewReview": true,
+    "browserExportBlocker": null,
+    "newOwnerDepthNotesCaptured": 2,
+    "allCurrentCaptionsSignatureFree": true,
+    "priorCaptionEditsExactlyVerified": 8,
+    "accidentalStandardDuplicateDeletedForEveryone": true,
+    "latestOwnerSignatureRule": "No agent signatures in forwardable poster captions.",
+    "depthCorrection": {
+      "page": 81,
+      "elementId": "PBDGzt6lwvxz9s2y-LByqNYNbQzC8sXDd",
+      "topBefore": 465,
+      "topAfter": 545,
+      "leftUnchanged": 64,
+      "exactlyOneNativeRecordChanged": true,
+      "savedReadbackVerified": true,
+      "freshActualHdExport": true,
+      "correctedHdMessageDelivered": true,
+      "marginFindings": 0
+    }
+  },
+  "feedbackRound7": {
+    "observedAt": "2026-11-13",
+    "affectedPosterCount": 5,
+    "initialNotesMapped": 5,
+    "liveFollowupNotesMapped": 3,
+    "initialSavedPageIndices": [
+      66,
+      79,
+      80,
+      82,
+      83
+    ],
+    "liveFollowupPageIndices": [
+      79,
+      80,
+      82
+    ],
+    "officialPageCount": 85,
+    "allPageIdsAndOrderRetained": true,
+    "initialNonTargetPagesUnchanged": 80,
+    "liveFollowupNonTargetPagesUnchanged": 82,
+    "savedReadbackExactlyMatchesReviewedDraft": true,
+    "safeArea": {
+      "textFrames": 45,
+      "reviewedLogoFrames": 23,
+      "insetPx": 64,
+      "findings": 0,
+      "twoSchoolLogoIdsReboundAfterExactAssetRestack": true
+    },
+    "actualHdExports": 8,
+    "exportDimensions": [
+      2160,
+      2700
+    ],
+    "actualPhotoCaptionSends": 8,
+    "currentAffectedPosterMessages": 5,
+    "fullSetResent": false,
+    "allActualHdBadgesWitnessed": true,
+    "allCaptionsExactlyVerifiedSignatureFree": true,
+    "whatsappHdDimensionsDisplayedForSixAttachments": [
+      2048,
+      2560
+    ],
+    "whatsappHdDimensionsNotDisplayedForTwoAttachments": true,
+    "privateCurrentMessageMapping": "DP02/03/05 from R7.1; DP12/EXTRA01 from R7",
+    "stockAssets": {
+      "ownerAuthorised": true,
+      "cup": "Unbranded ceramic latte, Billion Photos, Pro included with existing Canva Teams",
+      "school": "Generic smiling child in uniform, Africa images, Pro included with existing Canva Teams",
+      "genericStockNotClientCustomersOrProductPhotography": true,
+      "broaderHistoricalStockNonUseVerified": false
+    },
+    "positiveReactionsWitnessed": [
+      "DP12",
+      "EXTRA01",
+      "DP02 live follow-up"
+    ],
+    "fullCreativeApproval": false,
+    "originalClientPhotographyPreserved": true,
+    "newGenerativePhotography": false,
+    "desktopTakeover": false,
+    "incrementalCostZAR": 0,
+    "evidenceDocument": "TARGETED-FEEDBACK-2026-11-13.md",
+    "privateEvidenceFolder": "feedback-rework-r7-20261113",
+    "normalCompanyChatgptCreateAmendExportAcceptanceStillOpen": true,
+    "portalFinalUploads": 0,
+    "productionDeploymentOrDataChanges": false,
+    "validation": {
+      "freshLocalBuild": "passed TypeScript and Vite7.3.6; existing Browserslist/chunk warnings",
+      "skillValidator": true,
+      "gitDiffCheck": true,
+      "privateEightMessageDeliveryAudit": true,
+      "savedDraftEquality": true,
+      "current45Text23Logo64pxMarginFindings": 0,
+      "newImplementationTests": 0
+    }
+  },
+  "feedbackRound8": {
+    "observedAt": "2026-11-14",
+    "newNoteDated": "2026-11-13 15:37 SAST",
+    "newReviewNotes": 1,
+    "affectedPoster": "DP03",
+    "pageId": "PBhRR4d4pdXWyyBs",
+    "pageIndexObserved": 79,
+    "onlyChangedPage": [
+      79
+    ],
+    "nonTargetPagesUnchanged": 84,
+    "all85PageIdsOrderNotesUnchanged": true,
+    "allLiveTextUnchanged": true,
+    "clientPhotoFieldAndLogoRecordsUnchanged": true,
+    "cupAndContactShadowIndependentlyEditable": true,
+    "savedReadbackExactlyMatchesReviewedDraft": true,
+    "physicalCountertopContactCheckedInActualHd": true,
+    "sourceViewpointMatchedToCounter": true,
+    "stockCupIncludedWithExistingCanvaTeams": true,
+    "newClientPhotographyGenerated": false,
+    "sourceFileDimensions": [
+      2160,
+      2700
+    ],
+    "actualFinalExportInspected": true,
+    "intermediateTrialExportsNotSent": 1,
+    "actualSendCount": 1,
+    "hdOptionDimensionsDisplayed": [
+      2048,
+      2560
+    ],
+    "actualOutgoingHdBadge": true,
+    "captionExactlyVerifiedSignatureFree": true,
+    "messageStateWitnessed": "Sent",
+    "recipientReadOrCreativeApproval": false,
+    "safeArea": {
+      "textFrames": 45,
+      "logoFrames": 23,
+      "insetPx": 64,
+      "findings": 0
+    },
+    "caughtBeforeSend": [
+      "Replacement asset inherited an inappropriate internal crop; reset only the cup media frame.",
+      "HD base was too close to counter front edge; moved cup12px back onto wood and aligned shadow.",
+      "Single-file download event timed out while actual verified PNG arrived; no blind retry."
+    ],
+    "privateEvidenceFolder": "feedback-rework-r8-20261114",
+    "incrementalCostZAR": 0,
+    "normalCompanyChatgptFullRoundTripStillOpen": true,
+    "newDependenciesDeploymentsPortalFinalsOrProductionDataChanges": false,
+    "validation": {
+      "freshLocalBuild": "passed TypeScript and Vite7.3.6 on14November; existing Browserslist/chunk warnings",
+      "skillValidator": true,
+      "gitDiffCheck": true,
+      "savedDraftEquality": true,
+      "privateOneMessageAndFinalExportHashAudit": true,
+      "safeMarginFindings": 0,
+      "newImplementationTests": 0
+    }
+  },
+  "feedbackRound9": {
+    "observedAt": "2026-11-14",
+    "state": "single-internal-review-delivered-owner-directed-exception",
+    "canvaDesignId": "DAHaD4mJnGY",
+    "changedPageId": "PBhRR4d4pdXWyyBs",
+    "observedPageIndex": 79,
+    "ownerFeedback": "14November10:11-10:12 actual annotation: larger lower-right cup behind original blue gradient",
+    "changedPageCount": 1,
+    "nonTargetPagesUnchanged": 84,
+    "allPageIdsOrderNotesAndRichtextsExact": true,
+    "sourcePhotoGradientLogoRecordsExact": true,
+    "layersIndependent": true,
+    "actualHDExportInspected": true,
+    "exportDimensions": [
+      2160,
+      2700
+    ],
+    "cleanReviewPixelsMatchRaw": true,
+    "captionExactSignatureFree": true,
+    "safeArea": {
+      "insetPx": 64,
+      "textCount": 4,
+      "reviewedLogoCount": 1,
+      "findings": 0
+    },
+    "reuse": {
+      "state": "insufficient-coverage-hold",
+      "actualInstagramPostsRetained": 35,
+      "profilePostCountObserved": 181,
+      "retainedCanvaPreviewHashesRevalidated": 352,
+      "piekApprovalSearchCaptionsObserved": 9,
+      "approvalScreenshotsCaptured": 4,
+      "distinctApprovalArtworksVisuallyVerified": 3,
+      "supportedSourceMatchFoundInBoundedSamples": false,
+      "unusedCertified": false,
+      "completeCoverage": false,
+      "remainingGaps": [
+        "older/carousel/reel-interior/social history",
+        "Facebook",
+        "complete queued/approved/scheduled history",
+        "same-shoot/partial-person uncertainty"
+      ]
+    },
+    "delivery": {
+      "sendCount": 1,
+      "forwardCount": 0,
+      "state": "delivered-hd-photo-and-exact-signature-free-caption",
+      "senderVerified": "Nolan",
+      "destinationVerified": "CG Picasso Approvals",
+      "ownerDirection": "Subsequent Send it please after incomplete reuse coverage disclosed",
+      "reuseClearanceGranted": false,
+      "internalReviewException": true,
+      "hdBadgeWitnessed": true,
+      "outgoingCaptionTextContentExact": true,
+      "transportDimensionsReported": null,
+      "completedImageWitnessed": true,
+      "deliveryStateWitnessed": "Delivered",
+      "deliveredAtObserved": "2026-11-14T12:07:00+02:00"
+    },
+    "creativeApproval": "pending",
+    "incrementalCostZAR": 0,
+    "privateProofDirectory": "feedback-rework-r9-20261114",
+    "notesPath": "TARGETED-FEEDBACK-2026-11-13.md",
+    "productionRelease": false
+  }
+}
