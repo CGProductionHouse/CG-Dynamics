@@ -1,3 +1,21 @@
+## 15November — Browser/Chrome bundle restoration; host reload still unverified
+
+Used the running desktop app's bundled CLI to reinstall the already-enabled
+`browser@openai-bundled` and `chrome@openai-bundled`, version26.1111.21308.
+Both previously empty skills directories are now restored. Supported bootstrap
+still returns `Trusted RPC service is not configured: browser`; this does not
+prove a Chrome-extension fault. Official app-server documentation provides
+`config/mcpServer/reload`, but this chat exposes no callable GUI reload endpoint;
+the public managed-daemon control socket is not reachable. No private transport,
+native-host repair, auth/token replay or policy bypass attempted.
+
+The next isolated-host recovery test is a controlled Codex restart, not a proven
+fix. It has NOT been executed because three other chats were active and owner
+instructions require preserving other lanes. Private repair checkpoint retained.
+Personal Desktop Commander pairing/startup unchanged. Four current R4 HD exports,
+WhatsApp messages and Amonique tag remain outstanding; Claude handover still owns
+delivery until receipt/coordination is reconciled. No production change or spend.
+
 ## 15November — Desktop Commander npm installer failure repaired locally
 
 Owner supplied real npm Invalid Version error from official Windows remote launcher.
