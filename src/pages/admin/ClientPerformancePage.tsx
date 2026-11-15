@@ -137,7 +137,6 @@ function formatDate(value: string | null | undefined) {
 
 export default function ClientPerformancePage() {
   const { profile } = useAuth()
-  const canManageOnboarding = isManagerRole(profile?.role)
   const [clients, setClients] = useState<Client[]>([])
   const [reports, setReports] = useState<Report[]>([])
   const [linkedMetaClients, setLinkedMetaClients] = useState<number | null>(null)
@@ -374,12 +373,12 @@ export default function ClientPerformancePage() {
             </PremiumCard>
           </section>
 
-          <WebsitePerformancePanel clients={clients} canSave={canManageOnboarding} />
+          <WebsitePerformancePanel clients={clients} canSave={isManagerRole(profile?.role)} />
 
           <details className="mt-6 rounded-xl border border-white/10 bg-white/[0.02] p-4">
             <summary className="cursor-pointer text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-teal">More performance tools</summary>
               <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                {LINKS.filter(link => link.to !== '/admin/client-onboarding' || canManageOnboarding).map((link) => (
+                {LINKS.map((link) => (
                   <Link
                     key={link.to}
                     to={link.to}
@@ -393,10 +392,7 @@ export default function ClientPerformancePage() {
                 ))}
               </div>
           </details>
-          {canManageOnboarding && <details onToggle={event => { if (event.currentTarget.open) setOnboardingOpened(true) }} className="mt-3 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3">
-            <summary className="cursor-pointer text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-teal">Client onboarding status</summary>
-            {onboardingOpened && <OnboardingStatusCard clients={clients} />}
-          </details>}
+          {onboardingOpened && <OnboardingStatusCard clients={clients} />}
         </>
       )}
     </div>
