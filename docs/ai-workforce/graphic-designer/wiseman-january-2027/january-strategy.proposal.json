@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "clientId": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
   "month": "2027-01-01",
-  "status": "rebuild-native-HD-inspected-internal-review-pending",
+  "status": "automotive-r4-native-preview-accepted-held-HD-and-delivery",
   "ownerMonthConfirmedAt": "2026-11-14",
   "packageBaseline": {
     "designPosters": 4,
@@ -11,7 +11,7 @@
     "videoExcludedFromThisTask": true
   },
   "productionLane": {
-    "state": "official-working-copies-replaced-caption-footers-validated-no-sends",
+    "state": "four-automotive-r4-posters-replaced-official-master-held-HD-and-browser-policy",
     "masterDesignId": "DAHEfeuQzP4",
     "scheduleMeaning": "Creative windows only; no dated rows, UUIDs, scheduling or publication created. DP numbering is not authoritative posting order.",
     "excludedPackages": [
@@ -21,7 +21,8 @@
     ],
     "bulkHydrationRestarted": false,
     "masterObservedPages": 102,
-    "other94PagesPreserved": true
+    "other94PagesPreserved": true,
+    "other98PagesPreserved": true
   },
   "seasonalEvidence": [
     {
@@ -95,10 +96,12 @@
       "qaState": "blocked-production-local-font-runtime-and-human-approval",
       "workingCanvaDesignId": "DAHa7Hy-_Xs",
       "supersededWorkingDesignId": "DAHa50-3QfY",
-      "nativeDraftQualityState": "Actual Canva native fonts and2160x2700 output inspected; internal candidate, not human creative approval.",
-      "masterPageId": "PBWnlY8rcVFXfgSC",
+      "nativeDraftQualityState": "Actual saved480x600 native R4 output inspected; source/logo/copy preserved. New HD export unverified, superseded R2 image deselected.",
+      "masterPageId": "PB8Jj94kZ5d19Xhq",
       "masterPageNumber": 40,
-      "officialCopyTransferred": true
+      "officialCopyTransferred": true,
+      "artRevision": "automotive-r4",
+      "ownerPreviewAccepted": true
     },
     {
       "provisionalId": "2027_01_WISEMAN_DP02",
@@ -127,10 +130,12 @@
       "qaState": "blocked-production-local-font-runtime-and-human-approval",
       "workingCanvaDesignId": "DAHa7HhAotA",
       "supersededWorkingDesignId": null,
-      "nativeDraftQualityState": "Actual Canva native fonts and2160x2700 output inspected; internal candidate, not human creative approval.",
-      "masterPageId": "PBzz5zF63CvvnllW",
+      "nativeDraftQualityState": "Actual saved480x600 native R4 output inspected; source/logo/copy preserved. New HD export unverified, superseded R2 image deselected.",
+      "masterPageId": "PBrfWh0vpT9XHfPs",
       "masterPageNumber": 41,
-      "officialCopyTransferred": true
+      "officialCopyTransferred": true,
+      "artRevision": "automotive-r4",
+      "ownerPreviewAccepted": true
     },
     {
       "provisionalId": "2027_01_WISEMAN_DP03",
@@ -146,7 +151,7 @@
       "nextAction": "Use the verified Group website to find the appropriate business.",
       "januaryRelevance": "Returning to ordinary driving after a longer summer journey. This is a proposed creative window, not a schedule.",
       "headlineCandidates": [
-        "THE HOLIDAY’S OVER. THE KILOMETRES STAY."
+        "THE HOLIDAY\u00e2\u20ac\u2122S OVER. THE KILOMETRES STAY."
       ],
       "mechanism": "actual Group vehicle with registered roof/type overlap, large tightly stacked centred live headline, top-right logo and right-aligned footer",
       "sourceRequirement": "Retain the original owned candidate photograph; historical vehicle-wrap marks are documentary, not current Hi-Q promotion.",
@@ -159,10 +164,12 @@
       "qaState": "blocked-production-local-font-runtime-and-human-approval",
       "workingCanvaDesignId": "DAHa6dj_8iU",
       "supersededWorkingDesignId": null,
-      "nativeDraftQualityState": "Actual Canva native fonts and2160x2700 output inspected; internal candidate, not human creative approval.",
-      "masterPageId": "PBQ44whvg371jp7L",
+      "nativeDraftQualityState": "Actual saved480x600 native R4 output inspected; source/logo/copy preserved. New HD export unverified, superseded R2 image deselected.",
+      "masterPageId": "PBsdXDCfCsJzF829",
       "masterPageNumber": 42,
-      "officialCopyTransferred": true
+      "officialCopyTransferred": true,
+      "artRevision": "automotive-r4",
+      "ownerPreviewAccepted": true
     },
     {
       "provisionalId": "2027_01_WISEMAN_DP04",
@@ -191,10 +198,12 @@
       "qaState": "blocked-production-local-font-runtime-and-human-approval",
       "workingCanvaDesignId": "DAHa640Ndpc",
       "supersededWorkingDesignId": "DAHa6EwI0Mk",
-      "nativeDraftQualityState": "Actual Canva native fonts and2160x2700 output inspected; internal candidate, not human creative approval.",
-      "masterPageId": "PBYSfdzp6967gVBR",
+      "nativeDraftQualityState": "Actual saved480x600 native R4 output inspected; source/logo/copy preserved. New HD export unverified, superseded R2 image deselected.",
+      "masterPageId": "PBYNFX2VmFY7GnBY",
       "masterPageNumber": 43,
-      "officialCopyTransferred": true
+      "officialCopyTransferred": true,
+      "artRevision": "automotive-r4",
+      "ownerPreviewAccepted": true
     }
   ],
   "photoPosts": [
@@ -259,7 +268,7 @@
       "officialCopyTransferred": true
     }
   ],
-  "releaseStatus": "Official eight replaced after exact owner approval; all94other pages preserved. Current caption footers pass exact-client packet checks. Source HD and transferred previews inspected; final full-resolution master export, latest approval history, human creative approval and authoritative January dates remain open. No sends.",
+  "releaseStatus": "Owner accepted R4 native previews and authorised four HD+caption sends plus Amonique tag. All four current copies replaced, all98other IDs/order preserved. New actual HD exports/WhatsApp delivery blocked by Computer Use browser URL-policy stop; no sends or tag. Current actual approval history and authoritative January order remain separate gates.",
   "ownerCreativeCorrection": {
     "sourcePermission": "Suitable actual Supa Quick, Wise Ride, Midas and Dunlop Zone sources allowed for Group content; Hi-Q excluded.",
     "photoPosts": "All four rejected; reselect attractive natural active/product/service images, not awkward portraits or uniform/paper closeups.",

@@ -27,6 +27,17 @@ Check source expression/task, a specific evidenced product/service, tight intent
 type spacing and genuinely different composition/CTA/logo mechanisms before scaling
 a month's exports. More layers or background removal alone do not establish depth.
 
+For automotive work, use the owner's actual visual preference: modern typography,
+purposeful mechanical/route/tyre graphics and realistic materials. Do not substitute
+hard offset duplicate lettering, a frame around every heading or toy-like steering
+icons for design depth. Retain a strong concept while refining its composition;
+preserve exact real photographs, logos and live text. Compare the actual saved
+render, not the number of layers. The Wiseman15November pass removed four offset
+text duplicates, replaced the steering motif and added independent original graphics.
+Its inspected480x600 native previews are not HD export or human creative approval.
+Invalidate stale delivery exports after visual amendments: keep them as history,
+but never leave the old HD file selected for a newly revised poster.
+
 1. Read the owning GitHub issue and current exact-client/month authority.
 2. Fail closed if the exact logo, font licence/file, colour values, branch, product/service fact or source rights are unresolved.
 3. Build or refresh the compact Brand Pack for the exact `client_id + brand_scope`; do not borrow a sibling brand kit.

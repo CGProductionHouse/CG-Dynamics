@@ -74,19 +74,19 @@
     "ownedJanuaryWorkingPageIds": [
       {
         "slot": "DP01",
-        "id": "PBWnlY8rcVFXfgSC"
+        "id": "PB8Jj94kZ5d19Xhq"
       },
       {
         "slot": "DP02",
-        "id": "PBzz5zF63CvvnllW"
+        "id": "PBrfWh0vpT9XHfPs"
       },
       {
         "slot": "DP03",
-        "id": "PBQ44whvg371jp7L"
+        "id": "PBsdXDCfCsJzF829"
       },
       {
         "slot": "DP04",
-        "id": "PBYSfdzp6967gVBR"
+        "id": "PBYNFX2VmFY7GnBY"
       },
       {
         "slot": "F01",
@@ -130,5 +130,18 @@
     "recordedOn": "2026-11-15",
     "retrievalVerified": true,
     "source": "Agency-owner working brief, not client creative approval; canonical append returned by get_client_context. Guidev1 unchanged."
+  },
+  "ownerVisualRefinement": {
+    "source": "Owner15November direct feedback and acceptance of actual revised previews; issue948",
+    "direction": "Modern mature automotive graphics and realistic materials; no hard offset duplicate type or toy steering icons. Concepts retained.",
+    "revision": "automotive-r4",
+    "ownerPreviewAccepted": true,
+    "actualPreviewDimensions": [
+      480,
+      600
+    ],
+    "newHdExportVerified": false,
+    "other98MasterPageIdsAndOrderPreserved": true,
+    "deliveryState": "Owner-authorised but blocked by Computer Use URL-policy stop; no sends or tag"
   }
 }

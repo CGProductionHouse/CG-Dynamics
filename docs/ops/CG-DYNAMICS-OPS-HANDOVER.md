@@ -1,4 +1,42 @@
-## 15November — approved Wiseman replacement complete; caption contract guard added
+## 15November — automotive R4 saved; owner accepts previews; HD delivery blocked
+
+Owner retained the concepts but rejected flat/dated execution, hard offset font
+shadows and the childish steering motif. All four existing poster source drafts
+were refined and committed; no new official file. Removed four duplicate text
+shadows, added original independent tyre-tread/route/brake engineering graphics,
+and one separate built-in-generated generic photorealistic steering wheel. No client
+photo/logo/person was generated. Exact original photographs, logos, live copy and
+allocated footer-r3 captions are preserved. Four photo posts unchanged.
+
+Actual saved480x600 Canva outputs inspected. Fresh readback confirms27live text,
+21media records and all12protected photo/logo/registered-layer records unchanged;
+27text frames and4reviewed logos pass64px insets. Owner said perfect and authorised
+HD+caption delivery of only these four, then an Amonique tag. This is owner preview
+acceptance, not a claim that the new full-resolution exports have been inspected.
+
+After fresh exact owner approval, the four official copies at40–43 were replaced.
+All98other IDs/order, including F01–F04, are preserved; master remains102pages.
+The combined five-operation merge failed INVALID_ARGUMENT without side effects.
+The separately approved delete timed out but full98-ID readback proved completion;
+it was not replayed. Four individual insertions succeeded. New current master IDs:
+DP01 `PB8Jj94kZ5d19Xhq`, DP02 `PBrfWh0vpT9XHfPs`,
+DP03 `PBsdXDCfCsJzF829`, DP04 `PBYNFX2VmFY7GnBY`.
+Four original photo posts remain44–47; protected Drafts/Posted remain48/49.
+
+**No sends or Amonique tag.** Supported local window enumeration worked, but the
+Computer Use policy stopped browser observation because the current Chrome URL
+could not be determined confidently enough to enforce policy. No subsequent UI
+input, bypass or alternate-browser automation attempted. This is a URL-policy
+block, not a laptop outage or a request for broader permissions. Canva connector
+editing remains supported. Final HD export/WhatsApp access still needs a supported
+route; do not upscale the480x600 previews and call them HD. Prior R2 HD files are
+history and explicitly deselected. Current private pointer selects
+`delivery-manifest-r4-held.json`; source drafts/current captions remain safe.
+R0 additional spend; one built-in generation call, no paid API or allowance purchase.
+No new data append, deployment, SQL/migration, schedule/task write or Nolan/Picasso
+change in this refinement; the earlier authorised unreviewed direction note remains.
+
+## Earlier15November — approved Wiseman replacement complete; caption contract guard added
 
 Same #948/draft#956 lane/worktree. Owner approved the exact nine-call plan. Before
 writing, fresh IDs revealed one additional January page at39, so only the eight

@@ -2,6 +2,18 @@
 
 Owner steering14November2026; same #948 / draft#956 lane, no new agent or branch.
 
+Current15November override: Wiseman four poster concepts retained, automotive R4
+source drafts saved and exact owner-approved official40–43 replacements complete.
+All98other IDs/order, four photo posts and protected sections preserved. Owner
+accepted native previews and requested only these four in HD with clean captions,
+then an Amonique tag. No sends/tag: Computer Use stopped at browser observation
+because current Chrome URL could not be verified for policy. No UI retry/bypass.
+New480x600 saved renders inspected; new HD exports still required, prior R2 delivery
+images deselected. Current pointer selects delivery-manifest-r4-held.json. Details
+and current stable IDs are in the Wiseman README/Brand Pack. All earlier R2 quality
+claims are historical, not current R4 export evidence.
+
+
 1. **Central Canvas January2027 â€” finish first.** Preserve the existing human New
    Year artwork. Improve DP02/DP03 using the general Piek feedback: exact original
    photographs and logo, stronger hierarchy, useful source-faithful depth, varied

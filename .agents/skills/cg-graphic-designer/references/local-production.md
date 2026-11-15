@@ -31,6 +31,22 @@ Do not infer a laptop outage or grant broader permissions from that connector er
 Folder-scoped search also returned unrelated-client results: enforce exact parent
 containment before using a result. Never fetch another client's returned item.
 
+## Native visual amendment lessons15November
+
+Owner rejected flat/dated Wiseman execution while retaining concepts. Four existing
+source drafts were refined in place: removed hard offset duplicate type, retained
+exact source/logo/copy, added original tyre/route/brake graphics and one separate
+generic photorealistic steering-wheel asset. Built-in generation received no client
+media and was not used to reconstruct a photograph, logo or full poster.
+Fresh native readback verified27live text records,21media records, all12protected
+photo/logo/registered-layer records and64px frame containment for27texts/4logos.
+Actual saved480x600 renders inspected. This is not HD export or creative acceptance.
+Two attempted vertical text resizes failed as unsupported while other operations
+succeeded. Do not replay the whole batch: inspect individual operation results and
+the actual render. Text auto-layout and frame-height limits remain separate from
+photograph/logo preservation. Final102-page master still cannot be natively edited;
+prepare exact scoped replacement operations and obtain required tool approval.
+
 ## Offline alpha only
 
 `scripts/poster-studio/local-cutout.py` runs the explicitly pinned U2-Net checkpoint
