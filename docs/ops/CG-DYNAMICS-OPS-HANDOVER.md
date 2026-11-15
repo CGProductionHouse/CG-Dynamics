@@ -1,3 +1,18 @@
+## 15November — Desktop Commander npm installer failure repaired locally
+
+Owner supplied real npm Invalid Version error from official Windows remote launcher.
+Log showed Arborist deduplication failure upgrading old cached0.2.46 tree to0.3.3.
+After path containment/reparse/process-use checks, preserved only that NPX directory
+in a quarantine folder; no cache deletion or broad cleanup. Clean0.3.3 CLI resolves
+successfully; exact original @latest remote command plus --help passes from
+C:\Windows\System32, exit0. Help exits before pairing; no duplicate device launched.
+Personal pinned0.3.1 runtime, saved pairing and running automatic startup unchanged.
+No company connection repair claimed: connector still authenticates to a different
+account and its registered MSI remains offline. Browser trusted service still absent;
+new R4 HD exports/messages remain outstanding, Claude delivery handover retained.
+Private local repair receipt retained. R0; no production dependency/deployment,
+Nolan/Picasso change, security setting or new account/authorization.
+
 ## 15November — four-poster delivery handed to MSI Claude by owner
 
 Owner requested a local handover for MSI Claude to export/send the four revised
