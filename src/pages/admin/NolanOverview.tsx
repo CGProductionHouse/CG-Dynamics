@@ -1,3 +1,5 @@
+import { NolanTaskOwnership } from './NolanTaskOwnership'
+import { nolanTaskOwnerLabel } from '../../lib/nolanOwnership'
 import { nolanScheduleRecordHref } from '../../lib/nolanRecordLinks'
 import { NolanRecordIdentity } from './NolanRecordIdentity'
 import { captureNolanSource } from '../../lib/nolanSourceRead'
@@ -11,14 +13,14 @@ import { taskInNolanLane, type NolanTaskLane } from '../../lib/nolanSourceLanes'
 import { useAuth } from '../../contexts/AuthContext'
 import { Link } from 'react-router-dom'
 import { listTasks, listActiveClients, taskStatusDisplayLabel, type CommandCentreTask } from '../../lib/commandCentre'
-import { listPipelineVideos, type ContentGuideIdea } from '../../lib/contentWorkflow'
+import { listPipelineVideos, listStaffProfiles, type ContentGuideIdea } from '../../lib/contentWorkflow'
 import { listMonthlyDeliverablesByMonth, PRODUCTION_STATUS_LABELS, type MonthlyDeliverable } from '../../lib/planner'
 import { businessMonthKey } from '../../lib/businessTime'
 import { VIDEO_STATUS_LABELS } from '../../lib/videoPipelineRules'
 
 type Lane = NolanTaskLane | 'master' | 'videos' | 'packages' | 'systems'
 type SourceReceipt = { source: string; checkedAt: string; unavailable: boolean }
-type Snapshot = { receipts: SourceReceipt[]; tasks: CommandCentreTask[]; videos: ContentGuideIdea[]; deliverables: MonthlyDeliverable[]; clients: Record<string, string>; errors: string[]; checked: string; month: string }
+type Snapshot = { staff: Map<string, string> | null; receipts: SourceReceipt[]; tasks: CommandCentreTask[]; videos: ContentGuideIdea[]; deliverables: MonthlyDeliverable[]; clients: Record<string, string>; errors: string[]; checked: string; month: string }
 
 // A view, not another task store. All edits stay in the existing authoritative
 // screens. Reads use the signed-in Supabase client and existing RLS unchanged.
@@ -37,24 +39,26 @@ export default function NolanOverview() {
       setLoading(true)
       setSnapshot(null)
       try {
-        const [taskRead, videoRead, scheduleRead, clientRead] = await Promise.all([
+        const [taskRead, videoRead, scheduleRead, clientRead, staffRead] = await Promise.all([
           captureNolanSource(() => listTasks()), captureNolanSource(() => listPipelineVideos()),
-          captureNolanSource(() => listMonthlyDeliverablesByMonth(month)), captureNolanSource(() => listActiveClients()),
+          captureNolanSource(() => listMonthlyDeliverablesByMonth(month)), captureNolanSource(() => listActiveClients()), captureNolanSource(() => listStaffProfiles()),
         ])
         const tasks = taskRead.result ?? { data: [], error: { message: taskRead.error } }
         const videos = videoRead.result ?? { data: [], error: videoRead.error, migrationNeeded: false }
         const deliverables = scheduleRead.result ?? { data: [], error: { message: scheduleRead.error } }
         const clients = clientRead.result ?? { data: [], error: { message: clientRead.error } }
+        const staff = staffRead.result && !staffRead.result.error && !staffRead.result.migrationNeeded ? new Map(staffRead.result.data.filter(p => p.full_name).map(p => [p.id, p.full_name!])) : null
         const receipts = [
+          { source: 'Owner profile directory', checkedAt: staffRead.checkedAt, unavailable: !staff },
           { source: 'Work records', checkedAt: taskRead.checkedAt, unavailable: !!tasks.error },
           { source: 'Video pipeline', checkedAt: videoRead.checkedAt, unavailable: !!videos.error || !!videos.migrationNeeded },
           { source: 'Monthly schedule', checkedAt: scheduleRead.checkedAt, unavailable: !!deliverables.error },
           { source: 'Client labels', checkedAt: clientRead.checkedAt, unavailable: !!clients.error },
         ]
         if (cancelled) return
-        setSnapshot({ receipts, clients: Object.fromEntries((clients.data ?? []).map(c => [c.id, c.name])), tasks: tasks.error ? [] : (tasks.data ?? []) as CommandCentreTask[], videos: videos.error || videos.migrationNeeded ? [] : videos.data, deliverables: deliverables.error ? [] : (deliverables.data ?? []) as MonthlyDeliverable[], errors: [clients.error && `Client labels unavailable: ${clients.error.message}`, tasks.error && `Work unavailable: ${tasks.error.message}`, videos.error && `Videos unavailable: ${videos.error}`, videos.migrationNeeded && 'Video source unavailable: required schema is missing.', deliverables.error && `Package schedule unavailable: ${deliverables.error.message}`].filter(Boolean) as string[], month, checked: new Date().toISOString() })
+        setSnapshot({ staff, receipts, clients: Object.fromEntries((clients.data ?? []).map(c => [c.id, c.name])), tasks: tasks.error ? [] : (tasks.data ?? []) as CommandCentreTask[], videos: videos.error || videos.migrationNeeded ? [] : videos.data, deliverables: deliverables.error ? [] : (deliverables.data ?? []) as MonthlyDeliverable[], errors: [!staff && 'Owner profile directory unavailable; assignment verification incomplete.', clients.error && `Client labels unavailable: ${clients.error.message}`, tasks.error && `Work unavailable: ${tasks.error.message}`, videos.error && `Videos unavailable: ${videos.error}`, videos.migrationNeeded && 'Video source unavailable: required schema is missing.', deliverables.error && `Package schedule unavailable: ${deliverables.error.message}`].filter(Boolean) as string[], month, checked: new Date().toISOString() })
       } catch (error) {
-        if (!cancelled) setSnapshot({ receipts: [], clients: {}, tasks: [], videos: [], deliverables: [], errors: [error instanceof Error ? error.message : 'Source reads failed.'], month, checked: new Date().toISOString() })
+        if (!cancelled) setSnapshot({ staff: null, receipts: [], clients: {}, tasks: [], videos: [], deliverables: [], errors: [error instanceof Error ? error.message : 'Source reads failed.'], month, checked: new Date().toISOString() })
       } finally { if (!cancelled) setLoading(false) }
     }
     void load()
@@ -66,11 +70,11 @@ export default function NolanOverview() {
     return () => window.removeEventListener('focus', refresh)
   }, [])
   const match = (...values: (string | null | undefined)[]) => values.join(' ').toLowerCase().includes(query.trim().toLowerCase())
-  const rows = ['work', 'needs', 'special', 'done', 'apps', 'editor'].includes(lane) ? (snapshot?.tasks ?? []).filter(t => taskInNolanLane(t, lane as NolanTaskLane, profile?.id)).filter(t => match(t.title, t.client_name, t.assigned_to_name, t.bucket, t.id, t.native_id)).map(t => ({ id: `task:${t.id}`, source: t.data_origin === 'planner_tasks' ? 'Dynamics Planner task' : 'Command Centre task', recordId: t.native_id ?? t.id, dueDate: t.due_date || null, dateLabel: t.data_origin === 'planner_tasks' ? 'Task date (due/start fallback)' : 'Recorded due date', title: t.title, owner: t.assigned_to_name, client: t.client_name ?? t.bucket, status: taskStatusDisplayLabel(t), href: t.data_origin === 'planner_tasks' ? `/admin/work?tab=board&id=${encodeURIComponent(t.native_id ?? t.id)}` : '/admin/work?tab=daily-tasks', detail: t.notes, updated: t.updated_at, scheduleEvidence: null }))
-    : lane === 'videos' ? (snapshot?.videos ?? []).filter(v => match(v.title, v.canonical_name, v.client_name, v.editor_name, v.owner_name, v.id)).map(v => ({ id: `video:${v.id}`, source: 'Content video pipeline', recordId: v.id, dueDate: null, dateLabel: 'Recorded due date', title: v.canonical_name ?? v.title, owner: v.editor_name ?? v.owner_name, client: v.client_name, status: VIDEO_STATUS_LABELS[v.production_status] ?? v.production_status, href: '/admin/content?tab=pipeline', detail: v.production_note, updated: v.updated_at, scheduleEvidence: null }))
-    : lane === 'packages' ? (snapshot?.deliverables ?? []).filter(d => match(d.title, snapshot?.clients[d.client_id], d.assigned_to_name, d.code, d.id)).map(d => ({ id: `deliverable:${d.id}`, source: 'Monthly deliverable', recordId: d.id, dueDate: d.due_date, dateLabel: 'Recorded due date', title: d.title, owner: d.assigned_to_name, client: `${snapshot?.clients[d.client_id] ?? 'Client label unavailable'} · ${d.code} · ${d.month}`, status: PRODUCTION_STATUS_LABELS[d.production_status] ?? d.production_status, href: nolanScheduleRecordHref(d), detail: d.notes, updated: d.updated_at, scheduleEvidence: d })) : []
+  const rows = ['work', 'ownership', 'needs', 'special', 'done', 'apps', 'editor'].includes(lane) ? (snapshot?.tasks ?? []).filter(t => taskInNolanLane(t, lane as NolanTaskLane, profile?.id, snapshot?.staff ?? null)).filter(t => match(t.title, t.client_name, t.assigned_to_name, t.bucket, t.id, t.native_id, nolanTaskOwnerLabel(t, snapshot?.staff ?? null))).map(t => ({ id: `task:${t.id}`, source: t.data_origin === 'planner_tasks' ? 'Dynamics Planner task' : 'Command Centre task', recordId: t.native_id ?? t.id, dueDate: t.due_date || null, dateLabel: t.data_origin === 'planner_tasks' ? 'Task date (due/start fallback)' : 'Recorded due date', title: t.title, owner: nolanTaskOwnerLabel(t, snapshot?.staff ?? null), taskEvidence: t, client: t.client_name ?? t.bucket, status: taskStatusDisplayLabel(t), href: t.data_origin === 'planner_tasks' ? `/admin/work?tab=board&id=${encodeURIComponent(t.native_id ?? t.id)}` : '/admin/work?tab=daily-tasks', detail: t.notes, updated: t.updated_at, scheduleEvidence: null }))
+    : lane === 'videos' ? (snapshot?.videos ?? []).filter(v => match(v.title, v.canonical_name, v.client_name, v.editor_name, v.owner_name, v.id)).map(v => ({ id: `video:${v.id}`, source: 'Content video pipeline', recordId: v.id, dueDate: null, dateLabel: 'Recorded due date', title: v.canonical_name ?? v.title, owner: v.editor_name ?? v.owner_name, taskEvidence: null, client: v.client_name, status: VIDEO_STATUS_LABELS[v.production_status] ?? v.production_status, href: '/admin/content?tab=pipeline', detail: v.production_note, updated: v.updated_at, scheduleEvidence: null }))
+    : lane === 'packages' ? (snapshot?.deliverables ?? []).filter(d => match(d.title, snapshot?.clients[d.client_id], d.assigned_to_name, d.code, d.id)).map(d => ({ id: `deliverable:${d.id}`, source: 'Monthly deliverable', recordId: d.id, dueDate: d.due_date, dateLabel: 'Recorded due date', title: d.title, owner: d.assigned_to_name, taskEvidence: null, client: `${snapshot?.clients[d.client_id] ?? 'Client label unavailable'} · ${d.code} · ${d.month}`, status: PRODUCTION_STATUS_LABELS[d.production_status] ?? d.production_status, href: nolanScheduleRecordHref(d), detail: d.notes, updated: d.updated_at, scheduleEvidence: d })) : []
   const visibleRows = statusFilter === 'All statuses' ? rows : rows.filter(row => row.status === statusFilter)
-  const sections: [Lane, string][] = [['master', 'Master schedule'], ['work', 'Active work'], ['needs', 'Assigned to you'], ['special', 'Special tasks & campaigns'], ['done', 'Completed'], ['videos', 'Video & amendments'], ['packages', 'Client packages & schedule'], ['systems', 'Websites & reach'], ['editor', 'CG Web Editor'], ['apps', 'Apps & milestones']]
+  const sections: [Lane, string][] = [['master', 'Master schedule'], ['work', 'Active work'], ['needs', 'Assigned to you'], ['ownership', 'Ownership review'], ['special', 'Special tasks & campaigns'], ['done', 'Completed'], ['videos', 'Video & amendments'], ['packages', 'Client packages & schedule'], ['systems', 'Websites & reach'], ['editor', 'CG Web Editor'], ['apps', 'Apps & milestones']]
   return <div className="nolan-board" aria-label="Nolan overview">
     <aside><div className="brand"><span className="brandmark">n.</span><span>NOLAN<span className="brand-sub">YOUR WORKBOARD</span></span></div><div className="navlabel">WORKSPACE</div><nav aria-label="Work views">{sections.map(([id, label]) => <button key={id} className={lane === id ? 'selected' : ''} aria-pressed={lane === id} onClick={() => { setLane(id); setStatusFilter('All statuses') }}>{label}</button>)}</nav><div className="side-bottom"><div className="avatar">CA</div><div><strong>CA + Nolan</strong><small>Dynamics workspace</small></div></div></aside>
     <main><header><div className="breadcrumb">WORK / NOLAN</div><Link className="source-link" to="/admin/work?tab=board&id=7f413d31-17cd-4761-b2e9-a031c1343444">Master record ↗</Link></header>
@@ -85,10 +89,11 @@ export default function NolanOverview() {
         <p>These are individual reader completion times, not upstream provider refresh times or complete external-source coverage.</p>
       </div></details>
       {lane === 'packages' && <NolanPackageEvidence month={month} refreshGeneration={generation} />}
-      {lane === 'needs' && <div className="coverage">Open work assigned to your signed-in profile. Unrecorded personal decisions are not inferred from notes.</div>}
+      {lane === 'ownership' && <div className="coverage">Open tasks with canonical unresolved, conflicting or unassigned ownership. Missing profile evidence is not an unassigned conclusion; check source errors. Existing owners remain unchanged.</div>}
+      {lane === 'needs' && <div className="coverage">Open work with verified canonical assignment to your signed-in profile. Unrecorded personal decisions are not inferred from notes.</div>}
       {lane === 'special' && <div className="coverage">Existing Once-off and CG Socials tasks. Unclassified campaigns remain in Active work.</div>}
       {(lane === 'apps' || lane === 'editor') && <div className="coverage">Live Dynamics work linked to exact app repositories. This is not a full GitHub milestone inventory; unlinked or ambiguous records stay in Active work. Repository issue status is not deployed acceptance.</div>}
-      {lane === 'master' ? <MasterScope /> : lane === 'systems' ? <NolanWebsiteConnections key={generation} /> : <div className="grid list">{visibleRows.map(row => <article className="card" key={row.id}><h3>{row.title}<small style={{ display: 'block', fontWeight: 400, marginTop: 4 }}>{row.client ?? 'Client not recorded'}</small></h3><span className="badge">{row.status}</span><div className="next" aria-label="Source note, not a verified next action">{row.detail ? row.detail.split('\n')[0] : 'No source note recorded'}</div><span className="native-owner">{row.owner ?? 'Owner not recorded'}</span><details className="native-details"><summary>Details & source ↗</summary><p>{row.detail || 'No next-action note recorded.'}</p><p>Source updated: {row.updated}</p><NolanRecordIdentity source={row.source} recordId={row.recordId} dueDate={row.dueDate} dateLabel={row.dateLabel} />{row.scheduleEvidence && <NolanScheduleEvidence deliverable={row.scheduleEvidence} />}<Link to={row.href}>Open authoritative record / workspace →</Link></details></article>)}{!loading && visibleRows.length === 0 && <p className="native-empty">No matching records returned. Check source errors and filters before concluding there is no work.</p>}</div>}
+      {lane === 'master' ? <MasterScope /> : lane === 'systems' ? <NolanWebsiteConnections key={generation} /> : <div className="grid list">{visibleRows.map(row => <article className="card" key={row.id}><h3>{row.title}<small style={{ display: 'block', fontWeight: 400, marginTop: 4 }}>{row.client ?? 'Client not recorded'}</small></h3><span className="badge">{row.status}</span><div className="next" aria-label="Source note, not a verified next action">{row.detail ? row.detail.split('\n')[0] : 'No source note recorded'}</div><span className="native-owner">{row.owner ?? 'Owner not recorded'}</span><details className="native-details"><summary>Details & source ↗</summary><p>{row.detail || 'No next-action note recorded.'}</p><p>Source updated: {row.updated}</p>{row.taskEvidence && <NolanTaskOwnership task={row.taskEvidence} directory={snapshot?.staff ?? null} />}<NolanRecordIdentity source={row.source} recordId={row.recordId} dueDate={row.dueDate} dateLabel={row.dateLabel} />{row.scheduleEvidence && <NolanScheduleEvidence deliverable={row.scheduleEvidence} />}<Link to={row.href}>Open authoritative record / workspace →</Link></details></article>)}{!loading && visibleRows.length === 0 && <p className="native-empty">No matching records returned. Check source errors and filters before concluding there is no work.</p>}</div>}
       </section><footer><strong>One source of truth.</strong> Existing Dynamics records, not a second task database. Edit once in the source workspace. The existing pinned external workboard has not been redirected or made live by this page.</footer>
     </main>
   </div>

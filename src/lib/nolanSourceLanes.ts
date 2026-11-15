@@ -1,3 +1,5 @@
+import { nolanTaskOwnership } from './nolanOwnership'
+import { isVerifiedOwner } from './taskOwnership'
 import type { CommandCentreTask } from './commandCentre'
 import { isOperationallyCompletedStatus } from './taskLifecycle'
 
@@ -23,12 +25,15 @@ export function linkedAppRepository(task: Pick<CommandCentreTask, 'notes' | 'wha
   return matches.size === 1 ? [...matches][0] : null
 }
 
-export type NolanTaskLane = 'work' | 'needs' | 'special' | 'done' | 'apps' | 'editor'
-export function taskInNolanLane(task: CommandCentreTask, lane: NolanTaskLane, viewerId?: string): boolean {
+export type NolanTaskLane = 'work' | 'ownership' | 'needs' | 'special' | 'done' | 'apps' | 'editor'
+export function taskInNolanLane(task: CommandCentreTask, lane: NolanTaskLane, viewerId?: string, directory: Map<string, string> | null = null): boolean {
   const complete = isOperationallyCompletedStatus(task)
   if (lane === 'done') return complete
   if (complete) return false
-  if (lane === 'needs') return !!viewerId && (task.assigned_to_user_id === viewerId || !!task.assignee_user_ids?.includes(viewerId))
+  if (lane === 'needs' || lane === 'ownership') {
+    const ownership = nolanTaskOwnership(task, directory)
+    return !!ownership && (lane === 'needs' ? isVerifiedOwner(ownership, viewerId) : ownership.state !== 'verified')
+  }
   if (lane === 'special') return task.bucket === 'Once-off' || task.bucket === 'CG Socials'
   if (lane === 'editor') return linkedAppRepository(task) === 'CGProductionHouse/cg-website-editor'
   if (lane === 'apps') return linkedAppRepository(task) !== null

@@ -15,7 +15,7 @@ test('lookalike repos and ambiguous two-app sources do not establish identity', 
 test('task lane completion and personal ownership remain canonical', () => {
   const base = { status: 'to_do', bucket: 'Once-off', assigned_to_user_id: 'u1', notes: null, whatsapp_source_text: null }
   assert.equal(rules.taskInNolanLane(base,'special'),true)
-  assert.equal(rules.taskInNolanLane(base,'needs','u1'),true)
+  assert.equal(rules.taskInNolanLane(base,'needs','u1',new Map([['u1','Fixture owner']])),true)
   assert.equal(rules.taskInNolanLane(base,'needs','u2'),false)
   assert.equal(rules.taskInNolanLane({...base,status:'done'},'work'),false)
   assert.equal(rules.taskInNolanLane({...base,status:'done'},'done'),true)

@@ -243,3 +243,27 @@ Full normal suite: 4,361 tests, 4,331 passed, 30 skipped, zero failures/cancella
 exit 0 in 179.73 seconds. The pre-review-correction in-flight run was stopped, not
 counted as a pass. Independent re-review found no further issues. Browser/mobile/
 authenticated acceptance remains open; no merge, deployment or production writes.
+
+### Daily ownership review using existing authority
+
+Added an open-task Ownership review lane without creating/reassigning any task.
+Workbook task ownership now uses shared `resolveOwnership`/`taskOwnershipInput` and
+`isVerifiedOwner`, plus the existing staff-profile reader as an independently
+reported source. Assigned to you no longer treats raw IDs in conflicting/unresolved
+records as verified assignment. Displayed owners come from canonical profile names;
+helpers and imported names remain explicitly separate audit evidence in disclosure.
+
+Unavailable/partially missing canonical profiles return an evidence gap, not an
+unassigned or partially verified conclusion. Such rows remain in Active work with
+an explicit owner-evidence label, not silently promoted into Ownership review.
+Search includes canonical displayed owner labels and source IDs while keeping
+imported text searchable solely as evidence. No staff reader, shared ownership
+rule, assignment permission or scheduler was changed.
+
+Seven new tests cover canonical versus imported owners, helpers, conflicts,
+unresolved names, missing/partial directory coverage, completed exclusion, escaped
+SSR disclosure and canonical-owner search. Independent review confirmed the final
+search correction and no remaining blockers. Final 45 focused Nolan tests, build,
+scoped lint and diff pass. Normal full suite: 4,368 tests; 4,338 passed, 30 skipped,
+zero failed/cancelled, exit 0 in 179.87 seconds. Actual browser/authenticated role
+acceptance remains open; this candidate is not deployed.
