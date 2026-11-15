@@ -12,10 +12,22 @@ URLs, retain the filename-to-asset mapping privately, and fetch only selected
 originals through the authenticated UI/connector. Do not turn this into a hidden
 API crawler or guess authenticated asset URLs. A thumbnail is not export media.
 
-The file connector returned `403 serviceReadOnly / Database Is Read Only` for four
-selected files; the existing company OneDrive UI downloaded those same originals
-successfully. Verify original hashes against returned OneDrive metadata. Do not
-infer a laptop outage or grant broader permissions from that connector error.
+The browser-facing OneDrive URL returned `403 serviceReadOnly / Database Is Read
+Only`. A later headless proof succeeded through the same authorised connector:
+resolve the exact selected item's verified drive/item IDs and parent containment,
+then call `microsoft_sharepoint.fetch` with `download_raw_file=true` and the
+documented canonical item URL:
+`https://graph.microsoft.com/v1.0/drives/<verified-drive-id>/items/<verified-item-id>`.
+Materialise its private returned file reference only into the authorised local job.
+Never guess IDs, create a public share or print/store transient signed download URLs.
+Inspect safe metadata rather than the full successful fetch response. Verify bytes
+against an existing trusted original hash; a metadata-only readback is insufficient.
+On15November, a selected7,476,556-byte original matched its exact prior SHA256,
+and the1,611,173-byte R3 recovery ZIP matched its uploaded SHA256 and passed ZIP CRC.
+No browser, credential change or public sharing was used. This proves selected
+private retrieval, not ordinary company-ChatGPT local execution or WhatsApp access.
+The earlier UI download remains historical evidence, not the default fallback.
+Do not infer a laptop outage or grant broader permissions from that connector error.
 Folder-scoped search also returned unrelated-client results: enforce exact parent
 containment before using a result. Never fetch another client's returned item.
 
@@ -86,6 +98,37 @@ and hash locally. Do not report a failed export solely from its event timeout.
 None of these local tools proves normal company ChatGPT invocation, master-page
 transfer, human approval, schedule assignment or delivery. Keep those gates separate.
 # Proven November14 corrections
+
+- Durable owner direction belongs in the exact client's canonical intelligence,
+  when recording it is authorised. The append-only content-direction tool returned
+  an unreviewed record subsequently retrieved by get_client_context, with guidev1
+  unchanged. Preserve agency-owner versus client-approval provenance; do not turn
+  machine findings into approved knowledge or create unrelated meeting/tasks.
+- Local access and remote-account access are separate proofs. The MSI was reachable
+  in Codex while its running saved remote pairing belonged to Gmail and this chat's
+  connector belonged to the company account. Existing personal autostart was already
+  enabled/running. Do not re-pair, kill, duplicate or weaken that setup to make an
+  offline record look healthy; company invocation needs an authorised matching
+  pairing. Metadata diagnosis must never expose or transmit saved credentials.
+
+- Retrieve the exact-client `get_client_context` packet with `task_type=caption`
+  before allocating copy. An idea packet can have no footer while the caption
+  contract requires phone plus website. Run both caption transport and
+  `caption-footer-guard.mjs` checks on the explicit current version. Reverify
+  mutable contact facts; the guard checks supplied-packet consistency, not source
+  authenticity or current business truth. Never rewrite an approved caption
+  silently; preserve its prior bytes/hash and record the bounded amendment.
+- Re-resolve stable IDs immediately before structural edits. An additional January
+  page shifted the rejected owned copies from39–46 to40–47. The approved nine-call
+  replacement preserved all94other IDs/order, including that new page. Old page
+  numbers must never serve as write authority. Exact-operation approval does not
+  grant creative approval, publication or deletion of anyone else's work.
+- The actual master allowed native layer inspection at99and100pages during
+  transfer, then rejected full editing at102. Verified six drafts' full native
+  records and extracted all four posters' live text; inspect the actual final
+  previews too. Do not imply every transferred media record or final master HD
+  was independently rechecked when the connector cannot expose it. Keep current
+  source workbenches until that operational limit is resolved.
 
 - Native formatting may auto-fit both width and left position. After a font-size
   change, restore the intended frame width, then explicitly reapply its position.

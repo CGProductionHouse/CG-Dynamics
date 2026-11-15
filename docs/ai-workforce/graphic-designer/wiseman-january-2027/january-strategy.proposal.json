@@ -11,7 +11,7 @@
     "videoExcludedFromThisTask": true
   },
   "productionLane": {
-    "state": "eight-rebuilt-HD-inspected-held-latest-approval-history",
+    "state": "official-working-copies-replaced-caption-footers-validated-no-sends",
     "masterDesignId": "DAHEfeuQzP4",
     "scheduleMeaning": "Creative windows only; no dated rows, UUIDs, scheduling or publication created. DP numbering is not authoritative posting order.",
     "excludedPackages": [
@@ -19,7 +19,9 @@
       "Wiseman Midas",
       "WiseRide"
     ],
-    "bulkHydrationRestarted": false
+    "bulkHydrationRestarted": false,
+    "masterObservedPages": 102,
+    "other94PagesPreserved": true
   },
   "seasonalEvidence": [
     {
@@ -93,7 +95,10 @@
       "qaState": "blocked-production-local-font-runtime-and-human-approval",
       "workingCanvaDesignId": "DAHa7Hy-_Xs",
       "supersededWorkingDesignId": "DAHa50-3QfY",
-      "nativeDraftQualityState": "Actual Canva native fonts and2160x2700 output inspected; internal candidate, not human creative approval."
+      "nativeDraftQualityState": "Actual Canva native fonts and2160x2700 output inspected; internal candidate, not human creative approval.",
+      "masterPageId": "PBWnlY8rcVFXfgSC",
+      "masterPageNumber": 40,
+      "officialCopyTransferred": true
     },
     {
       "provisionalId": "2027_01_WISEMAN_DP02",
@@ -122,7 +127,10 @@
       "qaState": "blocked-production-local-font-runtime-and-human-approval",
       "workingCanvaDesignId": "DAHa7HhAotA",
       "supersededWorkingDesignId": null,
-      "nativeDraftQualityState": "Actual Canva native fonts and2160x2700 output inspected; internal candidate, not human creative approval."
+      "nativeDraftQualityState": "Actual Canva native fonts and2160x2700 output inspected; internal candidate, not human creative approval.",
+      "masterPageId": "PBzz5zF63CvvnllW",
+      "masterPageNumber": 41,
+      "officialCopyTransferred": true
     },
     {
       "provisionalId": "2027_01_WISEMAN_DP03",
@@ -151,7 +159,10 @@
       "qaState": "blocked-production-local-font-runtime-and-human-approval",
       "workingCanvaDesignId": "DAHa6dj_8iU",
       "supersededWorkingDesignId": null,
-      "nativeDraftQualityState": "Actual Canva native fonts and2160x2700 output inspected; internal candidate, not human creative approval."
+      "nativeDraftQualityState": "Actual Canva native fonts and2160x2700 output inspected; internal candidate, not human creative approval.",
+      "masterPageId": "PBQ44whvg371jp7L",
+      "masterPageNumber": 42,
+      "officialCopyTransferred": true
     },
     {
       "provisionalId": "2027_01_WISEMAN_DP04",
@@ -180,7 +191,10 @@
       "qaState": "blocked-production-local-font-runtime-and-human-approval",
       "workingCanvaDesignId": "DAHa640Ndpc",
       "supersededWorkingDesignId": "DAHa6EwI0Mk",
-      "nativeDraftQualityState": "Actual Canva native fonts and2160x2700 output inspected; internal candidate, not human creative approval."
+      "nativeDraftQualityState": "Actual Canva native fonts and2160x2700 output inspected; internal candidate, not human creative approval.",
+      "masterPageId": "PBYSfdzp6967gVBR",
+      "masterPageNumber": 43,
+      "officialCopyTransferred": true
     }
   ],
   "photoPosts": [
@@ -194,7 +208,10 @@
       "pageId": "PBHmlNl4Rk5hkJNv",
       "sourceQualification": "Owner-authorised actual subsidiary original supporting a Group post. Individual sRGB finish, source/product context inspected, exact independent Group logo; bounded source/shoot/history checks and creative approval remain explicit.",
       "state": "native-saved-actual-HD-inspected-internal-review-pending",
-      "supersededWorkingDesignId": "DAHa6Lv7Ksk"
+      "supersededWorkingDesignId": "DAHa6Lv7Ksk",
+      "masterPageId": "PBL5qh3V0q3hLytH",
+      "masterPageNumber": 44,
+      "officialCopyTransferred": true
     },
     {
       "provisionalId": "2027_01_WISEMAN_F02",
@@ -206,7 +223,10 @@
       "pageId": "PBLNqfLMcnTCvpp2",
       "sourceQualification": "Owner-authorised actual subsidiary original supporting a Group post. Individual sRGB finish, source/product context inspected, exact independent Group logo; bounded source/shoot/history checks and creative approval remain explicit.",
       "state": "native-saved-actual-HD-inspected-internal-review-pending",
-      "supersededWorkingDesignId": "DAHa6EVnEAo"
+      "supersededWorkingDesignId": "DAHa6EVnEAo",
+      "masterPageId": "PB7XLwkSDrgsrTV3",
+      "masterPageNumber": 45,
+      "officialCopyTransferred": true
     },
     {
       "provisionalId": "2027_01_WISEMAN_F03",
@@ -218,7 +238,10 @@
       "pageId": "PBjZBB0xBsQHYM5W",
       "sourceQualification": "Owner-authorised actual subsidiary original supporting a Group post. Individual sRGB finish, source/product context inspected, exact independent Group logo; bounded source/shoot/history checks and creative approval remain explicit.",
       "state": "native-saved-actual-HD-inspected-internal-review-pending",
-      "supersededWorkingDesignId": "DAHa6NlVXhI"
+      "supersededWorkingDesignId": "DAHa6NlVXhI",
+      "masterPageId": "PBS4b5yFvMnp1Byk",
+      "masterPageNumber": 46,
+      "officialCopyTransferred": true
     },
     {
       "provisionalId": "2027_01_WISEMAN_F04",
@@ -230,10 +253,13 @@
       "pageId": "PBNTCHJtpytjcvm7",
       "sourceQualification": "Owner-authorised actual subsidiary original supporting a Group post. Individual sRGB finish, source/product context inspected, exact independent Group logo; bounded source/shoot/history checks and creative approval remain explicit.",
       "state": "native-saved-actual-HD-inspected-internal-review-pending",
-      "supersededWorkingDesignId": "DAHa6EVnEAo"
+      "supersededWorkingDesignId": "DAHa6EVnEAo",
+      "masterPageId": "PBxpqDSwlwgs6CDD",
+      "masterPageNumber": 47,
+      "officialCopyTransferred": true
     }
   ],
-  "releaseStatus": "Five full originals compared with837retained artworks; raw flags visually reviewed. No Wiseman sends: latest approval-window access unavailable. Human creative/source-cycle review, supported official-master replacement and authoritative January dates remain separate gates.",
+  "releaseStatus": "Official eight replaced after exact owner approval; all94other pages preserved. Current caption footers pass exact-client packet checks. Source HD and transferred previews inspected; final full-resolution master export, latest approval history, human creative approval and authoritative January dates remain open. No sends.",
   "ownerCreativeCorrection": {
     "sourcePermission": "Suitable actual Supa Quick, Wise Ride, Midas and Dunlop Zone sources allowed for Group content; Hi-Q excluded.",
     "photoPosts": "All four rejected; reselect attractive natural active/product/service images, not awkward portraits or uniform/paper closeups.",
@@ -243,5 +269,14 @@
     "DP03": "Recompose type; move logo; tighten line spacing.",
     "DP04": "Sell a specific verified service instead of vague car-care direction.",
     "release": "Do not send rejected artwork, even though all technical tests passed."
-  }
+  },
+  "existingJanuaryCandidate": {
+    "pageId": "PBcymBNbhmR8JW6X",
+    "observedPage": 39,
+    "observedHeadline": "2026 WAS THE WARM-UP. NOW WE LAUNCH.",
+    "state": "Preserved existing In Progress work; source authority and package/schedule assignment not inferred.",
+    "creativeReview": "Generic New Year launch differs from specific wheel-balancing enquiry; retain it in the whole-month concept check and do not count it as one of the new batch automatically.",
+    "reviewFlag": "Apparent Hi-Q mark in its footer; owner excludes Hi-Q from this campaign. Existing page left untouched for staff review, not included in this new batch."
+  },
+  "ownerDirectionUpdateId": "8c8ca9a8-1191-429d-ac79-c5aa43585ec1"
 }

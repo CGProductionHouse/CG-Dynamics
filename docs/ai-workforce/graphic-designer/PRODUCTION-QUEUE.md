@@ -33,20 +33,28 @@ Owner steering14November2026; same #948 / draft#956 lane, no new agent or branch
    No repeated footer mechanism or excessive leading. Owner now explicitly permits
    suitable Supa Quick, Wise Ride, Midas and Dunlop Zone photography for Group posts;
    Hi-Q is taken down and excluded. Child packages still cannot count as Group slots.
-   Eight owner-approved inserts are in official In Progress, pages39–46; all original
-   93 IDs/order preserved. Canva native editing now rejects the101-page master;
-   retain source workbenches for amendments rather than deleting the only supported
-   native-edit path. On15November all four posters and four source replacements
-   are saved natively and actual2160x2700 output inspected. Exact caption guards
-   pass. Five full originals against837artworks completed with four visually
-   different-photo background/equipment flags retained; possible same-day DP03/F03
-   shoot overlap stays a review flag. No Wiseman sends: latest company WhatsApp
-   refresh is blocked by another active window/tool access failure. Do not force
-   a session switch or send old art. Current private selector/HD board and exact
-   workbench IDs are in the Wiseman README. Human approval, supported official
-   replacement, latest history and January schedule assignment remain gates.
+   The owner-approved nine-call replacement is complete: current official working
+   pages40–47, preserving all94other IDs/order including the additional January
+   page39. New stable IDs are in the Brand Pack; do not use old39–46 numbers.
+   Actual native layers checked for six drafts during transfer at99/100pages;
+   final102-page editing request rejected. All four posters' live text and all
+   eight actual transferred previews read back; source2160x2700 media unchanged.
+   Current footer-r3 captions fix the mandatory exact-client phone/website contract;
+   transport and footer checks pass. Five full sources/837artworks plus seven
+   originals/new-page check retain bounded findings and the DP03/F03 same-day flag.
+   R3 transfer/caption patch backed up/read back in existing OneDrive helper.
+   Canonical Graph item fetch now retrieves selected private original bytes without
+   a browser: one original and the R3 backup downloaded with exact SHA256 equality;
+   backup CRC passes. The large R2 pack remains remotely metadata-only verified.
+   No Wiseman sends: browser control unavailable in this chat; company Desktop
+   Commander pairing differs from the running personal agent. Existing personal
+   autostart already enabled, unchanged. Human approval, latest actual history,
+   master HD export, matching company remote access and authoritative January
+   schedule remain gates. No forced session switch or old-art delivery.
 
 Red Oak research remains retained. Nolan's video and Picasso's photo-library
 lanes remain separate. Existing Drafts/Posted/Scheduled and human work stay
-protected; January proposals do not create Client Schedule records. R0, no new
-deployment, dependencies, production data or hosting.
+protected; January proposals do not create Client Schedule records. One owner-
+authorised Wiseman content-direction update is recorded/read back in CG Dynamics,
+unreviewed, guidev1 unchanged. R0; no deployment, dependencies, direct production
+SQL, schedule/task mutation or new hosting.

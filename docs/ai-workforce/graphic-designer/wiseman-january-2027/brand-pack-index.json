@@ -4,7 +4,7 @@
     "id": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
     "name": "Wiseman Group"
   },
-  "observedAt": "2026-11-14",
+  "observedAt": "2026-11-15",
   "status": "verified-kit-rebuilt-internal-candidates-unapproved",
   "sourceAuthority": "CG Dynamics exact-client guide v1 plus owner month/tone instructions; OneDrive remains media authority",
   "scopes": [
@@ -56,21 +56,57 @@
   ],
   "officialCanva": {
     "id": "DAHEfeuQzP4",
-    "observedPages": 101,
+    "observedPages": 102,
     "unchanged": false,
     "legacyReadOnlyId": "DAFvepOOYcM",
     "original93PagesPreserved": true,
     "ownedJanuaryWorkingPages": [
-      39,
       40,
       41,
       42,
       43,
       44,
       45,
-      46
+      46,
+      47
     ],
-    "nativeEditingConnector": "Actual start-editing request rejected at101pages; no transaction opened. Keep source workbenches until a supported amendment/transfer route is verified."
+    "nativeEditingConnector": "Actual native verification succeeded at99and100pages during the approved transfer; full completed102-page editing request was rejected. Source workbenches retained for amendments. All four poster live text read from official pages; six transferred drafts full native layers verified.",
+    "ownedJanuaryWorkingPageIds": [
+      {
+        "slot": "DP01",
+        "id": "PBWnlY8rcVFXfgSC"
+      },
+      {
+        "slot": "DP02",
+        "id": "PBzz5zF63CvvnllW"
+      },
+      {
+        "slot": "DP03",
+        "id": "PBQ44whvg371jp7L"
+      },
+      {
+        "slot": "DP04",
+        "id": "PBYSfdzp6967gVBR"
+      },
+      {
+        "slot": "F01",
+        "id": "PBL5qh3V0q3hLytH"
+      },
+      {
+        "slot": "F02",
+        "id": "PB7XLwkSDrgsrTV3"
+      },
+      {
+        "slot": "F03",
+        "id": "PBS4b5yFvMnp1Byk"
+      },
+      {
+        "slot": "F04",
+        "id": "PBxpqDSwlwgs6CDD"
+      }
+    ],
+    "other94PageIdsAndOrderPreserved": true,
+    "additionalJanuaryPagePreserved": "PBcymBNbhmR8JW6X"
   },
   "releaseGates": [
     "Actual relevant social and approval artwork coverage",
@@ -85,5 +121,14 @@
       "scope": "HI_Q",
       "reason": "Owner says taken down on14November2026; do not promote, regardless of stale website listing."
     }
-  ]
+  ],
+  "captionFooterContract": "Retrieve current exact-client task_type=caption packet; both required footer fields verified against official HQ contact page15November. Local receipt only; no contacts copied into a second database.",
+  "ownerDirectionUpdate": {
+    "id": "8c8ca9a8-1191-429d-ac79-c5aa43585ec1",
+    "kind": "content_direction",
+    "reviewState": "unreviewed",
+    "recordedOn": "2026-11-15",
+    "retrievalVerified": true,
+    "source": "Agency-owner working brief, not client creative approval; canonical append returned by get_client_context. Guidev1 unchanged."
+  }
 }

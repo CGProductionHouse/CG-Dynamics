@@ -1,4 +1,79 @@
-# 15November — eight rebuilt and HD checked; delivery held
+# 15November — official drafts replaced; current captions use the verified footer
+
+Owner approved and all nine exact calls completed. Official `DAHEfeuQzP4` now
+contains the current revisions at40–47. Fresh preflight found a new January page
+at39; all94other page IDs/order were preserved, including original93 and that
+additional page. Protected Drafts/Posted remain48/49. Do not replay the consumed
+replacement plan or use old39–46 numbering as authority.
+
+| Slot | Current official page ID | Page observed |
+| --- | --- | --- |
+| DP01 | `PBWnlY8rcVFXfgSC` | 40 |
+| DP02 | `PBzz5zF63CvvnllW` | 41 |
+| DP03 | `PBQ44whvg371jp7L` | 42 |
+| DP04 | `PBYSfdzp6967gVBR` | 43 |
+| F01 | `PBL5qh3V0q3hLytH` | 44 |
+| F02 | `PB7XLwkSDrgsrTV3` | 45 |
+| F03 | `PBS4b5yFvMnp1Byk` | 46 |
+| F04 | `PBxpqDSwlwgs6CDD` | 47 |
+
+Actual full native layers were verified for the four photo posts and DP04 at99
+pages, then DP03 at100pages; read-only transactions cancelled. Final master live
+text was extracted for all four posters, and all eight actual400x500 transferred
+previews inspected. The completed102-page editing transaction is explicitly
+unsupported. Source2160x2700 exports remain checked and unchanged; this is not a
+claim of a final full-resolution master export or complete102-page edit access.
+
+Fresh `get_client_context(task_type=caption)` returned the mandatory HQ phone plus
+website contract, confirmed against the official contact page. Eight R3 captions
+now include that footer. Bodies/hashtags and every delivery image hash are unchanged.
+Both transport and new exact-client footer guards pass for all eight. The new CLI
+has8meaningful tests;37focused JS checks pass in total. It checks supplied-packet
+consistency, not authenticity, current facts or creative/send approval. No contact
+values are hardcoded into reusable code or a second client database.
+
+The added January page `PBcymBNbhmR8JW6X` is preserved as existing work. Its generic
+New Year launch differs from the service-specific balancing enquiry; keep both in
+the whole-month concept review. Seven selected originals against that actual page
+returned0matches/0errors, still bounded. Its schedule/package assignment is unknown.
+Fresh January scheduled-date query returned0rows/has_more=false; undated work is not
+covered. No dates, quota assignment, publication or forwarding order inferred.
+
+Current private pointer: `CONTINUE-CURRENT.json`; caption revision `footer-r3`;
+delivery manifest `production-r2/delivery-r2/delivery-manifest-r3.json`. The R2 asset
+pack is retained; a53-entry1,611,173-byte transfer/caption patch was uploaded and
+exact metadata read back in the same internal OneDrive helper. Sharing unchanged.
+The earlier captions are historical. No Wiseman sends or client-portal finals.
+
+Selected OneDrive retrieval now works headlessly using the documented canonical
+Graph item URL and the existing authorised fetch connector. The selected original
+3Q7A3400.JPG downloaded as7,476,556bytes with its prior exact SHA256; the R3 backup
+download matched its uploaded SHA256 and passed CRC. Private receipts retain hashes,
+not signed URLs. No public sharing, browser or auth change was needed. R2's larger
+asset pack still has metadata-only remote verification. This is actual source/backup
+retrieval evidence, not a normal-company-ChatGPT create/amend/export invocation.
+
+Current delivery blocker: browser control is not exposed in this resumed session;
+plugin discovery found no matching WhatsApp connector. Prior active-elsewhere
+failure has not been revalidated. Desktop Commander's company connection lists
+devices offline, while the locally running agent/startup task uses a different
+saved Gmail pairing. Personal autostart is already enabled/running; no pairing,
+credentials, process or startup settings changed. Company remote execution and
+normal company ChatGPT end-to-end remain unverified; do not call the laptop offline.
+Latest actual approval-history refresh, human creative/source-cycle review,
+master HD export and authoritative posting order remain open. Internal review
+delivery is authorised; access/history are its current blockers. Human acceptance
+and verified order gate client release and Graphic Design Approvals forwarding.
+
+Owner-directed intelligence is now recorded in canonical CG Dynamics update
+`8c8ca9a8-1191-429d-ac79-c5aa43585ec1` and read back for this exact client. It is
+unreviewed agency-owner working direction, not client creative approval. Guidev1
+is unchanged. This is the one authorised data append; no meeting/task/schedule
+rewrite, direct SQL, migration, deployment, dependency or new spend. No Nolan/
+Picasso changes. Current Node24.16.0 checks:37focused JS tests, month-plan, skill
+validation and TypeScript/Vite7.3.6 build pass; existing warnings unchanged.
+
+# Earlier15November — eight rebuilt and HD checked; delivery held
 
 This is the current checkpoint. All eight replacements are native Canva drafts
 with inspected2160x2700 exports and exact clean caption/hash pairs. First-pass work

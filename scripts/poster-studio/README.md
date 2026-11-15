@@ -11,6 +11,8 @@ It deliberately does not upload assets, call a paid API or flatten an image and 
 
 The companion headless tools are:
 
+- `caption-guard.mjs` — validates canonical UTF-8/LF copy, encoding integrity and signature exclusion without rewriting or sending.
+- `caption-footer-guard.mjs` — validates the mandatory terminal footer against a supplied current exact-client CG Dynamics caption packet, including scope, ambiguous/missing fields and optional trailing hashtags. It does not fetch/authenticate the packet, verify live facts, rewrite copy or send anything.
 - `creative-ledger.mjs` — image fingerprints plus source/shoot/person/product/service/branch/concept/headline/mechanism repetition checks for both human and AI work;
 - `month-plan.mjs` — validates a proposed monthly strategy board against package, Brand Pack and future-schedule safety gates;
 - `month-board.mjs` — renders the complete proposal as a responsive, printable local review board.
@@ -21,6 +23,19 @@ The companion headless tools are:
 They are designed for a future normal-company-ChatGPT tool wrapper and do not require routine desktop takeover.
 
 ## Commands
+
+For captions, retrieve `get_client_context` with `task_type=caption`, not the idea
+packet. Keep that response privately and recheck mutable contacts against approved
+primary evidence. A website-only caption may pass transport checks while failing
+the client's mandatory phone/website contract. Both checks are needed:
+
+```powershell
+node scripts/poster-studio/caption-guard.mjs C:\private\job\caption.txt canonical-sha256 --out C:\private\job\transport-receipt.json
+node scripts/poster-studio/caption-footer-guard.mjs C:\private\job\caption.txt C:\private\job\caption-context.json exact-client-id --out C:\private\job\footer-receipt.json
+```
+
+Receipts are new files; inputs are never rewritten. A missing/ambiguous/unready
+contract is a hold, not permission to guess contacts or borrow a sibling's number.
 
 ```powershell
 node scripts/poster-studio/poster-studio.mjs render C:\private\job\scene-v1.json --out C:\private\job\output

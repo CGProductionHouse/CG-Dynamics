@@ -11,6 +11,7 @@ Produce professional, individually art-directed work from exact client evidence.
 
 - Resolve the exact client, package, Client Schedule rows, current strategy and approved feedback from CG Dynamics. Never invent a future deliverable ID or promote a draft strategy.
 - Keep original brand/media files in OneDrive. A Brand Pack stores verified locators, hashes and rules, not a duplicate client database.
+- Retrieve selected OneDrive originals through the authorised connector before browser control. If its browser-facing URL fails, use the documented canonical Graph item route from verified drive/item IDs and containment; see [local retrieval proof](references/local-production.md). Keep returned private file references and signed URLs out of logs, Git and handovers. This component proof does not establish everyday company-ChatGPT local execution.
 - Treat Canva as creative history, one-time brand discovery and an optional editor/output. Do not rescan giant designs for every job.
 - Treat workflow sections inside a client's Canva master as operational permissions, not decoration. Historical `DRAFTS`, `POSTED` and `SCHEDULED` pages are read-only evidence and must never be edited, moved or deleted by the agent.
 - Use normal company ChatGPT as the intended staff interface. Prefer connector calls and headless local job commands; direct desktop control is a bounded integration/debug exception, not routine production.
@@ -246,6 +247,15 @@ For the proven WhatsApp photo route, upload one true-HD file through the browser
 ## Quality gate
 
 ### Implementing review feedback
+
+Before allocating captions, retrieve the current exact-client CG Dynamics packet
+with `task_type=caption`; an idea packet is not the caption/footer contract. Keep
+the packet privately and reverify mutable contacts against approved primary
+evidence. Run `caption-guard.mjs` on the explicit canonical version. When the
+packet requires a mandatory footer, also run `caption-footer-guard.mjs` with its
+exact client ID. Missing/ambiguous/unready contact evidence is a hold, never a
+website-only fallback or permission to borrow a sibling number. Both checks are
+read-only and neither grants creative or send approval.
 
 For targeted amendment rounds, resend only the affected posters. Capture new live feedback before another correction, preserve accepted revisions and keep separate delivery receipts for each version. Do not resend the full month or treat review-history messages as accidental duplicates. Forwardable poster captions must contain no agent signature.
 

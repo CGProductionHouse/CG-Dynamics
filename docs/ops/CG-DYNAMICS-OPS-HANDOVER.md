@@ -1,4 +1,62 @@
-## 15November — Wiseman eight rebuilt; HD checked, delivery held
+## 15November — approved Wiseman replacement complete; caption contract guard added
+
+Same #948/draft#956 lane/worktree. Owner approved the exact nine-call plan. Before
+writing, fresh IDs revealed one additional January page at39, so only the eight
+owned rejected copies at40–47 were deleted and replaced. Current102-page master
+DAHEfeuQzP4 preserves all94other IDs/order, including original93 and the additional
+pagePBcymBNbhmR8JW6X. Protected Drafts/Posted remain48/49. New owned IDs are in
+the Wiseman Brand Pack; old page numbers must not authorise edits. Approved plan
+is marked executed/do-not-replay. Source workbenches/recovery remain retained.
+
+Actual verification: native full layer records for four photo posts plus DP04 at99
+pages and DP03 at100pages; read-only transactions cancelled. All four posters' live
+text extracted from final master and all eight actual400x500 transferred previews
+inspected against source HD. Final102-page editing request explicitly rejected;
+no full-resolution master export claimed. Source2160x2700 exports/media unchanged.
+New January page received a seven-source reuse check:0matches/0errors, bounded
+evidence. Its month/package assignment is unknown; not counted as a new batch slot.
+
+Fresh exact-client task_type=caption packet requires HQ phone+website; former
+website-only captions did not meet it. Official contact page cross-check completed.
+Eight footer-only R3 revisions pass transport+new exact-client footer guard; bodies,
+hashtags and image hashes unchanged. New CLI fails wrong-client/effective scope,
+missing/ambiguous/unready contracts and duplicate/misplaced footers.37focused JS
+checks pass. January scheduled-date read still0rows/has_more=false; undated work
+excluded. No fabricated dates or deliverable IDs. Data impact: one owner-authorised,
+append-only exact-client content-direction note8c8ca9a8-1191-429d-ac79-c5aa43585ec1,
+read back through get_client_context, review_state=unreviewed. Guidev1 unchanged;
+no meeting, task, schedule rewrite or direct production SQL/migration.
+
+R2 asset backup remains99,864,838bytes; current53-entry R3 transfer/caption patch
+1,611,173bytes uploaded to existing internal OneDrive helper, exact item/name/size
+read back, sharing unchanged. A canonical Graph item fetch through the existing
+OneDrive connector now privately retrieves actual raw bytes: R3 downloaded SHA256
+matches the uploaded ZIP and CRC passes; one selected7,476,556-byte original also
+matches its prior exact SHA256. Browser-facing URL403 was not a source-access
+verdict. Recipe saved in the designer skill; no public links or auth changes.
+R2's large asset pack remains metadata-only remotely verified. This clears selected
+source retrieval without browser control, not company local execution/WhatsApp.
+Current private pointerCONTINUE-CURRENT.json selects
+delivery-manifest-r3.json; prior caption versions remain historical, not current.
+
+**No Wiseman sends.** Browser-control tools are not exposed in this resumed chat;
+plugin discovery found no matching WhatsApp connector. Prior active-elsewhere
+failure is historical, not a newly observed laptop outage. Desktop Commander
+company connection lists devices offline, while local worker/startup task runs
+with a different saved Gmail pairing. User-requested personal autostart already
+enabled/running with mutex/fallback; no settings, credentials or pairing changed.
+Do not overwrite it or report the laptop off. Company remote execution and normal
+company-ChatGPT end-to-end remain unverified pending authorised matching pairing.
+Human creative/source-cycle review, latest approval history, master HD export and
+authoritative January posting order remain gates. No portal finals/publication,
+new hosting/dependency/spend, deployment or Nolan/Picasso changes. Control Centre
+exact edit target unavailable; no guessed tracker row.
+Internal review delivery remains authorised; access/history block it. Human
+acceptance and verified posting order gate client/GDA release. Current Node24.16.0
+checks:37focused JS tests, month-plan, skill validator and TypeScript/Vite7.3.6
+build pass; existing Browserslist/chunk warnings unchanged.
+
+## Earlier15November — Wiseman eight rebuilt; HD checked, delivery held
 
 Same #948/draft#956 worktree/owner, no competing agent. All four poster revisions
 and four replacement photo posts are saved natively; all eight actual2160x2700
