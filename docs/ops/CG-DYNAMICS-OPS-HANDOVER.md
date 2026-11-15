@@ -1,7 +1,8 @@
 ## 15 November — social publishing #220, isolated local candidate
 
 CA requested continued Meta/TikTok/LinkedIn/YouTube publishing infrastructure.
-`codex/social-publishing-220` extends existing #220/#236/#269/#493, with no
+[Draft PR991](https://github.com/CGProductionHouse/CG-Dynamics/pull/991),
+`codex/social-publishing-220`, extends existing #220/#236/#269/#493, with no
 competing calendar/queue or Nolan/staff workboard changes. Teams remains current;
 Microsoft sync hold preserved. [Implementation/provider/activation receipt](SOCIAL-PUBLISHING-220-2026-11-15.md).
 

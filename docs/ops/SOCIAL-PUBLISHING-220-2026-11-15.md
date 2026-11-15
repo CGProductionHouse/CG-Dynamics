@@ -1,6 +1,7 @@
 # Social publishing — 15 November 2026
 
-Owners: #220 shared production/publishing, #236 Meta, #269 TikTok Business,
+Candidate: [draft PR991](https://github.com/CGProductionHouse/CG-Dynamics/pull/991),
+implementation commit `ac30e80e`. Owners: #220 shared production/publishing, #236 Meta, #269 TikTok Business,
 #493 LinkedIn. This extends their existing lane; it is not a new calendar or
 Nolan workboard. Teams remains the team's scheduling platform. The Microsoft
 sync hold, calendar separation, package authority and staff edits are unchanged.
