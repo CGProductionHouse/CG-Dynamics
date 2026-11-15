@@ -36,3 +36,12 @@ test('UI refresh/retry cancels superseded reads and clears stale results, with i
   assert.ok(page.includes('if (!cancelled) { setData(result.data); setCheckedAt(result.checkedAt) }'))
   for (const text of ['setData(null)','setCheckedAt(null)','setError(null)','Retry package evidence','Package evidence last read:','disabled={loading}']) assert.ok(page.includes(text))
 })
+test('partial evidence accompanying an error never receives a successful read receipt', async () => {
+  let clockCalls = 0
+  await assert.rejects(load(
+    async()=>({data:[{id:'fixture'}],error:null}),
+    async()=>({data:[{clientId:'partial-result'}],error:new Error('later page unavailable')}),
+    ()=>{clockCalls++; return '2026-11-15T10:00:00Z'}
+  ), /later page unavailable/)
+  assert.equal(clockCalls,0)
+})

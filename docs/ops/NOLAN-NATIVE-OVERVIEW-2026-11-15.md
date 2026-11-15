@@ -181,3 +181,20 @@ client-library origin-expectation failure; correcting only the synthetic test
 configuration produced the passing full run. No guard or production code was
 weakened. Independent code review found no blocking issues. Browser/device/real
 role tests were not run for this addition and remain explicit release gates.
+
+### Source-only long-content and failure continuation
+
+Added scoped min-width/wrapping for source titles, status labels, owner labels,
+expanded details and errors, preserving the liked board without hiding content.
+Four additional tests cover escaped long source strings, empty fields versus a valid
+epoch timestamp, source CSS containment contracts, and rejecting partial package
+results accompanied by a later-page error without stamping success. All 26 Nolan
+tests pass; TypeScript/Vite build and diff check pass. The previous full-suite receipt
+belongs to the prior schedule-evidence tree, not a new full-suite run of this CSS/test
+follow-up. These are SSR/source contracts, not proof of visual/mobile rendering.
+
+Candidate browser acceptance remains blocked: local Vite route returned HTTP 200
+inside its execution workspace, while cloud browser access returned connection
+refused. Other listed desktop environments were offline. No authenticated candidate
+role sessions were available; no credentials forwarded, auth bypass, production
+change or release performed. PR #990 comment 6894081825 records the attempt.

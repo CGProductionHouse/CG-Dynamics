@@ -43,3 +43,22 @@ test('evidence view is read-only and only attached to canonical package rows', (
   assert.ok(page.includes('row.scheduleEvidence && <NolanScheduleEvidence deliverable={row.scheduleEvidence} />'))
   assert.doesNotMatch(component, /supabase|fetch\(|\.update\(|\.insert\(|localStorage/)
 })
+test('long source values remain escaped readable text, never markup', () => {
+  const value = 'source-'.repeat(100) + '<img src=x onerror=alert(1)>'
+  const html = render({ scheduled_date:value })
+  assert.ok(html.includes('source-'.repeat(100)))
+  assert.ok(html.includes('&lt;img'))
+  assert.ok(!html.includes('<img'))
+  assert.equal((html.match(/Not recorded/g) ?? []).length,4)
+})
+test('empty source fields stay missing and epoch timestamps are not treated as absent', () => {
+  const html = render({scheduled_date:'', posted_at:'1970-01-01T00:00:00Z', client_approved_at:''})
+  assert.ok(html.includes('02:00'))
+  assert.equal((html.match(/Not recorded/g) ?? []).length,4)
+})
+test('long source content has scoped wrap rules without hiding errors or details', () => {
+  const css = readFileSync('src/pages/admin/nolanOverview.css','utf8')
+  assert.ok(css.includes('.nolan-board .list .card > *{min-width:0}'))
+  assert.ok(css.includes('.nolan-board .native-error,.nolan-board .coverage{overflow-wrap:anywhere}'))
+  assert.ok(css.includes('.nolan-board .native-details,'))
+})
