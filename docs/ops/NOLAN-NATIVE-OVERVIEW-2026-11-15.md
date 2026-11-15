@@ -267,3 +267,22 @@ search correction and no remaining blockers. Final 45 focused Nolan tests, build
 scoped lint and diff pass. Normal full suite: 4,368 tests; 4,338 passed, 30 skipped,
 zero failed/cancelled, exit 0 in 179.87 seconds. Actual browser/authenticated role
 acceptance remains open; this candidate is not deployed.
+
+### Video handoff evidence in workbook disclosures
+
+Video rows expose the existing footage, internal-review, client-review and final
+asset link fields separately, with linked monthly-deliverable ID and recorded
+production-status timestamp. They remain explicitly unverified source evidence:
+a review URL is not approval, a final URL is not the approved final revision, and
+neither establishes client correctness, access or delivery. No destination was
+fetched, no pipeline/editor changed and no publishing or sharing action added.
+
+Recorded links reuse the existing URL guard plus parsed HTTP(S)/no-credentials
+checks; malformed/unsafe values are labelled without rendering their raw contents.
+Links use noopener/noreferrer. React escapes source IDs and timestamps. Six tests
+cover missing evidence, link separation, rejected URLs, exact identity/timestamp,
+and read-only wiring. Independent review found no blockers. All 51 focused Nolan
+tests pass; build, scoped lint, diff and full normal suite pass: 4,374 tests,
+4,344 passed, 30 skipped, zero failures/cancellations, exit 0 in 179.26 seconds.
+Browser, destination accessibility and actual asset/approval provenance remain
+unverified. No merge, deployment or production mutation occurred.
