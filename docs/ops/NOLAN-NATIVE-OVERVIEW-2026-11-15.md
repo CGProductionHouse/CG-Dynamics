@@ -220,3 +220,26 @@ loopback navigation refused the synthetic local endpoint; direct file access sho
 an explicit organization block and was not bypassed. Temporary native window/server
 were closed and original tabs preserved. No visual/mobile/authenticated acceptance,
 production release, provider retry or credentials movement occurred.
+
+### Exact record navigation and date provenance
+
+Monthly schedule rows now open the existing Client Schedule drawer using encoded
+record ID, client and month with all-status mode, rather than a generic workspace
+that could hide historical/completed targets. No destination screen or access rule
+changed. Disclosures expose canonical source/record IDs; search accepts those IDs
+and video canonical names. Video links remain workspace-level because that screen
+has no verified exact-video query contract.
+
+Recorded dates are labelled by actual source semantics: native and monthly due dates
+remain due dates; Planner adapter dates explicitly say due/start fallback. Independent
+review caught that distinction before release; corrected it without altering shared
+adapter semantics and added an SSR regression. Video proposed-post dates are not
+invented as deadlines. Identity/source dates remain tracking, not delivery proof.
+
+Six additional tests cover historical source context, URL encoding, escaped identity,
+existing destination drawer support, searchable identities and due/start provenance.
+Corrected source: 38 focused Nolan tests pass; build, scoped lint and diff pass.
+Full normal suite: 4,361 tests, 4,331 passed, 30 skipped, zero failures/cancellations,
+exit 0 in 179.73 seconds. The pre-review-correction in-flight run was stopped, not
+counted as a pass. Independent re-review found no further issues. Browser/mobile/
+authenticated acceptance remains open; no merge, deployment or production writes.
