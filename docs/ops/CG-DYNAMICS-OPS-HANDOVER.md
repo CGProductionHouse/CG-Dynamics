@@ -1,3 +1,15 @@
+## 15November — four-poster delivery handed to MSI Claude by owner
+
+Owner requested a local handover for MSI Claude to export/send the four revised
+Wiseman R4 posters with exact captions, then mention Amonique. The actual Desktop
+now contains `CLAUDE - SEND WISEMAN POSTERS.txt` and the dated handover folder with
+four canonical caption files/hashes, current source/master IDs,480x600 reference
+previews explicitly marked NOT HD, empty HD export directory and pending receipt.
+**New R4 HD files remain unexported; nothing sent/tagged.** Claude has delivery-only
+ownership; originating Codex must not send concurrently. Same #948/#956 development
+lane remains; no new agent/branch, artwork, deployment or permissions changed.
+Current private pointer records the handover owner/path and pending export/send.
+
 ## 15November — Browser service root cause confirmed; current four still unsent
 
 Owner again authorised four revised Wiseman HD+caption messages to CG Picasso
