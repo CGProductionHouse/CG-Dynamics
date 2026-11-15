@@ -98,8 +98,8 @@ export function preparePublishingIntent(context: PublishingContext): { intent: P
 export function publishingDispatchDecision(intent: PublishingIntent, context: PublishingContext, now: string, maxLateMs = 15 * 60_000) {
   const prepared = preparePublishingIntent(context)
   if (!prepared.intent || prepared.intent.key !== intent.key
-    || JSON.stringify([prepared.intent.assetSha256, prepared.intent.assetPath, prepared.intent.caption, prepared.intent.scheduledAt, prepared.intent.route, prepared.intent.connectionId, prepared.intent.authorizationId])
-      !== JSON.stringify([intent.assetSha256, intent.assetPath, intent.caption, intent.scheduledAt, intent.route, intent.connectionId, intent.authorizationId])) return 'blocked_source_changed'
+    || JSON.stringify([prepared.intent.assetSha256, prepared.intent.assetPath, prepared.intent.caption, prepared.intent.scheduledAt, prepared.intent.platform, prepared.intent.mediaType, prepared.intent.route, prepared.intent.connectionId, prepared.intent.authorizationId])
+      !== JSON.stringify([intent.assetSha256, intent.assetPath, intent.caption, intent.scheduledAt, intent.platform, intent.mediaType, intent.route, intent.connectionId, intent.authorizationId])) return 'blocked_source_changed'
   if (!['queued', 'retry_wait'].includes(intent.state)) return 'do_not_submit'
   const time = instant(now), due = instant(intent.scheduledAt), expiry = instant(context.binding.tokenValidUntil)
   if (time === null || due === null || expiry === null || expiry <= time) return 'blocked_token_or_time'

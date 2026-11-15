@@ -125,6 +125,8 @@ test('repeated scheduling authorizations keep the same channel intent identity',
 test('due-time dispatch refuses stale consent, revoked access, expiration and late catch-up', () => {
   const c = context(), intent = policy.preparePublishingIntent(c).intent
   assert.equal(policy.publishingDispatchDecision(intent, c, NOW), 'submit')
+  assert.equal(policy.publishingDispatchDecision({ ...intent, platform: 'tiktok' }, c, NOW), 'blocked_source_changed')
+  assert.equal(policy.publishingDispatchDecision({ ...intent, mediaType: 'video/mp4' }, c, NOW), 'blocked_source_changed')
   assert.equal(policy.publishingDispatchDecision(intent, c, '2026-11-15T09:59:59Z'), 'wait_until_due')
   assert.equal(policy.publishingDispatchDecision(intent, c, '2026-11-15T10:16:00Z'), 'blocked_overdue_review')
   const expired = structuredClone(c); expired.binding.tokenValidUntil = NOW

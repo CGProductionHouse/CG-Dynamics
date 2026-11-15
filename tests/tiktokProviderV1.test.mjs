@@ -999,7 +999,7 @@ describe('TikTok provider rollout contract', () => {
 
   it('describes the active browser rollout as read-only', () => {
     expect(TIKTOK_INTEGRATION_PAGE_SOURCE).toContain('Publishing is unavailable in this rollout.')
-    expect(TIKTOK_INTEGRATION_PAGE_SOURCE).toContain('does not request video.publish or video.upload')
+    expect(TIKTOK_INTEGRATION_PAGE_SOURCE).toContain('Analytics sign-in stays read-only; Business publishing authorization is a separate, explicit connection.')
     expect(TIKTOK_INTEGRATION_PAGE_SOURCE).not.toContain('Connect a TikTok account for organic analytics and content publishing')
   })
 

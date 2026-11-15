@@ -6,6 +6,7 @@
 // behalf of the caller and trusts nothing from the request body.
 import { createClient, type SupabaseClient } from 'jsr:@supabase/supabase-js@2'
 import webpush from 'npm:web-push@3.6.7'
+import { SOCIAL_PUBLICATION_JOB, runClaimedSocialPublication } from '../_shared/socialPublishingQueue.ts'
 import { dispatchMetaWorker } from '../_shared/metaWorkerDispatch.ts'
 import { currentMetaMonth, previousMetaMonth, currentMonthHasIncrementalWindow } from '../_shared/metaPeriod.ts'
 import { fetchAllRows } from '../_shared/paginatedRows.ts'
@@ -52,6 +53,7 @@ interface JobRow {
   payload: Record<string, unknown>
   requested_by: string | null
   requested_by_name: string | null
+  idempotency_key?: string
 }
 
 interface JobResult extends Record<string, unknown> {
@@ -90,6 +92,10 @@ Deno.serve(async () => {
     if (!job || !job.id) break
     try {
       const result = await runJob(supabase, job as JobRow, url, serviceKey, worker)
+      if (job.job_type === SOCIAL_PUBLICATION_JOB && result.managed === true) {
+        processed.push({ id: job.id, job_type: job.job_type, ok: result.publication !== undefined })
+        continue
+      }
       if (result.waiting === true) {
         const { error: deferError } = await supabase.rpc('defer_background_job', {
           p_id: job.id,
@@ -794,6 +800,14 @@ async function runJob(
   const payload = (job.payload ?? {}) as Record<string, unknown>
 
   switch (job.job_type) {
+    case SOCIAL_PUBLICATION_JOB: {
+      // No provider binding is activated by this candidate. Even if someone
+      // enables the flag prematurely, the durable job holds with an explicit
+      // blocker. Reviewed private transport/preflight registration is separate.
+      return await runClaimedSocialPublication({ sb: supabase, jobId: job.id,
+        key: job.idempotency_key ?? '', worker, now: new Date().toISOString(),
+        enabled: Deno.env.get('SOCIAL_PUBLISHING_ENABLED') === 'true' })
+    }
     case GOOGLE_ADS_REFRESH_JOB_TYPE: {
       return await runGoogleAdsRefreshJob({
         payload, url, serviceKey,

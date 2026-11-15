@@ -1,4 +1,4 @@
-## 15 November — social publishing #220, isolated local candidate
+## 15 November — durable publishing queue + Business OAuth, local only
 
 CA requested continued Meta/TikTok/LinkedIn/YouTube publishing infrastructure.
 [Draft PR991](https://github.com/CGProductionHouse/CG-Dynamics/pull/991),
@@ -10,19 +10,34 @@ Read-only company Chrome now shows TikTok API for Business **CG Dynamics Approve
 and Business video/photo/publish-status endpoints in its Accounts permission
 section. September Pending evidence is stale. Ten native Manage account entries
 are visible; API authorization is not inferred. Current main and clean historical
-`codex/tiktok-business-agency` lack the configured Business OAuth callback; retain
-that branch's foundation, and verify/complete it before activation. Meta Suite
+`codex/tiktok-business-agency` lack the configured Business OAuth callback; this
+candidate completes that code locally using the historical foundation. Meta Suite
 native access works; current OAuth source still lacks publishing scopes.
 
-Local typed preflight/execution seam and Facebook photo adapter cover approved
-asset/account/time binding, due-time submission, receipt/status separation,
-duplicate prevention contract and ambiguous-outcome recovery. Existing TikTok
-status handler refuses unchecked persistence success. No production store/worker
-is wired; fixture concurrency does not prove database rollout. Focused95 tests,
-scoped lint/helper TypeScript/app build pass. Full4338:4307pass/30skip/1 unchanged
-fixture-origin mismatch; complete6-test file passes with its expected loopback
-origin. No unqualified green full-run claim. No new production dependency/schema/data/Edge/OAuth/settings, uploaded
-or published content, deployment or spend. No all-provider readiness claim.
+Continuation wires durable SQL ports onto existing background_jobs and shared
+worker, preserving a submitting barrier across lease recovery and retaining late
+provider receipts without another POST. Unique intent/source/actor/fence and
+cross-version guards are tested in real task-isolated PostgreSQL. The worker's
+private provider bindings remain unconfigured; premature flag enablement holds
+jobs. There is no public publication enqueue endpoint or active publishing pilot.
+
+Business OAuth start/callback/status, encrypted tokens, leased refresh and the
+exact-account staff form are implemented locally using #269's authorization model;
+its old separate publish_jobs queue is deliberately omitted. No consumer token,
+mapping, Meta key or Microsoft setting changes. Read-only hosted inventory/catalog
+confirms Business functions/tables remain absent, so live pairing was not started.
+The form's leave/return confirmation defect was reproduced and fixed in the local
+synthetic browser fixture; provider calls/consent were blocked during that test.
+
+Focused130 tests, scoped lint, helper/Edge typing bridge and app build pass. Full
+4359:4329pass/30skip/0fail completed, including final SQL guard hardening. After
+the Wi-Fi pause,120 affected checks passed again for the final worker-only
+completion guard. Native Deno/hosted Edge, real OAuth consent,
+real publishing and phone acceptance are not inferred from local fixtures.
+Two candidate migrations and three Business functions require a later exact
+reviewed rollout, dedicated private configuration and specific-account consent.
+No new production dependency/schema/data/Edge/OAuth/settings, uploaded or published
+content, deployment or spend. No all-provider readiness claim.
 Existing staff/Nolan/Picasso PRs untouched. #679 gates remain. Exact Google Control
 Centre target remains unavailable; no guessed tracker write.
 

@@ -58,10 +58,13 @@ describe('TikTok active-client connection queue', () => {
     assert.match(page, /refresh_pending/)
   })
 
-  test('keeps the rollout read-only and never implements password collection', () => {
+  test('keeps analytics read-only, Business consent separate, and never collects passwords', () => {
     assert.match(page, /never asks for or stores a TikTok password/)
     assert.match(page, /Publishing is unavailable in this rollout/)
-    assert.match(page, /does not request video\.publish or video\.upload/)
+    assert.match(page, /Analytics sign-in stays read-only; Business publishing authorization is a separate, explicit connection/)
+    const readScopes = start.match(/const READ_SCOPES = \[([\s\S]*?)\]/)?.[1]
+    assert.ok(readScopes)
+    assert.doesNotMatch(readScopes, /['"]video\.(?:publish|upload)['"]/)
     assert.doesNotMatch(page, /type="password"/)
   })
 })

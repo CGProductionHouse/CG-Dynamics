@@ -38,5 +38,5 @@ export async function executePublishingIntent(ports: PublishingExecutionPorts, k
   try {
     if (await ports.saveObservation(intent, fence, observation)) return observation
   } catch { /* Keep the durable pre-dispatch submitting attempt as the recovery barrier. */ }
-  return { state: 'unknown_outcome', errorCode: 'RECEIPT_PERSISTENCE_UNVERIFIED' } as const
+  return { ...observation, state: 'unknown_outcome', errorCode: 'RECEIPT_PERSISTENCE_UNVERIFIED' } as const
 }
