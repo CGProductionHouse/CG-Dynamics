@@ -323,3 +323,28 @@ lint/diff and TypeScript/Vite build pass. Normal full suite: 4,382 tests, 4,352
 passed, 30 skipped, zero failures/cancellations, exit 0 in 186.18 seconds.
 Browser/authenticated acceptance, actual source/reference verification and paid
 package reconciliation remain open. No merge, deploy or production mutation.
+
+### Return-to-work workflow continuation
+
+Native Nolan lane, selected schedule month, search and status filters now live in
+namespaced route parameters. Opening an authoritative record and returning with
+browser Back restores the prior working context instead of resetting Active work.
+The URL can also be bookmarked; it does not grant access or change underlying
+records. Search typing replaces history rather than adding a Back step for each
+keystroke. Lane/month/status navigation pushes a history entry. Clear filters
+retains lane/month. Existing filters with no current matches remain visible for
+recovery rather than disappearing from the status selector.
+
+Route parsing validates month/lane and bounds filter text; existing parent tab
+and manager access checks remain untouched. Filtering does not cause new reader
+calls; only the existing month/refresh dependencies do. No persistent second store,
+background scheduler, writes or mappings were added. Parent tab-button navigation
+still starts a fresh tab URL; this is Back/bookmark restoration, not persistence
+across every navigation path. URLs include filter text, so users should avoid
+putting secrets in search and review a URL before sharing it.
+
+Independent review found no blockers; all 64 focused Nolan tests, build, scoped
+lint and diff pass. Browser Back/mobile/authenticated runtime acceptance remains
+open; route roundtrip/source contracts are not a browser acceptance claim.
+Full regression on this source: 4,387 tests, 4,357 passed, 30 skipped, zero
+failures/cancellations, exit 0 in 180.60 seconds. No merge or deployment.

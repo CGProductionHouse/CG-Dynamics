@@ -12,14 +12,15 @@ import { useEffect, useState } from 'react'
 import './nolanOverview.css'
 import { taskInNolanLane, type NolanTaskLane } from '../../lib/nolanSourceLanes'
 import { useAuth } from '../../contexts/AuthContext'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
+import { readNolanViewState, updateNolanViewState, type NolanViewState, type NolanLane } from '../../lib/nolanViewState'
 import { listTasks, listActiveClients, taskStatusDisplayLabel, type CommandCentreTask } from '../../lib/commandCentre'
 import { listPipelineVideos, listStaffProfiles, type ContentGuideIdea } from '../../lib/contentWorkflow'
 import { listMonthlyDeliverablesByMonth, PRODUCTION_STATUS_LABELS, type MonthlyDeliverable } from '../../lib/planner'
 import { businessMonthKey } from '../../lib/businessTime'
 import { VIDEO_STATUS_LABELS } from '../../lib/videoPipelineRules'
 
-type Lane = NolanTaskLane | 'master' | 'videos' | 'packages' | 'systems'
+type Lane = NolanLane
 type SourceReceipt = { source: string; checkedAt: string; unavailable: boolean }
 type Snapshot = { staff: Map<string, string> | null; receipts: SourceReceipt[]; tasks: CommandCentreTask[]; videos: ContentGuideIdea[]; deliverables: MonthlyDeliverable[]; clients: Record<string, string>; errors: string[]; checked: string; month: string }
 
@@ -27,10 +28,10 @@ type Snapshot = { staff: Map<string, string> | null; receipts: SourceReceipt[]; 
 // screens. Reads use the signed-in Supabase client and existing RLS unchanged.
 export default function NolanOverview() {
   const { profile } = useAuth()
-  const [lane, setLane] = useState<Lane>('work')
-  const [query, setQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState('All statuses')
-  const [month, setMonth] = useState(businessMonthKey())
+  const [searchParams, setSearchParams] = useSearchParams()
+  const fallbackMonth = businessMonthKey()
+  const { lane, query, status: statusFilter, month } = readNolanViewState(searchParams, fallbackMonth)
+  const changeView = (patch: Partial<NolanViewState>, replace = false) => setSearchParams(current => updateNolanViewState(current, patch, fallbackMonth), { replace })
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null)
   const [loading, setLoading] = useState(false)
   const [generation, setGeneration] = useState(0)
@@ -77,12 +78,12 @@ export default function NolanOverview() {
   const visibleRows = statusFilter === 'All statuses' ? rows : rows.filter(row => row.status === statusFilter)
   const sections: [Lane, string][] = [['master', 'Master schedule'], ['work', 'Active work'], ['needs', 'Assigned to you'], ['ownership', 'Ownership review'], ['special', 'Special tasks & campaigns'], ['done', 'Completed'], ['videos', 'Video & amendments'], ['packages', 'Client packages & schedule'], ['systems', 'Websites & reach'], ['editor', 'CG Web Editor'], ['apps', 'Apps & milestones']]
   return <div className="nolan-board" aria-label="Nolan overview">
-    <aside><div className="brand"><span className="brandmark">n.</span><span>NOLAN<span className="brand-sub">YOUR WORKBOARD</span></span></div><div className="navlabel">WORKSPACE</div><nav aria-label="Work views">{sections.map(([id, label]) => <button key={id} className={lane === id ? 'selected' : ''} aria-pressed={lane === id} onClick={() => { setLane(id); setStatusFilter('All statuses') }}>{label}</button>)}</nav><div className="side-bottom"><div className="avatar">CA</div><div><strong>CA + Nolan</strong><small>Dynamics workspace</small></div></div></aside>
+    <aside><div className="brand"><span className="brandmark">n.</span><span>NOLAN<span className="brand-sub">YOUR WORKBOARD</span></span></div><div className="navlabel">WORKSPACE</div><nav aria-label="Work views">{sections.map(([id, label]) => <button key={id} className={lane === id ? 'selected' : ''} aria-pressed={lane === id} onClick={() => { changeView({ lane: id, status: 'All statuses' }) }}>{label}</button>)}</nav><div className="side-bottom"><div className="avatar">CA</div><div><strong>CA + Nolan</strong><small>Dynamics workspace</small></div></div></aside>
     <main><header><div className="breadcrumb">WORK / NOLAN</div><Link className="source-link" to="/admin/work?tab=board&id=7f413d31-17cd-4761-b2e9-a031c1343444">Master record ↗</Link></header>
       <section className="intro"><div><h1>Here’s the situation.</h1><p>What needs attention, who owns it, and what happens next.</p></div><div className="fresh"><strong>{loading ? 'Reading Dynamics…' : snapshot?.errors.length ? 'Source checks incomplete' : 'Direct Dynamics records'}</strong><small>{snapshot ? 'Last attempt: ' + new Date(snapshot.checked).toLocaleString('en-ZA', { timeZone: 'Africa/Johannesburg' }) + ' SAST' : 'Waiting for source reads'}</small><button className="refresh-data" disabled={loading} onClick={() => setGeneration(n => n + 1)}>Refresh status</button></div></section>
       {!!snapshot?.errors.length && <div role="alert" className="native-error">{snapshot.errors.map(e => <p key={e}>{e}</p>)}</div>}
       <section className="work"><div className="work-heading"><div><h2>{sections.find(([id]) => id === lane)?.[1]}</h2><p>{lane === 'master' ? '12 responsibility areas · source navigation, not task statuses' : lane === 'systems' ? 'Reviewed connections and on-demand reporting · partial coverage' : `${visibleRows.length} matching records returned · open a row for details`}</p></div></div>
-      {lane !== 'master' && lane !== 'systems' && <div className="toolbar"><label className="search"><span>⌕</span><input aria-label="Search this lane" value={query} onChange={e => setQuery(e.target.value)} placeholder="Find a client, task or owner…" /></label><select aria-label="Filter status" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}><option>All statuses</option>{[...new Set(rows.map(row => row.status))].sort().map(status => <option key={status}>{status}</option>)}</select>{lane === 'packages' && <input aria-label="Schedule month" type="month" value={month} onChange={e => { if (e.target.value) setMonth(e.target.value) }} />}</div>}
+      {lane !== 'master' && lane !== 'systems' && <div className="toolbar"><label className="search"><span>⌕</span><input aria-label="Search this lane" value={query} onChange={e => changeView({ query: e.target.value }, true)} placeholder="Find a client, task or owner…" /></label><select aria-label="Filter status" value={statusFilter} onChange={e => changeView({ status: e.target.value })}><option>All statuses</option>{[...new Set([...rows.map(row => row.status), ...(statusFilter === 'All statuses' ? [] : [statusFilter])])].sort().map(status => <option key={status}>{status}</option>)}</select><button className="refresh-data" onClick={() => changeView({ query: '', status: 'All statuses' })}>Clear filters</button>{lane === 'packages' && <input aria-label="Schedule month" type="month" value={month} onChange={e => { if (e.target.value) changeView({ month: e.target.value }) }} />}</div>}
       <details className="coverage-details"><summary>Coverage & source freshness</summary><div className="coverage">Refreshes on open, return to this window and Refresh. Source status is not independent delivery or approval verification. {lane === 'packages' ? 'Scheduled deliverables, not a complete paid-entitlement audit.' : lane === 'work' ? 'Paged Dynamics task records. External source coverage remains separate.' : 'Records visible to this signed-in account.'}
         {snapshot && <ul aria-label="Individual source read receipts">{snapshot.receipts.map(receipt => <li key={receipt.source}>
           {receipt.source}: {receipt.unavailable ? 'Unavailable; no successful read claimed' : 'Read completed for visible records'} · {new Date(receipt.checkedAt).toLocaleString('en-ZA', { timeZone: 'Africa/Johannesburg' })} SAST
