@@ -42,3 +42,44 @@ This is a proposed implementation contract, not a deployed capability.
 No endpoint, token, role, live configuration, permission or deployment was changed
 by this investigation. Implementation cannot honestly be called supported by the
 current inspected contract. The website tab remains visibly incomplete meanwhile.
+
+## 15 November authoritative recheck (compiled 14:24 UTC / 16:24 SAST)
+
+Production `list_websites` returned **10 accessible enabled-operation records**, not
+a certified full-fleet denominator. IDs: Piek 1, Get Together 2, Imbewu 4, CG ARCC 5,
+Emmanuel 6, Red Oak 7, All Around PVC 8, JFJ 9, Raadzaal 10, Wiseman 11. This differs
+from the earlier nine-row receipt; do not silently carry nine forward. Seven have
+publicSiteUrl values; CG ARCC/JFJ/Wiseman return null. Null means no recorded URL,
+not down, missing or unowned. All ten exact `get_website` records were read; none
+exposes `reporting.dynamicsClientId`. Registration read for Get Together also omits
+that binding. No new Dynamics joins can therefore be certified by these tools.
+
+Builder source pinned to commit `96a6876da6b46cfa71d3c5a28d80af8f2964a12a`:
+- `src/lib/websiteOperations/service.ts`: `listManagedWebsites` filters
+  `operations.enabled=true`, uses `limit:200`, returns projected docs without total
+  or continuation. Its exact getters expose identity/repository, not reporting UUID.
+- `src/collections/Websites.ts`: the UUID exists under `reporting.dynamicsClientId`;
+  existence of the schema field does not verify values of any live record.
+- `src/lib/websiteOperations/auth.ts` and `src/access/websiteAccess.ts`: bearer
+  principal resolves via Payload or configured OAuth user-info; enabled account
+  and owner/admin versus assigned-website access remain authoritative. This is not
+  proof that a Dynamics bearer may be forwarded to that separate service.
+- `src/app/(payload)/api/reporting/websites/[websiteId]/route.ts`: server-held
+  reporting token, one Website ID plus exact client UUID and bounded date range;
+  this is not inventory authorization or pagination.
+
+Existing Dynamics `website-performance-report` validates its own signed-in user
+and active client, server-held explicit client map and duplicate-map rejection,
+then returned Website/client/period identity. Its report preview role list is
+admin/manager/staff/team; saving is separately admin/manager-only. The workbook
+still uses the existing manager route and read-only reporting panel. The proposed
+inventory adapter's narrower manager/admin contract remains a NEW requirement,
+not an already-deployed capability. No token, role, map or permission changed.
+
+The four source-reviewed Dynamics UUID/presentation hosts remain unchanged.
+Matching their recorded public hosts to operations summaries is corroboration of
+presentation only, not a newly verified reporting binding. Six remaining operations
+records must not be joined by names, slugs, domains or presumed package activity.
+The existing workbook now exposes accessible client-identity coverage and exact
+mapping IDs, explicitly distinct from website denominator, report health or source
+freshness. Additional inventory/mapping access remains the precise expansion blocker.

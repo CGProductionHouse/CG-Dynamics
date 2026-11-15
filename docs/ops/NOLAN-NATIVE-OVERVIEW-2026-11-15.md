@@ -286,3 +286,23 @@ tests pass; build, scoped lint, diff and full normal suite pass: 4,374 tests,
 4,344 passed, 30 skipped, zero failures/cancellations, exit 0 in 179.26 seconds.
 Browser, destination accessibility and actual asset/approval provenance remain
 unverified. No merge, deployment or production mutation occurred.
+
+### Website source boundary and mapping-coverage continuation
+
+Rechecked production operations list, all ten exact records and current Builder
+source contract. The connector exposes enabled/authorized operations only and no
+Dynamics UUID bindings, with a source cap of 200 and no total/cursor. Full registry
+and additional exact joins remain blocked rather than guessed. Exact receipt and
+source SHA are in `NOLAN-WEBSITE-REGISTRY-ADAPTER-CONTRACT.md`.
+
+Website UI now discloses unique active client identities read, number with reviewed
+mappings, and identities without those mappings. Those are client coverage counts,
+not a website denominator or an outage. Exact mapped client ID/presentation host is
+visible in row details, with server reporting validation still required. No mapping,
+backend, credential or source authority changed. Three new tests guard unique
+counts, refusal to infer new joins, and truthful coverage/health wording.
+
+Mapping-coverage verification: six targeted website tests, build, scoped lint and
+diff pass. Independent review found no blockers. Normal full suite: 4,377 tests,
+4,347 passed, 30 skipped, zero failures/cancellations, exit 0 in 181.74 seconds.
+No browser/authenticated reporting acceptance, live map change, merge or deployment.

@@ -8,3 +8,15 @@ export function reviewedNolanWebsites(clients: Client[]) {
     return website ? [{ client, website }] : []
   })
 }
+
+/** Count accessible client identity coverage, never the number of websites.
+ * No match means no reviewed reporting mapping, not a missing/down website. */
+export function nolanWebsiteMappingCoverage(clients: Client[]) {
+  const activeIds = new Set(clients.filter(client => client.active).map(client => client.id))
+  const mappedIds = new Set(reviewedNolanWebsites(clients).map(({client}) => client.id))
+  return {
+    activeClientIdentitiesRead: activeIds.size,
+    reviewedMappingsMatched: mappedIds.size,
+    clientIdentitiesWithoutReviewedMapping: [...activeIds].filter(id => !mappedIds.has(id)).length,
+  }
+}
