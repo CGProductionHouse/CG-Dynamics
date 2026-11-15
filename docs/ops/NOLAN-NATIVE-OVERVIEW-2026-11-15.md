@@ -373,3 +373,34 @@ This closes only these synthetic component layout/disclosure checks. Fixture
 navigation was inert and scripts/network blocked. Actual application routing,
 search/refresh/races, authenticated role boundaries, live source records and
 edit/readback remain UNTESTED. No production deployment, merge or auth bypass.
+
+
+### Verified dynamic synthetic workbook interactions
+
+A second isolated memory-only fixture exercised actual NolanOverview/CSS/router
+with explicitly invented build-only auth/data providers. SHA256
+ed2a67920158b75776ca4a83480bf6215eb61d0512f1a7e31c8f0f8b9e55a0b7,
+286193bytes; same application source tree504757c164c94d81b49cd3dabaf967f19d42c1b9.
+Esbuild write:false built from stdin; no .env, credentials or real records read.
+Bundle inputs excluded Supabase; CSP blocked external network. Synthetic auth
+was not a real session or modification to production authentication.
+
+Visible-control checks passed in isolated Edge tab: initial active work3;
+search amber1/clear3; status in_progress1/to_do2; canonical owner search2;
+Assigned2 and ownership-conflict1. Native month input committed2027-02 and
+route/title/mock-reader month agreed. Canonical link opened a synthetic destination;
+Fixture Back preserved packages/month2027-02/query2027/statusPlanned exactly.
+Video failure plus actual Refresh showed explicit incomplete-source/video error
+while all3 task rows remained. Directory failure plus Refresh showed explicit
+unavailable assignment evidence and zero Assigned rows with caution. Turning both
+failures off and refreshing recovered2 Assigned rows and removed errors.
+
+One automation locator quirk changed the month input display without committing
+React state; native keyboard commitment succeeded. No application defect inferred.
+No hidden React/provider state was accessed. Own tab closed and original preserved;
+exact temporary process and loopback listener verified absent after cleanup.
+
+This is a mock-provider workbook route harness, NOT authenticated/RLS/parent-app,
+real canonical destination, production source or edit/readback acceptance. It does
+not establish network-race, complete source coverage or hosting readiness. No
+application code changed during these checks, no merge or deployment occurred.
