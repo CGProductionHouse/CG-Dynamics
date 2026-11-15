@@ -348,3 +348,28 @@ lint and diff pass. Browser Back/mobile/authenticated runtime acceptance remains
 open; route roundtrip/source contracts are not a browser acceptance claim.
 Full regression on this source: 4,387 tests, 4,357 passed, 30 skipped, zero
 failures/cancellations, exit 0 in 180.60 seconds. No merge or deployment.
+
+
+### Verified isolated component browser acceptance
+
+On 15 November 2026, exact candidate 294b0508088843aeb8f8f93facc0ab07dce26a8f
+(tree504757c164c94d81b49cd3dabaf967f19d42c1b9) received an isolated component
+browser pass on CA-MSICyborg15 Edge. Synthetic HTML used actual scoped CSS and
+SSR MasterScope, package-record evidence, video handoff and record-identity
+components with invented records and a representative sidebar/main shell.
+Fixture26864bytes SHA256856f5610ee14cac3ccf1b50924ad3fe49b5b3d9d7261253b3dfbf05f33f3746d
+was transferred programmatically and hash-verified before memory-only loopback
+serving. No local files, real data, credentials or sessions were transferred.
+
+Screenshots and DOM inspection at360x800,768x900,1024x900: document client/scroll
+widths345/345,753/753,1009/1009; no main descendant beyond viewport right. Long
+IDs/references wrap; missing/invalid evidence readable. Native allowance summary
+collapsed on click and reopened with Enter, with visible keyboard focus. Desktop
+master descriptions intentionally clamp; full source-description visibility is
+not claimed. Viewport reset and own tab closed, original Edge tab preserved;
+transient server stopped with intentional Ctrl-C. No WhatsApp interaction.
+
+This closes only these synthetic component layout/disclosure checks. Fixture
+navigation was inert and scripts/network blocked. Actual application routing,
+search/refresh/races, authenticated role boundaries, live source records and
+edit/readback remain UNTESTED. No production deployment, merge or auth bypass.
