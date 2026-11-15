@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { NolanPackageRecordEvidence } from './NolanPackageRecordEvidence'
 import { loadNolanPackageEvidence } from '../../lib/nolanPackageEvidence'
 import type { ActiveClientPackageEvidence } from '../../lib/packageEvidence'
 
@@ -33,6 +34,6 @@ export function NolanPackageEvidence({ month, refreshGeneration }: { month: stri
       {checkedAt && <p>Package evidence last read: {new Date(checkedAt).toLocaleString('en-ZA', { timeZone: 'Africa/Johannesburg' })} SAST. This is a source-read time, not independent verification.</p>}
       {error && <p role="alert">{error}</p>}{loading && <p role="status">Reading package authority…</p>}
       {requested && <button className="refresh-data" disabled={loading} onClick={() => setRetry(value => value + 1)}>{error ? 'Retry package evidence' : 'Refresh package evidence'}</button>}
-      {data && <ul>{data.map(client => <li key={client.clientId}><strong>{client.clientName}</strong>: {client.confirmed ? 'Recorded package confirmation' : 'Unverified package'} · {client.conflicts.length} conflicts · {client.unknownFields.length} unknown fields<details><summary>View recorded allowance evidence</summary><ul>{Object.entries(client.fields).map(([field, value]) => <li key={field}>{field.replaceAll('_', ' ')}: {value.proposedValue === null ? 'Unknown' : String(value.proposedValue)} ({value.state})</li>)}</ul><p>{client.conflicts.join(' · ')}</p></details></li>)}</ul>}
+      {data && (data.length ? <ul>{data.map(client => <li key={client.clientId}><NolanPackageRecordEvidence client={client} /></li>)}</ul> : <p>No active client package rows returned by this reader. This does not establish company-wide coverage.</p>)}
     </div></details>
 }

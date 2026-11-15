@@ -306,3 +306,20 @@ Mapping-coverage verification: six targeted website tests, build, scoped lint an
 diff pass. Independent review found no blockers. Normal full suite: 4,377 tests,
 4,347 passed, 30 skipped, zero failures/cancellations, exit 0 in 181.74 seconds.
 No browser/authenticated reporting acceptance, live map change, merge or deployment.
+
+### Package provenance continuation
+
+Workbook package details now retain exact Dynamics client identity and per-field
+recorded evidence class, confidence, note and source references. Named conflicts
+and unknown fields are visible rather than just totals. Direct references remain
+separate from supporting context; reference strings are escaped audit text, not
+clickable destinations. This reuses the existing package authority without new
+reads, writes, mappings or historical/paid entitlement assumptions. Empty results
+explicitly do not establish company-wide coverage. Zero, false and unknown remain
+distinct. No billing, rescheduling or publishing capability was added.
+
+Independent review found no blockers. All 59 focused Nolan tests pass, scoped
+lint/diff and TypeScript/Vite build pass. Normal full suite: 4,382 tests, 4,352
+passed, 30 skipped, zero failures/cancellations, exit 0 in 186.18 seconds.
+Browser/authenticated acceptance, actual source/reference verification and paid
+package reconciliation remain open. No merge, deploy or production mutation.
