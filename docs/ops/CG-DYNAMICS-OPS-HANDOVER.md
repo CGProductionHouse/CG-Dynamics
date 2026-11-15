@@ -1,3 +1,30 @@
+## 15 November — social publishing #220, isolated local candidate
+
+CA requested continued Meta/TikTok/LinkedIn/YouTube publishing infrastructure.
+`codex/social-publishing-220` extends existing #220/#236/#269/#493, with no
+competing calendar/queue or Nolan/staff workboard changes. Teams remains current;
+Microsoft sync hold preserved. [Implementation/provider/activation receipt](SOCIAL-PUBLISHING-220-2026-11-15.md).
+
+Read-only company Chrome now shows TikTok API for Business **CG Dynamics Approved**
+and Business video/photo/publish-status endpoints in its Accounts permission
+section. September Pending evidence is stale. Ten native Manage account entries
+are visible; API authorization is not inferred. Current main and clean historical
+`codex/tiktok-business-agency` lack the configured Business OAuth callback; retain
+that branch's foundation, and verify/complete it before activation. Meta Suite
+native access works; current OAuth source still lacks publishing scopes.
+
+Local typed preflight/execution seam and Facebook photo adapter cover approved
+asset/account/time binding, due-time submission, receipt/status separation,
+duplicate prevention contract and ambiguous-outcome recovery. Existing TikTok
+status handler refuses unchecked persistence success. No production store/worker
+is wired; fixture concurrency does not prove database rollout. Focused95 tests,
+scoped lint/helper TypeScript/app build pass. Full4338:4307pass/30skip/1 unchanged
+fixture-origin mismatch; complete6-test file passes with its expected loopback
+origin. No unqualified green full-run claim. No new production dependency/schema/data/Edge/OAuth/settings, uploaded
+or published content, deployment or spend. No all-provider readiness claim.
+Existing staff/Nolan/Picasso PRs untouched. #679 gates remain. Exact Google Control
+Centre target remains unavailable; no guessed tracker write.
+
 ## 11 November — existing-film registration repair, local candidate only
 
 CA asked MSI to finish all possible video tracking reconciliation. Sixteen
