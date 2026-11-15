@@ -198,3 +198,25 @@ inside its execution workspace, while cloud browser access returned connection
 refused. Other listed desktop environments were offline. No authenticated candidate
 role sessions were available; no credentials forwarded, auth bypass, production
 change or release performed. PR #990 comment 6894081825 records the attempt.
+
+### Independent source receipts and exception isolation
+
+Each task, video, schedule and client-label reader now settles independently. A
+thrown reader no longer discards successful unrelated lanes. Native error payloads
+and missing video schema still mark that source unavailable and suppress partial
+rows. The coverage disclosure lists each reader's completion time and outcome,
+explicitly not upstream-provider freshness, full coverage or delivery proof.
+
+Six new tests cover independent success/failure, completion-time capture, preserved
+native errors, opaque thrown values, source UI labels and empty Error messages.
+Independent review caught empty thrown Error text potentially becoming a false
+success for videos; normalized empty/whitespace errors and added regression coverage.
+The pre-correction in-flight full run was stopped, not counted as a pass. Corrected
+source passed build, scoped lint, diff check and the normal full suite: 4,355 tests,
+4,325 passed, 30 skipped, no failures/cancellations, exit 0 in 179.79 seconds.
+
+Browser acceptance remains unavailable: both CDP and separate native Chromium
+loopback navigation refused the synthetic local endpoint; direct file access showed
+an explicit organization block and was not bypassed. Temporary native window/server
+were closed and original tabs preserved. No visual/mobile/authenticated acceptance,
+production release, provider retry or credentials movement occurred.

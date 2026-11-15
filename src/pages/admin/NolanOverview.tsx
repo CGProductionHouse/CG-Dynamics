@@ -1,3 +1,4 @@
+import { captureNolanSource } from '../../lib/nolanSourceRead'
 import { NolanScheduleEvidence } from './NolanScheduleEvidence'
 import { NolanWebsiteConnections } from './NolanWebsiteConnections'
 import { NolanPackageEvidence } from './NolanPackageEvidence'
@@ -14,7 +15,8 @@ import { businessMonthKey } from '../../lib/businessTime'
 import { VIDEO_STATUS_LABELS } from '../../lib/videoPipelineRules'
 
 type Lane = NolanTaskLane | 'master' | 'videos' | 'packages' | 'systems'
-type Snapshot = { tasks: CommandCentreTask[]; videos: ContentGuideIdea[]; deliverables: MonthlyDeliverable[]; clients: Record<string, string>; errors: string[]; checked: string; month: string }
+type SourceReceipt = { source: string; checkedAt: string; unavailable: boolean }
+type Snapshot = { receipts: SourceReceipt[]; tasks: CommandCentreTask[]; videos: ContentGuideIdea[]; deliverables: MonthlyDeliverable[]; clients: Record<string, string>; errors: string[]; checked: string; month: string }
 
 // A view, not another task store. All edits stay in the existing authoritative
 // screens. Reads use the signed-in Supabase client and existing RLS unchanged.
@@ -33,11 +35,24 @@ export default function NolanOverview() {
       setLoading(true)
       setSnapshot(null)
       try {
-        const [tasks, videos, deliverables, clients] = await Promise.all([listTasks(), listPipelineVideos(), listMonthlyDeliverablesByMonth(month), listActiveClients()])
+        const [taskRead, videoRead, scheduleRead, clientRead] = await Promise.all([
+          captureNolanSource(() => listTasks()), captureNolanSource(() => listPipelineVideos()),
+          captureNolanSource(() => listMonthlyDeliverablesByMonth(month)), captureNolanSource(() => listActiveClients()),
+        ])
+        const tasks = taskRead.result ?? { data: [], error: { message: taskRead.error } }
+        const videos = videoRead.result ?? { data: [], error: videoRead.error, migrationNeeded: false }
+        const deliverables = scheduleRead.result ?? { data: [], error: { message: scheduleRead.error } }
+        const clients = clientRead.result ?? { data: [], error: { message: clientRead.error } }
+        const receipts = [
+          { source: 'Work records', checkedAt: taskRead.checkedAt, unavailable: !!tasks.error },
+          { source: 'Video pipeline', checkedAt: videoRead.checkedAt, unavailable: !!videos.error || !!videos.migrationNeeded },
+          { source: 'Monthly schedule', checkedAt: scheduleRead.checkedAt, unavailable: !!deliverables.error },
+          { source: 'Client labels', checkedAt: clientRead.checkedAt, unavailable: !!clients.error },
+        ]
         if (cancelled) return
-        setSnapshot({ clients: Object.fromEntries((clients.data ?? []).map(c => [c.id, c.name])), tasks: tasks.error ? [] : (tasks.data ?? []) as CommandCentreTask[], videos: videos.error || videos.migrationNeeded ? [] : videos.data, deliverables: deliverables.error ? [] : (deliverables.data ?? []) as MonthlyDeliverable[], errors: [clients.error && `Client labels unavailable: ${clients.error.message}`, tasks.error && `Work unavailable: ${tasks.error.message}`, videos.error && `Videos unavailable: ${videos.error}`, videos.migrationNeeded && 'Video source unavailable: required schema is missing.', deliverables.error && `Package schedule unavailable: ${deliverables.error.message}`].filter(Boolean) as string[], month, checked: new Date().toISOString() })
+        setSnapshot({ receipts, clients: Object.fromEntries((clients.data ?? []).map(c => [c.id, c.name])), tasks: tasks.error ? [] : (tasks.data ?? []) as CommandCentreTask[], videos: videos.error || videos.migrationNeeded ? [] : videos.data, deliverables: deliverables.error ? [] : (deliverables.data ?? []) as MonthlyDeliverable[], errors: [clients.error && `Client labels unavailable: ${clients.error.message}`, tasks.error && `Work unavailable: ${tasks.error.message}`, videos.error && `Videos unavailable: ${videos.error}`, videos.migrationNeeded && 'Video source unavailable: required schema is missing.', deliverables.error && `Package schedule unavailable: ${deliverables.error.message}`].filter(Boolean) as string[], month, checked: new Date().toISOString() })
       } catch (error) {
-        if (!cancelled) setSnapshot({ clients: {}, tasks: [], videos: [], deliverables: [], errors: [error instanceof Error ? error.message : 'Source reads failed.'], month, checked: new Date().toISOString() })
+        if (!cancelled) setSnapshot({ receipts: [], clients: {}, tasks: [], videos: [], deliverables: [], errors: [error instanceof Error ? error.message : 'Source reads failed.'], month, checked: new Date().toISOString() })
       } finally { if (!cancelled) setLoading(false) }
     }
     void load()
@@ -61,7 +76,12 @@ export default function NolanOverview() {
       {!!snapshot?.errors.length && <div role="alert" className="native-error">{snapshot.errors.map(e => <p key={e}>{e}</p>)}</div>}
       <section className="work"><div className="work-heading"><div><h2>{sections.find(([id]) => id === lane)?.[1]}</h2><p>{lane === 'master' ? '12 responsibility areas · source navigation, not task statuses' : lane === 'systems' ? 'Reviewed connections and on-demand reporting · partial coverage' : `${visibleRows.length} matching records returned · open a row for details`}</p></div></div>
       {lane !== 'master' && lane !== 'systems' && <div className="toolbar"><label className="search"><span>⌕</span><input aria-label="Search this lane" value={query} onChange={e => setQuery(e.target.value)} placeholder="Find a client, task or owner…" /></label><select aria-label="Filter status" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}><option>All statuses</option>{[...new Set(rows.map(row => row.status))].sort().map(status => <option key={status}>{status}</option>)}</select>{lane === 'packages' && <input aria-label="Schedule month" type="month" value={month} onChange={e => { if (e.target.value) setMonth(e.target.value) }} />}</div>}
-      <details className="coverage-details"><summary>Coverage & source freshness</summary><div className="coverage">Refreshes on open, return to this window and Refresh. Source status is not independent delivery or approval verification. {lane === 'packages' ? 'Scheduled deliverables, not a complete paid-entitlement audit.' : lane === 'work' ? 'Paged Dynamics task records. External source coverage remains separate.' : 'Records visible to this signed-in account.'}</div></details>
+      <details className="coverage-details"><summary>Coverage & source freshness</summary><div className="coverage">Refreshes on open, return to this window and Refresh. Source status is not independent delivery or approval verification. {lane === 'packages' ? 'Scheduled deliverables, not a complete paid-entitlement audit.' : lane === 'work' ? 'Paged Dynamics task records. External source coverage remains separate.' : 'Records visible to this signed-in account.'}
+        {snapshot && <ul aria-label="Individual source read receipts">{snapshot.receipts.map(receipt => <li key={receipt.source}>
+          {receipt.source}: {receipt.unavailable ? 'Unavailable; no successful read claimed' : 'Read completed for visible records'} · {new Date(receipt.checkedAt).toLocaleString('en-ZA', { timeZone: 'Africa/Johannesburg' })} SAST
+        </li>)}</ul>}
+        <p>These are individual reader completion times, not upstream provider refresh times or complete external-source coverage.</p>
+      </div></details>
       {lane === 'packages' && <NolanPackageEvidence month={month} refreshGeneration={generation} />}
       {lane === 'needs' && <div className="coverage">Open work assigned to your signed-in profile. Unrecorded personal decisions are not inferred from notes.</div>}
       {lane === 'special' && <div className="coverage">Existing Once-off and CG Socials tasks. Unclassified campaigns remain in Active work.</div>}
