@@ -1,0 +1,71 @@
+import { NolanPackageEvidence } from './NolanPackageEvidence'
+import { MasterScope } from './NolanMasterScope'
+import { useEffect, useState } from 'react'
+import './nolanOverview.css'
+import { taskInNolanLane, type NolanTaskLane } from '../../lib/nolanSourceLanes'
+import { useAuth } from '../../contexts/AuthContext'
+import { Link } from 'react-router-dom'
+import { listTasks, listActiveClients, taskStatusDisplayLabel, type CommandCentreTask } from '../../lib/commandCentre'
+import { listPipelineVideos, type ContentGuideIdea } from '../../lib/contentWorkflow'
+import { listMonthlyDeliverablesByMonth, PRODUCTION_STATUS_LABELS, type MonthlyDeliverable } from '../../lib/planner'
+import { businessMonthKey } from '../../lib/businessTime'
+import { VIDEO_STATUS_LABELS } from '../../lib/videoPipelineRules'
+
+type Lane = NolanTaskLane | 'master' | 'videos' | 'packages' | 'systems'
+type Snapshot = { tasks: CommandCentreTask[]; videos: ContentGuideIdea[]; deliverables: MonthlyDeliverable[]; clients: Record<string, string>; errors: string[]; checked: string; month: string }
+
+// A view, not another task store. All edits stay in the existing authoritative
+// screens. Reads use the signed-in Supabase client and existing RLS unchanged.
+export default function NolanOverview() {
+  const { profile } = useAuth()
+  const [lane, setLane] = useState<Lane>('work')
+  const [query, setQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState('All statuses')
+  const [month, setMonth] = useState(businessMonthKey())
+  const [snapshot, setSnapshot] = useState<Snapshot | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [generation, setGeneration] = useState(0)
+  useEffect(() => {
+    let cancelled = false
+    async function load() {
+      setLoading(true)
+      setSnapshot(null)
+      try {
+        const [tasks, videos, deliverables, clients] = await Promise.all([listTasks(), listPipelineVideos(), listMonthlyDeliverablesByMonth(month), listActiveClients()])
+        if (cancelled) return
+        setSnapshot({ clients: Object.fromEntries((clients.data ?? []).map(c => [c.id, c.name])), tasks: tasks.error ? [] : (tasks.data ?? []) as CommandCentreTask[], videos: videos.error || videos.migrationNeeded ? [] : videos.data, deliverables: deliverables.error ? [] : (deliverables.data ?? []) as MonthlyDeliverable[], errors: [clients.error && `Client labels unavailable: ${clients.error.message}`, tasks.error && `Work unavailable: ${tasks.error.message}`, videos.error && `Videos unavailable: ${videos.error}`, videos.migrationNeeded && 'Video source unavailable: required schema is missing.', deliverables.error && `Package schedule unavailable: ${deliverables.error.message}`].filter(Boolean) as string[], month, checked: new Date().toISOString() })
+      } catch (error) {
+        if (!cancelled) setSnapshot({ clients: {}, tasks: [], videos: [], deliverables: [], errors: [error instanceof Error ? error.message : 'Source reads failed.'], month, checked: new Date().toISOString() })
+      } finally { if (!cancelled) setLoading(false) }
+    }
+    void load()
+    return () => { cancelled = true }
+  }, [month, generation])
+  useEffect(() => {
+    const refresh = () => setGeneration(n => n + 1)
+    window.addEventListener('focus', refresh)
+    return () => window.removeEventListener('focus', refresh)
+  }, [])
+  const match = (...values: (string | null | undefined)[]) => values.join(' ').toLowerCase().includes(query.trim().toLowerCase())
+  const rows = ['work', 'needs', 'special', 'done', 'apps', 'editor'].includes(lane) ? (snapshot?.tasks ?? []).filter(t => taskInNolanLane(t, lane as NolanTaskLane, profile?.id)).filter(t => match(t.title, t.client_name, t.assigned_to_name, t.bucket)).map(t => ({ id: `task:${t.id}`, title: t.title, owner: t.assigned_to_name, client: t.client_name ?? t.bucket, status: taskStatusDisplayLabel(t), href: t.data_origin === 'planner_tasks' ? `/admin/work?tab=board&id=${encodeURIComponent(t.native_id ?? t.id)}` : '/admin/work?tab=daily-tasks', detail: t.notes, updated: t.updated_at }))
+    : lane === 'videos' ? (snapshot?.videos ?? []).filter(v => match(v.title, v.client_name, v.editor_name, v.owner_name)).map(v => ({ id: `video:${v.id}`, title: v.canonical_name ?? v.title, owner: v.editor_name ?? v.owner_name, client: v.client_name, status: VIDEO_STATUS_LABELS[v.production_status] ?? v.production_status, href: '/admin/content?tab=pipeline', detail: v.production_note, updated: v.updated_at }))
+    : lane === 'packages' ? (snapshot?.deliverables ?? []).filter(d => match(d.title, snapshot?.clients[d.client_id], d.assigned_to_name, d.code)).map(d => ({ id: `deliverable:${d.id}`, title: d.title, owner: d.assigned_to_name, client: `${snapshot?.clients[d.client_id] ?? 'Client label unavailable'} · ${d.code} · ${d.month}`, status: PRODUCTION_STATUS_LABELS[d.production_status] ?? d.production_status, href: '/admin/client-schedule', detail: d.notes, updated: d.updated_at })) : []
+  const visibleRows = statusFilter === 'All statuses' ? rows : rows.filter(row => row.status === statusFilter)
+  const sections: [Lane, string][] = [['master', 'Master schedule'], ['work', 'Active work'], ['needs', 'Assigned to you'], ['special', 'Special tasks & campaigns'], ['done', 'Completed'], ['videos', 'Video & amendments'], ['packages', 'Client packages & schedule'], ['systems', 'Websites & reach'], ['editor', 'CG Web Editor'], ['apps', 'Apps & milestones']]
+  return <div className="nolan-board" aria-label="Nolan overview">
+    <aside><div className="brand"><span className="brandmark">n.</span><span>NOLAN<span className="brand-sub">YOUR WORKBOARD</span></span></div><div className="navlabel">WORKSPACE</div><nav aria-label="Work views">{sections.map(([id, label]) => <button key={id} className={lane === id ? 'selected' : ''} aria-pressed={lane === id} onClick={() => { setLane(id); setStatusFilter('All statuses') }}>{label}</button>)}</nav><div className="side-bottom"><div className="avatar">CA</div><div><strong>CA + Nolan</strong><small>Dynamics workspace</small></div></div></aside>
+    <main><header><div className="breadcrumb">WORK / NOLAN</div><Link className="source-link" to="/admin/work?tab=board&id=7f413d31-17cd-4761-b2e9-a031c1343444">Master record ↗</Link></header>
+      <section className="intro"><div><h1>Here’s the situation.</h1><p>What needs attention, who owns it, and what happens next.</p></div><div className="fresh"><strong>{loading ? 'Reading Dynamics…' : snapshot?.errors.length ? 'Source checks incomplete' : 'Direct Dynamics records'}</strong><small>{snapshot ? 'Last attempt: ' + new Date(snapshot.checked).toLocaleString('en-ZA', { timeZone: 'Africa/Johannesburg' }) + ' SAST' : 'Waiting for source reads'}</small><button className="refresh-data" disabled={loading} onClick={() => setGeneration(n => n + 1)}>Refresh status</button></div></section>
+      {!!snapshot?.errors.length && <div role="alert" className="native-error">{snapshot.errors.map(e => <p key={e}>{e}</p>)}</div>}
+      <section className="work"><div className="work-heading"><div><h2>{sections.find(([id]) => id === lane)?.[1]}</h2><p>{lane === 'master' ? '12 responsibility areas · source navigation, not task statuses' : `${visibleRows.length} matching records returned · open a row for details`}</p></div></div>
+      {lane !== 'master' && <div className="toolbar"><label className="search"><span>⌕</span><input aria-label="Search this lane" value={query} onChange={e => setQuery(e.target.value)} placeholder="Find a client, task or owner…" /></label><select aria-label="Filter status" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}><option>All statuses</option>{[...new Set(rows.map(row => row.status))].sort().map(status => <option key={status}>{status}</option>)}</select>{lane === 'packages' && <input aria-label="Schedule month" type="month" value={month} onChange={e => { if (e.target.value) setMonth(e.target.value) }} />}</div>}
+      <details className="coverage-details"><summary>Coverage & source freshness</summary><div className="coverage">Refreshes on open, return to this window and Refresh. Source status is not independent delivery or approval verification. {lane === 'packages' ? 'Scheduled deliverables, not a complete paid-entitlement audit.' : lane === 'work' ? 'Paged Dynamics task records. External source coverage remains separate.' : 'Records visible to this signed-in account.'}</div></details>
+      {lane === 'packages' && <NolanPackageEvidence month={month} refreshGeneration={generation} />}
+      {lane === 'needs' && <div className="coverage">Open work assigned to your signed-in profile. Unrecorded personal decisions are not inferred from notes.</div>}
+      {lane === 'special' && <div className="coverage">Existing Once-off and CG Socials tasks. Unclassified campaigns remain in Active work.</div>}
+      {(lane === 'apps' || lane === 'editor') && <div className="coverage">Live Dynamics work linked to exact app repositories. This is not a full GitHub milestone inventory; unlinked or ambiguous records stay in Active work. Repository issue status is not deployed acceptance.</div>}
+      {lane === 'master' ? <MasterScope /> : lane === 'systems' ? <div className="coverage"><strong>Full website registry: not connected yet</strong><p>The governed Builder registry adapter is still pending; existing four-client reporting mappings are not the whole fleet. Missing evidence is not a health pass.</p><Link to="/admin/work?tab=board&id=7f413d31-17cd-4761-b2e9-a031c1343444">Open existing master coordination task ↗</Link></div> : <div className="grid list">{visibleRows.map(row => <article className="card" key={row.id}><h3>{row.title}<small style={{ display: 'block', fontWeight: 400, marginTop: 4 }}>{row.client ?? 'Client not recorded'}</small></h3><span className="badge">{row.status}</span><div className="next" aria-label="Source note, not a verified next action">{row.detail ? row.detail.split('\n')[0] : 'No source note recorded'}</div><span className="native-owner">{row.owner ?? 'Owner not recorded'}</span><details className="native-details"><summary>Details & source ↗</summary><p>{row.detail || 'No next-action note recorded.'}</p><p>Source updated: {row.updated}</p><Link to={row.href}>Open authoritative record / workspace →</Link></details></article>)}{!loading && visibleRows.length === 0 && <p className="native-empty">No matching records returned. Check source errors and filters before concluding there is no work.</p>}</div>}
+      </section><footer><strong>One source of truth.</strong> Existing Dynamics records, not a second task database. Edit once in the source workspace. The existing pinned external workboard has not been redirected or made live by this page.</footer>
+    </main>
+  </div>
+}

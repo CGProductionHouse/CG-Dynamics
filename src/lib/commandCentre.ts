@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { fetchAllPages } from './paginatedQuery'
 import { matchClient, clientSelection } from './clientMatcher'
 import { isMissingPlannerAssignmentRpcError, listPlannerBoardAssignments, listPlannerTaskRows, PLANNER_TASK_STATUS_LABELS } from './planner'
 
@@ -308,17 +309,20 @@ export interface ListTaskOptions {
 }
 
 export async function listTasks(options: ListTaskOptions = {}) {
+  const buildNativeQuery = () => {
   let nativeQuery = supabase
     .from(TABLE)
     .select('*')
-    .order('created_at', { ascending: false })
+    .order('created_at', { ascending: false }).order('id')
 
   if (options.activeOnly) {
     nativeQuery = nativeQuery.not('status', 'in', '(done,completed)')
   }
 
+  return nativeQuery
+  }
   const [nativeResult, plannerResult, assignmentResult] = await Promise.all([
-    nativeQuery,
+    fetchAllPages<CommandCentreTask>((from, to) => buildNativeQuery().range(from, to)),
     listPlannerTaskRows({ order: 'due', activeOnly: options.activeOnly }),
     listPlannerBoardAssignments(),
   ])
@@ -532,8 +536,8 @@ export interface ClientOption {
  */
 export async function listActiveClients() {
   const [clientsResult, aliasResult] = await Promise.all([
-    supabase.from('clients').select('id, name').eq('active', true).order('name'),
-    supabase.from('client_aliases').select('client_id, alias'),
+    fetchAllPages<{ id: string; name: string }>((from, to) => supabase.from('clients').select('id, name').eq('active', true).order('name').order('id').range(from, to)),
+    fetchAllPages<{ client_id: string; alias: string }>((from, to) => supabase.from('client_aliases').select('client_id, alias').order('client_id').order('alias').range(from, to)),
   ])
   if (clientsResult.error || !clientsResult.data) return clientsResult
 

@@ -39,7 +39,8 @@ test('calendar and schedule remain separate while Content navigates to unified p
 
 test('Work defaults staff to My Day and gates workload and unassigned controls to managers', () => {
   assert.match(work, /const canViewWorkload = isManagerRole\(profile\?\.role\)/)
-  assert.match(work, /requestedTab === 'workload' && canViewWorkload/)
+  assert.match(work, /\(requestedTab === 'workload' \|\| requestedTab === 'nolan'\) && canViewWorkload/)
+  assert.match(work, /tab === 'nolan' && canViewWorkload && <NolanOverview/)
   assert.match(work, /: 'my-day'/)
   assert.match(work, /canViewWorkload \? \[\['workload', 'Workload'\]/)
   assert.match(work, /canViewWorkload && <Link to="\?tab=board&scope=unassigned"/)

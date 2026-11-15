@@ -2,6 +2,7 @@ import { useEffect, useEffectEvent, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import MyDayPage from './MyDayPage'
+import NolanOverview from './NolanOverview'
 import CommandCentrePage from './CommandCentrePage'
 import PlannerPage from './PlannerPage'
 import { listPipelineVideos, listRuns, type ContentGuideIdea, type ContentRun } from '../../lib/contentWorkflow'
@@ -11,7 +12,7 @@ import { isManagerRole } from '../../lib/roles'
 import { listPlannerWorkloadSummary, listPlannerWorkloadTasks, type PlannerWorkloadSummary, type PlannerWorkloadTask } from '../../lib/planner'
 import { EmptyState } from '../../components/ui/States'
 
-type WorkTab = 'my-day' | 'board' | 'daily-tasks' | 'workload'
+type WorkTab = 'my-day' | 'board' | 'daily-tasks' | 'workload' | 'nolan'
 
 // Videos the signed-in editor is actively working, plus internal reviews the
 // signed-in manager/admin owns. Compact; silent before phase-19e.
@@ -241,7 +242,7 @@ export default function MyWorkPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const canViewWorkload = isManagerRole(profile?.role)
   const requestedTab = searchParams.get('tab')
-  const tab: WorkTab = requestedTab === 'board' || requestedTab === 'daily-tasks' || (requestedTab === 'workload' && canViewWorkload)
+  const tab: WorkTab = requestedTab === 'board' || requestedTab === 'daily-tasks' || ((requestedTab === 'workload' || requestedTab === 'nolan') && canViewWorkload)
     ? requestedTab
     : 'my-day'
 
@@ -271,12 +272,12 @@ export default function MyWorkPage() {
               <h1 className="text-2xl font-bold tracking-tight text-white">Work</h1>
             </div>
             <div className="flex flex-col gap-2 sm:items-end">
-              <div className={`grid gap-1 rounded-lg border border-white/10 bg-white/[0.025] p-1 ${canViewWorkload ? 'grid-cols-2 lg:grid-cols-4' : 'grid-cols-3'}`} role="group" aria-label="Work views">
+              <div className={`grid gap-1 rounded-lg border border-white/10 bg-white/[0.025] p-1 ${canViewWorkload ? 'grid-cols-2 lg:grid-cols-5' : 'grid-cols-3'}`} role="group" aria-label="Work views">
               {([
                 ['my-day', 'My Day'],
                 ['board', 'Team Board'],
                 ['daily-tasks', 'Daily Tasks'],
-                ...(canViewWorkload ? [['workload', 'Workload'] as const] : []),
+                ...(canViewWorkload ? [['workload', 'Workload'] as const, ['nolan', 'Nolan'] as const] : []),
               ] as Array<[WorkTab, string]>).map(([value, label]) => (
                 <button key={value} type="button" aria-pressed={tab === value} onClick={() => switchTab(value)} className={`min-h-11 rounded-md px-3 py-2 text-sm font-semibold transition-colors ${tab === value ? 'bg-brand-teal/15 text-brand-teal' : 'text-brand-primary hover:bg-white/[0.05] hover:text-white'}`}>
                   {label}
@@ -300,6 +301,7 @@ export default function MyWorkPage() {
       </div>
       {tab === 'my-day' && <><MyVideoQueue /><MyContentRuns /><MyDayPage embedded /></>}
       {tab === 'board' && <PlannerPage embedded />}
+      {tab === 'nolan' && canViewWorkload && <NolanOverview />}
       {tab === 'daily-tasks' && (
         <>
           <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
