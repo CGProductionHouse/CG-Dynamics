@@ -152,3 +152,32 @@ Website-reuse code commit `6ce0315`: exact build, focused lint and diff-check pa
 Normal full suite exits 0 in 184.2 seconds: 4,340 tests, 4,310 passed, 30 skipped,
 zero failed/cancelled. Test fixtures use synthetic loopback configuration; this does
 not verify actual production report access or rendered browser/device acceptance.
+
+## 15 November continuation: schedule evidence disclosure
+
+The package row disclosure now shows canonical scheduled date, recorded posted
+timestamp, internal approval, sent-to-client and client approval timestamps
+separately. Missing evidence stays `Not recorded`; invalid timestamps are labelled
+as source gaps. Schedule/status values never synthesize posting or approval dates.
+All displayed times use Africa/Johannesburg. This does not verify platform post
+identity, final asset revision, reviewer provenance or historical paid entitlement.
+The existing row and source workspace remain authoritative; no new query, provider
+sync, write surface, credential, dependency or production change is introduced.
+The liked layout and external pinned board remain unchanged.
+
+Verification is local only: new rendered component contracts cover missing fields,
+schedule-versus-post separation, SAST timestamp display, malformed inputs and
+read-only integration. The initial broader test command used the wrong synthetic
+environment variable name and failed existing Supabase initialization; corrected
+VITE_SUPABASE_PUBLISHABLE_KEY rerun passes. Authenticated browser/role acceptance,
+full current fleet/posted reconciliation and release gates remain open.
+
+Final continuation receipt: TypeScript/Vite build, emitted app component/CSS,
+scoped ESLint and diff check pass. Nolan focused suite: 22 passed, zero failures.
+Full normal suite with the repository's synthetic `http://127.0.0.1:1`
+configuration: 4,345 tests, 4,315 passed, 30 skipped, zero failed/cancelled;
+exit 0 in 179.2 seconds. An earlier full run used port 54321 and hit one existing
+client-library origin-expectation failure; correcting only the synthetic test
+configuration produced the passing full run. No guard or production code was
+weakened. Independent code review found no blocking issues. Browser/device/real
+role tests were not run for this addition and remain explicit release gates.

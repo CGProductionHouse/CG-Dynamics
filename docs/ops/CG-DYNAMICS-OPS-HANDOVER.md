@@ -1,3 +1,14 @@
+## 15 November — Nolan workbook evidence disclosure, local continuation
+
+Existing draft #990 remains the native workbook owner. The core-only candidate
+now exposes canonical schedule, recorded-post and approval timestamps separately
+in package row details, without treating status or dates as provider publication
+proof. No scheduler/provider, security, DB, permissions or release change; the
+external pinned board stays in place. See
+[Nolan candidate and verification](NOLAN-NATIVE-OVERVIEW-2026-11-15.md).
+Authenticated role/browser/visual acceptance and actual-posted reconciliation
+remain open. #679 ZERO unapproved deployment gate and all other owners remain.
+
 ## 11 November — existing-film registration repair, local candidate only
 
 CA asked MSI to finish all possible video tracking reconciliation. Sixteen
