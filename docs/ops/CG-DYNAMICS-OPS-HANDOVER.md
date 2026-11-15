@@ -1,3 +1,22 @@
+## 15November — Browser service root cause confirmed; current four still unsent
+
+Owner again authorised four revised Wiseman HD+caption messages to CG Picasso
+Approvals, then Amonique tag, no signatures. Supported Browser bootstrap and the
+owner-requested retry both return `Trusted RPC service is not configured: browser`.
+Chrome is running; documented extension diagnostics show enabled installation;
+native-host manifest/registry checks pass. Non-secret local profile metadata
+identifies the existing company account; no browser session/account sign-in was
+claimed verified. Do not blame a disconnected/disabled extension, change permissions,
+repair native host or bypass runtime policy with other browser automation. This
+chat needs the supported Browser service provisioned before export/delivery.
+
+R4 working recovery ZIP uploaded to the existing internal OneDrive helper and
+exact name/4,900,835-byte metadata read back, sharing unchanged. Local65-entry ZIP
+CRC/SHA checked; remote SHA not claimed. Original libraries/fonts/credentials absent.
+Current four official R4 pages and source drafts remain saved; prior HD exports
+remain deselected. No send/tag, deployment, runtime code or new spend. User send
+authority persists; no fresh send approval is required once access is restored.
+
 ## 15November — automotive R4 saved; owner accepts previews; HD delivery blocked
 
 Owner retained the concepts but rejected flat/dated execution, hard offset font

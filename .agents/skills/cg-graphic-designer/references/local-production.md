@@ -31,6 +31,16 @@ Do not infer a laptop outage or grant broader permissions from that connector er
 Folder-scoped search also returned unrelated-client results: enforce exact parent
 containment before using a result. Never fetch another client's returned item.
 
+## Browser bootstrap failure is separate from Chrome setup
+
+On15November, the supported bundled Browser runtime failed twice with
+`Trusted RPC service is not configured: browser`, including the owner-requested
+retry. Chrome, enabled extension and native-host/registry diagnostics passed.
+A healthy local extension does not provision a missing trusted service in the
+current chat. Do not blame user disconnection, modify native host/security settings,
+or switch to unofficial browser automation. Request the supported Browser service
+for the chat; preserve held HD/caption manifests and do not send stale exports.
+
 ## Native visual amendment lessons15November
 
 Owner rejected flat/dated Wiseman execution while retaining concepts. Four existing
@@ -135,7 +145,7 @@ transfer, human approval, schedule assignment or delivery. Keep those gates sepa
   authenticity or current business truth. Never rewrite an approved caption
   silently; preserve its prior bytes/hash and record the bounded amendment.
 - Re-resolve stable IDs immediately before structural edits. An additional January
-  page shifted the rejected owned copies from39–46 to40–47. The approved nine-call
+  page shifted the rejected owned copies from39â€“46 to40â€“47. The approved nine-call
   replacement preserved all94other IDs/order, including that new page. Old page
   numbers must never serve as write authority. Exact-operation approval does not
   grant creative approval, publication or deletion of anyone else's work.
