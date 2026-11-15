@@ -404,3 +404,33 @@ This is a mock-provider workbook route harness, NOT authenticated/RLS/parent-app
 real canonical destination, production source or edit/readback acceptance. It does
 not establish network-race, complete source coverage or hosting readiness. No
 application code changed during these checks, no merge or deployment occurred.
+
+
+### Authenticated candidate hosting discovery, 15 November 15:08 UTC
+
+Read-only Vercel metadata matched exact CGProductionHouse/CG-Dynamics repository
+to cg-dynamics/prj_jHVsExoStNjI7ikqlJyXZx26Ahuu under
+team_SK5vvWv1AIXFkPNV8JFYL205 (cg-dynamics-projects). Exact workbook branch
+codex/nolan-native-core-overview returned zero deployments with no continuation.
+Exact PR head30fde305c405a59eab218c5bbe30d941db863ee4 and application
+commit294b0508088843aeb8f8f93facc0ab07dce26a8f also returned zero deployments.
+Custom environments list was empty. Sampled latest previews belonged to older
+October branches, not this candidate. Protection remains enabled except custom
+domains. No existing candidate preview URL was found; no environment values or
+credentials were read or changed. PR-triggered workflow lookup also returned no
+runs, not a CI pass or preview proof.
+
+Existing #679 policy was read; all49 comments were retrieved and the latest six
+receipts inspected. The latest specific
+release packets cover older source, not an independently verified authorization
+to release this workbook. Git auto-deployment remains disabled. The sanctioned
+path is an explicitly approved frozen integrated SHA, fresh spend/headroom and
+client-serving reserve, rollback capture, one local production-target prebuilt
+staging upload without moving live domains, legitimate staged-origin role checks,
+and only then authorized promotion of that same artifact. Production cookies or
+tokens must not be borrowed; unavailable authentication stops promotion.
+
+Real authenticated candidate acceptance is therefore BLOCKED on an approved
+candidate hosting/release packet and legitimate same-origin test access, not a
+source-code or synthetic-browser failure. No cloud build, deploy, promotion,
+settings/budget/DNS change or credential forwarding occurred in this discovery.
