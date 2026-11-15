@@ -13,7 +13,7 @@ test('Nolan tab keeps existing manager boundary and deep links', () => {
   assert.ok(work.includes("if (taskId) next.set('id', taskId)"))
 })
 test('Incomplete coverage and source failures are explicit, not passes', () => {
-  for (const text of ['not connected yet', 'not a complete paid-entitlement audit', 'role="alert"', 'migrationNeeded', 'No matching records returned', 'not independent delivery or approval verification']) assert.ok(page.includes(text))
+  for (const text of ['partial coverage', 'not a complete paid-entitlement audit', 'role="alert"', 'migrationNeeded', 'No matching records returned', 'not independent delivery or approval verification']) assert.ok(page.includes(text))
 })
 test('Refresh is bounded to opening, focus and explicit action; cleanup suppresses stale reads', () => {
   assert.ok(page.includes("window.addEventListener('focus', refresh)"))

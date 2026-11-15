@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 // Responsibilities are navigation/coverage, never synthetic completed tasks.
 export function MasterScope() {
   const sections = [
-    ['Websites & discovery', '/admin/work?tab=board&id=7f413d31-17cd-4761-b2e9-a031c1343444', 'Full Builder registry adapter pending.'],
+    ['Websites & discovery', '/admin/work?tab=board&id=7f413d31-17cd-4761-b2e9-a031c1343444', 'Four reviewed reporting mappings; full Builder registry pending.'],
     ['Apps: CG Hours, CG Pay, Dynamics, Web Editor', '/admin/work?tab=board', 'Exact linked Dynamics work; full external milestone inventory pending.'],
     ['Client packages, posters and posting', '/admin/client-schedule', 'Canonical schedule; paid entitlements and posted proof require reconciliation.'],
     ['Videos, amendments and approvals', '/admin/content?tab=pipeline', 'Canonical pipeline; delivery and approval remain separate.'],

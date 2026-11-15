@@ -134,3 +134,21 @@ Final normal full-suite receipt on code/test commit `6327a63`: exit 0 in 177.2 s
 loopback Supabase configuration and the original real SES delays, without production
 credentials or provider calls. Exact code build, focused lint and diff-check pass.
 Authenticated UI/role/readback and budgeted production release remain unverified.
+
+## Existing website reporting reused, not a new registry bridge
+
+The Websites lane now offers explicit on-demand loading of actual active Clients,
+matched only to the four existing reviewed `cgWebsiteFleet` UUID mappings. It labels
+this as partial coverage, not a complete Builder inventory. Maintenance-only and
+unmapped sites are not inferred. Existing `WebsitePerformancePanel` is reused with
+saving disabled; client/month selection uses its existing authenticated reporting
+and canonical enquiries readers. No token, endpoint, credential, role or backend
+configuration changed. The optional source-generated timestamp is shown separately
+from directory-read time. Parent refresh/focus remounts this lazy view, discarding
+old reporting state; explicit retry/reset clears stale data and cancels old reads.
+The full website fleet and authenticated reporting acceptance remain outstanding.
+
+Website-reuse code commit `6ce0315`: exact build, focused lint and diff-check pass.
+Normal full suite exits 0 in 184.2 seconds: 4,340 tests, 4,310 passed, 30 skipped,
+zero failed/cancelled. Test fixtures use synthetic loopback configuration; this does
+not verify actual production report access or rendered browser/device acceptance.

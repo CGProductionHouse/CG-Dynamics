@@ -19,7 +19,7 @@ const monthLabel = (month: string) => new Intl.DateTimeFormat('en-ZA', { month: 
  * and month. Traffic comes from the provider snapshot; enquiries and lead outcomes come only
  * from canonical #405 lead truth (never a provider conversion aggregate).
  */
-export function WebsitePerformancePanel({ clients, canSave }: { clients: Client[]; canSave: boolean }) {
+export function WebsitePerformancePanel({ clients, canSave, showFreshness = false }: { clients: Client[]; canSave: boolean; showFreshness?: boolean }) {
   const [clientId, setClientId] = useState('')
   const [month, setMonth] = useState(() => currentReportingMonth())
   const [performance, setPerformance] = useState<{ key: string; result: WebsitePerformanceResult | null; failed: boolean } | null>(null)
@@ -80,6 +80,7 @@ export function WebsitePerformancePanel({ clients, canSave }: { clients: Client[
       </div>
 
       {clientId && period && !model && <p className="mt-5 text-sm text-brand-primary/75">Loading website performance…</p>}
+      {showFreshness && clientId && currentPerformance && <p className="mt-4 text-sm text-slate-400">Traffic snapshot generated: {report?.generatedAt ?? 'Not available'}. This source timestamp is separate from the directory refresh; canonical enquiry data is read separately for the selected month.</p>}
       {client && period && model && <div className="mt-6">
         <WebsitePerformanceDashboard
           model={model}
