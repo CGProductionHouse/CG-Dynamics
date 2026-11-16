@@ -23,7 +23,7 @@ export interface MonthlyBaselineInput {
 }
 
 const MAX_SIGNAL_LENGTH = 180
-const CONTENT_GUIDE_HEADING = /(content (ideas|formats|that suits)|recurring formats|content[, /]+reels|reels? \/ video|social\/content lessons|(?:umbrella|engen|sasol|get together) mode)/i
+const CONTENT_GUIDE_HEADING = /(content (ideas|formats|directions|that suits)|recurring formats|content[, /]+reels|reels? \/ video|social\/content lessons|(?:umbrella|engen|sasol|get together) mode)/i
 const POSITIONING_GUIDE_HEADING = /(identity|positioning|audience)/i
 const UNSAFE_GUIDE_HEADING = /(contact|address|website|hashtag|freshness|unresolved|mistakes|guardrail)/i
 const UNSAFE_SIGNAL = /(@|https?:\/\/|www\.|\+\d|\b\d{2,4}[ -]\d{3}[ -]\d{3,4}\b)/i

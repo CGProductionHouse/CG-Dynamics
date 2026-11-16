@@ -128,7 +128,11 @@ export function instagramPublishingContinuationDecision(intent: PublishingIntent
 
 export type InstagramPublicationPhase = 'container_creating' | 'container_processing' | 'container_ready' | 'publishing' | 'verifying'
 export interface InstagramPublicationProtocol { phase: InstagramPublicationPhase; publishAttempted: boolean; statusReads: number; startedAt: string | null }
-export interface PublishingObservation { state: 'processing' | 'provider_scheduled' | 'posted' | 'failed' | 'unknown_outcome'; operationId?: string; postId?: string; errorCode?: string; instagramPhase?: InstagramPublicationPhase }
+export interface TikTokStatusAudit {
+  version: 1; businessId: string; publishId: string; publicPostIds: readonly string[]
+  nativeState: PublishingObservation['state']; checkedAt: string; notBefore: string | null; statusReads: number
+}
+export interface PublishingObservation { state: 'processing' | 'provider_scheduled' | 'posted' | 'failed' | 'unknown_outcome'; operationId?: string; postId?: string; errorCode?: string; instagramPhase?: InstagramPublicationPhase; tiktokStatus?: TikTokStatusAudit }
 /** Provider IDs alone are not evidence that a post is live. Unknown states fail closed. */
 export function normalizePublishingObservation(platform: PublishingPlatform, payload: Record<string, unknown>, route?: PublishingRoute): PublishingObservation {
   const status = payload.status

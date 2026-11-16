@@ -1,6 +1,86 @@
 # Social publishing — 15 November 2026
 
-## Latest 16 November — concrete TikTok Business status credentials, SOURCE ONLY
+## Latest 16 November — private TikTok queue reconciliation bridge, SOURCE ONLY
+
+Same DRAFT PR #991 / #220 / #269. Added a private status-only binding over the
+existing `background_jobs` claim/save contract and concrete Business credential
+reader. No additional queue, table, migration, OAuth store, public API or worker
+registration. Submission and publication preflight are deliberately unavailable
+on this binding; the current worker configuration still registers Facebook only.
+
+The bridge reads the exact stored job, original intent/fingerprint/actor,
+submission record, current lease/fence and recorded share_id before private
+credential inspection. It rereads the record afterward; changed identity,
+receipt, stored intent or lease cannot promote native status. A revoked confirmation
+does not conceal an already-started exact task, and cannot permit a new POST.
+Job/provider failures use fixed diagnostics, not SDK/provider text or tokens.
+
+The existing receipt JSON now has a bounded typed `tiktokStatus` audit containing
+all returned public IDs (maximum32), exact business/share identity, native state,
+read count and timestamps. It passes through the existing service-only save RPC;
+no candidate SQL or stored permissions were changed. The manager projection
+continues to omit the private audit; no client/public projection was added.
+Tests exercise the actual queue adapter and real encryption/HTTP composition
+with synthetic SDK/RPC/provider responses. This is NOT fresh PostgreSQL/RLS or
+durable-database acceptance; the optional SQL suite remains skipped.
+
+Pending native reads wait180seconds even if the generic durable worker wakes
+every30seconds. Maximum5native status attempts and20minutes from the recorded
+submission; invalid audit metadata cannot reset the budget. Terminal/inbox/
+ambiguous evidence is held for review, never silently polled/replayed. All
+multiple IDs survive the queue observation without choosing a first post.
+
+Important remaining provenance gate: native success proves only that TikTok's
+task produced a public post. This bridge intentionally retains that evidence as
+UNKNOWN with `TIKTOK_SOURCE_TO_RECEIPT_UNVERIFIED` until a qualified uploader
+durably binds the immutable approved asset/hash to share_id. A native failure
+also retains the duplicate barrier rather than authorizing a fresh submission
+without that source proof. No uploader or proof-producing path is invented here.
+The private binding remains unregistered and cannot be enabled by a request.
+
+61 new / 246 affected focused regressions pass, covering real queue handoff,
+multi-ID retention, cooldown/read limits, lost persistence, concurrent lease/
+source changes, withdrawal, SDK/HTTP cancellation, safe diagnostics and private
+projection. Actual cached Deno check, scoped lint, build/emitted app pass.
+Final frozen-source acceptance: **4,898 total / 4,867 passed / 31 skipped /
+0 failures**, concurrency2, duration474861ms. Source self-review passes within
+this private status-only increment; native/SQL/rollout gates remain explicit.
+Restored only the two unrelated generated issue519 artifacts after completion.
+Evidence: task TEMP `cg-tiktok-queue-reconcile-focused.log`,
+`cg-tiktok-queue-reconcile-types.log`, `cg-tiktok-queue-reconcile-lint.log`,
+`cg-tiktok-queue-reconcile-build.log`, `cg-tiktok-queue-reconcile-full.log`,
+`cg-tiktok-queue-reconcile-full-corrected.log`, `cg-tiktok-queue-reconcile-final.log`
+and failing-before-fix `cg-tiktok-queue-null-repro.log`. The first full run had exactly
+one test-environment mismatch: Brand Hub's existing positive grant fixture uses
+`http://127.0.0.1:1`; configuring port54321 correctly rejected that foreign origin.
+All six Brand Hub checks pass after using the required port1 test base, without
+changing application/tests. Corrected full run uses that base, the synthetic
+`local-public-fixture` key, existing Git Bash/OpenSSL PATH and concurrency2.
+
+Review then reproduced a real storage-contract defect: the existing SQL's
+recursive `jsonb_strip_nulls` removes terminal audit's null notBefore field.
+[Official PostgreSQL17 JSON semantics](https://www.postgresql.org/docs/17/functions-json.html)
+confirm recursive object-field removal while non-object nulls remain untouched.
+Two red regressions (one/multiple public IDs) now model that exact compact
+JSON roundtrip. Decoder accepts only the exact compact terminal shape and
+normalizes it; processing still requires its real deadline, no read-budget
+reset or publication permission. No SQL change. Before this small fix the
+corrected full suite passed4896total/4865pass/31skips/0failures; that snapshot is
+prior evidence only. Final frozen-source full run includes the additional two
+regressions and is recorded above. Lost persistence and terminal
+resumption preserve receipts; no automatic retry/submission is introduced.
+
+Integrated main34c4552e/PR998, preserving the other owner's exact Madison
+readiness receipt, strategy-heading fix/tests and operational live snapshot.
+Those live/phone/content claims remain that owner's receipt, not new acceptance
+from this lane. No new product UI/browser/device or live provider call.
+FOUR earlier migrations remain unapplied; native consent/rollout, owned-media
+qualification, uploader/source proof and controlled provider pilot remain held.
+No deployment/provider/OAuth/SQL/data/config/secret/permission/Microsoft/Vercel/
+hosting/cost action. Teams/sync hold and staff/Nolan lanes remain separate.
+Google Control Centre exact target remains unavailable; no guessed tracker write.
+
+## Earlier 16 November — concrete TikTok Business status credentials, SOURCE ONLY
 
 Same draft PR #991 / #220 / #269. Implemented the previously missing PRIVATE
 status-credential resolver against the existing candidate Business OAuth tables,

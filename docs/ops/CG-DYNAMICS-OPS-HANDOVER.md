@@ -1,4 +1,33 @@
-## Latest 16 November — concrete private TikTok Business status credentials
+## Latest 16 November — private TikTok durable reconciliation bridge
+
+Same DRAFT PR991/#220/#269. Status-only binding now connects the exact canonical
+job/lease/submission receipt to the concrete Business credential/status reader,
+then rechecks stored intent/fence before returning a queue observation. Typed private
+audit retains all native public IDs, read count/time; existing service-only JSON
+save substrate reused without SQL/schema changes. Manager/client projections do
+not disclose the audit. Synthetic SDK/RPC/HTTP composition tests are not fresh
+PostgreSQL/RLS or live provider acceptance.
+
+180second cooldown,5native attempts/20minute age bound, terminal review hold;
+no first-ID selection, credential serialization, refresh or publish retry.
+Native success/failure stays ambiguous until the future uploader proves the
+immutable approved-source-to-share_id link. Submit/preflight unavailable; this
+binding is UNREGISTERED with no env/parser/public endpoint activation.
+61new/246affected regressions pass; actual Deno typing, build/emitted app and
+scoped lint pass. Final frozen-source suite: **4898 total /4867 pass /31 skips /
+0 failures**, concurrency2. Source self-review passes for this private increment.
+Restored only unrelated generated issue519 artifacts after completion.
+Review reproduced/fixed SQL null-stripping breaking compact terminal receipt
+decode, with two red-to-green storage-shaped regressions; no SQL changed.
+Earlier corrected4896/4865/31/0 pass is before that fix, not final-source proof.
+[Existing receipt](SOCIAL-PUBLISHING-220-2026-11-15.md) records precise limits.
+Main34c4552e/PR998 exact Madison/strategy files and their owner's live snapshot
+preserved below; no new live/device/content acceptance claim. FOUR candidates
+unapplied, no Docker restart/new SQL proof. No deploy/provider/OAuth/config/
+secret/data/permission/Microsoft/Vercel/hosting/cost change. Teams/sync hold/
+staff/Nolan unaffected. Tracker exact target unknown; no guessed write.
+
+## Earlier 16 November — concrete private TikTok Business status credentials
 
 Same DRAFT PR991/#220/#269. Missing status resolver now has a concrete encrypted
 Business-store + native inspection/profile implementation and private status
@@ -26,6 +55,30 @@ Backend/config/consent/native acceptance/uploader/durable registration remain
 held; no publication/deploy/OAuth/SQL/config/secret/permission/provider mutation/
 Microsoft/Vercel/cost action. [Existing evidence](SOCIAL-PUBLISHING-220-2026-11-15.md).
 Tracker exact target unknown; no guessed write.
+
+## 16 November — Madison current portal accepted; narrow guide fix LIVE
+
+CA prioritised Madison Wear7b47afb0-fa55-4916-85f6-09c57e5905b9. Real issued login
+200/exact client, October report published15:51:30UTC and manually reviewed current
+November strategyv5 published15:56:51UTC. Actual client reads report/22facts across
+FB/IG/TikTok, Plan ten fields/2videos8photos8posters, protected logo PNG200;
+foreign real Novus posts/facts/Ads/calendar denied403, asset404, no draft leakage.
+No credentials in repo/issues, reset, provider permission/mapping, package,
+website, schema/migration, Vercel or other-agent change.
+
+33Meta posts refreshed;35historical rows retained/two not-returned Facebook posts
+guardedly excluded from current comparisons pending confirmation, NOT deleted.
+Staff report hash unchanged. TikTok1video refreshed, native semantics preserved;
+missing unique viewers stays null. No Ads mapping is not zero or entitlement.
+Decemberv3/Januaryv1 real drafts; actual assets/dates not invented.
+
+Parser omitted approved guide's Content directions heading, producing false
+EXACT_STRATEGY_EVIDENCE_UNAVAILABLE. One-word alias, no trust-gate/data change;
+two failing-before regressions now pass,138focused/245broader strategy tests,
+build/lint/full hosted Deno/diff green. Existing MCPv84 exact41-file readback,
+other40/auth unchanged; actual brief admits same approved guide. No frontend or
+worker release implied. [Exact receipt/limits](MADISON-CLIENT-READINESS-2026-11-16.md).
+Same normal author/hourly task continues. Tracker target unavailable, no guessed write.
 
 ## 16 November — Novus actual client login/current plan accepted; fleet continued
 
