@@ -33,7 +33,7 @@ export interface PublishingIntent {
 }
 export interface PublishingContext {
   review: ApprovedPublishingReview
-  deliverable: { id: string; client_id: string; scheduled_date: string | null; archived_at: string | null; posted_at: string | null }
+  deliverable: { id: string; client_id: string; scheduled_date: string | null; archived_at: string | null; posted_at: string | null; production_status?: string }
   binding: PublishingBinding
   authorization: { id: string; reviewVersionId: string; clientId: string; connectionId: string; accountId: string; route: PublishingRoute; scheduledAt: string; assetSha256: string } | null
   assetSha256: string
@@ -64,7 +64,7 @@ export function preparePublishingIntent(context: PublishingContext): { intent: P
   if (!path) return { intent: null, blockers: ['UNSUPPORTED_PROVIDER_ROUTE'] }
   if (![r.id, d.id, d.client_id, b.clientId, b.connectionId, b.accountId].every(present)
     || r.client_id !== d.client_id || r.client_id !== b.clientId || r.deliverable_id !== d.id) blockers.push('EXACT_CLIENT_BINDING_REQUIRED')
-  if (r.state !== 'approved' || d.archived_at !== null || d.posted_at !== null) blockers.push('CURRENT_APPROVED_REVIEW_REQUIRED')
+  if (r.state !== 'approved' || d.archived_at !== null || d.posted_at !== null || ['scheduled', 'posted'].includes(d.production_status ?? '')) blockers.push('CURRENT_APPROVED_REVIEW_REQUIRED')
   if (!r.channels.includes(path.platform)) blockers.push('CHANNEL_NOT_APPROVED')
   if (!present(r.caption) || !hash(context.assetSha256) || !r.asset_path.startsWith(`${d.id}/`)
     || !['image/jpeg', 'image/png', 'image/webp', 'video/mp4'].includes(r.media_type)) blockers.push('APPROVED_ASSET_REQUIRED')

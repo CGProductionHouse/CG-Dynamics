@@ -39,11 +39,16 @@ before(async () => {
    grant usage on schema auth to authenticated,service_role;
    create table public.profiles(id uuid primary key,role text,is_active boolean,full_name text);
    create table public.clients(id uuid primary key,active boolean,package_settings jsonb);
-   create table public.monthly_deliverables(id uuid primary key,client_id uuid,scheduled_date date,archived_at timestamptz,posted_at timestamptz);
+   create table public.monthly_deliverables(id uuid primary key,client_id uuid,scheduled_date date,archived_at timestamptz,posted_at timestamptz,production_status text default 'not_started',
+    microsoft_source_type text,microsoft_plan_id text,microsoft_bucket_id text,microsoft_task_id text);
    create table public.content_review_versions(id uuid primary key,deliverable_id uuid,client_id uuid,state text,asset_path text,media_type text,caption text,channels text[],scheduled_at timestamptz);
    create unique index one_current_review on public.content_review_versions(deliverable_id) where state='approved';
    create table public.tiktok_connections(id uuid primary key,client_id uuid,status text,profile_deep_link text);
    create table public.notifications(id uuid default gen_random_uuid(),user_id uuid,type text,title text,body text,entity_type text,entity_id uuid,link text);
+   create table public.microsoft_sync_jobs(id uuid primary key,status text,exported_at timestamptz,created_at timestamptz,updated_at timestamptz);
+   create table public.microsoft_sync_job_sources(id uuid primary key,job_id uuid,source_type text,source_id text,source_name text,stage text,complete boolean,
+    safe_error text,pagination_cursor text,records jsonb,record_count integer,updated_at timestamptz);
+   create table public.microsoft_sync_runs(id uuid primary key,preview_job_id uuid,status text,finished_at timestamptz,snapshot_exported_at timestamptz,source_completeness jsonb);
    create function public.is_admin() returns boolean language sql as $$ select false $$;
    create function public.is_manager() returns boolean language sql as $$ select false $$;
    insert into profiles values(${q(actor)},'manager',true,'Fixture manager');
@@ -54,6 +59,7 @@ before(async () => {
   sql(legacy.slice(legacy.indexOf('create or replace function public.claim_next_background_job('), legacy.indexOf('drop function if exists public.update_background_job_progress(')))
   sql(readFileSync('supabase/migrations/20261115104948_social_publishing_queue.sql', 'utf8'))
   sql(readFileSync('supabase/migrations/20261115104950_tiktok_business_oauth.sql', 'utf8'))
+  sql(readFileSync('supabase/migrations/20261116085815_social_publication_preparation_evidence.sql', 'utf8'))
   server = await createServer({ configFile: false, server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true }, logLevel: 'error' })
   queue = await server.ssrLoadModule('/supabase/functions/_shared/socialPublishingQueue.ts')
   authorization = await server.ssrLoadModule('/supabase/functions/_shared/socialPublicationAuthorization.ts')
@@ -63,7 +69,7 @@ after(async () => server?.close())
 
 function fixture({ authorized = true, advance = true } = {}) {
   const client = randomUUID(), deliverable = randomUUID(), review = randomUUID(), connection = randomUUID()
-  sql(`insert into clients values(${q(client)},true,'{}'); insert into monthly_deliverables values(${q(deliverable)},${q(client)},(now() at time zone 'Africa/Johannesburg')::date,null,null);
+  sql(`insert into clients values(${q(client)},true,'{}'); insert into monthly_deliverables(id,client_id,scheduled_date,archived_at,posted_at) values(${q(deliverable)},${q(client)},(now() at time zone 'Africa/Johannesburg')::date,null,null);
    insert into content_review_versions values(${q(review)},${q(deliverable)},${q(client)},'approved',${q(`${deliverable}/final.jpg`)},'image/jpeg','Approved caption',array['facebook'],now()+interval '2 minutes');
    insert into tiktok_connections values(${q(connection)},${q(client)},'connected','https://www.tiktok.com/@fixture');`)
   const intent = jsonSql(`select jsonb_build_object('key',${q(`social-publish:v1:${JSON.stringify([client, deliverable, review, 'facebook', '12345'])}`)},'clientId',${q(client)},'deliverableId',${q(deliverable)},'reviewVersionId',id,
@@ -113,7 +119,66 @@ function context(f) {
     assetSha256: f.intent.assetSha256, teamsScheduleVerified: true, rolloutApproved: true }
 }
 
+function capturedScheduleFixture() {
+  const f = fixture({ advance: false }), job = randomUUID(), source = randomUUID(), run = randomUUID(), plan = randomUUID(), bucket = randomUUID(), task = randomUUID()
+  const record = { sourceType: 'planner_task', sourcePlanId: plan, sourcePlanName: 'CLIENT SOCIALS FIXTURE', sourceBucketId: bucket,
+    sourceTaskId: task, title: 'PRIVATE TITLE', description: 'PRIVATE NOTES', percentComplete: 0, completedDate: null,
+    dueDate: sql(`select scheduled_date from monthly_deliverables where id=${q(f.deliverable)}`) }
+  const coverage = [{ sourceType: 'planner_plan', sourceId: plan, sourceName: record.sourcePlanName, complete: true, safeError: null, recordCount: 1 }]
+  sql(`update monthly_deliverables set microsoft_source_type='planner_task',microsoft_plan_id=${q(plan)},microsoft_bucket_id=${q(bucket)},microsoft_task_id=${q(task)} where id=${q(f.deliverable)};
+   insert into microsoft_sync_jobs values(${q(job)},'complete',now()-interval '1 minute',now()-interval '2 minutes',now()-interval '1 minute');
+   insert into microsoft_sync_job_sources values(${q(source)},${q(job)},'planner_plan',${q(plan)},${q(record.sourcePlanName)},'complete',true,null,null,${q(JSON.stringify([record]))},1,now()-interval '1 minute');
+   insert into microsoft_sync_runs values(${q(run)},${q(job)},'completed',now()-interval '30 seconds',now()-interval '1 minute',${q(JSON.stringify(coverage))});
+   update microsoft_sync_runs set snapshot_exported_at=(select exported_at from microsoft_sync_jobs where id=${q(job)}) where id=${q(run)};`)
+  const read = () => JSON.parse(sql(`select read_social_publication_schedule_evidence(${q(actor)},${q(f.deliverable)},${q(f.review)})`, 'service_role'))
+  return { ...f, sourceJob: job, source, run, plan, bucket, task, record, coverage, read }
+}
+
 test('real PostgreSQL: queue, source/role fences, crash recovery, receipts and OAuth transactions', { skip: !enabled }, async t => {
+  await t.test('captured-source preflight reads one exact fresh task proof without exposing text or writing capture/schedule state', () => {
+    const f = capturedScheduleFixture(), before = sql(`select row_to_json(s) from microsoft_sync_job_sources s where id=${q(f.source)}`)
+    const proof = f.read()
+    assert.equal(proof.contract, 'social_publication_schedule_evidence_v1'); assert.equal(proof.clientId, f.client)
+    assert.equal(proof.recordId, f.task); assert.match(proof.revision, /^[a-f0-9]{64}$/)
+    assert.equal(JSON.stringify(proof).includes('PRIVATE'), false)
+    assert.equal(sql(`select row_to_json(s) from microsoft_sync_job_sources s where id=${q(f.source)}`), before)
+    assert.equal(sql(`select production_status from monthly_deliverables where id=${q(f.deliverable)}`), 'not_started')
+    for (const role of ['anon', 'authenticated']) assert.throws(() => sql(`select read_social_publication_schedule_evidence(${q(actor)},${q(f.deliverable)},${q(f.review)})`, role), /permission denied/)
+    sql(`update background_jobs set status='cancelled' where id=${q(f.job)}`)
+  })
+  await t.test('stale/incomplete/changed/duplicated captured instruction cannot ground publication', () => {
+    for (const change of [
+      f => `update microsoft_sync_jobs set exported_at=now()-interval '6 minutes' where id=${q(f.sourceJob)}`,
+      f => `update microsoft_sync_jobs set created_at=now()-interval '6 minutes' where id=${q(f.sourceJob)}`,
+      f => `update microsoft_sync_job_sources set updated_at=now()-interval '6 minutes' where id=${q(f.source)}`,
+      f => `update microsoft_sync_job_sources set complete=false where id=${q(f.source)}`,
+      f => `update microsoft_sync_runs set source_completeness='[]' where id=${q(f.run)}`,
+      f => `update microsoft_sync_job_sources set records=${q(JSON.stringify([{ ...f.record, dueDate: '2000-01-01' }]))} where id=${q(f.source)}`,
+      f => `update microsoft_sync_job_sources set records=${q(JSON.stringify([{ ...f.record, percentComplete: 100 }]))} where id=${q(f.source)}`,
+      f => `update microsoft_sync_job_sources set records=${q(JSON.stringify([f.record, f.record]))},record_count=2 where id=${q(f.source)};
+       update microsoft_sync_runs set source_completeness=${q(JSON.stringify([{ ...f.coverage[0], recordCount: 2 }]))} where id=${q(f.run)}`,
+      f => `update monthly_deliverables set microsoft_task_id=${q(randomUUID())} where id=${q(f.deliverable)}`,
+      f => `update monthly_deliverables set production_status='scheduled' where id=${q(f.deliverable)}`,
+      f => `update content_review_versions set client_id=${q(randomUUID())} where id=${q(f.review)}`,
+      f => `insert into monthly_deliverables(id,client_id,microsoft_plan_id,microsoft_task_id) values(gen_random_uuid(),${q(f.client)},${q(f.plan)},${q(f.task)})`,
+    ]) {
+      const f = capturedScheduleFixture(); sql(change(f)); assert.throws(f.read)
+      sql(`update background_jobs set status='cancelled' where id=${q(f.job)}`)
+    }
+  })
+  await t.test('new incomplete capture supersedes older success; explicit source identity is required', () => {
+    const f = capturedScheduleFixture(), newer = randomUUID()
+    sql(`insert into microsoft_sync_jobs values(${q(newer)},'running',null,now(),now());
+     insert into microsoft_sync_job_sources select gen_random_uuid(),${q(newer)},source_type,source_id,source_name,'fetching_tasks',false,null,null,'[]',0,now() from microsoft_sync_job_sources where id=${q(f.source)};`)
+    assert.throws(f.read, /Fresh complete/)
+    sql(`update background_jobs set status='cancelled' where id=${q(f.job)}`)
+  })
+  await t.test('marking the canonical item scheduled manually blocks a new provider mutation even without posted_at', () => {
+    const f = fixture(), row = claim(f, 'manual-schedule')
+    sql(`update monthly_deliverables set production_status='scheduled' where id=${q(f.deliverable)}`)
+    assert.throws(() => sql(`select begin_social_publication(${q(f.job)},'manual-schedule',${q(row.fence)})`), /approved publication source/)
+    sql(`update background_jobs set status='cancelled' where id=${q(f.job)}`)
+  })
   await t.test('publication rows are hidden from former requesters who become client/staff/inactive; generic job visibility stays intact', () => {
     const f = fixture({ advance: false })
     sql('grant select on background_jobs,profiles to authenticated')

@@ -25,6 +25,9 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-
 const record = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v)
 const exactKeys = (r: Record<string, unknown>, keys: readonly string[]) => Object.keys(r).every(k => keys.includes(k)) && keys.every(k => Object.hasOwn(r, k))
 const hash = (s: unknown): s is string => typeof s === 'string' && /^[a-f0-9]{64}$/.test(s)
+const preparationBlockers = new Set(['PREPARATION_SCOPE_INVALID', 'ACTIVE_MANAGER_REQUIRED', 'EXACT_ACCOUNT_RELEASE_REQUIRED',
+  'CANONICAL_PUBLICATION_SOURCE_UNAVAILABLE', 'CURRENT_UNSCHEDULED_REVIEW_REQUIRED', 'FRESH_TEAMS_EVIDENCE_REQUIRED',
+  'CURRENT_PROVIDER_PROOF_REQUIRED', 'REVIEWED_PROVIDER_MEDIA_PROOF_REQUIRED', 'PREPARATION_SOURCE_CHANGED'])
 
 /** This is a stale-preview detector, NOT a bearer capability. Authorization
  * still requires an active manager, fresh private preflight and atomic storage.
@@ -124,6 +127,10 @@ export function socialPublicationAuthorizationHandler(ports: PublicationAuthoriz
       if (receipt.fingerprint !== fingerprint || !UUID.test(receipt.jobId) || !UUID.test(receipt.authorizationId)) return respond(503, { ok: false, error: 'PUBLICATION_RECEIPT_UNVERIFIED' })
       return respond(200, { ok: true, publication: { jobId: receipt.jobId, authorizationId: receipt.authorizationId,
         fingerprint: receipt.fingerprint, status: receipt.status, state: receipt.state } })
-    } catch { return respond(503, { ok: false, error: 'PUBLICATION_VERIFICATION_UNAVAILABLE' }) }
+    } catch (error) {
+      const code = record(error) && typeof error.code === 'string' ? error.code : null
+      if (code && preparationBlockers.has(code)) return respond(409, { ok: false, error: 'PUBLICATION_PREFLIGHT_BLOCKED', blockers: [code] })
+      return respond(503, { ok: false, error: 'PUBLICATION_VERIFICATION_UNAVAILABLE' })
+    }
   }
 }

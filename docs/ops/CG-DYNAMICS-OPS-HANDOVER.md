@@ -1,3 +1,31 @@
+## 16 November — publishing preparation evidence, local only
+
+Same draft PR991 / #220. Private canonical candidate reader derives the approved
+snapshot hash WITHOUT signing/sharing, binds exact manager/client/review/account
+release policy, and requires fresh private provider/media qualification. No caller
+booleans or signature-only qualification. New stable invoker/service-only RPC reads
+one exact task proof from existing completed Microsoft capture; no new collector,
+refresh/apply, source stamp or Microsoft write. It rejects stale/incomplete/foreign/
+duplicate/changed evidence and cannot fall back after a newer failed capture.
+Only IDs/date/revision/timing leave SQL; existing sync hold preserved.
+
+Reproduced/fixed canonical manual `scheduled` status still passing worker begin
+when posted_at was null. Admission and final SQL now reject scheduled/posted.
+Queue migration remains unapplied and was updated. CLI-generated additional
+`20261116085815_social_publication_preparation_evidence.sql` is also **unapplied**;
+there are now THREE pending migration candidates in this draft. Review latest
+contents before any future release. [Current receipt](SOCIAL-PUBLISHING-220-2026-11-15.md).
+
+Reader is private/unregistered. Actual provider/media qualification, exact-account
+release review, preview/new-confirmation wiring and provider/phone acceptance remain
+gates. Current staff status/withdrawal stays unchanged, canAuthorize false. No
+production SQL/data/config/Edge/OAuth/provider/Microsoft/Vercel action occurred.
+Final full4463 total /4433 pass /30 skipped /0 failures, with isolated PostgreSQL.
+121 affected checks pass;19 new regressions included. The manual-scheduled
+duplicate-post regression failed before the fix, then passed. Build/app-bundle,
+scoped lint, strict helper typing and diff pass. No new UI/browser/phone or real
+provider acceptance claimed. Generated artifacts restored; owned container stopped.
+
 ## 16 November — staff publishing status/withdrawal, local only
 
 Same draft PR991 / #220. Manager-only publishing status panel is wired into the

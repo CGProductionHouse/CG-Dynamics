@@ -45,6 +45,69 @@ client was found or assumed; no LinkedIn publishing entitlement was verified.
 
 ## Implemented locally
 
+### 16 November continuation — canonical preparation and captured schedule proof
+
+`publicationCandidateReader` now binds the active manager, active exact client,
+approved review, canonical deliverable and reviewed exact-account release policy.
+It derives SHA-256 from the actual private review snapshot, re-reading approval
+metadata first. `inspectPublicationSnapshot` is shared with due-time delivery;
+preparation creates no signed URL, upload, transformation or grant. Private byte
+buffers and verifier extras/credentials never enter its returned context/evidence.
+Provider access and full media qualification require fresh independent private
+receipts; a signature/hash or caller readiness flag cannot substitute for them.
+Selected target/release identity is captured against mutation during async work.
+Only allowlisted preparation blockers reach the authorization response; raw private
+adapter/SDK errors remain unavailable and sanitized.
+
+The CLI-generated **unapplied**
+`20261116085815_social_publication_preparation_evidence.sql` adds one stable,
+invoker, service-only read RPC over existing Microsoft capture tables. It neither
+collects Graph data nor invokes refresh/apply, stamps jobs or writes Microsoft/
+schedule state. It reads only the exact persisted plan/task/bucket link, checks
+the approved revision/client and rejects duplicate canonical task links. The
+latest source attempt wins: a newer incomplete/failed capture blocks an older
+success. Job start, export and source completion must be within the existing
+five-minute preparation evidence window; an old capture cannot be freshened by
+changing only its export timestamp. Run/job/source identities and completed
+coverage must agree, and the exact task must be uncompleted with the canonical
+posting date. Only IDs, date, revision and timing proof leave SQL; titles, notes
+and the captured array remain private. The existing Microsoft sync hold is intact.
+
+This proves the current captured **date/completion instruction**, not a native
+platform's full schedule or every semantic change to task notes. The approved
+review and staff confirmation bind the exact UTC/SAST publication time and bytes.
+Stale or absent captures are held; this reader never starts a new capture to
+manufacture freshness or falls back to a task/client title match.
+
+A real-PostgreSQL negative test reproduced a duplicate-post risk: setting the
+canonical item to `scheduled` manually, without `posted_at`, still permitted the
+worker begin barrier. Both pure admission and final SQL source checks now reject
+canonical `scheduled`/`posted` state. The existing unapplied queue migration was
+updated for that guard; current-source review is required before any later apply.
+
+There are now **three unapplied migration candidates** in this PR (queue, Business
+OAuth and this narrow preparation read). No existing Microsoft function/table,
+collector, permission or mapping is changed by this increment. The new candidate
+reader is private/unregistered: provider/media qualification implementations,
+reviewed exact-account release policy, preview/new-confirmation wiring and real
+provider/phone acceptance remain activation gates. Existing status/withdrawal
+scope is unchanged; `canAuthorize` remains false. No production/API/provider/
+OAuth/Microsoft/deployment action was performed and no browser work was repeated.
+
+Final acceptance: **4463 total /4433 passed /30 skipped /0 failures**, Node24.16.0,
+with the task-isolated real PostgreSQL fixture. Nineteen new regressions are
+included (15 preparation/snapshot checks, four added SQL subtests). The121 affected
+checks pass:98 policy/OAuth/provider/authorization/preparation and23 PostgreSQL.
+The manual-scheduled source defect failed first in
+`%TEMP%/cg-preparation-manual-schedule-repro.log`, then passed in the corrected
+targeted and full runs. Build/emitted app bundle, scoped ESLint, strict helper
+typing and diff pass. No new dependency or CLI upgrade; CLI2.115.0 generated the
+third migration in this exact isolated worktree. Generated access artifacts were
+restored and the owned QA container stopped. No new UI/browser/phone/hosted Edge/
+real-provider acceptance is claimed. Logs: `%TEMP%/cg-preparation-full-acceptance.log`,
+`%TEMP%/cg-preparation-focused-final.log`, `%TEMP%/cg-preparation-evidence-pg-final.log`,
+`%TEMP%/cg-preparation-build.log`. Existing Vercel Git-deployment guard remains off.
+
 ### 16 November continuation — staff status and withdrawal interface
 
 The existing `ContentReviewCard` now exposes a lazy **Publishing status** panel
@@ -320,7 +383,8 @@ No universal hard-coded media size, quota or native scheduling window is inferre
 
 1. Review the now-tested storage/worker and OAuth candidate. Migrations are
    `20261115104948_social_publishing_queue.sql` and
-   `20261115104950_tiktok_business_oauth.sql`, generated by the installed CLI.
+   `20261115104950_tiktok_business_oauth.sql`, plus the narrow read RPC in
+   `20261116085815_social_publication_preparation_evidence.sql`, all CLI-generated.
    No historical #269 publish_jobs migration should be applied alongside them.
 2. For a future OAuth-only rollout, review the three Business functions and shared
    helpers against hosted manifests first. Configure only the reviewed Business
@@ -338,7 +402,9 @@ No universal hard-coded media size, quota or native scheduling window is inferre
 3. The first Facebook photo adapter now has private encrypted token/mapping and
    approved-hash snapshot delivery ports. Exact preview/confirmation persistence
    and revocation now exist in the same queue. Complete trusted current-context,
-   media qualification and staff-action wiring before registering it. Add provider status reconciliation jobs,
+   media qualification and staff-action wiring before registering it. The canonical
+   candidate/snapshot reader and captured-Teams proof now exist privately; no
+   default provider/media proof is supplied. Add provider status reconciliation jobs,
    per-provider polling cadence and a staff-authorized publication producer using
    fresh server preflight. Register those private bindings only after review.
    `SOCIAL_PUBLISHING_ENABLED` remains false; OAuth enablement never enables it.

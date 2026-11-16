@@ -45,7 +45,7 @@ begin
  select * into r from public.content_review_versions where id=(p_intent->>'reviewVersionId')::uuid for share;
  if d.id is null or r.id is null or d.client_id::text is distinct from p_intent->>'clientId'
   or r.client_id<>d.client_id or r.deliverable_id<>d.id or r.state<>'approved'
-  or d.archived_at is not null or d.posted_at is not null
+  or d.archived_at is not null or d.posted_at is not null or d.production_status in ('scheduled','posted')
   or not exists(select 1 from public.clients where id=d.client_id and active)
   or coalesce(not (p_intent->>'platform'=any(r.channels)),true)
   or (case p_intent->>'route' when 'facebook_page' then 'facebook'
