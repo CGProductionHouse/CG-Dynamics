@@ -59,7 +59,7 @@ closure/reopening/posting dates supplied. Canonical monthly_deliverables contain
 no December/January rows in this readback; do not infer absent upstream content,
 invent dates, or claim pre-scheduling is complete.
 
-## Bounded code candidate
+## Bounded code and live acceptance
 
 Only monthlyStrategyWorkspace, monthlyStrategyAmendment and toolCatalog runtime
 files change. Company-admin can read/submit/explicitly amend current or nextTWO
@@ -82,7 +82,17 @@ ESLint and diff-check pass. Full hosted candidate Deno check passes with
 definitions inspected read-only: generic exact first-of-month dates, existing
 actor/client/provenance/revision guards; no migration required.
 
-Release is pending exact-head review and fresh hosted-version drift preflight.
+PR #996 runtime c900d48d passed exact-head self-review. Fresh v82 version/hash/
+all-file drift preflight passed. Existing MCP is now ACTIVEv83, bundle SHA256
+`74c71ba7a0efb15a296fec91b16d2aec3e4c4a3c15cc142645f6afd24512bbbb`.
+Independent get_edge_function readback verifies ALL41 candidate files, unchanged
+body-auth setting and other38 files. Actual connected company-admin Jan Novus
+brief returns ready_for_proposal, no draft yet, correct1video/4photos/4posters,
+previous published October report and explicit source gaps. February refuses
+CURRENT_OR_NEXT_TWO_MONTHS_REQUIRED; client-context authoring is denied. No fake
+production strategy written. Same ordinary author was notified after acceptance
+to update the existing task clause and continue real January review/save/readback.
+[Exact live receipt and author direction](https://github.com/CGProductionHouse/CG-Dynamics/issues/731#issuecomment-6920110257).
 No Vercel, frontend deployment, package/provider/Microsoft changes, automatic
 approval/publication or social scheduling. Do not present January rows as saved
 until normal author receipts and independent canonical readback prove them.

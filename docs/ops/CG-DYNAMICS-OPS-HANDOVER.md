@@ -12,9 +12,12 @@ now **CG Client & Industry Research** is independently UI-verified Active, hourl
 RepeatON/endNever. Same author updated/read back January-preparation instructions;
 no new writer/model/task. New recovery performed0canonical saves; source triage
 is not substantive completion. #731 latest author receipt6919535126.
-Small three-file connector candidate admits current+nextTWO months (Nov→Jan)
+Small three-file connector release admits current+nextTWO months (Nov→Jan)
 without changing automatic worker cadence/schema/staff/source/publication guards.
-136tests/build/lint/diff/full hosted Deno check pass; backend release pending.
+136tests/build/lint/diff/full hosted Deno check pass. Existing MCPv83 ACTIVE:
+all41 deployed files match candidate, other38/auth unchanged; actual NovusJan
+brief ready, February refused, client-context authoring denied. Same author
+notified to continue January; no saved January row claimed at release acceptance.
 [Exact evidence, coverage and release boundary](STRATEGY-JANUARY-PLANNING-2026-11-16.md).
 Other agent work untouched; no Vercel. Google Control Centre target unavailable;
 no guessed tracker write.
